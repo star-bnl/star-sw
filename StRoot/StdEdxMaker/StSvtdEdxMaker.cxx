@@ -186,126 +186,140 @@ Int_t StSvtdEdxMaker::Make()
        //
        
        int index = 0;
+       int index2 = 0;
        dst_dedx_st dedxTable;
        
        for (jj=0; jj<(Groups->GetNRows()); jj++) {
-	  
+	 
 	 if (trackId == svtGroups[jj].id1) {
-	   spacePoints[index] = svtGroups[jj].id2-1;
-	   index++;    // can incorporate this into the spacePoints[index]?
+	   if( svtCluster[svtGroups[jj].id2-1].res[0] > 1 &&
+	       svtCluster[svtGroups[jj].id2-1].res[0] < 10){
+	     spacePoints[index] = svtGroups[jj].id2-1;
+	     index++;    // can incorporate this into the spacePoints[index]?
+	   }
+	   index2++;
 	 }
-	 if (index == numberOfPointsOnTrack)
+	 if (index2 == numberOfPointsOnTrack)
 	   break;      // get out if I found all the points!
        }
        
-       // Calc unit vector for first point
-       u_ab_x = (svtCluster[spacePoints[1]].x[0] - 
-		 svtCluster[spacePoints[0]].x[0]);
-       u_ab_y = (svtCluster[spacePoints[1]].x[1] - 
-		  svtCluster[spacePoints[0]].x[1]); 
-       u_ab_z = (svtCluster[spacePoints[1]].x[2] - 
-		 svtCluster[spacePoints[0]].x[2]); 
-	norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
-	
-	u_ab_x /= norm;
-	u_ab_y /= norm;
-	u_ab_z /= norm; 
-	
-	//
-	// reset and get the ionization from the clusters
-	// using the indices above
-	//
-	index = 0;
-	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
-	  
-	  ionization[index]        = svtCluster[spacePoints[jj]].de[0];
-	  
-	  // Path length correction
-	  
-	  
-	  wafer_no = mGeom->getWaferIndex(
-				 svtCluster[spacePoints[jj]].id_wafer);
-	  waferGeom = (StSvtWaferGeometry*)mGeom->at(wafer_no);
-	
+       numberOfPointsOnTrack  = index;
+       if( numberOfPointsOnTrack > 1){
+	 // Calc unit vector for first point
+	 u_ab_x = (svtCluster[spacePoints[1]].x[0] - 
+		   svtCluster[spacePoints[0]].x[0]);
+	 u_ab_y = (svtCluster[spacePoints[1]].x[1] - 
+		   svtCluster[spacePoints[0]].x[1]); 
+	 u_ab_z = (svtCluster[spacePoints[1]].x[2] - 
+		   svtCluster[spacePoints[0]].x[2]); 
+	 norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	 
+	 u_ab_x /= norm;
+	 u_ab_y /= norm;
+	 u_ab_z /= norm; 
+       }
+       else{
+	 u_ab_x = 1;
+	 u_ab_y = 1;
+	 u_ab_z = 1;
+       }
+       //
+       // reset and get the ionization from the clusters
+       // using the indices above
+       //
+       
+       index = 0;
+       for (jj=0; jj<numberOfPointsOnTrack; jj++) {
+	 
+	 
+	 ionization[index]        = svtCluster[spacePoints[jj]].de[0];
+	 
+	 // Path length correction
+	 
+	 
+	 wafer_no = mGeom->getWaferIndex(
+					 svtCluster[spacePoints[jj]].id_wafer);
+	 waferGeom = (StSvtWaferGeometry*)mGeom->at(wafer_no);
+	 
+	 
+	 cos_theta = u_ab_x*waferGeom->n(0) +
+	   u_ab_y*waferGeom->n(1) +
+	   u_ab_z*waferGeom->n(2) ;
+	 
+	 
+	 pathLength[index]        = fabs((float)(0.03/cos_theta));
+	 
+	 spacePointsCharge[index] = (ionization[index]/pathLength[index]);
+	 
+	 index++;
+	 
+	 // unit vector for next point
+	 
+	 u_ab_x = (svtCluster[spacePoints[jj+1]].x[0] - 
+		   svtCluster[spacePoints[jj]].x[0]);
+	 u_ab_y = (svtCluster[spacePoints[jj+1]].x[1] - 
+		   svtCluster[spacePoints[jj]].x[1]); 
+	 u_ab_z = (svtCluster[spacePoints[jj+1]].x[2] - 
+		   svtCluster[spacePoints[jj]].x[2]); 
+	 norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	 
+	 u_ab_x /= norm;
+	 u_ab_y /= norm;
+	 u_ab_z /= norm;
+       }
+       
+       //
+       // The dE/dx calculation
+       // For now, only use the logmean
+       // a truncated mean will require a sort!
+       //
+       float dEdx=0;
+       float dEdxError=0;
+       for (jj=0; jj<numberOfPointsOnTrack; jj++) {
+	 dEdx      += ::log(spacePointsCharge[jj]);
+	 dEdxError += ::log(spacePointsCharge[jj]);
+       }
+       
+       //
+       // Normalize to the number of Points
+       //
+       dEdx      /= numberOfPointsOnTrack;
+       dEdxError /= numberOfPointsOnTrack;      
+       
+       dEdx = exp(dEdx);
+       dEdxError = ::sqrt(exp(dEdxError));
+       
+       // Assign to tables
+       //
+       
+       dEdxError = exp(dEdxError) - (dEdx * dEdx);
+       svtTrack[ii].dedx[0] = dEdx;
+       svtTrack[ii].dedx[1] = dEdxError;
+       
+       
+       // Fill in dedx table
+       
+       dedxTable.id_track  =  svtTrack[ii].id_globtrk;
+       dedxTable.det_id    =  kSvtId;    // SVT track
+       dedxTable.method    =  0;
+       dedxTable.ndedx     =  numberOfPointsOnTrack;
+       dedxTable.dedx[0]   =  svtTrack[ii].dedx[0];
+       dedxTable.dedx[1]   =  svtTrack[ii].dedx[1];
+       dst_dedx->AddAt(&dedxTable);
+       
+       // Fill in histo info.
+       double p= (svtTrack[ii].tanl/svtTrack[ii].invpt)*
+	 (svtTrack[ii].tanl/svtTrack[ii].invpt);
+       p += 1/(svtTrack[ii].invpt*svtTrack[ii].invpt);
+       p = ::sqrt(p);
+       FillHistograms(svtTrack[ii].dedx[0],p);
+      
+     }
+   }
+   
 
-	  cos_theta = u_ab_x*waferGeom->n(0) +
-	              u_ab_y*waferGeom->n(1) +
-	              u_ab_z*waferGeom->n(2) ;
-	  
-	  
-	  pathLength[index]        = fabs((float)(0.03/cos_theta));
-	  
-	  spacePointsCharge[index] = (ionization[index]/pathLength[index]);
-	  
-	  index++;
-	  
-	  // unit vector for next point
-	  
-	  u_ab_x = (svtCluster[spacePoints[jj+1]].x[0] - 
-		    svtCluster[spacePoints[jj]].x[0]);
-	  u_ab_y = (svtCluster[spacePoints[jj+1]].x[1] - 
-		    svtCluster[spacePoints[jj]].x[1]); 
-	  u_ab_z = (svtCluster[spacePoints[jj+1]].x[2] - 
-		    svtCluster[spacePoints[jj]].x[2]); 
-	  norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
-	  
-	  u_ab_x /= norm;
-	  u_ab_y /= norm;
-	  u_ab_z /= norm;
-	}
-	
-	//
-	// The dE/dx calculation
-	// For now, only use the logmean
-	// a truncated mean will require a sort!
-	//
-	float dEdx=0;
-	float dEdxError=0;
-	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
-	  dEdx      += ::log(spacePointsCharge[jj]);
-	  dEdxError += ::log(spacePointsCharge[jj]);
-	}
-	
-	//
-	// Normalize to the number of Points
-	//
-	dEdx      /= numberOfPointsOnTrack;
-	dEdxError /= numberOfPointsOnTrack;      
-	
-	dEdx = exp(dEdx);
-	dEdxError = ::sqrt(exp(dEdxError));
-
-	// Assign to tables
-	//
-	
-	dEdxError = exp(dEdxError) - (dEdx * dEdx);
-	svtTrack[ii].dedx[0] = dEdx;
-	svtTrack[ii].dedx[1] = dEdxError;
-
-
-	// Fill in dedx table
-
-	dedxTable.id_track  =  svtTrack[ii].id_globtrk;
-	dedxTable.det_id    =  kSvtId;    // SVT track
-	dedxTable.method    =  0;
-	dedxTable.ndedx     =  0;
-	dedxTable.dedx[0]   =  svtTrack[ii].dedx[0];
-	dedxTable.dedx[1]   =  svtTrack[ii].dedx[1];
-	dst_dedx->AddAt(&dedxTable);
-	
-	// Fill in histo info.
-	double p= (svtTrack[ii].tanl/svtTrack[ii].invpt)*
-	  (svtTrack[ii].tanl/svtTrack[ii].invpt);
-	p += 1/(svtTrack[ii].invpt*svtTrack[ii].invpt);
-	p = ::sqrt(p);
-	FillHistograms(svtTrack[ii].dedx[0],p);
-	
-      }
-    }
-
-
-  return kStOK;
-
+   return kStOK;
+   
 }
 //_____________________________________________________________________________
 
