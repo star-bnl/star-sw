@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.7 2000/02/08 23:46:46 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.8 2000/02/12 21:54:25 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.7  2000/02/08 23:46:46  lasiuk
- * comment to prevent streamer for ionize and inducesignal. Remove filter
+ * Revision 1.8  2000/02/12 21:54:25  lasiuk
+ * Introduce provisions to read in local coordinates
  *
+ *
+ * Revision 1.9  2000/02/14 01:08:02  lasiuk
+ * write the data set
  * add two member functions for pedestal and noise switches
  * add coordinate conditional and StCoordinateTransform
  * incorporate track_p into GHit
@@ -35,21 +38,25 @@
 #include "St_ObjectSet.h"
 
 //#include <iostream.h>
+#include "StMemoryInfo.hh"
+#endif
+#include "StParticleTable.hh"
 
 // DataBases
 #include "StRichGeometryDb.h"
 #include "StRichPhysicsDb.h"
 #include "StRichMomentumTransform.h"
 #include "StRichGeantReader.h"
-//#include "StRichFilter.h"
-//#include "StRichNoiseSimulator.h"
-//#include "StRichAnalogToDigitalConverter.h"
+#define rICH_WITH_PADMONITOR 1
+#include "StRichPadPlane.h"
+#include "StRichWriter.h"
+#endif
 // #include "StRichRingCalculator.h"
 // #include "StParticleDefinition.hh"
 // #include "StParticleTypes.hh"
 // #endif
 //////
-#define RICH_DECODE_DATA 1
+#define rICH_DECODE_DATA 1
 #ifdef RICH_DECODE_DATA
 #include "StRrsReader.h"
 #endif
@@ -75,7 +82,7 @@ extern "C" int agfhit1_ (int*, int*, int*, float*);
 #include "tables/St_g2t_track_Table.h"
 
 
-    : StMaker(name)
+    : StMaker(name), mUseLocalCoordinate(0)
 #ifdef __ROOT__
 #define gufld   gufld_
 //#define gufld   GUFLD
@@ -100,6 +107,11 @@ int StRrsMaker::readFile(char* file)
     return kStOK;
 }
 
+void StRrsMaker::setUseLocalCoordinate(int b)
+    mWriteToFile = 1;
+    PR(mNumberOfEvents);
+    PR(mOutputFileName);
+
 void StRrsMaker::addPedestal(int b)
 {
     mAddPedestal = b;
@@ -121,17 +133,20 @@ void StRrsMaker::addElectricNoise(int b)
     mPhysicsDb  = StRichPhysicsDb::getDb();
     mGeometryDb = StRichGeometryDb::getDb();
 
-    mGeometryDb->print();
-    mPhysicsDb->print();
-    //exit(0);
+    if ( !mGeometryDb ) {
+      cerr << "Geometry database could not be initialized. Aborting!!!\n";
       return 1;
-    
+      cerr << "Physics database could not be initialized. Aborting!!!\n";
     //mPhysicsDb->print();
-    mADC.setAddPedestal(0);  // adds a DC level to each pad!
+
+    
+    mADC.setAddPedestal(0);
     // ADC
     mCoordinateTransform = StRichCoordinateTransform::getTransform(mGeometryDb);
     // adds a DC level to each pad
-    mPadPlane = new StRichPadPlane(2*mGeometryDb->n_pad_x, 2*mGeometryDb->n_pad_z);
+    mADC.setAddPedestal(mAddPedestal);
+    
+    // PadPlane
     
 
     //
@@ -192,7 +207,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	break;	
     default:
 	*vName = string("");
-#define RICH_DIAGNOSTIC 1
+#define RICH_DIAGNOSTIC 0
 //     cout << "-- Press return to continue -- ";
     ofstream raw("/afs/rhic/star/users/lasiuk/junk/rrs.txt");
 //       char c = cin.get();
@@ -238,22 +253,38 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		cout << "StRrsMaker::Make()";
 		cout << "\tNo g2t_rch_hit pointer";
 		cout << "\treturn from StRrsMaker::Make()" << endl;
-
+	    ///////////////////////
+	    //numberOfRichHits = 10;
+	    StRichCoordinateTransform tmpTform(mGeometryDb);
+	    PR(numberOfRichHits);
+	    ///////////////////////
 	    string volumeName;
 	    int    quadrant;
 
 		StThreeVector<double>
 		    momentum(rch_hit->p[0],rch_hit->p[1],rch_hit->p[2]);
-		double step = 10;
-		hit.fill(rch_hit->x[0], rch_hit->x[1], rch_hit->x[2],
+
+		// Input is in local or global coordinates
+		    StGlobalCoordinate global(rch_hit->x[0], rch_hit->x[1], rch_hit->x[2]);
+		    tmpTform(global,local);
+		//
+		else {
+		    local.position().setX(rch_hit->x[0]);
+		    local.position().setY(rch_hit->x[1]);
+		    local.position().setZ(rch_hit->x[2]);
+		    // z-component okay
+		}
+		hit.fill(local.position().x(), local.position().y(), local.position().z(),
 			 rch_hit->id,
 			 (momentum.x()/abs(momentum))*GeV,
 			 (momentum.y()/abs(momentum))*GeV,
 			 (momentum.z()/abs(momentum))*GeV,
-			 step*centimeter,
+		
 		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
 			 rch_hit->volume_id,
 		    
+		hit.fill(local.position(),
+		    gTrackMomentum.setZ(track[(rch_hit->track_p)-1].p[2]*GeV);
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
 		raw << "volumeName= " << volumeName.c_str() << endl;
 		raw << "quadrant= "   << quadrant           << endl;
@@ -266,7 +297,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    << " egpid= "     << track[(rch_hit->track_p-1)].eg_pid << endl;
 // 			    << tpc_hit[zz].x[1] << " "
 // 			    << tpc_hit[zz].x[2] << " ";
-		PR((hit.volumeID().c_str()));
+// 			double ptot = (sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
 // 		if ( hit.volumeID() != "RCSI" ) { 
 		if ( hit.volumeID() == "RGAP" ) { 
 		    mIonize( hit );		 
@@ -274,8 +305,9 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		else {
 #endif
 		    // check if it is photon
-		    if ( hit.dE() > 0 ) 
+
 			mInduceSignal ( hit );
+		    // Check if it is photon, and induce signal if so
 		    //
 // 		    cout << "RGAP" << "ii/size " << ii << " " << theList.size() << endl;
 			mInduceSignal(hit);
@@ -313,32 +345,48 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	}	      
 
     
+	iter++) {
+	*iter = 0;
+    thePadMonitor->clearPads();
+
 #ifdef RICH_DECODE_DATA
     int version = 1;
-    for(int iRow=0; iRow<(2*mGeometryDb->n_pad_x); iRow++) {  // 96
-	for(int iCol=0; iCol<(2*mGeometryDb->n_pad_z) ; iCol++) {
+
+#ifdef RICH_WITH_PADMONITOR
     cout << "Get Instance of Pad Monitor" << endl;
 	    theADCValue = theReader.GetADCFromCoord(iRow,iCol);
     cout << "Try Clear" << endl;
 		//cout << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
+
+    cout << "DECODER " << endl;
+    int ctr = 0;
+    for(int iRow=0; iRow<(mGeometryDb->numberOfRowsInAColumn()); iRow++) {
+	for(int iCol=0; iCol<(mGeometryDb->numberOfPadsInARow()) ; iCol++) {
 #ifdef RICH_DIAGNOSTIC
-		raw << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
+		raw << "r/c/adc: "
+		    << iRow << ' '
+		    << iCol << ' ' << theADCValue << endl;
 		anIDList MCInfo = theReader.GetMCDetectorInfo(iRow, iCol);
 		anIDList::iterator iter;
 		for(iter = MCInfo.begin();
 		    iter!= MCInfo.end();
 		    iter++) {
 #ifdef __SUNPRO_CC
-		    raw << ">>* MCinfo.G_ID= " << (*iter).G_ID << "MCinfo.amount= "
+		    raw << ">>* MCinfo.G_ID= "
+			<< (*iter).G_ID << "MCinfo.amount= "
 			<< (*iter).amount << endl;
 #else
-		    raw << ">>* MCinfo.G_ID= " << iter->G_ID << "MCinfo.amount= "
+		    raw << ">>* MCinfo.G_ID= "
+			<< iter->G_ID << "MCinfo.amount= "
 			<< iter->amount << endl;
 #endif
 		}
 #endif
 		
 // 			<< (*iter).mAmount << endl;
+// #else
+	    thePadMonitor->drawPads();
+// 			<< iter->mG_ID << "MCinfo.trackp= "
 // 			<< iter->mTrackp << "MCinfo.amount= "
 // 			<< iter->mAmount << endl;
 //     StThreeVector<double> bPoint;
