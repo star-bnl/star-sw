@@ -114,8 +114,8 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
     unsigned short token   = *p++;    // 2
     unsigned short cratrig = *p++;    // 3
     if(token!=evtoken) {
-      fprintf(stderr,"eemcfeerootfile: *** token mismatch *** ");
-      fprintf(stderr,"(event token=%hd crate token=%hd)\n",evtoken,token);
+      fprintf(stderr,"eemcfeerootfill: *** token mismatch in crate %d",cratrig);
+      fprintf(stderr," (event token=%hd crate token=%hd)\n",evtoken,token);
     }
     if(wordcnt>4) wordcnt -= 4;
     head[EEfeeDataBlock::EVTYPE] = evtype;
@@ -133,6 +133,7 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
   }
 
 
+  des->setProcessingTime(time(0));
   tree->Fill();  
   *ierr=0;
   return;
