@@ -17,7 +17,8 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR) {
 
   // will process the event to fill the arrays for different detectors.
   //Towers
-  EMC_BarrelReader* barreltowerreader= new EMC_BarrelReader(ercpy,EmcPTR);
+  EMC_BarrelReader* barreltowerreader = 
+  new EMC_BarrelReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
   int towerresult=  barreltowerreader->ProcessBarrelTower(EmcPTR);
   mTheTowerAdcR=barreltowerreader->getBTOWERADCR();
 
@@ -28,7 +29,8 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR) {
   delete barreltowerreader;barreltowerreader=0;
 
   //SMDs
-  EMC_SmdReader* barrelsmdreader= new EMC_SmdReader(ercpy,EmcPTR);
+  EMC_SmdReader* barrelsmdreader= 
+  new EMC_SmdReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
   int smdresult= barrelsmdreader->ProcessBarrelSmd(EmcPTR);
   mTheSmdAdcR=barrelsmdreader->getBSMDADCR();
 
