@@ -35,6 +35,7 @@ my @SetG = (
              "auau200/mevsim/cascade/central/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on",  
              "auau200/vni/default/b0_3/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
@@ -44,6 +45,7 @@ my @SetG = (
              "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
              "auau200/hbt/default/middle/year_1h/hadronic_on",
              "auau200/hbt/default/central/year_1h/hadronic_on",
+             "auau200/hbt/default/midcentral/year_1h/hadronic_on",
 );
 
 my $SetD = "dst/prod5/1999/12";
@@ -175,6 +177,11 @@ for( $ll = 0; $ll<scalar(@SetG); $ll++) {
   print "diskRecoDir: $diskRecoDirs[$inext]\n" if $debugOn;
    $inext++;
 }
+$diskRecoDirs[$inext] = $DISK1 . "/" . $SetG[2] . "/tfs_6";
+ $inext++;
+$diskRecoDirs[$inext] = $DISK1 . "/" . $SetG[4] . "/tfs_6";
+ $inext++;
+#$diskRecoDirs[$inext] = $DISK1 . "/" . $SetG[5] . "/tfs_6";
 
 print "\nFinding reco files in disk\n";
  
