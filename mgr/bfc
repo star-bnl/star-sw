@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc,v 1.4 1999/06/15 22:48:29 fisyak Exp $
+# $Id: bfc,v 1.5 1999/10/12 16:01:13 didenko Exp $
 # $Log: bfc,v $
+# Revision 1.5  1999/10/12 16:01:13  didenko
+# fixed disk names
+#
 # Revision 1.4  1999/06/15 22:48:29  fisyak
 # Production version
 #
@@ -106,7 +109,7 @@ exit 0;
 #______________________________________________________
 sub convert($) {
   my $new_name = @_[0];
-  $new_name =~ s'/home/starreco/reco'/disk00001/star'g;
+  $new_name =~ s'/home/starreco/reco'/star/rcf/disk00001/star'g;
   return $new_name;
 }
 #END
