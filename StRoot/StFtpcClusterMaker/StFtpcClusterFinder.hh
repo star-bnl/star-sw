@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.17 2003/05/07 15:09:49 putschke Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.18 2004/05/24 13:37:57 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.18  2004/05/24 13:37:57  jcs
+// save number of clusters found in StFtpcSoftwareMonitor
+//
 // Revision 1.17  2003/05/07 15:09:49  putschke
 // improvements for cathode offset corretions
 //
@@ -65,6 +68,7 @@
 #include "StDAQMaker/StFTPCReader.h"
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
+#include "StFtpcSoftwareMonitor.h"
 #include "TH1.h"
 #include "TH2.h"
 
@@ -118,6 +122,7 @@ class StFtpcClusterFinder
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
+  StFtpcSoftwareMonitor *mFtpcMon;
   TH1F *mHistoW;
   TH1F *mHistoE;
   TH2F *mHisto;
@@ -157,6 +162,7 @@ class StFtpcClusterFinder
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
+		      StFtpcSoftwareMonitor *ftpcMon,
 		      TObjArray *pointarray,
 		      TH2F *hpad,
 		      TH2F *htime,
