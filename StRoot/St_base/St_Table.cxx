@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.37 1999/01/30 04:24:22 fine Exp $ 
+// $Id: St_Table.cxx,v 1.38 1999/01/30 18:29:29 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.38  1999/01/30 18:29:29  fine
+// Clean up
+//
 // Revision 1.37  1999/01/30 04:24:22  fine
 // St_Table: Print memory leak fixed
 //
@@ -645,7 +648,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
             isdate = kTRUE;
          }
 
-//         cout << member->GetTypeName() << "\t" << member->GetName();
+//         cout << member->GetTypeName() << "\t" << member->GetName(); 
          cout << member->GetTypeName();
 
          // Add the dimensions to "array" members 
@@ -756,11 +759,11 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
            }
            cout << endl;
          }
+        if (arrayLayout) delete [] arrayLayout;
+        if (arraySize) delete [] arraySize;
       }
       rowCount -= thisLoopLenth;
       startRow  = nextRow;
-      if (arrayLayout) delete [] arrayLayout;
-      if (arraySize) delete arraySize;
   }
   cout << "---------------------------------------------------------------------------------------" << endl;
   return 0;
