@@ -138,7 +138,7 @@ double Histogram::GetVolume (double rank,
   int hitcount = 0;		// hitcount for that bin
   int cur_marker = 1;
 
-  static int prior_p0_marker;
+  static float prior_p0_marker;
 
   //JP
   if (!prior_p) {

@@ -6,7 +6,6 @@
 */
 #include "PAM.idl"
 #include "dst_track.idl"
-#include "particle.idl"
 #include "sca_in.idl"
 #include "sca_filter_const.idl"
 #include "sca_switch.idl"
@@ -15,10 +14,9 @@
 interface sca_filter : amiModule{
         STAFCV_T call (
                   in	dst_track		dstTrack     ,   
-                  in	particle		particle     ,   
                   in	sca_filter_const	filter_const ,   
                   in	sca_switch		sca_switch   ,   
                   in	sca_const       	sca_const    ,  
                   out	sca_in			sca_in  );
 };
-/* last mod. for sca_filter.idl : $Date: 1998/08/04 20:07:44 $ */
+/* last mod. for sca_filter.idl : $Date: 1998/08/05 22:04:14 $ */

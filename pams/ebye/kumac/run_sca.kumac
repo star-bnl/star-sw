@@ -8,9 +8,9 @@
  MACRO run_filter
    macro/global/import *
      
-  ami/module/call sca_filter_
-	[dst]/dstrack  _
-	[evgen]/particle  _
+     ami/module/call sca_filter_
+        [dst]/event_summary _
+        [dst]/dstrack  _
         [params]/ebye/sca_filter_const _
 	[params]/ebye/sca_switch _
 	[params]/ebye/sca_const _
@@ -27,8 +27,8 @@ MACRO run_runsca
         [params]/ebye/sca_switch _
         [params]/ebye/sca_const _
 	[data]/ebye/sca/sca_in _
-	[data]/ebye/sca/sca_ensemble_ave _
-	[data]/ebye/sca/sca_prior _
+	[params]/ebye/sca_ensemble_ave _
+	[params]/ebye/sca_prior _
 	[data]/ebye/sca/sca_out
 RETURN
 *********************************************************

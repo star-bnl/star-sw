@@ -25,34 +25,18 @@
 debug_t& debug(char *level)
 {
   static debug_t d;
-  static int first_time = TRUE;
-  static int scale_debug = FALSE;
-  char *buf;
-  
-  strcpy(d.level, level);	// always save the level
-  
-  if(first_time)
-    {
-      first_time = FALSE;
-      buf = getenv("SCALE_DEBUG");
-      if(buf)
-	scale_debug = TRUE;
-    }
-  
-  if( !scale_debug )		// only check level if necessary
-    buf = getenv(level);
-  
   d.print = FALSE;
-  if(scale_debug || buf)
-    d.print = TRUE;
-  
   return d;
-  
 }  // end debug()
 
 ostream& operator << (ostream& s, debug_t& d)
 {
-  ostream *blank = new ofstream("/dev/null");
+  static int init=0;
+  static ostream *blank;
+  if(!init) {
+    blank = new ofstream("/dev/null");
+    init=7;
+  }
   
   if( d.print )
     {
@@ -122,7 +106,14 @@ error_t& error(int level)
 
 ostream& operator << (ostream& s, error_t& e)
 {
-  ostream *blank = new ofstream("/dev/null");
+  static int init=0;
+  static ostream *blank;
+  if(!init) {
+    blank = new ofstream("/dev/null");
+    init=7;
+  } else {
+    printf("got the other new of ooo ooo ooo ooo ooo ooo ooo \n");
+  }
 
   if( e.print )
     {
