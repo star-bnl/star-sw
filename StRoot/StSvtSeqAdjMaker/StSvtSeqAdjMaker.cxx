@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.21 2001/07/25 14:47:41 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.22 2001/08/22 14:24:49 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.22  2001/08/22 14:24:49  caines
+ * Raise m_thresh_hi to 10
+ *
  * Revision 1.21  2001/07/25 14:47:41  caines
  * Fix filling histogram only when debug is on
  *
@@ -120,7 +123,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mPedFile = NULL;
   mPedOffSet = 10;
   m_thresh_lo = 1+mPedOffSet;
-  m_thresh_hi = 5+mPedOffSet; 
+  m_thresh_hi = 10+mPedOffSet; 
   m_n_seq_lo  = 2;
   m_n_seq_hi  = 0;
   m_inv_prod_lo = 8;
