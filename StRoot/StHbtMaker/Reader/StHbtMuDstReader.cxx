@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.7 2004/02/24 19:45:34 magestro Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.8 2004/10/12 13:52:46 kisiel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -61,7 +61,7 @@ StHbtMuDstReader::StHbtMuDstReader(int mode, int nameMode, const char* dirName, 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mSplit(99), mCompress(9), mBufferSize(65536*4), mHbtEvent(0)
 {
-
+  mReaderStatus = 0;
   mEventCounter=0;
   mStMuDst = new StMuDst();
   /// from muDst
@@ -683,6 +683,9 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.8  2004/10/12 13:52:46  kisiel
+ * Properly hadle mReaderStatus to make frontLoadedEventCut work
+ *
  * Revision 1.7  2004/02/24 19:45:34  magestro
  * reverted to 1.5 code
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.cxx,v 1.4 2004/02/24 19:50:00 magestro Exp $
+ * $Id: StHbtMuDstMakerReader.cxx,v 1.5 2004/10/12 13:48:53 kisiel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -62,6 +62,8 @@ StHbtMuDstMakerReader::StHbtMuDstMakerReader(StMuDstMaker* maker) :
   mHbtEvent(0)
 {
   mEventCounter=0;
+  mReaderStatus = 0;
+  
 }
 
 //-----------------------------------------------------------------------
@@ -118,7 +120,13 @@ StHbtEvent* StHbtMuDstMakerReader::ReturnHbtEvent(){
       }
     }
   }
-
+  else 
+    {
+      // DTSMaker returned NULL, so we are not OK
+      mReaderStatus = 1;
+    }
+  
+  
   if (mFlowMaker && mHbtEvent ) {
     int harmonic = 1;
     mFlowMaker->FlowSelection()->SetHarmonic(harmonic);
@@ -150,6 +158,9 @@ void StHbtMuDstMakerReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.cxx,v $
+ * Revision 1.5  2004/10/12 13:48:53  kisiel
+ * Properly hadle mReaderStatus to make frontLoadedEventCut work
+ *
  * Revision 1.4  2004/02/24 19:50:00  magestro
  * Added optional event cut
  *
