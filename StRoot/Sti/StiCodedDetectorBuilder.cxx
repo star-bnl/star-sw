@@ -1,9 +1,20 @@
+//Std
+#include <iostream.h>
+using std::cout;
+using std::endl;
+#include <string>
+using std::string;
+//#include <sstream>
+//using std::stringstream;
+
+//StDb
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 #include "StTpcDb/StTpcDimensionsI.h"
 #include "tables/St_svg_config_Table.h"
 #include "tables/St_svg_shape_Table.h"
 
+//Sti
 #include "StiGeometryTransform.h"
 #include "StiPlanarShape.h"
 #include "StiCylindricalShape.h"
@@ -58,8 +69,9 @@ void StiCodedDetectorBuilder::buildMaterials(){
 
 // builds all the unique shapes needed to describe our detectors, then
 // adds them to map by name
-void StiCodedDetectorBuilder::buildShapes(){
-
+void StiCodedDetectorBuilder::buildShapes()
+{
+    cout <<"StiCodedDetectorBuilder::buildShapes()"<<endl;
   char szName[100];
 
   //---------------------------------------------------------------------------
@@ -85,6 +97,14 @@ void StiCodedDetectorBuilder::buildShapes(){
                          pPadPlane->numberOfPadsAtRow(iPadrow + 1) / 2.);
 
     sprintf(szName, "Tpc/Padrow_%d", iPadrow + 1);
+
+    //string theName = "Tpc/Padrow_";
+    //stringstream stemp("");
+    //stemp << iPadrow + 1;
+    //theName += stemp.str();
+    //NameMapKey key(theName);    
+    //cout <<"szName: "<<szName<<"\ttheName: "<<theName<<endl;
+    
     NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
