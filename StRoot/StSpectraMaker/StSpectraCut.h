@@ -1,13 +1,13 @@
 #ifndef StSpectraCut_hh
 #define StSpectraCut_hh
 
-#ifdef SOLARIS 
- #ifndef false
-  typedef int bool;
-  #define false 0
-  #define true 1
- #endif
-#endif
+//#ifdef SOLARIS 
+// #ifndef false
+//  typedef int bool;
+//  #define false 0
+//  #define true 1
+// #endif
+//#endif
 
 #include "StEvent.h"
 

@@ -11,7 +11,7 @@ void StSpectraAnalysis::setParticle(string particle) {
    cout << "found particle, mass " << mParticle->mass() << endl;
  }
  else {
-   cout << "particle not found: " << particle << endl;
+   cout << "particle not found: " << particle.c_str() << endl;
  }
 }
 

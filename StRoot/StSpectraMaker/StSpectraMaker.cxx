@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.5 1999/11/28 20:22:06 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.6 2000/01/11 19:09:12 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.6  2000/01/11 19:09:12  ogilvie
+// compiles on sun CC5, linux, but not sun cc4
+//
 // Revision 1.5  1999/11/28 20:22:06  ogilvie
 // updated to work with new StEvent
 //
@@ -32,7 +35,19 @@
 #include <vector>
 #include <fstream.h>
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.5 1999/11/28 20:22:06 ogilvie Exp $";
+string readString(ifstream& ifs) {
+  string line;
+  #if defined(__SUNPRO_CC)
+        char c; line.erase();
+        while ((c = ifs.get()) && c != '\n' && !ifs.eof()) line += c;
+  #else
+        getline(ifs,line,'\n');
+  #endif
+  cout << line.c_str() << endl;
+  return line;
+}
+
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.6 2000/01/11 19:09:12 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -48,39 +63,34 @@ Int_t StSpectraMaker::Init() {
   // 
 
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
-  while (!from.eof()) {
-    string particleName;
-    from >> particleName;
-    string analysisTitle;
-    from >> analysisTitle; 
-    efficiencyType efficType;
-    from >> efficType; 
+  while (!from.fail()) {
+    string particleName = readString(from);
+    string analysisTitle = readString(from);
+    efficiencyType efficType = FUNCTION; 
     char* efficiencyFile = new char[100];
     from >> efficiencyFile; 
+    cout << efficiencyFile << endl;
     StEfficiency effic(efficType,efficiencyFile);
-    //
+    delete efficiencyFile; 
+   //
     // to do, add in particle Definition to efficiency constructor
     //
     StParticleDefinition* particle = 
    	StParticleTable::instance()->findParticle(particleName);
     effic.setParticle(particleName);
-
-    string comment;
+   
     float lYbin;
     float uYbin;
-    from >> lYbin >> uYbin >> comment;
+    from >> lYbin >> uYbin ;
     int nYbin ;
-    from >> nYbin >> comment;
+    from >> nYbin ;
     float lMt = particle->mass();
     float mtRange;
-    from >> mtRange >> comment; 
+    from >> mtRange ; 
     cout << mtRange << endl;
-    //
-    // why does the following line not compile on solaris?
-    //
     float uMt = lMt + mtRange;
     int nMtbin;
-    from >> nMtbin >> comment;
+    from >> nMtbin ;
 
     StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
     anal->setParticle(particleName);
@@ -90,6 +100,8 @@ Int_t StSpectraMaker::Init() {
     anal->setYAxis(lYbin,uYbin,nYbin); 
     anal->setMtAxis(lMt,uMt,nMtbin); 
     mSpectraAnalysisContainer.push_back(anal);
+    char* comment = new char[100];
+    from >> comment;
   }
   from.close();
  
@@ -148,6 +160,15 @@ Int_t StSpectraMaker::Finish() {
   mOutput->Write("MyKey",kSingleKey);
   cout << "written"<< endl;
   mOutput->Close();
+
+  // delete analyses in container
+
+  for (analysisIter = mSpectraAnalysisContainer.begin();
+	 analysisIter != mSpectraAnalysisContainer.end();
+	 analysisIter++) {
+    delete (*analysisIter);
+  }
+
   return kStOK;
 }
 
