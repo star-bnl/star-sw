@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 1.1.1.1 1999/07/13 18:28:19 uid2620 Exp $
+% $Id: StMcEvent.tex,v 1.2 1999/07/14 14:44:15 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,8 +23,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
-% Revision 1.1.1.1  1999/07/13 18:28:19  uid2620
-% Initial import
+% Revision 1.2  1999/07/14 14:44:15  calderon
+% Updated documentation to include macros in CVS
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -283,34 +283,36 @@ summarize the most relevant one concerning the programmable interface:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{How to use it: StMcEventMaker, StAssociationMaker and StAssociator.C}
+\section{How to use it: StMcEventMaker and StMcEventReadMacro.C}
 \label{sec:howto}
-\index{StAssociator.C}
+\index{StMcEventReadMacro.C}
 \index{StMcEventMaker}
-\index{StAssociationMaker}
-\index{StMcAnalysisMaker}
 \index{root4star}
 \index{ROOT files}
 The procedure starting from scratch to run the provided StMcEvent usage
-example is
+example is (note that at the moment it only works in new/pro)
 \begin{verbatim}
     starnew
     mkdir workdir
     cd workdir
-    root4star StAssociator.C
+    cvs co StRoot/StMcEvent
+    cvs co StRoot/StMcEventMaker
+    makel -C StRoot/StMcEvent
+    makel -C StRoot/StMcEventMaker
+    root4star StMcEventReadMacro.C
 \end{verbatim}
 
 Please note that at the moment, StMcEventMaker only runs with ROOT files.
 
-StAssociator.C will run \name{\$STAR/StRoot/macros/StAssociator.C} which runs a %$%%%
-chain consisting of three makers:
+StMcEventReadMacro.C is found in
+\name{\$CVSROOT/StRoot/macros/examples/StMcEventReadMacro.C},  %$
+and it runs a chain runs a
+chain consisting of two makers:
 \begin{description}
 \item[\name{StEventReaderMaker}:] loads StEvent
 \item[\name{StMcEventMaker}:] loads StMcEvent
-\item[\name{StAssociationMaker}:] creates the hit and track associations
-\item[\name{StMcAnalysisMaker}:] Picks up the previous info. and analyzes it 
-    (incorporates a few simple examples)
 \end{description}
+
 
 %%%%%%%%%%%%%%%%%%%
 
@@ -318,25 +320,15 @@ At the moment, it runs the chain on a ROOT file tree.  That is, it uses the DST
 and GEANT braches of the files it finds in the directory.  Example invocation
 is 
 \begin{verbatim}
-.x StAssociator.C(10,"-","/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root")
+.x StMcEventReadMacro.C(10,"-","/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root")
      processes 10 events from the specified file
 
 \end{verbatim}
 It takes the path to look for files from the specified file, but the files it actually opens depend on
 what branches are activated in the macro.  This is done inside the macro with the command \name{SetBranch}.
 
-To play with it yourself you can pick up StMcAnalysisMaker and play with it
-or use it as a template for a Maker of your own that works with
-StMcEvent:
-
-\begin{verbatim}
-    mkdir StRoot/StMyMcAnalysisMaker
-    cp $STAR/StRoot/StMcAnalysisMaker/* StRoot/StMyMcAnalysisMaker/ %$%%%
-    [edit]
-    makel -C StRoot/StMyMcAnalysisMaker
-    cp $STAR/StRoot/macros/StAssociator.C ./  (and edit to use your maker) %$%%
-    root4star StAssociator.C
-\end{verbatim}
+The next step is the use of the \StAssociationMaker package.  This is described
+in its own manual.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
