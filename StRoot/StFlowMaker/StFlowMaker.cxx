@@ -1,13 +1,15 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.75 2002/06/07 22:18:40 kirill Exp $
+// $Id: StFlowMaker.cxx,v 1.76 2002/06/10 22:51:00 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 //////////////////////////////////////////////////////////////////////
 //
-// Description: Maker to fill StFlowEvent from StEvent
+// Description:
+//    Maker to fill StFlowEvent from StEvent, picoevent, or microevent
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -221,7 +223,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.75 2002/06/07 22:18:40 kirill Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.76 2002/06/10 22:51:00 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -987,9 +989,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST(){
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST()" << endm;
 
   pFlowEvent->SetEventID(pMuEvent->eventId());
-
   pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
-
   pFlowEvent->SetRunID(pMuEvent->runId());
   pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
 
@@ -1012,7 +1012,6 @@ Bool_t StFlowMaker::FillFromMuVersion0DST(){
   
   pFlowEvent->SetMultEta(pMuEvent->refMult()); 
   pFlowEvent->SetCentrality(); 
-
   
   int goodTracks = 0;
   // Fill FlowTracks
@@ -1067,9 +1066,8 @@ Bool_t StFlowMaker::FillFromMuVersion0DST(){
         pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
       }
 
-      //       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
-      
-    
+      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+          
       int mostLikelihoodPid=0;
       double mostLikelihoodPidProbability=0;
       if (pFlowTrack->ElectronPositronProb()>mostLikelihoodPidProbability) {
@@ -1480,8 +1478,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
   pFlowEvent->SetCentrality();
 
-
-
   pFlowEvent->SetCTB(pPicoEvent->CTB());
   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
@@ -1739,6 +1735,11 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.76  2002/06/10 22:51:00  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.75  2002/06/07 22:18:40  kirill
 // Introduced MuDst reader
 //

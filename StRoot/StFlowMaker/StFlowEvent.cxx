@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.33 2002/05/23 18:54:10 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.34 2002/06/10 22:50:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -88,8 +88,8 @@ Float_t StFlowEvent::mAntiDeuteronCuts[2]  = {-3., 3.};
 Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mDcaGlobalCuts[2]     = { 0., 0.};
-Bool_t  StFlowEvent::mPtWgt                = kFALSE;
-Bool_t  StFlowEvent::mEtaWgt               = kFALSE;
+Bool_t  StFlowEvent::mPtWgt                = kTRUE;
+Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
 Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
@@ -856,6 +856,11 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.34  2002/06/10 22:50:59  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.33  2002/05/23 18:54:10  posk
 // Moved centrality cuts into StFlowConstants
 //

@@ -1,15 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.31 2002/06/07 22:18:42 kirill Exp $
+//  $Id: StFlowMaker.h,v 1.32 2002/06/10 22:51:02 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
-//  Maker to fill StFlowEvent from StEvent
+//  Maker to fill StFlowEvent from StEvent, picoevent, or microevent
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.31 2002/06/07 22:18:42 kirill Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.32 2002/06/10 22:51:02 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -166,6 +167,11 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.32  2002/06/10 22:51:02  posk
+//  pt and eta weighting now default.
+//  DcaGlobalPart default now 0 to 1 cm.
+//  Event cut order changed.
+//
 //  Revision 1.31  2002/06/07 22:18:42  kirill
 //  Introduced MuDst reader
 //
