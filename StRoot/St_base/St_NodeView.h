@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.17 1999/06/21 22:16:55 fine Exp $
+// $Id: St_NodeView.h,v 1.18 1999/07/09 01:56:39 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.18  1999/07/09 01:56:39  fine
+// New method to contrsuct sub views and manage visibilities
+//
 // Revision 1.17  1999/06/21 22:16:55  fine
 // Some clean up
 //
@@ -53,12 +56,17 @@
 
 class St_NodeView : public St_ObjectSet {
 protected:
-  TList          *fListOfShapes;  //Pointer to the list of the "extra" shape definitions
+  TList          *fListOfShapes;     //Pointer to the list of the "extra" shape definitions
+//  TList          *fListOfAttributes;  //Pointer to the list of this node attributes
+//  St_Node        *fAttributes;
+
   virtual void    PaintShape(Option_t *option);
 
 public:
   St_NodeView():St_ObjectSet(),fListOfShapes(0) {;}
   St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition=0);
+  St_NodeView(St_NodeView *viewNode,const Char_t *NodeName1,const Char_t *NodeName2=0);
+  St_NodeView(St_NodeView *viewNode,St_NodeView *topNode);
   St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition=0,EDataSetPass iopt=kAll,Int_t level=0);
   St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionId, St_Node *thisNode,
               const Char_t *thisNodePath, const Char_t *matrixName=0, const Int_t matrixType=0);
@@ -70,13 +78,16 @@ public:
   virtual void     Browse(TBrowser *b);
   virtual void     Draw(Option_t *option=""); // *MENU* 
   virtual Int_t    DistancetoPrimitive(Int_t px, Int_t py);
+//  virtual St_Node *GetAttributes() const;
   virtual St_NodePosition *GetPosition() const { return (St_NodePosition *)GetObject();}
-  virtual St_Node *GetNode() const ;
+  virtual St_Node *GetNode() const ; 
   virtual Int_t    GetGlobalRange(const St_NodeView *rootNode,Float_t *min, Float_t *max);
-  virtual TList   *GetListOfShapes()  const;
+  virtual TList   *GetListOfShapes()      const;
+//  virtual TList   *GetListOfAttributes()  const;
   virtual void     GetLocalRange(Float_t *min, Float_t *max);
   virtual TShape  *GetShape()  const;
-  virtual Int_t    GetVisibility() const {return GetNode() ? GetNode()->GetVisibility():0;}
+//  virtual St_Node *GetThisAttributes() const;
+  virtual Int_t    GetVisibility() const;
   virtual Bool_t   IsMarked();
   virtual Bool_t   Is3D()  {return kTRUE;}
   virtual TList   *Nodes(){ return GetList();}
@@ -92,7 +103,11 @@ public:
 inline void    St_NodeView::Add(St_NodeView *node){ St_DataSet::Add(node);}
 inline Bool_t  St_NodeView::IsMarked(){ return TestBit(kMark); }
 inline TList  *St_NodeView::GetListOfShapes() const {return fListOfShapes;}
+// inline TList  *St_NodeView::GetListOfAttributes() const {return fListOfAttributes;}
 inline TShape *St_NodeView::GetShape()  const 
        {return fListOfShapes ? (TShape *)fListOfShapes->First():0;}
+inline Int_t   St_NodeView::GetVisibility() const {return GetNode() ? GetNode()->GetVisibility():0;}
+// inline St_Node *St_NodeView::GetThisAttributes() const {return fAttributes;}
+
 #endif
 

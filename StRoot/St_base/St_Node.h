@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.15 1999/06/09 22:09:35 fine Exp $
+// $Id: St_Node.h,v 1.16 1999/07/09 01:56:38 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.16  1999/07/09 01:56:38  fine
+// New method to contrsuct sub views and manage visibilities
+//
 // Revision 1.15  1999/06/09 22:09:35  fine
 // St_PolyLine3D has beed redesigned
 //
@@ -79,11 +82,19 @@ class TRotMatrix;
 class TList;
 
 class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill { 
+ public:
+  enum ENodeSEEN {kBothVisible  = 00,                              //'00'
+                  kSonUnvisible =  1,                              //'01'
+                  kThisUnvisible=  2,                              //'10'
+                  kNoneVisible  = kThisUnvisible | kSonUnvisible}; //'11'
  protected:
    TShape         *fShape;         //Pointer to the "master" shape definition
    TList          *fListOfShapes;  //Pointer to the list of the shape definitions
    TString         fOption;        //List of options if any
-   Int_t           fVisibility;    //Visibility flag
+   ENodeSEEN       fVisibility;    //Visibility flag  00 - everything visible, 
+                                   //                 10 - this unvisible, but sons are visible
+                                   //                 01 - this visible but sons
+                                   //                 11 - neither this nor its sons are visible
 
    virtual void             Add(St_NodePosition *position);
    virtual St_NodePosition *Add(St_Node *node, St_NodePosition *nodePosition);
@@ -99,6 +110,8 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual ~St_Node();
         virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, UInt_t id=0, Option_t *option="");
         virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname,  UInt_t id=0, Option_t *option="");
+        static  Int_t       MapStNode2GEANTVis(ENodeSEEN  vis);
+        static  Int_t       MapGEANT2StNodeVis(Int_t vis);
         virtual void        Add(TShape *shape, Bool_t IsMaster=kFALSE);
         virtual void        Browse(TBrowser *b);
         virtual TNode      *CreateTNode(const St_NodePosition *position=0);
@@ -113,8 +126,8 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
                 TShape     *GetShape()  const {return fShape;}
                 TList      *GetListOfShapes()  const {return fListOfShapes;}
         virtual void        GetLocalRange(Float_t *min, Float_t *max);
-        Int_t               GetVisibility() const {return fVisibility;}
-        virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
+        virtual ENodeSEEN   GetVisibility() const {return fVisibility;}
+        virtual TList      *GetListOfPositions()  { return (TList *)(GetObject());}
         virtual ULong_t     Hash() { return TObject::Hash();}
         virtual void        ImportShapeAttributes();
         virtual Bool_t      IsMarked();
@@ -122,7 +135,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual TList      *Nodes() const { return GetList(); }
         virtual void        Paint(Option_t *option="");
         virtual void        PaintShape(Option_t *option="");
-        virtual void        SetVisibility(Int_t vis=1); // *MENU*
+        virtual void        SetVisibility(ENodeSEEN vis=kBothVisible); // *MENU*
         virtual void        Sizeof3D() const;
  
         ClassDef(St_Node,1)  //Description of parameters to position a 3-D geometry object

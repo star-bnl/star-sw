@@ -38,6 +38,7 @@ ClassImp(St_NodeView)
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
             : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition),fListOfShapes(0)
+            //             ,fListOfAttributes(0)
 {
   //
   // This ctor creates a St_NodeView structure from the "marked" nodes
@@ -65,8 +66,130 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
 }
 
 //_____________________________________________________________________________
+St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodeView *topNode)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)0),fListOfShapes(0)
+            //             ,fListOfAttributes(0)
+{
+  //
+  // This ctor creates a St_NodeView structure containing:
+  //
+  //   - viewNode on the top
+  //   - skip ALL node from the original viewNode untill topNode found
+  //   - include all "marked" node below "topNode" if any
+  //     topNode is always included
+  //
+  // It re-calculates all positions according of the new topology
+  //
+  if (viewNode && topNode) 
+  {
+     SetTitle(viewNode->GetTitle());
+     // define the depth of the "top" Node
+     EDataSetPass mode = kContinue;
+     St_NodeViewIter next(viewNode,0);
+     St_NodeView *nextView = 0;
+     while ( (nextView = (St_NodeView *)next(mode)) ){     
+       mode = kContinue;
+      // Skip till  "top Node" found
+      if (topNode != nextView) continue;
+      St_NodePosition *position = next[0];
+      if (!position->GetNode()) {
+         Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
+      }
+      Add(new St_NodeView(nextView,position));
+      break;
+    }
+  }
+}
+
+#if 0
+//_____________________________________________________________________________
+St_NodeView::St_NodeView(St_NodeView *viewNode,const Char_t *topNodeName)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)0),fListOfShapes(0)
+            //             ,fListOfAttributes(0)
+{
+  //
+  // This ctor creates a St_NodeView structure containing:
+  //
+  //   - viewNode on the top
+  //   - skip ALL node from the original viewNode untill topNodeName found
+  //   - include all "marked" node below "topNodename" if any
+  //     topNodeName is always included
+  //
+  // It re-calculates all positions according of the new topology
+  //
+  if (viewNode && topNodeName && topNodeName[0]) 
+  {
+     SetTitle(viewNode->GetTitle());
+     // define the depth of the "top" Node
+     EDataSetPass mode = kContinue;
+     St_NodeViewIter next(viewNode,0);
+     St_NodeView *nextView = 0;
+     while ( (nextView = (St_NodeView *)next(mode)) ){     
+       mode = kContinue;
+      // Skip till  "top Node" found
+      if (strcmp(nextView->GetName(),topNodeName)) continue;
+      St_NodePosition *position = next[0];
+      if (!position->GetNode()) {
+         Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
+      }
+      Add(new St_NodeView(nextView,position));
+      break;
+    }
+  }
+}
+#endif
+
+//_____________________________________________________________________________
+St_NodeView::St_NodeView(St_NodeView *viewNode,const Char_t *nodeName1,const Char_t *nodeName2)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)0),fListOfShapes(0)
+            //             ,fListOfAttributes(0)
+{
+  //
+  // This ctor creates a St_NodeView structure containing:
+  //
+  //   - viewNode on the top
+  //   - skip ALL node from the original viewNode untill topNodeName found
+  //   - include all "marked" node below "topNodename" if any
+  //     topNodeName is always included
+  //
+  // It re-calculates all positions according of the new topology
+  //
+  const Char_t *foundName[2] = {nodeName1, nodeName2};
+  Bool_t found = kFALSE;
+  if (viewNode && nodeName1 && nodeName1[0]) 
+  {
+     SetTitle(viewNode->GetTitle());
+     // define the depth of the "top" Node
+     EDataSetPass mode = kContinue;
+     St_NodeViewIter next(viewNode,0);
+     St_NodeView *nextView = 0;
+     while ( (nextView = (St_NodeView *)next(mode)) ){     
+       mode = kContinue;
+      // Skip till  "top Node" found
+      Int_t i = 0;
+      for (i=0;i<2;i++) {
+        if (foundName[i]) {
+            if (strcmp(nextView->GetName(),foundName[i])) continue;
+            foundName[i] = 0; 
+            found = kTRUE;
+            break;
+        }
+      } 
+      if (!found) continue;
+      St_NodePosition *position = next[0];
+      if (!position->GetNode()) {
+         Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
+      }
+      Add(new St_NodeView(nextView,position));
+      mode = kPrune;
+    }
+  }
+}
+
+//_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt,Int_t level)
             : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition),fListOfShapes(0)
+            // ,fListOfAttributes(0)
 {
   //
   // Creates St_NodeView (view) with a topology similar with St_Node *pattern
@@ -116,6 +239,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionId, St_Node *topNode,
                          const Char_t *thisNodePath, const Char_t *matrixName, const Int_t matrixType)
+            // : fListOfAttributes(0)
 {
   // Special ctor to back St_NodeView::SavePrimitive() method
   fListOfShapes     = 0;
@@ -242,7 +366,9 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
      position->UpdatePosition(); 
      if (thisNode) {     
         thisShape    = thisNode->GetShape();
-        if (thisNode->GetVisibility() && thisShape && thisShape->GetVisibility()) {
+        if (!(thisNode->GetVisibility() & St_Node::kThisUnvisible) && 
+              thisShape && thisShape->GetVisibility()) 
+        {
           dist = thisShape->DistancetoPrimitive(px,py);
           if (dist < maxdist) {
              gPad->SetSelected(this);
@@ -251,6 +377,7 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
        }
      }
    }
+
 //   if ( TestBit(kSonsInvisible) ) return dist;
  
 //*-*- Loop on all sons
@@ -316,6 +443,12 @@ St_Node *St_NodeView::GetNode() const {
   return 0;
 }
 
+#if 0
+//_____________________________________________________________________________
+St_Node *St_NodeView::GetAttributes() const {
+  return GetThisAttributes() ? GetThisAttributes() : GetNode();
+}
+#endif
 //_____________________________________________________________________________
 Int_t St_NodeView::GetGlobalRange(const St_NodeView *rootNode,Float_t *globalMin,Float_t *globalMax)
 {
@@ -438,11 +571,14 @@ void St_NodeView::PaintShape(Option_t *option)
     if (!shape->GetVisibility())   continue;
     if (!rangeView) {
 #if 0
-      shape->SetLineColor(GetLineColor());
-      shape->SetLineStyle(GetLineStyle());
-      shape->SetLineWidth(GetLineWidth());
-      shape->SetFillColor(GetFillColor());
-      shape->SetFillStyle(GetFillStyle());
+      St_Node *attrib = GetAttributes();
+      if (attrib) {
+        shape->SetLineColor(attrib->GetLineColor());
+        shape->SetLineStyle(attrib->GetLineStyle());
+        shape->SetLineWidth(attrib->GetLineWidth());
+        shape->SetFillColor(attrib->GetFillColor());
+        shape->SetFillStyle(attrib->GetFillStyle());
+     }
 #endif
       TPadView3D *view3D=gPad->GetView3D();
       if (view3D)
@@ -549,7 +685,7 @@ void  St_NodeView::SetLineAttributes()
 void St_NodeView::SetVisibility(Int_t vis)
 {
  St_Node *node = GetNode();
- if (node) node->SetVisibility(vis);
+ if (node) node->SetVisibility(St_Node::ENodeSEEN(vis));
 }
 
 //______________________________________________________________________________
@@ -567,7 +703,7 @@ void St_NodeView::Sizeof3D() const
    }
 
    St_Node *thisNode  = GetNode();
-   if (thisNode && thisNode->GetVisibility()) {
+   if (thisNode && !(thisNode->GetVisibility()&St_Node::kThisUnvisible) ) {
      TIter nextShape(thisNode->GetListOfShapes());
      TShape *shape = 0;
       while( (shape = (TShape *)nextShape()) ) {
