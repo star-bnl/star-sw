@@ -24,8 +24,6 @@
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/StiMasterHitLoader.h"
-#include "Sti/Tpc/StiTpcHitLoader.h"
-#include "Sti/Svt/StiSvtHitLoader.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiDetectorFinder.h"
@@ -49,6 +47,10 @@
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiHitErrorCalculator.h"
+
+#include "StiTpc/StiTpcHitLoader.h"
+#include "StiSvt/StiSvtHitLoader.h"
+
 #include "StiMaker/RootEditableParameter.h"
 #include "StiMaker/StiRootIOBroker.h"
 #include "StiGui/StiRootDisplayManager.h"
