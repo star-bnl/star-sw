@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.2 2001/01/25 17:54:17 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.3 2001/01/31 15:05:58 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.3  2001/01/31 15:05:58  caines
+ * Added check to BFChain evaluation option to decide wehter to set Idealtracking on
+ *
  * Revision 1.2  2001/01/25 17:54:17  lmartin
  * Divorced from the real tracking code.
  * Initialize the StEstParams and StEstSegments objects controling the tracking.
@@ -38,6 +41,7 @@
 #include "tables/St_stk_track_Table.h" 
 #include "tables/St_sgr_groups_Table.h" 
 #include "tables/St_svm_evt_match_Table.h" 
+#include "StBFChain.h"
 
 ClassImp(StEstMaker)
 
@@ -102,9 +106,12 @@ Int_t StEstMaker::Init(){
 
   mNPass = 5;
   //  mNPass = 1;
+  mIdealTracking=0;
 
  // ideal tracking: mIdealTracking = 1
-  mIdealTracking = 1;
+  if( ((StBFChain *) GetChain())->GetOption("Eval") == kTRUE ){
+    mIdealTracking = 1;
+  }
   mDebugLevel = 0;
 
   mParams = new StEstParams*[mNPass];
@@ -477,7 +484,6 @@ Int_t StEstMaker::Make() {
   St_g2t_vertex*   Stg2tvertex=0;
   if (mIdealTracking==1) {
     Stevaltrk = (St_tte_eval *)tpc->Find("evaltrk");
-    cout<<"tteeval="<<Stevaltrk->GetNRows()<<endl;
     St_DataSet *geant  = GetInputDS("geant");
     Stg2ttrack = (St_g2t_track *)geant->Find("g2t_track");
     Stg2tvertex = (St_g2t_vertex *)geant->Find("g2t_vertex");
