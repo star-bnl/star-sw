@@ -60,6 +60,8 @@ extern CC_P void kam_soc_list_();
 extern CC_P void kam_soc_newobject_();
 extern CC_P void kam_socobject_name_();
 extern CC_P void kam_socobject_type_();
+extern CC_P void kam_socobject_version_();
+
 extern CC_P int kam_soc_bind();
 extern CC_P int kam_soc_release();
 extern CC_P int kam_soc_count();
@@ -71,6 +73,7 @@ extern CC_P int kam_soc_list();
 extern CC_P int kam_soc_newobject();
 extern CC_P int kam_socobject_name();
 extern CC_P int kam_socobject_type();
+extern CC_P int kam_socobject_version();
 
 #endif /* SOC_TYPES_H */
 
