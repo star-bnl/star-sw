@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.17 1998/07/18 03:15:59 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.18 1998/07/18 18:13:38 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -1003,17 +1003,20 @@ for IFIRST.
 If you want output to the screen instead of a file,
 write 'screen' for the filename.
 .
-The COLUMNLIST parameter is used
-to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
-column names with carets (^).  See the example below.
+The COLUMNLIST parameters are used
+to select a subset of the columns.  
+Separate the column names with spaces or carets (^).
+See the example below.
 If you want all the columns, type 'allColumns'.
 .
 EXAMPLE: 
-This example writes columns id, offset, and pedestal of
-rows 0 through 9 of the table tpg_cathode to a file named
-myfile.dat.
+           table  tpg_cathode
+        num rows  10
+       first row  0
+     output file  myfile.dat
+         columns  id offset pedestal
 .
- STAF[46] tdm/table/dump tpg_cathode 10 0 myfile.dat id^offset^pedestal
+ STAF[46] tdm/table/dump tpg_cathode 10 0 myfile.dat id offset pedestal
 .
 EXCEPTIONS: 
 .
