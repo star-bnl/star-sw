@@ -6,6 +6,8 @@
 #define StiRootDrawableDetector_HH
 
 #include "Sti/StiDetector.h"
+#include "Sti/StiObjectFactory.h"
+
 #include "StiRootDrawable.h"
 
 class StiRootDrawableDetector : public StiDetector , public StiRootDrawable
@@ -28,5 +30,7 @@ protected:
 protected:
     virtual void makeShape();
 };
+
+typedef StiObjectFactory<StiRootDrawableDetector> detector_factory;
 
 #endif

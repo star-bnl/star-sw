@@ -6,6 +6,8 @@
 #define StiRootDrawableStiEvaluableTrack_HH
 
 #include "Sti/StiEvaluableTrack.h"
+#include "Sti/StiObjectFactory.h"
+
 #include "StiRootDrawableLine.h"
 
 class StiRootDrawableStiEvaluableTrack : public StiEvaluableTrack, public StiRootDrawableLine
@@ -22,5 +24,7 @@ protected:
 private:
     
 };
+
+typedef StiObjectFactory<StiRootDrawableStiEvaluableTrack> StiEvaluableTrackFactory;
 
 #endif
