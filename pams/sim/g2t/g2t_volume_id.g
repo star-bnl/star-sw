@@ -84,17 +84,25 @@
 
       else If (Csys.eq.'emc') then
 *6*                                barrel calorimeter - K.Shester
-        rileft=numbv(1)
-        eta=idigi(1)+1
-        If (rileft.eq.1) then
-          phi=60-numbv(2)+1
-          phi_sub=idigi(2)
-          If (phi_sub.eq.0) phi_sub=2 
+        if (numbv(3)>0) then
+          rileft=numbv(1)
+          eta=idigi(1)+1
+          If (rileft.eq.1) then
+            phi=60-numbv(2)+1
+            phi_sub=idigi(2)
+            If (phi_sub.eq.0) phi_sub=2 
+          else
+            phi=60+numbv(2)
+            phi_sub=idigi(2)+1
+          endif     
+          superl=numbv(3)
         else
-          phi=60+numbv(2)
+          rileft=0
+          eta=idigi(1)+1
+          phi=60+numbv(1)
           phi_sub=idigi(2)+1
-        endif     
-        superl=numbv(3)
+          superl=numbv(2)
+        endif
         volume_id=10000000*rileft+100000*eta+100*phi+
      +                            10*phi_sub+superl
 
