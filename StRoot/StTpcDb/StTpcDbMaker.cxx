@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.17 2000/08/08 19:15:23 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.18 2000/08/09 14:54:54 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.18  2000/08/09 14:54:54  hardtke
+ * Add Clear option, set trigger table pointer to 0 after each event
+ *
  * Revision 1.17  2000/08/08 19:15:23  hardtke
  * use correct trigger time offset in case of laser
  *
@@ -299,6 +302,11 @@ Int_t StTpcDbMaker::Make(){
       tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
   return kStOK;
+}
+
+//---------------------------------------------------------------------------
+void StTpcDbMaker::Clear(const char *opt){
+  m_TpcDb->Clear();
 }
 
 //_____________________________________________________________________________
