@@ -89,6 +89,9 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
 //--------------------------------------------------
 
 int EEfeeDataBlock ::getValidDataLen() const {
+
+  return MaxData;   //tmp
+
   if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MaxTwCrateCh;
   if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MaxMapmtCrateCh;
   return 0;
@@ -111,7 +114,7 @@ int EEfeeDataBlock ::getNData(int thres) const {
 
 void EEfeeDataBlock ::setDataArray(UShort_t *d, int size) {
   assert(d);
-  if(size>MaxData) { 
+  if(size!=MaxData) { // tmp, was '>' 
     if(data) delete [] data;
     MaxData = size;
     data = new UShort_t[MaxData];
@@ -155,12 +158,15 @@ void EEfeeDataBlock :: clear(){
 //--------------------------------------------------
 //--------------------------------------------------
 int  EEfeeDataBlock :: isValid(){
-  return (getCrateID()< MaxAnyCrate);// add more conditions as emerge
+      	return (getCrateID()< MaxAnyCrate);// add more conditions as emerge
 }
 
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.9  2004/01/27 07:09:37  balewski
+ * slower but simpler
+ *
  * Revision 1.8  2003/12/03 18:55:41  zolnie
  * fixed yet another bug
  *
