@@ -2,8 +2,9 @@
 #include "table_header.h"
 #include "fortranc.h"
 void *ReAllocate(TABLE_HEAD_ST *h, int newsize);
+#if 0
 void *ami;
-
+void sig_die(){printf("***DUMMY SIG_DIE****");}
 void type_of_call F77_NAME(hbook1,HBOOK1)(int i1,int i2,int i3,int i4,int i5,int i6,int i7){printf("***DUMMY HBOOK1****");}
 void type_of_call F77_NAME(hbook2,HBOOK2)(){printf("***DUMMY HBOOK2****");}
 void type_of_call F77_NAME(hbookn,HBOOKN)(){printf("***DUMMY HBOOKN****");}
@@ -16,9 +17,6 @@ void type_of_call F77_NAME(hreset,HRESET)(int i1,int i2,int i3){printf("***DUMMY
 void type_of_call F77_NAME(hrend,HREND)(){printf("***DUMMY HREND****");}
 void type_of_call F77_NAME(hropen,HROPEN)(){printf("***DUMMY HROPEN****");}
 void type_of_call F77_NAME(hrout,HROUT)(){printf("***DUMMY HROUT****");}
-
-void sig_die(){printf("***DUMMY SIG_DIE****");}
-#if 0
 void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b){
 printf("***DUMMY GUFLD 0 0 5****");
   b[0] = 0.;

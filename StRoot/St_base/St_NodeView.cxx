@@ -101,28 +101,28 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
    TView *view =gPad->GetView();
    if (!view) return big;
  
-  St_Node *thisNode  = GetNode();
-  static St_NodePosition nullPosition;
-  St_NodePosition *position = &nullPosition;
-  TShape  *shape = 0;
-  if (thisNode) {
-    shape    = thisNode->GetShape();
-    position = GetPosition();
-    position->UpdatePosition();      
-  } 
+   St_Node *thisNode  = GetNode();
+   static St_NodePosition nullPosition;
+   St_NodePosition *position = &nullPosition;
+   TShape  *shape = 0;
+   if (thisNode) {
+     shape    = thisNode->GetShape();
+     position = GetPosition();
+     position->UpdatePosition();      
+   } 
 //*-*- Paint Referenced shape
-  Int_t dist = big;
-  if (thisNode) {
-    if (thisNode->GetVisibility() && shape->GetVisibility()) {
-//        gNode = this;
-       dist = shape->DistancetoPrimitive(px,py);
-       if (dist < maxdist) {
-          gPad->SetSelected(this);
-          return 0;
-       }
-    }
+   Int_t dist = big;
+   if (thisNode) {
+     if (thisNode->GetVisibility() && shape->GetVisibility()) {
+//         gNode = this;
+        dist = shape->DistancetoPrimitive(px,py);
+        if (dist < maxdist) {
+           gPad->SetSelected(this);
+           return 0;
+        }
+     }
 ////      if ( TestBit(kSonsInvisible) ) return dist;
-  }
+   }
  
 //*-*- Loop on all sons
    Int_t nsons = 0;
