@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.99 1999/06/29 22:51:08 fisyak Exp $
+# $Id: MakePam.mk,v 1.100 1999/06/30 15:29:15 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.100  1999/06/30 15:29:15  fisyak
+# Add StarClassLibrary for pams
+#
 # Revision 1.99  1999/06/29 22:51:08  fisyak
 # Add Objectspace for pams
 #
@@ -245,6 +248,13 @@ SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc))
 SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/inc)))
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 INC_DIRS+= $(STAF_UTILS_INCS)
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
+              StRoot .share .share/tables .share/$(PKG) pams inc 
+#                            StarClassLibrary/include
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
+ifneq ($(ROOT_DIR),$(STAR))
+INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
+endif
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
