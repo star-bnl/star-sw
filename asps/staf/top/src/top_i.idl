@@ -41,22 +41,33 @@ STAFCV_T join(in tdmTable_i table1, in tdmTable_i table2
 
 //:#####################################################################
 //:=============================================== INTERFACE          ==
-interface topMask_i : socObject_i {
+interface topCut_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
 readonly attribute string cutFunction;
-attribute boolean static;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T filter(in tdmTable_i table1, in tdmTable_i table2);
+STAFCV_T cut(in tdmTable_i table1);
+//- NYI --STAFCV_T mask(inout tdmTable_i table1);
+//- NYI --STAFCV_T unmask(inout tdmTable_i table1);
+
+};      /* topCut_i */
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topMask_i : topCut_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long size;
 readonly attribute long pass;
 readonly attribute long fail;
 
 //:----------------------------------------------- FUNCTIONS          --
-STAFCV_T filter(in tdmTable_i table1, inout tdmTable_i table2);
-STAFCV_T cut(inout tdmTable_i table1);
-STAFCV_T mask(inout tdmTable_i table1);
-STAFCV_T unmask(inout tdmTable_i table1);
-STAFCV_T fill(in tdmTable_i table1);
+STAFCV_T set(in tdmTable_i table1);
+STAFCV_T reset();
 
-};	/* topMask_i */
+};      /* topMask_i */
 
 //:#####################################################################
 //:=============================================== INTERFACE          ==
@@ -88,10 +99,15 @@ STAFCV_T findJoin(in string name, out topJoin_i join);
 STAFCV_T getJoin(in IDREF_T id, out topJoin_i join);
 STAFCV_T newJoin(in string name, in string spec, in string clause);
 
+STAFCV_T deleteCut(in string name);
+STAFCV_T findCut(in string name, out topCut_i cut);
+STAFCV_T getCut(in IDREF_T id, out topCut_i cut);
+STAFCV_T newCut(in string name, in string func);
+
 STAFCV_T deleteMask(in string name);
 STAFCV_T findMask(in string name, out topMask_i mask);
 STAFCV_T getMask(in IDREF_T id, out topMask_i mask);
-STAFCV_T newMask(in string name, in string cut);
+STAFCV_T newMask(in string name, in string func);
 
 STAFCV_T deleteSort(in string name);
 STAFCV_T findSort(in string name, out topSort_i sort);
