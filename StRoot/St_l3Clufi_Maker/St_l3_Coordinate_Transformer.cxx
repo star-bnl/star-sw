@@ -17,19 +17,17 @@ ClassImp(St_l3_Coordinate_Transformer);
 //______________________________
 St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
 {
- 
     // initialize transformations
+    // reset start values
+    max_tb_inner =0;
+    max_tb_outer =0;
+    transformation_errors =0;
     
     //Use_transformation_provided_by_db() ;
-  Set_parameters_by_hand() ;
-  //Get_parameters_from_db() ;
+    Set_parameters_by_hand() ;
+    //Get_parameters_from_db() ;
     //Use_transformation_provided_by_db() ;
     //Print_parameters() ;   
-
-  // set values
-   max_tb_inner =0;
-   max_tb_outer =0;
-   transformation_errors =0;
 }
 //______________________________
 St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
