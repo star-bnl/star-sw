@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.239 2001/10/08 01:56:10 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.240 2001/10/15 14:11:16 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -293,7 +293,7 @@ Bfc_st BFC[] = {
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim" ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2","",""       ,"db,StEvent,EmcUtil","StEmcADCtoEMaker","StEmcADCtoEMaker","EMC raw chain",kFALSE},
+  {"emcDY2","",""       ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker","EMC raw chain",kFALSE},
 
 
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
@@ -317,8 +317,8 @@ Bfc_st BFC[] = {
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
-  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
-                                         "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
+  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE}, 
+                          
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
 
   {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
