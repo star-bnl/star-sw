@@ -233,7 +233,7 @@ $iFirstIndex = $iCommit - 500;
 if ($iFirstIndex < 1) { $iFirstIndex = 1; }
 for ( $i=$iCommit; $i>=$iFirstIndex; $i--) {
     if($userA[$i] =~ /CVS:/ || $userA[$i] eq ""){ next;}
-    print USERCOMMITS qq~
+    print COMMITHISTORY qq~
     <tr bgcolor=whitesmoke>
         <td>&nbsp; <a href="user/$userA[$i]/index.html#bottom">$userA[$i]</a> &nbsp;</td>
         <td>&nbsp; <a href="$cvsUrl/$modA[$i]/?sortby=date">$modA[$i]</a> &nbsp;</td>
