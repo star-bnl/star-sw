@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.3 2001/01/31 16:54:40 lmartin Exp $
+ * $Id: StEstProjection.cxx,v 1.4 2001/02/23 13:31:11 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.4  2001/02/23 13:31:11  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/31 16:54:40  lmartin
  * mParams[]->debug replaced by mDebug.
  * phi and z params for StEstIndexGeom removed from StEstParams.
@@ -22,6 +25,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "math_constants.h"
@@ -41,8 +45,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
   double    sd;      // path length
   int       phi;     // phi bin
   int       z;       // z bin
-  long      il;
-  long      jl,lm;
+  long      il,jl;
   int       ns;      
   int       ret = 0;
   int       nneighbours = mParams[mPass]->nneighbours[slayer];
@@ -55,8 +58,8 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
 
 
   if(mDebugLevel>4){
-    cout<<"     branch  = "<<&branch<<endl;
-    cout<<"     slayer  = "<<slayer<<endl;
+    gMessMgr->Info()<<"     branch  = "<<&branch<<endm;
+    gMessMgr->Info()<<"     slayer  = "<<slayer<<endm;
   }
   
   switch(slayer){
@@ -70,10 +73,8 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
     break;
   default:
     ret = 4;
-    cerr<<"ERROR in Preprojection !!!"<<endl;
-    cerr<<" slay<1 or slay>4 !!!"<<endl;
-    cerr<<"     slay = "<<slayer;
-    cerr<<"     branch* = "<<long(&branch)<<endl;
+    gMessMgr->Error()<<"ERROR in Preprojection !!! slay<1 or slay>4 !!!"<<endm;
+    gMessMgr->Error()<<"     slay = "<<slayer<<"     branch* = "<<long(&branch)<<endm;
     return(ret);
   }
 
@@ -116,7 +117,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
       if(z>=0 && z<mNZBins && phi>=0 && phi<mNPhiBins) {
 	for(jl=0; jl<mIndexGeom->getNWaf(phi,z,slayer); jl++){
 	  if(mPreprojNumber>=MAXFINDWAF){
-	    cout<<"       WARNING!!! too many wafers. "<<endl;
+	    gMessMgr->Warning()<<"Preprojection : too many wafers. "<<endm;
 	    ret = 2;
 	    goto PREPROJ_FINISH;
 	  }
@@ -135,10 +136,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
       for(jl=0; jl<8; jl++){
 	if(mPreprojNumber>=MAXFINDWAF){
 	  if(mDebugLevel>0) 
-	    cout<<"      WARNING!!! too many neighbours. mPreprojNumber="<<mPreprojNumber<<endl;
-	  for (lm=0;lm<mPreprojNumber;lm++) 
-	    cout<<" "<<mPreprojTable[lm]->GetId()<<" ";
-	  cout<<endl;
+	    gMessMgr->Warning()<<"Prepojection : too many neighbours. mPreprojNumber="<<mPreprojNumber<<endm;
 	  ret=3;
 	  goto PREPROJ_FINISH;
 	}
@@ -156,15 +154,14 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
 
  PREPROJ_FINISH:;
   for(jl=0; jl<mPreprojNumber; jl++) {
-    if(mDebugLevel>4) {
-      cout << "detector ="<<mPreprojTable[jl]->mId<<"  nhits ="<<mPreprojTable[jl]->GetNHits()<<" srodek (center)="<<*(mPreprojTable[jl]->GetX())<<"  direction = "<<*(mPreprojTable[jl]->GetN())<<endl;
-    }
+    if(mDebugLevel>4)
+      gMessMgr->Info()<<"wafer ="<<mPreprojTable[jl]->mId<<" nhits ="<<mPreprojTable[jl]->GetNHits()<<endm;
     mPreprojTable[jl]->mPreprojection=FREE;
   }
     
   if(mDebugLevel>2){
-    cout << "    Wafers found: "<<mPreprojNumber<<endl;
-    cout<<"**** Preprojection STOP ****"<<endl;    
+    gMessMgr->Info()<<"    Wafers found: "<<mPreprojNumber<<endm;
+    gMessMgr->Info()<<"**** Preprojection STOP ****"<<endm;
   }
 
   return(ret); // 0=O.K.  1=no wafers 2=too many wafers 3=too many neighbours
@@ -191,8 +188,8 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 
   if(mDebugLevel>4) {
     StThreeVector<double> *vect0 = new StThreeVector<double>(0,0,0);
-    cout << "  dist from (0,0,0)="<<helix->distance(*vect0)<<endl;
-    cout << "  pathlength to (0,0,0)="<<helix->pathLength(*vect0)<<endl;
+    gMessMgr->Info()<<"  dist from (0,0,0)="<<helix->distance(*vect0)<<endm;
+    gMessMgr->Info()<<"  pathlength to (0,0,0)="<<helix->pathLength(*vect0)<<endm;
     delete vect0;
   }
 
@@ -218,7 +215,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
     sd=helix->pathLength(vect2, vect3);
     
     if(mDebugLevel>4) {
-      cout<<"  helix->pathLength="<<sd<<endl;
+      gMessMgr->Info()<<"  helix->pathLength="<<sd<<endm;
     }
     if(sd<1000) {
       vect1=helix->at(sd);
@@ -246,9 +243,9 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 	if(mProjOut.nhit < MAXHITPROJ) 
 	  mProjOut.nhit++;
 	else
-	  cerr <<  "mProjOut.nhit==MAXHITPROJ" <<endl;
+	  gMessMgr->Warning()<<"Projection : mProjOut.nhit==MAXHITPROJ"<<endm;
 	if(mDebugLevel>4) 
-	  cout << "--- HIT ADDED TO PROJ TABLE ---  "<<mProjOut.nhit<<endl;
+	  gMessMgr->Info()<<"--- HIT ADDED TO PROJ TABLE ---  "<<mProjOut.nhit<<endm;
 	
 	// do pomyslenia :
 	for(kl=0; kl<mProjOut.nhit; kl++) // sorting
@@ -272,7 +269,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 	  }
 	if(mDebugLevel>4) 
 	  for(kl=0; kl<mProjOut.nhit; kl++) {
-	    cout << "hit nr = "<<kl<<"\tdist = "<<mProjOut.dist[kl]<<endl;
+	    gMessMgr->Info()<<"hit nr = "<<kl<<"\tdist = "<<mProjOut.dist[kl]<<endm;
 	  }
 	
       } // end of for(jl=0; jl<mPreprojTable[il]->GetNHits; jl++)
@@ -281,7 +278,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
   // end of projection & hit information
 
   if(mDebugLevel>2)
-    cout<<"Projection **** STOP ****"<<endl;
+    gMessMgr->Info()<<"Projection **** STOP ****"<<endm;
  
   return(1);
 
