@@ -202,7 +202,7 @@ Int_t St_io_Maker::AddFilesFromFile(const Char_t *fileName)
   
 }
 //_____________________________________________________________________________
-void St_io_Maker::Clear(Option_t *option)
+void St_io_Maker::Clear(Option_t *)
 {
   TTree *tree = GetTree();
   if (tree) {
@@ -246,6 +246,7 @@ void St_io_Maker::BuildBranchList(TTree *tree)
 //_____________________________________________________________________________
 static Int_t GetEntries(StIOHeader *obj)
 {
+  // Returns the number of entries from the selected TBranch
   if (obj) {
     TBranch *b = obj->GetBranch();
     if (b) return b->GetEntries();
@@ -254,16 +255,28 @@ static Int_t GetEntries(StIOHeader *obj)
 }
 
 //_____________________________________________________________________________
+Bool_t St_io_Maker::IsNewTree(Int_t nevent)
+{
+  // Returns the condition whether the new TTree file should be opened
+   return  ( m_Entries != -1)
+         &&  m_ListOfFiles 
+         && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) ;
+}
+
+//_____________________________________________________________________________
 St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
 {
+  //
+  // Looks for "next event" of the branch with the name defined by "set"
+  // returns the St_DataSet pointer of the dataset from that branch if any
+  // 
+  // tries to switch to the new TTree if the current one is exhausted
+  //
+
    if (!m_ListOfBranches) return 0;
    Int_t nevent = g_Chain->Event()-1;
    cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
-   if (  ( m_Entries != -1)
-         &&  m_ListOfFiles 
-         && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) 
-      )
-   {
+   if (  IsNewTree( nevent ) ) {
        DestroyBranchList();
        // Let's create it from the TTree if any
        BuildBranchList(SetNextTree());
@@ -290,6 +303,10 @@ St_DataSet *St_io_Maker::DataSet(const Char_t *set)
 //_____________________________________________________________________________
 void St_io_Maker::DestroyBranchList()
 {
+  //
+  // Destroy the list of the current TTree branches
+  // (to prepare reading the next TTree or from this class dtor)
+
   if (m_ListOfBranches) {
       m_ListOfBranches->Delete();
       delete m_ListOfBranches;
@@ -300,6 +317,7 @@ void St_io_Maker::DestroyBranchList()
 //_____________________________________________________________________________
 Int_t St_io_Maker::GetEvent(Int_t nevent)
 {
+  // returns the nuber of the bytes been read from the "nevent" event
   Int_t i = NextEventGet(nevent);
   printf(" =========== >>>>>>> %d bytes have been read\n",i);
   return i;
@@ -361,11 +379,7 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
   Int_t nevent = nEvent-1;
   cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
 
-//  if (m_ListOfFiles && m_Entries != -1 && nevent == m_OffSet+m_Entries-1) DestroyBranchList();
-   if (  ( m_Entries != -1)
-         &&  m_ListOfFiles 
-         && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) 
-      )  DestroyBranchList();
+  if (  IsNewTree( nevent ) ) DestroyBranchList();
 
   if (!m_ListOfBranches) {
     // Let's create it from the TTree if any
@@ -408,6 +422,8 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
 //_____________________________________________________________________________
 Int_t St_io_Maker::NextEventPut()
 {
+  // Write next event out 
+  // returns the number of the bytes written
 #ifdef tree
   TTree *tree = GetTree();
   if (!tree) return 0;
@@ -454,7 +470,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.13 1999/03/07 02:15:32 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.14 1999/03/07 16:38:07 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -493,6 +509,7 @@ Int_t St_io_Maker::SetActive()
 //_____________________________________________________________________________
 TTree *St_io_Maker::SetNextTree()
 {
+  // Switches this maker to readin next TFile if any.
   if (m_ListOfFiles) 
   {
     if (!m_FileIterator) m_FileIterator = new TIter(m_ListOfFiles);
