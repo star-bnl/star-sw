@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.18 2000/08/28 16:15:50 snelling Exp $
+// $Id: doFlowEvents.C,v 1.19 2000/08/28 16:48:01 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.19  2000/08/28 16:48:01  snelling
+// Right defaults for QA
+//
 // Revision 1.18  2000/08/28 16:15:50  snelling
 // Added Pt and Eta cuts to macro
 //
@@ -245,15 +248,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //   If you want to read more than one PhiWeight file, instantiate multiple
   //      FlowMakers with the corresponding selection objects.
   //
-  //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+  //   StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
   
   if (makerName[0]=='\0') {
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   } else {
-        sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
-        StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
-  //sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
-  //StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
+    sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
+    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+    //    sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
+    //    StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
   }
 
   //
@@ -264,7 +267,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //  flowMaker->FlowEventWrite(kTRUE);
   //  flowMaker->FlowEventRead(kTRUE);
   
-  // Set Debug status
+  //  Set Debug status
   //  flowMaker->SetDebug();
   //  flowTagMaker->SetDebug();
   //  flowAnalysisMaker->SetDebug();
@@ -401,8 +404,8 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, c
 void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
-  //const Char_t *filePath="-";
-  //const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
+  const Char_t *filePath="-";
+  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
   
   // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
@@ -430,8 +433,8 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="/data06/posk/f07/";
   // Char_t* fileExt="f0730picoevent.root";
 
-  Char_t* filePath="/auto/pdsfdv09/star/dst/P00he/2000/07/"; //data
-  Char_t* fileExt="*.dst.root";
+  //  Char_t* filePath="/auto/pdsfdv09/star/dst/P00he/2000/07/"; //data
+  //  Char_t* fileExt="*.dst.root";
 
   doFlowEvents(nevents, filePath, fileExt);
 }
