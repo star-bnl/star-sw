@@ -16,7 +16,7 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc ctf svt global' _
-   chain='  g2tin tpg tfs tpt tid tte_e drhd dehd evr egr ev0 ddedx dpnt desum dmsft drsum ntup' _
+   chain='  g2tin tpg tfs tpt tid tte_e drhd dehd egr evr ev0 ddedx dpnt desum dmsft drsum ntup' _
    skip=0 _
    no_events=1000 _
    input_data_file=/star/mds/users/saulys/test/v0test-g2t.xdf _
