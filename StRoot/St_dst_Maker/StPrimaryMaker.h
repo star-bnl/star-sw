@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.3 1999/07/08 19:09:52 fisyak Exp $
+// $Id: StPrimaryMaker.h,v 1.4 1999/07/12 23:04:16 fisyak Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.4  1999/07/12 23:04:16  fisyak
+// Remove glob2
+//
 // Revision 1.3  1999/07/08 19:09:52  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -47,6 +50,9 @@ class StPrimaryMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.4 1999/07/12 23:04:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(StPrimaryMaker, 1)   //StAF chain virtual base class for Makers
     };
     

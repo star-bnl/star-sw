@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.7 1999/07/01 17:27:42 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.8 1999/07/12 23:04:17 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.8  1999/07/12 23:04:17  fisyak
+// Remove glob2
+//
 // Revision 1.7  1999/07/01 17:27:42  fisyak
 // New global chain from  Wensheng Deng
 //
@@ -69,6 +72,9 @@ class St_dst_Maker : public StMaker {
    virtual void   SetSelection(const Char_t **sel ){fSelect=sel;};
    virtual void   PrintInfo();
    
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.8 1999/07/12 23:04:17 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -5,8 +5,11 @@
 //                                                                      //
 // StMatchMaker virtual base class for Maker                            //
 //                                                                      //
-// $Id: StMatchMaker.h,v 1.3 1999/07/08 19:09:52 fisyak Exp $
+// $Id: StMatchMaker.h,v 1.4 1999/07/12 23:04:16 fisyak Exp $
 // $Log: StMatchMaker.h,v $
+// Revision 1.4  1999/07/12 23:04:16  fisyak
+// Remove glob2
+//
 // Revision 1.3  1999/07/08 19:09:52  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -29,7 +32,7 @@ class StMatchMaker : public StMaker {
   
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.3 1999/07/08 19:09:52 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.4 1999/07/12 23:04:16 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -100,6 +103,9 @@ class StMatchMaker : public StMaker {
   virtual void   Set_usetpc   (Int_t m = 1){m_usetpc    = m;} // *MENU*
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
   virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StMatchMaker.h,v 1.4 1999/07/12 23:04:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(StMatchMaker, 1)   //StAF chain virtual base class for Makers
 };
     

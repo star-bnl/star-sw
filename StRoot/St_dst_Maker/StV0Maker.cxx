@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.6 1999/07/12 01:49:39 fine Exp $
+// $Id: StV0Maker.cxx,v 1.7 1999/07/12 23:04:16 fisyak Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.7  1999/07/12 23:04:16  fisyak
+// Remove glob2
+//
 // Revision 1.6  1999/07/12 01:49:39  fine
 // Clean up
 //
@@ -109,13 +112,7 @@ Int_t StV0Maker::Make(){
     cout << " StV0Maker: primary is missing" << endl;
     return kStWarn;
   }
-  
-  St_DataSetIter primaryI(primary);         
-  St_dst_track   *globtrk2 = (St_dst_track *) primaryI("globtrk2");
-  if (!globtrk2) {
-    cout << " StV0Maker: globtrk2 is missing" << endl;
-    return kStWarn;
-  }
+  St_DataSetIter primaryI(primary);
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
     cout << " StV0Maker: vertex is missing" << endl;
@@ -196,7 +193,7 @@ Int_t StV0Maker::Make(){
 //_____________________________________________________________________________
 void StV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StV0Maker.cxx,v 1.6 1999/07/12 01:49:39 fine Exp $\n");
+  printf("* $Id: StV0Maker.cxx,v 1.7 1999/07/12 23:04:16 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
