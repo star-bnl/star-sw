@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.7 2001/10/26 20:59:46 porter Exp $
+ * $Id: StDbBuffer.h,v 1.8 2003/04/11 22:47:36 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.8  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.7  2001/10/26 20:59:46  porter
  * fixed new endtime flag from previous checkin. made StDataBaseI available
  * at root-cli.
@@ -83,7 +90,7 @@ public:
     mLast=-1;
     mMax=100;
     mCol= new column[mMax+1];
-    zeroColumn(0,100);
+    zeroColumn(0,mMax);
     mMode=Storage;
   };
 

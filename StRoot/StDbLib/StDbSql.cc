@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.19 2003/01/29 03:44:54 porter Exp $
+ * $Id: StDbSql.cc,v 1.20 2003/04/11 22:47:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.20  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.19  2003/01/29 03:44:54  porter
  * added setRowNumber in QueryDbFunction method to simplify codes that use
  * this when plotting directly from the database
@@ -100,6 +107,7 @@
 #include "StDbConfigNodeImpl.hh"
 #include "StDbTableIter.hh"
 #include "StDbTable.h"
+#include "StDbFastSqlWriter.h"
 
 #include <strstream.h>
 #include <iostream.h>
@@ -654,9 +662,6 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
   readTableInfo(table);
   clear();    
 
-  char* dataTable;
-  if(!((dataTable)=getDataTable(table,storeTime)))
-     return sendMess(tName," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   if(table->IsBaseLine() && hasInstance(table)) 
      return sendMess("BaseLine instance already exists",tName,dbMErr,__LINE__,__CLASS__,__METHOD__);
@@ -664,7 +669,14 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
   if(!QueryDescriptor(table))
      return sendMess(tName," doesn't have a descriptor",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
+
   table->setRowNumber(); // set to 0
+  if(!table->IsIndexed())return WriteDbNoIndex(table,storeTime);
+
+  char* dataTable;
+  if(!((dataTable)=getDataTable(table,storeTime)))
+     return sendMess(tName," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
+
   int numRows;
   int* elements = table->getElementID(numRows);
 
@@ -719,6 +731,68 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
 
   if(!retVal)sendMess(" Write failed for table=",tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
   return retVal;
+#undef __METHOD__
+}
+
+////////////////////////////////////////////////////////////////////
+int
+StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
+#define __METHOD__ "WriteDbNoIndex(table,storeTime)"
+ 
+  int retVal=0; 
+  char* dataTable;
+  if(!((dataTable)=getDataTable(table,storeTime)))
+     return sendMess(table->printName()," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
+
+  ostrstream cList;
+  cList<<"beginTime,"<<getColumnList(table)<<ends;
+
+  char* sTime=getDateTime(storeTime);
+
+  int numRows=table->GetNRows();
+  char* colList=cList.str();
+  int i;
+  bool hasBinary=false;
+  if(Db.InputStart(dataTable,&buff,colList,numRows,hasBinary)){
+ 
+    if(hasBinary){ // got to go through the buffer
+
+      for(i=0;i<numRows;i++){
+        buff.WriteScalar(sTime,"beginTime");
+        table->dbStreamerWrite(&buff); //,false);
+        if(!Db.InputRow(&buff,i)) break;
+      }
+      if( i==numRows && Db.InputEnd() ){
+        retVal=1;
+        table->commitData();
+      }
+    } else {
+       
+      table->setBeginTime(storeTime);
+      ostrstream fsql;
+      StDbFastSqlWriter writer(fsql);
+      writer.ioTable(table);
+      fsql<<ends;
+      char* sql=fsql.str();
+      Db<<sql; fsql.freeze(0);
+      if(Db.InputEnd()){
+	retVal=1;
+        table->commitData();
+      }
+    }
+     
+  }
+
+  clear();
+
+  table->setRowNumber();
+  delete [] sTime;
+  cList.freeze(0);
+  delete [] dataTable;
+
+  if(!retVal)sendMess(" Write failed for Non-Indexed table=",table->printName(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+  return retVal;
+
 #undef __METHOD__
 }
 
@@ -1339,7 +1413,8 @@ StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
      if(funcName && (desc->getElementLength(i)>1))continue;
      char* name=desc->getElementName(i);
      if(funcName)es<<funcName<<"(";
-     es<<tableName<<"."<<name;
+     if(tableName)es<<tableName<<".";
+     es<<name;
      if(funcName)es<<") as "<<name;
      if(i<(numElements-1))es<<", ";
      delete [] name;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.6 2003/01/10 04:19:20 porter Exp $
+ * $Id: StDbSql.hh,v 1.7 2003/04/11 22:47:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.7  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.6  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -106,7 +113,7 @@ protected:
   char* getFlavorQuery(const char* flavor);
   char* getProdTimeQuery(unsigned int prodTime);
   char* getElementList(int* elements, int num);
-  char* getColumnList(StDbTable* table,char* tableName, char* funcName=0);
+  char* getColumnList(StDbTable* table,char* tableName=0, char* funcName=0);
   char* getEmptyString();
 
   bool  hasInstance(StDbTable* table);
@@ -125,6 +132,10 @@ protected:
   bool  checkColumn(const char* tableName, const char* columnName);
   bool  updateEndTime(StDbTable* table, const char* dataTable, unsigned int reqTime);
   void  init();
+
+  // specific meth for fast multi-row writes of non-indexed tables
+  virtual int   WriteDbNoIndex(StDbTable* table, unsigned int storeTime);
+
 
 public:
 

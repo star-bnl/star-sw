@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.23 2003/02/12 22:12:45 porter Exp $
+ * $Id: MysqlDb.cc,v 1.24 2003/04/11 22:47:27 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.24  2003/04/11 22:47:27  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.23  2003/02/12 22:12:45  porter
  * moved warning message about null columns (checked in 2 days ago) from the
  * depths of the mysql coding into the StDbTable code. This suppresses confusing
@@ -175,7 +182,7 @@ mtimeout=1;
 mQuery=0;
 mQueryLast=0;
 mRes= new MysqlResult;
-
+ for(int i=0;i<200;i++)cnames[i]=0;
 
 }
 //////////////////////////////////////////////////////////////////////
@@ -324,6 +331,8 @@ bool MysqlDb::ExecQuery(){
 
 mqueryState=false;
 
+//cout<<mQuery<<endl;
+
 if(mlogTime)mqueryLog.start();
 
 int status=mysql_real_query(&mData,mQuery,mQueryLen);
@@ -392,6 +401,114 @@ MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
   return *this;
 };
 
+////////////////////////////////////////////////////////////////////////
+
+bool MysqlDb::InputStart(const char* table,StDbBuffer *aBuff, const char* colList, int nRows,bool& hasBinary){
+
+  bool tRetVal=false;
+  if(!table || !aBuff || !colList) return tRetVal;
+
+  bool change=aBuff->IsClientMode();
+  if(change) aBuff->SetStorageMode();
+
+  *this << "select * from " << table << " where null"<< endsql;
+  *this << "insert delayed into " << table << " ("<<colList<<") VALUES(";
+  int i;
+
+    char* tmpString=new char[strlen(colList)+1];
+    strcpy(tmpString,colList);
+    char *ptr1,*ptr2;
+    jfields=0;    
+    bool done = false;
+    ptr1=tmpString;
+
+    while(!done){
+      if((ptr2=strstr(ptr1,","))){
+	*ptr2='\0';
+      } else {
+        done=true;
+      }
+      if(*ptr1==' ')ptr1++;
+      if(cnames[jfields]) delete [] cnames[jfields];
+      cnames[jfields]=new char[strlen(ptr1)+1];
+      strcpy(cnames[jfields],ptr1);
+      if(!done){
+	ptr1=ptr2+1;
+        *ptr2=',';
+      }
+      jfields++;
+    }
+    delete [] tmpString;
+    int nfields=NbFields();
+    int fcount=0;
+    hasBinary=false;
+
+    for(int k=0;k<jfields;k++){
+      for(i=0;i<nfields;i++)
+        if(strcmp(mRes->mRes->fields[i].name,cnames[k])==0)break;
+
+      if(i==nfields)continue;
+      fcount++;
+      isBlob[k]=( (IS_BLOB(mRes->mRes->fields[i].flags)) || 
+                  (mRes->mRes->fields[i].type ==254) );
+      isBinary[k]= (mRes->mRes->fields[i].flags&BINARY_FLAG);
+      isSpecialType[k]=(mRes->mRes->fields[i].type ==254);
+
+      if(isBinary[k])hasBinary=true;
+    }
+    if(fcount!=jfields) done=false;
+
+    return done;
+
+};
+
+bool MysqlDb::InputRow(StDbBuffer* aBuff, int row){
+
+  char* tVal;tVal=0;
+  int len; 
+  aBuff->SetStorageMode();
+      if(row>0)*this<<"),(";
+      int k;
+       for(k=0;k<jfields;k++){
+         if(k!=0)*this<<",";
+	 if(isBlob[k]){
+	   if(isBinary[k]){
+	     if(!aBuff->ReadArray(tVal,len,cnames[k]))break;
+	     *this<<"'"<<Binary(len,(float*)tVal)<<"'";
+	   } else if(isSpecialType[k]) {
+             if(!aBuff->ReadScalar(tVal,cnames[k]))break;
+             *this<<"'"<<tVal<<"'";
+	   } else {
+             char** tVal2=0;
+	     if(!aBuff->ReadArray(tVal2,len,cnames[k]))break;
+	     tVal=CodeStrArray(tVal2,len);
+             for(int jj=0;jj<len;jj++)if(tVal2[jj])delete []tVal2[jj];
+             *this<<"'"<<tVal<<"'";
+	   }
+	 } else {
+	   if(!aBuff->ReadScalar(tVal,cnames[k])) break;
+           *this<<"'"<<tVal<<"'";
+ 	 }
+       }
+
+       aBuff->SetClientMode();
+
+    if(k!=jfields){
+       RazQuery();
+       return false;
+    }
+
+    return true;
+}
+
+bool MysqlDb::InputEnd(){
+
+bool tRetVal=false;
+*this<<")"<<endsql;
+if(mqueryState)tRetVal=true;
+  return tRetVal;
+
+};
 ////////////////////////////////////////////////////////////////////////
 
 bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
