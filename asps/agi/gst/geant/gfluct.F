@@ -1,7 +1,10 @@
 *
-* $Id: gfluct.F,v 1.2 1998/04/16 16:59:32 fisyak Exp $
+* $Id: gfluct.F,v 1.3 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: gfluct.F,v $
+* Revision 1.3  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:32  fisyak
 * 2nd pass with gstar
 *
@@ -38,7 +41,8 @@ C.    *    ==>Called by : GTELEC,GTMUON,GTHADR                         *
 C.    *                                                                *
 C.    *   Modifications:                                               *
 C.    *PN,27/07/97: For Gamma<1.1 PAI fluctuations are scaled as 1/v**2*
-C.    *             Brems losses are added to ionization for all models*
+C.    *PN,29/05/98: - no  Brems losses are added to ionization         *
+C.    *             ILOSS 1 and 3 are equivalent. Thanks to F.Luerhing *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -57,7 +61,7 @@ C.
       DE=DEMEAN
       IF (STEP. LE.0) return
       IF (ILOSS.LE.0) return
- 
+
       POTI  = Q(JPROB+9)
       GAMMA = GETOT/AMASS
       BETA  = VECT(7)/GETOT
@@ -65,11 +69,11 @@ C.
       DNMIN = MIN(XI,DEMEAN)/POTI
 *
 *PN,27/06/97:  PAI properly tabulated for GAMMA higher than 1.1
-      IF (ILOSS.GT.1 .and. DNMIN.GE.DNLIM) THEN
- 
+      IF (ILOSS.EQ.2 .and. DNMIN.GE.DNLIM) THEN
+
          CALL GLANDO(ILOSS,STEP,Z,A,DENS,VECT(7),GETOT,AMASS,DELAND,I)
          DE = DEMEAN + DELAND
- 
+
       else IF (ISTRA.GT.0 .and. DNMIN.LT.DNLIM) THEN
 #if defined(CERNLIB_ASHO)
 *        ISTRA = 2 --> PAI + URBAN + ASHO
@@ -85,10 +89,10 @@ C.
          If (Gamma.LE.1.1) DE=DE*.173554/(BETA*BETA)
 #endif
       ELSE
- 
+
          DEDX  = DEMEAN/STEP
          CALL GLANDZ(Z,STEP,VECT(7),GETOT,DEDX,DE,POTI,Q(JPROB+ 10))
- 
+
       ENDIF
 *
 *        Add brem losses to ionisation

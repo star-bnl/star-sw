@@ -1,7 +1,10 @@
 *
-* $Id: gschit.F,v 1.2 1998/04/16 16:59:40 fisyak Exp $
+* $Id: gschit.F,v 1.3 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: gschit.F,v $
+* Revision 1.3  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:40  fisyak
 * 2nd pass with gstar
 *
@@ -96,7 +99,7 @@ C
 C
   999 CONTINUE
       END
- 
- 
- 
- 
+
+
+
+

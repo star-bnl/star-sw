@@ -1,7 +1,10 @@
 *
-* $Id: gsstak.F,v 1.2 1998/04/16 16:59:42 fisyak Exp $
+* $Id: gsstak.F,v 1.3 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: gsstak.F,v $
+* Revision 1.3  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:42  fisyak
 * 2nd pass with gstar
 *
@@ -35,7 +38,7 @@ C.    *   - save interaction description (MECAT) in stack and NTTARG   *
 C.    *   - accept all unknown IPART as geantino                       *
 C.    ******************************************************************
 C.
-#include "gst/atcdes/typing.inc"
+#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gctrak.inc"
 #include "geant321/gckine.inc"
@@ -55,7 +58,7 @@ C.
       COMMON /VTXKIN/ NVTX,ITR
       REAL    UBUF(1)
       DATA    UBUF/0./
-      INTEGER         IFLAG,IER,ISKIP,LP,ITRT,JST,I,MECAT
+      INTEGER         IFLAG,IER,ISKIP,LP,ITRT,JST,I,MECAT,JV,LgVERT
 C.
 C.    ------------------------------------------------------------------
 *
@@ -100,7 +103,8 @@ C.    ------------------------------------------------------------------
             IEOTRI=1
             RETURN
          ENDIF
-         Q(6+LQ(JVERTX-NVTX))=MECAT
+
+         Q(6+LgVERT(JV,NVTX))=MECAT
          CALL GSKINE (PVERT, IPART, NVTX, UBUF, 0, ITR)
       ELSE IF (IFLAG.LT.0) THEN
          NVTX = -IFLAG
@@ -131,7 +135,7 @@ C.    ------------------------------------------------------------------
       LP   = 0
       IF (IPART.LE.IQ(JPART-2)) LP = LQ(JPART-Ipart)
       IF (LP.LE.0)              LP = LQ(JPART-48)
- 
+
 *PN:  do not save Cerenkov photons if the mechanism is not activated
       ITRT =  Q(6+LP)
       IF (ITRT.EQ.7 .and. ITCKOV.EQ.0) GO TO 999

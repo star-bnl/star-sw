@@ -1,13 +1,15 @@
 *
-* $Id: gmedia.F,v 1.2 1998/04/16 16:59:36 fisyak Exp $
+* $Id: gmedia.F,v 1.3 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gmedia.F,v $
+* Revision 1.3  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:36  fisyak
 * 2nd pass with gstar
 *
 *
 #include "geant321/pilot.h"
-#if !defined(CERNLIB_OLD)
 *CMZ :          13/02/98  18.13.57  by  Pavel Nevski
 *CMZ :  1.30/00 30/04/97  22.41.05  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.24.17  by  S.Giani
@@ -101,7 +103,7 @@ C*****  Code Expanded From Routine:  GTRNSF
      +      ,NLEVEL)
          XC(3) = XL1*GRMAT(7,NLEVEL) + XL2*GRMAT(8,NLEVEL) + XL3*GRMAT(9
      +      ,NLEVEL)
- 
+
       ENDIF
       xc(4)=0.
       xc(5)=0.
@@ -343,7 +345,7 @@ C
      +      GRMAT(6,NLEVEL)
             XC(3) = XL1*GRMAT(7,NLEVEL) + XL2*GRMAT(8,NLEVEL) + XL3*
      +      GRMAT(9,NLEVEL)
- 
+
          ENDIF
 C*****  End of Code Expanded From Routine:  GTRNSF
 *
@@ -384,4 +386,3 @@ C*****  End of Code Expanded From Routine:  GTRNSF
 *                                                             END GMEDIA
   999 IF(JGSTAT.NE.0) CALL GFSTAT(2)
       END
-#endif

@@ -1,7 +1,10 @@
 *
-* $Id: guscntr.F,v 1.2 1998/04/16 16:59:48 fisyak Exp $
+* $Id: guscntr.F,v 1.3 2000/01/06 22:09:18 nevski Exp $
 *
 * $Log: guscntr.F,v $
+* Revision 1.3  2000/01/06 22:09:18  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:48  fisyak
 * 2nd pass with gstar
 *
@@ -19,15 +22,12 @@
 * Author      :  Pavel Nevski                       Date : 25/05/93    *
 * Modification:  Never done                                            *
 *----------------------------------------------------------------------*
-#include "gst/atcdes/typing.inc"
-*  - GEANT common GCTMED (version 3.15)
+#include "atcdes/typing.inc"
 #include "geant321/gctmed.inc"
-*  - GEANT common GCTRACK (version 3.15)
 #include "geant321/gctrak.inc"
-*  - Multi-level current volume description
 #include "geant321/gcvolu.inc"
-*  - Geant logical units
 #include "geant321/gcunit.inc"
+#include "geant321/gcflag.inc"
 *
       INTEGER ICNT,IPRI,MSTEP,LU
       REAL SAFEOLD,ONLY,PRECOR
@@ -43,16 +43,16 @@ C   Check IGNEXT==1 & SAFETY<0 & STEP<10*PREC & ONLY>0
          ICNT=0
       END IF
 C   Check ICNT==10
-      IF (ICNT.EQ.10) THEN
+      IF (ICNT.GT.10) THEN
          IFIELD =0
       END IF
-C   Check 11<=ICNT<=18
-      IF (11.LE.ICNT.AND.ICNT.LE.18) THEN
+C   Check 11<=ICNT<=19
+      IF (11.LE.ICNT.AND.ICNT.LE.19) THEN
          PRECOR=PRECOR*2
       END IF
 C   Check 20<=ICNT<=20
       IF (20.LE.ICNT.AND.ICNT.LE.20) THEN
-         IPRI =1
+         IPRI = IDEBUG
       END IF
 C   Check NSTEP>=MSTEP+1000
       IF (NSTEP.GE.MSTEP+1000) THEN
@@ -61,7 +61,7 @@ C   Check NSTEP>=MSTEP+1000
       END IF
 C   Check NSTEP==MAXNST
       IF (NSTEP.EQ.MAXNST) THEN
-         IPRI=3
+         IPRI = IDEBUG
       END IF
 C   If Amax1(Abs(Vect(1)),Abs(Vect(2)))>Rmx \ Abs(Vect(3))>Zmx [Istop=1;]
 C   Check IPRI>0

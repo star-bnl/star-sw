@@ -1,7 +1,10 @@
 *
-* $Id: gltrac.F,v 1.2 1998/04/16 16:59:36 fisyak Exp $
+* $Id: gltrac.F,v 1.3 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gltrac.F,v $
+* Revision 1.3  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:36  fisyak
 * 2nd pass with gstar
 *
@@ -65,7 +68,6 @@ C.    ------------------------------------------------------------------
 *        This is a new track. We set to zero the stack number and
 *        update the vertex number
          ISTAK = 0
-*<       JK=LQ(JKINE-ITRA)
          IVERT=Q(LgKINE(JK,ITRA)+6)
       ENDIF
 *PN: extract and save ALL from stack, it may be overwritten by interactions
@@ -110,7 +112,7 @@ C.    ------------------------------------------------------------------
          JPA = 0
          IF (IPART.LE.IQ(JPART-2)) JPA = LQ(JPART-IPART)
          IF (JPA .EQ. 0)           JPA = LQ(JPART-48)
- 
+
          DO 90 I = 1,5
             NAPART(I) = IQ(JPA+I)
    90    CONTINUE
@@ -200,5 +202,5 @@ C.    ------------------------------------------------------------------
       INFROM = 0
 *                                                             END GLTRAC
       END
- 
- 
+
+

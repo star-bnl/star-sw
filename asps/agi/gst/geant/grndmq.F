@@ -1,7 +1,10 @@
 *
-* $Id: grndmq.F,v 1.2 1998/07/04 20:25:52 nevski Exp $
+* $Id: grndmq.F,v 1.3 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: grndmq.F,v $
+* Revision 1.3  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/07/04 20:25:52  nevski
 * CERNLIB_LINUX flag introduced
 *
@@ -31,8 +34,8 @@ C.
 #if defined(CERNLIB_CRAY)
       REAL ISEED
 #endif
-#if defined(CERNLIB_IBMALL)||defined(CERNLIB_IBMRT)||defined(CERNLIB_APO10K)||defined(CERNLIB_HPUX)||defined(CERNLIB_MSDOS)||defined(CERNLIB_WINNT)||defined(CERNLIB_LINUX)
-      DOUBLE PRECISION ISEED
+#if !defined(CERNLIB_CRAY)
+*      DOUBLE PRECISION ISEED
 #endif
       PARAMETER  (MAXSEQ=215)
       COMMON / GCRNDM / JSEQ(2), ISEED(2,MAXSEQ)

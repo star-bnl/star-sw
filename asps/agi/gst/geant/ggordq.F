@@ -1,7 +1,10 @@
 *
-* $Id: ggordq.F,v 1.3 1999/09/28 13:51:36 nevski Exp $
+* $Id: ggordq.F,v 1.4 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: ggordq.F,v $
+* Revision 1.4  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1999/09/28 13:51:36  nevski
 * fixed for pgf-m transition
 *
@@ -37,7 +40,7 @@ C.
 #include "geant321/gcbank.inc"
 #include "geant321/gcunit.inc"
 *
- 
+
       DIMENSION CLOW(500),CHIGH(500),CORD(1000),ITYPE(1000),
      +ICONT(500),ICON(1000),ICONS(500)
       EQUIVALENCE (CLOW(1),WS(1)),(CHIGH(1),WS(501))
@@ -46,7 +49,7 @@ C.
       EQUIVALENCE (ICONS(1),WS(4501))
 C
       CHARACTER*4 NAME
- 
+
 C.    ------------------------------------------------------------------
 *
       JVO = LQ(JVOLUM-IVO)
@@ -71,21 +74,21 @@ C.    ------------------------------------------------------------------
 *   assume that ordering can not be done unless proven otherwise
       Q(JVO+1)=0.
       RBEST=1.E9
- 
+
 * try all possible axes
- 
-      DO 199 IAX=1,7
- 
+
+      DO 1 IAX=1,7
+
 *   count number of additional words needed and total number of volumes
 *   in all divisions
- 
+
       NCOALL=0
 *
 * *** Find the upper and lower coordinates of each content
 *
       DO 50 IN = 1,NIN
          CALL GFCLIM (JVO, IN, IAX, CLOW(IN), CHIGH(IN), IERR)
-         IF (IERR.NE.0) GOTO 199
+         IF (IERR.NE.0) GOTO 1
    50 CONTINUE
 *
 * *** Order the coordinate limits, keeping track of the associated
@@ -104,7 +107,7 @@ C.    ------------------------------------------------------------------
    60 CONTINUE
       NDIV  = IBO -1
       IF (IAX.EQ.6) NDIV = IBO
- 
+
 *   *   Load up number of contents in each section
 *
       IDIV    = 0
@@ -176,34 +179,34 @@ C.    ------------------------------------------------------------------
         RBEST=RNOW
         NDIVB=NDIV
       ENDIF
- 
+
 * end of loop over IAX
- 
- 199  CONTINUE
- 
- 
+
+1     CONTINUE
+
+
 * now the best axis is selected - compare with axis requested by CALL
 * to GSORD (if any)
- 
+
       IF(IAXNOW.GT.0)THEN
- 
+
 *        WRITE (CHMAIL,1002) NAME,NIN,IAXOPT,NDIVB,RBEST,IAXNOW
 *        CALL  GMAIL (0, 0)
  1002   FORMAT(' GGORDQ : Volume ',A4,2X,'NIN=',I4,' IAX=',I2,2X,
      +    'NDIV=',I3,2X,'NVOL/DIV=',F5.1,2X,'IAX wanted by user:',I2)
- 
+
       ELSE
- 
+
 *        WRITE (CHMAIL,1003) NAME,NIN,IAXOPT,NDIVB,RBEST
 *        CALL  GMAIL (0, 0)
  1003   FORMAT(' GGORDQ : Volume ',A4,2X,'NIN=',I4,' IAX=',I2,2X,
      +    'NDIV=',I3,2X,'NVOL/DIV=',F5.1)
- 
+
       ENDIF
- 
+
 * overwrite old axis and store sorting information for new axis
- 
+
       Q(JVO+1)=-IAXOPT
       CALL GGORD(IVO)
- 
+
       END

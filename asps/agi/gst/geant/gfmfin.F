@@ -1,13 +1,15 @@
 *
-* $Id: gfmfin.F,v 1.2 1998/04/16 16:59:32 fisyak Exp $
+* $Id: gfmfin.F,v 1.3 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: gfmfin.F,v $
+* Revision 1.3  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:32  fisyak
 * 2nd pass with gstar
 *
 *
 #include "geant321/pilot.h"
-#if defined(CERNLIB_HADRON)
 *CMZ :          16/12/97  13.31.05  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.47  by  S.Giani
 *-- Author :
@@ -24,84 +26,19 @@
 #include "geant321/gsecti.inc"
 #include "geant321/gctmed.inc"
 #include "geant321/gcunit.inc"
-*KEEP,DIMPAR.
-*                                                                     *
-*=== dimpar ==========================================================*
-*                                                                     *
-*---------------------------------------------------------------------*
-*                                                                     *
-*      DIMPAR: included in any routine                                *
-*                                                                     *
-*          Mxxrgn = maximum number of regions                         *
-*          Mxxmdf = maximum number of media in Fluka                  *
-*          Mxxmde = maximum number of media in Emf                    *
-*          Mfstck = stack dimension in Fluka                          *
-*          Mestck = stack dimension in Emf                            *
-*          Nallwp = number of allowed particles                       *
-*          Mpdpdx = number of particle types for which EM dE/dx pro-  *
-*                   cesses (ion,pair,bremss) have to be computed      *
-*          Icomax = maximum number of materials for compounds (equal  *
-*                   to the sum of the number of materials for every   *
-*                   compound )                                        *
-*          Nstbis = number of stable isotopes recorded in common iso- *
-*                   top                                               *
-*                                                                     *
-*---------------------------------------------------------------------*
-*                                                                     *
-      PARAMETER ( MXXRGN = 500  )
-      PARAMETER ( MXXMDF = 50   )
-      PARAMETER ( MXXMDE = 18   )
-      PARAMETER ( MFSTCK = 1000 )
-      PARAMETER ( MESTCK = 100  )
-      PARAMETER ( NALLWP = 39   )
-      PARAMETER ( MPDPDX = 8    )
-      PARAMETER ( ICOMAX = 120  )
-      PARAMETER ( NSTBIS = 304  )
- 
-*KEEP,FINUCT.
-      DOUBLE PRECISION CXR, CYR, CZR, TKI, PLR, WEI, TV, TVCMS,
-     &                 TVRECL, TVHEAV, TVBIND
- 
-*KEEP,FINUC.
-*
-*=== finuc ============================================================*
-*
-*----------------------------------------------------------------------*
-*     Last change on 5 april 1990     by Alfredo Ferrari, INFN Milan   *
-*     include file: finuc copy                   created 26/11/86 by pa*
-*     note: if changed change finuc2 copy also                         *
-*     changes: none                                                    *
-*     included in the following subroutines or functions: not updated  *
-*                                                                      *
-*     description of the common block(s) and variable(s)               *
-*                                                                      *
-*     /finuc/ is the storage for secondaries created in event          *
-*        np        = number of secondaries                             *
-*        kpart(ip) = type of the secondary ip                          *
-*        cxr(ip)   = direction cosine of the secondary ip              *
-*                    with respect to x-axis                            *
-*        cyr(ip)   = direction cosine of the secondary ip              *
-*                    with respect to y-axis                            *
-*        czr(ip)   = direction cosine of the secondary ip              *
-*                    with respect to z-axis                            *
-*        tki(ip)   = kinetic energy of secondary ip                    *
-*        plr(ip)   = momentum of the secondary ip                      *
-*        wei(ip)   = weight of the secondary ip                        *
-*        tv        = excitation energy                                 *
-*        tvcms     = actual excitation energy of the residual nucleus  *
-*        tvrecl    = recoil kinetic energy of the residual nucleus     *
-*        tvheav    = recoil kinetic energies of heavy (2-H, 3-H, 3-He, *
-*                    4-He) fragments after evaporation                 *
-*        tvbind    = approximate energy wasted in nuclear binding      *
-*                    effects
-*----------------------------------------------------------------------*
-*
-      PARAMETER (MXP=999)
-      COMMON / FKFINU / CXR (MXP), CYR (MXP), CZR (MXP), TKI (MXP),
-     &                 PLR (MXP), WEI (MXP), TV, TVCMS, TVRECL, TVHEAV,
-     &                 TVBIND, NP0, NP, KPART (MXP)
- 
-*KEND.
+#include "geant321/dimpar.inc"
+#include "geant321/finuct.inc"
+#include "geant321/finuc.inc"
+#include "geant321/part2t.inc"
+#include "geant321/part2.inc"
+#include "geant321/comcont.inc"
+#include "geant321/comcon.inc"
+#include "geant321/fheavyt.inc"
+#include "geant321/fheavy.inc"
+#include "geant321/paprop.inc"
+#include "geant321/papropt.inc"
+#include "geant321/gfkdis.inc"
+
       REAL RNDM(1)
       DOUBLE PRECISION AOCMBM, AMSS , ZTAR, RHO , ZLIN, ZLEL, ZLRAD,
      +ZUL
@@ -110,181 +47,13 @@
      +                  ZLRAD  (MXXMDF), ZUL  (MXXMDF), MEDIUM (MXXRGN),
      +                  MULFLG (MXXMDF),IFCOMP(MXXMDF), MSSNUM (MXXMDF),
      +                  NREGS, NMATF, MTBSNM
-*KEEP,PART2T.
-      DOUBLE PRECISION AAM, GA, TAU, AAMDSC
- 
-*KEEP,PART2.
-*
-*=== part2 ============================================================*
-*
-*----------------------------------------------------------------------*
-*     Include file: part2 copy        Revised on 20-7-90 by A. Ferrari *
-*     Note: see also part copy and part3 copy                          *
-*     Changes: none                                                    *
-*     Included in the following subroutines or functions: not updated  *
-*                                                                      *
-*     Description of the common block(s) and variable(s)               *
-*                                                                      *
-*         Kptoip = conversion from part to paprop numbering            *
-*         Iptokp = conversion from paprop to part numbering            *
-*                                                                      *
-*----------------------------------------------------------------------*
-*
-      PARAMETER (IDMAX8=183)
-      CHARACTER*8  ANAME
-      COMMON / FKPART / AAM  (IDMAX8), GA     (IDMAX8), TAU    (IDMAX8),
-     &                AAMDSC (IDMAX8), IICH   (IDMAX8), IIBAR  (IDMAX8),
-     &                K1     (IDMAX8), K2     (IDMAX8), KPTOIP (IDMAX8),
-     &                IPTOKP (39)
-      COMMON / FKCHPA / ANAME (IDMAX8)
- 
-*KEEP,COMCONT.
-      DOUBLE PRECISION AOCMBC, CONTNT, SUMACN, CABINX, CABELX,
-     &                 ANXNOR, ELXNOR, CONA13, SUMZMF
- 
-*KEEP,COMCON.
-*
-*=== comcon ===========================================================*
-*
-*----------------------------------------------------------------------*
-*                                                                      *
-*     include file: comcon copy                 created 26/11/86 by pa *
-*                                                                      *
-*     Last change  on  30-oct-92   by   Alfredo Ferrari, INFN - Milan  *
-*     included in the following subroutines or functions: not updated  *
-*                                                                      *
-*     description of the common block(s) and variable(s)               *
-*                                                                      *
-*                                                                      *
-*     /comcon/ contains information about compounds                    *
-*         icompl(imat) = number of materials in a compound             *
-*         matnum(i)    = material numbers (compounds consist of the    *
-*                        materials)                                    *
-*         aocmbc(i)    = atomic densities in barn**-1 cm**-1           *
-*                        (Atoms Over Cm times Barn for Compounds)      *
-*         cona13(i)    = A^1/3 of the constituents                     *
-*         sumzmf(i)    = cumulative z^2 for multiple scattering        *
-*         contnt(i)    = partial densities                             *
-*         sumacn(i)    = cumulative atom contents of the compounds     *
-*         cabinx(i)    = cumulative at.cont.*inelastic cross section   *
-*         cabelx(i)    = cumulative at.cont.*  elastic cross section   *
-*         anxnor       = total inelastic cross section                 *
-*         elxnor       = total   elastic cross section                 *
-*----------------------------------------------------------------------*
-*
-      COMMON /FKCOMC/ AOCMBC (ICOMAX), CONA13 (ICOMAX), SUMZMF (ICOMAX),
-     &                CONTNT (ICOMAX), SUMACN (ICOMAX), CABINX (ICOMAX),
-     &                CABELX (ICOMAX), ANXNOR, ELXNOR,  ICOMPL (MXXMDF),
-     &                MATNUM (ICOMAX)
- 
-*KEEP,FHEAVYT.
-      DOUBLE PRECISION CXHEAV, CYHEAV, CZHEAV, TKHEAV, PHEAVY,
-     &                 WHEAVY, AMHEAV
- 
-*KEEP,FHEAVY.
-*
-*=== fheavy ===========================================================*
-*
-*----------------------------------------------------------------------*
-*     Last change on 9 March 1993     by Alfredo Ferrari, INFN Milan   *
-*     include file: fheavy copy       created 5/4/90 by A. Ferrari     *
-*     changes: none                                                    *
-*     included in the following subroutines or functions: not updated  *
-*                                                                      *
-*     description of the common block(s) and variable(s)               *
-*                                                                      *
-*     /fheavy/ is the storage for heavy secondaries created in the     *
-*              nuclear evaporation                                     *
-*        npheav     = number of secondaries                            *
-*        kheavy(ip) = type of the secondary ip                         *
-*                   ( 3 = deuteron, 4 = 3-H, 5 = 3-He, 6 = 4-He,       *
-*                     7-12 = "Heavy" fragment specified by Ibheav and  *
-*                     Icheav )                                         *
-*        cxheav(ip) = direction cosine of the secondary ip             *
-*                     with respect to x-axis                           *
-*        cyheav(ip) = direction cosine of the secondary ip             *
-*                     with respect to y-axis                           *
-*        czheav(ip) = direction cosine of the secondary ip             *
-*                     with respect to z-axis                           *
-*        tkheav(ip) = kinetic energy of secondary ip                   *
-*        pheavy(ip) = momentum of the secondary ip                     *
-*        wheavy(ip) = weight of the secondary ip                       *
-*        amheav(ip) = atomic masses of the six types of evaporated     *
-*                     particles                                        *
-*        anheav(kp) = name of the kp-type heavy particle               *
-*        icheav(kp) = charge of the kp-type heavy particle             *
-*        ibheav(kp) = mass number of the kp-type heavy particle        *
-*   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   *
-*   !!! There is now the possibility to produce up to 6 "heavy" !!!!   *
-*   !!! fragments besides the residual nucleus recorded in      !!!!   *
-*   !!! Resnuc: they are identified by indeces 7-12, of course  !!!!   *
-*   !!! the corresponding physical properties (Z,A,m..) must be !!!!   *
-*   !!! updated every time they are produced                    !!!!   *
-*   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   *
-*----------------------------------------------------------------------*
-*
-      PARAMETER ( MXHEAV = 100 )
-      CHARACTER*8 ANHEAV
-      COMMON / FKHEAV / CXHEAV (MXHEAV), CYHEAV (MXHEAV),
-     &                  CZHEAV (MXHEAV), TKHEAV (MXHEAV),
-     &                  PHEAVY (MXHEAV), WHEAVY (MXHEAV),
-     &                  AMHEAV  ( 12 ) ,
-     &                  KHEAVY (MXHEAV), ICHEAV  ( 12 ) ,
-     &                  IBHEAV  ( 12 ) , NPHEAV
-      COMMON / FKHEAC / ANHEAV  ( 12 )
- 
-*KEEP,PAPROP.
-*
-*=== paprop ===========================================================*
-*
-*----------------------------------------------------------------------*
-*     include file: paprop copy                   created 26/11/86 by p*
-*     changes: on  16 december 1992 by Alfredo Ferrari                 *
-*     included in the following subroutines or functions: not updated  *
-*                                                                      *
-*     description of the common block(s) and variable(s)               *
-*                                                                      *
-*     /paprop/ contains particle properties                            *
-*        btype  = literal name of the particle                         *
-*        am     = particle mass in gev                                 *
-*        ichrge = electric charge of the particle                      *
-*        iscore = explanations for the scored distribution             *
-*        genpar = names of the generalized particles                   *
-*        ijdisc = list of the particle types to be discarded           *
-*        thalf  = half life of the particle in sec                     *
-*        biasdc = decay biasing factors                                *
-*        biasin = inelastic interaction biasing factors                *
-*        lhadro = flag for hadrons                                     *
-*        jspinp = particle spin (in units of 1/2)                      *
-*        lbsdcy = logical flag for biased decay: if .true. the biasing *
-*                 factor is used as an upper limit to the decay length *
-*        lprbsd = logical flag for biased decay: if .true. the biasing *
-*                 factor is applied only to primaries                  *
-*        lprbsi = logical flag for inelastic interaction biasing: if   *
-*                 .true. the biasing factor is applied only to prima-  *
-*                 ries                                                 *
-*                                                                      *
-*----------------------------------------------------------------------*
-*
-      LOGICAL LHADRO, LBSDCY, LPRBSD, LPRBSI
-      CHARACTER*8 BTYPE,GENPAR
-      COMMON / FKPAPR / AM  (NALLWP), AMDISC (NALLWP), THALF  (NALLWP),
-     &               BIASDC (NALLWP), BIASIN (NALLWP), ICHRGE (NALLWP),
-     &               ISCORE     (10), IJDISC (NALLWP), LHADRO (NALLWP),
-     &               JSPINP (NALLWP), LBSDCY (NALLWP), LPRBSD, LPRBSI
-      COMMON / FKCHPR / BTYPE  (NALLWP), GENPAR (30)
- 
-*KEEP,PAPROPT.
-      DOUBLE PRECISION AM, AMDISC, THALF,BIASDC, BIASIN
- 
-*KEEP,GFKDIS.
-*KEND.
+
       DOUBLE PRECISION POO,EKE,TXI,TYI,TZI,AMM,WE,ONE,PGEANT,DMOD
       PARAMETER (ONE=1)
       DIMENSION IGTOFL(49),IFLTOG(39),IHVTOG(6),ZSAMP(50)
       DATA IGTOFL / 0, 0, 0, 0, 0, 0,23,13,14,12, 15,16, 8, 1, 2,19, 0,
      +17,21,22, 20, 34, 36, 38, 9,18, 31, 32, 33, 35, 37, 39, 17*0/
- 
+
       DATA IFLTOG /14,15, 3, 2, 4, 4, 1,13,25, 5, 6,10, 8, 9,11,12,18,
      +26,16,21, 19,20, 7, 7*0, 27, 28, 29, 22, 30, 23, 31, 24, 32/
       DATA IHVTOG /13,14,45,46,49,47/
@@ -335,7 +104,7 @@
       NCOMP = ABS (Q(JMA+11))
       AMM = Q(JMA+6)
       JMIXT = LQ(JMA-5)
- 
+
 *    Antiprotons, antineutrons and pi- are sent to
 *    eventv for annihilation
       IF (GEKIN.EQ.0..AND.
@@ -378,7 +147,7 @@
       CALL GRNDM(RNDM,1)
       RNDEVT=RNDM(1)
       IF ( RNDEVT .GE. SINE/FSIG) THEN
- 
+
          IF (GEKIN .GT. 0.02) THEN
             POO=SQRT(EKE*(EKE+2*AM(IJ)))
          ELSE
@@ -506,4 +275,4 @@
 10100 FORMAT(' **** FLUFIN: Stack overflow, ',I6,
      +' heavy particles lost')
   999 END
-#endif
+

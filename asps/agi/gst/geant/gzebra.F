@@ -1,9 +1,12 @@
 *
-* $Id: gzebra.F,v 1.4 1998/08/20 16:51:28 perev Exp $
+* $Id: gzebra.F,v 1.5 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: gzebra.F,v $
+* Revision 1.5  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.4  1998/08/20 16:51:28  perev
-* decrease default size geant=1Mw paw=1Mw
+*  decrease default size geant=1Mw paw=1Mw
 *
 * Revision 1.3  1998/07/20 20:17:30  perev
 * Mods for exe SGI64 and HP rubber Zebra
@@ -29,21 +32,21 @@ C.    *       Modifications:                                           *
 C.    *   PN: Ellastic zebra inspired by V.Perevozchikov               *
 C.    ******************************************************************
 C.
-#include "gst/atcdes/typing.inc"
+#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcflag.inc"
-       INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB,iudivd
+       INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB
 C.
 C.    ------------------------------------------------------------------
 C.
        NZEBRA = abs(NZEB)
-       NZEBRA = max(NZEBRA,100000)
+       NZEBRA = max(NZEBRA,1000000)
        I1     = LOCF   (IQ)
        Do iTry=0,5
           I2  = memget (NZEBRA*4+1000)
-          i2  = iudivd (I2,4)
+          I2  = iudivd (I2,4)
           If (I2.GT.I1) GO TO 11
-          NZEBRA = NZEBRA/2
+          NZEBRA = (NZEBRA/1500)*1000
           PRINT *,'* GZEBRA: requested memory size reduced to ',
      >               Nzebra,' *'
        enddo
@@ -62,8 +65,8 @@ C
        CALL GWORK  (KWBANK-100)
 C
       END
- 
- 
- 
- 
- 
+
+
+
+
+

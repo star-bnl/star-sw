@@ -1,7 +1,10 @@
 *
-* $Id: gsdetv.F,v 1.3 1998/10/18 23:24:17 nevski Exp $
+* $Id: gsdetv.F,v 1.4 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: gsdetv.F,v $
+* Revision 1.4  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1998/10/18 23:24:17  nevski
 * make it re-entrant and overwrite old banks
 *
@@ -167,7 +170,7 @@ C
          NDET = NDET +1
          IDET = NDET
       ENDIF
- 
+
       CALL UCTOH (IUDET, IQ(JS+IDET), 4, 4)
       IF (LQ(JS-IDET).LE.0) THEN
          CALL MZBOOK (IXCONS, JD, JS, -IDET, 'SEJD', 4,4,100, IOSEJD, 0)

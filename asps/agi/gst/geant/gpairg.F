@@ -1,7 +1,10 @@
 *
-* $Id: gpairg.F,v 1.2 1998/04/16 16:59:38 fisyak Exp $
+* $Id: gpairg.F,v 1.3 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gpairg.F,v $
+* Revision 1.3  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:38  fisyak
 * 2nd pass with gstar
 *
@@ -222,5 +225,5 @@ C
       ISTOP = 1
       IF(NGKINE.EQ.0) ISTOP = 2
  999  END
- 
- 
+
+
