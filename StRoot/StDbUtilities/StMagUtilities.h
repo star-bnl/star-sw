@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.22 2003/09/02 17:57:51 perev Exp $
+ * $Id: StMagUtilities.h,v 1.23 2004/01/06 20:09:26 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.23  2004/01/06 20:09:26  jhthomas
+ * Add new routine to handle shorted stripe on East end of TPC
+ *
  * Revision 1.22  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -68,6 +71,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Stiostream.h>
+
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 
@@ -92,7 +96,8 @@ enum   DistortSelect
   kEndcap            = 0x100,    // Bit 9
   kIFCShift          = 0x200,    // Bit 10
   kSpaceCharge       = 0x400,    // Bit 11
-  kSpaceChargeR2     = 0x800     // Bit 12
+  kSpaceChargeR2     = 0x800,    // Bit 12
+  kShortedRing       = 0x1000    // Bit 13
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -115,10 +120,17 @@ class StMagUtilities {
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge* fSpaceCharge ;
-  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  // Check that this is correct after updating DB !!!
+  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  // Not used as of 01/01/2004 ... waiting for DB upgrade.
   StDetectorDbTpcVoltages* fTpcVolts ;
 
-  virtual void    CommonStart ( Int_t mode, StTpcDb* dbin , TDataSet* dbin2 ) ;
+  virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
+  virtual void    GetMagFactor ()     ;
+  virtual void    GetTPCParams ()     ;
+  virtual void    GetTPCVoltages ()   ;
+  virtual void    GetSpaceCharge ()   ;
+  virtual void    GetSpaceChargeR2 () ;  
+
+  virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
   virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
@@ -159,6 +171,7 @@ class StMagUtilities {
   Float_t  shiftEr[neZ][neR] ;
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
+  Float_t  shortEr[neZ][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
   
  public:
@@ -168,7 +181,6 @@ class StMagUtilities {
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
   virtual ~StMagUtilities () {}
 
-  virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
@@ -186,6 +198,7 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
 					const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
