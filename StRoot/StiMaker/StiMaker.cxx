@@ -23,25 +23,37 @@
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHitFactory.h"
 #include "Sti/StiHitFiller.h"
+#include "Sti/StiDetectorLayerContainer.h"
+#include "Sti/StiDrawableDetector.h"
 
 // StiMaker
-//#include "AnaTreeManager/TreeEntryClasses.h"
-//#include "AnaTreeManager/AnaTreeManager.h"
+#include "StiDisplayManager.h"
 #include "StiMaker.h"
+
+StiMaker* StiMaker::sinstance = 0;
+bool StiMaker::mdone = true;
+int StiMaker::mcounter = 0;
 
 ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name)
 {
-    mhitstore = new StiHitContainer();
-    mhitfactory = new StiHitFactory();
-    mhitfiller = new StiHitFiller();
-    //AnaTreeManager* treestore = AnaTreeManager::instance();
-    //char* outfilename = "testTree.root";
-    //treestore->setFileName(outfilename);
-    //treestore->setAnaTreeType(AnaTreeManager::write);
-    //bool ok = treestore->makeTree();
-    //cout <<"Result of opening tree in write mode:\t"<<ok<<endl;
+    cout <<"StiMaker::StiMaker()"<<endl;
+    sinstance = this;
+}
+
+StiMaker* StiMaker::instance()
+{
+    return (sinstance) ? sinstance : new StiMaker();
+}
+
+void StiMaker::kill()
+{
+    if (sinstance) {
+	delete sinstance;
+	sinstance = 0;
+    }
+    return;
 }
 
 StiMaker::~StiMaker() 
@@ -52,8 +64,10 @@ StiMaker::~StiMaker()
     mhitfactory = 0;
     delete mhitfiller;
     mhitfiller = 0;
-    
-    //AnaTreeManager::kill();
+    delete mdisplay;
+    mdisplay = 0;
+    StiDetectorLayerContainer::kill();
+    mdetector = 0;
 }
 
 void StiMaker::Clear(const char*)
@@ -64,32 +78,100 @@ void StiMaker::Clear(const char*)
 
 Int_t StiMaker::Finish()
 {
-  return StMaker::Finish();
+    return StMaker::Finish();
 }
 
 Int_t StiMaker::Init()
 {
-    mhitfiller->addDetector(kTpcId);
-    mhitfiller->addDetector(kSvtId);
-    cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
 
+    mhitstore = new StiHitContainer();
+    mhitfactory = new StiHitFactory();
+    mhitfiller = new StiHitFiller();
+
+    mhitfiller->addDetector(kTpcId);
+    //mhitfiller->addDetector(kSvtId);
+    //cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+
+    cout <<"cd()"<<endl;
+    mdisplay->cd();
+    cout <<"Draw Display"<<endl;
+    mdisplay->draw();
+    cout <<"Update Display"<<endl;
+    mdisplay->update();
+
+    const char* buildfile = "/star/rcf/pwg/spectra/mmiller/StiGeometryParameters/Detectors/";
+    mdetector = StiDetectorLayerContainer::instance();
+    mdetector->setSectors(1, 3);
+    mdetector->setPadrows(1, 45);
+    mdetector->buildReset();
+    while (mdetector->hasMoreToBuild()) {
+	mdetector->buildNext(buildfile);
+	//mdisplay->draw();
+	//mdisplay->update();
+    }
+    mdetector->reset();
+    
+    mdisplay->draw();
+    mdisplay->update();
+    
     return StMaker::Init();
 }
 
 Int_t StiMaker::Make()
-{   
-    StEvent* rEvent = 0;
-    rEvent = (StEvent*) GetInputDS("StEvent");
-    if (rEvent) {
-	mevent = rEvent;
-	
-	//Initialize tree this event
-	//AnaTreeManager* treestore = AnaTreeManager::instance();
-	//treestore->event()->clear();
+{
+    /*
+      StEvent* rEvent = 0;
+      rEvent = (StEvent*) GetInputDS("StEvent");
+      if (rEvent) {
+      mevent = rEvent;
+      
+      cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
+      cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
+      mhitfiller->setEvent(mevent);
+      mhitfiller->fillHits(mhitstore, mhitfactory);
+      }
+    */
 
-	cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
-	cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
-    }
     
     return kStOK;
 }
+
+void StiMaker::reset()
+{
+    mdone=false;
+    mcounter=0;
+    StiDetectorLayerContainer::instance()->reset();
+}
+
+void StiMaker::doNextAction()
+{
+    if (mdone) {
+	cout <<"StiMaker::doNext()\t Nothing Left to do"<<endl;
+	return;
+    }
+
+    StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
+    const StiDrawableDetector* layer = dynamic_cast<const StiDrawableDetector*>(*rdet);
+    if (!layer) return;
+    StiDisplayManager::instance()->setVisible(layer);
+    StiDisplayManager::instance()->draw();
+    StiDisplayManager::instance()->update();
+    bool cangofurther = rdet.padrowStepMinus();
+    if (!cangofurther) {
+	rdet.setRefDetector( layer->getSector()+1 );
+    }
+    //if (!cangofurther) mdone = true;
+    
+    //cout <<"StiMaker::doNext()\t mcounter:\t"<<mcounter<<endl;
+    //++mcounter;
+    //if (mcounter>10) mdone=true;
+
+    return;
+}
+
+bool StiMaker::hasMore()
+{
+    return (!mdone);
+}
+
