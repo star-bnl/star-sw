@@ -1,5 +1,8 @@
-* $Id: tgc_local_to_global_p.F,v 1.4 1998/11/10 01:25:01 sakrejda Exp $
+* $Id: tgc_local_to_global_p.F,v 1.5 1998/11/18 04:41:09 sakrejda Exp $
 * $Log: tgc_local_to_global_p.F,v $
+* Revision 1.5  1998/11/18 04:41:09  sakrejda
+* transformations for sector<13 were broken, fixed them
+*
 * Revision 1.4  1998/11/10 01:25:01  sakrejda
 * conversion between loccal and global fixed for z>0, there rotation is actually counterclockwise
 *
@@ -22,14 +25,16 @@ C     plocal - momentum in local coordinate system
 C     Returns:
 C     pglobal - momentum in global coordinate system
 C     
-      real  b_rot
+      real  b_rot, plg
       pglobal(3)=-plocal(3)
       if(isect.le.12) then    
-        b_rot=-real(isect)*(C_PI_2/3.)
+        b_rot=real(isect)*(C_PI_2/3.)
+        plg = -plocal(1)
       else
         b_rot=real(24-isect)*(C_PI_2/3.)
+        plg = plocal(1)
       endif
-      pglobal(1)=plocal(1)*cos(b_rot)+plocal(2)*sin(b_rot)
-      pglobal(2)=plocal(2)*cos(b_rot)-plocal(1)*sin(b_rot)
+      pglobal(1)=plg*cos(b_rot)+plocal(2)*sin(b_rot)
+      pglobal(2)=plocal(2)*cos(b_rot)-plg*sin(b_rot)
       tgc_local_to_global_p=STAFCV_OK
       end
