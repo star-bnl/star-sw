@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 # Find all DST files on disk and create kumac to load new ones
 # into DB
 # T. Wenaus
