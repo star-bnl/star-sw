@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.6 1999/02/25 02:42:58 wenaus Exp $
+// $Id: doEvents.C,v 1.7 1999/02/25 02:51:42 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.6  1999/02/25 02:42:58  wenaus
-// input file options
+// Revision 1.7  1999/02/25 02:51:42  wenaus
+// make sure default file is a working one
+//
+// Revision 1.7  1999/02/25 02:51:42  wenaus
+// make sure default file is a working one
 //
 // Revision 1.6  1999/02/25 02:42:58  wenaus
 // input file options
@@ -74,9 +77,9 @@ const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 
 void doEvents(const Int_t nevents=999,
               const Char_t *path="-/disk00000/star/auau200/hijing135/",
-              const Char_t *file="/scr22/kathy/test23/psc0049_08_40evts_dst.root")
+              const Char_t *file="/disk1/star/test/psc0049_08_40evts.root")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-  // const Char_t *file="/disk1/star/test/psc0049_08_40evts.root")
+  // const Char_t *file="/scr22/kathy/test23/psc0049_08_40evts_dst.root")
   // const Char_t *file="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0032_03_40evts.root")
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0015_08_49evts_dst.root")
   // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
