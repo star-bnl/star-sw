@@ -91,6 +91,7 @@ enum ETestCommandIdentifiers {
     M_DisplayOptions,
     M_SeedFinderOptions,
     M_LocalSeedFinderOptions,
+    M_TrackFinderOptions,
     
     M_TrackingSwitch_NextDetector,
     M_TrackingSwitch_ScanLayer,
@@ -472,6 +473,34 @@ private:
 public:
     LocalSeedFinderIO(const TGWindow *p, const TGWindow *main);
     virtual ~LocalSeedFinderIO();
+    virtual void CloseWindow();
+    
+    void SetLimits();
+    virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
+};
+
+// Kalman Track Finder IO
+
+class KalmanTrackFinderIO : public TGTransientFrame
+{    
+private:
+    TGVerticalFrame      *fF1;
+    TGVerticalFrame      *fF2;
+    HorizontalFrameVec fF;
+    TGLayoutHints        *fL1;
+    TGLayoutHints        *fL2;
+    TGLayoutHints        *fL3;
+    LabelVec fLabel;
+    NumberEntryVec fNumericEntries;
+    TGButton             *fSetButton;
+    TGButton             *fExitButton;
+    DetActivatePairVec fC;
+    
+    void makeNumberEntries();
+    
+public:
+    KalmanTrackFinderIO(const TGWindow *p, const TGWindow *main);
+    virtual ~KalmanTrackFinderIO();
     virtual void CloseWindow();
     
     void SetLimits();

@@ -75,8 +75,43 @@ public:
 
     virtual void setLTSFDoHelixFit(bool) = 0;
     virtual bool ltsfDoHelixFit() const = 0;
+
+    //Kalman Track Finder (KTF) IO
+    
+    //whether MCS must be calc-ed
+    virtual void setKTFMcsCalculated(bool) = 0;
+    virtual bool ktfMcsCalculated() const = 0;
+
+     //whether E-loss must be calculate
+    virtual void setKTFElossCalculated(bool) = 0;
+    virtual bool ktfElossCalculated() const = 0;
+
+    //Max chi1 increment allowed/hit
+    virtual void setKTFMaxChi2ForSelection(double) = 0;
+    virtual double ktfMaxChi2ForSelection() const = 0;
+
+    //Tesla magnetic field
+    virtual void setKTFBField(double) = 0; 
+    virtual double ktfBField() const = 0;
+
+    //GeV mass used in MCS calcualtions
+    virtual void setKTFMassHypothesis(double) = 0; 
+    virtual double ktfMassHypothesis() const = 0;
+
+    //?
+    virtual void setKTFMinContiguousHitCount(unsigned int) = 0; 
+    virtual unsigned int ktfMinContiguousHitCount() const = 0;
+
+    //max # layers w/o a hit
+    virtual void setKTFMaxNullCount(unsigned int) = 0; 
+    virtual unsigned int ktfMaxNullCount() const = 0;
+
+    //max # contiguous layers w/o hit
+    virtual void setKTFMaxContiguousNullCount(unsigned int) = 0; 
+    virtual unsigned int ktfMaxContiguousNullCount() const = 0;
     
 protected:
+    
     //singleton management
     StiIOBroker();
     virtual ~StiIOBroker();
@@ -101,12 +136,22 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
        <<"ltsfSectors():\t";
     copy( b.ltsfSectors().begin(), b.ltsfSectors().end(), ostream_iterator<unsigned int>(os, " "));
     os <<endl
+	
        <<"ltsfZWindow():\t"<<b.ltsfZWindow()<<endl
        <<"ltsfYWindow():\t"<<b.ltsfYWindow()<<endl
        <<"ltsfSeedLength():\t"<<b.ltsfSeedLength()<<endl
        <<"ltsfUseVertex():\t"<<b.ltsfUseVertex()<<endl
-       <<"ltsfDoHelixFit():\t"<<b.ltsfDoHelixFit()<<endl;
-    
+       <<"ltsfDoHelixFit():\t"<<b.ltsfDoHelixFit()<<endl
+	
+       <<"ktfMcsCalculated():\t"<<b.ktfMcsCalculated()<<endl
+       <<"ktfElossCalculated():\t"<<b.ktfElossCalculated()<<endl
+       <<"ktfMaxChi2ForSelection():\t"<<b.ktfMaxChi2ForSelection()<<endl
+       <<"ktfBField():\t"<<b.ktfBField()<<endl
+       <<"ktfMassHypothesis():\t"<<b.ktfMassHypothesis()<<endl
+       <<"ktfMinContiguousHitCount():\t"<<b.ktfMinContiguousHitCount()<<endl
+       <<"ktfMaxNullCount():\t"<<b.ktfMaxNullCount()<<endl
+       <<"ktfMaxContiguousNullCount():\t"<<b.ktfMaxContiguousNullCount()<<endl;
+
     return os;
 }
 

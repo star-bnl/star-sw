@@ -1,8 +1,13 @@
 #ifndef StiKalmanTrackFinder_H
 #define StiKalmanTrackFinder_H 1
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 #include "StiTrackFinder.h"
 #include "Messenger.h"
+#include "SubjectObserver.h"
 
 class StiDetector;
 class StiDectorContainer;
@@ -11,12 +16,17 @@ class StiKalmanTrack;
 
 enum StiFindStep {StepByLayer=1,StepByDetector=2 };
 
-class StiKalmanTrackFinder : public StiTrackFinder
+class StiKalmanTrackFinder : public StiTrackFinder, public Observer
 {
 public:
     StiKalmanTrackFinder();
     ~StiKalmanTrackFinder();
     //action methods_______________________________________________
+
+    //Inherited from Observer
+    virtual void update(Subject* changedSubject);
+    virtual void forgetSubject(Subject* theObsoleteSubject);
+    
     //inherited
     virtual void reset();
     virtual void findTracks();
@@ -59,6 +69,7 @@ public:
     //double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;
     
 protected:
+    void getNewState();
     
     int    singleNodeFrom;
     bool   singleNodeDescent;
@@ -103,7 +114,37 @@ private:
     void search();
     
     Messenger & trackMes;
+    Subject* mSubject;
 };
+
+//inlines
+
+inline void StiKalmanTrackFinder::update(Subject* changedSubject)
+{
+    // cout <<"StiKalmanTrackFinder::update(Subject*)"<<endl;
+    if (changedSubject!=mSubject) {
+	cout <<"StiKalmanTrackFinder::update(Subject*). ERROR:\t"
+	     <<"changedSubject!=mSubject"<<endl;
+    }
+    else {
+	// cout <<"getting new values"<<endl;
+	getNewState();
+	// cout <<"\tdone getting new values"<<endl;
+    }
+}
+
+inline void StiKalmanTrackFinder::forgetSubject(Subject* obsolete)
+{
+    // cout <<"StiKalmanTrackFinder::forgetSubject(Subject*)"<<endl;
+    if (obsolete==mSubject) {
+	mSubject=0;
+    }
+    else {
+	cout <<"StiKalmanTrackFinder::forgetSubject(Subject*). ERROR:\t"
+	     <<"changedSubject!=mSubject"<<endl;
+    }
+}
+
 
 #endif
 
