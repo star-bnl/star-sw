@@ -1,0 +1,21 @@
+/*  dst_point_unpack.idl  
+ *  
+ *  Module: dst_point_unpack
+ *
+ *  Description:  Post-DST space point unpacking module
+ *                for TPC and SVT space points.
+ */
+
+#include "PAM.idl"
+#include "tcl_tphit.idl"
+#include "scs_spt.idl"
+#include "dst_point.idl"
+
+interface dst_point_unpack : amiModule {
+             STAFCV_T call
+                     ( out    tcl_tphit      tcl_tphit, 
+                       out    scs_spt        scs_spt,
+                       in     dst_point      dst_point 
+             );
+     };
+     /*  Last mod. for dst_point_unpack $Date: 1998/08/24 23:55:17 $ */

@@ -5,7 +5,7 @@
 
 #include "PAM.idl"
 #include "tcl_tphit.idl"
-#include "evr_privert.idl"
+#include "dst_vertex.idl"
 #include "tpt_track.idl"
 #include "tte_eval.idl"
 #include "scs_spt.idl"
@@ -19,7 +19,7 @@
 interface egr_fitter   :        amiModule {
         STAFCV_T call
                 ( inout tcl_tphit       tphit
-                , in    evr_privert     privert
+                , in    dst_vertex      privert
                 , inout tpt_track       tptrack
                 , in    tte_eval        tpeval
                 , inout scs_spt         svt_spt
@@ -31,4 +31,4 @@ interface egr_fitter   :        amiModule {
 	        , out   dst_track_aux   globtrk_aux
         );
 };
-/* Last mod. for egr_fitter: $Date: 1998/07/02 16:32:03 $ */
+/* Last mod. for egr_fitter: $Date: 1998/08/24 23:55:06 $ */
