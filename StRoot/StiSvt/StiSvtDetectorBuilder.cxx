@@ -358,7 +358,7 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     {"SIES", "Volume to hold inner endring screws","HALL_1/CAVE_1/SVTT_1/SIES_1-2/*","",""},
     {"SOES", "Volume to hold outer endring screws","HALL_1/CAVE_1/SVTT_1/SOES_1-2/*","",""},
     {"SBRG", "Bracket joining the end rungs","HALL_1/CAVE_1/SVTT_1/SBRG_1-2/*","",""},
-    {"SOER", "outer end ring","HALL_1/CAVE_1/SVTT_1/SBRG_1-2/*","",""},
+    {"SOER", "outer end ring","HALL_1/CAVE_1/SVTT_1/SOER_1-2/*","",""},
     {"SIRT", "inner end ring tube piece ","HALL_1/CAVE_1/SVTT_1/SIRT_1-2","",""},
     {"SIRP", "inner end ring polygon piece ","HALL_1/CAVE_1/SVTT_1/SIRP_1-2","",""},
 #ifndef __SsdInChain__
