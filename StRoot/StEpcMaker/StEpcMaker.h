@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.6 2001/12/01 02:44:50 pavlinov Exp $
+// $Id: StEpcMaker.h,v 1.7 2003/05/26 13:44:34 suaide Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.7  2003/05/26 13:44:34  suaide
+// added setPrint() method
+//
 // Revision 1.6  2001/12/01 02:44:50  pavlinov
 // Cleanp for events with zero number of tracks
 //
@@ -83,6 +86,7 @@ class StEpcMaker : public StMaker
     TH1F *m_point_flag;        //! //Point Flag spectra
 
     double mBField;
+    Bool_t mPrint;
   
   public: 
     StEpcMaker(const char *name="epc");
@@ -91,10 +95,11 @@ class StEpcMaker : public StMaker
     virtual Int_t Make();
     virtual Int_t Finish();
     virtual Int_t fillStEvent();
+            void  setPrint(Bool_t a) {mPrint = a;}
     virtual void  Browse(TBrowser* b); // StEvent staf will be visible in browser
   
     virtual const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.6 2001/12/01 02:44:50 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.7 2003/05/26 13:44:34 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };

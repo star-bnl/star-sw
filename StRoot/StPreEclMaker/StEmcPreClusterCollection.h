@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.9  2003/05/26 13:44:19  suaide
+// added setPrint() method
+//
 // Revision 1.8  2001/04/20 22:23:40  pavlinov
 // Clean up
 //
@@ -76,6 +79,7 @@ private:
   Bool_t          kCheckClustersOk;
   Bool_t          kStEvOk;
   Int_t           mLoop;
+  Bool_t          mPrint;
  
 protected:   
 public: 
@@ -101,6 +105,7 @@ public:
   void            setSizeMax(Int_t);
   void            setNclusters(Int_t);  
   void            setCheckClusters(Bool_t);
+  void            setPrint(Bool_t a) { mPrint = a;}
 
   virtual  void   Browse(TBrowser *b);
   virtual  void   Delete(Option_t *opt="");

@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.16  2003/05/26 13:44:34  suaide
+// added setPrint() method
+//
 // Revision 1.15  2003/01/23 04:03:21  jeromel
 // Include fixed
 //
@@ -125,12 +128,14 @@ StMatchVecClus ClusterPointer[4];
 StPointCollection::StPointCollection():TDataSet("Default")
 {
   SetTitle("EmcPoints");
+  mPrint = kTRUE;
   mBField = 0.5;
 }
 //_____________________________________________________________________________
 StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 {
   SetTitle("EmcPoints");
+  mPrint = kTRUE;
   mBField = 0.5;
 }
 //_____________________________________________________________________________
@@ -154,7 +159,7 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
                                        StTrackVec& TrackToFit)
 {
   //Sort BEMC, SMDe, SMDp, PRS clusters according to location
-  cout <<"Finding EMC Points ...\n"; 
+  if(mPrint) cout <<"Finding EMC Points ...\n"; 
   ClusterSort(Bemccluster, Bprscluster,Bsmdecluster,Bsmdpcluster);
 
   // Getting BemcGeom to obtain radius etc
@@ -163,7 +168,7 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
   Int_t *Trcheck;
   if(TrackToFit.size()>0)
   {
-    cout<<" Taking Tracks from StEvent for track matching**"<<endl;
+    if(mPrint) cout<<" Taking Tracks from StEvent for track matching**"<<endl;
     TrackSort(TrackToFit);
 
   //track check array for checking if the track is matched
@@ -199,7 +204,7 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
                                          Trcheck);
         if(testp!=0)
         {
-          cout<<" GetEmcPoint not successful for "<<im<<" "<<is<<endl;
+          if(mPrint) cout<<" GetEmcPoint not successful for "<<im<<" "<<is<<endl;
           return kStWarn;
         }
       }
@@ -591,7 +596,7 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
 	    }
 
       Int_t testadd = addPoints(PointMember);
-	    if(testadd==1)cout<<" addPoints not O.K"<<endl;
+	    if(testadd==1)if(mPrint) cout<<" addPoints not O.K"<<endl;
 
 	    // Point in StEvent
 
@@ -679,8 +684,8 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
 //-------------------------------------------------------
 Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
 {
-  cout <<" Inside TrackSort*** size "<<TrackToFit.size()<<endl;
-  cout <<" Magnetic Field used = "<<mBField<<endl;
+  if(mPrint) cout <<" Inside TrackSort*** size "<<TrackToFit.size()<<endl;
+  if(mPrint) cout <<" Magnetic Field used = "<<mBField<<endl;
   double spath;
   //  double x0,y0,z0;
   //  double ptinv,psi,tanl;
@@ -721,7 +726,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
       helices.push_back(Helix);
     }
   }
-  //  cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
+  //  if(mPrint) cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
 
   for(unsigned int jj=0; jj < helices.size(); jj++)
   {
@@ -731,7 +736,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
     double s=0.0;
     double R1St = sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
     
-    if( R1St > RIN ) {cout<<"GlobSort: ERROR: Radius of First point > EmcInnerradius!! R1St= "<<R1St<<endl; return kStWarn;}
+    if( R1St > RIN ) {if(mPrint) cout<<"GlobSort: ERROR: Radius of First point > EmcInnerradius!! R1St= "<<R1St<<endl; return kStWarn;}
 
     // Find Coordinates of Intersect with Emc Inner radius
     if( R1St < RIN )
@@ -843,7 +848,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
 
     }
   }
-  cout<<" END OF TRACKSORT*** size**"<<HitTrackEta.size()<<" "<<HitTrackPhi.size()<<endl;
+  if(mPrint) cout<<" END OF TRACKSORT*** size**"<<HitTrackEta.size()<<" "<<HitTrackPhi.size()<<endl;
   return kStOK;
 }
 //-----------------------------------------------------------------------
@@ -852,7 +857,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
                                     StEmcClusterCollection* Bsmdecluster,
 	                                  StEmcClusterCollection* Bsmdpcluster)
 {
-  cout<<" I am inside PointCalc***"<<endl;
+  if(mPrint) cout<<" I am inside PointCalc***"<<endl;
   for(Int_t i1=0;i1<Epc::nModule;i1++)
   {
     for(Int_t i2=0;i2<Epc::nPhiBin;i2++)
@@ -889,7 +894,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
           //keeping the cluster very close to phibin boundry to the previous bin
           //
-          //       cout<<" EMC module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
+          //       if(mPrint) cout<<" EMC module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
           if(emc_phi_bin>0)
           {
             //	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
@@ -970,7 +975,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
           //keeping the cluster very close to phibin boundry to the previous bin
           //
-	        // cout<<" SMDE module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
+	        // if(mPrint) cout<<" SMDE module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
           if(emc_phi_bin>0)
           {
             //if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
@@ -1010,7 +1015,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
           //keeping the cluster very close to phibin boundry to the previous bin
           //
-          //       cout<<" SMDP module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
+          //       if(mPrint) cout<<" SMDP module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
           if(emc_phi_bin>0)
           {
 	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
