@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.27 2001/04/26 23:56:19 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.28 2001/11/12 22:56:38 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.28  2001/11/12 22:56:38  caines
+//Simulation hits now go into our SvtHit collection like real data
+//
 //Revision 1.27  2001/04/26 23:56:19  caines
 //Check that Geant svt hits,tracks and vertex exist before do get table
 //
@@ -44,6 +47,8 @@
 #include "TString.h"
 
 #include "StSvtClassLibrary/StSvtConfig.hh"
+#include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 #include "svt/St_svg_am_Module.h"
 #include "svt/St_srs_am_Module.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -187,13 +192,17 @@ Int_t St_srs_Maker::Make()
 
   mCoordTransform->setParamPointers(mSvtSrsPar, mSvtGeom, mSvtShape, mConfig);
 
+  // cope with pile up events and fill hit collection
+  
   int MaxTimeBucket = (int)(3.*mSvtSrsPar[0].fsca/mSvtSrsPar[0].vd);
   StSvtWaferCoordinate WaferCoord;
   StGlobalCoordinate GlobalCoord;
-  int VertexId;
+  StSvtAnalysedHybridClusters* mSvtAnalClusters;
+  int VertexId, index, NumOfHits;
   double TimeBucketShift;
-  
-//		Fill histograms and cope with pile up events
+
+
+   SetSvtAnalysis();
 
   if( scs_spt->GetNRows()){
 
@@ -210,11 +219,12 @@ Int_t St_srs_Maker::Make()
 
 	//cout << GlobalCoord ;
 	mCoordTransform->operator()(GlobalCoord,WaferCoord);
+
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
+	
 	if( WaferCoord.timebucket() < 0. || WaferCoord.timebucket() > MaxTimeBucket){
 	  spc->flag = -77;
 	  gMessMgr->Warning() << " Moved hit off of wafer" << endl;
-	  continue;
 	}
 	else{
 	  mCoordTransform->operator()(WaferCoord,GlobalCoord);
@@ -223,46 +233,101 @@ Int_t St_srs_Maker::Make()
 	  if( GlobalCoord.position().x() < -99){
 	    spc->flag = -77;
 	    cout << " Moved hit off of wafer" << endl;
-	    continue;
 	  }
 	}
-      }
-      int lader = spc->id_wafer -((int)spc->id_wafer/1000)*1000;
-      lader = lader -(int)(lader/100)*100;
-      float ladder = (float) lader;
-      if( 999 < spc->id_wafer && spc->id_wafer <1999){
-	m_waf_no1->Fill(spc->x[2],ladder);
-      }
-      else if( 1999 < spc->id_wafer && spc->id_wafer <2999){
-	m_waf_no2->Fill(spc->x[2],ladder);
-      }
-      else if( 2999 < spc->id_wafer && spc->id_wafer <3999){
-	m_waf_no3->Fill(spc->x[2],ladder);
-      }
-      
-      else if( 3999 < spc->id_wafer && spc->id_wafer <4999){
-	m_waf_no4->Fill(spc->x[2],ladder);
-      }
-      else if( 4999 < spc->id_wafer && spc->id_wafer <5999){
-	m_waf_no5->Fill(spc->x[2],ladder);
-      }
-      else if( 5999 < spc->id_wafer && spc->id_wafer <6999){
-	m_waf_no6->Fill(spc->x[2],ladder);
-      }
-      else if( 6999 < spc->id_wafer && spc->id_wafer <8999){
-	m_waf_no7->Fill(spc->x[2],ladder);
-      }
 
-      m_x_vs_y->Fill(spc->x[0],spc->x[1]);
-      
-	     
+	//Fill hit collection
+	index = mSvtAnalColl->getHybridIndex(WaferCoord.barrel(),
+					    WaferCoord.ladder(),
+					    WaferCoord.wafer(),
+					    WaferCoord.hybrid());
+	if( index <0) continue;
+	mSvtAnalClusters = (StSvtAnalysedHybridClusters*)
+	  mSvtAnalColl->at(index);
 
+	NumOfHits=0;
+	if( mSvtAnalClusters){
+	  NumOfHits = mSvtAnalClusters->numOfHits();
+	  // Resize every 10 hits
+          if( NumOfHits%10 == 0){
+	    mSvtAnalClusters->ReSize();
+	  }
+	}
+	else{
+	  mSvtAnalClusters = new StSvtAnalysedHybridClusters(
+							WaferCoord.barrel(),
+							WaferCoord.ladder(),
+							WaferCoord.wafer(),
+							WaferCoord.hybrid());
+	  mSvtAnalClusters->setMembers(NumOfHits,index);
+	}
+	if(mSvtAnalClusters) {
+	  mSvtAnalClusters->setSvtHit(spc);
+	  mSvtAnalColl->at(index) = mSvtAnalClusters;
+	}			
+      }
     }
-  }
     
+    FillHist(scs_spt);
+  }
   return kStOK;
 }
-//_____________________________________________________________________________
+//___________________________________________________________________________
+Int_t St_srs_Maker::SetSvtAnalysis()
+{
+  
+  mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
+  AddData(mSvtAnalSet);  
+  
+  mSvtAnalColl = new StSvtHybridCollection(mConfig);    
+  mSvtAnalSet->SetObject((TObject*)mSvtAnalColl); 
+  
+  for(int i=0; i<mConfig->getTotalNumberOfHybrids(); i++){
+    mSvtAnalColl->at(i) = NULL;  
+  }
+  return kStOK;
+}
+//___________________________________________________________________________
+Int_t St_srs_Maker::FillHist(St_scs_spt* scs_spt){
+  
+  //		Fill histograms 
+  
+  scs_spt_st  *spc   = scs_spt->GetTable();
+  for (Int_t i = 0; i < scs_spt->GetNRows(); i++,spc++){
+    
+    
+    
+    int lader = spc->id_wafer -((int)spc->id_wafer/1000)*1000;
+    lader = lader -(int)(lader/100)*100;
+    float ladder = (float) lader;
+    if( 999 < spc->id_wafer && spc->id_wafer <1999){
+      m_waf_no1->Fill(spc->x[2],ladder);
+    }
+    else if( 1999 < spc->id_wafer && spc->id_wafer <2999){
+      m_waf_no2->Fill(spc->x[2],ladder);
+    }
+    else if( 2999 < spc->id_wafer && spc->id_wafer <3999){
+      m_waf_no3->Fill(spc->x[2],ladder);
+    }
+    
+    else if( 3999 < spc->id_wafer && spc->id_wafer <4999){
+      m_waf_no4->Fill(spc->x[2],ladder);
+    }
+    else if( 4999 < spc->id_wafer && spc->id_wafer <5999){
+      m_waf_no5->Fill(spc->x[2],ladder);
+    }
+    else if( 5999 < spc->id_wafer && spc->id_wafer <6999){
+      m_waf_no6->Fill(spc->x[2],ladder);
+    }
+    else if( 6999 < spc->id_wafer && spc->id_wafer <8999){
+      m_waf_no7->Fill(spc->x[2],ladder);
+    }
+    
+    m_x_vs_y->Fill(spc->x[0],spc->x[1]);
+        
+  }
+  return kStOk;
+}
 
 //_____________________________________________________________________________
 
