@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.32 2002/07/11 12:26:22 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.33 2003/01/13 19:09:43 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.33  2003/01/13 19:09:43  genevb
+// Minor FTPC histo changes
+//
 // Revision 2.32  2002/07/11 12:26:22  genevb
 // Some FTPC histogram changes
 //
@@ -696,7 +699,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,1000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",50,0.,1500.,50,0.,1500.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
@@ -1190,7 +1193,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",50,0.,5000.);
-  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1000.,50,0.,1000.);
+  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1500.,50,0.,1500.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
