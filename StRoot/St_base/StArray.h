@@ -159,7 +159,7 @@ virtual void operator=(const StObjArrayIter &iter);
 virtual Bool_t operator==(const StObjArrayIter &iter);
 virtual Bool_t operator!=(const StObjArrayIter &iter);
 
-
+private:
 const StObjArray* fColl;
 ClassDef(StObjArrayIter,1)
 };
@@ -266,6 +266,8 @@ ClassDef(QWERTYIter,1)
 
 
 void testqwe();
+//ClassDef(StArray,1)
+
 #endif // 0
 
 

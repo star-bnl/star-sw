@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.8 1999/05/22 17:46:45 perev Exp $
+// $Id: StArray.cxx,v 1.9 1999/06/17 12:50:50 fisyak Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.9  1999/06/17 12:50:50  fisyak
+// Make StArray classes visible in RootCint, remove ShowMembers
+//
 // Revision 1.8  1999/05/22 17:46:45  perev
 // StVectorInt class added
 //
@@ -28,8 +31,6 @@ TObjArray *StRegistry::fReg = 0;
 ClassImp(StVectorInt)
 //______________________________________________________________________________
  void StVectorInt::Streamer(TBuffer &b){}
-//______________________________________________________________________________
- void StVectorInt::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
  void StVectorInt::Set(Int_t n)
 {
@@ -133,9 +134,6 @@ ClassImp(StObjArray)
 void StObjArray::Streamer(TBuffer &)
 {;}
 //______________________________________________________________________________
- void StObjArray::ShowMembers(TMemberInspector &, char *){}
-
-//______________________________________________________________________________
 const TIterator *StObjArray::Begin() const
 { 
 //  TIterator *(StObjArray::*mkit)(Bool_t dir) const = (TIterator *(StObjArray::*)(Bool_t) const)&MakeIterator;
@@ -196,8 +194,6 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
 }
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
-//______________________________________________________________________________
- void StObjArrayIter::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 void StObjArrayIter::SetCursor(Int_t kursor)
 {
@@ -268,8 +264,6 @@ void StObjArrayIter::operator=(const StObjArrayIter &iter)
 //______________________________________________________________________________
 ClassImp(StRefArray)
 //______________________________________________________________________________
-void StRefArray::ShowMembers(TMemberInspector &, char *){}
-//______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
 {
    // Stream all objects in the array to or from the I/O buffer.  
@@ -331,8 +325,6 @@ void StRefArray::Streamer(TBuffer &R__b)
 }
 
 ClassImp(StStrArray)
-//______________________________________________________________________________
-void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 
