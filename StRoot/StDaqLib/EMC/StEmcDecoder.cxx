@@ -57,10 +57,14 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
     for(int index=0;index<4800;index++)
     {
       int status=GetPsdId(RDO,index,id);
-      if(status==1 && id>0 && id<4801)
-      {
-        PsdRDO[id-1] = RDO;
-        PsdIndex[id-1]=index;
+      if (id>0 && id<4801){
+	if(status==1){
+	  PsdRDO[id-1] = RDO;
+	  PsdIndex[id-1]=index;
+	} else {
+	  PsdRDO[id-1]  = -1;
+	  PsdIndex[id-1]= -1;
+	}
       }
     }
   
