@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.5 1998/08/26 20:34:20 hardtke Exp $
+* $Id: tph.F,v 1.6 1998/08/31 17:03:43 hardtke Exp $
 * $Log: tph.F,v $
+* Revision 1.6  1998/08/31 17:03:43  hardtke
+* fix bug in alpha estimation
+*
 * Revision 1.5  1998/08/26 20:34:20  hardtke
 * set clusters of 0 width to 1/sqrt(12)
 *
@@ -490,8 +493,10 @@ c     with the ansatz that the track comes from (0,0,0)
               
 c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
 c     explanation...
+c DH  Fix bug in alpha calculation--STAR note238 says the cut should
+c     be on phi and not lambda.  Confirmed by M. Lisa.
               if (tand(tphit(tphit_h.nok).lambda).ne.0.0) then
-                 if (tphit(tphit_h.nok).lambda.ge.10.0) then
+                 if (abs(tphit(tphit_h.nok).phi).ge.10.0) then
                     tphit(tphit_h.nok).alpha = atand(
      +                   0.5*tand(tphit(tphit_h.nok).phi)/
      +                   tand(tphit(tphit_h.nok).lambda))
