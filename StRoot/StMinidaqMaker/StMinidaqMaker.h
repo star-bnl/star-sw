@@ -23,7 +23,7 @@ class TH3C;
 class StMinidaqMaker : public StMaker {
  private:
                             Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.2 1999/02/20 02:25:54 liq Exp $";
+// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.3 1999/02/23 16:36:46 love Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
                            St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
@@ -41,6 +41,7 @@ class StMinidaqMaker : public StMaker {
 	                                          // of adcxyz table from tss
                             virtual void TransferData();
                             virtual void MakeHistograms();
+	       Float_t      m_clock_frequency;//Different clock
  
  protected:
 	       TH2F *m_pxl_in; //! No. of pixel in versus Sector

@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.2 1999/02/20 02:25:42 liq Exp $
+// $Id: StMinidaqMaker.cxx,v 1.3 1999/02/23 16:36:45 love Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.3  1999/02/23 16:36:45  love
+// Set Clock to 9.4345 MC
+//
 // Revision 1.2  1999/02/20 02:25:42  liq
 // call mudle reformat_new
 //
@@ -54,10 +57,13 @@ m_Params(0),
 m_tpg_pad_plane(0),
 m_tpg_detector(0),
 m_tpg_pad(0),
+
 StMaker(name,title){
    m_first_sector=1;
    m_last_sector=no_of_sectors;
    drawinit=kFALSE;
+   //   m_clock_frequency = 13359400.0;  //Nominal for tss
+   m_clock_frequency = 9.4345e+6; // For 1997 and 1998 tpc test runs.
 }
 //_____________________________________________________________________________
 StMinidaqMaker::~StMinidaqMaker(){
@@ -98,6 +104,9 @@ Int_t StMinidaqMaker::Init() {
          cout << "TPC geometry parameter tables are incomplete."<< endl;
          SafeDelete(tpgpar);
        }
+    // set the clock for the TPC system tests
+       tpg_detector_st *tpg_detector = m_tpg_detector->GetTable();
+       tpg_detector->clock_frequency = m_clock_frequency;
        m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
        if (!m_tpg_pad) {
          m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad);
@@ -478,7 +487,7 @@ void StMinidaqMaker::MakeHistograms(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.2 1999/02/20 02:25:42 liq Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.3 1999/02/23 16:36:45 love Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
