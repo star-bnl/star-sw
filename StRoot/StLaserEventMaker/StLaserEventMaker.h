@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.15 2002/02/20 16:14:20 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.16 2003/01/21 02:48:07 jeromel Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.16  2003/01/21 02:48:07  jeromel
+// enum added
+//
 // Revision 1.15  2002/02/20 16:14:20  pfachini
 // The clock is now obtained from Jon Gans offline db code
 //
@@ -60,7 +63,10 @@ class St_tpcDriftVelocity;
 class TTree;
 class StLaserEvent;
 
-enum { maxNofTracks = 8000};
+enum { 
+  minValidTracks = 700,
+  maxNofTracks   = 8000
+};
 
 class StLaserEventMaker : public StMaker {
 private:
@@ -138,7 +144,7 @@ public:
   double clockNominal;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.15 2002/02/20 16:14:20 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.16 2003/01/21 02:48:07 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
