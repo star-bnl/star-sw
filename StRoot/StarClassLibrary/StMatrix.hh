@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.11 2001/10/31 00:33:34 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.12 2001/10/31 15:11:36 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.12  2001/10/31 15:11:36  ullrich
+ * Rewrote swap() to work as non-friend to StMatrix.
+ *
  * Revision 1.11  2001/10/31 00:33:34  ullrich
  * Remove macro ifdef for GCC which is not needed anymore.
  *
@@ -346,7 +349,6 @@ public:
     // Must be of same type to swap
     static void   swap(unsigned int&, unsigned int&);
     static void   swap(DataType *&, DataType *&);
-    friend void   swap(StMatrix<DataType>&, StMatrix<DataType>&);
     
 private:
     // Friend classes.
@@ -1175,14 +1177,25 @@ void StMatrix<DataType>::swap(DataType *&i, DataType *&j)
     j=tmp;
 }
 
-// This function swaps two Matrices without doing a full copy.
+// This function swaps two Matrices doing a full copy
 template<class DataType>
 void swap(StMatrix<DataType>& m1, StMatrix<DataType>& m2) {
-    StMatrix<DataType>::swap(m1.mElement, m2.mElement);
-    StMatrix<DataType>::swap(m1.mRow,     m2.mRow);
-    StMatrix<DataType>::swap(m1.mCol,     m2.mCol);
-    StMatrix<DataType>::swap(m1.mSize,    m2.mSize);
+    StMatrix<DataType> tmp(m1);
+    m1 = m2;
+    m2 = tmp;
 }
+
+// This function swaps two Matrices without doing a full copy.
+// The version below had some problems with the new GCC compiler
+// (friendship with StMatrix caused trouble) and was replaced
+// by the version above. tu
+// template<class DataType>
+// void swap(StMatrix<DataType>& m1, StMatrix<DataType>& m2) {
+//     StMatrix<DataType>::swap(m1.mElement, m2.mElement);
+//     StMatrix<DataType>::swap(m1.mRow,     m2.mRow);
+//     StMatrix<DataType>::swap(m1.mCol,     m2.mCol);
+//     StMatrix<DataType>::swap(m1.mSize,    m2.mSize);
+// }
 
 template<class DataType>
 unsigned int StMatrix<DataType>::dfact(DataType& det, size_t *ir) {
