@@ -1,5 +1,8 @@
-* $Id: tte_track.F,v 1.4 1998/09/18 21:57:19 perev Exp $
+* $Id: tte_track.F,v 1.5 1999/02/27 22:29:18 sakrejda Exp $
 * $Log: tte_track.F,v $
+* Revision 1.5  1999/02/27 22:29:18  sakrejda
+* changes suggested by Victor implemented
+*
 * Revision 1.4  1998/09/18 21:57:19  perev
 * WRONG calling sequence for tls_sort
 *
@@ -251,7 +254,6 @@ c          go through all the points on the long_list list
            if(track_h.maxlen.gt.track_size) then
                write(6,*) 'track_size not big enough', track_size,
      >         track_h.maxlen 
-               track_h.maxlen=track_size
            endif
 c
            if(long_list_nok.gt.0) then
