@@ -26,7 +26,7 @@ amiInvoker:: amiInvoker(const char * name, long rank
    myPtr = (SOC_PTR_T)this;
    if( rank != specs._length){
       EML_LOG_ERROR(BAD_MODULE_RANK);
-      myRank=-1;
+      myRank=-1; /*-AMI_E_NO_MODULE_RANK-*/
       return;
    }
    myRank = rank;
