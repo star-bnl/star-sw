@@ -4,18 +4,21 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Author   W.B.Christie
 * modifications:
 * PN, 30-03-99:  outer part is Aluminum, not steel
+* 14-09-99, Holm Huemmler: include beampipe wrap and shield
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
       Content  PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,
-               PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT
+               PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
 *
       Structure PIPG {version,  BeInnR,   BeOutR,   BeLeng,   char Material,
                       S1InnR,   S1OutR,   S1Leng,   S2InnR,   S2OutR,  S2Leng,
                       S3InnR,   S3OutR,   S3Leng,
                       S4InnR,   S4OutR,   S4Leng,
                       Flange1T, Flange1R, ConeLen, 
-                      RibNum,   RibSpa,   RibThk,   RibOutR,  RibCent }
+                      RibNum,   RibSpa,   RibThk,   RibOutR,  RibCent,
+                      WrpInnR,  WrpOutR,  WrpLeng, 
+                      SldInnR,  SldOutR,  SldLeng}
 *
 *    local variable for section positioning
       Real    Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/
@@ -48,6 +51,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibThk    = 0.05  ! Rib half thickness
       RibOutR   = 4.8   ! Rib Outer Radius
       RibCent   = 454.5 ! Rib Set center 
+      WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
+      WrpOutR   = 4.003 ! outer radius of beampipe multi layer insulation
+      WrpLeng   = 56    ! length of beampipe multi layer insulation
+      SldInnR   = 4.003 ! inner radius of SVT beam pipe shield
+      SldOutR   = 4.006 ! outer radius of SVT beam pipe shield
+      SldLeng   = 300   ! length of SVT beam pipe shield
 
    FILL PIPG    !  Beam Pipe data
       version   =  1    ! geometry version     
@@ -64,7 +73,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
 * Calculate the center position of the bell transition cone
       Z4 = Z2 + pipg_flange1t + 2*pipg_s3leng + pipg_conelen 
 * calculate mother PCON radii
-      R1 = pipg_S2OutR
+      R1 = pipg_SldOutR
       R2 = pipg_S4outR
 *
       Create   PIPE
@@ -99,6 +108,8 @@ Block PIPE is the STAR beam pipe mother volume
       Create and Position PFLT z=Z2                      " 2nd set of flanges "
       Create and Position PIPS z=Z3-pipg_S4Leng          " 5 inch steel sectn "
       Create and position PRIS z=(Z1+Z2)/2               " Steel Bellow Ribs  "
+      Create and position PWRP z=pipg_WrpLeng/2          " beampipe wrap "
+      Create and position PSLD z=pipg_SldLeng/2          " svt beam shield "
 endblock
 * -----------------------------------------------------------------------------
 
@@ -221,6 +232,31 @@ Block PRIB is a Rib of Steel Bellows
        Material  Iron
        Attribute PRIB      Seen=1   Colo=7
        Shape     TUBE      Dz=pipg_RibThk 
+EndBlock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block PWRP is the beampipe wrap of Kapton and aluminum 
+* use mylar mixture from svttgeo instead of kapton
+       Component C5     A=12    Z=6  W=5
+       Component H4     A=1     Z=1  W=4
+       Component O2     A=16    Z=8  W=2
+       Component Al     A=27    Z=13 W=7
+       Mixture   MLI    Dens=1.91
+       Attribute Pwrp      Seen=1  colo=3
+       Shape     TUBE      Rmin=pipg_WrpInnR  Rmax=pipg_WrpOutR,
+                           Dz=pipg_WrpLeng/2 
+EndBlock
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block PSLD is the svt beampipe shield 
+* use mylar mixture from svttgeo instead of kapton
+       Component C5     A=12    Z=6  W=5
+       Component H4     A=1     Z=1  W=4
+       Component O2     A=16    Z=8  W=2
+       Component Al     A=27    Z=13 W=3
+       Mixture   ALKAP  Dens=1.65
+       Attribute PSLD   Seen=1  colo=3
+       Shape     TUBE   Rmin=pipg_SldInnR  Rmax=pipg_SldOutR,
+                        Dz=pipg_SldLeng/2 
 EndBlock
 *
       END
