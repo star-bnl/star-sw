@@ -29,7 +29,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.9 2001/08/01 19:10:33 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.10 2001/08/07 17:43:42 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -62,7 +62,6 @@ private:
     StiTrackContainer* mtrackstore; //!
     StiDrawableHits* mdrawablehits; //!
     StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
-    StiRDEvaluableTrackFactory* md_trackfactory; //!
     detector_factory* mdetectorfactory; //!
     data_node_factory* mdatanodefactory; //!
 

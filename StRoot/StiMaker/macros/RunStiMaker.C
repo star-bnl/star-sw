@@ -7,7 +7,8 @@ StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
 		 //const char *MainFile="/star/data04/reco/reco/minbias/P00hm/2000/08/*.dst.root")
-		 const char *MainFile="/star/rcf/scratch/haibin/geantTest/muon_10.dst.root")
+		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
+		 //const char * MainFile = "/afs/rhic/star/users/mmiller/code/ITF/geant/pion_50_neg.dst.root")
 {    
     // Dynamically link needed shared libs
     
@@ -100,22 +101,20 @@ void RunStiMaker(Int_t nevents=1,
     chain->Init();
     
     cout <<"Starting Event Loop"<<endl;
-    
-    /*
-      int istat=0,iev=1;
-      EventLoop: if (iev<=nevents && !istat) {
-      chain->Clear();
-      cout << "---------------------- Processing Event : " << iev << endl;
-      istat = chain->Make(iev);
-      if (istat) {
-      cout << "Last Event Processed. Status = " << istat << endl;
-      }
-      iev++; goto EventLoop;
-      }
-    */
-    
-    //chain->Finish();
 
+    if (0) {
+	int istat=0,iev=1;
+    EventLoop: if (iev<=nevents && !istat) {
+	chain->Clear();
+	cout << "---------------------- Processing Event : " << iev << endl;
+	istat = chain->Make(iev);
+	if (istat) {
+	    cout << "Last Event Processed. Status = " << istat << endl;
+	}
+	iev++; goto EventLoop;
+    }
+    }
+    
     return;
 }
 
