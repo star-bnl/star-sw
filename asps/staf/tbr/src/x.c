@@ -35,9 +35,10 @@
 #define EXTERN extern
 #include "brow.h"
 #include "x.h"
+#define CUTS_WIDTH 50
 /******************************************************  GLOBALS  **/
 extern int gNDs;
-int gLastWhWin=-10,gDone;
+int gLastWhWin=-10,gDone2,gDone;
 myBool gBlurb2,gBlurb1;
 char *gBlurb7="Click on the abbreviation (to\n\
 expand/contract) to the left.  Do not click\n\
@@ -50,8 +51,9 @@ char *gMess0=
  3. Perhaps you want to click on the name (not\n\
     on the abbreviation \"TB\") of the table\n\
     which contains this column.";
-Widget gSecondLabel,gProgressPopup,gProgressScale;
+Widget gSecondLabel,gCutsPopup,gProgressPopup,gCutsText,gProgressScale;
 /******************************************************  PROTOTYPES  **/
+void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad);
 myBool TableHasMoreThanZeroCols(int tlm);
 XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad);
 XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad);
@@ -207,6 +209,64 @@ void DoOnce2(void) {
   gNGraphicsUp=0;
   gNWin=0;
 }
+XtCP CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
+  gDone2=63;
+}
+XtCP CutsOkCB(Widget w,caddr_t cld,caddr_t cad) {
+  gDone2=7;
+}
+void PrepareCutsPopup() {
+  Arg args[24];
+  int nn;
+  Widget butBox,button,theLabel,rrr,theWindow;
+  XmString title;
+  nn=0;
+  gCutsPopup=XtCreatePopupShell("",transientShellWidgetClass,gMainWindow,
+  args,nn);
+  nn=0;
+  theWindow=XmCreateMainWindow(gCutsPopup,"",args,nn);
+  XtManageChild(theWindow);
+  nn=0;
+  XtSetArg(args[nn], XmNorientation, XmVERTICAL); nn++;
+  rrr=XmCreateRowColumn(theWindow,"",args,nn);
+  XtManageChild(rrr);
+
+  title=XmStringCreateLtoR("Cuts Editor",XmSTRING_DEFAULT_CHARSET);
+  nn=0;
+  XtSetArg(args[nn],XmNlabelString,title); nn++;
+  theLabel=XmCreateLabel(rrr,"",args,nn);
+  XtManageChild(theLabel);
+  XmStringFree(title);
+
+  title=XmStringCreateLtoR(
+  "If you have a big cuts string, you can use several lines.",
+  XmSTRING_DEFAULT_CHARSET);
+  nn=0;
+  XtSetArg(args[nn],XmNlabelString,title); nn++;
+  theLabel=XmCreateLabel(rrr,"",args,nn);
+  XtManageChild(theLabel);
+  XmStringFree(title);
+
+  nn=0;
+  XtSetArg(args[nn],XmNrows,5);  nn++;
+  XtSetArg(args[nn], XmNcolumns, CUTS_WIDTH);  nn++;
+  XtSetArg(args[nn],XmNresizeWidth, False);  nn++;
+  XtSetArg(args[nn],XmNresizeHeight, False);  nn++;
+  XtSetArg(args[nn],XmNeditMode, XmMULTI_LINE_EDIT);  nn++;
+  XtSetArg(args[nn],XmNscrollHorizontal, False);  nn++;
+  gCutsText=XmCreateText(rrr,"TxtWid",args,nn);
+  butBox=Row(rrr);
+  XtManageChild(gCutsText);
+  button=XmCreatePushButton(butBox," OK ",NULL,0);
+  XtManageChild(button);
+  XtAddCallback(button,XmNactivateCallback,(XtCP)CutsOkCB,NULL);
+  button=XmCreatePushButton(butBox," Cancel ",NULL,0);
+  XtManageChild(button);
+  XtAddCallback(button,XmNactivateCallback,(XtCP)CutsCancelCB,NULL);
+  button=XmCreatePushButton(butBox," Help ",NULL,0);
+  XtManageChild(button);
+  XtAddCallback(button,XmNactivateCallback,(XtCP)HelpCutsCB,NULL);
+}
 void PrepareProgressPopup() {
   Arg args[14];
   int n;
@@ -315,21 +375,90 @@ void Write(char *mess,int whWin) {
       (XmTextPosition)strlen(gWin[whWin]->textOutput)-1);
   XmUpdateDisplay(gWin[whWin]->txtWidWrite);
 }
-myBool GetTheCuts(char *out,char *tableName) {
- FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
-  sprintf(fn,"stargl.cuts"); ff=fopen(fn,"r");
-  if(ff==NULL) { Say("You have no cuts file.\nSee \"Help\"."); return FALSE; }
-  fo=FALSE;
-  while(fgets(line,MAX_CUTS_STRING,ff)) {
-    if(*line=='#') continue;
-    tok=strtok(line," \t");
-    if(!strcmp(tableName,tok)) { fo=TRUE; break; }
-  } fclose(ff);
-  if(!fo) {
-    Say("Cuts file has no line for this table \nSee \"Help\"."); return FALSE;
+myBool IsOperator(char *xx,int pp) {
+  if(xx[pp]=='.'&&(xx[pp+1]=='g'||xx[pp+1]=='G')) return TRUE;
+  if(xx[pp]=='.'&&(xx[pp+1]=='l'||xx[pp+1]=='L')) return TRUE;
+  if(xx[pp]=='.'&&(xx[pp+1]=='e'||xx[pp+1]=='E')) return TRUE;
+  if(xx[pp]=='='&&xx[pp+1]=='=') return TRUE;
+  if(xx[pp]=='<') return TRUE;
+  if(xx[pp]=='>') return TRUE;
+  return FALSE;
+}
+void BreakIntoLines(char *xx) {
+  int len,ii,chos=0,bufPos=0,lastPrint=-1;
+  char buf[MAX_CUTS_STRING],save;
+  len=strlen(xx); if(len>800) Err(770); *buf='\0';
+  for(ii=0;ii<len;ii++) {
+    if(IsOperator(xx,ii)&&chos>CUTS_WIDTH-15) {
+      chos=0; save=xx[ii]; xx[ii]='\0';
+      strcat(buf,xx+lastPrint+1); strcat(buf,"\n");
+      lastPrint=ii-1; xx[ii]=save;
+    }
+    chos++;
   }
-  tok=strtok(NULL," \n\t"); strcpy(out,tok);
-  return TRUE;
+  strcat(buf,xx+lastPrint+1); 
+  strcpy(xx,buf);
+}
+void GetRidOfNewlines(char *xx) {
+  int len,ii,bufPos=0,lastPrint=-1;
+  char buf[MAX_CUTS_STRING];
+  len=strlen(xx); if(len<0||len>800) Err(770); *buf='\0';
+  for(ii=0;ii<len;ii++) {
+    if(xx[ii]=='\n') {
+      xx[ii]='\0';
+      strcat(buf,xx+lastPrint+1);
+      lastPrint=ii;
+    }
+  }
+  strcat(buf,xx+lastPrint+1); strcpy(xx,buf);
+}
+void SaveCutsInFile(char *tableName,char *xx) {
+  FILE *ff,*temp; char *tok,copy[MAX_CUTS_STRING+5],line[MAX_CUTS_STRING+5];
+  temp=fopen("bRoWsER.tmp","w");
+  if(temp==NULL) { Say("I don't have write permission here."); return; }
+  ff=fopen("browser.cuts","r");
+  if(ff!=NULL) {
+    while(fgets(line,MAX_CUTS_STRING,ff)) {
+      strcpy(copy,line);
+      tok=strtok(line," \t"); if(tok==NULL) continue;
+      if(!strcmp(tableName,tok)) continue;
+      if(strlen(line)<5) continue;
+      fprintf(temp,"%s",copy);
+    } fclose(ff);
+  }
+  fprintf(temp,"\n%s %s\n",tableName,xx); fclose(temp);
+  system("mv bRoWsER.tmp browser.cuts");
+}
+myBool UserMod(char *tableName,char *xx) {
+  XEvent event; XmString cuts;
+  BreakIntoLines(xx); XmTextSetString(gCutsText,xx);
+  XtPopup(gCutsPopup,XtGrabNone);
+  gDone2=0;
+  for(;;) { /* un-main loop */
+    XtAppNextEvent(gAppCon,&event); XtDispatchEvent(&event);
+    if(gDone||gDone2) break;
+  }
+  XtPopdown(gCutsPopup);
+  if(gDone2>10) return FALSE; /* User cancelled. */
+  strcpy(xx,XmTextGetString(gCutsText));
+  GetRidOfNewlines(xx);
+  SaveCutsInFile(tableName,xx);
+  return TRUE; /* User said OK. */
+}
+myBool GetCuts(char *out,char *tableName) {
+ FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
+  sprintf(fn,"browser.cuts"); ff=fopen(fn,"r");
+  if(ff!=NULL) {
+    fo=FALSE;
+    while(fgets(line,MAX_CUTS_STRING,ff)) {
+      if(*line=='#') continue;
+      tok=strtok(line," \t"); if(tok==NULL) continue;
+      if(!strcmp(tableName,tok)) { fo=TRUE; break; }
+    } fclose(ff);
+    if(!fo) tok=""; else tok=strtok(NULL," \n\t");
+  }
+  strcpy(out,tok);
+  return UserMod(tableName,out); /* whether user cancels */
 }
 char *ColName(int ln,int whWin) {
   int ii,nl=0,len; char *cc,*rr;
@@ -585,7 +714,9 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   sprintf(gSumCol,"%6s ",act); /* for passing to runFunc */
   gRunNRowsDone=0;
   RunTheRows(FALSE,whWin,runFunc);
-  if(gRunNRowsDone==0) Say("No rows were\nselected by \"ROW SELECTION\".");
+  if(gRunNRowsDone==0&&gDone2<10) {
+    Say("No rows were\nselected by \"ROW SELECTION\".");
+  }
   whActS=whAct; whWinS=whWin;
 }
 /* Comment 8b: OneLnAllRowsCB is the callback for "half" the Action menu
@@ -644,8 +775,9 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
           case 1: case 2: break;
           default: Err(130);
         }
-      }
-      else { Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break; }
+      } else if(gDone2<10) { /* User did not cancel. */
+        Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break;
+      } else break; /* User may have canceled in cuts dialog. */
     }	/* if/else gStrValueWrapper */
   }	/* loop hlLstIx */
   if(gMax==gMin) { gMax=gMin+0.1*fabs(gMin); gMin=gMin-0.1*fabs(gMin); }
@@ -654,9 +786,12 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
     case 0: if(fo==0) SayError0();
       else { strcat(sumCol,"\n"); Write(sumCol,whWin); } break;
     case 1: break;
-    case 2: for(ii=HIST-1;ii>=0;ii--) gHist[ii]=0;
-      if(fo==0) { SayError0(); return; }
-      RunTheRows(FALSE,whWin,RunHistFill); break;
+    case 2:
+      if(gDone2<11) {
+        for(ii=HIST-1;ii>=0;ii--) gHist[ii]=0;
+        if(fo==0) { SayError0(); return; } RunTheRows(TRUE,whWin,RunHistFill);
+      }
+      break; /* 950709, FALSE->TRUE */
     default: Err(126);
   }
   AuxOutputFromOneLn(whWin,whAct);
@@ -681,9 +816,12 @@ void AuxOutputFromOneLn(int whWin,int whAct) { /* includes histogramming */
         car,gRunNRowsDone); Write(bf,whWin);
       } break;
     case 1:
-      sprintf(bf,"Your \"ROW SELECTION\" (top right) selects %d row(s).\n",
-      gRunNRowsDone); Write(bf,whWin); break;
-    case 2: DrawHist(whWin); break;
+      if(gDone2<10) { /* User did not cancel in cuts dialog. */
+        sprintf(bf,"Your \"ROW SELECTION\" (top right) selects %d row(s).\n",
+        gRunNRowsDone); Write(bf,whWin);
+      }
+      break;
+    case 2: if(gDone2<11) DrawHist(whWin); break;
     default: Err(133);
   }
   if(reportCuts) { Write(gCuts,whWin); Write("\n",whWin); }
@@ -703,7 +841,7 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
   start=FirstRow(whWin); end=LastRow(skipInit,whWin);
   if(start>end) { Complain6(); return; }
   if(!skipInit&&gWin[whWin]->useCuts) {
-    if(!GetTheCuts(cuts,gWin[whWin]->tableName)) return;
+    if(!GetCuts(cuts,gWin[whWin]->tableName)) return;
     if(!DoCutsWrapper(MAXROW_DIV_BY_8,ba,cuts,gWin[whWin]->wh_gDs)) {
       Say("We have error 51r.\nCheck your cuts string."); return;
     }
@@ -760,6 +898,8 @@ void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
  Highlight a column by clicking in this list.\n\
  Un-highlight by clicking again.\n\
  \n\
+ Then select an item from the \"Action\" menu.\n\
+ \n\
  CRITICAL:\n\
  Items from the \"Action\" menu only work on rows\n\
  selected in \"ROW SELECTION\", so be careful with\n\
@@ -770,24 +910,18 @@ void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
 }
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad) {
   *gPass='\0';
-  strcat(gPass,"Cuts are in file stargl.cuts.  Five-line sample:\n");
+  strcat(gPass,"Cuts specification follows Fortran 90 guidelines, except\n");
+  strcat(gPass,"that the \".ne.\" and \"/=\" operators are not supported.\n");
+  strcat(gPass,"-------- Examples:\n");
+  strcat(gPass,"id.gt.10.and.id<=110\n");
+  strcat(gPass,"id_globtrk.gt.10.and.id_globtrk.le.110\n");
+  strcat(gPass,"cov[5]>3.12\n");
   strcat(gPass,"--------\n");
-  strcat(gPass,"# Comment line\n");
-  strcat(gPass,"globtrk  id.gt.10.and.id.le.110\n");
-  strcat(gPass,"# globtrk  (id.eq.1.or.icharge.eq.1).and.(invpt.gt.7)\n");
-  strcat(gPass,"tphit    id_globtrk.gt.10.and.id_globtrk.le.110\n");
-  strcat(gPass,"tptrack    cov[5].gt.3.12\n");
-  strcat(gPass,"--------\n");
-  strcat(gPass,"Each non-comment line begins with a table name.\n");
   strcat(gPass,"Specifiers in the conditionals (eg, id_globtrk) are\n");
   strcat(gPass,"column names.  Note the use of\n");
   strcat(gPass,"square brackets (NOT PARENTHESES, AS IN TAS)\n");
   strcat(gPass,"for columns whose data types are arrays.\n");
   strcat(gPass,"\n");
-  strcat(gPass,"You can alter your cuts while running this table brow-\n");
-  strcat(gPass,"ser by opening the cuts file with an editor, making your\n");
-  strcat(gPass,"changes, and saving the changes (without quitting the\n");
-  strcat(gPass,"editor, if you desire).\n");
   Say(gPass);
 }
 void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
@@ -917,9 +1051,12 @@ void AddToHiliteList(int whWin,int lineNum) {
   int ii;
   for(ii=gWin[whWin]->nhlLst-1;ii>=0;ii--) {
     if(gWin[whWin]->hlLst[ii]==lineNum) {
+      return;
+      /*------- so user can click twice on same line in primary window
       PP"I am being asked to add line# %d to my highlight list for\n",lineNum);
       PP"window %d, but it is already on the list.\n",whWin);
       Err(772);
+      -----------------------------------------------*/
     }
   }
   ii=gWin[whWin]->nhlLst;
@@ -1295,7 +1432,7 @@ void DoXStuff(void) {
   "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
   PP"MakeWindow()\n");
   MakeWindow(0,WIN_TYPE_PRIMARY);
-  PrepareProgressPopup();
+  PrepareProgressPopup(); PrepareCutsPopup();
   PP"XtRealizeWidget()\n");
   haveInited=TRUE;
   XtRealizeWidget(gAppShell);
@@ -1316,5 +1453,3 @@ void DoXStuff(void) {
     if(gDone) break;
   }
 }
-        /* PP"gFocus=%d. (%03d,%03d)  (%03d,%03d)\n",gFocus,
-        bev->x_root,bev->y_root, bev->x,bev->y); */

@@ -325,23 +325,24 @@ void ColumnList(char *header,
     strcpy(minString,"???"); strcpy(maxString,"???");
     strcpy(stdString,"???"); strcpy(aveString,"???");
   }
-  if(gCalculateAverages)
-          Progress(-5,10,"ferences\" menu to speed this up.",
-          "Doing min/max/averages.  See the \"Pre-");
-  for(ii=0;ii<rr;ii++) { /* 1st pass for progTot */
-    whichCol=ii;
-    if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 56);
-    if(dimensionality>1) Err( 57);
-    if(!dsColumnDimensions(&arraySize,pp,whichCol)) Err( 58);
-    if(dimensionality==0) arraySize=1;
-    arraySizeInt=arraySize;
-    for(jj=1;jj<=arraySizeInt;jj++) {
-      progTot++;
-      if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gStrMinMaxAve */
-      if(gStrMinMaxAve) break;
+  if(gCalculateAverages) {
+    Progress(-5,10,"ferences\" menu to speed this up.",
+    "Doing min/max/averages.  See the \"Pre-");
+    for(ii=0;ii<rr;ii++) { /* 1st pass for progTot */
+      whichCol=ii;
+      if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 56);
+      if(dimensionality>1) Err( 57);
+      if(!dsColumnDimensions(&arraySize,pp,whichCol)) Err( 58);
+      if(dimensionality==0) arraySize=1;
+      arraySizeInt=arraySize;
+      for(jj=1;jj<=arraySizeInt;jj++) {
+        progTot++;
+        if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gStrMinMaxAve */
+        if(gStrMinMaxAve) break;
+      }
     }
   }
-  for(ii=0;ii<rr;ii++) { /* loop over columns */
+  for(ii=0;ii<rr;ii++) { /* 2nd pass, loop over columns */
     whichCol=ii;
     if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 39);
     if(dimensionality>1) Err( 40);
