@@ -137,6 +137,11 @@ Int_t St_xdfin_Maker::Make(){
         ret = kStOK;
         break;
       }
+      m_DataSet->Shunt(set);
+      m_DataSet->Purge();
+      ret = kStOK;
+      break;
+#if 0
       const Char_t *makertype = GetTitle();
       if (makertype && strlen(makertype)) {
         local.Mkdir(makertype);
@@ -146,6 +151,7 @@ Int_t St_xdfin_Maker::Make(){
         ret = kStOK;
         break;
       }
+#endif
     }
   }
   Split();
