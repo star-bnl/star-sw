@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.82 2003/04/26 03:36:25 jeromel Exp $
+// $Id: doEvents.C,v 1.83 2003/05/02 23:12:53 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -116,6 +116,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StIOMaker");
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("StBichsel");
     gSystem->Load("StTriggerDataMaker");    
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
@@ -321,6 +322,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.83  2003/05/02 23:12:53  jeromel
+// StBichsel
+//
 // Revision 1.82  2003/04/26 03:36:25  jeromel
 // Forgot to commit
 //
