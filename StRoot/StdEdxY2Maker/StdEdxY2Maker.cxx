@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.37 2004/08/12 17:02:09 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.38 2004/09/16 02:09:27 perev Exp $
 //#define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -20,6 +20,8 @@
 #include "TCanvas.h"
 #include "TRandom.h"
 #include "TClonesArray.h"
+#include "TArrayI.h"
+#include "TArrayD.h"
 // StUtilities
 #include "StMagF.h"
 #include "StDbUtilities/StMagUtilities.h"
@@ -79,6 +81,10 @@ static  Int_t NoPads;
 const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
 #include "dEdxTrack.h"
+#include "TMemStat.h"
+void pmem() { TMemStat::PM();}
+
+
 //______________________________________________________________________________
 
 // QA histogramss
@@ -101,13 +107,9 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
   //  SETBIT(m_Mode,kOldClusterFinder); 
   SETBIT(m_Mode,kPadSelection); 
   SETBIT(m_Mode,kAlignment);
-  if (!m_Minuit) m_Minuit = new TMinuit(2);
-  for (int i = 0; i < 24; i++) 
-    for (int j = 0; j < 45; j++) {
-      mNormal[i][j] = 0;
-      for (Int_t k = 0; k < 3; k++) 
-	mRowPosition[i][j][k] = 0;
-    }
+  m_Minuit = new TMinuit(2);
+  memset(mNormal[0]        ,0,sizeof(mNormal     ));
+  memset(mRowPosition[0][0],0,sizeof(mRowPosition));
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
@@ -200,6 +202,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 //     m_tpcGainMonitor = (St_tpcGainMonitor *) GetDataBase("Conditions/tpc/tpcGainMonitor");
 //   } // GASHISTOGRAMS
   if (! TESTBIT(m_Mode, kDoNotCorrectdEdx))
+    delete m_TpcdEdxCorrection;
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
   StTpcCoordinateTransform transform(gStTpcDb);
   for (Int_t sector = 1; sector<= numberOfSectors; sector++) {
@@ -236,6 +239,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 	} else {
 	  transform(lsCoord,  gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
 	}
+	delete mRowPosition[sector-1][row-1][l];
 	mRowPosition[sector-1][row-1][l] = 
 	  new  StThreeVectorD(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
 	if (Debug()>1) cout << "mRowPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
@@ -273,12 +277,14 @@ Int_t StdEdxY2Maker::Make(){
 		     24,1.,25.,45,1.,46.,450,-15.,210.);
   static TAxis *Zax = Charge.GetZaxis();
 #endif
+{
   if (Debug() > 0) timer.start();
-  if (! CdEdx) CdEdx = new dEdx_t[NdEdxMax]; 
-  if (! FdEdx) FdEdx = new dEdx_t[NdEdxMax]; 
-  if (! dEdxS) dEdxS = new dEdx_t[NdEdxMax]; 
+  dEdx_t CdEdxT[NdEdxMax],FdEdxT[NdEdxMax],dEdxST[NdEdxMax];
+  CdEdx = CdEdxT; 
+  FdEdx = FdEdxT; 
+  dEdxS = dEdxST; 
 #if 0
-  FdEdx = CdEdx + NdEdxMax; dEdxS = FdEdx + NdEdxMax;}
+//  FdEdx = CdEdx + NdEdxMax; dEdxS = FdEdx + NdEdxMax;}
 #endif
   St_tpcGas           *tpcGas = 0;
   if (m_TpcdEdxCorrection) {
@@ -319,8 +325,9 @@ Int_t StdEdxY2Maker::Make(){
 	      TotalNoOfTpcHits += NoHits;
 #if defined(dChargeCorrection) || defined(SpaceChargeQdZ)
 	      if (NoHits > 1) {
-		Double_t *zL = new Double_t[NoHits];
-		Int_t    *indx = new Int_t[NoHits];
+                TArrayD zLT(NoHits);TArrayI indxT(NoHits);
+		Double_t *zL = zLT.GetArray();
+		Int_t    *indx = indxT.GetArray();
 		for (UInt_t k = 0; k < NoHits; k++) {
 		  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
 		  if (! tpcHit)  zL[k] = 9999;
@@ -341,8 +348,6 @@ Int_t StdEdxY2Maker::Make(){
 		  StTpcHit *tpcHitk1 = static_cast<StTpcHit *> (hits[indx[k+1]]);
 		  if (tpcHitk) tpcHitk->SetNextHit(tpcHitk1);
 		}
-		delete [] zL;
-		delete [] indx;
 	      }
 #endif /* dChargeCorrection || SpaceChargeQdZ */
 	    }
@@ -369,8 +374,10 @@ Int_t StdEdxY2Maker::Make(){
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   StTrackNode *node=0;
+  
   for (unsigned int i=0; i < nTracks; i++) {
-    node = trackNode[i]; if (!node) continue;
+    node = trackNode[i]; 
+    if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
     StTptTrack     *tTrack = static_cast<StTptTrack    *>(node->track(tpt));
@@ -413,6 +420,8 @@ Int_t StdEdxY2Maker::Make(){
       }
     }
     if (! gTrack ||  gTrack->flag() <= 0) continue;
+
+    {
     StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
     if (hvec.size()) {// if no hits than make only histograms. Works if kDoNotCorrectdEdx mode is set
       Int_t Id = gTrack->key();
@@ -439,7 +448,10 @@ Int_t StdEdxY2Maker::Make(){
 	const StThreeVectorD  &lower  = *mRowPosition[sector-1][row-1][2];
 	// check that helix prediction is consistent with measurement
 	Double_t s = gTrack->geometry()->helix().pathLength(middle, normal);
-	if (s > 1.e4) {BadHit(2,tpcHit->position()); continue;}
+	if (s > 1.e4) {
+	  BadHit(2,tpcHit->position());
+          continue;}
+
 	StThreeVectorD xyzOnPlane = gTrack->geometry()->helix().at(s);
 	StGlobalCoordinate globalOnPlane(xyzOnPlane.x(),xyzOnPlane.y(),xyzOnPlane.z());
 	StGlobalCoordinate global(tpcHit->position());
@@ -451,6 +463,7 @@ Int_t StdEdxY2Maker::Make(){
 	  transform(globalOnPlane,localA,sector,row);
 	  transform(localA,local);
 	  transform(local,PadOnPlane);
+
 	  transform(global,localA,sector,row);
 	  transform(localA,local);
 #if 0
@@ -470,13 +483,21 @@ Int_t StdEdxY2Maker::Make(){
 	  transform(local,Pad);
 	}
 	double s_out = gTrack->geometry()->helix().pathLength(upper, normal);
-	if (s_out > 1.e4) {BadHit(2, tpcHit->position()); continue;}
+	if (s_out > 1.e4) {
+	BadHit(2, tpcHit->position()); 
+	continue;}
 	double s_in  = gTrack->geometry()->helix().pathLength(lower, normal);
-	if (s_in > 1.e4) {BadHit(2, tpcHit->position()); continue;}
+	if (s_in > 1.e4) {
+	BadHit(2, tpcHit->position());
+	 continue;}
 	Double_t dx = TMath::Abs(s_out-s_in);
 	TrackLengthTotal += dx;
-	if (! tpcHit->usedInFit()) {BadHit(0,tpcHit->position()); continue;}
-	if (  tpcHit->flag()) {BadHit(1,tpcHit->position()); continue;}
+	if (! tpcHit->usedInFit()) {
+	BadHit(0,tpcHit->position());
+	 continue;}
+	if (  tpcHit->flag()) {
+	BadHit(1,tpcHit->position());
+	 continue;}
 	//________________________________________________________________________________      
 	Int_t iokCheck = 0;
 	if (sector != Pad.sector() || // ? && TMath::Abs(xyzOnPlane.x()) > 20.0 ||
@@ -514,9 +535,11 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  iokCheck++;
 	}
+
 	if ((TESTBIT(m_Mode, kXYZcheck)) && (TESTBIT(m_Mode, kCalibration))) XyzCheck(&global, iokCheck);
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
+
 	StTpcdEdxCorrection::ESector kTpcOutIn = StTpcdEdxCorrection::kTpcOuter;
 	if (row <= NumberOfInnerRows) kTpcOutIn = StTpcdEdxCorrection::kTpcInner;
 	Double_t padlength;
@@ -527,6 +550,7 @@ Int_t StdEdxY2Maker::Make(){
 	// Corrections
 	CdEdx[NdEdx].Reset();
 	//	memset (&CdEdx[NdEdx].sector, 0 , sizeof(dEdx_t));
+
 #ifdef SpaceChargeQdZ
 	// next hit
 	StTpcHit *currentTpcHit = tpcHit;
@@ -593,7 +617,9 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	if (m_TpcdEdxCorrection) {
 	  Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx[NdEdx]);
-	  if (iok) {BadHit(5+iok, tpcHit->position()); continue;} 
+	  if (iok) {
+	  BadHit(5+iok, tpcHit->position());
+	   continue;} 
 	}
 	TrackLength         += CdEdx[NdEdx].dx;
 	if ((TESTBIT(m_Mode, kSpaceChargeStudy))) SpaceCharge(2,pEvent,&global,&CdEdx[NdEdx]);
@@ -604,6 +630,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (NdEdx > NoFitPoints) 
 	  gMessMgr->Error() << "StdEdxY2Maker:: NdEdx = " << NdEdx 
 			    << ">  NoFitPoints ="<< NoFitPoints << endm; 
+
       }
       if (NdEdx <= 0 || ! m_TpcdEdxCorrection) goto HIST;
       SortdEdx(NdEdx,CdEdx,dEdxS);
@@ -674,7 +701,9 @@ Int_t StdEdxY2Maker::Make(){
       //    if (primtrkC && iprim >= 0&& (TESTBIT(m_Mode, kCalibration)) > 0) {
       //      if ((TESTBIT(m_Mode, kCalibration)) && bField && pTrack) Histogramming(gTrack);
     }
+  }//vp
   HIST:
+
     if ((TESTBIT(m_Mode, kCalibration))) Histogramming(gTrack);
     QAPlots(gTrack);
   }
@@ -695,25 +724,19 @@ Int_t StdEdxY2Maker::Make(){
 #if 0
   //  if (CdEdx) { delete [] CdEdx; CdEdx = FdEdx = dEdxS = 0;}
 #else
-  if (CdEdx) { delete [] CdEdx; CdEdx = 0;}
-  if (FdEdx) { delete [] FdEdx; FdEdx = 0;}
-  if (dEdxS) { delete [] dEdxS; dEdxS = 0;}
 #endif
+}
+
   return kStOK;
 }
 //________________________________________________________________________________
 Int_t StdEdxY2Maker::SortdEdx(Int_t N, dEdx_t *dE, dEdx_t *dES) {
   int i;
-  for (i = 0; i < N; i++) dES[i] = dE[i];
-  for (i = 0; i < N-1; i++) {
-    for (int j = i+1; j < N; j++) {
-      if (dES[i].dEdx > dES[j].dEdx) {
-	dEdx_t temp = dES[i];
-	dES[i] = dES[j];
-	dES[j] = temp;
-      }
-    }
-  }
+  TArrayI idxT(N); int *idx = idxT.GetArray();
+  TArrayD dT(N); double *d = dT.GetArray();
+  for (i = 0; i < N; i++) d[i] = dE[i].dEdx;
+  TMath::Sort(N,d,idx,0);
+  for (i=0;i<N;i++) dES[i] = dE[idx[i]];
   return 0;
 }
 //________________________________________________________________________________
@@ -783,8 +806,10 @@ static TH3D *ChargeSum3 = 0, *ChargeSum3B = 0;
   static TH3D *dXdE  = 0, *dXdEA  = 0, *dXdEC  = 0;
   // end of CORRELATION
   static dEdxTrack *ftrack = 0;
+  static int hMade = 0;
   
-  if (! gTrack) {
+  if (! gTrack && !hMade) {
+    hMade=2004;
     // book histograms
     Int_t      nZBins = 200;
     Double_t ZdEdxMin = -5;
@@ -1140,7 +1165,7 @@ ChargeSum3B= new TH3D("ChargeSum3B",
     //    Z3->SetTitle(Form("%s p in [%4f.1,%4f.1]",Z3->GetTitle(),pMomin,pMomax);
 		 //
     // Create a ROOT Tree and one superbranch
-    if ((TESTBIT(m_Mode, kMakeTree))) { 
+    if ((TESTBIT(m_Mode, kMakeTree))&& !ftree) { 
       gMessMgr->Warning() << "StdEdxY2Maker::Histogramming Make Tree" << endm;
       ftree = new TTree("dEdxT","dEdx tree");
       ftree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
@@ -1826,7 +1851,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   static TH1D *ZdcC = 0; // ZdcCoincidenceRate
   static TH1D *BBC   = 0; // BbcCoincidenceRate
   static TH1D *L0   = 0; // L0RateToRich
-  if (! iok) {
+  if (! iok && !BarPressure) {
     TDatime t1(tMin,0); /// min Time and
     TDatime t2(tMax,0); /// max 
     UInt_t i1 = t1.Convert();
@@ -1906,7 +1931,7 @@ void StdEdxY2Maker::SpaceCharge(Int_t iok, StEvent* pEvent, StGlobalCoordinate *
   static TH2D *Space2Charge = 0, *Space2ChargeU = 0, *Space2ChargeT = 0;
   static TH1D *TimeShift = 0;
   static TH3D *Space3Charge = 0, *Space3ChargePRZ = 0,*Space3ChargeShifted = 0;
-  if (iok == 0) {
+  if (iok == 0 && !SpaceCharge) {
     if (Debug()) gMessMgr->Warning() << "StdEdxY2Maker::SpaceCharge Space Charge Histograms" << endm;
     SpaceCharge   = new TProfile2D("SpaceCharge","dE versus R and Z",85,40.,210.,92,-230.,230.);
     SpaceChargeU  = new TProfile2D("SpaceChargeU","dEU versus R and Z",85,40.,210.,92,-230.,230.);
@@ -1991,7 +2016,7 @@ void StdEdxY2Maker::SpaceCharge(Int_t iok, StEvent* pEvent, StGlobalCoordinate *
 //________________________________________________________________________________
 void StdEdxY2Maker::XyzCheck(StGlobalCoordinate *global, Int_t iokCheck) {
   static TH3D *XYZ = 0, *XYZbad = 0;
-  if (! global) {
+  if (! global && !XYZ) {
     if (Debug()) gMessMgr->Warning() << "StdEdxY2Maker::XyzCheck XYZ check Histograms" << endm;
     XYZ    = new TH3D("XYZ","xyz for clusters",80,-200,200,80,-200,200,84,-210,210);
     XYZbad = new TH3D("XYZbad","xyz for clusters with mismatched sectors",
@@ -2011,6 +2036,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
   static StKaonPlus* Kaon = StKaonPlus::instance();
   static StProton* Proton = StProton::instance();
   static const Double_t Log10E = TMath::Log10(TMath::Exp(1.));
+  static int first=0;
   if (! gTrack) {
     TFile *f = 0;
     if (TESTBIT(m_Mode, kCalibration)) {
@@ -2018,6 +2044,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       if (chain) f = chain->GetTFile();
       if (f) f->cd();
     }
+    if (!first) {
     fZOfBadHits = new TH1F*[fNZOfBadHits];
     static Char_t *BadCaseses[fNZOfBadHits] = 
     {"it is not used in track fit",     // 0
@@ -2069,7 +2096,8 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
     fTdEdxPFP->SetMarkerColor(6);
     mHitsUsage  = new TH2S("HitsUsage","log10(No.of Used in dE/dx hits) versus log10(Total no. of Tpc Hits",
 			   80,0,8,60,0,6);
-    if (! f) {
+    }
+    if (! f && !first) {
       for (Int_t i = 0; i < fNZOfBadHits; i++) AddHist(fZOfBadHits[i]);           
       AddHist(fZOfGoodHits);
       AddHist(fPhiOfBadHits);         
@@ -2138,6 +2166,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       }
     }
   }
+  first = 2004;
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
