@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.20 2001/10/05 03:44:25 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.21 2001/10/05 20:19:38 dunlop Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.21  2001/10/05 20:19:38  dunlop
+ * Made default BMap + Padrow13 + Twist + Clock.
+ * Made selection logic symmetric
+ *
  * Revision 1.20  2001/10/05 03:44:25  jeromel
  * Modifications by Jamie so we can turn on/off every corrections.
  *
@@ -177,6 +181,8 @@ void StMagUtilities::Init ( Int_t mode )
       mDistortionMode |= kBMap;
       mDistortionMode |= kPadrow13;
       mDistortionMode |= kClock;
+      mDistortionMode |= kTwist;
+      
   }
  
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
@@ -307,13 +313,16 @@ void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
 {
     // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
-
+// Set it up
   for (unsigned int i=0; i<3; ++i) {
       Xprime1[i] = x[i];
   }
 
   if (mDistortionMode & kBMap) {
-      FastUndoBDistortion    ( x, Xprime1 ) ;
+      FastUndoBDistortion    ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
   }
   if (mDistortionMode & kPadrow13) {
       UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
@@ -350,7 +359,9 @@ void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
 	  Xprime1[i] = Xprime2[i];
       }
   }
-  
+
+  // Return it
+
   for (unsigned int i=0; i<3; ++i) {
       Xprime[i] = Xprime2[i];
   }
