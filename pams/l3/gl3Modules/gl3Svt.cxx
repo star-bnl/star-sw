@@ -18,7 +18,7 @@ int gl3Svt::init ( l3List* histoList ) {
    //
    strcpy ( hid, "svt:dx" ) ;
    strcpy ( title, "svt:dx" ) ;
-   hx = new gl3Histo ( hid, title, 100, -10., 10. ) ;
+   hx = new gl3Histo ( hid, title, 200, -10., 10. ) ;
    histoList->append ( (void *)hx ) ;
 
    strcpy ( hid, "svt:dy" ) ;

@@ -9,7 +9,11 @@ void gl3Hit::print (  ){
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Set a gl3Hit from a l3_cluster structure
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int gl3Hit::set ( int sector, l3_cluster* cluster ){
+int gl3Hit::set ( St_l3_Coordinate_Transformer* transformer,
+                  int sector, l3_cluster* cluster ){
+
+   St_l3_xyz_Coordinate XYZ(0,0,0) ;
+   St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
 
    double pad  = double(cluster->pad)/64.;
    double time = double(cluster->time)/64.;
@@ -20,13 +24,15 @@ int gl3Hit::set ( int sector, l3_cluster* cluster ){
    mezzanninneCard = cluster->RB_MZ%16 ; 
 
    rowSector  = sector * 100 + cluster->padrow ;
-   double xx, yy, zz ;
    
-   rawToGlobal(sector, (int)cluster->padrow, pad, time, &xx, &yy, &zz);
+// rawToGlobal(sector, (int)cluster->padrow, pad, time, &xx, &yy, &zz);
+ 
+   PTRS.Setptrs((double)pad, (double)time,(double)(cluster->padrow), (double) sector) ;
+   transformer->raw_to_global(PTRS,XYZ) ;
 
-   x = xx ;
-   y = yy ;
-   z = zz ;
+   x = XYZ.Getx();
+   y = XYZ.Gety();
+   z = XYZ.Getz();
 
    trackId = cluster->trackId ;
    flags   = cluster->flags   ;

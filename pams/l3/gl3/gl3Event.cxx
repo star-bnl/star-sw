@@ -169,6 +169,10 @@ int gl3Event::readEvent  ( int maxLength, char* buffer ){
 int gl3Event::readSectorHits ( char* buffer, int nSectorTracks ){
    L3_SECCD* head = (L3_SECCD *)buffer ;
 //
+//   Construct coordinate transformer class
+//
+   St_l3_Coordinate_Transformer transformer;
+//
 //   Check bank header type
 //
   if ( strncmp(head->bh.bank_type,CHAR_L3_SECCD,8) ) {
@@ -200,7 +204,7 @@ int gl3Event::readSectorHits ( char* buffer, int nSectorTracks ){
       //
       if ( hitProcessing > 1 ) {
          gHitP = &(hit[nHits+i]);
-         gHitP->set ( sector, hitP ) ;
+         gHitP->set ( &transformer, sector, hitP ) ;
       }
       //
       //  Now logic to reset trackId in hits
@@ -235,6 +239,7 @@ int gl3Event::readSectorHits ( char* buffer, int nSectorTracks ){
       //   Modify trackId of clusters got from sl3
       //
       hitP->trackId = track[index].id ;
+//    printf ( "hit trackId %d \n", track[index].id  ) ;
 
    }
    nHits += nSectorHits ;

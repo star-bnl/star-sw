@@ -105,6 +105,9 @@ int gl3Histo::Read ( char* input ) {
    header.xStep = *(double *)contents ;
    contents += sizeof(double);
    size_t length_2 = (header.nBins+2)*sizeof(double) ; 
+
+   if ( info ) delete info ;
+   info     = new double[length_2]; 
    memcpy ( info, contents, length_2 ) ;
    contents += (header.nBins+2)*sizeof(double);
 // printf ( "length 2 %d \n", length_2 ) ;

@@ -47,7 +47,7 @@ public:
     Ftf3DHit extraRadius     ( double r ) ;
     int      extraRCyl       ( double &r, double &phi, double &z,
                                double &rc, double &xc, double &yc ) ;
-    int      intersectorZLine ( double a, double b, Ftf3DHit& cross ) ;
+    int      intersectorZLine    ( double a, double b, Ftf3DHit& cross ) ;
     Ftf3DHit getClosest      ( double xBeam, double yBeam,
 	                       double &rc, double &xc, double &yc ) ;
     int      getClosest      ( double xBeam, double yBeam,

@@ -553,7 +553,7 @@ double FtfFinder::CpuTime( void )
 //
 #ifdef LINUX
 double FtfFinder::RealTime (void) {
-  const long nClicks = 500000000 ;
+  const long nClicks = 400000000 ;
   unsigned long eax, edx;
   asm volatile("rdtsc":"=a" (eax), "=d" (edx));
   double realTime = (double)(eax)/ nClicks;
