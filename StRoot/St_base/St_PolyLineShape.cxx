@@ -30,6 +30,8 @@ St_PolyLineShape::St_PolyLineShape()
    m_HasDrawn = kFALSE;
    m_ShapeType = kNULL;
    m_SizeX3D   = 0;
+   m_PointFlag = kFALSE;
+   m_LineFlag  = kFALSE;
 }
 
 //______________________________________________________________________________
@@ -47,6 +49,9 @@ St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
      Error("St_PolyLineShape","No polyline is defined");
      return;
    }
+   m_PointFlag = strchr(option,'P')?kTRUE:kFALSE;
+   m_LineFlag  = strchr(option,'L')?kTRUE:kFALSE;
+
    SetWidthFactor();
    Create();
 }
@@ -290,17 +295,32 @@ void St_PolyLineShape::Paint(Option_t *opt)
   Bool_t rangeView = opt && opt[0] && strcmp(opt,"range")==0 ? kTRUE : kFALSE;
   TPadView3D *view3D = 0;
   if (!rangeView  && (view3D = gPad->GetView3D()) ) {
-     view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
-     view3D->PaintPoints3D(GetPoints(), "L");
+    TString mode;
+    mode="";
+    view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
+    if (m_LineFlag)  mode  = "L";
+    if (m_PointFlag) mode += "P";    
+    view3D->PaintPoints3D(GetPoints(), mode.Data());
   }
   if (!strstr(opt, "x3d")) {
+    if (m_PointFlag) {
          SetMarkerColor(GetColorAttribute());
          SetMarkerSize(GetSizeAttribute());
          PaintPolyMarker(m_Points->Size());
+    }
+    if (m_LineFlag) {
+         SetLineColor(GetColorAttribute());
+         SetLineWidth(GetSizeAttribute());
+         PaintPoints(m_Points->Size());
+    }
+
   }
   else {
-     CreateX3DSize(kTRUE);  PaintX3DMarker(opt);
-//      CreateX3DSize(kFALSE); PaintX3DLine(opt);
+    if (m_LineFlag) {
+       CreateX3DSize(kFALSE); PaintX3DLine(opt);
+    } else {
+       CreateX3DSize(kTRUE);  PaintX3DMarker(opt);
+    }
 //     Paint3d(opt);
   }
 }
@@ -610,8 +630,10 @@ void St_PolyLineShape::Sizeof3D() const
 //*-*-*-*-*-*-*Return total X3D size of this shape with its attributes*-*-*-*-*-*
 //*-*          =======================================================
   St_PolyLineShape *line = (St_PolyLineShape *)this;
-//  line->CreateX3DSize(kFALSE); 
-  line->CreateX3DSize(kTRUE); 
+  if (m_LineFlag )
+    line->CreateX3DSize(kFALSE); 
+  else
+    line->CreateX3DSize(kTRUE); 
   if (m_SizeX3D) {
      gSize3D.numPoints += m_SizeX3D->numPoints;
      gSize3D.numSegs   += m_SizeX3D->numSegs;
