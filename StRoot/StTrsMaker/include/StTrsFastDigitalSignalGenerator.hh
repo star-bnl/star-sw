@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.2 1999/01/18 10:25:12 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.3 1999/02/04 18:35:17 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.hh,v $
+ * Revision 1.3  1999/02/04 18:35:17  lasiuk
+ * digital sector removed from constructor;
+ * fillSector() added in base class
+ *
  * Revision 1.2  1999/01/18 10:25:12  lasiuk
  * add conversion code for StTrsDigitalSector
  *
@@ -38,14 +42,14 @@ public:
     //StTrsFastDigitalSignalGenerator& operator=(const StTrsFastDigitalSignalGenerator&);
 
     static StTrsDigitalSignalGenerator* instance();
-    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
+    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*);
     
     void digitizeSignal()    ;
     void addWhiteNoise()     ;
     void addCorrelatedNoise();
     
 protected:
-    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
+    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 
 private:
     static StTrsDigitalSignalGenerator* mInstance;
