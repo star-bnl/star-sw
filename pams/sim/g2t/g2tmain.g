@@ -86,17 +86,17 @@ created   22 april 98
      ctab  = 'ctb'        ! table name
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
-     cdet  = 'BCSA'       ! Sensitive detector
-   fill dete       ! star subsystem
-     ctab  = 'tof'        ! table name
-     spec  = 'ctf'        ! specification type
-     csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BXSA'       ! Sensitive detector
    fill dete       ! star subsystem
      ctab  = 'tof'        ! table name
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BCSB'       ! Sensitive detector
+   fill dete       ! star subsystem
+     ctab  = 'ctb'        ! table name
+     spec  = 'ctf'        ! specification type
+     csys  = 'BTOF'       ! Geant Subsystem
+     cdet  = 'BCSA'       ! Sensitive detector
 
    fill dete       ! star subsystem
      ctab  = 'rch'        ! table name
@@ -124,7 +124,7 @@ created   22 april 98
      ctab  = 'esm'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'ECAL'       ! Geant Subsystem
-     cdet  = 'MSEC'       ! Sensitive detector
+     cdet  = 'EXSE'       ! Sensitive detector
    fill dete       ! star subsystem
      ctab  = 'zdc'        ! table name
      spec  = 'emc'        ! specification type
