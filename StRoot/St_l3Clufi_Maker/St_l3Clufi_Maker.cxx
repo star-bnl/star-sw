@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.18 2000/07/08 18:19:43 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.19 2000/07/22 21:19:29 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.19  2000/07/22 21:19:29  flierl
+// switch off writing clusters to table for embedding !
+//
 // Revision 1.18  2000/07/08 18:19:43  flierl
 // rm ClassImp of transformation classes
 //
@@ -350,7 +353,8 @@ Int_t St_l3Clufi_Maker::Make(){
   // timing
   if (Debug()) { timer1.Stop() ; }
   
-
+if (0)
+    {
   /////////
   /// now fill /l3/hits_in_sec_xx banks in /l3/hit/tcl_tphit tables
   /////////
@@ -399,6 +403,7 @@ Int_t St_l3Clufi_Maker::Make(){
       //  call module which translates banks into tables old style
       // l3totphit(bank_entries,stl3hit);
     }
+    
 
   // fill histogramms
   cout << "Number of clusters found by l3 :  " << stl3hit->GetNRows() << endl << endl ;
@@ -432,6 +437,7 @@ Int_t St_l3Clufi_Maker::Make(){
       cout << "Timer2 : " ; timer2.Print() ; cout << endl ;
       cout << "Timer3 : " ; timer3.Print() ; cout << endl ;
       cout << endl ;
+    }
     }
 
   // done with the whole job  
