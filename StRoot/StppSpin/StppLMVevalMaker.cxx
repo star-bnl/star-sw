@@ -1,6 +1,9 @@
-//*-- Author : Jan Balewski 
-// $Id: StppLMVevalMaker.cxx,v 1.3 2001/04/23 21:55:52 balewski Exp $
+// *-- Author : Jan Balewski 
+// $Id: StppLMVevalMaker.cxx,v 1.4 2001/04/24 15:54:49 balewski Exp $
 // $Log: StppLMVevalMaker.cxx,v $
+// Revision 1.4  2001/04/24 15:54:49  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/04/23 21:55:52  balewski
 // *** empty log message ***
 //
@@ -76,7 +79,7 @@ Int_t StppLMVevalMaker::Init(){
   he[3]=new TH1F("dz","error of any vertex",100,-5.,5.);
 
   he[4] =(TH1F*)new TH2F("2dz","dz vs. NchG",50,-0.5,49.5,50,-3.,3.);
-  he[5] =(TH1F*)new TH2F("2dr","dRxy vs. NchG",50,.0,6.,50,-0.5,49.5);
+  he[5] =(TH1F*)new TH2F("2dr","dRxy vs. NchG",50,-0.5,49.5,50,.0,6.);
 
   // h1 = new TH1F("trg_out","Trigger decision",10, -1.5, 8.5);
   //h1->SetXTitle(" trigger ") ;
@@ -171,7 +174,7 @@ void   StppLMVevalMaker::getGenerated( int &Nch)
  g2t_track_st *GTRA=gtra->GetTable(); assert(GTRA);
  int it;
  int nTr2=0; // MIPS: pi+- & K+- with eta<1.4 & pt>0.2 GeV/c
- g2t_track_st *track=NULL;
+ //g2t_track_st *track=NULL;
 
  // search for the largest two pT values 
  for( it=0; it<gtra->GetNRows();it++,GTRA++) 
