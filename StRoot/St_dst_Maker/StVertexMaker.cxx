@@ -275,16 +275,25 @@ Int_t StVertexMaker::Make(){
 		    vSeed->dxdz, vSeed->dydz);
     }
       
-    if(EstGlobal and m_Mode == 4)  ppLMV4(maEstTrk,EstGlobal,vertex,mdate);
-    else iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
-
+    iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
+    
+    if(EstGlobal and m_Mode == 4) {
+      
+      dst_vertex_st* MyVert = vertex->GetTable();
+      for( int nVert=0; nVert<vertex->GetNRows(); nVert++){
+	if( MyVert->iflag == 1) MyVert->iflag = 302;
+	MyVert++;
+      }
+      ppLMV4(maEstTrk,EstGlobal,vertex,mdate);
+    }
+    
     break; }
   default:
     gMessMgr->Error() << "StVertexMaker: unknown vertex switch ="
-      << m_Mode << endm;
+		      << m_Mode << endm;
     return kStErr;
   } // end of lmv/evr,ppLMV switch
-
+  
   return iRes;
 }
 //_____________________________________________________________________________
@@ -414,8 +423,11 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.6 2003/07/31 01:37:11 caines Exp $
+// $Id: StVertexMaker.cxx,v 1.7 2003/08/07 00:19:52 caines Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.7  2003/08/07 00:19:52  caines
+// Write out the TPC only vertex as a calibration vertex if est vertex found
+//
 // Revision 1.6  2003/07/31 01:37:11  caines
 // Set up code to find vertex using SVT matched tracks if that mode is selected
 //

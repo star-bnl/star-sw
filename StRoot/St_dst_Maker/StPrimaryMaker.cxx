@@ -425,7 +425,12 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
       dst_track_st* primtrkPtr = primtrk->GetTable();  
       for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) 
         {
-          primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+	  
+	  globtrkPtr->id_start_vertex = 0;
+	  primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+	  if( globtrkPtr->impact < 3.){
+	    primtrkPtr->id_start_vertex = myvrtx->id*10+1;
+	  }     
           //          if(primtrkPtr->id_start_vertex != 0)
           //  keep_vrtx_id=primtrkPtr->id_start_vertex;
           primtrkPtr->n_max_point = globtrkPtr->n_max_point;
@@ -516,8 +521,11 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.77 2002/05/16 01:59:19 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.78 2003/08/07 00:19:52 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.78  2003/08/07 00:19:52  caines
+// Write out the TPC only vertex as a calibration vertex if est vertex found
+//
 // Revision 1.77  2002/05/16 01:59:19  caines
 // Send in differnt group tables for the TPC and est refit so flagging of hits correct
 //
