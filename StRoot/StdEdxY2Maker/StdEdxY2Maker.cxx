@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.41 2004/10/27 21:48:29 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.42 2004/11/02 16:00:40 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -841,8 +841,8 @@ Int_t StdEdxY2Maker::Make(){
 	  if ((TESTBIT(m_Mode, kCalibration)))  // uncorrected dEdx
 	    for (int l = 0; l < 3; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	  if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
-// 	    m_TpcdEdxCorrection->dEdxTrackCorrection(StTpcdEdxCorrection::kTpcLengthCorrection,2,dedx); 
-// 	    m_TpcdEdxCorrection->dEdxTrackCorrection(StTpcdEdxCorrection::kTpcdEdxCor,1,dedx); 
+ 	    m_TpcdEdxCorrection->dEdxTrackCorrection(StTpcdEdxCorrection::kTpcLengthCorrection,1,dedx); 
+ 	    m_TpcdEdxCorrection->dEdxTrackCorrection(StTpcdEdxCorrection::kTpcdEdxCor,1,dedx); 
 	    dedx.method    =  kLikelihoodFitId;
 	    for (int l = 0; l < 3; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	  }
