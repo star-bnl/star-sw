@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.hh,v 1.2 2000/04/09 16:16:33 aihong Exp $
+ * $Id: StPidAmpChannelCollection.hh,v 1.3 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.hh,v $
+ * Revision 1.3  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:16:33  aihong
  * change for adapting NHitsDcaNet added
  *
@@ -57,12 +60,12 @@ public:
 
     StPidAmpChannelCollection();
     
-    StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry, int d, double* dcaAry, StPidAmpNetType theNetType,TString fitOpt, TString drawOpt);
+    StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry, int d, double* dcaAry, StPidAmpNetType theNetType,StPidAmpTrkVector* trks,TString fitOpt, TString drawOpt);
 
     ~StPidAmpChannelCollection();
 
       
-    void process(StPidAmpTrkVector* trks,TH3D* histo); 
+    void process(TH3D* histo); 
   //do all stuff for output parameters, and save them to channel
 
 

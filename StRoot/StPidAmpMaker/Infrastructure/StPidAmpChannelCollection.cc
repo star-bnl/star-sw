@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.3 2000/04/09 16:16:33 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.4 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.4  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.3  2000/04/09 16:16:33  aihong
  * change for adapting NHitsDcaNet added
  *
@@ -40,9 +43,20 @@
 #include "StPidAmpMaker/Infrastructure/StPidAmpNet.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpBGNet.hh"
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
-
 //----------------------------
-StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry,int d, double* dcaAry, StPidAmpNetType theNetType,TString fitOpt, TString drawOpt){
+StPidAmpChannelCollection::StPidAmpChannelCollection(){
+
+  setDefaultBandParameters();
+  mWritePars2Disk=true;
+  mDrawBGNet     =false;
+  mNHitsCut4BGNet=0;
+  
+  mChannelCollect=new StPidAmpChannelVector();
+
+  setUpBGNets();
+}
+//----------------------------
+StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry,int d, double* dcaAry, StPidAmpNetType theNetType,StPidAmpTrkVector* trks,TString fitOpt, TString drawOpt){
 
   //n is # of marks along nhits axis.like(0,15,35,45)
   //p is # of marks along pt axis
@@ -55,6 +69,7 @@ StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p,
      mDrawBGNet     =false;
      mNetType       =theNetType;
      mNHitsCut4BGNet=0;
+     mTrks=trks;
 
      filterOptions(theNetType,fitOpt,drawOpt);
 
@@ -99,7 +114,7 @@ StPidAmpChannelCollection::~StPidAmpChannelCollection(){
 }
 
 //----------------------------
-void StPidAmpChannelCollection::process(StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpChannelCollection::process(TH3D* histo){
 
     bool BGBandOutPut4Debug=false;
 
@@ -108,11 +123,16 @@ void StPidAmpChannelCollection::process(StPidAmpTrkVector* trks,TH3D* histo){
     StPidAmpChannelIter iter;
     StPidAmpChannel* theChannel;
 
+    for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
+    theChannel=*iter;
+    theChannel->filterAndFillTrks(mTrks);
+    }
+
   if (mFitOpt.Contains("B")){
 
     for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
     theChannel=*iter;
-    theChannel->fillBGNet(trks,this);
+    theChannel->fillBGNet(this);
     }
 
  processBGNet(true,false,false,false,false,  false, false,mDrawBGNet,false, *mBGNet);
@@ -124,7 +144,7 @@ void StPidAmpChannelCollection::process(StPidAmpTrkVector* trks,TH3D* histo){
      mBGNet->setUp();
     for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
     theChannel=*iter;
-    theChannel->fillBGNet(trks,this);
+    theChannel->fillBGNet(this);
     }
  processBGNet(true,false,false,false,false,  false, false,mDrawBGNet,false, *mBGNet);
    //         fBd  fPth  fAmp  fReso drSlic drPth  drAmp drBd  drReso
@@ -167,7 +187,7 @@ void StPidAmpChannelCollection::process(StPidAmpTrkVector* trks,TH3D* histo){
 
     for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
     theChannel=*iter;
-    theChannel->processChannel(trks,histo,(mFitOpt.Contains("I")) ,  false, (mFitOpt.Contains("A")),(mFitOpt.Contains("R")) );
+    theChannel->processChannel(histo,(mFitOpt.Contains("I")) ,  false, (mFitOpt.Contains("A")),(mFitOpt.Contains("R")) );
 //                            trks,hitso,  fitband,                  fitpath, fitamp,                  fitReso
 
     }
@@ -375,7 +395,7 @@ void StPidAmpChannelCollection::drawMultiBGNets2Gether(){
      theMultiBGCanvas->Update();
 }
 //----------------------------
-void StPidAmpChannelCollection::setUpBGNets(){//StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
+void StPidAmpChannelCollection::setUpBGNets(){
   
 
    strstream bgStr;
