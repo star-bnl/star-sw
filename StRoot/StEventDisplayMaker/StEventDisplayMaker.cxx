@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.36 1999/11/21 00:56:58 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.37 1999/11/22 16:14:31 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -120,38 +120,7 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      m_ListDataSetNames = 0;
   }
 }
-#ifdef PALETTE
-//_____________________________________________________________________________
-static void palette()
-{  
-  const float  saturation = 1;
-  const float  lightness = 0.5;
-  const float  MaxHue = 280;
-  const float  MinHue = 0;
-  const int    MaxColors = 50;   
-  int          palette[MaxColors];
-  int          index;
-  float        hue, r, g, b, rv, gv, bv;
-  TColor       *color;
-  unsigned int failures = 0;
-  
-  for (int i=0 ; i<MaxColors ; i++) {
-      index = palette[i] = MaxColors+1+i;     
-      color = new TColor(index, 0, 0, 0);
-      hue = MaxHue-(i+1)*((MaxHue-MinHue)/MaxColors);
-      color->HLStoRGB(hue, lightness, saturation, r, g, b);
-      color->SetRGB(r, g, b);
-      gGXW->GetRGB(index, rv, gv, bv);
-      if (r != rv || g != gv || b != bv) {
-          failures++;
-          palette[i] =  i ? palette[i-1] : 1;
-      }
-  }
-  if (failures)
-      printf("palette(): couldn't allocate %d of %d colors\n", failures, MaxColors);
-  gStyle->SetPalette(MaxColors, palette);
-}
-#endif
+
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Init(){
    // Create geometry 
@@ -966,6 +935,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.37  1999/11/22 16:14:31  fine
+// palette() has been removed
+//
 // Revision 1.36  1999/11/21 00:56:58  fine
 // SVT volume name typo fixed
 //
