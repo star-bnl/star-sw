@@ -13,6 +13,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TTree.h"
+#include "TString.h"
 class TChain;
 class TTreeHelperMem;
 class TTreeHelperCast
@@ -64,18 +65,20 @@ protected:
     TObjArray     fBraList;		//!  list of uset branches
     Int_t         fUnits;		//!  current number of units
     Int_t         fNErr;		//|
-    Int_t         fCINT;		//|  Called from CINT(workaround)
+    Int_t         fCint;		//|
 TTreeHelperCast   fCast;		//!
 public:
 
-#ifndef __CINT__
     TTreeHelper(TTree *tree);
-#endif
-    TTreeHelper(TObject *tree=0);
+    TTreeHelper(const char *treeName);
     virtual ~TTreeHelper();
 
-TTreeHelperCast &operator() (const char *varname);
+TTreeHelperCast &operator() (const TString varname);
+#ifndef __CINT__
+TTreeHelperCast &operator() (const char   *varname);
+#endif
     TBranch          *GetBranch(const char* brName){return GetBranch(brName,fTree);};     
+    Int_t             AddFile(const char *file);
     Int_t             Next(Int_t ient=-1);
     virtual void      Print(Option_t* option) const;
     virtual void      ls(Option_t* option) const;

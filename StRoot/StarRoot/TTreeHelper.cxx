@@ -50,6 +50,8 @@
 #include "TList.h"
 #include "TObjArray.h"
 #include "TNamed.h"
+#include "TSystem.h"
+#include "TRegexp.h"
 #include "assert.h"
 #include "TError.h"
 
@@ -195,22 +197,21 @@ ClassImp(TTreeHelper)
 
 TTreeHelper::TTreeHelper(TTree *tree):fCast(&fNErr)
 {
-  fCINT=0;
   fTree  = tree;
   Init();
 }
 //______________________________________________________________________________
 
-TTreeHelper::TTreeHelper(TObject *tree):fCast(&fNErr)
+TTreeHelper::TTreeHelper(const char *treeName):fCast(&fNErr)
 {
-  fCINT=2001;
-  fTree  = (TTree*)tree;
+  fTree  = new TChain(treeName);
   Init();
 }
 //______________________________________________________________________________
 
 void TTreeHelper::Init()
 {
+  fCint  = 0;
   fNErr  = 0;
   fEntry = 0;
   fUnits = 0;
@@ -321,7 +322,12 @@ TBranch *TTreeHelper::GetBranch(const char* brName,TSeqCollection *brList,Int_t 
    }
    return 0;
 }
-
+//______________________________________________________________________________
+TTreeHelperCast &TTreeHelper::operator() (const TString varname)
+{
+   fCint = 1;
+   return operator() (varname.Data());
+}
 //______________________________________________________________________________
 TTreeHelperCast &TTreeHelper::operator() (const char *varname)
 {
@@ -347,7 +353,6 @@ TTreeHelperCast &TTreeHelper::operator() (const char *varname)
      mem = new TTreeHelperMem(br->GetName(),tyCode,fUnits);
      fMemList.Add(mem);
      pddr = mem->GetMem();
-//     br->SetAddress(*pddr);
      fTree->SetBranchAddress(br->GetName(),*pddr);
      br->ResetBit  (kDoNotProcess);
      fBraList.Add(br);
@@ -358,7 +363,8 @@ TTreeHelperCast &TTreeHelper::operator() (const char *varname)
    if (fUnits) { tyCode+=20; addr = (void*)pddr;}
    fCast.Set(addr,tyCode,varname);
 
-   if (fCINT)  {
+   if (fCint)  {
+     fCint = 0;
      TTreeHelperCast *v =(TTreeHelperCast*)addr;
      return *v;//CINT workaround
    }
@@ -491,3 +497,48 @@ Int_t  TTreeHelper::TypeCode(const char *typeName)
 } 
 //______________________________________________________________________________
 void TTreeHelper::Streamer(TBuffer &) {Assert(0);}
+//_____________________________________________________________________________
+Int_t TTreeHelper::AddFile(const Char_t *file)
+{
+  Int_t num = 0;
+  TString tfile,tdir,tname,tbase,fullname;
+  const char *name; char *cc;
+
+  Assert(fChain);
+
+  tfile = file;
+  tdir  = gSystem->DirName(tfile);
+  tbase = gSystem->BaseName(tfile);
+  gSystem->ExpandPathName(tdir);
+
+
+  void *dir = gSystem->OpenDirectory(tdir);
+  if (!dir) {
+    Warning("AddFile","*** IGNORED Directory %s does NOT exist ***\n",
+    (const Char_t *)tdir);
+    return 0;}
+
+  while ((name = gSystem->GetDirEntry(dir))) {
+//              skip some "special" names
+    if (strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
+    tname = name;
+
+    cc = gSystem->ConcatFileName(tdir,name);
+    fullname = cc; delete [] cc;
+
+    Long_t idqwe,sizeqwe,flags,modtimeqwe;
+    gSystem->GetPathInfo(fullname,&idqwe,&sizeqwe,&flags,&modtimeqwe);
+    if (flags&2 || !flags&4) continue;
+
+//              prepare simple regular expression
+    TRegexp rexp(tbase,kTRUE);
+    int len=0;
+    if (rexp.Index(tname,&len)!=0)      continue;
+    if (len!=tname.Length())            continue;
+    num++;
+    printf("%02d -  TTreeHelper::AddFile %s\n",num,fullname.Data());
+    fChain->Add(fullname);
+  }
+  gSystem->FreeDirectory(dir);
+  return num;
+}
