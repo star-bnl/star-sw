@@ -513,10 +513,10 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 void StTree::SetBaseName(const char *baseName)
 {
   fBaseName = baseName;
-  const char *dot = strchr(baseName,'.');
+  const char *dot = strrchr(baseName,'.');
   if (!dot) return;
-  if (isdigit(dot[1])) dot = strchr(dot+1,'.');
-  if (!dot) return;
+  const char *sla = strrchr(baseName,'/');
+  if (sla && dot<sla) return;
   fBaseName.Remove(dot-baseName);
 }  
   
