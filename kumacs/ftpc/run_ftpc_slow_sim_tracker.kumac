@@ -60,8 +60,7 @@
     
  macro/global/create input_file  [input_file]   'Input file name'
  macro/global/create TOP              [TOP]
-   
- macro/global/import *
+
    
 ***********************************************************
 * BEGINNING STUFF 
@@ -71,6 +70,8 @@
    
  exec setup#setup 
  
+ macro/global/import *
+   
  exec load_libraries#run        [domain]   
    
 * **************************************************************
