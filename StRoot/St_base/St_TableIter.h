@@ -1,7 +1,7 @@
 #ifndef ROOT_St_TableIter
 #define ROOT_St_TableIter
 //*-- Author :    Valery Fine(fine@bnl.gov)   03/12/99  
-// $Id: St_TableIter.h,v 1.2 1999/12/04 22:41:37 fine Exp $
+// $Id: St_TableIter.h,v 1.3 1999/12/05 06:34:16 fine Exp $
 // Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
 // Author                  Valerie Fine  (fine@bnl.gov)
 // Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
@@ -17,7 +17,7 @@ class St_TableSorter;
 
 class St_TableIter : public TObject {
  private: 
-       St_TableSorter *m_TableSorter;
+       const St_TableSorter *m_TableSorter;
        Int_t  m_Indx;
        Int_t  m_TotalKeys;
        Int_t  m_FirstIndx;
@@ -26,11 +26,11 @@ class St_TableIter : public TObject {
    St_TableIter(const St_TableIter &){;}
    
  public:
-   St_TableIter(St_TableSorter *table, Float_t  &keyvalue);
-   St_TableIter(St_TableSorter *table, Double_t &keyvalue);
-   St_TableIter(St_TableSorter *table, Int_t    &keyvalue);
-   St_TableIter(St_TableSorter *table, Long_t   &keyvalue);
-   St_TableIter(St_TableSorter *table, Short_t  &keyvalue);
+   St_TableIter(const St_TableSorter *table, Float_t  &keyvalue);
+   St_TableIter(const St_TableSorter *table, Double_t &keyvalue);
+   St_TableIter(const St_TableSorter *table, Int_t    &keyvalue);
+   St_TableIter(const St_TableSorter *table, Long_t   &keyvalue);
+   St_TableIter(const St_TableSorter *table, Short_t  &keyvalue);
 
    virtual ~St_TableIter(){;}
 
@@ -58,6 +58,9 @@ inline Int_t St_TableIter::operator()() { return Next();}
 inline Int_t St_TableIter::operator[](Int_t idx) { return Next(idx);}
 
 // $Log: St_TableIter.h,v $
+// Revision 1.3  1999/12/05 06:34:16  fine
+// Several const methods for St_TableSorter introduced
+//
 // Revision 1.2  1999/12/04 22:41:37  fine
 // clean up sole const methods
 //

@@ -39,7 +39,7 @@ Int_t StVirtualEventFilter::Channel(const StObjArray *,Width_t &,Style_t &)
 {return GetFlag()? kYellow : 0 ;}
 
 //_____________________________________________________________________________
-Int_t StVirtualEventFilter::Channel(St_TableSorter *,Int_t index,Width_t &,Style_t &)
+Int_t StVirtualEventFilter::Channel(const St_TableSorter *,Int_t index,Width_t &,Style_t &)
 { return GetFlag()? (kGreen+index)%20 : 0 ;}
 //_____________________________________________________________________________
 Int_t StVirtualEventFilter::Channel(const StVertex *,Width_t &,Style_t &)

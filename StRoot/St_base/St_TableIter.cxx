@@ -2,7 +2,7 @@
 // Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
 // Author                  Valerie Fine  (fine@bnl.gov)
 // Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
-// $Id: St_TableIter.cxx,v 1.2 1999/12/04 22:41:37 fine Exp $
+// $Id: St_TableIter.cxx,v 1.3 1999/12/05 06:34:16 fine Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_TableIter - class iterator to loop over sorted St_Table's         //
@@ -14,34 +14,34 @@
 
 ClassImp(St_TableIter)
 //_____________________________________________________________________
-St_TableIter::St_TableIter(St_TableSorter *table, Float_t &keyvalue) 
+St_TableIter::St_TableIter(const St_TableSorter *table, Float_t &keyvalue) 
 : m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
 {
   CountKey(keyvalue);
 }
 //_____________________________________________________________________
-St_TableIter::St_TableIter(St_TableSorter *table, Long_t &keyvalue) 
-: m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
-{
-  CountKey(keyvalue);
-}
-
-//_____________________________________________________________________
-St_TableIter::St_TableIter(St_TableSorter *table, Int_t &keyvalue) 
+St_TableIter::St_TableIter(const St_TableSorter *table, Long_t &keyvalue) 
 : m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
 {
   CountKey(keyvalue);
 }
 
 //_____________________________________________________________________
-St_TableIter::St_TableIter(St_TableSorter *table, Short_t &keyvalue) 
+St_TableIter::St_TableIter(const St_TableSorter *table, Int_t &keyvalue) 
 : m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
 {
   CountKey(keyvalue);
 }
 
 //_____________________________________________________________________
-St_TableIter::St_TableIter(St_TableSorter *table, Double_t &keyvalue) 
+St_TableIter::St_TableIter(const St_TableSorter *table, Short_t &keyvalue) 
+: m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
+{
+  CountKey(keyvalue);
+}
+
+//_____________________________________________________________________
+St_TableIter::St_TableIter(const St_TableSorter *table, Double_t &keyvalue) 
 : m_TableSorter(table), m_Indx(-1), m_FirstIndx(0) 
 {
   CountKey(keyvalue);
