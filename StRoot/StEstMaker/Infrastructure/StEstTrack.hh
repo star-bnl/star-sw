@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.hh,v 1.1 2000/12/07 11:14:28 lmartin Exp $
+ * $Id: StEstTrack.hh,v 1.2 2001/01/25 18:20:39 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,26 +10,28 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.hh,v $
+ * Revision 1.2  2001/01/25 18:20:39  lmartin
+ * Destructor completed to prevent memory leak.
+ * New method RemoveLastBranch added to force the last branch destruction.
+ *
  * Revision 1.1  2000/12/07 11:14:28  lmartin
  * First CVS commit
  *
  **************************************************************************/
 #ifndef StEstTrack_hh
 #define StEstTrack_hh
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
 
+#include "StMaker.h"
+#include <iostream.h>
 
 class StEstBranch;
 class StEstHit;
 class StEstTPCTrack;
-class StEstMaker;
-
-#include "StHelix.hh"
-#include "StEstBranch.hh"
-#include "StEstTPCTrack.hh"
-
+class StEstTracker;
+class StHelix;
+//#include "StHelix.hh"
+//#include "StEstBranch.hh"
+//#include "StEstTPCTrack.hh"
 class StEstTrack {
 
 protected:
@@ -52,16 +54,13 @@ protected:
 public :
     
   StEstTrack(long int maxbranch, StEstTPCTrack *tr);
-  ~StEstTrack() {
-    delete mTPCTrack;
-    delete [] mBranch;
-    if (mHelix!=NULL) delete mHelix;
-  };
+  ~StEstTrack(); 
   int AddBranch(StEstBranch *branch);
   int AddFindableBranch(StEstBranch *branch);
   int AddIdealBranch(StEstBranch *branch);
   int SetBranch(long i, StEstBranch *branch);
   int RemoveBranch(long int nbr);
+  int RemoveLastBranch();
   inline long int GetNBranches();
   StEstBranch* GetBranch(long int nbr);
   StEstBranch* GetIdealBranch();
@@ -85,28 +84,13 @@ public :
   void SetHelix(StHelix *hel);
   StHelix* GetHelix();
 
-  friend class StEstMaker;
+  friend class StEstTracker;
 };
 
 inline long int StEstTrack::GetNBranches() {return mNBranch;};
 inline StEstTPCTrack* StEstTrack::GetTPCTrack() {return mTPCTrack;};
 inline StEstBranch* StEstTrack::GetIdealBranch() {return mIdealBranch;};
 inline StEstBranch* StEstTrack::GetFindableBranch() {return mFindableBranch;};
-inline StEstBranch* StEstTrack::GetBranch(long int nbr) {
-  if (nbr<0) {
-    cerr << "ERROR StEstTrack::GetBranch nbr<0" <<endl;
-    cout << "ERROR StEstTrack::GetBranch nbr<0" <<endl;
-    return NULL;
-  }
-  if (mNBranch<nbr) {
-    cerr << "ERROR StEstTrack::GetBranch mNBranch<nbr" << endl;
-    cout << "ERROR StEstTrack::GetBranch mNBranch<nbr" << endl;
-    cout << "mNBranch="<<mNBranch<<" nbr="<<nbr<<" TPC Id = "<<mTPCTrack->GetId()<<endl;
-    return NULL;
-  }
-  return mBranch[nbr];
-};
-
 inline int StEstTrack::CheckAvailability() {
   if (mNBranch<mMaxBranch) return 1;
   else return 0;
@@ -149,15 +133,9 @@ inline int StEstTrack::SetBranch(long i, StEstBranch *branch) {
   return 0;
 };
 
-inline void     StEstTrack::SetHelix(StHelix *hel) {
-  if (mHelix!=NULL)
-    delete mHelix;
-  mHelix=hel;
-};
 inline StHelix* StEstTrack::GetHelix() {return mHelix;};
 
 #endif
-
 
 
 
