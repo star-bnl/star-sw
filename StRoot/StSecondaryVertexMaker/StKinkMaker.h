@@ -45,7 +45,7 @@ public:
   //  virtual Int_t GetTrackerUsage(){return UseTracker;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.1 2004/03/03 01:44:04 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.2 2004/03/04 07:23:01 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:
@@ -61,7 +61,7 @@ public:
   StThreeVectorD   mKinkVertex;
   Float_t          mParentImpact, mDaughterImpact;
   Float_t          mDca, mDecayAngle;
-
+  Int_t            mGlobalTrks;//number of global tracks used
   double mBfield;//mg field 
   protected:
   
