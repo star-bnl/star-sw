@@ -1,5 +1,10 @@
-// $Id: StMcEventReadMacro.C,v 1.13 2000/04/13 22:00:24 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.14 2000/04/20 17:02:42 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.14  2000/04/20 17:02:42  calderon
+// Modified macros to continue looping when status = 3
+// Pick up maker with name "StMcAnalysisMaker" instead of "McAnalysis"
+// in StAssociator.C
+//
 // Revision 1.13  2000/04/13 22:00:24  calderon
 // set dst branch and appropriate tables as per Kathy
 //
@@ -89,23 +94,24 @@ const char *MainFile=
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("geantBranch",0,"r");
     IOMk->SetBranch("dstBranch",0,"r");
+    
 
     // StMcEvent
     StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
-    
+    mcEventReader->doPrintEventInfo = false;
     // now execute the chain member functions
     
     chain->PrintInfo();
-    chain->Init(); // This should call the Init() method in ALL makers
-
+    Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+    if (initStat) chain->Fatal(initStat, "during Init()");
+    
     int istat=0,iev=1;
- EventLoop: if (iev<=nevents && !istat) {
+ EventLoop: if (iev<=nevents && istat!=2) {
      chain->Clear();
-     cout << "---------------------- Processing Event : " << iev << endl;
+     cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
      istat = chain->Make(iev); // This should call the Make() method in ALL makers
-     if (istat) {
-	 cout << "Last Event Processed. Status = " << istat << endl;
-     }
+     if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
+     if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
      iev++; goto EventLoop;
      
      // this next part is just for doing the browser:

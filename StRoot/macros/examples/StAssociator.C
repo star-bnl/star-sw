@@ -1,5 +1,10 @@
-// $Id: StAssociator.C,v 1.17 2000/04/13 22:01:41 calderon Exp $
+// $Id: StAssociator.C,v 1.18 2000/04/20 17:02:42 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.18  2000/04/20 17:02:42  calderon
+// Modified macros to continue looping when status = 3
+// Pick up maker with name "StMcAnalysisMaker" instead of "McAnalysis"
+// in StAssociator.C
+//
 // Revision 1.17  2000/04/13 22:01:41  calderon
 // proper table and branch activating as per Kathy
 //
@@ -143,17 +148,17 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     // now execute the chain member functions
 
     chain->PrintInfo();
-    chain->Init(); // This should call the Init() method in ALL makers
-
+    Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+    if (initStat) chain->Fatal(initStat, "during Init()");
+    
     int istat=0,iev=1;
-    EventLoop: if (iev<=nevents && !istat) {
-	chain->Clear();
-	cout << "---------------------- Processing Event : " << iev << endl;
-	istat = chain->Make(iev); // This should call the Make() method in ALL makers
-	if (istat) {
-	    cout << "Last Event Processed. Status = " << istat << endl;
-	}
-	iev++; goto EventLoop;
+ EventLoop: if (iev<=nevents && istat!=2) {
+     chain->Clear();
+     cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
+     istat = chain->Make(iev); // This should call the Make() method in ALL makers
+     if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
+     if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
+     iev++; goto EventLoop;
     } // Event Loop
     examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
     TCanvas* myCanvas = examples->mAssociationCanvas;
@@ -161,9 +166,9 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 
     myCanvas->cd(1);
     gPad->SetLogy(0);
-    examples->mTrackNtuple->Draw("(p-prec)/prec:commTpcHits");
+    examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits");
 
-    TList* dList = chain->GetMaker("McAnalysis")->Histograms();
+    TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
     TH2F* hitRes = dList->At(0);
     TH2F* momRes = dList->At(1);
     TH2F* coordRc = dList->At(2);
