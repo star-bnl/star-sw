@@ -491,7 +491,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	    }   
 	    next;   
 	  }   
-	  if ($subsub_dir =~ /^inc$/) {
+	  if ($subsub_dir =~ /^inc/) {
 	    opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	    my @incs = readdir DIR; 
 	    closedir DIR; #print "subsub_DIR = $subsub_DIR\n";
