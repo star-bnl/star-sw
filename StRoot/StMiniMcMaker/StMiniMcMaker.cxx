@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.9 2003/05/08 02:11:43 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.10 2003/05/14 00:12:20 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,13 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.10  2003/05/14 00:12:20  calderon
+ * The minimc replaces now whatever it finds between the first and last '.', not
+ * just geant.root, in the creation of the output file name.
+ *
+ * Curvature, tan(lambda) and Covariance matrix diagonal elements are now stored
+ * in rcTrack, for both primary and global tracks.
+ *
  * Revision 1.9  2003/05/08 02:11:43  calderon
  * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
  * fit points for the RcTrack.
@@ -48,6 +55,13 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.10  2003/05/14 00:12:20  calderon
+ * The minimc replaces now whatever it finds between the first and last '.', not
+ * just geant.root, in the creation of the output file name.
+ *
+ * Curvature, tan(lambda) and Covariance matrix diagonal elements are now stored
+ * in rcTrack, for both primary and global tracks.
+ *
  * Revision 1.9  2003/05/08 02:11:43  calderon
  * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
  * fit points for the RcTrack.
@@ -85,7 +99,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.9 2003/05/08 02:11:43 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.10 2003/05/14 00:12:20 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -114,7 +128,7 @@
 #include "SystemOfUnits.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StParticleDefinition.hh"
-
+#include "StMatrixF.hh"
 /*
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -817,10 +831,17 @@ StMiniMcMaker::openFile()
   
   //
   // for the output root file, replace geant.root with minimc.root
-  //
+  // in case there is an event.root, or any other blabla.root, we will
+  // replace the blabla.root with minimc.root.  This takes some funky TString
+  // manipulation, and will only work if the filename is of the form  somefilestring.blablabla.root
+  // it will change it to somefilestring.minimc.root
   cout << "Infilename = " << mInFileName << endl;
   TString outFileName(mInFileName);
-  outFileName.ReplaceAll("geant.root","minimc.root");
+  //outFileName.ReplaceAll("geant.root","minimc.root");
+  short indx1 = outFileName.First('.');
+  short indx2 = outFileName.Last('.');
+  outFileName.Remove(indx1+1,(indx2-indx1)-1);
+  outFileName.Insert(indx1+1,"minimc");
   outFileName.Prepend(mOutDir);
 
   mMiniMcDST = 0;
@@ -1018,15 +1039,26 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
   const StPhysicalHelixD& prHelix = prTrack->geometry()->helix();
 
+  StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
+  StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
+  Float_t errorPr[5] = {pCM(1,1),pCM(2,2),pCM(3,3),pCM(4,4),pCM(5,5)};
+  Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
+  
   tinyRcTrack->setPtPr(prMom.perp());
   tinyRcTrack->setPzPr(prMom.z());
   tinyRcTrack->setEtaPr(prMom.pseudoRapidity());
   tinyRcTrack->setPhiPr(prMom.phi());
+  tinyRcTrack->setCurvPr(prTrack->geometry()->curvature());
+  tinyRcTrack->setTanLPr(tan(prTrack->geometry()->dipAngle()));
+  tinyRcTrack->setErrPr(errorPr);
   
   tinyRcTrack->setPtGl(glMom.perp());
   tinyRcTrack->setPzGl(glMom.z());
   tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
   tinyRcTrack->setPhiGl(glMom.phi()); 
+  tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
+  tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
+  tinyRcTrack->setErrGl(errorGl);
 
   tinyRcTrack->setChi2Pr(prTrack->fitTraits().chi2());
   tinyRcTrack->setFlag(prTrack->flag());
