@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.cxx,v 2.5 2004/02/19 20:42:01 pruneau Exp $  
+ * $Id: StiTrackingParameters.cxx,v 2.6 2004/03/22 23:07:47 pruneau Exp $  
  *
  * $Log: StiTrackingParameters.cxx,v $
+ * Revision 2.6  2004/03/22 23:07:47  pruneau
+ * Added comments in the load function
+ *
  * Revision 2.5  2004/02/19 20:42:01  pruneau
  * Added the noton of loadable
  *
@@ -104,7 +107,11 @@ void StiTrackingParameters::loadFS(ifstream& inFile)
 void StiTrackingParameters::loadDS(TDataSet &ds)
 {
 	cout << "StiTrackingParameters::loadDS(TDataSet&ds) -I- Starting" << endl;
-	St_TrackingParameters * a = dynamic_cast<St_TrackingParameters*>(ds.Find(getName().c_str() ));
+	cout << " Table name to retrieve:" << getName() << endl;
+	string mmmm;// = "tracker/";
+	mmmm = getName();
+	TDataSet * myTable = ds.Find(mmmm.c_str() );
+	St_TrackingParameters * a = dynamic_cast<St_TrackingParameters*>( myTable);
   if (!a) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet&ds) -E- a==0");
 	TrackingParameters_st * b = a->GetTable();
 	if (!b) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet&ds) -E- b==0");
