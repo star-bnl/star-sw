@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.135 2003/11/13 02:54:34 perev Exp $
+// $Id: StMaker.cxx,v 1.136 2003/11/17 22:19:20 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -497,10 +497,11 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
-  fMemStatMake->Start();
+  if (GetNumber()>3) fMemStatMake->Start();
   
 
-  StartTimer();}
+  StartTimer();
+}
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
@@ -511,7 +512,7 @@ void StMaker::EndMaker(int ierr)
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  fMemStatMake->Stop();
+  if (GetNumber()>3) fMemStatMake->Stop();
   StopTimer();
 }
 
@@ -1199,6 +1200,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.136  2003/11/17 22:19:20  perev
+// count memory only after 3 events, to avoid non event memory
+//
 // Revision 1.135  2003/11/13 02:54:34  perev
 // Safe destructor of TDataSet like object added
 //
