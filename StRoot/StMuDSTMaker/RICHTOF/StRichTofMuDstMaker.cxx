@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.4 2002/03/10 15:49:54 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.5 2002/03/10 17:59:33 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.5  2002/03/10 17:59:33  dunlop
+ * More clever with removing of RICH collection and pid traits when not wanted.
+ *
  * Revision 1.4  2002/03/10 15:49:54  dunlop
  * Remove StRichCollection if detectorState(kRichId) is bad
  *
@@ -204,7 +207,16 @@ Int_t StRichTofMuDstMaker::Make()
 	delete event;
 	return kStOK;
     }
-
+    // Remove rich collection if event is not accepted for RICH.
+    if (!mEventAcceptedRich
+	&&event->richCollection() 
+	&& !(event->richCollection()->isZombie())) {
+	cout << "event no good for RICH.  Removing rich." << endl;
+	
+	this->removeRich(event);
+	
+    }
+    
     // Overwrite the stuff in event summary
     cout << "Overwriting numberOfGoodtracks in StEvent " << endl;
     
@@ -212,22 +224,17 @@ Int_t StRichTofMuDstMaker::Make()
     event->summary()->setNumberOfGoodTracks(positive,uncorrectedNumberOfPositivePrimaries(*event));
     event->summary()->setNumberOfGoodTracks(negative,uncorrectedNumberOfNegativePrimaries(*event));
     
-//    cout << "Pos: " << event->summary()->numberOfGoodTracks(positive);
-//    cout << "Neg: " << event->summary()->numberOfGoodTracks(negative);
-//    cout << "All: " << event->summary()->numberOfGoodTracks();
-    // Use this as a flag
+
     event->summary()->setNumberOfExoticTracks(-999);
 
-//    StEventScavenger::removeV0Vertices(event);
-// Will figure out how to keep the tpc hits later.
+
     StEventScavenger::removeFtpcHitCollection(event);
     StEventScavenger::removeSvtHitCollection(event);
     StEventScavenger::removeSsdHitCollection(event);
     StEventScavenger::removeEmcCollection(event);
 // Remove them all to save space
     StEventScavenger::removeTpcHitCollection(event);
-//    StEventScavenger::removeL3Trigger(event);
-//    StEventScavenger::removeV0Vertices(event);
+
     StEventScavenger::removeXiVertices(event);
     StEventScavenger::removeKinkVertices(event);
 
@@ -301,8 +308,14 @@ Int_t StRichTofMuDstMaker::Make()
     }
     if (!goodNodes.size() && nL3 ==0) {
 	cout << "StRichTofMuDstMaker::Make():  no good tracks.  Not deleting event." << endl;
-//	delete event;
-	return kStOK;
+
+	
+    }
+    if (acceptedRich==0 
+	&&event->richCollection() 
+	&& !(event->richCollection()->isZombie())) {
+	cout << "0 accepted rich tracks.  Removing rich" << endl;
+	this->removeRich(event);
     }
     
 
@@ -342,7 +355,22 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
 	cout <<"StRichTofMuDstMaker::event not accepted: no primary vertex" << endl;
 	return false;
     }
+    // Get triggerActionWord
+    unsigned int theTriggerActionWord = 0;
+    if (event->l0Trigger()) {
+	theTriggerActionWord = event->l0Trigger()->triggerActionWord();
+    }
+    
+    
+
     mEventAcceptedTof = true;
+    if (! (theTriggerActionWord & mTofMaskInActionWord)) {
+	cout << "triggerActionWord: 0x" << hex << theTriggerActionWord 
+				     << " does not contain tof 0x" 
+				     << mTofMaskInActionWord 
+				     << dec << endl;
+	mEventAcceptedTof = false;
+    }
     
     // 2. must have TOF collection and TofData()
     StTofCollection *theTof = event->tofCollection();
@@ -361,16 +389,23 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
     }
     
     mEventAcceptedRich = true;
+    if (! (theTriggerActionWord & mRichMaskInActionWord)) {
+	cout<< "triggerActionWord: 0x"
+	    << hex << theTriggerActionWord 
+	    << " does not contain Rich 0x" 
+	    << mRichMaskInActionWord 
+	    << dec << endl;
+	mEventAcceptedRich = false;
+    }
     
 // Also check if there is a rich collection
     if (event->detectorState(kRichId) && !(event->detectorState(kRichId)->good())) {
-	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << " time " << event->time() << " Dropping richCollection" << endl;
-	StEventScavenger::removeRichCollection(event);
+	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << " time " << event->time() << endl;
 	
 	mEventAcceptedRich = false;
     }
-    if (!(event->richCollection())) mEventAcceptedRich = false;
-    if (event->richCollection() && !(event->richCollection()->pixelsPresent())) mEventAcceptedRich = false;
+//    if (!(event->richCollection())) mEventAcceptedRich = false;
+//    if (event->richCollection() && !(event->richCollection()->pixelsPresent())) mEventAcceptedRich = false;
     
     
     return true;
@@ -438,11 +473,6 @@ unsigned int StRichTofMuDstMaker::removeL3Tracks(StEvent* evt)
 
     unsigned int nL3Accepted = 0;
     if (evt && evt->l3Trigger()) {
-
-	
-//	vector<bool> detectorInfoIsGood;
-	
-
 	StSPtrVecTrackNode& theL3Tracks = 
 	    evt->l3Trigger()->trackNodes();
 
@@ -458,28 +488,11 @@ unsigned int StRichTofMuDstMaker::removeL3Tracks(StEvent* evt)
 		(*iter)->makeZombie();
 		(*iter)->track(0)->detectorInfo()->makeZombie();
 		
-//		detectorInfoIsGood.push_back(false);
-		
 	    }
 	    else {
 		++nL3Accepted;
-//		detectorInfoIsGood.push_back(true);
 	    }
 	}
-// // Now remove bad detector infos
-// 	StSPtrVecTrackDetectorInfo& theL3info = 
-// 	    evt->l3Trigger()->trackDetectorInfo();
-// 	if (detectorInfoIsGood.size() != theL3info.size()) {
-// 	    cout << "StRichTofMuDstMaker::removeL3Tracks() Warning: detectorInfo != track size"
-// 		<< endl;
-// 	}
-	
-
-// 	for (size_t iinfo =0; iinfo < theL3info.size(); ++iinfo) {
-// 	    if (!(detectorInfoIsGood[iinfo])) {
-// 		theL3info[iinfo]->makeZombie();
-// 	    }
-// 	}
 
 	cout <<"StRichTofMuDstMaker::Accepted " << nL3Accepted << " L3 Tracks " << endl;
 	
@@ -776,3 +789,33 @@ bool StRichTofMuDstMaker::acceptLambdaDaughter(StTrack* track)
 
     return false;
 }
+
+void StRichTofMuDstMaker::removeRich(StEvent *event) 
+{
+    // Get Rid of rich collection
+
+    StEventScavenger::removeRichCollection(event);
+
+    // Get rid of rich pid traits
+    StSPtrVecTrackNode &tracks = event->trackNodes();
+
+    unsigned int nPidTraitsRemoved = 0;
+    
+    for (StSPtrVecTrackNodeIterator titer = tracks.begin();
+	 titer != tracks.end(); ++titer) {
+	for (unsigned int ientry = 0; ientry < (*titer)->entries(); ++ientry) {
+	    StTrack *track = (*titer)->track(ientry);
+	    
+	    StPtrVecTrackPidTraits traits = track->pidTraits(kRichId);
+	    for (StPtrVecTrackPidTraitsIterator piter = traits.begin();
+		 piter != traits.end(); ++piter) {
+		(*piter)->makeZombie();
+		++nPidTraitsRemoved;
+		
+	    }
+	}
+    }
+    cout << "Removed rich PID traits from " << nPidTraitsRemoved << " tracks." << endl;
+    
+}
+

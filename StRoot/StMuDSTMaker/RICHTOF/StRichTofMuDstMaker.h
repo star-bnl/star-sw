@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.h,v 1.1 2002/02/20 01:57:27 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.h,v 1.2 2002/03/10 17:59:33 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.h,v $
+ * Revision 1.2  2002/03/10 17:59:33  dunlop
+ * More clever with removing of RICH collection and pid traits when not wanted.
+ *
  * Revision 1.1  2002/02/20 01:57:27  dunlop
  * New Rich and Tof combined maker
  *
@@ -67,6 +70,8 @@ protected:
     
     vector<StV0Vertex*> getLambdas(StEvent*);//!
     vector<unsigned int> removeV0sButLambdas(StEvent*,vector<StV0Vertex*>&);//!
+
+    void removeRich(StEvent*);
     
 
 
@@ -104,6 +109,9 @@ private:
     double mLambdaFitPointsCut;
     
     double mLambdaPCut;
+    
+    static const unsigned int mTofMaskInActionWord = 0x10;
+    static const unsigned int mRichMaskInActionWord = 0x20;
     
     
 
