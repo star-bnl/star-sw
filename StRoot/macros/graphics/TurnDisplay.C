@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.6 1999/12/27 21:47:06 fine Exp $
+// $Id: TurnDisplay.C,v 1.7 2000/04/18 21:43:14 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
@@ -11,7 +11,7 @@ void TurnDisplay(const Char_t *filterName=0) {
   //  - Load user-defined filter class if provided
   //  - defines the tables one wants to be drawn
 
-    if (!chain->GetOption("DISPLAY")) {
+    if (chain->IsA() == StChain::Class() || !chain->GetOption("DISPLAY") ) {
        gSystem->Load("St_geom_Maker");
        gSystem->Load("StEventDisplayMaker");
        StMaker *mini = new St_geom_Maker();
@@ -93,6 +93,9 @@ void TurnDisplay(const Char_t *filterName=0) {
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.7  2000/04/18 21:43:14  fine
+// make TurnDisplay macro available for doEvents
+//
 // Revision 1.6  1999/12/27 21:47:06  fine
 // St_geom_Maker has been added
 //

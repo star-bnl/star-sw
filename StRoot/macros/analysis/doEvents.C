@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.47 2000/04/13 22:14:03 perev Exp $
+// $Id: doEvents.C,v 1.48 2000/04/18 21:43:12 fine Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.48  2000/04/18 21:43:12  fine
+// make TurnDisplay macro available for doEvents
+//
 // Revision 1.47  2000/04/13 22:14:03  perev
 // StFile -> StFileI
 //
@@ -82,6 +85,8 @@ TString  theFileName;
 TString  originalPath;
 class    StChain;
 StChain  *chain=0;
+class StEventDisplayMaker;
+StEventDisplayMaker *dsMaker = 0;
 TBrowser *b=0;
 
 const char *dstFile = 0;
