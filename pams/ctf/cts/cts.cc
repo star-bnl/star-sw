@@ -118,7 +118,7 @@ extern "C" long type_of_call cts_(
 **: 
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-   char  OutMessage[100] ;
+   char  OutMessage[132] ;
 //
 //   Check there are input hits
 //
@@ -260,7 +260,7 @@ long cts_detector_response (
 **:              mslat    - Monte Carlo slat information   
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-   char  OutMessage[100] ;
+   char  OutMessage[132] ;
 //
 //    Total number of counters in phi and eta
 //
@@ -275,10 +275,6 @@ long cts_detector_response (
 //
 //   printf(" CTS: starting hit loop for detector=%d\n",geo->detector);
    for ( int i_hit = 0 ; i_hit < mhit_h->nok ; i_hit++ ) {
-//
-//   Get indexes
-//   If routines return 0 something went wrong
-//
 
 #ifdef TEST
 	if(geo->detector == 2){     //WJL
@@ -288,6 +284,7 @@ long cts_detector_response (
 	}                          //WJL
 #endif
 
+//======= get indices from the geant volume_id...
       if ( mpara->geo_from_geant ){
          cts_get_ctf_indexes ( geo->detector, mhit[i_hit].volume_id, i_phi, i_eta ) ;
 #ifdef TEST
@@ -295,19 +292,33 @@ long cts_detector_response (
          float phi = atan2 ( mhit[i_hit].x[1], mhit[i_hit].x[0] ) ;
          long i_phi_test = ctg_i_phi ( phi, geo_h, geo, slat_phi_h, slat_phi ) ;
          if ( i_phi != i_phi_test ){
-            cout<<" phi "<<phi<<endl ;
-            cout<<" iphi iphi_test "<<i_phi<<" "<<i_phi_test<<endl ;
+            cout<<"CTS VOLUME_ID ERROR -- volid phi iphi iphi_test "<<mhit[i_hit].volume_id<<
+                         " "<<phi             <<" "<<i_phi<<" "<<i_phi_test<<endl ;
          }
          if ( i_eta != i_eta_test ){
-            cout<<" z   "<<mhit[i_hit].x[2]<<endl ;
-            cout<<" ieta ieta_test "<<i_eta<<" "<<i_eta_test<<endl ;
+            cout<<"CTS VOLUME_ID ERROR -- volid z ieta ieta_test "<<mhit[i_hit].volume_id<<
+                         " "<<mhit[i_hit].x[2]<<" "<<i_eta<<" "<<i_eta_test<<endl ;
          }
 #endif
-      }
-      else {
+//======= get indices from CTG tables...
+      } else {
          i_eta = ctg_i_eta ( mhit[i_hit].x[2], slat_eta_h, slat_eta ) ;
          float phi = atan2 ( mhit[i_hit].x[1], mhit[i_hit].x[0] ) ;
          i_phi = ctg_i_phi ( phi, geo_h, geo, slat_phi_h, slat_phi ) ;
+         if(geo->detector==1 && i_phi > 60) { i_phi = i_phi - 60; }  //MDC2 kluge... wjl
+         if(geo->detector==2              ) { i_phi = i_phi +  5; }  //MDC2 kluge... wjl
+//#ifdef TEST     //WJL
+         long i_phi_test, i_eta_test;
+         cts_get_ctf_indexes ( geo->detector, mhit[i_hit].volume_id, i_phi_test, i_eta_test ) ;
+         if ( i_phi != i_phi_test ){
+            cout<<"CTS VOLUME_ID ERROR -- volid phi iphi iphi_test "<<mhit[i_hit].volume_id<<
+                         " "<<phi             <<" "<<i_phi<<" "<<i_phi_test<<endl ;
+         }
+         if ( i_eta != i_eta_test ){
+            cout<<"CTS VOLUME_ID ERROR -- volid z ieta ieta_test "<<mhit[i_hit].volume_id<<
+                         " "<<mhit[i_hit].x[2]<<" "<<i_eta<<" "<<i_eta_test<<endl ;
+         }
+//#endif          //WJL
       }
 //
 //     Check indexes don't go crazy
@@ -346,11 +357,18 @@ long cts_detector_response (
       if ( Length < -1 * mpara->position_tolerance || 
            Length - mpara->position_tolerance > max_distance  ) { 
            sprintf ( OutMessage, 
-             " cts: Hit %d has local-Z exceeding len. of assigned slat: %f %f ",
-             i_hit, Length, max_distance ) ;
+             " cts: Hit %d, local-Z exceeds length of assigned slat: %f %f    ( %f %f %f )",
+             i_hit, Length, max_distance,
+             mhit[i_hit].x[2],slat_eta[i_eta].z_max,slat_eta[i_eta].cosang );
            MessageOut ( OutMessage ) ;
            continue ;
-      }
+      } else {               //wjl
+//n           sprintf ( OutMessage, 
+//n             " cts: Hit %d,                                        : %f %f    ( %f %f %f )",
+//n             i_hit, Length, max_distance,
+//n             mhit[i_hit].x[2],slat_eta[i_eta].z_max,slat_eta[i_eta].cosang );
+//n           MessageOut ( OutMessage ) ;
+      }                     //wjl
 //
 //    Check what kind of slat response model is requested
 //    and get number of photoelectrons
@@ -486,7 +504,7 @@ void cts_fill_event (
 **:           event       - event       table
 **:>------------------------------------------------------------------*/
    long i ;
-   char  OutMessage[50] ;
+   char  OutMessage[132] ;
 //
    long n_event = event_h->nok ;
 //
@@ -926,7 +944,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
 **:           mpara       - Module parameters
 **:>------------------------------------------------------------------*/
    float weight ;
-   char  OutMessage[50] ;
+   char  OutMessage[132] ;
 //
 //   Check array dimensions
 //
