@@ -177,6 +177,15 @@ foreach my $dsfile (@hpssDstFiles) {
 
    $dhfile = ($$dsfile)->flName;
    $dhSet = ($$dsfile)->dataS;
+   next if ($dhfile =~ /rcf0127_01/);
+   next if ($dhfile =~ /rcf0123_01/);
+   next if ($dhfile =~ /rcf0126_01/);
+   next if ($dhfile =~ /rcf0122_01/);
+   next if ($dhfile =~ /rcf0125_01/);
+   next if ($dhfile =~ /rcf0125_02/);
+   next if ($dhfile =~ /rcf0121_01/);
+   next if ($dhfile =~ /rcf0121_02/);
+   next if ($dhfile =~ /rcf0124_01/);
    $dstHpEvts{$dhSet}  += ($$dsfile)->Nevts;
    $dstHpsize{$dhSet}  += ($$dsfile)->flSize; 
 
