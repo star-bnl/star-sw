@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.36 1999/09/21 15:05:18 perev Exp $
+// $Id: StMaker.h,v 1.37 1999/09/23 21:24:58 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.37  1999/09/23 21:24:58  perev
+// recovered debug level init(lost)
+//
 // Revision 1.36  1999/09/21 15:05:18  perev
 // InitRun & FinishRun added
 //
@@ -137,8 +140,7 @@ public:
 
 //		Constructor & Destructor
 
-                  	StMaker();
-                  	StMaker(const char *name,const char *dummy=0);
+                  	StMaker(const char *name="",const char *dummy=0);
    virtual       	~StMaker();
    virtual Int_t IsChain() const {return 0;}
 
@@ -243,7 +245,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.36 1999/09/21 15:05:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.37 1999/09/23 21:24:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };

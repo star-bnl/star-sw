@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.71 1999/09/21 15:05:17 perev Exp $
+// $Id: StMaker.cxx,v 1.72 1999/09/23 21:24:57 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.72  1999/09/23 21:24:57  perev
+// recovered debug level init(lost)
+//
 // Revision 1.71  1999/09/21 15:05:17  perev
 // InitRun & FinishRun added
 //
@@ -205,16 +208,10 @@ ClassImp(StMaker)
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker()
-{
-::doPs(GetName(),"constructor");
-  SetMode();
-}
-
-//_____________________________________________________________________________
 StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActive(kTRUE)
 {
    SetMode();
+   m_DebugLevel=0;
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
