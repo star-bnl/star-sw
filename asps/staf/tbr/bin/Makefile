@@ -13,7 +13,7 @@ endif
 #
 export VPATH := $(BINDIR) $(SRCMDIR) $(LIBDIRS) $(INCDIRS)
 #
-VERSION := "$Id: Makefile,v 1.8 1997/07/16 22:54:36 ward Exp $"
+VERSION := "$Id: Makefile,v 1.9 1997/11/17 21:03:09 tull Exp $"
 # 
 #-- Object files
 SUFS := *.cc *.c *.F
@@ -103,7 +103,7 @@ $(STAF).cc: $(BASE_DIR)/$(BASE_NAME).config
 $(STAF).o: $(STAF).cc
 #
 UNDEPENDS := -L% -R% -lX11 -lgen -lucb -ldl
-$(STAF): $(STAF).o
+$(STAF): $(STAF).o $(filter-out $(UNDEPENDS),$(STAFLIBS)) $(USRLIBS)
 	@echo "########################################################"
 	@echo "###                    Making $@                     ###"
 	@echo "########################################################"
@@ -147,7 +147,7 @@ objs: $(BINDIR)
 	@echo "########################################################"
 #
 #
-#?make install     - Install binaries in $STAR_LIB/dev/bin area.
+#?make install     - Install binaries in $STAR_LIB/$STAR_SYS_LEVEL/bin area.
 #?                   Change INSTALL_BIN_FILES in pkg/Makefile.control.
 install:
 ifneq ($(EMPTY),$(strip $(INSTALL_BIN_FILES)))
@@ -156,7 +156,7 @@ ifneq ($(EMPTY),$(strip $(INSTALL_BIN_FILES)))
 	@echo "########################################################"
 	cd $(BINDIR); \
 	$(INSTALL) $(INSTALL_BIN_FILES) \
-	$(STAR_LIB)/dev/$(BRANCH_NAME)/bin;
+	$(STAR_LIB)/$(STAR_SYS_LEVEL)/$(BRANCH_NAME)/bin;
 else
 	@echo "########################################################"
 	@echo "###            No binary files to install.           ###"
@@ -168,7 +168,7 @@ $(BINDIR):
 #
 #?make help        - Show help for SLMakefile targets.
 help:
-	@$(SLM_DIR)/help $(SLM_DIR)
+	@$(SLM_DIR)/slm_help $(SLM_DIR)
 #
 Makefile: $(SLM_DIR)/SLMakefile.bin
 	cp $< $@
