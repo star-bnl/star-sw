@@ -1,0 +1,22 @@
+macro test file 
+   
+ debug    on
+*
+ ghist star.his
+ make  sim/control
+*
+   gfile pz [file]
+   if ($iquest(1)<>0) exitm
+* check physics
+   gclose all
+* check geometry
+   fort/file 72 star.ps
+   meta      72 -111
+   dcut cave x .1 10 10 .03 .03
+   close     72
+* fill histigrams
+   trig 1000000
+
+ exit  
+return
+         
