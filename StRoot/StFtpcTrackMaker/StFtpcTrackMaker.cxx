@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.63 2004/06/18 12:07:41 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.64 2004/08/09 15:08:14 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.64  2004/08/09 15:08:14  jcs
+// remove unused histogram
+//
 // Revision 1.63  2004/06/18 12:07:41  jcs
 // replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
 //
@@ -376,7 +379,6 @@ Int_t StFtpcTrackMaker::Init()
   m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track", 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-  m_track        = new TH1F("fpt_track", "FTPC: number of tracks found", 100, 0., 5000.);    
   m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
@@ -823,7 +825,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.63 2004/06/18 12:07:41 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.64 2004/08/09 15:08:14 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
