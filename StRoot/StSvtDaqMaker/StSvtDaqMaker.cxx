@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.15 2004/02/04 16:14:23 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.16 2004/03/18 01:51:05 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.16  2004/03/18 01:51:05  caines
+ * Make sure GetDaqReader returns something as it is declared Int_t
+ *
  * Revision 1.15  2004/02/04 16:14:23  munhoz
  * fix few problems with pedestal reading
  *
@@ -233,6 +236,7 @@ Int_t StSvtDaqMaker::GetDaqReader()
   assert(dataSet);
   daqReader = (StDAQReader*)(dataSet->GetObject());
   assert(daqReader);
+  return kStOk;
 }
 
 //_____________________________________________________________________________
@@ -378,7 +382,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.15 2004/02/04 16:14:23 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.16 2004/03/18 01:51:05 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
