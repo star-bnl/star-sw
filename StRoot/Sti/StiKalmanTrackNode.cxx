@@ -20,7 +20,7 @@
 bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.5;
-double StiKalmanTrackNode::massHypothesis = .137;
+double StiKalmanTrackNode::massHypothesis = 0.13957018;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
