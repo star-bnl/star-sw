@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.6 2002/09/05 15:48:07 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.7 2002/11/25 19:49:04 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.7  2002/11/25 19:49:04  jml
+ * Changed mintmbk, maxtmbk, ntmbk = 10 to fix problem with loss of high pt tracks
+ *
  * Revision 1.6  2002/09/05 15:48:07  jml
  * Now fill the deconvolution flag to help dedx
  *
@@ -698,17 +701,60 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
   }
   hit.maxpad = cl_xb + 2;
 
-  hit.ntmbk = 5;
-  hit.mintmbk = cl_tb - 2;
-  if(hit.mintmbk < 0)
-  {
-    hit.ntmbk = cl_tb + 3;
-    hit.mintmbk = 0;
+  if(cl_tb >= 5) {
+    hit.mintmbk = cl_tb - 5;
+    hit.maxtmbk = cl_tb + 5;  
   }
-  hit.maxtmbk = cl_tb + 2;
+  else {
+    hit.mintmbk = 0;
+    hit.maxtmbk = 10;
+  }
+  hit.ntmbk = hit.maxtmbk - hit.mintmbk;
 
   hit.prf = (r>=13) ? mPrfout : mPrfin ;
   hit.zrf = (r>=13) ? mTrfout : mTrfin ;
+
+#ifdef XXXX_WRITEFILE_XXXX
+  FILE *ff = fopen("clf_hits.txt","a");
+  fprintf(ff, 
+	  "%d %d %d %d %d "
+	  "%d %e %e %e %e "
+	  "%e %e %e %e %e "
+	  "%e %e %e %e %e "
+	  "%e %d %d %d %d "
+	  "%d %d %d %d %d\n",
+	  hit.cluster,
+	  hit.flag,
+	  hit.id,
+	  hit.id_globtrk,
+	  hit.track,
+	  hit.truncTag,
+	  hit.alpha,
+	  hit.dalpha,
+	  hit.lambda,
+	  hit.q,
+	  hit.dq,
+	  hit.x,
+	  hit.dx,
+	  hit.y,
+	  hit.dy,
+	  hit.z,
+	  hit.dz,
+	  hit.phi,
+	  hit.prf,
+	  hit.zrf,
+	  hit.dedx,
+	  hit.row/100,
+	  hit.row%100,
+	  hit.nseq,
+	  hit.npads,
+	  hit.minpad,
+	  hit.maxpad,
+	  hit.ntmbk,
+	  hit.mintmbk,
+	  hit.maxtmbk);
+  fclose(ff);
+#endif
 
   if(mFill_tphit)
   {
