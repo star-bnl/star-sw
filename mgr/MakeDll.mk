@@ -64,6 +64,7 @@ SRC_DIR := $(INP_DIR)
     check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
     check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
     check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
+    check_gen   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
 
 #	Includes
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
