@@ -1,5 +1,8 @@
-* $Id: tpt_helix_fit.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
+* $Id: tpt_helix_fit.F,v 1.6 1999/09/14 00:53:13 liq Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.6  1999/09/14 00:53:13  liq
+* add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.5  1999/07/19 19:15:54  genevb
 * Use StMessMgr
 *
@@ -41,9 +44,10 @@ C___________________________________________________________________
 #include "PAM.inc"
 
 #include "tpt_pars.inc"
-#include "tpt_pointers.inc"
+#include "tpt_mxdim.inc"
+#include "tpt_track_pointers.inc"
 C____________________________________________________________________
-      RECORD /track_pointers/ trk(*)
+      RECORD /tpt_track_pointers_st/ trk(*)
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/    tpar(*)
       
