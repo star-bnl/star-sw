@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.7 2002/01/12 00:10:23 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.8 2002/02/01 17:45:56 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.8  2002/02/01 17:45:56  lasiuk
+ * Mods for gcc(7.2)
+ * outer helix usage
+ * histo mods
+ *
  * Revision 1.7  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -172,6 +177,11 @@ protected:
 
     StThreeVectorF mRadPoint;
     StThreeVectorF mQuartzRadPoint;
+
+    int            mUniqueRingHits;
+
+
+
     
     StRichCoordinateTransform* mTransform;//!
     StRichMomentumTransform* mMomTform;//!
@@ -214,7 +224,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.7 2002/01/12 00:10:23 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.8 2002/02/01 17:45:56 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:

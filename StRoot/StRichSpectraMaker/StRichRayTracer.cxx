@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.5  2002/02/01 17:45:56  lasiuk
+ * Mods for gcc(7.2)
+ * outer helix usage
+ * histo mods
+ *
  * Revision 1.4  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -1005,7 +1010,7 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 	    lastPointOnPlane = firstPointOnPlane;
 	}
 	
-	if( (abs(bottomDetector.x())>70) || (abs(bottomDetector.y())>50)) continue;
+	if( (fabs(bottomDetector.x())>70) || (fabs(bottomDetector.y())>50)) continue;
 	pts.push_back(bottomDetector);
     }
 
