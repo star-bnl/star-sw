@@ -7,11 +7,11 @@ NavigationMenuGroup::NavigationMenuGroup(const string& name,
 					 const string & description, 
 					 EventDisplay * display, 
 					 int offset)
-  : MenuGroup(name,description,display,offset)
-{
-  _colorSave = -1;
-  _visibleSave = true;
-}
+  : MenuGroup(name,description,display,offset),
+    _colorSave(-1),
+    _visibleSave(true),
+    _launched(false)
+{}
 
 NavigationMenuGroup::~NavigationMenuGroup()
 {}
@@ -56,9 +56,12 @@ void NavigationMenuGroup::moveToNextRegion()
 {
   hideCurrentDetector();
   StiDetectorContainer* detectorContainer = getToolkit()->getDetectorContainer();
-  if (!detectorContainer->moveToNextRegion())
-    cout <<"Navigation::moveToNextRegion() -I- Reached inner most volume."<<endl;
-  showCurrentDetector();
+  if (detectorContainer)
+    {
+      if (!detectorContainer->moveToNextRegion())
+	cout <<"Navigation::moveToNextRegion() -I- No next region available."<<endl;
+      showCurrentDetector();
+    }
 }
 
 void NavigationMenuGroup::moveToPreviousRegion()
@@ -66,7 +69,7 @@ void NavigationMenuGroup::moveToPreviousRegion()
   hideCurrentDetector();
   StiDetectorContainer* detectorContainer = getToolkit()->getDetectorContainer();
   if (!detectorContainer->moveToPreviousRegion())
-    cout <<"Navigation::moveToPreviousRegion() -I- Reached inner most volume."<<endl;
+    cout <<"Navigation::moveToPreviousRegion() -I- No previous region available."<<endl;
   showCurrentDetector();
 }
 
@@ -148,12 +151,16 @@ void NavigationMenuGroup::setLayerAndAngle()
 
 void NavigationMenuGroup::launchNavigator()
 {
-  TGCompositeFrame * compositeFrame = getCompositeFrame();
-  TGLayoutHints * layout = new TGLayoutHints(kLHintsBottom | kLHintsLeft,  0,0,1,0);
-  getDisplay()->AddFrame(compositeFrame, layout); 
-  getDisplay()->MapSubwindows();
-  getDisplay()->Resize(getDisplay()->GetDefaultSize()); 
-  getDisplay()->MapWindow(); 
+  if (!_launched)
+    {
+      TGCompositeFrame * compositeFrame = getCompositeFrame();
+      TGLayoutHints * layout = new TGLayoutHints(kLHintsBottom | kLHintsLeft,  0,0,1,0);
+      getDisplay()->AddFrame(compositeFrame, layout); 
+      getDisplay()->MapSubwindows();
+      getDisplay()->Resize(getDisplay()->GetDefaultSize()); 
+      getDisplay()->MapWindow(); 
+      _launched = true;
+    }
 }
 
 TGCompositeFrame * NavigationMenuGroup::getCompositeFrame()
@@ -178,11 +185,11 @@ TGCompositeFrame * NavigationMenuGroup::getCompositeFrame()
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
   
-  button = new TGTextButton(frame, "Move Plus Phi", _offset+_cmdMovePlusPhi);
+  button = new TGTextButton(frame, "Move +Phi", _offset+_cmdMovePlusPhi);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
   
-  button = new TGTextButton(frame, "Move Minus Phi", _offset+_cmdMoveMinusPhi);
+  button = new TGTextButton(frame, "Move -Phi", _offset+_cmdMoveMinusPhi);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
   //frame->AddFrame(button,layout);
