@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.5 2000/09/30 17:14:28 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.6 2000/11/27 17:33:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
- * Revision 1.5  2000/09/30 17:14:28  perev
- * Streame added to ThreeVector
+ * Revision 1.6  2000/11/27 17:33:53  ullrich
+ * Enclosed streamer in macro __ROOT__.
  *
  * Revision 1.5  2000/09/30 17:14:28  perev
  * Streame added to ThreeVector
@@ -119,7 +119,8 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
     v.setZ(z);
     return is;
 }
-//______________________________________________________________________________
+
+#ifdef __ROOT__
 void StThreeVectorF::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorF.
@@ -151,5 +152,4 @@ void StThreeVectorF::Streamer(TBuffer &R__b)
       R__b << mX3;
    }
 }
-
-
+#endif
