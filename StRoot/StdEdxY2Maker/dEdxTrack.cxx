@@ -1,7 +1,7 @@
 #include "dEdxTrack.h"
 
 ClassImp(dEdxTrack)
-ClassImp(dEdx_t)
+  //ClassImp(dEdx_t)
 
 TClonesArray *dEdxTrack::fgPoints = 0;
 
