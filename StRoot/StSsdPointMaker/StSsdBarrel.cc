@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.8 2005/03/22 10:57:18 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.9 2005/03/22 13:45:02 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.9  2005/03/22 13:45:02  lmartin
+// new member mActiveLadders added
+//
 // Revision 1.8  2005/03/22 10:57:18  lmartin
 // hardware position information fully implemented
 //
@@ -48,7 +51,13 @@ StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *con
   mNLadder         = config[0].nMaxLadders;
   mNWaferPerLadder = dimensions[0].wafersPerLadder;
   mNStripPerSide   = dimensions[0].stripPerSide;
-
+  for (int i=0;i<mNLadder;i++)
+    {
+      if (config[0].ladderIsPresent[i]>0)
+	mActiveLadders[i]=1;
+      else
+	mActiveLadders[i]=0;
+    }
   mLadders = new StSsdLadder*[mNLadder];
   for (int iLad=0; iLad < mNLadder; iLad++)
       mLadders[iLad] = new StSsdLadder(iLad,mSsdLayer,mNWaferPerLadder,mNStripPerSide);
@@ -596,4 +605,9 @@ int StSsdBarrel::waferNumbToIdWafer(int waferNumb)
   int iL = 1+(int)((waferNumb)/mNWaferPerLadder);
   int iW = waferNumb-((iL-1)*mNWaferPerLadder)+1;
   return mSsdLayer*1000 + iW*100 + iL;
+}
+
+int StSsdBarrel::isActiveLadder(int iLadder)
+{
+  return mActiveLadders[iLadder];
 }
