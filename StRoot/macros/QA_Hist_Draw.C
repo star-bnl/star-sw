@@ -2,7 +2,7 @@
 void QA_Hist_Draw(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
      const Char_t
-     *fileName="/disk00001/star/auau200/hijing135/jetq_on/b3_6/year_1b/hadronic_on/tfs/set0050_04_24evts.root",
+     *fileName="/diskA/star/kathy/output/psc0049_08_40evts_3EV_26feb.root",
      const Char_t *psFile="QA_hist.ps")
 { 
     cout << endl   
@@ -20,7 +20,12 @@ void QA_Hist_Draw(
   // file1.ls();
   TList *keys = file1.GetListOfKeys();
   if (keys) {
-    TPostScript p5(psFile);
+  TCanvas QACanvas("CanvasName","Canvas Title");
+  gStyle->SetOptStat(111111);
+ Int_t width = 16;
+ Int_t height = 10;
+ gStyle->SetPaperSize(width, height);
+  TPostScript p5(psFile);
     // Create an itertor
     TIter nextKey(keys);
     TKey *key = 0; 
