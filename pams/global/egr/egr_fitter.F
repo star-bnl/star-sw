@@ -806,10 +806,10 @@ C     Now find first point on track.
                   globtrk(iglob).x_first(1) = tphit(ifirst).x
                   globtrk(iglob).x_first(2) = tphit(ifirst).y
                   globtrk(iglob).x_first(3) = tphit(ifirst).z
-                  if( abs(globtrk(iglob).x_first(1)-globtrk(iglob).x0) 
-     +                 .gt. 0.5) then
-                     write(6,*) "Errr"
-                  endif
+C                  if( abs(globtrk(iglob).x_first(1)-globtrk(iglob).x0) 
+C     +                 .gt. 0.5) then
+C                     write(6,*) "Errr"
+C                  endif
 
 C     Now find last point on track and calculate track length.
                   if (tptrack(itrk).id.gt.0.and.
