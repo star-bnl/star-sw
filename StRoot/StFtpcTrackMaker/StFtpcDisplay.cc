@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.8 2001/04/25 17:53:42 perev Exp $
+// $Id: StFtpcDisplay.cc,v 1.9 2001/07/12 13:02:25 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.9  2001/07/12 13:02:25  oldi
+// Boundaries of FTPC set to correct values (7.73, 30.05).
+//
 // Revision 1.8  2001/04/25 17:53:42  perev
 // HPcorrs
 //
@@ -266,9 +269,9 @@ void StFtpcDisplay::TrackInfo()
 
   TCanvas *track_canvas = new TCanvas("track_canvas", "Tracks", 1580, 600);
   track_canvas->Divide(3,1);
-  TH2F *phi_frame  = new TH2F("phi_frame",  "phi_frame",   60, -30,    30, 60, -30, 30);
-  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -30, 30);
-  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120,  150,  270, 60, -30, 30);
+  TH2F *phi_frame  = new TH2F("phi_frame",  "phi_frame",   60, -30.05,    30.05, 60, -30.05, 30.05);
+  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -30.05, 30.05);
+  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120,  150,  270, 60, -30.05, 30.05);
 
   TH2F *circle_frame = new TH2F("circle_frame", "circle_frame",  60,   -0.15,   0.15,  60, -0.15, 0.15);
   TH2F *z_frame      = new TH2F("z_frame",      "z_frame",      540, -270,    270,    700, -7,    7);
@@ -292,8 +295,8 @@ void StFtpcDisplay::TrackInfo()
   TLine *phi_line = new TLine[mNumPhiSegment];
 
   {for (Int_t i=0; i<mNumPhiSegment; i++) {
-    phi_line[i] = TLine(0., 0., 30*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
-			30*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
+    phi_line[i] = TLine(0., 0., 30.05*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
+			30.05*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
   }} 
 
   TLine *eta_line = new TLine[2*mNumEtaSegment+2];
@@ -474,7 +477,7 @@ void StFtpcDisplay::Info()
   TH1F *phi = new TH1F("phi", "phi", mNumPhiSegment*10, 0. ,2*TMath::Pi());
   TH1F *eta = new TH1F("eta", "eta", mNumEtaSegment*10, -4.165, 4.165);
  
-  TH2F *xy = new TH2F("xy", "xy", 60, -30., 30., 60, -30., 30.);
+  TH2F *xy = new TH2F("xy", "xy", 60, -30.05, 30.05, 60, -30.05, 30.05);
   TH2F *phi_eta = new TH2F("phi_eta", "phi_eta", 60, 0., 2*TMath::Pi(), 60, -4.165, 4.165);
 
   Int_t cluster_anz = mHit->GetEntriesFast();
@@ -550,9 +553,9 @@ void StFtpcDisplay::Info()
 
   TCanvas *track_canvas = new TCanvas("track_canvas", "Tracks", 1580, 600);
   track_canvas->Divide(3,1);
-  TH2F *phi_frame = new TH2F("phi_frame", "phi_frame", 60, -30, 30, 60, -30, 30);
-  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -30, 30);
-  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120, 150, 270, 60, -30, 30);
+  TH2F *phi_frame = new TH2F("phi_frame", "phi_frame", 60, -30.05, 30.05, 60, -30.05, 30.05);
+  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -30.05, 30.05);
+  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120, 150, 270, 60, -30.05, 30.05);
 
   track_canvas->cd(1);
   gPad->SetGridx();
@@ -598,8 +601,8 @@ void StFtpcDisplay::Info()
   TLine phi_line[mNumPhiSegment];
 
   for (Int_t i=0; i<mNumPhiSegment; i++) {
-    phi_line[i] = TLine(0., 0., 30*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
-			30*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
+    phi_line[i] = TLine(0., 0., 30.05*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
+			30.05*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
   } 
 
   TLine eta_line[2*mNumEtaSegment+2];
@@ -779,7 +782,7 @@ void StFtpcDisplay::ShowClusters()
   TCanvas *X_Yplus = new TCanvas("X_Yplus", "Blick in Beamrichtung +", 1100, 1100);
   TCanvas *X_Yminus = new TCanvas("X_Yminus", "Blick in Beamrichtung -", 1100, 1100);
 
-  TH2F *xy = new TH2F("xy", "xy", 60, -30., 30., 60, -30., 30.);
+  TH2F *xy = new TH2F("xy", "xy", 60, -30.05, 30.05, 60, -30.05, 30.05);
   X_Yplus->cd();
   xy->Draw();
   X_Yminus->cd();
@@ -842,10 +845,10 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
-  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc1_in =  new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_in =  new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30.05, 30.05, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_in =  new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  7.73,  7.73, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30.05, 30.05, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_in =  new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  7.73,  7.73, (256.45-162.75)/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -1106,10 +1109,10 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
-  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc1_in  = new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_in  = new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30.05, 30.05, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_in  = new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  7.73,  7.73, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30.05, 30.05, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_in  = new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  7.73,  7.73, (256.45-162.75)/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -1125,7 +1128,7 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   ftpc2_in->SetLineColor(4);
 
   /*
-  TCONE *cone = new TCONE("cone", "cone", "void", 5., 30./256.45*254.20-0.22, 30./256.45*254.20, 30./256.45*258.7-0.22,30./256.45*258.7 );
+  TCONE *cone = new TCONE("cone", "cone", "void", 5., 30.05/256.45*254.20-0.22, 30.05/256.45*254.20, 30.05/256.45*258.7-0.22,30.05/256.45*258.7 );
   cone->SetNumberOfDivisions(100);
   cone->SetLineColor(1);
   */
@@ -1638,7 +1641,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
 
       Int_t cluster_entries = track->GetNumberOfPoints();
       
-      if (cluster_entries < 10 && track->GetRFirst() > 8. && track->GetRLast() < 30.) { 
+      if (cluster_entries < 10 && track->GetRFirst() > 7.73 && track->GetRLast() < 30.05) { 
       
 	// loop over all clusters
 	for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
