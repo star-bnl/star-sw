@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.56 1999/06/26 01:40:56 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.57 1999/06/27 00:46:56 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.57  1999/06/27 00:46:56  fine
+// Obsolete comment deleted
+//
 // Revision 1.56  1999/06/26 01:40:56  fisyak
 // Add Valery's abstract buffer
 //
@@ -1668,7 +1671,6 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       row += GetRowSize();
      }
    } else {
-//      R__b.WriteVersion(St_ev0_track2::IsA());
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
