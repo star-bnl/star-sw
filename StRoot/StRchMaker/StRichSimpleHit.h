@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 1.2 2000/05/23 16:55:58 lasiuk Exp $
+ * $Id: StRichSimpleHit.h,v 1.3 2000/05/31 19:26:15 dunlop Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,10 +7,13 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
- * Revision 1.2  2000/05/23 16:55:58  lasiuk
- * Incorporate new MC info
- * add clone() where necessary
- * accomodate name changes
+ * Revision 1.3  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
+ *
+ * number of pads added as a member
+ *
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
  * Revision 1.3  2000/05/31 19:26:15  dunlop
  * Filling non-ctor entries in persistent hits + support for this
@@ -52,6 +55,8 @@ public:
     StRichSimpleHit(const StRichHit*);
 #endif
     virtual ~StRichSimpleHit();
+    const StThreeVector<double>& global()    const;
+    const StThreeVector<double>& local()    const;
     const StThreeVector<double>& internal() const;
     //StRichSimpleHit& operator=(const StRichSimpleHit&){}
     const StThreeVector<double>& global()     const;
@@ -59,7 +64,8 @@ public:
     const StThreeVector<double>& internal()   const;
     const StThreeVector<double>& localError() const;
     const StThreeVector<double>& sigma()      const;
-
+    
+    double charge()        const;
     double maxAmplitude()  const;
     int    clusterNumber() const;
     StThreeVector<double>&  global();
@@ -81,6 +87,8 @@ protected:
     unsigned int          mClusterNumber;
     unsigned long         mFlags;
     unsigned short        mNumberOfPads;
+};
+
 inline const StThreeVector<double>& StRichSimpleHit::global() const {return mGlobal;}
 inline StThreeVector<double>& StRichSimpleHit::global() {return mGlobal;}
 inline const StThreeVector<double>& StRichSimpleHit::local() const {return mLocal;}

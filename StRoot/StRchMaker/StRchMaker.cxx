@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.18  2000/05/23 16:49:51  lasiuk
- * writing to StEvent/StRichCollection
+ * Revision 1.19  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
+ *
+ * Revision 1.19  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
  *
  * Revision 1.18  2000/05/23 16:49:51  lasiuk
  * writing to StEvent/StRichCollection
@@ -449,6 +452,7 @@ Int_t StRchMaker::Make() {
     cout << "==> USE SIMPLE HITS" << endl;
     if(!mClusterFinder->simpleHitsFromClusters()) {
       cout << "==> simple hits from clusters failed!" << endl;
+    }
     
     mClusterFinder->calculateHitsInLocalCoordinates();
     mClusterFinder->calculateHitsInGlobalCoordinates();
@@ -630,14 +634,28 @@ void StRchMaker::fillStEvent()
 	for(size_t ii=0; ii<mTheHits.size(); ii++) {
 	    if(dynamic_cast<StRichSimpleMCHit*>(mTheHits[ii])) {
 		//cout << "mchit ";
-								StThreeVectorF(0,0,0),
+		StRichMCHit* thePersistentHit = new StRichMCHit(StThreeVectorF(mTheHits[ii]->global().x(),
+									       mTheHits[ii]->global().y(),
+									       mTheHits[ii]->global().z()),
 								StThreeVectorF(mTheHits[ii]->localError().x(),
 									       mTheHits[ii]->localError().y(),
 									       mTheHits[ii]->localError().z()),
 								1,
-		//StRichMCInfo make this, then add it
-		//thePersistentHit.setMCInof(StRichMCInfo)
-		//
+								mTheHits[ii]->charge(),
+								mTheHits[ii]->maxAmplitude(),
+								static_cast<unsigned char>(0));
+		
+		//Set the single MCInfo
+		StRichID theID = (dynamic_cast<StRichSimpleMCHit*>(mTheHits[ii]))->getMCInfo();
+		
+		thePersistentHit->setMCInfo(
+		    StRichMCInfo(
+			theID.mHitID,
+			theID.mG_ID,
+			theID.mTrackp,
+			theID.mCharge,
+			static_cast<unsigned short>(theID.mSignalType)
+			)
 		    );
 		
 		// Add it
@@ -645,18 +663,28 @@ void StRchMaker::fillStEvent()
 	    }
 	    else {
 		//cout << "hit ";
-							    StThreeVectorF(0,0,0),
+		StRichHit* thePersistentHit = new StRichHit(StThreeVectorF(mTheHits[ii]->global().x(),
+									   mTheHits[ii]->global().y(),
+									   mTheHits[ii]->global().z()),
 							    StThreeVectorF(mTheHits[ii]->localError().x(),
 									   mTheHits[ii]->localError().y(),
 									   mTheHits[ii]->localError().z()),
 							    1,
-		//
-		// member functions to add other info if necessary?
-		//
-		//thePersistentHit->setClusterNumber();
+							    mTheHits[ii]->charge(),
 							    mTheHits[ii]->maxAmplitude(),
 							    static_cast<unsigned char>(0));
-	
+		// Add it
+		richCollection->addHit(thePersistentHit);
+	    }
+	    // Fill in the stuff missing in the constructor
+	    richCollection->getRichHits().back()->setClusterNumber(mTheHits[ii]->clusterNumber());
+	    
+	    richCollection->getRichHits().back()->local() 
+		= StThreeVectorF(mTheHits[ii]->local().x(),
+				 mTheHits[ii]->local().y(),
+				 mTheHits[ii]->local().z());
+	    
+	    richCollection->getRichHits().back()->internal() 
 		= StThreeVectorF( mTheHits[ii]->internal().x(),
 				  mTheHits[ii]->internal().y(),
 				  mTheHits[ii]->internal().z());
@@ -679,10 +707,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
