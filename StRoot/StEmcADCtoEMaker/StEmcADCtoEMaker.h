@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.29 2003/09/11 20:40:08 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.30 2003/09/12 22:03:16 jeromel Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.30  2003/09/12 22:03:16  jeromel
+// No changes (ident)
+//
 // Revision 1.29  2003/09/11 20:40:08  suaide
 // Removed SMD capacitors 124 and 125 from data for dAu and pp Y2003 runs only.
 // It is timestamp flagged so it will work only for this data.
@@ -112,64 +115,65 @@ class StBemcData;
 
 class StEmcADCtoEMaker : public StMaker 
 {
-  private: 
-           TH2F              *mNhit;           //! 
-           TH2F              *mEtot;           //!
-           TH2F              *mHits[MAXDET];   //!
-           TH2F              *mAdc[MAXDET];    //!
-           TH2F              *mEnergyHist[MAXDET]; //!
-           TH2F              *mEnergySpec[MAXDET][3]; //!
-           TH1F              *mAdc1d[MAXDET];  //!           
-           TH1F              *mEn1d[MAXDET];  //!           
-           TH2F              *mTower;          //!           
-           TH2F              *mSmdTimeBinHist; //!
-					 TH2F              *mValidEvents;    //!
+ private: 
+  TH2F              *mNhit;           //! 
+  TH2F              *mEtot;           //!
+  TH2F              *mHits[MAXDET];   //!
+  TH2F              *mAdc[MAXDET];    //!
+  TH2F              *mEnergyHist[MAXDET]; //!
+  TH2F              *mEnergySpec[MAXDET][3]; //!
+  TH1F              *mAdc1d[MAXDET];  //!           
+  TH1F              *mEn1d[MAXDET];  //!           
+  TH2F              *mTower;          //!           
+  TH2F              *mSmdTimeBinHist; //!
+  TH2F              *mValidEvents;    //!
            
-           controlADCtoE_st  *mControlADCtoE; 
+  controlADCtoE_st  *mControlADCtoE; 
+					 
+  TDataSet          *mDb;
+  StEmcCollection   *mEmc;            
+  StEmcDecoder      *mDecoder;          
+  StBemcData        *mData;                      
+  StEmcGeom         *mGeo[MAXDET]; 
            
-           TDataSet          *mDb;
-           StEmcCollection   *mEmc;            
-           StEmcDecoder      *mDecoder;          
-					 StBemcData        *mData;                      
-           StEmcGeom         *mGeo[MAXDET]; 
-           
-           Bool_t            mEmbedd;
-					 Bool_t            mFromDaq;
-           Bool_t            mPrint;
+  Bool_t            mEmbedd;
+  Bool_t            mFromDaq;
+  Bool_t            mPrint;
 					 
 					 
-           void              zeroAll(); ///< Zero all temporary vectors
-           Bool_t            getEmc(); ///< This method gets EMC hits from different sources.
-           Bool_t            getStatus(Int_t); ///< This method gets the status tables 
-           Bool_t            calibrate(Int_t); ///< This method applies the calibration constants to get the hit energy.
-           Bool_t            fillHistograms(); ///< This method fills QA histograms
-           Bool_t            fillStEvent(); ///< This method makes a clean up of StEvent
-           Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
-           Bool_t            clearOldEmc(); ///< Clear old emc collection
-           Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
-           Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
-  protected:    
+  void              zeroAll(); ///< Zero all temporary vectors
+  Bool_t            getEmc(); ///< This method gets EMC hits from different sources.
+  Bool_t            getStatus(Int_t); ///< This method gets the status tables 
+  Bool_t            calibrate(Int_t); ///< This method applies the calibration constants to get the hit energy.
+  Bool_t            fillHistograms(); ///< This method fills QA histograms
+  Bool_t            fillStEvent(); ///< This method makes a clean up of StEvent
+  Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
+  Bool_t            clearOldEmc(); ///< Clear old emc collection
+  Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
+  Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
+ protected:    
     
-  public: 
+ public: 
                  
-                             StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
-   virtual                   ~StEmcADCtoEMaker(); ///< StEmcADCtoEMaker destructor
-   virtual Int_t             Init(); ///< Init function. This method initializes the histograms
-   virtual Int_t             Make(); ///< Process each event
-   virtual Int_t             Finish(); ///< This method creates mean ADC and RMS histograms.
+  StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
+  virtual                   ~StEmcADCtoEMaker(); ///< StEmcADCtoEMaker destructor
+  virtual Int_t             Init(); ///< Init function. This method initializes the histograms
+  virtual Int_t             Make(); ///< Process each event
+  virtual Int_t             Finish(); ///< This method creates mean ADC and RMS histograms.
    
-           controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
-           StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
-           StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
-					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
-           void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
-           void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
-   virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.29 2003/09/11 20:40:08 suaide Exp $ built "__DATE__" "__TIME__ ; 
-     return cvs;
-   }
+  controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
+  StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
+  StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
+  void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
+  void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
+  void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
 
-   ClassDef(StEmcADCtoEMaker, 1)  
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.30 2003/09/12 22:03:16 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+
+  ClassDef(StEmcADCtoEMaker, 1)  
 };
 
 #endif
