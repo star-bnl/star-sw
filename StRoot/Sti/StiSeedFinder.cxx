@@ -7,12 +7,12 @@
 
 StiSeedFinder::StiSeedFinder()
 {
-  cout <<"StiSeedFinder::StiSeedFinder()"<<endl;
+    //cout <<"StiSeedFinder::StiSeedFinder()"<<endl;
 }
 
 StiSeedFinder::~StiSeedFinder()
 {
-  cout <<"StiSeedFinder::~StiSeedFinder()"<<endl;
+    //cout <<"StiSeedFinder::~StiSeedFinder()"<<endl;
 }
 
 

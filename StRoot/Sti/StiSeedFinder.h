@@ -16,12 +16,12 @@ class StiSeedFinder
 {
 public:
     StiSeedFinder();
-    StiSeedFinder(const StiSeedFinder&);
     virtual ~StiSeedFinder();
 
-    //User interface
+    //Inherited interface
     virtual bool hasMore() = 0;
     virtual StiKalmanTrack* next() = 0;
+    virtual void build() = 0;
 
 protected:
 private:

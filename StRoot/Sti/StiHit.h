@@ -11,6 +11,7 @@
 
 class StHit;
 class StThreeVectorD;
+class StThreeVectorF;
 class StMatrixF;
 class StiDetector;
 
@@ -40,7 +41,7 @@ public:
     const StHit* stHit() const;
     
     bool   isUsed() const;
-    StThreeVectorD globalPosition() const;
+    const StThreeVectorF& globalPosition() const;
 
     //Sets
     void set(double refAngle, double position,double x, double y, double z, 

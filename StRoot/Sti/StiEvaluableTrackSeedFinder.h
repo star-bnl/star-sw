@@ -33,6 +33,7 @@ public:
     //User query interface to StiKalmanTracks
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
+    virtual void build();
 
 protected:
     StiEvaluableTrack* makeTrack(StMcTrack*);

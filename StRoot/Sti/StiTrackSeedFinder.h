@@ -12,10 +12,10 @@
 
 #include "StiHit.h"
 #include "StiHitContainer.h" //Include temp., so that we can use typedefs
+#include "StiKalmanTrack.h"
 #include "CombinationIterator.h"
 
 class StiRootDrawableHits;
-class StiKalmanTrack;
 class StTrack;
 class Sti2HitComboFilter;
 
@@ -25,22 +25,24 @@ class StiTrackSeedFinder : public StiSeedFinder
     typedef combo_iterator::tvector tvector;
 
 public:
-    typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
 
-    StiTrackSeedFinder(const StiTrackSeedFinder&); //Not Implemented
-    StiTrackSeedFinder(StiHitContainer*);
+    StiTrackSeedFinder(StiHitContainer*, Sti2HitComboFilter*);
+    StiTrackSeedFinder(const StiTrackSeedFinder&);
+    StiTrackSeedFinder& operator=(const StiTrackSeedFinder&);
+    
     virtual ~StiTrackSeedFinder();
 
     //Set Hit Combination filter type
-    void setHitComboFilter(Sti2HitComboFilter* val) {mhitcombofilter = val;}
-    const Sti2HitComboFilter* getHitComboFilter() const {return mhitcombofilter;}
-
+    void setHitComboFilter(Sti2HitComboFilter* val);
+    const Sti2HitComboFilter* getHitComboFilter() const;
+    
     //SetFactory
-    void setFactory(StiKalmanTrackFactory* val) {mtrackfactory=val;}
+    void setFactory(StiKalmanTrackFactory* val);
     
     //Enforced User interface
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
+    virtual void build();
     
     void addLayer(double refangle, double position);
     virtual void clear();
@@ -49,15 +51,18 @@ public:
     int numberOfLayers() const;
     
 protected:
+    void copyToThis(const StiTrackSeedFinder&); //deep copy
     virtual StiKalmanTrack* makeTrack(const tvector&) const;
-    bool acceptCombination(const tvector&) const;
-    
+
+protected:
+    //Shallow members
     StiHitContainer* mhitstore;
-    combo_iterator* miterator;
+    combo_iterator miterator;
     StiKalmanTrackFactory* mtrackfactory;
     int mnlayers;
     StiRootDrawableHits* mdrawablehits;
     Sti2HitComboFilter* mhitcombofilter;
+
 };
 
 // Non members ---
@@ -66,18 +71,48 @@ protected:
 struct Sti2HitComboFilter
 {
     virtual bool operator()(const StiHit*, const StiHit*) const = 0;
+    virtual void build(const string& val="empty")=0;
 };
 
 //This is a simple test for rectangular distance in 2 dimensions
 struct StiRectangular2HitComboFilter : public Sti2HitComboFilter
 {
+    StiRectangular2HitComboFilter() :  deltaD(-1), deltaZ(-1) {};
     virtual bool operator()(const StiHit*, const StiHit*) const;
+    virtual void build(const string&);
     double deltaD;
     double deltaZ;
 };
+
+struct StiCollinear2HitComboFilter : public Sti2HitComboFilter
+{
+    StiCollinear2HitComboFilter() : deltaPhi(-1.), deltaTheta(-1.) {};
+    virtual bool operator()(const StiHit*, const StiHit*) const;
+    virtual void build(const string&);
+    double deltaPhi;
+    double deltaTheta;
+};
+//inlines
+
 
 inline bool StiRectangular2HitComboFilter::operator()(const StiHit* lhs, const StiHit* rhs) const
 {
     return ( (fabs(lhs->y()-rhs->y())<=deltaD) && (fabs(lhs->z()-rhs->z())<deltaZ));
 }
+
+inline void StiTrackSeedFinder::setHitComboFilter(Sti2HitComboFilter* val)
+{
+    mhitcombofilter = val;
+}
+
+inline const Sti2HitComboFilter* StiTrackSeedFinder::getHitComboFilter() const
+{
+    return mhitcombofilter;
+}
+
+inline void StiTrackSeedFinder::setFactory(StiKalmanTrackFactory* val)
+{
+    mtrackfactory=val;
+}
+
 #endif
