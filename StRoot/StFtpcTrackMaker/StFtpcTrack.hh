@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.17 2003/01/16 18:04:33 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.18 2003/01/20 09:16:33 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.18  2003/01/20 09:16:33  oldi
+// Calculation of residuals simplified.
+//
 // Revision 1.17  2003/01/16 18:04:33  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -182,6 +185,8 @@ public:
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
       void   CalcResiduals(Bool_t primaryFit);                                    // calulates the primary or global fit residuals for each point on track
+      void   CalcGlobResiduals();                                                 // calulates the global fit residuals for each point on track
+      void   CalcPrimResiduals();                                                 // calulates the primary fit residuals for each point on track
      Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, 
 			StFtpcVertex *vertex,
 			Bool_t primary_fit);                                      // writes track to table
@@ -287,6 +292,22 @@ protected:
 
   ClassDef(StFtpcTrack, 1)    // Ftpc track class  
 };
+
+
+inline void StFtpcTrack::CalcGlobResiduals()
+{
+  // calulates the global fit residuals for each point on track
+
+  CalcResiduals((Bool_t)kFALSE);
+}
+
+
+inline void StFtpcTrack::CalcPrimResiduals()
+{
+  // calulates the primary fit residuals for each point on track
+
+  CalcResiduals((Bool_t)kTRUE);
+}
 
 
 inline Double_t StFtpcTrack::GetMeanAlpha()
