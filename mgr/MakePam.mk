@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.71 1998/12/10 22:47:55 fine Exp $
+# $Id: MakePam.mk,v 1.72 1998/12/11 22:21:18 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.72  1998/12/11 22:21:18  fisyak
+# Remove doublet in idl and inc directories
+#
 # Revision 1.71  1998/12/10 22:47:55  fine
 # Correction for fit Window NT branch
 #
@@ -184,8 +187,14 @@ endif
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-IDL_DIRS:= $(wildcard $(OUT_DIR)/pams/*/idl $(STAR)/pams/*/idl)
-INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
+SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/idl)
+SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/idl)))
+IDL_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
+SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc)
+SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/inc)))
+INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
+
+#INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
