@@ -49,7 +49,7 @@ public:
 private:
     double ma;
     double mb;
-    TClonesArray* mArray;
+    TClonesArray* mArray; //! Temporary fix to compile
     int mCounter;
     
     ClassDef(TreeEntry,1) 
