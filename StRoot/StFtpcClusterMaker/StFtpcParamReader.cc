@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.cc,v 1.15 2001/04/02 12:10:26 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.16 2001/04/24 07:11:39 oldi Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.16  2001/04/24 07:11:39  oldi
+// Float_t mSlowSimPressure introduced to replace mNormalizedNowPressure in
+// StFtpcSlowSimMaker.
+//
 // Revision 1.15  2001/04/02 12:10:26  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -174,6 +178,7 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
      mChamberCathodeVoltage = paramTable->chamberCathodeVoltage;
      mSigmaPadResponseFuntion = paramTable->sigmaPadResponseFuntion;
      mReadoutShaperTime = paramTable->shaperTime;
+     mSlowSimPressure = paramTable->slowSimPressure;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcSlowSimPars","E");
   }
