@@ -1,0 +1,38 @@
+ Library: EVR
+   Owner: The STAR Collaboration
+   Description: Primary Vertex Reconstruction                               
+                                                                            
+/*   evr_evrpar.idl
+*   Table: evr_evrpar : Parameter table driving the fitting
+*/
+ struct evr_evrpar {
+       long      match;      /* use TPC-SVT matched tracks */
+       long      minhit;     /* minimum no. of hits */
+       long      use;        /* which tracks are used */
+       float     cut2;       /* select tracks for 2nd vertex fit */
+       float     cut3;       /* select tracks for 3rd vertex fit */
+       float     cutxy;      /* select tracks for vertex fitting */
+       float     cutz;       /* select tracks for vertex fitting */
+       float     ptmin;      /* minimum pt of individual tracks */
+   } ;
+
+/*  Last mod. for evrpar: $Date: 1998/07/01 22:24:41 $ */
+
+/*   evr_privert.idl
+*   Table: evr_privert  : Output table containing the found vertex (vertices)
+*/
+ struct evr_privert{
+       char      use[16];    /* which tracks were used */
+       long      id;         /* primary key for primary vertices */
+       long      match;      /* matched TPC-SVT tracks */
+       long      ndegf;      /* no. deg. of freedom for fit */
+       long      ntch;       /* no. of charged tracks attached */
+       float     chisq;      /* chisq of primary vertex fit */
+       float     covar[6];   /* Covariance matrix of primary vertex fit */
+       float     ptmin;      /* minimum pt of individual tracks */
+       float     x;          /* x coordinate of primary vertex */
+       float     y;          /* y coordinate of primary vertex */
+       float     z;          /* z coordinate of primary vertex */
+   } ;
+/*  Last mod. for privert: $Date: 1998/07/01 22:24:41 $  */
+
