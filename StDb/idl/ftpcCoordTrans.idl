@@ -1,0 +1,13 @@
+/*    ftpcCoordTrans.idl
+*
+*  Table: ftpcCoordTrans
+*
+*       description: //    FTPC Rotation and Shift parameters
+* 
+*/
+
+
+struct ftpcCoordTrans {
+  
+  float observedVertexOffsetY[2];  /* [0] = east, [1] = west */
+};
