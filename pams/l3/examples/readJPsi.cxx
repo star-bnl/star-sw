@@ -1,3 +1,4 @@
+//
 {
    gSystem->Load("FtfSl3.so");
    FtfGraphic tracker ;
@@ -29,7 +30,8 @@
    para->etaMax =  2.2 ;
    para->fillTracks = 1 ;
    para->vertexConstrainedFit = 1 ;
-   para->init = 0 ;
+   //   Tracks needs to be reset after parameters are modified
+   tracker.reset();
 //
 //  Setup input file
 //

@@ -5,6 +5,7 @@
 **: 10/12/99 ppy Demo version 
 **: 10/18/99 ppy Check in reading loop to turn all phi angle to positive values
 **:              It causes problems when reading hits with phi=(0,2*pi)
+**: 11/05/99 ppy Add line "tracker.reset()" after parameter modification
 **:  
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
@@ -36,10 +37,10 @@ int main ( ) {
   int   row ;
 //
 //   
-//tracker.para.phiMin = 45.F * pi / 180.F ;
-//tracker.para.phiMax = 75.F * pi / 180.F  ;
-  tracker.para.phiMin =  0.F * pi / 180.F ;
-  tracker.para.phiMax = 360.F * pi / 180.F  ;
+  tracker.para.phiMin = 45.F * pi / 180.F ;
+  tracker.para.phiMax = 75.F * pi / 180.F  ;
+//tracker.para.phiMin =  0.F * pi / 180.F ;
+//tracker.para.phiMax = 360.F * pi / 180.F  ;
   tracker.para.etaMin =  0.0F ;
   tracker.para.etaMax =  2.0F ;
   tracker.para.fillTracks = 1 ; 
@@ -47,6 +48,9 @@ int main ( ) {
   tracker.para.trackDebug = 24 ;
   tracker.para.debugLevel =  1 ;
 #endif
+// !!! IMPORTANT !!!! tracker needs to be reset 
+// when parameters are changed
+  tracker.reset(); 
 //
   int i ;
   int counter = 0 ;
