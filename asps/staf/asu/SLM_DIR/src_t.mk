@@ -35,6 +35,9 @@ $(IDLTYPES): $(IDLDIR)/%.idl
 	cp $(dir $<)/$@ $@
 	echo $@ >> .sources_generated
 #
+%_init.cc:
+	pamiGen $(BASE_NAME) $(IDLDIR)/*.idl > $@
+#
 .sources_generated:
 	touch $@
 #
