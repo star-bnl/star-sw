@@ -8,6 +8,7 @@ int
 mysqlAccessor::QueryDb(StDbConfigNode* node){
   
   char* configName = node->getConfigName();
+  if(!configName)return 0;
   char* nodeName = node->getName();
   char* keyName = getKeyName(nodeName);
 
@@ -198,7 +199,7 @@ mysqlAccessor::QueryDescriptor(StDbTable* table){
   if(!table->hasDescriptor()){
 
     char* tableName=table->getTableName();
-    cout << "Getting Descriptor for table = " << tableName << endl;  
+    //cout << "Getting Descriptor for table = " << tableName << endl;  
 
     Db<< "SELECT structure.KeyID FROM structure WHERE structure.name='";
     Db<<tableName<<"'"<<endsql;

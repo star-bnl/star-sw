@@ -17,7 +17,7 @@ StDbTableI* ret = 0;
 if(!done()) { 
  ret = *itr;
  char* tableName = (*itr)->getTableName();
- cout << "Table [" << tableName <<"] is available" << endl;
+ // cout << "Table [" << tableName <<"] is available" << endl;
  delete [] tableName;
  itr++;
 }
@@ -40,6 +40,9 @@ bool retVal = true;
 if(itr != mnode->mTables.end())retVal = false;
 return retVal;
 }
+
+
+
 
 
 

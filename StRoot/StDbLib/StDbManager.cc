@@ -3,9 +3,11 @@
 #include "StDbConfigNode.hh"
 #include "StDbServer.hh"
 #include "StDbTable.h"
+#include <iostream.h>
+#include <strstream.h>
+#include <strings.h>
 
 StDbManager* StDbManager::mInstance=0;
-
 
 ////////////////////////////////////////////////////////////////
 
@@ -89,7 +91,7 @@ char* name;
     }
   }
 
-return strdup(name);
+return mstringDup(name);
 }     
 
 ////////////////////////////////////////////////////////////////
@@ -106,10 +108,10 @@ char* name;
     }
   }
 
-char* retName=strdup(name);
+char* retName=mstringDup(name);
 if(strcmp(retName,"unknown")==0)retName=0;
 
-return strdup(retName);
+return retName;
 }     
 
 
@@ -154,41 +156,247 @@ return retType;
 void
 StDbManager::initServers(const char* refFile){
 
+  if(!refFile){
   //
   // No longer called. servers are created as needed 
   //
-
-StDbServer* mserver = 0;
-
-/* just now only one server
- if(refFile){  // get from a XML reference file
-    StDbServer::instance()->queryDbServers(refFile);
- } else {     // get from the mysql DataBase
-    StDbServer::instance()->queryDbServers();
- }
-*/
-
+  /*
+  StDbServer* mserver = 0;
   cout << "StDbManager:: Creating Server List " << endl;
-    mservers.push_back(new StDbServer(StarDb,Star,"StarDb","Star"));
-    mservers.push_back(new StDbServer(Conditions,Star,"Conditions","Star"));
-    mservers.push_back(new StDbServer(Calibrations,Star,"Calibrations","Star"));
-    mservers.push_back(new StDbServer(Geometry,Star,"Geometry","Star"));
-    mservers.push_back(new StDbServer(Conditions,Tpc,"Conditions","tpc"));
-    mservers.push_back(new StDbServer(Calibrations,Tpc,"Calibrations","tpc"));
-    mservers.push_back(new StDbServer(Geometry,Tpc,"Geometry","tpc"));
-      /*
-    while( (mserver=StDbServer::instance()->nextServer())){
-         mservers.push_back(mserver);
-    }
-      */
+  mservers.push_back(new StDbServer(StarDb,Star,"StarDb","Star"));
+  mservers.push_back(new StDbServer(Conditions,Star,"Conditions","Star"));
+  mservers.push_back(new StDbServer(Calibrations,Star,"Calibrations","Star"));
+  mservers.push_back(new StDbServer(Geometry,Star,"Geometry","Star"));
+  mservers.push_back(new StDbServer(Conditions,Tpc,"Conditions","tpc"));
+  mservers.push_back(new StDbServer(Calibrations,Tpc,"Calibrations","tpc"));
+  mservers.push_back(new StDbServer(Geometry,Tpc,"Geometry","tpc"));
+  */
+  }
+
 }
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::lookUpServers(){
+
+  //cout << "looking up Servers " << endl;
+
+char* xmlfile1 = getFileName("HOME");
+char* xmlfile2 = getFileName("STAR","/StDb/Servers");
+char* xmlfile3 = getFileName("STDB_SERVERS");
+
+if(xmlfile1){
+ ifstream is1(xmlfile1);
+
+ //cout << "Trying HomeDir " << xmlfile1 << endl;
+
+ if(is1)findServersXml(is1);
+ delete [] xmlfile1;
+}
+
+if(xmlfile2){
+ ifstream is2(xmlfile2);
+ if(is2)findServersXml(is2);
+ delete [] xmlfile2;
+}
+
+if(xmlfile3){
+ ifstream is3(xmlfile3);
+ if(is3)findServersXml(is3);
+ delete [] xmlfile3;
+}
+
+mhasServerList = true;
+
+}
+
+////////////////////////////////////////////////////////////////
+
+char*
+StDbManager::getFileName(const char* envName, const char* subDirName){
+
+char* xmlFile = 0;
+char* dirname=getenv(envName);
+
+ if(dirname){
+
+  xmlFile = new char[1024];
+  ostrstream os(xmlFile,1024);
+
+  char* serverFile="/dbServers.xml";
+
+  if(subDirName){
+     os<<dirname<<subDirName<<serverFile<<ends;
+   } else {
+     os<<dirname<<serverFile<<ends;
+   }
+
+ }
+
+
+return xmlFile;
+}
+
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::findServersXml(ifstream& is){
+
+
+  //cout << " finding Server from ifstream " << endl;
+  //  parseXmlString mparser;
+  char* stardatabase;
+
+  while(!is.eof()){
+
+    //cout << " not eof yet " << endl;
+  // builds 1 string from file contained by "<StDbServer> ... </StDbServer>"
+  
+
+  stardatabase = findServerString(is); 
+  if(!stardatabase) continue;
+
+  int portNum = 0;
+  //cout << stardatabase << endl;
+
+  char* servName = mparser.getString(stardatabase,"<server>","</server>");
+  //cout << "server Name = " << servName << endl;
+  char* hostName = mparser.getString(stardatabase,"<host>","</host>");
+  char* uSocket = mparser.getString(stardatabase,"<socket>","</socket>");
+  char* portNumber = mparser.getString(stardatabase,"<port>","</port>");
+
+  if(portNumber){
+    portNum   = atoi(portNumber);
+    delete [] portNumber;
+  }
+
+  char* dbNames = mparser.getString(stardatabase,"<databases>","</databases>");
+
+   StDbServer* server = new StDbServer();
+   server->setServerName(servName); delete [] servName;
+   server->setHostName(hostName); delete [] hostName;
+   server->setUnixSocket(uSocket); delete [] uSocket;
+   server->setPortNumber(portNum); 
+
+  if( !dbNames && !mhasDefaultServer ){
+
+    //cout << " setting the default Server" << endl;
+    server->setIsDefaultServer();
+    mservers.push_back(server);
+    mhasDefaultServer = true;
+
+  } else {
+
+    StDbServer* aserver;
+    char* p1 = &dbNames[0];
+    char* aname;
+
+    while(p1){
+      aname = getNextName(p1); // p1 is reset to after next "," 
+      //cout << " dbName = " << aname;
+      //if(p1) cout << " & the remaining are = " << p1<< endl;
+      aserver = new StDbServer(*server);
+      aserver->setDbName(aname);
+      mservers.push_back(aserver);
+      if(aname)delete [] aname;
+    }
+    
+   if(dbNames)delete [] dbNames;
+  }
+  if(stardatabase)delete [] stardatabase;
+  }
+
+}
+
+////////////////////////////////////////////////////////////////
+
+char*
+StDbManager::findServerString(ifstream& is){
+
+char* line = new char[10240];
+char tmpline[256];
+bool done = false;
+bool started = false;
+char* id;
+
+ostrstream os(line,10240);
+
+ while(!done){
+
+   if(is.eof()){
+     done = true; 
+     delete [] line;
+     line = 0; // and no new complete string was found
+   } else {
+     is.getline(tmpline,255);
+
+     if(id=strstr(tmpline,"//"))continue;
+
+     if(!started){
+
+        id= strstr(tmpline,"<StDbServer>");
+        if(id){
+          os<<tmpline;
+          started = true;
+        }
+
+     } else {
+
+        os<<tmpline;
+
+        id=strstr(tmpline,"</StDbServer>");
+        if(id){
+          os<<ends;
+          done=true;
+        }
+
+     } // started check          
+   } // eof check 
+ } // while loop
+
+return line;
+}
+
+////////////////////////////////////////////////////////////////
+
+char*
+StDbManager::getNextName(char*& names){
+
+char* nextName = 0;
+if(!names)return nextName;
+
+char* id = strstr(names,",");
+
+if(!id) {
+  // nextName = mstringDup(names);
+ nextName = mparser.removeBlankEnds(names);
+ //delete [] names;
+ names = 0;
+} else {
+  int iloc = id-names;
+  char* saveName = new char[iloc+1];
+  strncpy(saveName,names,iloc);
+  saveName[iloc]='\0';
+  nextName=mparser.removeBlankEnds(saveName);
+  delete [] saveName;
+  names = id; names++;
+}
+
+return nextName;
+}
+
 
 ////////////////////////////////////////////////////////////////
 
 StDbServer*
 StDbManager::findServer(StDbType type, StDbDomain domain){
 
+ if(!mhasServerList)lookUpServers();
  StDbServer* server = 0;
+
+ // first check if it exists in list
 
  for(ServerList::iterator itr = mservers.begin();
      itr != mservers.end(); ++itr){
@@ -198,25 +406,75 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
    }
  }
 
- if(!server){
+ // if not build from default server
+
+ if(!server){ 
+
     char * typeName = getDbTypeName(type);
     char * domainName = getDbDomainName(domain);
-    if(typeName && domainName) {
-      server = new StDbServer(type,domain,typeName,domainName);
-      if(server){
-        mservers.push_back(server);
-        if(!server->isconnected())server->init();
-      }
+    //cout << " looking for Default server " << endl;
+    StDbServer* defaultServer = findDefaultServer();
+
+    if(defaultServer){
+      // cout << " creating real server from default " << endl;
+     server = new StDbServer(*defaultServer);
+     // cout << "  Setting real DB attributes " << endl;
+     server->setDataBase(type,domain,typeName,domainName);
+     // cout << "  adding to list " << endl;
+     mservers.push_back(server);
     }
+
+    delete [] typeName; delete [] domainName;
+
  }
 
-if(!server) {
-   cout << "No Such Server " << endl;
-   cout << "Type = " << type << " & name= " << getDbTypeName(type) << endl;
-   cout << "Domain = "<< domain << " & name = " << getDbDomainName(domain) << endl;
+ // connect to database if needed
+
+ //cout << server->getServerName() << " & " << server->isconnected() << endl;
+ if(server && !server->isconnected()){
+   server->init();
+   //  cout << " Connecting Server " << endl;
+ }
+ // report failure
+
+ if(!server) {
+   cerr << "No Such Server :: " << endl;
+   cerr << "Type = " << type << " name= " << getDbTypeName(type) << endl;
+   cerr << "Domain = "<< domain << " name = " << getDbDomainName(domain) << endl;
 }
+
 return server;
 }
+
+
+////////////////////////////////////////////////////////////////
+
+StDbServer*
+StDbManager::findDefaultServer(){
+
+ StDbServer* server = 0;
+
+ // first check if it exists in list
+
+ for(ServerList::iterator itr = mservers.begin();
+     itr != mservers.end(); ++itr){
+   if((*itr)->isDefault()){
+     server = *itr;
+     break;
+   }
+ }
+
+ /*
+ if(server){
+    cout << " found default " << endl;
+ } else {
+    cout << " default not found " << endl;
+ }
+ */
+return server;
+
+}
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -304,6 +562,7 @@ mTypes.push_back(new dbType(Calibrations,"Calibrations"));
 mTypes.push_back(new dbType(Geometry,"Geometry")); 
 mTypes.push_back(new dbType(RunCatalog,"RunCatalog")); 
 mTypes.push_back(new dbType(Configurations,"Configurations")); 
+mTypes.push_back(new dbType(RunParams,"RunParams")); 
 
 }
 
@@ -327,21 +586,18 @@ mDomains.push_back(new dbDomain(L3,"l3"));
 }
 
 ////////////////////////////////////////////////////////////////
+char*
+StDbManager::mstringDup(const char* str){
+
+if(!str)return str;
+char* retString = new char[strlen(str)+1];
+strcpy(retString,str);
+
+return retString;
+}
+
+
 ////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

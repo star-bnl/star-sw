@@ -123,7 +123,12 @@ inline
 void StDbTable::setRequestTime(int time) { maccessor.requestTime = time; }
 
 inline 
-char* StDbTable::getVersion() const { return strdup(maccessor.version); }
+char* StDbTable::getVersion() const { 
+if(!maccessor.version)return maccessor.version;
+char* retString=new char[strlen(maccessor.version)+1];
+strcpy(retString,maccessor.version);
+return retString;
+}
 
 inline 
 void StDbTable::setVersion(char* version) {strcpy(maccessor.version,version); }

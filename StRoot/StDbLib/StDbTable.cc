@@ -86,7 +86,15 @@ StDbTable::setTableName(const char* name){
 //////////////////////////////////////////////////////////////////////
 
 char* 
-StDbTable::getTableName() const { return strdup(mtableName); }
+StDbTable::getTableName() const { 
+
+if(!mtableName)return mtableName;
+
+char* retString = new char[strlen(mtableName)+1];
+strcpy(retString,mtableName);
+return retString;
+
+}
 
 
 //////////////////////////////////////////////////////////////////////

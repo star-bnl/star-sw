@@ -264,7 +264,10 @@ if(p1){
 void
 StDbXmlReader::pass(char* name, char* i,  int len){
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strcmp(e->type,"String")==0)i=strdup((e->val).data);
+ if(strcmp(e->type,"String")==0){
+   i=new char[strlen((e->val).data)+1];
+   strcpy(i,(e->val).data);
+  }
 }
 
 
