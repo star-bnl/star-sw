@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.8 2003/09/10 19:47:37 perev Exp $ 
+ * $Id: StTofMaker.h,v 1.9 2004/01/27 23:12:23 dongx Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.9  2004/01/27 23:12:23  dongx
+ * *** empty log message ***
+ *
+ *
+ * New year run year4(TOFp+pVPD+TOFr') raw data
+ *  - Additional ADCs and TDCs put in
+ *  - TOTs of TOFr' added in, combined with TDCs
+ * 
  * Revision 1.8  2003/09/10 19:47:37  perev
  * ansi corrs
  *
@@ -92,7 +100,7 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.8 2003/09/10 19:47:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.9 2004/01/27 23:12:23 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofMaker,0)
 
