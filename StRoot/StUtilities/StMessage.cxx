@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.5 1999/06/29 19:17:14 genevb Exp $
+// $Id: StMessage.cxx,v 1.6 1999/06/29 23:32:41 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.6  1999/06/29 23:32:41  genevb
+// Handle multi-line calls to fortran routines better
+//
 // Revision 1.5  1999/06/29 19:17:14  genevb
 // Lots of fixes..
 //
@@ -59,6 +62,7 @@ messTime(new TDatime()) {
   while (mess[--len] == space) {}    // remove trailing spaces
   message = new char[++len];
   strncpy(message,mess,len);
+  strcat(message,"");
   Print();
 }
 //_____________________________________________________________________________
@@ -116,7 +120,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.5 1999/06/29 19:17:14 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.6 1999/06/29 23:32:41 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
