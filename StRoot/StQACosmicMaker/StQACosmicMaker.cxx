@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.10 1999/09/24 01:23:21 fisyak Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.11 1999/11/11 16:22:38 fisyak Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.11  1999/11/11 16:22:38  fisyak
+ * Add TF1 include
+ *
  * Revision 1.10  1999/09/24 01:23:21  fisyak
  * Reduced Include Path
  *
@@ -43,6 +46,7 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TFile.h"
+#include "TF1.h"
 //-----------------------------------------------------------------------
 
 ClassImp(StQACosmicMaker)
@@ -96,7 +100,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.10 1999/09/24 01:23:21 fisyak Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.11 1999/11/11 16:22:38 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
