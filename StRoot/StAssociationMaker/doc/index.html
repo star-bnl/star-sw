@@ -126,7 +126,154 @@
       allows multiple keys.  This means that if a phonebook were a <i>multimap</i>, then everyone
       could have
       as many phone numbers as they pleased.
+      
+      One thing that help to picture the map and the multimap is the following.
+      Recall the definition is that they are "associative containers of
+      pairs of
+      objects".  You can always think of a vector as an array.  So if you have
+      a <code>vector< int></code> then you can picture it like this:
+    <p>
+      <table height=3 align=center border=4>
+	<tr align=center >
+	  <th bgcolor=lightseagreen>Vector: </th><td align=center> 1 </td><td> 2 </td><td> 5 </td><td> 17 </td><td> 20 </td><td> 25 </td>
+	</tr>
+      </table>
 
+    So the first element is 1, the second is 2 and so on.  Now, a map is a
+    container of PAIRS of objects.  The 2 objects can be anything, (i.e. the
+    PAIR class is also a template.)  So a phonebook would be, for example, 
+    a
+    
+    <br> <code>map< string,int, less< string> ></code>.
+    <br>
+    I would picture it like this:
+    <p>
+      <table align=center border=2 cellspacing=4>
+	<caption align=bottom>Example phonebook as map</caption>
+	<tr>
+	  <th bgcolor=lightseagreen>Map: </th>
+	  <td>("Brian",2034322043)</td>
+	  <td>("Manuel",6313448342)</td>
+	  <td>("Thomas",2034325829)</td>
+	  
+	</tr>
+    </table>
+    
+    Now, the 'key' here would be the <tt>string</tt>, and the 'value' the
+    <tt>int</tt> representing the phone
+    number.  Since it is a map, keys are unique.  This means that there
+    will only be one entry for each string.  
+    If I say:
+    <p>
+    
+    <code>
+      phonebook["Manuel"] = 2034325637;
+    </code>
+    <p>
+    the entry for "Manuel" will be overwritten.
+    
+    Note that I can say 
+    <p>
+    <code>
+      phonebook["Thomas"] = phonebook["Manuel"];
+    </code>
+    <p>
+    and I'll overwrite Thomas's phone number with mine.  The 'values' 
+    can be repeated.
+
+    By the way, a map
+    supports indexing. Since there is one entry for each key (and only one)
+    it is unambiguous which entry one wants so we can use the key as an index.
+    A multimap doesn't support indexing,
+    because there is still the ambiguity of having multiple entries.
+    If we made the phonebook a
+    <p>
+    <code>
+      multimap< string, int, less< string> > 
+    </code>
+    <p>
+      then we could have
+    <p>
+      <table border=0 >
+	<caption align=bottom>Example phonebook as a multimap</caption>
+	<tr>
+	  <td>
+	    <table border=4>
+	      <th bgcolor=lightseagreen>Multimap: </th>
+	      <tr><td>("Brian",2034322043)</td></tr>
+	      <tr><td>("Manuel",6313448342)</td></tr>
+	      <tr><td>("Manuel",2034325637)</td></tr>
+	      <tr><td>("Thomas",2034325829)</td></tr>
+	    </table>
+	  </td>
+	
+	  <td>
+	    <table border=0>
+	      <th><font color=white>.</font></th>
+	      <tr><td rowspan=1><font color=white>.</font></td></tr>
+	      <tr><td>&lt;-- phonebook.lower_bound("Manuel");</td></tr>
+	      <tr><td rowspan=1><font color=white>.</font></td></tr>
+	      <tr><td>&lt;-- phonebook.upper_bound("Manuel");</td></tr>
+	      
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      <br>
+    <p>
+    <p>
+      Since you don't know a priori how many entries there are,
+      that is why you need the 2 iterators, lower_bound and upper_bound,
+      to loop over all the entries of a particular key in the multimap.  
+    
+    You can think of them as the equivalent to
+    <p>
+    <code>
+      vector.begin();
+    </code>
+    <p>
+      and
+    <p>
+      <code>
+      vector.end();
+    </code>
+    <p>
+    (Remember that upper_bound will point to the first element greater than
+    the key it takes as argument. )   The comparison is also
+    important, so that the entries in the multimap are ordered.
+      You'll
+      find more discussion on iterators in the next section.
+
+    <p>
+      It is important to stress that every entry in the multimap is a key-value pair,
+      regardless of whether the key has appeared before.  This means that there is some
+      redundancy.  If you loop over a sequence of entries using lower_bound and
+      upper_bound, ALL of the entries in that sequence will have the same key:
+    <p>
+      <table border=0 >
+	<caption align=bottom>Multiple entries for a key.</caption>
+	<tr>
+	  <td>
+	    <table border=4>
+	      <th bgcolor=lightseagreen>Multimap: </th>
+	      <tr><td>("Manuel",631...)</td></tr>
+	      <tr><td>("Manuel",203...)</td></tr>
+	      <tr><td>("Manuel",212...)</td></tr>
+	    </table>
+	  </td>
+	
+	  <td>
+	    <table border=0>
+	      <th><font color=white>.</font></th>
+	      <tr><td>&lt;-- First entry</td></tr>
+	      <tr><td>&lt;-- Second entry, same key, different value</td></tr>
+	      <tr><td>&lt;-- Third entry, etc.</td></tr>
+	      
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      <br>
     <h2>Multimap Usage</h2>
     <p>
       Now that we have an idea of what a multimap is supposed to do, we can get around to how
@@ -756,12 +903,12 @@
     <b>StAssociationMaker</b>.
     <hr>
     <b>StAssociationMaker</b> is a work in progress.  For questions, contact
-    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
+    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calder&oacute;n de la Barca S&aacute;nchez</a></address>
     or
     <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
 <!-- Created: Mon Sep 27 15:18:56 EDT 1999 -->
 <!-- hhmts start -->
-Last modified: Tue Feb  1 11:31:22 EST 2000
+Last modified: Mon Feb 14 15:51:05 EST 2000
 <!-- hhmts end -->
   </body>
 </html>
