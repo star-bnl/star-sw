@@ -9,10 +9,10 @@ class TH2D;
 class TH3D;
 
 #include "StSpectraAnalysis.h"
-#include "StEvent.h"
-#include "StTpcDedxPid.h"
+#include "StEventTypes.h"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
+#include "StTpcDedxPidAlgorithm.h"
 
 class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
 

@@ -3,7 +3,7 @@
 #include "StSpectraCut.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTable.hh"
-#include "StEvent.h"
+#include "StEventTypes.h"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "TH2.h"

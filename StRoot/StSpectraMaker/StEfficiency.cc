@@ -94,8 +94,7 @@ void StEfficiency::setParticle(string particle) {
 
 double StEfficiency::efficiency(StTrack* track) {
 
- const double  bField = 0.5*tesla;
- StThreeVectorD mom = track->helix().momentum(bField);
+ StThreeVectorD mom = track->geometry()->momentum();
  double p = abs(mom);
  double mass = mParticle->mass();
  double e = sqrt(p*p + mass*mass);

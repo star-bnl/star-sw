@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.3 1999/11/22 01:54:58 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.4 1999/11/28 20:22:06 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.4  1999/11/28 20:22:06  ogilvie
+// updated to work with new StEvent
+//
 // Revision 1.3  1999/11/22 01:54:58  ogilvie
 // generalised analysis containers to beany object that inherits from StSpectraAnalysis
 //
@@ -33,15 +36,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include "StArray.h"
 #include <TFile.h>
 #include <vector>
-#include "StSpectraAnalysis.h"
-#include "StTpcDeviantSpectraAnalysis.h"
-#include "StEfficiency.h"
 
-class StEvent;
-class StRun;
+class StSpectraAnalysis;
 
 class StSpectraMaker : public StMaker {
 
@@ -66,12 +64,13 @@ public:
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
-
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.3 1999/11/22 01:54:58 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.4 1999/11/28 20:22:06 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
-  ClassDef(StSpectraMaker, 1)
+  ClassDef(StSpectraMaker,1)
+
 };
+
 
 #endif
 

@@ -11,8 +11,8 @@ StSpectraCutNhit::StSpectraCutNhit(int lowLimit, int highLimit){
 StSpectraCutNhit::~StSpectraCutNhit() {
 }
 
-bool StSpectraCutNhit::satisfiesCut(StGlobalTrack* track, StEvent* event){
-  int nhit = track->numberOfTpcHits();
+bool StSpectraCutNhit::satisfiesCut(StTrack* track, StEvent* event){
+  int nhit = track->fitTraits().numberOfFitPoints();
   if (nhit > mLowLimit && nhit < mHighLimit) { 
     return true;
   } else {

@@ -21,7 +21,7 @@ class StSpectraCut {
 
   virtual  ~StSpectraCut() {};
  
-  virtual bool satisfiesCut(StGlobalTrack* track, StEvent* event) = 0;
+  virtual bool satisfiesCut(StTrack* track, StEvent* event) = 0;
 
 };
 

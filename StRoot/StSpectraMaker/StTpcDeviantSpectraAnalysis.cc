@@ -65,51 +65,50 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
 
 void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 
-  mNumEvent++ ;  
+  StVertex* primvtx = event.primaryVertex();
+  if (primvtx==0) return;
+  mNumEvent++ ; 
+ 
   double mMassPid = mParticle->mass();
   cout << mParticle->charge() << endl;
-  int pidStatus = 1;
-  StTrackCollection *tracks = event.trackCollection();
-  StTrackIterator iter;
-  StGlobalTrack *track;
 
-  StVertex* primvtx = event.primaryVertex();
+  const StSPtrVecPrimaryTrack& tracks = event.primaryVertex()->daughters();
+  StPrimaryTrackIterator iter;
+  StPrimaryTrack *track;
 
-  if (primvtx==0) return;
-
-  for (iter = tracks->begin();
-       iter != tracks->end(); iter++) {
+  for (iter = tracks.begin();
+       iter != tracks.end(); iter++) {
     track = *iter;
     if (track==0) continue;
-    pidStatus = track->pidTraits().tpcDedxPid()->meetsStandardPid();
-    if (pidStatus) {
-	  const StDedx *tpc = track->tpcDedx();
-          if (tpc==0) continue;
-
-	  // 
+       StTpcDedxPidAlgorithm tpcDedx;
+          // 
 	  // check to see if track satisfies the quality cuts set up
 	  // for this analysis
 	  //
-	  vector<StSpectraCut*>::const_iterator cutIter;
-          bool satisfiesAllCuts = true ;
-          for (cutIter = mEffic.mSpectraCutContainer.begin();
-	       cutIter != mEffic.mSpectraCutContainer.end();
-	       cutIter++) {
+       vector<StSpectraCut*>::const_iterator cutIter;
+       bool satisfiesAllCuts = true ;
+       for (cutIter = mEffic.mSpectraCutContainer.begin();
+	    cutIter != mEffic.mSpectraCutContainer.end();
+	    cutIter++) {
 	    if (!((*cutIter)->satisfiesCut(track,&event)) && satisfiesAllCuts){
 	       satisfiesAllCuts = false;
 	    }
-	  }
+       }
 
-	  const double  bField = 0.5*tesla;
-	  // remove this hardwired and get from new StEvent
+       if (satisfiesAllCuts && 
+	      fabs(mParticle->charge() - 
+		   track->geometry()->charge())<0.01) {
 
-	  if (satisfiesAllCuts && 
-	      fabs(mParticle->charge() - track->helix().charge(bField))<0.01) {
-	    StThreeVectorD mom = track->helix().momentum(bField);
+	    StThreeVectorD mom = track->geometry()->momentum();
 	    double p = abs(mom);
-            double dedx = tpc->mean();
-	    double deviant = 
-	      track->pidTraits().tpcDedxPid()->numberOfSigma(mMassPid);
+
+            StDetectorId useTpc = kTpcId;
+	    StTrackPidTraits* trkPidTr = track->pidTraits(kTpcId)[0];
+	    StDedxPidTraits* dedxPidTr = (StDedxPidTraits*)(trkPidTr);
+	    double dedx = dedxPidTr->mean();
+
+            StParticleDefinition *guess = track->pidTraits(tpcDedx);
+	    double deviant = tpcDedx.numberOfSigma(mParticle);
 
 	    double effic = mEffic.efficiency(track);
 	    //  cout << effic << endl;
@@ -129,8 +128,7 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
                mPIDDeviant->Fill(deviant,weight);
 	      }
 	    }
-	  }            
-    }
+       }            
   }   
 
 }
