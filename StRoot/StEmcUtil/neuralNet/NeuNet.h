@@ -83,7 +83,7 @@ class TNNFormula : public TNamed
   virtual void SetCut(Text_t *cutarg=""); 
 
 
-  ClassDef(TNNFormula,1)
+  ClassDef(TNNFormula,0)
 
 };
 
@@ -140,7 +140,7 @@ class TNNTree : public TNamed
   virtual void SetFile(Text_t *namearg);
   virtual void DeleteTree();
   
-  ClassDef(TNNTree,1)
+  ClassDef(TNNTree,0)
 
 };
 
@@ -185,7 +185,7 @@ class TNNControlE : public TCanvas
     tText->Draw();
   }
 
-  ClassDef(TNNControlE,1)
+  ClassDef(TNNControlE,0)
 
 };
 
@@ -305,7 +305,7 @@ class TNNKernel : public TNamed
      return n;
   };
 
-  ClassDef(TNNKernel,1)
+  ClassDef(TNNKernel,0)
 
 };
 
@@ -341,7 +341,7 @@ class TNNUtils : public TNamed
   virtual Int_t FillNB();
   virtual TH1F* HIntegral(TH1F *hOrig, Int_t efficiency=1, Text_t *name="Integral", Text_t *title="Integral");
   virtual TGraph* XY(TH1F *hX, TH1F *hY, Int_t color=1);
-  ClassDef(TNNUtils,1)
+  ClassDef(TNNUtils,0)
 
 };
 
