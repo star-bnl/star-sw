@@ -134,6 +134,7 @@ extern CC_P void kam_tdmtable_column_type_();
 extern CC_P void kam_tdmtable_maxrowcount_();
 extern CC_P void kam_tdmtable_name_();
 extern CC_P void kam_tdmtable_print_();
+extern CC_P void kam_tdmtable_dump_();
 extern CC_P void kam_tdmtable_rowcount_();
 extern CC_P void kam_tdmtable_rowsize_();
 extern CC_P void kam_tdmtable_show_();
@@ -177,6 +178,8 @@ extern CC_P STAFCV_T tdmtable_column_size();
 extern CC_P STAFCV_T tdmtable_column_type();
 extern CC_P STAFCV_T tdmtable_maxrowcount(char* name,long maxrowcount);
 extern CC_P STAFCV_T tdmtable_name(char* name);
+extern CC_P STAFCV_T tdmtable_dump(char* name, long nrows
+		, long ifirst,char *outputfilename,char *columnList);
 extern CC_P STAFCV_T tdmtable_print(char* name, long nrows
 		, long ifirst);
 extern CC_P STAFCV_T tdmtable_rowcount(char* name, long rowcount);

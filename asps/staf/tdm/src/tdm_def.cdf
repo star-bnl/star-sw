@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.10 1998/03/16 02:08:15 fisyak Exp $
+ #(@)$Id: tdm_def.cdf,v 1.11 1998/06/09 22:39:28 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -982,6 +982,48 @@ BUGS:
    None known. 
 .
 >ACTION kam_tdmtable_typename_%C
+**
+** ---------------------------------------------------------------------
+** TDM/TABLE/DUMP SOREF [ NROWS IFIRST ]
+>COMMAND DUMP
+>PARAMETERS
+SOREF 'name of table' C
+NROWS   'Number of rows to dump' I D=10
+IFIRST  'First row to dump' I D=0
+NAMEOFFILE 'Name of output file' C
+COLUMNLIST 'List of columns' C
+>GUIDANCE
+Dumps a table to file.
+.
+The IFIRST parameter counts from zero _UNLIKE_ Fortran.
+.
+If you want all the rows, use a negative number for NROWS, and zero
+for IFIRST.
+.
+The COLUMNLIST parameter is used
+to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
+column names with carets (^).  See the example below.
+.
+Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+tdmTable::dump method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLE: 
+This example writes columns id, offset, and pedestal of
+rows 0 through 9 of the table tpg_cathode to a file named
+myfile.dat.
+.
+ STAF[46] tdm/table/dump tpg_cathode 10 0 myfile.dat id^offset^pedestal
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - Table not found.
+.
+BUGS: 
+.
+   None known.
+.
+>ACTION kam_tdmtable_dump_%C
+**
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/PRINT SOREF [ NROWS IFIRST ]

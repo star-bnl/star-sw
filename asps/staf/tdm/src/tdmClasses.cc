@@ -15,6 +15,8 @@
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
+#include <sys/types.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,6 +28,11 @@
 #include "tdmClasses.hh"
 
 //:----------------------------------------------- MACROS             --
+#define TOKENS " \n\t"
+#define LINESIZE 2000
+#define MCIF      500  /* max cols in temp file, incs vector multiplicity */
+#define COLLIST   200
+#define NCOL      200  /* max cols in user specification */
 #include "tdm_macros.h"
 #ifndef MIN
 #define MIN(A,B) ( ( A < B ) ? A : B )
@@ -307,8 +314,97 @@ unsigned char tdmTable:: isType (const char * aType) {
    }
    return rslt;
 }
+STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
 
-//----------------------------------
+  FILE *gg,*ff; long i; DS_TYPE_T *dstype; char *pCellData; char *c=NULL;
+  char colListCopy[COLLIST+1],tmp[80],haveSetMask=0,mask[MCIF];
+  char *col[NCOL],line[LINESIZE+2],linecopy[LINESIZE+2],*cc,*dd;
+  int imask,nmask,ncol,linecnt;
+
+  if(strlen(colList)>COLLIST) EML_ERROR(COL_LIST_TOO_LONG);
+  strcpy(colListCopy,colList); 
+  cc=strtok(colListCopy,"^"); ncol=0;
+  while(cc) {
+    if(ncol>=NCOL) EML_ERROR(COL_LIST_HAS_TOO_MANY_ITEMS);
+    col[ncol++]=cc; cc=strtok(NULL,"^");
+  }
+  sprintf(tmp,"/tmp/staf.dump.%d",getpid());
+  ff=fopen(tmp,"w"); if(!ff) EML_ERROR(CANT_WRITE_FILE);
+  if( !dsTypePtr(&dstype,pDSthis->tid)) {
+     EML_ERROR(BAD_TABLE_TYPE);
+  }
+
+  long ii=rowCount(); if(ifirst<0||ii<=ifirst) EML_ERROR(INVALID_TABLE_ROW);
+
+  /* Print Table Header Column Names-*/
+  fprintf(ff," ROW #");
+  for( i=0;i<columnCount();i++ ){
+     fprintf(ff,"\t%s",c=columnName(i)); FREE(c);
+     if( DS_TYPE_CHAR == columnTypeCode(i) ) {
+	 long ii = columnElcount(i)-strlen(c=columnName(i));
+	 FREE(c);
+	 for(;0<ii;ii--){ fprintf(ff," "); }
+     } else {
+	 if( 1 < columnElcount(i) ){
+	    fprintf(ff,"[0]");
+	    for( long n=1;n<columnElcount(i);n++ ){
+	       if( (8 > n)
+	       ||  (columnElcount(i) == n)
+	       ||  (12 > columnElcount(i))
+	       ){
+		  fprintf(ff,"\t%s[%ld]",c=columnName(i),n); FREE(c);
+	       } else if( (8 == n) ) {
+		  fprintf(ff,"\t***%ld HEADERS UNPRINTED",columnElcount(i)-9);
+	       }
+	    }
+	 }
+     }
+  }
+  fprintf(ff,"\n");
+  /* Print Table Data */
+  pCellData = (char*)pDSthis->p.data;
+  pCellData += ifirst*rowSize();
+  for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
+     fprintf(ff,"%6ld:",i); dsPrintData(ff, dstype, 1, pCellData);
+     pCellData += rowSize(); fprintf(ff,"\n");
+  }
+  fclose(ff);
+  ff=fopen(tmp,"r"); if(!ff) EML_ERROR(CANT_READ_FILE);
+  gg=fopen(out,"w"); if(!gg) EML_ERROR(CANT_WRITE_FILE); linecnt=0;
+  while(fgets(line,LINESIZE,ff)) {
+    linecnt++;
+    if(strlen(line)>LINESIZE-5) {
+      fclose(ff); fclose(gg); EML_ERROR(LINE_TOO_BIG); /* too many cols */
+    }
+    if(!haveSetMask) {
+      haveSetMask=7; for(i=MCIF-1;i>=0;i--) mask[i]=0; nmask=0;
+      strcpy(linecopy,line); cc=strtok(linecopy,TOKENS);
+      cc=strtok(NULL,TOKENS); cc=strtok(NULL,TOKENS); /* discard first 2 */
+      while(cc) {
+        if(nmask>=MCIF) { fclose(ff); fclose(gg); EML_ERROR(TOO_MANY_COLS); }
+        dd=strstr(cc,"["); if(dd) dd[0]=0;
+        for(i=0;i<ncol;i++) {
+          if(!strcmp(col[i],cc)) { mask[nmask]=7; break; }
+        }
+        cc=strtok(NULL,TOKENS); nmask++;
+      }
+    }
+    if(linecnt<=1) {
+      strtok(line,TOKENS); strtok(NULL,TOKENS); fprintf(gg,"      ");
+    } else {
+      strtok(line,TOKENS); fprintf(gg,"%5d ",linecnt-2); 
+    }
+    cc=strtok(NULL,TOKENS); imask=0;
+    while(cc) {
+      if(mask[imask++]) fprintf(gg,"%10s ",cc); cc=strtok(NULL,TOKENS);
+    }
+    fprintf(gg,"\n");
+  }
+  fclose(ff); fclose(gg);
+  printf("Have written %s,  vi %s\n",out,out);
+  /* bbb remove(tmp); */
+  EML_SUCCESS(STAFCV_OK);
+}
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 
    long i;
