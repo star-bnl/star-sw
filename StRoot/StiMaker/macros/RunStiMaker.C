@@ -28,6 +28,10 @@ void RunStiMaker(Int_t nevents=1,
     
     cout <<"Loading StarClassLibrary"<<endl;
     gSystem->Load("StarClassLibrary");
+
+    //We have to activate this to run in dev
+    //cout <<"Loading StarRoot"<<endl;
+    //gSystem->Load("StarRoot");
     
     cout <<"Loading DataBase"<<endl;
     gSystem->Load("StDbUtilities");
