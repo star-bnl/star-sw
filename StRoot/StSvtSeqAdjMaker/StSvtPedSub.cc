@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.5 2000/08/28 22:12:39 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.6 2000/11/30 20:45:56 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.6  2000/11/30 20:45:56  caines
+ * Dynamically calc prob values, use database
+ *
  * Revision 1.5  2000/08/28 22:12:39  caines
  * Error accessing timebucket in Ped. subtraction
  *
@@ -27,13 +30,13 @@
  *
  *
  **************************************************************************/
-
 #include "StSvtPedSub.h"
 #include "StSequence.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
-
+#include "StMessMgr.h"
+#include <iostream.h>
 
 StSvtPedSub::StSvtPedSub( StSvtHybridCollection *PedPointer)
 {
@@ -58,6 +61,8 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
 
   nAnodes = fData->getAnodeList(anodeList);
   mPed = (StSvtHybridPed *) mSvtPed->at(Index);
+
+  if (!mPed) return 0;
   
   for (int ianode=0;ianode<nAnodes;ianode++) {
     
@@ -68,6 +73,9 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
     status = fData->getSequences(anodeID,nSeq,Seq);
     for (iseq=0;iseq<nSeq;iseq++) {	  	  
       for (time=0; time<Seq[iseq].length; time++) {
+
+	//	if ((anodeID == 180) && (time == 64) )
+	  //gMessMgr->Debug() << "ped = " << mPed->getPixelContent(anodeID,Seq[iseq].startTimeBin+time) << endm;
 	
 	// Actually subtract the pedestal per pixel. PedOffset  
 	//allows undershoot to be seen 

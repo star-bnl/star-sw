@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.cc,v 1.3 2000/10/02 13:48:10 caines Exp $
+ * $Id: StSvtInverseProducts.cc,v 1.4 2000/11/30 20:45:56 caines Exp $
  *
- * Author: 
+ * Author: Selemon Bekele
  ***************************************************************************
  *
  * Description: 
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.cc,v $
- * Revision 1.3  2000/10/02 13:48:10  caines
- * Adjusting donw hybrid by hybrid
+ * Revision 1.4  2000/11/30 20:45:56  caines
+ * Dynamically calc prob values, use database
  *
  * Revision 1.2  2000/07/11 18:36:15  caines
  * Updates to save more of sequence for fitting
@@ -32,41 +32,20 @@
 
 StSvtInverseProducts::StSvtInverseProducts()
 {
- mHybridData = NULL;
-
+  ResetBuffer();
 }
 
 StSvtInverseProducts::~StSvtInverseProducts()
+{}
+
+void StSvtInverseProducts::SetProbTable(StSvtProbValues* probValues)
 {
-  delete [] mProbTable;
-}
-
-void StSvtInverseProducts::SetHybridPointer(StSvtHybridData* hybData)
-{
- mHybridData = hybData;
-  for(int j = 0; j < 128; j++)
-   mBuffer[j] = 0;
-}
-
-void StSvtInverseProducts::FillProbTable(ifstream & inseqFile, int TotalNumberOfHybrids)
-{
-
- mProbTable = (double**) new double[TotalNumberOfHybrids];
-
-
-  for( int Hybrid=0; Hybrid<TotalNumberOfHybrids; Hybrid++){
-    mProbTable[Hybrid] = (double*) new double[14];
-    for( int j=0; j<14; j++)
-      {
-	inseqFile >> mProbTable[Hybrid][j];
-	// cout<<mProbTable[Hybrid][j]<<endl;
-      }
-  }
+  for( int j = 0; j < MAX_ADC_COUNTS; j++)
+    mProbTable[j] = probValues->GetProbValue(j);
 }
 
 
-
-void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Anode)
+void StSvtInverseProducts::FindInvProducts(StSvtHybridData* hybridData, int anode, int pedOffSet)
 {
  StSequence* mSequence;
  unsigned char*  adcValue;
@@ -74,9 +53,8 @@ void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Ano
  int startTBin, length;
  double mProdOfInvProb;
 
- 
- status = mHybridData->getListSequences(Anode,mNumOfSequence,mSequence);
- 
+ status = hybridData->getListSequences(anode,mNumOfSequence,mSequence);
+  
  for(int mSeq = 0; mSeq < mNumOfSequence; mSeq++)
    {
      startTBin = mSequence[mSeq].startTimeBin;
@@ -84,9 +62,7 @@ void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Ano
      adcValue = mSequence[mSeq].firstAdc;
      
      for(int i = 0; i < length ; i++)
-       {
-	 
-	 
+       {	 
 	 // Now actually calcs products not inverse products for speed  
          mProdOfInvProb = 1;
          for(int j = i - 1; j<= i+1; j++)
@@ -94,15 +70,14 @@ void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Ano
 	   if(j == -1 || j == length)
 	     k = 0;
 	   else{
-	     k = (int)adcValue[j] - PedOffSet;
+	     k = (int)adcValue[j] - pedOffSet;
 	   }
-	   if( k >= 0 && k < 13) mProdOfInvProb *= mProbTable[HybIndex][k]; 
-	   else if(k >= -13 && k < 0) mProdOfInvProb *= 1/(1 - 1/mProbTable[HybIndex][abs(k)]);
-	   else if(k > 13) mProdOfInvProb *= mProbTable[HybIndex][13];
-	   else  mProdOfInvProb *= 1/(1 - 1/mProbTable[HybIndex][13]);
+	   if( k >= 0 && k < (MAX_ADC_COUNTS-1)) mProdOfInvProb *= mProbTable[k]; 
+	   else if(k >= -(MAX_ADC_COUNTS-1)  && k < 0) mProdOfInvProb *= 1/(1 - 1/mProbTable[abs(k)]);
+	   else if(k > (MAX_ADC_COUNTS-1) ) mProdOfInvProb *= mProbTable[MAX_ADC_COUNTS - 1];
+	   else  mProdOfInvProb *= 1/(1 - 1/mProbTable[MAX_ADC_COUNTS - 1]);
 	   }
-         //cout<<mProdOfInvProb<<endl;
-	 // cout<< log(mProdOfInvProb)<<endl;
+
          mBuffer[i + startTBin] = log10(mProdOfInvProb);
 	 
        }
@@ -110,9 +85,9 @@ void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Ano
    
 }
 
-double  StSvtInverseProducts::GetBuffer(int timBin)
+double  StSvtInverseProducts::GetBuffer(int timeBin)
 {
-  return mBuffer[timBin];
+  return mBuffer[timeBin];
 }
 
 
