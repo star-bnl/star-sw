@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.11 2000/07/16 21:38:22 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.12 2000/07/16 22:23:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.12  2000/07/16 22:23:17  laue
+ * I forgot that we moved memberfunctions out of StHbtBaseAnalysis.
+ * So my previous check-ins didn't compile with the library.
+ * Now they do.
+ *
  * Revision 1.11  2000/07/16 21:38:22  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -139,7 +144,6 @@ StHbtAnalysis::StHbtAnalysis(){
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
-  mThirdParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
@@ -152,7 +156,6 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
-  mThirdParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
