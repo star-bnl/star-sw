@@ -7,14 +7,21 @@
 class EEmcDbItem {
 
  public:
+  int key; // unique internal ID in form 0 to EEindexMax-1
+  //  of every active EEMC pixel
+  //  see StEEmcUtil/EEfeeRaw/EEname2Index.h for definition
+
   char name[StEEmcNameLen]; ///< ASCII name of the channel, see Readme 
   char tube[StEEmcNameLen]; ///< name of PMT or MAPMT pixel
+  // for towers/pre/post use (sec,sub,eta)
+  // for SMD use sec,plane,strip)
+  int sec,eta; // 1-12, 1-12
+  char sub,plane; //A-E, U-V
+  int strip; // 1-288 
+
   int crate, chan; ///< hardware channel
   float gain; 
   float ped,thr; // in ADC channals
-  int sec,eta;
-  char sub;
-  int strip; // for SMD instead of sub&eta
   unsigned short stat; // bits, see eemcConstDB.hh for definitions
   unsigned short fail; // bits, see eemcConstDB.hh for definitions
 
@@ -24,6 +31,7 @@ class EEmcDbItem {
   void setName(char *text);
   void setTube(char *text);
   int isEmpty() const;
+  int isSMD() const { return (plane=='U' || plane=='V');}
 };
 
 #endif 
