@@ -33,8 +33,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.rad_per_gap	 =  0.0504754; // phi angle of sector gap, def 0.05047541 ;
     row.p_standard	 =    1013.25; // standard air pressure (1013.25hPa) ;
     row.p_normalized	 =    1013.25; // normalized air pressure (in hPa) ;
-    row.padtrans_e_min	 =          0; // lowest e-field in padtrans database ;
-    row.padtrans_e_max	 =          0; // highest e-field in padtrans database ;
     row.t_zero           =          0; // time from collision to readout start [usec];
     row.angle_factor     =          1; // multiplicative lorentz angle correction;
     row.pad_err_diff[0]	 =      0.015; // function of driftlength up to 2nd order;
