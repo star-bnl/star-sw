@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.434 2004/08/11 21:47:30 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.435 2004/08/11 23:25:58 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1756,6 +1756,11 @@ Int_t StBFChain::Instantiate()
 	    //mk->UseOnlyLaserDriftVelocity();    // uses laserDV database
 	    //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
 	  }
+	  if (maker == "StSvtDbMaker"){
+            mk->SetMode(0);
+            // If simulation running make sure pick up simu stuff from db
+            if (GetOption("Simu")) mk->SetMode(1);
+          }
 
 
 	  // Hit filtering will be made from a single maker in
