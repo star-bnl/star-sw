@@ -1,5 +1,8 @@
-* $Id: tpt_cross_fact.F,v 1.3 1998/04/06 19:16:09 sakrejda Exp $
+* $Id: tpt_cross_fact.F,v 1.4 1998/08/25 21:46:32 sakrejda Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.4  1998/08/25 21:46:32  sakrejda
+* crossing angle in degrees, STAR convention
+*
 * Revision 1.3  1998/04/06 19:16:09  sakrejda
 * local constants replaced by include, not used variables removed
 *
@@ -51,7 +54,22 @@ C_____________________________________________________________________
          iret= tgc_global_to_local_p(isect,vglobal,vlocal)
 C
          cf = (vlocal(2))**2/(vlocal(2)**2+vlocal(1)**2)
-         theta = atan(vlocal(1)/vlocal(2))
+cc      
+c        output angle should be in degree
+c        ******Qun Li  21/08/98
+c        theta = atan(vlocal(1)/vlocal(2))
+
+         theta = atand(vlocal(1)/vlocal(2))
       endif
       tpt_cross_fact = 0
       end
+
+
+
+
+
+
+
+
+
+
