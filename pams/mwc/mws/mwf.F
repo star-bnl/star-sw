@@ -46,7 +46,7 @@ CC:>------------------------------------------------------------------
       INTEGER icell, cell_num, cell_hit(7680)
       INTEGER se_hit(384), overload_slat, num_below_thresh
       INTEGER hit_index, tot_cell_hit(384), ee_correct
-      INTEGER isect, iosect, i, j, wire_hit(7680), ipie
+      INTEGER isect, iosect, i, j, wire_hit(7680), ipie,jj
       REAL    Tolerance, Pi, se_de(384)
       REAL    Rhit, Phihit, Phi_step
       REAL    Scale, RG32, Dummy, Ped

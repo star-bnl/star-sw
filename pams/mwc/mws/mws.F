@@ -711,7 +711,6 @@ C VM:have put the factor 2.75e-13 to make V_out(1electron) = 24mv/6750
           prob=( 1./(sigma*sqrt(2.0*pi)) )*exp(-0.5*t*t) ! normalized gaussian
           if (rval2.lt.prob) next=.false.
        enddo
-       write(29,*)rval1
        elnoise=ret_val
        return
        end
