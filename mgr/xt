@@ -36,7 +36,7 @@ if (! $color) {
 if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) || 
     ($comp =~ /^rmds0[12]/) || ($comp =~ /^rdev/) || ($comp =~ /^rls/)) {
 	$com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -title " . $comp . " -n " . $comp . "&";
-} elsif (($comp =~ /^ru/) || ($comp =~ /^rsun/) || ($comp =~ /^rcf/) || 
+} elsif (($comp =~ /^ru/) || ($comp =~ /^rsun/) || ($comp =~ /^rcf/) ||  ($comp =~ /^rmine/) || 
          ($comp =~ /^rmds00/) || ($comp =~ /^rmds03/)) {
         $com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) || ($comp =~ /^play/) ) {
@@ -45,6 +45,8 @@ if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) ||
 	$com = $ssh . " "  . $comp . ".usatlas.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^atlas/) ) {
 	$com = $ssh . " "  . $comp . ".usatlas.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+} elsif (($comp =~ /^starlx/ || $comp =~ /^stars/) ) {
+	$com = $ssh . " "  . $comp . ".nersc.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
          ($comp =~ /^robinson/) || ($comp =~ /^pickford/))
 {        $com = $ssh . " "  . $comp . ".star.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
