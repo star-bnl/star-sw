@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.7 2000/02/22 20:06:27 hardtke Exp $
+* $Id: tfs_ini.F,v 1.8 2000/07/12 02:25:57 fqwang Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.8  2000/07/12 02:25:57  fqwang
+* Put in B-dependent diffusion constants: Const and omega_tau
+*
 * Revision 1.7  2000/02/22 20:06:27  hardtke
 * replace tgc functions with tpc functions
 *
@@ -102,6 +105,9 @@ C     ASCALE - is the linear scale factor in-between
       INTEGER tpc_drift_volume_length
       REAL    xlength
 
+C fqwang begin add a line
+      real B2
+C fqwang end add a line
 CDH test variables:
       real origin(3), bfield(3)      
       data origin /3*0/
@@ -147,14 +153,31 @@ C     C=2.8 & omega*tau=2.34 (see STAR CDR p. 4C-15 & S.R. Amendolia et al.
 C     NIM A244 (1986) 516) and for zero B-field, C=1 & omega*tau=0. 
 C     *** DSW  03/29/1997 ***
       call gufld(origin,bfield)
-      if ( bfield(3).ne. 0. ) then
-         Const     = 2.8
-         omega_tau = 2.34
+C fqwang comment out
+C      if ( bfield(3).ne. 0. ) then
+C         Const     = 2.8
+C         omega_tau = 2.34
+C      else
+C         Const     = 1.0
+C         omega_tau = 0.0
+C      endif
+C fqwang end comment out
+C fqwang begin add code
+      B2 = bfield(3)**2
+      if ( B2.le.2.143) then
+         Const = 1.
+         omega_tau = sqrt(0.51848343)*bfield(3)
+      elseif ( B2.le.6.4286) then
+         Const = 1.38088
+         omega_tau = sqrt(0.34075)*bfield(3)
+      elseif ( B2.le.12.14286) then
+         Const = 1.4821
+         omega_tau = sqrt(0.325)*bfield(3)
       else
-         Const     = 1.0
-         omega_tau = 0.0
+         Const = 2.7302
+         omega_tau = sqrt(0.22222)*bfield(3)
       endif
-
+C fqwang end add code
       sprf_02(1)  = ctrl(1).sprf_0(1)**2
       sprf_02(2)  = ctrl(1).sprf_0(2)**2
       sprf_dr2(1) = ctrl(1).sprf_dr0(1)**2/(Const + omega_tau**2)
@@ -170,7 +193,7 @@ C     sigma of longitudinal pulse due to electronics shaping time -
 C     TSHAPE is a FWHM in nanoseconds, DRIVEL is cm/microseconds
 
       sig_shape2 = ( drivel * par(1).tshape / 2.36 *1.0e-9)**2
-      
+
 C     spatial resolution
 
 C     Modefy the calculation of  sigmad2 to accommodate the changes to
