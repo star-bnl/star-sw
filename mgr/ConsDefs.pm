@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.1 2000/02/21 00:48:26 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.2 2000/02/22 20:54:07 fisyak Exp $
 {
  if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
@@ -23,7 +23,7 @@
  my $O        = "o";
  my $A        = "a";
  my $Cxx      = "cxx";
- my $so       = "so";
+ my $SOEXT    = "so";
  my $EXESUF   = "";
  
  my $SoOUT    = "-o ";
@@ -32,24 +32,29 @@
  my $Lout     = "-o ";
  my $Cinp     = "";
  my $CXXinp   = "";
- 
  my $CPP      = "gcc";
  my $CPPFLAGS = "";#-I-";
+ my $CPPPATH  = "";
+ my $EXTRA_CPPPATH = "";
  my $CXX      = "g++";
  my $CXXFLAGS = "-fpic -w";
- my $CXXEXTRA = "";
+ my $EXTRA_CXXFLAGS = "";
  my $CXXOPT   = "";
+ my $CINTCXXFLAGS = "";
+ 
  my $CC       = "gcc";
  my $CFLAGS   = "-fpic -w";
+ my $EXTRA_CFLAGS = "";
+ my $CINTCFLAGS = "";
  my $FC       = "f77";
  my $FFLAGS   = "-KPIC -w -DCERNLIB_TYPE";
  my $AR       = "ar";
  my $ARFLAGS  = "rvu";
  my $LD       = $CXX;
  my $LDFLAGS  = $CXXFLAGS;
+ my $EXTRA_LDFLAGS = "";
  my $SO       = $CXX;
  my $SOFLAGS  = "";
- my $EXEFLAGS = "NONE";
  my $STIC     = "stic";
  my $STICFLAGS= "";
  my $GEANT3   = "geant3";
@@ -59,11 +64,12 @@
  my $Libraries= "";
  my $CLIBS    = "";
  my $FLIBS    = "";
+ my $XLIBS    = "";
+ my $THREAD   = "";
  my $CERNLIBS = "";
  my $OSFID    = "";
- my $ROOTCINTD= "";
- my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
- my $LINKCOM  = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+ my $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+ my $LINKCOM  = "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
  my $GEANT3COM= "test -f %>.F && rm %>.F;";
  $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
@@ -75,14 +81,20 @@
    #    case linux
    #  ====================
    $OSFID    = "f2cFortran";
-   $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+   $OSFID   .= " lnx Linux linux LINUX";
+   $OSFID   .= " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+   $OSFID   .= " R__GLIBC";
    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+   my $CINTD  = "-DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
    $CXXFLAGS = "-fPIC -Wall";
+   $CINTCXXFLAGS = $CXXFLAGS . " " . $CINTD;
    #                                             -fpipe
    $CFLAGS   = "-fPIC -Wall";
-   $LDFLAGS  = "-Wl,-Bstatic";
-   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
+   $CINTCFLAGS = $$CFLAGS . " " . $CINTD;
+   $LDFLAGS  = $DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $SOFLAGS  = "-shared -Wl,-Bdynamic";  
+   $XLIBS    = "-L/usr/X11R6/lib -lX11 -lXpm";
+   $THREAD   = "-lpthread";
    if (/egcs$/) {
      $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
      $FC       = "g77";
@@ -100,7 +112,6 @@
      $OSFID    = "f2cFortran";
      $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
      $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
-     #   $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
      $DEBUG    = "-g";
      $CXXOPT   = "+K0 -O0 --no_exceptions";
      $CXX      = "KCC";
@@ -115,7 +126,6 @@
      $FEXTEND  = "-Mextend";
      $LD       = $CXX;
      $LDFLAGS  = $CXXOPT;
-     $EXEFLAGS = $CXXOPT;
      $SO       = $CXX;
      $SOFLAGS  = $CXXOPT;
    }
@@ -147,16 +157,19 @@
    $CC       = "cc";
    $LD       = $CXX;
    $SO       = $CXX;
-   $CXXFLAGS = " -z +Z  -Dextname";
+   $CXXFLAGS = "+W70,495,740,749,823,829 -DR__ACC -z +Z -Dextname";
+   $CINTCXXFLAGS = "-z +Z -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB -D_POSIX2_SOURCE -DG__ROOT -DG__REDIRECTIO";
    $CFLAGS   = " -Ae -z +Z -Dextname";  
-   $so       = "sl";
+   $CINTCFLAGS = $CFLAGS . " -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB";
+   $CINTCFLAGS.= " -D_POSIX2_SOURCE -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
+   $SOEXT    = "sl";
+   $XLIBS    = $ROOTSYS . "../lib/libXpm.a -lX11";
    if (defined($SCL_OPTIMISE)){ # from Brian
      $CXXFLAGS .= " +Olibcalls +Onolimit";
    }
    else {$CXXFLAGS .= " +d";}
    $LDFLAGS   = "-z -Wl,+s -Wl,-E,+vnocompatwarnings";
-   $EXEFLAGS  = $CXXFLAGS . " " . $LDFLAGS . " -Wl,-N"; 
-   $SOFLAGS   = "-b -z";  
+   $SOFLAGS   = "-b -Wl,+vnocompatwarnings";#-b -z";  
    $CLIBS     = "/usr/lib/libM.sl";
    $FC        = "fort77";
    $FFLAGS    = "-WF,-P +ppu +Z +B -K";
@@ -164,59 +177,64 @@
    print "SHLIB_PATH = $SHLIB_PATH\n";
  }
  elsif (/^sun4x_56_CC5$/) {
-   $ROOTCINTD = "-DSOLARIS";
-   $OSFID     = "__CC5__";
+   $OSFID     = "__CC5__ __SunOS_5_6";
    $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
    $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
-   # $OSFID    .= " ST_NO_NAMESPACES"; # add
    $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
+   $EXTRA_CPPPATH = ":/usr/openwin/include";
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
    $FC        = "/opt/WS5.0/bin/f77";
-   # $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
-   $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
-   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
-   #  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -lCstd -liostream -lCrun";
+   $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream";
+   my $CINTD  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
+   $CINTCXXFLAGS = $CXXFLAGS . " " . $CINTD;
+   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
+   $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
-   $CFLAGS    = "-KPIC -I/usr/openwin/include";
+   $CFLAGS    = "-KPIC";
+   $CINTCFLAGS= $CFLAGS . " " . $CINTD;
    $LD        = $CXX;
-   $EXEFLAGS  = "-library=iostream,no_Cstd";
-   $LDFLAGS   = $EXEFLAGS;
+#   $EXEFLAGS  = "-library=iostream";
+   $LDFLAGS   = "-library=iostream";
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
  }
  elsif (/^sun4x_5.$/) {
-   $ROOTCINTD = "-DSOLARIS";
-   $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
+   $OSFID     = "__SunOS_5_6";
+   $OSFID    .= "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
    $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
    $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+   $EXTRA_CPPPATH = ":/usr/openwin/include";
    $CC        = "cc";
    $CXX       = "CC";
    $FC        = "f77";
    $CXXFLAGS  = "-KPIC +w -features=no_anachronisms -features=rtti";
+   my $CINTD  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
+   $CINTCXXFLAGS = $CXXFLAGS . " " . $CINTD;
    $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
    $FLIBS     = "-lM77 -lF77 -lsunmath";
+   $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
+   $CINTCFLAGS= $CFLAGS . " " . $CINTD;
    $LD        = $CXX;
-   $LDFLAGS   = "-Bstatic"; 
-   $EXEFLAGS  = "-z muldefs -Bdynamic -t";
+   $LDFLAGS  = "-z muldefs -Bdynamic -t";
    $SO        = $CXX;
    $SOFLAGS   = "-G";
    my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
-   $CXXEXTRA.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
-   $CXXEXTRA.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
-   $CXXEXTRA.= " -I/usr/openwin/include -I/usr/local/include";
-   $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
-   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
-   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
+   $EXTRA_CXXFLAGS.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
+   $EXTRA_CXXFLAGS.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
+   $EXTRA_CXXFLAGS.= " -I/usr/openwin/include -I/usr/local/include";
+   $MAKELIB = "test -d %>:d/Templates.DB &&";
+   $MAKELIB.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
+   $MAKELIB.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
    $LINKCOM       = "test -d %>:d/Templates.DB &&";
-   $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
+   $LINKCOM      .= "%LD %DEBUG %LDFLAGS %EXTAR_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
    $LINKCOM      .= "%>:d/Templates.DB/*.o $ROOTSYS/obj/Templates.DB/*.o ||";  
-   $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+   $LINKCOM      .= "%LD %DEBUG %EXEFLAGS %EXTAR_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
    if (defined($ARG{INSURE})){
      print "***Use INSURE++***\n";
      $CC       = "insure -g -Zoi \"compiler_c cc\"";
@@ -233,7 +251,7 @@
    $O        = "obj";
    $A        = "lib";
    $Cxx      = "cxx";
-   $so       = "DLL";
+   $SOEXT    = "DLL";
    $AR       = "set LIB && lib"; print "NT Lib: lib = $lib / LIB = $LIB\n";
    $ARFLAGS  = "-nologo -MACHINE:IX86";
    $Cout     = "-Fo";
@@ -248,7 +266,6 @@
    $GEANT3   += $EXESUF;
    $ROOTCINT += $EXESUF;
    
-   $ROOTCINTD = "-DWIN32";
    $OSFID     = "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32 ";
    $OSFID    .= "ST_NO_NAMESPACES ";
    $CPP       = "cl";
@@ -266,7 +283,7 @@
    #  $LDFLAGS   =  $DEBUG . $(conlflags); 
    $SO        =  "link";
    $SOFLAGS   = " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
-   $LINKMODULECOM = 
+   $MAKELIB = 
      "BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS %Libraries";
    $LIB .= ";" . $ROOTSYS . "\\lib";
    $Libraries = $ROOTSYS . "/lib/*.lib" . " ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
@@ -286,7 +303,8 @@
  if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{CPP}))      {$CPP = $ARG{CPP}            ; print "set CPP = $CPP\n" unless ($param::quiet);}
  if (defined($ARG{CC}))       {$CC = $ARG{CC}              ; print "set CC = $CC\n" unless ($param::quiet);}
- if (defined($ARG{CCFLAGS}))  {$CCFLAGS = $ARG{CCFLAGS}    ; print "set CCFLAGS = $CCFLAGS\n" unless ($param::quiet);}
+ if (defined($ARG{CFLAGS}))   {$CFLAGS = $ARG{CFLAGS}      ; print "set CFLAGS = $CFLAGS\n" unless ($param::quiet);}
+ if (defined($ARG{EXTRA_CFLAGS}))   {$EXTRA_CFLAGS = $ARG{EXTRA_CFLAGS}      ; print "set EXTRA_CFLAGS = $EXTRA_CFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{CLIBS}))    {$CLIBS = $ARG{CLIBS}        ; print "set CLIBS = $CLIBS\n" unless ($param::quiet);}
  if (defined($ARG{CXX}))      {$CXX = $ARG{CXX}            ; print "set CXX = $CXX\n" unless ($param::quiet);}
  if (defined($ARG{CXXFLAGS})) {$CXXFLAGS = $ARG{CXXFLAGS}  ; print "set CXXFLAGS = $CXXFLAGS\n" unless ($param::quiet);}
@@ -295,39 +313,37 @@
  if (defined($ARG{FLIBS}))    {$FLIBS = $ARG{FLIBS}        ; print "set FLIBS = $FLIBS\n" unless ($param::quiet);}
  if (defined($ARG{LD}))       {$LD = $ARG{LD}              ; print "set LD = $LD\n" unless ($param::quiet);}
  if (defined($ARG{LDFLAGS}))  {$LDFLAGS = $ARG{LDFLAGS}    ; print "set LDFLAGS = $LDFLAGS\n" unless ($param::quiet);}
- if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS}  ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
+# if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS}  ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{Libraries})){$Libraries = $ARG{Libraries}; print "set Libraries = $Libraries\n" unless ($param::quiet);}
  if (defined($ARG{LIBS}))     {$LIBS = $ARG{LIBS}          ; print "set LIBS = $LIBS\n" unless ($param::quiet);}
  if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH}    ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
  if (defined($ARG{SO}))       {$SO = $ARG{SO}              ; print "set SO = $SO\n" unless ($param::quiet);}
  if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS}    ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
  
- if (! $param::quiet) {
-   print "STAR     = \t$STAR\n";
-   print "DEBUG    = \t$DEBUG\n";
-   print "CPPFLAGS = \t$CPPFLAGS\n";
-   print "CPP      = \t$CPP    \nCPPFLAGS = \t$CPPFLAGS\n"; 
-   print "CC       = \t$CC     \tCCFLAGS  = \t$CFLAGS     \tCLIBS    =\t$CLIBS\n"; 
-   print "CXX      = \t$CXX    \tCXXFLAGS = \t$CXXFLAGS\n";
-   print "FC       = \t$FC     \nFFLAGS   = \t$FFLAGS     \tFLIBS    =\t$FLIBS\n"; 
-   print "LD       = \t$LD     \tLDFLGAS  = \t$LDFLAGS    \nEXEFLAGS =\t$EXEFLAGS\n";
-   print "LIBPATH  = \t$LIBPATH\tLIBS     = \t$LIBS       \nLibraries=\t$Libraries\n";
-   print "SO       = \t$SO     \tSOFLAGS  = \t$SOFLAGS\n";
- }
  my $ROOTLIBS;
  my $RINTLIBS;
  my $ROOTGLIBS;
  $ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
  $RINTLIBS    = " -lRint ";
  my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
- #$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
- $CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:/opt/star/include";
+ $CPPPATH  = $INCLUDE . ":#StRoot:" .  $ROOTSRC;
+ $CPPPATH .= ":" . $CERN_ROOT . "/include:/opt/star/include" . $EXTRA_CPPPATH;
  $FCPPPATH ="";
- print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
+ if (! $param::quiet) {
+   print "STAR     = \t$STAR\n";
+   print "DEBUG    = \t$DEBUG\n";
+   print "CPP      = \t$CPP    \tCPPFLAGS = \t$CPPFLAGS \nCPPPATH  = \t$CPPPATH\n";
+   print "CC       = \t$CC     \tCFLAGS   = \t$CFLAGS \tEXTRA_CFLAGS  = \t$EXTRA_CFLAGS     \tCLIBS    =\t$CLIBS\n"; 
+   print "CXX      = \t$CXX    \tCXXFLAGS = \t$CXXFLAGS \tEXTRA_CXXFLAGS = \t$EXTRA_CXXFLAGS\n";
+   print "FC       = \t$FC     \tFFLAGS   = \t$FFLAGS     \tFLIBS    =\t$FLIBS\n"; 
+   print "LD       = \t$LD     \tLDFLAGS  = \t$LDFLAGS \tEXTRA_LDFLAGS  = \t$EXTRA_LDFLAGS\n";
+                            #    \nEXEFLAGS =\t$EXEFLAGS\n";
+   print "LIBPATH  = \t$LIBPATH\tLIBS     = \t$LIBS       \tLibraries=\t$Libraries\n";
+   print "SO       = \t$SO     \tSOFLAGS  = \t$SOFLAGS\n";
+ }
  (my $DirPath  = cwd()) =~ s/\/$//g;
  chdir($STAR); my $repository = cwd(); chdir($DirPath); print "repository $repository\n";
  Repository ($repository);# unless $param::noRepository;
- #Repository ($STAR);# unless $param::noRepository;
  my @Repo = Repository_List; 
  print "Build directory: $DirPath;" unless ($param::quiet);
  if (defined($ARG{Salt})) {$Salt = $ARG{Salt} ; print "set Salt = $Salt\n" unless ($param::quiet);}
@@ -369,14 +385,13 @@
    }
    my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
    $INCLUDE_PATH .= ";" . $ROOTSRC;
-   #  $INCLUDE_PATH .= ";" . $STAF . "/inc";
    $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
  }
  $env = new cons(
 		 'CPPPATH'      => $CPPPATH,
 		 'CPPFLAGS'     => $CPPFLAGS,
 		 'DEBUG'        => $DEBUG,
-		 'FC'	       => $FC,
+		 'FC'	        => $FC,
 		 'FFLAGS'       => $FFLAGS,
 		 'FEXTEND'      => $FEXTEND,
 		 'FCPPPATH'     => $FCPPPATH,
@@ -389,23 +404,26 @@
 		 'FCCOM'        => $FCCOM,
 		 'GEANT3'       => $GEANT3,
 		 'GEANT3COM'    => $GEANT3COM,
-		 'CC'	       => $CC,
+		 'CC'	        => $CC,
 		 'CFLAGS'       => $CFLAGS,
+		 'EXTRA_CFLAGS' => $EXTRA_CFLAGS,
 		 'KUIP'         => $KUIP,
 		 'KUIPCOM'      => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
-		 'CCCOM'        => '%CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
+		 'CCCOM'        => '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
 		 'CXX'          => $CXX,
 		 'CXXFLAGS'     => $CXXFLAGS,
-		 'CXXEXTRA'     => $CXXEXTRA,
-		 'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS  %CXXEXTRA -c %CXXinp%< %Cout%>',
+		 'EXTRA_CXXFLAGS'     => $EXTRA_CXXFLAGS,
+		 'CXXCOM'       => '%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
 		 'CLIBS'        => $CLIBS,
 		 'FLIBS'        => $FLIBS,
+		 'XLIBS'        => $XLIBS,
+		 'THREAD'       => $THREAD,
 		 'CERNLIBS'     => $CERNLIBS,
 		 'ROOTLIBS'     => $ROOTLIBS,
 		 'ROOTGLIBS'    => $ROOTGLIBS,
 		 'Libraries'    => $Libraries,
 		 'LIBS'         => $LIBS,
-		 'LINK'	       => $LD,
+		 'LD' 	        => $LD,
 		 'LDFLAGS'      => $LDFLAGS,
 		 'EXEFLAGS'     => $EXEFLAGS,
 		 'LIBPATH'      => $LIBPATH,
@@ -413,20 +431,20 @@
 		 'SO'           => $SO,
 		 'SOFLAGS'      => $SOFLAGS, 
 		 'SoOUT'        => $SoOUT,
-		 'LINKMODULECOM'=> $LINKMODULECOM,
-		 'AR'	       => $AR,
+		 'LINKMODULECOM'=> $MAKELIB,
+		 'AR'	        => $AR,
 		 'ARFLAGS'      => $ARFLAGS,
 		 'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
 		 'RANLIB'       => 'ranlib',
-		 'AS'	       => 'as',
+		 'AS'	        => 'as',
 		 'ASFLAGS'      => '',
 		 'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
-		 'LD'	       => $LD,
+		 'LD'	        => $LD,
 		 'LDFLAGS'      => $LDFLAGS,
 		 'PREFLIB'      => 'lib',
 		 'SUFLIB'       => $A,
-		 'SUFLIBS'      => $so . ":" . $A,
-		 'SUFSOLIB'     => $so,
+		 'SUFLIBS'      => $SOEXT . ":" . $A,
+		 'SUFSOLIB'     => $SOEXT,
 		 'SUFEXE'       => $EXESUF,
 		 'SUFMAP'       => {
 				    '.g'  => 'build::command::geant3',

@@ -13,9 +13,12 @@ my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
 if ($pkg =~ /^sim$/ || $pkg =~ /^gen$/) {goto Tables;}
 my $i;
-my @idlML    = find_idlM($Dir);    if ($param::debug){$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}} 
-my @srcL     = find_sources($Dir); if ($param::debug){$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}}
-my @h_filesL = find_hfiles($Dir);  if ($param::debug){$i = 0; foreach my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}}
+my @idlML    = find_idlM($Dir);    
+if ($param::debug){$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}} 
+my @srcL     = find_sources($Dir); 
+if ($param::debug){$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}}
+my @h_filesL = find_hfiles($Dir);  
+if ($param::debug){$i = 0; foreach my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}}
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
   if (-d $RepDir) {
