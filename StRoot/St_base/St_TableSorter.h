@@ -115,7 +115,7 @@ class St_TableSorter : public TNamed {
     void  SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t numberRows);
 
  public:
-    St_TableSorter(const St_Table &table=*((const St_Table *)0));
+    St_TableSorter();
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
 
 // The last parameter below ",const St_Table &table=*((const St_Table *)0));" 
