@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.10 1999/02/26 22:54:43 sakrejda Exp $
+* $Id: tph.F,v 1.11 1999/02/27 23:09:50 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.11  1999/02/27 23:09:50  sakrejda
+* auxiliary hit table eliminated
+*
 * Revision 1.10  1999/02/26 22:54:43  sakrejda
 * protection against empty clusters added
 *
@@ -294,6 +297,8 @@ C-----------------------------------------------------------------------
         parameter(Nrows_in=13)
         save last_cluster_index
         data last_cluster_index / 1 /
+        logical do_aux
+        data do_aux /.false./
        
 C-----------------------------------------------------------------------
         data first/.true./
@@ -544,6 +549,7 @@ c     also put q (magnitude of hit) into units of energy loss
               
 C     Added an auxiliary diagnostic hit table to evaluate "various quality
 C     studies" of hit finder.   DSW 08/29/97.
+              if(do_aux) then
               tphit_aux_h.nok = tphit_h.nok
 	      tphit_aux(tphit_h.nok).id     = tphit_h.nok		
               tphit_aux(tphit_h.nok).flag   = tphit(tphit_h.nok).flag
@@ -569,6 +575,7 @@ c              tphit_aux(tphit_h.nok).xave   = 0.0
 c              tphit_aux(tphit_h.nok).sigma  = 0.0
 c              tphit_aux(tphit_h.nok).skew   = 0.0
 c              tphit_aux(tphit_h.nok).kurto  = 0.0
+              endif
 
          
 
