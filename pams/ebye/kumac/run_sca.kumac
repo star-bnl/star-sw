@@ -1,9 +1,11 @@
-* 
+* run_sca.kumac
+*
 * written by D. Weerasundara -- dhammika@npl.washington.edu
 * modified by L.D. Carr -- lcarr@u.washington.edu
 * 8/4/98 K.Turner - edited to make it standard
 * 8/10/98 K. Turner - changed name of table dstrack to globtrk
-* 
+* 8/10/98 L.D. Carr -- added close MACRO to support reference
+                       switch options
 
 *********************************************************
  MACRO filter
@@ -15,7 +17,8 @@
 	[params]/ebye/sca/sca_switch _
 	[params]/ebye/sca/sca_const _
 	[data]/ebye/sca/sca_in
-RETURN
+
+ RETURN
  
 *********************************************************
  
@@ -27,8 +30,34 @@ MACRO runsca
         [params]/ebye/sca/sca_switch _
         [params]/ebye/sca/sca_const _
 	[data]/ebye/sca/sca_in _
-	[calib]/ebye/sca/sca_ensemble_ave _
-	[calib]/ebye/sca/sca_prior _
+	[calib]/ebye/sca_ensemble_dir/sca_ensemble_ave _
+	[calib]/ebye/sca_prior_dir/sca_prior _
 	[data]/ebye/sca/sca_out
+
+RETURN
+*********************************************************
+
+MACRO close calib_dir=$STAR_CALIB prior_switch=0 ensemble_switch=0 analysis_switch=1
+
+  macro/global/import *
+
+  if [prior_switch]=1 then
+    message ' writing out sca_prior to ' [calib_dir] ' directory '
+    cd /dui
+*    dio/newfilestream SCAPRIOR2 [calib_dir]/ebye/sca_prior.xdf w
+    dio/newfilestream SCAPRIOR2 $STAR_CALIB/ebye/sca_prior.xdf w
+    dio/stream/putevent    SCAPRIOR2   calib/ebye/sca_prior_dir
+    dio/stream/close       SCAPRIOR2
+  endif
+
+  if [ensemble_switch]=1 then
+    message ' writing out sca_ensemble to ' [calib_dir] ' directory '
+    cd /dui
+*    dio/newfilestream SCAENSEMBLE2 [calib_dir]/ebye/sca_ensemble.xdf w
+    dio/newfilestream SCAENSEMBLE2 $STAR_CALIB/ebye/sca_ensemble.xdf w
+    dio/stream/putevent    SCAENSEMBLE2   calib/ebye/sca_ensemble
+    dio/stream/close       SCAENSEMBLE2 
+  endif
+
 RETURN
 *********************************************************
