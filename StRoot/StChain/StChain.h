@@ -32,12 +32,14 @@ class St_XDFFile;
 
 class StChain : public TNamed {
 
+typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
    Int_t               m_Version;           //StChain version number
    Int_t               m_VersionDate;       //StChain version date
    Int_t               m_Run;               //Run number
    Int_t               m_Event;             //Event number
    Int_t               m_Mode;              //Run mode
+   EDebugLevel         m_DebugLevel;        //Debug level
    St_DataSet         *m_DataSet;           //The main chain dataset structure
    St_DataSetIter     *m_RunIter;           //The parameters
    St_DataSetIter     *m_CalibIter;         //The calibration       
@@ -54,6 +56,7 @@ public:
    virtual void       Draw(Option_t *option="");  // *MENU*
    St_DataSet        *DataSet(){return m_DataSet;}
    St_DataSet        *DataSet(Char_t *makername); // find the maker by name and return its dataset
+   EDebugLevel        Debug(){return m_DebugLevel;}
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
    virtual void       Clear(Option_t *option="");
@@ -68,6 +71,7 @@ public:
    virtual Int_t      Make(Int_t i=0);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();
+   void               SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
    virtual void       SetDefaultParameters();
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
    void               SetRunIter(St_DataSetIter *run) {m_RunIter = run;}

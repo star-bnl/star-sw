@@ -12,7 +12,7 @@
 class St_xdfin_Maker : public StMaker {
 public:
                   St_xdfin_Maker();
-                  St_xdfin_Maker(const char *name);
+                  St_xdfin_Maker(const char *name,const char *title="");
    virtual       ~St_xdfin_Maker();
    virtual void   Clear(Option_t *option="");
    virtual void   Finish();
