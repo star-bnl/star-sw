@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.77 1999/04/26 22:40:15 fisyak Exp $
+# $Id: MakeDll.mk,v 1.78 1999/04/28 00:46:06 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.78  1999/04/28 00:46:06  fisyak
+# Fix feature with QWERTY for St_base
+#
 # Revision 1.77  1999/04/26 22:40:15  fisyak
 # remove -lpgc for new pfg77, Victor has updated libpgf77S.so
 #
@@ -171,7 +174,7 @@ endif
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StarClassLibrary) \
+INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StarClassLibrary StRootEvent) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
@@ -300,8 +303,10 @@ endef
 
 ifdef FILES_ORD
   ifneq (,$(strip $(FILES_H)))
-    NAMES_ORD  := $(shell $(AWK))
-    NAMES_DD    = $(shell $(AWK2))
+    NAMES_ORD  := $(filter-out StVecPtr, $(shell $(AWK)))
+ifdef NEVER
+    NAMES_DD   := $(shell $(AWK2))
+    NAMES_DD   := $(strip $(filter-out %StArray.h, $(NAMES_DD)))
     ifneq (,$(NAMES_DD))
       NAMES_ORDD := $(addprefix St, $(addsuffix Collection, $(NAMES_DD))\
                                      $(addsuffix Iterator,   $(NAMES_DD))\
@@ -310,6 +315,7 @@ ifdef FILES_ORD
       FILES_COL := $(shell grep -l StCollectionDef  $(FILES_H))
       FILES_GCO := $(notdir $(FILES_COL))
     endif
+endif
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
   ifneq (,$(LinkDef))
