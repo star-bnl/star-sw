@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.8 1998/07/23 21:09:14 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.9 1998/07/23 22:12:00 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.9  1998/07/23 22:12:00  fisyak
+// Recover after Correction for root 2.09
+//
 // Revision 1.8  1998/07/23 21:09:14  fisyak
 // Adjust for ROOT 2.09
 // 
@@ -272,6 +275,20 @@ void St_Table::ls(Option_t *option)
   Print();
   DecreaseDirLevel();
 }
+//_____________________________________________________________________________
+ void St_Table::ls(Int_t deep)
+{
+   St_DataSet::ls(deep);
+   IncreaseDirLevel();
+   IndentLevel();
+   cout       <<"Allocated rows: "<<fN
+        <<'\t'<<"Used rows: "     <<*s_MaxIndex
+        <<'\t'<<"Row size: "      <<*s_Size
+        <<endl;
+   Print();
+   DecreaseDirLevel();
+}
+
 //______________________________________________________________________________
 Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
 {
