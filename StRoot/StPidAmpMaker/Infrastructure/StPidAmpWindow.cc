@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.cc,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpWindow.cc,v 1.2 2000/03/30 20:23:44 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.cc,v $
+ * Revision 1.2  2000/03/30 20:23:44  aihong
+ * Modified getWindowIdex() & isIn*Window()
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -146,8 +149,8 @@ bool StPidAmpWindow::isInFirstWindow(double x){
 
       return theCut.isInCut(x);
  
-  } else if (mWindows.size()<=0) {return false;}
-
+      //  } else if (mWindows.size()<=0) {return false;}
+  } else  return false;
 
 
 }
@@ -158,7 +161,7 @@ bool StPidAmpWindow::isInSecondWindow(double x){
 
       return mWindows[1].isInCut(x);
  
-  } else if (mWindows.size()<=1) {return false;}
+  } else return false;
 
 
 
@@ -171,7 +174,7 @@ bool StPidAmpWindow::isInThirdWindow(double x){
 
       return mWindows[2].isInCut(x);
  
-  } else if (mWindows.size()<=2) {return false;}
+  } else return false;
 
 
 
@@ -183,7 +186,7 @@ bool StPidAmpWindow::isInForthWindow(double x){
 
       return mWindows[3].isInCut(x);
  
-  } else if (mWindows.size()<=3) {return false;}
+  } else return false;
 
 
 
@@ -197,7 +200,7 @@ int StPidAmpWindow::getWindowIdex(double x){
   else if ( isInThirdWindow(x))  return 3;
   else if ( isInForthWindow(x))  return 4;
 
-  else if ( !(isInWindow(x)))    return -1;
+  else                           return -1;
 
 }
 
