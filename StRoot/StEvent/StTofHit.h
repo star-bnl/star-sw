@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.8 2003/09/02 17:58:05 perev Exp $
+ * $Id: StTofHit.h,v 2.9 2004/02/05 17:59:44 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.9  2004/02/05 17:59:44  ullrich
+ * Changed $LINK to StLink mechanism and add new member.
+ *
  * Revision 2.8  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -58,6 +61,7 @@ public:
     int   moduleIndex() const;
     int   cellIndex() const;
     int   daqIndex() const;
+    int   cellCollIndex() const;
     float timeOfFlight() const;
     float pathLength() const;
     float beta() const;
@@ -81,6 +85,7 @@ public:
     void setTrayIndex(int);
     void setModuleIndex(int);
     void setCellIndex(int);
+    void setCellCollIndex(int);
     void setDaqIndex(int);
     void setTimeOfFlight(float);
     void setPathLength(float);
@@ -102,10 +107,16 @@ public:
     Int_t   mModuleIndex;
     Int_t   mCellIndex;
     Int_t   mDaqIndex;
+    Int_t   mCellCollIndex;
     Float_t mTimeOfFlight;
     Float_t mPathLength;
     Float_t mBeta;
-    StTrack *mAssociatedTrack;   //$LINK
+    //    StTrack *mAssociatedTrack;   //$LINK
+#ifdef __CINT__
+    StObjLink        mAssociatedTrack;		
+#else
+    StLink<StTrack>  mAssociatedTrack;		
+#endif //__CINT__
     Float_t mTOFExpectedAsElectron;
     Float_t mTOFExpectedAsPion;
     Float_t mTOFExpectedAsKaon;
@@ -116,7 +127,7 @@ public:
     Float_t mSigmaProton;
     StParticleDefinition *mParticleHypothesis;
 
-    ClassDef(StTofHit,2)
+    ClassDef(StTofHit,3)
 };
 
 #endif

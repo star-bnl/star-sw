@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.3 2003/08/28 23:24:17 jeromel Exp $
+ * $Id: StTofCell.h,v 2.4 2004/02/05 17:59:31 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.4  2004/02/05 17:59:31  ullrich
+ * Changed $LINK to StLink mechanism and add new member.
+ *
  * Revision 2.3  2003/08/28 23:24:17  jeromel
  * Modif in class
  *
@@ -29,13 +32,15 @@
 
 #include "StObject.h"
 #include "StThreeVectorD.hh"
+#include "StContainers.h"
 
 class StTrack;
 
 class StTofCell : public StObject {
 public:
     StTofCell();
-    StTofCell(int, int, int, int, int, StTrack*, float, int, StThreeVectorD&);
+    StTofCell(int, int, int, int, int, int, StTrack*,
+	      float, int, const StThreeVectorD&);
     ~StTofCell();
     
     int operator==(const StTofCell&) const;
@@ -44,6 +49,7 @@ public:
     int                   trayIndex() const;
     int                   moduleIndex() const;
     int                   cellIndex() const;
+    int                   daqIndex() const;
     int                   adc() const;
     int                   tdc() const;
     StTrack*              associatedTrack();
@@ -55,6 +61,7 @@ public:
     void      setTrayIndex(int);
     void      setModuleIndex(int);
     void      setCellIndex(int);
+    void      setDaqIndex(int);
     void      setAdc(int);
     void      setTdc(int);
     void      setAssociatedTrack(StTrack*);
@@ -66,14 +73,20 @@ protected:
     Int_t    mTrayIndex;
     Int_t    mModuleIndex;
     Int_t    mCellIndex;
+    Int_t    mDaqIndex;
     Int_t    mAdc;
     Int_t    mTdc;
-    StTrack* mAssociatedTrack;   //$LINK
+    //    StTrack* mAssociatedTrack;   //$LINK
+#ifdef __CINT__
+    StObjLink        mAssociatedTrack;		
+#else
+    StLink<StTrack>  mAssociatedTrack;		
+#endif //__CINT__
     Float_t  mZhit;
     Int_t    mMatchFlag;
     StThreeVectorD mPosition;
 
-    ClassDef(StTofCell,2)
+    ClassDef(StTofCell,3)
 };
 
 
@@ -93,6 +106,12 @@ inline void
 StTofCell::setCellIndex(int cellId)
 {
     mCellIndex = cellId;
+}
+
+inline void
+StTofCell::setDaqIndex(int daqId)
+{
+    mDaqIndex = daqId;
 }
 
 inline void
@@ -132,6 +151,12 @@ inline int
 StTofCell::cellIndex() const
 {
     return mCellIndex;
+}
+
+inline int
+StTofCell::daqIndex() const
+{
+    return mDaqIndex;
 }
 
 inline int

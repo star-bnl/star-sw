@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.cxx,v 2.4 2003/07/09 20:14:20 ullrich Exp $
+ * $Id: StTofHit.cxx,v 2.5 2004/02/05 17:59:43 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.cxx,v $
+ * Revision 2.5  2004/02/05 17:59:43  ullrich
+ * Changed $LINK to StLink mechanism and add new member.
+ *
  * Revision 2.4  2003/07/09 20:14:20  ullrich
  * New methods added.
  *
@@ -33,7 +36,9 @@ StTofHit::StTofHit()
 {
     mTrayIndex = 0;
     mModuleIndex = 0;
+    mCellIndex = 0;
     mDaqIndex = 255; 
+    mCellCollIndex = -1;
     mTimeOfFlight = 0;
     mPathLength = 0;
     mBeta = 0;
@@ -52,82 +57,119 @@ StTofHit::StTofHit()
 
 StTofHit::~StTofHit() {/* noop */}
 
-StObject* StTofHit::clone() const { return new StTofHit(*this); }
+StObject*
+StTofHit::clone() const { return new StTofHit(*this); }
 
-int StTofHit::trayIndex() const { return mTrayIndex; }
+int
+StTofHit::trayIndex() const { return mTrayIndex; }
 
-int StTofHit::moduleIndex() const { return mModuleIndex; }
+int
+StTofHit::moduleIndex() const { return mModuleIndex; }
 
-int StTofHit::cellIndex() const { return mCellIndex; }
+int
+StTofHit::cellIndex() const { return mCellIndex; }
 
-int StTofHit::daqIndex() const { return mDaqIndex; }
+int
+StTofHit::daqIndex() const { return mDaqIndex; }
 
-float StTofHit::timeOfFlight() const { return mTimeOfFlight; }
+int
+StTofHit::cellCollIndex() const { return mCellCollIndex; }
 
-float StTofHit::pathLength() const { return mPathLength; }
+float
+StTofHit::timeOfFlight() const { return mTimeOfFlight; }
 
-float StTofHit::beta() const { return mBeta; }
+float
+StTofHit::pathLength() const { return mPathLength; }
 
-StTrack* StTofHit::associatedTrack() { return mAssociatedTrack; }
+float
+StTofHit::beta() const { return mBeta; }
 
-const StTrack* StTofHit::associatedTrack() const { return mAssociatedTrack; }
+StTrack*
+StTofHit::associatedTrack() { return mAssociatedTrack; }
 
-float StTofHit::tofExpectedAsElectron() const { return mTOFExpectedAsElectron; }
+const StTrack*
+StTofHit::associatedTrack() const { return mAssociatedTrack; }
 
-float StTofHit::tofExpectedAsPion() const { return mTOFExpectedAsPion; }
+float
+StTofHit::tofExpectedAsElectron() const { return mTOFExpectedAsElectron; }
 
-float StTofHit::tofExpectedAsKaon() const { return mTOFExpectedAsKaon; }
+float
+StTofHit::tofExpectedAsPion() const { return mTOFExpectedAsPion; }
 
-float StTofHit::tofExpectedAsProton() const { return mTOFExpectedAsProton; }
+float
+StTofHit::tofExpectedAsKaon() const { return mTOFExpectedAsKaon; }
 
-float StTofHit::sigmaElectron() const { return mSigmaElectron; }
+float
+StTofHit::tofExpectedAsProton() const { return mTOFExpectedAsProton; }
 
-float StTofHit::sigmaPion() const { return mSigmaPion; }
+float
+StTofHit::sigmaElectron() const { return mSigmaElectron; }
 
-float StTofHit::sigmaKaon() const { return mSigmaKaon; }
+float
+StTofHit::sigmaPion() const { return mSigmaPion; }
 
-float StTofHit::sigmaProton() const { return mSigmaProton; }
+float
+StTofHit::sigmaKaon() const { return mSigmaKaon; }
 
-StParticleDefinition* StTofHit::particleHypothesis() { return mParticleHypothesis; }
+float
+StTofHit::sigmaProton() const { return mSigmaProton; }
 
-const StParticleDefinition* StTofHit::particleHypothesis() const { return mParticleHypothesis; }
+StParticleDefinition*
+StTofHit::particleHypothesis() { return mParticleHypothesis; }
 
-void StTofHit::setTrayIndex(int trayId) { mTrayIndex = trayId; }
+const StParticleDefinition*
+StTofHit::particleHypothesis() const { return mParticleHypothesis; }
 
-void StTofHit::setModuleIndex(int moduleId) { mModuleIndex = moduleId; }
+void
+StTofHit::setTrayIndex(int trayId) { mTrayIndex = trayId; }
 
-void StTofHit::setCellIndex(int cellId) { mCellIndex = cellId; }
+void
+StTofHit::setModuleIndex(int moduleId) { mModuleIndex = moduleId; }
 
-void StTofHit::setDaqIndex(int daqId) { mDaqIndex = daqId; }
+void
+StTofHit::setCellIndex(int cellId) { mCellIndex = cellId; }
 
-void StTofHit::setTimeOfFlight(float tof) { mTimeOfFlight = tof; }
+void
+StTofHit::setDaqIndex(int daqId) { mDaqIndex = daqId; }
 
-void StTofHit::setPathLength(float length) { mPathLength = length; }
+void
+StTofHit::setCellCollIndex(int cellcollId) { mCellCollIndex = cellcollId; }
 
-void StTofHit::setBeta(float b) { mBeta = b; }
+void
+StTofHit::setTimeOfFlight(float tof) { mTimeOfFlight = tof; }
 
-void StTofHit::setAssociatedTrack(StTrack* val)
-{
-    mAssociatedTrack = val;
-}
+void
+StTofHit::setPathLength(float length) { mPathLength = length; }
 
-void StTofHit::setTofExpectedAsElectron(float tofexp) { mTOFExpectedAsElectron = tofexp; }
+void
+StTofHit::setBeta(float b) { mBeta = b; }
 
-void StTofHit::setTofExpectedAsPion(float tofexp) { mTOFExpectedAsPion = tofexp; }
+void
+StTofHit::setAssociatedTrack(StTrack* val) {mAssociatedTrack = val;}
 
-void StTofHit::setTofExpectedAsKaon(float tofexp) { mTOFExpectedAsKaon = tofexp; }
+void
+StTofHit::setTofExpectedAsElectron(float tofexp) { mTOFExpectedAsElectron = tofexp; }
 
-void StTofHit::setTofExpectedAsProton(float tofexp) { mTOFExpectedAsProton = tofexp; }
+void
+StTofHit::setTofExpectedAsPion(float tofexp) { mTOFExpectedAsPion = tofexp; }
 
-void StTofHit::setSigmaElectron(float sigma) { mSigmaElectron = sigma; }
+void
+StTofHit::setTofExpectedAsKaon(float tofexp) { mTOFExpectedAsKaon = tofexp; }
 
-void StTofHit::setSigmaPion(float sigma) { mSigmaPion = sigma; }
+void
+StTofHit::setTofExpectedAsProton(float tofexp) { mTOFExpectedAsProton = tofexp; }
 
-void StTofHit::setSigmaKaon(float sigma) { mSigmaKaon = sigma; }
+void
+StTofHit::setSigmaElectron(float sigma) { mSigmaElectron = sigma; }
 
-void StTofHit::setSigmaProton(float sigma) { mSigmaProton = sigma; }
+void
+StTofHit::setSigmaPion(float sigma) { mSigmaPion = sigma; }
 
-void StTofHit::setParticleHypothesis(StParticleDefinition* val)
-{
-    mParticleHypothesis = val;
-}
+void
+StTofHit::setSigmaKaon(float sigma) { mSigmaKaon = sigma; }
+
+void
+StTofHit::setSigmaProton(float sigma) { mSigmaProton = sigma; }
+
+void
+StTofHit::setParticleHypothesis(StParticleDefinition* val) { mParticleHypothesis = val; }
