@@ -3,8 +3,8 @@
 
 #include <TObject.h>
 
-const int NPHIBINS = 16;
-const int NETABINS =  8;
+const int NPHIBINS = 24;
+const int NETABINS = 16;
 const int NPTBINS  =  2;
 
 class multStruct : public TObject {

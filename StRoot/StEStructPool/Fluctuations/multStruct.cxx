@@ -8,6 +8,7 @@ ClassImp( multStruct )
 
 int multStruct::NewEvent(float xv, float yv, float zv) {
     mCalcRefMult = true;
+    mRefMult = 0;
     mXVertex = xv;
     mYVertex = yv;
     mZVertex = zv;
