@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.cxx,v 1.3 2003/06/25 23:05:41 thenry Exp $
+ * $Id: StJetOutputMaker.cxx,v 1.4 2003/08/27 18:10:08 thenry Exp $
  * 
  * Author: Thomas Henry May 2003
  ***************************************************************************
@@ -58,6 +58,8 @@ Int_t StJetOutputMaker::doMake() {
   // First basic event information:
   StMuDst* muDst = muDstMaker->muDst();
   StMuEvent* muEvent = muDst->event();
+  unsigned int runNumber = muEvent->runNumber();
+  oJetEvent.event.subEvent.runNumber = runNumber;
   oJetEvent.event.subEvent.eventId = muEvent->eventId();
   const vector<UInt_t> &triggers = 
     muEvent->triggerIdCollection().nominal().triggerIds();
@@ -70,9 +72,56 @@ Int_t StJetOutputMaker::doMake() {
   oJetEvent.event.subEvent.zVertex = muEvent->primaryVertexPosition().z();
   int numberPrimaryTracks = muDst->numberOfPrimaryTracks();
   oJetEvent.event.subEvent.npTracks = numberPrimaryTracks;
-  StMuEmcCollection* muEmc = NULL;
+  StL0Trigger &l0 = muEvent->l0Trigger();
+  oJetEvent.event.subEvent.clearSpinBits();
+  oJetEvent.event.subEvent.ySpinUp(l0.spinBitYellowUp(runNumber) != 0);
+  oJetEvent.event.subEvent.bSpinUp(l0.spinBitBlueUp(runNumber) != 0);
+  oJetEvent.event.subEvent.ySpinDown(l0.spinBitYellowDown(runNumber) != 0);
+  oJetEvent.event.subEvent.bSpinDown(l0.spinBitBlueDown(runNumber) != 0);
+  //oJetEvent.event.subEvent.ySpinUp(l0.spinBitYellowUp() != 0);
+  //oJetEvent.event.subEvent.bSpinUp(l0.spinBitBlueUp() != 0);
+  //oJetEvent.event.subEvent.ySpinDown(l0.spinBitYellowDown() != 0);
+  //oJetEvent.event.subEvent.bSpinDown(l0.spinBitBlueDown() != 0);
+  oJetEvent.event.subEvent.bunchCrossingId7bit = 
+    l0.bunchCrossingId7bit(runNumber);
+  oJetEvent.event.subEvent.bunchCrossingId = l0.bunchCrossingId();
+  oJetEvent.event.subEvent.numPoints = 0;
+  oJetEvent.event.subEvent.isAborted = 255;
+
+  bool usesPoints = false;
   if(fourPMaker != NULL)
-    muEmc = fourPMaker->getMuEmcCollection();
+    usesPoints = true;
+
+  if(usesPoints)
+    {
+      oJetEvent.event.subEvent.numCoincidences = 
+	fourPMaker->getNumberCoincidences();
+      oJetEvent.event.subEvent.sumPtTracks = fourPMaker->getSumPtTracks();
+      oJetEvent.event.subEvent.sumEMC = fourPMaker->getSumEMC();
+      oJetEvent.event.subEvent.sumDoubleECalc = 
+	fourPMaker->getSumTheorySubtracted();
+      oJetEvent.event.subEvent.sumDoubleESub = 
+	fourPMaker->getSumSubtracted();
+      oJetEvent.event.subEvent.numPoints = 
+	fourPMaker->getNumPoints();
+      oJetEvent.event.subEvent.isAborted = 
+	fourPMaker->isAborted();
+    }
+  else
+    {
+      oJetEvent.event.subEvent.numCoincidences = 0;
+      double sumPtTracks = 0;
+      long nTracks = muDst->numberOfPrimaryTracks();
+      for(int i = 0; i < nTracks; i++)
+	{
+	  StMuTrack* track = muDst->primaryTracks(i);
+	  if(track->flag() < 0) continue;
+	  double pt = track->pt();
+	  sumPtTracks += pt;
+	}
+      oJetEvent.event.subEvent.sumPtTracks = sumPtTracks;
+      oJetEvent.event.subEvent.sumEMC = 0;
+    }
 
   // Then the jets (if any)
   StJetMaker::jetBranchesMap &jetAnalyzers = jetMaker->getJets();
@@ -105,12 +154,12 @@ Int_t StJetOutputMaker::doMake() {
 	    {
 	      if(*trackit >= numberPrimaryTracks)
 		{
-		  if(muEmc)
+		  if(usesPoints)
 		    {
-		      StMuEmcPoint* muPoint = 
-			muEmc->getPoint(*trackit-numberPrimaryTracks);
+		      StMuEmcPoint& muPoint = 
+			fourPMaker->fakePoints[*trackit-numberPrimaryTracks];
 		      StCorrectedEmcPoint &point = fourPMaker->binmap.
-		        moddPoints[muPoint];
+		        moddPoints[&muPoint];
 		      oJetEvent.track.trackE = point.E();
 		      jet_energy += oJetEvent.track.trackE;
 		      oJetEvent.track.trackPhi = point.Phi();
@@ -122,9 +171,7 @@ Int_t StJetOutputMaker::doMake() {
 		  continue;
 		}
 	      StMuTrack* muTrack = muDst->primaryTracks(*trackit);
-	      tempTrack.initProbabilities(muTrack);
-              oJetEvent.track.trackE = 
-		sqrt(tempTrack.masssqr() + muTrack->p().mag2());
+              oJetEvent.track.trackE = muTrack->p().mag();
 	      jet_energy += oJetEvent.track.trackE;
 	      oJetEvent.track.trackPhi = muTrack->phi();
 	      oJetEvent.track.trackEta = muTrack->eta();
@@ -232,14 +279,14 @@ istream& read(istream &is, JetStruct &toRead)
   toRead.tracks.clear();
   short size = 0;
   read(is, reinterpret_cast<char*>(&size), sizeof(size));
-  if(toRead.jetname.size() < static_cast<unsigned short>(size) ) 
-    toRead.jetname.resize(size);
+  toRead.jetname.resize(size);
   for(int i = 0; i < size; i++)
     {
       char input;
       read(is, &input, sizeof(input));
       toRead.jetname[i] = input;
     }
+  //toRead.jetname[size] = 0;
   read(is, reinterpret_cast<char*>(&toRead.jet), sizeof(toRead.jet));
   return read(is,toRead.tracks);
 }
@@ -259,7 +306,7 @@ ostream& write(ostream &os, const char *toWrite, int size)
   int pos = os.tellp();
   os.write(toWrite, size);
   pos += size;
-  if(os.tellp() != pos)
+  if(static_cast<int>(os.tellp()) != pos)
     os.seekp(pos, ios::beg);
   return os;
 }
@@ -270,7 +317,7 @@ istream& read(istream &is, char *toRead, int size)
   is.read(toRead, size);
   if(is.eof()) throw eofException();
   pos += size;
-  if(is.tellg() != pos)
+  if(static_cast<int>(is.tellg()) != pos)
     is.seekg(pos, ios::beg);
   return is;
 }
