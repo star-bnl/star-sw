@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.10 2004/07/09 10:40:09 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.11 2004/07/09 12:23:03 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.11  2004/07/09 12:23:03  subhasis
+ *numbering scheme adopted on CPV
+ *
  *Revision 1.10  2004/07/09 10:40:09  subhasis
  *channel 0 ADC made to 0, numbering scheme implemented in fillStEvent, earlier it was done on StPmdHit, in stead of StPhmdHit
  *
@@ -405,13 +408,22 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    Int_t adc=spmcl2->Adc();
 	    
 	    StPhmdHit *phit = new StPhmdHit();
-
+	    /*
 	    phit->setSuperModule(Int_t(gsuper-1));
 	    phit->setSubDetector(Int_t(subdet));
 	    phit->setRow(Int_t(row));
 	    phit->setColumn(Int_t(col));
 	    phit->setEnergy(edep);
 	    phit->setAdc(adc);              
+	    */
+
+	    // changed to accommodate numbering scheme (i.e start from 0)
+	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
+	    phit->setSubDetector(Int_t(subdet-1));   // filling subdetector (pmd=0,cpv=1)
+	    phit->setRow(Int_t(row-1));              // filling row (starts from 0)
+	    phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
+	    phit->setEnergy(edep);                 // filling energy
+	    phit->setAdc(adc);                     // filling ADC
 	    
 	    if(mCpvEvent)mCpvEvent->addHit(phit);
 	  }
