@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.1 2001/08/30 16:17:03 macross Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.2 2001/08/31 19:07:36 macross Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
- * Revision 1.1  2001/08/30 16:17:03  macross
- * Initial Revition.
+ * Revision 1.2  2001/08/31 19:07:36  macross
+ * Modified code to retrieve ADC and TDC pulses from TrgDet table
  *
  **************************************************************************/
 #include "StZdcVertexMaker.h"
@@ -30,10 +30,13 @@
 #include "St_DataSetIter.h"
 #include "ZdcCalPars.h"
 #include "tables/St_ZdcCalPars_Table.h"
+#include "tables/St_dst_TrgDet_Table.h"
+#include "StDaqLib/TRG/trgStructures.h"
+
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.1 2001/08/30 16:17:03 macross Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.2 2001/08/31 19:07:36 macross Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -109,6 +112,7 @@ Int_t StZdcVertexMaker::Init()
 //_________________________________________________
 Int_t StZdcVertexMaker::Make()
 {
+/*
     //
     //  Get StEvent
     //
@@ -117,10 +121,23 @@ Int_t StZdcVertexMaker::Make()
     if (!event) {
         return kStOK;
     }
-
+*/
     //
     //  Get ZDC trigger
     //
+
+    TDataSet *triggerDS = GetDataSet("trg");
+    if (!triggerDS)
+    {
+        gMessMgr->Error() << "StZdcVertexMaker::Make():  GetDataSet() in ZdcVertexMaker did not find Data Set ." << endm;
+        return kStErr;
+    }
+
+    St_DataSetIter triggerI(triggerDS);
+    St_dst_TrgDet *triggertable = (St_dst_TrgDet *) triggerI("TrgDet");         
+    dst_TrgDet_st *tt = triggertable->GetTable();
+
+/*
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
     if (!theTriggers) 
     {
@@ -135,13 +152,21 @@ Int_t StZdcVertexMaker::Make()
     float tdcE = theZdc.adc(8);
     float tdcW = theZdc.adc(9);
 
+*/
+    float adcE = tt->adcZDC[15];
+    float adcW = tt->adcZDC[12];
+    float tdcE = tt->adcZDC[8];
+    float tdcW = tt->adcZDC[9];
+    
     float VertexZ = ((tdcW-(mWAP0+(mWAP1*adcW)+(mWAP2*pow(adcW,2))+(mWAP3*pow(adcW,3))))-
                      (tdcE-(mEAP0+(mEAP1*adcE)+(mEAP2*pow(adcE,2))+(mEAP3*pow(adcE,3)))))*mVPAR + mOFF;
 
     //
     //  Store VertexZ 
     //
-    theZdc.setVertexZ(VertexZ);
+        //theZdc.setVertexZ(VertexZ);
+    
+    tt->ZDCvertexZ = VertexZ;
 
     return kStOK;
 }
