@@ -1,3 +1,8 @@
+* $Id: tgc_z_to_time.F,v 1.2 1998/01/27 01:56:45 fisyak Exp $
+* $Log: tgc_z_to_time.F,v $
+* Revision 1.2  1998/01/27 01:56:45  fisyak
+* Split sources
+*
       integer function tgc_z_to_time(z,pad,padrow,sector,time)
 C     Description: Converts z in the local coordinates to TIME BUCKET NUMBER
 c     mal 05feb97

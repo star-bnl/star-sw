@@ -1,3 +1,8 @@
+* $Id: tgc_clock_frequency.F,v 1.2 1998/01/27 01:56:38 fisyak Exp $
+* $Log: tgc_clock_frequency.F,v $
+* Revision 1.2  1998/01/27 01:56:38  fisyak
+* Split sources
+*
       integer function tgc_clock_frequency(clock,TPG_DETECTOR_H,TPG_DETECTOR)
       implicit none
 #include "PAM.inc"

@@ -1,3 +1,8 @@
+* $Id: tgc_time_to_z.F,v 1.2 1998/01/27 01:56:43 fisyak Exp $
+* $Log: tgc_time_to_z.F,v $
+* Revision 1.2  1998/01/27 01:56:43  fisyak
+* Split sources
+*
       integer function tgc_time_to_z(time,pad,padrow,sector,z)
 
       implicit none

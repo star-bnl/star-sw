@@ -1,3 +1,8 @@
+* $Id: tgc_z_inner_offset.F,v 1.2 1998/01/27 01:56:44 fisyak Exp $
+* $Log: tgc_z_inner_offset.F,v $
+* Revision 1.2  1998/01/27 01:56:44  fisyak
+* Split sources
+*
       integer function tgc_z_inner_offset(z_offset,TPG_DETECTOR_H,TPG_DETECTOR)
       implicit none
 #include "PAM.inc"

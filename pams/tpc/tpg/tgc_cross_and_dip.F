@@ -1,3 +1,8 @@
+* $Id: tgc_cross_and_dip.F,v 1.2 1998/01/27 01:56:38 fisyak Exp $
+* $Log: tgc_cross_and_dip.F,v $
+* Revision 1.2  1998/01/27 01:56:38  fisyak
+* Split sources
+*
       integer function tgc_cross_and_dip(sector,pglobal,cross,dip)
       implicit none
 
