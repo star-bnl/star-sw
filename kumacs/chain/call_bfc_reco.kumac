@@ -1,3 +1,4 @@
+* 1/26/99 K. Turner
 * 12/9/98 K. Turner (for 98j)
 * Run BFC in following manner:
 * - read in simulated data file (thru tss & srs)
@@ -16,6 +17,6 @@
    chain=' evin tpg svg tcl tcl_e tpt tid tte_e sgr drhd dehd svm egr evr ev02 ev0d ddedx dpnt desum dmsft drsum evout' _
    skip=0 _
    no_events=1 _
-   input_data_file=$AFS_RHIC/star/data/samples/auau_ce_b0-2_4041_4060_tss_srs.xdf _
+   input_data_file=/disk00000/star/kathy/auau_ce_b0-2_4041_4060_tss_srs.xdf _
    output_file=auau_ce_b0-2_4041_4060_reco _
    log=bfc_reco.log

@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.80 1999/01/26 14:37:53 didenko Exp $
+* * $Id: bfc.kumac,v 1.81 1999/01/26 18:39:20 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.81  1999/01/26 18:39:20  kathy
+* changed location of input data files to disk00000/star/test_data
+*
 * Revision 1.80  1999/01/26 14:37:53  didenko
 * added fde and dftpc to chain from Janet
 *
@@ -321,7 +324,7 @@ MACRO bfc _
    chain=' fzin rg2t tpg svg tss tcl tcl_e srs ems ctf mwc fss fcl fpt fte fde tpt tid tte_e sgr spr drhd dehd svm egr evr ev02 ev0d ddedx dpnt dftpc desum dmsft drsum dout ' _
    skip=0 _
    no_events=1 _
- input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.fza _
+   input_data_file=/disk00000/star/test_data/year2a_psc079_01_46evts.fza _
    output_file=year2a_psc079_01_46evts _
    log=bfc.log _
    nunit=21 _
