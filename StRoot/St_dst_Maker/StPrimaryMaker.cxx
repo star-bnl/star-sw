@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.15 1999/10/27 19:31:16 nystrand Exp $
+// $Id: StPrimaryMaker.cxx,v 1.16 1999/10/29 23:23:26 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.16  1999/10/29 23:23:26  caines
+// Removed scenario methods
+//
 // Revision 1.15  1999/10/27 19:31:16  nystrand
 // Added call to lmv
 //
@@ -130,7 +133,6 @@ Int_t StPrimaryMaker::Init(){
   {  
     egr_egrpar_st row;
     memset(&row,0,m_egr_egrpar->GetRowSize());
-    row.scenario =  0;
     row.mxtry =    10;
     row.minfit =    5;
     row.prob[0] =   2;
