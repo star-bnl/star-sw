@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.hh,v 1.2 2003/09/02 17:55:32 perev Exp $
+ * $Id: RichEventReader.hh,v 1.3 2003/12/24 21:55:57 perev Exp $
  * Author: Zhangbu Xu
  ***************************************************************************
  * Description: definition for Rich Standalone event reader
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.hh,v $
+ * Revision 1.3  2003/12/24 21:55:57  perev
+ * Cleanup
+ *
  * Revision 1.2  2003/09/02 17:55:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -127,8 +130,7 @@ public:
 
   char *getDATAP() { return DATAP; };
   struct EventInfo getEventInfo();
-  void printEventInfo();
-  void printEventInfo(FILE *);
+  void printEventInfo(FILE *fd = stdout);
   void fprintError(int err, char *file, int line, char *userstring);
 
   int runno() { return runnum; }

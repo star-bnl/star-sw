@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.cxx,v 1.2 2000/04/25 15:18:08 xzb Exp $
+ * $Id: RichEventReader.cxx,v 1.3 2003/12/24 21:55:57 perev Exp $
  * Author: Zhangbu Xu 
  ***************************************************************************
  * Description: Rich Event reader code for standalone data file
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.cxx,v $
+ * Revision 1.3  2003/12/24 21:55:57  perev
+ * Cleanup
+ *
  * Revision 1.2  2000/04/25 15:18:08  xzb
  * Fix the compiler warnings.
  *
@@ -388,54 +391,10 @@ EventInfo RichEventReader::getEventInfo()
   return ei;
 }
 
-void RichEventReader::printEventInfo()
-{
-  char ts[128] ;
-
-  EventInfo ei = getEventInfo();
-  sprintf(ts,"%s",ctime((const long int*)&ei.UnixTime)) ;
-  ts[24] = 0 ;
-  printf("===============  Event # %d  =============\n",ei.EventSeqNo);
-  printf("Ev len (wds) %d\n",ei.EventLength);
-  printf("Creation Time: %s \n",ts);
-  printf("Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
-  printf("Detectors present: ");
-  if (ei.TPCPresent) printf("TPC ");
-  if (ei.SVTPresent) printf("SVT ");
-  if (ei.TOFPresent) printf("TOF ");
-  if (ei.EMCPresent) printf("EMC ");
-  if (ei.SMDPresent) printf("SMD ");
-  if (ei.FTPCPresent) printf("FTPC ");
-  if (ei.RICHPresent) printf("RICH ");
-  if (ei.TRGDetectorsPresent) printf("TRG ");
-  if (ei.L3Present) printf("L3 ");
-  printf("\n");
-  printf("===========================================\n");
-}
-
 void RichEventReader::printEventInfo(FILE * fd)
 {
-  char ts[128] ;
-
   EventInfo ei = getEventInfo();
-  sprintf(ts,"%s",ctime((const long int*)&ei.UnixTime)) ;
-  ts[24] = 0 ;
-  fprintf(fd,"===============  Event # %d  =============\n",ei.EventSeqNo);
-  fprintf(fd,"Ev len (wds) %d\n",ei.EventLength);
-  fprintf(fd,"Creation Time: %s \n",ts);
-  fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
-  fprintf(fd,"Detectors present: ");
-  if (ei.TPCPresent) fprintf(fd,"TPC ");
-  if (ei.SVTPresent) fprintf(fd,"SVT ");
-  if (ei.TOFPresent) fprintf(fd,"TOF ");
-  if (ei.EMCPresent) fprintf(fd,"EMC ");
-  if (ei.SMDPresent) fprintf(fd,"SMD ");
-  if (ei.FTPCPresent) fprintf(fd,"FTPC ");
-  if (ei.RICHPresent) fprintf(fd,"RICH ");
-  if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
-  if (ei.L3Present) fprintf(fd,"L3 ");
-  fprintf(fd,"\n");
-  fprintf(fd,"===========================================\n");
+  ei.printEventInfo(fd);
 }
 
 long RichEventReader::NextEventOffset()
