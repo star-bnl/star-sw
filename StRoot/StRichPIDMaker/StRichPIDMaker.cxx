@@ -1,12 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.21 2000/11/27 17:19:40 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.22 2000/11/28 19:21:01 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.21  2000/11/27 17:19:40  lasiuk
- * fill the constant area in teh PID structure
+ * Revision 2.22  2000/11/28 19:21:01  lasiuk
+ * correct memory leak in writing to StEvent
+ * add additional WARNING for tracks without assigned MIP
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -203,7 +204,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.21 2000/11/27 17:19:40 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.22 2000/11/28 19:21:01 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -563,7 +564,6 @@ Int_t StRichPIDMaker::Make() {
 
 		//
 		// calculate all areas, angles using default input parameters
-
 		// gap correction on, no angle cut (but the constant area is still ok) and 
 		// number of points used in calculation == 3600
 		//
@@ -592,7 +592,6 @@ Int_t StRichPIDMaker::Make() {
 	if(!theTraits) {
 	    cout << "StRichPIDMaker::Make()\n";
 	    cout << "\tERROR Processing the PIDTraits\n";
-// 	cout << "p= " << richTrack->getMomentum().mag() << endl;
 	    cout << "\tContinuing..." << endl;
 	    continue;
 	}
@@ -606,6 +605,11 @@ Int_t StRichPIDMaker::Make() {
 	//
 	// fill the StTrack's StRichPidTrait with RICH PID info
 	//
+	StTrack* track = richTrack->getStTrack();
+	if (track && richTrack->getPidTrait()) {
+	    track->addPidTraits(richTrack->getPidTrait());
+	}
+	else {
 	    cout << "StRichPIDMaker::Make()\n";
 	    cout << "\tCannot fill the PidTrait to the StTrack" << endl;
 	    cout << "\tContinuing..." << endl;
@@ -1614,7 +1618,7 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
     // It is kept in a ROOT-STL container so
     // it is by pointer
     //
-// 	cout << "PARTICLE " <<  part->pdgEncoding() << endl;
+
     if (richTrack->fastEnough(part) && richTrack->isGood(part)) {
 	StRichPid* pid = new StRichPid();
 	pid->setRingType(part);
@@ -1650,11 +1654,11 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	    pid->addHit(theCurrentHit);
 	    richTrack->getStTrack()->detectorInfo()->addHit(theCurrentHit);
 
-// 	    cout << "d s si csi "
-// 		 << normalizedD << '\t'
-// 		 << sigma << '\t'
-// 		 << psi << '\t'
-// 		 << ringCalc->getConstantAreaAngle() << " ";
+	    float normalizedD = hits[i]->getDist();
+	    float sigma       = hits[i]->getNSigma();
+	    float psi         = hits[i]->getAngle();
+
+//  	    cout << "d s si csi "
 //  		 << normalizedD << '\t'
 //  		 << sigma << '\t'
 //  		 << psi << '\t'
@@ -1865,23 +1869,25 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	//if (part==kaon && constantHits>2 && fabs(mVertexPos.z())<30) {
 	//        if (fabs(mVertexPos.z())<30) {
 	//  	  mPrintThisEvent=true;
+	//        }
 
 	pid->setTotalHits(totalHitsInArea);
 	pid->setTruncatedHits(hitsInConstantArea);
  
-	    cout << "\treturning" << endl;
-	    return;
+	StThreeVectorD residual(-999.,-999.,-999.);
+	if (!richTrack->getAssociatedMIP()) {
+	    cout << "StRichPIDMaker::fillPIDTraits()\n";
+	    cout << "\tWARNING Rich Track has no AssociatedMIP\n";
+	    cout << "\tp= " << richTrack->getStTrack()->geometry()->momentum().mag() << endl;
+	}
 	else {
 	    residual.setX(richTrack->getProjectedMIP().x()-richTrack->getAssociatedMIP()->local().x());
-	StThreeVectorD residual(richTrack->getProjectedMIP().x()-richTrack->getAssociatedMIP()->local().x(),
-				richTrack->getProjectedMIP().y()-richTrack->getAssociatedMIP()->local().y(),
-				richTrack->getProjectedMIP().z()-richTrack->getAssociatedMIP()->local().z());
-	
 	    residual.setY(richTrack->getProjectedMIP().y()-richTrack->getAssociatedMIP()->local().y());
 	    residual.setZ(richTrack->getProjectedMIP().z()-richTrack->getAssociatedMIP()->local().z());
 	}
 	
 	pid->setMipResidual(residual);
+	
 	//
 	// assign the pid to the StRichTrack
 	//
