@@ -33,10 +33,10 @@ echo installStaf: STAF_MAKE_HOME = $STAF_MAKE_HOME
 gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 #
+if (-f asps/staf/dsl/star.mk) then
 # prepare standalone dsl package for MakeStaf.mk
-
 (cd asps/staf/dsl; gmake -f star.mk prepare)
-
+endif
 #real run of makefile. It creates all the libraries ans all executables
 # if you want only one ASP , "asu" for instance, add in line PKG=asu
 # if you add "libs" only libraries will be created (no executables)
