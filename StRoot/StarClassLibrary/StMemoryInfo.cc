@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.cc,v 1.1 1999/06/04 17:57:01 ullrich Exp $
+ * $Id: StMemoryInfo.cc,v 1.2 1999/11/05 18:10:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.cc,v $
- * Revision 1.1  1999/06/04 17:57:01  ullrich
- * Initial Revision
+ * Revision 1.2  1999/11/05 18:10:47  ullrich
+ * Added blank line as last printed line.
  *
  * Revision 1.2  1999/11/05 18:10:47  ullrich
  * Added blank line as last printed line.
@@ -88,6 +88,7 @@ void StMemoryInfo::print(ostream& os)
     printLine(os, "space in small blocks in use", mInfo.usmblks, mOldInfo.usmblks);            
     printLine(os, "space in free small blocks", mInfo.fsmblks, mOldInfo.fsmblks);              
     printLine(os, "space in ordinary blocks in use", mInfo.uordblks, mOldInfo.uordblks);         
+    printLine(os, "space in free ordinary blocks", mInfo.fordblks, mOldInfo.fordblks);          
     printLine(os, "space penalty if keep option is used", mInfo.keepcost, mOldInfo.keepcost);
 #endif
     os << endl;
