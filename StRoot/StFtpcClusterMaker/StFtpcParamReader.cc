@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.cc,v 1.26 2003/10/10 12:37:14 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.27 2004/01/28 01:41:15 jeromel Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.27  2004/01/28 01:41:15  jeromel
+// Change OST to OS everywhere since defaultoption is now not to print
+// the date.
+//
 // Revision 1.26  2003/10/10 12:37:14  jcs
 // remove parameters used to calculate the FTPC geant volume id using the obsolete method
 //
@@ -302,7 +306,7 @@ Float_t StFtpcParamReader::padDiffusionErrors(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: padDiffusionErrors index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: padDiffusionErrors index out of range, using 0", "W", "OS");
       return mPadDiffusionErrors[0];
     }
 }
@@ -315,7 +319,7 @@ Float_t StFtpcParamReader::timeDiffusionErrors(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: timeDiffusionErrors index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: timeDiffusionErrors index out of range, using 0", "W", "OS");
       return mTimeDiffusionErrors[0];
     }
 }
@@ -328,7 +332,7 @@ Float_t StFtpcParamReader::vDriftEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: vDriftEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: vDriftEstimates index out of range, using 0", "W", "OS");
       return mVDriftEstimates[0];
     }
 }
@@ -341,7 +345,7 @@ Float_t StFtpcParamReader::tDriftEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: tDriftEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: tDriftEstimates index out of range, using 0", "W", "OS");
       return mTDriftEstimates[0];
     }
 }
@@ -354,7 +358,7 @@ Float_t StFtpcParamReader::sigmaRadialEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: sigmaRadialEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: sigmaRadialEstimates index out of range, using 0", "W", "OS");
       return mSigmaRadialEstimates[0];
     }
 }
@@ -367,7 +371,7 @@ Float_t StFtpcParamReader::sigmaAzimuthalEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: sigmaAzimuthalEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: sigmaAzimuthalEstimates index out of range, using 0", "W", "OS");
       return mSigmaAzimuthalEstimates[0];
     }
 }
@@ -380,7 +384,7 @@ Float_t StFtpcParamReader::errorRadialEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: errorRadialEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: errorRadialEstimates index out of range, using 0", "W", "OS");
       return mErrorRadialEstimates[0];
     }
 }
@@ -393,7 +397,7 @@ Float_t StFtpcParamReader::errorAzimuthalEstimates(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: errorAzimuthalEstimates index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: errorAzimuthalEstimates index out of range, using 0", "W", "OS");
       return mErrorAzimuthalEstimates[0];
     }
 }
@@ -406,7 +410,7 @@ Float_t StFtpcParamReader::fssGasEField(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasEField index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasEField index out of range, using 0", "W", "OS");
       return mFssGasEField[0];
     }
 }
@@ -419,7 +423,7 @@ Float_t StFtpcParamReader::fssGasVDrift(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasVDrift index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasVDrift index out of range, using 0", "W", "OS");
       return mFssGasVDrift[0];
     }
 }
@@ -432,7 +436,7 @@ Float_t StFtpcParamReader::fssGasDiffusionX(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionX index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionX index out of range, using 0", "W", "OS");
       return mFssGasDiffusionX[0];
     }
 }
@@ -445,7 +449,7 @@ Float_t StFtpcParamReader::fssGasDiffusionY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionY index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionY index out of range, using 0", "W", "OS");
       return mFssGasDiffusionY[0];
     }
 }
@@ -458,7 +462,7 @@ Float_t StFtpcParamReader::fssGasDiffusionY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionZ index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasDiffusionZ index out of range, using 0", "W", "OS");
       return mFssGasDiffusionZ[0];
     }
 }
@@ -471,7 +475,7 @@ Float_t StFtpcParamReader::fssGasDiffusionY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcParamReader: fssGasLorentzAngle index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcParamReader: fssGasLorentzAngle index out of range, using 0", "W", "OS");
       return mFssGasLorentzAngle[0];
     }
 }

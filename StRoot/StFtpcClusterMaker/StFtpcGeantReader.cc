@@ -1,6 +1,10 @@
-// $Id: StFtpcGeantReader.cc,v 1.2 2003/10/07 12:40:29 jcs Exp $
+// $Id: StFtpcGeantReader.cc,v 1.3 2004/01/28 01:41:15 jeromel Exp $
 //
 // $Log: StFtpcGeantReader.cc,v $
+// Revision 1.3  2004/01/28 01:41:15  jeromel
+// Change OST to OS everywhere since defaultoption is now not to print
+// the date.
+//
 // Revision 1.2  2003/10/07 12:40:29  jcs
 // created member functions to extract ftpc plane and sector number from the GEANT volume id
 //
@@ -38,7 +42,7 @@ Int_t StFtpcGeantReader::nextTrackHit(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: nextTrackHit index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: nextTrackHit index out of range, using 0", "W", "OS");
       return hitTable[0].next_tr_hit_p-1;
     }
 }
@@ -51,7 +55,7 @@ Int_t StFtpcGeantReader::track(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: track index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: track index out of range, using 0", "W", "OS");
       return hitTable[0].track_p-1;
     }
 }
@@ -64,7 +68,7 @@ Int_t StFtpcGeantReader::geantVolume(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: geantVolume index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: geantVolume index out of range, using 0", "W", "OS");
       return hitTable[0].volume_id;
     }
 }
@@ -88,7 +92,7 @@ Float_t StFtpcGeantReader::energyLoss(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: energyLoss index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: energyLoss index out of range, using 0", "W", "OS");
       return hitTable[0].de;
     }
 }
@@ -101,7 +105,7 @@ Float_t StFtpcGeantReader::segmentLength(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: segmentLength index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: segmentLength index out of range, using 0", "W", "OS");
       return hitTable[0].ds;
     }
 }
@@ -114,7 +118,7 @@ Float_t StFtpcGeantReader::pLocalX(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pLocalX index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pLocalX index out of range, using 0", "W", "OS");
       return hitTable[0].p[0];
     }
 }
@@ -127,7 +131,7 @@ Float_t StFtpcGeantReader::pLocalY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pLocalY index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pLocalY index out of range, using 0", "W", "OS");
       return hitTable[0].p[1];
     }
 }
@@ -140,7 +144,7 @@ Float_t StFtpcGeantReader::pLocalZ(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pLocalZ index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pLocalZ index out of range, using 0", "W", "OS");
       return hitTable[0].p[2];
     }
 }
@@ -153,7 +157,7 @@ Float_t StFtpcGeantReader::timeOfFlight(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: timeOfFlight index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: timeOfFlight index out of range, using 0", "W", "OS");
       return hitTable[0].tof;
     }
 }
@@ -166,7 +170,7 @@ Float_t StFtpcGeantReader::x(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: x index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: x index out of range, using 0", "W", "OS");
       return hitTable[0].x[0];
     }
 }
@@ -179,7 +183,7 @@ Float_t StFtpcGeantReader::y(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: y index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: y index out of range, using 0", "W", "OS");
       return hitTable[0].x[1];
     }
 }
@@ -192,7 +196,7 @@ Float_t StFtpcGeantReader::z(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: z index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: z index out of range, using 0", "W", "OS");
       return hitTable[0].x[2];
     }
 }
@@ -205,7 +209,7 @@ Int_t StFtpcGeantReader::trackType(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: trackType index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: trackType index out of range, using 0", "W", "OS");
       return hitTable[0].track_type;
     }
 }
@@ -218,7 +222,7 @@ Int_t StFtpcGeantReader::trackPid(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: geantPid index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: geantPid index out of range, using 0", "W", "OS");
       return trackTable[0].ge_pid;
     }
 }
@@ -231,7 +235,7 @@ Int_t StFtpcGeantReader::hitsOnTrack(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: hitsOnTrack index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: hitsOnTrack index out of range, using 0", "W", "OS");
       return trackTable[0].n_ftp_hit;
     }
 }
@@ -244,7 +248,7 @@ Int_t StFtpcGeantReader::firstHitOnTrack(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: firstHitOnTrack index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: firstHitOnTrack index out of range, using 0", "W", "OS");
       return trackTable[0].hit_ftp_p-1;
     }
 }
@@ -257,7 +261,7 @@ Int_t StFtpcGeantReader::isShower(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: isShower index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: isShower index out of range, using 0", "W", "OS");
       return trackTable[0].is_shower;
     }
 }
@@ -270,7 +274,7 @@ Int_t StFtpcGeantReader::trackVertex(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: trackVertex index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: trackVertex index out of range, using 0", "W", "OS");
       return trackTable[0].start_vertex_p-1;
     }
 }
@@ -283,7 +287,7 @@ Float_t StFtpcGeantReader::trackCharge(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: trackCharge index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: trackCharge index out of range, using 0", "W", "OS");
       return trackTable[0].charge;
     }
 }
@@ -296,7 +300,7 @@ Float_t StFtpcGeantReader::trackEnergy(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: trackEnergy index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: trackEnergy index out of range, using 0", "W", "OS");
       return trackTable[0].e;
     }
 }
@@ -309,7 +313,7 @@ Float_t StFtpcGeantReader::trackEta(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: trackEta index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: trackEta index out of range, using 0", "W", "OS");
       return trackTable[0].eta;
     }
 }
@@ -322,7 +326,7 @@ Float_t StFtpcGeantReader::pVertexX(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pVertexX index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pVertexX index out of range, using 0", "W", "OS");
       return trackTable[0].p[0];
     }
 }
@@ -335,7 +339,7 @@ Float_t StFtpcGeantReader::pVertexY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pVertexY index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pVertexY index out of range, using 0", "W", "OS");
       return trackTable[0].p[1];
     }
 }
@@ -348,7 +352,7 @@ Float_t StFtpcGeantReader::pVertexZ(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pVertexZ index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pVertexZ index out of range, using 0", "W", "OS");
       return trackTable[0].p[2];
     }
 }
@@ -361,7 +365,7 @@ Float_t StFtpcGeantReader::pTVertex(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pTVertex index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pTVertex index out of range, using 0", "W", "OS");
       return trackTable[0].pt;
     }
 }
@@ -374,7 +378,7 @@ Float_t StFtpcGeantReader::pTotalVertex(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: pTotalVertex index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: pTotalVertex index out of range, using 0", "W", "OS");
       return trackTable[0].ptot;
     }
 }
@@ -387,7 +391,7 @@ Float_t StFtpcGeantReader::rapidityVertex(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: rapidityVertex index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: rapidityVertex index out of range, using 0", "W", "OS");
       return trackTable[0].rapidity;
     }
 }
@@ -402,7 +406,7 @@ Int_t StFtpcGeantReader::productionProcess(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: productionProcess index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: productionProcess index out of range, using 0", "W", "OS");
       return vertexTable[0].ge_proc;
     }
 }
@@ -417,7 +421,7 @@ Float_t StFtpcGeantReader::vertexX(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: vertexX index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: vertexX index out of range, using 0", "W", "OS");
       return vertexTable[0].ge_x[0];
     }
 }
@@ -432,7 +436,7 @@ Float_t StFtpcGeantReader::vertexY(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: vertexY index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: vertexY index out of range, using 0", "W", "OS");
       return vertexTable[0].ge_x[1];
     }
 }
@@ -447,7 +451,7 @@ Float_t StFtpcGeantReader::vertexZ(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcGeantReader: vertexZ index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcGeantReader: vertexZ index out of range, using 0", "W", "OS");
       return vertexTable[0].ge_x[2];
     }
 }
