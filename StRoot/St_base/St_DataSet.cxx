@@ -2,8 +2,11 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.50 1999/06/09 22:08:53 fine Exp $
+// $Id: St_DataSet.cxx,v 1.51 1999/06/26 01:40:55 fisyak Exp $
 // $Log: St_DataSet.cxx,v $
+// Revision 1.51  1999/06/26 01:40:55  fisyak
+// Add Valery's abstract buffer
+//
 // Revision 1.50  1999/06/09 22:08:53  fine
 // Comment clean up
 //
@@ -11,6 +14,7 @@
 #include <iostream.h>
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
+#include "StBufferAbc.h"
 
 #include "TBrowser.h"
 
@@ -617,3 +621,5 @@ void St_DataSet::Sort()
     list->Sort(); ds->Sort();
   }
 }
+//______________________________________________________________________________
+Int_t St_DataSet::Streamer(StBufferAbc &R__b){return 0;}

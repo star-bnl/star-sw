@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.27 1999/06/25 01:35:54 fine Exp $
+// $Id: St_Table.h,v 1.28 1999/06/26 01:40:56 fisyak Exp $
 // $Log: St_Table.h,v $
+// Revision 1.28  1999/06/26 01:40:56  fisyak
+// Add Valery's abstract buffer
+//
 // Revision 1.27  1999/06/25 01:35:54  fine
 // New streamers for St_Tables
 //
@@ -103,10 +106,12 @@ protected:
    void       SetTitle(const Char_t *title);
    void       SetType(const Text_t *const type);
    void       StreamerHeader(TBuffer &b);
+   Int_t      StreamerHeader(StBufferAbc &b);
    int        PointerToPointer(G__DataMemberInfo &m);
    void       SetTableName(const Char_t *name);
    void       SetTableType(const Char_t *type);
    void       StreamerTable(TBuffer &b);
+   Int_t      StreamerTable(StBufferAbc &b);
    TList     *GetTableDescriptors();
 
    Long_t    *s_MaxIndex;   // The used capacity of this array
@@ -163,6 +168,7 @@ public:
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
    virtual     void       SetNRows(Int_t n);
+   virtual     Int_t      Streamer(StBufferAbc &R__b);
    virtual     void       Reset(Int_t c=0);
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
