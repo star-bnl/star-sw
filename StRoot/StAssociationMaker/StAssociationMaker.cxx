@@ -1,7 +1,15 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.32 2001/07/16 17:18:42 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.33 2002/04/11 22:11:10 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.33  2002/04/11 22:11:10  calderon
+ * Changes to incorporate association of tracks from Sti
+ * Basically all that was needed was to add a flag to switch between
+ * Sti and regular EGR global tracks, and based on this flag, one looks for
+ * the proper bits to be set in the StTrack::encodedMethod() member function.
+ * Current default behaviour is still to use EGR global tracks, and the modification
+ * is done in the macro with a call to StAssociationMaker::useInTracker()
+ *
  * Revision 1.32  2001/07/16 17:18:42  calderon
  * Modification in the access of the L3 event at the beginning of loop.
  *
@@ -362,6 +370,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 
     doPrintMemoryInfo = kFALSE;
     mL3TriggerOn = false;
+    mInTrackerOn = false;
 }
 
 //_________________________________________________
@@ -589,6 +598,9 @@ Int_t StAssociationMaker::Init()
 
     gMessMgr->Info() << "Cuts used in association for this run: " << endm;
     gMessMgr->Info() << "\n" << *(StMcParameterDB::instance()) << "\n" << endm;
+    if (mInTrackerOn) {
+	gMessMgr->Info() << "Using IT Tracks " << endm;
+    }
     return StMaker::Init();
 }
 
@@ -596,9 +608,14 @@ Int_t StAssociationMaker::Init()
 
 Int_t StAssociationMaker::Make()
 {
-    if (Debug()) gMessMgr->Info() << "AssociationMaker -- Make()" << endm;
+    gMessMgr->Info() << "AssociationMaker::Make()" << endm;
     if (doPrintMemoryInfo) 
 	StMemoryInfo::instance()->snapshot();
+
+    if (mL3TriggerOn && mInTrackerOn) {
+	gMessMgr->Warning() << "AssociationMaker::Make(): L3 and IT Tracks are both on!" << endm;
+	return kStWarn;
+    }
     //
     // Get StEvent
     //
@@ -963,7 +980,7 @@ Int_t StAssociationMaker::Make()
     bool smallTpcHitMap, smallSvtHitMap, smallFtpcHitMap;
     smallTpcHitMap = smallSvtHitMap = smallFtpcHitMap = false;
     
-    if (mRcTpcHitMap && mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
+    if (mRcTpcHitMap && mRcTpcHitMap->size()>0 && mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
 	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
 			    << "   The Tpc Hit Map is too small for   \n"
 			    << "   any meaningful track association.  \n"
@@ -974,7 +991,7 @@ Int_t StAssociationMaker::Make()
 	smallTpcHitMap = true;
     }
     
-    if (mRcSvtHitMap && mRcSvtHitMap->size() < parDB->reqCommonHitsSvt()) {
+    if (mRcSvtHitMap && mRcSvtHitMap->size()>0 && mRcSvtHitMap->size() < parDB->reqCommonHitsSvt()) {
 	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
 			    << "   The Svt Hit Map is too small for   \n"
 			    << "   any meaningful track association.  \n"
@@ -984,7 +1001,7 @@ Int_t StAssociationMaker::Make()
 			    << "Suggest increase distance cuts." << endm;
 	smallSvtHitMap = true;
     }
-    if (mRcFtpcHitMap && mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
+    if (mRcFtpcHitMap && mRcFtpcHitMap->size()>0 && mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
 	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
 			    << "   The Ftpc Hit Map is too small for  \n"
 			    << "   any meaningful track association.  \n"
@@ -1039,7 +1056,7 @@ Int_t StAssociationMaker::Make()
     mRcTrackMap = new rcTrackMapType;
     mMcTrackMap = new mcTrackMapType;
     // Begin making associations
-    if(Debug()) gMessMgr->Info() << "Making Track Associations..." << endl;
+    if(Debug()) gMessMgr->Info() << "Making Track Associations..." << endm;
 
     //
     // Loop over tracks nodes in StEvent
@@ -1054,9 +1071,11 @@ Int_t StAssociationMaker::Make()
 #endif
 	trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
 	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
+	
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    continue; // If there are no Tpc Hits, skip track.
-	
+	if (mInTrackerOn  && rcTrack->encodedMethod()!=32770) continue; //for IT Tracks, skip the old globals
+	if (!mInTrackerOn && rcTrack->encodedMethod()==32770) continue; //for old globals, skip the IT tracks
 	unsigned int nCandidates = 0;
 
 
@@ -1328,8 +1347,7 @@ Int_t StAssociationMaker::Make()
     
 	 
     if(Debug()){
-	gMessMgr->Info() << "Finished Making Track Associations *********" << endl;
-	gMessMgr->Info() << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endl;
+	gMessMgr->Info() << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endm;
     }
     if (doPrintMemoryInfo) {
 	cout << "End of Track Associations\n";
@@ -1349,12 +1367,12 @@ Int_t StAssociationMaker::Make()
     mRcXiMap   = new rcXiMapType;
     mMcXiMap   = new mcXiMapType;
     // Begin making associations
-    if(Debug()) gMessMgr->Info() << "Making Vertex Associations" << endl;
+    if(Debug()) gMessMgr->Info() << "Making Vertex Associations" << endm;
     
     StSPtrVecKinkVertex& kinks = rEvent->kinkVertices();
 
     
-    if(Debug()) gMessMgr->Info() << "Kinks..." << endl;
+    if(Debug()) gMessMgr->Info() << "Kinks..." << endm;
 
     // Loop over Kinks
 
@@ -1399,8 +1417,7 @@ Int_t StAssociationMaker::Make()
 	}
     } // kink loop
     if(Debug()){
-	gMessMgr->Info() << "Finished Making kink Associations *********" << endl;
-	gMessMgr->Info() << "Number of Entries in kink Maps: " << mRcKinkMap->size() << endl;
+	gMessMgr->Info() << "Number of Entries in kink Maps: " << mRcKinkMap->size() << endm;
     }
     if (doPrintMemoryInfo) {
 	cout << "End of kink Associations\n";
@@ -1408,7 +1425,7 @@ Int_t StAssociationMaker::Make()
 	StMemoryInfo::instance()->print();
     }
 	
-    if(Debug()) gMessMgr->Info() << "V0s..." << endl;
+    if(Debug()) gMessMgr->Info() << "V0s..." << endm;
 
     StSPtrVecV0Vertex& v0s = rEvent->v0Vertices();    
    
@@ -1442,8 +1459,7 @@ Int_t StAssociationMaker::Make()
 	
     } // V0 loop
     if(Debug()) {
-	gMessMgr->Info() << "Finished Making V0 Associations *********" << endl;
-	gMessMgr->Info() << "Number of Entries in V0 Maps: " << mRcV0Map->size() << endl;
+	gMessMgr->Info() << "Number of Entries in V0 Maps: " << mRcV0Map->size() << endm;
     }
     if (doPrintMemoryInfo) {
 	cout << "End of V0 Associations\n";
@@ -1451,7 +1467,7 @@ Int_t StAssociationMaker::Make()
 	StMemoryInfo::instance()->print();
     }
     
-    if(Debug()) gMessMgr->Info() << "Xis..." << endl;
+    if(Debug()) gMessMgr->Info() << "Xis..." << endm;
 
     StSPtrVecXiVertex& xis = rEvent->xiVertices();    
     
@@ -1480,8 +1496,7 @@ Int_t StAssociationMaker::Make()
 	}
     }
     if(Debug()) {
-	gMessMgr->Info() << "Finished Making Xi Associations *********" << endl;
-	gMessMgr->Info() << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endl;
+	gMessMgr->Info() << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endm;
     }
 
     }
