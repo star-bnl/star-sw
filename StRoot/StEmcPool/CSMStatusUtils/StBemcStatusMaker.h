@@ -3,8 +3,10 @@
 
 #include "StMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
 
 #include "TFile.h"
+#include "TTree.h"
 #include "TH2.h"
 
 #include <string>
@@ -31,7 +33,16 @@ class StBemcStatusMaker : public StMaker {
   string mOutputDirectory; //!
   string mOutputFilePrefix; //!
   TFile* mOutputFile; //!
+  TTree* mOutputTree; //!
+  Float_t mFillNumber;
+  Int_t mEemcStatusBits[720];
+  Int_t mEemcFailBits[720];
+  Int_t mBemcStatusBits[4800];
+  Int_t mTheDate;
+  Int_t mTheTime;
+  Bool_t mFirstEvent;
   StMuDstMaker* mMuDstMaker;//!
+  StEEmcDbMaker* eeDb;
 
   ClassDef(StBemcStatusMaker,0)
 };
