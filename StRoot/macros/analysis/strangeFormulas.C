@@ -51,6 +51,7 @@
 // Internal members and functions:
 void formulate(const char* name, const char* formula);
 TTree* strangeTree=0;
+TChain* strangeChain=0;
 TSeqCollection* ListofFuncs=0;
 Int_t max_codes=0;
 static const char* defaultFile = "evMuDst.root";
@@ -125,7 +126,7 @@ TTree* strangeFormulas(const char* fname, char* tname) {
     tname = defaultTree;
   }
   printf("Looking for tree with name %s\n",tname);
-  TChain* strangeChain = new TChain(tname);
+  strangeChain = new TChain(tname);
   if (!fname) {
     fname = defaultFile;
   }
@@ -160,6 +161,9 @@ Int_t strangeFormulas(TTree* tree) {
     max_codes = 50;
   } else {
     max_codes = 100;
+  }
+  if (tree->GetBranch("EmcCollection")) {
+    tree->SetBranchStatus("EmcCollection.*",0);
   }
 
   strangeTree = tree;
@@ -221,7 +225,7 @@ Int_t strangeFormulas(TTree* tree) {
   
     // The following formula uses 6 values:
     formulate("V0.decayLengthV0()",
-      "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
+      "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX[0])+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY[0])+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ[0]))");
   
     // The following formulas use 1 value:
     formulate("V0.decayVertexV0X()", "V0.mDecayVertexV0X");
@@ -242,9 +246,9 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.radtV0()", "sqrt(V0.radt2V0())");
     formulate("V0.radV0()", "sqrt(V0.radt2V0()+sq(V0.mDecayVertexV0Z))");
     formulate("V0.phiV0()",
-      "atan2((V0.mDecayVertexV0Y-Event.mPrimaryVertexY),(V0.mDecayVertexV0X-Event.mPrimaryVertexX))");
+      "atan2((V0.mDecayVertexV0Y-Event.mPrimaryVertexY[0]),(V0.mDecayVertexV0X-Event.mPrimaryVertexX[0]))");
     formulate("V0.phi90V0()",
-      "atan2(-(V0.mDecayVertexV0X-Event.mPrimaryVertexX),(V0.mDecayVertexV0Y-Event.mPrimaryVertexY))");
+      "atan2(-(V0.mDecayVertexV0X-Event.mPrimaryVertexX[0]),(V0.mDecayVertexV0Y-Event.mPrimaryVertexY[0]))");
 
     formulate("V0.Ptot2Pos()",
       "(sq(V0.mMomPosX)+sq(V0.mMomPosY)+sq(V0.mMomPosZ))");
@@ -444,7 +448,7 @@ Int_t strangeFormulas(TTree* tree) {
 
     // The following formula uses 6 values:
     formulate("V0Mc.decayLengthV0()",
-      "sqrt(sq(V0Mc.mPositionX-McEvent.mPrimaryVertexX)+sq(V0Mc.mPositionY-McEvent.mPrimaryVertexY)+sq(V0Mc.mPositionZ-McEvent.mPrimaryVertexZ))");
+      "sqrt(sq(V0Mc.mPositionX-McEvent.mPrimaryVertexX[0])+sq(V0Mc.mPositionY-McEvent.mPrimaryVertexY[0])+sq(V0Mc.mPositionZ-McEvent.mPrimaryVertexZ[0]))");
 
     // The following formulas use 1 value:
     formulate("V0Mc.decayMode()", "V0Mc.mDecayMode");
@@ -482,7 +486,7 @@ Int_t strangeFormulas(TTree* tree) {
     // The following formula uses 6 values:
     formulate("Xi.decayLengthV0()",
       "sqrt(sq(Xi.mDecayVertexV0X-Xi.mDecayVertexXiX)+sq(Xi.mDecayVertexV0Y-Xi.mDecayVertexXiY)+sq(Xi.mDecayVertexV0Z-Xi.mDecayVertexXiZ))");
-//      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
+//      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX[0])+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY[0])+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ[0]))");
 
     // The following formulas use 1 value:
     formulate("Xi.decayVertexV0X()", "Xi.mDecayVertexV0X");
@@ -503,7 +507,8 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.radtV0()", "sqrt(Xi.radt2V0())");
     formulate("Xi.radV0()", "sqrt(Xi.radt2V0()+sq(Xi.mDecayVertexV0Z))");
     formulate("Xi.phiV0()",
-      "atan2((Xi.mDecayVertexV0Y-Event.mPrimaryVertexY),(Xi.mDecayVertexV0X-Event.mPrimaryVertexX))");
+      "atan2((Xi.mDecayVertexV0Y-Xi.mDecayVertexXiY),(Xi.mDecayVertexV0X-Xi.mDecayVertexXiX))");
+//      "atan2((Xi.mDecayVertexV0Y-Event.mPrimaryVertexY[0]),(Xi.mDecayVertexV0X-Event.mPrimaryVertexX[0]))");
 
     formulate("Xi.Ptot2Pos()",
       "(sq(Xi.mMomPosX)+sq(Xi.mMomPosY)+sq(Xi.mMomPosZ))");
@@ -586,8 +591,9 @@ Int_t strangeFormulas(TTree* tree) {
 
     // Now, finally get to the unique Xi formulas:
     // The following formula uses 6 values:
+    // A straight line approximation to the path...
     formulate("Xi.decayLengthXi()",
-      "sqrt(sq(Xi.mDecayVertexXiX-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexXiY-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexXiZ-Event.mPrimaryVertexZ))");
+      "sqrt(sq(Xi.mDecayVertexXiX-Event.mPrimaryVertexX[0])+sq(Xi.mDecayVertexXiY-Event.mPrimaryVertexY[0])+sq(Xi.mDecayVertexXiZ-Event.mPrimaryVertexZ[0]))");
 
     // The following formulas use 1 value:
     formulate("Xi.charge()", "Xi.mCharge");
@@ -609,7 +615,7 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.radtXi()", "sqrt(Xi.radt2Xi())");
     formulate("Xi.radXi()", "sqrt(Xi.radt2Xi()+sq(Xi.mDecayVertexXiZ))");
     formulate("Xi.phiXi()",
-      "atan2((Xi.mDecayVertexXiY-Event.mPrimaryVertexY),(Xi.mDecayVertexXiX-Event.mPrimaryVertexX))");
+      "atan2((Xi.mDecayVertexXiY-Event.mPrimaryVertexY[0]),(Xi.mDecayVertexXiX-Event.mPrimaryVertexX[0]))");
 
     formulate("Xi.Ptot2Bachelor()",
       "(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY)+sq(Xi.mMomBachelorZ))");
@@ -798,7 +804,7 @@ Int_t strangeFormulas(TTree* tree) {
 
     // The following formulas use 6 values:
     formulate("XiMc.decayLengthXi()",
-      "sqrt(sq(XiMc.mPositionX-McEvent.mPrimaryVertexX)+sq(XiMc.mPositionY-McEvent.mPrimaryVertexY)+sq(XiMc.mPositionZ-McEvent.mPrimaryVertexZ))");
+      "sqrt(sq(XiMc.mPositionX-McEvent.mPrimaryVertexX[0])+sq(XiMc.mPositionY-McEvent.mPrimaryVertexY[0])+sq(XiMc.mPositionZ-McEvent.mPrimaryVertexZ[0]))");
 
     // The following formulas use 1 value:
     formulate("XiMc.decayMode()", "XiMc.mDecayMode");
@@ -852,8 +858,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.7 2003/01/22 05:15:16 genevb Exp $
+// $Id: strangeFormulas.C,v 3.8 2004/01/06 05:21:22 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.8  2004/01/06 05:21:22  genevb
+// Restore decay length functionality (was broken)
+//
 // Revision 3.7  2003/01/22 05:15:16  genevb
 // Use TChain for multiple files
 //
