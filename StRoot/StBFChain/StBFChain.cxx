@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.450 2004/10/28 19:02:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.451 2004/11/02 01:57:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -71,7 +71,11 @@ Bfc_st BFC1[] = { // standard chains
   {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
   {"RY2004" ,"","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
+  {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+
+  {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
+  {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -86,9 +90,15 @@ Bfc_st BFC1[] = { // standard chains
                                   "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
   {"Y2003b" ,"","","db,detDb","","",
     "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
-  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2004a" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2004x" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
+
+  {"Y2004"  ,"","","db,detDb","","",                            
+       "Initial Yea4 geometry - TPC, SVT, SSD, CTB(TOF), FTPC, EMC, ECAL, PMD, BBC, ZDC, FPD, pVPD",kFALSE},
+  {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
+  {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
+  {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+
+  {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
+  {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","-db,-tpcDb,-magF"                              ,"","","Take out Db from Chain",kFALSE},
@@ -650,7 +660,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
   {"RY2004" ,"","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
+  {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+
+  {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
+  {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -665,9 +679,15 @@ Bfc_st BFC2[] = { // ITTF Chains
                                   "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
   {"Y2003b" ,"","","db,detDb","","",
     "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
-  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2004a" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2004x" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
+
+  {"Y2004"  ,"","","db,detDb","","",                            
+       "Initial Yea4 geometry - TPC, SVT, SSD, CTB(TOF), FTPC, EMC, ECAL, PMD, BBC, ZDC, FPD, pVPD",kFALSE},
+  {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
+  {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
+  {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+
+  {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
+  {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","-db,-tpcDb,-magF"                              ,"","","Take out Db from Chain",kFALSE},
@@ -2348,8 +2368,14 @@ void StBFChain::SetGeantOptions(){
 	       GetOption("RY2004"))   geantMk->LoadGeometry("detp geometry y2004");
       else if (GetOption("Y2004a") ||
 	       GetOption("RY2004a"))  geantMk->LoadGeometry("detp geometry y2004a");
-      else if (GetOption("Y2004x") ||
-	       GetOption("RY2004x"))  geantMk->LoadGeometry("detp geometry y2004x");
+      else if (GetOption("Y2004b") ||
+	       GetOption("RY2004b"))  geantMk->LoadGeometry("detp geometry y2004b");
+      else if (GetOption("Y2005") ||
+	       GetOption("RY2005"))   geantMk->LoadGeometry("detp geometry y2005");
+                                      // gMessMgr->Error() << "Y2005/RY2005 not yet implemented" << endm;
+      else if (GetOption("Y2005x") ||
+	       GetOption("RY2005x"))  geantMk->LoadGeometry("detp geometry y2005x");
+
 
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
@@ -2459,7 +2485,10 @@ void StBFChain::SetDbOptions(){
 	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
 	else if (GetOption("Y2004")) db->SetDateTime("y2004");
 	else if (GetOption("Y2004a"))db->SetDateTime("y2004a");
+	else if (GetOption("Y2004b"))db->SetDateTime("y2004b");
 	else if (GetOption("Y2004x"))db->SetDateTime("y2004x");
+	else if (GetOption("Y2005")) db->SetDateTime("y2005");
+	else if (GetOption("Y2005x"))db->SetDateTime("y2005x");
 	else gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;
       }
 
