@@ -1,13 +1,20 @@
-//  create chain to read in root dst file(s), run QA_Maker & 
-//  send all histograms to a postscript file
-
+//  
+//  
+//
+//  create chain to:
+//        read in root dst file(s) from MDC2
+//        run St_QA_Maker  
+//        send all histograms to a postscript file
+//
+//===============================================================
+//
 TCanvas *QACanvas = 0;
 TBrowser *QABrowser = 0;
 class StChain;
 class St_DataSet;
 StChain  *chain=0;
 
-// Load macro --------------------------------------------------------
+// Load macro ==========================================================
 void Load()
 {
     gSystem->Load("St_base");
@@ -18,16 +25,17 @@ void Load()
 };
 
 
-// DrawDstHist macro ---------------------------------------------------
+// DrawDstHist macro ======================================================
 // enter nevproc,firstHistName,lastHistName,input fileName,output psFile name
 
-// this is an MDC2 dst:
-//fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
+// MDC2 dsts:
+//   *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
+//   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
 
 void DrawDstHist(
-     Int_t nevproc=50,
-     const Char_t *firstHistName="*",const Char_t *lastHistName="*",
-//     const Char_t *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
+     Int_t nevproc=40,
+     const Char_t *firstHistName="*",
+     const Char_t *lastHistName="*",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
      const Char_t *psFile="QA_hist.ps")
 { 
@@ -41,10 +49,10 @@ void DrawDstHist(
          << "                        const Char_t *fileName =\""     << fileName      << "\","   << endl
          << "                        const Char_t *psFile=\""        << psFile        << "\","   << endl
          << "                      );" << endl 
-         << " Note: firstHistName = \"*\" is by default and means ALL histograms from the file should be drawn" << endl
-         << " ----- lastHistName  = \"*\" is by default and means ALL histograms by the end of file should be drawn" << endl
+         << " Note: firstHistName = \"*\" is by default and means ALL histograms from the file are drawn" << endl
+         << " ----- lastHistName  = \"*\" is by default and means ALL histograms by the end of file are drawn" << endl
          << "       fileName      - may define either file or entire directory tree." << endl
-         << "                       For the directory all files from that will be used." << endl
+         << "                       For the directory, all files from that will be used." << endl
          << endl ;
 
 // execute Load macro
@@ -105,8 +113,11 @@ void DrawDstHist(
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
 // set max # events to read from each file ()=default value of 10 million 
-    input->SetMaxEvent();
-    input->SetDebug();
+   
+    cout << " Default max event per file is " << input->GetMaxEvent() << endl;
+      input->SetMaxEvent(nevproc);
+    cout << " Have set max event per file to " << input->GetMaxEvent() << endl;
+      input->SetDebug();
 
 // now setup the rest of the Makers in the chain 
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
@@ -119,8 +130,14 @@ void DrawDstHist(
 // Now actually execute the init & make methods in the Makers 
   chain->Init();
   chain->PrintInfo();
-  int i;
-  for (i=1;i<=nevproc; i++)  { 
+  int i=0;
+  int iloop=0;
+  iloop = input->GetMaxEvent();
+// add 1 to iloop 
+  iloop+=1;
+  cout << " DrawDstHist - will now loop over # events = " << input->GetMaxEvent() << endl;
+  cout << "   -- but really have to add 1 to loop to make it work! iloop =  " << iloop << endl;
+  for (i=1;i<=iloop; i++)  { 
     cout <<  " !!! processing event !!! " << i << endl ;
     if (!chain->Make(i))  chain->Clear();
     else break;
@@ -134,7 +151,7 @@ void DrawDstHist(
 
   delete [] exFileName;
   delete [] exPsFile;
-  cout <<  " !!! This is last line of macro" << endl ;
+//  cout <<  " !!! This is last line of macro" << endl ;
 }
 
 
