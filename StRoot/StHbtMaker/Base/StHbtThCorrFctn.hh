@@ -37,7 +37,7 @@ public:
   virtual void AddNum(StHbtThPair*)=0;
   virtual void AddDen(StHbtThPair*)=0;
 
-  virtual StHbtThCorrFctn* Clone() const =0;
+  virtual StHbtThCorrFctn* ThClone() const =0;
 
 
 protected:

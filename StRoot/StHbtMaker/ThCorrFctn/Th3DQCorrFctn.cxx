@@ -127,4 +127,4 @@ inline void Th3DQCorrFctn::Write()  {
   qLongdist->Write(); qLongSdist->Write(); DeltaqLongdist->Write();
 };
 
-inline StHbtThCorrFctn* Th3DQCorrFctn::Clone() const {return new Th3DQCorrFctn(*this);}
+inline StHbtThCorrFctn* Th3DQCorrFctn::ThClone() const {return new Th3DQCorrFctn(*this);}

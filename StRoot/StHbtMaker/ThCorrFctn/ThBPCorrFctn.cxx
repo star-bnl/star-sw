@@ -151,7 +151,7 @@ ThBPCorrFctn::~ThBPCorrFctn()
   delete mRatio;
   delete mQinvHisto;
   if (addedHistos > 0) {
-    for (int i=0; i++; i<numAdd2DHistos)
+    for (int i=0; i<numAdd2DHistos; i++)
       delete add2DHistos[i];
     delete add2DHistos;
   }
@@ -168,4 +168,4 @@ void ThBPCorrFctn::Write()  {
 inline StHbt3DHisto* ThBPCorrFctn::Numerator() const {  return mNumerator;};
 inline StHbt3DHisto* ThBPCorrFctn::Denominator() const { return mDenominator;};
 inline StHbt3DHisto* ThBPCorrFctn::Ratio() const { return mRatio;};
-inline StHbtThCorrFctn* ThBPCorrFctn::Clone() const {return new ThBPCorrFctn(*this);}
+inline StHbtThCorrFctn* ThBPCorrFctn::ThClone() const {return new ThBPCorrFctn(*this);}

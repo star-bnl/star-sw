@@ -42,7 +42,7 @@ StHbtThCFGaussSize* StHbtThCFGaussSize::Copy( const char* aName, double aX, doub
        char* tCFName=new char[tBaseNameLen+strlen(aName)+1];
        memcpy(tCFName,(*iter)->GetName(),tBaseNameLen);
        strcpy(tCFName+tBaseNameLen,aName);
-       StHbtThCorrFctn *NewCF=(*iter)->Clone(); 
+       StHbtThCorrFctn *NewCF=(*iter)->ThClone(); 
        NewCF->SetName(tCFName);
        delete [] tCFName;
        NewSize->mThCorrFctnColl.push_back(NewCF);
@@ -53,7 +53,7 @@ StHbtThCFGaussSize* StHbtThCFGaussSize::Copy( const char* aName, double aX, doub
 
 void StHbtThCFGaussSize::AddCorrFctn(const StHbtThCorrFctn* aCF){
 
-  StHbtThCorrFctn* NewCF=aCF->Clone();
+  StHbtThCorrFctn* NewCF=aCF->ThClone();
   char* tName=new char[strlen(aCF->GetName())+strlen(mName)+1];
   strcpy(tName, aCF->GetName());
   strcat(tName,mName);
