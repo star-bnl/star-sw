@@ -38,7 +38,7 @@ c
       REAL      xprivert(2),p_privert(6),xp(2),xcc(2)
       REAL      xinner(2),xouter(2),drinner
       REAL      xend(2),p_end(6),xtrktof,ytrktof
-      REAL      privert_r_cut
+      REAL      privert_r_cut, sind
       REAL      x_privert,y_privert,z_privert
       INTEGER   Z_to_IETA
       LOGICAL   KEEPIT
@@ -59,7 +59,7 @@ c---- initialize...
        do i         = 1,18
         ctg_zmin(i) = ctg_slat_eta(i).z_min
         ctg_zmax(i) = ctg_slat_eta(i).z_max
-cTEST        write(*,*)i,ctg_zmin(i),ctg_zmax(i)
+c test        write(*,*)i,ctg_zmin(i),ctg_zmax(i)
        end do
       end if       ! end first_call code...
 c
@@ -140,8 +140,8 @@ c---- set up lookup from i_eta and i_phi to cts_mslat table...
       do i       = 1,cts_mslat_h.nok
        j         = cts_mslat(i).i_eta
        k         = cts_mslat(i).i_phi
-cTEST        write(*,*)' cts ',cts_mslat(i).i_eta,cts_mslat(i).i_phi,
-cTEST     1         cts_mslat(i).z_hit,cts_mslat(i).ptot,cts_mslat(i).s_length
+c test        write(*,*)' cts ',cts_mslat(i).i_eta,cts_mslat(i).i_phi,
+c test     1         cts_mslat(i).z_hit,cts_mslat(i).ptot,cts_mslat(i).s_length
        if((j.ge.1.and.j.le. 18).AND.
      1    (k.ge.1.and.k.le.300))then
         if(k.lt.251.or.k.gt.255)then
@@ -313,10 +313,9 @@ c---- calculate path length...
              theta   = ATAN2(rval,z_int)
              s_trk   = SQRT((2.*r*ASIN(c/2./r))**2 + (z_int-z_privert)**2)
      1               - SIN(theta) + pi/2. + 0.5
-             if(s_trk.gt.200.and.             ! <----------<<<<<<<
-     1          p_tot.le.5.0)then             ! <----------<<<<<<<
-              KEEPIT    = .TRUE.              ! <----------<<<<<<<
-             end if                           ! <----------<<<<<<<
+             if(s_trk.gt.200.and.p_tot.le.5.0)then
+              KEEPIT    = .TRUE.
+             end if
            else
             s_trk    = 0.
            end if                             ! end drinner check...
@@ -324,31 +323,33 @@ c---- calculate path length...
 c           if(eta_bin .ge.1.and.eta_bin .le. 18.and.       ! sanity check...
 c     1        slat_bin.ge.1.and.slat_bin.le.300)then       ! sanity check...
            iout2     = iout2 + 1
-           if(eta_bin .ge. 10.and.eta_bin .le. 18.and.      ! does it extrapolate to TOFp?
-     1        slat_bin.ge.251.and.slat_bin.le.255)then      ! does it extrapolate to TOFp?
-              imslat = ietaphi2mslat(eta_bin,slat_bin)      ! yes, but does it match a struck slat?
+c  does it extrapolate to TOFp?
+           if(eta_bin .ge. 10.and.eta_bin .le. 18.and.
+     >        slat_bin.ge.251.and.slat_bin.le.255)then    
+              imslat = ietaphi2mslat(eta_bin,slat_bin)      
+C  yes, but does it match a struck slat?
               iout3  = iout3 + 1
               if(imslat.le.0)then
-cTEST              write(*,*)'track hits tray but not slat ',eta_bin,slat_bin
+c test              write(*,*)'track hits tray but not slat ',eta_bin,slat_bin
                idet  = 0
               else
                iout4 = iout4 + 1 
                idet  = (eta_bin-10)*5 + (slat_bin-250)      ! appropriate mdc2 tofp only!!!
               end if
            else
-cTEST              write(*,*)'track not in TOFp acceptance ',eta_bin,slat_bin
+c test              write(*,*)'track not in TOFp acceptance ',eta_bin,slat_bin
               KEEPIT = .FALSE.
               imslat = 0
            end if
 
-cTEST        if(imslat.gt.0)then
-cTEST         write(*,*)'match? ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
-cTEST     1     imslat,cts_mslat(imslat).z_hit,cts_mslat(imslat).ptot,
-cTEST     1     cts_mslat(imslat).s_length
-cTEST        elseif(eta_bin.ge.10.and.(slat_bin.ge.241.and.slat_bin.le.265))then
-cTEST         write(*,*)'no mat ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
-cTEST     1     imslat,0.0,0.0,0.0
-cTEST        end if
+c test        if(imslat.gt.0)then
+c test         write(*,*)'match? ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
+c test     1     imslat,cts_mslat(imslat).z_hit,cts_mslat(imslat).ptot,
+c test     1     cts_mslat(imslat).s_length
+c test        elseif(eta_bin.ge.10.and.(slat_bin.ge.241.and.slat_bin.le.265))then
+c test         write(*,*)'no mat ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
+c test     1     imslat,0.0,0.0,0.0
+c test        end if
 
 c---- fill dst_tof_trk...
           if(KEEPIT)then
@@ -411,7 +412,7 @@ c---- fill dst_tof_trk...
            end if            ! end slat lookup check...
           end if             ! end KEEPIT check for dst_tof_trk fill...
         else
-cTEST         write(*,*)trk_qual,trk_qual_cut,tpt_track(itptrk).nfit,trk_npts_min
+c test         write(*,*)trk_qual,trk_qual_cut,tpt_track(itptrk).nfit,trk_npts_min
         end if                 ! end track quality check...
 201     continue               ! jump to here if necessary to skip track.
       enddo                    ! End loop over input tracks...
