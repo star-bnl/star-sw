@@ -76,6 +76,10 @@ Modifications (09/08/2000) by A. A. P. Suaide
      SetClusterConditions("bsmde",5,0.08,0.001,0.001,kFALSE);
      SetClusterConditions("bsmdp",5,0.08,0.001,0.001,kFALSE);
    
+Modifications (06/02/2001) by Aleksei Pavlinov
+-------------
+
+   Changed the algorithm of finding of EMC's collection in StPreEclMaker.
    
     
    
