@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.6 1998/12/01 01:53:17 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.7 1998/12/02 20:41:59 perev Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.7  1998/12/02 20:41:59  perev
+# cleanup
+#
 # Revision 1.6  1998/12/01 01:53:17  fisyak
 # Merge with NT
 #
@@ -108,7 +111,7 @@ endif
 endif
 #
 #	Default value for STAF_SYS
-ifndef STAF_SYS  
+ifndef STAF_SYS
   QWE := $(wildcard ./asps)
   STAF_SYS := $(STAR)
   ifdef QWE

@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.68 1998/12/01 01:53:28 fisyak Exp $
+# $Id: MakePam.mk,v 1.69 1998/12/02 20:42:47 perev Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.69  1998/12/02 20:42:47  perev
+# cleanup
+#
 # Revision 1.68  1998/12/01 01:53:28  fisyak
 # Merge with NT
 #
@@ -179,10 +182,13 @@ IDL_DIRS:= $(wildcard $(OUT_DIR)/pams/*/idl $(STAR)/pams/*/idl)
 INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 #-------------------------------includes----------------------------
-STICFLAGS =  $(addprefix -I,  $(STAR)/inc $(SRC_DIR) $(IDL_DIRS))
-INCLUDES := -I. -I../ -I/usr/include -I$(STAR)/inc \
+STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
+CXXFLAGS   += -DASU_MALLOC_OFF
+
+CPPFLAGS += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
+
 ifneq ($(OUT_DIR),$(STAR))        
 INCLUDES := $(INCLUDES) -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
