@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.437 2004/08/23 23:12:09 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.438 2004/09/01 00:14:12 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1250,19 +1250,20 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
   FDateS = FTimeS = 0;
 }
 
-// Hack onstructor.
+
+// Hack constructor.
 /*!
  * This method can be called with mode 1 or 2 to enable chain setup 1 or chain
- * setup 2. Note that this constructor does not allow for changing the chain
- * name (set to be <tt>bfc</tt>) as the regular constructor does. So, embeding
- * is a no-no (until we extend this, actually easy with a 3 arguments default
- * constructor but would require embeding scripts update).
+ * setup 2. 
+ *
+ * Note: This constructor now accepts a second argument for the chain name.
+ * Embedding scripts were modified accordingly.
  *
  * This was primarily set to make possible the transition between the regular
  * chain and the ITTF chain options.
  */
-StBFChain::StBFChain(Int_t mode):
-  StChain("bfc",kFALSE),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+StBFChain::StBFChain(Int_t mode, const char *name="bfc"):
+  StChain(name,kFALSE),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
 
   if(mode == 2){
     gMessMgr->Info("StBFChain::StBFChain Special Constructor called using chain-setup 2");
