@@ -4,10 +4,10 @@
 using namespace std;
 #include "StChain/StChain.h"
 #include "StMiniMcMaker/StMiniMcMaker.h"
+#include "StiMaker/StiDefaultToolkit.h"
 #include "StiMaker/StiMaker.h"
 #include "StiMaker/MiniChain.h"
 #include "StiMaker/StiMakerParameters.h"
-#include "StiGui/EventDisplay.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/StDetectorDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
@@ -18,7 +18,7 @@ using namespace std;
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
-#include "StiMaker/StiDefaultToolkit.h"
+#include "StiGui/EventDisplay.h"
 
 ClassImp(MiniChain)
 
@@ -46,7 +46,7 @@ void MiniChain::run(int first,
 		    const char ** fileList )
 {
   int iList=0;
-  cout << "MiniChain::Run(...) - INFO - Starting"<< endl
+  cout << "MiniChain::Run(...) -I- Starting"<< endl
        << "     First Event Index:" << first      << endl 
        << "     #Events Requested:" << nEvents    << endl
        << "           File Prefix:" << filePrefix << endl
@@ -98,13 +98,13 @@ void MiniChain::run(int first,
 
 void MiniChain::setupDatabase()
 {  
-  cout <<"MiniChain::setupDatabase() - INFO - Started" <<endl;
+  cout <<"MiniChain::setupDatabase() -I- Started" <<endl;
   St_db_Maker * dbaseMk  = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
   if (_pars->doSimulation) dbaseMk-> SetDateTime(20010801,000000);  // << trouble here
   if (_pars->useTpc) new StTpcDbMaker("tpcDb");
   if (_pars->useSvt) new StSvtDbMaker("svtDb");
   new StDetectorDbMaker("detDb");
-  cout <<"MiniChain::setupDatabase() - INFO - Done" <<endl;
+  cout <<"MiniChain::setupDatabase() -I- Done" <<endl;
 }
 
 void MiniChain::setupSimulation()
@@ -113,18 +113,18 @@ void MiniChain::setupSimulation()
 
 void MiniChain::eventLoop(int first, int last)
 {
-  cout <<"MiniChain::eventLoop() - INFO - Started" <<endl;
+  cout <<"MiniChain::eventLoop() -I- Started" <<endl;
   _chain->PrintInfo();
 
   int status = _chain->Init();
-  cout <<"MiniChain::eventLoop() - INFO - chain->Init() completed with status:"<<status <<endl;
+  cout <<"MiniChain::eventLoop() -I- chain->Init() completed with status:"<<status <<endl;
   int theRunNumber = 100000;
   status = _chain->InitRun(theRunNumber);
-  cout <<"MiniChain::eventLoop() - INFO - chain->InitRun() completed with status:"<<status <<endl;
+  cout <<"MiniChain::eventLoop() -I- chain->InitRun() completed with status:"<<status <<endl;
   int iEvent=first;
   while (iEvent < last && status!=2) 
     {
-      cout << "MiniChain::eventLoop() - INFO - Starting Event# " <<iEvent<<endl;
+      cout << "MiniChain::eventLoop() -I- Starting Event# " <<iEvent<<endl;
       _chain->Clear();
       status = _chain->Make(iEvent++); 
       if (status>1) 
@@ -169,12 +169,21 @@ void MiniChain::setupInput(const char ** fileList)
 */
 void MiniChain::setupGui()
 {  
-  cout <<"MiniChain::setupGui - INFO - Started"<<endl;
-  EventDisplay * display = new EventDisplay("STAR Event Display","STAR",_toolkit,gClient->GetRoot(), 400, 220);
+  cout <<"MiniChain::setupGui -I- Started"<<endl;
+  if (!gClient)
+    {
+      cout <<"MiniChain::setupGui -E- gClient==0"<<endl;
+      return;
+    }
+  EventDisplay * display = new EventDisplay("STAREventDisplay","STAR Event Display",_toolkit,gClient->GetRoot(), 400, 220);
+  cout <<"MiniChain::setupGui -I- Display instantiated"<<endl;
   display->setStChain(_chain);
   display->setIoMaker(_ioMaker);
-  _stiMaker->setEventDisplay(display);
-  cout <<"MiniChain::setupGui - INFO - Done"<<endl;
+  if (_stiMaker)
+    _stiMaker->setEventDisplay(display);
+  else
+    cout << "MiniChain::setupGui -E- _stiMaker==0"<<endl;
+  cout <<"MiniChain::setupGui -I- Done"<<endl;
 }
 
 /*!
@@ -185,7 +194,7 @@ void MiniChain::setupGui()
 void MiniChain::setupOutput(const char * filePrefix,
 			    const char * fileTemplate)
 {
-  cout <<"MiniChain::setupOutput - INFO - Started"<<endl;
+  cout <<"MiniChain::setupOutput -I- Started"<<endl;
   TString outFilePrefix = "MiniChain_";
   TString stEventFileSuffix = "event.root";
   TString MuDstSuffix = "MuDst.root";
@@ -225,6 +234,6 @@ void MiniChain::setupOutput(const char * filePrefix,
     {
       cout << "    MiniMcEvent will NOT be called."<<endl;
     }
-  cout <<"MiniChain::setupOutput - INFO - Done"<<endl;
+  cout <<"MiniChain::setupOutput -I- Done"<<endl;
 }
 

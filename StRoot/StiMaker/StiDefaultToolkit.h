@@ -51,10 +51,6 @@ public:
   virtual StiTrackFitter         * getTrackFitter();
   virtual StiTrackMerger         * getTrackMerger();
   virtual StiVertexFinder        * getVertexFinder();
-  virtual StiDisplayManager      * getDisplayManager();
-  //virtual StiEvaluator         * getEvaluator(const string& file);
-  //virtual StiEvaluator         * getEvaluator();
-  //virtual StiEventAssociator   * getEventAssociator();
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader();
   virtual StAssociationMaker     * getAssociationMaker();
   virtual void setAssociationMaker(StAssociationMaker * a);
@@ -101,9 +97,6 @@ public:
   StiTrackFitter          * _trackFitter;
   StiTrackMerger          * _trackMerger;
   StiVertexFinder         * _vertexFinder;
-  StiDisplayManager       * _displayManager;
-  //StiEvaluator          * _evaluator;
-  //StiEventAssociator    * _eventAssociator;
   StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
   StAssociationMaker                       * _associationMaker; 
 };

@@ -1,3 +1,4 @@
+#include "TGFrame.h"
 #include "StThreeVector.hh"
 #include "StiGui/EventDisplay.h"
 #include "StiGui/EventDisplayParameters.h"
@@ -47,23 +48,17 @@ EventDisplay::EventDisplay(const string& name, const string & description, StiTo
     _trackContainer(0),  
     _mcTrackContainer(0),
     _hitFilter(0),
-    _trackFilter( 0),
-    _mcTrackFilter( new StiDefaultTrackFilter("McTrackFilter","Reconstructed McTracks Filter") ),
+    _trackFilter(0),
+    _mcTrackFilter(0),
     _hitDrawingPolicy(0),
     _trackDrawingPolicy(0),
     _mcTrackDrawingPolicy(0),
-    _defaultHitDrawingPolicy( new DefaultDrawingPolicy("DefaultHitDrawingPolicy","Default Hit Draw Policy",1,1,0.2) ),
-    _defaultTrackDrawingPolicy( new DefaultDrawingPolicy("DefaultTrackDrawingPolicy","Default Track Draw Policy",2,1,1.) ),
-    _defaultMcTrackDrawingPolicy( new DefaultDrawingPolicy("DefaultMcTrackDrawingPolicy","Default McTrack Draw Policy",4,2,1.)),
-    //_hitDrawingPolicies(0),
-    //_trackDrawingPolicies(0),
-    //_mcTrackDrawingPolicies(0),
-    //_detectorViews( new StiDetectorViews("DetectorViews", "Detector Views") )
-   
-    _messenger(*Messenger::instance(1))
+    _defaultHitDrawingPolicy(0),
+    _defaultTrackDrawingPolicy(0),
+    _defaultMcTrackDrawingPolicy(0),
+    _messenger(*Messenger::instance(MessageType::kTrackMessage))  //needs a fix...
 {
   cout << "EventDisplay::EventDisplay( ) -I- Started"<<endl;
-
   _detectorContainer = toolkit->getDetectorContainer();
   _hitContainer      = toolkit->getHitContainer();
   _mcHitContainer    = toolkit->getMcHitContainer();
@@ -383,6 +378,9 @@ void EventDisplay::createFilters()
 void 	EventDisplay::createPolicies()
 {
   //cout << "EventDisplay::createPolicies() -I- Started" << endl;
+  _defaultHitDrawingPolicy = new DefaultDrawingPolicy("DefaultHitDrawingPolicy","Default Hit Draw Policy",1,1,0.2);
+  _defaultTrackDrawingPolicy = new DefaultDrawingPolicy("DefaultTrackDrawingPolicy","Default Track Draw Policy",2,1,1.);
+  _defaultMcTrackDrawingPolicy =  new DefaultDrawingPolicy("DefaultMcTrackDrawingPolicy","Default McTrack Draw Policy",4,2,1.);
   _hitDrawingPolicy = _defaultHitDrawingPolicy;
   _trackDrawingPolicy = _defaultTrackDrawingPolicy;
   _mcTrackDrawingPolicy = _defaultMcTrackDrawingPolicy;

@@ -11,7 +11,6 @@ using namespace std;
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/StiKTNIterator.h"
-#include "StiRootDisplayManager.h"
 #include "StiRootDrawableKalmanTrack.h"
 using std::sort;
 

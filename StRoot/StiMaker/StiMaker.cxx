@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.119  2003/04/10 14:53:06  pruneau
+// removing obsolete files and classes
+//
 // Revision 1.118  2003/04/10 12:10:09  pruneau
 // Changed StiMaker and Default Toolkit to accomodate the new Event Display
 //
@@ -72,18 +75,6 @@
 // Revision 1.96  2002/06/04 19:45:31  pruneau
 // including changes for inside out tracking
 //
-// Revision 1.95  2002/05/29 19:13:50  calderon
-// Added
-//
-//   mevent = mStEventFiller->fillEvent(mevent, _toolkit->getTrackContainer());
-//
-// for globals and
-//
-//   mevent = mStEventFiller->fillEventPrimaries(mevent, _toolkit->getTrackContainer());
-//
-// for primaries.
-//
-//
 #include <iostream.h>
 #include <math.h>
 #include <string>
@@ -91,13 +82,10 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
-// SCL
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
-// StEvent
 #include "StDetectorId.h"
 #include "StEventTypes.h"
-//StMcEventMaker
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackContainer.h"
@@ -114,10 +102,7 @@
 #include "Sti/StiVertexFinder.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
-
-#include "StiGui/StiRootDisplayManager.h"
 #include "StiGui/EventDisplay.h"
-
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
 #include "TFile.h"
@@ -148,17 +133,9 @@ StiMaker::~StiMaker()
 
 void StiMaker::Clear(const char*)
 {
-  cout <<"StiMaker::Clear( ) -I- Started"<<endl;
   if (_initialized) 
-    {
-      cout <<"StiMaker::Clear( ) -I- Initialized - call tracker reset"<<endl;
       _tracker->clear();
-      //if (_toolkit->isGuiEnabled() )
-      //_toolkit->getDisplayManager()->reset();
-    }
-  cout <<"StiMaker::Clear( ) -I- Call base class clear"<<endl;
   StMaker::Clear();
-  cout <<"StiMaker::Clear( ) -I- Done"<<endl;
 }
 
 Int_t StiMaker::Finish()
