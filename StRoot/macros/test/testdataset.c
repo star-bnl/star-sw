@@ -2,6 +2,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
 //  &
 // $Log: testdataset.c,v $
+// Revision 1.9  1999/04/15 19:45:26  fine
+// testdataset.c has been improved
+//
 // Revision 1.8  1999/04/07 15:41:22  fine
 // Extra test for St_DataSetIter::Du() was introduced
 //
@@ -64,36 +67,45 @@
   cout  << endl << "-------- 2 test \"FindObject\" ------------ " << endl;
 
   const Char_t *v3212 = "v3212";
-  St_DataSet *found = d.FindObject(v3212);
+  St_DataSet *found = d.FindByName(v3212);
   if (found) {
       const Char_t *t = found->Path();
       cout << "Object: " << v3212 << " found. It\'s path is " << t << endl;
   }
-  else 
+  else {
       cout <<  "Object: " << v3212 << " has not been found." << endl;
+      return;
+  }
 
   cout  << endl << "-------- 2.2 test \"FindObject\" ------------ " << endl;
+  cout  << endl << "-------- 2.2 test \"FindByName\" ------------ " << endl;
  
   const Char_t *vS3213 = "/v32/13";
   cout << " ===   Error message expected " << endl;
-  found = d.FindObject(vS3213);
+  found = d.FindByName(vS3213);
+  if (found) return;
 
   cout  << endl << "-------- 2.3 test \"FindObject\" ------------ " << endl;
+  cout  << endl << "-------- 2.3 test \"FindByName\" ------------ " << endl;
 
   const Char_t *V3212 = "V3212";
-  found = d.FindObject(V3212,0,"-I");
+  found = d.FindByName(V3212,0,"-I");
   if (found) {
        const Char_t *t2 = found->Path();
        cout << "Object: " << V3212 << " found. It\'s path is " << t2 << endl;
   }
-  else
+  else {
        cout <<  "Object: " << V3212 << " has not been found." << endl;
+       return;
+  }
 
   cout  << endl << "-------- 2.4 test \"FindObject\" ------------ " << endl;
+  cout  << endl << "-------- 2.4 test \"FindByName\" ------------ " << endl;
 
   cout << " ===   Error message expected " << endl;
   found = d.FindObject(V3212,"v1/v21/v3212/v4","-I");
-  if (!found) cout << " Object not found" << endl;
+  if (found) return;
+  cout << " Object not found" << endl;
 
   cout << "recreating directories" << endl;
 
