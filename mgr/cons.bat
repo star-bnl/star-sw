@@ -1,21 +1,21 @@
 @rem = '--*-PERL-*--';
-@rem = '
-@rem = 'Copyright (C) 1996-2000 Free Software Foundation, Inc.'
-@rem = ''
-@rem = 'This program is free software; you can redistribute it and/or modify'
-@rem = 'it under the terms of the GNU General Public License as published by'
-@rem = 'the Free Software Foundation; either version 2 of the License, or'
-@rem = '(at your option) any later version.'
-@rem = ''
-@rem = 'This program is distributed in the hope that it will be useful,'
-@rem = 'but WITHOUT ANY WARRANTY; without even the implied warranty of'
-@rem = 'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the'
-@rem = 'GNU General Public License for more details.'
-@rem = ''
-@rem = 'You should have received a copy of the GNU General Public License'
-@rem = 'along with this program; see the file COPYING.  If not, write to'
-@rem = 'the Free Software Foundation, Inc., 59 Temple Place - Suite 330,'
-@rem = 'Boston, MA 02111-1307, USA.'
+@rem = '';
+@rem = 'Copyright (C) 1996-2000 Free Software Foundation, Inc.';
+@rem = '';
+@rem = 'This program is free software; you can redistribute it and/or modify';
+@rem = 'it under the terms of the GNU General Public License as published by';
+@rem = 'the Free Software Foundation; either version 2 of the License, or';
+@rem = '(at your option) any later version.';
+@rem = '';
+@rem = 'This program is distributed in the hope that it will be useful,';
+@rem = 'but WITHOUT ANY WARRANTY; without even the implied warranty of';
+@rem = 'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the';
+@rem = 'GNU General Public License for more details.';
+@rem = '';
+@rem = 'You should have received a copy of the GNU General Public License';
+@rem = 'along with this program; see the file COPYING.  If not, write to';
+@rem = 'the Free Software Foundation, Inc., 59 Temple Place - Suite 330,';
+@rem = 'Boston, MA 02111-1307, USA.';
 @rem = '
 @echo off
 rem setlocal
@@ -27,19 +27,20 @@ shift
 goto loop
 :endloop
 rem ***** This assumes PERL is in the PATH *****
-rem $Id: cons.bat,v 1.1.1.3 2000/06/07 15:51:55 fisyak Exp $
+rem $Id: cons.bat,v 1.1.1.4 2000/06/14 22:44:43 fisyak Exp $
 perl.exe -S cons.bat %ARGS%
 goto endofperl
 @rem ';
 
 #!/usr/bin/env perl
 
-# $Id: cons.bat,v 1.1.1.3 2000/06/07 15:51:55 fisyak Exp $
+# $Id: cons.bat,v 1.1.1.4 2000/06/14 22:44:43 fisyak Exp $
 
 $ver_num = 2.0;
-$ver_rev = "";
-$version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons.bat,v 1.1.1.3 2000/06/07 15:51:55 fisyak Exp $)'. "\n";
+$ver_rev = ".1";
+$version = sprintf "This is Cons %2.1f%s " .
+	    '($Id: cons.bat,v 1.1.1.4 2000/06/14 22:44:43 fisyak Exp $)'. "\n",
+	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -239,6 +240,9 @@ if ($main::_WIN32) {
 	'CC'             => 'cl',
 	'CFLAGS'         => '/nologo',
 	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+	'CXX'            => '%CC',
+	'CXXFLAGS'       => '%CFLAGS',
+	'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS -c %< /Fo%>',
 	'INCDIRPREFIX'   => '/I',
 	'LINK'           => 'link',
 	'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
@@ -740,7 +744,7 @@ sub SplitPath {
     if (ref($dirs) ne ARRAY) {
 	$dirs = [ split(/$main::PATH_SEPARATOR/o, $dirs) ];
     }
-    map { DirPath(@_) } @$dirs;
+    map { DirPath($_) } @$dirs;
 }
 
 # Return true if the supplied path is available as a source file
@@ -1706,10 +1710,8 @@ sub scan {
     my(@includes);
     # File should have been built by now. If not, we'll ignore it.
     return () unless open(SCAN, $file->rpath);
-###    local($script::env) = $self->{env};
     while(<SCAN>) {
-	my $f = &$code;
-	push(@includes, $f) if $f ne '';
+	push(@includes, grep($_ ne '', &$code));
     }
     close(SCAN);
     my($wd) = $file->{dir};
@@ -3017,7 +3019,7 @@ the original.
 
 by Bob Sidebotham, et al. F<cons-discuss@gnu.org>
 
-A guide and reference for version 2.0
+A guide and reference for version 2.0.1
 
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
 
@@ -4950,7 +4952,7 @@ installed in the script:
   # path $BIN_DIR.
 
   sub cons::InstallScript {
-	my($env, $dst, $src) = shift;
+	my ($env, $dst, $src) = @_;
 	Command $env $dst, $src, qq(
 		sed s+your-path-here+$BIN_DIR+ %< > %>
 		chmod oug+x %>

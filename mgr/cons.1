@@ -1,9 +1,9 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.3 $$Date: 2000/06/07 15:51:54 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.4 $$Date: 2000/06/14 22:44:42 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.3  2000/06/07 15:51:54  fisyak
-''' cons 2.0
+''' Revision 1.1.1.4  2000/06/14 22:44:42  fisyak
+''' 2.0.1
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.0" "6/Jun/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.0.1" "14/Jun/2000" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -199,7 +199,7 @@ the original.
 .SH "Cons: A Software Construction System"
 by Bob Sidebotham, et al. \fIcons-discuss@gnu.org\fR
 .PP
-A guide and reference for version 2.0
+A guide and reference for version 2.0.1
 .PP
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
 .PP
@@ -2030,7 +2030,7 @@ installed in the script:
 .Ve
 .Vb 7
 \&  sub cons::InstallScript {
-\&        my($env, $dst, $src) = shift;
+\&        my ($env, $dst, $src) = @_;
 \&        Command $env $dst, $src, qq(
 \&                sed s+your-path-here+$BIN_DIR+ %< > %>
 \&                chmod oug+x %>
