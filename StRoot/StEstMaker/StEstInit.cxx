@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.4 2001/01/31 16:45:25 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.5 2001/02/10 20:45:14 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.5  2001/02/10 20:45:14  caines
+ * Reset mNSvtHit after removal of bad flagged hits
+ *
  * Revision 1.4  2001/01/31 16:45:25  lmartin
  * mParams[]->debug replaced by mDebug.
  * phi and z params for StEstIndexGeom remove from StEstParams.
@@ -388,7 +391,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 	ill++;
       }
     }
-
+  
+  mNSvtHit = ill-1;
   if(mDebugLevel>0)
     cout << "SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endl;
   
