@@ -956,7 +956,7 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) co
     //make sure node has a hit
     StiHit* hit = node.getHit();
     if((&node)->getHit()!=hit) cout <<"Danger, Will Robinson! Danger!"<<endl;
-    if (hit) {
+    if (hit && hit->detector() != NULL) {
       if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
 	{//Tpc Hit requested and found
 	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
