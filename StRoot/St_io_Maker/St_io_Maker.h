@@ -1,8 +1,7 @@
 //*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
 //
-// $Id: St_io_Maker.h,v 1.16 2000/05/04 20:03:59 fine Exp $
-//  
+// $Id: St_io_Maker.h,v 1.17 2000/05/04 20:04:46 fine Exp $
 //
 #ifndef STAR_St_io_Maker
 #define STAR_St_io_Maker
@@ -25,7 +24,7 @@ class  TFile;
 class St_io_Maker : public StIOInterFace {
  private:
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.16 2000/05/04 20:03:59 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.17 2000/05/04 20:04:46 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
@@ -82,13 +81,16 @@ class St_io_Maker : public StIOInterFace {
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.16 2000/05/04 20:03:59 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.17 2000/05/04 20:04:46 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 //_________________________
-//  
+// $Log: St_io_Maker.h,v $
+// Revision 1.17  2000/05/04 20:04:46  fine
+// CVS id introduced
+//
 //_________________________
 #endif
 
