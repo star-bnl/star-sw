@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.1 2003/04/25 14:15:59 jeromel Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.2 2003/04/27 23:08:02 balewski Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.2  2003/04/27 23:08:02  balewski
+// clean up of daq-reader
+//
 // Revision 1.1  2003/04/25 14:15:59  jeromel
 // Reshaped Jan's code
 //
@@ -51,7 +54,10 @@ Int_t StEEmcDataMaker::Init(){
   if(mDb==0){ 
     mDb= (StEEmcDbMaker*) GetMaker("eeDb");
   } 
-  assert(mDb); //  should be initialized prior to use 
+  
+  if(mDb==0){  
+    printf("\n\nWARN %s::Init() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
+  } 
   
   return StMaker::Init();
 }
@@ -63,7 +69,14 @@ Int_t StEEmcDataMaker::Init(){
 
 Int_t StEEmcDataMaker::InitRun  (int runNumber){
   printf("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber);
-  mDb->print();
+ if(mDb==0){  
+    printf("\n\nWARN %s::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
+  } else if ( mDb->valid()==0 ) {
+    printf("\n\nWARN %s::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n", GetName());
+    mDb=0;
+  } else {
+    mDb->print();
+  }
   return kStOK;
 }
 
@@ -72,6 +85,11 @@ Int_t StEEmcDataMaker::InitRun  (int runNumber){
 //____________________________________________________
 //____________________________________________________
 Int_t StEEmcDataMaker::Make(){
+  if(mDb==0){  
+    printf("WARN %s::Make() did not found \"eeDb-maker\" or no DB data for EEMC, all EEMC data will be ignored\n", GetName());
+    return kStOK;
+  } 
+  
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
   assert(mEvent);// fix your chain or open the right event file
   printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
@@ -87,7 +105,9 @@ Int_t StEEmcDataMaker::Make(){
   int det = kEndcapEmcTowerId; 
   StDetectorId id = StDetectorId(det);
   StEmcDetector* d = new StEmcDetector(id,12);
-  emcC->setDetector(d);
+  //   emcC->setDetector(d);                           <<== CRASH IS HERE
+
+  int first=1;
   
   int nDrop=0;
   int nMap=0;
@@ -107,6 +127,13 @@ Int_t StEEmcDataMaker::Make(){
       int ieta=x->eta-1;   //range 0-11
       
       int rawAdc=steemcreader->getTowerAdc(crate,chan);
+      if(rawAdc<0) continue; // there was no data for this channel
+
+      if(first) { // tmp to avoid crash if BEMC has no data
+	emcC->setDetector(d);
+	first=0;
+      }
+
       float adc=rawAdc - x->ped;
       float energy=-1.;
             
@@ -115,15 +142,8 @@ Int_t StEEmcDataMaker::Make(){
 	nOver++;
       }
       
-      printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d pedSub=%+.1f energy=%+10g  -->   %2.2dT%c%2.2d\n",crate,chan,rawAdc,adc,energy,x->sec,x->sub,x->eta);
-
-      /* To Do:
-	 3) test mapping back
-	 4) some channals have ADC=0, e.g. 8TC07, in raw data?
-	 5) what to do if no DB info is avaliable
-         6) what to do if timestamp before Feb 18 ?
-      */
-
+      //printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d pedSub=%+.1f energy=%+10g  -->   %2.2dT%c%2.2d\n",crate,chan,rawAdc,adc,energy,x->sec,x->sub,x->eta);
+      
       assert(strchr(x->name,'T')); // works only for towers
       
       StEmcRawHit* h = new StEmcRawHit(id,isec,ieta,isub,rawAdc,energy);

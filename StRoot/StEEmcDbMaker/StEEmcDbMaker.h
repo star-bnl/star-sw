@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.5 2003/03/26 15:26:23 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -47,7 +47,7 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.5 2003/03/26 15:26:23 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -72,6 +72,7 @@ class StEEmcDbMaker : public StMaker {
   void mPrintItems();///< utility
  
   float KsigOverPed; // defines threshold
+  int nFound;
 
  protected:
  public:  
@@ -84,6 +85,7 @@ class StEEmcDbMaker : public StMaker {
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
 
+  int valid(){ return nFound;}
   unsigned int getTimeStampUnix(){return myTimeStampUnix;} ///< if zero then not fixed 
 
   StEEmcDbMaker(const char *name="EEmcDbMaker");
@@ -94,7 +96,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.5 2003/03/26 15:26:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
