@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.51 2000/01/14 23:16:21 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.52 2000/01/16 21:39:34 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.52  2000/01/16 21:39:34  fisyak
+// Fix problem with quotes
+//
 // Revision 1.51  2000/01/14 23:16:21  fisyak
 // remove possibility of strlen(0)
 //
@@ -269,7 +272,7 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"in"          ,""  ,"","xin"                                                  ,"","Alias to xin",kFALSE},
+  {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                        ,"","xdf2root","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","GEANT",kFALSE}, 
@@ -324,9 +327,9 @@ BfcItem BFC[] = {
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","tables,SCL,global"             ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
-  {"EvOut"       ,""  ,"",""                                          ,"Write StEvent to StTree","",kFALSE},
+  {"EvOut"       ,""  ,"",""                                       ,"","","Write StEvent to StTree",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
-  {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
+  {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"    ,"EventDisplay","","SCL,St_geom"    ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
