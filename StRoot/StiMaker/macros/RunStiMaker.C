@@ -14,7 +14,7 @@ void RunStiMaker(Int_t nevents=1,
 		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
-    //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_standard/hc_standard.40_evts.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_standard/hc_standard.40_evts.event.root")
     //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Mon/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
     //This file points to 5 muons /event
