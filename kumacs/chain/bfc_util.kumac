@@ -454,6 +454,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
             exec create_tables_ctf#init
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
+            exec init_dst#init_esum
     (drsum) exec create_tables_global#fill_dst_run_summary
             exec init_dst#init_rsum
      (dehd) exec create_tables_global#fill_dst_event_header
@@ -594,12 +595,24 @@ return
 	         nev_total = [nev_total] - 1
                  goto EOF
                endif
-           endif
+	     endif
    (dstin) 
+* Kathy ==>
 * now if we're rerunning desum, need to delete event_summary table
+* 
+* DSW Nov. 18, 1998
+* When running 'desum', bfc_util#bfc_init call 
+* create_table_global#fill_dst_event_summary which creates event_summary table.
+* So we will have two event_summary tables when rerunning 'dstin desum'
+* To avoid confusing STAF, delete event_summary table created by 
+* create_table_global#fill_dst_event_summary just once per job [in the very
+* first event] before reading in the data from [event]/data/global.
+* DSW   Nov. 18, 1998
+   
 	  if ($vexist(chain_desum).ne.0) then 
             message ' BFC_UTIL,init:  delete existing event_summary table'
             rm [dst]/event_summary
+	    vec/del chain_desum
 	  endif
 * read in dst
 	  exec read_table_from_file#read ind [event]/data/global
