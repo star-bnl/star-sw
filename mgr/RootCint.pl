@@ -8,16 +8,19 @@ use Env;
 use File::Basename;
 #
 my $Cint_cxx = shift;
-(my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
-my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
-my $LinkDef = $DirName . "/" . "LinkDef.h"; #print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
-my $sources  = shift; #print "sources =", $sources,"\n";
-my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
-my @cpps = split / /,$CPPFLAGS;# print "cpps: @cpps \n";
-my %class_hfile = (); # class h-file map
+my $Cint_h  = $Cint_cxx;
+$Cint_h  =~ s/_Cint\.cxx/_Cint\.h/g;
+my $DirName = dirname($Cint_cxx);		# print "DirName = $DirName\n";
+my $LinkDef = $DirName . "/" . "LinkDef.h"; 	#print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
+
+my $sources  = shift; 				#print "sources =", $sources,"\n";
+my $CPPFLAGS = shift; 				#print "CPPFLAGS = ", $CPPFLAGS, "\n";
+my @cpps = split / /,$CPPFLAGS;			# print "cpps: @cpps \n";
+
+my %class_hfile = (); 		# class h-file map
 my %class_hfile_depens_on = (); # 
 my %class_written = (); 
-my @classes = 0; # list of classes
+my @classes = 0; 		# list of classes
 my $h_files = "";
 my $coll = 0;
 my $col  = 0;
@@ -25,25 +28,38 @@ my $col  = 0;
 my $ListOfWrittenClasses = ":"; 
 my $ListOfDefinedClasses = "";
 my $off = 0;
+
 open (Out, ">$LinkDef") or die "Can't open $LinkDef";
-for my $def  (split /\s/,$sources) {#  print "SRC:", $def, "\n";
-  if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
-    open (In, $def) or die "Can't open $def";
-    while ($line = <In>) {
-      print Out $line;# print $line; 
-      if ($line =~ /link off all/) {$off++;}
-      if ($line =~ / class / && $line  =~ /\#pragma/) {
-	my @words = split /([ \(,\)\;\-\!])/, $line;
-	my $class = $words[8];
-	if ($class) {
-	  push @classes, $class;
-	  $class_written{$class} = "YES"; #print "class: $class, written: $class_written{$class}\n";
-	}
-      }
-    }
+
+print Out "#pragma link off all globals;\n";  
+print Out "#pragma link off all classes;\n";
+print Out "#pragma link off all functions;\n";;
+my $off = 1;
+for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
+  if (!($def =~ /LinkDef/  ))		{next;}
+  if ( ($def =~/^$LinkDef$/))   	{next;}
+
+  open (In, $def) or die "Can't open $def";
+  while ($line = <In>) {
+    if (!($line  =~ /^\#pragma/))	{next;}
+    if ($line =~ /link off all/) 	{next;}
+
+##VP      print Out $line;# print $line; 
+    if (!($line =~ / class / ))		{goto PRINT;}
+
+    my @words = split /([ \(,\)\;\-\!+])/, $line;
+    if ($words[10] != "class") 		{goto PRINT;}
+    my $class = $words[12];
+    if (!$class) 			{goto PRINT;}
+    if ($class_written{$class})		{next;}
+    push @classes, $class;
+    $class_written{$class} = 1; 		#print "class: $class, written: $class_written{$class}\n";
+PRINT: print Out $line;
   }
 }
 close (Out);
+
+
 for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   next if !$h;
   next if $h =~ /LinkDef/;
