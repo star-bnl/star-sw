@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.49 2003/09/26 06:08:55 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.50 2003/10/07 14:08:33 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.50  2003/10/07 14:08:33  jcs
+// remove previous fix for determining magnetic field
+//
 // Revision 1.49  2003/09/26 06:08:55  oldi
 // Check if the magentic field was reversed 'by hand' with a chain option.
 // If yes, multiply the scaleFactor of the field with -1.
@@ -226,7 +229,6 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
-#include "StChain.h"
 #include "StVertexId.h"
 #include "StMessMgr.h"
 
@@ -279,8 +281,7 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run){
   // get run dependend tracking parameters from database
   StFtpcTrackingParams::Instance(kTRUE, 
 				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"),
-				 (StBFChain*) GetChain());
+				 GetDataBase("RunLog"));
 
   return kStOK;
 }
@@ -493,7 +494,7 @@ Int_t StFtpcTrackMaker::Make()
   TObjArray *clusters = tracker->GetClusters();
   StFtpcPoint *point;
     
-  // loop over all clusters
+   // loop over all clusters
   for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
     point = (StFtpcPoint *)clusters->At(i);
     point->TransformFtpc2Global();
@@ -672,7 +673,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.49 2003/09/26 06:08:55 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.50 2003/10/07 14:08:33 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.15 2003/10/02 00:10:37 perev Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.16 2003/10/07 14:11:10 jcs Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.16  2003/10/07 14:11:10  jcs
+// remove previous fix for determining magnetic field
+//
 // Revision 1.15  2003/10/02 00:10:37  perev
 // Zeroing of members added and bug in ResetMagField fixed
 //
@@ -82,7 +85,6 @@ using namespace units;
 
 #include "StDbUtilities/StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StBFChain.h"
 
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
@@ -197,7 +199,7 @@ protected:
   Int_t InitCoordTransformation();
   Int_t InitCoordTransformation(ftpcCoordTrans_st* ftpcCoordTrans);
   Int_t InitSpaceTransformation();
-  Int_t ResetMagField(TDataSet *RunLog = 0, StBFChain *chain = 0);
+  Int_t ResetMagField(TDataSet *RunLog = 0);
   
 public:
   
@@ -208,8 +210,7 @@ public:
 					St_ftpcPadrowZ *padrow_z);
   static StFtpcTrackingParams* Instance(Bool_t debug, 
 					St_ftpcCoordTrans *ftpcCoordTrans, 
-					TDataSet *RunLog,
-					StBFChain *chain);
+					TDataSet *RunLog);
   static StFtpcTrackingParams* Instance(Bool_t debug, Double_t magFieldFactor);
   static StFtpcTrackingParams* Instance();
   
