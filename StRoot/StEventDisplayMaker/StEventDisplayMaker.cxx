@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.56 2000/04/10 20:11:03 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.57 2000/04/22 20:01:17 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -835,7 +835,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
                                               nextKeyIndx,
                                               keyPositions[0]);
          else if (keyPositions[1] && keyPositions[2])
-             hitsPoints = new St_Table3Points(track2Line,
+             hitsPoints = new TTable3Points(track2Line,
                                               nextKeyIndx,
                                               keyPositions[0],keyPositions[1],keyPositions[2]);
          else { hitColor = -1; break; }
@@ -968,6 +968,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.57  2000/04/22 20:01:17  fine
+// replace St_Table with TTable
+//
 // Revision 1.56  2000/04/10 20:11:03  fine
 // change the default valume fro SVT from SLDI to STSI
 //
