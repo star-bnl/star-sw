@@ -25,15 +25,15 @@ my $TOPHPSS_RECO =  "/home/starreco/reco";
 my $TOPDISK1_RECO=  $DISK1 . "/star";
 my $TOPDISK0_RECO=  $disk0 . "/star/starreco";
 my $REQUEST      =  "/star/u2e/starreco/prod4/requests";
-my $JOB_LOG      =  $DISK1 . "/star/log";
-my $JOB_SUM      =  $DISK1 . "/star/sum";
+my $JOB_LOG      =  $DISK1 . "/star/prod4/log";
+my $JOB_SUM      =  $DISK1 . "/star/prod4/sum";
 #my @SETS = @ARGV;
 my @SETS=     (
 
-#"auau200/venus412/default/b0_3/year_1b/hadronic_on",      # 
-#"auau100/venus412/default/b0_3/year_1s/hadronic_on",
-#"auau100/venus412/default/b3_6/year_1s/hadronic_on",
-#"auau100/venus412/default/b6_9/year_1s/hadronic_on",
+"auau200/venus412/default/b0_3/year_1b/hadronic_on",      # 
+"auau100/venus412/default/b0_3/year_1s/hadronic_on",
+"auau100/venus412/default/b3_6/year_1s/hadronic_on",
+"auau100/venus412/default/b6_9/year_1s/hadronic_on",
 #"auau200/venus412/default/b0_9/year_1b/hadronic_on",      # 
 #"auau200/venus412/default/b3_6/year_1b/hadronic_on",      # 
 #"auau200/venus412/default/b6_9/year_1b/hadronic_on",      # 
@@ -41,7 +41,7 @@ my @SETS=     (
 #"auau200/venus412/halffield/b0_3/year_1b/hadronic_on",    #  
 #"auau200/venus412/default/b0_3/year_2a/hadronic_on",      #
 
-#"auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",     # 
+"auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",     # 
 "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on" ,      # 
 #"auau200/hijing135/jetq_on/b0_9/year_1b/hadronic_on",     # 
 #"auau200/hijing135/jetq_on/b3_6/year_1b/hadronic_on",     # 
@@ -372,43 +372,31 @@ sub end_html($){
 #____________________________________________________________________
 sub logfile($$){
   my $f      = @_[0];
-  my $jb_log = @_[1];
-  my @events = `grep 'Done with Event no.' $jb_log | grep -v printf | grep -v cout;`;
-#  print "No. of Event", $#events, "\n";
-#  print @events;
-  $no_events = $#events+1;
-  my @output = `tail -90 $jb_log`;
-#  print @output;
+  my $jb_sum = @_[1];
+  my $sum_line ;
+  my $job_status;
   my @string;
-  @string = grep /Run completed/, @output;
-  if ($string[0]){
-    $running{$f} = "done";
-    $no_events_complete = $#events+1;
-    foreach my $line (@output){
-      if ($line =~ "Cpu Time = ") {
-	@words = split (":",$line);
-	my $Maker = $words[0];
-#	print "Maker :", $Maker, "\n" ,$words[1];
-	my @w = split(" ",$words[1]);
-	my $real_time = $w[3];
-	my $cpu_time  = $w[8];
-	if (!$Makers{$Maker}) {
-	  $Makers{$Maker} = $Maker;
-	  $REALTIME{$Maker} = 0;
-	  $CPUTIME{$Maker} = 0;
-	}
-	$REALTIME{$Maker} =  $real_time;
-	$CPUTIME{$Maker}  += $cpu_time;
-#	if ($Maker =~ "l3Tracks") {printf ("Maker : %s  real / cpu = %f %f \n", $Maker, $real_time, $cpu_time);}
-#	printf ("%s :: %f  - %f \n",$Maker,$REALTIME{$Maker},$CPUTIME{$Maker});
-      }
+  my @word_sum;
+  my @output = `more $jb_sum`; 
+  foreach my $sum_line (@output) {
+           chop $sum_line;
+    if ( $sum_line =~ /Job status:/) {
+       @word_sum = split (":", $sum_line);
+         $job_status = $word_sum[1];
+       }  
+    if ($sum_line =~ /Number of Events Done/ ) {
+      @word_sum = split (":", $sum_line);          
+        $no_events_complete = $word_sum[1];
     } 
   }
-  @string = grep /Break/, @output;
-  if ($string[0]){
-    $comment{$f} .= $string[0];
+    $no_events = $no_events_complete;
+    $running{$f} = $job_status;
+    $string[0] = $job_status;  
+
+#   if ($string[0]){
+#    $comment{$f} .= $string[0];
 #    print "------------->", $comment{$file};
-  }
+  
 }
 #____________________________________________________________________
 sub crs_script($$$$){
@@ -418,8 +406,8 @@ sub crs_script($$$$){
   my $process = @_[3];
   my $log_file = $file . ".log";
   my $sum_file = $file . ".sum";
-  my $jb_log  = $JOB_LOG . "/" . $process . "_4" . "/" . $log_file;
-  my $jb_sum  = $JOB_SUM . "/" . $process . "_4" . "/" . $sum_file;
+  my $jb_log  = $JOB_LOG . "/" . $process . "/" . $log_file;
+  my $jb_sum  = $JOB_SUM . "/" . $process . "/" . $sum_file;
   my $jb_arc  = $REQUEST . "/" . $process . "/archive/"  .  $gen_set . "_" . $file;
   my $jb_new  = $REQUEST . "/" . $process . "/new_jobs/" .  $gen_set . "_" . $file;
   my $jb_tom  = $REQUEST . "/" . $process . "/jobfiles/" .  $gen_set . "_" . $file;
@@ -431,12 +419,12 @@ sub crs_script($$$$){
   if ($size_tfs{$file}) {$done++;}
   if ($tfs_size{$file})  {$done++;}  if ($tss_size{$file})  {$done++;}
   if ($trs_size{$file})  {$done++;}
-  if (-f $jb_log) {
+  if (-f $jb_sum) {
     if ($running{$file}) {$JFS  .= "R"; $done++;}
     else {                $JFS  .= "L"; $done++;}
-    logfile($file,$jb_log);
+    logfile($file,$jb_sum);
   }
-  if (!-f $jb_log && $running{$file}) {$JFS  .= "T"; $done++;}
+  if (!-f $jb_sum && $running{$file}) {$JFS  .= "T"; $done++;}
   if (-f $jb_tom)                     {$JFS  .= "J"; $done++;}
   if (-f $jb_arc)                     {$JFS  .= "A"; $done++;}
   if (-f $jb_new)                     {$JFS  .= "N"; $done++;}
@@ -451,10 +439,10 @@ sub crs_script($$$$){
       my $hpss_dst_file0 = $file . ".event.root";
       my $hpss_dst_file1 = $file . ".dst.root";
       my $hpss_dst_file2 = $file . ".hist.root";
-      my $hpss_dst_file3 = $file . "_dst.xdf";
+      my $hpss_dst_file3 = $file . ".dst.xdf";
       my $executable     = "/afs/rhic/star/packages/SL99f/mgr/bfc.csh";
-      my $executableargs    = $process . ",y1b,-emc,eval,fzin,xout";
-      my $log_dir       = $JOB_LOG . "/" . $process . "_4";
+      my $executableargs    = $process . ",y1b,eval,fzin,xout";
+      my $log_dir       = $JOB_LOG . "/" . $process;
       my $log_name      = $file . ".log";
       my $err_log       = $file . ".err";
       if (!open (TOM_SCRIPT,">$jb_new")) {printf ("Unable to create job submission script %s\n",$jb_new);}
