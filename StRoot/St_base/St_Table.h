@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.38 1999/09/24 21:56:08 fisyak Exp $
+// $Id: St_Table.h,v 1.39 1999/10/28 00:32:55 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.39  1999/10/28 00:32:55  fine
+// method At() has been removed
+//
 // Revision 1.38  1999/09/24 21:56:08  fisyak
 // Add operator [] for particular table (VF)
 //
@@ -174,7 +177,7 @@ public:
   
    virtual     void       Adopt(Int_t n, void *array);
    virtual     void       AddAt(const void *c, Int_t i);
-   virtual     const void *At(Int_t i) const;
+//    virtual     const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
    virtual     void       Draw(Option_t *opt);
