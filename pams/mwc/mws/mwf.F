@@ -315,7 +315,7 @@ CC:>------------------------------------------------------------------
                do jj = 0, 10
                 raw(nsignal + 96*jj).sector = isec 
                 raw(nsignal + 96*jj).count = 0          
-                if(jj.eq.0)raw(nsignal + 96*jj).count = se_hit(isec)
+                if(jj.eq.5)raw(nsignal + 96*jj).count = se_hit(isec)
                enddo
 
          enddo
