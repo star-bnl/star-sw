@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_file_browser.C,v 1.1 1999/06/07 21:10:37 kathy Exp $
+// $Id: bfcread_hist_file_browser.C,v 1.2 1999/06/11 20:08:09 kathy Exp $
 // $Log: bfcread_hist_file_browser.C,v $
+// Revision 1.2  1999/06/11 20:08:09  kathy
+// changed so variable definitions in correct place
+//
 // Revision 1.1  1999/06/07 21:10:37  kathy
 // fixing up macros - removed or renamed some, fixed others so the default input file is there
 //
@@ -24,9 +27,11 @@ class St_DataSet;
 St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
+class StTreeMaker;
+StTreeMaker *treeMk=0;
 
 void bfcread_hist_file_browser(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/psc0050_01_40evts.hist.root")
+*MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/psc0050_01_40evts.hist.root")
 
 {
 //
@@ -39,7 +44,7 @@ void bfcread_hist_file_browser(Int_t nevents=1, const char
 
 
 //  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
+  treeMk = new StTreeMaker("treeRead",MainFile);
   treeMk->SetIOMode("r");
   treeMk->SetDebug();
   treeMk->SetBranch("*",0,"0");  		//deactivate all branches
