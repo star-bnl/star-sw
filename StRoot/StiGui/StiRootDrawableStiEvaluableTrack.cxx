@@ -105,22 +105,9 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     mLineHitPair.first->clearLine();
     setLineInfo();
     
-    //Let's try to find out where the first node is:
-    /*
-      double xStart = lastNode->fX;
-      double xStop = firstNode->fX;
-      
-      for (double xLocal=6.; xLocal<xStop; xLocal+=1.) {
-      StThreeVector<double> pos = getGlobalPointNear(xLocal);
-      //cout <<"Adding Position:\t"<<pos<<endl;
-      //mLineHitPair.first->push_back( pos );
-      mLineHitPair.first->push_back( pos.x() );
-      mLineHitPair.first->push_back( pos.y() );
-      mLineHitPair.first->push_back( pos.z() );
-      }
-    */
-    
     //Loop over nodes by hand (faster than using StiKalmanTrack interface)
+    //This is essentailly the guts of an interpolation routine that should become
+    // a class at some point.
     double step = 1.; //cm
     
     bool go = true;
@@ -144,28 +131,28 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 	    //cout <<"node->fX: "<<node.fX<<"\tnext->fX: "<<next.fX<<endl;
 
 	    //This is a temp hack to avoid IFC nodes!
-	    if (node.fX!=0. && next.fX!=0.) {
+	    //if (node.fX!=0. && next.fX!=0.) {
 		
-		//cout <<"node.fX!=0. && next.fX!=0."<<endl;
-		//now step!
-		while (xLocal<next.fX) {
-		    //cout <<" xLocal: "<<xLocal<<"\tnext->fX: "<<next.fX<<endl;
-		    double xx = node.fX;
-		    double yy = node.fP0;
-		    double zz = node.fP1;
-		    double alpha = node.fAlpha;
-		    double ca = cos(alpha);
-		    double sa = sin(alpha);
-		    double gx = ca*xx-sa*yy;
-		    double gy = sa*xx+ca*yy;
-		    mLineHitPair.first->push_back(gx);
-		    mLineHitPair.first->push_back(gy);
-		    mLineHitPair.first->push_back(zz);
-		    
-		    xLocal+=step;
-		}
-		//cout <<"Done stepping"<<endl;
+	    //cout <<"node.fX!=0. && next.fX!=0."<<endl;
+	    //now step!
+	    while (xLocal<next.fX) {
+		//cout <<" xLocal: "<<xLocal<<"\tnext->fX: "<<next.fX<<endl;
+		double xx = node.fX;
+		double yy = node.fP0;
+		double zz = node.fP1;
+		double alpha = node.fAlpha;
+		double ca = cos(alpha);
+		double sa = sin(alpha);
+		double gx = ca*xx-sa*yy;
+		double gy = sa*xx+ca*yy;
+		mLineHitPair.first->push_back(gx);
+		mLineHitPair.first->push_back(gy);
+		mLineHitPair.first->push_back(zz);
+		
+		xLocal+=step;
 	    }
+	    //cout <<"Done stepping"<<endl;
+	    //} //temporary patch
 	}
     }
     
