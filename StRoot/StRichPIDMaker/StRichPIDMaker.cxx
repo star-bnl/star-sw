@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.50 2002/02/18 22:59:34 dunlop Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.51 2002/02/22 14:34:25 dunlop Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.51  2002/02/22 14:34:25  dunlop
+ * Loosened cuts to match StRichSpectraMaker
+ *
  * Revision 2.50  2002/02/18 22:59:34  dunlop
  * Keep also primaries > 1.5 GeV.  Is global or primary now
  *
@@ -325,7 +328,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.50 2002/02/18 22:59:34 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.51 2002/02/22 14:34:25 dunlop Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -361,9 +364,9 @@ void StRichPIDMaker::initCutParameters() {
     //
     mPtCut        = 0.5*GeV; // GeV/c
     mEtaCut       = 0.5; 
-    mLastHitCut   = 140.0*centimeter;
+    mLastHitCut   = 100.0*centimeter;
     mDcaCut       = 3.0*centimeter;
-    mFitPointsCut = 24;
+    mFitPointsCut = 20;
     mPathCut      = 500*centimeter;
     mPadPlaneCut  = 1.0*centimeter;
     mRadiatorCut  = 1.0*centimeter;
