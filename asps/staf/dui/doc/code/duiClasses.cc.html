@@ -1,0 +1,363 @@
+<HTML>
+<PRE>
+<H2>file: dui/src/duiClasses.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:        duiClasses.C
+//:DESCRIPTION: Dataset Unix-like Interface Classes
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     01feb96-v001a-cet- make more like tdmFactory
+//:HISTORY:     08dec95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include &lt;string.h&gt;
+#include "asuAlloc.h"
+#include "tdmLib.h"
+#include "<A HREF="duiClasses.hh.html">duiClasses.hh</A>"
+#include "<A HREF="dui_globals.h.html">dui_globals.h</A>"
+//:----------------------------------------------- PROTOTYPES         --
+#include "sutLib.h"
+
+//:=============================================== CLASS              ==
+// duiDispatcher
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>duiDispatcher:: <A NAME="duiDispatcher">duiDispatcher(</A>const char * name)</B>
+		: tdmFactory()
+		, socFactory()
+		, socObject(name, "duiDispatcher") {
+//- normal socObject stuff
+   myPtr = (SOC_PTR_T)this;
+//- normal object factory stuff
+   lock(TRUE);
+
+//- specific to <A HREF="dui_macros.h.html#DUI">DUI</A>
+   myCwd=NULL;
+   myCwd = (char*)ASUALLOC(strlen(name) +2);
+   strcpy(myCwd,"/");
+   strcat(myCwd,name);
+   if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
+      dsPerror("duiDispatcher -- Error creating root dataset");
+   }
+   IDREF_T id;
+   if( soc-&gt;idObject(myCwd,"tdmDataset",id) ){
+      EML_LOG_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   myRoot = new tdmDataset(myCwd,pDSroot);
+   if( !soc-&gt;idObject(myCwd,"tdmDataset",id) ){
+      EML_LOG_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   <A HREF="#findNode_ds">findNode_ds</A>(myCwd,dui_pDScwd);
+}
+
+//----------------------------------
+<B>duiDispatcher:: ~<A NAME="duiDispatcher">duiDispatcher(</A>) {</B>
+// delete[] myRoot;
+   ASUFREE(myCwd);
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+<B>void duiDispatcher::  <U>cwd</U> (const char * <A NAME="cwd">cwd</A>) {</B>     //OVERLOAD CALL: cwd: <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>, <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>
+   if(myCwd)ASUFREE(myCwd);
+   myCwd = (char*)ASUALLOC(strlen(<U>cwd</U>) +1);        //OVERLOAD CALL: cwd: <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>, <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>
+   strcpy(myCwd,<U>cwd</U>);        //OVERLOAD CALL: cwd: <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>, <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>
+   <A HREF="#findNode_ds">findNode_ds</A>(myCwd,dui_pDScwd);
+}
+
+//----------------------------------
+<B>char * duiDispatcher::  <A NAME="cwd">cwd</A> () {</B>
+   char *c = (char*)ASUALLOC(strlen(myCwd)+1);
+   strcpy(c,myCwd);
+   return c;
+}
+
+//----------------------------------
+<B>tdmDataset* duiDispatcher::  <A NAME="cwdDO">cwdDO</A> () {</B>
+    return NULL;	/* NOT YET IMPLEMENTED */
+}
+
+//----------------------------------
+<B>tdmDataset* duiDispatcher::  <A NAME="rootDO">rootDO</A> () {</B>
+    return myRoot;
+}
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+<B>STAFCV_T duiDispatcher:: <A NAME="mkTable">mkTable</A> (const char * filePath</B>
+		, const char * spec, long rows) {
+
+   DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
+   char* pData=NULL;
+
+   if( !<A HREF="#findNode_ds">findNode_ds</A>(<A HREF="dui_utils.cc.html#dui_dirof">dui_dirof(</A><A HREF="dui_utils.cc.html#dui_pathof">dui_pathof(</A>myCwd,filePath)), pDSbase)
+   ||  !dsAddTable(pDSbase,<A HREF="dui_utils.cc.html#dui_notdirof">dui_notdirof(</A>filePath),(char*)spec,rows
+		,&pData)
+   ){
+      EML_ERROR(CANT_CREATE_OBJECT);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="cd">cd</A> (const char * dirPath) {</B>
+
+   DS_DATASET_T *pDS=NULL;
+   bool_t result;
+
+   if( !<A HREF="#findNode_ds">findNode_ds</A>(dirPath,pDS)
+   ||  !dsIsDataset(&result,pDS)
+   ||  !result
+   ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+
+   char* newPath = (char*)<A HREF="dui_utils.cc.html#dui_pathof">dui_pathof(</A>myCwd,dirPath);
+   char* p=NULL;
+   if( NULL == strstr(newPath,p=myRoot-&gt;name()) ){
+      EML_ERROR(INVALID_DATASET);
+   }
+   ASUFREE(p);
+   <U>cwd</U>(newPath);        //OVERLOAD CALL: cwd: <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>, <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>
+   ASUFREE(newPath);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="cp">cp</A> (const char * fromPath</B>
+		, const char * toPath) {
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="findDatasetPath">findDatasetPath</A> (const char * dirPath</B>
+		, tdmDataset*& dataset) {
+
+   DS_DATASET_T* pDS=NULL;
+
+   if( !<A HREF="#findDataset">findDataset</A>(dirPath,dataset) ){
+      if( !<A HREF="#findNode_ds">findNode_ds</A>(dirPath,pDS)
+      ||  !createDataset(dirPath,pDS,dataset)
+      ){
+	 dataset = NULL;
+	 EML_ERROR(OBJECT_NOT_FOUND);
+      }
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="findTablePath">findTablePath</A> (const char * filePath</B>
+		, tdmTable*& table) {
+
+   DS_DATASET_T* pDS=NULL;
+
+   if( !<A HREF="#findTable">findTable</A>(filePath,table) ){
+      if( !<A HREF="#findNode_ds">findNode_ds</A>(filePath,pDS)
+      ||  !createTable(filePath,pDS,table)
+      ){
+	 table = NULL;
+	 EML_ERROR(OBJECT_NOT_FOUND);
+      }
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="ls">ls</A> (const char * path, char *& result) {</B>
+
+   DS_DATASET_T *pDS;
+   bool_t isTable, isDataset;
+   char* errormessage = "*** No such <A HREF="dui_macros.h.html#DUI">DUI</A> table or directory ***";
+
+   if( !<A HREF="#findNode_ds">findNode_ds</A>(path,pDS) ){
+      result = (char*)ASUALLOC(strlen(errormessage) +1);
+      strcpy(result,errormessage);
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   if( !dsIsTable(&isTable, pDS)
+   ||  !dsIsDataset(&isDataset, pDS)
+   ||  !(isTable || isDataset)
+   ){
+      dsPerror("invalid DSL type");
+   }
+   if( isTable ) <A HREF="dui_dslUnix.cc.html#dui_ls_l_Table">dui_ls_l_Table(</A>pDS,result);
+   if( isDataset ) <A HREF="dui_dslUnix.cc.html#dui_ls_l_Dataset">dui_ls_l_Dataset(</A>pDS,result);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="mkdir">mkdir</A> (const char * dirPath) {</B>
+
+   DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
+   bool_t isDataset;
+
+   char* c=<A HREF="#cvtRelAbs">cvtRelAbs</A>(dirPath);
+   char* bName=<A HREF="dui_utils.cc.html#dui_dirof">dui_dirof(</A>c);
+   char* nName=<A HREF="dui_utils.cc.html#dui_notdirof">dui_notdirof(</A>c);
+   ASUFREE(c);
+
+   if( !<A HREF="#findNode_ds">findNode_ds</A>(bName, pDSbase)
+   ||  !dsAddDataset(pDSbase,nName,DSET_DIM,NULL)
+   ||  !dsFindEntry(&pDSnew, pDSbase, nName)
+   ||  !dsIsDataset(&isDataset,pDSnew)
+   ||  !isDataset
+   ){
+      ASUFREE(bName); ASUFREE(nName);
+      EML_ERROR(DSL_ERROR);
+   }
+   ASUFREE(bName); ASUFREE(nName);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="mv">mv</A> (const char * fromPath</B>
+		, const char * toPath) {
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="pwd">pwd</A> (char *& result) {</B>
+   result = (char*)ASUALLOC(strlen(myCwd) +1);
+   strcpy(result,myCwd);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="rm">rm</A> (const char * filePath) {</B>
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="rmdir">rmdir</A> (const char * dirPath) {</B>
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>char * duiDispatcher:: <A NAME="cvtRelAbs">cvtRelAbs</A> (const char * relPath) {</B>
+   char *absPath=NULL;
+   if( relPath == NULL ){
+      return absPath;	// bad relPath
+   }
+   char *c=<U>cwd</U>();        //OVERLOAD CALL: cwd: <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>, <A HREF="duiClasses.cc.html#cwd">duiClasses.cc(?)</A>
+   absPath = (char*)<A HREF="dui_utils.cc.html#dui_pathof">dui_pathof(</A>c,relPath);
+   if(c)ASUFREE(c);
+   return absPath;
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="findDataset">findDataset</A> (const char * dirPath</B>
+		, tdmDataset*& dataset) {
+
+   DS_DATASET_T* pDS=NULL;
+
+   if( !tdmFactory::<A HREF="#findDataset">findDataset</A>(dirPath,dataset) ){
+      if( !<A HREF="#findNode_ds">findNode_ds</A>(dirPath,pDS)
+      ||  !createDataset(dirPath,pDS,dataset)
+      ){
+	 dataset = NULL;
+	 EML_ERROR(OBJECT_NOT_FOUND);
+      }
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T duiDispatcher:: <A NAME="findTable">findTable</A> (const char * filePath</B>
+		, tdmTable*& table) {
+
+   DS_DATASET_T* pDS=NULL;
+   char *fullPath=NULL;
+
+   if( !(fullPath = <A HREF="#cvtRelAbs">cvtRelAbs</A>(filePath)) ){
+	 EML_ERROR(INVALID_AHS_SPEC);
+   }
+
+   if( !tdmFactory::<A HREF="#findTable">findTable</A>(fullPath,table) ){
+      if( !<A HREF="#findNode_ds">findNode_ds</A>(fullPath,pDS)
+      ||  !createTable(fullPath,pDS,table)
+      ){
+	 table = NULL;
+	 ASUFREE(fullPath);
+	 EML_ERROR(OBJECT_NOT_FOUND);
+      }
+   }
+   ASUFREE(fullPath);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+<B>STAFCV_T duiDispatcher:: <A NAME="findNode_ds">findNode_ds</A> (const char * path</B>
+		, DS_DATASET_T*& pNode) {
+   char* fullPath;
+   if( !(fullPath = <A HREF="#cvtRelAbs">cvtRelAbs</A>(path))
+   ||  !<A HREF="dui_utils.cc.html#duiFindDS">duiFindDS(</A>pNode,pDSroot,fullPath)
+   ){
+      ASUFREE(fullPath);
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   ASUFREE(fullPath);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+// ---------------------------------------------------------------------
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
