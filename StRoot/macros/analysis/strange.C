@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.9 2000/01/19 21:00:33 kathy Exp $
+// $Id: strange.C,v 1.10 2000/03/20 17:32:55 kathy Exp $
 // $Log: strange.C,v $
+// Revision 1.10  2000/03/20 17:32:55  kathy
+// setbranches in all macros so that they will work with softlinks - for StIOMaker
+//
 // Revision 1.9  2000/01/19 21:00:33  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -52,7 +55,7 @@ StChain *chain=0;
 
 TBrowser *b=0;
 
-const char *dstFile ="/afs/rhic/star/data/smaple/gstar.dst.root";
+const char *dstFile ="/afs/rhic/star/data/samples/gstar.dst.root";
 const char *xdfFile ="/afs/rhic/star/data/samples/gstar.dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
@@ -114,6 +117,9 @@ void strange(Int_t nevents,const Char_t **fileList,const char *qaflag)
   for (int ifil=0; fileList[ifil]; ifil++)
   { setFiles->AddFile(fileList[ifil]);}
   StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+   IOMk->SetIOMode("r");
+   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 //  IOMk->SetDebug();
 
 // Maker to read events from file or database into StEvent
