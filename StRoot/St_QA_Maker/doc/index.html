@@ -126,13 +126,9 @@
     MakeHistPrim();   - table dst_dedx
     MakeHistDE();     - table primtrk
     MakeHistGen();    - table particle
-    MakeHistV0();     - table dst_v0_vertex
     MakeHistPID();    - table primtrk & dst_dedx
     MakeHistVertex(); - table dst_vertex
-    MakeHistXi();     - table dst_xi_vertex
     MakeHistPoint();  - table point
-    MakeHistKink();   - table kinkVertex
-    MakeHistV0Eval(); - table ev0_eval
     MakeHistRich();   - table g2t_rch_hit
     MakeHistEval();   - uses table dst_vertex & g2t_vertex 
                       (g2t_vertex not on dst & only exists for simulated data)
@@ -159,15 +155,12 @@
     MakeHistGlob();   
     MakeHistPrim();   
     MakeHistDE();     
-    MakeHistGen();    
-    MakeHistV0();     
     MakeHistPID();    
     MakeHistVertex(); 
-    MakeHistXi();     
     MakeHistPoint();  
-    MakeHistKink();   
-    MakeHistV0Eval(); 
     MakeHistRich();   
+    <br>
+    Note - MakeHistGen and MakeHistEval require StMcEvent, which is not loaded by this maker.
   </pre>
    </h4>
 
@@ -196,13 +189,9 @@
     BookHistPrim();   
     BookHistDE();     
     BookHistGen();    
-    BookHistV0();     
     BookHistPID();    
     BookHistVertex(); 
-    BookHistXi();     
     BookHistPoint();  
-    BookHistKink();   
-    BookHistV0Eval(); 
     BookHistRich();   
     BookHistEval();     
   </pre>
@@ -249,6 +238,16 @@
                    SetDefaultPrintList,ExaminePrintList,DrawHists methods
                   from StHistUtil
 
+    <li>  <font  size ="+1" color="red">bfcread_event_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .event.root file produced from bfc.C <br>
+          &nbsp   - creates chain and runs StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory from given print list <br>                 
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                   SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
     <li>  <font  size ="+1" color="red">bfcread_dst_QA_outhistfile.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
           &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
@@ -263,6 +262,15 @@
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
           &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
                     and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_event_QA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .event.root file produced from bfc.C <br>
+          &nbsp   - creates chain and runs StEventQAMaker for nevents to book & fill QA 
                     StEvent histograms<br>
           &nbsp   - writes histograms to output *.hist.root with given top level and Maker
                      subdirectory   <br>                  
