@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.24 2000/06/24 19:26:31 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.25 2000/06/26 18:25:20 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.25  2000/06/26 18:25:20  ward
+// mulitple veto zones for ExcludeTheseTimeBins
+//
 // Revision 1.24  2000/06/24 19:26:31  ward
 // changed the name of the function to ExcludeTheseTimeBins
 //
@@ -137,7 +140,7 @@ class St_tpcdaq_Maker : public StMaker {
    TH1F *m_pad_numSeq;         // Happy sailing.
    TH1F *m_pix_AdcValue;       //
  public: 
-   void ExcludeTheseTimeBins(int lo,int hi);
+   void ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3);
    St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile="undefined"); // If
        // the 2nd arg (daqInputFile) is NULL, then we use TRS.
    
@@ -186,7 +189,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.24 2000/06/24 19:26:31 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.25 2000/06/26 18:25:20 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
