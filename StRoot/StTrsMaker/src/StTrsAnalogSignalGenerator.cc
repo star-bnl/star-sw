@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.9 2000/02/10 01:21:49 calderon Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.10 2000/06/23 00:12:40 snelling Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.10  2000/06/23 00:12:40  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.9  2000/02/10 01:21:49  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -70,11 +73,7 @@ RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el),
-#ifndef TPC_DATABASE_PARAMETERS      
-      transformer(mGeomDb, mSCDb, mElectronicsDb),
-#else
       transformer(gStTpcDb),
-#endif
       mDeltaPad(6),
       mDeltaRow(1),
       mSector(sec),

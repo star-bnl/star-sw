@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.17 2000/06/22 17:52:44 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.18 2000/06/23 00:12:40 snelling Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.18  2000/06/23 00:12:40  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.17  2000/06/22 17:52:44  long
  * get zoffset by calling tBFromZ
  *
@@ -102,11 +105,7 @@
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
-#ifndef TPC_DATABASE_PARAMETERS
-#include "StTpcLocalSectorCoordinate.hh"
-#else
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-#endif
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::sort;
 #endif

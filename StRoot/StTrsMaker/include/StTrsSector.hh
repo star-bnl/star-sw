@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.4 2000/01/10 23:11:32 lasiuk Exp $
+ * $Id: StTrsSector.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
+ * Revision 1.5  2000/06/23 00:12:24  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.4  2000/01/10 23:11:32  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -52,7 +55,7 @@ using std::vector;
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"
 
-#include "StTpcPadCoordinate.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StTrsAnalogSignal>  tpcTimeBins;
