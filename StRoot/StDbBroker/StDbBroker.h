@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.11 2000/02/28 15:24:20 porter Exp $
+ * $Id: StDbBroker.h,v 1.12 2000/03/26 16:47:13 fine Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.12  2000/03/26 16:47:13  fine
+ * Adjusted to ROOT 2.24
+ *
  * Revision 1.11  2000/02/28 15:24:20  porter
  * add more StDbLib methods to broker: this time, StDbManager::closeAllConnections()
  *
@@ -61,7 +64,7 @@ class StDbManager;
 class StTableDescriptorI;
 
 /* needed for GetComments only   */
-class St_Table;
+class TTable;
 /*this is a temporary quick-and-dirty class for db access*/
 
 
@@ -86,8 +89,8 @@ typedef tableDescriptor_st Descriptor;
 
   protected:
     Descriptor  *m_descriptor;
-    Char_t *     m_structName;  //name of the struct type used in this St_Table
-    Char_t *     m_tableName;   //name of this instance of St_Table
+    Char_t *     m_structName;  //name of the struct type used in this TTable
+    Char_t *     m_tableName;   //name of this instance of TTable
     UInt_t       m_sizeOfStruct;// byte size of this struct
     UInt_t       m_nElements;   // Number of variables in the structure
     UInt_t       m_nRows;       // number of rows in the table
@@ -119,7 +122,7 @@ typedef tableDescriptor_st Descriptor;
     void * Use();
     void * Use(int tabID, int parID);
 
-    char  **GetComments(St_Table *parentTable);
+    char  **GetComments(TTable *parentTable);
     void   Fill(void * pArray, const char **ElementComment);
 
     UInt_t GetNRows()                {return m_nRows;       }
