@@ -36,10 +36,6 @@ StiHitContainer::StiHitContainer(const string & name,
 StiHitContainer::~StiHitContainer()
 {
   cout <<"StiHitContainer::~StiHitContainer()"<<endl;
-  //delete _minPoint;
-  //_minPoint=0;
-  //delete _maxPoint;
-  //_maxPoint=0;
 }
 
 /*! Null implementation.  We provide this virtual function for the situation
@@ -69,7 +65,8 @@ void StiHitContainer::add(StiHit* hit)
   if (!det) 
     throw runtime_error("StiHitContainer::add() -E- Given hit has no associated detector");
   _key.refangle = det->getPlacement()->getNormalRefAngle();
-  _key.position = det->getPlacement()->getNormalRadius();
+  //_key.position = det->getPlacement()->getNormalRadius();
+  _key.position = det->getPlacement()->getLayerRadius();
   _map[_key].theHitVec.push_back(hit);
   return;
 }
@@ -97,11 +94,11 @@ void StiHitContainer::clear()
 {
   cout<<"StiHitContainer::clear() -I- Started"<<endl;
     HitMapToVectorAndEndType::iterator it;
-    for (it=_map.begin(); it!=_map.end(); it++) {
-	(*it).second.theHitVec.clear();
-	(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
-    }
-    //mvertexvec.clear();
+    for (it=_map.begin(); it!=_map.end(); it++) 
+			{
+				(*it).second.theHitVec.clear();
+				(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
+			}
     cout<<"StiHitContainer::clear() -I- Done"<<endl;
 }
 
@@ -123,21 +120,16 @@ unsigned int StiHitContainer::size() const
 vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
     _key.refangle = layer->getPlacement()->getNormalRefAngle();
-    _key.position = layer->getPlacement()->getNormalRadius();
+    //_key.position = layer->getPlacement()->getNormalRadius();
+    _key.position = layer->getPlacement()->getLayerRadius();
     return _map[_key].theHitVec.begin();
 }
 
 vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
     _key.refangle = layer->getPlacement()->getNormalRefAngle();
-    _key.position = layer->getPlacement()->getNormalRadius();
-    //if (_map[_key].theHitVec.end() != _map[_key].theEffectiveEnd) {
-    //cout <<"StiHitContainer::hitsEnd(const StiDetector*). ERROR:\t"
-    //     <<"theEffectiveEnd != theHitVec.end()"<<endl
-    //     <<"_key:\t"<<_key.refangle<<" "<<_key.position<<endl;
-    //}
-    //return _map[_key].theHitVec.end();
-
+    //_key.position = layer->getPlacement()->getNormalRadius();
+    _key.position = layer->getPlacement()->getLayerRadius();
     return _map[_key].theEffectiveEnd;
 }
 
@@ -172,8 +164,11 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
   _selectedHits.clear();
   _key.refangle = ref.refangle();
   _key.position = ref.position();
-  _minPoint.set(ref.position(),ref.refangle(),ref.y(),ref.z()-dZ );
-  _maxPoint.set(ref.position(),ref.refangle(),ref.y(),ref.z()+dZ );
+	//cout << "StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bool fetchAll) -I- " << endl;
+	//cout << "   dY:"<<dY<<endl
+	//<< "   dZ:"<<dZ<<endl;
+  _minPoint.set(ref.position(),ref.refangle(),ref.y()-dY,ref.z()-dZ );
+  _maxPoint.set(ref.position(),ref.refangle(),ref.y()+dY,ref.z()+dZ );
   vector<StiHit*>& tempvec = _map[_key].theHitVec;
   vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
   //Search first by distance along z
