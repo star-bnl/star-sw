@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.9 1998/04/26 02:49:36 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.10 1998/05/03 18:27:43 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.10  1998/05/03 18:27:43  fisyak
+#  Set fixed path to geant3
+#
 #  Revision 1.9  1998/04/26 02:49:36  fisyak
 #  Fix fortran dependencies
 #
@@ -50,14 +53,14 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/04/26 02:49:36 $ 
+#             Last modification $Date: 1998/05/03 18:27:43 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
 ALL_TAGS    = $@
 STEM        = $*
 STEMF       = $(*D)/$(*F)
-STIC        = stic
+STIC       := $(STAR_BIN)/stic
 KUIPC      := kuipc
 KUIPC_FLAGS+=
 EMPTY      :=
@@ -71,8 +74,9 @@ FIVE       :=5
 CC         := gcc
 CXX        := gcc
 ARFLAGS    := rvu
-PWD       = /bin/pwd
-CWD      := $(shell $(PWD))
+PWD        := /bin/pwd
+CWD        := $(shell $(PWD))
+GEANT3     := $(STAR_BIN)/geant3
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),rs_aix31 rs_aix32 rs_aix41))
 CXX        := xlC
 FFLAGS     +=-O -qextname -qcharlen=6000 -WF,-D
@@ -96,7 +100,7 @@ ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp700_ux90))
 CXX        :=      CC
 CXXFLAGS   += -w -O +a1 -Dextname
 CFLAGS     +=  +z  -Aa -D_HPUX_SOURCE -Dextname
-FFLAGS     += +ppu +z +O2
+FFLAGS     += +ppu +z +O2 -K
 LDFLAGS    += -b +a1 -z
 LD_LIBS    := /opt/fortran/lib/libU77.a
 CC_LIBS    := -L/opt/CC/lib -lC.ansi -lcxx -lcl -lc
@@ -112,7 +116,7 @@ CC         := cc
 CFLAGS     +=  +z -Aa -D_HPUX_SOURCE -Dextname          # Brian
 FC         := /opt/fortran/bin/fort77
 #FFLAGS     += +DAportable +U77 +ppu +B +Z                    # from DSPACK
-FFLAGS     += +U77 +ppu +B +Z                    # Brian
+FFLAGS     += +U77 +ppu +B +Z -K                   # Brian
 F_EXTENDED := +es
 LDFLAGS    += -b                                     # from DSPACK 
 LD         := ld                                     # from DSPACK

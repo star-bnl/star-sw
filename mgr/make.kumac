@@ -76,7 +76,7 @@ macro ld_standard
   if [sl]=1 then
      message  '================ Load standard shared library:' [slib] '================'
      for/call  csrmsl($quote([p]))
-     gexec [slib]| for/call [p]_init;
+     gexec [slib]
   endif
 return
 **************************************************
@@ -91,7 +91,7 @@ macro ld_private
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'
     call  csrmsl($quote([p]))
-    gexec [slib]| for/call [p]_init;
+    gexec [slib]
   endif
 return
 endkumac
