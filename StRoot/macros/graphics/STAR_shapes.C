@@ -1,8 +1,3 @@
-// $Id: STAR_shapes.C,v 1.4 1999/05/21 15:33:53 kathy Exp $
-// $Log: STAR_shapes.C,v $
-// Revision 1.4  1999/05/21 15:33:53  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
-//
 {
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
 // Based on Begin_html <a href = "http://root.cern.ch/root/html/examples/shapes.C.html">shapes.C</a>
@@ -11,13 +6,16 @@
 // To see the output of this macro, click begin_html <a href="gif/shapes.gif" >here</a> end_html
 //=======================================================================
 // owner:  Valery Fine
-// what it does: 
+// what it does: Use TVolume class to show "geant" based shapes
 //=======================================================================
    //
    gROOT->Reset();
-   gSystem->Load("St_base");
+   Bool_t NT=kFALSE;
+   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE;
+   if (NT) gSystem->Load("ROOT_STAR");
+   else  gSystem->Load("libSTAR");
    c1 = new TCanvas("c1","Geometry Shapes",200,10,700,500);
- 
+
    //  Define some volumes
    brik = new TBRIK("BRIK","BRIK","void",200,150,150);
    trd1 = new TTRD1("TRD1","TRD1","void",200,50,100,100);
@@ -64,42 +62,33 @@
  
  
    //  Build the geometry hierarchy
-   node1 = new St_Node("NODE1","NODE1","BRIK");
+   node1 = new TVolume("NODE1","NODE1","BRIK");
  
-   node1->Add(new St_Node("NODE2","NODE2","TRD1"),0,0,-1000);
-   node1->Add(new St_Node("NODE3","NODE3","TRD2"),0,0,1000);
-   node1->Add(new St_Node("NODE4","NODE4","TRAP"),0,-1000,0);
-   node1->Add(new St_Node("NODE5","NODE5","PARA"),0,1000,0);
-   node1->Add(new St_Node("NODE6","NODE6","TUBE"),-1000,0,0);
-   node1->Add(new St_Node("NODE7","NODE7","TUBS"),1000,0,0);
-   node1->Add(new St_Node("NODE8","NODE8","CONE"),-300,-300,0);
-   node1->Add(new St_Node("NODE9","NODE9","CONS"),300,300,0);
-   node1->Add(new St_Node("NODE10","NODE10","PCON"),0,-1000,-1000);
-   node1->Add(new St_Node("NODE11","NODE11","PGON"),0,1000,1000);
-   node1->Add(new St_Node("NODE12","NODE12","GTRA"),0,-400,700);
-   node1->Add(new St_Node("NODE13","NODE13","SPHE"),10,-400,500);
-   node1->Add(new St_Node("NODE14","NODE14","SPHE1"),10, 250,300);
-   node1->Add(new St_Node("NODE15","NODE15","SPHE2"),10,-100,-200);
+   node1->Add(new TVolume("NODE2","NODE2","TRD1"),0,0,-1000);
+   node1->Add(new TVolume("NODE3","NODE3","TRD2"),0,0,1000);
+   node1->Add(new TVolume("NODE4","NODE4","TRAP"),0,-1000,0);
+   node1->Add(new TVolume("NODE5","NODE5","PARA"),0,1000,0);
+   node1->Add(new TVolume("NODE6","NODE6","TUBE"),-1000,0,0);
+   node1->Add(new TVolume("NODE7","NODE7","TUBS"),1000,0,0);
+   node1->Add(new TVolume("NODE8","NODE8","CONE"),-300,-300,0);
+   node1->Add(new TVolume("NODE9","NODE9","CONS"),300,300,0);
+   node1->Add(new TVolume("NODE10","NODE10","PCON"),0,-1000,-1000);
+   node1->Add(new TVolume("NODE11","NODE11","PGON"),0,1000,1000);
+   node1->Add(new TVolume("NODE12","NODE12","GTRA"),0,-400,700);
+   node1->Add(new TVolume("NODE13","NODE13","SPHE"),10,-400,500);
+   node1->Add(new TVolume("NODE14","NODE14","SPHE1"),10, 250,300);
+   node1->Add(new TVolume("NODE15","NODE15","SPHE2"),10,-100,-200);
 
    // Create "view" object of the "node1" to browse 
-   St_NodeView view(*node1);   
- //  TBrowser bb("BB",&view);
+   TVolumeView view(*node1);   
 
    view.Draw();
-//   node1->Draw();
-   // Create ROOT node to draw
-//   TNode *rootNode = node1->CreateTNode();
-//   rootNode->cd();
-//   rootNode->Draw();  
-   // Draw this geometry in the current canvas
-//   node1->cd();
-//   node1->Draw();
-//   c1->Update();
+
    //
    //  Draw the geometry using the x3d viewver.
    //  Note that this viewver may also be invoked from the "View" menu in
    //  the canvas tool bar
-//   c1->x3d();
+    c1->x3d();
    //
    // once in x3d viewer, type m to see the menu.
    // For example typing r will show a solid model of this geometry.
