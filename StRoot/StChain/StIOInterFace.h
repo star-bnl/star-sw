@@ -11,7 +11,7 @@
 #include "StMaker.h"
 #endif
 #include "StTree.h"
-
+class StUKey;
 
 class StIOInterFace : public StMaker {
 private:
@@ -20,7 +20,7 @@ public:
    StIOInterFace(const char *name="",const char *iomode="r");
    virtual        ~StIOInterFace(){};
    virtual  Int_t MakeRead() {return Make();};
-   virtual  Int_t MakeRead(UInt_t *RunEvent) {assert(!*RunEvent);return MakeRead();};
+   virtual  Int_t MakeRead(const StUKey &RunEvent) {return MakeRead();};
    virtual  Int_t Make() {assert(0);return 1999;};
    virtual  Int_t Skip(int nskip);
    virtual  Int_t MakeWrite(){assert(0);return 1999;};
