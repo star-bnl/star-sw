@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.7 2004/07/06 23:05:26 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.8 2004/10/20 16:06:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.8  2004/10/20 16:06:53  ullrich
+ * Add variables to report on space charge and the correction mode.
+ *
  * Revision 2.7  2004/07/06 23:05:26  ullrich
  * Added SVT drift velocity scaler.
  *
@@ -77,6 +80,9 @@ public:
     double   bbcBlueBackgroundRate() const;
     double   bbcYellowBackgroundRate() const;
 
+    int      spaceChargeCorrectionMode() const;
+    float    spaceCharge() const;
+
     void     setRunId(int);
     void     setProductionTime(time_t);                 
     void     setProductionVersion(const char*);   
@@ -101,6 +107,10 @@ public:
     void     setBbcWestRate(double);	
     void     setBbcBlueBackgroundRate(double);
     void     setBbcYellowBackgroundRate(double);
+
+    void     setSpaceChargeCorrectionMode(int);
+    void     setSpaceCharge(float);
+
     
 protected:
     Int_t	mRunId;
@@ -131,7 +141,10 @@ protected:
     Double_t    mBbcWestRate;
     Double_t    mBbcBlueBackgroundRate;
     Double_t    mBbcYellowBackgroundRate;
+
+    Int_t       mSpaceChargeCorrectionMode;
+    Float_t     mSpaceCharge;
     
-    ClassDef(StRunInfo,6)
+    ClassDef(StRunInfo,7)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.6 2004/07/06 23:05:21 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.7 2004/10/20 16:06:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.7  2004/10/20 16:06:53  ullrich
+ * Add variables to report on space charge and the correction mode.
+ *
  * Revision 2.6  2004/07/06 23:05:21  ullrich
  * Added SVT drift velocity scaler.
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.6 2004/07/06 23:05:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.7 2004/10/20 16:06:53 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -63,6 +66,9 @@ StRunInfo::StRunInfo()
     mBbcWestRate = 0;		 
     mBbcBlueBackgroundRate = 0;	 
     mBbcYellowBackgroundRate = 0;
+
+    mSpaceChargeCorrectionMode = 0;
+    mSpaceCharge = 0;
 }
 
 StRunInfo::~StRunInfo() {/* noop */}
@@ -155,6 +161,14 @@ double
 StRunInfo::bbcYellowBackgroundRate() const
 {return mBbcYellowBackgroundRate;}
 
+int
+StRunInfo::spaceChargeCorrectionMode() const
+{return mSpaceChargeCorrectionMode;}
+
+float
+StRunInfo::spaceCharge() const
+{return mSpaceCharge;}
+
 void
 StRunInfo::setRunId(int val) {mRunId = val;}
 
@@ -241,3 +255,11 @@ StRunInfo::setBbcBlueBackgroundRate(double val)
 void
 StRunInfo::setBbcYellowBackgroundRate(double val)
 {mBbcYellowBackgroundRate = val;}
+
+void
+StRunInfo::setSpaceChargeCorrectionMode(int val)
+{mSpaceChargeCorrectionMode = val;}
+
+void
+StRunInfo::setSpaceCharge(float val)
+{mSpaceCharge = val;}
