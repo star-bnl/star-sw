@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.23 2001/01/16 20:27:53 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.24 2001/01/18 16:55:05 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.24  2001/01/18 16:55:05  ward
+// Corrections in Vladimir2Herbert from Vladimir Morozov.
+//
 // Revision 1.23  2001/01/16 20:27:53  ward
 // npre=5 npost=5 instead of 0 in St_trg_Maker::HandleMwc
 //
@@ -348,12 +351,13 @@ int St_trg_Maker::getTrayCtb ( float phi, float z ) {
 
 
 void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
-  int offset;
+  int offset, flip;
   assert(input>=1&&input<=96);
-  if(input>48) { input-=48; offset=0; } else offset=12;
+  if(input>48) { input-=48; offset=0; flip = -1;} else { offset=24; flip = 1; }
   *sector = (input-1)/4 + 1 ;
   *subsector = 4 + input - 4 * (*sector) ;
-  *sector += offset;
+  *sector = flip*(offset - *sector);
+  if (45<=input&&input<=48) { *sector=24; *subsector=input-44; }
 }
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   int prePost,sector,subsector,index,irow;
