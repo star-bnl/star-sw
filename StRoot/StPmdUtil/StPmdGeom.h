@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.4 2003/10/14 07:30:19 subhasis Exp $
+ * $Id: StPmdGeom.h,v 1.5 2003/11/27 12:31:52 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,6 +15,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.5  2003/11/27 12:31:52  subhasis
+ * ADC2EDEP added by Supriya
+ *
  * Revision 1.4  2003/10/14 07:30:19  subhasis
  * mzreal changed to 535
  *
@@ -78,7 +81,9 @@ class StPmdGeom {
   void chain23(int&,int&,int&,int&);
   void chain34(int&,int&,int&,int&);
   void chain45(int&,int&,int&,int&);
-  
+ 
+ void ADC2Edep(Int_t, Float_t&); //! To convert the ADC value to Edep
+ 
   ClassDef(StPmdGeom, 1)
 };
 //! for defining constants 
