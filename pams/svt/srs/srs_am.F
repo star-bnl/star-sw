@@ -62,6 +62,7 @@ c       flag=0 unperturbed hit                                                 c
 c       flag=1 merged hit                                                      c
 c       Merging will take place if the table entry srspar.merge = 1            c
 c       (The default is 1)                                                     c
+c       modified to accept the SSD hits    LM sept-98                          c
 c       id_globtrk initialized to zero when filling scs_spt LM sept-98         c
 c------------------------------------------------------------------------------c
       INTEGER*4 FUNCTION SRS_AM(
@@ -77,23 +78,23 @@ c------------------------------------------------------------------------------c
 c      IMPLICIT NONE
 #include "srs_am.inc"
 c------------------------------------------------------------------------------c
-c	integer j,k,ii,jj,kk
-        integer i
-        integer svt_resolution_sim,spt_direct,spt_direct_gs
-        integer ihit,iwafer,wafer,layer,id_active,active,active_area
-        integer filtered
-        integer id_shape,get_geom_row,dead
-        real gcoord(3),lcoord(3),drift_length,trans_length
-        character*132 m132(5)  ! And some message-generating space.
-        integer idI1
-        data    idI1 /0/
-        save    idI1
+c      integer j,k,ii,jj,kk
+      integer i
+      integer svt_resolution_sim,spt_direct,spt_direct_gs
+      integer ihit,iwafer,wafer,layer,id_active,active,active_area
+      integer filtered,deadssd,deadsvt
+      integer id_shape,get_geom_row,dead
+      real gcoord(3),lcoord(3),drift_length,trans_length
+      character*132 m132(5)     ! And some message-generating space.
+      integer idI1
+      data    idI1 /0/
+      save    idI1
 
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 
       WRITE(*,*) 'SRS_AM: Starting ######################################'
-      print*,' nok svt_hit = ',svt_hit_h.nok
+c      print*,' nok svt_hit = ',svt_hit_h.nok
       if (svt_hit_h.nok.eq.0) then
          spt_h.nok=0
          WRITE(*,*) 'SRS_AM: Stopping ######################################'
@@ -106,64 +107,72 @@ c------------------------------------------------------------------------------c
 c       REMOVE HITS IN NON-ACTIVE AREAS                                        c
 c------------------------------------------------------------------------------c
         filtered=0
+        deadssd=0
+        deadsvt=0
         do ihit=1,svt_hit_h.nok
-                gcoord(1)=svt_hit(ihit).x(1) ! svt global to local
-                gcoord(2)=svt_hit(ihit).x(2)
-                gcoord(3)=svt_hit(ihit).x(3)
-                iwafer = 0
-                wafer  = svt_hit(ihit).volume_id
-                iwafer = get_geom_row(geom_h,geom,wafer)
-                if (iwafer.gt.0) then
-			if (wafer.lt.7000) then ! hit on Drift Detectors
-	                        call svtgtol(gcoord,lcoord,
-     &  	                 geom(iwafer).x,
-     &          	         geom(iwafer).d,
-     &                  	 geom(iwafer).t,
-     &                   	geom(iwafer).n)
-        	                layer=geom(iwafer).layer
-	                        id_shape=config(1).layer_shape(layer)
-		                drift_length=shape(id_shape).shape(1)
-        	                trans_length=shape(id_shape).shape(2)
-	                        id_active=srspar(1).id_active(layer)
-	                        active=active_area(id_active,lcoord,
-     &  	                 drift_length,trans_length,
-     &          	         activea_h,activea)
-			else ! hit on Strip Detectors
-				active=1
-			endif
-                        if (active.eq.1) then ! keep this one
-                                filtered=filtered+1
-                                svt_hit(filtered).id=
-     &                                       svt_hit(ihit).id
-                                svt_hit(filtered).volume_id=
-     &                                       svt_hit(ihit).volume_id
-                                svt_hit(filtered).next_tr_hit_p=
-     &                                       svt_hit(ihit).next_tr_hit_p
-                                svt_hit(filtered).track_p=
-     &                                       svt_hit(ihit).track_p
-                                svt_hit(filtered).de=
-     &                                       svt_hit(ihit).de
-                                svt_hit(filtered).ds=
-     &                                       svt_hit(ihit).ds
-                                svt_hit(filtered).tof=
-     &                                       svt_hit(ihit).tof
-                                do i=1,3
-                                        svt_hit(filtered).p(i)=
-     &                                            svt_hit(ihit).p(i)
-                                        svt_hit(filtered).x(i)=
-     &                                            svt_hit(ihit).x(i)
-                                enddo
-                        endif
-                else
-                        write(m132,*) 'SVT Wafer Shape ID is not set!'
-                        call Message( m132, 1, idI1)
-*yf                     print*,'SVT Wafer Shape ID is not set!'
-*yf	                srs_am=STAFCV_BAD
-*yf                     return
-                endif
+           gcoord(1)=svt_hit(ihit).x(1) ! svt global to local
+           gcoord(2)=svt_hit(ihit).x(2)
+           gcoord(3)=svt_hit(ihit).x(3)
+           iwafer = 0
+           wafer  = svt_hit(ihit).volume_id
+           iwafer = get_geom_row(geom_h,geom,wafer)
+           if (iwafer.gt.0) then
+              call svtgtol(gcoord,lcoord,
+     &             geom(iwafer).x,
+     &             geom(iwafer).d,
+     &             geom(iwafer).t,
+     &             geom(iwafer).n)
+              layer=geom(iwafer).layer
+              id_shape=config(1).layer_shape(layer)
+              drift_length=shape(id_shape).shape(1)
+              trans_length=shape(id_shape).shape(2)
+              id_active=srspar(1).id_active(layer)
+              active=active_area(id_active,lcoord,
+     &             drift_length,trans_length,
+     &             activea_h,activea)
+              if(active.eq.0.and.wafer.gt.7000) then 
+                 deadssd=deadssd+1 ! only dead sdd hits
+              endif
+              if(active.eq.0.and.wafer.lt.7000) then 
+                 deadsvt=deadsvt+1 ! only dead svt hits
+              endif
+              if (active.eq.1) then ! keep this one
+                 filtered=filtered+1
+                 svt_hit(filtered).id=
+     &                svt_hit(ihit).id
+                 svt_hit(filtered).volume_id=
+     &                svt_hit(ihit).volume_id
+                 svt_hit(filtered).next_tr_hit_p=
+     &                svt_hit(ihit).next_tr_hit_p
+                 svt_hit(filtered).track_p=
+     &                svt_hit(ihit).track_p
+                 svt_hit(filtered).de=
+     &                svt_hit(ihit).de
+                 svt_hit(filtered).ds=
+     &                svt_hit(ihit).ds
+                 svt_hit(filtered).tof=
+     &                svt_hit(ihit).tof
+                 do i=1,3
+                    svt_hit(filtered).p(i)=
+     &                   svt_hit(ihit).p(i)
+                    svt_hit(filtered).x(i)=
+     &                   svt_hit(ihit).x(i)
+                 enddo
+              endif
+           else
+              write(m132,*) 'SVT Wafer Shape ID is not set!'
+              call Message( m132, 1, idI1)
+*yf           print*,'SVT Wafer Shape ID is not set!'
+*yf           srs_am=STAFCV_BAD
+*yf           return
+           endif
         enddo
         dead=svt_hit_h.nok-filtered
-        print*,'The number of hits on inactive areas = ',dead
+        write(6,111)'Initial number of hits               = ',svt_hit_h.nok
+        write(6,111)'Number of hits on inactive areas     = ',dead
+        write(6,111)'Number of SVT hits on inactive areas = ',deadsvt
+        write(6,111)'Number of SSD hits on inactive areas = ',deadssd
+ 111    format(A45,I6)
         svt_hit_h.nok=filtered
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
@@ -244,7 +253,9 @@ c	TEST THE HIT:      						       c
 c------------------------------------------------------------------------------c
 c       Rectangle, butterfly, and trapizoid all need to pass this test:
         active_area=1 ! set to keep
-        if (id_active.gt.0.and.id_active.le.3) then 
+        if (id_active.gt.0.and.id_active.le.4) then 
+C we remove first the guard area. This part is commoon for all shapes
+C and it is the only cut for the shape 1 and 4.
                 test=drift_length-activea(id_active).param(1)
                 if (abs(lcoord(1)).gt.test) then
                         active_area=0
@@ -2289,7 +2300,7 @@ c     Ken wilson 8-4-93
 c*****************************PROGRAM BOUNDRY**********************************c
 
       integer function spt_direct(svt_hit_h,svt_hit,spt_h
-     +,                                                       spt)
+     +     ,spt)
 c      implicit none
 c
 c     DESCRIPTION
