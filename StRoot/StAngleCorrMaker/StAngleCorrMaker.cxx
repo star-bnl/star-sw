@@ -1,5 +1,8 @@
-// $Id: StAngleCorrMaker.cxx,v 1.9 1999/12/28 19:10:02 horsley Exp $
+// $Id: StAngleCorrMaker.cxx,v 1.10 1999/12/29 01:55:45 horsley Exp $
 // $Log: StAngleCorrMaker.cxx,v $
+// Revision 1.10  1999/12/29 01:55:45  horsley
+// *** empty log message ***
+//
 // Revision 1.9  1999/12/28 19:10:02  horsley
 // *** empty log message ***
 //
@@ -43,7 +46,7 @@
 #include "StAngleCorrAnalysis.h"
 #include "StAngleCorrAnalysisManager.h"
 
-static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.9 1999/12/28 19:10:02 horsley Exp $";
+static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.10 1999/12/29 01:55:45 horsley Exp $";
 
 Int_t
 StAngleCorrMaker::Make() 
@@ -57,7 +60,12 @@ StAngleCorrMaker::Make()
 }
 
 
-StAngleCorrMaker::StAngleCorrMaker(const Char_t *name) : StMaker(name) {drawinit = kFALSE;}
+StAngleCorrMaker::StAngleCorrMaker(const Char_t *name) : StMaker(name) 
+{
+  track1     = "track1";
+  track2     = "track2";
+  drawinit = kFALSE;
+}
 
 StAngleCorrMaker::~StAngleCorrMaker() {}
 
@@ -70,8 +78,6 @@ StAngleCorrMaker::Init()
 void
 StAngleCorrMaker::AddAnalysis(TString analysisName)
 {
-  track1 = "track1";
-  track2 = "track2";
   corrAnalysis.AddAnalysis(analysisName);
 }
 

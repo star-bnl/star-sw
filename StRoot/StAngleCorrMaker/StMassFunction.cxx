@@ -14,7 +14,7 @@ StMassFunction::Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist)
   Double_t piMass = 0.139569;
   e1 = sqrt(px1*px1 + py1*py1 + pz1*pz1 + piMass*piMass);
   e2 = sqrt(px2*px2 + py2*py2 + pz2*pz2 + piMass*piMass);
-  correlation = sqrt(e1*e2 - px1*px2 - py1*py2 - pz1*pz2);
+  correlation = sqrt((e1+e2)*(e1+e2) - ((px1+px2)*(px1+px2)  + (py1+py2)*(py1+py2) + (pz1+pz2)*(pz1+pz2)));
   hist->Fill(correlation,weight);
 }
 
