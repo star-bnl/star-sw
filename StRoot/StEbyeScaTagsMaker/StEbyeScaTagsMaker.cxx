@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.18 2000/05/24 13:36:30 fisyak Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.19 2000/06/05 13:42:50 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.19  2000/06/05 13:42:50  jgreid
+ * change to exit(0) on primary vertex failure
+ *
  * Revision 1.18  2000/05/24 13:36:30  fisyak
  * Add cast to make  Solaris happy
  *
@@ -197,11 +200,14 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   // uncomment the next line (and 'outFile' << line below) to APPEND output to a file
   //  !! If this file already exists it will just add the new data to the end !!
-  // ofstream outFile("EbyeSca.out",ios::app);
+  ofstream outFile("EbyeSca.out",ios::app);
 
   // Number of primary vertices
   Int_t npvtx = event.numberOfPrimaryVertices();
-  if (npvtx == 0) return kStErr;
+
+  // If there is no found vertex exit with no error
+  //   so that the DST can be written
+  if (npvtx == 0) exit(0);
   
   // loop over these and choose the one with the most daughters,
   //  or default to primaryVertex(0) if there is only one
@@ -353,10 +359,14 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
-    //     for charge > 0 ...
-    //outFile << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
-    //     for charge < 0 ... 
-    //outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
+    //    for charge > 0 ...
+    outFile << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV);
+    //    for charge < 0 ...
+    outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV);
+    //    for charge > 0 ...
+    outFile << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus;
+    //    for charge < 0 ...
+    outFile << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
   }
 
   return kStOk;
