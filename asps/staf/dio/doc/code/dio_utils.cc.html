@@ -1,0 +1,235 @@
+<HTML>
+<PRE>
+<H2>file: dio/src/dio_utils.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         dio_utils.C
+*:DESCRIPTION:  Utility functions for <A HREF="dio_macros.h.html#DIO">DIO</A>.
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      13dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+
+/*-------------------------------------------- INCLUDES             --*/
+#include "dstype.h"
+#include "asuLib.h"
+#include "<A HREF="dio_types.h.html">dio_types.h</A>"
+
+/*-------------------------------------------- MACROS               --*/
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      int <A HREF="#dio_addHierarchy">dio_addHierarchy(</A>pDS,pAdd)
+*:DESCRIPTION:  Add an entire DSL hierarchy to a dataset.
+*:ARGUMENTS:    ----------
+*:RETURN VALUE: TRUE or FALSE
+*:&lt;---------------------------------------------------------------------
+*/
+<B>int <A NAME="dio_addHierarchy">dio_addHierarchy(</A>DS_DATASET_T *pDS,DS_DATASET_T *pAdd)</B>
+{
+   DS_DATASET_T *pEntry=NULL, *pAdded=NULL;
+   bool_t isDataset, isTable;
+   char *name,*spec;
+   size_t count,maxcount;
+   char *pData;
+
+/*printf("Add (%s) to (%s) \n", pAdd-&gt;name, pDS-&gt;name);*/
+   if( !dsIsDataset(&isDataset,pAdd)
+   ||  !dsIsTable(&isTable,pAdd)
+   ||  !(isDataset || isTable)
+   ){
+      dsPerror("bad DS_DATASET_T pointer");
+      return FALSE;
+   }
+   if( isDataset ){
+      if( !dsDatasetName(&name,pAdd)
+      ||  !dsDatasetEntryCount(&count,pAdd)
+      ||  !dsDatasetMaxEntryCount(&maxcount,pAdd)
+      ||  !dsAddDataset(pDS,name,maxcount,pAdded)
+      ||  !dsFindEntry(&pAdded,pDS,name)
+      ){
+	 dsPerror("can't add dataset");
+	 return FALSE;
+      }
+      for( int i=0;i&lt;count;i++ ){
+	 pEntry = NULL;
+	 if( !dsDatasetEntry(&pEntry,pAdd,(size_t)i)
+	 ||  !<A HREF="#dio_addHierarchy">dio_addHierarchy(</A>pAdded,pEntry)
+	 ){
+	    dsPerror("can't add entry");
+	 }
+      }
+   } else if( isTable ){
+	 if( !dsTableName(&name,pAdd)
+	 ||  !dsTableTypeSpecifier(&spec,pAdd)
+	 ||  !dsTableRowCount(&count,pAdd)
+	 ||  !dsTableMaxRowCount(&maxcount,pAdd)
+	 ||  !dsTableDataAddress(&pData,pAdd)
+	 ||  !(0&lt;count && count&lt;=maxcount)
+	 ||  !dsAddTable(pDS,name,spec,maxcount,&pData)
+	 ||  !dsFindEntry(&pAdded,pDS,name)
+	 ||  !dsSetTableRowCount(pAdded,count)
+	 ){
+	    dsPerror("can't add table");
+	    return FALSE;
+	 }
+   }
+   return TRUE;
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      char* <A HREF="#dio_mode2text">dio_mode2text(</A><A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A>)
+*:DESCRIPTION:  Return a text string version of <A HREF="dioClasses.cc.html#mode">mode</A>.
+*:ARGUMENTS:    ----------
+*:RETURN VALUE: text
+*:&lt;---------------------------------------------------------------------
+*/
+<B>char* <A NAME="dio_mode2text">dio_mode2text(</A><A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A>)</B>
+{
+	switch(<A HREF="dioClasses.cc.html#mode">mode</A>) {
+	case DIO_READ_MODE:
+	   return "READONLY";
+	case DIO_WRITE_MODE:
+	   return "WRITEONLY";
+	case DIO_UPDATE_MODE:
+	   return "READWRITE";
+	case DIO_UNKNOWN_MODE:
+	default:
+	   return "***UNKNOWN***";
+	}
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="#dio_text2mode">dio_text2mode(</A>char* text)
+*:DESCRIPTION:  ----------
+*:ARGUMENTS:    ----------
+*:RETURN VALUE: ----------
+*:&lt;---------------------------------------------------------------------
+*/
+<B><A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A NAME="dio_text2mode">dio_text2mode(</A>char* text)</B>
+{
+	switch(text[0]) {
+	case 'r': case 'R':
+	   return DIO_READ_MODE;
+	case 'w': case 'W':
+	   return DIO_WRITE_MODE;
+	case 'u': case 'U':
+	   return DIO_UPDATE_MODE;
+	default:
+	   return DIO_UNKNOWN_MODE;
+	}
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      char* <A HREF="#dio_state2text">dio_state2text(</A><A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> <A HREF="dioClasses.cc.html#state">state</A>)
+*:DESCRIPTION:  ----------
+*:ARGUMENTS:    ----------
+*:RETURN VALUE: text
+*:&lt;---------------------------------------------------------------------
+*/
+<B>char* <A NAME="dio_state2text">dio_state2text(</A><A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> <A HREF="dioClasses.cc.html#state">state</A>)</B>
+{
+	switch(<A HREF="dioClasses.cc.html#state">state</A>) {
+	case DIO_OPEN_STATE:
+	   return "OPENED";
+	case DIO_CLOSE_STATE:
+	   return "CLOSED";
+	case DIO_READ_STATE:
+	   return "READING";
+	case DIO_WRITE_STATE:
+	   return "WRITING";
+	case DIO_UNKNOWN_STATE:
+	default:
+	   return "***UNKNOWN***";
+	}
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      <A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> <A HREF="#dio_text2state">dio_text2state(</A>char* text)
+*:DESCRIPTION:  ----------
+*:ARGUMENTS:    ----------
+*:RETURN VALUE: <A HREF="dioClasses.cc.html#state">state</A>
+*:&lt;---------------------------------------------------------------------
+*/
+<B><A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> <A NAME="dio_text2state">dio_text2state(</A>char* text)</B>
+{
+	switch(text[0]) {
+	case 'o': case 'O':
+	   return DIO_OPEN_STATE;
+	case 'c': case 'C':
+	   return DIO_CLOSE_STATE;
+	case 'r': case 'R':
+	   return DIO_READ_STATE;
+	case 'w': case 'W':
+	   return DIO_WRITE_STATE;
+	default:
+	   return DIO_UNKNOWN_STATE;
+	}
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

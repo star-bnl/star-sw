@@ -1,0 +1,143 @@
+<HTML>
+<PRE>
+<H2>file: dio/inc/dio_types.h</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         dio_types.h
+*:DESCRIPTION:  Variable types for <A HREF="dio_macros.h.html#DIO">DIO</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      08dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#ifndef <A HREF="#DIO_TYPES_H">DIO_TYPES_H</A>
+<B>#define <A NAME="DIO_TYPES_H">DIO_TYPES_H</A></B>
+
+/*-------------------------------------------- INCLUDES             --*/
+#include "<A HREF="dio_macros.h.html">dio_macros.h</A>"
+#include "dstype.h"
+
+#ifdef CORBA
+#include "dio_i.hh"
+#endif
+
+/*-------------------------------------------- CORBA                --*/
+
+/*-------------------------------------------- TYPEDEFS             --*/
+#ifndef CORBA
+
+<B>typedef enum <A NAME="dio_mode_t">dio_mode_t</A> {</B>
+    DIO_READ_MODE,
+    DIO_WRITE_MODE,
+    DIO_UPDATE_MODE,
+    DIO_UNKNOWN_MODE
+<B>}<A NAME="DIO_MODE_T">DIO_MODE_T</A>;</B>
+
+<B>typedef enum <A NAME="dio_state_t">dio_state_t</A> {</B>
+    DIO_OPEN_STATE,
+    DIO_CLOSE_STATE,
+    DIO_READ_STATE,
+    DIO_WRITE_STATE,
+    DIO_UNKNOWN_STATE
+<B>}<A NAME="DIO_STATE_T">DIO_STATE_T</A>;</B>
+
+#endif /*CORBA*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+extern CC_P int <A HREF="dio_init.cc.html#dio_init">dio_init(</A>);
+extern CC_P int <A HREF="dio_init.cc.html#dio_start">dio_start(</A>);
+extern CC_P int <A HREF="dio_init.cc.html#dio_stop">dio_stop(</A>);
+extern CC_P void dio_def_();
+extern CC_P int <A HREF="dio_utils.cc.html#dio_addHierarchy">dio_addHierarchy(</A>DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
+extern CC_P char* <A HREF="dio_utils.cc.html#dio_mode2text">dio_mode2text(</A><A HREF="#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A>);
+extern CC_P <A HREF="#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dio_utils.cc.html#dio_text2mode">dio_text2mode(</A>char* text);
+extern CC_P char* <A HREF="dio_utils.cc.html#dio_state2text">dio_state2text(</A><A HREF="#DIO_STATE_T">DIO_STATE_T</A> <A HREF="dioClasses.cc.html#state">state</A>);
+extern CC_P <A HREF="#DIO_STATE_T">DIO_STATE_T</A> <A HREF="dio_utils.cc.html#dio_text2state">dio_text2state(</A>char* text);
+
+#ifndef NOTCL
+extern CC_P int <A HREF="dio_tcltk_browsefile.c.html#dio_tcltk_browsefile">dio_tcltk_browsefile(</A>char** name, char** file
+		, <A HREF="#DIO_MODE_T">DIO_MODE_T</A> *iomode);
+#endif /*NOTCL*/
+
+#ifndef NOKUIP
+extern CC_P void <A HREF="dio_kam.cc.html#kam_dio_count_">kam_dio_count_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_dio_list_">kam_dio_list_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_dio_newfilestream_">kam_dio_newfilestream_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_open_">kam_diofilestream_open_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_close_">kam_diofilestream_close_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_getevent_">kam_diofilestream_getevent_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_putevent_">kam_diofilestream_putevent_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_mode_">kam_diofilestream_mode_(</A>);
+extern CC_P void <A HREF="dio_kam.cc.html#kam_diofilestream_state_">kam_diofilestream_state_(</A>);
+
+extern CC_P int <A HREF="dio_kam.cc.html#kam_dio_count">kam_dio_count(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_dio_list">kam_dio_list(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_dio_newfilestream">kam_dio_newfilestream(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_open">kam_diofilestream_open(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_close">kam_diofilestream_close(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_getevent">kam_diofilestream_getevent(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_putevent">kam_diofilestream_putevent(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_mode">kam_diofilestream_mode(</A>);
+extern CC_P int <A HREF="dio_kam.cc.html#kam_diofilestream_state">kam_diofilestream_state(</A>);
+#endif /*NOKUIP*/
+
+#endif /* <A HREF="#DIO_TYPES_H">DIO_TYPES_H</A> */
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,304 @@
+<HTML>
+<PRE>
+<H2>file: dio/src/dio_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         dio_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for <A HREF="dio_macros.h.html#DIO">DIO</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      12dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+#include "kuip.h"
+
+#include "<A HREF="dio_macros.h.html">dio_macros.h</A>"
+#include "<A HREF="dio_types.h.html">dio_types.h</A>"
+#include "<A HREF="dio_globals.h.html">dio_globals.h</A>"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dio_count_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/COUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dio_count_">kam_dio_count_(</A>){<A HREF="#kam_dio_count">kam_dio_count(</A>);}</B>
+<B>int <A NAME="kam_dio_count">kam_dio_count(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   printf("<A HREF="dio_macros.h.html#DIO">DIO</A>:\tObject count = %d \n",dio-&gt;count());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dio_list_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/LIST
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dio_list_">kam_dio_list_(</A>){<A HREF="#kam_dio_list">kam_dio_list(</A>);}</B>
+<B>int <A NAME="kam_dio_list">kam_dio_list(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#list">list</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dio_newfilestream_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/NEWFILESTREAM NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dio_newfilestream_">kam_dio_newfilestream_(</A>){<A HREF="#kam_dio_newfilestream">kam_dio_newfilestream(</A>);}</B>
+<B>int <A NAME="kam_dio_newfilestream">kam_dio_newfilestream(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* filestream name */
+   char* file = ku_gets();      /* data file name */
+   char* <A HREF="dioClasses.cc.html#mode">mode</A> = ku_getc();      /* I/O <A HREF="dioClasses.cc.html#mode">mode</A> */
+
+   <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> iomode=<A HREF="dio_utils.cc.html#dio_text2mode">dio_text2mode(</A><A HREF="dioClasses.cc.html#mode">mode</A>);
+
+#ifndef NOTCL
+   switch (file[0]) {
+      case '-':
+      switch (file[1]) {
+	 case 'b': case 'B':
+	    file = NULL;
+	    if( !<A HREF="dio_tcltk_browsefile.c.html#dio_tcltk_browsefile">dio_tcltk_browsefile(</A>&name,&file,&iomode)
+	    ||  !(file != NULL)
+	    ){
+	       EML_ERROR(KAM_NO_FILE_SELECTED);
+	    }
+      }
+   }
+#endif /*NOTCL*/
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#newFileStream">newFileStream</A>(name,file,iomode) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//######################################################################
+<B>void <A NAME="kam_diofilestream_open_">kam_diofilestream_open_(</A>){<A HREF="#kam_diofilestream_open">kam_diofilestream_open(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_open">kam_diofilestream_open(</A>)</B>
+{
+   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+//######################################################################
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_diofilestream_close_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/FILESTREAM/CLOSE NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_diofilestream_close_">kam_diofilestream_close_(</A>){<A HREF="#kam_diofilestream_close">kam_diofilestream_close(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_close">kam_diofilestream_close(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* stream name */
+
+   dioFileStream* stream;
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#findFileStream">findFileStream</A>(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !stream-&gt;<A HREF="dioClasses.cc.html#close">close</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_diofilestream_getevent_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/FILESTREAM/GETEVENT NAME [ PATH ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_diofilestream_getevent_">kam_diofilestream_getevent_(</A>){<A HREF="#kam_diofilestream_getevent">kam_diofilestream_getevent(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_getevent">kam_diofilestream_getevent(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* stream name */
+   char* path = ku_gets();      /* DUI path */
+
+   dioFileStream* stream;
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#findFileStream">findFileStream</A>(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !stream-&gt;<A HREF="dioClasses.cc.html#getEvent">getEvent</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_diofilestream_putevent_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/FILESTREAM/GETEVENT NAME [ PATH ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_diofilestream_putevent_">kam_diofilestream_putevent_(</A>){<A HREF="#kam_diofilestream_putevent">kam_diofilestream_putevent(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_putevent">kam_diofilestream_putevent(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* stream name */
+   char* path = ku_gets();      /* DUI path */
+
+   dioFileStream* stream;
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#findFileStream">findFileStream</A>(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !stream-&gt;<A HREF="dioClasses.cc.html#putEvent">putEvent</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_diofilestream_mode_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/FILESTREAM/MODE NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_diofilestream_mode_">kam_diofilestream_mode_(</A>){<A HREF="#kam_diofilestream_mode">kam_diofilestream_mode(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_mode">kam_diofilestream_mode(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* stream name */
+
+   dioFileStream* stream;
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#findFileStream">findFileStream</A>(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("<A HREF="dio_macros.h.html#DIO">DIO</A>:\tStream <A HREF="dioClasses.cc.html#mode">mode</A> = (%s) \n"
+		, <A HREF="dio_utils.cc.html#dio_mode2text">dio_mode2text(</A>stream-&gt;<A HREF="dioClasses.cc.html#mode">mode</A>()));
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_diofilestream_state_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dio_macros.h.html#DIO">DIO</A>/FILESTREAM/MODE NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_diofilestream_state_">kam_diofilestream_state_(</A>){<A HREF="#kam_diofilestream_state">kam_diofilestream_state(</A>);}</B>
+<B>int <A NAME="kam_diofilestream_state">kam_diofilestream_state(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* stream name */
+
+   dioFileStream* stream;
+
+   if( !dio-&gt;<A HREF="dioClasses.cc.html#findFileStream">findFileStream</A>(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("<A HREF="dio_macros.h.html#DIO">DIO</A>:\tStream <A HREF="dioClasses.cc.html#state">state</A> = (%s) \n"
+		, <A HREF="dio_utils.cc.html#dio_state2text">dio_state2text(</A>stream-&gt;<A HREF="dioClasses.cc.html#state">state</A>()));
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
