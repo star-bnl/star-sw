@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.hh,v 1.2 2005/03/18 14:17:39 lmartin Exp $
+// $Id: StSsdStripList.hh,v 1.3 2005/03/18 15:02:37 lmartin Exp $
 //
 // $Log: StSsdStripList.hh,v $
+// Revision 1.3  2005/03/18 15:02:37  lmartin
+// setPedestalSigma method added, setSigma removed
+//
 // Revision 1.2  2005/03/18 14:17:39  lmartin
 // missing CVS header added
 //
@@ -27,7 +30,7 @@ class StSsdStripList
   int        addNewStrip(StSsdStrip *ptr);
   void       exchangeTwoStrips(StSsdStrip *ptr1, StSsdStrip *ptr2);
   void       sortStrip();
-  void       setSigma(int iStrip, int iSigma, StSsdDynamicControl *dynamicControl);
+  void       setPedestalSigma(int iStrip, int iPedestal, int iSigma, StSsdDynamicControl *dynamicControl);
   int        removeStrip(StSsdStrip *ptr);
   int        getSize();
   int*       getListAdc(int idStrip, int SizeCluster);

@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.cc,v 1.4 2005/03/18 14:17:39 lmartin Exp $
+// $Id: StSsdStripList.cc,v 1.5 2005/03/18 15:02:37 lmartin Exp $
 //
 // $Log: StSsdStripList.cc,v $
+// Revision 1.5  2005/03/18 15:02:37  lmartin
+// setPedestalSigma method added, setSigma removed
+//
 // Revision 1.4  2005/03/18 14:17:39  lmartin
 // missing CVS header added
 //
@@ -188,7 +191,7 @@ int* StSsdStripList::getListAdc(int idStrip, int sizeCluster)
 }
 
 
-void StSsdStripList::setSigma(int iStrip, int iSigma, StSsdDynamicControl *dynamicControl)
+void StSsdStripList::setPedestalSigma(int iStrip, int iPedestal, int iSigma, StSsdDynamicControl *dynamicControl)
 {
   const int     NAdcChannel             = 1 << (dynamicControl->getNBitEncoding()); // 1 << x == 2^x 
   //  const float   conversionFactor = (float)(NAdcChannel)/(dynamicControl->getADCDynamic()*dynamicControl->getNElectronInAMip());
@@ -202,10 +205,11 @@ void StSsdStripList::setSigma(int iStrip, int iSigma, StSsdDynamicControl *dynam
       float sigmaAdc = iSigma*conversionFactor;
       if (sigmaAdc<NAdcChannel)	currentStrip->setSigma(sigmaAdc);
       else                      currentStrip->setSigma(NAdcChannel-1);
+      if (iPedestal<NAdcChannel) currentStrip->setPedestal(iPedestal);
+      else                       currentStrip->setPedestal(NAdcChannel-1);
     }
   return;
 }
-
 
 int StSsdStripList::isSorted()
 {
