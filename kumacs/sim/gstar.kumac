@@ -48,7 +48,35 @@
  return
  
 * ********************************************
+ macro input_phase
+   
+          
+ wait ' NOW YOU MUST ENTER VALUES FOR PHASE - hit enter or q '
+  message ' ENTER #particles per event '
+  read npev 
+  message ' ENTER particle type '
+  read tpart
+  message ' ENTER min mom '
+  read minmom
+  message ' ENTER max mom '
+  read maxmom
+  message ' ENTER min eta '
+  read mineta
+  message ' ENTER max eta '
+  read maxeta
+  message ' ENTER min phi '
+  read minphi
+  message ' ENTER max phi '
+  read maxphi
   
+  message ' You entered # particles & type ' [npev] [tpart] 
+  message ' values ' [minmom] [maxmom] [mineta] [maxeta] [minphi] [maxphi]
+   
+  phase [npev] [tpart] [minmom] [maxmom] [mineta] [maxeta] [minphi] [maxphi]
+  
+ return
+ 
+* *********************************************
  macro process_event
    
 
