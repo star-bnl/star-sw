@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.72 2003/11/13 00:21:42 potekhin Exp $
+* $Id: geometry.g,v 1.73 2003/11/13 00:54:50 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.73  2003/11/13 00:54:50  potekhin
+* Create a facility to modify the TPC
+* gas density programmatically
+*
 * Revision 1.72  2003/11/13 00:21:42  potekhin
 * The modification flag we introduced earlier
 * to reflect variations in the dimensions of
@@ -794,6 +798,10 @@ If LL>1
      If ( mwx <2 )  call AgDETP add ('tpcg(1).MWCread=',mwx,1)
      If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
    endif 
+
+   if(CorrNum==3) then
+     call AgDETP add ('tpcg.gasCorr=',2 ,1)
+   endif
 
    if (tpce) Call tpcegeo
 
