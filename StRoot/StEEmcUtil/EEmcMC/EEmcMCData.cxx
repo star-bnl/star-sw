@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.4 2003/02/21 15:31:38 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.5 2003/03/22 19:37:33 balewski Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.5  2003/03/22 19:37:33  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2003/02/21 15:31:38  balewski
 // do not kill the chain (it is against my will, JB)
 //
@@ -93,7 +96,7 @@
 
 #include "StEventTypes.h"
 
-#include "emc_def.h"          /* FIXME - move it to pams */
+//#include "emc_def.h"          /* FIXME - move it to pams */
 
 
 #include "TError.h"
@@ -309,7 +312,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       if(! ( 0<sec   && sec  <=kEEmcNumSectors )){err=12; goto crash;};
       if(!( 0<strip && strip<=kEEmcNumStrips  )){err=13; goto crash;};
 
-      printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
+      // printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
       // fill in
       mHit[mLastHit].detector = det;
       mHit[mLastHit].sector   = sec;
@@ -370,7 +373,7 @@ EEmcMCData::print()
   TString detName;
   Int_t   detId;
   EEmcMCHit *h  = mHit;  
-  cout << "EndcapEmc MC event #" << mEventID << endl;
+  printf("EndcapEmc MC event #%d\n",mEventID);
   for(Int_t i=0; i<mLastHit; i++,h++) {
     detId=h->detector;
     switch(detId) {
@@ -389,24 +392,18 @@ EEmcMCData::print()
     case kEEmcMCPreShower1Id:
     case kEEmcMCPreShower2Id:
     case kEEmcMCPostShowerId:
-      cout << detName ;
-      cout << " sector="    << h->sector ;
-      cout << " subsector=" << h->tower.ssec-1+'A' ;
-      cout << " eta="       << h->tower.eta ;
-      cout << " energy="    << h->de; 
+      printf("%s sec=%2d sub=%c eta=%d de=%g\n",detName.Data(), h->sector,h->tower.ssec-1+'A',h->tower.eta,h->de); 
       break;
     case kEEmcMCSmdUStripId:
     case kEEmcMCSmdVStripId:
-      cout << detName ; 
-      cout << " sector=" << h->sector ;
-      cout << " strip="  << h->strip;
-      cout << " energy=" << h->de;       
+      printf("%s sec=%2d strip=%d de=%g\n",detName.Data(), h->sector,h->strip,h->de); 
       break;
     default:
       cout << "**** WARNING **** detectorId=" << detId << " is unknown";
+      assert(1==2);
       break;
     }
-    cout << endl;
+
   }
 }
 
