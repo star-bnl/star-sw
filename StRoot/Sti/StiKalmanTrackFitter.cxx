@@ -41,18 +41,18 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
 	fitInward(first);
 	track->setChi2(last->fChi2);
 	if (last->fP3>0)
-	    track->setCharge(unitCharge);
+	    track->setCharge(StiKalmanTrackNode::unitCharge);
 	else
-	    track->setCharge(-unitCharge);
+	    track->setCharge(-StiKalmanTrackNode::unitCharge);
 	break;
     case Outward:
 	cout << "Outward" << endl;
 	fitOutward(last);
 	track->setChi2(first->fChi2);
 	if (last->fP3>0)
-	    track->setCharge(unitCharge);
+	    track->setCharge(StiKalmanTrackNode::unitCharge);
 	else
-	    track->setCharge(-unitCharge);
+	    track->setCharge(-StiKalmanTrackNode::unitCharge);
 	break;
     }
 }

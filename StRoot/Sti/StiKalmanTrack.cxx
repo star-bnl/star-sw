@@ -1,6 +1,4 @@
 #include <iostream.h>
-
-
 //Sti
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
@@ -50,6 +48,16 @@ double  StiKalmanTrack::getPt()             const
 
   return lastNode->getPt();
 }
+
+double StiKalmanTrack::getCurvature()             const
+{
+  // returns the curvature of the track at the inner most node held by this track
+  // which may (or not) be the primary vertex. 
+  // this will need to be refined...
+
+  return lastNode->fP3;
+}
+
 
 double  StiKalmanTrack::getRapidity()       const 
 {
@@ -385,11 +393,11 @@ void StiKalmanTrack::initialize(double curvature,
 				alphaP = pNode->fAlpha; // value of the parent
       if (alphaP!=alpha)
 				{
-					cout << "=================alphaP/alpha:" << alphaP << "\t" << alpha << endl;
+					//cout << "=================alphaP/alpha:" << alphaP << "\t" << alpha << endl;
 					StThreeVectorD temp = origin;
-					cout << "OG:" << temp << endl;
+					//cout << "OG:" << temp << endl;
 					temp.rotateZ(-alpha);
-					cout << "OL:" << temp << endl;
+					//cout << "OL:" << temp << endl;
 					eta = curvature*temp.x();
 				}
       state[0] = (*it)->y(); 

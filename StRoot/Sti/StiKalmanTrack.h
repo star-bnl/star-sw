@@ -39,6 +39,7 @@ class StiKalmanTrack : public StiTrack
   virtual void    reset();
   virtual void    getMomentum(double p[3], double e[6]) const ;
   virtual double  getPt()             const                   ;   // transverse momentum
+	virtual double  getCurvature()      const; // curvature of the track 
   virtual double  getRapidity()       const                   ;   // rapidity
   virtual double  getPseudoRapidity() const                   ;   // pseudo rapidity
   virtual double  getPhi()            const                   ;   // azimuthal angle

@@ -455,7 +455,7 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 
 void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
                                        StHelix *pHelix){
-
+	/*
   cout << "StiKalmanTrackNode: x=" << pTrackNode->fX 
        << ", alpha=" << pTrackNode->fAlpha
        << ", y=" << pTrackNode->fP0
@@ -463,18 +463,20 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
        << ", c*x0=" << pTrackNode->fP2
        << ", c=" << pTrackNode->fP3
        << ", tanL=" << pTrackNode->fP4 << endl;
-
+	*/
   // first, calculate the helix origin in global coords
   StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
                                pTrackNode->fP1);
-  cout << "Before rotation: x=" << origin.x()
+  /*cout << "Before rotation: x=" << origin.x()
        << ", y=" << origin.y()
        << ", z=" << origin.z() << endl;
+	*/
   origin.rotateZ(pTrackNode->fAlpha);
-  cout << "After rotation: x=" << origin.x()
+  
+	/*cout << "After rotation: x=" << origin.x()
        << ", y=" << origin.y()
        << ", z=" << origin.z() << endl;
-
+	*/
   // dip angle & curvature easy
   cout << "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
@@ -486,13 +488,13 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
   double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
       (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
-  cout << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
+  //cout << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
   double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
   while(dPhi<0.){      dPhi += 2.*M_PI; };
   while(dPhi>2.*M_PI){ dPhi -= 2.*M_PI; };
-  cout << "phi=" << dPhi << endl;
+  //cout << "phi=" << dPhi << endl;
 
   // finally, need the sense of rotation.  Here we need the fact that
   // the track model assumes outward tracks (positive local x coord of mtm).
@@ -500,6 +502,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
 
   pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
 
+	/*
   cout << "StHelix: x0=" << pHelix->x(0)
        << ", y0=" << pHelix->y(0)
        << ", z0=" << pHelix->z(0)
@@ -507,6 +510,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
        << ", phi0=" << pHelix->phase()
        << ", dip=" << pHelix->dipAngle()
        << ", h=" << pHelix->h() << endl;
+	*/
 }
 
 //Go from global->Sti, expect refAngle positive
