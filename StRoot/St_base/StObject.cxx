@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.12 2000/07/30 01:49:03 perev Exp $
+// $Id: StObject.cxx,v 1.13 2000/09/15 15:11:58 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.13  2000/09/15 15:11:58  perev
+// Zombie for StEvent
+//
 // Revision 1.12  2000/07/30 01:49:03  perev
 // StObject vers restored
 //
@@ -46,19 +49,6 @@ ClassImp(StObject)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
-#if 0
-  Int_t colIdx,objIdx; UInt_t u;
-  u = GetUniqueID();
-  if (!u) return;
-  StRegistry::Ident(u,colIdx,objIdx);
-  if (!colIdx) return;
-  StStrArray *ar = StRegistry::GetColl(colIdx);
-  if (!ar) return;
-  int n = ar->GetSize();
-  if (objIdx>=n)			return;
-  if (ar->At(objIdx) != (TObject*)this) return;
-  ar->RemoveAt(objIdx);
-#endif
 }
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
@@ -70,3 +60,27 @@ Bool_t StObject::IsFolder()
 {
   return StAutoBrowse::Browse(this,0);
 }
+//______________________________________________________________________________
+void StObject::Streamer(TBuffer &R__b)
+{
+//	Stream an object of class StObject.
+  unsigned char uc=0;
+
+  if (R__b.IsReading()) {
+    Version_t R__v = R__b.ReadVersion();
+    uc = 1; if (R__v >= 2) R__b >> uc;
+    if (uc) TObject::Streamer(R__b);
+
+  } else {
+    R__b.WriteVersion(StObject::Class());
+    uc = (GetUniqueID() || TestBit(0xffffffff));
+    R__b << uc;
+    if (uc) TObject::Streamer(R__b);
+  }
+}
+
+//______________________________________________________________________________
+//void StObject::ShowMembers(TMemberInspector &R__insp, char *R__parent)
+//{
+//  TObject::ShowMembers(R__insp, R__parent);
+//}
