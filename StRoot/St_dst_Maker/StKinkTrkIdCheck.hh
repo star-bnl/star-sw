@@ -16,7 +16,7 @@ public:
   
   // Set mCommonIdp to 1 if two parents have common dst_track id
   void setCommonIdp(Int_t val); 
-  // Set mCommonIdp to 1 if two daughters have common dst_track id 
+  // Set mCommonIdd to 1 if two daughters have common dst_track id 
   void setCommonIdd(Int_t val);
   void setPosInKinkVtx(Int_t val);
 
