@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.101 2005/02/02 00:16:09 potekhin Exp $
+* $Id: geometry.g,v 1.102 2005/02/19 05:26:29 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.102  2005/02/19 05:26:29  potekhin
+* a) Corrected the comment for tag IST1
+* b) Added the FGTD activation in same
+*
 * Revision 1.101  2005/02/02 00:16:09  potekhin
 * We now have a new estimate of the copper cable mass, for
 * the cables feeding the SVT and residing on the support cones.
@@ -414,7 +418,7 @@
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,fstd,ftro
+              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,fstd,ftro,fgtd
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -437,7 +441,7 @@
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
               PixlConfig, IstbConfig, FstdConfig,
-              FtroConfig, ConeConfig
+              FtroConfig, ConeConfig, FgtdConfig
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -500,6 +504,7 @@ replace[;ON#{#;] with [
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
    IstbConfig  = 0 ! 0=no, >1=version
    FstdConfig  = 0 ! 0=no, >1=version
+   FgtdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
 
@@ -512,7 +517,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,fstd,sisd,ftro} = off;
+   {bbcm,fpdm,phmd,pixl,istb,fstd,sisd,ftro,fgtd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -657,7 +662,7 @@ If LL>1
                 }
 
 *************************************************************************************************************
-  on IST1   { New IST Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on IST1   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD;
 
                      svtt=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -697,6 +702,9 @@ If LL>1
 * Forward STAR tracker disk
                    fstd=on;  "new pixel based forward tracker"
                    FstdConfig=1;
+* Forward STAR tracker disk
+                   fgtd=on;  "GEM forward tracker"
+                   FgtdConfig=1;
                 }
 
 *************************************************************************************************************
@@ -1572,6 +1580,7 @@ If LL>1
 
    if (istb.and.IstbConfig>0)  Call istbgeo
    if (fstd.and.FstdConfig>0)  Call fstdgeo
+   if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
