@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.32 2001/10/30 20:43:29 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.33 2001/10/30 21:59:32 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.33  2001/10/30 21:59:32  porter
+ * same timestamp fix for runlevel query... but works..
+ *
  * Revision 1.32  2001/10/30 20:43:29  porter
  * timestamp set for failure on query by runNumber
  *
@@ -424,21 +427,19 @@ void * StDbBroker::Use(int tabID, int parID)
   // redoing it all with
 
   bool fetchStatus;
-  bool fetchRun=true;
   if(node->getDbType()==dbRunLog && 
      node->getDbDomain() != dbStar && 
      m_runNumber !=0 ){
-     fetchRun=UseRunLog(node);   
+     fetchStatus=UseRunLog(node);   
   } else {
     fetchStatus=mgr->fetchDbTable(node);
   }
 
-  if(!fetchStatus)SetZombie(true);
+  if(fetchStatus){ 
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
 
-    if(fetchRun){ // failure on fetch run may not give good timestamps
 
     // reformat timestamp for StRoot
     char* thisTime;
@@ -463,6 +464,8 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndDate = (UInt_t)atoi(tmp1);
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
+  } else {
+    SetZombie(true);
   }
 
 
