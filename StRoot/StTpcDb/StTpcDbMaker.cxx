@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.21 2001/06/19 23:07:13 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.22 2001/06/21 16:27:52 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.22  2001/06/21 16:27:52  perev
+ * two error matrix transformation methods added
+ *
  * Revision 1.21  2001/06/19 23:07:13  hardtke
  * Restore to old functionality using Tpc Local Coordinates
  *
@@ -65,6 +68,7 @@
  **************************************************************************/
 
 #define StTpc_STATIC_ARRAYS
+#include "TCL.h"
 #include "StTpcDbMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -133,9 +137,8 @@ int type_of_call tpc_global_to_local_p_(int *isect,float *xglobal, float* xlocal
   if (*isect<=12) xlocal[2] = -xlocal[2];
   return 1; 
 }
-int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
-  //  StGlobalCoordinate global;
-  StTpcLocalCoordinate global;
+int type_of_call tpc_local_to_global_(int *isect,const float *xlocal, float* xglobal){
+  StGlobalCoordinate global;
   StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(localSector,global); 
@@ -144,6 +147,51 @@ int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
   xglobal[2] = global.position().z(); 
   return 1; 
 }
+int tpc_local_to_global_emx_(int &isect,const float *glocal, float* gglobal)
+{
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                              			//
+// The routine of tpc_local_to_global_emx_ computes the error matrix of space point  	//
+// Arguments:		        							//
+// isect	sector number       							//
+// glocal       error matrix (3X3)      in local  coordinate system  (INPUT)    	//
+// gglobal      error matrix (3X3)      in global coordinate system  (OUTPUT)		//
+//                                                                                   	//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  static int iSECT=-1;
+  static const float req[4][3] = {{0,0,0},{1,0,0},{0,1,0},{0,0,1}};
+  static       float ans[4][3];
+
+  if (iSECT != isect) {
+    iSECT = isect;
+    for (int i=0;i<4;i++) {
+      tpc_local_to_global_(&isect,req[i], ans[i]);
+      if (i) TCL::vsub(ans[i],ans[0],ans[i],3);
+    }  
+  }
+
+  TCL::mxmlrt(ans[1], glocal, gglobal, 3, 3);
+  return 1;
+}
+int tpc_local_to_global_err_(int &isect,const float *elocal, float* gglobal)
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                              			//
+// The routine of tpc_local_to_global_err_ computes the error matrix of space point  	//
+// Arguments:		        							//
+// isect	sector number       							//
+// elocal       array of errx,erry,errz in local  coordinate system  (INPUT)    	//
+// gglobal      error matrix (3X3)      in global coordinate system  (OUTPUT)		//
+//                                                                                   	//
+//////////////////////////////////////////////////////////////////////////////////////////
+{
+   float glocal[3][3];
+   TCL::vzero(glocal[0],9);
+   for (int i=0;i<3;i++) glocal[i][i]=elocal[i]*elocal[i];
+   return tpc_local_to_global_emx_(isect,glocal[0],gglobal);
+}
+
+
 int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,float *z){
   static StTpcCoordinateTransform* trans = new StTpcCoordinateTransform(gStTpcDb); 
   double zoff;
