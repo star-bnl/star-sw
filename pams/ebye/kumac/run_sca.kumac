@@ -9,7 +9,6 @@
    macro/global/import *
      
      ami/module/call sca_filter_
-        [dst]/event_summary _
         [dst]/dstrack  _
         [params]/ebye/sca_filter_const _
 	[params]/ebye/sca_switch _
