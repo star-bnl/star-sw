@@ -237,7 +237,7 @@ public:
   int contiguousNullCount;
   const StiDetector * _detector;
   char   _end[1];
-
+  int _Kount;  //for debug only 
   static StiKalmanTrackFinderParameters * pars;
 
   static int counter;
@@ -509,76 +509,6 @@ inline void StiKalmanTrackNode::setCurvature(double curvature)
   _p3=curvature;
 }
 
-inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double XcRho, double curvature, double tanl)
-{
-  //cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
-  reset();
-  _hit     = h;
-  //_refX    = h->detector()->getPlacement()->getNormalRadius();
-  _refX    = h->detector()->getPlacement()->getLayerRadius();
-  _layerAngle= h->detector()->getPlacement()->getLayerAngle();
-  _x       = h->x();
-  _alpha   = alpha;
-  _cosAlpha = cos(alpha);
-  _sinAlpha = sin(alpha);
-  _p0      = h->y();
-  _p1      = h->z();
-  _p2      = XcRho-_x*curvature;
-  _p3      = curvature;
-  _p4      = tanl;
-  _sinCA = 999.;
-  if (fabs(_p2)>1.)   
-      throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-  _sinCA   = -_p2;
-  _cosCA   = ::sqrt(1.-_sinCA*_sinCA);
-  //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
-};
-
-
-inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode & n)
-{
-  children.clear();
-  parent     = n.parent;
-  _detector  = n._detector;
-  _hit       = n._hit;
-  _alpha     = n._alpha;
-  _cosAlpha = n._cosAlpha;
-  _sinAlpha = n._sinAlpha;
-  _sinCA = n._sinCA;
-  _cosCA = n._cosCA;
-  _refX = n._refX;
-  _layerAngle = n._layerAngle;
-  _x    = n._x;   
-  _p0   = n._p0; 
-  _p1   = n._p1;
-  _p2   = n._p2;
-  _p3   = n._p3;  
-  _p4   = n._p4;
-  _c00  = n._c00;                       
-  _c10  = n._c10;
-  _c11  = n._c11;                 
-  _c20  = n._c20;
-  _c21  = n._c21;
-  _c22  = n._c22;           
-  _c30  = n._c30;
-  _c31  = n._c31;
-  _c32  = n._c32;
-  _c33  = n._c33; 
-  _c40  = n._c40;
-  _c41  = n._c41;
-  _c42  = n._c42;
-  _c43  = n._c43;
-  _c44  = n._c44;
-  setChi2(n._chi2);
-  eyy   = n.eyy;
-  ezz   = n.ezz;
-  hitCount = n.hitCount;
-  nullCount = n.nullCount;
-  contiguousHitCount = n.contiguousHitCount;
-  contiguousNullCount = n.contiguousNullCount;
-  _detector = n._detector;  
-  return *this;
-}
 
 #endif
 
