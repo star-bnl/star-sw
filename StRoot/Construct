@@ -119,25 +119,24 @@ print "CPPFLAGS = ", $_CPPFLAGS, "\n";
 print "INCLUDE = ",$INLCUDE,"\n";
 my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent",);
 #my $CPPPATH = "-I" . $STAR . " -I" . $STAR . "/inc" . " -I" . $STAR . "/StRoot" . " -I" . $STAR . "/.share" . " -I" . $STAR . "/.share/tables";
-$CPPPATH .= $STAR . ":" . $STAR . "/inc:" . $STAR . "/StRoot:" . $STAR . "/.share:" . $STAR . "/.share/tables";
+#$CPPPATH .= $STAR . :" . $STAR . "/inc:" . $STAR . "/StRoot:" . $STAR . "/.share:" . $STAR . "/.share/tables";
+$CPPPATH .= ".:inc:StRoot:.share:.share/tables";
 foreach my $inc (@includes) {
-  $CPPPATH .= ":" . $STAR . "/StRoot/" . $inc;
+  $CPPPATH .= ":StRoot/" . $inc;
 }
 $CPPPATH .= ":" . $ROOTSYS . "/src";
 print "CPPPATH = ",$CPPPATH,"\n";
 my $DirPath  = cwd();
 print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n";
 print " STAR = ",$STAR,"\n";
-if ($DirPath = $STAR) {
-  Repository qw (
-		 $STAR
-	       );
+if ($DirPath eq $STAR) {
+  print "Repository = ",$STAR,"\n";
+  Repository($STAR); 
 }
 else {
-  Repository qw (
-		 $DirPath
-		 $STAR
-		);
+  print "Repositories = ",$DirPath," + ",$STAR,"\n";
+  Repository  ($DirPath);
+  Repository  ($STAR);
 }
 #print "Repository = ",$Repository,"\n";
 $env = new cons(
@@ -195,12 +194,13 @@ print "BUILD = ",$BUILD," OBJ = ",$OBJ,"\n";
 Link $OBJ => 'StRoot';
 Default qw (   .  );
 Build  ( "$OBJ/Conscript" );
-
+#________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
 
 BEGIN { @ISA = qw(build::command) }
 
+#________________________________________
 sub find {
 # print "==========\tDebug:","In build::command::cxx-find- parameters = ", @_, "\n";
     $_[1]->{_cxx} || do {
@@ -212,10 +212,38 @@ sub find {
 	bless $env->{_cxx} = $self;
     }
 }
-
+#________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
 # print "==========\tDebug:","In build::command::cxx-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+
+package script;
+#________________________________________
+sub find_files_by_extention($) {
+  
+  my $obj = $OBJ;
+  $obj =~ s/\#//g;
+  my $FilePath = FilePath();
+#  my $FilePath = DirPath '.';
+  $FilePath =~ s/$obj/StRoot/g;
+  print " FilePath=",$FilePath,"\n"; 
+#  my @c_files = glob $FilePath . "*.c*", $FilePath . "*/*.c*" ; #$tag; 
+  my @c_files = map { glob($_) } $FilePath . $_[0], $FilePath . "*/" . $_[0] ; #$tag; 
+  print "c_files = ",@c_files,"\n";
+  my @files;
+  my $i=0;
+  foreach $file (@c_files) {
+    next if $file =~ /~/;
+    print "File:",$file;
+    $files[$i] = $file; 
+    $files[$i] =~ s/$FilePath//g;
+    print "\tfile:", $files[$i],"\n";  
+    $i++; 
+  } 
+  
+  return @files;
 }

@@ -1,36 +1,52 @@
 #!/usr/local/bin/perl
-#use Env;
-#use File::Basename;
-print "St_dst_Maker::cons\n";
 Import qw ( env INCLUDE LIB BIN OBJ );
-my $FilePath = FilePath();
-my $DirPath  = DirPath();
-print "Execute ", $0;
-print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n"; 
-my $tag =  $FilePath . "*.cxx";  
-print "Tag:", $tag, "\n"; 
-my @files = glob $tag; 
-print "files = ",@files,"\n";
-@_[0] = $env;
-@_[1] = 'St_dst_Maker.so';
-my $i=1;
-foreach $file (@files) {
-  print "File:",$file,"\n"; $i++; 
-  @_[$i] = basename($file); 
-} 
-#Install $env $LIB, 'St_dst_Maker.so'; 
+$pwd = DirPath '.';
+my $PKG  = basename($pwd);
+print $PKG,"::cons\n";
+print "pwd = ",$pwd,"\n";
+($up_two_dirs = $pwd) =~ s#/[^/]+/[^/]+$##;
+print "up_two_dirs = ",$up_two_dirs,"\n";
+#Link "$up_two_dirs/.$OS" => 'src';
+my $SO_PKG = $PKG . ".so";
+my @h_files = find_files_by_extention("*.h*");
+my $no_of_rootcint_includes = 0;
+my @root_cint_includes = 0;
+my $n = 0;
+my @ClassDefs;
 my $m = 0;
-for ($m =0; $m<=$i;$m++) { print $m," ",@_[$m],"\n";}
-while ($m =shift) { print $m," ",@_[$m],"\n";}
-%cons::LinkedModule;
-#&cons::Program;
-&cons::Program;
-#Install $env, 'St_dst_Maker.so';
-#Program $env  'St_dst_Maker.so', qw (
-#				       StKinkMaker.cxx
-#				       StMatchMaker.cxx
-#				       StPrimaryMaker.cxx
-#				       StV0Maker.cxx
-#				       StXiMaker.cxx
-#				       St_dst_Maker.cxx
-#				      );
+my @CollectionDefs;
+foreach my $file (@h_files) {
+  print "H file:",$file,"\n";
+  next unless open (SCAN, $pwd . "/" . $file);
+  my $classdef = 0;
+  while (<SCAN>) {
+    if (/ClassDef/) {
+      if (!$classdef) { $classdef=1; 
+			$root_cint_includes[$no_of_rootcint_includes] = $file;
+			$no_of_rootcint_includes++;
+		      }
+      my @words = split '([\(\)\,])', $_;
+      my $class = $words[2];
+      $ClassDefs[$n] = $class; $n++;
+      next;
+    }
+    if (/StCollectionDef/) {
+      next;
+    }
+  }
+  close (SCAN);
+}
+my $list_of_objects; 
+$list_of_objects[0] = $env;
+$list_of_objects[1] = $SO_PKG;
+my @c_files = find_files_by_extention("*.c*");
+my $i=1;
+foreach my $file (@c_files) {
+  $i++;
+  $list_of_objects[$i] = $file; 
+  print "\tfile:", $list_of_objects[$i],"\n";  
+} 
+@_ = @list_of_objects;
+&cons::LinkedModule;
+#cons::LinkedModule ($env, $SO_PKG, @list_of_objects);
+Install $env $LIB, $SO_PKG;
