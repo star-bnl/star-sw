@@ -63,7 +63,8 @@ Usage:
 
 Calibration is a two step process. The first step allows calibration on
 a per DAQ file sequence basis. The second step aggregates information from
-fills to provide calibration on a per fill basis.
+fills to provide calibration on a per fill basis. Both steps need access
+to the beamInfo table from the RunLog_onl database.
 
 _____
 1) A step that can be run during FastOffline or
@@ -79,13 +80,19 @@ like:
   vertexseedhist.20030126.213934.ROOT
 
 The date/timestamp is for that daqFile's first event.
-If statistics are sufficient, it may also produce a
-database table file named something like:
+If statistics and fit errors are sufficient, a database
+table file may also be produced, named something like:
   vertexSeed.20030126.213934.C
 
 These files will be placed in ./StarDb/Calibrations/rhic
 if they can, otherwise they will be placed in the working
 directory of the root4star job.
+
+Step 1 can actually produce output using the date/timestamp
+for the fill by invoking the UseFillDateTime() member
+function (useful if one daqFile can yield sufficient stats
+for an entire fill). The default is the date/timestamp of
+the first event.
 
 _____
 2) A second step aggregates data by fill. For this, we
