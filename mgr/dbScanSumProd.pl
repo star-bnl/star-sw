@@ -105,7 +105,7 @@ $nhpssInFiles = 0;
 my $seti;
  for($ik=0; $ik <scalar(@SetS); $ik++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$ik]' AND fName LIKE '%fzd' AND hpss = 'Y'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$ik]' AND fName LIKE '%fzd' AND hpss = 'Y'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -142,7 +142,7 @@ foreach my $pfile (@hpssInFiles) {
 
  }
 
-### select DST files on HPSS from cpFileCatalog
+### select DST files on HPSS from FileCatalog
 my $hdfile;
 my $dhSet;
 
@@ -151,7 +151,7 @@ $nhpssDstFiles = 0;
 
 for ($ll=0; $ll<scalar(@SetS); $ll++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND hpss ='Y'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND hpss ='Y'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -193,7 +193,7 @@ foreach my $dsfile (@hpssDstFiles) {
 
  }
 
-### select DST files on DISK from cpFileCatalog
+### select DST files on DISK from FileCatalog
 
 my $ddfile;
 my $ddSet;
@@ -203,7 +203,7 @@ $ndiskDstFiles = 0;
 
 for ($kk=0; $kk<scalar(@SetS); $kk++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%mdc3%' AND site = 'disk_rcf'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%mdc3%' AND site = 'disk_rcf'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;

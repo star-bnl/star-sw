@@ -321,7 +321,7 @@ print "Total daq reco files: $nDiskFiles\n";
 
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $cpJobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
+ $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -570,7 +570,7 @@ foreach my $jobnm (@jobFSum_set){
      if ( $mfName =~ /$jfile/ and $mjobFname =~ /$newset/) {
 
 #    print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n";
-      print "updating cpFileCatalogT table\n";
+      print "updating FileCatalogT table\n";
  
      &fillDbTable();
          last;
@@ -673,7 +673,7 @@ foreach my $jobnm (@jobFSum_set){
       $dfile =~ s/.sum//g;
         
      if ( $mfName =~ /$dfile/) {
-      print "updating cpFileCatalogT table\n";
+      print "updating FileCatalogT table\n";
  
 #      &updateDbTable();
 #      &fillDbTestTable();
@@ -695,7 +695,7 @@ foreach my $jobnm (@jobFSum_set){
 ################################################################################
 sub updateJSTable {
 
-    $sql="update $cpJobStatusT set ";
+    $sql="update $JobStatusT set ";
     $sql.="jobfileDir='$mjbDir',";
     $sql.="jobStatus='$mjobSt',";
     $sql.="NoEvents='$mNev',";
@@ -715,7 +715,7 @@ sub updateJSTable {
 #############################################################################
 sub fillDbTable {
 
-    $sql="insert into $cpFileCatalogT set ";
+    $sql="insert into $FileCatalogT set ";
     $sql.="jobID='$mJobId',";
     $sql.="runID='$mrunId',";
     $sql.="fileSeq='$mfileSeq',";
@@ -744,7 +744,7 @@ sub fillDbTable {
 ###============================================================
  sub updateDbTable {
 
-       $sql="update $cpFileCatalogT set ";
+       $sql="update $FileCatalogT set ";
        $sql.="NevLo='$mNevtLo',";
        $sql.="NevHi='$mNevtHi'";
        $sql.=" WHERE fName='$mfName' "; 

@@ -21,7 +21,6 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $debugOn=0;
 
 my @Sets = (
-             "auau200/vni/default/b0_3/year_1h/hadronic_on",
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
              "auau200/mevsim/cascade/central/year_1h/hadronic_on",
@@ -118,18 +117,18 @@ my $jb_fstat;
 my $filename;
 
 ### need to clear the jobRelationsT table first
-# $sql="delete from $cpjobRelationsT";
+# $sql="delete from $jobRelationsT";
 # $cursor =$dbh->prepare($sql)
 #     || die "Cannot prepare statement: $DBI::errstr\n";
 # $cursor->execute;
 
 ###  need to clear the JobStatusT table first
-# $sql="delete from $cpJobStatusT";
+# $sql="delete from $JobStatusT";
 # $cursor =$dbh->prepare($sql)
 #     || die "Cannot prepare statement: $DBI::errstr\n";
 # $cursor->execute;
 
-#    $sql="delete from $cpJobStatusT WHERE jobfileName LIKE 'daq_1999%'";    
+#    $sql="delete from $JobStatusT WHERE jobfileName LIKE 'daq_1999%'";    
 #    $cursor =$dbh->prepare($sql)
 #     || die "Cannot prepare statement: $DBI::errstr\n";
 #    $cursor->execute;
@@ -137,7 +136,7 @@ my $filename;
 
 ### insert first line to JobStatusT table get last ID 
 
-   $sql="insert into $cpJobStatusT set ";    
+   $sql="insert into $JobStatusT set ";    
    $sql.="jobID='$startId',"; 
    $sql.="prodSeries='$startSer'";
     print "$sql\n" if $debugOn;
@@ -187,7 +186,7 @@ my $filename;
   $jobIn_no = 0; 
   for ($ii=0; $ii< scalar(@Sets); $ii++)  { 
 
- $sql="SELECT dataset, fName, Nevents FROM $cpFileCatalogT WHERE fName LIKE '%fzd' AND dataset = '$Sets[$ii]' AND hpss = 'Y'";
+ $sql="SELECT dataset, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%fzd' AND dataset = '$Sets[$ii]' AND hpss = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -316,7 +315,7 @@ my $filename;
 
 #### Select Daq files from FilesCatalogT
 
-$sql="SELECT dataset, fName, Nevents FROM $cpFileCatalogT WHERE fName LIKE '%daq' AND dataset = '$SetD' AND hpss = 'Y'";
+$sql="SELECT dataset, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND dataset = '$SetD' AND hpss = 'Y'";
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
          $cursor->execute;
@@ -400,7 +399,7 @@ my $jbset;
 
 ###delete from $JobStatusT inserted JobID
 
-    $sql="delete from $cpJobStatusT WHERE ";    
+    $sql="delete from $JobStatusT WHERE ";    
     $sql.="jobID='$startId' AND "; 
     $sql.="prodSeries='$startSer'";
      print "$sql\n" if $debugOn;
@@ -414,7 +413,7 @@ my $jbset;
 ################################################################################
  sub fillJSTable {
 
-   $sql="insert into $cpJobStatusT set ";
+   $sql="insert into $JobStatusT set ";
    $sql.="jobID='$mjobID',";
    $sql.="prodSeries='$mprodSr',";
    $sql.="jobfileName='$mjobFname',";
@@ -433,7 +432,7 @@ my $jbset;
 ###############################################################################
  sub fillJRelTable {
 
-   $sql="insert into $cpjobRelationsT set ";
+   $sql="insert into $jobRelationsT set ";
    $sql.="JobID='$mjobID',";
    $sql.="prodSeries='$mprodSr',";
    $sql.="inputFile='$mflName'"; 
