@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.3 2000/01/05 16:02:28 ullrich Exp $
+ * $Id: StEvent.h,v 2.4 2000/01/13 21:06:22 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.3  2000/01/05 16:02:28  ullrich
- * SSD hits added to StEvent.
+ * Revision 2.4  2000/01/13 21:06:22  lasiuk
+ * add rich pixel info/containers
+ *
+ * Revision 2.10  2000/05/22 21:47:15  ullrich
+ * Added RICH collection and related methods.
  *
  * Revision 2.9  2000/05/15 18:35:37  ullrich
  * All data member related to collections and containers are now
@@ -40,6 +43,7 @@
  * Revision 2.2  1999/11/04 13:30:42  ullrich
  * Added constructor without summary table
  *
+ * Revision 2.1  1999/10/28 22:25:10  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Completely Revised for New Version
@@ -78,6 +82,8 @@ public:
     const TString&                      type() const;
     virtual ~StEvent();
 
+    void                                Browse(TBrowser*);
+    static const TString&               cvsTag();
     
     ULong_t                             bunchCrossingNumber(UInt_t) const;
     
@@ -113,6 +119,7 @@ public:
     const StSPtrVecTrackDetectorInfo&   trackDetectorInfo() const;
     
     StSPtrVecTrackNode&                 trackNodes();
+    const StSPtrVecTrackNode&           trackNodes() const;
 
     UInt_t                              numberOfPrimaryVertices() const;
     const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
@@ -132,6 +139,7 @@ public:
     Long_t                       mId;
     Long_t                       mTime;
     StEventSummary*              mSummary;           
+    StSoftwareMonitor*           mSoftwareMonitor;   
     
     StTpcHitCollection*          mTpcHits;           
     StFtpcHitCollection*         mFtpcHits;          

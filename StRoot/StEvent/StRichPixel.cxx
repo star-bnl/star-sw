@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.cxx,v 2.3 2000/01/10 17:12:21 lasiuk Exp $
+ * $Id: StRichPixel.cxx,v 2.4 2000/01/13 21:06:19 lasiuk Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.cxx,v $
+ * Revision 2.4  2000/01/13 21:06:19  lasiuk
+ * add rich pixel info/containers
+ *
  * Revision 2.3  2000/01/10 17:12:21  lasiuk
  * remove dst_rch_pixel dependency;
  * change stored data to a single long;
@@ -24,7 +27,7 @@
  **************************************************************************/
 #include "StRichPixel.h"
 
-static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.3 2000/01/10 17:12:21 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.4 2000/01/13 21:06:19 lasiuk Exp $";
 
 ClassImp(StRichPixel)
 
@@ -50,20 +53,3 @@ StRichPixel::operator!=(const StRichPixel& p) const
     return !(*this == p);  // use operator==()
 }
 
-UShort_t
-StRichPixel::pad() const
-{
-    return (mPackedData & 0xff);  // first 8 bits
-}
-
-UShort_t
-StRichPixel::row() const
-{
-    return ( (mPackedData>>8) & 0xff);  // second 8 bits
-}
-
-UShort_t
-StRichPixel::adc()  const
-{
-    return ( (mPackedData>>16) & 0x3ff); // 10bits
-}
