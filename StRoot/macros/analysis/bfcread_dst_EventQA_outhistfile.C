@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.3 2000/01/13 16:55:11 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.4 2000/01/18 15:09:58 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.4  2000/01/18 15:09:58  kathy
+// setbranch runco so this branch of file will also be opened
+//
 // Revision 1.3  2000/01/13 16:55:11  kathy
 // updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
 //
@@ -83,6 +86,8 @@ void bfcread_dst_EventQA_outhistfile(
    
 // Input File Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+//     also open the runco branch in addition to dst branch (input file)
+    IOMk->SetBranch("runcoBranch",0,"r");
 
 // constructor for other maker (not used in chain)
    StHistUtil   *HU  = new StHistUtil;
