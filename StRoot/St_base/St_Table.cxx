@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.42 1999/02/15 14:20:33 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.43 1999/02/17 16:09:41 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.43  1999/02/17 16:09:41  fisyak
+// Fix Adopt
+//
 // Revision 1.42  1999/02/15 14:20:33  fisyak
 // remove staf stuff
 //
@@ -309,6 +312,7 @@ void St_Table::Adopt(Int_t n, void *arr)
    Clear();
  
    SetfN(n);
+   *s_MaxIndex = TMath::Max((Int_t)n,Int_t(*s_MaxIndex));
    s_Table = (char *)arr;
 }
  
