@@ -48,7 +48,7 @@ CC:>--------------------------------------------------------------------
 
       if(key.eq.0) then ! Calculated value of coefficients
          key = 1
-         write(6,1)
+         write(6,101)
          do i=1,MAXDET
             write(6,2) i,control_toadc(1).mode(i)
             if(control_toadc(1).mode(i).eq.0) then
@@ -202,7 +202,7 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
       write(*,7) det1,o1, det2,o2
       
       return
- 1    format(6x,'dep_e_toadc(Ver. 1.32) date => 07-Jun-1999')
+ 101  format(6x,'dep_e_toadc(Ver. 1.32) date => 07-Jun-1999')
  2    format(6x,'dep_e_toadc: detector# = ',i2,' mode =',i2)
  3    format(
      + ' Sample Fraction coefficient (unused now)     ', f10.2/
