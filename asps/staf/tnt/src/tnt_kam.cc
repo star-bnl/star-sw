@@ -53,7 +53,9 @@ void kam_tnt_list_()
 STAFCV_T 
 tnt_list()
 {
-  printf("%s", tnt->list());
+  char *s;
+  printf("%s", s=tnt->list());
+  free(s); /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }
 
@@ -109,7 +111,7 @@ tnt_newcwntuple(long hid, char* tname)
   tdmTable* table = tdm->findTable(tname);
 
   if (table == NULL || !tnt->createCWNtuple(hid,table)) {
-    EML_ERROR(KAM_FAILURE);
+    EML_FAILURE(FAILURE);
   }
   EML_SUCCESS(STAFCV_OK);
 }
@@ -131,7 +133,8 @@ tntcwntuple_hid(long hid)
   tntCWNtuple* tuple = tnt->findCWNtuple(hid);
 
   if (tuple == NULL) {
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
   printf("TNTCWNTUPLE:\tHID = %d \n",tuple->hid());
 
@@ -153,11 +156,14 @@ STAFCV_T
 tntcwntuple_title(long hid)
 {
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  char *s; /*fix memory leak -akio*/
   
   if (tuple == NULL) {
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  printf("TNTCWNTUPLE:\tTitle = (%s) \n",tuple->title());
+  printf("TNTCWNTUPLE:\tTitle = (%s) \n",s=tuple->title()); /*fix memory leak -akio*/
+  free(s);  /*fix memory leak -akio*/
 
   EML_SUCCESS(STAFCV_OK);
 }
@@ -179,7 +185,8 @@ tntcwntuple_entrycount(long hid)
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
   
   if (tuple == NULL) {
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
   printf("TNTCWNTUPLE:\tEntry Count = %d \n",tuple->entryCount());
 
@@ -203,7 +210,8 @@ tntcwntuple_columncount(long hid)
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
   
   if (tuple == NULL) {
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
   printf("TNTCWNTUPLE:\tColumn Count = %d \n",tuple->columnCount());
 
@@ -227,7 +235,8 @@ tntcwntuple_zebradir(long hid)
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
   
   if (tuple == NULL) {
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
   /*   printf("TNTCWNTUPLE:\tZebra Dir = (%s) \n",tuple->zebraDir()); HACK*/
 
@@ -253,19 +262,20 @@ tntcwntuple_gettable(long hid, char* tname)
   tdmTable* table = tdm->findTable(tname);
   
   if (tuple == NULL || table == NULL) {
-    EML_ERROR(KAM_FAILURE);
+    EML_CONTEXT("ERROR: One is invalid:  HID %d or name %s.\n",hid,tname);
+    EML_FAILURE(FAILURE);
   }
 
   EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
-** TNT/CWNTUPLE/APPEND NTUPLE TABLE
+** TNT/CWNTUPLE/GETTABLE NTUPLE TABLE
 */
 void kam_tntcwntuple_append_()
 {
   long npars = ku_npar();	/* no. of KUIP param.s */
-  long hid = ku_geti();		/* hid of CWNtuple */
+  long hid = ku_geti();	/* hid of CWNtuple */
   char *tname = ku_gets();	/* name of tdmTable */
 
   STAFCV_T status = tntcwntuple_append(hid, tname);
@@ -278,59 +288,10 @@ tntcwntuple_append(long hid, char* tname)
   tdmTable* table = tdm->findTable(tname);
   
   if (tuple == NULL || table == NULL) {
-    EML_ERROR(KAM_FAILURE);
+    EML_CONTEXT("ERROR: One is invalid:  HID %d or name %s.\n",hid,tname);
+    EML_FAILURE(FAILURE);
   }
   tuple->append(table);
-
-  EML_SUCCESS(STAFCV_OK);
-}
- 
-/*---------------------------------------------------------------------
-** TNT/CWNTUPLE/IMPORT NTUPLE TABLE
-*/
-void kam_tntcwntuple_import_()
-{
-  long npars = ku_npar();	/* no. of KUIP param.s */
-  long hid = ku_geti();		/* hid of CWNtuple */
-  char *tname = ku_gets();	/* name of tdmTable */
-
-  STAFCV_T status = tntcwntuple_import(hid, tname);
-}
-
-STAFCV_T 
-tntcwntuple_import(long hid, char* tname)
-{
-  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
-  tdmTable* table = tdm->findTable(tname);
-  
-  if (tuple == NULL || table == NULL) {
-    EML_ERROR(KAM_FAILURE);
-  }
-  tuple->import(table);
-
-  EML_SUCCESS(STAFCV_OK);
-}
- 
-/*---------------------------------------------------------------------
-** TNT/CWNTUPLE/CLEAR NTUPLE 
-*/
-void kam_tntcwntuple_clear_()
-{
-  long npars = ku_npar();	/* no. of KUIP param.s */
-  long hid = ku_geti();		/* hid of CWNtuple */
-
-  STAFCV_T status = tntcwntuple_clear(hid);
-}
-
-STAFCV_T 
-tntcwntuple_clear(long hid)
-{
-  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
-  
-  if (tuple == NULL) {
-    EML_ERROR(KAM_FAILURE);
-  }
-  tuple->clear();
 
   EML_SUCCESS(STAFCV_OK);
 }
@@ -353,7 +314,8 @@ STAFCV_T tntcwntuple_puttable(long hid, char* tname)
   tdmTable *table = tdm->findTable(tname);
 
   if (tuple == NULL || table == NULL) {
-    EML_ERROR(KAM_FAILURE);
+    EML_CONTEXT("ERROR: One is invalid:  HID %d or name %s.\n",hid,tname);
+    EML_FAILURE(FAILURE);
   }
 
   EML_SUCCESS(STAFCV_OK);
@@ -370,13 +332,57 @@ void kam_tntcwntuple_show_()
   STAFCV_T status = tntcwntuple_show(hid);
 }
 
+void kam_tntcwntuple_import_()
+{
+  long npars = ku_npar();     /* no. of KUIP param.s */
+  long hid = ku_geti();               /* hid of CWNtuple */
+  char *tname = ku_gets();    /* name of tdmTable */
+
+  STAFCV_T status = tntcwntuple_import(hid, tname);
+}
+
+STAFCV_T
+tntcwntuple_import(long hid, char* tname)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+  tdmTable* table = tdm->findTable(tname);
+
+  if (tuple == NULL || table == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->import(table);
+
+  EML_SUCCESS(STAFCV_OK);
+}
+void kam_tntcwntuple_clear_()
+{
+  long npars = ku_npar();     /* no. of KUIP param.s */
+  long hid = ku_geti();               /* hid of CWNtuple */
+
+  STAFCV_T status = tntcwntuple_clear(hid);
+}
+
+STAFCV_T
+tntcwntuple_clear(long hid)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+
+  if (tuple == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->clear();
+
+  EML_SUCCESS(STAFCV_OK);
+}
+
 STAFCV_T 
 tntcwntuple_show(long hid)
 {
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
 
   if (tuple == NULL) {
-    EML_ERROR(KAM_FAILURE);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(FAILURE);
   }
   tuple->show();
 
@@ -401,7 +407,8 @@ tntcwntuple_print(long hid)
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
 
   if (tuple == NULL) {
-    EML_ERROR(KAM_FAILURE);
+    EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
+    EML_FAILURE(FAILURE);
   }
   tuple->show();
 

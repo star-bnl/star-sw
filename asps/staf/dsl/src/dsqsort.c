@@ -40,8 +40,8 @@ static int dsQuickSortR(char *pLeft, char *pRight, unsigned size,
 int dsBinSearch(char **pFound, char *value, char *base, unsigned count,
 	unsigned size, int (*cmp)(char *base1, char *base2, char *key), char *key)
 {
-	char *ptr;
-	int left, mid, right, test;
+  char *ptr = 0; /* Initialize to quiet compiler. */
+  int left, mid, right, test;
     
 	left = 0;
 	right = (int)count - 1;

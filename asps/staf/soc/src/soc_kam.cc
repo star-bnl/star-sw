@@ -102,12 +102,12 @@ void kam_socobject_name_()
 STAFCV_T socobject_name(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    char *n;
@@ -136,12 +136,12 @@ void kam_socobject_type_()
 STAFCV_T socobject_type(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    char *t;
@@ -170,17 +170,18 @@ void kam_socobject_version_()
 STAFCV_T socobject_version(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    char *t;
    printf("SOC:\tObject version = %s \n",t=p->version());
-   delete[] t;
+   /* delete[] t; */
+   free (t);  /* alloc_conflict -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -220,7 +221,7 @@ void kam_soc_deleteid_()
    long npars = ku_npar();	/* number of KUIP parameters */
    long id = ku_geti();		/* object id */
 
-   EML_CONTEXT("This is a functional, though obsolete command.\n"
+   EML_CONTEXT("ERROR: This is a functional, though obsolete command.\n"
    "Please use SOC/DELETEOID instead.\n");
    EML_WARNING(OBSOLETE_COMMAND);
 
@@ -271,7 +272,7 @@ void kam_soc_deleteobject_()
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
-   EML_CONTEXT("This is a functional, though obsolete command.\n"
+   EML_CONTEXT("ERROR: This is a functional, though obsolete command.\n"
    "Please use SOC/OBJECT/DELETE instead.\n");
    EML_WARNING(OBSOLETE_COMMAND);
 
@@ -306,7 +307,7 @@ STAFCV_T soc_idobject(char* name, char* type)
 {
    IDREF_T id;
    if( !soc->idObject(name,type,id) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
    float f = id; set_staf_result(f);
@@ -382,12 +383,12 @@ void kam_socobject_lock_()
 STAFCV_T socobject_lock(long idref, char l)
 {
    if( !VALID_IDREF(idref) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    unsigned char lorig = p->lock();
@@ -430,12 +431,12 @@ void kam_socobject_implements_()
 STAFCV_T socobject_implements(long idref, char* iface)
 {
    if( !VALID_IDREF(idref) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *n=NULL;
    if( p->implementsInterface(iface) ){
@@ -499,7 +500,7 @@ STAFCV_T socobject_oid(char* name, char* type)
 {
    IDREF_T id;
    if( !soc->idObject(name,type,id) ){
-      EML_FAILURE(KAM_INVALID_IDREF);
+      EML_FAILURE(INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
    float f = id; set_staf_result(f);

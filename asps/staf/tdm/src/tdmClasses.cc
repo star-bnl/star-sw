@@ -278,8 +278,10 @@ char * tdmTable::  typeSpecifier () {
 char * tdmTable::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
+   cc = (char*)MALLOC(100); /*fix write bad  -akio*/
+   memset(cc,0,100);        /*fix write bad -akio*/
+   /* cc = (char*)MALLOC(79);*/
+   /* memset(cc,0,79);       */
    sprintf(cc,"%s %d/%d rows; %d bytes",c,rowCount()
 		,maxRowCount() ,rowSize());
    FREE(c);
@@ -325,9 +327,11 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    fprintf(stdout," ROW #");
    for( i=0;i<columnCount();i++ ){
       fprintf(stdout,"\t%s",c=columnName(i));
-/*HACK:			FREE(c); 	UNKNOWN BUG*/
+      /*HACK:                 FREE(c);        UNKNOWN BUG*/
+      FREE(c);  /*fix memory leak, or take out HACK. Works fine  -akio*/
       if( DS_TYPE_CHAR == columnTypeCode(i) ){
 	 long ii = columnElcount(i)-strlen(c=columnName(i));
+ 	 FREE(c);
 	 for(;0<ii;ii--){ fprintf(stdout," "); }
 //	 for(long ii=0;ii<iii;i++){ fprintf(stdout," "); }
       }
@@ -829,6 +833,7 @@ unsigned char tdmFactory :: implementsInterface (const char * iface) {
 //----------------------------------
 STAFCV_T tdmFactory:: deleteDataset (const char * name) {
    if( !soc->deleteObject(name,"tdmDataset") ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(CANT_DELETE_OBJECT);
    }
    EML_SUCCESS(STAFCV_OK);
@@ -837,6 +842,7 @@ STAFCV_T tdmFactory:: deleteDataset (const char * name) {
 //----------------------------------
 STAFCV_T tdmFactory:: deleteTable (const char * name) {
    if( !soc->deleteObject(name,"tdmTable") ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(CANT_DELETE_OBJECT);
    }
    EML_SUCCESS(STAFCV_OK);
@@ -983,7 +989,8 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    lbuff = 0;
    while ( isalnum(buff[lbuff]) || (buff[lbuff] == '_') ) lbuff++;
    name = (char*)MALLOC(lbuff+1);
-   strncpy(name,buff,lbuff);
+   strncpy(name,buff,lbuff); 
+   name[lbuff]=0; /* hjw 19Feb98 */
    name[lbuff] = 0;
    EML_SUCCESS(STAFCV_OK);
 }
@@ -1021,7 +1028,7 @@ STAFCV_T tdmFactory:: findTypeSpecification (const char * name
       }
       FREE(nm);
    }
-   EML_ERROR(INVALID_TYPE_NAME);		/*- 14jul97 BUGFIX -*/
+   EML_ERROR(INVALID_TYPE_NAME); /*- 14jul97 BUGFIX -*/
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --

@@ -63,6 +63,10 @@ typedef long EMLCV_T;
 #else
 #       define EXTERN extern
 #endif
+
+/* pretty err messages */
+EXTERN char eml_beep_on,eml_pretty_on,eml_demand_ack_on; 
+
 EXTERN char eml_stack[EML_STACKSIZE];
 EXTERN char eml_buffer[EML_BUFFERSIZE];
 EXTERN char eml_context[EML_CONTEXTSIZE];
@@ -75,6 +79,7 @@ extern CC_P int eml_start();
 extern CC_P int eml_stop();
 
 /*- Error and message handling functions -*/
+extern CC_P void emlPrettifyErrorMessage(char *errorString,int maxlen);
 extern CC_P int emlMessage(char *fmt, ...);
 extern CC_P char * emlContext(char *fmt, ...);
 
@@ -106,11 +111,11 @@ extern CC_P char * emlContext(char *fmt, ...);
 	EML_CLEARCONTEXT();}
 
 #define EML_PRINTCONTEXT(STREAM) \
-	{ if(eml_context)fprintf(STREAM,"%s\n",eml_context); \
+	{ if(eml_context[0])fprintf(STREAM,"%s\n",eml_context); \
 	EML_CLEARCONTEXT(); fflush(STREAM); }
 
 #define EML_PUSHCONTEXT() \
-	{if(eml_context)strcat(eml_stack,eml_context); \
+	{if(eml_context[0])strcat(eml_stack,eml_context); \
 	EML_CLEARCONTEXT();}
 #define EML_PUSHERROR(CODE) \
 	{sprintf(eml_buffer,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
@@ -119,8 +124,15 @@ extern CC_P char * emlContext(char *fmt, ...);
 	}
 #define EML_PUSHSUCCESS(CODE) \
 	{ SETCV(STAFCV_OK); }
-#define EML_POPSTACK() {fflush(0); \
+#define EML_POPSTACK() { \
+        char eml_error_ack[100]; \
+	fflush(0); \
+        emlPrettifyErrorMessage(eml_stack,EML_STACKSIZE); \
+	fprintf(stderr,"-------------------------------"); \
+	fprintf(stderr,"------------------------------------------------\n"); \
 	fprintf(stderr,"%s\n",eml_stack); \
+	if(eml_demand_ack_on) { fprintf(stderr,"Press return to continue: "); \
+				gets(eml_error_ack); } \
 	DSPERROR((dsl):); \
 	fflush(stderr); EML_CLEARSTACK();}
 
@@ -149,7 +161,7 @@ extern CC_P char * emlContext(char *fmt, ...);
 #define EML_TRACE(CODE) \
 	{fflush(0); \
 	fprintf(stderr,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
-	if(eml_context)fprintf(stderr,"%s\n",eml_context); \
+	if(eml_context[0])fprintf(stderr,"%s\n",eml_context); \
 	EML_CLEARCONTEXT(); fflush(stderr); }
 
 #define EML_DSPERROR(msg)

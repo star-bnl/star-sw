@@ -46,7 +46,7 @@ STAFCV_T spxdummy_ncalls(char* name)
    spxDummy* dummy;		/* spxDummy object */
 
    if( !spx->findDummy(name, dummy) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("SPXDUMMY:\tNumber of calls = %d \n",dummy->nCalls());
    EML_SUCCESS(STAFCV_OK);
@@ -74,7 +74,7 @@ STAFCV_T spxdummy_null(char* name)
 
    if( !spx->findDummy(name, dummy) 
    ||  !dummy->null() ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -100,11 +100,11 @@ STAFCV_T spxdummy_time(char* name)
    spxDummy* dummy;		/* spxDummy object */
 
    if( !spx->findDummy(name, dummy) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char* tim;
    if( !dummy->getTime(tim) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    printf("SPXDUMMY:\tTime = %s \n",tim);
    FREE(tim);
@@ -132,7 +132,7 @@ STAFCV_T spxgrid_height(char* name)
    spxGrid* grid;		/* spxGrid object */
 
    if( !spx->findGrid(name, grid) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("SPXGRID:\tHeight = %d \n",grid->height());
    EML_SUCCESS(STAFCV_OK);
@@ -159,7 +159,7 @@ STAFCV_T spxgrid_width(char* name)
    spxGrid* grid;		/* spxGrid object */
 
    if( !spx->findGrid(name, grid) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("SPXGRID:\tWidth = %d \n",grid->width());
    EML_SUCCESS(STAFCV_OK);
@@ -188,11 +188,11 @@ STAFCV_T spxgrid_get(char* name,short m,short n)
    spxGrid* grid;		/* spxGrid object */
 
    if( !spx->findGrid(name, grid) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    long value;
    if( !grid->get(m,n,value) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    printf("SPXGRID:\tCell value = %d \n",value);
    EML_SUCCESS(STAFCV_OK);
@@ -222,10 +222,10 @@ STAFCV_T spxgrid_set(char* name, short m, short n, long value)
    spxGrid* grid;		/* spxGrid object */
 
    if( !spx->findGrid(name, grid) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    if( !grid->set(m,n,value) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -293,7 +293,7 @@ void kam_spx_newdummy_()
 STAFCV_T spx_newdummy(char* name)
 {
    if( !spx->newDummy(name) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -319,7 +319,7 @@ void kam_spx_newgrid_()
 STAFCV_T spx_newgrid(char* name, short height, short width)
 {
    if( !spx->newGrid(name,height,width) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }

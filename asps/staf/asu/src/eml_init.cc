@@ -32,6 +32,10 @@ int eml_init()
 			15may97 - REMOVE HACK... vectors were missing
 -- 22JUL97 ---- TEMPORARY DEBUG REHACK --*/
    eml_kuvec_init_();
+   EML_INIT();
+   eml_pretty_on=7;          /* make error messages pretty */
+   eml_beep_on=7;            /* beep terminal on error */
+   eml_demand_ack_on=0;      /* beep terminal on error */
 
    return TRUE;
 }

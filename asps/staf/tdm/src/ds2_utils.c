@@ -61,19 +61,19 @@ int ds2ReallocTable(TABLE_HEAD_ST** ppHead,char** ppData
 	||  !dsTableDataAddress(&pDat, pTable)
 			|| !(pDat == pData)
 	){
-	   EML_ERROR(dsError("ds2ReallocTable: corrupt table structs"));
-	   return FALSE;
+	   EML_ERROR(CORRUPT_TABLE_STRUCTS);
+	   /*	   return FALSE;  EML_ERROR returns on its own  (done) */
 	}
 
 	if( !dsReallocTable(pTable,newCount)
 	||  !dsTableDataAddress(&pDat, pTable)
 	){
 	   EML_ERROR(dsError("ds2ReallocTable: can't reallocate"));
-	   return FALSE;
+	   /*	   return FALSE;  EML_ERROR returns on its own */
 	}
 	*ppData = pDat;
 	pHead->maxlen = newCount;
-	pHead->data_pointer=pDat;
+	pHead->data_pointer = (long) pDat;
 	return TRUE;
 }
 

@@ -213,7 +213,11 @@ int tcpWrite(int *fd, char *buf, int len)
         int *fd=herb;   /* to compile on irix */
 #endif
 
+#ifdef __sgi
+        for (cnt = len; cnt > 0; cnt -= i, ((char*)buf) += i) {
+#else
         for (cnt = len; cnt > 0; cnt -= i, buf += i) {
+#endif
                 if ((i = write(*fd, buf, cnt)) == -1) {
                         return (-1);
                 }

@@ -46,7 +46,9 @@ void kam_top_list_()
 }
 STAFCV_T top_list()
 {
-   printf("%s",top->list() );
+   char *s;
+   printf("%s",s=top->list() );
+   free(s);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -62,7 +64,7 @@ void kam_top_newproject_()
 STAFCV_T top_newproject(char* agent, char* select)
 {
    if( !top->newProject(agent, select) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE); // done
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -80,7 +82,7 @@ void kam_top_newjoin_()
 STAFCV_T top_newjoin(char* agent, char* select, char* where)
 {
    if( !top->newJoin(agent, select, where) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -97,7 +99,7 @@ void kam_top_newcut_()
 STAFCV_T top_newcut(char* agent, char* func)
 {
    if( !top->newCut(agent, func) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -110,13 +112,16 @@ void kam_topsort_agent_sort_() {
 }
 STAFCV_T topsort_agent_sort(char *agent,char *whichTable) {
   topSort* sort=NULL;
-  if(!top->findSort(agent,sort)) EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  if(!top->findSort(agent,sort)) {
+    EML_CONTEXT("ERROR: Did not find SOREF '%s'.\n",agent);
+    EML_FAILURE(OBJECT_NOT_FOUND);
+  }
   tdmTable* tbl=NULL;
   if( NULL == (tbl = tdm->findTable(whichTable)) ){
-    printf("I can't find table '%s'.\n",whichTable);
-    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: Did not find table '%s'.\n",whichTable);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  if(!sort->sort(tbl)) EML_ERROR(KAM_METHOD_FAILURE);
+  if(!sort->sort(tbl)) EML_FAILURE(METHOD_FAILURE);
   EML_SUCCESS(STAFCV_OK);
 }
 void kam_top_newsort_()
@@ -128,7 +133,7 @@ void kam_top_newsort_()
 }
 STAFCV_T top_newsort(char *agent,char *whichCol) {
   if( !top->newSort(agent, whichCol) ){
-     EML_ERROR(KAM_METHOD_FAILURE);
+     EML_FAILURE(METHOD_FAILURE);
   }
   EML_SUCCESS(STAFCV_OK);
 }
@@ -138,15 +143,15 @@ void kam_topsort_agent_column_()
 {
    // long npars = ku_npar();
    char *agent = ku_gets(); /* name of project agent */
-   char *whichColumn;/*17jan98 = ku_gets(); which column to sort with */
 
-   STAFCV_T status = topsort_agent_column(agent, whichColumn);
+   STAFCV_T status = topsort_agent_column(agent);
 }
-STAFCV_T topsort_agent_column(char* agent, char* whichCol)
+STAFCV_T topsort_agent_column(char* agent)
 {
    topSort* sort=NULL;
    if( !top->findSort(agent, sort) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *s=NULL;
    printf("TOP:\tThis agent sorts on column '%s'\n",s=sort->whichColumn());
@@ -165,7 +170,8 @@ STAFCV_T topproject_agent_selectspec(char* agent, char* select)
 {
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *s=NULL;
    printf("TOP:\tSelection Specification = (%s) \n"
@@ -192,11 +198,13 @@ STAFCV_T topproject_agent_project(char* agent, char* table1, char* table2
 //- Find Mandatory Input Objects
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table1);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
    switch (select[0]) {
@@ -213,7 +221,7 @@ STAFCV_T topproject_agent_project(char* agent, char* table1, char* table2
    }
 //- Project table
    if( !proj->project(tbl1,tbl2) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -231,10 +239,11 @@ STAFCV_T topproject_agent_reset(char* agent)
 //- Find Mandatory Input Objects
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    if( !proj->reset() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -252,7 +261,8 @@ STAFCV_T topjoin_agent_selectspec(char* agent, char* select)
 {
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *s=NULL;
    printf("TOP:\tSelection Specification = (%s) \n"
@@ -274,7 +284,8 @@ STAFCV_T topjoin_agent_whereclause(char* agent, char* where)
 {
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *s=NULL;
    printf("TOP:\tWhere Clause = (%s) \n"
@@ -303,15 +314,18 @@ STAFCV_T topjoin_agent_fastjoin(char* agent, char* table1, char* table2
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table1);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    tdmTable* tbl2=NULL;
    if( NULL == (tbl2 = tdm->findTable(table2)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table2);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
    switch (select[0]) {
@@ -336,7 +350,7 @@ STAFCV_T topjoin_agent_fastjoin(char* agent, char* table1, char* table2
    }
 //- Join tables
    if( !join->fastjoin(tbl1,tbl2,tbl3) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -360,15 +374,18 @@ STAFCV_T topjoin_agent_join(char* agent, char* table1, char* table2
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table1);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    tdmTable* tbl2=NULL;
    if( NULL == (tbl2 = tdm->findTable(table2)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table2);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
    switch (select[0]) {
@@ -393,7 +410,7 @@ STAFCV_T topjoin_agent_join(char* agent, char* table1, char* table2
    }
 //- Join tables
    if( !join->join(tbl1,tbl2,tbl3) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -411,10 +428,11 @@ STAFCV_T topjoin_agent_reset(char* agent)
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    if( !join->reset() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -429,10 +447,12 @@ STAFCV_T topcut_agent_function(char* agent)
 {
   topCut* cut=NULL;
   if( !top->findCut(agent, cut) ){
-    printf("I can't find agent %s.\n",agent);
-    EML_ERROR(OBJECT_NOT_FOUND);
+    EML_CONTEXT("ERROR: I can't find %s.\n",agent);
+    EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  printf("%s\n",cut->cutFunction());
+  char *s;
+  printf("%s\n",s=cut->cutFunction());
+  free(s); /*fix memory leak -akio*/
 }
 /*-------------------------------------------------------------------*/
 void kam_topcut_agent_filter_()
@@ -451,43 +471,47 @@ STAFCV_T topcut_agent_filter(char* agent, char* table1, char* table2
 //- Find or create Mandatory Objects
    topCut* cut=NULL;
    if( !top->findCut(agent, cut) ){
-      if(0 == strcmp(".",func))EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      if(0 == strcmp(".",func)) EML_FAILURE(OBJECT_NOT_FOUND);
       if( !top->newCut(agent, func)
       ||  !top->findCut(agent,cut)
       ){
-	 EML_ERROR(KAM_OBJECT_NOT_CREATED);
+	 EML_FAILURE(OBJECT_NOT_CREATED);
       }
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      printf("I can't find table '%s'.\n",table1);
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: I can't find table '%s'.\n",table1);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *spec1 = tbl1->typeSpecifier();
    tdmTable* tbl2=NULL;
    if( !tdm->newTable(table2,spec1,0) ) {
       if( NULL == (tbl2 = tdm->findTable(table2)) ){
          FREE(spec1);
-         printf("Could not create new table '%s' with spec '%s'.\n",
+         EML_CONTEXT("ERROR: Couldn't create new table '%s' with spec '%s'.\n",
          table2,spec1);
-         EML_ERROR(KAM_CREATE_FAILED);
+         EML_FAILURE(CREATE_FAILED);
       } else {
          if( NULL == (tbl2 = tdm->findTable(table2)) ) {
 	   FREE(spec1);
-	   EML_ERROR(KAM_OBJECT_NOT_FOUND);
+           EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",table2);
+	   EML_FAILURE(OBJECT_NOT_FOUND);
          }
       }
    } else {
       tbl2 = tdm->findTable(table2);
       if( !tbl2->isType(spec1) ){
-	 EML_ERROR(KAM_BAD_TABLE_TYPE);
+	 FREE(spec1);  /*fix memory leak -akio*/
+         EML_CONTEXT("ERROR: Bad table type '%s'?\n",spec1);
+	 EML_FAILURE(BAD_TABLE_TYPE);
       }
+      FREE(spec1);
       tbl2->maxRowCount(0);
    }
 
 //- filter table
    if( !cut->filter(tbl1,tbl2) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -508,22 +532,22 @@ STAFCV_T topcut_agent_cut(char* agent, char* table1,
 //- Find or create Mandatory Objects
    topCut* cut=NULL;
    if( !top->findCut(agent, cut) ){
-      if(0 == strcmp(".",func))EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      if(0 == strcmp(".",func)) EML_FAILURE(OBJECT_NOT_FOUND);
       if( !top->newCut(agent, func)
       ||  !top->findCut(agent,cut)
       ){
-	 EML_ERROR(KAM_OBJECT_NOT_CREATED);
+	 EML_FAILURE(OBJECT_NOT_CREATED);
       }
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      printf("I can't find table '%s'.\n",table1);
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: I can't find table '%s'.\n",table1);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
 //- cut table
    if( !cut->cut(tbl1) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE)
    }
    EML_SUCCESS(STAFCV_OK);
 }

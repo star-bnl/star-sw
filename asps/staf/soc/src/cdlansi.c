@@ -351,7 +351,7 @@ int cdl_create(char *filename)
 int cdl_create_(char *filename, int n)
 {
    char file_name[80];
-   strncpy(file_name, filename, n);
+   strncpy(file_name, filename, n); 
    file_name[n] = '\0';
    return cdl_create(file_name);
 }
@@ -372,15 +372,16 @@ void cdl_fnparse(char *filename, char *path, char *name, char *fext)
       }
       else {
         flll = strlen(str1);
-        strncpy(name, filename, fl - flll);
+        strncpy(name, filename, fl - flll); 
+        name[ fl - flll]=0; /* hjw 19Feb98 */
         name[fl - flll] = '\0';
-        strncpy(fext, str1 + 1, flll - 1);
+        strncpy(fext, str1 + 1, flll - 1); 
         fext[flll - 1] = '\0';
       }
     }
     else {
       fll = strlen(str);
-      strncpy(path, filename, fl - fll + 1);
+      strncpy(path, filename, fl - fll + 1); 
       path[fl - fll + 1] = '\0';
       str1 = strchr(str, '.');
       if (str1 == NULL) {
@@ -389,7 +390,7 @@ void cdl_fnparse(char *filename, char *path, char *name, char *fext)
       }
       else {
         strcpy(fext, str1 + 1);
-        strncpy(name, str + 1, fll - strlen(str1) - 1);
+        strncpy(name, str + 1, fll - strlen(str1) - 1); 
         name[fll - strlen(str1) - 1] = '\0';
       }
     }
@@ -492,7 +493,8 @@ int cdl_load(char *lib_name)
 int cdl_load_(char *lib_name, int n)
 {
     char name[82];
-    strncpy(name, lib_name, n);
+    strncpy(name, lib_name, n); 
+    name[ n]=0; /* hjw 19Feb98 */
     name[n] = '\0';
     return cdl_load(name);
 }
@@ -534,7 +536,7 @@ int cdl_unload(char *lib_name)
 int cdl_unload_(char *lib_name, int n)
 {
     char name[82];
-    strncpy(name, lib_name, n);
+    strncpy(name, lib_name, n); 
     name[n] = '\0';
     return cdl_unload(name);
 }
@@ -593,7 +595,7 @@ void *cdl_func_addr(char *func_name)
 void *cdl_func_addr_(char *func_name, int n)
 {
    char name[82];
-   strncpy(name, func_name, n);
+   strncpy(name, func_name, n); 
    name[n] = '\0';
    return cdl_func_addr(name);
 }
@@ -652,7 +654,7 @@ void cdl_print_symbols_(char *lib_name, int n)
      char symbol[80];
      int  ns;
 
-     strncpy(name, lib_name, n);
+     strncpy(name, lib_name, n); 
      name[n] = '\0';
 
      printf(" contents of library --%s--\n", name);
@@ -682,7 +684,7 @@ FuncPtr cdl_get_func(char *func_name)
 FuncPtr cdl_get_func_(char *func_name, int n)
 {
    char name[80];
-   strncpy(name, func_name, n);
+   strncpy(name, func_name, n); 
    name[n] = '\0';
    return cdl_get_func(name);
 }
@@ -806,7 +808,7 @@ int cdl_proto(char *func_proto)
 int cdl_proto_(char *func_proto, int n)
 {
    char proto[80];
-   strncpy( proto, func_proto, n);
+   strncpy( proto, func_proto, n); 
    proto[n] = '\0';
    return cdl_proto(proto);
 }

@@ -61,6 +61,9 @@ void asuMallocGrowTrace(size_t m)
 		ASU_MALLOCTRACE_T));
    memcpy(asu_mallocTrace, (void*)oldTrace
 		, oldMaxTrace*sizeof(ASU_MALLOCTRACE_T));
+   if(&asu_mallocTrace0 != oldTrace){ /* avoid free global -akio */
+     FREE(oldTrace);                  /* fix memory leak -akio */
+   }
 }
 
 /*--------------------------------------------------------------------*/
@@ -180,7 +183,8 @@ void asuMallocAdd(void *p, size_t size, char* file, int line)
       }
       asu_mallocTrace[asu_nTrace].p = p;
       asu_mallocTrace[asu_nTrace].size = size;
-      strncpy(asu_mallocTrace[asu_nTrace].file,file,127);
+      strncpy(asu_mallocTrace[asu_nTrace].file,file,127);  
+      asu_mallocTrace[asu_nTrace].file[127]=0; /* hjw 19Feb98 */
       asu_mallocTrace[asu_nTrace].line = line;
       asu_nTrace++;
    case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
@@ -273,7 +277,7 @@ void *asuRealloc(void *p, size_t size, char* file, int line)
 void asuFree(void *p, char* file, int line)
 {
    asuMallocRemove(p,file,line);
-   free(p);
+   if(p) free(p); /* This has more probrems... fix only free null -akio */
 }
 
 /*--------------------------------------------------------------------*/

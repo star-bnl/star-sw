@@ -445,6 +445,10 @@ int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount)
 	if (!DS_IS_TABLE(pTable)) {
 		DS_ERROR(DS_E_INVALID_TABLE);
 	}
+ 
+ 	/* OK to set a table to it's current row count */
+ 	if (pTable->elcount == rowCount) return TRUE;
+ 
 	if (rowCount > pTable->maxcount || pTable->p.data == NULL) {
 		DS_ERROR(DS_E_INVALID_ROW_COUNT);
 	}

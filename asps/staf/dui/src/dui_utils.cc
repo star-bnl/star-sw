@@ -117,39 +117,47 @@ char * dui_pathof(const char* base,const char* mod)
       return p;
       break;
    default:		// mod looks like a relative path
-   { //-for d[] scope
+   { // These curly brackets define the scope of d[].
       char *d[128];	// max directory depth of 128
+      char *herb;       // 20Feb98
       int i=0;		// depth counter
       int l=0;		// string length
       while( d[i]=strntok(base,"/",i) ){	// load absolute base
          l += strlen(d[i]);
          i++;
       }
-      int j=0;
-      while( d[i]=strntok(mod,"/",j++) ){	// add relative mod
+      // int j=0; 
+      herb=(char*)MALLOC(strlen(mod)+1); if(!herb) return NULL;
+      strcpy(herb,mod);   // so we can strtok (mod is const char*)
+      d[i]=strtok(herb,"/");
+      for(;;) {
+         if(!d[i]) break;
          if( 0 == strcmp("..",d[i]) ){
-            FREE(d[i--]);
+            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
+            i--;
             l -= strlen(d[i]);
-            FREE(d[i]);
+            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
          }
          else if( 0 == strcmp(".",d[i]) ){
-            FREE(d[i]);
+            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
          }
          else {
             l += strlen(d[i]);
             i++;
          }
+         d[i]=strtok(NULL,"/");
       }
       char* ap = (char*)MALLOC(l+i+1);
       memset(ap,0,l+i+1);		//ap[0] = '\000';
       for( int k=0;k<i;k++ ){
          strcat(ap,"/");
          strcat(ap,d[k]);
-         FREE(d[k]);
+         // hjw 20Feb98, can't free() this (const char*) FREE(d[k]);
       }
+      FREE(herb);
       return ap;
       break;
-   } //-for d[] scope
+   } //  These curly brackets define the scope of d[].
    }
 }
 
@@ -177,20 +185,20 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
    while( (s = strntok(path,"/",i++)) != NULL ){
 //printf("elem = %s \t",s);			.. ***** DEBUG *****
 //printf("base = %s \n",pDSr->name);		.. ***** DEBUG *****
-   if( 0 != strcmp(s,pDSr->name)){ 	// ***** HACK *****
-      if( !dsIsDataset(&isDataset,pDSr)
-      ||  !isDataset
-      ||  !dsFindEntry(&pDSc, pDSr, s)
-      ){
+     if( 0 != strcmp(s,pDSr->name)){ 	// ***** HACK *****
+       if( !dsIsDataset(&isDataset,pDSr)
+	   ||  !isDataset
+	   ||  !dsFindEntry(&pDSc, pDSr, s)
+	   ){
+	 if(s) FREE(s);  /*fix memory leak -akio/phenix*/
 	 EML_PUSHERROR(dsError("DSL-NODE_NOT_FOUND"));
-//printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
-//printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
-	 FREE(s);
+	 //printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
+	 //printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
 	 return FALSE;
-      }
-      FREE(s);
-      pDSr = pDSc;
-   }
+       }
+       pDSr = pDSc;
+     }
+     FREE(s); /*fix memory leak -akio*/
    }
    node = pDSr;
    return TRUE;

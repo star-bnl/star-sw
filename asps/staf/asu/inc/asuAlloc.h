@@ -63,11 +63,11 @@ extern CC_P void asuFree(void *p
 #define CALLOC(NOBJ,SIZE) asuCalloc(NOBJ,SIZE,__FILE__,__LINE__)
 #define MALLOC(SIZE) asuMalloc(SIZE,__FILE__,__LINE__)
 #define REALLOC(P,SIZE) asuRealloc(P,SIZE,__FILE__,__LINE__)
-#define FREE(P) asuFree(P,__FILE__,__LINE__)
+#define FREE(P) asuFree(P,__FILE__,__LINE__); P = NULL /*phenix*/
 #else
 #define CALLOC(NOBJ,SIZE) calloc(NOBJ,SIZE)
 #define MALLOC(SIZE) malloc(SIZE)
 #define REALLOC(P,SIZE) realloc(P,SIZE)
-#define FREE(P) free(P)
+#define FREE(P) free(P);  P=NULL /*phenix*/
 #endif
 

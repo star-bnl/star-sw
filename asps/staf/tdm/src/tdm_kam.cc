@@ -117,16 +117,19 @@ void kam_tdm_newdataset_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* dataset name */
-
-        STAFCV_T status = tdm_newdataset(name);
+   /*   long dim = ku_geti();	phenix correction, taken out by akio*//* dataset dimension */
+//   STAFCV_T status = tdm_newdataset(name,dim);   - akio
+   STAFCV_T status = tdm_newdataset(name);
 }
+
+//STAFCV_T tdm_newdataset(char* name, long dim) -akio
 STAFCV_T tdm_newdataset(char* name)
 {
-   long dim = 0; //HACK - REMOVE THIS JUNK!!!
-   if( !tdm->newDataset(name,dim) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+  long dim = 0; //HACK - REMOVE THIS JUNK!!! put back by akio
+  if( !tdm->newDataset(name,dim) ){
+    EML_FAILURE(METHOD_FAILURE);
+  }
+  EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -151,7 +154,7 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
 {
    if( sutMatchPrefix("struct",spec) ){
       if( !tdm->newTable(name,spec,rowcount) ){
-	 EML_FAILURE(KAM_METHOD_FAILURE);
+	 EML_FAILURE(METHOD_FAILURE);
       }
       EML_SUCCESS(STAFCV_OK);
    }
@@ -160,7 +163,7 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
       if( !tdm->findTypeSpecification(spec,specs)
       ||  !tdm->newTable(name,specs,rowcount) ){
 	 FREE(specs);
-	 EML_FAILURE(KAM_METHOD_FAILURE);
+	 EML_FAILURE(METHOD_FAILURE);
       }
       FREE(specs);
       EML_SUCCESS(STAFCV_OK);
@@ -198,7 +201,7 @@ STAFCV_T tdmtypespecifiers_list(long tid)
    }
    else {
       if( !tdm->getTypeName(tid,name) ){
-         EML_FAILURE(KAM_METHOD_FAILURE);
+         EML_FAILURE(METHOD_FAILURE);
       }
       printf("TDM:\tType name = (%s) \n",name);
       FREE(name);
@@ -231,12 +234,17 @@ STAFCV_T tdmtypespecifiers_show(char* name)
       if( !tdm->getTypeSpecification(i,tspec)
       ||  !tdm->getTypeName(i,tname)
       ){
-	 break;
+        printf("TDM:\tType spec = %s\n", tspec); /*shall we comment out this??*/
+        if(tspec) FREE(tspec); /*fix memory leak -akio*/
+        if(tname) FREE(tname); /*fix memory leak -akio*/
+        break;
       }
       if( sutMatchWild(name,tname) ){
 	 printf("TDM:\tType spec = ...\n%s\n.\n",tspec);
-	 FREE(tspec);
+         /* FREE(tspec); fix memory leak -akio*/
       }
+      FREE(tspec); /*fix memory leak -akio*/
+      FREE(tname); /*fix memory leak -akio*/
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -263,21 +271,26 @@ STAFCV_T tdmtypespecifiers_load(char * fname)
    FILE *f = NULL;
    if( NULL == (f = fopen(fname,"rb")) ){
       fclose(f);
-      EML_FAILURE(KAM_FILE_OPEN_FAILURE);
+      EML_FAILURE(FILE_OPEN_FAILURE);
    }
-   char * spec = (char*)MALLOC(2048);
+   char * spec = (char*)MALLOC(16384); /* more space... -akio*/
+   memset(spec,0,16384);
    char * s = spec;
    char * buffer = (char*)MALLOC(256);
+   memset(buffer,0,256);
    size_t l;
+   sprintf(spec,"empty"); /*fix read overflow(not null terminated) -akio*/
    while( fgets(buffer,255,f) ){
       printf("*"); fflush(0);
       l = strlen(buffer);
-      if( (strlen(spec) + l) >= 2047 ){
-	 FREE(spec); FREE(buffer);
+      if( (strlen(spec) + l) >= 16382 ){ /* more space... -akio*/
+	 FREE(spec);
+	 FREE(buffer);
 	 fclose(f);
-	 EML_FAILURE(KAM_SPEC_TOO_LONG);
+	 EML_FAILURE(SPEC_TOO_LONG);
       }
-      strncpy(s,buffer,l);
+      strncpy(s,buffer,l); /*fix "not null terminated" -akio*/ 
+      s[l]='\0'; /* hjw 19Feb98 */
       s += l;
    }
    unsigned char ccmt=0;
@@ -301,10 +314,14 @@ STAFCV_T tdmtypespecifiers_load(char * fname)
    ptmp=NULL;
    if( !dsNewTable(&ttmp,ntmp=temp_tablename(),spec,1,ptmp)
    ){
-      EML_FAILURE(CANT_CREATE_TEMP_TABLE);
+     FREE(spec); 
+     FREE(buffer);
+     EML_FAILURE(CANT_CREATE_TEMP_TABLE);
    }
 
-   FREE(spec); FREE(buffer);
+   FREE(ttmp); /*fix memory leak -akio*/
+   FREE(spec); 
+   FREE(buffer);
    fclose(f);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -332,17 +349,21 @@ void kam_tdmdataset_adddataset_()
    long npars = ku_npar();      /* number of KUIP parameters */
    char* dsname = ku_gets();	/* dataset name */
    char* name = ku_gets();	/* new dataset name */
+   /* long dim = ku_geti();   phenix correction, taken out by akio*//* dataset dimension */
 
-        STAFCV_T status = tdmdataset_adddataset(dsname,name);
+//   STAFCV_T status = tdmdataset_adddataset(dsname,name,dim); -akio
+   STAFCV_T status = tdmdataset_adddataset(dsname,name);
 }
+
+//STAFCV_T tdmdataset_adddataset(char* dsname,char* name, long dim) -akio
 STAFCV_T tdmdataset_adddataset(char* dsname,char* name)
 {
    tdmDataset *dataset;
-   long dim = 0; //HACK - REMOVE THIS JUNK!!!
+   long dim = 0; //HACK - REMOVE THIS JUNK!!!  put back by akio
    if( NULL == (dataset = tdm->findDataset(dsname))
    ||  !dataset->addDataset(name,dim)
    ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -374,7 +395,7 @@ STAFCV_T tdmdataset_addtable(char* dsname, char* name, char* spec
    if( NULL == (dataset = tdm->findDataset(dsname))
    ||  !dataset->addTable(name,spec,rowcount)
    ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -402,7 +423,7 @@ STAFCV_T tdmdataset_entrycount(char* name)
    long result=0;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    printf("TDMDATASET:\tEntry Count = %d \n"
 		,result=dataset->entryCount());
@@ -420,7 +441,7 @@ void kam_tdmdataset_entryname_()
 }
 STAFCV_T tdmdataset_entryname()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -433,7 +454,7 @@ void kam_tdmdataset_findentry_()
 }
 STAFCV_T tdmdataset_findentry()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -459,7 +480,7 @@ STAFCV_T tdmdataset_maxentrycount(char* name)
    long result=0;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMDATASET:\tMax Entry Count = %d \n"
 		,result=dataset->maxEntryCount());
@@ -489,7 +510,8 @@ STAFCV_T tdmdataset_name(char* name)
    tdmDataset* dataset;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *c=NULL;
    printf("TDMDATASET:\tDSL name = (%s) \n",c = dataset->dslName());
@@ -507,7 +529,7 @@ void kam_tdmdataset_show_()
 }
 STAFCV_T tdmdataset_show()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -528,7 +550,8 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
    /*- HACK - preliminary AHS calls do not work!!! -*/
    char *cs = (char*)MALLOC(strlen(cellSpec) +1);
    strcpy(cs,cellSpec);
-   char *tname = strtok(cs,"[].");
+   char* css = cs; /*fix memory leak -akio*/
+   char *tname = strtok(css,"[]."); /*fix memory leak -akio*/
    char *c = strtok(NULL,"[].");
    int nrow = atoi(c);
    char *cname = strtok(NULL,"[].");
@@ -548,19 +571,24 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 #**/
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      free(cs); /*fix memory leak -akio*/
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",tname);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      free(cs); /*fix memory leak -akio*/
+      EML_CONTEXT("ERROR: Are you sure you have a column named '%s'?\n",cname);
+      EML_FAILURE(METHOD_FAILURE);
    }
 
    int ncol = col.nCol;
 	
    TDM_CELLDATA_T cellData;
    if( !table->getCell(cellData,nrow,ncol) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      free(cs); /*fix memory leak -akio*/
+      EML_FAILURE(METHOD_FAILURE);
    }
 
    printf("TDMTABLE:\tCell data = ");
@@ -596,7 +624,10 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
       case DS_TYPE_STRUCT:
 	 result = 11301957; /*-TDM_E_UNIMPLEMENTED_TYPE-*/
 	 set_staf_result(result);
-	 EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+         FREE(col.name); /*fix memory leak -akio*/
+         FREE(col.type); /*fix memory leak -akio*/
+         free(cs); /*fix memory leak -akio*/
+	 EML_FAILURE(NOT_YET_IMPLEMENTED);
 	 break;
       default:
 	 result = -11301957; /*-TDM_E_UNKNOWN_TYPE-*/
@@ -606,12 +637,17 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 	 ,DS_TYPE_CHAR,DS_TYPE_OCTET,DS_TYPE_SHORT,DS_TYPE_U_SHORT
 	 ,DS_TYPE_LONG,DS_TYPE_U_LONG,DS_TYPE_FLOAT,DS_TYPE_DOUBLE
 	 ,DS_TYPE_STRUCT);
-	 EML_FAILURE(KAM_INVALID_TYPE);
+         FREE(col.name); /*fix memory leak -akio*/
+         FREE(col.type); /*fix memory leak -akio*/
+         free(cs); /*fix memory leak -akio*/
+	 EML_FAILURE(INVALID_TYPE);
 	 break;
    }
    set_staf_result(result);
 
-   FREE(cs);
+   FREE(col.name); /*fix memory leak -akio/phenix*/
+   FREE(col.type); /*fix memory leak -akio/phenix*/
+   free(cs); /*fix memory leak -akio/phenix*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -632,6 +668,7 @@ void kam_tdmtable_cell_putvalue_()
       values[np] = ku_gets();
    }
    STAFCV_T status = tdmtable_cell_putvalue(cellSpec,npars-1,values);
+   delete values; /*fix memory leak -akio*/
 }
 STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 {
@@ -642,18 +679,22 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    /*- HACK - preliminary AHS calls do not work!!! -*/
    char *cs = (char*)MALLOC(strlen(cellSpec) +1);
    strcpy(cs,cellSpec);
-   char *tname = strtok(cs,"[].");
+   char* css = cs; /*fix memory leak -akio*/
+   char *tname = strtok(css,"[]."); /*fix memory leak -akio*/
    char *c = strtok(NULL,"[].");
    int nrow = atoi(c);
    char *cname = strtok(NULL,"[].");
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      free(cs); /*fix memory leak -akio*/
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      free(cs); /*fix memory leak -akio*/
+      EML_CONTEXT("ERROR: Are you sure you have a column named '%s'?\n",cname);
+      EML_FAILURE(METHOD_FAILURE);
    }
 
    int ncol = col.nCol;
@@ -673,10 +714,12 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	    lv = 0;
 	    for( iv=0;iv<nv;iv++ ){ lv += strlen(values[iv]); }
 	    value = (char*)MALLOC(lv +1);
-	    strncpy(value,values[0],lv + 1); //4aug97 - BUGFIX
+	    strncpy(value,values[0],lv + 1); //4aug97 - BUGFIX 
+	    value[lv + 1]=0; /* hjw 19Feb98 */
 	    for( iv=1;iv<nv;iv++ ){ strcat(value,values[iv]); }
 	    value[strlen(value)] = 0;
-	    strncpy(cellData.data.c,value,col.size);
+	    strncpy(cellData.data.c,value,col.size); 
+	    cellData.data.c[col.size]=0; /* hjw 19Feb98 */
 	    FREE(value);
 	    break;
 	 case DS_TYPE_OCTET:
@@ -701,27 +744,35 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	    *(buff.data.d) = atof(values[np]);
 	    break;
 	 case DS_TYPE_STRUCT:
+            FREE(col.name); /*fix memory leak -akio*/
+            FREE(col.type); /*fix memory leak -akio*/
 	    FREE(cellData.data.v);
-	    FREE(cs);
-	    EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+            FREE(cs);       /*fix memory leak -akio*/
+	    EML_FAILURE(NOT_YET_IMPLEMENTED);
 	    break;
 	 default:
+            FREE(col.name); /*fix memory leak -akio*/
+            FREE(col.type); /*fix memory leak -akio*/
 	    FREE(cellData.data.v);
-	    FREE(cs);
-	    EML_FAILURE(KAM_INVALID_TYPE);
+	    FREE(cs);       /*fix memory leak -akio*/
+	    EML_FAILURE(INVALID_TYPE);
 	    break;
       }
       buff.data.c += elsize;
    }
 
    if( !table->putCell(cellData,nrow,ncol) ){
+      FREE(col.name); /*fix memory leak -akio/phenix*/
+      FREE(col.type); /*fix memory leak -akio/phenix*/
       FREE(cellData.data.v);
-      FREE(cs);
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      FREE(cs);       /*fix memory leak -akio/phenix*/
+      EML_FAILURE(METHOD_FAILURE);
    }
 
+   FREE(col.name); /*fix memory leak -akio/phenix*/
+   FREE(col.type); /*fix memory leak -akio/phenix*/
    FREE(cellData.data.v);
-   FREE(cs);
+   FREE(cs);       /*fix memory leak -akio/phenix*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -747,7 +798,8 @@ STAFCV_T tdmtable_columncount(char* name)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tColumn Count = %d \n"
 		,result=table->columnCount());
@@ -765,7 +817,7 @@ void kam_tdmtable_column_code_()
 }
 STAFCV_T tdmtable_column_code()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -778,7 +830,7 @@ void kam_tdmtable_column_elcount_()
 }
 STAFCV_T tdmtable_column_elcount()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -791,7 +843,7 @@ void kam_tdmtable_column_find_()
 }
 STAFCV_T tdmtable_column_find()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -804,7 +856,7 @@ void kam_tdmtable_column_name_()
 }
 STAFCV_T tdmtable_column_name()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -817,7 +869,7 @@ void kam_tdmtable_column_rank_()
 }
 STAFCV_T tdmtable_column_rank()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -830,7 +882,7 @@ void kam_tdmtable_column_shape_()
 }
 STAFCV_T tdmtable_column_shape()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -843,7 +895,7 @@ void kam_tdmtable_column_size_()
 }
 STAFCV_T tdmtable_column_size()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -856,7 +908,7 @@ void kam_tdmtable_column_type_()
 }
 STAFCV_T tdmtable_column_type()
 {
-EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -882,7 +934,7 @@ STAFCV_T tdmtable_maxrowcount(char* name,long maxrowcount)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    if( maxrowcount >= 0 ){				/* SET */
       table->maxRowCount(maxrowcount);
@@ -916,7 +968,7 @@ STAFCV_T tdmtable_name(char* name)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    char *c=NULL;
    printf("TDMTABLE:\tDSL Name = (%s) \n",c = table->dslName());
@@ -947,7 +999,7 @@ STAFCV_T tdmtable_print(char* name, long nrows, long ifirst)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    table->printRows(ifirst,nrows);
    EML_SUCCESS(STAFCV_OK);
@@ -976,7 +1028,7 @@ STAFCV_T tdmtable_rowcount(char* name, long rowcount)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    if( rowcount >= 0 ){					/* SET */
       table->rowCount(rowcount);
@@ -1010,7 +1062,7 @@ STAFCV_T tdmtable_rowsize(char* name)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tRow Size = %d bytes \n"
 		,result=table->rowSize());
@@ -1039,7 +1091,7 @@ STAFCV_T tdmtable_show(char* name)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tTable = ...\n"); table->show(); printf("\n.\n");
    EML_SUCCESS(STAFCV_OK);
@@ -1067,7 +1119,7 @@ STAFCV_T tdmtable_specifier(char* name)
    char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Specifier = ...\n%s\n.\n"
 		,c=table->typeSpecifier());
@@ -1097,7 +1149,7 @@ STAFCV_T tdmtable_typename(char* name)
    char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Name = (%s) \n",c=table->typeName());
    FREE(c);

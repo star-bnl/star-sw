@@ -66,7 +66,7 @@ extern CC_P STAFCV_T topcut_agent_filter(char*,char*,char*,char*);
 extern CC_P STAFCV_T topcut_agent_function(char*);
 
 extern CC_P STAFCV_T top_newsort(char *agent,char *whichCol);
-extern CC_P STAFCV_T topsort_agent_column(char* agent, char* table1);
+extern CC_P STAFCV_T topsort_agent_column(char* agent);
 extern CC_P STAFCV_T topproject_agent_selectspec(char* agent, char* select);
 extern CC_P STAFCV_T topproject_agent_project(char* agent, char* table1, char* table2
 		, char* select);

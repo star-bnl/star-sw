@@ -53,8 +53,19 @@ DS_MODULUS_STRUCT(1, DS_TYPE_CHAR,    char);
 DS_MODULUS_STRUCT(1, DS_TYPE_OCTET,   octet);
 DS_MODULUS_STRUCT(2, DS_TYPE_SHORT,   short);
 DS_MODULUS_STRUCT(2, DS_TYPE_U_SHORT, unsigned short);
+
+/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
+                      long and ulong are 8 bytes (not 4!)
+		      John Lajoie - lajoie@iastate.edu
+*/
+#ifdef OSF1
+DS_MODULUS_STRUCT(8, DS_TYPE_LONG,    long);
+DS_MODULUS_STRUCT(8, DS_TYPE_U_LONG,  unsigned long);
+#else
 DS_MODULUS_STRUCT(4, DS_TYPE_LONG,    long);
 DS_MODULUS_STRUCT(4, DS_TYPE_U_LONG,  unsigned long);
+#endif
+
 DS_MODULUS_STRUCT(4, DS_TYPE_FLOAT,   float);
 DS_MODULUS_STRUCT(8, DS_TYPE_DOUBLE,  double);
 
@@ -63,8 +74,19 @@ static DS_TYPE_T basicType[] = {
 	DS_TYPE_INIT(1, DS_TYPE_OCTET,   octet),
 	DS_TYPE_INIT(2, DS_TYPE_SHORT,   short),
 	DS_TYPE_INIT(2, DS_TYPE_U_SHORT, unsigned short),
+
+/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
+                      long and ulong are 8 bytes (not 4!)
+		      John Lajoie - lajoie@iastate.edu
+*/
+#ifdef OSF1
+	DS_TYPE_INIT(8, DS_TYPE_LONG,    long),
+	DS_TYPE_INIT(8, DS_TYPE_U_LONG,  unsigned long),
+#else
 	DS_TYPE_INIT(4, DS_TYPE_LONG,    long),
 	DS_TYPE_INIT(4, DS_TYPE_U_LONG,  unsigned long),
+#endif
+
 	DS_TYPE_INIT(4, DS_TYPE_FLOAT,   float),
 	DS_TYPE_INIT(8, DS_TYPE_DOUBLE,  double)};
 	

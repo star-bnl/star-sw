@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.19 1998/01/24 19:05:36 ward Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.20 1998/03/05 22:40:15 fisyak Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>

@@ -124,12 +124,15 @@ STAFCV_T duiFactory:: cd (const char * dirPath) {
    ||  !dsIsDataset(&result,pDS)
    ||  !result
    ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",dirPath);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
 
    char* newPath = (char*)dui_pathof(myCwd,dirPath);
    char* p=NULL;
    if( NULL == strstr(newPath,p=myRoot->name()) ){
+     if(p) FREE(p);    /*fix memory leaks -phenix*/
+     if(newPath) FREE(newPath);  /*fix memory leaks -phenix*/
       EML_ERROR(INVALID_DATASET);
    }
    FREE(p);
@@ -146,7 +149,7 @@ STAFCV_T duiFactory:: df () {
   struct mallinfo qq;
   qq=mallinfo();
   thisTime=qq.usmblks+qq.uordblks;
-  // bbb Do we need to delete qq?
+  // Do we need to delete qq?
   if(previous>=0) {
     duiSprinfWithCommas(buf1,(long)(thisTime));
     duiSprinfWithCommas(buf2,(long)(thisTime-previous));
@@ -164,7 +167,7 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
       long minsize) {
   bool_t isDataset; DS_DATASET_T *pDS2; char *dsName;
   static callCnt=0;
-  int ii; char path2[DUI_PATH_SIZE+1],buf[17];
+  int ii; char *dname,path2[DUI_PATH_SIZE+1],buf[17];
   size_t iEntry,numEntries,rowsize,nrows;
   indent++; indent++; path2[0]=0;
   if(!dsIsDataset(&isDataset,pDS)) EML_ERROR(DATASET_NOT_FOUND);
@@ -177,6 +180,12 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
   }
   if(isDataset) {
     if(!dsDatasetEntryCount(&numEntries,pDS)) EML_ERROR(DATASET_ERROR);
+    if(!dsDatasetName(&dname,pDS)) EML_ERROR(DATASET_ERROR);
+    printf("%s/%s ",path,dname);
+    for(ii=57-strlen(path)-strlen(dname);ii>=0;ii--) {
+      printf("%c",(callCnt%3==0)?'-':' ');
+    }
+    printf(" directory\n"); callCnt++;
     for(iEntry=0;iEntry<numEntries;iEntry++) {
       if(!dsDatasetEntry(&pDS2,pDS,iEntry)) EML_ERROR(DATASET_ERROR);
       if(duRecurse(path2,indent,pDS2,minsize)!=STAFCV_OK) 
@@ -215,11 +224,9 @@ STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
    DS_DATASET_T *pDS=NULL; int i; char buf[50];
    bool_t result;
 
-   if( !findNode_ds(dirPath,pDS)
-   ){
+   if( !findNode_ds(dirPath,pDS)) {
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-
    char* path2 = (char*)dui_pathof(myCwd,dirPath);
    char* p=NULL;
    if( NULL == strstr(path2,p=myRoot->name()) ){
@@ -291,24 +298,33 @@ STAFCV_T duiFactory:: cp (const char * fromPath
     toPathExtended=(char*)MALLOC(strlen(toPath)+1);
     strcpy(toPathExtended,toPath);
   }
-
-  if(!findNode_ds(fromPath,from))         EML_ERROR(SRC_NOT_FOUND);
-  if(!dsTableRowCount(&nok,from))         EML_ERROR(TABLE_NOT_FOUND);
-  if(!dsTableMaxRowCount(&nmax,from))     EML_ERROR(TABLE_NOT_FOUND);
-  if(!dsTableTypeSpecifier(&spec,from))   EML_ERROR(SPECS_NOT_FOUND);
+  /*fix memory leaks -akio*/
+  if(!findNode_ds(fromPath,from)){
+    free(toPathExtended);                 EML_ERROR(SRC_NOT_FOUND);}
+  if(!dsTableRowCount(&nok,from)){
+    free(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
+  if(!dsTableMaxRowCount(&nmax,from)){
+    free(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
+  if(!dsTableTypeSpecifier(&spec,from)){
+    free(toPathExtended);                 EML_ERROR(SPECS_NOT_FOUND);}
   nmaxLong=nmax;
   newTable(toPathExtended,spec,nmaxLong);
-  if(!findNode_ds(toPathExtended,to))      EML_ERROR(TGT_NOT_CREATED);
-  if(!dsSetTableRowCount(to,nok))          EML_ERROR(NROW_NOT_SET);
-  if(!dsAllocTables(to))                   EML_ERROR(TBL_MEMORY_NOT_ALLOCATED);
-  if(!dsTableDataAddress(&pDataTo,to))     EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);
-  if(!dsTableDataAddress(&pDataFrom,from)) EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);
-  if(!dsTableRowSize(&rowSize,to))         EML_ERROR(ROW_SIZE_NOT_FOUND);
+  if(!findNode_ds(toPathExtended,to)){
+    free(toPathExtended);                 EML_ERROR(TGT_NOT_CREATED);}
+  if(!dsSetTableRowCount(to,nok)){
+    free(toPathExtended);                 EML_ERROR(NROW_NOT_SET);}
+  if(!dsAllocTables(to)){
+    free(toPathExtended);                 EML_ERROR(TBL_MEMORY_NOT_ALLOCATED);}
+  if(!dsTableDataAddress(&pDataTo,to)){
+    free(toPathExtended);                 EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);}
+  if(!dsTableDataAddress(&pDataFrom,from)){
+    free(toPathExtended);                 EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);}
+  if(!dsTableRowSize(&rowSize,to)){
+    free(toPathExtended);                 EML_ERROR(ROW_SIZE_NOT_FOUND);}
   nbytes=nok*rowSize;
   memcpy(pDataTo,pDataFrom,nbytes);
 
   FREE(toPathExtended);
-
 
   EML_SUCCESS(STAFCV_OK);
 }
@@ -325,7 +341,8 @@ char * duiFactory:: ls (const char * path) {
    if( !findNode_ds(path,pDS) ){
       result = (char*)MALLOC(strlen(errormessage) +1);
       strcpy(result,errormessage);
-      EML_ERROR(OBJECT_NOT_FOUND);
+/*      EML_ERROR(OBJECT_NOT_FOUND);  fix memory leak -akio */
+      return result; /*fix memory leak -akio*/
    }
    if( !dsIsTable(&isTable, pDS)
    ||  !dsIsDataset(&isDataset, pDS)
@@ -388,6 +405,19 @@ char * duiFactory:: pwd () {
 
 //----------------------------------
 STAFCV_T duiFactory:: rm ( const char * filePath) {
+
+  DS_DATASET_T *pp=NULL;
+  bool_t isDir;
+
+  if(!findNode_ds(filePath,pp)) {
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",filePath);
+    EML_ERROR(DIR_NOT_FOUND);
+  }
+  if(!dsIsDataset(&isDir,pp))  EML_ERROR(DATASET_NOT_FOUND);
+  if(isDir) {
+    EML_CONTEXT("ERROR: '%s' is dir.  Use 'rmdir' to remove.\n",filePath);
+    EML_ERROR(USE_RMDIR_FOR_DIRS_NOT_RM);
+  }
   if(unlinkAndMaybeFreeMemory(TRUE,filePath)!=STAFCV_OK) {
     EML_ERROR(REMOVAL_FAILED);
   }
@@ -407,15 +437,22 @@ STAFCV_T duiFactory:: unlinkAndMaybeFreeMemory (char freeMemory,
   size_t numLinks;
   bool_t isTable;
 
-  if(!findNode_ds(filePath,from))  EML_ERROR(TABLE_NOT_FOUND);
+  if(!findNode_ds(filePath,from))  {
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",filePath);
+    EML_ERROR(TABLE_NOT_FOUND);
+  }
 
   if(!dsIsTable(&isTable,from)) EML_ERROR(DATASET_NOT_FOUND);
   if(!dsRefcount(&numLinks,from)) EML_ERROR(DATASET_NOT_FOUND);
 
   fullPath=(char*)dui_pathof(myCwd,filePath);
   if(!fullPath) EML_ERROR(FAIL_CREATE_FULL_PATH_OF_SRC);
-  if(strlen(fullPath)>MAXPATH) EML_ERROR(FULL_PATH_OF_SRC_TOO_LONG);
+  if(strlen(fullPath)>MAXPATH) {
+    FREE(fullPath);  /*fix memory leak -akio/phenix*/
+    EML_ERROR(FULL_PATH_OF_SRC_TOO_LONG);
+  }
   strcpy(tmp,fullPath);
+  free(fullPath);  /*fix memory leak -akio*/
   for(ii=strlen(tmp)-1;ii>=0;ii--) if(tmp[ii]=='/') break; tmp[ii]=0;
   if(!strstr(tmp,"/")) EML_ERROR(NO_PARENT_DIR_FOR_SRC);
   if(!findNode_ds(tmp,parentOfFrom)) EML_ERROR(PARENT_DIR_OF_SRC_NOT_FOUND);
@@ -438,26 +475,41 @@ STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
   char *theName=NULL,*newPath=NULL,*fullpath=NULL;
   bool_t isDir;
 
-  if(!findNode_ds(dirPath,pp)) EML_ERROR(DIR_NOT_FOUND);
+  if(!findNode_ds(dirPath,pp)) {
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",dirPath);
+    EML_ERROR(DIR_NOT_FOUND);
+  }
   if(!dsIsDataset(&isDir,pp))  EML_ERROR(DATASET_NOT_FOUND);
   if(!isDir)                   EML_ERROR(USE_RM_FOR_TABLES_NOT_RMDIR);
   if(!dsDatasetEntryCount(&nentry,pp)) EML_ERROR(DATASET_NOT_FOUND);
   fullpath=(char*)dui_pathof(myCwd,dirPath);
 
   for(ii=0;ii<nentry;ii++) {
-    if(!dsDatasetEntry(&dsp,pp,ii)) EML_ERROR(ENTRY_NOT_FOUND);
-    if(!dsIsDataset(&isDir,dsp))  EML_ERROR(DATASET_NOT_FOUND);
+    if(!dsDatasetEntry(&dsp,pp,ii)){
+      FREE(fullpath); /*fix memory leak -akio*/
+      EML_ERROR(ENTRY_NOT_FOUND);
+    }
+    if(!dsIsDataset(&isDir,dsp)){
+      FREE(fullpath); /*fix memory leak -akio*/
+      EML_ERROR(DATASET_NOT_FOUND);
+    }
     if(isDir) {
       if(!dsDatasetName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
       newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
-      if(!newPath) EML_ERROR(MEM_ALLOC_FAILED);
+      if(!newPath) {
+ 	FREE(fullpath);  
+ 	EML_ERROR(MEM_ALLOC_FAILED);
+      }	
       sprintf(newPath,"%s/%s",fullpath,theName);
       rmdir(newPath);
       free(newPath);
     } else {
       if(!dsTableName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
       newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
-      if(!newPath) EML_ERROR(MEM_ALLOC_FAILED);
+      if(!newPath) {
+ 	FREE(fullpath);
+ 	EML_ERROR(MEM_ALLOC_FAILED);
+      }	
       sprintf(newPath,"%s/%s",fullpath,theName);
       unlinkAndMaybeFreeMemory(TRUE,newPath);
       free(newPath);
@@ -505,6 +557,7 @@ tdmDataset* duiFactory:: findDataset (const char * dirPath) {
       ||  NULL == (dataset = createDataset(fullPath,pDS))
       ){
 	 // EML_ERROR(OBJECT_NOT_FOUND);
+         FREE(fullPath); /*fix memory leak -akio*/
 	 return NULL;
       }
    }
@@ -563,6 +616,9 @@ tdmDataset* duiFactory:: newDataset (const char * name, long setDim){
 tdmTable* duiFactory:: newTable (const char * name
 		, const char * spec, long rows ){
    IDREF_T id;
+   char *p1=NULL;   /*fix memory leak -akio/phenix*/
+   char *p2=NULL;   /*fix memory leak -akio/phenix*/
+   char *p3=NULL;   /*fix memory leak -akio/phenix*/
 
    if( soc->idObject(name,"tdmTable",id) ){
       // EML_ERROR(DUPLICATE_OBJECT_NAME);
@@ -573,14 +629,20 @@ tdmTable* duiFactory:: newTable (const char * name
    char* pData=NULL;
    if( NULL == (p = findTable(name)) ){	//- create object from pointer
       					//- ... or create pointer
-      if( !findNode_ds(dui_dirof(dui_pathof(myCwd,name)), pDSbase)
-      ||  !dsAddTable(pDSbase,dui_notdirof(name),(char*)spec,rows,&pData)
-      ||  NULL == (p = findTable(name))	//- create object from pointer
-      ){
-	 // EML_ERROR(CANT_CREATE_OBJECT);
-	 return NULL;
+     if( !findNode_ds(p1=dui_dirof(p2=dui_pathof(myCwd,name)), pDSbase)
+	 ||  !dsAddTable(pDSbase,(p3=dui_notdirof(name)),(char*)spec,rows,&pData)
+	 ||  NULL == (p = findTable(name))	//- create object from pointer
+	 ){                                      /*fix memory leak -akio/phenix*/
+       // EML_ERROR(CANT_CREATE_OBJECT);
+       if(p1) FREE(p1);  /*fix memory leak -akio/phenix*/
+       if(p2) FREE(p2);  /*fix memory leak -akio/phenix*/
+       if(p3) FREE(p3);  /*fix memory leak -akio/phenix*/
+       return NULL; 
       }
    }
+   if(p1) FREE(p1);  /*fix memory leak -akio/phenix*/
+   if(p2) FREE(p2);  /*fix memory leak -akio/phenix*/
+   if(p3) FREE(p3);  /*fix memory leak -akio/phenix*/
    addEntry(id);
    // EML_SUCCESS(STAFCV_OK);
    return p;
@@ -594,6 +656,7 @@ STAFCV_T duiFactory:: findNode_ds (const char * path
    ||  !duiFindDS(pNode,pDSroot,fullPath)
    ){
       FREE(fullPath);
+      EML_CONTEXT("ERROR: I can't find '%s'.\n",path);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    FREE(fullPath);

@@ -58,11 +58,28 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
 
 /*- WARNING - Following strncpy's write \000 into next struct word. -*/
    strncpy(tbl_h->name,name,20);		/*- WARNING -*/
+ 
+/* OSF1 ifdefs added 12 Dec. 1997 by J. Lajoie - lajoie@iastate.edu
+   - use a cast to long (not int!) for 64-bit architecture */
+#ifdef OSF1
+   memset((char*)(long(tbl_h->name)+strlen(name)),' ',
+	  20-strlen(name));
+#else
    memset((char*)(int(tbl_h->name)+strlen(name)),' ',
-                20-strlen(name));
+	  20-strlen(name));
+#endif
+   
    strncpy(tbl_h->type,type,20);		/*- WARNING -*/
+
+/* OSF1 ifdefs added 12 Dec. 1997 by J. Lajoie - lajoie@iastate.edu
+   - use a cast to long (not int!) for 64-bit architecture */
+#ifdef OSF1
+   memset((char*)(long(tbl_h->type)+strlen(type)),' ',
+	  20-strlen(type));
+#else
    memset((char*)(int(tbl_h->type)+strlen(type)),' ',
-                20-strlen(type));
+	  20-strlen(type));
+#endif
 
    tbl_h->maxlen = header.maxlen;
    tbl_h->nok = header.nok;

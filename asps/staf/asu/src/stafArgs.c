@@ -16,7 +16,7 @@
 /*-------------------------------------------- TYPEDEFS             --*/
 #define TRUE 1
 #define FALSE 0
-
+#define MAX_ARGS 100
 /*-------------------------------------------- GLOBALS              --*/
 /*-------------------------------------------- PROTOTYPES           --*/
 int stafArgs(int argc, char **argv);
@@ -37,17 +37,22 @@ int stafArgs(int argc, char **argv)
    int i=0,j=0;
 
    static int nargs=0;
-   static char **argvs;
+/*   static char **argvs; */
+   static char* argvs[MAX_ARGS];  /*fix write bad index -akio*/
 
    int none=0,error=0;
    int help=0,shared=0,paw=0,exec=0;
 
 /*- Store arguments. -*/
-   nargs = argc;
-   argvs = (char**)malloc(nargs);
+   nargs = argc; 
+   if(nargs > MAX_ARGS){     /*fix write bad index -akio*/
+     puts("stafArgs: Too mant arguments. Ignore rest");
+     nargs=MAX_ARGS;
+   }
+/*   argvs = (char**)malloc(nargs); */
    for( i=0;i<nargs;i++ ){
-      argvs[i] = (char*)malloc(strlen(argv[i]) +1);/*INS++:WRITE_BAD_INDEX*/
-      strcpy(argvs[i],argv[i]);/*INS++:READ_BAD_INDEX*/
+     argvs[i] = (char*)malloc(strlen(argv[i]) +1);
+     strcpy(argvs[i],argv[i]);
    }
 
 /*- Interpret arguments. -*/
@@ -87,7 +92,7 @@ int stafArgs(int argc, char **argv)
 
    if( exec ){
       i = exec +1;
-      while( '-' != argvs[i] ){
+      while( '-' != argvs[i][0] ){
          printf("EXECUTE %s\n",argvs[i++]);
       }
    }

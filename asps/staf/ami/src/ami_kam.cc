@@ -66,7 +66,9 @@ void kam_ami_list_()
 /*------------------------------------*/
 STAFCV_T ami_list()
 {
-   printf("%s",ami->list());
+   char* amilist;
+   printf("%s",(amilist = ami->list()) );
+   free(amilist);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -111,7 +113,7 @@ void kam_ami_call_()
    for( int np=1;np<npars;np++ ){
       tnames[np-1] = ku_gets();
    }
-	EML_CONTEXT("This is an obsolete command.\n"
+	EML_CONTEXT("ERROR: This is an obsolete command.\n"
 	"Please use AMI/MODULE/CALL instead.\n");
 	EML_WARNING(OBSOLETE_COMMAND);
 	STAFCV_T status = ami_call(pname,npars-1,tnames);
@@ -131,7 +133,7 @@ STAFCV_T ami_call(char* name,long ntabs,char **tnames)
       //- WARNING!!! - PAM status already recorded!!!
       EML_POPSTACK();
       return FALSE;
-//    EML_FAILURE(KAM_METHOD_FAILURE);
+//    EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 
@@ -159,7 +161,8 @@ STAFCV_T amimodule_rank(char* name)
    amiInvoker* pam;		/* amiInvoker object */
 
    if( NULL == (pam = ami->findInvoker(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    printf("AMI:\tAnalysis module rank = %d \n",pam->rank());
    EML_SUCCESS(STAFCV_OK);
@@ -188,7 +191,8 @@ STAFCV_T amimodule_show(char* name)
    amiInvoker* pam;		/* amiInvoker object */
 
    if( NULL == (pam = ami->findInvoker(name)) ){
-      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+      EML_FAILURE(OBJECT_NOT_FOUND);
    }
    int rank = pam->rank();
    char *c;
@@ -226,7 +230,7 @@ void kam_amimodule_init_()
 /*------------------------------------*/
 STAFCV_T amimodule_init(char* name)
 {
-   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -248,7 +252,7 @@ void kam_amimodule_start_()
 /*------------------------------------*/
 STAFCV_T amimodule_start(char* name)
 {
-   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -270,6 +274,6 @@ void kam_amimodule_stop_()
 /*------------------------------------*/
 STAFCV_T amimodule_stop(char* name)
 {
-   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 

@@ -294,7 +294,7 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   /* if(row!=1) return FALSE; */
   if(*cuts=='\0') return TRUE;  /* no cuts, so return TRUE */
   DelWhiteSpace(cuts); /* October 9 1995 ToLowerCase(cuts); */ 
-  strncpy(dsu_gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2);
+  strncpy(dsu_gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2); 
   if(!DelOutParens(cuts)) {
     Say1("Parse error in dsuDoCuts().");
     return PARSE_ERR; /* BBB This was TRUE as from evl. */
@@ -356,10 +356,10 @@ dsu_Progress(int a,int total,char *junk1,char *junk2) {
 #define SHOW 35
 int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
-  strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
+  strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy); 
   if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
   dsu_gAlreadyDidIt=FALSE;
-  strncpy(litCopy,cuts,SHOW+1); litCopy[SHOW]='\0';
+  strncpy(litCopy,cuts,SHOW+1); litCopy[SHOW]='\0'; 
   if(strlen(cuts)>SHOW) strcat(litCopy,"...");
   if(sizeof(char)!=1) {
     /* If you get this error message, you may have to adjust BITSPERCHAR */
@@ -455,7 +455,7 @@ int TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
     ** since we don't access the chars individually. */
     if(off!=0) {dsuTableValErr(772); return 0;}
 
-    /*           */ strncpy(uu,(char*)(pData+off*rowSize),98);
+    /*           */ strncpy(uu,(char*)(pData+off*rowSize),98); 
     if(colSize<98) uu[colSize]='\0';
     for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]<32||uu[ii]>126) uu[ii]=' '; }
     for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]!=' ') break; uu[ii]='\0'; }

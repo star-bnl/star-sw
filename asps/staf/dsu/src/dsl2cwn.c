@@ -15,7 +15,11 @@
 #include "dsxdr.h"
 #include "dsuType.h"
 #include "cfortran.h"
+#ifdef hpux
+#include "hbook_hpux.h"
+#else
 #include "hbook.h"
+#endif
 
 /*----------------------------------
 *  globals
@@ -171,11 +175,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 		  strcpy(&bspec[strlen(bspec)-1],"");
 		  switch (btype[nb-1]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-			HBNAME(hid,block_name(name,nb-1)
+			HBNAMC(hid,block_name(name,nb-1)
 				   ,(char *)pData,bspec);
 			break;
 		     case NUMB_BLOCK:
-			HBNAME(hid,block_name(name,nb-1)
+			HBNAMC(hid,block_name(name,nb-1)
 				   ,(int *)pData,bspec);
 			break;
 		     default:
@@ -201,11 +205,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
       strcpy(&bspec[strlen(bspec)-1],"");
       switch (btype[nb-1]) {
 	 case CHAR_BLOCK: /* should use HBNAMC */
-	    HBNAME(hid,block_name(name,nb-1)
+	    HBNAMC(hid,block_name(name,nb-1)
 		       ,(char *)pData,bspec);
 	    break;
 	 case NUMB_BLOCK:
-	    HBNAME(hid,block_name(name,nb-1)
+	    HBNAMC(hid,block_name(name,nb-1)
 		       ,(int *)pData,bspec);
 	    break;
 	 default:
@@ -222,11 +226,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	       } else {
 		  switch(btype[ib]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-			HBNAME(hid,block_name(name,ib)
+			HBNAMC(hid,block_name(name,ib)
 				   ,(char *)pData,"$SET");
 			break;
 		     case NUMB_BLOCK:
-			HBNAME(hid,block_name(name,ib)
+			HBNAMC(hid,block_name(name,ib)
 				   ,(int *)pData,"$SET");
 			break;
 		     default:
@@ -350,16 +354,19 @@ char* block_name(char *name,long n)
    static char *bname[16];
    char numb[4];
 
-   strncpy(bname,"",8);
-   strncpy(numb,"",4);
+   strncpy(bname,"",8); 
+   strncpy(numb,"",3);  /* hjw 19Feb98 */
    if(n < 1 || n > 99) {
-      strncpy(bname,name,8);
+      strncpy(bname,name,8); 
+      bname[8]=0; /* hjw 19Feb98 */
    } else {
       sprintf(numb,"%d",n);
       if(n < 10) {
-	 strncpy(bname,name,7);
+	 strncpy(bname,name,7); 
+	 bname[7]=0; /* hjw 19Feb98 */
       } else if(n < 100) {
-	 strncpy(bname,name,6);
+	 strncpy(bname,name,6); 
+	 bname[6]=0; /* hjw 19Feb98 */
       }
 	 strcat(bname,numb);
    }

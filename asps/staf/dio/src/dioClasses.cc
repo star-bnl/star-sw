@@ -77,7 +77,7 @@ char * dioStream::  listing () {
    char* l = location();
    char ll[28];
    strcpy(ll,"                           ");
-   strncpy(ll,l,strlen(ll)-1);
+   strncpy(ll,l,strlen(ll)-1); 
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
    if(strlen(ll)>24) ll[24]=0; // hjw 980118
@@ -100,6 +100,7 @@ unsigned char dioStream :: implementsInterface (const char * iface) {
 STAFCV_T dioStream:: close () {
 
    if( !(DIO_CLOSE_STATE != myState) ){
+      EML_CONTEXT("ERROR: This stream is already closed.\n");
       EML_ERROR(BAD_MODE_OR_STATE);
    }
 
@@ -123,8 +124,8 @@ STAFCV_T dioStream:: getEvent (tdmDataset* destination) {
    if( !(DIO_OPEN_STATE == myState)
    ||  !(DIO_READ_MODE == myMode || DIO_UPDATE_MODE == myMode)
    ){
-      EML_CONTEXT("Read-write mode must be READ or UPDATE\n"
-      "Open-close state must be OPEN\n");
+      EML_CONTEXT("ERROR: Read-write mode must be READ or UPDATE.\n"
+      "Open-close state must be OPEN.\n");
       EML_ERROR(BAD_MODE_OR_STATE);
    }
    myState = DIO_READ_STATE;
@@ -170,7 +171,8 @@ STAFCV_T dioStream:: putEvent (tdmDataset* source) {
    if( !(DIO_OPEN_STATE == myState)
    ||  !(DIO_WRITE_MODE == myMode || DIO_UPDATE_MODE == myMode)
    ){
-      EML_ERROR(BAD_MODE_OR_STATE);
+    EML_CONTEXT("ERROR: stream either not open or not write/update mode.\n");
+    EML_ERROR(BAD_MODE_OR_STATE);
    }
    myState = DIO_WRITE_STATE;
 
@@ -500,7 +502,7 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
   if( !(myMode == DIO_UNKNOWN_MODE)
   &&  !(mode == myMode)
   ){
-    EML_CONTEXT("dioSockStream mode cannot change from (%s) to (%s)\n"
+    EML_CONTEXT("ERROR: dioSockStream mode cannot change from (%s) to (%s)\n"
 		,cc=dio_mode2text(myMode)
 		,ccc=dio_mode2text(mode));
     FREE(cc); FREE(ccc);
@@ -549,6 +551,7 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
    case DIO_UPDATE_MODE:	//- Not implemented
    case DIO_UNKNOWN_MODE:
    default:
+      EML_CONTEXT("ERROR: The mode (read/write/update) is wrong.\n");
       EML_ERROR(INVALID_MODE);
       break;
    }
@@ -788,6 +791,7 @@ dioFileStream * dioFactory:: newFileStream (const char * name
 		, const char * fileName) {
    IDREF_T id;
    if( soc->idObject(name,"dioFileStream",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    static dioFileStream* p;
@@ -823,6 +827,7 @@ dioSockStream * dioFactory:: findSockStream (const char * name){
    socObject* obj;
    if( NULL == (obj = soc->findObject(name,"dioSockStream")) ){
       sockStream = NULL;
+      EML_CONTEXT("ERROR: Are you sure you have a sock stream '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    sockStream = DIOSOCKSTREAM(obj);
@@ -852,6 +857,7 @@ dioSockStream *  dioFactory:: newSockStream (const char * name
 		, const char * hostName, long port) {
    IDREF_T id;
    if( soc->idObject(name,"dioSockStream",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    static dioSockStream* p;
