@@ -22,7 +22,7 @@ public:
     double getZDCX();
     double getMult();
     double getL0();
-    double getRichHVStatus();
+    unsigned int getRichHVStatus();
     void update(StMaker*);
     
     friend class nodbody; // For virtual ~
