@@ -12,10 +12,13 @@ void Messenger::setMessageOstream(unsigned int routing, ostream *pNewStream){
 
   ostream *pOstream = g_apMessageOstreams[iMessageType];
   if( pOstream!=&cout && pOstream!=&cerr ){
-    pOstream->close();
+    pOstream->flush();
+    ofstream *pOfstream = dynamic_cast<ofstream *>(pOstream);
+    if(pOfstream != NULL){ pOfstream->close(); }
     delete pOstream;
   }
   g_apMessageOstreams[iMessageType] = pNewStream;
+
 } // setMessageOstream
 
 void Messenger::init(unsigned int routing){
@@ -57,6 +60,7 @@ Messenger* Messenger::instance(unsigned int routing){
 
 } // instance
 
+/*
 Messenger& Messenger::operator<<(char *szMessage){ 
   dispatchMessage(szMessage, (__sender)writeMessageSz);
   return *this;
@@ -73,6 +77,8 @@ Messenger& Messenger::operator<<(double dVal){
 } // operator<<(double)
 
 void Messenger::dispatchMessage(void *pMessage, __sender sender){
+*/
+void Messenger::dispatchMessage(char *szMessage, streamsize iLen){
 
   // keep track of which unique streams (not routing bits) we have
   // written to
@@ -88,7 +94,9 @@ void Messenger::dispatchMessage(void *pMessage, __sender sender){
     if((routing&message) == message && !bStreamUsed[iMessageType]){
 
       ostream *pStream = g_apMessageOstreams[iMessageType];
-      (*sender)(*pStream, pMessage);
+      pStream->write(szMessage, iLen);
+      pStream->flush();
+//      (*sender)(*pStream, pMessage);
 
       // mark that we have written to this stream for all message routes
       // using exactly the same stream
@@ -102,5 +110,80 @@ void Messenger::dispatchMessage(void *pMessage, __sender sender){
   }
 
 } // dispatchMessage
+/*
+ostream& Messenger::flush(){
 
+  //printf("[[Messenger::flush()]]");
 
+  // print message to all streams
+  dispatchMessage();
+
+  // clear buffer for next message
+  //rdbuf()->seekpos(0, ios::out);
+
+} // flush
+
+/// kludge necessary because ostream::flush() isn't virtual.
+/// We need a hook into ostream to know when to dispatch our messages,
+/// and this is it.
+ostream& ostream::flush()
+{
+  //printf("[[ostream::flush()]]");
+
+  // dynamic_cast and type_info don't work here for ostream 
+  // because of a bug in gcc <3.0, see
+  // http://faqchest.dynhost.com/prgm/gcc-l/gcc-01/gcc-0108/gcc-010802/gcc01081306_08660.html
+
+  if(Messenger::isMessenger(this)){
+    Messenger *pMessenger = dynamic_cast<Messenger *>(this);
+    pMessenger->flush();
+  }
+
+  //----------------------
+  // real ostream::flush
+  if (_strbuf->sync())
+    set(ios::badbit);
+
+  return *this;
+  //----------------------
+}
+
+bool Messenger::isMessenger(ostream *pOstream){
+
+  for(messengerMapIterator iterator = s_messengerMap.begin();
+        iterator!=s_messengerMap.end(); iterator++){
+    if(pOstream == iterator->second){ return true; }
+  }
+
+  return false;
+} // isMessenger
+*/
+
+int MessengerBuf::sync ()
+{ streamsize n = pptr () - pbase ();
+//  return (n && m_pMessenger->dispatchMessage(pbase(), n) != n) ? EOF : 0;
+ m_pMessenger->dispatchMessage(pbase(), n);
+ return n;
+}
+
+int MessengerBuf::overflow (int ch)
+{ streamsize n = pptr () - pbase ();
+  if (n && sync ())
+    return EOF;
+  if (ch != EOF)
+    {
+      char cbuf[1];
+      cbuf[0] = ch;
+//      if (m_pMessenger->dispatchMessage(cbuf, 1) != 1)
+//        return EOF;
+      m_pMessenger->dispatchMessage(cbuf, 1);
+    }
+  pbump (-n);  // Reset pptr().
+  return 0;
+}
+
+streamsize MessengerBuf::xsputn (char* text, streamsize n)
+{// return sync () == EOF ? 0 : m_pMessenger->dispatchMessage(text, n); }
+ m_pMessenger->dispatchMessage(text, n); 
+return n;
+}

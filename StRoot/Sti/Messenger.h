@@ -8,8 +8,11 @@
 
 #include <ostream.h>
 #include <fstream.h>
-#include <map.h>
-#include <vector.h>
+#include <strstream.h>
+#include <map>
+#include <vector>
+#include <typeinfo>
+#include <stdio.h>
 
 /// These message types can be ORed into routing codes.
 /// When you add a new routing code, make sure it is 2 times
@@ -35,19 +38,41 @@ typedef messengerMap::value_type messengerMapValueType;
 typedef vector<Messenger*> messengerVector;
 typedef messengerVector::const_iterator messengerVectorIterator;
 
+/*
 typedef void (*__sender)(ostream &stream, void*);
+*/
+class Messenger;
+class MessengerBuf: public streambuf{
+public:
+    MessengerBuf(Messenger *pMessenger):m_pMessenger(pMessenger){}
+    virtual ~MessengerBuf(){}
 
-class Messenger{
+    int sync ();
+    int overflow (int ch);
+    // Defining xsputn is an optional optimization.
+    // (streamsize was recently added to ANSI C++, not portable yet.)
+    streamsize xsputn (char* text, streamsize n);
+
+protected:
+    Messenger *m_pMessenger;
+};
+
+class Messenger: public ostream{
 
 public:
 
+    /// we override this to capture messages for dispatching to 
+    /// the various output streams
+    //virtual ostream& flush();
+
+/*
     /// Allows you to route message strings using ostream syntax
     Messenger& operator<<(char *szMessage);
     /// Allows you to route iostream manipulators using ostream syntax
     Messenger& operator<<(__omanip manip);
     /// Allows you to route numbers using ostream syntax
     Messenger& operator<<(double dVal); 
-
+*/
     /// Return a Messenger instance corresponding to the given routing code,
     /// or all routes allowed by the global mask if no routing is specified.
     static Messenger *instance(unsigned int routing=0);
@@ -74,19 +99,33 @@ public:
     /// a power of 2, uses the highest bit.
     static void setMessageOstream(unsigned int routing, ostream *pNewStream);
 
+    /// Destructor;
+    virtual ~Messenger(){}
+
+    /// This is a necessary kludge because of a bug in g++ 2.x which SEGVs
+    /// when you try to access RTTI (dynamic_cast or typeid, for example)
+    /// from another shared library (we need RTTI for ostream in libstdc++)
+    //static bool isMessenger(ostream *pOstream);
+
+    /// sends the current message to all appropriate output streams.
+    void dispatchMessage(char *szMessage, streamsize iLen);
+
 protected:
 
     /// Construct a Messenger with the given routing.
     Messenger(unsigned int routing=0):
-        m_routing(routing==0 ? s_routing : routing){}
-    /// Destructor;
-    virtual ~Messenger(){}
+            ostream(new MessengerBuf(this)),
+            m_routing(routing==0 ? s_routing : routing){}
 
+/*
     /// sends the given message to all appropriate output streams.
     /// The actual writeMessageXXX function called determines the
     /// type of pMessage.
     void dispatchMessage(void *pMessage, __sender sender);
-      
+*/
+
+    
+/*
     /// print a string to the output stream
     static void writeMessageSz(ostream &stream, char *szMessage){
       stream << szMessage;
@@ -99,6 +138,10 @@ protected:
     static void writeMessageD(ostream &stream, double *pdVal){
       stream << *pdVal;
     }
+*/
+    /// buffer between the ostream implementation (ostrstream) and the
+    /// actual output streams selected by the routing code & mask.
+    //char m_szBuf[1024];
 
     /// routing code for this Messenger tells which streams should be output
     unsigned int m_routing;
