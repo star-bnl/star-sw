@@ -2,13 +2,16 @@ TObjArray  *HList;
 class StEEstaleMaker;
 
 int rdEztStale(
- int nEve=100000,
+ int nEve=1,
  Int_t nFiles  = 20,
  char* file="R5135068ezB.lis", 
  char* inDir   = "./"
 ){ 
   
-  //file="st_fast_5135068_raw_1070001.MuDst.root";
+  file="st_physics_5107005_raw_1020002.MuDst.root";
+  //file="../EzMuRace8/st_fast_5135068_raw_1070001.MuDst.root";
+  // file="LOCAL_st_physics_5314115_raw_1020001.MuDst.root";
+
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   cout << " loading done " << endl;

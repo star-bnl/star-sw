@@ -1,10 +1,10 @@
-// $Id: StEEstaleMaker.h,v 1.1 2004/11/02 14:37:16 balewski Exp $
+// $Id: StEEstaleMaker.h,v 1.2 2004/11/10 03:20:31 balewski Exp $
 
 #ifndef STAR_StEEstaleMaker
 #define STAR_StEEstaleMaker
 
 /************************************************************
- * $Id: StEEstaleMaker.h,v 1.1 2004/11/02 14:37:16 balewski Exp $
+ * $Id: StEEstaleMaker.h,v 1.2 2004/11/10 03:20:31 balewski Exp $
  ************************************************************
  Goal: detects stale EEMC data
  *
@@ -51,10 +51,11 @@ class StEEstaleMaker : public StMaker{
   virtual Int_t  Make();
   void SetHList(TObjArray * x){HList=x;} 
   void saveHisto(TString fname="fixMe3");
+  void test1(EztEmcRawData *, int flag=0);
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEstaleMaker.h,v 1.1 2004/11/02 14:37:16 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEstaleMaker.h,v 1.2 2004/11/10 03:20:31 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -65,6 +66,9 @@ class StEEstaleMaker : public StMaker{
 
 
 // $Log: StEEstaleMaker.h,v $
+// Revision 1.2  2004/11/10 03:20:31  balewski
+// trig fixed
+//
 // Revision 1.1  2004/11/02 14:37:16  balewski
 // exampl eof stale data monitor
 //
