@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 2.5 2000/11/01 16:59:20 lasiuk Exp $
+ * $Id: StRichPadMonitor.h,v 2.6 2000/12/08 04:59:13 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,10 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
+ * Revision 2.6  2000/12/08 04:59:13  lasiuk
+ * unambiguate hiliteHits(flag) by requiring user
+ * to specify which ring is of interest
+ *
  * Revision 2.5  2000/11/01 16:59:20  lasiuk
  * MAJOR.  add ringInfo().  Clear() of TObjArray containers is simplified
  * (Valery suggestion)  Utilities added to draw lines and markers.
@@ -74,15 +78,18 @@ using std::vector;
 
 #include "StRichDrawableTTrack.h"
 
-class StRichPadMonitorText;
+class StParticleDefinition;
 class StRichGeometryDb;
-class StRichCoordinateTransform;
 class StRichSinglePixel;
-class StRichSimpleHit;
+class StRichCoordinateTransform;
+
+class StRichPadMonitorText;
 class StRichSingleMCPixel;
 class StRichDrawableTPad;
-class StRichTrack;
 class StRichDrawableTTrack;
+
+class StRichTrack;
+class StRichSimpleHit;
 
 class StRichPadMonitor : public TObject {
 public:
@@ -124,7 +131,7 @@ public:
     //
     void drawHit(StRichSimpleHit*);
     void hiLiteHits();
-    void hiLiteHits(const StRichHitFlag&);
+    void hiLiteHits(const StRichHitFlag&,StParticleDefinition*);
     
     void update();
     //
