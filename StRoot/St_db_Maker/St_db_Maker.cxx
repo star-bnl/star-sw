@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.28 2000/04/13 02:58:47 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.29 2000/04/14 14:49:59 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.29  2000/04/14 14:49:59  perev
+// Communication via descriptor struct -> class
+//
 // Revision 1.28  2000/04/13 02:58:47  perev
 // Method Save is added & default CintDB loaded if exists
 //
@@ -312,6 +315,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   assert(fDBBroker);assert(dat);
   fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
+#if 0
   int nElements = rowTL->GetNRows();
 
   tableDescriptor_st *elem= rowTL->GetTable();
@@ -320,6 +324,9 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 
   StDbBroker::Descriptor *descriptor = (StDbBroker::Descriptor *)elem;
   fDBBroker->SetDictionary(nElements,descriptor);
+#else
+  fDBBroker->SetDictionary(rowTL);
+#endif
   fDBBroker->SetTableName (dat->GetName());
   fDBBroker->SetStructName(dat->GetTitle());
   fDBBroker->SetStructSize(dat->GetRowSize());
