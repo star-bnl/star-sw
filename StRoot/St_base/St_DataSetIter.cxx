@@ -283,8 +283,9 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //   dirname[0] != '/' - prints DataSet with respect of the current class
 //
  
-  St_DataSet *set= fWorkingDataSet;
-  if (dirname && strlen(dirname)) set= Find(dirname);
+  St_DataSet *set= 0;
+  if (dirname && strlen(dirname)) set = Find(dirname);
+  if (!set && dirname==0) set=Cwd();
   if (set) set->ls(opt);
   return set;
 }
@@ -295,6 +296,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //   Ls(const Char_t *dirname,Int_t depth)
 //
 //   Prints the list of the St_DataSet defined with dirname
+//   Returns the dataset defined by "path" or Cwd();
 //
 //   dirname     = 0   - prints the current dataset
 //   dirname[0]  = '/' - print St_DataSet defined with dirname
@@ -303,8 +305,9 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //   depth       = 0   - print all level of the St_DataSet defined with dirname
 //               > 0   - print depth levels at most of the dirname St_DataSet
 //
-  St_DataSet *set= fWorkingDataSet;
-  if (dirname && strlen(dirname)) set= Find(dirname);
+  St_DataSet *set= 0;
+  if (dirname && strlen(dirname)) set = Find(dirname);
+  if (!set && dirname==0) set=Cwd();
   if (set) set->ls(depth);
   return set;
 }
@@ -348,12 +351,8 @@ St_DataSet *St_DataSetIter::Next()
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) ) 
     {
       // create the next level iterator, go deeper
-#ifndef DATASETMAP
-      TList 
-#else
-      TMap
-#endif
-            *list  = fDataSet->GetListOfDataset();
+
+      TList  *list  = fDataSet->GetListOfDataset();
       // Look for the next level
       if (list && list->GetSize() ) {
          fDepth++;
@@ -412,6 +411,7 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
    const Char_t pathseparator='/';
    const Char_t *startpos = path;
    const Char_t *seppos = startpos ? strchr(startpos,pathseparator) : 0;
+   Bool_t isAbs = kFALSE;
  
  // delete all "blanks"
  
@@ -425,6 +425,7 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
       startpos = seppos+1;
       seppos = strchr(startpos,pathseparator);
       if (!dataset) dataset = fRootDataSet;
+      isAbs = kTRUE;
    }
    else
       if (!dataset)
@@ -467,20 +468,38 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
         found = kTRUE;
       }
       else {
-#ifndef DATASETMAP
-        TList 
-#else
-        TMap
-#endif
-              *list = dataset->GetListOfDataset();
+        TList *list = dataset->GetListOfDataset();
         if (list) {
           TIter next(list);
           St_DataSet *obj = 0;
-          while (!(found = dataset->IsThisDir(dirname)) && (obj = (St_DataSet *)next()) )
-                dataset = obj;
-        } else
+           while ( obj = (St_DataSet *)next() ) {
+             if (found = obj->IsThisDir(dirname)) {
+               dataset = obj;
+               break;
+             }
+          }
+        } 
+#if 0
+else
           found = dataset->IsThisDir(dirname);
+#endif
       }
+#if 1
+      if (!(found || mkdirflag))
+          found = dataset->IsThisDir(dirname);
+
+      if ( !found && mkdirflag            
+            && (!isAbs || !(found = dataset->IsThisDir(dirname)))
+         )
+      {
+         found = kTRUE;
+         dataset = new St_DataSet(dirname,thisset);
+         if (thisset)
+            thisset->Add(dataset);
+      }
+
+      if (!found) dataset = 0;
+#else
       if (!found) dataset = 0;
       if (!found && mkdirflag) {
           found = kTRUE;
@@ -488,9 +507,12 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
           if (thisset)
              thisset->Add(dataset);
       }
+#endif
       // Go to the next recursive level
-      if (found)
+      if (found) {
+        if (seppos) seppos++;
         dataset = Find(seppos,dataset,mkdirflag);
+      }
  
       delete [] dirname;
    }
