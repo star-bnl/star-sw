@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.4 1999/07/10 13:17:21 wenaus Exp $
+# $Id: swguide.pl,v 1.5 1999/07/25 16:26:52 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.5  1999/07/25 16:26:52  wenaus
+# Report linecounts in files modified in last 2 months
+#
 # Revision 1.4  1999/07/10 13:17:21  wenaus
 # Add ROOT class doc links, when they exist, which isn't too often
 #
@@ -73,6 +76,7 @@ if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
 
 foreach $typ (sort keys %okExtensions) {
     $typeCounts{$okExtensions{$typ}} = 0;
+    $typeCountsRecent{$okExtensions{$typ}} = 0;
 }
 
 &printMainHeader("STAR Offline Software Guide",1);
@@ -313,10 +317,11 @@ for ($idr=0; $idr<@allDirs; $idr++) {
 if ( $find eq "" && $pkg eq "" && $showFlag > 0 ) {
     print "\n<b>Total files $totfiles</b>";
     print "\n<b>Total lines $totlines</b>";
-    print "\n  By type:\n";
+    print "\n  By type:          All    Last 2 months\n";
     foreach $typ (sort keys %typeCounts) {
         if ( $typeCounts{$typ} > 0 ) {
-            printf("    %-10s   %-d\n",$typ,$typeCounts{$typ});
+            printf("    %-10s   %7d   %7d\n",$typ,$typeCounts{$typ},
+                   $typeCountsRecent{$typ});
         }
     }
 }
@@ -657,6 +662,14 @@ sub showFiles {
                     $ball="white";
                 }
                 $ballUrl="<img src=\"/images/".$ball."ball.gif\">";
+
+                if ( exists($okExtensions{$ee}) || ($ff =~ m/akefile/)
+                     || $isScript ) {
+                    if ( $ball ne "white" ) {
+                        # count lines for recently modified files
+                        $typeCountsRecent{$ftype} = $typeCountsRecent{$ftype} +$count;
+                    }
+                }
 
                 ## Does ROOT class doc exist?
                 $fnameFull = $fname;
