@@ -1,3 +1,15 @@
+//StiKalmanTrack.cxx
+/*
+ * $Id: StiKalmanTrackNode.cxx,v 2.9 2003/03/04 15:25:48 andrewar Exp $
+ *
+ * /author Claude Pruneau
+ *
+ * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.9  2003/03/04 15:25:48  andrewar
+ * Added several functions for radlength calculation.
+ *
+ */
+
 #include <iostream.h>
 #include <stdexcept>
 #include <math.h>
@@ -596,6 +608,33 @@ void StiKalmanTrackNode::propagateMCS(double pathLength,
       _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
       _p2 = _p2 + _x*(_p3-cc);
     }
+}
+
+double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
+{
+/*!Calulates length between center of this node and provided node, which
+  is assumed to be on the same helix. Have to use global coords, since 
+  nodes may not be in the same detector volume.
+
+  \returns (double) length
+*/
+  //delta(dx,dy,dz) = here - there
+
+  const StThreeVector<double> delta = 
+                 getGlobalPoint() - oNode->getGlobalPoint();
+
+  double R = getCurvature();
+
+
+  // s = 2c * asin( t/(2c)); t=sqrt(dx^2+dy^2+dz^2)
+  return length(delta, R);
+}
+
+inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
+{
+  double tR = fabs(2./curv);
+
+  return  tR*asin(delta.magnitude()/tR);
 }
 
 
