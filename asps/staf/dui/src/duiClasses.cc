@@ -281,6 +281,39 @@ STAFCV_T duiFactory:: ln (const char * fromPath
 }
 
 //----------------------------------
+STAFCV_T duiFactory:: append (const char * fromPath
+		, const char * targPath) {
+  DS_DATASET_T *from=NULL,*targ=NULL;
+  size_t nbytes,nokFrom,nmaxFrom,nmaxTarg,nokTarg,offset,sizeTarg,sizeFrom;
+  char *fromSpec,*targSpec,*fromData,*targData;
+  bool_t isDirectory;
+
+  if(!findNode_ds(fromPath,from)) EML_ERROR(SRC_NOT_FOUND);
+  if(!dsTableRowCount(&nokFrom,from)) EML_ERROR(SRC_TABLE_NOT_FOUND);
+  if(!dsTableMaxRowCount(&nmaxFrom,from)) EML_ERROR(SRC_TABLE_NOT_FOUND);
+  if(!dsTableTypeSpecifier(&fromSpec,from)) EML_ERROR(SRC_SPECS_NOT_FOUND);
+  if(!dsTableRowSize(&sizeFrom,from)) EML_ERROR(SRC_SIZE_NOT_FOUND);
+
+  if(!findNode_ds(targPath,targ)) EML_ERROR(TGT_NOT_FOUND);
+  if(!dsTableRowCount(&nokTarg,targ)) EML_ERROR(TGT_TABLE_NOT_FOUND);
+  if(!dsTableMaxRowCount(&nmaxTarg,targ)) EML_ERROR(TGT_TABLE_NOT_FOUND);
+  if(!dsTableTypeSpecifier(&targSpec,targ)) EML_ERROR(TGT_SPECS_NOT_FOUND);
+  if(!dsTableRowSize(&sizeTarg,targ)) EML_ERROR(TGT_SIZE_NOT_FOUND);
+
+  if(strcmp(targSpec,fromSpec)) EML_ERROR(SRC_AND_TGT_DIFFERENT_TYPES);
+  if(sizeFrom!=sizeTarg) EML_ERROR(SRC_AND_TGT_DIFFERENT_SIZES);
+
+  if(!dsReallocTable(targ,nokFrom+nokTarg)) EML_ERROR(TGT_REALLOC_FAILURE);
+  if(!dsSetTableRowCount(targ,nokFrom+nokTarg)) EML_ERROR(TGT_SETROW_FAILURE);
+
+  if(!dsTableDataAddress(&targData,targ)) EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);
+  if(!dsTableDataAddress(&fromData,from)) EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);
+  nbytes=nokFrom*sizeFrom;
+  offset=nokTarg*sizeTarg;
+  memcpy(targData+offset,fromData,nbytes);
+
+  EML_SUCCESS(STAFCV_OK);
+}
 STAFCV_T duiFactory:: cp (const char * fromPath
 		, const char * toPath) {
   DS_DATASET_T *from=NULL,*to=NULL,*pDS;
