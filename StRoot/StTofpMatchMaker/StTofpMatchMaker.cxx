@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.9 2004/06/09 21:28:05 dongx Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.10 2004/06/10 15:54:31 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.10  2004/06/10 15:54:31  dongx
+ * rename the defition of int vector
+ *
  * Revision 1.9  2004/06/09 21:28:05  dongx
  * update matching : checking before projecting track, improve the speed by around an order of magnitude
  *
@@ -303,7 +306,7 @@ Int_t StTofpMatchMaker::Make(){
       nAllTracks++;
       StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
 
-      IntVec projTrayVec;
+      idVector projTrayVec;
       if(!mTofGeom->projTrayVector(theHelix, projTrayVec)) continue;
 
       Bool_t hitTofp = kFALSE;
