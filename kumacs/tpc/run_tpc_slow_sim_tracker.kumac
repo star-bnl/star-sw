@@ -6,8 +6,9 @@
 *  editted 6/9/98 Kathy Turner
 * editted 6/25/98 Lidia Didenko
 *  editted 6/25/98 Kathy Turner
-* 7/2/98 - K. Turner - code now requires that you load geometry libraries 
+*  7/2/98 - K. Turner - code now requires that you load geometry libraries 
 *  7/3/98 - K. Turner - make to use bfc_util kumacs and include pam kumacs
+*  7/8/98 - I. Sakrejda - put in cluster matching evaluator & track evaluator
 * ***********************************************************************
 ************************************************************************
  macro run__
@@ -90,10 +91,10 @@
    exec tpt_init#init
    exec tid_init#init
 
-
 * tpc evaluation init
    exec create_tables_tpc#tte
    exec tte_init#init
+   
 * ------------------- process events ------------------------------*
   
 * read event and then process thru tpc slow sim
