@@ -3,11 +3,13 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.128 2000/03/27 02:57:12 fine Exp $
+// $Id: bfc.C,v 1.129 2000/04/07 15:48:38 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
+class StMaker;        
 class StBFChain;        
 StBFChain  *chain=0;
+StMaker    *treeMk=0;
 class StEvent;
 StEvent *Event;
 class St_geant_Maker;
@@ -129,6 +131,7 @@ if (Last >= 0) {
   }
   
 }
+treeMk = chain->GetMaker("tree");
 TBenchmark evnt;
 Int_t iMake = 0, i = First;
 EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
@@ -140,6 +143,10 @@ EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
     St_DataSet *dstSet = chain->GetInputDS("dst");
     if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
   }
+
+  if (treeMk && iMake == kStErr) treeMk->Make(i);
+
+
   //    gSystem->Exec("ps ux");
   evnt->Stop("QAInfo:");
   //  evnt->Show("QAInfo:");
