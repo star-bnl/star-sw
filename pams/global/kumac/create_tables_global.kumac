@@ -50,7 +50,7 @@ macro svm
   macro/global/import *
       
     
-  ls [run_dst]/run_summary
+  ls [dst]/ev0out
     if (staf_status(2).ne.STAFCV_OK) then
       cd [dst]
       tdm/newtable ev0out ev0_aux 100000
