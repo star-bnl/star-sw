@@ -155,7 +155,7 @@ Bool_t StXiFinderMaker::UseV0() {
 
   /// Variables:
   StPhysicalHelixD /**trkHelix,*/tmpHelix;
-  StThreeVectorD xk,/**pk,*/xpp,pp,impact,tmp3V;
+  StThreeVectorD xpp,pp,impact,tmp3V;
   TVector2 /**rk,xck,*/tmp2V;
   StLorentzVectorD posVec,negVec;
   double mlam,mala;
@@ -215,7 +215,7 @@ Bool_t StXiFinderMaker::UseV0() {
   posKey=v0Vertex->daughter(positive)->key();
   
   // Xi cut parameters using detector id from V0
-  parsXi  = exipar->GetTable(det_id_v0-1);
+  parsXi = exipar->GetTable(det_id_v0-1);
 
   xV0=v0Vertex->position();
   pV0=v0Vertex->momentum();
@@ -260,12 +260,20 @@ Bool_t StXiFinderMaker::UseV0() {
      {return usedV0;
       }
 
-
+  StHelixModel* bachGeom = new StHelixModel;
+  if (bachGeom == NULL) {printf("CAUTION : pointer bachGeom is null.\n");return usedV0;}
+  StHelixModel* bachGeom2 = new StHelixModel;
+  if (bachGeom2 == NULL) {printf("CAUTION : pointer bachGeom2 is null.\n");return usedV0;}
+  
   // Loop over tracks (bachelors) to find Xis
-
   for (k=0; k<trks; k++)
-     {StTrackGeometry* bachGeom=trk[k]->geometry();
-      if (bachGeom == NULL) {printf("CAUTION : pointer bachGeom is null.\n");return usedV0;}
+     {bachGeom->setCharge(trk[k]->geometry()->charge());
+      bachGeom->setHelicity(trk[k]->geometry()->helicity());
+      bachGeom->setCurvature(trk[k]->geometry()->curvature());
+      bachGeom->setPsi(trk[k]->geometry()->psi());
+      bachGeom->setDipAngle(trk[k]->geometry()->dipAngle());
+      bachGeom->setOrigin(trk[k]->geometry()->origin());
+      bachGeom->setMomentum(trk[k]->geometry()->momentum());
       if (charge*bachGeom->charge() > 0)
          {//Check that ITTF and TPT tracks/V0's are not combined together.
           if (UsingITTFTracks() == kUseBOTH)
@@ -275,8 +283,6 @@ Bool_t StXiFinderMaker::UseV0() {
           //Check that the bachelor is not one of the V0's daughters.
           if (trk[k]->key() == negKey) continue;
           if (trk[k]->key() == posKey) continue;
-          /**pk=bachGeom->momentum();
-          if (pk == NULL) {printf("CAUTION : pointer pk is null.\n");return usedV0;}*/
           ///trkHelix=heli[k];
           ///"heli" and "trk" : cf StRoot/St_dst_Maker/StV0FinderMaker.cxx (STAT).
           
@@ -286,15 +292,19 @@ Bool_t StXiFinderMaker::UseV0() {
           parsXi=exipar->GetTable(det_id_xi-1);
           
           //Cut on number of hits
-          ///if (hits[k] >= parsXi->n_point)
-          ///`struct exi_exipar_st' has no member named `n_point'
+          //if (hits[k] >= parsXi->n_point)
+          //`struct exi_exipar_st' has no member named `n_point'
 
 
 
           // Beginning of the big(est) block inserted from StXiVertexFinder.cxx
-
-          StHelixModel *bachGeom2 = new StHelixModel(bachGeom->charge(),bachGeom->psi(),bachGeom->curvature(),bachGeom->dipAngle(),bachGeom->origin(),bachGeom->momentum(),bachGeom->helicity());
-
+          bachGeom2->setCharge(bachGeom->charge());
+          bachGeom2->setHelicity(bachGeom->helicity());
+          bachGeom2->setCurvature(bachGeom->curvature());
+          bachGeom2->setPsi(bachGeom->psi());
+          bachGeom2->setDipAngle(bachGeom->dipAngle());
+          bachGeom2->setOrigin(bachGeom->origin());
+          bachGeom2->setMomentum(bachGeom->momentum());
           if ((bachGeom->origin().x()==0) && (bachGeom->origin().y()==0) && (bachGeom->origin().z()==0))
              {printf("CAUTION : bachelor candidate has all parameters = 0.\n");
               continue;
@@ -590,27 +600,29 @@ Bool_t StXiFinderMaker::UseV0() {
                   } //End if (valid && tries<4)
               if (iflag1 == 3) break; //There is only 1 intersection point
               } //End loop over 2 intersection points
-          delete bachGeom2;
-          bachGeom2=0;
           // End of the big(est) block inserted from StXiVertexFinder.cxx
 
 
 
           } // charge sign
       } // k-Loop
+  delete bachGeom;
+  bachGeom=0;
+  delete bachGeom2;
+  bachGeom2=0;
 
-  if (alaCand) {
-    alaCand = kFALSE;
-    goto AssignSign;
-  }
+  if (alaCand)
+     {alaCand = kFALSE;
+      goto AssignSign;
+      }
 
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.5 2003/05/05 21:24:15 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.6 2003/05/07 10:51:42 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
-// Revision 1.5  2003/05/05 21:24:15  faivre
-// Lots of cleanup. Don't re-use V0 daughters' track for the bachelor.
+// Revision 1.6  2003/05/07 10:51:42  faivre
+// Use brand new StHelixModel::setMomentum to solve memory leaks.
 //
 // Revision 1.4  2003/05/02 21:21:08  lbarnby
 // Now identify ITTF tracks by fittingMethod() equal to  kITKalmanFitId
