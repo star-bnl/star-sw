@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.30 1999/02/18 16:43:10 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.31 1999/02/18 18:40:57 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.31  1999/02/18 18:40:57  caines
+// Altered the creation of svm tables
+//
 // Revision 1.30  1999/02/18 16:43:10  caines
 // Added in est the 4th layer tracking
 //
@@ -464,10 +467,11 @@ Int_t St_glb_Maker::Make(){
   }
   if (!primtrk){ //create dst
     St_svm_evt_match *evt_match = 0;
+    evt_match = (St_svm_evt_match *) global("tracks/evt_match");
+    if (!evt_match) {evt_match  = new St_svm_evt_match("evt_match",3000); temp->Add(evt_match);}
+
     if (tptrack && svtracks) {
        //svm
-      evt_match = (St_svm_evt_match *) global("tracks/evt_match");
-      if (!evt_match) {evt_match  = new St_svm_evt_match("evt_match",3000); temp->Add(evt_match);}
       Int_t res_svm =  svm_am (stk_track, tptrack,
 			       m_svm_ctrl, evt_match);
       if (! globtrk)    {globtrk = new St_dst_track("globtrk",20000);             dst.Add(globtrk);}
@@ -495,9 +499,6 @@ Int_t St_glb_Maker::Make(){
 				 est_match,m_egr_egrpar);
       
      cout << "Calling EST_TOGLOB2" << endl;
-     
-     evt_match  = new St_svm_evt_match("evt_match",10000); 
-     global.Add(evt_match);
 
      Int_t Res_est_toglob2 = est_toglob2(est_match,tphit,tptrack,scs_spt,
 					 groups,stk_track,evt_match);
@@ -811,7 +812,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.30 1999/02/18 16:43:10 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.31 1999/02/18 18:40:57 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
