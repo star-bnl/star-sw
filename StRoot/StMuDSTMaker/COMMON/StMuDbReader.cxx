@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.cxx,v 1.3 2002/10/03 19:27:13 laue Exp $
+ * $Id: StMuDbReader.cxx,v 1.4 2003/04/15 16:57:42 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -186,10 +186,17 @@ int StMuDbReader::createDB(const char* dbName, const char* inputList) {
   return count;
 }
   
+/// number of entries in internal data base
+inline int StMuDbReader::entriesDb() { return mDb.size(); }
 
 /***************************************************************************
  *
  * $Log: StMuDbReader.cxx,v $
+ * Revision 1.4  2003/04/15 16:57:42  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.3  2002/10/03 19:27:13  laue
  * maximum filename length increased (256 characters)
  *
