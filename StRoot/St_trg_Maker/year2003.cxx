@@ -13,6 +13,8 @@ TrgDataType *gs2003;
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11
 unsigned short gActionWord;
+
+
 void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   int i;
   
@@ -30,6 +32,7 @@ void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_topology = 0;
   tt->MWC_CTB_moment   = 0;
 }
+
 void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
   int npre,npost,pp,i,tray,slat,subsector,sector;
   dst_TrgDet_st *tt = dst1->GetTable();
@@ -57,12 +60,14 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
     for(i=0;i<32;i++) tt->mwcaux[i][pp]=gs2003->rawTriggerDet[pp].MWC[auxmwcmap[i]];
   }
 }
+
 Int_t St_trg_Maker::SanityCheck2003() {
   unsigned short x;
   x=gs2003->TrgSum.L1SumBytes; assert(x==0x0084||x==0x8400);
   x=gs2003->TrgSum.L2SumBytes; assert(x==0x0084||x==0x8400);
   return kStOK;
 }
+
 ///////////////////////////// Here begins the stuff from Jennifer Klay.  Oct 16 2001.
 #ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
 #define BYTESPERDSM 16  //The number of output bytes the 20 signals are packed into
@@ -165,15 +170,19 @@ void St_trg_Maker::Emc2003(St_dst_TrgDet *dst1) {
 // is 0xf200" from Bill Love (email Nov 9 2001).
 
 int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
-      St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
+			  St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
   char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
   fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
-  assert(fVictor->thereIsTriggerData()); // No TRG bank in .daq file.  Perhaps a pedestal or laser run?
-              // StTRGReader *St_trg_Maker::fVictor;
-              // TRG_Reader  *StTRGReader::fTRGImpReader;
-              // Bank_TRGD   *TRG_Reader::pBankTRGD;
+
+  // No TRG bank in .daq file.  Perhaps a pedestal or laser run?
+  assert(fVictor->thereIsTriggerData()); 
+
+  // StTRGReader *St_trg_Maker::fVictor;
+  // TRG_Reader  *StTRGReader::fTRGImpReader;
+  // Bank_TRGD   *TRG_Reader::pBankTRGD;
+
   ptr=(char*)(fVictor->fTRGImpReader->pBankTRGD);
   assert(ptr);
   ptr+=40; // Skip 10-word DAQ bank header.
@@ -181,13 +190,13 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   gActionWord=
     ( (unsigned short)(gs2003->EvtDesc.actionWdTrgCommand) * 16 * 16 * 16 ) +
     ( (unsigned short)(gs2003->EvtDesc.actionWdDaqCommand) * 16 * 16      ) +
-    (            gs2003->EvtDesc.actionWdDetectorBitMask & 0x00ff       );
+    (                  gs2003->EvtDesc.actionWdDetectorBitMask & 0x00ff   );
   Int_t Iret = SanityCheck2003();
   if (Iret !=  kStOK) {
-    printf("St_trg_Maker failed sanity check.\n"); 
+    printf("St_trg_Maker:: Daq2003 : failed L1/L2 summary sanity check.\n"); 
     return Iret;
   }
-  printf("St_trg_Maker passed sanity check.\n"); 
+  // printf("St_trg_Maker:: Daq2003 : passed L1/L2 summary sanity check.\n"); 
   if(  
        (((gActionWord)&0xf000)==0x9000 ) &&
        (((gActionWord)&0x0001)==0x0001 ) &&
@@ -202,28 +211,36 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   if((m_Mode&4)&&isPulser)  thisEventOk=7;
 
 
-  oo="";
-  if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
-  printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
-      oo,gActionWord,
-      gs2003->EvtDesc.TriggerWord,thisEventOk?"kStOK":"kStErr",m_Mode);
+  oo = "unknown";
+  if(isPhysics) oo="Physics"; 
+  if(isLaser)   oo="Laser"; 
+  if(isPulser)  oo="Pulser";
+
+  printf("St_trg_Maker:: Daq2003 : %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
+	 oo,gActionWord,
+	 gs2003->EvtDesc.TriggerWord,
+	 thisEventOk?"kStOK":"kStErr",
+	 m_Mode);
 
   if (!thisEventOk) return kStErr; // Skip this event.
 
   // dumpDataToScreenAndExit();
-  VpdDaq2003(dst1);       // The function
-  ZdcDaq2003(dst1);       // St_trg_Maker::Sim
-  CtbMwcDaq2003(dst1);    // has four lines
-  SecondDstDaq2003(dst2); // which are analogous to these four.
+  VpdDaq2003(dst1);                // The function
+  ZdcDaq2003(dst1);                // St_trg_Maker::Sim
+  CtbMwcDaq2003(dst1);             // has four lines
+  SecondDstDaq2003(dst2);          // which are analogous to these four.
   TakeCareOfL1andL2Daq2003(dst3,dst4);
-#ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
+#ifdef LATER_THAN_YEAR_2000        // Year 2000 trgStructures.h does not have BEMC.
   Emc2003(dst1);
 #endif
 
-  // dumpDataToScreenAndExit2003();
-
+  // Request for a clear message
+  //if(m_DebugLevel > 0)
+  cout << "St_trg_Maker:: Daq2003 : Event has been accepted" << endl;
   return kStOK;
 }
+
+
 void St_trg_Maker::TakeCareOfL1andL2Daq2003(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   int i;
   dst_L1_Trigger_st *tt1 = dst3->GetTable();
@@ -259,6 +276,7 @@ void St_trg_Maker::ZdcDaq2003(St_dst_TrgDet *dst1) {
   tt->adcZDCsum=gs2003->rawTriggerDet[0].ZDC[13]+gs2003->rawTriggerDet[0].ZDC[10];
 }
 void St_trg_Maker::dumpDataToScreenAndExit2003() {
-  int i;
+  //int i;
   exit(2);
 }
+
