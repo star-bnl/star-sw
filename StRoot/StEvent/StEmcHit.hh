@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHit.hh,v 1.3 1999/02/23 15:25:55 ullrich Exp $
+ * $Id: StEmcHit.hh,v 1.4 1999/03/07 15:31:38 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcHit.hh,v $
+ * Revision 1.4  1999/03/07 15:31:38  wenaus
+ * Order constructor inits to remove g+ warnings
+ *
  * Revision 1.3  1999/02/23 15:25:55  ullrich
  * Complete Revision
  *
@@ -52,10 +55,10 @@ ostream& operator<< (ostream&, const StEmcHit&);
 //
 //    Inline member functions
 //
-inline StEmcHit::StEmcHit() : mId(0), mEnergy(0), mPhi(0), mEta(0) { /* noop */ }
+inline StEmcHit::StEmcHit() : mId(0), mPhi(0), mEta(0), mEnergy(0) { /* noop */ }
 
 inline StEmcHit::StEmcHit(int i, float E, float p, float e)
-    : mId(i), mEnergy(E), mPhi(p), mEta(e) { /* noop */ }
+    : mId(i), mPhi(p), mEta(e), mEnergy(E) { /* noop */ }
 
 inline StEmcHit::~StEmcHit() { /* noop */ }
 
