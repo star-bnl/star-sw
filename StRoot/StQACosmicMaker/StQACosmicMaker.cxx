@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.2 1999/08/03 17:15:53 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.3 1999/08/17 01:44:31 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.3  1999/08/17 01:44:31  snelling
+ * changed ntuple projection to normal histogram filling
+ *
  * Revision 1.2  1999/08/03 17:15:53  snelling
  * added id tags
  *
@@ -36,10 +39,57 @@ ClassImp(StQACosmicMaker)
 
 //-----------------------------------------------------------------------
 StQACosmicMaker::~StQACosmicMaker() {
+
 }
 
 //-----------------------------------------------------------------------
 Int_t StQACosmicMaker::Make() {
+
+  fillTNtuple();
+  fillHistograms();
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+void StQACosmicMaker::PrintInfo() {
+  printf("**************************************************************\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.3 1999/08/17 01:44:31 snelling Exp $\n");
+  printf("**************************************************************\n");
+  if (Debug()) StMaker::PrintInfo();
+}
+
+//-----------------------------------------------------------------------
+Int_t StQACosmicMaker::Finish() {
+
+  calcHistograms();
+  
+  return StMaker::Finish();
+}
+
+//-----------------------------------------------------------------------
+Int_t StQACosmicMaker::Init() {
+  
+  initHistograms(); 
+  initTNtuple();
+
+  return StMaker::Init();
+}
+
+//-----------------------------------------------------------------------
+Int_t StQACosmicMaker::initTNtuple() {
+  
+  mTNtupleTPC = new TNtuple("nttpc",
+			    "TPC TNtuple",
+			    "hrow:hx:hy:hz:hdx:hdy:hdz:halpha:hlamda:hdalpha:\
+hdlamda:resy:resz:trknfit:trkcalcp");
+  
+  return kStOK;
+  
+}
+
+//-----------------------------------------------------------------------
+Int_t StQACosmicMaker::fillTNtuple() {
 
   // get pointers to tpc hit table
   St_DataSetIter Itpc_hits(GetDataSet("tpc_hits"));
@@ -52,21 +102,19 @@ Int_t StQACosmicMaker::Make() {
 
   // get pointers to tpc residuals table and track table
   St_DataSetIter Itpc_trk(GetDataSet("tpc_tracks"));
-  
   St_tpt_res *phres = 0;
   tpt_res_st *ptres = 0;
   phres = (St_tpt_res *) Itpc_trk.Find("restpt");
   if (phres) {ptres = phres->GetTable();}
   else { cout << "error: restpt table header does not exist " << endl; return kStWarn; }
   if (!ptres) { cout << "error: restpt table does not exist " << endl; return kStWarn; }
-
   St_tpt_track *phtrk = 0;
   tpt_track_st *pttrk = 0;
   phtrk = (St_tpt_track *) Itpc_trk.Find("tptrack");
   if (phtrk) {pttrk = phtrk->GetTable();}
   else { cout << "error: tptrack table header does not exist " << endl; return kStWarn; }
   if (!pttrk) { cout << "error: tptrack table does not exist " << endl; return kStWarn; }
-  
+
   // create a sorter to get an index to a row
   Int_t nrows = phres->GetNRows();
   if (nrows == 0) {cout << "error: residual table contains zero rows " << endl; return kStWarn;}
@@ -82,287 +130,246 @@ Int_t StQACosmicMaker::Make() {
     Int_t irow_res = ressorter[(Int_t)(pttphit[i].id)];
     // track in row table is 1000*id + position on track
     Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
-    
+
     Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
 			    (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-    nttpc->Fill(
-		(Float_t)(Int_t(pttphit[i].row/100.)),
-		(Float_t)(pttphit[i].x),
-		(Float_t)(pttphit[i].y),
-		(Float_t)(pttphit[i].z),
-		(Float_t)(pttphit[i].dx),
-		(Float_t)(pttphit[i].dy),
-		(Float_t)(pttphit[i].dz),
-		(Float_t)(pttphit[i].alpha),
-		(Float_t)(pttphit[i].lambda),
-		(Float_t)(pttphit[i].dalpha),
-		(Float_t)(pttphit[i].dlambda),
-		(Float_t)(ptres[irow_res].resy),
-		(Float_t)(ptres[irow_res].resz),
-		(Float_t)(Float_t(pttrk[irow_trk].nfit)),
-		(Float_t)(trkcalcp)
-		);
+    
+    mTNtupleTPC->Fill(
+		      (Float_t)(Int_t(pttphit[i].row/100.)),
+		      (Float_t)(pttphit[i].x),
+		      (Float_t)(pttphit[i].y),
+		      (Float_t)(pttphit[i].z),
+		      (Float_t)(pttphit[i].dx),
+		      (Float_t)(pttphit[i].dy),
+		      (Float_t)(pttphit[i].dz),
+		      (Float_t)(pttphit[i].alpha),
+		      (Float_t)(pttphit[i].lambda),
+		      (Float_t)(pttphit[i].dalpha),
+		      (Float_t)(pttphit[i].dlambda),
+		      (Float_t)(ptres[irow_res].resy),
+		      (Float_t)(ptres[irow_res].resz),
+		      (Float_t)(Float_t(pttrk[irow_trk].nfit)),
+		      (Float_t)(trkcalcp)
+		      );
+    
+    if (Debug()) {
+      cout << "dip angle " <<pttphit[i].lambda << endl;
+    }
 
-    if (Debug()) {cout << "dip angle " <<pttphit[i].lambda << endl;}
   }
-  
+
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
-void StQACosmicMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.2 1999/08/03 17:15:53 snelling Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
+Int_t StQACosmicMaker::initHistograms() {
+
+  int i;
+
+  Float_t xMin = -100.;
+  Float_t xMax = 100.;
+  Int_t nXBins = 200;
+  Float_t yMin = -1.;
+  Float_t yMax = 1.;
+  Int_t nYBins = 200;
+  
+  for (i = 0; i < 4; i++) {
+    TString *mHistTitle;
+    TString *mHistName;
+    char mCount[1];
+    sprintf(mCount,"%d",i);
+
+    mHistTitle = new TString("xy residual vs crossing angle");
+    mHistName  = new TString("xyresvsalpha");
+    mHistName->Append(*mCount);
+    ResidualHists[i].mXYResVersusAlpha =
+      new TH2F(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+    ResidualHists[i].mXYResVersusAlpha->SetXTitle("crossing angle (radians)");
+    ResidualHists[i].mXYResVersusAlpha->SetYTitle("xy residuals");
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Mean xy residual vs crossing angle");
+    mHistName  = new TString("meanxyresvsalpha");
+    mHistName->Append(*mCount);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Sigma xy residual vs crossing angle");
+    mHistName  = new TString("sigmaxyresvsalpha");
+    mHistName->Append(*mCount);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_sigma =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Magnitude xy residual vs crossing angle");
+    mHistName  = new TString("magxyresvsalpha");
+    mHistName->Append(*mCount);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mag =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("ChiSquared xy residual vs crossing angle");
+    mHistName  = new TString("chixyresvsalpha");
+    mHistName->Append(*mCount);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_chi =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+  }
+
+  return kStOK;
+
 }
 
 //-----------------------------------------------------------------------
-Int_t StQACosmicMaker::Finish() {
-  MakeHistograms();
-  return StMaker::Finish();
+Int_t StQACosmicMaker::fillHistograms() {
+  
+  int i;
+  
+  // get pointers to tpc hit table
+  St_DataSetIter Itpc_hits(GetDataSet("tpc_hits"));
+  St_tcl_tphit *phtcl = 0;
+  tcl_tphit_st *pttphit = 0;
+  phtcl = (St_tcl_tphit *) Itpc_hits.Find("tphit");
+  if (phtcl) {pttphit = phtcl->GetTable();}
+  else { cout << "error: tphit table header does not exist " << endl; return kStWarn; }
+  if (!pttphit) { cout << "error: tphit table does not exist " << endl; return kStWarn; }
+  
+  // get pointers to tpc residuals table and track table
+  St_DataSetIter Itpc_trk(GetDataSet("tpc_tracks"));
+  St_tpt_res *phres = 0;
+  tpt_res_st *ptres = 0;
+  phres = (St_tpt_res *) Itpc_trk.Find("restpt");
+  if (phres) {ptres = phres->GetTable();}
+  else { cout << "error: restpt table header does not exist " << endl; return kStWarn; }
+  if (!ptres) { cout << "error: restpt table does not exist " << endl; return kStWarn; }
+  St_tpt_track *phtrk = 0;
+  tpt_track_st *pttrk = 0;
+  phtrk = (St_tpt_track *) Itpc_trk.Find("tptrack");
+  if (phtrk) {pttrk = phtrk->GetTable();}
+  else { cout << "error: tptrack table header does not exist " << endl; return kStWarn; }
+  if (!pttrk) { cout << "error: tptrack table does not exist " << endl; return kStWarn; }
+
+  // create a sorter to get an index to a row
+  Int_t nrows = phres->GetNRows();
+  if (nrows == 0) {cout << "error: residual table contains zero rows " << endl; return kStWarn;}
+  TString colName = "hit";
+  St_TableSorter ressorter(*phres,colName,0,nrows-1);
+  // create a sorter to get an index to a track
+  nrows = phtrk->GetNRows();
+  if (nrows == 0) {cout << "error: residual table contains zero rows " << endl; return kStWarn;}
+  colName = "id";
+  St_TableSorter trksorter(*phtrk,colName,0,nrows-1);
+  
+  for(i=0; i<phtcl->GetNRows();i++) {
+    Int_t irow_res = ressorter[(Int_t)(pttphit[i].id)];
+    // track in row table is 1000*id + position on track
+    Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
+    
+    Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+			    (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+
+    // global cuts
+    if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0.) {    
+      // inner sector
+      if ((Int_t(pttphit[i].row/100.)) <= 13) {
+	if (trkcalcp >= 0.3) {
+	  ResidualHists[0].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+	}
+	else {
+	  ResidualHists[1].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	}
+      }
+      // outer sector
+      else {
+	if (trkcalcp >= 0.3) {
+	  ResidualHists[2].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	}
+	else {
+	  ResidualHists[3].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	}
+      }
+    }
+  }
+
+  return kStOK;
+
 }
 //-----------------------------------------------------------------------
-Int_t StQACosmicMaker::Init() {
-  
-  Float_t xmin = -50.;
-  Float_t xmax = 50.;
-  Int_t nxbin = 25;
-  Float_t ymin = -0.5;
-  Float_t ymax = 0.5;
-  Int_t nybin = 100;
 
-  xyresvsalpha_prof = new TProfile("xyresvsalpha_prof",
-				   "profile hist for xy residual vs crossing angle",
-				   50,xmin,xmax,-1000.,1000.,"");
-  
-  nttpc = new TNtuple("nttpc",
-		      "tpc ntuple",
-		      "hrow:hx:hy:hz:hdx:hdy:hdz:halpha:hlamda:hdalpha:\
-hdlamda:resy:resz:trknfit:trkcalcp");
+Int_t StQACosmicMaker::calcHistograms() {
 
-  xyresvsalpha_inner = new TH2F("xyresvsalpha_inner",
-				"xy residual vs crossing angle",
-				nxbin,xmin,xmax,nybin,ymin,ymax);
+  int i;
 
-  xyresvsalpha_inner_mean = new TH1D("xyresvsalpha_inner_mean",
-				     "mean value gaussian fit xy residual vs crossing angle",
-				     nxbin,xmin,xmax);
+  for (i = 0; i < 4; i++) {
+    TString *mHistName;
+    char mCount[1];
+    sprintf(mCount,"%d",i);
 
-  xyresvsalpha_inner_sigma = new TH1D("xyresvsalpha_inner_sigma",
-				      "sigma gaussian fit xy residual vs crossing angle",
-				      nxbin,xmin,xmax);
+    //    TH2F *test=(TH2F*)chain->Maker("QACosmics")->GetHistList()->FindObject("xyresvsalpha0");   
+    ResidualHists[i].mXYResVersusAlpha->FitSlicesY();
+    if (Debug()) {  
+      cout << "pointer to hist: " << ResidualHists[i].mXYResVersusAlpha << endl;
+    }
+    mHistName  = new TString("xyresvsalpha");
+    mHistName->Append(*mCount);
+    mHistName->Append("_0");
+    if (Debug()) {  
+    cout << "pointer to hist0: " << ((TH1D *) gDirectory->Get(mHistName->Data())) << endl;
+    cout << "pointer to dest hist: " << ResidualHists[i].FitHists.mXYResVersusAlpha_mag << endl;
+    }
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mag);
+    delete mHistName;
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetXTitle("Crossing Angle (radians)");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetYTitle("Magnitude");
+    
+    mHistName  = new TString("xyresvsalpha");
+    mHistName->Append(*mCount);
+    mHistName->Append("_1");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mean);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetName("Mean xy residual vs crossing angle");
+    delete mHistName;
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetXTitle("Crossing Angle (radians)");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetYTitle("Mean xy residuals");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->GetXaxis()->SetLabelSize(0.04);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->GetYaxis()->SetLabelSize(0.04);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMarkerColor(kBlue);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMarkerStyle(20);
+    
+    mHistName  = new TString("xyresvsalpha");
+    mHistName->Append(*mCount);
+    mHistName->Append("_2");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_sigma);
+    delete mHistName;
+    ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->SetXTitle("Crossing Angle (radians)");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->SetYTitle("Sigma");
+    
+    mHistName  = new TString("xyresvsalpha");
+    mHistName->Append(*mCount);
+    mHistName->Append("_chi2");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_chi);
+    delete mHistName;
+    ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetXTitle("Crossing Angle (radians)");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetYTitle("chi^2");
+    
+    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fN; j++) { 
+      ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fArray[j] = 
+    	fabs(ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fArray[j]);
+    }
 
-  xyresvsalpha_inner_mag = new TH1D("xyresvsalpha_inner_mag",
-				    "magnitude gaussian fit xy residual vs crossing angle",
-				    nxbin,xmin,xmax);
+  }
 
-  xyresvsalpha_inner_chi = new TH1D("xyresvsalpha_inner_chi",
-				    "chi squared gaussian fit xy residual vs crossing angle",
-				    nxbin,xmin,xmax);
+  return kStOK;
 
-  xyresvsalpha_inner_lowpt = new TH2F("xyresvsalpha_inner_lowpt",
-				      "xy residual vs crossing angle",
-				      nxbin,xmin,xmax,nybin,ymin,ymax);
-
-  xyresvsalpha_inner_lowpt_mean = new TH1D("xyresvsalpha_inner_lowpt_mean",
-					   "mean value gaussian fit xy residual vs crossing angle",
-					   nxbin,xmin,xmax);
-
-  xyresvsalpha_inner_lowpt_sigma = new TH1D("xyresvsalpha_inner_lowpt_sigma",
-					    "sigma gaussian fit xy residual vs crossing angle",
-					    nxbin,xmin,xmax);
-
-  xyresvsalpha_inner_lowpt_mag = new TH1D("xyresvsalpha_inner_lowpt_mag",
-					  "magnitude gaussian fit xy residual vs crossing angle",
-					  nxbin,xmin,xmax);
-  
-  xyresvsalpha_inner_lowpt_chi = new TH1D("xyresvsalpha_inner_lowpt_chi",
-					  "chi squared gaussian fit xy residual vs crossing angle",
-					  nxbin,xmin,xmax);
-
-  xyresvsalpha_outer = new TH2F("xyresvsalpha_outer",
-				"xy residual vs crossing angle",
-				nxbin,xmin,xmax,nybin,ymin,ymax);
-
-  xyresvsalpha_outer_mean = new TH1D("xyresvsalpha_outer_mean",
-				     "mean value gaussian fit xy residual vs crossing angle",
-				     nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_sigma = new TH1D("xyresvsalpha_outer_sigma",
-				      "sigma gaussian fit xy residual vs crossing angle",
-				      nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_mag = new TH1D("xyresvsalpha_outer_mag",
-				    "magnitude gaussian fit xy residual vs crossing angle",
-				    nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_chi = new TH1D("xyresvsalpha_outer_chi",
-				    "chi squared gaussian fit xy residual vs crossing angle",
-				    nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_lowpt = new TH2F("xyresvsalpha_outer_lowpt",
-				      "xy residual vs crossing angle",
-				      nxbin,xmin,xmax,nybin,ymin,ymax);
-
-  xyresvsalpha_outer_lowpt_mean = new TH1D("xyresvsalpha_outer_lowpt_mean",
-					   "mean value gaussian fit xy residual vs crossing angle",
-					   nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_lowpt_sigma = new TH1D("xyresvsalpha_outer_lowpt_sigma",
-					    "sigma gaussian fit xy residual vs crossing angle",
-					    nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_lowpt_mag = new TH1D("xyresvsalpha_outer_lowpt_mag",
-					  "magnitude gaussian fit xy residual vs crossing angle",
-					  nxbin,xmin,xmax);
-
-  xyresvsalpha_outer_lowpt_chi = new TH1D("xyresvsalpha_outer_lowpt_chi",
-					  "chi squared gaussian fit xy residual vs crossing angle",
-					  nxbin,xmin,xmax);
-
-  return StMaker::Init();
 }
-
-//-----------------------------------------------------------------------
-void StQACosmicMaker::MakeHistograms() {
-
-  Int_t i = 0;
-
-  nttpc->Draw("resy:halpha>>xyresvsalpha_prof",
-	      "resy != 0. && halpha != 0.",
-	      "prof,goff");
-  
-  nttpc->Draw("resy:halpha>>xyresvsalpha_inner",
-	      "resy != 0. && halpha != 0. && hrow <= 13. && trkcalcp >= 0.3",
-	      "goff,same");
-  xyresvsalpha_inner->FitSlicesY();
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_0"))->Copy(*xyresvsalpha_inner_mag);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_1"))->Copy(*xyresvsalpha_inner_mean);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_2"))->Copy(*xyresvsalpha_inner_sigma);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_chi2"))->Copy(*xyresvsalpha_inner_chi);
-
-  for (i=0;i<xyresvsalpha_inner_sigma->fN;i++) { 
-    xyresvsalpha_inner_sigma->fArray[i]=fabs(xyresvsalpha_inner_sigma->fArray[i]);
-  }
-  
-  xyresvsalpha_inner_sigma->SetXTitle("Crossing Angle");
-  xyresvsalpha_inner_sigma->SetYTitle("sigma (cm)");
-  xyresvsalpha_inner_sigma->SetTitle("sigma gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_inner_sigma->SetName("xyresvsalpha_inner_sigma");
-  xyresvsalpha_inner_sigma->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_sigma->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_sigma->SetMarkerColor(kRed);
-  xyresvsalpha_inner_sigma->SetMarkerStyle(21);
-  xyresvsalpha_inner_sigma->SetMaximum(0.5);
-  
-  xyresvsalpha_inner_mean->SetXTitle("Crossing Angle");
-  xyresvsalpha_inner_mean->SetYTitle("mean (cm)");
-  xyresvsalpha_inner_mean->SetTitle("mean gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_inner_mean->SetName("xyresvsalpha_inner_mean");
-  xyresvsalpha_inner_mean->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_mean->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_mean->SetMarkerColor(kBlue);
-  xyresvsalpha_inner_mean->SetMarkerStyle(20);
-
-  nttpc->Draw("resy:halpha>>xyresvsalpha_inner_lowpt",
-	      "resy != 0. && halpha != 0. && hrow <= 13. && trkcalcp <= 0.3",
-	      "goff,same");
-  xyresvsalpha_inner_lowpt->FitSlicesY();
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_lowpt_0"))->Copy(*xyresvsalpha_inner_lowpt_mag);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_lowpt_1"))->Copy(*xyresvsalpha_inner_lowpt_mean);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_lowpt_2"))->Copy(*xyresvsalpha_inner_lowpt_sigma);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_inner_lowpt_chi2"))->Copy(*xyresvsalpha_inner_lowpt_chi);
-  
-  for (i=0;i<xyresvsalpha_inner_lowpt_sigma->fN;i++) { 
-    xyresvsalpha_inner_lowpt_sigma->fArray[i]=fabs(xyresvsalpha_inner_lowpt_sigma->fArray[i]);
-  }
-  
-  xyresvsalpha_inner_lowpt_sigma->SetXTitle("Crossing Angle");
-  xyresvsalpha_inner_lowpt_sigma->SetYTitle("sigma (cm)");
-  xyresvsalpha_inner_lowpt_sigma->SetTitle("sigma gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_inner_lowpt_sigma->SetName("xyresvsalpha_inner_lowpt_sigma");
-  xyresvsalpha_inner_lowpt_sigma->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_lowpt_sigma->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_lowpt_sigma->SetMarkerColor(kRed);
-  xyresvsalpha_inner_lowpt_sigma->SetMarkerStyle(21);
-  
-  xyresvsalpha_inner_lowpt_mean->SetXTitle("Crossing Angle");
-  xyresvsalpha_inner_lowpt_mean->SetYTitle("mean (cm)");
-  xyresvsalpha_inner_lowpt_mean->SetTitle("mean gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_inner_lowpt_mean->SetName("xyresvsalpha_inner_lowpt_mean");
-  xyresvsalpha_inner_lowpt_mean->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_lowpt_mean->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_inner_lowpt_mean->SetMarkerColor(kBlue);
-  xyresvsalpha_inner_lowpt_mean->SetMarkerStyle(20);
-  
-  
-  nttpc->Draw("resy:halpha>>xyresvsalpha_outer",
-	      "resy != 0. && halpha != 0. && hrow > 13. && trkcalcp >= 0.3",
-	      "goff,same");
-  xyresvsalpha_outer->FitSlicesY();
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_0"))->Copy(*xyresvsalpha_outer_mag);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_1"))->Copy(*xyresvsalpha_outer_mean);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_2"))->Copy(*xyresvsalpha_outer_sigma);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_chi2"))->Copy(*xyresvsalpha_outer_chi);
-  
-  for (i=0;i<xyresvsalpha_outer_sigma->fN;i++) { 
-    xyresvsalpha_outer_sigma->fArray[i]=fabs(xyresvsalpha_outer_sigma->fArray[i]);
-  }
-  
-  xyresvsalpha_outer_sigma->SetXTitle("Crossing Angle");
-  xyresvsalpha_outer_sigma->SetYTitle("sigma (cm)");
-  xyresvsalpha_outer_sigma->SetTitle("sigma gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_outer_sigma->SetName("xyresvsalpha_outer_sigma");
-  xyresvsalpha_outer_sigma->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_sigma->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_sigma->SetMarkerColor(kRed);
-  xyresvsalpha_outer_sigma->SetMarkerStyle(21);
-  xyresvsalpha_outer_sigma->SetMaximum(0.5);
-  
-  xyresvsalpha_outer_mean->SetXTitle("Crossing Angle");
-  xyresvsalpha_outer_mean->SetYTitle("mean (cm)");
-  xyresvsalpha_outer_mean->SetTitle("mean gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_outer_mean->SetName("xyresvsalpha_outer_mean");
-  xyresvsalpha_outer_mean->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_mean->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_mean->SetMarkerColor(kBlue);
-  xyresvsalpha_outer_mean->SetMarkerStyle(20);
-  
-  nttpc->Draw("resy:halpha>>xyresvsalpha_outer_lowpt",
-	      "resy != 0. && halpha != 0. && hrow > 13. && trkcalcp <= 0.3",
-	      "goff,same");
-  xyresvsalpha_outer_lowpt->FitSlicesY();
-  // *xyresvsalpha_mean  = *((TH1D *) gDirectory->Get("xyresvsalpha_1"));
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_lowpt_0"))->Copy(*xyresvsalpha_outer_lowpt_mag);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_lowpt_1"))->Copy(*xyresvsalpha_outer_lowpt_mean);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_lowpt_2"))->Copy(*xyresvsalpha_outer_lowpt_sigma);
-  ((TH1D *) gDirectory->Get("xyresvsalpha_outer_lowpt_chi2"))->Copy(*xyresvsalpha_outer_lowpt_chi);
-  
-  for (i=0;i<xyresvsalpha_outer_lowpt_sigma->fN;i++) { 
-    xyresvsalpha_outer_lowpt_sigma->fArray[i]=fabs(xyresvsalpha_outer_lowpt_sigma->fArray[i]);
-  }
-  
-  xyresvsalpha_outer_lowpt_sigma->SetXTitle("Crossing Angle");
-  xyresvsalpha_outer_lowpt_sigma->SetYTitle("sigma (cm)");
-  xyresvsalpha_outer_lowpt_sigma->SetTitle("sigma gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_outer_lowpt_sigma->SetName("xyresvsalpha_outer_lowpt_sigma");
-  xyresvsalpha_outer_lowpt_sigma->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_lowpt_sigma->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_lowpt_sigma->SetMarkerColor(kRed);
-  xyresvsalpha_outer_lowpt_sigma->SetMarkerStyle(21);
-  
-  xyresvsalpha_outer_lowpt_mean->SetXTitle("Crossing Angle");
-  xyresvsalpha_outer_lowpt_mean->SetYTitle("mean (cm)");
-  xyresvsalpha_outer_lowpt_mean->SetTitle("mean gaussian fit of xy residual vs crossing angle");
-  xyresvsalpha_outer_lowpt_mean->SetName("xyresvsalpha_outer_lowpt_mean");
-  xyresvsalpha_outer_lowpt_mean->GetXaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_lowpt_mean->GetYaxis()->SetLabelSize(0.04);
-  xyresvsalpha_outer_lowpt_mean->SetMarkerColor(kBlue);
-  xyresvsalpha_outer_lowpt_mean->SetMarkerStyle(20);
-  
-}
-
-
-
 
