@@ -534,8 +534,7 @@ my $newset;
    $mfileSeq = $2 ; 
    $mrun = $1;
    $mrunId = substr($1,3) + 0;    
-#   print "file name = ", $mName, " Run = ", $mrun, " fileSeq = ", $mfileSeq, "  RunID = ",$mrunId, "\n"; 
-#    print "Path = ", $mpath, "File name: ", $mfName, "\n"; 
+
    if($mfName =~ /dst.xdf/ ) {
      $mformat = "xdf";
      $mcomp = "dst";
@@ -573,7 +572,6 @@ foreach my $jobnm (@jobFSum_set){
 #    print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n";
       print "updating cpFileCatalogT table\n";
  
-     &fillDbTestTable();   
      &fillDbTable();
          last;
       }  else {
@@ -626,7 +624,6 @@ my $dfile;
    $mprotc = ($$eachDstFile)->faccess;
    $mowner = ($$eachDstFile)->fowner;
    $msize = ($$eachDstFile)->dsize;
-   $mName = $mfName;
 
 #  print "Path:  ", $mpath,  "File name:", $mfName, "\n";
    if($mfName =~ /dst.xdf/ ) {
@@ -719,35 +716,6 @@ sub updateJSTable {
 sub fillDbTable {
 
     $sql="insert into $cpFileCatalogT set ";
-    $sql.="jobID='$mJobId',";
-    $sql.="runID='$mrunId',";
-    $sql.="fileSeq='$mfileSeq',";
-    $sql.="eventType='$mevtType',";
-    $sql.="fName='$mfName',";
-    $sql.="path='$mpath',";
-    $sql.="dataset='$mdataSet',";
-    $sql.="size='$msize',";
-    $sql.="createTime='$mcTime',";
-    $sql.="Nevents='$mNevts',";
-    $sql.="NevLo='$mNevtLo',";
-    $sql.="NevHi='$mNevtHi',";
-    $sql.="owner='$mowner',";
-    $sql.="protection='$mprotc',";
-    $sql.="type='$mtype',";
-    $sql.="component='$mcomp',";
-    $sql.="format='$mformat',";
-    $sql.="site='$msite',"; 
-    $sql.="hpss='$mhpss',";
-    $sql.="status= 0,";
-    $sql.="comment=''";
-    print "$sql\n" if $debugOn;
-    $rv = $dbh->do($sql) || die $dbh->errstr;
-
-  }
-########################################################################
-sub fillDbTestTable {
-
-    $sql="insert into $FilesCatalogTestT set ";
     $sql.="jobID='$mJobId',";
     $sql.="runID='$mrunId',";
     $sql.="fileSeq='$mfileSeq',";
