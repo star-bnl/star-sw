@@ -7,6 +7,10 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.100  2002/08/23 18:16:50  pruneau
+// Added StiSimpleTrackFilter to StiMaker to enable simple and
+// fast track finding diagnostics.
+//
 // Revision 1.99  2002/08/19 19:32:59  pruneau
 // eliminated cout when unnecessary, made helix member of the EventFiller
 //
@@ -74,6 +78,7 @@
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/Messenger.h"
 #include "Sti/StiDynamicTrackFilter.h"
+#include "Sti/StiSimpleTrackFilter.h"
 
 //StiGui
 #include "StiGui/StiGuiFactoryTypes.h"
@@ -91,11 +96,11 @@
 #include "StiDefaultToolkit.h"
 #include "StiStEventFiller.h"
 #include "StiMaker.h"
+#include "Sti/StiSimpleTrackFilter.h"
 
 StiMaker* StiMaker::sinstance = 0;
 
 ostream& operator<<(ostream&, const StiHit&);
-
 
 ClassImp(StiMaker)
   
@@ -114,6 +119,8 @@ ClassImp(StiMaker)
 {
   cout <<"StiMaker::StiMaker()"<<endl;
   sinstance = this;
+  trackFilter = new StiSimpleTrackFilter();
+
   toolkit = StiDefaultToolkit::instance();
 }
 
@@ -135,6 +142,8 @@ StiMaker::~StiMaker()
 {
   cout <<"StiMaker::~StiMaker()"<<endl;
 	
+  delete trackFilter;
+
   Messenger::kill();
 }
 
@@ -178,40 +187,40 @@ Int_t StiMaker::InitRun(int run)
       ioBroker = toolkit->getIOBroker();
       cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
       if (ioBroker->useGui()) 
-				{
-					cout <<"--- Display Manager will be set" << endl;
-					toolkit->getDisplayManager()->cd();
-					cout <<"--- Display Manager Ready" << endl;
-				}
+	{
+	  cout <<"--- Display Manager will be set" << endl;
+	  toolkit->getDisplayManager()->cd();
+	  cout <<"--- Display Manager Ready" << endl;
+	}
       else
-				cout <<"--- Display Manager will not be used" << endl;
+	cout <<"--- Display Manager will not be used" << endl;
       if (ioBroker->simulated()==true)
-				{
-					if (mAssociationMaker)
-						cout << "AssociationMaker Defined" << endl;
-					else
-						cout << "---- AssociationMaker NOT Defined" << endl;
+	{
+	  if (mAssociationMaker)
+	    cout << "AssociationMaker Defined" << endl;
+	  else
+	    cout << "---- AssociationMaker NOT Defined" << endl;
 					
-					StiEventAssociator::instance(mAssociationMaker);
-					StiEvaluator::instance(mEvalFileName);
-					//toolkit->setAssociationMaker(mAssociationMaker);
-					//toolkit->getEvaluator(mEvalFileName);
-					cout <<"--- Evaluator Ready" << endl;
-				}
+	  StiEventAssociator::instance(mAssociationMaker);
+	  StiEvaluator::instance(mEvalFileName);
+	  //toolkit->setAssociationMaker(mAssociationMaker);
+	  //toolkit->getEvaluator(mEvalFileName);
+	  cout <<"--- Evaluator Ready" << endl;
+	}
       else
-				cout <<"--- Evaluator will not be used" << endl;
+	cout <<"--- Evaluator will not be used" << endl;
       tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
       //StiStEventFiller
       mStEventFiller = new StiStEventFiller();
       
       cout <<"--- Tracker Ready" << endl;
       if (ioBroker->useGui()) 
-				{
-					toolkit->getDisplayManager()->setSkeletonView();
-					toolkit->getDisplayManager()->draw();
-					toolkit->getDisplayManager()->update();
-					//toolkit->getDisplayManager()->print();
-				}
+	{
+	  toolkit->getDisplayManager()->setSkeletonView();
+	  toolkit->getDisplayManager()->draw();
+	  toolkit->getDisplayManager()->update();
+	  //toolkit->getDisplayManager()->print();
+	}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
   return StMaker::InitRun(run);
@@ -242,12 +251,12 @@ Int_t StiMaker::Make()
       //Init seed finder for start
       StiSeedFinder * seedFinder = toolkit->getTrackSeedFinder();
       if (seedFinder)
-				seedFinder->reset();
+	seedFinder->reset();
       else
-				{
-					cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
-					return 0;
-				}
+	{
+	  cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
+	  return 0;
+	}
       cout <<"StiMaker::Make() - INFO - Call TrackSeedFinder reset completed"<<endl;
       if (ioBroker->simulated()) 
 	{
@@ -327,26 +336,26 @@ void StiMaker::finishEvent()
     {
       cout <<"StiMaker::finishEvent() - INFO - Get main vertex and extend tracks" << endl;
       if (mevent->primaryVertex()) {
-	  StiHit * vertex = toolkit->getHitFactory()->getObject();
-	  const StThreeVectorF& vp = mevent->primaryVertex()->position();
-	  const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
-	  vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
-	  vertex->setStHit(mevent->primaryVertex());
-	  tracker->extendTracksToVertex(vertex);
-	  cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
+	StiHit * vertex = toolkit->getHitFactory()->getObject();
+	const StThreeVectorF& vp = mevent->primaryVertex()->position();
+	const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
+	vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+	vertex->setStHit(mevent->primaryVertex());
+	tracker->extendTracksToVertex(vertex);
+	cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
 
-	  //
-	  // fill the primary tracks in StEvent
-	  //
-	  clock.start();  
-	  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
-	  mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
-	  clock.stop();
-	  cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+	//
+	// fill the primary tracks in StEvent
+	//
+	clock.start();  
+	cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
+	mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+	clock.stop();
+	cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
       }
       else {
-	  cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
+	cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
       }
     }
   if (ioBroker->simulated())
@@ -376,35 +385,61 @@ void StiMaker::finishEvent()
   */
   clock.stop();
   eventIsFinished = true;
+
+  // filter our baby...
+  trackFilter->set(StiSimpleTrackFilter::kChi2,       0., 100.);
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0., 10. );
+  trackFilter->set(StiSimpleTrackFilter::kPseudoRap, -1.5, 1.5);
+  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 50.);
+  trackFilter->set(StiSimpleTrackFilter::kNGaps,      0., 50.);
+  cout << "      Total Found:" << tracker->getTrackFoundCount()<<endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0.1, 0.2 );
+  cout << "       0.1<pt<0.2:" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0.2, 0.5 );
+  cout << "       0.2<pt<0.5:" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0.5, 1.0 );
+  cout << "       0.5<pt<1.0:" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         1.0,10.0 );
+  cout << "       1.0<pt<10.:" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0.1, 0.5 );
+  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 20.);
+  cout << "NPts<20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kNPts,       20., 100.);
+  cout << "NPts>20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kPt,         0.5, 10. );
+  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 20.);
+  cout << "NPts<20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
+  trackFilter->set(StiSimpleTrackFilter::kNPts,       20., 100.);
+  cout << "NPts>20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
   cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
 }
 
 void StiMaker::finishTrack()
 {
-	//Add call to next tracker action here
-	if (ioBroker->doTrackFit()==true) {
-		tracker->fitNextTrack();
-	}
-	else {
-		tracker->findNextTrack();
-	}
-	return;
+  //Add call to next tracker action here
+  if (ioBroker->doTrackFit()==true) {
+    tracker->fitNextTrack();
+  }
+  else {
+    tracker->findNextTrack();
+  }
+  return;
 }
 
 void StiMaker::doNextTrackStep()
 {
-	tracker->doNextTrackStep();
+  tracker->doNextTrackStep();
 }
 
 void StiMaker::defineNextTrackStep(StiFindStep val)
 {
-	cout <<"StiMaker::defineNextTrackStep(). Set to: ";
-	cout <<static_cast<int>(val)<<endl;
-	tracker->setStepMode(val);
+  cout <<"StiMaker::defineNextTrackStep(). Set to: ";
+  cout <<static_cast<int>(val)<<endl;
+  tracker->setStepMode(val);
 }
 
 StiIOBroker* StiMaker::getIOBroker()
 {
-	return toolkit->getIOBroker();
+  return toolkit->getIOBroker();
 }
 
