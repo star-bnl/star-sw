@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.25 2003/02/06 21:28:10 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.26 2003/04/03 13:18:07 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.26  2003/04/03 13:18:07  suaide
+// option to turn off message log was included
+//
 // Revision 1.25  2003/02/06 21:28:10  suaide
 // bugs fixed
 //
@@ -122,6 +125,7 @@ class StEmcADCtoEMaker : public StMaker
            
            Bool_t            mEmbedd;
 					 Bool_t            mFromDaq;
+           Bool_t            mPrint;
 					 
 					 
            void              zeroAll(); ///< Zero all temporary vectors
@@ -149,8 +153,9 @@ class StEmcADCtoEMaker : public StMaker
            StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
 					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
+           void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.25 2003/02/06 21:28:10 suaide Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.26 2003/04/03 13:18:07 suaide Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
