@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: g2t_tpc_hit.hh,v 1.1 1998/11/10 17:12:13 fisyak Exp $
+ * $Id: g2t_tpc_hit.hh,v 1.2 1999/02/14 20:42:17 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: g2t_tpc_hit.hh,v $
- * Revision 1.1  1998/11/10 17:12:13  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/02/14 20:42:17  lasiuk
+ * use 3 vectors
  *
  * Revision 1.1  1998/11/10 17:12:13  fisyak
  * Put Brian trs versin into StRoot
@@ -25,17 +25,27 @@
  **************************************************************************/
 #ifndef ST_G2T_HH
 #define ST_G2T_HH
+#include <iostream.h>
+#include "StThreeVector.hh"
 
 struct g2t_tpc_hit {            /* G2t_tpc_hit */ 
-       long      id;            /* primary key */
-       long      next_tr_hit_p; /* Id of next hit on same track */
-       long      track_p;       /* Id of parent track */
-       long      volume_id;     /* STAR volume identification */
-       float     de;            /* energy deposition at hit */
-       float     ds;            /* path length within padrow */
-       float     p[3];          /* local momentum */
-       float     tof;           /* time of flight */
-       float     x[3];          /* coordinate (Cartesian) */
+    long      id;            /* primary key */
+    long      next_tr_hit_p; /* Id of next hit on same track */
+    long      track_p;       /* Id of parent track */
+    long      volume_id;     /* STAR volume identification */
+    float     de;            /* energy deposition at hit */
+    float     ds;            /* path length within padrow */
+    float     tof;           /* time of flight */
+    StThreeVector<double>     p;          /* local momentum */
+    StThreeVector<double>     x;          /* coordinate (Cartesian) */
 };
 
+ostream& operator<<(ostream& os, const g2t_tpc_hit& a)
+{
+    return os << a.volume_id << ", "
+	      << a.de        << ", "
+	      << a.ds        << ", "
+	      << a.x         << ", "
+	      << a.p;
+}
 #endif
