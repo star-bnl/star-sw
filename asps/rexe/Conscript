@@ -28,6 +28,11 @@ my $CPPFLAGS = $env->{CPPFLAGS};
 my $FLIBS = $env->{FLIBS};
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
+my $LD = $env->{LD};
+my $LDFLAGS = "";#$env->{LDFLAGS};
+if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc'){
+  $LDFLAGS = "-Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
+}
 if ($PGI) {
   $PGILIBS .= " -L$PGI/linux86/lib";
   $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
@@ -89,6 +94,8 @@ $env2 = $env->clone('FC'           => $FC,
 		    'FCPATH'       => $FCPATH,
 		    'FEXTEND'      => $FEXTEND,
 		    'CPPFLAGS'     => $CPPFLAGS,
+		    'LD'           => $LD,
+		    'LDFLAGS'      => $LDFLAGS,
 		    'LIBPATH'      => $LIBPATH,
 		    'LIBS'         => $LIBS,
 		    'ObjDir'       => $obj_dir,
