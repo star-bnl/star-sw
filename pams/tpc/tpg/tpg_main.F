@@ -1,5 +1,8 @@
-* $Id: tpg_main.F,v 1.15 1998/07/12 05:29:57 sakrejda Exp $
+* $Id: tpg_main.F,v 1.16 1998/09/01 21:36:36 sakrejda Exp $
 * $Log: tpg_main.F,v $
+* Revision 1.16  1998/09/01 21:36:36  sakrejda
+* trigger offset added
+*
 * Revision 1.15  1998/07/12 05:29:57  sakrejda
 * flag moved to a common, so it is not overwritten, not good, but working...
 *
@@ -37,6 +40,7 @@ C  I. Sakrejda 19/12/97
       integer tgc_drift_volume_length
       integer tgc_drift_velocity, tgc_clock_frequency
       integer tgc_z_inner_offset
+      integer tgc_trigger_offset
       integer iret
       integer init_flag, idebug
 
@@ -57,6 +61,7 @@ CCCCCCCCCCCC
       if(init_flag.eq.0) then
          iret=tgc_drift_volume_length(dummy5,tpg_detector_h,tpg_detector)
          iret=tgc_z_inner_offset(dummy5,tpg_detector_h,tpg_detector)
+         iret=tgc_trigger_offset(dummy5,tpg_detector_h,tpg_detector)
          iret=tgc_drift_velocity(dummy1,tpg_detector_h,tpg_detector)
          iret=tgc_clock_frequency(dummy1, tpg_detector_h,tpg_detector)
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)

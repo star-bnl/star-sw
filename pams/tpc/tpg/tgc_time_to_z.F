@@ -1,5 +1,8 @@
-* $Id: tgc_time_to_z.F,v 1.3 1998/07/08 02:44:44 sakrejda Exp $
+* $Id: tgc_time_to_z.F,v 1.4 1998/09/01 21:36:34 sakrejda Exp $
 * $Log: tgc_time_to_z.F,v $
+* Revision 1.4  1998/09/01 21:36:34  sakrejda
+* trigger offset added
+*
 * Revision 1.3  1998/07/08 02:44:44  sakrejda
 * z positioned in the middle of a bucket
 *
@@ -26,10 +29,11 @@ C     z - z coodinate in the local coordinate system
       integer tgc_drift_velocity
       integer tgc_clock_frequency
       integer tgc_z_inner_offset
+      integer tgc_trigger_offset
       integer iret, pad, padrow, sector, time
 
       real dummy1, dvel, clock, z
-      real dvel_local, clock_local, t0_offset
+      real dvel_local, clock_local, t0_offset, trigger_offset
       real z_inner_offset, z_offset, zoff
       save
 
@@ -38,13 +42,15 @@ C     z - z coodinate in the local coordinate system
          iret = tgc_drift_velocity(dvel, dummy1, dummy1)
          iret = tgc_clock_frequency(clock, dummy1, dummy1)
          iret = tgc_z_inner_offset(z_inner_offset, dummy1, dummy1)
+         iret = tgc_trigger_offset(trigger_offset,dummy1, dummy1)
 *
          dvel_local   = dvel
          clock_local  = clock
          z_offset     = z_inner_offset
+         t0_offset    = -trigger_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
-      t0_offset=0.0
+
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
