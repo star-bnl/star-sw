@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.68 2001/11/21 01:49:25 long Exp $
+// $Id: StTrsMaker.cxx,v 1.69 2002/02/05 22:21:27 hardtke Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.69  2002/02/05 22:21:27  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.68  2001/11/21 01:49:25  long
 // add log message for 3/2001 long;
 // adding in Make():
@@ -370,7 +373,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.68 2001/11/21 01:49:25 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.69 2002/02/05 22:21:27 hardtke Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -414,8 +417,11 @@ int StTrsMaker::writeFile(char* file, int numEvents)
     return kStOK;
 }
 
+Int_t StTrsMaker::Init(){
+   return StMaker::Init();
+}
 
-Int_t StTrsMaker::Init()
+Int_t StTrsMaker::InitRun(int runnumber)
 {
 #ifdef TPC_DATABASE_PARAMETERS
     // The global pointer to the Db is gStTpcDb and it should be created in the macro.
@@ -667,7 +673,7 @@ Int_t StTrsMaker::Init()
    mDigitalNtuple    = new TNtuple("DigitalSignalNtuple", "Digital Sector", "adc:timebin:pad:row");
    
 #endif
-   return StMaker::Init();
+   return kStOK;
 }
 
 //

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.21 2001/05/22 22:32:50 hardtke Exp $
+// $Id: St_tcl_Maker.h,v 1.22 2002/02/05 22:21:56 hardtke Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.22  2002/02/05 22:21:56  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.21  2001/05/22 22:32:50  hardtke
 // Add option for returning hits in global coordinates
 //
@@ -131,11 +134,12 @@ class St_tcl_Maker : public StMaker {
   void   AllOn();    // turn on all of tpc
  
   virtual Int_t  Init();
+  virtual Int_t  InitRun(int runnumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.21 2001/05/22 22:32:50 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.22 2002/02/05 22:21:56 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  private:
 

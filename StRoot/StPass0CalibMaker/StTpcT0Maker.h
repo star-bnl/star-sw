@@ -1,13 +1,16 @@
 /*!
  * \class StTpcT0Maker 
  * \author David Hardtke
- * \version $Id: StTpcT0Maker.h,v 1.1 2002/01/26 18:55:33 jeromel Exp $
+ * \version $Id: StTpcT0Maker.h,v 1.2 2002/02/05 22:20:54 hardtke Exp $
  *
  * StTpcT0Maker virtual base class for Maker  
  *
  */
 
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.2  2002/02/05 22:20:54  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.1  2002/01/26 18:55:33  jeromel
 // StTpcT0Maker moved from directory of the same name. First version
 // of StVertexSeedMaker.
@@ -53,6 +56,7 @@ class StTpcT0Maker : public StMaker {
                   StTpcT0Maker(const char *name="TpcT0");
    virtual       ~StTpcT0Maker();
    virtual Int_t Init();
+   virtual Int_t InitRun(int runnumber);
    virtual Int_t  Make();
    virtual void PrintInfo();
    virtual void Clear(Option_t *option);
@@ -72,7 +76,7 @@ class StTpcT0Maker : public StMaker {
    void SetCorrectionFactors(float constant, float linear, float quadratic); //del z correction factors from trs
    float GetCorrection(float z);  // Get Correction Factor for this Z
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.1 2002/01/26 18:55:33 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.2 2002/02/05 22:20:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.66 2001/05/22 22:32:49 hardtke Exp $
+// $Id: St_tcl_Maker.cxx,v 1.67 2002/02/05 22:21:56 hardtke Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.67  2002/02/05 22:21:56  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.66  2001/05/22 22:32:49  hardtke
 // Add option for returning hits in global coordinates
 //
@@ -84,10 +87,17 @@ St_tcl_Maker::St_tcl_Maker(const char *name):
 //_____________________________________________________________________________
 St_tcl_Maker::~St_tcl_Maker() {
 }
+//____________________________________________________________________________
+St_tcl_Maker::Init() {
+  m_tcl_sector_index = new St_tcl_sector_index("tcl_sector_index",1);
+  m_tcl_sector_index->SetNRows(1); 
+  AddConst(m_tcl_sector_index);
 
+  return StMaker::Init();
+}
 //_____________________________________________________________________________
 
-Int_t St_tcl_Maker::Init() {
+Int_t St_tcl_Maker::InitRun(int runnumber) {
 
   // Limit Error Messages
   gMessMgr->SetLimit("TPSEQ",10);
@@ -118,9 +128,6 @@ Int_t St_tcl_Maker::Init() {
   St_DataSet *tclpars = tpc->Find("tclpars");
   assert(tclpars);
 
-  m_tcl_sector_index = new St_tcl_sector_index("tcl_sector_index",1);
-  m_tcl_sector_index->SetNRows(1); 
-  AddConst(m_tcl_sector_index);
   
   m_tclpar           = NULL;
   m_tclpar           = (St_tcl_tclpar *) tclpars->Find("tclpar");
@@ -150,8 +157,8 @@ Int_t St_tcl_Maker::Init() {
 
   //		Histograms     
   InitHistograms(); // book histograms
+  return kStOK;
 
-  return StMaker::Init();
 }
 
 //_____________________________________________________________________________
@@ -459,7 +466,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.66 2001/05/22 22:32:49 hardtke Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.67 2002/02/05 22:21:56 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.1 2002/01/26 18:55:33 jeromel Exp $
+// $Id: StTpcT0Maker.cxx,v 1.2 2002/02/05 22:20:54 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.2  2002/02/05 22:20:54  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.1  2002/01/26 18:55:33  jeromel
 // StTpcT0Maker moved from directory of the same name. First version
 // of StVertexSeedMaker.
@@ -88,7 +91,6 @@ StTpcT0Maker::~StTpcT0Maker(){
 }
 //_____________________________________________________________________________
 Int_t StTpcT0Maker::Init(){
-  theDb = ((StTpcDbMaker*)GetMaker("tpcDB"))->tpcDbInterface();
   t0guess = 0;
   zVertexWest = -999.0;
   zVertexEast = -999.0; 
@@ -112,6 +114,12 @@ Int_t StTpcT0Maker::Init(){
   trigger_assumed=0.0;
   length_assumed=0.0;
   return StMaker::Init();
+}
+
+Int_t StTpcT0Maker::InitRun(int runnumber){
+  theDb = ((StTpcDbMaker*)GetMaker("tpcDB"))->tpcDbInterface();
+  if (!theDb) return kStErr;
+  return kStOK;
 }
 
 void StTpcT0Maker::Clear(Option_t *option){
@@ -145,6 +153,8 @@ Int_t StTpcT0Maker::Make(){
       return kStFatal;
   }
   St_tcl_Maker* tcl = (St_tcl_Maker*)GetMaker("tpc_hits");
+  tcl->InitRun(0);
+  GetMaker("tpc_tracks")->InitRun(0);
   tcl->Clear();
   //  GetMaker("tpc_tracks")->Clear();
   // GetMaker("primary")->Clear();
@@ -284,7 +294,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.1 2002/01/26 18:55:33 jeromel Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.2 2002/02/05 22:20:54 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.69 2002/02/02 00:52:03 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.70 2002/02/05 22:22:15 hardtke Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.70  2002/02/05 22:22:15  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.69  2002/02/02 00:52:03  jeromel
 // Modified mask (extended options). Instantiaion f MagUtilities() uses db.
 //
@@ -269,6 +272,10 @@ void St_tpt_Maker:: SetInputHits(  TString DataSet,  TString Hit)
 St_tpt_Maker::~St_tpt_Maker(){}
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Init(){
+  return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t St_tpt_Maker::InitRun(int runnumber){
   //Suppress annoying messages
 gMessMgr->SetLimit("TPTROOT1-E1",10);
 gMessMgr->SetLimit("TPTOUT2-E1",10);
@@ -321,7 +328,7 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
 //  cout<<"kFALSE="<<kFALSE<<endl;
 
   if(m_tteEvalOn){VertexEffResolutionInit();}
-  return StMaker::Init();
+  return kStOK;
 }
 
 //_____________________________________________________________________________
