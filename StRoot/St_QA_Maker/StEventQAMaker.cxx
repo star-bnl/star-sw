@@ -58,7 +58,7 @@ Bool_t isTriggerAmong(const StTriggerId* tr, UInt_t n, ... ) {
 
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
- StQAMakerBase(name,title,"StE") {
+ StQAMakerBase(name,title,"StE"), event(0), mHitHist(0) {
   allTrigs = kFALSE;
 }
 
@@ -2009,8 +2009,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.48 2003/09/02 17:59:21 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.49 2003/09/19 22:58:11 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.49  2003/09/19 22:58:11  genevb
+// Initialize pointers to zero, some doxygenization
+//
 // Revision 2.48  2003/09/02 17:59:21  perev
 // gcc 3.2 updates + WarnOff
 //

@@ -1,57 +1,3 @@
-// $Id: St_QA_Maker.cxx,v 2.16 2003/09/02 17:59:21 perev Exp $
-// $Log: St_QA_Maker.cxx,v $
-// Revision 2.16  2003/09/02 17:59:21  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 2.15  2003/02/28 16:01:09  genevb
-// Further improvements for previous check-in
-//
-// Revision 2.14  2003/02/28 06:17:56  genevb
-// Allow StQAMakerBase::Make to be called for all events
-//
-// Revision 2.13  2003/02/20 20:09:54  genevb
-// Several changes for new trigger scheme, dAu data
-//
-// Revision 2.12  2003/02/19 06:38:29  genevb
-// Rework trigger and mult/event class sections
-//
-// Revision 2.11  2002/05/29 13:54:30  genevb
-// Some changes to FTPC chisq histos
-//
-// Revision 2.10  2002/02/12 18:42:00  genevb
-// Additional FTPC histograms
-//
-// Revision 2.9  2001/08/07 07:51:28  lansdell
-// primvtx check for different multiplicities crashed for MC data, now fixed
-//
-// Revision 2.8  2001/08/03 21:32:28  lansdell
-// fixed primvtx check for dst table qa
-//
-// Revision 2.7  2001/08/03 20:33:56  lansdell
-// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
-//
-// Revision 2.6  2001/05/16 20:57:03  lansdell
-// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
-//
-// Revision 2.5  2001/04/25 21:35:26  genevb
-// Added V0 phi distributions
-//
-// Revision 2.4  2001/04/24 22:53:51  lansdell
-// Removed redundant radial position of first hit histograms
-//
-// Revision 2.3  2001/04/24 19:59:08  genevb
-// Use det_id to identify detectors
-//
-// Revision 2.2  2000/09/08 18:55:54  lansdell
-// turned on FTPC primary track histograms
-//
-// Revision 2.1  2000/09/01 16:59:03  genevb
-// Change for V0 plots
-//
-// Revision 2.0  2000/08/25 16:02:41  genevb
-// New revision: new structure, multiplicity classes
-//
-//
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
 //  St_QA_Maker class for QA Histograms using dst tables                 //
@@ -101,7 +47,7 @@ ClassImp(St_QA_Maker)
   
 //_____________________________________________________________________________
 St_QA_Maker::St_QA_Maker(const char *name, const char *title) :
- StQAMakerBase(name,title,"Tab"){
+ StQAMakerBase(name,title,"Tab"), dst(0) {
 
 }
 //_____________________________________________________________________________
@@ -1405,4 +1351,61 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
+// $Id: St_QA_Maker.cxx,v 2.17 2003/09/19 22:58:11 genevb Exp $
+// $Log: St_QA_Maker.cxx,v $
+// Revision 2.17  2003/09/19 22:58:11  genevb
+// Initialize pointers to zero, some doxygenization
+//
+// Revision 2.16  2003/09/02 17:59:21  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 2.15  2003/02/28 16:01:09  genevb
+// Further improvements for previous check-in
+//
+// Revision 2.14  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
+// Revision 2.13  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
+// Revision 2.12  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
+// Revision 2.11  2002/05/29 13:54:30  genevb
+// Some changes to FTPC chisq histos
+//
+// Revision 2.10  2002/02/12 18:42:00  genevb
+// Additional FTPC histograms
+//
+// Revision 2.9  2001/08/07 07:51:28  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
+// Revision 2.8  2001/08/03 21:32:28  lansdell
+// fixed primvtx check for dst table qa
+//
+// Revision 2.7  2001/08/03 20:33:56  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
+// Revision 2.6  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
+// Revision 2.5  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
+// Revision 2.4  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
+// Revision 2.3  2001/04/24 19:59:08  genevb
+// Use det_id to identify detectors
+//
+// Revision 2.2  2000/09/08 18:55:54  lansdell
+// turned on FTPC primary track histograms
+//
+// Revision 2.1  2000/09/01 16:59:03  genevb
+// Change for V0 plots
+//
+// Revision 2.0  2000/08/25 16:02:41  genevb
+// New revision: new structure, multiplicity classes
+//
+//
 

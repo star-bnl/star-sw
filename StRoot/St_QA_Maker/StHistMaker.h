@@ -1,5 +1,50 @@
-//! $Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $
+/*!
+  \class StHistMaker
+                                                                     
+  Code that will collect all histograms that were added together in
+  StHistUtil::AddHists - has to be in a maker in order to write it out
+ 
+*/
+
+
+#ifndef STAR_StHistMaker
+#define STAR_StHistMaker
+
+#include "StMaker.h"
+
+class TH1;
+
+class StHistMaker : public StMaker {
+
+ private:
+  TH1** mHArray; //!
+  int   mHArraySize;
+
+ public: 
+  StHistMaker(const char *name="QA", const char *title="SummedQAHist");
+  virtual       ~StHistMaker() {}
+  virtual Int_t  Init();
+  virtual Int_t  Finish();
+  virtual Int_t  Make();
+
+  void SetHArray(TH1** arrayPtr) {mHArray = arrayPtr;}
+  void SetHArraySize(int size) {mHArraySize = size;}
+
+// the following is a ROOT macro  that is needed in all ROOT code
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.3 2003/09/19 22:58:11 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+  ClassDef(StHistMaker,0)
+};
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////
+//! $Id: StHistMaker.h,v 2.3 2003/09/19 22:58:11 genevb Exp $
 //! $Log: StHistMaker.h,v $
+//! Revision 2.3  2003/09/19 22:58:11  genevb
+//! Initialize pointers to zero, some doxygenization
+//!
 //! Revision 2.2  2003/09/10 19:47:43  perev
 //! ansi corrs
 //!
@@ -13,56 +58,7 @@
 //! removed virtual from inline methods
 //!
 //! Revision 1.1  2000/06/23 21:16:18  kathy
-//! code that will collect all histograms that were added together in StHistUtil::AddHists - has to be in a maker in order to write it out
-//!
-//                                                                       //
-///////////////////////////////////////////////////////////////////////////
-
-#ifndef STAR_StHistMaker
-#define STAR_StHistMaker
-
-#include "StHistUtil.h"
-#include "StMaker.h"
-#include "TH1.h"
-
-//////////////////////////////////////////////////////////////////////////
-
-class StHistMaker : public StMaker {
-
- private:
-
-  TH1** mHArray; //!
-  int   mHArraySize;
-
-
- public: 
-
-//! static Char_t m_VersionCVS = "$Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $";
-
-  StHistMaker(const char *name="QA", const char *title="SummedQAHist");
-  virtual       ~StHistMaker();
-  virtual Int_t  Init();
-  virtual Int_t  Finish();
-  virtual Int_t  Make();
-
-  void SetHArray(TH1**);
-  void SetHArraySize(int);
-
-// the following is a ROOT macro  that is needed in all ROOT code
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-  ClassDef(StHistMaker,0)   //StAF chain virtual base class for Makers
-    };
-    
-inline void StHistMaker::SetHArray(TH1** val)
-                           {mHArray = val; }
-inline void StHistMaker::SetHArraySize(int val)
-                           {mHArraySize = val; }
-
-
-#endif
-
-
+//! code that will collect all histograms that were added together in
+//! StHistUtil::AddHists - has to be in a maker in order to write it out
 
 

@@ -1,5 +1,56 @@
-// $Id: StHistMaker.cxx,v 2.3 2003/09/02 17:59:21 perev Exp $
+///////////////////////////////////////////////////////////////////////////
+//
+// Code that will collect all histograms that were added together in
+// StHistUtil::AddHists - has to be in a maker in order to write it out
+//
+///////////////////////////////////////////////////////////////////////////
+
+#include "StHistMaker.h"
+#include "StHistUtil.h"
+#include "StMessMgr.h"
+#include "TH1.h"
+#include "TList.h"
+#include "TString.h"
+
+ClassImp(StHistMaker)
+  
+//_____________________________________________________________________________
+StHistMaker::StHistMaker(const char *name, const char *title) :
+  StMaker(name), mHArray(0) {
+  mHArraySize = 0;
+}
+
+//_____________________________________________________________________________
+Int_t StHistMaker::Finish() {
+  return StMaker::Finish();
+}
+
+//_____________________________________________________________________________
+Int_t StHistMaker::Init() {
+  return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+Int_t StHistMaker::Make() {
+  //gMessMgr->Info() << "StHistMaker::Make(): "
+  //  << "This is the array: " << mHArray << endm;
+  if (mHArraySize && !mHArray) {
+    gMessMgr->Error("StHistMaker::Make(): Array size non-zero, but no array.");
+    return kStErr;
+  }
+  for (int i=0; i<mHArraySize; i++) {
+    AddHist(mHArray[i]);
+  }
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+// $Id: StHistMaker.cxx,v 2.4 2003/09/19 22:58:11 genevb Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 2.4  2003/09/19 22:58:11  genevb
+// Initialize pointers to zero, some doxygenization
+//
 // Revision 2.3  2003/09/02 17:59:21  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -19,57 +70,4 @@
 // code that will collect all histograms that were added together in StHistUtil::AddHists - has to be in a maker in order to write it out
 //
 //
-///////////////////////////////////////////////////////////////////////////
-#include <Stiostream.h>
-
-#include "StHistMaker.h"
-#include "StHistUtil.h"
-
-#ifndef ROOT_TH1
-#include "TH1.h"
-#endif
-
-
-#include "TList.h"
-#include "TString.h"
-
-ClassImp(StHistMaker)
-  
-//_____________________________________________________________________________
-  StHistMaker::StHistMaker(const char *name, const char *title) : StMaker(name){
-
-}
-//_____________________________________________________________________________
-
-StHistMaker::~StHistMaker(){
-
-}
-
-//_____________________________________________________________________________
-
-Int_t StHistMaker::Finish() {
-
-  return StMaker::Finish();
-}
-//_____________________________________________________________________________
-
-Int_t StHistMaker::Init(){
-
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
-
-Int_t StHistMaker::Make(){
-
-  cout << " StHistMaker::Make  " << endl;
-  cout << "This is the array " << mHArray << endl;
-  for (int i=0; i<mHArraySize; i++) {
-    AddHist(mHArray[i]);
-  }
-
- return kStOK;
-
-}
-
-//_____________________________________________________________________________
 
