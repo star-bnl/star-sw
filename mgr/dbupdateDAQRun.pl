@@ -202,7 +202,7 @@ my $maccess;
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobfileName like 'P00hi%' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobfileName like '$prodSr%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
