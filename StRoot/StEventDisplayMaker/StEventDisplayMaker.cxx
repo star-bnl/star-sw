@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.49 1999/12/27 21:45:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.50 1999/12/29 18:56:44 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -100,9 +100,13 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
    m_FilterArray->AddAt(&m_DefaultFilters[i],i);
 //    m_FilterArray->AddAt(&hitsOffFilter,i);
   }
+#ifdef STEVENT
   ((StVirtualEventFilter *)m_FilterArray->At(kVertices))->TurnOn();
   ((StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks))->TurnOn();
   ((StVirtualEventFilter *)m_FilterArray->At(kTrack))->TurnOn();
+#endif
+  ((StVirtualEventFilter *)m_FilterArray->At(kTptTrack))->TurnOn();
+  ((StVirtualEventFilter *)m_FilterArray->At(kTable))->TurnOn();
 
   gROOT->GetListOfBrowsables()->Add(this,GetName());
 }
@@ -376,9 +380,12 @@ Int_t StEventDisplayMaker::Make()
     if (!m_ListDataSetNames || m_ListDataSetNames->GetSize() == 0) 
     {
     // Add default names
+#ifdef STEVENT
       m_Event  = (StEvent *) GetDataSet("StEvent");       
       if (m_Event)  AddName("StEvent");
-      else {
+      else 
+#endif
+      {
         St_DataSet *dshits = GetDataSet("tphit");
         if (dshits)   {
            AddName("tphit(id_globtrk,x:y:z)");
@@ -964,6 +971,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.50  1999/12/29 18:56:44  fine
+// Change the default filter settings in favour of  StTable
+//
 // Revision 1.49  1999/12/27 21:45:45  fine
 // Protection against of zero-pointer
 //
