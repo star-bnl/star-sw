@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.27 2000/08/10 22:10:57 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.28 2000/08/14 20:43:49 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.28  2000/08/14 20:43:49  nevski
+* bug corrected
+*
 * Revision 1.27  2000/08/10 22:10:57  nevski
 * vpd versionning introduced
 *
@@ -409,7 +412,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='vpd') then
 *11*    Vertex position detector - Frank Geurts <geurts@rice.edu>
 
-        if (vpdg_version == 1)
+        if (vpdg_version == 1) then
           rileft    = numbv(1)
           innout    = numbv(2)
           sector    = numbv(3)
