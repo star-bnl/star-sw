@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.4 1999/12/21 15:14:33 ullrich Exp $
+ * $Id: StThreeVectorF.hh,v 1.5 2000/09/25 20:23:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
- * Revision 1.4  1999/12/21 15:14:33  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 1.5  2000/09/25 20:23:08  ullrich
+ * Removed inheritance from TObject.
  *
  * Revision 1.4  1999/12/21 15:14:33  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -39,19 +39,16 @@
 #include <iostream.h>
 #include <math.h>
 #ifdef __ROOT__
-#include "TObject.h"
+#include "Rtypes.h"
 #endif
 
 class StThreeVectorD;
 
 class StThreeVectorF
-#ifdef __ROOT__
- : public TObject 
-#endif
 {
 public:    
     StThreeVectorF(float = 0, float = 0, float = 0);
-    ~StThreeVectorF();
+    virtual ~StThreeVectorF();
 
     StThreeVectorF(const StThreeVectorF&);
     StThreeVectorF(const StThreeVectorD&);
@@ -123,7 +120,7 @@ public:
 protected:
     float    mX1, mX2, mX3;
 #ifdef __ROOT__
-    ClassDef(StThreeVectorF,1)
+    ClassDef(StThreeVectorF,2)
 #endif
 };
 #ifndef __CINT__
