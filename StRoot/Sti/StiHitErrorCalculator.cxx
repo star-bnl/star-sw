@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.20 2004/03/22 23:07:12 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.21 2004/12/11 04:31:36 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.21  2004/12/11 04:31:36  perev
+ * set of bus fixed
+ *
  * Revision 2.20  2004/03/22 23:07:12  pruneau
  * Added comments to operator<<
  *
@@ -132,7 +135,7 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
   coeff[3]= intrinsicX;
   coeff[4]= driftX;
   coeff[5]= crossX;
-  cout << *this;
+  cout << *this << endl;
 }
 
 //Load values from given input file stream
