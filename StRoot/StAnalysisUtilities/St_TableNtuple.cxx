@@ -1,8 +1,11 @@
 //*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
 //*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
 //
-// $Id: St_TableNtuple.cxx,v 1.9 1999/03/11 01:29:52 perev Exp $
+// $Id: St_TableNtuple.cxx,v 1.1 1999/09/08 16:36:54 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.1  1999/09/08 16:36:54  genevb
+// Move St_TableNtuple from xdf2root to StAnalysisUtilities
+//
 // Revision 1.9  1999/03/11 01:29:52  perev
 // New schema xdf2root
 //
@@ -468,7 +471,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.9 1999/03/11 01:29:52 perev Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.1 1999/09/08 16:36:54 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());

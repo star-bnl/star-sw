@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.6 1999/03/02 14:52:07 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.1 1999/09/08 16:36:55 genevb Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.1  1999/09/08 16:36:55  genevb
+// Move St_TableNtuple from xdf2root to StAnalysisUtilities
+//
 // Revision 1.6  1999/03/02 14:52:07  genevb
 // Made enum global to compile on Redhat
 //
