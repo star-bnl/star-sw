@@ -60,6 +60,7 @@
 <a href="#reading">Reading</a><br>
 <a href="#filtering">Filtering</a><br>
 <a href="#tools">Tools</a><br>
+<a href="#buffer">Buffer Sizes</a><br>
 </center>
 
 <p>
@@ -406,7 +407,43 @@ described above.<p>
 <br><tt>TClonesArray* GetMcArray()</tt>
 <br><tt>TClonesArray* GetAssocArray()</tt>
 </ul>
-<P>
 
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="buffer"><h2>Buffer Sizes</h2></a>
+The maker allocates a certain amount of buffer memory for each variable
+stored. Optimally, one would like this buffer to be as large as possible,
+reducing the time spent for I/O, and consequently reducing the number of
+keys Root uses in its files (thereby reducing the file size). However,
+with limited memory available on computers running the job, making this
+buffer large makes the executable very large, and may lead to significant
+virtual memory paging (disk swapping), thereby reducing the performance.
+If other users are running jobs, the amount of available memory may be
+very limited.
+Default values of the buffer sizes have been chosen which accomodate the
+usage of about 200 MB of memory for running with all branches activated.
+But in some situations, the user may wish to changes these limits. To do
+this, the following functions are provided:
+
+<ul>
+<li><tt>SetV0BufferSize(b)</tt>
+<li><tt>SetXiBufferSize(b)</tt>
+<li><tt>SetKinkBufferSize(b)</tt>
+</ul>
+
+where <tt>b</tt> is the buffer size in bytes for each of the variables
+associated with the particular branch. The default values are 1024000
+(1 MB) for the V0 and Xi branches, and 128000 (128 KB) for the Kink branch.
+The event branch currently uses 64 KB per variable. The total memory used
+is then a function of which branches are activated, as well as how many
+variables are in each branch. The above functions must be called between
+the instantiation of the maker, and the call to <tt>Init()</tt>.
+
+
+
+<P>
 </BODY>
 </HTML>

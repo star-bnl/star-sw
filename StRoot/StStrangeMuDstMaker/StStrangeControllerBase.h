@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 3.1 2000/07/17 20:28:40 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.2 2000/12/18 21:35:18 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.2  2000/12/18 21:35:18  genevb
+// Introduced variable buffer-sizing
+//
 // Revision 3.1  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -70,6 +73,7 @@ class StStrangeControllerBase : public TNamed {
   void PrintNumMc();
   const char* GetMcName() const;
   const char* GetAssocName() const;
+  void SetBufferSize(Int_t b);
   static StStrangeMuDstMaker* currentMaker;
     
  protected:
@@ -106,6 +110,7 @@ class StStrangeControllerBase : public TNamed {
   
   Int_t increment;
   Int_t max;
+  Int_t bsize;
   TString mcName;
   TString assocName;
   
@@ -139,4 +144,5 @@ inline const char* StStrangeControllerBase::GetMcName() const
 inline const char* StStrangeControllerBase::GetAssocName() const
             { return assocName.Data(); }
 
+inline void StStrangeControllerBase::SetBufferSize(Int_t b) { bsize = b; }
 #endif
