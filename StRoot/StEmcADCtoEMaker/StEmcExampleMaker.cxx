@@ -1,7 +1,13 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcExampleMaker.cxx,v 1.3 2003/09/02 17:57:59 perev Exp $
+// $Id: StEmcExampleMaker.cxx,v 1.4 2003/09/11 20:40:18 suaide Exp $
 // $Log: StEmcExampleMaker.cxx,v $
+// Revision 1.4  2003/09/11 20:40:18  suaide
+// Removed SMD capacitors 124 and 125 from data for dAu and pp Y2003 runs only.
+// It is timestamp flagged so it will work only for this data.
+// The point is the fact the the ped subtracted SMD data looks strange for these
+// two capacitors values
+//
 // Revision 1.3  2003/09/02 17:57:59  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -18,7 +24,7 @@
 #include "StChain.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include <Stiostream.h>
+#include "Stiostream.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
 ClassImp(StEmcExampleMaker)

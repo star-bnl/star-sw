@@ -1,8 +1,11 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.49 2003/09/11 05:49:18 perev Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.50 2003/09/11 20:39:57 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.49  2003/09/11 05:49:18  perev
-// ansi corrs
+// Revision 1.50  2003/09/11 20:39:57  suaide
+// Removed SMD capacitors 124 and 125 from data for dAu and pp Y2003 runs only.
+// It is timestamp flagged so it will work only for this data.
+// The point is the fact the the ped subtracted SMD data looks strange for these
+// two capacitors values
 //
 // Revision 1.48  2003/09/08 20:56:41  suaide
 // Patch to fix problem with SMD-phi pedestals saved on database
@@ -102,7 +105,7 @@
 #include "StEmcADCtoEMaker.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include <Stiostream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -115,7 +118,7 @@
 #include "StBemcData.h"
 
 #define STATUS_OK 1
-//VP #define MAXDET 4  // defined already in emcInternalDef.h
+#define MAXDET 4
 #define CAP1 124
 #define CAP2 125
 
@@ -206,11 +209,6 @@ Int_t StEmcADCtoEMaker::Init()
         Float_t center;
         mGeo[i]->getPhiModule(m,center);
         PhiBins1[j]=center-PhiB[s-1];
-        //Float_t ee,pp;
-        //Int_t id;
-        //if(i==3 && s<=nSub) mGeo[i]->getId(m,1,s,id);
-        //if(i==3 && s<=nSub) mGeo[i]->getEtaPhi(id,ee,pp);
-        //if(i==3 && s<=nSub) cout <<"j = "<<j<<"  center = "<<center<<"  DPhi = "<<PhiB[s-1]<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<"  phi = "<<pp<<endl;
         j++;
       }
       
@@ -253,7 +251,18 @@ Int_t StEmcADCtoEMaker::Init()
     TString title_e1= detname[i] +" Energy distribution";
     mHits[i]   = new TH2F(name_h,title_h,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mEnergyHist[i] = new TH2F(name_e,title_e,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
-    mEnergySpec[i] = new TH2F(name_s,title_s,nbins[i],0.5,(float)nbins[i]+0.5,200,0,5);
+    if(i<2)
+    {
+      mEnergySpec[i][0] = new TH2F(name_s.Data(),title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
+      mEnergySpec[i][1] = mEnergySpec[i][0];
+      mEnergySpec[i][2] = mEnergySpec[i][0];
+    }
+    else for(int k=0;k<3;k++)
+    {
+      char name[40];
+      sprintf(name,"%s for capacitor %d",name_s.Data(),k);
+      mEnergySpec[i][k] = new TH2F(name,title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
+    }
     mAdc[i]    = new TH2F(name_a,title_a,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
     mEn1d[i]   = new TH1F(name_e1,title_e1,1000,-200,2000);   
@@ -483,16 +492,15 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
 							mData->TowerPresent = kTRUE;
 							mData->NTowerHits++;
 						}
-						if(det==2) mData->SmdeADC[idh-1] = adc;
-						if(det==3) mData->SmdpADC[idh-1] = adc;
-            if(det==2 || det==3) 
+						if(det==2) {mData->SmdeADC[idh-1] = adc;mData->NSmdHits++;}
+						if(det==3) {mData->SmdpADC[idh-1] = adc;mData->NSmdHits++;}
+            if(det==2) 
             {
               Int_t RDO,index;
               mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
               mData->TimeBin[RDO]=rawHit[k]->calibrationType();
 							mData->ValidSMDEvent=kTRUE;
 							mData->SMDPresent=kTRUE;
-							mData->NSmdHits++;
             }
           }
         }
@@ -654,13 +662,25 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
         // by AAPSUAIDE 20030908
         //
         int shift = 1;
-        if(det==3)
+        if(GetDate()>20021101 && GetDate()<20030501)
         {
-          if(GetDate()>20021101 && GetDate()<20030501) shift = 0;
+          if(det==3) shift = 0;
         }
 				if((id-shift)>=0 && (id-shift)<18000) 
           PED = ((Float_t)smdpedst[0].AdcPedestal[id-shift][cap])/100.;
         else PED = 0;
+        
+        // This lines ZERO the PEDESTAL values for capacitors 124 and 125 for Y2003
+        // run. Once the pedestal is zero the energy of the corresponding hit
+        // will be set also as zero.
+        // This will remove the SMD hits with these capacitor values and
+        // remove the pedestal problem we are having with them
+        //
+        // by AAPSUAIDE 20030910
+        if(GetDate()>20021101 && GetDate()<20030501)
+        {
+          if((cap==1 || cap==2) && (det==2 || det==3)) PED = 0;
+        }
         /////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////
 		  }
@@ -696,7 +716,8 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			{
 				TOTALE+=EN;
 				NHITS++;
-			  //if(det==3) cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  CAP = "<<cap<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
+        mEnergySpec[det][cap]->Fill(id,EN);			  
+        //if(det==3) cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  CAP = "<<cap<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
 			}
       else
       {
@@ -753,7 +774,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				nHits++;
 				Float_t eta,phi;
 				mGeo[det]->getEtaPhi(i+1,eta,phi);
-        mEnergySpec[det]->Fill(i+1,E);
+        //mEnergySpec[det]->Fill(i+1,E);
 				if(ADC!=0) mHits[det]->Fill(eta,phi);
         if(ADC!=0) mAdc[det]->Fill(eta,phi,ADC);
 				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
