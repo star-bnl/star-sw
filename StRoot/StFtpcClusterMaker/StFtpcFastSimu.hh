@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.10 2000/11/24 15:02:33 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.11 2001/01/08 17:10:04 jcs Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.11  2001/01/08 17:10:04  jcs
+// move remaining constants from code to database
+//
 // Revision 1.10  2000/11/24 15:02:33  hummler
 // commit changes omitted in last commit
 //
@@ -63,7 +66,6 @@ class StFtpcFastSimu
   float s_azi[4];
   float err_rad[4];
   float err_azi[4];
-  float slong;
   float ri;
   float ra;
   float padrows;
