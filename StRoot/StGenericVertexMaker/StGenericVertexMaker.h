@@ -27,7 +27,7 @@ class TNtuple;
 class StGenericVertexMaker : public StMaker 
 {
  private: 
-  // static Char_t  m_VersionCVS = "$Id: StGenericVertexMaker.h,v 1.1 2003/05/09 22:21:32 lbarnby Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StGenericVertexMaker.h,v 1.2 2004/03/23 16:15:04 lbarnby Exp $";
 
   // control and cuts
   Bool_t use_ITTF;
@@ -68,9 +68,10 @@ class StGenericVertexMaker : public StMaker
   inline void DoEval(){eval= kTRUE;};
   inline void SetInternalFind(){externalFindUse=kFALSE;};
   inline void SetUseITTF(){use_ITTF=kTRUE;};
+  inline void SetDoNotUseITTF(){use_ITTF=kFALSE;};
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.1 2003/05/09 22:21:32 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.2 2004/03/23 16:15:04 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };
