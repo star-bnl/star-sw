@@ -373,31 +373,41 @@ double StiKalmanTrackNode::getPt() const
 
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
-  return os << n.fX  <<"\t"
-  << n.fAlpha<<"\t"
-  << n.fdEdx <<"\t"
-  << n.fChi2 <<"\t"
-  << n.mDepth<<"\t"
-  << n.fP0 <<"\t"
-  << n.fP1 <<"\t"
-  << n.fP2 <<"\t"
-  << n.fP3 <<"\t"
-  << n.fP4 <<"\t"
-  << n.fC00<<"\t"
-  << n.fC10<<"\t"
-  << n.fC11<<"\t"
-  << n.fC20<<"\t"
-  << n.fC21<<"\t"
-  << n.fC22<<"\t"
-  << n.fC30<<"\t"
-  << n.fC31<<"\t"
-  << n.fC32<<"\t"
-  << n.fC33<<"\t"
-  << n.fC40<<"\t"
-  << n.fC41<<"\t"
-  << n.fC42<<"\t"
-  << n.fC43<<"\t"
-  << n.fC44;
+	// print to the ostream "os" the parameters of this node 
+	// and all its children recursively
+
+  os << "Node Level: " << n.mDepth << endl
+		 << "x:" << n.fX  <<"\t"
+		 << "a:" << n.fAlpha<<"\t"
+		 << "dedx:" << n.fdEdx <<"\t"
+		 << "chi2:" << n.fChi2 << endl
+		 << "P0/1/2/3/4:" << n.fP0 << " " 
+		 << n.fP1 <<" "
+		 << n.fP2 <<" "
+		 << n.fP3 <<" "
+		 << n.fP4 << endl
+		 << "ERROR:" << n.fC00 << "\t"
+		 << n.fC10<<"\t"
+		 << n.fC11<<"\t"
+		 << n.fC20<<"\t"
+		 << n.fC21<<"\t"
+		 << n.fC22<<"\t"
+		 << n.fC30<<"\t"
+		 << n.fC31<<"\t"
+		 << n.fC32<<"\t"
+		 << n.fC33<<"\t"
+		 << n.fC40<<"\t"
+		 << n.fC41<<"\t"
+		 << n.fC42<<"\t"
+		 << n.fC43<<"\t"
+		 << n.fC44 << endl;
+	int nChildren = n.getChildCount();
+	for (int i=0;i<nChildren;i++)
+		{
+			const StiKalmanTrackNode * child = dynamic_cast<const StiKalmanTrackNode *>(n.getChildAt(i));
+			os << *child;
+		}
+	return os;
 }
 
 
