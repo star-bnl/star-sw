@@ -11,6 +11,7 @@
 #ifdef __ROOT__
 #include "TROOT.h"
 #endif
+#include <assert.h>
 #include <ctype.h>
 #include <string.h>
 #include "StMessage.h"
@@ -166,7 +167,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.25 2004/01/28 00:09:14 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.26 2004/03/01 17:52:13 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -181,8 +182,11 @@ int StMessage::InitBuffer() {
 int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.25 2004/01/28 00:09:14 genevb Exp $
+// $Id: StMessage.cxx,v 1.26 2004/03/01 17:52:13 fisyak Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.26  2004/03/01 17:52:13  fisyak
+// Add include for assert (osf required)
+//
 // Revision 1.25  2004/01/28 00:09:14  genevb
 // Messages (except Debug) default to no time-date stamp
 //
