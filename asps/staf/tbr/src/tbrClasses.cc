@@ -45,7 +45,7 @@ STAFCV_T tbrMotifViewer:: viewDataset ( tdmDataset * dataset) {
    pDataset = (DS_DATASET_T*)ptr;
 
    tbrNewDSView(&pDataset,1);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -58,7 +58,7 @@ STAFCV_T tbrMotifViewer:: viewTable ( tdmTable * table) {
    pTable = (DS_DATASET_T*)ptr;
 
    tbrNewTbView(&pTable);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 
@@ -113,7 +113,7 @@ STAFCV_T tbrAsciiViewer:: printTable (tdmTable * table) {
    pTable = (DS_DATASET_T*)ptr;
 
    dsPrintTableData(stdout,pTable);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -133,8 +133,8 @@ tbrFactory:: ~tbrFactory() { }
 //:----------------------------------------------- ATTRIBUTES         --
 //:**NONE**
 //:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T tbrFactory:: list () {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+char * tbrFactory:: list () {
+   return ""; // TEMPORARY HACK
 }
 
 STAFCV_T tbrFactory:: deleteAsciiViewer (const char * name) {

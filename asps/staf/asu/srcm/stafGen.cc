@@ -209,7 +209,7 @@ char* pam_includes()
    s[0]=NULL;
    for( i=0;i<npam;i++ ){
       sprintf(s+strlen(s),
-"int %s_init(), %s_start(), %s_stop(); \n"
+"extern \"C\" int %s_init(), %s_start(), %s_stop(); \n"
       ,pam[i] ,pam[i] ,pam[i]);
    }
    s[strlen(s)]=NULL;

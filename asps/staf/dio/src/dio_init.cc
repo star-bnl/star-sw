@@ -22,7 +22,7 @@ dioFactory *dio;
 //:<--------------------------------------------------------------------
 int dio_init()
 {
-   EML_MESSAGE(Initializing DIO.);
+   EML_MESSAGE(DIO: Initializing.);
 
 /*- Define the DIO KUIP commands. -*/
    dio_def_();
@@ -38,7 +38,7 @@ int dio_init()
 //:<--------------------------------------------------------------------
 int dio_start()
 {
-   EML_MESSAGE(Starting DIO.);
+   EML_MESSAGE(DIO: Starting.);
 
 /*- Create the DIO Factory. -*/
    dio = new dioFactory("dio");
@@ -54,7 +54,7 @@ int dio_start()
 //:<--------------------------------------------------------------------
 int dio_stop()
 {
-   EML_MESSAGE(Stopping DIO.);
+   EML_MESSAGE(DIO: Stopping.);
 
 /*- Delete the DIO Factory.
    delete dio;

@@ -3,7 +3,8 @@
 if ( $#argv < 2 ) then
 	echo " "
 	echo Usage: $0 pkg file "[ ... ]"
-	echo Example: $0 tcl *.idl
+	echo Example:
+	echo '	'$0' xxx ../idl/*.idl'
 	echo " "
 	exit
 endif

@@ -40,7 +40,7 @@ int kam_tbr_count()
    long npars = ku_npar();      /* number of KUIP parameters */
 
    printf("TBR:\tObject count = %d \n",tbr->count());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -57,10 +57,8 @@ int kam_tbr_list()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !tbr->list() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",tbr->list() );
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -80,6 +78,6 @@ int kam_tbr_motif_viewdataset()
    if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 

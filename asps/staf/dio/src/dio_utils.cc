@@ -196,6 +196,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    ||  !dsFindEntry(&pAdded,pDS,name)
 	    ||  !dsSetTableRowCount(pAdded,maxcount)
 	    ){
+	       if( 0 == maxcount )return TRUE; /* SPECIAL CASE */
 	       EML_DSPERROR("can't map table");
 	       return FALSE;
 	    }
