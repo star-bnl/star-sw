@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.373 2004/01/08 17:35:38 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.374 2004/01/16 15:05:20 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -380,11 +380,8 @@ Bfc_st BFC1[] = {
   {"SvtOnlSeq","SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                              ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
 
-  {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
                                   ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
-  {"sls"     ,"","svtChain","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
-  {"spa"     ,"","svtChain","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
   {"SvtClu"      ,"SvtClu","svtChain","StEvent,SvtCL"   ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
@@ -392,9 +389,6 @@ Bfc_st BFC1[] = {
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
   {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
-  {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
-  {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
@@ -453,10 +447,25 @@ Bfc_st BFC1[] = {
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
+
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StBichsel,StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
+
+
+  {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
+  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",    
+                                                                            "... SSD slow simulator",kFALSE},
+  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker", 
+                                                                     "... SSD Pedestal Annihilator",kFALSE},
+  {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
+  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",     
+                                                              "... SSD Cluster Matcher (both side)",kFALSE},
+  {"spt"         ,"","",""      ,"StSsdPointMaker","St_svt,StSsdPointMaker","... SSD Point Creator",kFALSE},
+  {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
+                                                                                "... SSD Evaluator",kFALSE},
+ 
 
   {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
@@ -907,11 +916,8 @@ Bfc_st BFC2[] = {
   {"SvtOnlSeq","SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                              ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
 
-  {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
                                   ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
-  {"sls"     ,"","svtChain","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
-  {"spa"     ,"","svtChain","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
   {"SvtClu"      ,"SvtClu","svtChain","StEvent,SvtCL"   ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
@@ -919,9 +925,6 @@ Bfc_st BFC2[] = {
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
   {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
-  {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
-  {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
@@ -984,6 +987,20 @@ Bfc_st BFC2[] = {
       "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
+
+
+  {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
+  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",    
+                                                                            "... SSD slow simulator",kFALSE},
+  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker", 
+                                                                     "... SSD Pedestal Annihilator",kFALSE},
+  {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
+  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",     
+                                                              "... SSD Cluster Matcher (both side)",kFALSE},
+  {"spt"         ,"","",""      ,"StSsdPointMaker","St_svt,StSsdPointMaker","... SSD Point Creator",kFALSE},
+  {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
+                                                                                "... SSD Evaluator",kFALSE},
+
 
   {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
