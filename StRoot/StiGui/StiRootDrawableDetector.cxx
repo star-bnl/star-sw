@@ -10,6 +10,7 @@
 #include "TNode.h"
 #include "TVolume.h"
 #include "TBRIK.h"
+#include "TPCON.h"
 
 //Sti
 #include "StiDisplayManager.h"
@@ -51,7 +52,23 @@ void StiRootDrawableDetector::makeShape()
 
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",getName());
-    mshape = new TBRIK(shapename,"BRIK","void", getThickness()/2., getHalfWidth(), getHalfDepth());
+    // make rectangular or cylindrical shapes based on shape code
+    if(getShapeCode() == kPlanar){
+      mshape = new TBRIK(shapename,"BRIK","void", getThickness()/2., getHalfWidth(), getHalfDepth());
+    }else{ // kCylindrical
+      // R00T expects this angle in degrees, of all things
+      double dHalfDeltaPhi = 180.*getHalfWidth()/getCenterRadius()/M_PI;
+      double dMinRadius = getCenterRadius() - getThickness()/2;
+      double dMaxRadius = getCenterRadius() + getThickness()/2;
+      TPCON *pCon = new TPCON(shapename,"PCON","void", 
+                              getCenterRefAngle() - dHalfDeltaPhi,
+                              2.*dHalfDeltaPhi, 2);
+      pCon->DefineSection(0, -getHalfDepth(), dMinRadius, dMaxRadius);
+      pCon->DefineSection(1, getHalfDepth(), dMinRadius, dMaxRadius);
+
+      mshape = pCon;
+      pCon = 0;
+    }
     mshape->SetLineColor(1);
     
 
@@ -86,11 +103,17 @@ void StiRootDrawableDetector::makeShape()
 
     //Set position of center of shape w.r.t. global coordinates
     //cout <<"Set Position of center of shape w.r.t. global"<<endl;
-    double xcenter = getCenterRadius()*cos(getCenterRefAngle());
-    double ycenter = getCenterRadius()*sin(getCenterRefAngle());
-    mposition.setX(xcenter);
-    mposition.setY(ycenter);
-    mposition.setZ(getZCenter());
+    if(getShapeCode() == kPlanar){
+      double xcenter = getCenterRadius()*cos(getCenterRefAngle());
+      double ycenter = getCenterRadius()*sin(getCenterRefAngle());
+      mposition.setX(xcenter);
+      mposition.setY(ycenter);
+      mposition.setZ(getZCenter());
+    }else{ // for kCylindrical, we assume center @ origin
+      mposition.setX(0);
+      mposition.setY(0);
+      mposition.setZ(0);
+    }
 
     //cout <<"Done Making Shape"<<endl;
     return;

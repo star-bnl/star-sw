@@ -28,7 +28,9 @@ class StiGeometryTransform;
 #define STI_HYBRID_THICKNESS   0.1  // real thickness is O(1mm)
 // this doesn't appear in the database:
 #define STI_HYBRID_WIDTH        2.  // extent in local y
-//#define STI_HYBRID_DEPTH       54.  // extend in z
+//#define STI_HYBRID_DEPTH       54.  // extent in z
+
+#define IFC_NOMEX_THICKNESS     1.27 // cm
 
 class StiGeometryGenerator : public StMaker {
  public:
@@ -44,10 +46,11 @@ class StiGeometryGenerator : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.2 2001/07/03 21:39:22 bnorman Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.3 2001/07/17 21:35:22 bnorman Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 private:
     void buildTpc();
+    void buildIfc();
     void buildSvg(); // SVT + SSD
     void buildPolygons();
     vector<StiPolygon> mpoly_vec; //!

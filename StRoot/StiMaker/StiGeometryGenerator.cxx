@@ -80,6 +80,9 @@ Int_t StiGeometryGenerator::Make()
   cout << "  building SVT && SSD." << endl;
   buildSvg();
 
+  cout << "  building IFC." << endl;
+  buildIfc();
+
   cout << "  building TPC." << endl;
   buildTpc();
 
@@ -102,6 +105,59 @@ void StiGeometryGenerator::buildPolygons()
     }
     return;
 }
+
+void StiGeometryGenerator::buildIfc(){
+
+  char szOutfile[500];
+
+  // we build the Ifc in 12 sections, each of which spans a 30 degree arc
+  // in xy and runs the whole length of the IFC.  This makes for easy
+  // (we hope) transition from padrow 1.
+
+  double dRadius = gStTpcDb->Dimensions()->ifcRadius();
+  double dHalfDepth = gStTpcDb->Dimensions()->tpcTotalLength()/2;
+
+  for(int iSector = 1; iSector <= 12; iSector++){
+
+    double dPhi = mGeometryTransform->phiForSector(iSector, 12);
+      
+    StiDetector detector;
+    StiMaterial gas; // dummy for holding gas name
+    gas.setName("Air");
+    detector.setGas(&gas);
+    StiMaterial material;
+    material.setName("Nomex");
+    detector.setMaterial(&material);
+
+    detector.setIsOn(true);
+    detector.setIsActive(false);
+    detector.setIsContinuousMedium(false);
+    detector.setIsDiscreteScatterer(true);
+
+    detector.setShapeCode(StiDetector::kCylindrical);
+    
+    detector.setCenterRep(dRadius, dPhi, 0, M_PI*dRadius/12);
+
+    detector.setHalfDepth(dHalfDepth);
+    detector.setZCenter(0.);
+    detector.setThickness(IFC_NOMEX_THICKNESS);
+    
+    detector.setSector(iSector);
+    detector.setPadrow(10);
+    
+    sprintf(szOutfile, "Ifc/Sector_%i", iSector);
+    detector.setName(szOutfile);
+    sprintf(szOutfile, "%s/%s.txt", m_szGeomDirectory, detector.getName());
+    detector.write(szOutfile);
+
+    cout << "wrote file '"<< szOutfile << "'." << endl;
+
+    StiPolygon poly(12, 0, dRadius);
+    mpoly_vec.push_back(poly);
+
+  }  
+} // buildIfc()
+
 // warning:  the ladder numbers used here are NOT the same as those shown in
 // CSN 229A
 void StiGeometryGenerator::buildSvg(){
