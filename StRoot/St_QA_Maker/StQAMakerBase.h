@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.4 2001/08/29 20:45:15 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.5 2001/12/28 09:19:13 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.5  2001/12/28 09:19:13  genevb
+// Adjustments for pp running
+//
 // Revision 2.4  2001/08/29 20:45:15  genevb
 // Trigger word histos
 //
@@ -39,7 +42,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.4 2001/08/29 20:45:15 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.5 2001/12/28 09:19:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -80,6 +83,7 @@ class StQAMakerBase : public StMaker {
 
   virtual void BookHist();
   virtual void BookHistGeneral();
+  virtual void BookHistTrigger();
   virtual void BookHistEvSum();
 
   virtual void MakeHistEvSum() = 0;

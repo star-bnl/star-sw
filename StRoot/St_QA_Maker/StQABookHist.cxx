@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.26 2001/11/20 21:53:45 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.27 2001/12/28 09:19:13 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.27  2001/12/28 09:19:13  genevb
+// Adjustments for pp running
+//
 // Revision 2.26  2001/11/20 21:53:45  lansdell
 // added x-y dist of hits, tpc east&west histos
 //
@@ -615,7 +618,7 @@ void StQABookHist::BookHist(Int_t histsSet){
 
   QAH::preString = QAHistType;
 //book histograms --------------
-  if (histsSet == 1) {
+  if (histsSet > 0) {
     mNullPrimVtxMult = QAH::H1F("QaNullPrimVtxMult","event primary vertex check",40,-2,2);
     mNullPrimVtxMult->SetXTitle("has primary vertex? (yes = 1, no = -1)");
     mNullPrimVtxMult->SetYTitle("# of events");

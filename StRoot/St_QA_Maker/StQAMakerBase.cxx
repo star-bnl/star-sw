@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.11 2001/12/20 03:11:08 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.12 2001/12/28 09:19:13 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.12  2001/12/28 09:19:13  genevb
+// Adjustments for pp running
+//
 // Revision 2.11  2001/12/20 03:11:08  genevb
 // pp trigger words 0x2XXX
 //
@@ -107,6 +110,10 @@ Int_t StQAMakerBase::Make(){
       if (!multClass) return kStOk;
       hists = (StQABookHist*) histsList->At((Int_t) (--multClass));
       break; }
+    case (2) : {
+      multClass = 0;
+      hists = (StQABookHist*) histsList->At(0);
+      break; }
     default  : {}
   }
 
@@ -179,6 +186,11 @@ void StQAMakerBase::BookHist() {
       NewQABookHist(temp.Data());
       break; }
 
+    // pp data with just one multiplicity class
+    case (2) : {
+      NewQABookHist(QAMakerType.Data());
+      break; }
+
     default  : {}
   }
   
@@ -186,6 +198,7 @@ void StQAMakerBase::BookHist() {
   QAH::maker = (StMaker*) (this);
   QAH::preString = QAMakerType;
 
+  BookHistTrigger();
   BookHistGeneral();
   BookHistEvSum();
   for (Int_t i=0; i<multClass; i++)
@@ -198,12 +211,16 @@ void StQAMakerBase::BookHistGeneral(){
   mNullPrimVtx->SetXTitle("has primary vertex? (yes = 1, no = -1)");
   mNullPrimVtx->SetYTitle("# of events");
 
-  if (histsSet != 0) {
+  if (histsSet == 1) {
     mMultClass = QAH::H1F("QaMultClass","event multiplicity class",5,-0.5,4.5);
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
   }
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistTrigger(){  
 
+  if (mTrigWord) return;
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
   mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=Other Physics, 4=pp, 7=Laser, 8=Other");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
