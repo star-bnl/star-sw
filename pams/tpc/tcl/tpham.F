@@ -146,6 +146,11 @@ c     June-Dec 1995 - lots of stuff
 c
 c     Dec 1995
 c      - now transform tphit.q into units of energy loss
+c      - Also, when taking mean for z-position, the offset of the
+c        mean has been shown to be independent of lambda and diffusion,
+c        and the value is related to the shaper response function.  The
+c        value is no longer hard-wired in fit_isolated_cluster, but
+c        is subtracted at the top level
 C
 C   Error conditions : 
 C   ================
@@ -404,6 +409,12 @@ c
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
 cccc  invec(3) = invec(3) - 0.88 now we do this in fit_isolated_cluster
+c the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
+c  n is the (effective) number of stages in the amplifier, and tau is the
+c  (effective) time constant.  For STAR, n=2, and tau is set by tss.
+              if (tclpar(1).tfit.eq.0) ! average value used
+     +             invec(3) = invec(3) - 
+     +             dble(3.0*tsspar(1).tau*tsspar(1).v_drift)
               
               invec(2)=tpg_row_to_y(iirow,iisec)
               
@@ -1308,6 +1319,7 @@ C-----------------------------------------------------------------------
         parameter(npads_max=184,nbuck_max=1024)
         integer pad_proj(npads_max),time_proj(nbuck_max)
         integer numpix_pad_proj(npads_max)
+        integer numpix_time_proj(nbuck_max)
         integer tdc_x_adc(npads_max)
         integer nmc_tracks_max,nmc_tracks
         parameter(nmc_tracks_max=2000)
@@ -1315,6 +1327,7 @@ C-----------------------------------------------------------------------
 
         real identity_vector(nbuck_max) ! useful for x-axis of projections
         real rvec(nbuck_max),d_rvec(nbuck_max) ! temp arrays
+        real d_rvec_cor(nbuck_max),d_rvec_uncor(nbuck_max) ! SAS, SCA noise
         logical first/.true./
         integer mtrk,iucomp,ktrk
 
@@ -1344,6 +1357,7 @@ c 4) get time average for each pad (fit each and obtain orientation)
 c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
 
 	call vzero(numpix_pad_proj,npads_max)
+	call vzero(numpix_time_proj,nbuck_max)
         call vzero(pad_proj,npads_max)
         call vzero(time_proj,nbuck_max)
         call vzero(tdc_x_adc,npads_max)
@@ -1352,6 +1366,7 @@ c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
            adc_sum = adc_sum+iadc(ipix)
            pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
            numpix_pad_proj(ipad(ipix))=numpix_pad_proj(ipad(ipix))+1
+           numpix_time_proj(itdc(ipix))=numpix_time_proj(itdc(ipix))+1
            time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
            tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
      +          itdc(ipix)*iadc(ipix)
@@ -1362,37 +1377,47 @@ c q:
 c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
         call vfloat(pad_proj,rvec,npads_max)
         do indx=1,npads_max
-           if (pad_proj(indx).ne.0)
-     +          d_rvec(indx) = 
+           if (pad_proj(indx).ne.0) then
+              d_rvec(indx) = 
      +          sqrt((float(numpix_pad_proj(indx))*filtered_noise)**2+
      +          (float(numpix_pad_proj(indx))*white_noise**2))
-c     +          sqrt(float(numpix_pad_proj(indx)))*rms_noise
+           else
+              d_rvec(indx)=0.0
+           endif
+           d_rvec_cor(indx) = 0.0
         enddo
         if (tph_3point_gauss(identity_vector,rvec,d_rvec,
      +       npads_max,centroid,sigma,uncertainty).ne.1) 
-     +       call tph_weighted_mean(identity_vector,rvec,d_rvec,
+     +       call tph_weighted_mean(identity_vector,rvec,
+     +       d_rvec_cor,d_rvec,
      +       npads_max,centroid,sigma,uncertainty)
         x(1) = centroid
         dx(1) = uncertainty
         prf(1) = sigma
 
 c z,dz,zrf: - do weighted mean
+c  for uncertainties, see notebook2 p113
         call vfloat(time_proj,rvec,nbuck_max)
         do indx=1,nbuck_max
            if (time_proj(indx).ne.0) then
-              d_rvec(indx) = sqrt(rvec(indx))*white_noise ! needs work...
+              d_rvec_cor(indx) = 
+     +             sqrt(float(numpix_time_proj(indx)))*filtered_noise
+              d_rvec_uncor(indx) = 
+     +             sqrt(float(numpix_time_proj(indx)))*white_noise
            else
-              d_rvec(indx) = 0.0
+              d_rvec_cor(indx) = 0.0
+              d_rvec_uncor(indx) = 0.0
            endif
         enddo
-        if (tclpar(1).tfit.eq.1) then ! fancy fit
-           call tph_fit_pulse(identity_vector,rvec,d_rvec,
+c        if (tclpar(1).tfit.eq.1) then ! fancy fit - not recommended...
+c           call tph_fit_pulse(identity_vector,rvec,d_rvec,
+c     +       nbuck_max,centroid,sigma,uncertainty)
+c       else                          ! simple weighted mean
+        call tph_weighted_mean(identity_vector,rvec,
+     +       d_rvec_cor,d_rvec_uncor,
      +       nbuck_max,centroid,sigma,uncertainty)
-        else                          ! simple weighted mean
-           call tph_weighted_mean(identity_vector,rvec,d_rvec,
-     +          nbuck_max,centroid,sigma,uncertainty)
-           centroid = centroid - 2.146 ! ** very crude phase correction!
-        endif
+        centroid = centroid     ! phase correction done at top level....
+c     endif
         z(1) = centroid
         dz(1) = uncertainty
         zrf(1) = sigma
@@ -1551,7 +1576,8 @@ c       B = (rat)**(1.0/float(N))	! for arbitrary N
         id=0
         call message('TPH_FIT_PULSE failure; going to mean',
      +       1,id)
-        call tph_weighted_mean(tseq,aseq,daseq,npts_max,
+c this should be fixed before using for real-----v
+        call tph_weighted_mean(tseq,aseq,daseq,daseq,npts_max,
      +       t0,tau,dt0)
 c     should correct for phase here!!!!!!!! *** mal 27jul95
         return
@@ -1681,8 +1707,9 @@ C-----------------------------------------------------------------------
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_weighted_mean(x, y, dy, npts,
-     +				     mom1, mom2, uncertainty)
+	Subroutine tph_weighted_mean(x, y, dy_cor,dy_uncor,
+     +     npts,
+     +     mom1, mom2, uncertainty)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1691,7 +1718,8 @@ C   Input arguments  (One to a line with definition after ! )
 C
 C     x		- x coordinate of each point
 C     y		- y(x) distribution
-C     dy	- uncertainty in y(x)
+C     dy_cor	- uncertainty in y(x) that is CORRELATED
+C     dy_uncor	- uncertainty in y(x) that is UNCORRELATED
 C     npts	- number of samples in distribution
 C
 C   Output arguments : 
@@ -1713,14 +1741,16 @@ c
 c   modificattions:
 c   ==============
 C
+C     27dec95 - mal - calculate uncertainty in mean using
+C                     correlated and uncorrelated uncertainty in y
+C
 C   Error conditions : 
 C   ================
 C
 C-----------------------------------------------------------------------
-	real x(*),y(*),dy(*)
+	real x(*),y(*),dy_cor(*),dy_uncor(*)
 	integer npts
-	real mom1,mom2,uncertainty
-        integer n_nonzero
+	real mom1,mom2,uncertainty_cor,uncertainty_uncor,uncertainty
 C-----------------------------------------------------------------------
 	real ysum
 	integer ipt
@@ -1729,25 +1759,28 @@ C-----------------------------------------------------------------------
 	mom1 = 0.0
 	mom2 = 0.0
 	ysum = 0.0
-	n_nonzero = 0
 	do ipt=1,npts
 	  ysum = ysum + y(ipt)
-          if (y(ipt).gt.1.0e-10) n_nonzero=n_nonzero+1
 	  mom1 = mom1 + x(ipt)*y(ipt)
-	  mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
+          mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
 	enddo
 	mom1 = mom1 / ysum
-	mom2 = mom2 / ysum
-	mom2 = sqrt(mom2 - mom1*mom1)
-c what follows is what I think is right... however, it does not give
-c  good z-errors, so I calculate uncertainty differently for now...
-c	uncertainty = 0.0
-c	do ipt=1,npts
-c	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
-c	enddo
-c	uncertainty = sqrt(uncertainty)
+        mom2 = sqrt(mom2/ysum - mom1**2)
+c
+c the uncertainty from the correlated noise and uncorrelated noise
+c  is estimated below...
+	uncertainty_cor = 0.0
+	uncertainty_uncor = 0.0
+	do ipt=1,npts
+	  uncertainty_cor = uncertainty_cor+
+     +          abs(x(ipt)-mom1)*dy_cor(ipt)
+	  uncertainty_uncor = uncertainty_uncor+
+     +          ((x(ipt)-mom1)*dy_uncor(ipt))**2
+	enddo
+        uncertainty_cor = uncertainty_cor/ysum
+	uncertainty_uncor = sqrt(uncertainty_uncor)/ysum
 
-	uncertainty = mom2/sqrt(float(n_nonzero))
+	uncertainty = sqrt(uncertainty_cor**2+uncertainty_uncor**2)
 
 	return
 	end
