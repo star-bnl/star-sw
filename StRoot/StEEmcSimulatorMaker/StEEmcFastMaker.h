@@ -1,5 +1,8 @@
-// $Id: StEEmcFastMaker.h,v 1.1 2003/01/28 23:12:59 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.2 2003/02/20 05:15:51 balewski Exp $
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.2  2003/02/20 05:15:51  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2003/01/28 23:12:59  balewski
 // star
 //
@@ -73,7 +76,7 @@ www.star.bnl.gov/STAR/eemc -->How To
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class EEevent;
+class EEeventDst;
 class StEvent;
 class EEmcMCData;
 
@@ -87,9 +90,9 @@ class EEmcMCData;
 class StEEmcFastMaker : public StMaker {
  private:
   EEmcMCData  *mevIN; ///< decoded raw .fzd event
-  EEevent *meeve;    ///<  result stored in TTRee 
-  void mEE2ST(EEevent*, StEvent*); ///< TTree-->StEvent
-  void mST2EE(EEevent*, StEvent*); ///< StEvent -->TTree
+  EEeventDst *meeve;    ///<  result stored in TTRee 
+  void mEE2ST(EEeventDst*, StEvent*); ///< TTree-->StEvent
+  void mST2EE(EEeventDst*, StEvent*); ///< StEvent -->TTree
   int mdbg;
   float msamplingFraction; ///< for Towers
   float * mfixTgain; ///<  (adc=g*de )ideal gains for Towers
@@ -98,7 +101,7 @@ class StEEmcFastMaker : public StMaker {
 
   StEvent *mlocalStEvent; ///< for test only
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.1 2003/01/28 23:12:59 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.2 2003/02/20 05:15:51 balewski Exp $";
   
  protected:
  public: 
@@ -111,7 +114,7 @@ class StEEmcFastMaker : public StMaker {
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.1 2003/01/28 23:12:59 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.2 2003/02/20 05:15:51 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

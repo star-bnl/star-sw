@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.3 2003/02/18 19:56:03 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.4 2003/02/20 05:15:51 balewski Exp $
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.4  2003/02/20 05:15:51  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2003/02/18 19:56:03  balewski
 // add pedestals
 //
@@ -19,11 +22,12 @@
 #include "StEEmcFastMaker.h"
 
 
-#include "StEEmcUtil/EEevent/EEevent.h"
+#include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
-#include "StEEmcUtil/EEevent/EEmcMCData.h"
 #include "StEEmcUtil/EEevent/EEtwHitDst.h"
 #include "StEEmcUtil/EEevent/EEsmdHitDst.h"
+
+#include "StEEmcUtil/EEmcMC/EEmcMCData.h"
 
 
 ClassImp(StEEmcFastMaker)
@@ -33,7 +37,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   mlocalStEvent=0;
   mdbg=0;
   mevIN= new EEmcMCData;
-  meeve=new EEevent;
+  meeve=new EEeventDst;
   msamplingFraction=0.05;
   // towers are gain matched to fixed E_T
   const int maxAdc=4095;
@@ -91,7 +95,7 @@ Int_t StEEmcFastMaker::Make(){
     return kStOK;
   }
 
-  EEevent eeveRaw;    // raw M-C hits 
+  EEeventDst eeveRaw;    // raw M-C hits 
   
   // generation of TTree
   mevIN->write(&eeveRaw); // Clear & Store RAW EEevent
@@ -115,7 +119,7 @@ Int_t StEEmcFastMaker::Make(){
   mEE2ST(meeve, stevent);
   
   if(mdbg>2) { // test copying back 
-    EEevent eeve2;   // after EE2St and ST2EE
+    EEeventDst eeve2;   // after EE2St and ST2EE
     mST2EE(&eeve2, stevent);  
     printf( "***** before\n");
     meeve->print();
@@ -140,7 +144,7 @@ void  StEEmcFastMaker::SetLocalStEvent(){
 //--------------------------------------------
 //--------------------------------------------
 //--------------------------------------------
-void  StEEmcFastMaker::mEE2ST(EEevent* eevt, StEvent* stevt){
+void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
   int mxSector = kEEmcNumSectors;
   assert(stevt); // fix dumm input
   if(mdbg)printf("EE2ST() start %p\n",stevt);
@@ -250,7 +254,7 @@ void  StEEmcFastMaker::mEE2ST(EEevent* eevt, StEvent* stevt){
 //--------------------------------------------
 //--------------------------------------------
 //--------------------------------------------
-void  StEEmcFastMaker::mST2EE(EEevent* evt, StEvent* stevt){
+void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
   printf("ST2EE: started\n");
   printf("ST2EE: is not matched to EE2ST, fix the code first (J.B.)\n");
   assert(1==2); // not working method, fix it if you need it
