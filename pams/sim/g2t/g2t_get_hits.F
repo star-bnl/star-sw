@@ -59,7 +59,7 @@ C :>--------------------------------------------------------------------
       Integer         G2T_GET_HITS, AgHITSET, AgHITGET, G2T_VOLUME_ID, 
      >                TDM_GET_COLUMN, TDM_GET_CCOUNT, ISLFLAG, IG2TPOS
 * Local variables
-      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),IPOS,Nbytpw,Iprin,
+      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),IPOS,Nbytpw,Iprin,Jtra,
      >                LenT,LenH,Npar,Ish,nh,i,j,k,l,e,f,m,n,ip,in,Ip0,Nu,n0
       Real            G2T_FIELD,Par(50),xxx(10),U(50),Pt,Vr,dphi,dtr,FieldZ
       Character*4     Csys*4/' '/,cnam*4,col*80,typ*80,cp*20
@@ -133,6 +133,7 @@ C :>--------------------------------------------------------------------
       endif
 * - - -     
       Itra = 0
+      Jtra = 0
       ip0  = 0
       n0   = 0
 
@@ -142,16 +143,20 @@ C :>--------------------------------------------------------------------
 
 C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
          if (Csys.eq.'tpc') then
+*           skip short after-steps
+            if (NUMBV(3).eq.n0 .and. trac.eq.jtra .and.step.le.0.01) go to 190
+
             if (NUMBV(3).ne.n0) Call Agfpara(ish,npar,par)
             If (Ish.ne.1) print *,' Awful error in TPC, shape=',Ish,Npar
-            if(trac.ne.Itra) Call GfKINE(trac,vert,pvert,ipart,ivert,U,nu)
-            if(ipart.ne.ip0) Call GfPART(ipart,cp,ItrTyp,amass,charge,TLife,U,nu)
             n0   = NUMBV(3)
-            Itra = trac
-            ip0  = ipart
-            if (charge.ne.0.and.step.lt.0.01) go to 190
+            Jtra = trac
 
             if (user.lt.0) then
+               if(trac.ne.Itra) Call GfKINE(trac,vert,pvert,ipart,ivert,U,nu)
+               if(ipart.ne.ip0) Call GfPART(ipart,cp,ItrTyp,amass,charge,TLife,
+     >                                                                  U,nu)
+               Itra     = trac
+               ip0      = ipart
                Vr       = 1.e9 
                Pt       = pmomg(4)*sqrt(Chloc(1)**2+Chloc(2)**2)
                if (Pt.gt.0) Vr = 0.0003*FieldZ/Pt
@@ -160,6 +165,7 @@ C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
                xhloc(1) = min(max(-par(1),xhloc(1)+Chloc(2)*dtr),par(1))
                xhloc(2) = min(max(-par(2),xhloc(2)-Chloc(1)*dtr),par(2))
             endif
+
             if (abs(Step*Chloc(1)).lt.2*par(1)-0.1) User=-abs(User)
             Call GDTOM(xhloc,xhglb,1)
          endif

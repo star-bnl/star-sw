@@ -1,6 +1,6 @@
       subroutine control
-+CDE,gcbank,gcnum,gcflag,quest.
-      print *,' control ready '
++CDE,gcbank,gcnum,gcflag,gcunit,quest.
+      <w>; (' control ready ')
       IQUEST(100) = JVOLUM
       call agsbegm('CONTROL',IPRIN)
       if (ISLFLAG('CONT','HIST')<=0) return
@@ -15,7 +15,7 @@
 
       subroutine agudigi
       implicit   none
-+CDE,gcbank,gcnum,gcflag,quest.
++CDE,gcbank,gcnum,gcflag,gcunit,quest.
       integer ISLFLAG,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
@@ -25,9 +25,14 @@
    
 * do not allow run without geometry
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
+      if (JHEAD <=0) then
+         <W>; ('CONTROL: event without header rejected ');   go to :e:
+      endif
+      if (IQ(JHEAD+5)>0 & IQ(JHEAD+6)==0) then
+         <W>; ('CONTROL: splitted event header skipped ');   go to :r:
+      endif
       if (JVERTX<=0 | JKINE<=0) then
-         print *,'CONTROL: empty event rejected'
-         go to :e:
+         <W>; ('CONTROL: empty event rejected');             go to :e:
       endif
 * 
       if (ISLFLAG('CONT','HIST')<=0) goto :r:
@@ -42,8 +47,7 @@
       do Itrac=1,Ntrack
          call GFKINE(Itrac,vert,Pvert, Ipart,Ivert,Ubuf,Nu)
          if (0>=Ivert | Ivert > Nvertx | Ipart<=0 ) then
-             print *,'CONTROL: error in Itrac,Ivert,Ipart=',
-                                        Itrac,Ivert,Ipart
+             <W> Itrac,Ivert,Ipart;('CONTROL: error in Itrac,Ivert,Ipart=',3i8)
              go to :e:
          endif
          call GFVERT(Ivert,vert,Nttarg,Ntbeam,Tofg,Ubuf,Nu)
@@ -102,7 +106,7 @@
 
 :r:   IEV=IEV+1
       iquest(100)=Iev
-      if (ISLFLAG('CONT','PRIN')>0) print *,' EVENT ',IEV,' DONE '
+      if (ISLFLAG('CONT','PRIN')>0) <W> IEV;(' EVENT ',i6,'  DONE ')
       return
 :e:
       IEOTRI = 1
