@@ -11,6 +11,8 @@ class StEvent;
 class StiHitContainer;
 class StiHitFactory;
 class StiHitFiller;
+class StiDisplayManager;
+class StiDetectorLayerContainer;
 
 class StiMaker : public StMaker {
  public:
@@ -24,12 +26,30 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.1 2001/04/18 22:27:37 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.2 2001/05/02 19:04:38 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
+public:
+
+    //Static access
+    static StiMaker* instance();
+    static void kill();
+    
+    //Used for stepping to next action (via StiControlPad)
+    static void reset();
+    static bool hasMore();
+    static void doNextAction();
+    
 private:
+
+    static StiMaker* sinstance; //!
+    static bool mdone;
+    static int mcounter;
+
     StiHitContainer* mhitstore; //!
     StiHitFactory* mhitfactory; //!
     StiHitFiller* mhitfiller; //!
+    StiDisplayManager* mdisplay; //!
+    StiDetectorLayerContainer* mdetector; //!
     
 private:
     StEvent* mevent; //!
