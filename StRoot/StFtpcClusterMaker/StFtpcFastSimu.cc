@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.6 2000/01/27 09:47:18 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.7 2000/01/27 14:48:06 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.7  2000/01/27 14:48:06  hummler
+// correct hit smearing
+//
 // Revision 1.6  2000/01/27 09:47:18  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
 //
@@ -409,10 +412,10 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     *st_dev_y = sqr(sin(phi)) * sqr(st_dev_l) + sqr(cos(phi)) * sqr(st_dev_t);
     *st_dev_y = sqrt (*st_dev_y)/10000.;   // microns -> cm
 
-    smear=(float) quasiRandom.flat();
+    smear=(float) quasiRandom.flat()-0.5;
     err_pad = st_dev_t*smear;
 
-    smear=(float) quasiRandom.flat();
+    smear=(float) quasiRandom.flat()-0.5;
     err_drft = st_dev_l*smear;
 
     //        err_Z = st_dev_Z*SMEAR
