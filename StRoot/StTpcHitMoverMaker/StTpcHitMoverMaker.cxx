@@ -1,16 +1,15 @@
+//#define DEBUG_DbUtil
 #include "StTpcHitMoverMaker.h"
 
 #include "StMessMgr.h"
 
-#include "TTableIter.h"
-#include "tables/St_type_index_Table.h"
-
-#include "tpc/St_tcl_Module.h"
-#include "tpc/St_tpt_Module.h"
+#include "tables/St_tcl_tphit_Table.h"
 
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StSectorAligner.h"
 #include "StDbUtilities/StCoordinates.hh"
+
+#include "StEventTypes.h"
 
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name), 
 						   mAlignSector(kTRUE),
@@ -60,6 +59,99 @@ void StTpcHitMover::FlushDB() {
 
 
 Int_t StTpcHitMover::Make() {
+  if (m_Mode & 0x01) {
+    // option handling needs some clean up, but right now we stay compatible
+    Int_t option = (m_Mode & 0x7FFE) >> 1;
+    if (! mExB ) {
+      TDataSet *RunLog = GetDataBase("RunLog");
+      mExB = new StMagUtilities(gStTpcDb, RunLog, option);
+    }
+  }
+  StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
+  if ( pEvent) {
+    gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
+    if (! gStTpcDb) {
+      gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
+      return kStErr;
+    }
+    StTpcCoordinateTransform transform(gStTpcDb);
+    StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+    if (TpcHitCollection) {
+      UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+      StTpcLocalSectorCoordinate local;
+      StTpcLocalSectorCoordinate  coorLS; 
+      StTpcLocalCoordinate  coorLT, coorLTD;
+      StTpcLocalSectorAlignedCoordinate  coorLSA;
+      StGlobalCoordinate    coorG;
+      for (UInt_t i = 0; i< numberOfSectors; i++) {
+	StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+	if (sectorCollection) {
+	  Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	  for (int j = 0; j< numberOfPadrows; j++) {
+	    StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	    if (rowCollection) {
+	      StSPtrVecTpcHit &hits = rowCollection->hits();
+	      UInt_t NoHits = hits.size();
+	      if (NoHits) {
+		for (UInt_t k = 0; k < NoHits; k++) {
+		  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
+		  transform(coorL,coorLS);   // to sector 12
+		  transform(coorLS,coorLSA); // alignment 
+		  transform(coorLSA,coorLT); //
+		  coorLTD = coorLT;          // distortions
+		  // ExB corrections
+		  Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
+		  if ( mExB ) {
+		    Float_t posMoved[3];
+		    mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
+		    StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
+		    coorLTD.setPosition(newPos);
+		  }
+		  transform(coorLTD,coorG);
+		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
+#ifdef DEBUG_DbUtil
+		  Float_t x[3] = {tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z()};
+		  Float_t xprime[3];
+		  moveTpcHit(x,xprime,i+1,j+1);
+		  Float_t xA[3] = {xyzF.x() - xprime[0],
+				   xyzF.y() - xprime[1],
+				   xyzF.z() - xprime[2]
+				     };
+		  Double_t dev = xA[0]*xA[0] + xA[1]*xA[1] +  xA[2]*xA[2];
+		  if (dev > 1.e-6) {
+		    StTpcPadCoordinate coorP;
+		    transform(coorLS,coorP);
+		    StTpcLocalSectorCoordinate  coorLSR; // reference for sector/row/pad
+		    transform(coorP,coorLSR);
+		    cout << "sector/row " << i+1 << "/" << j+1 
+			 << "\t xyzFCF\t" << pos[0] << "\t" << pos[1] << "\t" << pos[2] << endl;
+		    cout << "coorL " << coorL << endl;
+		    cout << "coorLS " <<  coorLS <<endl;
+		    cout << "coorP " << coorP << endl;
+		    cout << "coorLSR " << coorLSR <<endl;
+		    cout << "coorLSA " << coorLSA << endl;
+		    cout << "coorLT " << coorLT << endl;
+		    cout << "coorLTD " << coorLTD << endl;
+		    cout << "coorG " << coorG << endl;
+		    cout << "xprime/xA";
+		    for (int i = 0; i < 3; i++) 
+		      cout << "\t" << xprime[i] << "/" << xA[i];
+		    cout << "\tdev\t" << dev << endl;
+		  }
+#endif		  
+		  tpcHit->setPosition(xyzF);
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    return kStOK;        
+  }
+  
   St_DataSet *tpc_data = GetInputDS(mInputDataSetName);
   if (!tpc_data){
     // no TPC ???
@@ -149,13 +241,7 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   }
 
   // ExB corrections
-  if (m_Mode & 0x01) {
-    // option handling needs some clean up, but right now we stay compatible
-    Int_t option = (m_Mode & 0x7FFE) >> 1;
-    if (! mExB ) {
-      TDataSet *RunLog = GetDataBase("RunLog");
-      mExB = new StMagUtilities(gStTpcDb, RunLog, option);
-    }
+  if ( mExB ) {
     mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
     pos[0] = posMoved[0];
     pos[1] = posMoved[1];
