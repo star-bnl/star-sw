@@ -197,6 +197,7 @@ C Load the fitting arrays with the TPC points
 
          if (itpct.ne.0) then
             cf = -1.0
+            ient1 = 0
             do i=gtrk(igtrk).ntpc,1,-1
                
 C     load the working arrays for the fitting subroutines
@@ -215,9 +216,10 @@ C     calculate correction to the error, coming from the crossing angle
                   iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
      +                 ycir(ncir),xold,yold,cf,theta)
                   
-                  if(i.eq.gtrk(igtrk).ntpc) then
-                     ient1 = ient
-                  else if(i.eq.gtrk(igtrk).ntpc-1) then
+                  if(ient1 .eq. 0) then
+                     ient1 = 1
+                  else if(ient1 .eq. 1) then
+                     ient1 = 2
                      wcir(ncir-1) = wcir(ncir-1)/cf
                   endif
                   xold = xcir(ncir)

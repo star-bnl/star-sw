@@ -419,12 +419,18 @@ c     mark spts as used
                   elseif( gtrk(itpct).det(ient) .eq. 2)  then   
                      svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
      +                    globtrk_h.nok
+                     if( gtrk(itpct).pos(ient) .gt. 0) then
+                       globtrk(globtrk_h.nok).n_fit_point = 
+     +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
+                    endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
      +                    .gt.6000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                     if( gtrk(itpct).pos(ient) .gt. 0) then
                        globtrk(globtrk_h.nok).n_fit_point = 
      +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                    endif
                      endif
                   
                   endif
@@ -458,12 +464,18 @@ c     mark spts as used
                   elseif( gtrk(itpct).det(ient) .eq. 2)  then   
                      svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
      +                    globtrk_h.nok
+                     if( gtrk(itpct).pos(ient) .gt. 0) then
+                       globtrk(globtrk_h.nok).n_fit_point = 
+     +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
+                       endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
      +                    .gt.6000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                     if( gtrk(itpct).pos(ient) .gt. 0) then
                        globtrk(globtrk_h.nok).n_fit_point = 
      +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                       endif
                      endif
                   endif
                enddo
@@ -933,17 +945,26 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                        if( gtrk(igtrk).det(ishit) .eq. 2) then
                           ient = gtrk(igtrk).ipnt(ishit)
                           svt_spt(ient).id_globtrk = globtrk_h.nok
+                        if( gtrk(igtrk).pos(ishit) .gt. 0) then
+                           globtrk(globtrk_h.nok).n_fit_point = 
+     +                          globtrk(globtrk_h.nok).n_fit_point-1+1000
+                        endif
                           if( svt_spt(ient).id_wafer .gt. 6000) then
                        globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                        if( gtrk(igtrk).pos(ishit) .gt. 0) then
                        globtrk(globtrk_h.nok).n_fit_point = 
      +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                       endif
                        endif
                        endif
                     enddo
                     
                  endif          ! End of if usesvt=1
-                 
+  
+
+
+               
                  svt_track(itrk).id_globtrk = globtrk_h.nok
                  
               endif             ! End of if egrpar(1).svtchicut

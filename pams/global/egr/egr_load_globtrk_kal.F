@@ -58,6 +58,10 @@ C     Local variables
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = 0
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
+      if( ipriv .gt. 0) then
+         globtrk(iglob).n_fit_point =        globtrk(iglob).n_fit_point-1
+         globtrk(iglob).n_point = globtrk(iglob).n_point-1000
+      endif
       globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(5))
       globtrk(iglob).r0 = gtrk(igtrk).p(6)
       globtrk(iglob).phi0 = gtrk(igtrk).p(1)*C_DEG_PER_RAD  ! to degrees     

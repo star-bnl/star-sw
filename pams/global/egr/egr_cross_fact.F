@@ -26,7 +26,7 @@ C<--------------------------------------------------------------------
 C#include "tpt_const.inc"
 #include "math_constants.inc"
 C_______________________________________________________________________
-      INTEGER idet
+      INTEGER*2 idet
       REAL    xnew,ynew,xold,yold,cf,theta
       REAL    vlocal(3),vglobal(3)
       real    atand
