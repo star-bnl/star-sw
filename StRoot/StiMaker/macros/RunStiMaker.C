@@ -74,7 +74,8 @@ void RunStiMaker(Int_t nevents=1,
     eventReader->doPrintEventInfo = 0;
     
     //StiMaker
-    StiMaker* anaMk = new StiMaker;
+    //StiMaker* anaMk = new StiMaker;
+    StiMaker* anaMk = StiMaker::instance();
     
     // now execute the chain member functions    
     chain->PrintInfo();
