@@ -1,5 +1,8 @@
-// $Id: StHFillObject.h,v 1.2 1999/08/03 02:29:36 genevb Exp $
+// $Id: StHFillObject.h,v 1.3 1999/08/10 21:29:21 genevb Exp $
 // $Log: StHFillObject.h,v $
+// Revision 1.3  1999/08/10 21:29:21  genevb
+// Use formulas, separate headers, use StMessMgr, spaces no longer separate
+//
 // Revision 1.2  1999/08/03 02:29:36  genevb
 // Re-implemented using TMethodCall's
 //
@@ -17,29 +20,6 @@
 #define STAR_StHFillObject
 
 #include "TObject.h"
-class TMethodCall;
-class TH1;
-
-static const size_t dimMax = 8;
-static const size_t nsMax = 50;
-static const size_t bufSize = 1024;
-
-class StHFillVars {
- public:
-  StHFillVars();
-  ~StHFillVars();
-  void ClearBuffer();
-  Char_t buffer[bufSize];
-  Char_t buffer1[bufSize];
-  Int_t indices[nsMax][dimMax];
-  Float_t values[nsMax][dimMax];
-  TMethodCall* methods[nsMax][dimMax];
-  Char_t* opt[nsMax];
-  Int_t dims[nsMax];
-  Int_t nsets;
-  TH1* histo[nsMax];
-};
-
 
 class StHFillObject : public TObject {
  private:
@@ -48,8 +28,6 @@ class StHFillObject : public TObject {
   StHFillObject();
   virtual ~StHFillObject();
    static void Reset();
-          void Setup(Option_t* option, Int_t hists=1);
-          void GetValues(Int_t printIt=0);
   virtual void Draw(Option_t* option);
   virtual void Print(Option_t* option);
   virtual void ls(Option_t* option);
