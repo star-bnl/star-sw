@@ -20,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.9 1999/12/12 01:07:21 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.10 1999/12/12 17:25:51 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -159,10 +159,8 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 {
 //*-*-*-*-*-*-*-*-*-*-*Execute action corresponding to one event*-*-*-*
 //*-*                  =========================================
-//*-*  This member function is called when a axis is clicked with the locator
+//*-*  This member function is called when an axis is clicked with the locator
 //*-*
-//*-*  If Left button clicked on the bin top value, then the content of this bin
-//*-*  is modified according to the new position of the mouse when it is released.
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
  if (fSelected) fSelected->ExecuteEvent(event,px,py);
@@ -173,7 +171,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
    static Int_t pxold, pyold;
    static Int_t px0, py0;
    static Int_t linedrawn;
-   Float_t temp;
+//   Float_t temp;
 #if 0
    if (!fZoomMode && gPad->GetView()) {
       gPad->GetView()->ExecuteRotateView(event, px, py);
@@ -192,8 +190,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
    case kButton1Down:
       gVirtualX->SetLineColor(-1);
       gPad->TAttLine::Modify();  //Change line attributes only if necessary
-      x0 = gPad->AbsPixeltoX(px);
-      y0 = gPad->AbsPixeltoY(py);
+      ((TPad *)gPad)->AbsPixeltoXY(px,py,x0,y0);
       px0   = px; py0   = py;
       pxold = px; pyold = py;
       linedrawn = 0;
@@ -207,44 +204,75 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
       gVirtualX->DrawBox(px0, py0, pxold, pyold, TVirtualX::kHollow);
       break;
 
-   case kButton1Up:
-      gPad->GetCanvas()->FeedbackMode(kFALSE);
+   case kButton1Up: {
+        gPad->GetCanvas()->FeedbackMode(kFALSE);
+        TView *view = gPad->GetView();
+        if (!view) break;                       // no 3D view yet 
 
-      x1 = gPad->AbsPixeltoX(px);
-      y1 = gPad->AbsPixeltoY(py);
+        Float_t min[3],max[3],viewCenter[3],viewCenterNDC[3];
 
-      // If there was a small motion move center there
-      if (TMath::Abs(px-px0)+TMath::Abs(py - py0) < 4 ) {
-         Float_t cx = x1;
-         Float_t cy = y1;
+        view->GetRange(min,max);
+        for (int i =0; i<3;i++) viewCenter[i] = (max[i]+min[i])/2;
+        view->WCtoNDC(viewCenter,viewCenterNDC);
+        // Define the center
+        Axis_t center[3],pointNDC[3],size[3],oldSize[3];
+        ((TPad *)gPad)->AbsPixeltoXY(px,py,x1,y1);
+        pointNDC[0] = (x0+x1)/2; pointNDC[1] = (y0+y1)/2;
+        pointNDC[2] = viewCenterNDC[2];
+        view->NDCtoWC(pointNDC, center); 
 
-         gPad->GetRange(x0,y0,x1,y1);
-         Float_t xSize = (x1 - x0)/2;
-         Float_t ySize = (y1 - y0)/2;
-         x0 = cx - xSize;
-         y0 = cy - ySize;
-         x1 = cx + xSize;
-         y1 = cy + ySize;
-         gPad->Range(x0,y0,x1,y1);
-      }
-      else {
-        if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
-        if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
-        gPad->Range(x0,y0,x1,y1);
+        for (int i =0; i<3;i++) oldSize[i] = size[i]= (max[i]-min[i])/2;
+
+        // If there was a small motion move the center only, do not change a scale
+        if (TMath::Abs(px-px0)+TMath::Abs(py - py0) > 4 ) {
+           Float_t newEdge[3];
+           for (int i =0; i<3;i++) size[i] = -1;
+
+           pointNDC[0] = x0; pointNDC[1] = y0;
+
+           view->NDCtoWC(pointNDC, newEdge); 
+           for (int i =0; i<3;i++) {
+             Float_t newSize = TMath::Abs(newEdge[i]-center[i]);
+             if ( newSize/oldSize[i] > 0.002)
+               size[i] = TMath::Max(size[i], newSize);
+             else
+               size[i] = oldSize[i];
+           }
+
+           pointNDC[0] = x1; pointNDC[1] = y1;
+
+           view->NDCtoWC(pointNDC, newEdge); 
+           for (int i =0; i<3;i++) {
+             Float_t newSize = TMath::Abs(newEdge[i]-center[i]);
+             if ( newSize/oldSize[i] > 0.002)
+               size[i] = TMath::Max(size[i], newSize);
+             else
+               size[i] = oldSize[i];
+           }
 #if 0
-        if (fZooms < kMAXZOOMS-1) {
-           fZooms++;
-           fZoomX0[fZooms] = x0;
-           fZoomY0[fZooms] = y0;
-           fZoomX1[fZooms] = x1;
-           fZoomY1[fZooms] = y1;
-        }
+          if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
+          if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
+          gPad->Range(x0,y0,x1,y1);
+          if (fZooms < kMAXZOOMS-1) {
+             fZooms++;
+             fZoomX0[fZooms] = x0;
+             fZoomY0[fZooms] = y0;
+             fZoomX1[fZooms] = x1;
+             fZoomY1[fZooms] = y1;
+          }
 #endif
+        }
+        for (int i =0; i<3;i++) {
+          max[i] = center[i] + size[i];
+          min[i] = center[i] - size[i];
+        }
+        view->SetRange(min,max);
+
+        SwitchZoom();
+        gPad->Modified(kTRUE);
+        gPad->Update();
+        break;
       }
-      SwitchZoom();
-      gPad->Modified(kTRUE);
-      gPad->Update();
-      break;
       default: break;
    }
 }
@@ -293,16 +321,16 @@ void TAxis3D::PaintAxis(TGaxis *axis, Float_t ang)
  
 //--    if (Hopt.System != kCARTESIAN) return ;
  
+    TView *view = gPad->GetView();
+    if (!view) {
+        Error("PaintLegoAxis", "no TView in current pad");
+        return;
+    }
+
     rad  = TMath::ATan(1.) * (float)4. / (float)180.;
     cosa = TMath::Cos(ang*rad);
     sina = TMath::Sin(ang*rad);
- 
-    TView *view = gPad->GetView();
-        if (!view) {
-           Error("PaintLegoAxis", "no TView in current pad");
-                return;
-        }
- 
+  
     view->AxisVertex(ang, av, ix1, ix2, iy1, iy2, iz1, iz2);
     for (i = 1; i <= 8; ++i) {
         r[i*3 - 3] = av[i*3 - 3] + av[i*3 - 2]*cosa;
@@ -405,6 +433,28 @@ void TAxis3D::PaintAxis(TGaxis *axis, Float_t ang)
        axis->PaintAxis(ax[0], ay[0], ax[1], ay[1], bmin, bmax, ndiv, chopax);
     }
 }
+//______________________________________________________________________________
+Axis_t *TAxis3D::PixeltoXYZ(Axis_t px, Axis_t py, Axis_t *point3D, TView *view)
+{
+  // Convert "screen pixel" coordinates to some center of 3D WC coordinate
+  // if view and gPad present
+  Axis_t *thisPoint = 0;
+  if (!view && gPad) view = gPad->GetView();
+  if (view) {
+    Axis_t x[3] = {px,py,0.5}; // ((TPad *)thisPad)->AbsPixeltoXY(px,py,x[0],x[1]);
+    Float_t min[3], max[3];
+    view->GetRange(min,max);
+    for (int i =0; i<3;i++) min[i] = (max[i]+min[i])/2;
+    view->WCtoNDC(min,max);
+    min[0] = x[0]; min[1] = x[1];
+    min[2] = max[2];
+    view->NDCtoWC(min, x);  
+    for (int i=0;i<3;i++) point3D[i] = x[i];
+    thisPoint = point3D;
+  }
+  return thisPoint;
+}
+
 //______________________________________________________________________________
 void TAxis3D::SavePrimitive(ofstream &out, Option_t *option)
 {
@@ -595,7 +645,7 @@ TAxis3D *TAxis3D::ToggleRulers(TVirtualPad *pad)
   TAxis3D *ax = 0;
   TVirtualPad *thisPad=pad;
   if (!thisPad) thisPad = gPad;
-  if (thisPad) {
+  if (thisPad && thisPad->GetView() ) {
     TAxis3D *a =  GetPadAxis(pad);
     if (a)  delete a; 
     else {
@@ -616,7 +666,7 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
   TAxis3D *ax = 0;
   TVirtualPad *thisPad=pad;
   if (!thisPad) thisPad = gPad;
-  if (thisPad) {
+  if (thisPad && thisPad->GetView()) {
     // Find axis in the current thisPad 
     TList *l = thisPad->GetListOfPrimitives();
     TObject *o = l->FindObject(TAxis3D::rulerName);
@@ -642,6 +692,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.10  1999/12/12 17:25:51  fine
+// smart zooming
+//
 // Revision 1.9  1999/12/12 01:07:21  fine
 // remove the compilation warnings
 //
