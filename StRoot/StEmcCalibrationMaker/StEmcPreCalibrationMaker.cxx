@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.10 2003/01/23 03:09:04 jeromel Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.11 2003/01/25 01:42:14 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.11  2003/01/25 01:42:14  suaide
+// included trigger data
+//
 // Revision 1.10  2003/01/23 03:09:04  jeromel
 // Include modif
 //
@@ -43,6 +46,11 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
+
+// trigger tables
+#include "tables/St_dst_L0_Trigger_Table.h"
+#include "tables/St_dst_L1_Trigger_Table.h"
+#include "tables/St_dst_TrgDet_Table.h"
 
 #include "StEmcUtil/daq/StEmcDaqUtil.h"
 ClassImp(StEmcPreCalibrationMaker)
@@ -185,6 +193,14 @@ Int_t StEmcPreCalibrationMaker::Make()
 
       currevent->setL3Trigger(l3t);
     }
+  }
+  
+  // add L0 data, if available
+  St_dst_TrgDet *dst = (St_dst_TrgDet*)GetDataSet("TrgDet");
+  if(dst)
+  {
+    dst_TrgDet_st* dstTriggerDetectors = (dst_TrgDet_st*)dst->GetTable();
+    if (dstTriggerDetectors) currevent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
   }
 	    
   AddData(currevent);
