@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.11 2001/08/21 18:48:38 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.12 2001/09/25 20:10:30 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.12  2001/09/25 20:10:30  hardtke
+// Add ad hoc correction factor to take care of bias suggested by TRS
+//
 // Revision 1.11  2001/08/21 18:48:38  hardtke
 // Add StMatchMaker::InitRun() call to handle no field data
 //
@@ -87,12 +90,13 @@ Int_t StTpcT0Maker::Init(){
   zVertexEast = -999.0; 
   T0HIST_MIN = 35.0;
   T0HIST_MAX = 38.0;
+  SetCorrectionFactors(-9.7e-2,9.7e-5,-8e-6);  // take defaults from TRS
   t0result = new TH1F("t0result","t0result",1000,T0HIST_MIN,T0HIST_MAX);
   t0guessError = new TH1F("t0guessError","t0 measured - t0 guess",1000,-1,1);
   xVertexDiff = new TH1F("xVertexDiff","x Vertex: East - West",600,-0.3,0.3);
   yVertexDiff = new TH1F("yVertexDiff","y Vertex: East - West",600,-0.3,0.3);
   zVertexDiff = new TH1F("zVertexDiff","z Vertex: East - West",600,-0.3,0.3);
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:xEast:yEast:zEast:xWest:yWest:zWest:multEast:multWest");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:xEast:yEast:zEast:xWest:yWest:zWest:multEast:multWest:corrDelZ");
   AddHist(t0result);
   AddHist(t0guessError);
   AddHist(xVertexDiff);
@@ -211,7 +215,10 @@ Int_t StTpcT0Maker::Make(){
   }
 
     if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
-      t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
+      float deltaz = zVertexEast-zVertexWest;
+      float meanz = (zVertexEast+zVertexWest)/2;
+      float corrz = deltaz+GetCorrection(meanz);
+      t0current = (corrz)/(2*dvel_assumed) + t0guess;
       gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
       gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
       gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
@@ -221,7 +228,7 @@ Int_t StTpcT0Maker::Make(){
       yVertexDiff->Fill(yVertexEast-yVertexWest);
       zVertexDiff->Fill(zVertexEast-zVertexWest);
       eventNumber = (float)GetEventNumber();
-      resNtuple->Fill(eventNumber,xVertexEast,yVertexEast,zVertexEast,xVertexWest,yVertexWest,zVertexWest,multEast,multWest);
+      resNtuple->Fill(eventNumber,xVertexEast,yVertexEast,zVertexEast,xVertexWest,yVertexWest,zVertexWest,multEast,multWest,corrz);
       if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
          gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
       }
@@ -273,7 +280,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.11 2001/08/21 18:48:38 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.12 2001/09/25 20:10:30 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -327,4 +334,8 @@ int  StTpcT0Maker::GetValidityTime(){return time;}
 void StTpcT0Maker::HistFileByDefault(){mHistOut = kTRUE;} 
 void StTpcT0Maker::SetVertexZmax(float zmax){zVertexMax = zmax;}
 void StTpcT0Maker::SetVertexZmin(float zmin){zVertexMin = zmin;}
-
+void StTpcT0Maker::SetCorrectionFactors(float constant, float linear, float quadratic){CorrFac[0]=constant;CorrFac[1]=linear;CorrFac[2]=quadratic;}  
+float StTpcT0Maker::GetCorrection(float z){
+  float factor = -1*(CorrFac[0]+CorrFac[1]*z+CorrFac[2]*z*z);
+  return factor;
+}
