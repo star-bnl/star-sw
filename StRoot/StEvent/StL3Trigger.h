@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3Trigger.h,v 2.2 2001/04/05 04:00:38 ullrich Exp $
+ * $Id: StL3Trigger.h,v 2.3 2001/08/02 01:27:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3Trigger.h,v $
+ * Revision 2.3  2001/08/02 01:27:45  ullrich
+ * Added event summary and algorithms.
+ *
  * Revision 2.2  2001/04/05 04:00:38  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -26,11 +29,15 @@ class StTrackNode;
 class StTpcHitCollection;
 class StTrackDetectorInfo;
 class StPrimaryVertex;
+class StL3EventSummary;
 
 class StL3Trigger : public StObject {
 public:
     StL3Trigger();
     ~StL3Trigger();
+
+    StL3EventSummary*                   l3EventSummary();
+    const StL3EventSummary*             l3EventSummary() const;
 
     StTpcHitCollection*                 tpcHitCollection();
     const StTpcHitCollection*           tpcHitCollection() const;
@@ -45,10 +52,12 @@ public:
     StPrimaryVertex*                    primaryVertex(unsigned int = 0);
     const StPrimaryVertex*              primaryVertex(unsigned int = 0) const;
 
+    void setL3EventSummary(StL3EventSummary*);
     void setTpcHitCollection(StTpcHitCollection*);
     void addPrimaryVertex(StPrimaryVertex*);
     
 protected:
+    StL3EventSummary*            mL3EventSummary;
     StTpcHitCollection*          mL3TpcHits;
     StSPtrVecTrackDetectorInfo   mL3TrackDetectorInfo;
     StSPtrVecTrackNode           mL3TrackNodes;
