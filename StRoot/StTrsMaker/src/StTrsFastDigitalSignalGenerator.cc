@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.24  2000/02/24 16:29:34  long
+ * add 0.5 in digitalization for test
+ *
+ *  Revision 1.24  2000/02/23  16:14:30  long
+ * add 0.5 in digitalization for test 
  * Revision 1.23  2000/02/10 01:21:50  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -169,7 +174,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		}
 	        
 		int temporary_digitalAmplitude =
-		    static_cast<int>(mTimeSequenceIterator->amplitude()/mSimpleConversion);
+		  static_cast<int>(mTimeSequenceIterator->amplitude()/mSimpleConversion+0.5);//add 0.5  for test ,by HL
 		
 		// here we have a 10 bit number!
 		// Find in Mike Levine's array from:
