@@ -84,7 +84,7 @@ Fill  EMCG                          ! EM EndCAp Calorimeter basic data
       OnOff    = 3                  ! Configurations 0-no, 1-west 2-east 3-both
       FillMode = 3                  ! sectors fill mode 
 
-Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
+Fill  EMCS                          ! EM Endcap Calorimeter geometry
       Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
       ZOrig    = 268.763            ! calorimeter origin in z
       ZEnd     = 310.007            ! Calorimeter end in z
