@@ -107,10 +107,8 @@ public:
     // static methods
     
 
-    static void   setParameters(StiKalmanTrackFinderParameters *parameters)
-      {
-	pars = parameters;
-      }
+    static void   setParameters(StiKalmanTrackFinderParameters *parameters);
+
     friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
     /*

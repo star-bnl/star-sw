@@ -15,7 +15,7 @@ public:
 			{}
     
     //_action method
-    virtual void fit(StiTrack * track); //throw (Exception);
+    virtual void fit(StiTrack * track, int direction);
     
 };
 

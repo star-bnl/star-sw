@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.96  2002/06/04 19:45:31  pruneau
+// including changes for inside out tracking
+//
 // Revision 1.95  2002/05/29 19:13:50  calderon
 // Added
 //
@@ -138,7 +141,7 @@ void StiMaker::Clear(const char*)
       toolkit->getTrackNodeFactory()->reset();
       toolkit->getTrackContainer()->clear();
       if (ioBroker->useGui()) 
-	toolkit->getDisplayManager()->reset();
+				toolkit->getDisplayManager()->reset();
     }
   StMaker::Clear();
 }
@@ -166,40 +169,40 @@ Int_t StiMaker::InitRun(int run)
       ioBroker = toolkit->getIOBroker();
       cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
       if (ioBroker->useGui()) 
-	{
-	  cout <<"--- Display Manager will be set" << endl;
-	  toolkit->getDisplayManager()->cd();
-	  cout <<"--- Display Manager Ready" << endl;
-	}
+				{
+					cout <<"--- Display Manager will be set" << endl;
+					toolkit->getDisplayManager()->cd();
+					cout <<"--- Display Manager Ready" << endl;
+				}
       else
-	cout <<"--- Display Manager will not be used" << endl;
+				cout <<"--- Display Manager will not be used" << endl;
       if (ioBroker->simulated()==true)
-	{
-	  if (mAssociationMaker)
-	    cout << "AssociationMaker Defined" << endl;
-	  else
-	    cout << "---- AssociationMaker NOT Defined" << endl;
-	  
-	  StiEventAssociator::instance(mAssociationMaker);
-	  StiEvaluator::instance(mEvalFileName);
-	  //toolkit->setAssociationMaker(mAssociationMaker);
-	  //toolkit->getEvaluator(mEvalFileName);
-	  cout <<"--- Evaluator Ready" << endl;
-	}
+				{
+					if (mAssociationMaker)
+						cout << "AssociationMaker Defined" << endl;
+					else
+						cout << "---- AssociationMaker NOT Defined" << endl;
+					
+					StiEventAssociator::instance(mAssociationMaker);
+					StiEvaluator::instance(mEvalFileName);
+					//toolkit->setAssociationMaker(mAssociationMaker);
+					//toolkit->getEvaluator(mEvalFileName);
+					cout <<"--- Evaluator Ready" << endl;
+				}
       else
-	cout <<"--- Evaluator will not be used" << endl;
+				cout <<"--- Evaluator will not be used" << endl;
       tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
       //StiStEventFiller
       mStEventFiller = new StiStEventFiller();
       
       cout <<"--- Tracker Ready" << endl;
       if (ioBroker->useGui()) 
-	{
-	  toolkit->getDisplayManager()->setSkeletonView();
-	  toolkit->getDisplayManager()->draw();
-	  toolkit->getDisplayManager()->update();
-	  //toolkit->getDisplayManager()->print();
-	}
+				{
+					toolkit->getDisplayManager()->setSkeletonView();
+					toolkit->getDisplayManager()->draw();
+					toolkit->getDisplayManager()->update();
+					//toolkit->getDisplayManager()->print();
+				}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
   return StMaker::InitRun(run);

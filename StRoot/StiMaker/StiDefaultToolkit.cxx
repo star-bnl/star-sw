@@ -271,6 +271,8 @@ StiTrackFinder       * StiDefaultToolkit::getTrackFinder()
 		return trackFinder;
 	// only one track finder at this point, no option
 	trackFinder = new StiKalmanTrackFinder(this);
+	StiTrack::setTrackFinder(trackFinder);
+	getTrackFitter();
 	return trackFinder;
 }
 
@@ -286,7 +288,7 @@ StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
 StiTrackFilter       * StiDefaultToolkit::getTrackFilter()
 {
 	if (trackFilter)
-		return trackFilter;
+	  return trackFilter;
 	trackFilter = new StiDynamicTrackFilter(getIOBroker());
 	return trackFilter;
 }

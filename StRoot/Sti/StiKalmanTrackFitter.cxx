@@ -15,58 +15,60 @@
       and updates are performed only if nodes hold a hit.
 	</ol>
 */
-void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
+void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
-	StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
-	if (track==0) 
-			throw runtime_error("StiKalmanTrack::fit() - ERROR:\t Dynamic cast to StiKalmanTrack failed");
-	StiHit * targetHit;
-	StiKalmanTrackNode * targetNode; // parent node
-	const StiDetector * targetDet;  // parent detector
-	StiDirection fitDirection =  track->getFittingDirection(); 
-	StiDirection trackingDirection =  track->getTrackingDirection(); 
-
-	StiKTNBidirectionalIterator first;
-	StiKTNBidirectionalIterator last;
-	bool direction = (trackingDirection==fitDirection);
-	if (direction)
-		{ 
-			//cout << "set =="<<endl;
-			first = track->begin();
-			last  = track->end();
-		}
-	else
-		{
-			//cout << "set !="<<endl;
-			last  = track->begin();
-			first = track->end();
-		}
-	StiKTNBidirectionalIterator source;
-	for (source=first;source!=last;)
-		{
-			if (direction)
+  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
+  if (track==0) 
+    throw runtime_error("StiKalmanTrack::fit() - ERROR:\t Dynamic cast to StiKalmanTrack failed");
+  StiHit * targetHit;
+  StiKalmanTrackNode * targetNode; // parent node
+  const StiDetector * targetDet;  // parent detector
+  //StiDirection fitDirection =  track->getFittingDirection(); 
+  StiDirection trackingDirection =  track->getTrackingDirection(); 
+  
+  StiKTNBidirectionalIterator first;
+  StiKTNBidirectionalIterator last;
+  bool direction = (trackingDirection==fitDirection);
+  if (direction)
+    { 
+      //cout << "set =="<<endl;
+      first = track->begin();
+      last  = track->end();
+    }
+  else
+    {
+      //cout << "set !="<<endl;
+      last  = track->begin();
+      first = track->end();
+    }
+  StiKTNBidirectionalIterator source;
+  for (source=first;source!=last;)
+    {
+      if (direction)
 				{
 					source++;//cout<<"=="<<endl;
 				}
-			else
+      else
 				{
 					source--;//cout<<"!="<<endl;
 				}			
-			targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
-			targetDet = targetNode->getDetector();
-			targetHit = targetNode->getHit();
-			// evolve state from that of source using dets source to source
-			if (targetDet)
+			if (source==last)
+				break;
+      targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
+      targetDet = targetNode->getDetector();
+      targetHit = targetNode->getHit();
+      // evolve state from that of source using dets source to source
+      if (targetDet)
 				targetNode->propagate(&(*source),targetDet);	// hit
-			else
+      else
 				targetNode->propagate(&(*source),targetHit);  // vertex
-			// if targetNode has hit, get chi2 and update track parameters accordingly
-			if (targetHit)
+      // if targetNode has hit, get chi2 and update track parameters accordingly
+      if (targetHit)
 				{
 					targetNode->evaluateChi2();
 					targetNode->updateNode();
 				}
-		}
+    }
 }
 
 
