@@ -51,16 +51,16 @@
 
 
 // Public interface:
-    TTree* strangeFormulas(const char* fname=0, const char* tname=0);
-    TTree* strangeFormulas(TFile* fptr);
-     Int_t strangeFormulas(TTree* tree);
-      void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
- TFormula* findFormula(const char* c0);       // Requires exact match
-      void findDefinition(const char* c0);    // Requires exact match
+//    TTree* strangeFormulas(const char* fname=0, const char* tname=0);
+//    TTree* strangeFormulas(TFile* fptr);
+//     Int_t strangeFormulas(TTree* tree);
+//      void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
+// TFormula* findFormula(const char* c0);       // Requires exact match
+//      void findDefinition(const char* c0);    // Requires exact match
 
 
 // Internal members and functions:
-void formulate(const char* name, const char* formula);
+// void formulate(const char* name, const char* formula);
 TTree* strangeTree=0;
 TChain* strangeChain=0;
 TSeqCollection* ListofFuncs=0;
@@ -73,15 +73,15 @@ static const char* altTree = "MuDst";
 
 void prep() {
   if (!(gROOT->GetClass("TTreePlayer"))) {
-    gSystem->Load("libProof");
     gSystem->Load("libTreePlayer");
+    gSystem->Load("libProof");
   }
   if (!ListofFuncs) ListofFuncs=gROOT->GetListOfFunctions();
 }
 
 //-----------------------------------------------------
 
-void findFormulas(const char* c0, const char* c1, const char* c2) {
+void findFormulas(const char* c0, const char* c1=0, const char* c2=0) {
   for (Int_t i=0; i<ListofFuncs->GetSize(); i++) {
     TString ostr = ListofFuncs->At(i)->GetName();
     if (ostr.Contains(c0,TString::kIgnoreCase)) {
@@ -131,7 +131,7 @@ void formulate(const char* name, const char* formula) {
 
 //-----------------------------------------------------
 
-TTree* strangeFormulas(const char* fname, char* tname) {
+TTree* strangeFormulas(const char* fname=0, const char* tname=0) {
   if (!fname) {
     fname = defaultFile;
   } else {
@@ -911,8 +911,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.10 2004/04/12 19:50:06 genevb Exp $
+// $Id: strangeFormulas.C,v 3.11 2004/10/20 19:22:10 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.11  2004/10/20 19:22:10  genevb
+// Compatibility with small ROOT and CINT changes
+//
 // Revision 3.10  2004/04/12 19:50:06  genevb
 // Allow use of list files
 //
