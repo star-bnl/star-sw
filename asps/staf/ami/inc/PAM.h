@@ -6,6 +6,8 @@
 #include "table_header.h"
 #include "amiLib.h"
 
+#include "fortranc.h"
+
 #ifndef EXTERN
 #define EXTERN extern
 #endif

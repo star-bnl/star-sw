@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Module_Invoker commands.
 .
- #(@)$Id: ami_def.cdf,v 1.6 1998/03/11 21:39:42 ward Exp $
+ #(@)$Id: ami_def.cdf,v 1.7 1998/03/16 00:49:13 fisyak Exp $
 .
 AMI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -74,7 +74,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_AMI_COUNT
+>ACTION kam_ami_count_%C
 **
 ** ---------------------------------------------------------------------
 ** AMI/LIST
@@ -160,7 +160,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_AMI_LIST
+>ACTION kam_ami_list_%C
 **
 ** ---------------------------------------------------------------------
 ** AMI/CALL PAM [ TABLES ]
@@ -171,7 +171,7 @@ PAM     'Physics Analysis Module function name.' C
 TABLES  'List of PAM argument tables.' C D='-'
 >GUIDANCE
 OBSOLETE -- PLEASE USE AMI/MODULE/CALL.
->ACTION KAM_AMI_CALL
+>ACTION kam_ami_call_%C
 **
 ************************************************************************
 ** AMI/MODULE
@@ -263,7 +263,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_AMIMODULE_RANK
+>ACTION kam_amimodule_rank_%C
 **
 ** ---------------------------------------------------------------------
 ** AMI/MODULE/CALL SOREF [ TABLES ]
@@ -328,7 +328,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_AMIMODULE_CALL
+>ACTION kam_amimodule_call_%C
 **
 ** ---------------------------------------------------------------------
 ** AMI/MODULE/SHOW SOREF
@@ -399,7 +399,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_AMIMODULE_SHOW
+>ACTION kam_amimodule_show_%C 
 **
 
 

@@ -12,6 +12,11 @@
 #include "amiClasses.hh"
 #include "ami_globals.h"
 
+#include "fortranc.h"
+
+#define ami_def_ F77_NAME(ami_def,AMI_DEF)
+extern CC_P void type_of_call ami_def_();
+
 amiBroker *ami;
 extern CC_P int ami_load(amiBroker* broker); //automatically generated
 

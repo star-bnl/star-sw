@@ -1,6 +1,6 @@
 #ifndef EMLLIB_INC
 #define EMLLIB_INC
-#endif /*EMLLIB_INC*/
+#endif  
 
 c:----------------------------------------------------------------------
 C: Duplicate emlLib.h 
