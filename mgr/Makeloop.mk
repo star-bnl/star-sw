@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.91  1999/08/17 14:45:35  fisyak
+#  take out StAssociationMaker for SUN/HP
+#
 #  Revision 1.90  1999/08/16 16:31:33  fisyak
 #  Simplify Makefiles
 #
@@ -349,7 +352,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/16 16:31:33 $ 
+#           Last modification $Date: 1999/08/17 14:45:35 $ 
 #  default setings
 # Current Working Directory
 #
@@ -382,7 +385,7 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
-    SUBDIRS := $(filter-out StPeCMaker StHbtMaker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StPeCMaker StHbtMaker StAssociationMaker, $(SUBDIRS))
   endif
   ifdef SKIP_LIB
     SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
