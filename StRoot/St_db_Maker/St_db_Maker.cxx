@@ -37,7 +37,7 @@ static const char *aliases[]={"sd97",   "sd98",   "year_1a","year_1b","year_1c"
 			     ,"es99",   "er99"
                              ,"year_1d","year_1e","year_2a","nofield",      0};   
 
-static const int   dates[]=  {19970101, 19980101, 19990101, 19990500, 19991001
+static const int   dates[]=  {19970101, 19980101, 19990101, 19990501, 19991001
 			     ,19990615, 19990616
                              ,19991101, 19991201, 20000101, 1996010,        0};
 static const int   times[]=  {       0,        0,        0,        0,        0
