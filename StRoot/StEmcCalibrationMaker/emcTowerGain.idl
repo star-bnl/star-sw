@@ -15,5 +15,6 @@ struct emcTowerGain {
    float  RMS[4800];        /*    ADC RMS of emc tower  */
    float  Sum[4800];        /*    Spectrum integral */
    float  SumAbove30[4800]; /*    Spectrum integral above 30 adc counts */
+   float  SumAbove80[4800]; /*    Spectrum integral above 80 adc counts */
 
  };  
