@@ -36,6 +36,10 @@ StEmcMipSpectra::StEmcMipSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_
   Int_t n = GetNBin();
   mMipFit    = new TH2D("mMipFit","mMipFit",n,1,(Float_t)n+1,30,0,30);
   mMipFit->Reset();
+  NPars=7;
+  //peak = new TF1("peak","[0]*exp(-0.5*( (x-[1])*(x-[1])/([2]*[2]*(1.0-[3]*(x-[1]))   ) ))");
+  peak = new TF1("peak","[0]*( exp(-0.5*((x-[1])/[2])*((x-[1])/[2]) ) + [3]*exp(-0.5*((x-([1]+1.5*[2]))/[2])*((x-([1]+1.5*[2]))/[2]) ) )");
+  back = new TF1("back","gaus(0)");
 }
 //_____________________________________________________________________________
 StEmcMipSpectra::~StEmcMipSpectra()
@@ -67,20 +71,18 @@ TH1D* StEmcMipSpectra::DrawEtaBin(Int_t etabin)
     
     for(Int_t adc=0;adc<nadcMax;adc++)
     {
-      Double_t ADC = (Double_t)log((Float_t)adc);
-      Double_t par[6];
-      for(Int_t i=0;i<6;i++)
+      Double_t ADC = (Double_t)adc;
+      for(Int_t i=0;i<NPars;i++)
       {    
         ibin = mMipFit->FindBin((Float_t)etabin,i);
-        par[i] = mMipFit->GetBinContent(ibin);
-        //cout <<i<<"  par = "<<par[i]<<endl;
+        Float_t par = mMipFit->GetBinContent(ibin);
+        if(i<4) peak->SetParameter(i,par);
+        else back->SetParameter(i-4,par);
       }
-      Double_t gauss1=Gaussian(ADC,par[0],par[1],par[2]);
-      Double_t gauss2=Gaussian(ADC,par[3],par[4],par[5]);
       
-      fit->Fill((Float_t)adc,gauss1+gauss2);
-      fitpeak->Fill((Float_t)adc,gauss1);
-      fitback->Fill((Float_t)adc,gauss2);
+      fit->Fill((Float_t)adc,peak->Eval(ADC)+back->Eval(ADC));
+      fitpeak->Fill((Float_t)adc,peak->Eval(ADC));
+      fitback->Fill((Float_t)adc,back->Eval(ADC));
     }
     hist->SetFillColor(11);
     fit->SetLineColor(4);
@@ -129,12 +131,47 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TH1D* SpectraTemp,
 //  
 //  This is the method that performs the MIP peak fit. The fit is 
 //  dependent on initial guesses so, every case is one case and there is
-//  no way to find best guesses automaticaly. An initial guess finder is
-//  implemented but every fit we must check the numbers by hand.
+//  no way to find best guesses automaticaly. 
 
-  const Int_t parms=6;
+  TF1 *func = new TF1("func","[0]*( exp(-0.5*((x-[1])/[2])*((x-[1])/[2]) ) + [3]*exp(-0.5*((x-([1]+1.5*[2]))/[2])*((x-([1]+1.5*[2]))/[2]) ) ) +gaus(4)",(Float_t) fitmin, (Float_t)fitmax);
+  if(doUseGuess[bin-1])
+  {
+    for(Int_t i=0;i<NPars;i++)
+    {
+      func->SetParameter(i,guess[bin-1][i]);
+      if(fixed[bin-1][i]==1) func->FixParameter(i,guess[bin-1][i]);
+    }
+  }
+  SpectraTemp->Fit(func,"RBN");
   
-  StEmcFit *fit=new StEmcFit();
+  for (int i=0;i<NPars;i++)
+  {
+    Float_t a  = func->GetParameter(i);
+    Float_t ea = func->GetParError(i);
+    cout <<"Parm i = "<<i<<"  Final a = "<<a<<" +- "<< ea<<endl;
+    mMipFit->Fill((Float_t)bin,(Float_t)i,a);
+    mMipFit->Fill((Float_t)bin,(Float_t)i+10,ea);   
+  }
+  Float_t chi=func->GetChisquare()/(func->GetNDF());
+  cout <<"Final chi2 = "<<chi<<endl;
+  
+  Float_t mip   = func->GetParameter(1);
+  Float_t emip  = func->GetParError(1);
+  Float_t w     = func->GetParameter(2);
+  Float_t ew    = func->GetParError(2);
+  
+  mMipFit->Fill((Float_t)bin,20,mip);  // mip peak position
+  mMipFit->Fill((Float_t)bin,21,emip); // mip peak position error
+  mMipFit->Fill((Float_t)bin,22,w);    // mip peak width
+  mMipFit->Fill((Float_t)bin,23,ew);   // mip peak width error
+  mMipFit->Fill((Float_t)bin,28,chi);  // chi square of the fit
+  mMipFit->Fill((Float_t)bin,29,1);    // status of the fit
+  cout <<"MIP Peak position = "<<mip<<" +- "<<emip<<endl;
+  cout <<"MIP Peak width    = "<<w<<" +- "<<ew<<endl;
+  delete func;
+  
+  
+  /*StEmcFit *fit=new StEmcFit();
   fit->SetNParms(parms);
   Int_t type=1;             // two gaussians
   fit->SetFuncType(type);
@@ -225,15 +262,15 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TH1D* SpectraTemp,
   mMipFit->Fill((Float_t)bin,29,1);    // status of the fit
   cout <<"MIP Peak position = "<<mip<<" +- "<<emip<<endl;
   cout <<"MIP Peak width    = "<<w<<" +- "<<ew<<endl;
-  delete fit;
+  delete fit;*/
 
   return kTRUE; 
 }
 //_____________________________________________________________________________
-void StEmcMipSpectra::SetInitialGuess(Int_t bin, Float_t* a,Int_t f,Int_t l) 
+void StEmcMipSpectra::SetInitialGuess(Int_t bin, Float_t* a,Int_t *fix,Int_t f,Int_t l) 
 { 
   doUseGuess[bin-1]=kTRUE; 
-  for(Int_t i=0;i<6;i++) guess[bin-1][i]=a[i]; 
+  for(Int_t i=0;i<NPars;i++) { guess[bin-1][i]=a[i]; fixed[bin-1][i] = fix[i]; } 
   FIRST[bin-1]=f;
   LAST[bin-1]=l;
 }
