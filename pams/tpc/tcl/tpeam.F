@@ -142,7 +142,7 @@ c
          integer iquest(100)
 
          integer nquota,nvar,icycle,nvar2,nvar3
-         character*4 chtags(9),chtags2(13),chtags3(5)
+         character*4 chtags(9),chtags2(16),chtags3(5)
 C-----------------------------------------------------------------------
          logical lstat,first
 
@@ -201,10 +201,11 @@ c to account for the fact that the number or volumes per row has changed..
          integer mcptr(numbv_row_max*mxhits),dtptr(mxhits)
 
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/13/,nvar3/5/,nvar4/17/
+         data nvar/9/,nvar2/16/,nvar3/5/,nvar4/17/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
-     +,              'delx','dely','delz','nrow', 'clus','nseq'/
+     +,              'delx','dely','delz','nrow', 'clus','nseq',
+     +                'dx','dy','dz'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 	 data chtags4/'hit ','clus','sect','row ','pad ',
      +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -276,7 +277,7 @@ c things needed for the ntuple 500+ihisto...
 c ntuple 200 as defined has no more information than the hits table...
 *         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
 *     +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',13000,
+         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',16000,
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
@@ -442,6 +443,9 @@ c
                     vec(10) = vec(4)-vec(7)
 		    vec(12) = tphit(dtptr(irow)).cluster
                     vec(13) = tpcluster(vec(12)).nseq
+                    vec(14) = tphit(dtptr(irow)).dx
+                    vec(15) = tphit(dtptr(irow)).dy
+                    vec(16) = tphit(dtptr(irow)).dz
                  else
                     vec(5) = 0.
                     vec(6) = 0.
@@ -451,6 +455,9 @@ c
                     vec(10) = 0.
                     vec(12) = 0.
                     vec(13) = 0.
+                    vec(14) = 0.
+                    vec(15) = 0.
+                    vec(16) = 0.
                  endif
                  call hfn(300+ihisto,vec)
                  
