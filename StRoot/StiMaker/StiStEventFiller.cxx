@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.11 2002/06/25 15:09:16 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.12 2002/06/26 23:05:31 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.12  2002/06/26 23:05:31  pruneau
+ * changed macro
+ *
  * Revision 1.11  2002/06/25 15:09:16  pruneau
  * *** empty log message ***
  *
@@ -212,7 +215,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trackNode) );
 		    if (trackNode->entries(global)<1)
 					{
-						cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!!"<<endl;
+						cout << "StiStEventFiller::fillEvent() - FATAL ERROR - Track Node has no entries!!"<<endl;
 						exit(1);
 					}
 			}
@@ -260,10 +263,12 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
 
 
+	int tCount=0;
 	int skippedCount=0;
 	// loop over StiKalmanTracks
 	for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt)
 		{
+			cout<<"|"<<++tCount;
 			// get track and corresponding StTrackNode
 			const StiKalmanTrack* kTrack = (*trackIt).second;	
 			if (kTrack==0)

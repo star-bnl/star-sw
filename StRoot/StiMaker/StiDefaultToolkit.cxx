@@ -28,6 +28,7 @@
 #include "../Sti/StiTrackFinder.h"
 #include "../Sti/StiTrackFitter.h"
 #include "../Sti/StiTrackFilter.h"
+#include "../Sti/StiSimpleTrackFilter.h"
 #include "../Sti/StiKalmanTrackFitter.h"
 #include "../Sti/StiKalmanTrackFinder.h"
 #include "../Sti/StiTrackMerger.h"
@@ -289,7 +290,8 @@ StiTrackFilter       * StiDefaultToolkit::getTrackFilter()
 {
 	if (trackFilter)
 	  return trackFilter;
-	trackFilter = new StiDynamicTrackFilter(getIOBroker());
+	trackFilter = new StiSimpleTrackFilter();
+	//trackFilter = new StiDynamicTrackFilter(getIOBroker());
 	return trackFilter;
 }
 
