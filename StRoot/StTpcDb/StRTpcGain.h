@@ -1,7 +1,7 @@
 #ifndef __STRTPCGAIN__
 #define __STRTPCGAIN__
 //#include <TObject.h>
-#include <StTpcGainI.h>
+#include "StTpcGainI.h"
 #include "StDbLib/Calibrations/tpcGainFactors.h"
 //#include <StTpcPadPlaneI.h>
 //#include <iostream.h>

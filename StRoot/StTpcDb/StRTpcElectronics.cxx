@@ -1,4 +1,4 @@
-#include <StRTpcElectronics.h>
+#include "StRTpcElectronics.h"
 
 ClassImp(StRTpcElectronics)
 

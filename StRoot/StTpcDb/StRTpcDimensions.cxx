@@ -1,4 +1,4 @@
-#include <StRTpcDimensions.h>
+#include "StRTpcDimensions.h"
 
 ClassImp(StRTpcDimensions)
 

@@ -1,7 +1,7 @@
 #ifndef __STRTPCPADPLANE__
 #define __STRTPCPADPLANE__
 //#include <TObject.h>
-#include <StTpcPadPlaneI.h>
+#include "StTpcPadPlaneI.h"
 #include "StDbLib/Geometry/tpcPadPlanes.h"
 
 class StRTpcPadPlane : public StTpcPadPlaneI {
