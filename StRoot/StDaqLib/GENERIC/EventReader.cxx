@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.11 1999/11/20 00:13:09 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.12 1999/12/02 16:40:23 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -20,6 +20,10 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.12  1999/12/02 16:40:23  levine
+ * change test on ret value for read (line 230) to prevent looping behavior
+ * at end of file
+ *
  * Revision 1.11  1999/11/20 00:13:09  fisyak
  * Micheal LeVine update
  *
@@ -230,7 +234,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
       ret = read(fd,bank,8);
       lseek(fd,-8,SEEK_CUR); //backspace over BANK TYPE
 //       printf("%s::%d  c_offset=0x%x  BANK %s\n",__FILE__,__LINE__,c_offset,bank);
-      if(ret < 0) ERROR(ERR_FILE);
+      if(ret <= 0) ERROR(ERR_FILE);
     }
     else { // DATA record. Skip LR
 //       printf("%s::%d  c_offset=0x%x \n",__FILE__,__LINE__,c_offset);
