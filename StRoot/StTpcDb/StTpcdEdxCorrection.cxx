@@ -23,7 +23,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 {
   assert(gStTpcDb);
   memset (&m_Corrections, 0, kTpcAllCorrections*sizeof(dEdxCorrection_t));
-  m_Corrections[kAdcCorrection       ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clutering nonlinearity correction");
+  m_Corrections[kAdcCorrection       ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction");
   m_Corrections[kTpcSecRow           ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kDrift               ] = dEdxCorrection_t("TpcDriftDistOxygen" 	,"Correction for Electron Attachment due to O2");
   m_Corrections[kMultiplicity        ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence");
@@ -126,7 +126,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   Double_t ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
-  
   Double_t gc, ADC, LogPressure, xL2, dXCorr;
   Int_t l, N;
   tpcCorrection_st *cor = 0;
@@ -159,6 +158,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ZdriftDistanceO2));
       break;
     case    kMultiplicity:
+       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.QRatio));
       break;
     case    kzCorrection:
       l = kTpcOutIn;
@@ -190,6 +190,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       break;
     case    kTpcdCharge:
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.dCharge));
+      break;
+    case   kSpaceCharge: 
+      dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.QRatioA));
       break;
     default:
       break;
@@ -258,13 +261,12 @@ void StTpcdEdxCorrection::SetCorrection(Int_t k, St_tpcCorrection *m) {
     m_Corrections[k].Chair = new St_tpcCorrectionC(m);
     tpcCorrection_st *cor = m->GetTable();
     m_Corrections[k].nrows = cor->nrows;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SetCorrection " << m_Corrections[k].Name << "/" 
-			<< m_Corrections[k].Title <<  endm;
-    gMessMgr->Warning() << " \thas been set with nrows = " << m_Corrections[k].nrows << endm;
+    gMessMgr->Warning() << "StTpcdEdxCorrection::SetCorrection " << m_Corrections[k].Name
+			<< " \thas been set with nrows = " << m_Corrections[k].nrows << endm;
     if (dbMk) {
       TDatime t[2];
       dbMk->GetValidity(m,t);
-      gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+      gMessMgr->Warning()  << " \tValidity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
     if (Debug()) m->Print(0,m_Corrections[k].nrows);

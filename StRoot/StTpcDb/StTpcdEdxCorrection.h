@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.5 2004/07/29 22:29:25 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.6 2004/08/08 21:06:39 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -31,16 +31,19 @@ class dEdx_t : public TObject {
      U->R (TpcAdcCorrection) -> P (tpcPressure) ->
      S (TpcSecRowB) ->  O (TpcDriftDistOxygen) ->  
      Z (TpcZCorrection) -> X(TpcdXCorrection) */
+  Char_t   first;
   Int_t    sector;
   Int_t    row;
   Int_t    pad;
   Int_t    Npads;
   Int_t    Ntbins;
   Double_t ZdriftDistance;     // drift distance
-  Double_t ZdriftDistanceO2;     // ZdriftDistance*ppmOxygenIn
-  Double_t ZdriftDistanceO2W;     // ZdriftDistance*ppmOxygenIn*ppmWaterOut
-  Double_t DeltaZ;            // distance to privious cluster
-  Double_t QRatio;            // Ratio to previous cluster Charge 
+  Double_t ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
+  Double_t ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
+  Double_t DeltaZ;             // distance to privious cluster
+  Double_t QRatio;             // Ratio to previous cluster Charge 
+  Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
+  Double_t QSumA;              // Sum of all previous cluster Charge 
   Double_t dx;
 #if 0
   Double_t dx0;    // stright line approximation
@@ -108,6 +111,8 @@ class dEdx_t : public TObject {
   Double_t zP;      // the most probable value from Bichsel
   Double_t sigmaP;  // sigma from Bichsel
   Double_t dCharge; //
+  Char_t   last;
+  void Reset() {memset(&sector, 0, &last - &first);}
   ClassDef(dEdx_t,1)
 }; 
 struct dEdxCorrection_t {
