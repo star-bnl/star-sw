@@ -1,5 +1,10 @@
-* $Id: sisdgeo.g,v 1.3 2004/10/28 22:02:18 potekhin Exp $
+* $Id: sisdgeo.g,v 1.4 2005/01/03 22:09:57 potekhin Exp $
 * $Log: sisdgeo.g,v $
+* Revision 1.4  2005/01/03 22:09:57  potekhin
+* Need to optionally position the Strip Detector in
+* the CAVE, when the SVT is missing form the configuration
+* (typical for the tracker upgrade)
+*
 * Revision 1.3  2004/10/28 22:02:18  potekhin
 * Improved the diagnostic message
 *
@@ -38,7 +43,7 @@ Module  SISDGEO  is the Silicon Strip Detector
 * SSD Volumes
       Content   SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,SFSS,SFCP,SFCW,SFCF,SFCT,SFCX
 * SSD Parameters:
-      Structure SSDP { Version,  Int Config }
+      Structure SSDP { Version,  Int Config, Int Placement}
       Structure SFPA { Version,  rmin,     rmax,     Len,
                        rad,      nssd,     dmWid,    dmThk,
 		       dmLen,    smWid,    smThk,    smLen,
@@ -55,6 +60,7 @@ Module  SISDGEO  is the Silicon Strip Detector
       Fill SSDP               ! Silicon Strips
         Version  = 1          ! Version
         Config   = 1          ! There are a few configuraions possible
+        Placement= 0          ! 0=cave, 1=svtt
       EndFill
 
       Fill SFPA               ! Silicon Strip detector parameters
@@ -148,7 +154,13 @@ Module  SISDGEO  is the Silicon Strip Detector
       Mixture   Water  Dens=1.0
 
       write(*,*) 'Level 0 of the SSD geometry'
-      Create and Position SFMO in SVTT
+      if(ssdp_Placement==1) then
+         write(*,*) 'Positioining the Silicon Strip Detector in SVT'
+         Create and Position SFMO in SVTT
+      else
+         write(*,*) 'Positioining the Silicon Strip Detector in CAVE'
+         Create and Position SFMO in CAVE
+      endif
 *******************************************************************************
 *
 Block SFMO is the mother of all Silicon Strip Detector volumes
