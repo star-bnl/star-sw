@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.2  1999/11/05 18:35:54  ullrich
- * Added methods and flags for debugging and monitoring.
+ * Revision 2.3  1999/11/08 17:04:59  ullrich
+ * Hits now allocated individually.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -28,7 +28,6 @@
  * Instance of StEvent now also created if no DST dataset
  * is available.
  *
-#include <new.h>
  * Revision 2.23  2000/05/22 21:53:41  ullrich
  * No more copying of RICH tables. RICH now writes directly
  * to StEvent. printEventInfo() and makeEvent() modified.
@@ -89,7 +88,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -126,10 +125,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -405,9 +404,6 @@ StEventMaker::makeEvent()
 	    if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
 	    id = dstV0Vertices[i].idpos;
         StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
-    //  Allocating small objects is not very efficient and that's why
-    //  we are using here the placement new() operator. The memory for
-    //  each kind of hit gets allocated in one chunk.
         id = dstKinkVertices[i].idd;
         if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
         id = dstKinkVertices[i].idp;
@@ -421,7 +417,6 @@ StEventMaker::makeEvent()
     dst_v0_vertex_st* dstV0Vertices = mEventManager->returnTable_dst_v0_vertex(nV0Vertices);
 	if (id < static_cast<unsigned long>(nVertices)) {
 			    << " Xi vertices, no valid id_vertex." << endm;
-        char *buf;
 	    id = dstXiVertices[i].id_v0 - 1;
 	    if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
 	    id  = dstXiVertices[i].id_b;       // no -1 here 
@@ -430,11 +425,9 @@ StEventMaker::makeEvent()
 	}
 
 	    nfailed++;
-            buf   = new char[sizeof(StTpcHit)*index[kTpcId].second];
     }
         int  nfailed;
-                tpcHit = new(reinterpret_cast<void*>(buf)) StTpcHit(dstPoints[i]);
-                buf += sizeof(StTpcHit);
+	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
     if (nfailed)
     if (doLoadTpcHits || doLoadFtpcHits || doLoadSvtHits) {
                             << " V0 vertices, no valid id_vertex." << endm;
@@ -452,11 +445,9 @@ StEventMaker::makeEvent()
 
     }
     if (nfailed)
-            buf   = new char[sizeof(StSvtHit)*index[kSvtId].second];
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " Xi vertices, invalid foreign key to vertex table." << endm;
-                svtHit = new(reinterpret_cast<void*>(buf)) StSvtHit(dstPoints[i]);
-                buf += sizeof(StSvtHit);
+
     //  Setup kinks
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(tpcHit);
@@ -474,12 +465,10 @@ StEventMaker::makeEvent()
     //  we have to scan them all and get the first index and the total
     //  number of those which have to be loaded.
 		    id = dstPoints[i].id_track;
-            buf   = new char[sizeof(StFtpcHit)*index[kFtpcWestId].second];
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
 			info = vecGlobalTracks[id]->detectorInfo();
 			info->addHit(tpcHit);
-                ftpcHit = new(reinterpret_cast<void*>(buf)) StFtpcHit(dstPoints[i]);
-                buf += sizeof(StFtpcHit);
+		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(svtHit);
 		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
@@ -488,12 +477,10 @@ StEventMaker::makeEvent()
                 if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
                     vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
                 else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-            buf   = new char[sizeof(StFtpcHit)*index[kFtpcEastId].second];
                     vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
             StSvtHit *svtHit;
 		else
-                ftpcHit = new(reinterpret_cast<void*>(buf)) StFtpcHit(dstPoints[i]);
-                buf += sizeof(StFtpcHit);
+	    info    = 0;
                 svtHit = new StSvtHit(dstPoints[i]);
                 if (svtHitColl->addHit(svtHit)) {
                     id = dstPoints[i].id_track;
