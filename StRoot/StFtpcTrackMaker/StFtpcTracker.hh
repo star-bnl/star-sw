@@ -1,5 +1,10 @@
-// $Id: StFtpcTracker.hh,v 1.14 2002/06/04 13:41:37 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.15 2002/10/31 13:41:54 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.15  2002/10/31 13:41:54  oldi
+// dE/dx parameters read from database, now.
+// Vertex estimation for different sectors added.
+// Vertex estimation for different areas (angle, radius) added.
+//
 // Revision 1.14  2002/06/04 13:41:37  oldi
 // Minor change: 'west' -> 'hemisphere' (just a naming convention)
 //
@@ -90,7 +95,6 @@
 #include "TObjArray.h"
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_fcl_fppoint_Table.h"
-#include "tables/St_fde_fdepar_Table.h"
 
 class StFtpcTracker : public TObject {
 
@@ -134,11 +138,16 @@ public:
   virtual  ~StFtpcTracker();  // destructor
 
   void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);     // vertex estimation with fit tracks for FTPC east amd west
-  void    EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations);  // vertex estimation with fit tracks
-  void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
+  void    EstimateVertex(StFtpcVertex *vertex, Char_t hemispshere, UChar_t iterations);  // vertex estimation with fit tracks
+  StFtpcVertex EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, 
+			      Char_t sector, UChar_t iterations = 1);  // vertex estimation with fit tracks
+  StFtpcVertex EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere,
+			      Float_t lowAngle, Float_t highAngle,
+			      Float_t lowRadius, Float_t highRadius, 
+			      UChar_t iterations = 1);  // vertex estimation with fit tracks
+  void    CalcEnergyLoss();                                                 // calculates dE/dx
   void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
-			     FDE_FDEPAR_ST *fdepar, 
 			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
   Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
   Int_t   WriteTracksAndClusters();                                         // writes tracks and clusters in ROOT file
