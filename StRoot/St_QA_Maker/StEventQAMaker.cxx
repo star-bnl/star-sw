@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.43 2000/06/29 05:18:40 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.44 2000/07/11 18:10:38 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.44  2000/07/11 18:10:38  lansdell
+// replaced call to pidTraits with numberOfHits to get detector ids for tracks
+//
 // Revision 1.43  2000/06/29 05:18:40  lansdell
 // removed unnecessary cout statement
 //
@@ -273,9 +276,32 @@ void StEventQAMaker::MakeHistGlob() {
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
 // so it doesn't need to be calculated here 
 
-      // read the det id for the first element of the pidTraits vector -CPL
-      if (globtrk->pidTraits()[0])
-	m_det_id->Fill(globtrk->pidTraits()[0]->detector());
+      // check if the track has hits in a detector -CPL
+      if (globtrk->topologyMap().numberOfHits(kUnknownId)>0) m_det_id->Fill(kUnknownId);
+      if (globtrk->topologyMap().numberOfHits(kTpcId)>0) m_det_id->Fill(kTpcId);
+      if (globtrk->topologyMap().numberOfHits(kSvtId)>0) m_det_id->Fill(kSvtId);
+      if (globtrk->topologyMap().numberOfHits(kRichId)>0) m_det_id->Fill(kRichId);
+      if (globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) m_det_id->Fill(kFtpcWestId);
+      if (globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) m_det_id->Fill(kFtpcEastId);
+      if (globtrk->topologyMap().numberOfHits(kTofPatchId)>0) m_det_id->Fill(kTofPatchId);
+      if (globtrk->topologyMap().numberOfHits(kCtbId)>0) m_det_id->Fill(kCtbId);
+      if (globtrk->topologyMap().numberOfHits(kSsdId)>0) m_det_id->Fill(kSsdId);
+      if (globtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) m_det_id->Fill(kBarrelEmcTowerId);
+      if (globtrk->topologyMap().numberOfHits(kBarrelEmcPreShowerId)>0) m_det_id->Fill(kBarrelEmcPreShowerId);
+      if (globtrk->topologyMap().numberOfHits(kBarrelSmdEtaStripId)>0) m_det_id->Fill(kBarrelSmdEtaStripId);
+      if (globtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) m_det_id->Fill(kBarrelSmdPhiStripId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) m_det_id->Fill(kEndcapEmcTowerId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) m_det_id->Fill(kEndcapEmcPreShowerId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapSmdEtaStripId)>0) m_det_id->Fill(kEndcapSmdEtaStripId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapSmdPhiStripId)>0) m_det_id->Fill(kEndcapSmdPhiStripId);
+      if (globtrk->topologyMap().numberOfHits(kZdcWestId)>0) m_det_id->Fill(kZdcWestId);
+      if (globtrk->topologyMap().numberOfHits(kZdcEastId)>0) m_det_id->Fill(kZdcEastId);
+      if (globtrk->topologyMap().numberOfHits(kMwpcWestId)>0) m_det_id->Fill(kMwpcWestId);
+      if (globtrk->topologyMap().numberOfHits(kMwpcEastId)>0) m_det_id->Fill(kMwpcEastId);
+      if (globtrk->topologyMap().numberOfHits(kTpcSsdId)>0) m_det_id->Fill(kTpcSsdId);
+      if (globtrk->topologyMap().numberOfHits(kTpcSvtId)>0) m_det_id->Fill(kTpcSvtId);
+      if (globtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) m_det_id->Fill(kTpcSsdSvtId);
+      if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_det_id->Fill(kSsdSvtId);
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
@@ -424,8 +450,8 @@ void StEventQAMaker::MakeHistGlob() {
       }
 
 // now fill all FTPC East histograms ------------------------------------------
-      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==5) {             // didn't loop over pidTraits vector this time
-                               // -> should I have? -CPL
+      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+
 // these are TPC & FTPC
 	m_pointFE->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
@@ -457,8 +483,8 @@ void StEventQAMaker::MakeHistGlob() {
 
       }
 // now fill all FTPC West histograms ------------------------------------------
-      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==4) {             // didn't loop over pidTraits vector this time
-                               // -> should I have? -CPL
+      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+
 // these are TPC & FTPC
 	m_pointFW->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
@@ -612,9 +638,32 @@ void StEventQAMaker::MakeHistPrim() {
 	                     primtrk->geometry()->helix().at(s);
         Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
 
-	// read the det id for the first element of the pidTraits vector -CPL
-	if (primtrk->pidTraits()[0])
-	  m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
+	// check if the track has hits in a detector -CPL
+	if (primtrk->topologyMap().numberOfHits(kUnknownId)>0) m_pdet_id->Fill(kUnknownId);
+	if (primtrk->topologyMap().numberOfHits(kTpcId)>0) m_pdet_id->Fill(kTpcId);
+	if (primtrk->topologyMap().numberOfHits(kSvtId)>0) m_pdet_id->Fill(kSvtId);
+	if (primtrk->topologyMap().numberOfHits(kRichId)>0) m_pdet_id->Fill(kRichId);
+	if (primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) m_pdet_id->Fill(kFtpcWestId);
+	if (primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) m_pdet_id->Fill(kFtpcEastId);
+	if (primtrk->topologyMap().numberOfHits(kTofPatchId)>0) m_pdet_id->Fill(kTofPatchId);
+	if (primtrk->topologyMap().numberOfHits(kCtbId)>0) m_pdet_id->Fill(kCtbId);
+	if (primtrk->topologyMap().numberOfHits(kSsdId)>0) m_pdet_id->Fill(kSsdId);
+	if (primtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) m_pdet_id->Fill(kBarrelEmcTowerId);
+	if (primtrk->topologyMap().numberOfHits(kBarrelEmcPreShowerId)>0) m_pdet_id->Fill(kBarrelEmcPreShowerId);
+	if (primtrk->topologyMap().numberOfHits(kBarrelSmdEtaStripId)>0) m_pdet_id->Fill(kBarrelSmdEtaStripId);
+	if (primtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) m_pdet_id->Fill(kBarrelSmdPhiStripId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) m_pdet_id->Fill(kEndcapEmcTowerId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) m_pdet_id->Fill(kEndcapEmcPreShowerId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapSmdEtaStripId)>0) m_pdet_id->Fill(kEndcapSmdEtaStripId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapSmdPhiStripId)>0) m_pdet_id->Fill(kEndcapSmdPhiStripId);
+	if (primtrk->topologyMap().numberOfHits(kZdcWestId)>0) m_pdet_id->Fill(kZdcWestId);
+	if (primtrk->topologyMap().numberOfHits(kZdcEastId)>0) m_pdet_id->Fill(kZdcEastId);
+	if (primtrk->topologyMap().numberOfHits(kMwpcWestId)>0) m_pdet_id->Fill(kMwpcWestId);
+	if (primtrk->topologyMap().numberOfHits(kMwpcEastId)>0) m_pdet_id->Fill(kMwpcEastId);
+	if (primtrk->topologyMap().numberOfHits(kTpcSsdId)>0) m_pdet_id->Fill(kTpcSsdId);
+	if (primtrk->topologyMap().numberOfHits(kTpcSvtId)>0) m_pdet_id->Fill(kTpcSvtId);
+	if (primtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) m_pdet_id->Fill(kTpcSsdSvtId);
+	if (primtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_pdet_id->Fill(kSsdSvtId);
 
 // now fill all TPC histograms ------------------------------------------------
 	if (primtrk->flag()>=300 && primtrk->flag()<400) {
@@ -765,8 +814,8 @@ void StEventQAMaker::MakeHistPrim() {
 
 /* The following are for the FTPC, which doesn't do primary tracking yet.
 // now fill all FTPC East histograms ------------------------------------------
-	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->pidTraits()[0]->detector()==5) {             // didn't loop over pidTraits vector this time
-                                 // -> should I have? -CPL
+	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+
 // these are TPC & FTPC
 	  m_ppointFE->Fill(primtrk->detectorInfo()->numberOfPoints());
 	  m_pmax_pointFE->Fill(primtrk->numberOfPossiblePoints());
@@ -798,8 +847,8 @@ void StEventQAMaker::MakeHistPrim() {
 	}
 
 // now fill all FTPC West histograms ------------------------------------------
-	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->pidTraits()[0]->detector()==4) {             // didn't loop over pidTraits vector this time
-                               // -> should I have? -CPL
+	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+
 // these are TPC & FTPC
 	  m_ppointFW->Fill(primtrk->detectorInfo()->numberOfPoints());
 	  m_pmax_pointFW->Fill(primtrk->numberOfPossiblePoints());
