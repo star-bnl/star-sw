@@ -10,4 +10,5 @@
           INTEGER*4    nfit                 ! # of points used in fit
           INTEGER*4    flag                 ! flags from the fitting 
 	  INTEGER*4    ntpc                 ! Number of TPC hits
+	  INTEGER*4    nmax                 ! # of max points
       END STRUCTURE

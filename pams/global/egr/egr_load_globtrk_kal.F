@@ -56,7 +56,7 @@ C     Local variables
       globtrk(iglob).id = iglob
       globtrk(iglob).n_point = gtrk(igtrk).ntpc+
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
-      globtrk(iglob).n_max_point = 0
+      globtrk(iglob).n_max_point = gtrk(igtrk).nmax
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
       if( ipriv .gt. 0) then
          globtrk(iglob).n_fit_point =        globtrk(iglob).n_fit_point-1
