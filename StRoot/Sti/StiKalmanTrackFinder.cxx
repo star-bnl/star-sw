@@ -92,27 +92,26 @@ void StiKalmanTrackFinder::getNewState()
 {
   StiIOBroker *  broker = StiIOBroker::instance();
   //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
-  pars->setMCSCalculated(broker->ktfMcsCalculated());
-  pars->setElossCalculated(broker->ktfElossCalculated());
-  pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
-  pars->setField(broker->ktfBField());
-  pars->setMassHypothesis(broker->ktfMassHypothesis());
-  pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
-  pars->setMaxNullCount(broker->ktfMaxNullCount());
-  pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
-  pars->setMinSearchWindow(broker->ktfMinSearchRadius());
-  pars->setMaxSearchWindow(broker->ktfMaxSearchRadius());
-  pars->setSearchWindowScale(broker->ktfSearchWindowScale());
+  pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
+  pars->setElossCalculated(broker->ktfElossCalculated()); //check
+  pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
+  pars->setField(broker->ktfBField()); //check
+  pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
+  
+  pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());  //check
+  pars->setMaxNullCount(broker->ktfMaxNullCount()); //check
+  pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount()); //check
+  
+  pars->setMinSearchWindow(broker->ktfMinSearchRadius()); //check
+  pars->setMaxSearchWindow(broker->ktfMaxSearchRadius()); //check
+  pars->setSearchWindowScale(broker->ktfSearchWindowScale()); //check
 
-  if (broker->ktfUseHelixExtrapolation()==true) 
-    {
-      //cout <<"Using helix extrapolation"<<endl;
+  if (broker->ktfUseHelixExtrapolation()==true)  {
       StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
-    }
-  else 
-    {
+  }
+  else {
       StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
-    }
+  }
 }
 
 void StiKalmanTrackFinder::reset()

@@ -137,7 +137,6 @@ StiKalmanTrack* StiLocalTrackSeedFinder::next()
 
     while (hasMore() && track==0) {
 	//For now, do one hit at a time, regardless of validity
-	//if ( (*mCurrentHit)->isUsed() == false ) {
 	if ( (*mCurrentHit)->timesUsed()==0 ) {
 	    track =makeTrack(*mCurrentHit);
 	}
@@ -284,6 +283,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 */
 bool StiLocalTrackSeedFinder::extrapolate()
 {
+    //This is a little ugly, but it's faster than manipulating 3-vectors
     mMessenger <<"StiLocalTrackSeedFinder::extrapolate()"<<endl;
     //Calculate slope and offset in r-z and r-y projections, then extend
     const StiHit* hit1 = *( mSeedHitVec.begin()+mSeedHitVec.size() -2 ); //second to last
