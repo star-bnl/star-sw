@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.80 2003/01/14 14:12:17 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.81 2003/01/14 14:19:07 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.80 2003/01/14 14:12:17 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.81 2003/01/14 14:19:07 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1891,7 +1891,13 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.81  2003/01/14 14:19:07  oldi
+// Log of last commit changed to indicate the important introduction of the
+// pMuTrack->flag() cut.
+//
 // Revision 1.80  2003/01/14 14:12:17  oldi
+// Cut on pMuTrack->flag() introduced. No the results agree, 
+// independently of the input format (*.event.root <-> *.MuDst.root).
 // Possibility to exclude TPC tracks completely (= FTPC only).
 //
 // Revision 1.79  2003/01/13 20:03:16  aihong
