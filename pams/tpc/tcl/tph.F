@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.27 2000/08/10 03:50:20 snelling Exp $
+* $Id: tph.F,v 1.28 2001/10/25 23:03:06 hardtke Exp $
 * $Log: tph.F,v $
+* Revision 1.28  2001/10/25 23:03:06  hardtke
+* return hits in tpc local coordinates using function tpc_localsector_to_local.  We now do the global coordinate transformation in St_tpt_Maker
+*
 * Revision 1.27  2000/08/10 03:50:20  snelling
 * removed verbose output of drift velocity
 *
@@ -83,7 +86,9 @@ c functions:
       real    tand, atand
       integer tpc_pad_to_x
       integer tpc_row_to_y
-      integer tpc_local_to_global
+      integer tpc_localsector_to_local  ! local sector = sector 12 coordinate
+c                                       ! local = TPC local coordinate
+c                                       ! transform to global coordinate later
       integer tpc_drift_velocity !function that returns as a first
 c                                !argument the drift velocity
 c                                !two next arguments dummy             
@@ -365,7 +370,7 @@ c     (using the drift velocity and tau)
               endif
 
 c     Transform local to global coordinates !
-              istatus = tpc_local_to_global(isec, invec, outvec)
+              istatus = tpc_localsector_to_local(isec, invec, outvec)
 
 c     Fill hit coordinates
               tphit(tphit_h.nok).x = outvec(1)
