@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.29 2004/01/28 01:41:15 jeromel Exp $
+// $Id: StFtpcFastSimu.cc,v 1.30 2004/01/28 02:04:43 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.30  2004/01/28 02:04:43  jcs
+// replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
+//
 // Revision 1.29  2004/01/28 01:41:15  jeromel
 // Change OST to OS everywhere since defaultoption is now not to print
 // the date.
@@ -105,7 +108,6 @@
 #include "RanluxEngine.h"
 // random number engines from StarClassLibrary
 #include "RandGauss.h"
-#include "StFtpcTrackMaker/StFtpcPoint.hh"
 
 static RanluxEngine engine;
 
@@ -128,7 +130,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   // allocate memory for local storage
   // we need local arrays here that we can mess around in
   nPoints=mGeant->numberOfHits();
-  mPoint=new StFtpcReducedPoint[nPoints];
+  mPoint=new StFtpcConfMapPoint[nPoints];
   mGeantPoint=new StFtpcGeantPoint[nPoints];
 
   nPadrows = mDb->numberOfPadrows();
@@ -162,25 +164,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   for (Int_t i = 0; i < nPoints; i++) {
     // use (default) copy constructor for StFtpcGeantPoint
     geantarray->AddAt(new StFtpcGeantPoint(mGeantPoint[i]), i);
-    // as StFtpcPoint is in different package, we have to copy data 
-    // from StFtpcReducedPoint
-    // hgrrrumpf!!!
-    pointarray->AddAt(new StFtpcPoint(), i);
-    ((StFtpcPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
-    ((StFtpcPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
-    ((StFtpcPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());
-    ((StFtpcPoint *)pointarray->At(i))->SetXerr(mPoint[i].GetXerr());
-    ((StFtpcPoint *)pointarray->At(i))->SetYerr(mPoint[i].GetYerr());
-    ((StFtpcPoint *)pointarray->At(i))->SetZerr(mPoint[i].GetZerr());
-    ((StFtpcPoint *)pointarray->At(i))->SetPadRow(mPoint[i].GetPadRow());
-    ((StFtpcPoint *)pointarray->At(i))->SetSector(mPoint[i].GetSector());
-    ((StFtpcPoint *)pointarray->At(i))->SetNumberPads(mPoint[i].GetNumberPads());
-    ((StFtpcPoint *)pointarray->At(i))->SetNumberBins(mPoint[i].GetNumberBins());
-    ((StFtpcPoint *)pointarray->At(i))->SetMaxADC(mPoint[i].GetMaxADC());
-    ((StFtpcPoint *)pointarray->At(i))->SetCharge(mPoint[i].GetCharge());
-    ((StFtpcPoint *)pointarray->At(i))->SetFlags(mPoint[i].GetFlags());
-    ((StFtpcPoint *)pointarray->At(i))->SetSigmaPhi(mPoint[i].GetSigmaPhi());
-    ((StFtpcPoint *)pointarray->At(i))->SetSigmaR(mPoint[i].GetSigmaR());
+    pointarray->AddAt(new StFtpcConfMapPoint(), i);
   }
 
   

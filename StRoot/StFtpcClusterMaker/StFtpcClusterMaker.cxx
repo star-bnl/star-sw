@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.62  2004/01/28 02:04:43  jcs
+// replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
+//
 // Revision 1.61  2004/01/28 01:41:15  jeromel
 // Change OST to OS everywhere since defaultoption is now not to print
 // the date.
@@ -211,7 +214,7 @@
 #include "StFtpcGeantReader.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcGasUtilities.hh"
-#include "StFtpcTrackMaker/StFtpcPoint.hh"
+#include "StFtpcTrackMaker/StFtpcConfMapPoint.hh"
 #include "StFtpcGeantPoint.hh"
 #include "StFtpcFastSimu.hh"
 #include "StChain.h"
@@ -621,11 +624,11 @@ Int_t StFtpcClusterMaker::Make()
       
       fcl_fppoint_st *pointTable= fcl_fppoint->GetTable();
       
-      StFtpcPoint *point;
+      StFtpcConfMapPoint *point;
       
       for (Int_t i=0; i<num_points; i++) 
 	{
-	  point = (StFtpcPoint *)hitarray->At(i);
+	  point = (StFtpcConfMapPoint *)hitarray->At(i);
 	  point->ToTable(&(pointTable[i]));    
 	}
       
