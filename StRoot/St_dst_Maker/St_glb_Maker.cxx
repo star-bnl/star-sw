@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.21 1999/02/11 02:53:37 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.22 1999/02/12 19:23:46 didenko Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.22  1999/02/12 19:23:46  didenko
+// updated v0 finding code from Helen
+//
 // Revision 1.21  1999/02/11 02:53:37  fisyak
 // Janet update to FTPC dst table
 //
@@ -78,6 +81,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
+#include "PhysicalConstants.h"
 #include "TMath.h"
 #include "St_glb_Maker.h"
 #include "St_particle_Table.h"
@@ -96,13 +100,11 @@
 #include "global/St_track_propagator_Module.h"
 //#include "global/St_ev0_am_Module.h"
 #include "global/St_ev0_am2_Module.h"
-#include "global/St_ev0_dst_Module.h"
+//#include "global/St_ev0_dst_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 #include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_fill_ftpc_dst_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
-
-#include "strange/St_smdst2_am_Module.h"
 
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
@@ -124,8 +126,8 @@ m_evr_evrpar(0),
 m_ev0par(0),
 m_magf(0),
 m_egr_egrpar(0),
-m_particle_dst_param(0),
-m_smdst_v0cut(0)
+m_particle_dst_param(0)
+
 {
   drawinit=kFALSE;
   m_scenario  = 8;
@@ -203,7 +205,7 @@ Int_t St_glb_Maker::Init(){
   egr2_egrpar->useglobal = 0;
 
   //ev0   
-  m_ev0par = (St_ev0_ev0par *)  params("global/ev0pars/ev0par");
+  //  m_ev0par = (St_ev0_ev0par *)  params("global/ev0pars/ev0par");
   //  m_magf   = (St_mft_control *) params("global/magnetic_field/magf");  
   m_ev0par2 = (St_ev0_ev0par2 *)  params("global/ev0pars/ev0par2");
   if (!m_ev0par2) {
@@ -212,25 +214,35 @@ Int_t St_glb_Maker::Init(){
   }
   ev0_ev0par2_st *ev0par2 = m_ev0par2->GetTable();
   Int_t l;
-  for (l=0;l<3;l++){
-    ev0par2->dca =   0.8;
-    ev0par2->dcav0 = 0.3;
-    ev0par2->dlen =  100;
-    ev0par2->alpha_max = 1.2;
-    ev0par2->ptarm_max = 0.3;
-    ev0par2++;
-  }
-  ev0par2 = m_ev0par2->GetTable();
-  ev0par2->dlen =  2;
-  // 
-  m_smdst_v0cut = (St_smdst_v0cut *) params("strange/smdst/smdst_v0cut");
-  if (! m_smdst_v0cut) {
-    m_smdst_v0cut = new St_smdst_v0cut("m_smdst_v0cut",1);
-    smdst_v0cut_st smdst_v0cut = {100., // max_dca
-				  100., // max_bv0
-				  0.0}; // min_dv0
-    m_smdst_v0cut->AddAt(&smdst_v0cut,0);
-  }
+  // TPC only cuts
+
+  ev0par2->dca =   0.8;
+  ev0par2->dcav0 = 0.3;
+  ev0par2->dlen =  2.;
+  ev0par2->alpha_max = 1.2;
+  ev0par2->ptarm_max = 0.3;
+  ev0par2->dcapnmin = 0.3;
+  ev0par2++;
+
+  //SVT only cuts
+
+  ev0par2->dca =   0.8;
+  ev0par2->dcav0 = 0.3;
+  ev0par2->dlen =  10000.;
+  ev0par2->alpha_max = 1.2;
+  ev0par2->ptarm_max = 0.3;
+  ev0par2->dcapnmin = 100;
+  ev0par2++;
+
+  // SVT+TPC cuts
+  ev0par2->dca =   0.8;
+  ev0par2->dcav0 = 0.3;
+  ev0par2->dlen =  0.6;
+  ev0par2->alpha_max = 1.2;
+  ev0par2->ptarm_max = 0.3;
+  ev0par2->dcapnmin = 0.3;
+
+  
   // Create Histograms    
   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
@@ -262,7 +274,8 @@ Int_t St_glb_Maker::Make(){
   St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
   St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
   St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
-  St_ev0_aux        *ev0out      = (St_ev0_aux       *) dst("ev0out");
+  //  St_ev0_aux        *ev0out      = (St_ev0_aux       *) dst("ev0out");
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex");  
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
   St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
@@ -334,6 +347,7 @@ Int_t St_glb_Maker::Make(){
     if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); ctf_hits.Add(ctb_cor,"ctf");}
   }
   if (!primtrk){ //create dst
+    
     if (tptrack && stk_track) {
        //svm
       if (!evt_match) {
@@ -394,7 +408,7 @@ Int_t St_glb_Maker::Make(){
 	memcpy(&tp_param->x,&vrtx->x,3*sizeof(Float_t));  
       }
     }
-    Int_t Res_tp = track_propagator(globtrk2,m_tp_param,globtrk);
+    Int_t Res_tp = track_propagator(globtrk,m_tp_param,globtrk2);
 
     if (Res_tp !=  kSTAFCV_OK) {
       cout << "Problem on return from Track_Propagator" << endl;
@@ -422,16 +436,14 @@ Int_t St_glb_Maker::Make(){
 #endif
     // ev0
     cout << "Calling ev0..." << endl;
-    if (! ev0out) {ev0out = new St_ev0_aux("ev0out",100000); dst.Add(ev0out);}
+    if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",100000); dst.Add(dst_v0_vertex);}
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
     dst.Add(ev0track2);
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
-    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,ev0out,ev0track2);
-    //ev0d
-    St_dst_v0_vertex *dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",100000);
-    dst.Add(dst_v0_vertex);
-    Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
-    if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
+     Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+    //ev0d No longer needed
+    //Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
+    //if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
 #if 0
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
@@ -450,16 +462,6 @@ Int_t St_glb_Maker::Make(){
 	if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
       }
     }
-    // sdst2
-    St_smdst_index *tindex   = new St_smdst_index("tindex",50000); dst.Add(tindex);
-    St_smdst_index *vindex   = new St_smdst_index("vindex",10000); dst.Add(vindex);
-    St_smdst_v0    *smdst_v0 = new St_smdst_v0("smdst_v0",10000);  dst.Add(smdst_v0);
-    cout << " Calling smdst2..." << endl;
-    Int_t Res_smdst =  smdst2_am(event_header,globtrk,
-				 vertex,dst_v0_vertex,
-				 m_smdst_v0cut, 
-				 smdst_v0,tindex,vindex);
-    if (Res_smdst != kSTAFCV_OK) {cout << " Problem on return from smdst2_am" << endl;}
 #endif
     // dst 
     // dst_dedx_filler
@@ -473,7 +475,7 @@ Int_t St_glb_Maker::Make(){
       if (Res_dedx_filler != kSTAFCV_OK) {
 	cout << "Problem on return from DST_DEDX_FILLER" << endl; 
       }
-      cout << " run_dst: finished calling dst_dedx_filler" << endl;
+      cout << " run_dst: finshed calling dst_dedx_filler" << endl;
     }
     // dst_mon_soft
     if (tphit &&  scs_spt) {
@@ -612,10 +614,21 @@ Int_t St_glb_Maker::Make(){
     }
   }
   // V0
-  if (ev0out) {
-    ev0_aux_st *ev0 = ev0out->GetTable();
-    for (Int_t k=0; k<ev0out->GetNRows(); k++){
-      m_lameffm->Fill(ev0->inv_mass_la);
+  if (dst_v0_vertex) {
+    dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
+    for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
+      Float_t e1 = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
+	+ v0->pos_pz*v0->pos_pz;
+      Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
+	+ v0->neg_pz*v0->neg_pz;
+      e1 += proton_mass_c2*proton_mass_c2;
+      e2 += (0.139567*0.139567);
+      e1 = TMath::Sqrt(e1);
+      e2 = TMath::Sqrt(e2);
+      Float_t p = v0->neg_px+v0->pos_px +  v0->neg_py+v0->pos_py +
+	v0->neg_pz+v0->pos_pz;
+      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p*p);
+      m_lameffm->Fill(inv_mass_la);
     }
   }
   return kStOK;
@@ -623,7 +636,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.21 1999/02/11 02:53:37 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.22 1999/02/12 19:23:46 didenko Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
