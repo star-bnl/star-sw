@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.18 2004/02/02 22:22:54 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.19 2004/02/19 20:40:15 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.19  2004/02/19 20:40:15  pruneau
+ * Added the notion of loadbale to the builders
+ *
  * Revision 2.18  2004/02/02 22:22:54  pruneau
  * Fixed include
  *
@@ -126,28 +129,46 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
   coeff[3]= intrinsicX;
   coeff[4]= driftX;
   coeff[5]= crossX;
-
-  report();
+  cout << *this;
 }
 
-void StiDefaultHitErrorCalculator::set(ifstream& iFle)
+//Load values from given input file stream
+void StiDefaultHitErrorCalculator::loadFS(ifstream& iFile)
 {
-  iFle >> coeff[0] >> coeff[1] >> coeff[2];
-  iFle >> coeff[3] >> coeff[4] >> coeff[5];
-  
-  report();
- 
-  return;
+	cout << "StiDefaultHitErrorCalculator::loadFS(ifstream& iFile) -I- Started" <<endl;
+  iFile >> coeff[0] >> coeff[1] >> coeff[2];
+  iFile >> coeff[3] >> coeff[4] >> coeff[5];
+  cout << *this;
+  cout << "StiDefaultHitErrorCalculator::loadFS(ifstream& iFile) -I- Done" <<endl;
 }
 
-void StiDefaultHitErrorCalculator::report()
+//Load values from given dataset
+void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
 {
-  cout <<"Hit Error Parameters: "<<coeff[0]
-       <<" "<<coeff[1]
-       <<" "<<coeff[2]
-       <<" "<<coeff[3]
-       <<" "<<coeff[4]
-       <<" "<<coeff[5]<<endl;
+  cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Started" <<endl;
+  St_HitError * a = dynamic_cast<St_HitError*>(ds.Find(getName().c_str() ));
+  if (!a) throw runtime_error("StiDefaultHitErrorCalculator::loadDS(TDataSet&ds) -E- a==0");
+  HitError_st * b = a->GetTable();
+  if (!b) throw runtime_error("StiDefaultHitErrorCalculator::loadDS(TDataSet&ds) -E- b==0");
+  coeff[0] = b->coeff[0];
+  coeff[1] = b->coeff[1];
+  coeff[2] = b->coeff[2];
+  coeff[3] = b->coeff[3];
+  coeff[4] = b->coeff[4];
+  coeff[5] = b->coeff[5];
+  cout << *this;
+  cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Done" <<endl;
+}
+
+ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
+{
+  cout <<"Hit Error Parameters: "<<c.coeff[0]
+       <<" "<<c.coeff[1]
+       <<" "<<c.coeff[2]
+       <<" "<<c.coeff[3]
+       <<" "<<c.coeff[4]
+       <<" "<<c.coeff[5]<<endl;
+  return os;	
 }
 
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
@@ -164,7 +185,6 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
   if (edip>50) edip = 50.; 
-
   node->eyy = ecross;
   node->ezz = edip;
 }

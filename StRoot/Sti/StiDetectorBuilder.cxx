@@ -7,11 +7,12 @@
 #include "StThreeVector.hh"
 #include "StMaker.h"
 
-StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
+StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
   : Named(name+"Builder"),
     _groupId(-1),
     _active(active),
-    _detectorFactory( StiToolkit::instance()->getDetectorFactory() )
+    _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
+		_inputFile(inputFile)
 {
   cout << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
 }
