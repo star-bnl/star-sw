@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.19 2000/03/02 20:41:35 caines Exp $
+// $Id: StV0Maker.cxx,v 1.20 2000/03/30 16:33:39 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.20  2000/03/30 16:33:39  genevb
+// Change messages to say where they are called from
+//
 // Revision 1.19  2000/03/02 20:41:35  caines
 // New dcav0 cut went from 0.7cm ->2.5cm from Curtis
 //
@@ -127,7 +130,7 @@ Int_t StV0Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Make(){
-  //if(Debug()) gMessMgr->Debug() << "Calling ev0..."<< endm; 
+  //if(Debug()) gMessMgr->Debug("StV0Maker::Make(): Calling ev0..."); 
   PrintInfo();   
   
   int iMake = kStOK;
@@ -135,26 +138,26 @@ Int_t StV0Maker::Make(){
   
   St_DataSet     *match = GetDataSet("match"); 
   if (!match) {
-    gMessMgr->Warning() << " StV0Maker: match is missing" << endm;
+    gMessMgr->Warning() << "StV0Maker::Make(): match is missing" << endm;
     return kStWarn;
   }
   St_DataSetIter matchI(match);         
   St_dst_track   *globtrk  = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    gMessMgr->Warning() << " StV0Maker: globtrk is missing" << endm;
+    gMessMgr->Warning() << "StV0Maker::Make(): globtrk is missing" << endm;
     return kStWarn;
   }
   
   St_DataSet     *primary = GetDataSet("primary"); 
   
   if (!primary) {
-    gMessMgr->Warning() << " StV0Maker: primary is missing" << endm;
+    gMessMgr->Warning() << "StV0Maker::Make(): primary is missing" << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    gMessMgr->Warning() << " StV0Maker: vertex is missing" << endm;
+    gMessMgr->Warning() << "StV0Maker::Make(): vertex is missing" << endm;
     return kStWarn;
   }
   
@@ -188,7 +191,7 @@ Int_t StV0Maker::Make(){
   }
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     // ev0
-    if(Debug()) gMessMgr->Info() << "Calling ev0..." << endm;
+    if(Debug()) gMessMgr->Info() << "StV0Maker::Make(): Calling ev0..." << endm;
     Int_t v0_limit = globtrk->GetNRows()/80;
     v0_limit = v0_limit*v0_limit;
     if (v0_limit < 2048) v0_limit=2048;
@@ -202,7 +205,7 @@ Int_t StV0Maker::Make(){
     AddGarb(ev0track2);
         
     if (NGlbTrk < 1) {
-      gMessMgr->Warning() << " Cannot call ev0 with <1 tracks" << endm;
+      gMessMgr->Warning("StV0Maker::Make(): Cannot call ev0 with <1 tracks");
       iRes = kSTAFCV_ERR;
     } else {
       iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
@@ -210,7 +213,7 @@ Int_t StV0Maker::Make(){
     //       =========================================================
     
     if (iRes !=kSTAFCV_OK) {
-      gMessMgr->Warning() << " Problem on return from EV0 " << endm;
+      gMessMgr->Warning("StV0Maker::Make(): Problem on return from EV0");
       iMake = kStWarn;
     }
     if(m_ev0EvalOn){   
@@ -224,14 +227,14 @@ Int_t StV0Maker::Make(){
 	ev0_eval = new St_ev0_eval("ev0_eval",20000);
 	AddData(ev0_eval);
 	
-	if(Debug()) gMessMgr->Info() << " Calling ev0_eval2.." << endm;
+	if(Debug()) gMessMgr->Info("StV0Maker::Make(): Calling ev0_eval2..");
 	Int_t Res_ev0_eval = kSTAFCV_BAD;
 	Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
 				 vertex,dst_v0_vertex,ev0_eval,
 				 g2t_track,g2t_vertex);
 	
 	if (Res_ev0_eval != kSTAFCV_OK) {
-	  gMessMgr->Warning() << "Problem on return from ev0eval2" << endm;}
+	  gMessMgr->Warning("StV0Maker::Make(): Problem on return from ev0eval2");
       }
     }     // If ev0 evaluation switched on 
   }  
