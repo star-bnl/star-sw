@@ -1,5 +1,8 @@
-* $Id: tcl_clsrow.F,v 1.2 1998/08/20 21:29:33 sakrejda Exp $
+* $Id: tcl_clsrow.F,v 1.3 1998/11/30 19:13:05 sakrejda Exp $
 * $Log: tcl_clsrow.F,v $
+* Revision 1.3  1998/11/30 19:13:05  sakrejda
+* double declaration for ide2 removed (found by Valeri)
+*
 * Revision 1.2  1998/08/20 21:29:33  sakrejda
 * printing replaced by a message call
 *
@@ -127,7 +130,7 @@ c
 
 c local variables:
 c
-        integer ide1, ide2
+        integer ide1
         integer ipad_seq
         integer iptr
 	integer iseq
