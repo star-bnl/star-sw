@@ -88,14 +88,17 @@ void VoltCalibrator::process()
   vector<GainVoltPmtParameters*>::iterator i;
   for (i=calculator.begin();i!=calculator.end();i++)
     {
-      gain>>pmtId>>g;
+			gain>>pmtId>>g;
       long a = pmtId._serial;
+			long soft = pmtId._softId;
       // read current voltage
       currentVolt >> pmtId>>v;
       // current gain
       cGain = (*i)->getGain(v);
       // new voltage
       newV = (*i)->getVoltage(g*cGain);
+			
+			cout <<"id = "<<soft<<"  pmtId = "<<a<<"  voltage = "<<v<<"  cGain = "<<cGain<<"  new V = "<<newV<<"  correction = "<< g<<endl;
       if (a!=pmtId._serial)
 	{
 	  cout <<"Gain and HV Files are not in synch - abort"<<endl;
