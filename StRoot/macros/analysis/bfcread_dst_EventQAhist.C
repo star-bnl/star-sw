@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.8 1999/12/03 20:20:23 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.9 2000/01/11 16:31:02 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.9  2000/01/11 16:31:02  kathy
+// change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
+//
 // Revision 1.8  1999/12/03 20:20:23  kathy
 // correct the event number counter in bfcread_dst*.C macros
 //
@@ -48,7 +51,7 @@ StChain *chain;
 void bfcread_dst_EventQAhist(
      Int_t nevents=10, 
      const Char_t *MainFile=
-      "/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
+      "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
     const Char_t *psFile="Event_QA_hist.ps",
     const Char_t *PageTitle="")
 {

@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.1 1999/12/02 00:57:51 fine Exp $
+// $Id: Root2XDF.C,v 1.2 2000/01/11 16:31:02 kathy Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.2  2000/01/11 16:31:02  kathy
+// change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
+//
 // Revision 1.1  1999/12/02 00:57:51  fine
 // Macro to convert dst file from the ROOT to XDF format
 //
@@ -14,7 +17,7 @@ StChain *chain;
 
 void Root2XDF(
   const char *MainFile=
-  "/star/rcf/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
+  "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
   Int_t nevents=99999) 
 {
   cout << "Usage: root.exe -b -q Root2XDF.C(\"rootfile name.dst.root\")" << endl

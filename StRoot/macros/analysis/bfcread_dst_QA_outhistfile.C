@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.3 2000/01/10 21:57:16 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.4 2000/01/11 16:31:02 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.4  2000/01/11 16:31:02  kathy
+// change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
+//
 // Revision 1.3  2000/01/10 21:57:16  kathy
 // must now load St_global when running St_QA_Maker
 //
@@ -48,7 +51,7 @@ class StChain;
 StChain *chain;
 
 void bfcread_dst_QA_outhistfile(
-     Int_t nevents=2, 
+     Int_t nevents=10, 
      const Char_t *MainFile=
      "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
      const Char_t *outHistFile="QAMaker",
@@ -74,8 +77,8 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
-  gSystem->Load("StTreeMaker");
   gSystem->Load("St_global");
+  gSystem->Load("StTreeMaker");
 
 //  Setup top part of chain
   chain = new StChain("bfc");
