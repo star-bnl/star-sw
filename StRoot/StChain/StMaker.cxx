@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.101 2000/07/21 21:54:43 fisyak Exp $
+// $Id: StMaker.cxx,v 1.102 2000/07/27 19:05:34 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -1024,19 +1024,19 @@ StMaker  *StMakerIter::NextMaker()
 
 AGAIN: switch (fState) {
 
-    case 0: 
+    case 0: 					//current maker 
       ds = fIter->Next();
-      if (ds == fItWas) 	goto AGAIN;
-      fState = 2;  if (!ds) 	goto AGAIN;
-      fState = 1;
+      if (ds == fItWas) 	goto AGAIN;	//used already, go to Next
+      fState = 2;  if (!ds) 	goto AGAIN;	//no more,      go to UP
+      fState = 1;				//go to Down
       delete fMakerIter; 
       fMakerIter = new StMakerIter((StMaker*)ds,1);
       goto AGAIN;
 
-    case 1: 
+    case 1: 	// Recursive iteration
       ds = fMakerIter->NextMaker();
       if (ds) return (StMaker*)ds;
-      fState = 0;		goto AGAIN;
+      fState = 0;		goto AGAIN;	//no more in downstaires,go curren
      
     case 2:
       delete fMakerIter; fMakerIter=0;
@@ -1044,7 +1044,7 @@ AGAIN: switch (fState) {
       fState = 3;
       return fMaker;
 
-    case 3:
+    case 3:					// go upper when started
       if (fSecond) return 0;
       TDataSet *par = fMaker->GetParent();
       fItWas = fMaker; fMaker = 0;
@@ -1052,7 +1052,7 @@ AGAIN: switch (fState) {
       if (strcmp(".make",par->GetName()))	return 0;
       fMaker = (StMaker*)par->GetParent();
       if (!fMaker)				return 0;
-      fIter = new TDataSetIter(par);
+      delete fIter; fIter = new TDataSetIter(par);
       fState = 0; goto AGAIN;
   }
   assert(0); return 0;
@@ -1061,6 +1061,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.102  2000/07/27 19:05:34  perev
+// Small memleak in StMakerIter fixed, thanx Akio
+//
 // Revision 1.101  2000/07/21 21:54:43  fisyak
 // Respore lost ps after memory leak correction
 //
