@@ -225,13 +225,14 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   unsigned int iLadder = m_pCoordinateTransform->svtLadderForGlobal(position);
   unsigned int iLayer = 2*iBarrel - (iLadder + 1)%2;
   
-  /*
+  
   if(iLayer!=svthit->layer() || iLadder!=svthit->ladder()){
     cout << "SvtHit [perp, phi]=[" << position.perp() << ", "
          << position.phi() << "], layer=" << svthit->layer()
-         << ", ladder=" << svthit->ladder() << endl;
+         << " " << iLayer
+         << ", ladder=" << svthit->ladder() << " " << iLadder << endl;
   }
-  */
+  
 
   // first the position & ref angle
   double dRefAngle = m_pCoordinateTransform->phiForSvtBarrelLadder(

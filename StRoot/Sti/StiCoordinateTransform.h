@@ -97,6 +97,12 @@ protected:
     StiCoordinateTransform();
     virtual ~StiCoordinateTransform();
 
+    /// svt barrel [1-3] for global position (quick & dirty)
+    unsigned int _svtBarrelForGlobal(const StThreeVector<double> &vec) const;
+    /// svt ladder [1-16] for global position (quick & dirty)
+    unsigned int _svtLadderForGlobal(const StThreeVector<double> &vec) const;
+
+
     // cosine & sine of detector reference angles
     vector<double>           m_vdCosForTpcSector;
     vector<double>           m_vdSinForTpcSector;

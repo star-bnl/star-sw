@@ -120,8 +120,35 @@ unsigned int StiCoordinateTransform::svtBarrelForGlobal(
   StGlobalCoordinate global(vec);
   m_pSvtCoordinateTransform->operator()(global, local);
 
-  return (local.layer() + 1)/2;
+  // check for sanity; sometimes the svt transform screws up and
+  // we have to do a quick & dirty (& sometimes wrong) assignment
+  int iBarrel = (local.layer() + 1)/2;
+  if(iBarrel == -49){  // layer==-99
+    iBarrel = _svtBarrelForGlobal(vec);
+  }
+
+//  cout << "svtBarrelForGlobal(" << vec << ") = " << iBarrel << endl;
+
+  return iBarrel;
 } // svtBarrelForGlobal
+
+unsigned int StiCoordinateTransform::_svtBarrelForGlobal(
+    const StThreeVector<double> &vec) const{
+//    cout << "_svtBarrelForGlobal:" << endl;
+    
+    unsigned int iBarrel = 1;
+    double dDeltaR = fabs(m_vdPositionForSvtBarrel[1] - vec.perp());
+    for(unsigned int iTestBarrel = 2; iTestBarrel<=m_nSvtBarrels; 
+        iTestBarrel++){
+      if(fabs(m_vdPositionForSvtBarrel[iTestBarrel] - vec.perp()) <
+         dDeltaR){
+        iBarrel = iTestBarrel;
+        dDeltaR = fabs(m_vdPositionForSvtBarrel[iTestBarrel] - vec.perp());
+      }
+    }
+    
+    return iBarrel;
+} // _svtBarrelForGlobal
 
 unsigned int StiCoordinateTransform::svtLadderForGlobal(
     const StThreeVector<double> &vec) const{
@@ -130,8 +157,40 @@ unsigned int StiCoordinateTransform::svtLadderForGlobal(
   StGlobalCoordinate global(vec);
   m_pSvtCoordinateTransform->operator()(global, local);
 
-  return local.ladder();
+  // check for sanity; sometimes the svt transform screws up and
+  // we have to do a quick & dirty (& sometimes wrong) assignment
+  int iLadder = local.ladder();
+  if(iLadder == -99){
+    iLadder = _svtLadderForGlobal(vec);
+  }
+
+//  cout << "svtLadderForGlobal(" << vec << ") = " << iLadder << endl;
+
+  return iLadder;
 } // svtLadderForGlobal
+
+unsigned int StiCoordinateTransform::_svtLadderForGlobal(
+    const StThreeVector<double> &vec) const{
+
+//  cout << "_svtLadderForGlobal:" << endl;
+  
+  StThreeVector<double> loc = vec;
+  unsigned int nLadders = m_vnSvtLadders[_svtBarrelForGlobal(vec)];
+  double dDeltaPhi = 2.*M_PI/nLadders;
+  
+  // start in sector @ phi=0 and rotate around
+  unsigned int iLadder = nLadders/4;
+//  cout << " phi" << iLadder << "=" << loc.phi() << endl;
+  
+  while(fabs(loc.phi())>dDeltaPhi/2.){
+    iLadder++;
+    loc.rotateZ(dDeltaPhi);
+//    cout << " phi" << iLadder << "=" << loc.phi() << endl;
+  }
+  if(iLadder>nLadders){ iLadder -= nLadders; }
+  
+  return iLadder;
+} // _svtLadderForGlobal
 
 unsigned int StiCoordinateTransform::tpcPadrowForGlobal(
     const StThreeVector<double> &vec) const{
