@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cc,v 1.7 1999/04/13 23:27:21 genevb Exp $
+ * $Id: StXiVertex.cc,v 1.8 1999/04/14 22:04:30 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cc,v $
+ * Revision 1.8  1999/04/14 22:04:30  genevb
+ * Fixed a memory leak
+ *
  * Revision 1.7  1999/04/13 23:27:21  genevb
  * Slightly refined vertex code, updated V0, Xi vertex documentation
  *
@@ -37,7 +40,7 @@
 #include <iostream.h>
 #include "StEvent/StXiVertex.hh"
 
-static const char rcsid[] = "$Id: StXiVertex.cc,v 1.7 1999/04/13 23:27:21 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cc,v 1.8 1999/04/14 22:04:30 genevb Exp $";
 
 StXiVertex::StXiVertex() : 
  StVertex()
@@ -74,17 +77,14 @@ float StXiVertex::dcaV0ToPrimaryVertex() const
     }
 }
 
-StThreeVector<float>& StXiVertex::momentumOfV0() const
+StThreeVector<float> StXiVertex::momentumOfV0() const
 {
-    StThreeVector<float>* v0Mom;
     if (mV0Vertex) {
       const StThreeVector<float>& nMom = mV0Vertex->momentumOfDaughter(negativeTrack);
       const StThreeVector<float>& pMom = mV0Vertex->momentumOfDaughter(positiveTrack);
-      v0Mom = new StThreeVector<float>(nMom + pMom);
-    } else {
-      v0Mom = new StThreeVector<float>();
+      return (nMom + pMom);
     }
-    return *v0Mom;
+    return StThreeVector<float>();
 }
 
 void StXiVertex::setDcaBachelorToPrimaryVertex(float val)

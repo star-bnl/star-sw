@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.6 1999/04/13 23:27:21 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.7 1999/04/14 22:04:30 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.7  1999/04/14 22:04:30  genevb
+ * Fixed a memory leak
+ *
  * Revision 1.6  1999/04/13 23:27:21  genevb
  * Slightly refined vertex code, updated V0, Xi vertex documentation
  *
@@ -54,7 +57,7 @@ public:
     float dcaDaughters() const;
     float dcaParentToPrimaryVertex() const;
     const StThreeVector<float>& momentumOfBachelor() const;
-    StThreeVector<float>& momentumOfV0() const;
+    StThreeVector<float> momentumOfV0() const;
     StV0Vertex* v0Vertex() const;
     StGlobalTrack* bachelor();
     double chargeOfBachelor(double B);
