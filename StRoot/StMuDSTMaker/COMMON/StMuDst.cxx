@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.19 2003/10/28 18:57:56 perev Exp $
+ * $Id: StMuDst.cxx,v 1.20 2003/10/31 19:12:56 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -266,7 +266,8 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   if (track->type() == global)  t = new StGlobalTrack();
   assert(t);
   t->setFlag( track->flag() );
-
+  t->setKey( track->id() );
+  
   StPhysicalHelixD helix;
   helix = track->helix(); 
   tg = trackGeometry( track->charge(), &helix );
@@ -297,6 +298,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.20  2003/10/31 19:12:56  laue
+ * added filling of track id to createStTrack() function
+ *
  * Revision 1.19  2003/10/28 18:57:56  perev
  * BadData protection added
  *
