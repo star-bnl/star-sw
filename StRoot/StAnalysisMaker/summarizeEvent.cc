@@ -1,5 +1,8 @@
-// $Id: summarizeEvent.cc,v 1.7 1999/08/07 19:40:58 fisyak Exp $
+// $Id: summarizeEvent.cc,v 1.8 1999/08/09 19:38:32 kathy Exp $
 // $Log: summarizeEvent.cc,v $
+// Revision 1.8  1999/08/09 19:38:32  kathy
+// checkin Curtis' changes that print out the event # with each set of QAInfo stuff
+//
 // Revision 1.7  1999/08/07 19:40:58  fisyak
 // use StMessage
 //
@@ -40,12 +43,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent.h"
  *
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.7 1999/08/07 19:40:58 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.8 1999/08/09 19:38:32 kathy Exp $";
+ * Revision 2.1  1999/11/16 12:28:44  ullrich
+void summarizeEvent(StEvent& event, Int_t &nevents) {
  *
-void summarizeEvent(StEvent& event)
-{
-  gMessMgr->Info() << "QAInfo: StAnalysisMaker,  Reading Event "  << 
-    " Type " << event.type() << " Run " << event.runNumber() << endm;
+  nevents++;
+  gMessMgr->Info() << "QAInfo: StAnalysisMaker,  Reading Event: " << nevents <<
+    "  Type: " << event.type() << "  Run: " << event.runNumber() << endm;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
   gMessMgr->Info() << "QAInfo:  # tracks:         " << 
               event.trackCollection()->size() << endm;
