@@ -15,7 +15,8 @@ struct cts_mslat {
    float     s_length;   // Trajectory length 
    float     pm_length;  // Distance from impact to tube
    float     z_hit    ;  // Z hit position 
-   float     tof;        // Tof of first particle to strike the slat
-   float     time;       // Tof+prop delay of first particle to strike the slat 
-   float     mtime;      // now include the length-dependent time resolution
+   float     tof;        // tof of first particle to strike the slat
+   float     time;       // tof+prop delay of first particle to strike the slat 
+   float     mtime;      // =tof plus the length-dependent time resolution
+   float     mtimel;     // =mtime plus the length-dependent propagation delay
 } ;

@@ -404,7 +404,8 @@ long cts_detector_response (
       float time = mhit[i_hit].tof + mpara->delay*Length ;
       float resl = mpara->time_res*sqrt(fabs(Length));            //WJL
       if (resl < 50.e-12) resl = 50.e-12;                         //WJL practical lower limit
-      float tt  = mhit[i_hit].tof + mpara->delay*Length + rg32_(1)*resl;
+      float tt  = mhit[i_hit].tof + rg32_(1)*resl;
+      float ttl = mhit[i_hit].tof + rg32_(1)*resl + mpara->delay*Length;
 
 #ifdef TEST
 	if(geo->detector == 2){     //WJL
@@ -420,9 +421,10 @@ long cts_detector_response (
 //
 //---- Keep earliest measured time 
 //WJL *and* other information appropriate for this hit....
-      if ( mslat[i_slat].time < 0 || time < mslat[i_slat].time ) {  
-             mslat[i_slat].time      = time ;
+      if ( mslat[i_slat].time == 0 || time < mslat[i_slat].time ) {  
+             mslat[i_slat].time      = time;
              mslat[i_slat].mtime     = tt;
+             mslat[i_slat].mtimel    = ttl;
              mslat[i_slat].z_hit     = mhit[i_hit].x[2] ;    //WJL from above...
              mslat[i_slat].pm_length = Length ;              //WJL from above...
              mslat[i_slat].s_length  = mhit[i_hit].s_track ; //WJL from below...
