@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.5 2000/05/25 20:51:31 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.6 2000/07/27 23:06:50 hardtke Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.6  2000/07/27 23:06:50  hardtke
+ * Hui requested that all member functions be public -- probably bad programming, but TRS needs to be speeded up
+ *
  * Revision 1.5  2000/05/25 20:51:31  hardtke
  * make z-to-time functions public, use correct t0s, get rid of spurious 0.5
  *
@@ -150,7 +153,6 @@ public:
     int      tBFromZ(const double)                                   const;
     double   zFromTB(const int)                   const;
     
-private:
     // Transformation Routines!!
     // Raw Data From tpc local Coordinates
     int      sectorFromCoordinate(const StTpcLocalCoordinate&)       const;
