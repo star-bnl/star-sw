@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSlowControl.hh,v 1.1 1998/11/10 17:12:08 fisyak Exp $
+ * $Id: StTpcSlowControl.hh,v 1.2 1999/04/07 00:45:27 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSlowControl.hh,v $
+ * Revision 1.2  1999/04/07 00:45:27  lasiuk
+ * addition of gas gain
+ *
  * Revision 1.1  1998/11/10 17:12:08  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -48,6 +51,15 @@ public:
     virtual double outerSectorAnodeVoltage()      const = 0;
     virtual double outerSectorGatingGridVoltage() const = 0;
 
+    // Gas Gains
+    virtual double innerSectorGasGain()           const = 0;
+    virtual double innerSectorGasGainVzero()      const = 0;
+    virtual double innerSectorGasGainb()          const = 0;
+    
+    virtual double outerSectorGasGain()           const = 0;
+    virtual double outerSectorGasGainVzero()      const = 0;
+    virtual double outerSectorGasGainb()          const = 0;
+    
     // Diagnostic
     virtual void print(ostream& os = cout)        const = 0;
 };

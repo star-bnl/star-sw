@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSimpleSlowControl.hh,v 1.1 1998/11/10 17:12:08 fisyak Exp $
+ * $Id: StTpcSimpleSlowControl.hh,v 1.2 1999/04/07 00:45:27 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSimpleSlowControl.hh,v $
+ * Revision 1.2  1999/04/07 00:45:27  lasiuk
+ * addition of gas gain
+ *
  * Revision 1.1  1998/11/10 17:12:08  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -51,8 +54,17 @@ public:
     double hallTemperature()              const;
     double hallPressure()                 const;
 
+    // Gas Gain
+    double innerSectorGasGain()           const;
+    double innerSectorGasGainVzero()      const;
+    double innerSectorGasGainb()          const;
+    
+    double outerSectorGasGain()           const;
+    double outerSectorGasGainVzero()      const;
+    double outerSectorGasGainb()          const;
+
     // Diagnostic
-    void print(ostream& os = cout)    const;
+    void print(ostream& os = cout)        const;
     
 private:
     StTpcSimpleSlowControl();
@@ -74,6 +86,15 @@ private:
     double mISGatingGridVoltage;
     double mOSAnodeVoltage;
     double mOSGatingGridVoltage;
+
+    // Gas Gain
+    double mISGasGain;
+    double mISGasGainVzero;
+    double mISGasGainb;
+
+    double mOSGasGain;
+    double mOSGasGainVzero;
+    double mOSGasGainb;
 };
 
 
@@ -85,4 +106,11 @@ inline double StTpcSimpleSlowControl::outerSectorAnodeVoltage() const {return mO
 inline double StTpcSimpleSlowControl::outerSectorGatingGridVoltage() const {return mOSGatingGridVoltage;}
 inline double StTpcSimpleSlowControl::hallTemperature() const {return mHallTemperature;}
 inline double StTpcSimpleSlowControl::hallPressure() const {return mHallPressure;}
+inline double StTpcSimpleSlowControl::innerSectorGasGain() const {return mISGasGain;}
+inline double StTpcSimpleSlowControl::innerSectorGasGainVzero() const {return mISGasGainVzero;}
+inline double StTpcSimpleSlowControl::innerSectorGasGainb() const {return mISGasGainb;}
+
+inline double StTpcSimpleSlowControl::outerSectorGasGain() const {return mOSGasGain;}
+inline double StTpcSimpleSlowControl::outerSectorGasGainVzero() const {return mOSGasGainVzero;}
+inline double StTpcSimpleSlowControl::outerSectorGasGainb() const {return mOSGasGainb;}
 #endif
