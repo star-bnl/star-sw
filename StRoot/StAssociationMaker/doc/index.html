@@ -17,13 +17,25 @@
       <h1>A Class for <font color="red">StMcEvent-StEvent</font> Object Association</h1>
     </center>
     <p>
-
+    <h2> New Version </h2>
 
     <p>
-      For a detailed description, you can download the <b>StAssociationMaker</b>
+      The new version of <b>StAssociationMaker</b> is ready for testing. 
+      The current <b>StAssociationMaker</b>
       <a href="./ps/StAssociationMaker.psnup"> User's Guide & Reference Manual</a>
+      is now outdated.  The overall idea has remained the same, but more associations
+      have been added and the names of the relevant multimaps have changed because of
+      this new diversity.  There are now maps for 
+      <a href="#Tracks">Tracks</a>, <a href="#Vertices">Vertices</a> and
+      <a href="#Hits">Hits</a>. For quick reference, look at the brief
+      <a href="#class description">class description</a> below.  This gives a list of
+      the most relevant multimap type definitions (or "What was the name of the map between TPC Hits?")
+      , and the methods
+      to <a href="#Getting">get the maps</a> from the <i>StAssociationMaker</i> class (or "How do I get the maps
+      once I have a pointer to the Association Maker?").
 
     </p>
+    <h2> Description </h2>
     <p>
       The <b>StAssociationMaker</b> package provides the functionality to analyze Monte Carlo
       data contained in <b>StMcEvent</b> and reconstructed data contained in <b>StEvent</b>.  It relates the
@@ -60,31 +72,56 @@
     <hr>
     <h2> Multimaps Implemented in the Package </h2>
     <p>
-      Currently, there are only 2 multimaps implemented in <b>StAssociatonMaker</b>:
+      The following multimaps are now implemented in <b>StAssociatonMaker</b>:
     </p>
     <ul>
       <li> TPC Hits</li>
-      <li> Tracks  </li>
+      <li> SVT Hits</li>
+      <li> FTPC Hits</li>
+      <li> Tracks  (using all the previous hit multimaps)</li>
+      <li> Kink Vertices </li>
+      <li> V0 Vertices </li>
+      <li> Xi Vertices </li>
+      
     </ul>
-    <p>
-      Future versions will include hits in other detectors like SVT, FTPC, etc.
-    </p>
     <p>
       The association is made based on criteria given by the user.  These criteria are
       established at runtime, and the user controls them at the macro level.
     </p>
     <p>
       For the
-      TPC Hit multimap, the criterion is spatial proximity.  That is, if 2 hits are closer
-      in space than a certain distance cut, they are associated.  The user specifies the
-      desired distance cut.
-    </p>
+      Hit multimaps, the criterion is spatial proximity.  That is, if 2 hits are closer
+      in space than a certain distance cut, they are associated.
+      Note that all associations are done in GLOBAL coordinates.
+      The user specifies the
+      desired distance cut at the macro level.  This can be seen in the example macro
+      <pre>$STAR/StRoot/macros/examples/StAssociator.C </pre>
     <p>
+      
       For the Track multimap, the criterion is based on the number of hits the tracks share in common.
       This means that to build the Track Multimap, the TPC Hit Multimap is used.  When the relevant
       Hit Multimaps are implemented for the other detectors, these will be used too.  The user specifies
       the minimum number of hits the tracks must share in order to be associated.
     </p>
+    
+    The defaults are:
+    <pre>
+    TPC Cuts
+    X Cut    : 5 mm
+    Y Cut    : 5 mm
+    Z Cut    : 2 mm
+    Required TPC Hits for Associating Tracks : 3
+    SVT Cuts
+    X Cut    : 1 mm
+    Y Cut    : 1 mm
+    Z Cut    : 1 mm
+    Required SVT Hits for Associating Tracks : 1
+    FTPC Cuts
+    R Cut    : 3 mm
+    Phi Cut  : 5 degrees
+    Required FTPC Hits for Associating Tracks : 3
+    </pre>
+    
     <hr>
     <h2> Running the Code</h2>
     <p>
@@ -94,28 +131,31 @@
       <font face="courier">$STAR/StRoot/macros/examples/<b>StAssociator.C</b></font>
     </p>
     <p>
-      The following is a list of commands to run the code from scratch, building the libraries in your
-      own area.  The code compiles and runs on Linux, Solaris and HP.
-      (The libraries should be built in "new", and "dev".  Look in
-      <pre> $STAR/lib/ </pre> for the .so files.  If one of them is missing, contact
-      Lidia!)
-
-      <pre>
-	> mkdir workdir
-	> cd workdir
-	> klog
-	> cvs co StRoot/StMcEvent
-	> cvs co StRoot/StMcEventMaker
-	> cvs co StRoot/StAssociationMaker
-	> cvs co StRoot/StMcAnalysisMaker
-	> cvs co StRoot/macros/examples/StAssociator.C
-	> makel -C StRoot/StMcEvent
-	> makel -C StRoot/StMcEventMaker
-	> makel -C StRoot/StAssociationMaker
-	> makel -C StRoot/StMcAnalysisMaker
-	> root4star
-	root4star[0] .x StAssociator.C
-      </pre>
+       The code compiles and runs on Linux, Solaris and HP.
+      Make sure that you are in one of the libraries that has the new <b>StEvent</b>
+      and the new <b>StMcEvent</b> (at least SL99j).
+      For this example, we'll assume the "dev" version.  Please note that as time goes by,
+      libraries are moved and what once was "dev" becomes "new" and so on.  Keep this in mind
+      when you try to run this and make sure you understand which libraries have what.  The libraries
+      should be built, and the macros are in the macro search path. There is a very important
+      thing to keep in mind when using <b>StAssociationMaker</b> or any code that uses  <b>StEvent</b>
+      is that these packages RELY ON THE NEW DST TABLES.  This means that to use them you have to make
+      sure that the *.dst.root file you want to use can actually be read by  <b>StEvent</b>.  Moreover,
+      most of the new dst files are NOT produced with their *.geant.root file.  So before running
+      <b>StAssociationMaker</b>, make sure that
+    <ul>
+      <li> You are using a dst.root file that can be read by the new <b>StEvent</b>.
+      <li> The geant.root file from the dst.root file you want to use was written out.
+      <li> Both files are in the same directory.
+    </ul>
+    An example invocation using files generated by Lidia is : 
+    <pre>
+  > mkdir workdir
+  > cd workdir
+  > klog
+  > root4star
+  root4star[0] .x StAssociator.C(1,"/star/rcf/test/request/psc0208_01_40evts.geant.root")
+    </pre>
 	  
     </p>
     <p>
@@ -149,15 +189,172 @@
 	from its associated Monte Carlo track.
 	
     </ul>
+
     <hr>
+    <a name="class description"></a>
+    <h2> Brief Class Description</h2>
+    <b>StAssociationMaker</b> defines several type definitions to simplify the declaration of the several
+    multimaps and their value_types, iterators, etc.
+    Also,
+    for every type of association, 2 multimaps are provided.  One takes the reconstructed object
+    as "key" and the other takes the Monte Carlo object as "key".  The naming convention
+    to distinguish the 2 cases is to add the prefixes "rc" and "mc".  To illustrate a typical type
+    definition of these maps, the multimap for Tpc Hits that takes the reconstructed object
+    (<i>StTpcHit</i>)
+    as key is defined as:
+    <pre>
+ typedef multimap< const StTpcHit*, const StMcTpcHit*, compTpcHit> rcTpcHitMapType;
+    </pre>
+    The most commonly used of these will be the multimaps themselves and their iterators.  These are
+    listed below.
     
+    <a name="Hits"></a>
+    <h3>Hits</h3>
+    
+    <p> <i>Tpc Hits</i> </p>
+    <pre>
+    rcTpcHitMapType     
+    rcTpcHitMapIter 
+
+    mcTpcHitMapType  
+    mcTpcHitMapIter   
+    </pre>
+    <p> <i>Svt Hits</i> </p>
+    <pre>
+    rcSvtHitMapType    
+    rcSvtHitMapIter     
+
+    mcSvtHitMapType   
+    mcSvtHitMapIter   
+    </pre>
+    <p> <i>Svt Hits</i> </p>
+    <pre>
+    rcFtpcHitMapType    
+    rcFtpcHitMapIter    
+
+    mcFtpcHitMapType  
+    mcFtpcHitMapIter  
+    </pre>
+    <a name="Tracks"></a>
+    <h3>Tracks</h3>
+
+    The tracks are built based on the Hit map associations. The reconstructed object used is
+    <i>StGlobalTrack</i> because it is the more general type of track in <b>StEvent</b>.  The track
+    multimap differs from the Hit and Vertex multimap in that one not just wants to find out
+    which tracks are associated, but there is other information that the association can give.
+    For example, one would want to easily find out how many TPC, SVT and FTPC hits do the tracks
+    have in common.  This information then really belongs in another class, in this case
+    <i>StTrackPairInfo</i>.  The track maps are then between a pointer to a track and a pointer to an
+    <i>StTrackPairInfo</i>.  The "get" methods of this class are:
+
+    <pre>
+    StMcTrack* partnerMcTrack() const;
+    StGlobalTrack* partnerTrack() const;
+
+    unsigned int commonTpcHits() const;
+    unsigned int commonSvtHits() const;
+    unsigned int commonFtpcHits() const;
+
+    float percentOfPairedTpcHits() const;
+    float percentOfPairedSvtHits() const;
+    float percentOfPairedFtpcHits() const;
+    </pre>
+    <p>
+      The "percent" method really returns the ratio between the number of common hits and the total number of
+      hits the <i>StGlobalTrack</i> has.
+
+    <p>
+      The relevant multimap type definitions for tracks are:
+    <pre>
+    rcTrackMapType
+    rcTrackMapIter
+    rcTrackMapConstIter
+
+    mcTrackMapType
+    mcTrackMapIter
+    mcTrackMapConstIter
+
+    </pre>
+    
+    <a name="Vertices"></a>
+    <h3>Vertices</h3>
+    The vertices are associated depending on the association between the parent and daughter tracks
+    of each vertex.  Like the hits, this is more a Yes/No type of association.  The type definitions are:
+    
+    <p> <i>Kinks</i> </p>
+    <pre>
+    rcKinkMapType
+    rcKinkMapIter
+    rcKinkMapConstIter
+
+    mcKinkMapType
+    mcKinkMapIter
+    mcKinkMapConstIter
+
+    </pre>
+    <p> <i>V0s</i> </p>
+    <pre>
+    rcV0MapType
+    rcV0MapIter
+    rcV0MapConstIter
+
+    mcV0MapType
+    mcV0MapIter
+    mcV0MapConstIter
+
+    </pre>
+    <p> <i>Xis</i> </p>
+    <pre>
+    rcXiMapType
+    rcXiMapIter
+    rcXiMapConstIter
+
+    mcXiMapType
+    mcXiMapIter
+    mcXiMapConstIter
+
+    </pre>
+    <a name="Getting"></a>
+    <h3>Getting the Maps</h3>
+    
+    <p>
+      The multimaps are accessed via the <i>StAssociationMaker</i> class.  The methods to get them, and their
+      return types, are:
+    <pre>
+    rcTpcHitMapType*  rcTpcHitMap()  
+    mcTpcHitMapType*  mcTpcHitMap()
+
+    rcSvtHitMapType*  rcSvtHitMap()  
+    mcSvtHitMapType*  mcSvtHitMap()  
+
+    rcFtpcHitMapType* rcFtpcHitMap() 
+    mcFtpcHitMapType* mcFtpcHitMap() 
+
+    rcTrackMapType*   rcTrackMap()   
+    mcTrackMapType*   mcTrackMap()   
+
+    rcKinkMapType*    rcKinkMap()    
+    mcKinkMapType*    mcKinkMap()    
+
+    rcV0MapType*      rcV0Map()      
+    mcV0MapType*      mcV0Map()      
+
+    rcXiMapType*      rcXiMap()      
+    mcXiMapType*      mcXiMap()      
+
+    </pre>
+
+    This are the basic types and methods needed to access the multimaps in <b>StAssociationMaker</b>.
+    Please look at <b>StMcAnalysisMaker</b> since it is really a working example of how to use
+    <b>StAssociationMaker</b>.
+    <hr>
     <b>StAssociationMaker</b> is a work in progress.  For questions, contact
     <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
     or
     <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
 <!-- Created: Mon Sep 27 15:18:56 EDT 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Sep 27 18:22:51 EDT 1999
+Last modified: Wed Dec 15 18:05:53 EST 1999
 <!-- hhmts end -->
   </body>
 </html>
