@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.2 2000/03/06 18:05:22 calderon Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.3 2000/04/18 23:46:12 calderon Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.3  2000/04/18 23:46:12  calderon
+ * Fix bug in reurning barrel number
+ * Enumerations for the Max barrels, ladders & wafers modified for
+ * SSD inclusion in current scheme.
+ *
  * Revision 2.2  2000/03/06 18:05:22  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -41,7 +46,7 @@ public:
     const StMcSvtBarrelHitCollection* barrel(unsigned int) const;
 
 private:
-    enum { mNumberOfBarrels = 3 };
+    enum { mNumberOfBarrels = 4 }; // Keeping the SSD along with SVT
     StMcSvtBarrelHitCollection mBarrels[mNumberOfBarrels];
     
 };
