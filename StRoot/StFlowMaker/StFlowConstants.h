@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.11 2001/12/18 19:21:59 posk Exp $
+// $Id: StFlowConstants.h,v 1.12 2002/01/31 01:04:41 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -29,6 +29,7 @@ class Flow{
     //nEtaBins     = 90,
     nEtaBins     = 30,
     nPtBins      = 40,
+    nPtBinsPart  = 40,
     nCumulIntegOrders =   3, 
     nCumulInteg_qMax  =   8,
     nCumulDiffOrders  =   2,
@@ -52,6 +53,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.12  2002/01/31 01:04:41  posk
+// *** empty log message ***
+//
 // Revision 1.11  2001/12/18 19:21:59  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.

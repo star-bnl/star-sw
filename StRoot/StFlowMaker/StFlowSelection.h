@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.15 2001/12/18 19:22:38 posk Exp $
+// $Id: StFlowSelection.h,v 1.16 2002/01/31 01:04:55 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -34,9 +34,11 @@ class StFlowSelection : public StObject {
   Bool_t  Select(StFlowTrack*);
   Bool_t  SelectPart(StFlowTrack*);
   Float_t PtMaxPart() const;
+  Int_t   PtBinsPart() const;
   void    PrintList() const;
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
+  void    SetPtBinsPart(const Int_t);
   void    SetPPart(const Float_t, const Float_t);
   void    SetEtaPart(const Float_t, const Float_t);
   void    SetYPart(const Float_t, const Float_t);
@@ -50,9 +52,10 @@ class StFlowSelection : public StObject {
   
  private:
 
-  // pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, d+, d-, d, e+, e-, e
+  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, d+, d-, d, e+, e-, e
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
+  Int_t   mPtBinsPart;                       // for parts. wrt plane
   Float_t mPPart[2];                         // for parts. wrt plane
   Float_t mEtaPart[2];                       // for parts. wrt plane
   Float_t mYPart[2];                         // for parts. wrt plane 
@@ -72,6 +75,8 @@ inline Char_t* StFlowSelection::PidPart() { return mPidPart; }
 
 inline Float_t StFlowSelection::PtMaxPart() const { return mPtPart[1]; }
 
+inline Int_t StFlowSelection::PtBinsPart() const { return mPtBinsPart; }
+
 inline Int_t StFlowSelection::Sel() const { return mSelection; }
 
 inline Int_t StFlowSelection::Har() const { return mHarmonic; }
@@ -83,6 +88,9 @@ inline void StFlowSelection::SetPidPart(const Char_t* pid)  {
 
 inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
   mPtPart[0] = lo; mPtPart[1] = hi; }
+
+inline void StFlowSelection::SetPtBinsPart(Int_t bins) {
+  mPtBinsPart = bins; }
 
 inline void StFlowSelection::SetPPart(Float_t lo, Float_t hi) {
   mPPart[0] = lo; mPPart[1] = hi; }
@@ -128,6 +136,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.16  2002/01/31 01:04:55  posk
+// *** empty log message ***
+//
 // Revision 1.15  2001/12/18 19:22:38  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.
