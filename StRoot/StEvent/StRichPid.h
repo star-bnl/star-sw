@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.h,v 2.4 2000/11/25 11:51:52 lasiuk Exp $
+ * $Id: StRichPid.h,v 2.5 2000/11/27 17:19:09 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPid.h,v $
- * Revision 2.4  2000/11/25 11:51:52  lasiuk
- * remove D vector and replace with a container of StRichPhotonInfo
+ * Revision 2.5  2000/11/27 17:19:09  lasiuk
+ * keep the constant angle
  *
  * Revision 2.4  2000/11/25 11:51:52  lasiuk
  * remove D vector and replace with a container of StRichPhotonInfo
@@ -90,6 +90,8 @@ public:
     UShort_t getTruncatedHits()    const;
     Float_t  getTruncatedDensity() const;
 
+    Float_t  getConstantAreaCut()  const;
+    void     setConstantAreaCut(Float_t);
     
     StParticleDefinition* getRingType()       const;
     Int_t                 getParticleNumber() const;
@@ -120,6 +122,8 @@ private:
     Float_t  mTruncatedArea;
     UShort_t mTruncatedHits;
     Float_t  mTruncatedDensity;
+
+    Float_t  mConstantAreaCut;
     
     unsigned long mFlags;
 
@@ -159,6 +163,11 @@ inline Float_t  StRichPid::getTruncatedAzimuth() const { return mTruncatedAzimut
 inline Float_t  StRichPid::getTruncatedArea()    const { return mTruncatedArea;}
 inline UShort_t StRichPid::getTruncatedHits()    const { return mTruncatedHits;}
 inline Float_t  StRichPid::getTruncatedDensity() const { return mTruncatedDensity;}
+
+inline Float_t  StRichPid::getConstantAreaCut() const {return mConstantAreaCut;}
+inline void     StRichPid::setConstantAreaCut(Float_t c) { mConstantAreaCut = c;}
+
+
 
 inline StThreeVectorD  StRichPid::getMipResidual() const     { return mMipResidual;}
 
