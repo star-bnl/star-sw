@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.13 1998/12/16 22:22:40 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.14 1998/12/17 14:37:19 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.14  1998/12/17 14:37:19  fisyak
+// Fix tp_param
+//
 // Revision 1.13  1998/12/16 22:22:40  fisyak
 // New global from Spiros
 //
@@ -124,10 +127,8 @@ Int_t St_dst_Maker::Init(){
   egr_egrpar->minfit =     2;
   egr_egrpar->prob[0] =    2;
   egr_egrpar->prob[1] =    2;
-  //  memset((Int_t *) egr_egrpar->debug[0], 0, 10*sizeof(Int_t));  
-  Int_t i;
+  memset(egr_egrpar->debug, 0, 10*sizeof(Int_t));  
   egr_egrpar->debug[0] =   1; 
-  for (i=1;i<10;i++){egr_egrpar->debug[i]=0;}
   egr_egrpar->svtchicut =  0;
   egr_egrpar->usetpc =     1;
   egr_egrpar->usesvt =     1;
@@ -143,7 +144,7 @@ Int_t St_dst_Maker::Init(){
   m_evr_evrpar  = (St_evr_evrpar *) params("global/evrpars/evr_evrpar");
   // prop
   m_tp_param = new St_egr_propagate("tp_param",1); 
-  params("global/evrpars/evr_evrpar")->Add(m_tp_param);
+  params("global/evrpars")->Add(m_tp_param);
   egr_propagate_st *tp_param = m_tp_param->GetTable();
   tp_param->iflag =   m_flag;
   if (m_flag == 1 || m_flag == 2) {
@@ -167,9 +168,8 @@ Int_t St_dst_Maker::Init(){
   egr2_egrpar->minfit =    5;
   egr2_egrpar->prob[0] =   2;
   egr2_egrpar->prob[1] =   2;
-  //  memset ((Int_t *)egr2_egrpar->debug[0],0,10*sizeof(Int_t));
+  memset (egr2_egrpar->debug,0,10*sizeof(Int_t));
   egr2_egrpar->debug[0] =  1;
-  for (i=1;i<10;i++){egr2_egrpar->debug[i]=0;}
   egr2_egrpar->svtchicut = 0;
   egr2_egrpar->usetpc    = 1;
   egr2_egrpar->usesvt    = 0;
@@ -504,7 +504,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.13 1998/12/16 22:22:40 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.14 1998/12/17 14:37:19 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
