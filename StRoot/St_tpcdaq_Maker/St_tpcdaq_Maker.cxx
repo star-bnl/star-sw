@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.41  1999/11/23 20:32:48  ward
+// forward declaration for StTrsDetectorReader & StTrsZeroSuppressedReader
+//
 // Revision 1.40  1999/11/19 19:59:53  ward
 // Converted for new TRS ZeroSuppressed Reader.
 //
@@ -116,6 +119,8 @@
 #include <sys/stat.h>   // For binary file input (the DAQ data file).
 #include <fcntl.h>      // For binary file input (the DAQ data file).
 ///////////////////////////////////////////////////////////////////////////
+#include "StTrsMaker/include/StTrsDetectorReader.hh"
+#include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "St_tpcdaq_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
