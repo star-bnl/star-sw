@@ -13,13 +13,12 @@ Point::Point(dEdx_t point) {
  dE = point.dE;
  dEU = point.dEU; // before correction
  dx = point.dx;
- dEdx = point.dEdx; 
- dEdxU = point.dEdxU; 
- dEdxP = point.dEdxP; // after pulser correction only
+ dEdx  = point.dEdx; 
  dEdxL = point.dEdxL; // log of dEdx
- dEdxLU = point.dEdxLU; // log of dEdx
  dEdxN = point.dEdxN; // normolized to BB
- dEdxNP = point.dEdxNP; // normolized to BB
+ dEdxU = point.dEdxU; 
+ dEdxLU = point.dEdxLU; // log of dEdx
+ dEdxNU = point.dEdxNU; // log of dEdx
  dETot = point.dETot; 
  xyz[0] = point.xyz[0];
  xyz[1] = point.xyz[1];
