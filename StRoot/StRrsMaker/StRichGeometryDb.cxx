@@ -1,13 +1,16 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 1.4 2000/02/12 21:55:44 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.5 2000/02/29 18:25:46 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.4  2000/02/12 21:55:44  lasiuk
- * Wire position adjustment
+ * Revision 1.5  2000/02/29 18:25:46  lasiuk
+ * change radial placement of detector
  *
+ *
+ * Revision 1.6  2000/03/12 22:18:45  lasiuk
+ * add from materials Db
  * add normal vector value
  *
  * Revision 1.5  2000/02/29 18:25:46  lasiuk
@@ -77,7 +80,7 @@ void StRichGeometryDb::my_fill()
     
     number_of_pads    = 15360;                       // verified
 
-    mRadialDistanceToRich   = 242.6655311 * centimeter;
+    // Detector Parameters
     length            = 1310  * millimeter;          // verified
     width             = 836   * millimeter;          // verified
     height            = 2     * millimeter;          // verified
