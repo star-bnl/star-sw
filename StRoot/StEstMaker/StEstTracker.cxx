@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.5 2001/02/23 13:46:13 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.6 2001/03/02 16:23:49 lmartin Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.6  2001/03/02 16:23:49  lmartin
+ * New method CumulEval to save the tracking performances.
+ *
  * Revision 1.5  2001/02/23 13:46:13  lmartin
  * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
  *
@@ -53,6 +56,12 @@ StEstTracker::StEstTracker(int npass,
   mNPhiBins=36;
   mZBin=4;
   mNZBins=18;
+  mNIdealPrim=0;
+  mNIdealSeco=0;
+  mNGoodPrim=0;
+  mNGoodSeco=0;
+  mNBadPrim=0;
+  mNBadSeco=0;
 }
 
 StEstTracker::~StEstTracker() {
@@ -297,7 +306,7 @@ Int_t StEstTracker::DoTracking() {
     ReInitializeHelix();
 
     // Doing the evaluation for the superpass.
-    if(mDebugLevel>0 && mIdealTracking==1) Eval(onoffmatrix,nminhit);
+    if(mDebugLevel>=0 && mIdealTracking==1) Eval(onoffmatrix,nminhit);
     //      Eval(0,1);
   }// for(mSuperPass...
 
@@ -682,4 +691,20 @@ void StEstTracker::CleanUp(){
 
   if (mDebugLevel>0) gMessMgr->Info()<<" CleanUp : Done"<<endm;
 
+}
+
+void StEstTracker::CumulEval(long* CumulIdealPrim,
+			     long* CumulIdealSeco,
+			     long* CumulGoodPrim,
+			     long* CumulGoodSeco,
+			     long* CumulBadPrim,
+			     long* CumulBadSeco,
+			     long* CumulEvents){
+  *CumulIdealPrim=*CumulIdealPrim+mNIdealPrim;
+  *CumulIdealSeco=*CumulIdealSeco+mNIdealSeco;
+  *CumulGoodPrim=*CumulGoodPrim+mNGoodPrim;
+  *CumulGoodSeco=*CumulGoodSeco+mNGoodSeco;
+  *CumulBadPrim=*CumulBadPrim+mNBadPrim;
+  *CumulBadSeco=*CumulBadSeco+mNBadSeco;
+  *CumulEvents=*CumulEvents+1;
 }
