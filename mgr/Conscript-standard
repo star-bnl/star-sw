@@ -34,7 +34,9 @@ foreach my $Rep(@Repo) {
 }
 @idlL = script::sortu(@idlL);
 print "idlL = @idlL\n" if $param::debug;
-if ( $pkg =~ /^sim$/ || $pkg =~ /^gen$/ ) { goto Tables; }
+if ( $pkg =~ /^sim$/ || $pkg =~ /^gen$/ ) { 
+    goto Tables; 
+}
 my $i;
 my @idlML = script::find_idlM($Dir);
 
@@ -60,8 +62,8 @@ foreach my $Rep(@Repo) {
 
     if ( -d $RepDir ) {
         my @srcR =
-          script::find_sources($RepDir)
-          ;    # my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
+          script::find_sources($RepDir);
+	# my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
         foreach my $i(@srcR) { push @srcL, $i; }
         my @idlMR = script::find_idlM($RepDir);
 
@@ -118,10 +120,10 @@ if ( $pkg =~ m/^StEventDisplay/){
 	$CXXFLAGS.= " -DR__QT";
     }
 
-#
-# This is more strict with -lmysqlclient addition
-# and MUST appear PRIOR to the next block ...
-#
+    #
+    # This is more strict with -lmysqlclient addition
+    # and MUST appear PRIOR to the next block ...
+    #
 } elsif ( $pkg =~ m/^StDbLib$/ || 
 	  $pkg =~ m/^StDbBroker$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
@@ -167,8 +169,8 @@ if ( $pkg =~ m/^StEventDisplay/){
     $CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 
-# This block can be used for ANY maker having a 2 level
-# directory structure using auto-globbing
+    # This block can be used for ANY maker having a 2 level
+    # directory structure using auto-globbing
 } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/EmcUtil$/             ||
 	  $pkg =~ m/^StMuDSTMaker$/       ||
@@ -221,9 +223,9 @@ if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
     $LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env->{SUFLIB};
 }
 if ($pkg =~ /^St_base$/) {
-  if ( $STAR_SYS =~ /^hp_ux102$/) {
-    $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
-  }
+    if ( $STAR_SYS =~ /^hp_ux102$/) {
+	$CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
+    }
 }
 
 #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
@@ -232,17 +234,17 @@ my $FCCOM = $env->{FCCOM};
 if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
 if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
 $env2 = $env->clone(
-  'CPPPATH'  => $CPPPATH,
-  'CXXFLAGS' => $CXXFLAGS,
-  'FCCOM'    => $FCCOM,
-  'LIBPATH'  => $LIBPATH,
-  'LIBS'     => $LIBS,
-  'share'    => $share,
-  'ObjDir'   => $obj_dir,
-  'FC'       => $FC,
-  'FFLAGS'   => $FFLAGS,
-  'FEXTEND'  => $FEXTEND
-);
+		    'CPPPATH'  => $CPPPATH,
+		    'CXXFLAGS' => $CXXFLAGS,
+		    'FCCOM'    => $FCCOM,
+		    'LIBPATH'  => $LIBPATH,
+		    'LIBS'     => $LIBS,
+		    'share'    => $share,
+		    'ObjDir'   => $obj_dir,
+		    'FC'       => $FC,
+		    'FFLAGS'   => $FFLAGS,
+		    'FEXTEND'  => $FEXTEND
+		    );
 bless $env2, cons;
 
 
@@ -257,7 +259,7 @@ my $STIC_CPP     = "";
 
 foreach my $cpp( $Dir, @cpps ) {
     if ( $cpp =~ /cern/ || $cpp eq "/usr/include" || $cpp =~ /ospace/
-      || $cpp =~ /openwin/ )
+	 || $cpp =~ /openwin/ )
     {
         next;
     }
@@ -274,7 +276,7 @@ my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner = find scan::cpp( $env2->{_cwd}, $STIC_CPP );
 my $STIC_CPPPATH =
-  $cscanner->iflags($env2);    # print "STIC_CPPPATH  = $STIC_CPPPATH\n";
+    $cscanner->iflags($env2);    # print "STIC_CPPPATH  = $STIC_CPPPATH\n";
 my $DIR = Cwd::cwd();
 print "DIR = $DIR\n" if $param::debug;
 my $line;
@@ -302,13 +304,13 @@ if ( $#idlM > -1 ) {
 
         if ( $STAR_SYS !~ /^intel_wnt$/ ) {
             Command $env2 [$modh], @idlS,
-              qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
+	      qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
             Command $env2 [$modi], @idlS,
-              qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
+	      qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
             Command $env2 [$modH], @idlS,
-              qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
+	      qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
             Command $env2 [$modC], @idlS,
-              qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
+	      qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
         }
         my @objmod = ($modC);
         Install $env2 $ObjDir, @objmod;
@@ -318,8 +320,7 @@ if ( $#idlM > -1 ) {
         print "src + $mod: @src\n" if $param::debug;
         push @Defs, $modH;
     }
-}
-else {
+} else {
     foreach $h(@h_files) {
         if ( $h =~ /LinkDef/ || $h =~ /Stypes/ ) { push @Defs, $h; next; }
         my $hh = $Dir . "/" . $h;
@@ -338,8 +339,8 @@ else {
                 next if ( $classDefFlag + $qtFlag == 0 );
             }
             close(In);
-        }
-        else {
+
+        } else {
 
             foreach my $Rep(@Repo) {
                 my $RepDir = $Rep . "/" . $Dir;
@@ -362,14 +363,14 @@ else {
                 }
             }
         }
-        ENDL:
+      ENDL:
     }
 }
 
 if ( $#Defs > -1 ) {
     my @CintFiles =
-      ( $share . "/" . $PKG . "_Cint.cxx", $share . "/" . $PKG . "_Cint.h" )
-      ;    #, $share . "/"  . "LinkDef.h");
+	( $share . "/" . $PKG . "_Cint.cxx", $share . "/" . $PKG . "_Cint.h" )
+	    ;    #, $share . "/"  . "LinkDef.h");
 
     #yf  Install $env2 $share, @Defs;
     my @defs = ();
@@ -386,13 +387,14 @@ if ( $#Defs > -1 ) {
 }
 
 if ( $#QtDefs > -1 ) {
-     my $mocheaders = join $main::PATH_SEPARATOR, @QtDefs;
+    my $mocheaders = join $main::PATH_SEPARATOR, @QtDefs;
 #     my @mocs = script::MakeMoc( $env2, $pkg, $done, @QtDefs);
-     my @mocs = script::MakeMoc( $env2, $pkg, $done, $mocheaders);
-     foreach $m(@mocs) { push @src, $m;}
+    my @mocs = script::MakeMoc( $env2, $pkg, $done, $mocheaders);
+    foreach $m(@mocs) { push @src, $m;}
 }
  
 #____________________________________Tables____________________________
+
 Tables:
 my @sourcesT = ();
 
