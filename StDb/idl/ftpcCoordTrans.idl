@@ -9,5 +9,6 @@
 
 struct ftpcCoordTrans {
   
+  float observedVertexOffsetX[2];  /* [0] = east, [1] = west */
   float observedVertexOffsetY[2];  /* [0] = east, [1] = west */
 };
