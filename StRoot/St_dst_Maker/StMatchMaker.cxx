@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.28 2000/07/10 17:06:54 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.29 2000/08/07 14:39:40 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.29  2000/08/07 14:39:40  caines
+// Add to dst a copy of tpc and svt tracks called CpyTrk
+//
 // Revision 1.28  2000/07/10 17:06:54  caines
 // Take out some hardwired numbers for svm
 //
@@ -615,7 +618,47 @@ Int_t StMatchMaker::Make(){
    
    tpc_groups->SetNRows(count);
 
-  
+   //First call egr and make a copy of the tpc and svt tracks for evaluation
+   //purposes - see exactly what the trackers do before re-fitting touches them
+   
+   if(Debug()){
+     //
+
+     //Change params so just a copy is made of the tracks
+     egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
+     int usetpc = egr_egrpar->usetpc;
+     egr_egrpar->usetpc = 1;
+     int usesvt = egr_egrpar->usesvt;
+     egr_egrpar->usesvt = 1;
+     int useglobal = egr_egrpar->useglobal;
+     egr_egrpar->useglobal  = 0;
+
+     // Allocate some space for the tracks
+     
+     int Nrows = tptrack->GetNRows()+ stk_track->GetNRows();
+     St_dst_track     *CpyTrk     = new St_dst_track("CpyTrk",Nrows);  
+     AddData(CpyTrk);
+     
+     iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
+			scs_spt,m_egr_egrpar,stk_track, svt_groups,
+			evt_match,CpyTrk);
+     //	 ======================================================
+     
+     // Set pointers back as they were
+
+     egr_egrpar->usetpc = usetpc;
+     egr_egrpar->usesvt = usesvt;
+     egr_egrpar->useglobal  = useglobal; 
+
+     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+     if (iRes !=kSTAFCV_OK) {
+       gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+      gMessMgr->Debug() << " finished calling egr_fitter" << endm;
+   }
+   
+
+  //  Now call egr for real
+
   iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
 		     scs_spt,m_egr_egrpar,stk_track, svt_groups,
 		     evt_match,globtrk);

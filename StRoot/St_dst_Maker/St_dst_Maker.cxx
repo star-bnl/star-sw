@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.50 2000/07/29 00:16:19 margetis Exp $
+// $Id: St_dst_Maker.cxx,v 1.51 2000/08/07 14:39:41 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.51  2000/08/07 14:39:41  caines
+// Add to dst a copy of tpc and svt tracks called CpyTrk
+//
 // Revision 1.50  2000/07/29 00:16:19  margetis
 // put information about whether a point was used in fit or not
 //
@@ -154,7 +157,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.50 2000/07/29 00:16:19 margetis Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.51 2000/08/07 14:39:41 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -171,7 +174,7 @@ St_dst_Maker::~St_dst_Maker(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
-    "match:",  "globtrk", 
+    "match:",  "globtrk","CpyTrk", 
     "primary:","globtrk2", "primtrk", "vertex",
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
