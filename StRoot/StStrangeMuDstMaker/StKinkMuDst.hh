@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 3.0 2000/07/14 12:56:48 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.1 2000/08/10 01:16:24 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.1  2000/08/10 01:16:24  genevb
+ * Added number of dedx points
+ *
  * Revision 3.0  2000/07/14 12:56:48  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -67,8 +70,10 @@ public:
   Float_t  clParent()     const;       // Confidence level of parent
   Float_t  chi2Daughter() const;       // Chi square of daughter
   Float_t  clDaughter()   const;       // Confidence level of daughter
-  Float_t  dedxParent() const;         // dE/dX of parent
+  Float_t  dedxParent()   const;       // dE/dX of parent
   Float_t  dedxDaughter() const;       // dE/dX of daughter
+  UShort_t numDedxParent()   const;    // Number of dE/dX points for parent
+  UShort_t numDedxDaughter() const;    // Number of dE/dX points for daughter
 
   UShort_t mParentGeantId;
   UShort_t mDaughterGeantId;
@@ -102,6 +107,8 @@ public:
   Float_t  mClDaughter;
   Float_t  mDedxParent;
   Float_t  mDedxDaughter;
+  UShort_t mNumDedxParent;
+  UShort_t mNumDedxDaughter;
 
 private:
   void     findMinDeltaEnergy(StKinkVertex*);
@@ -162,4 +169,6 @@ inline Float_t StKinkMuDst::chi2Daughter() const { return mChi2Daughter; }
 inline Float_t StKinkMuDst::clDaughter()   const { return mClDaughter; }
 inline Float_t StKinkMuDst::dedxParent()   const { return mDedxParent; }
 inline Float_t StKinkMuDst::dedxDaughter() const { return mDedxDaughter; }
+inline UShort_t StKinkMuDst::numDedxParent()   const { return mNumDedxParent; }
+inline UShort_t StKinkMuDst::numDedxDaughter() const { return mNumDedxDaughter; }
 #endif

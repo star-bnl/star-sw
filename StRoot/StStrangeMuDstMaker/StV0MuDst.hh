@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 3.0 2000/07/14 12:56:50 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.1 2000/08/10 01:16:24 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.1  2000/08/10 01:16:24  genevb
+ * Added number of dedx points
+ *
  * Revision 3.0  2000/07/14 12:56:50  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -55,7 +58,7 @@ public:
 
   StStrangeEvMuDst *event();           // Pointer to event information
 
-  virtual Float_t decayLengthV0() const;  // 3-d decay distance
+  Float_t decayLengthV0() const;       // 3-d decay distance
   Float_t decayVertexV0X() const;      // Coordinates of decay vertex
   Float_t decayVertexV0Y() const;
   Float_t decayVertexV0Z() const;
@@ -108,6 +111,8 @@ public:
   virtual Long_t detectorIdPars();// Detector ID for pars used in V0 finder
   Float_t dedxPos() const;        // dE/dX of pos. daughter
   Float_t dedxNeg() const;        // dE/dX of neg. daughter
+  UShort_t numDedxPos() const;    // Number of dE/dX points for pos. daughter
+  UShort_t numDedxNeg() const;    // Number of dE/dX points for neg. daughter
 
 protected:
   StStrangeEvMuDst *mEvent;       //!
@@ -126,8 +131,8 @@ protected:
   Float_t mMomNegY;
   Float_t mMomNegZ;
 
-  UShort_t mKeyPos;
-  UShort_t mKeyNeg;
+  UShort_t  mKeyPos;
+  UShort_t  mKeyNeg;
 
   StTrackTopologyMap mTopologyMapPos;
   StTrackTopologyMap mTopologyMapNeg;
@@ -150,6 +155,8 @@ protected:
 
   Float_t mDedxPos;
   Float_t mDedxNeg;
+  UShort_t mNumDedxPos;
+  UShort_t mNumDedxNeg;
 
   ClassDef(StV0MuDst,3)
 };
@@ -181,8 +188,8 @@ inline StTrackTopologyMap& StV0MuDst::topologyMapPos()
              { return mTopologyMapPos; }
 inline StTrackTopologyMap& StV0MuDst::topologyMapNeg()
              { return mTopologyMapNeg; }
-inline UShort_t StV0MuDst::keyPos() const { return mKeyPos; } 
-inline UShort_t StV0MuDst::keyNeg() const { return mKeyNeg; } 
+inline UShort_t StV0MuDst::keyPos() const { return 0; } 
+inline UShort_t StV0MuDst::keyNeg() const { return 0; } 
 inline Float_t StV0MuDst::momV0X()  const { return mMomPosX + mMomNegX; }
 inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
 inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
@@ -194,4 +201,6 @@ inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
 inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
 inline Float_t StV0MuDst::dedxPos() const { return mDedxPos; }
 inline Float_t StV0MuDst::dedxNeg() const { return mDedxNeg; }
+inline UShort_t StV0MuDst::numDedxPos() const { return mNumDedxPos; }
+inline UShort_t StV0MuDst::numDedxNeg() const { return mNumDedxNeg; }
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 3.0 2000/07/14 12:56:50 genevb Exp $
+ * $Id: StXiMuDst.cc,v 3.1 2000/08/10 01:16:25 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 3.1  2000/08/10 01:16:25  genevb
+ * Added number of dedx points
+ *
  * Revision 3.0  2000/07/14 12:56:50  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -74,6 +77,7 @@ void StXiMuDst::FillXi(StXiVertex* xiVertex) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidBachelor[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxBachelor = pid->mean();
+      mNumDedxBachelor = pid->numberOfPoints();
       break;
     }
   }
