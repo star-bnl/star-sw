@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.66 2000/02/11 00:10:02 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.67 2000/02/12 17:36:31 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.67  2000/02/12 17:36:31  fisyak
+// Restore depend tpcdaq from Trs
+//
 // Revision 1.66  2000/02/11 00:10:02  fisyak
 // Add dependence of tpc on globT
 //
@@ -349,11 +352,11 @@ BfcItem BFC[] = {
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc","dbutil"                               ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"Trs"         ,"","tpc","scl"                      ,"StTrsMaker","St_tpcdaq_Maker,StTrsMaker","",kFALSE},
+  {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tpc_T,tls"             ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"           ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"      ,"","","tpt,SCL"     ,"StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
