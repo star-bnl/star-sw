@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Id: St_Node.cxx,v 1.3 1998/12/27 02:33:16 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.3  1998/12/27 02:33:16  fine
+// St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
+//
 // Revision 1.2  1998/12/26 21:40:40  fisyak
 // Add Id and Log
 // 
@@ -95,8 +98,6 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
 //*-*    name    is the name of the node
 //*-*    title   is title
 //*-*    shapename is the name of the referenced shape
-//*-*    x,y,z   are the offsets of the volume with respect to his mother
-//*-*    matrixname  is the name of the rotation matrix
 //*-*
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -140,8 +141,6 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
 //*-*    name    is the name of the node
 //*-*    title   is title
 //*-*    shape   is the pointer to the shape definition
-//*-*    x,y,z   are the offsets of the volume with respect to his mother
-//*-*    matrix  is the pointer to the rotation matrix
 //*-*
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -187,18 +186,25 @@ void St_Node::Add(St_NodePosition *position)
   else Error("Add","Can not create list of positions for the current node <%s>:<%s>",GetName(),GetTitle());
 }
 //______________________________________________________________________________
-void St_Node::Add(St_Node *node, St_NodePosition *nodePosition)
+St_NodePosition *St_Node::Add(St_Node *node, St_NodePosition *nodePosition)
 {  
   St_NodePosition *position = nodePosition;
-  if (!node) return;
+  if (!node) return 0;
   if (!position) position = new St_NodePosition(node);  // Create default position
   St_DataSet::Add(node);
   Add(position);
+  return position;
 }
 //______________________________________________________________________________
-void St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z, TRotMatrix *matrix, Option_t *option)
+St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
+                              TRotMatrix *matrix, Option_t *option)
 {
- if (!node) return;
+//*-*
+//*-*    node    the pointer to the node to be placed
+//*-*    x,y,z   are the offsets of the volume with respect to his mother
+//*-*    matrix  is the pointer to the rotation matrix
+//*-*
+ if (!node) return 0;
  TRotMatrix *rotation = matrix;
  if(rotation) {
      rotation =gGeometry->GetRotMatrix("Identity");
@@ -208,13 +214,18 @@ void St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z, TRotMatrix 
      }
    }
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
- Add(node,position);
+ return Add(node,position);
 }
 
 //______________________________________________________________________________
-void St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option)
+St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option)
 {
- if (!node) return;
+//*-*
+//*-*    node        the pointer to the node to be placed
+//*-*    x,y,z       are the offsets of the volume with respect to his mother
+//*-*    matrixname  is the name of the rotation matrix
+//*-*
+ if (!node) return 0;
  TRotMatrix *rotation = 0;
  if (strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
  else {
@@ -225,21 +236,30 @@ void St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text
    }
  } 
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
- Add(node,position);
+ return Add(node,position);
 }
 
-#if 0
 //______________________________________________________________________________
 void St_Node::Browse(TBrowser *b)
 {
-    if( GetList() ) {
-       GetList()->Browse( b );
-    } else {
-       Draw();
-       gPad->Update();
+   if (GetListOfPositions()){
+       St_NodePosition *nodePosition = 0;
+       TIter next(GetListOfPositions());
+       while (nodePosition = (St_NodePosition *)next()){
+//         b->Add(nodePosition->GetNode());
+         b->Add(nodePosition,nodePosition->GetNode()->GetName());
+       }
+//       GetListOfPositions()->Browse(b);
+   }
+//    if( GetList() ) {
+//       GetList()->Browse( b );
+//    }
+   else {
+      Inspect();
+ //      Draw();
+ //      gPad->Update();
     }
 } 
-#endif
  
 //______________________________________________________________________________
 Int_t St_Node::DistancetoPrimitive(Int_t px, Int_t py)
