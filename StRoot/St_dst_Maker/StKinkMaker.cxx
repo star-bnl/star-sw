@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.5 1999/07/07 15:47:53 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.6 1999/07/08 18:40:30 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.6  1999/07/08 18:40:30  fisyak
+// Wensheng Deng global chain
+//
 // Revision 1.5  1999/07/07 15:47:53  wdeng
 // add Id and Log at the first two lines for the purpose of version maintainance
 //
@@ -397,11 +400,12 @@ Int_t StKinkMaker::Make(){
 //==========================================================================
 	  if(m_kinkEvalOn) {
 	    St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
+	    if (tpcTracks) {
 	    St_DataSetIter tpcI(tpcTracks);  
 	    
 	    St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
 	    St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
-	   
+	    if (tptTrack && tteEval) {
 	    tpt_track_st* tptPtr  = tptTrack->GetTable();
 	    tte_eval_st*  tteEPtr = tteEval->GetTable(); 
 	    
@@ -504,6 +508,8 @@ Int_t StKinkMaker::Make(){
 	      }
 	    goto PROPERFILL;
 	  }
+	    }
+	  }
 //================================================================================ 
 WRONGFILL:
 	  cout << "filling dst_vertex.iflag with 2. \n" << endl; 
@@ -527,7 +533,7 @@ PROPERFILL:
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.5 1999/07/07 15:47:53 wdeng Exp $\n");
+  printf("* $Id: StKinkMaker.cxx,v 1.6 1999/07/08 18:40:30 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

@@ -81,13 +81,35 @@ Int_t StV0Maker::Make(){
   int iRes = 0;
   
   St_DataSet     *match = GetDataSet("match"); 
+  if (!match) {
+    cout << " StV0Maker: match is missing" << endl;
+    return kStWarn;
+  }
   St_DataSetIter matchI(match);         
   St_dst_track   *globtrk  = (St_dst_track *) matchI("globtrk");
+  if (!globtrk) {
+    cout << " StV0Maker: globtrk is missing" << endl;
+    return kStWarn;
+  }
   
   St_DataSet     *primary = GetDataSet("primary"); 
+
+  if (!primary) {
+    cout << " StV0Maker: primary is missing" << endl;
+    return kStWarn;
+  }
+
   St_DataSetIter primaryI(primary);         
   St_dst_track   *globtrk2 = (St_dst_track *) primaryI("globtrk2");
+  if (!globtrk2) {
+    cout << " StV0Maker: globtrk2 is missing" << endl;
+    return kStWarn;
+  }
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
+  if (!vertex) {
+    cout << " StV0Maker: vertex is missing" << endl;
+    return kStWarn;
+  }
 
   St_dst_v0_vertex *dst_v0_vertex  = 0;
   St_ev0_eval      *ev0_eval = 0;
@@ -172,7 +194,7 @@ Int_t StV0Maker::Make(){
 //_____________________________________________________________________________
 void StV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StV0Maker.cxx,v 1.2 1999/07/01 17:30:46 fisyak Exp $\n");
+  printf("* $Id: StV0Maker.cxx,v 1.3 1999/07/08 18:40:30 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
