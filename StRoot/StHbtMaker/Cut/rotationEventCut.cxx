@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: rotationEventCut.cxx,v 1.1 2000/06/14 18:22:33 laue Exp $
+ * $Id: rotationEventCut.cxx,v 1.2 2001/04/02 16:14:31 jeromel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: rotationEventCut.cxx,v $
+ * Revision 1.2  2001/04/02 16:14:31  jeromel
+ * Type cast in sprintf() statement for bool conversion (insure++ issue)
+ *
  * Revision 1.1  2000/06/14 18:22:33  laue
  * New event cut
  *
@@ -91,7 +94,7 @@ StHbtString rotationEventCut::Report(){
   char Ctemp[100];
   sprintf(Ctemp,"rotationEventCut: ");
   Stemp += Ctemp;
-  sprintf(Ctemp,"\n Rotation :\t %d",mRotation);
+  sprintf(Ctemp,"\n Rotation :\t %d",(int) mRotation);
   Stemp += Ctemp;
   sprintf(Ctemp,"\n Multiplicity:\t %d-%d",mEventMult[0],mEventMult[1]);
   Stemp += Ctemp;
