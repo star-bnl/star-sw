@@ -18,7 +18,7 @@
 #define MEAN_CH  11
 #define GAUSS    12
 
-long emc_adc_hist_(
+long type_of_call emc_adc_hist_(
   TABLE_HEAD_ST          *ems_control_h, EMS_CONTROL_ST           *ems_control ,
   TABLE_HEAD_ST *emc_adc_hist_control_h, EMC_ADC_HIST_CONTROL_ST  *emc_adc_hist_control ,
   TABLE_HEAD_ST              *emc_adc_h, EMC_ADC_ST               *emc_adc ,

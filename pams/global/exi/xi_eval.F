@@ -87,7 +87,10 @@ C---------------
 
  10   CONTINUE
 
-999   RETURN
+999   CONTINUE
+      XI_EVAL = 0
+      RETURN
+
       END
 
 

@@ -70,7 +70,7 @@ int Calculate_Cluster_Moments (TABLE_HEAD_ST  *seq_h,       SSF_SEQ_ST  *seq,
 
 /***************************************************************************/
 
-long scs_fitter_(
+long type_of_call scs_fitter_(
 		 TABLE_HEAD_ST            *par_h,        SCS_PAR_ST              *par ,
 		 TABLE_HEAD_ST            *map_h,   SSF_8TO10MAP_ST              *map ,
 		 TABLE_HEAD_ST           *geom_h,       SVG_GEOM_ST             *geom ,
@@ -434,14 +434,14 @@ typedef struct POINT_TYPE
 {
   long  x,y;
   float val;
-} POINT;
+} scsPOINT;
 
 
 void      free_matrix ();
 int     **malloc_matrix (int iRows, int iCols);
-POINT    *Find_Peaks ();
+scsPOINT    *Find_Peaks ();
 int       Compare_Point ();
-int       IsValidPeak (int **Pixels, int iRows, int iCols, POINT  *Peaks, int iNumPeaks);
+int       IsValidPeak (int **Pixels, int iRows, int iCols, scsPOINT  *Peaks, int iNumPeaks);
 
 
 /*------------------------------------------------------------------
@@ -462,7 +462,7 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
 {
   int   i, iSeq, iRows, iFirstTime, iLastTime, iFirstAnode, iLastAnode, iCols, iNumPeaks;
   
-  POINT         *Peaks;
+  scsPOINT         *Peaks;
   SSF_SEQ_ST    *theSeq;
   int **Pixels,   **Shadow;
   long iCluster;
@@ -519,7 +519,7 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
 	free_matrix (Pixels, iRows);
       if (Shadow)
 	free_matrix (Shadow, iRows);
-      return;
+      return 0;
     }
   
   /* Now fill the pixel array with pixels from the cluster */
@@ -561,22 +561,22 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
 }
 
 /*------------------------------------------------------------------
-ROUTINE:      POINT * Find_peaks
+ROUTINE:      scsPOINT * Find_peaks
 DESCRIPTION:  find peaks within the local array
 RETURN VALUE: 
 ------------------------------------------------------------------*/
 #define MAX_PEAKS 10
-POINT * Find_Peaks (int  **Pixels,
+scsPOINT * Find_Peaks (int  **Pixels,
 		   int  **Shadow,
 		   int    iRows,
 		   int    iCols,
 		   int   *iNumPeaks)
 {
-  POINT *Array;
-  static POINT Peaks[MAX_PEAKS];
+  scsPOINT *Array;
+  static scsPOINT Peaks[MAX_PEAKS];
   int i, j, k;
   
-  Array = (POINT *) malloc (iRows * iCols * sizeof (POINT));
+  Array = (scsPOINT *) malloc (iRows * iCols * sizeof (scsPOINT));
   if (Array == NULL)
     {
       *iNumPeaks = 0;
@@ -592,7 +592,7 @@ POINT * Find_Peaks (int  **Pixels,
 	Array[k].val = Pixels[i][j];
 	k++;
       }
-  qsort (Array, k, sizeof (POINT), Compare_Point);
+  qsort (Array, k, sizeof (scsPOINT), Compare_Point);
   
   /* Now lets go find the peaks */
   
@@ -627,7 +627,7 @@ ROUTINE:      int Compare_Point
 DESCRIPTION:  evaluate the diff between two points
 RETURN VALUE: the amplitude difference
 ------------------------------------------------------------------*/
-int Compare_Point (POINT *a, POINT *b)
+int Compare_Point (scsPOINT *a, scsPOINT *b)
 {
   return b->val - a->val;
 }
@@ -648,7 +648,7 @@ int Compare_Point (POINT *a, POINT *b)
 int IsValidPeak (int    **Pixels, 
 		 int      iRows, 
 		 int      iCols, 
-		 POINT   *Peaks, 
+		 scsPOINT   *Peaks, 
 		 int      iNumPeaks)
 {
   int Px = Peaks[iNumPeaks].x,
@@ -694,7 +694,7 @@ int Fit_Peaks (int             *Pixels[],
 	       int             iFirstAnode,
 	       int             iFirstTime,
 	       int             iNumPeaks,
-	       POINT           *Peaks,
+	       scsPOINT           *Peaks,
 	       SVG_GEOM_ST     *geom,
 	       SVG_SHAPE_ST    *shape,
 	       SCS_PAR_ST      *par,

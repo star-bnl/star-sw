@@ -19,7 +19,7 @@ RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "ssf_10to8.h"
 
-long ssf_10to8_(  
+long type_of_call ssf_10to8_(  
   TABLE_HEAD_ST *map_h,    SSF_MAP_ST *map,
   TABLE_HEAD_ST *adc10_h,  SSF_ADC_ST *adc10,
   TABLE_HEAD_ST *adc8_h,   SSF_ADC_ST *adc8)

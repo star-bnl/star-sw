@@ -15,7 +15,7 @@ RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "ssf_zero_supp_init.h"
 
-long ssf_zero_supp_init_(  
+long type_of_call ssf_zero_supp_init_(  
   TABLE_HEAD_ST *zero_par_h,  SSF_ZERO_PAR_ST  *zero_par)
 {  
   zero_par->n_anode     = 210;

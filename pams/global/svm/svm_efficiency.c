@@ -1,7 +1,7 @@
 
 #include "svm_efficiency.h"
 
-long svm_efficiency_(
+long type_of_call svm_efficiency_(
 		TABLE_HEAD_ST *svt_spt_h, SCS_SPT_ST *svt_spt,
                 TABLE_HEAD_ST *svt_track_h, STK_TRACK_ST *svt_track,
                 TABLE_HEAD_ST *tpc_spt_h, TCL_TPHIT_ST *tpc_spt,

@@ -125,5 +125,6 @@ C     Now find last point on track and calculate track length.
          globtrk(iglob).length = -0.
       endif
 
+      EGR_LOAD_GLOBTRK = 0
       return
       end

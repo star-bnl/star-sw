@@ -88,6 +88,8 @@ C2345678901234567890123456789012345678901234567890123456789012345678901
 
       !delapse=dtime(timearray)
 
+      SPR_AM = 0
+
       print *,'*****************************************************'
       print *,'*            dE/dx and pid for the SVT              *'
       print *,'*  Hit data               : svt_spt_direct module   *'
@@ -907,6 +909,8 @@ C----------------------------------------------------------------------
      @               k,nok,i,ii,itra1,npt
 
       integer jcount
+
+      reset_svt = 0
 
       noka=0
       igr=0

@@ -9,7 +9,7 @@
 #include "sal_getallver.h"
 
 
-long sal_getallver_( 
+long type_of_call sal_getallver_( 
 TABLE_HEAD_ST    *g2t_vertex_h, G2T_VERTEX_ST  *g2t_vertex ,
 TABLE_HEAD_ST    *sal_vrtx_h, SAL_VRTX_ST  *sal_vrtx)
 {

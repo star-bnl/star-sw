@@ -11,7 +11,7 @@
 extern float ran0(long*);
 extern float gasdev(long*);
 
-long toy_simulator_(
+long type_of_call toy_simulator_(
   TABLE_HEAD_ST     *ems_control_h,   EMS_CONTROL_ST          *ems_control ,
   TABLE_HEAD_ST *ems_cal_control_h,   EMS_CAL_CONTROL_ST  *ems_cal_control ,
   TABLE_HEAD_ST         *emc_adc_h,   EMC_ADC_ST                  *emc_adc )

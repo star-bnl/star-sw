@@ -18,7 +18,7 @@ RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "scs_par_init.h"
 
-long scs_par_init_(TABLE_HEAD_ST   *par_h, SCS_PAR_ST *par ) 
+long type_of_call scs_par_init_(TABLE_HEAD_ST   *par_h, SCS_PAR_ST *par ) 
 {
 
 /*  fCorrection  = 15.75 + 2.87 * Cl->x[0] + 1.796 * sqr(Cl->x[0]); */

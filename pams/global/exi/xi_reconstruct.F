@@ -300,7 +300,8 @@ c
  10   CONTINUE	
 
 
-999   RETURN
+999   XI_RECONSTRUCT = 0
+      RETURN
       END
 
 

@@ -17,7 +17,7 @@
 # include "svt.h"
 
 
-long sal_change_geom_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
+long type_of_call sal_change_geom_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
                       TABLE_HEAD_ST *sal_spt_h, SAL_SPT_ST  *sal_spt,
                       TABLE_HEAD_ST  *sal_vrtx_h, SAL_VRTX_ST *sal_vrtx,
                       TABLE_HEAD_ST *sal_geom_real_h, SAL_GEOM_ST *sal_geom_real, 

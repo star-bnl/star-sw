@@ -12,7 +12,7 @@
 # include "svt.h"
 # include "sal_get_chi.h"
 
-long sal_get_chi_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
+long type_of_call sal_get_chi_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
                   TABLE_HEAD_ST *sal_spt_h, SAL_SPT_ST  *sal_spt)
 {
 

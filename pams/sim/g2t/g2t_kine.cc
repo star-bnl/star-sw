@@ -10,7 +10,7 @@
 #include "g2t_kine.h"
 #include "g2t_hits.h"
 #include "geant_gcnum.h"
-long g2t_kine_()
+long type_of_call g2t_kine_()
 {
    long  npars   = 3;                   /* number of tables  */
    char* pname   = "g2t_get_kine";      /* first PAM name    */

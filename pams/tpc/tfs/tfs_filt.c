@@ -6,7 +6,7 @@
 **:<------------------------------------------------------------------*/
 #include "tfs_filt.h"
 
-long tfs_filt_(
+long type_of_call tfs_filt_(
   TABLE_HEAD_ST          *tphit_h,      TCL_TPHIT_ST            *tphit )
 {
 /*:>--------------------------------------------------------------------

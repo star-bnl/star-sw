@@ -16,7 +16,7 @@ RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "ssf_mv_to_adc.h"
 
-long ssf_mv_to_adc_(  
+long type_of_call ssf_mv_to_adc_(  
   TABLE_HEAD_ST *mv_h,     SSF_MV_ST  *mv,
   TABLE_HEAD_ST *adc10_h, SSF_ADC_ST  *adc10)
 {  

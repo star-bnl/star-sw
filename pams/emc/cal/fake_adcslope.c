@@ -10,7 +10,7 @@
 
 extern float ran0(long*);
 
-long fake_adcslope_(
+long type_of_call fake_adcslope_(
   TABLE_HEAD_ST     *ems_control_h,  EMS_CONTROL_ST          *ems_control ,
   TABLE_HEAD_ST *ems_cal_control_h,  EMS_CAL_CONTROL_ST  *ems_cal_control ,
   TABLE_HEAD_ST   *fake_pedestal_h,  EMC_PEDESTAL_ST       *fake_pedestal ,
