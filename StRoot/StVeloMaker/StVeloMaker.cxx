@@ -205,8 +205,13 @@ StVeloMaker::StVeloMaker(const char *name): StMaker(name)
   hZVtx[6] = new TH1F("Rvtx-Zoom","Rvertex -ZOOM",40,0.,4.);
   hPlot = new TH2C("PlotZR","",80,-200.,200.,40,0.,200);
 
-  fC1 = fC2 = fC3 = fC4 = 0;
+  hZHit->SetDirectory(0);
+  hZBadHit->SetDirectory(0);
+  hPlot->SetDirectory(0);
+  for (int i=0;i<6;i++) hZVtx[i]->SetDirectory(0);
 
+  fC1 = fC2 = fC3 = fC4 = 0;
+  
 
 
 
@@ -219,9 +224,9 @@ StVeloMaker::~StVeloMaker() {}
 
 Int_t StVeloMaker::Init() {
 
-  hDZ[0] = new TH1F("dZ "    ," ZV+ - ZV- ", 2*10,-1.,1.);
-  hDZ[1] = new TH1F("dZ/Err "," dZ / dzErr", 2*10,-5.,5.);
-  hDZ[2] = new TH1F("zErr ","zErr"         , 40,0.,2.);
+  hDZ[0] = new TH1F("dZ "    ," ZV+ - ZV- ", 2*20,-.5,.5);
+  hDZ[1] = new TH1F("dZ/Err "," dZ / dzErr", 2*20,-5.,5.);
+  hDZ[2] = new TH1F("zErr ","zErr"         , 40,0.,1.);
   hDZ[3] = new TH1F("ZV "," ZV", 40,-200.,200.);
  hZdZPlot = new TH2C("PlotZdZ","PlotZdZ",80,-200.,200.,40,-2.,2.);
 
@@ -281,13 +286,13 @@ Int_t StVeloMaker::Make()
   fGate = new float[fNHits];
   fHits = new MyHit[fNHits];
   int nacc = 0;
-  double dz;
+  double dz,zz;
   for(int ihit = 0; ihit < fNHits; ihit++) {
       if (fHitChair->DetectorId(ihit)!=kTpcIdentifier) continue;
       if (fHitChair->PadRow(ihit)==13) continue;		//***bad 13 padrow
-      nacc++;
       fHits[nacc].x = fHitChair->GetX(ihit);
       fHits[nacc].y = fHitChair->GetY(ihit);
+      zz = fHitChair->GetZ(ihit);
       fHits[nacc].z = fHitChair->GetZ(ihit);
       fHits[nacc].s = (short)fHitChair->Sector(ihit);
       fHits[nacc].r = sqrt(pow(fHits[nacc].x,2)+pow(fHits[nacc].y,2));
@@ -301,8 +306,9 @@ Int_t StVeloMaker::Make()
       float sec = fHits[nacc].s-12.5;
       if (sec*fHits[nacc].z>0) {
         hZBadHit->Fill( fHits[nacc].z );
-        nacc--;
+        continue;
       }
+      nacc++;
 
   }
   fNHits = nacc;
@@ -325,20 +331,21 @@ Int_t StVeloMaker::Make()
   dz = fV[3][2];
   if (dz*dz/fG[3][8] < 3.*3.)	goto RETN;
 
-  for(int ihit = 0; ihit < fNHits; ihit++) {
-    if(fHits[ihit].s <=12) fHits[ihit].z -= dz;
-    else                   fHits[ihit].z += dz;  
-  }
+//VP  for(int ihit = 0; ihit < fNHits; ihit++) {
+//VP    if(fHits[ihit].s <=12) fHits[ihit].z -= dz;
+//VP    else                   fHits[ihit].z += dz;  
+//VP  }
 
 
 //		UPdate tphit
   nacc = 0;  
   fNHits =  fHitChair->GetNRows(); 
   for(int ihit = 0; ihit < fNHits; ihit++) {
-      if (fHitChair->DetectorId(ihit)!=kTpcIdentifier) continue;
-      if (fHitChair->PadRow(ihit)==13) continue;		//***bad 13 padrow
-      nacc++;
-      fHitChair->SetZ(fHits[nacc].z,ihit);
+    if (fHitChair->DetectorId(ihit)!=kTpcIdentifier) continue;
+    zz = fHitChair->GetZ(ihit);
+    int s = fHitChair->Sector(ihit);
+    if(s <=12) zz -= dz; else zz += dz;  
+    fHitChair->SetZ(zz,ihit);
   }
 
 RETN:
