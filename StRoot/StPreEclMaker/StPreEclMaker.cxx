@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.9 2001/02/01 22:23:13 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.10 2001/02/06 18:23:58 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.10  2001/02/06 18:23:58  pavlinov
+// Changed the algorithm of finding of EMC's collection in StPreEclMaker
+//
 // Revision 1.9  2001/02/01 22:23:13  suaide
 // Fixed some memory leaks
 //
@@ -76,6 +79,8 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StPreEclMaker.h"
+#include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
+#include "St_ems_Maker/St_ems_Maker.h"
 
 // added for StEvent
 
@@ -153,60 +158,53 @@ Int_t StPreEclMaker::Init()
 Int_t StPreEclMaker::Make()
 {
   cout << "\n************************* Entering PreEclMaker Make() \n\n";
-  
+//
+// This maker must be run after StEventMaker => StEvent must be !!!!!
+//
+   StEmcSimulatorMaker* simnew;
+   St_ems_Maker* simold;
 // First of all, try to get StEvent Pointer
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
-  
-  if(!currevent)
-  {
-    cout << "***** Can not get StEvent pointer\n";
-    kStEvOk=kFALSE;
+  if(!currevent){
+    cout << "***** Can not get StEvent pointer .. sorry \n";
+    return kStErr;
   }
-  else
-  {
+  else{
     cout << "***** StEvent pointer Ok\n";
-    kStEvOk=kTRUE;
-    emc=currevent->emcCollection();
-  }
-    
-  if(!emc) // if not emcCollection, try to get from St_emc_Maker or creates one and fill it with hits from emc
-  {
-      cout <<"***** No emc object. Creating one ..\n";
-      emc = new StEmcCollection();
-      St_DataSetIter itr(GetDataSet("emc_hits"));
-      StEmcHitCollection* hit=0;
-      while((hit = (StEmcHitCollection*)itr()))
-      {
-        TString name = hit->GetName();
-        for(Int_t i=0; i<8; i++)
-        {  
-          if(!strcmp(name.Data(),detname[i].Data()))
-          {
-            StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
-            //Create StEmcDetector
-            StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
-            //Create StEmcHit
-            for(Int_t j=0; j<hit->NHit(); j++)
-            {
-	            Float_t energy=hit->HitEnergy(j);
-              Int_t hid=hit->HitId(j);
-              Int_t module,eta,sub;
-              hit->getBin(hid,module,eta,sub);
-              StEmcRawHit *rawHit=new StEmcRawHit(id,(UInt_t)module,(UInt_t)eta,(UInt_t)sub,0,energy);
-  	          detector->addHit(rawHit);
-            }
-            emc->setDetector(detector);
-          } 
+    emc = currevent->emcCollection();
+
+    if(emc == 0){
+    // Try to get from simulator(s) ==============================================
+      simnew = (StEmcSimulatorMaker*)GetMaker("emcRaw");
+      if(simnew) {
+        emc = (StEmcCollection*)simnew->getEmcCollection();
+        cout <<"***** New simulator in chain";
+      }
+      else {
+        simold = (St_ems_Maker*)GetMaker("emc_raw");;
+        if(simold){
+          emc = (StEmcCollection*)simold->getEmcCollection();
+          cout <<"***** Old simulator in chain\n";
         }
       }
-    
-    if(kStEvOk) 
-    {
-      currevent->setEmcCollection(emc);
-      cout <<"***** New EmcCollection on StEvent\n";
+      if(emc){ // Emc from simulator(s)  
+        cout<<" => Get EmcCollection from simulator\n";
+	currevent->setEmcCollection(emc);
+	if(simnew) simnew->clearStEventStaf();  // We move StEmcCollection from new simulator to StEvent 
+      }
+      else cout<<" => No EmcCollection from simulator\n";
     }
-    
+    else cout<<"***** Get EmcCollection from StEvent\n";
+
+    if(emc == 0) {
+    // Try to get from calibration (will be define later)
+    }
+
+    if(emc==0) return kStWarn;
+
   }
+    
+//
 // At this point, StEmcCollection should be Ok.
 //
 
@@ -373,7 +371,7 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.9 2001/02/01 22:23:13 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.10 2001/02/06 18:23:58 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
