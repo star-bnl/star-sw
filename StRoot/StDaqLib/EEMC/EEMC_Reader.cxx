@@ -3,6 +3,19 @@
 #include <assert.h>
 
 
+int EEMC_Reader::isEemcBankIn( char type) {
+  switch(type) {
+  case 'T': // tower crates
+    return emc.etow_in;
+  case 'S': // smd/pre/post  crates
+    return emc.esmd_in;
+  default:
+    assert(2==3);
+  }
+  return 0;
+}
+
+
 u_short *EEMC_Reader::getEemcHeadBlock(int fiber, char type) {
 
   switch(type) {
