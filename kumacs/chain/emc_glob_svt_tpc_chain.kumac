@@ -35,13 +35,13 @@
  * History:
  *          Feb 24, 97 - created
  *          May 1, 1998 - editted by Kathy
- *
+ *          May 5, 1998 - Kathy
 **************************************************
  
 MACRO run_all _
    no_events=1 _ 
-   INPUT_DATA_DIR=/star/mds/users/yepes/gst/hijing/au_200_ce/ _
-   file=event_0000001.xdf _ 
+   INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+   file=event_0000050.xdf _ 
    svt_simul=srs _
    svt_tracker=sgr _  
    tpc_simul=tfs _
