@@ -1,5 +1,10 @@
-* $Id: vpddgeo.g,v 1.12 2004/03/24 19:42:39 llope Exp $
+* $Id: vpddgeo.g,v 1.13 2004/03/24 23:32:47 potekhin Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.13  2004/03/24 23:32:47  potekhin
+* Moved the numerical data introduced by Bill Llope in
+* geometry.g, into that source file, similar to the pipegeo
+* and other code, to make it self-contained.
+*
 * Revision 1.12  2004/03/24 19:42:39  llope
 * extremely trivial change: stupid typo in a print statement for debugging. fixed.
 *
@@ -58,6 +63,8 @@ Created 21 June 2000
                VPCV, VPCH, VDTI,
                IBEM,IBEH,IBEV,IBEW
 *
+
+     Structure VPDV { version,  int vpdConfig}
      Structure VPDG { version,  zposEast, zposWest, rmin,    rmax,
                       BPwidth,  BPlength, BPthick,
                       BXheight, BXlength, BXwidth,  BXthick, BXzposC,
@@ -80,10 +87,15 @@ Created 21 June 2000
 *
 * ----------------------------------------------------------------------
 *
+     Fill VPDV  ! VPD configuration control
+        version   =    1      ! version
+        vpdConfig =    1      ! vpd configuration
+     EndFill
+
      FILL VPDG  ! pVPD basic dimensions
-        version   =    3.     ! geometry version
-        zposEast  =  574.5688 ! Z position East: run-3 564.4388, run-4 574.5688
-        zposWest  =  573.5669 ! Z position West: run-3 563.4069, run-4 573.5669
+        version   =    1      ! geometry version
+        zposEast  =  550.0000 ! Z position East
+        zposWest  =  550.0000 ! Z position West
         rmin      =    6.35   ! mothervolume rmin		(2.5inch)
         rmax      =   31.27375! mothervolume rmin		(12.3125inch)
         BPwidth   =   30.48   ! baseplate width 		(12inch)
@@ -139,11 +151,192 @@ Created 21 June 2000
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
      Endfill
 *
-     USE  VPDG  
+     FILL VPDG  ! pVPD basic dimensions
+        version   =    2      ! geometry version
+        zposEast  =  561.2638 ! Z position East
+        zposWest  =  563.1688 ! Z position West
+        rmin      =    6.35   ! mothervolume rmin		(2.5inch)
+        rmax      =   31.27375! mothervolume rmin		(12.3125inch)
+        BPwidth   =   30.48   ! baseplate width 		(12inch)
+        BPlength  =   46.355  ! baseplate length		(18.5inch)
+        BPthick   =    0.635  ! baseplate thickness		(0.25inch)
+        BXheight  =    5.08   ! FEE box height			(2inch)
+        BXlength  =   15.24   ! FEE box length			(6inch)
+        BXwidth   =   25.4    ! FEE box width			(10inch)
+        BXthick   =    0.635  ! FEE box plate thickness		(0.25inch)
+        BXzposC   =    0.635  ! FEE central z pos (+/-??)	(0.25inch)
+        FPwidth   =    7.62   ! frontplate width		(3inch)
+        FPheight  =   25.45842! frontplate height		(10.023inch)
+        FPthick   =    2.54   ! frontplate thickness		(1inch)
+        FPAwidth  =    6.63956! frontpl.part A width            (2.614inch)
+        FPAhght   =    8.35405! frontpl.part A height           (3.289inch)
+        FPChght   =   12.573  ! frontpl.part C height           (4.95inch)
+        FPHhght   =    3.81   ! frontpl. hook height            (1.5inch)
+        FPHwidth  =    5.08   ! frontpl. hook width             (2inch)
+        FPHthick  =    0.635  ! frontpl. hook thickness         (0.25inch)
+        STthick   =    0.635  ! strut thickness			(0.25inch)
+        STheight  =   23.1775 ! strut height			(9.125 inch)
+        STangle   =   25.     ! strut angle (degr)
+        STdiagsz  =    5.08   ! diagnoal strut size             (2inch)
+        SCwidth   =    7.62   ! strut clamp width               (3inch)
+        SCheight  =    3.81   ! strut clamp height              (1.5inch)
+        SClength  =    3.81   ! strut clamp length              (1.5inch)
+        SCthick   =    0.635  ! strut clamp thickness           (0.25inch)
+        CLheight  =    3.4925 ! clamp height			(1.375inch)
+        CLwidth   =    3.81   ! clamp width			(1.5inch)
+        CLlength  =   41.275  ! clamp length			(16.25inch)
+        CLthick   =    0.3175 ! clamp plate thickness           (0.125inch)
+        DETlen    =   33.02   ! PMT assembly length		(13inch)
+        DETrad    =    3.81   ! PMT assembly radius		(1.5inch)
+        DETfront  =    1.016  ! PMT ass. frontplate thickness	(0.4inch)
+        ConvThk   =    1.     ! Converter layer thickness
+        RadiThk   =    1.     ! Radiator layer thickness      
+        EleLeng   =   15.0    ! electronics mount length
+        DrLayer   =    6.     ! layer radial width
+        NumPMT    =    3      ! number of PMT in layer
+        PMTwall   =    0.1    ! PMT wall thickness
+        PMTrad    =    2.54   ! PMT and detector radius		(1inch)
+        PMTlen    =    8.0    ! PMT tube length 
+        IBchoice  =    1      ! active/de-activate (0) ibeam
+        IBPosYc   =  -16.51   ! IBeam central Ylocation		(6.5inch)
+        IBPosZc   =  530.477  ! IBeam central Zposition
+        IBLeng    =  294.894  ! IBeam length                    (116.1inch)
+        IBthickH  =    0.7366 ! IBeam horiz. plate thickness	(0.29inch)
+        IBthickV  =    0.4318 ! IBeam vert. plate thickness	(0.17inch)
+        IBheight  =   10.16   ! IBeam height			(4inch)
+        IBwidth   =    7.62   ! IBeam width			(3inch)
+        IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
+        IBwhghtF  =    4.4489 ! IBeam vert. front piece height
+        IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+     Endfill
 *
+     FILL VPDG  ! pVPD basic dimensions
+        version   =    3      ! geometry version
+        zposEast  =  564.4388 ! Z position East
+        zposWest  =  563.4069 ! Z position West
+        rmin      =    6.35   ! mothervolume rmin		(2.5inch)
+        rmax      =   31.27375! mothervolume rmin		(12.3125inch)
+        BPwidth   =   30.48   ! baseplate width 		(12inch)
+        BPlength  =   46.355  ! baseplate length		(18.5inch)
+        BPthick   =    0.635  ! baseplate thickness		(0.25inch)
+        BXheight  =    5.08   ! FEE box height			(2inch)
+        BXlength  =   15.24   ! FEE box length			(6inch)
+        BXwidth   =   25.4    ! FEE box width			(10inch)
+        BXthick   =    0.635  ! FEE box plate thickness		(0.25inch)
+        BXzposC   =    0.635  ! FEE central z pos (+/-??)	(0.25inch)
+        FPwidth   =    7.62   ! frontplate width		(3inch)
+        FPheight  =   25.45842! frontplate height		(10.023inch)
+        FPthick   =    2.54   ! frontplate thickness		(1inch)
+        FPAwidth  =    6.63956! frontpl.part A width            (2.614inch)
+        FPAhght   =    8.35405! frontpl.part A height           (3.289inch)
+        FPChght   =   12.573  ! frontpl.part C height           (4.95inch)
+        FPHhght   =    3.81   ! frontpl. hook height            (1.5inch)
+        FPHwidth  =    5.08   ! frontpl. hook width             (2inch)
+        FPHthick  =    0.635  ! frontpl. hook thickness         (0.25inch)
+        STthick   =    0.635  ! strut thickness			(0.25inch)
+        STheight  =   23.1775 ! strut height			(9.125 inch)
+        STangle   =   25.     ! strut angle (degr)
+        STdiagsz  =    5.08   ! diagnoal strut size             (2inch)
+        SCwidth   =    7.62   ! strut clamp width               (3inch)
+        SCheight  =    3.81   ! strut clamp height              (1.5inch)
+        SClength  =    3.81   ! strut clamp length              (1.5inch)
+        SCthick   =    0.635  ! strut clamp thickness           (0.25inch)
+        CLheight  =    3.4925 ! clamp height			(1.375inch)
+        CLwidth   =    3.81   ! clamp width			(1.5inch)
+        CLlength  =   41.275  ! clamp length			(16.25inch)
+        CLthick   =    0.3175 ! clamp plate thickness           (0.125inch)
+        DETlen    =   33.02   ! PMT assembly length		(13inch)
+        DETrad    =    3.81   ! PMT assembly radius		(1.5inch)
+        DETfront  =    1.016  ! PMT ass. frontplate thickness	(0.4inch)
+        ConvThk   =    1.     ! Converter layer thickness
+        RadiThk   =    1.     ! Radiator layer thickness      
+        EleLeng   =   15.0    ! electronics mount length
+        DrLayer   =    6.     ! layer radial width
+        NumPMT    =    3      ! number of PMT in layer
+        PMTwall   =    0.1    ! PMT wall thickness
+        PMTrad    =    2.54   ! PMT and detector radius		(1inch)
+        PMTlen    =    8.0    ! PMT tube length 
+        IBchoice  =    1      ! active/de-activate (0) ibeam
+        IBPosYc   =  -16.51   ! IBeam central Ylocation		(6.5inch)
+        IBPosZc   =  530.477  ! IBeam central Zposition
+        IBLeng    =  294.894  ! IBeam length                    (116.1inch)
+        IBthickH  =    0.7366 ! IBeam horiz. plate thickness	(0.29inch)
+        IBthickV  =    0.4318 ! IBeam vert. plate thickness	(0.17inch)
+        IBheight  =   10.16   ! IBeam height			(4inch)
+        IBwidth   =    7.62   ! IBeam width			(3inch)
+        IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
+        IBwhghtF  =    4.4489 ! IBeam vert. front piece height
+        IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+     Endfill
+*
+     FILL VPDG  ! pVPD basic dimensions
+        version   =    4      ! geometry version
+        zposEast  =  574.5688 ! Z position East
+        zposWest  =  573.5669 ! Z position West
+        rmin      =    6.35   ! mothervolume rmin		(2.5inch)
+        rmax      =   31.27375! mothervolume rmin		(12.3125inch)
+        BPwidth   =   30.48   ! baseplate width 		(12inch)
+        BPlength  =   46.355  ! baseplate length		(18.5inch)
+        BPthick   =    0.635  ! baseplate thickness		(0.25inch)
+        BXheight  =    5.08   ! FEE box height			(2inch)
+        BXlength  =   15.24   ! FEE box length			(6inch)
+        BXwidth   =   25.4    ! FEE box width			(10inch)
+        BXthick   =    0.635  ! FEE box plate thickness		(0.25inch)
+        BXzposC   =    0.635  ! FEE central z pos (+/-??)	(0.25inch)
+        FPwidth   =    7.62   ! frontplate width		(3inch)
+        FPheight  =   25.45842! frontplate height		(10.023inch)
+        FPthick   =    2.54   ! frontplate thickness		(1inch)
+        FPAwidth  =    6.63956! frontpl.part A width            (2.614inch)
+        FPAhght   =    8.35405! frontpl.part A height           (3.289inch)
+        FPChght   =   12.573  ! frontpl.part C height           (4.95inch)
+        FPHhght   =    3.81   ! frontpl. hook height            (1.5inch)
+        FPHwidth  =    5.08   ! frontpl. hook width             (2inch)
+        FPHthick  =    0.635  ! frontpl. hook thickness         (0.25inch)
+        STthick   =    0.635  ! strut thickness			(0.25inch)
+        STheight  =   23.1775 ! strut height			(9.125 inch)
+        STangle   =   25.     ! strut angle (degr)
+        STdiagsz  =    5.08   ! diagnoal strut size             (2inch)
+        SCwidth   =    7.62   ! strut clamp width               (3inch)
+        SCheight  =    3.81   ! strut clamp height              (1.5inch)
+        SClength  =    3.81   ! strut clamp length              (1.5inch)
+        SCthick   =    0.635  ! strut clamp thickness           (0.25inch)
+        CLheight  =    3.4925 ! clamp height			(1.375inch)
+        CLwidth   =    3.81   ! clamp width			(1.5inch)
+        CLlength  =   41.275  ! clamp length			(16.25inch)
+        CLthick   =    0.3175 ! clamp plate thickness           (0.125inch)
+        DETlen    =   33.02   ! PMT assembly length		(13inch)
+        DETrad    =    3.81   ! PMT assembly radius		(1.5inch)
+        DETfront  =    1.016  ! PMT ass. frontplate thickness	(0.4inch)
+        ConvThk   =    1.     ! Converter layer thickness
+        RadiThk   =    1.     ! Radiator layer thickness      
+        EleLeng   =   15.0    ! electronics mount length
+        DrLayer   =    6.     ! layer radial width
+        NumPMT    =    3      ! number of PMT in layer
+        PMTwall   =    0.1    ! PMT wall thickness
+        PMTrad    =    2.54   ! PMT and detector radius		(1inch)
+        PMTlen    =    8.0    ! PMT tube length 
+        IBchoice  =    1      ! active/de-activate (0) ibeam
+        IBPosYc   =  -16.51   ! IBeam central Ylocation		(6.5inch)
+        IBPosZc   =  530.477  ! IBeam central Zposition
+        IBLeng    =  294.894  ! IBeam length                    (116.1inch)
+        IBthickH  =    0.7366 ! IBeam horiz. plate thickness	(0.29inch)
+        IBthickV  =    0.4318 ! IBeam vert. plate thickness	(0.17inch)
+        IBheight  =   10.16   ! IBeam height			(4inch)
+        IBwidth   =    7.62   ! IBeam width			(3inch)
+        IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
+        IBwhghtF  =    4.4489 ! IBeam vert. front piece height
+        IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+     Endfill
+
+*
+** decide on the version
+     USE  VPDV
+     USE  VPDG version=VPDV_vpdConfig;  
+**
      Create VPDD
-* need zpos passed on inside the vpdd definition for the I-beam
+
      print *,'pVPD: Zpositions West and East:',vpdg_zposWest,' &',vpdg_zposEast,' cm'	
+
      zpos = vpdg_zposWest
      Position VPDD in Cave   z=+zpos            Konly='Many'
      zpos = vpdg_zposEast
