@@ -12,13 +12,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.40 2000/06/12 13:46:43 fisyak Exp $
+# $Id: cons,v 1.41 2000/06/12 13:51:32 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.40 2000/06/12 13:46:43 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.41 2000/06/12 13:51:32 fisyak Exp $)'. "\n";
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -607,12 +607,10 @@ sub main::doscripts {
 # so we've replaced it with the following code.
 	my($key,$val);
 	while (($key,$val) = each %script::) {
-#	    next if $key eq 'env';
 	    local(*priv::script) = $val;
 	    undef $priv::script;
 	    undef @priv::script;
 	    undef %priv::script;
-#	    print "$key $val $env->{INCDIRPREFIX}\n";
 	}
     }
     die("$0: script errors encountered: construction aborted\n")
@@ -1279,17 +1277,6 @@ sub LinkedModule {
 	       ($progenv, $progenv->{LINKMODULECOM}),
 	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
 }
-
-#sub LinkedTables {
-#    my($env) = shift;
-#    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
-#    my($progenv) = $env->_resolve($tgt);
-#    $tgt->bind(find build::command::linkedmodule
-#	       ($progenv, $progenv->{LINKMODULECOM}),
-#	       $env->_Objects(map(@_, @_)));
-##	       @_);
-##	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
-#}
 
 sub Library {
     my($env) = shift;
@@ -2222,20 +2209,7 @@ sub iflags {
     my($self, $env) = @_;
     my($iflags);
     my($dpath);
-    # Recognize /I style include directive on Win32
-    # <schwarze@isa.de> 1998-05-13
-    # Move its invariant calculation outside the loop
-    # <knight@baldmt.com> 1998-09-22
-#yf    my($flagprefix) = " ${main::FLAG_CHARACTER}I";
-#    my $PWD = `pwd`; chomp($PWD);
     for $dpath (map($_->path, @{$self->{path}})) {
-#yf     if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
-#	$iflags .= $flagprefix . $PWD . "/" . $dpath;
-#yf	$iflags .= $flagprefix . $dpath;
-#      print "iflags: $env->{INCDIRPREFIX}\n";
-#	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
-#	$iflags .= " -I".$dpath;
-#yf	next if File::Spec->file_name_is_absolute($dpath);
 	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
 	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
