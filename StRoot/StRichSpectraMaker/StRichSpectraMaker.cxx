@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.10 2002/02/19 04:26:50 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.11 2002/02/22 14:30:51 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.11  2002/02/22 14:30:51  dunlop
+ * Fixed bug in filling of StEvent StRichSpectra.
+ * Loosened cuts to match StRichPIDMaker.
+ *
  * Revision 1.10  2002/02/19 04:26:50  lasiuk
  * addition of filling StEvent for inclusion in chain
  *
@@ -319,7 +323,7 @@ void StRichSpectraMaker::initCutParameters() {
     //
     // Event Level
     //
-    mVertexWindow = 80.*centimeter;
+    mVertexWindow = 200.*centimeter;
     
     //
     // Track Level
@@ -330,8 +334,8 @@ void StRichSpectraMaker::initCutParameters() {
     mDcaCut = 3.0*centimeter;
     mFitPointsCut = 20;
     mPathCut = 500*centimeter;
-    mPadPlaneCut = 2.0*centimeter;
-    mRadiatorCut = 2.0*centimeter;
+    mPadPlaneCut = 1.0*centimeter;
+    mRadiatorCut = 1.0*centimeter;
 
     mMomentumThreshold = .5*GeV;
     mMomentumLimit = 7.*GeV;
@@ -729,9 +733,8 @@ Int_t StRichSpectraMaker::Make() {
 			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
 			      mass2, lineIntegralRatio, totalPath,
 			      mTracer->trackAngle()/degree, iflag, dEdx,
-			      mD[0], mNpd[0],
-			      mD[1], mNpd[1],
-			      mD[2], mNpd[2]);
+			      mD[0], mD[1], mD[2],
+			      mNpd[0], mNpd[1], mNpd[2]);
 	//
 	// default Production
 	//
@@ -753,7 +756,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.10 2002/02/19 04:26:50 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.11 2002/02/22 14:30:51 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
