@@ -45,19 +45,22 @@ extern CC_P void kam_topjoin_whereclause_();
 extern CC_P void kam_topjoin_join_();
 extern CC_P void kam_topjoin_reset_();
 /*-*/
-extern CC_P int kam_top_count();
-extern CC_P int kam_top_list();
-extern CC_P int kam_top_newproject();
-extern CC_P int kam_top_newjoin();
-extern CC_P int kam_top_newfilter();
-extern CC_P int kam_top_newsort();
-extern CC_P int kam_topproject_selectspec();
-extern CC_P int kam_topproject_project();
-extern CC_P int kam_topproject_reset();
-extern CC_P int kam_topjoin_selectspec();
-extern CC_P int kam_topjoin_whereclause();
-extern CC_P int kam_topjoin_join();
-extern CC_P int kam_topjoin_reset();
+extern CC_P STAFCV_T top_count();
+extern CC_P STAFCV_T top_list();
+extern CC_P STAFCV_T top_newproject(char* agent, char* select);
+extern CC_P STAFCV_T top_newjoin(char* agent, char* select, char* where);
+extern CC_P STAFCV_T top_newfilter();
+extern CC_P STAFCV_T top_newsort();
+extern CC_P STAFCV_T topproject_selectspec(char* agent, char* select);
+extern CC_P STAFCV_T topproject_project(char* agent, char* table1, char* table2
+		, char* select);
+extern CC_P STAFCV_T topproject_reset(char* agent);
+extern CC_P STAFCV_T topjoin_selectspec(char* agent, char* select);
+extern CC_P STAFCV_T topjoin_whereclause(char* agent, char* where);
+extern CC_P STAFCV_T topjoin_join(char* agent, char* table1, char* table2
+		, char* table3, char* select, char* where);
+extern CC_P STAFCV_T topjoin_reset(char* agent);
+/*-*/
 
 #endif /*NOKUIP*/
 

@@ -5,12 +5,12 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.1 1996/10/28 21:26:27 tull Exp $"
+VERSION			:= "$Id: Makefile,v 1.2 1997/01/01 00:53:20 tull Exp $"
 #
-default: setup config all
+default: all
 #
 #?make all         - Make libraries and binaries.
-all: setup config inc_all src_all lib_all bin_all doc_all install
+all: setup config inc_all src_all lib_all bin_all doc_all
 %_all:
 	@cd $*; $(MAKE) all
 #

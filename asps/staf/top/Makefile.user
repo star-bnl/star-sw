@@ -1,17 +1,7 @@
 # Makefile.user - user customization of SLM
-#? - Use this file to override SLMakefile behavior.
+#? - Customize this file to override SLMakefile behavior.
 ######################################################################
 #
 mytarget:
 	@echo "Put any special make targets in this file."
-#
-tst_validity: tst_validity.o
-	$(CXX)  -o $@ $^ $(LIBDIR)/libtop.a
-#
-VPATH += /usr/lib
-#
-# TEMPORARY HACK for TOP ... development library
-###CPPFLAGS += -I$$STAR_LIB/dev/sys/inc
-###VPATH += $$STAR_LIB/dev/sys/lib
-###LOAD_LIBS += -L$$STAR_LIB/dev/sys/lib
 #
