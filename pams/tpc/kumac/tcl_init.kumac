@@ -11,12 +11,11 @@ cd /dui/constants/tpc/params
   dio/newfilestream tclp $STAR/params/tpc/tcl_pars.xdf r
   dio/stream/getevent    tclp
   dio/stream/close       tclp
-
-cd /dui
+ 
+ cd /dui
 
 return
-
-
+ 
 *********************************************************************
 **********************************************************************
 *********************************************************************
