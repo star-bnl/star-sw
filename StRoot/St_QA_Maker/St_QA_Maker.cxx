@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.6 1999/02/25 19:25:39 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.7 1999/02/25 21:11:56 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.7  1999/02/25 21:11:56  kathy
+// fix histograms
+//
 // Revision 1.6  1999/02/25 19:25:39  kathy
 // fix up histograms
 //
@@ -338,25 +341,27 @@ void St_QA_Maker::MakeHistGlob(){
     dst_track_st  *trk   = globtrk->GetTable();
     for (Int_t i = 0; i < globtrk->GetNRows(); i++){
       dst_track_st *t = trk + i;
-      Float_t pT = 9999.;
-      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
-      Float_t theta = asin(1.) - atan(t->tanl);
-      Float_t eta   =-log(tan(theta/2.));
-      m_pT->Fill(pT);
-      m_eta->Fill(eta);
-      m_pT_eta_rec->Fill(eta,pT);
-      Float_t chisq0 = t->chisq[0];
-      Float_t chisq1 = t->chisq[1]; 
-      Float_t pointk = t->n_point ;
-      Float_t chisq0_p = chisq0/pointk ;
-      Float_t chisq1_p = chisq1/pointk ;
-      m_point->Fill(pointk);
-      m_fit_point->Fill(t->n_fit_point); 
-      m_chisq0->Fill(chisq0_p);
-      m_chisq1->Fill(chisq1_p);
-      m_length->Fill(t->length);
-      m_psi->Fill(t->psi);
-      m_det_id->Fill(t->det_id);
+      if (t->iflag>0) {
+       Float_t pT = 9999.;
+       if (t->invpt) pT = 1./TMath::Abs(t->invpt);
+       Float_t theta = asin(1.) - atan(t->tanl);
+       Float_t eta   =-log(tan(theta/2.));
+       m_pT->Fill(pT);
+       m_eta->Fill(eta);
+       m_pT_eta_rec->Fill(eta,pT);
+       Float_t chisq0 = t->chisq[0];
+       Float_t chisq1 = t->chisq[1]; 
+       Float_t pointk = t->n_point ;
+       Float_t chisq0_p = chisq0/pointk ;
+       Float_t chisq1_p = chisq1/pointk ;
+       m_point->Fill(pointk);
+       m_fit_point->Fill(t->n_fit_point); 
+       m_chisq0->Fill(chisq0_p);
+       m_chisq1->Fill(chisq1_p);
+       m_length->Fill(t->length);
+       m_psi->Fill(t->psi);
+       m_det_id->Fill(t->det_id);
+      }
     }
   }       
 }
@@ -397,22 +402,24 @@ void St_QA_Maker::MakeHistPrim(){
     dst_track_st  *trk   = primtrk->GetTable();
     for (Int_t i = 0; i < primtrk->GetNRows(); i++){
       dst_track_st *t = trk + i;
-      Float_t pT = 9999.;
-      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
-      Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
-      Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
-      m_prim_pT->Fill(pT);
-      m_prim_eta->Fill(eta);
-      m_prim_pT_eta_rec->Fill(eta,pT);
-      m_prim_point->Fill(t->n_point);
-      m_prim_fit_point->Fill(t->n_fit_point);
-      m_prim_psi->Fill(t->psi);
-      m_prim_det_id->Fill(t->det_id);
-      // Al histograms
-      m_prim_tlength->Fill(t->length);
-      if (t->ndegf>0) {
+      if (t->iflag>0) {
+       Float_t pT = 9999.;
+       if (t->invpt) pT = 1./TMath::Abs(t->invpt);
+       Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
+       Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+       m_prim_pT->Fill(pT);
+       m_prim_eta->Fill(eta);
+       m_prim_pT_eta_rec->Fill(eta,pT);
+       m_prim_point->Fill(t->n_point);
+       m_prim_fit_point->Fill(t->n_fit_point);
+       m_prim_psi->Fill(t->psi);
+       m_prim_det_id->Fill(t->det_id);
+       // Al histograms
+       m_prim_tlength->Fill(t->length);
+       if (t->ndegf>0) {
         m_prim_chi2xd->Fill(t->chisq[0]/((t->ndegf+5.)/2.-3.));  
         m_prim_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-2.));  
+       }
       }
     }
   }
@@ -527,7 +534,7 @@ void St_QA_Maker::MakeHistPID(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.6 1999/02/25 19:25:39 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.7 1999/02/25 21:11:56 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
