@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.4 2001/10/15 01:41:41 pavlinov Exp $
+// $Id: StEpcMaker.h,v 1.5 2001/11/06 23:35:27 suaide Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.5  2001/11/06 23:35:27  suaide
+// fixed bug in the way we get magnetic field
+//
 // Revision 1.4  2001/10/15 01:41:41  pavlinov
 // Added Clear method
 //
@@ -54,49 +57,38 @@ typedef StVector(StTrack*)::iterator StTrackVecIter;
 
 
 
-class StEpcMaker : public StMaker {
-private:
-  StEvent*                    mEvent;//!
-  StEmcCollection*           mTheEmcCollection;//!
-  bool accept(StTrack*);   // This is used to select tracks
-  void MakeHistograms();   // Filling QA Histograms
+class StEpcMaker : public StMaker 
+{
+  private:
+    StEvent*             mEvent;              //!
+    StEmcCollection*     mTheEmcCollection;   //!
+    bool                 accept(StTrack*);    // This is used to select tracks
+    void                 MakeHistograms();    // Filling QA Histograms
 
-protected:
+  protected:
+    TH1F *m_point_energy[4];   //! //Point Energy spectra
+    TH1F *m_point_eta[4];      //! //Point Eta spectra
+    TH1F *m_point_phi[4];      //! //Point Phi spectra
+    TH1F *m_point_sigeta[4];   //! //Point SigmaEta spectra
+    TH1F *m_point_sigphi[4];   //! //Point SigmaPhi spectra
+    TH1F *m_point_deleta[4];   //! //Point DeltaEta spectra
+    TH1F *m_point_delphi[4];   //! //Point DeltaPhi spectra
+    TH1F *m_point_trmom[4];    //! //Point TrMom spectra
+    TH1F *m_emc_points[4];     //! //Emc Point multiplicity
+    TH1F *m_point_flag;        //! //Point Flag spectra
 
-  //Point Energy spectra
-
-  TH1F* m_point_energy[4];   //!
-  //Point Eta spectra
-  TH1F *m_point_eta[4];      //!
-  //Point Phi spectra
-  TH1F *m_point_phi[4];      //!
-  //Point SigmaEta spectra
-  TH1F *m_point_sigeta[4];   //!
-  //Point SigmaPhi spectra
-  TH1F *m_point_sigphi[4];   //!
-  //Point DeltaEta spectra
-  TH1F *m_point_deleta[4];   //!
-  //Point DeltaPhi spectra
-  TH1F *m_point_delphi[4];   //!
-  //Point TrMom spectra
-  TH1F *m_point_trmom[4];    //!
-  //Emc Point multiplicity
-  TH1F *m_emc_points[4];     //!
-  //Point Flag spectra
-  TH1F *m_point_flag;        //!
-public: 
-  StEpcMaker(const char *name="epc");
-  virtual ~StEpcMaker();
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual void   Clear(Option_t *option="");
-  virtual Int_t Finish();
-
-  virtual Int_t fillStEvent();
+    double BField;
+  
+  public: 
+    StEpcMaker(const char *name="epc");
+    virtual ~StEpcMaker();
+    virtual Int_t Init();
+    virtual Int_t Make();
+    virtual Int_t Finish();
+    virtual Int_t fillStEvent();
 
   
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.4 2001/10/15 01:41:41 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+    virtual const char *GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.5 2001/11/06 23:35:27 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };

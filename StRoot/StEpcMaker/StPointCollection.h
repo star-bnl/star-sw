@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.4  2001/11/06 23:35:27  suaide
+// fixed bug in the way we get magnetic field
+//
 // Revision 1.3  2000/12/01 17:05:42  subhasis
 // track matching after assignment, PRS, deltaeta,deltaphi added to StEmcPoint
 //
@@ -23,6 +26,7 @@
 #ifndef HEP_SYSTEM_OF_UNITS_H
 #include "SystemOfUnits.h"                                                     
 #endif
+
 #include "StEpcConstants.h"                                                     
 #include "StEpcCut.h"                                                     
 
@@ -59,69 +63,62 @@ class StEmcCluster;
 typedef StVector(StEmcCluster*) StMatchVecClus;
 typedef StVector(StEmcCluster*)::iterator StMatchVecClusIter;
 
-
 #include "tables/St_dst_track_Table.h"
-class StPointCollection : public St_DataSet {
 
-private:
- TObjArray mPoints;
- TObjArray mPointsReal;
- Int_t mNPoints;
- Int_t mNPointsReal;
+class StPointCollection : public St_DataSet 
+{
 
-protected:   
+  private:
+    TObjArray         mPoints;
+    TObjArray         mPointsReal;
+    Int_t             mNPoints;
+    Int_t             mNPointsReal;
+    double            BField;
+  protected:   
 
-public: 
+  public: 
 
-  StPointCollection();
-  StPointCollection(const Char_t *);
-  virtual ~StPointCollection();
+                      StPointCollection();
+                      StPointCollection(const Char_t *);
+    virtual           ~StPointCollection();
 
-  Int_t NPoints() const;
-  const TObjArray* Points() const;
-  Int_t NPointsReal() const;
-  const TObjArray* PointsReal() const;
+    void              SetBField(double B) { BField=B; }
+    Int_t             NPoints() const;
+    const TObjArray*  Points() const;
+    Int_t             NPointsReal() const;
+    const TObjArray*  PointsReal() const;
 
-Int_t
-  findEmcPoints(StEmcClusterCollection*,
-             StEmcClusterCollection*,
-             StEmcClusterCollection*,
-             StEmcClusterCollection*,
-             StTrackVec &);
+    Int_t             findEmcPoints(StEmcClusterCollection*,
+                                    StEmcClusterCollection*,
+                                    StEmcClusterCollection*,
+                                    StEmcClusterCollection*,
+                                    StTrackVec &);
 
-virtual Int_t
-  TrackSort(const StTrackVec &) const;
+    virtual Int_t     TrackSort(const StTrackVec &) const;
 
-void
-  ClusterSort(StEmcClusterCollection*,
-             StEmcClusterCollection*,
-             StEmcClusterCollection*,
-             StEmcClusterCollection*);
+    void              ClusterSort(StEmcClusterCollection*,
+                                  StEmcClusterCollection*,
+                                  StEmcClusterCollection*,
+                                  StEmcClusterCollection*);
 
-virtual Int_t
-  MatchClusterAndTrack(const StMatchVecClus,
-                       const StMatchVecClus,
-                       const StMatchVecClus,
-                       const StMatchVecClus,
-                       const FloatVector,
-                       const FloatVector,
-                       const FloatVector,
-                       Int_t *);
+    virtual Int_t     MatchClusterAndTrack(const StMatchVecClus,
+                                           const StMatchVecClus,
+                                           const StMatchVecClus,
+                                           const StMatchVecClus,
+                                           const FloatVector,
+                                           const FloatVector,
+                                           const FloatVector,
+                                           Int_t *);
 
-virtual Int_t
-  addPoints(Float_t*);
+    virtual Int_t     addPoints(Float_t*);
 
   ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection 
 };
 //
-inline 
- Int_t StPointCollection::NPointsReal() const {return mNPointsReal;}
-inline
- const TObjArray* StPointCollection::PointsReal() const {return &mPointsReal;}
-inline
- Int_t StPointCollection::NPoints() const {return mNPoints;}
-inline
-const TObjArray* StPointCollection::Points() const  {return &mPoints;}
+inline        Int_t        StPointCollection::NPointsReal() const {return mNPointsReal;}
+inline  const TObjArray*   StPointCollection::PointsReal()  const {return &mPointsReal;}
+inline        Int_t        StPointCollection::NPoints()     const {return mNPoints;}
+inline  const TObjArray*   StPointCollection::Points()      const {return &mPoints;}
 
 #endif
 
