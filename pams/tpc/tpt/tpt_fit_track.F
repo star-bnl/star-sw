@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.9 2000/03/10 08:16:09 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.10 2000/03/24 06:36:28 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.10  2000/03/24 06:36:28  sakrejda
+* Reload pointers to tracks only if necessary
+*
 * Revision 1.9  2000/03/10 08:16:09  sakrejda
 * Single point on the track end removed
 *
@@ -204,13 +207,13 @@ C         fit wasn't succesful, reset all the points
           do i=1,trk(ipt).nhit
              if(good_hit(i)) then
                n_good = n_good+1                  ! count good hits
-               trk(ipt).ipnt(n_good)=trk(ipt).ipnt(i) ! and memorize them
+               if(i.ne.n_good) trk(ipt).ipnt(n_good)=trk(ipt).ipnt(i) ! and memorize them
              else
 *              forget about this hit- 
 *              The "tte_skip" variable keeps this routine from chainging
 *              the hit table when called by tte.
                if (tte_skip.ne.-999.and.hit(trk(ipt).ipnt(i)).track.gt.0)
-     >         hit(trk(ipt).ipnt(i)).track=0.0
+     >            hit(trk(ipt).ipnt(i)).track=0.0
              endif
           end do 
 *         reload good points to the trk.ipnt
