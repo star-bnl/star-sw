@@ -132,14 +132,6 @@ FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH
 endif    
 endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_F) $(NAMES_C))))
-# *.cc moved to sl $(NAMES_CC)
-ifneq ($(FILES_O),)    
-	LIB_PKG := $(LIB_DIR)/lib$(PKG).a
-	qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
-endif                          
-ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
-        SL_PKG  := $(LIB_DIR)/$(PKG).sl
-endif                          
 MKDEPFLAGS:= -MG -MM -w -nostdinc
 ifndef NODEPEND                
 FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
@@ -147,8 +139,14 @@ FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FILES_ICC)))))
 NAMES_O   = $(notdir $(FILES_O))
-ifneq (,$(NAMES_O))
-OBJS     := $(LIB_PKG)($(NAMES_O))
+# *.cc moved to sl $(NAMES_CC)
+ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
+        SL_PKG  := $(LIB_DIR)/$(PKG).sl
+endif                          
+ifneq (,$(strip $(FILES_O)))
+LIB_PKG := $(LIB_DIR)/lib$(PKG).a
+qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
+OBJS    := $(LIB_PKG)($(NAMES_O))
 endif
 ifneq (,$(FILES_IDM))   
 IDLSD    := $(wildcard $(STAR)/pams/$(DOMAIN)/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*/*.idl)
@@ -257,6 +255,7 @@ $(FILES_OG): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 #	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def
 	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(FILES_SL) : $(OBJ_DIR)/%.o: %.cc
