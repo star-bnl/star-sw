@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.22 2004/04/27 22:27:08 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.23 2004/05/06 19:19:33 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -195,10 +195,6 @@ Int_t StEmcTpcFourPMaker::Make() {
       if(adc2E == NULL)
       {
 	muEmc = uDst->emcCollection();
-        if(muEmc != NULL)
-          cout << "muEmc != NULL" << endl;
-        else
-          cout << "muEmc == NULL" << endl;
       }
       else
 	emc = adc2E->getEmcCollection();
@@ -300,9 +296,6 @@ Int_t StEmcTpcFourPMaker::Make() {
 
       for(hitId = 1; hitId <= maxHits; hitId++)
 	{
-          cout << "Hit #: " << hitId << endl;
-          if(muEmc != NULL)
-            cout << "muEmc != NULL" << endl;
 	  float eta, phi, energy;
           bool isGood;
           getValuesFromHitId(hitId, runNumber, eta, phi, energy, isGood, 
@@ -526,6 +519,7 @@ bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi,
   TDataSet *mDb, emcGain_st* emcgaintbl,
   emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl)
 {
+          isGood = true;
 	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
             isGood = false;
 	    return false; }
@@ -549,14 +543,11 @@ bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi,
 	    }
 	  else // Calibration!!!!  MuDst does not contain energy.
 	    {
-              if(emccalibtbl == NULL)
-                return false;
 	      float ADC = 0; 
 	      float PED = 0;
               if(muEmc != NULL)
               {
-	        ADC = muEmc->getTowerADC(hitId, bemc);
-                //cout << "ADC value: " << ADC << endl;
+	        ADC = muEmc->getTowerADC(hitId);
               }
               else
                 return false;
@@ -567,6 +558,8 @@ bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi,
                 }
               else
                 {
+                  if(emccalibtbl == NULL)
+                    return false;
 	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
 		    /100.0;
 	          //PED = static_cast<double>(static_cast<int>(PED));
