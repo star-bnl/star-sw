@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.67 2004/04/12 16:48:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.68 2004/07/06 23:06:05 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1221,6 +1221,14 @@ StEventMaker::makeEvent()
 	mCurrentRunInfo->setBbcBlueBackgroundRate(richScalers->getBBCBlueBkg());	
 	mCurrentRunInfo->setBbcYellowBackgroundRate(richScalers->getBBCYellowBkg());
     }
+    // Add SVT drift scaler to run info 
+    St_DataSet *svtDriftScalerSet = GetDataSet("svt_hits/.data/svtDrift");
+    if (svtDriftScalerSet) {
+	dst_mon_soft_svt_st*  svtDriftScalerTable = dynamic_cast<dst_mon_soft_svt_st*>(svtDriftScalerSet);    
+	if (svtDriftScalerTable)
+	    mCurrentRunInfo->setSvtDriftVelocityScaler(svtDriftScalerTable->res_drf_svt);
+    }    
+    
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(mCurrentRunInfo);
 
@@ -1649,8 +1657,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.67 2004/04/12 16:48:21 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.68 2004/07/06 23:06:05 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.68  2004/07/06 23:06:05  ullrich
+ * Fill SVT drift velocity scaler into StRunInfo.
+ *
  * Revision 2.67  2004/04/12 16:48:21  ullrich
  * Fixed bug in creating StTriggerDetectorCollection. StTriggerData
  * needs to be instantiated and added before StTriggerDetectorCollection
