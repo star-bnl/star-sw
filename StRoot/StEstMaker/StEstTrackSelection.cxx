@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.7 2001/02/23 08:47:05 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.8 2001/02/23 08:50:19 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.8  2001/02/23 08:50:19  lmartin
+ * StMessMgr.h included in order to use gMessMgr.
+ *
  * Revision 1.7  2001/02/23 08:47:05  lmartin
  * cout replaced by gMessMgr.
  *
@@ -33,6 +36,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "Infrastructure/StEstWafer.hh"
