@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.24 2003/01/23 03:24:54 jeromel Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.25 2003/02/06 21:28:10 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.25  2003/02/06 21:28:10  suaide
+// bugs fixed
+//
 // Revision 1.24  2003/01/23 03:24:54  jeromel
 // GetCVS() added
 //
@@ -104,8 +107,10 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *mAdc[MAXDET];    //!
            TH2F              *mEnergyHist[MAXDET]; //!
            TH1F              *mAdc1d[MAXDET];  //!           
+           TH1F              *mEn1d[MAXDET];  //!           
            TH2F              *mTower;          //!           
            TH2F              *mSmdTimeBinHist; //!
+					 TH2F              *mValidEvents;    //!
            
            controlADCtoE_st  *mControlADCtoE; 
            
@@ -116,6 +121,7 @@ class StEmcADCtoEMaker : public StMaker
            StEmcGeom         *mGeo[MAXDET]; 
            
            Bool_t            mEmbedd;
+					 Bool_t            mFromDaq;
 					 
 					 
            void              zeroAll(); ///< Zero all temporary vectors
@@ -144,7 +150,7 @@ class StEmcADCtoEMaker : public StMaker
 					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.24 2003/01/23 03:24:54 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.25 2003/02/06 21:28:10 suaide Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
