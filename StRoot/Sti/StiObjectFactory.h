@@ -9,117 +9,148 @@
 #include <iostream>
 #include <vector>
 
+using std::vector;
+using std::cout;
+using std::endl;
+using std::ostream;
+
 template <class T>
 class StiObjectFactory : public StiFactory
 {
- public:
-
-    enum StiObjectFacotryDefaults {defaultMaxIncrementCount = 10, defaultIncrementSize=5000,
-				   defaultOriginalSize=10000};
+public:
+    
     typedef vector<T*> t_vector;
-
-    StiObjectFactory( const string& newName, int original=-1, int incremental=-1, int maxInc=-1)
-	: StiFactory(newName)
-    {
-	originalSize          = original>0    ? original    : defaultOriginalSize;
-	incrementalSize       = incremental>0 ? incremental : defaultIncrementSize;
-	maxIncrementCount     = maxInc>0      ? maxInc      : defaultMaxIncrementCount;
-	currentSize      = 0;
-	nextObjectIndex  = 0;
-	incrementCount   = 0;
-	
-	createObjects(originalSize);
-	currentSize = container.size();
-    }
     
-    virtual ~StiObjectFactory() {
-	for (t_vector::iterator it=container.begin(); it!=container.end(); ++it) {
-	    delete (*it);
-	    (*it) = 0;
-	}
-    }
+    StiObjectFactory(const char* newName, int original=-1, int incremental=-1, int maxInc=-1);
     
-    inline void reset()  {// Declare all objects owned by this container as unused.
-	nextObjectIndex    = 0; 
-    }
+    virtual ~StiObjectFactory();
     
-    inline void setIncrementalSize(int increment) {// Set the increment used in further expension of the container
-	incrementalSize = increment;
-    }
+    // Declare all objects owned by this container as unused.
+    void reset();
     
-    inline void setMaxIncrementCount(int maxCount) {//Set the max number of permitted expension
-	maxIncrementCount = maxCount;
-    }
+    void setIncrementalSize(int);
     
-    inline int getOriginalSize() const {//Get the original size of the container
-	return originalSize;
-    }
-	
-    inline int getIncrementalSize() const {// Get the increment used in further expensions of the container
-	return incrementalSize;
-    }
+    void setMaxIncrementCount(int);
     
-    inline int getMaxIncrementCount() const {// Get the max number of permitted expension
-	return maxIncrementCount;
-    }
-
-    inline int getCurrentSize() const {// Get the current size of the container
-	return container.size();
-    }
-
-    inline int getNextObjectIndex() const {
-	// Get the index  of the next object (within the container) to be served by the factory
-	return nextObjectIndex;
-    }
+    int getIncrementalSize() const;
     
-    T* getObject() {// serve the next object
-	if ( nextObjectIndex<getCurrentSize() ) {
-	    // return next object available
-	    return container[nextObjectIndex++];
-	}
-	else {
-	    if (incrementCount< maxIncrementCount) {
-		// expand container size
-		++incrementCount;
-		createObjects(incrementalSize);
-		currentSize = container.size();
-		return container[nextObjectIndex++];
-	    }
-	    else {
-		// s.o.l.
-		cout << "StiObjectFactory::getObject() - FATAL" << endl
-		     << "     Too many expension request " << endl
-		     << "     incrementCount : " << incrementCount << endl;
-		return 0;
-	    }
-	}
-    }
+    int getMaxIncrementCount() const;
+    
+    int getCurrentSize() const;
+    
+    T* getObject();
     
 protected:
     
-    //static int defaultOriginalSize;
-    //static int defaultIncrementSize;
-    //static int defaultMaxIncrementCount;
+    enum StiObjectFacotryDefaults {defaultMaxIncrementCount = 10, 
+				   defaultIncrementSize=5000,defaultOriginalSize=10000};
     
-    
-    virtual void createObjects(int n) {
-	for (int i=0;i<n; ++i) {
-	    container.push_back( new T() );
-	}
-	currentSize = container.size();
-    }
+    virtual void createObjects(int);
     
     int originalSize;
     int incrementalSize;
     int maxIncrementCount;
-    int currentSize;
-    int nextObjectIndex;
     int incrementCount;
-
+    
     t_vector container;
-
+    t_vector::iterator mCurrent;
+    
 private:
     
 };
 
+template <class T>
+StiObjectFactory<T>::StiObjectFactory(const char* newName, int original, int incremental, int maxInc)
+    : StiFactory(newName)
+{
+    originalSize = (original>0) ? original : defaultOriginalSize;
+    incrementalSize = (incremental>0) ? incremental : defaultIncrementSize;
+    maxIncrementCount = (maxInc>0) ? maxInc : defaultMaxIncrementCount;
+    incrementCount = 0;
+    
+    mCurrent = container.begin();
+    createObjects(originalSize);
+}
+
+template <class T>
+StiObjectFactory<T>::~StiObjectFactory() 
+{
+    for (t_vector::iterator it=container.begin(); it!=container.end(); ++it) {
+	delete (*it);
+	(*it) = 0;
+    }
+}
+
+template <class T>
+inline void StiObjectFactory<T>::reset()  
+{
+    mCurrent = container.begin();
+}
+
+template <class T>    
+inline void StiObjectFactory<T>::setIncrementalSize(int increment) 
+{
+    incrementalSize = increment;
+}
+    
+template <class T>
+inline void StiObjectFactory<T>::setMaxIncrementCount(int maxCount) 
+{
+    maxIncrementCount = maxCount;
+}
+
+template <class T>	
+inline int StiObjectFactory<T>::getIncrementalSize() const 
+{
+    return incrementalSize;
+}
+
+template <class T>    
+inline int StiObjectFactory<T>::getMaxIncrementCount() const 
+{
+    return maxIncrementCount;
+}
+
+template <class T>
+inline int StiObjectFactory<T>::getCurrentSize() const 
+{
+    return container.size();
+}
+
+template <class T>
+T* StiObjectFactory<T>::getObject() 
+{
+    if ( mCurrent < container.end() ) {
+	return *mCurrent++;
+    }
+    
+    else {
+	if (incrementCount< maxIncrementCount) {
+	    // expand container size
+	    ++incrementCount;
+	    createObjects(incrementalSize);
+	    return *mCurrent++;
+	}
+	else {
+	    // s.o.l.
+	    cout << "StiObjectFactory::getObject() - FATAL" << endl;
+	    cout << "     Too many expension request " << endl;
+	    cout << "     incrementCount : " << incrementCount << endl;
+	    return 0;
+	}
+    }
+}
+
+template <class T>
+void StiObjectFactory<T>::createObjects(int n) 
+{
+    int currentDistance = mCurrent-container.begin();
+    container.reserve( container.size()+n );
+    for (int i=0;i<n; ++i) {
+	container.push_back( new T() );
+    }
+    mCurrent = container.begin()+currentDistance;
+}
+
 #endif
+
