@@ -33,6 +33,7 @@ public:
 
   virtual bool Pass(const StHbtTrack* track)=0;       // true if passes, false if not
   virtual StHbtParticleType Type(){return hbtTrack;}
+  virtual StHbtTrackCut* Clone() { return 0;}
 
 #ifdef __ROOT__
   ClassDef(StHbtTrackCut, 0)

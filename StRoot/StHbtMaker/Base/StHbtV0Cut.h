@@ -34,6 +34,7 @@ public:
   virtual bool Pass(const StHbtV0* )=0;               // true if passes, false if not
 
   virtual StHbtParticleType Type(){return hbtV0;}
+  virtual StHbtV0Cut* Clone() { return 0;}
 
 #ifdef __ROOT__
   ClassDef(StHbtV0Cut, 0)

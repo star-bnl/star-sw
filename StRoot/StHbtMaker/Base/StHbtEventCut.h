@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.5 2000/03/17 17:18:25 laue Exp $
+ * $Id: StHbtEventCut.h,v 1.6 2000/03/23 22:43:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.6  2000/03/23 22:43:27  laue
+ * Clone() function implemented in cuts.
+ *
  * Revision 1.5  2000/03/17 17:18:25  laue
  * Roberts new three particle correlations implemented.
  *
@@ -68,8 +71,8 @@ public:
 
   virtual bool Pass(const StHbtEvent* event) =0;  // true if passes, false if not
 
-  //  virtual string Report() =0;    // user-written method to return string describing cuts
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
+  virtual StHbtEventCut* Clone() { return 0;}
 
 #ifdef __ROOT__
   ClassDef(StHbtEventCut, 0)
