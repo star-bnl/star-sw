@@ -1,10 +1,14 @@
 #!/opt/star/bin/perl
 
-use CGI;
+use CGI qw(:standard);
+use Time::Local;
+
+sub cgiSetup {
+    $q=new CGI;
+    if ( exists($ENV{'QUERY_STRING'}) ) { print $q->header };
+}
 
 sub printMainHeader {
-    $q=new CGI;
-    print $q->header;
     my ( $title ) = @_;
     if ( @_>1 ) {
         $cache="";
@@ -15,6 +19,7 @@ sub printMainHeader {
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 END
     }
+    $curtime = localtime(time());
     print <<END;
 <html>
 <head>
@@ -55,7 +60,8 @@ A:hover.nav {  text-decoration: none}
 	<td align=right> <font size="-1"> 
 &nbsp; </font></td>
 	</tr>
-        <tr><td colspan=2 align=right> <font size="-1"> &nbsp;
+        <tr><td colspan=2 align=right> <font size="-1"> 
+Generated at $curtime
  </font></td></tr>
 </table>
 
