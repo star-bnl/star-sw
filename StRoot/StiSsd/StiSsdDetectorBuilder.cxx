@@ -177,7 +177,8 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 	
 		StiPlacement *pPlacement = new StiPlacement;
 		pPlacement->setZcenter(0.);
-		pPlacement->setLayerRadius(centerVector.perp()); //this is only used for ordering in detector container...
+		//pPlacement->setLayerRadius(centerVector.perp()); //this is only used for ordering in detector container...
+		pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
 		pPlacement->setRegion(StiPlacement::kMidRapidity);
 		//pPlacement->setNormalRep(psi, rprime, dy); //this should work
 		pPlacement->setNormalRep(phi, r, 0.);  //but we have to use this to fix ladders 20 and 12
