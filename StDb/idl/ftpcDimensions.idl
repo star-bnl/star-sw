@@ -26,6 +26,7 @@ struct ftpcDimensions {
   float  sizeOfTimebin;                /*   size of timebin                                       */
   float  innerRadiusSensitiveVolume;   /*   inner radius of sensitive volume                      */
   float  outerRadiusSensitiveVolume;   /*   outer radius of sensitive volume                      */
+  float  installationPointX[2];        /*   x-coord of installation point, [0] = east, [1] = west */ 
   float  installationPointY[2];        /*   y-coord of installation point, [0] = east, [1] = west */ 
   float  installationPointZ[2];        /*   z-coord of installation point, [0] = east, [1] = west */ 
 };  
