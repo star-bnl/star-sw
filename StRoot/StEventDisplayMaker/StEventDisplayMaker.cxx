@@ -383,23 +383,39 @@ Int_t StEventDisplayMaker::Make()
 
 #if 0
 //_____________________________________________________________________________
-cinst Char_t StEventDisplayMaker::ParseName(const Char_t *inName)
+const Char_t StEventDisplayMaker::ParseName(const Char_t *inName)
 {
   //  "name" - StEvent
   //  "g2t_tpc_hit(track_id,x[0],x[1],x[2])"
   // look for the first bracket:
-  const Char_t *pos = 0;
-  const Char_t *positions[5] = {0,0,0,0,0};
-  const Int_t lenExpr = sizeof(positions)/sizeof(Char_t *);
-  const Char_t openBracket  = '(';
-  const Char_t closeBracket = ')';
-  const Char_t comma        = ',';
-  const Char_t delimiters[5] = {openBracket,comma,comma,comma,closeBracket };
-  Int_t i = 0;
-  positions[0] = inName;
-  for (i=1;i<lenExpr;i++)  {
-     if( pos = strchr(inName,delimiters[i]) ) 
-              position[i] = pos;
+  if (inName && inName[0]) {
+    Char_t *parsedName = StrDup(inName);
+    const Char_t *pos = 0;
+    const Char_t *positions[] = {0,0,0,0,0};
+    const Char_t *errorMessages[] = {"the open bracket missed"
+                                     , "first comma missed"
+                                     , "second comma missed"
+                                     , "third comma missed"
+                                     , "the closed bracket missed"
+                                    }
+ 
+    const Int_t lenExpr = sizeof(positions)/sizeof(Char_t *);
+    const Char_t openBracket  = '(';
+    const Char_t closeBracket = ')';
+    const Char_t comma        = ',';
+    const Char_t delimiters[5] = {openBracket,comma,comma,comma,closeBracket };
+    Int_t i = 0;
+    pos = positions[0] = parsedName;
+    for (i=1;i<lenExpr;i++)  {
+       if( pos = strchr(pos+1,delimiters[i]) ) {
+                position[i] = pos;
+               *pos = 0;
+       } else break;
+    }
+    if (i > 1) 
+      for (i=1;i<lenExpr;i++) {
+         if (!position[i]) Error("ParseName","%s",errorMessages[i]);
+
   }
 }
 #endif
