@@ -24,7 +24,7 @@
   for (Int_t i=1; i<strDstT; i++) { \
     if (doT[i]) proc; }
 
-#define EachController(proc) EachDoT(cont[i]->proc);
+#define EachController(proc) EachDoT( if( cont[i]) cont[i]->proc );
 
 // Defaults file and tree names;
 static char* defFileName = "evMuDst.root";
@@ -50,6 +50,8 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   SetNumber(-2);
   outFileNum = 1;
   doT0JitterAbort = kFALSE;
+
+  //printf("DEBUG :: >>>>>>>> %d \n",strDstT);
 
   for (Int_t i=0; i<strDstT; i++) {
     doT[i] = kFALSE;
@@ -95,7 +97,11 @@ Int_t StStrangeMuDstMaker::Init() {
   }
   cutsArray = new TClonesArray("TCut",0);
   StStrangeControllerBase::currentMaker = this;
-  {EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));}
+  {
+    EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));
+    //printf("DEBUG :: %d \n",strDstT);
+    //for(Int_t i=1; i < strDstT; i++) printf("DEBUG :: %d\n",cont[i]);
+  }
 
   v0 = cont[v0T];
   xi = cont[xiT];
@@ -464,6 +470,7 @@ Int_t StStrangeMuDstMaker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
                                << GetName() << endm; 
   if (rw==StrangeWrite) CloseFile();
+  //printf("DEBUG :: >>>>>>>> %d \n",strDstT);  
   EachController(Finish());
 
   return kStOK;
@@ -637,8 +644,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.23 2003/02/10 17:55:55 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.24 2003/03/20 00:26:05 jeromel Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.24  2003/03/20 00:26:05  jeromel
+// Logic correction ; can't call a method if no instance
+//
 // Revision 3.23  2003/02/10 17:55:55  genevb
 // Output currently read file
 //
