@@ -167,7 +167,7 @@ Int_t StSectorHitFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_
   //
   int colorIndex = -1;
   TString mStr = tableObject->GetType();
-
+  size = 1;  // change default size from 2 to 1
   if( mStr == "dst_track_st" ) {
     St_dst_track &track = *((St_dst_track *)tableObject); 
     colorIndex = SubChannel(track, rowNumber, size, style);

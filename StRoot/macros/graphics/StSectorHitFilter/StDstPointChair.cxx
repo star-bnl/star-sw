@@ -2,7 +2,7 @@
 ClassImp(StDstPointChair)
 
 //________________________________________________________________________________
-Int_t StDstPointChair::DetectId(const Char_t *name="tpc") 
+Int_t StDstPointChair::DetectId(const Char_t *name) 
 {
   //
   // return > 0 detector index by its name
