@@ -82,8 +82,12 @@ my %yearGeomHash = (
                     "year_2a" => "y2a"
                    );
 
-########## Find reco files in disk
+########## Set variables to find jobs running
+my @j_name;
+my @j_status;
+my $jline = 0;
 
+########## Find reco files in disk
 my @diskRecoDirs;
 $nDiskFiles = 0;
 
@@ -252,6 +256,22 @@ my $tfsDstEvtsT = 0;
 #my $tssDstEvtsT = 0;
 #my $trsDstEvtsT = 0;
 
+##################################
+## find running jobs
+
+  $jline = 0;
+  my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
+  foreach my $job_line (@CRS_JOB) {
+     chop $job_line; 
+    my @job_word = split ("_", $job_line);
+    my @word_part = split ("%", $job_word[12]);
+    $j_name[$jline] = $job_word[10]."_". $job_word[11]."_". $word_part[0];
+    $j_status[$jline] = $word_part[1];
+     $jline++; 
+ } 
+
+
+
 ## connect to the DB
 &StDbOperaConnect();
 
@@ -363,24 +383,19 @@ foreach $eachSet (@Sets) {
 ## check if job is running
 
    if($job_status eq "n\/a") {
-
-  my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
-  foreach my $job_line (@CRS_JOB) {
-     chop $job_line;
-    print $job_line, "\n";
-    my @job_word = split ("_", $job_line);
-    my @word_part = split ("%", $job_word[12]);
-    my $j_name = $job_word[10]."_". $job_word[11]."_". $word_part[0];
-    if( $j_name =~ /$basename/ ) {
-      $job_status = $word_part[1];
-#   print $j_name, "\n";
-#   print $basename, "\n";
-#   print $job_status, "\n";
+      my $jj = 0;
+     foreach my $job_fname (@j_name) {
+    if( $job_fname =~ /$basename/ ) {
+      $job_status = $j_status[$jj];
+   print $job_fname, "\n";
+   print $basename, "\n";
+   print $job_status, "\n";
   last;
 }
    else {   
     next; 
   } 
+      $jj++;
  }
 }
 
@@ -544,6 +559,7 @@ sub fillDbTable {
     $sql.="HPSS_hist_date=$hpss_hist_date,";
     $sql.="HPSS_hist_size=$hpss_hist_size,";
     $sql.="Sum_File='$sum_File',";
+    $sql.="Jobfile='$jfile_status',"; 
     $sql.="Lib_tag='$lb_tag',";
     $sql.="Mem_size_MB= '$mem_size',";
     $sql.="CPU_per_evt_sec='$cpu_event',";
