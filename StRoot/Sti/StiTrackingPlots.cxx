@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.17 2004/11/22 19:21:45 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.18 2004/12/01 14:02:08 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.18  2004/12/01 14:02:08  pruneau
+ * svt
+ *
  * Revision 2.17  2004/11/22 19:21:45  pruneau
  * revamped the plotting package
  *
@@ -98,11 +101,11 @@ void StiTrackingPlots::initialize()
 
   cout <<"StiTrackingPlots::StiTrackingPlots() -I- Started"<<endl;
 
-  for (i=0;i<4;++i)
+  for (i=0;i<NPLOTS;++i)
     {
       sprintf(label,"t%d",i);
       _track[i] = book(label,label,600,0.,600.);
-      for (k=i+1;k<4;++k)
+      for (k=i+1;k<NPLOTS;++k)
 	{
 	  sprintf(label,"t%dVs%d",k,i);
 	  _track2D[i][k]   = book(label,label,100,0.,600.,100,0.,600.);
@@ -119,7 +122,7 @@ void StiTrackingPlots::initialize()
   // index = 1 : all good primary tracks
   //         2 : accepted global 
   //         3 : accepted primaries
-  for (i=0;i<5;++i)
+  for (i=0;i<NPLOTS;++i)
     {
       sprintf(label,"eta_%d",i);        _eta[i]        = book(label,label,200, -2.,2.);
       sprintf(label,"phi_%d",i);        _phi[i]        = book(label,label, 100,-3.1415927,3.1415927);
@@ -143,9 +146,12 @@ void StiTrackingPlots::initialize()
 	{
 	  sprintf(label,"chi2_%d_L%d",i,layer);	      _chi2Inc[i][layer] = book(label,label,400,0.,100.);
 	  sprintf(label,"dcaVschi2_%d_L%d",i,layer);  _chi2IncVsDca[i][layer] = book(label,label,400,0.,100.,30,0.,1.5);
-	  sprintf(label,"dx_%d_L%d",i,layer);         _dx[i][layer] = book(label,label,100,-5.,5.);
-	  sprintf(label,"dy_%d_L%d",i,layer);         _dy[i][layer] = book(label,label,100,-5.,5.);
-	  sprintf(label,"dz_%d_L%d",i,layer);         _dz[i][layer] = book(label,label,100,-5.,5.);
+
+	  double bound = 3.;
+	  if (layer<6) bound = 1.5;
+	  sprintf(label,"dx_%d_L%d",i,layer);         _dx[i][layer] = book(label,label,200,-bound,bound);
+	  sprintf(label,"dy_%d_L%d",i,layer);         _dy[i][layer] = book(label,label,200,-bound,bound);
+	  sprintf(label,"dz_%d_L%d",i,layer);         _dz[i][layer] = book(label,label,200,-bound,bound);
 	  sprintf(label,"yPull_%d_L%d",i,layer);      _yPull[i][layer] = book(label,label,100,-5.,5.);
 	  sprintf(label,"zPull_%d_L%d",i,layer);      _zPull[i][layer] = book(label,label,100,-5.,5.);
 
@@ -296,12 +302,18 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  globalAccepted = true;
 	  if (primary) primaryAccepted = true;
 	}
-      for (int i=0;i<4;++i)
+      for (int i=0;i<NPLOTS-1; ++i)
 	{
 	  if (i==0 && !good)     continue;
 	  if (i==1 && !primary)  continue;
 	  if (i==2 && !globalAccepted)  continue;
 	  if (i==3 && !primaryAccepted) continue;
+
+	  if (i==4 && ! (svtPoints==0) ) continue;
+	  if (i==5 && ! (svtPoints==1) ) continue;
+	  if (i==6 && ! (svtPoints==2) ) continue;
+	  if (i==7 && ! (svtPoints>=3) ) continue;
+	  
 	  trackCount[i]++;
 	  _eta[i]->Fill(eta);
 	  _phi[i]->Fill(phi);
@@ -395,10 +407,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
   trackCount[0] = trackCount[0]/10.;
   trackCount[1] = trackCount[1]/10.;
   // some global histograms
-  for (int j1=0;j1<4;++j1)
+  for (int j1=0;j1<NPLOTS-1;++j1)
     {
       _track[j1]->Fill(trackCount[j1]);
-      for (int j2=j1+1;j2<4;++j2)
+      for (int j2=j1+1;j2<NPLOTS-1;++j2)
 	{
 	  _track2D[j1][j2]->Fill(trackCount[j1],trackCount[j2]);
 	}
@@ -443,7 +455,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  globalAccepted = true;
 	  if (primary) primaryAccepted = true;
 	}
-      int i = 4;
+      int i = NPLOTS-1;
 	  _eta[i]->Fill(eta);
 	  _phi[i]->Fill(phi);
 	  _pt[i]->Fill(pt);
