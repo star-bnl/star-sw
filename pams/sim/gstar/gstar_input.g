@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.29 2000/02/17 00:06:12 nevski Exp $
+* $Id: gstar_input.g,v 1.30 2000/02/17 17:01:21 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.30  2000/02/17 17:01:21  nevski
+* agcuser common changed
+*
 * Revision 1.29  2000/02/17 00:06:12  nevski
 * cscall truncates strings - corrected
 *
@@ -113,10 +116,10 @@
 *************************************************************************
    Implicit   None
 +CDE,GCBANK,GCNUM,SCLINK,RBBANK,AgCKINE.
-   Integer    LENOCC,CSADDR,AMI_CALL,Igate,Irec,Ier,J,I
-   Character  C*1, o*1, Table*120
-   common     /agcuser/ Irec(10),Table
-*
+   Integer          LENOCC,CSADDR,AMI_CALL,Igate,Ier,J,I
+   Character        C*1, o*1, Table*120
+   Integer          Irec,InEvent,NnEvent
+   common /agcuser/ Irec(10),InEvent,NnEvent,Table
 *
    o=CHAR(0)
    Call HEPEVNT
