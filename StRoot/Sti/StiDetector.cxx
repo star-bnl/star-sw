@@ -45,7 +45,7 @@ void StiDetector::build()
  
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-    os << d.getName()<<"\t"<<d.getPlacement()->getCenterRadius()<<"\t"<<d.getPlacement()->getCenterRefAngle();
+    os << d.getName()<<"\tR:"<<d.getPlacement()->getCenterRadius()<<"\tA:"<<d.getPlacement()->getCenterRefAngle();
     return os;
 
 }
