@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.28 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.29 2000/02/29 16:41:57 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.29  2000/02/29 16:41:57  genevb
+// Fortran-compliant interface
+//
 // Revision 1.28  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -213,6 +216,10 @@ void type_of_call Msg_Disable_(const char* mess, size_t len) {
   gMessMgr->SwitchOff(mess2);
 }
 //________________________________________
+void type_of_call MessageOut( const char *msg, int* lines, size_t len ) {
+  Message_(msg,lines,0,len);
+}
+//________________________________________
 void type_of_call StMessage_(const char* mess, const char* type,
                              const char* opt, size_t len1,
 			     size_t len2, size_t len3) {
@@ -268,8 +275,31 @@ void type_of_call StMessage_(const char* mess, const char* type,
   if (del_opt) delete [] opt2;
 }
 //________________________________________
-void type_of_call StCaller_(const char* mess, const char* opt, size_t len1, size_t len2,
-const char* typString, char* optString) {
+void type_of_call StCaller_(const char* mess, const char* opt,
+                            size_t len, const char* typString) {
+#ifdef LINUX
+  sMessLength = len;
+#endif
+  if (mess[0]==0) {
+    gMessMgr->Message(nullMess,"E",eOpt);
+    return;
+  }
+
+  size_t messlen = strlen(mess);
+
+  char* mess2 = new char[(messlen+1)];
+  strncpy(mess2,mess,messlen);
+  mess2[messlen] = 0;
+  
+  if ((len>1) && (messlen > len)) mess2[len] = 0;
+
+  gMessMgr->Message(mess2,typString,opt);
+  delete [] mess2;
+}
+//________________________________________
+void type_of_call StCallerOpt_(const char* mess, const char* opt,
+                               size_t len1, size_t len2,
+                               const char* typString, char* optString) {
 #ifdef LINUX
   sMessLength = len1;
 #endif
@@ -305,40 +335,56 @@ const char* typString, char* optString) {
   if (del_opt) delete [] opt2;
 }
 //________________________________________
-void type_of_call StInfo_(const char* mess, const char* opt,
-                          size_t len1, size_t len2) {
-  StCaller_(mess,opt,len1,len2,"I",oOpt);
+void type_of_call StInfo_(const char* mess, size_t len) {
+  StCaller_(mess,oOpt,len,"I");
 }
 //________________________________________
-void type_of_call StWarning_(const char* mess, const char* opt,
+void type_of_call StWarning_(const char* mess, size_t len) {
+  StCaller_(mess,eOpt,len,"W");
+}
+//________________________________________
+void type_of_call StError_(const char* mess, size_t len) {
+  StCaller_(mess,eOpt,len,"E");
+}
+//________________________________________
+void type_of_call StDebug_(const char* mess, size_t len) {
+  StCaller_(mess,oOpt,len,"D");
+}
+//________________________________________
+void type_of_call QAInfo_(const char* mess, size_t len) {
+  StCaller_(mess,otsOpt,len,"Q");
+}
+//________________________________________
+void type_of_call StInfoOpt_(const char* mess, const char* opt,
                              size_t len1, size_t len2) {
-  StCaller_(mess,opt,len1,len2,"W",eOpt);
+  StCallerOpt_(mess,opt,len1,len2,"I",oOpt);
 }
 //________________________________________
-void type_of_call StError_(const char* mess, const char* opt,
-                           size_t len1, size_t len2) {
-  StCaller_(mess,opt,len1,len2,"E",eOpt);
+void type_of_call StWarningOpt_(const char* mess, const char* opt,
+                                size_t len1, size_t len2) {
+  StCallerOpt_(mess,opt,len1,len2,"W",eOpt);
 }
 //________________________________________
-void type_of_call StDebug_(const char* mess, const char* opt,
-                           size_t len1, size_t len2) {
-  StCaller_(mess,opt,len1,len2,"D",oOpt);
+void type_of_call StErrorOpt_(const char* mess, const char* opt,
+                              size_t len1, size_t len2) {
+  StCallerOpt_(mess,opt,len1,len2,"E",eOpt);
 }
 //________________________________________
-void type_of_call QAInfo_(const char* mess, const char* opt,
-                          size_t len1, size_t len2) {
-  StCaller_(mess,opt,len1,len2,"Q",otsOpt);
+void type_of_call StDebugOpt_(const char* mess, const char* opt,
+                              size_t len1, size_t len2) {
+  StCallerOpt_(mess,opt,len1,len2,"D",oOpt);
+}
+//________________________________________
+void type_of_call QAInfoOpt_(const char* mess, const char* opt,
+                             size_t len1, size_t len2) {
+  StCallerOpt_(mess,opt,len1,len2,"Q",otsOpt);
 }
 //________________________________________
 void type_of_call StMessAddType_(const char* type, const char* text,
-                                                 size_t len1, size_t len2) {
+                                 size_t len1, size_t len2) {
   if (strlen(type) > len1) (const_cast<char*> (type))[len1] = 0;
   if (strlen(text) > len2) (const_cast<char*> (text))[len2] = 0;
   gMessMgr->AddType(type,text);
-}
-//________________________________________
-void type_of_call MessageOut( const char *msg ) {
-  StMessage_(const_cast<char*> (msg));
 }
 
 //
@@ -684,7 +730,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.28 2000/01/05 19:53:46 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.29 2000/02/29 16:41:57 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
