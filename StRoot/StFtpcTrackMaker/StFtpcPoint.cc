@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.16 2003/09/23 23:25:35 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.17 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.17  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.16  2003/09/23 23:25:35  oldi
 // SetGlobalCoord() and SetUsage() moved to the end of the constructors to avoid
 // them calling GetFlags() before mFlags is initialized.
@@ -316,7 +319,7 @@ void StFtpcPoint::TransformFtpc2Global()
   
   else {
     // hit is in global coordinates already
-    gMessMgr->Message("", "W", "OST") << "Hit is in global coordinates already! Not transformed." << endm;
+    gMessMgr->Message("", "W", "OS") << "Hit is in global coordinates already! Not transformed." << endm;
   }
   
   return;
@@ -359,7 +362,7 @@ void StFtpcPoint::TransformGlobal2Ftpc()
   
   else {
     // hit is in local (FTPC) coordinates already
-    gMessMgr->Message("", "W", "OST") << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
+    gMessMgr->Message("", "W", "OS") << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
   }
   
   return;

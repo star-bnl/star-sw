@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.29 2003/11/20 03:14:37 perev Exp $
+// $Id: StFtpcConfMapper.cc,v 1.30 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.30  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.29  2003/11/20 03:14:37  perev
 // LeakOff
 //
@@ -259,7 +262,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *ve
 
   if (mBench) {
     mBench->Stop("init");
-    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
     mTime += mBench->GetCpuTime("init");
   }
 }
@@ -336,7 +339,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
 
   if (mBench) {
     mBench->Stop("init");
-    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
     mTime += mBench->GetCpuTime("init");
   }
 }
@@ -392,7 +395,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   if (mBench) {
     mBench->Stop("init");
-    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
     mTime += mBench->GetCpuTime("init");
   }
 }
@@ -440,7 +443,7 @@ void StFtpcConfMapper::MainVertexTracking()
  
   if (mBench) {
     mBench->Stop("main_vertex");
-    gMessMgr->Message("", "I", "OST") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
     mTime += mBench->GetCpuTime("main_vertex");
 
     mBench->Start("extend");
@@ -450,7 +453,7 @@ void StFtpcConfMapper::MainVertexTracking()
 
   if (mBench) {
     mBench->Stop("extend");
-    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -460,7 +463,7 @@ void StFtpcConfMapper::MainVertexTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
   
@@ -483,7 +486,7 @@ void StFtpcConfMapper::FreeTracking()
 
   if (mBench) {
     mBench->Stop("non_vertex");
-    gMessMgr->Message("", "I", "OST") << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
     mTime += mBench->GetCpuTime("non_vertex");
   }
   
@@ -507,7 +510,7 @@ void StFtpcConfMapper::LaserTracking()
 
   if (mBench) {
     mBench->Stop("laser");
-    gMessMgr->Message("", "I", "OST") << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
     mTime += mBench->GetCpuTime("laser");
     mBench->GetCpuTime("nofield");
 
@@ -518,7 +521,7 @@ void StFtpcConfMapper::LaserTracking()
   
   if (mBench) {
     mBench->Stop("extend");
-    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -528,7 +531,7 @@ void StFtpcConfMapper::LaserTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
 
@@ -552,7 +555,7 @@ void StFtpcConfMapper::NoFieldTracking()
 
   if (mBench) {
     mBench->Stop("no_field");
-    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("no_field") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "No field tracking finished    (" << mBench->GetCpuTime("no_field") << " s)." << endm;
     mBench->GetCpuTime("no_field");
 
     mBench->Start("extend");
@@ -562,7 +565,7 @@ void StFtpcConfMapper::NoFieldTracking()
   
   if (mBench) {
     mBench->Stop("extend");
-    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -572,7 +575,7 @@ void StFtpcConfMapper::NoFieldTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    gMessMgr->Message("", "I", "OS") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
 
@@ -840,8 +843,8 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
   Int_t n = track->GetNumberOfPoints();
   
   if (n<2) {
-    gMessMgr->Message("StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)", "E", "OST");    
-    gMessMgr->Message(" - Call this function only if you are sure to have at least two points on the track already!", "E", "OST");
+    gMessMgr->Message("StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)", "E", "OS");    
+    gMessMgr->Message(" - Call this function only if you are sure to have at least two points on the track already!", "E", "OS");
     
     return 0.;
   }
@@ -883,8 +886,8 @@ Double_t const StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)
   }
 
   if (n<3) {
-    gMessMgr->Message("StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)", "E", "OST");
-    gMessMgr->Message(" - Call this function only if you are sure to have at least three points on this track already!", "E", "OST");
+    gMessMgr->Message("StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)", "E", "OS");
+    gMessMgr->Message(" - Call this function only if you are sure to have at least three points on this track already!", "E", "OS");
 
     return 0.;
   }
@@ -1905,11 +1908,11 @@ void StFtpcConfMapper::TrackingInfo()
 {
   // Information about the tracking process.
   
-  gMessMgr->Message("", "I", "OST") << endm;
-  gMessMgr->Message("Tracking information", "I", "OST");
-  gMessMgr->Message("--------------------", "I", "OST");
+  gMessMgr->Message("", "I", "OS") << endm;
+  gMessMgr->Message("Tracking information", "I", "OS");
+  gMessMgr->Message("--------------------", "I", "OS");
   
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(5);
   *gMessMgr << GetNumberOfTracks() << " (";
   gMessMgr->width(5);
@@ -1917,7 +1920,7 @@ void StFtpcConfMapper::TrackingInfo()
   gMessMgr->width(5);
   *gMessMgr << GetNumberOfTracks() - GetNumMainVertexTracks() << ") tracks (main vertex/non vertex) found." << endm;
   
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(5);
   *gMessMgr << GetNumberOfClusters() << " (";
   gMessMgr->width(5);
@@ -1925,25 +1928,25 @@ void StFtpcConfMapper::TrackingInfo()
   gMessMgr->width(5);
   *gMessMgr << GetNumClustersUnused() << ") clusters (used/unused, of which " << GetNumBadClusters() << " were flagged 'bad')." << endm;
 
-  gMessMgr->Message("", "I", "OST") << "       ";
+  gMessMgr->Message("", "I", "OS") << "       ";
   gMessMgr->width(5);
   *gMessMgr << GetNumMergedTracks() << "/";
   gMessMgr->width(5);
   *gMessMgr << GetNumMergedTracklets() << "  tracks/tracklets merged." << endm;
 
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(18);
   *gMessMgr << GetNumDiffHits() << "  times different hits for circle and length fit found." << endm;
 
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(18);
   *gMessMgr << GetNumLengthFitNaN() << "  times argument of arcsin set to +/-1." << endm;
 
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(18);
   *gMessMgr << GetNumExtendedTracks() << "  tracks extended." << endm;
 
-  gMessMgr->Message("", "I", "OST");
+  gMessMgr->Message("", "I", "OS");
   gMessMgr->width(18);
   *gMessMgr << GetNumMergedSplits() << "  split tracks merged." << endm;
 
@@ -1955,29 +1958,29 @@ void StFtpcConfMapper::CutInfo()
 {
   // Information about cuts.
 
-  gMessMgr->Message("", "I", "OST") << endm;
-  gMessMgr->Message("", "I", "OST") << "Cuts for main vertex constraint on / off" << endm;
-  gMessMgr->Message("", "I", "OST") << "----------------------------------------" << endm;
-  gMessMgr->Message("", "I", "OST") << "Max. angle between last three points of tracklets:  "; 
+  gMessMgr->Message("", "I", "OS") << endm;
+  gMessMgr->Message("", "I", "OS") << "Cuts for main vertex constraint on / off" << endm;
+  gMessMgr->Message("", "I", "OS") << "----------------------------------------" << endm;
+  gMessMgr->Message("", "I", "OS") << "Max. angle between last three points of tracklets:  "; 
   
   gMessMgr->width(6);
   *gMessMgr <<  mMaxAngleTracklet[1] << " / "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxAngleTracklet[0] << endm;
   
-  gMessMgr->Message("", "I", "OST") << "Max. angle between last three points of tracks:     "; 
+  gMessMgr->Message("", "I", "OS") << "Max. angle between last three points of tracks:     "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxAngleTrack[1] << " / "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxAngleTrack[0] << endm;
                       
-  gMessMgr->Message("", "I", "OST") << "Max. distance between circle fit and trackpoint:    "; 
+  gMessMgr->Message("", "I", "OS") << "Max. distance between circle fit and trackpoint:    "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxCircleDist[1] << " / "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxCircleDist[0] << endm;
 
-  gMessMgr->Message("", "I", "OST") << "Max. distance between length fit and trackpoint:    "; 
+  gMessMgr->Message("", "I", "OS") << "Max. distance between length fit and trackpoint:    "; 
   gMessMgr->width(6);
   *gMessMgr <<  mMaxLengthDist[1] << " / "; 
   gMessMgr->width(6);
@@ -1991,15 +1994,15 @@ void StFtpcConfMapper::SettingInfo()
 {
   // Information about settings.
 
-  gMessMgr->Message("", "I", "OST") << endm;
-  gMessMgr->Message("", "I", "OST") << "Settings for main vertex constraint on / off" << endm;
-  gMessMgr->Message("", "I", "OST") << "--------------------------------------------" << endm;
-  gMessMgr->Message("", "I", "OST") << "Points required to create a tracklet:                " << mTrackletLength[1] << " / " << mTrackletLength[0] << endm;
-  gMessMgr->Message("", "I", "OST") << "Points required for a track:                         " << mMinPoints[1] << " / " << mMinPoints[0] << endm;  
-  gMessMgr->Message("", "I", "OST") << "Subsequent padrows to look for next tracklet point:  " << mRowScopeTracklet[1] << " / " << mRowScopeTracklet[0] << endm; 
-  gMessMgr->Message("", "I", "OST") << "Subsequent padrows to look for next track point:     " << mRowScopeTrack[1] << " / " << mRowScopeTrack[0] << endm;
-  gMessMgr->Message("", "I", "OST") << "Adjacent phi segments to look for next point:        " << mPhiScope[1] << " / " << mPhiScope[0] << endm;
-  gMessMgr->Message("", "I", "OST") << "Adjacent eta segments to look for next point:        " << mEtaScope[1] << " / " << mEtaScope[0] << endm;
+  gMessMgr->Message("", "I", "OS") << endm;
+  gMessMgr->Message("", "I", "OS") << "Settings for main vertex constraint on / off" << endm;
+  gMessMgr->Message("", "I", "OS") << "--------------------------------------------" << endm;
+  gMessMgr->Message("", "I", "OS") << "Points required to create a tracklet:                " << mTrackletLength[1] << " / " << mTrackletLength[0] << endm;
+  gMessMgr->Message("", "I", "OS") << "Points required for a track:                         " << mMinPoints[1] << " / " << mMinPoints[0] << endm;  
+  gMessMgr->Message("", "I", "OS") << "Subsequent padrows to look for next tracklet point:  " << mRowScopeTracklet[1] << " / " << mRowScopeTracklet[0] << endm; 
+  gMessMgr->Message("", "I", "OS") << "Subsequent padrows to look for next track point:     " << mRowScopeTrack[1] << " / " << mRowScopeTrack[0] << endm;
+  gMessMgr->Message("", "I", "OS") << "Adjacent phi segments to look for next point:        " << mPhiScope[1] << " / " << mPhiScope[0] << endm;
+  gMessMgr->Message("", "I", "OS") << "Adjacent eta segments to look for next point:        " << mEtaScope[1] << " / " << mEtaScope[0] << endm;
 
   return;
 }
@@ -2125,7 +2128,7 @@ Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
   Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
 
   if (segm < 0 || segm >= mBounds) {
-    gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")! Garbage segment returned." << endm;
+    gMessMgr->Message("", "W", "OS") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")! Garbage segment returned." << endm;
     return mBounds;
   }
 

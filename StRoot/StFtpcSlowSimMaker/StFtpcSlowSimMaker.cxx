@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.24 2003/11/13 14:41:48 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.25 2004/01/28 01:41:31 jeromel Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.25  2004/01/28 01:41:31  jeromel
+// *** empty log message ***
+//
 // Revision 1.24  2003/11/13 14:41:48  jcs
 // use StFtpcGasUtilities to obtain current pressure and FTPC gas temperature
 //
@@ -369,14 +372,14 @@ Int_t StFtpcSlowSimMaker::Make(){
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader in StFtpcSlowSimMaker for embedding" << endm;
+      gMessMgr->Message("", "I", "OS") << "Using StDAQReader to get StFTPCReader in StFtpcSlowSimMaker for embedding" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
 
       if (!ftpcReader || !ftpcReader->checkForData()) {
-	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+	gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
         delete paramReader;
         delete dbReader;
 	return kStWarn;
@@ -438,7 +441,7 @@ Int_t StFtpcSlowSimMaker::Make(){
         returnCode = gasUtils->defaultTemperatureEast(dbDate,daqReader->SVTPresent());
      }
      
-       gMessMgr->Message("", "I", "OST") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm;
+       gMessMgr->Message("", "I", "OS") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm;
        paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
       gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
       paramReader->setAdjustedAirPressureEast(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureEast()+STP_Temperature)));
@@ -475,7 +478,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     delete geantReader;
 
     if (Res_fss) {
-      if(Debug()) gMessMgr->Message("", "I", "OST") << "finished fss" << endm;
+      if(Debug()) gMessMgr->Message("", "I", "OS") << "finished fss" << endm;
     }
   }
   MakeHistograms(); // FTPC slow simulator histograms
@@ -486,7 +489,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 //_____________________________________________________________________________
 void StFtpcSlowSimMaker::MakeHistograms() {
 
-   if(Debug()) gMessMgr->Message("", "I", "OST") << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;
+   if(Debug()) gMessMgr->Message("", "I", "OS") << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;
 
    // Create an iterator
    St_DataSetIter ftpc_raw(m_DataSet);
@@ -501,7 +504,7 @@ void StFtpcSlowSimMaker::MakeHistograms() {
    // Fill histograms for FTPC slow simulator
    if (adc) {
      Float_t nadc = adc->GetNRows();
-     gMessMgr->Message("", "I", "OST") << "total # adcs = " << adc->GetNRows() << ", nadc = " << nadc << endm;
+     gMessMgr->Message("", "I", "OS") << "total # adcs = " << adc->GetNRows() << ", nadc = " << nadc << endm;
      m_nadc->Fill(nadc);
    }
    if (ndx) {

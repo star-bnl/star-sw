@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.29 2003/12/05 04:08:49 perev Exp $
+// $Id: StFtpcTracker.cc,v 1.30 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.30  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.29  2003/12/05 04:08:49  perev
 // technical cleanup
 //
@@ -457,17 +460,17 @@ void StFtpcTracker::CalcEnergyLoss()
   Int_t n_untracked;
   
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 8) {      
-    gMessMgr->Message("", "I", "OST") << " No track = " << GetNumberOfTracks() << endm;
-    gMessMgr->Message("", "I", "OST") << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
-    gMessMgr->Message("", "I", "OST") << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
-    gMessMgr->Message("", "I", "OST") << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
-    gMessMgr->Message("", "I", "OST") << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
+    gMessMgr->Message("", "I", "OS") << " No track = " << GetNumberOfTracks() << endm;
+    gMessMgr->Message("", "I", "OS") << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
+    gMessMgr->Message("", "I", "OS") << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
+    gMessMgr->Message("", "I", "OS") << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
+    gMessMgr->Message("", "I", "OS") << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
     
-    gMessMgr->Message("", "I", "OST") << " name= (no name), nok = (" << GetNumberOfClusters() 
+    gMessMgr->Message("", "I", "OS") << " name= (no name), nok = (" << GetNumberOfClusters() 
 				      << "), maxlen = (" << GetNumberOfClusters() << ")" << endm;
-    gMessMgr->Message("", "I", "OST") << " name= (no mane), nok = (" << GetNumberOfTracks() 
+    gMessMgr->Message("", "I", "OS") << " name= (no mane), nok = (" << GetNumberOfTracks() 
 				      << "), maxlen = (" << GetNumberOfTracks() << ")" << endm;
-    //gMessMgr->Message("", "I", "OST") << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
+    //gMessMgr->Message("", "I", "OS") << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
     //				      << "), maxlen = (" << fdepar_h->maxlen << ")" << endm;
   }
   
@@ -501,7 +504,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	n_tracked++;
 
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  gMessMgr->Message("", "I", "OST") << "total_charge = " << total_charge << ", hit_p = " << hit_p 
+	  gMessMgr->Message("", "I", "OS") << "total_charge = " << total_charge << ", hit_p = " << hit_p 
 					    << ", de = " << hit->GetCharge() << endm;
 	}
       }
@@ -510,7 +513,7 @@ void StFtpcTracker::CalcEnergyLoss()
     if (all_hit < StFtpcTrackingParams::Instance()->MinHit() || all_hit > StFtpcTrackingParams::Instance()->MaxHit()) {
       
       if (StFtpcTrackingParams::Instance()->DebugLevel() < 5) {  // level = 10 debugging
-	gMessMgr->Message("", "I", "OST") << " number of hits = " << all_hit << endm;
+	gMessMgr->Message("", "I", "OS") << " number of hits = " << all_hit << endm;
       }
       
       continue;              // skip if unacceptable no. hits
@@ -550,7 +553,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	} 
 	   
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  gMessMgr->Message("", "I", "OST") << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
+	  gMessMgr->Message("", "I", "OS") << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
 					    << cos_lambda << ");  cross= " << 180./3.14159 * TMath::ACos(cos_alpha) 
 					    << "(" << cos_alpha << ") [deg]; P=(" << px << ", " << py << ", " 
 					    << pz << endm;
@@ -564,7 +567,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	  dedx_arr[ihit] = hit->GetCharge() * cos_alpha*cos_lambda;
 
 	  if(dedx_arr[ihit]<0) {
-	    gMessMgr->Message("", "I", "OST") << dedx_arr[ihit] << " " << hit->GetCharge() 
+	    gMessMgr->Message("", "I", "OS") << dedx_arr[ihit] << " " << hit->GetCharge() 
 					      << " " << cos_alpha << " " << cos_lambda << endm;
 	  }
 	}
@@ -595,14 +598,14 @@ void StFtpcTracker::CalcEnergyLoss()
     track->SetNumdEdxHits(acc_hit);
     
     if(track->GetdEdx() == 0) {
-      gMessMgr->Message("", "I", "OST") << "track " << itrk << " dedx " << track->GetdEdx() 
+      gMessMgr->Message("", "I", "OS") << "track " << itrk << " dedx " << track->GetdEdx() 
 					<< " ndedx " << track->GetNumdEdxHits() << endm;
     }
     
     itrk_ok++;
 
     if (itrk > GetNumberOfTracks()) {
-      gMessMgr->Message("", "I", "OST") << " itrk ("<< itrk <<") > fpt_fptrack_h->maxlen (" 
+      gMessMgr->Message("", "I", "OS") << " itrk ("<< itrk <<") > fpt_fptrack_h->maxlen (" 
 					<< GetNumberOfTracks() << ")" << endm;
       break;
     }
@@ -610,7 +613,7 @@ void StFtpcTracker::CalcEnergyLoss()
   } // end loop itrk 
 
   if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-    gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
+    gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
     weighted = new Double_t[GetNumberOfClusters()];
     if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
@@ -752,8 +755,8 @@ void StFtpcTracker::CalcEnergyLoss()
   } 
 
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 11) {
-    gMessMgr->Message("", "I", "OST") << " total charges in 2 FTPCs " << total_charge << endm;
-    gMessMgr->Message("", "I", "OST") << " processed tracks = " << itrk_ok << endm;
+    gMessMgr->Message("", "I", "OS") << " total charges in 2 FTPCs " << total_charge << endm;
+    gMessMgr->Message("", "I", "OS") << " processed tracks = " << itrk_ok << endm;
   }
   
   delete[] dedx_arr;    // release the dedx_arr array
@@ -816,7 +819,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t prima
     }
    
     trackTableWrapper->SetNRows(num_tracks);
-    gMessMgr->Message("", "I", "OST") << "Writing " << num_tracks << " found track";
+    gMessMgr->Message("", "I", "OS") << "Writing " << num_tracks << " found track";
     
     if (num_tracks == 1) {
       *gMessMgr << "." << endm;
@@ -830,7 +833,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t prima
   }
 
   else {
-    gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
+    gMessMgr->Message("", "W", "OS") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
 }
@@ -997,7 +1000,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
     } // end loop itrk 
 
     if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-      gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
+      gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
       weighted = new Double_t[GetNumberOfClusters()];
       if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
@@ -1151,7 +1154,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
 
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OST") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      gMessMgr->Message("", "I", "OS") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
 
@@ -1162,11 +1165,11 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
     
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OST") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      gMessMgr->Message("", "I", "OS") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
     
-    gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
+    gMessMgr->Message("", "W", "OS") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
 }

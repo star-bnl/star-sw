@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.18 2003/12/05 04:10:54 perev Exp $
+// $Id: StFtpcVertex.cc,v 1.19 2004/01/28 01:41:33 jeromel Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.19  2004/01/28 01:41:33  jeromel
+// *** empty log message ***
+//
 // Revision 1.18  2003/12/05 04:10:54  perev
 // Fix typo, h1h.Set(&x_hist,low,upp) to h1h.Set(&y_hist,low,uppx)
 //
@@ -381,7 +384,7 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
       SetX((Double_t) vertex->ge_x[0]);
       SetY((Double_t) vertex->ge_x[1]);
       SetZ((Double_t) vertex->ge_x[2]);
-      gMessMgr->Message("Using primary vertex coordinates (Geant): ", "I", "OST");
+      gMessMgr->Message("Using primary vertex coordinates (Geant): ", "I", "OS");
     }
     
     else {
@@ -389,7 +392,7 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
       SetX(dummy);
       SetY(dummy);
       SetZ(dummy);
-      gMessMgr->Message("Using primary vertex coordinates (Default): ", "I", "OST");
+      gMessMgr->Message("Using primary vertex coordinates (Default): ", "I", "OS");
     }
 
     SetXerr(0.);
@@ -605,22 +608,22 @@ Int_t StFtpcVertex::CheckVertex()
 
   if (GetIFlag() == 1) {
     // TPC  Vertex used
-    gMessMgr->Message("", "I", "OST") << "Using Tpc Vertex (" << *this <<  ") for Ftpc tracking." << endm;
+    gMessMgr->Message("", "I", "OS") << "Using Tpc Vertex (" << *this <<  ") for Ftpc tracking." << endm;
   }
   
   else if (GetIFlag() == 101) {
     // TPC  preVertex used
-    gMessMgr->Message("", "I", "OST") << "Using Tpc preVertex estimation (" << *this << ") for Ftpc tracking."   << endm;
+    gMessMgr->Message("", "I", "OS") << "Using Tpc preVertex estimation (" << *this << ") for Ftpc tracking."   << endm;
   }
   
   else if (GetIFlag() == 0) {
     //  No vertex found, therefore set to (0., 0., 0.) to make FTPC tracking possible.
-    gMessMgr->Message("", "W", "OST") << "No vertex found. Use (" << *this << ")." << endm;    
+    gMessMgr->Message("", "W", "OS") << "No vertex found. Use (" << *this << ")." << endm;    
   }
   
   // Check for the position of the main vertex
   if (CoordIsNan()) {
-    gMessMgr->Message("", "W", "OST") << "Error in vertex calculation - no tracking." << endm;
+    gMessMgr->Message("", "W", "OS") << "Error in vertex calculation - no tracking." << endm;
 
     // No tracking!
     return 1;
@@ -638,7 +641,7 @@ Int_t StFtpcVertex::CheckVertex()
     }
     
     else if (GetAbsZ() > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
-      gMessMgr->Message("", "E", "OST") << "Found vertex is more than " 
+      gMessMgr->Message("", "E", "OS") << "Found vertex is more than " 
 					<< StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
 					<< " cm off from z = 0. Ftpc tracking makes no sense." << endm;
       // No tracking!
@@ -646,7 +649,7 @@ Int_t StFtpcVertex::CheckVertex()
     }
     
     else {
-      gMessMgr->Message("", "W", "OST") << "Found vertex is more than " 
+      gMessMgr->Message("", "W", "OS") << "Found vertex is more than " 
 					<< StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
 					<< " cm off from z = 0 but Ftpc tracking is still possible." << endm;
       // Do tracking.
@@ -654,7 +657,7 @@ Int_t StFtpcVertex::CheckVertex()
   }
   
   if (GetRadius2() >= StFtpcTrackingParams::Instance()->InnerRadius()) {
-    gMessMgr->Message("", "E", "OST") << "Found vertex x-z-position is greater than " 
+    gMessMgr->Message("", "E", "OS") << "Found vertex x-z-position is greater than " 
 				      << StFtpcTrackingParams::Instance()->InnerRadius()
 				      << " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
     // No tracking!

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.19 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.20 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.20  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.19  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -328,7 +331,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 {
   // Usual used constructor if conformal mapping tracker output available.
 
-  gMessMgr->Message("Track evaluating started...", "I", "OST");
+  gMessMgr->Message("Track evaluating started...", "I", "OS");
 
   mVertex = tracker->GetVertex();
 
@@ -344,8 +347,8 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
  
   if (!ffs_gepoint) {
     // event processed with slow simulator
-    gMessMgr->Message("", "I", "OST") << "This event was processed with the slow simulator!" << endm;
-    gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
+    gMessMgr->Message("", "I", "OS") << "This event was processed with the slow simulator!" << endm;
+    gMessMgr->Message("", "I", "OS") << "Most information will be missing due to lack of geant hit information." << endm;
   }
   
   InfoAll();
@@ -369,7 +372,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 {
   // Usual used constructor if the output of the tracker was written in STAF tables only.
 
-  gMessMgr->Message("Track evaluating started...", "I", "OST");
+  gMessMgr->Message("Track evaluating started...", "I", "OS");
 
   mVertex = main_vertex;
 
@@ -404,8 +407,8 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
  
   if (!ffs_gepoint) {
     // event processed with slow simulator
-    gMessMgr->Message("", "I", "OST") << "This event was processed with the slow simulator!" << endm;
-    gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
+    gMessMgr->Message("", "I", "OS") << "This event was processed with the slow simulator!" << endm;
+    gMessMgr->Message("", "I", "OS") << "Most information will be missing due to lack of geant hit information." << endm;
   }
   
   InfoAll();
@@ -646,7 +649,7 @@ void StFtpcTrackEvaluator::SetupFile(Char_t *filename, Char_t *write_permission)
     
     if (!mFile->IsOpen()) {
       // File not there
-      gMessMgr->Message("but that's o.k. - I'll create it immediately!", "W", "OST"); 
+      gMessMgr->Message("but that's o.k. - I'll create it immediately!", "W", "OS"); 
       delete mFile;
       mFile = new TFile(mFilename, "RECREATE");
       CreateHistos();
@@ -741,7 +744,7 @@ void StFtpcTrackEvaluator::SetupHistos()
   // Sets up the histograms.
   
   if (strcmp(mWritePermission, "RECREATE") !=0 && strcmp(mWritePermission, "UPDATE") != 0) {
-    gMessMgr->Message("Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE.", "W", "OST");
+    gMessMgr->Message("Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE.", "W", "OS");
     mWritePermission = (Char_t*)"RECREATE";
   }
 
@@ -2272,11 +2275,11 @@ void StFtpcTrackEvaluator::GeantInfo()
 {
   // Shows information abaout GEANT output.
 
-  gMessMgr->Message("", "I", "OST") << "Geant hits                    : " << GetNumGeantHits() << endm;
-  gMessMgr->Message("", "I", "OST") << "Geant tracks                  : " << GetNumGeantTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Short tracks                  : " << GetNumShortTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Long tracks                   : " << GetNumLongTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Good tracks                   : " << GetNumGoodGeantTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Geant hits                    : " << GetNumGeantHits() << endm;
+  gMessMgr->Message("", "I", "OS") << "Geant tracks                  : " << GetNumGeantTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Short tracks                  : " << GetNumShortTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Long tracks                   : " << GetNumLongTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Good tracks                   : " << GetNumGoodGeantTracks() << endm;
 
   return;
 }
@@ -2286,12 +2289,12 @@ void StFtpcTrackEvaluator::ClusterInfo()
 {
   // Shows information abaout GEANT clusters.
   
-  gMessMgr->Message("", "I", "OST") << "Short track clusters          : " << GetNumShortTrackClusters() << endm;
-  gMessMgr->Message("", "I", "OST") << "Long track clusters           : " << GetNumLongTrackClusters() << endm;
-  gMessMgr->Message("", "I", "OST") << "Max. track clusters           : " << GetMaxClusters() << endm;
-  gMessMgr->Message("", "I", "OST") << "# of hits on good found tracks: " << GetNumGoodFoundPoints() << endm;
-  gMessMgr->Message("", "I", "OST") << "# of hits on good geant tracks: " << GetNumGoodGeantPoints() << endm;
-  gMessMgr->Message("", "I", "OST") << "Ratio of good found clusters  : " << (Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints() << endm;
+  gMessMgr->Message("", "I", "OS") << "Short track clusters          : " << GetNumShortTrackClusters() << endm;
+  gMessMgr->Message("", "I", "OS") << "Long track clusters           : " << GetNumLongTrackClusters() << endm;
+  gMessMgr->Message("", "I", "OS") << "Max. track clusters           : " << GetMaxClusters() << endm;
+  gMessMgr->Message("", "I", "OS") << "# of hits on good found tracks: " << GetNumGoodFoundPoints() << endm;
+  gMessMgr->Message("", "I", "OS") << "# of hits on good geant tracks: " << GetNumGoodGeantPoints() << endm;
+  gMessMgr->Message("", "I", "OS") << "Ratio of good found clusters  : " << (Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints() << endm;
 
   return;
 }
@@ -2301,11 +2304,11 @@ void StFtpcTrackEvaluator::ProblemsInfo()
 {
   // Shows information about problems.
 
-  gMessMgr->Message("", "I", "OST") << "Unclean tracks                : " << GetNumUncleanTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Unclean good tracks           : " << GetNumUncleanGoodTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Split tracks                  : " << GetNumSplitTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Split good tracks             : " << GetNumSplitGoodTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Split look like good tracks   : " << GetNumSplitLookLikeGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Unclean tracks                : " << GetNumUncleanTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Unclean good tracks           : " << GetNumUncleanGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Split tracks                  : " << GetNumSplitTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Split good tracks             : " << GetNumSplitGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Split look like good tracks   : " << GetNumSplitLookLikeGoodTracks() << endm;
 
   return;
 }
@@ -2315,17 +2318,17 @@ void StFtpcTrackEvaluator::TrackerInfo()
 {
   // Shows information about tracker output.
 
-  gMessMgr->Message("", "I", "OST") << "Found hits                    : " << GetNumFoundHits() << endm;
-  gMessMgr->Message("", "I", "OST") << "Found tracks (vtx/non vtx)    : " << GetNumFoundTracks() << " (" << GetNumFoundVertexTracks() << "/" << GetNumFoundNonVertexTracks() << ")" << endm;
-  gMessMgr->Message("", "I", "OST") << "Found good tracks             : " << GetNumGoodFoundTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Bad found tracks looking good : " << GetNumLookLikeGoodTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Found electron tracks         : " << GetNumElectronTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Found too short tracks        : " << GetNumTooShortTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Found hits                    : " << GetNumFoundHits() << endm;
+  gMessMgr->Message("", "I", "OS") << "Found tracks (vtx/non vtx)    : " << GetNumFoundTracks() << " (" << GetNumFoundVertexTracks() << "/" << GetNumFoundNonVertexTracks() << ")" << endm;
+  gMessMgr->Message("", "I", "OS") << "Found good tracks             : " << GetNumGoodFoundTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Bad found tracks looking good : " << GetNumLookLikeGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Found electron tracks         : " << GetNumElectronTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Found too short tracks        : " << GetNumTooShortTracks() << endm;
   
-  gMessMgr->Message("", "I", "OST") << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm;   
-  gMessMgr->Message("", "I", "OST") << "Contamination without splits  : " << ((Float_t)GetNumLookLikeGoodTracks()-(Float_t)GetNumSplitLookLikeGoodTracks())/(Float_t)GetNumFoundVertexTracks() << endm; 
+  gMessMgr->Message("", "I", "OS") << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endm;
+  gMessMgr->Message("", "I", "OS") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm;   
+  gMessMgr->Message("", "I", "OS") << "Contamination without splits  : " << ((Float_t)GetNumLookLikeGoodTracks()-(Float_t)GetNumSplitLookLikeGoodTracks())/(Float_t)GetNumFoundVertexTracks() << endm; 
 
   return;
 }
@@ -2336,11 +2339,11 @@ void StFtpcTrackEvaluator::InfoAll()
   // Shows all information.
 
   TrackerInfo();
-  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OS") << endm;
   GeantInfo();
-  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OS") << endm;
   ClusterInfo();
-  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OS") << endm;
   ProblemsInfo();
 
   return;
