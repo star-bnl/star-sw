@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.13 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.14 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -33,6 +33,7 @@
 #include "StStrangeMuDstMaker/StXiMc.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMc.hh"
+#include "StStrangeMuDstMaker/StStrangeCuts.hh"
 
 #include "StMuException.hh"
 #include "StMuEvent.h"
@@ -627,6 +628,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   StV0Mc v0Mc;      
   StXiMc xiMc;      
   StKinkMc kinkMc;  
+  TCut strangeCut;
 
   addType(maker->GetEvClonesArray(),  mStrangeArrays[0],ev);
   addType(maker->GetEvMcArray(),      mStrangeArrays[1],ev);
@@ -642,6 +644,8 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   addType(maker->GetKinkClonesArray(),mStrangeArrays[8],kink);
   addType(maker->GetKinkMcArray(),    mStrangeArrays[9],kinkMc);
   addType(maker->GetKinkAssocArray(), mStrangeArrays[10],assoc);
+
+  addType(maker->GetCutsArray(), mStrangeArrays[11],strangeCut);
   
 }
 //-----------------------------------------------------------------------
@@ -736,6 +740,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.14  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
  * Revision 1.13  2002/05/04 23:56:30  laue
  * some documentation added
  *

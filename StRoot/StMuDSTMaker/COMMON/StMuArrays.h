@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.2 2002/05/04 23:56:29 laue Exp $
+ * $Id: StMuArrays.h,v 1.3 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -14,12 +14,12 @@
 #define StMuArrays_hh
 
 /// @enum strangeTypes enumeration to to index the strangeArrays
-enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc};
+enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
 /// enumeration to to index the arrays
 enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject}; 
 
 #define __NARRAYS__ 9
-#define __NSTRANGEARRAYS__ 11
+#define __NSTRANGEARRAYS__ 12
 
 class StMuArrays {
  public:
@@ -39,6 +39,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.3  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
  * Revision 1.2  2002/05/04 23:56:29  laue
  * some documentation added
  *
