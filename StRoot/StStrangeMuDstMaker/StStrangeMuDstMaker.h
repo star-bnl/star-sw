@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.6 2001/08/23 13:20:56 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.7 2001/09/14 21:39:02 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.7  2001/09/14 21:39:02  genevb
+// Adjustments to not depend on order in which maker Clear() is called
+//
 // Revision 3.6  2001/08/23 13:20:56  genevb
 // Many bug workarounds...
 //
@@ -205,6 +208,7 @@ class StStrangeMuDstMaker : public StMaker {
   TClonesArray* evMcArray;   //!
 
   StStrangeMuDstMaker* dstMaker; //!
+  TObjArray subMakers;
 
   
   // Sub-controllers
@@ -213,6 +217,8 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeControllerBase* kink;  //!
   StStrangeControllerBase* cont[strDstT];  //!
  private:
+  virtual void  ClearForReal(Option_t *option="");
+
   ClassDef(StStrangeMuDstMaker,4)
 };
 
@@ -248,10 +254,8 @@ inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
 inline StStrangeCuts& StStrangeMuDstMaker::Cuts()
             { return (*cuts); }
-inline void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker* maker)
-            { dstMaker = maker; }
 inline void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker& maker)
-            { dstMaker = &maker; }
+            { SubDst(&maker); }
 inline void StStrangeMuDstMaker::SubDst(const char* maker_name)
             { SubDst((StStrangeMuDstMaker*) GetMaker(maker_name)); }
 inline StStrangeMuDstMaker* StStrangeMuDstMaker::GetSubDst()

@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 3.4 2001/08/23 13:20:53 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.5 2001/09/14 21:39:02 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.5  2001/09/14 21:39:02  genevb
+// Adjustments to not depend on order in which maker Clear() is called
+//
 // Revision 3.4  2001/08/23 13:20:53  genevb
 // Many bug workarounds...
 //
@@ -31,6 +34,7 @@
 
 class TTree;
 class TArrayI;
+class TArrayS;
 class StEvent;
 class StMcVertex;
 class StAssociationMaker;
@@ -108,6 +112,7 @@ class StStrangeControllerBase : public TNamed {
 
   // Array of muDst indices to copy
   TArrayI* selections;              //!
+  TArrayS* keepers;                 //!
 
   // Totals for entire set
   Int_t nEntries;
