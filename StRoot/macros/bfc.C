@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.66 1999/06/20 08:49:23 fisyak Exp $
+// $Id: bfc.C,v 1.67 1999/06/21 14:14:05 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.67  1999/06/21 14:14:05  fisyak
+// Add TDAQ chain
+//
 // Revision 1.66  1999/06/20 08:49:23  fisyak
 // Put back dst alias
 //
@@ -141,14 +144,14 @@ Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
   kFIRST   ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,kEval    ,kOFF     ,
-  kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
+  kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kTDAQ    ,kFZIN    ,kGEANT   ,kCTEST   ,
   kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
   kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
   "FIRST   ","Y1a     ","Y1b     ","Y1c     ","Y2a     ","Eval    ","OFF     ",
-  "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
+  "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","TDAQ    ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
   "DST     ","SQA     ","EVENT   ","ANALYS  ","TREE    ","AllEvent","LAST    "
@@ -159,12 +162,13 @@ Char_t *ChainComments[] = {
   "Turn on Year 1b geometry (and corresponding Makers)",
   "Turn on Year 1c geometry (and corresponding Makers)",
   "Turn on Year 2a geometry (and corresponding Makers)",
-  "Turn off default chain",
   "Turn on evaluation switch for different makers",
+  "Turn off default chain",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
   "Run minidaq chain",
+  "TPC DAQ chain",
   "read GSTAR fz-file",
   "initailize GEANT",
   "test DB with MINIDAQ constans",
@@ -192,10 +196,10 @@ Char_t *ChainComments[] = {
 };
 UChar_t  ChainFlags[] = {
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
-  kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kFALSE  ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE  ,
+  kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
   kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
-  kFALSE   ,kFALSE   ,kTRUE    ,kFALSE   ,kFALSE   ,kFALSE   
+  kFALSE   ,kFALSE   ,kTRUE    ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE  
 };
 //_____________________________________________________________________
 void SetChainOff(){// set all OFF
@@ -261,6 +265,13 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       printf(" Switch on  %s\n",ChainOptions[kCTEST]);
       printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
       printf(" Switch on  %s\n",ChainOptions[kEval]);
+      break;
+    case kTDAQ:
+      SetChainOff();
+      ChainFlags[kY1a]     = kTRUE;
+      ChainFlags[kTDAQ]    = kTRUE;
+      ChainFlags[kTPC]     = kTRUE;
+      DefaultSet = kTRUE;
       break;
     case  kY1a:
       ChainFlags[kY1a] = kTRUE;
@@ -364,7 +375,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     ChainFlags[kEVENT]    = kFALSE;
     ChainFlags[kANALYS]   = kFALSE;
   }
-  if (!ChainFlags[kXINDF] && !ChainFlags[kGSTAR]) {
+  if (!ChainFlags[kXINDF] && !ChainFlags[kGSTAR] &&!ChainFlags[kTDAQ]) {
     ChainFlags[kFZIN]  = kTRUE;
     ChainFlags[kGEANT] = kTRUE;
   }
@@ -400,11 +411,14 @@ void Load(const Char_t *Chain="gstar tfs"){
     gSystem->Load("St_tpc");
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-    if (ChainFlags[kTRS]) {
-      gSystem->Load("StTrsMaker"); 
-      gSystem->Load("St_tpcdaq_Maker");
+    if (ChainFlags[kTDAQ]) gSystem->Load("St_tpcdaq_Maker");
+    else {
+      if (ChainFlags[kTRS]) {
+	gSystem->Load("StTrsMaker"); 
+	gSystem->Load("St_tpcdaq_Maker");
+      }
+      else {if  (ChainFlags[kTSS])gSystem->Load("St_tss_Maker");}
     }
-    else {if  (ChainFlags[kTSS])gSystem->Load("St_tss_Maker");}
   }
   if (ChainFlags[kMINIDAQ]) gSystem->Load("StMinidaqMaker");
   if (ChainFlags[kGEANT])  {
@@ -586,14 +600,17 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
       //      tpc_raw->SetInput("params","tpcdb:params"); 
     }
   }
-  else {  
-    if (ChainFlags[kTRS]) {//		trs
-      StTrsMaker   *trs = new StTrsMaker;
-      if (dbMktpc) {
-	cout<<"initializing input for the trs DB"<<endl;
-	//	trs->SetInput("params","tpcdb:params");
+  else {
+    if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
+    else {
+      if (ChainFlags[kTRS]) {//		trs
+	StTrsMaker   *trs = new StTrsMaker;
+	if (dbMktpc) {
+	  cout<<"initializing input for the trs DB"<<endl;
+	  //	trs->SetInput("params","tpcdb:params");
+	}
+	St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
       }
-      St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
     }
     else { 
       if (ChainFlags[kTSS]) {//		tss
