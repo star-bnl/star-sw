@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.cc,v 1.3 2003/04/25 19:46:19 caines Exp $
+ * $Id: StSvtDbReader.cc,v 1.4 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.cc,v $
+ * Revision 1.4  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.3  2003/04/25 19:46:19  caines
  * Switch argument calls to correct order
  *
@@ -420,4 +423,10 @@ StSvtGeometry* StSvtDbReader::getGeometry()
   } // end of loop over barrels
 
   return svtGeom;
+}
+
+//_____________________________________________________________________________
+StSvtHybridCollection* StSvtDbReader::getRms()
+{
+  return NULL;
 }
