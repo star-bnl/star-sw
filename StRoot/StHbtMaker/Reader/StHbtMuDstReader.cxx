@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.3 2002/05/24 16:08:03 rcwells Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.4 2002/12/13 11:27:58 kisiel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -640,23 +640,38 @@ void StHbtMuDstReader::makeChain(const char* dir, const char* filter, int maxFil
   mChain = new TChain("MuDst");
   //  TChain* mChain2 = new TChain("StrangeMuDst");
   // read directory
-  void *pDir = gSystem->OpenDirectory(dir);
   // now find the files that end in the specified extention
-  const char* fileName(0);
   int fileCount(0);
-  while((fileName = gSystem->GetDirEntry(pDir))){
-    if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
-    if(strcmp(fileName,".event.root")==0 || strcmp(fileName,"..")==0) continue;
-    //    if( !strcmp(fileName,".MuDst.root") ) continue;
-    if(strstr(fileName,filter) && strstr(fileName,".MuDst.root") ){ // found a match
-      char* fullFile = gSystem->ConcatFileName(dir,fileName);
-      // add it to the chain
-      cout << fileCount << " " << fullFile << endl;
-      mChain->Add(fullFile);
-      //  mChain2->Add(mChain2);
-      delete fullFile;
-      if(++fileCount >= maxFiles) break;
-    }   
+  if(strncmp(dir+strlen(dir)-4,".lis",4)==0){
+    ifstream tF(dir);
+    char tFileName[500];
+    int tNFile =0;
+    tF >> tFileName;
+    while ((!tF.eof()) && (tNFile<=maxFiles)){
+      cout << "Add file " << tFileName << endl;
+      mChain->Add(tFileName);
+      tNFile++;
+      tF >> tFileName;
+    }
+    fileCount = tNFile;
+  }
+  else{
+    const char* fileName(0);
+    void *pDir = gSystem->OpenDirectory(dir);
+    while((fileName = gSystem->GetDirEntry(pDir))){
+      if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
+      if(strcmp(fileName,".event.root")==0 || strcmp(fileName,"..")==0) continue;
+      //    if( !strcmp(fileName,".MuDst.root") ) continue;
+      if(strstr(fileName,filter) && strstr(fileName,".MuDst.root") ){ // found a match
+	char* fullFile = gSystem->ConcatFileName(dir,fileName);
+	// add it to the chain
+	cout << fileCount << " " << fullFile << endl;
+	mChain->Add(fullFile);
+	//  mChain2->Add(mChain2);
+	delete fullFile;
+	if(++fileCount >= maxFiles) break;
+      }   
+    }
   }
   DEBUGVALUE2(fileCount);
 }
@@ -668,6 +683,9 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.4  2002/12/13 11:27:58  kisiel
+ * List files support for StHbtMuDstReader
+ *
  * Revision 1.3  2002/05/24 16:08:03  rcwells
  * Added event cut to StHbtMuDstReader
  *
