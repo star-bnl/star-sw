@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.25 1999/12/03 20:29:14 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.26 2000/01/25 16:01:48 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.26  2000/01/25 16:01:48  fisyak
+// Devorce with StAF
+//
 // Revision 1.25  1999/12/03 20:29:14  wdeng
 // Comment out the cut for dip angle of parent
 //
@@ -91,7 +94,7 @@
 #include "TObjArray.h"
 #include "SystemOfUnits.h"
 
-#include "fortranc.h"
+#include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 

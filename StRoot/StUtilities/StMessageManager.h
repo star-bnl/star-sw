@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.14 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessageManager.h,v 1.15 2000/01/25 16:01:29 fisyak Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.15  2000/01/25 16:01:29  fisyak
+// Devorce with StAF
+//
 // Revision 1.14  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -59,7 +62,7 @@
 #define ClassStMessageManager
 
 #ifndef __CINT__
-#include "fortranc.h"
+#include "StarCallf77.h"
 #define Message_ F77_NAME(message,MESSAGE)
 #define Msg_Enable_ F77_NAME(msg_enable,MSG_ENABLE)
 #define Msg_Enabled_ F77_NAME(msg_enabled,MSG_ENABLED)
