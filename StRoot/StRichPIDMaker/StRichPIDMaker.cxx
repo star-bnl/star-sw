@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.44 2001/06/22 15:00:38 jeromel Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.45 2001/09/27 00:52:43 perev Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.45  2001/09/27 00:52:43  perev
+ * Remove call TFile::SetFormat
+ *
  * Revision 2.44  2001/06/22 15:00:38  jeromel
  * Removed unused variables cosineOfD and oldsigma
  *
@@ -306,7 +309,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.44 2001/06/22 15:00:38 jeromel Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.45 2001/09/27 00:52:43 perev Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -3271,7 +3274,7 @@ void StRichPIDMaker::initNtuples() {
   char finalname[200];
   sprintf(finalname,"%s.root",mySaveDirectory);
   file = new TFile(finalname,"RECREATE");
-  file->SetFormat(1);
+  //  file->SetFormat(1);
   file->SetCompressionLevel(9);
   
 #ifdef myPrivateVersion	
