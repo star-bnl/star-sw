@@ -1,21 +1,36 @@
 <job nProcesses="3" simulateSubmission ="false">
    <command>       
+   <![CDATA[
     time
+    # --------------------------
+    #  Some user constants
+    # --------------------------
+
+    set nSimulatedEvents=5
+    set ZEBRAOUTPUT=testpyth.fz
+    set HIJINGOUTPUT=evgen.1.nt
+    set finalDirectory=/star/data05/scratch/didenko/gridwork/hj/register
+
+
+    # --------------------------
+
+    # check which site we aruunin on
+    set BNL=0
+    set remoteNode=stargrid02.rcf.bnl.gov 
+
+    # ---  URL: http://www-pdsf.nersc.gov/~username/   ----
+    set localWebPage=~/public_html
+
+    if ( `hostname -d` == "rcf.bnl.gov" ) then;
+        set BNL=1
+        set remoteNode=pdsfgrid2.nersc.gov 
+        # ---  URL: http://www.rhic.bnl.gov/~username/  ----
+        set localWebPage=~/WWW
+    endif
     # ----  at  BNL (local node) -----
     #
-    set finalDirectory=/star/data05/scratch/didenko/gridwork/hj/register
-    set finalNode=gsiftp://stargrid02.rcf.bnl.gov
+    set finalNode=gsiftp://${remoteNode}
 
-    # --- set finalNode=gsiftp://pdsfgrid2.nersc.gov
-
-    # ----- at PDSF (remote GRID node) ----
-    #
-    # URL: http://www-pdsf.nersc.gov/~username/
-    set localWebPage=~/public_html
- 
-   #
-    # URL: http://www.rhic.bnl.gov/~username/
-    #    set localWebPage=~/WWW
     set packageDirectory=${localWebPage}/gridwork/hj 
     set finalPackageDirectory=${finalNode}/${finalDirectory}
     set packageDirectoryBin=${packageDirectory}/bin
@@ -27,11 +42,7 @@
     # ----- The list of the application parameters  -----
     #
 
-    set ZEBRAOUTPUT=testpyth.fz
-    set HIJINGOUTPUT=evgen.1.nt
-
     set JOBSEED = $PROCESSID$REQUESTID
-    set nSimulatedEvents=5
 
     #
     # -----    End of the application parameters   -----
@@ -42,7 +53,7 @@
 # ---
 #   Start the local Web page
 # ---
-    echo "&lt;HTML&gt;&lt;TITLE&gt;The job   $PROCESSID.$REQUESTID has been started &lt;/TITLE&gt; &lt;BODY&gt; &lt;small&gt; &lt;code&gt; &lt;pre&gt;"  &gt;${localLogFile}
+    echo "<HTML><TITLE>The job   $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
     cd ${packageDirectoryBin}
 
 #    -------------------------------
@@ -70,7 +81,7 @@
 #    -------------------------------
 #    generate custom input file
 #    -------------------------------
-    cat &gt;hijev.inp &lt;&lt;HIJPARAMETERS
+    cat >hijev.inp <<HIJPARAMETERS
 '  ====================================================== '   
 '  =====         Hijing Control file                ===== '   
 '  ====================================================== ' 
@@ -101,7 +112,7 @@ HIJPARAMETERS
 #    register the result file (for the sake of the debugging)
 #    -------------------------------
 
-    ls -l ${HIJINGOUTPUT} &gt;&gt;${localLogFile}
+    ls -l ${HIJINGOUTPUT} >>${localLogFile}
     
 #    -------------------------------
 #    -------------------------------
@@ -117,7 +128,7 @@ HIJPARAMETERS
 #    Create GEANT3 kumac
 #    -------------------------------
    set StafKumacMacroName=hijjet
-    cat &gt;${StafKumacMacroName}.kumac &lt;&lt;STAFKUMAC
+    cat >${StafKumacMacroName}.kumac <<STAFKUMAC
 macro ${StafKumacMacroName}
 ***************BEGIN OF STAF KUMAC***********************
  detp geom y2004
@@ -132,7 +143,7 @@ macro ${StafKumacMacroName}
 ****************END OF STAF KUMAC ***********************
 STAFKUMAC
  
-     more ${StafKumacMacroName}.kumac&gt;&gt;${localLogFile}
+     more ${StafKumacMacroName}.kumac>>${localLogFile}
 
 #    -------------------------------
 #    Launching GEANT3 simulation
@@ -140,7 +151,7 @@ STAFKUMAC
     starsim -w 0 -b ${StafKumacMacroName}.kumac       
     time
     
-      ls -l $ZEBRAOUTPUT              &gt;&gt;${localLogFile}
+      ls -l $ZEBRAOUTPUT              >>${localLogFile}
       
 #    -------------------------------
 #    Copy output files to the permanent place
@@ -148,31 +159,38 @@ STAFKUMAC
       
 #      cp  ${HIJINGOUTPUT} $packageDirectory/evgen.$PROCESSID.nt
 #      cp  $ZEBRAOUTPUT $packageDirectory/gstar.$PROCESSID.fz
-     echo " Starting ${HIJINGOUTPUT} transfering to BNL" &gt;&gt;${localLogFile}
-     echo " Starting ${HIJINGOUTPUT} transfering to BNL"
+               echo " Starting ${HIJINGOUTPUT} transfering to BNL" >>${localLogFile}
+               echo " Starting ${HIJINGOUTPUT} transfering to BNL"
      time
-     echo "Invoking: globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory} "
-     globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory}
-     echo "globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory} with $status"
-     globus-url-copy -p 20 -vb  file:$SCRATCH/${HIJINGOUTPUT}    ${finalPackageDirectory}/evgen.$PROCESSID.nt
-     echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status" &gt;&gt;${localLogFile}
-     echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status"
-     globus-job-run  stargrid02.rcf.bnl.gov /bin/ls /star/data05/scratch/didenko/gridwork/hj  &gt;&gt;${localLogFile}
-     time
-     echo "Starting $ZEBRAOUTPUT  transfering to BNL" &gt;&gt;${localLogFile}
-     echo "Starting $ZEBRAOUTPUT  transfering to BNL"
-     globus-url-copy  -p 20 -vb file:$SCRATCH/$ZEBRAOUTPUT  ${finalPackageDirectory}/gstar.$PROCESSID.fz 
-     globus-job-run   stargrid04.rcf.bnl.gov /bin/ls /star/data05/scratch/didenko/gridwork/hj  &gt;&gt;${localLogFile}
-     time
-     echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz with status=$status" &gt;&gt;${localLogFile}
-     echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz  with status=$status"
+               echo "Invoking: globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory} "
 
-      time &gt;&gt;${localLogFile}
+     globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory}
+
+               echo "globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory} with $status"
+
+     globus-url-copy -p 20 -vb  file:$SCRATCH/${HIJINGOUTPUT}    ${finalPackageDirectory}/evgen.$PROCESSID.nt
+
+               echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status" >>${localLogFile}
+               echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status"
+
+     globus-job-run  ${remoteNode} /bin/ls /star/data05/scratch/didenko/gridwork/hj  >>${localLogFile}
+     time
+               echo "Starting $ZEBRAOUTPUT  transfering to BNL" >>${localLogFile}
+               echo "Starting $ZEBRAOUTPUT  transfering to BNL"
+
+     globus-url-copy  -p 20 -vb file:$SCRATCH/$ZEBRAOUTPUT  ${finalPackageDirectory}/gstar.$PROCESSID.fz 
+     globus-job-run   ${remoteNode}  /bin/ls /star/data05/scratch/didenko/gridwork/hj  >>${localLogFile}
+
+     time
+               echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz with status=$status" >>${localLogFile}
+               echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz  with status=$status"
+
+      time >>${localLogFile}
  # ----
  #   close local Web page
  # ----
-    echo "&lt;/PRE&gt;&lt;/BODY&gt;&lt;HTML&gt;"  &gt;${localLogFile}
-
+    echo "</PRE></BODY><HTML>"  >${localLogFile}
+   ]]>
    </command>  
     <stdout URL="file:./$JOBID.out" />
     <output fromScratch="$ZEBRAOUTPUT" >
