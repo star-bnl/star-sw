@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.20 2003/07/01 20:25:28 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.21 2003/08/05 18:26:15 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.21  2003/08/05 18:26:15  andrewar
+ * DCA track update logic modified.
+ *
  * Revision 2.20  2003/07/01 20:25:28  calderon
  * fillGeometry() - use node->getX(), as it should have been since the beginning
  * impactParameter() - always use the innermos hit node, not just for globals
@@ -339,6 +342,10 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
   int errorCount=0; 
+
+  int fillTrackCount1=0;
+  int fillTrackCount2=0;
+
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
       StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
@@ -350,6 +357,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       StGlobalTrack* gTrack = new StGlobalTrack;
       try 
 	{
+	  fillTrackCount1++;
 	  fillTrack(gTrack,kTrack);
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
@@ -365,6 +373,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! -------------------------" << endl;
+	  fillTrackCount2++;
 	}
       catch (runtime_error & rte ) 
 	{
@@ -383,6 +392,11 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
     }
   if (errorCount>4)
     cout << "There were "<<errorCount<<"runtime_error while filling StEvent"<<endl;
+
+  cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(1):"<< fillTrackCount1<<endl;
+  cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
+
+
   return mEvent;
 }
 
@@ -412,11 +426,14 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       return (StEvent*)NULL;
     }
   int skippedCount=0;
-  int fillTrackCount=0;
   // loop over StiKalmanTracks
-  //cout << "Tracks in container " << mTrackStore->size() << endl;
+  cout << "StiStEventFiller::fillEventPrimaries() -I- Tracks in container:" << mTrackStore->size() << endl;
   int mTrackN=0;
   StiKalmanTrack* kTrack;
+
+  int fillTrackCount1=0;
+  int fillTrackCount2=0;
+
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
       kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
@@ -427,8 +444,11 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       StTrackNode* currentTrackNode = (*itKtrack).second;
       //double globalDca = currentTrackNode->track(global)->impactParameter();
+      StiKalmanTrackNode * nnn1; 
+      StiKalmanTrackNode * nnnn;
       if (kTrack->isPrimary())
 	{
+	  fillTrackCount1++;
 	  if (currentTrackNode->entries()>10)
 	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
 	  if (currentTrackNode->entries(global)<1) 
@@ -439,7 +459,6 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	  StPrimaryTrack* pTrack = new StPrimaryTrack;
 	  try
 	    {
-	      fillTrackCount++;
 	      fillTrack(pTrack,kTrack);
 	      // set up relationships between objects
 	      detInfoVec.push_back(detInfo);
@@ -447,6 +466,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
 	      vertex->addDaughter(pTrack);
 	      StuFixTopoMap(pTrack);
+	      fillTrackCount2++;
 	    }
 	  catch (runtime_error & rte )
 	    {
@@ -465,7 +485,8 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
     } // kalman track loop
   if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
   mTrkNodeMap.clear();  // need to reset for the next event
-  //cout <<"StiStEventFiller::fillEventPrimaries() -I- Done"<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries(1):"<< fillTrackCount1<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries:(2)"<< fillTrackCount2<<endl;
   return mEvent;
 }
 
@@ -710,7 +731,7 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
     }
   StiKalmanTrackNode*	node;
 
-  node = track->getInnerMostNode();
+  node = track->getInnerMostHitNode(); // changed to InnerMostHitNode()...
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
 
@@ -726,9 +747,18 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
 			       node->getPhase()-node->getHelicity()*M_PI/2.,
 			       *originD,
 			       node->getHelicity());
+  
+
   //cout <<"PHelix: "<<*physicalHelix<<endl;
   float dca = static_cast<float>(physicalHelix->distance(vxDD));
-
-  track->setDca(dca);
+  if (track->isPrimary())
+    {
+      //cout << "StiStEventFiller::impactParameter() -I- Primary Track -   Dca:"<<dca<<endl;
+    }
+  else
+    {
+      track->setDca(dca);
+      //cout << "StiStEventFiller::impactParameter() -I- GLOBAL  Track -   Dca:"<<dca<<endl;
+    }
   return dca;
 }
