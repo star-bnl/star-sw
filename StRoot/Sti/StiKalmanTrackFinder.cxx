@@ -225,6 +225,8 @@ void StiKalmanTrackFinder::fitTracks()
 */
 void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 {
+    cout << "SKTF::extendTracksToVertex() - vertex position " << vertex->x_g() << ", " << vertex->y_g() << ", " << vertex->z_g() << endl;
+
   int rawCount = 0;
   int goodCount= 0;
   int plus=0;
@@ -249,7 +251,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	    helPlus++;
 	  else
 	    helMinus++;
-	   
+
 	}
       catch (runtime_error & rte) 
 	{
