@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.7 2002/01/17 02:06:29 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.8 2002/01/19 00:14:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.8  2002/01/19 00:14:16  ullrich
+ * Corrected typo.
+ *
  * Revision 2.7  2002/01/17 02:06:29  ullrich
  * Added the removal of objects recently added to StEvent.
  *
@@ -233,7 +236,7 @@ bool StEventScavenger::removeFpdCollection(StEvent* evt)
         return false;
 }
 
-bool StEventScavenger::removeToFCollection(StEvent* evt)
+bool StEventScavenger::removeTofCollection(StEvent* evt)
 {
     if (evt && evt->tofCollection()) {
         evt->tofCollection()->makeZombie();

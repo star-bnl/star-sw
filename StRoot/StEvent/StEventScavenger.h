@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.5 2002/01/17 02:06:29 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.6 2002/01/19 00:14:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.6  2002/01/19 00:14:17  ullrich
+ * Corrected typo.
+ *
  * Revision 2.5  2002/01/17 02:06:29  ullrich
  * Added the removal of objects recently added to StEvent.
  *
@@ -49,7 +52,7 @@ public:
     static bool removeXiVertices(StEvent*);
     static bool removeKinkVertices(StEvent*);
     static bool removeFpdCollection(StEvent*);
-    static bool removeToFCollection(StEvent*);
+    static bool removeTofCollection(StEvent*);
     static bool removeCalibrationVertices(StEvent*);
  
     static bool remove(StTrack*);
