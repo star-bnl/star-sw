@@ -1,5 +1,5 @@
 /********************************************************
- * $Id: StRichAnalogToDigitalConverter.cxx,v 2.0 2000/08/09 16:16:59 gans Exp $
+ * $Id: StRichAnalogToDigitalConverter.cxx,v 2.1 2002/04/01 21:55:22 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogToDigitalConverter takes an analog signal
@@ -11,8 +11,12 @@
  *
  ******************************************************
  * $Log: StRichAnalogToDigitalConverter.cxx,v $
+ * Revision 2.1  2002/04/01 21:55:22  lasiuk
+ * pedestal convolution
+ *
  * Revision 2.0  2000/08/09 16:16:59  gans
- * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
+ * Readded Files That were not added in last CVS.
+ *  Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
  *
  * Revision 1.5  2000/05/17 22:26:24  lasiuk
@@ -72,13 +76,41 @@ int StRichAnalogToDigitalConverter::operator()(double signal) const
     //    
     // signal is in [electrons], e_charge in [fC] and adc_factor in [fC/channel]
 
-    int Q = static_cast<int>(floor( signal  /  mAdcConversion ));
-    if(mAddPedestal)
-	Q += mPedestal;
+  double pedestal = mPedestal + mGenerator.Gauss(0,2);
+  //    cout << "signal  (ADC) " << (signal/mAdcConversion) << endl;
+  //    cout << "pedestal(ADC) " << pedestal << endl;
+  
+  double qMeasured = signal+pedestal*mAdcConversion;
+
+  int Q = static_cast<int>( floor(qMeasured/mAdcConversion) );
+  //    cout << "Q(ADC)=" << Q << endl;
+
+  int threshold = Q-(mPedestal+6);
+  //    cout << "threshold=" << threshold << endl;
+
+  if(Q>=mMaxADC) {
+    Q = mMaxADC;
+  }
+  else if(threshold<0) {
+    Q = 0;
+  }
+  else {
+    Q = threshold;
+  }
+
+  //    cout << "Qf= " << Q << endl;
+
+
+  //
+  // old code
+  //
+//        int Q = static_cast<int>(floor( signal  /  mAdcConversion ));
+//      if(mAddPedestal)
+//  	Q += mPedestal;
     
-    // check underflow or overflow ( saturation )
+//      // check underflow or overflow ( saturation )
 	
-    Q=min(max(0,Q),mMaxADC);
+//        Q=min(max(0,Q),mMaxADC);
     
     return Q;
 }
