@@ -19,7 +19,6 @@ public:
     virtual ~StiControlBar();
 
     //To be called with buttons
-    static void resetStiGuiForEvent(); //Reset for current event
     static void doNextStiGuiAction(); //do next action within this event
     static void stepToNextEvent(); //step to the next event
     static void stepThroughNEvents(); //step through user-specified number of events
@@ -38,6 +37,8 @@ public:
 
     static void setTpcVisible(); //call StiDisplayManager::setTpcVisible()
     static void setTpcInvisible(); //call StiDisplayManager::setTpcInvisible()
+
+    static void setSkeletonView(); //call StiDisplayManager::makeSkeletonView
 
     //Navigate through detector (should be sub-menued/cascaded)
     static void setCurrentDetectorToDefault();

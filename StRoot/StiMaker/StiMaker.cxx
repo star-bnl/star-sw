@@ -239,9 +239,6 @@ Int_t StiMaker::Init()
     mdetector->buildDetectors(mdatanodefactory, mdetectorfactory);
     mdetector->reset();
       
-    mdisplay->draw();
-    mdisplay->update();
-
     //The Hit Filler
     mhitfiller = new StiHitFiller();
     mhitfiller->addDetector(kTpcId);
@@ -263,7 +260,11 @@ Int_t StiMaker::Init()
     mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
     //mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
-    
+
+    mdisplay->setSkeletonView();
+    mdisplay->draw();
+    mdisplay->update();
+
     return StMaker::Init();
 }
 
