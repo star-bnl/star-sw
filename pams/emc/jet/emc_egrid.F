@@ -14,6 +14,7 @@ c:>------------------------------------------------------------------
      4       ems_control_h,       ems_control ,
      5     emc_egrid_par_h,     emc_egrid_par ,
      6        emc_energy_h,        emc_energy )
+      IMPLICIT NONE
 #include "emc_def.h"
 #include "math_constants.inc"
 #include "phys_constants.inc"
@@ -34,7 +35,6 @@ C:ARGUMENTS:    emc_hits_bemc emc_hits_eemc dst_track ems_control
 C:ARGUMENTS:    emc_energy
 C:RETURN VALUE: STAFCV_OK on successful completion
 c:>------------------------------------------------------------------
-      IMPLICIT NONE
 #include "emc_egrid.inc"
 
 c---energy grid id
