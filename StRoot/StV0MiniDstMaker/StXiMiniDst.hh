@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.hh,v 1.2 1999/08/13 14:28:20 jones Exp $
+ * $Id: StXiMiniDst.hh,v 1.3 1999/08/16 10:21:03 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.hh,v $
+ * Revision 1.3  1999/08/16 10:21:03  jones
+ * Fixed compilation problem on HP related to use of const on pointer type
+ *
  * Revision 1.2  1999/08/13 14:28:20  jones
  * Added comments to explain the usage of the public member functions
  *
@@ -36,11 +39,11 @@ public:
 
   int   charge() const;              // Particle charge
   float decayLengthXi() const;       // 3-d decay distance
-  float *decayVertexXi() const;      // Coordinate of decay vertex
+  float *decayVertexXi();            // Coordinate of decay vertex
   float dcaXiDaughters() const;      // DCA of xi daughters at decay vertex
   float dcaBachelorToPrimVertex() const; // DCA of bachelor to primary vertex
   float dcaXiToPrimVertex() const;   // DCA of xi to primary vertex
-  float *momBachelor() const;        // Momentum components of bachelor
+  float *momBachelor();              // Momentum components of bachelor
   int   tpcHitsBachelor() const;     // Number of TPC hits on bachelor
 
   float *momXi();                    // Momentum components of Xi/Omega
@@ -87,7 +90,7 @@ inline int   StXiMiniDst::charge() const
              { return mCharge; }
 inline float StXiMiniDst::decayLengthXi() const 
              { return mDecayLengthXi; } 
-inline float *StXiMiniDst::decayVertexXi() const 
+inline float *StXiMiniDst::decayVertexXi()
              { return mDecayVertexXi; } 
 
 inline float StXiMiniDst::dcaXiDaughters() const 
@@ -96,7 +99,7 @@ inline float StXiMiniDst::dcaXiToPrimVertex() const
              { return mDcaXiToPrimVertex; }
 inline float StXiMiniDst::dcaBachelorToPrimVertex() const 
              { return mDcaBachelorToPrimVertex; }
-inline float *StXiMiniDst::momBachelor() const 
+inline float *StXiMiniDst::momBachelor() 
              { return mMomBachelor; }
 inline float *StXiMiniDst::momXi()
              { return mMomXi; }
