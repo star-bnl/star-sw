@@ -1,4 +1,4 @@
-{
+  {
  //*-- Author :    Valery Fine   25/12/98
  //  
  // 
@@ -105,7 +105,8 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
+  Char_t *classes[] = { "St_TableSorter"
+                       ,"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
@@ -113,8 +114,6 @@
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
                        ,"St_ebye_Maker","St_laser_Maker","St_run_Maker"
-                       ,"St_calib_Maker"
-                       ,"St_tpctest_Maker","St_calib_Maker"
                         };
   Int_t nclass = 24;
   // Creat the definitions of the classes not derived from TObjects
@@ -147,7 +146,8 @@
   }
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
-
+  cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./TestSorter.C","An example of the STAF table sort utility");
   html.Convert("./XDFBrowser.C","XDF file interactive ROOT browser");
   html.Convert("./../Chain/xdf.C","STAR chain example");
   html.Convert("./../test/XDFcopy.C","How to read/write XDF file");

@@ -71,12 +71,9 @@ void make1doc(const Char_t *docname,const Char_t *doctitle)
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView",
                        ,"StMaker",     "StChain"
-                       ,"table_head_st"
-                       ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
-                       ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
-                       ,"St_ebye_Maker","St_laser_Maker"
+                       ,"table_head_st", "St_TableSorter"
                         };
-  Int_t nclass = 18;
+  Int_t nclass = 11;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
