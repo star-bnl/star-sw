@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.1 1998/03/16 03:02:51 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.2 1998/04/28 18:04:27 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -153,8 +153,8 @@ void DoComment(int codeLineNum,char *xx) {
   char *cc;
   if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
   if(gNoMoreComments) return;
-  if(strlen(cc)+strlen(gComments)>COMMENTS-13) {
-    strcat(gComments,"\nCOMMENTS TRUNCATED"); gNoMoreComments=7;
+  if(strlen(cc)+strlen(gComments)>COMMENTS-19) {
+    strcat(gComments,"\nCOMMENTS TRUNCATED"); gNoMoreComments=7; return;
   }
   strcat(gComments,cc);
 }
