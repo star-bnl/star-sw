@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.6 2001/04/02 12:04:39 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.7 2001/04/20 12:50:29 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.7  2001/04/20 12:50:29  jcs
+// cleanup comments
+//
 // Revision 1.6  2001/04/02 12:04:39  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
 //
@@ -80,23 +83,21 @@ int StFtpcSlowSimulator::simulate()
     float rad_off;
     float pad_off;
     float rad;
-    float phi;
+    float phi=0.;
     float drift_time;
 
     float aip = mDb->gasIonizationPotential()*1.0e-9;           // in GeV
     float px, py, pz, pp;
     float xx, yy, zz;
-    float rr;
     float de;
-    float phi_tmp;
     float r_min    = mDb->sensitiveVolumeInnerRadius();
     float r_max    = mDb->sensitiveVolumeOuterRadius();
     float dip_ang, cross_ang;
 
     int number_hits = mGeant->numberOfHits();
-    int rr_rej = 0;                                   //jcs
-    int de_zero = 0;                                //jcs
-    int n_cross_ang_max = 0;                        //jcs
+    int rad_rej = 0;
+    int de_zero = 0;
+    int n_cross_ang_max = 0;
     int counter=0;
     for ( i=0; i<number_hits; ++i ) 
       {
@@ -120,16 +121,16 @@ int StFtpcSlowSimulator::simulate()
 	zz = mGeant->z(i);
                 
 //   Test that current point is within chamber          
-         rr = sqrt ( xx*xx + yy*yy );
-        if(rr < r_min || rr > r_max) {               //jcs
-	  ++rr_rej;                                 //jcs
-	  continue ;                                //jcs
-        }                                            //jcs
+         rad = sqrt ( xx*xx + yy*yy );
+        if(rad < r_min || rad > r_max) {
+	  ++rad_rej;
+	  continue ;
+        }
 
 	de = mGeant->energyLoss(i);
-	if ( de == 0 ) {                            //jcs
-	  ++de_zero;                               //jcs
-	}                                           //jcs
+	if ( de == 0 ) {
+	  ++de_zero;
+	}
 
 
 //	// TEMPORARY FIX: pad length = 1 in gstar  JCS
@@ -138,16 +139,16 @@ int StFtpcSlowSimulator::simulate()
 	if(DEBUG)
 	  cout << "Now processing hit " << i << endl;
 	int irow= mGeant->geantVolume(i);
-	if ( irow > 200){                                   //jcs
-	  irow = irow - 201 + 10;                           //jcs
+	if ( irow > 200){
+	  irow = irow - 201 + 10;
 	}
-	else  {                                             //jcs
-	  irow = irow - 101;                                //jcs
+	else  {
+	  irow = irow - 101;
 	}
 
 	// angle between r and p vectors in xy plane:
-        float fpp=0; if (pp>0) fpp=atan2(py,px);          //jcs
-	float alpha = fpp - atan2(yy,xx);                 //jcs
+        float fpp=0; if (pp>0) fpp=atan2(py,px);
+	float alpha = fpp - atan2(yy,xx);
 	
 	
 	// momentum components with respect to r in xy plane:
@@ -171,36 +172,32 @@ int StFtpcSlowSimulator::simulate()
 	cross_ang = atan(p_rad / pz);
 	if(cross_ang>halfpi) cross_ang = cross_ang - pi;
 
-	//   Limit cross_ang to 1.5 to avoid nonsensical results             jcs
-	//(if this works put cross_ang_max in fss_param.idl and make necessary changes
-	// in both inparam.h and inparam.cc)
- 	float ang_max = 0;           //jcs
- 	if ( fabs( cross_ang) > ang_max ) {    //jcs/hh
- 	  cross_ang = ang_max*cross_ang/fabs(cross_ang) ;                 //jcs/hh
- 	  ++n_cross_ang_max;               //jcs
- 	}                                      //jcs
- 	if ( fabs( dip_ang) > ang_max ) {    //hh
- 	  dip_ang = ang_max*dip_ang/fabs(dip_ang) ;                 //hh
- 	  ++n_cross_ang_max;               //hh
- 	}                                      //hh
+	//   Limit cross_ang and dip_angle to 1.5 to avoid nonsensical results
+        //   Holm has inactivated these tests
+ 	float ang_max = 0;
+ 	if ( fabs( cross_ang) > ang_max ) {
+ 	  cross_ang = ang_max*cross_ang/fabs(cross_ang) ;
+ 	  ++n_cross_ang_max;
+ 	}
+ 	if ( fabs( dip_ang) > ang_max ) {
+ 	  dip_ang = ang_max*dip_ang/fabs(dip_ang) ;
+ 	  ++n_cross_ang_max;
+ 	}
 
         // calculate the polar coordinates
+        //  so that phi-phi_min >= 0.0  (phi_min=halfpi)
 
         if (xx > 0.0) {
-            if (yy >= 0.0)
-            //  quadrant I - necessary because phi_min=90deg   jcs
-                phi_tmp = twopi + atan(yy/xx);    //jcs
-            else
-                phi_tmp = twopi + atan(yy/xx);
+                phi = twopi + atan(yy/xx); 
         }
         else if (xx < 0.0) {
-                phi_tmp = pi + atan(yy/xx);
+                phi = pi + atan(yy/xx);
         }
         else {
             if (yy >= 0.0)
-                phi_tmp = halfpi;
-            else
-                phi_tmp = 1.5*pi ;
+                phi = halfpi;
+            else if (yy < 0.0) 
+                phi = 1.5*pi ;
         }
 
 
@@ -213,23 +210,19 @@ int StFtpcSlowSimulator::simulate()
         rad_off     = rdout->GetPadLength() * tan(dip_ang);
         pad_off     = rdout->GetPadLength() * tan(cross_ang); // in cm
 
-        rad         = rr;
-        phi         = phi_tmp;
 
         if (DEBUG) {
             cout << " ##### Point i= " << i
                  << " counter=" << counter
-                 << " nel=" << electron 
-                 << " rad=" << rad 
-                 << " phi=" << phi 
+                 << " nel=" << electron
+                 << " rad=" << rad
+                 << " phi=" << phi
                  << endl;
-            cout << " #####            " 
-                 << " rad_off=" << rad_off 
-                 << " pad_off=" << pad_off 
+            cout << " #####            "
+                 << " rad_off=" << rad_off
+                 << " pad_off=" << pad_off
                  << endl;
-           cout << " rr = " << rr
-                << " phi = " << phi_tmp
-                << " x = " << xx
+           cout << " x = " << xx
                 << " y = " << yy
                 << " z = " << zz << endl;
            cout << " px = " << px
@@ -256,7 +249,7 @@ int StFtpcSlowSimulator::simulate()
 
         rdout->ShaperResponse(clus);  // response on shaper 
 
-        rdout->Digitize(clus, irow);         // digitize signal   jcs
+        rdout->Digitize(clus, irow);         // digitize signal
 
        	delete clus;
 
@@ -265,7 +258,7 @@ int StFtpcSlowSimulator::simulate()
    if (DEBUG) {
        cout << "Total number of hit points tested = " << number_hits << endl;
        cout << "Number of hit points accepted = " << counter << endl;
-       cout << "Number of hit points rejected (rr test) = " << rr_rej << endl;
+       cout << "Number of hit points rejected (radius test) = " << rad_rej << endl;
        cout << "Number of hit points rejected (de=0 test) = " << de_zero << endl;
      //cout << "Number of hit points with cross_ang > cross_ang_max  = " << n_cross_ang_max << endl;
        cout << "Writing out ADC array in raw data structure." << endl;
