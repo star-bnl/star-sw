@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.18 2004/12/01 14:02:08 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.19 2004/12/11 22:21:01 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.19  2004/12/11 22:21:01  pruneau
+ * new histos
+ *
  * Revision 2.18  2004/12/01 14:02:08  pruneau
  * svt
  *
@@ -101,17 +104,6 @@ void StiTrackingPlots::initialize()
 
   cout <<"StiTrackingPlots::StiTrackingPlots() -I- Started"<<endl;
 
-  for (i=0;i<NPLOTS;++i)
-    {
-      sprintf(label,"t%d",i);
-      _track[i] = book(label,label,600,0.,600.);
-      for (k=i+1;k<NPLOTS;++k)
-	{
-	  sprintf(label,"t%dVs%d",k,i);
-	  _track2D[i][k]   = book(label,label,100,0.,600.,100,0.,600.);
-	}
-    }
-
   /*
   radLengthZ   =book("radLengthZ","Absorption Length (%) vs. Z",400,-200,200,  100,0,100);
   radLengthPhi =book("radLengthPhi","Absorption Length (%) vs. Phi",128,0,360, 256,0,1);
@@ -124,6 +116,14 @@ void StiTrackingPlots::initialize()
   //         3 : accepted primaries
   for (i=0;i<NPLOTS;++i)
     {
+      sprintf(label,"t%d",i);
+      _track[i] = book(label,label,600,0.,600.);
+      for (k=i+1;k<NPLOTS;++k)
+	{
+	  sprintf(label,"t%dVs%d",k,i);
+	  _track2D[i][k]   = book(label,label,100,0.,600.,100,0.,600.);
+	}
+
       sprintf(label,"eta_%d",i);        _eta[i]        = book(label,label,200, -2.,2.);
       sprintf(label,"phi_%d",i);        _phi[i]        = book(label,label, 100,-3.1415927,3.1415927);
       sprintf(label,"dca_%d",i);        _dca[i]        = book(label,label,  100,0., 10.);
@@ -141,7 +141,9 @@ void StiTrackingPlots::initialize()
       sprintf(label,"chi2VsNpts_%d",i); _chi2VsNpts[i] = book(label,label,50,0.,50.,120,-2.,10.);
       sprintf(label,"chi2VsDca_%d",i);  _chi2VsDca[i]  = book(label,label,50,0.,10.,120,-2.,10.);
       sprintf(label,"lastHitVsNode_%d",i); _xLastHitVsXLastNode[i] = book(label,label,200,0.,200.,200,0.,200.);
-
+      sprintf(label,"svtNhitVsNode_%d",i);_svtNhitVsNode[i] = book(label,label,6, 0., 6., 6, 0., 6.);
+      sprintf(label,"svtNfitVsNode_%d",i);_svtNfitVsNode[i] = book(label,label,6, 0., 6., 6, 0., 6.);
+      
       for (int layer=0;layer<51;++layer)
 	{
 	  sprintf(label,"chi2_%d_L%d",i,layer);	      _chi2Inc[i][layer] = book(label,label,400,0.,100.);
@@ -154,25 +156,32 @@ void StiTrackingPlots::initialize()
 	  sprintf(label,"dz_%d_L%d",i,layer);         _dz[i][layer] = book(label,label,200,-bound,bound);
 	  sprintf(label,"yPull_%d_L%d",i,layer);      _yPull[i][layer] = book(label,label,100,-5.,5.);
 	  sprintf(label,"zPull_%d_L%d",i,layer);      _zPull[i][layer] = book(label,label,100,-5.,5.);
-
+	  double yMax;
+	  double zMax;
+	  int    nY;
+	  int    nZ;
 	  int nSectors;
 	  switch (layer)
 	    {
 	    case 0:
-	    case 1: nSectors = 4; break;
+	    case 1: nSectors = 4; nY=8;  yMax=4.;     nZ=6; zMax=6.; break;
 	    case 2:
-	    case 3: nSectors = 6; break;
+	    case 3: nSectors = 6; nY=8;  yMax=4.;     nZ=6; zMax=12.; break;
 	    case 4:
-	    case 5: nSectors = 8; break;
-	    default: nSectors = 12;
+	    case 5: nSectors = 8; nY=8;  yMax=4.;     nZ=6; zMax=21.; break;
+	    default: nSectors = 12; nY=8;  yMax=40.;  nZ=10; zMax=100.; break;
 	    }
 	  for (int  sector=0;sector<nSectors;++sector)
 	    {
 	      //sprintf(label,"dx_%d_L%d_S%d",i,layer,sector);        _dx[i][layer][sector]=book(label,label,100,-1.,1.);
 	      //sprintf(label,"dy_%d_L%d_S%d",i,layer,sector);        _dy[i][layer][sector]=book(label,label,100,-1.,1.);
-	      sprintf(label,"dyVsTanCA_%d_L%d_S%d",i,layer,sector); _dyVsTanCA[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);
+	      sprintf(label,"dyVsTanCA_%d_L%d_S%d",i,layer,sector);   _dyVsTanCA[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);
+	      sprintf(label,"dyVsY_%d_L%d_S%d",i,layer,sector);       _dyVsY[i][layer][sector]=book(label,label, nY, -yMax, yMax, 100, -2., 2.);
+	      sprintf(label,"dyVsZ_%d_L%d_S%d",i,layer,sector);       _dyVsZ[i][layer][sector]=book(label,label, nZ, -zMax, zMax, 100, -2., 2.);
 	      //sprintf(label,"dz_%d_L%d_S%d",i,layer,sector);	  _dz[i][layer][sector]=book(label,label,100,-1.,1.);
-	      sprintf(label,"dzVsTanL_%d_L%d_S%d",i,layer,sector);  _dzVsTanL[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);	  
+	      sprintf(label,"dzVsTanL_%d_L%d_S%d",i,layer,sector);    _dzVsTanL[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);	  
+	      sprintf(label,"dzVsY_%d_L%d_S%d",i,layer,sector);       _dzVsY[i][layer][sector]=book(label,label, nY, -yMax, yMax, 100, -2., 2.);
+	      sprintf(label,"dzVsZ_%d_L%d_S%d",i,layer,sector);       _dzVsZ[i][layer][sector]=book(label,label, nZ, -zMax, zMax, 100, -2., 2.);
 	    }//sector
 	}//layer
     }//plot type
@@ -357,6 +366,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  */
 	    
 	  // loop through nodes
+	  int svtNnodes=0;
+	  int svtNhits=0;
+	  int svtNfits=0;
+
 	  StiKalmanTrackNode* leaf = kTrack->getLastNode();
 	  StiKTNForwardIterator it(leaf);
 	  StiKTNForwardIterator end = it.end();
@@ -365,45 +378,59 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	      StiKalmanTrackNode& node = *it;
 	      const StiHit * theHit = node.getHit();
 	      const StiDetector * theDetector = node.getDetector();
-	      if (theHit && theDetector)
+	      if (theDetector && theDetector->isActive())
 		{
-		  double dx = theHit->x() - node._x;
-		  double dy = theHit->y() - node._p0;
-		  double dz = theHit->z() - node._p1;
-		  double theDca = sqrt(dy*dy+dz*dz);
-		  double theChi2 = node.evaluateChi2(theHit);
-		  double tanCA = node._sinCA/node._cosCA;
-		  double tanL  = node._p4;
 		  int id   = theDetector->getGroupId();
 		  int key1 = theDetector->getKey(1);
 		  int key2 = theDetector->getKey(2);
+		  if (key1<0 || key2<0) {++it;continue;}
 		  int key;
 		  if (id==1) 
 		    key=5+key1;
 		  else if (id==2) 
-		    key=key1;
-		  else 
-		    continue;
-		  if (key>50 || key<0) continue;
-		  _chi2Inc[i][key]->Fill(theChi2);
-		  _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
-		  if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
-		  if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
-		  if (theChi2<30) //svt only
 		    {
-		      _dx[i][key]->Fill(dx);
-		      _dy[i][key]->Fill(dy);
-		      _dyVsTanCA[i][key][key2]->Fill(tanCA,dy);
-		      _dz[i][key]->Fill(dz);
-		      _dzVsTanL[i][key][key2]->Fill(tanL,dz);
+		      key=key1;
+		      svtNnodes++;
 		    }
-		}
+		  if (theHit && (id==1 || id==2) )
+		    {
+		      double dx = theHit->x() - node._x;
+		      double dy = theHit->y() - node._p0;
+		      double dz = theHit->z() - node._p1;
+		      double theDca = sqrt(dy*dy+dz*dz);
+		      double theChi2 = node.evaluateChi2(theHit);
+		      double tanCA = node._sinCA/node._cosCA;
+		      double tanL  = node._p4;
+		      if (key>50 || key<0) continue;
+		      if (id==2) 
+			{
+			  svtNhits++;
+			  if (theChi2<10) svtNfits++;
+			}
+		      _chi2Inc[i][key]->Fill(theChi2);
+		      _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
+		      if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
+		      if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
+		      if (theChi2<30) //svt only
+			{
+			  _dx[i][key]->Fill(dx);
+			  _dy[i][key]->Fill(dy);
+			  _dyVsTanCA[i][key][key2]->Fill(tanCA,dy);
+			  _dyVsY[i][key][key2]->Fill(node._p0,dy);
+			  _dyVsZ[i][key][key2]->Fill(node._p1,dy);
+			  _dz[i][key]->Fill(dz);
+			  _dzVsTanL[i][key][key2]->Fill(tanL,dz);
+			  _dzVsY[i][key][key2]->Fill(node._p0,dz);
+			  _dzVsZ[i][key][key2]->Fill(node._p1,dz);
+			}//theChi2
+		    } //theHit
+		} //theDetector
 	      ++it;
-	    }
-	  // end of loop hrough nodes
+	    } 	  // end of loop through nodes
+	  _svtNhitVsNode[i]->Fill(svtNnodes,svtNhits);
+	  _svtNfitVsNode[i]->Fill(svtNnodes,svtNfits);
 	} // end of loop plot types
     }//end loop over tracks
-      
   trackCount[0] = trackCount[0]/10.;
   trackCount[1] = trackCount[1]/10.;
   // some global histograms
@@ -415,12 +442,11 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  _track2D[j1][j2]->Fill(trackCount[j1],trackCount[j2]);
 	}
     }
-
   //xxxxx
   if (trackCount[3]>0.9*trackCount[2]) return;
 
 
-  cout << " anomalous event" << endl;
+  //cout << " anomalous event" << endl;
   for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
