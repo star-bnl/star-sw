@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.38 2001/02/22 21:06:05 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.39 2001/02/22 21:10:39 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.39  2001/02/22 21:10:39  lasiuk
+ * remove debug output (dca)
+ *
  * Revision 2.38  2001/02/22 21:06:05  lasiuk
  * fill the new StEvent structures in PidTraits, and richCollection
  * dca code now included
@@ -279,7 +282,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.38 2001/02/22 21:06:05 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.39 2001/02/22 21:10:39 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -913,8 +916,8 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent,
 		if(theGlobalTrack) {
 		    signed3dDca = this->calculateSignedDca(theGlobalTrack, &signed2dDca);
 		}
-		PR(signed2dDca);
-		PR(signed3dDca);
+// 		PR(signed2dDca);
+// 		PR(signed3dDca);
 		
 		theRichPidTraits->setSignedDca2d(signed2dDca);
 		theRichPidTraits->setSignedDca3d(signed3dDca);
