@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.11 1999/12/16 03:56:19 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.12 1999/12/16 04:27:34 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.12  1999/12/16 04:27:34  lansdell
+// histogram of psi values now in degrees instead of radians
+//
 // Revision 1.11  1999/12/16 03:56:19  lansdell
 // mirrored Kathy's changes in St_QA_Maker.cxx: separated tpc and tpc+svt histograms for global tracks using StEvent; added r0,phi0,z0,curvature histograms for global tracks in the tpc
 //
@@ -202,8 +205,9 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfT->Fill(radf);
 	m_glb_ratioT->Fill(nfitntot);
         m_glb_ratiomT->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
-	m_psiT->Fill(globtrk->geometry()->psi());
+	//originally t->psi... but psi()=t->psi*degree in StEvent
+	//(degree=(pi/180)*radian, where radian=1.) -CL
+	m_psiT->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	m_glb_thetaT->Fill(theta);
@@ -265,9 +269,9 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfTS->Fill(radf);
 	m_glb_ratioTS->Fill(nfitntot);
         m_glb_ratiomTS->Fill(nfitnmax);
-
-	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
-	m_psiTS->Fill(globtrk->geometry()->psi());
+	//originally t->psi... but psi()=t->psi*degree in StEvent
+	//(degree=(pi/180)*radian, where radian=1.) -CL
+	m_psiTS->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	m_tanlTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	m_glb_thetaTS->Fill(theta);
@@ -316,8 +320,9 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfFE->Fill(radf);
 	m_glb_ratioFE->Fill(nfitntot);
         m_glb_ratiomFE->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
-	m_psiFE->Fill(globtrk->geometry()->psi());
+	//originally t->psi... but psi()=t->psi*degree in StEvent
+	//(degree=(pi/180)*radian, where radian=1.) -CL
+	m_psiFE->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	//	m_tanlFE->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	//m_glb_thetaFE->Fill(theta);
@@ -353,8 +358,9 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfFW->Fill(radf);
 	m_glb_ratioFW->Fill(nfitntot);
         m_glb_ratiomFW->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
-	m_psiFW->Fill(globtrk->geometry()->psi());
+	//originally t->psi... but psi()=t->psi*degree in StEvent
+	//(degree=(pi/180)*radian, where radian=1.) -CL
+	m_psiFW->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	//m_tanlFW->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	//m_glb_thetaFW->Fill(theta);
@@ -486,10 +492,9 @@ void StEventQAMaker::MakeHistPrim() {
         m_prim_zf0->Fill(zdif);
         m_prim_radf->Fill(radf);
         m_prim_ratio->Fill(nfitntot);
-
-	// originally t->psi... but psi()=t->psi*degree in StEvent -CL
-	m_ppsi->Fill(primtrk->geometry()->psi());
-
+	//originally t->psi... but psi()=t->psi*degree in StEvent
+	//(degree=(pi/180)*radian, where radian=1.) -CL
+	m_ppsi->Fill(primtrk->geometry()->psi()/degree);
 	// originally was t->tanl -CL
         m_ptanl->Fill(TMath::Tan(primtrk->geometry()->dipAngle()));
         m_prim_theta->Fill(theta);
