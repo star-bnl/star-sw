@@ -1,11 +1,15 @@
 *
-* $Id: erstor.F,v 1.1.1.1 2004/01/15 00:11:58 potekhin Exp $
+* $Id: erstor.F,v 1.2 2004/02/12 15:33:10 fisyak Exp $
 *
 * $Log: erstor.F,v $
-* Revision 1.1.1.1  2004/01/15 00:11:58  potekhin
+* Revision 1.2  2004/02/12 15:33:10  fisyak
+* move STAR version of erdecks from rexe to geant321
 *
-* Revision 1.1.1.1  1997/11/03 15:28:40  atlascvs
-* Importing CERNLIB version 08.21.
+* Revision 1.2  2000/01/10 16:22:14  fisyak
+* Modify for multiple volume entries
+*
+* Revision 1.1  1999/12/07 15:44:30  fisyak
+* Add geane, new TGeant3 from Alice
 *
 * Revision 1.1.1.1  1996/03/06 15:37:35  mclareni
 * Add geane321 source directories
@@ -36,7 +40,8 @@ C.    ******************************************************************
 * *** Write out results at intermediate points
 *
       ILPRED = ILPRED + 1
-      IF (ILPRED.GE.NEPRED) ISTOP = 1
+*yf   IF (ILPRED.GE.NEPRED) ISTOP = 1
+      ISTOP = 1
       IEPRED(ILPRED) = INLIST
 *
 * *** Leave B-matrix intact for eventual further tracking
