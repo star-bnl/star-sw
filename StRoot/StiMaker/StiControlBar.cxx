@@ -239,7 +239,9 @@ void StiControlBar::printHitContainerForDetector()
 	cout <<"Error! StiControlBar::printHitContainerForDetector(): Failed to get detector"<<endl;
 	return;
     }
-    StiHitContainer::instance()->print( layer->getPlacement()->getCenterRefAngle(), layer->getPlacement()->getCenterRadius() );
+    cout << StiHitContainer::instance()->hits( layer->getPlacement()->getCenterRefAngle(),
+					       layer->getPlacement()->getCenterRadius() )
+	 <<endl;
 }
 
 void StiControlBar::showCurrentDetector()
@@ -285,12 +287,12 @@ void StiControlBar::setCurrentDetectorToDefault()
 
 void StiControlBar::printHits()
 {
-    StiHitContainer::instance()->print();
+    cout <<*StiHitContainer::instance()<<endl;
 }
 
 void StiControlBar::printVertices()
 {
-    StiHitContainer::instance()->printVertices();
+    cout <<StiHitContainer::instance()->vertices()<<endl;
 }
 
 TControlBar* StiControlBar::makeControlBar()
