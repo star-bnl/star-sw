@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.38 1999/07/15 13:57:30 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.39 1999/07/20 02:16:58 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.39  1999/07/20 02:16:58  lasiuk
+// bring in line with new options (TSS algorithms)
+//
 // Revision 1.38  1999/07/15 13:57:30  perev
 // cleanup
 //
@@ -117,7 +120,6 @@
 //                                                                      //
 // StTrsMaker class for Makers                                          //
 //                                                                      //
-#define hISTOGRAM  1
 #define uNPACK_ALL 1
 #define vERBOSITY  0
 //
@@ -205,7 +207,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.38 1999/07/15 13:57:30 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.39 1999/07/20 02:16:58 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -329,19 +331,17 @@ Int_t StTrsMaker::Init()
 
    // A Wire Plane
    mWireHistogram =
-       StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
+       StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb ,mGasDb);
    mWireHistogram->setDoGasGain(true);
-   mWireHistogram->setDoGasGainFluctuations(false); // used to be true
+   mWireHistogram->setDoGasGainFluctuations(true); // used to be true
    mWireHistogram->setDoSingleElectronMultiplication(false);
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
-   
-   //cout << ">innerSectorGasGain= " << mSlowControlDb->innerSectorGasGain() << endl;
-   //cout << ">outerSectorGasGain= " << mSlowControlDb->outerSectorGasGain() << endl;
+   mWireHistogram->setRangeOfWiresForChargeDistribution(3);
 
    //
-   // An Analog (for calculation)
+   // An Analog Sector(for calculation)
    mSector = 
        new StTrsSector(mGeometryDb);
 
@@ -353,8 +353,8 @@ Int_t StTrsMaker::Init()
    // set status:
    mChargeTransporter->setChargeAttachment(false); // used to be true
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(false);  // used to be true
-   mChargeTransporter->setLongitudinalDiffusion(false); // used to be true
+   mChargeTransporter->setTransverseDiffusion(true);  // used to be true
+   mChargeTransporter->setLongitudinalDiffusion(true); // used to be true
    mChargeTransporter->setExB(false);
 
 
@@ -410,20 +410,6 @@ Int_t StTrsMaker::Init()
    AddConst(new St_ObjectSet("Event"  , mAllTheData));
    AddConst(new St_ObjectSet("Decoder", mUnPacker));
 
-// #ifdef HISTOGRAM
-//     //
-//     //  Open histogram file and book tuple
-//     //
-//     string fname = "hbook";
-//     mHbookFile = new StHbookFile(fname.c_str());
-
-//     mTupleSize = 2;
-//     float tuple[mTupleSize];
-//     StHbookTuple *theTuple  =
-// 	new StHbookTuple("segment", tupleSize1);
-//     *theTuple << "seg"  << "n" << book;
-        
-// #endif
 
    
    return StMaker::Init();
@@ -633,15 +619,12 @@ Int_t StTrsMaker::Make(){
 	    // Fast Simulation can use breakNumber = 1
 	    //
 	    int breakNumber = max(aSegment.ds()/mMiniSegmentLength,1.);
+	    breakNumber = min(breakNumber,16);  // set limit
 // 	    PR(aSegment.ds()/millimeter);
 // 	    PR(breakNumber);
-#ifdef HISTOGRAM
-	    tuple[0] = static_cast<float>(aSegment.ds()/millimeter);
-	    tuple[1] = static_cast<float>(breakNumber);
-	    theTuple->fill(tuple);
-#endif
 
-	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+// 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+ 	    aSegment.tssSplit(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    //copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
