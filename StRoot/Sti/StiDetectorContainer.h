@@ -123,6 +123,55 @@ class StiDetectorContainer : public Named, public Described
   vector<StiDetector*>::iterator begin();
   vector<StiDetector*>::iterator end();
 
+  vector<StiDetectorNode*>::const_iterator beginRadial(const StiDetector * detector) 
+    {
+      setToDetector(detector);
+      return mradial_it;//(*mregion)->begin();
+    }
+  
+  vector<StiDetectorNode*>::const_iterator endRadial() 
+    {
+      return (*mregion)->end();
+    }  
+
+  vector<StiDetectorNode*>::reverse_iterator rbeginRadial(const StiDetector * detector) 
+    {
+      setToDetector(detector);
+      vector<StiDetectorNode*>::reverse_iterator it;
+      for (it =(*mregion)->rbegin(); 
+	   it != (*mregion)->rend(); 
+	   ++it)
+	{
+	  //if they point to the same node, we are done...
+	  if (*it==*mradial_it) break;
+	}
+      return  it;
+    }
+
+  StiDetectorNodeVector::const_reverse_iterator rendRadial() 
+    {
+      return (*mregion)->rend();
+    }
+
+  StiDetectorNodeVector::const_iterator beginPhi(StiDetectorNodeVector::const_iterator &radialIterator) 
+    {
+      //cout << " beginPhi: size:"<< (*radialIterator)->getChildCount()<<endl;
+      return (*radialIterator)->begin();
+    }
+  StiDetectorNodeVector::const_iterator endPhi(StiDetectorNodeVector::const_iterator &radialIterator) 
+    {
+      return (*radialIterator)->end();
+    }
+  StiDetectorNodeVector::const_iterator beginPhi(StiDetectorNodeVector::const_reverse_iterator &radialIterator) 
+    {
+      //cout << " beginPhi: size:"<< (*radialIterator)->getChildCount()<<endl;
+      return (*radialIterator)->begin();
+    }
+  StiDetectorNodeVector::const_iterator endPhi(StiDetectorNodeVector::const_reverse_iterator &radialIterator) 
+    {
+      return (*radialIterator)->end();
+    }
+
 private:
     bool setPhi(const StiOrderKey& oldOrder);
     // Utility function for moveIn(), moveOut() functions

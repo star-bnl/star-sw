@@ -122,13 +122,9 @@ void StiHit::setError(const StMatrixF& matrix)
 /*! Streamer for StiHit objects. */
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
-  return os <<hit.refangle()<<" "<<hit.position()<<"\t\t" //Key
-						<<"LOCAL :"<<hit.x()<<" "<<hit.y()<<" "<<hit.z()<< endl
-						<<"GLOBAL:"<<hit.x_g()<<" "<<hit.y_g()<<" "<<hit.z_g()<< endl
-						<<hit.sxx()<<" "<<hit.syy()<<" "<<hit.szz()<<"\t" //Diagonal Error
-						<<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz()<<"\t" //Off-diagonal error
-						<<hit.detector() //pointer to detector
-						<<"times Used: "<<hit.timesUsed();
+  return os <<hit.refangle() <<" "<<hit.position()
+	    <<"L:"<<hit.x()  <<" "<<hit.y()  <<" "<<hit.z()
+	    <<"G:"<<hit.x_g()<<" "<<hit.y_g()<<" "<<hit.z_g();
 }
 
 
@@ -165,7 +161,7 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (detector)
     {
       StiPlacement * placement = detector->getPlacement();
-      mrefangle = placement->getNormalRefAngle();
+      mrefangle = placement->getLayerAngle();
       mposition = placement->getLayerRadius();
       mx =  detector->_cos*gx + detector->_sin*gy;
       my = -detector->_sin*gx + detector->_cos*gy;
@@ -202,7 +198,7 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (detector)
     {
       StiPlacement * placement = detector->getPlacement();
-      mrefangle = placement->getNormalRefAngle();
+      mrefangle = placement->getLayerAngle();
       mposition = placement->getLayerRadius();
       _xg = detector->_cos*x - detector->_sin*y;
       _yg = detector->_sin*x + detector->_cos*y;
