@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.3 1999/07/26 17:00:02 levine Exp $
+ * $Id: DetectorReader.cxx,v 1.4 2000/01/14 17:57:30 levine Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -8,9 +8,13 @@
  *   change log
  * 02-Jul-99 MJL add #includes for other detectors
  * 08-Jul-99 MJL separate RICH_Reader
+ * 13-Jan-00 MJL add TRG
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.4  2000/01/14 17:57:30  levine
+ * added getTRGReader()
+ *
  * Revision 1.3  1999/07/26 17:00:02  levine
  * changes to RICH file organization
  *
