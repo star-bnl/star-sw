@@ -120,6 +120,7 @@ StBranch::StBranch(const Char_t *name, StTree *parent):St_DataSet(name,parent)
 
   SetTitle(".StBranch");
   fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fTFileOwner=0,fDebug=0;
+  fListTmp=0;
 }
 StBranch::~StBranch()
 {
@@ -224,19 +225,38 @@ Int_t StBranch::ReadEvent(ULong_t ukey)
 Int_t StBranch::NextEvent()
 {   
   if (!(fIOMode&1)) return 0;
+  Clear();
   return GetEvent(1);
 }
 
 Int_t StBranch::NextEvent (ULong_t &ukey)
 {
   if (!(fIOMode&1)) return 0;
+  Clear();
   fUKey=ukey; int iret = GetEvent(1); ukey=fUKey; return iret;
 }
 //_______________________________________________________________________________
 void StBranch::SetParAll(St_DataSet *par)
 {
+  if (!fListTmp) fListTmp = new TList();
   St_DataSetIter next(this);
-  St_DataSet *son; while ((son=next())) son->SetParent(par);
+  St_DataSet *son,*p;
+  while ((son=next())) {
+    if (!par) {//zero parents
+
+      fListTmp->Add(son->GetParent());
+      son->SetParent(0);  
+
+    } else {
+
+      p =(St_DataSet*)fListTmp->First();
+      son->SetParent(p); 
+      fListTmp->Remove(p);
+
+    }// endif
+  }// end while  
+
+  delete fListTmp; fListTmp = 0;
 }
 //_______________________________________________________________________________
 void StBranch::OpenTFile()
@@ -274,7 +294,11 @@ StBranch *tree,*bran;
   printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
         ,GetName(),TFOPT[ihismode],(const char*)fFile); 
 }
-
+//_______________________________________________________________________________
+void StBranch::Clear(Option_t *)
+{
+  if (fList) fList->Clear();
+}
 //===============================================================================
 
 ClassImp(StTree)
@@ -301,7 +325,7 @@ void StTree::SetIOMode(Option_t *iomode)
 void StTree::Clear(Option_t*)
 {
  St_DataSetIter next(this);StBranch *br;
- while ((br=(StBranch*)next())) { br->Delete();}
+ while ((br=(StBranch*)next())) { br->Clear();}
 } 
 
 //_______________________________________________________________________________
@@ -352,7 +376,7 @@ Int_t StTree::NextEvent()
 }  
   
 //_______________________________________________________________________________
-void StTree::Close(const char*)
+void StTree::Close(const char* opt)
 {  
   TString treeKey(GetName()); treeKey += ".tree";
   Clear();
@@ -365,7 +389,7 @@ void StTree::Close(const char*)
       St_DataSet *par = GetParent(); SetParent(0);
       StIO::Write(tfbr,(const char*)treeKey,2000,this);
       SetParent(par);}
-    br->Close();
+    if (strstr(opt,"keep")) br->Close();
   }
 }  
 

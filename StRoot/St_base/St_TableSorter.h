@@ -118,9 +118,6 @@ class St_TableSorter : public TNamed {
     St_TableSorter();
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
 
-// The last parameter below ",const St_Table &table=*((const St_Table *)0));" 
-// is useless but was introduced to make "g++" happy.
-
     St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
@@ -141,12 +138,12 @@ class St_TableSorter : public TNamed {
     virtual const Text_t *GetColumnName() const { return m_colName.Data();}
     virtual const Text_t *GetTableName()  const;
     virtual const Text_t *GetTableTitle() const;
-    virtual const Text_t *GetTableType() const;
+    virtual const Text_t *GetTableType()  const;
     virtual       Int_t   GetNRows()      const { return m_numberOfRows;}
     virtual       Int_t   GetFirstRow()   const { return m_firstRow;}
 
-    Int_t operator[](Int_t value)   { return BSearch(value); }
-    Int_t operator[](Double_t value){ return BSearch(value); } 
+    Int_t operator[](Int_t value)    { return BSearch(value); }
+    Int_t operator[](Double_t value) { return BSearch(value); } 
     Int_t operator[](const Char_t *value) { return BSearch(value); }
     Int_t operator[](TString &value) { return BSearch(value); }
 
@@ -154,7 +151,7 @@ class St_TableSorter : public TNamed {
     Int_t operator()(Int_t value)    { return BinarySearch(value); }
     Int_t operator()(Double_t value) { return BinarySearch(value); }
     Int_t operator()(const Char_t *value) { return BinarySearch(*value); }
-//    Int_t operator()(TString &value) { return *this(value.Data()); }
+//    Int_t operator()(TString &value)    { return *this(value.Data());  }
 
     ClassDef(St_TableSorter,0)
 };

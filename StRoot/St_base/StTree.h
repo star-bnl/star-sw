@@ -57,6 +57,7 @@ public:
   virtual Int_t NextEvent (ULong_t &ukey);
   virtual Int_t NextEvent ();
   virtual Int_t WriteEvent(ULong_t  ukey=kUMAX);
+  virtual void Clear(const char *opt=0);
   virtual void Close(const char *opt=0);
   virtual Int_t Open();
   virtual Int_t GetDebug(){return fDebug;};
@@ -73,6 +74,7 @@ protected:
   TFile   *fTFile;		//! Opened TFile
   Int_t   fTFileOwner;          //! Ownership of TFile flag
   Int_t   fDebug;		//! debug level
+  TList   *fListTmp;		//! temporary list
 ClassDef(StBranch,1)
 };  
 
