@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.329 2003/04/17 20:21:53 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.330 2003/04/18 00:21:30 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -101,7 +101,7 @@ Bfc_st BFC1[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
@@ -136,7 +136,7 @@ Bfc_st BFC1[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
@@ -148,11 +148,11 @@ Bfc_st BFC1[] = {
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
 
@@ -229,10 +229,11 @@ Bfc_st BFC1[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
-  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
-                                                                    "pp option without spin makers",kFALSE},
+
+  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+                                                            "Use pp-like + makers *** OBSOLETE ***",kFALSE},
+  {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
+
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -580,7 +581,7 @@ Bfc_st BFC2[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
@@ -615,7 +616,7 @@ Bfc_st BFC2[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
@@ -708,10 +709,11 @@ Bfc_st BFC2[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
-  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
-                                                                    "pp option without spin makers",kFALSE},
+
+  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+                                                       "Use pp-like + Spin makers *** OBSOLETE ***",kFALSE},
+  {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
+
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -1237,7 +1239,7 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options
 	if (mk) {
-	  if (GetOption("pp") ) {                            // pp specific stuff
+	  if (GetOption("ppOpt") ) {                         // pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
 	      mk->SetMode(1);                                // Switch vertex finder to ppLMV
