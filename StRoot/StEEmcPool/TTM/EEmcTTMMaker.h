@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.17 2004/05/10 23:02:53 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.18 2004/06/03 21:02:29 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -181,7 +181,8 @@ private:
 
   StMuDstMaker   *mMuDstMaker; // toplevel muDST maker
   StEEmcDbMaker  *mEEmcDb;     // EEMC database maker
-  EEmcGeomSimple *mGeom;       // tower geometry
+  //
+  EEmcGeomSimple& mGeom;       // tower geometry
 
   TString         mFileName;   // output file name
   TFile          *mFile;       // output file
@@ -209,7 +210,7 @@ private:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.17 2004/05/10 23:02:53 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.18 2004/06/03 21:02:29 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -221,6 +222,10 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.18  2004/06/03 21:02:29  zolnie
+// fixed subtle bug: when e.g. dphi = +180.(tower center) - -180.0(track)
+//  the match would be rejected - in practice it never happen
+//
 // Revision 1.17  2004/05/10 23:02:53  zolnie
 // EEmcTTMMaker produces now  nanoDST
 //
