@@ -11,7 +11,7 @@ void DbList(){
 
   mgr->setVerbose(true);
   node->printTree(0);
-  delete node;
+  //  delete node;
 }
 
 
