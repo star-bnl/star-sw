@@ -22,7 +22,7 @@ cd [run_dst]
 tdm/table/rowcount run_header 1
 
 tdm/table/cell/putvalue 'run_header[0].run_id'       0
-*tdm/table/cell/putvalue 'run_header[0].event_type'  Collision
+*tdm/table/cell/putvalue 'run_header[0].event_type'  'Collision'
 tdm/table/cell/putvalue 'run_header[0].trig_mask'    0
 tdm/table/cell/putvalue 'run_header[0].luminosity'   0. 0.
 tdm/table/cell/putvalue 'run_header[0].sqrt_s'       0.
@@ -49,7 +49,7 @@ tdm/table/rowcount event_header   1
 
 tdm/table/cell/putvalue 'event_header[0].n_event'      0  0
 tdm/table/cell/putvalue 'event_header[0].n_run'        0
-*tdm/table/cell/putvalue 'event_header[0].event_type'  Collision
+*tdm/table/cell/putvalue 'event_header[0].event_type'  'Collision'
 tdm/table/cell/putvalue 'event_header[0].time'         0
 tdm/table/cell/putvalue 'event_header[0].trig_mask'    0
 tdm/table/cell/putvalue 'event_header[0].bunch_cross'  0
