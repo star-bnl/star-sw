@@ -19,7 +19,8 @@ $currentTime = localtime time;
 open (COMMITLOG,"< $commitlog") or die "Can't read file $commitlog: $!";
 
 $userCommits = "$cvsHtml/userCommits.html";
-open (USERCOMMITS, "> $userCommits") or die "Can't write file $userCommits: $!";
+open (USERCOMMITS, "> $userCommits"."-tmp") ||
+    die "Can't write file $userCommits: $!";
 $content = <<END_BLOCK;
 <html>
 <head>
@@ -173,9 +174,10 @@ Commits since $firstTime <br>
 END_BLOCK
 print USERCOMMITS $content;
 close USERCOMMITS;
+rename($userCommits."-tmp",$userCommits);
 
-$commitHistory = "$cvsHtml/commitHistory.html-tmp";
-open (COMMITHISTORY, "> $commitHistory") or die "Can't write file $commitHistory: $!";
+$commitHistory = "$cvsHtml/commitHistory.html";
+open (COMMITHISTORY, "> $commitHistory"."-tmp") or die "Can't write file $commitHistory: $!";
 $content = <<END_BLOCK;
 <html>
 <head>
@@ -231,5 +233,5 @@ $content =<<END_BLOCK;
 END_BLOCK
 print COMMITHISTORY $content;
 close COMMITHISTORY;
-rename("$cvsHtml/commitHistory.html-tmp","$cvsHtml/commitHistory.html");
+rename($commitHistory."-tmp",$commitHistory);
 
