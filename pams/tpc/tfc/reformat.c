@@ -166,7 +166,7 @@ long put_ped_indx_mapped
     int row,
     int pad);
 
-int store
+int tfc_store
    (TABLE_HEAD_ST         *fmtpar_h,     TFC_FMTPAR_ST           *fmtpar ,
     TABLE_HEAD_ST     *native_map_h, TFC_NATIVE_MAP_ST       *native_map ,
     TABLE_HEAD_ST          *valid_h,      TFC_VALID_ST            *valid ,
@@ -328,7 +328,7 @@ long reformat_
 	    printf("main: Fatal error return from init_indx.");
             return STAFCV_BAD;
 	}
-        istat = store(
+        istat = tfc_store(
 		      fmtpar_h,         fmtpar ,
 		      native_map_h,	native_map ,
 		      valid_h,		valid ,
@@ -1568,7 +1568,7 @@ int calculate_gain
 /*:>--------------------------------------------------------------------
 **:  Store native_map and valid tables in static arrays
 **:<------------------------------------------------------------------*/
-int store
+int tfc_store
    (TABLE_HEAD_ST         *fmtpar_h,     TFC_FMTPAR_ST           *fmtpar ,
     TABLE_HEAD_ST     *native_map_h, TFC_NATIVE_MAP_ST       *native_map ,
     TABLE_HEAD_ST          *valid_h,      TFC_VALID_ST            *valid ,
