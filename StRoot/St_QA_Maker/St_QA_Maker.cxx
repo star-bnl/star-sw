@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.63 1999/11/23 19:00:51 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.64 1999/12/06 22:25:05 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.64  1999/12/06 22:25:05  kathy
+// split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
+//
 // Revision 1.63  1999/11/23 19:00:51  lansdell
 // Reorganized Make() and include files (Gene)
 //
@@ -342,6 +345,7 @@ void St_QA_Maker::MakeHistGlob(){
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
+        Float_t nfitnmax = (Float_t(t->n_fit_point))/(Float_t(t->n_max_point));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
@@ -357,50 +361,124 @@ void St_QA_Maker::MakeHistGlob(){
 //   The latter, different quantity is in x_first[3].
 
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
-// so it doesn't need to be calculated here (juts plotted)
-
+// so it doesn't need to be calculated here 
+		
  	m_det_id->Fill(t->det_id);
-	m_point->Fill(t->n_point);
-	m_max_point->Fill(t->n_max_point);
-	m_fit_point->Fill(t->n_fit_point);
-        m_glb_charge->Fill(t->icharge);
-        m_glb_xf->Fill(t->x_first[0]);
-        m_glb_yf->Fill(t->x_first[1]);
-        m_glb_zf->Fill(t->x_first[2]);
+
+//  now fill all TPC histograms ------------------------------------------------
+        if (t->iflag<700) {
+
+// these are tpc only
         m_glb_xf0->Fill(xdif);
         m_glb_yf0->Fill(ydif);
         m_glb_zf0->Fill(zdif);
-        m_glb_radf->Fill(radf);
-        m_glb_ratio->Fill(nfitntot);
-	m_psi->Fill(t->psi);
-        m_tanl->Fill(t->tanl);
-        m_glb_theta->Fill(theta);
-	m_eta->Fill(eta);
-	m_pT->Fill(pT);
-        m_mom->Fill(gmom);
-	m_length->Fill(t->length);
-        m_glb_impact->Fill(t->impact);
+        m_glb_impactT->Fill(t->impact);
+	
+// these are tpc & ftpc
+	m_pointT->Fill(t->n_point);
+	m_max_pointT->Fill(t->n_max_point);
+	m_fit_pointT->Fill(t->n_fit_point);
+        m_glb_chargeT->Fill(t->icharge);
+        m_glb_xfT->Fill(t->x_first[0]);
+        m_glb_yfT->Fill(t->x_first[1]);
+        m_glb_zfT->Fill(t->x_first[2]);
+        m_glb_radfT->Fill(radf);
+        m_glb_ratioT->Fill(nfitntot);
+        m_glb_ratiomT->Fill(nfitnmax);
+	m_psiT->Fill(t->psi);
+        m_tanlT->Fill(t->tanl);
+        m_glb_thetaT->Fill(theta);
+	m_etaT->Fill(eta);
+	m_pTT->Fill(pT);
+        m_momT->Fill(gmom);
+	m_lengthT->Fill(t->length);
+	m_chisq0T->Fill(chisq0);
+	m_chisq1T->Fill(chisq1);
+	
+// these are for tpc & ftpc
+        m_globtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+        m_eta_trklengthT->Fill(eta,t->length);
+	m_npoint_lengthT->Fill(t->length,Float_t(t->n_point));
+	m_fpoint_lengthT->Fill(t->length,Float_t(t->n_fit_point));
+	
+// these are tpc only
+	m_pT_eta_recT->Fill(eta,lmevpt);
+        m_tanl_zfT->Fill(t->x_first[2],t->tanl);
+	m_mom_trklengthT->Fill(t->length,lmevmom);
+	m_chisq0_momT->Fill(lmevmom,chisq0);
+	m_chisq1_momT->Fill(lmevmom,chisq1);
+	m_chisq0_etaT->Fill(eta,chisq0);
+	m_chisq1_etaT->Fill(eta,chisq1);
+	m_chisq0_dipT->Fill(t->tanl,chisq0);
+	m_chisq1_dipT->Fill(t->tanl,chisq1);
+	m_chisq0_zfT->Fill(t->x_first[2],chisq0);
+	m_chisq1_zfT->Fill(t->x_first[2],chisq1);
+        m_nfptonpt_momT->Fill(lmevmom,nfitntot);
+        m_nfptonpt_etaT->Fill(eta,nfitntot);
+        }
 
-	m_chisq0->Fill(chisq0  );
-	m_chisq1->Fill(chisq1  );
+//  now fill all FTPC East histograms ------------------------------------------------
+        if (t->iflag>700 && t->iflag<800 && t->det_id==5) {
+	
+// these are tpc & ftpc
+	m_pointFE->Fill(t->n_point);
+	m_max_pointFE->Fill(t->n_max_point);
+	m_fit_pointFE->Fill(t->n_fit_point);
+        m_glb_chargeFE->Fill(t->icharge);
+        m_glb_xfFE->Fill(t->x_first[0]);
+        m_glb_yfFE->Fill(t->x_first[1]);
+        m_glb_zfFE->Fill(t->x_first[2]);
+        m_glb_radfFE->Fill(radf);
+        m_glb_ratioFE->Fill(nfitntot);
+        m_glb_ratiomFE->Fill(nfitnmax);
+	m_psiFE->Fill(t->psi);
+        m_tanlFE->Fill(t->tanl);
+        m_glb_thetaFE->Fill(theta);
+	m_etaFE->Fill(eta);
+	m_pTFE->Fill(pT);
+        m_momFE->Fill(gmom);
+	m_lengthFE->Fill(t->length);
+	m_chisq0FE->Fill(chisq0);
+	m_chisq1FE->Fill(chisq1);
+	
+// these are for tpc & ftpc
+        m_globtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
+        m_eta_trklengthFE->Fill(eta,t->length);
+	m_npoint_lengthFE->Fill(t->length,Float_t(t->n_point));
+	m_fpoint_lengthFE->Fill(t->length,Float_t(t->n_fit_point));	
 
-	m_pT_eta_rec->Fill(eta,lmevpt);
-        m_globtrk_xf_yf->Fill(t->x_first[0],t->x_first[1]);
-        m_tanl_zf->Fill(t->x_first[2],t->tanl);
-	m_mom_trklength->Fill(t->length,lmevmom);
-        m_eta_trklength->Fill(eta,t->length);
-	m_npoint_length->Fill(t->length,Float_t(t->n_point));
-	m_fpoint_length->Fill(t->length,Float_t(t->n_fit_point));
-	m_chisq0_mom->Fill(lmevmom,chisq0  );
-	m_chisq1_mom->Fill(lmevmom,chisq1  );
-	m_chisq0_eta->Fill(eta,chisq0  );
-	m_chisq1_eta->Fill(eta,chisq1  );
-	m_chisq0_dip->Fill(t->tanl,chisq0  );
-	m_chisq1_dip->Fill(t->tanl,chisq1  );
-	m_chisq0_zf->Fill(t->x_first[2],chisq0  );
-	m_chisq1_zf->Fill(t->x_first[2],chisq1  );
-        m_nfptonpt_mom->Fill(lmevmom,nfitntot);
-        m_nfptonpt_eta->Fill(eta,nfitntot);
+        }
+
+//  now fill all FTPC West histograms ------------------------------------------------
+        if (t->iflag>700 && t->iflag<800 && t->det_id==4) {
+
+// these are tpc & ftpc
+	m_pointFW->Fill(t->n_point);
+	m_max_pointFW->Fill(t->n_max_point);
+	m_fit_pointFW->Fill(t->n_fit_point);
+        m_glb_chargeFW->Fill(t->icharge);
+        m_glb_xfFW->Fill(t->x_first[0]);
+        m_glb_yfFW->Fill(t->x_first[1]);
+        m_glb_zfFW->Fill(t->x_first[2]);
+        m_glb_radfFW->Fill(radf);
+        m_glb_ratioFW->Fill(nfitntot);
+        m_glb_ratiomFW->Fill(nfitnmax);
+	m_psiFW->Fill(t->psi);
+        m_tanlFW->Fill(t->tanl);
+        m_glb_thetaFW->Fill(theta);
+	m_etaFW->Fill(eta);
+	m_pTFW->Fill(pT);
+        m_momFW->Fill(gmom);
+	m_lengthFW->Fill(t->length);
+	m_chisq0FW->Fill(chisq0);
+	m_chisq1FW->Fill(chisq1);
+	
+// these are for tpc & ftpc
+        m_globtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
+        m_eta_trklengthFW->Fill(eta,t->length);
+	m_npoint_lengthFW->Fill(t->length,Float_t(t->n_point));
+	m_fpoint_lengthFW->Fill(t->length,Float_t(t->n_fit_point));	        
+        }
 
       }
     }
