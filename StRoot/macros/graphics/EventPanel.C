@@ -5,8 +5,7 @@
 // To see the HELP of a button, click on the right mouse button.
    gROOT->Reset();
    TControlBar *bar = new TControlBar("vertical", "Control Panel"); 
-   bar->AddButton("Help on Demos",".x demoshelp.C", "Click Here For Help on Running the Demos");
-   bar->AddButton("browser",     "{b = new TBrowser(\"HALL\");}", "Start the ROOT Browser");
+   bar->AddButton("Load STAR libraries",".x Load.C", "Load the share libraries with STAR base classes defintions");
    bar->AddButton("Print view port size",   ".x Get3DSize.C", "Print the total size of all 3D axice");
    bar->AddButton("Read StEvent",".x EventRead.C(1,\"gtrack.event.root\")","Read StEvent objects from root file");
    bar->AddButton("Make StEvent with tfs",".x bfc.C(1,\"gstar tfs\")","Make StEvent objects with tfs");
@@ -16,6 +15,9 @@
    bar->AddButton("Draw tracks",".x DrawTrackTpcHits.C","Draw the global tracks by its helix object");
    bar->AddButton("Draw g2t_tpc_hits",".x HitsDraw.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
    bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
+   bar->AddButton("Shape demo",".x shapes.C","Run the \"ROOT\" GEANT shape demo");
+   bar->AddButton("Help on Demos",".x EventDemosHelp.C", "Click Here For Help on Running the Demos");
+   bar->AddButton("browser",     "{b = new TBrowser(\"HALL\");}", "Start the ROOT Browser");
    bar->Show();
    gROOT->LoadMacro("PadControlPanel.C");
    gROOT->SaveContext();
