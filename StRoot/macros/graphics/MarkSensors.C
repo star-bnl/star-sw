@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: MarkSensors.C,v 1.3 1999/05/21 15:33:52 kathy Exp $
+// $Id: MarkSensors.C,v 1.4 2000/01/25 16:06:38 fisyak Exp $
 // $Log: MarkSensors.C,v $
+// Revision 1.4  2000/01/25 16:06:38  fisyak
+// g2r -> g2t
+//
 // Revision 1.3  1999/05/21 15:33:52  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -36,7 +39,7 @@
 //  printf("StChain . . .");       gSystem->Load("StChain");    printf(" ..\n");
 //  printf("St_Tables . . .");     gSystem->Load("St_Tables");  printf(" ..\n");
 //  printf("geometry . . .");      gSystem->Load("geometry");   printf(" ..\n");
-//  printf("St_g2r . . .");        gSystem->Load("St_g2r");     printf(" ..\n");
+//  printf("St_g2t . . .");        gSystem->Load("St_g2t");     printf(" ..\n");
 //  printf("St_geant_Maker . . .");gSystem->Load("St_geant_Maker"); printf(" ..\n");
 
   if (!geant) return;

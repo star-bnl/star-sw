@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.11 1999/06/17 20:00:44 didenko Exp $
+// $Id: geant.C,v 1.12 2000/01/25 16:06:37 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.12  2000/01/25 16:06:37  fisyak
+// g2r -> g2t
+//
 // Revision 1.11  1999/06/17 20:00:44  didenko
 // set default #ev= 1
 //
@@ -48,8 +51,7 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("geometry");
-  gSystem->Load("g2r");
-  gSystem->Load("St_g2r");
+  gSystem->Load("St_g2t");
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
 }

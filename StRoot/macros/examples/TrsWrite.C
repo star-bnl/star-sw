@@ -1,7 +1,10 @@
 //
-// $Id: TrsWrite.C,v 1.4 2000/01/20 18:18:16 calderon Exp $
+// $Id: TrsWrite.C,v 1.5 2000/01/25 16:06:37 fisyak Exp $
 //
 // $Log: TrsWrite.C,v $
+// Revision 1.5  2000/01/25 16:06:37  fisyak
+// g2r -> g2t
+//
 // Revision 1.4  2000/01/20 18:18:16  calderon
 // fixed for current TRS in dev.  Current DB in dev is ROOT DB, because
 // Electronics DB from MySQL is not accessible.  When it is, just comment out
@@ -42,7 +45,7 @@ void Load(){
   gSystem->Load("St_db_Maker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("geometry");
-  gSystem->Load("St_g2r");
+  gSystem->Load("St_g2t");
   gSystem->Load("St_geant_Maker");
   gSystem->Load("StTrsMaker");
 }

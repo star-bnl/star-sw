@@ -1,5 +1,8 @@
-// $Id: xdf2root.C,v 1.2 1999/05/21 15:34:02 kathy Exp $
+// $Id: xdf2root.C,v 1.3 2000/01/25 16:06:38 fisyak Exp $
 // $Log: xdf2root.C,v $
+// Revision 1.3  2000/01/25 16:06:38  fisyak
+// g2r -> g2t
+//
 // Revision 1.2  1999/05/21 15:34:02  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -10,7 +13,7 @@
 // Check in the latest updates to fix them
 //
 // Revision 1.3  1999/01/28 00:11:55  fisyak
-// add g2r
+// add g2t
 //
 // Revision 1.2  1999/01/26 16:04:15  fine
 // GetEvent.C print out of the current input file name
