@@ -1,7 +1,7 @@
-// $Id: doEvents.C,v 1.14 1999/05/21 15:33:57 kathy Exp $
+// $Id: doEvents.C,v 1.15 1999/05/22 19:39:09 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.14  1999/05/21 15:33:57  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
+// Revision 1.15  1999/05/22 19:39:09  perev
+// Big changes for all fmts(xdf,mdc2,root)
 //
 // Revision 1.1  1999/05/22 19:38:12  perev
 // temporary macro for RootEvents
@@ -43,10 +43,6 @@
 // load StEvent for Linux
 //
 // Revision 1.1  1999/02/11 15:44:28  wenaus
-//=======================================================================
-// owner: Torre Wenaus
-// what it does: 
-//=======================================================================
 //          to fill StEvent and StAnalysisMaker to show example of analysis
 //          
 //=======================================================================
@@ -67,9 +63,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-void setFiles(const Char_t *path, const Char_t *file);
-class St_XDFFile;
-St_XDFFile* nextFile();
 
 // Functions included below which retrieve a single file or all files
 // under a path
@@ -79,24 +72,20 @@ St_XDFFile* nextFile();
 
 Int_t usePath = 0;
 Int_t nFile = 0;
-class St_FileSet;
-St_FileSet *dstDirs = 0;
-class St_DataSet;
-St_DataSet *set = 0; 
-class St_DataSetIter;
-St_DataSetIter* nextDataSet;
-St_XDFFile *theFile = 0;
 TString  thePath;
 TString  theFileName;
 TString  originalPath;
-TFile *rootFile=0;  
 class StChain;
-Bool_t isRoot=kFALSE;
-Bool_t isXdf=kFALSE;
-TTree* tree=0;
+
+TBrowser *b=0;
+
+const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
-St_XDFFile* nextFile();
-TFile *nextRootFile();
+  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
+  // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
+  // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+  // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
+  // const Char_t *path="-/disk00000/star/auau200/hijing135/",
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 //========================================================================================================
 
@@ -116,120 +105,63 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // example ROOT file invocation:
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
 
+
 void doEvents(const Int_t nevents=999,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+              const Char_t **fileList)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
-  // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
-  // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
-  // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
-  // const Char_t *path="-/disk00000/star/auau200/hijing135/",
+    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
 
 
 
 
-  gSystem->Load("xdf2root");
   // Dynamically link needed shared libs
-  //  gSystem->Load("St_emc_Maker");
-  gSystem->Load("St_io_Maker");
-  St_io_Maker *rootIn=0;
+  gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
 //  gSystem->Load("StEventDisplayMaker");
-  theFileName = file;
-  isRoot = theFileName.Contains(".root");
-  isXdf  = theFileName.Contains(".xdf");
-  if (isRoot) {
-    cout << "Reading ROOT file" << endl;
-    chain  = new StChain("StChain");
-    rootIn = new St_io_Maker("Input","all");
-  } else if (isXdf) {
-    cout << "Reading XDF file" << endl;
-    chain  = new StChain("StChain");
-  } else {
-    cout << "File type not recognized on file " << theFileName << endl;
-    cout << "File type must be either .xdf or .root" << endl;
-    return;
-  }
 
-  setFiles(path,file);  
+
+  // Handling depends on whether file is a ROOT file or XDF file
+
+  chain  = new StChain("StChain");
+
+  StFile *setFiles= new StFile();
+  
+  // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
+  IOMk->SetDebug();
+  IOMk->SetMaxEvent(2);
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
-  // Maker to read events from file or database into StEvent
+// 		Maker to read events from file or database into StEvent
   StEventReaderMaker readerMaker("events","title");
-  // Sample analysis maker
-  StAnalysisMaker analysisMaker("analysis","title");
+// 		Sample analysis maker
+ 		StAnalysisMaker analysisMaker("analysis");
 //  Event Display Maker
-  if (isRoot) {
-    while (rootFile = nextRootFile()) {
-      // ROOT file handling -------------------------------
-      TTree *newTree = 0;
-      if (rootFile) newTree=(TTree *)rootFile->Get("Output");
-      
-      if (newTree) {
-        newTree->Print();
-        chain->SetTree(newTree);
-        tree = newTree;
-        TObjArray *list = tree->GetListOfBranches();
-        if (list) {
-          TIter next(list);
-          TBranch *nextb = 0;
-          while (nextb = (TBranch *)next()) 
-            cout << "Branch: <"<< nextb->GetName() << ">;"
-                 << "  File: <"<< nextb->GetFileName() << ">;"
-                 << " Entries: " << nextb->GetEntries()
-                 << "; Last event number: "<< nextb->GetEventNumber() << endl;
-        }
-        // Initialize chain
-        Int_t iInit = chain->Init();
-        if (iInit) chain->Fatal(iInit,"on init");
-        chain->PrintInfo();
-        
-        // Event loop
-        int istat;
-        for (Int_t i=1; i<=nevents; i++) {
-          cout << "============================ Event " << i << " start" << endl;
-          istat = chain->Make(i);
-          if (istat) {
-            cout << "Last event processed. Status = " << istat << endl;
-            chain->Clear();
-            break;
-          }
-          St_DataSet *set = chain->DataSet("dst");
-          if (set)  {
-            St_DataSetIter dirt(set);
-            dirt.Du();
-          }
-          cout << "============================ Event " << i << " finish" << endl;
-          if (i != nevents) chain->Clear();
-        }
-        if (nevents > 1) chain->Finish();
-      }
-    }
-    
-  } else {
-    // XDF file handling ------------------------------------
+  //  StEventDisplayMaker *disp  = new StEventDisplayMaker;
+Int_t iInit = chain->Init();
 
-    // Initialize chain
-    Int_t iInit = chain->Init();
-    if (iInit) chain->Fatal(iInit,"on init");
-    St_XDFFile *xdf_in = 0;
-    while (xdf_in = nextFile()) {
-      // Open XDF file and pass to reader
-      readerMaker.setXdfFile(xdf_in);
-      
-      // Event loop
-      for (Int_t i=1; i<=nevents; i++) {
-        if (i == 1) chain->Make(0); // Read the run header
-        cout << "============================ Event " << i << " start" << endl;
-        if (chain->Make(i)) break;
-        cout << "============================ Event " << i << " finish" << endl;      
-        if (i != nevents) chain->Clear();
-      }
+  // Initialize chain
+  Int_t iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  int istat;
+  for (Int_t i=1; i<=nevents; i++) {
+  // Event loop
+  int istat=0,i=1;
+EventLoop: if (i <= nevents && !istat) {
+    if (istat) {
+      cout << "Last event processed. Status = " << istat << endl;
+      chain->Clear();
+      break;
     }
+    St_DataSet *set = chain->DataSet("dst");
+    if (set)  {
+      St_DataSetIter dirt(set);
+      dirt.Du();
+    }
+}
   }
      chain->Clear();
     cout << "============================ Event " << i << " finish" << endl;
@@ -237,99 +169,17 @@ void doEvents(const Int_t nevents=999,
     if (!b) b = new TBrowser;
       //       gROOT->LoadMacro("PadControlPanel.C");
 }
-
-//************************************************************************
-void setFiles(const Char_t *path, const Char_t *file)
+void doEvents(const Int_t nevents=999,
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
 {
-  if ( path[0] != '-' ) {
-    // Path has been specified. Run on all DST files found under
-    // the path.
-    cout << "Using fileset based on path " << path << endl;
-    usePath = 1;
-    originalPath = path;
-    dstDirs     = new St_FileSet(path);
-    nextDataSet = new St_DataSetIter(dstDirs,0);
+  const char *fileListQQ[]={0,0};
+  if (path[0]=='-') {
+    fileListQQ[0]=file;
   } else {
-    // No path. Use single file.
-    cout << "Using file " << file << endl;
-    if (isRoot) {
-      rootFile = new TFile(file);
-    } else if (isXdf) {
-      theFile = new St_XDFFile(file,"r");
-    }
+    fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-}
-
-//************************************************************************
-St_XDFFile* nextFile()
-{
-  St_XDFFile *nextF = 0;
-  if (usePath) {
-    // Loop until we find a file of form *dst.xdf
-    while ( (set = nextDataSet->Next()) && 
-            ! (
-            (strstr(set->GetName(),"dst.xdf") != 0) &&
-            (strcmp(set->GetTitle(),"file") == 0) 
-            ) ) { };
-    if (set) {
-      if (strcmp(set->GetTitle(),"file") == 0){
-        if (strstr(set->GetName(),"dst.xdf")){
-          if (nextF) delete nextF;
-          thePath = originalPath;
-          thePath +=  set->Path();
-          Char_t *xdffilename= thePath.Data();
-          nextF = new St_XDFFile(xdffilename,"r");
-          cout << "Open file " << xdffilename << endl;
-        }
-      }
-    } else {
-      nextF = 0;
-    }
-  } else {
-    if (0 == nFile) {
-      nextF = theFile;
-    } else {
-      nextF = 0;
-    }
-  }
-  nFile++;
-  return nextF;
-
-}
-
-//************************************************************************
-TFile *nextRootFile()
-{
-  TFile *fileFound = 0;
-  if (usePath) {
-    // Loop until we find a file of form *evts.root
-    while ( (set = nextDataSet->Next()) && 
-            ! (
-            (strstr(set->GetName(),"evts.root") != 0) &&
-            (strcmp(set->GetTitle(),"file") == 0) 
-            ) ) { };
-    if (set) {
-      if (strcmp(set->GetTitle(),"file") == 0){
-        if (strstr(set->GetName(),"evts.root")){
-          thePath = originalPath;
-          thePath +=  set->Path();
-          Char_t *rootfilename= thePath.Data();
-          cout << "Open file " << rootfilename << endl;
-          if (rootFile) delete rootFile;
-          fileFound = new TFile(rootfilename);
-        }
-      }
-    } else 
-      rootFile = 0;
-    
-  } else 
-    if (0 == nFile) 
-      fileFound = rootFile;  // No iterating done. File opened in main.
-    else 
-      fileFound = 0;
-      
-  nFile++;
-  return fileFound;
+  doEvents(nevents,fileListQQ);
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
 }
 
