@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.12 2004/10/08 14:34:34 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.13 2005/03/11 15:44:25 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -257,7 +257,8 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   float RelTwEne=tileEne[kT][iEtaX][iPhiX]/towerMipE[iEtaX];
   bool mipT=  RelTwEne>twMipRelEneLow &&  RelTwEne<twMipRelEneHigh;
   mipT=  mipT || killT[kT][iEtaX][iPhiX]; // recover dead tower
- 
+ // printf("iphi=%d ieta=%d Tene=%f mipEne=%f mipT=%d\n",iPhiX,iEtaX,tileEne[kT][iEtaX][iPhiX],towerMipE[iEtaX],mipT);
+
   // ped corrected adc
   float adcT=tileAdc[kT][iEtaX][iPhiX];
   float adcP=tileAdc[kP][iEtaX][iPhiX];
@@ -268,7 +269,7 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   float eneT=tileEne[kT][iEtaX][iPhiX];  // GeV
   float eneP=tileEne[kP][iEtaX][iPhiX]*1000; // MeV
   float eneQ=tileEne[kQ][iEtaX][iPhiX]*1000; // MeV
-float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
+  float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
 
   if(thrR) hA[9]->Fill(7);
 
@@ -366,7 +367,7 @@ int EEsmdCal::getUxVmip(){
     pl->scanAdc(smdEne[iuv], thrMipSmdE);
     pl->findMipPattern();
     hA[12+iuv]->Fill(pl->nMatch);
-    //    pl->print(1);
+    // pl->print(1);
     // printf("iuv=%d  nM=%d\n",iuv, pl->nMatch);  
   }
   
