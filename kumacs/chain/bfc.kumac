@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.44 1998/09/11 20:25:22 kathy Exp $
+* $Id: bfc.kumac,v 1.45 1998/09/11 21:04:57 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.45  1998/09/11 21:04:57  kathy
+* made new default call_bfc_readfz_to_dst.kumac to read the fz file and do all processing thru dst packages
+*
 * Revision 1.44  1998/09/11 20:25:22  kathy
 * make default settings of bfc macro correct for MDC
 *
@@ -342,7 +345,7 @@ MACRO bfc _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
-   domain=' geometry tpc ctf svt global ' _
+   domain=' geometry g2t tpc ctf svt global ' _
    chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum evout ' _
    skip=0 _
    first=1 _
