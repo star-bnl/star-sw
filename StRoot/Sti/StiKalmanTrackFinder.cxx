@@ -318,8 +318,8 @@ int StiKalmanTrackFinder::propagate(StiKalmanTrackNode * node,
   if (tShape->getShapeCode()==kPlanar)
     {
       StiPlanarShape * tPlanar = dynamic_cast<StiPlanarShape *>(tShape);
-      maxY = scale*( tPlace->getNormalXoffset()+tPlanar->getHalfWidth() );
-      maxY = scale*( tPlace->getNormalXoffset()-tPlanar->getHalfWidth() );
+      maxY = scale*( tPlace->getNormalYoffset()+tPlanar->getHalfWidth() );
+      maxY = scale*( tPlace->getNormalYoffset()-tPlanar->getHalfWidth() );
       maxZ = scale*( tPlace->getZcenter()+tShape->getHalfDepth()       );
       minZ = scale*( tPlace->getZcenter()-tShape->getHalfDepth()       );
     }

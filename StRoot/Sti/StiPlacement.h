@@ -17,7 +17,7 @@
 // origin to its center.  Note that these definitions all assume that the
 // plane of the detector is parallel to global z.  The third "normal" 
 // cooridnate gives the location of the detector center along the detector
-// plane in the transverse direction (i.e., local x).  This representation is
+// plane in the aximuthal direction (i.e., local y).  This representation is
 // best for the Kalman local track model.
 //
 // The "center" coordinates are a little more natural and are best used for
@@ -43,7 +43,7 @@ public:
     // accessors
     float getNormalRefAngle() const { return normalRefAngle; }
     float getNormalRadius() const { return normalRadius; }
-    float getNormalXoffset() const { return normalXoffset; }
+    float getNormalYoffset() const { return normalYoffset; }
     float getCenterRefAngle() const { return centerRefAngle; }
     float getCenterRadius() const { return centerRadius; }
     float getCenterOrientation() const { return centerOrientation; }
@@ -59,7 +59,7 @@ protected:
     // store both representations
     float normalRefAngle; // in [0,2pi)
     float normalRadius;   // >= 0
-    float normalXoffset;
+    float normalYoffset;
     float centerRefAngle; // in [0,2pi)
     float centerRadius;   // >= 0
     float centerOrientation;  // in [-pi/2, pi/2)

@@ -65,7 +65,7 @@ protected:
 
     // material information
     StiMaterial *gas;           // gas representing the atmosphere in 
-    //   (if it's a continuous medium) and/or  radially inward from the detector.
+    //   (if it's a continuous medium) and/or  radially outward from the detector.
     StiMaterial *material;      // material composing the discrete scatterer
     
     // physical location / orientation
