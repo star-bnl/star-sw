@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.17 1998/05/09 02:40:01 perev Exp $";
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.18 1998/05/13 00:02:22 dave Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -82,7 +82,7 @@ unsigned char amiInvoker :: implementsInterface (const char * iface) {
 
 //----------------------------------
 STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
-
+  int i;
    STAFCV_T status;
 
 //- Check number of tables in sequence.
@@ -97,7 +97,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
       h = new TABLE_HEAD_ST* [tbl._length];
       d = new char* [tbl._length];
    }
-   for( int i=0;i<tbl._length;i++ ){
+   for( i=0;i<tbl._length;i++ ){
 //- Check types of tables in sequence.
       if( !((tbl._buffer[i])->isType(myTblSpecs[i])) ){
 	 EML_CONTEXT("ERROR: table #%d (%s) is wrong type\n",i
