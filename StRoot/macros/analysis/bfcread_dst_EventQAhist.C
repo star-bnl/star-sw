@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.16 2000/01/28 17:56:18 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.17 2000/01/31 21:20:13 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.17  2000/01/31 21:20:13  kathy
+// fixed up printouts - some printed wrong macro name; also moved finish method after drawhists method
+//
 // Revision 1.16  2000/01/28 17:56:18  lansdell
 // changed overlay code at end to match new methods
 //
@@ -98,9 +101,9 @@ void bfcread_dst_EventQAhist(
      psFile   << endl;
   cout << "bfcread_dst_EventQAhist.C, hist page title " << 
      PageTitle  << endl;
-  cout << "bfcread_dst_QAhist.C, Maker directory containing histograms =  " 
+  cout << "bfcread_dst_EventQAhist.C, Maker directory containing histograms =  " 
        << MakerHistDir   << endl;
-  cout << "bfcread_dst_QAhist.C, subset list name of which histograms to draw,print = "
+  cout << "bfcread_dst_EventQAhist.C, subset list name of which histograms to draw,print = "
        << PrintList  << endl;
 
   gSystem->Load("St_base");
@@ -147,7 +150,7 @@ void bfcread_dst_EventQAhist(
 //can do this anytime after they're booked
   Int_t NoHist=0;
   NoHist = HU->ListHists(MakerHistDir);
-  cout << " !!! bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
+  cout << " !!! bfcread_dst_EventQAhist.C, No. of Hist we have == " << NoHist << endl;
 
  
 // loop over events:
@@ -190,8 +193,6 @@ void bfcread_dst_EventQAhist(
   numPrint = HU->ExaminePrintList();
   cout << " bfcread_dst_EventQAhist.C, Number hist to print = " << numPrint << endl;
 
-  chain->Finish();
-  cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl ; 
 
 //  Now draw the actual histograms to canvas and to ps file
   HU->DrawHists(MakerHistDir);
@@ -204,4 +205,7 @@ void bfcread_dst_EventQAhist(
   result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEta");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay2D !!!" << endl;  
+
+  chain->Finish();
+  cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl ; 
 }

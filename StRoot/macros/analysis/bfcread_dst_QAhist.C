@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.23 2000/01/26 19:28:15 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.24 2000/01/31 21:20:14 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.24  2000/01/31 21:20:14  kathy
+// fixed up printouts - some printed wrong macro name; also moved finish method after drawhists method
+//
 // Revision 1.23  2000/01/26 19:28:15  kathy
 // put in call to method SetDefaultLogXList
 //
@@ -216,12 +219,12 @@ void bfcread_dst_QAhist(
   numPrint = HU->ExaminePrintList();
   cout << " bfcread_dst_QAhist.C, Number hist to print = " << numPrint << endl;
 
-  chain->Finish();
-  cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 
 
 //  Now draw the actual histograms to canvas and to ps file
     HU->DrawHists(MakerHistDir);
-   
+
+  chain->Finish();
+  cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ;    
 }
  
 
