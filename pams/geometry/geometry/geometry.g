@@ -1,5 +1,18 @@
-* $Id: geometry.g,v 1.61 2003/09/18 22:09:34 potekhin Exp $
+* $Id: geometry.g,v 1.62 2003/09/29 19:48:41 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.62  2003/09/29 19:48:41  potekhin
+* 1) Fixed typos in comments
+*
+* 2) Created a few options that allow the user to selectively include
+* certain detectors such as svtt, ecal, calb into the minimal geometry,
+* thus facilitating the creation of custom geometries on the fly --
+* useful for debugging and detector exploration
+*
+* 3) Improved the phmd logic
+*
+* 4) last but not least -- the shift variable for CALB was changed from
+* {75,75} (incorrect) to {75,105} in geometry y2003x (full).
+*
 * Revision 1.61  2003/09/18 22:09:34  potekhin
 * Corrected a small comment typo and added the full
 * endcap wheel to the  new flagship geometry, y2003b.
@@ -130,7 +143,7 @@
    Implicit   none
 * system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm
+              zcal,mfld,bbcm,fpdm,phmd
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,alpipe,svtw,
               on/.true./,off/.false./
@@ -174,7 +187,7 @@ replace[;ON#{#;] with [
    NtrSubEv = 1000     " automatic !"
 * No correction by default
    CorrNum = 0
-* No PHMD by default
+* No PHMD by default, hence init the version:
    PhmdVersion = 0
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -182,7 +195,7 @@ replace[;ON#{#;] with [
 *
    field=5                                             "defaults constants"
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
-   {bbcm,fpdm} = off;
+   {bbcm,fpdm,phmd} = off;
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
    {ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    btofconfig = 1        " ctb only
@@ -190,14 +203,14 @@ replace[;ON#{#;] with [
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Geom=_1 mwx=1 limites x in mwc hits (<Y2K) "
    Itof=2                " use btofgeo2 - default starting from Y2000     "
-   Rv=2                  " add non-sensetive hits to RICH system          "
+   Rv=2                  " add non-sensitive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
    ecal_config=0         " Ecal: east, west or both                       "
    ecal_fill=3           " lets say its full wheel by default             "
    mf=2                  " default field - simetrical, as fitted by Bill  "
-   ArgonBug=0            " in the future tsettting bug to 1 should introiduce "
-   Fieldbug=0            "  old bugs in these places "
+   ArgonBug=0            " in the future tsettting bug to 1 should introduce "
+   Fieldbug=0            " old bugs in these places "
    Commands=' '; Geom=' '
 
 
@@ -274,7 +287,12 @@ If LL>1
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   btofconfig=4;
-                  {rich,ems}=on;   ecal=off;  
+                  {rich,ems}=on;
+* a newer way to steer it:
+                  ecal_config=1   " one ecal patch, west "
+* this was put here in recent versions (as of 1.50) and I believe this is wrong as
+* it destroys compatibility with earlier code:
+*    ecal=off;  
                   nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
                 
   on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
@@ -333,7 +351,7 @@ If LL>1
 ***********************************************************************
 * In y2003a:
 *    removed serious bugs from SUPOGEO
-*    corrected ECAL -- the shift variable
+*    corrected CALB -- the shift variable
 *    corrected SVT  -- the layer radii correction
 
   on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
@@ -395,6 +413,7 @@ If LL>1
                   "geometry correction "
                      CorrNum = 2;
                   "Photon Multiplicity Detector Version "
+                     phmd=on;
                      PhmdVersion = 1;
                 }
 
@@ -412,7 +431,7 @@ If LL>1
                      btofconfig=5;
                   "calb" 
                      ems=on   "endcap " 
-                     nmod={60,60}; shift={75,75}; " 60 sectors " 
+                     nmod={60,60}; shift={75,105}; " 60 sectors " 
                   "ecal" 
                      ecal_config=3   "both wheels"
                      ecal_fill=3     "all sectors filled "
@@ -425,6 +444,7 @@ If LL>1
                   "geometry correction "
                      CorrNum = 1;
                   "Photon Multiplicity Detector Version "
+                     phmd=on;
                      PhmdVersion = 1;
                 }
 
@@ -439,7 +459,20 @@ If LL>1
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
-                     {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal}=off; }
+                  {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
+  on SVTT_ON    { Optional SVTT added on top of the minimal geo;
+                     svtt=on; }
+  on PIPE_ON    { Optional pipe added on top of the minimal geo;
+                     pipe=on; }
+  on FTPC_ON    { Optional FTPC added on top of the minimal geo;
+                     ftpc=on; }
+  on BTOF_ON    { Optional BTOF added on top of the minimal geo;
+                     btof=on; }
+  on ECAL_ON    { Optional ECAL  added on top of the minimal geo;
+                     ecal=on; }
+  on CALB_ON    { Optional CALB  added on top of the minimal geo;
+                     calb=on; }
+
   on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
       {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
@@ -572,11 +605,11 @@ If LL>1
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
 ******************************************************************
-* If a non-zero version of the Photon Multiplicity Detector
+* If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
 * and create it:
 
-   if  (PhmdVersion>0) then
+   if  (phmd.and.PhmdVersion>0) then
       call AgDETP add ('PMDG.version=',PhmdVersion,1)
       call phmdgeo
    endif
