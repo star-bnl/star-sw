@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.15 2003/09/19 16:39:15 caines Exp $
+ * $Id: StEstInit.cxx,v 1.16 2004/02/11 23:25:16 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.16  2004/02/11 23:25:16  caines
+ * Avoid crash for missing SVT events by quiting earlier
+ *
  * Revision 1.15  2003/09/19 16:39:15  caines
  * More fixed for the redhot upgrade
  *
@@ -219,15 +222,17 @@ int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
 
   //svggeom   = Stsvggeom->GetTable();
   //mNWafers=Stsvggeom->GetNRows();
-  mNWafers=svggeom->getTotalNumberOfWafers();
   svgshape   = Stsvgshape->GetTable();
   svgconf   = Stsvgconf->GetTable();
   // Now get hits
   scsspt   = Stscsspt->GetTable();
-
+  maxl=Stscsspt->GetNRows();
+  if( maxl == 0) return 1;
+  mIndexGeom = new StEstIndexGeom(mNPhiBins,mNZBins);
+  mNWafers=svggeom->getTotalNumberOfWafers();
   if (mDebugLevel>2) 
     gMessMgr->Info()<<"SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endm;  
-  mIndexGeom = new StEstIndexGeom(mNPhiBins,mNZBins);
+ 
   mIndexWaf  =  new StEstWafer*[mNWafers];
   if(!mIndexWaf){
     gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
