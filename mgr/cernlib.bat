@@ -78,8 +78,8 @@ echo user32.lib >> %tmp%\cernlib
 echo kernel32.lib >> %tmp%\cernlib
 echo advapi32.lib >> %tmp%\cernlib
 echo oldnames.lib >> %tmp%\cernlib
-echo wsock32.lib >> %tmp%\cernlib
-set CERNLIB=%CERNLIB% wsock32.lib user32.lib kernel32.lib oldnames.lib 
+echo ws2_32.lib >> %tmp%\cernlib
+set CERNLIB=%CERNLIB% ws2_32.lib user32.lib kernel32.lib oldnames.lib 
 echo %CERNLIB%
 rem echo.
 goto end
