@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.20 2001/07/22 20:31:28 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.21 2001/07/25 14:47:41 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.21  2001/07/25 14:47:41  caines
+ * Fix filling histogram only when debug is on
+ *
  * Revision 1.20  2001/07/22 20:31:28  caines
  * Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
  *
@@ -393,6 +396,7 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
   }
 
   mCommonModePitch = new TH1F("ComModPitch","Pitch of Common Mode Noise",120,0,120);
+  mCommonModeCount = new TH1F("comCount","Anodes that fire",240,-0.5,240.5);
 
   return kStOK;
 }
@@ -482,6 +486,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	    else  mCommonModeNoise[TimeBin] =0;
 	    
 	    if( Debug()){
+	      mCommonModeCount->Fill(mCommonModeNoiseAn[TimeBin]);
 	      if( index < 4 && mCommonModeNoiseAn[TimeBin] > 50){
 		if( TimeLast < TimeBin-3 && TimeSum > 0){
 		  
