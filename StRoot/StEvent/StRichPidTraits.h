@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.2 2000/11/01 16:47:02 lasiuk Exp $
+ * $Id: StRichPidTraits.h,v 2.3 2000/11/25 11:53:13 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
- * Revision 2.2  2000/11/01 16:47:02  lasiuk
- * Keep the StRichPid as the owner (use a StSPtrVec)
- * also check the pdg encoded number now
+ * Revision 2.3  2000/11/25 11:53:13  lasiuk
+ * introduction of hypothesis and probability
  *
  * Revision 2.2  2000/11/01 16:47:02  lasiuk
  * Keep the StRichPid as the owner (use a StSPtrVec)
@@ -51,9 +50,18 @@ public:
     
     StRichPid*              getPid(StParticleDefinition* t);
     const StRichPid*        getPid(StParticleDefinition* t)  const;
-  
+
+    void setId(Int_t);
+    void setProbability(Float_t);
+
+    Int_t   id() const;
+    Float_t probability() const;
+
 private:
     StSPtrVecRichPid mThePids;
+
+    Int_t            mId;
+    Float_t          mProbability;
     
     StObject* clone();
 
@@ -68,4 +76,9 @@ inline const StSPtrVecRichPid&  StRichPidTraits::getAllPids() const { return mTh
 inline void  StRichPidTraits::addPid(StRichPid* t) {mThePids.push_back(t);}
 
 inline StObject* StRichPidTraits::clone() {return new StRichPidTraits(*this);}
+inline void StRichPidTraits::setId(Int_t id) {mId = id;} 
+inline void StRichPidTraits::setProbability(Float_t p) {mProbability = p;}
+
+inline Int_t StRichPidTraits::id() const {return mId;}
+inline Float_t StRichPidTraits::probability() const {return mProbability;}
 #endif
