@@ -60,7 +60,7 @@ export RANLIB := /bin/true
 export OS_LIBS := -lm -ldl
 #
 # Fortran Libraries
-ifndef SUNW_ROOT
+ifndef SUNW_LDIRS
 SUNW_LDIRS := /vol/lic/SUNWspro-3.0/libs /vol/lic/SUNWspro-3.0/SC3.0/lib
 SUNW_LDIRS := /opt/SUNWspro/libs /opt/SUNWspro/SC4.0/lib
 endif
