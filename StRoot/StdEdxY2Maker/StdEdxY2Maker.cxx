@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.36 2004/08/08 21:07:26 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.37 2004/08/12 17:02:09 fisyak Exp $
 //#define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -416,7 +416,7 @@ Int_t StdEdxY2Maker::Make(){
     StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
     if (hvec.size()) {// if no hits than make only histograms. Works if kDoNotCorrectdEdx mode is set
       Int_t Id = gTrack->key();
-      Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints();
+      Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints(kTpcId);
       NdEdx = 0;
       Double_t TrackLength70 = 0, TrackLength = 0;
       Double_t TrackLengthTotal = 0;
