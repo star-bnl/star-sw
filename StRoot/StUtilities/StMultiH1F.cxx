@@ -14,6 +14,7 @@
 #include "TString.h"
 #include "TLegend.h"
 #include "TPad.h"
+#include "TDirectory.h"
 
 ClassImp(StMultiH1F)
 
@@ -111,9 +112,16 @@ void StMultiH1F::Draw(Option_t *option) {
 }
 
 TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
-  TH1F* temp=0;
-  if (ybin<0) temp = (TH1F*) ProjectionX(name);
-  else temp = (TH1F*) ProjectionX(name,ybin,ybin);
+  static char buf[256];
+  if (ybin<0) sprintf(buf,"%s.",name);
+  else sprintf(buf,"%s.%d.%s",GetName(),ybin,name);
+
+  TList* tgList = gDirectory->GetList();
+  TH1F* temp = (TH1F*) tgList->FindObject(buf);
+  if (temp) tgList->Remove(temp);
+
+  if (ybin<0) temp = (TH1F*) ProjectionX(buf);
+  else temp = (TH1F*) ProjectionX(buf,ybin,ybin);
   TAttLine::Copy(*temp);
   TAttFill::Copy(*temp);
   TAttMarker::Copy(*temp);
@@ -177,8 +185,11 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.7 2002/04/23 01:59:16 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.8 2003/01/21 18:33:27 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.8  2003/01/21 18:33:27  genevb
+// Better handling of temporary hists
+//
 // Revision 1.7  2002/04/23 01:59:16  genevb
 // New offset abilities
 //
