@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.37 2004/10/26 21:53:23 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.38 2004/10/27 03:25:49 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.38  2004/10/27 03:25:49  perev
+ * Version V3V
+ *
  * Revision 2.37  2004/10/26 21:53:23  pruneau
  * No truncation but bad hits dropped
  *
@@ -202,7 +205,7 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * n)
   _sinAlpha = n->_sinAlpha;
   _cosCA = n->_cosCA;
   _sinCA = n->_sinCA;
-  _chi2  = n->_chi2;
+  setChi2 (n->_chi2);
   _p0    = n->_p0;  _p1   = n->_p1; _p2   = n->_p2; _p3   = n->_p3; _p4   = n->_p4;
   _c00   = n->_c00;
   _c10   = n->_c10; _c11  = n->_c11;
@@ -1242,3 +1245,13 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
     position = zOff>0 ? kEdgeZplus : kEdgeZminus;
   return position;
 }
+#ifdef STI_NODE_DEBUG
+void StiKalmanTrackNode::setChi2(double chi2)
+{
+      _chi2 = chi2;
+static const double MyChi2 = 1.18179;
+      if (chi2 <  0.9999*MyChi2) return;
+      if (chi2 >  1.0001*MyChi2) return;
+  printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
+}
+#endif 
