@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.41 2001/03/15 01:14:20 nevski Exp $
+* $Id: geometry.g,v 1.42 2001/03/15 01:24:47 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.42  2001/03/15 01:24:47  nevski
+* default btof forced to no TOF tray
+*
 * Revision 1.41  2001/03/15 01:14:20  nevski
 * first approach to forward pion detector
 *
@@ -202,9 +205,10 @@ If LL>1
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1) call AgDETP new ('BTOF')
-   if (tof)  call AgDETP add ('btog.choice=',2,1)
-   if (t25)  call AgDETP add ('btog.choice=',3,1)
-   if (t1)   call AgDETP add ('btog.choice=',4,1)
+   if     (tof) { call AgDETP add ('btog.choice=',2,1) }
+   elseif (t25) { call AgDETP add ('btog.choice=',3,1) }
+   elseif (t1)  { call AgDETP add ('btog.choice=',4,1) }
+   else         { call AgDETP add ('btog.choice=',1,1) }
    if btof { If Itof==1 { call btofgeo1 } else { call btofgeo2 }}
      
    Call AGSFLAG('SIMU',1)
