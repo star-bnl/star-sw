@@ -1,5 +1,10 @@
-* $Id: pixlgeo.g,v 1.5 2003/10/16 21:06:01 potekhin Exp $
+* $Id: pixlgeo.g,v 1.6 2003/10/22 15:09:01 potekhin Exp $
 * $Log: pixlgeo.g,v $
+* Revision 1.6  2003/10/22 15:09:01  potekhin
+* Finished the changes needed to organize the detector into
+* 6 symmetrical sectors, removed a small bug on the tilt calculation,
+* and improved the comments.
+*
 * Revision 1.5  2003/10/16 21:06:01  potekhin
 * Notice that this check-in and previous
 * both contain only two sectors for brevity.
@@ -63,31 +68,31 @@ Module PIXLGEO is the geometry of the STAR pixel detector
 *
       r          =  5.294      ! 1st ladder nominal radius
       a          =  0.0        ! 1st ladder nominal position angle
-      aOffset    =  89.28-90.0 ! Angular offset
+      aOffset    =  89.28      ! Angular offset
 *
       pOffset    =  0.0        ! Position offset (shift)
-      aOffset    =  0.0        ! Angular offset
+      aOffset    =  90.0       ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  2          ! ladder index
       r          =  4.862      ! 2nd ladder nominal radius
       a          =  20.27      ! 2nd ladder nominal position angle
-      aOffset    =  88.31-90.0 ! Angular offset
+      aOffset    =  88.31      ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  3          ! ladder index
       r          =  4.391      ! 3rd ladder radius
       a          =  42.62      ! 3rd ladder nominal position angle
-      aOffset    =  87.01-90.0 ! Angular offset
+      aOffset    =  87.01      ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  4          ! ladder index
       r          =  1.595      ! 4th ladder nominal radius
       a          =  79.51      ! 4th ladder nominal position angle
-      aOffset    =  70.15-90.0 ! Angular offset
+      aOffset    =  70.15      ! Angular offset
    EndFill
 
 ******************************************************
@@ -103,40 +108,12 @@ Block PXMO is the mother of the pixel detector volumes
       Attribute PXMO  Seen=1  colo=6
       Shape TUBE Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0
 
-* The sector is defined as a group of 4 ladders, we
-* have a total of 6 sectors placed with Phi rotational symmetry
+* The "sector" is defined as a group of 4 ladders, we
+* have a total of 6 overlapping sectors placed with rotational symmetry
 
       Create PSEC
-      do nSector=1,2 ! Outer loop, populate sectors
-       Position PSEC AlphaZ=60.0*(nSector-1) konly='MANY'
-
-       do nLadder=1,4 ! Inner loop, create ladders
-
-         USE PIXG Ladder=nLadder ! simple loop over ladders, and their data structures
-
-* The anglePos defines the POSITION of the center of the ladder
-* in space, along the lines of x=r*cos(...), y=r*sin(...)
-
-* Individual ladders can be individually tuned by using
-* the aOffset parameter (angular offset), and the pOffset
-* (position offset), which is the individual lateral
-* displacement. What follows is trivial arithmetic:
-
-         angle    = PIXG_aOffset + PIXG_a + 60.0*(nSector-1)
-
-* Above, we hardcode the 60 degree rotation angle
-* between adjacent sectors, this may stay or be replaced later
-
-         angleCorr= atan(PIXG_pOffset/PIXG_r)  ! extra lateral correction
-
-* have to correct and convert to radians:
-         anglePos = angle*raddeg !  +angleCorr
-
-         Create and Position PLMO x=PIXG_r*cos(anglePos) y=PIXG_r*sin(anglePos) _
-         z=0.0 AlphaZ=90.0+angle
-* Note that in the previous line, the rotation of the ladder around the
-* Z axis does not include the lateral correction, by design
-       enddo
+      do nSector=1,6 ! need the "MANY" option as they do overlap
+          Position PSEC AlphaZ=60.0*(nSector-1) konly='MANY'
       enddo
 
 
@@ -145,7 +122,30 @@ endblock
 Block PSEC is a group of ladders
       Material  Silicon
       Attribute PSEC   Seen=1  colo=5
-      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-12.0 Phi2=110.0
+      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-11.0 Phi2=118.0
+
+
+       do nLadder=1,4 ! Inner loop, create ladders inside the sector
+
+         USE PIXG Ladder=nLadder ! index the ladder data structures
+         angle = PIXG_a
+
+* Individual ladders can be individually tilted by using
+* the aOffset parameter (angular offset), and the pOffset
+* (position offset), which is the individual lateral
+* displacement. (Optional and maybe obsoleted soon: angleCorr= atan(PIXG_pOffset/PIXG_r))
+
+* The anglePos defines the POSITION of the center of the ladder
+* in space, along the lines of x=r*cos(...), y=r*sin(...)
+* have to correct and convert to radians:
+
+         anglePos = angle*raddeg               !  +angleCorr  see above cpmment
+
+         Create and Position PLMO x=PIXG_r*cos(anglePos) y=PIXG_r*sin(anglePos) _
+         z=0.0 AlphaZ=-PIXG_aOffset+angle
+
+       enddo
+
 endblock
 *
 * -----------------------------------------------------------------------------
