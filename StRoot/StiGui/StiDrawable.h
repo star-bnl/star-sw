@@ -1,75 +1,24 @@
-//StiDrawable.h
-//M.L. Miller (Yale Software)
-//04/01
-
-//abstract base class for an sti displayable class
-
-#ifndef StiDrawable_HH
-#define StiDrawable_HH
-
-#include <string>
-using std::string;
-
-#include "StThreeVector.hh"
-
+///\file StiDrawable.cxx
+///\author M.L. Miller (Yale Software)
+///\author Claude A Pruneau, Wayne State U.
+///\date 04/2001
+#ifndef StiDrawable_H_INCLUDED
+#define StiDrawable_H_INCLUDED
+///\class StiDrawable
+///Class defining the notion of being drawbale for Sti purposes.
+///Properties included a color, style, size, and visibility.
+///Action are draw, update, and rest.
 class StiDrawable
 {
 public:
     StiDrawable();
     virtual ~StiDrawable();
-
     virtual void draw() = 0;
-    virtual void update() = 0;
+    virtual void reset() = 0;
     virtual void setColor(int val) = 0;
-    virtual void setVisibility(bool val) = 0;
-
-    void setName(const string&);
-    const string& name() const;
-
-    ///Can it be removed from the DisplayManager each event?
-    void setRemoved(bool);
-    bool canBeRemoved() const;
-    ///Has it been added to the DisplayManager for this event?
-    bool isAdded() const;
-    void setIsAdded(bool);
-    
-    const StThreeVector<double>& position() {return mposition;}
-    
-protected:
-    StThreeVector<double> mposition; //Global position of center of volume
-    bool mremoved_each_event;
-    bool mIsAddedToDisplay;
-    string mName;
+    virtual void setStyle(int val) = 0;
+    virtual void setSize(double val) = 0;
+    virtual void setVisible(bool val) = 0;
 };
-
-inline bool StiDrawable::isAdded() const
-{
-    return mIsAddedToDisplay;
-}
-
-inline void StiDrawable::setIsAdded(bool val)
-{
-    mIsAddedToDisplay=val;
-}
-
-inline void StiDrawable::setName(const string& val)
-{
-    mName = val;
-}
-
-inline const string& StiDrawable::name() const
-{
-    return mName;
-}
-
-inline bool StiDrawable::canBeRemoved() const
-{
-    return mremoved_each_event;
-}
-
-inline void StiDrawable::setRemoved(bool val)
-{
-    mremoved_each_event = val;
-}
 
 #endif

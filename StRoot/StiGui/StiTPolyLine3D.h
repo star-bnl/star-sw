@@ -19,13 +19,8 @@ public:
     StiTPolyLine3D(Int_t n, Double_t* p, Option_t* option="");
     StiTPolyLine3D(Int_t n, Float_t* x, Float_t* y, Float_t* z, Option_t* option="");
     StiTPolyLine3D(Int_t n, Double_t* x, Double_t* y, Double_t* z, Option_t* option="");
-
     virtual ~StiTPolyLine3D();
-
     virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
-
-protected:
-private:
 };
 
 #endif

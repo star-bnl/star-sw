@@ -1,129 +1,42 @@
-//StiRootDrawableKalmanTrack.cxx
-//M.L. Miller (Yale Software)
-//11/01
-
-//StiRootDrawableStiEvaluableTrack.cxx
-//M.L. Miller (Yale Software)
-//07/01
-
-//STD
+/// \file StiRootDrawableKalmanTrack.cxx
+/// \author M.L. Miller (Yale Software)
+/// \author Claude A Pruneau, Wayne State University
 #include <stdexcept>
 #include <iostream.h>
 #include <algorithm>
 using namespace std;
-
-//StEvent
 #include "StEventTypes.h"
-
-//SCL
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
-
-//Sti
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/StiKTNIterator.h"
-
-//StiGui
-#include "StiTPolyLine3D.h"
 #include "StiRootDisplayManager.h"
-#include "StiRootDrawableLine.h"
-#include "StiRootDrawableHits.h"
 #include "StiRootDrawableKalmanTrack.h"
 using std::sort;
 
 StiRootDrawableKalmanTrack::StiRootDrawableKalmanTrack()
-    : StiRootDrawableTrack()
-{
-	_hits->setColor( 2 );
-	_hits->setMarkerSize( 0.3 );
-	_hits->setMarkerStyle( 3 );
-}
+    : StiKalmanTrack(),
+      StiRootDrawableTrack()
+{}
 
 StiRootDrawableKalmanTrack::~StiRootDrawableKalmanTrack()
-{ }
+{}
 
-void StiRootDrawableKalmanTrack::fillHitsForDrawing()
+StiKalmanTrackNode * StiRootDrawableKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl)
 {
-  //cout<<"StiRootDrawableKalmanTrack::fillHitsForDrawing()"<<endl;
-    //be sure to reset internal state
-    _line->clear();
-    _hits->clear();
-    //Set color and line type
-    _line->clearLine();
-    //Loop over nodes by hand (faster than using StiKalmanTrack interface)
-    //This is essentailly the guts of an interpolation routine that should become
-    // a class at some point.
-    double step = 1.; //cm
-    
-    StiKalmanTrackNode * lastNode = getInnerMostNode();
-    double xLocal = lastNode->_x;
-    StiKTNForwardIterator it(lastNode);
-    StiKTNForwardIterator end = it.end();
-    StiHit * hit;
-    while(it!=end ) 
-      {
-	StiKalmanTrackNode& node = *it;
-	hit=node.getHit();
-	if (hit)
-	  {
-	    const StThreeVectorF& pos = hit->globalPosition();
-	    _hits->push_back( pos.x() );
-	    _hits->push_back( pos.y() );
-	    _hits->push_back( pos.z() );
-	  }
-	const StThreeVector<double>& pos = node.getGlobalPoint();
-	_line->push_back( pos.x() );
-	_line->push_back( pos.y() );
-	_line->push_back( pos.z() );	
-	++it;
-	/*
-	if (it==end)   
-	  break;
-	StiKalmanTrackNode& next = *it;
-	// Fill node position itself.
-	StiHit * hit = node.getHit();
-	if (hit)
-	  {
-	    const StThreeVectorF& pos = hit->globalPosition();
-	    _hits->push_back( pos.x() );
-	    _hits->push_back( pos.y() );
-	    _hits->push_back( pos.z() );
-	    }
-	// Fill interpolation to muck up a continuous track
+  //cout<<"StiRootDrawableKalmanTrack::add(StiHit *h,...) -I- Started"<<endl;
+  StiKalmanTrackNode * node = this->StiKalmanTrack::add(h,alpha,eta,curvature,tanl);
+  this->StiRootDrawableTrack::add(h->x_g(),h->y_g(),h->z_g());
+  return node;
+}
 
-	while (xLocal<next._x) 
-	  {
-	    try 
-	      {
-		pos = node.getPointAt(xLocal);
-		_line->push_back(pos.x());
-		_line->push_back(pos.y());
-		_line->push_back(pos.z());
-	      }
-	    catch (runtime_error & rte)	
-	      {
-		_line->setColor( 1 );
-	      }
-	    catch (exception & e) 
-	      {
-		_line->setColor( 1 );
-	      }
-	    xLocal+=step;
-	  }
-	*/
-      }
-	
-    _line->fillHitsForDrawing();
-    _hits->fillHitsForDrawing();
-
-    //These get automatically removed from display each event
-    //The display dynamically shrinks temp objects each event (tracks, hits, etc)
-    //if (!_line->isAdded())
-    StiRootDisplayManager::instance()->addDrawable( _line );
-    //if (!_hits->isAdded()) 
-    StiRootDisplayManager::instance()->addDrawable( _hits );
-    return;
+StiKalmanTrackNode * StiRootDrawableKalmanTrack::add(StiKalmanTrackNode * node)
+{
+  //cout<<"StiRootDrawableKalmanTrack::add(StiHit *h,...) -I- Started"<<endl;
+  StiKalmanTrackNode * aNode = this->StiKalmanTrack::add(node);
+  this->StiRootDrawableTrack::add(node->x_g(), node->y_g(), node->z_g());
+  return aNode;
 }
 
 void StiRootDrawableKalmanTrack::reset()

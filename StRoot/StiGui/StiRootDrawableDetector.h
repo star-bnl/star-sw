@@ -1,31 +1,23 @@
-//StiRootDrawableDetector.h
-//M.L. Miller (Yale Software)
-//04/01
-
+///\file StiRootDrawableDetector.h
+///\author M.L. Miller (Yale Software)
+///\date 04/2001
 #ifndef StiRootDrawableDetector_HH
 #define StiRootDrawableDetector_HH
-
 #include "Sti/StiDetector.h"
-
 #include "StiRootDrawable.h"
 
+///\class StiRootDrawableDetector
+/// Class defining a root drawable detector volume. The properties of the StiDetector
+/// are used to set and define a ROOT drawable volume.
 class StiRootDrawableDetector : public StiDetector , public StiRootDrawable
 {
 public:
-
     StiRootDrawableDetector();
     virtual ~StiRootDrawableDetector();
-    
-protected:
-
-    //Implement StiRootDrawable interface
+    virtual void reset();
     virtual void draw();
-    virtual void update();
-
-    //Overide StiDetector methods
+ protected:
     virtual void build();
-    
-protected:
     virtual void makeShape();
 };
 

@@ -1,79 +1,43 @@
-//StiRootDrawableHits.h
-//M.L. Miller (Yale Software)
-//07/01
-
-//SCL
-#include "StThreeVectorD.hh"
-
-//StEvent
-#include "StEventTypes.h"
-
-//Sti
-#include "Sti/StiHit.h"
-
-//StiGui
-#include "StiTPolyMarker3D.h"
 #include "StiRootDrawableHits.h"
 
-StiRootDrawableHits::StiRootDrawableHits() :
-    mpoly( new StiTPolyMarker3D() ), mcolor(1), mvisible(true), mmarker(8)
-{
-    mpoly->SetMarkerStyle(mmarker);
-    mpoly->SetMarkerSize(.5);
-    mpoly->SetMarkerColor(mcolor);
-    mpoly->ResetBit(kCanDelete);
-
-    setName("Unnamed RootDrawableHits"); //Default name
-}
+StiRootDrawableHits::StiRootDrawableHits() 
+  : StiDrawable(),
+    _visible(true)
+{}
 
 StiRootDrawableHits::~StiRootDrawableHits()
-{
-}
-
-void StiRootDrawableHits::setMarkerStyle(unsigned int val)
-{
-    mmarker = val;
-    mpoly->SetMarkerStyle(mmarker);
-}
-
-void StiRootDrawableHits::setMarkerSize(double val)
-{
-    mpoly->SetMarkerSize(val);
-}
-
-void StiRootDrawableHits::fillHitsForDrawing()
-{
-    mpoly->SetMarkerColor(mcolor);
-    mpoly->ResetBit(kCanDelete);
-
-    mpoly->SetPolyMarker( size()/3, &(this->operator[](0)), mmarker);
-
-    return;
-}
+{}
 
 void StiRootDrawableHits::draw()
-{
-    if (mvisible) {
-	mpoly->Draw();
-    }
+{ 
+  _markers.SetPolyMarker(size()/3, &(this->operator[](0)),_style);
+  _markers.SetMarkerColor(_color);
+  _markers.Draw();
 }
 
-void StiRootDrawableHits::update()
+void StiRootDrawableHits::reset()
 {
-    return;
+  clear();  
 }
 
-void StiRootDrawableHits::setColor(int val)
+void StiRootDrawableHits::setColor(int color)
 {
-    mcolor=val;
-    mpoly->SetMarkerColor(mcolor);
-    return;
+  _color = color;
 }
 
-void StiRootDrawableHits::setVisibility(bool val)
+void StiRootDrawableHits::setStyle(int style)
 {
-    mvisible=val;
-    return;
+  _style = style;
+}
+
+void StiRootDrawableHits::setSize(double val)
+{
+  _markers.SetMarkerSize(val);
+}
+
+void StiRootDrawableHits::setVisible(bool val)
+{
+  _visible = val;
 }
 
 void StiRootDrawableHits::add(double x, double y, double z)
