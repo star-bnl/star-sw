@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.85  1999/09/02 20:11:45  fisyak
+#  Completed Construct with shared dirs
+#
 #  Revision 1.84  1999/08/29 17:21:51  fisyak
 #  Add i386_redhat60
 #
@@ -230,7 +233,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/08/29 17:21:51 $ 
+#             Last modification $Date: 1999/09/02 20:11:45 $ 
 #. default setings
 
 MAKE  := gmake
@@ -272,7 +275,7 @@ CERN_LEVEL =pro
 CERN_STAF = $(CERN)/$(CERN_LEVEL)
 CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
 
-MAKECERNLIB := cernlib
+MAKECERNLIB := cernlib -v $CERN_LEVEL
 
 GCC      :=  gcc
 CXX      :=  g++
@@ -463,13 +466,13 @@ endif
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
+#            -lcrypt
+  FLIBS   := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
 # -L/usr/local/lib -L/usr/local/egcs-1.1.1 -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
 #  SL_EXTRA_LIB := -L/usr/pgi/linux86/lib -lpgc
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif
-  FLIBS   += -lcrypt
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y

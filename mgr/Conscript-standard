@@ -2,133 +2,108 @@
 #use Env;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
-$build =~ s/\\/\//g; #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
+$build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
-$ObjDir = "#" . $ObjDir;# print "ObjDir = $ObjDir\n";
-my @DirList = ( "ctf","db","ebye","emc","ftpc","geometry","global","l3","mwc",
-		"strange","svt","tpc","trg","vpd",
-		"gen/crs","gen/fri","gen/g2x","gen/hij","gen/mev","gen/par","gen/pyth","gen/ven",
-		"sim/control","sim/dig","sim/g2r","sim/gstar");
+$ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @dirs = ();
 my @incs = ();
-my @source = ();
-my $PKG  = basename($Dir); print "Run cons in $Dir for $PKG\n";
-if ($PKG eq "StRoot") {
-#         ________________
-  @sources = find_sources($PKG); 
-#  my $i=0; for my $s (@sources) {print "i=",$i++," sources = ",$s,"\n";}
-  my $dirlist = "";
-  for $src (@sources) {
-    (my $dir = $src) =~ s/\/\S*/$1/g; #print "$src => $dir\n";
-    if (grep (/$dir/,$dirlist)) {next;}
-#    if (!grep (/StEvent/,$dir))  {next;}
-    if (grep (/StTpcDb/,$dir))  {next;}
-    if (grep (/StTrsMaker/,$dir))  {next;}
-    if (grep (/StHbtMaker/,$dir))  {next;}
-    if (grep (/StTpcDb/,$dir))  {next;}
-    if (grep (/StDbLib/,$dir))  {next;}
-    if (grep (/StDbMaker/,$dir))  {next;}
-    $dirlist .= $dir . ": "; #print "dirlist = $dirlist\n";
-  }
-  $dirlist =~ s/$pwd\///g; #print "dirlist = $dirlist\n";
-  $dirlist =~ s/\:/\/Conscript/g;# print "dirlist = $dirlist\n";
-  my @dirs = split ' ',$dirlist;
-  Build @dirs;
+my $PKG  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
+my @idlM = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
+if ($#idlM > -1) {$PKG = "St_" . $PKG;}
+printf ("Run Conscript-standard in %-20s   \tfor %s",$Dir, $PKG) ;
+my $obj  = $ObjDir . "/";  #print "obj = $obj\n";
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
+my $LIBPKG = $PKG . "." . $env->{SUFLIB};
+(my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; #print "new share $share\n";
+$share =~ s/\/StRoot//g;
+$share =~ s/\/(sim|gen)//g; 
+my $CPPP = "$env->{CPPPATH}:$Dir:$share";# print "CPPP = $CPPP\n";
+my $CPP  = "";
+if ($PKG eq "StHbtMaker") {$CPP = ":#$Dir/Base:#$Dir/CorrFctn:#$Dir/Cut:#$Dir/Fit:#$Dir/Infrastructure:#$Dir/Reader";}
+if ($PKG eq "StTrsMaker") {$CPP = ":#$Dir/include";}
+if ($PKG eq "StTpcDb" ||
+    $PKG eq "StDbMaker")  {$CPP = ":#StDb/include";}
+$CPPP .= $CPP;  print " --- $CPP\n";
+$env2 = $env->clone('CPPPATH'      => $CPPP);
+$share .= "/";
+my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
+my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
+my $STIC_CPPP = $env2->{ENV}->{STAF} . "/inc:" . $EXPORT . "/tables";
+$cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPPP);
+my $STIC_CPPPATH = $cscanner->iflags;# print "STIC_CPPPATH = $STIC_CPPPATH\n";
+my @cpps = split /:/,$env2->{CPPPATH};# print "@cpps\n";
+my $ROOTCINT_CPP ="";
+foreach my $cpp (@cpps) {
+  if ($cpp =~ /cern/ ||
+      $cpp eq "/usr/include"
+     )  {next;}
+  if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
+  else               {$ROOTCINT_CPP .= $cpp;}
 }
-elsif ($PKG eq "pams") {
-  #          ___________
-  
-  @sources = find_sources($PKG);
-  @incs = find_inc ($PKG);
-  Install $env $INCLUDE, @incs;
-  for my $dir  (@DirList) {
-    my $DirName = $PKG . "/" . $dir; #print "Dir = $Dir\n";
-    if (-d $DirName) {push @dirs, $dir;}
-  }
-  my @Targets = ();
-  for my $dir (@dirs) {
-    my $Cons = $dir . "/Conscript";# print "Cons = $Cons\n";
-    push @Targets, $Cons;
-  } 
-  Build @Targets;
+$cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
+my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+my @CintFiles = ($share . $PKG . "_Cint.cxx", $share . $PKG . "_Cint.h", $share . "LinkDef.h"); 
+my @src  = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+my @h_files = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
+my $DIR = cwd(); #print "DIR = $DIR\n";
+my $line;
+my @Defs = ();
+foreach $h (@h_files) {
+  if ($h =~ /LinkDef/ || $h =~ /Stypes/) {push @Defs, $h; next;}
+  my $hh = $Dir . "/" . $h;
+  open (In,$hh) or die "Can't open $hh";
+  while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
+  close(In);
 }
-else {
-  my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-  my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
-  if ($Dir =~ /^pams/) {$PKG = "St_" . $PKG;}  print "Run Conscript-standard in $Dir for $PKG\n";
-  my $obj  = $ObjDir . "/";# print "obj = $obj\n";
-  my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
-  (my $share = $EXPORT .  "/" . $Dir . "/") =~ s/\/pams//g;# print "new share $share\n";
-  $share =~ s/\/(sim|gen)//g; 
-  my @CintFiles = ($share . $PKG . "_Cint.cxx", $share . $PKG . "_Cint.h", $share . "LinkDef.h"); 
-  my @src  = find_sources($Dir);  #my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
-  my @h_files = find_hfiles($Dir);   #$i = 0; for my $s (@Defs) {print "i=",$i++," Defs = ",$s,"\n";}
-  if ($PKG = "StDbLib" or 
-      $PKG = "St_base" or
-      $PKG = "StChain" or
-      $PKG = "StUtilities" or
-      $PKG = "xdf2root" or
-      $PKG = "StEvent") {
-    Install $env $INCLUDE, @h_files;
-  }
-  my @idlM = find_idlM($Dir);     #$i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
-  my $DIR = cwd();# print "DIR = $DIR\n";
-  my $line;
-  my @Defs = ();
-  foreach $h (@h_files) {
-    if ($h =~ /LinkDef/) {push @Defs, $h; next;}
-    my $hh = $Dir . "/" . $h;
-    open (In,$hh) or die "Can't open $hh";
-    while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
-    close(In);
-  }
-  if ($#idlM > -1) {
-    for $idl (@idlM) {
-      my $stem = basename($idl,".idl");# print "idl = $idl  stem = $stem\n";
-      my $idm  = $stem . ".idl";
-      my $idM  = $DIR . "/" . $Dir . "/" . $idl;# print "idM = $idM\n";
-      my @idlS = ($idM);
-      open (IN, "<$idM") or die  "Can't open $idM";
-      while ($line = <IN>) {
-	if ($line !~ "include") {next;}
-	if ($line =~ "PAM")     {next;}
-	my @words = split '"', $line; my $idt = $EXPORT . "/tables/" . $words[1]; #print "idt = $idt\n";
-	push @idlS, $idt; 
-      }
-      close (IN);
-      my @incs = ();
-      push @incs, $share  . $stem . ".h";
-      push @incs, $share  . $stem . ".inc";
-      push @incs, $share  . "St_" . $stem . "_Module.h";
-      my @Deps = @incs;
-      my $defs = $share  . "St_" . $stem . "_Module.h";# print "defs = $defs\n";
-      push @Deps, $defs;
-      push @Defs, $defs;
-      my $mod = $share  . "St_" . $stem . "_Module.cxx";# print "@incs\n";
-      push @Deps, $mod;
-      my @idlm = ($idM);
-      Command $env [@Deps], @idlS,  qq(stic.pl %>:d $stem -r $CPPPATH -q %1);  
-      Install $env $INCLUDE, @incs;#  print "Install incs = @incs in $INCLUDE\n";
-      my @objmod = ($mod);
-      Install $env $ObjDir, @Deps;#  print "Install Deps = @Deps in $ObjDir\n";
-#      Install $env $ObjDir, @objmod;  print "Install $objmod in $ObjDir\n";
-      $mod =~  s/$share/$obj/g;
-      push @src, $mod; #print "src: @src\n";
-      push @Defs, $Deps[2];
+if ($#idlM > -1) {
+  for $idl (@idlM) {
+    my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n";
+    my $idm  = $stem . ".idl";
+    my $idM  = $DIR . "/" . $Dir . "/" . $idl; #print "idM = $idM\n";
+    my @idlS = ($idM);
+    open (IN, "<$idM") or die  "Can't open $idM";
+    while ($line = <IN>) {
+      if ($line !~ "include") {next;}
+      if ($line =~ "PAM")     {next;}
+      my @words = split '"', $line; my $idt = $EXPORT . "/tables/" . $words[1]; #print "idt = $idt\n";
+      push @idlS, $idt; 
     }
+    close (IN);
+    my @incs = ();
+    push @incs, $share  . $stem . ".h";
+    push @incs, $share  . $stem . ".inc";
+    push @incs, $share  . "St_" . $stem . "_Module.h";
+    my @Deps = @incs;
+    my $defs = $share  . "St_" . $stem . "_Module.h"; #print "defs = $defs\n";
+    push @Deps, $defs;
+    push @Defs, $defs;
+    my $mod = $share  . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
+    push @Deps, $mod;
+    my @idlm = ($idM);
+    Command $env2 [@Deps], @idlS,  qq(stic.pl %>:d $stem -r $STIC_CPPPATH -q %1);  
+    #      Install $env2 $INCLUDE, @incs;#  print "Install incs = @incs in $INCLUDE\n";
+    my @objmod = ($mod);
+    Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n";
+    $mod =~  s/$share/$obj/g;
+    push @src, $mod; #print "src: @src\n";
+    push @Defs, $Deps[2];
   }
-  if ($#Defs > -1) {
-      Command $env [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$CPPPATH" );
-      my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
-      Install $env $ObjDir, @CintFiles;
-      (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
-      push @src, $cint;# print "+==========add $cint\n"; 
-  }
-  LinkedModule $env $SO_PKG, @src;
-  Install $env $LIB, $SO_PKG;
 }
+if ($#Defs > -1) {
+  Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
+  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
+  Install $env2 $ObjDir, @CintFiles;
+  (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
+  push @src, $cint;# print "+==========add $cint\n"; 
+}
+if ($#src > -1) {
+#  Library      $env2 $LIBPKG, @src;  
+  LinkedModule $env2 $SO_PKG, @src;
+#  Install $env2 $LIB, $LIBPKG;
+  Install $env2 $LIB, $SO_PKG;
+}  
 #________________________________________
 sub script::find_Template {
   if (defined($AFS)) {$File::Find::dont_use_nlink;}
