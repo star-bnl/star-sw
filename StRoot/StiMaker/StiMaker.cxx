@@ -250,8 +250,6 @@ Int_t StiMaker::Init()
     //    pTest->doTest();
 
     //StiCompositeSeedFinder
-    //mKalmanSeedFinder = new StiTrackSeedFinder(mhitstore);
-    //mKalmanSeedFinder->setFactory(mkalmantrackfactory);
     mcompseedfinder = new StiCompositeSeedFinder();
     mcompseedfinder->setFactory(mkalmantrackfactory);
     mcompseedfinder->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
