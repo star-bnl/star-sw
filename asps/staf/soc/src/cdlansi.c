@@ -477,6 +477,9 @@ cdl_load(char *lib_name)
     }
 #else
     /* hjw, for porting to low-version irix int flags=RTLD_NOW|RTLD_GLOBAL; */
+#ifndef RTLD_GLOBAL
+  #define RTLD_GLOBAL 0
+#endif
     int flags = RTLD_LAZY | RTLD_GLOBAL;
     file_handle = dlopen(lib_name, flags);
     if (file_handle ==  NULL) {
