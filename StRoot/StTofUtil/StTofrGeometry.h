@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.3 2004/03/09 16:45:16 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.4 2004/05/03 22:58:26 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.4  2004/05/03 22:58:26  dongx
+ * using a switch to set the ouput message
+ *
  * Revision 1.3  2004/03/09 16:45:16  dongx
  * Remove InitDaqMap() since a StTofrDaqMap is introduced
  *
@@ -356,6 +359,8 @@ const
 class StTofrGeometry : public TNamed {
  private:
    TNamed*    mGeoNamed;   //!Geometry to copy from
+   static Int_t const mNTrays = 120;
+   static Int_t const mNModules = 33;
 
  protected:
    //structure of btof_modr, btof_tray, etc, containing info in btofgeo.g
@@ -370,6 +375,11 @@ class StTofrGeometry : public TNamed {
    TVolume*    mStarHall;
    Int_t       mTofrConf;      //configuration for tray/full (0/1) tofr
 
+   StTofrGeomTray* mTofrTray[mNTrays];
+   StTofrGeomSensor* mTofrSensor[mNTrays][mNModules];
+   Int_t       mNValidTrays;
+   Int_t       mNValidModules;
+
    static Int_t const mY03TrayIndex = 83;  //year03 run tray index
 
    static Bool_t   mDebug;     //!Control message printing of this class
@@ -377,15 +387,6 @@ class StTofrGeometry : public TNamed {
    static char* const sectorPref ;//= "BSEC";
    static char* const trayPref   ;//= "BTRA";
    static char* const senPref    ;//= "BRMD";
-
-/*    unsigned short mTofDaqADCChanMap[120][33][6];   // */
-/*    unsigned short mTofDaqTDCChanMap[120][33][6];   // */
-/*    unsigned short mTofADCChan2TrayMap[132];        // */
-/*    unsigned short mTofADCChan2ModuleMap[132];      // */
-/*    unsigned short mTofADCChan2CellMap[132];        // */
-/*    unsigned short mTofTDCChan2TrayMap[132];        // */
-/*    unsigned short mTofTDCChan2ModuleMap[132];      // */
-/*    unsigned short mTofTDCChan2CellMap[132];        // */
 
  protected:
    //void        InitFromXdf(const char* xdffile);
@@ -463,49 +464,18 @@ class StTofrGeometry : public TNamed {
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
-   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
-                               DoubleVec &pathVec, PointVec &crossVec) const;
-   Bool_t            HelixCross(const StHelixD &helix) const;
-
-/*    int Cell2ADCChan(const int, const int, const int) const; */
-/*    int Cell2TDCChan(const int, const int, const int) const; */
-/*    int ADCChan2Tray(const int) const; */
-/*    int ADCChan2Module(const int) const; */
-/*    int ADCChan2Cell(const int) const; */
-/*    int TDCChan2Tray(const int) const; */
-/*    int TDCChan2Module(const int) const; */
-/*    int TDCChan2Cell(const int) const; */
+   //   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
+   //                               DoubleVec &pathVec, PointVec &crossVec) const;
+   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
+   //   Bool_t            HelixCross(const StHelixD &helix) const;
+   Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
+   Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 
 #ifdef __ROOT__      
- ClassDef(StTofrGeometry,1)  //Simplified TOFr Geometry
+ ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
 #endif
 };
 
 R__EXTERN  StTofrGeometry* gTofrGeometry;
 
-/*
-inline int StTofrGeometry::Cell2ADCChan(const int trayId, const int moduleId, const int cellId)
-     const { return mTofDaqADCChanMap[trayId][moduleId][cellId];}
-
-inline int StTofrGeometry::Cell2TDCChan(const int trayId, const int moduleId, const int cellId)
-     const { return mTofDaqTDCChanMap[trayId][moduleId][cellId];}
-
-inline int StTofrGeometry::ADCChan2Tray(const int daqId)
-     const { return mTofADCChan2TrayMap[daqId];}
-
-inline int StTofrGeometry::ADCChan2Module(const int daqId)
-     const { return mTofADCChan2ModuleMap[daqId];}
-
-inline int StTofrGeometry::ADCChan2Cell(const int daqId)
-     const { return mTofADCChan2CellMap[daqId];}
-
-inline int StTofrGeometry::TDCChan2Tray(const int daqId)
-     const { return mTofTDCChan2TrayMap[daqId];}
-
-inline int StTofrGeometry::TDCChan2Module(const int daqId)
-     const { return mTofTDCChan2ModuleMap[daqId];}
-
-inline int StTofrGeometry::TDCChan2Cell(const int daqId)
-     const { return mTofTDCChan2CellMap[daqId];}
-*/
 #endif  //end of STTOFRGEOMETRY_H
