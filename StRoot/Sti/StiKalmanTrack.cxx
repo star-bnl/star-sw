@@ -785,7 +785,6 @@ bool StiKalmanTrack::find(int direction)
       fit(kInsideOut);
       trackExtended = true;
     }		
-  /*
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
   if (outerMostNode->_x<190. )
@@ -793,15 +792,23 @@ bool StiKalmanTrack::find(int direction)
       // swap the track inside-out in preparation for the outward search/extension
       TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
       swap();      
-      if (trackFinder->find(this,kInsideOut))
+      try
 	{
-	  if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
-	  fit(kOutsideIn);             
-	  trackExtended = true;
+	  if (trackFinder->find(this,kInsideOut))
+	    {
+	      if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
+	      fit(kOutsideIn);             
+	      trackExtended = true;
+	    }
 	}
-      swap();
-      setTrackingDirection(kOutsideIn);
-      }*/
+      catch (runtime_error &rte)
+	{}
+      finally
+	{
+	  swap();
+	  setTrackingDirection(kOutsideIn);
+	}
+    }
   reserveHits();
   setFlag(1);
   return trackExtended;
