@@ -1,5 +1,10 @@
-// $Id: StLaserEventMaker.h,v 1.22 2003/09/10 19:47:21 perev Exp $
+// $Id: StLaserEventMaker.h,v 1.23 2004/03/11 20:57:37 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.23  2004/03/11 20:57:37  pfachini
+// The minimum number of valid tracks (minValidTracks) for a good drift velocity
+// calculation was lowered to 450 if both east and west lasers are up and 225
+// if one of them is down. The histogram numberEvents was defined.
+//
 // Revision 1.22  2003/09/10 19:47:21  perev
 // ansi corrs
 //
@@ -86,7 +91,8 @@ class StLaserEvent;
 
 enum { 
   //minValidTracks = 700,
-  minValidTracks = 500,
+  //minValidTracks = 500,
+  minValidTracks = 450,
   maxNofTracks   = 8000
 };
 
@@ -99,6 +105,7 @@ private:
   TH1* fzlEastLow;
   TH1* driftVelocityRec;
   TH1* numberTracks;
+  TH1* numberEvents;
   Bool_t   mHistOut;
   Int_t m_runno;          //Run number to put on events (derive from filename)
   Int_t m_date;           //date to put in event header
@@ -165,6 +172,8 @@ public:
   double fzlIntegralEastLow();
   double fzlIntegralWestHigh();
   double fzlIntegralWestLow();
+  double nTracks();
+  double nEvents();
   double driftVelocityReco;
   double clock;
   double clockNominal;
@@ -172,7 +181,7 @@ public:
   double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.22 2003/09/10 19:47:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.23 2004/03/11 20:57:37 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker,0)   //StAF chain virtual base class for Makers
 };
