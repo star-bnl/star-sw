@@ -1,5 +1,8 @@
-* $Id: g2t_get_hits.F,v 1.26 2000/03/03 21:54:19 nevski Exp $
+* $Id: g2t_get_hits.F,v 1.27 2000/03/03 22:05:41 didenko Exp $
 * $Log: g2t_get_hits.F,v $
+* Revision 1.27  2000/03/03 22:05:41  didenko
+* fixed syntax
+*
 * Revision 1.26  2000/03/03 21:54:19  nevski
 * protection against bad track number
 *
@@ -154,7 +157,7 @@ C :>--------------------------------------------------------------------
       nb   = 0
 
       DO WHILE (AgHITGET(0,xxx).eq.0)
-         if (abs(trac)>Ntrack) then
+         if (abs(trac).gt.Ntrack) then
             nb = nb + 1
             go to 190
          endif
