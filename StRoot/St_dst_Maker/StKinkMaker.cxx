@@ -1,3 +1,8 @@
+// $Id: StKinkMaker.cxx,v 1.5 1999/07/07 15:47:53 wdeng Exp $
+// $Log: StKinkMaker.cxx,v $
+// Revision 1.5  1999/07/07 15:47:53  wdeng
+// add Id and Log at the first two lines for the purpose of version maintainance
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StKinkMaker class for Makers                                        //
@@ -16,6 +21,7 @@
 #include "St_DataSetIter.h"
 
 #include "pams/global/inc/StDetectorId.h"
+#include "pams/global/inc/StVertexId.h"
 #include "PhysicalConstants.h"
 #include "StThreeVector.hh"
 #include "TObjArray.h"
@@ -470,7 +476,7 @@ Int_t StKinkMaker::Make(){
 	    g2tTrackPtr = g2tTrackStart + (parentMcId -1);
 
 	    stopIdParent = g2tTrackPtr->stop_vertex_p;
- //-----------------------------------------------------------------
+ //=====================================================================
 	    g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
 
 	    startIdDaughter = g2tTrackPtr->start_vertex_p;
@@ -521,12 +527,13 @@ PROPERFILL:
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.4 1999/07/02 20:14:16 wdeng Exp $\n");
+  printf("* $Id: StKinkMaker.cxx,v 1.5 1999/07/07 15:47:53 wdeng Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
+//_____________________________________________________________________________
 Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
 				   const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
 				   Float_t yCoordinates[2])
@@ -628,6 +635,7 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
   return flag;
 }
 
+//_____________________________________________________________________________
 Float_t StKinkMaker::dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, Float_t syz1, 
 		     Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3])
 {

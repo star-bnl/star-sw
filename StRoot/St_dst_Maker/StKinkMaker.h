@@ -1,3 +1,8 @@
+// $Id: StKinkMaker.h,v 1.4 1999/07/07 15:47:36 wdeng Exp $
+// $Log: StKinkMaker.h,v $
+// Revision 1.4  1999/07/07 15:47:36  wdeng
+// add Id and Log at the first two lines for the purpose of version maintainance
+//
 #ifndef STAR_StKinkMaker
 #define STAR_StKinkMaker
 //////////////////////////////////////////////////////////////////////////
@@ -50,7 +55,7 @@ using namespace std;
 class StKinkMaker : public StMaker {
 private:
   Bool_t m_kinkEvalOn;   //switch for the evaluation
-// static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.3 1999/07/02 19:56:16 wdeng Exp $";
+// static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.4 1999/07/07 15:47:36 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
   StKinkLocalTrack *mKinkLocalTrack;   //!
 protected:
