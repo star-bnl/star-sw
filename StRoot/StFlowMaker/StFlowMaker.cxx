@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.33 2000/07/20 17:25:51 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.34 2000/08/09 21:38:23 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.34  2000/08/09 21:38:23  snelling
+// PID added
+//
 // Revision 1.33  2000/07/20 17:25:51  posk
 // Fixed bug in readPico checkEvent.
 //
@@ -121,6 +124,10 @@
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
 #include "StProton.hh"
+#include "StKaonMinus.hh"
+#include "StKaonPlus.hh"
+#include "StAntiProton.hh"
+#include "StDeuteron.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StMessMgr.h"
 //#include <algorithm>
@@ -230,7 +237,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.33 2000/07/20 17:25:51 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.34 2000/08/09 21:38:23 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -329,18 +336,42 @@ void StFlowMaker::FillFlowEvent() {
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
 
-  // Get initial multiplicity before TrackCuts 
-  UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
-  pFlowEvent->SetOrigMult(origMult);
-  pFlowEvent->SetCentrality(origMult);
-  PR(origMult);
-
   // Get primary vertex position
   const StThreeVectorF& vertex = pEvent->primaryVertex(0)->position();
   pFlowEvent->SetVertexPos(vertex);
 
+  // include trigger (ZDC and CTB)
+  Float_t ctb =-1.;
+  Float_t zdce =-1.;
+  Float_t zdcw =-1.;
+  StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
+  if (triggers)	{
+    StCtbTriggerDetector &CTB = triggers->ctb();
+    StZdcTriggerDetector &ZDC = triggers->zdc();
+    // get CTB
+    for (UInt_t slat=0; slat<CTB.numberOfSlats(); slat++) {
+      for (UInt_t tray=0; tray<CTB.numberOfTrays();tray++) {
+	ctb += CTB.mips(tray,slat,0);
+      }
+    }
+    //get ZDCe and ZDCw        
+    zdce = ZDC.adcSum(east);
+    zdcw = ZDC.adcSum(west);
+  } 
+  
+  pFlowEvent->SetCTB(ctb);
+  pFlowEvent->SetZDCe(zdce);
+  pFlowEvent->SetZDCw(zdcw);
+
+  // Get initial multiplicity before TrackCuts 
+  UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+
   // loop over tracks in StEvent
   int goodTracks = 0;
+  int goodTracksEta1 = 0;
+  int goodTracksEta2 = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackConstIterator itr;
   StTpcDedxPidAlgorithm tpcDedxAlgo;
@@ -348,30 +379,63 @@ void StFlowMaker::FillFlowEvent() {
 
   for (itr = tracks.begin(); itr != tracks.end(); itr++) {
     StPrimaryTrack* pTrack = *itr;
-    if (pTrack && pTrack->flag() > 0 && StFlowCutTrack::CheckTrack(pTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return;
+    if (pTrack && pTrack->flag() > 0) {
       StThreeVectorD p = pTrack->geometry()->momentum();
-      pFlowTrack->SetPhi(p.phi());
-      pFlowTrack->SetEta(p.pseudoRapidity());
-      pFlowTrack->SetPt(p.perp());
-      pFlowTrack->SetCharge(pTrack->geometry()->charge());
-      pFlowTrack->SetDca(pTrack->impactParameter());
-      pFlowTrack->SetChi2((Float_t)(pTrack->fitTraits().chi2()));
-      pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
-      pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
-      pTrack->pidTraits(tpcDedxAlgo);       // initialize
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionPlus::instance());
-      pFlowTrack->SetPidPiPlus(nSigma);
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionMinus::instance());
-      pFlowTrack->SetPidPiMinus(nSigma);
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(StProton::instance());
-      pFlowTrack->SetPidProton(nSigma);
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
+      // calculate the number of tracks with positive flag 
+      if (fabs(p.pseudoRapidity()) < 1.) {
+	goodTracksEta2++;
+	if (fabs(p.pseudoRapidity()) < 0.5) {
+	  goodTracksEta1++;
+	}
+      }
+      if (StFlowCutTrack::CheckTrack(pTrack)) {
+	// Instantiate new StFlowTrack
+	StFlowTrack* pFlowTrack = new StFlowTrack;
+	if (!pFlowTrack) return;
+	pFlowTrack->SetPhi(p.phi());
+	pFlowTrack->SetEta(p.pseudoRapidity());
+	pFlowTrack->SetPt(p.perp());
+	pFlowTrack->SetCharge(pTrack->geometry()->charge());
+	pFlowTrack->SetDca(pTrack->impactParameter());
+	pFlowTrack->SetChi2((Float_t)(pTrack->fitTraits().chi2()));
+	pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
+	pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
+	
+	pTrack->pidTraits(tpcDedxAlgo);       // initialize
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionPlus::instance());
+	pFlowTrack->SetPidPiPlus(nSigma);
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionMinus::instance());
+	pFlowTrack->SetPidPiMinus(nSigma);
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StProton::instance());
+	pFlowTrack->SetPidProton(nSigma);
+	
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StKaonMinus::instance());
+	pFlowTrack->SetPidKaonMinus(nSigma);
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StKaonPlus::instance());
+	pFlowTrack->SetPidKaonPlus(nSigma);
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StAntiProton::instance());
+	pFlowTrack->SetPidAntiProton(nSigma);
+	nSigma = (float)tpcDedxAlgo.numberOfSigma(StDeuteron::instance());
+	pFlowTrack->SetPidDeuteron(nSigma);
+	
+	// dE/dx
+	StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
+	StDedxPidTraits* pid;
+	for (unsigned int i = 0; i < traits.size(); i++) {
+	  pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+	  if (pid && pid->method()==kTruncatedMeanId) break;
+	}
+	pFlowTrack->SetDedx(pid->mean());
+
+	pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+	goodTracks++;
+      }
     }
   }
+
+  pFlowEvent->SetMultEta1(goodTracksEta1);
+  pFlowEvent->SetCentrality(goodTracksEta1);
+  pFlowEvent->SetMultEta2(goodTracksEta2);
   
   // Check Eta Symmetry
   if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
@@ -406,8 +470,13 @@ void StFlowMaker::FillNanoEvent() {
 
   pNanoEvent->SetEventID(pFlowEvent->EventID());
   pNanoEvent->SetOrigMult(pFlowEvent->OrigMult());
+  pNanoEvent->SetMultEta1(pFlowEvent->MultEta1());
+  pNanoEvent->SetMultEta2(pFlowEvent->MultEta2());
   pNanoEvent->SetCentrality(pFlowEvent->Centrality());
   pNanoEvent->SetVertexPos(pFlowEvent->VertexPos());
+  pNanoEvent->SetCTB(pFlowEvent->CTB());
+  pNanoEvent->SetZDCe(pFlowEvent->ZDCe());
+  pNanoEvent->SetZDCw(pFlowEvent->ZDCw());
   
   StFlowTrackIterator itr;
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -432,10 +501,15 @@ void StFlowMaker::FillPicoEvent() {
   
   pPicoEvent->SetEventID(pFlowEvent->EventID());
   pPicoEvent->SetOrigMult(pFlowEvent->OrigMult());
+  pPicoEvent->SetMultEta1(pFlowEvent->MultEta1());
+  pPicoEvent->SetMultEta2(pFlowEvent->MultEta2());
   pPicoEvent->SetCentrality(pFlowEvent->Centrality());
   pPicoEvent->SetVertexPos(pFlowEvent->VertexPos().x(),
 			       pFlowEvent->VertexPos().y(),
 			       pFlowEvent->VertexPos().z());
+  pPicoEvent->SetCTB(pFlowEvent->CTB());
+  pPicoEvent->SetZDCe(pFlowEvent->ZDCe());
+  pPicoEvent->SetZDCw(pFlowEvent->ZDCw());
   
   StFlowTrackIterator itr;
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -446,6 +520,7 @@ void StFlowMaker::FillPicoEvent() {
     StFlowTrack* pFlowTrack = *itr;
     new(tracks[nt++]) StFlowPicoTrack(pFlowTrack->Pt(), 
 				      pFlowTrack->Eta(),
+				      pFlowTrack->Dedx(),
 				      pFlowTrack->Phi(),
 				      pFlowTrack->Charge(),
 				      pFlowTrack->Dca(),
@@ -454,7 +529,12 @@ void StFlowMaker::FillPicoEvent() {
 				      pFlowTrack->MaxPts(),
 				      pFlowTrack->PidPiPlus(),
 				      pFlowTrack->PidPiMinus(),
-				      pFlowTrack->PidProton()  );
+				      pFlowTrack->PidProton(),  
+				      pFlowTrack->PidKaonPlus(),  
+				      pFlowTrack->PidKaonMinus(),  
+				      pFlowTrack->PidAntiProton(),  
+				      pFlowTrack->PidDeuteron()
+				      );
   }  
   pPicoEvent->SetNtrack(nt);
   
@@ -478,8 +558,13 @@ Bool_t StFlowMaker::FillFromNanoDST(StFlowNanoEvent* pNanoEvent) {
   pFlowEvent->SetEventID(pNanoEvent->EventID());
   UInt_t origMult = pNanoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
-  pFlowEvent->SetCentrality(origMult);
+  pFlowEvent->SetMultEta1(pNanoEvent->MultEta1());
+  pFlowEvent->SetMultEta2(pNanoEvent->MultEta2());
+  pFlowEvent->SetCentrality(pNanoEvent->MultEta1());
   pFlowEvent->SetVertexPos(pNanoEvent->VertexPos());
+  pFlowEvent->SetCTB(pNanoEvent->CTB());
+  pFlowEvent->SetZDCe(pNanoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pNanoEvent->ZDCw());
 
   // Fill FlowTracks
   Int_t nTracks = (Int_t)pNanoEvent->GetNtrack();
@@ -492,8 +577,8 @@ Bool_t StFlowMaker::FillFromNanoDST(StFlowNanoEvent* pNanoEvent) {
   pFlowEvent->MakeSubEvents();
   pFlowEvent->SetPids();
 
-  //PR("Nano Subs");
-  //PrintSubeventMults();
+  //  PR("Nano Subs");
+  //  PrintSubeventMults();
 
   return kTRUE;
 }
@@ -513,10 +598,15 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
-  pFlowEvent->SetCentrality(origMult);
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
+  pFlowEvent->SetMultEta1(pPicoEvent->MultEta1());
+  pFlowEvent->SetMultEta2(pPicoEvent->MultEta2());
+  pFlowEvent->SetCentrality(pPicoEvent->MultEta1());
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
 
   // Fill FlowTracks
   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
@@ -529,6 +619,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPt(pPicoTrack->Pt());
       pFlowTrack->SetPhi(pPicoTrack->Phi());
       pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
@@ -537,6 +628,10 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPidPiPlus(pPicoTrack->PidPiPlus());
       pFlowTrack->SetPidPiMinus(pPicoTrack->PidPiMinus());
       pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+      pFlowTrack->SetPidAntiProton(pPicoTrack->PidAntiProton());
+      pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaonPlus());
+      pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaonMinus());
+      pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
     }
   }
@@ -614,7 +709,7 @@ Int_t StFlowMaker::InitNanoEventWrite() {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
     return kStFatal;
   }
-
+  pNanoDST->SetFormat(1);
   pNanoDST->SetCompressionLevel(comp);
   gMessMgr->Info() << "##### FlowMaker: NanoEvents file = " << file << endm;
 
@@ -649,7 +744,7 @@ Int_t StFlowMaker::InitPicoEventWrite() {
     cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
     return kStFatal;
   }
-  
+  pPicoDST->SetFormat(1);
   pPicoDST->SetCompressionLevel(comp);
   gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
 
@@ -693,7 +788,8 @@ Int_t StFlowMaker::InitNanoEventRead() {
   TBranch* branch = pFlowTree->GetBranch("pNanoEvent");
   branch->SetAddress(&pNanoEvent);
   Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-  gMessMgr->Info() << "##### FlowMaker: events in nano-DST file = " << nEntries << endm;
+  gMessMgr->Info() << "##### FlowMaker: events in nano-DST file = " 
+		   << nEntries << endm;
   
   mNanoEventCounter = 0;
 

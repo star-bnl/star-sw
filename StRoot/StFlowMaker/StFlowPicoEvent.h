@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.3 2000/06/01 18:26:39 posk Exp $
+// $Id: StFlowPicoEvent.h,v 1.4 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.4  2000/08/09 21:38:23  snelling
+// PID added
+//
 // Revision 1.3  2000/06/01 18:26:39  posk
 // Increased precision of Track integer data members.
 //
@@ -37,32 +40,51 @@ class StFlowPicoEvent : public TObject {
                 StFlowPicoEvent();
   virtual       ~StFlowPicoEvent() { Clear(); }
   void          Clear(Option_t *option ="");
-  TClonesArray* Tracks() const { return fTracks; }
+  TClonesArray* Tracks()     const { return fTracks; }
   Int_t         GetNtrack()  const { return mNtrack; }
 
   UInt_t        OrigMult()   const { return mOrigMult; }
+  UInt_t        MultEta1()   const { return mMultEta1; }
+  UInt_t        MultEta2()   const { return mMultEta2; }
+ 
   UInt_t        Centrality() const { return mCentrality; }
   Float_t       VertexX()    const { return mVertexX; }
   Float_t       VertexY()    const { return mVertexY; }
   Float_t       VertexZ()    const { return mVertexZ; }
   Int_t         EventID()    const { return mEventID; }
+  Float_t       CTB()        const { return mCTB; }
+  Float_t       ZDCe()       const { return mZDCe; }
+  Float_t       ZDCw()       const { return mZDCw; }
+
   
   void SetEventID(const Int_t id)       { mEventID = id; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
   void SetOrigMult(const UInt_t mult)   { mOrigMult = mult; }
+  void SetMultEta1(const UInt_t goodtracks1) { mMultEta1 = goodtracks1; }
+  void SetMultEta2(const UInt_t goodtracks2) { mMultEta2 = goodtracks2; }
   void SetCentrality(const UInt_t cent) { mCentrality = cent; }
   void SetVertexPos(const Float_t x, const Float_t y, const Float_t z) { 
     mVertexX=x; mVertexY=y; mVertexZ=z; }
-  
+  void SetCTB(const Float_t ctb)  {mCTB = ctb; }
+  void SetZDCe(const Float_t zdce) {mZDCe = zdce; }
+  void SetZDCw(const Float_t zdcw) {mZDCw = zdcw; }
+
  private:
 
-  Int_t          mNtrack;                     // track number
-  Int_t          mEventID;                    // event ID
-  UInt_t         mOrigMult;                   // number of tracks
-  UInt_t         mCentrality;                 // centrality bin
-  Float_t        mVertexX;                    // primary vertex position
-  Float_t        mVertexY;                    // primary vertex position
-  Float_t        mVertexZ;                    // primary vertex position
+  Int_t          mNtrack;               // track number
+  Int_t          mEventID;              // event ID
+  UInt_t         mOrigMult;             // number of tracks
+  UInt_t         mMultEta1;             // number of tracks with 
+                                        // positive flag in 1 unit of eta
+  UInt_t         mMultEta2;             // number of tracks with positive flag 
+                                        // in 2 units of eta
+  UInt_t         mCentrality;           // centrality bin
+  Float_t        mVertexX;              // primary vertex position
+  Float_t        mVertexY;              // primary vertex position
+  Float_t        mVertexZ;              // primary vertex position
+  Float_t        mCTB;                  // CTB value sum
+  Float_t        mZDCe;                 // ZDC east
+  Float_t        mZDCw;                 // ZDC west
   
   TClonesArray*        fTracks;
   static TClonesArray* fgTracks;
@@ -78,6 +100,7 @@ public:
             StFlowPicoTrack() { }
             StFlowPicoTrack(Float_t pt, 
                             Float_t eta, 
+                            Float_t Dedx, 
                             Float_t phi,
           		    Short_t charge,
                             Float_t dca,
@@ -86,7 +109,12 @@ public:
                             Int_t   maxPts,
                             Float_t pidPiPlus,
                             Float_t pidPiMinus,
-                            Float_t pidProton);
+                            Float_t pidProton,
+			    Float_t pidKaonPlus,
+			    Float_t pidKaonMinus,
+			    Float_t pidAntiProton,
+                            Float_t pidDeuteron
+			    );
    virtual  ~StFlowPicoTrack() { }
 
    Float_t  Pt()         const { return mPt; }
@@ -100,10 +128,16 @@ public:
    Float_t  PidPiPlus()  const { return mPidPiPlus/1000.; }
    Float_t  PidPiMinus() const { return mPidPiMinus/1000.; }
    Float_t  PidProton()  const { return mPidProton/1000.; }
+   Float_t  PidKaonMinus()  const { return mPidKaonMinus/1000.; }
+   Float_t  PidKaonPlus()   const { return mPidKaonPlus/1000.; }
+   Float_t  PidAntiProton() const { return mPidAntiProton/1000.; }
+   Float_t  PidDeuteron()   const { return mPidDeuteron/1000.; }
+   Float_t  Dedx()          const { return mDedx; }
 
 private:
    Float_t   mPt;
    Float_t   mEta;
+   Float_t   mDedx;
    Float_t   mPhi;
    Char_t    mCharge;
    UShort_t  mDca;
@@ -113,6 +147,10 @@ private:
    Short_t   mPidPiPlus;      
    Short_t   mPidPiMinus;
    Short_t   mPidProton;
+   Short_t   mPidKaonPlus;
+   Short_t   mPidKaonMinus;
+   Short_t   mPidAntiProton;
+   Short_t   mPidDeuteron;
 
    ClassDef(StFlowPicoTrack,1)
 };

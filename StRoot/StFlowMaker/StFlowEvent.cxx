@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.7 2000/06/01 18:26:35 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.8 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.8  2000/08/09 21:38:23  snelling
+// PID added
+//
 // Revision 1.7  2000/06/01 18:26:35  posk
 // Increased precision of Track integer data members.
 //
@@ -121,6 +124,9 @@ Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.05,0.05},
 Float_t StFlowEvent::mPiPlusCuts[2]  = {-2., 1.};
 Float_t StFlowEvent::mPiMinusCuts[2] = {-2., 2.};
 Float_t StFlowEvent::mProtonCuts[2]  = {-1., 2.};
+Float_t StFlowEvent::mKMinusCuts[2]  = {-1., 1.};
+Float_t StFlowEvent::mKPlusCuts[2]  = {-1., 1.};
+Float_t StFlowEvent::mAntiProtonCuts[2]  = {-1., 1.};
 
 //-----------------------------------------------------------
 
@@ -320,20 +326,65 @@ void StFlowEvent::SetPids() {
     if (charge == 1) {
       Float_t piPlus  = pFlowTrack->PidPiPlus();
       Float_t proton  = pFlowTrack->PidProton();
+      Float_t kPlus   = pFlowTrack->PidKaonPlus();
       if (piPlus > mPiPlusCuts[0] && piPlus < mPiPlusCuts[1]) {
 	strcpy(pid, "pi+");
       } else if ( proton > mProtonCuts[0] && proton < mProtonCuts[1]) {
 	strcpy(pid, "proton");
+      } else if ( kPlus > mKPlusCuts[0] && kPlus < mKPlusCuts[1]) {
+	strcpy(pid, "k+");
       }
     } else if (charge == -1) {
       Float_t piMinus = pFlowTrack->PidPiMinus();
+      Float_t antiProton  = pFlowTrack->PidAntiProton();
+      Float_t kMinus   = pFlowTrack->PidKaonMinus();
       if (piMinus > mPiMinusCuts[0] && piMinus < mPiMinusCuts[1]) {
 	strcpy(pid, "pi-");
+      } else if ( antiProton > mAntiProtonCuts[0] && antiProton < mAntiProtonCuts[1]) {
+	strcpy(pid, "pbar");
+      } else if ( kMinus > mKMinusCuts[0] && kMinus < mKMinusCuts[1]) {
+	strcpy(pid, "k-");
       }
     }
 
     pFlowTrack->SetPid(pid);
 
+  }
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowEvent::SetCentrality(const UInt_t& tracks) {
+  //  int maxTracks = 4000; 
+  //  mCentrality = (6*tracks)/maxTracks + 1; 
+  UInt_t cent[9] = {40,80,125,180,240,310,380,450,700};
+
+  if (tracks < cent[0]) {
+    mCentrality = 1;
+  }
+  else if (tracks >= cent[0] && tracks < cent[1]) {
+    mCentrality = 2;
+  }
+  else if (tracks >= cent[1] && tracks < cent[2]) {
+    mCentrality = 3;
+  }
+  else if (tracks >= cent[2] && tracks < cent[3]) {
+    mCentrality = 4;
+  }
+  else if (tracks >= cent[3] && tracks < cent[4]) {
+    mCentrality = 5;
+  }
+  else if (tracks >= cent[4] && tracks < cent[5]) {
+    mCentrality = 6;
+  }
+  else if (tracks >= cent[5] && tracks < cent[6]) {
+    mCentrality = 7;
+  }
+  else if (tracks >= cent[6] && tracks < cent[7]) {
+    mCentrality = 8;
+  }
+  else if (tracks >= cent[7] && tracks < cent[8]) {
+    mCentrality = 9;
   }
 }
 
