@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.65 2001/11/29 00:43:10 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.66 2001/12/05 21:57:56 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.66  2001/12/05 21:57:56  balewski
+// *** empty log message ***
+//
 // Revision 1.65  2001/11/29 00:43:10  balewski
 // *** empty log message ***
 //
@@ -440,9 +443,9 @@ Int_t StPrimaryMaker::Init(){
   AddRunCont(m_egr2_egrpar);
 
   if(m_Mode==15) { // initialize ppLMV
-    int   ppLMVparI[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
-    float ppLMVparF[10]={1., 3.9, 0.20, .02, 1., 90., 0, 0, 0, 8888};
-    ppLMVuse(ppLMVparI,ppLMVparF);
+    int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
+    float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1., 90., 0, 0, 0, 8888};
+    ppLMVuse(ppLMVparIdef,ppLMVparFdef);
   }
 
    // few histos for monitoring of ppLMV
