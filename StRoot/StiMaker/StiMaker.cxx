@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.142  2004/04/15 00:43:22  pruneau
+// Added Ssd to the list of possible detectors...
+//
 // Revision 1.141  2004/03/26 15:30:06  andrewar
 // bug in field reset
 //
@@ -168,6 +171,7 @@
 #include "StiFtpc/StiFtpcDetectorGroup.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
+#include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
 #include "StiPixel/StiPixelDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
@@ -314,15 +318,15 @@ Int_t StiMaker::InitDetectors()
     }
   if (_pars->useSvt)
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt,_pars->svtInputFile));
-      group->setGroupId(kSvtId);
+    cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
+    _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt,_pars->svtInputFile));
+    group->setGroupId(kSvtId);
     }
-  if (_pars->usePixel)
+  if (_pars->useSsd)
       {
-	  cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-	  _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
-	  group->setGroupId(9999);
+	  cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
+	  _toolkit->add(group = new StiSsdDetectorGroup(_pars->activeSsd,_pars->ssdInputFile));
+	  group->setGroupId(kSsdId);
       }
   if (_pars->useFtpc)
     {
@@ -330,11 +334,11 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiFtpcDetectorGroup(_pars->activeFtpc,_pars->ftpcInputFile));
       group->setGroupId(kFtpcWestId);
     }
-  if (_pars->useEmc)
+  if (_pars->usePixel)
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:BEMC"<<endl;
-      _toolkit->add(group = new StiEmcDetectorGroup(_pars->activeEmc,_pars->emcInputFile));
-      group->setGroupId(kBarrelEmcTowerId);
+      cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
+      _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
+      group->setGroupId(9999);
     }
   return kStOk;
 }
