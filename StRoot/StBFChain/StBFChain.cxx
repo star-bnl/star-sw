@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.257 2001/12/27 01:20:51 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.258 2002/01/17 20:04:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -205,7 +205,7 @@ Bfc_st BFC[] = {
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
-  {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
+  {"daq"         ,""  ,"","",""                            ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
@@ -321,14 +321,16 @@ Bfc_st BFC[] = {
   {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
                                                   ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
 
-  {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker"
-                                                                ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
+                                                 ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
-  {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
+  {"Event"       ,"","","StEvent,tpcDB"                           ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
+
+  {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
   {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
