@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.52 1999/12/06 04:09:02 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.53 1999/12/07 23:49:35 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.53  1999/12/07 23:49:35  snelling
+// Fixed Linux warnings
+//
 // Revision 1.52  1999/12/06 04:09:02  snelling
 // Fixed morphology, now in chain when running with eval switch
 //
@@ -293,7 +296,8 @@ Int_t St_tcl_Maker::Make() {
   if (Debug()) printf("Start of TCL Maker");
 
   // get the parameters for TCL
-  tcl_tclpar_st* sttclpar = m_tclpar->GetTable();
+  // apparently not used this looks strange
+  //  tcl_tclpar_st* sttclpar = m_tclpar->GetTable();
 
   // initialize pointers to tables
   tpseq = NULL;
@@ -525,7 +529,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.52 1999/12/06 04:09:02 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.53 1999/12/07 23:49:35 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
