@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.44  1998/11/16 01:26:44  fisyak
+#  New merging with NT
+#
 #  Revision 1.43  1998/11/14 01:16:58  fisyak
 #  Post NT updates
 #
@@ -110,7 +113,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/14 01:16:58 $ 
+#             Last modification $Date: 1998/11/16 01:26:44 $ 
 #. default setings
 
 MOTIF := Yess
@@ -222,7 +225,7 @@ ifneq (,$(findstring $(STAR_SYS),intel_wnt))
   ROOTCINT   =rootcint
 
   RM := del /Q
-  RMDIR := del /S /Q
+  RMDIR := rmdir /S /Q
   CP := copy
   LN := xcopy
   SLASH := \\
