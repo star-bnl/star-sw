@@ -93,7 +93,7 @@ void kam_dui_ls_()
 }
 STAFCV_T dui_ls(char* path)
 {
-   char * result = (char*)ASUALLOC(2048);
+   char * result = (char*)MALLOC(2048);
    strncpy(result,"",1);
    if( !dui->ls(path, result) ){
       EML_ERROR(KAM_METHOD_FAILURE);
@@ -220,32 +220,6 @@ void kam_dui_rmdir_()
 STAFCV_T dui_rmdir(char* path)
 {
    if( !dui->rmdir(path) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_dui_table_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DUI/MKTABLE NAME SPEC ROWCOUNT
-*:<---------------------------------------------------------------------
-*/
-void kam_dui_mktable_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* table name */
-   char* spec = ku_gets();      /* table row specifier */
-   long rowcount = ku_geti();   /* rows to allocate */
-
-	STAFCV_T status = dui_mktable(name,spec,rowcount);
-}
-STAFCV_T dui_mktable(char* name,char* spec,long rowcount)
-{
-   if( !dui->mkTable(name,spec,rowcount) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);

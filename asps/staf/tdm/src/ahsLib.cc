@@ -135,7 +135,7 @@ int ahs_specSplit(const char *s
    char **buffs; int nbuffs;
    int nspec = 0;
 
-   spec = (char*)ASUALLOC(strlen(s) +1);
+   spec = (char*)MALLOC(strlen(s) +1);
    strcpy(spec,s);
 
 /*-(" Is there a location in the specification? \n");-*/
@@ -144,9 +144,9 @@ int ahs_specSplit(const char *s
       nbuffs = strsplit(spec,":",&buffs);
       if(nbuffs != 2){ _PRINTF("syntax error\n"); return FALSE; }
       loc = buffs[0]; buffs[0] = NULL;
-      ASUFREE(spec);
+      FREE(spec);
       spec = buffs[1]; buffs[1] = NULL;
-      ASUFREE(buffs);
+      FREE(buffs);
    }
    else {
       loc = NULL;
@@ -163,11 +163,11 @@ int ahs_specSplit(const char *s
       }
       else {
 	 nspec++;
-	 entr = (char*)ASUALLOC(strlen(spec) - (cc+1-spec) +1);
+	 entr = (char*)MALLOC(strlen(spec) - (cc+1-spec) +1);
 	 strncpy(entr,cc+1,strlen(spec) - (cc+1-spec));
-	 c = (char*)ASUALLOC((cc-spec) +1);
+	 c = (char*)MALLOC((cc-spec) +1);
 	 strncpy(c,spec,(cc-spec));
-	 ASUFREE(spec);
+	 FREE(spec);
 	 spec = c; c = NULL;
       }
    }
@@ -180,10 +180,10 @@ int ahs_specSplit(const char *s
       nspec++;
       nbuffs = strsplit(spec,"()",&buffs);
       if(nbuffs != 2){ _PRINTF("syntax error\n"); return FALSE; }
-      ASUFREE(spec);
+      FREE(spec);
       spec = buffs[0]; buffs[0] = NULL;
       qual = buffs[1]; buffs[1] = NULL;
-      ASUFREE(buffs);
+      FREE(buffs);
    }
    else {
       qual = NULL;
@@ -198,7 +198,7 @@ int ahs_specSplit(const char *s
       path = NULL;
    }
 
-   if(spec)ASUFREE(spec);
+   if(spec)FREE(spec);
    return nspec;
 }
 
@@ -224,7 +224,7 @@ int ahs_spec2shape(const char *spec, SHAPE_T& shape)
    }
 
    shape.rank = nbuffs;
-   shape.indexes = (int*)ASUALLOC(nbuffs*sizeof(int*));
+   shape.indexes = (int*)MALLOC(nbuffs*sizeof(int*));
 
    for( i=0;i<nbuffs;i++ ){
       if( isInteger(buffs[i]) ){
@@ -253,22 +253,22 @@ int ahs_spec2nodes(const char *spec, AHSNODE_T*& nodes)
    }
    else {
       depth = 1;
-      buffs = (char**)ASUALLOC(1*sizeof(char**));
-      buffs[0] = (char*)ASUALLOC(strlen(spec) +1);
+      buffs = (char**)MALLOC(1*sizeof(char**));
+      buffs[0] = (char*)MALLOC(strlen(spec) +1);
       strcpy(buffs[0],spec);
    }
 
 /*-(" Create nodes array. \n");-*/
    if( NULL == nodes ){
-      nodes = (AHSNODE_T*)ASUALLOC(depth*sizeof(AHSNODE_T*));
+      nodes = (AHSNODE_T*)MALLOC(depth*sizeof(AHSNODE_T*));
    }
 
 /*-(" Load the AHS nodes. \n");-*/
    for(i=0;i<depth;i++){
       ahs_spec2nameShape(buffs[i],nodes[i].name,nodes[i].shape);
-      ASUFREE(buffs[i]);
+      FREE(buffs[i]);
    }
-   ASUFREE(buffs);
+   FREE(buffs);
 
    return depth;
 }
@@ -282,13 +282,13 @@ int ahs_spec2nameShape(const char *spec, char*& name, SHAPE_T& shape)
    name = buffs[0]; buffs[0] = NULL;
    if( nbuffs == 2 ){
       ahs_spec2shape(buffs[1],shape);
-      ASUFREE(buffs[1]);
+      FREE(buffs[1]);
    }
    else {
       shape.rank = 0;
       shape.indexes = NULL;
    }
-   ASUFREE(buffs);
+   FREE(buffs);
    return TRUE;
 }
 /*--------------------------------------------------------------------*/

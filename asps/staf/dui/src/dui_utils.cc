@@ -51,18 +51,18 @@ char * dui_dirof(const char* path)
    char *d=NULL,*n,*p;
    int i=0;
 
-   d=(char*)ASUALLOC(strlen(path)+1);
+   d=(char*)MALLOC(strlen(path)+1);
    d[0] = '\000';
    p=NULL;
    while( n = (char*)strntok(path,"/",i++) ){
       if(p){
          strcat(d,"/");
          strcat(d,p);
-         ASUFREE(p);
+         FREE(p);
       }
       p=(char*)n;
    }
-   if(p)ASUFREE(p);
+   if(p)FREE(p);
    return d;
 }
 
@@ -82,7 +82,7 @@ char * dui_notdirof(const char * path)
    int i=0;
 
    while( c = (char*)strntok(path,"/",i++) ){
-      if(p)ASUFREE(p);
+      if(p)FREE(p);
       p = (char*)c;
    }
    return p;
@@ -105,13 +105,13 @@ char * dui_pathof(const char* base,const char* mod)
       return NULL;	// base must be absolute path.
    }
    if( mod == NULL ){
-      p = (char*)ASUALLOC(strlen(base)+1);
+      p = (char*)MALLOC(strlen(base)+1);
       strcpy(p,base);
       return p;		// bad mod
    }
    switch (mod[0]) {
    case '/':		// mod looks like an absolute path
-      p = (char*)ASUALLOC(strlen(mod)+1);
+      p = (char*)MALLOC(strlen(mod)+1);
       strcpy(p,mod);
       return p;
       break;
@@ -127,24 +127,24 @@ char * dui_pathof(const char* base,const char* mod)
       int j=0;
       while( d[i]=strntok(mod,"/",j++) ){	// add relative mod
          if( 0 == strcmp("..",d[i]) ){
-            ASUFREE(d[i--]);
+            FREE(d[i--]);
             l -= strlen(d[i]);
-            ASUFREE(d[i]);
+            FREE(d[i]);
          }
          else if( 0 == strcmp(".",d[i]) ){
-            ASUFREE(d[i]);
+            FREE(d[i]);
          }
          else {
             l += strlen(d[i]);
             i++;
          }
       }
-      char* ap = (char*)ASUALLOC(l+i+1);
+      char* ap = (char*)MALLOC(l+i+1);
       memset(ap,0,l+i+1);		//ap[0] = '\000';
       for( int k=0;k<i;k++ ){
          strcat(ap,"/");
          strcat(ap,d[k]);
-         ASUFREE(d[k]);
+         FREE(d[k]);
       }
       return ap;
       break;
@@ -184,10 +184,10 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
 	 dsPerror("can't find DSL node");
 //printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
 //printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
-	 ASUFREE(s);
+	 FREE(s);
 	 return FALSE;
       }
-      ASUFREE(s);
+      FREE(s);
       pDSr = pDSc;
    }
    }

@@ -93,7 +93,6 @@ void kam_dio_newfilestream_()
 STAFCV_T dio_newfilestream(char* name, char* file, char* mode)
 {
    DIO_MODE_T iomode=dio_text2mode(mode);
-   dioFileStream* stream;
 
 #ifndef NOTCL
    switch (file[0]) {
@@ -110,13 +109,11 @@ STAFCV_T dio_newfilestream(char* name, char* file, char* mode)
    }
 #endif /*NOTCL*/
 
-   if( !dio->newFileStream(name,file) ){
+   dioFileStream* stream;
+   if( NULL == (stream = dio->newFileStream(name,file)) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    if( !(DIO_UNKNOWN_MODE == iomode) ){
-      if( !dio->findFileStream(name, stream) ){
-	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
-      }
       if( !stream->open(iomode) ){
 	 EML_ERROR(KAM_METHOD_FAILURE);
       }
@@ -139,259 +136,48 @@ void kam_dio_newsockstream_()
    char* name = ku_gets();      /* sockStream name */
    char* host = ku_getc();      /* remote host name */
    long port = ku_geti();	/* socket port number */
+   char* mode = ku_getc();      /* I/O mode */
 
-   STAFCV_T status = dio_newsockstream(name, host, port);
+   STAFCV_T status = dio_newsockstream(name, host, port, mode);
 }
 
-STAFCV_T dio_newsockstream(char* name, char* host, long port)
+STAFCV_T dio_newsockstream(char* name, char* host, long port
+		, char* mode)
 {
+   DIO_MODE_T iomode=dio_text2mode(mode);
+
    dioSockStream* stream;
-
-   if( !dio->newSockStream(name,host,port) ){
+   if( NULL == (stream = dio->newSockStream(name,host,port)) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-//######################################################################
-void kam_diofilestream_open_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* filestream name */
-   char* mode = ku_getc();      /* I/O mode */
-
-   STAFCV_T status = diofilestream_open(name, mode);
-}
-
-STAFCV_T diofilestream_open(char* name, char* mode)
-{
-   DIO_MODE_T iomode=dio_text2mode(mode);
-   dioFileStream* stream;
-
    if( !(DIO_UNKNOWN_MODE == iomode) ){
-      if( !dio->findFileStream(name, stream) ){
-	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
-      }
       if( !stream->open(iomode) ){
 	 EML_ERROR(KAM_METHOD_FAILURE);
       }
    }
    EML_SUCCESS(STAFCV_OK);
 }
+
 //######################################################################
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_diofilestream_close_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DIO/FILESTREAM/CLOSE NAME
-*:<---------------------------------------------------------------------
-*/
-void kam_diofilestream_close_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* stream name */
-
-   STAFCV_T status = diofilestream_close(name);
-}
-
-STAFCV_T diofilestream_close(char* name)
-{
-   dioFileStream* stream;
-
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   if( !stream->close() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_diofilestream_getevent_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DIO/FILESTREAM/GETEVENT NAME [ PATH ]
-*:<---------------------------------------------------------------------
-*/
-void kam_diofilestream_getevent_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* stream name */
-   char* dest = ku_gets();      /* destination dataset */
-
-   STAFCV_T status = diofilestream_getevent(name, dest);
-}
-
-STAFCV_T diofilestream_getevent(char* name, char* dest)
-{
-   dioFileStream* stream;
-   tdmDataset* destination=NULL;
-
-//-DEBUG-("Find file stream (%s).\n",name);
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-
-//-DEBUG-("Find destination dataset (%s)(%p).\n",dest,destination);
-   if( !tdm->findDataset(dest, destination)
-   ||  !(NULL != destination)
-   ){
-      if( !tdm->newDataset(dest, 100) 		// HACK - 100
-      ||  !tdm->findDataset(dest, destination)
-      ){
-	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
-      }
-   }
-
-//-DEBUG-("Get the event.\n");
-   if( !stream->getEvent(destination) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_diofilestream_putevent_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DIO/FILESTREAM/GETEVENT NAME [ PATH ]
-*:<---------------------------------------------------------------------
-*/
-void kam_diofilestream_putevent_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* stream name */
-   char* sour = ku_gets();      /* source dataset */
-
-   STAFCV_T status = diofilestream_putevent(name, sour);
-}
-
-STAFCV_T diofilestream_putevent(char* name, char* sour)
-{
-   dioFileStream* stream;
-   tdmDataset* source=NULL;
-
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   if( !tdm->findDataset(sour, source)
-   ||  !( NULL != source )
-   ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   if( !stream->putEvent(source) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_diofilestream_mode_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DIO/FILESTREAM/MODE NAME
-*:<---------------------------------------------------------------------
-*/
-void kam_diofilestream_mode_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* stream name */
-
-   STAFCV_T status = diofilestream_mode(name);
-}
-
-STAFCV_T diofilestream_mode(char* name)
-{
-   dioFileStream* stream;
-
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("DIO:\tStream mode = (%s) \n"
-		, dio_mode2text(stream->mode()));
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_diofilestream_state_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DIO/FILESTREAM/MODE NAME
-*:<---------------------------------------------------------------------
-*/
-void kam_diofilestream_state_()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();      /* stream name */
-
-   STAFCV_T status = diofilestream_state(name);
-}
-
-STAFCV_T diofilestream_state(char* name)
-{
-   dioFileStream* stream;
-
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("DIO:\tStream state = (%s) \n"
-		, dio_state2text(stream->state()));
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*-------------------------------------------------------------------*/
-void kam_diofilestream_filename_()
-{
-   long npars = ku_npar(); /* no. of KUIP param.s */
-   char* name = ku_gets();      /* stream name */
-
-   STAFCV_T status = diofilestream_filename(name);
-}
-
-STAFCV_T diofilestream_filename(char* name)
-{
-   dioFileStream* stream;
-
-   if( !dio->findFileStream(name, stream) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("DIO:\tFile name = (%s) \n"
-		, stream->fileName());
-   EML_SUCCESS(STAFCV_OK);
-}
- 
-//######################################################################
-// Socket Streams
+// GENERIC Streams
 //######################################################################
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_open_()
+void kam_diostream_open_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
    char* mode = ku_getc();      /* I/O mode */
 
-   STAFCV_T status = diosockstream_open(name, mode);
+   STAFCV_T status = diostream_open(name, mode);
 }
 
-STAFCV_T diosockstream_open(char* name, char* mode)
+STAFCV_T diostream_open(char* name, char* mode)
 {
    DIO_MODE_T iomode=dio_text2mode(mode);
    dioStream* stream;
 
    if( !(DIO_UNKNOWN_MODE == iomode) ){
-      if( !dio->findStream(name, stream) ){
+      if( NULL == (stream = dio->findStream(name)) ){
 	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
       }
       if( !stream->open(iomode) ){
@@ -402,19 +188,19 @@ STAFCV_T diosockstream_open(char* name, char* mode)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_close_()
+void kam_diostream_close_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
 
-   STAFCV_T status = diosockstream_close(name);
+   STAFCV_T status = diostream_close(name);
 }
 
-STAFCV_T diosockstream_close(char* name)
+STAFCV_T diostream_close(char* name)
 {
    dioStream* stream;
 
-   if( !dio->findStream(name, stream) ){
+   if( NULL == (stream = dio->findStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    if( !stream->close() ){
@@ -424,31 +210,28 @@ STAFCV_T diosockstream_close(char* name)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_getevent_()
+void kam_diostream_getevent_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
    char* dest = ku_gets();      /* destination dataset */
 
-   STAFCV_T status = diosockstream_getevent(name, dest);
+   STAFCV_T status = diostream_getevent(name, dest);
 }
 
-STAFCV_T diosockstream_getevent(char* name, char* dest)
+STAFCV_T diostream_getevent(char* name, char* dest)
 {
    dioStream* stream;
    tdmDataset* destination=NULL;
 
 //-("Find stream (%s).\n",name);
-   if( !dio->findStream(name, stream) ){
+   if( NULL == (stream = dio->findStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 
 //-("Find destination dataset (%s)(%p).\n",dest,destination);
-   if( !tdm->findDataset(dest, destination)
-   ||  !(NULL != destination)
-   ){
-      if( !tdm->newDataset(dest, 100) 		// HACK - 100
-      ||  !tdm->findDataset(dest, destination)
+   if( NULL == (destination = tdm->findDataset(dest)) ){
+      if( NULL == (destination = tdm->newDataset(dest, 100)) //HACK 100
       ){
 	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
       }
@@ -462,26 +245,24 @@ STAFCV_T diosockstream_getevent(char* name, char* dest)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_putevent_()
+void kam_diostream_putevent_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
    char* sour = ku_gets();      /* source dataset */
 
-   STAFCV_T status = diosockstream_putevent(name, sour);
+   STAFCV_T status = diostream_putevent(name, sour);
 }
 
-STAFCV_T diosockstream_putevent(char* name, char* sour)
+STAFCV_T diostream_putevent(char* name, char* sour)
 {
    dioStream* stream;
    tdmDataset* source=NULL;
 
-   if( !dio->findStream(name, stream) ){
+   if( NULL == (stream = dio->findStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( !tdm->findDataset(sour, source)
-   ||  !( NULL != source )
-   ){
+   if( NULL == (source = tdm->findDataset(sour)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    if( !stream->putEvent(source) ){
@@ -491,19 +272,19 @@ STAFCV_T diosockstream_putevent(char* name, char* sour)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_mode_()
+void kam_diostream_mode_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
 
-   STAFCV_T status = diosockstream_mode(name);
+   STAFCV_T status = diostream_mode(name);
 }
 
-STAFCV_T diosockstream_mode(char* name)
+STAFCV_T diostream_mode(char* name)
 {
    dioStream* stream;
 
-   if( !dio->findStream(name, stream) ){
+   if( NULL == (stream = dio->findStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tStream mode = (%s) \n"
@@ -512,19 +293,19 @@ STAFCV_T diosockstream_mode(char* name)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_state_()
+void kam_diostream_state_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
 
-   STAFCV_T status = diosockstream_state(name);
+   STAFCV_T status = diostream_state(name);
 }
 
-STAFCV_T diosockstream_state(char* name)
+STAFCV_T diostream_state(char* name)
 {
    dioStream* stream;
 
-   if( !dio->findStream(name, stream) ){
+   if( NULL == (stream = dio->findStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tStream state = (%s) \n"
@@ -532,6 +313,34 @@ STAFCV_T diosockstream_state(char* name)
    EML_SUCCESS(STAFCV_OK);
 }
  
+
+//######################################################################
+// File Streams
+//######################################################################
+/*-------------------------------------------------------------------*/
+void kam_diofilestream_filename_()
+{
+   long npars = ku_npar(); /* no. of KUIP param.s */
+   char* name = ku_gets();      /* stream name */
+
+   STAFCV_T status = diofilestream_filename(name);
+}
+
+STAFCV_T diofilestream_filename(char* name)
+{
+   dioFileStream* stream;
+
+   if( NULL == (stream = dio->findFileStream(name)) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("DIO:\tFile name = (%s) \n"
+		, stream->fileName());
+   EML_SUCCESS(STAFCV_OK);
+}
+ 
+//######################################################################
+// Socket Streams
+//######################################################################
 /*-------------------------------------------------------------------*/
 void kam_diosockstream_host_()
 {
@@ -545,7 +354,7 @@ STAFCV_T diosockstream_host(char* name)
 {
    dioSockStream* stream;
 
-   if( !dio->findSockStream(name, stream) ){
+   if( NULL == (stream = dio->findSockStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tHost name = (%s) \n"
@@ -566,7 +375,7 @@ STAFCV_T diosockstream_port(char* name)
 {
    dioSockStream* stream;
 
-   if( !dio->findSockStream(name, stream) ){
+   if( NULL == (stream = dio->findSockStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tPort number = (%d) \n"
@@ -588,7 +397,7 @@ STAFCV_T diosockstream_maxhandshakes(char* name, long count)
 {
    dioSockStream* stream;
 
-   if( !dio->findSockStream(name, stream) ){
+   if( NULL == (stream = dio->findSockStream(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    if( count >= 0 ){

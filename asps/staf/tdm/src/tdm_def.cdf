@@ -16,7 +16,7 @@
 >MENU TDM
 >GUIDANCE
 Table & Dataset Memory commands.
-$Id: tdm_def.cdf,v 1.2 1997/01/22 06:16:22 tull Exp $
+$Id: tdm_def.cdf,v 1.3 1997/01/30 22:08:50 tull Exp $
 .
 Commands for the Table & Dataset Memory (TDM) ASP.
 .
@@ -467,13 +467,14 @@ Show the number of entries in a tdmDataset Object.
 
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/MAXENTRYCOUNT TDMDATASET
->COMMAND MAXENTRYCOUNT
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
->GUIDANCE
-Show the maximum allowable number of entries in a tdmDataset Object.
-.
->ACTION KAM_TDMDATASET_MAXENTRYCOUNT
+**OLD_DSL >COMMAND MAXENTRYCOUNT
+**OLD_DSL >PARAMETERS
+**OLD_DSL TDMDATASET 'tdmDataset name.' C
+**OLD_DSL >GUIDANCE
+**OLD_DSL Show the maximum allowable number of entries in a tdmDataset
+**OLD_DSL Object.
+**OLD_DSL .
+**OLD_DSL >ACTION KAM_TDMDATASET_MAXENTRYCOUNT
 
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/ADDDATASET TDMDATASET NAME [ DIM ]

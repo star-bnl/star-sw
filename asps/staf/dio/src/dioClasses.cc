@@ -34,6 +34,7 @@ extern "C" int klose(int);	//-HACK- C++ fails on close(int)
 //extern "C" static void reaper();
 extern "C" void signal_reaper();
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // dioStream
 //:----------------------------------------------- CTORS & DTOR       --
@@ -55,6 +56,33 @@ DIO_MODE_T dioStream::  mode () {
 //----------------------------------
 DIO_STATE_T dioStream::  state () {
    return myState;
+}
+
+//----------------------------------
+char * dioStream::  location () {
+   char * c="unknown";
+   char * cc;
+   cc = (char*)MALLOC(strlen(c) +1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+// OVERRIDE socObject::listing()
+char * dioStream::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   char* m = dio_mode2text(mode());
+   char* s = dio_state2text(state());
+   char* l = location();
+   char* ll="                           ";
+   strncpy(ll,l,strlen(ll)-1);
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s (%c,%c) %s",c,m[0],s[0],ll);
+   FREE(c);
+   FREE(l);
+   return cc;
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
@@ -155,6 +183,7 @@ STAFCV_T dioStream:: putEvent (tdmDataset* source) {
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // dioFileStream
 
@@ -163,21 +192,27 @@ dioFileStream:: dioFileStream(const char * name, const char * fileName)
 		: dioStream()
 		, socObject(name, "dioFileStream") {
    myPtr = (SOC_PTR_T)this;
-   myFileName = (char*)ASUALLOC(strlen(fileName) +1);
+   myFileName = (char*)MALLOC(strlen(fileName) +1);
    strcpy(myFileName,fileName);
 }
 
 //----------------------------------
 dioFileStream:: ~dioFileStream() {
    close();
-   ASUFREE(myFileName);
+   FREE(myFileName);
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * dioFileStream::  fileName () {
-   char * c = (char*)ASUALLOC(strlen(myFileName) +1);
+   char * c = (char*)MALLOC(strlen(myFileName) +1);
    strcpy(c,myFileName);
    return c;
+}
+
+//----------------------------------
+//-OVERRIDE dioStream:: location()
+char * dioFileStream::  location () {
+   return fileName();
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
@@ -239,6 +274,7 @@ STAFCV_T dioFileStream:: open (DIO_MODE_T mode) {
 
 // ---------------------------------------------------------------------
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // dioTapeStream
 //:----------------------------------------------- CTORS & DTOR       --
@@ -246,18 +282,24 @@ dioTapeStream:: dioTapeStream(const char * name, const char * tape)
 		: dioStream()
 		, socObject(name,"dioTapeStream") {
    myPtr = (SOC_PTR_T)this;
-   myTapeName = (char*)ASUALLOC(strlen(tape) +1);
+   myTapeName = (char*)MALLOC(strlen(tape) +1);
    strcpy(myTapeName,tape);
 }
 dioTapeStream:: ~dioTapeStream() {
-   ASUFREE(myTapeName);
+   FREE(myTapeName);
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * dioTapeStream::  tapeName () {
-   char * c = (char*)ASUALLOC(strlen(myTapeName) +1);
+   char * c = (char*)MALLOC(strlen(myTapeName) +1);
    strcpy(c,myTapeName);
    return c;
+}
+
+//----------------------------------
+//-OVERRIDE dioStream:: location()
+char * dioTapeStream::  location () {
+   return tapeName();
 }
 
 //----------------------------------
@@ -274,11 +316,12 @@ long dioTapeStream::  bufferSize () {
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // dioSockStream
 //:----------------------------------------------- CTORS & DTOR       --
 dioSockStream:: dioSockStream(const char * name, const char * hostName
-			, long port)
+			, unsigned long port)
 		: dioStream()
 		, socObject(name,"dioSockStream") {
    myPtr = (SOC_PTR_T)this;
@@ -286,7 +329,7 @@ dioSockStream:: dioSockStream(const char * name, const char * hostName
 //- Socket stuff;
    myState = DIO_UNKNOWN_STATE;
    myBufferSize = -1; /*-DIO_E_UNIMPLEMENTED-*/
-   myHost = (char*)ASUALLOC(strlen(hostName) +1);
+   myHost = (char*)MALLOC(strlen(hostName) +1);
    strcpy(myHost,hostName);
    myPort = port;
    myMaxHandshakes = 10; //-default
@@ -297,6 +340,19 @@ dioSockStream:: ~dioSockStream() {
    close();
 }
 
+//----------------------------------
+//-OVERRIDE dioStream:: location()
+char * dioSockStream::  location () {
+   char * h=host();
+   long p=port();
+   char * cc;
+   cc = (char*)MALLOC(strlen(h)+5 +1);
+   memcpy(cc,0,strlen(cc) +1);
+   sprintf(cc,"%s:%4d",h,p);
+   FREE(h);
+   return cc;
+}
+
 //:----------------------------------------------- ATTRIBUTES         --
 long dioSockStream::  port () {
    return myPort;
@@ -304,7 +360,7 @@ long dioSockStream::  port () {
 
 //----------------------------------
 char * dioSockStream::  host () {
-   char *c=(char*)ASUALLOC(strlen(myHost) +1);
+   char *c=(char*)MALLOC(strlen(myHost) +1);
    strcpy(c,myHost);
    return c;
 }
@@ -510,6 +566,7 @@ int dioSockStream:: openClient() {
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // dioFactory
 
@@ -529,49 +586,24 @@ dioFactory:: ~dioFactory() {
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-char * dioFactory:: list (){
-   socObject* obj;
+//----------------------------------
+char * dioFactory:: list () {
 
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|**************** DIO - Dataset Input/Output listing *****************"
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-   "\n"
-"| IDREF | NAME            | TYPE            | MODE & STATE            "
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-    "\n");
-   for( int i=0;i<count();i++ ){
-      if( soc->getObject(entry(i),obj) ){
-         if( 0 == strcmp("dioFileStream",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %s %s \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-			, dio_mode2text(DIOFILESTREAM(obj)->mode())
-			, dio_state2text(DIOFILESTREAM(obj)->state())
-                        );
-         } else if( 0 == strcmp("dioSockStream",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %s %s \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-			, dio_mode2text(DIOSOCKSTREAM(obj)->mode())
-			, dio_state2text(DIOSOCKSTREAM(obj)->state())
-                        );
-         } else if( 0 == strcmp("dioTestStream",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-                        );
-         }
-      } else {
-         printf("| %5d | %-15s | %-15s | \n"
-                        ,entry(i),"**DELETED**","**DELETED**");
-      }
-   }
-   printf(
-"+-------+-----------------+-----------------+-------------------------"
-   "\n\n");
+   char *c = socFactory::list();
 
-   return ""; // TEMPORARY HACK
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
+
+   sprintf(cc, 
+                "\n"
+                "+-------------------------------------------"
+                "-----------------------------------\n"
+                "|********************* "
+                "DIO - Dataset Input/Output listing"
+                " *********************\n"
+                "%s\n",c);
+   FREE(c);
+   return cc;
+
 }
 
 //- Generic Streams ---------------------------------------------------
@@ -580,43 +612,50 @@ STAFCV_T dioFactory:: deleteStream (const char * name) {
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: findStream (const char * name
-		, dioStream*& stream) {
+dioStream* dioFactory:: findStream (const char * name) {
    socObject* obj;
-   if( soc->findObject(name,"dioFileStream",obj) ){
+   dioStream* stream;
+   if( NULL != (obj = soc->findObject(name,"dioFileStream")) ){
       stream = DIOFILESTREAM(obj);
-      EML_SUCCESS(STAFCV_OK);
+      // EML_SUCCESS(STAFCV_OK);
+      return stream;
    }
-   if( soc->findObject(name,"dioSockStream",obj) ){
+   if( NULL != (obj = soc->findObject(name,"dioSockStream")) ){
       stream = DIOSOCKSTREAM(obj);
-      EML_SUCCESS(STAFCV_OK);
+      // EML_SUCCESS(STAFCV_OK);
+      return stream;
    }
    stream = NULL;
-   EML_ERROR(OBJECT_NOT_FOUND);
+   // EML_ERROR(OBJECT_NOT_FOUND);
+   return NULL;
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: getStream (IDREF_T id, dioStream*& stream) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+dioStream* dioFactory:: getStream (IDREF_T id) {
+   dioStream* stream;
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       stream = NULL;
-      EML_ERROR(OBJECT_NOT_FOUND);
+      // EML_ERROR(OBJECT_NOT_FOUND);
+      return NULL;
    }
    char *t=obj->type();
    if( (0 == strcmp(t,"dioFileStream")) ){
-      ASUFREE(t);
+      FREE(t);
       stream = DIOFILESTREAM(obj);
-      EML_SUCCESS(STAFCV_OK);
+      // EML_SUCCESS(STAFCV_OK);
+      return stream;
    }
    if( (0 == strcmp(t,"dioSockStream")) ){
-      ASUFREE(t);
+      FREE(t);
       stream = DIOSOCKSTREAM(obj);
-      EML_SUCCESS(STAFCV_OK);
+      // EML_SUCCESS(STAFCV_OK);
+      return stream;
    }
-   ASUFREE(t);
+   FREE(t);
    stream = NULL;
-   EML_ERROR(WRONG_OBJECT_TYPE);
+   // EML_ERROR(WRONG_OBJECT_TYPE);
+   return NULL;
 }
 
 //- File Streams ------------------------------------------------------
@@ -628,22 +667,24 @@ STAFCV_T dioFactory:: deleteFileStream (const char * name ){
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: findFileStream (const char * name
-		, dioFileStream*& fileStream ){
+dioFileStream* dioFactory:: findFileStream (const char * name) {
+   dioFileStream* fileStream;
    socObject* obj;
-   if( !soc->findObject(name,"dioFileStream",obj) ){
+   if( NULL == (obj = soc->findObject(name,"dioFileStream")) ){
       fileStream = NULL;
-      EML_ERROR(OBJECT_NOT_FOUND);
+      // EML_ERROR(OBJECT_NOT_FOUND);
+      return NULL;
    }
    fileStream = DIOFILESTREAM(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return fileStream;
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: getFileStream (IDREF_T id
-		, dioFileStream*& fileStream ){
+dioFileStream * dioFactory:: getFileStream (IDREF_T id ){
+   dioFileStream* fileStream;
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       fileStream = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -652,11 +693,12 @@ STAFCV_T dioFactory:: getFileStream (IDREF_T id
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    fileStream = DIOFILESTREAM(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return fileStream;
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: newFileStream (const char * name
+dioFileStream * dioFactory:: newFileStream (const char * name 
 		, const char * fileName) {
    IDREF_T id;
    if( soc->idObject(name,"dioFileStream",id) ){
@@ -675,7 +717,8 @@ STAFCV_T dioFactory:: newFileStream (const char * name
       EML_ERROR(CANT_OPEN_FILE);
    }
 ***/
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return p;
 
 }
 
@@ -689,22 +732,23 @@ STAFCV_T dioFactory:: deleteSockStream (const char * name ){
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: findSockStream (const char * name
-		, dioSockStream*& sockStream ){
+dioSockStream * dioFactory:: findSockStream (const char * name){
+   dioSockStream* sockStream;
    socObject* obj;
-   if( !soc->findObject(name,"dioSockStream",obj) ){
+   if( NULL == (obj = soc->findObject(name,"dioSockStream")) ){
       sockStream = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    sockStream = DIOSOCKSTREAM(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return sockStream;
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: getSockStream (IDREF_T id
-		, dioSockStream*& sockStream ){
+dioSockStream *  dioFactory:: getSockStream (IDREF_T id ){
+   dioSockStream* sockStream;
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       sockStream = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -713,11 +757,12 @@ STAFCV_T dioFactory:: getSockStream (IDREF_T id
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    sockStream = DIOSOCKSTREAM(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return sockStream;
 }
 
 //----------------------------------
-STAFCV_T dioFactory:: newSockStream (const char * name
+dioSockStream *  dioFactory:: newSockStream (const char * name
 		, const char * hostName, long port) {
    IDREF_T id;
    if( soc->idObject(name,"dioSockStream",id) ){
@@ -736,7 +781,8 @@ STAFCV_T dioFactory:: newSockStream (const char * name
       EML_ERROR(CANT_OPEN_SOCKET);
    }
 ***/
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return p;
 
 }
 //:----------------------------------------------- PRIV FUNCTIONS     --

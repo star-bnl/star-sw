@@ -81,23 +81,24 @@ interface dioFactory_i : socFactory_i {
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T deleteStream(in string name);
-STAFCV_T findStream(in string name, out dioStream_i stream);
-STAFCV_T getStream(in IDREF_T id, out dioStream_i stream);
+dioStream_i findStream(in string name);
+dioStream_i getStream(in IDREF_T id);
 
 STAFCV_T deleteFileStream(in string name);
-STAFCV_T findFileStream(in string name, out dioFileStream_i fStream);
-STAFCV_T getFileStream(in IDREF_T id, out dioFileStream_i fStream);
-STAFCV_T newFileStream(in string name, in string fileName);
+dioFileStream_i findFileStream(in string name);
+dioFileStream_i getFileStream(in IDREF_T id);
+dioFileStream_i newFileStream(in string name, in string fileName);
 
 STAFCV_T deleteTapeStream(in string name);
-STAFCV_T findTapeStream(in string name, out dioTapeStream_i tStream);
-STAFCV_T getTapeStream(in IDREF_T id, out dioTapeStream_i tStream);
-STAFCV_T newTapeStream(in string name, in string tapeName);
+dioTapeStream_i findTapeStream(in string name);
+dioTapeStream_i getTapeStream(in IDREF_T id);
+dioTapeStream_i newTapeStream(in string name, in string tapeName);
 
 STAFCV_T deleteSockStream(in string name);
-STAFCV_T findSockStream(in string name, out dioSockStream_i sStream);
-STAFCV_T getSockStream(in IDREF_T id, out dioSockStream_i sStream);
-STAFCV_T newSockStream(in string name, in string hostName, in long port);
+dioSockStream_i findSockStream(in string name);
+dioSockStream_i getSockStream(in IDREF_T id);
+dioSockStream_i newSockStream(in string name, in string hostName
+		, in long port);
 
 };
 

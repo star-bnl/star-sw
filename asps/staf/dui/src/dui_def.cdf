@@ -27,7 +27,7 @@ Commands for the Dataset Unix-like Interface ASP.
 >COMMAND CD
 >PARAMETERS
 +
-PATH 'Directory Path' C D='/'
+PATH 'Directory Path' C D='/dui'
 >GUIDANCE
 Change current working directory.
 .
@@ -68,18 +68,6 @@ PATH 'Directory Path' C
 Create a new, empty dataset.
 .
 >ACTION KAM_DUI_MKDIR
-
-** ---------------------------------------------------------------------
-** DUI/MKTABLE NAME SPEC ROWCOUNT
->COMMAND MKTABLE
->PARAMETERS
-NAME 'DUI-Path-Name of table' C
-SPEC 'Type specifier for a table row.' C
-ROWCOUNT 'Number of rows in the table.' I
->GUIDANCE
-Create a new, empty table.
-.
->ACTION KAM_DUI_MKTABLE
 
 ** ---------------------------------------------------------------------
 ** DUI/MV SOURCE TARGET

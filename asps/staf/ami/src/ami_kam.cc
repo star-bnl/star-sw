@@ -131,7 +131,7 @@ STAFCV_T amiinvoker_rank(char* name)
 {
    amiInvoker* pam;		/* amiInvoker object */
 
-   if( !ami->findInvoker(name, pam) ){
+   if( NULL == (pam = ami->findInvoker(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("AMI:\tAnalysis module rank = %d \n",pam->rank());
@@ -161,7 +161,7 @@ STAFCV_T amiinvoker_show(char* name, char* opts)
 {
    amiInvoker* pam;		/* amiInvoker object */
 
-   if( !ami->findInvoker(name, pam) ){
+   if( NULL == (pam = ami->findInvoker(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    int rank = pam->rank();
@@ -169,7 +169,7 @@ STAFCV_T amiinvoker_show(char* name, char* opts)
    for( int i=0;i<rank;i++ ){
       printf("AMI:\tTable Specification = ...\n%s .\n"
 		,c = pam->tableSpec(i));
-      ASUFREE(c);
+      FREE(c);
    }
    EML_SUCCESS(STAFCV_OK);
 }
