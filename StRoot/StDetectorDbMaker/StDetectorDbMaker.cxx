@@ -7,6 +7,7 @@
 #include "StDetectorDbClock.h"
 #include "StDetectorDbSpaceCharge.h"
 #include "StDetectorDbTpcVoltages.h"
+#include "StDetectorDbBeamInfo.h"
 
 ClassImp(StDetectorDbMaker)
 
@@ -39,6 +40,10 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     // Update Clock Frequency
     StDetectorDbClock* clock = StDetectorDbClock::instance();
     clock->update(this);
+
+    // Update Beam Info
+    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
+    beam->update(this);
     
     return StMaker::InitRun(runNumber);
 }
@@ -54,7 +59,7 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
     scalers->update(this);
 
-
+    // Update the tpc voltages
     StDetectorDbTpcVoltages* tpcVolts = StDetectorDbTpcVoltages::instance();
     tpcVolts->update(this);
     
@@ -65,7 +70,7 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
     StDetectorDbClock* clock = StDetectorDbClock::instance();
-
+    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
 
     // Jamie Asked for SpaceCharge to be couted every event
     cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
