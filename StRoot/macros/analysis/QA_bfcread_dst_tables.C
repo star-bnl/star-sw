@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.7 1999/07/17 00:48:46 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.8 1999/07/26 20:54:16 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.8  1999/07/26 20:54:16  kathy
+// changed output text to QAInfo: so that the QA sripts can tag on it; also cleaned up a bit and set to newer default input file
+//
 // Revision 1.7  1999/07/17 00:48:46  kathy
 // change check on dst_TrgDet to test on TrgDet table
 //
@@ -42,7 +45,7 @@ class St_DataSet;
 St_DataSet *Event;
 
 void QA_bfcread_dst_tables(const char 
-*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Fri/year_2a/psc0208_01_40evts.dst.root",
+*MainFile="/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
 const char *fname="qa_tables.txt")
 
 {
@@ -57,33 +60,26 @@ const char *fname="qa_tables.txt")
   fout << "Tester: " << endl;
   fout << "Date tested: " << endl;
   fout << "Date DST created: " << endl;
-  fout << "QA-> " << MainFile << endl << endl;
-  fout << "QA-> table name";
+  fout << "QAInfo: " << MainFile << endl << endl;
+  fout << "QAInfo: table name";
   fout.width(18);
-  fout << "# rows";
-  fout.width(15);
-  fout << "data looks" << endl;
-  fout << "QA-> __________";
+  fout << "# rows" << endl;
+  fout << "QA->     __________";
   fout.width(18);
-  fout << "______";
-  fout.width(15);
-  fout << "__________" << endl << endl;
+  fout << "______"<< endl << endl;
 
 
       cout << "QA-> Tester: " << endl;
       cout << "QA-> Date tested: " << endl;
       cout << "QA-> Date DST created: " << endl;
-      cout << "QA-> " << MainFile << endl << endl;
-      cout << "QA-> table name";
+      cout << "QAInfo: " << MainFile << endl << endl;
+      cout << "QAInfo: table name";
       cout.width(18);
-      cout << "# rows";
-      cout.width(15);
-      cout << "data looks" << endl;
+      cout << "# rows" << endl;
       cout << "QA-> ----------";
       cout.width(18);
-      cout << "------";
-      cout.width(15);
-      cout << "----------" << endl << endl;
+      cout << "------" << endl << endl;
+
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -105,7 +101,6 @@ const char *fname="qa_tables.txt")
   Int_t tabcntr=0;
   Int_t tabmiss=0;
 
-
    Int_t cnt_event_header=0;
    Int_t cnt_event_summary=0;
    Int_t cnt_globtrk=0;
@@ -122,6 +117,8 @@ const char *fname="qa_tables.txt")
    Int_t cnt_TrgDet=0;
    Int_t cnt_monitor_soft=0;
    Int_t cnt_g2t_rch_hit=0;
+   Int_t cnt_kinkVertex=0;
+   Int_t cnt_ev0_eval=0;
 
 // We will always just check 1 event!
   Int_t nevents=1;
@@ -144,7 +141,6 @@ const char *fname="qa_tables.txt")
 // ls() returns a virtual void, so don't have to set it = to anything
       ds->ls(2);
 
-
       while (obj = tabiter.Next()) {
 //.. count all tables that exist:
         if (obj->InheritsFrom("St_Table")) {
@@ -154,11 +150,11 @@ const char *fname="qa_tables.txt")
 
           tabl = (St_Table *)tabiter.Find(obj->GetName());
           if (tabl) {
-            cout << "QA-> " << obj->GetName();
+            cout << "QAInfo: " << obj->GetName();
             cout.width(28-strlen(obj->GetName()));
             cout << tabl->GetNRows() << endl;
 
-            fout << "QA-> " << obj->GetName();
+            fout << "QAInfo: " << obj->GetName();
             fout.width(28-strlen(obj->GetName()));
             fout << tabl->GetNRows()<< endl;
 
@@ -182,8 +178,12 @@ const char *fname="qa_tables.txt")
                cnt_primtrk_aux++;
             if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
                cnt_dst_v0_vertex++;
+            if (strcmp(obj->GetName(),"ev0_eval")==0) 
+               cnt_ev0_eval++;
             if (strcmp(obj->GetName(),"dst_xi_vertex")==0) 
                cnt_dst_xi_vertex++;
+            if (strcmp(obj->GetName(),"kinkVertex")==0) 
+               cnt_kinkVertex++;
             if (strcmp(obj->GetName(),"dst_dedx")==0) 
                cnt_dst_dedx++;
             if (strcmp(obj->GetName(),"particle")==0) 
@@ -202,8 +202,8 @@ const char *fname="qa_tables.txt")
 // ------------------------------------------------------------
 
 
-      cout << endl << "QA-> total # tables (expect 16) = " << tabcntr << endl;
-      fout << endl << "QA-> total # tables (expect 16) = " << tabcntr << endl;
+      cout << endl << "QAInfo: total # tables = " << tabcntr << endl;
+      fout << endl << "QAInfo: total # tables = " << tabcntr << endl;
 
 
       if (cnt_event_header == 0){
@@ -256,9 +256,19 @@ const char *fname="qa_tables.txt")
         fout << endl << "QA-> Missing Table: " << "dst_v0_vertex" << endl;
         tabmiss++;
       } 
+      if (cnt_ev0_eval == 0){
+        cout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
+        fout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
+        tabmiss++;
+      } 
       if (cnt_dst_xi_vertex == 0){
         cout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
         fout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
+        tabmiss++;
+      } 
+      if (cnt_kinkVertex == 0){
+        cout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
+        fout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
         tabmiss++;
       } 
       if (cnt_dst_dedx == 0){
