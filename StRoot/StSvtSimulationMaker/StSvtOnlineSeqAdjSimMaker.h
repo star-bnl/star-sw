@@ -15,11 +15,11 @@ class StSvtData;
 //used bad anode list is the same as in StSvtSeqAdjMaker => no difference between online and offline
 
 
-class StSvtOnlineSeqAdjSim:public StMaker
+class StSvtOnlineSeqAdjSimMaker:public StMaker
 {
 public:
-  StSvtOnlineSeqAdjSim(const char* name = "SvtOnlineSeqAdj");
-  ~StSvtOnlineSeqAdjSim();
+  StSvtOnlineSeqAdjSimMaker(const char* name = "SvtOnlineSeqAdj");
+  ~StSvtOnlineSeqAdjSimMaker();
 
   void SetKillBadAnodes(bool doit){mKillBadAnodes=doit;}
   bool GetKillBadAnodes(){return mKillBadAnodes;}
@@ -98,7 +98,7 @@ private:
   void  WriteSequence(int anode,int begins, int ends, int NumOfHigh);
   void  FillRawData();
   
- ClassDef(StSvtOnlineSeqAdjSim,1)
+ ClassDef(StSvtOnlineSeqAdjSimMaker,1)
 };
 
 #endif
