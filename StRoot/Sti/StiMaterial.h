@@ -19,12 +19,12 @@ class StiMaterial{
   // accessors
   double getDensity() const { return dDensity; }
   double getRadLength() const { return dRadLength; }
-  char* getName() const { return szName; }
+  const char* getName() const { return szName; }
 
   // mutators
   void setDensity(double val){ dDensity = val; }
   void setRadLength(double val){ dRadLength = val; }
-  void setName(char *val){ szName = val; }
+  void setName(const char *val){ strncpy(szName, val, 99); }
 
   // utility
   void build(const char *szFileName);
@@ -34,7 +34,7 @@ class StiMaterial{
 
   double dDensity;   // g/cm^3
   double dRadLength; // cm
-  char *szName;
+  char szName[100];
 
 };
 

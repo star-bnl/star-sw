@@ -113,8 +113,8 @@ Int_t StiMaker::Init()
     //mdetector->buildNext(buildfile);
     //}
     mdetector->reset();
-    mdetector->build(buildfile);
     mdetector->buildMaterials("/scr20/ittf/StiGeometryParameters/Materials");
+    mdetector->build(buildfile);
     
     mdisplay->draw();
     mdisplay->update();

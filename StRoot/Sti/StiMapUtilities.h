@@ -27,9 +27,19 @@ struct DetectorMapKey {
   double z;
 };
 
+// Structure for material map key
+struct MaterialMapKey {
+    MaterialMapKey::MaterialMapKey(const char *str):name(str){}
+    MaterialMapKey::MaterialMapKey():name(0){}
+    bool operator==(const MaterialMapKey&) const;
+    bool operator<(const MaterialMapKey&) const;
+    const char *name;
+};
+
 //Non member functions
 ostream& operator<<(ostream&, const HitMapKey&);
 ostream& operator<<(ostream&, const DetectorMapKey&);
+ostream& operator<<(ostream&, const MaterialMapKey&);
 
 //Functors for ordering hits
 struct StiHitLessThan

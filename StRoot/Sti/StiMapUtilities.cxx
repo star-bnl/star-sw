@@ -79,6 +79,14 @@ bool DetectorMapKey::operator<(const DetectorMapKey& key2) const
   return val;
 }
 
+bool MaterialMapKey::operator==(const MaterialMapKey& key2) const{
+  return( strcmp(name, key2.name) == 0 );
+}
+
+bool MaterialMapKey::operator<(const MaterialMapKey& key2) const{
+  return( strcmp(name, key2.name) < 0 );
+}
+
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
 {
@@ -90,3 +98,6 @@ ostream& operator<<(ostream& os, const DetectorMapKey& a)
   return os <<a.refangle<<"\t"<<a.position<<"\t"<<a.z;
 }
 
+ostream& operator<<(ostream& os, const MaterialMapKey& a){
+  return os << a.name;
+}
