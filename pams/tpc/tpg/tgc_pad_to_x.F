@@ -1,5 +1,8 @@
-* $Id: tgc_pad_to_x.F,v 1.3 1998/11/08 00:19:48 sakrejda Exp $
+* $Id: tgc_pad_to_x.F,v 1.4 1998/11/18 21:59:34 sakrejda Exp $
 * $Log: tgc_pad_to_x.F,v $
+* Revision 1.4  1998/11/18 21:59:34  sakrejda
+* reversing disasterous changes, will have to work more on that
+*
 * Revision 1.3  1998/11/08 00:19:48  sakrejda
 * definition of the local coordinate system changed so that it is right-handed
 *
@@ -46,6 +49,6 @@ C     x - x coordinate in the local coordinate system
       pad_int=int(pad+0.5)
       pad_half=pad_num(int(row+0.5))/2.0
       pad_dif=pad-pad_int
-      x=-(pad_int-pad_half-0.5+pad_dif)*pitch
+      x=(pad_int-pad_half-0.5+pad_dif)*pitch
       tgc_pad_to_x=STAFCV_OK
       end
