@@ -32,6 +32,7 @@ class StHbtThPairGaussFit : public StHbtThPairGauss {
   virtual ~StHbtThPairGaussFit();
   virtual void Set(const StHbtPair* aPair);
   virtual double GetRejectionProb2Size(double aX, double aY, double aZ, double aT);
+  virtual void setVariables(const StHbtPair*);
   
  protected:
  StHbtLorentzVector mSourceDist1;

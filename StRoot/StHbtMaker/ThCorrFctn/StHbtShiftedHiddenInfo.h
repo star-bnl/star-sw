@@ -38,7 +38,7 @@ public:
   StHbtShiftedHiddenInfo();
   StHbtShiftedHiddenInfo(const StHbtLorentzVector& aInitialMom, 
 			 const int& aPid,
-			 TRandom* aRand,
+			  TRandom* aRand,
 			 const StHbtMomRes* aMomRes,
 			 const double momShift,
 			 const ShiftType aShiftType);
@@ -52,8 +52,8 @@ public:
 
 // --- Return hidden info content
 
-  const StHbtLorentzVector& getShiftedMom() const;
-   const StHbtLorentzVector& getMomentum() const;
+  const StHbtLorentzVector getShiftedMom() const;
+  StHbtLorentzVector getMomentum() const;
   int getPid() const;
 
 // ---Change hidden info content
@@ -66,9 +66,9 @@ public:
 // --- Copy the hidden info from StHbtTrack to StHbtParticle
   virtual StHbtHiddenInfo* getParticleHiddenInfo() const;
 
- protected:
-
   StHbtLorentzVector mShiftedMom;
+ protected:
+  //  StHbtLorentzVector mEmPoint;
   int mPid;
   double mMomShift;
   ShiftType mShiftType;

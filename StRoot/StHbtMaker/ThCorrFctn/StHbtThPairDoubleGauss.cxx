@@ -38,13 +38,39 @@ StHbtThPairDoubleGauss::StHbtThPairDoubleGauss() : StHbtThPair(){
   mBetaRCMS=0.;
   mGammaRCMS=1.;
   mCoreHalo=1;
+  mXShift = 0.0;
+  mYShift = 0.0;
+  mZShift = 0.0;
+  mTShift = 0.0;
+  mRand = *(new TRandom2(31811));
+
+  Int_t nbins = 100;
+  Double_t posMin = -10.0;
+  Double_t posMax = 10.0;
+  Double_t ptMin = 0.0;
+  Double_t ptMax = 1.0;
+  
+  mPosDist1 = new StHbt3DHisto("PosDist1","PosDist1",nbins,posMin,posMax,nbins,posMin,posMax,nbins,posMin,posMax);
+  mPosDist2 = new StHbt3DHisto("PosDist2","PosDist2",nbins,posMin,posMax,nbins,posMin,posMax,nbins,posMin,posMax);
+  mTDist1 = new StHbt1DHisto("TDist1","PosDist1",nbins,posMin,posMax);
+  mTDist2 = new StHbt1DHisto("TDist2","PosDist2",nbins,posMin,posMax);
+  mPosPtDist1 = new StHbt2DHisto("PosPtDist1","PosPtDist1",nbins,posMin,posMax,nbins,ptMin,ptMax);
+  mPosPtDist2 = new StHbt2DHisto("PosPtDist2","PosPtDist2",nbins,posMin,posMax,nbins,ptMin,ptMax);
 }; 
 
-StHbtThPairDoubleGauss::~StHbtThPairDoubleGauss() {};
+StHbtThPairDoubleGauss::~StHbtThPairDoubleGauss() 
+{
+  delete mPosDist1;
+  delete mPosDist2;
+  delete mTDist1;
+  delete mTDist2;
+  delete mPosPtDist1;
+  delete mPosPtDist2;
+};
 
 void StHbtThPairDoubleGauss::Set(const StHbtPair* aPair){
   SetMomentum_PID (aPair);
-  SetPosition();
+  SetPosition(aPair);
   BoostPosition();
 
   mMeasPair=aPair;
@@ -52,58 +78,56 @@ void StHbtThPairDoubleGauss::Set(const StHbtPair* aPair){
 
 }
 
-void StHbtThPairDoubleGauss::SetMomentum_PID(const StHbtPair* aPair ){
+void StHbtThPairDoubleGauss::SetMomentum_PID( const StHbtPair* aPair ){
 
-  const StHbtSmearedHiddenInfo* tSmearedHidInf1=0;
-  const StHbtSmearedHiddenInfo* tSmearedHidInf2=0;
+  StHbtSmearedHiddenInfo* tSmearedHidInf1=0;
+  StHbtSmearedHiddenInfo* tSmearedHidInf2=0;
   const StHbtEvtGenHiddenInfo* tEvtGenHidInf1=0;
   const StHbtEvtGenHiddenInfo* tEvtGenHidInf2=0;
-  const StHbtShiftedHiddenInfo* tShiftedHidInf1=0;
-  const StHbtShiftedHiddenInfo* tShiftedHidInf2=0;
-
-
+  StHbtShiftedHiddenInfo* tShiftedHidInf1=0;
+  StHbtShiftedHiddenInfo* tShiftedHidInf2=0;
 
   if (mUseHidMom||mUseHidPid) {
     if (mHiddenInfoType == SMEAR) {
-      tSmearedHidInf1=dynamic_cast<const StHbtSmearedHiddenInfo*>
-	(aPair->track1()->HiddenInfo()); 
-      tSmearedHidInf2=dynamic_cast<const StHbtSmearedHiddenInfo*>
-	(aPair->track2()->HiddenInfo());
+      tSmearedHidInf1=dynamic_cast< StHbtSmearedHiddenInfo*>
+	(aPair->track1()->getHiddenInfo()); 
+      tSmearedHidInf2=dynamic_cast< StHbtSmearedHiddenInfo*>
+	(aPair->track2()->getHiddenInfo());
       if ((tSmearedHidInf1==0)||(tSmearedHidInf2==0)) {
 	if (tSmearedHidInf1==0) {
 	  StHbtMomRes *mMomRes1 = new StHbtMomRes(mPid1);
 	  mMomRes1->setMult(mResMult);
-	  aPair->track1()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track1()->FourMomentum(), mPid1, &mRand, mMomRes1));
-	  tSmearedHidInf1 = dynamic_cast<const StHbtSmearedHiddenInfo*>(aPair->track1()->HiddenInfo());
+	  aPair->track1()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track1()->FourMomentum(), *GenerateFreezeOut(1), mPid1, &mRand, mMomRes1));
+	  tSmearedHidInf1 = dynamic_cast< StHbtSmearedHiddenInfo*>(aPair->track1()->getHiddenInfo());
 	  delete mMomRes1;
 	} 
 	if (tSmearedHidInf2==0) {
 	  StHbtMomRes *mMomRes2 = new StHbtMomRes(mPid2);
 	  mMomRes2->setMult(mResMult);
-	  aPair->track2()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track2()->FourMomentum(), mPid2, &mRand, mMomRes2));
-	  tSmearedHidInf2 = dynamic_cast<const StHbtSmearedHiddenInfo*>(aPair->track2()->HiddenInfo());
+	  aPair->track2()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track2()->FourMomentum(), *GenerateFreezeOut(2), mPid2, &mRand, mMomRes2));
+	  tSmearedHidInf2 = dynamic_cast< StHbtSmearedHiddenInfo*>(aPair->track2()->getHiddenInfo());
 	  delete mMomRes2;
 	} 
       }
     }
-    if (mHiddenInfoType == SHIFT) {
-      tShiftedHidInf1=dynamic_cast<const StHbtShiftedHiddenInfo*>
-	(aPair->track1()->HiddenInfo()); 
-      tShiftedHidInf2=dynamic_cast<const StHbtShiftedHiddenInfo*>
-	(aPair->track2()->HiddenInfo());
+    else if (mHiddenInfoType == SHIFT) {
+      tShiftedHidInf1=dynamic_cast< StHbtShiftedHiddenInfo*>
+	(aPair->track1()->getHiddenInfo()); 
+      tShiftedHidInf2=dynamic_cast< StHbtShiftedHiddenInfo*>
+	(aPair->track2()->getHiddenInfo());
       if ((tShiftedHidInf1==0)||(tShiftedHidInf2==0)) {
 	if (tShiftedHidInf1==0) {
 	  StHbtMomRes *mMomRes1 = new StHbtMomRes(mPid1);
 	  mMomRes1->setMult(mResMult);
 	  aPair->track1()->SetHiddenInfo(new StHbtShiftedHiddenInfo(aPair->track1()->FourMomentum(), mPid1, &mRand, mMomRes1, mShift, PHISHIFT));
-	  tShiftedHidInf1 = dynamic_cast<const StHbtShiftedHiddenInfo*>(aPair->track1()->HiddenInfo());
+	  tShiftedHidInf1 = dynamic_cast< StHbtShiftedHiddenInfo*>(aPair->track1()->getHiddenInfo());
 	  delete mMomRes1;
 	} 
 	if (tShiftedHidInf2==0) {
 	  StHbtMomRes *mMomRes2 = new StHbtMomRes(mPid2);
 	  mMomRes2->setMult(mResMult);
 	  aPair->track2()->SetHiddenInfo(new StHbtShiftedHiddenInfo(aPair->track2()->FourMomentum(), mPid2, &mRand, mMomRes2, mShift, PHISHIFT));
-	  tShiftedHidInf2 = dynamic_cast<const StHbtShiftedHiddenInfo*>(aPair->track2()->HiddenInfo());
+	  tShiftedHidInf2 = dynamic_cast< StHbtShiftedHiddenInfo*>(aPair->track2()->getHiddenInfo());
 	  delete mMomRes2;
 	} 
       }
@@ -117,16 +141,19 @@ void StHbtThPairDoubleGauss::SetMomentum_PID(const StHbtPair* aPair ){
   }
   
   if (mUseHidMom&&tSmearedHidInf2&&tSmearedHidInf1) {
-    mMomentum1=&(tSmearedHidInf1->getMomentum());
-    mMomentum2=&(tSmearedHidInf1->getMomentum());
+    //    cout << "Setting Smeared HiddenMomentum " << endl;
+    mMomentum1=&(tSmearedHidInf1->mSmearedMom);
+    mMomentum2=&(tSmearedHidInf2->mSmearedMom);
   }
   else if (mUseHidMom&&tShiftedHidInf2&&tShiftedHidInf1) {
-    mMomentum1=&(tShiftedHidInf1->getMomentum());
-    mMomentum2=&(tShiftedHidInf2->getMomentum());
+    mMomentum1=&(tShiftedHidInf1->mShiftedMom);
+    mMomentum2=&(tShiftedHidInf2->mShiftedMom);
   }
   else if (mUseHidMom&&tEvtGenHidInf2&&tEvtGenHidInf1) {
-    mMomentum1=&(tEvtGenHidInf1->getFreezeOutMomEn());
-    mMomentum2=&(tEvtGenHidInf2->getFreezeOutMomEn());
+    //    mMomentum1=&(tEvtGenHidInf1->getFreezeOutMomEn());
+    //    mMomentum2=&(tEvtGenHidInf2->getFreezeOutMomEn());
+    mMomentum1= new StHbtLorentzVector(*tEvtGenHidInf1->getFreezeOutMomEn());
+    mMomentum2= new StHbtLorentzVector(*tEvtGenHidInf2->getFreezeOutMomEn());
   }
   else{
     mMom1=aPair->track1()->FourMomentum();
@@ -144,7 +171,7 @@ void StHbtThPairDoubleGauss::SetMomentum_PID(const StHbtPair* aPair ){
   }
 }
     
-void StHbtThPairDoubleGauss::SetPosition() {
+void StHbtThPairDoubleGauss::SetPosition( const StHbtPair* aPair) {
   /*
    * Set the random freeze-out space coordinates
    * according to either of two models:
@@ -155,49 +182,149 @@ void StHbtThPairDoubleGauss::SetPosition() {
    * from the second set.
    */
 
-  float x,y,z,t;
-  mRand.Rannor(x,y);
-  mRand.Rannor(z,t);
-  if (mCoreHalo) {
-    if (mRand.Uniform() < mProb1) {
-      mPos1.setX(x*mSizeX1);
-      mPos1.setY(y*mSizeY1);
-      mPos1.setZ(z*mSizeZ1);
-      mPos1.setT(t*mTime1);
-      mRand.Rannor(x,y);
-      mRand.Rannor(z,t);
-      mPos2.setX(x*mSizeX1);
-      mPos2.setY(y*mSizeY1);
-      mPos2.setZ(z*mSizeZ1);
-      mPos2.setT(t*mTime1);
-    }
-    else {
-      mPos1.setX(x*mSizeX2);
-      mPos1.setY(y*mSizeY2);
-      mPos1.setZ(z*mSizeZ2);
-      mPos1.setT(t*mTime2);
-      mRand.Rannor(x,y);
-      mRand.Rannor(z,t);
-      mPos2.setX(x*mSizeX2);
-      mPos2.setY(y*mSizeY2);
-      mPos2.setZ(z*mSizeZ2);
-      mPos2.setT(t*mTime2);
-    }
-  }
-  else{
-    mPos1.setX(x*mSizeX1);
-    mPos1.setY(y*mSizeY1);
-    mPos1.setZ(z*mSizeZ1);
-    mPos1.setT(t*mTime1);
-    mRand.Rannor(x,y);
-    mRand.Rannor(z,t);
-    mPos2.setX(x*mSizeX2);
-    mPos2.setY(y*mSizeY2);
-    mPos2.setZ(z*mSizeZ2);
-    mPos2.setT(t*mTime2);
+  const StHbtSmearedHiddenInfo* tSmearedHidInf1=0;
+  const StHbtSmearedHiddenInfo* tSmearedHidInf2=0;
+
+  if (mHiddenInfoType == SMEAR) {
+    tSmearedHidInf1 = dynamic_cast<const StHbtSmearedHiddenInfo*>(aPair->track1()->HiddenInfo());
+    tSmearedHidInf2 = dynamic_cast<const StHbtSmearedHiddenInfo*>(aPair->track2()->HiddenInfo());
   }
 
+  if ((mHiddenInfoType == SMEAR) && (tSmearedHidInf1 != 0) && (tSmearedHidInf2 != 0))
+    {
+      //      cout << "Setting position for pair:  " << this << endl;
+      mPos1 = tSmearedHidInf1->getFreezeOut();
+      mPos2 = tSmearedHidInf2->getFreezeOut();
+      //      cout << "Set the position 1 to: X: " << mPos1.x() << "   Y: " << mPos1.y() << "   Z: " << mPos1.z() << "   T: " << mPos1.t() << endl;
+      //      cout << "Set the position 2 to: X: " << mPos2.x() << "   Y: " << mPos2.y() << "   Z: " << mPos2.z() << "   T: " << mPos2.t() << endl;
+
+    }
+  else
+    {
+      mPos1 = *GenerateFreezeOut(1);
+      mPos2 = *GenerateFreezeOut(2);
+      //      cout << mPos1.x() << " " << mPos1.y() << endl;
+    }
+
 };
+
+inline StHbtLorentzVector* StHbtThPairDoubleGauss::GenerateFreezeOut(int partno) {
+
+  StHbtLorentzVector *mPos;
+  mPos = new StHbtLorentzVector();
+  float x,y,z,t;
+
+  //  cout << "Generating Freeze-out! " << partno  << endl;
+  mRand.Rannor(x,y);
+  mRand.Rannor(z,t);
+  if (mCoreHalo == 1) {
+     if (mRand.Uniform() < mProb1) {
+       mPos->setX(x*mSizeX1);
+       mPos->setY(y*mSizeY1);
+       mPos->setZ(z*mSizeZ1);
+       mPos->setT(t*mTime1);
+     }
+     else {
+       mPos->setX(x*mSizeX2);
+       mPos->setY(y*mSizeY2);
+       mPos->setZ(z*mSizeZ2);
+       mPos->setT(t*mTime2);
+     }
+  }
+  else if (mCoreHalo ==2) 
+    {
+      Double_t phi;
+      phi = mRand.Rndm();
+      
+      mPos->setX(x*mSizeX1*cos(phi*2*TMath::Pi()));
+      mPos->setY(x*mSizeX1*sin(phi*2*TMath::Pi()));
+      mPos->setZ(z*mSizeZ2);
+      mPos->setT(t*mTime2);      
+    }
+  else if (mCoreHalo ==3) 
+    {
+      if (partno == 1)
+	{
+	  mPos->setX(0.0);
+	  mPos->setY(0.0);
+	  mPos->setZ(0.0);
+	  mPos->setT(0.0);      
+	}
+      else
+	{
+	  double tROut =  mRand.Gaus(mTime1,mSizeX1); // reuse of long
+	  double tRSide = mRand.Gaus(0,mSizeX1);
+	  double tRLong = mRand.Gaus(0,mSizeX1);
+	  double tDTime = tROut;
+      
+	  double tPx = mMomentum1->x()+mMomentum2->x();
+	  double tPy = mMomentum1->y()+mMomentum2->y();
+	  double tPz = mMomentum1->z()+mMomentum2->z();
+	  double tE  = mMomentum1->e()+mMomentum2->e();
+
+	  double tPt = tPx*tPx+tPy*tPy;
+	  double tMt = tE*tE-tPz*tPz; 
+	  double tM = sqrt(tMt - tPt);
+	  tPt = sqrt(tPt);
+	  tMt = sqrt(tMt);
+
+	  tROut *= (tMt/tM); // Rout*gammaT
+	  tDTime *= (tPt/tM); // Rout*betaT*gammaT
+	  double ttDTime = tDTime; 
+	  tDTime += (tPz/tE*tRLong);
+	  tDTime *= (tE/tMt);
+	  tRLong += (tPz/tE*ttDTime); 
+	  tRLong *= (tE/tMt);
+	  
+	  tPx /= tPt;
+	  tPy /= tPt;
+	  
+	  mPos->setX(tROut*tPx-tRSide*tPy);
+	  mPos->setY(tROut*tPy+tRSide*tPx);
+	  mPos->setZ(tRLong);
+	  mPos->setT(tDTime);
+
+	  //       mPos->setX(x*mSizeX1*cos(phi*2*TMath::Pi()));
+	  //       mPos->setY(x*mSizeX1*sin(phi*2*TMath::Pi()));
+	  //       mPos->setZ(z*mSizeZ2);
+	  //       mPos->setT(t*mTime2);      
+	}
+    }
+  else
+  {
+    if (partno == 1)
+      {
+	mPos->setX(x*mSizeX1);
+	mPos->setY(y*mSizeY1);
+	mPos->setZ(z*mSizeZ1);
+	mPos->setT(t*mTime1);
+	//	mPos->setT(mTime1);
+      }
+    else
+      {
+	mPos->setX(mXShift+x*mSizeX2);
+	mPos->setY(mYShift+y*mSizeY2);
+	mPos->setZ(mZShift+z*mSizeZ2);
+	mPos->setT(mTShift+t*mTime2);
+	//	mPos->setT(mTime2);
+      }
+  }
+  if (partno == 1)
+    {
+      mTDist1->Fill(mPos->t());
+      mPosDist1->Fill(mPos->x(),mPos->y(),mPos->z());
+      //      mPosPtDist1->Fill(hypot(mPos->x(),mPos->y()), hypot(partMom->x(),partMom->y()));
+    }
+  else
+    {
+      mTDist2->Fill(mPos->t());
+      mPosDist2->Fill(mPos->x(),mPos->y(),mPos->z());
+      //      mPosPtDist2->Fill(hypot(mPos->x(),mPos->y()), hypot(partMom->y(),partMom->x()));
+    }
+  return mPos;
+  //  cout << "X: " << mPos->x() << "   Y: " << mPos->y() << "   Z: " << mPos->z() << "   T: " << mPos->t() << endl;
+  return mPos;
+}
 
 void StHbtThPairDoubleGauss::BoostPosition(){
   double tBeta;
@@ -296,6 +423,25 @@ inline  void          StHbtThPairDoubleGauss::SetFirstProb(double aProb1) {
   else mProb1 = aProb1;
 }
 
-inline  void          StHbtThPairDoubleGauss::SetCoreHalo() { mCoreHalo=1; }
+inline  void          StHbtThPairDoubleGauss::SetCoreHalo()   { mCoreHalo=1; }
 inline  void          StHbtThPairDoubleGauss::SetTwoSources() { mCoreHalo=0; }
+inline  void          StHbtThPairDoubleGauss::SetRadialGaus() { mCoreHalo=2; }
+inline  void          StHbtThPairDoubleGauss::SetPRFGaus()    { mCoreHalo=3; }
+inline  void          StHbtThPairDoubleGauss::SetPositionShift(double aX, double aY, double aZ, double aT)
+{
+  mXShift = aX;
+  mYShift = aY;
+  mZShift = aZ;
+  mTShift = aT;
+}
 
+void StHbtThPairDoubleGauss::Write()
+{
+  mPosDist1->Write();
+  mPosDist2->Write();
+  mTDist1->Write();
+  mTDist2->Write();
+  mPosPtDist1->Write();
+  mPosPtDist2->Write();
+
+}

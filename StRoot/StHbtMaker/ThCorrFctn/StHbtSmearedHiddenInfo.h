@@ -29,22 +29,26 @@ public:
 // --- Constructors
   StHbtSmearedHiddenInfo();
   StHbtSmearedHiddenInfo(const StHbtLorentzVector& aInitialMom, 
+			 const StHbtLorentzVector& aFreezeOut,
 			 const int& aPid,
 			 TRandom* aRand,
 			 const StHbtMomRes* aMomRes);
   StHbtSmearedHiddenInfo(const StHbtSmearedHiddenInfo& aHiddenInfo);
   StHbtSmearedHiddenInfo(const StHbtLorentzVector& aSmearedMom,
+			 const StHbtLorentzVector& aFreezeOut,
 			 const int& aPid);
 // --- Destructor
   virtual ~StHbtSmearedHiddenInfo();
 
 // --- Return hidden info content
   const StHbtLorentzVector& getSmearedMom() const;
-  const StHbtLorentzVector& getMomentum() const;
+  StHbtLorentzVector& getMomentum();
+  StHbtLorentzVector& getFreezeOut() const;
   int getPid() const;
 
 // ---Change hidden info content
   void setInitialMom(const StHbtLorentzVector*, TRandom*, const StHbtMomRes*);
+  void setFreezeOut(const StHbtLorentzVector*);
   void setPid(int);
 
 // !!! MANDATORY !!!
@@ -52,6 +56,7 @@ public:
   virtual StHbtHiddenInfo* getParticleHiddenInfo() const;
 
   StHbtLorentzVector mSmearedMom;
+  StHbtLorentzVector *mFreezeOut;
 
  private:
   int mPid;

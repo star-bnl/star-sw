@@ -50,7 +50,10 @@ class StHbtFsiLednicky : public  StHbtFsiWeight {
   void SetT0ApproxOff();//only with  Spherical wave Approximation - this is default mode
   void SetT0ApproxOn(); 
  
-  void SetNuclCharge(const double aNuclCharge); // for 3-body calculation
+// Test Lambda parameters
+   void PrintLambdas();
+   
+   void SetNuclCharge(const double aNuclCharge); // for 3-body calculation
   void SetNuclMass(const double aNuclMass);
 
   virtual StHbtString Report();
@@ -78,8 +81,7 @@ protected:
   int mLL;
   short mNuclChargeSign;  
   bool mSwap;  // are particle in wright order ? 
-  //  int const mLLMax;  this makes Cint and gcc compiler puke, so I make it non-const... malisa 14nov01
-  int mLLMax;
+  int const mLLMax;
   int* mNumProcessPair;
   int mNumbNonId;
   char** mLLName;

@@ -20,7 +20,7 @@ ClassImp(ThNonId3DCF)
 #endif
   
 ThNonId3DCF::ThNonId3DCF(char* title, const int& nbins, const float& QinvLo, const float& QinvHi)
-  : StHbtThCorrFctn() 
+  : StHbtThCorrFctn(), mBtMin(0.0), mBtMax(1.0), mUtMin(0.0), mUtMax(1.0)
 {
   // set up numerator
   char TitNumOutP[100] = "NumOutP";
@@ -169,7 +169,7 @@ ThNonId3DCF::ThNonId3DCF(char* title, const int& nbins, const float& QinvLo, con
   mRatLong->Sumw2(); 
   mRatLongNOverP->Sumw2();
 
-  float klim = 0.6 * QinvHi;
+  float klim = 1.2 * QinvHi;
   mHOutKSame = new  StHbt2DHisto("HOutKSame","HOutKSame",
 				 100,-klim,klim,nbins,QinvLo,QinvHi);
   mHOutKDiff = new  StHbt2DHisto("HOutKDiff","HOutKDiff",
@@ -275,71 +275,79 @@ ThNonId3DCF::~ThNonId3DCF(){
 
 //____________________________
 void ThNonId3DCF::AddNum(StHbtThPair* aThPair){
-  double tKStar = 2*fabs(aThPair->GetMeasPair()->KStar());
+  double tKStar = fabs(aThPair->GetMeasPair()->KStar());
   double tKOut = aThPair->GetMeasPair()->dKOut();
   double tKSide = aThPair->GetMeasPair()->dKSide();
   double tKLong = aThPair->GetMeasPair()->dKLong();
   double weight = aThPair->GetWeightNum();
 
-  if(tKOut>0.){
-    mNumOutP->Fill(tKStar, weight);
-    mProfOutP->Fill(tKStar, weight);
-  }
-  else{
-    mNumOutN->Fill(tKStar, weight); 
-    mProfOutN->Fill(tKStar, weight);
-  }
-  if(tKSide>0.){
-    mNumSideP->Fill(tKStar, weight);
-    mProfSideP->Fill(tKStar, weight);
-  }
-  else{
-    mNumSideN->Fill(tKStar, weight); 
-    mProfSideN->Fill(tKStar, weight);
-  }
-  if(tKLong>0.){
-    mNumLongP->Fill(tKStar, weight);
-    mProfLongP->Fill(tKStar, weight);
-  }
-  else{
-    mNumLongN->Fill(tKStar, weight);  
-    mProfLongN->Fill(tKStar, weight);
-  }
+  if ((aThPair->Betat() < mBtMax) && (aThPair->Betat() > mBtMin) &&
+      (aThPair->Ut() < mUtMax) && (aThPair->Ut() > mUtMin))
+    {
+      if(tKOut>0.){
+	mNumOutP->Fill(tKStar, weight);
+	mProfOutP->Fill(tKStar, weight);
+      }
+      else{
+	mNumOutN->Fill(tKStar, weight); 
+	mProfOutN->Fill(tKStar, weight);
+      }
+      if(tKSide>0.){
+	mNumSideP->Fill(tKStar, weight);
+	mProfSideP->Fill(tKStar, weight);
+      }
+      else{
+	mNumSideN->Fill(tKStar, weight); 
+	mProfSideN->Fill(tKStar, weight);
+      }
+      if(tKLong>0.){
+	mNumLongP->Fill(tKStar, weight);
+	mProfLongP->Fill(tKStar, weight);
+      }
+      else{
+	mNumLongN->Fill(tKStar, weight);  
+	mProfLongN->Fill(tKStar, weight);
+      }
 
-  mHOutKSame->Fill(tKOut, tKStar, weight);
-  mHSideKSame->Fill(tKSide, tKStar, weight);
-  mHLongKSame->Fill(tKLong, tKStar, weight);
+      mHOutKSame->Fill(tKOut, tKStar, weight);
+      mHSideKSame->Fill(tKSide, tKStar, weight);
+      mHLongKSame->Fill(tKLong, tKStar, weight);
+    }
 }
 
 void ThNonId3DCF::AddDen(StHbtThPair* aThPair){
-  double tKStar = 2*fabs(aThPair->GetMeasPair()->KStar());
+  double tKStar = fabs(aThPair->GetMeasPair()->KStar());
   double tKOut = aThPair->GetMeasPair()->dKOut();
   double tKSide = aThPair->GetMeasPair()->dKSide();
   double tKLong = aThPair->GetMeasPair()->dKLong();
   double weight = aThPair->GetWeightDen();
 
-  if(tKOut>0.){
-    mDenOutP->Fill(tKStar, weight);
-  }
-  else{
-    mDenOutN->Fill(tKStar, weight);    
-  }
-  if(tKSide>0.){
-    mDenSideP->Fill(tKStar, weight);
-  }
-  else{
-    mDenSideN->Fill(tKStar, weight);    
-  }
-  if(tKLong>0.){
-    mDenLongP->Fill(tKStar, weight);
-  }
-  else{
-    mDenLongN->Fill(tKStar, weight);    
-  }
+  if ((aThPair->Betat() < mBtMax) && (aThPair->Betat() > mBtMin) &&
+      (aThPair->Ut() < mUtMax) && (aThPair->Ut() > mUtMin))
+    {
+      if(tKOut>0.){
+	mDenOutP->Fill(tKStar, weight);
+      }
+      else{
+	mDenOutN->Fill(tKStar, weight);    
+      }
+      if(tKSide>0.){
+	mDenSideP->Fill(tKStar, weight);
+      }
+      else{
+	mDenSideN->Fill(tKStar, weight);    
+      }
+      if(tKLong>0.){
+	mDenLongP->Fill(tKStar, weight);
+      }
+      else{
+	mDenLongN->Fill(tKStar, weight);    
+      }
 
-  mHOutKDiff->Fill(tKOut, tKStar, weight);
-  mHSideKDiff->Fill(tKSide, tKStar, weight);
-  mHLongKDiff->Fill(tKLong, tKStar, weight);
+      mHOutKDiff->Fill(tKOut, tKStar, weight);
+      mHSideKDiff->Fill(tKSide, tKStar, weight);
+      mHLongKDiff->Fill(tKLong, tKStar, weight);
+    }
 }
 
 void ThNonId3DCF::Finish(){
@@ -477,3 +485,13 @@ StHbtString ThNonId3DCF::Report(){
 }
 
 inline StHbtThCorrFctn* ThNonId3DCF::Clone() const {return new ThNonId3DCF(*this);}
+inline void ThNonId3DCF::SetBtRange(double aBtMin, double aBtMax)
+{
+  mBtMin = aBtMin;
+  mBtMax = aBtMax;
+}
+inline void ThNonId3DCF::SetUtRange(double aUtMin, double aUtMax)
+{
+  mUtMin = aUtMin;
+  mUtMax = aUtMax;
+}

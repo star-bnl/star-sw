@@ -54,12 +54,12 @@ class ThBPCorrFctn :  public virtual StHbtThCorrFctn {
   unsigned long int mNumRealsNorm;
   unsigned long int mNumMixedNorm;
 
-  StHbt2DHisto** add2DHistos;
+  StHbt2DHisto** add2DHistos; //!
   Int_t numAdd2DHistos;
   Int_t addedHistos;
 
 #ifdef __ROOT__
-ClassDef(ThBPCorrFctn, 0)
+ClassDef(ThBPCorrFctn, 1)
 #endif
 };
 

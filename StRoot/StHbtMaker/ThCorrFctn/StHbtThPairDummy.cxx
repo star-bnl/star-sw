@@ -23,3 +23,6 @@ void StHbtThPairDummy::Set(const StHbtPair* aPair){
 
 }
 
+void StHbtThPairDummy::setVariables(const StHbtPair*){
+  
+}

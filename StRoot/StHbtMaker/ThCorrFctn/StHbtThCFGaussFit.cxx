@@ -64,7 +64,7 @@ void StHbtThCFGaussFit::AddRealPair( const StHbtPair* aPair) {};
 void StHbtThCFGaussFit::AddMixedPair( const StHbtPair* aPair) {
   if (mSizeColl.size()>0) {
     mPair.Set(aPair);
-     //    double tProb=mRand.Rndm();
+    double tProb=mRand.Rndm();
     StHbtThCFGaussSizeIterator iter;
     for (iter=mSizeColl.begin(); iter!=mSizeColl.end();iter++){
       //      if (mPair.GetRejectionProb2Size((*iter)->GetSizeX(),(*iter)->GetSizeY(),
@@ -120,4 +120,4 @@ inline void StHbtThCFGaussFit::SetPRF() {mPair.SetPRF();};
 inline void StHbtThCFGaussFit::AddSize(const char* aName, double aXYZ, double aT){
   AddSize(aName,aXYZ,aXYZ,aXYZ,aT);};
 
-inline const StHbtThCFGaussSizeCollection *StHbtThCFGaussFit::getCollection() const { return &mSizeColl; }
+inline StHbtThCFGaussSizeCollection *StHbtThCFGaussFit::getCollection() { return &mSizeColl; }

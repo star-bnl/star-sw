@@ -35,10 +35,10 @@ void StHbtThPairEvtGen::Set(const StHbtPair* aPair){
     cout << "    HiddenInfo does NOT inherit from StHbtEvtGenHiddenInfo , Or it is NULL " << endl;
     exit(0);
   } else {
-    mMomentum1=&(tEvtGenHidInf1->getFreezeOutMomEn());
-    mMomentum2=&(tEvtGenHidInf2->getFreezeOutMomEn());
-    mEmPoint1=&(tEvtGenHidInf1->getEmPoint());
-    mEmPoint2=&(tEvtGenHidInf2->getEmPoint());
+    mMomentum1=new StHbtLorentzVector(*(tEvtGenHidInf1->getFreezeOutMomEn()));
+    mMomentum2=new StHbtLorentzVector(*(tEvtGenHidInf2->getFreezeOutMomEn()));
+    mEmPoint1=new StHbtLorentzVector(*(tEvtGenHidInf1->getEmPoint()));
+    mEmPoint2=new StHbtLorentzVector(*(tEvtGenHidInf2->getEmPoint()));
     mPid1=tEvtGenHidInf1->getPid();
     mPid2=tEvtGenHidInf2->getPid(); 
   }    

@@ -29,7 +29,7 @@
 #ifndef ST_HBT_THPAIR_DOUBLE_GAUSS_HH
 #define ST_HBT_THPAIR_DOUBLE_GAUSS_HH
 
-#include "TRandom.h"
+#include "TRandom2.h"
 
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Base/StHbtThPair.hh"
@@ -55,6 +55,7 @@ public:
   void SetSize1(double aX,double aY,double aZ, double aT);
   void SetSize2(double aXYZ,double aT );
   void SetSize2(double aX,double aY,double aZ, double aT);
+  void SetPositionShift(double aX, double aY, double aZ, double aT);
   void SetFirstProb(double amProb);
   void UseHiddenMomentum();
   void UseParticleMomentum();
@@ -70,22 +71,26 @@ public:
   void SetPRF();
   void SetCoreHalo();
   void SetTwoSources();
-
+  void SetRadialGaus();
+  void SetPRFGaus();
+  
   void SetResolutionMult(const double mult);
   void SetMomentumShift(const double shift);
 
   void UseSmearedHiddenInfo();
   void UseShiftedHiddenInfo();
   void UseEvtGenHiddenInfo();
-
+  void Write();
+  
 
  protected:
-  TRandom            mRand;
+  TRandom2           mRand;
   bool               mUseHidMom;
   bool               mUseHidPid;
   bool               mCoreHalo;
   double             mSizeX1,mSizeY1,mSizeZ1,mSizeX2,mSizeY2,mSizeZ2;
   double             mTime1,mTime2;
+  double             mXShift, mYShift, mZShift, mTShift;
   double             mProb1;
   RefFrameDG         mRef;
   double             mBetaRCMS;
@@ -100,12 +105,20 @@ public:
   StHbtLorentzVector mMom1;  //because StHbtParticle.FourMomentum() is not a ref
   StHbtLorentzVector mMom2;
 
+  StHbt3DHisto*      mPosDist1;
+  StHbt3DHisto*      mPosDist2;
+  StHbt2DHisto*      mPosPtDist1;
+  StHbt2DHisto*      mPosPtDist2;
+  StHbt1DHisto*      mTDist1;
+  StHbt1DHisto*      mTDist2;
+
   double mMassSq1,mMassSq2;
 
   // 3 protected Step called from  Set(...) public function member
-  void SetMomentum_PID(const StHbtPair* );
-  void SetPosition();
+  void SetMomentum_PID( const StHbtPair* );
+  void SetPosition( const StHbtPair* );
   void BoostPosition();
+  StHbtLorentzVector *GenerateFreezeOut(int partno);
 
 #ifdef __ROOT__
   ClassDef(StHbtThPairDoubleGauss,1)

@@ -65,8 +65,8 @@ void StHbtThPairGauss::SetMomentum_PID( const StHbtPair* aPair ){
     } 
   }
   if (mUseHidMom&&mUseHidPid) {
-    mMomentum1=&(tEvtGenHidInf1->getFreezeOutMomEn());
-    mMomentum2=&(tEvtGenHidInf2->getFreezeOutMomEn());
+    mMomentum1=new StHbtLorentzVector(*(tEvtGenHidInf1->getFreezeOutMomEn()));
+    mMomentum2=new StHbtLorentzVector(*(tEvtGenHidInf2->getFreezeOutMomEn()));
   }else{
     mMom1=aPair->track1()->FourMomentum();
     mMom1.setE(sqrt(mMassSq1+mMom1.vect().mag2()));
