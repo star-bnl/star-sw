@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.12 2001/10/26 20:59:46 porter Exp $
+ * $Id: StDbSql.cc,v 1.13 2001/12/05 17:16:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.13  2001/12/05 17:16:35  porter
+ * stand-alone make file no longer had "DLINUX" in compile but this is still needed
+ * and returned. Also retrieve elementID list  in query by whereClause for plotting
+ * many row instances.
+ *
  * Revision 1.12  2001/10/26 20:59:46  porter
  * fixed new endtime flag from previous checkin. made StDataBaseI available
  * at root-cli.
@@ -472,7 +477,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
     }
 
      Db<<" select unix_timestamp("<<dataTables[i]<<".beginTime) as bTime,";
-     Db<<" "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
+     Db<<" elementID, "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
      if(numRows)Db<<" limit "<<numRows;
      Db<<endsql;
      sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -739,8 +744,9 @@ if(table->hasDescriptor())return 1;
       descriptor->fillElement(&buff,requestSchemaID);
       buff.Raz();
     }
-
     Db.Release();
+    descriptor->endRowPadding();
+
     addDescriptor(descriptor);
 
   return 1;

@@ -90,7 +90,7 @@ ifeq (Linux,$(SYSTYPE))
 
 AR       := /usr/bin/ar -rvu
 
-  OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
+  OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES LINUX
   LD       := $(CXX)
   SO       := $(CXX)
   CXXFLAGS := $(DBG) -fPIC -Wall -I/usr/include/g++
