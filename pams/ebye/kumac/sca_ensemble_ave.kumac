@@ -7,6 +7,8 @@
 * table -- it runs with sca_makeXdf.kumac
 * -------------------------------------------------------------
 
+  cd [calib]/ebye/sca_ensemble_dir
+  tdm/table/rowcount   sca_ensemble_ave  1
 
   tdm/table/cell/putvalue 'sca_ensemble_ave[0].index'		0
   tdm/table/cell/putvalue 'sca_ensemble_ave[0].scale_x'		0

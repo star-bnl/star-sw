@@ -13,13 +13,14 @@
 *	    so that prior and ensemble_ave can be worked on
 *	    independently
 *------------------------------------------------------
-macro params
+macro params TOP=./.
 
- DEFAULT = _
-./pams/ebye/kumac
+  macro/global/create TOP              [TOP]
+  macro/global/import *
 
-def [DEFAULT] C
-message 'Define default kumac search path as' def
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
+  macro/global/import *
 
 * load idl tables
   tdm/types/load ./pams/ebye/idl/sca_const.idl
@@ -27,14 +28,11 @@ message 'Define default kumac search path as' def
   tdm/types/load ./pams/ebye/idl/sca_switch.idl
 
 * make directory structure
-  cd /dui
-  mkdir /dui/run/
-  mkdir /dui/run/params/
-  mkdir /dui/run/params/ebye
-  mkdir /dui/run/params/ebye/sca
+  cd [params]/ebye
+  mkdir sca
+  cd sca
 
 * make tables
-  cd /dui/run/params/ebye/sca
   tdm/newtable	sca_const		sca_const		1
   tdm/newtable	sca_switch		sca_switch		1
   tdm/newtable	sca_filter_const	sca_filter_const	1
@@ -51,33 +49,27 @@ message 'Define default kumac search path as' def
 
 * write from staf tables to xdf
   cd /dui
-  dio/newfilestream SCACONST ./params/ebye/sca_params.xdf w
-  dio/stream/putevent    SCACONST   run/params/ebye/sca
-  dio/stream/close       SCACONST
+  exec write_table_to_file#init  SCACONST  ./params/ebye/sca_params.xdf 
+  exec write_table_to_file#write SCACONST   [params]/ebye/sca
+  exec write_table_to_file#close SCACONST
 
 return
 *------------------------------------------------------
 
 *------------------------------------------------------
-macro prior
+macro prior TOP=./.
 
- DEFAULT = _
-./pams/ebye/kumac
+  macro/global/create TOP              [TOP]
+  macro/global/import *
 
-def [DEFAULT] C
-message 'Define default kumac search path as' def
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
 
 * load idl tables
   tdm/types/load ./pams/ebye/idl/sca_prior.idl
 
-* make directory structure
-  cd /dui
-  mkdir /dui/calib
-  mkdir /dui/calib/ebye
-  mkdir /dui/calib/ebye/sca_prior_dir
-
 * make tables
-  cd /dui/calib/ebye/sca_prior_dir
+  cd [calib]/ebye/sca_prior_dir
   tdm/newtable	sca_prior		sca_prior		300000
 
 * set nok for the SCA calibration tables.
@@ -85,32 +77,26 @@ message 'Define default kumac search path as' def
 
 * write from staf tables to xdf
   cd /dui
-  dio/newfilestream SCAPRIOR ./calib/ebye/sca_prior.xdf w
-  dio/stream/putevent    SCAPRIOR   calib/ebye/sca_prior_dir
-  dio/stream/close       SCAPRIOR
+  exec write_table_to_file#init  SCAPRIOR  ./calib/ebye/sca_prior.xdf 
+  exec write_table_to_file#write SCAPRIOR   [calib]/ebye/sca_prior_dir
+  exec write_table_to_file#close SCAPRIOR
 
 return
 *------------------------------------------------------
 
-macro ensemble
+macro ensemble TOP=./.
 
- DEFAULT = _
-./pams/ebye/kumac
+  macro/global/create TOP              [TOP]
+  macro/global/import *
 
-def [DEFAULT] C
-message 'Define default kumac search path as' def
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
 
 * load idl tables
   tdm/types/load ./pams/ebye/idl/sca_out.idl
 
-* make directory structure
-  cd /dui
-  mkdir /dui/calib
-  mkdir /dui/calib/ebye
-  mkdir /dui/calib/ebye/sca_ensemble_dir
-
 * make tables
-  cd /dui/calib/ebye/sca_ensemble_dir
+  cd [calib]/ebye/sca_ensemble_dir
   tdm/newtable	sca_ensemble_ave	sca_out			1
 
 * set nok for the SCA calibration tables.
@@ -121,9 +107,9 @@ message 'Define default kumac search path as' def
 
 * write from staf tables to xdf
   cd /dui
-  dio/newfilestream SCAENSEMBLE ./calib/ebye/sca_ensemble.xdf w
-  dio/stream/putevent    SCAENSEMBLE   calib/ebye/sca_ensemble_dir
-  dio/stream/close       SCAENSEMBLE 
+  exec write_table_to_file#init  SCAENSEMBLE  ./calib/ebye/sca_ensemble.xdf 
+  exec write_table_to_file#write SCAENSEMBLE   [calib]/ebye/sca_ensemble_dir
+  exec write_table_to_file#close SCAENSEMBLE 
 
 return
 *------------------------------------------------------
