@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.39 2003/05/06 21:33:06 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.40 2003/08/06 20:54:09 oldi Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,8 +54,10 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
+  void     SetPtRange_for_vEta(Float_t lo, Float_t hi);
+  void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.39 2003/05/06 21:33:06 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.40 2003/08/06 20:54:09 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -217,6 +219,9 @@ private:
   Float_t mEtaMax;
     Int_t mNEtaBins;
 
+  Float_t mPtRange_for_vEta[2];
+  Float_t mEtaRange_for_vPt[2];
+
   ClassDef(StFlowAnalysisMaker, 1)              // macro for rootcint
 };
 
@@ -231,6 +236,11 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.40  2003/08/06 20:54:09  oldi
+// Introduction of possibility to exclude pt ranges for v(eta) and eta regions
+// for v(pt) histograms. Default behavior stays the same (all available tracks
+// are included in v(pt) and v(eta)).
+//
 // Revision 1.39  2003/05/06 21:33:06  posk
 // Removed some histograms.
 //

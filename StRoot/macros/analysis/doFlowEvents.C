@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.47 2003/07/30 22:09:18 oldi Exp $
+// $Id: doFlowEvents.C,v 1.48 2003/08/06 20:54:26 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -214,18 +214,26 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     bool anaMaker = kTRUE;
     bool cumMaker = kFALSE;
     //bool cumMaker = kTRUE;
-    //bool spMaker = kFALSE;
-    bool spMaker = kTRUE;
+    bool spMaker = kFALSE;
+    //bool spMaker = kTRUE;
   }
 
   Bool_t includeTpcTracks  = kTRUE;
-  //Bool_t includeFtpcTracks = kTRUE;
+  Float_t ptRange_for_vEta[2] = {0., 0.};
+  Float_t etaRange_for_vPt[2] = {0., 0.};
   Bool_t includeFtpcTracks = kFALSE;
+  /*
+  Bool_t includeFtpcTracks = kTRUE;
+  Float_t ptRange_for_vEta[2] = {0., 2.};
+  Float_t etaRange_for_vPt[2] = {2., 5.};
+  */
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
       StFlowAnalysisMaker*  flowAnalysisMaker = new StFlowAnalysisMaker();
       flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
+      flowAnalysisMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
+      flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
     }
     if (cumMaker) {
       StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
@@ -241,6 +249,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
       StFlowAnalysisMaker* flowAnalysisMaker = new 
 	StFlowAnalysisMaker(makerName, flowSelect);
       flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
+      flowAnalysisMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
+      flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
     }
     if (cumMaker) {
       sprintf(makerName, "FlowCumulant");
@@ -528,6 +538,11 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.48  2003/08/06 20:54:26  oldi
+// Introduction of possibility to exclude pt ranges for v(eta) and eta regions
+// for v(pt) histograms. Default behavior stays the same (all available tracks
+// are included in v(pt) and v(eta)).
+//
 // Revision 1.47  2003/07/30 22:09:18  oldi
 // Eta cuts for event plane selection separated for FTPC east and west.
 // PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).

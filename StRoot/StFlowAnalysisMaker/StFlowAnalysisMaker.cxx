@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.75 2003/07/30 22:08:25 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.76 2003/08/06 20:54:06 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,6 +45,8 @@ StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StMaker(name),
   MakerName(name) {
   pFlowSelect = new StFlowSelection();
   SetHistoRanges();
+  SetPtRange_for_vEta(0., 0.);
+  SetEtaRange_for_vPt(0., 0.);
 }
 
 StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name,
@@ -52,6 +54,8 @@ StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name,
   StMaker(name), MakerName(name) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
   SetHistoRanges();
+  SetPtRange_for_vEta(0., 0.);
+  SetEtaRange_for_vPt(0., 0.);
 }
 
 //-----------------------------------------------------------------------
@@ -1157,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.75 2003/07/30 22:08:25 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.76 2003/08/06 20:54:06 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1668,15 +1672,43 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  float v = cos(order * (phi - psi_i))/perCent;
 	  float vFlip = v;
 	  if (eta < 0 && oddHar) vFlip *= -1;
-	  if (strlen(pFlowSelect->PidPart()) != 0) { 
+	  if (strlen(pFlowSelect->PidPart()) != 0) { // pid, fill rapidity 
 	    float rapidity = pFlowTrack->Y();
 	    histFull[k].histFullHar[j].mHist_vObs2D-> Fill(rapidity, pt, v);
-	    histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
-	  } else {
+	    
+	    if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0]) { // cut is used
+	      if (pt < mPtRange_for_vEta[1] && pt >= mPtRange_for_vEta[0]) {
+		// check cut range, fill if in range
+		histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
+	      }
+	    }
+	    else { // cut is not used, fill in any case
+	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
+	    }
+
+	  } else { // no pid, fill eta
 	    histFull[k].histFullHar[j].mHist_vObs2D-> Fill(eta, pt, v);
-	    histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	   
+	    if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0]) { // cut is used
+	      if (pt < mPtRange_for_vEta[1] && pt >= mPtRange_for_vEta[0]) {
+		// check cut range, fill if in range
+		histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	      }
+	    }
+	    else { // cut is not used, fill in any case
+	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	    }
 	  }
-	  histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
+
+	  if (mEtaRange_for_vPt[1] > mEtaRange_for_vPt[0]) { // cut is used
+	    if (TMath::Abs(eta) < mEtaRange_for_vPt[1] && TMath::Abs(eta) >= mEtaRange_for_vPt[0]) {
+	      // check cut range, fill if in range
+	      histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
+	    }
+	  }
+	  else { // cut is not used, fill in any case
+	    histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
+	  }
 	  histFull[k].mHist_vObs->Fill(order, vFlip);
 	  
 	  // Correlation of Phi of all particles with Psi
@@ -2070,9 +2102,40 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
     return;
 }
 
+//------------------------------------------------------------------------
+
+inline void StFlowAnalysisMaker::SetPtRange_for_vEta(Float_t lo, Float_t hi) {
+
+  // Sets the pt range for the v(eta) histograms.
+
+  mPtRange_for_vEta[0] = lo;
+  mPtRange_for_vEta[1] = hi;
+
+  return;
+}
+
+//------------------------------------------------------------------------
+
+inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
+  
+  // Sets the |eta| range for the v(pt) histograms.
+
+  mEtaRange_for_vPt[0] = lo;
+  mEtaRange_for_vPt[1] = hi;
+
+  return;
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.76  2003/08/06 20:54:06  oldi
+// Introduction of possibility to exclude pt ranges for v(eta) and eta regions
+// for v(pt) histograms. Default behavior stays the same (all available tracks
+// are included in v(pt) and v(eta)).
+//
 // Revision 1.75  2003/07/30 22:08:25  oldi
 // Several code fixes for EtaSym plots introduced (esp. the acceptance correction
 // is done now for 200 GeV data and for the FTPCs as well).
