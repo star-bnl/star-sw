@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: TMemStat.h,v 1.2 2003/10/25 02:58:51 jeromel Exp $
+ * $Id: TMemStat.h,v 1.3 2004/09/03 20:53:06 perev Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -30,6 +30,7 @@ public:
    //static methods
 
    static  Double_t Used();			/*!< Used heap memory in MB    */
+   static  Double_t Free();			/*!< Free heap memory in MB    */
    static  Double_t ProgSize();			/*!< Program size     in MB    */
    static  void     PrintMem(const char *tit);	/*!< Prints current memory     */
    static  void     Summary();			/*!< Prints usage summary      */
