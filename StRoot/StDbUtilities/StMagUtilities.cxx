@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.45 2004/02/11 22:26:55 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.46 2004/02/14 23:57:40 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.46  2004/02/14 23:57:40  jeromel
+ * File still had binary characters in CVS. Corrected and adjusted doc
+ *
  * Revision 1.45  2004/02/11 22:26:55  perev
  * More prints for NO TPC DB
  *
@@ -232,7 +235,6 @@ static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scal
 ClassImp(StMagUtilities)
 
 /// StMagUtilities default constructor
-
 StMagUtilities::StMagUtilities ()  
 {
   cout << "StMagUtilities:: Unfortunately, instantiation with StMagUtilities(<empty>) is obsolete" << endl ;
@@ -241,7 +243,6 @@ StMagUtilities::StMagUtilities ()
 
 
 /// StMagUtilities constructor using the DataBase
-
 StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 { 
   gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
@@ -256,7 +257,6 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 
 
 /// StMagUtilities constructor not using the DataBase
-
 StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
 { 
   gFactor = factor    ;      // Manually selected magnetic field scale factor
@@ -321,9 +321,7 @@ void StMagUtilities::GetSpaceChargeR2 ()
 
 
 /// Initialization method.  This will sort and apply the options received by the tpt Maker
-
 void StMagUtilities::CommonStart ( Int_t mode )
-
 {
 
   //  These items are not taken from the DB but they should be ... some day.
@@ -345,7 +343,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
       IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
-      EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians 
+      EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
       WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
     }
@@ -429,9 +427,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
 
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
-
 void StMagUtilities::BField( const Float_t x[], Float_t B[] )
-
 {                          
 
   Float_t r, z, Br_value, Bz_value ;
@@ -458,9 +454,7 @@ void StMagUtilities::BField( const Float_t x[], Float_t B[] )
 
 
 /// Bfield in Cartesian coordinates - 3D field
- 
 void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
-
 {                          
 
   Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
@@ -492,9 +486,7 @@ void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
 
 
 /// B field in Radial coordinates - 2D field (ie Phi symmetric)
-
 void StMagUtilities::BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value )
-
 {
   
   Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
@@ -503,10 +495,8 @@ void StMagUtilities::BrBzField( const Float_t r, const Float_t z, Float_t &Br_va
 
 
 /// B field in Radial coordinates - 3D field
-
 void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_t phi, 
 				  Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value )
-
 {
 
   Float_t phiprime ;
@@ -521,9 +511,7 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 
 
 /// Main Entry Point for requests to UNDO the E and B field distortions
-
 void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
   // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
@@ -627,9 +615,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 /// Main Entry Point for requests to DO the E and B field distortions (for simulations)
-
 void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   UndoDistortion ( x, Xprime ) ;
@@ -644,15 +630,12 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
 //________________________________________
 
 /// B field distortions ( no Table ) - calculate the distortions due to the shape of the B field
-
 /*! 
     Distortions are calculated point by point and integrated in real time.
     This avoids the time required to set up a table of distorted values but
     is slow for a very large number of points ( > 10,000 ).
 */
-
 void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
@@ -689,15 +672,12 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 /// B field distortions (Table) - calculate the distortions due to the shape of the B field
-
 /*! 
     Distortions are calculated and then stored in a table.  This method requires
     about 1 minute of CPU time to generate the table but it is very fast after the
     table has been created.  Use it when you have a large number of points ( > 10,000 ).
 */
-
 void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
 #define NPOINTS 22                                  // Number of points on the Z interpolation grid
@@ -782,9 +762,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 //________________________________________
 
 /// Twist distortion
-
 void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   Double_t        Zdrift ;
@@ -812,9 +790,7 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
 #define  NZDRIFT       15               // Dimension of the vector to contain ZDriftArray
 
 /// Pad row 13 distortion
-
 void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   const Int_t   TERMS    = 400 ;                 // Number of terms in the sum
@@ -904,9 +880,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
 //________________________________________
 
 /// Clock distortion
-
 void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   Double_t r, phi ;
@@ -927,9 +901,7 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 //________________________________________
 
 /// Membrane distortion
- 
 void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   Float_t  Er_integral, Ephi_integral ;
@@ -961,9 +933,7 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[]
 //________________________________________
 
 /// Endcap distortion
-
 void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
-
 {
 
   Float_t  Er_integral, Ephi_integral ;
@@ -994,11 +964,12 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
 
 //________________________________________
 
-/// IFC distortion
-
+/*! 
+  IFC distortion
+  Electrostatic equations solved in Rectangular Coodinates by Jim Thomas
+  Updated to work in cylindrical coordinates by Jamie Dunlop  11/01/2001
+*/
 void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[] )
-// Electrostatic equations solved in Rectangular Coodinates by Jim Thomas
-// Updated to work in cylindrical coordinates by Jamie Dunlop  11/01/2001
 { 
 
   Float_t  Er_integral, Ephi_integral ;
@@ -1065,12 +1036,12 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 
 //________________________________________
 
-/// Space Charge distortion using a uniform distribution of charge per unit volume
-
+/*!
+  Space Charge distortion using a uniform distribution of charge per unit volume
+  Electrostatic equations solved by Jamie Dunlop  11/01/2001
+  Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
+*/
 void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] )
-// Electrostatic equations solved by Jamie Dunlop  11/01/2001
-// Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
-
 { 
   
   Float_t  Er_integral, Ephi_integral ;
@@ -1149,12 +1120,12 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   
 //________________________________________
 
-/// Space Charge distortion using space charge from a real event (~1/R**2 distribution)
-
+/*
+  Space Charge distortion using space charge from a real event (~1/R**2 distribution)
+  Electrostatic equations solved by relaxtion.  Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
+  Charge density has 1/R**2 distribution but also includes linear increase of charge from endcap to CM 
+*/
 void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] )
-// Electrostatic equations solved by relaxtion.  Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
-// Charge density has 1/R**2 distribution but also includes linear increase of charge from endcap to CM 
-
 { 
   
   const Int_t     ROWS        =  31 ;
@@ -1316,12 +1287,12 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 //________________________________________
 
 
-/// Shorted Ring Distortion 
-
+/*!
+  Shorted Ring Distortion 
+  Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
+  This code contains *hardwired parameters* for the short on the EAST end of the TPC on 12/22/2003.
+*/
 void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
-// Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
-// This code contains *hardwired parameters* for the short on the EAST end of the TPC on 12/22/2003.
-
 { 
 
   const Float_t   Ring        =  169.5 ;                // Location of short (in units of rings)
@@ -1481,9 +1452,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 //________________________________________
 
 /// Read the electric and magnetic field maps stored on disk
-
 void StMagUtilities::ReadField( )
-
 {
 
   FILE    *magfile, *efile, *eefile, *b3Dfile ;
@@ -1743,9 +1712,7 @@ void StMagUtilities::ReadField( )
 //________________________________________
 
 /// Interpolate the B field map - 2D interpolation
-
 void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value )
-
 {
 
   Float_t fscale ;
@@ -1775,7 +1742,6 @@ void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Floa
 }
 
 /// Interpolate the B field map - 3D interpolation
-
 void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, const Float_t phi, 
 			 Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value )
 {
@@ -1823,10 +1789,8 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
 //________________________________________
 
 /// Interpolate the E field map - 2D interpolation
-
 void StMagUtilities::Interpolate2DEdistortion( const Float_t r, const Float_t z, 
  					       const Float_t Er[neZ][neR], Float_t &Er_value )
-
 {
 
   const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
@@ -1849,11 +1813,9 @@ void StMagUtilities::Interpolate2DEdistortion( const Float_t r, const Float_t z,
 }
 
 /// Interpolate the E field map - 3D interpolation
-
 void StMagUtilities::Interpolate3DEdistortion( const Float_t r, const Float_t phi, const Float_t z, 
 					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
                                              Float_t &Er_value, Float_t &Ephi_value )
-
 {
 
   const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
@@ -1891,10 +1853,8 @@ void StMagUtilities::Interpolate3DEdistortion( const Float_t r, const Float_t ph
 //________________________________________
 
 /// Interpolate a 3x2 table (quadratic) or a 2x2 table (linear)
-
 Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarray[], 
 				     const Int_t ORDER, const Float_t x )
-
 {
 
   Float_t y ;
@@ -1923,9 +1883,7 @@ Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarra
 //________________________________________
 
 /// Search an ordered table by starting at the most recently used point
-
 void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
-
 {
 
   Long_t middle, high ;
@@ -1982,39 +1940,38 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 
 /// Convert from the old (Uniform) space charge correction to the new (1/R**2) space charge correction. 
-
+/*! 
+  Applicable to 200 GeV Au+Au data that is on the P02ge (and other) microDSTs.
+  Given the charge and momentum of a particle and a point on the circular path described by the particle , 
+  this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  This 
+  is done by undoing the old space charge corrections and then applying the new space charge corrections.
+  
+  Input x[3], p[3] and return x_new[3], p_new[3].        x[3] in cm and p[3] in GeV.
+  
+  The program works by calculating the hits on the TPC rows for
+  the input track, distorts the hits according to the new presciption, and then refits the new hits to find
+  the new track parameters.  If the track is a primary track (PrimaryOrGlobal == 0) then x[3] is assumed to
+  be the vertex and it is included in the refit.  If the track is a global track (PrimaryOrGlobal == 1) then
+  x[3] is assumed to lie somewhere (anywhere) on the track but it is not included in the fit.  For a global
+  track, x[3] must lie on the track because it is used to determine where the track flies (ie. angle phi).
+  
+  PrimaryOrGlobal = 0   for a primary track.
+  PrimaryOrGlobal = 1   for a global track.  You can also use the "Prime" enumeration in the .h file.
+  
+  The code attempts to be as realistic as possible when it does the refit.  Therefore, it asks you for
+  the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
+  For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
+  word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
+  
+  VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
+  is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
+  So you can calculate this, external to the function, and then work with a realistic vertex error bar if
+  you wish to do it.  200 microns error is a good average value for central Au-Au events.
+*/
 void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
 					        const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
 		         const unsigned int RowMask1  , const unsigned int RowMask2 ,const Float_t VertexError)
-
-// Applicable to 200 GeV Au+Au data that is on the P02ge (and other) microDSTs.
-// Given the charge and momentum of a particle and a point on the circular path described by the particle , 
-// this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  This 
-// is done by undoing the old space charge corrections and then applying the new space charge corrections.
-// 
-// Input x[3], p[3] and return x_new[3], p_new[3].        x[3] in cm and p[3] in GeV.
-//   
-// The program works by calculating the hits on the TPC rows for
-// the input track, distorts the hits according to the new presciption, and then refits the new hits to find
-// the new track parameters.  If the track is a primary track (PrimaryOrGlobal == 0) then x[3] is assumed to
-// be the vertex and it is included in the refit.  If the track is a global track (PrimaryOrGlobal == 1) then
-// x[3] is assumed to lie somewhere (anywhere) on the track but it is not included in the fit.  For a global
-// track, x[3] must lie on the track because it is used to determine where the track flies (ie. angle phi).
-//
-// PrimaryOrGlobal = 0   for a primary track.
-// PrimaryOrGlobal = 1   for a global track.  You can also use the "Prime" enumeration in the .h file.
-//
-// The code attempts to be as realistic as possible when it does the refit.  Therefore, it asks you for
-// the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
-// For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
-// word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
-// 0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
-//
-// VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
-// is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
-// So you can calculate this, external to the function, and then work with a realistic vertex error bar if
-// you wish to do it.  200 microns error is a good average value for central Au-Au events.
-
 {
 
   x_new[0] = x[0] ; x_new[1] = x[1] ; x_new[2] = x[2] ;          // Default is to do nothing
