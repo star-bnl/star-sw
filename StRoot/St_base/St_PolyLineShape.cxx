@@ -17,6 +17,55 @@
 
 #define MyInputPoints TPoints3DABC
 
+//////////////////////////////////////////////////////////////////////////////////////
+//                                                                                  //
+//                           STAR 3D geometry Object Model                          //
+//                           =============================                          //
+//                                                                                  //
+//                          St_DataSet           Legend:                            //
+//                              |                  "classA"                         //
+//                              |                     |     "classB" is derived from// 
+//                              v                     v       the "classA"          //
+//                           St_Node               "classB"                         //
+//                              ^                                                   //  
+//                              |                  "classQ"                         //
+//                              |                      ^     "classQ" has a pointer //
+//                            TShape                   |       to "classT"          //
+//                              |                   "classT"                        //
+//                              v                                                   //
+//       ----------------------------------------------------                       //
+//       |              |      |                     |      |                       //
+//       |              |      |     .    .    .     |      |                       //
+//       |              |      |                     |      |                       //
+//       V              v      v                     v      v                       //
+// St_PolyLineShape   TBRIK  TTUBE                 TPCON  TTRD1                     //
+//       ^                                                                          //
+//       |              G  E  A  N  T     S  H  A  P  E  S                          //
+//       |              ----------------------------------                          //
+//  TPoints3DABC                                                                    //
+//       |                                                                          //
+//       v                                                                          //
+//      --------------------------------------------------------                    //
+//      |                 |                 |                  |                    //
+//      |                 |                 |                  |                    //
+//      |                 |                 |                  |                    //
+//      V                 v                 v                  v                    //
+//StHits3DPoints   StHelix3DPoints   St_Table3Points      St_Points3D               //
+//      ^                 ^                 ^                  ^                    //
+//      |                 |                 |                  |                    //
+//      |                 |                 |                  |                    //
+//  StObjArray    StTrack / StHelixD  St_TableSorter      flat floating             //
+//                                          ^              point array              //
+//                                          |                                       //
+//                                          |                                       //
+//                                      St_Table                                    //
+//                                                                                  //
+//                                                                                  //
+//                     S  T  A  R    S  H  A  P  E  S                               //
+//                     -------------------------------                              //
+//                                                                                  //
+//////////////////////////////////////////////////////////////////////////////////////
+
 ClassImp(St_PolyLineShape)
 
 //______________________________________________________________________________

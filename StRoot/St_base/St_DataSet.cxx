@@ -47,6 +47,10 @@
 //            member          of this object we will say it is an       //
 //                            "Associated Member" of this dataset       //
 //                                                                      //
+//           Orphan         - If some dataset is a member of NO other   //
+//           dataset          St_DataSet object it is called an "orphan"//
+//                            dataset object                            //
+//                                                                      //
 // - Any St_DataSet object may be "Owned" by one and only one another   //
 //   St_DataSet object if any.                                          //
 //                                                                      //
@@ -65,6 +69,32 @@
 // - It is NOT required those all "DataSet Members" are in possession   //
 //   of the unique names, i.e. any number of "DataSet Members"          // 
 //   may bear one and the same name                                     //
+//                                                                      //
+//   Actions:                                                           //
+//   ========                                                           //
+//   Create  DataSet is born either as "Orphan" or                      //
+//                                  as "Structural Member"              //
+//           of another St_DataSet object                               //
+//                                                                      //
+//   Add     One dataset can be included into aother dataset.           //
+//           Upon adding:                                               //
+//           -  the "Orphan dataset" becomes "Structural Member"        //
+//           - "Structural Members" of another dataset becomes the      //
+//             "Associated Member" of this datatset                     //
+//                                                                      //
+//   Delete  - Upon deleting the "Structural Member":                   //              
+//             - "REMOVES" itself  from the "Parent DataSet".           //
+//             - Its "Associated memberships" is not changed though     //
+//                                                                      //
+//              The last means the DataSet with the "Associated Members"//
+//              may contain a DIED pointers to unexisting "Associated"  //
+//              objects !!!                                             //
+//                                                                      //
+//  Further information is provided my the particular method            //
+//  descriptions.                                                       //
+//                                                                      //
+//  The St_DataSet class has several methods to control object('s)      // 
+//  memberships                                                         //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
