@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.27 2000/05/11 15:34:29 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.28 2000/06/09 19:54:02 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.28  2000/06/09 19:54:02  calderon
+ * use the new StMcHitComparisons
+ * use the message manager more extensively
+ * protection against the absence of hit collections
+ *
  * Revision 1.27  2000/05/11 15:34:29  calderon
  * added option to print memory usage using StMemoryInfo, useful
  * for checking leaks.  If used, a lot of status information is printed
@@ -145,6 +150,7 @@ using std::find_if;
 #include "SystemOfUnits.h"
 #include "StThreeVectorF.hh"
 
+#include "StMessMgr.h"
 
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -350,7 +356,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 StAssociationMaker::~StAssociationMaker()
 {
     //  StAssociationMaker Destructor
-    cout << "Inside StAssociationMaker Destructor" << endl;
+    if(Debug()) gMessMgr->Info() << "Inside StAssociationMaker Destructor" << endm;
     
     if (mRcTpcHitMap) {
 	mRcTpcHitMap->clear();
@@ -569,8 +575,8 @@ Int_t StAssociationMaker::Init()
     mFtpcHitResolution->SetXTitle("Rmc - Rrec (cm)");
     mFtpcHitResolution->SetYTitle("PHImc - PHIrec (deg)");
 
-    cout << "Cuts used in association for this run: " << endl;
-    cout << *(StMcParameterDB::instance()) << endl;
+    gMessMgr->Info() << "Cuts used in association for this run: " << endm;
+    gMessMgr->Info() << "\n" << *(StMcParameterDB::instance()) << "\n" << endm;
     return StMaker::Init();
 }
 
@@ -578,7 +584,7 @@ Int_t StAssociationMaker::Init()
 
 Int_t StAssociationMaker::Make()
 {
-    cout << "AssociationMaker -- Make()" << endl;
+    if (Debug()) gMessMgr->Info() << "AssociationMaker -- Make()" << endm;
     if (doPrintMemoryInfo) 
 	StMemoryInfo::instance()->snapshot();
     //
@@ -588,8 +594,8 @@ Int_t StAssociationMaker::Make()
     rEvent = (StEvent*) GetInputDS("StEvent");
 
     if (!rEvent) {
-	cerr << "No StEvent!!! " << endl;
-	cerr << "Bailing out ..." << endl;
+	gMessMgr->Warning() << "No StEvent!!! " << endm;
+	gMessMgr->Warning() << "Bailing out ..." << endm;
 	return kStWarn;
     }
     
@@ -599,8 +605,8 @@ Int_t StAssociationMaker::Make()
     StMcEvent* mEvent = 0;
     mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
     if (!mEvent) {
-	cerr << "No StMcEvent!!! " << endl;
-	cerr << "Bailing out ..." << endl;
+	gMessMgr->Error() << "No StMcEvent!!! " << endm;
+	gMessMgr->Error() << "Bailing out ..." << endm;
 	return kStWarn;
     }
     
@@ -629,314 +635,325 @@ Int_t StAssociationMaker::Make()
     //
     // Loop over TPC hits and make Associations
     //
-    cout << "Making TPC Hit Associations..." << endl;
-    
-    StTpcHit*   rcTpcHit;
-    StMcTpcHit* mcTpcHit;
-    
-    // Instantiate the Tpc Hit maps
-    mRcTpcHitMap = new rcTpcHitMapType;
-    mMcTpcHitMap = new mcTpcHitMapType;
-
-    float tpcHitDistance;
-    cout << "In Sector : ";
-    for (unsigned int iSector=0;
-	 iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
+    if (rcTpcHitColl && mcTpcHitColl) {
+	if (Debug()) gMessMgr->Info() << "Making TPC Hit Associations..." << endm;
 	
-	cout << iSector + 1 << " "; flush(cout);
-	StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
-	for (unsigned int iPadrow=0;
-	     iPadrow<tpcSectHitColl->numberOfPadrows();
-	     iPadrow++) {
-	    StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
-	    //PR(iPadrow);
+	StTpcHit*   rcTpcHit;
+	StMcTpcHit* mcTpcHit;
+	
+	// Instantiate the Tpc Hit maps
+	mRcTpcHitMap = new rcTpcHitMapType;
+	mMcTpcHitMap = new mcTpcHitMapType;
+	
+	float tpcHitDistance;
+	if (Debug()) cout << "In Sector : ";
+	for (unsigned int iSector=0;
+	     iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
 	    
-	    compFuncMcTpcHit tpcComp;
-	    for (unsigned int iHit=0;
-		 iHit<tpcPadRowHitColl->hits().size();
-		 iHit++){
-		//PR(iHit); 
-
-		rcTpcHit = tpcPadRowHitColl->hits()[iHit];
-
-		// Set the reference z for the comparison function
-		// The comparison will be used to find the first Mc Hit
-		// with a z greater than this reference, so that we don't loop
-		// over the hits that we don't need to.
+	    if (Debug()) cout << iSector + 1 << " "; flush(cout);
+	    StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
+	    for (unsigned int iPadrow=0;
+		 iPadrow<tpcSectHitColl->numberOfPadrows();
+		 iPadrow++) {
+		StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
+		//PR(iPadrow);
 		
-		tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc());
-		StMcTpcHit* closestTpcHit = 0;
-
-		// Find the first Mc Tpc Hit that might have a meaningful association.
-		StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
-							 mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
-							 tpcComp);
-		
-		bool isFirst = true;
-		float xDiff, yDiff, zDiff;
-		xDiff = yDiff = zDiff = -999;
-		for (StMcTpcHitIterator jHit = tpcHitSeed;
-		     jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
-		     jHit++){
-		    //PR(jHit); 
-		    mcTpcHit = *jHit;
-		    xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
-		    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
-		    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+		compFuncMcTpcHit tpcComp;
+		for (unsigned int iHit=0;
+		     iHit<tpcPadRowHitColl->hits().size();
+		     iHit++){
+		    //PR(iHit); 
 		    
-		    if ( zDiff > parDB->zCutTpc() ) break; //mc hits are sorted, save time!
+		    rcTpcHit = tpcPadRowHitColl->hits()[iHit];
 		    
-		    if (isFirst) {
-			tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
-			closestTpcHit = mcTpcHit;
-			isFirst = false;
-		    }
-		    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
-			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
-			closestTpcHit = mcTpcHit;
-		    }
+		    // Set the reference z for the comparison function
+		    // The comparison will be used to find the first Mc Hit
+		    // with a z greater than this reference, so that we don't loop
+		    // over the hits that we don't need to.
 		    
-		    if ( fabs(xDiff)< parDB->xCutTpc() &&
-			 fabs(yDiff)< parDB->yCutTpc() &&
-			 fabs(zDiff)< parDB->zCutTpc()) {
-			// Make Associations  Use maps,
-			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
-			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
-		    }
+		    tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc());
+		    StMcTpcHit* closestTpcHit = 0;
 		    
-		} // End of Hits in Padrow loop for MC Hits
-		if (closestTpcHit)
-		    if(false)
-		    mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
-						 rcTpcHit->position().x(),
-						 closestTpcHit->position().z()-
-						 rcTpcHit->position().z() );
-	    } // End of Hits in Padrow loop for Rec. Hits
-	} // End of Padrow Loop for Rec. Hits
-    } // End of Sector Loop for Rec. Hits
-    
-    cout << "\nFinished Making TPC Hit Associations *********" << endl;
-    cout << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endl;
-    if (doPrintMemoryInfo) {
-	cout << "End of TPC Hit Associations\n";
-	StMemoryInfo::instance()->snapshot();
-	StMemoryInfo::instance()->print();
+		    // Find the first Mc Tpc Hit that might have a meaningful association.
+		    StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
+							     mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
+							     tpcComp);
+		    
+		    bool isFirst = true;
+		    float xDiff, yDiff, zDiff;
+		    xDiff = yDiff = zDiff = -999;
+		    for (StMcTpcHitIterator jHit = tpcHitSeed;
+			 jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
+			 jHit++){
+			//PR(jHit); 
+			mcTpcHit = *jHit;
+			xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+			yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
+			zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+			
+			if ( zDiff > parDB->zCutTpc() ) break; //mc hits are sorted, save time!
+			
+			if (isFirst) {
+			    tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
+			    closestTpcHit = mcTpcHit;
+			    isFirst = false;
+			}
+			if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
+			    tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
+			    closestTpcHit = mcTpcHit;
+			}
+			
+			if ( fabs(xDiff)< parDB->xCutTpc() &&
+			     fabs(yDiff)< parDB->yCutTpc() &&
+			     fabs(zDiff)< parDB->zCutTpc()) {
+			    // Make Associations  Use maps,
+			    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
+			    mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+			}
+			
+		    } // End of Hits in Padrow loop for MC Hits
+		    if (closestTpcHit)
+			if(false)
+			    mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
+							 rcTpcHit->position().x(),
+							 closestTpcHit->position().z()-
+							 rcTpcHit->position().z() );
+		} // End of Hits in Padrow loop for Rec. Hits
+	    } // End of Padrow Loop for Rec. Hits
+	} // End of Sector Loop for Rec. Hits
+	
+	if (Debug()) {
+	    cout << "\n";
+	    gMessMgr->Info() << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endm;
+	}
+	if (doPrintMemoryInfo) {
+	    if (Debug()) gMessMgr->Info() << "End of TPC Hit Associations\n" << endm;
+	    StMemoryInfo::instance()->snapshot();
+	    StMemoryInfo::instance()->print();
+	}
     }
-    
     //
     // Loop over SVT hits and make Associations
     //
-    cout << "Making SVT Hit Associations..." << endl;
+    if (rcSvtHitColl && mcSvtHitColl) {
     
-    StSvtHit*   rcSvtHit;
-    StMcSvtHit* mcSvtHit;
-    
-    // Instantiate the Svt Hit maps
-    mRcSvtHitMap = new rcSvtHitMapType;
-    mMcSvtHitMap = new mcSvtHitMapType;
-
-    float svtHitDistance;
-    unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
-    cout << "In Barrel : ";
-    for (unsigned int iBarrel=0;  nSvtHits &&
-	     iBarrel<rcSvtHitColl->numberOfBarrels(); iBarrel++) {
+	if (Debug()) gMessMgr->Info() << "Making SVT Hit Associations..." << endm;
 	
-	cout << iBarrel + 1 << " "; flush(cout);
+	StSvtHit*   rcSvtHit;
+	StMcSvtHit* mcSvtHit;
 	
-	for (unsigned int iLadder=0;
-	     iLadder<rcSvtHitColl->barrel(iBarrel)->numberOfLadders();
-	     iLadder++) {
-	    //PR(iLadder);
-	    for (unsigned int iWafer=0;
-		 iWafer<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
-		 iWafer++) {
-		//PR(iWafer);
+	// Instantiate the Svt Hit maps
+	mRcSvtHitMap = new rcSvtHitMapType;
+	mMcSvtHitMap = new mcSvtHitMapType;
+	
+	float svtHitDistance;
+	unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
+	if (Debug()) cout << "In Barrel : ";
+	for (unsigned int iBarrel=0;  nSvtHits &&
+		 iBarrel<rcSvtHitColl->numberOfBarrels(); iBarrel++) {
+	    
+	    if (Debug()) cout << iBarrel + 1 << " "; flush(cout);
+	    
+	    for (unsigned int iLadder=0;
+		 iLadder<rcSvtHitColl->barrel(iBarrel)->numberOfLadders();
+		 iLadder++) {
+		//PR(iLadder);
+		for (unsigned int iWafer=0;
+		     iWafer<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
+		     iWafer++) {
+		    //PR(iWafer);
+		    
+		    for (unsigned int iHit=0;
+			 iHit<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
+			 iHit++){
+			//PR(iHit); 
+			rcSvtHit = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[iHit];
 			
-		for (unsigned int iHit=0;
-		     iHit<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
-		     iHit++){
-		    //PR(iHit); 
-		    rcSvtHit = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[iHit];
-				
-		    StMcSvtHit* closestSvtHit = 0;
-		    float newDist = 0;
-		    for (unsigned int jHit=0;
-			 jHit<mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
-			 jHit++){
-			//PR(jHit); 
-			mcSvtHit = mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[jHit];
-			float xDiff = mcSvtHit->position().x() - rcSvtHit->position().x();
-			float yDiff = mcSvtHit->position().y() - rcSvtHit->position().y();
-			float zDiff = mcSvtHit->position().z() - rcSvtHit->position().z();
-			if ( zDiff > parDB->zCutSvt() ) break; //mc hits are sorted, save time!
-
-			if (jHit==0) {
-			    svtHitDistance=xDiff*xDiff+yDiff*yDiff+zDiff*zDiff;
-			    closestSvtHit = mcSvtHit;
-			}
-			if ( (newDist = xDiff*xDiff+yDiff*yDiff+zDiff*zDiff) < svtHitDistance) {
-			    svtHitDistance = newDist;
-			    closestSvtHit = mcSvtHit;
-			}
-			
-			if ( fabs(xDiff)< parDB->xCutSvt() &&
-			     fabs(yDiff)< parDB->yCutSvt() &&
-			     fabs(zDiff)< parDB->zCutSvt()) {
-			    // Make Associations  Use maps,
-			    mRcSvtHitMap->insert(rcSvtHitMapValType (rcSvtHit, mcSvtHit) );
-			    mMcSvtHitMap->insert(mcSvtHitMapValType (mcSvtHit, rcSvtHit) );
-			}
-			
-		    } // End of Hits in Wafer loop for MC Hits
-		    if (closestSvtHit)
-			mSvtHitResolution->Fill(closestSvtHit->position().x()-
-						rcSvtHit->position().x(),
-						closestSvtHit->position().z()-
-					        rcSvtHit->position().z() );
-		} // End of Hits in Wafer loop for Rec. Hits
-	    } // End of Wafer Loop for Rec. Hits
-	} // End of Ladder Loop for Rec. Hits
-    } // End of Barrel Loop for Rec. Hits
-
-    cout << "Finished Making SVT Hit Associations *********" << endl;
-    cout << "Number of Entries in SVT Hit Maps: " << mRcSvtHitMap->size() << endl;
-    if (doPrintMemoryInfo) {
-	cout << "End of SVT Hit Associations\n";
-	StMemoryInfo::instance()->snapshot();
-	StMemoryInfo::instance()->print();
+			StMcSvtHit* closestSvtHit = 0;
+			float newDist = 0;
+			for (unsigned int jHit=0;
+			     jHit<mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
+			     jHit++){
+			    //PR(jHit); 
+			    mcSvtHit = mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[jHit];
+			    float xDiff = mcSvtHit->position().x() - rcSvtHit->position().x();
+			    float yDiff = mcSvtHit->position().y() - rcSvtHit->position().y();
+			    float zDiff = mcSvtHit->position().z() - rcSvtHit->position().z();
+			    if ( zDiff > parDB->zCutSvt() ) break; //mc hits are sorted, save time!
+			    
+			    if (jHit==0) {
+				svtHitDistance=xDiff*xDiff+yDiff*yDiff+zDiff*zDiff;
+				closestSvtHit = mcSvtHit;
+			    }
+			    if ( (newDist = xDiff*xDiff+yDiff*yDiff+zDiff*zDiff) < svtHitDistance) {
+				svtHitDistance = newDist;
+				closestSvtHit = mcSvtHit;
+			    }
+			    
+			    if ( fabs(xDiff)< parDB->xCutSvt() &&
+				 fabs(yDiff)< parDB->yCutSvt() &&
+				 fabs(zDiff)< parDB->zCutSvt()) {
+				// Make Associations  Use maps,
+				mRcSvtHitMap->insert(rcSvtHitMapValType (rcSvtHit, mcSvtHit) );
+				mMcSvtHitMap->insert(mcSvtHitMapValType (mcSvtHit, rcSvtHit) );
+			    }
+			    
+			} // End of Hits in Wafer loop for MC Hits
+			if (closestSvtHit)
+			    mSvtHitResolution->Fill(closestSvtHit->position().x()-
+						    rcSvtHit->position().x(),
+						    closestSvtHit->position().z()-
+						    rcSvtHit->position().z() );
+		    } // End of Hits in Wafer loop for Rec. Hits
+		} // End of Wafer Loop for Rec. Hits
+	    } // End of Ladder Loop for Rec. Hits
+	} // End of Barrel Loop for Rec. Hits
+	
+	if (Debug())  {
+	    cout << "\n";
+	    gMessMgr->Info() << "Number of Entries in SVT Hit Maps: " << mRcSvtHitMap->size() << endm;
+	}
+	if (doPrintMemoryInfo) {
+	    if (Debug()) gMessMgr->Info() << "End of SVT Hit Associations\n" << endm;
+	    StMemoryInfo::instance()->snapshot();
+	    StMemoryInfo::instance()->print();
+	}
     }
-
     //
     // Loop over FTPC hits and make Associations
     //
-    cout << "Making FTPC Hit Associations..." << endl;
-    
-    StFtpcHit*   rcFtpcHit = 0;
-    StMcFtpcHit* mcFtpcHit = 0;
-    
-    // Instantiate the Ftpc Hit maps
-    mRcFtpcHitMap = new rcFtpcHitMapType;
-    mMcFtpcHitMap = new mcFtpcHitMapType;
-
-    float ftpcHitDistance = 0;
-    float minHitDistance = 0;
-    cout << "In Plane : ";
-    for (unsigned int iPlane=0;
-	 iPlane<rcFtpcHitColl->numberOfPlanes(); iPlane++) {
+    if (rcFtpcHitColl && mcFtpcHitColl) {
+	if (Debug()) gMessMgr->Info() << "Making FTPC Hit Associations..." << endm;
 	
-	cout << iPlane + 1 << " "; flush(cout);
+	StFtpcHit*   rcFtpcHit = 0;
+	StMcFtpcHit* mcFtpcHit = 0;
+	
+	// Instantiate the Ftpc Hit maps
+	mRcFtpcHitMap = new rcFtpcHitMapType;
+	mMcFtpcHitMap = new mcFtpcHitMapType;
+	
+	float ftpcHitDistance = 0;
+	float minHitDistance = 0;
+	if (Debug()) cout << "In Plane : ";
+	for (unsigned int iPlane=0;
+	     iPlane<rcFtpcHitColl->numberOfPlanes(); iPlane++) {
+	    
+	    if (Debug()) cout << iPlane + 1 << " "; flush(cout);
+	    
+	    for (unsigned int iSector=0;
+		 iSector<rcFtpcHitColl->plane(iPlane)->numberOfSectors();
+		 iSector++) {
 		
-	for (unsigned int iSector=0;
-	     iSector<rcFtpcHitColl->plane(iPlane)->numberOfSectors();
-	     iSector++) {
-
-	    compFuncMcFtpcHit ftpcComp;
-	    //PR(iSector);
-
-	    for (unsigned int iHit=0;
-		 iHit<rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits().size();
-		 iHit++){
-		//PR(iHit); 
-
-		rcFtpcHit = rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits()[iHit];
-
-		ftpcComp.setReferencePhi((rcFtpcHit->position().phi()/degree) - parDB->phiCutFtpc());
+		compFuncMcFtpcHit ftpcComp;
+		//PR(iSector);
 		
-		float rDiff, phiDiff, rDiffMin, phiDiffMin;
-		rDiff = phiDiff = rDiffMin = phiDiffMin =0;
-
-		//PR(mcFtpcHitColl->plane(iPlane)->hits().size());
-
-		StMcFtpcHitIterator ftpcHitSeed = find_if (mcFtpcHitColl->plane(iPlane)->hits().begin(),
-							   mcFtpcHitColl->plane(iPlane)->hits().end(),
-							   ftpcComp);
-		bool isFirst = true;
-		for (StMcFtpcHitIterator jHit = ftpcHitSeed;
-		     jHit<mcFtpcHitColl->plane(iPlane)->hits().end();
-		     jHit++){
+		for (unsigned int iHit=0;
+		     iHit<rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits().size();
+		     iHit++){
+		    //PR(iHit); 
 		    
-		    mcFtpcHit = *jHit;
-		    rDiff   = mcFtpcHit->position().perp() - rcFtpcHit->position().perp();
-		    phiDiff = (mcFtpcHit->position().phi()  - rcFtpcHit->position().phi())/degree;
-
-		    if ( phiDiff > parDB->phiCutFtpc() ) break; //mc hits are sorted, save time!
+		    rcFtpcHit = rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits()[iHit];
 		    
-		    ftpcHitDistance = (mcFtpcHit->position() - rcFtpcHit->position()).mag2();
+		    ftpcComp.setReferencePhi((rcFtpcHit->position().phi()/degree) - parDB->phiCutFtpc());
 		    
-		    if (isFirst) {
-			minHitDistance=ftpcHitDistance;
-			rDiffMin=rDiff;
-			phiDiffMin=phiDiff;
-			isFirst = false;
-		    }
-		    if (ftpcHitDistance < minHitDistance) {
-			minHitDistance = ftpcHitDistance;
-			rDiffMin=rDiff;
-			phiDiffMin=phiDiff;
-		    }
-
-		    if ( fabs(rDiff)< parDB->rCutFtpc() && fabs(phiDiff) < parDB->phiCutFtpc()) {
-			// Make Associations  Use maps,
-			mRcFtpcHitMap->insert(rcFtpcHitMapValType (rcFtpcHit, mcFtpcHit) );
-			mMcFtpcHitMap->insert(mcFtpcHitMapValType (mcFtpcHit, rcFtpcHit) );
-		    }
+		    float rDiff, phiDiff, rDiffMin, phiDiffMin;
+		    rDiff = phiDiff = rDiffMin = phiDiffMin =0;
 		    
-		} // End of Hits in PLANE loop for MC Hits
-		if (!isFirst)
-		    mFtpcHitResolution->Fill(rDiffMin,phiDiffMin); //!
-	    } // End of Hits in Sector loop for Rec. Hits
-	} // End of Sector Loop for Rec. Hits
-    } // End of Plane Loop for Rec. Hits
-    
-    cout << "\nFinished Making FTPC Hit Associations *********" << endl;
-    cout << "Number of Entries in Ftpc Hit Maps: " << mRcFtpcHitMap->size() << endl;
-    if (doPrintMemoryInfo) {
-	cout << "End of FTPC Hit Associations\n";
-	StMemoryInfo::instance()->snapshot();
-	StMemoryInfo::instance()->print();
+		    //PR(mcFtpcHitColl->plane(iPlane)->hits().size());
+		    
+		    StMcFtpcHitIterator ftpcHitSeed = find_if (mcFtpcHitColl->plane(iPlane)->hits().begin(),
+							       mcFtpcHitColl->plane(iPlane)->hits().end(),
+							       ftpcComp);
+		    bool isFirst = true;
+		    for (StMcFtpcHitIterator jHit = ftpcHitSeed;
+			 jHit<mcFtpcHitColl->plane(iPlane)->hits().end();
+			 jHit++){
+			
+			mcFtpcHit = *jHit;
+			rDiff   = mcFtpcHit->position().perp() - rcFtpcHit->position().perp();
+			phiDiff = (mcFtpcHit->position().phi()  - rcFtpcHit->position().phi())/degree;
+			
+			if ( phiDiff > parDB->phiCutFtpc() ) break; //mc hits are sorted, save time!
+			
+			ftpcHitDistance = (mcFtpcHit->position() - rcFtpcHit->position()).mag2();
+			
+			if (isFirst) {
+			    minHitDistance=ftpcHitDistance;
+			    rDiffMin=rDiff;
+			    phiDiffMin=phiDiff;
+			    isFirst = false;
+			}
+			if (ftpcHitDistance < minHitDistance) {
+			    minHitDistance = ftpcHitDistance;
+			    rDiffMin=rDiff;
+			    phiDiffMin=phiDiff;
+			}
+			
+			if ( fabs(rDiff)< parDB->rCutFtpc() && fabs(phiDiff) < parDB->phiCutFtpc()) {
+			    // Make Associations  Use maps,
+			    mRcFtpcHitMap->insert(rcFtpcHitMapValType (rcFtpcHit, mcFtpcHit) );
+			    mMcFtpcHitMap->insert(mcFtpcHitMapValType (mcFtpcHit, rcFtpcHit) );
+			}
+			
+		    } // End of Hits in PLANE loop for MC Hits
+		    if (!isFirst)
+			mFtpcHitResolution->Fill(rDiffMin,phiDiffMin); //!
+		} // End of Hits in Sector loop for Rec. Hits
+	    } // End of Sector Loop for Rec. Hits
+	} // End of Plane Loop for Rec. Hits
+	
+	if (Debug()) {
+	    cout << "\n";
+	    gMessMgr->Info() << "Number of Entries in Ftpc Hit Maps: " << mRcFtpcHitMap->size() << endm;
+	}
+	if (doPrintMemoryInfo) {
+	    if (Debug()) gMessMgr->Info() << "End of FTPC Hit Associations\n" << endm;
+	    StMemoryInfo::instance()->snapshot();
+	    StMemoryInfo::instance()->print();
+	}
+	
     }
-    
-
     //
     // Check that Hit Maps are big enough to Make Track Maps
     //
     bool smallTpcHitMap, smallSvtHitMap, smallFtpcHitMap;
     smallTpcHitMap = smallSvtHitMap = smallFtpcHitMap = false;
     
-    if (mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
-	cout << " -----------  WARNING --------------- " << endl;
-	cout << "   The Tpc Hit Map is too small for   " << endl;
-	cout << "   any meaningful track association.  " << endl;
-	cout << " ------------------------------------ " << endl;
-	cout << "Entries in Hit Map  : " << mRcTpcHitMap->size() << endl;
-	cout << "Required Common Hits: " << parDB->reqCommonHitsTpc() << endl;
-	cout << "Suggest increase distance cuts." << endl;
+    if (mRcTpcHitMap && mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
+	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
+			    << "   The Tpc Hit Map is too small for   \n"
+			    << "   any meaningful track association.  \n"
+			    << " ------------------------------------ \n"
+			    << "Entries in Hit Map  : " << mRcTpcHitMap->size()      << "\n"
+			    << "Required Common Hits: " << parDB->reqCommonHitsTpc() << "\n"
+			    << "Suggest increase distance cuts." << endm;
 	smallTpcHitMap = true;
     }
     
-    if (mRcSvtHitMap->size() < parDB->reqCommonHitsSvt()) {
-	cout << " -----------  WARNING --------------- " << endl;
-	cout << "   The Svt Hit Map is too small for   " << endl;
-	cout << "   any meaningful track association.  " << endl;
-	cout << " ------------------------------------ " << endl;
-	cout << "Entries in Hit Map  : " << mRcSvtHitMap->size() << endl;
-	cout << "Required Common Hits: " << parDB->reqCommonHitsSvt() << endl;
-	cout << "Suggest increase distance cuts." << endl;
+    if (mRcSvtHitMap && mRcSvtHitMap->size() < parDB->reqCommonHitsSvt()) {
+	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
+			    << "   The Svt Hit Map is too small for   \n"
+			    << "   any meaningful track association.  \n"
+			    << " ------------------------------------ \n"
+			    << "Entries in Hit Map  : " << mRcSvtHitMap->size()       << "\n"
+			    << "Required Common Hits: " << parDB->reqCommonHitsSvt()  << "\n"
+			    << "Suggest increase distance cuts." << endm;
 	smallSvtHitMap = true;
     }
-    if (mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
-	cout << " -----------  WARNING --------------- " << endl;
-	cout << "   The Ftpc Hit Map is too small for   " << endl;
-	cout << "   any meaningful track association.  " << endl;
-	cout << " ------------------------------------ " << endl;
-	cout << "Entries in Hit Map  : " << mRcFtpcHitMap->size() << endl;
-	cout << "Required Common Hits: " << parDB->reqCommonHitsFtpc() << endl;
-	cout << "Suggest increase distance cuts." << endl;
+    if (mRcFtpcHitMap && mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
+	gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
+			    << "   The Ftpc Hit Map is too small for  \n"
+			    << "   any meaningful track association.  \n"
+			    << " ------------------------------------ \n"
+			    << "Entries in Hit Map  : " << mRcFtpcHitMap->size()       << "\n"
+			    << "Required Common Hits: " << parDB->reqCommonHitsFtpc()  << "\n"
+			    << "Suggest increase distance cuts." << endm;
 	smallFtpcHitMap = true;
     }
 
-    if (smallTpcHitMap && smallSvtHitMap && smallFtpcHitMap) {
-	cout << "No Useful Hit Map to make Track Associations" << endl;
+    if ((smallTpcHitMap && smallSvtHitMap && smallFtpcHitMap) ||
+	(!mRcTpcHitMap && !mRcSvtHitMap && !mRcFtpcHitMap)) {
+	gMessMgr->Error() << "No Useful Hit Map to make Track Associations" << endm;
 	return kStWarn;
     }
     
@@ -979,7 +996,7 @@ Int_t StAssociationMaker::Make()
     mRcTrackMap = new rcTrackMapType;
     mMcTrackMap = new mcTrackMapType;
     // Begin making associations
-    cout << "Making Track Associations..." << endl;
+    if(Debug()) gMessMgr->Info() << "Making Track Associations..." << endl;
 
     //
     // Loop over tracks nodes in StEvent
@@ -999,213 +1016,211 @@ Int_t StAssociationMaker::Make()
 	
 	int nCandidates = 0;
 
-	//
-	// Get the hits of this track.
-	//
-
-	StPtrVecHit recTpcHits   = rcTrack->detectorInfo()->hits(kTpcId);
-	StPtrVecHit recSvtHits   = rcTrack->detectorInfo()->hits(kSvtId);
-	StPtrVecHit recFtpcHitsW = rcTrack->detectorInfo()->hits(kFtpcWestId);
-	StPtrVecHit recFtpcHitsE = rcTrack->detectorInfo()->hits(kFtpcEastId);
 
 		
 	//
 	// Loop over the TPC hits of the track
 	//
-	unsigned int recTpcHitI;
- 	for (recTpcHitI = 0; recTpcHitI < recTpcHits.size(); recTpcHitI++) {
-	    	    
-	    rcHit = recTpcHits[recTpcHitI];
-	    rcKeyTpcHit = dynamic_cast<StTpcHit*>(rcHit);
+	if (mRcTpcHitMap) {
+	    StPtrVecHit recTpcHits   = rcTrack->detectorInfo()->hits(kTpcId);
+	    unsigned int recTpcHitI;
+	    for (recTpcHitI = 0; recTpcHitI < recTpcHits.size(); recTpcHitI++) {
 		
-	    if (!rcKeyTpcHit) continue;
-	    boundsTpc = mRcTpcHitMap->equal_range(rcKeyTpcHit);
-	    
-	    for (tpcHMIter=boundsTpc.first; tpcHMIter!=boundsTpc.second; ++tpcHMIter) {
+		rcHit = recTpcHits[recTpcHitI];
+		rcKeyTpcHit = dynamic_cast<StTpcHit*>(rcHit);
 		
-		mcValueTpcHit = (*tpcHMIter).second;
-		trackCand = mcValueTpcHit->parentTrack();
-				
-		// At this point we have a candidate Monte Carlo Track
-		// If there are no candidates, create the first candidate.
-		// If already there, increment its nPings.
-		// If doesn't match any of the previous candidates, create new candidate.
-		    
-		if (nCandidates == 0) {
-		    candidates[0].mcTrack    = trackCand;
-		    candidates[0].nPingsTpc  = 1;
-		    nCandidates++;
-		    
-		}
+		if (!rcKeyTpcHit) continue;
+		boundsTpc = mRcTpcHitMap->equal_range(rcKeyTpcHit);
 		
-		else {
-		    for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-			if (trackCand==candidates[iCandidate].mcTrack){
-			    candidates[iCandidate].nPingsTpc++;
-			    break;
-			}
-			if (iCandidate == (nCandidates-1)){
-			    candidates[nCandidates].mcTrack = trackCand;
-			    candidates[nCandidates].nPingsTpc  = 1;
-			    nCandidates++;
-			    break;
-			}
-		    } // candidate loop
+		for (tpcHMIter=boundsTpc.first; tpcHMIter!=boundsTpc.second; ++tpcHMIter) {
 		    
-		}
-	    } // mc hits in multimap
-	    
-	} // Tpc Hits from Track from StEvent loop
-
+		    mcValueTpcHit = (*tpcHMIter).second;
+		    trackCand = mcValueTpcHit->parentTrack();
+		    
+		    // At this point we have a candidate Monte Carlo Track
+		    // If there are no candidates, create the first candidate.
+		    // If already there, increment its nPings.
+		    // If doesn't match any of the previous candidates, create new candidate.
+		    
+		    if (nCandidates == 0) {
+			candidates[0].mcTrack    = trackCand;
+			candidates[0].nPingsTpc  = 1;
+			nCandidates++;
+			
+		    }
+		    
+		    else {
+			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			    if (trackCand==candidates[iCandidate].mcTrack){
+				candidates[iCandidate].nPingsTpc++;
+				break;
+			    }
+			    if (iCandidate == (nCandidates-1)){
+				candidates[nCandidates].mcTrack = trackCand;
+				candidates[nCandidates].nPingsTpc  = 1;
+				nCandidates++;
+				break;
+			    }
+			} // candidate loop
+			
+		    }
+		} // mc hits in multimap
+		
+	    } // Tpc Hits from Track from StEvent loop
+	}
 	//
 	// Loop over the SVT hits of the track
 	//
-
-	unsigned int recSvtHitI;
- 	for (recSvtHitI = 0; recSvtHitI < recSvtHits.size(); recSvtHitI++) {
-	    // Loop over the SVT hits of the track
-	    
-	    rcHit = recSvtHits[recSvtHitI];
-	    rcKeySvtHit = dynamic_cast<StSvtHit*>(rcHit);
+	if (mRcSvtHitMap) {
+	    StPtrVecHit recSvtHits   = rcTrack->detectorInfo()->hits(kSvtId);
+	    unsigned int recSvtHitI;
+	    for (recSvtHitI = 0; recSvtHitI < recSvtHits.size(); recSvtHitI++) {
+		// Loop over the SVT hits of the track
 		
-	    if (!rcKeySvtHit) continue;
-	    boundsSvt = mRcSvtHitMap->equal_range(rcKeySvtHit);
-	    
-	    for (svtHMIter=boundsSvt.first; svtHMIter!=boundsSvt.second; ++svtHMIter) {
+		rcHit = recSvtHits[recSvtHitI];
+		rcKeySvtHit = dynamic_cast<StSvtHit*>(rcHit);
 		
-		mcValueSvtHit = (*svtHMIter).second;
-		trackCand = mcValueSvtHit->parentTrack();
-				
-		// At this point we have a candidate Monte Carlo Track
-		// If there are no candidates, create the first candidate.
-		// If already there, increment its nPings.
-		// If doesn't match any of the previous candidates, create new candidate.
-		    
-		if (nCandidates == 0) {
-		    candidates[0].mcTrack    = trackCand;
-		    candidates[0].nPingsSvt  = 1;
-		    nCandidates++;
-		    
-		}
+		if (!rcKeySvtHit) continue;
+		boundsSvt = mRcSvtHitMap->equal_range(rcKeySvtHit);
 		
-		else {
-		    for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-			if (trackCand==candidates[iCandidate].mcTrack){
-			    candidates[iCandidate].nPingsSvt++;
-			    break;
-			}
-			if (iCandidate == (nCandidates-1)){
-			    candidates[nCandidates].mcTrack = trackCand;
-			    candidates[nCandidates].nPingsSvt  = 1;
-			    nCandidates++;
-			    break;
-			}
-		    } // candidate loop
+		for (svtHMIter=boundsSvt.first; svtHMIter!=boundsSvt.second; ++svtHMIter) {
 		    
-		}
-	    } // mc hits in multimap
-	    
-	} // Svt Hits from Track from StEvent loop
-
+		    mcValueSvtHit = (*svtHMIter).second;
+		    trackCand = mcValueSvtHit->parentTrack();
+		    
+		    // At this point we have a candidate Monte Carlo Track
+		    // If there are no candidates, create the first candidate.
+		    // If already there, increment its nPings.
+		    // If doesn't match any of the previous candidates, create new candidate.
+		    
+		    if (nCandidates == 0) {
+			candidates[0].mcTrack    = trackCand;
+			candidates[0].nPingsSvt  = 1;
+			nCandidates++;
+			
+		    }
+		    
+		    else {
+			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			    if (trackCand==candidates[iCandidate].mcTrack){
+				candidates[iCandidate].nPingsSvt++;
+				break;
+			    }
+			    if (iCandidate == (nCandidates-1)){
+				candidates[nCandidates].mcTrack = trackCand;
+				candidates[nCandidates].nPingsSvt  = 1;
+				nCandidates++;
+				break;
+			    }
+			} // candidate loop
+			
+		    }
+		} // mc hits in multimap
+		
+	    } // Svt Hits from Track from StEvent loop
+	}
 	//
 	// Loop over the FTPC hits of the track.  Note that there are 2 loops,
 	// one for the West and one for the East FTPC, but probably if there are hits in one
 	// there won't be in the other one.
 	//
-       
-	unsigned int recFtpcHitI;
 
-	// Loop over the West FTPC hits of the track
- 	for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsW.size(); recFtpcHitI++) {
+	if (mRcFtpcHitMap) {
+	    StPtrVecHit recFtpcHitsW = rcTrack->detectorInfo()->hits(kFtpcWestId);
+	    StPtrVecHit recFtpcHitsE = rcTrack->detectorInfo()->hits(kFtpcEastId);
+	    unsigned int recFtpcHitI;
 	    
-	    rcHit = recFtpcHitsW[recFtpcHitI];
-	    rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
-	    
-	    if (!rcKeyFtpcHit) continue;
-	    boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
-	    
-	    for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
+	    // Loop over the West FTPC hits of the track
+	    for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsW.size(); recFtpcHitI++) {
 		
-		mcValueFtpcHit = (*ftpcHMIter).second;
-		trackCand = mcValueFtpcHit->parentTrack();
-				
-		// At this point we have a candidate Monte Carlo Track
-		// If there are no candidates, create the first candidate.
-		// If already there, increment its nPings.
-		// If doesn't match any of the previous candidates, create new candidate.
-		    
-		if (nCandidates == 0) {
-		    candidates[0].mcTrack    = trackCand;
-		    candidates[0].nPingsFtpc  = 1;
-		    nCandidates++;
-		    
-		}
+		rcHit = recFtpcHitsW[recFtpcHitI];
+		rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
 		
-		else {
-		    for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-			if (trackCand==candidates[iCandidate].mcTrack){
-			    candidates[iCandidate].nPingsFtpc++;
-			    break;
-			}
-			if (iCandidate == (nCandidates-1)){
-			    candidates[nCandidates].mcTrack = trackCand;
-			    candidates[nCandidates].nPingsFtpc  = 1;
-			    nCandidates++;
-			    break;
-			}
-		    } // candidate loop
-		    
-		}
-	    } // mc ftpc hits in multimap
-	    
-	} // West Ftpc Hits from Track from StEvent loop
-	
-	// Loop over the East FTPC hits of the track
-	for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsE.size(); recFtpcHitI++) {
-		    
-	    
-	    rcHit = recFtpcHitsE[recFtpcHitI];
-	    rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
+		if (!rcKeyFtpcHit) continue;
+		boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 		
-	    if (!rcKeyFtpcHit) continue;
-	    boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
-	    
-	    for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
+		for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
+		    
+		    mcValueFtpcHit = (*ftpcHMIter).second;
+		    trackCand = mcValueFtpcHit->parentTrack();
+		    
+		    // At this point we have a candidate Monte Carlo Track
+		    // If there are no candidates, create the first candidate.
+		    // If already there, increment its nPings.
+		    // If doesn't match any of the previous candidates, create new candidate.
+		    
+		    if (nCandidates == 0) {
+			candidates[0].mcTrack    = trackCand;
+			candidates[0].nPingsFtpc  = 1;
+			nCandidates++;
+			
+		    }
+		    
+		    else {
+			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			    if (trackCand==candidates[iCandidate].mcTrack){
+				candidates[iCandidate].nPingsFtpc++;
+				break;
+			    }
+			    if (iCandidate == (nCandidates-1)){
+				candidates[nCandidates].mcTrack = trackCand;
+				candidates[nCandidates].nPingsFtpc  = 1;
+				nCandidates++;
+				break;
+			    }
+			} // candidate loop
+			
+		    }
+		} // mc ftpc hits in multimap
 		
-		mcValueFtpcHit = (*ftpcHMIter).second;
-		trackCand = mcValueFtpcHit->parentTrack();
-				
-		// At this point we have a candidate Monte Carlo Track
-		// If there are no candidates, create the first candidate.
-		// If already there, increment its nPings.
-		// If doesn't match any of the previous candidates, create new candidate.
-		    
-		if (nCandidates == 0) {
-		    candidates[0].mcTrack    = trackCand;
-		    candidates[0].nPingsFtpc  = 1;
-		    nCandidates++;
-		    
-		}
-		
-		else {
-		    for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-			if (trackCand==candidates[iCandidate].mcTrack){
-			    candidates[iCandidate].nPingsFtpc++;
-			    break;
-			}
-			if (iCandidate == (nCandidates-1)){
-			    candidates[nCandidates].mcTrack = trackCand;
-			    candidates[nCandidates].nPingsFtpc  = 1;
-			    nCandidates++;
-			    break;
-			}
-		    } // candidate loop
-		    
-		}
-	    } // mc hits in multimap
+	    } // West Ftpc Hits from Track from StEvent loop
 	    
-	} // Ftpc Hits from Track from StEvent loop
-
+	    // Loop over the East FTPC hits of the track
+	    for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsE.size(); recFtpcHitI++) {
+		
+		
+		rcHit = recFtpcHitsE[recFtpcHitI];
+		rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
+		
+		if (!rcKeyFtpcHit) continue;
+		boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
+		
+		for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
+		    
+		    mcValueFtpcHit = (*ftpcHMIter).second;
+		    trackCand = mcValueFtpcHit->parentTrack();
+		    
+		    // At this point we have a candidate Monte Carlo Track
+		    // If there are no candidates, create the first candidate.
+		    // If already there, increment its nPings.
+		    // If doesn't match any of the previous candidates, create new candidate.
+		    
+		    if (nCandidates == 0) {
+			candidates[0].mcTrack    = trackCand;
+			candidates[0].nPingsFtpc  = 1;
+			nCandidates++;
+			
+		    }
+		    
+		    else {
+			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			    if (trackCand==candidates[iCandidate].mcTrack){
+				candidates[iCandidate].nPingsFtpc++;
+				break;
+			    }
+			    if (iCandidate == (nCandidates-1)){
+				candidates[nCandidates].mcTrack = trackCand;
+				candidates[nCandidates].nPingsFtpc  = 1;
+				nCandidates++;
+				break;
+			    }
+			} // candidate loop
+			
+		    }
+		} // mc hits in multimap
+		
+	    } // Ftpc Hits from Track from StEvent loop
+	}
 	//
 	// Now we need to associate the tracks that meet the commonHits criteria.
 	//
@@ -1241,8 +1256,10 @@ Int_t StAssociationMaker::Make()
     }// StEvent track loop
     
 	 
-    cout << "Finished Making Track Associations *********" << endl;
-    cout << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endl;
+    if(Debug()){
+	gMessMgr->Info() << "Finished Making Track Associations *********" << endl;
+	gMessMgr->Info() << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endl;
+    }
     if (doPrintMemoryInfo) {
 	cout << "End of Track Associations\n";
 	StMemoryInfo::instance()->snapshot();
@@ -1261,12 +1278,12 @@ Int_t StAssociationMaker::Make()
     mRcXiMap   = new rcXiMapType;
     mMcXiMap   = new mcXiMapType;
     // Begin making associations
-    cout << "Making Vertex Associations" << endl;
+    if(Debug()) gMessMgr->Info() << "Making Vertex Associations" << endl;
 
     StSPtrVecKinkVertex& kinks = rEvent->kinkVertices();
 
     
-    cout << "Kinks..." << endl;
+    if(Debug()) gMessMgr->Info() << "Kinks..." << endl;
 
     // Loop over Kinks
 
@@ -1310,15 +1327,17 @@ Int_t StAssociationMaker::Make()
 	    
 	}
     } // kink loop
-    cout << "Finished Making kink Associations *********" << endl;
-    cout << "Number of Entries in kink Maps: " << mRcKinkMap->size() << endl;
+    if(Debug()){
+	gMessMgr->Info() << "Finished Making kink Associations *********" << endl;
+	gMessMgr->Info() << "Number of Entries in kink Maps: " << mRcKinkMap->size() << endl;
+    }
     if (doPrintMemoryInfo) {
 	cout << "End of kink Associations\n";
 	StMemoryInfo::instance()->snapshot();
 	StMemoryInfo::instance()->print();
     }
 	
-    cout << "V0s..." << endl;
+    if(Debug()) gMessMgr->Info() << "V0s..." << endl;
 
     StSPtrVecV0Vertex& v0s = rEvent->v0Vertices();    
    
@@ -1351,15 +1370,17 @@ Int_t StAssociationMaker::Make()
 	}
 	
     } // V0 loop
-    cout << "Finished Making V0 Associations *********" << endl;
-    cout << "Number of Entries in V0 Maps: " << mRcV0Map->size() << endl;
+    if(Debug()) {
+	gMessMgr->Info() << "Finished Making V0 Associations *********" << endl;
+	gMessMgr->Info() << "Number of Entries in V0 Maps: " << mRcV0Map->size() << endl;
+    }
     if (doPrintMemoryInfo) {
 	cout << "End of V0 Associations\n";
 	StMemoryInfo::instance()->snapshot();
 	StMemoryInfo::instance()->print();
     }
     
-    cout << "Xis..." << endl;
+    if(Debug()) gMessMgr->Info() << "Xis..." << endl;
 
     StSPtrVecXiVertex& xis = rEvent->xiVertices();    
     
@@ -1387,9 +1408,10 @@ Int_t StAssociationMaker::Make()
 	    }
 	}
     }
-    cout << "Finished Making Xi Associations *********" << endl;
-    cout << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endl;
-
+    if(Debug()) {
+	gMessMgr->Info() << "Finished Making Xi Associations *********" << endl;
+	gMessMgr->Info() << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endl;
+    }
     if (doPrintMemoryInfo) {
 	cout << "End of Make()\n";
 	StMemoryInfo::instance()->snapshot();
