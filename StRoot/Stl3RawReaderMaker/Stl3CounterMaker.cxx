@@ -17,9 +17,14 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.4 2002/02/26 21:40:38 struck Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.5 2002/03/07 22:03:41 struck Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.5  2002/03/07 22:03:41  struck
+//  major update: using new NotifyMe() to get input filename, allows to run on
+//  more than one input file in a chain, two output tables separated into two files
+//  and put into dedicated dir StarDb/RunLog_l3
+//
 //  Revision 1.4  2002/02/26 21:40:38  struck
 //  move GetDataSet("StDAQReader") from Init() to Make(), solves a seg. fault in current dev release
 //
@@ -42,6 +47,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
+#include "StIOMaker/StIOMaker.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "tables/St_l3RunSummary_Table.h"
 #include "tables/St_l3AlgorithmInfo_Table.h"
@@ -66,29 +72,25 @@ Stl3CounterMaker::~Stl3CounterMaker(){
 Int_t Stl3CounterMaker::Init(){
   //  Init - is a first method the top level StChain calls to initialize all its makers
 
+  //cout << "\n=======>> Stl3CounterMaker::Init()" << endl;   
+
+
   // set switches
   mL3On = kFALSE;
   mStoreDbTables = kTRUE;
 
   //SetDebug(1);
 
-  mDaqFileName = new TString(GetBroadcast("DAQFile"));
-  if (m_DebugLevel) cout << "daq file: " << mDaqFileName->Data() << endl;
+  // get notice from IOmaker
+  StIOMaker* IOMaker = (StIOMaker*)GetMaker("IO"); // for doEvents.C
+  if(!IOMaker) IOMaker = (StIOMaker*)GetMaker("inputStream"); // for bfc.C
+  if (IOMaker) {
+        IOMaker->SetNotify("OpenFile", this);
+	IOMaker->SetNotify("CloseFile", this);
+  }
+  else 
+        cout << "Stl3CounterMaker::Init(): Could not SetNotify for IOMaker." << endl;
 
-  // extract file sequence number
-  TString seq((*mDaqFileName)(mDaqFileName->Index("_physics_"), 30));
-  if (seq.Contains(".daq")) {
-        TString fileNo = seq(21,4);
-	TString rowNo = seq(9,7);
-	mDaqFileSequenceNumber = atoi(fileNo.Data());
-	mRunNumber = atoi(rowNo.Data());
-  }
-  else {
-        mDaqFileSequenceNumber = 999;
-	mRunNumber = 9999999;
-	cout << "Stl3CounterMaker::Init(): Could not extract daq file run/sequence number." << endl;
-  }
-  if (m_DebugLevel) cout << "run number: " << mRunNumber << ",  sequence number: " << mDaqFileSequenceNumber << endl;
 
   // reset database pointer
   mDbSet = 0;
@@ -97,18 +99,19 @@ Int_t Stl3CounterMaker::Init(){
   mAlgorithmCounterTable = new St_l3AlgorithmCount("l3AlgorithmCount", 1);
   mGlobalCounterTable = new St_l3GlobalCounter("l3GlobalCounter", 1);
 
+  // reset database tables
   l3GlobalCounter_st totalCounterRow;
-  totalCounterRow.runNumber      = mRunNumber;
-  totalCounterRow.fileNumber     = mDaqFileSequenceNumber;
+  totalCounterRow.runNumber      = 0;
+  totalCounterRow.fileNumber     = 0;
   totalCounterRow.nProcessed     = 0;
   totalCounterRow.nReconstructed = 0;
   mGlobalCounterTable->AddAt(&totalCounterRow);
 
   for (int i=0; i<MaxNumberOfAlgorithms; i++) {
         l3AlgorithmCount_st totalAlgCounterRow;
-	totalAlgCounterRow.runNumber  = mRunNumber;
+	totalAlgCounterRow.runNumber  = 0;
         totalAlgCounterRow.algId      = 0;
-	totalAlgCounterRow.fileNumber = mDaqFileSequenceNumber;
+	totalAlgCounterRow.fileNumber = 0;
 	totalAlgCounterRow.nProcessed = 0;
 	totalAlgCounterRow.nAccept    = 0;
 	totalAlgCounterRow.nBuild     = 0;
@@ -137,17 +140,89 @@ Int_t Stl3CounterMaker::Init(){
 
 
 //_____________________________________________________________________________
+void  Stl3CounterMaker::NotifyMe(const char *about,const void *info)
+{
+  //cout << "\n=======>> Stl3CounterMaker::NotifyMe()" << endl;
+  //cout << "  about: " << about << ", info: " << ((char*) info) << endl;
+
+  if (strcmp("CloseFile", about)==0) {
+        if (!mStoreDbTables) return;
+	else WriteTable();
+  }
+  if (strcmp("OpenFile", about)==0) {
+        mDaqFileName =((char*)info);
+	InitTable();
+  }
+}
+
+
+//_____________________________________________________________________________
+Int_t Stl3CounterMaker::InitTable()
+{
+  //cout << "\n=======>> Stl3CounterMaker::InitTable()" << endl;
+
+  // extract file sequence number
+  TString seq(mDaqFileName(mDaqFileName.Index("_physics_"), 30));
+  if (seq.Contains(".daq")) {
+        TString fileNo = seq(21,4);
+	TString rowNo = seq(9,7);
+	mDaqFileSequenceNumber = atoi(fileNo.Data());
+	mRunNumber = atoi(rowNo.Data());
+  }
+  else {
+        mDaqFileSequenceNumber = 999;
+	mRunNumber = 9999999;
+	cout << "Stl3CounterMaker::InitTable(): Could not extract daq file run/sequence number." << endl;
+  }
+  if (m_DebugLevel) cout << "run number: " << mRunNumber << ",  sequence number: " << mDaqFileSequenceNumber << endl;
+
+
+  // reset database tables
+  l3GlobalCounter_st* totalCounter = (l3GlobalCounter_st*) mGlobalCounterTable->GetTable();
+  mAlgorithmCounterTable->SetNRows(MaxNumberOfAlgorithms);
+  l3AlgorithmCount_st* totalAlgCounter = (l3AlgorithmCount_st*) mAlgorithmCounterTable->GetTable();
+
+  totalCounter->runNumber      = mRunNumber;
+  totalCounter->fileNumber     = mDaqFileSequenceNumber;
+  totalCounter->nProcessed     = 0;
+  totalCounter->nReconstructed = 0;
+
+  for (int i=0; i<MaxNumberOfAlgorithms; i++) {
+        totalAlgCounter[i].runNumber  = mRunNumber;
+	totalAlgCounter[i].fileNumber = mDaqFileSequenceNumber;
+        totalAlgCounter[i].algId      = 0;
+	totalAlgCounter[i].nProcessed = 0;
+	totalAlgCounter[i].nAccept    = 0;
+	totalAlgCounter[i].nBuild     = 0;
+  }
+   
+  // reset counters
+  for (int i=0; i<MaxNumberOfGl3Nodes; i++) {
+        mGlobalCounter[i].nProcessed = 0;
+	mGlobalCounter[i].nReconstructed = 0;
+	for (int j=0; j<MaxNumberOfAlgorithms; j++) {
+	      mAlgorithmCounter[i][j].algId = 0;
+	      mAlgorithmCounter[i][j].nProcessed = 0;
+	      mAlgorithmCounter[i][j].nAccept = 0;
+	      mAlgorithmCounter[i][j].nBuild = 0;
+	}
+  }
+
+  return 0;
+}
+
+
+//_____________________________________________________________________________
 Int_t Stl3CounterMaker::Make()
 {
     //
     //  Make - this method is called in loop for each event
     //
-       
-    // here we start
     cout << "Now we start l3Counter Maker. \n" ;
 
+
     // get the l3 daqreader
-    // Make Connection to raw data
+    // make Connection to raw data
     DAQReaderSet = GetDataSet("StDAQReader");
     if (!DAQReaderSet) {
           gMessMgr->Error() << "Stl3CounterMaker::Make():  no DaqReader found!" << endm;
@@ -364,25 +439,52 @@ Int_t Stl3CounterMaker::Finish()
 {
 
   if (!mStoreDbTables) return 0;
+  else WriteTable();
 
-  // write db tables into file
+  return 0;
+}
+
+
+//____________________________________________________________________________
+Int_t Stl3CounterMaker::WriteTable()
+{
+  // write db tables into seperate files
+  // (for technical reasons)
   char filename[80];
 
-  sprintf(filename,"./StarDb/RunLog/l3counters.%08d.%06d.C",GetDate(),GetTime());
+  // dump global counters
+  sprintf(filename,"./StarDb/RunLog_l3/l3counters_glob.%08d.%06d.C",GetDate(),GetTime());
   TString dirname = gSystem->DirName(filename);
 
-  if (Debug()) cout << "output dir: " << dirname.Data() << endl;
+  if (Debug()) cout << "Stl3CounterMaker::WriteTable(): output dir: " << dirname.Data() << endl;
 
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
         if (gSystem->mkdir(dirname.Data())) {
-	      cout << "Stl3CounterMaker::Finish(): Directory " << dirname << " creation failed" << endl;
-	      cout << "Stl3CounterMaker::Finish(): Putting l3counters.C in current directory" << endl;
+	      cout << "Stl3CounterMaker::WriteTable(): Directory " << dirname << " creation failed" << endl;
+	      cout << "Stl3CounterMaker::WriteTable(): Putting l3counters_glob.C in current directory" << endl;
 	      for (int i=0;i<80;i++) filename[i]=0;
-	      sprintf(filename,"l3counters.%08d.%06d.C",GetDate(),GetTime());
+	      sprintf(filename,"l3counters_glob.%08d.%06d.C",GetDate(),GetTime());
 	}
   }
   ofstream *out = new ofstream(filename);
   mGlobalCounterTable->SavePrimitive(*out,"");
+  delete out;
+
+  // dump algorithm counters
+  sprintf(filename,"./StarDb/RunLog_l3/l3counters_algo.%08d.%06d.C",GetDate(),GetTime());
+  dirname = gSystem->DirName(filename);
+
+  if (Debug()) cout << "Stl3CounterMaker::WriteTable(): output dir: " << dirname.Data() << endl;
+
+  if (gSystem->OpenDirectory(dirname.Data())==0) { 
+        if (gSystem->mkdir(dirname.Data())) {
+	      cout << "Stl3CounterMaker::WriteTable(): Directory " << dirname << " creation failed" << endl;
+	      cout << "Stl3CounterMaker::WriteTable(): Putting l3counters_algo.C in current directory" << endl;
+	      for (int i=0;i<80;i++) filename[i]=0;
+	      sprintf(filename,"l3counters_algo.%08d.%06d.C",GetDate(),GetTime());
+	}
+  }
+  out = new ofstream(filename);
   mAlgorithmCounterTable->SavePrimitive(*out,"");
   delete out;
 
