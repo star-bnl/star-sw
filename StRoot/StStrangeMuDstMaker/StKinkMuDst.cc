@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.3 2000/09/06 21:09:03 wdeng Exp $
+ * $Id: StKinkMuDst.cc,v 3.4 2001/02/14 19:37:44 wdeng Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.4  2001/02/14 19:37:44  wdeng
+ * Get parent momentum from primary track
+ *
  * Revision 3.3  2000/09/06 21:09:03  wdeng
  * Added track charges and total momenta
  *
@@ -58,17 +61,25 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mHitDistanceParentVertex = kinkVertex->hitDistanceParentVertex();
   mDecayAngle = kinkVertex->decayAngle();
 
-  mParentMomentumX = kinkVertex->parentMomentum().x();
-  mParentMomentumY = kinkVertex->parentMomentum().y();
-  mParentMomentumZ = kinkVertex->parentMomentum().z();
+  StTrack* parentPrimaryTrack = 
+    kinkVertex->parent()->node()->track(primary);
+  if (parentPrimaryTrack) {
+    mParentMomentumX = parentPrimaryTrack->geometry()->momentum().x();
+    mParentMomentumY = parentPrimaryTrack->geometry()->momentum().y();
+    mParentMomentumZ = parentPrimaryTrack->geometry()->momentum().z();
+  } else {
+    mParentMomentumX = 999.;
+    mParentMomentumY = 999.;
+    mParentMomentumZ = 999.;
+  }
   mParentMomentum = sqrt( mParentMomentumX*mParentMomentumX +
 			  mParentMomentumY*mParentMomentumY +
 			  mParentMomentumZ*mParentMomentumZ );
   mParentCharge = kinkVertex->parent()->geometry()->charge();
 
-  mDaughterMomentumX = kinkVertex->daughterMomentum().x();
-  mDaughterMomentumY = kinkVertex->daughterMomentum().y();
-  mDaughterMomentumZ = kinkVertex->daughterMomentum().z();
+  mDaughterMomentumX = kinkVertex->daughter()->geometry()->momentum().x();
+  mDaughterMomentumY = kinkVertex->daughter()->geometry()->momentum().y();
+  mDaughterMomentumZ = kinkVertex->daughter()->geometry()->momentum().z(); 
   mDaughterMomentum = sqrt( mDaughterMomentumX*mDaughterMomentumX +
 			    mDaughterMomentumY*mDaughterMomentumY +
 			    mDaughterMomentumZ*mDaughterMomentumZ );
