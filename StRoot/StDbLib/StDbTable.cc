@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.15 2000/03/28 17:03:19 porter Exp $
+ * $Id: StDbTable.cc,v 1.16 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.16  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.15  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -60,6 +65,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.16  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.15  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -121,7 +131,7 @@
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
+StDbTable::StDbTable(const char* tableName): StDbNode(tableName), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
  mschemaID=0;
  mendTime.munixTime=0;
@@ -131,11 +141,15 @@ StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhas
  mdataIDs = 0;
  mdataRows = 0;
  mMaxRows = 500;
+
+ setDefaultFlavor();
+ mprodTime = StDbDefaults::Instance()->getProdTime();
+
 }
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
+StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
 mendTime.munixTime=0;
 mschemaID=schemaID;
@@ -146,6 +160,8 @@ melementID = 0;
  mdataRows = 0;
  mMaxRows = 500;
 
+ setDefaultFlavor();
+ mprodTime = StDbDefaults::Instance()->getProdTime();
 
 }
 
@@ -154,7 +170,12 @@ melementID = 0;
 StDbTable::StDbTable(StDbTable& table): StDbNode(table){
 
 melementID=0;
-StDbNodeInfo mnode;
+
+ strncpy(mflavor,table.getFlavor(),sizeof(mflavor));
+ mdefaultFlavor = table.defaultFlavor();
+ mprodTime = table.getProdTime();
+
+ StDbNodeInfo mnode;
  table.getNodeInfo(&mnode);
  setNodeInfo(&mnode);
  mschemaID = table.getSchemaID();
@@ -195,6 +216,27 @@ StDbTable::setNodeInfo(StDbNodeInfo* node){
   if(melementID) delete [] melementID;
   melementID = mnode.getElementID((const char*)mnode.elementID,mrows);
     
+}
+
+/////////////////////////////////////////////////////////////////////
+
+void
+StDbTable::setDefaultFlavor(){
+
+  char* flavor = StDbDefaults::Instance()->getFlavor();
+  strncpy(mflavor,flavor,sizeof(mflavor));
+  mdefaultFlavor = true;
+
+}
+
+/////////////////////////////////////////////////////////////////////
+
+void 
+StDbTable::setFlavor(const char* flavor) { 
+ if(flavor){
+   strncpy(mflavor,flavor,sizeof(mflavor)); 
+   mdefaultFlavor = StDbDefaults::Instance()->IsDefaultFlavor(mflavor);
+ }
 }
 
 /////////////////////////////////////////////////////////////////////

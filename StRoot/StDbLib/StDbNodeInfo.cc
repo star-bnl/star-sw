@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.cc,v 1.4 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbNodeInfo.cc,v 1.5 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.cc,v $
+ * Revision 1.5  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.4  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -46,9 +51,9 @@ StDbNodeInfo::StDbNodeInfo(): name(0), versionKey(0), nodeType(0), structName(0)
 
 
 StDbNodeInfo::StDbNodeInfo(StDbNodeInfo& node){
-name=mstrDup(node.name);
-versionKey=mstrDup(node.versionKey);
-copyInfo(&node);
+ name=mstrDup(node.name);
+ versionKey=mstrDup(node.versionKey);
+ copyInfo(&node);
 }
 
 void

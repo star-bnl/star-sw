@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.9 2000/03/28 17:03:18 porter Exp $
+ * $Id: StDbDefs.hh,v 1.10 2000/04/25 18:26:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,11 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.10  2000/04/25 18:26:02  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.9  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -61,6 +66,71 @@ enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, db
 enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3 };
 
 #include "dbstl.h"
+#include <string.h>
+
+class StDbDefaults {
+
+private:
+ 
+  char mversion[64];
+  char mflavor[16];
+  unsigned int mprodTime;
+
+  StDbDefaults() {
+                    strncpy(mversion,"default",sizeof(mversion));
+                    strncpy(mflavor,"ofl",sizeof(mflavor));
+                    mprodTime = 0;
+                 };
+ 
+static StDbDefaults* mInstance;
+
+public:
+
+  static StDbDefaults* Instance(){
+    if(!mInstance){
+      mInstance = new StDbDefaults;
+    }
+   return mInstance;
+  }
+
+  virtual ~StDbDefaults() {};
+
+  virtual bool IsDefaultVersion(const char* version);
+  virtual bool IsDefaultFlavor(const char* flavor);
+  virtual char* getVersion() const;
+  virtual char* getFlavor() const;
+  virtual unsigned int getProdTime() const;
+
+};
+
+inline
+bool StDbDefaults::IsDefaultVersion(const char* version){
+if(strcmp(version,mversion)==0)return true;
+return false;
+}
+
+inline
+bool StDbDefaults::IsDefaultFlavor(const char* flavor){
+if(strcmp(flavor,mflavor)==0)return true;
+return false;
+}
+
+inline
+char* StDbDefaults::getVersion() const {
+ char* retVal = new char[strlen(mversion)+1];
+ strcpy(retVal,mversion);
+ return retVal;
+}
+
+inline
+char* StDbDefaults::getFlavor() const {
+ char* retVal = new char[strlen(mflavor)+1];
+ strcpy(retVal,mflavor);
+ return retVal;
+}
+
+inline
+unsigned int StDbDefaults::getProdTime() const { return mprodTime; }
 
 #endif
 

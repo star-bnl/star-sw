@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.11 2000/02/15 20:27:45 porter Exp $
+ * $Id: StDbTable.h,v 1.12 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.12  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.11  2000/02/15 20:27:45  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -67,6 +72,11 @@ class StDbBuffer;
 class StDbTable : public StDbNode {
 
 protected:
+
+char mflavor[16];
+bool mdefaultFlavor;
+unsigned int mprodTime;
+
 //! validity interval
 StDbTime mbeginTime;
 StDbTime mendTime;
@@ -116,6 +126,15 @@ public:
   virtual void setNodeInfo(StDbNodeInfo* node);
 
   virtual unsigned int getTableSize() const;
+
+  // flavor is "ofl", "onl", "sim", .... it is an char[16] array.
+  // 16 char is enough to later have "ofl|onl" type syntax
+  virtual char*        getFlavor();
+  virtual void         setFlavor(const char* flavor);
+  virtual bool         defaultFlavor() const;
+  virtual void         setDefaultFlavor();
+  virtual unsigned int getProdTime();
+  virtual void         setProdTime(unsigned int ptime);
 
   virtual unsigned int getEndTime() const ;
   virtual char*        getEndDateTime();
@@ -181,6 +200,18 @@ unsigned int
 StDbTable::getTableSize() const { if(mhasDescriptor) return mdescriptor->getTotalSizeInBytes();
 return 0;
 }
+
+inline 
+char* StDbTable::getFlavor() { return mflavor; }
+
+inline
+bool StDbTable::defaultFlavor() const {return mdefaultFlavor;}
+
+inline
+void StDbTable::setProdTime(unsigned int ptime) { mprodTime=ptime; }
+
+inline
+unsigned int StDbTable::getProdTime() { return mprodTime; }
 
 inline 
 unsigned int StDbTable::getEndTime() const { 
