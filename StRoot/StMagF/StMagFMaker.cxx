@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.8 2001/05/23 22:52:08 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.9 2001/05/29 21:59:41 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.9  2001/05/29 21:59:41  fisyak
+// Add StMagF class for back compartibility
+//
 // Revision 1.8  2001/05/23 22:52:08  fisyak
 // Fix bug with scale factor
 //
@@ -40,6 +43,7 @@
 #include "StBFChain.h"
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "tables/St_MagFactor_Table.h"
+#include "StMagF.h"
 #ifndef __CINT__
 #include "StarCallf77.h"
 #define    agdetp_new	 F77_NAME(agdetpnew,AGDETPNEW)
@@ -53,6 +57,7 @@ R__EXTERN  "C" {
 #endif
 
 ClassImp(StMagFMaker)
+ClassImp(StMagF)
   
   //_____________________________________________________________________________
 StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(kFALSE),fScale(1){}
