@@ -26,7 +26,7 @@ static const unsigned int kGeometryMessage = 16;
 static const int g_nMessageTypes = 5;
 /// Output streams corresponding to the message types
 static ostream *g_apMessageOstreams[g_nMessageTypes] = 
-{ &cout, &cout, &cout, &cout, new ofstream("GeometryMessageFile")};
+{ &cout, &cout, &cout, &cout, &cout};
 
 /// Typedefs for containers
 typedef map<unsigned int, Messenger*> messengerMap;
@@ -71,6 +71,8 @@ public:
       unsigned int oldRouting = MessengerBuf::getRoutingMask();
       return oldRouting & messages;
     }
+    /// Returns the number of message types
+    static int nMessageTypes(){ return g_nMessageTypes; }
 
     /// Initialize the output streams for the message maps.  This must be
     /// called before using a Messenger.  If a routing code is specified,
