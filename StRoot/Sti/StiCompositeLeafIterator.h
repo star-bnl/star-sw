@@ -76,7 +76,7 @@ public:
     ///Return a const_iterator marking the beginning of the leaf vector.
     tnode_vec::const_iterator const_begin() const;
 
-    ///Return a const_iterator marking the end of the leaf vector
+    ///Return a const_iterator marking the end of the leaf vector.
     tnode_vec::const_iterator const_end() const;
     
 protected:

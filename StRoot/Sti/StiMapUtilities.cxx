@@ -14,6 +14,10 @@
 //Sti
 #include "StiHit.h"
 #include "StiMapUtilities.h"
+#include "StiCompositeTreeNode.h"
+#include "StiPlacement.h"
+#include "StiDetector.h"
+#include "StiFactoryTypes.h" //For typedef
 
 //------------------------------ Hit Map Utilities ----------------------------
 
@@ -74,6 +78,19 @@ bool StidHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 bool StizHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 {
     return (lhs->z() < rhs->z()) ? true : false;
+}
+
+bool StiDetectorNodePositionLessThan::operator() (const StiDetectorNode* lhs,
+					  const StiDetectorNode* rhs) const
+{
+    if (lhs->getData()==0 || rhs->getData()==0) {
+	cout <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
+	cout <<"null data.  Return false"<<endl;
+    }
+    StiPlacement* lhsp = lhs->getData()->getPlacement();
+    StiPlacement* rhsp = rhs->getData()->getPlacement();
+
+    return lhsp->getCenterRadius()<rhsp->getCenterRadius();
 }
 
 bool SameStHit::operator()(const StiHit* rhs) const

@@ -7,6 +7,8 @@
 #include <string>
 using std::string;
 
+#include "StiFactoryTypes.h" //for typedef.  Can't forward declare!
+
 class StHit;
 class StiHit;
 class StTpcHit;
@@ -56,6 +58,10 @@ struct StizHitLessThan
     bool operator() (const StiHit*, const StiHit*) const;
 };
 
+struct StiDetectorNodePositionLessThan
+{
+    bool operator() (const StiDetectorNode*, const StiDetectorNode*) const;
+};
 
 struct SameStHit
 {
