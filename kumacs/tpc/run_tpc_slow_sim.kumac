@@ -2,6 +2,8 @@
 *                      - this is now kumac that drives tpc fast simulator 
 *  editted June 4, 1998 - Kathy Turner
 *  editted 6/9/98 Kathy Turner
+*  editted 6/25/98 Lidia Didenko
+*  editted 6/25/98 Kathy Turner
 * ***********************************************************************
 ************************************************************************
 macro run__

@@ -1,6 +1,8 @@
 * created May 27, 1998 - Kathy Turner
 *                      - this is now kumac that drives tpc fast simulator 
 *  editted June 4, 1998 Kathy Turner
+*  editted 6/25/98 Lidia Didenko
+*  6/25/98 - Kathy Turner
 * ***********************************************************************
 ************************************************************************
 
@@ -23,7 +25,6 @@ macro run__
 *         
 *
 *
-macro/global/import *
 
 message ' *** Data Sample directory -->        ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->               ' [input_g2t_file]
@@ -72,6 +73,7 @@ $STAR/pams/trg/kumac
 
 * generic inits
   exec setup_dir
+  macro/global/import *
   exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA

@@ -4,7 +4,8 @@
 *                            [data], [geant] !!
 * editted June 2, 1998 - Kathy Turner
 *                   - put in tcl_init#init and took it out of tpc_tracker.kumac
-*  editted June 3, 1998 - Kathy Turner
+* editted June 3, 1998 - Kathy Turner
+*  editted 6/25/98 - Kathy Turner
 * ***********************************************************************
 ************************************************************************
 
@@ -16,7 +17,7 @@
           funit=21 _
           nfile=tptrack.ntup _
           nid=111 _
-          table=/dui/data/tpc/tracks/tptrack
+          table=tpc/tracks/tptrack
           
 
 *  
@@ -26,7 +27,7 @@
 *    -   exec run_tpc_tracker
 *         
 *
-macro/global/import *
+
 
 message ' *** Input file data  -->             ' [input_filed]
 message ' *** Input file geant -->             ' [input_fileg]
@@ -73,6 +74,7 @@ $STAR/pams/trg/kumac
 ********************* GENERIC INITS ******************************
  
  exec setup_dir
+ macro/global/import *
  if STAF_STATUS(1).eq.0 goto ENDOFDATA
    
 ********************* READ DATA FROM TABLES ******************************
@@ -117,7 +119,7 @@ $STAR/pams/trg/kumac
    exec tpc_tracker#process_event_tte [i] 
  endif
  exec tpc_evaluation#process_event [i]
- exec write_table_to_ntuple#write_event_disk [nid] [table]
+ exec write_table_to_ntuple#write_event_disk [nid] [data][table]
  enddo
 
 
