@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.8 2001/11/09 21:10:26 posk Exp $
+// $Id: StFlowConstants.h,v 1.9 2001/11/10 01:08:06 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -37,6 +37,11 @@ class Flow{
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
   typedef Double_t PhiWgtFtpc_t[nSels][nHars][nPhiBinsFtpc];
 
+  static Float_t etaMin;
+  static Float_t etaMax;
+  static Float_t ptMin;
+  static Float_t ptMax;
+
   ClassDef(Flow,1)               // macro for rootcint
 };
 
@@ -45,6 +50,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.9  2001/11/10 01:08:06  posk
+// Moved some constants into StFlowConstants.
+//
 // Revision 1.8  2001/11/09 21:10:26  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
