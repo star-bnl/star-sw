@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.15 2004/03/30 03:16:15 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.16 2004/03/31 23:44:36 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,11 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.16  2004/03/31 23:44:36  calderon
+ * Function to find the dominatrack, the number of hits belonging to the
+ * dominatrack and the average hit quality of those hits (based on idTruth and
+ * quality of StHit).
+ *
  * Revision 1.15  2004/03/30 03:16:15  calderon
  * Modifications for running in bfc.
  *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -85,6 +90,11 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.16  2004/03/31 23:44:36  calderon
+ * Function to find the dominatrack, the number of hits belonging to the
+ * dominatrack and the average hit quality of those hits (based on idTruth and
+ * quality of StHit).
+ *
  * Revision 1.15  2004/03/30 03:16:15  calderon
  * Modifications for running in bfc.
  *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -159,7 +169,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.15 2004/03/30 03:16:15 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.16 2004/03/31 23:44:36 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -210,6 +220,9 @@
 #include "StuProbabilityPidAlgorithm.h"
 
 #include "Helper.h"
+
+//helper funtion prototypes
+void dominatrackInfo(const StTrack*, short&, short&, float&);
 
 // increasing order
 inline bool hitCmp(StTpcHit* p1, StTpcHit* p2){
@@ -1197,7 +1210,14 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
   // common association info
   miniMcPair->setNCommonHit(commonHits);
   miniMcPair->setIsBestContam(isBestContam);
-
+  // 
+  short aeonFlux(-999),aeonFluxHits(0);
+  float aeonFluxQuality(-999); // MCBS: name suggested by Jerome.
+  if (prTrack) dominatrackInfo(prTrack,aeonFlux,aeonFluxHits,aeonFluxQuality);
+  else if (glTrack) dominatrackInfo(glTrack,aeonFlux,aeonFluxHits,aeonFluxQuality);
+  miniMcPair->setDominatrack(aeonFlux);
+  miniMcPair->setDominCommonHit(aeonFluxHits);
+  miniMcPair->setAvgQuality(aeonFluxQuality);
   // special case for contam pairs
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
@@ -1248,7 +1268,6 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
 
 
 }
-
 /*
 
  */
@@ -1386,7 +1405,7 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
 
   const StThreeVectorF& mcMom = mcTrack->momentum();
     
-  
+  tinyMcTrack->setKey(mcTrack->key());
   tinyMcTrack->setPtMc(mcMom.perp());
   tinyMcTrack->setPzMc(mcMom.z());
   tinyMcTrack->setEtaMc(mcMom.pseudoRapidity());
