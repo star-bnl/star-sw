@@ -1,29 +1,29 @@
 
 /* Numbering scheme for detectors
- TPC             = 1
- SVT             = 2
- RICH            = 3
- FTPC west       = 4
- FTPC east       = 5
- TOF patch       = 6
- CTB             = 7
- SSD             = 8
- barrel EMC tower= 9
- barrel EMC pre-shower = 10
- barrel SMD eta strip  = 11
- barrel SMD phi strip  = 12
- endcap EMC tower      = 13
- endcap EMC pre-shower = 14
- endcap SMD eta strip  = 15
- endcap SMD phi strip  = 16
- Zero Degree Calo west = 17
- Zero Degree Calo east = 18
- MWPC west       = 19
- MWPC east       = 20
- TPC+SSD         = 21 
- TPC+SVT         = 22
- TPC+SSD+SVT     = 23
- SSD+SVT         = 24    */
+** TPC             = 1
+** SVT             = 2
+** RICH            = 3
+** FTPC west       = 4
+** FTPC east       = 5
+** TOF patch       = 6
+** CTB             = 7
+** SSD             = 8
+** barrel EMC tower= 9
+** barrel EMC pre-shower = 10
+** barrel SMD eta strip  = 11
+** barrel SMD phi strip  = 12
+** endcap EMC tower      = 13
+** endcap EMC pre-shower = 14
+** endcap SMD eta strip  = 15
+** endcap SMD phi strip  = 16
+** Zero Degree Calo west = 17
+** Zero Degree Calo east = 18
+** MWPC west       = 19
+** MWPC east       = 20
+** TPC+SSD         = 21 
+** TPC+SVT         = 22
+** TPC+SSD+SVT     = 23
+** SSD+SVT         = 24    */
  
 
 
