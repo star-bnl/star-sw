@@ -1,5 +1,17 @@
-// $Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $
+// $Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.5  2004/05/26 21:28:37  jwebb
+// o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
+//   gains, etc...
+//
+// o StMuEEmcSimuMaker is now just a shell of its former self
+//
+// o Added StMuEEmcSimuReMaker.  This maker takes a muDst as input, and uses
+//   the database maker to "massage" the ADC response, to better simulate
+//   the calorimeter as installed.  For now, it simply uses the geant
+//   energy response, combined with a single sampling fraction and the
+//   database gains and pedestals to come up with a new ADC response.
+//
 // Revision 1.4  2004/04/08 21:33:49  perev
 // Leak off
 //
@@ -94,11 +106,28 @@ class EEmcMCData;
 
 
 class StEEmcFastMaker : public StMaker {
+
+ public:
+   
+  Float_t   getSamplingFraction();
+  Float_t  *getTowerGains();
+  Float_t   getSmdGain();
+  Float_t   getPreshowerGain();
+
+  Int_t getMaxAdc() { return maxAdc; } // [ADC channels]
+  Int_t getMaxET() { return maxEtot; } // [GeV]
+
  private:
+
+  Int_t maxAdc;
+  Int_t maxEtot;
+
   EEmcMCData  *mevIN; ///< decoded raw .fzd event
   EEeventDst *meeve;    ///<  result stored in TTRee 
+
   void mEE2ST(EEeventDst*, StEvent*); ///< TTree-->StEvent
   void mST2EE(EEeventDst*, StEvent*); ///< StEvent -->TTree
+
   int mdbg;
   float msamplingFraction; ///< for Towers
   float * mfixTgain; ///<  (adc=g*de )ideal gains for Towers
@@ -107,7 +136,7 @@ class StEEmcFastMaker : public StMaker {
 
   StEvent *mlocalStEvent; ///< for test only
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $";
   
  protected:
  public: 
@@ -122,7 +151,7 @@ class StEEmcFastMaker : public StMaker {
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

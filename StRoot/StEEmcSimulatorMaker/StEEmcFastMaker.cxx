@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.11 2004/04/08 21:33:25 perev Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.12 2004/05/26 21:28:37 jwebb Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -27,15 +27,29 @@ void StEEmcFastMaker::Clear(Option_t *)
   StMaker::Clear();
 }	
 //--------------------------------------------
-StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
+
+StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name)
+{
+  /// Class Constructor.  
+
   mlocalStEvent=0;
   mdbg=0;
   mevIN= new EEmcMCData;
   meeve=new EEeventDst;
+
+  //--
+  //-- Define the sampling fraction and set the gains for converting
+  //-- geant energy response to ADC response.
+  //--
+  //-- NOTE: Gains can be changed after the fact by using the 
+  //-- StMuEEmcSimuReMaker to "remake" the ADC response of a muDst
+  //-- in a chain before any analysis on Monte Carlo is performed.
+  //-- 
+  //--
   msamplingFraction=0.05;
   // towers are gain matched to fixed E_T
-  const int maxAdc=4095;
-  const int maxEtot=60;  // in GeV
+  maxAdc=4095;
+  maxEtot=60;  // in GeV
   const float feta[kEEmcNumEtas]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115}; 
   
   int i;
@@ -323,7 +337,53 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
 }
 
 
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+Float_t StEEmcFastMaker::getSamplingFraction()
+{
+  // Returns the sampling fraction used by the fast simulator
+  // to simulate ADC response of the towers.
+  return msamplingFraction;
+}
+
+Float_t *StEEmcFastMaker::getTowerGains()
+{
+  // Returns the array of tower gains used by the fast simulator
+  // to simulate ADC response of the towers.
+  return mfixTgain;
+}
+
+Float_t StEEmcFastMaker::getSmdGain()
+{
+  // Returns the (single) constant "gain" used to convert geant
+  // energy to ADC response in the SMD.
+  return mfixSMDgain;
+}
+
+Float_t StEEmcFastMaker::getPreshowerGain()
+{
+  // Returns the (single) constant "gain" used to convert geant
+  // energy in the Pre- and Postshower detectors.
+  return mfixPgain;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.12  2004/05/26 21:28:37  jwebb
+// o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
+//   gains, etc...
+//
+// o StMuEEmcSimuMaker is now just a shell of its former self
+//
+// o Added StMuEEmcSimuReMaker.  This maker takes a muDst as input, and uses
+//   the database maker to "massage" the ADC response, to better simulate
+//   the calorimeter as installed.  For now, it simply uses the geant
+//   energy response, combined with a single sampling fraction and the
+//   database gains and pedestals to come up with a new ADC response.
+//
 // Revision 1.11  2004/04/08 21:33:25  perev
 // Leak off
 //
