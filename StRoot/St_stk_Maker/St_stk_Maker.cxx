@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.16 1999/07/15 13:58:21 perev Exp $
+// $Id: St_stk_Maker.cxx,v 1.17 1999/07/20 04:59:02 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.17  1999/07/20 04:59:02  caines
+// Temporary fix using geant vtx for tracking
+//
 // Revision 1.16  1999/07/15 13:58:21  perev
 // cleanup
 //
@@ -111,7 +114,7 @@ ClassImp(St_stk_Maker)
   m_nitermax = 7;
   m_niternull = 1000;
   m_sec_factor = 6.0;
-  m_ifstk = kFALSE;
+ 
 }
 //_____________________________________________________________________________
 St_stk_Maker::~St_stk_Maker(){
@@ -197,7 +200,6 @@ Int_t St_stk_Maker::Make()
   St_stk_track  *stk_mctrack = 0;
   St_stk_kine   *stk_mckine  = 0;
 
-  if( m_ifstk ){
   candidate_groups = new St_sgr_groups("candidate_groups",maxNofTracks);
   m_DataSet->Add(candidate_groups);
   groups      = new St_sgr_groups("groups",4*maxNofTracks);
@@ -212,49 +214,49 @@ Int_t St_stk_Maker::Make()
   m_DataSet->Add(stk_mctrack);
   stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
   m_DataSet->Add(stk_mckine);
-  }
+  
   //
   St_scs_spt    *scs_spt      = (St_scs_spt *)GetDataSet("svt_hits/.data/scs_spt");
   if (! scs_spt) {
     cout << "St_stk_Maker:: No SVT space points" << endl;
     return kStWarn;
   }
-  if( m_ifstk ){
-    // 			exec run_stk  
-    Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
-				     groups,stk_track,stk_kine,mcgroups,
-				     stk_mctrack,stk_mckine);
-    if (Res_stk_init !=  kSTAFCV_OK) {
-      cout << "Problem on return from STK_AM_INIT" << endl;
-    }
-    
-    stk_vtx_st *stk_vtx = m_stk_vtx->GetTable();
-    g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
-    printf("*************************** Warning cheating with vtx using geant\n");
-    stk_vtx->x[2] = g_vertex->ge_x[2];
-    
-    Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
-			   scs_spt,groups,
-			   m_pix_info,candidate_groups,stk_track);
-    if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
-    
-    stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
-    stk_stkpar->direct = 1;
-    Int_t Res_stk =  stk_am(m_stk_stkpar,
-			    g2t_track,g2t_event,g2t_vertex,
-			    scs_spt,
-			    m_stk_vtx,m_stk_vtx_direct,
+
+  // 			exec run_stk  
+  Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
+				   groups,stk_track,stk_kine,mcgroups,
+				   stk_mctrack,stk_mckine);
+  if (Res_stk_init !=  kSTAFCV_OK) {
+    cout << "Problem on return from STK_AM_INIT" << endl;
+  }
+  
+  stk_vtx_st *stk_vtx = m_stk_vtx->GetTable();
+  g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
+  printf("*************************** Warning cheating with vtx using geant\n");
+  stk_vtx->x[2] = g_vertex->ge_x[2];
+  
+  Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
+			 scs_spt,groups,
+			 m_pix_info,candidate_groups,stk_track);
+  if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
+  
+  stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
+  stk_stkpar->direct = 1;
+  Int_t Res_stk =  stk_am(m_stk_stkpar,
+			  g2t_track,g2t_event,g2t_vertex,
+			  scs_spt,
+			  m_stk_vtx,m_stk_vtx_direct,
 			  groups,stk_track,stk_kine,mcgroups,
-			    stk_mctrack,stk_mckine,
-			    m_stk_filler,m_config,m_geom );
-    if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
-    Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
-				m_geom, scs_spt,
+			  stk_mctrack,stk_mckine,
+			  m_stk_filler,m_config,m_geom );
+  if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
+  Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
+			      m_geom, scs_spt,
 			      groups, stk_track);
-    if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
-    
-    MakeHistograms(); //tracking histograms
-  } // If tracking turned on
+  if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
+  
+  MakeHistograms(); //tracking histograms
+
   return kStOK;
 }
 // --------------------------------------------------------------------------
