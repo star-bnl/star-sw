@@ -55,6 +55,9 @@ my $CPPP = $env->{CPPPATH};
 if ($pkg =~ /^StTrsMaker$/) {
   $CPPP = "#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
 }
+if ($pkg =~ /^StHbtMaker$/) {
+   $CPPP = "#" . $Dir . ":#" . $Dir . "/Base:" . $Dir . "/Infrastructure:" . $Dir . "/Reader:" . $Dir . "/Cut:" . $Dir . "/CorrFctn:" . $Dir . "/Fit:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+}
 if ($pkg =~ /^StDaqLib$/) {$CPPP = "#" . $Dir . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n"  if $param::debug;}
 if ($Dir =~ /pams\//) {
   $CPPP = $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
@@ -79,13 +82,18 @@ my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
-if ($STAR_SYS =~ /^sun4x_56_CC5$/) {$LIBS .= " -L/opt/WS5.0/SC5.0/lib -lCstd -liostream";}
-print "$STAR_SYS $LIBPATH\n"  if $param::debug;
+if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
+  if (!$LIBPATH) {$LIBPATH  = "/opt/WS5.0/SC5.0/lib";}
+  else           {$LIBPATH .= ":/opt/WS5.0/SC5.0/lib";}
+  $LIBS    = "-lCstd -liostream";
+}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
 		    'FCCOM'        => $FCCOM,
                     'LIBPATH'      => $LIBPATH,
                     'LIBS'         => $LIBS);
+print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
+print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
 my $CPPPATH = $cscanner->iflags;  print "CPPPATH = $CPPPATH\n" if $param::debug;
 my @cpps = split /:/,$env2->{CPPPATH}; print "@cpps\n" if $param::debug;
@@ -173,17 +181,6 @@ if ($#Defs > -1) {
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
   push @src, $cint; print "+==========add $cint\n" if $param::debug; 
 }
-if ($#src > -1) {
-  printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
-  if ($LIBPKG) {
-    Library      $env2 $LIBPKG, @src;  
-    Install $env2 $LIB, $LIBPKG; print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
-    my $libpkg = $LIB . "/" . basename($LIBPKG);
-    Depends $env2 $SO_PKG, $libpkg;
-  }
-  LinkedModule $env2 $SO_PKG, @src;
-  Install $env2 $LIB, $SO_PKG;
-}
 
 #____________________________________Tables____________________________
 Tables: 
@@ -232,12 +229,20 @@ if ($#idlL > -1) {
       $CXXFLAGS .= " -ptr" . $obj_dir . "/Tables" ;
       $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Tables/Templates.DB/*.o %_LDIRS %LIBS";
     }
-    $env3 = $env->clone(
-			'DEBUG'      => ' ',
-			'CPPPATH'    =>$ROOTCINT_CPP,
-			'CXXFLAGS'   => $CXXFLAGS,
-			'LINKMODULECOM'=> $LINKMODULECOM
-		       );
+    if ($SO_PKGT eq $SO_PKG) {
+      $CPPPATH = $env2->{CPPPATH} . ":" . $INCLUDE . "/tables";
+      $env3 = $env->clone(
+			  'CPPPATH'    => $CPPPATH
+			 );
+    }
+    else {
+      $env3 = $env->clone(
+			  'DEBUG'      => ' ',
+			  'CPPPATH'    =>$ROOTCINT_CPP,
+			  'CXXFLAGS'   => $CXXFLAGS,
+			  'LINKMODULECOM'=> $LINKMODULECOM
+			 );
+    }
     my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
     my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
     
@@ -285,18 +290,32 @@ if ($#idlL > -1) {
 	Install $env3 $objT, @src; #print "Install $env3 $objT, @src\n";
       }
       my $s;
-      ($s = $idlC)     =~  s/$shareT/$objT/g; push @sourcesT, $s;
-      ($s = $idlCintC) =~  s/$shareT/$objT/g; push @sourcesT, $s;
+      
+      if ($SO_PKGT eq $SO_PKG) {
+	($s = $idlC)     =~  s/$shareT/$objT/g; push @src, $s;
+	($s = $idlCintC) =~  s/$shareT/$objT/g; push @src, $s;
+      }
+      else {
+	($s = $idlC)     =~  s/$shareT/$objT/g; push @sourcesT, $s;
+	($s = $idlCintC) =~  s/$shareT/$objT/g; push @sourcesT, $s;
+      }
     } print "sourcesT = @sourcesT\n" if $param::debug;
-    if ($#sourcesT > -1) {
-      #    if ($STAR_SYS =~ /^intel_wnt$/) {
-      #      Library      $env3 $LIBPKGT, @sourcesT;  
-      #      Install $env3 $LIB, $LIBPKGT;
-      #    }
-      LinkedModule $env3 $SO_PKGT, @sourcesT;
-      Install $env3 $LIB, $SO_PKGT;
-    }
   }
+}
+if ($#sourcesT > -1) {
+  LinkedModule $env3 $SO_PKGT, @sourcesT;
+  Install $env3 $LIB, $SO_PKGT;
+}
+if ($#src > -1) {
+  printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
+  if ($LIBPKG) {
+    Library      $env2 $LIBPKG, @src;  
+    Install $env2 $LIB, $LIBPKG; print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
+    my $libpkg = $LIB . "/" . basename($LIBPKG);
+    Depends $env2 $SO_PKG, $libpkg;
+  }
+  LinkedModule $env2 $SO_PKG, @src;
+  Install $env2 $LIB, $SO_PKG;
 }
 #________________________________________________________________________________
   
