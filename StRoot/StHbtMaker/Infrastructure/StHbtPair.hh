@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.19  2003/01/14 09:44:00  renault
+ * corrections on average separation calculation for tracks which doesn't cross
+ * all 45 padrows.
+ *
  * Revision 1.18  2002/11/19 23:33:18  renault
  * Enable average separation calculation for all combinaisons of
  * V0 daughters and tracks
@@ -220,6 +224,16 @@ public:
   double getClosestRowAtDCA() const;
   double getWeightedAvSep() const;
   // >>>
+  double getFracOfMergedRowTrkV0Pos() const;
+  double getClosestRowAtDCATrkV0Pos() const;
+
+  double getFracOfMergedRowTrkV0Neg() const;
+  double getClosestRowAtDCATrkV0Neg() const;
+
+  double getFracOfMergedRowV0PosV0Neg() const;
+  double getFracOfMergedRowV0NegV0Pos() const;
+  double getFracOfMergedRowV0PosV0Pos() const;
+  double getFracOfMergedRowV0NegV0Neg() const;
 
 private:
   StHbtParticle* mTrack1;
@@ -244,21 +258,59 @@ private:
   mutable short mMergingParNotCalculated;
   mutable double mWeightedAvSep;
   mutable double mFracOfMergedRow;
-  mutable short mClosestRowAtDCA;
+  mutable double mClosestRowAtDCA;
+
+  mutable short mMergingParNotCalculatedTrkV0Pos;
+  mutable double mFracOfMergedRowTrkV0Pos;
+  mutable double mClosestRowAtDCATrkV0Pos;
+
+  mutable short mMergingParNotCalculatedTrkV0Neg;
+  mutable double mFracOfMergedRowTrkV0Neg;
+  mutable double mClosestRowAtDCATrkV0Neg;
+
+  mutable short mMergingParNotCalculatedV0PosV0Neg;
+  mutable double mFracOfMergedRowV0PosV0Neg;
+  mutable double mClosestRowAtDCAV0PosV0Neg;
+
+  mutable short mMergingParNotCalculatedV0NegV0Pos;
+  mutable double mFracOfMergedRowV0NegV0Pos;
+  mutable double mClosestRowAtDCAV0NegV0Pos;
+
+  mutable short mMergingParNotCalculatedV0PosV0Pos;
+  mutable double mFracOfMergedRowV0PosV0Pos;
+  mutable double mClosestRowAtDCAV0PosV0Pos;
+
+  mutable short mMergingParNotCalculatedV0NegV0Neg;
+  mutable double mFracOfMergedRowV0NegV0Neg;
+  mutable double mClosestRowAtDCAV0NegV0Neg;
+
   static double mMaxDuInner;
   static double mMaxDzInner;
   static double mMaxDuOuter;
   static double mMaxDzOuter;
   void calcMergingPar() const;
 
-  void resetParCalculated();
+  void CalcMergingParFctn(short* tmpMergingParNotCalculatedFctn,
+			  float* tmpZ1,float* tmpU1,
+			  float* tmpZ2,float* tmpU2,
+			  int *tmpSect1,int *tmpSect2,
+			  double* tmpFracOfMergedRow,
+			  double* tmpClosestRowAtDCA
+			  ) const;
 
+  void resetParCalculated();
 };
 
 inline void StHbtPair::resetParCalculated(){
   mNonIdParNotCalculated=1;
   mNonIdParNotCalculatedGlobal=1;
   mMergingParNotCalculated=1;
+  mMergingParNotCalculatedTrkV0Pos=1;
+  mMergingParNotCalculatedTrkV0Neg=1;
+  mMergingParNotCalculatedV0PosV0Pos=1;
+  mMergingParNotCalculatedV0NegV0Pos=1;
+  mMergingParNotCalculatedV0PosV0Neg=1;
+  mMergingParNotCalculatedV0NegV0Neg=1;
 }
 
 inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){
@@ -367,4 +419,94 @@ inline double StHbtPair::getWeightedAvSep() const {
   if(mMergingParNotCalculated) calcMergingPar();
   return mWeightedAvSep;
 }
+
+
+inline double StHbtPair::getFracOfMergedRowTrkV0Pos() const{
+  if(mMergingParNotCalculatedTrkV0Pos)
+    CalcMergingParFctn(&mMergingParNotCalculatedTrkV0Pos,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mZ[0]),&(mTrack2->mU[0]),
+		       &(mTrack1->mSect[0]),&(mTrack2->mSect[0]),
+		       &(mFracOfMergedRowTrkV0Pos),&(mClosestRowAtDCATrkV0Pos)
+		       );
+  return mFracOfMergedRowTrkV0Pos;
+}
+inline double StHbtPair::getClosestRowAtDCATrkV0Pos() const{
+  if(mMergingParNotCalculatedTrkV0Pos)
+    CalcMergingParFctn(&mMergingParNotCalculatedTrkV0Pos,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mZ[0]),&(mTrack2->mU[0]),
+		       &(mTrack1->mSect[0]),&(mTrack2->mSect[0]),
+		       &mFracOfMergedRowTrkV0Pos,&mClosestRowAtDCATrkV0Pos
+		       );
+  return mClosestRowAtDCATrkV0Pos;
+}
+inline double StHbtPair::getFracOfMergedRowTrkV0Neg() const{
+  if(mMergingParNotCalculatedTrkV0Neg)
+    CalcMergingParFctn(&mMergingParNotCalculatedTrkV0Neg,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mV0NegZ[0]),&(mTrack2->mV0NegU[0]),
+		       &(mTrack1->mSect[0]),&(mTrack2->mV0NegSect[0]),
+		       &(mFracOfMergedRowTrkV0Neg),&(mClosestRowAtDCATrkV0Neg)
+		       );
+  return mFracOfMergedRowTrkV0Neg;
+}
+inline double StHbtPair::getClosestRowAtDCATrkV0Neg() const{
+  if(mMergingParNotCalculatedTrkV0Neg)
+    CalcMergingParFctn(&mMergingParNotCalculatedTrkV0Neg,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mV0NegZ[0]),&(mTrack2->mV0NegU[0]),
+		       &(mTrack1->mSect[0]),&(mTrack2->mV0NegSect[0]),
+		       &mFracOfMergedRowTrkV0Neg,&mClosestRowAtDCATrkV0Neg
+		       );
+  return mClosestRowAtDCATrkV0Neg;
+}
+inline double StHbtPair::getFracOfMergedRowV0PosV0Neg() const{
+  if(mMergingParNotCalculatedV0PosV0Neg)
+    CalcMergingParFctn(&mMergingParNotCalculatedV0PosV0Neg,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mV0NegZ[0]),&(mTrack2->mV0NegU[0]),
+		       &(mTrack1->mSect[0]),&(mTrack2->mV0NegSect[0]),
+		       &(mFracOfMergedRowV0PosV0Neg),
+		       &(mClosestRowAtDCAV0PosV0Neg)
+		       );
+  return mFracOfMergedRowV0PosV0Neg;
+}
+inline double StHbtPair::getFracOfMergedRowV0NegV0Pos() const{
+  if(mMergingParNotCalculatedV0NegV0Pos)
+    CalcMergingParFctn(&mMergingParNotCalculatedV0NegV0Pos,
+		       &(mTrack1->mV0NegZ[0]),&(mTrack1->mV0NegU[0]),
+		       &(mTrack2->mZ[0]),&(mTrack2->mU[0]),
+		       &(mTrack1->mV0NegSect[0]),
+		       &(mTrack2->mSect[0]),
+		       &(mFracOfMergedRowV0NegV0Pos),
+		       &(mClosestRowAtDCAV0NegV0Pos)
+		       );
+  return mFracOfMergedRowV0NegV0Pos;
+}
+inline double StHbtPair::getFracOfMergedRowV0PosV0Pos() const{
+  if(mMergingParNotCalculatedV0PosV0Pos)
+    CalcMergingParFctn(&mMergingParNotCalculatedV0PosV0Pos,
+		       &(mTrack1->mZ[0]),&(mTrack1->mU[0]),
+		       &(mTrack2->mZ[0]),&(mTrack2->mU[0]),
+		       &(mTrack1->mSect[0]),
+		       &(mTrack2->mSect[0]),
+		       &(mFracOfMergedRowV0PosV0Pos),
+		       &(mClosestRowAtDCAV0PosV0Pos)
+		       );
+  return mFracOfMergedRowV0PosV0Pos;
+}
+inline double StHbtPair::getFracOfMergedRowV0NegV0Neg() const{
+  if(mMergingParNotCalculatedV0NegV0Neg)
+    CalcMergingParFctn(&mMergingParNotCalculatedV0NegV0Neg,
+		       &(mTrack1->mV0NegZ[0]),&(mTrack1->mV0NegU[0]),
+		       &(mTrack2->mV0NegZ[0]),&(mTrack2->mV0NegU[0]),
+		       &(mTrack1->mV0NegSect[0]),
+		       &(mTrack2->mV0NegSect[0]),
+		       &(mFracOfMergedRowV0NegV0Neg),
+		       &(mClosestRowAtDCAV0NegV0Neg)
+		       );
+  return mFracOfMergedRowV0NegV0Neg;
+}
+
 #endif
