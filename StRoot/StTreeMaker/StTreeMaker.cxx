@@ -9,7 +9,10 @@
 #include "StTreeMaker.h"
 #include "TInterpreter.h"
 
+
 ClassImp(StTreeMaker)
+static void RuncoHist(StTree *tree);
+
 
 //_____________________________________________________________________________
 StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeName )
@@ -106,6 +109,9 @@ Int_t StTreeMaker::Open(const char*)
     fTree->SetUKey(0);
     fTree->Close("keep");
   } 
+//	Treat special branches
+  RuncoHist(fTree);
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -175,7 +181,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
   St_DataSet *upd,*updList,*dat,*ds;
   const char *updName,*updTitl,*cc;
 
-  TString updFile,updMode,tlog;
+  TString updFile,updMode,updOpt,tlog;
   
   updList= Find(".branches");
   if (!updList) return;
@@ -184,7 +190,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
   while ((upd=updNext())) {//loop updates
     updTitl = upd->GetTitle();
     updName = upd->GetName();
-    updFile = ""; updMode = "";
+    updFile = ""; updMode = ""; updOpt = "";
     isSetBr = (strncmp("SetBranch:",updTitl,10)==0);
     if (isSetBr && flag!=0)	continue;
 
@@ -193,6 +199,8 @@ void StTreeMaker::UpdateTree(Int_t flag)
       if (cc) updFile.Replace(0,0,cc+5,strcspn(cc+5," "));
       cc = strstr(updTitl,"mode="); 
       if (cc) updMode.Replace(0,0,cc+5,strcspn(cc+5," "));
+      cc = strstr(updTitl,"opt="); 
+      if (cc) updOpt.Replace (0,0,cc+4,strcspn(cc+4," "));
   
       if (!updFile.IsNull())	delete upd;	//delete SetBranch with concrete filename
     } //endif SetBranch block*
@@ -206,6 +214,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
       
     if (!br) 				continue;
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
+    if (!updOpt.IsNull()) br->SetOption((const char*)updOpt);  
     
     if (flag==0) 	continue;
     
@@ -319,7 +328,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
 
     TString ts(ds->GetName());
     if (strncmp(bname,"hist"   ,4)==0) ts +="Hist";
-    if (strncmp(bname,"runco",5)==0) ts +="Runco";
+    if (strncmp(bname,"runco",  5)==0) ts +="Runco";
 
 
     St_ObjectSet *os = new St_ObjectSet(ts);
@@ -351,6 +360,15 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
   UpdateTree(2);
 }
 
-
-
+static void RuncoHist(StTree *tree)
+{
+//	special function to preset options. Keep backward compat
+  if(!tree) return;
+  St_DataSetIter nextBr(tree);
+  StBranch *br=0;
+  while ((br=(StBranch*)nextBr())) {//loop over branches
+    if (strcmp(br->GetName(),"histBranch" )==0) br->SetOption("const");
+    if (strcmp(br->GetName(),"runcoBranch")==0) br->SetOption("const");
+  }  
+}  
   

@@ -155,8 +155,7 @@ StBranch::StBranch(const Char_t *name, StTree *parent,Option_t *opt):St_DataSet(
 
   SetTitle(".StBranch");
   fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fDebug=0;
-  if (opt) 						SetOption(opt);
-  else if (strstr("histBranch runcoBranch",name))	SetOption("SINGLE");
+  SetOption(opt);
 
 }
 StBranch::~StBranch()
@@ -179,12 +178,13 @@ fIOMode = ::IntOMode(iomode[0]);
 //_______________________________________________________________________________
 Option_t *StBranch::GetIOMode()
 { 
-IOMODE[0] = RWU[fIOMode]; return IOMODE;
+IOMODE[0]=0; if (fIOMode>0) IOMODE[0] = RWU[fIOMode]; return IOMODE;
 }    
   
 //_______________________________________________________________________________
 Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 { 
+  fIOMode = abs(fIOMode);
   if (fTFile && !insist) { Error("SetFile","File is already opened");return kStWarn;}
   if (file && file[0]) fFile=file; 
   if (mode && mode[0]) SetIOMode(mode);
@@ -193,6 +193,7 @@ Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 //_______________________________________________________________________________
 Int_t StBranch::UpdateFile(const Char_t *file)
 {
+fIOMode = abs(fIOMode);
 TString outFile = file; gSystem->ExpandPathName(outFile);
 TString outDir  = gSystem->DirName (outFile);
 TString outBas  = gSystem->BaseName(outFile);
@@ -268,7 +269,7 @@ const char *StBranch::GetFile()
 //_______________________________________________________________________________
 Int_t StBranch::Open()
 {
-  if (!fIOMode) return 0;
+  if (fIOMode<=0) return 0;
   if (fTFile)   return 0;
   if (strncmp(".none",GetFile(),4)==0) return 1;
   OpenTFile();
@@ -278,7 +279,8 @@ Int_t StBranch::Open()
 Int_t StBranch::WriteEvent(ULong_t ukey)
 {
   int iret;
-  if (!(fIOMode & 2)) return 0;
+  if (fIOMode<=0) 	return 0;
+  if (!(fIOMode & 2)) 	return 0;
   SetUKey(ukey);
   if (!fList) 		return kStWarn;	//empty
   if (!fList->First()) 	return kStWarn;	//empty
@@ -296,12 +298,13 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
 Int_t StBranch::GetEvent(Int_t mode)
 {
   TObject *obj=0;
-  if (!(fIOMode&1)) return 0;
-  Delete(); if (fList) delete fList; fList=0; 
+  if (fIOMode<=0) 	return 0;
+  if (!(fIOMode&1)) 	return 0;
+  Delete(); if (fList) 	delete fList; fList=0; 
   if(Open()) return 1; 
 
-  if (IsOption("SINGLE"))	{//Read singleton
-    obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = 0;}
+  if (IsOption("const"))	{//Read constant branch (event independent)
+    obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = -fIOMode;}
 
   else if (mode) 		{//Read next
     obj = StIO::ReadNext(fTFile,GetName(),fUKey);
@@ -321,21 +324,24 @@ Int_t StBranch::GetEvent(Int_t mode)
 //_______________________________________________________________________________
 Int_t StBranch::ReadEvent(ULong_t ukey)
 {   
-  if (!(fIOMode&1)) return 0;
+  if (fIOMode<=0) 	return 0;
+  if (!(fIOMode&1)) 	return 0;
   SetUKey(ukey); 
   return GetEvent(0);
 }
 //_______________________________________________________________________________
 Int_t StBranch::NextEvent()
 {   
-  if (!(fIOMode&1)) return 0;
+  if (fIOMode<=0) 	return 0;
+  if (!(fIOMode&1)) 	return 0;
   Clear();
   return GetEvent(1);
 }
 
 Int_t StBranch::NextEvent (ULong_t &ukey)
 {
-  if (!(fIOMode&1)) return 0;
+  if (fIOMode<=0) 	return 0;
+  if (!(fIOMode&1)) 	return 0;
   Clear();
   fUKey=ukey; int iret = GetEvent(1); ukey=fUKey; return iret;
 }
@@ -390,7 +396,8 @@ void StBranch::OpenTFile()
 //_______________________________________________________________________________
 void StBranch::Clear(Option_t *)
 {
-Delete();
+  if (fIOMode<=0) 	return;
+  Delete();
 }
 //===============================================================================
 
@@ -505,10 +512,10 @@ Int_t StTree::NextEvent()
 {
   int iret=0;
   if (Open()) return kStEOF;
-  St_DataSetIter next(this); int num=0; StBranch *br;
+  St_DataSetIter next(this); StBranch *br; UInt_t ukey = fUKey;
   while ((br=(StBranch*)next())) {
     if (! br->fIOMode&1) continue;
-    if (!num++) {	//Read only 1st branch
+    if (ukey==fUKey) {	//Read only 1st branch
       iret = br->NextEvent(fUKey); 
       if(iret) return iret;
       continue;
@@ -517,7 +524,7 @@ Int_t StTree::NextEvent()
     if (iret==kStErr) return iret;
   }
   
-  return (num) ? 0 : kStEOF;
+  return (ukey!=fUKey) ? 0 : kStEOF;
 }  
   
 //_______________________________________________________________________________
