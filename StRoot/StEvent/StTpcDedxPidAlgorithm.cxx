@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.11 2001/04/05 04:00:56 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.12 2001/04/24 15:38:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.12  2001/04/24 15:38:08  fisyak
+ * Add switch (use length) for calibrated and non calibrated data
+ *
  * Revision 2.11  2001/04/05 04:00:56  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -64,7 +67,7 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.11 2001/04/05 04:00:56 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.12 2001/04/24 15:38:08 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -125,11 +128,23 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 
     // returns the number of sigma a tracks dedx is away from
     // the expected mean for a track for a particle of this mass
-            
-    double dedx_expected   = meanPidFunction(particle) ;
-    double dedx_resolution = sigmaPidFunction(particle) ;
-    double z = log(mTraits->mean()/dedx_expected);
+    double dedx_expected;
+    double dedx_resolution;
+    double z;
+    if (mTrack && mTraits->length() > 0) {
+      double momentum  = abs(mTrack->geometry()->momentum());
+      double dedx_expected   = 
+	1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
+				abs(particle->pdgEncoding())==11);
+      dedx_resolution = mTraits->errorOnMean();
+      if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
+    }
+    else {
+      dedx_expected   = meanPidFunction(particle) ;
+      dedx_resolution = sigmaPidFunction(particle) ;
 //     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
+    }
+    z = log(mTraits->mean()/dedx_expected);
     return z/dedx_resolution ;
 }
 
