@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.4 1999/07/21 09:18:36 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.5 1999/07/25 16:24:26 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.5  1999/07/25 16:24:26  wenaus
+# Use DB for HPSS check from Wensheng
+#
 # Revision 1.4  1999/07/21 09:18:36  wenaus
 # Add last update timestamp; Add HPSS check from Wensheng
 #
@@ -28,7 +31,6 @@
 #
 
 use lib "/star/u2d/wenaus/datadb";
-use Net::FTP;
 require "dbheader.pl";
 require "dbsetup.pl";
 
@@ -47,6 +49,8 @@ foreach $par ( @paramlist ) {
     $showLog = 1 if ( $par eq 'show' );
     $hpssCheck = 1 if ( $par eq 'hpss' );
 }
+# HPSS check now comes from the DB and is very fast, so turn it on always
+$hpssCheck = 1;
 
 $logLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&log\">Comments only</a>";
 $runLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&run\">Run log only</a>";
@@ -82,19 +86,25 @@ sub displayLog {
     # connect to the DB
     &StDbConnect();
 
+    my @theDbFiles;
     if ( $hpssCheck ) {
-        $ftpLgn = 1;
-        $ftp = Net::FTP->new("rmds02.rhic.bnl.gov", Port=>2121, Timeout=>10)
-            or $ftpLgn = 0;
-        $ftp->login("starsink", "MockData")
-            or $ftpLgn = 0;
-        if( !$ftpLgn ) {
-            print "HPSS access is failing; HPSS check will not be done\n";
-        }
-    } else {
-        $ftpLgn = 0;
+      $nDbfiles = 0;
+      
+      $sql="select name from $RunFileT where hpss='Y'";
+      $cursor =$dbh->prepare($sql)
+	|| die "Cannot prepare statement: $DBI::errstr\n";
+      $cursor->execute;
+
+      while(@fields = $cursor->fetchrow) {
+	my $cols=$cursor->{NUM_OF_FIELDS};
+	for($i=0;$i<$cols;$i++) {
+	  my $fvalue=$fields[$i];
+	  my $fname=$cursor->{NAME}->[$i];
+	  $theDbFiles[$nDbfiles] = $fvalue;
+	  $nDbfiles++;
+	}
+      }
     }
-    my $hpssDaq = "/home/starsink/raw/daq/";
 
     $table = $RunT;
     $selection = "*" ;
@@ -129,7 +139,7 @@ the database is rebuilt from the entry log). Updated every three hours.
 <p>
 <table border=0 cellpadding=0 cellspacing=0 width="100%">
 <tr><td align=left>
-<font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl - $hpssLogUrl</font>
+<font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl <!-- - $hpssLogUrl --></font>
 </td><td align=right>
 <font size="-1">
 Last update started at $timestamp
@@ -275,37 +285,20 @@ END
                         my ($fmode, $uid, $gid, $filesize, 
                             $readTime, $writeTime, $cTime) =
                                 (stat($daqf))[2,4,5,7,8,9,10];
-                        printf("<b>Data: %-28s %6dMB</b>",$daqf,$filesize/1000000);
-                        if($ftpLgn) {
+                        printf("<b>Data: %-28s %6dMB</b>\n",$daqf,$filesize/1000000);
+                        if($hpssCheck) {
                             my @daqfname = split(/\//, $daqf);
-                            my $year = substr $daqfname[4],0,2;
-                            my $month = substr $daqfname[4],2,2;
-                            if ( $year > 98 ) {
-                                $fullYear=1900+$year;
-                            } else {
-                                $fullYear=2000+$year;
-                            }
-                            $openDir = 1;
-                            my $hpssDaqDir = "$hpssDaq\/$fullYear\/$month";
-                            $ftp->cwd($hpssDaqDir) or $openDir = 0;
-                            if ( !$openDir ) {
-                                printf("<font color=\"red\"><b>%35s</b></font>", 'cannot open HPSS directory');
-                            } else { 
-                                @remoteFileList = $ftp->dir();
-                                $gotHpssFile = 0;
-                                for($jj=0; $jj<@remoteFileList; $jj++) {
-                                    @fields = split(/\s+/, $remoteFileList[$jj]);
-                                    $name = $fields[8];
-                                    if( $name eq $daqfname[4] ) {
-                                        $gotHpssFile = 1;
-                                        $hpssFilename = "$hpssDaqDir/$name";
-                                        $hpssFilename =~ s/\/\//\//g;
-                                        last;
-                                    }
-                                }                       
-                            }	      
-                        }             
-                        print "\n";
+                            $gotHpssFile = 0;
+                            foreach $aHpssFile (@theDbFiles) {
+                                @aHpssFileE = split(/\//,$aHpssFile);
+                                if( $aHpssFileE[7] eq $daqfname[4] ) {
+                                    $gotHpssFile = 1;
+                                    $hpssFilename = $aHpssFile;
+                                    $hpssFilename =~ s/\/\//\//g;
+                                    last;
+                                }
+                            }       
+                        }
                         $gotTheFile = 1;
                     }
                 }
@@ -315,13 +308,13 @@ END
                         if ( $gotHpssFile ) {
                             print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
                         } else {
-                            if ($ftpLgn) {print "  <b><font color=\"red\">Not in HPSS</font></b>"}
+                            if ($hpssCheck) {print "  <b><font color=\"red\">Not in HPSS</font></b>"}
                         }
                     } else {
                         if ( $gotHpssFile ) {
                             print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
                         } else {
-                            if ($ftpLgn) {
+                            if ($hpssCheck) {
                                 print "<b><font color=\"red\">Data file not in /disk1/star/daq and not in HPSS</b></font>";
                             } else {
                                 print "<b>Data file not in /disk1/star/daq/</b>\n";
@@ -335,7 +328,6 @@ END
     }
     print "</pre><p>\n";
 
-    $ftp->quit if( $ftpLgn );
     # finished
     &StDbDisconnect();
 }
@@ -355,7 +347,7 @@ Commissioning forum</a> -
 <h3>Browse the log:</h3>
 <blockquote>
 <h3>
-$fullLogUrl - $runLogUrl - $logLogUrl - $hpssLogUrl
+$fullLogUrl - $runLogUrl - $logLogUrl <!-- - $hpssLogUrl -->
 </h3>
 </blockquote>
 <h3>Make a log entry:
