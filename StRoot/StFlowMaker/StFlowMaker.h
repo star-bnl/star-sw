@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.14 2000/07/12 17:54:38 posk Exp $
+//  $Id: StFlowMaker.h,v 1.15 2000/08/25 19:55:16 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.15  2000/08/25 19:55:16  snelling
+//  Changed naming pico files (1 pico per dst)
+//
 //  Revision 1.14  2000/07/12 17:54:38  posk
 //  Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 //  Apply cuts when reading picoevent file.
@@ -100,6 +103,7 @@ class StFlowNanoEvent;
 class StFlowPicoTrack;
 class StFlowPicoEvent;
 class StFlowSelection;
+class StIOMaker;
 
 class StFlowMaker : public StMaker {
 
@@ -111,6 +115,7 @@ public:
   virtual       ~StFlowMaker();
 
   Int_t         Init();
+  Int_t         InitRun();
   Int_t         Make();
   Int_t         Finish();
   StFlowEvent*  FlowEventPointer() const;
@@ -123,7 +128,7 @@ public:
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.14 2000/07/12 17:54:38 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.15 2000/08/25 19:55:16 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -135,6 +140,8 @@ private:
   Bool_t           mNanoEventWrite;           // switch for nano-DST
   Bool_t           mNanoEventRead;            // switch for nano-DST
   Char_t           mPicoEventFileName[64];    // nano-DST file name
+  TString          mEventFileName;            //! IO Maker file name
+  TString          mEventFileNameOld;         //! IO Maker Old file name
   Bool_t           mPicoEventWrite;           // switch for nano-DST
   Bool_t           mPicoEventRead;            // switch for nano-DST
   Bool_t           mFlowEventWrite;           // switch for StFlowEvent
@@ -162,6 +169,7 @@ private:
   StFlowEvent*     pFlowEvent;                // pointer to micro-DST data
   StFlowNanoEvent* pNanoEvent;                // pointer to nano-DST Event
   StFlowPicoEvent* pPicoEvent;                // pointer to nano-DST Event
+  StIOMaker*       pIOMaker;                  //! pointer to the IOMaker
   TTree*           pFlowTree;                 // pointer to nano-DST Tree
   TTree*           pFlowMicroTree;            // pointer to the micro DST Tree
   TFile*           pNanoDST;                  //! pointer to nano-DST File

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.36 2000/08/12 20:22:20 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.37 2000/08/25 19:55:16 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.37  2000/08/25 19:55:16  snelling
+// Changed naming pico files (1 pico per dst)
+//
 // Revision 1.36  2000/08/12 20:22:20  posk
 // Recalculate centrality in read from pico.
 //
@@ -123,6 +126,7 @@
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
+#include "StIOMaker/StIOMaker.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TBranch.h"
@@ -153,7 +157,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
-					 const StFlowSelection& flowSelect) :
+			 const StFlowSelection& flowSelect) :
   StMaker(name), 
   mNanoEventWrite(kFALSE), mNanoEventRead(kFALSE), 
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), 
@@ -175,7 +179,33 @@ Int_t StFlowMaker::Make() {
   // Delete previous StFlowEvent
   if (pFlowEvent) delete pFlowEvent;
   pFlowEvent = NULL;
-    
+
+  mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
+  if (Debug()) { 
+    gMessMgr->Info() << "FlowMaker: filename: " << mEventFileName << endm;
+    gMessMgr->Info() << "FlowMaker: Old filename: " 
+		     << mEventFileNameOld << endm;  
+  }
+
+  if (mEventFileName != mEventFileNameOld) { 
+    if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
+    if (mPicoEventWrite && pPicoDST->IsOpen()) {
+      pPicoDST->Write();
+      pPicoDST->Close();
+    }
+    if (mPicoEventWrite) {
+      if (pPicoEvent) delete pPicoEvent;
+      if (pPicoDST) delete pPicoDST;
+      //      cout << "FlowMaker: FlowTree deleted " << endl;
+      //      if (pFlowTree) delete pFlowTree;
+      pPicoEvent = NULL;
+      pPicoDST = NULL;
+      //      pFlowTree = NULL;
+      InitPicoEventWrite();
+    }
+    mEventFileNameOld = mEventFileName;
+  }
+
   // Get a pointer to StEvent
   if (!mFlowEventRead && !mNanoEventRead && !mPicoEventRead) {
     pEvent = (StEvent*)GetDataSet("StEvent");
@@ -193,7 +223,8 @@ Int_t StFlowMaker::Make() {
       if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
     } else {
       Long_t eventID = pEvent->id();
-      gMessMgr->Info() << "##### FlowMaker: event " << eventID << " cut" << endm;
+      gMessMgr->Info() << "##### FlowMaker: event " << eventID 
+		       << " cut" << endm;
     }
 
   } else if (mFlowEventRead) {
@@ -229,10 +260,24 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Init() {
+
+  cout << "FlowMaker: Init is called" << endl;
+
   // Open PhiWgt file
   ReadPhiWgtFile();
 
   Int_t kRETURN = kStOK;
+
+  // get input file name
+  TString* makerName = new TString("IO");
+  pIOMaker = (StIOMaker*)GetMaker(makerName->Data());
+  delete makerName;
+
+  mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
+  mEventFileNameOld = mEventFileName; 
+
+  gMessMgr->Info() << "##### FlowMaker: truncated filename " 
+		   <<  mEventFileName << endm;
 
   if (mNanoEventWrite) kRETURN += InitNanoEventWrite();
   if (mNanoEventRead)  kRETURN += InitNanoEventRead();
@@ -242,10 +287,19 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.36 2000/08/12 20:22:20 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.37 2000/08/25 19:55:16 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StFlowMaker::InitRun() {
+  cout << "FlowMaker: InitRun is called" << endl;
+  // check filename which is being processed
+
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
@@ -367,13 +421,13 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetCTB(ctb);
   pFlowEvent->SetZDCe(zdce);
   pFlowEvent->SetZDCw(zdcw);
-
+  
   // Get initial multiplicity before TrackCuts 
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
   //pFlowEvent->SetCentrality(origMult);
   PR(origMult);
-
+  
   // loop over tracks in StEvent
   int goodTracks = 0;
   int goodTracksEta1 = 0;
@@ -664,8 +718,8 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
   
   // For use with STL vector
-//   random_shuffle(pFlowEvent->TrackCollection()->begin(),
-// 		 pFlowEvent->TrackCollection()->end());
+  //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
+  // 		 pFlowEvent->TrackCollection()->end());
 
   pFlowEvent->TrackCollection()->random_shuffle();
 
@@ -755,15 +809,20 @@ Int_t StFlowMaker::InitPicoEventWrite() {
 
   // creat a Picoevent and an output file
   pPicoEvent = new StFlowPicoEvent();   
-  Char_t* file = mPicoEventFileName;  
-  pPicoDST = new TFile(mPicoEventFileName,"RECREATE","Flow Pico DST file");
+
+  TString* filestring = new TString(mEventFileName);
+  filestring->Append(".");
+  filestring->Append(mPicoEventFileName);
+  pPicoDST = new TFile(filestring->Data(),"RECREATE","Flow Pico DST file");
   if (!pPicoDST) {
-    cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
+    cout << "##### FlowMaker: Warning: no PicoEvents file = " 
+	 << filestring->Data() << endl;
     return kStFatal;
   }
   pPicoDST->SetFormat(1);
   pPicoDST->SetCompressionLevel(comp);
-  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
+  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
+		   << filestring->Data() << endm;
 
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
@@ -775,6 +834,8 @@ Int_t StFlowMaker::InitPicoEventWrite() {
   pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
   pFlowTree->Branch("pPicoEvent", "StFlowPicoEvent", &pPicoEvent,
 		    bufsize, split);
+
+  delete filestring;
 
   return kStOK;
 }
