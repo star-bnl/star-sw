@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixelCollection.cxx,v 2.2 2000/01/31 12:01:03 ullrich Exp $
+ * $Id: StRichPixelCollection.cxx,v 2.3 2000/02/23 11:45:05 ullrich Exp $
  *
  * Author: bl, Jan 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPixelCollection.cxx,v $
- * Revision 2.2  2000/01/31 12:01:03  ullrich
- * Unique const_cast syntax for all platforms.
+ * Revision 2.3  2000/02/23 11:45:05  ullrich
+ * Added missing ClassImp macro and missing rcsid string.
  *
  * Revision 2.3  2000/02/23 11:45:05  ullrich
  * Added missing ClassImp macro and missing rcsid string.
@@ -23,8 +23,12 @@
  * add rich pixel info/containers
  *
  **************************************************************************/
+#include "StRichPixelCollection.h"
+#include "tables/St_dst_rch_pixel_Table.h"
 
-static const char rcsid[] = "$Id: StRichPixelCollection.cxx,v 2.2 2000/01/31 12:01:03 ullrich Exp $";
+ClassImp(StRichPixelCollection)
+
+static const char rcsid[] = "$Id: StRichPixelCollection.cxx,v 2.3 2000/02/23 11:45:05 ullrich Exp $";
   
 StRichPixelCollection::StRichPixelCollection()
 {
