@@ -1,6 +1,9 @@
-// $Id: StFtpcMagboltz1.hh,v 1.1 2000/12/20 08:44:02 jcs Exp $
+// $Id: StFtpcMagboltz1.hh,v 1.2 2001/04/25 17:47:12 perev Exp $
 //
 // $Log: StFtpcMagboltz1.hh,v $
+// Revision 1.2  2001/04/25 17:47:12  perev
+// HPcorrs
+//
 // Revision 1.1  2000/12/20 08:44:02  jcs
 // Replace pam/ftpc/fmg with maker
 //
@@ -133,45 +136,45 @@ private:
 public:
   StFtpcMagboltz1();
   ~StFtpcMagboltz1();
-  int StFtpcMagboltz1::magboltz_(float *e_magni__, float *b_magni__,
+  int magboltz_(float *e_magni__, float *b_magni__,
 				 float *b_ang__, float *press, float *p_ar__, 
 				 float *p_co2__, float *p_ne__, 
 				 float *p_he__, float *temper,
 				 float *vdr, float *psiang, float *efin);
-  int StFtpcMagboltz1::bfield_(int *nstep1);
-  int StFtpcMagboltz1::f0calc_(int *iback, int *icon, double *anew, int *l);
-  int StFtpcMagboltz1::fncalc_(int *lmax);
-  int StFtpcMagboltz1::g0calc_(int *icon, double *gfinal, 
+  int bfield_(int *nstep1);
+  int f0calc_(int *iback, int *icon, double *anew, int *l);
+  int fncalc_(int *lmax);
+  int g0calc_(int *icon, double *gfinal, 
 			       double *eg0sum, int *lmax);
 
-  int StFtpcMagboltz1::gas1_(double *q, double *qin, double *q2ro, int *nin,
+  int gas1_(double *q, double *qin, double *q2ro, int *nin,
 			     int *n2ro, double *e, double *ein, 
 			     double *e2ro, char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz1::gas2_(double *q, double *qin, double *q2ro, int *nin,
+  int gas2_(double *q, double *qin, double *q2ro, int *nin,
 			     int *n2ro, double *e, double *ein, double *e2ro,
 			     char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz1::gas3_(double *q, double *qin, double *q2ro, int *nin,
+  int gas3_(double *q, double *qin, double *q2ro, int *nin,
 			     int *n2ro, double *e, double *ein, double *e2ro, 
 			     char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz1::gas4_(double *q, double *qin, double *q2ro, int *nin,
+  int gas4_(double *q, double *qin, double *q2ro, int *nin,
 			     int *n2ro, double *e, double *ein, double *e2ro, 
 			     char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz1::h1calc_(int *l, double *dhfnal, double *dxx, 
+  int h1calc_(int *l, double *dhfnal, double *dxx, 
 			       double *dhfrst);
-  int StFtpcMagboltz1::mixer_();
-  int StFtpcMagboltz1::nalpha_();
-  int StFtpcMagboltz1::output_(int *n);
-  int StFtpcMagboltz1::prnter_();
-  int StFtpcMagboltz1::setup_(int *last);
-  int StFtpcMagboltz1::simp_(double *sum);
-  int StFtpcMagboltz1::stepph_(int *l);
-  int StFtpcMagboltz1::steppr_(int *itype, int *lmax);
-  int StFtpcMagboltz1::type2_(double *s2sum, int *i__, int *nstep1);
-  int StFtpcMagboltz1::type2g_(double *s2sum, int *i__, int *nstep1);
+  int mixer_();
+  int nalpha_();
+  int output_(int *n);
+  int prnter_();
+  int setup_(int *last);
+  int simp_(double *sum);
+  int stepph_(int *l);
+  int steppr_(int *itype, int *lmax);
+  int type2_(double *s2sum, int *i__, int *nstep1);
+  int type2g_(double *s2sum, int *i__, int *nstep1);
   
 };
 #endif

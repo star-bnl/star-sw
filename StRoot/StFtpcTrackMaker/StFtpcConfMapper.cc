@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.12 2001/03/30 21:30:27 jeromel Exp $
+// $Id: StFtpcConfMapper.cc,v 1.13 2001/04/25 17:53:06 perev Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.13  2001/04/25 17:53:06  perev
+// HPcorrs
+//
 // Revision 1.12  2001/03/30 21:30:27  jeromel
 // Constructor #2 argument 1 had an implicit/hidden copy of object.
 // Removed const  in declaration.
@@ -161,24 +164,24 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
   mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
 
-  for (Int_t i = 0; i < n_clusters; i++) {
+  {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
     ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
-  }
+  }}
 
   mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
 
-  for (Int_t i = 0; i < mBounds; i++) {
+  {for (Int_t i = 0; i < mBounds; i++) {
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
-  }
+  }}
 
   StFtpcConfMapPoint *h;
 
-  for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
+  {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);   
     h->Setup(mVertex);
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
-  }
+  }}
 
   if (mBench) {
     mBench->Stop("init");
@@ -222,16 +225,16 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
 
-  for (Int_t i = 0; i < mBounds; i++) {
+  {for (Int_t i = 0; i < mBounds; i++) {
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
-  }
+  }}
 
   StFtpcConfMapPoint *h;
 
-  for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
+  {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
-  }
+  }}
 
   if (mBench) {
     mBench->Stop("init");
@@ -828,7 +831,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   // Circle Fit
   StFtpcConfMapPoint *trackpoint;
 
-  for (Int_t i = start_counter; i < n; i++) {
+  {for (Int_t i = start_counter; i < n; i++) {
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
 
     L11 += 1./* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
@@ -836,7 +839,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     L22 += (trackpoint->GetXprime() * trackpoint->GetXprime())/* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
     g1  +=  trackpoint->GetYprime()/* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
     g2  += (trackpoint->GetXprime() * trackpoint->GetYprime())/* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
-  }
+  }}
 
   Double_t D = L11*L22 - L12*L12;
   
@@ -861,7 +864,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   L11 = 1.;
   L12 = L22 = g1 = g2 = 0.;
 
-  for (Int_t i = start_counter; i < n; i++ ) {
+  {for (Int_t i = start_counter; i < n; i++ ) {
     
     trackpoint= (StFtpcConfMapPoint *)trackpoints->At(i);
     
@@ -910,7 +913,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     L22 += (trackpoint->GetZv() * trackpoint->GetZv());
     g1  += s;
     g2  += (s * trackpoint->GetZv());
-  }
+  }}
     
   D = L11*L22 - L12*L12;
 
@@ -923,7 +926,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   Double_t chi2circle = 0.;
   Double_t chi2length = 0.;
   
-  for (Int_t i = start_counter; i < n; i++) {
+  {for (Int_t i = start_counter; i < n; i++) {
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
     asin_arg = StFormulary::CheckASinArg((trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius());
  
@@ -932,7 +935,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 
     chi2circle += TMath::Power(trackpoint->GetYprime() - a[0]*trackpoint->GetXprime()+a[1], 2.) / (a[0]*trackpoint->GetXprime()+a[1]);    
     chi2length += TMath::Power(s - a[2]*trackpoint->GetZv()+a[3], 2.) / (a[2]*trackpoint->GetZv()+a[3]);
-  }
+  }}
 
 
   if (mVertexConstraint) {
@@ -1048,7 +1051,7 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
 
   MIntArray *trackhitnumber = track->GetHitNumbers();  
 
-  for (Int_t i = 0; i < mMaxFtpcRow; i++) {
+  {for (Int_t i = 0; i < mMaxFtpcRow; i++) {
 
     if (i < num_t1_points) {
       trackpoint->AddAt(t1_points->At(i), mMaxFtpcRow - 1 -(((StFtpcPoint *)t1_points->At(i))->GetPadRow()-1)%mMaxFtpcRow);
@@ -1057,14 +1060,14 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
     if (i < num_t2_points) {
       trackpoint->AddAt(t2_points->At(i), mMaxFtpcRow - 1 -(((StFtpcPoint *)t2_points->At(i))->GetPadRow()-1)%mMaxFtpcRow);
     } 
-  }
+  }}
  
   trackpoint->Compress();
   trackpoint->Expand(trackpoint->GetLast()+1);
 
-  for (Int_t i = 0; i < trackpoint->GetEntriesFast(); i++) {
+  {for (Int_t i = 0; i < trackpoint->GetEntriesFast(); i++) {
     trackhitnumber->AddLast(((StFtpcPoint *)trackpoint->At(i))->GetHitNumber());
-  }
+  }}
   
   track->SetProperties(true, new_track_number);
   track->ComesFromMainVertex(mVertexConstraint);

@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.13 2001/04/02 14:20:15 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.14 2001/04/25 17:54:12 perev Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.14  2001/04/25 17:54:12  perev
+// HPcorrs
+//
 // Revision 1.13  2001/04/02 14:20:15  oldi
 // Some minor changes due to Insure++ was reporting problems.
 // These changes do not affect the physical output of StFtpcTrackMaker!
@@ -69,6 +72,7 @@
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
 
+#include <math.h>
 #include "StFtpcTracker.hh"
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
@@ -196,10 +200,10 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
 
-  for (Int_t i = 0; i < n_clusters; i++) {
+  {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcPoint(point_st++), i);
     ((StFtpcPoint *)mHit->At(i))->SetHitNumber(i);
-  }
+  }}
 
   // Copy tracks into ObjArray.
   Int_t n_tracks = fpt_fptrack->GetNRows();  // number of tracks
@@ -207,9 +211,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
 
   mTrack = new TObjArray(n_tracks);    // create TObjArray
 
-  for (Int_t i = 0; i < n_tracks; i++) {
+  {for (Int_t i = 0; i < n_tracks; i++) {
     mTrack->AddAt(new StFtpcTrack(track_st++, mHit, i), i);
-  }
+  }}
 
   mMaxDca = max_Dca;
 }

@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.7 2000/11/10 18:37:23 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.8 2001/04/25 17:53:42 perev Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.8  2001/04/25 17:53:42  perev
+// HPcorrs
+//
 // Revision 1.7  2000/11/10 18:37:23  oldi
 // It is now possible to display tracks which should be longer (so called 'short tracks').
 //
@@ -288,15 +291,15 @@ void StFtpcDisplay::TrackInfo()
 
   TLine *phi_line = new TLine[mNumPhiSegment];
 
-  for (Int_t i=0; i<mNumPhiSegment; i++) {
+  {for (Int_t i=0; i<mNumPhiSegment; i++) {
     phi_line[i] = TLine(0., 0., 30*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
 			30*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
-  } 
+  }} 
 
   TLine *eta_line = new TLine[2*mNumEtaSegment+2];
 
   Double_t eta_value;
-  for (Int_t i=0; i<=mNumEtaSegment/2.; i++) {
+  {for (Int_t i=0; i<=mNumEtaSegment/2.; i++) {
     
     eta_value = (4.165-2.396)/(mNumEtaSegment/2.) * i + 2.396;
     
@@ -309,7 +312,7 @@ void StFtpcDisplay::TrackInfo()
 			    -270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.), 
 			    -270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
 			     270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.));
-  }
+  }}
   
   TObjArray *hits;
   Int_t trackcluster;
@@ -371,7 +374,7 @@ void StFtpcDisplay::TrackInfo()
 
       cout << "Track: " << number << " Cluster: " << trackcluster << endl;
       StFtpcConfMapPoint *h;
-      for (Int_t j = 0; j < trackcluster; j++) {
+      {for (Int_t j = 0; j < trackcluster; j++) {
 	
 	h = (StFtpcConfMapPoint *)hits->At(j);
 	cout << "#" << h->GetHitNumber() << " address:" << (Int_t) h << endl;
@@ -381,7 +384,7 @@ void StFtpcDisplay::TrackInfo()
        	  
 	z_track->SetPoint(j, h->GetZv(), (track->GetRadius() * TMath::ASin((h->GetY() - track->GetCenterY()) / track->GetRadius()) - track->GetAlpha0())/1000.);
 	cout << "z: " << h->GetZv() << ", " << (track->GetRadius() * TMath::ASin((h->GetY() - track->GetCenterY()) / track->GetRadius()) - track->GetAlpha0())/1000. << endl;
-      }
+      }}
     
       fit_canvas->cd(1);
       circle_frame->Draw();
@@ -394,27 +397,27 @@ void StFtpcDisplay::TrackInfo()
       track_canvas->cd(1);
       phi_frame->Draw();
       
-      for (Int_t i=0; i<mNumPhiSegment; i++) {
+      {for (Int_t i=0; i<mNumPhiSegment; i++) {
 	phi_line[i].Draw("same");
-      } 
+      }} 
       
       phi_track->Draw("same");
 
       track_canvas->cd(2);
       eta_frame1->Draw();
       
-      for (Int_t i=0; i<2*mNumEtaSegment+2; i++) {
+      {for (Int_t i=0; i<2*mNumEtaSegment+2; i++) {
 	eta_line[i].Draw("same");
-      } 
+      }} 
 
       eta_track->Draw("same");
       
       track_canvas->cd(3);
       eta_frame2->Draw();
       
-      for (Int_t i=0; i<2*mNumEtaSegment+2; i++) {
+      {for (Int_t i=0; i<2*mNumEtaSegment+2; i++) {
 	eta_line[i].Draw("same");
-      } 
+      }}
 
       eta_track->Draw("same");
       track_canvas->Update();
@@ -427,7 +430,7 @@ void StFtpcDisplay::TrackInfo()
       cout << "Address: ";
       cin >> address;
      
-      for (Int_t i = 0; i < entries; i++) {
+      {for (Int_t i = 0; i < entries; i++) {
 	track = (StFtpcTrack *)mTrack->At(i);
 	
 	hits = (TObjArray *)(track->GetHits());
@@ -439,7 +442,7 @@ void StFtpcDisplay::TrackInfo()
 	    cout << "Track: " << i << " Cluster #" << j << endl;
 	  }
 	}
-      }
+      }}
 
       continue;
       

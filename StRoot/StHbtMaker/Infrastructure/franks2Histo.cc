@@ -1,5 +1,5 @@
 #ifndef Solaris
-
+#include <stdlib.h>
 
 #include "franks2Histo.hh"
 

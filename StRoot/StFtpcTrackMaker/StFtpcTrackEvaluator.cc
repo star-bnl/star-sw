@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.8 2001/03/06 18:06:36 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.9 2001/04/25 17:55:10 perev Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.9  2001/04/25 17:55:10  perev
+// HPcorrs
+//
 // Revision 1.8  2001/03/06 18:06:36  oldi
 // Because StFtpcClusterMaker and StFtpcConfMapper have changed two things had
 // to be changed here: coeff[4] -> coeff[6], ffs_gepoint -> ffs_fgepoint.
@@ -270,10 +273,10 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 
   mFoundHits = new TObjArray(n_clusters);    // create TObjArray
 
-  for (Int_t i = 0; i < n_clusters; i++) {
+  {for (Int_t i = 0; i < n_clusters; i++) {
     mFoundHits->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
     ((StFtpcPoint *)mFoundHits->At(i))->SetHitNumber(i);
-  }
+  }}
 
   // Copy tracks into ObjArray.
   Int_t n_tracks = fpt_fptrack->GetNRows();          // number of tracks
@@ -281,9 +284,9 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 
   mFoundTracks = new TObjArray(n_tracks);    // create TObjArray
 
-  for (Int_t i = 0; i < n_tracks; i++) {
+  {for (Int_t i = 0; i < n_tracks; i++) {
     mFoundTracks->AddAt(new StFtpcTrack(track_st++, mFoundHits, i), i);
-  }
+  }}
 
   mObjArraysCreated = (Bool_t)true;
 
@@ -1055,7 +1058,7 @@ void StFtpcTrackEvaluator::GeantHitInit(St_g2t_ftp_hit *g2t_ftp_hit)
     mGeantHits = new TObjArray(NumGeantHits);    // create TObjArray
 
     // Loop ovver all generated clusters
-    for (Int_t i = 0; i < NumGeantHits; i++, point_st++) { 
+    {for (Int_t i = 0; i < NumGeantHits; i++, point_st++) { 
       mGeantHits->AddAt(new StFtpcConfMapPoint(), i);                              // create StFtpcConfMapPoint
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetHitNumber(i);
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetNextHitNumber(point_st->next_tr_hit_p-1);
@@ -1063,7 +1066,7 @@ void StFtpcTrackEvaluator::GeantHitInit(St_g2t_ftp_hit *g2t_ftp_hit)
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetY(point_st->x[1]);
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetZ(point_st->x[2]);
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->Setup(mVertex);
-    }
+    }}
   }
 }
 
@@ -1084,7 +1087,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
     mFtpcTrackNum->SetFill(NumGeantTracks, -1);
 
     // Loop over all generated tracks
-    for (Int_t i = 0; i < NumGeantTracks; i++, track_st++) {
+    {for (Int_t i = 0; i < NumGeantTracks; i++, track_st++) {
       ftpc_hits = track_st->n_ftp_hit;
       
       if (ftpc_hits) {  // track has hits in Ftpc
@@ -1126,12 +1129,12 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	hitnumber->AddAt(track_st->hit_ftp_p - 1, 0);
 
 	// Loop over all hits in Ftpc
-	for(Int_t j = 1; j < ftpc_hits; j++) {
+	{for(Int_t j = 1; j < ftpc_hits; j++) {
 	  Int_t number = ((StFtpcConfMapPoint *)mGeantHits->At(hitnumber->At(j-1)))->GetNextHitNumber();
 	  ((StFtpcConfMapPoint *)mGeantHits->At(number))->SetTrackNumber(NumFtpcGeantTracks);
 	  points->AddAt(mGeantHits->At(number), j);
 	  hitnumber->AddAt(number, j);
-	}
+	}}
 
 	t->CalculateNMax();
 	NumFtpcGeantTracks++;
@@ -1158,7 +1161,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	  }
 	}
       }
-    }
+    }}
   }
 }
 
@@ -1174,11 +1177,11 @@ void StFtpcTrackEvaluator::FastSimHitInit(St_ffs_gepoint *ffs_hit)
     mFastSimHits = new TObjArray(NumFastSimHits);     // create TObjArray
     
     // Loop ovver all generated clusters
-    for (Int_t i = 0; i < NumFastSimHits; i++, point_st++) { 
+    {for (Int_t i = 0; i < NumFastSimHits; i++, point_st++) { 
       mFastSimHits->AddAt(new StFtpcPoint(), i);                              // create StFtpcPoint
       ((StFtpcPoint *)mFastSimHits->At(i))->SetHitNumber(i);
       ((StFtpcPoint *)mFastSimHits->At(i))->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
-    }
+    }}
   }
 }
 
@@ -1281,7 +1284,7 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
 
   Int_t wrong_hits_on_this_track = 0;
 
-  for (Int_t i=0; i<points->GetEntriesFast(); i++) {
+  {for (Int_t i=0; i<points->GetEntriesFast(); i++) {
     StFtpcPoint *p = (StFtpcPoint *)points->At(i);
     
     if (mParentTrack->At(t_counter*10+i) == mParent->At(t_counter)) {
@@ -1323,7 +1326,7 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
       }
 
     }
-  }
+  }}
 
   if (IsUncleanTrack(t_counter)) {
     mPtEtaUnclean->Fill(TMath::Abs(((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetEta()), ((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetPt());
@@ -1767,9 +1770,9 @@ void StFtpcTrackEvaluator::FillHitsOnTrack(TObjArray *trackarray, Char_t c)
     histo = mFHitsOnTrack;
   }
 
-  for (Int_t i = 0; i < trackarray->GetEntriesFast(); i++) {
+  {for (Int_t i = 0; i < trackarray->GetEntriesFast(); i++) {
     histo->Fill(((StFtpcTrack*)trackarray->At(i))->GetNumberOfPoints());
-  }
+  }}
   
   return;
 }

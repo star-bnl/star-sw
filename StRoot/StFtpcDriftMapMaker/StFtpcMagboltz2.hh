@@ -1,6 +1,9 @@
-// $Id: StFtpcMagboltz2.hh,v 1.1 2000/12/20 08:44:03 jcs Exp $
+// $Id: StFtpcMagboltz2.hh,v 1.2 2001/04/25 17:49:04 perev Exp $
 //
 // $Log: StFtpcMagboltz2.hh,v $
+// Revision 1.2  2001/04/25 17:49:04  perev
+// HPcorrs
+//
 // Revision 1.1  2000/12/20 08:44:03  jcs
 // Replace pam/ftpc/fmg with maker
 //
@@ -161,41 +164,41 @@ struct {
 public:
   StFtpcMagboltz2();
   ~StFtpcMagboltz2();
-  int StFtpcMagboltz2::magboltz_(float *e_magni__, float *b_magni__,
+  int magboltz_(float *e_magni__, float *b_magni__,
 				 float *b_ang__, float *press, float *p_ar__, 
 				 float *p_co2__, float *p_ne__, 
 				 float *p_he__, float *temper,
 				 float *vdr, float *psiang, float *efin);
-  int StFtpcMagboltz2::mixer_();
-  int StFtpcMagboltz2::gasmix_(int *ngs, int *niso, double *q, 
+  int mixer_();
+  int gasmix_(int *ngs, int *niso, double *q, 
 			       double *qin, int *nin, double *e, 
 			       double *ei, char *name__, double *virial, 
 			       double *peqel, double *peqin, int *kel, 
 			       int *kin, int name_len);
-  int StFtpcMagboltz2::setup_(float *e_magni__,
+  int setup_(float *e_magni__,
 			      float *b_magni__, float *b_ang__,
 			      float *press, float *p_ar__,
 			      float *p_co2__, float *p_ne__,
 			      float *p_he__, float *temper);
-  int StFtpcMagboltz2::prnter_();
-  int StFtpcMagboltz2::monte_();
-  int StFtpcMagboltz2::output_();
-  int StFtpcMagboltz2::montea_();
-  int StFtpcMagboltz2::monteb_();
-  int StFtpcMagboltz2::montec_();
-  int StFtpcMagboltz2::elimit_(int *ielow);
-  int StFtpcMagboltz2::elimitb_(int *ielow);
-  int StFtpcMagboltz2::elimitc_(int *ielow);
-  int StFtpcMagboltz2::gas2_(double *q, double *qin, int *nin, 
+  int prnter_();
+  int monte_();
+  int output_();
+  int montea_();
+  int monteb_();
+  int montec_();
+  int elimit_(int *ielow);
+  int elimitb_(int *ielow);
+  int elimitc_(int *ielow);
+  int gas2_(double *q, double *qin, int *nin, 
 			     double *e, double *ein, char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz2::gas3_(double *q, double *qin, int *nin, 
+  int gas3_(double *q, double *qin, int *nin, 
 			     double *e, double *ein, char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz2::gas5_(double *q, double *qin, int *nin, 
+  int gas5_(double *q, double *qin, int *nin, 
 			     double *e, double *ein, char *name__, 
 			     double *virial, int *monte, int name_len);
-  int StFtpcMagboltz2::gas12_(double *q, double *qin, int *nin, 
+  int gas12_(double *q, double *qin, int *nin, 
 			      double *e, double *ein, char *name__, 
 			      double *virial, int *monte, int name_len);
 

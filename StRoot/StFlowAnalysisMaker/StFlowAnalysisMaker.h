@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.29 2000/12/12 15:01:11 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.30 2001/04/25 17:45:52 perev Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,6 +36,7 @@ public:
            StFlowAnalysisMaker(const Char_t* name="FlowAnalysis");
            StFlowAnalysisMaker(const Char_t* name,
 			       const StFlowSelection& pFlowSelect);
+           StFlowAnalysisMaker(const StFlowAnalysisMaker &from){};
   virtual  ~StFlowAnalysisMaker();
 
   Int_t    Init();
@@ -44,7 +45,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.29 2000/12/12 15:01:11 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.30 2001/04/25 17:45:52 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -53,7 +54,7 @@ private:
   void     FillFromFlowEvent();
   void     FillEventHistograms();
   void     FillParticleHistograms();
-
+#ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
@@ -63,6 +64,7 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
+#endif /*__CINT__*/
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   FlowTag_st*      pFlowTag;    //! pointer to StEvent
@@ -201,6 +203,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.30  2001/04/25 17:45:52  perev
+// HPcorrs
+//
 // Revision 1.29  2000/12/12 15:01:11  posk
 // Put log comments at end of file.
 //
