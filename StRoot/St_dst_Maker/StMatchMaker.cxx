@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.27 2000/06/29 04:12:35 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.28 2000/07/10 17:06:54 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.28  2000/07/10 17:06:54  caines
+// Take out some hardwired numbers for svm
+//
 // Revision 1.27  2000/06/29 04:12:35  lbarnby
 // fix to track length calculation for very small tanl tracks
 //
@@ -157,7 +160,7 @@ Int_t StMatchMaker::Init(){
     row.ktrl4	 =          1; // control switch 4: selects MCS formula ;
     row.ktrl5	 =          3; // .ne.0 limits # loops in bi-direc. match. ;
     row.arfinc	 =          4; // search area increase factor ;
-    row.bmag	 =        0.5; // magnetic field (T) ;
+    row.bmag	 =          b[2]; // magnetic field (KGauss) ;
     row.dacep	 =          0; // not used at present ;
     row.efaca	 =          1; // relative weight for direc. part of chisq ;
     row.efacp	 =         10; // invpt cut-off for matched tpc tracks ;
