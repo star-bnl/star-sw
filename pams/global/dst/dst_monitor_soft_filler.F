@@ -13,7 +13,6 @@ CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION DST_MONITOR_SOFT_FILLER(
      1     tcl_tpcluster_h,     tcl_tpcluster ,
-     2       scs_cluster_h,       scs_cluster ,
      3         tcl_tphit_h,         tcl_tphit ,
      4           scs_spt_h,           scs_spt ,
      4       fcl_fppoint_h,       fcl_fppoint ,
@@ -41,8 +40,6 @@ CC: ARGUMENTS:
 CC:          IN:
 CC:    tcl_tpcluster     - TPC reconstructed clusters 
 CC:  tcl_tpcluster_h     - Header Structure for tcl_tpcluster
-CC:      scs_cluster     - SVT reconstructed clusters
-CC:    scs_cluster_h     - Header Structure for scs_cluster
 CC:        tcl_tphit     - TPC reconstructed space points
 CC:      tcl_tphit_h     - Header Structure for tcl_tphit
 CC:          scs_spt     - SVT reconstructed space points
@@ -166,10 +163,6 @@ CC:  cluster not yet available due to lack of slow sim/real data (LSB)
       dms_svt(1).n_clus_svt(2) = 0 
       dms_svt(1).n_clus_svt(3) = 0 
       dms_svt(1).n_clus_svt(4) = 0
-
-      if(scs_cluster_h.nok .gt. 0) then
-CC:     code to unpack cluster and count layers goes in here when ready
-      end if
 
 CC:  Fill TPC reconstructed space points summary information:
 
