@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.91 2005/02/08 22:37:53 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.92 2005/02/11 23:17:14 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -20,6 +20,7 @@
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
+#include "StFlowMaker/StFlowCutEvent.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -1179,7 +1180,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.91 2005/02/08 22:37:53 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.92 2005/02/11 23:17:14 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1223,8 +1224,9 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   // Fill histograms with event quantities
 
   // trigger
-  unsigned int triggerWord = pFlowEvent->L0TriggerWord();
-  mHistTrigger->Fill(triggerWord);
+  unsigned int triggers =  StFlowCutEvent::TriggersFound();
+  //unsigned int triggerWord = pFlowEvent->L0TriggerWord();
+  mHistTrigger->Fill(triggers);
 
   // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
   int origMult  = pFlowEvent->OrigMult();
@@ -2319,6 +2321,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.92  2005/02/11 23:17:14  posk
+// Fixed trigger histogram.
+//
 // Revision 1.91  2005/02/08 22:37:53  posk
 // Fixed trigger histogram for year=4.
 //
