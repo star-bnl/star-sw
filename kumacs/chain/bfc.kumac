@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.54 1998/09/16 18:51:01 kathy Exp $
+* * $Id: bfc.kumac,v 1.55 1998/09/16 19:39:10 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.55  1998/09/16 19:39:10  kathy
+* rm dst_chain.kumac because don't want to keep them up; fix dictionary in bfc; put emacs bfc.kumac &! into bfc to show users where to add in their own calls for testing
+*
 * Revision 1.54  1998/09/16 18:51:01  kathy
 * put in new dictionary items and example list
 *
@@ -108,7 +111,20 @@
 * Revision 1.19  1998/07/21 23:35:13  kathy
 * changed names of some items in chain, separated gstar and g2t parts, made bfc and bfc_mdc consistent
 *
-****************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* 
+* SYNOPSIS: STAF analysis driver 
+* 
+* NOTE ==> (Kathy 9/16/98) 
+* - to add in user code while testing, search this kumac for "!!!"
+* - this is to be done for personal use.  When your stuff is ready to
+*   be released, ask Kathy to make it official and she'll put it in bfc_util
+* 
 * TO RUN:
 *
 *  1. stardev (or whichever version you want)
@@ -118,13 +134,6 @@
 * if you want to change anything, copy kumac to your area and change:
 *  4. input values on macro command line
 *  5. default directory list where you pick up kumacs from 
-*******************************************************************
-*
-* SYNOPSIS: STAF analysis driver for running BFC which has
-*   event generation,
-*   detector simulation in GSTAR,
-*   SVT + TPC + EMC  simulation 
-*   and tracking and analysis
 *
 ******************************************************************
 *
@@ -200,6 +209,8 @@
 *                             
 * editted 9/14/98 K. Turner - removed input_data_prefix as input to macro bfc
 *                             and input put both dir + file in input_data_file
+* editted 9/16/98 K. Turner - put in !!! to show where to put user code
+* 
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -223,10 +234,10 @@
 * no_events  - number of events to process
 * input_data_file   - directory + input file name
 * output_file       - output file name for use with chain=fzout or evout
-* funit   - output ntuple file unit #
+* nunit   - output ntuple file unit #
 * nfile   - output ntuple file name
 * nid     - output ntuple i.d.
-* table   - output ntuple table - starts from event/data/ (i.e. list your
+* ntable   - output ntuple table - starts from event/data/ (i.e. list your
 *           table from under this directory)
 * 
 * 
@@ -409,10 +420,10 @@ MACRO bfc _
    input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
    log=bfc.log _
-   funit=21 _
+   nunit=21 _
    nfile=globtrk.ntup _
    nid=111 _
-   table=global/dst/globtrk 
+   ntable=global/dst/globtrk 
   
 * **********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
@@ -441,10 +452,10 @@ MACRO bfc _
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
  
- message ' ***  ntuple file unit # --> ' [funit]
+ message ' ***  ntuple file unit # --> ' [nunit]
  message ' ***  ntuple file name   --> ' [nfile]
  message ' ***  ntuple id          --> ' [nid]
- message ' ***  ntuple table       --> ' [table]
+ message ' ***  ntuple table       --> ' [ntable]
  
  
  
@@ -463,10 +474,10 @@ MACRO bfc _
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
    
-   macro/global/create funit [funit]
-   macro/global/create nfile [nfile]
-   macro/global/create nid   [nid]
-   macro/global/create table [table]
+   macro/global/create nunit  [nunit]
+   macro/global/create nfile  [nfile]
+   macro/global/create nid    [nid]
+   macro/global/create ntable [ntable]
 	   
 ***********************************************************
 * BEGINNING STUFF 
@@ -496,6 +507,11 @@ MACRO bfc _
  exec bfc_util#bfc_init chain=[chain]
  if (STAF_STATUS(1).ne. 1) goto ABEND
  
+*!!!!!!! Add user init stuff here !!!!!!!!!
+* exec create_tables_mydst#part1
+* exec init_mydst#init
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
 ***********************************************************
 * SKIP EVENTS 
 * **********************************************************
@@ -534,6 +550,9 @@ MACRO bfc _
      message ' BFC: skip to bfc_finish because problem reading input file'
      goto FINISH
    endif
+*!!!! Now add user finish stuff here !!!!!!!!!!!!!
+*  exec run_mydst#run
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
    nevents = [nevents] + 1
  enddo
 
@@ -544,7 +563,12 @@ MACRO bfc _
 FINISH:
   exec bfc_util#bfc_finish [chain]
   if (STAF_STATUS(1).ne. 1) goto ABEND
-  goto END
+  
+* !!!! Now add the dst finish stuff here !!!!!!!!!!!!!
+* exec finish_mydst#finish
+* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+ goto END
   
 ABEND:
  message "<bfc> Fatal error"
