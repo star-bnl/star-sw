@@ -584,7 +584,6 @@ ABEND:
 
  ABEND:
  NEXT_EVENT:
-     STAF_STATUS(1)=[STAFCV_OK]
  EOF:
 
  goto END
@@ -648,8 +647,8 @@ macro bfc_finish _
     ENDCASE
 
     sigma totime = totime + t[mod]
-    if [nev_proc]>0 then
-      sigma cpupev = t[mod]/[nev_proc]
+    if [nevents]>0 then
+      sigma cpupev = t[mod]/[nevents]
       string = '---<bfc>---'//[mod]//': CPU/event = '//$format(cpupev,f12.5)
      fmessage $quote([string])    [log_file]
       message $quote([string]) 
@@ -659,11 +658,11 @@ macro bfc_finish _
   enddo
 
 
-  string = '---<bfc>--- total CPU to process  '//$format([nev_proc],i6)//' events = '//$format(totime,f12.5)
+  string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//' events = '//$format(totime,f12.5)
  fmessage $quote([string])    [log_file]
   message $quote([string]) 
-  if [nev_proc]>0 then
-      sigma cpupev = totime/[nev_proc]
+  if [nevents]>0 then
+      sigma cpupev = totime/[nevents]
       string = '---<bfc>--- total CPU/event = '//$format(cpupev,f12.5)
      fmessage $quote([string])    [log_file]
       message $quote([string]) 
