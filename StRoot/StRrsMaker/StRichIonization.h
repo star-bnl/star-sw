@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.6 2000/03/17 14:54:46 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.7 2000/04/05 16:00:42 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,8 +14,8 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.6  2000/03/17 14:54:46  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.7  2000/04/05 16:00:42  lasiuk
+ * viewer, gid, update
  *
  * Revision 1.6  2000/03/17 14:54:46  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -77,7 +77,6 @@ private:
     double           mAverageNumberOfInteractions;
     double           mMaximumElectronEnergyProbability;
 
-    
     //
     //  parameters for bethe-bloch parameterization
     //
