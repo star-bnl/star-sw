@@ -5,18 +5,27 @@
  *
  *********************************************************/
 
+#ifndef StHbtIO_cc
+#define StHbtIO_cc
+
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+
+#include "float.h"    // these tell maximum values of types so we
+#include "limits.h"   // don't write the characters "inf" to our microDST
 
 
 //------------------------- StHbtTrack -----------------------------------
 ostream& operator<<(ostream& out, StHbtTrack& trk){
+  // sometimes ChiSqXY is infinity, so output largest number instead
+  float ChiSqXYtemp = (fabs(trk.mChiSqXY)>FLT_MAX) ? FLT_MAX : trk.mChiSqXY;
+
   return (out
 	  << trk.mCharge     << " " << trk.mNHits        << " "
 	  << trk.mNHitsPoss  << " " << trk.mNSigmaPion   << " "
 	  << trk.mNSigmaKaon << " " << trk.mNSigmaProton << " "
 	  << trk.mdEdx       << " " << trk.mDCAxy        << " "
-	  << trk.mDCAz       << " " << trk.mChiSqXY      << " "
+	  << trk.mDCAz       << " " << ChiSqXYtemp       << " "
 	  << trk.mChiSqZ     << " " << trk.mP.x()        << " "
 	  << trk.mP.y()      << " " << trk.mP.z()        << " "
 	  // now for the StPhysicalHelixD...
@@ -79,9 +88,14 @@ ostream& operator<<(ostream& out, StHbtEvent& ev){
 }
 
 istream& operator>>(istream& in,  StHbtEvent& ev){ 
+
   double x,y,z; 
-  in 
-    >> ev.mEventNumber         >> ev.mCtbMultiplicity 
+  in >> ev.mEventNumber;
+  if (in.eof()) {
+    cout << "Hit end of file " << endl;
+    return in;
+  }
+  in >> ev.mCtbMultiplicity 
     >> ev.mZdcAdc[0]           >> ev.mZdcAdc[1]         
     >> ev.mTpcNhits            >> ev.mNumberOfTracks  
     >> ev.mNumberOfGoodTracks  >> ev.mReactionPlane[0]
@@ -95,14 +109,35 @@ istream& operator>>(istream& in,  StHbtEvent& ev){
   // 
   long NtracksInCollection;
   in >> NtracksInCollection;
-  ev.mTrackCollection = new StHbtTrackCollection;
+  if (!(in.good())){
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return in;
+  }
+  //  ev.mTrackCollection = new StHbtTrackCollection; <-- NO!
+  //  the TrackCollection is instantiated by constructor!!
+  //
+  // since this should *overwrite* any StHbtTracks in the
+  // StHbtTrackCollection, let's erase any that might be there
+  //
+  StHbtTrackIterator iter;
+  for (iter=ev.mTrackCollection->begin();iter!=ev.mTrackCollection->end();iter++){
+    delete *iter;
+  }
+  // ok, now we have gotten rid of the tracks themselves.  Let's lose the pointers to those deleted tracks
+  ev.mTrackCollection->clear();  // if this doesn't work then just delete the collection and make a new one.
+
   for (int itrk=0; itrk<NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
-    in >> *trk;                        // ? ok?
+    if ( !(in >> (*trk))){
+      cout << "StHbtEvent input operator finds stream in bad state during track read ! ";
+      cout << itrk << " of " << NtracksInCollection << " intended" << endl;
+      return in;
+    }
     ev.mTrackCollection->push_back(trk);  // ?ok?
+    //cout << " " << itrk;
   }
   // now we should do the v0 collection...
-  ev.mV0TrackCollection = 0;  // but for now just make it a null pointer
   return in;
 }
 
+#endif

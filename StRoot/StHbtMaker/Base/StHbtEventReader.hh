@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.4 1999/09/04 04:41:01 lisa Exp $
+ * $Id: StHbtEventReader.hh,v 1.5 1999/09/05 02:58:11 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.5  1999/09/05 02:58:11  lisa
+ * add ASCII microDST reader/writer AND franksParticle cuts
+ *
  * Revision 1.4  1999/09/04 04:41:01  lisa
  * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
  *
@@ -53,10 +56,10 @@ public:
 
   // this next method does NOT need to be implemented, in which case the 
   // "default" method below is executed
-  virtual void WriteHbtEvent(StHbtEvent*){cout << "No WriteHbtEvent implemented";}
+  virtual int WriteHbtEvent(StHbtEvent*){cout << "No WriteHbtEvent implemented\n"; return (0);}
 
   // these next two are optional but would make sense for, e.g., opening and closing a file
-  virtual void Init(char ReadWrite, StHbtString Message=" "){/*no-op*/};
+  virtual int Init(const char* ReadWrite, StHbtString Message=" "){cout << "do-nothing StHbtEventReader::Init()\n"; return(0);}
   virtual void Finish(){/*no-op*/};
 
 
