@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.2 2004/09/10 18:13:53 mmiller Exp $
+// $Id: StJets.cxx,v 1.3 2004/09/14 17:27:15 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.3  2004/09/14 17:27:15  mmiller
+// Fixed bug (lack of StFourPMaker::Clear()).
+//
 // Revision 1.2  2004/09/10 18:13:53  mmiller
 // Two fixes:
 // 1) add StDetectorId to the TTree to allow sorting of jet particles into
@@ -109,8 +112,8 @@ StJets::~StJets()
 void StJets::Clear(bool clearAll)
 {
     mJets->Clear();
-    cout << "Cleared the Jets" <<endl;
     mTrackToJetIndices->Clear();
+    cout << "Cleared the Jets" <<endl;
 }
 
 void StJets::addProtoJet(StProtoJet& pj)
@@ -222,6 +225,7 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
 
 	if (trackIndex >= maxNumTracks) { //this should never happen!
 	    cout <<"StJets::jetParticles() ERROR:\tid==kTpcId but index out of bounds.  abort()"<<endl;
+	    cout <<"index\t"<<trackIndex<<"\tmaxNumTracks:\t"<<maxNumTracks<<endl;
 	    abort();
 	}
 	if (id->jetIndex() == jetIndex ) {

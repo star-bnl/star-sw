@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2004/09/10 18:13:52 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2004/09/14 17:27:15 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -422,22 +422,22 @@ Int_t StEmcTpcFourPMaker::Make() {
 		if(maxEtValue < 3.5)
 		    return kStOK;
 	}
-
+    
     // Add TPC tracks
     long index = 0;
     tracks.clear();
     cout <<"binmap.moddTracks.size():\t"<<binmap.moddTracks.size()<<endl;
     
-    for(trackMap::iterator track = binmap.moddTracks.begin(); 
+    for(trackMap::iterator track = binmap.moddTracks.begin();
 	track != binmap.moddTracks.end(); ++track)
 	{
 	    trackMap::value_type &track_val = *track;
 	    StMuTrackFourVec& newTrack = tPile[index++];
 	    StProjectedTrack &pTrack = track_val.second;
 	    newTrack.Init(pTrack.getTrack(), pTrack.P(), pTrack.getIndex(), kTpcId);
-	    //cout <<"InitTrack kTpcId"<<endl;
+	    //cout <<"InitTrack kTpcId:\t"<<newTrack<<endl;
 	    tracks.push_back(&newTrack);
-	}  
+	}
 
 
     // Now subtract the energy deposited by the tracks:
@@ -500,9 +500,8 @@ Int_t StEmcTpcFourPMaker::Make() {
 	    StCorrectedEmcPoint &cPoint = point_val.second;
 	    if(cPoint.P().e() > minPointThreshold)
 		{
-		    //newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks, kBarrelEmcTowerId);
-		    //cout <<"InitTrack kBarrelEmcTowerId"<<endl;
 		    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex(), kBarrelEmcTowerId);
+		    //cout <<"InitTrack kBarrelEmcTowerId:\t"<<newTrack<<endl;
 		    tracks.push_back(&newTrack);
 		}
 	}  

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+ * $Id: StFourPMaker.h,v 1.2 2004/09/14 17:27:15 mmiller Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.2  2004/09/14 17:27:15  mmiller
+ * Fixed bug (lack of StFourPMaker::Clear()).
+ *
  * Revision 1.1  2004/07/08 15:41:03  mmiller
  * First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
  *
@@ -56,6 +59,7 @@ public:
     virtual Int_t Init();
     virtual Int_t Make();
     virtual Int_t Finish();
+    virtual void Clear(const Option_t*);
 
     StMuEmcCollection* getStMuEmcCollection(void);
     FourList &getTracks() { return tracks; };
