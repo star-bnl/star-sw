@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.7 1999/12/08 02:10:25 calderon Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.8 2000/07/30 02:43:13 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
+ * Revision 1.8  2000/07/30 02:43:13  long
+ * add erf function look up table,table builder,etc.
+ *
  * Revision 1.7  1999/12/08 02:10:25  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -65,10 +68,12 @@
 
 #include "StThreeVector.hh"
 #include "Randomize.h"
+#include "TRandom.h"
 
 #include "StTpcGeometry.hh"
 #include "StTpcSlowControl.hh"
 #include "StTrsDeDx.hh"
+#include "StMagneticField.hh"
 #include "StTrsWireBinEntry.hh"
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -82,7 +87,7 @@ typedef vector<aTpcWire, allocator<aTpcWire> >                   aTpcWirePlane;
     
 class StTrsWireHistogram {
 public:
-    static StTrsWireHistogram* instance(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*);
+    static StTrsWireHistogram* instance(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*,StMagneticField*);
     ~StTrsWireHistogram();
 
     //StTrsWireHistogram(const StTrsWireHistogramy&);
@@ -93,21 +98,32 @@ public:
     int maxWire() const;
     
     // Book-keeping
-    void                addEntry(StTrsWireBinEntry&);
+    void                addEntry(StTrsWireBinEntry&,int );
     void                clear();
     
     // Wire Operations (and access)
     double              wireCoordinate(int) const;
     aTpcWire&           getWire(int)             ;
     aTpcWirePlane&      getWireHistogram()       ;
+    void    FreqFunctionTableBuilder();
+    double  table_fast(double) const;
+ 
+#ifndef ST_NO_TEMPLATE_DEF_ARGS 
+  vector<double> mFreqFunctionTable; 
+  
+#else
 
-    
+  vector<double, allocator<double> > mFreqFunctionTable; 
+  
+  
+#endif
+  double         mNumberOfEntriesInTable;
+  double         mRangeOfTable ;
     //Maybe needed later?
     //void sortTimeBins();
     //void putWire(vector<StTrsWireBinEntry>&);
 
-    // Charge Collection
-    void   setRangeOfWiresForChargeDistribution(int);
+  
     
     // Gas Gain
     void   setDoGasGain(bool)            ;
@@ -116,6 +132,8 @@ public:
     void   setDoGasGainFluctuations(bool);
     void   setDoSingleElectronMultiplication(bool);
     double exponentialAvalanche(int, double)      ;
+    double polyaAvalanche(int, double)      ; 
+  double polya()      ;//b=0.4
     double gaussianAvalanche(int, double)         ;
   
     // Time Delay For Charge Collection
@@ -123,10 +141,11 @@ public:
     
 private:
     void   gasGainCalculation()                ;
+    
     double noFluctuations(int)            const;
-
+    TRandom *random;  
 private:
-    StTrsWireHistogram(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*);
+    StTrsWireHistogram(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*,StMagneticField*);
     
 private:
     int             mMin;                      // minimum bin filled
@@ -135,8 +154,8 @@ private:
     StTpcGeometry*    mGeomDb;
     StTpcSlowControl* mSCDb;
     StTrsDeDx*        mGasDb;
-
-
+     
+  //  void   setRangeOfWiresForChargeDistribution(int);
 
     // Gas Gain
     bool            mDoGasGain;
@@ -148,7 +167,6 @@ private:
     bool            mDoTimeDelay;
     
     // Charge Distribution
-    int             mRangeOfWiresForChargeDistribution;
     
     aTpcWirePlane      mSectorWires;
     
@@ -158,19 +176,27 @@ private:
 
     double          mInnerSectorGasGain;
     double          mOuterSectorGasGain;
-
+   
     static StTrsWireHistogram* mInstance;
 
     static HepJamesRandom  mEngine;
     static RandGauss       mGaussianDistribution;
     static RandExponential mExponentialDistribution;
+     float           mOmegaTau;
+     float dx[4]; 
+     float dz[4];
+    
 };
 int inline StTrsWireHistogram::minWire() const {return mMin;}
 int inline StTrsWireHistogram::maxWire() const {return mMax;}
 void inline StTrsWireHistogram::setDoGasGain(bool gg) {mDoGasGain = gg;}
 void inline StTrsWireHistogram::setDoTimeDelay(bool t) {mDoTimeDelay = t;}
 void inline StTrsWireHistogram::setDoSingleElectronMultiplication(bool t) {mDoSingleElectronMultiplication = t;}
-void inline StTrsWireHistogram::setRangeOfWiresForChargeDistribution(int n) {mRangeOfWiresForChargeDistribution = n;}
+
+
+
+
+
 ;
 
 #endif
