@@ -77,7 +77,7 @@ void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit)
 
 	if(do_swap) {	// bytes swapping...
 		pt = swap32(pt) ;
-		cf = swap32(cf) ;
+		cf = swap32(pt) ;
 	}
 
 	tm = (pt >> 16) & 0x7FFF ;
@@ -273,7 +273,6 @@ int fcfAfterburner::next(fcfHit *h)
 
 		fcfHit hit ;
 		decode(res,&hit) ;
-
 		res += 2 ;
 		last_i++ ;
 
@@ -294,8 +293,8 @@ int fcfAfterburner::next(fcfHit *h)
 				//LOG(NOTE,"    list %d: %d %d %d %d",list,edge[0],edge[1],edge[2],edge[3]) ;
 			}
 			else {	// this happens when the pad width of hit is more than 7 in one direction...
-				LOG(DBG,"Row %d: incorrect edges are %d:%d, %f???",row,hit.p1,hit.p2,(double)hit.pad/64.0+0.5,0) ;
-				LOG(DBG,"    %d %d %d %d",edge[0],edge[1],edge[2],edge[3],0) ;
+				LOG(NOTE,"Row %d: incorrect edges are %d:%d, %f???",row,hit.p1,hit.p2,(double)hit.pad/64.0+0.5,0) ;
+				LOG(NOTE,"    %d %d %d %d",edge[0],edge[1],edge[2],edge[3],0) ;
 			}
 		}
 		else {
@@ -383,7 +382,7 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	// can compare "raw" data
 
 	do_merge = do_cuts = 0 ;
-	after.do_merge = after.do_cuts = 0 ;
+	after.do_merge = after.do_cuts ;
 
 	memset(marray,0,sizeof(marray)) ;
 
@@ -397,9 +396,7 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 		after.burn(p2) ;	// reset!
 
 		count2 = 0 ;
-		//print_hit("Checking 1",&h1) ;
 		while(after.next(&h2)) {
-			//print_hit(" with",&h2) ;
 			if(marray[1][count2]) {
 				count2++ ;
 				continue ;
@@ -414,10 +411,10 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 		}
 
 		if(match) {
-			//printf("*MATCH\n") ;
 			marray[0][count1] = 1 ;
 			matched1++ ;
 		}
+
 		count1++ ;
 	}
 
