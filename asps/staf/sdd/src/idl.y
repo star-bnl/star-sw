@@ -94,7 +94,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.29 2003/09/30 17:24:47 starlib Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.30 2003/09/30 18:01:03 starlib Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 char VERSION[132];
@@ -223,12 +223,12 @@ void StandardBlurb(int fortranOrC,char *mode,FILE *ff) {
   }
   if(fortranOrC==1) {
     FF"C This file was made by the idl compiler \"stic\". Do not edit.\n");
-    FF"C This was generated for version %s\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
+    FF"C This was generated for version '%s'\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
     FF"C Instead, edit the source idl file and then re-run the compiler.\n");
     FF"C For help, type contact Craig Tull or Herb Ward.\n"); 
   } else if(fortranOrC==2) {
     FF"/* This file was made by the idl compiler \"stic\". Do not edit.\n"); 
-    FF"** This was generated for version %s\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
+    FF"** This was generated for version '%s'\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
     FF"** Instead, edit the source idl file and then re-run the compiler.\n");
     FF"** For help, type contact Craig Tull or Herb Ward. */\n");
   } else ERR;
@@ -1365,7 +1365,7 @@ void ReadOptions(int nnn,char *aaa[]) {
       else if(!strcmp(aaa[ii]+1,"version")){
         ii++;
         (void) strcpy(VERSION,aaa[ii]);
-        (void) printf("Got version %s\n",aaa[ii]);
+        /* (void) printf("Got version %s\n",aaa[ii]); */
       }
       else if(aaa[ii][1]=='I') {
         if(gNincDir>INCDIR) TooManyIncs();
