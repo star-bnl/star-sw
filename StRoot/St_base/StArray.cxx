@@ -147,6 +147,8 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
   }
 } 
 //______________________________________________________________________________
+StStrArray::StStrArray(const StStrArray &from){ *this = from;}
+//______________________________________________________________________________
  VecTObjIter StStrArray::erase(VecTObjIter fst,VecTObjIter lst)
 {
    VecTObjIter it;
