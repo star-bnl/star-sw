@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.2 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuArrays.cxx,v 1.3 2002/04/11 15:45:44 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -15,7 +15,7 @@ char* StMuArrays::strangeArrayTypes[__NSTRANGEARRAYS__] = {"StStrangeEvMuDst","S
 							       "StV0MuDst","StV0Mc","StStrangeAssoc",
 							       "StXiMuDst","StXiMc","StStrangeAssoc",
 							       "StKinkMuDst","StKinkMc","StStrangeAssoc"};
-int StMuArrays::strangeArraySizes[__NSTRANGEARRAYS__]       = {1,1,5000,100,100,5000,100,100,5000,100,100};
+int StMuArrays::strangeArraySizes[__NSTRANGEARRAYS__]       = {1,1,10000,100,100,10000,100,100,10000,100,100};
 int StMuArrays::strangeArrayCounters[__NSTRANGEARRAYS__]    = {0,0,0,0,0,0,0,0,0,0,0};
 
 
@@ -25,12 +25,15 @@ char* StMuArrays::arrayNames[__NARRAYS__] = {"MuEvent",
 char* StMuArrays::arrayTypes[__NARRAYS__] = {"StMuEvent",
 						 "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 						 "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo"};
-int StMuArrays::arraySizes[__NARRAYS__]       = {1,5000,5000,5000,5000,100,100,100,100};
+int StMuArrays::arraySizes[__NARRAYS__]       = {1,10000,10000,10000,10000,100,100,100,100};
 int StMuArrays::arrayCounters[__NARRAYS__]    = {0,0,0,0,0,0,0,0,0};
 
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.3  2002/04/11 15:45:44  laue
+ * array size changed back, was crashing program
+ *
  * Revision 1.2  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
