@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.1 2003/01/28 23:12:59 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.2 2003/02/14 00:04:31 balewski Exp $
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.2  2003/02/14 00:04:31  balewski
+// remove few printouts
+//
 // Revision 1.1  2003/01/28 23:12:59  balewski
 // star
 //
@@ -25,7 +28,7 @@ ClassImp(StEEmcFastMaker)
 //--------------------------------------------
 StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   mlocalStEvent=0;
-  mdbg=1;
+  mdbg=0;
   mevIN= new EEmcMCData;
   meeve=new EEevent;
   msamplingFraction=0.05;
@@ -70,14 +73,14 @@ Int_t StEEmcFastMaker::Init(){
 //--------------------------------------------
 //--------------------------------------------
 Int_t StEEmcFastMaker::Make(){
- 
+
   static int first=1;
-  printf("\n\n%s::Make()\n\n",GetName());
+  printf("%s::Make()\n",GetName());
   meeve->clear();
   
   int nh=-1;
   if ( (nh = mevIN->readEventFromChain(this)) >0) {
-    printf("%s  actual RAW geant EEMC hits =%d nh\n",GetName(),nh);
+    printf("%s  RAW geant EEMC hits =%d \n",GetName(),nh);
     if(first && mdbg>1)mevIN->print();
     first=0;
   } else {
@@ -96,10 +99,10 @@ Int_t StEEmcFastMaker::Make(){
    
   StEvent *stevent = mlocalStEvent;
   if(stevent==0) {
-    printf("Access full StEvent ...\n");
+    //printf("Access full StEvent ...\n");
     stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
     assert(stevent); // do sth to provide StEvent first
-    printf("check existence of emcCollection... StEvent=%p\n",stevent);
+    // printf("check existence of emcCollection... StEvent=%p\n",stevent);
     assert(stevent->emcCollection()); 
     
   }  
