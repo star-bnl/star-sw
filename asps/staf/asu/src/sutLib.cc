@@ -15,7 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#ifdef AIX
+#if defined (AIX) || defined(linux)
 #include <fnmatch.h>
 #endif /*AIX*/
 
@@ -54,7 +54,8 @@
 *:RETURN VALUE: TRUE or FALSE
 *:<---------------------------------------------------------------------
 */
-int sutMatchWild(char *pattern,char* string)
+int 
+sutMatchWild(char *pattern,char* string)
 {
 #ifdef AIX
    int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
@@ -70,7 +71,10 @@ int sutMatchWild(char *pattern,char* string)
 #ifdef IRIX
    return gmatch(string,pattern);
 #endif /*IRIX*/
-   return NULL;
+#ifdef linux
+   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
+   return !fnmatch(pattern,string,flags);
+#endif
 }
 
 /*
