@@ -1,4 +1,4 @@
-/*CMZ :          17/06/98  21.50.49  by  Pavel Nevski*/
+/*CMZ :          09/07/98  17.21.49  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   28/11/97*/
 /*****************************************************/
 /*               S T A F   i n t e r f a c e         */
@@ -104,6 +104,7 @@ extern "C" int tdm_map_table_(char* path, char* name, char* spec, long* l,
   //             this should work,  but it does not
   //  ier=dsNewDataset(&ds,cpath);  tdm->createTable(name, ds);
  
+  if (!tdm) { printf(" tdm_map_table ERROR: no tdm is found !\n"); return 0; }
   if (!(tDs=tdm->findDataset(cpath))) dui->mkdir(cpath);
  
   if ( (tDs=tdm->findDataset(cpath))
@@ -293,7 +294,7 @@ int xdf_open(XdfLun_t **Lun, char *FileName,char *mode)
 {
   XdfLun_t *lun;
  
-  if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*Lun); return 1;}
+  if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*lun); return 1;}
  
   lun = (XdfLun_t*)malloc(sizeof(XdfLun_t));
  
