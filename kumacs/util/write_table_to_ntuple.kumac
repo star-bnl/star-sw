@@ -58,15 +58,16 @@ return
 
 ********************************************************************
 
-macro close_disk funit
-macro/global/import *
-
- message ' close ntuple and file unit ' [funit]
-
- hrout 0
- close [funit]
- oid = staf_result(1); 
- soc/deleteoid [oid] 
+macro close_disk funit nid
+  macro/global/import *
+    
+    message ' hrout all histograms'
+    hrout 0
+    
+    dio/list
+    message  'close file unit, ntuple id: ' [funit] [nid]
+    hi/delete [nid]
+    close [funit]
  
 return
 
