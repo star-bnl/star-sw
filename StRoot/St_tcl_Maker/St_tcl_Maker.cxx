@@ -1,5 +1,11 @@
-// $Id: St_tcl_Maker.cxx,v 1.32 1999/03/17 02:02:43 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.33 1999/03/17 19:23:49 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.33  1999/03/17 19:23:49  sakrejda
+// unpacking of raw data into adcxyz table with an on/off switch added
+//
+// Revision 1.33  1999/03/17 11:02:43  snellings
+// switch for the pixel table and pixel table added
+//
 // Revision 1.32  1999/03/17 02:02:43  fisyak
 // New scheme
 //
@@ -120,6 +126,7 @@ ClassImp(St_tcl_Maker)
   
 //_____________________________________________________________________________
   St_tcl_Maker::St_tcl_Maker(const char *name):
+    m_tclPixTransOn(kFALSE),
     m_tclEvalOn(kFALSE),
     m_tclMorphOn(kFALSE),
     m_tpg_detector(0),
@@ -486,6 +493,10 @@ Int_t St_tcl_Maker::Make(){
   if (raw_data_tpc){// Row data exits -> make clustering
     St_DataSetIter next(raw_data_tpc);
     St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
+    //Create the adcxyz table
+    St_tfc_adcxyz *adcxyz = (St_tfc_adcxyz *) next("adcxyz");
+    if (!adcxyz && m_tclPixTransOn)  // tfc_adcxyz Table
+      {adcxyz = new St_tfc_adcxyz("adcxyz",900000);  next.Add(adcxyz);}
     while ((sector=next())) {// loop over sectors
       Char_t *name= 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
@@ -504,6 +515,18 @@ Int_t St_tcl_Maker::Make(){
 	St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
 	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+
+	if (m_tclPixTransOn){
+	// call the pixel translation
+        if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
+
+        Int_t res =  xyz_newtab(m_tpg_detector,
+                            m_tcl_sector_index,raw_sec_m,
+                            raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
+                            raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+                            adcxyz);
+        if (res!=kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
+	}
 
 // 			TCL
         if(Debug()) printf("Starting %20s for sector %2d.\n","tcl",indx);
@@ -599,7 +622,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.32 1999/03/17 02:02:43 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.33 1999/03/17 19:23:49 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

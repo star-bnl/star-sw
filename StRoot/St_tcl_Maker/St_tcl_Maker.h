@@ -1,5 +1,11 @@
-// $Id: St_tcl_Maker.h,v 1.10 1999/03/16 00:20:43 sakrejda Exp $
+// $Id: St_tcl_Maker.h,v 1.11 1999/03/17 19:23:51 sakrejda Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.11  1999/03/17 19:23:51  sakrejda
+// unpacking of raw data into adcxyz table with an on/off switch added
+//
+// Revision 1.11  1999/03/17 00:10:43  snellings
+// switch for the pixel translation stuff added
+//
 // Revision 1.10  1999/03/16 00:20:43  sakrejda
 // switch for the cluster morphology stuff added
 //
@@ -71,7 +77,8 @@ class TH1F;
 class St_tcl_Maker : public StMaker {
 
 private:
-  Bool_t                m_tclEvalOn;            // switch for the cluster finder eveluation
+  Bool_t                m_tclPixTransOn;        // switch for pixel translation evaluation
+  Bool_t                m_tclEvalOn;            // switch for the cluster finder evaluation
   Bool_t                m_tclMorphOn;           // switch for the cluster morphology study
   St_tpg_detector       *m_tpg_detector;  	//! TPC geometry parameters 
   St_tpg_pad            *m_tpg_pad;       	//! characteristics unique to a given pad
@@ -166,6 +173,9 @@ protected:
    virtual void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
    virtual void   tclMorphOn() {tclMorph(kTRUE);}                       // *MENU*
    virtual void   tclMorphOff(){tclMorph();} 
+   virtual void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
+   virtual void   tclPixTransOn() {tclPixTrans(kTRUE);}                       // *MENU*
+   virtual void   tclPixTransOff(){tclPixTrans();} 
 
    virtual Int_t  Init();
    virtual Int_t  Make();
