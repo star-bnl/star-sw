@@ -1,18 +1,12 @@
-/***********************************************************************
-** emlLib.c
-*/
-#ifdef sun4os5pc
-#define __BUILTIN_VA_ARG_INCR
-#endif /* sun4os5pc */
-
-#include <stdio.h>
+#include <stdio.h> 
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include "emlLib.h"
 #include "asuAlloc.h"
 
-int emlMessage(char *fmt, ...)
+int 
+emlMessage(char *fmt, ...)
 {
 	int status;
 
