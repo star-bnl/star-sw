@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.6 1998/05/26 04:15:13 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.7 1999/05/05 21:52:13 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.7  1999/05/05 21:52:13  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.6  1998/05/26 04:15:13  sakrejda
 * message type set to E to limit printing
 *
@@ -62,7 +65,6 @@ C
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_root.inc"
-#include "tpt_mxhit.inc"
 C______________________________________________________________________
 
       RECORD /table_head_st/    tpar_h
@@ -78,7 +80,7 @@ C
 C     Local variables
       RECORD /track_pointers/ saved_trk
       RECORD /track_root/     root(mxroot)
-      INTEGER next_hit(tpt_mxhit)
+      INTEGER next_hit(*)
       INTEGER slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector,mxrow,mxslic)
       INTEGER loc_hit(*)

@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.4 1998/09/01 13:32:36 sakrejda Exp $
+* $Id: tpt_make_segment.F,v 1.5 1999/05/05 21:52:15 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.5  1999/05/05 21:52:15  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.4  1998/09/01 13:32:36  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -47,7 +50,6 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_mxhit.inc"
 
 C______________________________________________________________________
 
@@ -64,7 +66,7 @@ C     Local variables
       INTEGER isect, isect_trunc, isec1
       INTEGER irow_last,irow_start,irow_step,ngap
       INTEGER tgc_row_par, tpt_ptcrs
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER nf,drow,i,nh1,ilc
       INTEGER tpt_fit_track

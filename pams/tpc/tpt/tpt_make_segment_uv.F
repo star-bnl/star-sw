@@ -1,7 +1,10 @@
-* $Id: tpt_make_segment_uv.F,v 1.8 1999/03/30 15:55:02 love Exp $
+* $Id: tpt_make_segment_uv.F,v 1.9 1999/05/05 21:52:17 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.9  1999/05/05 21:52:17  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.8  1999/03/30 15:55:02  love
-* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  Spelling.  make_segment_uv removed doubling of tolerance on row skip.
 *  row_sect_point remove check on sector z position
 *
 * Revision 1.7  1998/09/01 13:32:36  sakrejda
@@ -60,7 +63,6 @@ C
 #include "tpt_pars.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_pointers.inc"
-#include "tpt_mxhit.inc"
 
 C______________________________________________________________________
 
@@ -84,7 +86,7 @@ C     Local variables
       INTEGER tpt_find_slic, irets, tpt_fit_uv,i_s, tpt_fit_sz
 
       INTEGER islic,is_pnt,ipass
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
 
       INTEGER tgc_global_to_sector

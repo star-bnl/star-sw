@@ -1,7 +1,10 @@
-* $Id: tpt_row_sect_pnt.F,v 1.10 1999/03/30 15:55:04 love Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.11 1999/05/05 21:52:23 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.11  1999/05/05 21:52:23  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.10  1999/03/30 15:55:04  love
-* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  Spelling.  make_segment_uv removed doubling of tolerance on row skip.
 *  row_sect_point remove check on sector z position
 *
 * Revision 1.9  1998/11/30 19:07:56  sakrejda
@@ -52,7 +55,6 @@ C<---------------------------------------------------------------------
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_mxhit.inc"
 
       STRUCTURE /sort_hit/
           INTEGER*4 ipnt
@@ -69,11 +71,17 @@ C_____________________________________________________________________
 C______________________________________________________________________
       INTEGER tpstart(mxrow,mxsector),tpcount(mxrow,mxsector),loc_hit(*)
       INTEGER irow,isect,i,inew,j,k,ipos,ic,itim,ntmp,ipnt,ipass
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),loc_hit_tmp(4000)
       INTEGER iret, tls_Index_Sort_r,nhalf,itim1,ipos1,kc
 
+c     allocate memory following Victor's suggestion
+      INTEGER malloc
+      INTEGER tpt_mxhit
+      PARAMETER (tpt_mxhit=300000)
       INTEGER rhit(tpt_mxhit)
+      POINTER (p_rhit,rhit)
+
       integer isec2, isec3
       INTEGER tls_Index_Sort_i
 C             sort hits in the TPC table according to row/sec field
@@ -89,6 +97,10 @@ C             sort hits in the TPC table according to row/sec field
       save id1, idI1
 
 C______________________________________________________________________
+
+c     allocate memory for a local array
+      p_rhit = malloc(hit_h.nok*4)
+
       do i=1,hit_h.nok
 C        clean up sector assignement.
          xglobal(1)=hit(i).x
@@ -261,5 +273,6 @@ C       loop through row-sorted list
       write(m132,*) ' TPTRSP-E1 done setting up pointers'
       call Message( m132, 1, id1 )
       tpt_row_sect_pnt=0
+      call free(p_rhit)
       end
 c

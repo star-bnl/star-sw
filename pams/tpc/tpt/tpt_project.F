@@ -1,7 +1,10 @@
-* $Id: tpt_project.F,v 1.6 1999/03/30 15:55:03 love Exp $
+* $Id: tpt_project.F,v 1.7 1999/05/05 21:52:22 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.7  1999/05/05 21:52:22  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.6  1999/03/30 15:55:03  love
-* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  Spelling.  make_segment_uv removed doubling of tolerance on row skip.
 *  row_sect_point remove check on sector z position
 *
 * Revision 1.5  1998/09/01 13:32:38  sakrejda
@@ -57,7 +60,6 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_mxhit.inc"
 
 C______________________________________________________________________
       RECORD /table_head_st/    tpar_h
@@ -70,7 +72,7 @@ C______________________________________________________________________
 C_____________________________________________________________________
 C
 C     Local variables
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER itrk,irow,ient,isect,isect_full,is(3),i,np,ixpnt
       INTEGER iret, tpt_helix_pred ,l,ip_in,ip_out,row_in,row_out,llc

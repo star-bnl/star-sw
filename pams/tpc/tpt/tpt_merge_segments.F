@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.7 1998/09/01 13:32:37 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.8 1999/05/05 21:52:19 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.8  1999/05/05 21:52:19  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.7  1998/09/01 13:32:37  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -40,7 +43,6 @@ C
 #include "tpt_pointers.inc"
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
-#include "tpt_mxhit.inc"
 C______________________________________________________________________
 c
 c Define local structure to sort radius

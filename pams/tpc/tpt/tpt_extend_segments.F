@@ -1,5 +1,8 @@
-* $Id: tpt_extend_segments.F,v 1.3 1998/03/23 18:25:55 sakrejda Exp $
+* $Id: tpt_extend_segments.F,v 1.4 1999/05/05 21:52:10 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.4  1999/05/05 21:52:10  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.3  1998/03/23 18:25:55  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -53,7 +56,6 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_mxhit.inc"
 
 C______________________________________________________________________
       RECORD /table_head_st/    tpar_h
@@ -66,7 +68,7 @@ C______________________________________________________________________
 C_____________________________________________________________________
 C
 C     Local variables
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER i,ipos,j,k,l,ld,lc,lvmax,last_track
       REAL    tmp(mxtrack)
