@@ -16,27 +16,30 @@ endif
 # FORTRAN 77
 #
 export FC := f77
-export FFLAGS += +es +e -K +ppu
+export FFLAGS += +es +e -K +ppu +Z
+###				??? -n
 ifeq ($(DEBUG),$(TRUE))
 export FFLAGS += -g
 endif
 #
 # C
 export CC := gcc
-export CFLAGS += -w 
+export CFLAGS += -w -fPIC
+###				??? -mshared-libs
 ifeq ($(DEBUG),$(TRUE))
 export CFLAGS += -g
 endif
 #
 # C++
 export CXX := g++
-export CXXFLAGS += -w 
+export CXXFLAGS += -w -fPIC
+###				??? -mshared-libs
 ifeq ($(DEBUG),$(TRUE))
 export CXXFLAGS += -g
 endif
 #
 # Loader
-export LD := CC
+export LD := $(CXX)
 ifeq ($(STATIC),$(TRUE))
 export LDFLAGS += -non_shared
 else
@@ -44,7 +47,8 @@ export LDFLAGS += -L/usr/lib -L/lib
 endif
 #
 # Shared Libraries
-export SO := ld -shared -o
+export SO := ld -b
+export SO := gcc -shared -o
 export SOFLAGS += $(EMPTY)
 #
 # Object Libraries
@@ -73,7 +77,11 @@ ifdef ASPS
 export LLIBS += $(ASPS:%=-l%)
 endif #ASPS
 #
-export LLIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+ifeq ($(MOTIF),$(TRUE))
+export LOAD_LIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+else
+export LOAD_LIBS += $(FOR_LIBS) $(OS_LIBS)
+endif
 #
 endif #HPUX_MK
 #

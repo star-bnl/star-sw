@@ -1,4 +1,3 @@
-#ifndef FULLPAW /* only load minimal cern stuff - kuip,vectors,zebra */
 C:---------------------------------------------------------------------
 C:- Min PAW Stuff
       SUBROUTINE STAF_KUIP_INIT()
@@ -24,63 +23,6 @@ C
 C
       RETURN
       END
-#else /*FULLPAW*/ /* load all the cern stuff */
-C:---------------------------------------------------------------------
-C:- PAW/CERN Stuff
-!!    SUBROUTINE STAF_CERN_INIT()
-!!    IMPLICIT NONE
-C
-!!    INTEGER*4 NWPAW
-!!    REAL*4 PAWCOM
-!!    PARAMETER (NWPAW=2000000)
-!!    COMMON/PAWC/PAWCOM(NWPAW)
-!!    INTEGER*4 NWORDS
-C
-!!    INTEGER*4 IWTYP/1/
-!!    LOGICAL*1 PAWOPT
-C
-!!    IF(PAWOPT)THEN
-!!       WRITE(*,*)'PAW initialized'
-!!       CALL PAW(NWPAW,IWTYP)
-!!       CALL KUEXEC('PROMPT ''STAF[]''')
-!!    ELSE
-!!       CALL MZEBRA(-3)
-!!       CALL MZPAW(500000,' ')
-C
-!!       NWORDS=20000
-!!       CALL KUINIT(NWORDS)
-!!       CALL VECDEF       ! VECTOR commands
-!!       CALL KUEXEC('PROMPT ''staf[]''')
-!!    ENDIF
-!!
-!!    RETURN
-!!    END
-
-
-C:---------------------------------------------------------------------
-C:- Full PAW Stuff
-      SUBROUTINE STAF_PAW_INIT()
-      IMPLICIT NONE
-C
-      INTEGER*4 NWPAW
-      REAL*4 PAWCOM
-      PARAMETER (NWPAW=2000000)
-      COMMON/PAWC/PAWCOM(NWPAW)
-      INTEGER*4 NWORDS
-C
-      INTEGER*4 IWTYP/1/
-C
-      LOGICAL*1 PAW_INITED
-      IF(PAW_INITED())RETURN
-C
-      CALL PAW(NWPAW,IWTYP)
-      WRITE(*,*)'PAW initialized'
-      CALL KUEXEC('PROMPT ''STAF[]''')
-C
-      RETURN
-      END
-#endif /*FULLPAW*/
-
 C:---------------------------------------------------------------------
       LOGICAL*1 FUNCTION PAW_INITED()
       LOGICAL*1 FIRSTIME/.TRUE./

@@ -23,6 +23,7 @@
 // ATTRIBUTES ----------------------
 // FUNCTIONS -----------------------
 // OPERATORS -----------------------
+#ifndef hpux
 string string::operator + (string p)
 {
    string temp;
@@ -32,6 +33,7 @@ string string::operator + (string p)
    strcat(temp.myStr, p.myStr);
    return temp;
 }
+#endif /*hpux*/
 
 string string::operator + (char* ptr)
 {

@@ -61,11 +61,13 @@ export OS_LIBS := -lm -ldl
 #
 # Fortran Libraries
 ifndef SUNW_LDIRS
-SUNW_LDIRS := /vol/lic/SUNWspro-3.0/libs /vol/lic/SUNWspro-3.0/SC3.0/lib
+SUNW_LDIRS := /vol/lic/SUNWspro-3.0/lib /vol/lic/SUNWspro-3.0/SC3.0/lib
+SUNW_LDIRS := /vol/lic/lang-4.0/lib /vol/lic/lang-4.0/SC4.0/lib
 SUNW_LDIRS := /opt/SUNWspro/libs /opt/SUNWspro/SC4.0/lib
 endif
 ifndef SUNW_CRTN
 SUNW_CRTN := /vol/lic/SUNWspro-3.0/SC3.0/lib/crtn.o
+SUNW_CRTN := /vol/lic/lang-4.0/SC4.0/lib/crtn.o
 SUNW_CRTN := /opt/SUNWspro/SC4.0/lib/crtn.o
 endif
 export FOR_LIBS += \

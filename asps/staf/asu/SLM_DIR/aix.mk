@@ -17,6 +17,7 @@ endif
 # FORTRAN 77
 #
 export FC := xlf23
+export FC := xlf
 export FFLAGS += -w -qextname -qsave -qfixed=132 -qctyplss -qintlog \
 		-bD:600000000
 ifeq ($(DEBUG),$(TRUE))
@@ -26,7 +27,9 @@ ifneq ($(PKOFF),$(TRUE))
 ifneq ($(DEBUG),$(TRUE))
 FFLAGS += -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS
 else
-FFLAGS += -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS,-F
+# HACK !!! - don't preserve debug code
+FFLAGS += -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS
+#FFLAGS += -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS,-F
 endif
 endif
 #
@@ -53,7 +56,7 @@ export LDFLAGS += $(EMPTY)
 endif
 #
 # Shared Libraries
-export SO := ld -shared -o
+export SO := gcc -shared -o
 export SOFLAGS += $(EMPTY)
 #
 # Object Libraries
@@ -80,7 +83,11 @@ ifdef ASPS
 export LLIBS += $(ASPS:%=-l%)
 endif #ASPS
 #
-export LLIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+ifeq ($(MOTIF),$(TRUE))
+export LOAD_LIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+else
+export LOAD_LIBS += $(FOR_LIBS) $(OS_LIBS)
+endif
 #
 endif #AIX_MK
 #
@@ -88,7 +95,7 @@ endif #AIX_MK
 #	$(CPP) $(CPPFLAGS) $< | egrep -v '^#' > $*.f
 %.o: %.F
 	$(CPP) -P $(CPPFLAGS) $< > $*.f
-	$(FC) -c $(FFLAGS) $(CPPFLAGS) $*.f -o $*.o
+	$(FC) -c $(FFLAGS) $*.f -o $*.o
 #%.o: %.f
 #	$(FC) -c $(FFLAGS) -o $@ $<
 %.o: %.c
