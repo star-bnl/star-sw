@@ -19,8 +19,8 @@ public:
     // returns the thickness in radiation lengths between the detector 
     // of the beginning node and the detector of the ending node.
     // Includes thickness of any intermediate gas, plus the thickness
-    float getEquivalentThickness(StiTrackNode *nodeBegin,
-                                 StiTrackNode *nodeEnd);
+    static float getEquivalentThickness(StiTrackNode *nodeBegin,
+                                        StiTrackNode *nodeEnd);
 
 protected:
 
