@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.26 2000/01/12 23:17:49 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.27 2000/01/13 16:22:32 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.27  2000/01/13 16:22:32  kathy
+// changed DrawHist method so that it now correctly prints from a list (if printlist is available)
+//
 // Revision 1.26  2000/01/12 23:17:49  kathy
 // changes so it can print from a list
 //
@@ -271,12 +274,27 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	}
 //...........................................................................
 
+
+// If there's no print list, then print all histograms in directory
+// If there is a print list, then only print if hist name is on list
+	//cout << " print list pointer = " << m_ListOfPrint << endl;
+        //cout << "     size of list   = " << m_ListOfPrint->GetSize() << endl;
+ 
+	if (!m_ListOfPrint || (m_ListOfPrint && m_ListOfPrint->FindObject(obj->GetName()) )){
+
+// this histogram will actually be printed/drawn!!
+        printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
+	  histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+
 // go to next pad 
-	 graphPad->cd(++padCount);
+        graphPad->cd(++padCount);
+//NOTE! (13jan00,kt) -->  this cd is really acting on gPad!!!
+//   --> gPad is a global variable & one uses it to set attributes of current pad
+//  --> you can see the full list of global variables by starting ROOT and entering .g
+//  --> to find the full list of commands, type ? in ROOT 
 
 // set logY scale off
 	 gPad->SetLogy(0);	  
-
 // Set logy scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
 	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
@@ -284,15 +302,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	  gPad->SetLogy(1);
           cout << "             -- Will draw in log scale: " << obj->GetName() <<endl;
 	 }
-
-// If there's no print list, then print all histograms in directory
-// If there is a print list, then only print if hist name is on list
-
-	if (!m_ListOfPrint || (m_ListOfPrint && m_ListOfPrint->FindObject(obj->GetName()) )){
-
-// this histogram will actually be printed/drawn!!
-        printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
-	  histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
 
 // check dimension of histogram
           chkdim = ((TH1 *)obj)->GetDimension();
@@ -304,8 +313,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
               obj->Draw();   
 	  if (gPad) gPad->Update();
         }
-
       }
+
+//NOTE! (13jan00,kt) 
+//--> obj->Draw just appends the histogram to the list
+//    --> you must update the current pad (gPad) or the whole big pad (graphPad)
+//        to actually see the stupid thing
+
 // just ended  actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     }
@@ -936,40 +950,40 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
  "TabQaEvsumMeanPt",
  "TabQaGtrkGood",
  "TabQaGtrkNPntT",
- "TabQAGtrkNPntMaxT",
- "TabQAGtrkNPntFitT",
- "TabQAGtrkRnmT",
- "TabQAGtrkChrgT",
- "TabQAGtrkR0T",
- "TabQAGtrkPhi0T",
- "TabQAGtrkZ0T",
- "TabQAGtrkCurvT",
- "TabQAGtrkXfT",
- "TabQAGtrkXf0",
- "TabQAGtrkYfT",
- "TabQAGtrkYf0",
- "TabQAGtrkZfT",
- "TabQAGtrkZf0",
- "TabQAGtrkRT",
- "TabQAGtrkLengthT",
- "TabQAGtrkPsiT",
- "TabQAGtrkTanlT",
- "TabQAGtrkThetaT",
- "TabQAGtrkPtT",
- "TabQAGtrkPT",
- "TabQAGtrkChisq0T",
- "TabQAGtrkChisq1T",
- "TabQAGtrkXfYfT",
- "TabQAGtrkTanlzf",
- "TabQAGtrkPVsTrkLength",
- "TabQAGtrkNPntLengthT",
- "TabQAGtrkChi0MomT",
- "TabQAGtrkChi1MomT",
- "TabQAGtrkChi0TanlT",
- "TabQAGtrkChi1TanlT",
- "TabQAGtrkChi0zfT",
- "TabQAGtrkChi1zfT",
- "TabQAGtrkPsiPhiT"
+ "TabQaGtrkNPntMaxT",
+ "TabQaGtrkNPntFitT",
+ "TabQaGtrkRnmT",
+ "TabQaGtrkChrgT",
+ "TabQaGtrkR0T",
+ "TabQaGtrkPhi0T",
+ "TabQaGtrkZ0T",
+ "TabQaGtrkCurvT",
+ "TabQaGtrkXfT",
+ "TabQaGtrkXf0",
+ "TabQaGtrkYfT",
+ "TabQaGtrkYf0",
+ "TabQaGtrkZfT",
+ "TabQaGtrkZf0",
+ "TabQaGtrkRT",
+ "TabQaGtrkLengthT",
+ "TabQaGtrkPsiT",
+ "TabQaGtrkTanlT",
+ "TabQaGtrkThetaT",
+ "TabQaGtrkPtT",
+ "TabQaGtrkPT",
+ "TabQaGtrkChisq0T",
+ "TabQaGtrkChisq1T",
+ "TabQaGtrkXfYfT",
+ "TabQaGtrkTanlzf",
+ "TabQaGtrkPVsTrkLength",
+ "TabQaGtrkNPntLengthT",
+ "TabQaGtrkChi0MomT",
+ "TabQaGtrkChi1MomT",
+ "TabQaGtrkChi0TanlT",
+ "TabQaGtrkChi1TanlT",
+ "TabQaGtrkChi0zfT",
+ "TabQaGtrkChi1zfT",
+ "TabQaGtrkPsiPhiT"
    };
   sdefList = sdefList1;
   lengofList = sizeof(sdefList1)/4;  
@@ -979,6 +993,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"TestQATable")==0) {
    Char_t* sdefList2[] = {
      "TabQaVtxX",
+     "TabQaVtxY"
    };
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  
