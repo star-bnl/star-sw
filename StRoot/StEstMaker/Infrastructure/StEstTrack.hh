@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.hh,v 1.3 2001/01/26 09:36:56 lmartin Exp $
+ * $Id: StEstTrack.hh,v 1.4 2001/02/23 14:48:32 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.hh,v $
+ * Revision 1.4  2001/02/23 14:48:32  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/26 09:36:56  lmartin
  * Minor changes. Useless statements removed. Add a short description of the data members
  *
@@ -24,6 +27,7 @@
 #ifndef StEstTrack_hh
 #define StEstTrack_hh
 
+#include "StMessMgr.h"
 #include "StMaker.h"
 #include <iostream.h>
 
@@ -122,11 +126,11 @@ inline int StEstTrack::AddFindableBranch(StEstBranch *branch) {
 
 inline int StEstTrack::SetBranch(long i, StEstBranch *branch) {
   if (i<0) {
-    cerr << "ERROR StEstTrack::SetBranch i<0" << endl;
+    gMessMgr->Error()<<"StEstTrack::SetBranch i<0"<<endm;
     return 1;
   }
   if (i>mNBranch) {
-    cerr << "ERROR StEstTrack::SetBranch i>mNBranch" << endl;
+    gMessMgr->Error()<<"StEstTrack::SetBranch i>mNBranch"<<endm;
     return 1;
   }
   mBranch[i]=branch;

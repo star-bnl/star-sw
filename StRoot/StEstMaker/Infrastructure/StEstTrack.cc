@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.cc,v 1.3 2001/01/26 09:36:56 lmartin Exp $
+ * $Id: StEstTrack.cc,v 1.4 2001/02/23 14:48:32 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.cc,v $
+ * Revision 1.4  2001/02/23 14:48:32  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/26 09:36:56  lmartin
  * Minor changes. Useless statements removed. Add a short description of the data members
  *
@@ -40,7 +43,7 @@ StEstTrack::StEstTrack(long maxbranch, StEstTPCTrack *tr=NULL) {
   mHelix = NULL;
   
   if(mBranch==NULL)
-    cerr << "ERROR StEstTrack::StEstTrack mBranch==NULL" << endl;
+    gMessMgr->Error()<<"StEstTrack::StEstTrack mBranch==NULL"<<endm;
 };
 
 StEstTrack::~StEstTrack() {
@@ -79,14 +82,11 @@ void StEstTrack::SetHelix(StHelix *hel) {
 
 StEstBranch* StEstTrack::GetBranch(long int nbr) {
   if (nbr<0) {
-    cerr << "ERROR StEstTrack::GetBranch nbr<0" <<endl;
-    cout << "ERROR StEstTrack::GetBranch nbr<0" <<endl;
+    gMessMgr->Error()<<"StEstTrack::GetBranch nbr<0"<<endm;
     return NULL;
   }
   if (mNBranch<nbr) {
-    cerr << "ERROR StEstTrack::GetBranch mNBranch<nbr" << endl;
-    cout << "ERROR StEstTrack::GetBranch mNBranch<nbr" << endl;
-    cout << "mNBranch="<<mNBranch<<" nbr="<<nbr<<" TPC Id = "<<endl;
+    gMessMgr->Error()<<"StEstTrack::GetBranch mNBranch ("<<mNBranch<<")<nbr ("<<nbr<<")"<<endm;
     return NULL;
   }
   return mBranch[nbr];
@@ -101,11 +101,11 @@ int StEstTrack::RemoveBranch(long int nbr) {
   long i,j,nhits;
 
   if (mNBranch<nbr) {
-    cerr << "ERROR  StEstTrack::RemoveBranch nbr>mNBranch" << endl;
+    gMessMgr->Error()<<"StEstTrack::RemoveBranch nbr>mNBranch"<<endm;
     return 1; 
   }
   if(nbr<0) {
-    cerr << "ERROR  StEstTrack::RemoveBranch nbr<0" << endl;
+    gMessMgr->Error()<<"StEstTrack::RemoveBranch nbr<0"<<endm;
     return 1; 
   }
   nhits=mBranch[nbr]->GetNHits();
@@ -127,11 +127,11 @@ int StEstTrack::RemoveLastBranch() {
   // a error is returned. This method is only used in the cleaning method
   // CleanUp.
   if (mNBranch!=1) {
-    cerr << "ERROR  StEstTrack::RemoveLastBranch more that one branch" << endl;
+    gMessMgr->Error()<<"StEstTrack::RemoveLastBranch more that one branch"<<endm;
     return 1; 
   }
   if(!mBranch[0]) {
-    cerr << "ERROR  StEstTrack::RemoveLastBranch last branch empty" << endl;
+    gMessMgr->Error()<<"StEstTrack::RemoveLastBranch last branch empty"<<endm;
     return 1; 
   }
   delete mBranch[0];

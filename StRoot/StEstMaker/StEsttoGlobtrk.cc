@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.4 2001/02/21 23:50:21 caines Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.5 2001/02/23 14:53:31 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.5  2001/02/23 14:53:31  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.4  2001/02/21 23:50:21  caines
  * Add some more info to SVT track for kalman fitting initial guess
  *
@@ -24,6 +27,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "Infrastructure/StEstBranch.hh"
@@ -39,21 +43,17 @@
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//class St_stk_track;
-//class St_sgr_groups;
-//class St_svm_match;
-
 void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 				St_sgr_groups* svtgrps,
 				St_svm_evt_match* EstMatch){
- 
+
   float x[3] = {0,0,0};
   float b[3];
   gufld(x,b);			    
   
 
   if (mDebugLevel>0)
-    cout<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endl;
+    gMessMgr->Info()<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endm;
   int CountHits=0;
   int CountMatch=0;
   int SaveHit, lsav ;
@@ -62,17 +62,8 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
   StEstBranch *branch;
   StEstHit *hit;
   
-  //  St_stk_track     *svttrk     = new St_stk_track("EstSvtTrk",mNTrack);
-  //  AddData(svttrk);
   stk_track_st* svtTrkPtr  = svttrk->GetTable();
-
-
-  //  St_sgr_groups     *svtgrps     = new St_sgr_groups("EstGroups",mNTrack*10);
-  //  AddData(svtgrps);
   sgr_groups_st* groups = svtgrps->GetTable();
-  
-  //  St_svm_evt_match     *EstMatch     = new St_svm_evt_match("EstMatch",mNTrack);
-  //  AddData(EstMatch);
   svm_evt_match_st* svtMatchPtr  = EstMatch->GetTable();
   
   for( int i=0; i<mNTrack; i++){
@@ -149,7 +140,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
   svtgrps->SetNRows(CountHits);
   EstMatch->SetNRows(CountMatch);
   svttrk->SetNRows(CountMatch);
-  if (mDebugLevel>0)
-    cout<<"StEstTracker::StEsttoGlobtrk : Stop"<<endl;
-  
+  gMessMgr->Info()<<"NRows(svttrk)="<<svttrk->GetNRows()<<endm;
+  gMessMgr->Info()<<"NRows(svtgrps)="<<svtgrps->GetNRows()<<endm;
+  gMessMgr->Info()<<"NRows(EstMatch)="<<EstMatch->GetNRows()<<endm;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTPCTrack.hh,v 1.3 2001/02/21 23:50:22 caines Exp $
+ * $Id: StEstTPCTrack.hh,v 1.4 2001/02/23 14:48:33 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTPCTrack.hh,v $
+ * Revision 1.4  2001/02/23 14:48:33  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/02/21 23:50:22  caines
  * Add some more info to SVT track for kalman fitting initial guess
  *
@@ -22,6 +25,7 @@
  **************************************************************************/
 #ifndef StEstTPCTrack_hh
 #define StEstTPCTrack_hh
+#include "StMessMgr.h"
 #include "StMaker.h"
 #include "StThreeVector.hh"
 #include "StHelix.hh"
@@ -92,13 +96,11 @@ public:
     mR       = new StThreeVectorD*[mMaxHits];
     mdR      = new StThreeVectorD*[mMaxHits];
     row      = new int[mMaxHits];
-    if(!mR || !mdR){
-      cerr << "ERROR!!! not enougth memory" << endl;
-      cerr << "StEstTPCTrack::StEstTPCTrack mR or mdR = NULL" << endl;
-    }
+    if(!mR || !mdR)
+      gMessMgr->Error()<<"StEstTPCTrack : not enougth memory mR or mdR = NULL"<<endm;
     mHitId = new long int[mMaxHits];
     if(!mHitId) 
-      cerr << "ERROR!!! StEstTPCTrack::StEstTPCTrack mHitId=NULL"<<endl;
+      gMessMgr->Error()<<"StEstTPCTrack: not enougth memory mHitId=NULL"<<endm;
     mHitIndex = new long int[mMaxHits];
     mHitFlag = new int[mMaxHits];
     mHelix    = hel;
