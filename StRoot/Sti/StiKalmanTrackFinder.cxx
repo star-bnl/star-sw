@@ -408,7 +408,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t) // throws runtime_error, logi
 	//cout << "           N:" << track->getPointCount() << endl;
 	//cout << "       Max N:" << track->getMaxPointCount() << endl;
 	//cout << "        Gaps:" << track->getGapCount() << endl;
-	trackMes << " SKTFinder::findTrack() - Track Parameters" << endl << *track;
+	//cout << " SKTFinder::findTrack() - Track Parameters" << endl << *track;
 	// insert track in track container for output.
 	if (pars->useTrackFilter && trackFilter->filter(track)) 
 		trackContainer->push_back(track);
