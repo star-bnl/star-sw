@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.22 2001/10/06 06:14:06 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.23 2001/10/25 23:00:24 hardtke Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.23  2001/10/25 23:00:24  hardtke
+ * Use database to get a few parameters in StMagUtilities (including twist)
+ *
  * Revision 1.22  2001/10/06 06:14:06  jeromel
  * Sorry for multiple commits but ... added one more comment line.
  *
@@ -81,17 +84,9 @@
 #define  neR              33            // Number of R points in table
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
-#define  StarDriftV     5.45            // STAR Drift Velocity (cm/microSec) Magnitude
-#define  StarMagE      148.0            // STAR Electric Field (V/cm) Magnitude
-#define  GG           -127.5            // Gating Grid voltage (volts)
-
-#define  TPC_Z0        209.3            // Z location of STAR TPC Ground Plane (cm)
-#define  XTWIST       -0.379            // X Displacement of West end of TPC wrt magnet (mRad)
-#define  YTWIST        0.153            // Y Displacement of West end of TPC wrt magnet (mRad)
-#define  EASTCLOCKERROR  0.0            // Phi rotation of East end of TPC in milli-radians
-#define  WESTCLOCKERROR -0.43           // Phi rotation of West end of TPC in milli-radians
 
 #include "StMagUtilities.h"
+#include "StTpcDb/StTpcDb.h"
 #define   gufld gufld_
 extern   "C" { void gufld(Float_t *, Float_t *) ; }
 
@@ -118,6 +113,18 @@ StMagUtilities::StMagUtilities( )
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
 
+  //initialize parameters to hard-wired values
+  cout << "StMagUtilities:  WARNING -- using hard-wired parameters.  If you want to use the database, use a different constructor" << endl;
+    StarDriftV =    5.45;            // STAR Drift Velocity (cm/microSec) Magnitude
+    StarMagE =     148.0;            // STAR Electric Field (V/cm) Magnitude
+    GG  =          -127.5;            // Gating Grid voltage (volts)
+
+    TPC_Z0 =       209.3;            // Z location of STAR TPC Ground Plane (cm)
+    XTWIST =      -0.379;            // X Displacement of West end of TPC wrt magnet (mRad)
+    YTWIST =       0.153;            // Y Displacement of West end of TPC wrt magnet (mRad)
+    EASTCLOCKERROR =  0.0;            // Phi rotation of East end of TPC in milli-radians
+    WESTCLOCKERROR = -0.43;           // Phi rotation of West end of TPC in milli-radians
+
   if ( gMap == kUndefined ) 
     {
       gufld(X,B) ;                          // Read crude values from Chain to get scale
@@ -129,11 +136,52 @@ StMagUtilities::StMagUtilities( )
 }
 
 
-StMagUtilities::StMagUtilities( Int_t mode )
+StMagUtilities::StMagUtilities( Int_t mode, StTpcDb* dbin )
 
 {                                           // StMagUtilities constructor - temporary kludge in lieu of DB
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
+  SetDb(dbin);
+  //initialize parameters to database, where available
+    StarDriftV =    1e-6*thedb->DriftVelocity();            // STAR Drift Velocity (cm/microSec) Magnitude
+    StarMagE =     148.0;            // STAR Electric Field (V/cm) Magnitude
+    GG  =          -127.5;            // Gating Grid voltage (volts)
+
+    TPC_Z0 =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()->outerSectorFrischGridPadPlaneSeparation();            // Z location of STAR TPC Ground Plane (cm)
+    XTWIST =      1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisY(); // X Displacement of West end of TPC wrt magnet (mRad)
+    YTWIST =       -1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisX();            // Y Displacement of West end of TPC wrt magnet (mRad)
+    EASTCLOCKERROR =  0.0;            // Phi rotation of East end of TPC in milli-radians
+    WESTCLOCKERROR = -0.43;           // Phi rotation of West end of TPC in milli-radians
+    cout << "StMagUtilities::XTWIST = " << XTWIST << " mrad" << endl;
+    cout << "StMagUtilities::YTWIST = " << YTWIST << " mrad" << endl;
+  if ( gMap == kUndefined ) 
+    {
+      gufld(X,B) ;                          // Read crude values from Chain to get scale
+      gFactor = B[2] / 4.980 ;              // Select factor based on Chain values (kGauss) 
+      gMap = kMapped ;                      // Do once & Select the B field map (mapped field or constant)
+      Init(mode) ;                          // Read the Magnetic and Electric Field Data Files, set constants
+      (void) printf("StMagUtilities: ExB init(0x%X)\n",mode);
+
+    }
+
+}
+
+StMagUtilities::StMagUtilities( Int_t mode)
+
+{                                           // StMagUtilities constructor - stand alone version with hardwired constants
+
+  Float_t  B[3], X[3] = { 0, 0, 0 } ;
+  //initialize parameters to hard-wired values
+  cout << "StMagUtilities:  WARNING -- using hard-wired parameters.  If you want to use the database, use a different constructor" << endl;
+    StarDriftV =    5.45;            // STAR Drift Velocity (cm/microSec) Magnitude
+    StarMagE =     148.0;            // STAR Electric Field (V/cm) Magnitude
+    GG  =          -127.5;            // Gating Grid voltage (volts)
+
+    TPC_Z0 =       209.3;            // Z location of STAR TPC Ground Plane (cm)
+    XTWIST =      -0.379;            // X Displacement of West end of TPC wrt magnet (mRad)
+    YTWIST =       0.153;            // Y Displacement of West end of TPC wrt magnet (mRad)
+    EASTCLOCKERROR =  0.0;            // Phi rotation of East end of TPC in milli-radians
+    WESTCLOCKERROR = -0.43;           // Phi rotation of West end of TPC in milli-radians
 
   if ( gMap == kUndefined ) 
     {
@@ -166,6 +214,8 @@ StMagUtilities::StMagUtilities( const EBField map=kMapped, const Float_t factor,
 
 }
 
+
+void StMagUtilities::SetDb(StTpcDb* dbin) {thedb = dbin;}
 
 void StMagUtilities::Init ( Int_t mode )
 
