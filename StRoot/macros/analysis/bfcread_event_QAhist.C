@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.10 2003/01/28 23:52:14 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.11 2005/01/05 21:57:02 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.11  2005/01/05 21:57:02  genevb
+// More lib loads, evtselBranch, remove date set on calib maker
+//
 // Revision 1.10  2003/01/28 23:52:14  genevb
 // Allow for multiple zones per page
 //
@@ -100,6 +103,10 @@ void bfcread_event_QAhist(
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libgeometry_Tables");
 
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
@@ -114,6 +121,8 @@ void bfcread_event_QAhist(
   gSystem->Load("StEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
+  gSystem->Load("StMagF");
+  gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker");  
 
 //  Setup top part of chain
@@ -122,6 +131,7 @@ void bfcread_event_QAhist(
    
 // Input File Maker
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetBranch("evtselBranch",0,"r");
   IOMk->SetBranch("event",0,"r");
   IOMk->SetBranch("geantBranch",0,"r");
   IOMk->SetDebug();
@@ -130,7 +140,7 @@ void bfcread_event_QAhist(
   const char* calibDB = "MySQL:StarDb";
   const char* calibDB2 = "$STAR/StarDb";
   St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,calibDB2);
-  calibMk->SetDateTime("year_2b");
+  //calibMk->SetDateTime("year_2b");
   calibMk->SetDebug();  
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
