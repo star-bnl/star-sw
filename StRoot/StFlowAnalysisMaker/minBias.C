@@ -1,23 +1,244 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.3 2000/09/29 22:53:17 posk Exp $
+// $Id: minBias.C,v 1.4 2001/05/22 20:05:47 posk Exp $
 //
-// Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
-// Description:  Macro to add centrality-selected histograms together with
-//               weighting to make a minimum bias result.
-//               Uses a set of histograms with different centrality
-//               starting with anaXX.root given by first run number XX.
-//               First Run Number appended to "ana" is entered in the box.
-//               Default selN = 1 and harN = 2.
-//               First time type .x minBias.C() to see the menu.
-//               After the first execution, just type minBias(N) .
-//               A negative N plots all pages starting with page N.
-//               Place a symbolic link to this file in StRoot/macros/analysis .
+// Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
+// Description:  Macro to add histograms together.
+//               The v histograms will be added with yield weighting.
+//               First file anaXX.root given by first run number XX.
+//               Output file given by output run number.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
+gROOT->Reset();
+
+void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
+
+  const  int nCens = 8;
+  int    nSels = 2;
+  const  int nHars = 6;
+  float  yCM   = 0.0;
+  char   fileName[30];
+  TFile* histFile[nCens+1];
+  TH1*   hist[nCens+1];
+  TH2*   yieldPartHist[nCens];
+  
+  // names of histograms to be added with weighting
+  const char* baseName[] = { 
+    "Flow_Res",
+    "Flow_v2D",   // must be first
+    "Flow_vEta",
+    "Flow_vPt",
+    "Flow_v"
+  };
+  const int nNames = sizeof(baseName) / sizeof(char*);
+
+  // open the files
+  for (int n = 0; n < nCens; n++) {
+    sprintf(fileName, "ana%2d.root", firstRunNo + n);
+    cout << " file name = " << fileName << endl;
+    histFile[n] = new TFile(fileName);
+    if (!histFile[n]) {
+      cout << "### Can't find file " << fileName << endl;
+      return;
+    }
+  }
+  sprintf(fileName, "ana%2d.root", outputRunNo);
+  cout << " output file name = " << fileName << endl << endl;
+  histFile[nCens] = new TFile(fileName, "RECREATE");
+    
+  // add all histograms with no weighting
+  TKey*    key;
+  TObject* obj;
+  TIter nextkey(histFile[0]->GetListOfKeys());  
+  while (key = (TKey*)nextkey()) {
+    histFile[0]->cd();
+    //key->ls();
+    obj = key->ReadObj();
+    if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
+      hist[0] = (TH1*)obj;
+      char* objName = key->GetName();
+      cout << "hist name= " << objName << endl;
+      for (int n = 1; n < nCens; n++) {
+	hist[1] = (TH1*)histFile[n]->Get(objName);
+	hist[0]->Add(hist[1]);
+      }
+    }
+    histFile[nCens]->cd();
+    obj->Write(objName);
+    delete obj;
+    obj = NULL;
+  }
+   
+  // get yield histogram
+  cout<<endl;
+  for (int n = 0; n < nCens; n++) {
+    yieldPartHist[n] = dynamic_cast<TH2*>(histFile[n]->Get("Flow_YieldPart2D"));
+    if (!yieldPartHist[n]) {
+      cout << "### Can't find yield part histogram Flow_YieldPart2D"
+	   << endl;
+      return;
+    }
+  }
+
+  for (int pageNumber = 0; pageNumber < nNames; pageNumber++ ) {
+    bool twoD = kFALSE;
+    if (strstr(baseName[pageNumber],"v2D")) twoD = kTRUE;
+
+    for (int selN = 0; selN < nSels; selN++) {
+      
+      // no harmonics
+      bool noHars = kFALSE;
+      int nHar = nHars;
+      if (strcmp(baseName[pageNumber],"Flow_v")==0 ||
+	  strstr(baseName[pageNumber],"Res")!=0) {
+	noHars = kTRUE;
+	nHar = 1;
+      } 
+      for (int harN = 0; harN < nHar; harN++) {	
+	
+	// construct histName
+	char sel[2];
+	sprintf(sel,"%d",selN+1);
+	char har[2];
+	sprintf(har,"%d",harN+1);
+	TString* histName = new TString(baseName[pageNumber]);
+	histName->Append("_Sel");
+	histName->Append(*sel);
+	if (!noHars) {	
+	  histName->Append("_Har");
+	  histName->Append(*har);
+	}
+	cout << "hist name= " << histName->Data() << endl;
+		
+	// get the histograms
+	for (int n = 0; n < nCens+1; n++) {
+	  hist[n] = dynamic_cast<TH1*>(histFile[n]->Get(histName->Data()));
+	  if (!hist[n]) {
+	    cout << "### Can't find histogram " << histName->Data() << endl;
+	    return;
+	  }
+	}
+
+	int nBins;      // set by 2D
+	int xBins = hist[0]->GetNbinsX();
+	int yBins;
+	if (twoD) {
+	  yBins = hist[0]->GetNbinsY();
+	  nBins = xBins + (xBins + 2) * yBins;
+	  float yMax  = hist[0]->GetXaxis()->GetXmax();
+	  float yMin  = hist[0]->GetXaxis()->GetXmin();
+	  TH1F* yieldY = new TH1F("Yield_Y", "Yield_Y", xBins, yMin, yMax);
+	  yieldY->SetXTitle("Rapidity");
+	  yieldY->SetYTitle("Counts");
+	  float ptMax  = hist[0]->GetYaxis()->GetXmax();
+	  TH1F* yieldPt = new TH1F("Yield_Pt", "Yield_Pt", yBins, 0., ptMax);
+	  yieldPt->SetXTitle("Pt (GeV/c)");
+	  yieldPt->SetYTitle("Counts");
+	} else {
+	  nBins = xBins + 2;
+	}
+	
+	// loop over the bins
+	if (strstr(baseName[pageNumber],"Res")) { // with error weighting
+	  cout<<"  With error weighting"<<endl;
+	  float content;
+	  float error;
+	  float errorSq;
+	  float meanContent;
+	  float meanError;
+	  float weight;
+	  for (int bin = 0; bin < nBins; bin++) {
+	    meanContent = 0.;
+	    meanError   = 0.;
+	    weight      = 0.;
+	    for (int n = 0; n < 2; n++) {
+	      content = hist[n]->GetBinContent(bin);
+	      error   = hist[n]->GetBinError(bin);
+	      errorSq = error * error;
+	      if (errorSq > 0.) {
+		meanContent += content / errorSq;
+		weight      += 1. / errorSq;
+	      }
+	    }
+	    if (weight > 0.) {
+	    meanContent /= weight;
+	    meanError = sqrt(1. / weight);
+	    hist[nCens]->SetBinContent(bin, meanContent);
+	    hist[nCens]->SetBinError(bin, meanError);
+	    }
+	  }
+	} else {                                   // with yield weighting
+	  cout<<"  With yield weighting"<<endl;
+	  float v;
+	  float vSum;
+	  float content;
+	  float error;
+	  float error2sum;
+	  float yield;
+	  float yieldSum;
+	  float y;
+	  float pt;
+	  for (int bin = 0; bin < nBins; bin++) {
+	    v         = 0.;
+	    vSum      = 0.;
+	    content   = 0.;
+	    error     = 0.;
+	    error2sum = 0.;
+	    yield     = 0.;
+	    yieldSum  = 0.;
+	    for (int n = 0; n < nCens; n++) {
+	      if (strstr(histName->Data(),"v2D")) {
+		yield = yieldPartHist[n]->GetBinContent(bin);
+	      } else if (strstr(histName->Data(),"vEta")) {
+		yield = yieldPartHist[n]->Integral(bin, bin, 1, yBins);
+		if (selN==0 && harN==0) {
+		  y = yieldPartHist[n]->GetXaxis()->GetBinCenter(bin);
+		  yieldY->Fill(y, yield);
+		}
+	      } else if (strstr(histName->Data(),"vPt")) {
+		yield = yieldPartHist[n]->Integral(1, xBins, bin, bin);
+		if (selN==0 && harN==0) {
+		  pt = yieldPartHist[n]->GetYaxis()->GetBinCenter(bin);
+		  yieldPt->Fill(pt, yield);
+		}
+	      } else {                                        // _v
+		yield = yieldPartHist[n]->Integral();
+	      }
+	      v = hist[n]->GetBinContent(bin);
+	      if (v != 0) {
+		yieldSum  += yield;
+		vSum      += yield * v;
+		error2sum += pow(yield *  hist[n]->GetBinError(bin), 2.);
+	      }
+	    }
+	    if (yieldSum) {
+	      content = vSum / yieldSum;
+	      error   = sqrt(error2sum) / yieldSum;
+	    }
+	    hist[nCens]->SetBinContent(bin, content);
+	    hist[nCens]->SetBinError(bin, error);
+	  }
+	} 
+	delete histName;
+      }
+    }
+  }
+  
+  //histFile[nCens]->ls();
+  histFile[nCens]->Write(0, TObject::kOverwrite);
+  histFile[nCens]->Close();
+  delete histFile[nCens];
+  
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.4  2001/05/22 20:05:47  posk
+// Now outputs a hist.root file.
+// The v values are averaged with yield weighting.
+//
 // Revision 1.3  2000/09/29 22:53:17  posk
 // More histograms.
 //
@@ -29,159 +250,4 @@
 // minimum bias histogram.
 //
 //
-//
 ///////////////////////////////////////////////////////////////////////////////
-
-Int_t runNumber      = 0;
-const Int_t nCens    = 8;
-TFile* histFile[nCens];
-
-TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
-
-  TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
-  if (cOld) cOld->Delete();
-  
-  gROOT->SetStyle("Bold");                              // set style
-  gROOT->ForceStyle();
-  
-  char  runName[6];
-  char  fileName[30];
-  int   canvasWidth = 780, canvasHeight = 600; 
-  
-  // names of histograms made by StFlowAnalysisMaker
-  const char* baseName[] = { "Flow_Phi_Flat",
-			     "Flow_Psi",
-			     "Flow_q",
-			     "Flow_Psi_Sub_Corr",
-			     "Flow_Psi_Sub_Corr_Diff",
-			     "Flow_vEta",
-			     "Flow_vPt"};
-  const int nNames = sizeof(baseName) / sizeof(char*);
-  
-  // input the first run number
-  if (runNumber == 0) {
-    cout << "     first run number? ";
-    cin >> runNumber;
-    sprintf(runName, "ana%2d", runNumber);               // add ana prefix
-    cout << " first run name = " << runName << endl;
-    
-    // open the files
-    for (int n = 0; n < nCens; n++) {
-      sprintf(fileName, "ana%2d.root", runNumber + n);
-      cout << " file name = " << fileName << endl;
-      histFile[n] = new TFile(fileName);
-    }
-  }
-  
-  // input the page number
-  while (pageNumber <= 0 || pageNumber > nNames) {
-    if (pageNumber < 0) {                                // plot all
-      minBiasAll(nNames, selN, harN, -pageNumber);
-      return;
-    }
-    cout << "-1: \t All" << endl;                        // print menu
-    for (int i = 0; i < nNames; i++) {
-      cout << i+1 << ":\t " << baseName[i] << endl;
-    }
-    cout << "     page number? ";
-    cin >> pageNumber;
-  }
-  pageNumber--;
-  
-  // construct histName
-  char sel[2];
-  sprintf(sel,"%d",selN);
-  char har[2];
-  sprintf(har,"%d",harN);
-  TString* histName = new TString(baseName[pageNumber]);
-  histName->Append("_Sel");
-  histName->Append(*sel);
-  histName->Append("_Har");
-  histName->Append(*har);
-  cout << " input hist name= " << histName->Data() << endl;
-  
-  // make the graph page
-  TCanvas* c = new TCanvas(baseName[pageNumber], baseName[pageNumber],
-			   canvasWidth, canvasHeight);
-  c->ToggleEventStatus();
-  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
-  run->Draw();
-  TDatime now;
-  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
-  date->Draw();
-  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
-  graphPad->Draw();
-  graphPad->cd();
-  
-  // get the histograms
-  TH1* hist[nCens];
-  for (int cen = 0; cen < nCens; cen++) {
-    hist[cen] = (TH1*)histFile[cen].Get(histName->Data());
-    if (!hist[cen]) {
-      cout << "### Can't find histogram " << histName->Data() << endl;
-      return;
-    }
-  }
-
-  // book the minBias histogram
-  TString* meanHistName = new TString(histName->Data());
-  meanHistName->Append("_MinBias");
-  cout << " output hist name= " << meanHistName->Data() << endl;
-  int nBins    = hist[0]->GetNbinsX();
-  TAxis* xAxis = hist[0]->GetXaxis();
-  float xMin   = xAxis->GetXmin();
-  float xMax   = xAxis->GetXmax();
-  char* xTitle = xAxis->GetTitle();
-  char* yTitle = hist[0]->GetYaxis()->GetTitle();
-  TH1F* meanHist = new TH1F(meanHistName->Data(), meanHistName->Data(), 
-			    nBins, xMin, xMax);
-  meanHist->SetXTitle(xTitle);
-  meanHist->SetYTitle(yTitle);
-  
-  // loop over the bins
-  float content, error, errorSq;
-  float meanContent, meanError, weight;
-  for (int bin = 0; bin < nBins; bin++) {
-    meanContent = 0.;
-    meanError   = 0.;
-    weight      = 0.;
-    for (int cen = 0; cen < nCens; cen++) {
-      content = hist[cen]->GetBinContent(bin);
-      error   = hist[cen]->GetBinError(bin);
-      errorSq = error * error;
-      if (errorSq > 0.) {
-	meanContent += content / errorSq;
-	weight      += 1. / errorSq;
-      }
-    }
-    if (weight > 0.) {
-      meanContent /= weight;
-      meanError = sqrt(1. / weight);
-      meanHist->SetBinContent(bin, meanContent);
-      meanHist->SetBinError(bin, meanError);
-    }
-  }
-
-  // make the plot
-  gStyle->SetOptStat(100100);
-  meanHist->Draw();
-  gPad->Update();
-
-  delete histName;
-  delete meanHistName;
-  
-  return c;
-}
-
-void minBiasAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
-  char temp[3];
-  for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = minBias(i, selN, harN);
-    c->Update();
-    cout << "save? y/[n]" << endl;
-    fgets(temp, sizeof(temp), stdin);
-    if (strstr(temp,"y")!=0) c->Print(".ps");
-    c->Delete();
-  }
-  cout << "  Done" << endl;
-}
