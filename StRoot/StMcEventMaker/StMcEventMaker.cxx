@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.45 2003/10/08 20:28:23 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.46 2003/12/04 05:58:15 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.46  2003/12/04 05:58:15  calderon
+ * Introduction of Endcap EMC collections into StMcEvent.  Read the corresponding
+ * g2t table for the hits, decode the volume Id and add it to the proper
+ * containers in StMcEvent and StMcTrack.
+ *
  * Revision 1.45  2003/10/08 20:28:23  calderon
  * use <iostream>, std::ostream, std::cout
  *
@@ -206,13 +211,15 @@ using std::find;
 
 #include "StEmcUtil/geometry/StEmcGeom.h" // For Barrel Emc
 
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h" // For Endcap Emc
+#include "StEEmcUtil/EEmcMC/EEmcMCData.h"     // we need to get some constants
 
 static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.45 2003/10/08 20:28:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.46 2003/12/04 05:58:15 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -233,6 +240,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseCtb         (kTRUE),
     doUseTofp        (kTRUE),
     doUseTof         (kTRUE),
+    doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     ttemp(),
     ttempParticle(),
@@ -358,6 +366,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_ctf_hit *g2t_ctb_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_ctb_hit"); // Added CTB Hits
     St_g2t_ctf_hit *g2t_tof_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tof_hit");
     St_g2t_ctf_hit *g2t_tfr_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tfr_hit");
+    St_g2t_emc_hit *g2t_eem_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_eem_hit");
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
@@ -469,6 +478,16 @@ Int_t StMcEventMaker::Make()
 	    smdHitTable = g2t_smd_hitTablePointer->GetTable();
 	else
 	    cerr << "Table g2t_smd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	//
+	// EEMC Hit Table
+	//
+	g2t_emc_hit_st *eemHitTable = 0;
+	if (g2t_eem_hitTablePointer)
+	    eemHitTable = g2t_eem_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_eem_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//	
 	// Pixel Hit Table
 	//
@@ -1106,6 +1125,9 @@ Int_t StMcEventMaker::Make()
 	// BSMDE and BSMDP Hits
 	if (doUseBsmd) fillBsmd(g2t_smd_hitTablePointer);
 	
+	// EEMC Hits
+	if (doUseEemc) fillEemc(g2t_eem_hitTablePointer);
+
 	ttemp.clear();
 	
 	//_______________________________________________________________
@@ -1280,6 +1302,134 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
     }
     cout << "Filled " << mCurrentMcEvent->bsmdeHitCollection()->numberOfHits() << " BSMDE Hits" << endl;
     cout << "Filled " << mCurrentMcEvent->bsmdpHitCollection()->numberOfHits() << " BSMDP Hits" << endl;
+
+}
+
+void
+StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
+{
+    if (g2t_eem_hitTablePointer == 0) {
+        cout << "No EEMC Hits in this event" << endl;
+        return;
+    }
+
+    g2t_emc_hit_st* eemHitTable = g2t_eem_hitTablePointer->GetTable();
+    // some note about the EEMC geometry
+    // I wasn't able to find translation functions from volume id
+    // to eta module sub
+    // There exists a piece of code in StEEmcUtil/EEmcMC/EEmcMCData.cxx
+    // which does this unpacking, I copied it into the loop below.
+    // the mapping of EEMC coordinates is described in StEEmcFastMaker.h
+    // TOWERS: det = kEndcapEmcTowerId;
+    //  sector 1-12   --> module 0-11
+    //  subsector A-E --> submodule 0-4
+    //  jeta 1-12     --> eta 0-11
+    // I use the same mapping...
+
+    float de;
+    StMcTrack *tr = 0;
+    StMcCalorimeterHit *emchEemc = 0;
+    StMcEmcHitCollection *eemcColl=mCurrentMcEvent->eemcHitCollection();
+    if (!eemcColl) { cerr << "halt, no eemc collection in StMcEvent found" << endl; return; }
+    m_DataSet->Add(eemcColl);
+    eemcColl->SetName("EemcHits");
+    
+    long NHits = g2t_eem_hitTablePointer->GetNRows();
+
+    for(long ihit = 0; ihit<NHits; ihit++,eemHitTable++) {
+        // decoding of the volume Id, see comments above
+        Int_t ivid = eemHitTable->volume_id;
+	if (Debug()>=2) cout << "vol id = " << ivid << endl;
+    
+	Short_t sec = 0;
+	Short_t ssec = 0;
+	Short_t half = ivid/kEEmcTowerHalfId; ivid %= kEEmcTowerHalfId;
+	if (half != 1) {
+	  // we only read in one endcap - y2003x has two...
+	  continue;
+	}
+	Short_t phi = ivid/kEEmcTowerPhiId; ivid %= kEEmcTowerPhiId;
+	Short_t eta = ivid/kEEmcTowerEtaId; ivid %= kEEmcTowerEtaId;
+	Short_t depth = ivid/kEEmcTowerDepId; ivid %= kEEmcTowerDepId;
+
+	if (!ivid==0) { 
+	    cerr << "Critical error in EEMC volume id decoding" << endl;
+	    return;
+	}
+    
+	ssec = (phi - 1) % 5 + 1; // sub-sector
+	sec = (phi - 1) / 5 + 1;
+
+	if (Debug()>=2) cout << "sec = " << sec << " sub-sec = " << ssec << " eta =" << eta << " depth = " << depth << endl;
+
+	// sanity checks on volume id decoding
+	if (!(0 < sec && sec <= kEEmcNumSectors)) {
+	    cout << "Critical error in EEMC volume id decoding, sector is off.  sec = " << sec << endl;
+	    return;
+	}
+	if (!(0 < ssec && ssec <= kEEmcNumSubSectors)) {
+	    cout << "Critical error in EEMC volume id decoding, sub-sector = " << ssec << endl;
+	    return;
+	}
+	if (!(0 < eta && eta <= kEEmcNumEtas)) {
+	    cout << "Critical error in EEMC volume id decoding, eta = " << eta << endl;
+	    return;
+	}
+	if (!(0 < depth && depth <= kEEmcNumDepths)) {
+	    cout << "Critical error in EEMC volume id decoding, depth = " << depth << endl;
+	    return;
+	}
+	
+	// get the track, not done in StEEmc*
+ 	tr = ttemp[eemHitTable->track_p - 1];
+
+	de = eemHitTable->de;
+
+	// translation sec,ssec,eta into module, eta, sub
+	// see comment above
+	// additon: the ****ing EMC code (StMcEmcHitCollection)
+	// requires modules to start with 1 and harcodes the number
+	// of modules to 120... this sucks and might brake things
+	// the numbering scheme from StEEmcFastMaker.h will not work with it
+	Int_t module_trans = sec; // -1;
+	Int_t eta_trans    = eta; // - 1;
+	Int_t sub_trans    = ssec; // - 1;//'A';
+// 	cerr << "TK - writing module=" << module_trans
+// 	     << " eta=" << eta_trans
+// 	     << " sub=" << sub_trans
+// 	     << " dE=" << de
+// 	     << " parent track=" << tr
+// 	     << endl;
+	
+	if (depth == EEmcMCData::kTower1Depth || 
+	    depth == EEmcMCData::kTower2Depth ||
+	    depth == EEmcMCData::kPreShower1Depth ||
+	    depth == EEmcMCData::kPreShower2Depth) {
+            emchEemc = new StMcCalorimeterHit(module_trans,eta_trans,
+					      sub_trans,de,tr);
+	    StMcEmcHitCollection::EAddHit eemcNew = eemcColl->addHit(emchEemc);
+	    if (eemcNew == StMcEmcHitCollection::kNew) {
+	      // adding the hit to the track produces a segfault
+	      tr->addEemcHit(emchEemc);
+	    } 
+	    else if (eemcNew == StMcEmcHitCollection::kAdd) {
+	        // nothing to do...
+	    } 
+	    else if (eemcNew == StMcEmcHitCollection::kErr) {
+	        delete emchEemc;
+		gMessMgr->Warning()<<"<E> Bad hit in Eemc collection" << endm;
+	    }
+	    else {
+	        delete emchEemc;
+		gMessMgr->Warning()<<"<E> Funny return value! EAddHit = " << static_cast<int>(eemcNew) << endm;
+	    }
+	}
+	else {
+	    // hm, don't know what to do here...
+	}
+    }
+    
+    cout << "Filled " << mCurrentMcEvent->eemcHitCollection()->numberOfHits() << " EEMC Hits" << endl;
 
 }
 
@@ -1483,6 +1633,7 @@ StMcEventMaker::printEventInfo()
     printEventInfoForEmc(mCurrentMcEvent->bprsHitCollection());
     printEventInfoForEmc(mCurrentMcEvent->bsmdeHitCollection());
     printEventInfoForEmc(mCurrentMcEvent->bsmdpHitCollection());
+    printEventInfoForEmc(mCurrentMcEvent->eemcHitCollection());
     
 }  
 
