@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.3 1998/03/17 16:57:18 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.4 1998/08/20 21:29:48 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.4  1998/08/20 21:29:48  sakrejda
+* printing replaced by a message call
+*
 * Revision 1.3  1998/03/17 16:57:18  sakrejda
 * temporary protection from NaN - RB is preparing a better one
 *
@@ -182,6 +185,7 @@ c
         integer iucomp
         integer lvsimx
         integer tgc_time_to_z
+        integer loop_over_z
 C        integer tph_3point_gauss   ! not in use?
 C-----------------------------------------------------------------------
         data first/.true./
@@ -308,14 +312,17 @@ cmal     +       call tph_weighted_mean(identity_vector, rvec,
 c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
 c
-        do indx=1,nclspix
+        loop_over_z=nclspix
+        if(loop_over_z.gt.nbuck_max)
+     +  loop_over_z=nbuck_max
+        do indx=1,loop_over_z
            rvec(indx) = float(iadc(indx))
            d_rvec_cor(indx) = filtered_noise
            d_rvec_uncor(indx) = white_noise
         enddo
         call tph_weighted_mean(z_vector, rvec,
      +       d_rvec_cor, d_rvec_uncor,
-     +       1, nclspix, nbuck_max,
+     +       1, loop_over_z, nbuck_max,
      +       centroid, sigma, uncertainty)
 c
         z(1) = centroid
