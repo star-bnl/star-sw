@@ -33,11 +33,11 @@ TGeoNode *findNode     (TObjArray *nodeList,const char *name);
 void
 show
 (
- char* inpDir  = "",          // MuDST directory
- char* inpFile = "show.lis",  // MuDST file(s);                      
- char* outFile = "show.root", // output tree file
- Int_t nFiles  = 100,         // # of MuDST file(s)
- Int_t nEvents = -1           // # of ebents
+ char* inpDir  = "",         // MuDST directory
+ char* inpFile = "show.lis", // MuDST file(s);                      
+ char* outFile = "show.root",// output tree file
+ Int_t nFiles  = 50,         // # of MuDST file(s)
+ Int_t nEvents = 100         // # of events
  )
   // remeber to adjust dbase timestamp below !!!! 
   // what a ... design
@@ -69,15 +69,17 @@ show
   TCanvas    *c1   = new TCanvas("eemc","eemc",10,10,1000,1000);
   TPaveLabel *tlab = new TPaveLabel(-0.99,+0.99,+0.99,+0.90,"EEMC TOWERS & TPC TRACKS     Piotr A Zolnierczuk (IU)");
 
-  eventInfo = new TPaveText (-0.99 ,-0.99,+0.0,-0.90);
+  eventInfo = new TPaveText (-0.99,-0.99,+0.0 ,-0.90);
   dateInfo  = new TPaveLabel(+0.60,-0.99,+0.99,-0.95,now->AsString());
 
   TGeoManager  *gm    = new TGeoManager("eemc", "eemc tower display");
   TGeoVolume   *top   = gm->MakeBox("star",0, 200., 200., 350.);
-  TGeoVolume   *smbox = gm->MakeBox("smbox1",0, 1., 1., 1.);
+  TGeoVolume   *smbox = gm->MakeBox("smbox1",0, 2., 2., 2.);
+  smbox->SetLineColor(kRed);
   // eemc 
   eemc  = new EEmcTTDisplay();
   eemc->SetMagneticField(0.5); // in Tesla
+  eemc->SetShowExtrapolatedTracks(true);
  
   TGeoTranslation *etra = new TGeoTranslation(0.0,0.0,0.5*(eemc->getZ1()+eemc->getZ2()));
   top->AddNode(smbox, 1,NULL);
@@ -104,7 +106,7 @@ show
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
-  eemcDbMaker->setTimeStampDay(20040327);  // format: yyyymmdd
+  eemcDbMaker->setTimeStampDay(20040331);  // format: yyyymmdd
   eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
   // eemcDbMaker->setDBname("TestScheme/eemc");             // use alternative database (if needed)
   // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal"); // request alternative flavor (if needed)
@@ -113,6 +115,9 @@ show
   ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
   ttm->SetFileName(outFile);
   ttm->Summary(cout);    // 
+  //ttm->SetMinTrackPt(0.5);
+  //ttm->SetMinTrackEta(0.7);
+  //ttm->SetMaxTrackEta(2.2);
 
   StMuDebug::setLevel(0);
 
@@ -132,14 +137,21 @@ next(int nMatch=1)
   int  stat=0;
   int  match=0;
   while(match<nMatch) {
-    if( (stat = chain->Make()) != 0 ) break;
- 
-    TIter  nextMatch(ttm->GetMatch()->GetTable());
-    
-    EEmcTower *tower;
-    StMuTrack *track;
-    TPair     *mapPair;
-    if(ttm->GetMatch()->GetTable()->IsEmpty()) continue;
+    stat=chain->Make();
+    if( stat==2 || stat==4) break;
+    if( stat!=0 ) continue;
+
+    TList       *matchList = ttm->GetMatchList();
+
+    if(matchList->IsEmpty()) continue;
+
+
+
+    EEmcTTMatch *tmatch;
+    EEmcTower   *tower;
+    StMuTrack   *track;
+
+    TIter  nextMatch(matchList);
 
     match++;
 
@@ -155,15 +167,17 @@ next(int nMatch=1)
     cerr << "<Event";
     cerr << "Run=\""  << evinfo.runId() << "\"\t";
     cerr << "Event=\""<< evinfo.id()    << "\">\n";
-    while ((mapPair = (TPair*) nextMatch())) {
+    while ((tmatch = (EEmcTTMatch *) nextMatch())) {
       TString outs;
-      tower = (EEmcTower *)mapPair->Key();
-      track = (StMuTrack *)mapPair->Value();
+      tower = tmatch->Tower();
       eemc->AddTower(*tower);
-      eemc->AddTrack(*track);
-      eemc->Out(cerr,*track,*tower);
-      eemc->Out(outs,*track,*tower);
-      eventInfo->AddText(outs);
+      TIter nextTrack(tmatch->Tracks());
+      while((track=(StMuTrack *)nextTrack())) { 
+	eemc->AddTrack(*track);
+	eemc->Out(cerr,*track,*tower);
+	eemc->Out(outs,*track,*tower);
+	eventInfo->AddText(outs);
+      }
     }
     cerr << "</Event>" << endl;
 
