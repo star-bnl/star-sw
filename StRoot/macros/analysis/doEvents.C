@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.39 2000/01/11 18:20:20 ullrich Exp $
+// $Id: doEvents.C,v 1.40 2000/03/17 23:10:06 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.40  2000/03/17 23:10:06  kathy
+// make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
+//
 // Revision 1.39  2000/01/11 18:20:20  ullrich
 // Add latests improvements from Victor.
 //
@@ -102,6 +105,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     for (int ifil=0; fileList[ifil]; ifil++)
 	{ setFiles->AddFile(fileList[ifil]);}
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+    IOMk->SetBranch("dstBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
     IOMk->SetDebug();
 
