@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.57 2001/04/19 18:03:28 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.58 2001/05/01 18:02:07 lbarnby Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.58  2001/05/01 18:02:07  lbarnby
+// Zero primtrk map before filling, fix filling bug for SVT part += becomes |=
+//
 // Revision 1.57  2001/04/19 18:03:28  balewski
 // *** empty log message ***
 //
@@ -565,7 +568,13 @@ Int_t StPrimaryMaker::Make(){
       int spt_id = 0;
       int row = 0,i;
       bool isset;
-      
+
+      //First set all bits in map to zero before doing bitwise ops
+      for(i=0;i<primtrk->GetNRows();i++){
+      	track[i].map[0] = 0UL;
+      	track[i].map[1] = 0UL;
+      }
+
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 	if( tgroup->id1 != 0 && tgroup->ident >= 0){
 	  spt_id = tgroup->id2-1;
@@ -606,7 +615,7 @@ Int_t StPrimaryMaker::Make(){
 	    assert(0);
 	  }
 	  if( row>7)row=7;
-	  track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
+	  track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
 	  
 	}
     
