@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.18 1998/08/20 21:27:27 sakrejda Exp $
+* $Id: tte.F,v 1.19 1999/01/09 21:15:03 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.19  1999/01/09 21:15:03  sakrejda
+* local arrays increased to hold Venus event
+*
 * Revision 1.18  1998/08/20 21:27:27  sakrejda
 * protection against tracks that cannot be associated with a mc track
 *
@@ -112,7 +115,7 @@ C_____________________________________________________________________________
       integer   list_size                     !size of the list arrays used 
 c                                              to address hits by id
 c                                              in the index table, mc g2t_hit
-      parameter (list_size=1000000)
+      parameter (list_size=1100000)
       integer   list_index_mc(list_size)      !address mc hit in tindex
       integer   list_index_rec(list_size)     !address rec hits in tindex
       integer   list_g2t_hits(list_size)      !mc hit address in g2t_tpc_hit
@@ -231,7 +234,7 @@ C
              tte=STAFCV_BAD
              write(m132(1),*) 'TTE-I1 list_size not big enough ','i= ',i
              write(m132(2),*) 'list_size = ',list_size,'g2t_hit(i).id = '
-     >                         ,g2t_hit(i).id
+     >                         ,g2t_hit(i).id, ' nok = ',g2t_hit_h.nok
              call Message (m132, 2, idI1 )
              return
          else
