@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.52 1999/04/02 15:48:19 fine Exp $ 
+// $Id: St_Table.cxx,v 1.53 1999/05/06 02:17:37 perev Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.53  1999/05/06 02:17:37  perev
+// Supress warnings in Table if <100 rows
+//
 // Revision 1.52  1999/04/02 15:48:19  fine
 // Minor casting problem for VC++ has been solved
 //
@@ -422,7 +425,7 @@ void St_Table::Clear(Option_t *opt)
     if (mx!=fN) s_Table = (char*)realloc(s_Table,mx*s_Size[0]);
     memset(s_Table+(mx-1)*s_Size[0],127,s_Size[0]);
 
-    if (!s_MaxIndex[0]) 
+    if (!s_MaxIndex[0] && fN > 100) 
       Warning("Clear"," Table %s has purged from %d to zero ",GetName(),fN);
       
     fN = mx;
