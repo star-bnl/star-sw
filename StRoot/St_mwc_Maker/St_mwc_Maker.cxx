@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.12 1999/03/12 21:47:36 perev Exp $
+// $Id: St_mwc_Maker.cxx,v 1.13 1999/06/09 19:56:31 druss Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.13  1999/06/09 19:56:31  druss
+// Added histograms : # of wire hits, # of sectors hit, # wires hit as a function of eta and phi
+//
 // Revision 1.12  1999/03/12 21:47:36  perev
 // New maker schema
 //
@@ -89,11 +92,21 @@ Int_t St_mwc_Maker::Init(){
    m_cal  = (St_mwc_cal  *) params("cal");
    m_mpar = (St_mwc_mpar *) params("mpar");
 
+   mwc_mpar_st *partable = m_mpar->GetTable();
+   partable->de_thresh_in      = 0;
+   partable->de_thresh_out     = 0;
+   partable->el_noise_width    = 0;
+   partable->min_ion    = 0;
+   m_mpar->AddAt(partable,0);
+
 // Create Histograms 
 
    m_px = new TH1F("MwcHitPx","MWC: px",100,-4.0,4.0);
    m_py = new TH1F("MwcHitPy","MWC: py",100,-4.0,4.0);
    m_pz = new TH1F("MwcHitPz","MWC: pz",100,-4.0,4.0);
+   m_nWiresHit = new TH1F("MwcNumberWiresHit","MWC: WiresHit",101,-0.5,100.5);
+   m_nSectorsHit = new TH1F("MwcNumSecHit","MWC: SectorsHit",101,-0.5,100.5);
+   m_EtaPhi = new TH2F("MwcEtaPhi","MWC: Eta vs Phi",24,0.5,24.5,4,0.5,4.5);
 
    return StMaker::Init();
 }
@@ -139,10 +152,31 @@ Int_t St_mwc_Maker::Make(){
       printf("**** Problems with mwc ****\n");
       return kStWarn;
    }
+
+   mwc_sector_st *sec = sector->GetTable();
+   mwc_raw_st    *rw  = raw->GetTable();
+   /*   for (int ii=0;ii<=95;ii++)
+     {
+       if ( (rw+ii)->count )
+	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
+		"%3d de %f\n",(rw+ii)->sector,(rw+ii)->count,
+		(sec+ii)->iphi,(sec+ii)->ieta,(sec+ii)->nhit,
+		(sec+ii)->tot_hit,(sec+ii)->de);
+     }*/
    g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
    table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
    float px,py,pz,x,y;
-   for (int iii=0;iii<hitHead->nok;iii++)
+   int iNHit;
+   int nSectorsHit=0;
+   for (int iii=0;iii<96;iii++)
+     {
+       iNHit = (sec+iii)->nhit;
+       if (iNHit) nSectorsHit++;
+       m_nWiresHit -> Fill( float(iNHit) );
+       m_EtaPhi -> Fill(float(int(iii/4)+1),float(iii%4)+1,float(iNHit) );
+     }
+   m_nSectorsHit -> Fill(float(nSectorsHit));
+   for (iii=0;iii<hitHead->nok;iii++)
      {
        x  = (hitTable+iii)->x[0];
        y  = (hitTable+iii)->x[1];
@@ -153,12 +187,13 @@ Int_t St_mwc_Maker::Make(){
        m_py ->Fill(py);
        m_pz ->Fill(pz);
      }
+   
    return kStOK;
 }
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.12 1999/03/12 21:47:36 perev Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.13 1999/06/09 19:56:31 druss Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

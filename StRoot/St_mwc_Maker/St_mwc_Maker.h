@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.h,v 1.5 1999/03/12 21:47:36 perev Exp $
+// $Id: St_mwc_Maker.h,v 1.6 1999/06/09 19:56:31 druss Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.6  1999/06/09 19:56:31  druss
+// Added histograms : # of wire hits, # of sectors hit, # wires hit as a function of eta and phi
+//
 // Revision 1.5  1999/03/12 21:47:36  perev
 // New maker schema
 //
@@ -55,7 +58,7 @@ class TH2F;
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.5 1999/03/12 21:47:36 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.6 1999/06/09 19:56:31 druss Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
@@ -66,6 +69,9 @@ class St_mwc_Maker : public StMaker {
    TH1F   *m_px;  //!
    TH1F   *m_py;  //!
    TH1F   *m_pz;  //!
+   TH1F   *m_nWiresHit; //!
+   TH1F   *m_nSectorsHit; //!
+   TH2F   *m_EtaPhi; //!
   
  public: 
                   St_mwc_Maker(const char *name="mwc");
