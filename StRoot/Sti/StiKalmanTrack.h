@@ -308,6 +308,9 @@ class StiKalmanTrack : public StiTrack
   void setFlag(long v);
   long getFlag() const;
 
+  StiKalmanTrackNode * extrapolateToBeam();
+  StiKalmanTrackNode * extrapolateToRadius(double radius);
+
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
@@ -324,6 +327,11 @@ protected:
   double  m;             // mass hypothesis
 
   double  _dca;
+
+ public:
+  double _vDca; // tempo dca 
+  double _vChi2;//
+
 };
 
 /*! Return the mass hypothesis used in the resconstruction of this track.
