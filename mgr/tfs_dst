@@ -1,8 +1,8 @@
 #!/usr/local/bin/tcsh
-#  $Id: tfs_dst,v 1.2 1998/09/25 00:27:01 fisyak Exp $
+#  $Id: tfs_dst,v 1.3 1998/10/16 19:08:19 fisyak Exp $
 #  $Log: tfs_dst,v $
-#  Revision 1.2  1998/09/25 00:27:01  fisyak
-#  Add job control scripts
+#  Revision 1.3  1998/10/16 19:08:19  fisyak
+#  new catalog
 #
 #  Revision 1.1.2.1  1998/09/16 22:50:52  fisyak
 #  BFC with tfs
@@ -15,21 +15,52 @@ set script_name = `basename ${script}`; echo ${script_name}
 set size        = 80
 set set         = `basename ${ACTUAL_INPUT0} .fzd`
 set input_file  = `basename ${ACTUAL_INPUT0}`
-set output_file = `basename ${ACTUAL_OUTPUT0} _dst.xdf`
-set log_file    = ${set}
+set log_file    = ${set}.`hostname`
 set no_events   = `echo ${input_file} | awk -F_ '{print $3}' | awk -Fe '{print $1}'`
+if ($no_events <1 ) set no_events = 1000;
+set already_done = `echo /star/u2e/starreco/MDC1/summary/${script_name}/${set}*.done`
+#if ("$already_done" != "") exit 1
 set long_log    = /star/u2e/starreco/MDC1/summary/${script_name}/${log_file}
 if ( -d ${set} ) rm -f ${set}
 mkdir ${set}
 cd ${set}
+mkdir core
+ls -alF  ../ ./  ; 
+if (! -f ../${INPUT0}) then
+   echo "HPSS Staging problem";
+   exit 1;
+endif
 touch ${long_log}
+ls -alF  ../ ./  >>  ${long_log};
 printenv  >>  ${long_log}
 echo Starting job execution at `date` >>  ${long_log}
 STAR_LEVELS  >>  ${long_log}
 pwd          >>  ${long_log}
+echo `hostname`; ls /opt/star/lib;
+echo `hostname` >> ${long_log};  ls /opt/star/lib >> ${long_log};
+
+while (! -d /opt/star/lib )
+  set HOSTNAME = `hostname`
+  set DATE = `date`
+#                                        mms@bnl.gov  
+  Mail -s "GENERAL: /opt/star/lib is not accessable from $HOSTNAME" fisyak@bnl.gov << EOF
+  /opt/star/lib is not accessable from $HOSTNAME at $DATE
+  Please check afs connection to this host ($HOSTNAME)
+  Set job with ${input_file} sleep for 30 minutes
+EOF
+sleep 1800
+end
+set OUTPUT_FILE = `echo ${ACTUAL_OUTPUT0} | sed -e 's/\/home\/starreco\/reco/\/disk1\/star/g'`
+set output_file = `basename ${OUTPUT_FILE} _dst.xdf`
+set out_dir = `dirname ${OUTPUT_FILE}`
+if (! -d ${out_dir}) mkdir -p ${out_dir}
 ln -s ../${INPUT0}  ${input_file};
-ln -s ../${OUTPUT0} ${output_file}_dst.xdf; 
-ls -alF  ../ ./  ; ls -alF  ../ ./  >>  ${long_log};
+# if keep dst on disk
+#ln -s ${OUTPUT_FILE} ${output_file}_dst.xdf;
+#ln -s ${OUTPUT_FILE} ../${OUTPUT0}
+# if put dst directly to HPSS
+ln -s ../${OUTPUT0} ${output_file}_dst.xdf  
+
 if ($?CRS_JOB_FILE == 1) then
   if (-f $CRS_JOB_FILE) then
     cat $CRS_JOB_FILE;  cat $CRS_JOB_FILE >>  ${long_log};
@@ -45,7 +76,8 @@ debug on
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry g2t tpc ctf svt global' _
-   chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
+   chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum dout ' _
+   skip=0 _
    no_events=${no_events} _ 
    input_data_file=${input_file} _ 
    output_file=${output_file} _ 
