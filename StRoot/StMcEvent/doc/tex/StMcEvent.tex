@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.2 2000/02/03 23:04:30 calderon Exp $
+% $Id: StMcEvent.tex,v 2.3 2000/04/18 00:55:47 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.3  2000/04/18 00:55:47  calderon
+% Updated documentation in class reference.  Added section about
+% inclusion of particle table.
+%
 % Revision 2.2  2000/02/03 23:04:30  calderon
 % Fixed typo that caused index to be generated in \texttt
 %
@@ -621,6 +625,72 @@ The following methods allow to access the elements of the container.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Particles from Event Generators}
+\label{sec:particle}
+\index{particle table}
+\index{event generator tracks}
+
+\StMcEvent also provides information on particles coming from the so
+called ``particle table''.  This is where all the particles produced
+by the event generator are stored, with all the necessary bookkeeping.
+
+The particle table is useful for the cases where a particle that one is
+interested in, has been decayed by the event generator and not in
+GSTAR.  It will therefore not appear in the g2t\_track table.  In
+order to find out if a track from the g2t\_track table comes from
+our particle of interest in this case, we need to access the particle
+table.
+
+All entries in the particle table are kept in the same container
+as the tracks from the g2t\_track table.  (We probably shouldn't call
+them tracks because these particles will most definitely NOT leave a
+track in the detector simulation, but we keep them along with the others
+for convenience.)  There will of course be tracks that appear in both
+tables, namely the final state particles of the event generator.  This
+case is already accounted for in \StMcEvent, so that only one entry
+with the relevant information from both tables is kept in the container.
+
+To properly use the additional information, it is important to know how to
+distinguish an \name{StMcTrack} that comes from the particle table
+and one that doesn't.  This can be done in several ways, according to
+the following properties (or conventions, if you will):
+
+\begin{itemize}
+	\item Tracks with an event generator label > 0 have a corresponding
+	entry in the particle table.
+	\item Tracks with a key > 0 have a corresponding entry in the g2t\_track
+	table.
+	\item Only tracks from the g2t\_track table are assigned a start vertex.  This also means that
+	the method \name{StMcVertex::daughters()} will not return any tracks from the particle
+	table.  It is important to realize this if one wants to asks for the daughters of the
+	primary vertex.  This will only return the tracks that actually have the primary
+	vertex as their parent, according to the start\_vertex\_p entry of the table.  (These tracks
+	are most probably also in the particle table, this scheme will of course not exclude them.  But
+	the point is that tracks that only appear in the particle table will NOT have a start vertex
+	and they will not appear as daughters of any vertex, not even the primary).
+	\item To find out the genealogy of a particle, the \name{StMcTrack::parent()} method is provided.
+	This method will return a pointer to the parent track, if there is one, otherwise it will return
+	a null pointer.  Using this method, one can get to the parent particle of a decay daughter all
+	the way into the particle table.  The parentage is followed not just until we reach the
+	particle table, but it is also followed {\it within} the particle table, i.e. down to the quarks and gluons
+	of the event generator.
+	It should be stressed, of course, that
+	this parentage is only event generator bookkeeping, and should not be used for more than this.	
+\end{itemize}
+Let's illustrate this with a simple example.  Suppose that we have an event generator and
+we want to look at $\phi \longrightarrow e^{+}e^{-}$ and the $\phi$ was decayed by the
+event generator.  To get to them, we can do the following.
+\begin{enumerate}
+	\item We get the daughters of the primary vertex.
+	\item We loop over the primary tracks thus obtained.
+	\item For each of the primary tracks, we check whether it is an electron.
+	\item If it is, we check whether its parent is a phi.
+	\item If it is, then we found it and we're done.
+\end{enumerate}
+For more information on the specific methods to do this, refer to the relevant sections for
+\name{StMcVertex} ~\ref{sec:StMcVertex} and \name{StMcTrack}  ~\ref{sec:StMcTrack}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{How to use \StMcEvent: The Macro and the Maker}
 \label{sec:howto}
@@ -901,7 +971,10 @@ the header file.
     \verb+unsigned long numberOfPrimaryTracks() const;+\\
     Number of primary tracks read from g2t\_event.  Note that this is
     not coming from {\tt primaryVertex()->daughters().size()} so one
-    can check whether these numbers are actually the same.
+    can check whether these numbers are actually the same (they should).  Note
+    that the tracks that only appear in the particle table are NOT assigned
+    either a start or a stop vertex, and they are NOT kept as daughters
+    of the primary vertex either.
     \index{primary tracks}
 
     \verb+float impactParameter() const;+\\
@@ -956,6 +1029,9 @@ the header file.
     after reconstruction.
     \index{hit collections, FTPC}
 
+    \verb+StMcRichHitCollection* richHitCollection();+\\
+    Returns a pointer to the RICH hit collection. This is a flat collection
+    of hits.
 
     The following member functions are used to set data members of \name{StMcEvent}.
     They are shown only for completeness and shouldn't be used without
@@ -976,6 +1052,7 @@ the header file.
     \verb+void setTpcHitCollection(StMcTpcHitCollection*);+\\
     \verb+void setSvtHitCollection(StMcSvtHitCollection*);+\\
     \verb+void setFtpcHitCollection(StMcFtpcHitCollection*);+\\
+    \verb+void setRichHitCollection(setRichHitCollection);+\\
     \verb+void setVertexCollection(StMcVertexCollection*);+\\
 
 \item[Public Member\\ Operators]
@@ -1312,6 +1389,9 @@ PositionOfHits(StMcTrack *track)
 \item[Public Member\\ Functions]
     \verb+const StThreeVectorF& position() const;+\\
     Hit position in global coordinates.
+
+    \verb+const StThreeVectorF& localMomentum() const;+\\
+    Local momentum direction of the parent track at the position of the hit.
 
     \verb+float dE() const;+\\
     Energy deposition.
@@ -2239,6 +2319,11 @@ for (unsigned int s=0; s<tpcHitColl->numberOfSectors(); s++) {
     The returned container holds the
     hits by pointer. Note, that the collection can be empty.
 
+    \verb+StPtrVecMcFtpcHit& ftpcHits();+\\
+    RICH hits belonging to the track.
+    The returned container holds the
+    hits by pointer. Note, that the collection can be empty.
+
     \verb+StParticleDefinition* particleDefinition();+\\
     Returns a pointer to the only instance of the appropriate
     \name{StParticleDefinition} class, which holds
@@ -2249,6 +2334,18 @@ for (unsigned int s=0; s<tpcHitColl->numberOfSectors(); s++) {
 
     \verb+long  geantId();+\\
     GEANT particle ID.
+
+    \verb+long  pdgId();+\\
+    PDG code particle ID (when the track comes from the particle table and has
+    no GEANT ID).
+
+    \verb+long  key();+\\
+    Primary key from g2t\_track table.
+
+    \verb+long  eventGenLabel();+\\
+    Event Generator Label.  This label should be different from zero if the track
+    comes from the event generator.  Useful also in determining the entry in the
+    particle table (as index = label - 1).
 
     \verb+void setFourMomentum(const StLorentzVectorF&);+\\
     Assigns the four-momentum of the track.
