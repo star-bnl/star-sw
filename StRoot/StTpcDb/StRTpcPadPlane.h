@@ -1,28 +1,10 @@
-/***************************************************************************
+/*!
+ * \class StRTpcPadPlane 
+ * \author David Hardtke
  *
- * $Id: StRTpcPadPlane.h,v 1.12 2002/02/21 18:35:58 hardtke Exp $
- *
- * Author:  David Hardtke
- ***************************************************************************
- *
- * Description: TPC Pad Plane Geometry Interface 
- *
- ***************************************************************************
- *
- * $Log: StRTpcPadPlane.h,v $
- * Revision 1.12  2002/02/21 18:35:58  hardtke
- * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
- *
- * Revision 1.11  2000/11/14 22:00:06  genevb
- * Switched several functions from float to double
- *
- * Revision 1.10  2000/01/12 15:14:40  hardtke
- * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
- *
- * Revision 1.9  1999/12/16 22:00:53  hardtke
- * add CVS tags
- *
- **************************************************************************/
+ * TPC Pad Plane Geometry Interface
+ */
+
 #ifndef __STRTPCPADPLANE__
 #define __STRTPCPADPLANE__
 //#include <TObject.h>
@@ -35,7 +17,6 @@ class StRTpcPadPlane : public StTpcPadPlaneI {
 private:
 
   St_tpcPadPlanes* mPadPlane;
-  int numberOfPads[45];
 
 public:
 
@@ -43,13 +24,7 @@ public:
   ~StRTpcPadPlane(){}
   void AddData(St_tpcPadPlanes* PadIn) {
    mPadPlane = PadIn;
-    for (int irow=1;irow<=numberOfRows();irow++){
-     if ( irow<=numberOfInnerRows() ) 
-      numberOfPads[irow-1] = (*mPadPlane)[0].innerPadsPerRow[irow-1];
-     else 
-      numberOfPads[irow-1] = (*mPadPlane)[0].outerPadsPerRow[irow-1-numberOfInnerRows()];
-    }
-  } 
+ } 
 
   //Implements Abstract Interface 
  
@@ -94,13 +69,7 @@ public:
 inline int   StRTpcPadPlane::numberOfRows() const { return (*mPadPlane)[0].padRows;}
 
 inline int   StRTpcPadPlane::numberOfInnerRows() const {
-  // Here I violate my principles in search of speed
-  return 13;
-  //return (*mPadPlane)[0].innerPadRows;
-}
-
-inline int StRTpcPadPlane::numberOfPadsAtRow(int row) const {
-  return numberOfPads[row-1];
+return (*mPadPlane)[0].innerPadRows;
 }
 
 inline int   StRTpcPadPlane::numberOfInnerRows48() const {
@@ -196,11 +165,31 @@ return (*mPadPlane)[0].outerSectorPadPlaneZ;
 
 #endif
 
-
-
-
-
-
-
-
-
+/***************************************************************************
+ *
+ * $Id: StRTpcPadPlane.h,v 1.13 2002/02/22 01:03:22 jeromel Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: TPC Pad Plane Geometry Interface 
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.13  2002/02/22 01:03:22  jeromel
+ * Undo recent changes (don't understand it yet). Will be recoverable ...
+ *
+ * Revision 1.12  2002/02/21 18:35:58  hardtke
+ * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
+ *
+ * Revision 1.11  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
+ * Revision 1.10  2000/01/12 15:14:40  hardtke
+ * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
+ *
+ * Revision 1.9  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
