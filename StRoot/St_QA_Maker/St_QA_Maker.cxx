@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.91 2000/02/10 23:02:45 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.92 2000/02/11 15:56:05 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.92  2000/02/11 15:56:05  kathy
+// change limits on number of hits in detector histograms; fill number of hits in detector histograms
+//
 // Revision 1.91  2000/02/10 23:02:45  kathy
 // changed limits on linear impact param hist; added new hist of detector id values for dst_point table
 //
@@ -296,6 +299,7 @@
 #include "St_QA_Maker.h"
 
 #include "StVertexId.h"
+#include "StDetectorDefinitions.h"
 
 // tables  on DST
 #include "tables/St_dst_event_summary_Table.h" // event_summary (1 row)
@@ -1253,6 +1257,12 @@ void St_QA_Maker::MakeHistPoint(){
 
     dst_point_st  *t   = pt->GetTable();
 
+    Int_t hitsTpc=0;
+    Int_t hitsSvt=0;
+    Int_t hitsFtpcW=0;
+    Int_t hitsFtpcE=0;
+    Int_t hitsSsd=0;
+
     Int_t id = 0;
     for (Int_t i = 0; i < pt->GetNRows(); i++,t++){
 
@@ -1260,7 +1270,21 @@ void St_QA_Maker::MakeHistPoint(){
       id = (t->hw_position) & 15;
 
       m_pnt_id->Fill(id);
+
+      if (id==kTpcIdentifier)           {hitsTpc++;}
+      else if (id==kSvtIdentifier)      {hitsSvt++;}
+      else if (id==kFtpcWestIdentifier) {hitsFtpcW++;}
+      else if (id==kFtpcEastIdentifier) {hitsFtpcE++;}
+      else if (id==kSsdIdentifier)      {hitsSsd++;}
+
     }
+
+      m_pnt_tpc->Fill(hitsTpc);
+      m_pnt_svt->Fill(hitsSvt);
+      m_pnt_ftpcW->Fill(hitsFtpcW);
+      m_pnt_ftpcE->Fill(hitsFtpcE);
+      m_pnt_ssd->Fill(hitsSsd);
+
   }
 
 }

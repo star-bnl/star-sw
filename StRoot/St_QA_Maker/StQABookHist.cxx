@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.37 2000/02/10 23:02:44 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.38 2000/02/11 15:56:04 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.38  2000/02/11 15:56:04  kathy
+// change limits on number of hits in detector histograms; fill number of hits in detector histograms
+//
 // Revision 1.37  2000/02/10 23:02:44  kathy
 // changed limits on linear impact param hist; added new hist of detector id values for dst_point table
 //
@@ -1166,10 +1169,10 @@ void StQABookHist::BookHistPoint(){
   m_pnt_id      = QAH1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
   m_pnt_tpc     = QAH1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
-  m_pnt_svt     = QAH1F("QaPointSvt",  "point: # hits svt ",100, 0.,250000.);
-  m_pnt_ssd     = QAH1F("QaPointSsd",  "point: # hits ssd ",100, 0.,250000.);
-  m_pnt_ftpcE   = QAH1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,250000.);
-  m_pnt_ftpcW   = QAH1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,250000.);
+  m_pnt_svt     = QAH1F("QaPointSvt",  "point: # hits svt ",100, 0.,10000.);
+  m_pnt_ssd     = QAH1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
+  m_pnt_ftpcE   = QAH1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,10000.);
+  m_pnt_ftpcW   = QAH1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,10000.);
 
 }
 //_____________________________________________________________________________
