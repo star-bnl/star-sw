@@ -1,13 +1,16 @@
 /******************************************************
- * $Id: StRichGHit.cxx,v 1.4 2000/02/08 23:50:02 lasiuk Exp $
+ * $Id: StRichGHit.cxx,v 1.5 2000/02/14 01:12:50 lasiuk Exp $
  *
  * Description:
  *  Implementation of the GHit object.
  *
  ******************************************************
  * $Log: StRichGHit.cxx,v $
- * Revision 1.4  2000/02/08 23:50:02  lasiuk
- * CC5 compatibility needs .c_str() for string printing
+ * Revision 1.5  2000/02/14 01:12:50  lasiuk
+ * keep the track pointer info
+ *
+ * Revision 1.6  2000/03/17 14:54:29  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.5  2000/02/14 01:12:50  lasiuk
  * keep the track pointer info
@@ -36,8 +39,8 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-StRichGHit::StRichGHit(double x, double y, double z, int q, short pID) 
-    : mXLocal(x, y, z), mQuad(q), mId(pID) {/* nopt*/ }
+
+StRichGHit::StRichGHit() {/* nopt */}
 
 StRichGHit::StRichGHit(double x, double y, double z, double dE, short pID, string vID)
     :  mXLocal(x,y,z), mId(pID), mVolumeId(vID), mdE(dE) {/* nopt*/ }
@@ -53,14 +56,14 @@ StRichGHit::StRichGHit(double x, double y, double z, double dE, double ds, short
     : mXLocal(x,y,z), mP(px, py,pz), mdS(ds), mId(pID), mVolumeId(vID), mdE(dE)
 {
     mCosX = mP.x()/abs(mP);
-void StRichGHit::fill(double x, double y, double z, int quad,
+    mCosY = mP.y()/abs(mP);
     mCosZ = mP.z()/abs(mP);
 }
 
 StRichGHit::~StRichGHit() {/*nopt*/}
 
 void StRichGHit::fill(double x, double y, double z, int track_p,
-    mQuad = quad;
+		      double cosX, double cosY, double cosZ, double step, 
 		      double dE ,short pID , string vID)
 {
     mXLocal.setX(x);
@@ -70,7 +73,7 @@ void StRichGHit::fill(double x, double y, double z, int track_p,
     mCosX = cosX;
     mCosY = cosY;
     mCosZ = cosZ;
-void StRichGHit::fill(double x, double y, double z, int quad,
+    mdS   = step;
     mdE = dE;
     mId = pID;
     mVolumeId = vID;
@@ -79,7 +82,7 @@ void StRichGHit::fill(double x, double y, double z, int quad,
 void StRichGHit::fill(double x, double y, double z, int track_p,
 		      double cosX, double cosY, double cosZ,
 		      double step, double dE,
-    mQuad = quad;
+		      double px, double py, double pz,
 		      short pID , string vID)
 {
     mXLocal.setX(x);
@@ -104,7 +107,7 @@ void StRichGHit::addGlobal(double xx, double yy, double zz)
     mXGlobal.setY(yy);
     mXGlobal.setZ(zz);
 }
-    os << "q        "  << mQuad << endl;
+
 void StRichGHit::full(ostream& os = cout) const
 {
     os << "XLocal:  "  << mXLocal << endl;
@@ -117,7 +120,7 @@ void StRichGHit::full(ostream& os = cout) const
     os << "id       "  << mId << endl;
 }
 
-	    << "quadrant " << hit.quadrant() << endl);
+ostream& operator<<(ostream& os, const StRichGHit& hit)
 {
     return (os << "Xlocal " << (hit.position()/centimeter) << " cm\n"
 	    << "cos (" << hit.cosX() << ", " << hit.cosY() << ", " << hit.cosZ() << ")\n"

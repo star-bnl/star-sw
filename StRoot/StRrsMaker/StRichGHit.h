@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichGHit.h,v 1.3 2000/02/08 16:23:44 lasiuk Exp $
+ * $Id: StRichGHit.h,v 1.4 2000/02/14 01:12:50 lasiuk Exp $
  *
  * Description:
  *   StRichGHit is a data type containing information
@@ -14,10 +14,13 @@
  *       
  ***************************************************************
  * $Log: StRichGHit.h,v $
- * Revision 1.3  2000/02/08 16:23:44  lasiuk
- * change to class.  Augment constructors.
- * Incorporate system of units
+ * Revision 1.4  2000/02/14 01:12:50  lasiuk
+ * keep the track pointer info
  *
+ * Revision 1.5  2000/03/17 14:54:31  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
+ *
+ * Revision 1.4  2000/02/14 01:12:50  lasiuk
  * keep the track pointer info
  *
  * Revision 1.3  2000/02/08 16:23:44  lasiuk
@@ -51,7 +54,7 @@ using std::string;
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-    StRichGHit(double x, double y, double z, int q, short pID);
+    
 class StRichGHit {
 public:
     StRichGHit();
@@ -66,7 +69,7 @@ public:
     //StRichGHit(const StRichGHit&); { /* use default */}
     //StRichGHit& operator=(const StRichGHit&) {/* use default */}
 
-    int     quadrant() const;
+    // Access
     const StThreeVector<double>& position()   const;
     StThreeVector<double>& position();
     int     trackp() const;
@@ -75,18 +78,16 @@ public:
     int     trackp()   const;
     double  cosX()     const;
     double  cosY()     const;
-    void fill(double x, double y, double z, int q,
+    double  cosZ()     const;
     double  dE()       const;
     short   id()       const;
     double  mass()     const;
     const string& volumeID() const;
     
-    void fill(double x, double y, double z, int q,
+    void fill(double x, double y, double z, int track_p,
 	      double cosX, double coxY, double cosZ,
 	      double step, double dE,
-//     void fill(double,double,double,int,   -- momentum
-// 	      double,double,double,double,
-// 	      double,short,string);
+	      double step, double dE, double mass,
 	      short pID, string vID);
 
     void fill(double x, double y, double z, int track_p,
@@ -96,7 +97,7 @@ public:
     void addGlobal(double,double,double);
 
     void full(ostream&) const;
-    int                      mQuad;
+
 private:
     StThreeVector<double>    mXGlobal; //xx,yy,zz  NEVER USED!!!
     StThreeVector<double>    mXLocal;  //x,y,z
@@ -108,7 +109,7 @@ private:
     double                   mdE;
     double                   mMass;
 };    
-inline int     StRichGHit::quadrant() const {return mQuad;}
+ostream& operator<<(ostream&, const StRichGHit&);
 
 inline const StThreeVector<double>& StRichGHit::position() const {return mXLocal;}
 inline StThreeVector<double>& StRichGHit::position() {return mXLocal;}
