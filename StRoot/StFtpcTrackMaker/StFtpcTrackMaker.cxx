@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.14 2001/01/25 15:22:25 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.15 2001/01/30 13:31:41 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.15  2001/01/30 13:31:41  oldi
+// New variable mTime introduced to count total time consumption.
+//
 // Revision 1.14  2001/01/25 15:22:25  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -298,6 +301,7 @@ Int_t StFtpcTrackMaker::Make()
   tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
 
   if (Debug()) {
+    gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
     tracker->SettingInfo();
     tracker->CutInfo();
     tracker->TrackingInfo();
@@ -387,7 +391,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.14 2001/01/25 15:22:25 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.15 2001/01/30 13:31:41 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

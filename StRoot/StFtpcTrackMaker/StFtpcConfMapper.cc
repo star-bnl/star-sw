@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.10 2001/01/25 15:21:33 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.11 2001/01/30 13:31:27 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.11  2001/01/30 13:31:27  oldi
+// New variable mTime introduced to count total time consumption.
+//
 // Revision 1.10  2001/01/25 15:21:33  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -176,6 +179,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
   if (mBench) {
     mBench->Stop("init");
     gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    mTime += mBench->GetCpuTime("init");
   }
 }
 
@@ -228,6 +232,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   if (mBench) {
     mBench->Stop("init");
     gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    mTime += mBench->GetCpuTime("init");
   }
 }
 
@@ -281,6 +286,7 @@ void StFtpcConfMapper::MainVertexTracking()
   if (mBench) {
     mBench->Stop("main_vertex");
     gMessMgr->Message("", "I", "OST") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
+    mTime += mBench->GetCpuTime("main_vertex");
 
     mBench->Start("extend");
   }
@@ -290,6 +296,7 @@ void StFtpcConfMapper::MainVertexTracking()
   if (mBench) {
     mBench->Stop("extend");
     gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
   }
@@ -299,6 +306,7 @@ void StFtpcConfMapper::MainVertexTracking()
   if (mBench) {
     mBench->Stop("splits");
     gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    mTime += mBench->GetCpuTime("splits");
   }
   
   return;
@@ -327,6 +335,7 @@ void StFtpcConfMapper::FreeTracking()
   if (mBench) {
     mBench->Stop("non_vertex");
     gMessMgr->Message("", "I", "OST") << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
+    mTime += mBench->GetCpuTime("non_vertex");
   }
   
   return;
@@ -357,6 +366,7 @@ void StFtpcConfMapper::LaserTracking()
   if (mBench) {
     mBench->Stop("laser");
     gMessMgr->Message("", "I", "OST") << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
+    mTime += mBench->GetCpuTime("laser");
   }
   
   return;

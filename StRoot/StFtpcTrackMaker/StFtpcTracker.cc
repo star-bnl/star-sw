@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.11 2001/01/25 15:22:31 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.12 2001/01/30 13:31:48 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.12  2001/01/30 13:31:48  oldi
+// New variable mTime introduced to count total time consumption.
+//
 // Revision 1.11  2001/01/25 15:22:31  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -86,6 +89,7 @@ StFtpcTracker::StFtpcTracker()
   // Sets the pointers to 0 an cut for momnetum fit loosely.
 
   mBench  = NULL;
+  mTime = 0.;
 
   mVertex = NULL;
   mHit    = NULL;
@@ -106,6 +110,8 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
   if (bench) {
     mBench = new TBenchmark();
   }
+
+  mTime = 0.;
 
   mHitsCreated = (Bool_t)false;
   mMaxDca = max_Dca;
@@ -134,6 +140,8 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
     mBench = new TBenchmark();
   }
 
+  mTime = 0.;
+
   mHit = hits;
   mHitsCreated = (Bool_t)false;
 
@@ -153,6 +161,8 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
     mBench = new TBenchmark();
   }
 
+  mTime = 0.;
+
   mVertex = vertex;
   mHit = hit;
   mHitsCreated = (Bool_t) false;
@@ -169,6 +179,8 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   if (bench) {
     mBench = new TBenchmark();
   }
+
+  mTime = 0.;
 
   mVertex = vertex;
   mVertexCreated = (Bool_t)false;
@@ -984,6 +996,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     if(mBench) {
       mBench->Stop("fit");
       gMessMgr->Message("", "I", "OST") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      mTime += mBench->GetCpuTime("fit");
     }
 
     return 0;
@@ -994,6 +1007,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     if(mBench) {
       mBench->Stop("fit");
       gMessMgr->Message("", "I", "OST") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      mTime += mBench->GetCpuTime("fit");
     }
     
     gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
