@@ -12,7 +12,6 @@
 #include "StEmcnoDaqInput.h"
 #include "StEmcTowerInput.h"
 #include "StEmcSmdInput.h"
-//#include "St_DataSetIter.h"
 #include "StEventTypes.h"
 
 //
@@ -25,51 +24,37 @@
 
 ClassImp(StEmcHandleInput) // macro
    
-//-----------------------------------------------------------------
-
-    StEmcHandleInput::StEmcHandleInput(StEvent*event, StEMCReader* emcreader, TDataSet* calibdb)
-      : mevent(event), mTheEmcReader(emcreader),m_calibdb(calibdb)
-{}
-
-//-----------------------------------------------------------------
+StEmcHandleInput::StEmcHandleInput(StEvent*event, StEMCReader* emcreader, TDataSet* calibdb)
+: mevent(event), mTheEmcReader(emcreader),mCalibDb(calibdb)
+{ }
 
 StEmcHandleInput::~StEmcHandleInput() {}
 
-//-----------------------------------------------------------------
+Int_t 
+StEmcHandleInput::ProcessInput() 
+{
+  cout << "HandleInput::ProcessInput()" << endl;
 
-Int_t StEmcHandleInput::ProcessInput() {
-    cout << "HandleInput::ProcessInput()" << endl;
-
-    //
-    if(!mTheEmcReader){
-    cout<<"ProcessInput::EmcRead does not exist"<<endl;
+  if(!mTheEmcReader){
     // case 1 , StEvent exist but no daq
-        StEmcnoDaqInput * ndaq = new StEmcnoDaqInput(mevent,mTheEmcReader,m_calibdb);
-      int stat=ndaq->ProcessInput();
-      if(stat!=kStOK)return kStWarn;
-    }
+    cout<<"ProcessInput::EmcRead does not exist"<<endl;
+    StEmcnoDaqInput *ndaq = new StEmcnoDaqInput(mevent,mTheEmcReader,mCalibDb);
+    int stat=ndaq->ProcessInput();
+    if(stat!=kStOK)return kStWarn;
+  }
+
+  if(mTheEmcReader){
     //case 2 StEvent, emcreader exist
-    if(mTheEmcReader){
     cout<<"ProcessInput::EmcRead "<<endl;
-        if(mTheEmcReader->NTowerHits()>0){
-	StEmcTowerInput *tower = new StEmcTowerInput(mevent, mTheEmcReader,m_calibdb);
 
-        int stat=tower->ProcessInput();
-        if(stat==kStOK){cout<<"Towerinput OK"<<endl;}
-	      }
-	      else{
-		cout<<" No towers Hit **"<<endl;
-	      }
+    StEmcTowerInput *tower = new StEmcTowerInput(mevent, mTheEmcReader,mCalibDb);
+    int stat=tower->ProcessInput();
+    if(stat==kStOK) cout<<"Towerinput OK"<<endl;
 
-	     if(mTheEmcReader->NSmdHits()>0){
-	StEmcSmdInput *smd = new StEmcSmdInput(mevent, mTheEmcReader,m_calibdb);
-        int statsmd=smd->ProcessInput();
-        if(statsmd==kStOK){cout<<"SmdInput OK"<<endl;}
-	      }
-	      else{
-		cout<<" No SMD strip Hit **"<<endl;
-      }
-    }
+    StEmcSmdInput *smd = new StEmcSmdInput(mevent, mTheEmcReader,mCalibDb);
+    int statsmd=smd->ProcessInput();
+    if(statsmd==kStOK) cout<<"SmdInput OK"<<endl;
+  }
 //
 //    if(ndaq){delete ndaq;ndaq=0;}
 //    if(tower){delete tower;tower=0;}

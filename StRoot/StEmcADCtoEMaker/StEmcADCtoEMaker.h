@@ -18,11 +18,12 @@
 using std::vector;
 #endif
 #endif
+#include "tables/St_controlADCtoE_Table.h"
 
 class StDAQReader;
 class StEMCReader;
 class StEvent;
-class StEmcCollection; 
+class StEmcCollection;
 
 class StEmcADCtoEMaker : public StMaker {
     
@@ -37,18 +38,27 @@ public:
     virtual Int_t  Make();
     //    virtual void   PrintInfo();
     virtual Int_t  Finish();
-    //    StEvent *getEvent() {return mevent;}
+
+    static controlADCtoE_st *getControlTable() 
+    {return mControlMaker->GetTable();}
+
     StEmcCollection *getEmcCollection();
+    void  clearStEventStaf();
+    void  print(); // *MENU* 
     virtual void  Browse(TBrowser* b);
+
 protected:
     
 private:
-    StDAQReader*           mTheDataReader;//!
-    StEMCReader* mTheEmcReader;//!
-    St_DataSet*            mTheEmcData;//!
-    StEvent* mevent;    //!
+    static St_controlADCtoE *mControlMaker; //!
+    static controlADCtoE_st *mControlTable; //!
+
+    StDAQReader     *mTheDataReader; //!
+    StEMCReader     *mTheEmcReader;  //!
+    TDataSet        *mTheEmcData;    //!
+    StEvent         *mevent;         //!
     StEmcCollection *mEmcCollection; //!
-    TDataSet* m_calibdb;
+    TDataSet        *mCalibDb;       //!
     int mDaq;  // looking for DAQ data or not?
 
     // the following is a ROOT macro  that is needed in all ROOT code

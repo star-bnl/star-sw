@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.10 2001/07/25 15:29:18 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.11 2001/10/03 17:27:37 pavlinov Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.11  2001/10/03 17:27:37  pavlinov
+// clean up for production
+//
 // Revision 1.10  2001/07/25 15:29:18  subhasis
 // check if clusters exist in bemc , bsmde and bsmdp
 //
@@ -157,13 +160,13 @@ mTheEmcCollection=0;
     cout << "No StEvent! Can not continue. " << endl;
     return kStOK; // If no event, we're done
   }
-  cout<<" StEpcMaker** , StEvent found**"<<endl; 
+  cout<<"StEpcMaker** , StEvent found**"<<endl; 
   //First Find if EmcCollection exists
 
  if(mEvent){
    cout<<"Epc::StEvent found **"<<endl;
         mTheEmcCollection = mEvent->emcCollection();
-  }
+ }
  if(!mTheEmcCollection){
    cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
    return kStOK;
@@ -178,34 +181,35 @@ mTheEmcCollection=0;
    StEmcClusterCollection* Bsmdpcluster;
 
    if(mTheEmcCollection){
-   cout<<" StEvent EmcCollection exists**"<<endl;
+     cout<<" StEvent EmcCollection exists**"<<endl;
 
-   for(Int_t idet=0;idet<4;idet++){
-     EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
-     EmcDet =mTheEmcCollection->detector(EmcId);
-     if(EmcDet){
-     cluscoll = EmcDet->cluster();
+     for(Int_t idet=0;idet<4;idet++){
+       EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
+       EmcDet =mTheEmcCollection->detector(EmcId);
+       if(EmcDet){
+         cluscoll = EmcDet->cluster();
+         UInt_t ncl=0;
+         if(cluscoll) ncl = cluscoll->numberOfClusters();
 // added to check if clusters exist for all detectors (not PRS now).
 
-     if((idet==0||idet==2||idet==3)&&(!cluscoll)){
-       cout<<" NO Clusters for detector" <<idet<<endl;
-       return kStWarn;
-      }
+         if(idet !=1 && ncl==0){
+           cout<<" NO Clusters for detector " << idet <<endl;
+           return kStWarn;
+         }
 
-     if(cluscoll){
-       //     Int_t Nclusters=cluscoll->numberOfClusters();
-     //     if(Nclusters>0){
-     //     const StSPtrVecEmcCluster& emcclusters= cluscoll->clusters();
-     //     cout<<" Clusters vector found, size **"<<emcclusters.size()<<endl;
-     if(idet==0) Bemccluster=(StEmcClusterCollection*)cluscoll;
-     if(idet==1) Bprscluster=(StEmcClusterCollection*)cluscoll;
-     if(idet==2) Bsmdecluster=(StEmcClusterCollection*)cluscoll;
-     if(idet==3) Bsmdpcluster=(StEmcClusterCollection*)cluscoll;
-
+         if(cluscoll){
+         //     Int_t Nclusters=cluscoll->numberOfClusters();
+         //     if(Nclusters>0){
+         //     const StSPtrVecEmcCluster& emcclusters= cluscoll->clusters();
+         //     cout<<" Clusters vector found, size **"<<emcclusters.size()<<endl;
+           if(idet==0) Bemccluster=(StEmcClusterCollection*)cluscoll;
+           if(idet==1) Bprscluster=(StEmcClusterCollection*)cluscoll;
+           if(idet==2) Bsmdecluster=(StEmcClusterCollection*)cluscoll;
+           if(idet==3) Bsmdpcluster=(StEmcClusterCollection*)cluscoll;
+         }
+       }
      }
-     }
-     }
-   } 
+   }
 
    //-------------------
    //Tracks from StEvent
@@ -214,42 +218,38 @@ mTheEmcCollection=0;
   StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
   cout<<" StEpcMaker:: Node size **"<<theTrackNodes.size()<<endl;
 
-    int allGlobals = 0;
-    int goodGlobals = 0;                                                       
+  int allGlobals = 0;
+  int goodGlobals = 0;                                                       
 
   StTrack *track;
   //Initialize container for track
 
-	 TrackVecForEmc.clear();
-	 //
+  TrackVecForEmc.clear();
 
   for (size_t nodeIndex=0; nodeIndex<theTrackNodes.size(); nodeIndex++) {
 
      size_t numberOfTracksInNode =  theTrackNodes[nodeIndex]->entries(global);
 
-       for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++)        {
-            track =theTrackNodes[nodeIndex]->track(global,trackIndex);
-        if (track) allGlobals++;
-        if (accept(track)){
+     for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++) {
+       track =theTrackNodes[nodeIndex]->track(global,trackIndex);
+       if (track) allGlobals++;
+       if (accept(track)){
          TrackVecForEmc.push_back(track);
-          goodGlobals++;
-	}                                      
-	  }
+         goodGlobals++;
+       }                                      
+     }
   }
 
   StTrackVec& TrackToFit=TrackVecForEmc;
 
  
  //******Creating StPointCollection and calling findPoints
-	StPointCollection *point = new StPointCollection("point");
-	m_DataSet->Add(point);
+  StPointCollection *point = new StPointCollection("point");
+  m_DataSet->Add(point);
 
- if(point->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
- { return kStErr;}
-else
- {
-       cout<<" findEmcPoint called"<<endl;
- }
+ if(point->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK){
+   return kStErr;
+ } else cout<<" findEmcPoint called"<<endl;
 
     MakeHistograms(); // Fill QA histgrams
    //------------------------------------------
