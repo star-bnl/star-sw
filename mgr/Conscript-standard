@@ -153,6 +153,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
 	    if (-f $file) {$LIBS .= " -l" . $py; last;}
 	}
+	foreach my $py ("pdflib804") {
+	    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
+	    if (-f $file) {$LIBS .= " -l" . $py; last;}
+	}
 
     } elsif ( $pkg =~ m/^StTrsMaker$/ ){
 	$CPPPATH =
