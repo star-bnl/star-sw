@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: StCL.cxx,v 1.5 1999/10/17 20:45:55 fine Exp $
+// $Id: StCL.cxx,v 1.6 1999/10/27 23:57:56 fine Exp $
 // $Log: StCL.cxx,v $
+// Revision 1.6  1999/10/27 23:57:56  fine
+// Clean up: const has been introduced instead of non-const
+//
 // Revision 1.5  1999/10/17 20:45:55  fine
 // vadd methods added
 //
@@ -558,7 +561,7 @@ ClassImp(StCL)
     }
 
 //___________________________________________________________________________
-float *StCL::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
+float *StCL::mxmad_0_(int n_, const float *a, const float *b, float *c, int i, int j, int k)
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* begin_html 
@@ -864,7 +867,7 @@ end_html
 } /* mxmad_ */
 
 //___________________________________________________________________________
-double *StCL::mxmad_0_(int n_, double *a, double *b, double *c, int i, int j, int k)
+double *StCL::mxmad_0_(int n_, const double *a, const double *b, double *c, int i, int j, int k)
 {
    StCL_MXMAD(n_,a,b,c,i,j,k)
    return c;
@@ -903,7 +906,7 @@ double *StCL::mxmad_0_(int n_, double *a, double *b, double *c, int i, int j, in
   }
 
 //___________________________________________________________________________
-float *StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
+float *StCL::mxmlrt_0_(int n__, const float *a, const float *b, float *c, int ni,int nj)
 {
  // Matrix Multiplication 
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img31.gif"> </P> End_Html // 
@@ -939,7 +942,7 @@ float *StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
 } /* mxmlrt_ */
 
 //___________________________________________________________________________
-double *StCL::mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj)
+double *StCL::mxmlrt_0_(int n__, const double *a, const double *b, double *c, int ni,int nj)
 {
  // Matrix Multiplication (double precision)
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img31.gif"> </P> End_Html // 
@@ -966,7 +969,7 @@ double *StCL::mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj)
     for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia]; }
 
 //___________________________________________________________________________
-float *StCL::mxtrp(float *a, float *b, int i, int j)
+float *StCL::mxtrp(const float *a, float *b, int i, int j)
 {
 //
 //  Matrix Transposition 
@@ -979,7 +982,7 @@ float *StCL::mxtrp(float *a, float *b, int i, int j)
 } /* mxtrp */
 
 //___________________________________________________________________________
-double *StCL::mxtrp(double *a, double *b, int i, int j)
+double *StCL::mxtrp(const double *a, double *b, int i, int j)
 {
 //  Matrix Transposition (double precision)
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img29.gif"> </P> End_Html // 

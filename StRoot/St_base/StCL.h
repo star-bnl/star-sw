@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.4 1999/10/17 20:45:57 fine Exp $
+// $Id: StCL.h,v 1.5 1999/10/27 23:57:57 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.5  1999/10/27 23:57:57  fine
+// Clean up: const has been introduced instead of non-const
+//
 // Revision 1.4  1999/10/17 20:45:57  fine
 // vadd methods added
 //
@@ -67,51 +70,51 @@ class StCL  {
     static float  *vadd(const float *b,  const double *c, float *a, int n);
     static double *vadd(const double *b, const float *c,  double *a, int n);
 
-    static float  *vsub(float *a,   float *b,  float *x, int n);
-    static double *vsub(double *a, double *b, double *x, int n);
+    static float  *vsub(const float *a,  const float *b,  float *x, int n);
+    static double *vsub(const double *a, const double *b, double *x, int n);
 
-    static float  *vcopyn(float *a,  float *x, int n);
-    static double *vcopyn(double *a, double *x, int n);
+    static float  *vcopyn(const float *a,  float *x, int n);
+    static double *vcopyn(const double *a, double *x, int n);
 
-    static float *mxmad_0_(int n, float *a, float *b, float *c, int i, int j, int k);
+    static float *mxmad_0_(int n, const float *a, const float *b, float *c, int i, int j, int k);
 
-    static float *mxmad( float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmad1(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmad2(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmad3(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmpy( float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmpy1(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmpy2(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmpy3(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmub( float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmub1(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmub2(float *a, float *b, float *c, int i, int j, int k);
-    static float *mxmub3(float *a, float *b, float *c, int i, int j, int k);
+    static float *mxmad( const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmad1(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmad2(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmad3(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmpy( const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmpy1(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmpy2(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmpy3(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmub( const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmub1(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmub2(const float *a, const float *b, float *c, int i, int j, int k);
+    static float *mxmub3(const float *a, const float *b, float *c, int i, int j, int k);
 
-    static float *mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj);
-    static float *mxmlrt(float *a, float *b, float *c, int ni, int nj);
-    static float *mxmltr(float *a, float *b, float *c, int ni, int nj);
-    static float *mxtrp(float *a, float *b, int i, int j);
+    static float *mxmlrt_0_(int n__, const float *a, const float *b, float *c, int ni,int nj);
+    static float *mxmlrt(const float *a, const float *b, float *c, int ni, int nj);
+    static float *mxmltr(const float *a, const float *b, float *c, int ni, int nj);
+    static float *mxtrp(const float *a, float *b, int i, int j);
 
-    static double *mxmad_0_(int n, double *a, double *b, double *c, int i, int j, int k);
+    static double *mxmad_0_(int n, const double *a, const double *b, double *c, int i, int j, int k);
 
-    static double *mxmad (double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmad1(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmad2(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmad3(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmpy (double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmpy1(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmpy2(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmpy3(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmub (double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmub1(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmub2(double *a, double *b, double *c, int i, int j, int k);
-    static double *mxmub3(double *a, double *b, double *c, int i, int j, int k);
+    static double *mxmad (const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmad1(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmad2(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmad3(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmpy (const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmpy1(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmpy2(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmpy3(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmub (const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmub1(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmub2(const double *a, const double *b, double *c, int i, int j, int k);
+    static double *mxmub3(const double *a, const double *b, double *c, int i, int j, int k);
 
-    static double *mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj);
-    static double *mxmlrt(double *a, double *b, double *c, int ni, int nj);
-    static double *mxmltr(double *a, double *b, double *c, int ni, int nj);
-    static double *mxtrp(double *a, double *b, int i, int j);
+    static double *mxmlrt_0_(int n__, const double *a, const double *b, double *c, int ni,int nj);
+    static double *mxmlrt(const double *a, const double *b, double *c, int ni, int nj);
+    static double *mxmltr(const double *a, const double *b, double *c, int ni, int nj);
+    static double *mxtrp(const double *a, double *b, int i, int j);
 
 // * TR pack
 
@@ -167,85 +170,85 @@ class StCL  {
 };
 
 //___________________________________________________________________________
-inline float *StCL::mxmad(float *a, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmad(const float *a, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
-inline float *StCL::mxmad1(float *a, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmad1(const float *a, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad1.gif"> </P> End_Html // 
  return mxmad_0_(1, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline float *StCL::mxmad2(float *p, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmad2(const float *p, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad2.gif"> </P> End_Html // 
  return mxmad_0_(2, p, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline float *StCL::mxmad3(float *p, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmad3(const float *p, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad3.gif"> </P> End_Html // 
  return mxmad_0_(3, p, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline float *StCL::mxmpy(float *a, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmpy(const float *a, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy.gif"> </P> End_Html // 
   return mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmpy1(float *a, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmpy1(const float *a, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy1.gif"> </P> End_Html // 
  return mxmad_0_(5, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline float *StCL::mxmpy2(float *p, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmpy2(const float *p, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy2.gif"> </P> End_Html // 
  return mxmad_0_(6, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmpy3(float *p, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmpy3(const float *p, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy3.gif"> </P> End_Html // 
  return mxmad_0_(7, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmub(float *a, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmub(const float *a, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub.gif"> </P> End_Html // 
  return mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline float *StCL::mxmub1(float *a, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmub1(const float *a, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub1.gif"> </P> End_Html // 
   return mxmad_0_(9, a, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmub2(float *p, float *b, float *c, int i, int j, int k)
+inline float *StCL::mxmub2(const float *p, const float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub2.gif"> </P> End_Html // 
   return mxmad_0_(10, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmub3(float *p, float *q, float *c, int i, int j, int k)
+inline float *StCL::mxmub3(const float *p, const float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub3.gif"> </P> End_Html // 
   return mxmad_0_(11, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmlrt(float *a, float *b, float *x, int ni, int nj)
+inline float *StCL::mxmlrt(const float *a, const float *b, float *x, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmlrt.gif"> </P> End_Html // 
   return mxmlrt_0_(0, a, b, x, ni, nj); }
 
 //___________________________________________________________________________
-inline float *StCL::mxmltr(float *a, float *b, float *x, int ni, int nj)
+inline float *StCL::mxmltr(const float *a, const float *b, float *x, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmltr.gif"> </P> End_Html // 
   return mxmlrt_0_(1, a, b, x, ni, nj);   }
@@ -254,85 +257,85 @@ inline float *StCL::mxmltr(float *a, float *b, float *x, int ni, int nj)
 //--   double version --
 
 //___________________________________________________________________________
-inline double *StCL::mxmad(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmad(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
-inline double *StCL:: mxmad1(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL:: mxmad1(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(1, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline double *StCL::mxmad2(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmad2(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(2, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline double *StCL::mxmad3(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmad3(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(3, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline double *StCL::mxmpy(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmpy(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmpy1(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmpy1(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(5, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline double *StCL::mxmpy2(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmpy2(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(6, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmpy3(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmpy3(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(7, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmub(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmub(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  return mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline double *StCL::mxmub1(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmub1(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(9, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmub2(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmub2(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(10, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmub3(double *a, double *b, double *c, int i, int j, int k)
+inline double *StCL::mxmub3(const double *a, const double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   return mxmad_0_(11, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmlrt(double *a, double *b, double *c, int ni, int nj)
+inline double *StCL::mxmlrt(const double *a, const double *b, double *c, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
 return  mxmlrt_0_(0, a, b, c, ni, nj); }
 
 //___________________________________________________________________________
-inline double *StCL::mxmltr(double *a, double *b, double *c, int ni, int nj)
+inline double *StCL::mxmltr(const double *a, const double *b, double *c, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
 return mxmlrt_0_(1, a, b, c, ni, nj);   }
@@ -396,7 +399,7 @@ inline double *StCL::vadd(const double *b, const float *c,  double *a, int n)
 }
 
 //________________________________________________________
-inline float *StCL::vsub(float *a, float *b, float *x, int n)
+inline float *StCL::vsub(const float *a, const float *b, float *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = a[i]-b[i];
@@ -404,7 +407,7 @@ inline float *StCL::vsub(float *a, float *b, float *x, int n)
 }
 
 //________________________________________________________
-inline double *StCL::vsub(double *a, double *b, double *x, int n)
+inline double *StCL::vsub(const double *a, const double *b, double *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = a[i]-b[i];
@@ -412,14 +415,14 @@ inline double *StCL::vsub(double *a, double *b, double *x, int n)
 }
 
 //________________________________________________________
-inline float *StCL::vcopyn(float *a, float *x, int n)
+inline float *StCL::vcopyn(const float *a, float *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = -a[i];
   return x;
 }
 //________________________________________________________
-inline double *StCL::vcopyn(double *a, double *x, int n)
+inline double *StCL::vcopyn(const double *a, double *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = -a[i];
