@@ -15,7 +15,6 @@ my $SO_PKG  = "";
 my $SO_PKGT = "";
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
-
 foreach my $Rep(@Repo) {
     my $RepDir = $Rep . "/" . $Dir;
     print "RepDir = $RepDir\n" if $param::debug;
@@ -76,7 +75,6 @@ my $CPPPATH = $env->{CPPPATH};
 my $FC      = $env->{FC};
 my $FFLAGS  = $env->{FFLAGS};
 my $FEXTEND = $env->{FEXTEND};
-
 
 # Resolve Mysql right away i.e. use the Linux local installed
 # library instead of the eventually provided /opt/star one.
@@ -231,6 +229,7 @@ my $DIR = Cwd::cwd();
 print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
+my @QtDefs = ();
 
 if ( $#idlM > -1 ) {
     my $include = $INCLUDE . "/" . $pkg;
@@ -271,18 +270,24 @@ if ( $#idlM > -1 ) {
     }
 }
 else {
-
     foreach $h(@h_files) {
         if ( $h =~ /LinkDef/ || $h =~ /Stypes/ ) { push @Defs, $h; next; }
         my $hh = $Dir . "/" . $h;
         if ( -r $hh ) {
             open( In, $hh ) or die "Can't open $hh";
+            my $classDefFlag = 1;
+            my $qtFlag       = 1;
             while ( $line = <In> ) {
-
-                if ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/ ) {
+                if ( ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/) ) {
                     push @Defs, $h;
-                    goto ENDL;
+                    $classDefFlag = 0;
+                } elsif ( $line =~ /Q_OBJECT/ ) {
+                    push @QtDefs, $h;
+                    $qtFlag = 0;
+                    # $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{INCDIR};
+                    # $CPPFLAGS .= " " . $env->{Packages}->{QT}->{FLAGS};
                 }
+                next if ( $classDefFlag + $qtFlag == 0 );
             }
             close(In);
         }
@@ -332,6 +337,11 @@ if ( $#Defs > -1 ) {
     print "+==========add $cint\n" if $param::debug;
 }
 
+if ( $#QtDefs > -1 ) {
+     my @mocs = script::MakeMoc( $env2, $pkg, $done, @QtDefs);
+     foreach $m(@mocs) { push @src, $m;}
+}
+ 
 #____________________________________Tables____________________________
 Tables:
 my @sourcesT = ();
@@ -488,6 +498,34 @@ if ( $#src > -1 ) {
         my $lib = $LIB . "/lib" . $SO_PKG;
         InstallAs $env2 $lib, $SO_PKG;
     }
+}
+
+#_________________________________________________________________________________
+sub script::MakeMoc {
+  my $env  = shift;
+  my $pkg  = shift;
+  my $done = shift; 
+  my @includes = shift;
+  my $Dir  = $env->{Dir};
+  my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
+  my $ObjDir        = "#" . $env->{ObjDir};  #    print "MakeMoc ObjDir = $ObjDir\n";
+  my @src      = ();
+  my @Defs     = ();
+  my $PLATFORM = $env->{PLATFORM};
+  
+  foreach my $header (@includes) { 
+    my $dd = $d;
+    my $G__name = "moc_" . $header; 
+    $G__name =~ s/\.h$/\.cxx/; # print "G__name = $G__name\n";
+    my $moc = $ENV{QTDIR} . "/bin/moc";
+#    my $moc = "moc";
+#    print "moc = $moc\n";
+    Command $env ($G__name), ($header),
+    qq($moc -o %>  %<);
+    push @src, $G__name;
+    print "+==========add moc file: $G__name\n" if $param::debug;
+  }
+  return @src;
 }
 
 #________________________________________________________________________________

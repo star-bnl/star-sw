@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.45 2002/05/21 00:37:23 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.46 2002/12/24 16:01:15 fine Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -109,6 +109,15 @@
     $CRYPTLIBS     = "";
     $SYSLIBS       = "";
     $OSFID         = "";
+
+    if (defined($QTDIR) && -d $QTDIR . "/include" ) {
+       $CPPPATH .= $main::PATH_SEPARATOR . 
+               $QTDIR . "/include";	       
+       if ( -r $ROOTSYS . "/include/TQt.h")	{
+          $CPPFLAGS .= "-DR__QT";
+       }
+       
+    }
 
     # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
     $date   = `date +\%d\%b-%T`;
