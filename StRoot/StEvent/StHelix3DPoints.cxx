@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.cxx,v 1.3 1999/07/14 01:38:03 fine Exp $
+// $Id: StHelix3DPoints.cxx,v 1.4 1999/08/04 03:51:49 fine Exp $
 // $Log: StHelix3DPoints.cxx,v $
-// Revision 1.3  1999/07/14 01:38:03  fine
-// Previous version has been restored
+// Revision 1.4  1999/08/04 03:51:49  fine
+// Helix drawing improvements
+//
+// Revision 1.4  1999/08/04 03:51:49  fine
+// Helix drawing improvements
 //
 // Revision 1.3  1999/07/14 01:38:03  fine
 // Previous version has been restored
@@ -23,6 +26,27 @@
 
 StHelix3DPoints hh;
 
+ClassImp(StHelix3DPoints)
+
+//________________________________________________________________________________
+StHelix3DPoints::StHelix3DPoints(StTrack *track)
+{
+  m_Helix = 0;
+  if (!track) return;
+  m_Helix = &(track->helix());
+  if (m_Helix) 
+  {
+    Float_t length = track->length();
+    Int_t nSteps = 4*length*m_Helix->curvature() + 1; 
+    SetLastPosition( nSteps);
+    SetStep(length/GetLastPosition());
+  }
+  else 
+  {
+    SetLastPosition(-1);
+    SetStep(0);
+  } 
+  
 }
 
 //________________________________________________________________________________
@@ -39,6 +63,7 @@ StHelix3DPoints::StHelix3DPoints(StHelixD *trackHelix,Float_t step,Int_t lastPos
    }
 }
 //________________________________________________________________________________
+StHelix3DPoints::StHelix3DPoints(StTrack *track, Float_t length,Int_t lastPosition)
 {
   m_Helix = 0;
   if (!track) return; 

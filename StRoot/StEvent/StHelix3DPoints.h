@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.3 1999/07/14 01:38:04 fine Exp $
+// $Id: StHelix3DPoints.h,v 1.4 1999/08/04 03:51:49 fine Exp $
 // $Log: StHelix3DPoints.h,v $
-// Revision 1.3  1999/07/14 01:38:04  fine
-// Previous version has been restored
+// Revision 1.4  1999/08/04 03:51:49  fine
+// Helix drawing improvements
+//
+// Revision 1.4  1999/08/04 03:51:49  fine
+// Helix drawing improvements
 //
 // Revision 1.3  1999/07/14 01:38:04  fine
 // Previous version has been restored
@@ -23,8 +26,9 @@ class StTrack;
 class StHelix3DPoints : public TPoints3DABC {
 private:
         StHelixD *m_Helix;
+        Float_t   m_Step;
         Int_t     m_N;
-        StHelix3DPoints(StTrack *track,        Float_t length=0,Int_t lastPosition=50);
+public:
         StHelix3DPoints(StTrack *track);
         StHelix3DPoints(StHelixD *trackHelix=0,Float_t step=0,Int_t lastPosition=50);
         StHelix3DPoints(StTrack *track,        Float_t length,Int_t lastPosition=50);

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.14 1999/08/03 19:18:37 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.15 1999/08/04 03:52:01 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.15  1999/08/04 03:52:01  fine
+// Helix drawing improvements
+//
 // Revision 1.14  1999/08/03 19:18:37  fine
 // Vertices collections have been introduced
 //
@@ -620,7 +623,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     if (filter) trackColor =  filter->Filter(globTrack,trackSize,trackStyle); //
     // ---------------------------------------------------------------------- //
     if (trackColor > 0) {
-       StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack,globTrack->length(),30);
+       StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
        m_TrackCollector->Add(tracksPoints);    // Collect to remove  
        St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
          tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
