@@ -3,17 +3,17 @@
 
 //*-- Author :    Valery Fine   14/08/01  (E-mail: fine@bnl.gov)
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
-// $Id: StEventDisplayInfo.h,v 1.1 2003/01/08 03:16:32 fine Exp $
+// $Id: StEventDisplayInfo.h,v 1.2 2003/01/17 01:36:16 fine Exp $
 
 #include "TObject.h"
 #ifdef R__QT
 // Qt header files
-#include <qtextview.h>
+#include <qtextedit.h>
 #endif
 
 class StEventDisplayInfo
 #ifdef R__QT
-   : public QTextView 
+   : public QTextEdit 
 #endif
 {
 public:

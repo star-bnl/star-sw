@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.h,v 1.1 2003/01/08 03:16:32 fine Exp $
+// $Id: StEventControlPanel.h,v 1.2 2003/01/17 01:36:16 fine Exp $
 //
 
 
@@ -18,13 +18,18 @@
 #define STAR_StEventControlPanel
 
 #include "TObject.h"
+#include <qcursor.h>
 
 class StChain;
 class StMaker;
+class TBrowser;
 class StEventDisplayMaker;
 class StEventDisplayInfo;
 
-class QButtonGroup;
+class QWidget;
+class QButton;
+class StFilterDialog;
+class QPushButton;
  
 #if !defined(__CINT__)
 # include <qobject.h>
@@ -39,15 +44,35 @@ class StEventControlPanel
 Q_OBJECT
 #endif
 protected:
-   QButtonGroup *fBar;  
+   QWidget *fBar;  
+   TObject *fFilter;
+   StFilterDialog *fDialog;
+   TBrowser    *fBrowser;
+   QPushButton *fRedrawButton;
+   QPushButton *fNextEventButton;
+   QCursor      fSavedCursor;
 
 
 public:
-   static StMaker             *fgChain;
+   static StChain             *fgChain;
    static StEventDisplayMaker *fgDispMk;
    static StEventDisplayInfo  *fgHlp;  
 public slots:
      void Clicked(int id);
+     void Clicked();
+     void ClickedVolume();
+     void PrntNames();
+     void ShowFilter();
+     void NextEvent();
+     void Redraw();
+     void SuspendTopWidget();
+     void ResumeTopWidget();
+     void ShowVolumeBrowser();
+
+
+protected slots:
+   void Disconnect();
+   void DisconnectBrowser();
 
 protected:
    void AddButt(const Char_t *buttonName, const Char_t *command);
@@ -56,12 +81,13 @@ protected:
 public:
    StEventControlPanel();
    virtual ~StEventControlPanel();
-   QButtonGroup *Bar() const;
 
    static void PrintNames();
+   QWidget *Bar(){ return fBar;}
    void Refresh();
    void AddFilter(TObject *filter);
    void Show();
+
 };
 
 // StEventControlPanel __StEventControlPanel__;
