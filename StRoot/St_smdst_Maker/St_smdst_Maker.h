@@ -1,5 +1,8 @@
-// $Id: St_smdst_Maker.h,v 1.2 1999/01/19 22:42:32 genevb Exp $
+// $Id: St_smdst_Maker.h,v 1.3 1999/03/12 22:10:38 perev Exp $
 // $Log: St_smdst_Maker.h,v $
+// Revision 1.3  1999/03/12 22:10:38  perev
+// New maker schema
+//
 // Revision 1.2  1999/01/19 22:42:32  genevb
 // update comments
 //
@@ -48,7 +51,7 @@ class St_smdst_Maker : public StMaker {
    TPaveText *m_legend2;               //!
    virtual void   MakeHistograms();    // Fill diagnostic histograms
  public:
-                  St_smdst_Maker(const char *name="smdst", const char *title="event/data/strange/smdst");
+                  St_smdst_Maker(const char *name="smdst");
    virtual        ~St_smdst_Maker();
    virtual void   DoHistograms(Int_t n) { draw_histos = kTRUE; update = n; } // Turn on diagnostic histograms
    virtual void   DoHistograms() { DoHistograms(update); } // Turn on diagnostic histograms
