@@ -1,4 +1,4 @@
-//*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
+ //*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
 //
 //  
@@ -22,11 +22,12 @@ void Load()
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("St_io_Maker");
+    gSystem->Load("St_emc_Maker");
 };
 
-void GetEvent(Int_t numberOfEvent=1,
-	      Int_t firstEventNumber=2,
-	      const Char_t *RootFileName = "/disk1/star/test/psc0049_08_40evts.root",
+void GetEvent(Int_t numberOfEvent=4,
+	      Int_t firstEventNumber=150,
+	      const Char_t *RootFileName = "/disk00001/star/auau200//hijing135/jetq_on/b9_12/year_1b/hadronic_on/tfs/set0076_02_160evts.root",
 	      const Char_t *testedMakerName = "dst")
 {
   cout << "Usage:   \tGetEvent(Int_t numberOfEvent=\t"<<numberOfEvent<<"," << endl; 
@@ -44,7 +45,6 @@ void GetEvent(Int_t numberOfEvent=1,
     chain = new StChain("bfc");
     St_io_Maker *in    = new St_io_Maker("Input","all");
 //  St_TLA_Maker   *geant = new St_TLA_Maker(testedMakerName,"event/geant/Event");
-//  St_TLA_Maker    *dst   = new St_TLA_Maker("dst","event/geant/Event");
 //  in->MakeDoc(); 
 
     if (root_file) tree=(TTree *)root_file->Get("Output");
