@@ -128,6 +128,8 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
 
+	TCL_Make_Clusters = tucod_ok
+
 *       CALL MESSAGE(
 *    +               'TCL_Make_Clusters-I1  Making TCL table "cluster"'
 *    +               //'from "tppad" et al.' , 1, -1 )
@@ -167,7 +169,6 @@ c    1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
 
 	END DO !Sector = 1, Nsectors
 
-	TCL_Make_Clusters = tucod_ok
 
 	RETURN
 	END
@@ -649,6 +650,10 @@ c->RJM  necessary baggage for unpacking tppixel data
 
         data first/.true./
 C----------------------------------------------------------------------
+c
+c       initialise return!
+c
+        tcl_get_row_seq = .true.
 c
 c       set up pointers into tppad; note that tppad uses
 c       sectors 1,48 but rows 1,45; handled below by 
