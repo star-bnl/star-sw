@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.16 1999/12/07 23:23:55 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.17 2000/01/04 22:08:41 fisyak Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.17  2000/01/04 22:08:41  fisyak
+// replace agufld by gufld
+//
 // Revision 1.16  1999/12/07 23:23:55  genevb
 // Fixed linux warnings
 //
@@ -82,8 +85,9 @@
 #include "math_constants.h"
 #include "PhysicalConstants.h"
 #include <math.h>
-#include "StMagF/StMagF.h"
 #include "StMessMgr.h"
+#define gufld   gufld_
+extern "C" {void gufld(Float_t *, Float_t *);}
 
 ClassImp(StSmdstMaker)
 
@@ -245,7 +249,7 @@ Int_t StSmdstMaker::FillV0Table() {
    St_smdst_v0 *smdst_v0  = new St_smdst_v0("smdst_v0",m_v0_maxlen);
    m_DataSet->Add(smdst_v0);
 
-   agufld_(x,bf);
+   gufld_(x,bf);
    bf[2] = bf[2]*0.1;
    if( bf[2] == 0. )
      gMessMgr->Warning("StSmdstMaker - magnetic field not loaded.");
