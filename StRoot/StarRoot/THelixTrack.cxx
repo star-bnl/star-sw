@@ -5,8 +5,31 @@
 #include <complex>
 typedef std::complex<double > Complex;
 const Complex Im(0,1);
-const double Zero = 1.e-5;
+const double Zero = 1.e-6;
 
+
+//_____________________________________________________________________________
+static Complex MyFactor(double rho,double drho,double s)
+{
+// Integral exp(i*Phi)*dL where Phi = rho*L + 0.5*drho*L**2
+// Let it is equal  exp(i*Phi)*A(L) + const
+// then dA/dL + i*(rho+drho*L)*A = 1
+// Solve this equation for Taylor representation of A(L)
+// static int Iter=0;
+  Complex arr[3],add;
+  Complex Sum=0.; //
+  arr[0] = 1.; arr[1] = 0.;
+  drho = drho/rho;
+  double ss = s;
+  for (int j=2;1;j++) {
+    arr[2] = -Im*rho*(arr[1]+drho*arr[0])/double(j);
+    ss *=s; add = ss*arr[2]; Sum += add;
+    if (std::norm(Sum)*1.e-12>std::norm(add)) break;
+//    printf(" Iter=%d %d %g\n",Iter++,j-1,std::abs(add));
+    arr[0]=arr[1]; arr[1]=arr[2]; 
+  }
+  return Sum;
+}
 
 ClassImp(THelixTrack)
 //_____________________________________________________________________________
@@ -200,7 +223,7 @@ void THelixTrack::Set(const double *xyz,const double *dir,double rho
   fP[0] = dir[0]; fP[1] = dir[1]; fP[2] = dir[2];
   fKind=0;
   if (hxyz) {
-    fH[0] = hxyz[0];fH[1] = hxyz[1];fH[2] = hxyz[2];
+    if (fH!=hxyz) memcpy(fH, hxyz,sizeof(fH));
     if (!fH[0] && !fH[1]) fKind=1;
   } else {
     fH[0] = 0.;     fH[1] =0.;      fH[2] = 1.; fKind=1;}
@@ -248,7 +271,7 @@ void THelixTrack::Build()
 }
 
 //_____________________________________________________________________________
-double THelixTrack::Step(double step, double *xyz, double *dir) const
+double THelixTrack::Steb(double step, double *xyz, double *dir) const
 {
 //_______________________________________________________________________
 //	
@@ -305,9 +328,9 @@ double THelixTrack::Step(double step, double *xyz, double *dir) const
 //_____________________________________________________________________________
 double THelixTrack::Move(double step) 
 {
-  double xyz[3],dir[3];
-  Step(step,xyz,dir);
-  Set(xyz,dir,fRho);
+  double xyz[3],dir[3],rho;
+  Step(step,xyz,dir,rho);
+  Set(xyz,dir,rho,fH,fDRho);
   return step;
 }
 
@@ -443,7 +466,7 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
 }
 
 //_____________________________________________________________________________
-double THelixTrack::Step(const double *point,double *xyz, double *dir) const
+double THelixTrack::Steb(const double *point,double *xyz, double *dir) const
 {
     double pnt[3],pnd[3],step[3],tg;
     int i;    
@@ -524,20 +547,128 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       ss += dstep; 
     }
     Assert(iter);
-    step[0]+=ss;
-    fDist=0; for (i=0;i<3;i++) {fDist += pow(pnd[i]-xnear[i],2);}
-
+    fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
+    if (fRho<0) fDCA[0] = - fDCA[0];
+    fDCA[1] = point[2]-xnear[2];
+    
   return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
 //_____________________________________________________________________________
-double THelixTrack::Dist(const double *point,double *xyz, double *dir) const
+double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 {
-  Step(point,xyz,dir);
-  return sqrt(fDist);
+
+    static int nCount=0; nCount++;
+    Complex cpnt(point[0]-fX[0],point[1]-fX[1]);
+    Complex cdir(fP[0],fP[1]); cdir /=std::abs(cdir);
+    double step[3];
+//		Z estimated step 
+
+    int zStep=0;
+    step[1] = 0;
+    if (fabs(fHP) > 0.01){ //Z approximation
+      zStep = 1;
+      step[1] = (point[2]-fX[2])/fHP;
+    }
+//angle approximation
+//		R estimated step
+    {
+      cpnt /= cdir;
+      if (fabs(cpnt.real()*fRho) < 0.01) {
+        step[2]=cpnt.real();
+      } else {
+        double rho = fRho;
+        for (int i=0;i<2;i++) {
+          Complex ctst = (1.+Im*rho*cpnt);
+	  ctst /=std::abs(ctst);
+	  ctst = std::log(ctst);
+	  step[2]= ctst.imag()/rho;
+          if (!fDRho) break;
+	  rho = fRho+ 0.5*fDRho*step[2];
+        }
+      }
+      step[2]/=fCosL;
+    }
+
+    if (zStep && fabs(step[1]-step[2]) > GetPeriod()) {
+      int nperd = (int)((step[1]-step[2])/GetPeriod());
+      step[2] += nperd*GetPeriod();
+    }
+    step[0] = step[2];
+
+    double ds = step[1]-step[2];
+    if (zStep && fabs(ds)>1.e-5) {
+      double dz = ds*fHP;
+      step[0] += dz*dz/ds;
+    }
+
+
+    double xnear[6],ss=0;  double* pnear=xnear+3;
+//		iterations
+    double dstep = 1.e+10,dztep;
+    double lMax = step[0]+0.25*GetPeriod();
+    double lMin = step[0]-0.25*GetPeriod();
+
+    if (zStep) {
+      lMax = (step[1]>step[2])? step[1]:step[2];
+      lMin = (step[1]>step[2])? step[2]:step[1];}
+    int iter=40,icut=1;
+    THelixTrack local(*this);
+    local.Move(step[0]);
+    lMax-=step[0];lMin-=step[0];
+    local.Step(0.,xnear,pnear);
+    for (; iter; iter--)
+    { 
+      double diff = (icut)? lMax-lMin: fabs(dstep);
+      if (diff < 0.1) {
+        if (diff < 1.e-5) 	break;
+        double tmp = 0;
+        for (int i=0;i<3;i++) {tmp += fabs(point[i]-xnear[i]);}
+        if (diff < tmp*1.e-4) 	break;
+        if (tmp < 1.e-5) 	break;
+      }
+      
+      local.Step(ss,xnear,pnear);
+      dstep = 0; icut = 0;
+      for (int i=0;i<3;i++) {dstep += pnear[i]*(point[i]-xnear[i]);}
+      if(dstep<0) {
+        lMax = ss; dztep = -0.5*(lMax-lMin);
+	if (dstep<dztep) {icut=1;dstep = dztep;}
+      } else {
+        lMin = ss; dztep =  0.5*(lMax-lMin);
+	if (dstep>dztep) {icut=1;dstep = dztep;}
+      }
+      ss += dstep; 
+    }
+    Assert(iter);
+    step[0]+=ss;
+    fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
+    if (fRho<0) fDCA[0] = - fDCA[0];
+    fDCA[1] = point[2]-xnear[2];
+    return (xyz) ? Step(step[0],xyz,dir) : step[0];
+}
+//_____________________________________________________________________________
+double THelixTrack::GetDCAxy() const
+{
+  return fDCA[0];
+}
+//_____________________________________________________________________________
+double THelixTrack::GetDCAz() const
+{
+  return fDCA[1];
+}
+//_____________________________________________________________________________
+double THelixTrack::GetDCA() const
+{
+  double tmp = sqrt(fDCA[0]*fDCA[0]+fDCA[1]*fDCA[1]);
+  if (fDCA[0]<0) tmp = -tmp;
+  return tmp;
 }
 //_____________________________________________________________________________
 double THelixTrack::GetPeriod() const
-{ return (fabs(fRho) > 1.e-10) ? fabs(1./fRho/fCosL): 1.e+10; }
+{
+   double per = (fabs(fRho) > 1.e-10) ? fabs(2.*M_PI/fRho):1.e+10;
+   return per/fCosL;
+}
 //_____________________________________________________________________________
 void THelixTrack::Streamer(TBuffer &){}
 //_____________________________________________________________________________
@@ -555,16 +686,6 @@ void THelixTrack::Print(Option_t *) const
   printf("double Rho = %g;\n" ,fRho); 
   printf("THelixTrack *ht = new THelixTrack(xyz,dir,Rho,hhh);\n");
   
-}
-//_____________________________________________________________________________
-void THelixTrack::Tailor(void *vrr, int narr)
-{
-  Complex *arr = (Complex*)vrr;
-  arr[0] = -Im/fRho;
-  arr[1] = 0.;
-  for (int j=1;j<narr-1;j++) {
-    arr[j+1] = -Im*(fRho*arr[j]+fDRho*arr[j-1])/(j+1.);
-  }
 }
 //_____________________________________________________________________________
 int THelixTrack::SqEqu(double *cba, double *sol)
@@ -615,13 +736,28 @@ int THelixTrack::SqEqu(double *cba, double *sol)
   return nsol;
 }
 //_____________________________________________________________________________
-double THelixTrack::Steb(double step, double *xyz, double *dir,double *rho) const
+double THelixTrack::Step(double step, double *xyz, double *dir,double &rho) const
 {
+   Step(step,xyz,dir);
+   rho = fRho +(step*fCosL)*fDRho;
+   return step;
+}
+//_____________________________________________________________________________
+double THelixTrack::Step(double step, double *xyz, double *dir) const
+{
+  if (!step) {
+    if (xyz) memcpy(xyz,fX,sizeof(fX));
+    if (dir) memcpy(dir,fP,sizeof(fP));
+    return 0.;
+  }
 
   double ztep = step*fCosL;
+  double teta = ztep*(fRho+0.5*ztep*fDRho);
+
   Complex CX(fX[0]  ,fX[1]  ),CXn;
-  Complex CP(fPxy[0],fPxy[1]),CPn;
-  Complex ImTet(0,fRho * ztep );
+  Complex CP(fP[0],fP[1]),CPn;
+  CP /=std::abs(CP);
+  Complex ImTet(0,teta);
   Complex ImRho(0,fRho);
   if (fabs(ImTet.imag()) > 0.01)	{
 //    Complex Cf1 = std::exp(ImTet)-1.;
@@ -629,6 +765,10 @@ double THelixTrack::Steb(double step, double *xyz, double *dir,double *rho) cons
     Complex Cf1 = 2.*Im*hlf*hlf.imag();
     CPn = CP + CP*Cf1;
     CXn = CX + CP*Cf1/(ImRho);
+    if (fDRho) {//
+      CXn += CP*(Cf1+1.)/(ImRho)*MyFactor(fRho,fDRho,ztep);
+    }
+
   } else { 
     Complex COne = (1.+ImTet*(0.5 +ImTet*(1./6+ImTet*(1./24+ImTet/120.))));
     Complex Cf1 = ImTet*COne;
@@ -648,3 +788,83 @@ double THelixTrack::Steb(double step, double *xyz, double *dir,double *rho) cons
 
   return step;
 }
+//_____________________________________________________________________________
+double THelixTrack::Steb(double stmin,double stmax, const double *s, int nsurf,
+                         double *xyz, double *dir) const
+{
+  int ix,jx,nx,ip,jp;
+  double poly[3][4],tri[3]={0,0,0},sol[2],f1,f2,step,ss;
+  static const int idx[4][4] = {{0,1,2,3}, {1,4,7,9},{2,7,5,8}, {3,9,8,6}}; 
+
+  
+  poly[0][0]=1.;poly[1][0]=0.;poly[2][0]=0.;
+  memcpy(poly[0]+1,fX,sizeof(fX));
+  memcpy(poly[1]+1,fP,sizeof(fP));
+  Complex CP(fP[0],fP[1]); CP /=fCosL;
+  Complex C2 = 0.5*Im*fRho;
+  if (fDRho) C2 += 0.5*fDRho/fRho;
+  C2 *=CP*fCosL*fCosL;
+  poly[2][1] = C2.real();
+  poly[2][2] = C2.imag();
+  poly[2][3] = 0;
+
+  nx = (nsurf<=4) ? 1:4;
+  for(ix=0;ix<nx;ix++) {
+    for(jx=ix;jx<4;jx++) {  
+      int ii = idx[ix][jx];
+      if (ii>=nsurf || !s[ii]) 		continue;     
+      ss = s[ii]; 
+      for (ip=0;ip<3;ip++) {
+        f1 = poly[ip][ix]; if(!f1) 	continue;
+        f1 *=ss;
+        for (jp=0;jp+ip<3;jp++) {
+          f2 = poly[jp][jx]; if(!f2) 	continue;
+          tri[ip+jp] += f1*f2;
+  } } } }
+
+  int nsol = SqEqu(tri,sol);
+  step = 1.e+12;
+  if (nsol<0) 	return step;
+
+  if (nsol) step = sol[0];
+  if (step < stmin && nsol > 1) step = sol[1];
+  if (step < stmin)	{nsol = 0; step = stmax;}
+  if (step > stmax) 	{nsol = 0; step = stmax ; }   
+  if (!nsol && fabs(step) < 0.1*fMax) return 1.e+12;
+  
+  double xx[4],*x=xx+1,d[3];
+  Step(step,x,d);
+  if (nsol) {//test it
+  xx[0]=1;ss = 0;
+  for(ix=0;ix<nx;ix++) {
+    for(jx=ix;jx<4;jx++) {  
+      int ii = idx[ix][jx];
+      if (ii>=nsurf || !s[ii]) 	continue;     
+      ss += s[ii]*xx[jx]*xx[ix];
+  } } 
+  if (fabs(ss)<1.e-7) {
+    if (xyz) memcpy(xyz,x,sizeof(*xyz)*3);
+    if (dir) memcpy(dir,d,sizeof(*dir)*3);
+      return step;
+  } }
+
+  stmax -=step; stmin -=step; if (stmin < -fMax) stmin = -fMax; 
+  THelixTrack th(x,d,fRho,fH,fDRho);
+  return th.Steb(stmin,stmax,s,nsurf,xyz,dir)+step;
+
+
+}
+//_____________________________________________________________________________
+double THelixTrack::Steb(double stmax,const  double *surf, int nsurf,
+                         double *xyz, double *dir) const
+{
+  int i;
+  double s[10]={0,0,0,0,0,0,0,0,0,0},tmp=0;
+  memcpy(s,surf,nsurf*sizeof(surf[0]));
+  
+  for(i=1;i<nsurf;i++) if (fabs(s[i])>tmp) tmp = fabs(s[i]);
+  if(fabs(tmp-1.)>0.1) {for(i=0;i<nsurf;i++) s[i]/=tmp;}
+  return Steb(0.0,stmax,s,nsurf,xyz,dir);
+}
+
+
