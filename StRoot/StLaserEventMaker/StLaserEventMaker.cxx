@@ -1,7 +1,7 @@
-// $Id: StLaserEventMaker.cxx,v 1.12 2001/12/12 20:43:53 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.13 2001/12/12 22:50:44 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.12  2001/12/12 20:43:53  pfachini
-// Increasing the cut on the number of tracks per event requested for good laser events (from 500 to 600)
+// Revision 1.13  2001/12/12 22:50:44  pfachini
+// Writing laserhits.*.*.root to ./StarDb/Calibrations/tpc/ for tests
 //
 // Revision 1.10  2001/11/28 19:14:47  jeromel
 // Fixed default values for Laser calibration.
@@ -673,7 +673,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.12 2001/12/12 20:43:53 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.13 2001/12/12 22:50:44 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -681,8 +681,7 @@ void StLaserEventMaker::PrintInfo() {
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteTableToFile(){
   char filename[80]; 
-  //sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
-  sprintf(filename,"/star/u/pfachini/workir/Laser/tpcDriftVelocityLaser.%08d.%06d.C",date,time);
+  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
@@ -712,7 +711,7 @@ void StLaserEventMaker::WriteTableToFile(){
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteHistFile(){
   char filename[80]; 
-  sprintf(filename,"laserhist.%08d.%06d.root",date,time);
+  sprintf(filename,"./StarDb/Calibrations/tpc/laserhist.%08d.%06d.root",date,time);
   TFile out(filename,"RECREATE");
   GetHistList()->Write();
   out.Close();
