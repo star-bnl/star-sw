@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.3 1999/01/18 17:21:29 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.4 1999/02/24 19:33:29 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
- * Revision 1.3  1999/01/18 17:21:29  lasiuk
- * tau units
+ * Revision 1.4  1999/02/24 19:33:29  lasiuk
+ * add tzero offset parameter
  *
  * Revision 1.4  1999/02/24 19:33:29  lasiuk
  * add tzero offset parameter
@@ -46,6 +46,7 @@ StTpcElectronics* StTpcSimpleElectronics::mInstance = 0; // static data member
 StTpcSimpleElectronics::StTpcSimpleElectronics() { /* nopt */ }
 
 StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
+{
     StGetConfigValue(file,"nominalGain",mNominalGain);
     StGetConfigValue(file,"samplingFrequency",mSamplingFrequency);
     StGetConfigValue(file,"tZero",mTZero);
@@ -59,6 +60,7 @@ StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
     using namespace units;
 #endif
 
+    //Units Integrity
     mNominalGain         *= ((volt*.001)/(coulomb*1.e-15));  // mV/fC
     mSamplingFrequency   *= MHz;
     mTZero               *= microsecond;
@@ -128,6 +130,7 @@ void StTpcSimpleElectronics::print(ostream& os) const
 #endif
     os << "Simple Electronics Data Base Parameters"                         << endl;
     os << "======================================="                         << endl;
+    os << "Analog:"                                                         << endl;
     os << "nominalGain:         " << mNominalGain/((volt*.001)/(coulomb*1.e-15))  << " mV/fC"       << endl;
     os << "samplingFrequency:   " << mSamplingFrequency/MHz   << " MHz"         << endl;
     os << "tZero:               " << mTZero/microsecond       << " us"          << endl;

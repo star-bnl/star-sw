@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleElectronics.hh,v 1.2 1999/01/18 10:21:57 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.hh,v 1.3 1999/02/24 19:33:17 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleElectronics.hh,v $
- * Revision 1.2  1999/01/18 10:21:57  lasiuk
- * add tau
+ * Revision 1.3  1999/02/24 19:33:17  lasiuk
+ * add tzero offset parameter
  *
  * Revision 1.3  1999/02/24 19:33:17  lasiuk
  * add tzero offset parameter
@@ -43,6 +43,7 @@ public:
 
         // Analog Electronics
     double    nominalGain()                    const;
+    double    channelGain(int,int,int)         const;
     double    channelGain(StTpcPadCoordinate&) const;
     double    samplingFrequency()              const;
     double    tZero()                          const;
@@ -65,6 +66,7 @@ private:
     
 private:
     static StTpcElectronics* mInstance;
+
     double mNominalGain;
     double mSamplingFrequency;
     double mTZero;
@@ -75,6 +77,7 @@ private:
     double mAdcConversionCharge;
     int mAveragePedestal;
 };
+inline double StTpcSimpleElectronics::nominalGain() const {return mNominalGain;}
 inline double StTpcSimpleElectronics::samplingFrequency() const {return mSamplingFrequency;}
 inline double StTpcSimpleElectronics::shapingTime() const {return mShapingTime;}
 inline double StTpcSimpleElectronics::tZero() const {return mTZero;}
