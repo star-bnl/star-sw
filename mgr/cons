@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.7 1999/08/27 15:01:48 fisyak Exp $
+# $Id: cons,v 1.6 1999/08/19 12:49:27 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -43,7 +43,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "a3";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.7 1999/08/27 15:01:48 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.6 1999/08/19 12:49:27 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -174,8 +174,7 @@ $0 =~ s#.*/##;
 
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
-$param::defaultConstruct = $STAR . "/mgr/Construct";	# Default construction file.
-$param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
+$param::defaultfile = $STAR . "/mgr/Conscript-standard";	# Default construction file.
 $param::install = 1;		# Show installations
 $param::build = 1;		# Build targets
 $param::show = 1;		# Show building of targets.
@@ -490,11 +489,7 @@ sub main::doscripts {
 	$dir::cwd = $priv::self->{script}->{dir};
 	if (!-f $path) {
 #	    print qq(Missing script $path.);
-	  (my $p = $path) =~ s#.*/##g; 
-	  $p =~ s#.*\\##g;
-	  if ($p eq "Construct")  {$path = $param::defaultConstruct;}
-	  if ($p eq "Conscript")  {$path = $param::defaultConscript;}
-#	  if (!-f $path) {$path =~ s/\//\\/g;}
+	    $path = $param::defaultfile;
 #	    print qq( Use $path\n);
 	}
 	if (-f $path) {
@@ -807,14 +802,9 @@ sub _resolve {
 # Internal function/method.
 sub _subst {
 # print "==========\tDebug:","In cons-_subst- parameters = ", @_, "\n";
-    my($env, $str) = @_; # no% option for Sun
+    my($env, $str) = @_;
     while ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge) {}
-#    while ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/) {
-#      my $v = $1;print "subst: $v -> $env->{$v} \n";
-#      $str =~ s/-features=no\%/-features=no_/g;
-#    }
-    $str =~ s/-features=no_/-features=no\%/g;
-    return $str;
+    $str;
 }
 
 sub Install {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.4 1999/09/01 19:04:53 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.3 1999/07/06 22:33:23 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
- * Revision 1.4  1999/09/01 19:04:53  lisa
- * update Particle class AND add parity cf and Randys Coulomb correction
- *
  * Revision 1.3  1999/07/06 22:33:23  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -45,7 +42,5 @@ StHbtParticle::StHbtParticle(const StHbtTrack* hbtTrack,const double& mass){
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
-
-  mHelix = hbtTrack->Helix();
 }
 //_____________________

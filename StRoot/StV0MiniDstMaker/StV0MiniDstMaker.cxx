@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.cxx,v 1.3 1999/09/02 09:04:56 jones Exp $
+// $Id: StV0MiniDstMaker.cxx,v 1.4 1999/09/02 09:53:41 jones Exp $
 // $Log: StV0MiniDstMaker.cxx,v $
+// Revision 1.4  1999/09/02 09:53:41  jones
+// Protected Make() if called in read mode; Protected Read() if file not open
+//
 // Revision 1.3  1999/09/02 09:04:56  jones
 // Added StEvMiniDst class, New file handling, Partially implemented TTrees
 //
@@ -81,6 +84,9 @@ Int_t StV0MiniDstMaker::Init(){
 Int_t StV0MiniDstMaker::Make(){
 
   printf("In StV0MiniDstMaker::Make() ...\n");
+
+  // Do nothing if file open for reading only
+  if( ! mWriteFile ) return kStOk;
 
   // Get pointer to event
   StEventMaker* evMaker = (StEventMaker *) GetMaker("events");
@@ -217,12 +223,17 @@ Int_t StV0MiniDstMaker::SetOutputFile(const char* file) {
 }
 //_____________________________________________________________________________
 TOrdCollection* StV0MiniDstMaker::Read(Int_t* nent) {
-  mEntries = 0;
+  *nent = mEntries = 0;
   mCollection = 0;
   mClonesArray = 0;
 
   if( mVertexType == undefined ) {
-    printf("StV0MiniDstMaker: Error - VertexType is undefined\n");
+    printf("StV0MiniDstMaker::Read Error - VertexType is undefined\n");
+    return 0;
+  }
+
+  if( ! muDst ) {
+    printf("StV0MiniDstMaker::Read Error - File is not open\n");
     return 0;
   }
 

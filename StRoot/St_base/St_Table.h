@@ -1,12 +1,6 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.35 1999/08/30 23:15:09 fine Exp $
+// $Id: St_Table.h,v 1.33 1999/08/12 16:41:31 fine Exp $
 // $Log: St_Table.h,v $
-// Revision 1.35  1999/08/30 23:15:09  fine
-// St_Table::Fit method has been introduced
-//
-// Revision 1.34  1999/08/20 13:22:25  fine
-// new method St_Table::Draw
-//
 // Revision 1.33  1999/08/12 16:41:31  fine
 // Clean up
 //
@@ -103,12 +97,14 @@ enum ETableBits {
 };
 class G__DataMemberInfo;
 class St_XDFFile;
-class St_tableDescriptor;
 
 extern "C" {
    void *ReAllocate(table_head_st *h, Int_t newsize);
 }
 
+#if 1
+class St_tableDescriptor;
+#endif
 
 class St_Table : public St_DataSet, public TArray {
    friend class St_XDFFile;
@@ -120,9 +116,8 @@ private:
 protected:
    void       CopyStruct(Char_t *dest, const Char_t *src);
    Char_t    *Create();
-   virtual     void       Clear(Option_t *opt="");  
-   virtual     void       Delete(Option_t *opt="");
-   virtual Bool_t  EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *obj, Int_t nentries=1000000000, Int_t firstentry=0, Option_t *option="");
+   void       Clear(Option_t *opt="");  
+   void       Delete(Option_t *opt="");
    void       LinkHeader();
    void       SetHeadFields(Text_t *name);
    Int_t      SetfN(Long_t len);
@@ -164,34 +159,30 @@ public:
    virtual     const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
-   virtual     void       Draw(Option_t *opt);
-   virtual     void       Draw(const Text_t *varexp, const Text_t *selection, Option_t *option=""
-                              ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
    virtual     void      *GetArray() const ;
    virtual     TClass    *GetRowClass() const ;
    virtual     Long_t     GetNRows() const;
    virtual     Long_t     GetRowSize() const;
    virtual     Long_t     GetTableSize() const;
+#if 0
+   virtual     TList     *GetTableDescriptors();
+   virtual     TList     *GetRowDescriptors();
+#else
    virtual     St_tableDescriptor *GetTableDescriptors() const;
    virtual     St_tableDescriptor *GetRowDescriptors() const;
-   virtual     const Char_t *GetType() const;
-   virtual     void       Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *selection="",Option_t *option="" ,Option_t *goption=""
-                              ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
+#endif
 
+   virtual     const Char_t *GetType() const;
    virtual     Long_t     HasData() const { return 1; }
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
    virtual     void       ls(Int_t deep);
    static      St_Table  *New(const Char_t *name, const Char_t *type, void *array, UInt_t size);
-   virtual     Char_t    *MakeExpression(const Char_t *expressions[],Int_t nExpressions);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
    virtual     void       Print(Option_t *opt="");
    virtual  const Char_t *Print(Int_t row, Int_t rownumber=10,
                                 const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
    virtual  const Char_t *PrintHeader() const; // *MENU*
-   virtual     void       Project(const Text_t *hname, const Text_t *varexp, const Text_t *selection="", Option_t *option=""
-                                 ,Int_t nentries=1000000000, Int_t firstentry=0);
-
    virtual Int_t         Purge(Option_t *opt="");   
 
                void      *ReAllocate(Int_t newsize);
@@ -243,15 +234,14 @@ inline  void   St_Table::SetNRows(Int_t n) {SetUsedRows(n);}
 //   ULong_t   &operator(){ return GetTable();}
 
 
+#if 1
 inline void *St_Table::operator[](Int_t i)
 {
    if (!BoundsOk("St_Table::operator[]", i))
       i = 0;
     return (void *)(s_Table+i*(*s_Size));
 }
-
-inline void St_Table::Draw(Option_t *opt)
-{ Draw(opt, "", "", 1000000000, 0); }
+#endif
 
 #endif 
 

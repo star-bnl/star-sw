@@ -1,32 +1,5 @@
-// $Id: St_Table.cxx,v 1.78 1999/09/01 22:32:54 fine Exp $ 
+// $Id: St_Table.cxx,v 1.69 1999/08/13 23:27:56 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.78  1999/09/01 22:32:54  fine
-// St_Table::Fit fixed Rene\'s bug
-//
-// Revision 1.77  1999/08/30 23:15:08  fine
-// St_Table::Fit method has been introduced
-//
-// Revision 1.76  1999/08/30 00:54:54  fine
-// Working version of St_Table::Draw NO crash on either system
-//
-// Revision 1.75  1999/08/29 02:01:33  fine
-// St_Table::Draw clean up, G__Calc is activated since it works well but too slow
-//
-// Revision 1.74  1999/08/28 01:23:12  fine
-// St_Table::Draw work well under. With no bytecode works under Linux as well
-//
-// Revision 1.73  1999/08/26 04:35:46  fine
-// St_Table::Draw() works somehow for Sun but still fail for Linux
-//
-// Revision 1.72  1999/08/25 02:45:47  fine
-// StTable::Draw works under Sun and crashes under Linux
-//
-// Revision 1.71  1999/08/21 00:40:54  fine
-// GetExpressionFileName function has been introduced
-//
-// Revision 1.70  1999/08/20 13:22:24  fine
-// new method St_Table::Draw
-//
 // Revision 1.69  1999/08/13 23:27:56  fisyak
 // remove endif
 //
@@ -212,11 +185,9 @@
 //////////////////////////////////////////////////////////////////////////
  
 #include <iostream.h>
-#include <fstream.h>
 #include <iomanip.h>
 
 #include "TROOT.h"
-#include "TSystem.h"
 #include "TBuffer.h"
 #include "TMath.h"
 #include "TClass.h"
@@ -229,21 +200,6 @@
 #include "St_TableElementDescriptor.h"
 #include "St_tableDescriptor.h"
 #include "StBufferAbc.h"
-
-#include "TH1.h"
-#include "TH2.h"
-#include "TProfile.h"
-#include "TPad.h"
-#include "TEventList.h"
-#include "TPolyMarker.h"
-#include "TView.h"
-#include "TPolyMarker3D.h"
-
-R__EXTERN TH1 *gCurrentHist;
-
-static   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
-static   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
-static   Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
 
 //______________________________________________________________________________
 void *ReAllocate(table_head_st *header, Int_t newsize) 
@@ -316,12 +272,35 @@ static void AsString(void *buf, const char *name, Int_t width=0)
 
 ClassImp(St_Table)
  
-
+#if 1
 //______________________________________________________________________________
 St_tableDescriptor *St_Table::GetTableDescriptors() const {
     return new St_tableDescriptor(this);
 }
+#else
+//______________________________________________________________________________
+TList *St_Table::GetTableDescriptors() {
+  // Create a new list of the columns descriptors
 
+   TClass *classPtr = GetRowClass();
+   if (classPtr == 0)         return 0;
+   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
+   if (!classPtr->GetNdata()) return 0;
+
+   TIter      next( classPtr->GetListOfDataMembers());
+
+   TDataMember *member = 0;
+   TList *dscList = 0;
+   while ((member = (TDataMember*) next())) {
+     if (!dscList) dscList = new TList;
+     const Char_t *memberName = member->GetName();
+     St_TableElementDescriptor *dsc = new St_TableElementDescriptor(this, memberName);
+     if (dsc->IsZombie()) { delete dsc; dsc = 0; MakeZombie();}
+     else dscList->Add(dsc);
+  }
+  return dscList;
+}
+#endif
 //______________________________________________________________________________
 const void *St_Table::At(Int_t i) const
 {
@@ -329,676 +308,6 @@ const void *St_Table::At(Int_t i) const
       i = 0;
    return (const void *)(s_Table+i*(*s_Size));
 }
- 
-//______________________________________________________________________________
-void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
-{
-
-//*-*-*-*-*-*-*-*-*-*-*Draw expression varexp for specified entries-*-*-*-*-*
-//*-*                  ===========================================
-//
-//  varexp is an expression of the general form e1:e2:e3
-//    where e1,etc is a C++ expression referencing a combination of the columns
-//  Example:
-//     varexp = x     simplest case: draw a 1-Dim distribution of column named x
-//            = sqrt(x)            : draw distribution of sqrt(x)
-//            = x*y/z
-//            = y:sqrt(x) 2-Dim dsitribution of y versus sqrt(x)
-//  Note that the variables e1, e2 or e3 may contain a boolean expression as well.
-//  example, if e1= x*(y<0), the value histogrammed will be x if y<0
-//  and will be 0 otherwise.
-//
-//  selection is a C++ expression with a combination of the columns.
-//  The value corresponding to the selection expression is used as a weight
-//  to fill the histogram.
-//  If the expression includes only boolean operations, the result
-//  is 0 or 1. If the result is 0, the histogram is not filled.
-//  In general, the expression may be of the form:
-//      value*(boolean expression)
-//  if boolean expression is true, the histogram is filled with
-//  a weight = value.
-//  Examples:
-//      selection1 = "x<y && sqrt(z)>3.2"
-//      selection2 = "(x+y)*(sqrt(z)>3.2"
-//  selection1 returns a weigth = 0 or 1
-//  selection2 returns a weight = x+y if sqrt(z)>3.2
-//             returns a weight = 0 otherwise.
-//
-//  option is the drawing option
-//      see TH1::Draw for the list of all drawing options.
-//      If option contains the string "goff", no graphics is generated.
-//
-//  nentries is the number of entries to process (default is all)
-//  first is the first entry to process (default is 0)
-//
-//     Saving the result of Draw to an histogram
-//     =========================================
-//  By default the temporary histogram created is called htemp.
-//  If varexp0 contains >>hnew (following the variable(s) name(s),
-//  the new histogram created is called hnew and it is kept in the current
-//  directory.
-//  Example:
-//    tree.Draw("sqrt(x)>>hsqrt","y>0")
-//    will draw sqrt(x) and save the histogram as "hsqrt" in the current
-//    directory.
-//
-//  By default, the specified histogram is reset.
-//  To continue to append data to an existing histogram, use "+" in front
-//  of the histogram name;
-//    tree.Draw("sqrt(x)>>+hsqrt","y>0")
-//      will not reset hsqrt, but will continue filling.
-//
-//     Making a Profile histogram
-//     ==========================
-//  In case of a 2-Dim expression, one can generate a TProfile histogram
-//  instead of a TH2F histogram by specyfying option=prof or option=profs.
-//  The option=prof is automatically selected in case of y:x>>pf
-//  where pf is an existing TProfile histogram.
-//
-//     Saving the result of Draw to a TEventList
-//     =========================================
-//  TTree::Draw can be used to fill a TEventList object (list of entry numbers)
-//  instead of histogramming one variable.
-//  If varexp0 has the form >>elist , a TEventList object named "elist"
-//  is created in the current directory. elist will contain the list
-//  of entry numbers satisfying the current selection.
-//  Example:
-//    tree.Draw(">>yplus","y>0")
-//    will create a TEventList object named "yplus" in the current directory.
-//    In an interactive session, one can type (after TTree::Draw)
-//       yplus.Print("all")
-//    to print the list of entry numbers in the list.
-//
-//  By default, the specified entry list is reset.
-//  To continue to append data to an existing list, use "+" in front
-//  of the list name;
-//    tree.Draw(">>+yplus","y>0")
-//      will not reset yplus, but will enter the selected entries at the end
-//      of the existing list.
-//
-//      Using a TEventList as Input
-//      ===========================
-//  Once a TEventList object has been generated, it can be used as input
-//  for TTree::Draw. Use TTree::SetEventList to set the current event list
-//  Example:
-//     TEventList *elist = (TEventList*)gDirectory->Get("yplus");
-//     tree->SetEventList(elist);
-//     tree->Draw("py");
-//
-//  Note: Use tree->SetEventList(0) if you do not want use the list as input.
-//
-   if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return;
-   TString  opt;
-   Text_t *hdefault = (char *)"htemp";
-   Text_t *varexp;
-   Int_t i,j,hkeep, action;
-   opt = option;
-   opt.ToLower();
-   Text_t *varexp0 = StrDup(varexp00);
-   Text_t *hname = strstr(varexp0,">>");
-   TH1 *oldh1 = 0;
-   TEventList *elist = 0;
-   Bool_t profile = kFALSE;
- 
-   gCurrentHist = 0;
-   if (hname) {
-     *hname  = 0;
-      hname += 2;
-      hkeep  = 1;
-      i = strcspn(varexp0,">>");
-      varexp = new char[i+1];
-      varexp[0] = 0; //necessary if i=0
-      Bool_t hnameplus = kFALSE;
-      while (*hname == ' ') hname++;
-      if (*hname == '+') {
-         hnameplus = kTRUE;
-         hname++;
-         while (*hname == ' ') hname++;
-         j = strlen(hname)-1;
-         while (j) {
-            if (hname[j] != ' ') break;
-            hname[j] = 0;
-            j--;
-         }
-      }
-      if (i) {
-         strncpy(varexp,varexp0,i); varexp[i]=0;
-         oldh1 = (TH1*)gDirectory->Get(hname);
-         if (oldh1 && !hnameplus) oldh1->Reset();
-      } else {
-         elist = (TEventList*)gDirectory->Get(hname);
-         if (!elist) {
-            elist = new TEventList(hname,selection,1000,0);
-         }
-         if (elist && !hnameplus) elist->Reset();
-      }
-   } 
-  // Look for colons
-  const Char_t *expressions[] ={varexp0,0,0,0,selection};
-  Int_t maxExpressions = sizeof(expressions)/sizeof(Char_t *);
-  Char_t *nextColon    = varexp0;
-  Int_t colIndex       = 1;
-  while ((nextColon = strchr(nextColon,':')) && ( colIndex < maxExpressions - 1 ) ) {
-    *nextColon = 0;
-     nextColon++;
-     expressions[colIndex] = nextColon;
-     colIndex++;    
-  }
-
-  expressions[colIndex] = selection;
-
-  if (!hname) {
-      hname  = hdefault;
-      hkeep  = 0;
-      varexp = (char*)varexp0;
-      if (gDirectory) {
-         oldh1 = (TH1*)gDirectory->Get(hname);
-         if (oldh1 ) { oldh1->Delete(); oldh1 = 0;}
-      }
-   }
-//--------------------------------------------------
-    printf(" Draw %s for <%s>\n", varexp00, selection);
-    Char_t *exprFileName = MakeExpression(expressions,colIndex+1);
-    if (!exprFileName) return;
-
-//--------------------------------------------------
-//   if (!fVar1 && !elist) return;
- 
-//*-*- In case oldh1 exists, check dimensionality
-   Int_t dimension = colIndex;
-
-   TString title = expressions[0];
-   for (i=1;i<colIndex;i++) {
-     title += ":";
-     title += expressions[i];     
-   }
-   Int_t nsel = strlen(selection);
-   if (nsel > 1) {
-      if (nsel < 80-title.Length()) {
-        title += "{"; 
-        title += selection; 
-        title += "}"; 
-      }
-      else
-        title += "{...}"; 
-   }
-
-   const Char_t *htitle = title.Data();
-
-   if (oldh1) {
-      Int_t mustdelete = 0;
-      if (oldh1->InheritsFrom("TProfile")) profile = kTRUE;
-      if (opt.Contains("prof")) {
-         if (!profile) mustdelete = 1;
-      } else {
-         if (oldh1->GetDimension() != dimension) mustdelete = 1;
-      }
-      if (mustdelete) {
-         Warning("Draw","Deleting old histogram with different dimensions");
-         delete oldh1; oldh1 = 0;
-      }
-   }
-//*-*- Create a default canvas if none exists
-   if (!gPad && !opt.Contains("goff") && dimension > 0) {
-      if (!gROOT->GetMakeDefCanvas()) return;
-      (gROOT->GetMakeDefCanvas())();
-   }
-#if 0
-   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
-   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
-   Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
-#endif
-//*-*- 1-D distribution
-   if (dimension == 1) {
-      action = 1;
-      if (!oldh1) {
-         fNbins[0] = 100;
-         if (gPad && opt.Contains("same")) {
-             TH1 *oldhtemp = (TH1*)gPad->GetPrimitive(hdefault);
-             if (oldhtemp) {
-                fNbins[0] = oldhtemp->GetXaxis()->GetNbins();
-                fVmin[0]  = oldhtemp->GetXaxis()->GetXmin();
-                fVmax[0]  = oldhtemp->GetXaxis()->GetXmax();
-             } else {
-                fVmin[0]  = gPad->GetUxmin();
-                fVmax[0]  = gPad->GetUxmax();
-             }
-         } else {
-             action = -1;
-         }
-      }
-      TH1F *h1;
-      if (oldh1) {
-         h1 = (TH1F*)oldh1;
-         fNbins[0] = h1->GetXaxis()->GetNbins();  // for proofserv
-      } else {
-         h1 = new TH1F(hname,htitle,fNbins[0],fVmin[0],fVmax[0]);
-//         h1->SetLineColor(GetLineColor());
-//         h1->SetLineWidth(GetLineWidth());
-//         h1->SetLineStyle(GetLineStyle());
-//         h1->SetFillColor(GetFillColor());
-//         h1->SetFillStyle(GetFillStyle());
-//         h1->SetMarkerStyle(GetMarkerStyle());
-//         h1->SetMarkerColor(GetMarkerColor());
-//         h1->SetMarkerSize(GetMarkerSize());
-         if (!hkeep) {
-            h1->SetBit(kCanDelete);
-            h1->SetDirectory(0);
-         }
-         if (opt.Length() && opt[0] == 'e') h1->Sumw2();
-      }
-
-      EntryLoop(exprFileName,action, h1, nentries, firstentry, option);
- 
-//      if (!fDraw && !opt.Contains("goff")) h1->Draw(option);
-        if (!opt.Contains("goff")) h1->Draw(option);
- 
-//*-*- 2-D distribution
-   } else if (dimension == 2) {
-      action = 2;
-      if (!opt.Contains("same") && gPad)  gPad->Clear();
-      if (!oldh1 || !opt.Contains("same")) {
-         fNbins[0] = 40;
-         fNbins[1] = 40;
-         if (opt.Contains("prof")) fNbins[1] = 100;
-         if (opt.Contains("same")) {
-             TH1 *oldhtemp = (TH1*)gPad->GetPrimitive(hdefault);
-             if (oldhtemp) {
-                fNbins[1] = oldhtemp->GetXaxis()->GetNbins();
-                fVmin[1]  = oldhtemp->GetXaxis()->GetXmin();
-                fVmax[1]  = oldhtemp->GetXaxis()->GetXmax();
-                fNbins[0] = oldhtemp->GetYaxis()->GetNbins();
-                fVmin[0]  = oldhtemp->GetYaxis()->GetXmin();
-                fVmax[0]  = oldhtemp->GetYaxis()->GetXmax();
-             } else {
-                fNbins[1] = 40;
-                fVmin[1]  = gPad->GetUxmin();
-                fVmax[1]  = gPad->GetUxmax();
-                fNbins[0] = 40;
-                fVmin[0]  = gPad->GetUymin();
-                fVmax[0]  = gPad->GetUymax();
-             }
-         } else {
-             action = -2;
-         }
-      }
-      if (profile || opt.Contains("prof")) {
-         TProfile *hp;
-         if (oldh1) {
-            action = 4;
-            hp = (TProfile*)oldh1;
-         } else {
-            if (action < 0) action = -4;
-            if (opt.Contains("profs"))
-               hp = new TProfile(hname,htitle,fNbins[1],fVmin[1], fVmax[1],"s");
-            else
-               hp = new TProfile(hname,htitle,fNbins[1],fVmin[1], fVmax[1],"");
-            if (!hkeep) {
-               hp->SetBit(kCanDelete);
-               hp->SetDirectory(0);
-            }
-#if 0
-            hp->SetLineColor(GetLineColor());
-            hp->SetLineWidth(GetLineWidth());
-            hp->SetLineStyle(GetLineStyle());
-            hp->SetFillColor(GetFillColor());
-            hp->SetFillStyle(GetFillStyle());
-            hp->SetMarkerStyle(GetMarkerStyle());
-            hp->SetMarkerColor(GetMarkerColor());
-            hp->SetMarkerSize(GetMarkerSize());
-#endif
-         }
- 
-         EntryLoop(exprFileName,action,hp,nentries, firstentry, option);
- 
-         if (!opt.Contains("goff")) hp->Draw(option);
-      } else {
-         TH2F *h2;
-         if (oldh1) {
-            h2 = (TH2F*)oldh1;
-         } else {
-            h2 = new TH2F(hname,htitle,fNbins[1],fVmin[1], fVmax[1], fNbins[0], fVmin[0], fVmax[0]);
-#if 0
-            h2->SetLineColor(GetLineColor());
-            h2->SetFillColor(GetFillColor());
-            h2->SetFillStyle(GetFillStyle());
-            h2->SetMarkerStyle(GetMarkerStyle());
-            h2->SetMarkerColor(GetMarkerColor());
-            h2->SetMarkerSize(GetMarkerSize());
-#endif
-            if (!hkeep) {
-               const Int_t kNoStats = BIT(9);
-               h2->SetBit(kCanDelete);
-               h2->SetBit(kNoStats);
-               h2->SetDirectory(0);
-            }
-         }
-         Int_t noscat = strlen(option);
-         if (opt.Contains("same")) noscat -= 4;
-         if (noscat) {
-            EntryLoop(exprFileName,action,h2,nentries, firstentry, option);
- //           if (!fDraw && !opt.Contains("goff")) h2->Draw(option);
-            if (!opt.Contains("goff")) h2->Draw(option);
-         } else {
-            action = 12;
-            if (!oldh1 && !opt.Contains("same")) action = -12;
-            EntryLoop(exprFileName,action,h2,nentries, firstentry, option);
-//            if (oldh1 && !fDraw && !opt.Contains("goff")) h2->Draw(option);
-            if (oldh1 && !opt.Contains("goff")) h2->Draw(option);
-         }
-      }
- 
-//*-*- 3-D distribution
-   } else if (dimension == 3) {
-      action = 13;
-      if (!opt.Contains("same")) action = -13;
-      EntryLoop(exprFileName,action,0,nentries, firstentry, option);
- 
-//*-* an Event List
-   } else {
-      action = 5;
-//      Int_t oldEstimate = fEstimate;
-//      SetEstimate(1);
-      EntryLoop(exprFileName,action,elist,nentries, firstentry, option);
-//      SetEstimate(oldEstimate);
-   }
-  if (exprFileName) delete [] exprFileName;
-  if (hkeep) delete [] varexp;
-}
-//______________________________________________________________________________
-static void FindGoodLimits(Int_t nbins, Int_t &newbins, Float_t &xmin, Float_t &xmax)
-{
-//*-*-*-*-*-*-*-*-*Find reasonable bin values*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-//*-*              ==========================
-//*-*  This mathod is a stright copy of void TTree::FindGoodLimits method
-//*-*
-
-   static TGaxis gaxis_tree;
-   Float_t binlow,binhigh,binwidth;
-   Int_t n;
-   Float_t dx = 0.1*(xmax-xmin);
-   Float_t umin = xmin - dx;
-   Float_t umax = xmax + dx;
-   if (umin < 0 && xmin >= 0) umin = 0;
-   if (umax > 0 && xmax <= 0) umax = 0;
- 
-   gaxis_tree.Optimize(umin,umax,nbins,binlow,binhigh,n,binwidth);
- 
-   if (binwidth <= 0 || binwidth > 1.e+39) {
-      xmin = -1;
-      xmax = 1;
-   } else {
-      xmin    = binlow;
-      xmax    = binhigh;
-   }
- 
-   newbins = nbins;
-}
- 
-//______________________________________________________________________________
-Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *obj
-                          ,Int_t nentries, Int_t firstentry, Option_t *option)
-{
- //
- // EntryLoop creates a CINT bytecode to evaluate the given expressions for
- // all table rows in loop and fill the appropriated histograms.
- //
- // Solution for Byte code 
- // From: Masaharu Goto <MXJ02154@nifty.ne.jp>
- // To: <fine@bnl.gov>
- // Cc: <rootdev@hpsalo.cern.ch>
- // Sent: 13-th august 1999 year  23:01
- //
- //  action =  1  Fill 1-D histogram obj
- //         =  2  Fill 2-D histogram obj
- //         =  3  Fill 3-D histogram obj
- //         =  4  Fill Profile histogram obj
- //         =  5  Fill a TEventlist
- //         = 11  Estimate Limits
- //         = 12  Fill 2-D PolyMarker obj
- //         = 13  Fill 3-D PolyMarker obj
- //  action < 0   Evaluate Limits for case abs(action)
- //
- //  Load file
-  Float_t rmin[3],rmax[3];
-  switch(G__loadfile((Char_t *)exprFileName)) {
-  case G__LOADFILE_SUCCESS:
-  case G__LOADFILE_DUPLICATE:
-    break;
-  default:
-    fprintf(stderr,"Error: loading file %s\n",exprFileName);
-    G__unloadfile((Char_t *)exprFileName);
-    return kFALSE; // can not load file
-  }
-
-  // Float_t  Selection(Float_t *results[], void *address[])
-  const Char_t *funcName = "SelectionQWERTY";  
-#define BYTECODE
-#ifdef BYTECODE
-  const Char_t *argtypes = "Float_t *,float **";
-  long offset;
-  G__ClassInfo globals;
-  G__MethodInfo func = globals.GetMethod(funcName,argtypes,&offset);
-
-  // Compile bytecode
-  struct G__bytecodefunc *pbc = func.GetBytecode();
-  if(!pbc) {
-    fprintf(stderr,"Error: Bytecode compilation %s\n",funcName);
-    G__unloadfile((Char_t *)exprFileName);
-    return kFALSE; // can not get bytecode
-  }
-#endif
-  // Prepare callfunc object
-  int i;
-  St_tableDescriptor  *tabsDsc   = GetRowDescriptors();
-  tableDescriptor_st  *descTable = tabsDsc->GetTable();
-  Float_t  results[]    = {1,1,1,1,1};
-  Char_t **addressArray = (Char_t **)new ULong_t[tabsDsc->GetNRows()];
-  Char_t *thisTable     = (Char_t *)GetArray();
-#ifdef BYTECODE
-  G__CallFunc callfunc;
-  callfunc.SetBytecode(pbc);
- 
-  callfunc.SetArg((long)(&results[0]));   // give 'Float_t *results[5]' as 1st argument
-  callfunc.SetArg((long)(addressArray));  // give 'void    *addressArray[]' as 2nd argument
-#else
-  char buf[200];
-  sprintf(buf,"%s((Float_t*)(%ld),(void**)(%ld))",funcName,(long int)results,(long int)addressArray);
-#endif
-  
-  // Call bytecode in loop
-
-#ifdef BYTECODE
-#  define CALLMETHOD callfunc.Exec(0);
-#else
-#  define CALLMETHOD G__calc(buf);
-#endif
-
-#define TAKEACTION_BEGIN                                                                    \
-            descTable = tabsDsc->GetTable();                                                \
-            for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ )                            \
-               addressArray[i] = thisTable + descTable->m_Offset + GetRowSize()*firstentry; \
-            for(i=firstentry;i<lastEntry;i++) {                                             \
-            CALLMETHOD
-
-#define TAKEACTION_END  for (int j=0; j < tabsDsc->GetNRows(); j++ ) addressArray[j] += GetRowSize(); }                                                                     \
-
-
-  if (firstentry < GetNRows() ) {
-    Int_t lastEntry = TMath::Min(UInt_t(firstentry+nentries),UInt_t(GetNRows()));
-      if (action < 0) {
-        fVmin[0] = fVmin[1] = fVmin[2] = 1e30;
-        fVmax[0] = fVmax[1] = fVmax[2] = -fVmin[0];
-      }
-      Int_t nchans = 0;
-      switch ( action ) {
-        case -1: {
-             TAKEACTION_BEGIN
-              if (results[1]) {
-                 if (fVmin[0] > results[0]) fVmin[0] = results[0];
-                 if (fVmax[0] < results[0]) fVmax[0] = results[0];
-              }
-             TAKEACTION_END
- 
-             nchans = fNbins[0];
-             if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
-             FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
-             ((TH1 *)obj)->SetBins(fNbins[0],fVmin[0],fVmax[0]);
-           }
-        case  1:
-            TAKEACTION_BEGIN
-               if (results[1]) ((TH1 *)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
-            TAKEACTION_END
-            gCurrentHist = ((TH1 *)obj);
-            break;
-        case  -2:
-            TAKEACTION_BEGIN
-              if (results[2]) {
-                if (fVmin[0] > results[1]) fVmin[0] = results[1];
-                if (fVmax[0] < results[1]) fVmax[0] = results[1];
-                if (fVmin[1] > results[0]) fVmin[1] = results[0];
-                if (fVmax[1] < results[0]) fVmax[1] = results[0];
-              }
-            TAKEACTION_END
-            nchans = fNbins[0];
-            if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
-            FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
-            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
-            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
-            ((TH1*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1],fNbins[0],fVmin[0],fVmax[0]);
-        case   2:
-              if (obj->IsA() == TH2F::Class()) {
-                 TAKEACTION_BEGIN
-                   if (results[2]) ((TH2F*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
-                 TAKEACTION_END
-              }
-              else if (obj->IsA() == TH2S::Class()) {
-                 TAKEACTION_BEGIN
-                  if (results[2]) ((TH2S*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
-                 TAKEACTION_END
-              }
-              else if (obj->IsA() == TH2C::Class()) {
-                 TAKEACTION_BEGIN
-                   if (results[2]) ((TH2C*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
-                 TAKEACTION_END
-              }
-              else if (obj->IsA() == TH2D::Class()) {
-                 TAKEACTION_BEGIN
-                   if (results[2]) ((TH2D*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
-                 TAKEACTION_END
-              }
-            gCurrentHist =  ((TH1 *)obj);
-            break;
-        case -4:
-            TAKEACTION_BEGIN
-              if (results[2]) {
-                if (fVmin[0] > results[1]) fVmin[0] = results[1];
-                if (fVmax[0] < results[1]) fVmax[0] = results[1];
-                if (fVmin[1] > results[0]) fVmin[1] = results[0];
-                if (fVmax[1] < results[0]) fVmax[1] = results[0];
-              }
-            TAKEACTION_END
-            nchans = fNbins[1];
-            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
-            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
-            ((TProfile*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1]);
-        case  4:
-            TAKEACTION_BEGIN
-               if (results[2]) ((TProfile*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
-            TAKEACTION_END
-            break;
-        case -12:
-            TAKEACTION_BEGIN
-              if (results[2]) {
-                if (fVmin[0] > results[1]) fVmin[0] = results[1];
-                if (fVmax[0] < results[1]) fVmax[0] = results[1];
-                if (fVmin[1] > results[0]) fVmin[1] = results[0];
-                if (fVmax[1] < results[0]) fVmax[1] = results[0];
-              }
-            TAKEACTION_END
-            nchans = fNbins[0];
-            if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
-            FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
-            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
-            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
-            ((TH2F*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1],fNbins[0],fVmin[0],fVmax[0]);
-        case  12: {             
-            if (!strstr(option,"same") && !strstr(option,"goff")) {
-              ((TH2F*)obj)->DrawCopy(option);
-              gPad->Update();
-            }
-            TPolyMarker *pm = new TPolyMarker(lastEntry-firstentry);
-//            pm->SetMarkerStyle(GetMarkerStyle());
-//            pm->SetMarkerColor(GetMarkerColor());
-//            pm->SetMarkerSize(GetMarkerSize());
-            Float_t *x = pm->GetX();
-            Float_t *y = pm->GetY();
-            Float_t u, v;
-            Float_t umin = gPad->GetUxmin();
-            Float_t umax = gPad->GetUxmax();
-            Float_t vmin = gPad->GetUymin();
-            Float_t vmax = gPad->GetUymax();
-            Int_t pointIndex = 0;
-            TAKEACTION_BEGIN
-             if (results[2]) {
-                u = gPad->XtoPad(results[0]);
-                v = gPad->YtoPad(results[1]);
-                if (u < umin) u = umin;
-                if (u > umax) u = umax;
-                if (v < vmin) v = vmin;
-                if (v > vmax) v = vmax;
-                x[pointIndex] = u;
-                y[pointIndex] = v;
-                pointIndex++;
-             }
-            TAKEACTION_END
-            if (!strstr(option,"goff")) pm->Draw();
-            if (!((TH2F*)obj)->TestBit(kCanDelete)) 
-            for(i=firstentry;i<lastEntry;i++) ((TH2F*)obj)->Fill(x[i], y[i]);
-            gCurrentHist = ((TH1*)obj);         
-          }
-          break; 
-        case -13:
-            TAKEACTION_BEGIN
-              if (results[3]) {
-                if (fVmin[0] > results[2]) fVmin[0] = results[2];
-                if (fVmax[0] < results[2]) fVmax[0] = results[2];
-                if (fVmin[1] > results[1]) fVmin[1] = results[1];
-                if (fVmax[1] < results[1]) fVmax[1] = results[1];
-                if (fVmin[2] > results[0]) fVmin[2] = results[0];
-                if (fVmax[2] < results[0]) fVmax[2] = results[0];
-              }
-            TAKEACTION_END
-            rmin[0] = fVmin[2]; rmin[1] = fVmin[1]; rmin[2] = fVmin[0];
-            rmax[0] = fVmax[2]; rmax[1] = fVmax[1]; rmax[2] = fVmax[0];
-            gPad->Clear();
-            gPad->Range(-1,-1,1,1);
-            new TView(rmin,rmax,1);
-        case 13: {
-            TPolyMarker3D *pm3d = new TPolyMarker3D(lastEntry-firstentry);
-//            pm3d->SetMarkerStyle(GetMarkerStyle());
-//            pm3d->SetMarkerColor(GetMarkerColor());
-//            pm3d->SetMarkerSize(GetMarkerSize());
-            Int_t pointIndex = 0;
-            TAKEACTION_BEGIN
-                if (results[3]) {
-                  pm3d->SetPoint(pointIndex,results[0],results[1],results[2]);
-                  pointIndex++;
-                }
-            TAKEACTION_END
-            pm3d->Draw();
-          }  
-            break;
-        default:
-          Error("EntryLoop","unknown action \"%d\" for table <%s>", action, GetName());
-          break;
-      };
-  }
-  G__unloadfile((Char_t *)exprFileName);
-  delete [] addressArray;
-  return kTRUE;
-}
-
 //______________________________________________________________________________
 Int_t St_Table::MakeWrapClass(Text_t *name)
 {
@@ -1209,6 +518,7 @@ void St_Table::Clear(Option_t *opt)
     fN = mx;
     return;}
 }
+
 //______________________________________________________________________________
 void St_Table::Delete(Option_t *opt)
 {
@@ -1271,56 +581,16 @@ Long_t St_Table::GetRowSize() const {
 }
 //______________________________________________________________________________
 Long_t St_Table::GetTableSize() const { 
-// Returns the number of the allocated rows 
+// Returns the number of the aloocated rows 
 return fN;
 }
-//______________________________________________________________________________
-void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *selection,Option_t *option ,Option_t *goption,Int_t nentries, Int_t firstentry)
-{
-//*-*-*-*-*-*-*-*-*Fit a projected item(s) from a St_Table*-*-*-*-*-*-*-*-*-*
-//*-*              =======================================
-//
-//  formula is a TF1 expression.
-//
-//  See St_Table::Draw for explanations of the other parameters.
-//
-//  By default the temporary histogram created is called htemp.
-//  If varexp contains >>hnew , the new histogram created is called hnew
-//  and it is kept in the current directory.
-//  Example:
-//    table.Fit(pol4,"sqrt(x)>>hsqrt","y>0")
-//    will fit sqrt(x) and save the histogram as "hsqrt" in the current
-//    directory.
-//
- 
-   Int_t nch = strlen(option) + 10;
-   char *opt = new char[nch];
-   if (option) sprintf(opt,"%sgoff",option);
-   else        strcpy(opt,"goff");
- 
-   Draw(varexp,selection,opt,nentries,firstentry);
- 
-   delete [] opt;
- 
-   TH1 *hfit = gCurrentHist;
-   if (hfit) {
-      printf("hname=%s, formula=%s, option=%s, goption=%s\n",hfit->GetName(),formula,option,goption);
-      // remove bit temporary 
-      Bool_t canDeleteBit = hfit->TestBit(kCanDelete);
-      if (canDeleteBit)  hfit->ResetBit(kCanDelete);
-      hfit->Fit(formula,option,goption);   
-      if (TestBit(canDeleteBit))   hfit->SetBit(kCanDelete);
-   }
-   else      printf("ERROR hfit=0\n");
-}
-
 //______________________________________________________________________________
 void  *St_Table::GetArray() const {
 //  return the void pointer to the C-structure
  return s_Table; }
 //______________________________________________________________________________
 const Char_t *St_Table::GetType() const { 
-//Returns the type of the wrapped C-structure kept as the TNamed title
+//Returns the type of the wrpped C-structure
   return GetTitle();
 }
 
@@ -1691,31 +961,6 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
   return 0;
  }
 //______________________________________________________________________________
-void St_Table::Project(const Text_t *hname, const Text_t *varexp, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
-{
-//*-*-*-*-*-*-*-*-*Make a projection of a St_Table using selections*-*-*-*-*-*-*
-//*-*              =============================================
-//
-//   Depending on the value of varexp (described in Draw) a 1-D,2-D,etc
-//   projection of the St_Table will be filled in histogram hname.
-//   Note that the dimension of hname must match with the dimension of varexp.
-//
- 
-   Int_t nch = strlen(hname) + strlen(varexp);
-   char *var = new char[nch+5];
-   sprintf(var,"%s>>%s",varexp,hname);
-   nch = strlen(option) + 10;
-   char *opt = new char[nch];
-   if (option) sprintf(opt,"%sgoff",option);
-   else        strcpy(opt,"goff");
- 
-   Draw(var,selection,opt,nentries,firstentry);
- 
-   delete [] var;
-   delete [] opt;
-}
-
-//______________________________________________________________________________
 Int_t St_Table::Purge(Option_t *opt)
 {
   ReAllocate();
@@ -1950,88 +1195,32 @@ int St_Table::PointerToPointer(G__DataMemberInfo &m)
    if (strstr(m.Type()->Name(), "**")) return 1;
    return 0;
 }
+#if 0
 //______________________________________________________________________________
-static Char_t *GetExpressionFileName()
-{ 
-  // Create a name of the file in the temporary directory if any
-  const Char_t *tempDirs =  gSystem->Getenv("TEMP");
-  if (!tempDirs)  tempDirs =  gSystem->Getenv("TMP");
-  if (!tempDirs) tempDirs = "/tmp";
-  if (gSystem->AccessPathName(tempDirs)) tempDirs = ".";
-  if (gSystem->AccessPathName(tempDirs)) return 0;
-  Char_t buffer[16];
-  sprintf(buffer,"C.%d.tmp",gSystem->GetPid());
-  TString fileName = "Selection.";
-  fileName += buffer;
-  return  gSystem->ConcatFileName(tempDirs,fileName.Data());
-}
-
-//______________________________________________________________________________
-Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
+Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
 {
-  // return the name of temporary file with the current expressions
-   const Char_t *typeNames[] = {"NAN","float", "int",  "long",  "short",         "double"
-                                ,"unsigned int","unsigned long", "unsigned short","unsigned char"
-                                ,"char"};
-   const char *resID     = "results";
-   const char *addressID = "address";
-   Char_t *fileName = GetExpressionFileName();
-   if (!fileName) {
-       Error("MakeExpression","Can not create a temoprary file");
-       return 0;
-   }
-
-   ofstream str;
-   str.open(fileName);
-   if (str.bad() ) {
-       Error("MakeExpression","Can not open the temporary file <%s>",fileName);
-       delete [] fileName;
-       return 0;
-   }
-
-   St_tableDescriptor *dsc = GetRowDescriptors();
-   const tableDescriptor_st *descTable  = dsc->GetTable();
+   St_tableDescriptor *dsc = GetRowDescriptor();
+   tableDescriptor_st *descTable  = dsc->GetTable();
+   Int_t size = dsc->GetNRows();
    // Create function
-   str << "void SelectionQWERTY(float *"<<resID<<", float **"<<addressID<<")"   << endl;
-   str << "{"                                                        << endl;
-   int i = 0;
-   for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
-    // Take the column name
-    const Char_t *columnName = descTable->m_ColumnName;
-    const Char_t *type = 0;
-    // First check whether we do need this column
-    for (Int_t exCount = 0; exCount < nExpressions; exCount++) {
-       if (expressions[exCount] && expressions[exCount][0] && strstr(expressions[exCount],columnName)) goto LETSTRY;
-    }
-    continue;
-LETSTRY:
-    Bool_t isScalar = !(descTable->m_Dimensions);
-    Bool_t isFloat = descTable->m_Type == kFloat;
-    type = typeNames[descTable->m_Type];
-                    str << type << " ";
-    if (!isScalar)  str << "*";
-    
-                    str << columnName << " = " ;
-    if (isScalar)   str << "*(";
-    if (!isFloat)   str << "(" << type << "*)";
-                    str << addressID << "[" << i << "]";
-    if (isScalar)   str << ")" ;
-                    str << ";" << endl;
+   cout << "Float_t  Selection(const Char *expresions[],Float *results[], void *address[])" << endl;
+   cout << "{"                                                          << endl;
+   cout << "   void *nextAddress[] = address;"                          << endl;
+   for (int i=0; i < dsc->GetNRows(); i++,descTable++ ) {
+     const Char_t *type = typeNames[descTable->m_Type];
+     cout << type  << " &" << descTable->m_ColumnName << " = *(" << type << "*)nextAddress++" << endl;
    }
    // Create expressions
-   for (i=0; i < nExpressions; i++ ) {
-      if (expressions[i] && expressions[i][0]) 
-                   str << " "<<resID<<"["<<i<<"]=(float)(" << expressions[i] << ");"  << endl;
-//      if (i == nExpressions-1 && i !=0 ) 
-//          str  << "  if ("<<resID<<"["<<i<<"] == 0){ return; }" << endl;
+   for (int i=0; i < nExpressions; i++ ) {
+     cout << "*result["<<i<<"]=" << expressions[i] << ";"  << endl;
+     if (i == 0 ) 
+         cout  << "if (*result[0] == 0) return 0;" << endl;
    };
-   str << "}" << endl;
-   str.close();
+   cout << "return *result[0];}"; << endl;
    // Create byte code and check syntax
-   if (str.good()) return fileName;
-   delete [] fileName; 
-   return 0;
+    return kTRUE;
 }
+#endif 
 //______________________________________________________________________________
 void St_Table::MakeHeader(const Char_t *prefix,const Char_t *tablename,
                          const Char_t *suffix, FILE *fl)
@@ -2411,7 +1600,7 @@ void St_Table::Set(Int_t n, Char_t *array)
 }
  
 //_______________________________________________________________________
-Int_t St_Table::StreamerTable(StBufferAbc &)
+Int_t St_Table::StreamerTable(StBufferAbc &b)
 {
  return 0;
 }
@@ -2519,11 +1708,16 @@ Int_t St_Table::SetfN(Long_t len)
  else                                                         \
     R__b.WriteScalar(*(_NAME2_(type,_t) *)(row+nextCol->m_Offset),nextCol->m_ColumnName);   \
  break
+//______________________________________________________________________________
+Int_t St_Table::StreamerHeader(StBufferAbc &b){ return 0;}
 
 //______________________________________________________________________________
-Int_t St_Table::StreamerHeader(StBufferAbc &){ return 0;}
-//______________________________________________________________________________
-St_tableDescriptor  *St_Table::GetRowDescriptors() const { return 0;}
+#if 0
+TList 
+#else
+St_tableDescriptor 
+#endif
+       *St_Table::GetRowDescriptors() const { return 0;}
 //______________________________________________________________________________
 Int_t St_Table::Streamer(StBufferAbc &R__b)
 {

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.6 1999/09/01 19:04:54 lisa Exp $
+ * $Id: StHbtTrack.hh,v 1.5 1999/07/27 20:21:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
- * Revision 1.6  1999/09/01 19:04:54  lisa
- * update Particle class AND add parity cf and Randys Coulomb correction
- *
  * Revision 1.5  1999/07/27 20:21:10  lisa
  * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
  *
@@ -58,7 +55,7 @@ public:
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
   float Pt() const;
-  StPhysicalHelixD& Helix() const;
+  StPhysicalHelixD& Helix();
 
   void SetCharge(const char&);
   void SetNHits(const unsigned short&);
@@ -124,6 +121,6 @@ inline float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;}
 inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 inline float StHbtTrack::Pt() const {return mPt;}                
-inline StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
+inline StPhysicalHelixD& StHbtTrack::Helix() {return mHelix;}
 
 #endif

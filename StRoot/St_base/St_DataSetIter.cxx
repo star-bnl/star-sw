@@ -1,11 +1,8 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.29 1999/08/28 01:25:17 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.28 1999/05/14 21:28:30 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
-// Revision 1.29  1999/08/28 01:25:17  fine
-// St_DataSetIter::Find now can find itself
-//
 // Revision 1.28  1999/05/14 21:28:30  fine
 // Reset - protection against of the ZERO pointer has been introduced
 //
@@ -255,15 +252,11 @@ St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Opt
   else                      startset = fWorkingDataSet;
   if (!startset) return 0;
 
-  St_DataSet *set = startset;
-  if ( !((opti && strcasecmp(set->GetName(),name) == 0 ) ||
-          (strcmp(set->GetName(),name) == 0)) )  
-  {
-    St_DataSetIter next(startset,0);
-    while ((set = next()))
-       if ( (opti && strcasecmp(set->GetName(),name) == 0 ) ||  
-            (strcmp(set->GetName(),name) == 0) )           break;
-  }
+  St_DataSetIter next(startset,0);
+  St_DataSet *set = 0;
+  while ((set = next()))
+     if ( (opti && strcasecmp(set->GetName(),name) == 0 ) ||  
+          (strcmp(set->GetName(),name) == 0) )           break;
   
   return set;
 }
