@@ -1,5 +1,16 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.6 2000/11/10 18:38:24 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.7 2001/01/25 15:22:10 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.7  2001/01/25 15:22:10  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.6  2000/11/10 18:38:24  oldi
 // Short tracks are treated now.
 //
@@ -57,7 +68,7 @@
 // StFtpcTrackEvaluator class - evaluates found tracks by comparison to the input //
 //                              GEANT clusters and tracks.                        //
 //                                                                                //
-// As input this class gets the pointers to the ClonesArrays of found hits and    //
+// As input this class gets the pointers to the ObjArrays of found hits and    //
 // tracks and the pointers of the input (to the tracker) geant hits and tracks.   //
 // The class should tell then which tracks are found and where are the remaining  //
 // problems.                                                                      //
@@ -223,7 +234,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
 }
 
 
-StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, TClonesArray *hits, TClonesArray *tracks, Char_t *filename, Char_t *write_permission)
+StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, TObjArray *hits, TObjArray *tracks, Char_t *filename, Char_t *write_permission)
 {
   // Usual used constructor if conformal mapping tracker output available.
 
@@ -249,29 +260,25 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 
   mVertex = main_vertex;
 
-  // Copy clusters into ClonesArray.
+  // Copy clusters into ObjArray.
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  mFoundHits = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
+  mFoundHits = new TObjArray(n_clusters);    // create TObjArray
 
-  TClonesArray &hit = *mFoundHits;
-  
   for (Int_t i = 0; i < n_clusters; i++) {
-    new(hit[i]) StFtpcConfMapPoint(point_st++, mVertex);
+    mFoundHits->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
     ((StFtpcPoint *)mFoundHits->At(i))->SetHitNumber(i);
   }
 
-  // Copy tracks into ClonesArray.
+  // Copy tracks into ObjArray.
   Int_t n_tracks = fpt_fptrack->GetNRows();          // number of tracks
   fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
 
-  mFoundTracks = new TClonesArray("StFtpcTrack", n_tracks);    // create TClonesArray
+  mFoundTracks = new TObjArray(n_tracks);    // create TObjArray
 
-  TClonesArray &track = *mFoundTracks;
-  
   for (Int_t i = 0; i < n_tracks; i++) {
-    new(track[i]) StFtpcTrack(track_st++, mFoundHits, i);
+    mFoundTracks->AddAt(new StFtpcTrack(track_st++, mFoundHits, i), i);
   }
 
   mObjArraysCreated = (Bool_t)true;
@@ -285,7 +292,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 StFtpcTrackEvaluator::~StFtpcTrackEvaluator()
 {
   // Destructor.
-  // Deletes ClonesArrays and Histograms.
+  // Deletes ObjArrays and Histograms.
   
   DeleteHistos();
 
@@ -1041,12 +1048,11 @@ void StFtpcTrackEvaluator::GeantHitInit(St_g2t_ftp_hit *g2t_ftp_hit)
     Int_t NumGeantHits = g2t_ftp_hit->GetNRows();       // number of generated clusters
     g2t_ftp_hit_st *point_st = g2t_ftp_hit->GetTable(); // pointer to generated clusters
     
-    mGeantHits = new TClonesArray("StFtpcConfMapPoint", NumGeantHits);    // create TClonesArray
-    TClonesArray &hit = *mGeantHits;
-    
+    mGeantHits = new TObjArray(NumGeantHits);    // create TObjArray
+
     // Loop ovver all generated clusters
     for (Int_t i = 0; i < NumGeantHits; i++, point_st++) { 
-      new(hit[i]) StFtpcConfMapPoint();                              // create StFtpcConfMapPoint
+      mGeantHits->AddAt(new StFtpcConfMapPoint(), i);                              // create StFtpcConfMapPoint
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetHitNumber(i);
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetNextHitNumber(point_st->next_tr_hit_p-1);
       ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetX(point_st->x[0]);
@@ -1066,9 +1072,8 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
     
     Int_t NumGeantTracks = g2t_track->GetNRows();       // number of generated tracks
     g2t_track_st *track_st = g2t_track->GetTable();     // pointer to generated tracks
-    mGeantTracks = new TClonesArray("StFtpcTrack", NumGeantTracks);    // create TClonesArray
-    TClonesArray &track = *mGeantTracks;
-    
+    mGeantTracks = new TObjArray(NumGeantTracks);       // create TObjArray
+
     Int_t NumFtpcGeantTracks = 0;
     Int_t ftpc_hits = 0;
     
@@ -1080,7 +1085,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
       
       if (ftpc_hits) {  // track has hits in Ftpc
 	mGHitsOnTrack->Fill(ftpc_hits);
-	new(track[NumFtpcGeantTracks]) StFtpcTrack(NumFtpcGeantTracks);     // create StFtpcTrack
+	mGeantTracks->AddAt(new StFtpcTrack(NumFtpcGeantTracks), NumFtpcGeantTracks);     // create StFtpcTrack
 	StFtpcTrack *t = (StFtpcTrack*)mGeantTracks->At(NumFtpcGeantTracks);
 	TObjArray *points = t->GetHits();
 
@@ -1162,12 +1167,11 @@ void StFtpcTrackEvaluator::FastSimHitInit(St_ffs_gepoint *ffs_hit)
     
     Int_t NumFastSimHits = ffs_hit->GetNRows();       // number of generated clusters
     ffs_gepoint_st *point_st = ffs_hit->GetTable();   // pointer to fast simulated clusters
-    mFastSimHits = new TClonesArray("StFtpcPoint", NumFastSimHits);    // create TClonesArray
-    TClonesArray &hit = *mFastSimHits;
+    mFastSimHits = new TObjArray(NumFastSimHits);     // create TObjArray
     
     // Loop ovver all generated clusters
     for (Int_t i = 0; i < NumFastSimHits; i++, point_st++) { 
-      new(hit[i]) StFtpcPoint();                              // create StFtpcPoint
+      mFastSimHits->AddAt(new StFtpcPoint(), i);                              // create StFtpcPoint
       ((StFtpcPoint *)mFastSimHits->At(i))->SetHitNumber(i);
       ((StFtpcPoint *)mFastSimHits->At(i))->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
     }
@@ -1744,7 +1748,7 @@ void StFtpcTrackEvaluator::FillParentHistos(Int_t t_counter)
 }
 
 
-void StFtpcTrackEvaluator::FillHitsOnTrack(TClonesArray *trackarray, Char_t c)
+void StFtpcTrackEvaluator::FillHitsOnTrack(TObjArray *trackarray, Char_t c)
 {
   // Fills histogram with the number of points on tracks.
   // If c is set to 'g' it fills the 'geant histo', otherwise the 'found histo'.

@@ -1,5 +1,16 @@
-// $Id: StFtpcConfMapper.hh,v 1.7 2000/11/10 18:37:02 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.8 2001/01/25 15:21:45 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.8  2001/01/25 15:21:45  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.7  2000/11/10 18:37:02  oldi
 // New functions introduced to be able to extend tracks after main vertex tracking.
 // This implied many changes in other parts of the class (loop over clusters can run backwards now).
@@ -71,7 +82,6 @@ private:
 
   // Volume segemnts
   TObjArray *mVolume;             // array of volume (pad, phi, eta) elements
-  TObjArray *mSegment;            // array of StFtpcConfMapPoints (all hits of/in one mVolume cell)
 
   // Number of cells (segments)
   Int_t  mNumRowSegment;  // this is (and has to be at most) the number of padrows
@@ -157,7 +167,7 @@ public:
 			     Bool_t bench = (Bool_t)false,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
-            StFtpcConfMapper(TClonesArray *hits, 
+            StFtpcConfMapper(TObjArray *hits, 
 			     StFtpcVertex *vertex = NULL, 
 			     Bool_t bench = (Bool_t)false, 
 			     Int_t phi_segments = 100, 
@@ -242,7 +252,7 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
 			       const StFtpcConfMapPoint *newhit, Bool_t backward = (Bool_t)true);                // returns true if phi and eta cut holds
               void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);                // loops over tracks and looks for split tracks
               void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                          // merges two tracks
-              void  AdjustTrackNumbers();                                                                        // renews tracknumbers
+              void  AdjustTrackNumbers(Int_t first_split = 0);                                                                        // renews tracknumbers
 
   // Start tracking
   void MainVertexTracking(); // tracking of main vertex tracks (vertex constraint on)
@@ -285,8 +295,9 @@ inline void StFtpcConfMapper::RemoveTrack(StFtpcTrack *track)
   // Removes track from ObjArry and takes care that the points are released again.
 
   track->SetProperties(false, -1); // release points
-  mTrack->Remove(track);           // actual removement
-  
+  mTrack->Remove(track);           // actual removement of TObjArray
+  delete track;                    // delete track
+
   return;
 }
 
@@ -462,7 +473,7 @@ inline Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapPo
 }
 
 
-inline void StFtpcConfMapper::AdjustTrackNumbers()
+inline void StFtpcConfMapper::AdjustTrackNumbers(Int_t first_split)
 {
   // After split tracks are merged the size of the ObjArry holding the tracks needs to be changed.
   // Afterwards the tracknumbers need to be changed to be the number of the slot of the array again.
@@ -470,7 +481,7 @@ inline void StFtpcConfMapper::AdjustTrackNumbers()
   mTrack->Compress();
   mTrack->Expand(mTrack->GetLast()+1);
   
-  for (Int_t i = 0; i < mTrack->GetEntriesFast(); ((StFtpcTrack*)mTrack->At(i))->SetTrackNumber(i), i++);
+  for (Int_t i = first_split; i < mTrack->GetEntriesFast(); ((StFtpcTrack*)mTrack->At(i))->SetTrackNumber(i), i++);
 
   return;
 }

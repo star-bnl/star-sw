@@ -1,5 +1,16 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.13 2000/11/10 18:38:50 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.14 2001/01/25 15:22:25 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.14  2001/01/25 15:22:25  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.13  2000/11/10 18:38:50  oldi
 // Cleanup due to changes in other classes.
 //
@@ -87,11 +98,11 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TProfile.h"
-#include "TClonesArray.h"
 #include "TCanvas.h"
 #include "TFile.h"
 
 #include "StMessMgr.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -142,7 +153,6 @@ Int_t StFtpcTrackMaker::Make()
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
 
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
-  St_fpt_fptrack *fpt_fptrack = NULL;
   
   if (!ftpc_data) {
     return kStWarn;
@@ -281,11 +291,7 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->FreeTracking();
   //tracker->LaserTracking();
 
-  if (fpt_fptrack) {
-    delete fpt_fptrack;
-  }
-
-  fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
+  St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
   m_DataSet->Add(fpt_fptrack);
 
   // momentum fit, dE/dx calculation, write tracks to tables
@@ -300,7 +306,6 @@ Int_t StFtpcTrackMaker::Make()
   else {
     tracker->TrackingInfo();
   }
-
     
   /*
   // Track Display
@@ -382,7 +387,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.13 2000/11/10 18:38:50 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.14 2001/01/25 15:22:25 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -1,5 +1,16 @@
-// $Id: StFtpcVertex.hh,v 1.5 2000/11/10 18:39:25 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.6 2001/01/25 15:22:43 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.6  2001/01/25 15:22:43  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.5  2000/11/10 18:39:25  oldi
 // Changes due to replacement of StThreeVector by TVector3.
 // New constructor added to find the main vertex with given point array.
@@ -37,7 +48,7 @@
 #define STAR_StFtpcVertex
 
 #include "TObject.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "TVector3.h"
 #include "St_DataSet.h"
 
@@ -54,7 +65,7 @@ public:
 
   StFtpcVertex();                                                 // default constructor
   StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints);   // constructor from points        
-  StFtpcVertex(TClonesArray *hits);                               // constructor from point array   
+  StFtpcVertex(TObjArray *hits);                                  // constructor from point array   
   StFtpcVertex(St_DataSet *const geant);                          // constructor from geant
   StFtpcVertex(Double_t pos[3]);                                  // constructor from array of doubles
   StFtpcVertex(Double_t x, Double_t y, Double_t z);               // constructor from doubles

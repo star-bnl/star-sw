@@ -1,5 +1,16 @@
-// $Id: StFtpcTrack.hh,v 1.7 2000/11/10 18:38:02 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.8 2001/01/25 15:22:02 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.8  2001/01/25 15:22:02  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.7  2000/11/10 18:38:02  oldi
 // Changes due to replacement of StThreeVector by TVector3.
 // Points can be added to a track on either end now.
@@ -45,7 +56,6 @@
 
 #include "TObject.h"
 #include "TObjArray.h"
-#include "TClonesArray.h"
 #include "TVector3.h"
 
 #include "MIntArray.h"
@@ -98,7 +108,7 @@ public:
   
               StFtpcTrack();                                                       // constructor
               StFtpcTrack(Int_t tracknumber);                                      // constructor which fills tracknumber (all other members are set to default values)
-              StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits = 0, 
+              StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits = 0, 
 			  Int_t tracknumber = 0);                                  // constructor if STAF track is given
     virtual  ~StFtpcTrack();                                                       // destructor
 
