@@ -1,8 +1,8 @@
-// $Id: StFtpcParamReader.hh,v 1.5 2000/11/03 14:20:42 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.6 2000/11/06 13:42:57 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
-// Revision 1.5  2000/11/03 14:20:42  hummler
-// add new members needed for the drift map generator
+// Revision 1.6  2000/11/06 13:42:57  hummler
+// include latest changes in second constructor as well
 //
 // Revision 1.3  2000/10/31 09:52:19  hummler
 // add parameters for slow simulator
@@ -19,7 +19,6 @@
 
 #ifndef STAR_StFtpcParamReader
 #define STAR_StFtpcParamReader
-
 
 #include <sys/types.h>
 #include "TObject.h"

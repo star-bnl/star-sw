@@ -1,8 +1,8 @@
-// $Id: StFtpcParamReader.cc,v 1.5 2000/11/03 14:20:42 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.6 2000/11/06 13:42:57 hummler Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
-// Revision 1.5  2000/11/03 14:20:42  hummler
-// add new members needed for the drift map generator
+// Revision 1.6  2000/11/06 13:42:57  hummler
+// include latest changes in second constructor as well
 //
 // Revision 1.3  2000/10/31 09:52:13  hummler
 // add parameters for slow simulator
@@ -264,6 +264,14 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   m3PadWeightedError = detTable->pad_err_3mean;
   m3PadGaussError = detTable->pad_err_3gauss;
   mZDirectionError = detTable->z_err;
+  mMinimumDriftField = detTable->start_field;
+  mStepSizeDriftField = detTable->step_field;
+  mDvdpCalcOffset = detTable->dvdp_off;
+  mBaseTemperature = detTable->temperature;
+  mPercentAr = detTable->percent_ar;
+  mPercentCO2 = detTable->percent_co2;
+  mPercentNe = detTable->percent_ne;
+  mPercentHe = detTable->percent_he;
 
   //  just copy zrow table start to pointer
   mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
