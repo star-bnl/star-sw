@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.55 2001/11/09 21:14:33 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.56 2001/11/10 01:09:05 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -113,13 +113,13 @@ Int_t StFlowAnalysisMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  const float etaMin          =  -4.5;
-  const float etaMax          =   4.5;
+  //const float etaMin          =  -4.5;
+  //const float etaMax          =   4.5;
   const float triggerMin      =    0.;
   const float triggerMax      =   10.;
-  const float ptMin           =    0.;
+  //const float ptMin           =    0.;
   //const float ptMax           =    2.;
-  const float ptMax           =    8.;
+  //const float ptMax           =    8.;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
@@ -347,35 +347,37 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // EtaPtPhi
   mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
-      Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMax, nPhi3DBins,
-      phiMin, phiMax);
+      Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin, 
+			     Flow::ptMax, nPhi3DBins, phiMin, phiMax);
   mHistEtaPtPhi3D->SetXTitle("Eta");
   mHistEtaPtPhi3D->SetYTitle("Pt (GeV)");
   mHistEtaPtPhi3D->SetZTitle("Phi (rad)");
     
   // Yield for all particles
   mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
-    Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMax);
+    Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin, 
+			     Flow::ptMax);
   mHistYieldAll2D->Sumw2();
   mHistYieldAll2D->SetXTitle("Pseudorapidty");
   mHistYieldAll2D->SetYTitle("Pt (GeV)");
 
   // Yield for particles correlated with the event plane
   mHistYieldPart2D = new TH2D("Flow_YieldPart2D", "Flow_YieldPart2D",
-    Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMaxPart);
+    Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin, 
+			      ptMaxPart);
   mHistYieldPart2D->Sumw2();
   mHistYieldPart2D->SetXTitle((char*)xLabel.Data());
   mHistYieldPart2D->SetYTitle("Pt (GeV)");
 
   // Mean Eta in each bin
   mHistBinEta = new TProfile("Flow_Bin_Eta", "Flow_Bin_Eta",
-    Flow::nEtaBins, etaMin, etaMax, etaMin, etaMax, "");
+    Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::etaMin, Flow::etaMax, "");
   mHistBinEta->SetXTitle((char*)xLabel.Data());
   mHistBinEta->SetYTitle("<Eta>");
   
   // Mean Pt in each bin
   mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
-    Flow::nPtBins, ptMin, ptMaxPart, ptMin, ptMaxPart, "");
+    Flow::nPtBins, Flow::ptMin, ptMaxPart, Flow::ptMin, ptMaxPart, "");
   mHistBinPt->SetXTitle("Pt (GeV)");
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
@@ -894,8 +896,8 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax,
-			   Flow::nPtBins, ptMin, ptMax);
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax,
+			   Flow::nPtBins, Flow::ptMin, Flow::ptMax);
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
       histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
@@ -907,8 +909,8 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, 
-		 ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, 
+		 Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -919,7 +921,8 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax, -100., 100., "");
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, 
+							      -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
@@ -929,7 +932,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), Flow::nPtBins, ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), Flow::nPtBins, Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -938,7 +941,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.55 2001/11/09 21:14:33 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.56 2001/11/10 01:09:05 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1643,6 +1646,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.56  2001/11/10 01:09:05  posk
+// Moved some constants into StFlowConstants.
+//
 // Revision 1.55  2001/11/09 21:14:33  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //
