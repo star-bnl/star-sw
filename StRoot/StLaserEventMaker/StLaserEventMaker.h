@@ -1,13 +1,7 @@
-// $Id: StLaserEventMaker.h,v 1.11 2001/12/18 21:50:37 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.12 2001/12/23 20:08:04 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
-// Revision 1.11  2001/12/18 21:50:37  pfachini
-// Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
-//
-// Revision 1.9  2001/12/14 17:30:16  pfachini
-// Adding two histograms to the laserhist.*.*.root file
-//
-// Revision 1.8  2001/12/12 19:39:24  pfachini
-// Changes to automate the drift velocity calculation
+// Revision 1.12  2001/12/23 20:08:04  pfachini
+// *** empty log message ***
 //
 // Revision 1.7  2001/11/28 17:54:21  love
 // Default ExB flags to FALSE
@@ -74,11 +68,11 @@ private:
   Bool_t   mHistOut;
   Int_t m_runno;          //Run number to put on events (derive from filename)
   Int_t m_date;           //date to put in event header
-  Int_t m_time;           //date to put in event header
+  Int_t m_time;           //time to put in event header
   Float_t m_tzero;        // record tzero etc. in the event header
   Float_t m_drivel;
   Float_t m_clock;
-  Float_t m_trigger;      //additional time added to tZero for trigger delay
+  Float_t m_trigger;//additional time added to tZero for trigger delay
   Int_t m_rowmin ; Int_t m_rowmax ;  //Range for the pixel branch.
   Bool_t m_mklaser;   	          //control flag for laser tree production
   Bool_t m_undoExB;        // control flag for applying ExB hit corrections
@@ -89,16 +83,14 @@ private:
   St_tcl_tpc_index_type *m_type;   	  //! Table of many-to-many index 
 	                                  //! correlations for tpc evaluations
   St_tpt_pars           *m_tpt_pars;  	  //! Parameters for the track finding
-  StMagUtilities        *m_mag;           //!JT's ExB code
+  StMagUtilities            *m_mag;                 //!JT's ExB code
   int    date;
   int    time;
 
   void         MakeHistograms();// Histograms for tracking
-
 protected:
  TTree                *m_laser; //! Laser track-hit event Tree
  StLaserEvent              *event;  //! Laser Event object 
-
 public: 
   StLaserEventMaker(const char *name="tpc_stracks");
   virtual       ~StLaserEventMaker();
@@ -114,6 +106,7 @@ public:
                       Float_t *xl, Float_t *yl, Float_t *zl, Float_t *phi); 
   virtual void   SetRun(Int_t run) {m_runno = run;} 
   virtual void   SetDate(Int_t date) {m_date = date;} 
+  virtual void   SetTime(Int_t time) {m_time = time;} 
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}
   virtual void   Set_laser(Bool_t m=kTRUE){m_mklaser = m;}
   virtual void   Set_lasers(Bool_t m=kTRUE){m_lasers = m;}
@@ -135,7 +128,7 @@ public:
   double driftVelocityReco;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.11 2001/12/18 21:50:37 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.12 2001/12/23 20:08:04 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,8 +1,8 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
-//Revision 1.9  2001/12/18 21:48:27  pfachini
-//Adding date and time stamp to Bill's tree
+//Revision 1.10  2001/12/23 20:07:09  pfachini
+//*** empty log message ***
 //
 //Revision 1.7  2001/07/17 17:12:44  love
 // Added phi variable to laser track object
@@ -46,7 +46,7 @@
 //        TClonesArray  *fHits;
 //        TClonesArray  *fPixels;
 //
-//   The EventHeader class has 3 integer and 4 float data members:
+//   The EventHeader class has 4 integer and 4 float data members:
 //     public:
 //        Int_t          fEvtNum;
 //        Int_t          fRun;

@@ -1,16 +1,7 @@
-// $Id: StLaserEventMaker.cxx,v 1.18 2001/12/20 23:39:55 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.19 2001/12/23 20:08:04 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.18  2001/12/20 23:39:55  pfachini
-// Increasing the number of tracks for a good laser event
-//
-// Revision 1.17  2001/12/18 21:50:37  pfachini
-// Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
-//
-// Revision 1.14  2001/12/14 17:30:16  pfachini
-// Adding two histograms to the laserhist.*.*.root file
-//
-// Revision 1.10  2001/11/28 19:14:47  jeromel
-// Fixed default values for Laser calibration.
+// Revision 1.19  2001/12/23 20:08:04  pfachini
+// *** empty log message ***
 //
 // Revision 1.9  2001/07/17 17:17:57  love
 // phi variable added to lasertrack def
@@ -85,8 +76,8 @@ ClassImp(StLaserEventMaker)
   mHistOut=kTRUE;
   m_mklaser=kTRUE;
   m_lasers =kTRUE;
-  m_rowmin = 1;
-  m_rowmax = 1;
+  m_rowmin=14;
+  m_rowmax=45;
 }
 //_____________________________________________________________________________
 StLaserEventMaker::~StLaserEventMaker(){}
@@ -218,7 +209,7 @@ Int_t StLaserEventMaker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void StLaserEventMaker::MakeHistograms() {
+  void StLaserEventMaker::MakeHistograms() {
     // reset static clones arrays
    // go get event number from the event data
    Int_t evno = 0;
@@ -233,12 +224,12 @@ void StLaserEventMaker::MakeHistograms() {
       Float_t m_tzero = gStTpcDb->Electronics()->tZero();
       Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
       Float_t m_trigger = gStTpcDb->triggerTimeOffset();
-      m_date = date;
-      m_time = time;
+      m_date = GetDate();
+      m_time = GetTime();
        //   m_tzero = 1.0; m_clock = 1.0;
 
      // Fill the event header.
-      event->SetHeader(evno, m_runno, m_date, m_time,
+     event->SetHeader(evno, m_runno, m_date, m_time,
                   m_tzero, m_drivel, m_clock, m_trigger);
      cout << "Event "<< evno << " Run " << m_runno << endl;
      cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
@@ -320,11 +311,11 @@ void StLaserEventMaker::MakeHistograms() {
          ngtk++;
 	 Float_t phi = t->psi;
 	 Float_t tlam = t->tanl;
-	 event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
-			 t->ndedx, t->nfit, t->nrec, t->npos, t->q,
-			 t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
-			 phi, tlam, t->phi0, t->r0, t->z0, sector[itrk],xl[itrk],
-			 yl[itrk],zl[itrk], phil[itrk] );
+        event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
+         t->ndedx, t->nfit, t->nrec, t->npos, t->q,
+         t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
+         phi, tlam, t->phi0, t->r0, t->z0, sector[itrk],xl[itrk],
+         yl[itrk],zl[itrk], phil[itrk] );
 	 Float_t fzl = zl[itrk];
 	 Float_t nfits = t->nfit;
 	 if (fzl > 165 && fzl < 190 && nfits > 15) fzlWestHigh->Fill(fzl);
@@ -687,7 +678,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.18 2001/12/20 23:39:55 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.19 2001/12/23 20:08:04 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -735,3 +726,4 @@ double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMea
 double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestHigh(){double mean = fzlWestHigh->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestLow(){double mean = fzlWestLow->GetMean();return mean;};
+
