@@ -234,7 +234,7 @@ Int_t StEventQAMaker::Make() {
     for (int i=0; i<nEvClasses; i++) {
       eventClass = evClasses[i];
       makeStat = StQAMakerBase::Make();
-      if ((eventClass) && (histsSet != StQA_MC))
+      if ((eventClass) && (histsSet != StQA_MC) && (hists))
         hists->mNullPrimVtxClass->Fill(vertExists);
       if (makeStat != kStOk) break;
     }
@@ -2003,8 +2003,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.45 2003/02/28 06:17:55 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.46 2003/02/28 16:01:07 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.46  2003/02/28 16:01:07  genevb
+// Further improvements for previous check-in
+//
 // Revision 2.45  2003/02/28 06:17:55  genevb
 // Allow StQAMakerBase::Make to be called for all events
 //
