@@ -1,0 +1,7 @@
+struct jdata1
+{
+  long id; // Id if the entry
+  float x[3]; // (cm) Y,Y,Z
+};
+
+ 
