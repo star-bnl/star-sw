@@ -1,6 +1,6 @@
 /***************************************************************************
- *
- * $Id: StDbManager.cc,v 1.12 2000/01/10 20:37:54 porter Exp $
+ *   
+ * $Id: StDbManager.cc,v 1.13 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.13  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.12  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -594,8 +598,10 @@ StDbManager::getDbType(const char* typeName){
     }
   }
 
-if(!ifound)addDbType(retType,typeName); //This'll overwrite User db definition
-
+if(!ifound){
+  if(misVerbose)cout << "Adding dbUser Type "<<typeName<<endl;
+  addDbType(retType,typeName); //This'll overwrite User db definition
+}
 return retType;
 }     
 
@@ -606,12 +612,17 @@ StDbDomain
 StDbManager::getDbDomain(const char* domainName){
 
 StDbDomain retType=dbDomainUnknown;
+  if(misVerbose)cout << "Finding dbDomain for domainName= "<<domainName<<endl;
   for(dbDomains::iterator itr=mDomains.begin();
       itr != mDomains.end(); ++itr){
     if(strcmp((*itr)->name,domainName) ==0){
       retType = (*itr)->domain;
       break;
     }
+  }
+
+  if(retType==dbDomainUnknown && misVerbose){
+    cout << "No Domain found "<<domainName<<endl;
   }
 
 return retType;

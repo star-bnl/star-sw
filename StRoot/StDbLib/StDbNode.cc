@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.1 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbNode.cc,v 1.2 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.2  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.1  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -27,6 +31,8 @@
    
 StDbNode::StDbNode(StDbNodeInfo* node) {
 
+mnode.mstrCpy(mnode.name,node->name);
+mnode.mstrCpy(mnode.versionKey,node->versionKey);
 mnode.setNodeInfo(node);
 misConfigured = true;
 misNode = true;
@@ -45,6 +51,8 @@ misNode = false;
 
 StDbNode::StDbNode(StDbNode& node){
 
+mnode.name = node.getName();
+mnode.versionKey = node.getVersion();
 node.getNodeInfo(&mnode);
 misConfigured = node.IsConfigured();
 misNode = node.IsNode();
@@ -70,10 +78,10 @@ char*
 StDbNode::getName() { return mnode.mstrDup((const char*)mnode.name); };
 
 char*
-StDbNode::getVersion()  { return mnode.mstrDup((const char*)mnode.versionKey); }
+StDbNode::getVersion()  {  return mnode.mstrDup((const char*)mnode.versionKey); }
 
 char*
-StDbNode::getDbName()  { return mnode.mstrDup((const char*)mnode.dbName); }
+StDbNode::getDbName()  {return mnode.mstrDup((const char*)mnode.dbName); }
 
 char*
 StDbNode::getElementID()  { return mnode.mstrDup((const char*)mnode.elementID); }

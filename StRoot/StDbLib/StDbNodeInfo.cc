@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.cc,v 1.1 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbNodeInfo.cc,v 1.2 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.cc,v $
+ * Revision 1.2  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.1  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -32,14 +36,14 @@ StDbNodeInfo::StDbNodeInfo(): name(0), versionKey(0), nodeType(0), structName(0)
 
 
 StDbNodeInfo::StDbNodeInfo(StDbNodeInfo& node){
+name=mstrDup(node.name);
+versionKey=mstrDup(node.versionKey);
 copyInfo(&node);
 }
 
 void
 StDbNodeInfo::copyInfo(StDbNodeInfo* node){
 
- name=mstrDup(node->name);
- versionKey=mstrDup(node->versionKey);
  nodeType=mstrDup(node->nodeType);
  structName=mstrDup(node->structName);
  elementID=mstrDup(node->elementID);
@@ -68,14 +72,15 @@ void
 StDbNodeInfo::deletePointers(){
 
  deleteInfoPointers();
- if(name)       delete [] name;
- if(versionKey) delete [] versionKey;
+ if(dbName)     {delete [] dbName; dbName=0;}
+ if(name)       {delete [] name; name=0;}
+ if(versionKey) {delete [] versionKey; versionKey = 0;}
 
 }
 
 void
 StDbNodeInfo::setNodeInfo(StDbNodeInfo* node){
- deletePointers();
+ deleteInfoPointers();
  copyInfo(node);
 }
 
@@ -88,6 +93,7 @@ if(!s2){
   cerr << "Attempting to copy null pointer " << endl;  
   return s1;
 }
+ if(!strstr(s2,"\0")) cout << "Dup ERROR ************" <<endl;
 s1 = new char[strlen(s2)+1];
 strcpy(s1,s2);
 // cout << "duplicated "<<s2 << " into " << s1 << endl;
@@ -100,6 +106,8 @@ StDbNodeInfo::mstrCpy(char*& s1, const char* s2) {
 
   if(s2){ 
     if(s1) delete [] s1;
+    if(!strstr(s2,"\0")) cout << "COPY ERROR ************" <<endl;
+
     s1 = new char[strlen(s2)+1];
     strcpy(s1,s2);
     //  cout << " copied over " << s1 << " from " << s2 << endl;
@@ -112,10 +120,9 @@ StDbNodeInfo::mstrCpy(char*& s1, const char* s2) {
 void
 StDbNodeInfo::deleteInfoPointers() {
 
- if(nodeType)   delete [] nodeType;
- if(structName) delete [] structName;
- if(elementID)  delete [] elementID;
- if(dbName)     delete [] dbName;
+ if(nodeType)  { delete [] nodeType; nodeType = 0;}
+ if(structName){ delete [] structName; structName = 0;}
+ if(elementID) { delete [] elementID;  elementID = 0;}
 
 }
 
@@ -154,7 +161,7 @@ id2 = strstr(tmpName,"-");
 char islist[2048];
 ostrstream sl(islist,2048);
 
-if(id2 && id && id2<id){
+if(id2 && ( (id && id2<id) || !id)){
   id=id2;
   id[0]=',';
   sl<<"r";
@@ -213,7 +220,6 @@ while(id){
  delete [] tmpElements;
  delete [] tmpName; 
 
- cout << " number of rows found = " << numRows << endl;
 
 return retVal;
 }
