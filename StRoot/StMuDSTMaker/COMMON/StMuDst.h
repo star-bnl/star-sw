@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.6 2002/05/20 17:23:31 laue Exp $
+ * $Id: StMuDst.h,v 1.7 2002/08/20 19:55:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -44,52 +44,98 @@ class StPhysicalHelixD;
 
 #define DO(TYPE,NAME) ARRAY(NAME)    OBJECT(TYPE,NAME)
 
+
+/** 
+    @class StMuDst
+    Top class of the 'dataformat'. This class exists only in memory and is not written/read to/from disk.
+    However, this class is used to hold the pointers to all the TClonesArrays that have been read from disk.
+    The class is used to navigate within a 'physics' event (to access tracks, detector info, etc).  
+    
+*/
 class StMuDst : public TObject {
 public:
+  /// constructor
   StMuDst();
+  /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
+  /// set the pointers to the TClonesArrays
   void set(TClonesArray**, TClonesArray**);
+  /// resets the pointers to the TClonesArrays to 0
   void unset();
+  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding gloabl track)
   void fixTrackIndices();
+  /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
+  /// helper function to create a StTrackGeometry
   StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
+  /// creates a StTrack from an StMuTrack and return pointer to it
   StTrack* createStTrack(StMuTrack*);
 
  private:
+  /// array of TClonesArrays
   static TClonesArray* arrays[__NARRAYS__];
+  /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
   static TClonesArray* strangeArrays[__NSTRANGEARRAYS__];
 
 public:
+  /// returns pointer to the n-th TClonesArray 
   static TClonesArray* StMuDst::array(int type) { return arrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the strangeness arrays
   static TClonesArray* StMuDst::strangeArray(int type) { return strangeArrays[type]; }
 
+  /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
+  /// returns pointer to the global tracks list
   static TClonesArray* globalTracks() { return arrays[muGlobal]; }
+  /// returns pointer to the other tracks list (all tracks that are not flagged as primary of global)
   static TClonesArray* otherTracks() { return arrays[muOther]; }
+  /// returns pointer to the l3Tracks list
   static TClonesArray* l3Tracks() { return arrays[muL3]; }
+  /// returns pointer to the list of rich spectra
   static TClonesArray* richSpectra() { return arrays[muRich]; }
+  /// returns pointer to the list of detector states
   static TClonesArray* detectorStates() { return arrays[muState]; }
+  /// returns pointer to list of accepted l3 algorithms 
   static TClonesArray* l3AlgoAccept() { return arrays[muAccept]; }
+  /// returns pointer to list rejected l3 algorithms 
   static TClonesArray* l3AlgoReject() { return arrays[muReject]; }
 
+  /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() { return (StMuEvent*)arrays[muEvent]->UncheckedAt(0); }
+  /// return pointer to i-th primary track 
   static StMuTrack* primaryTracks(int i) { return (StMuTrack*)arrays[muPrimary]->UncheckedAt(i); }
+  /// return pointer to i-th global track 
   static StMuTrack* globalTracks(int i) { return (StMuTrack*)arrays[muGlobal]->UncheckedAt(i); }
+  /// return pointer to i-th other track  (track that is not flagged as primary of global)
   static StMuTrack* otherTracks(int i) { return (StMuTrack*)arrays[muOther]->UncheckedAt(i); }
+  /// return pointer to i-th l3 track
   static StMuTrack* l3Tracks(int i) { return (StMuTrack*)arrays[muL3]->UncheckedAt(i); }
+  /// returns pointer to i-th StRichSpectra
   static StRichSpectra* richSpectra(int i) { return (StRichSpectra*)arrays[muRich]->UncheckedAt(i); }
+  /// returns pointer to i-th StDetectorState
   static StDetectorState* detectorStates(int i) { return (StDetectorState*)arrays[muState]->UncheckedAt(i); }
+  /// returns pointer to i-th accepted StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoAccept(int i) { return (StL3AlgorithmInfo*)arrays[muAccept]->UncheckedAt(i); }
+  /// returns pointer to i-th rejected StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
 
+  /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
   static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
+  /// returns pointer to the v0 list
   static TClonesArray* v0s() { return strangeArrays[smuV0]; }
-  static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
+  /// returns pointer to the xi list
   static TClonesArray* xis() { return strangeArrays[smuXi]; }
-  static StXiMuDst* xis(int i) { return (StXiMuDst*)strangeArrays[smuXi]->UncheckedAt(i); }
+  /// returns pointer to the kink list
   static TClonesArray* kinks() { return strangeArrays[smuKink]; }
-  static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)strangeArrays[smuKink]->UncheckedAt(i); }
+  /// returns pointer to the list of strangeCuts
   static TClonesArray* strangeCuts() { return strangeArrays[smuCut]; }
+  /// returns pointer to the i-th v0
+  static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
+  /// returns pointer to the i-th xi
+  static StXiMuDst* xis(int i) { return (StXiMuDst*)strangeArrays[smuXi]->UncheckedAt(i); }
+  /// returns pointer to the i-th kink
+  static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)strangeArrays[smuKink]->UncheckedAt(i); }
+  /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
     ClassDef(StMuDst,1)
@@ -100,6 +146,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.7  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.6  2002/05/20 17:23:31  laue
  * StStrangeCuts added
  *

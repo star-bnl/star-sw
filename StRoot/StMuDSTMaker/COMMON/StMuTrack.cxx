@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.2 2002/08/20 19:55:49 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -104,6 +104,11 @@ StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const St
   return track->geometry()->helix().momentumAt(pathlength,event->runInfo()->magneticField()*kilogauss);
 }
 
+StPhysicalHelixD StMuTrack::helix() const {return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
+StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
+
+double StMuTrack::length() const { 
+  return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mLastPoint)) ); }
 
 
 ClassImp(StMuTrack)
@@ -112,6 +117,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.2  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *

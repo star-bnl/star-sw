@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.7 2002/06/18 19:21:00 laue Exp $
+ * $Id: StMuDst.cxx,v 1.8 2002/08/20 19:55:48 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,8 +56,8 @@ void StMuDst::set(StMuDstMaker* maker) {
   }
 
   StStrangeEvMuDst* ev = strangeEvent();
-  int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev);
-  int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev);
+  int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
+  int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
   //  int nKinks = kinks()->GetEntries(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
 
 }
@@ -76,7 +76,7 @@ void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDst:: fixTrackIndices() {
+void StMuDst::fixTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
   /// a track from the TClonesArrayx
@@ -86,7 +86,7 @@ void StMuDst:: fixTrackIndices() {
   StTimer timer;
   timer.start();
 
-  /// fill an array with the indices to the global tracks as function of trackId
+  // fill an array with the indices to the global tracks as function of trackId
   static int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) globalIndex[i]=-1;   // there must be an better way
   int nGlobals = arrays[muGlobal]->GetEntries();
@@ -94,7 +94,7 @@ void StMuDst:: fixTrackIndices() {
     globalIndex[ globalTracks(i)->id() ] = i;
     globalTracks(i)->setIndex2Global(i);
   }
-  /// set the indices for the primary tracks
+  // set the indices for the primary tracks
   DEBUGVALUE2(arrays[muPrimary]->GetEntries());
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
@@ -215,6 +215,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.8  2002/08/20 19:55:48  laue
+ * Doxygen comments added
+ *
  * Revision 1.7  2002/06/18 19:21:00  laue
  * cout statement taken out
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.15 2002/05/20 18:57:18 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.16 2002/08/20 19:55:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -64,6 +64,12 @@ ClassImp(StMuDstMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   The default constructor as it is right now was written in order to run the StMuDstMaker during reconstruction in the bfc.
+   Since Jerome doesn't want to pass the PID table that is needed for muDst production as an argument to the bfc, this default constructor
+   sets a specific PID table. This table has to be updated when changing to a new production version.
+   Also, the standard track and l3 track filters are set.
+ */
 StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
@@ -82,11 +88,11 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   createArrays();
   
   setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
-  DEBUGMESSAGE("ATTENTION: pid table hardwired to /afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+  FORCEDDEBUGMESSAGE("ATTENTION: pid table hardwired to /afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
   StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
-  DEBUGMESSAGE("ATTENTION: use standard MuFilter");
-  DEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
+  FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
+  FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
 
 
 }
@@ -121,6 +127,9 @@ StMuDstMaker::~StMuDstMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/** Switch of the TObject part of some streamers, so that only the datamenbers of the derived classes are written to disk, but not the data 
+    members of the base class TObject
+*/ 
 void  StMuDstMaker::streamerOff() {
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
   StV0MuDst::Class()->IgnoreTObjectStreamer();
@@ -183,6 +192,11 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray* p, const char* type, int s
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   The Init() routine is used to establish contact to other makers. As it is STAR habit (but really really bad coding) we identify the 
+   other makers by names (instead of passing pointers). Here, the names are hard-wired because they have to be identical to the names 
+   the bfc is assining to the makers. Do not alter these names unless you know what you are doing.
+*/
 int StMuDstMaker::Init(){
   DEBUGMESSAGE2("");
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
@@ -201,6 +215,11 @@ void StMuDstMaker::Clear(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or write the next event. After the Make() function has finished,
+   a call to muDst() will return a pointer to an object od type StMuDst. This object will hold the current event if the io was successful, 
+   or return a null pointer.
+*/
 int StMuDstMaker::Make(){
   DEBUGMESSAGE2("");
   StTimer timer;
@@ -741,6 +760,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.16  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.15  2002/05/20 18:57:18  laue
  * update for Christof
  *
