@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.32 2004/05/03 23:29:28 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.33 2004/06/05 23:38:22 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.33  2004/06/05 23:38:22  fisyak
+ * Add more chairs for TPC Db parameters
+ *
  * Revision 1.32  2004/05/03 23:29:28  perev
  * WarnOff
  *
@@ -107,13 +110,10 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
+#include "tables/St_MagFactor_Table.h"
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
-#ifndef gufld
-#define gufld gufld_
-extern "C" void gufld(float *,float *);
-#endif
 ClassImp(StTpcDbMaker)
 
 //
@@ -176,7 +176,7 @@ int type_of_call tpc_global_to_local_p_(int *isect,float *xglobal, float* xlocal
 }
 int type_of_call tpc_local_to_global_(int *isect,const float *xlocal, float* xglobal){
   StGlobalCoordinate global;
-  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
+  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect,0);
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(localSector,global); 
   xglobal[0] = global.position().x(); 
@@ -187,7 +187,7 @@ int type_of_call tpc_local_to_global_(int *isect,const float *xlocal, float* xgl
 int type_of_call tpc_localsector_to_local_(int *isect,const float *xlocal, float* xtpc){
   //translates from sector 12 coordinates to TPC local coordinates
   StTpcLocalCoordinate tpc;
-  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
+  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect,0);
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(localSector,tpc); 
   xtpc[0] = tpc.position().x(); 
@@ -263,7 +263,6 @@ int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,floa
 	 zoff = gStTpcDb->Dimensions()->zOuterOffset(); 
        }
        *z = zztop - zoff;
-
 //    StTpcPadCoordinate pad(*sector,*row,*padin,*time);
 //    StTpcLocalSectorCoordinate localSector;
 //    StTpcCoordinateTransform transform(gStTpcDb);
@@ -413,11 +412,10 @@ Int_t StTpcDbMaker::Init(){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
     if (m_TpcDb) return 0;
-    float x[3] = {0,0,0};
-    float b[3];
-    gufld(x,b);
-    float gFactor = b[2]/4.980;
-    cout << "Magnetic Field = " << b[2] << endl;
+    TDataSet *RunLog = GetDataBase("RunLog");                              assert(RunLog);
+    St_MagFactor *fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
+    Float_t gFactor = (*fMagFactor)[0].ScaleFactor;
+    cout << "Magnetic Field gFactor = " << gFactor << endl;
     if (fabs(gFactor)>0.8){
       gMessMgr->Info() << "StTpcDbMaker::Using full field TPC hit errors" << endm;
       SetFlavor("FullMagF","tpcHitErrors");
