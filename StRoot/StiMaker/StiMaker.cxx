@@ -375,11 +375,9 @@ Int_t StiMaker::InitRun(int run)
 Int_t StiMaker::Make()
 {
     cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
-    //cout <<"\n--- HitFilter ---\n";
-    //mFilter->print();
     
     StEvent* rEvent = 0;
-    rEvent = (StEvent*) GetInputDS("StEvent");
+    rEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
     
     if (StiIOBroker::instance()->simulated() && !mMcEventMaker) {
 	cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
@@ -447,6 +445,8 @@ void StiMaker::printStatistics() const
 void StiMaker::finishEvent()
 {
     cout <<"StiMaker::finishEvent()"<<endl;
+    cout <<mevent->numberOfPrimaryVertices()<<endl;
+    
     StTimer clock;
     clock.start();
     double n=0.;
@@ -461,13 +461,16 @@ void StiMaker::finishEvent()
 	}
 	clock.stop();
 	cout <<"Time to find "<<n<<" tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-	cout <<"Merge Tracks"<<endl;
 	clock.reset();
-	//clock.start();
-	//mTrackMerger->mergeTracks();
-	//clock.stop();
-	//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-
+	
+	/*
+	  cout <<"Merge Tracks"<<endl;
+	  clock.start();
+	  mTrackMerger->mergeTracks();
+	  clock.stop();
+	  cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+	*/
+	
 	//Write into StEvent
 	cout <<"Fill StEvent:\t"<<endl;
 	clock.reset();
