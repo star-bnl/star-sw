@@ -4,7 +4,7 @@ MACRO run_srs
 
    ami/mod/call srs_am _
         [data]/svt/hits/srs_result _
-        [geant]/Event/g2t_svt_hit _
+        [geant_Event]/g2t_svt_hit _
         [data]/svt/hits/scs_spt _
         [geometry]/svt/geom _
         [geometry]/svt/config _
