@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.28 2001/08/15 17:12:18 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.29 2001/08/22 15:16:30 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.29  2001/08/22 15:16:30  ward
+// Changed the laser flag from x9001 to x9009.
+//
 // Revision 1.28  2001/08/15 17:12:18  ward
 // m_Mode third bit means pass pulser events.
 //
@@ -256,7 +259,7 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   GraceSlick=(MarilynMonroe_t*)ptr;
   Int_t Iret = SanityCheck();
   if (Iret !=  kStOK) return Iret;
-  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) isLaser=7;
+  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9009) isLaser=7;
   if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
   if(GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd==0xf101) isPulser=7;
   if((m_Mode&1)&&isPhysics) thisEventOk=7;
