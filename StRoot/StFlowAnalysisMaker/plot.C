@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.35 2001/11/13 22:47:35 posk Exp $
+// $Id: plot.C,v 1.36 2001/12/11 22:04:13 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -94,9 +94,18 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_PidElectronPart",
     "Flow_PidPositronPart",
     "Flow_PidMult",
-    "Flow_Phi_Sel",                      // first multi graph hist
-    "Flow_Phi_Flat_Sel",
-    "Flow_Phi_Weight_Sel",
+    "Flow_Phi_FarEast_Sel",                      // first multi graph hist
+    "Flow_Phi_Flat_FarEast_Sel",
+    "Flow_Phi_Weight_FarEast_Sel",
+    "Flow_Phi_East_Sel",
+    "Flow_Phi_Flat_East_Sel",
+    "Flow_Phi_Weight_East_Sel",
+    "Flow_Phi_West_Sel",
+    "Flow_Phi_Flat_West_Sel",
+    "Flow_Phi_Weight_West_Sel",
+    "Flow_Phi_FarWest_Sel",
+    "Flow_Phi_Flat_FarWest_Sel",
+    "Flow_Phi_Weight_FarWest_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
     "Flow_Phi_Weight_FtpcEast_Sel",
@@ -107,6 +116,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
+    "Flow_EtaPhi2D_Sel",
+    "Flow_EtaPhi.Eta_Sel",
+    "Flow_EtaPhi.Phi_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
     "Flow_Psi_Sub_Corr_Sel",
@@ -378,6 +390,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gPad->SetLogy();
 	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
+      } else if (strstr(shortName[pageNumber],".Phi")!=0) { // 2D Phi projection
+	if (singleGraph) {
+	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999); 
+	} else {
+	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999, "E");
+	}
+	projY->SetName(histProjName->Data());
+	projY->SetXTitle("azimuthal angle (rad");
+	projY->SetYTitle("Counts");
+	gStyle->SetOptStat(0);
+	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
@@ -471,7 +494,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	lineZeroY->Draw();
       } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
  	if (strstr(shortName[pageNumber],"_v")!=0 ) {
-	  hist->SetMaximum(15.);
+	  hist->SetMaximum(25.);
 	  hist->SetMinimum(-5.);
 	}
 	gStyle->SetOptStat(100110);
@@ -528,7 +551,7 @@ TCanvas* plotResolution(){
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
-  TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+  TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
   graphPad->Draw();
   graphPad->cd();
@@ -600,6 +623,11 @@ static Double_t qDist(double* q, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.36  2001/12/11 22:04:13  posk
+// Four sets of phiWgt histograms.
+// StFlowMaker StFlowEvent::PhiWeight() changes.
+// Cumulant histogram names changed.
+//
 // Revision 1.35  2001/11/13 22:47:35  posk
 // Documentation updated. Fit to q function moved to macro.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.9 2001/11/09 21:15:11 posk Exp $
+// $Id: plotCen.C,v 1.10 2001/12/11 22:04:17 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -98,9 +98,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
     "Flow_Mul_Sel",
-    "Flow_Phi_Sel",
-    "Flow_Phi_Flat_Sel",
-    "Flow_Phi_Weight_Sel",
+    "Flow_Phi_East_Sel",
+    "Flow_Phi_Flat_East_Sel",
+    "Flow_Phi_Weight_East_Sel",
+    "Flow_Phi_West_Sel",
+    "Flow_Phi_Flat_West_Sel",
+    "Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
     "Flow_Phi_Weight_FtpcEast_Sel",
@@ -497,6 +500,11 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.10  2001/12/11 22:04:17  posk
+// Four sets of phiWgt histograms.
+// StFlowMaker StFlowEvent::PhiWeight() changes.
+// Cumulant histogram names changed.
+//
 // Revision 1.9  2001/11/09 21:15:11  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //
