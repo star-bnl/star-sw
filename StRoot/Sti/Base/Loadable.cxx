@@ -38,7 +38,7 @@ void Loadable::load(const string & userFileName, StMaker & source)
 void Loadable::loadM(StMaker & source)
 {
   cout << "Loadable::loadM(StMaker & source) -I- Start loading db parameters" << endl;
-  TDataSet * ds = source.GetDataSet("Calibrations/tracker");
+  TDataSet * ds = source.GetDataBase("Calibrations/tracker");
   if (!ds) throw runtime_error("Loadable::load(StMaker & source) -W- ds==0");
   loadDS(*ds);
   cout << "Loadable::loadM(StMaker & source) -I- Done" << endl;
