@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.11 2003/04/23 18:11:31 balewski Exp $
+ * $Id: EEmcGeomSimple.h,v 1.12 2003/04/25 15:53:54 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.12  2003/04/25 15:53:54  zolnie
+ * always initalize
+ *
  * Revision 1.11  2003/04/23 18:11:31  balewski
  * 'continous' eta & phi bins added
  *
@@ -42,7 +45,7 @@
 
 class  EEmcGeomSimple : public TObject { 
 public:
-  enum Chiral_t { CounterClockwise=-1, Clockwise=1};
+  enum Chiral_t { CounterClockwise=-1, Clockwise=1, Undefined=0};
 
   EEmcGeomSimple();
   virtual ~EEmcGeomSimple();

@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.10 2003/04/23 18:11:19 balewski Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.11 2003/04/25 15:53:52 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.11  2003/04/25 15:53:52  zolnie
+// always initalize
+//
 // Revision 1.10  2003/04/23 18:11:19  balewski
 // 'continous' eta & phi bins added
 //
@@ -21,6 +24,7 @@
 // Revision 1.1  2003/01/16 19:33:50  zolnie
 // added a simple Geom class to conver a track hit -> tower hit
 //
+#include <iostream.h>
 #include <math.h>
 
 #include "TVector3.h"
@@ -46,6 +50,18 @@ ClassImp(EEmcGeomSimple)
 
 EEmcGeomSimple::EEmcGeomSimple() 
 {
+  // always initialize
+  mEtaBin  = NULL;
+  mNumSec  = 0; 
+  mNumSSec = 0; 
+  mNumEta  = 0; 
+
+  mZ1     =  0.0; 
+  mZ2     =  0.0; 
+  mZSMD   =  0.0; 
+  mPhi0   =  0.0; 
+  mClock  =  Undefined; 
+
   useDefaultGeometry();
 }
 
@@ -106,8 +122,8 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
   int ietaBin=(int)(xetaBin+0.5);
   int iphiBin=(int)(xphiBin+0.5);
 
-  int isec=iphiBin/5;
-  int isub=iphiBin%5;
+  int isec=iphiBin/kEEmcNumSubSectors;
+  int isub=iphiBin%kEEmcNumSubSectors;
 
   // note the higher etaBin the smaller eta,
   //      the larger sec/sub the smaller phi-angle
