@@ -5,8 +5,6 @@
 #include <math.h>
 
 #include "StSvtEnergySim.hh"
-#define RAND_MAX 32767
-
     
 StSvtEnergySim::StSvtEnergySim()
 {
