@@ -49,7 +49,7 @@ c: From CERN Program Library Long Writeup I102 pg. 176
       DIMENSION IQ(1),Q(1),LQ(8000)
       EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN)
 C     COMMON /QUEST/ IQUEST(100)
-      COMMON /QUEST/ IQUEST(256)
+*VP   COMMON /QUEST/ IQUEST(256)
 
 c: Variables for STAF_STATUS and STAF_RESULT vectors.
 
