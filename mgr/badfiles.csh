@@ -1,5 +1,8 @@
 #
+#uncomment for total test
+#set x = ( `find $1 -name '*.root' ` )
 
-foreach FIL ( $1/*.root )
-$STAR/mgr/lsFile.csh $FIL | grep Error
+set x = ( $1/*.root )
+foreach FIL ( $x )
+$STAR/mgr/lsFile.csh $FIL |& grep Error
 end
