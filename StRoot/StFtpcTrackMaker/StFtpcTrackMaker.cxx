@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.43 2003/01/20 13:11:56 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.44 2003/02/21 01:14:03 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.44  2003/02/21 01:14:03  oldi
+// Unnecessary call of database "Geometry/tpc" removed.
+//
 // Revision 1.43  2003/01/20 13:11:56  oldi
 // Floats converted to ints to avoid warnings on linux machines.
 //
@@ -286,18 +289,6 @@ Int_t StFtpcTrackMaker::Init()
 
   St_DataSetIter ftpcGeometry(ftpcGeometryDb);
 
-  // get tpc geometry
-  St_DataSet *tpcGeometryDb = GetDataBase("Geometry/tpc");
-
-  if (!tpcGeometryDb){
-    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting TPC database: Geometry" << endm;
-    assert(tpcGeometryDb);
-
-    return kStWarn;
-  }
-
-  St_DataSetIter tpcGeometry(tpcGeometryDb);
- 
   // get tracking parameters from database
   StFtpcTrackingParams::Instance(Debug(),
   				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
@@ -665,7 +656,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.43 2003/01/20 13:11:56 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.44 2003/02/21 01:14:03 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
