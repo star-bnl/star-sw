@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.34 2004/09/03 20:36:23 perev Exp $
+// $Id: StFtpcTracker.cc,v 1.35 2005/02/05 01:04:38 perev Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.35  2005/02/05 01:04:38  perev
+// test for 1/0
+//
 // Revision 1.34  2004/09/03 20:36:23  perev
 // Big LeakOff + mem optimisation
 //
@@ -829,7 +832,8 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
       py = track->GetPy();
       pz = track->GetPz();
       pp = track->GetP();
-       
+      if (pp<1.e-3) continue;
+             
       // fill the array after correcting the track length
       for (icluster = 0, ihit = 0; icluster < track->GetNumberOfPoints(); icluster++) {
 	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
@@ -917,7 +921,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 	py  = track->GetPy();
 	pz  = track->GetPz();
 	pp  = track->GetP();
-      
+        if (pp <1.e-3) continue;
 	average_dedx += track->GetdEdx();
       
 	for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
@@ -957,7 +961,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 	}
       }
     
-      average_dedx /= TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack());
+      if (average_dedx) average_dedx /= TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack());
     
       Sorter(weighted, index_arr, GetNumberOfClusters());
     
@@ -988,7 +992,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 	  py  = track->GetPy();
 	  pz  = track->GetPz();
 	  pp  = track->GetP();
-	
+	  if (pp <1.E-3) continue;
 	  hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	  hit_p = hit->GetHitNumber();
 	
