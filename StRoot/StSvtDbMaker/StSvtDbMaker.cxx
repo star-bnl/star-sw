@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.7 2002/05/06 00:42:51 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.8 2003/01/28 20:19:57 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.8  2003/01/28 20:19:57  munhoz
+ * including InitRun()
+ *
  * Revision 1.7  2002/05/06 00:42:51  munhoz
  * adding bad anode list reading
  *
@@ -52,6 +55,11 @@
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 
 StSvtDbMaker* gStSvtDbMaker=NULL; 
+St_ObjectSet *svtSetConfig;
+St_ObjectSet *svtSetDrift;
+St_ObjectSet *svtSetPed;
+St_ObjectSet *svtSetGeom;
+St_ObjectSet *svtSetBad;
 
 //C and fortran routines
 
@@ -138,12 +146,26 @@ Int_t StSvtDbMaker::Init()
   //setSvtDbReader();
   //setSvtDbWriter();
 
+  setSvtConfig();
   readSvtConfig();
+  setSvtGeometry();
+  setSvtDriftVelocity();
+  setSvtBadAnodes();
+
+  return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDbMaker::InitRun(int runumber)
+{
+  if (Debug()) gMessMgr->Debug() << "StSvtDbMaker::InitRun" << endm;
+  cout << "StSvtDbMaker::InitRun" << endl;
+
   readSvtGeometry();
   readSvtDriftVelocity();
   readSvtBadAnodes();
 
-  return StMaker::Init();
+  return kStOk;
 }
 
 //_____________________________________________________________________________
@@ -206,63 +228,83 @@ void StSvtDbMaker::setSvtDbWriter(Text_t *timestamp)
 }
 
 //_____________________________________________________________________________
+void StSvtDbMaker::setSvtConfig()
+{    
+  svtSetConfig = new St_ObjectSet("StSvtConfig");
+  AddConst(svtSetConfig);  
+}
+
+//_____________________________________________________________________________
 void StSvtDbMaker::readSvtConfig()
 {    
-  St_ObjectSet *svtSet = new St_ObjectSet("StSvtConfig");
-  AddConst(svtSet);  
-
   if (mReader)
-    svtSet->SetObject((TObject*)mReader->getConfiguration());
+    svtSetConfig->SetObject((TObject*)mReader->getConfiguration());
   else if (m_Reader)
-    svtSet->SetObject((TObject*)m_Reader->getConfiguration());
+    svtSetConfig->SetObject((TObject*)m_Reader->getConfiguration());
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtDriftVelocity()
+{
+  svtSetDrift = new St_ObjectSet("StSvtDriftVelocity");
+  AddConst(svtSetDrift);  
 }
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtDriftVelocity()
 {
-  St_ObjectSet *svtSet = new St_ObjectSet("StSvtDriftVelocity");
-  AddConst(svtSet);  
-    
   if (mReader)
-    svtSet->SetObject((TObject*)mReader->getDriftVelocity());
+    svtSetDrift->SetObject((TObject*)mReader->getDriftVelocity());
   else if (m_Reader)
-    svtSet->SetObject((TObject*)m_Reader->getDriftVelocity());  
+    svtSetDrift->SetObject((TObject*)m_Reader->getDriftVelocity());  
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtPedestals()
+{
+  svtSetPed = new St_ObjectSet("StSvtPedestal");
+  AddConst(svtSetPed);  
 }
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtPedestals()
 {
-  St_ObjectSet *svtSet = new St_ObjectSet("StSvtPedestal");
-  AddConst(svtSet);  
-    
   if (mReader)
-    svtSet->SetObject((TObject*)mReader->getPedestals());
+    svtSetPed->SetObject((TObject*)mReader->getPedestals());
   else if (m_Reader)
-    svtSet->SetObject((TObject*)m_Reader->getPedestals());
+    svtSetPed->SetObject((TObject*)m_Reader->getPedestals());
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtGeometry()
+{
+  svtSetGeom = new St_ObjectSet("StSvtGeometry");
+  AddConst(svtSetGeom);  
 }
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtGeometry()
 {
-  St_ObjectSet *svtSet = new St_ObjectSet("StSvtGeometry");
-  AddConst(svtSet);  
-    
   if (mReader)
-    svtSet->SetObject((TObject*)mReader->getGeometry());
+    svtSetGeom->SetObject((TObject*)mReader->getGeometry());
   else if (m_Reader)
-    svtSet->SetObject((TObject*)m_Reader->getGeometry());
+    svtSetGeom->SetObject((TObject*)m_Reader->getGeometry());
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtBadAnodes()
+{
+  svtSetBad = new St_ObjectSet("StSvtBadAnodes");
+  AddConst(svtSetBad);  
 }
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtBadAnodes()
 {
-  St_ObjectSet *svtSet = new St_ObjectSet("StSvtBadAnodes");
-  AddConst(svtSet);  
-    
   if (mReader)
-    svtSet->SetObject((TObject*)mReader->getBadAnodes());
+    svtSetBad->SetObject((TObject*)mReader->getBadAnodes());
   else if (m_Reader)
-    svtSet->SetObject((TObject*)m_Reader->getBadAnodes());
+    svtSetBad->SetObject((TObject*)m_Reader->getBadAnodes());
 }
 
 //_____________________________________________________________________________

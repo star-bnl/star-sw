@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.3 2002/02/20 17:10:10 caines Exp $
+ * $Id: StSvtDbMaker.h,v 1.4 2003/01/28 20:20:10 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.4  2003/01/28 20:20:10  munhoz
+ * including InitRun()
+ *
  * Revision 1.3  2002/02/20 17:10:10  caines
  * Added fortran2c code from StDbUtilities so library depedancies removed
  *
@@ -63,6 +66,7 @@ class StSvtDbMaker : public StMaker {
   StSvtDbMaker(const char *name="SvtDb");
   virtual       ~StSvtDbMaker();
   virtual Int_t  Init();
+  virtual Int_t  InitRun(int runumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   Clear(const char *opt);
@@ -75,10 +79,15 @@ class StSvtDbMaker : public StMaker {
   void setSvtDbWriter(Text_t *timestamp);
   void setSvtDbWriter(int unixTime);
 
+  void setSvtConfig();
   void readSvtConfig();
+  void setSvtDriftVelocity();
   void readSvtDriftVelocity();
+  void setSvtPedestals();
   void readSvtPedestals();
+  void setSvtGeometry();
   void readSvtGeometry();
+  void setSvtBadAnodes();
   void readSvtBadAnodes();
 
   void writeSvtDriftVelocity(StSvtHybridCollection* driftVeloc=0);
