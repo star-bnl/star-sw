@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.25  1999/05/01 03:39:52  ward
+// raw_row col PadModBreak set per row instead of per half-sector
+//
 // Revision 1.24  1999/04/28 19:46:12  ward
 // QA histograms.
 //
@@ -293,10 +296,11 @@ int St_tpcdaq_Maker::Output() {
   int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int prevStartTimeBin,rowR,padR,seqR;  // row counters
   int iseqSave,pixTblWhere,seqLen,timeOff,numPadsWithSignal,pixOffset;
-  int seqOffset,timeWhere,nPixelThisPadRow;
+  int seqOffset,timeWhere;
   int nPixelThisPad,nSeqThisPadRow,offsetIntoPadTable;
   int nPixelPreviousPadRow;
-  int pixSave,pixR,offIntoPixTbl,pixTblOff; // unsigned long
+  int pixSave,pixR;
+  unsigned long int nPixelThisPadRow;
   StSequence *listOfSequences;
   St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
 
@@ -320,12 +324,12 @@ int St_tpcdaq_Maker::Output() {
     if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
     raw_seq_gen=raw_seq_out; pixel_data_gen=pixel_data_out; seqR=0; pixR=0;
-    pixTblOff=0; nPixelPreviousPadRow=0;
+    nPixelPreviousPadRow=0;
     for(ipadrow=NROW-1;ipadrow>=0;ipadrow--) {
       if(ipadrow==12) { // switch to the inner part of this sector
         raw_row_gen=raw_row_in; raw_pad_gen=raw_pad_in; rowR=0; padR=0;
         raw_seq_gen=raw_seq_in; pixel_data_gen=pixel_data_in; seqR=0; 
-        pixR=0; pixTblOff=0; nPixelPreviousPadRow=0;
+        pixR=0; nPixelPreviousPadRow=0;
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
@@ -341,7 +345,7 @@ int St_tpcdaq_Maker::Output() {
           numPadsWithSignal++; 
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
         } else continue; // So we don't write meaningless rows in pad table.
-        timeOff=0; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
+        timeOff=0; timeWhere=0; prevStartTimeBin=-123;
 #ifdef HISTOGRAMS
         m_pad_numSeq->Fill((Float_t)nseq);
 #endif
@@ -372,7 +376,7 @@ int St_tpcdaq_Maker::Output() {
           }
           seqR++;
         } // seq loop
-        if(offIntoPixTbl<0x10000) pixTblWhere++; else pixTblOff=0x10000;
+        if(nPixelPreviousPadRow<0x10000) pixTblWhere++;
         PadWrite(raw_pad_gen,padR++,pixOffset,seqOffset,nseq,timeWhere,pad);
         seqOffset+=nseq; pixOffset+=nPixelThisPad;
       } // pad loop, don't confuse padR (table row #) with ipad (loop index)
@@ -418,7 +422,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Doris Day. St_tpcdaq_Maker::Make().\n");
+  printf("I am Marilyn Monroe. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -439,7 +443,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.24 1999/04/28 19:46:12 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.25 1999/05/01 03:39:52 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
