@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.8 1999/02/04 19:22:23 fine Exp $
+// $Id: St_Node.h,v 1.9 1999/04/05 03:18:26 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.9  1999/04/05 03:18:26  fine
+// St_Node family steps
+//
 // Revision 1.8  1999/02/04 19:22:23  fine
 // Severak drawing method have been added to draw STAR nodes
 //
@@ -91,6 +94,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
         virtual ULong_t     Hash() { return TObject::Hash();}
         virtual void        ImportShapeAttributes();
+        virtual Bool_t      IsMarked();
         virtual Bool_t      Is3D()  {return kTRUE;}
         virtual TList      *Nodes() const { return GetList(); }
         virtual void        Paint(Option_t *option="");
@@ -100,5 +104,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
  
         ClassDef(St_Node,1)  //Description of parameters to position a 3-D geometry object
 };
+
+inline Bool_t St_Node::IsMarked(){ return TestBit(kMark); }
  
 #endif

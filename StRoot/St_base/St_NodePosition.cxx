@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.12 1999/04/02 23:36:04 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.13 1999/04/05 03:18:27 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.13  1999/04/05 03:18:27  fine
+// St_Node family steps
+//
 // Revision 1.12  1999/04/02 23:36:04  fine
 // Collapsed geometry structures has been implemeted
 //
@@ -382,6 +385,23 @@ void St_NodePosition::Print(Option_t *option)
   }
 }
  
+//______________________________________________________________________________
+St_NodePosition *St_NodePosition::Reset(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix)
+{
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Reset this position *-*-*-*-*-*-*-*-*-*-*
+//*-*                           ===================
+//*-*    x,y,z   are the offsets of the volume with respect to his mother
+//*-*    matrix  is the pointer to the rotation matrix
+//*-*
+//*-*    This method is to re-use the mempry this object without delete/creae steps
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
+   fNode = node;
+   SetPosition(x,y,z);
+   SetMatrix(matrix);
+   if (!fMatrix) fMatrix = St_Node::GetIdentity();
+   return this;
+}
+
 //_______________________________________________________________________
 void St_NodePosition::SavePrimitive(ofstream &out, Option_t *option)
 {
