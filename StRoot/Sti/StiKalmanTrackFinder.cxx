@@ -210,6 +210,7 @@ void StiKalmanTrackFinder::doTrackFind()
 		    findTrack(track);
 		    //trackMes << " StiKalmanTrackFinder::doTrackFind() - Track Parameters" << endl << *track;
 		    trackContainer->push_back(track);
+		    
 		    track->update();  //This updates the track on the display
 		    trackDone = false;  // ready for a new track
 		}
@@ -333,7 +334,8 @@ void StiKalmanTrackFinder::initSearch(StiKalmanTrackNode * node)
     sNode = node; // source node
     tNode  = 0;    // target node
     leadDet = 0;
-    trackDone = false;
+    trackDone = false;		    
+    
     scanningDone = true;
     sDet  = sNode->getHit()->detector();
     if (sDet==0) 

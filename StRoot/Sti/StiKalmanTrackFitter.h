@@ -13,8 +13,8 @@ public:
     //_c-tor/d-tor__________________________________________________
     StiKalmanTrackFitter();
     virtual ~StiKalmanTrackFitter()
-      {}
-
+    {}
+    
     //_action method
     virtual void fit(StiTrack * track); //throw (Exception);
     
@@ -22,13 +22,13 @@ public:
     virtual void fitOutward(StiKalmanTrackNode * node); //throw (Exception) ;
     
     //_set/get_ methods
-
+    
     virtual void setFitMethod(StiFitMethod fitMethod);
     virtual StiFitMethod getFitMethod() const;
-
+    
     
 protected:
-
+    
     StiFitMethod fitMethod;
 };
 

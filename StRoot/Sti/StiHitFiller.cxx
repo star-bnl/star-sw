@@ -109,6 +109,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store,
 		stihit->setDetector( layer );
 		
 		//Now Fill the Hit Container!
+		//Check the hit (temp)
 		store->push_back( stihit );
 		++nhit;
 		if (fmod(nhit, nprint)==0.) {
