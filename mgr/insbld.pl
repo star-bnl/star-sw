@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/opt/star/bin/perl -w
 
 # Written by J.Lauret on Tue Mar 27 2001
 # This script takes care of Insure++ compilation and output 
@@ -7,6 +7,10 @@
 # Note : This script is also menat to be usable by users so NO default
 #        file names with location in specific area should be hardcoded.
 #        use options to overwrite default instead.
+# 
+# History :
+#   Creation of an empty file if insure does not report any problems.
+#   This will lead to an empty HTML file formatting instead of abort.
 #
 use lib "/afs/rhic/star/packages/DEV/mgr";
 use InsUtils;
@@ -22,7 +26,8 @@ use InsUtils;
 $FILOUT="insure.txt";
 
 # At the end, an HTML file will be produced. This is its name
-$FLNM="InsureComp.html";
+#$FLNM="InsureComp.html";
+$FLNM="/afs/rhic/star/doc/www/comp/prod/Sanity/InsureComp.html";
 
 # To format in HTML, this script will be used. Expected arguments are
 # RawInputFile OutputFile
@@ -64,6 +69,7 @@ for($i=0 ; $i <= $#ARGV ; $i++){
 	    $COMPIL=1==1;
 	} elsif ($arg eq "-h" || $arg eq "--help"){
 	    &lhelp();
+	    exit;
 	} elsif ($arg eq "-s"){
 	    $SILENT=1==1;
 	} else {
@@ -75,7 +81,6 @@ for($i=0 ; $i <= $#ARGV ; $i++){
     }
 }
 
-exit;
 
 # No more variables needed. From now on, we will assume that the user is in
 # the proper directory and we will NOT assume any platform. We will assume
@@ -234,16 +239,17 @@ if($COMPIL){
     if($rc != 0){
 	print " * Failure. Returned status is $rc\n";
     } else {
-	if( -e "$dir/$FILOUT"){
-	    print " - Formatting now ...\n";
-	    system("$FRMTPRGM $dir/$FILOUT $dir/$FLNM");
-	    if( -e "$dir/$FLNM"){
-		print " - All done. $dir/$FLNM is ready\n";
-	    } else {
-		print " * Problem : Preceeding action did not create $FLNM\n";
-	    }
+	if( ! -e "$dir/$FILOUT"){
+	    # create a dummy file
+	    open(FO,">$FILOUT") || die "Could not create empty file\n";
+	    close(FO);
+	}
+	print " - Formatting now ...\n";
+	system("$FRMTPRGM $dir/$FILOUT $dir/$FLNM");
+	if( -e "$dir/$FLNM"){
+	    print " - All done. $dir/$FLNM is ready\n";
 	} else {
-	    print " * Problem : Preceeding action did not create $FILOUT\n";
+	    print " * Problem : Preceeding action did not create $FLNM\n";
 	}
     }
 } else {
@@ -260,8 +266,8 @@ sub lhelp
  Usage is : $0 [options...]
  Where options is one of
   -x ABC      exclude ABC from list. Default = $excl
-  -i xxx      use include file xxx. Default is $FILOUT
-  -o xxx      output result to xxx. Default is $FLNM
+  -i xxx      insure output file xxx. Default is $FILOUT
+  -o xxx      HTML output result to xxx. Default is $FLNM
   -c          compile. Currently = $COMPIL
   -s          silent mode (do not ask for confirmation)
               Currently = $SILENT 
