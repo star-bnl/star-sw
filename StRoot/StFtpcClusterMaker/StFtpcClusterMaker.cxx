@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.30 2001/11/21 12:44:44 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.31 2001/12/12 16:05:28 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.31  2001/12/12 16:05:28  jcs
+// Move GetDataBase.. statements from Init to Make to ensure selection of
+// correct flavor (Thank you Jeff)
+//
 // Revision 1.30  2001/11/21 12:44:44  jcs
 // make ftpcGas database table available to FTPC cluster maker
 //
@@ -224,6 +228,28 @@ Int_t StFtpcClusterMaker::Init(){
   m_fastsimgas   = (St_ftpcFastSimGas  *)local("ftpcFastSimGas");
   m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
 
+// 		Create Histograms
+m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
+m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
+m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
+//m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
+//m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
+//m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
+//m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
+//m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
+//m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
+//m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+m_cluster_radial = new TH1F("fcl_radius","FTPC cluster radial position",700,0.,35.);
+
+  return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t StFtpcClusterMaker::Make()
+{
+  int iMake=kStOK;
+
+  int using_FTPC_slow_simulator = 0;
+
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
      gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Geometry"<<endm;
@@ -252,28 +278,6 @@ Int_t StFtpcClusterMaker::Init(){
    m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
    m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
    m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
-
-// 		Create Histograms
-m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
-m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
-m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
-//m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
-//m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
-//m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
-//m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
-//m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
-//m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
-//m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
-m_cluster_radial = new TH1F("fcl_radius","FTPC cluster radial position",700,0.,35.);
-
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
-Int_t StFtpcClusterMaker::Make()
-{
-  int iMake=kStOK;
-
-  int using_FTPC_slow_simulator = 0;
 
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
