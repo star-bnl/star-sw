@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.29 2000/04/26 21:01:44 ullrich Exp $
+% $Id: StEvent.tex,v 2.30 2000/05/09 11:09:30 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.29  2000/04/26 21:01:44  ullrich
-% Removed text for obsolete StBrowsableEvent.
+% Revision 2.30  2000/05/09 11:09:30  ullrich
+% Updated section on StMwcTriggerDetector and StCtbTriggerDetector.
 %
 % Revision 2.34  2000/05/24 15:43:38  ullrich
 % More on the StEventMaker (update).
@@ -175,8 +175,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -184,17 +184,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -209,8 +209,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -1151,14 +1151,16 @@ depicted in Fig.~\ref{fig:umlTrigger}.
         \includegraphics{trigger.eps}
         \caption{Class diagrams for the trigger detector collection and
             the \texttt{StTrigger} hierarchy.}
-    cout << "  counter  |     mips    |     time   \n";
-    cout << "--------------------------------------\n";
+        \label{fig:umlTrigger}
+    \end{center}
+\end{figure}
+The class contains everything there is available about the actual
+trigger: trigger word, trigger action word, multiplicities, and more.
+The trigger is directly contained in the \texttt{StEvent} class. In
+order to get a pointer to the L0 trigger use:
+\texttt{StEvent::l0Trigger()}. Even if we repeat us here: it is a
+pointer and therefore can be \texttt{NULL}. At the moment all
 simulations have no trigger data. You were warned.
-    for (int i=0; i<ctb.numberOfCtbCounters(); i++) {
-        cout << setw(9) << i <<   "  | "
-             << setw(10) << ctb.mips(i) << "  | "
-             << ctb.time(i) << endl;
-    }
 
 The \textbf{trigger detectors} are those detectors which data is used
 in the trigger (which doesn't mean that the data isn't useful for
@@ -2336,30 +2338,79 @@ keyword.  The state-of-the-art reference is always the class
 definition in the header file.
 \begin{figure}[htb]
     \begin{center}
-\item[Summary] Central Trigger Barrel (CTB) data.
+        \includegraphics[width=0.8\textwidth]{cartoon8.eps}
+        \caption{A class represents a set of objects that share
             a common structure and a common behavior.}
     \end{center}
 \end{figure}
 \clearpage
 
+
+\subsection{StContainers}
+\index{StContainers|textbf}
 \label{sec:StContainers}
 \begin{Entry}
-
 \item[Summary] Definitions of all container types used in \StEvent.
+\item[Synopsis]
     \verb+#include "StContainers.h"+\\
-    \verb+UInt_t numberOfCtbCounters() const;+\\
+\item[Description] \texttt{StContainers.h} includes \texttt{StArray.h}
+    which contains the guts of the container implementation. In
+    StContainer.h (and .cxx) the appropriate macros are called to
+    declare and define the container types. If a new container type
+    has to be defined it \emph{must} be defined here and only here.
+\end{Entry}
+\clearpage
 
-    \verb+Float_t mips(UInt_t) const;+\\
 
-    \verb+Float_t time(UInt_t) const;+\\
+\subsection{StCtbSoftwareMonitor}
+\index{StCtbSoftwareMonitor|textbf}
+\label{sec:StCtbSoftwareMonitor}
+\begin{Entry}
+\item[Summary] Monitors details of the Central Trigger Barrel (CTB)
+    reconstruction.
+\item[Synopsis]
+    \verb+#include "StCtbSoftwareMonitor.h"+\\
+    \verb+class StCtbSoftwareMonitor;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StCtbSoftwareMonitor();+\\
 
-    \verb+void setMips(UInt_t, Float_t);+\\
+    \verb+StCtbSoftwareMonitor(const dst_mon_soft_ctb_st&);+\\
+\item[Public Data\\ Member]
+    \verb+Long_t mult_ctb_tot;+\\
+    Total multiplicity (or ADC sum) in CTB.
+\end{Entry}
+\clearpage
 
-    \verb+void setTime(UInt_t, Float_t);+\\
+
+\subsection{StCtbTriggerDetector}
+\index{StCtbTriggerDetector|textbf}
+\label{sec:StCtbTriggerDetector}
+\begin{Entry}
+\item[Summary] Interface to CTB event data.
+    
+\item[Synopsis]
+    \verb+#include "StCtbTriggerDetector.h"+\\
+    \verb+class StCtbTriggerDetector;+\\
+\item[Description]
+    
+\item[Related Classes]
+    Inherits from StObject.
+    
+\item[Public\\ Constructors]
+    \verb+StCtbTriggerDetector();+\\
+    \verb+StCtbTriggerDetector(const dst_TrgDet_st&);+\\
+    
+\item[Public Member\\ Functions]
+    \verb+UInt_t numberOfTrays() const;+\\
+    Returns number of CTB trays (usually 120).
+    
     \verb+UInt_t numberOfSlats() const;+\\
     Returns number of slats (usually 2).
     \texttt{1-(1+npresamples+npostsamples-1)} are the other "events",
     in chronological order.  For example, assuming 3 pre events and 2
+    Number of pre-samples taken.
     
     \verb+UInt_t numberOfPostSamples() const;+\\
     \item[evt = 1] 1st pre event at t = -3
@@ -3392,18 +3443,71 @@ definition in the header file.
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StL3Trigger();+\\
+\item[Public Member\\ Functions]
+    \verb+StTpcHitCollection* tpcHitCollection();+\\
     \verb+const StTpcHitCollection* tpcHitCollection() const;+\\
 
     \verb+StSPtrVecTrackDetectorInfo& trackDetectorInfo();+\\
+    \verb+const StSPtrVecTrackDetectorInfo& trackDetectorInfo() const;+\\
 
+    \verb+StSPtrVecTrackNode& trackNodes();+\\
     \verb+const StSPtrVecTrackNode& trackNodes() const;+\\
+
+    \verb+UInt_t numberOfPrimaryVertices() const;+\\
     \verb+StPrimaryVertex* primaryVertex(UInt_t = 0);+\\
     \verb+const StPrimaryVertex* primaryVertex(UInt_t = 0) const;+\\
 
+    \verb+void setTpcHitCollection(StTpcHitCollection*);+\\
     \verb+void addPrimaryVertex(StPrimaryVertex*);+\\
-    \verb+UInt_t numberOfMwcSectors() const;+\\
-    \verb+Float_t mips(UInt_t) const;+\\
-    \verb+void setMips(UInt_t, Float_t);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StMeasuredPoint}
+\index{StMeasuredPoint|textbf}
+\label{sec:StMeasuredPoint}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StMeasuredPoint.h"+\\
+    \verb+class StMeasuredPoint;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StMeasuredPoint();+\\
+    \verb+StMeasuredPoint(const StThreeVectorF&);+\\
+\item[Public Member\\ Functions]
+    \verb+const StThreeVectorF& position() const;+\\
+    \verb+StThreeVectorF positionError() const = 0;+\\
+    \verb+StMatrixF covariantMatrix() const = 0;+\\
+    \verb+void setPosition(const StThreeVectorF&);+\\
+\item[Public Member\\ Operators]
+    \verb+Int_t operator==(const StMeasuredPoint&) const;+\\
+    \verb+Int_t operator!=(const StMeasuredPoint&) const;+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StMwcTriggerDetector}
+\index{StMwcTriggerDetector|textbf}
+\label{sec:StMwcTriggerDetector}
+\begin{Entry}
+\item[Summary]
+    Interface to the MWC event data.
+    
+\item[Synopsis]
+    \verb+#include "StMwcTriggerDetector.h"+\\
+    \verb+class StMwcTriggerDetector;+\\
+    
+\item[Description]
+
+\item[Related Classes]
+    Inherits from \texttt{StObject}.
+    
+\item[Public\\ Constructors]
+    \verb+StMwcTriggerDetector();+\\
+    \verb+StMwcTriggerDetector(const dst_TrgDet_st&);+\\
+    
 \item[Public Member\\ Functions]
     \verb+UInt_t numberOfSectors() const;+\\
     Number of MWC sectors (usually 24).
