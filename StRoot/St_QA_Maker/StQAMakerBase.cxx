@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.15 2002/02/12 18:42:00 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.16 2002/03/01 22:51:20 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.16  2002/03/01 22:51:20  genevb
+// Small set-to-zero possible bug fix
+//
 // Revision 2.15  2002/02/12 18:42:00  genevb
 // Additional FTPC histograms
 //
@@ -79,6 +82,8 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 //  - Zero all histogram pointers
   mNullPrimVtx = 0; // histogram for number of events without primary vertex
   mMultClass = 0;   // histogram for number of events in mult classes
+  mTrigWord = 0;    // histogram for event trigger words
+  mTrigBits = 0;    // histogram for event trigger bits
 
 // for method MakeEvSum - from table software monitor
   m_glb_trk_chg=0;          //! all charge east/west, tpc
