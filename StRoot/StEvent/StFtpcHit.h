@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.9 2004/04/08 19:02:33 ullrich Exp $
+ * $Id: StFtpcHit.h,v 2.10 2004/05/07 15:05:28 calderon Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
+ * Revision 2.10  2004/05/07 15:05:28  calderon
+ * Adding constructor based on StFtpcPoint from Markus.
+ *
  * Revision 2.9  2004/04/08 19:02:33  ullrich
  * Added additional data member and access methods to hold the position in
  * pad and time units including their std deviation. Constructors updated.
@@ -52,6 +55,8 @@
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
+
+class StFtpcPoint;
 class dst_point_st;
 
 class StFtpcHit : public StHit {
@@ -61,6 +66,7 @@ public:
               const StThreeVectorF&,
               unsigned int, float, unsigned char = 0);
     StFtpcHit(const dst_point_st&);
+    StFtpcHit(const StFtpcPoint&);
     // StFtpcHit(const StFtpcHit&);            use default
     // StFtpcHit& operator=(const StFtpcHit&); use default
     ~StFtpcHit();
@@ -73,6 +79,8 @@ public:
     unsigned int plane() const;         // 1-20
     unsigned int padsInHit() const;
     unsigned int timebinsInHit() const;
+
+    void update(const StFtpcPoint&);
 
     double padPosition() const;
     double timePosition() const;
