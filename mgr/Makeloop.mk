@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.66  1999/04/02 22:59:01  fisyak
+#  filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
+#
 #  Revision 1.65  1999/04/02 22:56:56  fisyak
 #  Remove Objy if OBJY_HOME is not defined
 #
@@ -274,7 +277,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/02 22:56:56 $ 
+#           Last modification $Date: 1999/04/02 22:59:01 $ 
 #  default setings
 # Current Working Directory
 #
@@ -329,8 +332,8 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker St_io_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_laser_Maker St_tpctest_Maker, $(SUBDIRS))
-#  
+#                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out  St_laser_Maker St_run_summary_Maker St_tpctest_Maker , $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 

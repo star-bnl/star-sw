@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.69  1999/04/02 22:59:00  fisyak
+#  filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
+#
 #  Revision 1.68  1999/03/21 20:41:00  fisyak
 #  Cleanup for SL99d
 #
@@ -182,7 +185,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/03/21 20:41:00 $ 
+#             Last modification $Date: 1999/04/02 22:59:00 $ 
 #. default setings
 
 MAKE  := gmake
@@ -395,7 +398,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   STRID    := lnx
   FC       := pgf77
-  FOREXE      := g77 -fno-second-underscore
+  FOREXE      := g77 -fno-automatic -fno-second-underscore -fugly-complex
   LD       := $(CXX)
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
