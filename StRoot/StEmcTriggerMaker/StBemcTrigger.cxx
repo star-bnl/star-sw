@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.11 2003/01/23 03:08:58 jeromel Exp $
+// $Id: StBemcTrigger.cxx,v 1.12 2003/01/29 20:43:49 suaide Exp $
 //
 //    
 
@@ -260,11 +260,11 @@ void StBemcTrigger::MakeTrigger()
 //----------------------------------------------------    
 void StBemcTrigger::GetCrateEtaPatch(Int_t patch,Int_t* mi,Int_t* ei)
 {
-
-  Int_t crate=(patch-1)/10+1; // crate number
   Int_t subpatch=(patch-1)%10*16;
-  //cout <<"patch = "<<patch<<"  crate = "<<crate <<"  subpatch = "<<subpatch<<endl;
-    
+  Int_t crate;
+  if(patch<=150) crate = 16+(patch-1)/10;
+  else crate = (patch-1)/10-14;
+  //cout <<"patch = "<<patch<<"  crate = "<<crate <<"  subpatch = "<<subpatch<<endl;    
   *mi=crate;
   *ei=subpatch;
 }
