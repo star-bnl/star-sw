@@ -1,5 +1,4 @@
 #include "StRTpcPadPlane.h"
-#include <iostream.h>
 
 ClassImp(StRTpcPadPlane)
 
@@ -106,7 +105,7 @@ int   StRTpcPadPlane::numberOfPadsAtRow(int row) const {
 }
 
 float   StRTpcPadPlane::radialDistanceAtRow(int row) const {
- int radius;
+ float radius;
  if (row<1||row>numberOfRows()) {radius = 0;}
   else if (row>0&&row<=numberOfInnerRows()) {
         radius = mPadPlane->innerRowRadii[row-1];}
@@ -150,25 +149,31 @@ float StRTpcPadPlane::RowPitchAtRow(int row) const {
 
 int StRTpcPadPlane::indexForRowPad(int row, int pad) const {
   int index = 0;
-  if (row>0&&row<=numberOfInnerRows()){
+  if (pad<=numberOfPadsAtRow(row)){
+   if (row>0&&row<=numberOfInnerRows()){
     for (int i=1;i<row;i++){
      index += numberOfPadsAtRow(i);
     }
     index+=pad;
     index--;   //start at index 0
     return index;
-  }
-  else if (row>numberOfInnerRows()&&row<=numberOfRows()){
+   }
+   else if (row>numberOfInnerRows()&&row<=numberOfRows()){
     for (int i=numberOfInnerRows()+1;i<row;i++){
      index += numberOfPadsAtRow(i);
     }
     index+=pad;
     index--;   //start at index 0
     return index;
-  }
-  else {
-    cout << "StRTpcPadPlane::Invalid Row Number" << endl;
+   }
+   else{
+    gMessMgr->Message("StRTpcPadPlane::Invalid Row Number","E");
     return -1;
+   }
+  }
+  else{
+   gMessMgr->Message("StRTpcPadPlane::Invalid Pad number","E");
+   return -1;
   }
 }
 

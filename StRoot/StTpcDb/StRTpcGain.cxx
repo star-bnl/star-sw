@@ -8,6 +8,7 @@ ClassImp(StRTpcGain)
 
 
 float StRTpcGain::getGain(int row, int pad)   const {
+  if (padplane->indexForRowPad(row,pad)<0){return 0;}
   if (row>0&&row<=padplane->numberOfInnerRows()){
     return mGain->innerSectorGainFactors[padplane->indexForRowPad(row,pad)];
   }

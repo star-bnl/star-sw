@@ -25,6 +25,8 @@ R__EXTERN  int type_of_call numberOfPadsAtRow_(int *row);
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
+#include "StRTpcGain.h"
+#include "StRTpcT0.h"
 class StMaker;
 
 
@@ -34,6 +36,8 @@ class StTpcDb {
  StTpcPadPlaneI* PadPlane;
  StTpcWirePlaneI* WirePlane;
  StTpcDimensionsI* dimensions;
+ StTpcGainI* gain[24];
+ StTpcT0I* t0[24];
  St_DataSet* tpc_geometry;
  St_DataSet* tpc_calibrations;
  St_DataSet* tpc_conditions;
@@ -46,6 +50,8 @@ class StTpcDb {
    StTpcPadPlaneI* PadPlaneGeometry();
    StTpcWirePlaneI* WirePlaneGeometry();
    StTpcDimensionsI* Dimensions();
+   StTpcGainI* Gain(int sector);
+   StTpcT0I* T0(int sector);
 
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
@@ -56,4 +62,12 @@ class StTpcDb {
 R__EXTERN StTpcDb* gStTpcDb;
 
 #endif
+
+
+
+
+
+
+
+
 

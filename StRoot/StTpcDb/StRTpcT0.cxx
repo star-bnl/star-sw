@@ -8,6 +8,7 @@ ClassImp(StRTpcT0)
 
 
 float StRTpcT0::getT0(int row, int pad)   const {
+  if (padplane->indexForRowPad(row,pad)<0){return 0;}
   if (row>0&&row<=padplane->numberOfInnerRows()){
     return mT0->innerSectorTimeOffsets[padplane->indexForRowPad(row,pad)];
   }

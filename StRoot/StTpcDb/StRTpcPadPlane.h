@@ -1,6 +1,7 @@
 #ifndef __STRTPCPADPLANE__
 #define __STRTPCPADPLANE__
 //#include <TObject.h>
+#include "StMessMgr.h"
 #include "StTpcPadPlaneI.h"
 #include "Geometry/tpcPadPlanes.h"
 
