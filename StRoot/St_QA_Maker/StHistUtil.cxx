@@ -1,7 +1,7 @@
-// $Id: StHistUtil.cxx,v 1.8 1999/12/07 18:56:00 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.9 1999/12/07 21:54:15 kathy Exp $
 // $Log: StHistUtil.cxx,v $
-// Revision 1.8  1999/12/07 18:56:00  lansdell
-// added a few more histograms and updated the default list of logy plots
+// Revision 1.9  1999/12/07 21:54:15  kathy
+// added date and time to DrawHist method in StHistUtil class so that this is printed at bottom right of histogram output
 //
 // Revision 1.7  1999/12/06 22:25:05  kathy
 // split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
@@ -43,6 +43,7 @@
 #include "TMath.h"
 #include "TString.h"
 #include "TPaveLabel.h"
+#include "TDatime.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -105,28 +106,40 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 
 // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
 //                                        (600 x 720                US      )
-  TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
+  //  TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
+    TCanvas *HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
 
-//  HistCanvas->SetFillColor(19);
-// but now we have paper size in cm
+  //  HistCanvas->SetFillColor(19);
+  // but now we have paper size in cm
   //  HistCanvas->Range(0,0,20,24);
   //  Can set range to something which makes it equivalent to canvas but is 0,1 by default
   //HistCanvas->SetBorderSize(2);  
 
 // Range for all float numbers used by ROOT methods is now 0,1 by default!
 
-// write title at top of canvas
 // order of PaveLabel is x1,y1,x2,y2 - fraction of pad (which is the canvas now)
-   TPaveLabel *title = new TPaveLabel(0.1,0.96,0.9,0.99,(char *)gtitle,"br");
-   title->SetFillColor(18);
-   title->SetTextFont(32);
-   title->SetTextSize(0.6);
-   // title->SetTextColor(49);
-   title->Draw();
+// option = br means the shadow of box starts at bottom right
+//    myself, I'd like to get rid of the stupid shadow that somebody decided I need!
 
-// Make 1 big pad on the canvas - make it a little shorter than the canvas 
+// write title at top of canvas - first page
+   TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+   Ltitle->SetFillColor(18);
+   Ltitle->SetTextFont(32);
+   Ltitle->SetTextSize(0.5);
+   // Ltitle->SetTextColor(49);
+   Ltitle->Draw();
+
+// now put in date & time at bottom right of canvas - first page
+  TDatime HistTime;
+  const Char_t *myTime = HistTime.AsString();
+  TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
+  Ldatetime->SetTextSize(0.4);
+  Ldatetime->Draw();
+
+// Make 1 big pad on the canvas - make it a little bit inside the  canvas 
 //    - must cd to get to this pad! 
-  TPad *graphPad = new TPad("PadName","Pad Title",0.01,0.05,0.95,0.95);
+// order is x1 y1 x2 y2 
+  TPad *graphPad = new TPad("PadName","Pad Title",0.0,0.05,1.00,0.95);
   graphPad->Draw();
   graphPad->cd();
 

@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.3 1999/11/05 22:26:01 kathy Exp $
+//! $Id: StHistUtil.h,v 1.4 1999/12/07 21:54:15 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.4  1999/12/07 21:54:15  kathy
+//! added date and time to DrawHist method in StHistUtil class so that this is printed at bottom right of histogram output
+//!
 //! Revision 1.3  1999/11/05 22:26:01  kathy
 //! now allow setting of global title from a method
 //!
@@ -10,6 +13,9 @@
 //! moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
 //!
 
+///////////////////////////////////////////////////////////////////////////////
+// Histogram Utility methods for use with star makers and bfc output
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef STAR_StHistUtil
 #define STAR_StHistUtil
@@ -26,12 +32,12 @@
 #include "TList.h"
 #include "TString.h"
 
-
 //  - if not using the methods of the class, then can just put class TCanvas;
 //   -  however, if we are using the methods of TCanvas, then put include "TCanvas.h"
 class TCanvas;
 class StMaker;
 class TPaveLabel;
+class TDatime;
 
 class StHistUtil {
  private:
@@ -52,7 +58,6 @@ class StHistUtil {
   
   TList         *m_ListOfLog;      //! list of histogram names that will be drawn with logy scale
   StMaker       *m_PntrToMaker;    //! pointer to an St_Maker, so can find histograms
-
 
  protected:
 
@@ -76,10 +81,11 @@ class StHistUtil {
   virtual void    SetPostScriptFile(const Char_t *psFileName="");
   virtual void    SetPntrToMaker(StMaker *m1);
   virtual void    SetGlobalTitle(const Char_t *globalTitle="");
+
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.3 1999/11/05 22:26:01 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.4 1999/12/07 21:54:15 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -98,7 +104,6 @@ inline void StHistUtil::SetPntrToMaker(StMaker *m1)
                           {m_PntrToMaker = m1;}
 inline void StHistUtil::SetGlobalTitle(const Char_t *globalTitle)
                          { m_GlobalTitle = globalTitle;}
-
 
 
 
