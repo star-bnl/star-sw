@@ -2,7 +2,7 @@
 #define STAR_MuEzSoloPi0Maker
 
 /************************************************************
- * $Id: MuEzSoloPi0Maker.h,v 1.2 2005/03/01 20:02:15 balewski Exp $
+ * $Id: MuEzSoloPi0Maker.h,v 1.3 2005/03/11 15:39:50 balewski Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -24,7 +24,7 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
  private: 
   StMuDstMaker* mMuDstMaker;  
-  int nInpEve, nTrigEve, nAcceptEve; /// no. of input events
+  int nInpEve, nTrigEve, nAcceptEve,nCorrEve; /// no. of input events
   EztEventHeader *eHead;
   EztEmcRawData  *eETow;
   EztEmcRawData  *eESmd;
@@ -49,7 +49,7 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzSoloPi0Maker.h,v 1.2 2005/03/01 20:02:15 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzSoloPi0Maker.h,v 1.3 2005/03/11 15:39:50 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -60,6 +60,9 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
 
 // $Log: MuEzSoloPi0Maker.h,v $
+// Revision 1.3  2005/03/11 15:39:50  balewski
+// use corruption method from muEzt
+//
 // Revision 1.2  2005/03/01 20:02:15  balewski
 // hack to access 2005 trigger data
 //

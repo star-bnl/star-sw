@@ -1,8 +1,7 @@
 TObjArray  *HList;
-
-int rdMuEztSoloPi0( int trigID=66007,
- int nEve=5000000,
- Int_t nFiles  = 1000,
+int rdEztMuSoloPi0( int trigID=66007,
+ int nEve=500,
+ Int_t nFiles  = 2,
  char* file="lis/R6034014.lis", 
  char* inDir   = "./"
  ){ 
