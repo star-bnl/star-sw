@@ -10,29 +10,44 @@ Advanced Geant Interface
     *                                                                  *
     *        A D V A N C E D   G E A N T   I N T E R F A C E           *
     *                                                                  *
-    *                      30-Jul-98 hot news:                         *
+    *                      04-Sep-98 hot news:                         *
     *                                                                  *
+    *                          CONTROL                                 *
     * Kuip command "ON ERROR GOTO label" will now react on:            *
     *      - End_of_DATA on P stream, Write_Error on O stream          *
     *      - time_left less than defined by GTIME command argument     *
-    * Explicit NCOPY parameter is now allowed in the POSITION operator *
-    * USE operator has an OPERation NEXT, allowing bank chain scanning *
-    * "-b filename" option now available for batch mode.               *
-    *                                                                  *
-    * Absorption length calculation for mixtures corrected in GEANT.   *
-    * CMZ KEEP sequences (car-format) are recognised as REPLACE macros *
-    *                                                                  *
-    * GEANT memory may be increased at the program invocation time -   *
+    * On GHIST command some standard histogram handling is introduced  *
+    *        with automatic histogram dump when EXITing the program.   *
+    * Print control is now fully consistent with SLUG-DICE-ATRECON     *
+    * CERNLIB 97a release is now the default library version.          *
+    * Be aware that it requires the FILL attribute to be 0, otherwise  *
+    * edges drawn in black/white obscure most of the GEANT drawings !  *
+    * GEANT and PAW memory may be increased at the invocation time -   *
     * start with -h option to get more information how to use switches *
-    *                                                                  *
-    * Tracking in MANY volumes is corrected - no missing hits anymore  *
-    *                                                                  *
-    * GENZ package added - LGNFIND,GNZGET* calls are available         *
-    *                                                                  *
-    *           FOR MORE DETAILS PLEASE USE HELP FACILITY              *
-    *                                                                  *
+    * "-b filename" option now available for batch mode.               *
     * To get complete description of AGI commands in printable format  *
     *              do:  MANUAL AGUSER MAN.TEX LATEX                    *
+    *                                                                  *
+    *                       GEANT & PHYSICS:                           *
+    * GCALOR avalable for calorimeter simulations on command: HADR 6   *
+    *        It needs bertaf.dat and xsneut95.dat from /cern/95a/lib   *
+    * Electron physics (Bremsstraghlung, Pair production) updated      *
+    * Absorption length calculation for mixtures corrected in GEANT.   *
+    * Explicit NCOPY parameter is now allowed in the POSITION operator *
+    * Binning refined: - for BIT option all 2**Nbit values are used,   *
+    *                    unknown elements are supposed to be integer   *
+    *                  - for BIN option the interval is centered       *
+    * Protection against errenious hit limits (bug in GFIPAR on SUN)   *
+    * Tracking in MANY volumes is corrected - no missing hits anymore  *
+    *                                                                  *
+    *                       Data STRUCTURING:                          *
+    * RbGET counting request now returns again the correct number      *
+    *       of banks in a chain, as it is described in SOFT-NO-002     *
+    * CMZ KEEP sequences (car-format) are recognised as REPLACE macros *
+    * GENZ package added - LGNFIND,GNZGET* calls are available         *
+    * USE operator has an OPERation NEXT, allowing bank chain scanning *
+    * Schema evolution is supported by USE operator - see help USE     *
+    *                                                                  *
     ********************************************************************
  
 >Command ACTIONS
@@ -541,6 +556,44 @@ All fields apart from Path are optional.
  
   STAT=ISTAT returns in ISTAT the bank access status (0 if OK).
              Initial value of ISTAT should be defined with a DATA statement.
+ 
+If structure description in the program is different from the one in ZEBRA
+memory, local copy is filled correctly using documentation. New variables,
+not present in the bank, are left intact.
+ 
+ Example: suppose a bank has been created by the following module:
+ --------
+      module    somegeo is a system
+      author    me
+      created   today
+      integer   iprin
+      structure MFLG { version, int Bfield(2,3), RmaxInn, ZmaxInn ,char title}
+      fill MFLG(1)                  !  system data
+          version =1                   !  bank version
+          Bfield  = {1,2; 4,5; 11,12}  !  some field value
+          RmaxInn = 100                !  max rad
+          ZmaxInn = 200                !  max len
+          title   = 'abcdef'           !  some 4-letter text
+      end
+ 
+ Then you try to read it with the following subroutine:
+ -----
+      subroutine sometest
+      integer   iprin,istat/0/,i
+      structure MFLG { int version, char title, int aaa,
+                       Bfield(3,2), RmaxInn, ZmaxInn }
+      begin
+      mflg_aaa  = 999
+      use  SOMEGEO/MFLG
+      print *, ' version, aaa, ZmaxInn, title, Bfield: '
+      print *,mflg_version,mflg_aaa,mflg_ZmaxInn,' ',mflg_title,mflg_Bfield
+      end
+ 
+ Result will be the following:
+ ------
+ Schema evolution for Bpath=/DETM/SOME/MFLG* bank=MFLG:
+  version, aaa, ZmaxInn, title, Bfield:
+   2  999    200.000 abcd    1.00000    2.00000  0.    4.00000    5.00000  0.
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------

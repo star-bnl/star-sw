@@ -13,13 +13,13 @@ Replace[LIST #;] with [ #1 _
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,rnpssn,
  "random "   binomi,rngama,gauss,proxim,
- "comis  "   csjcal,csaddr,jumpad,Jbyt,
- "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,
+ "comis  "   csjcal,csaddr,jumpad,Jbyt,msbit,
+ "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lvmaxa,lzlong,
  "zebra  "   mzvolm,mzdred,zverif,
  "hbook  "   hplfun,hpagsz,hnoent,hnform,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
- " math  "   sortrq,dgmlt1,dgmlt2
-
+ " math  "   sortrq,dgmlt1,dgmlt2,eisrs1,dsfeqn,mxuty,
+ "spare  "   ie3tos,ie3fos,pkbyt,upkbyt,ucocop,vbias,vline,vdist2,vmaxa
  "tr-prop    trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55 "
  ]
 +CDE,GCFLAG.
@@ -31,14 +31,10 @@ Replace[LIST #;] with [ #1 _
   ix = SystemF(' ')
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
-  x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.);
+  x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.)
+  x=ifromc(' '); c=cfromi(0)
+ 
 * now fake calls to library - no need for arguments
   list ref;
 *
   END
- 
- 
- 
- 
- 
- 
