@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.7 2001/04/20 12:50:29 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.8 2001/04/20 13:04:25 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.8  2001/04/20 13:04:25  jcs
+// this is the routine in which I changed the if/else statements for
+// calculating the polar coordinates to avoid problems with optimizing
+//
 // Revision 1.7  2001/04/20 12:50:29  jcs
 // cleanup comments
 //
@@ -86,7 +90,7 @@ int StFtpcSlowSimulator::simulate()
     float phi=0.;
     float drift_time;
 
-    float aip = mDb->gasIonizationPotential()*1.0e-9;           // in GeV
+    float aip = mDb->gasIonizationPotential()*1.0e-9;         // in GeV
     float px, py, pz, pp;
     float xx, yy, zz;
     float de;
