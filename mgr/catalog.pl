@@ -7,47 +7,81 @@ use Sys::Hostname;
 #use FileHandle;
 use English;
 my $caller_name  = 'catalog.pl';
-my @PROCESSES    = ('tfs_dst');
+my @PROCESSES    = ('tfs,tss');
 my $process;
-my $DISK1        = "/disk1";
+my $DIR;
+my $TOP;
+my $PROCESS;
+my $SET;
+my $EXTENSION;
+my $LIST;
+my $RAW_SET;
+my $DISK1        = "/disk00001";
 my $HOSTNAME     = hostname();
 my $RCF          = "rcf.rhic.bnl.gov";
 #if ($HOSTNAME == $RCF) {$DISK1 = "/net/rmds03/disk1";}
 my $TOPHPSS_SINK =  "/home/starsink/raw";
 my $TOPHPSS_RECO =  "/home/starreco/reco";
 my $TOPDISK1_RECO=  $DISK1 . "/star";
-my $TOP_TEST     =  "/star/scr2f/starreco/MDC1/tests";
-my $REQUEST      =  "/star/u2e/starreco/MDC1/requests";
-my $JOB_SUMMARY  =  "/star/u2e/starreco/MDC1/summary";
-my $JOB_LOG      =  $DISK1 . "/star/MDC1";
+my $TOP_TEST     =  "/star/scr2f/starreco/MDC2/tests";
+my $REQUEST      =  "/star/u2e/starreco/MDC2/requests";
+my $JOB_LOG      =  $DISK1 . "/star/MDC2";
 my $Objy         =  $DISK1 . "/star/stardb/dst";
-my @SETS = @ARGV;
-#my @SETS = ("b0_3/year2a/hadronic_on");
-
-my @MORE_SETS=(
-            "b0_20/year2a/hadronic_on",
-            "b0_20/year2x/hadronic_on",
-            "b0_20/year_1b/hadronic_off",
-            "b0_2/year1a/hadronic_off",
-            "b0_2/year1a/hadronic_on",
-            "b0_2/year2a/hadronic_off",
-            "b0_2/year2a/hadronic_on",
-            "b0_2/year2y/hadronic_on",
-            "b0_3/year1a/hadronic_off",
-            "b0_3/year1a/hadronic_on",
-            "b0_3/year2a/hadronic_on",
-            "b0_3/year2x/hadronic_on",
-            "b0_3/year_1b/hadronic_off");
+#my @SETS = @ARGV;
+my @SETS=     (
+"auau200/venus412/default/b0_3/year_1b/hadronic_on",
+"auau200/venus412/default/b0_3/year_2a/hadronic_on",
+"auau200/venus412/default/b0_9/year_1b/hadronic_on",
+"auau200/venus412/default/b3_6/year_1b/hadronic_on",
+"auau200/venus412/default/b6_9/year_1b/hadronic_on",
+"auau200/venus412/default/b9_12/year_1b/hadronic_on",
+"auau200/venus412/halffield/b0_3/year_1b/hadronic_on",
+"auau200/hijing135/default/b0_3/year_1b/hadronic_on",
+"auau200/hijing135/default/b0_9/year_2a/hadronic_on",
+"auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",
+"auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on",
+"auau200/hijing135/jetq_on/b0_9/year_1b/hadronic_on",
+"auau200/hijing135/jetq_on/b3_6/year_1b/hadronic_on",
+"auau200/hijing135/jetq_on/b6_9/year_1b/hadronic_on",
+"auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",
+"auau200/hijing/b0_3/jet05/year_1b/hadronic_on",
+"auau200/hijing/b0_3/jet10/year_1b/hadronic_on",
+"auau200/hijing/b0_3/jet15/year_1b/hadronic_on",
+"auau200/hijing/b0_3/jet20/year_1b/hadronic_on",
+"auau200/hijing/default/jet05/year_2a/hadronic_on",
+"auau200/hijing/default/jet10/year_2a/hadronic_on",
+"auau200/hijing/default/jet15/year_2a/hadronic_on",
+"auau200/hijing/default/jet20/year_2a/hadronic_on",
+"auau200/hbt_vni/1d/r5/year_1b/hadronic_on",
+"auau200/hbt_vni/1d/r7/year_1b/hadronic_on",
+"auau200/hbt_vni/sol/r533/year_1b/hadronic_on",
+"auau200/hbt_vni/sol/r563/year_1b/hadronic_on",
+"auau200/hbt_vni/sol/r674/year_1b/hadronic_on",
+"auau200/hijet/default/central/year_1b/hadronic_on",
+"auau200/vni/after/central/year_1b/hadronic_on",
+"auau200/vni/after/minb/year_1b/hadronic_on",
+"auau200/vni/before/central/year_1b/hadronic_on",
+"auau200/vni/before/minb/year_1b/hadronic_on",
+"pp200/pythia/default/jet15/year_1b/hadronic_on",
+"pp200/pythia/default/jet15/year_2a/hadronic_on",
+"pp200/pythia/default/minbias/year_1b/hadronic_on",
+"pp200/pythia/default/minbias/year_2a/hadronic_on",
+"pau200/hijing/default/minbias/year_2a/hadronic_on");
 my %geant_size = ();
-my %geant_date = ();
-my %geant_test = ();         # test of input (Y/N)
+my %geant_date = (); my %geant_test = ();         # test of input (Y/N)
 my %geant_noev = ();
-my %reco_size = ();
-my %reco_date = ();
-my %dst_size = ();           # dst on disk1
-my %dst_date = ();
-my %Objy_size = ();          # dst in Objy
-my %Objy_date = ();
+my $hpss_size = 0;
+my $hpss_date = 0;
+my $disk_size = 0;
+my $disk_date = 0;
+my %size_tfs = ();           # tfs on hpss
+my %date_tfs = ();
+my %tfs_size = ();           # tfs dst on disk1
+my %tfs_date = ();
+my %size_tss = ();           # tss dst on hpss 
+my %date_tss = ();
+my %tss_size = ();           # tss dst on disk1 
+my %tss_date = ();
 my %files = ();
 my %files_job = ();
 my %comment = ();
@@ -57,20 +91,31 @@ my %running = ();
 my %processed = ();
 my %noevents = ();
 my %timeperevent = ();
+my %Makers = ();
+my %REALTIME = ();
+my %CPUTIME = ();
 my %kBsec = ();
 my %node = ();
 my %job_status = ();
 my @chars;
+my %jobs = ();
+my %status = ();
+my %nodes  = ();
 #___________________________________________
+my $TOTAL_GEANT_SIZE=0;
+my $NO_OF_EVENTS=0;
+my $TOTAL_SIZE_TFS = 0;
+my $TOTAL_SIZE_TSS = 0;
+my $TOTAL_TFS_SIZE = 0;
+my $TOTAL_TSS_SIZE = 0;
+my $TOTAL_NO_EVE   = 0;
 my $set;
 my $no_events;
+my $no_events_complete;
 my $input;
 my $input_files;
 my $output;
 my $output_files;
-my $gen_set;
-my $raw_set;                  # list of Gstar files on HPSS
-my $reco_set;                 # list of tfs_dst files on HPSS
 my $answer;                   # output of system calls
 my $catalog;
 my %list_of_files;
@@ -89,7 +134,12 @@ my @out;
 my $t;
 my $gsze;
 my $gdat;
-my $GJB;
+my $JFS;   # job script status XYZ (X = A - archived
+           #                            J - in jobfiles
+           #                            N - in jobfiles_new
+           #                            L - in logfiles
+           #                        Y = F - fast simulator
+           #                        Z = S - slow simulator
 my $dsze;
 my $ddat;
 my $run;
@@ -127,7 +177,10 @@ my $isdst;
 my $month;
 my $BJOBS;
 my $CRS_JOBS;
+my $ifnever =0;
+#____________________________________________________________________
 # Subroutines
+#____________________________________________________________________
 sub usage
   {
     printf("\nUsage: %s <job id>_<subjob number> | job_<job id>_<subjob number>\n",$0);
@@ -137,550 +190,455 @@ sub usage
     printf("\tpresented by the \"crs_node_status.pl\" script.\n");
     exit(1);
   }
-
-#------------------------------------------
-#format STDOUT_TOP =
-#set = b0_3/year_1b/hadronic_off Input Total = 249.671 (GB) in 256 files -> Output Total = 0(GB) in 0 files
-#set = @<<<<<<<<<<<<<<<<<<<<<<<< Input Total = @<<<<<< (GB) in @<< files -> Output Total = @>> (GB) in @>> files
-#      $set,                                   $input,         $input_files,               $output,    $output_files
-#.
-format STDOUT_TOP =
-set =@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$set,
-                   size            dst on HPSS   on disk1   in Objy                  No. time   Rate  Comments
-         Filename  (MB)   date GJA (MB)   date (MB)   date (MB)   date  run          ev.(mins) (kB/s) cpu\tot (hrs)
-.
-format STDOUT =
-@<<<<<<<<<<<<<<<<<@>>>> @>>>>>@|||||@>>@>>>>>>@>>>>@>>>>>>@>>>>@>>>>>> @<<<<<<<<<<<<@>>> @>>>> @<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$file,$geant_size{$file},$geant_date{$file},$GJB,$reco_size{$file},$reco_date{$file},$dst_size{$file},$dst_date{$file},$Objy_size{$file},$Objy_date{$file},$running{$file},$noevents{$file},$timeperevent{$file},$kBsec{$file},$comment{$file}
-.
-#  $~ = "STDOUT";
-#$BJOBS = `bjobs -u starreco`;
-$CRS_JOBS = `crs_status.pl`; #print $CRS_JOBS;
-@lines = split /^/m, $CRS_JOBS;
-my $job_status;
-foreach $line (@lines){
-   @words = split (" ",$line);#   print $line, $#words, "\n";
-   next if $#words<2;
-   if (grep (/Running|Queuing|Cleanin|Staging|Trans|Not/,$words[2])) {# 907967368       0        Queuing
-     $job_status = $words[2];#     print $job_status;
-   }
-   else {
-     if ($#words ==3) {# Job Description file: b0_20y2a_on_psc256_03_200evts
-       my $file = $words[$#words];
-       $file =~ s/b0_20y2a_on_|b0_20y2x_on_|b0_20y_1b_off_|b0_2y1a_off_|b0_2y1a_on_//g;
-       $file =~ s/b0_2y2a_off_|b0_2y2a_on_|b0_2y2y_on_|b0_3y1a_off_|b0_3y1a_on_//g;
-       $file =~ s/b0_3y2a_on_|b0_3y2x_on_|b0_3y_1b_off_|//g;
-       $job_status{$file} = $job_status;
-       $files_job{$file} = $file;
-    }
-   }
-}
-my $NODE_JOBS = `crs_node_status.pl`;
-@lines = split /^/m, $NODE_JOBS;
-my $no_of_jobs;
-my $rnode;
-foreach $line (@lines){
-   @words = split (" ",$line); #   printf ("%s %d \n",$line,$#words);
-   next if $#words <0;
-   next if grep (/Node/,$words[0]);
-   next if grep (/Status/,$words[0]);
-   if (grep (/rcrs/,$words[0])) {
-     ($rnode) = split /\./, $words[0];
-     $no_of_jobs = $words[1]; #     printf ("%s %d\n",$rnode,$no_of_jobs);
-   }
-   if (grep (/Job/,$words[0])) {
-     my $i;
-     for ($i=1;$i<=$no_of_jobs;$i++){
-       my $j = $i + 2;
-       $file = $words[$j]; # printf ("file = %d %s %s\n",$j,$words[$j],$file);
-       $file =~ s/b0_20y2a_on_|b0_20y2x_on_|b0_20y_1b_off_|b0_2y1a_off_|b0_2y1a_on_//g;
-       $file =~ s/b0_2y2a_off_|b0_2y2a_on_|b0_2y2y_on_|b0_3y1a_off_|b0_3y1a_on_//g;
-       $file =~ s/b0_3y2a_on_|b0_3y2x_on_|b0_3y_1b_off_|//g;
-       $node{$file} = $rnode; #       printf ("%s %s\n",$file,$rnode);
-     }
-   }
-}
-#foreach  $file (sort keys %files_job){printf ("%s %s %s \n",$file,$job_status{$file},$node{$file});}
-foreach $set (sort @SETS){
-#
-  printf ("set = %s \n", $set);
-  $gen_set = $set;
-  $gen_set =~ s/auau200/auau_/g;
-  $gen_set =~ s/hijing135/hijing/g;
-  $gen_set =~ s/default//g;
-  $gen_set =~ s/complete/com/g;
-  $gen_set =~ s/ear//g;
-  $gen_set =~ s/hadronic//g;
-  $gen_set =~ s|/||g;
-  $raw_set = $gen_set . ".list";
-  printf ("gen_set = %s raw_set = %s \n", $gen_set, $raw_set);
-#  if (! -e $raw_set) {
-    print ("raw_set does not exist \n");
-    print ("%s %s \n", $TOPHPSS_SINK,  $set);
-    $answer = `ftp -i -v rmds01 2121 <<EOF
-cd $TOPHPSS_SINK
-cd $set/gstardata
-mdir *.fzd $raw_set
+#____________________________________________________________________
+sub get_list_dir($$$){
+  my $DIR       = @_[0];
+  my $EXTENSION = @_[1];
+  my $LIST      = @_[2];
+#  printf ("DIR=%s EXTENSION=%s\n", $DIR, $EXTENSION, $LIST);
+  $answer = `ftp -i -v rmds01 2121 <<EOF
+cd $DIR
+mdir $EXTENSION $LIST
 EOF
 `;
-#  }
-  foreach $process (@PROCESSES){
-#    printf ("process = %s",$process);
-    my $jb = $gen_set . ".err";
-    my $jb_old = $jb . ".old";
-    if (-f $jb) {my $mv = `mv $jb $jb_old`;}
-    if (open(ERR_LOG,">$jb")) {
-#      printf ("Create log file  %s\n",$jb);
-    }
-    else {
-      printf ("Unable to create log file\n");
-      next;
-    }
-     $reco_set = $process . $gen_set . ".list";
-    $catalog =  $process . $gen_set . ".catalog";
-    if (! -e $reco_set) {
-      $answer = `ftp -i rmds01 2121 <<EOF
-cd ${TOPHPSS_RECO}
-cd ${set}/$process
-mdir *.xdf ${reco_set}
-EOF
-`;
-    }
+}
+#____________________________________________________________________
+sub get_job_status{
+  my $CRS_JOBS = `crs_status.pl -c`; #print $CRS_JOBS;
+  @lines = split /^/m, $CRS_JOBS;
+  foreach $line (@lines){
+#   open(CRS_STATUS,"crs_status.log") ||  die "Can't open RAW_SET tus.log: $!\n";
+#   while ($line=<CRS_STATUS>){
+    my $job;
+    @words = split ("%",$line);#   print $line, $#words, "\n";
+    next if $#words<1;  $job = $words[1]; $jobs{$job} = $job;
+    $job_status{$job} = sprintf("%.4s_%.8s",$words[2],$words[3]);
+#    printf ("job %s status %s node %s",$jobs{$job},$job_status{$job},$nodes{$job});
   }
-# raw data set
-  open(RAW_SET,"$raw_set" ) || die "Can't open RAW_SET $raw_set: $!\n";
-  while ($line=<RAW_SET>){
-#       printf ("%s\n",$line);
-      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#       printf ("filename = %s date =  %s %s %s size = %s\n", $filename,$mon, $day, $time, $size );
-      $file = $filename;
-      $file =~ s/.fzd//g;
-#      printf  ("file = %s size = %s\n", $file, $size);
-      $files{$file}       = $file;
-      $size = $size/1000000;
+}
+#____________________________________________________________________
+sub init_hash {
+  $no_events = 0;
+  $no_events_complete = 0;
+  %geant_size = ();
+  %geant_date = ();
+  %geant_test = ();         # test of input (Y/N)
+  %geant_noev = ();
+  %size_tfs = ();
+  %date_tfs = ();
+  %tfs_size = ();           # dst on disk1
+  %tfs_date = ();
+  %tss_size = ();          # dst in Objy
+  %tss_date = ();
+  %files = ();
+  %files_job = ();
+  %comment = ();
+  %jobfile = ();
+  %archive = ();
+  %running = ();
+  %processed = ();
+  %noevents = ();
+  %Makers = ();
+  %timeperevent = ();
+  %REALTIME = ();
+  %CPUTIME = ();
+  %kBsec = ();
+  %node = ();
+}
+#____________________________________________________________________
+sub read_set($$){
+  # gstardata data set
+  my $SET = @_[0];
+  my $flag = @_[1];
+  open(SET,"$SET" ) || die "Can't open SET $SET: $!\n";
+  while ($line=<SET>){
+    #       printf ("%s\n",$line);
+    ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+#    printf ("filename = %s date =  %s %s %s size = %s\n", $filename,$mon, $day, $time, $size );
+    $file = $filename;
+    $file =~ s/.fzd//g;
+    $file =~ s/_dst.root//g;
+    #      printf  ("file = %s size = %s\n", $file, $size);
+    $files{$file}       = $file;
+    $size = $size/1000000;
+    if ($flag =~ "g"){
       $geant_size{$file} .= int $size;
       $geant_date{$file} .= $mon  . "_" . $day ;
       $geant_test{$file}  = "N";
-      $reco_size{$file}   = "";
-      $reco_date{$file}   = "";
-      $dst_size{$file}    = "";
-      $dst_date{$file}    = "";
-      $Objy_size{$file}   = "";
-      $Objy_date{$file}   = "";
+      $size_tfs{$file}   = "";
+      $date_tfs{$file}   = "";
+      $size_tss{$file}   = "";
+      $date_tss{$file}   = "";
+      $tfs_size{$file}    = "";
+      $tfs_date{$file}    = "";
+      $tss_size{$file}   = "";
+      $tss_date{$file}   = "";
       $kBsec{$file}       = "";
+      $timeperevent{$file} = "";
       $comment{$file}     = "";
       $jobfile{$file}     = "N";
       $archive{$file}     = "N";
       $running{$file}     = "";
+      my $no_ev;
+      ($dummy, $dummy, $no_ev) = split /_/, $file;
+      $no_ev =~ s/evts//g;# printf ("file = %s noev = %d\n", $file, $no_ev);
+      $geant_noev{$file}    = $no_ev;
+#      printf ("geant %i %s\n",$geant_size{$file}, $geant_date{$file});
+    }
+    if ($flag =~ "f"){
+      $size_tfs{$file}    = int $size;
+      $date_tfs{$file}    = $mon  . "_" . $day ;
+#      printf ("tfs %i %s\n",$tfs_size{$file}, $tfs_date{$file});
+    }
+    if ($flag =~ "s"){
+      $size_tss{$file}    = int $size;
+      $date_tss{$file}    = $mon  . "_" . $day ;
+#      printf ("tss %i %s\n",$tss_size{$file}, $tss_date{$file});
+    }
   }
-  close(RAW_SET);
-# reco data set
-  foreach $process (@PROCESSES){
-    $reco_set = $process . $gen_set . ".list";
-    open(RECO_SET,"$reco_set") || die "Can't open RECO_SET $reco_set: $!\n";
-    while ($line=<RECO_SET>){
-      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#       printf ("filename = %s date =  %s %s %s size = %s\n", $filename,$mon, $day, $time, $size );
-      $file = $filename;
-      my @h_dst = grep /_h_/, $filename;
-      if ($#h_dst &&  $reco_date{$file}) {next;} # skip dst if _h_ already exists
-      $file =~ s/(_|_h_)dst.xdf//g;
-#      printf  ("file = %s size = %s\n", $file, $size);
-      $files{$file}       = $file;
-      $size = $size/1000000;
-      $reco_size{$file} = int $size;
-      if ($geant_size{$file}) {my $ratio = $reco_size{$file}/$geant_size{$file};
-          if ($ratio < 0.1) {$reco_size{$file} = "";}
-#          printf ("reco/geant ratio = %f\n",$ratio);}
+  close(SET);
+}
+#______________________________________________________________________
+sub begin_html($){
+  my $new_html = @_[0];
+  open (HTML,">$new_html");
+  print HTML "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n";
+  print HTML "<html>\n";
+  print HTML "  <head>\n";
+  print HTML "          <title>MDC2 summary</title>\n";
+  print HTML "  </head>\n";
+  print HTML "  <body BGCOLOR=\"#ccffff\"> \n";
+  print HTML "      <h1>Production summary</h1>\n";
+  print HTML "<TABLE BORDER=5 CELLSPACING=1 CELLPADDING=2 >\n";
+  print HTML "<TR>\n";
+  print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
+  print HTML "<TD WIDTH=\"30%\" HEIGHT=110><B>Set</B></TD>\n";
+  print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>GEANT input<br>size (GB)</B></TD>\n";
+  print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>GEANT input <br>No. of events</B></TD>\n";
+  print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>tfs/tss dst on HPSS<br>size (GB)</B></TD>\n";
+  print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>tfs/tss dst on disk<br>size (GB)</B></TD>\n";
+  print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>Total DST<br>No. of events<br></B></TD>\n";
+  print HTML "</TR>\n";
+}
+#______________________________________________________________________
+sub end_html($){
+  my $new_html = @_[0];
+  my $Date = `date`;
+  
+  print HTML "</TABLE>\n";
+  print HTML "      <h5>\n";
+  print HTML "      <address><a href=\"mailto:didenko\@bnl.gov\">Lidia Didenko</a></address>\n";
+  print HTML "<!-- Created: Tue Oct 6 05:29:25 MET 1998 -->\n";
+  print HTML "<!-- hhmts start -->\n";
+  print HTML "Last modified: $Date\n";
+  print HTML "<!-- hhmts end -->\n";
+  print HTML "  </body>\n";
+  print HTML "</html>\n";
+  close (HTML);
+}
+
+#____________________________________________________________________
+sub logfile($$){
+  my $f      = @_[0];
+  my $jb_log = @_[1];
+  my @events = `grep 'Done with Event no.' $jb_log;`;
+#  print "No. of Event", $#events, "\n";
+#  print @events;
+  $noevents{$f} = $#events+1;
+  $no_events += $noevents{$f};
+  my @output = `tail -40 $jb_log`;
+#  print @output;
+  my @string;
+  @string = grep /Run completed/, @output;
+  if ($string[0]){
+    $running{$f} = "done";
+    $no_events_complete += $noevents{$f};
+    foreach my $line (@output){
+      if ($line =~ "Cpu Time = ") {
+	@words = split (":",$line);
+	my $Maker = $words[0];
+#	print "Maker :", $Maker, "\n" ,$words[1];
+	my @w = split(" ",$words[1]);
+	my $real_time = $w[3];
+	my $cpu_time  = $w[8];
+	if (!$Makers{$Maker}) {
+	  $Makers{$Maker} = $Maker;
+	  $REALTIME{$Maker} = 0;
+	  $CPUTIME{$Maker} = 0;
+	}
+	$REALTIME{$Maker} =  $real_time;
+	$CPUTIME{$Maker}  += $cpu_time;
+#	if ($Maker =~ "l3Tracks") {printf ("Maker : %s  real / cpu = %f %f \n", $Maker, $real_time, $cpu_time);}
+#	printf ("%s :: %f  - %f \n",$Maker,$REALTIME{$Maker},$CPUTIME{$Maker});
       }
-      if ($reco_size{$file} == 0) {$reco_size{$file} = "";}
-      $reco_date{$file} = $mon  . "_" . $day;
-      if (! defined $geant_date{$file}) { $geant_date{$file} = "";}
-      if (! defined $geant_size{$file}) { $geant_size{$file} = "";}
-      if (! defined $geant_test{$file}) { $geant_test{$file} = "N";}
-      if (! defined $jobfile{$file})    { $jobfile{$file} = "N";}
-      if (! defined $archive{$file})    { $archive{$file} = "N";}
-    }
-    close(RECO_SET);
+    } 
   }
-#  my $count = 0;
-#  foreach  $file (sort keys %files){
-#     $count++;
-#     printf ("file = %s no %d\n",$file, $count);
-#  }
-
-#_____________________ scalars for summary
-my $geant_size = 0;
-my $reco_size = 0;
-my $dst_size = 0;
-my $dst_size_tot = 0;
-my $Objy_size = 0;
-my $noevents = 0;
-my $no_ev_tot = 0;
-my $no_ev;
-  foreach  $file (sort keys %files){
-# /disk1/dst
-    ($dummy, $dummy, $no_ev) = split /_/, $file;
-    $no_ev =~ s/evts//g;# printf ("file = %s noev = %d\n", $file, $no_ev);
-    if ($no_ev) {$no_ev_tot += $no_ev;}
-    if ($no_ev && $kBsec{$file}) {
-       $kBsec{$file} = $kBsec{$file} * $noevents{$file} / $no_ev;
-       if (! $reco_size{$file} && $dst_size{$file}) {$kBsec{$file} = "";}
-    }
-    $dir = $TOPDISK1_RECO . "/" . $set . "/tfs_dst/";
-    $full_name = $dir . $file . "_h_dst.xdf";# printf ("full name = %s\n",$full_name);
-    if (! -f $full_name) {$full_name = $dir . $file . "_dst.xdf";}
-    if (-f $full_name){
-      $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
-      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
-      $size = $size/1000000;
-      $dst_size{$file} = int $size;
-      $dst_date{$file} = $mon . "_" . $day;
-    }
-# Objy files
-    $dir = $Objy . "/";
-    $full_name = $dir . $file . "_h_dst.xdf.STAR.DB";# printf ("full name = %s\n",$full_name);
-    if (! -f $full_name) {$full_name = $dir . $file . "_h_dst.xdff.STAR.DB";}# printf ("full name = %s\n",$full_name);}
-    if (! -f $full_name) {$full_name = $dir . $file . "_dst.xdf.STAR.DB";}# printf ("full name = %s\n",$full_name);}
-    if (-f $full_name){
-      $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
-      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
-      $size = $size/1000000;
-      $Objy_size{$file} = int $size;
-      $Objy_date{$file} = $mon . "_" . $day;
-     }
-
-#  geant test logfiles
-    $dir = $TOP_TEST . "/" . $set . "/Gstardata";
-    ($tag) = split /_/, $file, 3;
-    $tag .= ".log";
-    @out = `find $dir -name $tag`;
-    $noevents{$file} = "";
-    $timeperevent{$file} = "";
-#    printf ("file = %s dir = %s tag = %s out = %s\n", $file, $dir, $tag, @out);
-    if ($out[0]) {$geant_test{$file}  = "Y";}
-# log files comments
-    $dir = $JOB_LOG . "/" . $set . "/tfs_dst";#    printf ("file = %s \n", $file);
-#    my @outfind = `find $dir -name $tag -a ! -name $tag.err -a ! -name $tag.old`;# print @outfind;
-    $tag = $dir . "/" . $file . "*";
-    my @log = glob $tag;
-    my @outfind;
-    if ($log[0]) {@outfind = `ls -t $tag`;}# print @outfind;
-    if ($outfind[0]) {
-      my $count=0;
-      foreach $t (@outfind){
-        $count++;
-        if ($count ==1){
-          my @output = `tail -100 $t`;
-          my @string = grep /total/, @output;
-          if ($string[0]){
-             my @newstring = grep /process/, @string;
-             if ($newstring[0]){
-               my @last_line = grep /\<bfc\>/, @newstring;#printf ("last = %s\n",$last_line[0]);
-               $last_line = $last_line[0];
-               if ($last_line){#            printf ("%s\n", $last_line);
-                 ($dummy, $dummy, $dummy, $dummy, $dummy, $no_events, $dummy, $time2, $time) = split (" ",$last_line);
-                 my $ev = $no_events;
-                 $ev =~ s/events//g;
-                 $time2 =~ s/=//g;
-                 if ($time2) {$no_events = $ev;
-                              $time = $time2;
-                 }
-                 $noevents{$file} = $no_events;
-#                printf ("no_events %d time = %d\n",$no_events,$time);
-                 $timeperevent{$file} = $time/60/$no_events;
-                 $running{$file} = "Done";
-               }
-             }
-          }
-          @string = grep /pf+/, @output;# printf ("string %s\n", $string[0]);
-          if ($string[0]) {
-            my $cpu;
-            my $tot;
-            ($cpu, $dummy, $tot) = split / /,$string[0];
-            $cpu =~ s/u//g;
-            if ($cpu && $geant_size{$file} && $noevents{$file}) {
-              $kBsec{$file} = 1000*$geant_size{$file}/$cpu;
-#             printf ("cpu = %f size =%f MGB/sec = %f\n",  $geant_size{$file}, $cpu, $kBsec{$file});
-            }
-            $cpu = (int $cpu/36)/100;
-            @string = split /\./, $tot;
-            $tot = $string[0];
-            $comment{$file} = $cpu . '\/' . $tot;
-          }
-        }
-        $comment{$file} .= $t;
-        $comment{$file} =~ s/$dir//g;
-        $comment{$file} =~ s/$file//g;
-        $comment{$file} =~ s/.err//g;
-        $comment{$file} =~ s|/old/|old|g;
-        $comment{$file} =~ s|/||g;
-        $comment{$file} =~ s/.old/|/g;
-        $comment{$file} =~ s/old/|/g;
-        $comment{$file} =~ s/_/ /g;
-        $comment{$file} =~ s/done//g;
-        $comment{$file} =~ s/-Aft-//g;
-#        printf ("comment = \%s",  $comment{$file});
-      }
-    }
-# process
-    foreach $process (@PROCESSES){
-       my $jb;
-       $jb =  $REQUEST . "/" . $process . "/jobfiles/" .  $gen_set . "_" . $file;
-       if (-f $jb) {$jobfile{$file} = "Y";}
-       $jb =  $REQUEST . "/" . $process . "/" . "/archive/" . $file;
-       if (-f $jb) {$archive{$file} = "Y";} # printf ("archive %s \n",$archive{$file});}
-#        $jb =  $REQUEST . "/" . $process . "/" . $process . ".lsf/" . $file;
-#       if (-f $jb) {$archive{$file} = "Y";} # printf ("archive %s \n",$archive{$file});}
-# summary file
-      $jb = "";
-      my $full_tag =   $JOB_SUMMARY . "/" . $process . "/" . $file . "*";
-      my @jb = glob $full_tag;  #      printf ("found %d summary files %s\n",$#jb);
-      if ($#jb < 0) {next;}
-      if ($#jb>0) {
-        print "Multiple summary files\n";
-        for (my $i = 0; $i<=$#jb; $i++){
-          printf ("summary file = %s\n",$jb[$i]);
-        }
-      }
-        $jb = $jb[0];
-        $running{$file} = "???";# printf ("%s %s\n",   $running{$file}, $jb);
-        $processed{$file} = "No";
-        $full_tag =   $JOB_SUMMARY . "/" . $process . "/" . $file . "*" . ".done";
-        my @jb = glob $full_tag;
-        $jb = "";
-        if ($#jb > -1) {$jb = $jb[0];}
-        my $rnode;
-        if ($jb) {
-          $running{$file} = "done";
-          $last_line = `grep 'total\ CPU\ to\ process' $jb`;
-          if ($last_line){#            printf ("%s\n", $last_line);
-            ($dummy, $dummy, $dummy, $dummy, $dummy, $no_events, $dummy, $time2, $time) = split (" ",$last_line);
-            my $ev = $no_events;
-            $ev =~ s/events//g;
-            $time2 =~ s/=//g;
-            if ($time2) {
-              $no_events = $ev;
-              $time = $time2;
-            }
-            $noevents{$file} = $no_events;#            printf ("no_events %d time = %d\n",$no_events,$time);
-            $timeperevent{$file} = $time/60/$no_events;
-          }
-          ($dummy, $rnode) = split '\.', $jb;# printf ("jb = %s rnode = %s\n", $jb, $rnode);
-          $running{$file} = $running{$file} . "_" . $rnode;
-        }
-        if ($job_status{$file}) {
-#          if (grep (/\?\?/, $running{$file}) ==0) { print $file "job conflict";}
-          @chars = split //, $job_status{$file};
-          $running{$file} = $chars[0] . $chars[1] . $chars[2] . $chars[3] . "_" . $node{$file};
-        }
-#     printf ("Run status %s from summary file %s\n", $running{$file},$jb);
-    }
-#    printf ("comment = %s", $comment{$file});
-#    printf ("file = %s, geant_size = %s, date = %s reco_size = %s reco_date = %s",
-#   $file, $geant_size{$file}, $geant_date{$file}, $reco_size{$file}, $reco_date{$file});
-#   printf (" gtest = %s comment = %s\n", $geant_test{$file}, $comment{$file}) ;
-     if (! $reco_size{$file} && !$dst_size{$file} && grep (/[Dd]one/,$running{$file})) {
-       $running{$file} = "";
-     }
-     $GJB  = $geant_test{$file} . $jobfile{$file} . $archive{$file};
-     write;
-# summary
-     if ($geant_size{$file})    {$geant_size    +=  $geant_size{$file};}
-     if ($reco_size{$file})     {$reco_size     +=  $reco_size{$file};}
-     if ($dst_size{$file})      {$dst_size      +=  $dst_size{$file};}
-     if ($Objy_size{$file})     {$Objy_size     +=  $Objy_size{$file};}
-     if ($noevents{$file})      {$noevents      +=  $noevents{$file};}
-     if ($reco_size{$file})     {$dst_size_tot  +=  $reco_size{$file};}
-     else {if ($dst_size{$file})    {$dst_size_tot  +=  $dst_size{$file};}}
-
+  @string = grep /Break/, @output;
+  if ($string[0]){
+    $comment{$f} .= $string[0];
+#    print "------------->", $comment{$file};
   }
- printf (" ------- Summary for set = %s ----------------------\n",$set);
- $geant_size = $geant_size/1000;
- $reco_size  = $reco_size/1000;
- $dst_size   = $dst_size/1000;
- $Objy_size  = $Objy_size/1000;
- $dst_size_tot =  $dst_size_tot/1000;
- printf (" GEANT = %6.2f GB with %d events, dst = %6.2f (HPSS) + %6.2f (DISK1) = %6.2f GB with %d events, Objy = %6.2f GB\n", $geant_size, $no_ev_tot, $reco_size, $dst_size, $dst_size_tot, $noevents, $Objy_size);
-  foreach $process (@PROCESSES){
-#_______lsf
-    my $jb = $REQUEST . "/" . $process . "/" . $process . ".lsf/" . $gen_set;
-    my $jb_old = $jb . ".old";
-    if (-f $jb) {my $mv = `mv $jb $jb_old`;}
-#    if (open(JOB_SCRIPT,">$jb")) {
-#      printf ("Create job script to submit jobs %s\n",$jb);
-#      print JOB_SCRIPT "#! /usr/local/bin/tcsh -f\n";
-#    }
-#    else {
-#      printf ("Unable to create job submission script\n");
-#      next;
-#    }
-    my $jb = $gen_set . ".del";
-    my $jb_old = $jb . ".old";
-    if (-f $jb) {my $mv = `mv $jb $jb_old`;}
-    if (open(DEL_SCRIPT,">$jb")) {
-#      printf ("Create job script to delete dst files %s\n",$jb);
-      print DEL_SCRIPT "#! /usr/local/bin/tcsh -f\n";
-    }
-    else {
-      printf ("Unable to create file delete script\n");
-      next;
-    }
-    my $jb = $gen_set . ".ftp";
-    my $jb_old = $jb . ".old";
-    if (-f $jb) {my $mv = `mv $jb $jb_old`;}
-    if (open(FTP_SCRIPT,">$jb")) {
-      my $ftp_log = $jb . ".log";
-#      printf ("Create job script to ftp dst files %s\n",$jb);
-      print FTP_SCRIPT "#! /usr/local/bin/tcsh -f\n";
-      print FTP_SCRIPT "pftp rmds01 2121 <<EOF | tee -a $ftp_log\n";
-      print FTP_SCRIPT "bin\n";
-      print FTP_SCRIPT "quote site setcos 7\n";
-    }
-    else {
-      printf ("Unable to create file ftp script\n");
-      next;
-    }
-    foreach  $file (sort keys %files){
-      my $input_file = $TOPHPSS_SINK . "/" . $set . "/gstardata/" . $file . ".fzd";
-# No dst on HPSS, No dst on disk1 and job is not running
-      if ($geant_size{$file} && ! $reco_size{$file} && ! $dst_size{$file}){
-        if (! $running{$file}){
-#          print   JOB_SCRIPT "lsf_sub.csh $input_file \n";
-#_______Tom
-    my $Tom = "";
-    if ($Tom){
-    my $jb_tom  = $REQUEST . "/" . $process . "/jobfiles/" .  $gen_set . "_" . $file;
-    my $jb_arc  = $REQUEST . "/" . $process . "/archive/"  .  $gen_set . "_" . $file;
-    my $jb_hold = $REQUEST . "/" . $process . "/hold_jobs/"  .  $gen_set . "_" . $file;
-    if (! -f $jb_tom && ! -f $jb_arc && ! -f $jb_hold) {
+}
+#____________________________________________________________________
+sub crs_script($$$$){
+  my $file    = @_[0];
+  my $gen_set = @_[1];
+  my $set     = @_[2];
+  my $process = @_[3];
+  my $jb_log  = $JOB_LOG . "/" . $process . "/" . $gen_set . "_" . $file;
+  my $jb_arc  = $REQUEST . "/" . $process . "/archive/"  .  $gen_set . "_" . $file;
+  my $jb_new  = $REQUEST . "/" . $process . "/new_jobs/" .  $gen_set . "_" . $file;
+  my $jb_tom  = $REQUEST . "/" . $process . "/jobfiles/" .  $gen_set . "_" . $file;
+  my $jb_hold = $REQUEST . "/" . $process . "/hold_jobs/"  .  $gen_set . "_" . $file;
+#  printf ("log %s\n",$jb_log);
+  my $done=0;
+  if ($size_tfs{$file}) {$done++;}
+  if ($tfs_size{$file})  {$done++;}
+  if ($tss_size{$file})  {$done++;}
+  if (-f $jb_log) {
+    if ($running{$file}) {$JFS  .= "R"; $done++;}
+    else {                $JFS  .= "L"; $done++; logfile($file,$jb_log);}
+  }
+  if (!-f $jb_log && $running{$file}) {$JFS  .= "T"; $done++;}
+  if (-f $jb_tom) {$JFS  .= "J"; $done++;}
+  if (-f $jb_arc) {$JFS  .= "A"; $done++;}
+  if (-f $jb_new) {$JFS  .= "N"; $done++;}
+  if (-f $jb_hold) {$JFS .= "H"; $done++;}
+  
+    
+#    printf ("create new job file %s\n",$jb_new);
+  if (! $done) {
       my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $set . "/gstardata";
       my $hpss_raw_file = $file . ".fzd";
       my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $set . "/" . $process;
-      my $hpss_dst_file = $file . "_h_dst.xdf";
+      my $hpss_dst_file0 = $file . ".root";
+      my $hpss_dst_file1 = $file . "_dst.root";
+      my $hpss_dst_file2 = $file . "_dst.xdf";
       my $executable    = $REQUEST . "/" . $process . "/" . $process;
-      my $log_dir       = $JOB_LOG . "/" . $set . "/" . $process;
-      my $err_log       = $file . ".err";
-      if (!open (TOM_SCRIPT,">$jb_tom")) {printf ("Unable to create job submission script\n");}
-      print TOM_SCRIPT "#\n";
-      print TOM_SCRIPT "#  This is a sample Central Reconstruction Job Specification File\n";
-      print TOM_SCRIPT "#\n";
-      print TOM_SCRIPT " \n";
+#      my $executable    = "bfc_" . $process . ".C";
+      my $log_dir       = $JOB_LOG . "/" . $process;
+      my $log_name      = $gen_set . "_" . $file;
+      my $err_log       = $log_name . ".err";
+      if (!open (TOM_SCRIPT,">$jb_new")) {printf ("Unable to create job submission script %s\n",$jb_new);}
       print TOM_SCRIPT "mergefactor=1\n";
       print TOM_SCRIPT "#input\n";
       print TOM_SCRIPT "      inputnumstreams=1\n";
-      print TOM_SCRIPT "      inputstreamtype[0]= HPSS\n";
+      print TOM_SCRIPT "      inputstreamtype[0]=HPSS\n";
       print TOM_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
       print TOM_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
-      print TOM_SCRIPT " \n";
       print TOM_SCRIPT "#output\n";
-      print TOM_SCRIPT "      outputnumstreams=1\n";
+      print TOM_SCRIPT "      outputnumstreams=3\n";
       print TOM_SCRIPT "#output stream \n";
-      print TOM_SCRIPT "      outputstreamtype[0]= HPSS\n";
+      print TOM_SCRIPT "      outputstreamtype[0]=HPSS\n";
       print TOM_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
-      print TOM_SCRIPT "      outputfile[0]=$hpss_dst_file\n";
-      print TOM_SCRIPT " \n";
+      print TOM_SCRIPT "      outputfile[0]=$hpss_dst_file0\n";
+      print TOM_SCRIPT "      outputstreamtype[1]= HPSS\n";
+      print TOM_SCRIPT "      outputdir[1]=$hpss_dst_dir\n";
+      print TOM_SCRIPT "      outputfile[1]=$hpss_dst_file1\n";
+      print TOM_SCRIPT "      outputstreamtype[2]=HPSS\n";
+      print TOM_SCRIPT "      outputdir[2]=$hpss_dst_dir\n";
+      print TOM_SCRIPT "      outputfile[2]=$hpss_dst_file2\n";
       print TOM_SCRIPT "#standard out -- Should be five outputs\n";
       print TOM_SCRIPT "      stdoutdir=$log_dir\n";
-      print TOM_SCRIPT "      stdout=$file\n";
-      print TOM_SCRIPT " \n";
+      print TOM_SCRIPT "      stdout=$log_name\n";
       print TOM_SCRIPT "#standard error -- Should be five\n";
       print TOM_SCRIPT "      stderrdir=$log_dir\n";
       print TOM_SCRIPT "      stderr=$err_log\n";
-      print TOM_SCRIPT " \n";
       print TOM_SCRIPT "      notify=starreco\@rcf.rhic.bnl.gov\n";
-      print TOM_SCRIPT " \n";
       print TOM_SCRIPT "#program to run\n";
       print TOM_SCRIPT "      executable=$executable\n";
-      print TOM_SCRIPT " \n";
       close(TOM_SCRIPT);
-    }
-#          print   JOB_SCRIPT "lsf_sub.csh $input_file \n";
-#_______root
-    my $root = "Yes";
-    if ($root){
-    my $jb_root = $REQUEST . "/" . $process . "/jobfiles/" .  $gen_set . "_" . $file;
-    my $jb_arc  = $REQUEST . "/" . $process . "/archive/"  .  $gen_set . "_" . $file;
-    my $jb_hold = $REQUEST . "/" . $process . "/hold_jobs/"  .  $gen_set . "_" . $file;
-    if (! -f $jb_root && ! -f $jb_arc && ! -f $jb_hold) {
-      my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $set . "/gstardata";
-      my $hpss_raw_file = $file . ".fzd";
-      my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $set . "/" . $process;
-      my $hpss_root_file = $file . ".root";
-      my $hpss_dst_file = $file . "_dst.xdf";
-      my $executable    = $REQUEST . "/" . $process . "/" . $process . ".csh";
-      my $log_dir       = $JOB_LOG . "/" . $set . "/" . $process;
-      my $err_log       = $file . ".err";
-      if (!open (root_SCRIPT,">$jb_root")) {printf ("Unable to create job submission script\n");}
-      print root_SCRIPT "#\n";
-      print root_SCRIPT "#  This is a sample Central Reconstruction Job Specification File\n";
-      print root_SCRIPT "#\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "mergefactor=1\n";
-      print root_SCRIPT "#input\n";
-      print root_SCRIPT "      inputnumstreams=1\n";
-      print root_SCRIPT "      inputstreamtype[0]= HPSS\n";
-      print root_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
-      print root_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "#output\n";
-      print root_SCRIPT "      outputnumstreams=2\n";
-      print root_SCRIPT "#output stream \n";
-      print root_SCRIPT "      outputstreamtype[0]= HPSS\n";
-      print root_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
-      print root_SCRIPT "      outputfile[0]=$hpss_root_file\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "#output stream \n";
-      print root_SCRIPT "      outputstreamtype[1]= HPSS\n";
-      print root_SCRIPT "      outputdir[1]=$hpss_dst_dir\n";
-      print root_SCRIPT "      outputfile[1]=$hpss_dst_file\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "#standard out -- Should be five outputs\n";
-      print root_SCRIPT "      stdoutdir=$log_dir\n";
-      print root_SCRIPT "      stdout=$file\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "#standard error -- Should be five\n";
-      print root_SCRIPT "      stderrdir=$log_dir\n";
-      print root_SCRIPT "      stderr=$err_log\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "      notify=starreco\@rcf.rhic.bnl.gov\n";
-      print root_SCRIPT " \n";
-      print root_SCRIPT "#program to run\n";
-      print root_SCRIPT "      executable=$executable\n";
-      print root_SCRIPT " \n";
-      close(root_SCRIPT);
+      $JFS .= "N";
     }
 }
-        }
-        else {print ERR_LOG  "file = $file run status is $running{$file}  but dst is missing \n" ;}
-      }
-      else {
-        if ($reco_size{$file} && $dst_size{$file}){
-          if ($reco_size{$file} == $dst_size{$file}){
-            my $delete_file = $TOPDISK1_RECO . "/" . $set . "/" .  $process . "/" . $file . "_h_dst.xdf";
-            print  DEL_SCRIPT "rm $delete_file\n";
-          }
-        }
-      }
-      if ($dst_size{$file} && ! $reco_size{$file} || $dst_size{$file} > ! $reco_size{$file}){
-        my $disk1_dir = $TOPDISK1_RECO . "/" . $set . "/" .  $process;
-        my $hpss_dir  = $TOPHPSS_RECO . "/" . $set . "/" .  $process;
-        my $ftp_file  = $file . "_h_dst.xdf";
-        print FTP_SCRIPT "lcd $disk1_dir\n";
-        print FTP_SCRIPT "cd  $hpss_dir\n";
-        print FTP_SCRIPT "pput  $ftp_file\n";
-      }
+#____________________________________________________________________
+format STDOUT_TOP =
+set = b0_3/year_1b/hadronic_off Input Total = 249.671 (GB) in 256 files -> Output Total = 0(GB) in 0 files
+set = @<<<<<<<<<<<<<<<<<<<<<<<< Input Total = @<<<<<< (GB) in @<< files -> Output Total = @>> (GB) in @>> files
+      $set,                                   $input,         $input_files,               $output,    $output_files
+.
+format STDOUT_TOP =
+set =@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$set,
+                      size               tfs/tss on HPSS  tfs/tss on disk        No. time   Rate  Comments
+            Filename  (MB)   date   JSF  (MB)   date     (MB)   date     run     ev.(mins) (kB/s) cpu\tot (hrs)
+.
+format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<@>>>> @>>>>>@||||||||@>>>>>@>>>>>>>@>>>>>>>@>>>>>>>>@>>>>@>>>>>>@<<<<<<<<<<@>>>@>>>> @<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$file,$geant_size{$file},$geant_date{$file},$JFS,$hpss_size,$hpss_date,$disk_size,$disk_date,$running{$file},$noevents{$file},$timeperevent{$file},$kBsec{$file},$comment{$file}
+.
+#____________________________________________________________________
+format OUT_TOP =
+set = b0_3/year_1b/hadronic_off Input Total = 249.671 (GB) in 256 files -> Output Total = 0(GB) in 0 files
+set = @<<<<<<<<<<<<<<<<<<<<<<<< Input Total = @<<<<<< (GB) in @<< files -> Output Total = @>> (GB) in @>> files
+      $set,                                   $input,         $input_files,               $output,    $output_files
+.
+format OUT_TOP =
+set =@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$set,
+                      size               tfs/tss on HPSS  tfs/tss on disk        No. time   Rate  Comments
+            Filename  (MB)   date   JSF  (MB)   date     (MB)   date     run     ev.(mins) (kB/s) cpu\tot (hrs)
+.
+format OUT =
+@<<<<<<<<<<<<<<<<<<<<@>>>> @>>>>>@||||||||@>>>>>@>>>>>>>@>>>>>>>@>>>>>>>>@>>>>@>>>>>>@<<<<<<<<<<@>>>@>>>> @<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$file,$geant_size{$file},$geant_date{$file},$JFS,$hpss_size,$hpss_date,$disk_size,$disk_date,$running{$file},$noevents{$file},$timeperevent{$file},$kBsec{$file},$comment{$file}
+.
+#______________________________________________________________
+#  @lines = split /^/m, `date +"%T_%d_%h_%y"`;
+#  my $DATE = /$/,`date +"%T_%d_%h_%y"`;
+   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
+#   printf("%s %s %s %s 5s %s %s %s\n", $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst);
+#   my $month =  ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")[(localtime)[3]];
+   my $DATE  = $hour . ":" . $min . ":" . $sec . "_" . $day . $mon . "_" . $year;
+#   printf ("Date = %s\n",$DATE);
+my $html     = "MDC2.summary.html";
+my $new_html = $html . $DATE;
+get_job_status();
+begin_html($new_html);
+#foreach my $full_set ("auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on"){
+foreach my $full_set (@SETS){
+  $set = $full_set;
+  $set =~ s/auau200\///g;
+  init_hash();
+  my $gen_set = $set;
+  $gen_set =~ s/\//_/g;
+  printf ("set = %s \n", $set);
+# gstardata
+  my $gstardata_set = $gen_set . ".list";
+  printf ("gen_set = %s gstardata_set = %s \n", $gen_set, $gstardata_set);
+  $DIR = $TOPHPSS_SINK . "/" . $full_set . "/" . "gstardata";
+  $EXTENSION = "*.fz*";
+  $LIST = $gstardata_set;
+  if (! -e $gstardata_set) {get_list_dir($DIR,$EXTENSION,$LIST);}
+  read_set($gstardata_set,'g');
+# tfs
+  my $tfs_set = "tfs_" . $gen_set . ".list";
+  printf ("gen_set = %s tfs_set = %s \n", $gen_set, $tfs_set);
+  $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tfs";
+  $EXTENSION = "*_dst.root";
+  $LIST = $tfs_set;
+  if (! -e $tfs_set) {get_list_dir($DIR,$EXTENSION,$LIST);}
+  read_set($tfs_set,'f');
+# tss
+  my $tss_set = "tss_" . $gen_set . ".list";
+  printf ("gen_set = %s tss_set = %s \n", $gen_set, $tss_set);
+  $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tss";
+  $EXTENSION = "*_dst.root";
+  $LIST = $tss_set;
+  if (! -e $tss_set) {get_list_dir($DIR,$EXTENSION,$LIST);}
+  read_set($tss_set,'s');
+
+  my $no_of_files=0;
+  my $no_of_events=0;
+  my $total_geant_size =0;
+  my $total_size_tfs = 0;
+  my $total_tfs_size = 0; # on disk1
+  my $total_tss_size = 0;
+  my $total_size_tfs = 0; # on hpss
+  my $total_size_tss = 0;
+  my $total_no_eve   = 0;
+#  select 
+  my $catalog = $gen_set . ".catalog";
+  open (OUT, ">$catalog");
+  foreach  $file (sort keys %files){
+# tfs/tss on hpss
+
+# tfs on disk1
+    my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tfs/" . $file . "_dst.root";
+#    printf ("full name %s\n",$full_name);
+    if (-f $full_name){
+      $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
+      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+#      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
+      $size = $size/1000000;
+      $tfs_size{$file} = int $size;
+      $tfs_date{$file} = $mon . "_" . $day;
+      $total_tfs_size += $tfs_size{$file};
     }
-#    close (JOB_SCRIPT);
-    close (DEL_SCRIPT);
-    print FTP_SCRIPT "dir\n";
-    print FTP_SCRIPT "EOF\n";
-    close (FTP_SCRIPT);
-    close (ERR_LOG);
+# tss on disk1
+    my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tss/" . $file . "_dst.root";
+#    printf ("full name %s\n",$full_name);
+    if (-f $full_name){
+      $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
+      ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+#      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
+      $size = $size/1000000;
+      $tss_size{$file} = int $size;
+      $tss_date{$file} = $mon . "_" . $day;
+      $total_tss_size += $tss_size{$file};
+      
+    }
+    $no_of_files++;
+    $total_geant_size += $geant_size{$file};
+    $no_of_events     += $geant_noev{$file};
+    my $tag = $gen_set . "_" . $file;
+#    printf ("tag %s status %s\n",$tag,$job_status{$tag});
+    $running{$file} = $job_status{$tag};
+    $JFS = "";
+    $JFS .= "f";
+    my $process = "tfs";
+    crs_script($file,$gen_set,$full_set,$process);
+#    if ($no_events_complete) {last;}
+    $JFS .= "-s";
+    my $process = "tss";
+    crs_script($file,$gen_set,$full_set,$process);
+    $hpss_size = $size_tfs{$file} . "/" . $size_tss{$file} . "|" ;
+    $hpss_date = $date_tfs{$file} . "/" . $date_tss{$file} . "|";
+    $disk_size = $tfs_size{$file} . "/" . $tss_size{$file} . "|" ;
+    $disk_date = $tfs_date{$file} . "/" . $tss_date{$file} . "|";
+    $total_size_tfs += $size_tfs{$file};
+    $total_size_tss += $size_tss{$file};
+    $total_no_eve   += $noevents{$file};
+    write OUT;
+    write;
   }
+  printf (" Total no. of files %i with %12.3f (GBytes) with %i events on input and %i/%i events on output\n",
+  $no_of_files, $total_geant_size/1000., $no_of_events,$no_events,$no_events_complete);
+  printf (" Total no. of event processed = %i on hpss %12.3f/%12.3f on disk %12.3f/%12.3f\n",
+	  $total_no_eve,$total_size_tfs,$total_size_tss,$total_tfs_size,$total_tss_size);
+#  my $HPSS_GB = 
+  my $GB = $total_geant_size/1000;
+  print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
+  print HTML "<td><a href=\"$catalog\">$set</a></td>\n";
+  print HTML "<td>$GB</td><td>$no_of_events</td><td>$total_size_tfs/$total_size_tss</td><td>$total_tfs_size/$total_tss_size</td><td>$total_no_eve</td></tr>\n"; 
+  my $prt=0;
+  if ($prt && $no_events_complete) {
+    my $real_time_total = 0;
+    my $cpu_time_total = 0;
+    foreach my $Maker (sort keys %Makers){
+      my $real_time = int $REALTIME{$Maker};
+      my $cpu_time  = int $CPUTIME{$Maker};
+      $real_time_total += $real_time;
+      $cpu_time_total  += $cpu_time;
+#      printf ("Total %s %f seconds %f seconds\n",  $Maker, $real_time,$cpu_time); 
+      my $real_time =  $real_time/$no_events_complete;
+      my $cpu_time  =  $cpu_time/$no_events_complete;
+      printf ("%s %f seconds %f seconds\n",  $Maker, $real_time,$cpu_time); 
+      
+    }
+    $real_time_total = $real_time_total/$no_events_complete;
+    $cpu_time_total  = $cpu_time_total /$no_events_complete;
+    printf ("Total %f seconds %f seconds\n",  $real_time_total,$cpu_time_total); 
+  }
+  close (OUT);
+  $TOTAL_GEANT_SIZE += $total_geant_size; 
+  $NO_OF_EVENTS += $no_of_events;
+  $TOTAL_SIZE_TFS += $total_size_tfs;
+  $TOTAL_SIZE_TSS += $total_size_tss;
+  $TOTAL_TFS_SIZE += $total_tfs_size;
+  $TOTAL_TSS_SIZE += $total_tss_size;
+  $TOTAL_NO_EVE   += $total_no_eve;
+#____$TOTAL_SIZE_TSS__________________________________________________________
 }
+  print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
+  print HTML "<td>Total</td>\n";
+  my $GB = $TOTAL_GEANT_SIZE/1000;
+  print HTML "<td>$GB</td><td>$NO_OF_EVENTS</td><td>$TOTAL_SIZE_TFS/$TOTAL_SIZE_TSS</td><td>$TOTAL_TFS_SIZE/$TOTAL_TSS_SIZE</td><td>$TOTAL_NO_EVE</td></tr>\n";
+  print HTML "</TR>\n";
+
+end_html($new_html);
+my $answer = `rm -f $html; ln -s $new_html $html;`; 
+
 exit(0);
 # last line
+  
