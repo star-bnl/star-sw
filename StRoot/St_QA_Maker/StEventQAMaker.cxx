@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.30 2001/12/20 03:11:07 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.31 2001/12/28 09:19:12 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.31  2001/12/28 09:19:12  genevb
+// Adjustments for pp running
+//
 // Revision 2.30  2001/12/20 03:11:07  genevb
 // pp trigger words 0x2XXX
 //
@@ -177,7 +180,7 @@ Int_t StEventQAMaker::Make() {
         // process Monte Carlo events
         histsSet = 0;
       }
-      BookHist();
+      BookHistTrigger();
     }
     UInt_t tword = 0;
     Bool_t doEvent = kTRUE;
@@ -200,6 +203,7 @@ Int_t StEventQAMaker::Make() {
         } else if ((tword >= 0x2000) && (tword < 0x3000)) {
           mTrigWord->Fill(4.); // "pp Physics"
 	  doEvent = kTRUE;
+          if ((firstEvent) && (histsSet==1)) histsSet = 2;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"
         } else {
@@ -222,18 +226,19 @@ Int_t StEventQAMaker::Make() {
         << "skipping because trigger word=" << tword << endm;
       return kStOk;
     }
+    if (firstEvent) BookHist();
     // only process if a primary vertex exists !!!
     if (event->primaryVertex()) {
       multiplicity = event->trackNodes().size();
       int makeStat = StQAMakerBase::Make();
       mNullPrimVtx->Fill(1);
-      if (histsSet == 1)
+      if (histsSet > 0)
 	hists->mNullPrimVtxMult->Fill(1);
       return makeStat;
     } else {
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
       mNullPrimVtx->Fill(-1);
-      if (histsSet == 1)
+      if (histsSet > 0)
 	hists->mNullPrimVtxMult->Fill(-1);
       return kStOk;
     }
