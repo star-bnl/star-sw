@@ -252,3 +252,10 @@
 *       - get from $STAR/kumacs/gen directory
 *    - run hijing
 *    - write xdf file out
+* 
+* 15. call_bfc_mdin_tpc_reco.kumac
+*    - read in tpc minidaq data file
+*    - reformat tpc minidaq data into standard format
+*    - run tpc clustering code
+*    - write xdf file containing full directories
+*
