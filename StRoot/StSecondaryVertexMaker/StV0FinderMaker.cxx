@@ -56,7 +56,7 @@ ClassImp(StV0FinderMaker)
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
          ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
          prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
-         useTracker(kTrackerUseTPT),useSVT(kNoSVT),useEventModel(kUseStEvent),
+         useTracker(kTrackerUseBOTH),useSVT(kUseSVT),useEventModel(kUseStEvent),
 	 useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
 	 useLanguage(kLanguageUseRun),useLikesign(kLikesignUseStandard),
 	 useRotating(kRotatingUseStandard)
@@ -161,6 +161,10 @@ Int_t StV0FinderMaker::Init()
     {gMessMgr->Error("StV0FinderMaker::Init() : wrong SVTUsage parameter set.");
      return kStErr;
      }
+ if ((useEventModel!=kUseStEvent) && (useEventModel!=kUseMuDst))
+    {gMessMgr->Error("StV0FinderMaker::Init() : wrong EventModelUsage parameter set.");
+     return kStErr;
+     }
  if ((useLikesign!=kLikesignUseStandard) && (useLikesign!=kLikesignUseLikesign))
     {gMessMgr->Error("StV0FinderMaker::Init() : wrong LikesignUsage parameter set.");
      return kStErr;
@@ -173,7 +177,10 @@ Int_t StV0FinderMaker::Init()
  if (useTracker == kTrackerUseTPT) gMessMgr->Info()<<"StV0FinderMaker : use TPT tracks."<<endm;
  if (useTracker == kTrackerUseITTF) gMessMgr->Info()<<"StV0FinderMaker : use ITTF tracks."<<endm;
  if (useTracker == kTrackerUseBOTH) gMessMgr->Info()<<"StV0FinderMaker : use TPT *and* ITTF tracks."<<endm;
- if (useSVT == kUseSVT) gMessMgr->Info()<<"StV0FinderMaker : use SVT points if possible."<<endm;///Betty
+ if (useSVT == kUseSVT) gMessMgr->Info()<<"StV0FinderMaker : use SVT points if possible."<<endm;
+ if (useSVT == kNoSVT) gMessMgr->Info()<<"StV0FinderMaker : do not use SVT points."<<endm;
+ if (useEventModel == kUseStEvent) gMessMgr->Info()<<"StV0FinderMaker : expect StEvent files in input."<<endm;
+ if (useEventModel == kUseMuDst)  gMessMgr->Info()<<"StV0FinderMaker : expect MuDst files in input."<<endm;
  if (useLikesign == kLikesignUseLikesign) gMessMgr->Info()<<"StV0FinderMaker : does like-sign finding."<<endm;
  if (useRotating == kRotatingUseRotating) gMessMgr->Info()<<"StV0FinderMaker : does rotating finding."<<endm;
  if (useRotating == kRotatingUseSymmetry) gMessMgr->Info()<<"StV0FinderMaker : does symmetry finding."<<endm;
@@ -214,17 +221,10 @@ Int_t StV0FinderMaker::Init()
  if (2&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
  if (4&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
 
- //Betty 
- if (!useEventModel) gMessMgr->Info()<<"StV0FinderMaker :  Will use StEvent files"<<endm;
- if (useEventModel)  gMessMgr->Info()<<"StV0FinderMaker :  Will use MuDst files"<<endm;
  if (useEventModel)  { //initialize mMuDstMaker
-   
    mMuDstMaker = (StMuDstMaker*)GetMaker("myMuDstMaker");
    if(!mMuDstMaker) gMessMgr->Warning("StV0FinderMaker::Init can't find a valid MuDst");
  }
- 
- //end Betty 
- 
  
  return StMaker::Init();
 }
@@ -264,13 +264,12 @@ Int_t StV0FinderMaker::Prepare() {
 
   // Get event 
 
-  //Betty method one:
+  ///Betty method one:
   if(GetEventUsage()==kUseStEvent){
     event = (StEvent*) GetInputDS("StEvent");
   }
-  //Betty method two:
+  ///Betty method two:
   else if(GetEventUsage()==kUseMuDst){ 
-    
     StMuDst* mu = mMuDstMaker->muDst();
     if(mu) cout<<"V0Finder :: found a MuDst"<<endl;
     if(mu->event())cout<<"see a muEvent ... "<<endl;
@@ -281,7 +280,7 @@ Int_t StV0FinderMaker::Prepare() {
     if(event)cout<<"see a recreated StEvent!"<<endl;
     cout<<"the number of existing v0's is "<<nV0s<<endl;
   }
-  //end of Betty 
+  ///end of Betty
   
   if (!event)
     {gMessMgr->Warning("StV0FinderMaker : no StEvent ; skipping event.");
@@ -308,13 +307,15 @@ Int_t StV0FinderMaker::Prepare() {
 
       StTrack* tri = theNodes[i]->track(global,j);
       ///Begin Betty
+      //if there is a track that uses an SVT point, set the track to estGlobal
       if(useSVT){
         StTrack* svtTrack = theNodes[i]->track(estGlobal,j);
-        if (svtTrack){  //if there is a track that uses an SVT point, set the track to estGlobal
+        if (svtTrack){
           tri=svtTrack;
         }
       }
       ///End Betty
+
       //Cut: track type
       if ((tri->fittingMethod() != ITTFflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
           (tri->fittingMethod() == ITTFflag && (GetTrackerUsage() == kTrackerUseTPT))) continue;
@@ -400,16 +401,11 @@ Int_t StV0FinderMaker::Make() {
   double alpha,ptArm_sq,pPosAlongV0,pNegAlongV0; // Armenteros params
   double cosij,sin2ij,t1,t2;                     // 3D dca calculation vars
   unsigned short i,j,ii,jj;                      // track iteration vars
-  pairD paths,path2;                             // helix pathLength vars
+  pairD paths,paths1,path2;                      // helix pathLength vars
   double temp;
   Bool_t doSecond, isPrimaryV0, usedV0;
   Int_t iRes;
-
-  ///Julien
-  pairD paths1;
-  
-  ///Betty
-  long  keepTrack;
+  long  keepTrack; ///Betty
 
   if (! (2&useV0Language)) return kStOk;
 
@@ -562,7 +558,7 @@ Int_t StV0FinderMaker::Make() {
       if ((pi.dot(xi-mainv) < 0.0) ||
           (pj.dot(xj-mainv) < 0.0)) continue;
 						
-						///Begin Betty 
+      ///Begin Betty
       //Cut: check if the first point of either track is after v0vertex
       if ((pi.dot(heli[i].origin() - xi) < 0.0) ||  //if pV0 * r <0, cut
          (pj.dot(heli[j].origin() - xj) < 0.0)) continue;
@@ -743,9 +739,19 @@ Int_t StV0FinderMaker::Make() {
   
   return kStOk;
 }
+
+
+
+
+
+
+
+
+
+
 //____________________________________________________________________________
 
-void StV0FinderMaker::Clear(Option_t *option=""){
+void StV0FinderMaker::Clear(Option_t *option){
   prepared = kFALSE;
   if(useEventModel){
     if(mMuDstMaker){
@@ -798,9 +804,13 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.15 2004/01/27 17:56:05 betya Exp $
+// $Id: StV0FinderMaker.cxx,v 1.16 2004/02/03 09:52:45 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.16  2004/02/03 09:52:45  faivre
+// Update user-friendliness ; default options now use SVT and ITTF+TPT ; remove warning.
+//
 // Revision 1.15  2004/01/27 17:56:05  betya
+//
 // added EventModelUsage so that the V0Finder and XiFinder can no run on
 // MuDst as well as on StEvent.  Note that the output is still in the StEvent
 // format.  Added Clear() in StV0FinderMaker.cxx to accomodate this addition.
