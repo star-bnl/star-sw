@@ -126,24 +126,8 @@ Bool_t StEmcMipSpectra::CalibrateEtaBin(Int_t etabin,Int_t mode)
     emcCalibration_st*  calib=CalibTable->GetTable();
     emcEqualization_st* equal=EqualTable->GetTable();
     
-    Float_t rms=0,x=0;
     
-    // calculating mean pedestal rms
-    for(Int_t m=mi;m<=mf;m++)
-      for(Int_t e=ei;e<=ef;e++)
-        for(Int_t s=si;s<=sf;s++)
-        {
-          Int_t id=GetID(m,e,s);
-          if(equal[id-1].EqStatus>0)
-          {
-            rms+=calib[id-1].AdcPedestalRms;
-            x++;
-          }
-        }
-    if(x>0) rms/=x;
-    
-    Int_t firstadc=(Int_t)(3*rms);   // first adc to fit
-    if(firstadc<5) firstadc=5;
+    Int_t firstadc=5;   // first adc to fit
     
     Int_t nadcMax=GetNAdcMax();
     
@@ -168,10 +152,7 @@ Bool_t StEmcMipSpectra::CalibrateBin(Int_t bin,Int_t mode)
     
     emcCalibration_st* calib=CalibTable->GetTable();
     
-    Float_t pedrms = calib[bin-1].AdcPedestalRms;
-    
-    Int_t firstadc=(Int_t)(3*pedrms);   // first adc to fit
-    if(firstadc<5) firstadc=5;
+    Int_t firstadc=5;   // first adc to fit
     
     Int_t nadcMax=GetNAdcMax();
     

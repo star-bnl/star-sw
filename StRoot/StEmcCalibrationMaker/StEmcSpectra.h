@@ -37,6 +37,7 @@ class StEmcSpectra : public St_DataSet
            Int_t    nEtaBins;
            Float_t  etaBinWidth;
 
+           St_emcCalSettings*     SettingsTable;
            St_emcEqualization*    EqualTable;  
            St_emcMipCalib*        MipTable; 
            St_emcCalibration*     CalibTable; 
