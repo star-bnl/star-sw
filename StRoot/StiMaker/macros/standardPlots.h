@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlots.h,v 1.3 2002/07/02 18:59:30 andrewar Exp $
+ * $Id: standardPlots.h,v 1.4 2002/07/08 14:32:49 pruneau Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.4  2002/07/08 14:32:49  pruneau
+ * added efficiency plots
+ *
  * Revision 1.3  2002/07/02 18:59:30  andrewar
  * fixed bug with constructor
  *
@@ -19,6 +22,7 @@
 #ifndef standardPlots_h
 #define standardPlots_h
 
+#include <iostream.h>
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
@@ -638,10 +642,14 @@ class standardPlots {
    float  primary;
    float  global;
 
+   Int_t nentries;
+   Int_t nbytes;
+   Int_t nb;
+
    Int_t  GetEntry(Int_t entry);
    Int_t  LoadTree(Int_t entry);
    void   Init(TTree *tree);
-   void   Loop(TProfile*);
+   void   Loop();
    Bool_t Notify();
    void   Show(Int_t entry = -1);
 
@@ -654,6 +662,7 @@ class standardPlots {
    void    SetTrackCutNHit(float low, float high){nHitCut[0]=low;nHitCut[1]=high;};   
    void    SetTrackCutDca(float low, float high){dca[0]=low;dca[1]=high;};
    int    trackCut(int entry, int track);
+   int    mcTrackCut(int entry, int track);
    void   showCuts();
 
    //functions to make plots
@@ -661,7 +670,6 @@ class standardPlots {
    void   makeMomentumPlots();
    void   makeHitEffPlots();
    void   makeFitPointsPlots();
-   
 };
 
 #endif
