@@ -75,7 +75,9 @@ Int_t StEmcTriggerMaker::Init()
   HTxPatch=new TH2F("HTxPatch",a.Data(),64,0,32,64,0,32);
   HTxPatch->SetXTitle("HT Thr (GeV)");
   HTxPatch->SetYTitle("Patch Thr (GeV)");
-    
+
+  a="HT trigger - "+TitleHist; 
+  HT2D = new TH2F("HTtrigger",a.Data(),300,-0.5,299.5,64,0,64); 
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
@@ -85,11 +87,18 @@ Int_t StEmcTriggerMaker::Make()
 // Check if there is any pi0 present in the event generator level
 
   StEvent* event=(StEvent*)GetInputDS("StEvent");
-  if(!event) return kStWarn;
+  if(!event) 
+  {
+    cout <<"No StEvent \n";
+    return kStWarn;
+  }
   StEmcCollection* emc=event->emcCollection();
-  if(!emc) return kStWarn;
-  
-  BemcTrigger=new StBemcTrigger();
+  if(!emc) 
+  {
+    cout <<"No EMC\n";
+    return kStWarn;
+  }
+  BemcTrigger=new StBemcTrigger(GetDate(),GetTime());
   BemcTrigger->SetEmcCollection(emc);
   BemcTrigger->SetThreshold(EtTh,RatioTh,HighTowerTh,PatchTh,JetTh);
   BemcTrigger->MakeTrigger();
@@ -107,6 +116,15 @@ void StEmcTriggerMaker::FillHistograms()
 
   St_emcTrigger* trigger=BemcTrigger->EmcTrigger;
   emcTrigger_st* table=trigger->GetTable();
+  
+  St_emcPatchTrigger* patch=BemcTrigger->PatchTrigger;
+  emcPatchTrigger_st* pa=patch->GetTable();
+  
+  for(Int_t i=0;i<300;i++)
+  {
+    HT2D->Fill((Float_t)i,(Float_t)pa[i].HighTowerAdc6bits);
+    //cout <<" i = "<<i<<"  HT = "<<pa[i].HighTowerAdc6bits<<endl;
+  }
   
   Int_t set=table[0].NEtThresholds;
   Int_t sra=table[0].NRatioThresholds;

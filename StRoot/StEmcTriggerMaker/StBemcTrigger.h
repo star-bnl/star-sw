@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.2 2001/10/12 23:13:55 suaide Exp $
+// $Id: StBemcTrigger.h,v 1.3 2002/01/03 21:41:15 suaide Exp $
 //
 //    
 
@@ -9,9 +9,9 @@
 #include "StEmcTrigger.h" 
 
 class StBemcTrigger : public StEmcTrigger
-{
+{  
   public: 
-                 StBemcTrigger();
+                 StBemcTrigger(Int_t date =20300101, Int_t time = 120000);
     virtual     ~StBemcTrigger();
     void         MakeTrigger();
     void         GetCrateEtaPatch(Int_t,Int_t*,Int_t*);

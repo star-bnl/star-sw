@@ -1,19 +1,22 @@
 //
-// $Id: StEmcTrigger.cxx,v 1.1 2001/05/24 14:42:10 suaide Exp $
+// $Id: StEmcTrigger.cxx,v 1.2 2002/01/03 21:41:15 suaide Exp $
 //
 //    
 
 #include "StEmcTrigger.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"    
-  
+ 
+#include "StDaqLib/EMC/StEmcDecoder.h"
+ 
 ClassImp(StEmcTrigger);
 
 StEmcCollection* emc;
   
 //-------------------------------------------------------------------
-StEmcTrigger::StEmcTrigger():TObject()
+StEmcTrigger::StEmcTrigger(Int_t date, Int_t time):TObject()
 { 
+  emcdec = new StEmcDecoder(date,time);
   Float_t et[3]={5.0,10.0,20.0};
   Float_t ra[3]={0,0.4,0.8};
   Float_t ht[3]={1.0,4.0,7.0};
@@ -30,6 +33,7 @@ StEmcTrigger::StEmcTrigger():TObject()
 //-------------------------------------------------------------------
 StEmcTrigger::~StEmcTrigger()
 { 
+  delete emcdec;
 }
 //-------------------------------------------------------------------
 void StEmcTrigger::SetEmcCollection(StEmcCollection* e) 
