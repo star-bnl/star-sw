@@ -19,7 +19,7 @@ class StSpinSortMaker : public StMaker {
  private: //....................................................
   
   TH1F *hi, *ha;
-  TH1F *h[6];
+  TH1F *h[16];
   float tstart,tstop; // for histograms
   int ntbin;
   TString sVersion; // remembers version of the SpinSort-scheme in DB
@@ -46,10 +46,10 @@ class StSpinSortMaker : public StMaker {
   virtual Int_t  Make(); 
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
-  // static Char_t  m_VersionCVS = "$Id: StSpinSortMaker.h,v 1.1 2001/04/13 18:04:35 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinSortMaker.h,v 1.2 2001/11/28 23:03:41 balewski Exp $";
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpinSortMaker.h,v 1.1 2001/04/13 18:04:35 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpinSortMaker.h,v 1.2 2001/11/28 23:03:41 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSpinSortMaker, 0)   //StAF chain virtual base class for Makers
     };

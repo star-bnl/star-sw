@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: histoLPproject.cxx,v 1.6 2001/05/04 20:29:36 balewski Exp $
+// $Id: histoLPproject.cxx,v 1.7 2001/11/28 23:03:42 balewski Exp $
 // $Log: histoLPproject.cxx,v $
+// Revision 1.7  2001/11/28 23:03:42  balewski
+// ppLMV uses only tracks matched to CTB slats, runs with DAQ & MC data
+//
 // Revision 1.6  2001/05/04 20:29:36  balewski
 // *** empty log message ***
 //
@@ -49,11 +52,11 @@ void StppLPprojectMaker::init_histo()
   hst[2]=new TH1F("sID","valid spinID, AC",5,-0.5,4.5);
   // [3] not used
 
-  hst[4]=new TH1F("ph0","rLP vs. #phi(deg), all AC",nphi*10,0.,360.);
-  hst[5]=new TH1F("ph1","rLP vs. #phi(deg), pT=[0,1]",nphi*5,0.,360.);
-  hst[6]=new TH1F("ph2","rLP vs. #phi(deg), pT=[1,2]",nphi*5,0.,360.);
-  hst[7]=new TH1F("ph3","rLP vs. #phi(deg), pT=[2,3]",nphi*5,0.,360.);
-  hst[8]=new TH1F("ph4","rLP vs. #phi(deg), pT=[3,4]",nphi*5,0.,360.);
+  hst[4]=new TH1F("ph0","rLP vs. #phi(deg), all AC",nphi*4,0.,360.);
+  hst[5]=new TH1F("ph1","rLP vs. #phi(deg), pT=[0,1]",nphi*2,0.,360.);
+  hst[6]=new TH1F("ph2","rLP vs. #phi(deg), pT=[1,2]",nphi*2,0.,360.);
+  hst[7]=new TH1F("ph3","rLP vs. #phi(deg), pT=[2,3]",nphi*2,0.,360.);
+  hst[8]=new TH1F("ph4","rLP vs. #phi(deg), pT=[3,4]",nphi*2,0.,360.);
 
 
   // spin dependent histos
