@@ -1,6 +1,8 @@
- macro init
- macro/global/import *
+macro init
+macro/global/import *
  
+cd [params]/mwc
+mkdir mwcpars
 cd [data]/mwc
 
 newtable mevent mwc_mevent 400
