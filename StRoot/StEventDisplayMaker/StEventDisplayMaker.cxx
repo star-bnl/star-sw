@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.11 1999/08/02 02:21:51 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.12 1999/08/02 14:43:25 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.12  1999/08/02 14:43:25  fine
+// Vertices collection has been introduced, more simple geometry
+//
 // Revision 1.11  1999/08/02 02:21:51  fine
-// new methpd ParseName has been introduced, nut not activated yet
+// new method ParseName has been introduced,but not activated yet
 //
 
 //////////////////////////////////////////////////////////////////////////
@@ -94,6 +97,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
    m_FilterArray->AddAt(&m_DefaultFilters[i],i);
 //    m_FilterArray->AddAt(&hitsOffFilter,i);
   }
+  ((StVirtualEventFilter *)m_FilterArray->At(kVertices))->TurnOn();
   ((StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks))->TurnOn();
   ((StVirtualEventFilter *)m_FilterArray->At(kTrack))->TurnOn();
 
@@ -194,7 +198,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
   St_DataSetIter nextSector(m_Sensible,0);
   St_DataSet *tpssNode = 0;
   while (( tpssNode = nextSector() ) ) {
-    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
+//    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
+    if (strcmp(tpssNode->GetName(),"TPSS")) continue;
     tpssNode->Mark();
   }
 
@@ -512,6 +517,14 @@ Int_t StEventDisplayMaker::MakeEvent()
     hitCounter += MakeHits(hits,filter);
     if (Debug()) printf(" SmdEtaHitCollection: %d \n", hitCounter);
   }
+
+  filter = (StVirtualEventFilter *)m_FilterArray->At(kVertices);
+  if (!filter || filter->IsOn() ) {
+    StVertexCollection *vertices   = m_Event->vertexCollection();
+    hitCounter += MakeHits(vertices,filter);
+    if (Debug()) printf(" VertexCollection: %d \n", hitCounter);
+  }
+
   return total+hitCounter;
 }
 //_____________________________________________________________________________
@@ -694,6 +707,7 @@ void StEventDisplayMaker::PrintFilterStatus()
                                  , "EmcPreShower Hit"
                                  , "SmdPhi Hit"
                                  , "SmdEta Hit"
+                                 , "Vertices"
                                  , "Global Tracks"
                                  ,  "Track"
                                  ,  "Track Tpc Hits"
@@ -732,6 +746,7 @@ DISPLAY_FILTER_DEFINITION(EmcTowerHit)
 DISPLAY_FILTER_DEFINITION(EmcPreShowerHit)
 DISPLAY_FILTER_DEFINITION(SmdPhiHit)
 DISPLAY_FILTER_DEFINITION(SmdEtaHit)
+DISPLAY_FILTER_DEFINITION(Vertices)
 
 // -- StGlobalTrack filters --
 

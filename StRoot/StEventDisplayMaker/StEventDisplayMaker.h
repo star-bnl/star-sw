@@ -32,7 +32,7 @@ class StVirtualEventFilter;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.9 1999/08/02 02:21:52 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.10 1999/08/02 14:43:26 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -88,7 +88,7 @@ class StEventDisplayMaker : public StMaker {
      enum EDisplayEvents 
           {
             kPrimaryVertex  ,kTpcHit      ,kSvtHit      ,kFtpcHit      ,kEmcTowerHit,
-            kEmcPreShowerHit,kSmdPhiHit   ,kSmdEtaHit   ,kGlobalTracks ,
+            kEmcPreShowerHit,kSmdPhiHit   ,kSmdEtaHit   ,kVertices     ,kGlobalTracks ,
             kTrack          ,kTrackTpcHits,kTrackSvtHits,kTrackFtpcHits, kTable     , 
             kEndOfEventList
           } ;
@@ -128,6 +128,9 @@ class StEventDisplayMaker : public StMaker {
      Int_t SetSmdEtaHitFlag(Int_t flag=1); // *MENU*
      StVirtualEventFilter *SetSmdEtaHit(StVirtualEventFilter *filter);
 
+     Int_t SetVerticesFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetVertices(StVirtualEventFilter *filter);
+
      // -- StGlobalTrack filters --
 
      Int_t SetGlobalTracksFlag(Int_t flag=1); // *MENU*
@@ -151,7 +154,7 @@ class StEventDisplayMaker : public StMaker {
   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.9 1999/08/02 02:21:52 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.10 1999/08/02 14:43:26 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
