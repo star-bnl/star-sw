@@ -133,7 +133,7 @@ elsif (/^hp_ux102/) {
 elsif (/^sun4x_56_CC5$/) {
   $ROOTCINTD = "-DSOLARIS";
   $OSFID     = "__CC5__";
-  $OSFID    .= "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
+  $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
   $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
   $CC        = "/opt/WS5.0/bin/cc";
   $CXX       = "/opt/WS5.0/bin/CC";
