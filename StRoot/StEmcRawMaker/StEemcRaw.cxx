@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.3 2004/11/14 21:55:52 jeromel Exp $
+// $Id: StEemcRaw.cxx,v 1.4 2005/01/08 03:55:36 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -41,14 +41,6 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawDa
 
   StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
 
-  StL0Trigger* trg=mEvent->l0Trigger();
-  if (! trg) {
-    gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , l0Trigger data, EEMC not verified, abort all EEMC" << endm;
-    return false;
-  }
-
-  int token=trg->triggerToken();
-  
   if(!eeReader || !mDb || ! eemcRaw ) {
     gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , some pointers are ZERO, code is sick, chain should be aborted, no EEMC data processed,JB :" <<eeReader << mDb << eemcRaw <<endm;
     return false;
@@ -61,7 +53,14 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawDa
   if(hs[0]) hs[0]->Fill(2);
 
   //::::::::::::::: assure raw data are sane  :::::::::::::::: 
+  StL0Trigger* trg=mEvent->l0Trigger();
+  if (! trg) {
+    gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , l0Trigger data, EEMC not verified, abort all EEMC hits in StEvent EmcCollection, but raw data are saved" << endm;
+    return false;
+  }
 
+  int token=trg->triggerToken();
+  
   if( headersAreSick(eemcRaw, token) ) return false;
   if (hs[0]) hs[0]->Fill(3);
    
@@ -315,6 +314,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.4  2005/01/08 03:55:36  balewski
+// logic was too conservative
+//
 // Revision 1.3  2004/11/14 21:55:52  jeromel
 // Unit var initialized (++ used later)
 //
