@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.4 2005/01/08 03:55:36 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.5 2005/02/03 02:35:11 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -60,8 +60,9 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawDa
   }
 
   int token=trg->triggerToken();
+  int runId=mEvent->runId();
   
-  if( headersAreSick(eemcRaw, token) ) return false;
+  if( headersAreSick(eemcRaw, token,  runId) ) return false;
   if (hs[0]) hs[0]->Fill(3);
    
   if( towerDataAreSick( eemcRaw)) return false;
@@ -94,14 +95,14 @@ Bool_t   StEemcRaw::copyRawData(StEEMCReader *eeReader, StEmcRawData *raw){
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
+Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId) {
  
   if (! raw) {
     gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() no EEMC raw data" << endm;
     return true;
   }
 
- 
+
   EEfeeDataBlock block; // use utility class as the work horse
 
   int icr;
@@ -118,12 +119,13 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
 
     int lenCount=fiber->nCh+fiber->nHead;
     int errFlag=0;
-    switch(fiber->type) {
-    case 'T': lenCount+=32; break; // one more board exist in harware
-    case 'S':  errFlag=0x28; break; // sth is set wrong in the boxes
-    default:;
-    }
-
+    
+    if(fiber->type=='T')
+      lenCount+=32; // one more board exist in harware
+    
+    if(fiber->type=='S' && runId<6000000) 
+      errFlag=0x28;  // bug in box firmawer prior to 2005
+    
     int trigCommand=4; // physics, 9=laser/LED, 8=??
     int sanity=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
 
@@ -314,6 +316,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.5  2005/02/03 02:35:11  balewski
+// accomodate MAPMT firmware change in 2005
+//
 // Revision 1.4  2005/01/08 03:55:36  balewski
 // logic was too conservative
 //

@@ -25,7 +25,7 @@ class StEemcRaw :  public TObject {
   StEEmcDbMaker *mDb;
   TH1F *hs[8];
   Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
-  Bool_t   headersAreSick( StEmcRawData *raw, int token);
+  Bool_t   headersAreSick( StEmcRawData *raw, int token, int runId);
   Bool_t   towerDataAreSick(StEmcRawData* raw);
   void     raw2pixels(StEvent* mEvent);
 
@@ -43,10 +43,13 @@ class StEemcRaw :  public TObject {
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.2 2004/10/21 00:01:50 suaide Exp $
+// $Id: StEemcRaw.h,v 1.3 2005/02/03 02:35:11 balewski Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.3  2005/02/03 02:35:11  balewski
+ * accomodate MAPMT firmware change in 2005
+ *
  * Revision 1.2  2004/10/21 00:01:50  suaide
  * small changes in histogramming and messages for BEMC
  * Complete version for EEMC done by Jan Balewski

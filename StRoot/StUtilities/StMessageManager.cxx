@@ -181,7 +181,7 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
     *curType = defaultMessType;               // default type is Info
     typeN = 1;                                // type number for Info is 1
   }
-  if ((!remember) || (gMessage->GetOption() & kMessOptDash)) {
+  if ((!remember) || strchr(curOpt,'-')) {
     StMessage tmp(mess, curType, curOpt);
     gMessage = endm;
   } else {
@@ -437,7 +437,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.43 2004/09/25 03:01:04 perev Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.44 2005/02/04 21:35:09 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -450,8 +450,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.43 2004/09/25 03:01:04 perev Exp $
+// $Id: StMessageManager.cxx,v 1.44 2005/02/04 21:35:09 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.44  2005/02/04 21:35:09  genevb
+// Fixed bug with remember from v. 1.43 (used pointer before assignment)
+//
 // Revision 1.43  2004/09/25 03:01:04  perev
 // Improved correction with remember messages
 //

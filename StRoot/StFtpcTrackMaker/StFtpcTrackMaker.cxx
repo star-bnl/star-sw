@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.72 2005/03/01 23:02:11 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.72  2005/03/01 23:02:11  jcs
+// Correct error: TWOCYCLETRACKING should be standard, not LASERTRACKING
+//
 // Revision 1.71  2004/12/10 23:07:37  jcs
 // Only fill FTPC software monitor if it exists
 //
@@ -287,8 +290,8 @@
 //#define DEBUGFILE
 
 // Select tracking method
-//#define TWOCYCLETRACKING
-#define LASERTRACKING
+#define TWOCYCLETRACKING
+//#define LASERTRACKING
 
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
@@ -539,15 +542,11 @@ Int_t StFtpcTrackMaker::Make()
   else {
 #ifdef TWOCYCLETRACKING
     tracker.TwoCycleTracking();
-    if (Debug()) {
-       gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
-     }       
+    gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
 #endif    
 #ifdef LASERTRACKING
     tracker.LaserTracking();
-    if (Debug()) {
-       gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
-     }       
+    gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
 #endif    
   }
   
@@ -860,7 +859,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.72 2005/03/01 23:02:11 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {

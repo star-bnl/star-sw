@@ -37,6 +37,7 @@
 
 // DAQ header specific information
 #define BTOWTDCERROFFSET 30
+#define BTOWCRATEOFFSET 90
 #define BTOWBYTESUM 164
 #define BTOWERRFLAG 0
 #define BTOWNOTPRESENT 4095

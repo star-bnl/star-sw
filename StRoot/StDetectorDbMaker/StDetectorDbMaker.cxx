@@ -7,6 +7,8 @@
 #include "StDetectorDbMagnet.h"
 #include "StDetectorDbClock.h"
 #include "StDetectorDbSpaceCharge.h"
+#include "StDetectorDbTpcOmegaTau.h"
+#include "StDetectorDbGridLeak.h"
 #include "StDetectorDbTpcVoltages.h"
 #include "StDetectorDbBeamInfo.h"
 #include "StDetectorDbTriggerID.h"
@@ -36,12 +38,20 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     magnet->update(this);
 
+    // Update TPC OmegaTau
+    StDetectorDbTpcOmegaTau* omegaTau = StDetectorDbTpcOmegaTau::instance();
+    omegaTau->update(this);
+
     // Update Space Charge Correction (must be done after magnet)
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
     spaceCharge->update(this);
     spaceCharge = StDetectorDbSpaceCharge::instanceR2();
     spaceCharge->update(this);
     
+    // Update TPC GridLeak
+    StDetectorDbGridLeak* gridLeak = StDetectorDbGridLeak::instance();
+    gridLeak->update(this);
+
     // Update Clock Frequency
     StDetectorDbClock* clock = StDetectorDbClock::instance();
     clock->update(this);

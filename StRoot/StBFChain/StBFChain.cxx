@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.460 2005/01/26 23:01:25 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.463 2005/02/04 18:07:33 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -366,6 +366,7 @@ Bfc_st BFC1[] = { // standard chains
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+  {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
@@ -474,13 +475,6 @@ Bfc_st BFC1[] = { // standard chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
-
-
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -503,14 +497,26 @@ Bfc_st BFC1[] = { // standard chains
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
 
                                                                      "Performs vertex seed finding",kFALSE},
+
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
-
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+
+
+
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
+
+
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
+
 
 
   {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
@@ -625,8 +631,8 @@ Bfc_st BFC1[] = { // standard chains
 
 
 
-  {"QA"          ,"QA","","globT,SCL,global"  ,"St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
-  {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"QA"     ,"QA","","QUtils,globT,SCL,global","St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
@@ -1008,6 +1014,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+  {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
@@ -1117,12 +1124,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
-
 
   //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
@@ -1156,12 +1157,25 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   //  Reminder: You are within the ITTF chain definitions
   {"Event"  ,"","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+
+
+
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
+
+
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"genvtx"      ,"","","","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
+
+
   {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent,TpcDb,SvtDb,ssdDb","StiMaker",
-   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
+   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
   {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1286,8 +1300,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   // Reminder: You are within the ITTF chain definitions
-  {"QA"          ,"QA","","globT,SCL,global"  ,"St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
-  {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"QA"     ,"QA","","QUtils,globT,SCL,global","St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event"   ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
@@ -1418,7 +1432,7 @@ Int_t StBFChain::Load()
 	    (void) printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
 			  gSystem->DynamicPathName(libe->GetString().Data()));
 	  }
-	  assert(iok == 0);
+	  assert(iok >= 0);
 	ENDL: //yf ? continue;
 	  LoadedLibs.Delete();
 	}
@@ -1600,10 +1614,10 @@ Int_t StBFChain::Instantiate()
 
 	    pars->useSvt=kTRUE;         // SVT used in Sti but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
-	    pars->useSsd=kTRUE;         // use SSD in Sti
+	    //pars->useSsd=kTRUE;         // use SSD in Sti
 
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
-	    if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+	    //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
 	    if (GetOption("FtpcIT")){
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
