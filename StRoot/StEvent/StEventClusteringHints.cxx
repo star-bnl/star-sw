@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.14 2003/07/25 19:47:37 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.15 2003/10/02 16:39:25 jeromel Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.15  2003/10/02 16:39:25  jeromel
+ * Unitialized data member mNameMap
+ *
  * Revision 2.14  2003/07/25 19:47:37  ullrich
  * Added StSPtrVecCalibrationVertex to I/O list.
  *
@@ -56,7 +59,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.14 2003/07/25 19:47:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.15 2003/10/02 16:39:25 jeromel Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -65,6 +68,8 @@ StEventClusteringHints::~StEventClusteringHints() {/*noop*/}
 StEventClusteringHints::StEventClusteringHints()
 {
     fParent = 0;
+    mNameMap= 0;
+
     setMiniDstMode();
     setBranch("StRunInfo",                   "evt_header",   2);
     setBranch("StEventInfo",                 "evt_header",   2);
