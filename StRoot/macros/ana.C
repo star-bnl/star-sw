@@ -1,5 +1,8 @@
-// $Id: ana.C,v 1.7 1998/11/22 01:03:57 fisyak Exp $
+// $Id: ana.C,v 1.8 1998/11/22 01:06:30 fisyak Exp $
 // $Log: ana.C,v $
+// Revision 1.8  1998/11/22 01:06:30  fisyak
+// Add
+//
 // Revision 1.7  1998/11/22 01:03:57  fisyak
 // Add name
 //
