@@ -1,9 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.7 2002/03/28 05:10:34 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.8 2002/04/01 22:42:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
+#include <fstream>
+
 #include "StChain.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
@@ -39,6 +41,7 @@
 #include "StMuCut.h"
 #include "StMuFilter.h"
 #include "StMuL3Filter.h"
+#include "StMuChainMaker.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -89,7 +92,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
@@ -141,7 +144,7 @@ void StMuDstMaker::createArrays() {
     strangeArrays[i] = 0;
     mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
   }
-  mStMuDst->set(this);
+  mStMuDst->set(mArrays,mStrangeArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -309,7 +312,9 @@ void StMuDstMaker::openRead() {
   DEBUGVALUE1(mFileName.c_str());
   DEBUGVALUE1(mFilter.c_str());
  
-  makeChain(mDirName, mFilter,mMaxFiles);
+  StMuChainMaker* chainMaker = new StMuChainMaker("MuDst");
+  mChain = chainMaker->make(mDirName, mFileName, mFilter, mMaxFiles);
+  DEBUGVALUE(mChain);
 
   // muDst stuff
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -323,7 +328,7 @@ void StMuDstMaker::openRead() {
   
   mTTree = mChain->GetTree();
 
-  mStMuDst->set(this);  
+  mStMuDst->set(mArrays,mStrangeArrays);  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -685,63 +690,6 @@ string StMuDstMaker::dirname(string s){
   DEBUGVALUE2(name);
   return name;
 } 
- 
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-string**  StMuDstMaker::subFilter(string filter) {
-  string** subFilter = new string*[100];
-  string tmp(filter);
-  int n=0;
-  size_t pos=0;
-  while (tmp.find_first_of(":")!=string::npos ) {
-    pos = tmp.find_first_of(":");
-    subFilter[n] = new string( tmp.substr(0,pos) );
-    tmp.erase(0,pos+1);
-    n++;
-  }				
-  subFilter[n++] = new string( tmp );
-  return subFilter;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::makeChain(string dir, string filter, int maxFiles) {
-  DEBUGMESSAGE1("");
-  mChain = new TChain("MuDst");
-
-  string** subFilters = subFilter(filter);
-  //  TChain* mChain2 = new TChain("StrangeMuDst");
-  // read directory 
-  void *pDir = gSystem->OpenDirectory(dir.c_str());
-  // now find the files that end in the specified extention
-  const char* fileName(0);
-  int fileCount(0);
-  while((fileName = gSystem->GetDirEntry(pDir))){
-    bool good = true;
-    string name(fileName);
-    if( strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) good=false;
-    if( strcmp(fileName,".root")==0 || strcmp(fileName,"..")==0) good=false;
-    if ( name.find(".MuDst.root")==string::npos ) good=false;
-    int n =0;
-    while (subFilters[n]) {
-      if ( name.find(*subFilters[n])==string::npos ) good=false;
-      //      cout << subFilters[n]->c_str() << endl;
-      n++;
-    }
-    if (good) {
-      char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
-      // add it to the chain
-      cout << fileCount << " " << fullFile << endl;
-      mChain->Add(fullFile);
-      fileCount++;
-      delete fullFile;
-    }
-    if(fileCount >= maxFiles) break;
-  }   
-  DEBUGVALUE2(fileCount);
-}
-
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
   if (mProbabilityPidAlgorithm)
     mProbabilityPidAlgorithm->readParametersFromFile(file);
@@ -749,6 +697,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.8  2002/04/01 22:42:30  laue
+ * improved chain filter options
+ *
  * Revision 1.7  2002/03/28 05:10:34  laue
  * update for running in the production
  *
