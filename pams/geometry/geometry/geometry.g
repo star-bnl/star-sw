@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.55 2003/04/29 21:04:55 potekhin Exp $
+* $Id: geometry.g,v 1.56 2003/05/01 23:00:16 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.56  2003/05/01 23:00:16  potekhin
+* Photon Multiplicity Detector is now part of the
+* GEANT geometry version "y2003a", with proper
+* versioning of its position
+*
 * Revision 1.55  2003/04/29 21:04:55  potekhin
 * To keep the consistency of current simulation runs,
 * the geometry "year2003" is frozen. All the corrections
@@ -99,7 +104,7 @@
    real       Par(1000),field,dcay(5),shift(2),wdm
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),ecal_config,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug,
-              CorrNum
+              CorrNum, PhmdVersion
 * Correction number within a year
 
    character  Commands*4000,Geom*8
@@ -128,6 +133,8 @@ replace[;ON#{#;] with [
    NtrSubEv = 1000     " automatic !"
 * No correction by default
    CorrNum = 0
+* No PHMD by default
+   PhmdVersion = 0
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
@@ -281,13 +288,16 @@ If LL>1
                      CorrNum = 0;
                 }
 
+
 * Only have 8 characters max in the name, soo we have to go with y2003a, not "year".
-* Corrections in y2003a:
+*
+* Corrections and enhancements in y2003a:
 *    extra material in SVT
 *    removed serious bugs from SUPOGEO
 *    corrected ECALGEO -- the shift variable
+*    added the Photon Multiplicity Detector (PHMD)
 
-  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -311,6 +321,8 @@ If LL>1
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
                      CorrNum = 1;
+                  "Photon Multiplicity Detector Version "
+                     PhmdVersion = 1;
                 }
 
   on HADR_ON    { all Geant Physics On;                                       }
@@ -438,11 +450,23 @@ If LL>1
          call AgDETP add ('emcg.FillMode=',ecal_config,1)
       }
    endif
+******************************************************************
    if (ecal) Call ecalgeo
    if (bbcm) Call bbcmgeo
    if (fpdm) Call fpdmgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
+******************************************************************
+* If a non-zero version of the Photon Multiplicity Detector
+* is defined, pass the version number to its constructor
+* and create it:
+
+   if  (PhmdVersion>0) then
+      call AgDETP add ('PMDG.version=',PhmdVersion,1)
+      call phmdgeo
+   endif
+
+****************  Magnetic Field  ********************************
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) then
