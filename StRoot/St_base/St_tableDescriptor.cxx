@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.19 2000/03/14 22:33:20 fisyak Exp $
+// $Id: St_tableDescriptor.cxx,v 1.20 2000/03/15 22:39:39 fine Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -255,6 +255,7 @@ const Int_t St_tableDescriptor::ColumnByName(const Char_t *columnName) const
 //____________________________________________________________________________
 Int_t St_tableDescriptor::Offset(const Char_t *columnName) const 
 {  
+  // Return offset of the column defined by "columnName"
   Int_t indx = ColumnByName(columnName);
   if (indx >= 0 ) indx = Offset(indx);
   return indx;
@@ -290,6 +291,9 @@ St_Table::EColumnType St_tableDescriptor::ColumnType(const Char_t *columnName) c
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.20  2000/03/15 22:39:39  fine
+// some comments
+//
 // Revision 1.19  2000/03/14 22:33:20  fisyak
 // Step forward with Valery's updates
 //
