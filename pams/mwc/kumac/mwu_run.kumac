@@ -4,7 +4,7 @@ macro/global/import *
 *   
 *    Call mwu
 *
-ami/mod/call mwu [params]/mwc/cal _ 
+ami/mod/call mwu [params]/mwcpars/cal _ 
                  [data]/mwc/raw   _
                  [data]/mwc/cor     
 

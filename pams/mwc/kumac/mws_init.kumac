@@ -10,7 +10,7 @@ macro fill
 * 
 *    Define tables
 *
-cd [params]/mwc
+cd [params]/mwcpars
 newtable mpar mwc_mpar 1
 *
 *     Set values
