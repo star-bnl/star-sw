@@ -50,6 +50,7 @@ extern struct DATA_RAM *phys_data_ram;
 int LogTable[256];
 
 
+
 /* all code in pseudocode
 
    peaks in a sequence
@@ -231,8 +232,9 @@ void CalculateMomentsUnfold(PClusterUCList NewCluster)
 							        /* no */
 							        /* a peak was found */
 							        /* store the peak (it was in the last sequence) */
+
 								peak_indices[number_of_peaks].pad = (int)PadCount-1;
-								peak_indices[number_of_peaks].pad_in_row = (int)Pad-1;
+	 							peak_indices[number_of_peaks].pad_in_row = (int)Pad-1;
 								peak_indices[number_of_peaks].seq_index = sequencepeaks[old_peakstore][compareinner].index;
 								number_of_peaks++;
 								/* too many peaks? */
@@ -285,7 +287,7 @@ void CalculateMomentsUnfold(PClusterUCList NewCluster)
 				{
 				        /* should be a peak */
 					peak_indices[number_of_peaks].pad = (int)PadCount-1;
-					peak_indices[number_of_peaks].pad_in_row = (int)Pad-1;
+               peak_indices[number_of_peaks].pad_in_row = (int)Pad-1;
 					peak_indices[number_of_peaks].seq_index = sequencepeaks[old_peakstore][compareinner].index;
 					number_of_peaks++;
 					/* too many peaks? */
@@ -316,6 +318,7 @@ emergency_exit:
 			timecenter += peak_indices[temp].seq_index;
 		}
 		padcenter /= number_of_peaks;
+
 		padcenter = padlist[NewCluster->PadRow][padcenter];
 		timecenter /= number_of_peaks;
 		/* 2. for each peak: */
@@ -324,10 +327,10 @@ emergency_exit:
 			/*	calculate difference pad_peak - pad_center
 			//	if > 0: take pad_peak+1 for prf
 			//	else: take pad_peak-1 for prf
-			// calculate differnce time_peak - time_center
+			// calculate difference time_peak - time_center
 			//	if > 0: take time_peak+1 for prf
 			//	else: take time_peak-1 for prf */
-			padpeak = peak_indices[temp].pad;
+			padpeak  = peak_indices[temp].pad;
 			timepeak = peak_indices[temp].seq_index;
 			dpeaktime = (int) timepeak << 6;
 			dpeakpad = (int) peak_indices[temp].pad_in_row << 6;
@@ -416,7 +419,9 @@ void CalculateMomentsPrf(PClusterUCList NewCluster)
 	unsigned char  *MemoryPtr, *MemoryEnd;
 	TFormattedData*  pStore;
 	unsigned int    PeakIndexPad, PeakIndexTime, MaxValue, PeakIndexPadCount;
-	int c1, c2, c3;	/* 32 bit! */
+	int c1, c2, c3, sigma2, padShift, offPos ;	/* 32 bit! */
+   int PadRow ;
+
 
   
 	/* get a pointer to the current entry in the global store, where the formatted data will be
@@ -427,11 +432,13 @@ void CalculateMomentsPrf(PClusterUCList NewCluster)
 	pStore = (TFormattedData*)&pGlobalStore[clusters];
 	SumAdc = MaxValue = 0;
 	PadCount = PeakIndexPad = PeakIndexPadCount = PeakIndexTime = 0;
+   PadRow   = NewCluster->PadRow ;
 	/* loop over all nodes in cluster 
 			NOTE:
 				the first node of a cluster list is allways assigned */
-	for(Pad = NewCluster->StartPad, PadCount = padlist[NewCluster->PadRow][NewCluster->StartPad],CurrentNode = NewCluster->pList; CurrentNode != NULL; 
-			CurrentNode = CurrentNode->next)
+	for( Pad = NewCluster->StartPad, PadCount = padlist[NewCluster->PadRow][NewCluster->StartPad],CurrentNode = NewCluster->pList; 
+        CurrentNode != NULL; 
+		  CurrentNode = CurrentNode->next)
 	{
 		/* loop over all pads (sequences) */
 		for(SequenceCount = 0; SequenceCount < CurrentNode->Filling; SequenceCount++, Pad++, PadCount++)
@@ -464,8 +471,8 @@ void CalculateMomentsPrf(PClusterUCList NewCluster)
 	// 'at an edge' means:
 	// PeakIndexTime not in [1..510] or
 	// PeakIndexPad not in [1..row_sizes[PadRow]] */
-	if ((PeakIndexTime >= 1) && (PeakIndexTime <= 510) &&
-		(PeakIndexPad >= 1) && (PeakIndexPad <= row_sizes[NewCluster->PadRow+MIN_PADROW-1]))
+	if ((PeakIndexTime >= 0 ) && (PeakIndexTime <= 511) &&
+		 (PeakIndexPad  >= 0 ) && (PeakIndexPad  <= row_sizes[NewCluster->PadRow+MIN_PADROW-1]))
 	{
 		/* valid peak, calculate prf
 		// prf:
@@ -477,20 +484,77 @@ void CalculateMomentsPrf(PClusterUCList NewCluster)
 		// sigma^2 could be calculated:
 		// sigma^2 = 1/ln(c2^2/(c1*c3))
 		// pad direction: */
-		c1 = (int) data_ram[PeakIndexPadCount-1]->t_sam[PeakIndexTime];
-		c2 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime];
-		c3 = (int) data_ram[PeakIndexPadCount+1]->t_sam[PeakIndexTime];
+
+//
+//   Go up and down two paths for inner sector. It seems
+//   to improve resolution even though I don't really
+//   understand how the pad is calculated. (PY 7/7/98)
+//   I think a better job can be done here.
+//
+      if ( PadRow < 13 ) {
+         offPos   =   2 ;
+
+         c1 = c2 = c3 = 0 ;
+//
+//   Get values around peak
+//
+         if ( PeakIndexPad > 1 )
+    	      c1 = (int) data_ram[PeakIndexPadCount-2]->t_sam[PeakIndexTime];
+         if ( PeakIndexPad > 0 )
+	         c1 += (int) data_ram[PeakIndexPadCount-1]->t_sam[PeakIndexTime];
+             
+            
+		  c2 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime];
+            
+         if ( PeakIndexPad < n_pads[PadRow] ) 
+            c2 += (int) data_ram[PeakIndexPadCount+1]->t_sam[PeakIndexTime];
+
+         if ( PeakIndexPad < n_pads[PadRow]-1 )
+            c3 = (int) data_ram[PeakIndexPadCount+2]->t_sam[PeakIndexTime];
+         if ( PeakIndexPad < n_pads[PadRow]-2 )
+            c3 += (int) data_ram[PeakIndexPadCount+3]->t_sam[PeakIndexTime];
+      }
+      else {
+         offPos   = 1 ;     
+//
+//   Get values around peak
+//
+         if ( PeakIndexPadCount > -1+offPos ) 
+		      c1 = (int) data_ram[PeakIndexPadCount-offPos]->t_sam[PeakIndexTime];
+         else
+            c1 = 0 ;
+		   c2 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime];
+		   if ( PeakIndexPadCount <= NPADS-offPos )
+            c3 = (int) data_ram[PeakIndexPadCount+offPos]->t_sam[PeakIndexTime];
+         else
+            c3 = 0 ;
+      }
+//
+//   Get logs
+//
 		c1 = LogTable[c1];
 		c2 = LogTable[c2];
 		c3 = LogTable[c3];
-		/* store centroids as short ints scaled to 1.0 = 64 */
-		if ( (2*c2 - (c1 + c3)) !=0 )
-		    pStore->CenterPad = (unsigned short) ((PeakIndexPad << 6) - ((c1 - c2) << 6) / (2*c2 - (c1 + c3)));
-		else pStore->CenterPad = (unsigned short) 0;
+
+/* store centroids as short ints scaled to 1.0 = 64 */
+
+      sigma2 = 2*c2 - (c1 + c3) ;
+      pStore->CenterPad = (unsigned short) ((PeakIndexPad << 6)) ;
+      if ( sigma2 !=0 ){
+          padShift = - offPos * ((c1 - c2) << 6) / sigma2  ;
+          pStore->CenterPad += padShift ;
+      } 
+
 		/* time direction: */
-		c1 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime-1];
+      if ( PeakIndexTime > 0 )
+		   c1 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime-1];
+      else
+         c1 = 0 ;
 		/*c2 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime]; */
-		c3 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime+1];
+		if ( PeakIndexTime < NTIME-1 )
+         c3 = (int) data_ram[PeakIndexPadCount]->t_sam[PeakIndexTime+1];
+      else
+         c3 = 0 ;
 		c1 = LogTable[c1];
 		/* c2 = LogTable[c2]; the same as above */
 		c3 = LogTable[c3];
@@ -519,6 +583,7 @@ void CalculateMoments(PClusterUCList NewCluster)
 	int SequenceCount;
 	int area;
 	int UnfoldLimit = 32; /* ~ 4*8 + extra */
+   UnfoldLimit = 100 ;
 
 	area = 0;
 	/* get total cluster area in hits */
