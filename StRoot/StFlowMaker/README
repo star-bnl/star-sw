@@ -3,21 +3,19 @@ Files:		StFlowMaker.cxx
 		StFlowMaker.h
 		StFlowEvent.cxx
 		StFlowEvent.h
-		StFlowTrackCollection.cxx
 		StFlowTrackCollection.h
-		StFlowTrack.cxx
 		StFlowTrack.h
 		StFlowCutEvent.cxx
 		StFlowCutEvent.h
 		StFlowCutTrack.cxx
 		StFlowCutTrack.h
-		StFlowPicoEvent.h
-		StFlowPicoEvent.cxx
+		StFlowNanoEvent.h
+		StFlowNanoEvent.cxx
 		StFlowSelection.h
 		StFlowSelection.cxx
 		StFlowConstants.h
 		StFlowConstants.cxx
-Authors		Raimond Snellings, Art Poskanzer, and Sergei Voloshin
+Authors		Raimond Snellings and Art Poskanzer
 		with lots of help from Glenn Cooper 
 Date:		Dec 1999
 Description:
@@ -25,20 +23,17 @@ Description:
 ** StFlowMaker: 
 
 StFlowMaker creates StFlowEvent from StEvent after event and track
-cuts. StFlowEvent contains a track collection (StFlowTrackCollection)
-which contains tracks (StFlowTrack).
+cuts. StFlowEvent contains a vector track collection
+(StFlowTrackCollection) which contains tracks (StFlowTrack).
 
 In Init, StFlowMaker reads the PhiWgt values from
 flowPhiWgt.hist.root . These are used for making the event plane
 isotropic in the lab.
 
-In Make, it stores in StFlowEvent the PhiWgt values, the RunID, the
-EventID, the CTB signal, the ZDC east and west signals, the original
-track multiplicity, the multiplicity within |eta| < 0.75, the
-centrality bin, and the primary vertex position. In each StFlowTrack
-it stores phi, eta, p_t, charge, dE/dx, deviant pid for each particle,
-pid, global dca, dca, chi2, fit points, and max points. StFlowTrack
-can also calculate total p and rapidity.
+In Make, it stores in StFlowEvent the PhiWgt values, the original
+track multiplicity, and the primary vertex position. In each
+StFlowTrack it stores phi, eta, p_t, charge, dca, pid, chi2, fit
+points, and max points.
 
 In Finish, it prints the lists of cuts and selections.
 
@@ -50,7 +45,7 @@ MeanPt, Q (the event plane vector), Psi (the event plane angle), and q
 sub-events and set the pid values.  It also contains the function
 which sets the flags for each track saying whether it is used in the
 event plane determined for each harmonic, each selection, and each
-subevent. StFlowEvent is used in the flow analysis by StFlowTagMaker
+subevent.  StFlowEvent is used in the flow analysis by StFlowTagMaker
 and StFlowAnalysisMaker.
 
 ** Cut Classes:
@@ -63,22 +58,20 @@ tracks removed by each cut. Call the PrintCutList functions in Finish
 to print these counters.
 
 Right now the event cuts are on multiplicity and primary vertex
-position. The track cuts are on chi2, dca, pt, eta, fit points, and
-the ratio of fit point to max points. It is set up so that other cuts
-can be easily added. If lo >= hi on a cut, the cut is not applied.
+position. The track cuts are on fit points and the ratio of fit point
+to max points. It is set up so that other cuts can be easily
+added. If lo >= hi on a cut, the cut is not applied.
 
 In CheckEvent and CheckTrack the calling argument is a pointer to the
 event or track.
 
 CutTrack also stores the number of tracks with positive and negative
 pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are
-used to calculate (Pos - Neg) / (Pos + Neg). A cut is put on this
-ratio after correcting for an acceptance effect and normalizing with
-the square root of the multiplicity. The purpose is to eliminate
-beam-gas background where most of the particles would go one way or
-the other.
+used to calculate (Pos - Neg) / (Pos + Neg) and put a cut on this
+ratio. The purpose is to eliminate beam-gas background where most of
+the particles would go one way or the other.
 
-** StFlowPicoEvent:
+** StFlowNanoEvent:
 
 This is a persistent sub-set of StFlowEvent which can be written out
 to disk.
@@ -91,9 +84,8 @@ Select() member function with a pointer to StFlowEvent it selects on
 centrality. If one calls it with a pointer to StFlowTrack it selects
 tracks for the event plane determination which have the indicated
 harmonic, selection, subevent, and PID. The SelectPart() member
-function selects tracks for correlating with the event plane which
-have the indicated pt, total p, rapidity, eta, fit points, ratio of
-fit points to max points, chi2, global dca, and dca.
+function selects the PID of tracks for correlating with the event
+plane
 
 ** Constants:
 

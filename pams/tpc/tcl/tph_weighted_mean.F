@@ -1,8 +1,5 @@
-* $Id: tph_weighted_mean.F,v 1.4 2000/11/14 22:29:04 genevb Exp $
+* $Id: tph_weighted_mean.F,v 1.3 1999/10/05 00:47:15 snelling Exp $
 * $Log: tph_weighted_mean.F,v $
-* Revision 1.4  2000/11/14 22:29:04  genevb
-* Switched from float to double in many places
-*
 * Revision 1.3  1999/10/05 00:47:15  snelling
 * the tdc range saga continues
 *
@@ -79,46 +76,41 @@ c
 	integer ipt                   ! Index for points
 	integer npts                  ! Number of points to use
 
-	real*8 ysum                   ! Sum of y values
-        real*8 tmp,unc_cor,unc_uncor,m1,m2
+	real ysum                     ! Sum of y values
 C-----------------------------------------------------------------------
 
         npts = ihi - ilo + 1
 
-	m1 = 0.0
-	m2 = 0.0
+	mom1 = 0.0
+	mom2 = 0.0
 	ysum = 0.0
 	do ipt=ilo,ihi
-	  ysum = ysum + dble(y(ipt))
-          tmp = dble(x(ipt))*dble(y(ipt))
-	  m1 = m1 + tmp
-          m2 = m2 + tmp*dble(x(ipt))
+	  ysum = ysum + y(ipt)
+	  mom1 = mom1 + x(ipt)*y(ipt)
+          mom2 = mom2 + x(ipt)*(x(ipt)*y(ipt))
 	enddo
-	m1 = m1 / ysum
-        m2 = m2/ysum - m1**2
+	mom1 = mom1 / ysum
+        mom2 = mom2/ysum - mom1**2
         if (mom2.ge.0.) then
-         m2=dsqrt(m2)
+         mom2=sqrt(mom2)
         else
-         m2 = 0.0
+         mom2 = 0.
         endif
 c
 c the uncertainty from the correlated noise and uncorrelated noise
 c  is estimated below...
-	unc_cor = 0.0
-	unc_uncor = 0.0
+	uncertainty_cor = 0.0
+	uncertainty_uncor = 0.0
 	do ipt=ilo,ihi
-          tmp = dble(x(ipt))-m1
-	  unc_cor = unc_cor+dabs(tmp)*dy_cor(ipt)
-	  unc_uncor = unc_uncor+(tmp*dy_uncor(ipt))**2
+	  uncertainty_cor = uncertainty_cor+
+     +          abs(x(ipt)-mom1)*dy_cor(ipt)
+	  uncertainty_uncor = uncertainty_uncor+
+     +          ((x(ipt)-mom1)*dy_uncor(ipt))**2
 	enddo
-        unc_cor = unc_cor/ysum
-	unc_uncor = dsqrt(unc_uncor)/ysum
+        uncertainty_cor = uncertainty_cor/ysum
+	uncertainty_uncor = sqrt(uncertainty_uncor)/ysum
 
-        uncertainty_cor = unc_cor
-        uncertainty_uncor = unc_uncor
-	uncertainty = dsqrt(unc_cor**2+unc_uncor**2)
-        mom1 = m1
-        mom2 = m2
+	uncertainty = sqrt(uncertainty_cor**2+uncertainty_uncor**2)
 
 	return
 	end

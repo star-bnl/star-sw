@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.24 2000/09/30 16:16:54 fisyak Exp $
+// $Id: St_XDFFile.h,v 1.23 2000/03/22 23:52:06 fine Exp $
 // $Log: St_XDFFile.h,v $
-// Revision 1.24  2000/09/30 16:16:54  fisyak
-// Valery's cast
-//
 // Revision 1.23  2000/03/22 23:52:06  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
@@ -101,7 +98,7 @@ class St_XDFFile : public TObject
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
-    virtual Bool_t    IsFolder() const { return fFile?kTRUE:kFALSE;}
+    virtual Bool_t    IsFolder(){ return fFile?kTRUE:kFALSE;}
     virtual TDataSet *ReadEvent();                                         // create TDataSet and read the next event in it.
     virtual TDataSet *NextEventGet(){return ReadEvent();};                                         // create TDataSet and read the next event in it.
     virtual TDataSet *NextEventList();

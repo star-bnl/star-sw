@@ -195,10 +195,9 @@ Block BTOF is the whole CTF system envelope
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
       choice = btog_choice
-      if (btog_choice != 2) choice = 1
-      Create and Position BTOH  z=+btog_dz/2    alphay=180
-      choice=btog_choice
       Create and Position BTOH  z=-btog_dz/2
+      if (choice != 2) choice = 1
+      Create and Position BTOH  z=+btog_dz/2    alphay=180
 EndBlock
 *
 *------------------------------------------------------------------------------

@@ -1,14 +1,9 @@
 //
-// $Id: StPreEclMaker.h,v 1.5 2000/09/08 21:48:00 suaide Exp $
+// $Id: StPreEclMaker.h,v 1.4 2000/08/24 22:11:35 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
-// Revision 1.5  2000/09/08 21:48:00  suaide
-// See README for details
-//
 // Revision 1.4  2000/08/24 22:11:35  suaide
-//
-//
 // restored some files for background compatibility
 //
 // Revision 1.3  2000/08/24 19:45:37  suaide
@@ -75,8 +70,7 @@ public:
   virtual Int_t Make();
   virtual void  PrintInfo();
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);
-          void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
-          
+  
   ClassDef(StPreEclMaker, 1)// Electromagnetic PreClusters maker
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtProbValues.cc,v 1.2 2000/10/02 13:48:10 caines Exp $
+ * $Id: StSvtProbValues.cc,v 1.1 2000/06/15 20:04:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtProbValues.cc,v $
- * Revision 1.2  2000/10/02 13:48:10  caines
- * Adjusting donw hybrid by hybrid
- *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -30,48 +27,23 @@ StSvtProbValues::StSvtProbValues()
 
   //Initialize the various variables
  mAdcCounts = 0; 
- mSigma[0] = 1.4; //the standared deviation Hybrid 0
- mSigma[1] = 1.4; //the standared deviation Hybrid 1
- mSigma[2] = 1.3; //the standared deviation Hybrid 2
- mSigma[3] = 1.2; //the standared deviation Hybrid 3
- mSigma[4] = 1.5; //the standared deviation Hybrid 4
- mSigma[5] = 1.5; //the standared deviation Hybrid 5
- mSigma[6] = 1.9; //the standared deviation Hybrid 6
- mSigma[7] = 1.9; //the standared deviation Hybrid 7
- mSigma[8] = 1.8; //the standared deviation Hybrid 8
- mSigma[9] = 2.0; //the standared deviation Hybrid 9
- mSigma[10] = 2.2; //the standared deviation Hybrid 10
- mSigma[11] = 5; //the standared deviation Hybrid 11
- mSigma[12] = 2.1; //the standared deviation Hybrid 12
- mSigma[13] = 2.1; //the standared deviation Hybrid 13
-
+ mSigma = 2.1; //the standared deviation
+ 
+ for(int i = 0; i <20; i++)
+   {
+    mProb[i] = 0;
+    mSum[i] = 0;
+    mErrf[i] = 0;
+   }
 }
 
 StSvtProbValues::~StSvtProbValues()
 {}
 
 
-void  StSvtProbValues::Prob2(int Hybrid)
+
+void StSvtProbValues::Prob()
 {
-  // New improved way using library code.
-  double num = 0;
-
- for(int i = 0; i < 15; i++){
-   mAdcCounts = i;
-     
-   num = mAdcCounts/(sqrt(2)*mSigma[Hybrid]);
-   
-   mProb[i] = 0.5*(1 - erf(num));
-   
- }
-}
-
-void StSvtProbValues::Prob1(int Hybrid)
-{
-
-  //Old way that has problems for some sigmas
- for(int i = 0; i <20; i++) mSum[i] = 0;
-
  for(int i = 0; i < 15; i++)
   {
    mAdcCounts = i;
@@ -89,7 +61,7 @@ void StSvtProbValues::Prob1(int Hybrid)
      if(j==0)
        {
         mFactorial = 1.0;
-        mPowerTerm = (double)(mAdcCounts/(sqrt(2)*mSigma[Hybrid]));  
+        mPowerTerm = (double)(mAdcCounts/(sqrt(2)*mSigma));  
         mPowerTermSquared = mPowerTerm*mPowerTerm; 
         mCountTerm = mPowerTerm; 
        }
@@ -124,21 +96,15 @@ void StSvtProbValues::WriteTable()
 {
   fstream probability;
 
-  probability.open("prob.dat",ios::app);
+  probability.open("prob.dat",ios::out);
  
   for(int i = 0; i < 14; i++)
     {
-      double k = mProb[i];
-      if( k > 1e-13){
-	probability << 1/k <<"\t";
-      }
-      else{
-	probability << "1e20" <<"\t";
-      }
-      cout<<"mProb "<<"\("<<i<<") = "<<k<<endl;
+     double k = mProb[i];
+     probability << 1/k <<"\t";
+     cout<<"mProb "<<"\("<<i<<") = "<<k<<endl;
     }
-  
-  probability << "\n";
+
  probability.close();
   
 }
@@ -147,9 +113,7 @@ main()
 {
   StSvtProbValues probValue;
 
+  probValue.Prob();
+  probValue.WriteTable();
 
-  for( int Hybrid=0; Hybrid<14; Hybrid++){
-    probValue.Prob2(Hybrid);
-    probValue.WriteTable();
-  }
 }

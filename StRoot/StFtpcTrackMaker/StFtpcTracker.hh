@@ -1,10 +1,5 @@
-// $Id: StFtpcTracker.hh,v 1.6 2000/11/10 18:39:09 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.5 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
-// Revision 1.6  2000/11/10 18:39:09  oldi
-// TBenchmark object 'mBech' moved from StFtpcConfMapper to here. This implied changes in the constructors.
-// New function CalcEnergyLoss(FDE_FDEPAR_ST *fdepar) which replaces the pams/fde modul.
-// New function FitAnddEdxAndWrite() introduced which replaces CalcEnergyLoss() and FitAndWrite().
-//
 // Revision 1.5  2000/07/18 21:22:17  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -45,18 +40,14 @@
 #define STAR_StFtpcTracker
 
 #include "TObject.h"
-#include "TBenchmark.h"
 #include "StFtpcVertex.hh"
 #include "TClonesArray.h"
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_fcl_fppoint_Table.h"
-#include "tables/St_fde_fdepar_Table.h"
 
 class StFtpcTracker : public TObject {
 
 protected:
-
-              TBenchmark   *mBench;         // benchmark object (just for run-time measurements)
 
             StFtpcVertex   *mVertex;        // pointer to the vertex
             TClonesArray   *mHit;           // ClonesArray of clusters
@@ -67,35 +58,16 @@ protected:
 
 public:
 
-            StFtpcTracker();                                  // default constructor
-            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, 
-			  Double_t vertexPos[3] = NULL, 
-			  Bool_t bench = (Bool_t)false, 
-			  Double_t max_Dca = 100.);           // real constructor
-            StFtpcTracker(StFtpcVertex *vertex, 
-			  TClonesArray *hit, 
-			  TClonesArray *track, 
-			  Bool_t bench = (Bool_t)false, 
-			  Double_t max_Dca = 100.);           // constructor if everything is already there
-            StFtpcTracker(TClonesArray *hits, 
-			  StFtpcVertex *vertex, 
-			  Bool_t bench = (Bool_t)false, 
-			  Double_t max_Dca = 100.);           // constructor to handle arbitrary hits 
-            StFtpcTracker(StFtpcVertex *vertex, 
-			  St_fcl_fppoint *fcl_fppoint, 
-			  St_fpt_fptrack *fpt_fptrack, 
-			  Bool_t bench = (Bool_t)false, 
-			  Double_t max_Dca = 100.);           // constructor do do refitting
+            StFtpcTracker();  // default constructor
+            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);            // real constructor
+            StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t max_Dca = 100.);         // constructor if everything is already there
+            StFtpcTracker(TClonesArray *hits, Double_t vertexPos[3], Double_t max_Dca = 100.);                            // constructor to handle arbitrary hits 
+            StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca);  // constructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
 
-  void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
-  void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
-  Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
-			     FDE_FDEPAR_ST *fdepar, 
-			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
-  Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
-  Int_t   Write();                                                          // writes tracks and clusters in ROOT file
+    Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
+    Int_t   Write();                                                          // writes tracks and clusters in ROOT file
 
   // getter
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex

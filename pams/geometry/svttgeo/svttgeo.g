@@ -1,9 +1,6 @@
-* $Id: svttgeo.g,v 1.13 2000/11/18 22:15:28 nevski Exp $
+* $Id: svttgeo.g,v 1.12 2000/01/22 17:42:21 nevski Exp $
 *
 * $Log: svttgeo.g,v $
-* Revision 1.13  2000/11/18 22:15:28  nevski
-* adjust wafer size as requested by Helen
-*
 * Revision 1.12  2000/01/22 17:42:21  nevski
 * clean up unused variables
 *
@@ -142,8 +139,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
    Fill SWCA ! Wafer Carrier
       Version   = 1          ! geometry version
       Length    = 56.04      ! ladder length
-      WaferWid  = 6.305      ! wafer width
-      WaferLen  = 6.305      ! wafer length
+      WaferWid  = 6          ! wafer width
+      WaferLen  = 6          ! wafer length
       WaferThk  = 0.0300     ! wafer thickness
       RoHaThk   = 0.0381     ! Roha cell plus glue thickness 
       WafCarWd  = 1.5        ! wafer carrier rails width

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3.Banks.hh,v 1.4 2000/09/11 16:25:20 struck Exp $
+ * $Id: L3.Banks.hh,v 1.3 2000/07/26 02:12:27 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -12,14 +12,10 @@
  * change log:
  *   06 Jun 00 CS initial version
  *   24 Jul 00 CS added i960 cluster banks
- *   09 Sep 00 CS added l3_summary and summary_data in L3_P
  *
  ***************************************************************************
  *
  * $Log: L3.Banks.hh,v $
- * Revision 1.4  2000/09/11 16:25:20  struck
- * added L3_summary and summary_data to L3_P
- *
  * Revision 1.3  2000/07/26 02:12:27  struck
  * added i960 cluster reader
  *
@@ -62,8 +58,6 @@ struct Bank_L3_P: public Bank
   INT32   trg_in_word;
   Pointer sector[24];
   Pointer tracks;
-  Pointer summary_data;
-  INT32   L3_summary[4];
 };
 
 
@@ -195,7 +189,6 @@ struct Bank_L3_SECCD: public Bank
 
     int swap();
 };
-
 
 
 // Vertex

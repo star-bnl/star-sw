@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.12 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.11 2000/07/17 20:03:17 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
- * Revision 1.12  2000/10/05 23:09:05  lisa
- * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
- *
  * Revision 1.11  2000/07/17 20:03:17  lisa
  * Implemented tools for addressing and assessing trackmerging
  *
@@ -101,10 +98,6 @@ public:
   void CalculateNominalTpcExitAndEntrancePoints(); // NOTE - this requires the mHelix, so be sure this is filled
 
 
-  StHbtThreeVector mNominalPosSample[11];  // I make this public for convenience and speed of StHbtPair()
-
-
-
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
@@ -115,7 +108,6 @@ private:
   int mNhits;
   StHbtThreeVector mNominalTpcExitPoint;
   StHbtThreeVector mNominalTpcEntrancePoint;
-
 
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.14 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.12 2000/07/23 13:52:56 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,16 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
- * Revision 1.14  2000/10/05 23:09:05  lisa
- * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
- *
- * Revision 1.13  2000/08/31 22:31:31  laue
- * StHbtAnalysis: output changed (a little bit less)
- * StHbtEvent: new version, members for reference mult added
- * StHbtIOBinary: new IO for new StHbtEvent version
- * StHbtTypes: TTree typedef to StHbtTTree added
- * StHbtVertexAnalysis: overflow and underflow added
- *
  * Revision 1.12  2000/07/23 13:52:56  laue
  * NominalExitPoint set to (-9999.,-9999.-9999.) if helix.at()
  * returns nan (not a number).
@@ -72,11 +62,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
 #include "math_constants.h"
-#ifdef __CC5__
-  #include <math.h>
-#else
-  #include <cmath>
-#endif
+#include "cmath"
 //_____________________
 StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
   /* no-op for default */
@@ -222,18 +208,6 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
 
   // This is faster  
   if (isnan(mNominalTpcExitPoint.x())) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
-
-
-  // 03Oct00 - mal.  OK, let's try something a little more along the lines of NA49 and E895 strategy.
-  //    calculate the "nominal" position at N radii (say N=11) within the TPC, and for a pair cut
-  //    use the average separation of these N
-  for (int irad=0; irad<11; irad++){
-    float radius = 50.0 + irad*15.0;
-    candidates = hel.pathLength(radius);
-    sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-    mNominalPosSample[irad] = hel.at(sideLength);
-  }
-
 
 }
 //_____________________

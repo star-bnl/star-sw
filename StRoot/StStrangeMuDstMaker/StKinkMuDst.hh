@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 3.2 2000/09/06 21:09:03 wdeng Exp $
+ * $Id: StKinkMuDst.hh,v 3.1 2000/08/10 01:16:24 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,9 +11,6 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
- * Revision 3.2  2000/09/06 21:09:03  wdeng
- * Added track charges and total momenta
- *
  * Revision 3.1  2000/08/10 01:16:24  genevb
  * Added number of dedx points
  *
@@ -55,13 +52,9 @@ public:
   Float_t  parentMomentumX() const;
   Float_t  parentMomentumY() const;
   Float_t  parentMomentumZ() const;
-  Float_t  parentMomentum() const;
-  Short_t  parentCharge() const;
   Float_t  daughterMomentumX() const;
   Float_t  daughterMomentumY() const;
   Float_t  daughterMomentumZ() const;
-  Float_t  daughterMomentum() const;
-  Short_t  daughterCharge() const;
   Float_t  positionX() const;
   Float_t  positionY() const;
   Float_t  positionZ() const;
@@ -94,13 +87,9 @@ public:
   Float_t  mParentMomentumX;
   Float_t  mParentMomentumY;
   Float_t  mParentMomentumZ;
-  Float_t  mParentMomentum;
-  Short_t  mParentCharge;
   Float_t  mDaughterMomentumX;
   Float_t  mDaughterMomentumY;
   Float_t  mDaughterMomentumZ;
-  Float_t  mDaughterMomentum;
-  Short_t  mDaughterCharge;
   Float_t  mPositionX;
   Float_t  mPositionY;
   Float_t  mPositionZ;
@@ -154,20 +143,12 @@ inline Float_t StKinkMuDst::parentMomentumY() const
                { return mParentMomentumY; }
 inline Float_t StKinkMuDst::parentMomentumZ() const
                { return mParentMomentumZ; }
-inline Float_t StKinkMuDst::parentMomentum() const
-               { return mParentMomentum; }
-inline Short_t StKinkMuDst::parentCharge() const
-               { return mParentCharge; }
 inline Float_t StKinkMuDst::daughterMomentumX() const
                { return mDaughterMomentumX; }
 inline Float_t StKinkMuDst::daughterMomentumY() const
                { return mDaughterMomentumY; }
 inline Float_t StKinkMuDst::daughterMomentumZ() const
                { return mDaughterMomentumZ; }
-inline Float_t StKinkMuDst::daughterMomentum() const
-               { return mDaughterMomentum; }
-inline Short_t StKinkMuDst::daughterCharge() const
-               { return mDaughterCharge; }
 inline Float_t StKinkMuDst::positionX() const { return mPositionX; }
 inline Float_t StKinkMuDst::positionY() const { return mPositionY; }
 inline Float_t StKinkMuDst::positionZ() const { return mPositionZ; }

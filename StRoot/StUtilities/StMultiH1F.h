@@ -1,8 +1,5 @@
-// $Id: StMultiH1F.h,v 1.4 2000/09/05 19:54:46 genevb Exp $
+// $Id: StMultiH1F.h,v 1.3 2000/08/28 19:21:05 genevb Exp $
 // $Log: StMultiH1F.h,v $
-// Revision 1.4  2000/09/05 19:54:46  genevb
-// Erroneous delete in destructor removed
-//
 // Revision 1.3  2000/08/28 19:21:05  genevb
 // Improved projection code
 //
@@ -26,7 +23,7 @@ class StMultiH1F : public TH2F {
 	     Axis_t xup,Int_t nbinsy);
   StMultiH1F(const char *name,const char *title,Int_t nbinsx,Double_t *xbins,
 	     Int_t nbinsy);
-  virtual ~StMultiH1F() {}
+  virtual ~StMultiH1F() { delete names; }
   virtual        void Draw(Option_t *option="");
   virtual        void SetNames(Int_t   ybin, const char* name)
                               { names[ybin] = name; }

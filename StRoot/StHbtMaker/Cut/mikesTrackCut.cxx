@@ -43,10 +43,9 @@ bool mikesTrackCut::Pass(const StHbtTrack* track){
                   (track->NSigmaKaon()   > mNSigmaKaon[0]) &&
                   (track->NSigmaKaon()   < mNSigmaKaon[1]) &&
                   (track->NSigmaProton() > mNSigmaProton[0]) &&
-                  (track->NSigmaProton() < mNSigmaProton[1]));
-  if (mCharge !=0){               // if user requests "charge=0" then that means ignore charge
-    goodPID = (goodPID&&(track->Charge() == mCharge));
-  }
+                  (track->NSigmaProton() < mNSigmaProton[1]) &&
+                  (track->Charge() == mCharge));
+
 
   if (goodPID){
     float TEnergy = sqrt(track->P().mag2()+mMass*mMass);

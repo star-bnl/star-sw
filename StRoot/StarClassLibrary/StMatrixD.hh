@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.hh,v 1.6 2000/09/25 20:22:59 ullrich Exp $
+ * $Id: StMatrixD.hh,v 1.5 2000/02/02 18:31:06 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.hh,v $
- * Revision 1.6  2000/09/25 20:22:59  ullrich
- * Removed inheritance from TObject.
+ * Revision 1.5  2000/02/02 18:31:06  lasiuk
+ * restore files
  *
  * Revision 1.5  2000/02/02 18:31:06  lasiuk
  * restore files
@@ -43,13 +43,13 @@
 #include "StLorentzVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StLorentzVectorD.hh"
-#ifdef __ROOT__
-#include "Rtypes.h"
-#endif
 
 class StMatrixF;
 
 class StMatrixD 
+#ifdef __ROOT__
+ : public TObject 
+#endif
 {
 public:
     StMatrixD();
@@ -65,7 +65,7 @@ public:
     
     // Destructor. --
     //Problem with LINUX (virtual table error when exception thrown)
-    virtual ~StMatrixD();
+    ~StMatrixD();
 
     //
     // access functions
@@ -174,7 +174,7 @@ protected:
     unsigned int mRow, mCol;
     unsigned int mSize;
 #ifdef __ROOT__
-    ClassDef(StMatrixD,2)
+    ClassDef(StMatrixD,1)
 #endif
 };
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.29 2000/10/12 21:01:32 posk Exp $
+// $Id: plot.C,v 1.24 2000/08/12 20:20:15 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -11,26 +11,12 @@
 //               Default hist file is flow.hist.root .
 //               After the first execution, just type plot(N) .
 //               A negative N plots all pages starting with page N.
+//
 //               Place a symbolic link to this file in StRoot/macros/analysis .
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
-// Revision 1.29  2000/10/12 21:01:32  posk
-// Minor update.
-//
-// Revision 1.28  2000/09/29 22:53:18  posk
-// More histograms.
-//
-// Revision 1.27  2000/09/26 20:54:12  posk
-// Updated documentation.
-//
-// Revision 1.26  2000/09/15 22:52:56  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.25  2000/08/31 18:50:32  posk
-// Added plotCen.C to plot from a series of files with different centralities.
-//
 // Revision 1.24  2000/08/12 20:20:15  posk
 // More centrality bins.
 //
@@ -89,6 +75,7 @@ const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 1.5;
+const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
 char  runName[6];
 char  fileNumber[4]  = "x";
@@ -102,10 +89,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   if (cOld) cOld->Delete();
     
   gROOT->SetStyle("Bold");                              // set style
-  //gROOT->LoadMacro("styles.C");
-  //Bold();
-  //Pub();
-  //gROOT->SetStyle("Video");                              // set style
   gROOT->ForceStyle();
 
   // names of histograms made by StFlowAnalysisMaker
@@ -113,7 +96,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   const char* baseName[] = { "Flow_Res_Sel",
 			     "Flow_Charge",
 			     "Flow_Dca",
-			     "Flow_DcaGlobal",
 			     "Flow_Chi2",
 			     "Flow_FitPts",
 			     "Flow_MaxPts",
@@ -121,33 +103,21 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
-			     "Flow_MultEta",
-			     "Flow_MultPart",
+			     "Flow_CorrMult",
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSymVerZ2D",
+			     "Flow_EtaSymVerZ",
 			     "Flow_EtaSym",
-			     "Flow_CTBvsZDC2D",
-			     "Flow_MeanDedx2D",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
-  			     "Flow_YieldPart2D",
-  			     "Flow_YieldPart.Eta",
-  			     "Flow_YieldPart.Pt",
-  			     "Flow_PidPiPlusPart",
-  			     "Flow_PidPiMinusPart",
-  			     "Flow_PidProtonPart",
-  			     "Flow_PidAntiProtonPart",
-  			     "Flow_PidKplusPart",
-  			     "Flow_PidKminusPart",
-  			     "Flow_PidDeuteronPart",
-  			     "Flow_PidAntiDeuteronPart",
-  			     "Flow_PidElectronPart",
-  			     "Flow_PidPositronPart",
+  			     "Flow_PidPiPlus",
+  			     "Flow_PidPiMinus",
+  			     "Flow_PidProton",
   			     "Flow_PidMult",
   			     "Flow_Cent",
    			     //"Flow_Bin_Eta",
@@ -174,7 +144,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 39 + 1;
+  const int nSingles = 26 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -193,14 +163,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     cout << " run name = " << runName << endl;
   }
 
-  // input the file number (0 opens flow.hist.root)
+  // input the file number (default opens flow.hist.root)
   if (strstr(fileNumber, "x")!=0) {
-    cout << "     anaXX.root file number? [0= flow.hist.root] ";
-    cin >> fileNumber;
-    if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
+    cout << "     anaXX.root file number? [flow.hist.root] " << flush;
+    fgets(fileNumber, sizeof(fileNumber), stdin);
+    if (strlen(fileNumber) == 1) {
       sprintf(fileName, "flow.hist.root");
     } else {
-      sprintf(fileName, "ana%s.root", fileNumber);       // insert
+      fileNumber[strlen(fileNumber)-1] = '\0';             // remove CR
+      sprintf(fileName, "ana%s.root", fileNumber);         // insert
     }
     cout << " file name = " << fileName << endl;
     histFile = new TFile(fileName);
@@ -231,7 +202,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
-  float qMax    =   3.5;
+  float qMax    =     3.5;
   float phiMax  = twopi; 
   int   n_qBins =    50;
   TString* histProjName = NULL;
@@ -249,8 +220,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   } else {
     int canvasWidth = 780, canvasHeight = 600;             // landscape
   }
-  TCanvas* c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
-			   canvasWidth, canvasHeight);
+  TCanvas* c = new TCanvas(shortName[pageNumber],shortName[pageNumber],
+			   canvasWidth,canvasHeight);
   c->ToggleEventStatus();
   if (selN==0) {
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
@@ -273,6 +244,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     int firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
   }
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
+  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
   TLine* lineOnePhi  = new TLine(0., 1., phiMax, 1.);
   for (int j = firstJ; j < lastJ; j++) {
     char countRows[2];
@@ -322,8 +294,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],".Eta")!=0) { // 2D X projection
 	TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999, "E");
 	projX->SetName(histProjName->Data());
-	char* xTitle = hist->GetXaxis()->GetTitle();
-	projX->SetXTitle(xTitle);
+	projX->SetXTitle("pseudorapidity");
 	projX->SetYTitle("Counts");
 	gStyle->SetOptStat(10);
 	if (projX) projX->Draw("H");
@@ -336,6 +307,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gPad->SetLogy();
 	gStyle->SetOptStat(100110);
 	if (projY) projY->Draw("H");
+  	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
@@ -400,11 +372,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
 	gStyle->SetOptStat(100110);
 	hist->Draw();
-	if (strstr(shortName[pageNumber],"v")!=0) {
-	  ptMax = hist->GetXaxis()->GetXmax();
-	  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
-	  lineZeroPt->Draw();
-	}
+  	lineZeroPt->Draw();
       } else {                                                // all others
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 
@@ -553,8 +521,7 @@ TCanvas* plotSingles(char* shortName){
   } else if (strstr(shortName,".Eta")!=0) {         // 2D Eta projection
     TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999);
     projX->SetName(histProjName->Data());
-    char* xTitle = hist->GetXaxis()->GetTitle();
-    projX->SetXTitle(xTitle);
+    projX->SetXTitle("pseudorapidity");
     projX->SetYTitle("Counts");
     gStyle->SetOptStat(10);
     if (projX) projX->Draw("H");

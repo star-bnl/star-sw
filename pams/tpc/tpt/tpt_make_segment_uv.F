@@ -1,8 +1,5 @@
-* $Id: tpt_make_segment_uv.F,v 1.16 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_make_segment_uv.F,v 1.15 2000/05/01 04:11:42 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
-* Revision 1.16  2000/11/14 22:29:08  genevb
-* Switched from float to double in many places
-*
 * Revision 1.15  2000/05/01 04:11:42  sakrejda
 * Debug write removed.
 *
@@ -117,12 +114,12 @@ C     Local variables
       INTEGER tpc_sec24_to_sec12
       INTEGER tpc_row_par
 
-      REAL    as1,bs1,xp1,yp1,zp1,xp(2),yp(2),xlast,ylast,zlast
-      REAL*8  at,bt,az,bz,stot,as,bs,phi,fact
-      REAL    x0,y0
-      REAL    xglobal(3)
-      REAL*8  dist1,dist2,dist3,dx,dy,dz
-      REAL*8  rc,da,ds,dfir,tolr2,dis0,disr2,sr1
+      REAL    as,bs,xp1,yp1,xp(2),yp(2),xlast,ylast,zlast
+      REAL    zp1,sr1,dis0,dy,dx,dz,dfir,tolr2,disr2,dist1,dist2,fact
+      REAL    at,bt,az,bz,stot
+      REAL    phi,x0,y0,rc,da,ds
+      REAL    xglobal(3), dummy
+      REAL    foo1, foo2, foo3
 
       LOGICAL sector_change
       
@@ -176,22 +173,14 @@ C
          do while (ns.eq.0)
 C           find what is the parametrisation for the row ir1 in 
 C           sector isect
-            iret = tpc_row_par(isect_trunc,float(ir1),as1,bs1)
-            as = dble(as1)
-            bs = dble(bs1)
+            iret = tpc_row_par(isect_trunc,float(ir1),as,bs)
 C           find what is the prediction for this row
-            iret = tpt_ptcrs_uv_p(as,bs,dble(-1.0),at,bt,x0,y0,xp,yp)
+            iret = tpt_ptcrs_uv_p(as,bs,-1.0,at,bt,x0,y0,xp,yp)
 C           check whether there is a crossing point
             if(iret.eq.STAFCV_OK) then
 C              find which solution is closer
-               dx=xlast-xp(1)
-               dy=ylast-yp(1)
-               dist1=dx**2+dy**2
-               dx=xlast-xp(2)
-               dy=ylast-yp(2)
-               dist2=dx**2+dy**2
-c              dist1=(xlast-xp(1))**2+(ylast-yp(1))**2
-c              dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
+               dist1=(xlast-xp(1))**2+(ylast-yp(1))**2
+               dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
                ns=1
                if(dist2.lt.dist1) ns=2
                xp1=xp(ns)
@@ -217,43 +206,24 @@ C	       boundaries and find which boundary is closer
                sector_change=.true.
                lsec=15-isect_trunc
                if(lsec.ge.12) lsec=lsec-12
-               phi=(dble(lsec)+0.5)*C_PI/6.0
-c              phi=dble(lsec)*C_PI/6.0+C_PI/12.0
+               phi=float(lsec)*C_PI/6.0+C_PI/12.0
                dist1=-1.0
                dist2=-1.0
-               iret = tpt_ptcrs_uv_p(-dtan(phi),dble(1.0),0,at,bt,
-     >                                                  x0,y0,xp,yp)
+               iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
-                 dx=xlast-xp(1)
-                 dy=ylast-yp(1)
-                 dist1=dx**2+dy**2
-                 dx=xlast-xp(2)
-                 dy=ylast-yp(2)
-                 dist2=dx**2+dy**2
-c                dist1=(xlast-xp(1))**2+(ylast-yp(1))**2
-c                dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
+                 dist1=(xlast-xp(1))**2+(ylast-yp(1))**2
+                 dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
                  if(dist1.gt.dist2) then
                   dist1=dist2
                  endif 
                endif
-               phi=(dble(lsec)-0.5)*C_PI/6.0
-C              phi=dble(lsec-1)*C_PI/6.0+C_PI/12.0
-               iret = tpt_ptcrs_uv_p(-dtan(phi),dble(1.0),0,at,bt,
-     >                                                  x0,y0,xp,yp)
+               phi=float(lsec-1)*C_PI/6.0+C_PI/12.0
+               iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
-                 dx=xlast-xp(1)
-                 dy=ylast-yp(1)
-                 dist2=dx**2+dy**2
-                 dx=xlast-xp(2)
-                 dy=ylast-yp(2)
-                 dist3=dx**2+dy**2
-                 if(dist2.gt.dist3)then
-                    dist2=dist3
+                 dist2=(xlast-xp(1))**2+(ylast-yp(1))**2
+                 if(dist2.gt.(xlast-xp(2))**2+(ylast-yp(2))**2)then
+                    dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
                  endif
-c                dist2=(xlast-xp(1))**2+(ylast-yp(1))**2
-c                if(dist2.gt.(xlast-xp(2))**2+(ylast-yp(2))**2)then
-c                   dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
-c                endif
                endif
                if(dist1.gt.0.and.dist2.gt.0.and.dist1.lt.dist2.or.
      >         dist1.gt.0.and.dist2.lt.0) then
@@ -274,14 +244,11 @@ c                endif
          end do 
          if(ns.gt.0) then
 C          prediction in the same sector, find 3 adjacent z-slices
-           dx=xlast-xp1
-           dy=ylast-yp1
-           da=dsqrt(dx**2+dy**2)*0.5
-c          da=sqrt((xlast-xp1)**2+(ylast-yp1)**2)*0.5
-           rc = 0.5*dsqrt((at**2+1.0)/bt**2)
+           da=sqrt((xlast-xp1)**2+(ylast-yp1)**2)*0.5
+           rc = 0.5*sqrt((at**2+1.0)/bt**2)
            nfound = 0
            if(da/rc.lt.1.0)then
-           ds=2.0*rc*dasin(da/rc)
+           ds=2.0*rc*asin(da/rc)
            sr1=stot+ds
            zp1 = az*sr1+bz
            if(abs(zp1).lt.210.0)then
@@ -300,8 +267,8 @@ C          check there are hits here
                  drow = irlast - ir1
                  fact=1.0
                  if(ir1.lt.14.or.drow.gt.1) fact=2.0
-                 if(dabs(dble(hit(i).z-zp1))
-     >           .lt.(fact*tpar(ipass).dzplim*hit(i).zrf))then
+                 if(abs(hit(i).z-zp1)
+     >           .lt.fact*tpar(ipass).dzplim*hit(i).zrf)then
                    dy = hit(i).y-yp1
                    dx = hit(i).x-xp1
                    dz = hit(i).z-zp1

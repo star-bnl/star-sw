@@ -1,12 +1,9 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.1 2000/08/31 06:21:53 dunlop Exp $
+ * $Id: StRrsMaker.cxx,v 2.0 2000/08/09 16:17:05 gans Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 2.1  2000/08/31 06:21:53  dunlop
- * Put mPadPlane to 0 after delete, in case finish is called twice (.dev right now)
- *
  * Revision 2.0  2000/08/09 16:17:05  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -761,10 +758,8 @@ int StRrsMaker::Finish()
 //     mRchNTupleFile->Write();
 //     mRchNTupleFile->Close();
 #endif
-    
+
     delete mPadPlane;
-    mPadPlane = 0;
-    
 
     return 0;
 } 

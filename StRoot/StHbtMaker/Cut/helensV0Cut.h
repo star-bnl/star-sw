@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.h,v 1.5 2000/10/09 21:56:16 laue Exp $
+ * $Id: helensV0Cut.h,v 1.4 2000/01/25 17:35:02 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.h,v $
- * Revision 1.5  2000/10/09 21:56:16  laue
- * Helens new cuts
- *
  * Revision 1.4  2000/01/25 17:35:02  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -86,7 +83,6 @@ public:
   void SetalphaV0(const float& lo, const float& hi);
   void SetPt(const float& lo, const float& hi);
   void SetRapidity(const float& lo, const float& hi);
-  void SetdEdx(const float& charge, const float& m1, const float& c1, const float& m2, const float& c2);
 
 
 private:   // here are the quantities we want to cut on...
@@ -103,8 +99,6 @@ private:   // here are the quantities we want to cut on...
   float             malphaV0[2];             //alpha Armenteros
   float             mPt[2];                 //pt of V0
   float             mRapidity[2];           //rapidity of V0
-  float             mdEdx[4];        // dEdx lines for daughter track
-  float             mChargedEdx;            // Charge of track to use in dedx
 
   long              mNV0sPassed;
   long              mNV0sFailed;
@@ -139,11 +133,6 @@ inline void helensV0Cut::SetptArmV0(const float& lo, const float& hi)
 {mptArmV0[0]=lo; mptArmV0[1]=hi;}
 inline void helensV0Cut::SetalphaV0(const float& lo, const float& hi)
 {malphaV0[0]=lo; malphaV0[1]=hi;}
-
-inline void helensV0Cut::SetdEdx(const float& charge,
-				 const float& m1,  const float& c1,
-				 const float& m2, const float& c2)
-{mChargedEdx=charge;mdEdx[0]=m1; mdEdx[1]=c1; mdEdx[2]=m2; mdEdx[3]=c2;}
 
 inline void helensV0Cut::SetPt(const float& lo, const float& hi)
 {mPt[0]=lo; mPt[1]=hi;}

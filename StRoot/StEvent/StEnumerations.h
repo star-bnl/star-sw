@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.8 2000/11/01 16:42:19 lasiuk Exp $
+ * $Id: StEnumerations.h,v 2.6 2000/08/28 16:28:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.8  2000/11/01 16:42:19  lasiuk
- * add StRichHitFlag for PID info
+ * Revision 2.6  2000/08/28 16:28:45  ullrich
+ * Added enum tpt and removed CINT pragmas.
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -60,34 +60,9 @@ enum StTrackType {global, primary, tpt, secondary};
 enum StTrackModel {helixModel, kalmanModel};
 
 enum StTrackFinderMethod { svtGrouper = 4,
-			   svtStk,
-			   svtOther, 
-			   tpcStandard,
-			   tpcOther,
-			   ftpcConformal,
 			   svtTpcSvm,
 			   svtTpcEst,
-			   svtTpcPattern };
 
-enum StRichPidFlag {eNoMip = 1,
-		    eFastEnough = 2,
-		    eLightOnPadPlane = 4};
-
-enum StRichHitFlag {eDeconvoluted=1,
-		    eMultiplyAssignedToRing=16,
-		    eAssociatedMip=32,
-		    e1SigmaPi=64,
-		    e2SigmaPi=128,
-		    eInConstantAreaPi=256,
-		    eInAreaPi=512,
-		    eAssignedToRingPi=1024,
-		    e1SigmaK=2048,
-		    e2SigmaK=4096,
-		    eInConstantAngleK=1024,
-		    eInAreaK=16384,
-		    eAssignedToRingK=32768,
-		    e1Sigmap=65536,
-		    e2Sigmap=131072,
 		    eInConstantAreap=262144,
 		    eInAreap=524288,
 		    eAssignedToRingp=1048576};

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.25 2000/09/29 22:53:16 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,24 +11,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
-// Revision 1.25  2000/09/29 22:53:16  posk
-// More histograms.
-//
-// Revision 1.24  2000/09/22 22:01:40  posk
-// Doubly integrated v now contains resolution error.
-//
-// Revision 1.23  2000/09/16 22:23:06  snelling
-// Auto magically switch to rapidity when identified particles are used
-//
-// Revision 1.22  2000/09/15 22:52:55  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.21  2000/09/12 01:31:00  snelling
-// Added pid histograms for e- e+ and dbar
-//
-// Revision 1.20  2000/08/31 18:50:30  posk
-// Added plotCen.C to plot from a series of files with different centralities.
-//
 // Revision 1.19  2000/08/09 21:38:59  snelling
 // Added monitor histograms
 //
@@ -102,7 +84,6 @@
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
-#include "TString.h"
 class StFlowEvent;
 class FlowTag_st;
 class StFlowSelection;
@@ -129,7 +110,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.25 2000/09/29 22:53:16 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -150,69 +131,51 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
-  TString          xLabel;      //! label axis with rapidity or pseudorapidity 
+ 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   FlowTag_st*      pFlowTag;    //! pointer to StEvent
   StFlowSelection* pFlowSelect; //! selection object
 
   // for single histograms
-  TH1F*     mHistCharge;               //!
-  TH1F*     mHistDca;                  //!
-  TH1F*     mHistDcaGlobal;            //!
-  TH1F*     mHistChi2;                 //!
-  TH1F*     mHistFitPts;               //!
-  TH1F*     mHistMaxPts;               //!
-  TH1F*     mHistFitOverMax;           //!
-  TH1F*     mHistOrigMult;             //!
-  TH1F*     mHistMultEta;              //!
-  TH1F*     mHistMult;                 //!
-  TH1F*     mHistMultOverOrig;         //!
-  TH1F*     mHistMultPart;             //!
-  TH1F*     mHistVertexZ;              //!
-  TH2F*     mHistVertexXY2D;           //!
-  TH1F*     mHistEtaSym;               //!
-  TH3F*     mHistEtaPtPhi3D;           //!
-  TH2D*     mHistYieldAll2D;           //!
-  TH2D*     mHistYieldPart2D;          //!
-  TProfile* mHistBinEta;               //!
-  TProfile* mHistBinPt;                //!
-  TProfile* mHistCosPhi;               //!
-  TH1F*     mHistPidPiPlus;            //!
-  TH1F*     mHistPidPiMinus;           //!
-  TH1F*     mHistPidProton;            //!
-  TH1F*     mHistPidAntiProton;        //!
-  TH1F*     mHistPidKplus;             //!
-  TH1F*     mHistPidKminus;            //!
-  TH1F*     mHistPidDeuteron;          //!
-  TH1F*     mHistPidAntiDeuteron;      //!
-  TH1F*     mHistPidElectron;          //!
-  TH1F*     mHistPidPositron;          //!
-  TH1F*     mHistPidPiPlusPart;        //!
-  TH1F*     mHistPidPiMinusPart;       //!
-  TH1F*     mHistPidProtonPart;        //!
-  TH1F*     mHistPidAntiProtonPart;    //!
-  TH1F*     mHistPidKplusPart;         //!
-  TH1F*     mHistPidKminusPart;        //!
-  TH1F*     mHistPidDeuteronPart;      //!
-  TH1F*     mHistPidAntiDeuteronPart;  //!
-  TH1F*     mHistPidElectronPart;      //!
-  TH1F*     mHistPidPositronPart;      //!
-  TProfile* mHistPidMult;              //!
-  TH1F*     mHistCent;                 //!
-  TH2F*     mHistEtaSymVerZ2D;         //!
-  TH1F*     mHistEtaSymVerZ;           //!
-  TH2F*     mHistCTBvsZDC2D;           //!
-  TH2F*     mHistMeanDedx2D;           //!
-  TH2F*     mHistMeanDedxPiPlus2D;     //!
-  TH2F*     mHistMeanDedxPiMinus2D;    //!
-  TH2F*     mHistMeanDedxProton2D;     //!
-  TH2F*     mHistMeanDedxPbar2D;       //!
-  TH2F*     mHistMeanDedxKplus2D;      //!
-  TH2F*     mHistMeanDedxKminus2D;     //!
-  TH2F*     mHistMeanDedxDeuteron2D;   //!
-  TH2F*     mHistMeanDedxAntiDeuteron2D;//!
-  TH2F*     mHistMeanDedxPositron2D;   //!
-  TH2F*     mHistMeanDedxElectron2D;   //!
+  TH1F*     mHistCharge;        //!
+  TH1F*     mHistDca;           //!
+  TH1F*     mHistChi2;          //!
+  TH1F*     mHistFitPts;        //!
+  TH1F*     mHistMaxPts;        //!
+  TH1F*     mHistFitOverMax;    //!
+  TH1F*     mHistOrigMult;      //!
+  TH1F*     mHistMultEta1;      //!
+  TH1F*     mHistMultEta2;      //!
+  TH1F*     mHistMult;          //!
+  TH1F*     mHistMultOverOrig;  //!
+  TH1F*     mHistCorrMult;      //!
+  TH1F*     mHistVertexZ;       //!
+  TH2F*     mHistVertexXY2D;    //!
+  TH1F*     mHistEtaSym;        //!
+  TH3F*     mHistEtaPtPhi3D;    //!
+  TH2D*     mHistYieldAll2D;    //!
+  TProfile* mHistBinEta;        //!
+  TProfile* mHistBinPt;         //!
+  TProfile* mHistCosPhi;        //!
+  TH1F*     mHistPidPiPlus;     //!
+  TH1F*     mHistPidPiMinus;    //!
+  TH1F*     mHistPidProton;     //!
+  TH1F*     mHistPidAntiProton; //!
+  TH1F*     mHistPidKplus;      //!
+  TH1F*     mHistPidKminus;     //!
+  TH1F*     mHistPidDeuteron;   //!
+  TProfile* mHistPidMult;       //!
+  TH1F*     mHistCent;          //!
+  TH2F*     mHistEtaSymVerZ2D;  //!
+  TH1F*     mHistEtaSymVerZ;    //!
+  TH2F*     mHistCTBversusZDC;  //!
+  TH2F*     mHistMeandEdx;      //!
+  TH2F*     mHistMeandEdxPiPlus;  //!
+  TH2F*     mHistMeandEdxPiMinus; //!
+  TH2F*     mHistMeandEdxProton;  //!
+  TH2F*     mHistMeandEdxPbar;    //!
+  TH2F*     mHistMeandEdxKplus;   //!
+  TH2F*     mHistMeandEdxKminus;  //!
 
   
   // for each harmonic, each selection, and each sub-event
@@ -259,6 +222,10 @@ private:
   };
   struct histFulls histFull[Flow::nSels]; //!
 
+  static const Float_t etaMin;                  // histogram limits
+  static const Float_t etaMax;
+  static const Float_t ptMin;
+  static const Float_t ptMax;
   static const Float_t qMax;
 
   TString      MakerName;

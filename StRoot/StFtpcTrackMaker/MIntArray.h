@@ -1,9 +1,5 @@
-// $Id: MIntArray.h,v 1.3 2000/11/10 18:32:37 oldi Exp $
+// $Id: MIntArray.h,v 1.2 2000/07/18 21:22:15 oldi Exp $
 // $Log: MIntArray.h,v $
-// Revision 1.3  2000/11/10 18:32:37  oldi
-// Introduced new function ShiftByOneAndAddAtFirst(Int_t value).
-// Cleanup.
-//
 // Revision 1.2  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -42,7 +38,6 @@ public:
    Int_t   AtLast();
     void   Fill(Int_t value);
     void   SetFill(Int_t size, Int_t value);
-    void   ShiftByOneAndAddAtFirst(Int_t value);
 
   ClassDef(MIntArray, 1)    // Class of an array of integers
 };
@@ -62,7 +57,7 @@ inline Int_t MIntArray::AtLast()
 {
   // Returns the value of the last array element.
 
-  return At(GetSize()-1);
+  return this->At(GetSize()-1);
 }
 
 
@@ -70,7 +65,7 @@ inline Int_t MIntArray::AtFirst()
 {
   // Returns the value of the last array element.
 
-  return At(0);
+  return this->At(0);
 }
 
 
@@ -78,7 +73,7 @@ inline void MIntArray::Fill(Int_t value)
 {
   // Fills the whole array with the value 'value'.
 
-  for (Int_t i = 0; i < GetSize(); AddAt(value, i), i++);
+  for (Int_t i = 0; i < GetSize(); this->AddAt(value, i), i++);
 
   return;
 }

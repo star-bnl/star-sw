@@ -81,13 +81,14 @@ Int_t St_sce_Maker::Make()
   // 		Create output tables
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
+  St_sls_spt *sls_spt = (St_sls_spt *)GetDataSet("sls_strip/.data/sls_spt");
   St_scf_cluster *scf_cluster = (St_scf_cluster *)GetDataSet("scf_cluster/.data/scf_cluster");
   St_scm_spt *scm_spt = (St_scm_spt *)GetDataSet("scm_spt/.data/scm_spt");
 
   St_sce_dspt *sce_dspt = new St_sce_dspt("sce_dspt",5000);
   m_DataSet->Add(sce_dspt);
 
-  Int_t res = sce_am(g2t_svt_hit, scf_cluster, scm_spt, m_geom, m_geom_par, sce_dspt, m_ctrl);
+  Int_t res = sce_am(g2t_svt_hit, sls_spt, scf_cluster, scm_spt, m_geom, m_geom_par, sce_dspt, m_ctrl);
 ;
    if(res!=kSTAFCV_OK){
      gMessMgr->Warning("St_sce_Maker: no output");
@@ -296,7 +297,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.4 2000/09/11 12:36:02 hippolyt Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.3 2000/08/15 19:32:59 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

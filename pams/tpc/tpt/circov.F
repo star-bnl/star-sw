@@ -1,8 +1,5 @@
-* $Id: circov.F,v 1.4 2000/11/14 22:29:07 genevb Exp $
+* $Id: circov.F,v 1.3 1999/07/19 19:15:53 genevb Exp $
 * $Log: circov.F,v $
-* Revision 1.4  2000/11/14 22:29:07  genevb
-* Switched from float to double in many places
-*
 * Revision 1.3  1999/07/19 19:15:53  genevb
 * Use StMessMgr
 *
@@ -55,15 +52,15 @@ C           Comment out unused variables.
 C
 
         IMPLICIT NONE
-C       REAL*8 SUM,SX,SY,SXX,SXY,SYY,SR2,SR4,SRX,SRY
-C       REAL*8 GAMMA
-        REAL*8 TEMP, TEM2
+C       REAL SUM,SX,SY,SXX,SXY,SYY,SR2,SR4,SRX,SRY
+C       REAL GAMMA
+        REAL TEMP
         REAL A,B,R
-        REAL*8 DETM
-        REAL*8 DMAX
+        REAL DETM
+        REAL DMAX
         REAL X(*),Y(*),W(*)
-        REAL*8 H(3,3)
-        REAL*8 S1, C1, RATIO, HYP
+        REAL H(3,3)
+        REAL S1, C1, RATIO, HYP
         INTEGER I,J,K,N,L,IK(3),JK(3),NOD
         CHARACTER*80 m80
 
@@ -148,11 +145,9 @@ C        H(3,1)=H(1,3)
 C        H(3,2)=H(2,3)
 C        H(3,3)=3.*SR4/(R**4) + SUM
         DO I = 1,N
-           TEMP = X(I)-A
-           TEM2 = Y(I)-B
-           HYP = DSQRT(TEMP**2 + TEM2**2)
-           S1 = TEMP/HYP
-           C1 = TEM2/HYP
+           HYP = SQRT((X(I)-A)**2 + (Y(I)-B)**2)
+           S1 = (X(I)-A)/HYP
+           C1 = (Y(I)-B)/HYP
            RATIO = R/HYP
 
            H(1,1) = H(1,1) + (W(I)*(1+RATIO*(S1*S1-1)))
@@ -193,7 +188,7 @@ C
            DMAX=0.D0
  21        DO 30 I=K,NOD
               DO 30 J=K,NOD
- 23              IF(DABS(DMAX)-DABS(H(I,J)))24,24,30
+ 23              IF(ABS(DMAX)-ABS(H(I,J)))24,24,30
  24              DMAX=H(I,J)
                  IK(K)=I
                  JK(K)=J

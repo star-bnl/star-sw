@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.10 2000/10/26 18:33:20 calderon Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.9 2000/07/28 16:55:35 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,14 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.10  2000/10/26 18:33:20  calderon
- * Return DBL_MAX in the numberOfSigma() function when
- * the number of dE/dx points is equal to zero.
- * The function sigmaPidFunction() already checked this, but
- * when this happens, it probably means that mTraits->mean()
- * is undefined, so it's better to exit immediately from the
- * function.
- *
  * Revision 2.9  2000/07/28 16:55:35  calderon
  * Mike's version of StTpcDedxPidAlgorithm using BetheBloch
  * class lookup table from
@@ -61,7 +53,7 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.10 2000/10/26 18:33:20 calderon Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.9 2000/07/28 16:55:35 calderon Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -117,9 +109,7 @@ double
 StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 {
     if (!mTraits) return 0;
-
-    if (mTraits->numberOfPoints()==0) return DBL_MAX; // sigmaPidFunction already checks this, but when number of dE/dx points is = 0, mTraits->mean() is probably undefined too (have to check this) so might as well exit here.
-
+    
     // returns the number of sigma a tracks dedx is away from
     // the expected mean for a track for a particle of this mass
             

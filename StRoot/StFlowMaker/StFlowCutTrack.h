@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.5 2000/10/12 22:46:35 snelling Exp $
+// $Id: StFlowCutTrack.h,v 1.3 2000/08/10 23:00:21 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,14 +13,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
-// Revision 1.5  2000/10/12 22:46:35  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.4  2000/08/31 18:58:20  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
 // Revision 1.3  2000/08/10 23:00:21  posk
 // New centralities. pt and eta cuts.
 //
@@ -58,29 +50,27 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StPrimaryTrack;
-class StGlobalTrack;
 class StFlowPicoTrack;
 
 class StFlowCutTrack {
 
  public:
 
-                 StFlowCutTrack();
-  virtual        ~StFlowCutTrack();
+                StFlowCutTrack();
+  virtual       ~StFlowCutTrack();
 
-  static Int_t   CheckTrack(StPrimaryTrack* pTrack);
-  static Int_t   CheckTrack(StGlobalTrack* gTrack);
-  static Int_t   CheckTrack(StFlowPicoTrack* pPicoTrack);
-  static void    PrintCutList();
-  static UInt_t  EtaSymPos();
-  static UInt_t  EtaSymNeg();
-  static void    EtaSymClear();
-  static void    SetFitPts(Int_t lo, Int_t hi);
-  static void    SetFitOverMaxPts(Float_t lo, Float_t hi);
-  static void    SetChiSq(Float_t lo, Float_t hi);
-  static void    SetDca(Float_t lo, Float_t hi);
-  static void    SetPt(Float_t lo, Float_t hi);
-  static void    SetEta(Float_t lo, Float_t hi);
+  static Int_t  CheckTrack(StPrimaryTrack* pTrack);
+  static Int_t  CheckTrack(StFlowPicoTrack* pPicoTrack);
+  static void   PrintCutList();
+  static UInt_t EtaSymPos();
+  static UInt_t EtaSymNeg();
+  static void   EtaSymClear();
+  static void   SetFitPts(Int_t lo, Int_t hi);
+  static void   SetFitOverMaxPts(Float_t lo, Float_t hi);
+  static void   SetChiSq(Float_t lo, Float_t hi);
+  static void   SetDca(Float_t lo, Float_t hi);
+  static void   SetPt(Float_t lo, Float_t hi);
+  static void   SetEta(Float_t lo, Float_t hi);
   
  private:
 

@@ -16,7 +16,7 @@
 #pragma link C++ class StFile;
 #pragma link C++ class StIOEvent-;
 #pragma link C++ class StIO-;
-#pragma link C++ class StObject-!;
+#pragma link C++ class StRegistry-!;
 #pragma link C++ class StObjArray-!;
 #pragma link C++ class StRefArray-!;
 #pragma link C++ class StStrArray-!;

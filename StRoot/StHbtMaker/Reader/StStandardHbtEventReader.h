@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.16 2000/08/31 22:32:37 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.15 2000/07/16 21:14:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,9 +20,6 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
- * Revision 1.16  2000/08/31 22:32:37  laue
- * Readers updated for new StHbtEvent version 3.
- *
  * Revision 1.15  2000/07/16 21:14:45  laue
  * StStandardHbtEventReader modified to read primary tracks only
  *
@@ -109,11 +106,7 @@
 #define StStandardHbtEventReader_hh
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StHbtMaker/Reader/StHbtTagReader.h"
-
 #include "StMaker.h"
-#include "StChain.h"
-#include "St_DataSetIter.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 
 class StPionPlus;
@@ -122,14 +115,13 @@ class StProton;
 class StTpcDedxPidAlgorithm;
 class StParticleDefinition;
 
-class StStandardHbtEventReader : public StMaker, public StHbtEventReader{
+class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
+  //  StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
   StStrangeMuDstMaker* mTheV0Maker; //! this is the chain where the StStrangeMuDstMaker is
-
-  StHbtTagReader* mTheTagReader;  //! this tag reader opens a tags.root file 
 
  protected:
 
@@ -144,8 +136,6 @@ public:
   StMaker* TheEventMaker();
   void SetTheV0Maker(StStrangeMuDstMaker*);
   StStrangeMuDstMaker* TheV0Maker();
-  void SetTheTagReader(StHbtTagReader*);
-  StHbtTagReader* TheTagReader();
 
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
@@ -156,8 +146,6 @@ inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEvent
 inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
 inline void StStandardHbtEventReader::SetTheV0Maker(StStrangeMuDstMaker* maker){mTheV0Maker=maker;}
 inline StStrangeMuDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
-inline void StStandardHbtEventReader::SetTheTagReader(StHbtTagReader* maker){mTheTagReader=maker;}
-inline StHbtTagReader* StStandardHbtEventReader::TheTagReader(){return mTheTagReader;}
 
 #endif
 

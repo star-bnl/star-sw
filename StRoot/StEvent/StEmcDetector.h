@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.2 2000/10/26 00:02:24 ullrich Exp $
+ * $Id: StEmcDetector.h,v 2.1 2000/02/23 17:33:59 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
- * Revision 2.2  2000/10/26 00:02:24  ullrich
- * Fixed various problems causing I/O failures.
+ * Revision 2.1  2000/02/23 17:33:59  ullrich
+ * Initial Revision
  *
  * Revision 2.1  2000/02/23 17:33:59  ullrich
  * Initial Revision
@@ -46,13 +46,12 @@ public:
     const StEmcClusterCollection*   cluster() const;
 
     void setCluster(StEmcClusterCollection*);
-    void setModule(StEmcModule*,Int_t);
     
 private:
     StDetectorId            mDetectorId;
     UInt_t                  mNumberOfModules;
     
-    StEmcModule             *mModules[120];
+    StEmcModule             *mModules;
     StEmcClusterCollection  *mClusters;
     
     ClassDef(StEmcDetector,1)

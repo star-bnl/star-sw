@@ -1,9 +1,5 @@
-// $Id: StFtpcVertex.cc,v 1.4 2000/11/10 18:39:25 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.3 2000/06/13 14:35:00 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
-// Revision 1.4  2000/11/10 18:39:25  oldi
-// Changes due to replacement of StThreeVector by TVector3.
-// New constructor added to find the main vertex with given point array.
-//
 // Revision 1.3  2000/06/13 14:35:00  oldi
 // Changed cout to gMessMgr->Message().
 //
@@ -18,11 +14,10 @@
 //
 
 //----------Author:        Holm G. H&uuml;ummler, Markus D. Oldenburg
-//----------Last Modified: 24.07.2000
+//----------Last Modified: 09.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcVertex.hh"
-#include "StFtpcPoint.hh"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -45,17 +40,8 @@ ClassImp(StFtpcVertex)
 
 StFtpcVertex::StFtpcVertex()
 {
-  // Default constructor.
-
-  SetX(0.);
-  SetY(0.);
-  SetZ(0.);
-
-  SetXerr(0.);
-  SetYerr(0.);
-  SetZerr(0.);
-  
-  return;
+  // Deafult constructor.
+  // Sets all pointers to zero. 
 }
 
 
@@ -71,7 +57,7 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
   Float_t *rmap = new Float_t[20*6*numFppoints];
   Float_t *zmap = new Float_t[20];
   Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[HISTOBINS];
+  Int_t *myhist  = new Int_t[HISTOBINS];
   Float_t hratio=HISTOBINS/(HISTOMAX-HISTOMIN);
   
   for(Int_t iii=0; iii<HISTOBINS; iii++) {
@@ -162,114 +148,6 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
 }
 
 
-StFtpcVertex::StFtpcVertex(TClonesArray *hits)
-{
-  // Constructor with TClonesArray of ftpc points - fits vertex from points
-
-  // constants, to be moved to parameter database
-#define HISTOBINS 300
-#define HISTOMIN -75.0
-#define HISTOMAX 75.0
-
-  Int_t numFppoints = hits->GetEntriesFast();
-
-  Float_t *rmap = new Float_t[20*6*numFppoints];
-  Float_t *zmap = new Float_t[20];
-  Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[HISTOBINS];
-  Float_t hratio=HISTOBINS/(HISTOMAX-HISTOMIN);
-  
-  for(Int_t iii=0; iii<HISTOBINS; iii++) {
-    myhist[iii]=0;
-  }
-  
-  for(Int_t ii=0; ii<120; ii++) mapMax[ii]=0;
-  
-  for(Int_t i=0; i<numFppoints;i++) {
-
-    StFtpcPoint *thispoint = (StFtpcPoint *)hits->At(i);
-
-    rmap[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)+120*mapMax[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)]]=sqrt(thispoint->GetX()*thispoint->GetX()+thispoint->GetY()*thispoint->GetY());
-    zmap[thispoint->GetPadRow()-1]=thispoint->GetZ();
-    mapMax[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)]++;
-  }
-
-  for(Int_t secI=0; secI<6; secI++) {
-    
-    for(Int_t rowOut=0; rowOut<19; rowOut++) {
-
-      for(Int_t rowIn=rowOut+1; rowIn<20; rowIn++) {
-	
-	if(rowIn<10 || rowOut>=10) {
-	  
-	  for(Int_t iOut=0; iOut<mapMax[rowOut+20*secI]; iOut++) {
-	    Float_t ri=rmap[rowOut+20*secI+120*iOut];	    
-
-	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+20*secI]; iIn++) {
-	      Float_t rj=rmap[rowIn+20*secI+120*iIn];
-			  
-	      if(rj>ri) {
-		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
-		
-		if(intersect>HISTOMIN && intersect<HISTOMAX) {
-		  myhist[int((intersect-HISTOMIN)*hratio)]++;
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
-
-  Int_t maxBin=HISTOBINS/2, maxHeight=0;
-  
-  Float_t vertex=0;
-
-  for(Int_t hindex=1; hindex<HISTOBINS-1; hindex++) {
-    
-    if(myhist[hindex]>maxHeight && myhist[hindex]>=myhist[hindex-1] && myhist[hindex]>=myhist[hindex+1]) {
-      maxBin=hindex;
-      maxHeight=myhist[hindex];
-    }  
-  }
-
-  // check if Gaussfit will fail
-  if((myhist[maxBin] == 0) 
-     || (myhist[maxBin+1] == 0) 
-     || (myhist[maxBin-1] == 0) 
-     || (myhist[maxBin] <= myhist[maxBin+1]) 
-     || (myhist[maxBin] <= myhist[maxBin-1])) {
-    
-    // use weighted mean instead 
-    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+HISTOMIN))
-      / (myhist[maxBin]+myhist[maxBin-1]+myhist[maxBin+1]);
-  }
-
-  else {
-      
-    // do gaussfit 
-    Float_t sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
-			       (log(myhist[maxBin+1]) + 
-				log(myhist[maxBin-1]))));
-    vertex =  ((maxBin+0.5)/hratio+HISTOMIN) + 
-      sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
-				     log(myhist[maxBin-1]));
-  } 
-		  
-  delete[] myhist;
-  delete[] mapMax;
-  delete[] zmap;
-  delete[] rmap;
-  
-  SetX(0.);
-  SetY(0.);
-  SetZ((Double_t) vertex);
-}
-
-
 StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
 {
   // Obsolete constructor taking vertex from geant.
@@ -322,3 +200,4 @@ StFtpcVertex::~StFtpcVertex()
   // Destructor.
   // Does nothing except destruct.
 }
+

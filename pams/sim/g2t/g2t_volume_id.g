@@ -1,17 +1,5 @@
-* $Id: g2t_volume_id.g,v 1.30 2000/11/19 21:27:13 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.26 2000/05/24 15:02:50 nevski Exp $
 * $Log: g2t_volume_id.g,v $
-* Revision 1.30  2000/11/19 21:27:13  nevski
-* comments updated
-*
-* Revision 1.29  2000/11/17 02:55:21  nevski
-* TOF geometry 3 - tof tray moved to east
-*
-* Revision 1.28  2000/08/14 20:43:49  nevski
-* bug corrected
-*
-* Revision 1.27  2000/08/10 22:10:57  nevski
-* vpd versionning introduced
-*
 * Revision 1.26  2000/05/24 15:02:50  nevski
 * rich volume numbering done in g2t_volume ONLY
 *
@@ -30,7 +18,7 @@
       integer  g2t_volume_id
 * 
       Character*3      Csys
-      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/,ivpd/0/
+      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
@@ -43,8 +31,7 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       Structure  TPCG  {version}
-      Structure  VPDG  {version}
-      Structure  BTOG  {version, choice, posit1 }
+      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1, }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
      + 	                         int Netfirst, int Netsecon}
@@ -54,16 +41,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       if (First) then
           first=.false.
           call RBPUSHD
-*        in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = 23
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
           USE  /DETM/CALB/CALG  stat=ical
-          USE  /DETM/VPDD/VPDG  stat=ivpd
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
-          if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
      >                         ' choice  =',btog_choice,btog_posit1
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
@@ -236,7 +220,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            innout     = numbv(4)
            volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
         elseif (btog_version==2) then
-*          simulations done in 2000 - one tof tray on west side
            if (btog_choice==4) then
               rileft     = 1
               sector     = btog_posit1
@@ -247,21 +230,20 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
               print *,' g2t_volume_id : choice not coded yet '
            endif        
         elseif (btog_version==3) then
-*          For simulations after 28-sep-00, before it was version 2
            if (btog_choice==2) then      ! Full TOF
              rileft     = numbv(1)       !     west(1)/east(2)
              sector     = numbv(2)       !     tray(1-60)
              innout     = numbv(3)       !     4wide(1)/5wide(2) sections
              sub_sector = numbv(4)       !     theta-tray(4w:1-4, 5w:1-5)
              section    = numbv(5)       !     phi-tray(4w:1-9,5w:1)
-           elseif (btog_choice==3) then  ! ~25% TOF (only on east side)
-             rileft     = 2              !     east (pre-set)
+           elseif (btog_choice==3) then  ! ~25% TOF (only on west side)
+             rileft     = 1              !     west (pre-set)
              sector     = numbv(1)       !     tray
              innout     = numbv(2)       !     4wide/5wide section
              sub_sector = numbv(3)       !     theta-tray
              section    = numbv(4)       !     phi-tray
            elseif (btog_choice==4) then  !  TOFp (single tray)
-             rileft     = 2              !     east (pre-set)
+             rileft     = 1              !     west (pre-set)
              sector     = btog_posit1    !     tray (pre-set)
              innout     = numbv(1)       !     4wide/5wide section
              sub_sector = numbv(2)       !     theta-tray
@@ -417,21 +399,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endcap    = numbv(1)
         zslice    = numbv(2)
         volume_id = 100*endcap+zslice
-*
-      else If (Csys=='vpd') then
-*11*    Vertex position detector - Frank Geurts <geurts@rice.edu>
 
-        if (vpdg_version == 1) then
-          rileft    = numbv(1)
-          innout    = numbv(2)
-          sector    = numbv(3)
-        else
-          rileft    = numbv(1)
-          innout    = 0
-          sector    = numbv(2)
-        endif
-        volume_id  =  1000*rileft + 100*innout + sector
-*
+      else If (Csys=='vpd') then
+*11*
+        rileft    = numbv(1)
+        innout    = numbv(2)
+        sector    = numbv(3)
+        volume_id = 1000*rileft+100*innout+sector
+
       else If (Csys=='pgc') then
 *12*
       else If (Csys=='psc') then

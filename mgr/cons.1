@@ -1,15 +1,9 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.6 $$Date: 2000/11/19 20:14:29 $
+''' $RCSfile: cons.1,v $$Revision: 1.3 $$Date: 2000/06/14 22:52:42 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.6  2000/11/19 20:14:29  fisyak
-''' Merge with 2.3.0
-'''
-''' Revision 1.1.1.7  2000/11/19 19:33:41  fisyak
-''' *** empty log message ***
-'''
-''' Revision 1.1.1.6  2000/11/13 01:21:34  fisyak
-''' *** empty log message ***
+''' Revision 1.3  2000/06/14 22:52:42  fisyak
+''' merge with 2.0.1
 '''
 ''' Revision 1.1.1.4  2000/06/14 22:44:42  fisyak
 ''' 2.0.1
@@ -108,7 +102,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.3.0" "19/Nov/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.0.1" "14/Jun/2000" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -203,27 +197,35 @@
 .\}
 .rm #[ #] #H #V #F C
 .SH "NAME"
-Cons \- A Software Construction System
+Cons \- Cons: A Software Construction System
 .SH "DESCRIPTION"
-A guide and reference for version 2.3.0
+The original document was automatically derived from the \fIcons/cons.html\fR
+by \fBhtml2pod\fR, thanks to Ulrich Pfiefer. Later revisions were created from
+the original.
+.SH "\fBCons: A Software Construction System\fR"
+by Bob Sidebotham \fIrns@fore.com\fR
 .PP
-Copyright (c) 1996-2000 Free Software Foundation, Inc.
+A guide and reference for version 2.0.1
 .PP
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 .PP
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Permission to use, copy, modify and distribute this software and its
+documentation for any purpose and without fee is hereby granted, provided
+that the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation, and that the name of FORE Systems, Inc. (``FORE Systems'')
+not be used in advertising or publicity pertaining to distribution of the
+software without specific, written prior permission.
 .PP
-You should have received a copy of the GNU General Public License
-along with this program; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place \- Suite 330,
-Boston, MA 02111-1307, USA.
-.SH "Introduction"
+FORE SYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ANY WARRANTIES REGARDING INTELLECTUAL PROPERTY RIGHTS AND ALL
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. IN NO EVENT SHALL FORE SYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT
+OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+OF THIS SOFTWARE.
+.SH "\fBIntroduction\fR"
 \fBCons\fR is a system for constructing, primarily, software, but is quite
 different from previous software construction systems. Cons was designed
 from the ground up to deal easily with the construction of software spread
@@ -264,7 +266,7 @@ for each sub-directory of a build. This leads to complicated code, in which
 it is often unclear how a variable is set, or what effect the setting of a
 variable will have on the build as a whole. The make scripting language has
 gradually been extended to provide more possibilities, but these have
-largely served to clutter an already overextended language. Often, builds
+largely served to clutter an already over extended language. Often, builds
 are done in multiple passes in order to provide appropriate products from
 one directory to another directory. This represents a further increase in
 build complexity.
@@ -306,19 +308,19 @@ the makefiles.
 A few of the difficulties with make have been cited above. In this and
 subsequent sections, we shall introduce Cons and show how these issues are
 addressed.
-.Sh "Perl scripts"
-Cons is Perl-based. That is, Cons scripts--\fIConscript\fR and \fIConstruct\fR
-files, the equivalent to \fIMakefile\fR or \fImakefile\fR--are all written in
-Perl. This provides an immediate benefit: the language for writing scripts
-is a familiar one. Even if you don't happen to be a Perl programmer, it
-helps to know that Perl is basically just a simple declarative language,
-with a well-defined flow of control, and familiar semantics. It has
-variables that behave basically the way you would expect them to,
-subroutines, flow of control, and so on. There is no special syntax
-introduced for Cons. The use of Perl as a scripting language simplifies
-the task of expressing the appropriate solution to the often complex
-requirements of a build.
-.Sh "Hello, World!"
+.Ip "\fBPerl scripts\fR" 0
+Cons is Perl-based. That is, Cons scripts--\f(CWConscript\fR and \f(CWConstruct\fR
+files, the equivalent to \f(CWmakefiles\fR--are all written in Perl. This
+provides an immediate benefit: the language for writing scripts is a
+familiar one. Even if you don't happen to be a Perl programmer, it helps to
+know that Perl is basically just a simple declarative language, with a
+well-defined flow of control, and familiar semantics. It has variables that
+behave basically the way you would expect them to, subroutines,
+flow-of-control, and so on. There is no special syntax introduced for
+Cons. The use of Perl as a scripting language simplifies the task of
+expressing the appropriate solution to the often complex requirements of a
+build.
+.Ip "\fBHello, World!\fR" 0
 To ground the following discussion, here's how you could build the \fBHello,
 World!\fR C application with Cons:
 .PP
@@ -473,28 +475,7 @@ top-level. Hybrid schemes are also possible. A separately maintained
 component that needs to be incorporated into a build tree, for example,
 might hook into the build tree in one place, but define its own construction
 hierarchy.
-.PP
-By default, Cons does not change its working directory to the directory
-containing a subsidiary \fIConscript\fR file it is including.  This behavior
-can be enabled for a build by specifying, in the top-level \fIConstruct\fR
-file:
-.PP
-.Vb 1
-\&  Conscript_chdir 1;
-.Ve
-When enabled, Cons will change to the subsidiary \fIConscript\fR file's
-containing directory while reading in that file, and then change back
-to the top-level directory once the file has been processed.
-.PP
-It is expected that this behavior will become the default in some future
-version of Cons.  To prepare for this transition, builds that expect
-Cons to remain at the top of the build while it reads in a subsidiary
-\fIConscript\fR file should explicitly disable this feature as follows:
-.PP
-.Vb 1
-\&  Conscript_chdir 0;
-.Ve
-.Sh "Relative, top-relative, and absolute file names"
+.Ip "\fBRelative, top-relative, and absolute file names\fR" 0
 You may have noticed that the file names specified to the Build command are
 relative to the location of the script it is invoked from. This is generally
 true for other filename arguments to other commands, too, although we might
@@ -504,36 +485,24 @@ Construct file resides). And, not surprisingly, if you begin it with ``/'\*(R',
 then it is considered to be an absolute pathname. This is true even on
 systems which use a back slash rather than a forward slash to name absolute
 paths.
-.Sh "Using modules in build scripts"
-You may pull modules into each \fIConscript\fR file using the normal Perl
-\f(CWuse\fR or \f(CWrequire\fR statements:
-.PP
-.Vb 2
-\&  use English;
-\&  require My::Module;
-.Ve
-Each \f(CWuse\fR or \f(CWrequire\fR only affects the one \fIConscript\fR file in which
-it appears.  To use a module in multiple \fIConscript\fR files, you must
-put a \f(CWuse\fR or \f(CWrequire\fR statement in each one that needs the module.
-.Sh "Scope of variables"
-The top-level \fIConstruct\fR file and all \fIConscript\fR files begin life in
-a common, separate Perl package.  \fBCons\fR controls the symbol table for
-the package so that, the symbol table for each script is empty, except
-for the \fIConstruct\fR file, which gets some of the command line arguments.
-All of the variables that are set or used, therefore, are set by the
-script itself\*(--not by some external script.
-.PP
-Variables can be explicitly \fBimported\fR by a script from its parent
-script. To import a variable, it must have been \fBexported\fR by the parent
-and initialized (otherwise an error will occur).
-.Sh "The Export command"
+.Ip "\fBScope of variables\fR" 0
+Each \f(CWConscript\fR file, and also the top-level \f(CWConstruct\fR file, begins
+life in a separate Perl package. Except for the \f(CWConstruct\fR file, which
+gets some of the command line arguments, the symbol table for each script is
+empty. All of the variables that are set, therefore, are set by the script
+itself\*(--not by some external script. Variables can be explicitly \fBimported\fR
+by a script from its parent script. To import a variable, it must have been
+\fBexported\fR by the parent and initialized (otherwise an error will
+occur). It is therefore possible to determine, from looking at a single
+script, exactly where each variable in that script is set.
+.Ip "\fBThe \fR\fBExport\fR\fB command\fR" 0
 The \f(CWExport\fR command is used as in the following example:
 .PP
 .Vb 5
-\&  $env = new cons();
+\&  $ENV = new cons();
 \&  $INCLUDE = "#export/include";
 \&  $LIB = "#export/lib";
-\&  Export qw( env INCLUDE LIB );
+\&  Export qw( ENV INCLUDE LIB );
 \&  Build qw( util/Conscript );
 .Ve
 The values of the simple variables mentioned in the \f(CWExport\fR list will be
@@ -547,10 +516,10 @@ to the exported scalar variable\*(--that won't change the underlying variable
 referenced. This sequence, for example, is \s-1OK\s0:
 .PP
 .Vb 5
-\&  $env = new cons();
-\&  Export qw( env INCLUDE LIB );
+\&  $ENV = new cons();
+\&  Export qw( ENV INCLUDE LIB );
 \&  Build qw( util/Conscript );
-\&  $env = new cons(CFLAGS => '-O');
+\&  $ENV = new cons(CFLAGS => '-O');
 \&  Build qw( other/Conscript );
 .Ve
 It doesn't matter whether the variable is set before or after the \f(CWExport\fR
@@ -564,9 +533,9 @@ scripts by the \f(CWImport\fR command. The subsidiary script always imports
 variables directly from the superior script. Consider this example:
 .PP
 .Vb 1
-\&  Import qw( env INCLUDE );
+\&  Import qw( ENV INCLUDE );
 .Ve
-This is only legal if the parent script exported both \f(CW$env\fR and
+This is only legal if the parent script exported both \f(CW$ENV\fR and
 \f(CW$INCLUDE\fR. It also must have given each of these variables values. It is
 \s-1OK\s0 for the subsidiary script to only import a subset of the exported
 variables (in this example, \f(CW$LIB\fR, which was exported by the previous
@@ -575,15 +544,15 @@ example, is not imported).
 All the imported variables are automatically re-exported, so the sequence:
 .PP
 .Vb 2
-\&  Import qw ( env INCLUDE );
+\&  Import qw ( ENV INCLUDE );
 \&  Build qw ( beneath-me/Conscript );
 .Ve
-will supply both \f(CW$env\fR and \f(CW$INCLUDE\fR to the subsidiary file. If only
-\f(CW$env\fR is to be exported, then the following will suffice:
+will supply both \f(CW$ENV\fR and \f(CW$INCLUDE\fR to the subsidiary file. If only
+\f(CW$ENV\fR is to be exported, then the following will suffice:
 .PP
 .Vb 3
-\&  Import qw ( env INCLUDE );
-\&  Export qw ( env );
+\&  Import qw ( ENV INCLUDE );
+\&  Export qw ( ENV );
 \&  Build qw ( beneath-me/Conscript );
 .Ve
 Needless to say, the variables may be modified locally before invoking
@@ -1011,9 +980,9 @@ And removing the local source file will cause Cons to revert back to
 building the derived files from the repository source:
 .PP
 .Vb 7
-\&  % rm world.c
-\&  % cons -R /usr/src_only/repository hello
-\&  gcc -c /usr/src_only/repository/world.c -o world.o
+\&  % touch -R /usr/src_only/repository hello world.c
+\&  % cons hello
+\&  gcc -c /usr/src_only/world.c/repository -o world.o
 \&  ar r libworld.a world.o
 \&  ar: creating libworld.a
 \&  ranlib libworld.a
@@ -1512,12 +1481,10 @@ writing, the default list of construction variables is defined as follows:
 On Win32 systems (Windows \s-1NT\s0), the following construction variables
 are overridden in the default:
 .PP
-.Vb 20
+.Vb 17
 \&  CC            => 'cl',
 \&  CFLAGS        => '/nologo',
 \&  CCCOM         => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
-\&  CXXCOM        => '%CXX %CXXFLAGS %_IFLAGS /c %< /Fo%>',
-\&  INCDIRPREFIX  => '/I',
 \&  LINK          => 'link',
 \&  LINKCOM       => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
 \&  LINKMODULECOM => '%LD /r /o %> %<',
@@ -1543,8 +1510,8 @@ files. For example:
 .Vb 1
 \&  Objects $env 'foo.c', 'bar.c';
 .Ve
-This will arrange to produce, if necessary, \fIfoo.o\fR and \fIbar.o\fR. The
-command invoked is simply \f(CW%CCCOM\fR, which expands through substitution, to
+This will arrange to produce, if necessary, \f(CWfoo.o\fR and \f(CWbar.o\fR. The
+command invoked is simply \f(CW%CCOM\fR, which expands through substitution, to
 the appropriate external command required to build each object. We will
 explore the substitution rules further under the \f(CWCommand\fR method, below.
 .PP
@@ -1572,22 +1539,7 @@ command. For the utmost reproducibility, you should really arrange to set
 your own execution path, in your top-level \f(CWConstruct\fR file (or perhaps by
 importing an appropriate construction package with the Perl \f(CWuse\fR
 command). The default variables are intended to get you off the ground.
-.Sh "Interpolating construction variables"
-Construction environment variables may be interpolated in the source and
-target file names by prefixing the construction variable name with \f(CW%\fR.
-.PP
-.Vb 5
-\&  $env = new cons(
-\&        DESTDIR =>      'programs',
-\&        SRCDIR  =>      'src',
-\&  );
-\&  Program $env '%DESTDIR/hello', '%SRCDIR/hello.c';
-.Ve
-Expansion of construction variables is recursive\*(--that is, the file
-\fIname\fR\|(s) will be re-expanded until no more substitutions can be made. If
-a construction variable is not defined in the environment, then the null
-string will be substituted.
-.SH "Default construction methods"
+.SH "\fBDefault construction methods\fR"
 The list of default construction methods includes the following:
 .Ip "\fBThe \fR\fBnew\fR\fB constructor\fR" 0
 The \f(CWnew\fR method is a Perl object constructor. That is, it is not invoked
@@ -1705,8 +1657,7 @@ Within the construction command, any variable from the construction
 environment may be introduced by prefixing the name of the construction
 variable with \f(CW%\fR. This is recursive: the command is expanded until no more
 substitutions can be made. If a construction variable is not defined in the
-environment, then the null string will be substituted.  A doubled \f(CW%%\fR
-will be replaced by a single \f(CW%\fR in the construction command.
+environment, then the null string will be substituted.
 .PP
 There are several pseudo variables which will also be expanded:
 .Ip "\f(CW%\fR>" 10
@@ -1743,13 +1694,12 @@ directory \f(CWtest\fR:
 Any of the above pseudo variables may be followed immediately by one of
 the following suffixes to select a portion of the expanded path name:
 .PP
-.Vb 6
-\&  :a    the absolute path to the file name
-\&  :b    the directory plus the file name stripped of any suffix
-\&  :d    the directory
-\&  :f    the file name
-\&  :s    the file name suffix
-\&  :F    the file name stripped of any suffix
+.Vb 5
+\&  C<:b>    the directory plus the file name stripped of any suffix
+\&  C<:d>    the directory
+\&  C<:f>    the file name
+\&  C<:s>    the file name suffix
+\&  C<:F>    the file name stripped of any suffix
 .Ve
 Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
@@ -1758,22 +1708,16 @@ It is possible to programmatically rewrite part of the command by
 enclosing part of it between \f(CW%[\fR and \f(CW%]\fR.  This will call the
 construction variable named as the first word enclosed in the brackets
 as a Perl code reference; the results of this call will be used to
-replace the contents of the brackets in the command line.  For example,
-given an existing input file named \fItgt.in\fR:
+replace the contents of the brackets in the command line.  For example:
 .PP
-.Vb 6
-\&  @keywords = qw(foo bar baz);
+.Vb 2
 \&  $env = new cons(X_COMMA => sub { join(",", @_) });
-\&  Command $env 'tgt', 'tgt.in', qq(
-\&        echo '# Keywords: %[X_COMMA @keywords %]' > %>
-\&        cat %< >> %>
-\&  );
+\&  Command $env 'tgt', qw(foo bar baz), "echo %[X_COMMA %<%] > %>"
 .Ve
 This will execute:
 .PP
-.Vb 2
-\&  echo '# Keywords: foo,bar,baz' > tgt
-\&  cat tgt.in >> tgt
+.Vb 1
+\&  echo foo,bar,baz > tgt
 .Ve
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
@@ -1802,40 +1746,6 @@ strings this way, you must either explicitly set up a dependency (with the
 \f(CWDepends\fR method), or be sure that the command you are using is a system
 command which is expected to be available. If it isn't available, you will,
 of course, get an error.
-.PP
-If any command (even one within a multi-line command) begins with
-\f(CW[perl]\fR, the remainder of that command line will be evaluated by the
-running Perl instead of being forked by the shell.  If an error occurs
-in parsing the Perl or if the Perl expression returns 0 or undef, the
-command will be considered to have failed.  For example, here is a simple
-command which creates a file \f(CWfoo\fR directly from Perl:
-.PP
-.Vb 3
-\&  $env = new cons();
-\&  Command $env 'foo',
-\&    qq([perl] open(FOO,'>foo');print FOO "hi\e\en"; close(FOO); 1);
-.Ve
-Note that when the command is executed, you are in the same package as
-when the \fIConstruct\fR or \fIConscript\fR file was read, so you can call
-Perl functions you've defined in the same \fIConstruct\fR or \fIConscript\fR
-file in which the \f(CWCommand\fR appears:
-.PP
-.Vb 9
-\&  $env = new cons();
-\&  sub create_file {
-\&        my $file = shift;
-\&        open(FILE, ">$file");
-\&        print FILE "hi\en";
-\&        close(FILE);
-\&        return 1;
-\&  }
-\&  Command $env 'foo', "[perl] &create_file('%>')";
-.Ve
-The Perl string will be used to generate the signature for the derived
-file, so if you change the string, the file will be rebuilt.  The contents
-of any subroutines you call, however, are not part of the signature,
-so if you modify a called subroutine such as \f(CWcreate_file\fR above,
-the target will \fInot\fR be rebuilt.  Caveat user.
 .PP
 Cons normally prints a command before executing it.  This behavior is
 suppressed if the first character of the command is \f(CW@\fR.  Note that
@@ -1888,82 +1798,68 @@ the specified source files. It is invoked as shown below:
 .Vb 1
 \&  @files = Objects $env <source or object files>;
 .Ve
-Under Unix, source files ending in \fI.s\fR and \fI.c\fR are currently
-supported, and will be compiled into a name of the same file ending
-in \fI.o\fR. By default, all files are created by invoking the external
-command which results from expanding the \f(CWCCCOM\fR construction
-variable, with \f(CW%<\fR and \f(CW%>\fR set to the source and object
-files, respectively (see the \f(CWCommand\fR method for expansion details).
-The variable \f(CWCPPPATH\fR is also used when scanning source files for
-dependencies. This is a colon separated list of pathnames, and is also
-used to create the construction variable \f(CW_IFLAGS,\fR which will contain
-the appropriate list of \-\f(CWI\fR options for the compilation. Any relative
-pathnames in \f(CWCPPPATH\fR is interpreted relative to the directory in
-which the associated construction environment was created (absolute
-and top-relative names may also be used). This variable is used by
-\f(CWCCCOM\fR. The behavior of this command can be modified by changing any
-of the variables which are interpolated into \f(CWCCCOM\fR, such as \f(CWCC\fR,
-\f(CWCFLAGS\fR, and, indirectly, \f(CWCPPPATH\fR. It's also possible to replace
-the value of \f(CWCCCOM\fR, itself. As a convenience, this file returns the
-list of object filenames.
-.Sh "The \f(CWProgram\fR method"
+Under Unix, source files ending in \f(CW.s\fR and \f(CW.c\fR are currently supported,
+and will be compiled into a name of the same file ending in \f(CW.o\fR. By
+default, all files are created by invoking the external command which
+results from expanding the \f(CWCCOM\fR construction variable, with C<%<> and
+\f(CW%\fR> set to the source and object files, respectively (see the \f(CWCommand\fR
+method for expansion details) . The variable \f(CWCPPPATH\fR is also used when
+scanning source files for dependencies. This is a colon separated list of
+pathnames, and is also used to create the construction variable \f(CW_IFLAGS,\fR
+which will contain the appropriate list of \-\f(CWI\fR options for the
+compilation. Any relative pathnames in \f(CWCPPPATH\fR is interpreted relative to
+the directory in which the associated construction environment was created
+(absolute and top-relative names may also be used). This variable is used by
+\f(CWCCOM\fR. The behavior of this command can be modified by changing any of the
+variables which are interpolated into \f(CWCCOM\fR, such as \f(CWCC\fR, \f(CWCFLAGS\fR,
+and, indirectly, \f(CWCPPPATH\fR. It's also possible to replace the value of
+\f(CWCCOM\fR, itself. As a convenience, this file returns the list of object
+filenames.
+.Ip "\fBThe \fR\fBProgram\fR\fB method\fR" 0
 The \f(CWProgram\fR method arranges to link the specified program with the
 specified object files. It is invoked in the following manner:
 .PP
 .Vb 1
 \&  Program $env <program name>, <source or object files>;
 .Ve
-The program name will have the value of the \f(CWSUFEXE\fR construction
-variable appended (by default, \f(CW.exe\fR on Win32 systems, nothing on Unix
-systems) if the suffix is not already present.
-.PP
 Source files may be specified in place of objects files\*(--the \f(CWObjects\fR
 method will be invoked to arrange the conversion of all the files into
 object files, and hence all the observations about the \f(CWObjects\fR method,
-above, apply to this method also.
-.PP
-The actual linking of the program will be handled by an external command
-which results from expanding the \f(CWLINKCOM\fR construction variable, with
-\f(CW%<\fR set to the object files to be linked (in the order presented),
-and \f(CW%>\fR set to the target (see the \f(CWCommand\fR method for expansion
-details). The user may set additional variables in the construction
-environment, including \f(CWLINK\fR, to define which program to use for
-linking, \f(CWLIBPATH\fR, a colon-separated list of library search paths,
-for use with library specifications of the form \fI\-llib\fR, and \f(CWLIBS\fR,
-specifying the list of libraries to link against (in either \fI\-llib\fR
-form or just as pathnames. Relative pathnames in both \f(CWLIBPATH\fR and
-\f(CWLIBS\fR are interpreted relative to the directory in which the associated
-construction environment is created (absolute and top-relative names may
-also be used). Cons automatically sets up dependencies on any libraries
-mentioned in \f(CWLIBS\fR: those libraries will be built before the command
-is linked.
-.Sh "The \f(CWLibrary\fR method"
+above, apply to this method also. The actual linking of the program will be
+handled by an external command which results from expanding the \f(CWLINKCOM\fR
+construction variable, with C<%<> set to the object files to be linked (in
+the order presented), and \f(CW%\fR> set to the target (see the \f(CWCommand\fR method
+for expansion details). The user may set additional variables in the
+construction environment, including \f(CWLINK\fR, to define which program to use
+for linking, \f(CWLIBPATH\fR, a colon-separated list of library search paths, for
+use with library specifications of the form \fI\-llib\fR, and \f(CWLIBS\fR,
+specifying the list of libraries to link against (in either \fI\-llib\fR form or
+just as pathnames. Relative pathnames in both \f(CWLIBPATH\fR and \f(CWLIBS\fR are
+interpreted relative to the directory in which the associated construction
+environment created (absolute and top-relative names may also be used). Cons
+automatically sets up dependencies on any libraries mentioned in \f(CWLIBS\fR:
+those libraries will be built before the command is linked.
+.Ip "\fBThe \fR\fBLibrary\fR\fB method\fR" 0
 The \f(CWLibrary\fR method arranges to create the specified library from the
 specified object files. It is invoked as follows:
 .PP
 .Vb 1
 \&  Library $env <library name>, <source or object files>;
 .Ve
-The library name will have the value of the \f(CWSUFLIB\fR construction
-variable appended (by default, \f(CW.lib\fR on Win32 systems, \f(CW.a\fR on Unix
-systems) if the suffix is not already present.
-.PP
 Source files may be specified in place of objects files\*(--the \f(CWObjects\fR
 method will be invoked to arrange the conversion of all the files into
 object files, and hence all the observations about the \f(CWObjects\fR method,
-above, apply to this method also.
-.PP
-The actual creation of the library will be handled by an external
-command which results from expanding the \f(CWARCOM\fR construction variable,
-with \f(CW%<\fR set to the library members (in the order presented),
-and \f(CW%>\fR to the library to be created (see the \f(CWCommand\fR method
-for expansion details). The user may set variables in the construction
-environment which will affect the operation of the command. These
-include \f(CWAR\fR, the archive program to use, \f(CWARFLAGS\fR, which can be
-used to modify the flags given to the program specified by \f(CWAR\fR, and
-\f(CWRANLIB\fR, the name of a archive index generation program, if needed
-(if the particular need does not require the latter functionality,
-then \f(CWARCOM\fR must be redefined to not reference \f(CWRANLIB\fR).
+above, apply to this method also. The actual creation of the library will be
+handled by an external command which results from expanding the \f(CWARCOM\fR
+construction variable, with C<%<> set to the library members (in the order
+presented), and \f(CW%\fR> to the library to be created (see the \f(CWCommand\fR
+method for expansion details). The user may set variables in the
+construction environment which will affect the operation of the
+command. These include \f(CWAR\fR, the archive program to use, \f(CWARFLAGS\fR, which
+can be used to modify the flags given to the program specified by \f(CWAR\fR, and
+\f(CWRANLIB\fR, the name of a archive index generation program, if needed (if the
+particular need does not require the latter functionality, then \f(CWARCOM\fR
+must be redefined to not reference \f(CWRANLIB\fR).
 .PP
 The \f(CWLibrary\fR method allows the same library to be specified in multiple
 method invocations. All of the contributing objects from all the invocations
@@ -1993,126 +1889,8 @@ This may be occasionally useful, especially in cases where no scanner exists
 (or is writable) for particular types of files. Normally, dependencies are
 calculated automatically from a combination of the explicit dependencies set
 up by the method invocation or by scanning source files.
-.PP
-A set of identical dependencies for multiple targets may be specified
-using a reference to a list of targets. In Perl, a list reference can
-be created by enclosing a list in square brackets. Hence the following
-command:
-.PP
-.Vb 1
-\&  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
-.Ve
-specifies that both the \fIfoo\fR and \fIbar\fR files depend on the listed
-input files.
-.Sh "The \f(CWIgnore\fR method"
-The \f(CWIgnore\fR method allows you to ignore explicitly dependencies that
-Cons infers on its own.  It is invoked as follows:
-.PP
-.Vb 1
-\&  Ignore <patterns>;
-.Ve
-This can be used to avoid recompilations due to changes in system header
-files or utilities that are known to not affect the generated targets.
-.PP
-If, for example, a program is built in an \s-1NFS\s0\-mounted directory on
-multiple systems that have different copies of \fIstdio.h\fR, the differences
-will affect the signatures of all derived targets built from source files
-that \f(CW#include <stdio.h>\fR.  This will cause all those targets to
-be rebuilt when changing systems.  If this is not desirable behavior, then
-the following line will remove the dependencies on the \fIstdio.h\fR file:
-.PP
-.Vb 1
-\&  Ignore '^/usr/include/stdio\e.h$';
-.Ve
-Note that the arguments to the \f(CWIgnore\fR method are regular expressions,
-so special characters must be escaped and you may wish to anchor the
-beginning or end of the expression with \f(CW^\fR or \f(CW$\fR characters.
-.Sh "The \f(CWSalt\fR method"
-The \f(CWSalt\fR method adds a constant value to the signature calculation
-for every derived file.  It is invoked as follows:
-.PP
-.Vb 1
-\&  Salt $string;
-.Ve
-Changing the Salt value will force a complete rebuild of every derived
-file.  This can be used to force rebuilds in certain desired
-circumstances.  For example,
-.PP
-.Vb 1
-\&  Salt `uname -s`;
-.Ve
-Would force a complete rebuild of every derived file whenever the
-operating system on which the build is performed (as reported by \f(CWuname
--s\fR) changes.
-.Sh "The \f(CWUseCache\fR method"
-The \f(CWUseCache\fR method instructs Cons to maintain a cache of derived
-files, to be shared among separate build trees of the same project.
-.PP
-.Vb 1
-\&  UseCache("cache/<buildname>") || warn("cache directory not found");
-.Ve
-.Sh "The \f(CWSourcePath\fR method"
-The \f(CWSourcePath\fR mathod returns the real source path name of a file,
-as opposted to the path name within a build directory.  It is invoked
-as follows:
-.PP
-.Vb 1
-\&  $path = SourcePath <buildpath>;
-.Ve
-.Sh "The \f(CWConsPath\fR method"
-The \f(CWConsPath\fR method returns true if the supplied path is a derivable
-file, and returns undef (false) otherwise.
-It is invoked as follows:
-.PP
-.Vb 1
-\&  $result = ConsPath <path>;
-.Ve
-.Sh "The \f(CWSplitPath\fR method"
-The \f(CWSplitPath\fR method looks up multiple path names in a string separated
-by the default path separator for the operating system (':\*(R' on \s-1UNIX\s0
-systems, \*(L';\*(R' on Windows \s-1NT\s0), and returns the fully-qualified names.
-It is invoked as follows:
-.PP
-.Vb 1
-\&  @paths = SplitPath <pathlist>;
-.Ve
-The \f(CWSplitPath\fR method will convert  names prefixed \*(L'#\*(R' to the
-appropriate top-level build name (without the \*(L'#') and will convert
-relative names to top-level names.
-.Sh "The \f(CWDirPath\fR method"
-The \f(CWDirPath\fR method returns the build path \fIname\fR\|(s) of a directory or
-list of directories.  It is invoked as follows:
-.PP
-.Vb 1
-\&  $cwd = DirPath <paths>;
-.Ve
-The most common use for the \f(CWDirPath\fR method is:
-.PP
-.Vb 1
-\&  $cwd = DirPath '.';
-.Ve
-to fetch the path to the current directory of a subsidiary \fIConscript\fR
-file.
-.Sh "The \f(CWFilePath\fR method"
-The \f(CWFilePath\fR method returns the build path \fIname\fR\|(s) of a file or
-list of files.  It is invoked as follows:
-.PP
-.Vb 1
-\&  $file = FilePath <path>;
-.Ve
-.Sh "The \f(CWHelp\fR method"
-The \f(CWHelp\fR method specifies help text that will be displayed when the
-user invokes \f(CWcons -h\fR.  This can be used to provide documentation
-of specific targets, values, build options, etc. for the build tree.
-It is invoked as follows:
-.PP
-.Vb 1
-\&  Help <helptext>;
-.Ve
-The \f(CWHelp\fR method may only be called once, and should typically be
-specified in the top-level \fIConstruct\fR file.
-.SH "Extending Cons"
-.Sh "Overriding construction variables"
+.SH "\fBExtending Cons\fR"
+.Ip "\fBOverriding construction variables\fR" 0
 There are several ways of extending Cons, which vary in degree of
 difficulty. The simplest method is to define your own construction
 environment, based on the default environment, but modified to reflect your
@@ -2292,130 +2070,24 @@ installs \f(CWexport/include/foo.h\fR, for example, just type:
 .Vb 1
 \&  cons -pw export/include/foo.h
 .Ve
-.SH "Using and writing dependency scanners"
-QuickScan allows simple target-independent scanners to be set up for source
-files. Only one QuickScan scanner may be associated with any given source
-file and environment.
-.PP
-QuickScan is invoked as follows:
-.PP
-.Vb 1
-\&  QuickScan CONSENV CODEREF, FILENAME [, PATH]
-.Ve
-The subroutine referenced by CODEREF is expected to return a list of
-filenames included directly by FILE. These filenames will, in turn, be
-scanned. The optional PATH argument supplies a lookup path for finding
-FILENAME and/or files returned by the user-supplied subroutine.  The PATH
-may be a reference to an array of lookup-directory names, or a string of
-names separated by the system's separator character (':\*(R' on UNIX systems,
-\&\*(R';\*(R' on Windows NT).
-.PP
-The subroutine is called once for each line in the file, with \f(CW$_\fR set to the
-current line. If the subroutine needs to look at additional lines, or, for
-that matter, the entire file, then it may read them itself, from the
-filehandle SCAN. It may also terminate the loop, if it knows that no further
-include information is available, by closing the filehandle.
-.PP
-Whether or not a lookup path is provided, QuickScan first tries to lookup
-the file relative to the current directory (for the top-level file supplied
-directly to QuickScan), or from the directory containing the file which
-referenced the file. This is not very general, but seems good
-enough\*(--especially if you have the luxury of writing your own utilities and
-can control the use of the search path in a standard way. Finally, the
-search path is, currently, colon separated. This may not make the NT camp
-happy.
-.PP
-Here's a real example, taken from a \fIConstruct\fR file here:
-.PP
-.Vb 14
-\&  sub cons::SMFgen {
-\&      my($env, @tables) = @_;
-\&      foreach $t (@tables) {
-\&          $env->QuickScan(sub { /\eb\eS*?\e.smf\eb/g }, "$t.smf",
-\&                          $env->{SMF_INCLUDE_PATH});
-\&          $env->Command(
-\&              ["$t.smdb.cc","$t.smdb.h","$t.snmp.cc","$t.ami.cc", "$t.http.cc"],
-\&              "$t.smf",
-\&              q(
-\&                smfgen %( %SMF_INCLUDE_OPT %) %<
-\&              )
-\&          );
-\&      }
-\&  }
-.Ve
-[NOTE that the form \f(CW$env->QuickScan ...\fR  and \f(CW$env->Command
-\&...\fR should not be necessary, but, for some reason, is required
-for this particular invocation. This appears to be a bug in Perl or
-a misunderstanding on my part; this invocation style does not always
-appear to be necessary.]
-.PP
-This finds all names of the form <name>.smf in the file. It will return the
-names even if they're found within comments, but that's OK (the mechanism is
-forgiving of extra files; they're just ignored on the assumption that the
-missing file will be noticed when the program, in this example, smfgen, is
-actually invoked).
-.PP
-A scanner is only invoked for a given source file if it is needed by some
-target in the tree. It is only ever invoked once for a given source file.
-.PP
-Here is another way to build the same scanner. This one uses an
-explicit code reference, and also (unecessarily, in this case) reads
-the whole file itself:
-.PP
-.Vb 7
-\&  sub myscan {
-\&      my(@includes);
-\&      do {
-\&          push(@includes, /\eb\eS*?\e.smf\eb/g);
-\&      } while <SCAN>;
-\&      @includes
-\&  }
-.Ve
-Note that the order of the loop is reversed, with the loop test at the
-end. This is because the first line is already read for you. This scanner
-can be attached to a source file by:
-.PP
-.Vb 1
-\&    QuickScan $env \emyscan, "$_.smf";
-.Ve
-.SH "SUPPORT AND SUGGESTIONS"
+.SH "\fBUsing and writing dependency scanners\fR"
+T.B.S.
+.SH "\fBSupport and Suggestions\fR"
 Cons is maintained by the user community.  To subscribe, send mail to
-\fBcons-discuss-request@gnu.org\fR with body \fBsubscribe\fR.
+\fBcons-discuss-request@eng.fore.com\fR with body \fBsubscribe\fR.
 .PP
-Please report any suggestions through the \fBcons-discuss@gnu.org\fR mailing
-list.
-.SH "BUGS"
-Sure to be some. Please report any bugs through the \fBbug-cons@gnu.org\fR
-mailing list.
-.SH "INFORMATION ABOUT CONS"
-Information about CONS can be obtained from the official cons web site
-\fBhttp://www.dsmit.com/cons/\fR or its mirrors listed there.
+Please report any bugs/fixes/suggestions through the
+cons-discuss@eng.fore.com mailing list.
 .PP
-The cons maintainers can be contacted by email at
-\fBcons-maintainers@gnu.org\fR
-.SH "AUTHORS"
-Originally by Bob Sidebotham. Then significantly enriched by the members
-of the Cons community \fBcons-discuss@gnu.org\fR.
-.PP
-The Cons community would like to thank Ulrich Pfeifer for the original pod
-documentation derived from the \fIcons.html\fR file. Cons documentation is now
-a part of the program itself.
+The Official cons site is: http://www.dsmit.com/cons
 
 .rn }` ''
 .IX Title "CONS 1"
-.IX Name "Cons - A Software Construction System"
+.IX Name "Cons - Cons: A Software Construction System"
 
 .IX Header "NAME"
 
 .IX Header "DESCRIPTION"
-
-.IX Header "Introduction"
-
-.IX Header "Why Cons? Why not Make?"
-
-.IX Subsection "Build complexity"
-
-.IX Subsection "Build reproducibility"
 
 .IX Header "\fBCons: A Software Construction System\fR"
 
@@ -2441,9 +2113,9 @@ a part of the program itself.
 
 .IX Item "\fBAutomatic and complete dependency analysis\fR"
 
-.IX Subsection "Using modules in build scripts"
+.IX Item "\fBAutomatic global build sequencing\fR"
 
-.IX Subsection "Scope of variables"
+.IX Header "\fBBuilding large trees\*(--still just as simple\fR"
 
 .IX Item "\fBA hierarchy of build scripts\fR"
 
@@ -2509,9 +2181,9 @@ a part of the program itself.
 
 .IX Header "\fBBacking builds\fR"
 
-.IX Subsection "Interpolating construction variables"
+.IX Header "\fBTemporary overrides\fR"
 
-.IX Header "Default construction methods"
+.IX Item "\fBOverriding environment variables\fR"
 
 .IX Item "\fBThe\fR\fB Override\fR\fB command\fR"
 
@@ -2613,13 +2285,7 @@ a part of the program itself.
 
 .IX Item "\f(CW-x\fR"
 
-.IX Header "Using and writing dependency scanners"
+.IX Header "\fBUsing and writing dependency scanners\fR"
 
-.IX Header "SUPPORT AND SUGGESTIONS"
-
-.IX Header "BUGS"
-
-.IX Header "INFORMATION ABOUT CONS"
-
-.IX Header "AUTHORS"
+.IX Header "\fBSupport and Suggestions\fR"
 

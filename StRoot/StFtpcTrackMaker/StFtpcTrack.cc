@@ -1,14 +1,5 @@
-// $Id: StFtpcTrack.cc,v 1.10 2000/11/10 18:38:02 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.8 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
-// Revision 1.10  2000/11/10 18:38:02  oldi
-// Changes due to replacement of StThreeVector by TVector3.
-// Points can be added to a track on either end now.
-// New data members for dE/dx information.
-// Cleanup.
-//
-// Revision 1.9  2000/09/07 11:35:39  jcs
-// Set flag,id_start_vertex,nrec,nmax,nfit for FTPC primary tracks
-//
 // Revision 1.8  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -48,7 +39,7 @@
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 10.11.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFormulary.hh"
@@ -56,8 +47,6 @@
 #include "StFtpcVertex.hh"
 #include "StFtpcConfMapPoint.hh"
 #include "StFtpcMomentumFit.hh"
-
-#include <math.h>
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                                                                //
@@ -113,13 +102,13 @@ StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits, Int_t tra
     }
   }
   
-  mP.SetX(track_st->p[0]);
-  mP.SetY(track_st->p[1]);
-  mP.SetZ(track_st->p[2]);
+  mP.setX(track_st->p[0]);
+  mP.setY(track_st->p[1]);
+  mP.setZ(track_st->p[2]);
 
-  mV.SetX(track_st->v[0]);
-  mV.SetY(track_st->v[1]);
-  mV.SetZ(track_st->v[2]);
+  mV.setX(track_st->v[0]);
+  mV.setY(track_st->v[1]);
+  mV.setZ(track_st->v[2]);
 
   mQ = track_st->q;
   mChiSq[0] = track_st->chisq[0];
@@ -135,9 +124,6 @@ StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits, Int_t tra
 
   SetNMax(track_st->nmax);
   SetDca(track_st->impact);
-
-  SetdEdx(track_st->dedx);
-  SetNumdEdxHits(track_st->ndedx);
 }
 
 
@@ -154,7 +140,7 @@ void StFtpcTrack::SetDefaults()
 {
   // Executes the default setup for the track.
 
-  mPoints = new TObjArray(0, 0);
+    mPoints = new TObjArray(0, 0);
   mPointNumbers = new MIntArray();
 
   mTrackNumber = -1;
@@ -168,22 +154,19 @@ void StFtpcTrack::SetDefaults()
 
   ComesFromMainVertex(false);
 
-  mP.SetX(0.);
-  mP.SetY(0.);
-  mP.SetZ(0.);
+  mP.setX(0.);
+  mP.setY(0.);
+  mP.setZ(0.);
 
-  mV.SetX(0.);
-  mV.SetY(0.);
-  mV.SetZ(0.);
-
+  mV.setX(0.);
+  mV.setY(0.);
+  mV.setZ(0.);
+ 
   mQ = 0;
   mChiSq[0] = 0.;
   mChiSq[1] = 0.;
   mTheta = 0.;
   mDca = 0.;
-
-  mdEdx = 0.;
-  mNumdEdxHits = 0;
 
   return;
 }
@@ -214,33 +197,6 @@ void StFtpcTrack::AddPoint(StFtpcPoint* point)
   point->SetTrackNumber(GetTrackNumber());
 
   return;
-}
-
-
-void StFtpcTrack::AddForwardPoint(StFtpcPoint* point)
-{
-  // Shifts all found points by one. Adds a given point in the (now) empty first slot.
-
-  Int_t num = mPoints->GetEntriesFast();
-  mPoints->Expand(num+1);
-
-  for (Int_t i = num-1; i >= 0; i--) {
-    mPoints->AddAt(mPoints->At(i), i+1);
-  }
-  
-  mPoints->AddFirst(point);
-  mPointNumbers->ShiftByOneAndAddAtFirst(point->GetHitNumber());
-  point->SetUsage(true);
-  point->SetTrackNumber(GetTrackNumber());
-
-  return;
-}
-
-
-Int_t StFtpcTrack::GetHemisphere() const
-{
-  // Returns +1 if z of track is positiv, -1 otherwise.
-  return (Int_t)TMath::Sign(1., ((StFtpcPoint *)(GetHits()->First()))->GetZ());  
 }
 
 
@@ -367,26 +323,12 @@ void StFtpcTrack::CalculateNMax()
     
     if (i == 0) {
       mRFirst = r;
-      
-      Double_t ratio = x/r;
-      if (TMath::Abs(ratio) > 1.) {
-	if (ratio > 0) ratio = 1.;
-	else ratio = -1.;
-      }
-
-      mAlphaFirst = TMath::ACos(ratio);
-   }
+      mAlphaFirst = TMath::ACos(x/r);
+    }
    
     if (i == 9) {
       mRLast = r;
-
-      Double_t ratio = x/r;
-      if (TMath::Abs(ratio) > 1.) {
-	if (ratio > 0) ratio = 1.;
-	else ratio = -1.;
-      }
-
-      mAlphaLast = TMath::ACos(ratio);
+      mAlphaLast = TMath::ACos(x/r);
     }
     
     if (r < outer_radius && r > inner_radius) {
@@ -405,17 +347,13 @@ void StFtpcTrack::Fit()
   StThreeVector<double> *Hit=new StThreeVector<double>[numHits];
   for(Int_t i=0; i<numHits; i++)
     {
-      Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-      Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-      Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
+      Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
     }
 
   // call fit class
   StFtpcMomentumFit *Fit = new StFtpcMomentumFit(Hit, numHits);
 
-  mP.SetX(Fit->momentum().x());
-  mP.SetY(Fit->momentum().y());
-  mP.SetZ(Fit->momentum().z());
+  mP = Fit->momentum();
   mChiSq[0] = Fit->chi2Rad();
   mChiSq[1] = Fit->chi2Lin();
   mQ = Fit->usedCharge();
@@ -432,22 +370,20 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
 
   Int_t numHits = GetNumberOfPoints();
   StThreeVector<double> *Hit = new StThreeVector<double>[numHits];
-  TVector3 vertexPos = vertex->GetCoord();
+  StThreeVector<double> vertexPos = vertex->GetCoord();
   
   for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-    Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-    Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
+    Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
   }
 
   // call fit class
   StFtpcMomentumFit *looseFit = new StFtpcMomentumFit(Hit, numHits);
 
-  StThreeVector<double> rv(vertexPos.X(), vertexPos.Y(), vertexPos.Z());
+  StThreeVector<double> rv(vertexPos.x(), vertexPos.y(), vertexPos.z());
   StThreeVector<double> nv(0,0,1);
   Double_t pl = looseFit->pathLength(rv,nv);
-  Double_t xvert = looseFit->x(pl) - vertexPos.X();
-  Double_t yvert = looseFit->y(pl) - vertexPos.Y();
+  Double_t xvert = looseFit->x(pl) - vertexPos.x();
+  Double_t yvert = looseFit->y(pl) - vertexPos.y();
   Double_t dca = TMath::Sqrt(xvert * xvert + yvert * yvert);
 
   delete looseFit;
@@ -464,12 +400,10 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   // set up hits for calling fit class
   Int_t numHits = GetNumberOfPoints();
   StThreeVector<double> *Hit = new StThreeVector<double>[numHits];
-  StThreeVector<double>  vertexPos(vertex->GetCoord().X(), vertex->GetCoord().Y(), vertex->GetCoord().Z());
+  StThreeVector<double> vertexPos = vertex->GetCoord();
   
   for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-    Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-    Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
+    Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
   }
 
   // call fit class
@@ -485,25 +419,21 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   StFtpcMomentumFit *Fit = new StFtpcMomentumFit(&vertexPos, Hit, numHits);
 
   if (id_start_vertex < 0 ) {
-    mP.SetX(Fit->momentum().x());
-    mP.SetY(Fit->momentum().y());
-    mP.SetZ(Fit->momentum().z());
+    mP = looseFit->momentum();
     StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
     pl = looseFit->pathLength(firstPoint,nv);
-    mV.SetX(looseFit->x(pl));
-    mV.SetY(looseFit->y(pl));
-    mV.SetZ(looseFit->z(pl));
+    mV.setX(looseFit->x(pl));
+    mV.setY(looseFit->y(pl));
+    mV.setZ(looseFit->z(pl));
     mTrackLength = looseFit->pathLength(Hit[numHits-1],nv);
     mChiSq[0] = looseFit->chi2Rad();
     mChiSq[1] = looseFit->chi2Lin();
     mQ = looseFit->usedCharge();
     mRadius = 1./looseFit->curvature();
-    mTheta = mP.Theta();
-
+    mTheta = mP.theta();
     if (mDca > max_Dca) {
        mFromMainVertex = (Bool_t)false;
     }
-
     else {
        mFromMainVertex = (Bool_t)true;
     }
@@ -512,39 +442,35 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   else {
 
      if (mDca > max_Dca) {
-       mP.SetX(Fit->momentum().x());
-       mP.SetY(Fit->momentum().y());
-       mP.SetZ(Fit->momentum().z());
+       mP = looseFit->momentum();
        StThreeVector<double> firstPoint(Hit[0].x(), Hit[0].y(), Hit[0].z());
        pl = looseFit->pathLength(firstPoint,nv);
-       mV.SetX(looseFit->x(pl));
-       mV.SetY(looseFit->y(pl));
-       mV.SetZ(looseFit->z(pl));
+       mV.setX(looseFit->x(pl));
+       mV.setY(looseFit->y(pl));
+       mV.setZ(looseFit->z(pl));
        mTrackLength = looseFit->pathLength(Hit[numHits-1], nv);
        mFromMainVertex = (Bool_t)false;
        mChiSq[0] = looseFit->chi2Rad();
        mChiSq[1] = looseFit->chi2Lin();
        mQ = looseFit->usedCharge();
        mRadius = 1./looseFit->curvature();
-       mTheta = mP.Theta();
+       mTheta = mP.theta();
      }
 
      else {
-       mP.SetX(Fit->momentum().x());
-       mP.SetY(Fit->momentum().y());
-       mP.SetZ(Fit->momentum().z());
+       mP = Fit->momentum();
        StThreeVector<double> firstPoint(vertexPos.x(), vertexPos.y(), vertexPos.z());
        pl = Fit->pathLength(firstPoint,nv);
-       mV.SetX(Fit->x(pl));
-       mV.SetY(Fit->y(pl));
-       mV.SetZ(Fit->z(pl));
+       mV.setX(Fit->x(pl));
+       mV.setY(Fit->y(pl));
+       mV.setZ(Fit->z(pl));
        mTrackLength = Fit->pathLength(Hit[numHits-1], nv);
        mFromMainVertex = (Bool_t)true;
        mChiSq[0] = Fit->chi2Rad();
        mChiSq[1] = Fit->chi2Lin();
        mQ = Fit->usedCharge();
        mRadius = 1./Fit->curvature();
-       mTheta = mP.Theta();
+       mTheta = mP.theta();
      }
    }
   
@@ -575,8 +501,6 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
     trackTableEntry->hitid[k] = -1;
   }
   
-  trackTableEntry->nrec = mPoints->GetEntriesFast();
-
   for(Int_t i=0; i<trackTableEntry->nrec; i++) {
     Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
     
@@ -586,41 +510,21 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
     
     trackTableEntry->hitid[rowindex-1] = mPointNumbers->At(i)+1;
   }
-
-  trackTableEntry->nfit = trackTableEntry->nrec;
-  trackTableEntry->nmax = mNMax;
-
-  if(mFromMainVertex) {
-    trackTableEntry->flag = 1;
-    trackTableEntry->id_start_vertex = id_start_vertex;
-    if (id_start_vertex > 0) {
-       ++trackTableEntry->nrec;
-       ++trackTableEntry->nmax;
-       ++trackTableEntry->nfit;
-    }
-  }
-
-  else {
-    trackTableEntry->flag = 0;
-    trackTableEntry->id_start_vertex = 0;
-  }
   
   trackTableEntry->q = mQ;
   trackTableEntry->chisq[0] = mChiSq[0];
   trackTableEntry->chisq[1] = mChiSq[1];
-  trackTableEntry->p[0] = mP.X();
-  trackTableEntry->p[1] = mP.Y();
-  trackTableEntry->p[2] = mP.Z();
-  trackTableEntry->v[0] = mV.X();
-  trackTableEntry->v[1] = mV.Y();
-  trackTableEntry->v[2] = mV.Z();
+  trackTableEntry->p[0] = mP.x();
+  trackTableEntry->p[1] = mP.y();
+  trackTableEntry->p[2] = mP.z();
+  trackTableEntry->v[0] = mV.x();
+  trackTableEntry->v[1] = mV.y();
+  trackTableEntry->v[2] = mV.z();
   trackTableEntry->length = mTrackLength;
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mRadius;
   trackTableEntry->impact = mDca;
   trackTableEntry->nmax = mNMax;
-  trackTableEntry->dedx = mdEdx;
-  trackTableEntry->ndedx = mNumdEdxHits;
 
   return 0;
 }

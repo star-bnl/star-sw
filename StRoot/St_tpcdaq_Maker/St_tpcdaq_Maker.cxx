@@ -1,8 +1,5 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.57  2000/11/07 16:30:29  ward
-// New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
-//
 // Revision 1.56  2000/06/26 18:25:20  ward
 // mulitple veto zones for ExcludeTheseTimeBins
 //
@@ -531,16 +528,6 @@ void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
   exit(2); // This is in WriteStructToScreenAndExit().
 }
 #endif /* NOISE_ELIM */
-///////////////////////////////////////
-// comment 66f:  Here is the chain of function calls:
-// TPCV2P0_ZS_SR::initialize rets 0 (error, corrupted event)
-// TPCV2P0::getZeroSuppressedReader returns 0
-// StTPCReader::setSector sets fZeroSuppressedReader to 0 (NULL)
-// StTPCReader::getPadList returns -1
-// St_tpcdaq_Maker::getPadList returns -1
-// St_tpcdaq_Maker::Output returns 1
-// St_tpcdaq_Maker::Maker returns kStErr
-///////////////////////////////////////
 int St_tpcdaq_Maker::Output() {
 #ifdef NOISE_ELIM
   char skip; int hj,lgg;
@@ -572,6 +559,7 @@ int St_tpcdaq_Maker::Output() {
     raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
 
+
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
   for(isect=1;isect<=NSECT;isect++) {
@@ -599,9 +587,7 @@ int St_tpcdaq_Maker::Output() {
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
-      seqOffset=0; npad=getPadList(ipadrow+1,&padlist);
-      if(npad<0) return 1; // Corrupted event, see comment 66f.
-      pixOffset=0;
+      seqOffset=0; npad=getPadList(ipadrow+1,&padlist); pixOffset=0;
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
       for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
@@ -720,10 +706,7 @@ Int_t St_tpcdaq_Maker::Make() {
     return kStErr;
   }
   assert(!m_DataSet->GetList());
-  if(Output()) {
-    PP"St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
-    return kStErr; // See comment 66f.
-  }
+  Output();
   if(mErr) {
     PP"St_tpcdaq_Maker failed with error code %d.\n",mErr);
     return kStFatal;

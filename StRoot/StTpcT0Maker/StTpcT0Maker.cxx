@@ -1,10 +1,7 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.5 2000/09/11 17:48:50 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.4 2000/09/01 21:24:28 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
-// Revision 1.5  2000/09/11 17:48:50  hardtke
-// save values of trig offset, dvel, and tpc length for use in Finish()
-//
 // Revision 1.4  2000/09/01 21:24:28  hardtke
 // Add kluge to evade infrastructure bug
 //
@@ -71,9 +68,6 @@ Int_t StTpcT0Maker::Init(){
   AddHist(t0guessError);
   date = 0;
   time = 0;
-  dvel_assumed=0.0;
-  trigger_assumed=0.0;
-  length_assumed=0.0;
   return StMaker::Init();
 }
 
@@ -87,17 +81,7 @@ void StTpcT0Maker::Clear(Option_t *option){
 Int_t StTpcT0Maker::Make(){
   if (date==0) {date = GetDate();cout << "date = " << date << endl;}
   if (time==0) {time = GetTime();cout << "time = " << time << endl;}
-  if (dvel_assumed==0.0) {dvel_assumed = 1e-6*theDb->DriftVelocity();
-  gMessMgr->Info() << "StTpcT0Maker::Drift Velocity = " << dvel_assumed << endm;} 
-  if (trigger_assumed==0.0){ trigger_assumed = theDb->triggerTimeOffset()*1e6;
-  gMessMgr->Info() << "StTpcT0Maker::Trig Offset  = " << trigger_assumed << endm;} 
-  if (length_assumed==0.0){ length_assumed =  theDb->Dimensions()->outerEffectiveDriftDistance();
-  gMessMgr->Info() << "StTpcT0Maker::TPC Length = " << length_assumed << endm;} 
-//   if (dvel_assumed!=(1e-6*theDb->DriftVelocity())||trigger_assumed!=(theDb->triggerTimeOffset()*1e6)||length_assumed!=(theDb->Dimensions()->outerEffectiveDriftDistance())) {
-//     gMessMgr->Error() << "StTpcT0Maker::t0 assumed has changed, calibration ceasing" << endm;
-//      return kStEOF;
-//   }
-  t0guess = length_assumed/dvel_assumed - trigger_assumed;
+  t0guess = theDb->Dimensions()->outerEffectiveDriftDistance()/(1e-6*theDb->DriftVelocity()) - theDb->triggerTimeOffset()*1e6;
   gMessMgr->Info() << "StTpcT0Maker::t0 guess = " << t0guess << " micro seconds" << endm; 
   if (!GetMaker("tpc_hits")||!GetMaker("tpc_tracks")||!GetMaker("match")||!GetMaker("primary")||!GetMaker("dst")) {
     gMessMgr->Error() << "StTpcT0Maker::Missing Another Maker, check chain options " << endm;
@@ -156,7 +140,7 @@ Int_t StTpcT0Maker::Make(){
      }    
     }
     if (zVertexEast>-999&&zVertexWest>-999){
-      t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
+      t0current = (zVertexEast-zVertexWest)/(2*theDb->DriftVelocity()*1e-6) + t0guess;
       gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
       gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
       gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
@@ -175,18 +159,18 @@ Int_t StTpcT0Maker::Make(){
   tcl->AllOn();
   if (t0result->GetEntries()>=desiredEntries){
     gMessMgr->Info() << "StTpcT0Maker::Sufficient Statistics, Ending Chain" << endm;
-//   if (t0result->GetEntries()>minEntries){
-//     if (t0result->GetRMS()<maxRMS){
-//      WriteTableToFile();
-//     }
-//     else{
-//       gMessMgr->Error() << "StTpcT0Maker::t0 unstable. RMS = " << t0result->GetRMS() << " micro-seconds. No table will be written" << endm;
-//     }
-//   }
-//   else {
-//    gMessMgr->Error() << "StTpcT0Maker::Insufficient statistics for velocity determination.  Only " << t0result->GetEntries() << " entries. No table will be written" << endm;
-//   }
-//   minEntries = 9999;
+  if (t0result->GetEntries()>minEntries){
+    if (t0result->GetRMS()<maxRMS){
+     WriteTableToFile();
+    }
+    else{
+      gMessMgr->Error() << "StTpcT0Maker::t0 unstable. RMS = " << t0result->GetRMS() << " micro-seconds. No table will be written" << endm;
+    }
+  }
+  else {
+   gMessMgr->Error() << "StTpcT0Maker::Insufficient statistics for velocity determination.  Only " << t0result->GetEntries() << " entries. No table will be written" << endm;
+  }
+  minEntries = 9999;
     return kStEOF;
   }
   return kStOK;
@@ -194,7 +178,7 @@ Int_t StTpcT0Maker::Make(){
 
 
 Int_t StTpcT0Maker::Finish() {
-  if (t0result->GetEntries()>=minEntries){
+  if (t0result->GetEntries()>minEntries){
     if (t0result->GetRMS()<maxRMS){
      WriteTableToFile();
     }
@@ -213,7 +197,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.5 2000/09/11 17:48:50 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.4 2000/09/01 21:24:28 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -237,7 +221,7 @@ void StTpcT0Maker::WriteTableToFile(){
 }
 
  St_tpcDriftVelocity* StTpcT0Maker::driftTable(){
-   float velocity = length_assumed/(AverageT0() + trigger_assumed);
+   float velocity = theDb->Dimensions()->outerEffectiveDriftDistance()/(AverageT0() + theDb->triggerTimeOffset()*1e6); //velocity in cm/us
   St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
   tpcDriftVelocity_st* row = table->GetTable();
   row->cathodeDriftVelocityEast = velocity;
@@ -256,8 +240,7 @@ void StTpcT0Maker::WriteHistFile(){
 
 float StTpcT0Maker::AverageT0(){float mean = t0result->GetMean();return mean;}
 void StTpcT0Maker::SetMinEntries(int entries){minEntries = entries; }
-void StTpcT0Maker::SetDesiredEntries(int entries){desiredEntries = entries;
-if (minEntries>desiredEntries) minEntries = desiredEntries; }
+void StTpcT0Maker::SetDesiredEntries(int entries){desiredEntries = entries; }
 void StTpcT0Maker::SetMaxRMS(float rms){maxRMS = rms;}
 int  StTpcT0Maker::GetValidityDate(){return date;}
 int  StTpcT0Maker::GetValidityTime(){return time;}

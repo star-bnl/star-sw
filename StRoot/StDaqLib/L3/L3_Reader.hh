@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.5 2000/09/11 16:31:39 struck Exp $
+ * $Id: L3_Reader.hh,v 1.4 2000/07/26 02:12:28 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -12,14 +12,10 @@
  * change log:
  *   06 Jun 00 CS initial version
  *   25 Jul 00 CS added i960 cluster reader
- *   11 Sep 00 CS removed memory leak in L3_Reader
  *
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
- * Revision 1.5  2000/09/11 16:31:39  struck
- * removed memory leak in L3_Reader
- *
  * Revision 1.4  2000/07/26 02:12:28  struck
  * added i960 cluster reader
  *
@@ -64,8 +60,6 @@ class L3_Reader;
 #define L3secERROR(x, text, s) {errnum = x; sprintf(errstr0,"ERROR: "text" in sector %d, %s::%d",s,__FILE__,__LINE__); }
 #define pL3secERROR(x, text, s) {l3->errnum = x; sprintf(l3->errstr0,"ERROR: "text" in sector %d, %s::%d",s,__FILE__,__LINE__); }
 
-#define maxClusterPerSector 100000
-
 // -------------- GlobalTrackReader ------------------------
 
 class GlobalTrackReader {
@@ -100,9 +94,9 @@ public:
   l3_cluster *getClusterList () { return cluster; }
   int getNumberOfClusters () { return nCluster; }
 
-  int initialize (int sector);
+  int initialize ();
 
-  Sl3ClusterReader (L3_Reader *l3r);
+  Sl3ClusterReader (int sector, L3_Reader *l3r);
   ~Sl3ClusterReader () {};
 
 private:
@@ -127,9 +121,8 @@ public:
   int getParameterSetId () {return paraSet; }
   vertex getVertex () { return locVertex; }
 
-  int initialize (int sector);
-
-  Sl3TrackReader (L3_Reader *l3r);
+  int initialize ();
+  Sl3TrackReader (int sector, L3_Reader *l3r);
   ~Sl3TrackReader () {};
 
 private:
@@ -156,8 +149,8 @@ public:
   l3_cluster *getClusterList () { return cluster; }
   int getNumberOfClusters () { return nCluster; }
 
-  int initialize (int sector);
-  I960ClusterReader (L3_Reader *l3r);
+  int initialize ();
+  I960ClusterReader (int sector, L3_Reader *l3r);
   ~I960ClusterReader ();
 
 private:
@@ -177,7 +170,7 @@ class L3_Reader {
 
 public:
   L3_Reader(EventReader *er, Bank_L3_P *pL3P);
-  ~L3_Reader();
+  ~L3_Reader(){};
 
   Bank_L3_P     *getL3_P () { return pBankL3P; };
   Bank_L3_GTD   *getL3_GTD ();
@@ -202,21 +195,14 @@ public:
 protected:
   // bank pointer, only pBankL3P is set by the constructor
   // the sector banks point to the last sector which was asked for
-  Bank_L3_P     *pBankL3P;
-  Bank_L3_GTD   *pBankL3GTD;
-  Bank_L3_SECP  *pBankL3SECP;
+  Bank_L3_P *pBankL3P;
+  Bank_L3_GTD *pBankL3GTD;
+  Bank_L3_SECP *pBankL3SECP;
   Bank_L3_SECCD *pBankL3SECCD;
   Bank_L3_SECTP *pBankL3SECTP;
   Bank_TPCSECLP *pBankTPCSECLP;
   Bank_TPCRBCLP *pBankTPCRBCLP;
   Bank_TPCMZCLD *pBankTPCMZCLD;
-
-private:
-  GlobalTrackReader *gtr;
-  Sl3ClusterReader  *scr;
-  Sl3TrackReader    *str;
-  I960ClusterReader *icr;
-
 };
 
 

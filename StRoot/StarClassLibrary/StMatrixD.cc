@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.4 2000/09/25 20:22:56 ullrich Exp $
+ * $Id: StMatrixD.cc,v 1.3 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
- * Revision 1.4  2000/09/25 20:22:56  ullrich
- * Removed inheritance from TObject.
+ * Revision 1.3  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
  *
  * Revision 1.3  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
@@ -34,7 +34,6 @@
 #include <math.h>
 
 #ifdef __ROOT__
-#include "TBuffer.h"
 ClassImp(StMatrixD)
 #endif
 
@@ -1097,6 +1096,7 @@ void StMatrixD::Streamer(TBuffer& R__b)
 {
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      TObject::Streamer(R__b);
       if (mElement) delete [] mElement;
       mElement = 0;
       R__b.ReadArray(mElement);  // allocates memory if mElement = 0
@@ -1105,6 +1105,7 @@ void StMatrixD::Streamer(TBuffer& R__b)
       R__b >> mSize;
    } else {
       R__b.WriteVersion(StMatrixD::IsA());
+      TObject::Streamer(R__b);
       R__b.WriteArray(mElement, mSize);
       R__b << mRow;
       R__b << mCol;

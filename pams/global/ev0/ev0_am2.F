@@ -123,7 +123,7 @@ C     Only write tracks that have more than a certain number of hits in a detect
              trak(nok).z0   = globtrk(i).z0
              trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
              trak(nok).tanl= globtrk(i).tanl
-             trak(nok).rc = 1./abs(C_D_CURVATURE*bfield(3)*10.
+             trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
      +            *globtrk(i).invpt)
              trak(nok).q  = float(globtrk(i).icharge)
              call ev0_circle_param(trak(nok).r0,xc,

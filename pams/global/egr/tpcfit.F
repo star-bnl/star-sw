@@ -48,7 +48,7 @@ C* covar - covariance matrix
 
       REAL xfirst,yfirst,zfirst,xlast,ylast,zlast,rfirst,xpar,ypar
       REAL x,y,z,xer,yer,zer,phi,psi,lambda,psii,psif,psir,parmass
-      REAL tanl,cosl
+      REAL tanl,cosl,q
       REAL r,x0,y0,dpsi,twopi
       REAL TRKGEN(6),TRKREF(6),TPC(6,MXPNT),TPCCH2(MXPNT),TRKTPC(23)
       INTEGER ihitseq(mxpnt)
@@ -58,7 +58,6 @@ C* covar - covariance matrix
       LOGICAL good_hit(*)
 
       real a,b
-      real csign
 
       XYZ(1) = 0.0
       XYZ(2) = 0.0
@@ -117,7 +116,7 @@ C parameters at beginning of track
       y = yfirst
       z = zfirst
       rfirst = sqrt(x**2+y**2) 
-      csign = bfield(3)*param(5) ! b_z * charge
+      q = sign(1.0,param(5)) ! charge
 
       phi = param(1)
       xpar = param(6)*cos(param(1)) ! x of parameters
@@ -125,8 +124,8 @@ C parameters at beginning of track
 
       tanl = param(4)
 
-      psi = param(3)+sign(1.0,csign)*C_PI_2 !mangled psi
-      r = 1.0/abs(C_D_CURVATURE*csign)
+      psi = param(3)+sign(1.0,param(5))*C_PI_2 !mangled psi
+      r = 1.0/(C_D_CURVATURE*bfield(3)*abs(param(5)))
 
       x0 = xpar - r*cos(psi)
       y0 = ypar - r*sin(psi)
@@ -149,7 +148,7 @@ C convert to 0-2pi
         dpsi = psif-psii
 C -- put dpsi in 0-2pi range
         dpsi = amod(dpsi,real(C_2PI))
-        psir = psi+dpsi - sign(1.0,csign)*C_PI_2
+        psir = psi+dpsi - sign(1.0,param(5))*C_PI_2
 C convert to 0-2pi
         psir = amod(psir,twopi)
         if(psir.lt.0)psir=psir+C_2PI
@@ -158,7 +157,7 @@ C convert to 0-2pi
         trkgen(5) = psir
 
 C -- check for rotation direction
-        if(csign.lt.0)then
+        if(q*bfield(3).lt.0)then
           if(dpsi.lt.0)then
             dpsi = (C_2PI+dpsi)
           endif
@@ -167,7 +166,7 @@ C -- check for rotation direction
             dpsi = -(C_2PI-dpsi)
           endif
         endif
-        trkgen(3) = param(2)-dpsi*sign(r,csign)*tanl ! z
+        trkgen(3) = param(2)-dpsi*r*sign(1.0,param(5))*tanl ! z
       endif ! if(abs(rfirst-param(6)).gt.0.1)
 
 C parameters at end of track
@@ -185,7 +184,7 @@ C convert to 0-2pi
       dpsi = psif-psii
 C -- put dpsi in 0-2pi range
       dpsi = amod(dpsi,real(C_2PI))
-      psir = psi+dpsi - sign(1.0,csign)*C_PI_2
+      psir = psi+dpsi - sign(1.0,param(5))*C_PI_2
 C convert to 0-2pi
       psir = amod(psir,twopi)
       if(psir.lt.0)psir=psir+C_2PI
@@ -195,7 +194,7 @@ C convert to 0-2pi
       trkref(6) = trkgen(6) ! q/pt
 
 C -- check for rotation direction
-      if(csign.lt.0)then
+      if(q*bfield(3).lt.0)then
         if(dpsi.lt.0)then
           dpsi = (C_2PI+dpsi)
         endif
@@ -205,7 +204,7 @@ C -- check for rotation direction
         endif
       endif
 
-      trkref(3) = trkgen(3)-dpsi*sign(r,csign)*tanl ! z
+      trkref(3) = trkgen(3)-dpsi*r*sign(1.0,param(5))*tanl ! z
 
       CALL TPCTRK(NEVT,NTRK,TRKGEN,TRKREF,NTPCUSED,TPC,TPCCH2,TRKTPC,IRET)
 C DEBUG
@@ -497,7 +496,6 @@ CCC         CH2SMO=1.E20
 *--
       REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23)
 *--
-      REAL PIx2xR
       REAL PR(5),P(5),C(15),V(2),CV(3),CINI(15)
 CCC      DATA CINI/1.E2 ,0.   ,0.   ,0.   ,0.   ,
 CCC     &                1.E1 ,0.   ,0.   ,0.   ,
@@ -625,9 +623,8 @@ CCC     &                                  1.E0 /
       TRKTPC( 1) = R
       CALL UCOPY(P(1),TRKTPC(2),5)
       CALL UCOPY(C(1),TRKTPC(7),15)
-      PIx2xR = 2.*PI*R
-      IF (TRKTPC(2).LT.0)      TRKTPC(2) = TRKTPC(2) + PIx2xR
-      IF (TRKTPC(2).GT.PIx2xR) TRKTPC(2) = TRKTPC(2) - PIx2xR
+      IF (TRKTPC(2).LT.0)       TRKTPC(2) = TRKTPC(2) + 2.*PI*R
+      IF (TRKTPC(2).GT.2.*PI*R) TRKTPC(2) = TRKTPC(2) - 2.*PI*R
 CCC      IF (TRKTPC(5).LT.0)       TRKTPC(5) = TRKTPC(5) + 2.*PI
 CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
       TRKTPC(22) = CH2TOT
@@ -694,7 +691,6 @@ CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
 *--
       REAL PR(5),P(5),C(15),V(2),CV(3),RES(2),PUL(2),CMS(15)
 *--
-      REAL PIxR
       REAL DER(5,5),HT(5,2)
       DATA HT/1.,0.,0.,0.,0.,
      &        0.,1.,0.,0.,0./
@@ -730,9 +726,8 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
         RETURN
       ENDIF
 *--
-      PIxR = PI * R
-      IF ((PR(1)-V(1)).GT.PIxR) V(1) = V(1) + 2. * PIxR
-      IF ((PR(1)-V(1)).LT.-PIxR) V(1) = V(1) - 2. * PIxR
+      IF ((PR(1)-V(1)).GT.( PI * R)) V(1) = V(1) + 2. * PI * R
+      IF ((PR(1)-V(1)).LT.(-PI * R)) V(1) = V(1) - 2. * PI * R
 *--
       CALL KTMEAS(2,V(1),CV(1),HT(1,1),IERR)
       IF (IERR.GT.0) THEN
@@ -797,27 +792,38 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
 *--
       CALL VZERO(C(1),15)
 *--
+CCC      IF(X.LE.0.0)RETURN
 
       COSL = SQRT(1./(1.+P(3)**2))
 
       BETM2 = 1. + (PMASS * P(5)/COSL)**2
-
+      rad = 1.0/(CONSB*abs(p(5)))
       dpsi = p(4)-pl(4)
 
+C -- check for rotation direction
+CCC      if(p(5)*CONSB.lt.0)then
+CCC        if(dpsi.lt.0)then
+CCC          dpsi = (C_2PI+dpsi)
+CCC        endif
+CCC      else
+CCC        if(dpsi.gt.0)then
+CCC           dpsi = -(C_2PI-dpsi)
+CCC        endif
+CCC      endif
+C -- put dpsi in 0-2pi range
+CCC      dpsi = amod(dpsi,real(C_2PI))
+CCC      pathl = abs(dpsi*rad/cosl)
       DXSQ = (R*cos(p(1)/R)-RL*cos(pl(1)/RL))**2
       DYSQ = (R*sin(p(1)/R)-RL*sin(pl(1)/RL))**2
       DZSQ = (p(2)-pl(2))**2
 
 *-- fraction of radiation length for P10
       XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
-
 *-- put in the material for inner field cage
       if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006/COSL
-*-- put in the material for beam pipe
-      if((rl.gt.4.0).and.(r.lt.4.0))then
-        if(abs(p(2)).lt.76.0)XLTRUE = XLTRUE + 0.003/COSL ! Beryllium
-        if(abs(p(2)).ge.76.0)XLTRUE = XLTRUE + 0.0739/COSL ! Iron
-      endif
+CCC      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006
+CCC      XLTRUE = pathl/11600.
+
       IF (XLTRUE.GT.1E-8) THEN
          CORR = 1. + 0.11111111 * ALOG10(XLTRUE)
       ELSE
@@ -829,9 +835,14 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
       C(1)  = 0.3333*(R-RL)**2*thplsq ! r*phi term 
 
       C(6)  = 0.3333*(DXSQ+DYSQ)*thplsq ! z term
+CCC      C(10) = thplsq ! atan(tanl) term
+CCC      C(10) = thplsq/cosl**2 ! tanl term
       C(10) = thplsq/cosl**4 ! tanl term
       C(13) = thplsq ! psi term
 *-- track radius
+CCC      tanl = tan(C_PI_2-p(3))
+CCC      tanl = p(3)
+CCC      cosl = sqrt(1./(1.+tanl**2))
       
       drorsq = 0.3333*thplsq*dpsi**2 
       C(15) = drorsq*p(5)**2 ! q/pt term

@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichTrackFilter.h,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichTrackFilter.h,v 2.0 2000/08/09 16:26:22 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.h,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.0  2000/08/09 16:26:22  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
  *  Revision 1.2  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
@@ -20,7 +19,6 @@
 #define STRICHTRACKFILTER_H
 
 #include "StThreeVector.hh"
-#include "StThreeVectorF.hh"
 
 class StRichTrack;
 class StRichGeometryDb;
@@ -37,8 +35,8 @@ public:
   void setMomentum(double);
   void setImpactParameter(double);
   void setNTPCPoints(int);
-  void setVertex(StThreeVectorF&);
-
+  void setChi2(double);
+  void setZVertex(double);
 protected:
 
 private:
@@ -48,13 +46,20 @@ private:
   StRichGeometryDb* myGeometryDb;
   
   double  mAngleOfIncidence;
-  int     mNumberOfTPCFitPoints;
-  double  mDCA;
-  double  mEtaCut;
-  double  mMinNTPCFitPoints;
-  StThreeVectorF  mMomentum;
-  StThreeVectorF  mMIP;
-  StThreeVectorF  mVertex;
+  int     mNumberOfTPCHits;  
+  double  mChiSqr;
+  double  mImpactParameter;
+  double  mMinNTPCHits;
+  double  mPrimaryTrackSigma;
+
+  double  mZVertex;
+  StThreeVector<double>  mMomentum;
+  StThreeVector<double>  mMIP;
+  
+  double mChi2Cut;
+  double mNTPCPoints;
+  double mImpactPar;
+  double mMomCut;
   double mFlag;
 
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.14 2000/08/31 22:31:30 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.13 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,13 +13,6 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
- * Revision 1.14  2000/08/31 22:31:30  laue
- * StHbtAnalysis: output changed (a little bit less)
- * StHbtEvent: new version, members for reference mult added
- * StHbtIOBinary: new IO for new StHbtEvent version
- * StHbtTypes: TTree typedef to StHbtTTree added
- * StHbtVertexAnalysis: overflow and underflow added
- *
  * Revision 1.13  2000/08/11 16:35:41  rcwells
  * Added number of events processed to each HBT analysis
  *
@@ -143,15 +136,15 @@ public:
   virtual StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
 
   virtual void ProcessEvent(const StHbtEvent*);
-  virtual void EventBegin(const StHbtEvent*); // startup for EbyE
-  virtual void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+  void EventBegin(const StHbtEvent*); //startup for EbyE
+  void EventEnd(const StHbtEvent*);   // cleanup for EbyE
   int GetNeventsProcessed();
 
   virtual void Finish();
 
   friend class StHbtLikeSignAnalysis;
 
-protected:
+private:
 
   void AddEventProcessed();
 

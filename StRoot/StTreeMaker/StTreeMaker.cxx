@@ -177,7 +177,7 @@ Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
     SetOutputAll(br,lv);
 //		copy StEVTHddr (RunEvent)
     if (!hddr) 		continue;
-    StEvtHddr *runevt = (StEvtHddr*)br->FindByName("RunEvent");
+    StEvtHddr *runevt = (StEvtHddr*)br->FindObject("RunEvent");
     if (!runevt)	continue;
     *hddr = *runevt;
 //

@@ -1,10 +1,7 @@
 *
-* $Id: ertrak.F,v 1.2 2000/09/28 00:36:20 fisyak Exp $
+* $Id: ertrak.F,v 1.1 1999/12/07 15:44:30 fisyak Exp $
 *
 * $Log: ertrak.F,v $
-* Revision 1.2  2000/09/28 00:36:20  fisyak
-* Use g77 on linux instead of pgf77
-*
 * Revision 1.1  1999/12/07 15:44:30  fisyak
 * Add geane, new TGeant3 from Alice
 *
@@ -86,7 +83,7 @@
       LEPLAN = IOPTP.NE.0
       LEVOLU = IOPTV.NE.0
       LEPOIN = IOPTX.NE.0
-*yf      LEVMIX = IOPTM.NE.0
+      LEVMIX = IOPTM.NE.0
 *
 * *** Check consistency of the Ch-options
 *

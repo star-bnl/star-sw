@@ -11,8 +11,9 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/disk00001/star/P00hk/log/daq";
-my $dir_sum      = "/star/rcf/disk00001/star/P00hk/sum/daq";   
+my $mdir_log      = "/star/rcf/disk00001/star/P00hf/log/";
+my $mdir_sum      = "/star/rcf/disk00001/star/P00hf/sum/"; 
+my @dir_ext      = ("daq","tfs");  
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -26,6 +27,8 @@ my $file_sum;
 my $dir_lg       = "../log";
 my $name_log;
 my $f_flag = 0;
+my $dir_log;
+my $dir_sum;
 my $size;
 my $mTime;
 my $flname;
@@ -35,6 +38,11 @@ my $fullname;
 
 #=========================================================
 my $ii =0;
+
+#for ($ii =0; $ii<2; $ii++) {
+ $ii = 0;
+$dir_log = $mdir_log . $dir_ext[$ii];
+$dir_sum = $mdir_sum . $dir_ext[$ii];
 
 
 struct FileAttr => {
@@ -71,7 +79,7 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 7200){
-		    if ($msize < 25000 )  {
+		    if ($msize < 5000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;

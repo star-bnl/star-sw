@@ -1,16 +1,5 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.14 2000/11/20 11:39:12 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.11 2000/08/03 14:39:00 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
-// Revision 1.14  2000/11/20 11:39:12  jcs
-// remove remaining traces of fspar table
-//
-// Revision 1.13  2000/11/14 13:08:16  hummler
-// add charge step calculation, minor cleanup
-//
-// Revision 1.12  2000/09/18 14:26:46  hummler
-// expand StFtpcParamReader to supply data for slow simulator as well
-// introduce StFtpcGeantReader to separate g2t tables from simulator code
-// implement StFtpcGeantReader in StFtpcFastSimu
-//
 // Revision 1.11  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -53,8 +42,6 @@
 
 #include "StFtpcClusterMaker.h"
 #include "StFtpcParamReader.hh"
-#include "StFtpcGeantReader.hh"
-#include "StFtpcChargeStep.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcFastSimu.hh"
@@ -91,6 +78,7 @@ StMaker(name),
     m_padtrans(0),
     m_det(0),
     m_zrow(0),
+    m_fspar(0),
     m_gaspar(0)
 {
   drawinit=kFALSE;
@@ -114,7 +102,6 @@ Int_t StFtpcClusterMaker::Init(){
   m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
 
 // 		Create Histograms
-m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
 //m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
 //m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
 //m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
@@ -171,14 +158,6 @@ Int_t StFtpcClusterMaker::Make()
 
       TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);
 
-      StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
-						    ftpcReader, 
-						    paramReader);
-      // uncomment to recalculate normalized pressure from charge step:
-      step->histogram(1);
-      // uncomment to fill charge step histogram only:
-      //      step->histogram(0);
-
       if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
             
       StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
@@ -211,7 +190,6 @@ Int_t StFtpcClusterMaker::Make()
 	  
 	}
       delete fcl;
-      delete step;
       delete ftpcReader;
     }
     else {
@@ -229,11 +207,7 @@ Int_t StFtpcClusterMaker::Make()
     St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex *) geant("g2t_vertex");
     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
     St_g2t_ftp_hit *g2t_ftp_hit = (St_g2t_ftp_hit *) geant("g2t_ftp_hit");
-    if (g2t_vertex && g2t_track && g2t_ftp_hit){
-      StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
-							     g2t_track,
-							     g2t_ftp_hit);
-
+    if (g2t_track && g2t_ftp_hit){
       St_ffs_gepoint *ffs_gepoint = new St_ffs_gepoint("ffs_gepoint",150000);
       m_DataSet->Add(ffs_gepoint);
       St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",150000);
@@ -241,25 +215,31 @@ Int_t StFtpcClusterMaker::Make()
       
       if(Debug()) cout<<"NO RAW DATA AVAILABLE - start running StFtpcFastSimu"<<endl;
       
+      Int_t numHit=g2t_ftp_hit->GetNRows();
+      Int_t numTrack=g2t_track->GetNRows();
       Int_t numGepoint=ffs_gepoint->GetNRows();
       Int_t maxGepoint=ffs_gepoint->GetTableSize();
       Int_t numFppoint=fcl_fppoint->GetNRows();
       Int_t maxFppoint=fcl_fppoint->GetTableSize();
-      StFtpcFastSimu *ffs = new StFtpcFastSimu(ffs_gepoint->GetTable(),
+      StFtpcFastSimu *ffs = new StFtpcFastSimu(g2t_ftp_hit->GetTable(), 
+					       &numHit,
+					       g2t_track->GetTable(), 
+					       &numTrack,
+					       g2t_vertex->GetTable(),
+					       ffs_gepoint->GetTable(),
 					       &numGepoint, maxGepoint,
 					       fcl_fppoint->GetTable(),
 					       &numFppoint, maxFppoint,
-					       geantReader,
 					       paramReader);
       ffs_gepoint->SetNRows(numGepoint);				      
       fcl_fppoint->SetNRows(numFppoint);				      
       if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;
       delete ffs;
-      delete geantReader;
     }
   }
   
   delete paramReader;
+
 // Deactivate histograms for MDC3
 //MakeHistograms(); // FTPC cluster finder histograms
   return iMake;

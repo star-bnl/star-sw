@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.hh,v 1.3 2000/09/25 20:21:08 ullrich Exp $
+ * $Id: StHelixD.hh,v 1.2 1999/03/02 19:47:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.hh,v $
- * Revision 1.3  2000/09/25 20:21:08  ullrich
- * Includes updated.
+ * Revision 1.2  1999/03/02 19:47:43  ullrich
+ * Added method to find dca between two helices
  *
  * Revision 1.2  1999/03/02 19:47:43  ullrich
  * Added method to find dca between two helices
@@ -36,7 +36,6 @@
 
 #include <math.h>
 #include "StThreeVectorD.hh"
-#include "TObject.h"
 
 struct pairD 
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.23 2000/09/13 17:02:09 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.22 2000/08/28 22:19:10 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
- * Revision 1.23  2000/09/13 17:02:09  perev
- * add delete of L3Reader in close
- *
  * Revision 1.22  2000/08/28 22:19:10  ward
  * Skip corrupted events. StDaqLib/GENERIC/EventReader.cxx & StDAQMaker/StDAQReader.cxx.
  *
@@ -145,7 +142,7 @@ int StDAQReader::close()
   if(fTPCReader) 	fTPCReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
-  delete fL3Reader; 	fL3Reader  = 0;  
+//if (fL3Reader) 	fL3Reader  ->close();  
   fOffset = -1;
   return 0;
 }

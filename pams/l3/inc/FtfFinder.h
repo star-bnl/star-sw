@@ -8,7 +8,6 @@
 //:                           FtfContainer
 //:             11feb2000 ppy timeout added, variables initialCpuTime and
 //:                           initialRealTime added
-//:             30oct2000 ppy ClassDef commented out
 //:<------------------------------------------------------------------
 
 #ifndef FTFFINDER
@@ -24,7 +23,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 
@@ -67,7 +66,7 @@ private:
 
    FtfTrack      *currentTrack ;
 
-// ClassDef(FtfFinder,1)
+   ClassDef(FtfFinder,1)
 
     
 } ;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 2.1 2000/09/29 18:59:33 lasiuk Exp $
+ * $Id: StRchMaker.h,v 2.0 2000/08/09 16:22:11 gans Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,10 +9,8 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 2.1  2000/09/29 18:59:33  lasiuk
- * addition of software monitor
- * write flags in persistent hit (reservedLong)
- * Histodefintions
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
  * Revision 2.0  2000/08/09 16:22:11  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
@@ -53,7 +51,7 @@
 #endif
 
 #define rCH_DEBUG 1
-#define rCH_HISTOGRAM 1
+#define rCH_HISTOGRAM
 
 #include "StRichDisplayActivate.h"
 
@@ -63,7 +61,6 @@
 using std::vector;
 #endif
 #endif
-
 #ifdef RCH_HISTOGRAM
 #include "TFile.h"
 #include "TH1.h"
@@ -154,8 +151,8 @@ private:
     TNtuple* mClusters;//!
     TNtuple* mHits;//!
     float mRawData[4];    //!
-    float mCluster[6];//!
-    float mHit[10];//!
+    float mCluster[5];//!
+    float mHit[3];//!
     
     TH1F* mcc;//!
     TH1F* mmc;//!
@@ -168,11 +165,10 @@ private:
     TH1F* mhmc;//!
     TH1F* mhc2m;//!
 #endif
-virtual const char *GetCVS() const	{
-    static const char cvs[]=
-	"Tag $Name:  $ $Id: StRchMaker.h,v 2.1 2000/09/29 18:59:33 lasiuk Exp $ built "__DATE__" "__TIME__ ;
-    return cvs;
-}
+    virtual const char *GetCVS() const	{
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 2.0 2000/08/09 16:22:11 gans Exp $ built "__DATE__" "__TIME__ ;
+	return cvs;
+    }
 public:
     virtual void SetMode(Int_t mode=0) {
 	m_Mode = mode;

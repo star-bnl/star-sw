@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.73 2000/09/12 20:56:16 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.71 2000/08/29 19:26:00 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -394,8 +394,8 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
    mDateTimeLabel->SetLabel(buffer);
 #endif
    Int_t date  = GetDate();
-   Int_t year  = date/10000;
-   Int_t day   = (date - year*10000);
+   Int_t year  = date/1000;
+   Int_t day   = (date - year*1000);
    Int_t month = day/100;
    day         = day  - month*100;
 
@@ -461,15 +461,6 @@ Int_t StEventDisplayMaker::Make()
            ((TTable *)dstracks)->Print(0,1);
          }
 #else
-       printf(" Note: To get tracks colored with de/dx the dst_dedx table should be provided\n");
-       printf("       as follows:\n\n");
-       printf("       ds->AddName(\"dst/dst_dedx(id_track)\");\n\n");
-       printf(" where: <ds> is a pointer to StEventDisplayMaker\n");
-       printf(" The method above can be invboke via TBrowser context-menu\n");
-
-
-       
-#ifdef dedx_default
         const char *dedx2Refs = "dst/dst_dedx";
         TDataSet *dedx  = GetDataSet(dedx2Refs);
         {
@@ -479,7 +470,7 @@ Int_t StEventDisplayMaker::Make()
              ((TTable *)dedx)->Print(0,5);   
            }
         }
-#endif
+
         TDataSet *dshits = GetDataSet("dst/point");
         // if (dshits)   
         {
@@ -818,12 +809,6 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
-// Revision 1.73  2000/09/12 20:56:16  fine
-// typo fixed
-//
-// Revision 1.72  2000/09/06 21:57:52  fine
-// Dynamic color axis
-//
 // Revision 1.71  2000/08/29 19:26:00  fine
 // New method to add/remove volumes and tables
 //

@@ -12,11 +12,6 @@
    struct fss_param {    
       long  random_number_gen      ;
       long adc_threshold           ;/* D=      5   minimum ADC value */
-      long n_grid_points           ;/* D=   4000   drift simu grid points */
-      long max_adc                 ;/* D=    255   maximum ADC value */
-      long n_int_steps             ;/* D=     21   gauss integration steps */
-      long diff_coarse             ;/* D=     10   diffusion coarseness */
-      float adc_conversion          ;/* D=   1000.0 electrons/adc value */
       float chamber_r_min           ;/* D=      8.0  inner radius [cm]    */
       float chamber_r_max           ;/* D=     32.0  outer radius [cm]    */
       float chamber_phi_min         ;/* D=      0.0  min. phi [deg]    */ 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.hh,v 1.2 2000/10/02 13:48:10 caines Exp $
+ * $Id: StSvtInverseProducts.hh,v 1.1 2000/06/15 20:04:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.hh,v $
- * Revision 1.2  2000/10/02 13:48:10  caines
- * Adjusting donw hybrid by hybrid
- *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -31,8 +28,8 @@ public:
    ~StSvtInverseProducts();
 
    void SetHybridPointer(StSvtHybridData* hybData);
-   void FillProbTable(ifstream & iFile, int TotalNumberOfHybrids);
-   void FindInvProducts(int HybIndex, int PedOffSet, int Anode);
+   void FillProbTable(ifstream & iFile);
+   void FindInvProducts(int PedOffSet, int Anode);
 
    double GetBuffer(int timBin);
    void ResetBuffer();
@@ -41,7 +38,7 @@ public:
 
   StSvtHybridData* mHybridData;    //!      
   double mBuffer[128];      
-  double **mProbTable; 
+  double mProbTable[14]; 
 };
 
 #endif

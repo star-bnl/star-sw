@@ -14,7 +14,7 @@ my $LIBS  = $env->{LIBS};
 my @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my @Deps = ();
 (my $llib = $LIB) =~ s/\#//; #print "llib = $llib\n";
-my $pwd = Cwd::cwd(); #print "pwd = $pwd\n";
+my $pwd = cwd(); #print "pwd = $pwd\n";
 foreach my $pkg (@pkgs) {
     my $lib = "-l" . $pkg . "_Tables"; $LIBS .= " " . $lib;
   $lib = $LIB . "/lib" . $pkg . "_Tables." . $env->{SUFSOLIB};			 
@@ -29,7 +29,7 @@ my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};#print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 printf ("Run Conscript          in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 Depends $env3 $SO_PKG, @Deps;
-script::Keep $SO_PKG;
+Keep $SO_PKG;
 LinkedModule $env3 $SO_PKG;
 Install $env3 $LIB, $SO_PKG;
 #

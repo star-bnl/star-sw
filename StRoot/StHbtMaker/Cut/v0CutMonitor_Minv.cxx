@@ -8,20 +8,11 @@ ClassImp(v0CutMonitor_Minv)
 #endif
 
 v0CutMonitor_Minv::v0CutMonitor_Minv(){
-  mHistoK0Short = new StHbt1DHisto("K0ShortMinv","invariant mass (GeV/c)",200,0.,1.);
+  mHistoK0Short = new StHbt1DHisto("K0Short Minv","invariant mass (GeV/c)",200,0.,1.);
   mHistoK0Short->SetDirectory(0);
-  mHistoLambda = new StHbt1DHisto("LambdaMinv","invariant mass (GeV/c)",200,0.5,1.5);
+  mHistoLambda = new StHbt1DHisto("Lambda Minv","invariant mass (GeV/c)",200,0.5,1.5);
   mHistoLambda->SetDirectory(0);
-  mHistoAntiLambda = new StHbt1DHisto("AntiLambdaMinv","invariant mass (GeV/c)",200,0.5,1.5);
-  mHistoAntiLambda->SetDirectory(0);
-}
-//------------------------------
-v0CutMonitor_Minv::v0CutMonitor_Minv(const char* Titlek0,const char* Titlela,const char* Titlelab){
-  mHistoK0Short = new StHbt1DHisto(Titlek0,"invariant mass (GeV/c)",200,0.,1.);
-  mHistoK0Short->SetDirectory(0);
-  mHistoLambda = new StHbt1DHisto(Titlela,"invariant mass (GeV/c)",200,0.5,1.5);
-  mHistoLambda->SetDirectory(0);
-  mHistoAntiLambda = new StHbt1DHisto(Titlelab,"invariant mass (GeV/c)",200,0.5,1.5);
+  mHistoAntiLambda = new StHbt1DHisto("AntiLambda Minv","invariant mass (GeV/c)",200,0.5,1.5);
   mHistoAntiLambda->SetDirectory(0);
 }
 //------------------------------

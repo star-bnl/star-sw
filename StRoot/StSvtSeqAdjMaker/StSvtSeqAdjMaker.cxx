@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.12 2000/10/31 16:21:59 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.9 2000/08/28 22:11:38 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,15 +9,6 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
- * Revision 1.12  2000/10/31 16:21:59  caines
- * Set up defaults for paramters in init
- *
- * Revision 1.11  2000/10/02 13:48:10  caines
- * Adjusting donw hybrid by hybrid
- *
- * Revision 1.10  2000/09/14 22:13:56  caines
- * Move histogram creation to better place
- *
  * Revision 1.9  2000/08/28 22:11:38  caines
  * Fixed check that data exists before using it
  *
@@ -81,19 +72,6 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mInvProd = NULL;
   tempSeq1 = new StSequence[128];
 
-
-  // Set up some defaults
-
-  mProbFile = "prob2.dat";
-  mPedFile = "Ped_st_physics_1183020_raw_1.root";
-  mPedOffSet = 100;
-  m_thresh_lo = 101;
-  m_thresh_hi = 105; 
-  m_n_seq_lo  = 2;
-  m_n_seq_hi  = 0;
-  m_inv_prod_lo = 8;
-
-
 }
 
 //____________________________________________________________________________________________
@@ -138,7 +116,7 @@ Int_t StSvtSeqAdjMaker::Init()
 
   inseqfile.open(mProbFile,ios::in);
 
-  mInvProd->FillProbTable(inseqfile,mTotalNumberOfHybrids);
+  mInvProd->FillProbTable(inseqfile);
 
   inseqfile.close();
 
@@ -402,10 +380,9 @@ Int_t StSvtSeqAdjMaker::Make()
 	  
 	  for( int Anode= 0; Anode<mHybridToBeAdjData->getAnodeList(anolist); Anode++)
             {
-
+	      
 	      if( BadAnode){
 		if( BadAnode->IsBadAnode(anolist[Anode]-1)){
-
 		  
 		  // If anode is bad set sequences to zero
 		  int nSequence = 0;
@@ -414,14 +391,14 @@ Int_t StSvtSeqAdjMaker::Make()
 						       seq);
 		  continue;
 		}
-	      } 
-	      MakeHistogramsAdc(index,Anode,1);
+		MakeHistogramsAdc(index,Anode,1);
+	      }
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(Anode);
 	      
 	      //Perform E896 type zero-suppresion (look for non-noise like signals
 	      if(m_inv_prod_lo){
-		mInvProd->FindInvProducts(index,mPedOffSet,Anode);
+		mInvProd->FindInvProducts(mPedOffSet,Anode);
 		MakeHistogramsProb(index,Anode);
 		AdjustSequences2(Anode);
 

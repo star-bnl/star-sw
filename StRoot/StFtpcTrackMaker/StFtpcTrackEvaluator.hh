@@ -1,8 +1,5 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.4 2000/11/10 18:38:24 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.3 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
-// Revision 1.4  2000/11/10 18:38:24  oldi
-// Short tracks are treated now.
-//
 // Revision 1.3  2000/07/18 21:22:17  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -82,7 +79,6 @@ private:
                    Int_t  mLongTrackClusters;       // Number of clusters on long tracks
                    Int_t  mShortTracks;             // Number of tracks with less than 5 points
                    Int_t  mShortTrackClusters;      // Number of clusters on short tracks
-                   Int_t  mTooShortTracks;          // Number of tracks which should be longer
                    Int_t  mMaxClusters;             // Max. number of clusters on a track
 
             StFtpcVertex *mVertex;                  // pointer ro the main vertex
@@ -108,7 +104,6 @@ private:
                     TH1F *mNumLongTrackClusters;    // number of hits belonging to long tracks per event
                     TH1F *mNumShortTracks;          // number of tracks with less than 5 points per event
                     TH1F *mNumShortTrackClusters;   // number of hits belonging to short tracks per event
-                    TH1F *mNumTooShortTracks;       // number of tracks which should be longer
 
                     TH1F *mGHitsOnTrack;            // number of geant hits per track
                     TH1F *mFHitsOnTrack;            // number of found hits per track
@@ -263,7 +258,6 @@ public:
     Int_t   GetNumLongTrackClusters()   { return mLongTrackClusters;             }  // returns number of clusters on long tracks
     Int_t   GetNumShortTracks()         { return mShortTracks;                   }  // returns number of tracks with less than 5 points in the Ftpc
     Int_t   GetNumShortTrackClusters()  { return mShortTrackClusters;            }  // returns number of clusters on short tracks
-    Int_t   GetNumTooShortTracks()      { return mTooShortTracks;                }  // returns number of tracks which should be longer
     Int_t   GetMaxClusters()            { return mMaxClusters;                   }  // returns max. number of clusters on a track
 
   Int_t GetNumGoodGeantPoints() { return mGoodGeantPoints; }

@@ -22,7 +22,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 //
@@ -114,7 +114,7 @@
        int       hitDebug ;
        int       debugLevel ;
 #endif
-// ClassDef(FtfPara,1)
+   ClassDef(FtfPara,1)
    } ;
 #endif
 

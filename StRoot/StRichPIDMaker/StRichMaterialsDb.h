@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMaterialsDb.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.h,v $
- *  Revision 2.1  2000/09/29 01:35:36  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
  *  Revision 1.2  2000/05/19 19:06:10  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
@@ -28,13 +27,10 @@ public:
   
   // Interface
   // common to all materials
-  double meanWavelength();
-  double shortestWavelength();
-  double longestWavelength();
+  double meanWaveLength();
+  double shortestWaveLength();
+  double longestWaveLength();
   double meanRadiatorDepth();  
-  double innerWavelength();
-  double outerWavelength();
-  void   setWavelengthRange(double, double);
 
   // C6F14    
   double indexOfRefractionOfC6F14At(double wavelength);
@@ -62,33 +58,30 @@ private:
     static StRichMaterialsDb* p2Db;   // handle to only instance
 
     bool boundsCheck(double index);
-
+   
   double mVersion;
-  double mLongestWavelength;
-  double mShortestWavelength;
-  double mMeanWavelength;  
+  double mLongestWaveLength;
+  double mShortestWaveLength;
+  double mMeanWaveLength;  
   double mConversion;
-  double mInnerWave;
-  double mOuterWave;
-
 
   double mMeanRadiatorDepth;
-
+  
 
     ///////////    measured CERN data    /////////////
     /* index of refraction measured at 11 different wavelengths  169 -- 220 */
   //    static const int arraySize = 11;
-    double mC6F14IndexOfRefraction[13]; 
-    double mQuartzIndexOfRefraction[13];
+    double mC6F14IndexOfRefraction[11]; 
+    double mQuartzIndexOfRefraction[11];
     double mMethaneIndexOfRefraction; 
     
     /* photon absorption coefficient measured at 11 different wavelengths  169 -- 220 */
-    double mC6F14AbsCoeff[13]; 
-    double mQuartzAbsCoeff[13];
+    double mC6F14AbsCoeff[11]; 
+    double mQuartzAbsCoeff[11];
     double mMethaneAbsCoeff;
 
     /* CsI QE measured at 11 different wavelengths  169 -- 220 */
-    double mCsIQE[13];
+    double mCsIQE[11];
       
 };
 

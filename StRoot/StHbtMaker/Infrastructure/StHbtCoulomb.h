@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.h,v 1.12 2000/10/26 19:48:54 rcwells Exp $
+ * $Id: StHbtCoulomb.h,v 1.11 2000/08/02 01:25:12 lisa Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.h,v $
- * Revision 1.12  2000/10/26 19:48:54  rcwells
- * Added functionality for Coulomb correction of <qInv> in 3D correltions
- *
  * Revision 1.11  2000/08/02 01:25:12  lisa
  * Add Coulomb correction capability to 3D Bertsch-Pratt CorrFctn
  *
@@ -59,13 +56,10 @@ public:
   double CoulombCorrect(const double& eta, const double& radius);
   double CoulombCorrect(const StHbtPair* pair);
   double CoulombCorrect(const StHbtPair* pair, const double& radius);
-  double CoulombCorrect(const double& mass, const double& charge,
-		        const double& radius, const double& qInv);
   StHbt1DHisto* CorrectionHistogram(const double& mass1, const double& mass2, const int& nBins, 
 				    const double& low, const double& high);
 #ifdef __ROOT__
   StHbt1DHisto* CorrectionHistogram(const StHbt1DHisto*, const double);
-  StHbt3DHisto* CorrectionHistogram(const StHbt3DHisto*, const double);
 #endif
 private:
   double Eta(const StHbtPair* pair);                // Calculates eta

@@ -1,10 +1,7 @@
-// $Id: St_geant_Maker.h,v 1.25 2000/09/23 03:07:13 fine Exp $
+// $Id: St_geant_Maker.h,v 1.24 2000/03/26 02:43:22 fine Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.25  2000/09/23 03:07:13  fine
-// class TShape; statement introduced to fix a side aeffect of TDataSet clean up
-//
 // Revision 1.24  2000/03/26 02:43:22  fine
-//  adjusted to ROOT 2.24
+// adjusted to ROOT 2.24
 //
 // Revision 1.23  2000/02/07 18:58:38  fisyak
 // Set default NwGeant = 20 000 000 words
@@ -29,7 +26,6 @@ class TVolume;
 class TGeant3;
 class TRotMatrix;
 class TH1F;
-class TShape;
 
 class St_geant_Maker : public StMaker {
 protected:
@@ -109,7 +105,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.25 2000/09/23 03:07:13 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.24 2000/03/26 02:43:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

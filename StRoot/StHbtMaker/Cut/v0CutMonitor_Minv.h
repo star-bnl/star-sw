@@ -14,7 +14,6 @@ private:
 
 public:
   v0CutMonitor_Minv();
-  v0CutMonitor_Minv(const char* Titlek0,const char* Titlela,const char* Titlelab);
   v0CutMonitor_Minv(const char* TitCutMoni, const char* title, int nbins ,double min, double max);
   virtual ~v0CutMonitor_Minv();
 

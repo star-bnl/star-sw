@@ -1,8 +1,5 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.4 2000/11/10 18:34:31 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.3 2000/07/18 21:22:15 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
-// Revision 1.4  2000/11/10 18:34:31  oldi
-// New constructor added.
-//
 // Revision 1.3  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -48,7 +45,7 @@ ClassImp(StFtpcConfMapPoint)
 StFtpcConfMapPoint::StFtpcConfMapPoint() : StFtpcPoint()
 {
   // Default constructor.
-  // Sets additional values to zero.
+  // Sets additioanl values to zero.
   
   SetPhi(0.);
   SetEta(0.);
@@ -72,54 +69,6 @@ StFtpcConfMapPoint::StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *v
   // track algorithm. 
   
   Setup(vertex);
-}
-
-
-StFtpcConfMapPoint::StFtpcConfMapPoint(Long_t   row, 
-				       Long_t   sector, 
-				       Long_t   n_pads, 
-				       Long_t   n_bins, 
-				       Long_t   max_adc, 
-				       Long_t   charge, 
-				       Double_t x, 
-				       Double_t y, 
-				       Double_t z, 
-				       Double_t x_err, 
-				       Double_t y_err, 
-				       Double_t z_err, 
-				       Double_t s_phi, 
-				       Double_t s_r, 
-				       Long_t   flags) : StFtpcPoint(row, 
-								     sector, 
-								     n_pads, 
-								     n_bins, 
-								     max_adc, 
-								     charge, 
-								     x, 
-								     y, 
-								     z, 
-								     x_err, 
-								     y_err, 
-								     z_err, 
-								     s_phi, 
-								     s_r, 
-								     flags)
-{
-  // Constructor which takes its arguments directly from the cluster finder.
-  // Sets additional values to zero.
-
-  SetPhi(0.);
-  SetEta(0.);
-  
-  SetXprime(0.);
-  SetYprime(0.);
-  SetXprimeerr(0.);
-  SetYprimeerr(0.);
-  SetIntPoint(0., 0., 0., 0., 0., 0.);
-  SetShiftedCoord();
-  SetDist(0., 0.);
-
-  return;
 }
 
 

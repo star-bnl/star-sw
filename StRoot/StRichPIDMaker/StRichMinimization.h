@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichMinimization.h,v 2.3 2000/11/01 17:40:02 lasiuk Exp $
+ * $Id: StRichMinimization.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.h,v $
- *  Revision 2.3  2000/11/01 17:40:02  lasiuk
- *  use of SystemOfUnits for definition of degree
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
  *  Revision 2.2  2000/10/19 18:11:12  lasiuk
  *  definition of degree
@@ -17,41 +17,36 @@
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
+ *
+ *  
+#include "StThreeVector.hh"
  **********************************************************/
+
 #ifndef StRichMinimization_h
 #define StRichMinimization_h
 
-#include "StThreeVectorF.hh"
-
-#include "StRichTrack.h"
 #include "StRichRingPoint.h"
+#include "StThreeVectorF.hh"
+          StThreeVector<double> rotatedMin(StThreeVector<double>& point);
 
-class  StRichMinimization {
-
-public:
-    StRichMinimization(StRichRingPoint* rp);
-    ~StRichMinimization();
-    StThreeVectorF rotatedMin(StThreeVectorF& point);
-
-    double getPsi() const;
-    double getMeanPathInRadiator();
-    double getMeanPathInQuartz();
-
-private:
-    // minimization routine
-    double brent(double ax, double bx, double cx, double *xmin);
+  
+          StRichMinimization(StRichRingPoint* rp);
+          ~StRichMinimization();
+          StThreeVectorF rotatedMin(StThreeVectorF& point);
+          double getPsi();
+          double getMeanPathInRadiator();
+          double getMeanPathInQuartz();
 
 private:
-    // data members
-    StRichRingPoint* ringPoint;
-    double mMeanPathInRadiator;
-    double mMeanPathInQuartz;
-    double mTolerance;
-    double psi,returnPsi;
-    double minDistance;
-    bool status;
-    StThreeVectorF returnThisPoint;
+  
+  StThreeVector<double> returnThisPoint;
+  StRichRingPoint* ringPoint;
+  double psi,returnPsi;
+  double minDistance,mTolerance;
+  double mMeanPathInRadiator;
+  bool status;
+  StThreeVectorF returnThisPoint;
+    double degree;
 };
 
-inline double StRichMinimization::getPsi() const { return returnPsi;}
 #endif

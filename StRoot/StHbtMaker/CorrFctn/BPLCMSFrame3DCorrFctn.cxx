@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.4 2000/10/26 19:48:49 rcwells Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.2 2000/08/23 19:43:43 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,12 +11,6 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.cxx,v $
- * Revision 1.4  2000/10/26 19:48:49  rcwells
- * Added functionality for Coulomb correction of <qInv> in 3D correltions
- *
- * Revision 1.3  2000/09/14 18:36:53  lisa
- * Added Qinv and ExitSep pair cuts and BPLCMSFrame3DCorrFctn_SIM CorrFctn
- *
  * Revision 1.2  2000/08/23 19:43:43  lisa
  * added alternate normalization algorithm to 3d CorrFctns in case normal one fails
  *
@@ -44,8 +38,6 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
   mNumMixedNorm = 0;
   mCorrection = 0;  // pointer to Coulomb Correction object
 
-  mPairCut = 0; // added Sept2000 - CorrFctn-specific PairCut
-
   // set up numerator
   char TitNum[100] = "Num";
   strcat(TitNum,title);
@@ -58,10 +50,6 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
   char TitRat[100] = "Rat";
   strcat(TitRat,title);
   mRatio = new StHbt3DHisto(TitRat,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
-  // set up ave qInv
-  char TitQinv[100] = "Qinv";
-  strcat(TitQinv,title);
-  mQinvHisto = new StHbt3DHisto(TitQinv,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
 
   // to enable error bar calculation...
   mNumerator->Sumw2();
@@ -75,7 +63,6 @@ BPLCMSFrame3DCorrFctn::~BPLCMSFrame3DCorrFctn(){
   delete mNumerator;
   delete mDenominator;
   delete mRatio;
-  delete mQinvHisto;
 }
 //_________________________
 void BPLCMSFrame3DCorrFctn::Finish(){
@@ -97,7 +84,6 @@ void BPLCMSFrame3DCorrFctn::Finish(){
   }
 
   mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
-  mQinvHisto->Divide(mDenominator);
 }
 
 //____________________________
@@ -126,28 +112,12 @@ StHbtString BPLCMSFrame3DCorrFctn::Report(){
       sprintf(ctemp,"No Coulomb Correction applied to this CorrFctn\n");
     }
   stemp += ctemp;
-
-  if (mPairCut){
-    sprintf(ctemp,"Here is the PairCut specific to this CorrFctn\n");
-    stemp += ctemp;
-    stemp += mPairCut->Report();
-  }
-  else{
-    sprintf(ctemp,"No PairCut specific to this CorrFctn\n");
-    stemp += ctemp;
-  }
-
   //  
   StHbtString returnThis = stemp;
   return returnThis;
 }
 //____________________________
 void BPLCMSFrame3DCorrFctn::AddRealPair(const StHbtPair* pair){
-
-  if (mPairCut){
-    if (!(mPairCut->Pass(pair))) return;
-  }
-
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
   if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumRealsNorm++;
   double qOut = fabs(pair->qOutCMS());
@@ -158,11 +128,6 @@ void BPLCMSFrame3DCorrFctn::AddRealPair(const StHbtPair* pair){
 }
 //____________________________
 void BPLCMSFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
-
-  if (mPairCut){
-    if (!(mPairCut->Pass(pair))) return;
-  }
-
   double weight=1.0;
   if (mCorrection)
     {
@@ -175,7 +140,6 @@ void BPLCMSFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
   double qLong = fabs(pair->qLongCMS());
 
   mDenominator->Fill(qOut,qSide,qLong,weight);
-  mQinvHisto->Fill(qOut,qSide,qLong,Qinv);
 }
 
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.5 2000/08/31 18:58:19 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.4 2000/07/12 17:54:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,11 +13,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
-// Revision 1.5  2000/08/31 18:58:19  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
 // Revision 1.4  2000/07/12 17:54:34  posk
 // Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 // Apply cuts when reading picoevent file.
@@ -69,7 +64,6 @@ class StFlowCutEvent {
   static Bool_t CheckEtaSymmetry(StEvent* pEvent);
   static Bool_t CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent);
   static void   PrintCutList();
-  static void   SetCent(const Int_t lo, const Int_t hi);
   static void   SetMult(const Int_t lo, const Int_t hi);
   static void   SetVertexX(const Float_t lo, const Float_t hi);
   static void   SetVertexY(const Float_t lo, const Float_t hi);
@@ -81,9 +75,6 @@ class StFlowCutEvent {
   static UInt_t  mEventN;                // number of events
   static UInt_t  mGoodEventN;            // number of accepted events   
 						
-  static UInt_t  mCentCut;               // number of not accepted events
-  static Int_t   mCentCuts[2];           // range of multiplicity
-
   static UInt_t  mMultCut;               // number of not accepted events
   static Int_t   mMultCuts[2];           // range of multiplicity
 
@@ -101,9 +92,6 @@ class StFlowCutEvent {
 
   ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
-
-inline void StFlowCutEvent::SetCent(const Int_t lo, const Int_t hi) {
-  mCentCuts[0] = lo; mCentCuts[1] = hi; }
 
 inline void StFlowCutEvent::SetMult(const Int_t lo, const Int_t hi) {
   mMultCuts[0] = lo; mMultCuts[1] = hi; }

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.27 2000/09/15 21:21:00 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.26 2000/09/12 19:19:06 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,9 +23,6 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
- * Revision 1.27  2000/09/15 21:21:00  fisyak
- * No ulong on HP
- *
  * Revision 1.26  2000/09/12 19:19:06  ward
  * Fixed bug in bank name extraction, added SVTSECP SVTRBP to bank list.
  *
@@ -770,24 +767,24 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(*beg>=*end) assert(0);
   if((*end-*beg)%2!=1) assert(0);
 }
-void EventReader::Swap4(unsigned long *data) {
+void EventReader::Swap4(ulong *data) {
   char *hh,temp[4];
   hh=(char*)data;
   temp[0]=hh[3]; temp[1]=hh[2]; temp[2]=hh[1]; temp[3]=hh[0];
-  *data=*((unsigned long*)temp);
+  *data=*((ulong*)temp);
 }
 #define DATA 400 /* number of words */
 /* comment 12c  It is not a pointer bank.  We've already looked at the header, that's all we can do
 for a generic bank. */
 char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // Boolean value.
-  unsigned long header[10],data[DATA];
+  ulong header[10],data[DATA];
   char doTheByteSwap=FALSE,lastletter,bankname[25];
   int i,beg,end,numberOfDataWords,bytesRead;
 
 
   if(lseek(herbFd,currentOffset,SEEK_SET)!=currentOffset) return TRUE;
-  bytesRead=read(herbFd,header,10*sizeof(unsigned long));
-  if(bytesRead!=10*sizeof(unsigned long)) return TRUE;
+  bytesRead=read(herbFd,header,10*sizeof(ulong));
+  if(bytesRead!=10*sizeof(ulong)) return TRUE;
 
   strcpy(bankname,ConvertToString(header));
   // PP"BBB bankname = %s\n",bankname);
@@ -813,8 +810,8 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
     assert(end<numberOfDataWords);
   }
 
-  bytesRead=read(herbFd,data,numberOfDataWords*sizeof(unsigned long));
-  if(bytesRead!=numberOfDataWords*sizeof(unsigned long)) return TRUE;
+  bytesRead=read(herbFd,data,numberOfDataWords*sizeof(ulong));
+  if(bytesRead!=numberOfDataWords*sizeof(ulong)) return TRUE;
   if(doTheByteSwap) for(i=0;i<numberOfDataWords;i++) Swap4(data+i);
 
   if(!strcmp(bankname,"TPCMZP")) {

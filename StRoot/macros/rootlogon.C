@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.29 2000/10/27 11:53:10 fisyak Exp $
+// $Id: rootlogon.C,v 1.27 2000/08/27 17:46:41 fisyak Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -73,7 +73,7 @@
 	  ROOT_LEVEL.Data(),
 	  gSystem->HostName());
    gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
-   gSystem->SetIncludePath("-I. -I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/include");
+   gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
 #ifdef RFIO    
    {
      // Load rfio map

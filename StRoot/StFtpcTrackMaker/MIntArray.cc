@@ -1,9 +1,5 @@
-// $Id: MIntArray.cc,v 1.3 2000/11/10 18:32:36 oldi Exp $
+// $Id: MIntArray.cc,v 1.2 2000/07/18 21:22:14 oldi Exp $
 // $Log: MIntArray.cc,v $
-// Revision 1.3  2000/11/10 18:32:36  oldi
-// Introduced new function ShiftByOneAndAddAtFirst(Int_t value).
-// Cleanup.
-//
 // Revision 1.2  2000/07/18 21:22:14  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -19,7 +15,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 18.10.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "MIntArray.h"
@@ -47,21 +43,3 @@ MIntArray::~MIntArray()
   // Destructor.
   // Has nothing to do.
 }
-
-
-void MIntArray::ShiftByOneAndAddAtFirst(Int_t value)
-{
-  // Shifts every array element in the next slot and adds the value in the first slot.
-  
-  Set(GetSize() + 1);
-  
-  for (Int_t i = GetSize() - 2; i >= 0; i--) {
-    AddAt(At(i), i+1);
-  }
-  
-  AddAt(value, 0);
-  
-  return;
-}
-
-

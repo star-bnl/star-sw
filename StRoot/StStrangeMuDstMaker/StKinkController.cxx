@@ -1,8 +1,5 @@
-// $Id: StKinkController.cxx,v 3.3 2000/09/18 19:25:19 genevb Exp $
+// $Id: StKinkController.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StKinkController.cxx,v $
-// Revision 3.3  2000/09/18 19:25:19  genevb
-// Additional protection for missing MC info
-//
 // Revision 3.2  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -83,7 +80,6 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcKinkMap = assocMaker->mcKinkMap();
     theMcTrackMap = assocMaker->mcTrackMap();
   }
-  if (!((assocMaker)&&(theMcKinkMap)&&(theMcTrackMap))) return kStOk;
   StKinkVertex* rcKinkPartner = 0;
   StMcTrack* Daughter = 0;
   Int_t indexRecoArray = -1;
@@ -100,7 +96,7 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
 
   if (Daughter) {
     StKinkMc* kinkMc = new((*mcArray)[mcEntries++]) StKinkMc(mcVert,Daughter);
-    if (count>0) {
+    if ((assocMaker)&&(count>0)) {
       pair<mcKinkMapIter,mcKinkMapIter> mcKinkBounds =
             theMcKinkMap->equal_range(mcVert);
       indexRecoArray = -1;

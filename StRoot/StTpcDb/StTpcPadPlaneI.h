@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPadPlaneI.h,v 1.5 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StTpcPadPlaneI.h,v 1.4 2000/01/12 15:14:41 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTpcPadPlaneI.h,v $
- * Revision 1.5  2000/11/14 22:00:06  genevb
- * Switched several functions from float to double
- *
  * Revision 1.4  2000/01/12 15:14:41  hardtke
  * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
  *
@@ -29,38 +26,38 @@ class StTpcPadPlaneI : public TObject {
   //Abstract base class defining accessors
 public:
 
-  virtual int   numberOfRows()            const = 0;
-  virtual int   numberOfInnerRows()       const = 0;
-  virtual int   numberOfInnerRows48()     const = 0;
-  virtual int   numberOfInnerRows52()     const = 0;
-  virtual int   numberOfOuterRows()       const = 0;
-  virtual double innerSectorPadWidth()    const = 0;
-  virtual double innerSectorPadLength()   const = 0;
-  virtual double innerSectorPadPitch()    const = 0;
-  virtual double innerSectorRowPitch1()   const = 0;
-  virtual double innerSectorRowPitch2()   const = 0;
-  virtual double firstPadRow()            const = 0;
-  virtual double firstOuterSectorPadRow() const = 0;
-  virtual double lastOuterSectorPadRow()  const = 0;
-  virtual double firstRowWidth()          const = 0; 
-  virtual double lastRowWidth()           const = 0;
-  virtual double outerSectorPadWidth()    const = 0;
-  virtual double outerSectorPadLength()   const = 0;
-  virtual double outerSectorPadPitch()    const = 0;
-  virtual double outerSectorRowPitch()    const = 0;
-  virtual double outerSectorLength()      const = 0;
-  virtual double ioSectorSeparation()     const = 0;
-  virtual double innerSectorEdge()        const = 0;
-  virtual double outerSectorEdge()        const = 0;
-  virtual double innerSectorPadPlaneZ()   const = 0;
-  virtual double outerSectorPadPlaneZ()   const = 0;
+  virtual int   numberOfRows()           const = 0;
+  virtual int   numberOfInnerRows()      const = 0;
+  virtual int   numberOfInnerRows48()    const = 0;
+  virtual int   numberOfInnerRows52()    const = 0;
+  virtual int   numberOfOuterRows()      const = 0;
+  virtual float innerSectorPadWidth()    const = 0;
+  virtual float innerSectorPadLength()   const = 0;
+  virtual float innerSectorPadPitch()    const = 0;
+  virtual float innerSectorRowPitch1()   const = 0;
+  virtual float innerSectorRowPitch2()   const = 0;
+  virtual float firstPadRow()            const = 0;
+  virtual float firstOuterSectorPadRow() const = 0;
+  virtual float lastOuterSectorPadRow()  const = 0;
+  virtual float firstRowWidth()          const = 0; 
+  virtual float lastRowWidth()           const = 0;
+  virtual float outerSectorPadWidth()    const = 0;
+  virtual float outerSectorPadLength()   const = 0;
+  virtual float outerSectorPadPitch()    const = 0;
+  virtual float outerSectorRowPitch()    const = 0;
+  virtual float outerSectorLength()      const = 0;
+  virtual float ioSectorSeparation()     const = 0;
+  virtual float innerSectorEdge()        const = 0;
+  virtual float outerSectorEdge()        const = 0;
+  virtual float innerSectorPadPlaneZ()   const = 0;
+  virtual float outerSectorPadPlaneZ()   const = 0;
  
   virtual int   numberOfPadsAtRow(int row)    const = 0;
-  virtual double radialDistanceAtRow(int row) const = 0;  
-  virtual double PadWidthAtRow(int row)       const = 0;
-  virtual double PadLengthAtRow(int row)      const = 0;
-  virtual double PadPitchAtRow(int row)       const = 0;
-  virtual double RowPitchAtRow(int row)       const = 0;
+  virtual float radialDistanceAtRow(int row) const = 0;  
+  virtual float PadWidthAtRow(int row)       const = 0;
+  virtual float PadLengthAtRow(int row)      const = 0;
+  virtual float PadPitchAtRow(int row)       const = 0;
+  virtual float RowPitchAtRow(int row)       const = 0;
 
   virtual int indexForRowPad(int row, int pad)  const = 0;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.cxx,v 1.10 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StRTpcPadPlane.cxx,v 1.9 2000/03/30 17:02:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.cxx,v $
- * Revision 1.10  2000/11/14 22:00:06  genevb
- * Switched several functions from float to double
- *
  * Revision 1.9  2000/03/30 17:02:36  hardtke
  * limit warning message in StRTpcPadPlane
  *
@@ -37,8 +34,8 @@ int   StRTpcPadPlane::numberOfPadsAtRow(int row) const {
 }
 
 //_____________________________________________________________________________
-double   StRTpcPadPlane::radialDistanceAtRow(int row) const {
- double radius = 0;
+float   StRTpcPadPlane::radialDistanceAtRow(int row) const {
+ float radius = 0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows() ) 
      radius = (*mPadPlane)[0].innerRowRadii[row-1];
@@ -49,8 +46,8 @@ double   StRTpcPadPlane::radialDistanceAtRow(int row) const {
 }
 
 //_____________________________________________________________________________
-double StRTpcPadPlane::PadWidthAtRow(int row) const {
- double width = 0;
+float StRTpcPadPlane::PadWidthAtRow(int row) const {
+ float width = 0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows()) 
      width = innerSectorPadWidth();
@@ -61,8 +58,8 @@ double StRTpcPadPlane::PadWidthAtRow(int row) const {
 }
 
 //_____________________________________________________________________________
-double StRTpcPadPlane::PadLengthAtRow(int row) const {
- double Length=0;
+float StRTpcPadPlane::PadLengthAtRow(int row) const {
+ float Length=0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows()) 
       Length = innerSectorPadLength();
@@ -73,8 +70,8 @@ double StRTpcPadPlane::PadLengthAtRow(int row) const {
 }
 
 //_____________________________________________________________________________
-double StRTpcPadPlane::PadPitchAtRow(int row) const {
- double Pitch = 0;
+float StRTpcPadPlane::PadPitchAtRow(int row) const {
+ float Pitch = 0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows()) 
      Pitch = innerSectorPadPitch();
@@ -85,8 +82,8 @@ double StRTpcPadPlane::PadPitchAtRow(int row) const {
 }
 
 //_____________________________________________________________________________
-double StRTpcPadPlane::RowPitchAtRow(int row) const {
- double Pitch = 0;
+float StRTpcPadPlane::RowPitchAtRow(int row) const {
+ float Pitch = 0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows48() ) 
       Pitch = innerSectorRowPitch1();

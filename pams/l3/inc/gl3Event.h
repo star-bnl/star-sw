@@ -32,7 +32,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 
@@ -123,7 +123,7 @@ private:
    FtfContainer*    trackContainer ;
    gl3Sector        sectorInfo[NSECTORS];
 
-// ClassDef(gl3Event,1)
+   ClassDef(gl3Event,1)
 //
 } ;
 #endif

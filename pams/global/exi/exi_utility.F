@@ -13,33 +13,78 @@ C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),xc(2),r,beta
-      REAL    x,y,p(3),a,b,ab,test
+      REAL    x,y,p(3),a,yt1,yt2,xt1,xt2,rxp,test,q
 C--------find the radius and the (hit)x-y coordinates------------------
       r=abs(1./trk(6))
       IF(trk(1).eq.0.) trk(1)=0.01
-      a=trk(2)/trk(1)
-      x=trk(1)*cos(a)
-      y=trk(1)*sin(a)
+      x=trk(1)*cos( trk(2)/trk(1) )
+      y=trk(1)*sin( trk(2)/trk(1) )
 C--------get the momentum components-----------------------------------
       iflag=0
       CALL track_mom(trk,iflag,p,beta)
 C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
-      b=sqrt( r*r/(a*a+1) )
-      ab=a*b
+      yt1= sqrt( r*r/(a*a+1) ) + y
+      yt2=-sqrt( r*r/(a*a+1) ) + y
+      xt1=-a*(yt1-y) + x
+      xt2=-a*(yt2-y) + x
 C-------decide which one is the right one------------------------------
-      test=(ab*p(2) + b*p(1))*trk(6)
-      IF(test.lt.0.0) THEN
-	xc(1)=-ab + x
-	xc(2)= b + y
+      rxp=(xt1-x)*p(2) - (yt1-y)*p(1)
+      test=rxp*trk(6)
+      IF(test.gt.0.0) THEN
+	xc(1)=xt1
+	xc(2)=yt1
       ELSE
-	xc(1)=ab + x
-	xc(2)=-b + y
+	xc(1)=xt2
+	xc(2)=yt2
       ENDIF 	!test.lt.0.0
 C---------------------------------------------------------------------
   999 CONTINUE
       RETURN
+      END
+
+C*********************************************************************
+
+      SUBROUTINE fine_approach(xv,x,p,x0)
+      IMPLICIT NONE
+C---------------------------------------------------------------------
+C   Input arguments   	xv	! 3-dimensional position vector 
+C				! of the main vertex
+C   		   	x	! 3-dimensional position vector 
+C				! of the secondary track
+C			p	! 3-dimensional momentum vector of the 
+C				! reconstructed secondary particle
+C   Output arguments :	x0      ! coordinates of closest approach
+C
+C   Functional Description:	Finds the coordinates of the point of
+C				closest approach from the main vertex
+C				The input vectors must be calculated
+C				at a point close to the vertex.
+C   Created  JUN-1992  S.Margetis
+C   Error conditions 		: None
+C   Status	     		: Tested
+C---------------------------------------------------------------------
+      REAL 	xv(3),x(3),p(3),x0(3),nom
+*---------------------------------------------------------------------
+
+	nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+	nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
+	x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
+
+	IF(p(1).ne.0.) THEN
+	 x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
+	 x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+	ELSE
+	 x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
+		IF(p(2).eq.0.) THEN
+		 x0(2)=x(2)
+		ELSE
+		 x0(2)=-x0(3)*p(3)/p(2)
+		ENDIF
+	ENDIF
+
+ 999  RETURN
       END
 
 C*********************************************************************
@@ -81,7 +126,7 @@ C-----Extract usefull parameters from helix --------------------------
       phi1  =trk1(4)
       cph1  =cos(phi1)
       sph1  =sin(phi1)
-      pt1   =abs(beta*C_D_CURVATURE/trk1(6))
+      pt1   =(beta*C_D_CURVATURE)/abs(trk1(6))
       pz1   =pt1*trk1(5)
       p1    =sqrt(pt1*pt1 + pz1*pz1)
       e1    =sqrt(p1*p1+m(1)*m(1))
@@ -95,7 +140,7 @@ C----second track ----------------------------------------------------
 	phi2  =trk2(4)
 	cph2  =cos(phi2)
 	sph2  =sin(phi2)
-	pt2   =abs(beta*C_D_CURVATURE/trk2(6))
+	pt2   =(beta*C_D_CURVATURE)/abs(trk2(6))
 	pz2   =pt2*trk2(5)
 	p2    =sqrt(pt2*pt2 + pz2*pz2)
 	e2    =sqrt(p2*p2+m(2)*m(2))
@@ -122,6 +167,60 @@ C----calculate the invariant mass ------------------------------------
 
 C*********************************************************************
 
+      SUBROUTINE exi_project_track(xc,r,xp,x)
+      IMPLICIT NONE
+C---------------------------------------------------------------------
+C   Input arguments  :	
+C			xc(2)	!position-coord. in x-y plane of the 
+C				!centre of the circle (charged part.)
+C			r	!radius of the above circle
+C			xp(2)	!x-y coord. of new point
+C   Output arguments : 	x(2)	!x-y coord. of point of closest approach
+C   Functional Description :	Extrapolates a helix and calculates the 
+C				coord. of the point of the closest approach
+C				from a given point in the bending plane.
+C   Created  JAN-1992 S.Margetis   
+C   Error conditions : None
+C   Status	     : Test
+C---------------------------------------------------------------------
+      REAL r,xp(2),xc(2),x(2)
+      REAL x1(2),x2(2),yy1,yy2,zz1,zz2
+      REAL a,b,c
+C-----first find the two possible solutions for closest approach-----
+      a=xc(1)-xp(1)
+      b=xc(2)-xp(2)
+      IF(b.eq.0.0) THEN
+	x1(2)=xc(2)
+	x2(2)=xc(2)
+	x1(1)=xc(1)+r	
+	x2(1)=xc(1)-r	
+      ELSE
+      	c=a/b
+	yy1= r/sqrt(c*c+1.)
+	yy2=-r/sqrt(c*c+1.)
+	zz1=c*yy1
+	zz2=c*yy2
+	x1(1)=zz1+xc(1)
+	x2(1)=zz2+xc(1)
+	x1(2)=yy1+xc(2)
+	x2(2)=yy2+xc(2)
+      ENDIF	!b.eq.0
+C-------choose the right one----------------------------------------
+      a=(xp(1)-xc(1))*(x1(1)-xc(1)) + (xp(2)-xc(2))*(x1(2)-xc(2))
+      IF(a.gt.0.) THEN
+	x(1)=x1(1)
+	x(2)=x1(2)
+      ELSE
+	x(1)=x2(1)
+	x(2)=x2(2)
+      ENDIF	!a.gt.0.
+
+  999 CONTINUE
+      RETURN
+      END
+
+C*********************************************************************
+
       SUBROUTINE track_mom(trk,iflag,p,beta)
       IMPLICIT NONE
 C---------------------------------------------------------------------
@@ -139,11 +238,13 @@ C----------------------------------------------------------------------
 #include "phys_constants.inc"
       INTEGER iflag
       REAL    trk(6),p(3),phi
-      REAL    beta
-      REAL    sph,cph,pt
+      REAL    beta,lamda,cl
+      REAL    sph,cph,pt,ptot
 
 C-----Extract momentum components from helix --------------------------
 
+	lamda=atan(trk(5))
+	cl   =cos(lamda)
 	phi  =trk(4)
 	cph  =cos(phi)
 	sph  =sin(phi)
@@ -151,14 +252,17 @@ C-----Extract momentum components from helix --------------------------
 C-------check if it is a neutral particle------------------------------
 
        IF(iflag.eq.5) THEN
-	pt   =cos(atan(trk(5)))/trk(6)
+	ptot =1./trk(6)
+	pt   =ptot*cl
+	p(3) =pt*trk(5)
        ELSE
-	pt   =abs(beta*C_D_CURVATURE/trk(6))
+	pt   =(beta*C_D_CURVATURE)/abs(trk(6))
+	p(3) =pt*trk(5)
+	ptot =sqrt(pt*pt+p(3)*p(3))
        ENDIF	!iflag.eq.5
 
-	p(3) =pt*trk(5)
-	p(1) =pt*cph
-	p(2) =pt*sph
+	p(1) =ptot*cl*cph
+	p(2) =ptot*cl*sph
 
   999 CONTINUE
       RETURN
@@ -185,9 +289,8 @@ C---------------------------------------------------------------------
       REAL xi,yi,dphi,ds
       REAL axb,dz,arg
 C-----calculate the distance ds and the angle between old/new position
-      arg = trk1(2)/trk1(1)
-      xi = trk1(1)*cos(arg)
-      yi = trk1(1)*sin(arg)
+      xi = trk1(1)*cos(trk1(2)/trk1(1))
+      yi = trk1(1)*sin(trk1(2)/trk1(1))
       axb = ( xi-xc(1))*(x(2)-xc(2)) - (yi-xc(2))*(x(1)-xc(1))
       arg =axb/(r*r)
       IF( arg.ge.1.0 )  arg = 1.
@@ -207,6 +310,135 @@ C-----calculate the new track parameters
 
   999 CONTINUE
       RETURN
+      END
+
+C*********************************************************************
+
+      SUBROUTINE v0_impact_param(mv,x,p,r_min,iflag)
+      IMPLICIT NONE
+C---------------------------------------------------------------------
+C   Input arguments   	mv      ! 3-dimensional main vertex position
+C                       x	! 3-dimensional position vector 
+C				! of the secondary vertex
+C			p	! 3-dimensional momentum vector of the 
+C				! reconstructed secondary particle
+C   Output arguments :	r_min 	!Distance from the main vertex at the 
+C			     	!point of closest approach 
+C			iflag	!if equal 2 wrong pointing/false particle
+C   Functional Description:	It checks first if the candidate particle
+C				points away from the vertex (as it should).
+C				Then it finds the impact parameter of a
+C				NEUTRAL reconstructed particle 
+C				from the main vertex
+C   Created  DEC-1991  S.Margetis
+C   Error conditions 		: None
+C   Status	     		: Tested
+C---------------------------------------------------------------------
+      INTEGER	iflag
+      REAL 	r_min,mv(3),x(3),p(3),check
+*
+*---------assume a good candidate, reset flag-------------------------
+*
+      iflag=0
+*
+*---------check first if the candidate flies away from vertex---------
+*---------through the dot product of position and momentum  vector----
+*
+      check=(x(1)-mv(1))*p(1)+(x(2)-mv(2))*p(2)+(x(3)-mv(3))*p(3)
+      IF(check.lt.0.0) THEN
+        iflag=2
+        goto 999
+      ENDIF !if(check<0)
+*
+*---------calculate the impact parameter of the track from vetex------
+*------------------ Normal way using vector-cross-product ------------
+*
+      r_min=((x(2)-mv(2))*p(3)-p(2)*(x(3)-mv(3)))**2.+
+     +      ((x(3)-mv(3))*p(1)-p(3)*(x(1)-mv(1)))**2.+
+     +      ((x(1)-mv(1))*p(2)-p(1)*(x(2)-mv(2)))**2.
+      r_min=r_min/(p(1)**2.+p(2)**2.+p(3)**2.)
+      r_min=sqrt(r_min)
+*---------------------------------------------------------------------
+ 999  RETURN
+      END
+
+C*********************************************************************
+
+      SUBROUTINE vzero_geom(cut,xc1,xc2,r1,r2,x,y,iflag)
+      IMPLICIT NONE
+C---------------------------------------------------------------------
+C   Input arguments  :	xc1(2)	!centre x-y coord. of the first circle
+C			xc2(2)	!centre x-y coord. of the sec. circle
+C			r1	!radius of first circle
+C			r2	!radius of second circle
+C   Output arguments :	x(2)	!x-coord. of two possible solutions
+C			y(2)	!y-coord. of   "  "          "
+C			iflag	!iflag=5 if no solution, =3 if only one
+C   Functional Description :	It finds all possible intersections in
+C				the bending plane of two circles.
+C   Created  DEC-1991 S.Margetis   
+C   Error conditions	: None
+C   Status		: Tested
+C----------------------------------------------------------------------
+      INTEGER	iflag
+      REAL	xc1(2),xc2(2),r1,r2
+      REAL	x(2),y(2),om1,om2,ph1,ph2
+      REAL	a,b,c,d,dia,dtouch,cut
+C---clear variables---------------------------------------------------
+      CALL VZERO(x,2)
+      CALL VZERO(y,2)
+C---find the two intersections----------------------------------------
+      a=xc1(1)-xc2(1)
+      b=xc1(2)-xc2(2)
+      dia=sqrt(a*a+b*b)
+      dtouch=dia-r1-r2
+      c=(r1*r1-r2*r2+a*a+b*b)/2.
+      d=(a*a+b*b)*r1*r1-c*c
+C---check if there is any solution, one or two -----------------------
+      IF(d.lt.0.0) GOTO 137
+      IF(d.eq.0.0) iflag=3
+      om1=( -b*c+abs(a)*sqrt(d) ) / (a*a+b*b)
+      om2=( -b*c-abs(a)*sqrt(d) ) / (a*a+b*b)
+C----find the right pair----------------------------------------------
+      IF( (r1*r1-om1*om1).ge.0.) THEN
+	ph1=sqrt(r1*r1-om1*om1)
+	ph2=-ph1
+	IF( abs((ph1+a)**2+(om1+b)**2-r2*r2).le.
+     +      abs((ph2+a)**2+(om1+b)**2-r2*r2) ) THEN
+		y(1)=om1+xc1(2)
+		x(1)=ph1+xc1(1)
+	ELSE
+		y(1)=om1+xc1(2)
+		x(1)=ph2+xc1(1)
+	ENDIF	
+      ENDIF
+C------second pair----------------------------------------------------
+      IF( (r1*r1-om2*om2).ge.0.) THEN
+	ph1=sqrt(r1*r1-om2*om2)
+	ph2=-ph1
+	IF( abs((ph1+a)**2+(om2+b)**2-r2*r2).le.
+     +      abs((ph2+a)**2+(om2+b)**2-r2*r2) ) THEN
+		y(2)=om2+xc1(2)
+		x(2)=ph1+xc1(1)
+	ELSE
+		y(2)=om2+xc1(2)
+		x(2)=ph2+xc1(1)
+	ENDIF	
+      ENDIF
+C---------------------------------------------------------------------
+  999 CONTINUE
+      RETURN
+
+  137 IF(dtouch.le.cut)  THEN
+        iflag=3
+        x(1)=xc1(1) + r1*(xc2(1)-xc1(1))/dia
+        y(1)=xc1(2) + r1*(xc2(2)-xc1(2))/dia
+        x(2)=x(1)
+        y(2)=y(1)
+      ELSE
+        iflag=5
+      RETURN
+      ENDIF
       END
 
 C*********************************************************************
@@ -234,64 +466,55 @@ C   Status	     : Tested
 C-------------------------------------------------------------------
       INTEGER iflag
       REAL r,p(3),xn(3),xc(2),dcut
-      REAL x(2),y(2),z(2),xd,yd,rd
-      REAL*8 a,b,c,d,rsq,ab,theta
+      REAL x(2),y(2),z(2),theta
+      REAL a,b,c
 C-----find the intersection points of a circle and a straight line--
-      rsq=r*r
-      xd=xn(1)-xc(1)
-      yd=xn(2)-xc(2)
       IF(p(1).ne.0.0) THEN
 	a=p(2)/p(1)
-	b=-a*xd +yd
-	d=a*a+1
-	c=d*rsq-b*b
+	b=a*( xc(1)-xn(1) ) - xc(2)+xn(2)
+	c=(a*a+1)*r*r-b*b
 	IF(c.lt.0.0) GOTO 137
 	IF(c.eq.0.0) iflag=3
-	c=sqrt(c)
-	ab=a*b
-	x(1)=( -ab+c )/d + xc(1)
-	x(2)=( -ab-c )/d + xc(1)
+	x(1)=( -a*b+sqrt((a*a+1)*r*r-b*b) )/(a*a+1) + xc(1)
+	x(2)=( -a*b-sqrt((a*a+1)*r*r-b*b) )/(a*a+1) + xc(1)
 	y(1)=a*(x(1)-xc(1)) + b + xc(2)
 	y(2)=a*(x(2)-xc(1)) + b + xc(2)
       ELSE
 	x(1)=xn(1)
 	x(2)=xn(1)
-	c   =rsq-(xd**2.)
+	c   =r*r-( xn(1)-xc(1) )**2.
 	IF(c.lt.0.0) GOTO 137
 	IF(c.eq.0.0) iflag=3
-	c=sqrt(c)
-	y(1)=xc(2) + c
-	y(2)=xc(2) - c
+	y(1)=xc(2) + sqrt(r*r-( xn(1)-xc(1) )**2.)
+	y(2)=xc(2) - sqrt(r*r-( xn(1)-xc(1) )**2.)
       ENDIF	!if(p(1).ne.0.0)
 C---------find the z1,z2 points for the neutral---------------------
-      d=p(3)/p(2)
-      z(1)=d*(y(1)-xn(2)) + xn(3)
-      z(2)=d*(y(2)-xn(2)) + xn(3)
+      z(1)=(p(3)/p(2))*(y(1)-xn(2)) + xn(3)
+      z(2)=(p(3)/p(2))*(y(2)-xn(2)) + xn(3)
 C-------------------------------------------------------------------
   999 CONTINUE
       RETURN
 
-  137 theta=xd*p(1)+yd*p(2)
-      rd = sqrt(xd**2. + yd**2.)
-      theta=theta/rd
+  137 theta=(xn(1)-xc(1))*p(1)+(xn(2)-xc(2))*p(2)
+      theta=theta/sqrt((xn(1)-xc(1))**2.+(xn(2)-xc(2))**2.)
       theta=theta/sqrt(p(1)*p(1)+p(2)*p(2))
       theta=acos(theta)
-      c=rd*sin(theta)
+      c=sqrt((xn(1)-xc(1))**2.+(xn(2)-xc(2))**2.)*sin(theta)
       IF(c.ge.(r+dcut)) THEN
         iflag=5
       ELSE
         iflag=3
         IF(p(1).ne.0.0) THEN
                 a=p(2)/p(1)
-                y(1)=sqrt(rsq/(a*a+1))
-                y(2)=-y(1)
+                y(1)=sqrt(r*r/(a*a+1))
+                y(2)=-sqrt(r*r/(a*a+1))
                 x(1)=-a*y(1)
                 x(2)=-a*y(2)
                 y(1)=y(1)+xc(2)
                 y(2)=y(2)+xc(2)
                 x(1)=x(1)+xc(1)
                 x(2)=x(2)+xc(1)
-                b=(x(1)-xc(1))*xd+(y(1)-xc(2))*yd
+                b=(x(1)-xc(1))*(xn(1)-xc(1))+(y(1)-xc(2))*(xn(2)-xc(2))
                 IF(b.gt.0.0) THEN
                   x(2)=x(1)
                   y(2)=y(1)
@@ -366,7 +589,7 @@ C---------------------------------------------------------------------
 *
       call make_track(x,p,track,q,beta)
       call circle_param(track,xc,r,beta)
-      call ev0_project_track(xc,r,vertex,xn)
+      call exi_project_track(xc,r,vertex,xn)
       call update_track_param(xc,r,xn,track,trk)
       r_min=sqrt( (xn(1)-vertex(1))**2+(xn(2)-vertex(2))**2+
      +     (trk(3)-vertex(3))**2 )

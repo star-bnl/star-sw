@@ -9,12 +9,7 @@ C
       REAL    trk(6),rr,xc(2)
       INTEGER nmax,i,l,ipad1(8),ipad2(5),ipad3(31)
       REAL    dia,zpl,bf,sav2
-      REAL    ypad(45),xwidth(45),x(2),y(2),f2,y0,temp
-      REAL    deg15,deg30,deg60,deg90
-      PARAMETER (deg15 = 0.2618)
-      PARAMETER (deg30 = 0.5236)
-      PARAMETER (deg60 = 1.0472)
-      PARAMETER (deg90 = 1.5708)
+      REAL    ypad(45),xwidth(45),x(2),y(2),x1,x2,f2,y0
 C     
       DATA ipad1/0,8,8,8,6,8,8,8/
       DATA ipad2/8,6,10,8,10/
@@ -45,11 +40,10 @@ C***  z position of padplane
 C***  Rotate track so its sector pads are normal to y-axis
 C***  Watch out. This is not as trivial as it seems.
       sav2 = trk(2)
-      temp = amod(trk(2),deg30)
-      IF(temp.gt.deg15) THEN
-         trk(2)=temp+deg60
+      IF(amod(trk(2),0.5236).gt.0.2618) THEN !0.2618 = 15 degrees
+         trk(2)=amod(trk(2),0.5236)+1.0472 !only 60 degrees
       ELSE
-         trk(2)=temp+deg90
+         trk(2)=amod(trk(2),0.5236)+1.5708 ! 0.5236 = 30 degrees
       ENDIF
       
       trk(4)=trk(4) +  trk(2) - sav2 ! psi has const. relation to phi
@@ -57,8 +51,8 @@ C***  Watch out. This is not as trivial as it seems.
 C***  Loop over three adjacent sectors
       
       nmax = 0
-      trk(2) = trk(2) - deg60
-      trk(4) = trk(4) - deg60
+      trk(2) = trk(2) - 2.*0.5236
+      trk(4) = trk(4) - 2.*0.5236
       DO 75 l=1,3
          
 C***  Clear variables
@@ -67,8 +61,8 @@ C***  Clear variables
             y(i) = 0.
          ENDDO
          
-         trk(2) = trk(2) + deg30
-         trk(4) = trk(4) + deg30
+         trk(2) = trk(2) + 0.5236
+         trk(4) = trk(4) + 0.5236
          call nmax_circle_param(trk,xc,rr,bf)         
          
          
@@ -82,15 +76,15 @@ C***  Intersections of track with first-last padrow
                dia = rr*rr - f2
                IF(dia.lt.0.) goto 30 ! No solution
                
-               temp =  sqrt(dia)
+               x1 =  sqrt(dia)
+               x2 = -sqrt(dia)
 C***  First pair of possible solutions
-               x(1) = temp + xc(1)
+               x(1) = x1 + xc(1)
 C***  Second pair
-               x(2) =-temp + xc(1)
+               x(2) = x2 + xc(1)
                
-               temp = 0.5*xwidth(i)
-               IF( abs(x(1)).lt.temp ) nmax = nmax + 1
-               IF( abs(x(2)).lt.temp ) nmax = nmax + 1
+               IF( abs(x(1)).lt.0.5*xwidth(i) ) nmax = nmax + 1
+               IF( abs(x(2)).lt.0.5*xwidth(i) ) nmax = nmax + 1
             ENDIF
  30      CONTINUE
          
@@ -139,7 +133,7 @@ C     xt2= a*b + x
 C-------decide which one is the right one------------------------------
 C     rxp=(xt1-x)*p(2) - b*p(1)
       rxp=-(ab*p(2) + b*p(1))
-      test=rxp*trk(6)*beta
+      test=rxp*trk(6)/r
       IF(test.gt.0.0) THEN
 C	xc(1)=xt1
 C	xc(2)=yt1
@@ -191,7 +185,7 @@ C-SM       IF(iflag.eq.5) THEN
        IF(abs(beta).le.0.001) THEN
 	pt   = 100.        !just any big number is good (GeV)
        ELSE
-	pt   = abs(beta*const*rc)/100.
+	pt   = (beta*const*rc)/100.
        ENDIF	!iflag.eq.5
 
         p(3) = pt*trk(5)

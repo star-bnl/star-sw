@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.5 2000/09/15 21:20:20 fisyak Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.4 2000/08/01 01:43:12 flierl Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -455,7 +455,7 @@ void StClusterDisplayMaker::Fill_Pixel()
       St_DataSetIter rawdata(raw_data_tpc) ;
       Char_t sectorname[10]; //= "Sector_1" ;
       sprintf(sectorname, "Sector_%d", sec);
-      St_DataSet *sector = rawdata(sectorname) ;
+      St_DataSet *sector = rawdata.FindObject(sectorname) ;
       cout << " Examining sector : " << sectorname << endl ;	
       
       if (!sector) return ;

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTMip.h,v 2.2 2000/11/01 16:54:26 lasiuk Exp $
+ * $Id: StRichDrawableTMip.h,v 2.1 2000/08/09 23:26:08 gans Exp $
  *
  * Description:
  *   The MIP which is drawn in the pad monitor
@@ -7,8 +7,8 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTMip.h,v $
- * Revision 2.2  2000/11/01 16:54:26  lasiuk
- * simplify default arguments in c'tor
+ * Revision 2.1  2000/08/09 23:26:08  gans
+ * Added Description comments for Inspect
  *
  * Revision 2.1  2000/08/09 23:26:08  gans
  * Added Description comments for Inspect
@@ -49,23 +49,20 @@ public:
     void findRealMip();    // *MENU*
     void clearRealMip();   // *MENU*
     void clearMomText();   // *MENU*
-
-    void draw();
     
     virtual ~StRichDrawableTMip();
 
     virtual StRichDrawableTTrack * getDrawableTTrack();
-
 protected:
-    double mThreeMomMag;      //|p| of track
-    double mTheta;            //Theta From Rich Normal Degrees
-    double mPhi;              //Phi From Rich X Degrees
-    double mEta;              //pseudorapidity global
-    double mXImpactRadiator;  //Radiator Impact X Local
-    double mYImpactRadiator;  //Radiator Impact Y Local
-    int mFastEnoughPion;      //Pion Above Cherenkov Threshold
-    int mFastEnoughKaon;      //Kaon Above Cherenkov Threshold
-    int mFastEnoughProton;    //Proton Above Cherenkov Threshold
+    double mThreeMomMag;//|p| of track
+    double mTheta;//Theta From Rich Normal Degrees
+    double mPhi;//Phi From Rich X Degrees
+    double mEta;//pseudorapidity global
+    double mXImpactRadiator;//Radiator Impact X Local
+    double mYImpactRadiator;//Radiator Impact Y Local
+    int mFastEnoughPion;//Pion Above Cherenkov Threshold
+    int mFastEnoughKaon;//Kaon Above Cherenkov Threshold
+    int mFastEnoughProton;//Proton Above Cherenkov Threshold
 
     double mGeantThreeMomMag;
     double mGeantX;
@@ -74,22 +71,19 @@ protected:
     double mGeantTheta,mGeantPhi;
     double mGeantXImpactRadiator,mGeantYImpactRadiator;
     double mGeantXStopVertex,mGeantYStopVertex;
-    long   mGeantStopVertexProcess;
+    long mGeantStopVertexProcess;
     unsigned int mGeantStopVertexNumDaught;
         
-    int    mGeantCommonTpcHits;
-    int    mGeantNumberOfPartners;
-    int    mGeantHitsInRadiator;
-    int    mGeantHitsInGap;
+    int mGeantCommonTpcHits,mGeantNumberOfPartners,
+	mGeantHitsInRadiator,mGeantHitsInGap;
 
     long mGeantTrackID;
-
-    TLine*         mTLineMIPPointer; //!
-    TMarker*       mTMarkerMIPPointer; //!
-    StRichMCTrack* geantTrackP; //!
-    TText*         mMomText;//!
-    StRichDrawableTTrack* mTrackPointer; //!
-
+    
+    StRichDrawableTTrack * mTrackPointer; //!
+    TLine * mTLineMIPPointer; //!
+    TMarker * mTMarkerMIPPointer; //!
+    StRichMCTrack * geantTrackP; //!
+    TText * mMomText;//!
 protected:
 
     ClassDef(StRichDrawableTMip,1)

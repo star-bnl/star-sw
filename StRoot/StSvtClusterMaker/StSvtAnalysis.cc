@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.9 2000/10/31 16:20:57 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.5 2000/08/24 04:27:56 caines Exp $
  *
- * Author: Selemon Bekele
+ * Author: 
  ***************************************************************************
  *
  * Description: Fits the clusters to find the various moments (0th, 1st, 2nd)
@@ -35,7 +35,37 @@
  *                            rethink this one for special physics studies.
  *                      128 = A hit which was deconvoluted.
  *
- * 
+ * Authors:     Dave Read, Claude Pruneau, Sanjeev Pandey, Selemon Bekele, Helen Caines
+ *
+ * History:     Just a guess by me.  (Sanjeev)
+ *              4/18/95 created  by Dave Read
+ *              8/13/95 Update with moment-analysis code by Dave Read 
+ *              8/15/96 adapted to STAF by C.Pruneau
+ *	        Hacked for E896 Helen Caines 4/2/98
+ *	        Removed fill_spt routine as this is going into
+ *	        calibration pkg
+ *              5/99 Changed cluster finder to do a little shape 
+ *              analysis. Changed some function calls. Sanjeev Pandey
+ *              6/99 Made the deconvolution work again. Algorithm is
+ *              slightly changed. The return TYPE of Find_Peaks should
+ *              be changes. Never wise to return a pointer even if static.
+ *              Structure POINT has been changed as well. Could be made 
+ *              signicantly faster by paying more attention to using 
+ *              fewer malloc's and in the deconvolution using previous
+ *              information. Calculate_cluster_moments should be
+ *              cleaned up. Errors on deconvoluted hits scale with
+ *              depth of valley between them. Sanjeev Pandey
+ *              7/99 Better calculation of 2nd moments. errors now
+ *              scaled by second moment and sqrt(numpixels). minimize
+ *              calls to malloc (for speed). better error propogation.
+ *              Sanjeev Pandey
+ *              8/00 moved the whole shebang over to C++/root4star.
+ *              and Selemon added a bunch of usefull member functions to 
+ *              calculate the first and last anodes and timebuckets of 
+ *              each cluster. Tried to make the code efficeint by putting
+ *              as few calls to new as possible. sanjeev
+ *              8/00 changed flags so that we only have positive flags. All
+ *              flags<4 are good.
  *
  * Bugs:       The method used to flad noisy anodes and time buckets is inefficient
  *             and should be looked at. We zero a huge array  before each event. Sanjeev
@@ -51,34 +81,11 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
- * Revision 1.9  2000/10/31 16:20:57  caines
- * Added more functions to make the code more readable
- *
- * Revision 1.9  2000/10/23 13:47:03  Selemon
- * Added more functions to make the code more readable
- *
- * Revision 1.8  2000/10/02 13:47:03  caines
- * Fixed some array bound problems. Better flagging of hits
- *
- * Revision 1.7  2000/09/14 22:17:15  caines
- * Fix memory problems
- *
- * Revision 1.6  2000/08/29 22:46:26  caines
- * Fixed some memory leaks
- *
  * Revision 1.5  2000/08/24 04:27:56  caines
  * Fixed casting warnings so compiles without errors on linux
  *
  * Revision 1.4  2000/08/21 13:06:57  caines
  * Much improved hit finding and fitting
- *
- * Revision 1.3  2000/08 13:06:57  sanjeev
- * changed flags so that we only have positive flags. All
- *              flags<4 are good.
- *
- * Revision 1.2  2000/08 13:06:57  sanjeev
- * Added methods for peak finding, cluster fitting, and deconvoluting
- * 
  *
  **************************************************************************/
 #include <iostream.h>
@@ -107,21 +114,7 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
   m_nGt8    = 0; 
   m_nSig    = 0;
   m_SvtEvt  = 0;
-  mHitId = 0;
 
-  mNumPixels = 0, mPeakADC = 0, mSumAdc = 0;
-  mMom0 = 0, mNeff = 0;
-  mDriftMom1 = 0, mAnodeMom1 = 0;
-  mDriftMom2 = 0, mAnodeMom2 = 0; mMom0 = 0, mNeff = 0;
-  mX_err=72., mY_err=75.;                          //default bin size/sqrt(12)
-
-  setMemory();
-  setArrays(TotalNumberOfHybrids);
-
-}
-
-void StSvtAnalysis::setMemory()
- {
   //call all new's here in init and hope we never go above 500. If we do we recall new and make it
   //the larger size. Sanjeev
 
@@ -156,48 +149,12 @@ void StSvtAnalysis::setMemory()
   assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
   assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
 
- 
-}
-
-void StSvtAnalysis::setMoreMemory(int numOfClusters)
-{
- if (numOfClusters>500)                                //Then we have to allocate more memory.
- {
-   mCluFlag                 = new int[numOfClusters];  //then just refill. Will speed up a lot.
-   mCluPeakAdc              = new int[numOfClusters];
-   mCluNumPixels            = new int[numOfClusters];
-   mCluNumAnodes            = new int[numOfClusters];
-   mHybridNum               = new int[numOfClusters];
-   mCluID                   = new int[numOfClusters];
-   mCluDeconvID             = new int[numOfClusters];
-   mCluCharge               = new double[numOfClusters];  //shouldn't call these each time. Make static and
-   mMeanClusterTimeBin      = new double[numOfClusters];
-   mMeanClusterAnode        = new double[numOfClusters];
-   mSecondMomClusterTimeBin = new double[numOfClusters];
-   mSecondMomClusterAnode   = new double[numOfClusters];
-   mCluXCov                 = new double[numOfClusters];
-   mCluYCov                 = new double[numOfClusters];
-
-   assert(mCluCharge);               assert(mCluFlag);
-   assert(mMeanClusterTimeBin);      assert(mMeanClusterAnode); 
-   assert(mSecondMomClusterTimeBin); assert(mSecondMomClusterAnode); 
-   assert(mCluXCov);                 assert(mCluYCov);
-   assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
-   assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
- }	
-
-}
-
-
-void StSvtAnalysis::setArrays(int TotalNumberOfHybrids)
-{
-
-  m_countBadAn = malloc_matrix_d (TotalNumberOfHybrids+1, 240+2);             // number of hybrids bad anodes (>4 hits)
+  m_countBadAn = malloc_matrix_d (TotalNumberOfHybrids+1, 240+1);             // number of hybrids bad anodes (>4 hits)
   m_countBadTb = malloc_matrix_d (TotalNumberOfHybrids+1, 128+1);             // bad time
 
   if (m_countBadAn == NULL || m_countBadTb == NULL) {
     cout<<"You have a bad error assigning memory for counting bad SVT pixels"<<endl;
-    if (m_countBadAn==NULL) free_matrix_d(m_countBadAn, 240+2);
+    if (m_countBadAn==NULL) free_matrix_d(m_countBadAn, 240+1);
     if (m_countBadTb==NULL) free_matrix_d(m_countBadTb, 128+1);
   }
 
@@ -220,7 +177,7 @@ void StSvtAnalysis::setArrays(int TotalNumberOfHybrids)
     }  
    }
 
-  }
+}
 
 
 StSvtAnalysis::~StSvtAnalysis()
@@ -241,77 +198,77 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
   mHybridCluster = hybClu;
   mPedOffset     = PedOffset;
 
-  mNumOfClusters = mHybridCluster->getNumberOfClusters();
-  if (mNumOfClusters>500) {
-    tempMemberInfo =  new StSvtClusterMemberInfo*[mNumOfClusters];	 
+  numOfClusters = mHybridCluster->getNumberOfClusters();
+  if (numOfClusters>500) {
+    tempMemberInfo =  new StSvtClusterMemberInfo*[numOfClusters];	 
     assert(tempMemberInfo);
   }
 
   //this is called for each new event
   for (int i=0; i<NumberOfHybrids; i++) {
-    for (int j=0; j<242; j++) m_countBadAn[i][j] = 0;
+    for (int j=0; j<241; j++) m_countBadAn[i][j] = 0;
     for (int j=0; j<129; j++) m_countBadTb[i][j] = 0;
   }
 
 }
 
 void StSvtAnalysis::FirstAndLastAnodes()
-  // Calculate the First and last Anodes of all the clusters. Selemon
-{
-  int actualAn = 0, actualan = 0, mem = 0;
-  
-  if (mNumOfClusters>500) { 
-    mCluFirstAnode = new int[mNumOfClusters];
-    mCluLastAnode = new int[mNumOfClusters];
-    assert(mCluFirstAnode); assert(mCluLastAnode);
-  }
-  
-  for(int clu = 0; clu < mNumOfClusters; clu++)   
-    {
+// Calculate the First and last Anodes of all the clusters. Selemon
+  {
+    int actualAn = 0, actualan = 0, mem = 0;
+   
+    if (numOfClusters>500) { 
+      mCluFirstAnode = new int[numOfClusters];
+      mCluLastAnode = new int[numOfClusters];
+      assert(mCluFirstAnode); assert(mCluLastAnode);
+    }
+
+    for(int clu = 0; clu < numOfClusters; clu++)   
+     {
       mem = 0;  //add apr00 SUP
-      mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
+      numOfMembers = mHybridCluster->getNumberOfMembers(clu);
       tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
-      
-      if(mNumOfMembers==1)
+
+      if(numOfMembers==1)
         {
-	  mCluFirstAnode[clu] = tempMemberInfo[clu][mem].actualAnode;
-	  mCluLastAnode[clu] = mCluFirstAnode[clu];
+         mCluFirstAnode[clu] = tempMemberInfo[clu][mem].actualAnode;
+         mCluLastAnode[clu] = mCluFirstAnode[clu];
 	}
       else
-	{
-	  for(int j = 1; j<mNumOfMembers ; j++)
-	    {
-	      actualAn =  tempMemberInfo[clu][mem].actualAnode;
-	      actualan = tempMemberInfo[clu][j].actualAnode;
-	      
-	      if(actualAn < actualan)
-		mCluFirstAnode[clu] = actualAn;
-	      else  
-		{
-		  mCluFirstAnode[clu]= actualan;
-		  mem = j;
-		}
-	    }
-	  
-	  mem = 0;
-	  for(int j = 1; j<mNumOfMembers ; j++)
-	    {
-	      actualAn = tempMemberInfo[clu][mem].actualAnode;
-	      actualan = tempMemberInfo[clu][j].actualAnode;
-	      
-	      if(actualAn > actualan)
-		mCluLastAnode[clu] = actualAn;
-	      
-	      else  
-		{
-		  mCluLastAnode[clu] =  actualan;
-		  mem = j;
-		}
-	    }
-	  
-	}
-    }
-}
+       {
+        for(int j = 1; j<numOfMembers ; j++)
+          {
+           actualAn =  tempMemberInfo[clu][mem].actualAnode;
+           actualan = tempMemberInfo[clu][j].actualAnode;
+                 
+           if(actualAn < actualan)
+            mCluFirstAnode[clu] = actualAn;
+           else  
+             {
+              mCluFirstAnode[clu]= actualan;
+              mem = j;
+             }
+	  }
+
+        mem = 0;
+        for(int j = 1; j<numOfMembers ; j++)
+          {
+           actualAn = tempMemberInfo[clu][mem].actualAnode;
+           actualan = tempMemberInfo[clu][j].actualAnode;
+
+           if(actualAn > actualan)
+            mCluLastAnode[clu] = actualAn;
+
+           else  
+             {
+              mCluLastAnode[clu] =  actualan;
+              mem = j;
+             }
+	  }
+
+       }
+     }
+  }
 
 
 void StSvtAnalysis::CluFirstTimeBin()
@@ -321,19 +278,19 @@ void StSvtAnalysis::CluFirstTimeBin()
    int listAn = 0, mseq = 0, mem;
 
    // StSequence* svtSequence;
-   if (mNumOfClusters>500) {
-     mCluFirstTimeBin = new int[mNumOfClusters];
+   if (numOfClusters>500) {
+     mCluFirstTimeBin = new int[numOfClusters];
      assert(mCluFirstTimeBin);
    }
 
-   for(int clu = 0; clu < mNumOfClusters; clu++)
+   for(int clu = 0; clu < numOfClusters; clu++)
      {
       tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
-      mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
+      numOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
        mem = 0;
 
-      if(mNumOfMembers==1)
+      if(numOfMembers==1)
        {
         listAn = tempMemberInfo[clu][mem].listAnode;
         mseq =  tempMemberInfo[clu][mem].seq; 
@@ -343,7 +300,7 @@ void StSvtAnalysis::CluFirstTimeBin()
        }
       else
        {
-        for(int j = 1; j< mNumOfMembers; j++)
+        for(int j = 1; j< numOfMembers; j++)
 	 {
           listAn = tempMemberInfo[clu][mem].listAnode;
           mseq =  tempMemberInfo[clu][mem].seq;
@@ -379,19 +336,19 @@ void StSvtAnalysis::CluLastTimeBin()
    int listAn = 0, mseq = 0, mem;
 
    //StSequence* svtSequence;
-   if (mNumOfClusters>500) {
-     mCluLastTimeBin = new int[mNumOfClusters];
+   if (numOfClusters>500) {
+     mCluLastTimeBin = new int[numOfClusters];
      assert(mCluLastTimeBin);
    }
 
-   for(int clu = 0; clu < mNumOfClusters; clu++)
+   for(int clu = 0; clu < numOfClusters; clu++)
      {
       tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
-      mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
+      numOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
       mem = 0;
 
-      if(mNumOfMembers==1)
+      if(numOfMembers==1)
        {
         listAn = tempMemberInfo[clu][mem].listAnode;
         mseq = tempMemberInfo[clu][mem].seq;
@@ -403,7 +360,7 @@ void StSvtAnalysis::CluLastTimeBin()
         }
      else
       {
-         for(int j = 1; j< mNumOfMembers ; j++)
+         for(int j = 1; j< numOfMembers ; j++)
 	   {
             listAn = tempMemberInfo[clu][mem].listAnode;
             mseq = tempMemberInfo[clu][mem].seq;
@@ -435,53 +392,71 @@ void StSvtAnalysis::CluLastTimeBin()
 	
  }   
 
-void StSvtAnalysis::MomentAnalysis(){
+void StSvtAnalysis::MomentAnalysis()
 //Calculate the moments of the cluster. We do not fit to determine the charge but rather 
 //just count pixels ADC. This routine presently call the catagoriser and deconvoluter. 
 //We might want to transfer those calls to the Maker. At present though the catagorizer 
 //and deconvluter work on a cluster by cluser basis. The Maker works with collections
 //of clusters so the logic would hav to change if this happens. Sanjeev
 //
- 
+{
+ int listAn , actualAn, numAnodes, numPixels, peakADC;
+ int mseq, Seq, stTimeBin, len;
+ int sumAdc;
+ double fDriftMom1, fAnodeMom1, fDriftMom2, fAnodeMom2, fMom0, Neff;
+ unsigned char* adc;
+ int ADC, hit_id;
+ double X_err=72., Y_err=75.;                          //default bin size/sqrt(12)
+ //StSequence* svtSequence;
+ int igt3=0, ano_p=0, bkt_p=0;                         //recall 1ADC = 4mV
+ int mem_p=0, seq_p=0;
+ int iQual, iRetu;
+ int iAst, iAend;
+ static int iRows=1, iCols=1;                          //size of box I seacrh for deconvolution. Important for zeroing arrays
+
  if (m_hybIndex==6) m_SvtEvt++;
 
  FillRawAdc();                                         //Put the raw adcs for the whole hybrid into an 2D
                                                        //Array. If there is no info value is 0.	 
+ if (numOfClusters>500)                                //Then we have to allocate more memory.
+ {
+   mCluFlag                 = new int[numOfClusters];  //then just refill. Will speed up a lot.
+   mCluPeakAdc              = new int[numOfClusters];
+   mCluNumPixels            = new int[numOfClusters];
+   mCluNumAnodes            = new int[numOfClusters];
+   mHybridNum               = new int[numOfClusters];
+   mCluID                   = new int[numOfClusters];
+   mCluDeconvID             = new int[numOfClusters];
+   mCluCharge               = new double[numOfClusters];  //shouldn't call these each time. Make static and
+   mMeanClusterTimeBin      = new double[numOfClusters];
+   mMeanClusterAnode        = new double[numOfClusters];
+   mSecondMomClusterTimeBin = new double[numOfClusters];
+   mSecondMomClusterAnode   = new double[numOfClusters];
+   mCluXCov                 = new double[numOfClusters];
+   mCluYCov                 = new double[numOfClusters];
 
-if(mNumOfClusters > 500)
-  setMoreMemory(mNumOfClusters);
+   assert(mCluCharge);               assert(mCluFlag);
+   assert(mMeanClusterTimeBin);      assert(mMeanClusterAnode); 
+   assert(mSecondMomClusterTimeBin); assert(mSecondMomClusterAnode); 
+   assert(mCluXCov);                 assert(mCluYCov);
+   assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
+   assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
+ }	
   
- m_clu = mNumOfClusters-1;                              //keep track of # deconcoluted clusters. 
+ m_clu = numOfClusters-1;                              //keep track of # deconcoluted clusters. 
+ for(int clu = 0; clu < numOfClusters; clu++)          //loop over all clusters for one hybrid 
+ {
+   tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+   numOfMembers        = mHybridCluster->getNumberOfMembers(clu);   //I guess this is the number of anodes
+	      
+   fDriftMom1 = 0; fAnodeMom1 = 0;  fAnodeMom2 = 0; fDriftMom2 = 0; //zero all before each new cluster
+   sumAdc = 0;     Neff = 0.;
+   hit_id = 0;
+   numPixels = 0;  peakADC = 0;
+   igt3 = 0, ano_p = 0, bkt_p = 0, mem_p = 0;     
+   numAnodes = GetLastAnode(clu)-GetFirstAnode(clu)+1;     //this is not the same as numOfMembers for clusters while curl around!!
 
- for(int clu = 0; clu < mNumOfClusters; clu++)          //loop over all clusters for one hybrid 
-   calcMoments(clu);
-
-
- m_clu++;   //make equal to mNumOfClusters     
-
- ClearRawAdc();                                              //have to reset the raw adc's since the number of anodes 
-                                                             //returned for each hybrid will not be the same and are not
-                                                             //guareented to be 240.
-}
-
-
-void StSvtAnalysis::calcMoments(int clu)
-{
- int listAn , actualAn, numAnodes;
- int mseq, Seq, stTimeBin, len, ADC = 0;
- unsigned char* adc;
-
- mNumPixels = 0, mPeakADC = 0,mSumAdc = 0;
- mDriftMom1 = 0, mAnodeMom1 = 0, mDriftMom2 = 0, mAnodeMom2 = 0, mMom0 = 0, mNeff = 0;
-
- int igt3=0, peakPosAn=0, peakPosTim=0, peakMem=0, peakPixel=0;                         //recall 1ADC = 4mV
-
- tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
- mNumOfMembers        = mHybridCluster->getNumberOfMembers(clu);   //I guess this is the number of anodes
-	     
- numAnodes = GetLastAnode(clu)-GetFirstAnode(clu)+1;     //this is not the same as mNumOfMembers for clusters while curl around!!
-
- for(int mem = 0; mem < mNumOfMembers; mem++)         //loop over anodes
+   for(int mem = 0; mem < numOfMembers; mem++)         //loop over anodes
    {
      listAn   =  tempMemberInfo[clu][mem].listAnode;   //what is this??
      mseq     =  tempMemberInfo[clu][mem].seq;
@@ -498,145 +473,130 @@ void StSvtAnalysis::calcMoments(int clu)
        ADC = (int)adc[j];
        (ADC==0 || ADC==255) ? ADC=ADC : ADC=ADC-mPedOffset;   //check this. I subtract mPedOffset to get rid of arbittary offset. Have to
                                                        //do this else we distort the means of small clusters.
-       if (mPeakADC<ADC) { mPeakADC=ADC; peakPosAn=actualAn; peakPosTim=stTimeBin+j; peakMem=mem; peakPixel=j;}
+       if (peakADC<ADC) { peakADC=ADC; ano_p=actualAn; bkt_p=stTimeBin+j; mem_p=mem; seq_p=j;}
 
-       if (ADC>1 && ADC<4000 && (stTimeBin+j)>=0 && (stTimeBin+j)<128 && actualAn>0 && actualAn<=240)
+       if (ADC>1 && ADC<4000 && (stTimeBin+j)>=0 && (stTimeBin+j)<128 && actualAn>=0 && actualAn<240)
        {
-         mNumPixels++;                                  //calculate the various moments
+         numPixels++;                                  //calculate the various moments
          if (ADC>3) igt3++;
-         mDriftMom1 += ADC * (stTimeBin + j + 0.5);
-         mAnodeMom1 += ADC * (actualAn + 0.5);
-         mDriftMom2 += ADC * (stTimeBin + j + 0.5) * (stTimeBin + j + 0.5);
-         mAnodeMom2 += ADC * (actualAn + 0.5) * (actualAn + 0.5);
-         mNeff       += ADC * ADC;
-         mSumAdc     += ADC;
-	 //cout<<"values: "<<ADC<<" "<<actualAn<<" "<<mAnodeMom2<<endl;
+         fDriftMom1 += ADC * (stTimeBin + j + 0.5);
+         fAnodeMom1 += ADC * (actualAn + 0.5);
+         fDriftMom2 += ADC * (stTimeBin + j + 0.5) * (stTimeBin + j + 0.5);
+         fAnodeMom2 += ADC * (actualAn + 0.5) * (actualAn + 0.5);
+         Neff       += ADC * ADC;
+         sumAdc     += ADC;
+	 //cout<<"values: "<<ADC<<" "<<actualAn<<" "<<fAnodeMom2<<endl;
        } 
        else 
        {
-         //mHitId += -1;
+         //hit_id += -1;
          //cout<<"You have funny SVT ADC or timebin or anodes numbers in this cluster"<<endl;
        }
      }	  
    }  //end loop over sequeces from 1 cluster
-
-
- if(numAnodes == 1 || numAnodes == 2)
-   oneOrTwoAnodeMoments(clu, peakPosTim);
-
- finalMoments(clu, numAnodes);
- newCluster(clu, numAnodes,igt3);
-	
-
-}
-
-void StSvtAnalysis::oneOrTwoAnodeMoments(int clu, int peakPosTim)
-{     
+	     
    //make the 2nd moments better for 1 anode hits. Look a little to the right of them for better calc. Sanjeev
-
-   int iAst, iAend, ADC;
-   iAst = GetFirstAnode(clu); iAend = GetLastAnode(clu);
-
-   if (iAst>1 && iAend<240 && peakPosTim>0 && peakPosTim<127){    /*do a better job for the 1 anode hits*/
-     for (int i=iAst-1; i<=iAend+1; i++)                 /*This is dangerous as we do it blindly*/
-       {                                                 /*It will mess up for a small fraction of hits*/ 
-        if (i==iAst || i==iAend)  continue;               /*when another cluster is close by*/ 
-        for (int j=peakPosTim-1; j<=peakPosTim+1; j++)
-         {    
-          ADC = m_Raw[i][j];
-          if (ADC>0 && ADC<mPeakADC/2)                                      /*since we do this blindly lets at least put*/ 
-          {                                                                /*some safety checks in*/ 
-           mSumAdc     += ADC;
-           mDriftMom1 += ADC * (j+0.5);
-           mAnodeMom1 += ADC * (i+0.5);
-           mDriftMom2 += ADC * (j+0.5) * (j+0.5);
-           mAnodeMom2 += ADC * (i+0.5) * (i+0.5);
-           mNeff       += ADC * ADC;
+   if (numAnodes==1  && ano_p>0 && ano_p<239 && bkt_p>0 && bkt_p<127) {    /*do a better job for the 1 anode hits*/
+     for (int i=ano_p-1; i<=ano_p+1; i++) {                                /*note we are doing this blindly*/
+       for (int j=bkt_p-1; j<=bkt_p+1; j++) {                                
+         if (i==ano_p && (j==bkt_p || j==bkt_p-1 || j==bkt_p+1)  ) continue;
+         ADC = m_Raw[i][j];
+         if (ADC>0 && ADC<peakADC/2)                                      /*since we do this blindly lets at least put*/ 
+         {                                                                /*some safety checks in*/ 
+           sumAdc     += ADC;
+           fDriftMom1 += ADC * (j+0.5);
+           fAnodeMom1 += ADC * (i+0.5);
+           fDriftMom2 += ADC * (j+0.5) * (j+0.5);
+           fAnodeMom2 += ADC * (i+0.5) * (i+0.5);
+           Neff       += ADC * ADC;
          } 
        }
      }
 
    }
-}
 
+   //make the 2nd moments better for 2 anode hits. Look a little to the right of them for better calc. Sanjeev
+   iAst = GetFirstAnode(clu); iAend = GetLastAnode(clu);
+   if (numAnodes==2 && iAst>0 && iAend<239 && bkt_p>0 && bkt_p<127) {       /*This is dangerous as we do it blindly*/
+     for (int i=iAst-1; i<=iAend+1; i++) {                                  /*It will mess up for a small fraction of hits*/
+       for (int j=bkt_p-1; j<=bkt_p+1; j++) {                               /*when another cluster is close by*/ 
+         if ( (i==iAst || i==iAend) && (j==bkt_p || j==bkt_p-1 || j==bkt_p+1)  ) continue;
+         ADC = m_Raw[i][j];
+         if (ADC>0 && ADC<peakADC/2)                                        /*since we do this blindly lets at least put*/
+         {                                                                  /*some safety checks in*/
+           sumAdc     += ADC;
+           fDriftMom1 += ADC * (j+0.5);
+           fAnodeMom1 += ADC * (i+0.5);
+           fDriftMom2 += ADC * (j+0.5) * (j+0.5);
+           fAnodeMom2 += ADC * (i+0.5) * (i+0.5);
+           Neff       += ADC * ADC;
+         } 
+       }
+     }
+   }
 
-void StSvtAnalysis::finalMoments(int clu,int numAnodes)
-{
-
-   if (mSumAdc>3)  //fianlize the moment calculation and also estiame the cov's. 
+   if (sumAdc>3)  //fianlize the moment calculation and also estiame the cov's. 
    {
-     mMom0 = (double)mSumAdc;
-     mDriftMom1 = (double)mDriftMom1/mSumAdc;
-     mAnodeMom1 = (double)mAnodeMom1/mSumAdc;
-     mDriftMom2 = sqrt((double)mDriftMom2/mSumAdc - mDriftMom1*mDriftMom1); /*note no N/N-1*/
-     mAnodeMom2 = sqrt((double)mAnodeMom2/mSumAdc - mAnodeMom1*mAnodeMom1);
-     if (mDriftMom2>1000 || mDriftMom2<0 || mAnodeMom2>1000 || mAnodeMom2<0)   /*calc fails occasionally*/
+     fMom0 = (double)sumAdc;
+     fDriftMom1 = (double)fDriftMom1/sumAdc;
+     fAnodeMom1 = (double)fAnodeMom1/sumAdc;
+     fDriftMom2 = sqrt((double)fDriftMom2/sumAdc - fDriftMom1*fDriftMom1); /*note no N/N-1*/
+     fAnodeMom2 = sqrt((double)fAnodeMom2/sumAdc - fAnodeMom1*fAnodeMom1);
+     if (fDriftMom2>1000 || fDriftMom2<0 || fAnodeMom2>1000 || fAnodeMom2<0)   /*calc fails occasionally*/
      {
-       mDriftMom2 = -999; mAnodeMom2 = -999; mNeff = 0;
+       fDriftMom2 = -999; fAnodeMom2 = -999; Neff = 0;
      }
 
-     if (mNeff>1)                                                     //the ones which are not are really bad 
+     if (Neff>1)                                                     //the ones which are not are really bad 
      {
-       mNeff = (double) mSumAdc*mSumAdc/mNeff;  
-       if (mNeff>1.5)                                                 //make sure calc. does not mess up
+       Neff = (double) sumAdc*sumAdc/Neff;  
+       if (Neff>1.5)                                                 //make sure calc. does not mess up
        {
-         mDriftMom2 = mDriftMom2 * sqrt( (mNeff/(mNeff-1)) );
-         mAnodeMom2 = mAnodeMom2 * sqrt( (mNeff/(mNeff-1)) );
-         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(mNeff); /*is 0 for 1 drift wonders. Units: cm*/
-         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(mNeff); /*is 0 for 1 anode wonders. Units: cm*/
+         fDriftMom2 = fDriftMom2 * sqrt( (Neff/(Neff-1)) );
+         fAnodeMom2 = fAnodeMom2 * sqrt( (Neff/(Neff-1)) );
+         if (fDriftMom2!=0) Y_err = 260.e-4*fDriftMom2/sqrt(Neff); /*is 0 for 1 drift wonders. Units: cm*/
+         if (fAnodeMom2!=0) X_err = 250.e-4*fAnodeMom2/sqrt(Neff); /*is 0 for 1 anode wonders. Units: cm*/
        }
    
-       if (numAnodes==1 && mAnodeMom2==0) mAnodeMom2=0.288;    //bin width/sqrt(12)
-       if ( (GetLastTimeBin(clu)-GetFirstTimeBin(clu))==0 && mDriftMom2==0) mDriftMom2=0.288;  //bin width/sqrt(12)
+       if (numAnodes==1 && fAnodeMom2==0) fAnodeMom2=0.288;    //bin width/sqrt(12)
+       if ( (GetLastTimeBin(clu)-GetFirstTimeBin(clu))==0 && fDriftMom2==0) fDriftMom2=0.288;  //bin width/sqrt(12)
 
      }
      else
      {
-       mHitId += 8;
-       mMom0      = -999.;
-       mDriftMom1 = -999.;
-       mAnodeMom1 = -999.;
-       mDriftMom2 = -999.;
-       mAnodeMom2 = -999.;
+       hit_id += 8;
+       fMom0      = -999.;
+       fDriftMom1 = -999.;
+       fAnodeMom1 = -999.;
+       fDriftMom2 = -999.;
+       fAnodeMom2 = -999.;
      }
    }
-
-}
-
-
-void StSvtAnalysis::newCluster(int clu, int numAnodes, int igt3)
-{
-
-    int iQual, iRetu;
-    static int iRows=1, iCols=1;
 
    //These are all the objects used by the Maker to make the cluster object later.
    mCluID[clu]                   = clu;            //unique ID
    mCluDeconvID[clu]             = clu;            //at this point the origional cluster and deconv. one are the same
-   mCluCharge[clu]               = mMom0;          //charge
-   mCluFlag[clu]                 = mHitId;         //this might be modified below. cafefull
-   mMeanClusterTimeBin[clu]      = mDriftMom1;     //mean time
-   mMeanClusterAnode[clu]        = mAnodeMom1;     //mean anode
-   mSecondMomClusterTimeBin[clu] = mDriftMom2;     //mean 2nd moment time
-   mSecondMomClusterAnode[clu]   = mAnodeMom2;     //mean 2nd moment anode
-   mCluXCov[clu]                 = 1.*mX_err*mX_err; //error in Anode
-   mCluYCov[clu]                 = 4.*mY_err*mX_err; //error in Time is made arbitarily 2 time larger (4 time for cov). Check dist.
-   mCluPeakAdc[clu]              = mPeakADC;        //peak ADC
-   mCluNumPixels[clu]            = mNumPixels;      //number of pixels
+   mCluCharge[clu]               = fMom0;          //charge
+   mCluFlag[clu]                 = hit_id;         //this might be modified below. cafefull
+   mMeanClusterTimeBin[clu]      = fDriftMom1;     //mean time
+   mMeanClusterAnode[clu]        = fAnodeMom1;     //mean anode
+   mSecondMomClusterTimeBin[clu] = fDriftMom2;     //mean 2nd moment time
+   mSecondMomClusterAnode[clu]   = fAnodeMom2;     //mean 2nd moment anode
+   mCluXCov[clu]                 = 1.*X_err*X_err; //error in Anode
+   mCluYCov[clu]                 = 4.*Y_err*X_err; //error in Time is made arbitarily 2 time larger (4 time for cov). Check dist.
+   mCluPeakAdc[clu]              = peakADC;        //peak ADC
+   mCluNumPixels[clu]            = numPixels;      //number of pixels
    mCluNumAnodes[clu]            = numAnodes;      //number of anodes including loop backs.
    mHybridNum[clu]               = m_hybIndex;     //hybrid index.
 
-
-
    for (int i1=0;i1<iRows;i1++)        //be more clever in the futre but for now....
-    {                                 //zero out previous box
-     for (int j1=0;j1<iCols;j1++)
-     {
+     {                                 //zero out previous box
+    for (int j1=0;j1<iCols;j1++)
+    {
       m_Pixels[i1][j1] = 0;            //used by deconvolution
       m_Shadow[i1][j1] = 0;
-     }  
+    }  
    }
-
 
    //size of search area for deconvolution
    iRows = mCluLastAnode[clu] - mCluFirstAnode[clu] +1+2;      //+2 to account for 0 paddind around side
@@ -644,19 +604,22 @@ void StSvtAnalysis::newCluster(int clu, int numAnodes, int igt3)
 
    Fill_Pixel_Array(clu);                                      //Fill 2D array with ADC's. Easier for the search in this format.
    iQual = CatagorizeCluster(iRows,iCols,igt3,clu);            //Classify the cluster as good or bad.
-   mHitId += iQual;                                            //Update previous classification
-   mCluFlag[clu] = mHitId;                                     //Set flag
-   if (mHitId<4 && m_deconv==1) iRetu = Deconvolve_Cluster(iRows, iCols, clu);   //do the deconvolution only for some candidates
+   hit_id += iQual;                                            //Update previous classification
+   mCluFlag[clu] = hit_id;                                     //Set flag
+   if (hit_id<4 && m_deconv==1) iRetu = Deconvolve_Cluster(iRows, iCols, clu);   //do the deconvolution only for some candidates
    // Print_Pixels(iRows, iCols, clu);                         //creates nice picture of cluster with 0's padding the edges
       
    //if (hit_id<4) {                                        //only good hits. NO NO. Look at all hits.
-   if( (int)(.5+mAnodeMom1) > 0 && (int)(.5+mAnodeMom1) <= 241 )
-     m_countBadAn[m_hybIndex][(int)(.5+mAnodeMom1)]++;         //count the noisy anodes and time for all hits whether good or bad
-     if(  (int)(.5+mDriftMom1) >= 0 && (int)(.5+mDriftMom1) <= 128)
-     m_countBadTb[m_hybIndex][(int)(.5+mDriftMom1)]++;         //invstigate this.
- 
-     //}  
+   m_countBadAn[m_hybIndex][(int)(.5+fAnodeMom1)]++;         //count the noisy anodes and time for all hits whether good or bad
+   m_countBadTb[m_hybIndex][(int)(.5+fDriftMom1)]++;         //invstigate this.
+   //}  
 
+ }  //end loop over cluster for this hybrid
+ m_clu++;   //make equal to numOfClus     
+
+ ClearRawAdc();                                              //have to reset the raw adc's since the number of anodes 
+                                                             //returned for each hybrid will not be the same and are not
+                                                             //guareented to be 240.
 
   //cout<<"******* Moment Analysis finished *******"<<endl;
   
@@ -1180,11 +1143,11 @@ int StSvtAnalysis::Fill_Pixel_Array(int clu)
   m_col_p = 0; m_row_p = 0; m_adc_p = 0;
 
   tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
-  mNumOfMembers        = mHybridCluster->getNumberOfMembers(clu);
+  numOfMembers        = mHybridCluster->getNumberOfMembers(clu);
 
   //cout<<"in fill: number of anodes: "<<numAnodes<<endl;
 
-  for(int mem = 0; mem < mNumOfMembers; mem++)            //loop over anodes (can be same anode if curls!!)
+  for(int mem = 0; mem < numOfMembers; mem++)            //loop over anodes (can be same anode if curls!!)
   {
     listAn   =  tempMemberInfo[clu][mem].listAnode; 
     mseq     =  tempMemberInfo[clu][mem].seq;
@@ -1255,8 +1218,8 @@ int StSvtAnalysis::FillRawAdc()
 
 void StSvtAnalysis::ClearRawAdc()
 {
-  for (int i1=0;i1<242;i1++) {
-    for (int j1=0;j1<130;j1++) {
+  for (int i1=0;i1<40;i1++) {
+    for (int j1=0;j1<128;j1++) {
       m_Raw[i1][j1] = 0;
     }
   }
@@ -1272,13 +1235,9 @@ void StSvtAnalysis::SetBadAnTb(int nClus)
     iHyb = mHybridNum[i];
     iAn  = (int)(.5+mMeanClusterAnode[i]);
     iTb  = (int)(.5+mMeanClusterTimeBin[i]);
-    if( iAn >=1 && iAn < 242){
-      if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
-    }
-    if( iTb >=0 && iTb < 129){
-      if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}//cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
-      //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
-    }
+    if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
+    if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}// cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
+    //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
   }
 
 }
@@ -1395,9 +1354,9 @@ void StSvtAnalysis::Report(int index)
  cout<<"##############################################################"<<endl;
  cout<<"\n";
  
- mNumOfClusters = mHybridCluster->getNumberOfClusters();
+ numOfClusters = mHybridCluster->getNumberOfClusters();
 
- if(mNumOfClusters == 0)                     
+ if(numOfClusters == 0)                     
    {
     cout <<"+++++++++ Clusters found:  None "<<"\n";
     cout<<"\n";
@@ -1405,12 +1364,12 @@ void StSvtAnalysis::Report(int index)
 
  else {
 
- for(int clu = 0; clu <  mNumOfClusters; clu++)
+ for(int clu = 0; clu <  numOfClusters; clu++)
    { 
-    mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
+    numOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
     cout << "cluster index = "<<' '<< clu <<"\n";
-    cout << "Number of Members = " <<' '<<  mNumOfMembers <<"\n";
+    cout << "Number of Members = " <<' '<<  numOfMembers <<"\n";
     cout << "First anode number =" <<' '<<mCluFirstAnode[clu]<<"\n";
     cout << "Last anode number ="<<' '<<mCluLastAnode[clu]<<"\n";
     cout << "minimum time bucket =" <<' '<<mCluFirstTimeBin[clu]<<"\n";
@@ -1424,7 +1383,7 @@ void StSvtAnalysis::Report(int index)
  cout<<"------- Moment Analysis Results for hybrid "<<index<<" ------"<<endl;
  cout<<"****************************************************"<<endl;
  
- for( int clu = 0; clu <  mNumOfClusters; clu++)
+ for( int clu = 0; clu <  numOfClusters; clu++)
    {
     cout<<"mAverageHybAn"<<"["<<clu<<"] ="<<mMeanClusterAnode[clu]<<endl;
     cout<<"mAverageTimeBin"<<"["<<clu<<"] ="<<mMeanClusterTimeBin[clu]<<endl;

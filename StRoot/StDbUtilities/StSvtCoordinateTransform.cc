@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.4 2000/10/05 21:51:43 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.3 2000/08/26 20:37:59 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -193,7 +193,6 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
      for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
 
        if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer)) break;
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer+1)) break;
      }
 
      b.setWafer(NWafer);
@@ -282,10 +281,10 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   // ladder 1even though its at r=10.4 at 12 0'Clock
   
   if( mgeom[0].id > 5000) ladderRangeLo = 1; 
-  
+
   Found = 0;
-  ibarrel = (barrel*2)-1;
-  while(ibarrel<=barrel*2 && Found == 0){
+  ibarrel = (barrel*2)-2;
+  while(ibarrel<barrel*2 && Found == 0){
     ibarrel++;
     for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
@@ -469,8 +468,7 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
   
   double a=1.80;
   double b=240000;
-  // Correct value double d=0.27;
-  double d = 0.;
+  double d=0.27;
   double l=mshape[0].shape[0];
 
 
@@ -514,8 +512,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
   
   double a=1.80;
   double b=240000;
-  //COrrect in principle double d=0.27;
-  double d=0;
+  double d=0.27;
   double l=mshape[0].shape[0];
 
 
@@ -528,7 +525,8 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
   
   v1=v1*0.8;  
   
-  t= x/v1;
+  t=x*mparam->fsca;
+  t /=v1;
 
   if (x>d) t = (x-d)/v2 + d/v1;
   

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.9 2000/10/09 21:56:16 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.7 2000/03/17 17:22:53 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
- * Revision 1.9  2000/10/09 21:56:16  laue
- * Helens new cuts
- *
  * Revision 1.7  2000/03/17 17:22:53  laue
  * Roberts new three particle correlations implemented.
  *
@@ -54,57 +51,8 @@
 ClassImp(helensV0Cut)
 #endif
 
-
 helensV0Cut::helensV0Cut(){
   mNV0sPassed = mNV0sFailed = 0;
-  
-  mV0MassRange[0] =0;
-  mV0MassRange[1]=10000;
-  
-  mdcaV0daughters[0]=0; 
-  mdcaV0daughters[1]=1000;
-  
-  mdcaV0ToPrimVertex[0]=0;
-  mdcaV0ToPrimVertex[1]=1000;
-
-  mdecayLengthV0[0]=0;
-  mdecayLengthV0[1]=10000;
-  
-  mtpcHitsPos[0]=0;
-  mtpcHitsPos[1]=1000;
-  
-  mtpcHitsNeg[0]=0;
-  mtpcHitsNeg[1]=1000;
-  
-  
-  mdcaPosToPrimVertex[0]=0;
-  mdcaPosToPrimVertex[1]=1000;
-  
-  mdcaNegToPrimVertex[0]=0;
-  mdcaNegToPrimVertex[1]=10000;
-  
-  mptArmV0[0]=0;
-  mptArmV0[1]=100;
-  
-  malphaV0[0]=-10;
-  malphaV0[1]=10;
-
-  mChargedEdx=0;
-  mdEdx[0]=0;
-  mdEdx[1]=-10;
-  mdEdx[0]=0;
-  mdEdx[1]=-10;
-
-  mPt[0]=0; 
-  mPt[1]=100000;
-
-  mRapidity[0]=-100000;
-  mRapidity[1]=100000;
-
-  V0Type = "K0Short";
-  mMass  = 0.498;
-
-
 }
 //------------------------------
 //helensV0Cut::~helensV0Cut(){
@@ -125,9 +73,6 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
   cout << " * dcaNegToPrimVertex " << V0->dcaNegToPrimVertex();
   cout << " * ptArmV0 " << V0->ptArmV0();
   cout << " * alphaV0 " << V0->alphaV0();
-  cout << " * dEdxPos " << V0->dedxPos();
-  cout << " * dEdxNeg " << V0->dedxNeg();
-  cout << endl;
 #endif
 
 
@@ -135,16 +80,16 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
   // Find out what particle is desired
 
   if( strstr(V0Type,"k") || strstr(V0Type,"K")){
-     if( V0->massK0Short() < (mV0MassRange[1]) && 
-	 V0->massK0Short() > (mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massK0Short() < (mMass+mV0MassRange[1]) && 
+	 V0->massK0Short() > (mMass-mV0MassRange[0]) ) inMassRange=1;
   }
   else if( (strstr(V0Type,"anti") || strstr(V0Type,"ANTI"))){
-     if( V0->massAntiLambda() < (mV0MassRange[1]) && 
-	 V0->massAntiLambda() > (mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massAntiLambda() < (mMass+mV0MassRange[1]) && 
+	 V0->massAntiLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
   }
   else if( (strstr(V0Type,"ambda") || strstr(V0Type,"AMBDA"))){
-     if( V0->massLambda() < (mV0MassRange[1]) && 
-	 V0->massLambda() > (mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massLambda() < (mMass+mV0MassRange[1]) && 
+	 V0->massLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
   }
 
 
@@ -169,16 +114,6 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
                   (V0->alphaV0()   > malphaV0[0]) &&
                   (V0->alphaV0()   < malphaV0[1]));
 
-  if(goodPID){
-    if( mChargedEdx <0){
-      goodPID = ( (V0->dedxNeg() > (mdEdx[0]*V0->ptNeg()+mdEdx[1])) &&
-		  (V0->dedxNeg() > (mdEdx[2]*V0->ptNeg()+mdEdx[3])));
-	}
-    if( mChargedEdx > 0){
-      goodPID = ( (V0->dedxPos() > (mdEdx[0]*V0->ptPos()+mdEdx[1])) &&
-		  (V0->dedxPos() > (mdEdx[2]*V0->ptPos()+mdEdx[3])));
-    }
-  }
 
   if (goodPID){
     float TEnergy = sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
@@ -221,9 +156,6 @@ StHbtString helensV0Cut::Report(){
   char Ctemp[100];
   sprintf(Ctemp,"--helensV0Cut--\n Particle mass:\t%E\n",this->Mass());
   Stemp=Ctemp;
-  sprintf(Ctemp,"V0 mass range:\t%E - %E\n",mV0MassRange[0],
-	  mV0MassRange[1]);
-  Stemp+=Ctemp;
   sprintf(Ctemp,"dcaV0daughters:\t%E - %E\n",mdcaV0daughters[0],
 mdcaV0daughters[1]);
   Stemp+=Ctemp;
@@ -242,8 +174,6 @@ mdcaPosToPrimVertex[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"dcaNegToPrimVertex:\t%E - %E\n",mdcaNegToPrimVertex[0],
 mdcaNegToPrimVertex[1]);
-  Stemp+=Ctemp;
-  sprintf(Ctemp,"dedx>:\t%E pt+%E and \t%E pt+ %E for Charge %E\n ",mdEdx[0],mdEdx[1],mdEdx[2],mdEdx[3],mChargedEdx);
   Stemp+=Ctemp;
   sprintf(Ctemp,"ptArmV0:\t%E - %E\n",mptArmV0[0],mptArmV0[1]);
   Stemp+=Ctemp;

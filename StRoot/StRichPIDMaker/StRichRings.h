@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichRings.h,v 2.2 2000/11/01 17:42:08 lasiuk Exp $
+ * $Id: StRichRings.h,v 2.0 2000/08/09 16:26:20 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.h,v $
- *  Revision 2.2  2000/11/01 17:42:08  lasiuk
- *  return containers and 3vectors by reference where applicable
+ *  Revision 2.0  2000/08/09 16:26:20  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -23,7 +23,7 @@
  **********************************************************/
 
 #ifndef StRichRings_H
-#define StRichRings_H
+#include "StThreeVector.hh"
 
 #include "StParticleDefinition.hh"
 #include <vector>
@@ -35,21 +35,21 @@ class TPolyLine;
 
 class StRichRings {
 
-public:
-  StRichRings(StRichTrack* , StParticleDefinition* );  
+  vector<StThreeVector<double> > getInnerPoints(int );
+  vector<StThreeVector<double> > getOuterPoints(int );
   ~StRichRings();
   
-  vector<StThreeVectorF>& getInnerPoints(int );
-  vector<StThreeVectorF>& getOuterPoints(int );
+  vector<StThreeVectorF > getInnerPoints(int );
+  vector<StThreeVectorF > getOuterPoints(int );
 
   StRichTrack* getTrack();
   StParticleDefinition* getParticle();
   
 private:
-  StRichTrack*          mTrack;
-  StParticleDefinition* mParticle;
+  vector<StThreeVector<double> > mInnerPoints;
+  vector<StThreeVector<double> > mOuterPoints;  
   StRichGeometryDb*     myGeometryDb;
-
+  bool inBounds(StThreeVector<double>& );  
   vector<StThreeVectorF > mInnerPoints;
   vector<StThreeVectorF > mOuterPoints;  
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.2 2000/09/30 16:14:31 fisyak Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.1 2000/06/06 18:08:31 jml Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
- * Revision 1.2  2000/09/30 16:14:31  fisyak
- * Add hp
- *
  * Revision 1.1  2000/06/06 18:08:31  jml
  * Initial version of SVT Readers (author: marcello munholz, helen caines)
  *
@@ -65,7 +62,7 @@ int classname(Bank_SVTANODK)::swap()
 
   //  if(!iret) return 0;
 
-#if defined (sparc) || defined (__hpux)
+#ifdef sparc
   if(!iret) {
     return 0;
   }

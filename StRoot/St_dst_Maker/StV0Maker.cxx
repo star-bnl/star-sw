@@ -2,20 +2,8 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.29 2000/10/12 18:26:38 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.25 2000/07/07 23:06:48 caines Exp $
 // $Log: StV0Maker.cxx,v $
-// Revision 1.29  2000/10/12 18:26:38  genevb
-// Edit some warning messages
-//
-// Revision 1.28  2000/10/12 14:52:14  genevb
-// Remove vertex table entries when trimming V0s
-//
-// Revision 1.27  2000/09/01 15:00:23  genevb
-// Reset dcaV0 to 0.8cm
-//
-// Revision 1.26  2000/08/31 21:47:08  genevb
-// Allow V0s to be trimmed after finding Xis
-//
 // Revision 1.25  2000/07/07 23:06:48  caines
 // Increase memory allocation for v0s
 //
@@ -102,13 +90,6 @@
 #include "global/St_ev0_am3_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 
-#include "tables/St_dst_xi_vertex_Table.h"
-#include "tables/St_dst_tkf_vertex_Table.h"
-
-St_dst_xi_vertex* dst_xi_vertex = 0;
-St_dst_tkf_vertex* dst_tkf_vertex = 0;
-Int_t rsize,rvsize,lastV0;
-
 ClassImp(StV0Maker)
   
   //_____________________________________________________________________________
@@ -122,15 +103,14 @@ StV0Maker::~StV0Maker(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Init(){
-  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3); // For finding V0s, even for Xis
-  m_ev0parT = new St_ev0_ev0par2("ev0parT",3); // For trimming to pure V0s
+  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
   {
     ev0_ev0par2_st row;
     memset(&row,0,m_ev0par2->GetRowSize());
   // TPC only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.8; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -139,37 +119,28 @@ Int_t StV0Maker::Init(){
       row.dcapnmin=       0.0; // Min. value of tracks at interaction for ev03;
     }
     row.n_point  =         11; // Min. number of TPC hits on a track ;
-    m_ev0parT->AddAt(&row,0);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,0);
     memset(&row,0,m_ev0par2->GetRowSize());
   //SVT only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        1.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin=         100; // Min. value of tracks at interaction ;
-    row.n_point  =          1; // Min. number of SVT hits on a track ;
-    m_ev0parT->AddAt(&row,1);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         100; // Min. value of tracks at interaction ;
+    row.n_point  =         1; // Min. number of SVT hits on a track ;
     m_ev0par2->AddAt(&row,1);
     memset(&row,0,m_ev0par2->GetRowSize());
   // SVT+TPC cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin =        0.7; // Min. value of tracks at interaction ;
     row.n_point  =         11; // Min. number of SVT+TPC hits on a track ;
-    m_ev0parT->AddAt(&row,2);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,2);
   }
   AddRunCont(m_ev0par2);
@@ -183,8 +154,6 @@ Int_t StV0Maker::Make(){
   
   int iMake = kStOK;
   int iRes = 0;
-  vertex = 0;
-  dst_v0_vertex = 0;
   
   St_DataSet     *match = GetDataSet("match"); 
   if (!match) {
@@ -205,13 +174,15 @@ Int_t StV0Maker::Make(){
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);
-  vertex   = (St_dst_vertex *) primaryI("vertex");
+  St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
     gMessMgr->Warning() << "StV0Maker::Make(): vertex is missing" << endm;
     return kStWarn;
   }
   
-  St_ev0_eval   *ev0_eval  = 0;
+  St_dst_v0_vertex *dst_v0_vertex  = 0;
+  St_ev0_eval      *ev0_eval = 0;
+  
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   St_tte_eval   *evaltrk   = 0;
@@ -307,140 +278,4 @@ Int_t StV0Maker::Make(){
   } // For-loop to find primary vertex
   return iMake;
 }
-//_____________________________________________________________________________
-void StV0Maker::Trim(){
-  if (!((dst_v0_vertex) && (vertex))) return;
 
-  // Get Xi vertices
-  St_DataSet *xi = GetDataSet("xi"); 
-  if (!xi) return;
-  St_DataSetIter xiI(xi);         
-  dst_xi_vertex = (St_dst_xi_vertex *) xiI("dst_xi_vertex");
-  if (!dst_xi_vertex) return;
-
-  // Get Kink vertices (if they are done)
-  St_DataSet *kink = GetDataSet("kink"); 
-  if (kink) {
-    St_DataSetIter kinkI(kink);         
-    dst_tkf_vertex = (St_dst_tkf_vertex *) kinkI("dst_tkf_vertex");
-  } else
-    dst_tkf_vertex = 0;
-
-  Int_t ixi = dst_xi_vertex->GetNRows() - 1;
-  ev0_ev0par2_st* pars = m_ev0parT->GetTable(0);
-  rsize = dst_v0_vertex->GetRowSize();
-  rvsize = vertex->GetRowSize();
-
-  for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
-    dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
-    Bool_t isXiV0 = (v0row->dcav0 < 0);
-    Bool_t passV0 = (TMath::Abs(v0row->dcav0) < pars->dcav0) &&
-        (v0row->dcap > pars->dcapnmin) && (v0row->dcan > pars->dcapnmin);
-
-    if (isXiV0 && passV0) {
-      v0row->dcav0 = - (v0row->dcav0);
-    } else if (!(isXiV0 || passV0)) {
-
-      // Want to delete this V0 and vertex
-      // Take last good V0 and move it here
-      Bool_t notGood = kTRUE;
-      lastV0 = dst_v0_vertex->GetNRows();
-      Long_t idVert = v0row->id_vertex;
-      while (notGood) {
-        if ((--lastV0)==iv0) {
-          break;
-	}
-        dst_v0_vertex_st* v0rowL = dst_v0_vertex->GetTable(lastV0);
-        isXiV0 = (v0rowL->dcav0 < 0);
-        passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&
-            (v0rowL->dcap > pars->dcapnmin) && (v0rowL->dcan > pars->dcapnmin);
-	if (isXiV0 || passV0) {
-	  notGood = kFALSE;
-
-	  // Move row to empty slot
-	  Long_t newId = v0row->id;
-	  Long_t oldId = v0rowL->id;
-	  v0rowL->id = newId;
-	  memcpy(v0row,v0rowL,rsize);
-	  
-	  if (isXiV0) { // Fix index in any Xis using this V0
-	    // Will assume that Xis are ordered by increasing V0 index
-	    while (ixi>=0) {
-              dst_xi_vertex_st* xirow = dst_xi_vertex->GetTable(ixi);
-	      if (xirow->id_v0 < oldId) break;
-	      if (xirow->id_v0 == oldId) xirow->id_v0 = newId;
-              ixi--;
-	    }
-	  }
-	} else ChopVertex(v0rowL->id_vertex);
-      }
-      dst_v0_vertex->SetNRows(lastV0);
-      ChopVertex(idVert);
-      iv0--; // Repeat analysis of this V0
-    }
-  }
-
-  dst_v0_vertex->Purge();
-  vertex->Purge();
-  gMessMgr->Info() << "StV0Maker::Trim(): saving " << dst_v0_vertex->GetNRows()
-                   << " V0 candidates" << endm;
-}
-//_____________________________________________________________________________
-void StV0Maker::ChopVertex(Long_t idVert){
-
-  // Want to delete this vertex
-  // Take last vertex and move it here
-  Int_t ivert = (Int_t) idVert - 1;
-  Int_t lastVert = vertex->GetNRows();
-  if ((--lastVert)!=ivert) {
-    dst_vertex_st* vertrow = vertex->GetTable(ivert);
-    dst_vertex_st* vertrowL = vertex->GetTable(lastVert);
-    Long_t idVertL = vertrowL->id;
-    memcpy(vertrow,vertrowL,rvsize);
-    vertrow->id = idVert;
-    Int_t i;
-    switch (vertrowL->vtx_id) {
-      case kV0DecayIdentifier : {
-        for (i = lastV0; i>0 ; i--) {
-          dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(i-1);
-          if (v0row->id_vertex == idVertL) {
-            v0row->id_vertex = idVert;
-            break;
-          }
-        }
-        if (!i)
-          gMessMgr->Warning("StV0Maker::ChopVertex(): v0 vertex not found");
-        break; }
-      case kXiDecayIdentifier : {
-        for (i = dst_xi_vertex->GetNRows(); i>0 ; i--) {
-          dst_xi_vertex_st* xirow = dst_xi_vertex->GetTable(i-1);
-          if (xirow->id_xi == idVertL) {
-            xirow->id_xi = idVert;
-            break;
-          }
-        }
-        if (!i)
-          gMessMgr->Warning("StV0Maker::ChopVertex(): xi vertex not found");
-        break; }
-      case kKinkDecayIdentifier : {
-	if (!dst_tkf_vertex) {
-	  gMessMgr->Warning() << "StV0Maker::ChopVertex(): "
-	    << " Deleting kink vertex, but kinks not done" << endm;
-          break;
-	}
-        for (i = dst_tkf_vertex->GetNRows(); i>0 ; i--) {
-          dst_tkf_vertex_st* kinkrow = dst_tkf_vertex->GetTable(i-1);
-          if (kinkrow->id_vertex == idVertL) {
-            kinkrow->id_vertex = idVert;
-            break;
-          }
-        }
-        if (!i)
-          gMessMgr->Warning("StV0Maker::ChopVertex(): kink vertex not found");
-        break; }
-      default : gMessMgr->Warning() << "StV0Maker::ChopVertex(): "
-	    << " Moving vertex of unkown type=" << vertrowL->vtx_id << endm;
-    }
-  }
-  vertex->SetNRows(lastVert);
-}

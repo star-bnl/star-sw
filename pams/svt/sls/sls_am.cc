@@ -6,6 +6,7 @@ long type_of_call sls_am_(
   TABLE_HEAD_ST           *geom_h,       SVG_GEOM_ST             *geom,
   TABLE_HEAD_ST       *geom_par_h,   SDM_GEOM_PAR_ST         *geom_par,
   TABLE_HEAD_ST           *ctrl_h,       SLS_CTRL_ST             *ctrl ,
+  TABLE_HEAD_ST            *spt_h,        SLS_SPT_ST              *spt ,
   TABLE_HEAD_ST          *strip_h,      SLS_STRIP_ST            *strip )
 {
   cout<<"#################################################"<<endl;
@@ -20,6 +21,8 @@ long type_of_call sls_am_(
   int inactiveHit = mySsd->removeInactiveHitInTable(svt_hit_h, svt_hit);
   cout<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endl;
   mySsd->chargeSharingOverStrip(ctrl);
+  int nSsdSpts = mySsd->writePointToTable(spt_h, spt);
+  cout<<"####    ->  "<<nSsdSpts<<" HITS WRITTEN INTO TABLE     ####"<<endl;
   int nSsdStrips = mySsd->writeStripToTable(strip_h, strip);
   cout<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endl;
   cout<<"####        END OF SSD LAZY SIMULATOR        ####"<<endl;

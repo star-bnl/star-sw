@@ -1,11 +1,5 @@
-// $Id: St_QA_Maker.cxx,v 2.2 2000/09/08 18:55:54 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.0 2000/08/25 16:02:41 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
-// Revision 2.2  2000/09/08 18:55:54  lansdell
-// turned on FTPC primary track histograms
-//
-// Revision 2.1  2000/09/01 16:59:03  genevb
-// Change for V0 plots
-//
 // Revision 2.0  2000/08/25 16:02:41  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -896,6 +890,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_ppsi_phiTS->Fill(t->phi0,t->psi);
         }
 
+/* The following is for the FTPC, which doesn't do primary tracking yet.
 //  now fill all FTPC East histograms ------------------------------------------------
         if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
 	
@@ -956,6 +951,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
         hists->m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
         }
+*/
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);
@@ -1124,7 +1120,6 @@ void St_QA_Maker::MakeHistVertex(){
     hists->m_v0->Fill(dst_v0_vertex->GetNRows());
 
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
-      if (v0->dcav0 < 0.) continue;
       Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
 	+ v0->pos_pz*v0->pos_pz;
       Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py

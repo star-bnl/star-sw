@@ -1,8 +1,5 @@
-// $Id: StChain.h,v 1.34 2000/09/27 19:34:59 fisyak Exp $
+// $Id: StChain.h,v 1.33 2000/07/26 20:58:22 fine Exp $
 // $Log: StChain.h,v $
-// Revision 1.34  2000/09/27 19:34:59  fisyak
-// Temporal fix to get Run/EventNo from dst
-//
 // Revision 1.33  2000/07/26 20:58:22  fine
 // StChain::GetOption virtual dummy methods have been introduced
 //
@@ -98,7 +95,6 @@ class StChain : public StMaker {
 private:
    Int_t               m_Version;    	//StChain version number
    Int_t               m_VersionDate;   //StChain version date
- protected:
    TDataSet         *m_EvtHddr;     	//Header of event
 public:
                       StChain(const char *name="bfcChain");
@@ -115,7 +111,7 @@ public:
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.34 2000/09/27 19:34:59 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.33 2000/07/26 20:58:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 

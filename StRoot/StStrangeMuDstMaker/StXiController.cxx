@@ -1,8 +1,5 @@
-// $Id: StXiController.cxx,v 3.3 2000/09/18 19:25:19 genevb Exp $
+// $Id: StXiController.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StXiController.cxx,v $
-// Revision 3.3  2000/09/18 19:25:19  genevb
-// Additional protection for missing MC info
-//
 // Revision 3.2  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -95,7 +92,6 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcXiMap = assocMaker->mcXiMap();
     theMcTrackMap = assocMaker->mcTrackMap();
   }
-  if (!((assocMaker)&&(theMcXiMap)&&(theMcTrackMap))) return kStOk;
   StXiVertex* rcXiPartner = 0;
   StMcTrack* Bach = 0;
   StMcTrack* V0daughter = 0;
@@ -125,7 +121,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
         }
       }
     }
-    if (count>0) {
+    if ((assocMaker)&&(count>0)) {
       pair<mcXiMapIter,mcXiMapIter> mcXiBounds =
             theMcXiMap->equal_range(mcVert);
       indexRecoArray = -1;

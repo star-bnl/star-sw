@@ -6,7 +6,7 @@
 #include "Rtypes.h"
 #include "TObject.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 class FtfBaseTrack ;
@@ -48,7 +48,7 @@ class FtfBaseHit
       float        wxy  ;          // x-y weight x-y
       float        wz   ;          // z weight on z
       float        s    ;          // Track trajectory
-//    ClassDef(FtfBaseHit,1)
+      ClassDef(FtfBaseHit,1)
 } ;
 #endif
 

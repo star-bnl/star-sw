@@ -2,8 +2,7 @@
 #uncomment for total test
 #set x = ( `find $1 -name '*.root' ` )
 
-set x = ( $* )
+set x = ( $1/*.root )
 foreach FIL ( $x )
-echo FILE $FIL
 $STAR/mgr/lsFile.csh $FIL |& grep Error
 end

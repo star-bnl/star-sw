@@ -78,6 +78,106 @@ void StSceBarrel::convertGlobalFrameToOther()
     }
 }
 
+int StSceBarrel::removeInactiveHitInTable(table_head_st *g2t_h,g2t_svt_hit_st *g2t)
+{
+  StSceListPoint *inactiveHits = new StSceListPoint();
+  int localSize = 0;
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
+    {
+      StSceListPoint *currDeadList = (this->mWafers[iWaf])->getDeadHits(mDetectorLargeEdge, mDetectorSmallEdge, mStripPitch);
+      inactiveHits = inactiveHits->addListPoint(currDeadList);
+      delete currDeadList;
+    }
+  inactiveHits->sortPoint();
+  localSize=inactiveHits->getSize();
+  if (localSize)
+    {
+      int firstSsdPoint=0;
+      int iP1 = 0;
+      for (iP1 = 0; ((iP1 < g2t_h->nok)&&(g2t[iP1].volume_id < mSsdLayer*1000)) ; iP1++) firstSsdPoint=iP1;
+      firstSsdPoint++;
+      int isG2tSorted = 1;
+      int iP2 = 0;
+      for (iP2 = firstSsdPoint+1 ; (iP2 < g2t_h->nok)&&(isG2tSorted) ;iP2++)
+	{
+	  if (g2t[iP2].id < g2t[iP2 - 1].id) isG2tSorted = 0;
+	}
+      StScePoint *currToDele = inactiveHits->first();
+      int nDeleted = 0;
+      int isAllRemove = 0;
+      if (isG2tSorted)
+	{
+	  int ipScan = 0;
+	  for (ipScan = firstSsdPoint; (ipScan<g2t_h->nok); ipScan++)
+	    {
+	      if (!isAllRemove)
+		{
+		  if (g2t[ipScan].id == currToDele->getNPoint())
+		    {
+		      currToDele=inactiveHits->next(currToDele);
+		      if (currToDele == 0)
+			{
+			  isAllRemove = 1;
+			}
+		      else
+			{
+			  nDeleted++;
+			}
+		    }
+		}
+	      g2t[ipScan]=g2t[ipScan + nDeleted];
+	    }
+	  g2t_h->nok -= nDeleted;
+	}
+      else
+	{
+	  int iLoop = 0;
+	  for (iLoop = 0 ; (iLoop < localSize)&&(!isAllRemove); iLoop++)
+	    {
+	      int ipScan = 0;
+	      int nLoopDeleted = 0;
+	      for (ipScan = firstSsdPoint; ipScan < g2t_h->nok; ipScan++)
+		{
+		  if (!isAllRemove)
+		    {
+		      if (g2t[ipScan].id == currToDele->getNPoint())
+			{
+			  currToDele=inactiveHits->next(currToDele);
+			  if (currToDele == 0)
+			    {
+			      isAllRemove = 1;
+			    }
+			  else
+			    {
+			      nDeleted++;
+			      nLoopDeleted++;
+			    }
+			}
+		    }
+		  g2t[ipScan]=g2t[ipScan + nLoopDeleted];
+		}
+	      
+	      g2t_h->nok -= nLoopDeleted;
+	    }
+	}
+    }
+  this->renumHitAfterRemove();
+  delete inactiveHits;
+  return localSize;  
+}
+
+void StSceBarrel::renumHitAfterRemove()
+{
+  int iLast = 0;
+  int iNewLast = 0;
+  int iWaf = 0;
+  for (iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
+    {
+      iNewLast = ((this->mWafers[iWaf])->getPoint())->renumHits(iLast);
+      iLast = iNewLast;
+    }
+}
+
 int StSceBarrel::idWaferToWaferNumb(int idWafer)
 {
   // idwafer = layer*1000+waf*100+ladder
@@ -147,6 +247,74 @@ int  StSceBarrel::doEvalCluster(sce_ctrl_st *ctrl)
    for (int iWaf = 0; iWaf < nWafer; iWaf++)
        nClustEvaluated +=  mWafers[iWaf]->doEvaluateCluster(ctrl);
   return nClustEvaluated;
+}
+
+int StSceBarrel::readSimPointFromTable(table_head_st *sim_spt_h, sls_spt_st *sim_spt)
+{
+  int nFlag       = 0;
+  int nSpt        = 0;
+  int idCluster   = 0;
+  int idGlobTrk   = 0;
+  int idMatch     = 0;
+
+  int *idMcHit    = new int[5];
+  int *idMcTrack  = new int[5];
+  int *idTrack    = new int[5];
+  int e           = 0;
+
+  int idWaf       = 0;
+
+  float *Cov      = new float[3];
+  float *Res      = new float[3];
+  float *Xg       = new float[3];
+  float *Xl       = new float[3];
+
+  float *Mom2     = new float[2];
+  float *De       = new float[2];
+
+  for (int i = 0; i < sim_spt_h->nok; i++)
+    {
+      nFlag       = sim_spt[i].flag;
+      nSpt        = sim_spt[i].id;
+
+      idCluster   = sim_spt[i].id_cluster;
+      idGlobTrk   = sim_spt[i].id_globtrk;
+      idMatch     = sim_spt[i].id_match;
+
+      for (e = 0; e < 5; e++)
+	{
+	  idMcHit[e]   = sim_spt[i].id_mchit[e];
+	  idMcTrack[e] = sim_spt[i].id_mctrack[e];
+	  idTrack[e]   = sim_spt[i].id_track[e];
+	}
+      idWaf = sim_spt[i].id_wafer;
+      for (e = 0; e < 3; e++)
+	{
+	  Cov[e] = sim_spt[i].cov[e];
+	  Res[e] = sim_spt[i].res[e];
+	  Xg[e]  = sim_spt[i].x[e];
+	  Xl[e]  = sim_spt[i].xl[e];
+	}
+
+      for (e = 0; e < 2; e++)
+	{
+	  Mom2[e] = sim_spt[i].mom2[e];
+	  De[e]   = sim_spt[i].de[e];
+	}
+
+      StScePoint *newPoint = new StScePoint(nFlag, nSpt, idCluster, idGlobTrk, idMatch, idMcHit, idMcTrack, idTrack, idWaf, Cov, Res, Xg, Xl, Mom2, De);
+      mWafers[idWaferToWaferNumb(idWaf)]->addSimPoint(newPoint);
+    }
+  delete [] idMcHit;
+  delete [] idMcTrack;
+  delete [] idTrack;
+  delete [] Cov;
+  delete [] Res;
+  delete [] Xg;
+  delete [] Xl;
+  delete [] Mom2;
+  delete [] De;
+  return  sim_spt_h->nok;  
 }
 
 int StSceBarrel::readRecPointFromTable(table_head_st *rec_spt_h, scm_spt_st *rec_spt)

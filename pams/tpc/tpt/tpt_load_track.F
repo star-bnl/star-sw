@@ -1,8 +1,5 @@
-* $Id: tpt_load_track.F,v 1.24 2000/09/27 16:53:29 genevb Exp $
+* $Id: tpt_load_track.F,v 1.23 2000/06/23 22:20:48 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
-* Revision 1.24  2000/09/27 16:53:29  genevb
-* Handle negative fields
-*
 * Revision 1.23  2000/06/23 22:20:48  sakrejda
 * Charge set to 0 if no field.
 *
@@ -145,6 +142,8 @@ C     number of points to fit
       track(ipt).nfit = trk(ipt).nfit
       track(ipt).id = ipt
 C
+C     charge
+      track(ipt).q=sign(1.0,trk(ipt).p(2))
 C
 C     chisq from the linear fit
       track(ipt).chisq(1) = trk(ipt).p(8)
@@ -169,9 +168,7 @@ C       curvature
         track(ipt).r0=trk(ipt).p(2)
         track(ipt).psi = trk(ipt).p(5)
       else
-C     charge
-      track(ipt).q=sign(1.0,trk(ipt).p(2)*bfield(3))
-        track(ipt).invp = 1.0/abs(trk(ipt).p(2)*bfield(3)*C_D_CURVATURE)
+        track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
         track(ipt).cov(1) = abs(trk(ipt).dpar(6))/
      >                    ((trk(ipt).p(2)**2*bfield(3)*C_D_CURVATURE)**2)
 C       curvature
@@ -278,7 +275,7 @@ C***  Copy parameters to local table
          trakl(5)   = track(ipt).tanl
          trakl(6)   = track(ipt).q
          IF((abs(bfield(3)).gt.0.001).AND.((track(ipt).invp).gt.0.001)) THEN
-            rr=1./abs(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
+            rr=1./(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
             call n_max(trakl,rr,nmax,bfield(3))
          ELSE
             call n_max_zero(trakl,nmax)

@@ -1,8 +1,5 @@
-// $Id: StHistUtil.cxx,v 2.3 2000/09/15 21:19:10 fisyak Exp $
+// $Id: StHistUtil.cxx,v 2.2 2000/08/28 19:21:40 genevb Exp $
 // $Log: StHistUtil.cxx,v $
-// Revision 2.3  2000/09/15 21:19:10  fisyak
-// HPUX does not like delete [] newHist
-//
 // Revision 2.2  2000/08/28 19:21:40  genevb
 // Plot MultiH1F hists like 1d
 //
@@ -89,9 +86,9 @@ StHistUtil::~StHistUtil(){
     m_ListOfPrint->Delete();
     SafeDelete(m_ListOfPrint);
   }
-//   if (newHist){
-//     delete [] newHist;
-//   }
+  if (newHist){
+    delete [] newHist;
+  }
 }
 //_____________________________________________________________________________
 Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {

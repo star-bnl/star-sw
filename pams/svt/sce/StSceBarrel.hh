@@ -16,8 +16,11 @@ class StSceBarrel
   void initWafers(table_head_st *geom_h, svg_geom_st *geom);
   int  readPointFromTable(table_head_st *g2t_h,g2t_svt_hit_st *g2t);
   void convertGlobalFrameToOther();
+  int  removeInactiveHitInTable(table_head_st *g2t_h,g2t_svt_hit_st *g2t);
+  void renumHitAfterRemove();
   int  readClusterFromTable(table_head_st *cluster_h, scf_cluster_st *cluster);
   int  doEvalCluster(sce_ctrl_st *ctrl);
+  int  readSimPointFromTable(table_head_st *sim_spt_h, sls_spt_st *sim_spt);
   int  readRecPointFromTable(table_head_st *rec_spt_h, scm_spt_st *rec_spt);
   int  doEvalSpt(sce_ctrl_st *ctrl);
   int  writeComPointToTable(table_head_st *sce_dspt_h, sce_dspt_st *sce_dspt);

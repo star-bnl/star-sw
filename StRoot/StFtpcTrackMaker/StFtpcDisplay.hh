@@ -1,8 +1,5 @@
-// $Id: StFtpcDisplay.hh,v 1.6 2000/11/10 18:37:24 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.5 2000/07/28 09:45:42 hummler Exp $
 // $Log: StFtpcDisplay.hh,v $
-// Revision 1.6  2000/11/10 18:37:24  oldi
-// It is now possible to display tracks which should be longer (so called 'short tracks').
-//
 // Revision 1.5  2000/07/28 09:45:42  hummler
 // change "iostream.h" to <iostream.h> for correct path
 //
@@ -116,7 +113,7 @@ public:
   void  ShowEvalTracks(MIntArray *splitArr = NULL, MIntArray *uncleanArr = NULL, MIntArray *clusterArr = NULL);                    // displays evaluated tracks
   void  FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits, 
 		  Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up, Bool_t blue);// fills geant histograms
-  void  FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, 
+  void  FillFound(Bool_t good_found, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, 
 		  Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up);             // fills found histograms
   void  DrawNodes();                                                                           // draw nodes
   void  Delete();                                                                              // deletes objects of found and geant tracks

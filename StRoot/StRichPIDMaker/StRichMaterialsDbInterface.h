@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichMaterialsDbInterface.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMaterialsDbInterface.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDbInterface.h,v $
- *  Revision 2.1  2000/09/29 01:35:36  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision

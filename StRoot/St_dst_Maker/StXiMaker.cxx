@@ -2,11 +2,8 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.16 2000/08/31 21:47:08 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.15 2000/06/13 13:04:21 genevb Exp $
 // $Log: StXiMaker.cxx,v $
-// Revision 1.16  2000/08/31 21:47:08  genevb
-// Allow V0s to be trimmed after finding Xis
-//
 // Revision 1.15  2000/06/13 13:04:21  genevb
 // Fixed bug with not finding primary vertex
 //
@@ -64,8 +61,6 @@
 #include "StMessMgr.h"
 
 #include "global/St_exiam_Module.h"
-
-#include "StV0Maker.h"
 
 ClassImp(StXiMaker)
   
@@ -166,13 +161,6 @@ Int_t StXiMaker::Make(){
     if (iRes != kSTAFCV_OK) {
       gMessMgr->Warning("StXiMaker::Make(): Problem on return from EXI");
     }
-    for (Int_t ixi = 0; ixi < dst_xi_vertex->GetNRows(); ixi++) {
-      dst_xi_vertex_st* xirow = dst_xi_vertex->GetTable(ixi);
-      dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(xirow->id_v0-1);
-      v0row->dcav0 = - TMath::Abs(v0row->dcav0);
-    }
-    StV0Maker* v0mak = (StV0Maker*) GetMaker("v0");
-    if (v0mak) v0mak->Trim(); // Trims extra V0s kept for looking for Xis
     break;
   } // If-then block if primary vertex found
   } // For-loop to find primary vertex

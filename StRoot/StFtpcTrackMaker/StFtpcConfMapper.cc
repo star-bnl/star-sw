@@ -1,11 +1,5 @@
-// $Id: StFtpcConfMapper.cc,v 1.9 2000/11/10 18:37:01 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.8 2000/07/24 02:42:47 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
-// Revision 1.9  2000/11/10 18:37:01  oldi
-// New functions introduced to be able to extend tracks after main vertex tracking.
-// This implied many changes in other parts of the class (loop over clusters can run backwards now).
-// TBenchmark object ('mBench') moved to StFtpcTracker.
-// Cleanup.
-//
 // Revision 1.8  2000/07/24 02:42:47  oldi
 // Problem of memory exhaustion solved. This was introduced during the last changes.
 //
@@ -23,7 +17,7 @@
 // correct comment
 //
 // Revision 1.5  2000/06/13 14:34:25  oldi
-// Excluded function call to ExtendTracks().
+// Excluded function call to TrackLoop().
 // Changed cout to gMessMgr->Message().
 // Limits for pseudorapidity eta changed. They are now calculated from the
 // z-position of the main vertex directly. This solves bug #574.
@@ -40,7 +34,7 @@
 // (a[6]). Also the code of this function was modified to take care of the first
 // point which is not allowed to be used in the circle fit (to avoid infinities).
 // Introduction of new function CreateTrack() to cleanup ClusterLoop().
-// Introduction of new function ExtendTracks() and TrackExtension() to get cleaner
+// Introduction of new function TrackLoop() and ExtendTrack() to get cleaner
 // tracks.
 // Cleanup.
 //
@@ -57,7 +51,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 10.11.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapper.hh"
@@ -98,10 +92,11 @@ StFtpcConfMapper::StFtpcConfMapper()
 {
   // Default constructor.
 
+  mBench = NULL;
   mLaser = (Bool_t)false;
 
-  mHit     = NULL;
-  mVolume  = NULL;
+  mHit = NULL;
+  mVolume = NULL;
   mSegment = NULL;
 
   mVertexConstraint = (Bool_t)true;
@@ -110,11 +105,12 @@ StFtpcConfMapper::StFtpcConfMapper()
 
 StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t vertexPos[3], Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(fcl_fppoint, vertexPos, bench)
+  : StFtpcTracker(fcl_fppoint, vertexPos)
 {
   // Constructor.
 
-  if (bench) {
+  if (bench) { 
+    mBench = new TBenchmark();
     mBench->Start("init");
   }
 
@@ -131,7 +127,6 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
   mMergedTracks = 0;
   mMergedTracklets = 0;
   mMergedSplits = 0;
-  mExtendedTracks = 0;
   mDiffHits = 0;
   mDiffHitsStill = 0;
   mLengthFitNaN  = 0;
@@ -162,7 +157,6 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 
   for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);   
-    h->Setup(mVertex);
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
   }
 
@@ -173,9 +167,9 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, StFtpcVertex *vertex, Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, Double_t vertexPos[3], Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(hits, vertex, bench)
+  : StFtpcTracker(hits, vertexPos)
 {
   // Constructor which needs a ClonesArray of hits as an input.
   // So it is possible to fill in arbitrary hits.
@@ -198,12 +192,11 @@ StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, StFtpcVertex *vertex, Boo
   mMergedTracks = 0;
   mMergedTracklets = 0;
   mMergedSplits = 0;
-  mExtendedTracks = 0;
   mDiffHits = 0;
   mDiffHitsStill = 0;
   mLengthFitNaN  = 0;
 
-  mClustersUnused = mHit->GetEntriesFast();
+  mClustersUnused = mHit->GetEntriesFast();;
 
   mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
 
@@ -215,7 +208,7 @@ StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, StFtpcVertex *vertex, Boo
   StFtpcConfMapPoint *h;
 
   for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
-    h = (StFtpcConfMapPoint *)mHit->At(i);
+    h = (StFtpcConfMapPoint *)mHit->At(i);   
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
   }
 
@@ -233,6 +226,10 @@ StFtpcConfMapper::~StFtpcConfMapper()
   if (mVolume) {
     mVolume->Delete();
     delete mVolume;
+  }
+
+  if (mBench) {
+    delete mBench;
   }
 }
 
@@ -271,28 +268,11 @@ void StFtpcConfMapper::MainVertexTracking()
   SetTrackCuts(0.007, 0.03, 30, true);
 
   ClusterLoop();
+  HandleSplitTracks(0.11, 0.5, 0.5);
  
   if (mBench) {
     mBench->Stop("main_vertex");
     gMessMgr->Message("", "I", "OST") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
-
-    mBench->Start("extend");
-  }
-
-  ExtendTracks();
-
-  if (mBench) {
-    mBench->Stop("extend");
-    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
-
-    mBench->Start("splits");
-  }
-
-  HandleSplitTracks(0.11, 0.5, 0.5);
-
-  if (mBench) {
-    mBench->Stop("splits");
-    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
   }
   
   return;
@@ -339,25 +319,24 @@ void StFtpcConfMapper::LaserTracking()
   // settings
   SetLaser((Bool_t)true);
   SetMaxDca(1.);
-  NonVertexSettings(10, 5, 2, 2, 2, 15);
+  NonVertexSettings (10, 5, 2, 2, 2, 15);
   SetVertexConstraint(false);
   
   // cuts
   SetTrackletCuts(0.0001, false);
   
   ClusterLoop();
-  ExtendTracks();
   
   if (mBench) {
     mBench->Stop("laser");
-    gMessMgr->Message("", "I", "OST") << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
+    gMessMgr->Message("", "I", "OST") << "Laser tracking finished  (" << mBench->GetCpuTime("laser") << " s)." << endm;
   }
   
   return;
 }
 
 
-void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
+inline void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
 {
   // Sets all settings of the tracker.
   // 
@@ -505,50 +484,6 @@ void StFtpcConfMapper::SetTrackletCuts(Double_t maxangle, Bool_t vertex_constrai
 }
 
 
-void StFtpcConfMapper::LoopUpdate(Int_t *sub_row_segm, Bool_t backward)
-{
-  // Increments or decrements *sub_row_segm, depending on backward.
-  
-  if (backward) {
-    (*sub_row_segm)--;
-  }
-  
-  else { // forward
-    (*sub_row_segm)++;
-  }
-}
-
-
-Bool_t const StFtpcConfMapper::TestExpression(Int_t sub_row_segm, Int_t end_row, Bool_t backward)
-{
-  // Tests if loop should be continued or not.
-  
-  if (backward) {
-    
-    if (sub_row_segm >= end_row) {
-      return (Bool_t)true;
-    }
-    
-    else {
-      return (Bool_t) false;
-    }
-  }
-  
-  else { // forward
-    
-    if (sub_row_segm <= end_row) {
-      return (Bool_t)true;
-    }
-    
-    else {
-      return (Bool_t) false;
-    }
-  }
- 
-  return (Bool_t) false;
-}
-
-
 Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2, Bool_t laser)
 {
   // Returns the distance of two given clusters. The distance in this respect (conformal mapping)
@@ -581,13 +516,13 @@ Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit, Dou
 } 
 
 
-Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapPoint *lasttrackhit, const StFtpcConfMapPoint *newhit, Bool_t backward)
+Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapPoint *lasttrackhit, const StFtpcConfMapPoint *newhit)
 {
   // Returns true if circle, length, and angle cut holds.
-
+  
   if (newhit->GetCircleDist() < mMaxCircleDist[mVertexConstraint] &&
       newhit->GetLengthDist() < mMaxLengthDist[mVertexConstraint] &&
-      TrackAngle(lasttrackhit, newhit, backward) < mMaxAngleTrack[mVertexConstraint]) {
+      TrackAngle(lasttrackhit, newhit) < mMaxAngleTrack[mVertexConstraint]) {
     return true;
   }
   
@@ -597,7 +532,7 @@ Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapPoint *lasttrackhit
 }
 
 
-Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit, Bool_t backward = (Bool_t)true)
+Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit)
 {
   // Returns the 'angle' between the last two points on the track (of which the last point is
   // given as input) and the second given point.
@@ -616,25 +551,13 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
     return 0.;
   }
 
-  if (backward) {
-    x1[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
-    x1[1] = ((StFtpcPoint *)hits->At(n-1))->GetY() - ((StFtpcPoint *)hits->At(n-2))->GetY();
-    x1[2] = ((StFtpcPoint *)hits->At(n-1))->GetZ() - ((StFtpcPoint *)hits->At(n-2))->GetZ();
-    
-    x2[0] = hit->GetX() - ((StFtpcPoint *)hits->At(n-1))->GetX();
-    x2[1] = hit->GetY() - ((StFtpcPoint *)hits->At(n-1))->GetY();
-    x2[2] = hit->GetZ() - ((StFtpcPoint *)hits->At(n-1))->GetZ();
-  }
+  x1[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
+  x1[1] = ((StFtpcPoint *)hits->At(n-1))->GetY() - ((StFtpcPoint *)hits->At(n-2))->GetY();
+  x1[2] = ((StFtpcPoint *)hits->At(n-1))->GetZ() - ((StFtpcPoint *)hits->At(n-2))->GetZ();
 
-  else { // forward
-    x1[0] = ((StFtpcPoint *)hits->At(0))->GetX() - ((StFtpcPoint *)hits->At(1))->GetX();
-    x1[1] = ((StFtpcPoint *)hits->At(0))->GetY() - ((StFtpcPoint *)hits->At(1))->GetY();
-    x1[2] = ((StFtpcPoint *)hits->At(0))->GetZ() - ((StFtpcPoint *)hits->At(1))->GetZ();
-    
-    x2[0] = hit->GetX() - ((StFtpcPoint *)hits->At(0))->GetX();
-    x2[1] = hit->GetY() - ((StFtpcPoint *)hits->At(0))->GetY();
-    x2[2] = hit->GetZ() - ((StFtpcPoint *)hits->At(0))->GetZ();
-  }
+  x2[0] = hit->GetX() - ((StFtpcPoint *)hits->At(n-1))->GetX();
+  x2[1] = hit->GetY() - ((StFtpcPoint *)hits->At(n-1))->GetY();
+  x2[2] = hit->GetZ() - ((StFtpcPoint *)hits->At(n-1))->GetZ();
 
   return StFormulary::Angle(x1, x2, 3);
 }
@@ -966,11 +889,6 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
 	continue;
       }
 
-      if (!t1) {
-	// track t1 was removed before (already merged) - leave inner loop
-	break;
-      }
-
       r1 = t1->GetRLast();
       r2 = t2->GetRLast();
       phi1 = t1->GetAlphaLast();
@@ -988,7 +906,6 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
 	  (t1->GetHemisphere() == t2->GetHemisphere()) &&
 	  dist <= max_dist && ratio <= ratio_max && ratio >= ratio_min) {
 	MergeSplitTracks(t1, t2);
-	t1 = t2 = NULL;
       }      
     }
   }
@@ -1143,8 +1060,8 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   
   // create tracklets
   for (point = 1; point < mTrackletLength[mVertexConstraint]; point++) {
-
-    if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)true))) {
+  
+    if ((closest_hit = GetNextNeighbor(hit, coeff))) {
       // closest_hit for hit exists
       track->AddPoint(closest_hit);
       hit = closest_hit;
@@ -1199,7 +1116,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 	//Double_t chi_len  = track->GetChi2Length();
 	
 	StraightLineFit(track, coeff);
-	closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff, (Bool_t)true);
+	closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff);
 	
 	if (closest_hit) {
 	  
@@ -1258,13 +1175,13 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 }
 
 
-StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = NULL, Bool_t backward = (Bool_t)true)
+StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = NULL)
 { 
   // Returns the nearest cluster to a given start_hit. 
   
   Double_t dist, closest_dist = 1.e7;
   Double_t closest_circle_dist = 1.e7;
-  Double_t closest_length_dist = 1.e7;
+  Double_t closest_length_dist = 1.e7;    
 
   StFtpcConfMapPoint *hit = NULL;
   StFtpcConfMapPoint *closest_hit = NULL;
@@ -1279,172 +1196,151 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
   Int_t sub_eta_segm;
   Int_t sub_hit_num;
 
-  Int_t start_row;
-  Int_t end_row;
+  Int_t max_row = GetRowSegm(start_hit) - 1;
+  Int_t min_row;
   
-  if (backward) {
-    start_row = GetRowSegm(start_hit) - 1;
-
-    if (coeff) {
-      end_row = GetRowSegm(start_hit) - mRowScopeTrack[mVertexConstraint];
-    }
-    
-    else {
-      end_row = GetRowSegm(start_hit) - mRowScopeTracklet[mVertexConstraint];
-    }
-    
-    while (end_row < (mFtpc-1) * mMaxFtpcRow) {
-      end_row++;
-    }
-  
-    if (start_row < end_row) return 0;
+  if (coeff) {
+    min_row = GetRowSegm(start_hit) - mRowScopeTrack[mVertexConstraint];
   }
-
-  else { // forward
-     start_row = GetRowSegm(start_hit) + 1;
-
-    if (coeff) {
-      end_row = GetRowSegm(start_hit) + mRowScopeTrack[mVertexConstraint];
-    }
-    
-    else {
-      end_row = GetRowSegm(start_hit) + mRowScopeTracklet[mVertexConstraint];
-    }
-    
-    while (end_row > mFtpc * mMaxFtpcRow - 1) {
-      end_row--;
-    }
   
-    if (start_row > end_row) return 0;
+  else {
+    min_row = GetRowSegm(start_hit) - mRowScopeTracklet[mVertexConstraint];
   }
-  //if (end_row == 20) 
-  //cout << start_row << " " << end_row << endl;
   
-  // loop over sub rows
-  //  for (sub_row_segm = start_row; sub_row_segm >= end_row; sub_row_segm--) {
-
-  for (sub_row_segm = start_row; TestExpression(sub_row_segm, end_row, backward); LoopUpdate(&sub_row_segm, backward)) {    
-
-    //  loop over sub phi segments
-    for (Int_t i = -(mPhiScope[mVertexConstraint]); i <= mPhiScope[mVertexConstraint]; i++) {
-      sub_phi_segm = GetPhiSegm(start_hit) + i;  // neighboring phi segment 
+  // loop over sub volume
+  while (min_row < (mFtpc-1) * mMaxFtpcRow) {
+    min_row++;
+  }
+  
+  if (max_row < min_row) return 0;
+  
+  else {
+    
+    // loop over sub rows
+    for (sub_row_segm = max_row; sub_row_segm >= min_row; sub_row_segm--) {
       
-      if (sub_phi_segm < 0) {  // find neighboring segment if #segment < 0
-	sub_phi_segm += mNumPhiSegment;
-      }
-      
-      else if (sub_phi_segm >= mNumPhiSegment) { // find neighboring segment if #segment > fNum_phi_segm
-	sub_phi_segm -= mNumPhiSegment;
-      }
-      
-      // loop over sub eta segments
-      for (Int_t j = -(mEtaScope[mVertexConstraint]); j <= mEtaScope[mVertexConstraint]; j++) {
-	sub_eta_segm = GetEtaSegm(start_hit) + j;   // neighboring eta segment 
+      //  loop over sub phi segments
+      for (Int_t i = -(mPhiScope[mVertexConstraint]); i <= mPhiScope[mVertexConstraint]; i++) {
+	sub_phi_segm = GetPhiSegm(start_hit) + i;  // neighboring phi segment 
 	
-	if (sub_eta_segm < 0 || sub_eta_segm >= mNumEtaSegment) {  
-	  continue;  // #segment exceeds bounds -> skip
+	if (sub_phi_segm < 0) {  // find neighboring segment if #segment < 0
+	  sub_phi_segm += mNumPhiSegment;
 	}
 	
-	// loop over entries in one sub segment
-	if ((sub_entries = ((sub_segment = (TObjArray *)mVolume->At(GetSegm(sub_row_segm, sub_phi_segm, sub_eta_segm)))->GetEntriesFast()))) {  		
-
-	  for (sub_hit_num = 0; sub_hit_num < sub_entries; sub_hit_num++) {  
-	    hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num);
+	else if (sub_phi_segm >= mNumPhiSegment) { // find neighboring segment if #segment > fNum_phi_segm
+	  sub_phi_segm -= mNumPhiSegment;
+	}
+	
+	// loop over sub eta segments
+	for (Int_t j = -(mEtaScope[mVertexConstraint]); j <= mEtaScope[mVertexConstraint]; j++) {
+	  sub_eta_segm = GetEtaSegm(start_hit) + j;   // neighboring eta segment 
+	  
+	  if (sub_eta_segm < 0 || sub_eta_segm >= mNumEtaSegment) {  
+	    continue;  // #segment exceeds bounds -> skip
+	  }
+	  
+	  // loop over entries in one sub segment
+	  if ((sub_entries = ((sub_segment = (TObjArray *)mVolume->At(GetSegm(sub_row_segm, sub_phi_segm, sub_eta_segm)))->GetEntriesFast()))) {  		
 	    
-	    if (!(hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num))->GetUsage()) {
-	      // hit was not used before
+	    for (sub_hit_num = 0; sub_hit_num < sub_entries; sub_hit_num++) {  
 	      
-	      // set conformal mapping coordinates if looking for non vertex tracks
-	      if (!mVertexConstraint) {
-		hit->SetAllCoord(start_hit);
-	      }
+	      hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num);
 	      
-	      if (coeff) { // track search - look for nearest neighbor to extrapolated track
+	      if (!(hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num))->GetUsage()) {  
+		// hit was not used before
 		
-		// test distance
-		hit->SetDist(CalcDistance(hit, coeff+0), CalcDistance(hit, coeff+2));
-
-		if (hit->GetCircleDist() < closest_circle_dist) {
-		  closest_circle_dist = hit->GetCircleDist();
-		  closest_circle_hit = hit;
+		// set conformal mapping coordinates if looking for non vertex tracks
+		if (!mVertexConstraint) {
+		  hit->SetAllCoord(start_hit);
 		}
 		
-		if (hit->GetLengthDist() < closest_length_dist) {   
-		  closest_length_dist = hit->GetLengthDist();
-		  closest_length_hit = hit;
-		}
-	      }
-	      
-	      else {  
-		// tracklet search - just look for the nearest neighbor (distance defined by Pablo Jepes)
-		
-		// test distance
-		if ((dist = CalcDistance(start_hit, hit, GetLaser())) < closest_dist) { // hit found that is closer than the hits before
+		if (coeff) { // track search - look for nearest neighbor to extrapolated track
 		  
-		  if (GetLaser() && ((StFtpcTrack*)start_hit->GetTrack(mTrack))->GetNumberOfPoints() > 1) { // laser tracking mode and already 2 hits on this track
+		  // test distance
+		  hit->SetDist(CalcDistance(hit, coeff+0), CalcDistance(hit, coeff+2));
+		  
+		  if (hit->GetCircleDist() < closest_circle_dist) {
+		    closest_circle_dist = hit->GetCircleDist();
+		    closest_circle_hit = hit;
+		  }
+		  
+		  if (hit->GetLengthDist() < closest_length_dist) {   
+		    closest_length_dist = hit->GetLengthDist();
+		    closest_length_hit = hit;
+		  }
+		}
+		
+		else {  
+		  // tracklet search - just look for the nearest neighbor (distance defined by Pablo Jepes)
+		  
+		  // test distance
+		  if ((dist = CalcDistance(start_hit, hit, GetLaser())) < closest_dist) { // hit found that is closer than the hits before
 
-		    if (TrackAngle(start_hit, hit, backward) <= mMaxAngleTracklet[mVertexConstraint]) {  // angle between last two hits and new within limits
+		    if (GetLaser() && ((StFtpcTrack*)mTrack->Last())->GetNumberOfPoints() > 1) { // laser tracking mode and already 2 hits on this track
 		      
+		      if (TrackAngle(start_hit, hit) <= mMaxAngleTracklet[mVertexConstraint]) {  // angle between last two hits and new within limits
+			
+			closest_dist = dist;
+			closest_hit = hit;
+		      }
+		      
+		      else {  // angle not in limits
+			continue;
+		      }
+		    }
+		    
+		    else { // no laser mode or laser mode but less the two points on the track up to now
 		      closest_dist = dist;
 		      closest_hit = hit;
 		    }
-		    
-		    else {  // angle not in limits
-		      continue;
-		    }
 		  }
 		  
-		  else { // no laser mode or laser mode but less the two points on the track up to now
-		    closest_dist = dist;
-		    closest_hit = hit;
-		  }
+		  else {  // sub hit was farther away than a hit before
+		    continue;
+		  } 
 		}
-		
-		else {  // sub hit was farther away than a hit before
-		  continue;
-		} 
 	      }
+	      
+	      else continue;  // sub hit was used before
 	    }
-	    
-	    else continue;  // sub hit was used before
+	  }
+	  
+	  else continue;  // no sub hits
+	}
+      }
+      
+      
+      if ((coeff && (closest_circle_hit || closest_length_hit)) || ((!coeff) && closest_hit)) {
+	
+	if ((max_row - sub_row_segm) >= 1) {
+	  
+	  if (coeff) {
+	    mMergedTracks++;
+	  }
+	  
+	  else {
+	    mMergedTracklets++;
 	  }
 	}
 	
-	else continue;  // no sub hits
-      }
-    }
-    
-    
-    if ((coeff && (closest_circle_hit || closest_length_hit)) || ((!coeff) && closest_hit)) {
-      
-      if ((start_row - sub_row_segm) >= 1) {
-	
-	if (coeff) {
-	  mMergedTracks++;
-	}
-	
-	else {
-	  mMergedTracklets++;
-	}
+	// found a hit in a sub layer - don't look in other sub layers
+	break;
       }
       
-      // found a hit in a sub layer - don't look in other sub layers
-      break;
-    }
+      else {
+	// didn't find a hit in this sub layer - try next sub layer
+	continue;
+      }
+    }		
+  }
     
-    else {
-      // didn't find a hit in this sub layer - try next sub layer
-      continue;
-    }
-  }		
-  
   if (coeff) {
     
     if (closest_circle_hit && closest_length_hit) { // hits are not zero
       
       if (closest_circle_hit == closest_length_hit) { // both found hits are identical
 	
-	if (VerifyCuts(start_hit, closest_circle_hit, backward)) {
+	if (VerifyCuts(start_hit, closest_circle_hit)) {
 
 	  // closest hit within limits found
 	  return closest_circle_hit;
@@ -1458,8 +1354,8 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
       else {  // found hits are different
 	mDiffHits++;
 
-	Bool_t cut_circle = VerifyCuts(start_hit, closest_circle_hit, backward);
-	Bool_t cut_length = VerifyCuts(start_hit, closest_length_hit, backward);
+	Bool_t cut_circle = VerifyCuts(start_hit, closest_circle_hit);
+	Bool_t cut_length = VerifyCuts(start_hit, closest_length_hit);
 
 	if (cut_circle && cut_length) { // both hits are within the limit
 
@@ -1505,32 +1401,26 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
 }
 
 
-void StFtpcConfMapper::ExtendTracks()
+void StFtpcConfMapper::TrackLoop()
 {
   // Loops over all found tracks and passes them to the part of the program where each track is tried to be extended.
   
+  Int_t num_extended = 0;
+
   for (Int_t t = 0; t < mTrack->GetEntriesFast(); t++) {
     
-    StFtpcTrack *track = (StFtpcTrack *)mTrack->At(t);
-  
-    if (track->GetHemisphere() == 1) {
-      mFtpc = (Char_t)1;
-    }
-    
-    else {
-      mFtpc = (Char_t)2;
-    }
-    
-    if (TrackExtension(track)) {
-      mExtendedTracks++;
+    if (ExtendTrack((StFtpcTrack *)mTrack->At(t))) {
+      num_extended++;
     }
   }
+  
+  gMessMgr->Message("", "I", "OST") << num_extended << " tracks extended" << endm;
 
   return;
 }
 
 
-Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
+Bool_t StFtpcConfMapper::ExtendTrack(StFtpcTrack *track)
 {
   // Trys to extend a given track.
 
@@ -1539,83 +1429,49 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
   Double_t *coeff = NULL;
 
   StFtpcConfMapPoint *closest_hit;
-  StFtpcConfMapPoint *hit;
   TObjArray *trackpoint = track->GetHits();
 
-  for (Int_t direction = 0; direction < 2; direction ++) {
+  for (point = number_of_points; point < mMaxFtpcRow; point++) {
     
-    for (point = number_of_points; point < mMaxFtpcRow; point++) {
-   
-      if (direction == 1) { // backward
-	hit = (StFtpcConfMapPoint *)trackpoint->Last();
-      }
-      
-      else { // forward
-	hit = (StFtpcConfMapPoint *)trackpoint->First();
-      }
-      
-      Int_t padrow = hit->GetPadRow()%10;
-
-      if ((padrow !=  1 && direction == 1) ||
-	  (padrow !=  0 && direction == 0)) {
-	
-	if (GetLaser()) { // Laser event
-
-	  if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)direction))) {
-	   
-	    // add closest hit to track
-	    if(direction == 1) { // backward
-	      track->AddPoint(closest_hit);
-	    }
-	    
-	    else { // forward
-	      track->AddForwardPoint(closest_hit);
-	    }
-	  }
-	}
-
-	else { // usual event
-
-	  if (!coeff) coeff = new Double_t[6];
-	  StraightLineFit(track, coeff);
-	  
-	  if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)direction))) {
-	    
-	    // add closest hit to track
-	    if(direction == 1) { // backward
-	      track->AddPoint(closest_hit);
-	    }
-	    
-	    else { // forward
-	      track->AddForwardPoint(closest_hit);
-	    }
-	  }
-
-	  else { 
-	    point = mMaxFtpcRow; // continue with next hit in segment
-	  }
-	}
-      }
+    if (!coeff) coeff = new Double_t[6];
+    StraightLineFit(track, coeff);
+    closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff);
+    
+    if (closest_hit) {
+      // add closest hit to track
+      track->AddPoint(closest_hit);
     }
-  }    
-
-  // cleanup
-  if (coeff) {
-    delete[] coeff; 
-    coeff = NULL;
+    
+    else { 
+      
+      // closest hit does not exist
+      
+      /*
+	probably switch off vertexconstraint!
+	
+	if (point.PadRow() > limit) {
+	
+	
+	}
+	
+	else
+      */
+      point = mMaxFtpcRow; // continue with next hit in segment
+    }
   }
+  
+  // cleanup
+  delete[] coeff; 
+  coeff = NULL;
 
   if (track->GetNumberOfPoints() - number_of_points) {
     
-    track->SetPointDependencies();
-    track->ComesFromMainVertex(mVertexConstraint);
-    track->CalculateNMax();
-
     mClustersUnused -= (track->GetNumberOfPoints() - number_of_points);
+    track->CalculateNMax();
 
     return (Bool_t)true;
   }
-  
+
   else {
     return (Bool_t)false;
   } 
@@ -1659,10 +1515,6 @@ void StFtpcConfMapper::TrackingInfo()
   gMessMgr->Message("", "I", "OST");
   gMessMgr->width(18);
   *gMessMgr << GetNumLengthFitNaN() << "  times argument of arcsin set to +/-1." << endm;
-
-  gMessMgr->Message("", "I", "OST");
-  gMessMgr->width(18);
-  *gMessMgr << GetNumExtendedTracks() << "  tracks extended." << endm;
 
   gMessMgr->Message("", "I", "OST");
   gMessMgr->width(18);

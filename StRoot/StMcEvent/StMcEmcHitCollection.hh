@@ -1,16 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.2 2000/08/30 14:52:03 calderon Exp $
- * $Log: StMcEmcHitCollection.hh,v $
- * Revision 2.2  2000/08/30 14:52:03  calderon
- * New changes made by Aleksei.
- *
+ * $Id $
+ * $Log $
  *
  **************************************************************************/
 #ifndef StMcEmcHitCollection_hh
 #define StMcEmcHitCollection_hh
 
 #include "StMcEmcModuleHitCollection.hh"
+#include "TDataSet.h"
 
 class StMcCalorimeterHit;
 
@@ -20,7 +18,6 @@ public:
 public:
     StMcEmcHitCollection();
     StMcEmcHitCollection(char*);
-    StMcEmcHitCollection(const char*);
     virtual ~StMcEmcHitCollection();
     
     StMcEmcHitCollection::EAddHit  addHit(StMcCalorimeterHit*);
@@ -31,13 +28,12 @@ public:
     StMcEmcModuleHitCollection*       module(unsigned int);
     const StMcEmcModuleHitCollection* module(unsigned int) const;
 
-    virtual Bool_t IsFolder() {return kTRUE;} // It is a directory for modules 
-    virtual void Browse(TBrowser *b);
-    void    print();
-
+    virtual Bool_t IsFolder() {return kFALSE;} // KTRUE means it is directory
+    void Browse(TBrowser *b);
 private:
     enum {mNumberOfModules=120};
     StMcEmcModuleHitCollection mModules[mNumberOfModules];
+    
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.7 2000/09/28 10:56:35 ullrich Exp $
+ * $Id: StContainers.h,v 2.6 2000/06/19 01:32:15 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 2.7  2000/09/28 10:56:35  ullrich
- * Added Rich PID classes.
+ * Revision 2.6  2000/06/19 01:32:15  perev
+ * Thomas StEvent branches added
  *
  * Revision 2.7  2000/09/28 10:56:35  ullrich
  * Added Rich PID classes.
@@ -46,7 +46,6 @@ class StPrimaryVertex;
 class StSvtHit;
 class StSsdHit;
 class StTpcHit;
-class StFtpcHit;
 class StRichHit;
 class StRichPixel;
 class StRichPid;
@@ -70,7 +69,6 @@ StCollectionDef(PrimaryVertex)
 StCollectionDef(SvtHit)
 StCollectionDef(SsdHit)
 StCollectionDef(TpcHit)
-StCollectionDef(FtpcHit)
 StCollectionDef(RichHit)
 StCollectionDef(RichPixel)
 StCollectionDef(RichPid)

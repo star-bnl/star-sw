@@ -1,18 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.41 2000/11/07 15:02:05 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.37 2000/07/14 02:39:21 perev Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.41  2000/11/07 15:02:05  fisyak
-// Fix typo
-//
-// Revision 1.40  2000/11/07 01:48:25  fisyak
-// Add one more protection agaist fDataBase==NULL
-//
-// Revision 1.39  2000/11/02 16:02:20  fisyak
-// Jeff request to allow a top level directory (e.g. database) have ID=0 which is ok
-//
-// Revision 1.38  2000/09/16 02:45:09  didenko
-// commit Victor's changes
-//
 // Revision 1.37  2000/07/14 02:39:21  perev
 // SetMaxEntryTime method added
 //
@@ -110,12 +98,9 @@ public:
    TDatime fTimeMin;
    TDatime fTimeMax;
    TDataSet *fDat;
-   Int_t  fMod;
    St_ValiSet(const char *name,TDataSet *parent);
    virtual ~St_ValiSet(){};
    virtual void ls(Int_t lev=1);
-           void Modified(int m=1){fMod=m;}
-          Int_t IsModified(){return fMod;}
 };
 
 //_____________________________________________________________________________
@@ -198,12 +183,11 @@ Int_t St_db_Maker::Init()
        } else          {fDataBase = fileset; }
    }
 
-   if (fDataBase) {
-     AddData(fDataBase);
-     SetOutputAll(fDataBase,2); //  
-     
-     if (Debug()) fDataBase->ls("*");
-   }
+
+   AddData(fDataBase);
+   SetOutputAll(fDataBase,2); //  
+
+   if (Debug()) fDataBase->ls("*");
    OnOff();
    return 0;
 }
@@ -423,8 +407,8 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   par->Remove(val->fDat);
 
   int kase = 0;
-  //  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
-  if (mk->fDBBroker && val->fDat) { // Try to load from MySQL
+  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
+     
     int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
   }

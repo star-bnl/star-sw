@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.18 2000/10/12 22:46:36 snelling Exp $
+// $Id: StFlowEvent.h,v 1.13 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,23 +10,6 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
-// Revision 1.18  2000/10/12 22:46:36  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.17  2000/09/22 22:02:59  posk
-// Clean up.
-//
-// Revision 1.16  2000/09/15 22:51:30  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.15  2000/09/05 16:11:32  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.14  2000/08/31 18:58:22  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
 // Revision 1.13  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -123,9 +106,9 @@ public:
 
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
   Int_t          EventID() const;
-  Int_t          RunID() const;
   UInt_t         OrigMult() const;
-  UInt_t         MultEta() const;
+  UInt_t         MultEta1() const;
+  UInt_t         MultEta2() const;
   UInt_t         FlowEventMult() const;
   UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
@@ -137,25 +120,18 @@ public:
   Float_t        CTB() const;
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
-  Bool_t         PtWgt() const;
-  Bool_t         ProbPid() const;
   StFlowTrackCollection* TrackCollection() const;
  
   void SetSelections();
   void SetPids();
-  void SetPidsDeviant();
-  void SetPidsProb();
   void PrintSelectionList();
   void MakeSubEvents();
   void SetEventID(const Int_t&);
-  void SetRunID(const Int_t&);
   void SetOrigMult(const UInt_t&);
-  void SetMultEta(const UInt_t&);
+  void SetMultEta1(const UInt_t&);
+  void SetMultEta2(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
-  void SetCTB(const Float_t ctb);
-  void SetZDCe(const Float_t zdce);
-  void SetZDCw(const Float_t zdcw);
 #ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
 #endif
@@ -167,39 +143,30 @@ public:
   static void SetAntiProtonCut(Float_t lo, Float_t hi);
   static void SetKPlusCut(Float_t lo, Float_t hi);
   static void SetKMinusCut(Float_t lo, Float_t hi);
-  static void SetElectronCut(Float_t lo, Float_t hi);
-  static void SetPositronCut(Float_t lo, Float_t hi);
-  static void SetDeuteronCut(Float_t lo, Float_t hi);
-  static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
-  static void SetPtWgt();
-  static void SetProbPid();
+  void  SetCTB(const Float_t ctb);
+  void  SetZDCe(const Float_t zdce);
+  void  SetZDCw(const Float_t zdcw);
 
 private:
 
   Int_t           mEventID;                             // ID of the event
-  Int_t           mRunID;                               // ID of the run
   UInt_t          mOrigMult;                            // number of tracks
-  UInt_t          mMultEta; // number of tracks with pos. flag in 1.5 unit of eta
+  UInt_t          mMultEta1; // number of tracks with positive flag in 1 unit of eta
+  UInt_t          mMultEta2; // number of tracks with positive flag in 2 units of eta
   UInt_t          mCentrality;                          // centrality bin
   StThreeVectorF  mVertexPos;                           // primary vertex position
-  Float_t         mCTB;                                 // CTB value sum
-  Float_t         mZDCe;                                // ZDC east
-  Float_t         mZDCw;                                // ZDC west
   static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
   static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels]; // range
   Flow::PhiWgt_t  mPhiWgt;                              //!flattening weights
   static Float_t  mPiPlusCuts[2];                       // PID cuts
-  static Bool_t   mPtWgt;                               // flag for pt weighting
-  static Bool_t   mProbPid;                              // flag for probability pid
   static Float_t  mPiMinusCuts[2];
   static Float_t  mProtonCuts[2];
   static Float_t  mKMinusCuts[2];
   static Float_t  mKPlusCuts[2];
   static Float_t  mAntiProtonCuts[2];
-  static Float_t  mDeuteronCuts[2];
-  static Float_t  mAntiDeuteronCuts[2];
-  static Float_t  mElectronCuts[2];
-  static Float_t  mPositronCuts[2];
+  Float_t         mCTB;                                 // CTB value sum
+  Float_t         mZDCe;                                // ZDC east
+  Float_t         mZDCw;                                // ZDC west
 
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //
@@ -211,11 +178,11 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
 
 inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
-inline Int_t StFlowEvent::RunID() const { return mRunID; }
-
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
 
-inline UInt_t StFlowEvent::MultEta() const { return mMultEta; }
+inline UInt_t StFlowEvent::MultEta1() const { return mMultEta1; }
+
+inline UInt_t StFlowEvent::MultEta2() const { return mMultEta2; }
 
 inline UInt_t StFlowEvent::FlowEventMult() const { return pTrackCollection->size(); }
 
@@ -223,15 +190,11 @@ inline UInt_t StFlowEvent::Centrality() const { return mCentrality; }
 
 inline StThreeVectorF StFlowEvent::VertexPos() const { return mVertexPos; }
 
-inline Float_t  StFlowEvent::CTB() const { return mCTB; }
+inline Float_t  StFlowEvent::CTB()         const { return mCTB; }
 
-inline Float_t  StFlowEvent::ZDCe() const { return mZDCe; }
+inline Float_t  StFlowEvent::ZDCe()        const { return mZDCe; }
 
-inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
-
-inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
-
-inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
+inline Float_t  StFlowEvent::ZDCw()        const { return mZDCw; }
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
@@ -244,15 +207,17 @@ inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t sel
 inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mPtCuts[0][harN][selN] = lo; mPtCuts[1][harN][selN] = hi; }
 
-inline void StFlowEvent::SetEventID(const Int_t& id) { mEventID = id; }
-
-inline void StFlowEvent::SetRunID(const Int_t& id) { mRunID = id; }
+inline void StFlowEvent::SetEventID(const Int_t& id) {
+  mEventID = id; }
 
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
 
-inline void StFlowEvent::SetMultEta(const UInt_t& goodtracks) {
-  mMultEta = goodtracks; }
+inline void StFlowEvent::SetMultEta1(const UInt_t& goodtracks1) {
+  mMultEta1 = goodtracks1; }
+
+inline void StFlowEvent::SetMultEta2(const UInt_t& goodtracks2) {
+  mMultEta2 = goodtracks2; }
 
 inline void StFlowEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
   mVertexPos = vertexPos; }
@@ -275,26 +240,17 @@ inline void StFlowEvent::SetKPlusCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetAntiProtonCut(Float_t lo, Float_t hi) { 
   mAntiProtonCuts[0] = lo; mAntiProtonCuts[1] = hi; }
 
-inline void StFlowEvent::SetDeuteronCut(Float_t lo, Float_t hi) { 
-  mDeuteronCuts[0] = lo; mDeuteronCuts[1] = hi; }
+inline void  StFlowEvent::SetCTB(const Float_t ctb)  {mCTB = ctb; }
 
-inline void StFlowEvent::SetAntiDeuteronCut(Float_t lo, Float_t hi) { 
-  mAntiDeuteronCuts[0] = lo; mAntiDeuteronCuts[1] = hi; }
+inline void  StFlowEvent::SetZDCe(const Float_t zdce)  {mZDCe = zdce; }
 
-inline void StFlowEvent::SetElectronCut(Float_t lo, Float_t hi) { 
-  mElectronCuts[0] = lo; mElectronCuts[1] = hi; }
-
-inline void StFlowEvent::SetPositronCut(Float_t lo, Float_t hi) { 
-  mPositronCuts[0] = lo; mPositronCuts[1] = hi; }
-
-inline void  StFlowEvent::SetCTB(const Float_t ctb) { mCTB = ctb; }
-
-inline void  StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
-
-inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
-
-inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
-
-inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
+inline void  StFlowEvent::SetZDCw(const Float_t zdcw)  {mZDCw = zdcw; }
 
 #endif
+
+
+
+
+
+
+

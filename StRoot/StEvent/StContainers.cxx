@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.7 2000/09/28 10:56:33 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.6 2000/06/19 01:32:15 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.7  2000/09/28 10:56:33  ullrich
- * Added Rich PID classes.
+ * Revision 2.6  2000/06/19 01:32:15  perev
+ * Thomas StEvent branches added
  *
  * Revision 2.7  2000/09/28 10:56:33  ullrich
  * Added Rich PID classes.
@@ -39,7 +39,6 @@
 #include "StSvtHit.h"
 #include "StSsdHit.h"
 #include "StTpcHit.h"
-#include "StFtpcHit.h"
 #include "StRichHit.h"
 #include "StRichPixel.h"
 #include "StRichPid.h"
@@ -65,7 +64,6 @@ StCollectionImp(SvtHit)
 StCollectionImp(SsdHit)
 StCollectionImp(TpcHit)
 StCollectionImp(FtpcHit)
-StCollectionImp(RichHit)
 StCollectionImp(RichCluster)
 StCollectionImp(RichPixel)
 StCollectionImp(RichPid)

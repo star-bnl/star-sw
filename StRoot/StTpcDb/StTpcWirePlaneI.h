@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcWirePlaneI.h,v 1.3 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StTpcWirePlaneI.h,v 1.2 1999/12/16 22:00:54 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTpcWirePlaneI.h,v $
- * Revision 1.3  2000/11/14 22:00:06  genevb
- * Switched several functions from float to double
- *
  * Revision 1.2  1999/12/16 22:00:54  hardtke
  * add CVS tags
  *
@@ -26,37 +23,37 @@ class StTpcWirePlaneI : public TObject {
   //Abstract base class defining accessors
 public:
 
-  virtual double  anodeWireRadius()                          const = 0;
-  virtual double  frischGridWireRadius()                     const = 0;
-  virtual double  gateWireRadius()                           const = 0;
+  virtual float  anodeWireRadius()                           const = 0;
+  virtual float  frischGridWireRadius()                      const = 0;
+  virtual float  gateWireRadius()                            const = 0;
   
-  virtual double  anodeWirePitch()                           const = 0;
-  virtual double  frischGridPitch()                          const = 0;
-  virtual double  gatePitch()                                const = 0;
+  virtual float  anodeWirePitch()                            const = 0;
+  virtual float  frischGridPitch()                           const = 0;
+  virtual float  gatePitch()                                 const = 0;
   
-  virtual double  innerSectorAnodeWirePadPlaneSeparation()   const = 0;
-  virtual double  innerSectorFrischGridPadPlaneSeparation()  const = 0;
-  virtual double  innerSectorGatingGridPadPlaneSeparation()  const = 0;
+  virtual float  innerSectorAnodeWirePadPlaneSeparation()    const = 0;
+  virtual float  innerSectorFrischGridPadPlaneSeparation()   const = 0;
+  virtual float  innerSectorGatingGridPadPlaneSeparation()   const = 0;
 
-  virtual double  outerSectorAnodeWirePadPlaneSeparation()   const = 0;
-  virtual double  outerSectorFrischGridPadPlaneSeparation()  const = 0;
-  virtual double  outerSectorGatingGridPadPlaneSeparation()  const = 0;
+  virtual float  outerSectorAnodeWirePadPlaneSeparation()    const = 0;
+  virtual float  outerSectorFrischGridPadPlaneSeparation()   const = 0;
+  virtual float  outerSectorGatingGridPadPlaneSeparation()   const = 0;
 
   virtual int    numberOfInnerSectorAnodeWires()             const = 0;
   virtual int    numberOfInnerSectorFrischGridWires()        const = 0;
   virtual int    numberOfInnerSectorGatingGridWires()        const = 0;
-  virtual double  firstInnerSectorAnodeWire()                const = 0;
-  virtual double  firstInnerSectorFrischGridWire()           const = 0;
-  virtual double  firstInnerSectorGatingGridWire()           const = 0;
-  virtual double  lastInnerSectorAnodeWire()                 const = 0;
+  virtual float  firstInnerSectorAnodeWire()                 const = 0;
+  virtual float  firstInnerSectorFrischGridWire()            const = 0;
+  virtual float  firstInnerSectorGatingGridWire()            const = 0;
+  virtual float  lastInnerSectorAnodeWire()                  const = 0;
 
   virtual int    numberOfOuterSectorAnodeWires()             const = 0;
   virtual int    numberOfOuterSectorFrischGridWires()        const = 0;
   virtual int    numberOfOuterSectorGatingGridWires()        const = 0;
-  virtual double  firstOuterSectorAnodeWire()                const = 0;
-  virtual double  firstOuterSectorFrischGridWire()           const = 0;
-  virtual double  firstOuterSectorGatingGridWire()           const = 0;
-  virtual double  lastOuterSectorAnodeWire()                 const = 0;
+  virtual float  firstOuterSectorAnodeWire()                 const = 0;
+  virtual float  firstOuterSectorFrischGridWire()            const = 0;
+  virtual float  firstOuterSectorGatingGridWire()            const = 0;
+  virtual float  lastOuterSectorAnodeWire()                  const = 0;
 
 
 ClassDef(StTpcWirePlaneI,0)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.14 2000/10/26 19:48:54 rcwells Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.13 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
- * Revision 1.14  2000/10/26 19:48:54  rcwells
- * Added functionality for Coulomb correction of <qInv> in 3D correltions
- *
  * Revision 1.13  2000/07/16 21:38:22  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -33,6 +30,7 @@
 
 #include "StHbtCoulomb.h"
 #include <fstream.h>
+//#include <cstdlib>
 #include <stdio.h>
 #include <cassert>
 #include "PhysicalConstants.h"
@@ -299,7 +297,7 @@ double StHbtCoulomb::Eta(const StHbtPair* pair) {
   static double e1,e2,e1new,e2new;
   static double psi,theta;
   static double beta,gamma;
-  static double VcmsXnew;
+  static double VcmsXnew, VcmsYnew, VcmsZnew;
 
   px1 = pair->track1()->FourMomentum().px();
   py1 = pair->track1()->FourMomentum().py();
@@ -400,56 +398,22 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt1DHisto* histo, const
   StHbt1DHisto* correction = (StHbt1DHisto*) ((StHbt1DHisto*)histo)->Clone();
   correction->Reset();
   correction->SetDirectory(0);
+  double low   = correction->GetXaxis()->GetXmin();
+  double high  = correction->GetXaxis()->GetXmax();
   int    nBins = correction->GetXaxis()->GetNbins();
-  const double reducedMass = mass1*mass2/(mass1+mass2);
-  double qInv;
+  //cout << " low " << low << " high " << high << " nBins " << nBins << endl;
+ const double reducedMass = mass1*mass2/(mass1+mass2);
+  double qInv = low;
+  double dQinv = (high-low)/( (double)nBins );
   double eta;
   for (int ii=1; ii<=nBins; ii++) 
     {
       qInv = correction->GetBinCenter(ii);
       eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
+      CoulombCorrect( eta );
       correction->Fill( qInv, CoulombCorrect(eta,mRadius) );
     }
 
   return (correction);
 }
-
-StHbt3DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt3DHisto* histo, const double mass) {
-  double mass1=mass;
-  double mass2=mass;
-  if ( mass1!=mass2 ) {
-    cout << "Masses not equal ... try again.  No histogram created." << endl;
-    assert(0);
-  }
-  StHbt3DHisto* correction = (StHbt3DHisto*) ((StHbt3DHisto*)histo)->Clone();
-  correction->Reset();
-  correction->SetDirectory(0);
-  int    nBinsX = correction->GetXaxis()->GetNbins();
-  int    nBinsY = correction->GetYaxis()->GetNbins();
-  int    nBinsZ = correction->GetZaxis()->GetNbins();
-  const double reducedMass = mass1*mass2/(mass1+mass2);
-  double eta;
-  double qInv;
-  int binNumber;
-  for (int ii=1; ii<=nBinsX; ii++) { 
-    for (int iii=1; iii<=nBinsY; iii++) {
-      for (int iv=1; iv<=nBinsZ; iv++) {
-	binNumber = histo->GetBin(ii,iii,iv);
-	qInv = histo->GetBinContent(binNumber);
-	eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
-	correction->SetBinContent(binNumber, CoulombCorrect(eta,mRadius) );
-      }
-    }
-  }
-  return (correction);
-}
 #endif
-
-double StHbtCoulomb::CoulombCorrect(const double& mass, const double& charge,
-				    const double& radius, const double& qInv) {
-  mRadius = radius;
-  mZ1Z2 = charge;
-  const double reducedMass = 0.5*mass; // must be same mass particles
-  double eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
-  return ( CoulombCorrect(eta,mRadius) );
-}

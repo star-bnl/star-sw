@@ -63,7 +63,7 @@ virtual void Browse(TBrowser *b);
         size_t size () const    {return fV.size()    ;}
         void reserve(size_t sz) {fV.reserve(sz)      ;}
         void resize(size_t sz,TObject *v=0) {fV.resize(sz,v);}
-virtual Bool_t IsFolder() const;
+virtual Bool_t IsFolder();
         TObject *&at(int i){return fV[i];}
         void     put_at(TObject *obj,int i){fV[i]=obj;}
 
@@ -82,7 +82,6 @@ const_VecTObjIter end()   const {return fV.end();}
         TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
 void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
-        Int_t getEntries() const;
 protected:
 #ifndef __CINT__
 VecTObj fV;
@@ -111,7 +110,6 @@ public:
  void push_back(const TObject *to){fV.push_back((TObject*)to);}
  VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
  void clear();
- virtual void makeZombie();
 private:
 TString fIDName;
 TString fName;

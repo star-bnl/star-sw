@@ -1,6 +1,8 @@
+{
+
 /**********************************************************************
  *
- * $Id: ebyeDST2Ntuple.C,v 1.6 2000/11/01 22:51:06 jgreid Exp $
+ * $Id: ebyeDST2Ntuple.C,v 1.1.1.1 2000/08/01 13:57:56 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *
@@ -17,32 +19,13 @@
  **********************************************************************
  *
  * $Log: ebyeDST2Ntuple.C,v $
- * Revision 1.6  2000/11/01 22:51:06  jgreid
- * fixed repeat file-loading bug
- *
- * Revision 1.5  2000/09/15 22:41:17  jgreid
- * made file array even larger
- *
- * Revision 1.4  2000/09/15 22:19:04  jgreid
- * made filename array larger in ebyeDST2Ntuple.C
- *
- * Revision 1.3  2000/09/15 16:41:38  jgreid
- * bug fix in multiple file name handler
- *
- * Revision 1.2  2000/09/01 22:59:11  jgreid
- * version 1 revision ; multiple file handling + additional data members added
- *
  * Revision 1.1.1.1  2000/08/01 13:57:56  jgreid
  * EbyE DST creation and access tools
  *
  *
  **********************************************************************/
 
-void ebyeDST2Ntuple() {
-  printf("Usage : ebyeDST2Ntuple.C(\"directory\")\n");
-}
-
-void ebyeDST2Ntuple(char *dirname) {
+  gROOT->Reset();
 
   // load StEbye microDST shared library
   gSystem.Load("libEvent.so");
@@ -69,70 +52,29 @@ void ebyeDST2Ntuple(char *dirname) {
   // create the root Ntuple 'EbyeMicroDST'
   ntuple = new TNtuple("ntuple","EbyE","rid:eid:pp:pm:p2p:p2m:Np:Nm:etab:etasqb:n:z:ctb:zdce:zdcw");
 
-  TChain chain("EbyeTree");
+  // open the DST file
+  TFile f("EbyeDST.root");
 
-  // This bit of code processes the directory listing of
-  //  the traget analysis directory, finds all of the .ebe.root
-  //  files in that directory and adds them to the analysis chain
-
-  Int_t nfiles = 0;
-  Char_t *file;
-  Char_t path_file[100];
-  //Char_t dirname[]="~/pwg/dst/aug/";
-  Char_t file_list[5000][128];
-
-  void *dirhandle = gSystem->OpenDirectory(gSystem->ExpandPathName(dirname));
-  while (file = gSystem->GetDirEntry(dirhandle)) {
-    if (strstr(file,".ebe.root") != 0) {
-      strcpy(path_file,dirname);
-      strcat(path_file,file);
-      sprintf(&file_list[nfiles],"%s",path_file);
-      printf("file %d: %s\n",nfiles,path_file);
-      nfiles++;
-    }
-  }
-
-  if (nfiles == 0) {
-    printf("No *.ebe.root files found in specified directory\n");
-    break;
-  }
-
-  printf("Hold on a sec, adding %i files to chain...\n",nfiles);
-  for (int q = 0; q < nfiles; q++) {
-    chain.Add(file_list[q]);
-    printf(".");
-  }
-
-  //
-  //
+  // Create a timer object to benchmark this loop
+  TStopwatch timer;
+  timer.Start();
 
   //we create the event object once outside the loop
   StEbyeEvent *event = new StEbyeEvent();   
 
+  // Get the tree, the branch, and the entries
+  ebyeTree = (TTree*)f.Get("EbyeTree");
+ 
   TClonesArray *tracks = 0;
 
-  TBranch *branch = chain.GetBranch("EbyeDSTBranch");
+  TBranch *branch = ebyeTree.GetBranch("EbyeDSTBranch");
   branch->SetAddress(&event);
-  Int_t nevent = chain.GetEntries();
+  Int_t nevent = ebyeTree.GetEntries();
 
-  printf("There are %i events in this DST chain.\n",nevent);
-  Int_t fCurrent = chain.GetTreeNumber();
+  printf("There are %i events in this DST file.\n",nevent);
   Int_t nb = 0;
-
-  for (int i = 0; i < nevent; i++) {
-
-    // here we load the Tree, determine which file it is in
-    //  get the branch from that file and connect the local
-    //  copy of event to it to access the data
-   
-    Int_t centry = chain.LoadTree(i);
-    if (chain.GetTreeNumber() != fCurrent) {
-       fCurrent = chain.GetTreeNumber();
-       branch = chain.GetBranch("EbyeDSTBranch");
-       branch->SetAddress(&event);
-    }
-
-    nb += chain.GetEvent(i);   //read complete event in memory
+  for (i = 0; i < nevent; i++) {
+    nb += ebyeTree.GetEvent(i);   //read complete event in memory
     Int_t numberOfTracks = event->OrigMult();
     tracks = event->Tracks();     //get pointer to the TClonesArray object
     
@@ -199,6 +141,20 @@ void ebyeDST2Ntuple(char *dirname) {
     printf("ntuple filled for event %i in run %i.\n",eid,rid);
 
   }
+
+  // Stop timer and print results
+  timer.Stop();
+  Float_t mbytes = 0.000001*nb;
+  Double_t rtime = timer.RealTime();
+  Double_t ctime = timer.CpuTime();
+  printf("%d events and %d bytes read.\n",nevent,nb);
+  printf("file compression factor = %f\n",f.GetCompressionFactor());
+  printf("RealTime=%f seconds, CpuTime=%f seconds\n",rtime,ctime);
+  printf("You read %f Mbytes/Realtime seconds\n",mbytes/rtime);
+  printf("You read %f Mbytes/Cputime seconds\n",mbytes/ctime);
+
+  // close the DST file
+  f.Close();
 
   // write ntuple out to a file
 

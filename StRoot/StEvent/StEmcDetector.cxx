@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.5 2000/10/26 00:02:21 ullrich Exp $
+ * $Id: StEmcDetector.cxx,v 2.4 2000/07/28 19:49:27 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
- * Revision 2.5  2000/10/26 00:02:21  ullrich
- * Fixed various problems causing I/O failures.
+ * Revision 2.4  2000/07/28 19:49:27  akio
+ * Change in Detector Id for Endcap SMD
  *
  * Revision 2.4  2000/07/28 19:49:27  akio
  * Change in Detector Id for Endcap SMD
@@ -31,7 +31,7 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.5 2000/10/26 00:02:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.4 2000/07/28 19:49:27 akio Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -41,17 +41,12 @@ StEmcDetector::StEmcDetector(StDetectorId id, UInt_t n)
 {
     mDetectorId = id;
     mNumberOfModules = n;
-    for(Int_t i=0; i<120;i++)
-    {
-      StEmcModule * module = new StEmcModule();
-      this->setModule(module,i);
-    }
-
+    mModules = new StEmcModule[n];
 }
 
 StEmcDetector::~StEmcDetector()
 {
-    for(Int_t i=0; i<120;i++) if(mModules[i]) delete mModules[i];
+    if (mModules)  delete [] mModules;
     if (mClusters) delete mClusters;
 }
 
@@ -60,10 +55,9 @@ StEmcDetector::addHit(StEmcRawHit* hit)
 {
     if (hit){
       UInt_t m = hit->module();
-      if (m > 0 && m <= mNumberOfModules)
-      {
-	      mModules[m-1]->hits().push_back(hit);
-	      return kTRUE;
+      if (m > 0 && m <= mNumberOfModules){
+	mModules[m-1].hits().push_back(hit);
+	return kTRUE;
       }
     }
     return kFALSE;
@@ -79,22 +73,28 @@ UInt_t
 StEmcDetector::numberOfHits() const
 {
     UInt_t sum = 0;
-    for (UInt_t m=0;m<mNumberOfModules;m++) sum+= mModules[m]->hits().size();
+    for (UInt_t m=0; m < mNumberOfModules; m++) {
+	sum += mModules[m].hits().size();
+    }
     return sum;
 }
 
 StEmcModule*
 StEmcDetector::module(UInt_t i)
 {
-    if (i > 0 && i <= mNumberOfModules) return (mModules[i-1]);
-    else return 0;
+    if (i > 0 && i <= mNumberOfModules)
+        return &(mModules[i-1]);
+    else
+        return 0;
 }
 
 const StEmcModule*
 StEmcDetector::module(UInt_t i) const
 {
-    if (i > 0 && i <= mNumberOfModules) return (mModules[i-1]);
-    else return 0;
+    if (i > 0 && i <= mNumberOfModules)
+        return &(mModules[i-1]);
+    else
+        return 0;
 }
 
 StEmcClusterCollection*
@@ -110,15 +110,3 @@ StEmcDetector::setCluster(StEmcClusterCollection* val)
     mClusters = val;
 }
 
-void
-StEmcDetector::setModule(StEmcModule* val,Int_t IdMod)
-{
-    if (val)
-    { 
-      if (IdMod >= 0 && IdMod < mNumberOfModules) 
-      {
-        if (mModules[IdMod]) delete mModules[IdMod];
-        mModules[IdMod] = val;
-      }
-   }
-}     

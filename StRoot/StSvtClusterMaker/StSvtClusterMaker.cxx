@@ -1,8 +1,5 @@
-// $Id: StSvtClusterMaker.cxx,v 1.3 2000/08/29 22:46:26 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.2 2000/08/21 13:06:58 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
-// Revision 1.3  2000/08/29 22:46:26  caines
-// Fixed some memory leaks
-//
 // Revision 1.2  2000/08/21 13:06:58  caines
 // Much improved hit finding and fitting
 //
@@ -21,8 +18,6 @@
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 #include "StSequence.hh"
-
-#include "StMessMgr.h"
 
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
@@ -54,9 +49,7 @@ StSvtClusterMaker::~StSvtClusterMaker()
 //_____________________________________________________________________________
 Int_t StSvtClusterMaker::Init(){
 
-
- if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Init() ..."  << 
-		 GetName() << endm;
+  printf("In StSvtClusterMaker::Init() ...\n");
 
   St_DataSet *dataSet = GetDataSet("StSvtData");
   assert(dataSet); 
@@ -89,9 +82,9 @@ Int_t StSvtClusterMaker::SetSvtCluster()
 //_____________________________________________________________________________
 Int_t StSvtClusterMaker::Make(){
   
-
- if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Make() ..."  << 
-		 GetName() << endm;
+  printf("In StSvtClusterMaker::Make() ...\n");
+  
+  printf("Running now \n");
 
   SetHybridClusters();
    
@@ -149,8 +142,7 @@ Int_t StSvtClusterMaker::SetHybridClusters()
 
 Int_t StSvtClusterMaker::Finish(){
 
-  if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Finish() ..."  << 
-		 GetName() << endm;
+  printf("In StSvtClusterMaker::Finish() ...\n"); 
 
   return kStOK;
 }

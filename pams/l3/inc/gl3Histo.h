@@ -13,7 +13,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 class gl3HistoHeader {
@@ -45,7 +45,7 @@ public:
    int   Reset  (  ) ;
    int   Write  ( int maxBytes, char* output ) ; 
 
-// ClassDef(gl3Histo,1)
+   ClassDef(gl3Histo,1)
 
 };
 #endif

@@ -1,11 +1,5 @@
-// $Id: StV0Controller.cxx,v 3.4 2000/09/18 19:25:19 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StV0Controller.cxx,v $
-// Revision 3.4  2000/09/18 19:25:19  genevb
-// Additional protection for missing MC info
-//
-// Revision 3.3  2000/08/31 21:25:34  genevb
-// Adjustment for V0s used in Xis only
-//
 // Revision 3.2  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -74,13 +68,10 @@ Int_t StV0Controller::MakeCreateDst(StEvent& event) {
   Int_t asize = dataArray->GetSize();
   if (entries > asize) dataArray->Expand(entries+increment);
   StStrangeEvMuDst* ev = masterMaker->GetEvent();
-  Int_t j=0;
   for (Int_t i=0; i<entries; i++) {
     StV0Vertex* v0Vertex = v0Vertices[i];
-    if (v0Vertex->dcaParentToPrimaryVertex() >= 0)
-      new((*dataArray)[j++]) StV0MuDst(v0Vertex,ev);
+    new((*dataArray)[i]) StV0MuDst(v0Vertex,ev);
   }
-  entries = j;
   PrintNumCand("found",entries);
   nEntries += entries;
 
@@ -95,14 +86,13 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcV0Map = assocMaker->mcV0Map();
     theMcTrackMap = assocMaker->mcTrackMap();
   }
-  if (!((assocMaker)&&(theMcV0Map)&&(theMcTrackMap))) return kStOk;
   StMcTrack *Pos = 0; 
   StMcTrack *Neg = 0;
   StV0Vertex* rcV0Partner = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcV0Map->count(mcVert);
   
-  if (count>0) {
+  if ((assocMaker)&&(count>0)) {
     pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
     rcV0Partner = (*mcV0Bounds.first).second;
     float x, y, z, delta;

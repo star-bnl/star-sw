@@ -1,7 +1,4 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.91  2000/09/20 13:11:17  fisyak
-#  Make correction for PGI and /opt/star request by Janet
-#
 #  Revision 1.90  2000/03/18 21:59:47  perev
 #  change := to += for linux
 #
@@ -251,7 +248,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 2000/09/20 13:11:17 $ 
+#             Last modification $Date: 2000/03/18 21:59:47 $ 
 #. default setings
 
 MAKE  := gmake
@@ -480,8 +477,8 @@ endif
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
   SOFLAGS  := $(DEBUG) -shared  
   CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
-  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl -lpgc -L$(OPTSTAR)/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
-#  FLIBS    := -L$(OPTSTAR)/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
+  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif

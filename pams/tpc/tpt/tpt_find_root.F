@@ -1,8 +1,5 @@
-* $Id: tpt_find_root.F,v 1.14 2000/11/14 22:29:07 genevb Exp $
+* $Id: tpt_find_root.F,v 1.13 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_find_root.F,v $
-* Revision 1.14  2000/11/14 22:29:07  genevb
-* Switched from float to double in many places
-*
 * Revision 1.13  2000/02/23 21:05:52  hardtke
 * replace tpg functions with tpc functions
 *
@@ -91,10 +88,10 @@ C     Local variables
       INTEGER tpt_find_slic, irets
       INTEGER tpc_sec24_to_sec12
       INTEGER longrow
-      REAL    zp3,zorigl,zp2,zp1,xp1,yp1,as1,bs1,fact
-      REAL*8  r3,r2,delr23,delz2p,dely23
-      REAL*8  delx23,delz23,sl23
-      REAL*8  an,bn,as,bs,ddr,delrow,det_local
+      REAL    zp3
+      REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
+      REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
+      REAL    as,bs,ddr,fact,delrow,dummy, det_local
 
 c     message related variables
       character*132 m132
@@ -112,7 +109,7 @@ C     get information about the seed
       longrow =hit(k).row 
       ir3   = mod(longrow,100)
       zp3   = hit(k).z
-      r3    = dsqrt(dble(hit(k).x)**2+dble(hit(k).y)**2)
+      r3    = sqrt(hit(k).x**2+hit(k).y**2)
        
 C     set maximum allowable gap 
       gap_2 = tpar(ipass).g2
@@ -192,7 +189,7 @@ c                      we have a good root
               end do
             endif
             else
-	      r2 = dsqrt(dble(hit(i).x)**2+dble(hit(i).y)**2)
+	      r2 = sqrt(hit(i).x**2+hit(i).y**2)
 	      delr23 = r3 - r2
 	      if( delr23 .gt. 0.0000001 ) then
 C               make tolerance proportional to the gap size
@@ -200,34 +197,30 @@ C               make tolerance proportional to the gap size
                 if( ir2 .lt. 14 ) fact=2.5
                 tol23 = real(ir3 - ir2)*fact
 C               calculate prediction
-                zp2 = (hit(k).z - zorigl) * (r2/r3) + zorigl
+                zp2 = (hit(k).z - zorigl) * r2 / r3 + zorigl
 c               squared distance between the prediction and the track (r-z projection)
-	        delz2p = dble(hit(i).z-zp2)**2/
-     >                   (1.0+((hit(k).z-zorigl)/r3)**2)
+	        delz2p = (hit(i).z-zp2)**2/(1.0+((hit(k).z-zorigl)/r3)**2)
                 if(delz2p.lt.(tpar(ipass).delzlm*tol23)**2)
      >          then
 		  dely23 = hit(k).y-hit(i).y
                   delx23 = hit(k).x-hit(i).x
                   if( dely23**2+delx23**2 .lt. 
-     >              dble(tpar(ipass).delrlm*tol23)**2) then
+     >              (tpar(ipass).delrlm*tol23)**2) then
                     delz23 = hit(k).z - hit(i).z
 c                   we have a candidate for the second point
 C                   calculate prediction for the row ir1
 c                   get the row parametrisation
-                    iret = tpc_row_par(isect,real(ir1),as1,bs1)
-                    as = dble(as1)
-                    bs = dble(bs1)
+                    iret = tpc_row_par(isect,real(ir1),as,bs)
 c                   calculate the track parametrisation as an*x+bn*y=1
-                    det_local=dble(hit(i).x*hit(k).y-hit(k).x*hit(i).y)
-                    if(dabs(det_local).gt.0.0000001) then
+                    det_local=(hit(i).x*hit(k).y-hit(k).x*hit(i).y)
+                    if(abs(det_local).gt.0.0000001) then
                     an=(hit(k).y-hit(i).y)/det_local
                     bn=-(hit(k).x-hit(i).x)/det_local
 c                   calculate the prediction in x-y plane
                     iret = tpt_ptcrs(as,bs,an,bn,xp1,yp1)
 c                   calculate the prediction in the r-z plane
                     sl23 = delz23/delr23
-                    zp1 = hit(i).z -
-     >                    sl23*(r2-dsqrt(dble(xp1)**2+dble(yp1)**2))
+                    zp1 = hit(i).z - sl23*(r2-sqrt(xp1**2+yp1**2))
                     if(abs(zp1).gt.209.0) zp1=sign(209.0,zp1)
 c                   find the slice number for the prediction and look for a hit there
                     irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
@@ -241,9 +234,8 @@ C                   next j'th hit is set at enddo
                          if( (hit(j).x-xp1)**2+(hit(j).y-yp1)**2
      +                     .lt.ddr**2) then
 c                          candidate passed cuts in x-y
-			   if(dble(hit(j).z-zp1)**2/(1.+sl23**2) 
-     >                     .lt.dble(tpar(ipass).dzlm1*tol12*hit(j).zrf)**2)
-     >                     then
+			   if((hit(j).z-zp1)**2/(1.+sl23**2) 
+     >                     .lt.(tpar(ipass).dzlm1*tol12*hit(j).zrf)**2) then
 c                              we have a good root
                                nroot=nroot+1
 		      	       root(nroot).hit(1) = k

@@ -2,20 +2,8 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.33 2000/11/01 00:53:01 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.29 2000/08/07 14:39:40 caines Exp $
 // $Log: StMatchMaker.cxx,v $
-// Revision 1.33  2000/11/01 00:53:01  lbarnby
-// Move field dependent set up from Init into InitRun
-//
-// Revision 1.32  2000/10/23 19:44:13  lbarnby
-// Fix units for B
-//
-// Revision 1.31  2000/10/20 21:21:35  lbarnby
-// Set up copying into globtrk table (NO refit) if field-off run
-//
-// Revision 1.30  2000/09/07 19:00:53  lbarnby
-// Explicitly set Kalman mass hypothesis to pion (whad been commented out) rather than relying on default inside Kalman module
-//
 // Revision 1.29  2000/08/07 14:39:40  caines
 // Add to dst a copy of tpc and svt tracks called CpyTrk
 //
@@ -444,11 +432,10 @@ Int_t StMatchMaker::Init(){
   //  row.usevert   = m_usevert;
    m_egr_egrpar->AddAt(&row,0);
   //Use this as the GEANT pid to be used for the kalman filter for now 
-    row.useglobal = 8;
-    m_egr_egrpar->AddAt(&row,1);
+    //row.useglobal = 8;
+    //m_egr_egrpar->AddAt(&row,1);
   }
-
-
+  
   AddRunCont(m_egr_egrpar);
  
 
@@ -460,24 +447,6 @@ Int_t StMatchMaker::Init(){
   m_srspar         = (St_srs_srspar  *) svtpars("srspars/srs_srspar");
   
   return StMaker::Init();
-}
-//_____________________________________________________________________________
-Int_t StMatchMaker::InitRun(int runnumber){
-  // Set up copying of TPC tracks (no refit) if field off (B very small)
-  Float_t x[3] = {0,0,0};
-  Float_t b[3];
-  gufld(x,b);
-  Double_t B = b[2]*kilogauss;
-  gMessMgr->Info() << "StMatchMaker::InitRun:B field is " << B/kilogauss << " kilogauss" << endm;
-  if (B/kilogauss < 0.005){
-    gMessMgr->Info() <<
-      "StMatchMaker::InitRun: No field run: no refit, copy tracks into globtrk table" << endm;
-    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-    egr_egrpar->usetpc = 1;
-    egr_egrpar->usesvt = 1;
-    egr_egrpar->useglobal  = 0;
-  }
-  return StMaker::InitRun(runnumber);
 }
 //_____________________________________________________________________________
 Int_t StMatchMaker::Make(){

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLabFrame3DCorrFctn.cxx,v 1.4 2000/10/26 19:48:50 rcwells Exp $
+ * $Id: BPLabFrame3DCorrFctn.cxx,v 1.3 2000/08/23 19:43:43 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: BPLabFrame3DCorrFctn.cxx,v $
- * Revision 1.4  2000/10/26 19:48:50  rcwells
- * Added functionality for Coulomb correction of <qInv> in 3D correltions
- *
  * Revision 1.3  2000/08/23 19:43:43  lisa
  * added alternate normalization algorithm to 3d CorrFctns in case normal one fails
  *
@@ -56,10 +53,6 @@ BPLabFrame3DCorrFctn::BPLabFrame3DCorrFctn(char* title, const int& nbins, const 
   char TitRat[100] = "Rat";
   strcat(TitRat,title);
   mRatio = new StHbt3DHisto(TitRat,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
-  // set up qInv
-  char TitQinv[100] = "Qinv";
-  strcat(TitQinv,title);
-  mQinvHisto = new StHbt3DHisto(TitQinv,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
 
   // to enable error bar calculation...
   mNumerator->Sumw2();
@@ -73,7 +66,6 @@ BPLabFrame3DCorrFctn::~BPLabFrame3DCorrFctn(){
   delete mNumerator;
   delete mDenominator;
   delete mRatio;
-  delete mQinvHisto;
 }
 //_________________________
 void BPLabFrame3DCorrFctn::Finish(){
@@ -95,7 +87,6 @@ void BPLabFrame3DCorrFctn::Finish(){
   }
 
   mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
-  mQinvHisto->Divide(mDenominator);
 }
 
 //____________________________
@@ -152,7 +143,6 @@ void BPLabFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
   double qLong = fabs(pair->qLongBf());
 
   mDenominator->Fill(qOut,qSide,qLong,weight);
-  mQinvHisto->Fill(qOut,qSide,qLong,Qinv);
 }
 
 

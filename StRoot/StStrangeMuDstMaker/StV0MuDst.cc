@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 3.2 2000/08/31 21:25:34 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.1 2000/08/10 01:16:24 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,9 +12,6 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
- * Revision 3.2  2000/08/31 21:25:34  genevb
- * Adjustment for V0s used in Xis only
- *
  * Revision 3.1  2000/08/10 01:16:24  genevb
  * Added number of dedx points
  *
@@ -42,7 +39,6 @@
 #include "StV0Vertex.h"
 #include "StStrangeEvMuDst.hh"
 #include "StDedxPidTraits.h"
-#include "TMath.h"
 ClassImp(StV0MuDst)
 
 StV0MuDst::StV0MuDst() { 
@@ -55,7 +51,7 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mDecayVertexV0Y = v0Vertex->position().y();
   mDecayVertexV0Z = v0Vertex->position().z();
   mDcaV0Daughters = v0Vertex->dcaDaughters();
-  mDcaV0ToPrimVertex = TMath::Abs(v0Vertex->dcaParentToPrimaryVertex());
+  mDcaV0ToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
   mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positive);
   mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negative);
   mMomNegX = v0Vertex->momentumOfDaughter(negative).x();

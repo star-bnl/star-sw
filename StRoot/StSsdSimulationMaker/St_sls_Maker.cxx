@@ -53,12 +53,14 @@ Int_t St_sls_Maker::Make()
 {
   // 		Create output tables
    Int_t res = 0;
+   St_sls_spt    *sls_spt   = new St_sls_spt("sls_spt",5000);
+   m_DataSet->Add(sls_spt);
    St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
    m_DataSet->Add(sls_strip);
 
    St_DataSetIter geant(GetInputDS("geant"));
    St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
-   res = sls_am (g2t_svt_hit, m_geom, m_geom_par, m_ctrl, sls_strip);
+   res = sls_am (g2t_svt_hit, m_geom, m_geom_par, m_ctrl, sls_spt, sls_strip);
 
    if(res!=kSTAFCV_OK){
      gMessMgr->Warning("St_sls_Maker: no output");
@@ -71,7 +73,7 @@ Int_t St_sls_Maker::Make()
 //_____________________________________________________________________________
 void St_sls_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_sls_Maker.cxx,v 1.3 2000/09/11 12:34:37 hippolyt Exp $\n");
+  printf("* $Id: St_sls_Maker.cxx,v 1.2 2000/08/15 19:31:19 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

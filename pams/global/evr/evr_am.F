@@ -283,21 +283,20 @@ CC:>----------------------------------------------------------------------
 CC:  Variables in common with Subroutines:
       INTEGER   maxtr
       PARAMETER (maxtr=20000)
-      REAL*8    vtrv(6,maxtr)
+      REAL      vtrv(6,maxtr)
       COMMON    /FITVERT/ vtrv
-      REAL*8    XV,YV,ZV,cov(6),chisq
+      REAL      XV,YV,ZV,cov(6),chisq
       COMMON    /VERTEX/ XV,YV,ZV,cov,chisq
 
 CC  Local Variable Type Declarations:
-      REAL*8 dr,x0(maxtr),y0(maxtr),z0(maxtr),phi0(maxtr),tanl(maxtr)
-      REAL*8 sig,sigma(maxtr),vertex_pass(3,3)
-      REAL*8 psi,ppt,xx0,yy0,zz0,tanla
-      REAL*8 xp(2),x(4),xxv(3),xa0(3),pa0(3),x3d0(3)
-      REAL*8 seed,LIFC,LRAD,LSVT1
-      REAL   xlocal(3),bfield(3),b,bfield_min,chisq1
-      REAL*8 ptdefault,pptdef
-      REAL*8 ntrkratio, beampipecut, ntrkratiocut
-      REAL   zsum(800),xsum(81),ysum(81),maxval,sumbin
+      REAL dr,x0(maxtr),y0(maxtr),z0(maxtr),phi0(maxtr),tanl(maxtr)
+      REAL sig,sigma(maxtr),vertex_pass(3,3)
+      REAL psi,ppt,xx0,yy0,b,zz0,tanla
+      REAL xp(2),x(4),xxv(3),xa0(3),pa0(3),x3d0(3)
+      REAL zsum(800),seed,zmax,LIFC,LRAD,LSVT1
+      REAL xlocal(3),bfield(3),ptdefault,bfield_min,pptdef
+      REAL ntrkratio, beampipecut, ntrkratiocut
+      REAL xsum(81), ysum(81), maxval, sumbin
 
       INTEGER   i,j,k,ipnt,ntrk,index,gindex(maxtr),icharge
       INTEGER   fitoption,covariance,ntrkcut
@@ -308,9 +307,10 @@ CC  Local Variable Type Declarations:
       INTEGER   flagset1, flagset2, bin_max, bin_low, bin_high
 
 CC  Declare new variables used in track cov() matrix contribution to sigma:
-      REAL*8 h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
-      REAL*8 deriv(3,5),derrorsq,derror,r0save,phi0save
-      REAL*8 sigdef,sigmin,sigmax,sigbig
+      REAL h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
+      REAL deriv(3,5),derrorsq,derror,r0save,phi0save
+      REAL sigdef,sigmin,sigmax,sigbig
+      REAL COSD,SIND
       INTEGER  ii,jj,ialpha,ibeta
 
 CC  Declare called CERNLIB Function:
@@ -474,8 +474,8 @@ CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
               ppt = pptdef
            end if
            tanla = globtrk(i).tanl
-           xx0 = globtrk(i).r0*dcosd(dble(globtrk(i).phi0))
-           yy0 = globtrk(i).r0*dsind(dble(globtrk(i).phi0))
+           xx0 = globtrk(i).r0*cosd(globtrk(i).phi0)
+           yy0 = globtrk(i).r0*sind(globtrk(i).phi0)
            zz0 = globtrk(i).z0
            globtrk(i).id_start_vertex = 0
            if(globtrk(i).det_id .eq. kTpcId       .or.
@@ -563,11 +563,11 @@ CCC  Calculate derivatives using same track parameters as assumed for
 CCC  covariance matrix.  This uses the Kalman filter track covariance
 CCC  matrix definition.  See comments for table dst_track.
 CCC  Compute the 5 track parameters using the Kalman filter definition:
-                 r0save = dsqrt(xx0*xx0 + yy0*yy0)
+                 r0save = sqrt(xx0*xx0 + yy0*yy0)
                  if(r0save.eq.0.0) then
                     phi0save = 0.0
                  else
-                    phi0save = DATAN2(yy0,xx0)*180.0/C_PI
+                    phi0save = ATAN2(yy0,xx0)*180.0/C_PI
                  end if
                  p(1) = r0save*phi0save
                  p(2) = zz0
@@ -576,7 +576,7 @@ CCC  Compute the 5 track parameters using the Kalman filter definition:
                  if(icharge.eq.0) then
                     p(5) = 1.0/ppt
                  else
-                    p(5) = dble(icharge)/ppt
+                    p(5) = float(icharge)/ppt
                  end if
 CCC  Set the shifted values of each track parameter needed for calculating
 CCC  the partial derivatives numerically.  Use amounts 
@@ -606,7 +606,7 @@ CC  Compute partial derivatives:
                     if(icharge.eq.0) then          ! Get pcall(8) = pt
                        pcall(8) = 1.0/pcall(5)
                     else
-                       pcall(8) = dble(icharge)/pcall(5)
+                       pcall(8) = float(icharge)/pcall(5)
                     end if
                     if(r0save.eq.0.0) then         ! Get pcall(6,7)=x0,y0
                        if(ii.eq.1) then
@@ -617,8 +617,8 @@ CC  Compute partial derivatives:
                           pcall(7) = 0.0
                        end if
                     else
-                       pcall(6) = r0save*dcosd(pcall(1)/r0save)
-                       pcall(7) = r0save*dsind(pcall(1)/r0save)
+                       pcall(6) = r0save*cosd(pcall(1)/r0save)
+                       pcall(7) = r0save*sind(pcall(1)/r0save)
                     end if
                     Call evr_project_track(pcall(4),icharge,pcall(8),
      1                   pcall(3),pcall(6),pcall(7),b,pcall(2),
@@ -641,7 +641,7 @@ CC  Compute partial derivatives:
      1                 'using covar()-USE Default:',derrorsq
                     derror = sigdef
                  else
-                    derror = dsqrt(derrorsq)
+                    derror = sqrt(derrorsq)
                     if(derror.eq.0.0.or.derror.gt.sigbig) then
                        derror = sigdef
                     else if(derror.gt.0.0 .and.
@@ -658,11 +658,11 @@ CCC   Assign final error (sigma) to extrapolated track position:
               if(sigma(k).eq.0.0 .and. derror.eq.0.0) then
                  sigma(k) = sigdef
               else
-                 sigma(k) = dsqrt(sigma(k)*sigma(k) + derror*derror)
+                 sigma(k) = sqrt(sigma(k)*sigma(k) + derror*derror)
               end if
 
-              if(dabs(z0(k)).lt.200. .and. dsqrt(x0(k)**2 + y0(k)**2)
-     1           .le. beampipecut) then
+              if(abs(z0(k)).lt.200. .and. sqrt(x0(k)*x0(k) +
+     1           y0(k)*y0(k)) .le. beampipecut) then
 CCC              Modified to correct fat bin at 0.0
                  zsum(int(2.0*(z0(k)+200.0))+1) =      
      1           zsum(int(2.0*(z0(k)+200.0))+1) + 1.   
@@ -684,7 +684,7 @@ CC                            ! the remainder of tracks are skipped.
 
 CCC   Check for adequate number of tracks:
         if(globtrk_h.nok .ne. 0) then
-           ntrkratio = dble(ntrk)/dble(globtrk_h.nok)
+           ntrkratio = float(ntrk)/float(globtrk_h.nok)
         end if
         if (ntrk.lt.5) then
            write(6,*) 'EVR: Not enough global tracks after ptmin,z '
@@ -724,12 +724,12 @@ CCC      z-coordinate seed value:
         sumbin = 0.0
         do i = bin_low,bin_high
            sumbin = sumbin + zsum(i)
-           seed = seed + (0.5*dble(i) - 200.25)*zsum(i)
+           seed = seed + (0.5*float(i) - 200.25)*zsum(i)
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.5*dble(bin_max) - 200.25
+           seed = 0.5*float(bin_max) - 200.25
         end if
         zv = seed
 
@@ -750,19 +750,19 @@ CCC     x-coordinate seed value:
         sumbin = 0.0
         do i = bin_low,bin_high
            sumbin = sumbin + xsum(i)
-           seed = seed + (0.1*dble(i) - 4.05)*xsum(i)
+           seed = seed + (0.1*float(i) - 4.05)*xsum(i)
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.1*dble(bin_max) - 4.05
+           seed = 0.1*float(bin_max) - 4.05
         end if
-        if(dabs(seed) .le. 0.1) then
+        if(abs(seed) .le. 0.1) then
            xv = 0.0
         else
            xv = 2.0*seed
         end if
-        if(dabs(xv) .gt. beampipecut) xv = seed
+        if(abs(xv) .gt. beampipecut) xv = seed
 
 CCC     y-coordinate seed value:
         bin_max = 0
@@ -781,19 +781,19 @@ CCC     y-coordinate seed value:
         sumbin = 0.0
         do i = bin_low,bin_high
            sumbin = sumbin + ysum(i)
-           seed = seed + (0.1*dble(i) - 4.05)*ysum(i)
+           seed = seed + (0.1*float(i) - 4.05)*ysum(i)
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.1*dble(bin_max) - 4.05
+           seed = 0.1*float(bin_max) - 4.05
         end if
-        if(dabs(seed) .le. 0.1) then
+        if(abs(seed) .le. 0.1) then
            yv = 0.0
         else
            yv = 2.0*seed
         end if
-        if(dabs(yv) .gt. beampipecut) yv = seed
+        if(abs(yv) .gt. beampipecut) yv = seed
 
 CC  Save vertex seed value:
         vertex_pass(1,1) = xv
@@ -845,8 +845,8 @@ CCC  estimate of vertex position if it is off the x=y=0 axis:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
-              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
+              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
+              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
               zz0 = globtrk(k).z0
               xp(1) = xv
               xp(2) = yv
@@ -864,9 +864,9 @@ CCC  Select tracks based on transverse x-y and z cuts and load
 CCC  track parameters into temporary arrays:
 	k=0
 	do 10 i=1,ntrk
-	   dr=dsqrt((x0(i)-xv)**2 + (y0(i)-yv)**2 )
+	   dr=sqrt((x0(i)-xv)**2 + (y0(i)-yv)**2 )
 	   if(dr.lt.evrpar(1).cutxy) then
-	      if( dabs(z0(i)-zv).lt.evrpar(1).cutz) then
+	      if( abs(z0(i)-zv).lt.evrpar(1).cutz) then
 	         k=k+1
 	         vtrv(1,k)=phi0(i)
 	         vtrv(2,k)=tanl(i)
@@ -880,7 +880,7 @@ CCC  track parameters into temporary arrays:
 
 CCC   Check for adequate number of tracks:
         if(globtrk_h.nok .ne. 0) then
-           ntrkratio = dble(k)/dble(globtrk_h.nok)
+           ntrkratio = float(k)/float(globtrk_h.nok)
         end if
         if (k.lt.5) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
@@ -967,7 +967,7 @@ CCC  Load first iteration vertex value into table privert:
            do i = 1,6
               privert(index).covar(i) = 0.0
            end do
-           privert(index).chisq(1) = chisq/dble(k-1)
+           privert(index).chisq(1) = chisq/float(k-1)
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
@@ -991,8 +991,8 @@ CC  Optional Re-calculation of helix track projection to new vertex position:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
-              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
+              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
+              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
               zz0 = globtrk(k).z0
               xp(1) = xxv(1)
               xp(2) = xxv(2)
@@ -1015,11 +1015,12 @@ CCC  track parameters into temporary arrays:
         xa0(2)=y0(i)
         xa0(3)=z0(i)
 C** straight line tracks, i.e. can put e.g. pt=1 then
-        pa0(1)=dcosd(phi0(i))
-        pa0(2)=dsind(phi0(i))
+        pa0(1)=cosd(phi0(i))
+        pa0(2)=sind(phi0(i))
         pa0(3)=tanl(i)
         call ThreeD_dca(xxv,xa0,pa0,x3d0)
-	dr=dsqrt( (x3d0(1)-xv)**2+(x3d0(2)-yv)**2+(x3d0(3)-zv)**2 )
+	dr=sqrt( (x3d0(1)-xv)*(x3d0(1)-xv)+(x3d0(2)-yv)*(x3d0(2)-yv)
+     +          +(x3d0(3)-zv)*(x3d0(3)-zv) )
 	if(dr.lt.evrpar(1).cut2) then
 	k=k+1
 	vtrv(1,k)=phi0(i)
@@ -1033,7 +1034,7 @@ C** straight line tracks, i.e. can put e.g. pt=1 then
 
 CCC   Check for adequate number of tracks:
         if(globtrk_h.nok .ne. 0) then
-           ntrkratio = dble(k)/dble(globtrk_h.nok)
+           ntrkratio = float(k)/float(globtrk_h.nok)
         end if
         if (k.lt.5) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
@@ -1120,7 +1121,7 @@ CCC  Load second iteration vertex value into table privert:
            do i = 1,6
               privert(index).covar(i) = 0.0
            end do
-           privert(index).chisq(1) = chisq/dble(k-1)
+           privert(index).chisq(1) = chisq/float(k-1)
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
@@ -1144,8 +1145,8 @@ CC  Optional Re-calculation of helix track projection to new vertex position:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
-              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
+              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
+              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
               zz0 = globtrk(k).z0
               xp(1) = xxv(1)
               xp(2) = xxv(2)
@@ -1168,11 +1169,12 @@ CCC  track parameters into temporary arrays:
         xa0(2)=y0(i)
         xa0(3)=z0(i)
 C** straight line tracks, i.e. can put e.g. pt=1 then
-        pa0(1)=dcosd(phi0(i))
-        pa0(2)=dsind(phi0(i))
+        pa0(1)=cosd(phi0(i))
+        pa0(2)=sind(phi0(i))
         pa0(3)=tanl(i)
         call ThreeD_dca(xxv,xa0,pa0,x3d0)
-	dr=dsqrt( (x3d0(1)-xv)**2+(x3d0(2)-yv)**2+(x3d0(3)-zv)**2 )
+	dr=sqrt( (x3d0(1)-xv)*(x3d0(1)-xv)+(x3d0(2)-yv)*(x3d0(2)-yv)
+     +          +(x3d0(3)-zv)*(x3d0(3)-zv) )
 	if(dr.lt.evrpar(1).cut3) then
 	k=k+1
         globtrk(gindex(i)).id_start_vertex = 1  ! mark global tracks used
@@ -1188,7 +1190,7 @@ CC                                              ! in final vertex fit
 
 CCC   Check for adequate number of tracks:
         if(globtrk_h.nok .ne. 0) then
-           ntrkratio = dble(k)/dble(globtrk_h.nok)
+           ntrkratio = float(k)/float(globtrk_h.nok)
         end if
         if (k.lt.5) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
@@ -1303,12 +1305,11 @@ CC  Fill covariance error matrix in units of cm^2:
            end if
         end if
 
-        chisq1=chisq
         privert(index).covar(2) = cov(2)
         privert(index).covar(4) = cov(4)
         privert(index).covar(5) = cov(5)
-        privert(index).chisq(1) = chisq/dble(k-1)
-        privert(index).chisq(2) = PROB(chisq1,k-1)
+        privert(index).chisq(1) = chisq/float(k-1)
+        privert(index).chisq(2) = PROB(chisq,k-1)
         privert(index).id_aux_ent  = 0
       else
            write(6,*) 'EVR:Privert table is full - cannot load vertex:',
@@ -1340,8 +1341,8 @@ C               ! DCA to primary vertex .lt.evrpar(1).vcut
               ppt = pptdef
            end if
            tanla = globtrk(i).tanl
-           xx0 = globtrk(i).r0*dcosd(dble(globtrk(i).phi0))
-           yy0 = globtrk(i).r0*dsind(dble(globtrk(i).phi0))
+           xx0 = globtrk(i).r0*cosd(globtrk(i).phi0)
+           yy0 = globtrk(i).r0*sind(globtrk(i).phi0)
            zz0 = globtrk(i).z0
            if(globtrk(i).det_id .eq. kTpcId       .or.
      1        globtrk(i).det_id .eq. kSvtId       .or.
@@ -1364,11 +1365,11 @@ C               ! DCA to primary vertex .lt.evrpar(1).vcut
               xa0(1) = x(1)
               xa0(2) = x(2)
               xa0(3) = x(3)
-              pa0(1) = dcosd(x(4))
-              pa0(2) = dsind(x(4))
+              pa0(1) = cosd(x(4))
+              pa0(2) = sind(x(4))
               pa0(3) = tanla
               Call ThreeD_dca(xxv,xa0,pa0,x3d0)
-              dr = dsqrt((x3d0(1)-xxv(1))**2 + (x3d0(2)-xxv(2))**2
+              dr = sqrt((x3d0(1)-xxv(1))**2 + (x3d0(2)-xxv(2))**2
      1                 +(x3d0(3)-xxv(3))**2)
               globtrk(i).impact = dr
               if(dr .lt. evrpar(1).vcut) then
@@ -1445,34 +1446,34 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL    bfld,ka
-      REAL*8  psi,pt,tanl,x0,y0,z0,trans_pathL,LIFC
-      REAL*8  xp(2),x(4),epsq,R,RMAX,xc(2),xi
-      REAL*8  sigma, sigma_estimate
+      REAL  psi,pt,tanl,x0,y0,z0,bfld,ka,trans_pathL,LIFC
+      REAL  xp(2),x(4),epsq,R,RMAX,xc(2),xi
+      REAL  sigma, sigma_estimate 
+      REAL COSD,SIND 
       INTEGER  q
 
 C      DATA ka  /0.000299792458/
-      DATA RMAX /1.0D+05/
+      DATA RMAX /1.0E+05/
 
       ka = C_D_CURVATURE
 CC    Compute epsq = charge*B_z
 
-      epsq = dble(q)*bfld
+      epsq = float(q)*bfld
 
       if(epsq .eq. 0.0) then    ! If neutral and/or B_z = 0 
          Call PROJECT_ST_TRACK(psi,tanl,x0,y0,z0,xp,x)
-         trans_pathL = dsqrt((x0-x(1))**2 + (y0-x(2))**2)
+         trans_pathL = sqrt((x0-x(1))**2 + (y0-x(2))**2)
          sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
       else
-         R = pt/dabs(ka*epsq)
+         R = pt/abs(ka*epsq)
          if(R .le. RMAX) then
             Call PROJECT_HELIX(psi,q,pt,tanl,x0,y0,z0,bfld,xp,x
      1                         ,R,xc,xi)
-            trans_pathL = dabs(R*xi)
+            trans_pathL = abs(R*xi)
             sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
-        else
+         else
             Call PROJECT_ST_TRACK(psi,tanl,x0,y0,z0,xp,x)
-            trans_pathL = dsqrt((x0-x(1))**2 + (y0-x(2))**2)
+            trans_pathL = sqrt((x0-x(1))**2 + (y0-x(2))**2)
             sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
          end if
       end if
@@ -1539,20 +1540,20 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL    bfld,ka
-      REAL*8  psi,pt,tanl,x0,y0,z0
-      REAL*8  xp(2),x(4),xc(2)
-      REAL*8  R,a,b,c,invc,signa,signb,cut,a1,b1
-      REAL*8  phi0,phiDCA,xi,epsq
+      REAL  psi,pt,tanl,x0,y0,z0,bfld,ka
+      REAL  xp(2),x(4),xc(2)
+      REAL  R,a,b,c,invc,signa,signb,cut
+      REAL  phi0,phiDCA,xi,epsq
+      REAL COSD,SIND    
       INTEGER  q
 
-      DATA cut /1.0D-03/
+      DATA cut /1.0E-03/
 C      DATA ka  /0.000299792458/
 
       ka = C_D_CURVATURE
 CC    Compute epsq = sign of charge*B_z
 
-      epsq = dble(q)*bfld
+      epsq = float(q)*bfld
       if(epsq .eq. 0.0) then    ! If neutral or B_z = 0 then return defaults
          x(1) = 0.0
          x(2) = 0.0
@@ -1560,20 +1561,18 @@ CC    Compute epsq = sign of charge*B_z
          x(4) = 0.0
          RETURN
       else
-         epsq = epsq/dabs(epsq)
+         epsq = epsq/abs(epsq)
       end if
 
 CC    Find radius of helix, center of circle projection onto x-y plane,
 CC    and x,y coordinates of DCA point on helix.
 
-      R     = pt/dabs(ka*dble(q)*bfld)
-      xc(1) = x0 + R*dcosd(psi - epsq*90.0)
-      xc(2) = y0 + R*dsind(psi - epsq*90.0)
+      R     = pt/abs(ka*float(q)*bfld)
+      xc(1) = x0 + R*cosd(psi - epsq*90.0)
+      xc(2) = y0 + R*sind(psi - epsq*90.0)
       a = xp(1) - xc(1)
       b = xp(2) - xc(2)
-      a1 = dabs(a)
-      b1 = dabs(b)
-      if(a1 .eq. 0.0 .and. b1 .eq. 0.0) then          ! Line coincides
+      if(abs(a) .eq. 0.0 .and. abs(b) .eq. 0.0) then  ! Line coincides
 C                                                     ! with axis of helix
 C                                                     ! Return initial pt.
          x(1) = x0
@@ -1582,21 +1581,21 @@ C                                                     ! Return initial pt.
          x(4) = psi
          xi   = 0.0
          RETURN
-      else if(b1 .eq. 0.0 .and. a1 .gt. 0.0) then
-         signa = a/a1
+      else if(abs(b) .eq. 0.0 .and. abs(a) .gt. 0.0) then
+         signa = a/abs(a)
          x(1) = xc(1) + signa*R
          x(2) = xc(2)
-      else if(a1 .eq. 0.0 .and. b1 .gt. 0.0) then
-         signb = b/b1
+      else if(abs(a) .eq. 0.0 .and. abs(b) .gt. 0.0) then
+         signb = b/abs(b)
          x(1) = xc(1)
          x(2) = xc(2) + signb*R
       else
          c = a/b
          invc = b/a
-         signa = a/a1
-         signb = b/b1
-         x(2) = xc(2) + signb*R/dsqrt(1.0 + c*c)
-         if(dabs(invc) .le. cut) then
+         signa = a/abs(a)
+         signb = b/abs(b)
+         x(2) = xc(2) + signb*R/sqrt(1.0 + c*c)
+         if(abs(invc) .le. cut) then
             x(1) = xc(1) +signa*R*(1.0 - 0.5/(1.0 + c*c))
          else
             x(1) = xc(1) + c*(x(2) - xc(2))
@@ -1606,8 +1605,8 @@ C                                                     ! Return initial pt.
 CC    Find the phase angle to go from initial point back to the DCA point x;
 CC    then calculate the azimuthal direction angle of p_T at the DCA point x.
 
-      phi0 = DATAN2(y0-xc(2),x0-xc(1))
-      phiDCA = DATAN2(x(2)-xc(2),x(1)-xc(1))
+      phi0 = ATAN2(y0-xc(2),x0-xc(1))
+      phiDCA = ATAN2(x(2)-xc(2),x(1)-xc(1)) 
       xi   = epsq*(phi0 - phiDCA)
       if(xi .gt. 0.0) then
          xi = xi - C_2PI
@@ -1659,14 +1658,15 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL*8  psi,tanl,x0,y0,z0,xp(2),x(4)
-      REAL*8  px,py,cut,d,m1,m2,pdu
-      DATA cut /1.0D-7/
+      REAL  psi,tanl,x0,y0,z0,xp(2),x(4)
+      REAL  px,py,cut,d,m1,m2,pdu
+      REAL COSD,SIND   
+      DATA cut /1.0E-7/
 
 CC  Determine if special cases apply:
 
-      px = dcosd(psi)
-      py = dsind(psi)
+      px = cosd(psi)
+      py = sind(psi)
 
       if(abs(px) .le. cut) then
          x(1) = x0
@@ -1683,10 +1683,10 @@ CC  Determine if special cases apply:
          m1 = -1.0/m2         ! slope of line from xp->x @ dca (perp.)
          x(1) = (m1*xp(1)-m2*x0-xp(2)+y0)/(m1-m2)
          x(2) = (m1*m2*(xp(1)-x0) + m1*y0 - m2*xp(2))/(m1-m2)
-         d = dsqrt((x(1)-x0)**2 + (x(2)-y0)**2)
+         d = sqrt((x(1)-x0)**2 + (x(2)-y0)**2)
          if(d .gt. cut) then
             pdu = px*(x(1)-x0)/d + py*(x(2)-y0)/d
-            if(dabs(dabs(pdu)-1.0) .gt. 100.0*cut) then
+            if(abs(abs(pdu)-1.0) .gt. 100.0*cut) then
                if(pdu .ge. 0.0) then
                   pdu = 1.0
                else
@@ -1694,7 +1694,7 @@ CC  Determine if special cases apply:
                end if
             end if
 
-            if(dabs(dabs(pdu)-1.0) .gt. 0.0001) then
+            if(abs(abs(pdu)-1.0) .gt. 0.0001) then
                write(6,*) 'EVR: Direction cosines .ne. +/-1,=',pdu
             end if
 
@@ -1713,7 +1713,7 @@ CC    For straight tracks:
 
 
 C------------------------------------------------------------------------
-      Real*8 Function sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
+      Real*4 Function sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
 C------------------------------------------------------------------------
       Implicit none
 #include "math_constants.inc"
@@ -1772,24 +1772,23 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL*8 pt,x0,y0,psi,tanl,trans_pathL
-      REAL*8 fac,ptot,phi0,cospr,Leff,LIFC
-      REAL*8 theta_mcs
-      REAL   sqrt2
+      REAL pt,x0,y0,psi,tanl,trans_pathL
+      REAL fac,ptot,phi0,cospr,Leff,LIFC
+      REAL theta_mcs,sqrt2
+      REAL COSD,SIND
 C      DATA sqrt2  /1.4142135/
 
       sqrt2 = C_SQRT2
-      fac = dsqrt(1.0 + tanl*tanl)
+      fac = sqrt(1.0 + tanl*tanl)
       ptot = pt*fac
-      phi0 = DATAN2(y0,x0)
-      cospr = dcos(psi*C_PI/180.0 - phi0)/fac
-c     cospr = (dcosd(psi)*dcos(phi0) + dsind(psi)*dsin(phi0))/fac
+      phi0 = ATAN2(y0,x0)
+      cospr = (cosd(psi)*cos(phi0) + sind(psi)*sin(phi0))/fac
 
       if(cospr .eq. 0.0) then
          sigma_estimate = trans_pathL*fac*sqrt2*
      1         theta_mcs(0.14,1.0,ptot,LIFC,1.0,1)
       else
-         Leff = LIFC/dabs(cospr)
+         Leff = LIFC/abs(cospr)
          sigma_estimate = trans_pathL*fac*sqrt2*
      1         theta_mcs(0.14,1.0,ptot,Leff,1.0,1)
       end if
@@ -1798,7 +1797,7 @@ c     cospr = (dcosd(psi)*dcos(phi0) + dsind(psi)*dsin(phi0))/fac
       END
  
 C---------------------------------------------------------------------- 
-      Real*8 Function theta_mcs(mass,charge,momentum,L,LR,
+      Real*4 Function theta_mcs(mass,charge,momentum,L,LR,
      1       formula_type)
       implicit none
 C----------------------------------------------------------------------
@@ -1835,10 +1834,9 @@ CCC
 
 CCC   Variable Declarations:
 
-      real   mass,charge,LR
-      real*8 momentum,L
-      real*8 theta_fac0, theta_fac1, LOGFAC0, LOGFAC1
-      real*8 E, gamma, beta, LFAC
+      real*4 mass,charge,momentum,L,LR
+      real*4 theta_fac0, theta_fac1, LOGFAC0, LOGFAC1
+      real*4 E, gamma, beta, LFAC
       integer*4 formula_type
 
       parameter(theta_fac0 = 14.1)
@@ -1852,16 +1850,16 @@ CCC   Begin Calculation, if L or LR = 0.0, set theta_mcs to zero and return:
          theta_mcs = 0.0
       else
          LFAC = L/LR
-         E = dsqrt(momentum**2 + mass**2)
+         E = sqrt(momentum*momentum + mass*mass)
          gamma = E/mass
-         beta = dsqrt(1.0 - 1.0/(gamma**2))
+         beta = sqrt(1.0 - 1.0/(gamma*gamma))
 
          if(formula_type .eq. 0) then
-            theta_mcs = theta_fac0*abs(charge)*dsqrt(LFAC)
-     1      *(1.0 + LOGFAC0*dlog(LFAC))/(1000.0*momentum*beta)
+            theta_mcs = theta_fac0*abs(charge)*sqrt(LFAC)
+     1      *(1.0 + LOGFAC0*log(LFAC))/(1000.0*momentum*beta)
          else
-            theta_mcs = theta_fac1*abs(charge)*dsqrt(LFAC)
-     1      *(1.0 + LOGFAC1*dlog(LFAC))/(1000.0*momentum*beta)
+            theta_mcs = theta_fac1*abs(charge)*sqrt(LFAC)
+     1      *(1.0 + LOGFAC1*log(LFAC))/(1000.0*momentum*beta)
          end if
 
       end if
@@ -1906,22 +1904,23 @@ CC:>--------------------------------------------------------------------
 
 	integer ngmx
 	PARAMETER (NGMX=20000)
-	REAL*8 vtrv(6,ngmx)
+	REAL vtrv(6,ngmx)
 	common /fitvert/ vtrv
-	real*8 Xv,Yv,Zv,cov(6),chisq
+	real Xv,Yv,Zv,cov(6),chisq
 	COMMON /VERTEX/XV,YV,ZV,cov,chisq
 c  passed parameters:
 	integer NT
 
 c  Local variables:
 	integer i,j,k
-	real*8 x0,y0,z0
-	real*8 sinV,cosV,sinL,cosL
-	real*8 sigma(3,3),H(3),G(3,3),Txx,Txy,Txz,Tyy,Tyz,Tzz,G_inv(3,3)
-	real*8 sigma2,det
-        real*8 E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
-        real*8 Sigxv,Sigyv,Sigzv
-        real*8 ex,ey,ez
+	real x0,y0,z0
+	real sinV,cosV,sinL,cosL
+	real sigma(3,3),H(3),G(3,3),Txx,Txy,Txz,Tyy,Tyz,Tzz,G_inv(3,3),det
+	real sigma2 
+        real E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
+        real Sigxv,Sigyv,Sigzv
+        real ex,ey,ez
+        REAL COSD,SIND
 
 c  Convention: L=angle lambda, V=angle phi
 
@@ -1948,9 +1947,9 @@ CC  Initialize all output quantities:
       end if
 
 	do k=1,nt			! Master loop over tracks
-	  sinV=dsind(vtrv(1,k))
-	  cosV=dcosd(vtrv(1,k))
-	  cosL=1.0/(dsqrt(1.0 + vtrv(2,k)**2))
+	  sinV=sind(vtrv(1,k))
+	  cosV=cosd(vtrv(1,k))
+	  cosL=1.0/(sqrt(1.0 + vtrv(2,k)**2))
 	  sinL=cosL*vtrv(2,k)
 
 	  X0= vtrv(4,k)
@@ -2040,9 +2039,9 @@ c  The vertex vector = The inverted G matrix times the H vector
 
 CC  Compute Chi-Square of fit to vertex, return the total chi-square value:
         do k = 1,nt
-           sinV = dsind(vtrv(1,k))
-           cosV = dcosd(vtrv(1,k))
-           cosL = 1.0/dsqrt(1.0 + vtrv(2,k)**2)
+           sinV = sind(vtrv(1,k))
+           cosV = cosd(vtrv(1,k))
+           cosL = 1.0/sqrt(1.0 + vtrv(2,k)**2)
            ex = cosV*cosL
            ey = sinV*cosL
            ez = vtrv(2,k)*cosL
@@ -2056,7 +2055,7 @@ CC  Compute Chi-Square of fit to vertex, return the total chi-square value:
      2           +  ((XV - X0)*ey - (YV- Y0)*ex)**2
      3           +  ((ZV - Z0)*ex - (XV- X0)*ez)**2)/sigma2
         end do
-C        chisq = chisq/dble(nt)   !  Return the Total Chi Square
+C        chisq = chisq/float(nt)   !  Return the Total Chi Square
 
 c  Invert the E matrix and calculate the determinant
 c  Calcualate the determinant
@@ -2093,9 +2092,9 @@ CC  Load the covariance matrix elements:
         Sigxv = 0.0
         Sigyv = 0.0
         Sigzv = 0.0
-        if(cov(1) .ge. 0.0) Sigxv = dsqrt(cov(1))
-        if(cov(3) .ge. 0.0) Sigyv = dsqrt(cov(3))
-        if(cov(6) .ge. 0.0) Sigzv = dsqrt(cov(6))
+        if(cov(1) .ge. 0.0) Sigxv = sqrt(cov(1))
+        if(cov(3) .ge. 0.0) Sigyv = sqrt(cov(3))
+        if(cov(6) .ge. 0.0) Sigzv = sqrt(cov(6))
         write(6,*) 'EVR: Diagonal Errors:', Sigxv,Sigyv,Sigzv
         write(6,*) 'EVR: COV=',cov(1),cov(2),cov(3),cov(4),cov(5),cov(6)
 999	Return
@@ -2122,30 +2121,24 @@ C   Modified: 4/2/99 R.L.Ray
 C   Error conditions            : Error for p(1)=0 fixed (4/2/99 RLR)
 C   Status                      : Tested
 C----------------------------------------------------------------------
-      REAL*8    xv(3),x(3),p(3),x0(3),nom,cut,det
-      REAL*8    p1sq,p2sq,p3sq,temp
-      DATA  cut /1.0D-06/
+      REAL      xv(3),x(3),p(3),x0(3),nom,cut,det
+      DATA  cut /1.0E-06/
 *----------------------------------------------------------------------
 
-        p1sq = p(1)**2
-        p2sq = p(2)**2
-        p3sq = p(3)**2
-        nom=(p2sq+p3sq)*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+        nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
         nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
-        x0(1)=nom/( p1sq+p2sq+p3sq )
+        x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
 
 C       IF(p(1).ne.0.) THEN
-        IF(dabs(p(1)) .gt. cut) THEN              ! RLR (4/99)
-         temp=(x0(1)-x(1))/p(1)
-         x0(2)=x(2)+p(2)*temp
-         x0(3)=x(3)+p(3)*temp
+        IF(abs(p(1)) .gt. cut) THEN              ! RLR (4/99)
+         x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
+         x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
         ELSE
-         temp = p(2)*p(3)
-         det = p2sq + p3sq                       ! RLR (4/99)
-         x0(2)=(x(2)*p3sq+xv(2)*p2sq+            ! RLR (4/99)
-     1         (xv(3)-x(3))*temp)/det            ! RLR (4/99)
-         x0(3)=(x(3)*p2sq+xv(3)*p3sq+            ! RLR (4/99)
-     1         (xv(2)-x(2))*temp)/det            ! RLR (4/99)
+         det = p(2)*p(2) + p(3)*p(3)             ! RLR (4/99)
+         x0(2)=(x(2)*p(3)*p(3)+xv(2)*p(2)*p(2)+  ! RLR (4/99)
+     1         (xv(3)-x(3))*p(2)*p(3))/det       ! RLR (4/99)
+         x0(3)=(x(3)*p(2)*p(2)+xv(3)*p(3)*p(3)+  ! RLR (4/99)
+     1         (xv(2)-x(2))*p(2)*p(3))/det       ! RLR (4/99)
 
 C        x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
 C               IF(p(2).eq.0.) THEN
@@ -2246,5 +2239,23 @@ CC   TPC-SSD-SVT tracks:
          Return
       end if
 
+      END
+
+      Real*4 Function cosd(x)
+      implicit none
+CCC   Cosine of angles (x) in degrees
+#include "math_constants.inc"
+      real*4 x
+      cosd = cos(x*C_RAD_PER_DEG)
+      Return
+      END
+
+      Real*4 Function sind(x)
+      implicit none
+CCC   Sine of angles (x) in degrees
+#include "math_constants.inc"
+      real*4 x
+      sind = sin(x*C_RAD_PER_DEG)
+      Return
       END
 

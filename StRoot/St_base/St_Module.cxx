@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.16 2000/09/15 15:12:37 perev Exp $
+// $Id: St_Module.cxx,v 1.15 2000/07/30 01:40:12 perev Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -216,7 +216,6 @@ Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
              errcode++;
              bug = kTRUE;
           }
-	  table->NaN();
           if (errcode && bug) {
           if (errcode == 1) 
                  fprintf(stderr,
@@ -323,9 +322,6 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
-// Revision 1.16  2000/09/15 15:12:37  perev
-// NaN check added
-//
 // Revision 1.15  2000/07/30 01:40:12  perev
 // StMem class added
 //

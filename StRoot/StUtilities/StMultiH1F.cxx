@@ -1,8 +1,5 @@
-// $Id: StMultiH1F.cxx,v 1.6 2000/09/15 21:23:36 fisyak Exp $
+// $Id: StMultiH1F.cxx,v 1.5 2000/08/28 19:21:05 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
-// Revision 1.6  2000/09/15 21:23:36  fisyak
-// HP does not have iostream
-//
 // Revision 1.5  2000/08/28 19:21:05  genevb
 // Improved projection code
 //
@@ -18,11 +15,8 @@
 // Revision 1.1  2000/07/26 22:00:27  lansdell
 // new multi-hist class for superimposing the x-projections of y-bins (of a TH2F histogram) into one TH1F histogram
 //
-#ifdef __HP_aCC
-#include <iostream.h>
-#else
+
 #include <iostream>
-#endif
 #include "StMultiH1F.h"
 #include "TString.h"
 #include "TLegend.h"

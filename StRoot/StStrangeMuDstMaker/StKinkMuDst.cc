@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.3 2000/09/06 21:09:03 wdeng Exp $
+ * $Id: StKinkMuDst.cc,v 3.2 2000/08/10 01:16:24 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,9 +11,6 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
- * Revision 3.3  2000/09/06 21:09:03  wdeng
- * Added track charges and total momenta
- *
  * Revision 3.2  2000/08/10 01:16:24  genevb
  * Added number of dedx points
  *
@@ -34,7 +31,6 @@
 #include "StKinkMuDst.hh"
 #include "StKinkVertex.h"
 #include "StTrack.h"
-#include "StTrackGeometry.h"
 #include "StTrackNode.h"
 #include "StTrackFitTraits.h"
 #include "StDedxPidTraits.h"
@@ -57,23 +53,12 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mHitDistanceParentDaughter = kinkVertex->hitDistanceParentDaughter();
   mHitDistanceParentVertex = kinkVertex->hitDistanceParentVertex();
   mDecayAngle = kinkVertex->decayAngle();
-
   mParentMomentumX = kinkVertex->parentMomentum().x();
   mParentMomentumY = kinkVertex->parentMomentum().y();
   mParentMomentumZ = kinkVertex->parentMomentum().z();
-  mParentMomentum = sqrt( mParentMomentumX*mParentMomentumX +
-			  mParentMomentumY*mParentMomentumY +
-			  mParentMomentumZ*mParentMomentumZ );
-  mParentCharge = kinkVertex->parent()->geometry()->charge();
-
   mDaughterMomentumX = kinkVertex->daughterMomentum().x();
   mDaughterMomentumY = kinkVertex->daughterMomentum().y();
   mDaughterMomentumZ = kinkVertex->daughterMomentum().z();
-  mDaughterMomentum = sqrt( mDaughterMomentumX*mDaughterMomentumX +
-			    mDaughterMomentumY*mDaughterMomentumY +
-			    mDaughterMomentumZ*mDaughterMomentumZ );
-  mDaughterCharge = kinkVertex->daughter()->geometry()->charge();
-
   mPositionX = kinkVertex->position().x();
   mPositionY = kinkVertex->position().y();
   mPositionZ = kinkVertex->position().z();

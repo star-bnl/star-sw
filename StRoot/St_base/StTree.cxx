@@ -29,15 +29,6 @@ extern "C" {
    int rfio_unlink(const char *filepath);
    int rfio_parse(const char *name, char **host, char **path);
 };
-class Cat : public TNamed {
-public:
-  Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
-  double fSize;
-  int    fNGeant;
-  int    fNKeys;
-  int    fNRecs;
-  int    fNFiles;
-};
 
 ClassImp(StIOEvent)
 StIOEvent::StIOEvent():TObject(){fObj=(TObject*)(-1);};
@@ -126,7 +117,7 @@ TObject *StIO::Read(TFile *file, const StUKey &ukey)
 Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
 {
   TObjLink *lnk; TList *lk; const char *kname; TObject *obj;
-  enum { kSorted = 1};
+
   assert(file);
 
   TString tk = ukey.GetKey(); ukey = kUMAX;
@@ -134,7 +125,6 @@ Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
   int lname = strlen(ukey.GetName())+1;
 
   lk = file->GetListOfKeys();  if(!lk) return 1;
-  if (!lk->TestBit(kSorted)) {lk->Sort(); lk->SetBit(kSorted);}
 
    // Find an object in this list using its name. Requires a sequential
    // scan till the object has been found. Returns 0 if object with specified
@@ -919,10 +909,8 @@ void StFile::SetInfo(TDataSet *ds)
       const char *bra=ky->GetName();
       if (strstr(bra,"tree"))                           continue;
       if (strstr(bra,"Tree"))                           continue;
-      if (strstr(bra,".")==0)				continue;
       i = tit.Index("branch=NONE"); assert(i>=0);
       tit.Replace(i+7,4,bra,strcspn(bra,"."));
-      break;
   } }
 
 RETN:;
@@ -933,6 +921,15 @@ RETN:;
 void StFile::ls(Option_t *opt)
 {
 
+class Cat : public TNamed {
+public:
+Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
+double fSize;
+int    fNGeant;
+int    fNKeys;
+int    fNRecs;
+int    fNFiles;
+};
 
 
   TList blist;

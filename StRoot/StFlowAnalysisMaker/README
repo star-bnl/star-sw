@@ -2,9 +2,7 @@ Time-stamp: <>
 Maker:		StFlowAnalysisMaker
 Files:		StFlowAnalysisMaker.cxx
 		StFlowAnalysisMaker.h
-		plot.C
-		plotCen.C
-		minBias.C	
+		plot.C	
 Authors:	Art Poskanzer and Raimond Snellings
 		with lots of help from Glenn Cooper 
 Date:		Dec 1999
@@ -19,16 +17,14 @@ number flow, v, vs. y and p_t.
 
 In Finish, it calculates the event plane resolution from the
 correlation of sub-event event planes. It then corrects the v
-histograms for the event plane resolution. For the doubly-integrated v
-values the error on the event plane resolution is folded in to the
-error. It fits the q histogram with the q distribution. It calculates
-the PhiWgts needed to make the event plane isotropic in the lab and
-outputs them as flowPhiWgtNew.hist.root . To use these PhiWgts in the
-next analysis you have to copy this root file to flowPhiWgt.hist.root
-. If the file flowPhiWgt.hist.root is missing the PhiWgts are set to
-1.0 .
+histograms for the event plane resolution. It fits the q histogram
+with the q distribution. It calculates the PhiWgts needed to make the
+event plane isotropic in the lab and outputs them as
+flowPhiWgtNew.hist.root . To use these PhiWgts in the next analysis
+you have to copy this root file to flowPhiWgt.hist.root . If the file
+flowPhiWgt.hist.root is missing the PhiWgts are set to 1.0 .
 
-The macro plot.C is for plotting the histograms and their
+Plot.C is a macro for plotting the histograms and their
 projections. It asks for a run number which will be printed at the
 bottom left of the plot. It presents you with a menu of possible
 plots. If you know the plot number you want you can invoke the macro
@@ -36,13 +32,4 @@ with that number as an argument. If you execute the macro with all
 three arguments (plot number, selection number, harmonics number) for
 a graph that has multiple harmonics and selections, it will plot only
 the histogram for that selection and harmonic. After it has been
-loaded and executed once, it can be rerun simply with plot().
-
-The macro plotCen.C reads a set of histogram files for different
-centralities and plots one histogram from each file on the same
-page. The interface is similar to plot.C.
-
-The macro minBias.C reads a set of histogram files for different
-centralities and combines the histograms them with proper weights so
-as to obtain a minimum bias histogram. The interface is similar to
-plot.C.
+loaded and executed once it can be rerun simply with plot().

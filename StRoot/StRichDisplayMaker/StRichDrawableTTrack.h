@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichDrawableTTrack.h,v 2.1 2000/11/01 16:57:01 lasiuk Exp $
+ * $Id: StRichDrawableTTrack.h,v 2.0 2000/08/09 16:28:04 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTTrack.h,v $
- *  Revision 2.1  2000/11/01 16:57:01  lasiuk
- *  default arguments in c'tor.  Reduce number of particles contained
+ *  Revision 2.0  2000/08/09 16:28:04  gans
+ *  Created New Maker for all drawable objects.
  *
  *  Revision 2.0  2000/08/09 16:28:04  gans
  *  Created New Maker for all drawable objects.
@@ -46,9 +46,7 @@ public:
     StRichDrawableTMip * getProjectedMIP();
     
     StRichTrack* getTrack();
-
-    // number of rings in track
-    Int_t numberOfRings();             
+    Int_t numberOfRings();              // returns number of rings in track
     StRichDrawableTRings* getRing(unsigned int);
     StRichDrawableTRings* getRing(StParticleDefinition*);
     

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.3 2000/09/25 20:23:06 ullrich Exp $
+ * $Id: StThreeVectorD.hh,v 1.2 1999/06/04 18:00:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,10 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
- * Revision 1.3  2000/09/25 20:23:06  ullrich
- * Removed inheritance from TObject.
+ * Revision 1.2  1999/06/04 18:00:10  ullrich
+ * Added new constructor which takes C-style array as argument.
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.2  1999/06/04 18:00:10  ullrich
  * Added new constructor which takes C-style array as argument.
@@ -34,16 +36,19 @@
 #include <iostream.h>
 #include <math.h>
 #ifdef __ROOT__
-#include "Rtypes.h"
+#include "TObject.h"
 #endif
 
 class StThreeVectorF;
 
 class StThreeVectorD 
+#ifdef __ROOT__
+ : public TObject 
+#endif
 {
 public:    
     StThreeVectorD(double = 0, double = 0, double = 0);
-    virtual ~StThreeVectorD();
+    ~StThreeVectorD();
 
     StThreeVectorD(const StThreeVectorF&);
     StThreeVectorD(const StThreeVectorD&);
@@ -115,7 +120,7 @@ public:
 protected:
     double    mX1, mX2, mX3;
 #ifdef __ROOT__
-    ClassDef(StThreeVectorD,2)
+    ClassDef(StThreeVectorD,1)
 #endif
 };
 

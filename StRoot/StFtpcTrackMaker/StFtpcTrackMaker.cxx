@@ -1,8 +1,5 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.13 2000/11/10 18:38:50 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.12 2000/08/09 19:15:31 didenko Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
-// Revision 1.13  2000/11/10 18:38:50  oldi
-// Cleanup due to changes in other classes.
-//
 // Revision 1.12  2000/08/09 19:15:31  didenko
 // remove unneeded include
 //
@@ -58,11 +55,10 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 10.11.2000
+//----------Last Modified: 17.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
-#include <math.h>
 
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
@@ -76,11 +72,12 @@
 #include "StChain.h"
 #include "StVertexId.h"
 
+#include "ftpc/St_fde_Module.h"
+#include "tables/St_g2t_vertex_Table.h"
+
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
-
-#include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 
 #include "TH1.h"
@@ -165,9 +162,8 @@ Int_t StFtpcTrackMaker::Make()
   
   //pointer to preVertex
   St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-  
   gMessMgr->Message("", "I", "OST") << "Using primary vertex coordinates "; 
-
+    
   Float_t primary_vertex_x = 0.0;
   Float_t primary_vertex_y = 0.0;
   Float_t primary_vertex_z = 0.0;
@@ -184,7 +180,6 @@ Int_t StFtpcTrackMaker::Make()
         primary_vertex_y =  preVtxPtr->y;
         primary_vertex_z =  preVtxPtr->z;
         primary_vertex_id = preVtxPtr->id;
-	
 	*gMessMgr << "(preVertex): ";
       }
     }
@@ -193,7 +188,7 @@ Int_t StFtpcTrackMaker::Make()
   if ( iflag != 101 ) {
     //    preVertex not found  - compute and store Holm's preVertex
     *gMessMgr << "(Holm's vertex): ";
-    
+
     StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows());
 
     if (isnan(vertex->GetZ())) {
@@ -235,14 +230,16 @@ Int_t StFtpcTrackMaker::Make()
       preVtxPtr->iflag = 301;
       preVtxPtr->det_id = 4;
       preVtxPtr->id = preVtx->GetNRows();
-      primary_vertex_id = preVtxPtr->id;
+      primary_vertex_id = preVtxPtr->id; 
       preVtxPtr->vtx_id = kEventVtxId;  
     }
 
     delete vertex;
   }
   
+
   *gMessMgr << " " << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z << "." << endm;
+  
 
   // check for the position of the main vertex
 
@@ -281,27 +278,31 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->FreeTracking();
   //tracker->LaserTracking();
 
+  if (Debug()) {
+    tracker->SettingInfo();
+    tracker->CutInfo();
+    tracker->TrackingInfo();
+  }
+  
   if (fpt_fptrack) {
     delete fpt_fptrack;
   }
 
   fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
   m_DataSet->Add(fpt_fptrack);
-
-  // momentum fit, dE/dx calculation, write tracks to tables
-  tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
-
+  tracker->FitAndWrite(fpt_fptrack, -primary_vertex_id);
+  
+  // dE/dx calculation
   if (Debug()) {
-    tracker->SettingInfo();
-    tracker->CutInfo();
-    tracker->TrackingInfo();
+    gMessMgr->Message("", "I", "OST") << "dE/dx module (fde) started" << endm;
   }
 
-  else {
-    tracker->TrackingInfo();
+  Int_t Res_fde = fde(fcl_fppoint, fpt_fptrack, m_fdepar);
+  
+  if(Debug()) {
+    gMessMgr->Message("", "I", "OST") << "dE/dx module finished: " << Res_fde << endm;
   }
 
-    
   /*
   // Track Display
   
@@ -339,8 +340,25 @@ Int_t StFtpcTrackMaker::Make()
   
   delete eval;
   */
-
+  
   delete tracker;
+
+  /*
+  // Refitting
+  // To do refitting of the tracks after some other module has found a 'better' 
+  // main vertex position include the following lines and insert the new vertex position. 
+  
+  St_DataSet *hit_data = GetDataSet("ftpc_hits");   
+  St_fcl_fppoint *points = (St_fcl_fppoint *)hit_data->Find("fcl_fppoint");
+  St_DataSet *track_data = GetDataSet("ftpc_tracks"); 
+  St_fpt_fptrack *tracks = (St_fpt_fptrack *)track_data->Find("fpt_fptrack");
+  
+  StFtpcVertex *refit_vertex = new StFtpcVertex(0., 0., 0.);   // insert vertex position (x, y, z) here!
+  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, 1.);
+  refitter->FitAndWrite(tracks);
+  delete refitter;
+  delete refit_vertex;
+  */
 
   MakeHistograms();
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
@@ -382,7 +400,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.13 2000/11/10 18:38:50 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.12 2000/08/09 19:15:31 didenko Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -56,18 +56,11 @@ memset(&row,0,tableSet->GetRowSize());
     row.pad_err_3mean	 =     0.0152; // additional error 3-pad-cluster, w.mean ;
     row.pad_err_3gauss	 =    0.00057; // additional error 3-pad-cluster, gaussfit ;
     row.z_err	 =       0.01; // parameter for error in z-direction ;
-    row.start_field	 =      240.0; // smallest drift field in drift map ;
-    row.step_field	 =        1.0; // step size for drift field ;
-    row.dvdp_off	 =       20.0; // offset for dv/dp-calculation (in Torr) ;
-    row.temperature	 =       20.0; // base temperature for calculations ;
-    row.percent_ar	 =       50.0; // percentage of argon in chamber gas ;
-    row.percent_co2	 =       50.0; // percentage of CO2 in chamber gas ;
-    row.percent_ne	 =        0.0; // percentage of neon in chamber gas ;
-    row.percent_he	 =        0.0; // percentage of helium in chamber gas ;
+ memcpy(&row.ampslopepath,"\x00",1);// path and name of ampslope database 
+ memcpy(&row.ampoffpath,"\x00",1);// path and name of ampoff database 
+ memcpy(&row.timeoffpath,"\x00",1);// path and name of timeoff database 
+ memcpy(&row.padtranspath,"\x00",1);// path and name of padtrans database 
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
 }
-
-
-

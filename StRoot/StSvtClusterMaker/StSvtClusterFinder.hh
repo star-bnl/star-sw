@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterFinder.hh,v 1.2 2000/10/31 16:19:43 caines Exp $
+ * $Id: StSvtClusterFinder.hh,v 1.1 2000/07/06 03:50:33 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.hh,v $
- * Revision 1.2  2000/10/31 16:19:43  caines
- * Improved speed of zeroing arrays
- *
  * Revision 1.1  2000/07/06 03:50:33  caines
  * First version of cluster finder and fitter
  *
@@ -50,11 +47,9 @@ public:
  
 private:
  
-      int mNumOfAnodes;
+      int numAnodes;
       int mSequence;
-      int mNumOfClusters;
       int mNumOfCluMem[30720];                   // array of clusters
-      int mNumSeq[240];          
       int cluIndex;
 
       int mCluster[8000][500];                    //array for storing anode and sequence of members

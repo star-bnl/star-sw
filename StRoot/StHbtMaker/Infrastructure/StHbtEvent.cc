@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.9 2000/08/31 22:31:31 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.8 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,13 +13,6 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
- * Revision 1.9  2000/08/31 22:31:31  laue
- * StHbtAnalysis: output changed (a little bit less)
- * StHbtEvent: new version, members for reference mult added
- * StHbtIOBinary: new IO for new StHbtEvent version
- * StHbtTypes: TTree typedef to StHbtTTree added
- * StHbtVertexAnalysis: overflow and underflow added
- *
  * Revision 1.8  2000/07/16 21:38:22  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -78,8 +71,6 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   mTpcNhits = ev.mTpcNhits;
   mNumberOfTracks = ev.mNumberOfTracks;
   mNumberOfGoodTracks = ev.mNumberOfGoodTracks;
-  mUncorrectedNumberOfPositivePrimaries = ev.mUncorrectedNumberOfPositivePrimaries;
-  mUncorrectedNumberOfNegativePrimaries = ev.mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = ev.mReactionPlane[0];
   mReactionPlane[1] = ev.mReactionPlane[1];
   mPrimVertPos = ev.mPrimVertPos;

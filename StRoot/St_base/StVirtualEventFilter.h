@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StVirtualEventFilter.h,v 1.10 2000/09/15 15:17:19 fine Exp $
+// $Id: StVirtualEventFilter.h,v 1.9 2000/03/24 20:35:21 fine Exp $
 //
 #ifndef STAR_StVirtualEventFilter
 #define STAR_StVirtualEventFilter
@@ -27,14 +27,12 @@ class TTable;
 class StVirtualEventFilter : public TObject {
  protected:
     Int_t m_ActiveFlag;  // Flag whether this filter is on/off 
-    ULong_t mOptions;    // Bit masks fro the user defined options
  public:
     StVirtualEventFilter(Int_t flag=0):m_ActiveFlag(flag){;}
     virtual ~StVirtualEventFilter(){;}
     Int_t IsOn() { return GetFlag();}
     Int_t IsOff(){ return !GetFlag();}
     virtual Int_t GetFlag();
-    ULong_t GetOptions();
     Int_t Turn(Int_t flag=1);
     Int_t TurnOn() { return Turn();}
     Int_t TurnOff(){ return Turn(0);}
@@ -45,19 +43,12 @@ class StVirtualEventFilter : public TObject {
     virtual Int_t Channel(const StVertex *vertexObject,Size_t &size,Style_t &style);
     virtual Int_t Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
     virtual Int_t Reset(Int_t reset=0){return reset;}
-    ULong_t SetOptions(ULong_t opt);
-
     ClassDef(StVirtualEventFilter,0) // virtual base class for the custom "event" filters (useful for 3D visualization)
 };
 
-inline ULong_t StVirtualEventFilter::GetOptions(){return mOptions;}
-inline ULong_t StVirtualEventFilter::SetOptions(ULong_t opt){ ULong_t o = GetOptions(); mOptions = opt; return o;}
 inline Int_t StVirtualEventFilter::Turn(Int_t flag){ Int_t s = GetFlag(); m_ActiveFlag = flag; return s;}
 
 // $Log: StVirtualEventFilter.h,v $
-// Revision 1.10  2000/09/15 15:17:19  fine
-// new method and data-member to add options introduced
-//
 // Revision 1.9  2000/03/24 20:35:21  fine
 // adjusted to ROOT 2.24. Doesn't work yet. Under development
 //

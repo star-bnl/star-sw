@@ -79,6 +79,9 @@ CC:  Local Variable Type Declarations:
       parameter(two28 = 268435456)
       parameter(two30 = 1073741824)
 
+CC:  Set dst_point number of used rows to zero:
+
+      dst_point_h.nok = 0
 
 CC:  Loop thru TPC space points; store all points
 

@@ -7,18 +7,20 @@
 #include "g2t_svt_hit.idl"
 #include "svg_geom.idl"
 #include "sdm_geom_par.idl"
+#include "sls_spt.idl"
 #include "sls_strip.idl"
 #include "sls_ctrl.idl"
 
 interface sls_am : amiModule {
         STAFCV_T call
-	( inout    g2t_svt_hit  svt_hit
+	( in    g2t_svt_hit  svt_hit
 	        , in    svg_geom     geom
                 , in    sdm_geom_par geom_par
 		, in    sls_ctrl     ctrl
+		, inout sls_spt      spt
 		, inout sls_strip    strip 
 	);
 };
-/*  Last mod. for sls_am: $Date: 2000/09/11 12:40:23 $ */
+/*  Last mod. for sls_am: $Date: 2000/07/21 15:04:06 $ */
 
 

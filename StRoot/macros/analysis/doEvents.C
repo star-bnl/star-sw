@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.60 2000/09/06 22:42:41 ullrich Exp $
+// $Id: doEvents.C,v 1.59 2000/07/21 01:38:46 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -143,10 +143,6 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
     //
     StEventMaker *readerMaker =  new StEventMaker("events","title");
 
-    //
-    //  Sample analysis maker
-    //
-    StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
     // WriteOut StEvent
     if (wrStEOut) {
@@ -156,6 +152,12 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
         outMk->SetBranch("eventBranch","test.event.root","w");
         outMk->IntoBranch("eventBranch","StEvent");
     }
+    //
+
+    //
+    //  Sample analysis maker
+    //
+    StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
     //
     // Initialize chain
@@ -267,9 +269,8 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.60  2000/09/06 22:42:41  ullrich
-// Moved WriteOut StEvent block after the line where the analysis
-// maker gets created.
+// Revision 1.59  2000/07/21 01:38:46  perev
+// GC query changed
 //
 // Revision 1.59  2000/07/21 01:38:46  perev
 // GC query changed

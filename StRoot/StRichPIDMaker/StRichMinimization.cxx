@@ -1,26 +1,13 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.6 2000/11/21 16:24:22 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 2.6  2000/11/21 16:24:22  horsley
- *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
- *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
- *  typo corrected.
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
- *  Revision 2.5  2000/11/01 17:39:59  lasiuk
- *  use of SystemOfUnits for definition of degree
- *
- *  Revision 2.4  2000/10/19 18:11:09  lasiuk
- *  definition of degree
- *
- *  Revision 2.3  2000/10/19 01:13:22  horsley
- *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
- *  added normal distance sigma cut on hits, quartz and radiator pathlengths
- *  for individual photons, modified minimization routine to correct boundary
- *  problems
  *
  *  Revision 2.2  2000/09/29 17:55:51  horsley
  *  fixed bug in Minimization routine, included StMagF stuff (commented out)
@@ -40,83 +27,54 @@
  *  initial revision
  **********************************************************/
 
+
 #include "StRichMinimization.h"
+#include "StRichTrack.h"
 
 #include <unistd.h>
 #include <iostream.h>
 #include <fstream.h>
 #include <iomanip.h>
 #include <math.h>
-
-#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "SystemOfUnits.h"
-#ifndef ST_NO_NAMESPACES
-using namespace units;
-#endif
 
-StRichMinimization::StRichMinimization(StRichRingPoint* rp)
-    : ringPoint(rp),  mMeanPathInRadiator(0.), mMeanPathInQuartz(0.) {
-  mTolerance = 0.00000005;  // what are the units
-}
+StRichMinimization::StRichMinimization(StRichRingPoint* rp) {
+  ringPoint  = rp;
+
+  // should use system of units
+StThreeVector<double> StRichMinimization::rotatedMin(StThreeVector<double>& point) {
 
 StRichMinimization::~StRichMinimization() { /* nopt */ }
+  
 
 StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
 
   StRichTrack* t =  ringPoint->getTrack();
-  double phi = t->getPhi();
+  StThreeVector<double> tempPoint = point - t->getImpactPoint();
   mMeanPathInRadiator = 0.0;
-  mMeanPathInQuartz   = 0.0;
-
-  // define "fast" trig functions
-  double mTrackCosPhi = cos(phi);
-  double mTrackSinPhi = sin(phi);
-
+  StThreeVector<double> rotatedPoint(mTrackCosPhi*tempPoint.x() + 
+				     mTrackSinPhi*tempPoint.y(),
+				     
+				    -mTrackSinPhi*tempPoint.x() + 
+				     mTrackCosPhi*tempPoint.y(),
+				     
+				     0.0);  
   StThreeVectorF tempPoint = point - t->getImpactPoint();
 
-  StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-			      mTrackSinPhi*tempPoint.y(),
-			      
-			     -mTrackSinPhi*tempPoint.x() + 
-			      mTrackCosPhi*tempPoint.y(),
-			      
-			      0.0);  
-  
-  ringPoint->setPoint(rotatedPoint);
 
-  //
-  // call to Numerical Recipes minimization routine here
-  //
-  double returnPsia,returnPsib,returnPsic;
-  double minDistancea = brent(0.0,M_PI/2.0,M_PI,&returnPsia);
-  double minDistanceb = brent(0.0,-M_PI/2.0,-M_PI,&returnPsib);
-  double minDistancec = brent(0.0,M_PI,2.0*M_PI,&returnPsic);
+  if (rotatedPoint.y() > 0) {
+    minDistance = brent(0.0,M_PI/2.0,M_PI,&returnPsi);}
 
-  if (minDistancea<minDistanceb) {
-    minDistance = minDistancea;
-    returnPsi = returnPsia;
-  }
   else {
-    minDistance = minDistanceb;
-    returnPsi = returnPsib;
-  }
-  
-  
-  if (minDistancec<minDistance) {
-    minDistance = minDistancec;
-    returnPsi = returnPsic;
-    if (returnPsi>M_PI) returnPsi = returnPsi - 2.0*M_PI; 
-  }
-  
- 
- status              = ringPoint->getPoint(returnPsi,returnThisPoint);
+    minDistance = brent(0.0,-M_PI/2.0,-M_PI,&returnPsi);}
+    
+  status = ringPoint->getPoint(returnPsi,returnThisPoint);
+  return returnThisPoint;
+ //
+ if (returnPsi>M_PI)  {returnPsi = returnPsi - 2.0*M_PI;}
  mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
- mMeanPathInQuartz   = ringPoint->getMeanPathInQuartz();
- 
- return returnThisPoint;
 }
 
 
@@ -125,7 +83,7 @@ double StRichMinimization::getMeanPathInQuartz()   { return mMeanPathInQuartz;}
 
 //
 // this is the numerical recipes minimization routine brent
-//
+ 
 
 /* CAUTION: This is the ANSI C (only) version of the Numerical Recipes
    utility file nrutil.c.  Do not confuse this file with the same-named

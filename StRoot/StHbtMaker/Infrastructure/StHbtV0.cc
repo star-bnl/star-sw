@@ -35,7 +35,7 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mcTauLambda = v.mcTauLambda;
   mcTauK0Short = v.mcTauK0Short;
   mptV0 = v.mptV0;
- mptotV0 = v.mptotV0;
+  mptotV0 = v.mptotV0;
   mptPos = v.mptPos;
   mptotPos = v.mptotPos;
   mptNeg = v.mptNeg;
@@ -47,8 +47,6 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mtpcHitsPos = v.mtpcHitsPos;
   mtpcHitsNeg = v.mtpcHitsNeg;
 
-  mdedxPos = v.mdedxPos;
-  mdedxNeg = v.mdedxNeg;
 
 }
 // -----------------------------------------------------------------------
@@ -141,10 +139,8 @@ StHbtV0::StHbtV0( StV0MuDst& v0FromMuDst){ // from strangess micro dst structure
     mptotV0 = v0FromMuDst.ptotV0();
     mptPos = v0FromMuDst.ptPos();
     mptotPos = v0FromMuDst.ptotPos();
-    mdedxPos = v0FromMuDst.dedxPos();
     mptNeg = v0FromMuDst.ptNeg();
     mptotNeg = v0FromMuDst.ptotNeg();
-    mdedxNeg = v0FromMuDst.dedxNeg();
 }
 #endif // __ROOT__
 

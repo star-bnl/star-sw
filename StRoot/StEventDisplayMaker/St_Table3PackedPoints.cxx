@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.6 2000/11/17 22:26:47 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.5 2000/07/21 15:50:19 fine Exp $
 
 #include <assert.h>
 
@@ -22,10 +22,7 @@ static Int_t detectId(const Char_t *name="tpc")
   // return > 0 detector index by its name
   //        = 0 wrong detector name found
   //
-  const Char_t *detectors[] = {"tpc",     "svt", 
-                               "rich",    "ftpcWest", "ftpcEast","tof",
-                               "ctb",     "ssd"};
-
+  const Char_t *detectors[] = {"tpc", "svt" ,"ftpc","ssd"};
   Int_t l = sizeof(detectors)/sizeof(Char_t *);
   for (Int_t i=0; i < l ; i++) 
      if ( strcmp(name,detectors[i]) ) return i+1;
@@ -41,8 +38,8 @@ static Float_t factor(Float_t &range,Int_t detId)
 //      parameter(detid_ftpc = 3)
 //      parameter(detid_ssd  = 8) // == 0
 
-  const Float_t factors[]   = {2380 , 23800 , 2380, 2380, 2380, 0, 0, 16000 };
-  const Float_t ranges[]    = { 220 ,  22   ,  270,  270,  270, 0, 0,  40   };
+  const Float_t factors[]   = {2380 , 23800 , 2380, 0, 0, 0, 0, 16000 };
+  const Float_t ranges[]    = { 220 ,  22   ,  270, 0, 0, 0, 0,  40   };
   assert(detId <= Int_t(sizeof(factors)/4));
   Float_t ret = factors[1];
   range =  ranges[1];
@@ -147,9 +144,6 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
-// Revision 1.6  2000/11/17 22:26:47  fine
-// packing factors for Ftpc adjusted
-//
 // Revision 1.5  2000/07/21 15:50:19  fine
 // Bug fix: needs some correction in ROOT/star as well
 //

@@ -1,8 +1,5 @@
-// $Id: StChargeStepMaker.h,v 1.4 2000/09/30 16:13:11 fisyak Exp $
+// $Id: StChargeStepMaker.h,v 1.3 2000/07/28 18:31:54 hardtke Exp $
 // $Log: StChargeStepMaker.h,v $
-// Revision 1.4  2000/09/30 16:13:11  fisyak
-// take out derivative and result from Streamer
-//
 // Revision 1.3  2000/07/28 18:31:54  hardtke
 // print out tpcDriftVelocity table
 //
@@ -51,10 +48,10 @@ class StChargeStepMaker : public StMaker {
   virtual void   Clear(const char *opt);
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.4 2000/09/30 16:13:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.3 2000/07/28 18:31:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   TH1S* step[4];  //!1=west,inner:2=west,outer:3=east,inner:4=east,outer
-  TH1S* derivative[4];//!
-  TH1F* result[4];    //!
+  TH1S* derivative[4];
+  TH1F* result[4];
   float GetWeightedMean(TH1S* inputHist);
   void AddToAverage(int section, float value);
   float GetAverage(int section);  

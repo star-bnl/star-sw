@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.cc,v 1.4 2000/09/28 02:06:10 perev Exp $
+ * $Id: StLorentzVectorD.cc,v 1.3 1999/10/15 21:55:09 didenko Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,11 +13,8 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.cc,v $
- * Revision 1.4  2000/09/28 02:06:10  perev
- * non automatic streamer added
- *
- * Revision 1.4  2000/09/28 02:06:10  perev
- * non automatic streamer added
+ * Revision 1.3  1999/10/15 21:55:09  didenko
+ * fixed type of x,y,z,t T-> double
  *
  * Revision 1.3  1999/10/15 21:55:09  didenko
  * fixed type of x,y,z,t T-> double
@@ -33,7 +30,6 @@
  *
  **************************************************************************/
 #include "StLorentzVectorF.hh"
-#include "StLorentzVectorD.hh"
 
 #ifdef __ROOT__
 #include "TBuffer.h"
@@ -124,22 +120,6 @@ istream&  operator>>(istream& is, StLorentzVectorD& v)
     is >> x >> y >> z >> t;
     v.setX(x);
     v.setY(y);
-    v.setZ(z);
-    v.setT(t);
-    return is;
-}
-//______________________________________________________________________________
-void StLorentzVectorD::Streamer(TBuffer &R__b)
-{
-//	Stream an object of class StLorentzVectorF.
-   if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
-      if (R__v==1) R__b.SetBufferOffset(R__b.Length()+10);	//skip TObject
-      mThreeVector.Streamer(R__b);
-      R__b >> mX4;
-   } else {
-      R__b.WriteVersion(Class());
-      mThreeVector.Streamer(R__b);
       R__b << mX4;
    }
 

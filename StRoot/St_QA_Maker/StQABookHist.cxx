@@ -1,11 +1,5 @@
-// $Id: StQABookHist.cxx,v 2.2 2000/09/08 18:55:53 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 2.0 2000/08/25 16:02:40 genevb Exp $ 
 // $Log: StQABookHist.cxx,v $
-// Revision 2.2  2000/09/08 18:55:53  lansdell
-// turned on FTPC primary track histograms
-//
-// Revision 2.1  2000/09/06 15:31:13  lansdell
-// changed FTPC radial position of first hit histogram limits
-//
 // Revision 2.0  2000/08/25 16:02:40  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -272,66 +266,66 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pdet_id=0;
 
   m_ppointT=0;
-  m_ppointFE=0;
-  m_ppointFW=0;
+  //m_ppointFE=0;
+  //m_ppointFW=0;
   m_pmax_pointT=0;
-  m_pmax_pointFE=0;
-  m_pmax_pointFW=0;
+  //m_pmax_pointFE=0;
+  //m_pmax_pointFW=0;
   m_pfit_pointT=0;
-  m_pfit_pointFE=0;
-  m_pfit_pointFW=0;
+  //m_pfit_pointFE=0;
+  //m_pfit_pointFW=0;
   m_prim_ratioT=0;
-  m_prim_ratioFE=0;
-  m_prim_ratioFW=0;
+  //m_prim_ratioFE=0;
+  //m_prim_ratioFW=0;
   m_prim_ratiomT=0;
-  m_prim_ratiomFE=0;
-  m_prim_ratiomFW=0;
+  //m_prim_ratiomFE=0;
+  //m_prim_ratiomFW=0;
   m_prim_chargeT=0;
-  m_prim_chargeFE=0;
-  m_prim_chargeFW=0;
+  //m_prim_chargeFE=0;
+  //m_prim_chargeFW=0;
   m_prim_r0T=0;
   m_prim_phi0T=0;
   m_prim_z0T=0;
   m_prim_curvT=0;
   m_prim_xf0=0;
   m_prim_xfT=0;
-  m_prim_xfFE=0;
-  m_prim_xfFW=0;
+  //m_prim_xfFE=0;
+  //m_prim_xfFW=0;
   m_prim_yf0=0;
   m_prim_yfT=0;  
-  m_prim_yfFE=0;  
-  m_prim_yfFW=0;     
+  //m_prim_yfFE=0;  
+  //m_prim_yfFW=0;     
   m_prim_zf0=0;     
   m_prim_zfT=0; 
-  m_prim_zfFE=0; 
-  m_prim_zfFW=0;
+  //m_prim_zfFE=0; 
+  //m_prim_zfFW=0;
   m_prim_f0=0;
   m_prim_radfT=0;
-  m_prim_radfFE=0;
-  m_prim_radfFW=0;
+  //m_prim_radfFE=0;
+  //m_prim_radfFW=0;
   m_ppsiT=0;  
-  m_ppsiFE=0;  
-  m_ppsiFW=0;        
+  //m_ppsiFE=0;  
+  //m_ppsiFW=0;        
   m_ptanlT=0;   
   m_prim_thetaT=0;  
   m_petaT=0;    
-  m_petaFE=0;    
-  m_petaFW=0;        
+  //m_petaFE=0;    
+  //m_petaFW=0;        
   m_ppTT=0;
-  m_ppTFE=0;
-  m_ppTFW=0;
+  //m_ppTFE=0;
+  //m_ppTFW=0;
   m_pmomT=0; 
-  m_pmomFE=0; 
-  m_pmomFW=0;        
+  //m_pmomFE=0; 
+  //m_pmomFW=0;        
   m_plengthT=0;  
-  m_plengthFE=0;  
-  m_plengthFW=0;  
+  //m_plengthFE=0;  
+  //m_plengthFW=0;  
   m_pchisq0T=0;     
-  m_pchisq0FE=0;     
-  m_pchisq0FW=0;     
+  //m_pchisq0FE=0;     
+  //m_pchisq0FW=0;     
   m_pchisq1T=0;
-  m_pchisq1FE=0;
-  m_pchisq1FW=0;     
+  //m_pchisq1FE=0;
+  //m_pchisq1FW=0;     
   m_prim_impactT=0; 
   m_prim_impactrT=0; 
 
@@ -366,22 +360,22 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_prim_impactrTS=0;   
 
   m_ppT_eta_recT = 0;
-  m_ppT_eta_recFE = 0;
-  m_ppT_eta_recFW = 0;
+  //m_ppT_eta_recFE = 0;
+  //m_ppT_eta_recFW = 0;
   m_primtrk_xf_yfT = 0;
-  m_primtrk_xf_yfFE = 0;
-  m_primtrk_xf_yfFW = 0;
+  //m_primtrk_xf_yfFE = 0;
+  //m_primtrk_xf_yfFW = 0;
   m_ptanl_zfT  = 0;
   m_pmom_trklengthT = 0;
   m_peta_trklengthT = 0;
-  m_peta_trklengthFE = 0;
-  m_peta_trklengthFW = 0;
+  //m_peta_trklengthFE = 0;
+  //m_peta_trklengthFW = 0;
   m_pnpoint_lengthT = 0;	
-  m_pnpoint_lengthFE = 0;	
-  m_pnpoint_lengthFW = 0;		  
+  //m_pnpoint_lengthFE = 0;	
+  //m_pnpoint_lengthFW = 0;		  
   m_pfpoint_lengthT = 0;
-  m_pfpoint_lengthFE = 0;
-  m_pfpoint_lengthFW = 0;
+  //m_pfpoint_lengthFE = 0;
+  //m_pfpoint_lengthFW = 0;
   m_pchisq0_momT = 0;
   m_pchisq1_momT = 0;
   m_pchisq0_etaT = 0;
@@ -775,8 +769,8 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomFW = QAH::H1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_glb_chargeFE = QAH::H1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
   m_glb_chargeFW = QAH::H1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
-  m_glb_rfFE     = QAH::H1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east",40,0.,40.);
-  m_glb_rfFW     = QAH::H1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west",40,0.,40.);
+  m_glb_rfFE     = QAH::H1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east", 100,40,200.);
+  m_glb_rfFW     = QAH::H1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west", 100,40,200.);
   m_glb_xfFE     = QAH::H1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_xfFW     = QAH::H1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_glb_yfFE     = QAH::H1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
@@ -838,7 +832,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",100,0.,5000.);
   m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",100,0.,20.);
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,801.);
-  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,3000.);
+  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,2500.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,20.);
   m_pdet_id     = QAH::H1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
 
@@ -1022,6 +1016,7 @@ void StQABookHist::BookHistPrim(){
     m_ppsi_phiTS->SetXTitle("phi");
     m_ppsi_phiTS->SetYTitle("psi");
 
+/* These are FTPC histograms. The FTPC doesn't do primary tracking yet.
 // 1D ftpc
   m_ppointFE      = QAH::H1F("QaPtrkNPntFE",    "primtrk: N points on trk,ftpc east", 15, 0.,15.);
   m_ppointFW      = QAH::H1F("QaPtrkNPntFW",    "primtrk: N points on trk,ftpc west", 15, 0.,15.);
@@ -1035,16 +1030,18 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratiomFW = QAH::H1F("QaPtrkRnmFW",     "primtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_prim_chargeFE = QAH::H1F("QaPtrkChrgFE",    "primtrk: charge, ftpc east ", 20,-2.,2.);
   m_prim_chargeFW = QAH::H1F("QaPtrkChrgFW",    "primtrk: charge, ftpc west ", 20,-2.,2.);
+  m_prim_radfFE   = QAH::H1F("QaPtrkRFE",       "primtrk: radial position of first hit, ftpc east", 40,0.,40.);
+  m_prim_radfFW   = QAH::H1F("QaPtrkRFW",       "primtrk: radial position of first hit, ftpc west", 40,0.,40.);
   m_prim_xfFE     = QAH::H1F("QaPtrkXfFE",      "primtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_prim_xfFW     = QAH::H1F("QaPtrkXfFW",      "primtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_prim_yfFE     = QAH::H1F("QaPtrkYfFE",      "primtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
   m_prim_yfFW     = QAH::H1F("QaPtrkYfFW",      "primtrk: y of first hit on trk, ftpc west", 50,-200.,200.);
-  m_prim_zfFE     = QAH::H1F("QaPtrkZfFE",      "primtrk: z of first hit on trk, ftpc east", 50,-300.,300.);
-  m_prim_zfFW     = QAH::H1F("QaPtrkZfFW",      "primtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
+  m_prim_zfFE     = QAH::H1F("QaPtrkZfFE",      "primtrk: z of first hit on trk, ftpc east", 50,-200.,200.);
+  m_prim_zfFW     = QAH::H1F("QaPtrkZfFW",      "primtrk: z of first hit on trk, ftpc west", 50,-200.,200.);
   m_prim_radfFE   = QAH::H1F("QaPtrkRFE",       "primtrk: radial position of first hit, ftpc east", 40,0.,40.);
   m_prim_radfFW   = QAH::H1F("QaPtrkRFW",       "primtrk: radial position of first hit, ftpc west", 40,0.,40.);
-  m_plengthFE     = QAH::H1F("QaPtrkLengthFE",  "primtrk: track length, ftpc east", 60,0.,300.);
-  m_plengthFW     = QAH::H1F("QaPtrkLengthFW",  "primtrk: track length, ftpc west", 60,0.,300.);
+  m_plengthFE     = QAH::H1F("QaPtrkLengthFE",  "primtrk: track length, ftpc east", 60,0.,120.);
+  m_plengthFW     = QAH::H1F("QaPtrkLengthFW",  "primtrk: track length, ftpc west", 60,0.,120.);
   m_ppsiFE        = QAH::H1F("QaPtrkPsiFE",     "primtrk: psi, ftpc east", 36, 0.,360.);
   m_ppsiFW        = QAH::H1F("QaPtrkPsiFW",     "primtrk: psi, ftpc west", 36, 0.,360.);
   m_petaFE        = QAH::H1F("QaPtrkEtaFE",     "primtrk: eta, ftpc east",80,-8.,8.);
@@ -1053,10 +1050,10 @@ void StQABookHist::BookHistPrim(){
   m_ppTFW         = QAH::H1F("QaPtrkPtFW",      "primtrk: pT, ftpc west",50,0.,5.);
   m_pmomFE        = QAH::H1F("QaPtrkPFE",       "primtrk: momentum, ftpc east ",50,0.,5.);
   m_pmomFW        = QAH::H1F("QaPtrkPFW",       "primtrk: momentum, ftpc west ",50,0.,5.);
-  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: chisq0, ftpc east", 50, 0.,5.);
-  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: chisq0, ftpc west", 50, 0.,5.);
-  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: chisq1, ftpc east", 50, 0.,5.);
-  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: chisq1, ftpc west", 50, 0.,5.);
+  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: chisq0, ftpc east", 50, 0.,5000.);
+  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: chisq0, ftpc west", 50, 0.,5000.);
+  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: chisq1, ftpc east", 50, 0.,500.);
+  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: chisq1, ftpc west", 50, 0.,500.);
 
 // 2D - ftpc
   m_ppT_eta_recFE = QAH::H2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
@@ -1067,24 +1064,25 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_xf_yfFW = QAH::H2F("QaPtrkXfYfFW","primtrk: Y vs X of first hit on trk, ftpcW", 40,-40.,40.,40,-40.,40.);
     m_primtrk_xf_yfFW->SetXTitle("x first");
     m_primtrk_xf_yfFW->SetYTitle("y first");
-  m_peta_trklengthFE = QAH::H2F("QaPtrkLengthVEtaFE","primtrk: trk length vs eta, ftpcE",25,-4.5,-2.,50,0.,300.);
+  m_peta_trklengthFE = QAH::H2F("QaPtrkLengthVEtaFE","primtrk: trk length vs eta, ftpcE",25,-4.5,-2.,30,0.,120.);
     m_peta_trklengthFE->SetXTitle("eta");
     m_peta_trklengthFE->SetYTitle("length");
-  m_peta_trklengthFW = QAH::H2F("QaPtrkLengthVEtaFW","primtrk: trk length vs eta, ftpcW",25,2.,4.5,50,0.,300.);
+  m_peta_trklengthFW = QAH::H2F("QaPtrkLengthVEtaFW","primtrk: trk length vs eta, ftpcW",25,2.,4.5,30,0.,120.);
     m_peta_trklengthFW->SetXTitle("eta");
     m_peta_trklengthFW->SetYTitle("length");
-  m_pnpoint_lengthFE = QAH::H2F("QaPtrkNPntLengthFE","primtrk: N pnts vs length, ftpcE",50,0.,300.,15,0.,15.);
+  m_pnpoint_lengthFE = QAH::H2F("QaPtrkNPntLengthFE","primtrk: N pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_pnpoint_lengthFE->SetXTitle("trk length");
     m_pnpoint_lengthFE->SetYTitle("Npoints on trk");
-  m_pnpoint_lengthFW = QAH::H2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",50,0.,300.,15,0.,15.);
+  m_pnpoint_lengthFW = QAH::H2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_pnpoint_lengthFW->SetXTitle("trk length");
     m_pnpoint_lengthFW->SetYTitle("Npoints on trk");
-  m_pfpoint_lengthFE = QAH::H2F("QaPtrkFitPntLengthFE","primtrk: N fit pnts vs length, ftpcE",50,0.,300.,15,0.,15.);
+  m_pfpoint_lengthFE = QAH::H2F("QaPtrkFitPntLengthFE","primtrk: N fit pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_pfpoint_lengthFE->SetXTitle("trk length");
     m_pfpoint_lengthFE->SetYTitle("Npoints on trk");
-  m_pfpoint_lengthFW = QAH::H2F("QaPtrkFitPntLengthFW","primtrk: N fit pnts vs length, ftpcW",50,0.,300.,15,0.,15.);
+  m_pfpoint_lengthFW = QAH::H2F("QaPtrkFitPntLengthFW","primtrk: N fit pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_pfpoint_lengthFW->SetXTitle("trk length");
     m_pfpoint_lengthFW->SetYTitle("Npoints on trk");
+*/
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistDE(){

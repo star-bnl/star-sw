@@ -1,8 +1,5 @@
-* $Id: tpt_make_segment.F,v 1.13 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_make_segment.F,v 1.12 2000/04/28 03:10:00 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
-* Revision 1.13  2000/11/14 22:29:08  genevb
-* Switched from float to double in many places
-*
 * Revision 1.12  2000/04/28 03:10:00  sakrejda
 * Added freing of hits from a track that did not survive the fitting.
 *
@@ -102,10 +99,9 @@ C     Local variables
       INTEGER tpc_sec24_to_sec12
       INTEGER longrow
 
-      REAL    as1,bs1,xp1,yp1,zp1
-      REAL*8  ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs
-      REAL*8  rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2,denom
-      REAL    xglobal(3)
+      REAL    ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs,xp1,yp1
+      REAL    zp1,rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2,denom
+      REAL    xglobal(3), dummy
 
 C     Find what was the innermost row number and continue the search 
 C     towards the inside of the chamber
@@ -135,13 +131,13 @@ C           if there was a gap parametrisation for a row won't change
             ax = hit(ip3).x-hit(ip2).x
             ay = hit(ip3).y-hit(ip2).y
             az = hit(ip3).z-hit(ip2).z
-            ar = dsqrt(dble(hit(ip3).x)**2+dble(hit(ip3).y)**2)-
-     >           dsqrt(dble(hit(ip2).x)**2+dble(hit(ip2).y)**2)
+            ar = sqrt(hit(ip3).x**2+hit(ip3).y**2)-
+     >           sqrt(hit(ip2).x**2+hit(ip2).y**2)
             bx = hit(ip4).x-hit(ip3).x
             by = hit(ip4).y-hit(ip3).y
             bz = hit(ip4).z-hit(ip3).z
-            br = dsqrt(dble(hit(ip4).x)**2+dble(hit(ip4).y)**2)-
-     >           dsqrt(dble(hit(ip3).x)**2+dble(hit(ip3).y)**2)
+            br = sqrt(hit(ip4).x**2+hit(ip4).y**2)-
+     >           sqrt(hit(ip3).x**2+hit(ip3).y**2)
             denom = hit(ip2).y*hit(ip3).x-hit(ip3).y*hit(ip2).x
             dydx = -(hit(ip3).y-hit(ip2).y)/denom
             oxy =  (hit(ip3).x-hit(ip2).x)/denom
@@ -150,9 +146,7 @@ C           if there was a gap parametrisation for a row won't change
          endif
 C        find what is the parametrisation for the row ir1 in sector 
 C        isect
-         iret = tpc_row_par(isect_trunc,real(ir1),as1,bs1)
-         as = dble(as1)
-         bs = dble(bs1)
+         iret = tpc_row_par(isect_trunc,real(ir1),as,bs)
 C        find what is the prediction for this row
          iret = tpt_ptcrs(as,bs,dydx,oxy,xp1,yp1)
 C        and check whether it lies in the same sector
@@ -161,7 +155,7 @@ C        and check whether it lies in the same sector
          xglobal(3)=10.0
          iret =  tpc_global_to_sector(isec1,xglobal)
          if( isect_trunc.eq.isec1 ) then
-           rp1 = dsqrt(dble(xp1)**2+dble(yp1)**2)
+           rp1 = sqrt(xp1**2+yp1**2)
            drp = r2 - rp1
            zp1 = hit(ip2).z - dzdr*drp
            if(abs(zp1).lt.210.0)then
@@ -180,8 +174,8 @@ C          check there are hits here
      >           call StInfo('TPT_MAKE_SEGMENT: looking for a matching point')
                if(hit(i).track.eq.0) then
                  drow = ir2 - ir1
-                 if(dabs(dble(hit(i).z-zp1))
-     >           .lt.dble(tpar(ipass).dzplim*hit(i).zrf)) then
+                 if(abs(hit(i).z-zp1)
+     >           .lt.tpar(ipass).dzplim*hit(i).zrf) then
                    dy = hit(i).y-yp1
                    dx = hit(i).x-xp1
                    dz = hit(i).z-zp1

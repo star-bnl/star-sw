@@ -1,8 +1,5 @@
-// $Id: StFtpcDisplay.cc,v 1.7 2000/11/10 18:37:23 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.6 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
-// Revision 1.7  2000/11/10 18:37:23  oldi
-// It is now possible to display tracks which should be longer (so called 'short tracks').
-//
 // Revision 1.6  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -40,7 +37,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 17.10.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcDisplay.hh"
@@ -58,7 +55,6 @@
 #include "TMarker.h"
 #include "TTUBE.h"
 #include "TBRIK.h"
-//#include "TCONE.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1121,12 +1117,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   ftpc2_out->SetLineColor(4);
   ftpc2_in->SetLineColor(4);
 
-  /*
-  TCONE *cone = new TCONE("cone", "cone", "void", 5., 30./256.45*254.20-0.22, 30./256.45*254.20, 30./256.45*258.7-0.22,30./256.45*258.7 );
-  cone->SetNumberOfDivisions(100);
-  cone->SetLineColor(1);
-  */
-
   // create 3 nodes (+, -, both) to generate the dependencies of the different geometric shapes
   mNode0 = new TNode("node0", "node0", "origin");
   mNode2 = new TNode("node2", "node2", "origin");
@@ -1149,7 +1139,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   // create dependencies for '+' Ftpc
   mX_Y_Zplus->cd();
   mNode1->cd();
-  //TNode *cone_1 = new TNode("con1_1", "cone_1", "cone", 0, 0, 256.45);
   TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, 162.75+(256.45-162.75)/2.);
   TNode *node1_in =  new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, 162.75+(256.45-162.75)/2.);
 
@@ -1165,7 +1154,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   node02_in->cd();
   node01_out->cd();
   node02_out->cd();
-  //cone_1->cd();
 
   Char_t a;
   
@@ -1178,7 +1166,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   Bool_t good_found = (Bool_t) true;
   Bool_t split =      (Bool_t) true;
   Bool_t unclean =    (Bool_t) true;
-  Bool_t st =         (Bool_t) false;
   Bool_t found_hits = (Bool_t) true;
   Bool_t blue =       (Bool_t) false;
 
@@ -1196,7 +1183,7 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
     //gSystem->Exec("/usr/bin/clear");
 
     cout << endl << endl;
-    cout << "Display (f)ound tracks..................: ";
+    cout << "Display (f)found tracks.................: ";
     OnOff(found);
     cout << "---------------------------------------------" << endl;
     cout << "   Show (g)ood tracks..............[red]: ";
@@ -1205,8 +1192,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
     OnOff(split);
     cout << "        (u)nclean tracks........[yellow]: ";
     OnOff(unclean);
-    cout << "        sho(r)t tracks..................: ";
-    OnOff(st);
     cout << "        (c)lusters......................: ";
     OnOff(found_hits);
     cout << endl;
@@ -1227,16 +1212,15 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
     cout << "(E)ta range              (2.0 - 4.4)    : " << eta_low_geant << " - " << eta_up_geant << endl;
     cout << "(p)t range               (0.0 - 5.0 GeV): " << pt_low_geant << " - " << pt_up_geant << endl;
     cout << endl;
-    cout << "Show (+), (-), or bo(t)h Ftpcs or (q)uit: ";
+    cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
     cin >> a;
     
-    if (a == 'f' || a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'e' || a == 'n' || a == 'o' || a == 'l' || a== 'E' || a == 'p' || a == 'b' || a == 'r') {
+    if (a == 'f' || a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'e' || a == 'n' || a == 'o' || a == 'l' || a== 'E' || a == 'p' ||a == 'b') {
       
       if (a == 'f') found = !found;
       if (a == 'g') good_found = !good_found;
       if (a == 's') split = !split  ;
       if (a == 'u') unclean = !unclean;
-      if (a == 'r') st = !st;
       if (a == 'c') found_hits = !found_hits;
       if (a == 'G') geant = !geant;
       if (a == 'e') electrons = !electrons;
@@ -1280,13 +1264,13 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 	}
 	
 	if (found) {
-	  FillFound(good_found, st, sp, uncl, hits, eta_low_found, eta_up_found, pt_low_found, pt_up_found);
+	  FillFound(good_found, sp, uncl, hits, eta_low_found, eta_up_found, pt_low_found, pt_up_found);
 	}
 	
 	// call the x3d function (this does the actual 3D displaying) for the right canvas
 	if (a == '+') mX_Y_Zplus->x3d();
 	if (a == '-') mX_Y_Zminus->x3d();
-	if (a == 't') mX_Y_Z->x3d();
+	if (a == 'b') mX_Y_Z->x3d();
       }
     }
   }  
@@ -1381,7 +1365,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       }
 
       current_line->SetLineColor(color);
-
+  
       // draw track in the right canvas
       current_line->Draw("same");
       // and draw track in the canvas for both Ftpcs
@@ -1453,7 +1437,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
 }
 
 
-void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up)
+void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up)
 {
   // Fill histograms with tracks and clusters.
 
@@ -1623,48 +1607,6 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
 	mX_Y_Z->cd();
 	current_line->Draw("same");
       }   
-    }
-  }
-
-  if (st) {
-
-    // loop over all tracks
-    for (Int_t tracks = 0; tracks < track_entries; tracks++) {
-          
-      track = (StFtpcTrack *)mTrack->At(tracks);
-
-      Int_t cluster_entries = track->GetNumberOfPoints();
-      
-      if (cluster_entries < 10 && track->GetRFirst() > 8. && track->GetRLast() < 30.) { 
-      
-	// loop over all clusters
-	for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
-	  
-	  cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
-	  
-	  // fill point array
-	  x[clusters] = (Float_t)(cluster->GetX());
-	  y[clusters] = (Float_t)(cluster->GetY());
-	  z[clusters] = (Float_t)(cluster->GetZ());
-	  
-	  // decide in which canvas (+,-) this track belongs
-	  if (z[clusters]>0) mX_Y_Zplus->cd();
-	  else mX_Y_Zminus->cd();   
-	}
-	
-	// fill PolyLine for this track
-	current_line = &(found_line[tracks]);
-	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
-	
-	// set colors
-	current_line->SetLineColor(2);
-	
-	// draw track in the right canvas
-	current_line->Draw("same");
-	// and draw track in the canvas for both Ftpcs
-	mX_Y_Z->cd();
-	current_line->Draw("same");   
-      }
     }
   }
 

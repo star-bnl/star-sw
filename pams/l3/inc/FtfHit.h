@@ -12,7 +12,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
    class FtfPara  ;
@@ -42,7 +42,7 @@
        short        buffer1 ;          //
        short        buffer2 ;          
        unsigned short hardwareId ;
-//ClassDef(FtfHit,1)
+ClassDef(FtfHit,1)
    } ;
 #endif
 

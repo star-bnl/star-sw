@@ -2,11 +2,8 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.49 2000/09/27 16:41:05 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.48 2000/06/22 16:57:41 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
-// Revision 1.49  2000/09/27 16:41:05  genevb
-// Handle negative fields
-//
 // Revision 1.48  2000/06/22 16:57:41  wdeng
 // Move globtrk length calculation from StPrimaryMaker to StMatchMaker.
 //
@@ -175,8 +172,6 @@
 #include "global/St_egr_impactcl_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 
-#define gufld   gufld_
-extern "C" {void gufld(Float_t *, Float_t *);}
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 
 //class St_tcl_tpcluster;
@@ -453,11 +448,6 @@ Int_t StPrimaryMaker::Make(){
       if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
     }
   }
-
-  Float_t xval[3] = {0.,0.,0.};
-  Float_t bval[3];
-  gufld(xval,bval);
-
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     Float_t *pv = &vrtx->x;
     StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
@@ -465,7 +455,7 @@ Int_t StPrimaryMaker::Make(){
     for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, glob++)
       {
 	Float_t dip   = atan(glob->tanl);
-	Int_t    h    = ((bval[2] * glob->icharge) > 0 ? -1 : 1);
+	Int_t    h    = (glob->icharge > 0 ? -1 : 1);
 	Float_t phase = glob->psi*degree-h*pi/2;
 	Float_t curvature = glob->curvature;
 	Float_t x0 = glob->r0 * cos(glob->phi0 * degree);
@@ -566,7 +556,6 @@ Int_t StPrimaryMaker::Make(){
     {
       
       Float_t *pv = &myvrtx->x;
-      StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
       
       dst_track_st* globtrkPtr = globtrk->GetTable();
       dst_track_st* primtrkPtr = primtrk->GetTable();  
@@ -579,7 +568,7 @@ Int_t StPrimaryMaker::Make(){
 	  primtrkPtr->map[0] |= (1UL<<0);
 
 	  Float_t dip   = atan(primtrkPtr->tanl);
-	  Int_t    h    = ((bval[2] * primtrkPtr->icharge) > 0 ? -1 : 1);
+	  Int_t    h    = (primtrkPtr->icharge > 0 ? -1 : 1);
 	  Float_t phase = primtrkPtr->psi*degree-h*pi/2;
 	  Float_t curvature = primtrkPtr->curvature;
 	  Float_t x0 = primtrkPtr->r0 * cos(primtrkPtr->phi0 * degree);
@@ -588,6 +577,7 @@ Int_t StPrimaryMaker::Make(){
 	  StThreeVectorD origin(x0, y0, z0);  
 	  StHelixD primHelix(curvature, dip, phase, origin, h);
 	  
+	  StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
           primtrkPtr->impact = primHelix.distance(primVertex);
 
 	  StThreeVectorD lastPoint(primtrkPtr->x_last[0], 

@@ -1,8 +1,5 @@
-* $Id: tde.F,v 1.14 2000/10/16 15:58:59 genevb Exp $
+* $Id: tde.F,v 1.13 2000/06/20 00:23:16 fisyak Exp $
 * $Log: tde.F,v $
-* Revision 1.14  2000/10/16 15:58:59  genevb
-* Fix for negative field values
-*
 * Revision 1.13  2000/06/20 00:23:16  fisyak
 * Patch for stright tracks
 *
@@ -325,7 +322,7 @@ c        xc, yc are the coordinates of center of the circle
 c
          radius = 1.e9
          if (abs(track(j).invp*bfield(3)*C_D_CURVATURE) .gt. 1.e-9) 
-     >   radius=1.0 / abs(track(j).invp*bfield(3)*C_D_CURVATURE)
+     >   radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
          psic=track(j).psi*C_RAD_PER_DEG+
      >      sign(1.,track(j).q*bfield(3))*C_PI*0.5
          xc = x1 - radius*cos(psic)

@@ -1,8 +1,5 @@
-* $Id: tpt_ptcrs.F,v 1.3 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_ptcrs.F,v 1.2 1998/01/27 00:35:51 fisyak Exp $
 * $Log: tpt_ptcrs.F,v $
-* Revision 1.3  2000/11/14 22:29:08  genevb
-* Switched from float to double in many places
-*
 * Revision 1.2  1998/01/27 00:35:51  fisyak
 * Split sources
 *
@@ -34,13 +31,12 @@ C<--------------------------------------------------------------------
       IMPLICIT NONE
 #include "PAM.inc"
 
-      REAL   xp1,yp1
-      REAL*8 as,bs,an,bn,tol,den
+      REAL as,bs,an,bn,xp1,yp1,tol,den
       PARAMETER (tol = 0.000000001)
 C
       tpt_ptcrs = STAFCV_OK
       den = as*bn-bs*an
-      if(dabs(den).lt.tol) then
+      if(abs(den).lt.tol) then
          tpt_ptcrs = STAFCV_BAD
       else
          xp1 = - (bs - bn)/den

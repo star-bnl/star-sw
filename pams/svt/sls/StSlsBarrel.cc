@@ -92,6 +92,7 @@ int StSlsBarrel::removeInactiveHitInTable(table_head_st *g2t_h,g2t_svt_hit_st *g
     }
   inactiveHits->sortPoint();
   localSize=inactiveHits->getSize();
+
   if (localSize)
     {
       int firstSsdPoint=0;
@@ -110,22 +111,26 @@ int StSlsBarrel::removeInactiveHitInTable(table_head_st *g2t_h,g2t_svt_hit_st *g
       if (isG2tSorted)
 	{
 	  int ipScan = 0;
-	  int ipKeep = firstSsdPoint;
 	  for (ipScan = firstSsdPoint; (ipScan<g2t_h->nok); ipScan++)
 	    {
-	      if ((!isAllRemove)&&(g2t[ipScan].id == currToDele->getNId()))
+	      if (!isAllRemove)
 		{
-		  currToDele=inactiveHits->next(currToDele);
-		  if (currToDele == 0) isAllRemove = 1;
-		  nDeleted++;
+		  if (g2t[ipScan].id == currToDele->getNId())
+		    {
+		      currToDele=inactiveHits->next(currToDele);
+		      if (currToDele == 0)
+			{
+			  isAllRemove = 1;
+			}
+		      else
+			{
+			  nDeleted++;
+			}
+		    }
 		}
-	      else
-		{
-		  g2t[ipKeep]=g2t[ipScan];
-		  ipKeep++;
-		}
+	      g2t[ipScan]=g2t[ipScan + nDeleted];
 	    }
- 	  g2t_h->nok -= nDeleted;
+	  g2t_h->nok -= nDeleted;
 	}
       else
 	{
@@ -191,6 +196,50 @@ void StSlsBarrel::chargeSharingOverStrip(sls_ctrl_st  *ctrl)
 				 ctrl[0].ParIndLeftP,
 				 ctrl[0].ParIndLeftN);
     }
+}
+
+int StSlsBarrel::writePointToTable(table_head_st *spt_h, sls_spt_st *spt)
+{
+  int currRecord   = 0;
+  spt_h->nok       = 0;
+  int i            = 0;
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
+    {
+     int idCurrentWaf = waferNumbToIdWafer(iWaf);
+     StSlsListPoint *sptList = mWafers[iWaf]->getPoint();
+     StSlsPoint *pSpt = sptList->first();
+     while (pSpt)
+       {
+      	     spt[currRecord].flag          = 0;
+	     spt[currRecord].id            = currRecord+1;
+      	     spt[currRecord].id_cluster    = pSpt->getNId();
+	     spt[currRecord].id_globtrk    = pSpt->getMcTrack();
+	     spt[currRecord].id_match      = pSpt->getMcHit();
+	  for (i = 0 ; i < 5 ; i++)
+	    {
+             spt[currRecord].id_mchit[i]   = 0;
+             spt[currRecord].id_mctrack[i] = 0;
+	     spt[currRecord].id_track[i]   = 0;
+	    }
+	     spt[currRecord].id_wafer      = idCurrentWaf;
+	  for (i = 0 ; i < 3 ; i++)
+	    {
+             spt[currRecord].cov[i]        = 0;
+             spt[currRecord].res[i]        = 0;
+             spt[currRecord].x[i]          = pSpt->getXg(i);
+	     spt[currRecord].xl[i]         = pSpt->getXl(i);
+	    }
+	  for (i = 0 ; i < 2 ; i++)
+	    {
+	      spt[currRecord].mom2[i]       = 0;
+              spt[currRecord].de[i]         = pSpt->getDe();
+	    }
+       	  currRecord++;
+	  pSpt    = sptList->next(pSpt);
+	  spt_h->nok++;
+       }
+    }
+  return currRecord;
 }
 
 int StSlsBarrel::writeStripToTable(table_head_st *strip_h, sls_strip_st *strip)

@@ -1,12 +1,9 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
-// $Id: testdataset.c,v 1.13 2000/09/30 17:51:54 perev Exp $
+// $Id: testdataset.c,v 1.11 1999/12/28 23:32:02 fine Exp $
 // $Log: testdataset.c,v $
-// Revision 1.13  2000/09/30 17:51:54  perev
-// Evolution On/Off SetEvol.C added
-//
 // Revision 1.11  1999/12/28 23:32:02  fine
-// TDataSetIter  operator++ removed to avoid a future problem
+// St_DataSetIter  operator++ removed to avoid a future problem
 //
 // Revision 1.10  1999/12/28 22:25:03  fine
 // new test for operators ++ and * implemented
@@ -15,14 +12,14 @@
 // testdataset.c has been improved
 //
 // Revision 1.8  1999/04/07 15:41:22  fine
-// Extra test for TDataSetIter::Du() was introduced
+// Extra test for St_DataSetIter::Du() was introduced
 //
 {
   gROOT->Reset();
   // Determinate the brand of the OS
-  gSystem.Load("libStar");
+  gSystem.Load("St_base");
 
-  TDataSetIter d;
+  St_DataSetIter d;
   d.Mkdir("v1/v1_1/v1_1_1");
   cout << "Short list:" << endl;
   d.Pwd();  
@@ -34,13 +31,13 @@
                                   cout << endl;
   d.Mkdir("v1/v1_3/v1_2_2");
 
-  TDataSet *last = d.Mkdir("v1/v1/v1_v1_2_2");
-  TDataSet *just = d("v1/v1/v1_v1_2_2");
+  St_DataSet *last = d.Mkdir("v1/v1/v1_v1_2_2");
+  St_DataSet *just = d("v1/v1/v1_v1_2_2");
 
   if (last != just) 
         cout << "Error: Mkdir return a wrong addrees";
    else    
-        cout << "Ok! return value of TDataSetIter::Mkdir method has been tested";
+        cout << "Ok! return value of St_DataSetIter::Mkdir method has been tested";
         
    cout << endl << endl;     
 
@@ -61,12 +58,12 @@
   d.ls("v1/v21/v3212");
    
                                  cout << endl;
-  cout << "--------------------" << " Testing TDataSetIter::Du() method: " <<
+  cout << "--------------------" << " Testing St_DataSetIter::Du() method: " <<
           "--------------------" << endl;  
   Int_t total = d.Du();                               
   cout << "---------------------" << endl;  
   cout << "Total: " << total << " datasets were listed" << endl;
-  cout << "-----------------" << " End of Testing TDataSetIter::Du() method: " <<
+  cout << "-----------------" << " End of Testing St_DataSetIter::Du() method: " <<
           "----------------" << endl;  
                                   cout << endl;
   cout << "We'll try some \"wrong\" path now" << endl;
@@ -76,7 +73,7 @@
   cout  << endl << "-------- 2 test \"FindObject\" ------------ " << endl;
 
   const Char_t *v3212 = "v3212";
-  TDataSet *found = d.FindObject(v3212);
+  St_DataSet *found = d.FindByName(v3212);
   if (found) {
       const Char_t *t = found->Path();
       cout << "Object: " << v3212 << " found. It\'s path is " << t << endl;
@@ -86,7 +83,7 @@
       return;
   }
 
-  cout  << endl << "-------- 2.2 test \"FindByName\" ------------ " << endl;
+  cout  << endl << "-------- 2.2 test \"FindObject\" ------------ " << endl;
   cout  << endl << "-------- 2.2 test \"FindByName\" ------------ " << endl;
  
   const Char_t *vS3213 = "/v32/13";
@@ -94,7 +91,7 @@
   found = d.FindByName(vS3213);
   if (found) return;
 
-  cout  << endl << "-------- 2.3 test \"FindByName\" ------------ " << endl;
+  cout  << endl << "-------- 2.3 test \"FindObject\" ------------ " << endl;
   cout  << endl << "-------- 2.3 test \"FindByName\" ------------ " << endl;
 
   const Char_t *V3212 = "V3212";
@@ -108,11 +105,11 @@
        return;
   }
 
-  cout  << endl << "-------- 2.4 test \"FindByName\" ------------ " << endl;
+  cout  << endl << "-------- 2.4 test \"FindObject\" ------------ " << endl;
   cout  << endl << "-------- 2.4 test \"FindByName\" ------------ " << endl;
 
   cout << " ===   Error message expected " << endl;
-  found = d.FindByName(V3212,"v1/v21/v3212/v4","-I");
+  found = d.FindObject(V3212,"v1/v21/v3212/v4","-I");
   if (found) return;
   cout << " Object not found" << endl;
 
@@ -136,8 +133,8 @@
    else
      cout << " Ok! the path to d[\"" <<  d("v1/v1_1/v1_1_1")->Path() << "\"]=" << d["v1/v1_1/v1_1_1"] << ";" << endl; 
   cout  << endl << "------------ 7 ------------ " << endl;
-  cout  << "  Check loop with \"TDataSet *operator *() const\"" << endl;
-  TDataSet *ds = 0;
+  cout  << "  Check loop with \"St_DataSet *operator *() const\"" << endl;
+  St_DataSet *ds = 0;
   do { 
     ds = *d; 
     if (ds) {

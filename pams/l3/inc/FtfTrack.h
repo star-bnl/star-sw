@@ -16,7 +16,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 
@@ -86,7 +86,7 @@ public:
 //private:
    inline virtual   void nextHit (){ currentHit = ((FtfBaseHit *)currentHit)->nextTrackHit ; } ;
 	   
-// ClassDef(FtfTrack,1)
+   ClassDef(FtfTrack,1)
    } ;
 #endif
 

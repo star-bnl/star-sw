@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.h,v 1.6 2000/09/15 21:22:50 fisyak Exp $
+ * $Id: StPidAmpManager.h,v 1.5 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.h,v $
- * Revision 1.6  2000/09/15 21:22:50  fisyak
- * HP does not have iostream
- *
  * Revision 1.5  2000/05/01 16:59:49  aihong
  * clean up
  *
@@ -35,11 +32,10 @@
 #ifndef StPidAmpManager_h
 #define StPidAmpManager_h
 
-#ifdef __HP_aCC
-#include <iostream.h>
-#else
+
+
 #include <iostream>
-#endif
+
 #include "TString.h"
 #include "TH1.h"
 

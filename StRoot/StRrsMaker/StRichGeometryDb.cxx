@@ -1,16 +1,10 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.2 2000/11/21 21:40:45 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.0 2000/08/09 16:17:00 gans Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 2.2  2000/11/21 21:40:45  dunlop
- * Tweak for ExB effects
- *
- * Revision 2.1  2000/10/20 23:25:16  dunlop
- * Fine tune for P00hi
- *
  * Revision 2.0  2000/08/09 16:17:00  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -75,7 +69,7 @@ void StRichGeometryDb::my_fill()
 {
     mVersion = 1.0;
     
-    quad_gap_x        =  30.8 * millimeter;          // verified          
+    quad_gap_x        =  30.0 * millimeter;          // verified          
     quad_gap_y        =  30.0 * millimeter;          
 	
     wire_spacing      = 4.2   * millimeter;          // verified
@@ -132,11 +126,11 @@ void StRichGeometryDb::my_fill()
 //    mLocalOriginAngle = -59.9911296661538 * degree ; 
 //    mLocalOriginR = 240.126958857466 * centimeter ;
 //    mLocalOriginZ = -0.558878974855719 * centimeter ; 
-    // local shift of (0.25,0.17,-0.1)
-    mLocalOriginAngle = -59.9506239157014*degree;
+    // local shift of (0.25,0.23,0.1)
+    mLocalOriginAngle = -59.9361080018053*degree;
     
-    mLocalOriginR = 240.22755151829*centimeter;
-    mLocalOriginZ = -0.3089772 * centimeter;
+    mLocalOriginR = 240.027805765613 * centimeter;
+    mLocalOriginZ = -0.3090868 * centimeter;
     
 #endif    
     // Calculate the positions of the uppermost left had

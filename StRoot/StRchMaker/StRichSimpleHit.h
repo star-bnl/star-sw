@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 2.2 2000/11/01 16:52:43 lasiuk Exp $
+ * $Id: StRichSimpleHit.h,v 2.0 2000/08/09 16:22:12 gans Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,9 +7,8 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
- * Revision 2.2  2000/11/01 16:52:43  lasiuk
- * Use the enumerated types from StEvent.  correct the NAMESPACE macro
- * and print more bits in the printBit member
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
  * Revision 2.1  2000/09/29 19:01:26  lasiuk
  * enumerated types added for flags
@@ -40,17 +39,16 @@
 #include <iostream.h>
 #include <vector>
 
-#ifndef ST_NO_NAMESPACES
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
 using std::vector;
 #endif
 
 #include "StThreeVector.hh"
 
-// From StEvent
-// if not running with STEVENT, set this and the enumerations
-// will be defined here...otherwise use the StEvent definitions.
-#include "StEnumerations.h"
-#include "StRichHit.h"
+#include "StEvent/StRichHit.h"
+#endif
+
+enum StRichSimpleHitFlag {eDeconvoluted=1, eMip=2, eSaturatedPad=4};
 
 class StRichSimpleHit  {
 public:
@@ -60,11 +58,10 @@ public:
     StRichSimpleHit(const StRichHit*);
 #endif
     virtual ~StRichSimpleHit();
-    virtual StRichSimpleHit* clone();
-    
-    //StRichSimpleHit(const StRichSimpleHit&){}
+    const StThreeVector<double>& global()    const;
+    const StThreeVector<double>& local()    const;
+    const StThreeVector<double>& internal() const;
     //StRichSimpleHit& operator=(const StRichSimpleHit&){}
-    
     const StThreeVector<double>& global()     const;
     const StThreeVector<double>& local()      const;
     const StThreeVector<double>& internal()   const;
@@ -74,25 +71,13 @@ public:
     double charge()        const;
     double maxAmplitude()  const;
     int    clusterNumber() const;
-    
     StThreeVector<double>&  global();
     StThreeVector<double>&  local();
     StThreeVector<double>&  internal();
     StThreeVector<double>&  localError();
-    StThreeVector<double>&  sigma();
-    
-    void setCharge(double q);
-    void setMaxAmplitude(double m);
-    void setClusterNumber(int no);
-
-    unsigned short numberOfPads() const;
-    void setNumberOfPads(unsigned short);
-
-    //
-    // Flag Operation
-    bool isSet(StRichHitFlag f)      const;
-    void setBit(StRichHitFlag f);
-    void unSetBit(StRichHitFlag f);
+    bool isSet(StRichSimpleHitFlag f)      const;
+    void setBit(StRichSimpleHitFlag f);
+    void unSetBit(StRichSimpleHitFlag f);
     unsigned long flags()                  const;
     void printBits()                       const;
     
@@ -100,8 +85,6 @@ protected:
     StThreeVector<double> mGlobal;
     StThreeVector<double> mLocal;  // local coordinates
     StThreeVector<double> mLError;  // local error
-    StThreeVector<double> mInternal;  // fraction pad/row
-    StThreeVector<double> mSigma;
     double                mCharge;
     double                mMaxAmplitude;
     unsigned int          mClusterNumber;
@@ -112,27 +95,17 @@ protected:
 inline const StThreeVector<double>& StRichSimpleHit::global() const {return mGlobal;}
 inline StThreeVector<double>& StRichSimpleHit::global() {return mGlobal;}
 inline const StThreeVector<double>& StRichSimpleHit::local() const {return mLocal;}
-inline StThreeVector<double>& StRichSimpleHit::local() {return mLocal;}
-inline const StThreeVector<double>& StRichSimpleHit::internal() const {return mInternal;}
 inline StThreeVector<double>& StRichSimpleHit::internal() {return mInternal;}
 inline const StThreeVector<double>& StRichSimpleHit::localError() const {return mLError;}
 inline StThreeVector<double>& StRichSimpleHit::localError() {return mLError;}
 inline const StThreeVector<double>& StRichSimpleHit::sigma() const {return mSigma;}
 inline StThreeVector<double>& StRichSimpleHit::sigma() {return mSigma;}
 inline void StRichSimpleHit::setCharge(double q) {mCharge = q;}
-inline double StRichSimpleHit::charge() const {return mCharge;}
-inline void StRichSimpleHit::setMaxAmplitude(double m) {mMaxAmplitude = m;}
-inline double StRichSimpleHit::maxAmplitude() const {return mMaxAmplitude;}
 inline void StRichSimpleHit::setClusterNumber(int no) {mClusterNumber = no;}
-inline int StRichSimpleHit::clusterNumber() const {return mClusterNumber;}
-inline unsigned short StRichSimpleHit::numberOfPads() const {return mNumberOfPads;}
-inline void StRichSimpleHit::setNumberOfPads(unsigned short n) {mNumberOfPads=n;}
-
-inline StRichSimpleHit* StRichSimpleHit::clone() {return new StRichSimpleHit(*this);}
 // Flags
-inline void StRichSimpleHit::setBit(StRichHitFlag b) { mFlags |= b; }
-inline void StRichSimpleHit::unSetBit(StRichHitFlag b) { mFlags &= ~(b);}
-inline bool StRichSimpleHit::isSet(StRichHitFlag b) const { return (mFlags & b); }
+inline void StRichSimpleHit::setBit(StRichSimpleHitFlag b) { mFlags |= b; }
+inline void StRichSimpleHit::unSetBit(StRichSimpleHitFlag b) { mFlags &= ~(b);}
+inline bool StRichSimpleHit::isSet(StRichSimpleHitFlag b) const { return (mFlags & b); }
 inline unsigned long StRichSimpleHit::flags() const { return (mFlags); }
 
 // non-members

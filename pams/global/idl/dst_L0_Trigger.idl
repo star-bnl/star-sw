@@ -9,7 +9,5 @@
   long            MWC_CTB_moment;     /* MWC/CTB moment analysis    */
   unsigned long   TriggerActionWd;    /* Trigger Action Word        */
   unsigned long   TriggerWd;          /* Trigger Word               */
-  unsigned short  DSMInput;           /* Oct 2 2000                 */
-  octet           DetectorBusy;       /* Oct 2 2000                 */
  };
-/*  Last mod. for dst_L0_Trigger:   $Date: 2000/10/02 19:41:56 $ */
+/*  Last mod. for dst_L0_Trigger:   $Date: 2000/01/05 20:19:25 $ */

@@ -18,10 +18,6 @@
 
 SYSTYPE := $(shell uname -s)
 
-ifndef OPTSTAR
-OPTSTAR := /opt/star
-endif
-
 # --> assume egcs
 CC       := /usr/local/bin/gcc
 CXX      := /usr/local/bin/g++
@@ -100,9 +96,9 @@ SO  := $(CXX)
 ###############################################################
 
 LIBS += $(EXTRA_LIBS)
-LOCAL_INCS = -I. -I$(OPTSTAR)/include
-SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -lmysqlclient $(LIBS)
-STATIC_LIBS = $(OPTSTAR)/lib/libmysqlclient.a $(LIBS)
+LOCAL_INCS = -I. -I/opt/star/include
+SHARED_LIBS = -L/opt/star/lib/ -L/opt/star/lib/mysql -lmysqlclient $(LIBS)
+STATIC_LIBS = /opt/star/lib/libmysqlclient.a $(LIBS)
 
 ########################################
 #

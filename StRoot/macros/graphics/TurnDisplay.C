@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.8 2000/08/31 21:28:01 fine Exp $
+// $Id: TurnDisplay.C,v 1.7 2000/04/18 21:43:14 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
@@ -55,9 +55,8 @@ void TurnDisplay(const Char_t *filterName=0) {
        // They should be sorted by the foreign key provided in brackets to be effecient
        // No filter channel used. No default action 
 
-       dsMaker->AddName("dst/dst_dedx(id_track)");   //Add the "reference" tables to the Event Display list
-       // dsMaker->AddName("g2t_track(ge_pid)");   //Add the "reference" tables to the Event Display list
-       // dsMaker->AddName("g2t_vertex(id)");      //Add the "reference" tables to the Event Display list
+       dsMaker->AddName("g2t_track(ge_pid)");   //Add the "reference" tables to the Event Display list
+       dsMaker->AddName("g2t_vertex(id)");      //Add the "reference" tables to the Event Display list
 
        // "Regular" tables:
        //      contain 3 columns associated with x,y,z and 
@@ -66,7 +65,7 @@ void TurnDisplay(const Char_t *filterName=0) {
        // dsMaker->AddName("g2t_tpc_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        // dsMaker->AddName("g2t_svt_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        dsMaker->AddName("tphit(id_globtrk,x:y:z)");               //Add the tables to the Event Display list
-       // dsMaker->AddName("scs_spt(id_globtrk,x[0]:x[1]:x[2])");    //Add the tables to the Event Display list
+       dsMaker->AddName("scs_spt(id_globtrk,x[0]:x[1]:x[2])");    //Add the tables to the Event Display list
 
        // extra table to check packed options
        // http://www.star.bnl.gov/STAR/html/comp_l/root/html/egr_globtrk_st.html
@@ -77,10 +76,10 @@ void TurnDisplay(const Char_t *filterName=0) {
        //      contain 1 columns with 2 long numbers associated with packed x,y,z and 
        //      foreing key to link all points together
        //      http://www.star.bnl.gov/STAR/html/comp_l/root/html/dst_point_st.html
-       dsMaker->AddName("dst/point(id_track,position[0]:position[1]:charge)");       //Add the tables to the Event Display list
+       // dsMaker->AddName("dst/point(id_track,position[0]:position[1]:charge)");       //Add the tables to the Event Display list
 
        // "Irregular" tables: has no column associated directly with (x,y,z) coordinates
-       dsMaker->AddName("dst/primtrk");
+
        dsMaker->AddName("tptrack");                // the table has no column with (x,y,z) coordinates,
                                                    // a special method has to be invoked to draw this table 
      //___________________________________________________________________
@@ -94,9 +93,6 @@ void TurnDisplay(const Char_t *filterName=0) {
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
-// Revision 1.8  2000/08/31 21:28:01  fine
-// new default to draw dst objects
-//
 // Revision 1.7  2000/04/18 21:43:14  fine
 // make TurnDisplay macro available for doEvents
 //

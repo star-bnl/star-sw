@@ -11,9 +11,6 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
- * Revision 1.8  2000/10/09 21:54:23  laue
- * Helens changes to the V0s
- *
  * Revision 1.7  2000/08/09 14:50:22  laue
  * 'const' removed to compile on solaris
  *
@@ -116,10 +113,8 @@ public:
   float ptotV0() const ;              // Total momentum
   float ptPos() const ;               // Transverse momentum of pos. daughter
   float ptotPos() const ;             // Total momentum of pos. daughter
-  float dedxPos() const;              // dedx of Positive track
   float ptNeg() const ;               // Transverse momentum of neg. daughter
   float ptotNeg() const ;             // Total momentum of neg. daughter
-  float dedxNeg() const;              // dedx of Negative track
   unsigned short   idNeg() const;               // Id of negative track
   unsigned short   idPos() const;               // Id of positive track
   unsigned short   keyNeg() const;               // Id of negative track
@@ -177,8 +172,6 @@ public:
   void SetptotNeg( float);
   void SetidNeg(const unsigned short&);
   void SetidPos(const unsigned short&);
-  void SetdedxNeg(float);
-  void SetdedxPos(float);
   void SetkeyNeg(const unsigned short&);
   void SetkeyPos(const unsigned short&);
      
@@ -227,8 +220,6 @@ protected:
   float mptotPos;
   float mptNeg;
   float mptotNeg;
-  float mdedxNeg;
-  float mdedxPos;
   unsigned short   midNeg;
   unsigned short   midPos;
 
@@ -282,9 +273,6 @@ inline int   StHbtV0::tpcHitsPos() const
              { return mtpcHitsPos; }
 inline int   StHbtV0::tpcHitsNeg() const
              { return mtpcHitsNeg; }
-inline float StHbtV0::dedxNeg() const {return mdedxNeg;}
-inline float StHbtV0::dedxPos() const {return mdedxPos;}
-
 
 inline unsigned long   StHbtV0::trackTopologyMapPos(unsigned int word) const { return mTrackTopologyMapPos[word]; }
 inline unsigned long   StHbtV0::trackTopologyMapNeg(unsigned int word) const { return mTrackTopologyMapNeg[word]; }
@@ -344,8 +332,6 @@ inline void StHbtV0::SetkeyNeg(const unsigned short& s){ midNeg= s;}
 inline void StHbtV0::SetkeyPos(const unsigned short& s){ midPos= s;}
 inline void StHbtV0::SettpcHitsPos(const int& i){mtpcHitsPos=i;} 
 inline void StHbtV0::SettpcHitsNeg(const int& i){mtpcHitsNeg=i;}
-inline void StHbtV0::SetdedxNeg(float x){mdedxNeg=x;}
-inline void StHbtV0::SetdedxPos(float x){mdedxPos=x;}
 
 #endif
 

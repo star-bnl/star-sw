@@ -1,11 +1,6 @@
-// $Id: StFtpcFastSimu.cc,v 1.12 2000/09/18 14:26:48 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.11 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
-// Revision 1.12  2000/09/18 14:26:48  hummler
-// expand StFtpcParamReader to supply data for slow simulator as well
-// introduce StFtpcGeantReader to separate g2t tables from simulator code
-// implement StFtpcGeantReader in StFtpcFastSimu
-//
 // Revision 1.11  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -37,8 +32,6 @@
 //
 
 #include "StFtpcFastSimu.hh"
-#include "StFtpcParamReader.hh"
-#include "StFtpcGeantReader.hh"
 #include "math_constants.h"
 #include <iostream.h>
 #include <stdlib.h>
@@ -50,25 +43,28 @@
 
 static RanluxEngine engine;
 
-StFtpcFastSimu::StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
+StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
+			       int *g2t_ftp_hit_nok,
+			       G2T_TRACK_ST* g2t_track,
+			       int *g2t_track_nok,
+			       G2T_VERTEX_ST* g2t_vertex,
+			       FFS_GEPOINT_ST* ffs_gepoint,
 			       int *ffs_gepoint_nok,
 			       int ffs_gepoint_maxlen,
 			       FCL_FPPOINT_ST* fcl_fppoint,
 			       int *fcl_fppoint_nok,
 			       int fcl_fppoint_maxlen,
-			       StFtpcGeantReader *geantReader,
 			       StFtpcParamReader *paramReader)
 {
   //-----------------------------------------------------------------------
   
-  // store Readers in data members
+  // store paramReader in data member
   mParam=paramReader;
-  mGeant=geantReader;
 
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
 
-  if(mGeant->numberOfHits() > fcl_fppoint_maxlen ||
-     mGeant->numberOfHits() > ffs_gepoint_maxlen)
+  if(*g2t_ftp_hit_nok > fcl_fppoint_maxlen ||
+     *g2t_ftp_hit_nok > ffs_gepoint_maxlen)
     {
       cerr << "point tables are too small to take all geant hits!!!" << endl;
     }
@@ -78,7 +74,8 @@ StFtpcFastSimu::StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
       ffs_ini();
       
       // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
-      ffs_hit_rd(ffs_gepoint_nok, ffs_gepoint_maxlen,
+      ffs_hit_rd(g2t_ftp_hit_nok, g2t_ftp_hit, g2t_track_nok,
+		 g2t_track, g2t_vertex, ffs_gepoint_nok, ffs_gepoint_maxlen,
 		 ffs_gepoint, fcl_fppoint_nok, fcl_fppoint_maxlen,
 		 fcl_fppoint);
       
@@ -88,7 +85,7 @@ StFtpcFastSimu::StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
       
       //       generate pad response and spatial resolutions
       // mk  in the routine FFS_GEN_PADRES the routine FFS_HIT_SMEAR is called
-      ffs_gen_padres(ffs_gepoint_nok,
+      ffs_gen_padres(g2t_ftp_hit_nok, g2t_ftp_hit, ffs_gepoint_nok,
 		     ffs_gepoint_maxlen, ffs_gepoint, fcl_fppoint_nok, 
 		     fcl_fppoint_maxlen, fcl_fppoint);
 
@@ -104,7 +101,9 @@ StFtpcFastSimu::~StFtpcFastSimu()
   cout << "StFtpcFastSimu destructed" << endl;
 }
 
-int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
+int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok, 
+				   G2T_FTP_HIT_ST *g2t_ftp_hit, 
+				   int *ffs_gepoint_nok,
 				   int ffs_gepoint_maxlen,
 				   FFS_GEPOINT_ST *ffs_gepoint,
 				   int *fcl_fppoint_nok,
@@ -194,12 +193,12 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
 	else
 	  {
 	    // twist-angle:
-	    r  = sqrt ( sqr(mGeant->x(k)) + 
-			sqr(mGeant->y(k)));
-	    pt = sqrt ( sqr(mGeant->pLocalX(k)) + 
-			sqr(mGeant->pLocalY(k)));
-	    twist_cosine=(mGeant->pLocalX(k)*mGeant->x(k)+
-			  mGeant->pLocalY(k)*mGeant->y(k))/(r*pt);
+	    r  = sqrt ( sqr(g2t_ftp_hit[k].x[0]) + 
+			sqr(g2t_ftp_hit[k].x[1]));
+	    pt = sqrt ( sqr(g2t_ftp_hit[k].p[0]) + 
+			sqr(g2t_ftp_hit[k].p[1]));
+	    twist_cosine=(g2t_ftp_hit[k].p[0]*g2t_ftp_hit[k].x[0]+
+			  g2t_ftp_hit[k].p[1]*g2t_ftp_hit[k].x[1])/(r*pt);
 	    if ( twist_cosine > 1.0 ) 
 	      twist_cosine = 1.0;
 	    if ( twist_cosine < -1.0 ) 
@@ -209,15 +208,15 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
 	    // dip-angle:
             theta = C_DEG_PER_RAD*
 	      atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
-		    (double) ((mGeant->z(k)
-			       /fabs(mGeant->z(k)))*
-			      mGeant->pLocalZ(k)));
+		    (double) ((g2t_ftp_hit[k].x[2]
+			       /fabs(g2t_ftp_hit[k].x[2]))*
+			      g2t_ftp_hit[k].p[2]));
 	    
 	    // crossing-angle: 
             cross_ang = C_DEG_PER_RAD*
 	      atan2((double) (pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
-		    (double) ((mGeant->z(k)/fabs(mGeant->z(k)))*
-			      mGeant->pLocalZ(k)));
+		    (double) ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
+			      g2t_ftp_hit[k].p[2]));
 	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
             if(alpha>(C_PI_2))
 	      alpha=C_PI-alpha;
@@ -274,7 +273,12 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
+int StFtpcFastSimu::ffs_hit_rd(int *g2t_ftp_hit_nok,
+			       G2T_FTP_HIT_ST *g2t_ftp_hit,
+                               int *g2t_track_nok, 
+			       G2T_TRACK_ST *g2t_track,
+                               G2T_VERTEX_ST *g2t_vertex,
+                               int *ffs_gepoint_nok,
 			       int ffs_gepoint_maxlen,
 			       FFS_GEPOINT_ST *ffs_gepoint,
                                int *fcl_fppoint_nok,
@@ -288,7 +292,7 @@ int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
 
     //     set ih_max 
       
-    ih_max = mGeant->numberOfHits();
+    ih_max = *g2t_ftp_hit_nok;
 
     //     loop over MC hits and extract sector-row information
     
@@ -296,41 +300,53 @@ int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
       {
 	// specification variables:
 	// changed to new structures (gepoint) 01/29/98 hh
-	ffs_gepoint[ih].ge_pid = mGeant->trackPid(ih);
-	ffs_gepoint[ih].ge_track_p = mGeant->track(ih)+1;
-	ffs_gepoint[ih].prim_tag = mGeant->trackType(ih);
-	if(mGeant->trackCharge(ih) < 0.0)
+	ffs_gepoint[ih].ge_pid =
+	  g2t_track[g2t_ftp_hit[ih].track_p-1].ge_pid;    
+	ffs_gepoint[ih].ge_track_p = g2t_ftp_hit[ih].track_p;
+	ffs_gepoint[ih].prim_tag = g2t_ftp_hit[ih].track_type;
+	if(g2t_track[g2t_ftp_hit[ih].track_p-1].charge < 0.0)
 	  {
 	    ffs_gepoint[ih].prim_tag *= -1;
 	  }
-	fcl_fppoint[ih].row = mGeant->geantVolume(ih) - 100;
+	fcl_fppoint[ih].row = g2t_ftp_hit[ih].volume_id - 100;
 	if (fcl_fppoint[ih].row > 10)
 	  {
 	    fcl_fppoint[ih].row -= 90;
 	  }
 
 	// Vertex-Momenta
-	ffs_gepoint[ih].p_v[0] = mGeant->pVertexX(ih);
-	ffs_gepoint[ih].p_v[1] = mGeant->pVertexY(ih);
-	ffs_gepoint[ih].p_v[2] = mGeant->pVertexZ(ih);
+	ffs_gepoint[ih].p_v[0] =
+	  g2t_track[g2t_ftp_hit[ih].track_p-1].p[0];
+	ffs_gepoint[ih].p_v[1] =
+	  g2t_track[g2t_ftp_hit[ih].track_p-1].p[1];
+	ffs_gepoint[ih].p_v[2] =
+	  g2t_track[g2t_ftp_hit[ih].track_p-1].p[2];
 	
 	// Vertex position
-	ffs_gepoint[ih].vertex[0] = mGeant->vertexX(ih);
-	ffs_gepoint[ih].vertex[1] = mGeant->vertexY(ih);
-	ffs_gepoint[ih].vertex[2] = mGeant->vertexZ(ih);
+	ffs_gepoint[ih].vertex[0] = 
+	  g2t_vertex[g2t_track[g2t_ftp_hit[ih].track_p-1].start_vertex_p-1]
+	  .ge_x[0];
+	ffs_gepoint[ih].vertex[1] = 
+	  g2t_vertex[g2t_track[g2t_ftp_hit[ih].track_p-1].start_vertex_p-1]
+	  .ge_x[1];
+	ffs_gepoint[ih].vertex[2] = 
+	  g2t_vertex[g2t_track[g2t_ftp_hit[ih].track_p-1].start_vertex_p-1]
+	  .ge_x[2];
 
 	// Secondary production process
 
-	ffs_gepoint[ih].ge_proc = mGeant->productionProcess(ih);
+	ffs_gepoint[ih].ge_proc = 
+	  g2t_vertex[g2t_track[g2t_ftp_hit[ih].track_p-1].start_vertex_p-1]
+	  .ge_proc;
 
 	//local momentum
-	ffs_gepoint[ih].p_g[0] = mGeant->pLocalX(ih);
-	ffs_gepoint[ih].p_g[1] = mGeant->pLocalY(ih);
-	ffs_gepoint[ih].p_g[2] = mGeant->pLocalZ(ih);
+	ffs_gepoint[ih].p_g[0] = g2t_ftp_hit[ih].p[0]; 
+	ffs_gepoint[ih].p_g[1] = g2t_ftp_hit[ih].p[1]; 
+	ffs_gepoint[ih].p_g[2] = g2t_ftp_hit[ih].p[2]; 
 
-	fcl_fppoint[ih].x = mGeant->x(ih);
-	fcl_fppoint[ih].y = mGeant->y(ih);
-	fcl_fppoint[ih].z = mGeant->z(ih);
+	fcl_fppoint[ih].x = g2t_ftp_hit[ih].x[0]; 
+	fcl_fppoint[ih].y = g2t_ftp_hit[ih].x[1]; 
+	fcl_fppoint[ih].z = g2t_ftp_hit[ih].x[2]; 
 	//sector number 
 	phi = atan2((double) fcl_fppoint[ih].y,
                     (double) fcl_fppoint[ih].x);
@@ -340,7 +356,7 @@ int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
 	fcl_fppoint[ih].sector = int ( dphi/phisec ) + 1;  
 	
 	//de/dx
-	fcl_fppoint[ih].max_adc = int( 8000000.0 * mGeant->energyLoss(ih) );
+	fcl_fppoint[ih].max_adc = int( 8000000.0 * g2t_ftp_hit[ih].de );
 	fcl_fppoint[ih].charge = fcl_fppoint[ih].max_adc * 6;
 	// for de/dx simulations, introduce de/dx smearing + adjust factors! hh
 	fcl_fppoint[ih].n_pads = 4;

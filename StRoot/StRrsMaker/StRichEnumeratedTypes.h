@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichEnumeratedTypes.h,v 2.1 2000/09/13 20:59:05 lasiuk Exp $
+ * $Id: StRichEnumeratedTypes.h,v 2.0 2000/08/09 16:17:00 gans Exp $
  *
  * Description:
  *   Enumerated type definitions
@@ -7,9 +7,6 @@
  ****************************************************************
  *
  * $Log: StRichEnumeratedTypes.h,v $
- * Revision 2.1  2000/09/13 20:59:05  lasiuk
- * add cluster/hit flags
- *
  * Revision 2.0  2000/08/09 16:17:00  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -33,7 +30,7 @@
 //
 // Bit operations for the cluster finder
 //
-enum StRichSinglePixelFlag {eUsed=1, eBorder=2, eGood=4, eIsolated=8, eLocalMaximum=16, eNotACentralMaximum=32, eMaxHasAVerticalNeighbor=64, eMaxHasAHorizontalNeighbor=128};
+enum StRichSinglePixelFlag {eUsed=1, eBorder=2, eGood=4, eIsolated=8, eLocalMaximum=16};
 
 //
 // MC flags for repsonsible particle

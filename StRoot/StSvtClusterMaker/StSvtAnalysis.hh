@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.5 2000/10/31 16:20:57 caines Exp $
+ * $Id: StSvtAnalysis.hh,v 1.4 2000/08/24 04:27:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
- * Revision 1.5  2000/10/31 16:20:57  caines
- * Added more functions to make the code more readable
- *
  * Revision 1.4  2000/08/24 04:27:56  caines
  * Fixed casting warnings so compiles without errors on linux
  *
@@ -41,13 +38,6 @@ public:
   void   SetPointers(StSvtHybridData* hybAdjData,StSvtHybridData* hybRawData,
                      StSvtHybridCluster* hybClu, int numOfHybrids,
 		     int PedOffset);
-  void setArrays(int TotalNumberOfHybrids);
-  void setMemory();
-  void setMoreMemory(int numOfClusters);
-  void calcMoments(int clu);
-  void oneOrTwoAnodeMoments(int clu, int peakPosTim);
-  void finalMoments(int clu , int numAnodes);
-  void newCluster(int clu, int numAnodes,int igt3);
   void   FirstAndLastAnodes();
   void   CluFirstTimeBin();
   void   CluLastTimeBin();
@@ -104,19 +94,11 @@ private:
 
   int m_hybIndex;                          //!
 
-  int mHitId;
-  int mNeff;
-  int mNumOfClusters, mNumOfMembers;
-  int mNumPixels, mPeakADC, mSumAdc;
-
-  double mDriftMom1, mAnodeMom1;
-  double mDriftMom2, mAnodeMom2, mMom0;
-  double mX_err, mY_err;  
-
   StSvtHybridData* mHybridData;            //!
   StSvtHybridData* mHybridRawData;         //!
   StSvtHybridCluster* mHybridCluster;      //!
   StSequence* mSvtSequence;                //!
+  int numOfClusters, numOfMembers;
   int* mCluFirstAnode;                     //!
   int* mCluLastAnode;                      //!
   int* mCluFirstTimeBin;                   //!

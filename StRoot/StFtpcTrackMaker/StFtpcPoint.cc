@@ -1,10 +1,5 @@
-// $Id: StFtpcPoint.cc,v 1.6 2000/11/10 18:37:46 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.5 2000/08/01 12:23:15 hummler Exp $
 // $Log: StFtpcPoint.cc,v $
-// Revision 1.6  2000/11/10 18:37:46  oldi
-// New constructor added.
-// StThreeVector replaced by TVector3 to be able to use ROOT output (e.g. Write()).
-// Cleanup.
-//
 // Revision 1.5  2000/08/01 12:23:15  hummler
 // add writing to table functionality
 //
@@ -31,7 +26,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 19.09.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcPoint.hh"
@@ -120,54 +115,6 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
 }
 
 
-StFtpcPoint::StFtpcPoint(Long_t   row, 
-			 Long_t   sector, 
-			 Long_t   n_pads, 
-			 Long_t   n_bins, 
-			 Long_t   max_adc, 
-			 Long_t   charge, 
-			 Double_t x, 
-			 Double_t y, 
-			 Double_t z, 
-			 Double_t x_err, 
-			 Double_t y_err, 
-			 Double_t z_err, 
-			 Double_t s_phi, 
-			 Double_t s_r, 
-			 Long_t   flags)
-{
-  // Constructor which fills all values found by the cluster finder directly.
-
-  SetUsage(false);
-  SetHitNumber(-1);
-  SetNextHitNumber(-1);
-  SetTrackNumber(-1);
-
-  SetPadRow(row);
-  SetSector(sector);
-
-  SetNumberPads(n_pads);
-  SetNumberBins(n_bins);
-
-  SetMaxADC(max_adc);
-  SetCharge(charge);
-
-  SetX(x);
-  SetY(y);
-  SetZ(z);
-
-  SetXerr(x_err);
-  SetYerr(y_err);
-  SetZerr(z_err);
-
-  SetSigmaPhi(s_phi);
-  SetSigmaR(s_r);
-  SetFlags(flags);
-
-  return;
-}  
-
-
 StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
 {
   // Constructor which takes the x, y, and z coodrinate and the pad row.
@@ -229,7 +176,6 @@ Int_t StFtpcPoint::ToTable(fcl_fppoint_st *point_st)
 
   return 1;
 }
-
 
 Int_t StFtpcPoint::Write()
 {

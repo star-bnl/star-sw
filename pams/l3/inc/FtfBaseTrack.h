@@ -17,7 +17,7 @@
 #include "Rtypes.h"
 #include "TObject.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 //
 //    Base Track class
@@ -88,7 +88,7 @@ public:
     double    dtanl ;
 
     void     *para  ;    // Parameters pointer     
-//  ClassDef(FtfBaseTrack,1)
+    ClassDef(FtfBaseTrack,1)
 
    } ;
 #endif

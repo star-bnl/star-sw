@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.2 2000/09/28 02:06:10 perev Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.1 1999/02/27 21:04:53 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,9 +23,6 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
- * Revision 1.2  2000/09/28 02:06:10  perev
- * non automatic streamer added
- *
  * Revision 1.1  1999/02/27 21:04:53  fisyak
  * Account change for StarClassLibrary
  *
@@ -42,7 +39,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class StThreeVectorF-;
+#pragma link C++ class StThreeVectorF;
 #pragma link C++ function operator<<(ostream&, const StThreeVectorF&);                  
 #pragma link C++ function operator>>(istream&, StThreeVectorF&);                        
 #pragma link C++ function abs(const StThreeVectorF&);                                      
@@ -58,7 +55,7 @@
 #pragma link C++ function operator* (double, const StThreeVectorF&);                     
 #pragma link C++ function operator/ (const StThreeVectorF&, double);                     
 
-#pragma link C++ class StThreeVectorD-;
+#pragma link C++ class StThreeVectorD;
 #pragma link C++ function operator<<(ostream&, const StThreeVectorD&);                     
 #pragma link C++ function operator>>(istream&, StThreeVectorD&);                           
 #pragma link C++ function abs(const StThreeVectorD&);                                         
@@ -74,7 +71,7 @@
 #pragma link C++ function operator* (double, const StThreeVectorD&);                        
 #pragma link C++ function operator/ (const StThreeVectorD&, double);                        
 
-#pragma link C++ class StLorentzVectorF-;
+#pragma link C++ class StLorentzVectorF;
 #pragma link C++ function operator<< (ostream&, const StLorentzVectorF&);                 
 #pragma link C++ function operator+ (const StLorentzVectorF&, const StLorentzVectorF&);        
 #pragma link C++ function operator- (const StLorentzVectorF&, const StLorentzVectorF&);        
@@ -84,7 +81,7 @@
 #pragma link C++ function operator/ (const StLorentzVectorF&, double);                         
 #pragma link C++ function abs(const StLorentzVectorF&);
 
-#pragma link C++ class StLorentzVectorD-;
+#pragma link C++ class StLorentzVectorD;
 #pragma link C++ function operator+ (const StLorentzVectorD&, const StLorentzVectorF&);  
 #pragma link C++ function operator+ (const StLorentzVectorF&, const StLorentzVectorD&);        
 #pragma link C++ function operator+ (const StLorentzVectorD&, const StLorentzVectorD&);        

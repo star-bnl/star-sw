@@ -415,11 +415,10 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   globtrk(iglob).n_max_point = tptrack(itrk).npos
                   globtrk(iglob).n_fit_point = tptrack(itrk).nfit          
                   globtrk(iglob).icharge = tptrack(itrk).q
-C     We don't want to change iflag if we are just copying (LSB)
-C                  if( abs(globtrk(iglob).icharge) .ne. 1) then
-C                     globtrk(iglob).iflag = 
-C     +                    -1.0*abs(globtrk(iglob).iflag+20)
-C                  endif
+                  if( abs(globtrk(iglob).icharge) .ne. 1) then
+                     globtrk(iglob).iflag = 
+     +                    -1.0*abs(globtrk(iglob).iflag+20)
+                  endif
                   globtrk(iglob).r0 = tptrack(itrk).r0
                   globtrk(iglob).phi0 = tptrack(itrk).phi0
                   globtrk(iglob).z0 = tptrack(itrk).z0

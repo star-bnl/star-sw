@@ -12,6 +12,7 @@
  
 long type_of_call sce_am_(
     TABLE_HEAD_ST  *svt_hit_h,     G2T_SVT_HIT_ST    *svt_hit ,
+    TABLE_HEAD_ST  *sls_spt_h,     SLS_SPT_ST        *sls_spt ,
     TABLE_HEAD_ST  *scf_cluster_h, SCF_CLUSTER_ST    *scf_cluster ,
     TABLE_HEAD_ST  *scm_spt_h,     SCM_SPT_ST        *scm_spt  ,
     TABLE_HEAD_ST  *geom_h,        SVG_GEOM_ST       *geom ,
@@ -29,8 +30,12 @@ long type_of_call sce_am_(
   int nSsdHits = mySsd->readPointFromTable(svt_hit_h, svt_hit);
   cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
   mySsd->convertGlobalFrameToOther();
+  int inactiveHit = mySsd->removeInactiveHitInTable(svt_hit_h, svt_hit);
+  cout<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endl;
   int nReadCluster = mySsd->readClusterFromTable(scf_cluster_h, scf_cluster);
   cout<<"####   -> "<<nReadCluster<<" CLUSTERS READ FROM TABLE      ####"<<endl;
+  int nSsdSimSpt = mySsd->readSimPointFromTable(sls_spt_h, sls_spt);
+  cout<<"####   -> "<<nSsdSimSpt<<" SIMULATED POINTS READ         ####"<<endl;
   int nEvaluatedCluster = mySsd->doEvalCluster(ctrl);
   cout<<"####   -> "<<nEvaluatedCluster<<" CLUSTERS EVALUATED            ####"<<endl;
   int nSsdRecSpt = mySsd->readRecPointFromTable(scm_spt_h, scm_spt);

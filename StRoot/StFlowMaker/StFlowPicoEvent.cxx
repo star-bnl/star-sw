@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.6 2000/09/15 22:51:31 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.4 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -23,12 +23,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
-// Revision 1.6  2000/09/15 22:51:31  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.5  2000/09/05 16:11:34  snelling
-// Added global DCA, electron and positron
-//
 // Revision 1.4  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -48,8 +42,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StFlowPicoEvent.h"
+#define PR(x) cout << "##### FlowPicoEvent: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowPicoEvent)
+ClassImp(StFlowPicoTrack)
 
 TClonesArray *StFlowPicoEvent::fgTracks = 0;
 
@@ -64,7 +60,6 @@ StFlowPicoEvent::StFlowPicoEvent()
   if (!fgTracks) fgTracks = new TClonesArray("StFlowPicoTrack", 4000);
   fTracks = fgTracks;
   mNtrack = 0;
-  mVersion = 0;
 }
 
 //-----------------------------------------------------------------------
@@ -77,12 +72,57 @@ void StFlowPicoEvent::Clear(Option_t *option)
 
 //---------------------------------------------------------------------
 
-void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
- 
-  TClonesArray &tracks = *fTracks;
-  new(tracks[mNtrack++]) StFlowPicoTrack(inputTrack);
+StFlowPicoTrack::StFlowPicoTrack(Float_t pt, 
+                                 Float_t eta, 
+				 Float_t Dedx, 
+                                 Float_t phi,
+                                 Short_t charge,
+                                 Float_t dca,
+                                 Float_t chi2,
+                                 Int_t   fitPts,
+                                 Int_t   maxPts,
+                                 Float_t pidPiPlus, 
+                                 Float_t pidPiMinus,
+				 Float_t pidProton,
+				 Float_t pidKaonPlus,
+				 Float_t pidKaonMinus,
+				 Float_t pidAntiProton,
+				 Float_t pidDeuteron
+                                 ) : TObject()
+{
+  float maxShort  = 32.;
+  float maxUShort = 6.4;
+  
+  if (dca > maxUShort)       dca         = maxUShort;
+  if (chi2 > maxUShort)      chi2        = maxUShort;
+  if (pidPiPlus > maxShort)  pidPiPlus   = maxShort;
+  if (pidPiMinus > maxShort) pidPiMinus  = maxShort;
+  if (pidProton > maxShort)  pidProton   = maxShort;
+  if (pidAntiProton > maxShort)  pidAntiProton   = maxShort;
+  if (pidKaonPlus > maxShort)  pidKaonPlus   = maxShort;
+  if (pidKaonMinus > maxShort)  pidKaonMinus   = maxShort;
+  if (pidDeuteron > maxShort)  pidDeuteron   = maxShort;
+  
+  mPt         = pt;
+  mPhi        = phi;
+  mEta        = eta;
+  mDedx       = Dedx;
+  mCharge     = (Char_t)charge;
+  mDca        = (UShort_t)(dca*10000.);
+  mChi2       = (UShort_t)(chi2*10000.);
+  mFitPts     = (UChar_t)fitPts;
+  mMaxPts     = (UChar_t)maxPts;
+  mPidPiPlus  = (Short_t)(pidPiPlus*1000.);
+  mPidPiMinus = (Short_t)(pidPiMinus*1000.);
+  mPidProton  = (Short_t)(pidProton*1000.);
+  mPidAntiProton  = (Short_t)(pidAntiProton*1000.);
+  mPidKaonPlus  = (Short_t)(pidKaonPlus*1000.);
+  mPidKaonMinus  = (Short_t)(pidKaonMinus*1000.);
+  mPidDeuteron  = (Short_t)(pidDeuteron*1000.);
 }
- 
+
+
+
 
 
 

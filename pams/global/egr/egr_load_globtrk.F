@@ -73,7 +73,7 @@ C Adjust for ssd later
          globtrk(iglob).n_fit_point =   globtrk(iglob).n_fit_point-1
          globtrk(iglob).n_point     =  globtrk(iglob).n_point - 1000
       endif
-      globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(2)*bfield)
+      globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(2))
 
       x0= abs(gtrk(igtrk).p(2))*cos(gtrk(igtrk).p(5))+
      +     gtrk(igtrk).p(3)
@@ -87,7 +87,7 @@ C Adjust for ssd later
       endif
       
       globtrk(iglob).z0 = gtrk(igtrk).p(6)
-      sgn = sign(1.0,gtrk(igtrk).p(2))
+      sgn = sign(1.0,gtrk(igtrk).p(2)*bfield)
       globtrk(iglob).psi = gtrk(igtrk).p(5)-sgn*C_PI_2
       globtrk(iglob).psi = globtrk(iglob).psi*C_DEG_PER_RAD  ! to degrees
       globtrk(iglob).psi = AMOD(globtrk(iglob).psi, 360.0)

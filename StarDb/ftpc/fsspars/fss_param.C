@@ -10,12 +10,7 @@ St_fss_param *tableSet = new St_fss_param("fss_param",1);
 //
 memset(&row,0,tableSet->GetRowSize());
     row.random_number_gen	 =          0; // ;
-    row.adc_threshold	 =          5; // D=      5   minimum ADC value    ;
-    row.n_grid_points    =       4000; // D=   4000   drift simu grid points    ;
-    row.max_adc          =        255; // D=    255   maximum ADC value    ;
-    row.n_int_steps      =         21; // D=     21   gauss integration steps    ;
-    row.diff_coarse      =         10; // D=     10   diffusion coarseness    ;
-    row.adc_conversion   =     1000.0; // D=   1000.0 electrons/adc value    ;
+    row.adc_threshold	 =          5; // D=      5   minimum ADC value ;
     row.chamber_r_min	 =       7.73; // D=      8.0  inner radius [cm]    ;
     row.chamber_r_max	 =      30.05; // D=     32.0  outer radius [cm]    ;
     row.chamber_phi_min	 =         90; // D=      0.0  min. phi [deg]    ;

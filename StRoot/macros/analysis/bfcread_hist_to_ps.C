@@ -1,8 +1,5 @@
-// $Id: bfcread_hist_to_ps.C,v 1.26 2000/09/05 19:52:20 lansdell Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.25 2000/06/21 21:15:22 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
-// Revision 1.26  2000/09/05 19:52:20  lansdell
-// fixed a minor syntax error
-//
 // Revision 1.25  2000/06/21 21:15:22  kathy
 // now allow the zone settings for horizontal & vertical axes to be set during input to macro
 //
@@ -134,7 +131,7 @@ void bfcread_hist_to_ps(
   const Char_t *PageTitle="",
   const Char_t *PrintList="",
   const Int_t ZoneH=2,
-  const Int_t ZoneV=3
+  const Int_t ZoneV=3)
 )
 {             
 

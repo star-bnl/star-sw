@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.3 2000/10/13 17:51:35 jgreid Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.1.1.1 2000/08/01 13:57:55 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,12 +19,6 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
- * Revision 1.3  2000/10/13 17:51:35  jgreid
- * modified centrality calc to use all uncorrected primaries
- *
- * Revision 1.2  2000/09/01 22:59:11  jgreid
- * version 1 revision ; multiple file handling + additional data members added
- *
  * Revision 1.1.1.1  2000/08/01 13:57:55  jgreid
  * EbyE DST creation and access tools
  *
@@ -43,8 +37,7 @@
 #include "StKaonMinus.hh"
 #include "StProton.hh"
 #include "StElectron.hh"
-#include "StDeuteron.hh"
-#include "StuRefMult.hh"
+//#include "StuProbabilityPidAlgorithm.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StMessMgr.h"
 
@@ -55,25 +48,13 @@ using namespace units;
 ClassImp(StEbyeDSTMaker)
 
 StEbyeDSTMaker::StEbyeDSTMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
+  SetFilename("EbyeDST.root");
 }
 
 StEbyeDSTMaker::~StEbyeDSTMaker() {
 }
 
 Int_t StEbyeDSTMaker::Make() {
-
-  TString newInputFilename;
-
-  // Get the input file name from the ioMaker
-  //  this way we can open an EbyE dst file for every StEvent dst file
-  if (mIOMaker) {
-    newInputFilename = strrchr(mIOMaker->GetFile(),'/')+1;
-    if (mCurrentInputFilename != newInputFilename) { 
-      CloseCurrentFile();
-      mCurrentInputFilename = newInputFilename;
-      OpenCurrentFile();
-    }
-  }
 
   // Get the current event from StEvent
 #if 0
@@ -92,23 +73,21 @@ Int_t StEbyeDSTMaker::Make() {
 
   StVertex *primeVertex;
   StTrack *currentTrack;
-  StTrack *currentGlobal;
 
   StThreeVectorD origin(0,0,0);
   StThreeVectorD primaryVertexPosition;
 
-  Int_t j;
+  Int_t i,j;
   UInt_t k,l;
   Int_t npvtx; // # of primary vertices in this event
   Int_t initialN;
 
-  Double_t s,sg;
+  Double_t s;
 
   Int_t currentCharge;
-  Float_t spi,ska,se,sp,sd;
+  Float_t spi,ska,se,sp;
 
   StThreeVectorD p,dca;
-  StThreeVectorD pg,dcag;
 
   StPtrVecTrackPidTraits traits;
   StDedxPidTraits* pid;
@@ -142,9 +121,7 @@ Int_t StEbyeDSTMaker::Make() {
 
     // set the event parameters for the EbyeDST
     mEbyeEvent->SetOrigMult(initialN);
-    mEbyeEvent->SetCentMult(uncorrectedNumberOfPrimaries(event));    
-
-    mEbyeEvent->SetCentrality(uncorrectedNumberOfPrimaries(event));
+    mEbyeEvent->SetCentrality(initialN);  // use multiplicity as centrality measure
 
     mEbyeEvent->SetEventID((Int_t) event.id());
     mEbyeEvent->SetRunID((Int_t) event.runId());
@@ -170,8 +147,6 @@ Int_t StEbyeDSTMaker::Make() {
       currentTrack = theNodes[k]->track(primary);
       if (currentTrack) {
 
-        currentGlobal = theNodes[k]->track(global);
-
         // calculate eta & phi
         ebyeTrack->SetEta(currentTrack->geometry()->momentum().pseudoRapidity());
         ebyeTrack->SetPhi(currentTrack->geometry()->momentum().phi());
@@ -191,25 +166,13 @@ Int_t StEbyeDSTMaker::Make() {
         ebyeTrack->SetBy(dca.y()/centimeter);
         ebyeTrack->SetBz(dca.z()/centimeter);
 
-        // calculate distance of closest approach to the primary vertex position
-        sg = currentGlobal->geometry()->helix().pathLength(primaryVertexPosition);
-        pg = currentGlobal->geometry()->helix().at(sg);
-        dcag = pg-primaryVertexPosition;
-
-        // get impact parameter information
-        ebyeTrack->SetBxGlobal(dcag.x()/centimeter);
-        ebyeTrack->SetByGlobal(dcag.y()/centimeter);
-        ebyeTrack->SetBzGlobal(dcag.z()/centimeter);
-
         // dE/dx
         traits = currentTrack->pidTraits(kTpcId);
         for (l = 0; l < traits.size(); l++) {
           pid = dynamic_cast<StDedxPidTraits*>(traits[l]);
           if (pid && pid->method()==kTruncatedMeanId) break;
         }
-
-        // need to save Dedx in units of 10^-6
-        ebyeTrack->SetDedx(pid->mean()*1000000);
+        ebyeTrack->SetDedx(pid->mean());
 
         // put PID info into the mEbyeEvent
         currentTrack->pidTraits(tpcDedxAlgo);       // initialize
@@ -224,13 +187,17 @@ Int_t StEbyeDSTMaker::Make() {
 	}
         se = (Float_t) tpcDedxAlgo.numberOfSigma(StElectron::instance());
         sp = (Float_t) tpcDedxAlgo.numberOfSigma(StProton::instance());
-        sd = (Float_t) tpcDedxAlgo.numberOfSigma(StDeuteron::instance());
-     
+
         ebyeTrack->SetPIDe(se);
         ebyeTrack->SetPIDp(sp);
         ebyeTrack->SetPIDpi(spi);
         ebyeTrack->SetPIDk(ska);
-        ebyeTrack->SetPIDd(sd);
+
+        // !!!!!!!! update PID when appropriate !!!!!!!!!!
+        // invoke the PID functor
+        // StParticleDefinition* def=theTrack->pidTraits(myPID);
+        // get an electron at 90% confidence
+        // if( def->name()=="e-" && myPID.getProbability(0) > 0.9 )
 
         // put chi2 info into mEbyeEvent
         ebyeTrack->SetChi2(currentTrack->fitTraits().chi2());
@@ -264,25 +231,21 @@ Int_t StEbyeDSTMaker::Make() {
 
   return kStOk;
 
-
 }
 
-Int_t StEbyeDSTMaker::OpenCurrentFile() {
+Int_t StEbyeDSTMaker::Init() {
  
   Int_t split  = 1;       // by default split Event into sub branches
   Int_t comp   = 1;       // by default file is compressed
   Int_t bufsize = 256000;
   if (split) bufsize /= 4;
-
-  TString* filestring = new TString(mCurrentInputFilename);
-  Int_t length = filestring->Length();
-
-  filestring->Remove((length-8),8);
-  filestring->Append("ebe.root");
  
-  mEbyeDST = new TFile(filestring->Data(),"RECREATE","Ebye DST");
+  // create the EbyeEvent and an output file
+  mEbyeEvent = new StEbyeEvent();
+
+  mEbyeDST = new TFile(mDSTFilename,"RECREATE","Ebye DST");
   if (!mEbyeDST) {
-    cout << "##### EbyeDSTMaker: Warning: no EbyeDST file = " << filestring->Data() << endl;
+    cout << "##### EbyeDSTMaker: Warning: no EbyeDST file = " << mDSTFilename << endl;
     return kStFatal;
   }
 
@@ -291,7 +254,7 @@ Int_t StEbyeDSTMaker::OpenCurrentFile() {
   mEbyeDST->SetFormat(1);
  
   mEbyeDST->SetCompressionLevel(comp);
-  gMessMgr->Info() << "##### EbyeDSTMaker: EbyeDST file = " << filestring->Data() << endm;
+  gMessMgr->Info() << "##### EbyeDSTMaker: EbyeDST file = " << mDSTFilename << endm;
  
   // Create a ROOT Tree and one superbranch
   mEbyeTree = new TTree("EbyeTree", "Ebye DST Tree");
@@ -304,30 +267,8 @@ Int_t StEbyeDSTMaker::OpenCurrentFile() {
   mEbyeTree->Branch("EbyeDSTBranch", "StEbyeEvent", &mEbyeEvent,
                     bufsize, split);
 
-  return kStOK;
-}
-
-Int_t StEbyeDSTMaker::CloseCurrentFile() {
-
-  mEbyeDST->Write();
-  mEbyeDST->Close();
-
-  return kStOK;
-}
-
-Int_t StEbyeDSTMaker::Init() {
-
-  // create the EbyeEvent and an output file
-  mEbyeEvent = new StEbyeEvent();
-
-  // get input file name
-  TString* makerName = new TString("IO");
-  mIOMaker = (StIOMaker*)GetMaker(makerName->Data());
-  delete makerName;
-
-  if (mIOMaker) mCurrentInputFilename = strrchr(mIOMaker->GetFile(),'/')+1;
-
-  OpenCurrentFile();
+  // read in the PID parameters file
+  //StuProbabilityPidAlgorithm::readParametersFromFile("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root");
 
   return kStOK;
 }
@@ -338,7 +279,9 @@ void StEbyeDSTMaker::Clear(Option_t *opt) {
 
 Int_t StEbyeDSTMaker::Finish() {
 
-  CloseCurrentFile();
+  mEbyeDST->Write();
+  mEbyeDST->Close();
 
   return kStOk;
+
 }

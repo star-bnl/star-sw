@@ -1,10 +1,5 @@
-// $Id: StFtpcPoint.hh,v 1.5 2000/11/10 18:37:46 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.4 2000/08/01 12:24:04 hummler Exp $
 // $Log: StFtpcPoint.hh,v $
-// Revision 1.5  2000/11/10 18:37:46  oldi
-// New constructor added.
-// StThreeVector replaced by TVector3 to be able to use ROOT output (e.g. Write()).
-// Cleanup.
-//
 // Revision 1.4  2000/08/01 12:24:04  hummler
 // add writing to table functionality (ToTable() function)
 //
@@ -38,7 +33,8 @@
 
 #include "TObject.h"
 #include "TClonesArray.h"
-#include "TVector3.h"
+
+#include "StThreeVector.hh"
 
 #include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
@@ -51,8 +47,8 @@ class StFtpcPoint : public TObject {
   
 private:
   
-  TVector3  mCoord;         // vector of cluster coordinates
-  TVector3  mError;         // vector of errors on cluster coordinates
+  StThreeVector<double> mCoord;  //! vector of cluster coordinates
+  StThreeVector<double> mError;  //! vector of errors on cluster coordinates
   
   Bool_t    mUsed;          // flag that indicates if the hit is assigned to a track 
   Int_t     mHitNumber;     // number of this cluster in this event
@@ -61,34 +57,19 @@ private:
   
   // additional input variables from cluster finder
   
-  Long_t    mPadRow;        // FTPC row number
-  Long_t    mSector;        // FTPC readout sector number
-  Long_t    mNumberPads;    // number of pads in cluster
-  Long_t    mNumberBins;    // number of consecutive timebins in cluster
-  Long_t    mMaxADC;        // cluster peak height (adc channels)
-  Long_t    mCharge;        // cluster charge (adc channels)
-  Long_t    mFlags;         // bit4: cut off, bit5: tracked
-  Double_t  mSigmaPhi;      // cluster sigma in pad direction
-  Double_t  mSigmaR;        // cluster sigma in drift direction
-
+  Long_t    mPadRow;      // FTPC row number
+  Long_t    mSector;      // FTPC readout sector number
+  Long_t    mNumberPads;  // number of pads in cluster
+  Long_t    mNumberBins;  // number of consecutive timebins in cluster
+  Long_t    mMaxADC;      // cluster peak height (adc channels)
+  Long_t    mCharge;      // cluster charge (adc channels)
+  Long_t    mFlags;       // bit4: cut off, bit5: tracked
+  Double_t  mSigmaPhi;    // cluster sigma in pad direction
+  Double_t  mSigmaR;      // cluster sigma in drift direction
+  
 public:
   
                  StFtpcPoint();                                 // default constructor
-                 StFtpcPoint(Long_t   row, 
-			     Long_t   sector, 
-			     Long_t   n_pads, 
-			     Long_t   n_bins, 
-			     Long_t   max_adc, 
-			     Long_t   charge, 
-			     Double_t x, 
-			     Double_t y, 
-			     Double_t z, 
-			     Double_t x_err, 
-			     Double_t y_err, 
-			     Double_t z_err, 
-			     Double_t s_phi, 
-			     Double_t s_r, 
-			     Long_t   flags);                   // constructor to be filled directly from the cluster finder
                  StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
                  StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
@@ -96,15 +77,15 @@ public:
   virtual Int_t  ToTable(fcl_fppoint_st *point_st);                                       // writes cluster to STAF table
   
   // getter
-  TVector3 GetCoord()  { return mCoord;    }
-  TVector3 GetError()  { return mError;    }
+  StThreeVector<double> GetCoord()  { return mCoord;    }
+  StThreeVector<double> GetError()  { return mError;    }
   
-  Double_t GetX()          const { return mCoord.X();   }
-  Double_t GetY()          const { return mCoord.Y();   }
-  Double_t GetZ()          const { return mCoord.Z();   }
-  Double_t GetXerr()       const { return mError.X();   }
-  Double_t GetYerr()       const { return mError.Y();   }
-  Double_t GetZerr()       const { return mError.Z();   }
+  Double_t GetX()          const { return mCoord.x();   }
+  Double_t GetY()          const { return mCoord.y();   } 
+  Double_t GetZ()          const { return mCoord.z();   }
+  Double_t GetXerr()       const { return mError.x();   }
+  Double_t GetYerr()       const { return mError.y();   }
+  Double_t GetZerr()       const { return mError.z();   }
   Double_t GetSigmaPhi()   const { return mSigmaPhi;    }
   Double_t GetSigmaR()     const { return mSigmaR;      }
   
@@ -125,12 +106,12 @@ public:
   Long_t   GetFlags()         const { return mFlags;         }
   
   // setter  
-  void    SetX(Double_t f)        {     mCoord.SetX(f); }
-  void    SetY(Double_t f)        {     mCoord.SetY(f); } 
-  void    SetZ(Double_t f)        {     mCoord.SetZ(f); }
-  void    SetXerr(Double_t f)     {     mError.SetX(f); }
-  void    SetYerr(Double_t f)     {     mError.SetY(f); }
-  void    SetZerr(Double_t f)     {     mError.SetZ(f); }
+  void    SetX(Double_t f)        {     mCoord.setX(f); }
+  void    SetY(Double_t f)        {     mCoord.setY(f); } 
+  void    SetZ(Double_t f)        {     mCoord.setZ(f); }
+  void    SetXerr(Double_t f)     {     mError.setX(f); }
+  void    SetYerr(Double_t f)     {     mError.setY(f); }
+  void    SetZerr(Double_t f)     {     mError.setZ(f); }
   
   void    SetUsage(Bool_t f)        {          mUsed =  f; SetTrackedFlag(f); }
   void    SetHitNumber(Int_t f)     {     mHitNumber =  f;  }

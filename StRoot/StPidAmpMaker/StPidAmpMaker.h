@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.7 2000/09/15 21:22:50 fisyak Exp $
+ * $Id: StPidAmpMaker.h,v 1.6 2000/07/22 22:11:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
- * Revision 1.7  2000/09/15 21:22:50  fisyak
- * HP does not have iostream
- *
  * Revision 1.6  2000/07/22 22:11:33  aihong
  * move some include files to StEventUtilities & change include path
  *
@@ -38,11 +35,7 @@
 #ifndef StPidAmpMaker_h
 #define StPidAmpMaker_h
 
-#ifdef __HP_aCC
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -90,7 +83,7 @@ public:
     void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt=" ");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.7 2000/09/15 21:22:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.6 2000/07/22 22:11:33 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 

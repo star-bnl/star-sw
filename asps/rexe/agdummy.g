@@ -46,7 +46,7 @@ Replace[LIST #;] with [ #1 _
              HBNT,HBNAME,HBNAMC,HFNT,HFNTB,HGNT,HGNTF,HGNTV,HBSET,
              HGNTB,HNBENT,HVXIST,HLPOS,HFC1,HSTAF,HKIND,
              HMINUT,HDIFFB,HRENAME,HNTDUP,HIJE,HMCINI,HMCMLL,
-             hlimap,hsetpr,hparam,
+             hlimap,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
  " math  "   sortrq,dgmlt1,dgmlt2,eisrs1,dsfeqn,mxuty,rseqn,
              dzddiv,rlsqp2,assndx,

@@ -22,28 +22,36 @@ my $debugOn=0;
 
 my $DISK1 = "/star/rcf/disk00001/star";
 
-my $prodSr = "P00hk";
+my @DISKR = (
+              "/star/rcf/data09/reco",
+              "/star/rcf/data10/reco",
+              "/star/rcf/data05/reco",
+              "/star/rcf/data08/reco",
+              "/star/rcf/data07/reco",
+); 
+
+my $prodSr = "P00hg";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-#             "P00hi/2000/06",
-#             "P00hi/2000/07",
-             "P00hk/2000/08", 
-             "P00hk/2000/09", 
+             "P00hg/2000/06",
+             "P00hg/2000/07",
+             "P00hg/2000/08", 
+             "P00hg/2000/09", 
 );
 
 my @SetS = (
-#             "daq/2000/06",
-#             "daq/2000/07",
+             "daq/2000/06",
+             "daq/2000/07",
              "daq/2000/08",
              "daq/2000/09", 
 );
 
 my @DirD = (
-#            "2000/06",
-#            "2000/07",
+            "2000/06",
+            "2000/07",
             "2000/08",
             "2000/09",
 );
@@ -61,7 +69,7 @@ struct JFileAttr => {
           NoEvSk => '$',
           jobSt  => '$',  
           FstEvt => '$',
-          LstEvt => '$',          
+          LstEvt => '$',
 		    };
  
  struct FileAttr => {
@@ -188,7 +196,7 @@ my $ndbOnFiles = 0;
  }
  
  print "\nFinding daq DST files in HPSS\n";
- my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>600)
+ my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
    or die "HPSS access failed";
  $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
@@ -200,6 +208,68 @@ my $ndbOnFiles = 0;
 my $maccess; 
 my $mdowner; 
 my $flname;
+my $nDiskFiles = 0;
+my $ndir = 0;
+
+#####  find daq reco files on disk
+
+ my @diskDstDirs;
+ $nDiskFiles = 0;
+ print "\nFinding daq reco files in disk\n";
+
+ for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
+ for( $ll = 0; $ll<scalar(@SetD); $ll++) {
+   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . $SetD[$ll];
+   print "diskDstDir: $diskDstDirs[$ndir]\n";
+   $ndir++;   
+ }
+}
+
+
+ foreach $diskDir (@diskDstDirs) {
+             if (-d $diskDir) {
+    opendir(DIR, $diskDir) or die "can't open $diskDir\n";
+   while( defined($flname = readdir(DIR)) ) {
+      next if $flname =~ /^\.\.?$/;
+
+         $maccess = "-rw-r--r--"; 
+         $mdowner = "starreco";
+
+      $fullname = $diskDir."/".$flname;
+   
+      my @dirF = split(/\//, $diskDir); 
+#      my $set = sprintf("%s\/%s\/%s\/%s",$dirF[3],$dirF[4],$dirF[5],$dirF[6]);
+#    print "Dst Set = ", $set, "\n";                                       
+     ($size, $mTime) = (stat($fullname))[7, 9];
+
+    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
+     $mo = sprintf("%2.2d", $mo+1);
+     $dy = sprintf("%2.2d", $dy);
+  
+     if( $yr > 98 ) {
+       $fullyear = 1900 + $yr;
+     } else {
+       $fullyear = 2000 + $yr;
+     }
+
+     $timeS = sprintf ("%4.4d%2.2d%2.2d",
+                       $fullyear,$mo,$dy);
+    
+     $fObjAdr = \(FileAttr->new());
+     ($$fObjAdr)->filename($flname);
+     ($$fObjAdr)->fpath($diskDir);
+     ($$fObjAdr)->dsize($size);
+     ($$fObjAdr)->timeS($timeS);
+     ($$fObjAdr)->faccess($maccess);
+     ($$fObjAdr)->fowner($mdowner);
+     $hpssDstFiles[$nDHpssFiles] = $fObjAdr;
+    $nDHpssFiles++;
+    $nDiskFiles++;
+  }
+ closedir DIR;
+ }
+}
+ print "Total daq reco files: $nDiskFiles\n";
 
 ##### connect to the DB
 
@@ -256,7 +326,7 @@ my $flname;
           $mEvType = ($$eachOnFile)->evType; 
   	 if (($mFile eq $dbFile) and ($mNevts > 0)) {
 
-    print "File, Nevent, FirstEv, LastEv: ", $mFile," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
+    print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
 
   &updateDAQTable();
 
@@ -269,7 +339,7 @@ my $flname;
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like '$prodSr%' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
 
 
    $cursor =$dbh->prepare($sql)
@@ -397,7 +467,6 @@ my $flname;
       ($$fObjAdr)->NoEvSk($mEvtSk); 
       ($$fObjAdr)->FstEvt($first_evts);
       ($$fObjAdr)->LstEvt($last_evts);               
-      ($$fObjAdr)->jobSt($mjobSt);
 
      $jobFSum_set[$jobFSum_no] = $fObjAdr;
      $jobFSum_no++; 
@@ -430,8 +499,7 @@ my $flname;
  my $msite = "n\/a";
  my $mhpss = "Y";
  my $mstatus = 0;
- my $mdtstat = "OK";
- my $mcomnt = " ";
+
 
 #####=======================================================
 ##### hpss reco daq file check
@@ -465,9 +533,7 @@ my $flname;
  $msite = "n\/a";
  $mhpss = "Y";
  $mstatus = 0;
- $mdtstat = "OK";
- $mcomnt = " ";   
-
+    
 ##### end of reinitialization
 
 my $dfile;
@@ -504,15 +570,14 @@ my $daqType = 0;
  }
   $mtype = "daq_reco";
 
-#  $daqType = 0; 
-  $mevtType = 3;
+  $daqType = 0; 
 
-#  foreach my $daqFile (@dbOnFiles){
-#        $daqName =  ($$daqFile)->dName;
-#        $daqType =  ($$daqFile)->evType;
-#        $daqName =~ s/.daq//g; 
-# 	if ($mfName =~ /$daqName/) {
-#           $mevtType = $daqType;
+  foreach my $daqFile (@dbOnFiles){
+        $daqName =  ($$daqFile)->dName;
+        $daqType =  ($$daqFile)->evType;
+        $daqName =~ s/.daq//g; 
+ 	if ($mfName =~ /$daqName/) {
+           $mevtType = $daqType;
 
  foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
@@ -521,22 +586,12 @@ my $daqType = 0;
        $mNevts = ($$jobnm)->NoEvt;
        $mNevtLo =($$jobnm)->FstEvt;
        $mNevtHi =($$jobnm)->LstEvt;
-       $mjobSt  =($$jobnm)->jobSt;
        $dfile = $msumFile;
        $dfile =~ s/.sum//g;
- 
-     chop $mjobSt;        
+        
     if ( $mfName =~ /$dfile/) {
-     if ( $mjobSt ne "Done") {
 
-       $mdtStat = "notOK";
-       $mcomnt = $mjobSt;
-} else{
-  $mdtStat = "OK";
-  $mcomnt = " ";
-}
-
- print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events :", $mNevts, "\n";     
+ print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
@@ -546,11 +601,11 @@ my $daqType = 0;
         next;
      }
    }   
-#    last;
-#  }else{
-#  next;
-#   } 
-#  }
+    last;
+  }else{
+  next;
+   } 
+  }
  }else{
   next;
  }
@@ -560,9 +615,9 @@ my $daqType = 0;
 
 my $myRun;
 
-# for ($ll = 0; $ll<scalar(@DirD); $ll++) {
+ for ($ll = 0; $ll<scalar(@DirD); $ll++) {
 
- $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$prodSr%' AND dataset = 'n/a' ";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$DirD[$ll]' AND dataset = 'n/a' ";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -581,7 +636,7 @@ my $myRun;
         $runSet[$nrunSet] = $myRun;
         $nrunSet++;
  }
-# }
+ }
 
  &StDbProdDisconnect(); 
 
@@ -664,17 +719,11 @@ foreach my $runDsc (@runDescr) {
        $engr = int($cWMnt + $cEMnt);
        if( !defined $magF) {$magF = 0};  
 
-       if ($magF < 2000) {
-       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
-     }
-       elsif ( $magF > 2240 && $magF < 2252 ) {
+#       if ($magF == 0) {
+#       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
+#     }else{
        $daqHash{$Numrun} = $ccn . $engr ."_" ."HalfField" . "_";
-    }
-       elsif ( $magF > 3000 ) {
-       $daqHash{$Numrun} = $ccn . $engr ."_" ."FullField" . "_";
-   } else{
-       $daqHash{$Numrun} = $ccn . $engr ."_" ."Unknown" . "_";
-   }
+#     }
        for ($ll = 0; $ll < scalar(@runDetector); $ll++) {
 
        if($DetecOn[$ll] != 0) { 
@@ -742,8 +791,7 @@ sub fillDbTable {
    $sql.="site='$msite',"; 
    $sql.="hpss='$mhpss',";
    $sql.="status= 0,";
-   $sql.="dataStatus='$mdtStat',";
-   $sql.="comment='$mcomnt' ";
+   $sql.="comment=''";
    print "$sql\n" if $debugOn;
    $rv = $dbh->do($sql) || die $dbh->errstr;
 
@@ -769,7 +817,7 @@ sub fillDbTable {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID' AND jobID like '%$prodSr%' "; 
+    $sql.=" WHERE runID = '$mrunID'"; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   

@@ -288,7 +288,7 @@ c*** loop over the two intersection points
             xp(1)=xcom(jk)
             xp(2)=ycom(jk)
 
-            CALL ev0_project_track(xc1,r1,xp,xn1)
+            CALL exi_project_track(xc1,r1,xp,xn1)
             CALL update_track_param(xc1,r1,xn1,trki,trkb)
 
             dca=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2 +
@@ -381,17 +381,15 @@ c*** calculate Armenteros variables
 
 c*** calculate daughter impact parameters (wkw)
 
-                CALL ev0_project_track(xc1,r1,vmain,xn1)
+                CALL exi_project_track(xc1,r1,vmain,xn1)
                 CALL update_track_param(xc1,r1,xn1,trki,trkb)
 
                 bb = sqrt( (xn1(1)-vmain(1))**2 + 
      >                     (xn1(2)-vmain(2))**2 +
      >                     (trkb(3)-vmain(3))**2 )
 
-C                CALL ev0_v0_impact_param(vmain,xpp,pxi,ptot_2,bv0,iflag)
-C                bv0=sqrt(bv0)
-C                if( iflag.eq.2 ) bv0 = -999.
-                bv0 = v0_vertex(j).dcav0
+                CALL ev0_v0_impact_param(vmain,xpp,pxi,ptot_2,bv0,iflag)
+                if( iflag.eq.2 ) bv0 = -999.
 
 c*** calculate cos(theta_c.m.)
 
@@ -421,8 +419,8 @@ c*** pgj: fill exiaux table if present (note: default allocation is 1)
 
                 if( exiaux_h.maxlen .eq. 1 ) then
                   if( first ) then
-c                   call
-c    >                StWarning('EXI - exi_aux table will not be filled')
+                    call
+     >                StWarning('EXI - exi_aux table will not be filled')
                     first = .false.
                   endif
                 elseif( n_xi .le. exiaux_h.maxlen ) then

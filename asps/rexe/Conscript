@@ -20,7 +20,7 @@ my @GDIRS = qw(.
 my $PKG  = $pkg . $env->{SUFEXE};
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
-my @h_files = script::find_hfiles($Dir);
+my @h_files = find_hfiles($Dir);
 $CPPPATH = "#asps/agi" . $main::PATH_SEPARATOR . "#asps/agi/gst" . $main::PATH_SEPARATOR . $env->{CPPPATH};
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
@@ -28,26 +28,13 @@ print "build $pkg with cons\n";
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; 
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
-my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};# . " " . $env->{LIBS};
-#print "LIBS = $LIBS : ROOTLIBS = ",$env->{ROOTLIBS}," ROOTGLIBS = ",$env->{ROOTGLIBS},
-#  " RINTLIBS = ", $env->{RINTLIBS},"\n";
+my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS} . " " . $env->{LIBS};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lStar -lStar2Root";}
 my $Libraries =  $env->{Libraries};
-my $FC    = $env->{FC};
-my $FFLAGS = $env->{FFLAGS};
-my $FEXTEND = $env->{FEXTEND};
-if ($STAR_SYS =~ /^i386/) {
-  $FC = "g77";
-  $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
-  $FEXTEND  = "-ffixed-line-length-132"; 
-}
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CXXFLAGS'     => $CXXFLAGS,
-		    'FC'           => $FC,
-		    'FFLAGS'       => $FFLAGS,
-		    'FEXTEND'      => $FEXTEND,
 		    'LIBPATH'      => $LIBPATH,
 		    'LIBS'         => $LIBS,
 		    'Libraries'    => $Libraries
@@ -55,7 +42,7 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 my @src = ();
 foreach my $d (@GDIRS){
   my $dir = $Dir . "/" . $d;
-  my @sources  = script::find_sources($dir);
+  my @sources  = find_sources($dir);
   foreach my $s (@sources) {
     my $ss = $d . "/" . $s;
     next if $ss =~ /\/gst\/agsim\/agdummy\.g/ or $ss =~ /traceqc/ or $ss =~ /ighcxy/;
@@ -63,8 +50,7 @@ foreach my $d (@GDIRS){
     push @src, $ss; 
   }
 }
-my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};# print "dirs = @dirs\n";
-for my $cpp (@dirs,$Dir) {
+foreach my $cpp (split /$main::PATH_SEPARATOR/,$env->{CPPPATH},$Dir) {
   next if $cpp =~ ' ';
   if ($cpp =~ /cern/ ||
       $cpp eq "/usr/include"
@@ -74,7 +60,7 @@ for my $cpp (@dirs,$Dir) {
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);
 my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
-my $DIR = Cwd::cwd(); 
+my $DIR = cwd(); 
 my $line;
 my @Defs = ();
 if ($Dir !~ /pams\//) {
@@ -109,8 +95,8 @@ if ($#Defs > -1) {
   my @defs = ();
   my @d    = ();
   foreach my $def (@Defs) {
-    push @defs, $share . "/" . File::Basename::basename($def); 
-    push @d   , "#include/" .  File::Basename::basename($def); 
+    push @defs, $share . "/" . basename($def); 
+    push @d   , "#include/" .  basename($def); 
   }
   Install $env2 $share, @d;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
@@ -120,7 +106,7 @@ if ($#Defs > -1) {
 }
 
 if ($#src > -1) {
-  script::Keep $pkg;
+  Keep $pkg;
   Program      $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
 }  

@@ -13,7 +13,7 @@
 #include "Rtypes.h"
 #include "TObject.h"
 #else
-//#define ClassDef(a,b)
+#define ClassDef(a,b)
 #endif
 
 //
@@ -50,7 +50,7 @@ public:
               float _pt, float _tanl, float _psi, int _q, int _nHits ) ;
 
 
-// ClassDef(FtfMcTrack,1)
+   ClassDef(FtfMcTrack,1)
 
 } ;
 #endif

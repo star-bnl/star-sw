@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.5 2000/10/02 13:47:03 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.3 2000/08/26 20:36:28 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,12 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
- * Revision 1.5  2000/10/02 13:47:03  caines
- * Fixed some array bound problems. Better flagging of hits
- *
- * Revision 1.4  2000/08/29 22:46:26  caines
- * Fixed some memory leaks
- *
  * Revision 1.3  2000/08/26 20:36:28  caines
  * Adjustments for StSvtCoordinateTransform calls
  *
@@ -156,7 +150,7 @@ Int_t StSvtHitMaker::Init()
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
 
-     cluInfo.open("ClusterInfo.dat",ios::out);
+     cluInfo.open("ClusterInfo.dat",ios::app);
     
   }
 
@@ -221,29 +215,13 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    waferCoord.setWafer(wafer);
 	    waferCoord.setHybrid(hybrid);
 
-	    SvtGeomTrans->operator()(waferCoord,localCoord);
-
-
-	    // Flag aas bad those hits not in the drift region
-	    if( (localCoord.position().x() < -0.1 && localCoord.hybrid()==2)
-		|| (localCoord.position().x() > 0.1 && localCoord.hybrid()==1)
-		|| fabs(localCoord.position().x())> 3.1){
-	      mSvtBigHit->svtHit()[clu].setFlag( 
-				      	mSvtBigHit->svtHit()[clu].flag()+3);
-	    }
-	    
+	    SvtGeomTrans->operator()(waferCoord,localCoord);	    
 	    SvtGeomTrans->operator()(localCoord,globalCoord);
 	    
-// 	    cout << " Timebucket=" << waferCoord.timebucket() << 
-// 	      " x=" << localCoord.position().x() <<
-// 	      " hybrid=" << localCoord.hybrid() <<
-// 	      " flag =" <<mSvtBigHit->svtHit()[clu].flag() << endl; 
-
 	    mPos.setX(globalCoord.position().x());
 	    mPos.setY(globalCoord.position().y());
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
-
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
@@ -397,8 +375,7 @@ Int_t StSvtHitMaker::FillHistograms(){
 //_____________________________________________________________________________
 Int_t StSvtHitMaker::Finish(){
 
- if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Finish() ..." 
-				<<  GetName() << endm;
+ if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Finish() ..."  << endm;
 
  if( iWrite == 1){
    m_hfile->Write();

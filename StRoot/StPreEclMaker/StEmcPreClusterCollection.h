@@ -2,12 +2,7 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
-// Revision 1.5  2000/09/08 21:48:00  suaide
-// See README for details
-//
 // Revision 1.4  2000/08/24 22:11:35  suaide
-//
-//
 // restored some files for background compatibility
 //
 // Revision 1.3  2000/08/24 19:45:37  suaide
@@ -45,8 +40,6 @@
 #define STAR_StEmcPreClusterCollection
 
 #include "TObjArray.h"
-#include "TArrayI.h"
-#include "TArrayF.h"
 #include "TMatrix.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -64,7 +57,6 @@ private:
   Int_t           mNclusters;
   TObjArray       mClusters;
   Bool_t          kIsOk;
-  Bool_t          kCheckClustersOk;
   Bool_t          kStEvOk;
  
 protected:   
@@ -89,23 +81,15 @@ public:
   void            setEnergyAdd(Float_t);
   void            setEnergyThresholdAll(Float_t);
   void            setSizeMax(Int_t);
-  void            setNclusters(Int_t);  
-  void            setCheckClusters(Bool_t);
-
+  void            setNclusters(Int_t);
   void            Browse(TBrowser *b);
+  Int_t           findClusters(); // Find clusters in all detectors
 
-// methods for cluster finder
-  Int_t           findClusters(); 
-  virtual  void   findClustersInModule(Int_t);   
+  virtual  void   findClustersInModule(Int_t);   // Find clusters in one module
+  virtual  void   checkClustersInModule(Int_t);  // by A. A. P. Suaide
+  virtual Float_t profile(Float_t,Float_t,Float_t);
   virtual  Int_t  testOnNeighbor(Int_t);
   virtual  void   addPreCluster(Int_t , TArrayI*);
-// methods for chisqr check
-  void            checkClustersInModule(Int_t);  
-  Int_t           applyProfile(Int_t,TArrayI);
-  Float_t         calcChiSqrt(Int_t,TArrayF,TArrayF,Int_t,TArrayF,TArrayF);
-  void            setNewClusters(Int_t,Int_t,Int_t,TArrayI);
-  Float_t         profile(Float_t,Float_t,Float_t);
-// methods for cluster printing 
   virtual  void   printCluster(Int_t, StEmcPreCluster*);
   virtual  void   printClusters(Int_t n=5, Int_t start=5);
   virtual  void   printClustersAll();

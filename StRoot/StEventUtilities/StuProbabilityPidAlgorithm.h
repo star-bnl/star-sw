@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.9 2000/10/24 22:36:47 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.7 2000/08/23 01:18:14 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,12 +11,6 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
- * Revision 1.9  2000/10/24 22:36:47  aihong
- * pass if no parameter file read
- *
- * Revision 1.8  2000/09/11 17:08:29  aihong
- * add geantID access
- *
  * Revision 1.7  2000/08/23 01:18:14  aihong
  * remove a bug
  *
@@ -77,12 +71,6 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       StParticleDefinition* thirdLikelihoodParticle();
 
       StParticleDefinition* getParticle(int i);
-
-      int mostLikelihoodParticleGeantID()    const;
-      int secondLikelihoodParticleGeantID()  const;     
-      int thirdLikelihoodParticleGeantID()   const;
-
-      int getParticleGeantID(int i)          const;
       
       double getProbability(int i);
       double mostLikelihoodProbability();
@@ -173,7 +161,6 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
     static  bool     mTurnOnNoise;
     static  bool     mDynamicallyCalculatePID;
-    static  bool     mHasParameterFile;
     static  double   mDedxBinWidth;
     static  double   mRigBinWidth; //do not let NBins exceed 999.
     static  double   mPtBinWidth; //not implemented yet.
@@ -201,13 +188,6 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
   static TVectorD*     mTheRangeSettingVector;
 
 };
-
-
-inline   int StuProbabilityPidAlgorithm::mostLikelihoodParticleGeantID()    const { return PID[0];}
-inline   int StuProbabilityPidAlgorithm::secondLikelihoodParticleGeantID()  const { return PID[1];}     
-inline   int StuProbabilityPidAlgorithm::thirdLikelihoodParticleGeantID()   const { return PID[2];}  
-inline   int StuProbabilityPidAlgorithm::getParticleGeantID(int i)          const {
-          if (i<3 && i>=0) return PID[i]; else return -1;}
 
 #endif
 

@@ -1,11 +1,6 @@
-// $Id: StFtpcFastSimu.hh,v 1.8 2000/09/18 14:26:49 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.7 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
-// Revision 1.8  2000/09/18 14:26:49  hummler
-// expand StFtpcParamReader to supply data for slow simulator as well
-// introduce StFtpcGeantReader to separate g2t tables from simulator code
-// implement StFtpcGeantReader in StFtpcFastSimu
-//
 // Revision 1.7  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -29,23 +24,26 @@
 
 #ifndef STAR_StFtpcFastSimu
 #define STAR_StFtpcFastSimu
+#include "StFtpcParamReader.hh"
+#include "g2t_ftp_hit.h"
+#include "g2t_track.h"
+#include "g2t_vertex.h"
+#include "ffs_gaspar.h"
 #include "ffs_gepoint.h"
 #include "fcl_fppoint.h"
+#include "fcl_det.h"
 
 #define TRUE 1
 #define FALSE 0
 #define MXMROW 150000
 #define SIZE 20
-
+// #define sqr(x) ((x)*(x))
 class RandGauss;
-class StFtpcParamReader;
-class StFtpcGeantReader;
 
 class StFtpcFastSimu
 {
  private:
   StFtpcParamReader *mParam;
-  StFtpcGeantReader *mGeant;
   float Va;
   float Vhm[4];
   float Tbm[4];
@@ -70,22 +68,33 @@ class StFtpcFastSimu
       return x1-(double)(int)(x1/x2)*x2;
     }
  public:
-  StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
+  StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
+		 int *g2t_ftp_hit_nok,
+		 G2T_TRACK_ST* g2t_track,
+		 int *g2t_track_nok,
+		 G2T_VERTEX_ST* g2t_vertex,
+		 FFS_GEPOINT_ST* ffs_gepoint,
 		 int *ffs_gepoint_nok,
 		 int ffs_gepoint_maxlen,
 		 FCL_FPPOINT_ST* fcl_fppoint,
 		 int *fcl_fppoint_nok,
 		 int fcl_fppoint_maxlen,
-		 StFtpcGeantReader *geantReader,
 		 StFtpcParamReader *paramReader);
   ~StFtpcFastSimu();
-  int ffs_gen_padres(int *ffs_gepoint_nok,
+  int ffs_gen_padres(int *g2t_ftp_hit_nok, 
+		     G2T_FTP_HIT_ST *g2t_ftp_hit, 
+		     int *ffs_gepoint_nok,
 		     int ffs_gepoint_maxlen,
 		     FFS_GEPOINT_ST *ffs_gepoint,
 		     int *fcl_fppoint_nok,
 		     int fcl_fppoint_maxlen,
 		     FCL_FPPOINT_ST *fcl_fppoint);
-  int ffs_hit_rd(int *ffs_gepoint_nok,
+  int ffs_hit_rd(int *g2t_ftp_hit_nok,
+		 G2T_FTP_HIT_ST *g2t_ftp_hit,
+		 int *g2t_track_nok, 
+		 G2T_TRACK_ST *g2t_track,
+		 G2T_VERTEX_ST *g2t_vertex,
+		 int *ffs_gepoint_nok,
 		 int ffs_gepoint_maxlen,
 		 FFS_GEPOINT_ST *ffs_gepoint,
 		 int *fcl_fppoint_nok,
@@ -116,7 +125,7 @@ class StFtpcFastSimu
 	      FFS_GEPOINT_ST *ffs_gepoint,
 	      int *fcl_fppoint_nok,
 	      int fcl_fppoint_maxlen,
-	      FCL_FPPOINT_ST *fcl_fppoint);
+	      FCL_FPPOINT_ST *fcl_fppoin);
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 3.1 2000/09/07 02:22:56 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 3.0 2000/07/14 12:56:49 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,9 +12,6 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
- * Revision 3.1  2000/09/07 02:22:56  genevb
- * Now using STAR standard uncorrected primary track multiplicity
- *
  * Revision 3.0  2000/07/14 12:56:49  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -34,8 +31,6 @@
  ***********************************************************************/
 #include "StStrangeEvMuDst.hh"
 #include "StEventTypes.h"
-#include "StuRefMult.hh"
-
 ClassImp(StStrangeEvMuDst)
 
 StStrangeEvMuDst::StStrangeEvMuDst() { 
@@ -47,14 +42,18 @@ void StStrangeEvMuDst::Fill(StEvent& event) {
   mEvent = event.id();
   
   mGlobalTracks = 0;
+  mPrimaryTracks = 0;
   StSPtrVecTrackNode& theNodes = event.trackNodes();
   for (unsigned int i=0; i<theNodes.size(); i++) {
     for (unsigned int j=0; j<theNodes[i]->entries(global); j++) {
       if (theNodes[i]->track(global,j)->flag() > 0)
         mGlobalTracks++;
     }
+    for (unsigned int j=0; j<theNodes[i]->entries(primary); j++) {
+      if (theNodes[i]->track(primary,j)->flag() > 0)
+        mPrimaryTracks++;
+    }
   }
-  mPrimaryTracks = uncorrectedNumberOfPrimaries(event);
 
   StPrimaryVertex* primaryVertex = event.primaryVertex();
   if( primaryVertex ) {

@@ -1,11 +1,5 @@
-// $Id: StFtpcConfMapper.hh,v 1.7 2000/11/10 18:37:02 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.6 2000/08/02 10:10:44 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
-// Revision 1.7  2000/11/10 18:37:02  oldi
-// New functions introduced to be able to extend tracks after main vertex tracking.
-// This implied many changes in other parts of the class (loop over clusters can run backwards now).
-// TBenchmark object ('mBench') moved to StFtpcTracker.
-// Cleanup.
-//
 // Revision 1.6  2000/08/02 10:10:44  oldi
 // Changes in function GetSegm() to avoid pointing out of the ObjArry.
 // If GetSegm() tries to use a segment out of bounds a warning will be print
@@ -67,6 +61,7 @@ class StFtpcConfMapper : public StFtpcTracker {
 
 private:
 
+  TBenchmark *mBench;             // benchmark object (just for run-time measurements)
       Bool_t  mLaser;             // indicator to know if this is a laser event
 
   // Volume segemnts
@@ -105,7 +100,6 @@ private:
   Int_t mMergedTracks;     // cluster on a track missing, but tracker was able to merge the pieces
   Int_t mMergedTracklets;  // cluster on a tracklet missing, but tracker was able to merge the pieces
   Int_t mMergedSplits;     // number of merged split tracks
-  Int_t mExtendedTracks;   // number of extended tracks
   Int_t mDiffHits;         // circle fit and length fit returned differnet hits
   Int_t mDiffHitsStill;    // different hits from fits could not be resolved
   Int_t mLengthFitNaN;     // argument of arcsin was higher than +1 (lower than -1)
@@ -158,7 +152,7 @@ public:
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
             StFtpcConfMapper(TClonesArray *hits, 
-			     StFtpcVertex *vertex = NULL, 
+			     Double_t vertexPos[3] = NULL, 
 			     Bool_t bench = (Bool_t)false, 
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor which takes an CLonesArray of hits
@@ -196,7 +190,6 @@ public:
      Int_t  GetNumMergedTracks()     { return mMergedTracks;     }  // returns number of merged tracks
      Int_t  GetNumMergedTracklets()  { return mMergedTracklets;  }  // returns number of merged tracklets
      Int_t  GetNumMergedSplits()     { return mMergedSplits;     }  // returns number of merged split tracks
-     Int_t  GetNumExtendedTracks()   { return mExtendedTracks;   }  // returns number of extended tracks
      Int_t  GetNumDiffHits()         { return mDiffHits;         }  // returns number of cases where length and circle fit are different
      Int_t  GetNumLengthFitNaN()     { return mLengthFitNaN;     }  // retruns number of settings of argumnet of arcsin to +/-1
      Int_t  GetNumClustersUnused()   { return mClustersUnused;   }  // returns number of unused clusters
@@ -217,29 +210,21 @@ public:
   Double_t const  GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);  // returns distance between to clusters
   Double_t const  GetDistanceFromFit(const StFtpcConfMapPoint *hit);                                   // returns distance of cluster from fit
 
-  Double_t const  GetSetupTime();
-  Double_t const  GetMainVertexTrackingTime();
-  Double_t const  GetFreeTrackingTime();
-  Double_t const  GetLaserTrackingTime();
-
   // Tracking procedures
               void  ClusterLoop();                                                                               // loops over clusters
               void  CreateTrack(StFtpcConfMapPoint *hit);                                                        // create track with start at hit
               void  RemoveTrack(StFtpcTrack *track);                                                             // removes track from track array
               void  CompleteTrack(StFtpcTrack *track);                                                           // completes track
-StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff, Bool_t backward);            // returns next cluster to start cluster
-              void  ExtendTracks();                                                                              // Loops over found tracks. Trys to extend them.
-            Bool_t  TrackExtension(StFtpcTrack *track);                                                          // Trys to extend given track.
-      Bool_t const  TestExpression(Int_t sub_row_segm, Int_t end_row, Bool_t backward = (Bool_t)true);           // increments or decrements *sub_row_segm
-              void  LoopUpdate(Int_t *sub_row_segm, Bool_t backward);                                            // tests if loop should be continued
-    Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit, Bool_t backward);      // returns angle
+StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff);                             // returns next cluster to start cluster
+              void  TrackLoop();                                                                                 // Loops over found tracks. Trys to extend them.
+            Bool_t  ExtendTrack(StFtpcTrack *track);                                                             // Trys to extend given track.
+    Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit);                       // returns angle
     Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 0);                                              // returns angle
     Double_t const  CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2, Bool_t laser);  // returns distance of two hits
     Double_t const  CalcDistance(const StFtpcConfMapPoint *hit, Double_t *coeff);                                // returns distance between a hit and straight line
               void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                               // calculates a straight line fit for given clusters 
               void  CalcChiSquared(StFtpcTrack *track, StFtpcConfMapPoint *point, Double_t *chi2);               // calculates chi squared for cirlce and length fit
-      Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, 
-			       const StFtpcConfMapPoint *newhit, Bool_t backward = (Bool_t)true);                // returns true if phi and eta cut holds
+      Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, const StFtpcConfMapPoint *newhit);     // returns true if phi and eta cut holds
               void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);                // loops over tracks and looks for split tracks
               void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                          // merges two tracks
               void  AdjustTrackNumbers();                                                                        // renews tracknumbers
@@ -386,7 +371,6 @@ inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta
   Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
 
   if (segm >= mBounds) {
-    cout << row_segm << " " << GetRow(row_segm) << endl;
     gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")!" << endm;
     return mBounds-1;
   }

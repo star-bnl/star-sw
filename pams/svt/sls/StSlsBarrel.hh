@@ -19,6 +19,7 @@ class StSlsBarrel
   int  removeInactiveHitInTable(table_head_st *g2t_h,g2t_svt_hit_st *g2t);
   void renumHitAfterRemove();
   void chargeSharingOverStrip(sls_ctrl_st  *ctrl);
+  int  writePointToTable(table_head_st *spt_h, sls_spt_st *spt);
   int  writeStripToTable(table_head_st *strip_h, sls_strip_st *strip);
 
 

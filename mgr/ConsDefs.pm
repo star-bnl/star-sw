@@ -1,9 +1,10 @@
-# $Id: ConsDefs.pm,v 1.27 2000/11/08 14:43:19 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.23 2000/08/08 17:02:28 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
  use Cwd;
  use File::Find ();
+ if (defined($AFS)) {$File::Find::dont_use_nlink;}
  #________________________________________
  *name           = *File::Find::name;
  *prune          = *File::Find::prune;
@@ -15,7 +16,7 @@
  *topnlink       = *File::Find::topnlink;
  #use strict;
  my $pwd = cwd();
-# if (defined($AFS) || $pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
+ if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
  
  @search_files   = ();
  $DEBUG = "-g";
@@ -31,15 +32,14 @@
  $Lout     = "-o ";
  $Cinp     = "";
  $CXXinp   = "";
+ $CPP      = "gcc";
  $CPPFLAGS = "";#-I-";
- $AFSFLAGS = "";
  $AFSDIR   = "/usr/afsws";
  $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
  $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
  $AFSLIBS .= " -lcmd -lcom_err -laudit ". $AFSDIR . "/lib/afs/util.a";
- if (! $ROOT) {$ROOT = "/afs/rhic/star/ROOT";}
  if (! $ROOT_LEVEL) {$ROOT_LEVEL = "2.25.01";}
- if (! $ROOTSYS) {$ROOTSYS = $ROOT . "/" . $ROOT_LEVEL;}
+ if (! $ROOTSYS) {$ROOTSYS = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL;}
  $SRPDIR   = $ROOTSYS . "/lib";
  $SRPFLAGS = "";# -DR__SRP -I" . $SRPDIR . "/include";
  $SRPLIBS  = "";# -L" . $SRPDIR . "/lib -lsrp -lgmp";
@@ -49,7 +49,6 @@
  $AUTHFLAGS   = $SHADOWFLAGS . " " . $AFSFLAGS . " " . $SRPFLAGS;
  $AUTHLIBS    = $SHADOWLIBS . " " .  $AFSLIBS . " " . $SRPLIBS;
  $R_CPPFLAGS = " -DR__AFS -DHAVE_CONFIG ";
- $CPP      = "";#"gcc -E";
  $CPPPATH  = "";
  $EXTRA_CPPPATH = "";
  $CXX      = "g++";
@@ -69,9 +68,9 @@
  $ARFLAGS  = "rvu";
  $LD       = $CXX;
  $LDFLAGS  = $CXXFLAGS;
- $EXTRA_LDFLAGS = "";
  $F77LD    = $LD;
  $F77LDFLAGS = $LDFLAGS;
+ $EXTRA_LDFLAGS = "";
  $SO       = $CXX;
  $SOFLAGS  = "";
  $STIC     = "stic";
@@ -97,8 +96,8 @@
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
  $LINKCOM  = "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
- $GEANT3COM= "test -f %>:b.F && rm %>:b.F;";
- $GEANT3COM.="%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
+ $GEANT3COM= "test -f %>.F && rm %>.F;";
+ $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
  $INCLUDE_PATH  = $INCLUDE;
  $Salt = undef;
  if (!$OPTSTAR) {$OPTSTAR = "/opt/star";}
@@ -119,10 +118,10 @@
      $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
    }
    $R_CPPFLAGS  .= " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-   $CXXFLAGS = "-pipe -fPIC -Wall";# -march=pentiumpro";
+   $CXXFLAGS = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    #                                             -fpipe
-   $CFLAGS   = "-pipe -fPIC -Wall";# -march=pentiumpro";
+   $CFLAGS   = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
    $LDFLAGS  = "";#$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $F77FLAGS      = "";
@@ -138,8 +137,8 @@
      $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
      $FCCOM    = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
      $FCCOM   .= "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
-     $FCCOM   .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;"; 
-     $FCCOM   .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
+     $FCCOM   .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>.f;"; 
+     $FCCOM   .= "if [ -f %>.f ]; then %FC %FFLAGS -c %>.f %Fout%> ;";
      $FCCOM   .= "else %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
      my $GEANT3COM= $FCCOM;
      $FEXTEND  = "-ffixed-line-length-132"; 
@@ -163,8 +162,10 @@
      $SOFLAGS  = $CXXOPT;
    }
    else {
-     if ($PGI) {$CLIBS    = "-L" . $PGI . "/linux86/lib";}
-     $CLIBS .= " -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
+     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
+     if ($HOST =~ /pcstar/) {# From Janet for MPI /usr/pgi -> /usr/local/pgi
+       $CLIBS    = "-L/usr/local/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11 -lpgc -lm -ldl  -rdynamic";
+     }
    }
    if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
    if (defined($ARG{INSURE})){
@@ -177,7 +178,7 @@
    } 
    if ($PGI) {
      $FC       = "pgf77";
-     $FLIBS    = "-L" . $PGI . "/linux86/lib -lpgftnrtl -lpgc";
+     $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
      $FLIBS   .= " -L" . $OPTSTAR . "/lib -lpgf77S -lpgf77A";
      $FFLAGS   = "-DPGI";  
      $FEXTEND  = "-Mextend";
@@ -193,7 +194,7 @@
    if ($STAR) {
      $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
    }
-   $OSFID   .= " NEW_ARRAY_ON";# _INCLUDE_HPUX_SOURCE";
+   $OSFID   .= " NEW_ARRAY_ON";
    $CXX      = "aCC";
    $CC       = "cc";
    $LD       = $CXX;
@@ -237,16 +238,18 @@
    $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no%%Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
+#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
+#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
-   $XLIBS     = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
-#   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
+   $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
    $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
    $CINTCFLAGS= $CFLAGS . " " . $R_CPPFLAGS;
    $LD        = $CXX;
+#   $EXEFLAGS  = "-library=iostream";
    $LDFLAGS   = "-library=iostream -Bdynamic";
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
@@ -364,7 +367,7 @@
  if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
  my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
  $CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
- if (defined($ARG{NODEBUG}) or $NODEBUG)  {$DEBUG = "-O -g"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+ if (defined($ARG{NODEBUG}) or $NODEBUG)  {$DEBUG = "-O1 -g"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{DEBUG}))    {$DEBUG = $ARG{DEBUG}        ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{EXTRA_CPPFLAGS})) {$EXTRA_CPPFLAGS = $ARG{EXTRA_CPPFLAGS}  ; print "set EXTRA_CPPFLAGS = $EXTRA_CPPFLAGS\n" unless ($param::quiet);}
@@ -388,7 +391,7 @@
  if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH}    ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
  if (defined($ARG{SO}))       {$SO = $ARG{SO}              ; print "set SO = $SO\n" unless ($param::quiet);}
  if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS}    ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
- $ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
+ $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/include";
  my @params = (	'PLATFORM'     => $PLATFORM,
 		'ARCH'         => $ARCH,
 		'AFSDIR'       => $AFSDIR,
@@ -401,7 +404,6 @@
 		'SHADOWLIBS'   => $SHADOWLIBS,
 		'AUTHFLAGS'    => $AUTHFLAGS,
 		'AUTHLIBS'     => $AUTHLIBS,
-#		'CPP'	       => $CPP,
 	        'CPPPATH'      => $CPPPATH,
 		'EXTRA_CPPPATH'=> $EXTRA_CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
@@ -443,7 +445,6 @@
 		'LIBS'         => $LIBS,
 		'LD' 	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'EXTRA_LDFLAGS'=> $EXTRA_LDFLAGS,
 		'F77LD'        => $F77LD,
 		'F77LDFLAGS'   => $F77LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,

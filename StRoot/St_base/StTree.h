@@ -112,7 +112,7 @@ public:
  ~StIOEvent(){};
 TObject *fObj;	// Pointer to full tree
  virtual void  Browse(TBrowser *b);
- virtual Bool_t IsFolder() const { return kTRUE; }
+ virtual Bool_t IsFolder(){ return kTRUE; }
 
 ClassDef(StIOEvent,1)
 };

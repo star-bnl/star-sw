@@ -1,8 +1,5 @@
-//$Id: estimateVertexZ.cc,v 1.9 2000/10/10 19:31:08 wdeng Exp $
+//$Id: estimateVertexZ.cc,v 1.8 2000/08/24 19:59:08 wdeng Exp $
 //$Log: estimateVertexZ.cc,v $
-//Revision 1.9  2000/10/10 19:31:08  wdeng
-//Delete array properly.
-//
 //Revision 1.8  2000/08/24 19:59:08  wdeng
 //Initialize both index variables to zero.
 //
@@ -115,5 +112,5 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   //  vertexZHistogram->Draw();
   
   delete vertexZHistogram;
-  delete[] radius2D;
+  delete radius2D;
 }

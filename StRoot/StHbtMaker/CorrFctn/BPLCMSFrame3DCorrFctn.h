@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.h,v 1.3 2000/10/26 19:48:50 rcwells Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.h,v 1.1 2000/08/17 20:48:39 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,12 +11,6 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.h,v $
- * Revision 1.3  2000/10/26 19:48:50  rcwells
- * Added functionality for Coulomb correction of <qInv> in 3D correltions
- *
- * Revision 1.2  2000/09/14 18:36:53  lisa
- * Added Qinv and ExitSep pair cuts and BPLCMSFrame3DCorrFctn_SIM CorrFctn
- *
  * Revision 1.1  2000/08/17 20:48:39  lisa
  * Adding correlationfunction in LCMS frame
  *
@@ -29,7 +23,6 @@
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 #include "StHbtMaker/Infrastructure/StHbtCoulomb.h"
-#include "StHbtMaker/Base/StHbtPairCut.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class BPLCMSFrame3DCorrFctn : public StHbtCorrFctn {
@@ -46,7 +39,7 @@ public:
   StHbt3DHisto* Numerator();
   StHbt3DHisto* Denominator();
   StHbt3DHisto* Ratio();
-  StHbt3DHisto* QinvHisto();
+
 
   // here are get and set for the range over which the correlation function 
   // is normalized (in Qinv).  The range is set to 0.15..0.18 in the constuctor
@@ -58,16 +51,11 @@ public:
 
   void SetCoulombCorrection(StHbtCoulomb* Correction);
 
-  void SetSpecificPairCut(StHbtPairCut*);
-
 
 private:
   StHbt3DHisto* mNumerator;
   StHbt3DHisto* mDenominator;
   StHbt3DHisto* mRatio;
-  StHbt3DHisto* mQinvHisto;
-
-  StHbtPairCut* mPairCut;    //! this is a PairCut specific to THIS CorrFctn, not the Analysis
 
   // upper and lower bounds of Qinv region where to do normalization
   float mQinvNormLo;
@@ -88,13 +76,11 @@ private:
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Numerator(){return mNumerator;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Denominator(){return mDenominator;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Ratio(){return mRatio;}
-inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::QinvHisto(){return mQinvHisto;}
 inline  void BPLCMSFrame3DCorrFctn::SetNormRangeLo(float qLo){mQinvNormLo = qLo;}
 inline  void BPLCMSFrame3DCorrFctn::SetNormRangeHi(float qHi){mQinvNormHi = qHi;}
 inline  float BPLCMSFrame3DCorrFctn::GetNormRangeLo(){return mQinvNormLo;}
 inline  float BPLCMSFrame3DCorrFctn::GetNormRangeHi(){return mQinvNormHi;}
 inline  void BPLCMSFrame3DCorrFctn::SetCoulombCorrection(StHbtCoulomb* Correction){mCorrection = Correction;}
-inline  void BPLCMSFrame3DCorrFctn::SetSpecificPairCut(StHbtPairCut* pc){mPairCut=pc;}
 
 #endif
 

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.h,v 1.3 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeEvent.h,v 1.2 2000/08/03 20:12:13 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,9 +14,6 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.h,v $
- * Revision 1.3  2000/09/01 22:59:11  jgreid
- * version 1 revision ; multiple file handling + additional data members added
- *
  * Revision 1.2  2000/08/03 20:12:13  jgreid
  * added CTBm() convenience function
  *
@@ -38,8 +35,6 @@ class StEbyeEvent : public TObject {
 
  private:
 
-  static const Int_t mVersion = 1;   // DST version number is 1
-
   Int_t mNtrack;                     // track number
   Int_t mNtrackG;                    // -"- && flag>0
   Int_t mNtrackG1;                   // -"- && |eta| < 1
@@ -47,7 +42,6 @@ class StEbyeEvent : public TObject {
   Int_t mEventID;                    // event ID
   Int_t mRunID;                      // run ID
   Int_t mOrigMult;                   // number of StEvent tracks
-  Int_t mCentMult;                   // multiplicity used to determine centrality
 
   Float_t mCentrality;               // centrality measure
 
@@ -69,12 +63,9 @@ class StEbyeEvent : public TObject {
 
   void Clear(Option_t *option ="");
 
-  Int_t Version() const { return mVersion; };
-
   Int_t EventID() const { return mEventID; }; 
   Int_t RunID() const { return mRunID; };
   Int_t OrigMult() const { return mOrigMult; };
-  Int_t CentMult() const { return mCentMult; };
 
   Float_t Centrality() const { return mCentrality; };
 
@@ -97,9 +88,8 @@ class StEbyeEvent : public TObject {
   void SetEventID(const Int_t id) { mEventID = id; }
   void SetRunID(const Int_t id) { mRunID = id; }
   void SetOrigMult(const Int_t tracks) { mOrigMult = tracks; }
-  void SetCentMult(const Int_t tracks) { mCentMult = tracks; }
 
-  void SetCentrality(const UInt_t N);
+  void SetCentrality(const Float_t cent) { mCentrality = cent; }
 
   void SetVx(const Float_t vx) { mVx = vx; }
   void SetVy(const Float_t vy) { mVy = vy; }

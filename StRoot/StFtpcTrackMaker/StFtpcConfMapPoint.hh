@@ -1,8 +1,5 @@
-// $Id: StFtpcConfMapPoint.hh,v 1.3 2000/11/10 18:34:31 oldi Exp $
+// $Id: StFtpcConfMapPoint.hh,v 1.2 2000/07/18 21:22:15 oldi Exp $
 // $Log: StFtpcConfMapPoint.hh,v $
-// Revision 1.3  2000/11/10 18:34:31  oldi
-// New constructor added.
-//
 // Revision 1.2  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -74,21 +71,6 @@ public:
   
             StFtpcConfMapPoint();                                                 // default constructor
             StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex);   // constructor
-            StFtpcConfMapPoint(Long_t    row, 
-			       Long_t    sector, 
-			       Long_t    n_pads, 
-			       Long_t    n_bins, 
-			       Long_t    max_adc, 
-			       Long_t    charge, 
-			       Double_t  x, 
-			       Double_t  y, 
-			       Double_t  z, 
-			       Double_t  x_err, 
-			       Double_t  y_err, 
-			       Double_t  z_err, 
-			       Double_t  s_phi, 
-			       Double_t  s_r, 
-			       Long_t    flags);                                  // constructor to handle points given directly from the cluster finder
             StFtpcConfMapPoint(Double_t *x, Int_t row, StFtpcVertex *vertex);     // constructor for arbitrary coordinates
   virtual  ~StFtpcConfMapPoint();                                                 // destructor
   

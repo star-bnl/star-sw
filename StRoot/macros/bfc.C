@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.147 2000/09/11 19:03:46 fisyak Exp $
+// $Id: bfc.C,v 1.144 2000/08/29 19:26:58 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -152,17 +152,14 @@ void bfc(const Int_t First,
     StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
     hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
-    if (First > 1) {
-      if (chain->GetOption("fzin")) {
-	geant = (St_geant_Maker *) chain->GetMaker("geant");
-	if (geant) {
-	  if (geant->IsActive()) geant->Skip(First-1);
-	}
-      }
-      else {
-	StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
-	if (inpMk) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
-      }
+    if (gClassTable->GetID("St_geant_Maker") >=0) 
+      geant = (St_geant_Maker *) chain->GetMaker("geant");
+    if (geant) {
+      if (First > 1 && geant->IsActive()) geant->Skip(First-1);
+    }
+    else {
+      StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
+      if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
     }
   }
   St_XDFFile *xdf_out = chain->GetXdfOut();

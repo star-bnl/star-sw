@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: probChiSquared.cc,v 1.2 2000/09/25 19:30:19 ullrich Exp $
+ * $Id: probChiSquared.cc,v 1.1 2000/04/06 22:23:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -16,8 +16,8 @@
  ***************************************************************************
  *
  * $Log: probChiSquared.cc,v $
- * Revision 1.2  2000/09/25 19:30:19  ullrich
- * Fixed code to avoid signed/unsigned comparison warning.
+ * Revision 1.1  2000/04/06 22:23:32  ullrich
+ * Initial Revision
  *
  * Revision 1.1  2000/04/06 22:23:32  ullrich
  * Initial Revision
@@ -29,7 +29,7 @@ double probChiSquared(double x, unsigned int n)
 {
     if(x < 0) return 0;
 
-    const unsigned int nmax   = 300;
+    const int    nmax   = 300;
     const double r1     = 1;
     const double hf     = r1/2;
     const double th     = r1/3;
@@ -68,7 +68,7 @@ double probChiSquared(double x, unsigned int n)
 	    s=exp(-hf*u);
 	    t=s;
 	    e=s;
-	    if (2*m == (int)n) {
+	    if (2*m == n) {
 		fi=0;
 		for (i=1; i<m; i++) {
 		    fi += 1;

@@ -1,8 +1,8 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.5 2000/10/31 16:19:37 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.4 2000/08/21 13:06:58 caines Exp $
  *
- * Author: Selemon Bekele
+ * Author: 
  ***************************************************************************
  *
  * Description: SVT Cluster Finder Class
@@ -10,17 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
- * Revision 1.5  2000/10/31 16:19:37  caines
- * Improved speed of zeroing arrays
- *
- * Revision 1.4  2000/08/21 13:06:58 bekele
- * Improved restting arrays, cluster finder
- *  now runs faster.
- *
- * $Log: StSvtClusterFinder.cc,v $
- * Revision 1.5  2000/10/31 16:19:37  caines
- * Improved speed of zeroing arrays
- *
  * Revision 1.4  2000/08/21 13:06:58  caines
  * Much improved hit finding and fitting
  *
@@ -50,7 +39,7 @@ sequence = NULL;
 anolist = NULL;
 tempList = NULL;
 cluIndex = 0;
-mNumOfAnodes = 0;
+numAnodes = 0;
 mSequence = 0;
 
 
@@ -61,11 +50,8 @@ for ( i=0; i<8000; i++)
   mCluster[i][j] = 0;
 
 for ( i=0; i<240; i++)
- {
-  mNumSeq[i] = 0;
-  for ( j=0; j<128; j++)
-   mSeqFlag[i][j] = 0;
- }
+ for ( j=0; j<128; j++)
+  mSeqFlag[i][j] = 0;
 
 for ( i=0; i<500; i++)
  {mContainer1[i] = 0;
@@ -81,19 +67,17 @@ StSvtClusterFinder::~StSvtClusterFinder()
 void StSvtClusterFinder::setHybridPointer(StSvtHybridData* hdata)
 {
   hybdata = hdata;
-  mNumOfAnodes = hdata->getAnodeList(anolist);
+  numAnodes = hdata->getAnodeList(anolist);
 }
 
 
 void StSvtClusterFinder::ClusterFinder()
  { 
   cluIndex = 0;
-  for(int mAnode = 0; mAnode<mNumOfAnodes; mAnode++)
+  for(int mAnode = 0; mAnode<numAnodes; mAnode++)
    {
      hybdata->getListSequences(mAnode,mSequence,sequence); //need to decide where to get sequences
      //cout<<"mSequence = "<<mSequence<<endl;
-
-    mNumSeq[mAnode] = mSequence;
     for(int mSeq = 0; mSeq < mSequence; mSeq++)
      { 
  
@@ -101,9 +85,6 @@ void StSvtClusterFinder::ClusterFinder()
          getClusterMembers(mAnode,mSeq);
      }
    }
-
-  mNumOfClusters = cluIndex;
-
  }
 
 
@@ -132,8 +113,6 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
       mAnode = mContainer1[mem]/1000;
       mSeq = mContainer1[mem]%1000;
 
-      mContainer1[mem] = 0;   //zeroed after being used
-
       status = hybdata->getListSequences(mAnode,mSequence,sequence);
 
       mSeqStart = sequence[mSeq].startTimeBin;
@@ -150,10 +129,8 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
         mRightFlagCounter = 0;
         mLeftFlagCounter = 0;
 
-       // we don't need to do this now since we  made each zero already
-	                                   
-        //for(mem = 0; mem < 500; mem++)
-        //  mContainer1[mem] = 0;          
+        for(mem = 0; mem < 500; mem++)
+          mContainer1[mem] = 0; 
                       
         int j = 0;
 
@@ -163,7 +140,7 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
            ++j;
           }
 
-        for( j = 0; j < newMem; j++)
+        for( j = 0; j < 500; j++)
           mContainer2[j] = 0;
    
           newMem = 0;
@@ -176,19 +153,16 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
 	 //cout<< memCount <<' '<<"members found in cluster"<<' '<<cluIndex - 1<<endl;
 
 	 mNumOfCluMem[cluIndex-1] = memCount;
-	 
+
 	 if( memCount == 1 && mSeqLength==1){
 	   cluIndex--;
 	 }
 	 
-	 /* we don't need to do this now since we made each one zero already 	
-	                                   	 
-	 for(int j = 0; j < 500; j++)       
+	 for(int j = 0; j < 500; j++)
 	   {
 	     mContainer1[j] = 0;
 	     mContainer2[j] = 0;
 	   }
-	 */
 	 
 	 mSeq = -1;
 	 mAnode = breakAn;
@@ -358,8 +332,7 @@ int StSvtClusterFinder::getSeqOnLeft(int mAnode, int& breakAn,int mSeqStart, int
 
 int StSvtClusterFinder::ClusterIndex()
   {
-   cout<<"mNumOfClusters = "<<mNumOfClusters<<endl;
-   return mNumOfClusters;
+   return cluIndex;
   }       
 
 int StSvtClusterFinder::ClusterMembers(int clu)
@@ -389,8 +362,7 @@ int StSvtClusterFinder::ClusterActualAnode(int listAn)
 void StSvtClusterFinder::ResetContainers()
 {
  int i,j;
- /*
- for( j = 0; j < 500; j++)
+  for( j = 0; j < 500; j++)
     {
       mContainer1[j] = 0;
       mContainer2[j] = 0;
@@ -402,20 +374,6 @@ void StSvtClusterFinder::ResetContainers()
   for ( i=0; i<240; i++)
     for ( j=0; j<128; j++)
       mSeqFlag[i][j] = 0;
- */
-
-//array memebers > mNumOfClusters already zero
-                                             
- for ( i=0; i< mNumOfClusters; i++)        
-    for ( j=0; j< mNumOfCluMem[i]; j++)
-      mCluster[i][j] = 0;
-
-// do only the ones that have been flagged
-
- for(int i = 0; i<mNumOfAnodes; i++)
-    for( j=0; j<mNumSeq[i];j++)
-      mSeqFlag[i][j] = 0;
-
   cluIndex=0;
 }
 

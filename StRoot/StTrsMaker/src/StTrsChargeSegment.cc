@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.28 2000/11/09 19:23:09 lbarnby Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.27 2000/07/30 02:59:23 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,9 +12,6 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.28  2000/11/09 19:23:09  lbarnby
- * Cernlib entry point changed (dstlan->dislan) Fix for optimization bug, prevent use of nan. Proper robust solution still required.
- *
  * Revision 1.27  2000/07/30 02:59:23  long
  * *** empty log message ***
  *
@@ -129,7 +126,7 @@ using std::random_shuffle;
 #include "StTrsDeDx.hh"
 
 // Need a CERNLIB routine for tssSplit
-extern "C"  float dislan_(float *);
+extern "C"  float dstlan_(float *);
 
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
@@ -622,17 +619,13 @@ double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
 
 double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 {
-    // uses dislan_() from CERNLIB
+    // uses dstlan_() from CERNLIB
     double granularity = .001;
 
     float arg3 = (1.-x0)/sig;
     float arg4 = -x0/sig;
-
-    float dlan3 = dislan_(&arg3);
-    float dlan4 = dislan_(&arg4);
-    if (isnan(dlan4)) dlan4=0;
-
-    double denom = dlan3 - dlan4;
+    
+    double denom = dstlan_(&arg3) - dstlan_(&arg4);
 
     double testValue = mFlatDistribution.shoot();
     
@@ -646,7 +639,7 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 	x = .5*(xlo+xhi);
 	arg1 = (x-x0)/sig;
 	arg2 = (1.-x-x0)/sig;
-	p = .5*(1. + (dislan_(&arg1) - dislan_(&arg2))/denom);
+	p = .5*(1. + (dstlan_(&arg1) - dstlan_(&arg2))/denom);
 	if( (fabs(testValue-p)<granularity) ) {
 	    return x;
 	}

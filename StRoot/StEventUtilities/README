@@ -142,26 +142,6 @@ Example:
 
 unsigned int mult = uncorrectedMultiplicity(evt);
 
-** StuJitterBug: Function to Abort a T0 jitter event
-----------------------------------------------------
-Files:       StuJitterBug.hh
-Author:      Peter G. Jones
-Date:        Sep 20, 2000
-Description:
-Contains a function which can be called to detect events in
-which the CTB signal is out of time (so-called T0 jitter).
-The algorithm sums over all slats the CTB signal for the event
-and the pre-sample preceding it. If the pre-sample is greater
-than 1% of the event sample, the function returns kTRUE.
-Else, it retruns kFALSE. Abort the event if kTRUE. You don't
-need to load any library to use it, just include the header file.
-Here's how:
-
-#include "StuJitterBug.hh"
-
-StEvent *event;
-if( jitterBugAbort(event) ) return kStWarn;
-
 <next entry comes here>
 
 

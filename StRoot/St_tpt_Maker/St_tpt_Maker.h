@@ -1,8 +1,5 @@
-// $Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $
+// $Id: St_tpt_Maker.h,v 1.15 2000/06/15 19:06:15 aihong Exp $
 // $Log: St_tpt_Maker.h,v $
-// Revision 1.16  2000/11/03 21:23:43  saulys
-// Added ExB correction code
-//
 // Revision 1.15  2000/06/15 19:06:15  aihong
 // ensemble truncation for de/dx calculation added
 //
@@ -62,8 +59,6 @@
 #include "StMaker.h"
 #endif
 
-#include "StDbUtilities/StMagUtilities.h"
-
 class St_tpg_pad_plane;
 class St_tcl_tpc_index_type;
 class St_tpt_pars;
@@ -88,7 +83,7 @@ private:
   TString m_InputDataSetName; //! 
   TString m_InputHitName; //!
 
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.15 2000/06/15 19:06:15 aihong Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -97,7 +92,6 @@ private:
   St_tte_control        *m_tte_control;		//! Control switches for the evaluation 
   St_tdeparm            *m_tdeparm;   		//! Parameters for the tde dedx module
   St_tpipar             *m_tpipar;    		//! parameter file for tpi package
-  StMagUtilities            *m_mag;                 //! ExB code
   void         MakeHistograms();// Histograms for tracking
   void         VertexEffResolutionInit();// Initial function  for VertexEffResolution
   void         VertexEffResolutionMakeHistograms();// Histograms for VertexEffResolution
@@ -213,7 +207,7 @@ public:
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.15 2000/06/15 19:06:15 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };

@@ -205,7 +205,7 @@ C--   skip all tracks with impact parameter .lt. dcapnmin
               ycom(1)=0
               ycom(2)=0
               iflag1=0
-              call ev0_vzero_geom(ev0par(det_id).dca,
+              call ev0_vzero_geom(ev0par(det_id).dca**2,
      +             trak(i).xc,trak(j).xc,
      +             trak(i).rc,trak(j).rc,xcom,ycom,iflag1)
               IF(iflag1.eq.5) GOTO 20

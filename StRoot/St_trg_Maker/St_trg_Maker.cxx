@@ -1,8 +1,5 @@
-// $Id: St_trg_Maker.cxx,v 1.20 2000/10/02 19:41:54 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.19 2000/08/19 19:51:55 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
-// Revision 1.20  2000/10/02 19:41:54  ward
-// Added DSMInput and DetectorBusy to trigger DST output (dst_L0_Trigger).
-//
 // Revision 1.19  2000/08/19 19:51:55  ward
 // Change physics mask from 0x2XXX to 0x4XXX.
 //
@@ -137,9 +134,7 @@ void St_trg_Maker::SecondDstDaq(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
   tt->TriggerActionWd  = GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd;
-  tt->DSMInput         = GraceSlick->EvtDesc.TCU2.FIFO2.DSMInput;        // Oct 2 2000
   tt->TriggerWd        = GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd;
-  tt->DetectorBusy     = GraceSlick->EvtDesc.TCU3.FIFO3.DetectorBusy;    // Oct 2 2000
   for(i=0;i<32;i++) tt->CPA[i]=GraceSlick->TrgSum.DSM.CPA[i];
   tt->MWC_CTB_mul      = GraceSlick->TrgSum.DSM.lastDSM[2]; // Per Hank Crawford, Jan 6 2000.
   tt->MWC_CTB_dipole   = 0;

@@ -1,18 +1,8 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.7 2000/09/08 22:55:06 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.5 2000/08/24 22:11:35 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
-// Revision 1.7  2000/09/08 22:55:06  suaide
-// some modifications to compile on Solaris
-//
-// Revision 1.6  2000/09/08 21:48:00  suaide
-//
-//
-// See README for details
-//
 // Revision 1.5  2000/08/24 22:11:35  suaide
-//
-//
 // restored some files for background compatibility
 //
 // Revision 1.4  2000/08/24 19:45:37  suaide
@@ -62,8 +52,18 @@
 
 // added for StEvent
 
-#include "StEvent/StEvent.h" 
-#include "StEvent/StEventTypes.h"
+#include "StEvent.h" 
+#include "StEventTypes.h"
+#include "St_ObjectSet.h"
+#include "StEmcCollection.h"
+#include "StEmcDetector.h"
+#include "StEmcModule.h"
+#include "StEmcRawHit.h"
+#include "StEmcClusterCollection.h"
+#include "StEmcCluster.h"
+#include "StEmcPoint.h"
+#include "StEnumerations.h"
+#include "StContainers.h"
 
 
 ClassImp(StPreEclMaker)
@@ -76,7 +76,7 @@ TArrayI       mSizeMaxConf(8);
 TArrayF       mEnergySeedConf(8);
 TArrayF       mEnergyAddConf(8);
 TArrayF       mEnergyThresholdAllConf(8);
-Bool_t        kCheckClustersOkConf[8];
+
 StEmcCollection* emc;
 
 //_____________________________________________________________________________
@@ -91,13 +91,10 @@ StPreEclMaker::~StPreEclMaker()
 Int_t StPreEclMaker::Init()
 {
   //Setting default cluster conditions ...
-  SetClusterConditions("bemc",4,0.1,0.001,0.02,kFALSE);
-  SetClusterConditions("bprs",4,0.1,0.001,0.2,kFALSE);
-  SetClusterConditions("bsmde",5,0.08,0.001,0.001,kFALSE);
-  SetClusterConditions("bsmdp",5,0.08,0.001,0.001,kFALSE);
-  
-  Int_t greta[4]={40,40,300,20}; // eta bins
-  Int_t grphi[4]={40,40,60,900}; // phi bins
+  SetClusterConditions("bemc",4,0.1,0.001,0.02);
+  SetClusterConditions("bprs",4,0.1,0.001,0.2);
+  SetClusterConditions("bsmde",5,0.08,0.001,0.001);
+  SetClusterConditions("bsmdp",5,0.08,0.001,0.001);
   
   //Making QA histgrams
   m_ncl  = new TH2F("Ncluster","Number of cluster(log) .vs. Detector #",40,0.0,4.0, 4,0.5,4.5);
@@ -112,8 +109,8 @@ Int_t StPreEclMaker::Init()
     TString name_e = detname[i] + "_cluster_energy";
     TString tit_h  = detname[i] + " cluster";
     TString tit_e  = detname[i] + " energy of cluster";
-    m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI, M_PI);
-    m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI, M_PI);
+    m_cl[i]     = new TH2F(name_h,tit_h,100,-1.0,1.0,100,-M_PI, M_PI);
+    m_energy[i] = new TH2F(name_e,tit_e,100,-1.0,1.0,100,-M_PI, M_PI);
 
     TString name_m  = detname[i] + "ClNum";
     TString tit_m   = "Number hits in cluster for " + detname[i];
@@ -121,15 +118,15 @@ Int_t StPreEclMaker::Init()
 
     TString name_en  = detname[i] + "ClEnergy";
     TString tit_en   = "Energy of cluster for " + detname[i];
-    m_EnergyCl[i]    = new TH1F(name_en, tit_en, 2000, 0.0, 20.0);
+    m_EnergyCl[i]    = new TH1F(name_en, tit_en, 1000, 0.0, 10.0);
 
     TString name_eta  = detname[i] + "Eta";
     TString tit_eta   = "Eta of clusters for " + detname[i];
-    m_EtaInCl[i]   = new TH1F(name_eta, tit_eta, greta[i], -1., 1.);
+    m_EtaInCl[i]   = new TH1F(name_eta, tit_eta, 100, -1., 1.);
 
     TString name_phi  = detname[i] + "Phi";
     TString tit_phi   = "Phi of clusters for " + detname[i];
-    m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -M_PI, M_PI);
+    m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, 100, -4., 4.);
   }
   return StMaker::Init();
 }  
@@ -143,47 +140,46 @@ Int_t StPreEclMaker::Make()
   
   if(!currevent)
   {
-    cout << "***** Can not get StEvent pointer\n";
+    cout << "***** Can not get Event pointer\n";
     kStEvOk=kFALSE;
   }
   else
   {
-    cout << "***** StEvent pointer Ok\n";
+    cout << "***** Event pointer Ok\n";
     kStEvOk=kTRUE;
     emc=currevent->emcCollection();
   }
-    
-  if(!emc) // if not emcCollection, try to get from St_emc_Maker or creates one and fill it with hits from emc
+  
+  if(!emc) // if not emcCollection, create one and fill it with hits from emc
   {
-      cout <<"***** No emc object. Creating one ..\n";
-      emc = new StEmcCollection();
-      St_DataSetIter itr(GetDataSet("emc_hits"));
-      StEmcHitCollection* hit=0;
-      while((hit = (StEmcHitCollection*)itr()))
-      {
-        TString name = hit->GetName();
-        for(Int_t i=0; i<8; i++)
-        {  
-          if(!strcmp(name.Data(),detname[i].Data()))
+    cout <<"***** No emc object. Creating one ..\n";
+    emc = new StEmcCollection();
+    St_DataSetIter itr(GetDataSet("emc_hits"));
+    StEmcHitCollection* hit=0;
+    while((hit = (StEmcHitCollection*)itr()))
+    {
+      TString name = hit->GetName();
+      for(Int_t i=0; i<8; i++)
+      {  
+        if(!strcmp(name.Data(),detname[i].Data()))
+        {
+          StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+          //Create StEmcDetector
+          StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
+          //Create StEmcHit
+          for(Int_t j=0; j<hit->NHit(); j++)
           {
-            StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
-            //Create StEmcDetector
-            StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
-            //Create StEmcHit
-            for(Int_t j=0; j<hit->NHit(); j++)
-            {
-	            Float_t energy=hit->HitEnergy(j);
-              Int_t hid=hit->HitId(j);
-              Int_t module,eta,sub;
-              hit->getBin(hid,module,eta,sub);
-              StEmcRawHit *rawHit=new StEmcRawHit(id,(UInt_t)module,(UInt_t)eta,(UInt_t)sub,0,energy);
-  	          detector->addHit(rawHit);
-            }
-            emc->setDetector(detector);
-          } 
-        }
+	          Float_t energy=hit->HitEnergy(j);
+            Int_t hid=hit->HitId(j);
+            Int_t module,eta,sub;
+            hit->getBin(hid,module,eta,sub);
+            StEmcRawHit *rawHit=new StEmcRawHit(id,(UInt_t)module,(UInt_t)eta,(UInt_t)sub,0,energy);
+  	        detector->addHit(rawHit);
+          }
+          emc->setDetector(detector);
+        } 
       }
-    
+    }
     if(kStEvOk) 
     {
       currevent->setEmcCollection(emc);
@@ -209,7 +205,6 @@ Int_t StPreEclMaker::Make()
       cc->setEnergySeed(mEnergySeedConf[i]);
       cc->setEnergyAdd(mEnergyAddConf[i]);
       cc->setEnergyThresholdAll(mEnergyThresholdAllConf[i]);
-      cc->setCheckClusters(kCheckClustersOkConf[i]);
 //      cc->printConf();
   	  if(cc->findClusters()!= kStOK) return kStErr;
     }
@@ -218,7 +213,7 @@ Int_t StPreEclMaker::Make()
   MakeHistograms(); // Fill QA histgrams
   fillStEvent(); 
   
-  AddData(new St_ObjectSet("PreEclEmcCollection",emc));
+  AddData(new St_ObjectSet("EmcCollection",emc));
   cout <<"***** New EmcCollection on local .data\n";
     
   return kStOK;
@@ -331,9 +326,16 @@ Int_t StPreEclMaker::fillStEvent()
           clus->setSigmaEta(sigmaeta);
           clus->setSigmaPhi(sigmaphi);
             
+//          cout <<"**********************************************************************\n";
+//          cout <<"Cluster Information for detector "<<detname[idet].Data()<<"\n";
+//          cout <<"Eta = "<<eta<<"  Phi = "<<phi<< "  Energy = "<<energy<<"\n";
+//          cout <<"Number of hits = "<<cl->Nhits()<<"\n";
+            
+//          cout <<"Hits Information\n";
           for(Int_t kk=0;kk<cl->Nhits();kk++)
           {
-            clus->addHit(RawHit[cl->ID(kk)]);
+//            cout <<"Hit number = "<<kk<<"  module = " << RawHit[kk]->module()<<"  eta = "<<RawHit[kk]->eta() << "  sub = "<< RawHit[kk]->sub() <<"  energy = "<<RawHit[kk]->energy()<<"\n";
+            clus->addHit(RawHit[kk]);
           }   
           
           cluscoll->addCluster(clus);
@@ -361,26 +363,11 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
     }
   }
 }
-//_____________________________________________________________________________
-void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
-                                            Float_t mEnergySeed,
-                                            Float_t mEnergyAdd,
-                                            Float_t mEnergyThresholdAll,
-                                            Bool_t  kCheckClustersOk)
-{
-  SetClusterConditions(cdet,mSizeMax,mEnergySeed,mEnergyAdd,mEnergyThresholdAll);
-  for(Int_t i=0;i<8;i++)
-  {
-    if(!strcmp(cdet,detname[i].Data()))
-    {
-      kCheckClustersOkConf[i]=kCheckClustersOk;
-    }
-  }
-}
+
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.7 2000/09/08 22:55:06 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.5 2000/08/24 22:11:35 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

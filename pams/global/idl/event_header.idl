@@ -14,8 +14,7 @@
   long   exp_run_id;        /* Reference to the experiment run ID number   */
   long   time;              /* Unique time stamp for event                 */
   long   trig_mask;         /* Trigger mask                                */
-  long   bunch_cross;       /* Beam-Beam bunch crossing number (obselete, to be removed later?) */
-  unsigned long bunchXing[2]; /* bunch crossing lo and hi */
+  long   bunch_cross;       /* Beam-Beam bunch crossing number             */
  } ;
-/*  Last mod. for event_header:   $Date: 2000/08/31 19:07:30 $ */
+/*  Last mod. for event_header:   $Date: 1999/10/01 02:14:07 $ */
 

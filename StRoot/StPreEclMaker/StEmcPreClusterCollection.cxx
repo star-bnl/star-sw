@@ -2,23 +2,7 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
-// Revision 1.7  2000/10/17 19:37:17  suaide
-// Small bug fixed
-//
-// Revision 1.6  2000/09/08 22:55:05  suaide
-//
-//
-//
-// some modifications to compile on Solaris
-//
-// Revision 1.5  2000/09/08 21:47:59  suaide
-//
-//
-// See README for details
-//
 // Revision 1.4  2000/08/24 22:11:34  suaide
-//
-//
 // restored some files for background compatibility
 //
 // Revision 1.3  2000/08/24 19:45:37  suaide
@@ -66,8 +50,8 @@
 #include "StEmcPreClusterCollection.h"
 #include <math.h>
 #include "emc_def.h"
-#include "StEvent/StEvent.h" 
-#include "StEvent/StEventTypes.h"
+#include "StEvent.h" 
+#include "StEventTypes.h"
 #include "StEmcUtil/StEmcGeom.h"
 ClassImp(StEmcPreClusterCollection)
 
@@ -97,7 +81,6 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   
   mDet=stdet;
   geo=new StEmcGeom(Name);
-  kCheckClustersOk=kFALSE;
    
   if(!strcmp(Name,"bemc"))
   {
@@ -115,13 +98,13 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   {
     mDetector  = 3;     mEnergySeed         = 0.08; 
     mEnergyAdd = 0.001; mEnergyThresholdAll = 0.001;  
-    mSizeMax = 5;       kCheckClustersOk = kTRUE; 
+    mSizeMax = 5; 
   }
   else if(!strcmp(Name,"bsmdp"))
   {
     mDetector  = 4;     mEnergySeed         = 0.08; 
     mEnergyAdd = 0.001; mEnergyThresholdAll = 0.001;  
-    mSizeMax = 5;       kCheckClustersOk = kTRUE;
+    mSizeMax = 5; 
   }
   else
   {
@@ -167,24 +150,17 @@ Int_t StEmcPreClusterCollection::findClusters()
         jh=ih-first;
         energyw[jh] = hits[ih]->energy();
         ew[jh]=hits[ih]->eta();
-        sw[jh]=abs(hits[ih]->sub());
+        sw[jh]=abs(hits[jh]->sub());
       }
 
       idBeforeClustering=mNclusters;
       findClustersInModule(mod);
       idAfterClustering=mNclusters;
-      if(kCheckClustersOk) checkClustersInModule(mod);
+      checkClustersInModule(mod);
     
     }
   }
-  if(kCheckClustersOk)
-  {
-    printf("before check: Det %s #Clusters %i \n",GetName(), mNclusters);
-    mClusters.Compress();
-    mNclusters=mClusters.GetLast()+1;
-    printf("after check: Det %s #Clusters %i \n",GetName(), mNclusters);
-  }
-  else printf("Det %s #Clusters %i \n",GetName(), mNclusters);
+  printf("Det %s #Clusters %i \n",GetName(), mNclusters);
   return 0;
 }
 //_____________________________________________________________________________
@@ -349,27 +325,17 @@ Int_t StEmcPreClusterCollection::testOnNeighbor(Int_t jn)
   return 1;
 }
 //_____________________________________________________________________________
-void StEmcPreClusterCollection::setCheckClusters(Bool_t Ok)
-{
-  kCheckClustersOk=Ok;
-  return;
-}
-
-//_____________________________________________________________________________
 void StEmcPreClusterCollection::checkClustersInModule(Int_t mod)
 // Added by A. A. P. Suaide. not ready yet...
 {
-
+/*
   Int_t nclus=idAfterClustering-idBeforeClustering;
   if(nclus==0) return;
   StSPtrVecEmcRawHit& hits=mDet->module(mod)->hits();
-  TArrayI ne(nclus);
-  for(Int_t i=0;i<nclus;i++) ne[i]=-1;
-
-// find neighbohor clusters in bsmde
-  
   if(!strcmp(GetName(),"bsmde"))
   {
+    TArrayI ne(nclus);
+    for(Int_t i=0;i<nclus;i++) ne[i]=-1;
     for(Int_t i=0;i<nclus-1;i++)
     {
       Int_t clnumi=i+idBeforeClustering;
@@ -401,186 +367,13 @@ void StEmcPreClusterCollection::checkClustersInModule(Int_t mod)
         if (deta==1) ne[i]=j;
       }
     }
-    applyProfile(mod,ne);
+    cout <<"clusters for bsmde detector for module "<<mod<<"\n";
+    for(Int_t i=0;i<nclus;i++) cout <<" cluster = "<<i<<"  Tarray = "<<neigh[i]<<"\n";
   }
-  
-// find neighbohor clusters in bsmdp
   if(!strcmp(GetName(),"bsmdp"))
   {
-    for(Int_t i=0;i<nclus-1;i++)
-    {
-      Int_t clnumi=i+idBeforeClustering;
-      StEmcPreCluster *ci=(StEmcPreCluster*)mClusters[clnumi];
-      Int_t nhitsi=ci->Nhits();
-      Float_t etai=ci->Eta();
-      Int_t submini=15,submaxi=0; 
-      for(Int_t k=0;k<nhitsi;k++)
-      {
-        Int_t sub=hits[ci->ID(k)]->sub();
-        if(sub<submini) submini=sub;
-        if(sub>submaxi) submaxi=sub;
-      }
-      for(Int_t j=i+1;j<nclus;j++)
-      {
-        Int_t clnumj=j+idBeforeClustering;
-        StEmcPreCluster *cj=(StEmcPreCluster*)mClusters[clnumj];
-        Int_t nhitsj=cj->Nhits();
-        Float_t etaj=cj->Eta();
-        if(fabs(etai-etaj)<0.000001)
-        {
-          Int_t subminj=15,submaxj=0;
-          for(Int_t k=0;k<nhitsj;k++)
-          {
-            Int_t sub=hits[cj->ID(k)]->sub();
-            if(sub<subminj) subminj=sub;
-            if(sub>submaxj) submaxj=sub;
-          }
-          Int_t dsub;
-          if(submaxi<subminj) dsub=subminj-submaxi;
-          else if(submaxj<submini) dsub=submini-submaxj;
-          else dsub=0;
-          if (dsub==1) ne[i]=j;
-        }
-      }
-    }
-    applyProfile(mod,ne);
   }
-}
-//_____________________________________________________________________________
-Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
-{
-  StSPtrVecEmcRawHit& hits=mDet->module(mod)->hits();
-  Int_t nclus=idAfterClustering-idBeforeClustering;
-  Int_t maxApply=0;
-  TArrayI used(nclus),applyOnThese(nclus);
-  
-  for(Int_t i=0;i<nclus;i++)
-  {
-    if(ne[i]>-1 && used[i]==0)
-    {
-      Int_t j=i;
-      maxApply=0;
-      do
-      {
-        used[j]=1;
-        applyOnThese[maxApply]=j;
-        j=ne[j];
-        maxApply++;
-      } while (j>-1);
-      
-      // setting arrays with clusters and positions to evaluate chisqr
-      Int_t nh=0;
-      for(Int_t j=0;j<maxApply;j++)
-      {
-        nh+= ((StEmcPreCluster*)mClusters[applyOnThese[j]+idBeforeClustering])->Nhits();
-      }
-      
-      TArrayF x(nh),y(nh);
-      Int_t index=0;
-      for(Int_t j=0;j<maxApply;j++)
-      {
-        StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[j]+idBeforeClustering];
-        for(Int_t k=0;k<c->Nhits();k++)
-        {
-          Int_t m=hits[c->ID(k)]->module();
-          Int_t e=hits[c->ID(k)]->eta();
-          Int_t s=abs(hits[c->ID(k)]->sub());
-          Float_t xtemp;
-          if(!strcmp(GetName(),"bsmde")) geo->getEta(m,e,xtemp);
-          if(!strcmp(GetName(),"bsmdp")) geo->getPhi(m,s,xtemp);
-          x[index]=xtemp;
-          y[index]=hits[c->ID(k)]->energy();
-          index++;
-        }
-      }
-      // finished setting arrays
-      
-      // starting doing combinations on clusters
-      Int_t shiftmin=0,inimin=0;
-      Float_t chimin=1e30;
-      for (Int_t ini=0;ini<maxApply-1;ini++)
-      {
-        for(Int_t shift=0+1*(ini!=0);shift<maxApply-ini;shift++)
-        {
-          Int_t nc=0,ncmax=maxApply-shift;
-          TArrayF xavg(ncmax),en(ncmax);
-          
-          for(Int_t clus=0;clus<maxApply;clus++)
-          {
-            StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[clus]+idBeforeClustering];
-            
-            if(!strcmp(GetName(),"bsmde")) xavg[nc]+=c->Eta()*c->Energy();
-            if(!strcmp(GetName(),"bsmdp")) xavg[nc]+=c->Phi()*c->Energy();
-            en[nc]+=c->Energy();
-            
-            if (clus<ini || clus>=ini+shift) 
-            {
-              xavg[nc]/=en[nc];
-              nc++;
-            }         
-          }
-          
-          // applying chisqr test for this combination
-          Float_t chi=calcChiSqrt(nc,en,xavg,nh,x,y);
-          if(chi<chimin)
-          {
-            chimin=chi;
-            shiftmin=shift;
-            inimin=ini;
-          }
-          // finished applying chisqrt test for this combination
-        } 
-      }
-      if(inimin!=0 || shiftmin!=0) setNewClusters(mod,inimin,shiftmin,applyOnThese);
-      // finished doing combinations on clusters
-    }
-  } 
-  return 0;  
-}
-//_____________________________________________________________________________
-Float_t StEmcPreClusterCollection::calcChiSqrt(Int_t nc,TArrayF en,TArrayF xavg,Int_t nh,TArrayF x,TArrayF y)
-{
-  Float_t chi=0.0,yprofile;
-  for(Int_t i=0;i<nh;i++)
-  {
-    Float_t yprofile=0.0;
-    for(Int_t j=0;j<nc;j++) yprofile+=profile(x[i],xavg[j],en[j]);
-    Float_t sigma=0.15*sqrt(y[i]);
-    chi+=(y[i]-yprofile)*(y[i]-yprofile)/(sigma*sigma);
-  }
-  chi=sqrt(chi/(nh-nc));
-  return chi;
-}
-//_____________________________________________________________________________
-void StEmcPreClusterCollection::setNewClusters(Int_t mod,Int_t ini,Int_t shift,TArrayI applyOnThese)
-{
-  Float_t eta=0,phi=0,en=0;
-  Int_t nhits=0,index=0;
-  for(Int_t clus=ini;clus<=ini+shift;clus++)
-  {
-    StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[clus]+idBeforeClustering];
-    nhits+=c->Nhits();        
-    eta+=c->Eta()*c->Energy();
-    phi+=c->Phi()*c->Energy();
-    en+=c->Energy();
-  }   
-  TArrayI newhits(nhits);
-  for(Int_t clus=ini;clus<=ini+shift;clus++)
-  {
-    StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[clus]+idBeforeClustering];
-    for(Int_t i=0;i<c->Nhits();i++)
-    {
-      newhits[index]=c->ID(i);
-      index++;
-    }            
-  }  
-  eta/=en;
-  phi/=en;
-  StEmcPreCluster *c=new StEmcPreCluster(mod,&newhits,mDetector);
-  c->calcMeanAndRms(mDet,mod);
-  mClusters.AddAt(c,applyOnThese[ini]+idBeforeClustering);
-  for(Int_t i=ini+1;i<=ini+shift;i++) mClusters[applyOnThese[i]+idBeforeClustering]=0;
-
+*/
 }
 //_____________________________________________________________________________
 Float_t StEmcPreClusterCollection::profile(Float_t x,Float_t xavg,Float_t e)
@@ -592,7 +385,7 @@ Float_t StEmcPreClusterCollection::profile(Float_t x,Float_t xavg,Float_t e)
     sig1=0.002638-0.0002124*log(e);
     A2=0.02278+0.01308*e+0.0008117*e*e;
     sig2=0.01268-0.01074*exp(-e)*pow(e,0.2686);
-    assym=1.069+1.975*fabs(xavg); 
+    assym=1.069+1.975*fabs(x); 
   }
   if(!strcmp(GetName(),"bsmdp"))
   {
@@ -603,12 +396,9 @@ Float_t StEmcPreClusterCollection::profile(Float_t x,Float_t xavg,Float_t e)
     assym=1;
   }
   if((fabs(x)-fabs(xavg))>0) assym2=assym;
-  
-    
-    exp1= A1*exp(-fabs(x-xavg)/(sig1));
-    exp2= A2*exp(-fabs(x-xavg)/(sig2*assym2));
-    if (sig2<=sig1) exp2=0;
-  
+  exp1= A1*exp(-fabs(x-xavg)/(sig1));
+  exp2= A2*exp(-fabs(x-xavg)/(sig2*assym2));
+  if (sig2<=sig1) exp2=0;
   return (exp1+exp2);
 }
 //_____________________________________________________________________________
@@ -649,7 +439,7 @@ void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start)
   if(start+n>=mNclusters) n=mNclusters-start;
   for(Int_t i=start; i<start+n; i++){
     if(i<=mClusters.Capacity()){
-      if( (cl=(StEmcPreCluster*)next()) ) printCluster(i,cl);
+      if( cl=(StEmcPreCluster*)next() ) printCluster(i,cl);
     }
     else cout<<" PreCluster "<<i<<" out of capacity "<<endl;
   }

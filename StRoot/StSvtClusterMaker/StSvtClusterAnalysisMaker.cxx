@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.7 2000/10/31 16:20:57 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.4 2000/08/21 13:06:58 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,15 +10,6 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
- * Revision 1.7  2000/10/31 16:20:57  caines
- * Added more functions to make the code more readable
- *
- * Revision 1.6  2000/09/14 22:17:57  caines
- * Put back in flagging hot anodes and timebuckets
- *
- * Revision 1.5  2000/08/29 22:46:26  caines
- * Fixed some memory leaks
- *
  * Revision 1.4  2000/08/21 13:06:58  caines
  * Much improved hit finding and fitting
  *
@@ -94,8 +85,7 @@ StSvtClusterAnalysisMaker::~StSvtClusterAnalysisMaker(){
 //_____________________________________________________________________________________________
 Int_t StSvtClusterAnalysisMaker::Init()
 {
-  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"
-				 << GetName() <<endm;
+  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"<<endm;
 
   mNoEvents=0;
   
@@ -239,9 +229,8 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
 
 Int_t StSvtClusterAnalysisMaker::Make()
 {
+  cout<<" In StSvtClusterAnalysisMaker::Make()"<<endl;
 
-  if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Make() ..."
-				 <<  GetName() << endm;
   SetClusterAnalysis();
 
   MakeHistograms();
@@ -287,7 +276,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis();
-          mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
+          //mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
           //mSvtAnalysis->Report(index);
 
 
@@ -387,8 +376,10 @@ Int_t StSvtClusterAnalysisMaker::GetRawData(int index)
 
   int counter = 0;
 
+  cout<<"\n\n";
   int an  = 0;
   int seq = 0, mseq = 0;
+
   do 
     {
      while(an + 1)
@@ -484,7 +475,6 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
          for(int clu = 0; clu < mNumOfClusters; clu++)
            {
 	     
-	     mTotNumOfClusters += mNumOfClusters;
 
             tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
             mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
@@ -508,8 +498,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 	         }
 	       
 	      }
-	   }
-	 delete [] tempMemberInfo;
+          }
 	} //hybrid loop
       } //wafer loop
    } //ladder loop
@@ -524,8 +513,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 
 Int_t StSvtClusterAnalysisMaker::Finish(){
 
- if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Finish() ..."
-				<<   GetName() << endm;
+  printf("In StSvtClusterAnalysisMaker::Finish() ...\n"); 
 
   return kStOK;
 }

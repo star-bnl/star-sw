@@ -1,10 +1,6 @@
-// $Id: StFtpcV0.cc,v 1.4 2000/11/16 12:48:05 jcs Exp $
+// $Id: StFtpcV0.cc,v 1.3 2000/01/03 13:16:08 jcs Exp $
 //
 // $Log: StFtpcV0.cc,v $
-// Revision 1.4  2000/11/16 12:48:05  jcs
-// Save FTPC vzero inforamtion in correct banks
-// Use correct FTPC track class
-//
 // Revision 1.3  2000/01/03 13:16:08  jcs
 // Add CVS Id strings
 //
@@ -16,8 +12,8 @@
 
 #include "StFtpcV0.hh"
 
-StFtpcV0::StFtpcV0(StFtpcV0Track track1,
-               StFtpcV0Track track2):StFtpcV0Track()
+StFtpcV0::StFtpcV0(StFtpcTrack track1,
+               StFtpcTrack track2):StFtpcTrack()
 {
 
   mTrack1Mass =0;

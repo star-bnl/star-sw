@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.10 2000/08/31 22:31:31 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.9 2000/05/25 21:54:16 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,13 +13,6 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
- * Revision 1.10  2000/08/31 22:31:31  laue
- * StHbtAnalysis: output changed (a little bit less)
- * StHbtEvent: new version, members for reference mult added
- * StHbtIOBinary: new IO for new StHbtEvent version
- * StHbtTypes: TTree typedef to StHbtTTree added
- * StHbtVertexAnalysis: overflow and underflow added
- *
  * Revision 1.9  2000/05/25 21:54:16  laue
  * RotateZ implemented. Rotates momentum and helix around the z axis
  *
@@ -76,8 +69,6 @@ public:
   int NumberOfTpcHits() const;
   unsigned short NumberOfTracks() const;
   unsigned short NumberOfGoodTracks() const;
-  unsigned int UncorrectedNumberOfPositivePrimaries() const;
-  unsigned int UncorrectedNumberOfNegativePrimaries() const;
   float ReactionPlane() const;
   float ReactionPlaneError() const;
   StHbtThreeVector PrimVertPos() const;
@@ -91,8 +82,6 @@ public:
   void SetNumberOfTpcHits(const int&);
   void SetNumberOfTracks(const unsigned short&);
   void SetNumberOfGoodTracks(const unsigned short&);
-  void SetUncorrectedNumberOfPositivePrimaries(const unsigned int&);
-  void SetUncorrectedNumberOfNegativePrimaries(const unsigned int&);
   void SetReactionPlane(const float&);
   void SetReactionPlaneError(const float&);
   void SetPrimVertPos(const StHbtThreeVector&);
@@ -109,8 +98,6 @@ private:
   int mTpcNhits;                         // number of TPC hits
   unsigned short mNumberOfTracks;     // total number of TPC tracks
   unsigned short mNumberOfGoodTracks; // number of "good" tracks
-  unsigned int mUncorrectedNumberOfPositivePrimaries;
-  unsigned int mUncorrectedNumberOfNegativePrimaries;
   float mReactionPlane[2]; //reaction plane/error  //   
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
@@ -119,32 +106,43 @@ private:
   friend class StHbtIOBinary;
 };
 
-inline void StHbtEvent::SetEventNumber(const unsigned short& event){mEventNumber = event;}
-inline void StHbtEvent::SetCtbMult(const unsigned short& mult){mCtbMultiplicity = mult;}
-inline void StHbtEvent::SetZdcAdcEast(const unsigned short& adc){mZdcAdc[0]= adc;}
-inline void StHbtEvent::SetZdcAdcWest(const unsigned short& adc){mZdcAdc[1]=adc;}
-inline void StHbtEvent::SetNumberOfTpcHits(const int& nhits){mTpcNhits = nhits;}
-inline void StHbtEvent::SetNumberOfTracks(const unsigned short& tracks){mNumberOfTracks = tracks;}
-inline void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){mNumberOfGoodTracks = tracks;}
-inline void StHbtEvent::SetUncorrectedNumberOfPositivePrimaries(const unsigned int& tracks){mUncorrectedNumberOfPositivePrimaries = tracks;}
-inline void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned int& tracks){mUncorrectedNumberOfNegativePrimaries = tracks;}
-inline void StHbtEvent::SetReactionPlane(const float& rp){mReactionPlane[0] = rp ;}
-inline void StHbtEvent::SetReactionPlaneError(const float& rp ){mReactionPlane[1]=rp;}
-inline void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
+inline void StHbtEvent::SetEventNumber(const unsigned short& event){
+mEventNumber = event;}
+inline void StHbtEvent::SetCtbMult(const unsigned short& mult){
+mCtbMultiplicity = mult;}
+inline void StHbtEvent::SetZdcAdcEast(const unsigned short& adc){
+mZdcAdc[0]= adc;}
+inline void StHbtEvent::SetZdcAdcWest(const unsigned short& adc){
+mZdcAdc[1]=adc;}
+inline void StHbtEvent::SetNumberOfTpcHits(const int& nhits){
+mTpcNhits = nhits;}
+inline void StHbtEvent::SetNumberOfTracks(const unsigned short& tracks){
+mNumberOfTracks = tracks;}
+inline void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){
+mNumberOfGoodTracks = tracks;}
+inline void StHbtEvent::SetReactionPlane(const float& rp){
+mReactionPlane[0] = rp ;}
+inline void StHbtEvent::SetReactionPlaneError(const float& rp ){
+mReactionPlane[1]=rp;}
+inline void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){
+mPrimVertPos = vp;}
 
 inline  unsigned short StHbtEvent::EventNumber() const {return mEventNumber;}
 inline  unsigned short StHbtEvent::CtbMult() const {return mCtbMultiplicity;}
 inline  unsigned short StHbtEvent::ZdcAdcEast() const {return mZdcAdc[0];}
 inline  unsigned short StHbtEvent::ZdcAdcWest() const {return mZdcAdc[1];}
 inline  int            StHbtEvent::NumberOfTpcHits() const {return mTpcNhits;}
-inline  unsigned short StHbtEvent::NumberOfTracks() const {return mNumberOfTracks;}
-inline  unsigned short StHbtEvent::NumberOfGoodTracks() const {return mNumberOfGoodTracks;}
-inline unsigned int StHbtEvent::UncorrectedNumberOfPositivePrimaries() const {return mUncorrectedNumberOfPositivePrimaries;}
-inline unsigned int StHbtEvent::UncorrectedNumberOfNegativePrimaries() const {return mUncorrectedNumberOfNegativePrimaries;}
-inline  float          StHbtEvent::ReactionPlane() const {return mReactionPlane[0];}
-inline  float          StHbtEvent::ReactionPlaneError() const {return mReactionPlane[1];}
+inline  unsigned short StHbtEvent::NumberOfTracks() const {
+return mNumberOfTracks;}
+inline  unsigned short StHbtEvent::NumberOfGoodTracks() const {
+return mNumberOfGoodTracks;}
+inline  float          StHbtEvent::ReactionPlane() const {
+return mReactionPlane[0];}
+inline  float          StHbtEvent::ReactionPlaneError() const {
+return mReactionPlane[1];}
 inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
-inline StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}
+inline StHbtV0Collection* StHbtEvent::V0Collection() const 
+{return mV0Collection;}
 inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
 
 

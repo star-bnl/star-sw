@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcDimensions.cxx,v 1.7 2000/11/14 22:00:05 genevb Exp $
+ * $Id: StRTpcDimensions.cxx,v 1.6 2000/02/15 22:21:47 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StRTpcDimensions.cxx,v $
- * Revision 1.7  2000/11/14 22:00:05  genevb
- * Switched several functions from float to double
- *
  * Revision 1.6  2000/02/15 22:21:47  hardtke
  * Add effective drift distances
  *
@@ -22,8 +19,8 @@
  **************************************************************************/
 #include "StRTpcDimensions.h"
 
-double StRTpcDimensions::gatingGridZ() const {
-  double distance;
+float StRTpcDimensions::gatingGridZ() const {
+  float distance;
   if (wp && pp){
   distance = pp->outerSectorPadPlaneZ() - wp->outerSectorGatingGridPadPlaneSeparation();
   }
@@ -33,11 +30,11 @@ double StRTpcDimensions::gatingGridZ() const {
   return distance;
 }
 
-double StRTpcDimensions::innerEffectiveDriftDistance() const {
+float StRTpcDimensions::innerEffectiveDriftDistance() const {
   return gatingGridZ() + zInnerOffset();
 }
 
-double StRTpcDimensions::outerEffectiveDriftDistance() const {
+float StRTpcDimensions::outerEffectiveDriftDistance() const {
   return gatingGridZ() + zOuterOffset();
 }
 

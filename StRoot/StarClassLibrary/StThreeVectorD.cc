@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.6 2000/10/26 21:13:59 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.3 1999/10/15 15:46:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,17 +10,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
- * Revision 1.6  2000/10/26 21:13:59  perev
- * assert.h include added
- *
- * Revision 1.6  2000/10/26 21:13:59  perev
- * assert.h include added
- *
- * Revision 1.5  2000/09/30 17:14:27  perev
- * Streame added to ThreeVector
- *
- * Revision 1.4  2000/09/28 02:06:10  perev
- * non automatic streamer added
+ * Revision 1.3  1999/10/15 15:46:49  ullrich
+ * Changed output format in operator<<
  *
  * Revision 1.3  1999/10/15 15:46:49  ullrich
  * Changed output format in operator<<
@@ -36,9 +27,8 @@
  * Revision 1.1  1999/01/23 00:29:23  ullrich
  * Initial Revision
  *
- **************************************************************************/
+
 #include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
 #include <assert.h>
 #ifdef __ROOT__
 #include "TBuffer.h"
@@ -112,39 +102,6 @@ istream&  operator>>(istream& is, StThreeVectorD& v)
     double x, y, z;
     is >> x >> y >> z;
     v.setX(x);
-    v.setY(y);
-    v.setZ(z);
-    return is;
-}
-//______________________________________________________________________________
-void StThreeVectorD::Streamer(TBuffer &R__b)
-{
-//	Stream an object of class StThreeVectorD.
-   int offset = 0;
-   if (R__b.IsReading() && R__b.GetVersion() == 2) {//Special case
-      offset = R__b.Length();
-      int buffset;
-      R__b >> buffset;
-      R__b.SetBufferOffset(buffset - 1 + 4);
-      Version_t R__v = R__b.ReadVersion();
-      assert(R__v==1);
-      R__b.SetBufferOffset(R__b.Length()+10);
-      R__b >> mX1;
-      R__b >> mX2;
-      R__b >> mX3;
-      R__b.SetBufferOffset(offset+4);
-      return;
-   }
-
-   if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(); 
-      if (R__v == 1) R__b.SetBufferOffset(R__b.Length()+10); //skip TObject
-      R__b >> mX1;
-      R__b >> mX2;
-      R__b >> mX3;
-   } else {
-      R__b.WriteVersion(Class());
-      R__b << mX1;
       R__b << mX2;
       R__b << mX3;
    }

@@ -10,8 +10,8 @@
 #my $dir_arch = "/star/u2e/starreco/mdc3/requests/tfs/archive";
 #my $dir_job = "/star/u2e/starreco/mdc3/requests/tfs/jobfiles";
 
-my $dir_arch = "/star/u2e/starreco/P00hi/requests/daq/archive";
-my $dir_job = "/star/u2e/starreco/P00hi/requests/daq/jobfiles";
+my $dir_arch = "/star/u2e/starreco/P00hg/requests/daq/archive";
+my $dir_job = "/star/u2e/starreco/P00hg/requests/daq/jobfiles";
 
 my @maifile;
 my $mail_line;

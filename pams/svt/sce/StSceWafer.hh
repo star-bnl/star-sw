@@ -21,11 +21,14 @@ class StSceWafer
   void            addHit(int rNId , int rMcHit, int rMcTrack, float *rXg , float rDe, float *p);
   int             convertGlobalToLocal();
   int             convertLocalToUFrame(float ActiveLargeEdge, float ActiveSmallEdge, float Theta);
+  StSceListPoint* getDeadHits(float ActiveLargeEdge, float ActiveSmallEdge, float Test);
   void            addCluster(StSceCluster *ptr, int iSide);
+  void            addSimPoint(StScePoint *ptr);
   void            addRecPoint(StScePoint *ptr);
   void            addComPoint(StSceComp  *ptr);
   int             getId();
   StSceListPoint* getPoint();
+  StSceListPoint* getSimPoint();
   StSceListPoint* getRecPoint();
   StSceListCluster* getClusterP();
   StSceListCluster* getClusterN();
@@ -40,11 +43,14 @@ class StSceWafer
   float            *mN;
   float            *mX;
   StSceListPoint   *mPoint;
+  StSceListPoint   *mSimPoint;
   StSceListPoint   *mRecPoint;
   StSceListCluster *mClusterP;
   StSceListCluster *mClusterN;
   StSceListComp    *mComPoint;
 
+  StSceListPoint* getNonActivePointBorder(float ActiveLargeEdge, float ActiveSmallEdge);
+  StSceListPoint* getNonActivePointTriangle(float Test);
   float*          findAngle(float *p, float *alpha);
 };  
 #endif

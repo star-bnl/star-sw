@@ -9,40 +9,40 @@ $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
-my $pkg  = File::Basename::basename($Dir);# print "Run cons in $Dir for $PKG\n";
+my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
-my @idlL     = script::find_idl($Dir);  print "In Dir = $Dir idlL = @idlL\n"  if $param::debug;
+my @idlL     = find_idl($Dir);  print "In Dir = $Dir idlL = @idlL\n"  if $param::debug;
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
   if (-d $RepDir) {
-    my @idlR = script::find_idl($RepDir);
+    my @idlR = find_idl($RepDir);
     foreach my $i (@idlR) {push @idlL, $i;}
   }
 }
-@idlL   = script::sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
+my @idlL   = sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
 if ($pkg =~ /^sim$/ || $pkg =~ /^gen$/) {goto Tables;}
 my $i;
-my @idlML    = script::find_idlM($Dir);    
+my @idlML    = find_idlM($Dir);    
 if ($param::debug){$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}} 
 
-my @srcL     = script::find_sources($Dir); 
+my @srcL     = find_sources($Dir); 
 if ($param::debug){$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}}
-my @h_filesL = script::find_hfiles($Dir);  
+my @h_filesL = find_hfiles($Dir);  
 if ($param::debug){$i = 0; foreach my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}}
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
   if (-d $RepDir) {
-    my @srcR = script::find_sources($RepDir);# my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
+    my @srcR = find_sources($RepDir);# my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
     foreach my $i (@srcR) {push @srcL,  $i;}
-    my @idlMR = script::find_idlM($RepDir); 
+    my @idlMR = find_idlM($RepDir); 
     foreach my $i (@idlMR) {push @idlML, $i;}
-    my @h_filesR = script::find_hfiles($RepDir);
+    my @h_filesR = find_hfiles($RepDir);
     foreach my $i (@h_filesR) {push @h_filesL, $i;}
   }
 }
-my @src     = script::sortu (@srcL);# print "src = @src\n";
-my @h_files = script::sortu (@h_filesL);
-my @idlM    = script::sortu (@idlML);# print "idlM = @idlM\n";
+my @src     = sortu (@srcL);# print "src = @src\n";
+my @h_files = sortu (@h_filesL);
+my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
@@ -77,8 +77,7 @@ if ($pkg =~ /^StHbtMaker$/) {
 }
 
 if ($pkg =~ /^StDaqLib$/) {$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n"  if $param::debug;}
-#if ($Dir =~ /pams\// || $Dir =~ /StRoot\//) {
-if ($#idlM > -1) {
+if ($Dir =~ /pams\//) {
   $CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 elsif ($#idlL > -1) {
@@ -132,13 +131,13 @@ my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
 my $STIC_CPPPATH = $cscanner->iflags($env2);# print "STIC_CPPPATH  = $STIC_CPPPATH\n";
-my $DIR = Cwd::cwd(); print "DIR = $DIR\n" if $param::debug;
+my $DIR = cwd(); print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
 if ($#idlM > -1) {
   my $include = $INCLUDE . "/" . $pkg; print "include = $include\n" if $param::debug;
   foreach my $idl (@idlM) {
-    my $stem = File::Basename::basename($idl,".idl"); print "idl = $idl  stem = $stem\n" if $param::debug;
+    my $stem = basename($idl,".idl"); print "idl = $idl  stem = $stem\n" if $param::debug;
     my $idm  = $stem . ".idl";
     my $idMM = $DIR . "/" . $Dir . "/" . $idl; print "idMM = $idMM\n" if $param::debug;
     my $idM  = "#" . $Dir . "/" . $idl; print "idM = $idM\n" if $param::debug;
@@ -188,7 +187,7 @@ else {
 if ($#Defs > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
-#yf  Install $env2 $share, @Defs;
+  Install $env2 $share, @Defs;
   my @defs = ();
   foreach my $def (@Defs) {#print "def = $def OBJ = $OBJ\n";
     if ($def =~ /^\#/) {push @defs, $def;}			   
@@ -213,8 +212,8 @@ if ($#idlL > -1) {
   my $SHARET  = $DIR . "/.share/tables";
   foreach my $idl (@idlL) {  print "$idl\n" if $param::debug;
     my $IDL = "#" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
-    my $stem = File::Basename::basename ($IDL, ".idl"); print "stem = $stem\n" if $param::debug;
-    my $idlt = $includeT . "/" . File::Basename::basename($idl);
+    my $stem = basename ($IDL, ".idl"); print "stem = $stem\n" if $param::debug;
+    my $idlt = $includeT . "/" . basename($idl);
     push @idlT, $IDL; 
   }
   print "idlT = @idlT\n" if $param::debug;
@@ -256,9 +255,9 @@ if ($#idlL > -1) {
     my $ROOTCINT_CPPPATH = $cscanner->iflags($env3);# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
     
     foreach my $idll (@idlT) { 
-      my $stem     = File::Basename::basename ($idll, ".idl"); print "stem = $stem; idll: $idll\n" if $param::debug;
-      my $dir      = File::Basename::dirname ($idll); print "dir = $dir\n" if $param::debug;
-      my $idl      = File::Basename::basename ($idll);
+      my $stem     = basename ($idll, ".idl"); print "stem = $stem; idll: $idll\n" if $param::debug;
+      my $dir      = dirname ($idll); print "dir = $dir\n" if $param::debug;
+      my $idl      = basename ($idll);
       my $idlh     = $INCLUDE . "/"    . $stem . ".h";             print "idlh: $idlh\n" if $param::debug;
       my $idli     = $INCLUDE . "/"    . $stem . ".inc";           print "idli: $idli\n" if $param::debug;
       my $idlH     = $includeT . "/St_" . $stem . "_Table.h";      print "idlH: $idlH\n" if $param::debug;
@@ -313,7 +312,7 @@ if ($#idlL > -1) {
   }
 }
 if ($#sourcesT > -1) {
-  script::Keep $SO_PKGT;
+  Keep $SO_PKGT;
   LinkedModule $env3 $SO_PKGT, @sourcesT;
   Install $env3 $LIB, $SO_PKGT;
 }
@@ -322,10 +321,10 @@ if ($#src > -1) {
   if ($LIBPKG) {
     Library      $env2 $LIBPKG, @src;  
     Install $env2 $LIB, $LIBPKG; print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
-    my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
+    my $libpkg = $LIB . "/" . basename($LIBPKG);
     Depends $env2 $SO_PKG, $libpkg;
   }
-  script::Keep $SO_PKG;
+  Keep $SO_PKG;
   LinkedModule $env2 $SO_PKG, @src;
   Install $env2 $LIB, $SO_PKG;
   if ($pkg eq "Star2Root"   or

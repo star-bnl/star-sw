@@ -13,7 +13,7 @@ C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),xc(2),r,beta
-      REAL    x,y,p(3),a,b,ab,test
+      REAL    x,y,p(3),a,b,ab,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
       IF(trk(1).eq.0.) trk(1)=0.01
       x=trk(1)*cos( trk(2) )
@@ -25,13 +25,23 @@ C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
       b = sqrt( r*r/(a*a+1) )
+C     yt1= b + y
+C     yt2=-b + y
+C     xt1=-a*b + x
+C     xt2= a*b + x
       ab = a*b
 C-------decide which one is the right one------------------------------
-      test=(ab*p(2) + b*p(1))*trk(6)*beta
-      IF(test.lt.0.0) THEN
+C     rxp=(xt1-x)*p(2) - b*p(1)
+      rxp=-(ab*p(2) + b*p(1))
+      test=rxp*trk(6)/r
+      IF(test.gt.0.0) THEN
+C	xc(1)=xt1
+C	xc(2)=yt1
 	xc(1)=-ab + x
 	xc(2)= b + y
       ELSE
+C	xc(1)=xt2
+C	xc(2)=yt2
 	xc(1)=ab + x
 	xc(2)=-b + y
       ENDIF 	!test.lt.0.0
@@ -249,7 +259,7 @@ C-------check if it is a neutral particle------------------------------
        IF(iflag.eq.5) THEN
 	pt   = cos( atan(trk(5)))/trk(6)
        ELSE
-	pt   = abs(beta*const*rc)/100.
+	pt   = (beta*const*rc)/100.
        ENDIF	!iflag.eq.5
 
         p(3) = pt*trk(5)
@@ -257,7 +267,6 @@ C-------check if it is a neutral particle------------------------------
 	p(2) = pt*sph
 
   999 CONTINUE
-
       RETURN
       END
 
@@ -281,7 +290,7 @@ C     trk(2) -> phi (angle about 0,0)
 C     trk(3) -> z
 C     trk(4) -> psi (the circle angle)
 C     trk(5) -> tanl
-C     trk(6) -> charge of track ( = +- 1.0)
+C     trk(6) -> charge of track ( = =- 1.0)
 
 
 C---------------------------------------------------------------------
@@ -289,7 +298,6 @@ C---------------------------------------------------------------------
 
       REAL r,xc(2),x(2),trk1(6),trk2(6),beta
       REAL psi,psir,dpsi
-      REAL csign
 
 C-----calculate the new track parameters
       trk2(1)=sqrt( x(1)**2+x(2)**2 )
@@ -300,8 +308,7 @@ C -- put psi in 0-2pi range
       psi = amod(psi,real(C_2PI))
       if(psi.lt.0)psi=psi+C_2PI
 
-      csign = beta*trk1(6)
-      psir = psi - sign(1.0,csign)*C_PI_2
+      psir = psi - trk1(6)*C_PI_2
 C -- put psir in 0-2pi range
       psir = amod(psir,real(C_2PI))
       if(psir.lt.0)psir=psir+C_2PI
@@ -313,7 +320,7 @@ C -- put dpsi in 0-2pi range
       trk2(4)=trk1(4)+dpsi
 
 C -- check for rotation direction
-      if(csign.gt.0)then
+      if(trk1(6).gt.0)then
         if(dpsi.lt.0)then
           dpsi = (C_2PI+dpsi)
         endif
@@ -410,28 +417,20 @@ C   Error conditions	: None
 C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER	iflag
-      REAL	xc1(2),xc2(2),r1,r2
-      REAL	x(2),y(2)
-      REAL      c1x,c1y,c2x,c2y,cut
-      REAL*8	om1,om2,ph1,ph2,r1sq,r2sq
-      REAL*8	a,b,c,d,dia,dtouch
-      REAL*8	asq_plus_bsq,r1sq_minus_om1sq,r_dia,r1sq_minus_om2sq
-      REAL*8	ph1_plus_a_sq,ph2_plus_a_sq,om_1,om_2
-      REAL*8	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
-      LOGICAL   first
+      REAL	xc1(2),xc2(2),r1,r2,r1sq,r2sq
+      REAL	x(2),y(2),om1,om2,ph1,ph2
+      REAL	a,b,c,d,dia,dtouch,cut
+      REAL	asq_plus_bsq,r1sq_minus_om1sq,r1_dia,r1sq_minus_om2sq
+      REAL	ph1_plus_a_sq,ph2_plus_a_sq,om_1,om_2
+      REAL	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
 C---clear variables cleared before entering routine--------------------
 c      CALL VZERO(x,2)
 c      CALL VZERO(y,2)
 C---find the two intersections----------------------------------------
-      first = .true.
       r1sq = r1*r1
       r2sq = r2*r2
-      c1x = xc1(1)
-      c1y = xc1(2)
-      c2x = xc2(1)
-      c2y = xc2(2)
- 10   a=c1x-c2x
-      b=c1y-c2y
+      a=xc1(1)-xc2(1)
+      b=xc1(2)-xc2(2)
       asq_plus_bsq = a*a + b*b
       c=(r1sq-r2sq + asq_plus_bsq)/2.
       d=asq_plus_bsq*r1sq - c*c
@@ -456,11 +455,11 @@ C----find the right pair---------------------------------------------
         om1_plus_b_sq_minus_r2sq = (om1+b)**2 - r2sq
 	IF( abs(ph1_plus_a_sq + om1_plus_b_sq_minus_r2sq).le.
      +      abs(ph2_plus_a_sq + om1_plus_b_sq_minus_r2sq) ) THEN
-		x(1)=ph1+c1x
+		x(1)=ph1+xc1(1)
 	ELSE
-		x(1)=ph2+c1x
+		x(1)=ph2+xc1(1)
 	ENDIF	
-	y(1)=om1+c1y
+	y(1)=om1+xc1(2)
       ENDIF	
 C------second pair------------------------------------------------
       IF( r1sq_minus_om2sq.ge.0.) THEN
@@ -471,24 +470,11 @@ C------second pair------------------------------------------------
         om2_plus_b_sq_minus_r2sq = (om2+b)**2 - r2sq
 	IF( abs(ph1_plus_a_sq + om2_plus_b_sq_minus_r2sq).le.
      +      abs(ph2_plus_a_sq + om2_plus_b_sq_minus_r2sq) ) THEN
-		x(2)=ph1+c1x
+		x(2)=ph1+xc1(1)
 	ELSE
-		x(2)=ph2+c1x
+		x(2)=ph2+xc1(1)
 	ENDIF	
-	y(2)=om2+c1y
-      ENDIF
-      IF (first.and.(((x(1).eq.0.).and.(y(1).eq.0.)).or.
-     +               ((x(2).eq.0.).and.(y(2).eq.0.)))) THEN
-C       Switch the two circles and try again
-        a = r1sq
-        r1sq = r2sq
-        r2sq = a
-        c1x = xc2(1)
-        c1y = xc2(2)
-        c2x = xc1(1)
-        c2y = xc1(2)
-        first = .false.
-        goto 10
+	y(2)=om2+xc1(2)
       ENDIF
 C----------------------------------------------------------------------
   999 CONTINUE
@@ -497,16 +483,13 @@ C----------------------------------------------------------------------
   137 continue
       dia=sqrt(asq_plus_bsq)
       dtouch=dia-r1-r2
-      IF(dtouch .le. cut)  THEN
-        iflag=30
-        r_dia = r1/dia
-        a = xc2(1)-xc1(1)
-        b = xc2(2)-xc1(2)
-        x(1)=xc1(1) + r_dia*a
-        y(1)=xc1(2) + r_dia*b
-        r_dia = r2/dia
-        x(2)=xc2(1) - r_dia*a
-        y(2)=xc2(2) - r_dia*b
+      r1_dia = r1/dia
+      IF(dtouch .le. sqrt(cut))  THEN
+        iflag=3
+        x(1)=xc1(1) + r1_dia*(xc2(1)-xc1(1))
+        y(1)=xc1(2) + r1_dia*(xc2(2)-xc1(2))
+        x(2)=x(1)
+        y(2)=y(1)
       ELSE
         iflag=5
       RETURN
@@ -537,7 +520,7 @@ C----------------------------------------------------------------------
         real xn1(3),xn2(3),xv0(3),sxz1, syz1, sxz2, syz2
         real x1,x2,y1,y2,z1,z2
         real v0dca
-        real*8 a1,a2,a3,c,k,l,m,b,v,AA,BB,CC,DD,EE,FF,GG
+        real a1,a2,a3,c,k,l,m,b,v,AA,BB,CC,DD,EE,FF,GG
         real x,y,z,xp,yp,zp
 
 

@@ -1,21 +1,3 @@
-*CMZ :  1.40/05 17/11/97  18.33.05  by  Pavel Nevski
-*-- Author :    Pavel Nevski   17/11/97
-      subroutine PMINIT
-      print *,'  PMINIT: motif interface not linked '
-      end
-      subroutine KUINIM(p)
-      character*(*) p
-      print *,'  KUINIM: motif interface not linked '
-      end
-      subroutine GBROS
-      call       ZBRDEF
-      end
-      subroutine KUWHAM(p)
-      character*(*) p
-      call       KUWHAG
-      end
-
-
 *CMZ :  2.00/03 17/02/2000  17.37.34  by  Pavel Nevski
 *CMZ :  2.00/00 28/09/98  01.03.58  by  Pavel Nevski
 *CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
@@ -101,14 +83,51 @@ c
      >       ,udecay_nstep_max
      >       ,i_udecay
      >       ,udecay_nstep_last
-
+ 
       logical udecay_track, udecay_in_region_last_step
       real    udecay_pathlength_entrance
       parameter (udecay_count_max=10)
       parameter (udecay_nstep_max=5000)
-
+ 
+      structure /udecay_t/
+         integer parent
+         integer new_parent
+         real    r_in
+         real    r_out
+         integer daughter_1
+         integer daughter_2
+         integer daughter_3
+         real    mass_p
+         real    mass_1
+         real    mass_2
+         real    mass_3
+         integer nbody
+      end structure
+      record /udecay_t/ udecay(udecay_count_max)
+ 
+      structure /udecay_step_t/
+         real x
+         real y
+         real z
+         real px
+         real py
+         real pz
+         real pathlength
+      end structure
+      record /udecay_step_t/ udecay_step(udecay_nstep_max)
+ 
+      common/c_udecay/
+     >         udecay_count
+     >        ,udecay
+     >        ,udecay_nstep
+     >        ,udecay_step
+     >        ,i_udecay
+     >        ,udecay_track
+     >        ,udecay_in_region_last_step
+     >        ,udecay_nstep_last
+     >        ,udecay_pathlength_entrance
 *---------------------------------------------------------------------------
-
+ 
       Integer       CSADDR, LENOCC, Input, Li, Ifile, Iadr, L, L1, token
       character*32  command
       character*256 string1/' '/, string/' '/
@@ -117,17 +136,17 @@ c
       logical       exist
       integer       i_part_dk
       equivalence   (string1,line1), (string,line)
-
+ 
 c*** udecay stuff : local variables used in calls to gfpart
-
+ 
       character*20  p_name
       integer       p_itrtyp, p_nwbuf, i, j, ier, IPU(5)
       real          p_charge, p_tlife, p_ubuf
-
+ 
 C========+=========+=========+=========+=========+=========+=========+
-
+ 
 c***  Get command and number of parameters passed
-
+ 
        Ncommand = Ncommand+1
        call KUPATL( command, npar )
        if ( command .eq. 'INPUT' ) then
@@ -151,7 +170,7 @@ c***  Get command and number of parameters passed
                write(6,*)' file ',string1(1:length1),' does not exist'
                goto 500
             endif
-
+ 
             C  = ' '
             L  = LENOCC(Ccommand)+1
             Li = 21-L
@@ -199,16 +218,16 @@ c***  Get command and number of parameters passed
 *     ----
           call KUGETC ( string, length )
           char = string(1:1)
-
+ 
           if ( char .eq. 'O' ) then                     !  open output
-
+ 
               call KUGETS ( string1, length1 )
               write(6,*) ' GXUSER: opening output file ',
      >                              string1(1:length1)
               Call AgZOPEN  ('O',string1(1:length1),'GEKHD',Ier)
 *             PN,03.09.98 - spool output until the first trig
 *             Call AGZWRITE ('O',ier)
-
+ 
           else                                          !  close output
               Call AgZOPEN('O',' ',' ',Ier)
           endif
@@ -216,9 +235,9 @@ c***  Get command and number of parameters passed
       else if (command.eq.'PHASESPACE'.or.command.eq.'MOMENTUMBIN') then
 *     ----
               Call AGXUSER
-
+ 
       else if (command.eq.'SKIP') then
-
+ 
          call KUGETI( NtoSkip )
          call KUGETI( NsubToSkip )
          call KUGETI( NsubRan(1) )
@@ -232,6 +251,64 @@ c***  Get command and number of parameters passed
 *
       else if (command.eq.'UDECAY') then
 *     ----
+         if ( udecay_count .gt. udecay_count_max ) then
+ 
+            write(6,*)' Too many uniform decay modes specified '
+            goto 5000
+ 
+         endif
+ 
+         i = udecay_count + 1
+         udecay(i).nbody  = 2
+         call KUGETI( udecay(i).parent )
+         call KUGETR( udecay(i).r_in )
+         call KUGETR( udecay(i).r_out )
+         call KUGETI( udecay(i).daughter_1 )
+         call KUGETI( udecay(i).daughter_2 )
+ 
+         if( npar .gt. 5 ) then
+            udecay(i).nbody = 3
+            call KUGETI( udecay(i).daughter_3 )
+         endif
+ 
+         udecay(i).r_in  = max (0.,             udecay(i).r_in)
+         udecay(i).r_out = max (udecay(i).r_in, udecay(i).r_out)
+ 
+c*** check to see if all particles exist in Geant:
+ 
+         IPU(1)=udecay(i).parent
+         IPU(2)=udecay(i).daughter_1
+         IPU(3)=udecay(i).daughter_2
+         IPU(4)=udecay(i).daughter_3
+ 
+         Do J = udecay(i).nbody+1,1,-1
+            call gfpart (IPU(i) , p_name, p_itrtyp, udecay(i).mass_p,
+     >                            p_charge, p_tlife, p_ubuf, p_nwbuf)
+ 
+            if ( p_itrtyp .le. 0 ) then
+               write(6,*) '*** UDECAY: unknown particle id ',IPU(i)
+               goto 5000
+            endif
+         enddo
+ 
+c*** define new parent with identical properties but with infinite lifetime
+ 
+         p_tlife = 1.e10
+         p_name  = 'udecay_'//p_name(1:13)
+         udecay(i).new_parent = udecay(i).parent + 200
+ 
+         write(6,*)'*** Defining new udecay parent ',p_name,
+     >             '  pid =',udecay(i).new_parent
+ 
+         call gspart( udecay(i).new_parent, p_name, p_itrtyp,
+     >           udecay(i).mass_p, p_charge, p_tlife, p_ubuf, p_nwbuf)
+ 
+         call gprint( 'PART', udecay(i).new_parent )
+ 
+c*** increment counter of number of defined udecay particles
+ 
+         udecay_count = udecay_count + 1
+*
       else if (command.eq.'SPARTSTAR') then
 *     ----
          WRITE(6,*) '  => use  GEANT/CONTROL/SPART command '
@@ -268,10 +345,10 @@ c***  Get command and number of parameters passed
          call KUGETI ( NtrSubEv )
          call KUGETI ( NkineMax )
          call KUGETI ( NhitsMax )
-
+ 
          If (NtrSubEv. gt. 0) write (6,*)
      >   ' Number of tracks per sub-event will be',NtrSubEv
-
+ 
          If (NtrSubEv. le. 0) write (6,*)
      >   ' Events will not be splitted into subevents '
 *
@@ -282,10 +359,10 @@ c***    this will prevent showering in magnets and other dense
 c***    objects but they will still block uphysical tracks
 *
          call KUGETI ( make_shadow )
-
+ 
          if (make_shadow.eq.0) write (6,*)
      >      ' normal tracking in dense material required '
-
+ 
          if (make_shadow.eq.1) write (6,*)
      >      ' tracking thresholds in dense materials will be set high'
 *
@@ -306,17 +383,8 @@ c----------------------------------------------------------------------
  5000  continue
        return
        end
-
-
-*CMZ :  2.00/00 28/10/98  00.25.15  by  Pavel Nevski
-*-- Author :    Pavel Nevski   28/10/98
-        function ETIME(XX)
-        real  ETIME,XX(2),tt
-        call timex(tt)
-        etime=tt
-        XX(1)=tt
-        XX(2)=tt
-        end
+ 
+ 
 *CMZ :  2.00/01 02/01/2000  21.01.14  by  Pavel Nevski
 *CMZ :  2.00/00 27/08/99  19.38.31  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  20.16.56  by  Pavel Nevski
@@ -332,7 +400,7 @@ c----------------------------------------------------------------------
       CHARACTER  CHPAW*8, MONTH(12)*12
       DATA MONTH/'January','February','March','April','May','June',
      > 'July','August','September','October','November','December'/
-
+ 
 *KEEP,agcvers.
       COMMON /AGCVERS/IDATQQ,ITIMQQ,IVERSQ,VERSQQ,QFTITLCH
       INTEGER         IDATQQ,ITIMQQ,IVERSQ
@@ -345,7 +413,7 @@ c----------------------------------------------------------------------
       IMONTH = mod(IDATQQ/100,100)
       IYEAR  = IDATQQ/10000
       NCM    = LENOCC(MONTH(IMONTH))
-
+ 
       IF      (IYEAR.LT.90)  then
            IYEAR=2000+IYEAR
       ELSE IF (IYEAR.LT.100) then
@@ -361,7 +429,15 @@ c----------------------------------------------------------------------
      >       ' *                                                    *'/,
      >       ' ******************************************************')
       END
-*CMZ :          20/04/2000  17.57.25  by  Pavel Nevski
+*CMZ :  2.00/00 28/10/98  00.25.15  by  Pavel Nevski
+*-- Author :    Pavel Nevski   28/10/98
+        function ETIME(XX)
+        real  ETIME,XX(2),tt
+        call timex(tt)
+        etime=tt
+        XX(1)=tt
+        XX(2)=tt
+        end
 *CMZ :  2.00/00 16/12/99  15.43.29  by  Pavel Nevski
 *CMZ :  2.02/00 20/11/92  10.10.02  by  R. DeWolf
 *-- Author :    R. DeWolf   06/03/91
@@ -385,12 +461,6 @@ C Original Version.                                 R.DeWolf   18/02/91
 C------------------------------------------------------------------------------
 *KEEP,TYPING.
       IMPLICIT NONE
-*KEEP,GCUNIT.
-      COMMON/GCUNIT/LIN,LOUT,NUNITS,LUNITS(5)
-      INTEGER LIN,LOUT,NUNITS,LUNITS
-      COMMON/GCMAIL/CHMAIL
-      CHARACTER*132 CHMAIL
-C
 *KEEP,GNCSTO.
       INTEGER IQ,LQ,NZEBRA,IXSTOR,IXDIV,IXCONS,LMAIN,LR1,JCG
       INTEGER KWBANK,KWWORK,IWS
@@ -445,7 +515,7 @@ C LGNWTR    -flag  .TRUE.= Write Run tree is pending
 C LGNUPR    -flag  .TRUE.= UnPack Run information to HEPEVT is pending
 C LGNMAG    -flag  .TRUE.= There is non-zero magnetic field.
 C IGNGAT    -current internal gate number (used when necessary)
-
+ 
 *KEEP,SLAC_DO.
 C Data offsets for standard SLAC words
       INTEGER    NHDWAC,NPAKAC,JOSYS1,JOSYS2,JOSYS3
@@ -455,14 +525,14 @@ C Data offsets for standard SLAC words
       PARAMETER (JOSYS1 = 1)
       PARAMETER (JOSYS2 = 2)
       PARAMETER (JOSYS3 = 3)
-
+ 
 *KEEP,GENP_DO.
 C particle bank offsets
       INTEGER        JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
       COMMON/Joofss/ JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
-
+ 
 *KEEP,GENE_DO.
 C event bank offsets
       INTEGER NAGENE
@@ -478,7 +548,7 @@ C event bank offsets
       PARAMETER (JOVRTT = 10)
       PARAMETER (JOWTFL = 11)
       PARAMETER (JOWEIG = 12)
-
+ 
 *KEEP,GENR_DO.
 C Data offsets
       INTEGER NAGENR
@@ -495,7 +565,7 @@ C Data offsets
       PARAMETER (JOGVDT = 11)
       PARAMETER (JOGZVR = 12)
       PARAMETER (JOZBVR = 13)
-
+ 
 *KEND.
       INTEGER  IGNLKP
       EXTERNAL IGNLKP
@@ -512,13 +582,12 @@ C Maximum number in particle decay stacks:
       INTEGER IE,IM,IP,IL,JM(2),JD(2),IDAU,IVENT,IPDG,J1,J2,J,IMVRT
       REAL    VERTX(4),PLAB(4),VMOD,VXYZT(4),PDUM(3),AROT,ROTMA(3,3)
       INTEGER LEVNT,LRUNT,LGENE,LGENR,LOFF,LMOTH,LDAU,LGENP,LD1,NGAP
-      LGNPRI = LOUT
 C
 C If LEVL <= 0, just return
       IF (LEVL.LE.0) GOTO 999
 C
 C Assume that there are no ZEBRA calls in this routine. Pointers are static.
-
+ 
       IF(ILINK.EQ.1)THEN
          LPQR = LGN(IGNLKP(1))
          LPQE = LGN(IGNLKP(2))
@@ -562,7 +631,7 @@ C Check if the run header is present
      +             10X,'Date= ',I10,'  Time= ',I10,'   Machine= ',A4)
             WRITE(LGNPRI,10500)
 10500       FORMAT(1X, 76('-'))
-
+ 
          ENDIF
 C
       ENDIF
@@ -624,7 +693,7 @@ C===>
          CALL UHTOC(IGN(LGENP-4),4,CTYP,4)
          LENB =     IGN(LGENP-1)
          ND   =     IGN(LGENP-1)
-
+ 
          IF       (CTYP.eq.'GENP') then
             NPART = MOD(IGN(LGENP+JOSYS2),NPAKAC)
             MODUL = MOD(IGN(LGENP+JOSYS3),NPAKAC)
@@ -682,7 +751,7 @@ C
 C
 C Check NP against length of bank:
 C
-
+ 
          IF(NEED.GT.ND)THEN
             WRITE(LGNPRI,10200)ND,NPART,NEED
 10200       FORMAT(' GNZPRIN: Bank length,',I7,
@@ -710,7 +779,7 @@ C calculate new momentum:
             IF(GN(LOFF+JOTIME).GT.TVTMIN.AND.LGNMAG)THEN
                CALL GNZGETV(ILINK,IE,IP,VERTX,IMVRT,PLAB,AROT,ROTMA)
             ENDIF
-
+ 
 C get pointers, calculate number of mothers, stability...
             JM(1) = IGN(LOFF+JOMOT1)
             JM(2) = IGN(LOFF+JOMOT2)
@@ -825,9 +894,9 @@ C
       WRITE(LGNPRI,10400)
 C
   999 END
-
-
-
+ 
+ 
+ 
 *CMZ :  2.00/00 16/12/99  01.15.03  by  Pavel Nevski
 *CMZ :  2.02/00 29/07/93  22.53.25  by  R. DeWolf
 *CMZ :  2.00/01 11/10/91  13.58.13  by  R. DeWolf
@@ -1063,7 +1132,7 @@ C LGNWTR    -flag  .TRUE.= Write Run tree is pending
 C LGNUPR    -flag  .TRUE.= UnPack Run information to HEPEVT is pending
 C LGNMAG    -flag  .TRUE.= There is non-zero magnetic field.
 C IGNGAT    -current internal gate number (used when necessary)
-
+ 
 *KEEP,SLAC_DO.
 C Data offsets for standard SLAC words
       INTEGER    NHDWAC,NPAKAC,JOSYS1,JOSYS2,JOSYS3
@@ -1073,16 +1142,16 @@ C Data offsets for standard SLAC words
       PARAMETER (JOSYS1 = 1)
       PARAMETER (JOSYS2 = 2)
       PARAMETER (JOSYS3 = 3)
-
+ 
 *KEEP,GENP_DO.
 C particle bank offsets
       INTEGER        JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
       COMMON/Joofss/ JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
-
+ 
 *KEND.
-
+ 
 C
       INTEGER IL,IE,IP,IMVRT
       REAL    ROTMA(3,*),VSTAR(*),PRET(*),AROT
@@ -1186,7 +1255,7 @@ C
          I1 = IGN(LGENP+IOFF2+JOMOT1)
 C Turn off LUNIQ if more than one mother found:
          IF(IGN(LGENP+IOFF2+JOMOT2).NE.0)LUNIQ=.FALSE.
-
+ 
          IF(I1 .GT.0.AND.I1.LE.NPART)THEN
             IOFF1 = MODUL*(I1-1)
 C Time difference ( in sec) for last section
@@ -1199,7 +1268,7 @@ C sense. First check that IMVRT not yet set:
                   IMVRT = I1
                ENDIF
             ENDIF
-
+ 
 C Calculate distance travelled by mother:
             IF(DELT.GT.0.0)THEN
 C
@@ -1238,7 +1307,7 @@ C Now add this to original particle
 C record total time to compare with VSTAR(4) at the end:
                TSTAR = TSTAR + DELT
                TNOW  = GN(LGENP+IOFF1+JOTIME)
-
+ 
                IF(TNOW.LT.TVTMIN)GOTO 20
             ENDIF
          ELSE
@@ -1257,7 +1326,7 @@ C
       VSTAR(1)=-VSTAR(1)
       VSTAR(2)=-VSTAR(2)
       VSTAR(3)=-VSTAR(3)
-
+ 
       IF(LGNMAG)THEN
 C
 C AROT arrived at above is the negative of the true rotation, so
@@ -1270,7 +1339,7 @@ C Get the rotation:
 C Rotate current particle's momentum for returning:
          CALL GNZROTA(GN(LGENP+IOFF+JOPXPX),ROTMA,PRET)
       ENDIF
-
+ 
       TDIFF = ABS(VSTAR(4) - TSTAR)
 C     IF(TDIFF.GT.TVTMIN)THEN
 C MORE LENIENT THRESHOLD FOR GENERATORS WHERE INTERNAL PRECISION IS BAD
@@ -1282,7 +1351,7 @@ C MORE LENIENT THRESHOLD FOR GENERATORS WHERE INTERNAL PRECISION IS BAD
 C
    30 CONTINUE
       END
-
+ 
 *CMZ :  2.00/00 03/11/99  21.31.21  by  Pavel Nevski
 *-- Author :
        function LGN(i)
@@ -1351,14 +1420,14 @@ C                                       Link to:
       EQUIVALENCE (LKSLUG(24),LKHIT2)  ! secondary GEANT HITS bank
       EQUIVALENCE (LKSLUG(26),LKGENE)  ! old slug ZEBRA generator structure
 *KEND.
-
+ 
 C           IF(ILINK.EQ.1)THEN
 C         LPQR = LGN(IGNLKP(1))
 C         LPQE = LGN(IGNLKP(2))
 C      ELSE IF(ILINK.EQ.2)THEN
 C         LPQR = LGN(IGNLKP(3))
 C         LPQE = LGN(IGNLKP(4))
-
+ 
        L    = 0
        LENB = 0
        if (0.lt.i .and. i.lt.5) then
@@ -1374,12 +1443,12 @@ C         LPQE = LGN(IGNLKP(4))
        endif
           LGN=L
        end
-
+ 
        function IGNLKP(i)
        IGNLKP=i
        end
-
-
+ 
+ 
 *================================================================
 *CMZ :  2.00/00 16/12/99  15.45.32  by  Pavel Nevski
 *CMZ :  2.02/04 30/09/96  06.05.09  by  Steve ONeale
@@ -1428,7 +1497,7 @@ C LGNWTR    -flag  .TRUE.= Write Run tree is pending
 C LGNUPR    -flag  .TRUE.= UnPack Run information to HEPEVT is pending
 C LGNMAG    -flag  .TRUE.= There is non-zero magnetic field.
 C IGNGAT    -current internal gate number (used when necessary)
-
+ 
 *KEND.
 *CDE, GNCHEP.
 *KEEP,SLAC_DO.
@@ -1440,14 +1509,14 @@ C Data offsets for standard SLAC words
       PARAMETER (JOSYS1 = 1)
       PARAMETER (JOSYS2 = 2)
       PARAMETER (JOSYS3 = 3)
-
+ 
 *KEEP,GENP_DO.
 C particle bank offsets
       INTEGER        JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
       COMMON/Joofss/ JOSTAT,JOPDGC,JOMOT1,JOMOT2,JODAU1,JOVXVX,JOVYVY,
      +        JOVZVZ,JOPXPX,JOPYPY,JOPZPZ,JOMASS,JOTIME,JOADIN,NAGENP
-
+ 
 *KEND.
 C
       INTEGER IGENP(*),IMOTH,NDAU,IDAU(*)
@@ -1523,7 +1592,7 @@ C
    20 CONTINUE
 C
   999 END
-
+ 
 ****************************** dummy *****************************
            subroutine GNZGROT(AROT,GNZMAG,ROTMA)
 C Get current rotation...
@@ -1533,4 +1602,4 @@ C Apply current rotation..
            end
            subroutine GNZSTEP(PIN,GNZMAG,DELT,QNEG,AM,POUT,VSTEP,ANGR)
            end
-
+ 

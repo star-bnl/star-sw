@@ -1,8 +1,5 @@
-// $Id: St_tpt_Maker.cxx,v 1.54 2000/11/03 21:23:34 saulys Exp $
+// $Id: St_tpt_Maker.cxx,v 1.53 2000/07/26 00:53:37 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
-// Revision 1.54  2000/11/03 21:23:34  saulys
-// Added ExB correction code
-//
 // Revision 1.53  2000/07/26 00:53:37  sakrejda
 // Pre-vertex info added to the tpt module
 //
@@ -231,6 +228,7 @@ gMessMgr->SetLimit("TPTOUT2-E1",10);
 gMessMgr->SetLimit("TPTRSP-E1",10);
 
   // Create tables
+  
   St_DataSet *tpcpars = GetInputDB("tpc");
   assert(tpcpars);
   
@@ -328,25 +326,6 @@ Int_t St_tpt_Maker::Make(){
 
 //			TPT
   if (!m_iftteTrack) {
-
-    //undo ExB distortions - only if exb switch is set
-
-    if(m_Mode == 1){
-    m_mag = new StMagUtilities() ;
-    Float_t x[3], xprime[3];
-    tcl_tphit_st  *spc   = tphit->GetTable();
-    for(Int_t i=0; i<tphit->GetNRows(); i++, spc++){
-     //ExB corections
-       x[0] = spc->x;    
-       x[1] = spc->y;    
-       x[2] = spc->z;
-       m_mag->UndoDistortion(x,xprime);   // input x[3], return xprime[3]
-       spc->x = xprime[0];
-       spc->y = xprime[1];
-       spc->z = xprime[2];
-    }
-    }
-
     if (Debug()) cout << " start tpt_run " << endl;
     Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
 //                      ==============================

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeTrack.cxx,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeTrack.cxx,v 1.1.1.1 2000/08/01 13:57:55 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,9 +14,6 @@
  **********************************************************************
  *
  * $Log: StEbyeTrack.cxx,v $
- * Revision 1.2  2000/09/01 22:59:11  jgreid
- * version 1 revision ; multiple file handling + additional data members added
- *
  * Revision 1.1.1.1  2000/08/01 13:57:55  jgreid
  * EbyE DST creation and access tools
  *
@@ -35,23 +32,16 @@ StEbyeTrack::StEbyeTrack(StEbyeTrack *track) : TObject() {
   mEta = track->Eta();
   mPhi = track->Phi();
 
-  mBxPrimary = track->BxPrimary();
-  mByPrimary = track->ByPrimary();
-  mBzPrimary = track->BzPrimary();
-
-  mBxGlobal = track->BxGlobal();
-  mByGlobal = track->ByGlobal();
-  mBzGlobal = track->BzGlobal();
+  mBx = track->Bx();
+  mBy = track->By();
+  mBz = track->Bz();
 
   mPIDe = track->PIDe();
   mPIDpi = track->PIDpi();
   mPIDp = track->PIDp();
   mPIDk = track->PIDk();
-  mPIDd = track->PIDd();
 
   mChi2 = track->Chi2();
-
-  mDedx = track->Dedx();
 
   mNFitPoints = track->NFitPoints();
   mNFoundPoints = track->NFoundPoints();
@@ -82,15 +72,7 @@ Float_t StEbyeTrack::Rapidity(Float_t mass) {
 }
 
 Float_t StEbyeTrack::Dca() { 
-  return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
-}
-
-Float_t StEbyeTrack::DcaPrimary() { 
-  return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
-}
-
-Float_t StEbyeTrack::DcaGlobal() { 
-  return (sqrt((mBxGlobal*mBxGlobal)+(mByGlobal*mByGlobal)+(mBzGlobal*mBzGlobal))); 
+  return (sqrt((mBx*mBx)+(mBy*mBy)+(mBz*mBz))); 
 }
 
 Float_t StEbyeTrack::PIDpiPlus() { 

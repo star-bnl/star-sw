@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.9 2000/11/17 22:26:47 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.4 2000/08/29 04:39:14 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -7,12 +7,7 @@
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_dst_point_Table.h"
-#include "St_dst_trackC.h"
 #include "StCL.h"
-#include "TColoredAxis.h"
-
-#include "TStyle.h"
-
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -48,7 +43,6 @@ ClassImp(StDefaultFilter)
 //_____________________________________________________________________________
 StDefaultFilter::StDefaultFilter()
 {
-   mColorAxis = 0;
    Reset();
 }
 //_____________________________________________________________________________
@@ -70,14 +64,11 @@ Int_t CutTracksOutOfRange, Int_t KindOfColoring)
 Int_t StDefaultFilter::Reset(Int_t reset)
 {
   mDedx = 0;
- 
+
   STFLowColor  = 51; 
   STFHighColor = 100;
-  STFLowColor  = 0; 
-  STFHighColor = 51;
-
   STFLowEnergy = 0;
-  STFHighEnergy = 0.000006;
+  STFHighEnergy = 0.00001;
   STFSize  = 0;
   STFStyle = 0; 
   STFColorEnergy = 0;
@@ -85,7 +76,6 @@ Int_t StDefaultFilter::Reset(Int_t reset)
   STFCutTracksOutOfRange = 0;
   STFKindOfColoring = 0;
   mlookFactor = 1;
-  if (mColorAxis) { delete mColorAxis; mColorAxis = 0;}
   return reset; 
 }
 //________________________________________________________________________________
@@ -97,9 +87,9 @@ Int_t StDefaultFilter::MakeColor(Double_t energy)
  else if ( energy<STFLowEnergy ) 
    STFColor = STFLowColor;
  else  {
-       STFColor = STFLowColor
-                  + int((STFHighColor-STFLowColor)
-                   *mDeLookUp[int((energy - STFLowEnergy)*mlookFactor)]);
+     STFColor = STFLowColor
+                + int((STFHighColor-STFLowColor)
+                 *mDeLookUp[int((energy - STFLowEnergy)*mlookFactor)]);
  }
  return STFColor;
 }
@@ -118,7 +108,23 @@ Int_t StDefaultFilter::Channel(const TTableSorter* tableObject,Int_t index,Size_
   if(mStr == "dst_dedx" && !mDedx)
   {
     mDedx = tableObject;
-    CreatePalette(tableObject->GetTable());
+    // Create lookup table
+    Int_t lookUpSize = sizeof(mDeLookUp);
+    mNbins = lookUpSize/sizeof(mDeLookUp[0]);
+    TH1F de("__de__","dedx",mNbins,STFLowEnergy,STFHighEnergy);
+
+    St_dst_dedx *t    = (St_dst_dedx *)tableObject->GetTable();
+    dst_dedx_st *dedx = 0;
+    dst_dedx_st *dEnd = t->end();
+    for (dedx = t->begin();dedx !=dEnd; dedx++)
+                     de.Fill(dedx->dedx[0]);
+    Double_t  s = de.ComputeIntegral();
+    Double_t *f = de.GetIntegral();
+
+    for (int i = 0; i < mNbins; i++) 
+                   mDeLookUp[i] = f[i]/s;
+    
+    mlookFactor = 1./de.GetBinWidth(1);
   } else if (mStr == "point"){
      color = SubChannel(tableObject, index, size, style);
   } else {
@@ -126,6 +132,7 @@ Int_t StDefaultFilter::Channel(const TTableSorter* tableObject,Int_t index,Size_
   }
   return color; 
 }
+
 //_____________________________________________________________________________
 Int_t StDefaultFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style)
 {
@@ -179,113 +186,19 @@ Int_t StDefaultFilter::SubChannel(const TTableSorter *tableObject, Int_t index,S
 //_____________________________________________________________________________
 Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
 {
-  Int_t color = -1;
-  size = 1;
   // SubChannel to provide a selections for St_dst_track tracks.
-  Double_t trackColor;
   if (mDedx) {
     const St_dst_dedx &t = *(St_dst_dedx *)mDedx->GetTable();
-    trackColor = t.GetTable((*mDedx)[rowNumber-1])->dedx[0];   
-  } else {    
-    if (rowNumber == 0)  CreatePalette(&track);
-    St_dst_trackC chair(&track);
-    trackColor = chair.AbsMoment(rowNumber);
+    Double_t energy = t.GetTable((*mDedx)[rowNumber-1])->dedx[0];   
+    return MakeColor(energy);
+  } else {
+    printf(" no dedx !!!!\n");
+    return StVirtualEventFilter::Channel(&track,rowNumber,size,style);
   }
-  color  =  gStyle->GetColorPalette(MakeColor(trackColor));
-  return color;
-}
-//_____________________________________________________________________________
-Int_t StDefaultFilter::CreatePalette(TTable *obj)
-{
-   if (!obj) return 0;
-   // Create lookup table
-   Int_t lookUpSize = sizeof(mDeLookUp);
-   mNbins = lookUpSize/sizeof(mDeLookUp[0]);
-
-   Float_t low, high;
-   if (mColorAxis) delete mColorAxis; 
-   TString str = obj->GetType();
-   if (mDedx) {
-     low  = STFLowEnergy  = 0;
-     high = STFHighEnergy = 0.000005;
-   } else {
-     low  = STFLowEnergy  = 0.1;
-     high = STFHighEnergy = 5;
-   }
-//   mColorAxis = new TColoredAxis(0.9,-0.95,0.9,0.95,low,high);
-   mColorAxis = new TColoredAxis(0.9,-0.95,0.9,0.95,low,high,mDeLookUp,mNbins);
-   TH1F de("__de__","dedx",mNbins,low,high);
-
-      if (mDedx) 
-        Distribution((St_dst_dedx *)obj,de);
-      else
-        Distribution((St_dst_track *)obj,de);
-
-   Double_t  s = de.ComputeIntegral();
-   Int_t hSize = mNbins;
-   if (s > 0) {
-     Double_t *f = de.GetIntegral();
-     for (hSize = 0; hSize < mNbins; hSize++) {
-       mDeLookUp[hSize] = f[hSize]/s;
-       if ( mDeLookUp[hSize] > 0.995) break; // Look for the rightmost non-zero bin
-     }
-   } else { 
-     TCL::vzero(mDeLookUp,hSize+1);
-   }
-   // Corect edges
-   high = STFHighEnergy = de.GetBinCenter(hSize);
-   mColorAxis = new TColoredAxis(0.9,-0.95,0.9,0.95,low,high,mDeLookUp,hSize+1);
-   if (mDedx) 
-     mColorAxis->SetTitle("tracks color = F(de/dx)");
-   else
-     mColorAxis->SetTitle("tracks color = F(momentum)");
-    
-   mlookFactor = 1./de.GetBinWidth(1);
-   mColorAxis->SetTitleSize(0.025);
-   mColorAxis->SetTextColor(14);
-   mColorAxis->SetLabelColor(14);
-   mColorAxis->SetLabelSize(0.02);
-   mColorAxis->SetLineColor(14);
-   mColorAxis->Draw();
-   return 0;
 }
 
-//_____________________________________________________________________________
-void StDefaultFilter::Distribution(St_dst_dedx *dedxT,TH1F &de) 
-{
- // Calculate De/Dx distribution
-  St_dst_dedx *t    = dedxT;
-  dst_dedx_st *dedx = 0;
-  dst_dedx_st *dEnd = t->end();
-  for (dedx = t->begin();dedx !=dEnd; dedx++)
-                   de.Fill(dedx->dedx[0]);
-}
-//_____________________________________________________________________________
-void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de) 
-{
- // Calculate momentum distribution
-  St_dst_trackC c(track);
-  Int_t cEnd = c.GetNRows();
-  Int_t i = 0;
-  for (i=0;i<cEnd;i++) de.Fill(c.AbsMoment(i));
-}
-//_____________________________________________________________________________
+
 // $Log: StDefaultFilter.cxx,v $
-// Revision 1.9  2000/11/17 22:26:47  fine
-// packing factors for Ftpc adjusted
-//
-// Revision 1.8  2000/09/26 17:04:46  fine
-// Two separate Distribution methods introduced
-//
-// Revision 1.7  2000/09/06 21:57:52  fine
-// Dynamic color axis
-//
-// Revision 1.6  2000/09/01 22:39:00  fine
-// minor bug fixex (Sun complained)
-//
-// Revision 1.5  2000/08/30 17:22:00  fine
-// Clean up
-//
 // Revision 1.4  2000/08/29 04:39:14  fine
 // RemoveName method introduced
 //
