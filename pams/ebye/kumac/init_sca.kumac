@@ -16,22 +16,19 @@ macro init calib_dir=$STAR_CALIB prior_switch=0 ensemble_switch=0 analysis_switc
   
   macro/global/import *
   message 'initialize sca tables and switches '  
-  cd [params]/ebye
-  dio/newfilestream      SCAPARAM  $STAR/params/ebye/sca_params.xdf r 
-  dio/stream/getevent    SCAPARAM
-  dio/stream/close       SCAPARAM
+  exec read_table_from_file#init SCAPARAM  $STAR/params/ebye/sca_params.xdf
+  exec read_table_from_file#read SCAPARAM   [params]/ebye
+  exec read_table_from_file#close SCAPARAM 
   
-  cd [calib]/ebye
-*  dio/newfilestream      SCAPRIOR  [calib_dir]/ebye/sca_prior.xdf r 
-  dio/newfilestream      SCAPRIOR  $STAR_CALIB/ebye/sca_prior.xdf r 
-  dio/stream/getevent    SCAPRIOR
-  dio/stream/close       SCAPRIOR
+*  exec read_table_from_file#init SCAPRIOR  [calib_dir]/ebye/sca_prior.xdf
+  exec read_table_from_file#init SCAPRIOR  $STAR_CALIB/ebye/sca_prior.xdf
+  exec read_table_from_file#read SCAPRIOR  [calib]/ebye
+  exec read_table_from_file#close SCAPRIOR 
   
-  cd [calib]/ebye
-*  dio/newfilestream      SCAENSEMBLE  [calib_dir]/ebye/sca_ensemble.xdf r 
-  dio/newfilestream      SCAENSEMBLE  $STAR_CALIB/ebye/sca_ensemble.xdf r 
-  dio/stream/getevent    SCAENSEMBLE
-  dio/stream/close       SCAENSEMBLE
+*  exec read_table_from_file#init SCAENSEMBLE  [calib_dir]/ebye/sca_ensemble.xdf
+  exec read_table_from_file#init SCAENSEMBLE  $STAR_CALIB/ebye/sca_ensemble.xdf
+  exec read_table_from_file#read SCAENSEMBLE  [calib]/ebye
+  exec read_table_from_file#close SCAENSEMBLE 
   
 * set switches
   cd [params]/ebye/sca
