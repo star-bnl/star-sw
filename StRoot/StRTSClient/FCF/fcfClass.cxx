@@ -908,7 +908,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		}
 
 //#ifdef __unix
-		if((cha > 0x7FFFFFFF)) {
+		if((cha == 0) || (cha > 0x7FFFFFFF)) {
 			LOG(TERR,"Bad charge: pad 0x%08X, time 0x%08X, charge 0x%08X, flags 0x%04X",rr->pad,rr->t,rr->charge,fla,0) ;
 			continue ;
 		}
