@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.88 1999/10/28 16:24:34 fine Exp $ 
+// $Id: St_Table.cxx,v 1.89 1999/11/10 00:23:55 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -46,9 +46,10 @@
 #include "TEventList.h"
 #include "TPolyMarker.h"
 #include "TView.h"
+#include "TGaxis.h"
 #include "TPolyMarker3D.h"
 
-R__EXTERN TH1 *gCurrentHist;
+TH1 *gCurrentTableHist = 0;
 
 static   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
 static   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
@@ -258,7 +259,7 @@ TH1 *St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    TEventList *elist = 0;
    Bool_t profile = kFALSE;
  
-   gCurrentHist = 0;
+   gCurrentTableHist = 0;
    if (hname) {
      *hname  = 0;
       hname += 2;
@@ -522,7 +523,7 @@ TH1 *St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    }
   if (exprFileName) delete [] exprFileName;
   if (hkeep) delete [] varexp;
-  return gCurrentHist;
+  return gCurrentTableHist;
 }
 //______________________________________________________________________________
 static void FindGoodLimits(Int_t nbins, Int_t &newbins, Float_t &xmin, Float_t &xmax)
@@ -668,7 +669,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             TAKEACTION_BEGIN
                if (results[1]) ((TH1 *)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
             TAKEACTION_END
-            gCurrentHist = ((TH1 *)obj);
+            gCurrentTableHist = ((TH1 *)obj);
             break;
         case  -2:
             TAKEACTION_BEGIN
@@ -706,7 +707,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
                    if (results[2]) ((TH2D*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
                  TAKEACTION_END
               }
-            gCurrentHist =  ((TH1 *)obj);
+            gCurrentTableHist =  ((TH1 *)obj);
             break;
         case -4:
             TAKEACTION_BEGIN
@@ -774,7 +775,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             if (!strstr(option,"goff")) pm->Draw();
             if (!((TH2F*)obj)->TestBit(kCanDelete)) 
             for(i=firstentry;i<lastEntry;i++) ((TH2F*)obj)->Fill(x[i], y[i]);
-            gCurrentHist = ((TH1*)obj);         
+            gCurrentTableHist = ((TH1*)obj);         
           }
           break; 
         case -13:
@@ -1178,7 +1179,7 @@ void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *se
  
    delete [] opt;
  
-   TH1 *hfit = gCurrentHist;
+   TH1 *hfit = gCurrentTableHist;
    if (hfit) {
       printf("hname=%s, formula=%s, option=%s, goption=%s\n",hfit->GetName(),formula,option,goption);
       // remove bit temporary 
@@ -2643,6 +2644,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.89  1999/11/10 00:23:55  fine
+// adjusted to ne ROOT 2.23
+//
 // Revision 1.88  1999/10/28 16:24:34  fine
 // St_DataSet major correction: it may be built with TList (default) or with TObjArray
 //
