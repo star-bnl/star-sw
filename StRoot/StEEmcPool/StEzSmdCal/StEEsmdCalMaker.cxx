@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.2 2004/06/22 23:31:11 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.3 2004/06/29 16:37:41 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -149,7 +149,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
     }
     
     int iT=pre; // P,Q,R fall in to iT=1,2,3 <== there is no '+1' error, JB
-    assert(iT>0 && iT<kTile);
+    assert(iT>0 && iT<mxTile);
     tileAdc[iT][ieta][iphi]=value; // store P,Q,R depending on 'iT'
     n2++;
   }
@@ -173,7 +173,8 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
       assert(x); // it should never happened for muDst
       // x->print();
       float value=hit->getAdc();
-      
+      assert(x->sec==15) ;// fix it
+
       // M-C & real data needs different handling
       if(MCflag) {
 	value/=70;// to ~match M-C with with slopeGains1 for data 
@@ -184,7 +185,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 	value/=x->gain;
       }
       //  printf("SMD hit sec=%d plane=%c strip=%d value=%f\n",x->sec,x->plane,x->strip,value);
-      smdEne[x->sec-1][x->plane-'U'][x->strip-1]=value;
+      smdEne[x->plane-'U'][x->strip-1]=value;
       n3++;
     }
   }
@@ -196,6 +197,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.3  2004/06/29 16:37:41  balewski
+// towards SMD calib
+//
 // Revision 1.2  2004/06/22 23:31:11  balewski
 // few more gadgets added
 //
