@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.12 2003/09/02 17:59:34 perev Exp $
+ * $Id: StHelixD.cc,v 1.13 2003/10/06 23:39:21 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.13  2003/10/06 23:39:21  perev
+ * sqrt(-ve) == no solution. infinity returns
+ *
  * Revision 1.12  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -286,6 +289,7 @@ double StHelixD::period() const
 pairD StHelixD::pathLength(double r) const
 {
     pairD value;
+    pairD VALUE(999999999.,999999999.);
     //
     // The math is taken from Maple with C(expr,optimized) and
     // some hand-editing. It is not very nice but efficient.
@@ -298,8 +302,10 @@ pairD StHelixD::pathLength(double r) const
 	double t13 = mCosPhase*mCosPhase;
 	double t15 = r*r;
 	double t16 = mOrigin.x()*mOrigin.x();
-	double t20 = ::sqrt(-mCosDipAngle*mCosDipAngle*(2.0*mOrigin.x()*mSinPhase*mOrigin.y()*mCosPhase +
+	double t20 = (-mCosDipAngle*mCosDipAngle*(2.0*mOrigin.x()*mSinPhase*mOrigin.y()*mCosPhase +
 				 t12-t12*t13-t15+t13*t16));
+        if(t20<0.) return VALUE;
+	t20 = ::sqrt(t20);
 	value.first  = (t1-t20)/(mCosDipAngle*mCosDipAngle);
 	value.second = (t1+t20)/(mCosDipAngle*mCosDipAngle);
     }
@@ -325,7 +331,9 @@ pairD StHelixD::pathLength(double r) const
 	             4.0*t8*mOrigin.x()*mCurvature*t5 - 4.0*t11*t23 -
 	             4.0*t11*mOrigin.y()*mCurvature*t2 + 4.0*t11 - 4.0*t14 +
 	             t32*t3 + 4.0*t15*t4 - 2.0*t35*t11 - 2.0*t35*t8;
-	double t40 = ::sqrt(-t3*t38);
+	double t40 = (-t3*t38);
+        if (t40<0.0) return VALUE;
+	t40 = ::sqrt(t40);
 	double t43 = mOrigin.x()*mCurvature;
 	double t45 = 2.0*t5 - t35 + t21 + 2.0 - 2.0*t1*t2 -2.0*t43 - 2.0*t43*t5 + t8*t3;
 	double t46 = mH*mCosDipAngle*mCurvature;
