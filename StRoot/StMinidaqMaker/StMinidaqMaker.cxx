@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.11 1999/04/28 00:32:31 sakrejda Exp $
+// $Id: StMinidaqMaker.cxx,v 1.12 1999/05/05 14:07:12 love Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.12  1999/05/05 14:07:12  love
+// Used Debug on debug messages, changed initraw sign, fixes some print statements
+//
 // Revision 1.11  1999/04/28 00:32:31  sakrejda
 // Dave's changes to handle missing tables checked in
 //
@@ -139,7 +142,7 @@ Int_t StMinidaqMaker::Init() {
 
 
    //
-     cout<<"just before the loop"<<endl;
+     if(Debug()) cout<<"just before the loop"<<endl;
 
      St_DataSet     *begin_run = GetDataSet("BEGIN_RUN");
      assert (begin_run);
@@ -181,28 +184,28 @@ Int_t StMinidaqMaker::Init() {
              current_sector= it->sector;
              number_of_sectors +=1;
              list_of_sectors[number_of_sectors]=current_sector;
-             cout<<"current sector"<< current_sector<<endl;
+             if(Debug())cout<<"current sector "<< current_sector<<endl;
              }
           }
-         cout<<"number of sectors"<< number_of_sectors<<endl;
+         if(Debug())cout<<"number of sector s"<< number_of_sectors<<endl;
          for(l=0;l<=number_of_sectors; l++){
                ttsi->CurrentSector = list_of_sectors[l];
               St_DataSetIter nextSector(gaindir);
-              cout<<" gaindir"<<gaindir<<endl;
+              if(Debug())cout<<" gaindir "<<gaindir<<endl;
               St_DataSet *sectorN = 0;
               Int_t sectorNumber =0;
               while ((sectorN = nextSector())) {
                    if(strcmp(sectorN->GetName(),"Sector") == 0){
                    sectorNumber++;
                   if(sectorNumber == list_of_sectors[l]){
-		 cout<<"sector number "<<sectorNumber<<" "<<sectorN<<endl;
+		 if(Debug())cout<<"sector number "<<sectorNumber<<" "<<sectorN<<endl;
 		 St_DataSetIter localIter(sectorN);
-		 cout<<"created localIter"<<endl;
+		 if(Debug())cout<<"created localIter"<<endl;
 		 St_raw_row *rri = (St_raw_row *) localIter.Find("gain_row_in");
 		 St_raw_row *rro = (St_raw_row *) localIter.Find("gain_row_out");
 		 St_type_floatdata *fdi = (St_type_floatdata *) localIter.Find("gain_data_in");
 		 St_type_floatdata *fdo = (St_type_floatdata *) localIter.Find("gain_data_out");
-		 cout<<"input pointers "<<rri<<" "<<rro<<" "<<fdi<<" "<<fdo<<endl;
+		 if(Debug()) cout<<"input pointers "<<rri<<" "<<rro<<" "<<fdi<<" "<<fdo<<endl;
 		 Int_t result = tfc_load_native_gains(tsi,m_it,m_gt,m_st,rsm,rri,fdi, rro, fdo); 
                  if(result!=kSTAFCV_OK) Warning("Make","tfc_load_native_gains==%d",result);
                   }
@@ -228,7 +231,7 @@ Int_t StMinidaqMaker::Make(){
 //_____________________________________________________________________________
 void StMinidaqMaker::TransferData(){
    //tell where we are
-  cout<<"begin to create tables in StMinidaqMaker"<<endl;
+   cout<<"begin to create tables in StMinidaqMaker"<<endl;
    St_DataSet   *sector = 0;
    // Check existance of DataSet and create it if any
    St_DataSetIter raw_data_tpc(m_DataSet);
@@ -285,14 +288,14 @@ void StMinidaqMaker::TransferData(){
            k = indx; if (k == m_first_sector) k = - indx;
            tss_tsspar_st *tsspar = m_tsspar->GetTable();
            tsspar->min_sect = k;
-           cout<<"run init_raw_table for sector=%d\n"<<k<<endl;
+           if(Debug())cout<<"run init_raw_table for sector= "<< k <<endl;
            St_DataSetIter sect(sector);
            St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
            St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
            Int_t initraw = init_raw_table(m_tsspar,  raw_sec_m,
                            raw_row_in, 
                            raw_row_out);
-           if(!initraw!=kSTAFCV_OK) Warning("Make","init_raw_table==%d",initraw);
+           if(initraw!=kSTAFCV_OK) Warning("Make","init_raw_table== %d",initraw);
        }
      }
        //begin to call module reformat_new
@@ -316,7 +319,7 @@ void StMinidaqMaker::TransferData(){
        if (!sector) {
 	 //         raw_data_tpc.Mkdir(name_of_sector);
          //sector = raw_data_tpc(name_of_sector);
-        printf("there is no this sector_%d\n", i);
+        printf("there is no sector_%d \n", im);
        }
  
       while ((sector=next())){
@@ -351,15 +354,20 @@ void StMinidaqMaker::TransferData(){
                  if (m_st==0) continue;
                  St_type_shortdata *m_sd = (St_type_shortdata *) mdaqdata(labelsd);
                  if (m_sd==0) continue;
-                 // make sure these input tables filled, then judge whether the information of IT tables concerns to this Sector Number
-                 cout<<"it size"<<m_it->GetNRows()<<" st size"<<m_st->GetNRows()<<" sd size"<<m_sd->GetNRows()<<endl;
-                 type_index_st  *mmp= m_it->GetTable(); 
+                 // make sure these input tables filled,
+		 // then judge whether the information of IT tables concerns to this Sector Number
+                 if (Debug()) {
+                    cout<<"it size "<<m_it->GetNRows()<<" st size "<<m_st->GetNRows();
+                    cout<<" sd size "<<m_sd->GetNRows()<<endl;
+		    }
+		 type_index_st  *mmp= m_it->GetTable(); 
                  if (mmp==0) continue;
                  Int_t kj=mmp->sector;
                  if(m_it->GetNRows()&&m_st->GetNRows()&&m_sd->GetNRows()&&kj==k){
                     tss_tsspar_st *tsspar = m_tsspar->GetTable();
                     tsspar->min_sect = k;
                     St_DataSetIter sect(sector);
+
                     St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
                     St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
                     St_raw_pad         *raw_pad_in     = (St_raw_pad *) sect("raw_pad_in");
@@ -384,7 +392,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.11 1999/04/28 00:32:31 sakrejda Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.12 1999/05/05 14:07:12 love Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
