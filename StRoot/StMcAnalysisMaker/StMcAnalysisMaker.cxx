@@ -1,7 +1,14 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.16 2000/04/12 21:33:57 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.17 2000/04/20 16:59:47 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.17  2000/04/20 16:59:47  calderon
+ * Pick up the makers with the new names
+ * Change the name from "McAnalysis" to "StMcAnalysisMaker"
+ * No longer use the helix, use the primary track momentum when available
+ * (also avoids dependency on StEventSummary)
+ * Denominator for mom. resolution histograms is now simulated momentum.
+ *
  * Revision 1.16  2000/04/12 21:33:57  calderon
  * check case where no multimaps are found
  *
@@ -81,7 +88,6 @@
 #include "StMcAnalysisMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-#include "StPhysicalHelixD.hh"
 
 #include "StMessMgr.h"
 
@@ -171,7 +177,7 @@ Int_t StMcAnalysisMaker::Init()
     mHitResolution->SetXTitle("Delta X (cm)");
     mHitResolution->SetYTitle("Delta Z (cm)");
 
-    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
+    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|pmc|",100,-1.,1.);
     mMomResolution->SetXTitle("Resolution (%)");
 
     coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
@@ -206,11 +212,11 @@ Int_t StMcAnalysisMaker::Make()
 
     // StMcEvent
     StMcEvent* mEvent = 0;
-    mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+    mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
 
     // StAssociationMaker
     StAssociationMaker* assoc = 0;
-    assoc = (StAssociationMaker*) gStChain->Maker("Associations");
+    assoc = (StAssociationMaker*) GetMaker("StAssociationMaker");
 
     // the Multimaps...
     rcTpcHitMapType* theHitMap = 0;
@@ -328,22 +334,21 @@ Int_t StMcAnalysisMaker::Make()
     StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
     StTrackNode*        firstTrackNode = *(rcTrackNodes.begin());
     StGlobalTrack*      firstTrack = dynamic_cast<StGlobalTrack*>(firstTrackNode->track(global));
-    double B = rEvent->summary()->magneticField();
+    
     if (firstTrack) {
 	pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
 
 	
 	cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
 	cout << "Momentum of First Track and of first Associated Track:" << endl;
-	// Calculate the momentum of the track at the start vertex and compare it to MC Track
-	StPhysicalHelixD trkHelix = firstTrack->geometry()->helix();
-	double s = 0;
-	if (firstTrack->vertex())
-	    s = trkHelix.pathLength(firstTrack->vertex()->position());
+	// Get the momentum of the track and compare it to MC Track.
+	// Use primary track if available
+	StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(firstTrack->node()->track(primary));
+	StThreeVectorD recMom(0,0,0);
+	if (pTrk)
+	    recMom = pTrk->geometry()->momentum();
 	else
-	    s = trkHelix.pathLength(VertexPos);
-	
-	StThreeVectorD recMom(trkHelix.momentumAt(s,B*kilogauss));
+	    recMom = firstTrack->geometry()->momentum();
 	
 	cout << "[" << abs(recMom) << ", ";
 	cout << abs((*trackBounds.first).second->partnerMcTrack()->momentum()) << "]" << endl;
@@ -360,9 +365,10 @@ Int_t StMcAnalysisMaker::Make()
     // Example: Make a histogram of the momentum resolution of the event
     //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
     StGlobalTrack* recTrack;
+    StPrimaryTrack* primTrk;
     StMcTrack*     mcTrack;
-    StThreeVectorD p;
-    StThreeVectorD pmc;
+    StThreeVectorD p(0,0,0);
+    StThreeVectorD pmc(0,0,0);
     float diff =0;
 
     float* values = new float[12];
@@ -378,20 +384,18 @@ Int_t StMcAnalysisMaker::Make()
 	for (int k=0; k<3; k++) values[k] = pmc[k];
 	values[3]=pmc.mag();
 	
-	double s = 0;
-	StPhysicalHelixD trkHelix = recTrack->geometry()->helix();
-	if (recTrack->vertex())
-	    s = trkHelix.pathLength(recTrack->vertex()->position());
+	primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary));
+	if (primTrk)
+	    p = primTrk->geometry()->momentum();
 	else
-	    s = trkHelix.pathLength(VertexPos);
-	
-	p = trkHelix.momentumAt(s,B);
+	    p = recTrack->geometry()->momentum();
+		
 	for (int j=0; j<3; j++) values[j+4] = p[j];
 	values[7]=p.mag();
 	values[8]=(*tIter).second->commonTpcHits();
 	// Fill 1d Mom. resolution Histogram
 	
-	diff = (p.mag() - pmc.mag())/p.mag();
+	diff = (p.mag() - pmc.mag())/pmc.mag();
 	mMomResolution->Fill(diff,1.);
 	// Loop to get Mean hit position diff.
 	StThreeVectorF rHitPos(0,0,0);
