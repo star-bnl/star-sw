@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.25 2000/03/21 00:24:43 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.26 2000/03/28 23:25:36 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.26  2000/03/28 23:25:36  posk
+// Allow multiple instances.
+//
 // Revision 1.25  2000/03/21 00:24:43  posk
 // Added GetCVS and changed some plot names.
 //
@@ -138,8 +141,7 @@ StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StMaker(name),
 
 StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name,
 					 const StFlowSelection& flowSelect) :
-  StMaker(name),
-  MakerName(name) {
+  StMaker(name), MakerName(name) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
 }
 
@@ -156,12 +158,18 @@ Int_t StFlowAnalysisMaker::Make() {
   // Get a pointer to the flow tags
   StFlowTagMaker* pFlowTagMaker = NULL;
   pFlowTag = NULL;
-  pFlowTagMaker = (StFlowTagMaker*)GetMaker("FlowTag");
+  TString* makerName = new TString("FlowTag");
+  makerName->Append(pFlowSelect->Number());
+  pFlowTagMaker = (StFlowTagMaker*)GetMaker(makerName->Data());
+  delete makerName;
   if (pFlowTagMaker) pFlowTag = pFlowTagMaker->TagPointer();
 
   // Get a pointer to StFlowEvent
   StFlowMaker* pFlowMaker = NULL;
-  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  makerName = new TString("Flow");
+  makerName->Append(pFlowSelect->Number());
+  pFlowMaker = (StFlowMaker*)GetMaker(makerName->Data());
+  delete makerName;
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
 
   if (pFlowSelect->Select(pFlowEvent)) {     // event selected
@@ -186,11 +194,6 @@ Int_t StFlowAnalysisMaker::Make() {
     
   }
   
-  // Clean up
-  if (pFlowEvent) {
-    delete pFlowEvent;    // it deletes pTrackCollection;
-  }
-
   return kStOK;
 }
 
@@ -198,7 +201,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.25 2000/03/21 00:24:43 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.26 2000/03/28 23:25:36 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -209,12 +212,12 @@ void StFlowAnalysisMaker::PrintInfo() {
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
 
-  const float chargeMin       =   -3.;
-  const float chargeMax       =    3.; 
+  const float chargeMin       =  -2.5;
+  const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
-  const float dcaMax          =   0.3; 
+  const float dcaMax          =    1.; 
   const float chi2Min         =    0.;
-  const float chi2Max         =    3.; 
+  const float chi2Max         =    5.; 
   const float fitPtsMin       =    0.;
   const float fitPtsMax       =   60.; 
   const float maxPtsMin       =    0.;
@@ -224,9 +227,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float origMultMin     =    0.;
   const float origMultMax     = 4000.; 
   const float totalMultMin    =    0.;
-  const float totalMultMax    = 2000.; 
+  const float totalMultMax    = 4000.; 
   const float corrMultMin     =    0.;
-  const float corrMultMax     = 2000.; 
+  const float corrMultMax     = 4000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -100.;
@@ -242,7 +245,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float meanPtMin       =    0.;
   const float meanPtMax       =    1.;
   const float multMin         =    0.;
-  const float multMax         = 2000.;
+  const float multMax         = 4000.;
   const float qMin            =    0.;
   const float pidMin          =  -10.;
   const float pidMax          =   10.;
@@ -254,19 +257,19 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nChi2Bins         = 50,
 	 nFitPtsBins       = 60,
 	 nMaxPtsBins       = 60,
-	 nFitOverMaxBins   = 50,
-	 nOrigMultBins     = 50,
-	 nTotalMultBins    = 50,
+	 nFitOverMaxBins   =100,
+	 nOrigMultBins     = 40,
+	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
-	 nCorrMultBins     = 50,
+	 nCorrMultBins     = 40,
 	 nVertexZBins      = 50,
 	 nVertexXYBins     = 50,
-	 nEtaSymBins       = 50,
+	 nEtaSymBins       = 40,
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
-	 nMultBins         = 50,
+	 nMultBins         = 40,
 	 nMeanPtBins       = 50,
-	 nPidBins          = 50,
+	 nPidBins          = 40,
          nCentBins         =  7 };
   
   // Charge
@@ -966,17 +969,17 @@ static Double_t chi(double res) {
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
   // Fits q distribution and outputs phiWgt values
-
   TString* histTitle;
 
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars);
 
   // Yield with zero error
-  TH2D* histYield2DZero = new TH2D("ZeroError", "ZeroError", nEtaBins, 
-    etaMin, etaMax, nPtBins, ptMin, ptMax);
-  histYield2DZero->Sumw2();
-  mHistYieldAll2D->Copy(*histYield2DZero);
+  TH2D* histYield2DZero;
+  //->Sumw2();
+  histYield2DZero = (TH2D*)mHistYieldAll2D->Clone();
+  histYield2DZero->SetName("ZeroError");
+  histYield2DZero->SetTitle("ZeroError");
   double zero[nEtaBins+2][nPtBins+2] = {{0.}};
   histYield2DZero->SetError(&zero[0][0]);
 
@@ -1090,20 +1093,27 @@ Int_t StFlowAnalysisMaker::Finish() {
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgt);
     }
   }
+  //GetHistList()->ls();
   delete histYield2DZero;
 
   // Write all histograms
-  TFile histFile("flow.hist.root", "RECREATE");
+  TString* fileName = new TString("flow.hist.root");
+  fileName->Prepend(pFlowSelect->Number());
+  TFile histFile(fileName->Data(), "RECREATE");
   GetHistList()->Write();
   histFile.Close();
+  delete fileName;
   
   // Write PhiWgt histograms
-  TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
+  fileName = new TString("flowPhiWgtNew.hist.root");
+  fileName->Prepend(pFlowSelect->Number());
+  TFile phiWgtNewFile(fileName->Data(), "RECREATE");
   phiWgtHistNames->Write();
   phiWgtNewFile.Close();
+  delete fileName;
   delete phiWgtHistNames;
 
-  // Note the selection object used
+  // Print the selection object details
   cout << "########################################################" << endl;
   cout << "##### The selection number was " << pFlowSelect->Number() << endl;
   cout << "##### Centrality was " << pFlowSelect->Centrality() << endl;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.15 2000/03/21 00:24:45 posk Exp $
+// $Id: plot.C,v 1.16 2000/03/28 23:25:37 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.16  2000/03/28 23:25:37  posk
+// Allow multiple instances.
+//
 // Revision 1.15  2000/03/21 00:24:45  posk
 // Added GetCVS and changed some plot names.
 //
@@ -65,8 +68,11 @@ const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 2.;
 const Float_t ptMax  = 2.;
-Int_t runNo          = 0;
-char  runNumber[6];
+Int_t runNumber      = 0;
+//Int_t fileNumber     = 0;
+char  fileNumber[3];
+char  runName[6];
+char  fileName[30];
  
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
@@ -140,12 +146,20 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   }
 
   // input the run number
-  if (runNo == 0) {
+  if (runNumber == 0) {
     cout << "     run number? ";
-    cin >> runNo;
-    sprintf(runNumber,"ana%2d",runNo);                   // add ana prefix
-    cout << " run number = " << runNumber << endl;
+    cin >> runNumber;
+    sprintf(runName, "ana%2d", runNumber);                   // add ana prefix
+    cout << " run name = " << runName << endl;
   }
+
+  // input the file number
+//     cout << "     file number? [none]";
+//     cin >> fileNumber;
+//     char* c0 = strstr(fileNumber, '\0');
+//     *(c0 - 1) = '\0';
+//     sprintf(fileName, "%sflow.hist.root", fileNumber); 
+//     cout << " file name = " << fileName << endl;
 
   // input the page number
   while (pageNumber <= nSingles || pageNumber > nNames) {
@@ -169,7 +183,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     cin >> pageNumber;
   }
   pageNumber--;
-  cout << "  name= " << shortName[pageNumber] << endl;
+  cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
   //float qMax    =     2.;
@@ -198,7 +212,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
     title->Draw();
   }
-  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
@@ -267,10 +281,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  projX->SetYTitle("Counts");
 	  gStyle->SetOptStat(10);
 	  if (projX) projX->Draw("H");
-	} else if (strcmp(shortName[pageNumber],"Flow_v.Eta")==0) {
-	  projX->SetYTitle("Sum Flow (%)");
-	  gStyle->SetOptStat(0);
-	  if (projX) projX->Draw("E1");
 	}
   	lineZeroEta->Draw();
       } else if (strstr(shortName[pageNumber],".Pt")!=0) {  // 2D Y projection
@@ -282,10 +292,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  gPad->SetLogy();
 	  gStyle->SetOptStat(100110);
 	  if (projY) projY->Draw("H");
-	} else if (strcmp(shortName[pageNumber],"Flow_v.Pt")==0) {
-	  projY->SetYTitle("Sum Flow (%)");
-	  gStyle->SetOptStat(0);
-	  if (projY) projY->Draw("E1");
 	}
   	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
@@ -377,7 +383,7 @@ TCanvas* plotResolution(){
   // make the graph page
   TCanvas* c = new TCanvas(resName[1],resName[1],600,780);
   c->ToggleEventStatus();
-  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
@@ -420,11 +426,11 @@ TCanvas* plotResolution(){
 
 // macro for the single plots
 TCanvas* plotSingles(char* shortName){
-  cout << "  name= " << shortName << endl;
+  cout << "  graph name= " << shortName << endl;
   // make the graph page
   TCanvas* c = new TCanvas(shortName,shortName,780,600);
   c->ToggleEventStatus();
-  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
