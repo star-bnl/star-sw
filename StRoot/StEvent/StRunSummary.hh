@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.hh,v 1.3 1999/01/30 23:03:15 wenaus Exp $
+ * $Id: StRunSummary.hh,v 1.4 1999/03/04 15:57:00 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.hh,v $
- * Revision 1.3  1999/01/30 23:03:15  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/03/04 15:57:00  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.4  1999/03/04 15:57:00  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.3  1999/01/30 23:03:15  wenaus
  * table load intfc change; include ref change
@@ -22,7 +25,7 @@
  * Revision 1.2  1999/01/15 22:53:51  wenaus
  * version with constructors for table-based loading
  *
-
+ **************************************************************************/
 #ifndef StRunSummary_hh
 #define StRunSummary_hh
 using namespace std;

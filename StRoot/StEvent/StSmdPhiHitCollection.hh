@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSmdPhiHitCollection.hh,v 1.1 1999/02/23 15:45:54 ullrich Exp $
+ * $Id: StSmdPhiHitCollection.hh,v 1.2 1999/03/04 15:57:01 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,12 +10,16 @@
  ***************************************************************************
  *
  * $Log: StSmdPhiHitCollection.hh,v $
- * Revision 1.1  1999/02/23 15:45:54  ullrich
- * Initial Revision
+ * Revision 1.2  1999/03/04 15:57:01  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.2  1999/03/04 15:57:01  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.1  1999/02/23 15:45:54  ullrich
  * Initial Revision
  *
+ **************************************************************************/
 #ifndef StSmdPhiHitCollection_hh
 #define StSmdPhiHitCollection_hh
 using namespace std;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.7 1999/02/24 12:49:06 ullrich Exp $
+ * $Id: StGlobalTrack.hh,v 1.8 1999/03/04 15:56:58 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.7  1999/02/24 12:49:06  ullrich
- * Added argument (h) to constructor needed to instatiate helix
+ * Revision 1.8  1999/03/04 15:56:58  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.11  1999/04/08 14:58:34  ullrich
+ * Moved PID traits from StTrack to StGlobalTrack.
  *
  * Revision 1.10  1999/03/23 21:47:37  ullrich
  * Member function made virtual
@@ -34,6 +37,7 @@
  * Revision 1.5  1999/02/15 16:17:03  wenaus
  * fix double& -> double referencing bug
  *
+ * Revision 1.4  1999/02/12 02:01:18  wenaus
  * New track constructor to load helix params independently of table
  *
 using namespace std;

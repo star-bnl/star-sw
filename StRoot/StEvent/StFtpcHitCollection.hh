@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHitCollection.hh,v 1.2 1999/01/15 22:53:43 wenaus Exp $
+ * $Id: StFtpcHitCollection.hh,v 1.3 1999/03/04 15:56:58 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,12 +10,16 @@
  ***************************************************************************
  *
  * $Log: StFtpcHitCollection.hh,v $
+ * Revision 1.3  1999/03/04 15:56:58  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
  * Revision 1.2  1999/01/15 22:53:43  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StFtpcHitCollection_hh
 #define StFtpcHitCollection_hh
+using namespace std;
 #include <vector>
 #include "StEvent/StFtpcHit.hh"
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.hh,v 1.3 1999/02/09 22:38:22 wenaus Exp $
+ * $Id: StL0Trigger.hh,v 1.4 1999/03/04 15:56:59 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.hh,v $
- * Revision 1.3  1999/02/09 22:38:22  wenaus
- * add missing 'inline'
+ * Revision 1.4  1999/03/04 15:56:59  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.4  1999/03/04 15:56:59  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.3  1999/02/09 22:38:22  wenaus
  * add missing 'inline'
@@ -20,6 +23,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
+#ifndef StL0Trigger_hh
 #define StL0Trigger_hh 
 #include "StEvent/StTrigger.hh"
 using namespace std;

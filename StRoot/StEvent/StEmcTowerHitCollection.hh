@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTowerHitCollection.hh,v 1.1 1999/02/23 15:45:47 ullrich Exp $
+ * $Id: StEmcTowerHitCollection.hh,v 1.2 1999/03/04 15:56:56 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,12 +10,16 @@
  ***************************************************************************
  *
  * $Log: StEmcTowerHitCollection.hh,v $
- * Revision 1.1  1999/02/23 15:45:47  ullrich
- * Initial Revision
+ * Revision 1.2  1999/03/04 15:56:56  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.2  1999/03/04 15:56:56  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.1  1999/02/23 15:45:47  ullrich
  * Initial Revision
  *
+ **************************************************************************/
 #ifndef StEmcTowerHitCollection_hh
 #define StEmcTowerHitCollection_hh
 using namespace std;

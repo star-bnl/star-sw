@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrSvtHit.hh,v 1.2 1999/01/15 22:54:19 wenaus Exp $
+ * $Id: StVecPtrSvtHit.hh,v 1.3 1999/03/04 15:57:09 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StVecPtrSvtHit.hh,v $
- * Revision 1.2  1999/01/15 22:54:19  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/03/04 15:57:09  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.3  1999/03/04 15:57:09  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.2  1999/01/15 22:54:19  wenaus
  * version with constructors for table-based loading
  *
-
+ **************************************************************************/
 #ifndef StVecPtrSvtHit_hh
 #define StVecPtrSvtHit_hh
 using namespace std;

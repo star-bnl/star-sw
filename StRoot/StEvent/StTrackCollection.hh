@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackCollection.hh,v 1.3 1999/01/30 23:03:16 wenaus Exp $
+ * $Id: StTrackCollection.hh,v 1.4 1999/03/04 15:57:05 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackCollection.hh,v $
- * Revision 1.3  1999/01/30 23:03:16  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/03/04 15:57:05  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.4  1999/03/04 15:57:05  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.3  1999/01/30 23:03:16  wenaus
  * table load intfc change; include ref change
@@ -19,6 +22,7 @@
  * Revision 1.2  1999/01/15 22:54:03  wenaus
  * version with constructors for table-based loading
  *
+ **************************************************************************/
 #ifndef StTrackCollection_hh
 #define StTrackCollection_hh
 using namespace std;
