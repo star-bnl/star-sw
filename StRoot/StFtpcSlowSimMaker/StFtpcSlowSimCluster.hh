@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.hh,v 1.2 2001/03/06 23:35:58 jcs Exp $
+// $Id: StFtpcSlowSimCluster.hh,v 1.3 2002/06/07 09:55:41 fsimon Exp $
 // $Log: StFtpcSlowSimCluster.hh,v $
+// Revision 1.3  2002/06/07 09:55:41  fsimon
+// Additional debug info to trace electron drift
+//
 // Revision 1.2  2001/03/06 23:35:58  jcs
 // use database instead of params
 //
@@ -76,7 +79,9 @@ private:
   float currentPhi;	// azimuthal position in deg
   float drift_time;	// accumulated drift time in usec.
   int padrow;           // self-explanatory (needed for drift field)
-  
+  int original_padrow;   // only for debug output
+
+
 };
 
 #endif
