@@ -293,6 +293,7 @@ TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un)
     if (!arr)		continue;
     int sz = arr->size();
     if (!sz)		continue;
+    if (strcmp("StSPtrVecEmcRawHit",arr->ClassName())==0) continue; //VP Hack
     for(int ih=0;ih<sz; ih++) {
       StHit *hit = (StHit*)arr->at(ih);
       if (!hit) 	continue;
@@ -370,6 +371,18 @@ TObjArray *StEventHelper::SelVertex(const char *sel,Int_t thFlag)
 
 //______________________________________________________________________________
 ClassImp(StPoints3DABC)
+void StPoints3DABC::Add(StPoints3DABC *add)
+{
+  int n = add->fSize + fSize;
+  if (n > fN) {
+    if (n < fN*2) n = fN*2;
+    Float_t *arr = new Float_t[n*3];
+    memcpy(arr, fXYZ, fSize*3*sizeof(Float_t));
+    delete [] fXYZ; fXYZ = arr; fN = n;
+  }
+  memcpy(fXYZ+fSize*3,add->fXYZ,add->fSize*3*sizeof(Float_t));
+  fSize+=add->fSize;
+}
 //______________________________________________________________________________
 ClassImp(StTrackPoints)
 //______________________________________________________________________________
@@ -388,7 +401,8 @@ void StTrackPoints::Init()
   double curva = fabs(geo->curvature());
   double dip   = geo->dipAngle();
   fSize = abs(int(len*cos(dip)*curva*20))+2;   
-  fXYZ = new Float_t[fSize*3];
+  fN = fSize;
+  fXYZ = new Float_t[fN*3];
   StPhysicalHelixD hel = geo->helix();
   Double_t step = len/(fSize-1);
   Double_t ss = 0;
@@ -408,7 +422,7 @@ StVertexPoints::StVertexPoints(StVertex *sv,const char *name,const char *title)
 :StPoints3DABC(name,title,sv),fVertex((StVertex*&)fObj)
 {
   fVertex = sv;
-  fSize = 1;
+  fSize = 1; fN =1;
   fXYZ = new Float_t[3];
   fXYZ[0] = fVertex->position().x(); 
   fXYZ[1] = fVertex->position().y(); 
@@ -421,7 +435,7 @@ ClassImp(StHitPoints)
 StHitPoints::StHitPoints(StHit *sh,const char *name,const char *title)
 :StPoints3DABC(name,title,sh)
 {
-  fSize = 1;
+  fSize = 1; fN =1;
   fObj = sh;
   Init();
 }
@@ -430,6 +444,7 @@ StHitPoints::StHitPoints(StRefArray *ar,const char *name,const char *title)
 :StPoints3DABC(name,title,ar)
 {
   fSize = ar->size();
+  fN = fSize;
   if (!fSize) return;
   fObj = (fSize==1) ? ar->front() : ar;
   Init();
@@ -438,7 +453,7 @@ StHitPoints::StHitPoints(StRefArray *ar,const char *name,const char *title)
 void StHitPoints::Init() 
 {  
   if (fXYZ) return;
-  fXYZ = new Float_t[fSize*3];
+  fXYZ = new Float_t[fN*3];
   
   for (int i =0;i<fSize;i++)
   {
