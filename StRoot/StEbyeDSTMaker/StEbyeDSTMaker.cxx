@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.3 2000/10/13 17:51:35 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
+ * Revision 1.3  2000/10/13 17:51:35  jgreid
+ * modified centrality calc to use all uncorrected primaries
+ *
  * Revision 1.2  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -139,9 +142,9 @@ Int_t StEbyeDSTMaker::Make() {
 
     // set the event parameters for the EbyeDST
     mEbyeEvent->SetOrigMult(initialN);
-    mEbyeEvent->SetCentMult(uncorrectedNumberOfNegativePrimaries(event));    
+    mEbyeEvent->SetCentMult(uncorrectedNumberOfPrimaries(event));    
 
-    mEbyeEvent->SetCentrality(uncorrectedNumberOfNegativePrimaries(event));
+    mEbyeEvent->SetCentrality(uncorrectedNumberOfPrimaries(event));
 
     mEbyeEvent->SetEventID((Int_t) event.id());
     mEbyeEvent->SetRunID((Int_t) event.runId());

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.cxx,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeEvent.cxx,v 1.3 2000/10/13 17:51:35 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.cxx,v $
+ * Revision 1.3  2000/10/13 17:51:35  jgreid
+ * modified centrality calc to use all uncorrected primaries
+ *
  * Revision 1.2  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -55,32 +58,18 @@ void StEbyeEvent::AddTrack(StEbyeTrack* inputTrack) {
 
 void StEbyeEvent::SetCentrality(UInt_t N) {
 
-  //UInt_t centralityDivider[] = {20,100,180,270,360,460,560,660,870};
-  // One-Half of the Flow Divider positions since we only have 
-  //  negative particles
-  UInt_t centralityDivider[] = {10,50,90,135,180,230,280,330,435};
+  UInt_t centralityDivider[] = {20,100,180,270,360,460,560,660,870};
 
-  if (N < centralityDivider[0]) {
-    mCentrality = 0;
-  } else if ((N >= centralityDivider[0]) && (N < centralityDivider[1])) {
-    mCentrality = 1;
-  } else if ((N >= centralityDivider[1]) && (N < centralityDivider[2])) {
-    mCentrality = 2;
-  } else if ((N >= centralityDivider[2]) && (N < centralityDivider[3])) {
-    mCentrality = 3;
-  } else if ((N >= centralityDivider[3]) && (N < centralityDivider[4])) {
-    mCentrality = 4;
-  } else if ((N >= centralityDivider[4]) && (N < centralityDivider[5])) {
-    mCentrality = 5;
-  } else if ((N >= centralityDivider[5]) && (N < centralityDivider[6])) {
-    mCentrality = 6;
-  } else if ((N >= centralityDivider[6]) && (N < centralityDivider[7])) {
-    mCentrality = 7;
-  } else if ((N >= centralityDivider[7]) && (N < centralityDivider[8])) {
-    mCentrality = 8;
-  } else if (N >= centralityDivider[8]) {
-    mCentrality = 9;
-  }
+  if (N < centralityDivider[0])      { mCentrality = 0; }
+  else if (N < centralityDivider[1]) { mCentrality = 1; }
+  else if (N < centralityDivider[2]) { mCentrality = 2; }
+  else if (N < centralityDivider[3]) { mCentrality = 3; }
+  else if (N < centralityDivider[4]) { mCentrality = 4; }
+  else if (N < centralityDivider[5]) { mCentrality = 5; }
+  else if (N < centralityDivider[6]) { mCentrality = 6; }
+  else if (N < centralityDivider[7]) { mCentrality = 7; }
+  else if (N < centralityDivider[8]) { mCentrality = 8; }
+  else                               { mCentrality = 9; }
 
 }
 
