@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.18 2000/03/04 00:33:07 sakrejda Exp $
+* $Id: tpt.F,v 1.19 2000/03/10 08:14:02 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.19  2000/03/10 08:14:02  sakrejda
+* Marging for field on and off under the same switch.
+*
 * Revision 1.18  2000/03/04 00:33:07  sakrejda
 * Segment merging added for straigth tracks
 *
@@ -260,23 +263,25 @@ C               failed while extending segments
                 go to 999
               endif
       endif
-      call gufld(xlocal,bfield)
-      if(abs(bfield(3)).lt.0.1)
-     >iret=tpt_merge_line(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)
+
       if(tpar(ipass).merge.eq.1) then
-C             merge pieces of tracks together
-              call timed(time_now)
-              time_all = time_all + time_now
-              iret=tpt_merge_segments(track_h,track,trk,hit_h,hit,
-     >                          tpar,tpar_h,ipass)
-              call timed(time_now)
-              time_all = time_all + time_now
-              time_merge = time_now
-              if(iret.eq.STAFCV_BAD) then
-                write(132,*) 'TPTI2-E1 problems in segment merging'
-                call message(m132, 1, idI2)
-                tpt=STAFCV_BAD
-              endif
+C       merge pieces of tracks together
+        call timed(time_now)
+        time_all = time_all + time_now
+        call gufld(xlocal,bfield)
+        if(abs(bfield(3)).lt.0.1) then
+           iret=tpt_merge_line(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)
+        else
+           iret=tpt_merge_segments(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)
+        endif
+        call timed(time_now)
+        time_all = time_all + time_now
+        time_merge = time_now
+        if(iret.eq.STAFCV_BAD) then
+          write(132,*) 'TPTI2-E1 problems in segment merging'
+          call message(m132, 1, idI2)
+          tpt=STAFCV_BAD
+        endif
       endif
 c
 C     write out timing information
