@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.25 1999/07/11 01:59:04 perev Exp $
+// $Id: StMaker.h,v 1.26 1999/07/11 02:02:05 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.26  1999/07/11 02:02:05  perev
+// clash inside GetCVS resolved
+//
 // Revision 1.25  1999/07/11 01:59:04  perev
 // add GetCVSTag again
 //
@@ -199,8 +202,9 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
 
+
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.25 1999/07/11 01:59:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.26 1999/07/11 02:02:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   virtual const char *GetCVSTag(){return  GetCVS();};
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
