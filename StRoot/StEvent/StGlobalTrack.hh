@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.10 1999/03/23 21:47:37 ullrich Exp $
+ * $Id: StGlobalTrack.hh,v 1.11 1999/04/08 14:58:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.10  1999/03/23 21:47:37  ullrich
- * Member function made virtual
+ * Revision 1.11  1999/04/08 14:58:34  ullrich
+ * Moved PID traits from StTrack to StGlobalTrack.
  *
  * Revision 1.11  1999/04/08 14:58:34  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -56,7 +56,9 @@
 #include "StEvent/StSvtHit.hh"
 #include "StEvent/StDedx.hh"
 #include "StEvent/StTrack.hh"
+#include "StEvent/StVecPtrTpcHit.hh"
 #include "StEvent/StVecPtrSvtHit.hh"
+#include "StEvent/StVecPtrFtpcHit.hh"
 #include "StEvent/StTrackPidTraits.hh"
 #include "tables/dst_track.h"
 
@@ -77,9 +79,10 @@ public:
     // StGlobalTrack(const StGlobalTrack&);     use default
     // const StGlobalTrack & operator=(const StGlobalTrack &);
     
-    virtual StDedx*                   svtDedx();
-    virtual StDedx*                   tpcDedx();
-    virtual StDedx*                   ftpcDedx();
+    virtual const StVecPtrTpcHit&     tpcHits() const;
+    virtual const StVecPtrSvtHit&     svtHits() const;
+    virtual const StVecPtrFtpcHit&    ftpcHits() const;
+    virtual const StDedx*             svtDedx() const;
     virtual const StDedx*             tpcDedx() const;
     virtual const StDedx*             ftpcDedx() const;
     virtual const StTrackPidTraits&   pidTraits() const;
@@ -98,12 +101,13 @@ public:
     virtual void addSvtHit(StSvtHit*);
     virtual void removeTpcHit(StTpcHit*);
     virtual void removeFtpcHit(StFtpcHit*);
-    StVecPtrTpcHit  mTpcHits;
-    StVecPtrSvtHit  mSvtHits;
-    StVecPtrFtpcHit mFtpcHits;
-    StDedx*         mTpcDedx;
-    StDedx*         mFtpcDedx;
-    StDedx*         mSvtDedx;       
+    virtual void removeSvtHit(StSvtHit*);
+
+protected:
+    StVecPtrTpcHit   mTpcHits;
+    StVecPtrSvtHit   mSvtHits;
+    StVecPtrFtpcHit  mFtpcHits;
+    StDedx*          mTpcDedx;
     StDedx*          mFtpcDedx;
     StDedx*          mSvtDedx;       
     StTrackPidTraits mPidTraits;
@@ -112,11 +116,13 @@ public:
 inline const StVecPtrTpcHit& StGlobalTrack::tpcHits() const { return mTpcHits; }
 
 inline const StVecPtrSvtHit& StGlobalTrack::svtHits() const { return mSvtHits; }
-inline StDedx* StGlobalTrack::svtDedx() { return mSvtDedx; }
+
+inline const StVecPtrFtpcHit& StGlobalTrack::ftpcHits() const { return mFtpcHits; }
+
 inline const StDedx* StGlobalTrack::svtDedx() const { return mSvtDedx; }
-inline StDedx* StGlobalTrack::tpcDedx() { return mTpcDedx; }
+
 inline const StDedx* StGlobalTrack::tpcDedx() const { return mTpcDedx; }
-inline StDedx* StGlobalTrack::ftpcDedx() { return mFtpcDedx; }
+
 inline const StDedx* StGlobalTrack::ftpcDedx() const { return mFtpcDedx; }
 
 inline const StTrackPidTraits& StGlobalTrack::pidTraits() const { return mPidTraits; }
