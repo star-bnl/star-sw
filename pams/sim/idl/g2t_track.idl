@@ -1,8 +1,10 @@
 struct g2t_track {          /* G2t_track */ 
-/* revised 961204, ge, changed ctf to ctb and added tof */
-/* revised 961219, ge, added  end cap cal:(eem & esm) */
-/* added photon multiplicity detector PMD:(pgc & psc) */
-/* --max -- added the pixel */
+  /* $Id: g2t_track.idl,v 1.7 2005/03/23 22:01:40 potekhin Exp $ */
+  /* $Log: g2t_track.idl,v $
+   * Revision 1.7  2005/03/23 22:01:40  potekhin
+   * Add fst
+   * */
+
 
        long      eg_label;   /* generator track label (0 if GEANT track) */
        long      eg_pid;     /* event generator particle id */
@@ -12,7 +14,8 @@ struct g2t_track {          /* G2t_track */
        long      hit_emc_p;  /* Id of first emc hit on track linked list */
        long      hit_esm_p;  /* Id of first esm hit on track linked list */
        long      hit_ftp_p;  /* Id of first ftp hit on track linked list */
-       long      hit_ist_p;  /* Id of first ftp hit on track linked list */
+       long      hit_ist_p;  /* Id of first ist hit on track linked list */
+       long      hit_fst_p;  /* Id of first fst hit on track linked list */
        long      hit_mwc_p;  /* Id of first mwc hit on track linked list */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
@@ -32,6 +35,7 @@ struct g2t_track {          /* G2t_track */
        long      n_esm_hit;  /* Nhits in esm (endcap shower max) */
        long      n_ftp_hit;  /* Nhits in forward tpc */
        long      n_ist_hit;  /* Nhits in ist */
+       long      n_fst_hit;  /* Nhits in fst */
        long      n_mwc_hit;  /* Nhits in mwc */
        long      n_pgc_hit;  /* Nhits in pgc  ???  */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */
