@@ -19,7 +19,7 @@
 
 StiTrackFinder::StiTrackFinder()
     : trackFilter(0), trackSeedFinder(0), trackNodeFactory(0), magField(0),
-      geometryContainer(0), hitContainer(0), trackContainer(0)
+      detectorContainer(0), hitContainer(0), trackContainer(0)
 {
     cout <<"StiTrackFinder::StiTrackFinder()"<<endl;
 
@@ -29,7 +29,7 @@ StiTrackFinder::StiTrackFinder()
     setTrackFilter( new StiTrackFilter() );
 
     //Detector Container
-    setGeometryContainer( StiDetectorContainer::instance() );
+    setDetectorContainer( StiDetectorContainer::instance() );
 
     //Hit Container
     setHitContainer( StiHitContainer::instance() );
@@ -49,7 +49,7 @@ StiTrackFinder::~StiTrackFinder()
 
 bool StiTrackFinder::isValid(bool debug) const
 {
-    bool val = trackSeedFinder && trackFilter && trackNodeFactory  && geometryContainer &&
+    bool val = trackSeedFinder && trackFilter && trackNodeFactory  && detectorContainer &&
 	hitContainer && trackContainer; //
 	//&& magField;
     
@@ -59,7 +59,7 @@ bool StiTrackFinder::isValid(bool debug) const
 	cout <<"trackFilter:\t\t"<<trackFilter<<endl;
 	cout <<"trackNodeFactory:\t"<<trackNodeFactory<<endl;
 	cout <<"magField:\t\t"<<magField<<endl;
-	cout <<"geometryContainer:\t"<<geometryContainer<<endl;
+	cout <<"detectorContainer:\t"<<detectorContainer<<endl;
 	cout <<"hitContainer:\t\t"<<hitContainer<<endl;
 	cout <<"trackContainer:\t\t"<<trackContainer<<endl;
 	cout <<"Returning:\t\t"<< val<< endl;
@@ -141,17 +141,17 @@ void StiTrackFinder::setMagneticField(StMagUtilities * magFieldDesc)
     }
 }
 
-void StiTrackFinder::setGeometryContainer(StiDetectorContainer* newGeometry)
+void StiTrackFinder::setDetectorContainer(StiDetectorContainer* newDetContainer)
 {
-    if (newGeometry==0)	{
-	cout << "StiTrackFinder::setGeometryContainer() - ERROR - " << endl
-	     << "  The geometry container is NULL." << endl
+    if (newDetContainer==0)	{
+	cout << "StiTrackFinder::setDetectorContainer() - ERROR - " << endl
+	     << "  The detector container is NULL." << endl
 	     << "  A valid, non null value, MUST be supplied" << endl;
 	return;
     }
 
     else {
-	geometryContainer = newGeometry;
+	detectorContainer = newDetContainer;
     }
 }
 

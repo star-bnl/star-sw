@@ -35,8 +35,7 @@ bool StiTrackFilter::accept(StiTrack * event)
   // incondionally. This method must be overiden in derived 
   // to perform actual track filtering... 
   //----------------------------------------------------------
-  analyzedTrackCount++;
-  acceptedTrackCount++;
+  incrementAccepted();
   return true;
 }
 
