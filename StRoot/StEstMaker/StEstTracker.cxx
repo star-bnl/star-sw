@@ -40,7 +40,10 @@ StEstTracker::StEstTracker(int npass,
   mSegments=segments;
   m_egr_egrpar=egr_egrpar;
   m_egrpar_h=egrpar_h;
-
+  mPhiBin=10;
+  mNPhiBins=36;
+  mZBin=4;
+  mNZBins=18;
   
   cout<<"mNPass="<<mNPass<<endl;
   cout<<"mNSuperPass="<<mNSuperPass<<endl;
@@ -67,7 +70,7 @@ Int_t StEstTracker::DoTracking() {
   long ihitb[4],ihitbshared[4];
 
 
-  if(mParams[mPass]->debug>0)
+  if(mDebugLevel>0)
     cout<<"StEstTracker::DoTracking() ****START****"<<endl;
   if(mIdealTracking==1){
     BuildIdealBranches();
@@ -113,7 +116,7 @@ Int_t StEstTracker::DoTracking() {
       for (slay=3;slay>=0;slay--) {
 	if(mParams[mPass]->onoff[slay])  Tracking(slay);
 
-	if (mIdealTracking==1) {
+	if (mIdealTracking==1 && mDebugLevel>0) {
 	  TrackDeadBeforeSegment=0;
 	  for (i=0;i<mNTrack;i++) 
 	    if (mTrack[i]->GetDoIt()==1) {
@@ -130,7 +133,7 @@ Int_t StEstTracker::DoTracking() {
 	// Removing dead branches
 	ChooseSegment(mSuperPass,slay);
 	
-	if (mIdealTracking==1) {
+	if (mIdealTracking==1 && mDebugLevel>0) {
 	  TrackDeadAfterSegment=0;
 	  for (i=0;i<mNTrack;i++) 
 	    if (mTrack[i]->GetDoIt()==1) {
@@ -149,7 +152,7 @@ Int_t StEstTracker::DoTracking() {
 	TrackDeadAfterSelection=0;
 	for (i=0;i<mNTrack;i++) 
 	  if (mTrack[i]->GetDoIt()==1) {
-	    if (mIdealTracking==1) {
+	    if (mIdealTracking==1 && mDebugLevel>0) {
 	      OneIsGood=0;
 	      for (j=0;j<mTrack[i]->GetNBranches();j++)
 		if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
@@ -160,7 +163,7 @@ Int_t StEstTracker::DoTracking() {
 	    }
 	    // We keep only N branches for each track
 	    ChooseBestNBranches(mTrack[i], slay);
-	    if (mIdealTracking==1) {
+	    if (mIdealTracking==1 && mDebugLevel>0) {
 	    OneIsGood=0;
 	    for (j=0;j<mTrack[i]->GetNBranches();j++)
 	      if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
@@ -170,13 +173,13 @@ Int_t StEstTracker::DoTracking() {
 	      TrackDeadAfterSelection++;
 	    }
 	  }
-	if (mIdealTracking==1)
+	if (mIdealTracking==1 && mDebugLevel>0)
 	cout<<"slay "<<slay<<" TrackDead (b/a) ChooseBestNBranches = "<<TrackDeadBeforeSelection<<"  "<<TrackDeadAfterSelection<<endl;
 	
       }// for (slay=3..... 
 
       TrackDeadBeforeBest=0;
-      if (mIdealTracking==1) {
+      if (mIdealTracking==1 && mDebugLevel>0) {
 	for (i=0;i<mNTrack;i++) 
 	  if (mTrack[i]->GetDoIt()==1) {
 	    OneIsGood=0;
@@ -195,7 +198,7 @@ Int_t StEstTracker::DoTracking() {
 	}
       }
       TrackDeadAfterBest=0;
-      if (mIdealTracking==1) {
+      if (mIdealTracking==1 && mDebugLevel>0) {
 	for (i=0;i<mNTrack;i++) 
 	  if (mTrack[i]->GetDoIt()==1) {
 	    OneIsGood=0;
@@ -292,11 +295,11 @@ Int_t StEstTracker::DoTracking() {
     ReInitializeHelix();
 
     // Doing the evaluation for the superpass.
-    if(mParams[0]->debug>0 && mIdealTracking==1) Eval(onoffmatrix,nminhit);
+    if(mDebugLevel>0 && mIdealTracking==1) Eval(onoffmatrix,nminhit);
     //      Eval(0,1);
   }// for(mSuperPass...
 
-  if(mParams[0]->debug>0)
+  if(mDebugLevel>0)
     cout<<"StEstTracker::DoTracking() ****STOP****"<<endl;
   
   return kStOK;
@@ -309,7 +312,6 @@ void StEstTracker::BuildIdealBranches() {
   int iret,flaglog[8];
   int fitstatus;
   long i,j,slay,mcid,nsvthit;
-  long slay_found;
   long IsolatedTPCTracks,AssociatedTPCTracks;
   double dist,distw,distl,sd;
   double dca;
@@ -319,7 +321,7 @@ void StEstTracker::BuildIdealBranches() {
   StThreeVector<double> NWaf;
 
 
-  if (mParams[0]->debug>0) cout<<"StEstTracker::BuildIdealBranches Starting"<<endl;
+  if (mDebugLevel>0) cout<<"StEstTracker::BuildIdealBranches Starting"<<endl;
   IsolatedTPCTracks=0;
   AssociatedTPCTracks=0;
   for (i=0;i<8;i++) flaglog[i]=0;
@@ -434,7 +436,7 @@ void StEstTracker::BuildIdealBranches() {
   cout<<"Fit status : ";
   for (i=0;i<8;i++) cout<<flaglog[i]<<" ";
   cout<<endl;
-  if (mParams[0]->debug>0) cout<<"StEstTracker::BuildIdealBranches Finished"<<endl;
+  if (mDebugLevel>0) cout<<"StEstTracker::BuildIdealBranches Finished"<<endl;
 }
 
 
@@ -452,7 +454,7 @@ void StEstTracker::BuildFindableBranches() {
   StThreeVector<double> XWaf;
   StThreeVector<double> NWaf;
 
-  if (mParams[0]->debug>0) cout<<"StEstTracker::BuildFindableBranches Starting"<<endl;
+  if (mDebugLevel>0) cout<<"StEstTracker::BuildFindableBranches Starting"<<endl;
   for (i=0;i<8;i++) flaglog[i]=0;
   for (i=0;i<mNTrack;i++) {
     if (mTrack[i]->mTPCTrack->GetFlag()>0) {
@@ -551,7 +553,7 @@ void StEstTracker::BuildFindableBranches() {
   cout<<"Fit status : ";
   for (i=0;i<8;i++) cout<<flaglog[i]<<" ";
   cout<<endl;
-  if (mParams[0]->debug>0) cout<<"StEstTracker::BuildFindableBranches Finished"<<endl;
+  if (mDebugLevel>0) cout<<"StEstTracker::BuildFindableBranches Finished"<<endl;
 }
 
 
