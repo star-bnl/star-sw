@@ -11,21 +11,21 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doFit=false, // false->find track only
 		 const char* outfile = "Evaluation.root",
 		 //This file points to 30 events of 10 neg muons w/ pt=.9
-		 const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
-    //const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
-    //const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
+		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+    //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+    //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
     
     //This file points to 110 events from mevsim (homebrew had. cocktail)
-    //const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
+    //const char* MainFile="/star/data22/ITTF/data/mevsim/10_9_01/*.event.root")
     
     //This file points to a nightly low density hadronic cocktail reconstruction.
     //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
     
     //This file points to 5 muons /event
-    //const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
+    //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
     
     //This file points to 110 events from mevsim (homebrew had. cocktail)
-    //const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
+    //const char* MainFile="/star/data22/ITTF/data/mevsim/10_9_01/*.event.root")
     
     //This file points to a nightly low density hadronic cocktail reconstruction.
     //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
@@ -91,12 +91,11 @@ void RunStiMaker(Int_t nevents=1,
     //gSystem->Load(".i386_redhat61/LIB/StiMaker"); //For optimized
     
     // create a new instance of the chain
-    
     chain = new StChain("StChain"); 
     chain->SetDebug();
     
     // add makers to the chain
-
+    
     StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
     ioMaker->SetDebug();
     ioMaker->SetIOMode("r");
@@ -104,7 +103,7 @@ void RunStiMaker(Int_t nevents=1,
     ioMaker->SetBranch("geantBranch",0,"r");  //activate geant Branch
     ioMaker->SetBranch("dstBranch",0,"r");    //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
-
+    
     //Calibration Maker (StarDB,not a real Database!)
     const char* calibDB = "MySQL:StarDb";
     const char* paramsDB = "$STAR/StarDb";
@@ -112,19 +111,19 @@ void RunStiMaker(Int_t nevents=1,
     calibMk->SetDateTime("year_2b");
     //calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
-
+    
     //Read Tpc Database access
     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-    
+	  
     //StEventMaker
     StEventMaker*       eventReader   = new StEventMaker("events","title");
     eventReader->doPrintEventInfo = 0;
-    
+	  
     //StMcEventMaker
     StMcEventMaker* mcEventReader = 0;
     //Association
     StAssociationMaker* assocMaker = 0;
-
+    
     if (simulated) {
 	mcEventReader = new StMcEventMaker();
 	assocMaker = new StAssociationMaker();
@@ -149,7 +148,7 @@ void RunStiMaker(Int_t nevents=1,
     
     // now execute the chain member functions    
     chain->PrintInfo();
-    
+
     //Make Control Window if not batch
     MainFrame* sti=0;
     StiGuiIOBroker* guiIO=0;
@@ -159,27 +158,26 @@ void RunStiMaker(Int_t nevents=1,
 	cout <<"No batch option detected.  Run Integrated Tracker in Gui Mode."<<endl;
 	
 	sti = new MainFrame(gClient->GetRoot(), 400, 220);
+	
 	sti->setStChain(chain);
 	sti->setIoMaker(ioMaker);
 	
 	//Tell StiMaker that we're in batch mode
 	anaMk->setGui(true);
-
+	
 	//Maker io gateway
 	guiIO = StiGuiIOBroker::instance();
-
+	
 	//Values for hits not assigned to tracks
 	guiIO->setUnMarkedHitSize(.3);
 	guiIO->setUnMarkedHitColor(4);
 	guiIO->setUnMarkedHitStyle(8);
-
+	
 	//Values for hits assigned to tracks
 	guiIO->setMarkedHitSize(.3);
 	guiIO->setMarkedHitColor(2);
 	guiIO->setMarkedHitStyle(8);
-
     }
-    
     else {
 	cout <<"Batch option detector.  Run Integrated Tracker in non-Gui Mode."<<endl;
 	anaMk->setGui(false);
@@ -201,6 +199,7 @@ void RunStiMaker(Int_t nevents=1,
      }
      iev++; goto EventLoop;
  }
+    
     
     return;
 }
