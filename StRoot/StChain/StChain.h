@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.28 1999/07/13 02:19:33 perev Exp $
+// $Id: StChain.h,v 1.29 1999/07/14 15:26:18 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.29  1999/07/14 15:26:18  fine
+// Context menu MakeEvent method has been introduced
+//
 // Revision 1.28  1999/07/13 02:19:33  perev
 // GetCVS,StEvtHddr,etc...
 //
@@ -82,15 +85,15 @@ private:
    Int_t               m_VersionDate;   //StChain version date
    St_DataSet         *m_EvtHddr;     	//Header of event
 public:
-                      StChain();
-                      StChain(const char *name);
+                      StChain(const char *name="bfcChain");
    virtual           ~StChain();
    virtual Int_t      IsChain() const {return 1;}
+   virtual Int_t      MakeEvent(); // *MENU*
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.28 1999/07/13 02:19:33 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.29 1999/07/14 15:26:18 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
