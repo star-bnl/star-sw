@@ -147,14 +147,14 @@ c
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
-         parameter (nvar=9,nvar2=18,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         parameter (nvar=9,nvar2=23,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(18)
+         real vec(23)
          real vec2(4)
 
          integer istat
@@ -239,7 +239,8 @@ C-----------------------------------------------------------------------
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
-     +                'dx','dy','dz','mhit','nmc'/
+     +                'dx','dy','dz','mhit','nmc',
+     +                'phi','lamd','malf','ralf','rhit'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 *	 data chtags4/'hit ','clus','sect','row ','pad ',
 *     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -260,9 +261,12 @@ c  given cluster... added 23jun95 mal
 
 cc for cleanup -- try to match up ghost and lost hits...
          integer n_maybe_ghost(1080),n_maybe_lost(1080)
-         integer maybe_ghost(200,1080),maybe_lost(200,1080)
+         integer n_maybe_ghost_max
+         parameter (n_maybe_ghost_max=400)
+         integer maybe_ghost(n_maybe_ghost_max,1080)
+         integer maybe_lost(200,1080)
          integer i_maybe_lost,i_maybe_ghost
-         logical lost_is_found(200),ghost_is_saved(200)
+         logical lost_is_found(200),ghost_is_saved(n_maybe_ghost_max)
          integer ptr_lost,ptr_ghost
 
          real max_sep_same_mcid/3.0/ ! these are used as maximum seperation
@@ -339,7 +343,7 @@ c things needed for the ntuple 500+ihisto...
          else
             call hropen(23,'NTUP',outfile,'U',5120,ISTAT)
          endif
-         if(status.ne.0)write(*,*)' no rz file'
+         if(istat.ne.0)write(*,*)' no rz file'
 
 
 c         call hcdir('//NTUP',' ')
@@ -347,7 +351,7 @@ c         call hcdir('//NTUP',' ')
 c ntuple 200 as defined has no more information than the hits table...
 *         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
 *     +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',17000,
+         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',22000,
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
@@ -545,6 +549,24 @@ ccc                        invec(2)=tpg_row_to_y(krowtemp,ksectortemp)
                         call hfn(650+ihisto,vec2)
 c----------------------------------------------------------------
 
+c a similar transformation is also needed for me to calculate the
+c  crossing angle alpha of the track, which is by definition in local
+c  coordinates-- NOTE THAT I USE THE TPG ROUTINE NOW ON MOMENTA, NOT
+C  COORDINATES... looking at source code, this should work, but this
+c  kind of stuff can be tricky
+                        invec(1) =
+     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(1))
+                        invec(2) =
+     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(2))
+                        invec(3) =
+     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(3))
+                        kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+                        if (real(outvec(2)).ne.0.0) then
+                           vec(21)=atand(float(outvec(1)/outvec(2)))
+                        else
+                           vec(21)=90.0
+                        endif
+
                         vec(17)=real(
      +			  mhits_tpc(mcptr(idummy,i_incidence)).id)
                         
@@ -555,13 +577,18 @@ c     within 2 cm.)
                         idummy=mxhits*(isect-1)+irow
                         closest=100.0
                         do kdummy=1,dtptr(idummy,0)
-                           distance=sqrt( 
-     +                        (tphit(dtptr(idummy,kdummy)).x-vec(2))**2+
-     +                        (tphit(dtptr(idummy,kdummy)).y-vec(3))**2+
-     +                        (tphit(dtptr(idummy,kdummy)).z-vec(4))**2)
-                           if (distance.lt.closest) then
-                              closest=distance
-                              jdummy=kdummy
+                           if (.not.used_recon_hit(kdummy)) then ! 20jul95 mal
+                              distance=sqrt( 
+     +                             (tphit(dtptr(idummy,kdummy)).x-
+     +                             vec(2))**2 +
+     +                             (tphit(dtptr(idummy,kdummy)).y-
+     +                             vec(3))**2 +
+     +                             (tphit(dtptr(idummy,kdummy)).z-
+     +                             vec(4))**2)
+                              if (distance.lt.closest) then
+                                 closest=distance
+                                 jdummy=kdummy
+                              endif
                            endif
                         enddo
 c     if closest>2.0) then there is no nearby reconstructed hit with same MCID
@@ -580,6 +607,10 @@ c     if closest>2.0) then there is no nearby reconstructed hit with same MCID
                            vec(14) = tphit(dtptr(idummy,jdummy)).dx
                            vec(15) = tphit(dtptr(idummy,jdummy)).dy
                            vec(16) = tphit(dtptr(idummy,jdummy)).dz
+                           vec(19) = tphit(dtptr(idummy,jdummy)).phi
+                           vec(20) = tphit(dtptr(idummy,jdummy)).lambda
+                           vec(22) = tphit(dtptr(idummy,jdummy)).alpha
+                           vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
 c ok we have found a reconstructed hit... how many mc tracks contributed
 c  to its cluster???
                            nmc_found=0
@@ -641,7 +672,7 @@ c  MAY BE a "ghost" hit... fill the ntuple with these guys AFTER CLEAN-UP
                   do i_incidence=1,dtptr(idummy,0)
                      if (.not.used_recon_hit(i_incidence)) then
                         n_maybe_ghost(idummy)=n_maybe_ghost(idummy)+1
-                        if (n_maybe_ghost(idummy).gt.200) then
+                        if (n_maybe_ghost(idummy).gt.n_maybe_ghost_max) then
                            write(6,*)'Increase Possible Ghost Array!!!'
                            goto 99
                         endif
@@ -760,6 +791,23 @@ c if a ghost and lost hit are within 1 cm of each other, they get associated
                   vec(3) = mhits_tpc(ptr_lost).x(2)
                   vec(4) = mhits_tpc(ptr_lost).x(3)
                   vec(17) = mhits_tpc(ptr_lost).id
+c a similar transformation is also needed for me to calculate the
+c  crossing angle alpha of the track, which is by definition in local
+c  coordinates-- NOTE THAT I USE THE TPG ROUTINE NOW ON MOMENTA, NOT
+C  COORDINATES... looking at source code, this should work, but this
+c  kind of stuff can be tricky
+                  invec(1) =
+     +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(1))
+                  invec(2) =
+     +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(2))
+                  invec(3) =
+     +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(3))
+                  kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+                  if (real(outvec(2)).ne.0.0) then
+                     vec(21)=atand(float(outvec(1)/outvec(2)))
+                  else
+                     vec(21)=90.0
+                  endif
                   closest=100.0
                   do i_maybe_ghost=1,n_maybe_ghost(idummy)
                      if (.not.ghost_is_saved(i_maybe_ghost)) then
@@ -789,6 +837,10 @@ c if a ghost and lost hit are within 1 cm of each other, they get associated
                      vec(14)=tphit(ptr_ghost).dx
                      vec(15)=tphit(ptr_ghost).dy
                      vec(16)=tphit(ptr_ghost).dz
+                     vec(19) = tphit(dtptr(idummy,jdummy)).phi
+                     vec(20) = tphit(dtptr(idummy,jdummy)).lambda
+                     vec(22) = tphit(dtptr(idummy,jdummy)).alpha
+                     vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -827,6 +879,10 @@ c find out how many mc tracks contributed to this hit's cluster...
                      vec(15)=0.0
                      vec(16)=0.0
                      vec(18)=0.0
+                     vec(19)=0.0
+                     vec(20)=0.0
+                     vec(22)=0.0
+                     vec(23)=0.0
                   endif
                   call hfn(300+ihisto,vec)
                enddo            ! i_maybe_lost
@@ -852,6 +908,11 @@ c
                      vec(15)=tphit(ptr_ghost).dy
                      vec(16)=tphit(ptr_ghost).dz
                      vec(17)=0.0
+                     vec(21)=0.0
+                     vec(19) = tphit(dtptr(idummy,jdummy)).phi
+                     vec(20) = tphit(dtptr(idummy,jdummy)).lambda
+                     vec(22) = tphit(dtptr(idummy,jdummy)).alpha
+                     vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster

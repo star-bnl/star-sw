@@ -246,7 +246,7 @@ C-----------------------------------------------------------------------
 
 c------------ for deconvolution -----------
         integer max_hits_in_cluster
-        parameter(max_hits_in_cluster=30)
+        parameter(max_hits_in_cluster=100)
         real q(max_hits_in_cluster)
         real x(max_hits_in_cluster)
         real dx(max_hits_in_cluster)
@@ -321,7 +321,7 @@ c           endif
      +             ipad, itdc, iadc, itrk,
      +             rms_noise, nhits,
      +             max_hits_in_cluster,
-     +             q,x,dx,prf,z,dz,zrf,phi,track)
+     +             q,x,dx,prf,z,dz,zrf,phi,track,irow)
 
            else
 c
@@ -688,7 +688,7 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     rms_noise, nhits,
      +     max_hits_in_cluster,
-     +     q,x,dx,prf,z,dz,zrf,phi,track)
+     +     q,x,dx,prf,z,dz,zrf,phi,track,irow)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -739,6 +739,7 @@ C-----------------------------------------------------------------------
       integer nseq,nclspix
       integer ipad(*),itdc(*),iadc(*),itrk(*)
       integer npix_seq(*),nhits
+      integer irow
 
       real rms_noise
 
@@ -770,6 +771,8 @@ c*** skip the neural net for now..... mal 21jun95
      +        rms_noise,
      +        nhits,
      +        q,x,dx,prf,z,dz,zrf,phi,track)
+         if (nhits.gt.max_hits_in_cluster) 
+     +        write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
          if (nhits.eq.0) then
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
@@ -777,6 +780,13 @@ c*** skip the neural net for now..... mal 21jun95
      +           q,x,dx,prf,z,dz,zrf,phi,track)
             nhits=1
          endif
+c
+c remove the following after done using it--
+c  just useful for outputing triage parameter for training
+c*****************
+         if (tclpar(1).decon.eq.-1)
+     +        call ouput_practice(ipad,itdc,iadc,nclspix,irow,nhits)
+c*****************
       else
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
@@ -787,6 +797,46 @@ c*** skip the neural net for now..... mal 21jun95
       
       return
       end
+
+C-----------------------------------------------------------------------
+      subroutine ouput_practice(ipad,itdc,iadc,nclspix,irow,nhits)
+c
+c just calculates some integer moments and outputs them for playing with
+c
+      implicit none
+
+      integer ipad(*),itdc(*),iadc(*),nclspix,irow,nhits
+c
+c see pp21-22 of STAR tcl notebook #2
+c
+      integer rms2_pad,rms2_tdc,rms2_mix,tdc_mean
+      integer ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
+      integer ipix
+
+      ppa=0
+      tta=0
+      pa=0
+      ta=0
+      a=0
+      pta=0
+      do ipix=1,nclspix
+         ppa = ppa + ipad(ipix)*ipad(ipix)*iadc(ipix)
+         tta = tta + itdc(ipix)*itdc(ipix)*iadc(ipix)
+         pa  = pa  + ipad(ipix)*iadc(ipix)
+         ta  = ta  + itdc(ipix)*iadc(ipix)
+         a   = a   + iadc(ipix)
+         pta = pta + ipad(ipix)*itdc(ipix)*iadc(ipix)
+      enddo
+      rms2_pad = ppa/a - (pa/a)**2
+      rms2_tdc = tta/a - (ta/a)**2
+      rms2_mix = pta/a - pa*ta/(a**2)
+      tdc_mean = ta/a
+
+      write(55,*)rms2_pad,rms2_tdc,rms2_mix,tdc_mean,irow,nhits
+
+      return
+      end
+C-----------------------------------------------------------------------
 
 
 C-----------------------------------------------------------------------
@@ -859,7 +909,7 @@ c local variables
       integer index_list(10000),indx
       integer previous_height,nmax,imax
       integer nmax_max          ! maximum number of local maxima
-      parameter(nmax_max=50)
+      parameter(nmax_max=100)
       integer max_pos(2,nmax_max) ! position (pad,tdc) of local maxima
       integer max_height(nmax_max)
       integer j_maxpad,j_minpad,j_maxtdc,j_mintdc
@@ -876,6 +926,7 @@ c  each found mountain top
       integer dpad,dtdc,valley
       real slope,peak_to_valley
 
+      integer iwriteout
 C-----------------------------------------------------------------------
 
 c fill the reference 2-d arrays...
@@ -960,6 +1011,16 @@ c if peak:valley test fails, we do not store and just jump to line 19
             endif
 c ok, passed peak:valley test... store this peak
             nmax=nmax+1
+            if (nmax.gt.nmax_max) then
+               nmax = nmax_max
+               write(6,*)'Hey!... too many peaks... I am bailing...'
+               do iwriteout=1,nclspix
+                  write(56,*)' '
+                  write(56,*)iwriteout,
+     +                 ipad(iwriteout),itdc(iwriteout),iadc(iwriteout)
+               enddo
+               goto 20
+            endif
             max_pos(1,nmax)=jpad
             max_pos(2,nmax)=jtdc
             max_height(nmax)=iadc(indx)
