@@ -178,12 +178,12 @@ void StiHitLoader<Source1, Source2,Detector>::loadHits(Source1 * source,
 }
 
 template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source2 * source,
-							 bool useMcAsRec,
-							 Filter<StiTrack> * trackFilter, 
-							 Filter<StiHit> * hitFilter,
-							 StMcTrack & stMcTrack,
-							 StiMcTrack & stiMcTrack)
+void StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source2 * source
+							,bool useMcAsRec
+							,Filter<StiTrack> * trackFilter 
+							,Filter<StiHit> * hitFilter
+							,StMcTrack  &stMcTrack
+							,StiMcTrack &stiMcTrack)
 {
   cout << "StiHitLoader<Source1, Source2,Detector>::loadMcHits( ... ) -E- Called for "<<_name<<endl;
 }
