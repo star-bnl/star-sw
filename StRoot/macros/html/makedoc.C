@@ -1,6 +1,6 @@
 {
   gROOT.Reset();
-  Char_t *libs[] = {"St_base","xdf2root.so","St_Tables", 
+  Char_t *libs[] = {"St_base","xdf2root","St_Tables", 
   "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
   Char_t *suffix=0;
   Int_t nlist = 10;
@@ -19,20 +19,20 @@
       if (!strchr(libs[i],'.')) strcat(buffer,suffix);
       if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
    }
-  //Create the object of the THml class
+  //Create the object of the THtml class
   THtml *html = new THtml();
 
   char *sourcedir = 0;
   if (NT) 
     sourcedir = "//sol/afs_rhic/star/packages/dev/StRoot/base";
   else
-    sourcedir = "/afs/rhic/star/packages/dev/StRoot/base:/afs/rhic/star/packages/dev/.share/tables";
+    sourcedir = "/afs/rhic/star/packages/dev/StRoot/base:/afs/rhic/star/packages/dev/StRoot/xdf2root:/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/inc";
 
   char *lookup = 0;
   if (NT) 
     lookup = "//sol/afs_rhic/star/packages/dev/.share/tables;../base;//sol/afs_rhic/star/packages/dev/.share/base";
   else
-    lookup = "/afs/rhic/star/packages/dev/StRoot/StChain:/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/StRoot/base";
+    lookup = "/afs/rhic/star/packages/dev/StRoot/StChain:/afs/rhic/star/packages/dev/StRoot/xdf2root:/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/StRoot/base";
 
   html->SetSourceDir(lookup);
 
@@ -45,7 +45,6 @@
 
   Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
-                       ,"St_particle", "particle_st"
                        ,"StParticleView",
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
@@ -53,11 +52,18 @@
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
                        ,"St_ebye_Maker","St_laser_Maker"
                         };
-  Int_t nclass = 20;
+  Int_t nclass = 18;
   // Creat the definitions of the classes not derived from TObjects
+  if (NT) {
+     gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
+  }
+  else
+     gROOT->LoadMacro("/afs/rhic/star/packages/dev/inc/table_header.h");
+
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
   // Make class descriptions
   Int_t i=0;
+
   for (i=0;i<nclass;i++) 
                    html.MakeClass(classes[i]);
 
@@ -76,6 +82,8 @@
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
   html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
   html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
+  html.Convert("./StarView.C","How to Draw the local STAR 3D geometry");
+  html.Convert("./StarWebView.C","How to Draw the remote STAR 3D geometry");
   if (NT) {
     html.Convert("//hepburn/common/p32/root/star/macros/CallMevSaveXDF.cxx","How to call STAF module");
     html.Convert("//hepburn/common/p32/root/star/macros/par_anal.cxx","How to pick the XDF file up with ROOT");
@@ -86,8 +94,6 @@
     html.Convert("./par_anal.cxx","How to pick the XDF file up with ROOT");
     html.Convert("./MakeHists.cxx","How to read the event from XDF file and build some histograms with ROOT");
   }
-
-
 
 //  html.MakeClass("EModuleTypes");
 //  html.MakeIndex();
