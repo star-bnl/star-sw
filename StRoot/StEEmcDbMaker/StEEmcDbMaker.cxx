@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.43 2005/01/24 05:08:26 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.44 2005/02/02 01:36:52 balewski Exp $
  
 
 #include <time.h>
@@ -487,6 +487,7 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
 	char *name1=ped->name+j*EEMCDbMaxName;
 	if(strncmp(name,name1,strlen(name))) continue;
 	x->ped=ped->ped[j];
+	x->sigPed=ped->sig[j];
 	x->thr=ped->ped[j]+KsigOverPed*ped->sig[j];
 	//printf("%d found %s %d %d\n",j,name,strlen(name),strncmp(name,name1,strlen(name)));
 	//x->print();
@@ -927,11 +928,13 @@ void  StEEmcDbMaker::changeGains(char *fname) {
 
 //________________________________________________________
 //________________________________________________________
-void  StEEmcDbMaker::changeMask(char *fname) {
+void  
+StEEmcDbMaker::changeMask(char *fname) {
   assert(nChMask+1< mxChMask);
   chGainL[nChMask]=fname;
   nChMask++;
 }
+
 
 //________________________________________________________
 //________________________________________________________
@@ -1029,6 +1032,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.44  2005/02/02 01:36:52  balewski
+// few more access methods + sigPed visible in EEmcDbItem
+//
 // Revision 1.43  2005/01/24 05:08:26  balewski
 // more get-methods
 //
