@@ -154,7 +154,7 @@ public:
   int  locate(StiPlacement*place,StiShape*sh);
   int  propagate(double x,int option,int dir);
   void propagateError();
-  int  testError(double *emx);
+  int  testError(double *emx,int begend);
   void numeDeriv(double val,int kind,int shape=0,int dir=0);
   int  testDeriv(double *der);
   void propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet);
@@ -263,20 +263,6 @@ public:
   static double fDerivTest[5][5];   
 };
 
-inline void StiKalmanTrackNode::reset()
-{ 
-  StiTrackNode::reset();
-  _cosAlpha = 1.;
-  _alpha=_sinAlpha=_sinCA=_cosCA=_refX=_refAngle=_x=_p0=_p1=_p2=_p3=_p4=0.;
-  // diagonal error set to 1
-  _c00=_c11=_c22=_c33=_c44=2.;
-  // off diagonal set to zero
-  _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
-  eyy=ezz=1.;
-  _chi2=1e55;
-  hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
-  _detector = 0;
-}
 
 inline double StiKalmanTrackNode::nice(double angle) const
 { 
