@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.6 1999/11/30 19:23:05 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.7 1999/12/01 21:30:11 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.7  1999/12/01 21:30:11  kathy
+// added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
+//
 // Revision 1.6  1999/11/30 19:23:05  kathy
 // changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
 //
@@ -39,18 +42,22 @@ StChain *chain;
 
 //TBrowser *brow=0;
 
-void bfcread_dst_EventQAhist(Int_t nevents=10, 
-             const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
-             const Char_t *psFile="Event_QA_hist.ps",
-             const Char_t *PageTitle="")
+void bfcread_dst_EventQAhist(
+     Int_t nevents=10, 
+     const Char_t *MainFile=
+      "/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
+    const Char_t *psFile="Event_QA_hist.ps",
+    const Char_t *PageTitle="")
 {
 //
+  cout << "bfcread_dst_EventQAhist.C, num events to process " << 
+     nevents  << endl;
   cout << "bfcread_dst_EventQAhist.C, input file name       " << 
      MainFile << endl;
   cout << "bfcread_dst_EventQAhist.C, output psfile name    " << 
      psFile   << endl;
-  cout << "bfcread_dst_EventQAhist.C, num events to process " << 
-     nevents  << endl;
+  cout << "bfcread_dst_EventQAhist.C, hist page title " << 
+     PageTitle  << endl;
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
