@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.3 1999/11/04 21:40:52 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.4 1999/11/09 19:35:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
- * Revision 2.3  1999/11/04 21:40:52  ullrich
- * Added missing default constructor
+ * Revision 2.4  1999/11/09 19:35:15  ullrich
+ * Memory now allocated using StMemoryPool via overloaded new/delete
  *
  * Revision 2.5  2000/01/05 16:05:37  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
@@ -29,9 +29,11 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "StSsdHit.h"
+#include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.3 1999/11/04 21:40:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.4 1999/11/09 19:35:15 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.2 1999/11/04 21:41:00 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.3 1999/11/09 19:35:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.2  1999/11/04 21:41:00  ullrich
- * Added missing default constructor
+ * Revision 2.3  1999/11/09 19:35:25  ullrich
+ * Memory now allocated using StMemoryPool via overloaded new/delete
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -29,12 +29,14 @@
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:48  ullrich
+ * Completely Revised for New Version
+ *
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.2 1999/11/04 21:41:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.3 1999/11/09 19:35:25 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 

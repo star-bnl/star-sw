@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.2 1999/11/04 21:40:55 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.3 1999/11/09 19:35:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 2.2  1999/11/04 21:40:55  ullrich
- * Added missing default constructor
+ * Revision 2.3  1999/11/09 19:35:20  ullrich
+ * Memory now allocated using StMemoryPool via overloaded new/delete
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -31,10 +31,12 @@
  * Revision 2.0  1999/10/12 18:42:43  ullrich
  * Completely Revised for New Version
  *
+ **************************************************************************/
+#include "StSvtHit.h"
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.2 1999/11/04 21:40:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.3 1999/11/09 19:35:20 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
