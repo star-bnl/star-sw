@@ -1,7 +1,11 @@
-* $Id: tpham.F,v 1.48 1998/01/27 00:49:19 fisyak Exp $
+* $Id: tpham.F,v 1.49 1998/02/09 20:11:01 sakrejda Exp $
 * $Log: tpham.F,v $
+* Revision 1.49  1998/02/09 20:11:01  sakrejda
+* Test mailing list
+*
 * Revision 1.48  1998/01/27 00:49:19  fisyak
 * Split sources
+* testing for Yuri 1998/02/09
 *
       INTEGER FUNCTION TPHAM( tclpar_h,        tclpar
      +,			      tsspar_h,        tsspar
