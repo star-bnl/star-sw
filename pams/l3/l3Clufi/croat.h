@@ -17,17 +17,15 @@
 
 /* defines the maximum timebin separation before the sequence will
  be broken in 2 */
-#define PARAM1		4
+#define PARAM1		2
 
 /* perform deconv. in the time direction */
-/*
 #define DECONVOLUTE_TIME 
-*/
+
 
 /* perform deconv. in the pad direction */
-/*
 #define DECONVOLUTE_PAD 
-*/
+
 
 
 /* output flags */
