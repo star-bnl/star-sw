@@ -1,7 +1,0 @@
-//   l3cl_para    
-// Controls L3 cluster finder
-//
-struct l3cl_para {
-   short      FirstSector  ;     // First Sector to be processed
-   short      LastSector   ;     // Last  Sector to be processed (0=all)
-};

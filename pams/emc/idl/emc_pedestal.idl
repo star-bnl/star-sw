@@ -1,8 +1,0 @@
-/*****************************************************************************
-*   Table: emc_pedestal
-*        description: Table which contains adc pedestal
-*        auther:      OGAWA, Akio
-*/
-   struct emc_pedestal { 
-       float       ped;     /* pedestal for ADC channel */
-   };
