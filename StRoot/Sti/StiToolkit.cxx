@@ -10,9 +10,9 @@ StiToolkit * StiToolkit::instance()
 
 void StiToolkit::kill()
 {
-	if (sInstance)
-		{
-			delete sInstance;
-			sInstance = 0;
-		}
+  if (sInstance)
+    {
+      delete sInstance;
+      sInstance = 0;
+    }
 }

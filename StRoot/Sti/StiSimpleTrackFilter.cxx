@@ -1,97 +1,126 @@
+#include <stdexcept>
+#include "Parameter.h"
 #include "StiTrack.h"
 #include "StiSimpleTrackFilter.h"
 
 StiSimpleTrackFilter::StiSimpleTrackFilter()
-{
-  setDefaults();
-}
+  : Parameters("SimpleTrackFilter","SimpleTrackFilter")
+{}
+
+StiSimpleTrackFilter::StiSimpleTrackFilter(const string & name, const string & description)
+  : Parameters(name,description)
+{}
 
 StiSimpleTrackFilter::~StiSimpleTrackFilter()
+{}
+
+void StiSimpleTrackFilter::initialize()
 {
-  for (int j=0;j<100;j++)
-    {
-      delete names[j];
-    }	
-}
-
-void StiSimpleTrackFilter::set(int id, const char * name, double minimum, double maximum, bool useIt)
-{
-  if (id<0||id>=100)
-    {
-      cout << "StiSimpleTrackFilter::set() - Warning - Invalid id:" << id
-	   << " - Filter not set"<<endl;
-      return;
-    }
-  used[id]  = useIt;
-  low[id]   = minimum;
-  hi[id]    = maximum;
-  //*names[id] = name;
-}
-
-void StiSimpleTrackFilter::set(int id, double minimum, double maximum, bool use=true)
-{  
-  if (id<0||id>=100)
-    {
-      cout << "StiSimpleTrackFilter::set() - Warning - Invalid id:" << id
-	   << " - Filter not set"<<endl;
-      return;
-    }
-  used[id]  = use;
-  low[id]   = minimum;
-  hi[id]    = maximum;
-}
-
-
-
-void StiSimpleTrackFilter::setDefaults()
-{
-  cout << "StiSimpleTrackFilter::setDefaults() - Starting" << endl;
- for (int i=0;i<100;i++)
-    {
-      used[i] = false;
-      low[i]  = 0.;
-      hi[i]   = -1.;
-      //*names[i] = new string("");
-    }
-  cout << "StiSimpleTrackFilter::setDefaults() - Setting usual parameters" << endl;
- 
-  // set defaults - with false
-  set(kChi2,      "chi2",       0.,  50.);
-  set(kPhi,       "PHI",        0.,   1.);
-  set(kPt,        "Pt",         0.,   1.);
-  set(kP,         "P",          0.,   1.);
+  parameterVector.clear();
+  add("Chi2Used", "Use Chi2",     false, Parameter::Boolean);
+  add("Chi2Min",  "Minimum Chi2", 0.,    Parameter::Double);
+  add("Chi2Max",  "Maximum Chi2", 20.,   Parameter::Double);
   
-  set(kPseudoRap, "PseudoRap",  -2.,   2.);
-  set(kNPts,      "NPts",       8., 100.);
-  set(kNGaps,     "NGaps",      0.,   1.);
-  set(kNToNmaxPts,"NToNmaxPts", 0.,   1.);
+  add("PtUsed",   "Use Pt",     false,   Parameter::Boolean);
+  add("PtMin",    "Minimum Pt", 0.1,     Parameter::Double);
+  add("PtMax",    "Maximum Pt", 10.,     Parameter::Double);
   
-  set(kNTpcPts,   "NTpcPts",    0.,   1.);
-  set(kNSvtPts,   "NSvtPts",    0.,   1.);
-  set(kTpcDedx,   "TpcDedx",    0.,   1.);
-  set(kSvtDedx,   "SvtDedx",    0.,   1.);
-  cout << "StiSimpleTrackFilter::setDefaults() - Done" << endl;
+  add("PUsed",    "Use P",     false,    Parameter::Boolean);
+  add("PMin",     "Minimum P", 0.,       Parameter::Double);
+  add("PMax",     "Maximum P", 10.,      Parameter::Double);
+  
+  add("EtaUsed",  "Use Eta",     false,  Parameter::Boolean);
+  add("EtaMin",   "Minimum Eta", -1.5,   Parameter::Double);
+  add("EtaMax",   "Maximum Eta",  1.5,   Parameter::Double);
+  
+  add("nPtsUsed", "Use nPts",     false, Parameter::Boolean);
+  add("nPtsMin",  "Minimum nPts", 0.,    Parameter::Integer);
+  add("nPtsMax",  "Maximum nPts", 60.,   Parameter::Integer);
 
+  add("nGapsUsed","Use nGaps",     false, Parameter::Boolean);
+  add("nGapsMin", "Minimum nGaps", 0.,    Parameter::Integer);
+  add("nGapsMax", "Maximum nGaps", 60.,   Parameter::Integer);
+
+  add("NToNmaxPtsUsed", "Use NToNmaxPts",false, Parameter::Boolean);
+  add("NToNmaxPtsMin","Minimum NToNmaxPts",0.25, Parameter::Double);
+  add("NToNmaxPtsMax","Maximum NToNmaxPts",1.0 , Parameter::Double);
+
+  add("PhiUsed",  "Use Phi",     false,  Parameter::Boolean);
+  add("PhiMin",   "Minimum Phi", 0.,     Parameter::Double);
+  add("PhiMax",   "Maximum Phi", 6.3,   Parameter::Double);
 }
 
 bool StiSimpleTrackFilter::accept(StiTrack * t) const
 {
+
   int j=0;	double v;
-  j=kChi2;       if (used[j]) { v = t->getChi2();            if (v<low[j]||v>hi[j]) return false;}
-  j=kPseudoRap;  if (used[j]) { v = t->getPseudoRapidity();  if (v<low[j]||v>hi[j]) return false;}
-  j=kNPts;       if (used[j]) { v = t->getPointCount();      if (v<low[j]||v>hi[j]) return false;}
-  j=kNGaps;      if (used[j]) { v = t->getGapCount();        if (v<low[j]||v>hi[j]) return false;}
-  j=kPhi;        if (used[j]) { v = t->getPhi();             if (v<low[j]||v>hi[j]) return false;}
-  j=kPt;         if (used[j]) { v = t->getPt();              if (v<low[j]||v>hi[j]) return false;}
-  j=kP;          if (used[j]) { v = t->getP();               if (v<low[j]||v>hi[j]) return false;}
-  
-  //j=kNToNmaxPts; if (used[j]) { v = t->getNToNmaxPts();         if (v<low[j]||v>hi[j]) return false;}
-  
-  //j=kNTpcPts;    if (used[j]) { v = t->getNTpcPts();         if (v<low[j]||v>hi[j]) return false;}
-  //j=kNSvtPts;    if (used[j]) { v = t->getNSvtPts();         if (v<low[j]||v>hi[j]) return false;}
-  //j=kTpcDedx;    if (used[j]) { v = t->getTpcDedx();         if (v<low[j]||v>hi[j]) return false;}
-  //j=kSvtDedx;    if (used[j]) { v = t->getSvtDedx();         if (v<low[j]||v>hi[j]) return false;}
+  if (parameterVector[j++]->getValue()) 
+    { 
+      v = t->getChi2();
+      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getPseudoRapidity();  
+      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getPointCount();      
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    } 
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getGapCount();
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getPhi();     
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getPt();     
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getP(); 
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  /*
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getNToNmaxPts();  
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue()) 
+	return false;
+    }
+  */
   return true;
 }
 
 
+StiSimpleTrackFilterFactory::StiSimpleTrackFilterFactory(const string& newName,
+							 int original,
+							 int incremental, 
+							 int maxInc)
+  : StiTrackFilterFactory(newName, 
+			  original, 
+			  incremental, 
+			  maxInc)
+{
+  initialize();
+}
+
+StiSimpleTrackFilterFactory::~StiSimpleTrackFilterFactory()
+{
+  // cout <<"StiSimpleTrackFilterFactory::~StiSimpleTrackFilterFactory()"<<endl;
+}

@@ -25,16 +25,16 @@ public:
   void setName(const string & newName);
   
   /// Get the name of the object
-  const string getName();
+  const string getName() const;
   
   /// Determine whether name is set, i.e object has a name
-  bool isNamed();
+  bool isNamed() const;
   
   /// Determine whether name equals given name
-  bool isName(const string & aName);
+  bool isName(const string & aName) const;
   
   /// Determine whether name equals that of given object
-  bool isNamedAs(const Named & named);
+  bool isNamedAs(const Named & named) const;
   
  protected:
   

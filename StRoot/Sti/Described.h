@@ -24,16 +24,16 @@ public:
    void setDescription(const string & description);
 
    /// Get the Describe of the object
-   const string getDescription();
+   const string getDescription() const;
 
    /// Determine whether Describe is set, i.e object has a Describe
-   bool isDescribed();
+   bool isDescribed() const;
 
    /// Determine whether Describe equals given Describe
-   bool isDescription(const string & description);
+   bool isDescription(const string & description) const;
 
    /// Determine whether Describe equals that of given object
-   bool sameDescriptionAs(const Described & described);
+   bool sameDescriptionAs(const Described & described) const;
 
    protected:
 

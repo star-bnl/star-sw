@@ -141,6 +141,28 @@ inline  void ConstrainedParameter::set(double value,
     }
 }
 
-
+/*! ConstrainedParameter factory
+ */
+class ConstrainedParameterFactory : public ParameterFactory
+{
+public:
+    ///This is the only constructor available.
+    ConstrainedParameterFactory(const string& newName, 
+		      int original=-1, int 
+		      incremental=-1, 
+		      int maxInc=-1);
+    ///Default destructor.
+    virtual ~ConstrainedParameterFactory();
+    
+protected:
+    ///Return a pointer to a new Parameter object on the heap.
+    virtual void* makeNewObject() const
+      {
+	return new ConstrainedParameter();
+      }
+    
+private:
+    ConstrainedParameterFactory(); // no imp
+};
 
 #endif // !defined(CONSTRAINEDPARAMETER_H__5B75CCD2_01CA_4993_8BD6_836465B6A0E1__INCLUDED_)

@@ -7,6 +7,7 @@
 
 #include "Named.h"
 #include "Described.h"
+#include "StiObjectFactoryInterface.h"
 
 class Parameter : public Named, public Described
 {
@@ -30,8 +31,12 @@ class Parameter : public Named, public Described
   double  getValue() const;
   
   void    setType(int type);
-  virtual void    setValue(double value);
-  
+  virtual void setValue(double value);
+  virtual void set(const string & name, 
+		   const string & description,
+		   double value,
+		   int type);
+
  protected:
   
   int     _type;
@@ -68,5 +73,41 @@ inline void    Parameter::setValue(double value)
 {
   _value = value;
 }
+
+inline  void Parameter::set(const string & name, 
+			    const string & description,
+			    double value,
+			    int type)
+{  
+  _name        = name;
+  _description = description;
+  _type        = type;
+  _value       = value;
+}
+
+
+
+/*! Parameter factory
+ */
+class ParameterFactory : public StiObjectFactoryInterface<Parameter>
+{
+public:
+    ///This is the only constructor available.
+    ParameterFactory(const string& newName, 
+		      int original=-1, int 
+		      incremental=-1, 
+		      int maxInc=-1);
+    ///Default destructor.
+    virtual ~ParameterFactory();
+    
+protected:
+    ///Return a pointer to a new Parameter object on the heap.
+    virtual void * makeNewObject() const
+      {
+	return new Parameter();
+      }
+private:
+    ParameterFactory(); //Not implemented
+};
 
 #endif // !defined(PARAMETER_H_INCLUDED_)

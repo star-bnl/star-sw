@@ -76,6 +76,10 @@ public:
   int getTrackFoundCount() const;
     
   void setEvent(StEvent * event, StMcEvent * mcEvent);
+ 
+  virtual StiTrackFilter * getTrackFilter() const;
+  virtual StiTrackFilter * getGuiTrackFilter() const;
+  virtual StiTrackFilter * getGuiMcTrackFilter() const;
 
 protected:
 
@@ -86,6 +90,8 @@ protected:
     // none of the following are owned by this class.
     StiToolkit                * toolkit;
     StiTrackFilter            * trackFilter;
+    StiTrackFilter            * guiTrackFilter;
+    StiTrackFilter            * guiMcTrackFilter;
     StiSeedFinder             * trackSeedFinder;
     StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
     StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
@@ -103,7 +109,7 @@ private:
     int       visitedDet ;
     int       position;
     int       lastMove;
-		int       nAdded;
+    int       nAdded;
     
     double    chi2;
     double    bestChi2;
@@ -133,6 +139,21 @@ inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *
 	pars = par;
 	StiKalmanTrack::setParameters(par);
 	StiKalmanTrackNode::setParameters(par);
+}
+
+inline StiTrackFilter * StiKalmanTrackFinder::getTrackFilter() const
+{
+  return trackFilter;
+}
+
+inline StiTrackFilter * StiKalmanTrackFinder::getGuiTrackFilter() const
+{
+  return guiTrackFilter;
+}
+
+inline StiTrackFilter * StiKalmanTrackFinder::getGuiMcTrackFilter() const
+{
+  return guiMcTrackFilter;
 }
 
 #endif

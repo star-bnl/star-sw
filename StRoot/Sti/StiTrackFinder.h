@@ -28,6 +28,10 @@ public:
   virtual int getTrackFoundCount() const=0;
   virtual int getTrackFoundCount(StiTrackFilter * filter) const=0;
   virtual bool find(StiTrack *track, int direction) = 0;
+  
+  virtual StiTrackFilter * getTrackFilter() const = 0;
+  virtual StiTrackFilter * getGuiTrackFilter() const = 0;
+  virtual StiTrackFilter * getGuiMcTrackFilter() const = 0;
 
 protected:
 

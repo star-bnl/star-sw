@@ -68,6 +68,8 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
   : Observer(StiIOBroker::instance()),
     toolkit(0),
     trackFilter(0), 
+    guiTrackFilter(0), 
+    guiMcTrackFilter(0), 
     trackSeedFinder(0), 
     trackNodeFactory(0), 
     trackFactory(0), 
@@ -100,8 +102,15 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
 {
   // none of the following instances are owned by this class.
   toolkit = userToolkit;
-  trackFilter = toolkit->getTrackFilter();
-  trackSeedFinder = toolkit->getTrackSeedFinder();
+  StiIOBroker *  broker = toolkit->getIOBroker();
+  StiObjectFactoryInterface<StiTrackFilter>* trackFilterFactory = toolkit->getTrackFilterFactory();
+  trackFilter      = trackFilterFactory->getObject();
+  if (broker->useGui())
+    {
+      guiTrackFilter   = trackFilterFactory->getObject();
+      guiMcTrackFilter = trackFilterFactory->getObject();
+    }
+  trackSeedFinder  = toolkit->getTrackSeedFinder();
   
   trackNodeFactory = toolkit->getTrackNodeFactory();
   detectorContainer = toolkit->getDetectorContainer();

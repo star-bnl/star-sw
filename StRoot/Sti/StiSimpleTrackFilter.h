@@ -1,9 +1,7 @@
 #ifndef StiSimpleTrackFilter_H
 #define StiSimpleTrackFilter_H 1
-
-#include <string>
-using std::string;
 #include "StiTrackFilter.h"
+#include "Parameters.h"
 
 class StiTrack;
 
@@ -38,7 +36,7 @@ class StiTrack;
  *                   other - All accepted - same as not using this filter
  */
 
-class StiSimpleTrackFilter : public StiTrackFilter
+class StiSimpleTrackFilter : public StiTrackFilter, public Parameters
 {
  public:
 	
@@ -55,19 +53,31 @@ class StiSimpleTrackFilter : public StiTrackFilter
 				 kTpcDedx,
 				 kSvtDedx};
   StiSimpleTrackFilter();
+  StiSimpleTrackFilter(const string & name, const string & description);
   virtual ~StiSimpleTrackFilter();
-  void setDefaults();
+  virtual void initialize();
   bool accept(StiTrack * track) const;
-  void set(int id, const char * name, double minimum=1, double maximum=0, bool use=false);
-  void set(int id, double minimum, double maximum, bool use=true);
-  
- protected:
-  
-  bool   used[100];
-  double low[100];
-  double hi[100];
-  string * names[100];
 };
 
+/*! StiSimpleTrackFilter factory
+ */
+class StiSimpleTrackFilterFactory : public StiTrackFilterFactory
+{
+public:
+  ///This is the only constructor available.
+  StiSimpleTrackFilterFactory(const string& newName, 
+			      int original=-1, int 
+			      incremental=-1, 
+			      int maxInc=-1);
+  ///Default destructor.
+  virtual ~StiSimpleTrackFilterFactory();
+
+ protected:
+  ///Return a pointer to a new StiSimpleTrackFilter object on the heap.
+  virtual void * makeNewObject() const;
+  
+ private:
+  StiSimpleTrackFilterFactory(); //Not implemented
+};
 
 #endif
