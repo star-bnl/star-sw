@@ -71,6 +71,8 @@ ClassImp(StHbtMcEventReader)
   using namespace units;
 #endif
 
+#define __2POWER16__ 65536
+
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
@@ -273,7 +275,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 #endif
     //cout << " P     " << hbtTrack->P() << endl;
 
-    hbtTrack->SetTrackId(track->key()+motherTrackId*pow(2,16));
+    hbtTrack->SetTrackId(track->key()+motherTrackId*__2POWER16__);
 
     hbtTrack->SetNHits( nTpcHits );               // hits in Tpc
     hbtTrack->SetNHitsPossible(nTpcHits );        // hits in Tpc

@@ -9,6 +9,8 @@
 ClassImp(franksPairCut)
 #endif
 
+#define __2POWER16__ 65536
+
 //__________________
 franksPairCut::franksPairCut()  /*: mResonanceInfoOn(false) */ {
   mQuality[0] = -1.; mQuality[1] = +1.;
@@ -77,7 +79,7 @@ bool franksPairCut::Pass(const StHbtPair* pair){
 //   }
 
   if (mIdenticalMother)
-    if(  (int)(pair->track1()->TrackId()/pow(2,16)) != (int)(pair->track2()->TrackId()/pow(2,16)) ) temp = false;
+    if(  (int)(pair->track1()->TrackId()/__2POWER16__) != (int)(pair->track2()->TrackId()/__2POWER16__) ) temp = false;
 
    temp ? mNPairsPassed++ : mNPairsFailed++;
   return temp;

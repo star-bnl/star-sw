@@ -80,6 +80,8 @@
   using namespace units;
 #endif
 
+#define __2POWER16__ 65536
+
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
@@ -370,7 +372,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
-    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*pow(2,16));
+    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*__2POWER16__);
 
     hbtTrack->SetNHits(nhits);
     
