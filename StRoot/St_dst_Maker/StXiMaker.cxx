@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.16 2000/08/31 21:47:08 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.17 2001/03/02 04:37:16 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.17  2001/03/02 04:37:16  genevb
+// Tightened some DCA cuts
+//
 // Revision 1.16  2000/08/31 21:47:08  genevb
 // Allow V0s to be trimmed after finding Xis
 //
@@ -89,8 +92,8 @@ Int_t StXiMaker::Init(){
     memset(&row,0,m_exipar->GetRowSize());
     // TPC only cuts
     row.use_pid	 =          0; // logical flag to control usage of global pid ;
-    row.dca_max	 =          1; // cut on dca between the two tracks ;
-    row.bxi_max	 =          1; // cut on impact param. of xi from prim. vertex ;
+    row.dca_max	 =        0.8; // cut on dca between the two tracks ;
+    row.bxi_max	 =        0.8; // cut on impact param. of xi from prim. vertex ;
     row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
     row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
     row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
@@ -111,8 +114,8 @@ Int_t StXiMaker::Init(){
     memset(&row,0,m_exipar->GetRowSize());
     // SVT+TPC cuts
     row.use_pid	 =          0; // logical flag to control usage of global pid ;
-    row.dca_max	 =          1; // cut on dca between the two tracks ;
-    row.bxi_max	 =          1; // cut on impact param. of xi from prim. vertex ;
+    row.dca_max	 =        0.8; // cut on dca between the two tracks ;
+    row.bxi_max	 =        0.8; // cut on impact param. of xi from prim. vertex ;
     row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
     row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
     row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
