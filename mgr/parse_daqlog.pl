@@ -40,7 +40,7 @@ foreach my $file (@list) {
              parse_log($file);
              timestamp($file);
             $name_log = $file; 
-         $dummy = `mv $file_sum sum`;
+         $dummy = `mv $file_sum $dir_sum`;
 #         $dummy = `mv $name_log $dir_lg`;   
            }             
         }
