@@ -40,11 +40,17 @@ extern CC_P void tbr_def_();
 extern CC_P void kam_tbr_count_();
 extern CC_P void kam_tbr_list_();
 extern CC_P void kam_tbr_motif_viewdataset_();
-#endif /*NOKUIP*/
+extern CC_P void kam_tbr_ascii_setvalue_();
+extern CC_P void kam_tbr_ascii_getvalue_();
+extern CC_P void kam_tbr_ascii_print_();
 
-extern CC_P STAFCV_T tbr_count();
-extern CC_P STAFCV_T tbr_list();
-extern CC_P STAFCV_T tbr_motif_viewdataset();
+extern CC_P int kam_tbr_count();
+extern CC_P int kam_tbr_list();
+extern CC_P int kam_tbr_motif_viewdataset();
+extern CC_P int kam_tbr_ascii_setvalue();
+extern CC_P int kam_tbr_ascii_getvalue();
+extern CC_P int kam_tbr_ascii_print();
+#endif /*NOKUIP*/
 
 #endif /* TBR_TYPES_H */
 

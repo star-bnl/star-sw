@@ -13,7 +13,7 @@ endif
 #
 export VPATH := $(BINDIR) $(SRCMDIR) $(LIBDIRS) $(INCDIRS)
 #
-VERSION := "$Id: Makefile,v 1.7 1997/05/13 00:24:16 tull Exp $"
+VERSION := "$Id: Makefile,v 1.8 1997/07/16 22:54:36 ward Exp $"
 # 
 #-- Object files
 SUFS := *.cc *.c *.F
@@ -103,7 +103,7 @@ $(STAF).cc: $(BASE_DIR)/$(BASE_NAME).config
 $(STAF).o: $(STAF).cc
 #
 UNDEPENDS := -L% -R% -lX11 -lgen -lucb -ldl
-$(STAF): $(STAF).o $(filter-out $(UNDEPENDS),$(STAFLIBS)) $(USRLIBS)
+$(STAF): $(STAF).o
 	@echo "########################################################"
 	@echo "###                    Making $@                     ###"
 	@echo "########################################################"
