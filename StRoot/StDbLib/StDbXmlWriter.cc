@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.cc,v 1.6 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbXmlWriter.cc,v 1.7 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.cc,v $
+ * Revision 1.7  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.6  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -368,6 +371,10 @@ void
 StDbXmlWriter::pass(char* name, unsigned long& i,  int& len){
 *os << "<dbULong> "<<name<<" <value> "<< i <<" </value> </dbULong>" << endl;
 }
+void
+StDbXmlWriter::pass(char* name, long long& i,  int& len){
+*os << "<dbLongLong> "<<name<<" <value> "<< i <<" </value> </dbLongLong>" << endl;
+}
 
 //----------------------------------------------------
 
@@ -390,6 +397,28 @@ StDbXmlWriter::pass(char* name, unsigned long*& i,  int& len){
 
   *os << i[len-1] << endl;
   *os << "</value> </dbULongArray> " << endl;
+}
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, long long*& i,  int& len){
+
+  *os << "<dbLongLongArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << i[len-1] << endl;
+  *os << "</value> </dbLongLongArray> " << endl;
 }
 //----------------------------------------------------
 

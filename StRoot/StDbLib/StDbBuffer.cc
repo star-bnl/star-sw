@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.14 2001/04/25 17:18:10 perev Exp $
+ * $Id: StDbBuffer.cc,v 1.15 2001/10/24 04:05:19 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.15  2001/10/24 04:05:19  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.14  2001/04/25 17:18:10  perev
  * HPcorrs
  *
@@ -268,6 +271,7 @@ void StDbBuffer::StrConv(char* aVal,int &s){s=atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned int &s){s=atol(aVal);};
 void StDbBuffer::StrConv(char* aVal,long &s){s=atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=atol(aVal);};
+void StDbBuffer::StrConv(char* aVal,long long &s){s=atoll(aVal);};
 void StDbBuffer::StrConv(char* aVal,float &s){s=(float) atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,double &s){s=atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,char* &s){s=new char[strlen(aVal)+1];strcpy(s,aVal);};
@@ -286,6 +290,7 @@ bool StDbBuffer::WriteMem( tpe *s,void* aVal, myctype type)\
    castcase(_uint,unsigned int,tpe);\
    castcase(_long,long,tpe);\
    castcase(_ulong,unsigned long,tpe);\
+   castcase(_longlong,long long,tpe);\
    castcase(_float,float,tpe);\
    castcase(_double,double,tpe);\
  case _string: {char** tVal=(char**)aVal;StrConv(*tVal,*s);};break;\
@@ -301,6 +306,7 @@ genwritemem(int);
 genwritemem(unsigned int);
 genwritemem(long);
 genwritemem(unsigned long);
+genwritemem(long long);
 genwritemem(float);
 genwritemem(double);
 
@@ -318,6 +324,7 @@ bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
     castcasest(_uint,unsigned int);
     castcasest(_long,long);
     castcasest(_ulong,unsigned long);
+    castcasest(_longlong,long long);
     castcasest(_float,float);
     castcasest(_double,double);
   case _string: {char** tVal=(char**)aVal;
@@ -351,6 +358,7 @@ Rscal(int&);
 Rscal(unsigned int&);
 Rscal(long&);
 Rscal(unsigned long& );
+Rscal(long long& );
 Rscal(float& );
 Rscal(double&);
 Rscal(char*&);
@@ -373,6 +381,7 @@ Wscal(int  ,_int ,1);
 Wscal(unsigned int ,_uint ,1);
 Wscal(long ,_long ,1);
 Wscal(unsigned long ,_ulong,1);
+Wscal(long long ,_longlong,1);
 Wscal(float ,_float,1);
 Wscal(double,_double,1);
 //Wscal(char*,_string,1);
@@ -427,6 +436,7 @@ Rarray(int,_int   );
 Rarray(unsigned int,_uint  );
 Rarray(long,_long  );
 Rarray(unsigned long,_ulong );
+Rarray(long long,_longlong );
 Rarray(float,_float );
 Rarray(double,_double);
 Rarray(char*,_string);
@@ -463,6 +473,20 @@ Warray(int,_int   );
 Warray(unsigned int,_uint  );
 Warray(long,_long  );
 Warray(unsigned long,_ulong );
+Warray(long long,_longlong );
 Warray(float,_float );
 Warray(double,_double);
 Warray(char*,_string);
+
+
+
+
+
+
+
+
+
+
+
+
+

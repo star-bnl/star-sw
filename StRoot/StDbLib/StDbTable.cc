@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.27 2001/08/02 17:37:20 porter Exp $
+ * $Id: StDbTable.cc,v 1.28 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.28  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.27  2001/08/02 17:37:20  porter
  * fixed problem in fetch by where-clause used in online in StDbSql.cc.
  * also got rid of warning comparing unsigned int to int.
@@ -123,6 +126,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.28  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.27  2001/08/02 17:37:20  porter
  * fixed problem in fetch by where-clause used in online in StDbSql.cc.
  * also got rid of warning comparing unsigned int to int.
@@ -239,6 +245,8 @@
  **************************************************************************/
 #include "StDbTable.h"
 #include "StDbBuffer.h"
+#include "typeAcceptor.hh"
+#include "StTableDescriptorI.h"
 #include "StDbDefaults.hh"
 #include <string.h>
 #include <iostream.h>
@@ -761,6 +769,7 @@ StDbTable::ReadElement(char*& ptr, char* name, int len, StTypeE type, StDbBuffer
 
 char* mchar; unsigned char* muchar; short* mshort; unsigned short* mushort; 
 int* mint; unsigned int* muint; long* mlong; unsigned long* mulong; 
+long long* mlonglong;
 float* mfloat; double* mdouble;
 
  int blen; // length returned from db  ### use lesser of len & blen 
@@ -844,6 +853,15 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
        memcpy(ptr,mulong,len*sizeof(unsigned long));
        delete [] mulong;
+      }
+    break;
+    }
+  case Stlonglong:
+    {
+      if(buff->ReadArray(mlonglong,blen,name)){
+	if(len>blen)len=blen;
+       memcpy(ptr,mlonglong,len*sizeof(long long));
+       delete [] mlonglong;
       }
     break;
     }
@@ -931,6 +949,12 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
     buff->WriteArray(mulong,len,name);
     break;
     }
+  case Stlonglong:
+    {
+    long long* mlonglong = (long long*) ptr;
+    buff->WriteArray(mlonglong,len,name);
+    break;
+    }
   case Stfloat:
     {
     float* mfloat = (float*) ptr;
@@ -1015,6 +1039,14 @@ StDbTable::PassInElement(char* ptr, char* name, int len, StTypeE type, typeAccep
      unsigned long* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(long));
+     delete [] data;
+     break;
+    }
+  case Stlonglong:
+    {
+     long long* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(long long));
      delete [] data;
      break;
     }
@@ -1111,6 +1143,16 @@ StDbTable::PassOutElement(char* ptr, char* name, int len, StTypeE type, typeAcce
       accept->pass(name, *mulong ,len);
     } else {
       accept->pass(name,mulong,len);
+    }
+    break;
+    }
+  case Stlonglong:
+    {
+    long long* mlonglong = (long long*)ptr;
+    if(len==1){
+      accept->pass(name, *mlonglong ,len);
+    } else {
+      accept->pass(name,mlonglong,len);
     }
     break;
     }

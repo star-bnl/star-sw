@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: typeAcceptor.hh,v 1.5 2000/01/10 20:37:55 porter Exp $
+ * $Id: typeAcceptor.hh,v 1.6 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: typeAcceptor.hh,v $
+ * Revision 1.6  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.5  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -45,6 +48,7 @@ public:
   virtual void pass(char* name, unsigned short& i, int& len) = 0;  
   virtual void pass(char* name, unsigned int& i, int& len) = 0;  
   virtual void pass(char* name, unsigned long& i, int& len) = 0;  
+  virtual void pass(char* name, long long& i, int& len) = 0;  
   virtual void pass(char* name, float& i, int& len) = 0;
   virtual void pass(char* name, double& i, int& len) = 0;
 
@@ -58,6 +62,7 @@ public:
   virtual void pass(char* name, unsigned short*& i, int& len) = 0;  
   virtual void pass(char* name, unsigned int*& i, int& len) = 0;  
   virtual void pass(char* name, unsigned long*& i, int& len) = 0;  
+  virtual void pass(char* name, long long*& i, int& len) = 0;  
   virtual void pass(char* name, float*& i, int& len) = 0;
   virtual void pass(char* name, double*& i, int& len) = 0;
 

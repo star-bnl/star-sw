@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTableDescriptorI.h,v 1.6 2001/01/22 18:38:02 porter Exp $
+ * $Id: StTableDescriptorI.h,v 1.7 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTableDescriptorI.h,v $
+ * Revision 1.7  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.6  2001/01/22 18:38:02  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -51,10 +54,11 @@
 #ifndef StTableDescriptorI_HH
 #define StTableDescriptorI_HH
 
-enum StTypeE {Stchar,Stuchar,Stshort,Stushort,Stint,Stuint,Stlong,Stulong,Stfloat,Stdouble};
+enum StTypeE {Stchar,Stuchar,Stshort,Stushort,Stint,Stuint,Stlong,Stulong,Stlonglong,Stfloat,Stdouble};
 
-const int StTypeSize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short), sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long), sizeof(float),sizeof(double)};
-
+#ifndef ROOT_CINT
+const int StTypeSize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short), sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long), sizeof(long long),sizeof(float),sizeof(double)};
+#endif
 
 class StTableDescriptorI {
 
@@ -76,3 +80,5 @@ public:
 };
 
 #endif
+
+

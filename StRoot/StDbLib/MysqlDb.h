@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.13 2001/04/25 17:17:33 perev Exp $
+ * $Id: MysqlDb.h,v 1.14 2001/10/24 04:05:08 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.14  2001/10/24 04:05:08  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.13  2001/04/25 17:17:33  perev
  * HPcorrs
  *
@@ -192,6 +195,7 @@ public:
   MysqlDb &operator<<(const unsigned short aq);
   MysqlDb &operator<<(const int aq);
   MysqlDb &operator<<(const unsigned int aq);
+  MysqlDb &operator<<(const long long aq);
   MysqlDb &operator<<(const float aq);
   MysqlDb &operator<<(const double aq);
 
@@ -247,6 +251,12 @@ inline MysqlDb &MysqlDb::operator<<( const unsigned int aq){
   return *this<<mStrBuff;
 }
 
+inline MysqlDb &MysqlDb::operator<<( const long long aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
 inline MysqlDb &MysqlDb::operator<<( const float aq){
   ostrstream ts;  ts<<aq<<ends;
   char* mStrBuff=ts.str(); ts.freeze(0);
@@ -263,5 +273,10 @@ inline MysqlDb &MysqlDb::operator<<( const double aq){
 extern MysqlBin *Binary(const unsigned long int aLen,const float *aBin);
 //extern MysqlBin *Binary(const unsigned long int aLen,const char  *aBin);
 #endif
+
+
+
+
+
 
 

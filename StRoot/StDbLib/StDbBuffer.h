@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.5 2000/01/27 05:54:33 porter Exp $
+ * $Id: StDbBuffer.h,v 1.6 2001/10/24 04:05:19 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.6  2001/10/24 04:05:19  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.5  2000/01/27 05:54:33  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -34,16 +37,16 @@
 
 #include "StDbBufferI.h"
 
-enum myctype{_char,_uchar,_short,_ushort,_int,_uint,_long,_ulong,_float,_double,_ascii,_string};
+enum myctype{_char,_uchar,_short,_ushort,_int,_uint,_long,_ulong,_longlong,_float,_double,_ascii,_string};
 
 const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short),
-		 sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long),
+		 sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long),sizeof(long long),
 		 sizeof(float),sizeof(double),sizeof(char*),sizeof(char*)};
 #ifdef SOLARIS
-const int mycswapl[]={1,1,1,1,4,4,4,4,4,8,1,1};
+const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1};
 #else
 #ifdef hpux
-const int mycswapl[]={1,1,1,1,4,4,4,4,4,8,1,1};  // same swapping than Solaris
+const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1};  // same swapping than Solaris
 #else
 const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1};
 #endif
@@ -109,6 +112,7 @@ public:
   virtual bool  ReadScalar(unsigned int   &i, const char *) ;
   virtual bool  ReadScalar(long   &l, const char *) ;
   virtual bool  ReadScalar(unsigned long  &l, const char *) ;
+  virtual bool  ReadScalar(long long  &l, const char *) ;
   virtual bool  ReadScalar(float  &f, const char *) ;
   virtual bool  ReadScalar(double &d, const char *) ;
   virtual bool  ReadScalar(char   *&c, const char *) ; 
@@ -121,6 +125,7 @@ public:
   virtual bool     WriteScalar(const unsigned int   i, const char *) ;
   virtual bool     WriteScalar(const long   l, const char *) ;
   virtual bool     WriteScalar(const unsigned long  l, const char *) ;
+  virtual bool     WriteScalar(const long long  l, const char *) ;
   virtual bool     WriteScalar(const float  f, const char *) ;
   virtual bool     WriteScalar(const double d, const char *) ;
   virtual bool     WriteScalar(const char  *c, const char *);
@@ -133,6 +138,7 @@ public:
   virtual bool     ReadArray(unsigned int   *&c, int &len, const char *);
   virtual bool     ReadArray(long  *&c, int &len, const char *);
   virtual bool     ReadArray(unsigned long  *&c, int &len, const char *);
+  virtual bool     ReadArray(long long  *&c, int &len, const char *);
   virtual bool     ReadArray(float   *&c, int &len, const char *);
   virtual bool     ReadArray(double  *&c, int &len, const char *);
   virtual bool     ReadArray(char  **&c, int &len, const char *);
@@ -145,6 +151,7 @@ public:
   virtual bool     WriteArray(unsigned int    *c, int len, const char *);
   virtual bool     WriteArray(long    *c, int len, const char *);
   virtual bool     WriteArray(unsigned long   *c, int len, const char *);
+  virtual bool     WriteArray(long long   *c, int len, const char *);
   virtual bool     WriteArray(float   *c, int len, const char *);
   virtual bool     WriteArray(double  *c, int len, const char *);
   virtual bool     WriteArray(char **c, int len, const char *);
@@ -168,6 +175,7 @@ protected:
   bool WriteMem(unsigned int *s,void* aVal, myctype type);
   bool WriteMem(long *s,void* aVal, myctype type);
   bool WriteMem(unsigned long *s,void* aVal, myctype type);
+  bool WriteMem(long long *s,void* aVal, myctype type);
   bool WriteMem(float *s,void* aVal, myctype type);
   bool WriteMem(double *s,void* aVal, myctype type);
   bool WriteMem(char **s,void* aVal, myctype type);
@@ -180,6 +188,7 @@ protected:
   void StrConv(char* aVal,unsigned int &s);
   void StrConv(char* aVal,long &s);
   void StrConv(char* aVal,unsigned long &s);
+  void StrConv(char* aVal,long long &s);
   void StrConv(char* aVal,float &s);
   void StrConv(char* aVal,double &s); 
   void StrConv(char* aVal,char* &s);
