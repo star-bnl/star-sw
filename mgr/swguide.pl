@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.7 1999/08/18 13:07:54 wenaus Exp $
+# $Id: swguide.pl,v 1.8 1999/09/20 22:55:16 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.8  1999/09/20 22:55:16  wenaus
+# Move output area to RCF NFS web area
+#
 # Revision 1.7  1999/08/18 13:07:54  wenaus
 # Move data files to datapool
 #
@@ -44,7 +47,7 @@ $q->param('detail','1') if ( $q->param('detail') eq '');
 $dynamic = $q->param('dynamic');
 if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
     # just display the pre-prepared page
-    $fpath = "/star/datapool/web";
+    $fpath = "/star/starlib/doc/www/html/comp-nfs";
     $fname = $fpath."/swguide-".$q->param('ver')."-".$q->param('detail').".html";
     if ( -e $fname ) {
         open(FILE,"< $fname");
@@ -327,7 +330,7 @@ if ( $find eq "" && $pkg eq "" && $showFlag > 0 ) {
         }
     }
     if ( $ver eq 'dev' ) {
-        open(FSTAT,">/star/datapool/web/swguide-stats.txt");
+        open(FSTAT,">/star/starlib/doc/www/html/comp-nfs/swguide-stats.txt");
         print FSTAT "\n<b>Total files $totfiles</b>";
         print FSTAT "\n<b>Total lines $totlines</b>";
         print FSTAT "\n  By type:          All    Last 2 months\n";

@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide-cron.pl,v 1.3 1999/07/25 16:27:30 wenaus Exp $
+# $Id: swguide-cron.pl,v 1.4 1999/09/20 22:55:17 wenaus Exp $
 #
 # $Log: swguide-cron.pl,v $
+# Revision 1.4  1999/09/20 22:55:17  wenaus
+# Move output area to RCF NFS web area
+#
 # Revision 1.3  1999/07/25 16:27:30  wenaus
 # Debug printout only
 #
@@ -24,7 +27,7 @@
 # Usage: swguide-cron.pl [dev .dev new pro old]
 #
 
-$fpath = "/usr/local/apache/htdocs/code";
+$fpath = "/star/starlib/doc/www/html/comp-nfs";
 $pgm = "/star/u2d/wenaus/datadb/swguide.pl";
 if ( @ARGV ) {
     @ver = @ARGV;
