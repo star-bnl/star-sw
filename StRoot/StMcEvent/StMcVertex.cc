@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.6 2000/03/29 16:15:54 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.7 2000/05/05 15:25:44 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.7  2000/05/05 15:25:44  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.6  2000/03/29 16:15:54  calderon
  * Added more information from g2t_vertex table
  *
@@ -42,10 +45,9 @@ using std::find;
 #endif
 
 #include "StMcVertex.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.6 2000/03/29 16:15:54 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.7 2000/05/05 15:25:44 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {

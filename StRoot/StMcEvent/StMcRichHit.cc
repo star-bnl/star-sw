@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.2 2000/04/18 00:55:14 calderon Exp $
+ * $Id: StMcRichHit.cc,v 2.3 2000/05/05 15:25:43 calderon Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.3  2000/05/05 15:25:43  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.2  2000/04/18 00:55:14  calderon
  * added printout of local momentum to operator<<
  *
@@ -17,33 +20,27 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.2 2000/04/18 00:55:14 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.3 2000/05/05 15:25:43 calderon Exp $";
 
 StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
 
 StMcRichHit::StMcRichHit() { /* noop */ };
 
-StMcRichHit::StMcRichHit(const StThreeVectorF& p,
+StMcRichHit::StMcRichHit(const StThreeVectorF& x,const StThreeVectorF& p,
 		       const float de, const float ds,
-		       StMcTrack* parent)  : StMcHit(p, de, ds, parent)
+		       StMcTrack* parent)  : StMcHit(x, p, de, ds, parent)
 { /* noop */ }
 
 
 StMcRichHit::StMcRichHit(g2t_rch_hit_st* pt)
-{
-  mdE = pt->de;
-  //mdS = pt->ds;
-  mdS = 0;
-  // Decode position.
-  mPosition.setX(pt->x[0]); 
-  mPosition.setY(pt->x[1]);
-  mPosition.setZ(pt->x[2]);
-  mLocalMomentum.setX(pt->p[0]);
-  mLocalMomentum.setY(pt->p[1]);
-  mLocalMomentum.setZ(pt->p[2]);
-  mVolumeId = pt->volume_id;
-  mTof      = pt->tof;
-}
+: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
+	  pt->de,
+	  0,
+	  0),
+  mVolumeId(pt->volume_id),
+  mTof(pt->tof)
+{/* noop */ }
 
 StMcRichHit::~StMcRichHit() {/* noop */}
 

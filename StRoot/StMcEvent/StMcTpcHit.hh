@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.5 2000/03/06 18:05:23 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.6 2000/05/05 15:25:44 calderon Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.6  2000/05/05 15:25:44  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.5  2000/03/06 18:05:23  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -49,7 +52,7 @@ class g2t_tpc_hit_st;
 class StMcTpcHit : public StMcHit {
 public:
     StMcTpcHit();
-    StMcTpcHit(const StThreeVectorF&,
+    StMcTpcHit(const StThreeVectorF&,const StThreeVectorF&,
 	     const float, const float, StMcTrack*);
     StMcTpcHit(g2t_tpc_hit_st*);
     ~StMcTpcHit();

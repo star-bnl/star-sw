@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.5 2000/05/05 15:25:43 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.5  2000/05/05 15:25:43  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -43,7 +46,7 @@ class g2t_ftp_hit_st;
 class StMcFtpcHit : public StMcHit {
 public:
     StMcFtpcHit();
-    StMcFtpcHit(const StThreeVectorF&,
+    StMcFtpcHit(const StThreeVectorF&,const StThreeVectorF&,
 	     const float, const float, StMcTrack*);
     StMcFtpcHit(g2t_ftp_hit_st*);
     ~StMcFtpcHit();

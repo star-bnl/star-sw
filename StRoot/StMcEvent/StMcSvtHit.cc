@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.5 2000/04/18 22:55:28 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.6 2000/05/05 15:25:44 calderon Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.6  2000/05/05 15:25:44  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.5  2000/04/18 22:55:28  calderon
  * Functions to access the volume Id
  * Added volume Id to output of operator<<
@@ -32,31 +35,26 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.5 2000/04/18 22:55:28 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.6 2000/05/05 15:25:44 calderon Exp $";
 
 StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
 
 StMcSvtHit::StMcSvtHit() { /* noop */ };
 
-StMcSvtHit::StMcSvtHit(const StThreeVectorF& p,
+StMcSvtHit::StMcSvtHit(const StThreeVectorF& x,const StThreeVectorF& p,
 		       const float de, const float ds,
-		       StMcTrack* parent)  : StMcHit(p, de, ds, parent)
+		       StMcTrack* parent)  : StMcHit(x, p, de, ds, parent)
 { /* noop */ }
 
 
 StMcSvtHit::StMcSvtHit(g2t_svt_hit_st* pt)
-{
-  mdE = pt->de;
-  mdS = pt->ds;
-  // Decode position.
-  mPosition.setX(pt->x[0]); 
-  mPosition.setY(pt->x[1]);
-  mPosition.setZ(pt->x[2]);
-  mLocalMomentum.setX(pt->p[0]); 
-  mLocalMomentum.setY(pt->p[1]);
-  mLocalMomentum.setZ(pt->p[2]);
-  mVolumeId = pt->volume_id;
-}
+: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
+	  pt->de,
+	  pt->ds,
+	  0),
+  mVolumeId(pt->volume_id)
+{/* noop */ }
 
 StMcSvtHit::~StMcSvtHit() {/* noop */}
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.3 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcHit.hh,v 2.4 2000/05/05 15:25:43 calderon Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.4  2000/05/05 15:25:43  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.3  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -35,7 +38,7 @@ class g2t_hits_st;
 class StMcHit {
 public:
     StMcHit();
-    StMcHit(const StThreeVectorF&,
+    StMcHit(const StThreeVectorF&,const StThreeVectorF&,
 	  float, float,
 	  StMcTrack*);
     StMcHit(g2t_hits_st*);
