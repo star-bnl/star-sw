@@ -15,9 +15,10 @@ public:
     virtual ~StiRootDrawableStiEvaluableTrack();
 
     virtual void fillHitsForDrawing();
+    virtual void reset();
     
 protected:
-    
+
 private:
     
 };
