@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.26 2001/05/31 16:06:12 perev Exp $
+// $Id: St_geant_Maker.h,v 1.27 2001/06/01 03:03:57 perev Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.27  2001/06/01 03:03:57  perev
+// overloaded GetDataSet -> FindDataSet
+//
 // Revision 1.26  2001/05/31 16:06:12  perev
 // hiding
 //
@@ -70,9 +73,6 @@ public:
                                  float theta2, float phi2,
                                  float theta3, float phi3);
 
-   virtual TDataSet  *GetDataSet (const char* logInput,
-                                    const StMaker *uppMk=0,
-                                    const StMaker *dowMk=0) const ;
 
    virtual void  SetDebug(Int_t dbl=kDebug); 
            Int_t SetInputFile(const char* file);
@@ -101,6 +101,9 @@ public:
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
    
  protected:
+   virtual TDataSet  *FindDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
    static TDataSet *fgGeom; //!
    static TGeant3    *geant3; //!
 
@@ -112,7 +115,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.26 2001/05/31 16:06:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.27 2001/06/01 03:03:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

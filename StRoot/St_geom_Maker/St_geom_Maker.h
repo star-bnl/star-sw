@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.h,v 1.6 2000/03/28 19:28:09 fine Exp $
+// $Id: St_geom_Maker.h,v 1.7 2001/06/01 03:04:25 perev Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.7  2001/06/01 03:04:25  perev
+// overloaded GetDataSet -> FindDataSet
+//
 // Revision 1.6  2000/03/28 19:28:09  fine
 // Adjusted to ROOT 2.24
 //
@@ -72,22 +75,22 @@
 
 class St_geom_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.6 2000/03/28 19:28:09 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.7 2001/06/01 03:04:25 perev Exp $";
  
  protected:
+   virtual St_DataSet  *FindDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
  public: 
                   St_geom_Maker(const char *name="star.root");
    virtual       ~St_geom_Maker();
-   virtual St_DataSet  *GetDataSet (const char* logInput,
-                                    const StMaker *uppMk=0,
-                                    const StMaker *dowMk=0) const ;
    virtual Int_t Init();
    virtual Int_t Make();
    virtual void  SetGeomFileName(const Char_t *fileName){SetName(fileName);} 
    virtual const Char_t *GetGeomFileName(){ return GetName();}
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_geom_Maker.h,v 1.6 2000/03/28 19:28:09 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_geom_Maker.h,v 1.7 2001/06/01 03:04:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_geom_Maker, 1)   //StAF chain virtual base class for Makers
 };
