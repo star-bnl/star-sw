@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.13 2000/05/26 21:26:53 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.14 2000/06/30 14:43:38 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.14  2000/06/30 14:43:38  posk
+// Using MessageMgr.
+//
 // Revision 1.13  2000/05/26 21:26:53  posk
 // Number of subevents fixed at 2.
 //
@@ -84,11 +87,10 @@ public:
 
   Int_t        Init();
   Int_t        Make();
-  void         PrintInfo();
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
   virtual const char *GetCVS() const {static const char cvs[]=
-  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.13 2000/05/26 21:26:53 posk Exp $ built "__DATE__" "__TIME__ ;
+  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.14 2000/06/30 14:43:38 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
