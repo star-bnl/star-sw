@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.9 2001/02/19 23:37:59 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.10 2001/02/19 23:55:34 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.10  2001/02/19 23:55:34  caines
+ * Even get id correct (start from 1 not 0)
+ *
  * Revision 1.9  2001/02/19 23:37:59  caines
  * Ensure hits have a unique id for ALL svt, remover print statement
  *
@@ -241,6 +244,8 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	  if( !mSvtBigHit) continue;
 	  
 	  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
+
+	    TotHits++;
 	    mSvtBigHit->svtHitData()[clu].id = TotHits;
 	    waferCoord.setTimeBucket(mSvtBigHit->WaferPosition()[clu].x());
 	    waferCoord.setAnode(mSvtBigHit->WaferPosition()[clu].y());
@@ -272,7 +277,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
 	 
-	    TotHits++;
+	  
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
