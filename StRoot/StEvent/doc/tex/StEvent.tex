@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.30 2000/05/09 11:09:30 ullrich Exp $
+% $Id: StEvent.tex,v 2.31 2000/05/16 13:22:39 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.30  2000/05/09 11:09:30  ullrich
-% Updated section on StMwcTriggerDetector and StCtbTriggerDetector.
+% Revision 2.31  2000/05/16 13:22:39  ullrich
+% More details on the second chi2 value in StTrackFitTraits.
 %
 % Revision 2.34  2000/05/24 15:43:38  ullrich
 % More on the StEventMaker (update).
@@ -175,8 +175,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.31 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/16 13:22:39 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -184,17 +184,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.31 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/16 13:22:39 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.31 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/16 13:22:39 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.31 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/16 13:22:39 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -209,8 +209,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.30 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/05/09 11:09:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.31 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/05/16 13:22:39 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -4580,7 +4580,8 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     are loaded for a given detector (e.g. on DST) this function will
     return 0. To find out about the number of hits as defined in
     reconstruction chain use \texttt{numberOfPoints()}.
-    $\chi^2$ values.
+
+    
     \verb+StPtrVecHit hits(StDetectorId) const;+\\
     \verb+StPtrVecHit hits(StHitFilter&) const;+\\
     \verb+StPtrVecHit& hits();+\\
