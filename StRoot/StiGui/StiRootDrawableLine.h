@@ -21,7 +21,9 @@ public:
     virtual void update();
     virtual void setColor(int val);
     virtual void setVisibility(bool val);
-    
+    virtual void setMarkerStyle(unsigned int val);
+    virtual void setMarkerSize(double);
+
     virtual const char* name() const;
 
 protected:

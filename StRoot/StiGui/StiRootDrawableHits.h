@@ -21,7 +21,10 @@ public:
     virtual void update();
     virtual void setColor(int val);
     virtual void setVisibility(bool val);
-    
+
+    virtual void setMarkerStyle(unsigned int);
+    virtual void setMarkerSize(double);
+
     virtual const char* name() const;
 
 protected:
@@ -30,6 +33,7 @@ protected:
     int mcolor;
     bool mvisible;
     char* mname;
+    unsigned int mmarker;
     
 private:
 
