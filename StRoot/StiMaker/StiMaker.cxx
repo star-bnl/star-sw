@@ -33,7 +33,7 @@
 #include "Sti/StiGeometryTransform.h"
 
 //StiGui
-#include "StiGui/StiDrawableDetector.h"
+//#include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDisplayManager.h"
 
 // StiMaker
@@ -166,24 +166,7 @@ void StiMaker::reset()
 
 void StiMaker::doNextAction()
 {
-    /*
-      if (mdone) {
-      cout <<"StiMaker::doNext()\t Nothing Left to do"<<endl;
-      return;
-      }
-      
-      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-      const StiDrawableDetector* layer = dynamic_cast<const StiDrawableDetector*>(*rdet);
-      if (!layer) return;
-      StiDisplayManager::instance()->setVisible(layer);
-      StiDisplayManager::instance()->draw();
-      StiDisplayManager::instance()->update();
-      bool cangofurther = rdet.padrowStepMinus();
-      if (!cangofurther) {
-      rdet.setRefDetector( layer->getSector()+1 );
-      }
-
-    */
+    //Add call to next tracker action here
     return;
 }
 
