@@ -21,8 +21,7 @@ class St_ctg_geo;
 
 class St_rl0_Maker : public StMaker {
  private:
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_rl0_Maker.h,v 1.1 1999/02/11 20:10:52 druss Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_rl0_Maker.h,v 1.2 1999/03/12 21:53:27 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -34,7 +33,7 @@ class St_rl0_Maker : public StMaker {
 
  protected:
  public: 
-                 St_rl0_Maker(const char *name="rl0", const char *title="rl0");
+                 St_rl0_Maker(const char *name="rl0");
    virtual      ~St_rl0_Maker();
    virtual Int_t Init();
    virtual Int_t Make();

@@ -13,8 +13,7 @@
 ClassImp(St_rl0_Maker)
 
 //_____________________________________________________________________________
-St_rl0_Maker::St_rl0_Maker(const char *name, const char *title):StMaker(name,title){
-   drawinit=kFALSE;
+St_rl0_Maker::St_rl0_Maker(const char *name):StMaker(name){
 }
 //_____________________________________________________________________________
 St_rl0_Maker::~St_rl0_Maker(){
@@ -24,7 +23,7 @@ Int_t St_rl0_Maker::Init(){
 
    // read in CTB parameters from parameter table.
 
-   St_DataSetIter       params(gStChain->DataSet("params"));
+   St_DataSetIter       params(GetDataBase("params"));
    m_ctb        = (St_ctg_geo      *) params("ctf/ctg/ctb");
 
    // set pointers to table wrappers
@@ -81,64 +80,59 @@ Int_t St_rl0_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_rl0_Maker::Make(){
 
-//  PrintInfo();
-
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-
 // Create Empty tables for us
 
-     St_rl0_data   *rl0_data = new St_rl0_data("rl0_data",1);
-     m_DataSet->Add(rl0_data);
+   St_rl0_data   *rl0_data = new St_rl0_data("rl0_data",1);
+   m_DataSet->Add(rl0_data);
 
 // Read in MWC Tables
 
-     St_DataSetIter mwc(gStChain->DataSet("mwc"));
-     St_mwc_raw     *rawmwc = (St_mwc_raw *) mwc("raw");
-     St_mwc_sector  *sector = (St_mwc_sector *) mwc("sector");
+   St_DataSetIter mwc(GetDataSet("mwc"));
+   St_mwc_raw     *rawmwc = (St_mwc_raw *) mwc("raw");
+   St_mwc_sector  *sector = (St_mwc_sector *) mwc("sector");
 
 // Read in CTB Tables
 
-     St_DataSetIter ctf(gStChain->DataSet("ctf"));
-     St_ctu_raw     *rawctb = (St_ctu_raw *) ctf("ctb_raw");
+   St_DataSetIter ctf(GetDataSet("ctf"));
+   St_ctu_raw     *rawctb = (St_ctu_raw *) ctf("ctb_raw");
 
 // Checking if the tables exist
 
-     if (!m_ctb)        {printf("m_ctb does not exist\n")     ;return kStWarn;}
-     if (!m_geom)       {printf("m_geom does not exist\n")    ;return kStWarn;}
-     if (!rawctb)       {printf("rawctb does not exist\n")    ;return kStWarn;} 
-     if (!sector)       {printf("sector does not exist\n")    ;return kStWarn;} 
-     if (!rawmwc)       {printf("rawmwc does not exist\n")    ;return kStWarn;} 
-     if (!m_rl0_ctrl)   {printf("rl0_ctrl does not exist\n")  ;return kStWarn;} 
-     if (!rl0_data)     {printf("rl0_data does not exist\n")  ;return kStWarn;} 
-     if (!m_rl0_ctbcal) {printf("rl0_ctcal does not exist\n") ;return kStWarn;} 
-     if (!m_rl0_mwccal) {printf("rl0_mwcal does not exist\n") ;return kStWarn;} 
+   if (!m_ctb)        {printf("m_ctb does not exist\n")     ;return kStWarn;}
+   if (!m_geom)       {printf("m_geom does not exist\n")    ;return kStWarn;}
+   if (!rawctb)       {printf("rawctb does not exist\n")    ;return kStWarn;} 
+   if (!sector)       {printf("sector does not exist\n")    ;return kStWarn;} 
+   if (!rawmwc)       {printf("rawmwc does not exist\n")    ;return kStWarn;} 
+   if (!m_rl0_ctrl)   {printf("rl0_ctrl does not exist\n")  ;return kStWarn;} 
+   if (!rl0_data)     {printf("rl0_data does not exist\n")  ;return kStWarn;} 
+   if (!m_rl0_ctbcal) {printf("rl0_ctcal does not exist\n") ;return kStWarn;} 
+   if (!m_rl0_mwccal) {printf("rl0_mwcal does not exist\n") ;return kStWarn;} 
 
-     Int_t rl0_result = rl0(
-                            m_ctb,
-                            m_geom,
-                            rawctb,
-                            sector,
-                            rawmwc,
-			    m_rl0_ctrl,
-			    rl0_data,
-			    m_rl0_ctbcal,
-			    m_rl0_mwccal);
-     if (rl0_result != kSTAFCV_OK)
-     {
-        printf("**** Problems with rl0 ****\n");
-        return kStWarn;
-     }
+   Int_t rl0_result = rl0(
+                          m_ctb,
+                          m_geom,
+                          rawctb,
+                          sector,
+                          rawmwc,
+			  m_rl0_ctrl,
+			  rl0_data,
+			  m_rl0_ctbcal,
+			  m_rl0_mwccal);
+   if (rl0_result != kSTAFCV_OK)
+   {
+      printf("**** Problems with rl0 ****\n");
+      return kStWarn;
+   }
 
-}
  return kStOK;
 }
 //_____________________________________________________________________________
 void St_rl0_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_rl0_Maker.cxx,v 1.2 1999/03/03 04:12:13 fisyak Exp $\n");
+  printf("* $Id: St_rl0_Maker.cxx,v 1.3 1999/03/12 21:53:27 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
      
 
