@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.8 2001/05/17 20:45:19 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.9 2001/07/12 18:19:31 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.9  2001/07/12 18:19:31  jcs
+// compute drift map according to FTPC cathode voltage and magnetic field
+//
 // Revision 1.8  2001/05/17 20:45:19  jcs
 // change to use Jim Thomas StMagUtilities
 //
@@ -57,9 +60,6 @@ StFtpcDriftMapMaker::~StFtpcDriftMapMaker(){
 }
 //_____________________________________________________________________________
 StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor):
-    m_clusterpars(0),
-    m_slowsimgas(0),
-    m_slowsimpars(0),
     m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
@@ -71,13 +71,6 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
     m_driftfield(0)
 {
 // Create tables
-  St_DataSet *ftpc = GetDataBase("ftpc");
-  assert(ftpc);
-  St_DataSetIter       local(ftpc);
-
-  m_clusterpars = (St_ftpcClusterPars *) local("ftpcClusterPars");
-  m_slowsimgas  = (St_ftpcSlowSimGas  *)local("ftpcSlowSimGas");
-  m_slowsimpars = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -96,21 +89,64 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
 
-  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
-  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
-  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
-  m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
-  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
   m_gas           = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
-  m_driftfield    = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+
+
+
+    m_driftfield    = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+//    St_ftpcDriftField *m_driftfield = new St_ftpcDriftField("ftpcDriftField",1);
+//    AddData(m_driftfield);
+    ftpcDriftField_st *ftpcDriftField = m_driftfield->GetTable();
+    ftpcDriftField->numberOfEFieldBinsUsed    = 761;
+    ftpcDriftField->maximumNumberOfEFieldBins = 1101;
+    ftpcDriftField->tZero                     =   0;
+    ftpcDriftField->minimumDriftField         = 240;
+    ftpcDriftField->stepSizeDriftField        =   1;
+    ftpcDriftField->radiusTimesField          =  7365.1;
+    ftpcDriftField->driftCathodeVoltage       = 10.0;
+
+    m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+    ftpcEField_st *ftpcEField = m_efield->GetTable();
+
+    m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
+    ftpcVDrift_st *ftpcVDrift = m_vdrift->GetTable();
+
+    m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
+    ftpcDeflection_st *ftpcDeflection = m_deflection->GetTable();
+
+    m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
+    ftpcdVDriftdP_st *ftpcdVDriftdP = m_dvdriftdp->GetTable();
+
+    m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+    ftpcdDeflectiondP_st *ftpcdDeflectiondP = m_ddeflectiondp->GetTable();
+    
+    Int_t mNumberOfPadrowsPerSide = 10;
+
+    for ( Int_t iBin=0; iBin<ftpcDriftField->maximumNumberOfEFieldBins; iBin++) 
+    {
+      ftpcEField->e[iBin]   = 0.0;
+      for(Int_t iPadrow=0; iPadrow<mNumberOfPadrowsPerSide; iPadrow++) {
+         ftpcVDrift->v[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
+         ftpcDeflection->psi[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
+         ftpcdVDriftdP->dv_dp[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
+         ftpcdDeflectiondP->dpsi_dp[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
+      }
+    }
+    for ( Int_t iBin=0; iBin<ftpcDriftField->numberOfEFieldBinsUsed; iBin++) 
+    {
+      ftpcEField->e[iBin] = ftpcDriftField->minimumDriftField 
+                            + iBin*ftpcDriftField->stepSizeDriftField;
+    }
+
+  if (!m_efield || !m_vdrift || !m_deflection || !m_dvdriftdp || !m_ddeflectiondp 
+                || !m_gas  || !m_driftfield) {
+    cout<<"MySQLDb:Calibrations/ftpc not complete"<<endl;
+    exit(0);
+  }
   
 
   StMagUtilities  *magField = new StMagUtilities(map,factor);
 
-  // create parameter reader
-  StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
-                                                         m_slowsimgas,
-                                                         m_slowsimpars);
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
@@ -160,23 +196,25 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
  		    bVector[2]*bVector[2]); 
  	  bRadial=sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1]); 
  	  bTheta=acos(bRadial/bMag)*90/acos(0.0); 
+          // set sign of angle between E and B fields 
+          bTheta = (factor/fabs(factor)) * bTheta;
  	  pressure=760.0; 
- 	  upPressure=760.0+paramReader->dvdpCalcOffset(); 
-          pOff=paramReader->dvdpCalcOffset()*1.3332; 
+ 	  upPressure=760.0+dbReader->pressureOffset();
+          pOff=dbReader->pressureOffset()*1.3332; 
           /* Torr -> hPa */
 	  vDrift=0;
 	  psiAngle=0;
 	  upDrift=0;
 	  upAngle=0;
  	  printf("loop %d of %d\n", i, dbReader->numberOfMagboltzBins()); 
-//     	  printf("calling magboltz with field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);
+       	  printf("calling magboltz with field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);
 	  float gas1=dbReader->percentAr();
 	  float gas2=dbReader->percentCO2();
 	  float gas3=dbReader->percentNe();
 	  float gas4=dbReader->percentHe();
-	  float temperature=paramReader->baseTemperature();
+	  float temperature=dbReader->baseTemperature();
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &pressure, &gas1, &gas2, &gas3, &gas4, &temperature, &vDrift, &psiAngle, &eFinal); 
-//   	  printf("called magboltz got field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);  
+     	  printf("called magboltz got field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);  
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &upPressure, &gas1, &gas2, &gas3, &gas4, &temperature, &upDrift, &upAngle, &eFinal); 
 	  printf("changing magboltz values from %f %f %f %f\n",dbReader->magboltzVDrift(i,j), dbReader->magboltzDeflection(i,j),dbReader->magboltzdVDriftdP(i,j),dbReader->magboltzdDeflectiondP(i,j));
 	  dbReader->setMagboltzEField(i,thisField);
@@ -188,6 +226,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 
  	} 
      } 
+ 
  
 // Write out new ftpcDeflection
 
@@ -247,7 +286,42 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
   table -> SavePrimitive(ofs_dVDriftdP,0);  // Write information of c-structure from object of TTable to the file
   ofs_dVDriftdP.close();                    // Close the file
 
-  delete paramReader;
+//-------------------------------------------------------------------
+ 
+// Write out new ftpcEField
+
+  cstruct = m_efield -> GetTable();   // Get pointer of table and copy to c-structure
+  nrows = m_efield -> GetNRows();      // Get number of rows in the table
+
+  fTableName = new char[20];
+  strcpy(fTableName,"ftpcEField");
+// Create new TTable object for c-structure
+  table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  fOutputFileName = new char[100];
+  strcpy(fOutputFileName,"./ftpcEField.C");
+  ofstream ofs_ftpcEField(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_ftpcEField,0);  // Write information of c-structure from object of TTable to the file
+  ofs_ftpcEField.close();                    // Close the file
+ 
+
+// Write out new ftpcDriftField
+
+  cstruct = m_driftfield -> GetTable();   // Get pointer of table and copy to c-structure
+  nrows = m_driftfield -> GetNRows();      // Get number of rows in the table
+
+  fTableName = new char[20];
+  strcpy(fTableName,"ftpcDriftField");
+// Create new TTable object for c-structure
+  table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  fOutputFileName = new char[100];
+  strcpy(fOutputFileName,"./ftpcDriftField.C");
+  ofstream ofs_ftpcDriftField(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_ftpcDriftField,0);  // Write information of c-structure from object of TTable to the file
+  ofs_ftpcEField.close();                    // Close the file
+
+//-------------------------------------------------------------------
   delete dbReader;
   delete magboltz;
 
