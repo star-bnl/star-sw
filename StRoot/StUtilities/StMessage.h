@@ -5,7 +5,7 @@
   This is the class of messages used by StMessageManager in STAR.
   Messages have a type and message specified at instantiation,
   and also include a time-date stamp and options for printing.
-
+  
 */
 
 #ifndef ClassStMessage
@@ -59,8 +59,11 @@ class StMessage {
 
 #endif
 
-// $Id: StMessage.h,v 1.13 2003/09/25 21:18:14 genevb Exp $
+// $Id: StMessage.h,v 1.14 2003/10/01 20:02:51 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.14  2003/10/01 20:02:51  genevb
+// No changes (testing)
+//
 // Revision 1.13  2003/09/25 21:18:14  genevb
 // Changed option storage
 //
