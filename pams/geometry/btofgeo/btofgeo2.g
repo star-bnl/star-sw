@@ -1,13 +1,4 @@
-* $Id: btofgeo2.g,v 1.3 2001/07/18 22:39:13 geurts Exp $
-* $Log: btofgeo2.g,v $
-* Revision 1.3  2001/07/18 22:39:13  geurts
-* changed max ToF for CTB and TOFp HITS to 10us for pile-up studies in pp
-*
-* Revision 1.2  2001/03/14 00:03:50  nevski
-* btof corrected by F.Geurts
-*
-* Revision 1.1  2000/11/22 17:49:07  nevski
-* tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
+* btofgeo2.g is the geometry to contain TOFp+r and the CTB
 *
 *******************************************************************************
 Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system 
@@ -34,12 +25,19 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *            08 Feb  2001  FG- final positions of the slats and FEE boards
 *            20 Feb  2001  FG- fixed bug in outer CTB slab dimensioning,
 *                              water in TOFp cooling loops
-*            19 Jul  2001  FG- changed max ToF for CTB and TOFp HITS
-*                              to 10us upon request by Jan Balewski.
-*                              The #bits for ToF has been increased to
-*                              20 to keep similar resolution and the
-*                              order of the HITS words is changed to
-*                              keep similar total HITS size
+*            03 Apr  2001  GE- add BRTC and BRMD for TOFr
+*            28 May  2002  GE- Change the Geometry of TOFr(S.L. Huang)
+*            10 Jun  2002  GE- add BRSG BUPC BRFE on geometry & change the 
+*            sensitive volume to gas layers
+*            Oct/Nov 2002  SY/SH/FG - many, many updates
+*            26 Nov 2002  FG - posit2 reintroduced. TOFr is now at
+*                              pos.23. New TOF_choices are 5 (single
+*                              TOFp+single TOFr tray) and 6 (full TOFr
+*                              system)
+*            04 Dec 2002 FG - modr structure changed. Position arrays
+*                             introduced for the TOFr geometry. Common
+*                             material definitions moved to the top.
+*
 *
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
@@ -49,10 +47,14 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                 BWAT,BCOV,BXTR,BMTC,BTTC,BMAA,BMTD,
                 BASS,BXSA,BCSB,BCCV,BFEE,BLEM,
                 BCPM,BCSK,BTSK,BZEL,BCEL,BCEB,BCON,BPLA,
-                BCOO,BRAI,BPIP,BPIQ
+                BCOO,BRAI,BPIP,BPIQ,
+                BRTC,BRMD,BRHC,BRCB,BRMY,BRGR,BROG,
+                BRDT,BRSG,BRIG,BRWG,
+                BRFE,BUPC,BGMT
+
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1 }
+      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2 }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -80,25 +82,35 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                        RailThck, RailWid,
                        CoolInnR, CoolOutR } 
 *
+      Structure MODR { Height, Width, Length,Center, mrpcX(33), 
+                       mrpcZ(33), mrpcA(33),
+                       HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
+                       MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
+                       OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
+                       SPRMin, SPRMax, SPLen,  WGRMin, WGRMax, WGLen,
+                       FEEH,   HBWid,  NGap }
+*
       real      support_arm_width,  support_arm_Xpos,  support_arm_Ypos,
                 support_aile_width, support_aile_Ypos, 
-                xpos, ypos, zpos, totlen, sublen, subcen
-      integer   is, choice, tof, iwid
+                xpos, ypos, zpos, totlen, sublen, subcen, x0, z0,
+                Y, Z, DTHgt
+      integer   i,is, choice, tof, iwid, igap
 *
 * -------------------------------------------------------------------------
 *
       Fill BTOG ! Barrel Trigger, CTB/TOF Basic dimensions 
-         Version   = 3         ! geometry version
+         Version   = 4         ! geometry version
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 4         ! 1=CTB, 2=TOF, 3=25% TOF+CTB, 4=1 tray TOF+CTB
-         posit1    = 32        ! TOF tray position for choice 4
+         choice    = 5         ! 1=CTB, 2=TOF, 3=25% TOF, 4=1 tray-TOFp, 5=tray-TOFr, 6=Full-TOFr
+         posit1    = 32        ! TOFp tray position for choice 4 or 5
+         posit2    = 23        ! TOFr tray position for choice 5 
 *
       Fill TRAY ! general tray stats        
-         Height    =  8.89      ! tray height
+         Height    =  8.89      ! tray height(8.89)
          Width     = 21.59      ! full tray width
-         Length    = 241.62     ! full tray length
+         Length    = 241.62      ! full tray length(241.62)
          WallThk   =  0.13      ! tray wall thickness
          SupFullH  =  2.03      ! support height (radial)
          SupFullW  =  15.24     ! support full width with arms
@@ -178,12 +190,85 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          RailWid   = 1.5      ! Cooling loop rail width
          CoolOutR  = 0.635    ! Cooling loop pipe outer radius, 0.5in/2
          CoolInnR  = 0.561    ! Cooling loop pipe inner radius, (0.5in-0.058in)/2
+*
+      Fill MODR ! RPC TOF Module dimensions and positions
+         Height    = 1.95     ! Module height (r)
+         Width     = 21.2     ! Module width (phi)
+         Length    = 9.4      ! Module length (z)
+         Center    = 0.35     ! Module detector center in (phi)
+	 mrpcX = { 4.76, 1.21, 4.99, 1.46, 5.19, 1.71, 4.98, 1.54, 2.69, 3.39,
+                   3.25, 3.49, 3.33, 3.54, 3.54, 3.57, 3.48, 3.51, 3.19, 3.19,
+		   3.19, 3.19, 3.19, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43,
+		   3.43, 3.43, 3.43 } ! mrpc Xpositions
+         mrpcZ = {  4.50,  10.48,  16.83,  22.64,  29.25,  34.89,
+                   41.68,  47.19,  53.76,  60.18,  66.53,  72.95,
+                   79.42,  85.97,  92.59,  99.28, 106.00, 112.84,
+                  119.60, 126.66, 133.80, 141.06, 148.43, 156.09,
+                  163.71, 171.46, 179.35, 187.38, 195.56, 203.84,
+                  212.33, 220.94, 229.7 } ! mrpc Zpositions
+         mrpcA = {  1.20,  2.84,  4.48,  6.12,  7.74,  9.36,
+                   10.97,  7.60, 14.30, 22.30, 22.30, 22.30,
+                   22.30, 22.30, 22.30, 22.30, 22.30, 22.30,
+                   33.00, 33.00, 33.00, 33.00, 33.00, 37.58,
+                   37.58, 37.58, 37.58, 37.58, 37.58, 37.58,
+                   37.58, 37.58, 37.58 } ! mrpc angles
+         HCHgt  =  0.466  ! HC->Height (r)
+         HCWid  = 20.8    !  HC->Width (phi)
+         HCLen  =  8.4    !   HC->Length (z)
+         PCBHgt =  0.15   ! PCB->Height (r)
+         PCBWid = 21.0    !  PCB->Width  (phi)
+         PCBLen =  9.4    !   PCB->Length (z) *PCBLen =  9.4(real)
+         MYHgt  =  0.035  ! MYlar->Height
+         MYWid  = 21.2    !  MYlar->Width
+         MYLen  =  8.4    !   MYlar->Length
+         GRHgt  =  0.013  ! GRaphite->Height
+         GRWid  = 20.2    !  GRaphite->Width
+         GRLen  =  7.4    !   GRaphite->Length
+         OGHgt  =  0.11   ! Outer Glass->Height
+         OGWid  = 20.6    !  Outer Glass->Width
+         OGLen  =  7.8    !   Outer Glass->Length
+         IGHgt  =  0.054  ! Inner Glass->Height
+         IGWid  = 20.0    !  Inner Glass->Width
+         IGLen  =  6.1    !   Inner Glass->Length
+         SPRMin =  0.     ! SeParator Tube->RMin
+         SPRMax =  0.011  !  SeParator Tube->RMax
+         SPLen  =  7.8    !   SeParator Tube->Length
+         WGRMin =  0.     ! Wedge Tube: RMin
+         WGRMax =  0.15   !  Wedge Tube->RMax
+         WGLen  = 10.0    !   Wedge Tube->Length
+         FEEH   =  0.15   ! tofr fee pcb thickness
+         HBWid  =  0.635  ! the slim honeycomb support box width
+         NGap   = 6       ! Number of gaps in MRPC
       EndFill
+*         NPad   = 6       ! Number of pads within a MRPC
 *
       USE   BTOG
       USE   TRAY
       USE   CTBB
       USE   TOFF
+      USE   MODR
+*
+* ---
+* G10 material definition for PCBs
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.   
+      Component O    A=16     Z=8    W=0.6*2*16./60.   
+      Component C    A=12     Z=6    W=0.4*8*12./174.  
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
+* ---
+* RPCgas material for TOFr gas
+      Component H    A=1      Z=1    W=0.90*2*1./102.  + 0. + 0.05*10*1./58.
+      Component C    A=12     Z=6    W=0.90*2*12./102. + 0. + 0.05*4*12./58.
+      Component F    A=19     Z=9    W=0.90*4*19./102. + 0.05*6*19./146. + 0.
+      Component S    A=32     Z=16   W=0.              + 0.05*1*32./146. + 0.
+      Mixture   RPCgas  Dens=4.55E-3
+* ---
+      Component  Al        A=27  Z=13   W=0.0105
+      Component  N         A=14  Z=7    W=0.7395
+      Component  Adhesive  A=9   Z=4.5  W=0.2500
+      Mixture    HoneyComb Dens=0.282
+* ---
 *
       Create and Position BTOF in Cave
 *
@@ -193,12 +278,13 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *     increasing z is then toward eta=0 in each half.
 *
 Block BTOF is the whole CTF system envelope 
-      Attribute BTOF      seen=0  colo=1
+      Attribute BTOF      seen=1  colo=1
       Material  Air
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
-      choice = btog_choice
-      if (btog_choice != 2) choice = 1
+      choice = 1
+      if (btog_choice == 2) choice=btog_choice
+      if (btog_choice == 6) choice=btog_choice
       Create and Position BTOH  z=+btog_dz/2    alphay=180
       choice=btog_choice
       Create and Position BTOH  z=-btog_dz/2
@@ -218,6 +304,9 @@ Block BTOH is a half of trigger system (west-east)
          if (choice==2)                      tof=1
          if (choice==3 & 46<=is&is<=60)      tof=1
          if (choice==4 & is==btog_posit1)    tof=1
+         if (choice==5 & is==btog_posit1)    tof=1
+         if (choice==5 & is==btog_posit2)    tof=2
+         if (choice==6)                      tof=2
          Create and Position BSEC  alphaz = 102+6*is
       enddo
 EndBlock
@@ -227,7 +316,12 @@ Block BSEC is a sector of CTB/TOF Trigger Barrel Scintillators
       Attribute BSEC      seen=0   colo=1  serial=tof  
       Shape     Tubs      phi1 = -3.0 phi2 = 3.0
       Create and Position BTRA   X = _ 
-                          btog_Rmin+(tray_SupFullH+tray_height+tray_StripT)/2
+             btog_Rmin+(tray_SupFullH+tray_height+tray_StripT)/2
+      if(tof==2) then
+         Create and Position BRFE   X = _
+             btog_Rmin+tray_SupFullH+tray_StripT+tray_height+modr_feeh/2,
+                                 z=(btog_dz-tray_length)/2
+      endif
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -240,7 +334,17 @@ Block BTRA is one full tray plus supporting structure for CTB/TOF
       Create and Position BXTR     X=(tray_SupFullH+tray_StripT)/2,
                                    z=(btog_dz-tray_length)/2
       Create and Position BUND     X=-(tray_height+tray_StripT)/2,
-                                   z=(btog_dz-tray_SupLen)/2
+                                   z=(btog_dz-tray_SupLen)/2 
+EndBlock
+*
+*------------------------------------------------------------------------------
+*
+Block BRFE is the front end electronic of tofr
+      Attribute BRFE seen=0   colo=3
+      Material  G10
+      Shape     BOX       dx=modr_feeh/2,
+                          dy=tray_Width/2,
+                          dz=tray_Length/2
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -248,19 +352,23 @@ EndBlock
 Block BXTR  is a Main TRay covering box for CTB or TOF
       Attribute  BXTR     seen=0   colo=2
       Material   Aluminium
-      Shape      BOX      DX=tray_height/2,
+
+      Shape      BOX      dx=tray_height/2,
                           dz=tray_length/2  
       if (tof==1) then
          Create and Position BTTC
+      else if (tof==2) then
+         Create and Position BRTC
+         Create and Position BUPC  X=(tray_Height-tray_WallThk)/2
       else
          Create and Position BMTC
-      endif
+      endif 
 EndBlock
 *
 *------------------------------------------------------------------------------
 *
 Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
-      Attribute  BMTC     seen=1   colo=5
+      Attribute  BMTC     seen=-1   colo=5
       Material   Air
       Shape      BOX      dx=tray_height/2-tray_WallThk,  
                           dy=tray_Width/2-tray_WallThk,
@@ -309,7 +417,7 @@ Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
 EndBlock
 *
 *-------------------------------------------------------------------------------
-Block BTTC  is  the Main Tray Cavity filled with the details for TOF
+Block BTTC  is  the Main Tray Cavity filled with the details for TOFp
       Attribute  BTTC      seen=0  colo=3
       Component  C         A=12 Z=6 W=1
       Component  H2        A=1  Z=1 W=2
@@ -356,9 +464,65 @@ Block BTTC  is  the Main Tray Cavity filled with the details for TOF
       Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec09z+3.0
       Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec10z+3.0
 EndBlock
+*------------------------------------------------------------------------------
+*
+Block BUPC is the up pcb cover of tofr
+      Attribute BUPC seen=0   colo=3
+      Material  G10
+      Shape     BOX       dx=tray_WallThk/2,
+                          dy=tray_Width/2-tray_WallThk,
+                          dz=tray_Length/2-tray_WallThk     
+EndBlock
 *
 *------------------------------------------------------------------------------
-Block BMAA is a box for a 4wide AND 5wide phi column of TOF Scintillators
+*
+Block BRTC  is  the Main Tray Cavity filled with the details for TOFr 
+      Attribute  BRTC     seen=0   colo=5
+      Material   HoneyComb Dens=0.282
+      Shape      BOX      dx=tray_Height/2-tray_WallThk,
+                          dy=tray_Width/2-tray_WallThk,
+                          dz=tray_Length/2-tray_WallThk
+*     Shape      BOX      dx=,
+*                         dy=,
+*                         dz=
+
+     Create and Position BGMT konly='MANY'
+
+*
+      z0 = tray_Length/2 - 0.05
+*      x0 = -(btog_Rmin+tray_SupFullH+tray_StripT+tray_Height/2) - 1.5
+      x0=-3.66
+*
+*---- create and position TOFr modules
+* 
+* Change the new geometry to honeycomb support of long slim box by
+* add mixture gas box in the tray box iterior
+
+*      Create and Position BGMT
+
+      Create BRMD
+
+      do i=1,33
+      Position BRMD  X=x0+modr_mrpcX(i) ,
+                     Z=z0-modr_mrpcZ(i) ,
+                     alphay=modr_mrpcA(i)
+      enddo
+*
+EndBlock
+*
+*------------------------------------------------------------------------------
+*
+Block BGMT is the mixture gas box in tray that change the hc box into slim
+      Attribute BGMT  seen=0   colo=2
+      Material  RPCgas
+      Shape     BOX  dx=tray_Height/2-tray_WallThk,
+                     dy=tray_Width/2-tray_WallThk-modr_HBWid,
+                     dz=tray_Length/2-tray_WallThk
+EndBlock
+*
+*------------------------------------------------------------------------------
+*
+Block BMAA is a b1ox for a 4wide AND 5wide phi column of TOF Scintillators
       Attribute BMAA  seen=0   colo=2
       if (iwid==4) then
 *  ----  the 4wide mother box...
@@ -376,7 +540,7 @@ EndBlock
 *
 * - - *
 Block BMTD is a 5wide phi column of TOF Scintillators
-      Attribute BMTD      seen=0   colo=1
+      Attribute BMTD      seen=1   colo=1
       Shape     division  Iaxis=2  Ndiv=iwid  
       Create BASS
       if (iwid==5) then
@@ -431,7 +595,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BXSA  is  the active trigger scintillator SLAB for ctb 
-      Attribute BXSA      seen=1   colo=3
+      Attribute BXSA      seen=0   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
       Shape   BOX    dx=0  dy=0 dz=0
@@ -441,7 +605,7 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
 *
       HITS    BXSA   X:.01:S   Y:.01:   Z:.01:,
                      Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
-                     Step:.01:    ToF:20:(0,1.e-5)   Sleng:.1:(0,500),
+                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6) Step:.01:,      
                      Eloss:16:(0,0.01) 
 EndBlock
 *
@@ -457,55 +621,45 @@ Block BCSB  is  the active trigger scintillator SLAB for tof
 *
       HITS    BCSB   X:.01:S   Y:.01:   Z:.01:,
                      Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
-                     Step:.01:    ToF:20:(0,1.e-5)   Sleng:.1:(0,500),
+                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6)  Step:.01:,
                      Eloss:16:(0,0.01) 
 EndBlock
 *
 *------------------------------------------------------------------------------
 Block BCCV  is  a  Ctb optical ConVerter
-      Attribute BCCV      seen=1   colo=3
+      Attribute BCCV      seen=0   colo=3
       Material polystyren 
       Shape   TRD2   Dx1=0   Dx2=0   Dy1=0   Dy2=0  dz=0
 EndBlock
 Block BCSK  is a CTB Linear Base tube
-      Attribute BCSK      seen=1   colo=2
+      Attribute BCSK      seen=0   colo=2
       Material  polystyren 
       Shape   TUBE   Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BZEL  is a Ctb PM electronics
-      Attribute BZEL      seen=1   colo=6
+      Attribute BZEL      seen=0   colo=6
       Material silicon
       Shape   BOX    dx=0  dy=0  dz=0
 EndBlock
 Block BCPM  is a PhotoMultiplier Tube (same for CTB and TOF)
-      Attribute BCPM      seen=1   colo=1
+      Attribute BCPM      seen=0   colo=1
       Material polystyren 
       Shape   TUBE   Rmin=0  Rmax=0  Dz=0
 EndBlock
 *
 Block BTSK  is the outer shell of a TOF CW Base 
-      Attribute BTSK      seen=1   colo=7
+      Attribute BTSK      seen=0   colo=7
       Material  polystyren
       Shape   TUBE   Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BCEL is a circular G10 board in the CW Base for TOF
-      Attribute BCEL seen=1   colo=3
-      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
-      Component O    A=16     Z=8    W=0.6*2*16./60.
-      Component C    A=12     Z=6    W=0.4*8*12./174.
-      Component H    A=1      Z=1    W=0.4*14*1./174.
-      Component O    A=16     Z=8    W=0.4*4*16./174.
-      Mixture   G10  Dens=1.7
+      Attribute BCEL seen=0   colo=3
+      Material G10
       Shape     TUBE Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BCEB is a square G10 board in the CW Base for TOF
-      Attribute BCEL seen=1   colo=3
-      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
-      Component O    A=16     Z=8    W=0.6*2*16./60.
-      Component C    A=12     Z=6    W=0.4*8*12./174.
-      Component H    A=1      Z=1    W=0.4*14*1./174.
-      Component O    A=16     Z=8    W=0.4*4*16./174.
-      Mixture   G10  Dens=1.7
+      Attribute BCEL seen=0   colo=3
+      Material  G10
       Shape     BOX  dx=0  dy=0  dz=0
 EndBlock
 *
@@ -525,19 +679,14 @@ Block BPLA is the plastic angle pieces that hold the upper foam supports...
                                 dz=0.08*2.54/2
 EndBlock
 Block BCON is a generic plastic block for various connectors, foam-support-angles, etc......
-      Attribute BCON      seen=1   colo=6
+      Attribute BCON      seen=0   colo=6
       Material  polystyren 
       Shape     BOX       dx=0 dy=0 dz=0
 EndBlock
 *
 Block BFEE is a G10 FrontEndElectronics board for TOF
-      Attribute BFEE seen=1   colo=3
-      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
-      Component O    A=16     Z=8    W=0.6*2*16./60.
-      Component C    A=12     Z=6    W=0.4*8*12./174.
-      Component H    A=1      Z=1    W=0.4*14*1./174.
-      Component O    A=16     Z=8    W=0.4*4*16./174.
-      Mixture   G10  Dens=1.7
+      Attribute BFEE seen=0   colo=3
+      Material  G10
       Shape     BOX  dx=0  dy=0  dz=0
       Create    BLEM
       Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
@@ -557,7 +706,7 @@ Block BFEE is a G10 FrontEndElectronics board for TOF
       Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
 EndBlock
 Block BLEM is a Lemo connector on the FEE boards
-      Attribute BLEM seen=1   colo=3
+      Attribute BLEM seen=0   colo=3
       Shape     BOX   dx=0 dy=0 dz=0
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
 **      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
@@ -570,7 +719,7 @@ EndBlock
 *******************************************************************************
 *******************************************************************************
 Block BCOO  are the cooling rails/loops
-      Attribute BCOO  seen=1  colo=2
+      Attribute BCOO  seen=0  colo=2
       Shape     BOX   dx=0 dy=0 dz=0
       Create    BRAI  dx=toff_RailThck/2,
                       dy=toff_RailWid/2,
@@ -615,17 +764,17 @@ Block BCOO  are the cooling rails/loops
              alphaX=90
 EndBlock
 Block BRAI  is the Rail for the cooling loop
-      Attribute BRAI   seen=1  colo=7
+      Attribute BRAI   seen=0  colo=7
       Material  Aluminium
       Shape     BOX    dx=0.0  dy=0.0  dz=0.0 
 EndBlock
 Block BPIP  is the Long Pipe for the cooling loop
-      Attribute BPIP seen=1  colo=7
+      Attribute BPIP seen=0  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
 Block BPIQ  is the Short Pipe for the cooling loop
-      Attribute BPIQ seen=1  colo=7
+      Attribute BPIQ seen=0  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
@@ -669,35 +818,283 @@ Block BUND   is  Undercarriage support tray - same both for CTB and TOF
       Create and Position  BCOV   X=-tray_SupFullH/2+tray_CoolOutR
 EndBlock
 Block BTFT  is the Foot structure    ( Material  Aluminium )
-      Attribute BTFT      seen=1   colo=2
+      Attribute BTFT      seen=0   colo=2
       Shape     BOX    dx = 0.0  dy = 0.0  dz = 0.0 
 EndBlock
 Block BARM  is  a TPC cooling structure arm             ( Material  Aluminium )
-      Attribute BARM      seen=1   colo=2
+      Attribute BARM      seen=0   colo=2
       Shape     BOX    Dx=tray_SupArmT/2   DY=support_arm_width/2
 EndBlock
 Block BANG  is  an angled part of TPC cooling structure ( Aile )
-      Attribute BANG   seen=1   colo=2
+      Attribute BANG   seen=0   colo=2
       Shape     PARA   dx=tray_SupArmT/2   Dy=support_aile_width/2,
                        Alph=-60   thet=0   phi=0
 EndBlock
 Block BASE  is  a bottom of TPC coolant structure       
-      Attribute BASE   seen=1   colo=2
+      Attribute BASE   seen=0   colo=2
       Shape     BOX    Dx=tray_SupBaseT/2  Dy=tray_SupBaseW/2
 EndBlock
 Block BCOV  is  a whole TPC cooling channel
-      Attribute BCOV   seen=1   colo=2
+      Attribute BCOV   seen=0   colo=2
       Shape     TUBE   Rmin=0   Rmax=tray_CoolOutR
       Create and Position BWAT Rmin=0  Rmax=tray_CoolInnR
 EndBlock
 Block BWAT  is  TPC cooling water
-      Attribute BWAT   seen=1   colo=3
+      Attribute BWAT   seen=0   colo=3
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
       Shape     TUBE
 **   Rmin=0  Rmax=0
 EndBlock
+
+*------------------------------------------------------------------------------
+* the frame of MPRC module:
 *
+*        HoneyComb      BRHC
+*        Double-side tape is not included
+*        PCB            BRCB
+*        Anode(Electrode) copper-pad is not included so far
+*        Mylar          BRMY
+*        Graphite       BRGR
+*        Outer-Glass    BROG
+*        Separator      BRSG
+*     /--Inner-Glass    BRIG
+*  n {
+*     \--Separator
+*        Outer-Glass
+*        Graphite
+*        Mylar
+*        Cathode(Electrode) copper-pad is not included so far
+*        PCB
+*        Double-side tape is not included
+*        HoneyComb
+*   +    Wedges         BRWG
+*
+*  Note:
+*      1. PCB, short for "Printed Circuit Board
+*      2. Separator(BRSP) and Wedge(BRWG) are not precisely positioned
+*
+*------------------------------------------------------------------------------
+Block BRMD  is a six channel module for TOFr
+      Attribute  BRMD     seen=1   colo=5
+      Material   RPCgas
+      Shape      BOX      dx=modr_Height/2,
+                          dy=modr_Width/2,
+                          dz=modr_Length/2
+      Create     BRHC
+      Create     BRCB
+      Create     BRMY
+      Create     BRGR
+      Create     BROG
+      DTHgt = (modr_IGHgt+modr_SPRMax*2)*(modr_NGap-1)+modr_SPRMax*2
+      Create     BRDT  dx=DTHgt/2., dy=modr_IGWid/2., dz=modr_IGLen/2.,
+                       konly='MANY'
+      Create     BRWG
+
+      XPOS = modr_Height/2.
+      Y = 0.
+      Z = modr_Center
+
+*
+*- Single-direction positioning from bottom only
+*
+      Position   BRHC   X=XPOS-modr_HCHgt/2 Z=modr_Center
+      XPOS = XPOS - modr_HCHgt
+
+      Position   BRCB   X=XPOS-modr_PCBHgt/2 Z=0.
+      XPOS = XPOS - modr_PCBHgt
+
+      Position   BRMY   X=XPOS-modr_MYHgt/2  Z=modr_Center
+      XPOS = XPOS - modr_MYHgt
+
+      Position   BRGR   X=XPOS-modr_GRHgt/2
+      XPOS = XPOS - modr_GRHgt
+
+      Position   BROG   X=XPOS-modr_OGHgt/2
+      XPOS = XPOS - modr_OGHgt
+
+      Position   BRDT   X=XPOS-DTHgt/2
+      XPOS = XPOS - DTHgt
+
+      Position   BROG   X=XPOS-modr_OGHgt/2
+      XPOS = XPOS - modr_OGHgt
+                 
+      Position   BRGR   X=XPOS-modr_GRHgt/2
+      XPOS = XPOS - modr_GRHgt
+
+      Position   BRMY   X=XPOS-modr_MYHgt/2
+      XPOS = XPOS - modr_MYHgt
+                 
+      Position   BRCB   X=XPOS-modr_PCBHgt/2, Z=0.
+      XPOS = XPOS - modr_PCBHgt
+
+      Position   BRHC   X=XPOS-modr_HCHgt/2, Z=modr_Center
+      XPOS = XPOS - modr_HCHgt
+
+EndBlock
+ 
+*------------------------------------------------------------------------------
+Block BRHC  is the HoneyComb in the TOFr module
+      Attribute  BRHC
+      Material   HoneyComb
+      Shape      BOX       dx = modr_HCHgt/2,
+                           dy = modr_HCWid/2,
+                           dz = modr_HCLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+Block BRCB  is the PCB in the TOFr module
+      Attribute  BRCB
+      Material   G10
+      Shape      BOX    dx = modr_PCBHgt/2,
+                        dy = modr_PCBWid/2,
+                        dz = modr_PCBLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+Block BRMY  is the MYlar in the TOFr module
+      Attribute  BRMY
+      Material   MYLAR
+      Shape      BOX    dx = modr_MYHgt/2,
+                        dy = modr_MYWid/2,
+                        dz = modr_MYLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+Block BRGR  is the GRaphite in the TOFr module
+      Attribute  BRGR
+      Material   Carbon
+      Shape      BOX    dx = modr_GRHgt/2,
+                        dy = modr_GRWid/2,
+                        dz = modr_GrLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+Block BROG  is the Outer Glass in the TOFr module
+      Attribute  BROG
+      Component  Si     A=28  Z=14  W=1.
+      Component  O      A=16  Z=8   W=2.
+      Mixture    Glass  Dens=2.2
+      Shape      BOX    dx = modr_OGHgt/2,
+                        dy = modr_OGWid/2,
+                        dz = modr_OGLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+* This is the sensitive part, consisting of gas, excluding volumes(glass and
+* separators) inside. The responses (amplitude, efficiency, and time
+* resolution) depends on the position.
+*
+Block BRDT  is the middle part (including innner glass and gas)in the MRPC
+      Attribute  BRDT
+      Shape      BOX
+      Create     BRIG  konly='MANY'
+      Create     BRSG  konly='MANY'
+      XPOS = DTHgt/2.
+      Y    = 0.
+      Z    = 0.
+      Do igap=1,modr_NGap-1
+         Position   BRSG   X= XPOS - modr_SPRMax
+         XPOS = XPOS - modr_SPRMax*2.
+
+         Position   BRIG   X= XPOS - modr_IGHgt/2
+         XPOS = XPOS - modr_IGHgt
+      Enddo
+
+      Position   BRSG   X= XPOS - modr_SPRMax
+      XPOS = XPOS - modr_SPRMax*2.
+
+*-Divsion of BRDT into Pad-Rooms(BRPR)
+*
+*      CREATE BRPR
+
+*
+*  hit is defined in BRDT instead of BTPR, because a hit may yield signal
+*   in two adjacent pads
+*
+*   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
+*                S - Single step
+*
+*      HITS    BRDT   X:.01:HS   Y:.01:   Z:.01:,
+*                     Ptot:18:(0,100),
+*                     Sleng:.1:(0,500)   ToF:16:(0,1.e-7)  Step:.01:,
+*                     Eloss:16:(0,1.e-6) 
+EndBlock
+
+
+*------------------------------------------------------------------------------
+*  It includes both anode and chathode, plus room between them, so it is the
+*  basic unit area to collect signal
+*
+*Block BRPR is the pad in the TOFr module
+*      Attribute  BRPR
+**      Shape      Division  IAxis=3  NDiv=modr_NPad
+*      Shape      Box    dy = modr_PadWid,
+*                        dz = modr_PadLen, konly='MANY'
+*EndBlock
+
+
+*------------------------------------------------------------------------------
+Block BRIG  is the Inner Glass in the TOFr module
+      Attribute  BRIG
+      Material   Glass
+      Shape      BOX    dx = modr_IGHgt/2,
+                        dy = modr_IGWid/2,
+                        dz = modr_IGLen/2
+EndBlock
+
+*------------------------------------------------------------------------------
+*Block BRSP  is the SeParator in the TOFr module
+*      Attribute  BRSP
+*      Component  O    A=16     Z=8    W=1
+*      Component  N    A=14     Z=7    W=1
+*      Component  C    A=12     Z=6    W=6
+*      Component  H    A=1      Z=1    W=11
+*      Mixture    Nylon  Dens = 1.14
+*      Shape      TUBE   rmin = modr_SPRMin,
+*                        rmax = modr_SPRMax,
+*                        dz   = modr_SPLen/2
+*EndBlock
+*------------------------------------------------------------------------------
+Block BRSG  is the sensitive gas layer in the TOFr module
+      Attribute BRSG seen=0   colo=5
+      Material  RPCgas
+      Medium    sensitive IsVol=1
+      Shape     BOX    dx = modr_IGHgt/2,
+                        dy = modr_IGWid/2,
+                        dz = modr_IGLen/2
+      
+      HITS    BRSG   X:.01:HS   Y:.01:   Z:.01:,
+                     Ptot:18:(0,100),
+                     Sleng:.1:(0,500)   ToF:16:(0,1.e-7)  Step:.01:,
+                     Eloss:16:(0,1.e-6)
+EndBlock
+*------------------------------------------------------------------------------
+Block BRWG  is the WedGe(support) in the TOFr module
+      Attribute  BRWG
+      Component  O    A=16     Z=8    W=2
+      Component  C    A=12     Z=6    W=5
+      Component  H    A=1      Z=1    W=8
+      Mixture    Lucite Dens = 1.18
+      Shape      TUBE   rmin = modr_WGRMin,
+                        rmax = modr_WGRMax,
+                        dz   = modr_WGLen/2
+EndBlock
+
+
 * ----------------------------------------------------------------------------
    end
+
+
+
+
+
+
+
+
+
+
+
+
+
