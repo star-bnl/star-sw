@@ -8,13 +8,15 @@
    { 
        long   PatchNumber;         /* Patch Number*/
               
-       long   FirstModule;         /* First module of patch (FirstModule <= module <FistModule+2) */
-       long   FirstEta;            /* First eta of patch (FirstEta <= Eta <FistEta+4) */
-              
+       long   TowerId[16];         /* towers (Soft Id) that make this patch */
+                     
        float  PatchEt6bits;        /* Patch Et */
        float  HighTowerEt6bits;    /* High Tower Et */
        long   HighTowerId;         /* High Tower Id */
        float  Ratio;               /* HT/Patch */
+
+       long   PatchAdcSum12bits;   /* raw data adc sum */
+       long   HighTowerAdc12bits;  /* raw data high tower adc */
        
        long   PatchBits[32];       /* Patch bits (for this patch only) */
        long   HighTowerBits[32];   /* High Tower bits (for this patch only)  */
