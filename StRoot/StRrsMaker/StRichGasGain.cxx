@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.5 2000/02/14 01:13:25 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,9 +35,12 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.4  2000/02/08 23:51:13  lasiuk
- * removal of rrs macro---CC4.2 cannot handle it!
+ * Revision 1.5  2000/02/14 01:13:25  lasiuk
+ * add track_p to the GHit c'tor
  *
+ * Revision 1.6  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.5  2000/02/14 01:13:25  lasiuk
  * add track_p to the GHit c'tor
@@ -120,7 +123,7 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 	z    = hit.position().z() + dist * cos(phi);
 	y    = mAnodePadPlaneSeparation;
 	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
-	StRichGHit aGHit(x,y,z, hit.id());
+	x    = hit->position().x() + dist * cos(phi);
  	y    = hit->position().y() + dist * sin(phi);
  	z    = mAnodePadPlaneSeparation;
 // 	x    = hit.position().x() + dist * sin(phi);
