@@ -14,7 +14,7 @@ void Say(char *mess);
 int gAlreadyErr;
 extern int gDone;
 char *gTheBlurb="\
-THIS IS NOT CRITICAL, CASUAL USERS CAN IGNORE IT:\n\
+NOT CRITICAL, CASUAL USERS CAN IGNORE:\n\
    At certain points this program tries to enlarge a window.  It will fail\n\
 unless you do the following on your X server:\n\
    STEP 1: put this line into file \"$HOME/.Xdefaults\":\n\
@@ -560,6 +560,7 @@ void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   UpdateUsageLog();
   gAlreadyErr=0; gDone=0; gNumDatasetWindows=0; /* June 28 1995 */
   gIndent=INDENT_INIT; gNDs=0;
+  PP"Version %s.\n",__DATE__);
   Ose(); PP"%s",gTheBlurb); Ose();
   for(ii=0;ii<nDsPtr;ii++) FillgDs("No parent",dsPtrs[ii]);
   TouchUpType();
