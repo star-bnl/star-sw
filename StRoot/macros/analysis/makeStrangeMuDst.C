@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.1 2000/06/09 22:15:10 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 2.2 2000/06/30 23:54:20 lansdell Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.2  2000/06/30 23:54:20  lansdell
+// load St_emc_Maker so StMcEventMaker runs properly
+//
 // Revision 2.1  2000/06/09 22:15:10  genevb
 // Include code for fixing track topology maps, if necessary
 //
@@ -49,6 +52,7 @@ void load() {
   gSystem->Load("StEventMaker");
   gSystem->Load("StStrangeMuDstMaker");
 // The following are needed for using Monte Carlo info
+//  gSystem->Load("St_emc_Maker");
 //  gSystem->Load("StMcEvent");
 //  gSystem->Load("StMcEventMaker");
 //  gSystem->Load("StAssociationMaker");
