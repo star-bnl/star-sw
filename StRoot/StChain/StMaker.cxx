@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.127 2003/05/01 16:56:50 jeromel Exp $
+// $Id: StMaker.cxx,v 1.128 2003/06/23 23:43:39 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -60,7 +60,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    m_DebugLevel=0;
    m_MakeReturn=0;
    m_Number=0;        	
-   m_LastRun=-1;        	
+   m_LastRun=-3;        	
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -1143,6 +1143,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.128  2003/06/23 23:43:39  perev
+// InitRun called even if no run at all
+//
 // Revision 1.127  2003/05/01 16:56:50  jeromel
 // Extraneous declaration removed
 //
