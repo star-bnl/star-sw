@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.6 1999/02/26 21:56:05 didenko Exp $
+// $Id: bfc_tss.C,v 1.7 1999/02/28 02:14:32 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -140,7 +140,7 @@ bfc_tss (const Int_t Nevents=1000,
     if (chain->Make(i)) break;
     if (xdf_out) {
       St_DataSet *dstSet = chain.DataSet("dst");
-      xdf_out->NextEventPut(dstSet);
+      if (dstSet) {xdf_out->NextEventPut(dstSet);}
      }// xdf output
     if (i != NoEvents) chain->Clear();
     printf ("===========================================\n");
