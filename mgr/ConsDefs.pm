@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.74 2004/07/29 17:44:57 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.77 2004/09/18 01:06:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -25,7 +25,7 @@
         $STAR_HOST_SYS = $STAR_SYS;
     }
     $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD\n" unless ($param::quiet);
-    $INCLUDE = $BUILD  . "/include"; 
+    $INCLUDE = $BUILD  . "/include";
 
     @search_files = ();
     $DEBUG        = "-g";
@@ -50,7 +50,7 @@
     $CXXinp   = "";
 
     $EXTRA_CPPFLAGS = "";
-    #$EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");                     
+    #$EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");
           #-I-";
 
     $AFSFLAGS = "";
@@ -113,7 +113,7 @@
     $AGETOF        = "agetof";
     $AGETOFLAGS    = "-V 1";
     $LIBG2C        = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
-    chomp($LIBG2C); 
+    chomp($LIBG2C);
     $LIBSTDC       = `gcc -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
     $KUIP          = $CERN_ROOT . "/bin/kuipc";
@@ -121,7 +121,7 @@
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
     $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
-    my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
+     my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP ) {$RLIBMAP = "";}
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
@@ -146,13 +146,13 @@
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
- my $FCviaAGETOFCOM 
+ my $FCviaAGETOFCOM
  = " test -f %>:b.g && rm %>:b.g; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
  . " test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;";
 # $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then grep -v '^#' %>:b.f > %>:b.for && %FC %FFLAGS %FDEBUG -c %>:b.for %Fout%>;";
  $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %FDEBUG -c %>:b.f %Fout%>;";
  $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
- 
+
  my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F;";
     $AGETOFCOM .= "%AGETOF %AGETOFLAGS %< -o %>:b.F &&";
     $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
@@ -168,54 +168,38 @@
     print "System: ", $_, "\n" unless ($param::quiet);
 
 
- if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-   my($packl,$cernl,$kernl,$strip);
-   
-   $strip = "";
-   if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
-	-e "$CERN_ROOT/lib/libkernlib_noshift.a" ){
-       if ( -e "$CERN_ROOT/bin/cernlib_noshift"){
-	   $cernl = "$CERN_ROOT/bin/cernlib_noshift";
-       } else {
-	   $cernl = "$CERN_ROOT/bin/cernlib";
-	   $strip = "-lshift";
-       }
-       $packl = "packlib_noshift";
-       $kernl = "kernlib_noshift";
+    if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
+	my($packl,$cernl,$kernl,$strip);
 
-   } else {
-       #if ( ! -e "$CERN_ROOT/bin/cernlib"){
-       #   print 
-       #       "\n",
-       #       " ** WARNING  ** Could not find $CERN_ROOT/bin/cernlib\n",
-       #       "                Will attempt to proceed and assume it is in\n",
-       #       "                your path ...\n",
-       #       "\n";
-       #   $cernl = "cernlib";
-       #} else {
-       #   $cernl = "$CERN_ROOT/bin/cernlib";
-       #}
-       #print "WARNING :: Using default packlib (with possibly shift)\n";
-       #$packl = "packlib";
-       #$kernl = "kernlib";
-       print "WARNING: using cernlib from the default path\n";
-       $cernl = "cernlib";
-       $packl = "packlib";
-       $kernl = "kernlib";
-   }
-   
-   $CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
-   $CERNLIBS =~ s/packlib\./$packl\./g;
-   $CERNLIBS =~ s/kernlib\./$kernl\./g;
-   $CERNLIBS =~ s/$strip//g if ($strip ne "");
-   
-   chop($CERNLIBS);
- }
+	$strip = "";
+	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
+	     -e "$CERN_ROOT/lib/libkernlib_noshift.a" &&
+	     -e "$CERN_ROOT/bin/cernlib_noshift"){
+	    $cernl = "$CERN_ROOT/bin/cernlib_noshift";
+	    $packl = "packlib_noshift";
+	    $kernl = "kernlib_noshift";
+
+	} else {
+	    print "WARNING: using cernlib from the default path\n";
+	    $cernl = "cernlib";
+	    $packl = "packlib";
+	    $kernl = "kernlib";
+	}
+
+	$CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
+	$CERNLIBS =~ s/packlib\./$packl\./g;
+	$CERNLIBS =~ s/kernlib\./$kernl\./g;
+	$CERNLIBS =~ s/$strip//g if ($strip ne "");
+
+	chop($CERNLIBS);
+	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
+    }
 
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
- if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/) {
+    if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/ ||
+	$STAR_HOST_SYS =~ /^sl/ and $STAR_HOST_SYS =~ /_icc/) {
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
 	$PGI           = "";
@@ -247,7 +231,7 @@
 	$FLIBS         = $F77LIBS;
 	$FFLAGS        = "-save";
 	$FEXTEND       = "-132";
-	
+
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl";# -rdynamic";
 	$CLIBS         = "-lm -ldl";# -rdynamic";
@@ -257,11 +241,11 @@
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
 
- } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/) {
+    } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/ || $STAR_HOST_SYS =~ /^sl/) {
         #
         # Case linux
         #
-        $CXX_VERSION  = `$CXX -dumpversion`; 
+        $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);# print "CXX_VERSION : $CXX_VERSION\n";
         $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
 	my $optflags = "";
@@ -340,7 +324,7 @@
 	$CC            = "cc";
 	$CXX           = "cxx";
 	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "tlocal"; 
+	$CXXFLAGS      = "tlocal";
 	$CFLAGS        = "";
 	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
 	$FC            = "f77";
@@ -424,217 +408,226 @@
 
     $ROOTSRC = $ROOTSYS . "/include";
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
-    my $pwd = cwd(); 
-    my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";   
+    my $pwd = cwd();
+    my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
     if ($PATH !~ /$STAR_BIN/) {$PATH = $STAR_BIN . ":" . $PATH;}
     $PATH = $path2bin .":". $PATH;  #print "PATH = $PATH\n";
     $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
-# packages
-# MySQL
- my $os_name = `uname`;
- chomp($os_name);
- my ($MYSQLINCDIR,$mysqlheader) = 
- script::find_lib($MYSQL . " " .
-		  "/include /usr/include ".
-		  "/usr/include/mysql  ".
-		  "/usr/mysql/include  ".
-		  "/usr/mysql  ".
-		  $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
-		  "mysql.h");
- if ($MYSQLINCDIR) {
-   print "Use MYSQLINCDIR = \t$MYSQLINCDIR \n" if $MYSQLINCDIR && ! $param::quiet;
- }
- else {die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";}
- (my $mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
- my ($MYSQLLIBDIR,$MYSQLLIB) = 
- script::find_lib($mysqllibdir . " /usr/lib/mysql ".
-		  $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
-		  "libmysqlclient");
- if ($STAR_HOST_SYS =~ /^rh/) { 
-   $MYSQLLIB .= " -L/usr/lib";
-   if (-r "/usr/lib/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-   if (-r "/usr/lib/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-   if (-r "/usr/lib/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-   $MYSQLLIB .= " -lz";
- }
- print "Use MYSQLLIBDIR = \t$MYSQLLIBDIR and MYSQLLIB = \t$MYSQLLIB\n" if $MYSQLLIBDIR && ! $param::quiet; 
-# QT
- if (defined($QTDIR) && -d $QTDIR) {
-   if (-e $QTDIR . "/bin/moc") {
-     $QTLIBDIR = $QTDIR . "/lib";
-     $QTBINDIR = $QTDIR . "/bin";
-   }
-   if ($QTBINDIR) {
-     $QTINCDIR = $QTDIR . "/include";
-     $QTFLAGS  = "-DR__QT";#-DQT_THREAD_SUPPORT";
-     $QTLIBS   = "-lqt-mt";
-     if ($main::_WIN32) {
-       $QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " . 
-	 $ROOTSYS . "/lib/libGraf.lib " . 
-	   $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";}
-     print "Use QTLIBDIR = \t$QTLIBDIR \tQTINCDIR = \t$QTINCDIR \tQTFLAGS = \t$QTFLAGS \tQTLIBS = \t$QTLIBS\n" 
-       if $QTLIBDIR && ! $param::quiet;
-   }
- }
-# Logger
- $LoggerDir = $OPTSTAR . "/include/log4cxx";
- if (-d $LoggerDir) {
-   $LoggerINCDIR = $OPTSTAR . "/include";
-   $LoggerLIBDIR = $OPTSTAR . "/lib";
-   $LoggerLIBS   = "-llog4cxx";
-   print "Use LoggerLIBDIR = \t$LoggerLIBDIR \tLoggerINCDIR = \t$LoggerINCDIR \tLoggerLIBS = \t$LoggerLIBS\n" 
-     if $LoggerLIBDIR && ! $param::quiet;
- }
-    
+
+
+    # --- packages ---
+    # MySQL
+    my $os_name = `uname`;
+    chomp($os_name);
+    my ($MYSQLINCDIR,$mysqlheader) =
+	script::find_lib($MYSQL . " " .
+			 "/include /usr/include ".
+			 "/usr/include/mysql  ".
+			 "/usr/mysql/include  ".
+			 "/usr/mysql  ".
+			 $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
+			 "mysql.h");
+    if ($MYSQLINCDIR) {
+	print "Use MYSQLINCDIR = \t$MYSQLINCDIR \n" if $MYSQLINCDIR && ! $param::quiet;
+    } else {
+	die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
+    }
+
+    (my $mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
+    my ($MYSQLLIBDIR,$MYSQLLIB) =
+	script::find_lib($mysqllibdir . " /usr/lib/mysql ".
+			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
+			 "libmysqlclient");
+    if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
+	$MYSQLLIB .= " -L/usr/lib";
+	if (-r "/usr/lib/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+	if (-r "/usr/lib/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+	if (-r "/usr/lib/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	$MYSQLLIB .= " -lz";
+    }
+    print "Use MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" if $MYSQLLIBDIR && ! $param::quiet;
+
+    # QT
+    if (defined($QTDIR) && -d $QTDIR) {
+	if (-e $QTDIR . "/bin/moc") {
+	    $QTLIBDIR = $QTDIR . "/lib";
+	    $QTBINDIR = $QTDIR . "/bin";
+	}
+	if ($QTBINDIR) {
+	    $QTINCDIR = $QTDIR . "/include";
+	    $QTFLAGS  = "-DR__QT";#-DQT_THREAD_SUPPORT";
+	    $QTLIBS   = "-lqt-mt";
+	    if ($main::_WIN32) {
+		$QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " .
+		    $ROOTSYS . "/lib/libGraf.lib " .
+		    $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";}
+	    print "Use QTLIBDIR = $QTLIBDIR \tQTINCDIR = $QTINCDIR \tQTFLAGS = $QTFLAGS \tQTLIBS = $QTLIBS\n"
+		if $QTLIBDIR && ! $param::quiet;
+	}
+    }
+
+    # Logger
+    $LoggerDir = $OPTSTAR . "/include/log4cxx";
+    if (-d $LoggerDir) {
+	$LoggerINCDIR = $OPTSTAR . "/include";
+	$LoggerLIBDIR = $OPTSTAR . "/lib";
+	$LoggerLIBS   = "-llog4cxx";
+	print "Use LoggerLIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
+	    if $LoggerLIBDIR && ! $param::quiet;
+    }
+
     my @params = (
-      'CPP'           => $CPP,
-      'CPPPATH'       => $CPPPATH,
-      'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
-      'CPPFLAGS'      => $CPPFLAGS,
-      'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
-      'DEBUG'         => $DEBUG,
-      'FDEBUG'        => $FDEBUG,
-      'NOOPT'         => $NOOPT,
-      'G77'           => $G77, 
-      'G77FLAGS'      => $G77FLAGS,
-      'G77EXTEND'     => $G77EXTEND,
-      'LIBG2C'        => $LIBG2C,
-      'LIBSTDC'       => $LIBSTDC,
-      'FC'            => $FC,
-      'FPPFLAGS'      => $FPPFLAGS,
-      'FEXTEND'       => $FEXTEND,
-      'FFLAGS'        => $FFLAGS,
-      'FCPATH'        => $FCPATH,
-      'EXTRA_FCPATH'  => $EXTRA_FCPATH,
-      'Fout'          => $Fout,
-      'CXXinp'        => $CXXinp,
-      'Cinp'          => $Cinp,
-      'Cout'          => $Cout,
-      'Lout'          => $Lout,
-      'SoOUT'         => $SoOUT,
-      'FCCOM'         => $FCCOM,
-      'AGETOF'        => $AGETOF,
-      'AGETOFLAGS'    => $AGETOFLAGS,
-      'AGETOFCOM'     => $AGETOFCOM,
-      'FCviaAGETOFCOM'=> $FCviaAGETOFCOM,
-      'CC'            => $CC,
-      'CFLAGS'        => $CFLAGS,
-      'EXTRA_CFLAGS'  => $EXTRA_CFLAGS,
-      'KUIP'          => $KUIP,
-      'KUIPCOM'       => '%KUIP %< %<.f && %FC %FDEBUG %FFLAGS -c %<.f -o %>',
-      'CCCOM'         =>
-      '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
-      'CXX'            => $CXX,
-      'CXXFLAGS'       => $CXXFLAGS,
-      'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
-      'CXXCOM'         => $CXXCOM,
-      'CXX_VERSION'    => $CXX_VERSION,		  
-      'CLIBS'          => $CLIBS,
-      'FLIBS'          => $FLIBS,
-      'XLIBS'          => $XLIBS,
-      'THREAD'         => $THREAD,
-      'CRYPTLIBS'      => $CRYPTLIBS,
-      'SYSLIBS'        => $SYSLIBS,
-      'CERNLIBS'       => $CERNLIBS,
-      'Libraries'      => $Libraries,
-      'LIBS'           => $LIBS,
-      'LD'             => $LD,
-      'LDFLAGS'        => $LDFLAGS,
-      'LDEXPORT'       => $LDEXPORT,
-      'LDALL'	       => $LDALL,
-      'LDNONE'	       => $LDNONE,
-      'EXTRA_LDFLAGS'  => $EXTRA_LDFLAGS,
-      'F77LD'          => $F77LD,
-      'F77LDFLAGS'     => $F77LDFLAGS,
-      'EXEFLAGS'       => $EXEFLAGS,
-      'LIBPATH'        => $LIBPATH,
-      'LINKCOM'        => $LINKCOM,
-      'SO'             => $SO,
-      'SOFLAGS'        => $SOFLAGS,
-      'SoOUT'          => $SoOUT,
-      'STIC'           => $STIC,
-      'LINKMODULECOM'  => $MAKELIB,
-      'AR'             => $AR,
-      'ARFLAGS'        => $ARFLAGS,
-      'ARCOM'          => $ARCOM,
-      'RANLIB'         => 'ranlib',
-      'AS'             => 'as',
-      'ASFLAGS'        => '',
-      'ASCOM'          => '%AS %%DEBUG ASFLAGS %< -o %>',
-      'PREFLIB'        => 'lib',
-      'SUFLIB'         => $A,
-      'SUFLIBS'        => "." . $SOEXT . $main::PATH_SEPARATOR . "." . $A,
-      'SUFSOLIB'       => $SOEXT,
-      'SUFEXE'         => $EXESUF,
-      'SUFMAP'         => {
-          '.g'   => 'build::command::agetof',
-          '.age' => 'build::command::agetof',
-          '.f'   => 'build::command::fc',
-          '.F'   => 'build::command::fc',
-          '.C'   => 'build::command::cxx',
-          '.s'   => 'build::command::cc',
-          '.S'   => 'build::command::cc',
-          '.c'   => 'build::command::cc',
-          '.cc'  => 'build::command::cxx',
-          '.cxx' => 'build::command::cxx',
-          '.cpp' => 'build::command::cxx',
-          '.cdf' => 'build::command::kuip',
-          '.o'   => 'build::command::user'
-      },
-      'SUFOBJ' => "." . $O,
-      'ENV'    => {
-          'PATH'            => $PATH,
-          'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
-          'INCLUDE'         => $INCLUDE_PATH,
-          'ROOTSRC'         => $ROOTSRC,
-          'ROOTSYS'         => $ROOTSYS,
-          'CINTSYSDIR'      => $CINTSYSDIR,
-          'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
-          'SHLIB_PATH'      => $SHLIB_PATH,
-          'LIB'             => $LIB,
-          'PGI'             => $PGI,
-          'PGILIB'          => $PGILIB,
-          'STAR'            => $STAR,
-          'CERN_ROOT'       => $CERN_ROOT,
-          'STAF'            => $STAF,
-          'STAR_BIN'        => $STAR_BIN,
-          'TEMP'            => $TEMP,
-          'TMP'             => $TMP,
-          'STAR_SYS'        => $STAR_HOST_SYS,
-	  'STAR_VERSION'    => $STAR_VERSION,
-          'PERL5LIB'        => $PERL5LIB,
-          'OPTSTAR'         => $OPTSTAR
-      },
-	  'Packages' => {		  
-			 'ROOT' => {
-				     'BINDIR'=> $ROOTSYS . "/bin",
-				     'LIBDIR'=> $ROOTSYS . "/lib",
-				     'INCDIR'=> $ROOTSYS . "/include",
-				     'RLIBMAP'  => $RLIBMAP,
-				     'ROOTCINT' => $ROOTCINT
-				    },
-			 'MYSQL' => {
-				     'LIBDIR'=> $MYSQLLIBDIR,
-				     'INCDIR'=> $MYSQLINCDIR,
-				     'LIBS'  => $MYSQLLIB
-				    },
-			 'QT' => {
-				  'DIR'   => $QTDIR,
-				  'INCDIR'=> $QTINCDIR,
-				  'BINDIR'=> $QTBINDIR,
-				  'FLAGS' => $QTFLAGS,
-				  'LIBDIR'=> $QTLIBDIR,
-				  'LIBS'  => $QTLIBS 
-				 },
+		  'CPP'           => $CPP,
+		  'CPPPATH'       => $CPPPATH,
+		  'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
+		  'CPPFLAGS'      => $CPPFLAGS,
+		  'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
+		  'DEBUG'         => $DEBUG,
+		  'FDEBUG'        => $FDEBUG,
+		  'NOOPT'         => $NOOPT,
+		  'G77'           => $G77,
+		  'G77FLAGS'      => $G77FLAGS,
+		  'G77EXTEND'     => $G77EXTEND,
+		  'LIBG2C'        => $LIBG2C,
+		  'LIBSTDC'       => $LIBSTDC,
+		  'FC'            => $FC,
+		  'FPPFLAGS'      => $FPPFLAGS,
+		  'FEXTEND'       => $FEXTEND,
+		  'FFLAGS'        => $FFLAGS,
+		  'FCPATH'        => $FCPATH,
+		  'EXTRA_FCPATH'  => $EXTRA_FCPATH,
+		  'Fout'          => $Fout,
+		  'CXXinp'        => $CXXinp,
+		  'Cinp'          => $Cinp,
+		  'Cout'          => $Cout,
+		  'Lout'          => $Lout,
+		  'SoOUT'         => $SoOUT,
+		  'FCCOM'         => $FCCOM,
+		  'AGETOF'        => $AGETOF,
+		  'AGETOFLAGS'    => $AGETOFLAGS,
+		  'AGETOFCOM'     => $AGETOFCOM,
+		  'FCviaAGETOFCOM'=> $FCviaAGETOFCOM,
+		  'CC'            => $CC,
+		  'CFLAGS'        => $CFLAGS,
+		  'EXTRA_CFLAGS'  => $EXTRA_CFLAGS,
+		  'KUIP'          => $KUIP,
+		  'KUIPCOM'       => '%KUIP %< %<.f && %FC %FDEBUG %FFLAGS -c %<.f -o %>',
+		  'CCCOM'         =>
+		  '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
+		  'CXX'            => $CXX,
+		  'CXXFLAGS'       => $CXXFLAGS,
+		  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
+		  'CXXCOM'         => $CXXCOM,
+		  'CXX_VERSION'    => $CXX_VERSION,
+		  'CLIBS'          => $CLIBS,
+		  'FLIBS'          => $FLIBS,
+		  'XLIBS'          => $XLIBS,
+		  'THREAD'         => $THREAD,
+		  'CRYPTLIBS'      => $CRYPTLIBS,
+		  'SYSLIBS'        => $SYSLIBS,
+		  'CERNLIBS'       => $CERNLIBS,
+		  'Libraries'      => $Libraries,
+		  'LIBS'           => $LIBS,
+		  'LD'             => $LD,
+		  'LDFLAGS'        => $LDFLAGS,
+		  'LDEXPORT'       => $LDEXPORT,
+		  'LDALL'	       => $LDALL,
+		  'LDNONE'	       => $LDNONE,
+		  'EXTRA_LDFLAGS'  => $EXTRA_LDFLAGS,
+		  'F77LD'          => $F77LD,
+		  'F77LDFLAGS'     => $F77LDFLAGS,
+		  'EXEFLAGS'       => $EXEFLAGS,
+		  'LIBPATH'        => $LIBPATH,
+		  'LINKCOM'        => $LINKCOM,
+		  'SO'             => $SO,
+		  'SOFLAGS'        => $SOFLAGS,
+		  'SoOUT'          => $SoOUT,
+		  'STIC'           => $STIC,
+		  'LINKMODULECOM'  => $MAKELIB,
+		  'AR'             => $AR,
+		  'ARFLAGS'        => $ARFLAGS,
+		  'ARCOM'          => $ARCOM,
+		  'RANLIB'         => 'ranlib',
+		  'AS'             => 'as',
+		  'ASFLAGS'        => '',
+		  'ASCOM'          => '%AS %%DEBUG ASFLAGS %< -o %>',
+		  'PREFLIB'        => 'lib',
+		  'SUFLIB'         => $A,
+		  'SUFLIBS'        => "." . $SOEXT . $main::PATH_SEPARATOR . "." . $A,
+		  'SUFSOLIB'       => $SOEXT,
+		  'SUFEXE'         => $EXESUF,
+		  'SUFMAP'         => {
+		      '.g'   => 'build::command::agetof',
+		      '.age' => 'build::command::agetof',
+		      '.f'   => 'build::command::fc',
+		      '.F'   => 'build::command::fc',
+		      '.C'   => 'build::command::cxx',
+		      '.s'   => 'build::command::cc',
+		      '.S'   => 'build::command::cc',
+		      '.c'   => 'build::command::cc',
+		      '.cc'  => 'build::command::cxx',
+		      '.cxx' => 'build::command::cxx',
+		      '.cpp' => 'build::command::cxx',
+		      '.cdf' => 'build::command::kuip',
+		      '.o'   => 'build::command::user'
+		      },
+		  'SUFOBJ' => "." . $O,
+		  'ENV'    => {
+		      'PATH'            => $PATH,
+		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
+		      'INCLUDE'         => $INCLUDE_PATH,
+		      'ROOTSRC'         => $ROOTSRC,
+		      'ROOTSYS'         => $ROOTSYS,
+		      'CINTSYSDIR'      => $CINTSYSDIR,
+		      'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
+		      'SHLIB_PATH'      => $SHLIB_PATH,
+		      'LIB'             => $LIB,
+		      'PGI'             => $PGI,
+		      'PGILIB'          => $PGILIB,
+		      'STAR'            => $STAR,
+		      'CERN_ROOT'       => $CERN_ROOT,
+		      'STAF'            => $STAF,
+		      'STAR_BIN'        => $STAR_BIN,
+		      'TEMP'            => $TEMP,
+		      'TMP'             => $TMP,
+		      'STAR_SYS'        => $STAR_HOST_SYS,
+		      'STAR_VERSION'    => $STAR_VERSION,
+		      'PERL5LIB'        => $PERL5LIB,
+		      'OPTSTAR'         => $OPTSTAR
+		      },
+		  'Packages' => {
+		      'ROOT' => {
+			  'BINDIR'=> $ROOTSYS . "/bin",
+			  'LIBDIR'=> $ROOTSYS . "/lib",
+			  'INCDIR'=> $ROOTSYS . "/include",
+			  'RLIBMAP'  => $RLIBMAP,
+			  'ROOTCINT' => $ROOTCINT
+			  },
+		       'MYSQL' => {
+			   'LIBDIR'=> $MYSQLLIBDIR,
+			   'INCDIR'=> $MYSQLINCDIR,
+			   'LIBS'  => $MYSQLLIB
+			   },
+		        'QT' => {
+			    'DIR'   => $QTDIR,
+			    'INCDIR'=> $QTINCDIR,
+			    'BINDIR'=> $QTBINDIR,
+			    'FLAGS' => $QTFLAGS,
+			    'LIBDIR'=> $QTLIBDIR,
+			    'LIBS'  => $QTLIBS
+			    },
 			 'Logger' => {
-				  'INCDIR'=> $LoggerINCDIR,
-				  'LIBDIR'=> $LoggerLIBDIR,
-				  'LIBS'  => $LoggerLIBS 
-				 }
-			}
-    );
- push ( @param::defaults, @params );
+			     'INCDIR'=> $LoggerINCDIR,
+			     'LIBDIR'=> $LoggerLIBDIR,
+			     'LIBS'  => $LoggerLIBS
+			     }
+		  }
+		  );
+
+    push ( @param::defaults, @params );
 }
+
+
 #________________________________________________________________________________
 sub find_lib {
   my @libsdirs = split ' ',shift;# print "libsdirs: @libsdirs\n";
