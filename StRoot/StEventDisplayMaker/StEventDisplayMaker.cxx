@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.79 2001/09/26 23:26:56 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.80 2001/11/01 00:45:31 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -559,7 +559,7 @@ AGAIN: fgEventLoop = -1;
         //  ---------------------------------------------------- //
       }
       else if (event->InheritsFrom("StEvent")) {
-          totalCounter += MakeEvent(event,positions); 
+          totalCounter += MakeEvent(event,(const char **)positions); 
       }
       else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
       delete [] nextObjectName;
@@ -1072,6 +1072,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.80  2001/11/01 00:45:31  fine
+// const ** cast to avoid cv-qual warning introduced
+//
 // Revision 1.79  2001/09/26 23:26:56  perev
 // Sorting by color added
 //
