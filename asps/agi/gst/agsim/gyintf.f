@@ -189,7 +189,7 @@ CDECK  ID>, GYINTF.
 *               "QEXT  "  Narg = 1 : 1
 *               "QFLOAT"  Narg = 1 : 1
 *               "RAN   "  Narg = 1 : 1
-      RVAL(1,0) = RAN(ISEED)
+*      RVAL(1,0) = RAN(ISEED)
 *               "REAL  "  Narg = 1 : 1
 *               "SIZEOF"  Narg = 1 : 1
 c        IVAL(1,0) = SIZEOF(IVAL(1,1))
@@ -228,22 +228,6 @@ c      RVAL(1,0) = SECNDS (RVAL(1,1))
         RVAL(1,0) = TANH (RVAL(1,1))
         RVAL(1,0) = TANH (RVAL(1,1))
         DVAL(1,0) = TANH (DVAL(1,1))
-
-*	bessel
-
-        RVAL(1,1) = besj0(RVAL(1,1))
-        RVAL(1,1) = besj1(RVAL(1,1))
-        RVAL(1,1) = besjn(RVAL(1,1))
-        RVAL(1,1) = besy0(RVAL(1,1))
-        RVAL(1,1) = besy1(RVAL(1,1))
-        RVAL(1,1) = besyn(RVAL(1,1))
-        DVAL(1,1) = dbesj0(DVAL(1,1))
-        DVAL(1,1) = dbesj1(DVAL(1,1))
-        DVAL(1,1) = dbesjn(DVAL(1,1))
-        DVAL(1,1) = dbesy0(DVAL(1,1))
-        DVAL(1,1) = dbesy1(DVAL(1,1))
-        DVAL(1,1) = dbesyn(DVAL(1,1))
-
 
 *		CERN Bessel
 
