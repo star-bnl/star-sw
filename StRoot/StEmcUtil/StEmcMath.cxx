@@ -98,6 +98,5 @@ TArrayD  *StEmcMath::binForSmde(Bool_t kprint)
     if(kprint)
     printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,(*xb)[iw1], iw2,(*xb)[iw2], eb[ik]);
   }
-  delete geom; 
   return xb;
 }
