@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.26 2003/04/30 20:39:08 perev Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.27 2003/05/02 23:54:22 hardtke Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.27  2003/05/02 23:54:22  hardtke
+ * Allow user to adjust normalFactor (i.e. Fudge Factor)
+ *
  * Revision 1.26  2003/04/30 20:39:08  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -177,6 +180,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   //                                              for inner and outer setor.
   //
   mFractionSampled=1.0;//HL,8/31/99
+  normalFactor= 1.0;//Default DH  5/2/03
   
 //   PR(mDriftVelocity/(centimeter/(1.e-6*second)));
 //   PR(mSamplingFrequency/MHz);
@@ -366,7 +370,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
     int PadsAtRow;
     double sigma_xpad2;
-    double InOuterFactor=1.0075,normalFactor=1.0 ;
+    double InOuterFactor=1.0075;
     double charge_fraction[7]; 
     int wire_index;
     double *SignalSum;

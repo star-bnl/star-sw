@@ -42,6 +42,7 @@ public:
     void   sampleAnalogSignal();
     double signalSampler(double, StTrsAnalogSignal&);
     double addNoise(double );
+    void setNormalFactor(double FudgeFactor);
 
 private:
     // sampling
@@ -64,6 +65,7 @@ private:
   double         mSamplingFrequency;
   double         mFractionSampled;  
   double         mPadResponseFunctionSigma;
+  double         normalFactor;
 const double         mPadResponseFunctionSigmaOuter;
 const double         mPadResponseFunctionSigmaInner;
  
@@ -118,6 +120,10 @@ inline double StTrsParameterizedAnalogSignalGenerator::signalSampler(double tt, 
   
 }
 
+inline void StTrsParameterizedAnalogSignalGenerator::setNormalFactor(double FudgeFactor) {normalFactor = FudgeFactor; cout << "TRS::Normal (Fudge) Factor applied to gain = " << normalFactor << endl;}
+
 #endif
+
+
 
 
