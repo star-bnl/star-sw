@@ -386,9 +386,40 @@ Int_t StRFEmcTrigMaker::Make(){
     cout <<" No StEvent !!! Game Over!"<< endl;
     return kStErr;
   }
+
+
+  StTriggerDetectorCollection *TrigDet=event->triggerDetectorCollection();
+  StBbcTriggerDetector *bbc=&(TrigDet->bbc());
+  assert(bbc);
+
+  int Npmt=bbc->numberOfPMTs();
+  //  bbc->dump();
+  
+  int Wbbc=0;
+  int Ebbc=0;
+  for (int pmt=0;pmt<Npmt;pmt++){    
+    BBCadc[pmt]=bbc->adc(pmt);
+    int bbcadc=bbc->adc(pmt);
+    if (bbcadc>5) {
+      if (pmt<16) {
+	//cout << "BBC EAST = true" << endl;
+	Ebbc=1;
+      }
+      if (23<pmt && pmt<40) {
+	//cout << "BBC WEST = true" << endl;
+	Wbbc=1;
+      }
+    }
+  }
+  
+  if ((Ebbc==1)&&(Wbbc==1)){
+    bbcTrig=1;
+    //cout << "BBC coin!" <<endl;
+  }
+ 
   StEmcCollection* EmcCol =(StEmcCollection*)event->emcCollection(); 
   if(EmcCol) {
-
+    
     // set array values to zero before each event
     memset(jpBsum,0,sizeof(jpBsum));
     memset(jpBmax,0,sizeof(jpBmax));
