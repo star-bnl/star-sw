@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.7 2001/02/28 18:27:19 caines Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.8 2001/03/02 15:32:56 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.8  2001/03/02 15:32:56  lmartin
+ * Assumes that only one branch survives per track. Swaps the saving order of the
+ * hits in the group table and removes the useless hit sorting.
+ *
  * Revision 1.7  2001/02/28 18:27:19  caines
  * Get psi angle correctly
  *
@@ -62,11 +66,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
     gMessMgr->Info()<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endm;
   int CountHits=0;
   int CountMatch=0;
-  int SaveHit, j;
   double q;
-  
-  StEstBranch *branch;
-  StEstHit *hit;
   
   stk_track_st* svtTrkPtr  = svttrk->GetTable();
   sgr_groups_st* groups = svtgrps->GetTable();
@@ -80,62 +80,39 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
     svtMatchPtr->id  = CountMatch;
     svtMatchPtr->idsvt = svtTrkPtr->id;
     svtMatchPtr->idtpc = mTrack[i]->mTPCTrack->GetId();
- 
 
-    for( j=0;j<mTrack[i]->GetNBranches();j++) {
-      branch = mTrack[i]->GetBranch(j);
-      for ( int k=0;k<branch->GetNHits();k++) {
-        hit = branch->GetHit(k);
 
-	for( int l=0;l<mNSvtHit;l++) {
-	  if (hit==mSvtHit[l]){
-	    
-	    svtTrkPtr->nspt++;
-	    groups->id1 = svtTrkPtr->id;
-	    groups->id2 = mSvtHit[l]->GetId();
-	    groups->ident = 3;
-	    groups++;
-	    CountHits++;
-	    break;
-	  }
-
-	}
+    if (mTrack[i]->GetBranch(0)->GetNHits()>0) {
+      // saving the hits by increasing layer.
+      for (int k=mTrack[i]->GetBranch(0)->GetNHits()-1;k>=0;k--) {
+	svtTrkPtr->nspt++;
+	groups->id1 = svtTrkPtr->id;
+	groups->id2 = mTrack[i]->GetBranch(0)->GetHit(k)->GetId();
+	groups->ident = 3;
+	groups++;
+	CountHits++;
       }
-    }
-
-    j = mTrack[i]->GetNBranches()-1;
-    if(svtTrkPtr->nspt > 0){
-      groups -= svtTrkPtr->nspt;
-      //Now reorder hits so track goes from inner barrel out
-      for( int nHits=0; nHits< svtTrkPtr->nspt/2; nHits++){
-	SaveHit = groups[nHits].id2;
-	groups[nHits].id2 = groups[svtTrkPtr->nspt-nHits-1].id2;
-	groups[svtTrkPtr->nspt-nHits-1].id2 = SaveHit;
-      }
-      groups += svtTrkPtr->nspt;
-
-      svtTrkPtr->z0 = mTrack[i]->GetBranch(j)->GetHelix()->z(0);
-      svtTrkPtr->psi = mTrack[i]->GetBranch(j)->GetHelix()->phase()
-	+mTrack[i]->GetBranch(j)->GetHelix()->h()*M_PI_2;
+      // saving the helix parameters (the pt has to be taken from the branch).
+      svtTrkPtr->z0 = mTrack[i]->GetBranch(0)->GetHelix()->z(0);
+      svtTrkPtr->psi = mTrack[i]->GetBranch(0)->GetHelix()->phase()
+	+mTrack[i]->GetBranch(0)->GetHelix()->h()*M_PI_2;
       svtTrkPtr->psi *= C_DEG_PER_RAD;
-      svtTrkPtr->tanl = tan(mTrack[i]->GetBranch(j)->GetHelix()->dipAngle());
-      q = ((b[2] * mTrack[i]->GetBranch(j)->GetHelix()->h()) > 0 ? -1 : 1);
+      svtTrkPtr->tanl = tan(mTrack[i]->GetBranch(0)->GetHelix()->dipAngle());
+      q = ((b[2] * mTrack[i]->GetBranch(0)->GetHelix()->h()) > 0 ? -1 : 1);
       svtTrkPtr->invpt = q/mTrack[i]->GetTPCTrack()->GetPt();
-      svtTrkPtr->r0 = sqrt(mTrack[i]->GetBranch(j)->GetHelix()->x(0)*
-			   mTrack[i]->GetBranch(j)->GetHelix()->x(0)
-			   +mTrack[i]->GetBranch(j)->GetHelix()->y(0)*
-			   mTrack[i]->GetBranch(j)->GetHelix()->y(0));
-      svtTrkPtr->phi0 =  atan2(mTrack[i]->GetBranch(j)->GetHelix()->y(0),
-			       mTrack[i]->GetBranch(j)->GetHelix()->x(0))
+      svtTrkPtr->r0 = sqrt(mTrack[i]->GetBranch(0)->GetHelix()->x(0)*
+			   mTrack[i]->GetBranch(0)->GetHelix()->x(0)
+			   +mTrack[i]->GetBranch(0)->GetHelix()->y(0)*
+			   mTrack[i]->GetBranch(0)->GetHelix()->y(0));
+      svtTrkPtr->phi0 =  atan2(mTrack[i]->GetBranch(0)->GetHelix()->y(0),
+			       mTrack[i]->GetBranch(0)->GetHelix()->x(0))
 	*C_DEG_PER_RAD;
       svtTrkPtr++;
       svtMatchPtr++;
       
     }
-    else{         
+    else
       CountMatch--;
-    }
-    
   }
   
   svtgrps->SetNRows(CountHits);
