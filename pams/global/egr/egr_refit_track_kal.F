@@ -186,13 +186,13 @@ C     Load the fitting arrays with the SVT space points
                   xcir(ncir) = svt_spt(isvth).x(1)
                   ycir(ncir) = svt_spt(isvth).x(2)
                   zcir(ncir) = svt_spt(isvth).x(3)
-c                  wcir(ncir) = 1.0/(svt_spt(isvth).cov(1)**2+svt_spt(isvth).
-c     +                 cov(2)**2+svt_spt(isvth).cov(3)**2)
-C     WRONG should only be 1/dx**2+dy**2 (yes?)
-C                  wcir(ncir) = 1.0/(0.01*0.01+0.01*0.01+0.01*0.01)
-CCC                  wcir(ncir) = 1.0/(0.01*0.01+0.01*0.01)
-c                     previous line is a hard wired 100 micron SVT resolution
-CCC                  wlin(ncir) = 1.0/(0.01*0.01)
+                  xerr(ncir) = sqrt(svt_spt(isvth).cov(1))
+                  yerr(ncir) = sqrt(svt_spt(isvth).cov(2))
+                  zerr(ncir) = sqrt(svt_spt(isvth).cov(3))
+                  xerr(ncir) = 0.01;
+                  yerr(ncir) = 0.01;
+                  zerr(ncir) = 0.01;
+                  
                   pnt(ncir) = iplane ! Used to identify outliers
                endif            ! good spt
             enddo               ! iplane
