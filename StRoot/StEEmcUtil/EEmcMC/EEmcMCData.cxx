@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.3 2003/02/20 21:27:06 zolnie Exp $
+// $Id: EEmcMCData.cxx,v 1.4 2003/02/21 15:31:38 balewski Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.4  2003/02/21 15:31:38  balewski
+// do not kill the chain (it is against my will, JB)
+//
 // Revision 1.3  2003/02/20 21:27:06  zolnie
 // added simple geometry class
 //
@@ -155,6 +158,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
   St_g2t_emc_hit *emc_hit    = NULL; // tower hits
   St_g2t_emc_hit *smd_hit    = NULL; // smd hits
   g2t_event_st   *event_head = NULL; // g2t event header
+  
+  int err=0;
 
   mLastHit  = 0;
   memset(mHit,0x0,sizeof(struct EEmcMCHit)*mSize); 
@@ -190,17 +195,17 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       Short_t depth = ivid/kEEmcTowerDepId;  ivid %= kEEmcTowerDepId;  
       //printf("Tw hit->volume_id=%d hit->de=%g phi=%d\n",hit->volume_id,hit->de,phi);
 
-      Assert(ivid==0);
-      
+      if(!ivid==0){err=1; goto crash;};
+       
       ssec = (phi-1)%5 + 1; // sub-sector
       
       sec  = (phi-1)/5 + 1;
 
-      Assert( 0<sec   && sec<=kEEmcNumSectors   );
-      Assert( 0<ssec  && ssec<=kEEmcNumSubSectors);
-      Assert( 0<eta   && eta<=kEEmcNumEtas);
-      Assert( 0<depth && depth<=kEEmcNumDepths);
-
+      if(!( 0<sec   && sec<=kEEmcNumSectors   )){err=2; goto crash;};
+      if(!( 0<ssec  && ssec<=kEEmcNumSubSectors)){err=3; goto crash;};
+      if(!( 0<eta   && eta<=kEEmcNumEtas)){err=4; goto crash;};
+      if(!( 0<depth && depth<=kEEmcNumDepths)){err=5; goto crash;};
+      
       switch(depth) {
       case kPreShower1Depth:
 	mHit[mLastHit].detector = kEEmcMCPreShower1Id; 
@@ -231,8 +236,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       if(mLastHit>=mSize && !expandMemory() ) 
 	throw EEmcException1(kEEmcMCErr1,"failed expandMemory() for tower tails");
 
-    }
-  }
+    } // end of tower hits
+  } 
 
  skipTower:
 
@@ -257,7 +262,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       Short_t plane = ivid/kEEmcSmdPlaneId;ivid %= kEEmcSmdPlaneId;
       Short_t strip = ivid/kEEmcSmdStripId;ivid %= kEEmcSmdStripId;  
       
-      Assert(ivid==0);
+      if(!ivid==0){err=10; goto crash;};
 
       switch(phi) { /* FIXME ONE DAY */
       case 1:
@@ -301,8 +306,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
 
       sec = phi;
 
-      Assert( 0<sec   && sec  <=kEEmcNumSectors );
-      Assert( 0<strip && strip<=kEEmcNumStrips  );
+      if(! ( 0<sec   && sec  <=kEEmcNumSectors )){err=12; goto crash;};
+      if(!( 0<strip && strip<=kEEmcNumStrips  )){err=13; goto crash;};
 
       printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
       // fill in
@@ -319,6 +324,13 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
 
  done:
   return mLastHit;
+
+ crash: 
+  printf("\n\n==============================\nEEmcMCData::readEventFromChain() Fatal error while decoding .fzd hits for EEMC err=%d,\n all EEMC data erased from StEvent\n=====================================\n",err);
+  mLastHit  = 0;
+  memset(mHit,0x0,sizeof(struct EEmcMCHit)*mSize); 
+  return mLastHit;
+
 }
 
 
