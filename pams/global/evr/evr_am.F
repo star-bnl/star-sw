@@ -48,21 +48,21 @@ CC:     Output variables in table privert:
 CC:     ----------------------------------
 CC:     privert().id        = Primary key; value of privert_h.nok when
 CC:                           row is filled
-CC:               iflag     = x1 for normal, successfully found primary vertex
+CC:               iflag     = +yx1 for normal, successfully found primary vertex
 CC:                             during the 3rd iteration
-CC:                         = -x3 for initial seed value
-CC:                         = -x2 for first iteration value
-CC:                         = -x1 for second iteration value
-CC:                         = -x4 for failed fit with Determinant of G = 0.0,
+CC:                         = -yx3 for initial seed value
+CC:                         = -yx2 for first iteration value
+CC:                         = -yx1 for second iteration value
+CC:                         = -yx4 for failed fit with Determinant of G = 0.0,
 CC:                              occuring during any iteration.
-CC:                         = -x5 for failed error covariance matrix evaluation
+CC:                         = -yx5 for failed error covariance matrix evaluation
 CC:                              during fit with Determinant of E = 0.0,
 CC:                              occuring during any iteration.
-CC:                            x is the event vertex number (for pileups). Zero
-CC:                              means one vertex, x=1 is one extra etc.
-cc:                            iflag=iflag+100   for TPC-prevertex finding
-cc:                            iflag=iflag+1000  for SVT-prevertex finding
-cc:                            iflag=iflag+10000 for FTPC-prevertex finding 
+CC:                            x is the event vertex id (for pileups). Zero
+CC:                              means one vertex, x=1 is the next one etc.
+cc:                            y is the det_id for prevertex finding only. 
+cc:                            y=0 is not prevertex, y=1 TPC prevertex, 
+cc:                            y=2 SVT, y=3 FTPC etc. det_id compliments this info.
 CC:               det_id    = Detectors contributing to all tracks used for
 CC:                           primary vertex finding/fitting:
 CC:                           This quantity, based on the definitions in
@@ -695,7 +695,8 @@ CCC  Load initial seed value into table privert:
            privert_h.nok = index
            privert(index).id = index
            privert(index).iflag = -3
-           if(covariance.eq.-1) privert(index).iflag =privert(index).iflag +100
+           if(covariance.eq.-1) privert(index).iflag =
+     +          privert(index).iflag - 100
            privert(index).det_id = DetectorIdSave
            privert(index).vtx_id = kEventVtxId
            privert(index).n_daughters = k
@@ -769,7 +770,8 @@ CCC  Load first iteration vertex value into table privert:
            else
               privert(index).iflag = -2
            end if
-           if(covariance.eq.-1) privert(index).iflag =privert(index).iflag +100
+           if(covariance.eq.-1) privert(index).iflag =
+     +          privert(index).iflag - 100
            privert(index).det_id = DetectorIdSave
            privert(index).vtx_id = kEventVtxId
            privert(index).n_daughters = k
@@ -880,7 +882,8 @@ CCC  Load second iteration vertex value into table privert:
            else
               privert(index).iflag = -1
            end if
-           if(covariance.eq.-1) privert(index).iflag =privert(index).iflag +100
+           if(covariance.eq.-1) privert(index).iflag =
+     +          privert(index).iflag - 100
            privert(index).det_id = DetectorIdSave
            privert(index).vtx_id = kEventVtxId
            privert(index).n_daughters = k
