@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.3 1999/02/04 18:33:48 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.4 1999/02/28 20:19:44 lasiuk Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,9 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
- * Revision 1.3  1999/02/04 18:33:48  lasiuk
- * remove digSector from constructor;
- * add fillSector for designation
+ * Revision 1.4  1999/02/28 20:19:44  lasiuk
+ * take number of time bins from db
+ * not compatible with data compression from the analogSignalGenerator
  *
  * Revision 1.3  1999/02/04 18:33:48  lasiuk
  * remove digSector from constructor;
@@ -57,6 +57,8 @@ protected:
     StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 	
 protected:
+    int                 mNumberOfTimeBins;
+    
     StTpcElectronics*   mElectronicsDb;
     StTrsSector*        mSector;
     StTrsDigitalSector* mDigitalSector;
