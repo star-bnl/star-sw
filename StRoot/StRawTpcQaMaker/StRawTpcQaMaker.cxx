@@ -1,5 +1,8 @@
-//! $Id: StRawTpcQaMaker.cxx,v 1.3 2000/06/19 19:01:21 kathy Exp $
+//! $Id: StRawTpcQaMaker.cxx,v 1.4 2000/06/20 19:46:04 kathy Exp $
 //! $Log: StRawTpcQaMaker.cxx,v $
+//! Revision 1.4  2000/06/20 19:46:04  kathy
+//! added GetCVS
+//!
 //! Revision 1.3  2000/06/19 19:01:21  kathy
 //! put in Sergei's new versions of the code
 //!
@@ -63,7 +66,6 @@ Int_t StRawTpcQaMaker::Init(){
   St_DataSet *herb;
   herb=GetDataSet("StDAQReader");
   assert(herb);
-  //  herb->setVerbose(0); // stop messages
 
   victorPrelim=(StDAQReader*)(herb->GetObject());
   assert(victorPrelim);
@@ -132,14 +134,14 @@ Int_t StRawTpcQaMaker::Make(){
       mhist_1->Fill((Float_t)(sectorIndex));
       for(int p=0; p<npad; p++) { // loop over pads with data in that row 
 	aPad = padList[p]-1;
-	//	cout << "zero   sector# " << sectorIndex << " row# " << r << " pad# " << aPad << endl; 
+//	cout << "zero   sector# " << sectorIndex << " row# " << r << " pad# " << aPad << endl; 
 	 iret = victor->getSequences(sectorIndex+1, r+1, aPad+1, nseq, sequence);
 	if (iret!=0) continue;
 
 	for(int seq=0; seq < nseq; seq++) { //sequences
 	  int start  = (sequence+seq)->startTimeBin;
 	  int length = (sequence+seq)->Length;
-	  int stop   = start+length-1; 
+	  //	  int stop   = start+length-1; 
 	  //  cout << endl << " startTimeBin " << (sequence+seq)->startTimeBin;
 	  //	cout << " Length       " << (sequence+seq)->Length << " : " ;
 	  unsigned char*  firstAdc = (sequence+seq)->FirstAdc;
@@ -160,7 +162,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.3 2000/06/19 19:01:21 kathy Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.4 2000/06/20 19:46:04 kathy Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
