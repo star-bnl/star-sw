@@ -45,13 +45,21 @@ void EEstarTrig :: clear() {
 //--------------------------------------------------
 //
 //--------------------------------------------------
-void EEstarTrig :: print(int k, FILE *fd) const{
+int  EEstarTrig :: get48bXing() const{
   // printf("EEstarTrig:: print0() %d %d %d \n",bX48hi,bX48lo, bX7bit);
   unsigned long long int hi=bX48hi;
   unsigned long long int lo=bX48lo;
   unsigned long long int bx48=hi<<32;
   bx48+= lo;
   int bx=bx48%120;
+  return bx;
+}
+
+//
+//--------------------------------------------------
+void EEstarTrig :: print(int k, FILE *fd) const{
+  // printf("EEstarTrig:: print0() %d %d %d \n",bX48hi,bX48lo, bX7bit);
+  int bx=get48bXing();
   int off=bx-bX7bit;
   if(off<0) off+=120;  
   fprintf(fd,"EEstarTrig:: print() bX=%d bX7=%d off=%d\n",bx,bX7bit,off);
