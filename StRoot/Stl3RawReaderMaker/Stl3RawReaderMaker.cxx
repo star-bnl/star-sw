@@ -9,9 +9,15 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.5 2001/08/20 22:32:00 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.7 2001/08/29 20:30:40 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.7  2001/08/29 20:30:40  struck
+//  and don't forget to delete your array ;-)
+//
+//  Revision 1.6  2001/08/29 20:24:49  struck
+//  makes Solaris compiler happy
+//
 //  Revision 1.5  2001/08/20 22:32:00  struck
 //  first version filling L3 counters and algorithm info into StEvent
 //
@@ -367,7 +373,11 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 
   // get total counters
   GlobalCounter totalCounter;
-  AlgorithmCounter totalAlgCounter[mNumberOfAlgorithms];
+  // make solaris happy
+  const int maxAlg = mNumberOfAlgorithms;
+  AlgorithmCounter* totalAlgCounter = new AlgorithmCounter[maxAlg];
+  //AlgorithmCounter totalAlgCounter[maxAlg];
+
 
   totalCounter.nProcessed     = 0;
   totalCounter.nReconstructed = 0;
@@ -426,6 +436,8 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	myEventSummary->addAlgorithm(myL3AlgorithmInfo);
   }
 
+  // delete counter array
+  delete [] totalAlgCounter;
 
   // call filling routines
   // global tracks

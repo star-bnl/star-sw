@@ -1,6 +1,15 @@
-* $Id: svttgeo.g,v 1.15 2001/03/16 00:32:06 nevski Exp $
+* $Id: svttgeo.g,v 1.18 2001/09/10 17:35:51 nevski Exp $
 *
 * $Log: svttgeo.g,v $
+* Revision 1.18  2001/09/10 17:35:51  nevski
+* bug fix - outer radius for a single ladder corrected
+*
+* Revision 1.17  2001/09/10 16:24:54  nevski
+* bug fix - outer radius for a single ladder corrected
+*
+* Revision 1.16  2001/09/05 23:02:19  nevski
+* svt geometry version 2 - as it is built
+*
 * Revision 1.15  2001/03/16 00:32:06  nevski
 * switch on/off cooling water
 *
@@ -65,6 +74,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
 * 08/26/99, E.Cains: if Nlayer is negaitive, generate one svt ladder there    *
 * 09/14/99, H.Huemmler: include beampipe support and svt shields              *
 * 03/16/01, PN: if water manifold is not installed, water is replaced by gas  *
+* 09/05/01, PN: geometry version 2 - SVT 'as it is built':                    *
+*               layer radia corrected, layers 3/4 swapped in phi              *
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -130,16 +141,16 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        AlMeshId, AlMeshOd, AlMshThk, AlMshPos} 
 *     
       Integer        iLayer,s,side,ilad,iwaf,i,j
-      Real           ladthk,cone_thk1,cone_thk2,roffset,RsizeMax,deg,rad
+      Real           ladthk,cone_thk1,cone_thk2,roffset,RsizeMax,deg,rad,c0
       Real	     cone_len,cone_sin,cone_cos,rmin,rmax,zmin,zmax,angle
-      Real           xpos,ypos,zpos,clearence,rin,rou,elethk,tabLen
+      Real           xpos,ypos,zpos,clearence,rin,rou,elethk,tabLen,radmax
       Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
       Real           xbuf, phi, xbuf1, xbuf2
 *
 *******************************************************************************
 *
    Fill SVTG ! Basic SVT dimensions 
-      Version   = 1          ! geometry version
+      Version   = 2          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
       RsizeMin  = 4.006      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
@@ -252,34 +263,34 @@ Module  SVTTGEO  is the SVT geometry for STAR
       CabWid   = 0.6         ! cable width 
 *
    Fill SVTL ! single layer data
-      layer    = 1          ! layer number
-      Radius   = 6.1+.025   ! layer radius (.025 puts it in center of wafer)
-      Nladder  = 4          ! number of ladder
-      Nwafer   = 4          ! number of wafers
+      layer    = 1           ! layer number
+      Radius   = 6.37+0.025  ! layer radius (center of wafer position)
+      Nladder  = 4           ! number of ladder
+      Nwafer   = 4           ! number of wafers
 *      
    Fill SVTL ! single layer parameters
-      layer    = 2          ! layer number
-      Radius   = 7.16+.025  ! layer radius
+      layer    = 2           ! layer number
+      Radius   = 7.38+0.025  ! layer radius
 *      
    Fill SVTL ! single layer parameters
-      layer    = 3          ! layer number
-      Radius   = 10.16+.025 ! layer radius
-      Nladder  = 6          ! number of ladder
-      Nwafer   = 6          ! number of wafers
+      layer    = 3           ! layer number
+      Radius   = 10.38+0.025 ! layer radius
+      Nladder  = 6           ! number of ladder
+      Nwafer   = 6           ! number of wafers
 *      
    Fill SVTL ! single layer parameters
-      layer    = 4          ! layer number
-      Radius   = 11.05+.025 ! layer radius
+      layer    = 4           ! layer number
+      Radius   = 11.27+0.025 ! layer radius
 *      
    Fill SVTL ! single layer parameters
-      layer    = 5          ! layer number
-      Radius   = 13.97+.025 ! layer radius
-      Nladder  = 8          ! number of ladder
-      Nwafer   = 7          ! number of wafers
+      layer    = 5           ! layer number
+      Radius   = 14.19+0.025 ! layer radius
+      Nladder  = 8           ! number of ladder
+      Nwafer   = 7           ! number of wafers
 *      
    Fill SVTL ! single layer parameters
-      layer    = 6          ! layer number
-      Radius   = 14.91+.025 ! layer radius
+      layer    = 6           ! layer number
+      Radius   = 15.13+0.025 ! layer radius
 *
    Fill SFPA ! fourth layer parameters
       version  = 1          ! geometry version
@@ -320,16 +331,16 @@ Module  SVTTGEO  is the SVT geometry for STAR
       AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
 *
-      USE SVTG  version=1
-      USE SWCA  version=1
-      USE SELC  version=1
-      USE SSUP  version=1
-      USE SSUB  version=1
-      USE SERG  version=1
-      USE SWAM  version=1
-      USE SELC  version=1
-      USE SFPA  version=1
-      USE SSLD  version=1
+      USE SVTG
+      USE SWCA
+      USE SELC
+      USE SSUP
+      USE SSUB
+      USE SERG
+      USE SWAM
+      USE SELC
+      USE SFPA
+      USE SSLD
 
 * introduce common materials here
 *
@@ -452,7 +463,14 @@ Block SVTT is the mother of all SVT volumes
 *
 * The SVT layers 
 *
+      radmax=svtg_rSizeMax
       Do ilayer = 1, min(6,nint(svtg_Nlayer))
+         if (ilayer<6) then
+            USE SVTL layer=ilayer+1
+            radmax=svtl_radius
+         else
+            radmax=svtg_rSizeMax
+         endif
          USE SVTL layer=ilayer
          Create   SLYD  " layer mother " 
 	 Position SLYD
@@ -497,12 +515,26 @@ Block SLYD is a single SVT layer
 *     elethk is the electronics+electronic carrier full thickness
       elethk=2.0*selc_BeThk+selc_WatThk+selc_BeOThk+selc_AgPdThk
       elethk=elethk+selc_GlassThk+selc_DyeThk
+      deg=180.0/svtl_Nladder
+      rad=Pi/svtl_Nladder
+
       Material Air
       Attribute SLYD    seen=0    colo=1
-      Shape    TUBE rmin=svtl_radius-ladthk,
-                    rmax=(sqrt((svtl_radius)**2+ _
-                         (swca_WaferWid/2)**2)+elethk),
-                    dz=swca_Length/2
+
+* Note: in case of layer conflict (outer layer starts too early),
+*       we can neglect some minor material loss in the corner of electronics,
+*       but not in the center of sensitive wafers (this would change dE/dx). 
+*       Make sure here that a layer ends up before the next layer starts
+
+        rmin=svtl_radius-ladthk
+        rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk
+        if (rmax>radmax-ladthk) print *,' SVT warning: layer overlap = ',
+                                ilayer,rmax,radmax-ladthk
+        rmax=min(rmax,radmax-ladthk)
+        if (Rmax<Rmin)   print *,' SVT error: bad geometry parameters =',
+                                ilayer,rmin,rmax
+      Shape    TUBE rmin=rmin  rmax=rmax  dz=swca_Length/2
+
       Create   SLSD
 EndBlock
 *
@@ -514,8 +546,12 @@ Block SLSD is a single ladder mother (sector of tube)
       if (svtg_Nlayer<0) then
         Shape  Division   Iaxis=2   Ndiv=1    c0=-90
       else
-        Shape  Division   Iaxis=2   Ndiv=svtl_Nladder,
-        c0=-180.0/svtl_Nladder*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2) 
+        if (svtg_version==1) then
+           c0=-deg*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2) 
+        else
+           c0=90-deg*mod(ilayer,2)
+        endif
+        Shape  Division   Iaxis=2   Ndiv=svtl_Nladder c0=c0
       endif
 *>>>
 *

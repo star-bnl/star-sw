@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.6 2001/03/14 01:42:35 nevski Exp $
+* $Id: vpddgeo.g,v 1.7 2001/09/13 15:59:47 geurts Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.7  2001/09/13 15:59:47  geurts
+* pVPD mothervolumes moved by 36inch
+*
 * Revision 1.6  2001/03/14 01:42:35  nevski
 * add few konly=MANY to make I-beam real
 *
@@ -20,6 +23,9 @@ Created 21 June 2000
 *
 * Notes:
 *   - Use IBchoice=0  to switch off the definition of the IBeam.
+*
+* modified:
+*   13 Sept 2001  FG - moved both pVPD mothervolumes 36" (91.44cm) outward.
 *
 ************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
@@ -57,7 +63,7 @@ Created 21 June 2000
 *
      FILL VPDG  ! pVPD basic dimensions
         version   =    3.     ! geometry version
-        zpos      =  500.     ! Z position of pVPD-volume along beam axis
+        zpos      =  591.44   ! Z position of pVPD-volume along beam axis
         rmin      =    6.35   ! mothervolume rmin		(2.5inch)
         rmax      =   31.27375! mothervolume rmin		(12.3125inch)
         BPwidth   =   30.48   ! baseplate width 		(12inch)

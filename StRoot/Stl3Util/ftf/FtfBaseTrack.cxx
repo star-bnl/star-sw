@@ -1148,7 +1148,7 @@ void FtfBaseTrack::updateToRadius  ( double radius ) {
 **:             rMax           - radius of point of closest approach beyond which no update
 **:
 **:>------------------------------------------------------------------*/
-void FtfBaseTrack::updateToClosestApproach ( double xBeam, double yBeam, double rMax=10000 ) {
+void FtfBaseTrack::updateToClosestApproach ( double xBeam, double yBeam, double rMax) {
    double rc, xc, yc ;
    Ftf3DHit closest = getClosest ( xBeam, yBeam, rc, xc, yc ) ;
 // ftfLog ( "FtfBaseTrack::updateClosestApproach: closest x y z %f %f %f \n", 

@@ -16,6 +16,8 @@
  *       08/18/00 cle: put L3 summary data and L3 summary into L3_P
  *       03/07/01 cle: add svt/FTPC banks to L3_P
  *	 06/21/01 cle: changed L3_P->seq to L3_P->gl3Id for recontruction of counters 
+ *       080801 cle:  got rid of type1/2/3 tracks, change vertex to floats in gtd
+ *	 082701 cle:  format number is now 5, due to addition of trigger data offlen
  *	
  */
 
@@ -31,9 +33,6 @@
 #define CHAR_L3_P	"L3_P    "
 #define CHAR_L3_SECP	"L3_SECP "
 #define CHAR_L3_SECTP	"L3_SECTP"
-#define CHAR_L3_STK1D	"L3_STK1D"
-#define CHAR_L3_STK2D	"L3_STK2D"
-#define CHAR_L3_STK3D	"L3_STK3D"
 #define CHAR_L3_LTD     "L3_LTD  "
 #define CHAR_L3_GTD     "L3_GTD  "
 #define CHAR_L3_SECCD   "L3_SECCD"
@@ -89,69 +88,6 @@ struct L3_counter{
 
 
 
-// Track Type I: Mergable Primary Track
-struct type1_track { 
-    short id ;// id 
-    short nHits ;// # Hits 
-    short innerMostRow ; /* Inner most row track expands */
-    short outerMostRow ; /* Outer most row track expands */
-    float dedx ; 
-    float s11Xy ;// Fit parameters 
-    float s12Xy ;// conformal line in xy plane 
-    float s22Xy ; 
-    float g1Xy ; 
-    float g2Xy ; 
-    float s11Sz ;// Fit parameters in sz plane 
-    float s12Sz ; 
-    float s22Sz ; 
-    float g1Sz ; 
-    float g2Sz ; 
-    float xLastHit ;
-    float yLastHit ;
-    float trackLength ; 
-}; // 16 words
-
-
-
-// Track Type II: Unmergable Primary Track 
-struct type2_track { 
-    short     id;        /* track id */
-    short     nrec;      /* Number of points assigned to that track */
-    short  xy_chisq;    /* xy & sz chi2 packed in 16 bits each */
-    short  sz_chisq;    /* both nr.'s  are multiplied by 10 and the fraction
-			   cut off   */
-    float     dedx;      /* dE/dx information */
-    float     pt  ;      /* pt time charge */
-    float     psi;       /* azimuthal angle of the momentum at (r,.. */
-    float     tanl;      /* tg of the dip angle at (r,phi,z) */
-    float     z0;        /* z coordinate of the first point */
-    float     trackLength; 
-    unsigned int Errors ;   /* dpt, dpsi, dtanl errors (10bits*3)*/
-}; //9 words
-
-
-// Track Type III: Unmergable Secondary Track
-struct type3_track { 
-       short     id;        /* track id */
-       short     nrec;      /* Number of points assigned to that track */
-       short  xy_chisq;     /* xy & sz chi2 packed in 16 bits each */
-       short  sz_chisq;     /* same as with track type II, divide by 10 for 
-			       real result*/
-       float     dedx;      /* dE/dx information */
-       float     pt  ;      /* pt time charge */
-       float     psi;       /* azimuthal angle of the momentum at (r,.. */
-       float     tanl;      /* tg of the dip angle at (r,phi,z) */
-       float     z0;        /* z   coordinate of the first point */
-       float     r0;        /* r   coordinate of the first point */
-       float     phi0;      /* phi coordinate of the first point */
-       float     trackLength;
-       unsigned int  Errors ;   /* dpt, dpsi, dtanl errors (10bits*3)  */
-};  // 11 words
-
-
-
-
-// only tracktype produced on sl3 beginning 04/06/00
 struct local_track {
        short     id;        /* track id */
        char     nHits;      /* Number of hits assigned to the track */
@@ -175,25 +111,6 @@ struct local_track {
        unsigned short dz0   ;
 };   // 13 dwords
 
-
-
-
-
-
-struct L3_STK1D {
-  struct bankHeader bh;
-  struct type1_track track[500]; //dimension not to be taken literally
-};
-
-struct L3_STK2D {
-  struct bankHeader bh;
-  struct type2_track track[500]; //dimension not to be taken literally
-};
-
-struct L3_STK3D {
-    struct bankHeader bh;
-    struct type3_track track[500]; //dimension not to be taken literally
-};
 
 struct L3_LTD {
     struct bankHeader bh;
@@ -301,9 +218,9 @@ struct L3_GTD {
     struct bankHeader bh;
     unsigned int      nHits; // Nr of space points
     unsigned int      nTracks; // Nr of Tracks
-    int               xVert;         // x vertex position in 10**-6 cm
-    int               yVert;         // y vertex position
-    int               zVert;         //z vertex postion
+    float               xVert;         // x vertex position in cm
+    float               yVert;         // y vertex position
+    float               zVert;         //z vertex postion
     struct global_track track[1];
 };
  
@@ -323,6 +240,7 @@ struct L3_P {
     struct offlen svt[5]; // 4 svt 'sectors' + 1 ssd
     struct offlen ftpc[2]; 
     struct offlen emc;
+    struct offlen trig;  //trigger summary+data
 
 } ; // almost the same as L3_SECP  
 // 70 dwords
