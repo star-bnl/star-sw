@@ -18,7 +18,7 @@
 /*-------------------------------------------- TYPEDEFS             --*/
 /*-------------------------------------------- GLOBALS              --*/
 #ifdef __cplusplus
-   extern spxManager *spx;
+   extern spxFactory *spx;
 #endif /*__cplusplus*/
 
 /*-------------------------------------------- PROTOTYPES           --*/

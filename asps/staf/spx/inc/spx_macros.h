@@ -20,6 +20,7 @@
 
 #define SPXGRID(OBJ) ((spxGrid*)(OBJ->ptr()))
 #define SPXDUMMY(OBJ) ((spxDummy*)(OBJ->ptr()))
+#define SPXFACORY(OBJ) ((spxFactory*)(OBJ->ptr()))
 
 #endif /* SPX_MACROS_H */
 

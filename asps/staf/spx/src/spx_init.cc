@@ -11,7 +11,7 @@
 #include "emlLib.h"
 #include "spxLib.h"
 
-spxManager *spx;
+spxFactory *spx;
 
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int spx_init()
@@ -21,7 +21,7 @@ spxManager *spx;
 //:<--------------------------------------------------------------------
 int spx_init()
 {
-   EML_MESSAGE(SPX: Initializing.);
+   EML_MESSAGE("SPX:Initializing. ");
 
 /*- Define the SPX KUIP commands. -*/
    spx_def_();
@@ -37,10 +37,10 @@ int spx_init()
 //:<--------------------------------------------------------------------
 int spx_start()
 {
-   EML_MESSAGE(SPX: Starting.);
+   EML_MESSAGE("SPX:Starting. ");
 
-/*- Create the SPX Manager. -*/
-   spx = new spxManager("spx");
+/*- Create the SPX Factory. -*/
+   spx = new spxFactory("spx");
 
    return TRUE;
 }
@@ -53,9 +53,9 @@ int spx_start()
 //:<--------------------------------------------------------------------
 int spx_stop()
 {
-   EML_MESSAGE(SPX: Stopping.);
+   EML_MESSAGE("SPX:Stopping. ");
 
-/*- Delete the SPX Manager.
+/*- Delete the SPX Factory.
    delete spx;
 unecessary -- soc will do it. -*/
 
