@@ -112,7 +112,16 @@ c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	  PAD        = tppad( Jtppad ).secpad !Unique pad ID within a sector.
 	  Jpixel     = tppad( Jtppad ).jpix   !Offset into the tppixel table.
 	  Nsequences = tppad( Jtppad ).nseq   !Number of sequences for this pad.
-	  DO Isequence = 1, Nsequences
+c-> RJM   
+c-> RJM   6 April 1994; Everything that follows assumes that the FEE has 
+c-> RJM   already grouped "sequences" in time space on each pad and 
+c-> RJM   written that information along with the data stream(?)--this is 
+c-> RJM   the origin of the double loops on Nsequences/Nseqpix--tss does 
+c-> RJM   not implement this--moreover, from the "caller arrays" that appear 
+c-> RJM   to be filled, the algorithm used after this stage does not depend 
+c-> RJM   upon this feature(?)
+c-> RJM   
+c	  DO Isequence = 1, Nsequences
 *	    Beware!  The pixel count is encoded "in here", but it's not in the
 *	             first byte (!!),  it's in the second, after (!!!) the top
 *	             two bits are stripped off and glued onto the first byte to
@@ -120,35 +129,60 @@ c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 *	             After the first two, the rest are "squeezed" ADC data.
 *	             And, of course, the pixel count doesn't include those 1st
 *	             two data... (It's a pixel count, not a data count...)
-	    TDC_lo  = IAND( tppixel( Jpixel   ).datum, 255 )      !Low 8 bits.
-	    TDC_hi  = IAND( tppixel( Jpixel+1 ).datum, 192 ) / 64 !High 2 bits.
-	    TDC     = TDC_lo + TDC_hi * 256
-	    Nseqpix = IAND( tppixel( Jpixel+1 ).datum, 63 ) + 1   ! 1 to 64 -- the count, at last!
-            IF ( ( Npixels + Nseqpix ) .GT. Npixels_max ) THEN !No room left in the local array:
+c	    TDC_lo  = IAND( tppixel( Jpixel   ).datum, 255 )      !Low 8 bits.
+c	    TDC_hi  = IAND( tppixel( Jpixel+1 ).datum, 192 ) / 64 !High 2 bits.
+c	    TDC     = TDC_lo + TDC_hi * 256
+c	    Nseqpix = IAND( tppixel( Jpixel+1 ).datum, 63 ) + 1   ! 1 to 64 -- the count, at last!
+c            IF ( ( Npixels + Nseqpix ) .GT. Npixels_max ) THEN !No room left in the local array:
+c              CALL Message( 'TCL_Get_Row_Pixels-E1  Npixels_max is too '
+c     +                    //'small.',1, IDE1 )
+c	      TCL_Get_Row_Pixels = .FALSE.                        !Fail.
+c	      RETURN
+c	    END IF
+c	    Ipixel = Jpixel                 !Save this pointer for the loop.
+c	    Jpixel = Jpixel + 2             !This points at first ADC value.
+*	    Load the pixels from this sequence:
+c	    DO Iseqpix = 1, Nseqpix
+c	      ADCraw         = IAND( tppixel( Jpixel ).datum, 255 ) !No attempt made to "desqueeze".
+*	      Insert "TCL_Recover_ADC" or something here:
+*	      ADC            = TCL_Recover_ADC( ADCraw )
+c	      ADC            = ADCraw       !Just copy, for now (10-Oct-93).
+c	      MCid           = tpmcpix( Jpixel ).mcid   !This shadows tppixel (we hope).
+c	      Npixels        = Npixels + 1  !One more pixel being stored in caller-arrays.
+c	      Ipix( Npixels ) = Ipixel       !This item repeats, but it makes life easier.
+c	      Ipad( Npixels ) = PAD          !This one, too...
+c	      Itdc( Npixels ) = TDC
+c	      Iadc( Npixels ) = ADC
+c	      Itid( Npixels ) = MCid
+c	      TDC            = TDC + 1      !The next datum, if preset, is expected from the next TDC bin.
+c	      Jpixel         = Jpixel + 1
+c	    END DO !Iseqpix = 1, Nseqpix
+*	    Take no special action to start the next sequence -- it follows this one;  Jpixel is ready to go.
+c	  END DO !Isequence = 1, Nsequences
+c-> RJM
+c-> RJM   Alternate loop unloading pixel data...
+c-> RJM
+          Ipixel = Jpixel
+	  DO Isequence = 0, Nsequences-1
+	    Npixels        = Npixels + 1  !One more pixel being stored in caller-arrays.
+            IF ( Npixels + Nseqpix  .GT. Npixels_max ) THEN !No room left in the local array:
               CALL Message( 'TCL_Get_Row_Pixels-E1  Npixels_max is too '
      +                    //'small.',1, IDE1 )
 	      TCL_Get_Row_Pixels = .FALSE.                        !Fail.
 	      RETURN
 	    END IF
-	    Ipixel = Jpixel                 !Save this pointer for the loop.
-	    Jpixel = Jpixel + 2             !This points at first ADC value.
-*	    Load the pixels from this sequence:
-	    DO Iseqpix = 1, Nseqpix
-	      ADCraw         = IAND( tppixel( Jpixel ).datum, 255 ) !No attempt made to "desqueeze".
-*	      Insert "TCL_Recover_ADC" or something here:
-*	      ADC            = TCL_Recover_ADC( ADCraw )
-	      ADC            = ADCraw       !Just copy, for now (10-Oct-93).
-	      MCid           = tpmcpix( Jpixel ).mcid   !This shadows tppixel (we hope).
-	      Npixels        = Npixels + 1  !One more pixel being stored in caller-arrays.
-	      Ipix( Npixels ) = Ipixel       !This item repeats, but it makes life easier.
-	      Ipad( Npixels ) = PAD          !This one, too...
-	      Itdc( Npixels ) = TDC
-	      Iadc( Npixels ) = ADC
-	      Itid( Npixels ) = MCid
-	      TDC            = TDC + 1      !The next datum, if preset, is expected from the next TDC bin.
-	      Jpixel         = Jpixel + 1
-	    END DO !Iseqpix = 1, Nseqpix
-*	    Take no special action to start the next sequence -- it follows this one;  Jpixel is ready to go.
+	    TDC     = tppixel(Jpixel+Isequence).datum/10000
+            ADC     = tppixel(Jpixel+Isequence).datum/10000-tdc*10000
+            MCid    = tpmcpix(Jpixel+Isequence).mcid
+c
+c-> RJM     here could crudely use tdc=tdc+1 test in order to make 
+c-> RJM     sequences in Bob H.'s sense...
+c
+            Ipix( Npixels ) = Ipixel !This item repeats, but it makes life easier.
+            Ipad( Npixels ) = PAD !This one, too...
+            Itdc( Npixels ) = TDC
+            Iadc( Npixels ) = ADC
+            Itid( Npixels ) = MCid
 	  END DO !Isequence = 1, Nsequences
 
 	  Jtppad = Jtppad + 1 !Next pad.
