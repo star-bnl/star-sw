@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.30 2004/02/21 18:27:34 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.31 2004/03/23 23:10:37 calderon Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.31  2004/03/23 23:10:37  calderon
+ * Check for nan's in getTrackLength() calculation.  When the argument for the
+ * asin() is >1, the code instead calculates a length iteratively.
+ * For these cases, the returned value is negative so that they can be inspected
+ * in the gui, or filtered in the StiStEventFiller.
+ *
  * Revision 2.30  2004/02/21 18:27:34  pruneau
  * Updates to comply with changes made in abstract interfaces.
  *
@@ -592,7 +598,24 @@ double StiKalmanTrack::getTrackLength() const
   double dy=out.y()-in.y();
   double dz=out.z()-in.z();
   double curvature = inNode->getCurvature();
-  double s = 2*asin(::sqrt(dx*dx+dy*dy)*curvature/2.)/curvature;
+  double s = 2*asin(::sqrt(dx*dx+dy*dy)*fabs(curvature)/2.)/fabs(curvature);
+  if (!isfinite(sqrt(dz*dz+s*s))) {
+      double lengthSum = 0;
+      if (firstNode) {
+	  StiKTNBidirectionalIterator node1,node2;
+	  node1=begin();
+	  node2=node1;
+	  node2++; //now node2 is just after node1.
+	  for (;node2!=end();node2++,node1++) {
+	      lengthSum += (*node2).pathLToNode(&(*node1));
+	  }
+      }
+      if (!isfinite(lengthSum)) {
+	  cout << "I give up!! Length sum is not finite" << endl;
+	  return -9999;
+      }
+      return -fabs(lengthSum);
+  }
   return ::sqrt(dz*dz+s*s);
 }
 
@@ -929,12 +952,13 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
-
+      
 	double dx,dy,dz,d;
 	dx=tNode->_x- localVertex.x();
 	dy=tNode->_p0- localVertex.y();
 	dz=tNode->_p1- localVertex.z();
 	d= ::sqrt(dx*dx+dy*dy+dz*dz);
+	//cout << "chi2 @ vtx " << chi2 << endl;
 	/*	cout << " dx:"<< dx
 	<< " dy:"<< dy
 	<< " dz:"<< dz
