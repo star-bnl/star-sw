@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StThreeVectorD.hh,v 1.2 1999/06/04 18:00:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,10 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
- * Revision 1.1  1999/01/30 03:59:05  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/06/04 18:00:10  ullrich
+ * Added new constructor which takes C-style array as argument.
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.2  1999/06/04 18:00:10  ullrich
  * Added new constructor which takes C-style array as argument.
@@ -46,6 +48,9 @@ class StThreeVectorD
 {
 public:    
     StThreeVectorD(double = 0, double = 0, double = 0);
+    ~StThreeVectorD();
+
+    StThreeVectorD(const StThreeVectorF&);
     StThreeVectorD(const StThreeVectorD&);
     
     StThreeVectorD(const float*);
@@ -72,6 +77,8 @@ public:
     double   perp()                     const;
     double   perp2()                    const;
     double   magnitude()                const;
+    double   mag()                      const;
+    double   mag2()                     const;
     double   pseudoRapidity()           const;
     double   operator() (size_t)        const;
     double   operator[] (size_t)        const;
@@ -298,11 +305,38 @@ inline double StThreeVectorD::operator() (size_t i) const
         return mX3;
     else {
       cerr << "StThreeVectorD::operator(): bad index" << endl;
+      return 0;
+    }
+}
+inline double& StThreeVectorD::operator() (size_t i)
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+      cerr << "StThreeVectorD::operator(): bad index" << endl;
       return mX3;
     }
 }
 
 inline double StThreeVectorD::operator[] (size_t i) const
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+      cerr << "StThreeVectorD::operator[]: bad index" << endl;
+      return 0;
+    }
+}
+
+inline double& StThreeVectorD::operator[] (size_t i)
 {
     if (i == 0)
         return mX1;

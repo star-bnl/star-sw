@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.3 1999/02/17 11:42:19 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.4 1999/06/04 18:00:05 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,8 +15,10 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.3  1999/02/17 11:42:19  ullrich
- * Removed specialization for 'long double'.
+ * Revision 1.4  1999/06/04 18:00:05  ullrich
+ * Added new constructor which takes C-style array as argument.
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.5  1999/10/15 15:46:54  ullrich
  * Changed output format in operator<<
@@ -58,6 +60,7 @@
 template<class T>
 #else
 template<class T = double>
+#endif
 class StThreeVector {
 public:    
     StThreeVector(T = 0, T = 0, T = 0);
@@ -65,6 +68,9 @@ public:
 
 #ifndef ST_NO_MEMBER_TEMPLATES
     template<class X> StThreeVector(const StThreeVector<X>&);
+    template<class X> StThreeVector(const X*);  
+    template<class X> StThreeVector<T>& operator=(const StThreeVector<X>&);
+    // StThreeVector(const StThreeVector<T>&);                use default
     // StThreeVector<T>& operator=(const StThreeVector<T>&);  use default
 #else    
     StThreeVector(const StThreeVector<float>&);
@@ -93,6 +99,9 @@ public:
     T   cosTheta()                 const;
     T   phi()                      const;
     T   perp()                     const;
+    T   perp2()                    const;
+    T   magnitude()                const;
+    T   mag()                      const;
     T   mag2()                     const;
     T   pseudoRapidity()           const;
     T   operator() (size_t)        const;
@@ -349,12 +358,50 @@ inline T StThreeVector<T>::operator() (size_t i) const
 #else
       cerr << "StThreeVector<T>::operator(): bad index" << endl;
 #endif
+      return 0;
+    }
+}
+
+template<class T>
+inline T& StThreeVector<T>::operator() (size_t i)
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+#ifndef ST_NO_EXCEPTIONS
+      throw out_of_range("StThreeVector<T>::operator(): bad index");
+#else
+      cerr << "StThreeVector<T>::operator(): bad index" << endl;
+#endif
       return mX3;   // have to return something here ...
     }
 }
 
 template<class T>
 inline T StThreeVector<T>::operator[] (size_t i) const
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+#ifndef ST_NO_EXCEPTIONS
+      throw out_of_range("StThreeVector<T>::operator[]: bad index"); 
+#else
+      cerr << "StThreeVector<T>::operator[]: bad index" << endl;
+#endif
+      return 0;
+    }
+}
+
+template<class T>
+inline T& StThreeVector<T>::operator[] (size_t i)
 {
     if (i == 0)
         return mX1;
@@ -399,6 +446,15 @@ StThreeVector<T> StThreeVector<T>::operator+ ()
 }
 
 #ifndef ST_NO_MEMBER_TEMPLATES
+
+template<class T>
+template<class X>
+inline StThreeVector<T>::StThreeVector(const StThreeVector<X>& v)
+    : mX1(v.x()), mX2(v.y()), mX3(v.z()) {/* nop */}
+
+template<class T>
+template<class X>
+inline StThreeVector<T>::StThreeVector(const X *a)
 {
     mX1 = a[0];
     mX2 = a[1];
@@ -473,6 +529,22 @@ inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
 }
 
 #else
+
+template<class T>
+inline StThreeVector<T>::StThreeVector(const StThreeVector<float>& v)
+    : mX1(v.x()), mX2(v.y()), mX3(v.z()) {/* nop */}
+
+template<class T>
+inline StThreeVector<T>::StThreeVector(const StThreeVector<double>& v)
+    : mX1(v.x()), mX2(v.y()), mX3(v.z()) {/* nop */}
+
+template<class T>
+inline StThreeVector<T>::StThreeVector(const float *a)
+{
+    mX1 = a[0];
+    mX2 = a[1];
+    mX3 = a[2];
+}
 
 template<class T>
 inline StThreeVector<T>::StThreeVector(const double *a)

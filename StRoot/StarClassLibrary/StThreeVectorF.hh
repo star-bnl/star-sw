@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.2 1999/02/14 23:11:51 fisyak Exp $
+ * $Id: StThreeVectorF.hh,v 1.3 1999/06/04 18:00:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,10 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
- * Revision 1.2  1999/02/14 23:11:51  fisyak
- * Fixes for Rootcint
+ * Revision 1.3  1999/06/04 18:00:14  ullrich
+ * Added new constructor which takes C-style array as argument.
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.4  1999/12/21 15:14:33  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -49,6 +51,9 @@ class StThreeVectorD;
 class StThreeVectorF
 #ifdef __ROOT__
  : public TObject 
+#endif
+{
+public:    
     StThreeVectorF(float = 0, float = 0, float = 0);
     ~StThreeVectorF();
 
@@ -76,6 +81,8 @@ class StThreeVectorF
     float   theta()                    const;
     float   cosTheta()                 const;
     float   phi()                      const;
+    float   perp()                     const;
+    float   perp2()                    const;
     float   magnitude()                const;
     float   mag()                      const;
     float   mag2()                     const;
@@ -296,8 +303,22 @@ inline float StThreeVectorF::mag2() const
 }
 
 inline float StThreeVectorF::operator() (size_t i) const
-      cerr << "StThreeVectorF::operator(): bad index" << endl;
-      return 0;
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+	cerr << "StThreeVectorF::operator(): bad index" << endl;
+	return 0;
+    }
+}
+
+inline float& StThreeVectorF::operator() (size_t i)
+{
+    if (i == 0)
         return mX1;
     else if (i == 1)
         return mX2;
@@ -310,8 +331,22 @@ inline float StThreeVectorF::operator() (size_t i) const
 }
 
 inline float StThreeVectorF::operator[] (size_t i) const
-      cerr << "StThreeVectorF::operator[]: bad index" << endl;
-      return 0;
+{
+    if (i == 0)
+        return mX1;
+    else if (i == 1)
+        return mX2;
+    else if (i == 2)
+        return mX3;
+    else {
+	cerr << "StThreeVectorF::operator[]: bad index" << endl;
+	return 0;
+    }
+}
+
+inline float& StThreeVectorF::operator[] (size_t i)
+{
+    if (i == 0)
         return mX1;
     else if (i == 1)
         return mX2;
