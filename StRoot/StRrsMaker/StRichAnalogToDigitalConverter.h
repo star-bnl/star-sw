@@ -1,5 +1,5 @@
 /*************************************************************
- * $Id: StRichAnalogToDigitalConverter.h,v 1.1 2000/01/18 21:32:00 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.h,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogToDigitalConverter is the function object containing
@@ -15,8 +15,11 @@
  *
  ****************************************************************
  * $Log: StRichAnalogToDigitalConverter.h,v $
- * Revision 1.1  2000/01/18 21:32:00  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:19  lasiuk
+ * Second Revision
+ *
+ * Revision 1.2  2000/01/25 22:02:19  lasiuk
+ * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:00  lasiuk
  * Initial Revision
@@ -35,14 +38,25 @@
 using std::unary_function;
 #endif
 
+#ifndef ST_NO_NAMESPACES
+//namespace StRichRawData {
 #endif
+#include "StRichRrsMacros.h"
 #include "StRichOtherAlgorithms.h"
+
+class StRichAnalogToDigitalConverter : public unary_function<double,double> {
+public:
+    StRichAnalogToDigitalConverter();
+    ~StRichAnalogToDigitalConverter();
+    //SRichAnalogToDigitalConverter(const StRichAnalogToDigitalConverter&);
+    //operator=RichAnalogToDigitalConverter(StRichAnalogToDigitalConverter&);
+    int operator()(double) const;
+
+    void setAddPedestal(int);
+    
+private:
+    int mAddPedestal;
 };
-    struct StRichAnalogToDigitalConverter : public unary_function<double,double> {
-	
-	int operator()(double) const;
-	
-    };
 inline
 void StRichAnalogToDigitalConverter::setAddPedestal(int v) {mAddPedestal = v;}
 

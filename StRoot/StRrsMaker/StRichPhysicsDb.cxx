@@ -1,14 +1,17 @@
 /******************************************************
- * $Id: StRichPhysicsDb.cxx,v 1.1 2000/01/18 21:32:03 lasiuk Exp $
+ * $Id: StRichPhysicsDb.cxx,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
  *
  * Description:
  *  Implementation of the two databases modules
  *
  ******************************************************
  * $Log: StRichPhysicsDb.cxx,v $
- * Revision 1.1  2000/01/18 21:32:03  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:22  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.3  2000/02/08 16:29:33  lasiuk
+ * include gasGainAmplification factor here instead of geometry
  *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  * Second Revision
@@ -51,9 +54,9 @@ using namespace units;
 	common_fill();
     }
     my_fill();
-	version         = 1;
+    adc_factor      = 0.16556*(1.e-15*coulomb);      // adc/femtocoulomb
     void StRichPhysicsDb::my_fill()
-	polia           = 0.3;
+    {
 	mVersion         = 1;
     
 	mPolia           = 0.3;
@@ -147,6 +150,30 @@ using namespace units;
 //     pedestal        = s->pedestal;
 //     adc_factor      = s->adc_factor;      // femtocoulomb/adc_channel
 //     adc_threshold   = s->adc_threshold;
+//     channel_width   = s->channel_width; 
+// }
+    if(!p2Db)
+	p2Db = new StRichPhysicsDb();
+    return p2Db;
+}
+
+void StRichPhysicsDb::print(ostream& os) const
+    os << "** StRichPhysicsDb::print() ** " << endl;
+    os << "averageNumberOfInteraction= " << averageNumberOfInteractions() << endl;
+    os << "gas Gain Amplification=    "  << gasGainAmplification()  << endl;
+    os << "photonToPadEfficiency= " << photonToPadEfficiency() << endl;
+    }
+
+    os << "maximumElectronEnergy= " << maximumElectronEnergy() << endl;
+    for(int i=0; i<e_distribut.size(); i++) {
+	os << "electronDistribution[" << i << "]= " << electronDistribution(i) << endl;
+    }
+    os << "\nEfficiency:" << endl;
+    os << "Electronics" << endl;
+    os << "averagePedestal= "      << averagePedestal()               << " channels" << endl;
+    os << "electronCharge= " << electronCharge() << endl;
+    os << "averagePedestal= " << averagePedestal() << endl;
+    os << "adcConversion= " << adcConversion() << endl;
     os << "adcThreshold= " << adcThreshold() << endl;
     os << "adcChannelWidth= " << adcChannelWidth() << endl;
     os << "adcChannelWidth= "      << adcChannelWidth()               << " channels" << endl;

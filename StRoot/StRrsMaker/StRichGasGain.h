@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichGasGain.h,v 1.1 2000/01/18 21:32:01 lasiuk Exp $
+ * $Id: StRichGasGain.h,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
  *
  * Description:
  *   StRichGasGain is a function object containing the charge amplification
@@ -27,8 +27,11 @@
  *
  *******************************************************************
  * $Log: StRichGasGain.h,v $
- * Revision 1.1  2000/01/18 21:32:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:20  lasiuk
+ * Second Revision
+ *
+ * Revision 1.3  2000/02/08 16:24:10  lasiuk
+ * use of dbs
  *
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
@@ -49,7 +52,7 @@
 #include <functional>
 #ifndef ST_NO_NAMESPACES
 using std::binary_function;
-
+#endif
 
 
 #ifndef ST_NO_NAMESPACES

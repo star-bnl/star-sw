@@ -1,5 +1,5 @@
 /**********************************NoiseSimulator.cxx**\
- * $Id: StRichNoiseSimulator.cxx,v 1.1 2000/01/18 21:32:03 lasiuk Exp $
+ * $Id: StRichNoiseSimulator.cxx,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
  *
  * Description:
  *
@@ -12,8 +12,11 @@
  *
  ******************************************************
  * $Log: StRichNoiseSimulator.cxx,v $
- * Revision 1.1  2000/01/18 21:32:03  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:03  lasiuk
  * Initial Revision
@@ -21,9 +24,9 @@
  ******************************************************/
 
 #ifndef ST_NO_NAMESPACES
-#include "StRichOtherAlgorithms.h"
-#include "StRichPhysicsDb.h"
-#include "StRichNoiseSimulator.h"
+//namespace StRichRawData {
+#endif
+
 #include "StRichOtherAlgorithms.h"
 #include "StRichPhysicsDb.h"
 #include "StRichNoiseSimulator.h"
@@ -38,7 +41,7 @@
 	static double electric_noise = physDB->electric_noise;
 	static Randoms random;                 // declarations
  
-	    StRichViewer::getView()->mStRichNoise->Fill(noise);
+	double noise = electric_noise * random.Gauss();
 #ifdef RICH_WITH_VIEWER
 	if (StRichViewer::histograms )
 	    StRichViewer::getView()->mNoise->Fill(noise);

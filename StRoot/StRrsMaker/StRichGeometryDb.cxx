@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRichGeometryDb.cxx,v 1.1 2000/01/18 21:32:02 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
  *
  * Description:
  *
  ******************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.1  2000/01/18 21:32:02  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:20  lasiuk
+ * Second Revision
+ *
+ * Revision 1.4  2000/02/12 21:55:44  lasiuk
+ * Wire position adjustment
  *
  * Revision 1.3  2000/02/08 16:26:01  lasiuk
  * rmove vector and StGlobals from Interface.
@@ -27,51 +30,51 @@
 //SCL
  * Initial Revision
  *
-    //RRS
+ *******************************************************************/
 
 #include "SystemOfUnits.h"
-    StRichGeometryDb* StRichGeometryDb::p2Db = 0;
-    
-    StRichGeometryDb::StRichGeometryDb()
-	: quads(5) 
-    {
+#ifndef ST_NO_NAMESPACES
+//namespace StRichRawData {
+#endif
+
+//RRS
 #ifndef ST_NO_NAMESPACES
     : quads(5) 
 #endif
     StRichGeometryDb::p2Db = this;   // access to current instance
-    }
+#include "StRichGeometryDb.h"
+
+StRichGeometryDb* StRichGeometryDb::p2Db = 0;
+
+StRichGeometryDb::StRichGeometryDb()
     : quads(5), quadsOrigin(5)
-    void StRichGeometryDb::my_fill()
-    {
-	version = 1.0;
-    quads[4].x0       = -1.92 * centimeter;          // verified
-	quads[1].z0       =   1.9 * centimeter;          // verified
-	quads[2].z0       = -65.1 * centimeter;          // verified
-	quads[3].z0       = -65.1 * centimeter;          // verified
-	quads[4].z0       =   1.9 * centimeter;          // verified
-	quads[1].x0       =  41.4 * centimeter;          // verified
-	quads[2].x0       =  41.4 * centimeter;          // verified
-	quads[3].x0       = -1.92 * centimeter;          // verified
-	quads[4].x0       = -1.92 * centimeter;          // verified
-	quad_gap_x        =  30.0 * millimeter;          // verified          
-	quad_gap_z        =  30.0 * millimeter;          
-	
-	wire_spacing      = 4.2   * millimeter;          // verified
-	wire_x0           = 41.61 * centimeter;          // verified
-	number_of_wires   = 192;                         // verified
-	
-	pad_side_x        = 7.9   * millimeter;          // verified
-	pad_side_z        = 7.5   * millimeter;          // verified
-	pad_spacing       = 0.5   * millimeter;          // verified
-	n_pad_x           = 48;                          // verified
-	n_pad_z           = 80;                          // verified
-	number_of_pads    = 15360;                       // verified
-	length            = 1310  * millimeter;          // verified
-	width             = 836   * millimeter;          // verified
-	height            = 2     * millimeter;          // verified
-	ampl_factor       = 1.0e4;                       // verified      
-    }
+{
+    //StRichGeometryDb::p2Db = this;   // access to current instance
     
+    quads[1].z0       =   1.9 * centimeter;          // verified
+    quads[2].z0       = -65.1 * centimeter;          // verified
+    quads[3].z0       = -65.1 * centimeter;          // verified
+    quads[4].z0       =   1.9 * centimeter;          // verified
+    quads[1].x0       =  41.4 * centimeter;          // verified
+    quads[2].x0       =  41.4 * centimeter;          // verified
+    quads[3].x0       = -1.92 * centimeter;          // verified
+    quads[4].x0       = -1.92 * centimeter;          // verified
+StRichGeometryDb::~StRichGeometryDb()
+    quad_gap_z        =  30.0 * millimeter;          
+    delete p2Db;
+}
+    wire_x0           = 41.61 * centimeter;          // verified
+void StRichGeometryDb::my_fill()
+    
+    pad_side_x        = 7.9   * millimeter;          // verified
+    pad_side_z        = 7.5   * millimeter;          // verified
+	
+    n_pad_x           = 48;                          // verified
+    n_pad_z           = 80;                          // verified
+    row_spacing       = 0.5   * millimeter;
+    n_pad_y           = 48;                          // verified
+
+    mNumberOfPadsInaColumn = 96;
     ampl_factor       = 1.0e4;                       // verified      
 }
     mNumberOfPadsInaRow    = 160;
@@ -133,7 +136,44 @@
     mRadiatorDimension = StThreeVector<double>(131./2.,83.6/2.,1.)*centimeter;
     mQuartzDimension = StThreeVector<double>(131./2.,83.6/2.,.5)*centimeter;
     mPadPlaneDimension = StThreeVector<double>(131./2.,83.6/2.,0.)*centimeter;
+    mProximityGap = 8.*centimeter; 
+    mNormalVectorToPadPlane = StThreeVector<double>(-.49718, 0.86765, -0.00038);
+}
+
+StRichGeometryDb* StRichGeometryDb::getDb()
 {
+    os << "** StRichGeometryDb::print() **" << endl;
+	p2Db = new StRichGeometryDb();
+    
+    os << "Detector Length=   " << (detectorLength()/centimeter) << " cm" << endl;
+    os << "Detector Width=    " << (detectorWidth()/centimeter)  << " cm" << endl;
+
+    os << "Xo (1)=            " << (quadrantX0(1)/centimeter)    << " cm" << endl;
+    os << "Xo (2)=            " << (quadrantX0(2)/centimeter)    << " cm" << endl;
+    os << "Xo (3)=            " << (quadrantX0(3)/centimeter)    << " cm" << endl;
+    os << "Xo (4)=            " << (quadrantX0(4)/centimeter)    << " cm" << endl;
+
+    os << "Zo (1)=            " << (quadrantZ0(1)/centimeter)    << " cm" << endl;
+    os << "Zo (2)=            " << (quadrantZ0(2)/centimeter)    << " cm" << endl;
+    os << "Zo (3)=            " << (quadrantZ0(3)/centimeter)    << " cm" << endl;
+    os << "Zo (4)=            " << (quadrantZ0(4)/centimeter)    << " cm" << endl;
+
+    os << "Quad Gap (x)=      " << (quadrantGapsInX()/centimeter) << " cm" << endl;
+    os << "Quad Gap (z)=      " << (quadrantGapsInZ()/centimeter) << " cm" << endl;
+    // Extra here
+
+    os << "No of Pads:        " <<  (numberOfPads())                       << endl;
+    os << " Row:              " << (numberOfPadsInRow())                   << endl;
+    os << " Column:           " << (numberOfPadsInColumn())                << endl;
+
+    os << "Pad Pitch=         " << (padPitch()/centimeter)        << " cm" << endl;
+    os << "Pad Width=         " << (padWidth()/centimeter)        << " cm" << endl;
+    os << "Pad Length=        " << (padLength()/centimeter)       << " cm" << endl;
+
+    os << "Wire Pitch=        " << (wirePitch()/centimeter)       << " cm" << endl;
+    os << "Wire OffSet (x)=   " << (firstWirePositionInX()/centimeter) << " cm" << endl;
+    os << "Number of Wires:   " << (numberOfWires())                       << endl;
+    os << "Pad Spacing=       " << (padSpacing()/millimeter)      << " mm" << endl;
 
     os << "Gas Gain=          " << (gasGainAmplificationFactor())            << endl;
     os << "AnodeToPadSpacing= " << (anodeToPadSpacing()/centimeter) << " cm" << endl;

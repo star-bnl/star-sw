@@ -1,5 +1,5 @@
 /*******************************************OtherAlgorithms.h**\
- *
+ * $Id: StRichOtherAlgorithms.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
  *  This file contains two small classes: Randoms encapsulates
  *  random number generation algorithms, such as poisson,
  *  gauss, flat and polia. MyRound rounds doubles to the nearest
@@ -12,10 +12,14 @@
  *  are initiated using the STAR HepJamesRandom engine.
  *  Flat comes from the C++ Standard Library.
  *
+ * $Log: StRichOtherAlgorithms.h,v $
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
  * Revision 1.4  2000/03/13 18:03:37  lasiuk
  * nearest integer
  *
-#include <iostream>
+\**************************************************************/
 
  * Revision 1.2  2000/01/25 22:02:21  lasiuk
  * Second Revision

@@ -1,5 +1,5 @@
 /**************************************************NoiseSimulator.h**\
- * $Id: StRichNoiseSimulator.h,v 1.1 2000/01/18 21:32:03 lasiuk Exp $
+ * $Id: StRichNoiseSimulator.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
  *
  * Description:
  *   StRichNoiseSimulator is the function object containing
@@ -14,8 +14,11 @@
  *
  *********************************************************************
  * $Log: StRichNoiseSimulator.h,v $
- * Revision 1.1  2000/01/18 21:32:03  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:03  lasiuk
  * Initial Revision
@@ -34,6 +37,7 @@
 using std::unary_function;
 #endif
 
+#ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
 #include "StRichRrsMacros.h"

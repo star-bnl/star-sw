@@ -1,13 +1,16 @@
 /*****************************************************************
- *   
+ * $Id: StRichPadPlane.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
- *   
+ * $Log: StRichPadPlane.h,v $
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
  * Revision 1.3  2000/01/26 23:39:20  lasiuk
  * Forward declaration of classes to bypass CINT evaluation
  * comment the list data member in StRichID
-\********************************************************************/
+ *
  * Revision 1.2  2000/01/25 22:02:21  lasiuk
  * Second Revision
  *
@@ -23,7 +26,7 @@
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES
-
+using std::vector;
 using std::list;
 #endif
 
@@ -69,10 +72,10 @@ typedef vector<aDetectorRow>  aPadPlane;
 #else
 typedef vector<StRichPad, allocator<StRichPad> >       aDetectorRow;
 typedef vector<aDetectorRow, allocator<aDetectorRow> > aPadPlane;
-typedef typename impl_type::iterator row_iter;
-typedef typename impl_type::const_iterator const_row_iter;
-typedef typename row_type::iterator pad_iter;
-typedef typename row_type::const_iterator const_pad_iter;
+#endif
+
+typedef aDetectorRow row_type;
+typedef aPadPlane impl_type;
 typedef anIDList::iterator id_iter;
 typedef anIDList::const_iterator const_id_iter;
 

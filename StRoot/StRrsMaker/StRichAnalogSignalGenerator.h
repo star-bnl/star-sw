@@ -1,5 +1,5 @@
 /*************************************************************ASG.h**\
- * $Id: StRichAnalogSignalGenerator.h,v 1.1 2000/01/18 21:32:00 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.h,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogSignalGenerator is a function object containing the 
@@ -15,9 +15,12 @@
  *
  *********************************************************************
  * $Log: StRichAnalogSignalGenerator.h,v $
- * Revision 1.1  2000/01/18 21:32:00  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:19  lasiuk
+ * Second Revision
  *
+ * Revision 1.3  2000/02/08 16:21:43  lasiuk
+ * use coordinate transformation routines for pad limits
+ * incorporation of dbs
  *
  * Revision 1.2  2000/01/25 22:02:19  lasiuk
  * Second Revision
@@ -35,7 +38,7 @@
 #include <functional>
 
 #ifndef ST_NO_NAMESPACES
-
+using std::binary_function;
 using std::pair;
 #endif
 

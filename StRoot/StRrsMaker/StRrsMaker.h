@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.1 2000/01/18 21:32:05 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,11 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.1  2000/01/18 21:32:05  lasiuk
- *  Initial Revision
+ *  Revision 1.2  2000/01/25 22:02:23  lasiuk
+ *  Second Revision
+ *
+ *  Revision 1.4  2000/01/27 17:10:04  lasiuk
+ *  modify to work stand-alone from ROOT
  *
  *  Revision 1.3  2000/01/26 23:39:19  lasiuk
  *  Forward declaration of classes to bypass CINT evaluation
@@ -42,9 +45,6 @@
  *  8/20/1999 Moved includes to DB and Viewer to .cxx
  *                                         Valery Fine
  *
-#define  RICH_WITH_NO_VIEWER 1
-
-
 
  *                                    Caroline Peter
  *  8/30/1999 removed bool for SUN compatibility
@@ -57,6 +57,8 @@
 
 #ifndef StMaker_H
 #include "StMaker.h"                  // Root4Star Maker
+#endif
+
 #ifndef HEP_SYSTEM_OF_UNITS_H
 #include "StRichGeometryDb.h"
 #include "StRichPhysicsDb.h"
@@ -80,6 +82,9 @@ class StRichMomentumTransform;
 
 class StRrsMaker : public StMaker 
 {
+public:
+    StRrsMaker(const char *name="Rrs");
+    ~StRrsMaker();
     
     Int_t Init();
     Int_t Init(int histograms);
@@ -99,6 +104,10 @@ class StRrsMaker : public StMaker
     void drawParticleId();          
     void drawPadPlane();            
     void drawClusterElectrons();    
+    void drawErrorDetection();      
+    void drawWhichWire();           
+    void drawFeedback();            
+    void drawPolia();               
     void drawAnalogSignals();       
     void drawTotalCharge();         
     void drawADCSignal();           
@@ -112,17 +121,29 @@ private:
     StRichCoordinateTransform      *mCoordinateTransform;//!
     StRichFilter                    mFilter;//!
     // Processing
-    //char*   mInputFileName;
-    //char*   mOutputFileName;
+    StRichIonization                mIonize;//!
+    StRichInduceSignal              mInduceSignal;//!
+    StRichAnalogToDigitalConverter  mADC;//!
+    StRichNoiseSimulator            mNoiseSimulator;//!
+
+    // Output Data
+    StRichPadPlane                 *mPadPlane;//!
+    StRichWriter                   *mWriter;//!
+    
+    // I/O streams
+    char*                        mInputFileName;//!
+
+    char*                        mOutputFileName;//!
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     /* TO BE ADDED */
     /*StRrsIstream*                mInputStream;  */
     /*StRrsOstream*                mOutputStream; */
     
     //   Flags settable at macro level!
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.1 2000/01/18 21:32:05 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.1 2000/01/18 21:32:05 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };

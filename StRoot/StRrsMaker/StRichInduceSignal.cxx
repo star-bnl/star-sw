@@ -1,5 +1,5 @@
 /*******************************************************
- * $Id: StRichInduceSignal.cxx,v 1.1 2000/01/18 21:32:02 lasiuk Exp $
+ * $Id: StRichInduceSignal.cxx,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
  *
  * Description:
  *  StRichInduceSignal calculates an analog signal on pads.
@@ -13,8 +13,11 @@
  *
  *******************************************************
  * $Log: StRichInduceSignal.cxx,v $
- * Revision 1.1  2000/01/18 21:32:02  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:20  lasiuk
+ * Second Revision
+ *
+ * Revision 1.3  2000/02/08 16:26:51  lasiuk
+ * rm viewer dependence
  *
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
@@ -22,13 +25,13 @@
  *******************************************************/
  * Revision 1.1  2000/01/18 21:32:02  lasiuk
  * Initial Revision
-#ifdef RICH_WITH_VIEWER
-#include "StRichViewer.h"
-#endif
  *********************************************************************/
 
 #ifndef ST_NO_NAMESPACES
 #endif
+
+#include "StRichInduceSignal.h"
+#include "StRichInduceSignal.h"
 #ifdef RICH_WITH_VIEWER
 #include "StRichViewer.h"
 #endif

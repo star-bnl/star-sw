@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichInduceSignal.h,v 1.1 2000/01/18 21:32:02 lasiuk Exp $
+ * $Id: StRichInduceSignal.h,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
  *
  * Description:
  *   InduceSigna1 is the module containing the sequence of
@@ -8,8 +8,11 @@
  *
  *****************************************************************
  * $Log: StRichInduceSignal.h,v $
- * Revision 1.1  2000/01/18 21:32:02  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:20  lasiuk
+ * Second Revision
+ *
+ * Revision 1.3  2000/02/08 16:26:52  lasiuk
+ * rm viewer dependence
  *
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
@@ -30,7 +33,7 @@
 
 #include <functional>
 #ifndef ST_NO_NAMESPACES
-
+using std::unary_function;
 #endif
 
 #ifndef ST_NO_NAMESPACES

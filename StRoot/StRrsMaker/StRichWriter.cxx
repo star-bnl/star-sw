@@ -1,13 +1,16 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.1 2000/01/18 21:32:05 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
- * Revision 1.1  2000/01/18 21:32:05  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:23  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.5  2000/02/08 19:53:43  lasiuk
+ * add to the pads rather than reassign each time!
  *
  * Revision 1.4  2000/02/08 16:36:47  lasiuk
  * Bring into line with HP
@@ -45,8 +48,9 @@
 	: mStorage(0)
     { /* NEVER CAN CALL */
 	cerr << "StRichWriter::StRichWriter()--> Never called" << endl;
-	cerr << "WARNING::>>StRichWriter::getInstance()" << endl;
-	cerr << "An Instance of StRichPadPlane must exist!" << endl;
+	exit(-9);
+    }
+
     StRichWriter::StRichWriter(StRichPadPlane* aPadPlane)
 	: mStorage(aPadPlane)
     { /* nopt */ }

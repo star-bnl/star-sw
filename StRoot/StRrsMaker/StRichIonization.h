@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.1 2000/01/18 21:32:02 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,8 +14,11 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.1  2000/01/18 21:32:02  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
+ * Revision 1.4  2000/02/12 00:38:29  lasiuk
+ * rename probability (max)
  *
  * Revision 1.3  2000/02/08 16:27:36  lasiuk
  * change to class.  Put dbs and random generators into
@@ -35,7 +38,7 @@
  *
  ****************************************************************************/
 #include <functional>
-    
+
 using std::unary_function;
 #include <list>
 #ifndef ST_NO_NAMESPACES
