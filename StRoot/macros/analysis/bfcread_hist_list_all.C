@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.6 1999/11/19 20:13:22 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.7 1999/11/30 19:23:05 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.7  1999/11/30 19:23:05  kathy
+// changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
+//
 // Revision 1.6  1999/11/19 20:13:22  kathy
 // cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
 //
@@ -20,10 +23,16 @@
 //
 //=======================================================================
 // owner: Kathy Turner
-// what it does: reads the *.hist.root file produced from bfc.C and
+// what it does: reads the *.hist.root file produced from a chain 
+//               (such as bfc) and
 //               then lists all histogram branches and the names and
 //               titles of the histograms in the branches
 // inputs: MainFile - *.hist.root file from bfc output
+// 
+// NOTE: assumes that top level directory is bfcTree! If you wrote the
+//   *.hist.root file with something else, then you must change this
+//   in StIOMaker constructor in this macro!!
+//
 //=======================================================================
 
 class StChain;

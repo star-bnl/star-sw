@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.13 1999/11/29 21:40:18 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.14 1999/11/30 19:23:05 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.14  1999/11/30 19:23:05  kathy
+// changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
+//
 // Revision 1.13  1999/11/29 21:40:18  kathy
 // clean up macros; change name of output files; remove unneccessary lines
 //
@@ -65,9 +68,10 @@
 //   - draws & prints histograms from given input Maker
 //
 // inputs: nevents - # events to process
-//         MainFile - *.hist.root file from bfc output
-//         MakerHist - name of Maker that you want histograms from
+//         MainFile - *.dst.root file from bfc output
 //         psFile - output postscript filename
+//         PageTitle - title you want on each output page, default is
+//                       MainFile name
 //
 // standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
@@ -82,15 +86,13 @@ StChain *chain;
 
 void bfcread_dst_QAhist(Int_t nevents=10, 
              const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root",
-             const Char_t *MakerHist="QA",
              const Char_t *psFile="DSTtable_QA_hist.ps",
              const Char_t *PageTitle="")
 {
 //
-  cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
-  cout << "bfcread_dst_QAhist.C, input Maker name      " << MakerHist<< endl;
-  cout << "bfcread_dst_QAhist.C, output psfile name    " << psFile   << endl;
   cout << "bfcread_dst_QAhist.C, num events to process " << nevents  << endl;
+  cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
+  cout << "bfcread_dst_QAhist.C, output psfile name    " << psFile   << endl;
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -99,6 +101,12 @@ void bfcread_dst_QAhist(Int_t nevents=10,
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
+
+// force the directory name for histograms since this macro is 
+// specifically for running St_QA_Maker
+  const Char_t *MakerHist="QA";
+  cout << "bfcread_dst_QAhist.C, directory of Maker name      " << 
+     MakerHist<< endl;
 
 //  Setup top part of chain
   chain = new StChain("bfc");
