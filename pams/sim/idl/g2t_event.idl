@@ -21,4 +21,5 @@
        long      n_wounded_east;   /* wounded in the east nucleus */
        long      n_wounded_west;   /* wounded in the west nucleus */
        long      njets;            /* number of jets */
+       long      n_rejected;       /* number of events rejected prior to the current one */
    } ;
