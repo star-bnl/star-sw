@@ -27,8 +27,8 @@ echo 'return 1; }'
 echo "int ${pkg}_stop() {"
 echo '	amiInvoker *i;'
 foreach p ($pams)
-	echo "	if(NULL != (i=ami->findInvoker(\"${p}\")))"
-	echo "		)ami->deleteInvoker(\"${p}\");"
+	echo "	if(NULL != (i=ami->findInvoker("\""${p}"\"")))"
+	echo "		ami->deleteInvoker("\""${p}"\"");"
 end
 echo 'return 1; }'
 #
