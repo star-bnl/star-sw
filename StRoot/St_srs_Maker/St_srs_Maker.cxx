@@ -98,8 +98,8 @@ Int_t St_srs_Maker::Make()
 {
   Int_t res; 
 // 		Create output tables
-  St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000);       m_DataSet->Add(scs_spt);
-  St_srs_result *srs_result = new St_srs_result("srs_result",20000); m_DataSet->Add(srs_result);
+  St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",25000);       m_DataSet->Add(scs_spt);
+  St_srs_result *srs_result = new St_srs_result("srs_result",25000); m_DataSet->Add(srs_result);
     
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
