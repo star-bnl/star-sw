@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.22 2003/02/11 03:22:07 porter Exp $
+ * $Id: MysqlDb.cc,v 1.23 2003/02/12 22:12:45 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.23  2003/02/12 22:12:45  porter
+ * moved warning message about null columns (checked in 2 days ago) from the
+ * depths of the mysql coding into the StDbTable code. This suppresses confusing
+ * warnings from tables that have had elements removed but their storage columns
+ * still exist in the database.
+ *
  * Revision 1.22  2003/02/11 03:22:07  porter
  * added warning message individual columns return null data
  *
@@ -509,7 +515,10 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
       } else {
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);
       };
-    } else {
+    }
+
+    /*
+       else {
 
       ostrstream nd;
       nd<<"null data returned from table = ";
@@ -517,6 +526,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
       StDbManager::Instance()->printInfo(nd.str(),dbMWarn,__LINE__,"MysqlDb","Output(StDbBuffer* b)");
       nd.freeze(0);
     }
+    */
+
     tRetVal=true;
   };
   if (change) aBuff->SetClientMode();

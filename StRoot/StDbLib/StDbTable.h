@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.20 2003/01/10 04:19:21 porter Exp $
+ * $Id: StDbTable.h,v 1.21 2003/02/12 22:12:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.21  2003/02/12 22:12:45  porter
+ * moved warning message about null columns (checked in 2 days ago) from the
+ * depths of the mysql coding into the StDbTable code. This suppresses confusing
+ * warnings from tables that have had elements removed but their storage columns
+ * still exist in the database.
+ *
  * Revision 1.20  2003/01/10 04:19:21  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -173,6 +179,8 @@ unsigned int* mtimeVals;
   bool createMemory(int nrows);
   char* duplicateData();
   void  init();
+  void printNoDataReturned(const char* elementName);
+
 
 public:
 
