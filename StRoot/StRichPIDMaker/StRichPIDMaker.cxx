@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.41 2001/04/25 00:31:40 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.42 2001/05/16 20:05:05 dunlop Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.42  2001/05/16 20:05:05  dunlop
+ * Modified to also write into StEvent high pt hits.
+ *
  * Revision 2.41  2001/04/25 00:31:40  lasiuk
  * HP changes.  removal of reprocessTraits()
  *
@@ -185,10 +188,17 @@
  ******************************************************/
 #include "StRichPIDMaker.h"
 
+#include <map>
 #include <algorithm>
 #ifndef ST_NO_NAMESPACES
 using std::min;
 using std::max;
+using std::map;
+using std::pair;
+using std::make_pair;
+using std::less;
+
+
 #endif
 
 // switches
@@ -289,7 +299,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.41 2001/04/25 00:31:40 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.42 2001/05/16 20:05:05 dunlop Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -444,10 +454,24 @@ Int_t StRichPIDMaker::Make() {
     //
     // Load vertex and number of primaries
     //
-    if (!this->checkEvent(rEvent)) return kStWarn;
-    mGoodEvents++;
+    // JCD 5/16/01 moved bail to later.
+    bool goodRichEvent = this->checkEvent(rEvent);
+    // but bail if no StEvent or vertex
+    if (!rEvent) {
+	cout << "StRichPIDMaker::Make()\n";
+	cout << "\tWarning: No StEvent" << endl;
+	return kStWarn;
+    }
+    if (!rEvent->primaryVertex()) {
+	cout << "StRichPIDMaker::Make()\n";
+	cout << "\tWarning: No vertex" << endl;
+	return kStWarn;
+    }
 
 
+    if (goodRichEvent) {
+	mGoodEvents++;
+    }
 
     //
     // Initialize Parameters
@@ -461,51 +485,47 @@ Int_t StRichPIDMaker::Make() {
     // get hits, clusters, pixels from StEvent
     //
     //const
-    StRichCollection*     richCollection = rEvent->richCollection();
-    mRichCollection = richCollection;
-    
-    if (!richCollection) {
-	cout << "StRichPIDMaker::Make()\n";
-	cout << "\tERROR: Cannot get richCollection from StEvent\n";
-	cout << "\tSkip Event" << endl;
-	return kStWarn;
-    }
-
     const StSPtrVecRichHit*     pRichHits      = 0;
     const StSPtrVecRichCluster* pRichClusters  = 0;
     const StSPtrVecRichPixel*   pRichPixels    = 0;
     
     int myRichHits   = 0;
     int myRichPixels = 0;
+    // Reorganized JCD 5/16/01.  Used to be that you would bail.
+    StRichCollection* richCollection=0;
     
-    if (richCollection->pixelsPresent()) {
-	myRichPixels = richCollection->getRichPixels().size();
-	const StSPtrVecRichPixel& richPixels =
-	    richCollection->getRichPixels();
-	pRichPixels = &richPixels;
-    }
-    
-    if (richCollection->clustersPresent()) {
-	const StSPtrVecRichCluster& richClusters =
-	    richCollection->getRichClusters();
-	pRichClusters = &richClusters;
-    }
-    
-    if (richCollection->hitsPresent()) {
-	const StSPtrVecRichHit& richHits =
-	    richCollection->getRichHits();
-	pRichHits = &richHits;
-	if(pRichHits)
-	    myRichHits = pRichHits->size();
-    }
-    
-    
+    if (goodRichEvent) {
+	richCollection = rEvent->richCollection();
+	mRichCollection = richCollection;
+	if (richCollection) {
+	    if (richCollection->pixelsPresent()) {
+		myRichPixels = richCollection->getRichPixels().size();
+		const StSPtrVecRichPixel& richPixels =
+		    richCollection->getRichPixels();
+		pRichPixels = &richPixels;
+	    }
+	    
+	    if (richCollection->clustersPresent()) {
+		const StSPtrVecRichCluster& richClusters =
+		    richCollection->getRichClusters();
+		pRichClusters = &richClusters;
+	    }
+	    
+	    if (richCollection->hitsPresent()) {
+		const StSPtrVecRichHit& richHits =
+		    richCollection->getRichHits();
+		pRichHits = &richHits;
+		if(pRichHits)
+		    myRichHits = pRichHits->size();
+	    }
     //
     // LOAD TRACKS intersecting RICH
     // 
-    mNumberOfPrimaries  = this->fillTrackList(rEvent,pRichHits);
-    mRichTracks = mListOfStRichTracks.size();
-
+	    mNumberOfPrimaries  = this->fillTrackList(rEvent,pRichHits);
+	    mRichTracks = mListOfStRichTracks.size();
+	}
+    }
+    
 
     //
     // Check if the tpcHitCollection Exists
@@ -544,13 +564,73 @@ Int_t StRichPIDMaker::Make() {
 		cout << "\tContinuing..." << endl;
 	    }
 	    else {
-		for(ii=0; ii<mListOfStRichTracks.size(); ii++) {
-		    StTrack* currentTrack = mListOfStRichTracks[ii]->getStTrack();
+                // Begin changes for high pt writing.  JCD 5/16/01.
+		// Use a map to avoid duplication of keys.  Avoids having to sort on pointer.
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+		typedef map < unsigned short, StTrack*> trackKeyToTrackMapType;
+#else
+		typedef map < unsigned short, StTrack*, less<unsigned short>, allocator < OS_PAIR<unsigned short, StTrack* > > trackKeyToTrackMapType;
+#endif
+		trackKeyToTrackMapType trackKeyToTrack;
+		
+		for (ii=0; ii<mListOfStRichTracks.size(); ++ii) {
+		    StTrackNode* theTrackNode = mListOfStRichTracks[ii]->getStTrack()->node();
+		    for (size_t jj=0; jj<theTrackNode->entries(); ++jj) {
+			
+			StTrack* currentTrack = theTrackNode->track(jj);
+			
+			if(!currentTrack->detectorInfo()) {
+			    cout << "StRichPIDMaker::Make()\n";
+			    cout << "\tWARNING: No detectorInfo()\n";
+			    cout << "\tassocciated with the track.  Continuing..." << endl;
+			    continue;
+			}
+			trackKeyToTrack.insert(make_pair(currentTrack->key(),currentTrack));
+			
+			break;
+		    }
+		}
+		// Now the global tracks that high pt wants.
+		StSPtrVecTrackNode& theNodes = rEvent->trackNodes();
+		for (size_t nodeIndex = 0; nodeIndex<theNodes.size(); ++nodeIndex) {
+		    StTrackNode* theTrackNode = theNodes[nodeIndex];
+		    for (size_t globalIndex=0; globalIndex<theTrackNode->entries(global);++globalIndex) {
+			StTrack* currentTrack = theTrackNode->track(global,globalIndex);
+			// Hard coded cuts on global pt and eta
+			if (currentTrack->geometry()->momentum().perp()>=1.5 
+			    && 
+			    fabs(currentTrack->geometry()->momentum().pseudoRapidity())<1.
+			    &&
+			    currentTrack->flag()>=0) {
+			    if(!currentTrack->detectorInfo()) {
+				cout << "StRichPIDMaker::Make()\n";
+				cout << "\tWARNING: No detectorInfo()\n";
+				    cout << "\tassocciated with the track.  Continuing..." << endl;
+				    continue;
+			    }
+			    trackKeyToTrack.insert(make_pair(currentTrack->key(),currentTrack));
+			
+			    break;
+			}
+		    }
+		}
+		
+		cout << "StRichPIDMaker::Make(): Adding hits to " << trackKeyToTrack.size() << " tracks" << endl;
+		cout << "\t " << mListOfStRichTracks.size() << " Rich Tracks " << endl;
+		
+
+// This can be made more efficient if necessary with multimaps.
+		
+		for(trackKeyToTrackMapType::const_iterator titer= trackKeyToTrack.begin(); 
+		    titer!=trackKeyToTrack.end(); ++titer) {
+		    
+		    StTrack* currentTrack = (*titer).second;
+		    
 		    if(!currentTrack->detectorInfo()) {
-			cout << "StRichPIDMaker::Make()\n";
-			cout << "\tWARNING: No detectorInfo()\n";
-			cout << "\tassocciated with the track.  Continuing..." << endl;
-			continue;
+			    cout << "StRichPIDMaker::Make()\n";
+			    cout << "\tWARNING: No detectorInfo()\n";
+			    cout << "\tassocciated with the track.  Continuing..." << endl;
+			    continue;
 		    }
 		    
 		    unsigned short trackKey = currentTrack->key(); 
@@ -566,13 +646,11 @@ Int_t StRichPIDMaker::Make() {
 			// access it later
 			//
 			if(theTpcHitCollection->addHit(tpcHit)) {
-			    currentTrack->detectorInfo()->addHit(tpcHit);
+				currentTrack->detectorInfo()->addHit(tpcHit);
 			}
 			
 		    } // loop over the hits
-
-		} // loop over the Rich Tracks
-			
+		} // loop over the map entries
 		delete theEvtManager;
 		theEvtManager=0;
 	    } // else Got 'em
@@ -583,7 +661,17 @@ Int_t StRichPIDMaker::Make() {
     // The StTpcHitCollection should exist at this
     // point whether it is created by the PIDMaker
     // or not
-
+ 
+   // Now bail.  JCD 5/16/2001
+    if (!goodRichEvent) return kStWarn;
+    if (!richCollection) {
+	cout << "StRichPIDMaker::Make()\n";
+	cout << "\tERROR: Cannot get richCollection from StEvent\n";
+	cout << "\tSkip Event" << endl;
+	return kStWarn;
+    }
+    
+       
     
     // 
     // This is the beginning of the main PID loop
