@@ -14,7 +14,7 @@
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
-      Integer          section,tpgv,tpss,tpad,isdet,ladder
+      Integer          section,tpgv,tpss,tpad,isdet,ladder,is
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -256,7 +256,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='psc') then
 *13*
       else If (Csys=='rch') then
-        volume_id = numbv(1)
+        is=0
+        if      cd=='RCSI' { is=1 }
+        elseif  cd=='RGAP' { is=2 }
+        elseif  cd=='QUAR' { is=3 }
+        elseif  cd=='FREO' { is=4 }
+        elseif  cd=='OQUA' { is=5 }
+        volume_id = numbv(1)+10*is
+
       else If (Csys=='zdc') then
         volume_id = numbv(1)*1000+numbv(2)
 *14*

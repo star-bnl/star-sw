@@ -1,5 +1,8 @@
-* $Id: g2tmain.g,v 1.36 2000/01/23 19:47:04 nevski Exp $
+* $Id: g2tmain.g,v 1.37 2000/01/28 00:47:13 nevsky Exp $
 * $Log: g2tmain.g,v $
+* Revision 1.37  2000/01/28 00:47:13  nevsky
+* rich hits may contain up to 5 detectors: RCSI,RGAP,QUAR,FREO,OQUA
+*
 * Revision 1.36  2000/01/23 19:47:04  nevski
 * *** empty log message ***
 *
@@ -51,7 +54,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
-     nsys    = 21                 ! number of subsystems
+     nsys    = 24                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
 
@@ -113,13 +116,15 @@ created   22 april 98
      ctab  = 'rch'        ! table name
      spec  = 'ctf'        ! specification type
      csys  = 'RICH'       ! Geant Subsystem
-     cdet  = 'RGAP'       ! Sensitive detector
-
-   fill dete       ! star subsystem
-     ctab  = 'rch'        ! table name
-     spec  = 'ctf'        ! specification type
-     csys  = 'RICH'       ! Geant Subsystem
      cdet  = 'RCSI'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'RGAP'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'QUAR'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'FREO'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'OQUA'       ! Sensitive detector
 
    fill dete       ! star subsystem
      ctab  = 'emc'        ! table name
