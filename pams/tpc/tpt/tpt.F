@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.21 2000/03/22 20:35:21 sakrejda Exp $
+* $Id: tpt.F,v 1.22 2000/07/26 01:03:49 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.22  2000/07/26 01:03:49  sakrejda
+* Vertex info added
+*
 * Revision 1.21  2000/03/22 20:35:21  sakrejda
 * Message enable removed from the fortran routines.
 * Message control will be handled in one place in the tpt Maker.
@@ -58,7 +61,7 @@
 * Revision 1.2  1998/01/27 00:35:42  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT(tpar_h,tpar,hit_h,hit,track_h,track)
+      INTEGER FUNCTION TPT(tpar_h,tpar,hit_h,hit,track_h,track,vertex_h,vertex)
 C
 C TPT - main track finding 
 C
