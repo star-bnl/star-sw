@@ -1,14 +1,17 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichRingPoint.cxx,v 2.3 2000/10/01 00:57:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 2.2  2000/09/29 17:55:51  horsley
- *  fixed bug in Minimization routine, included StMagF stuff (commented out)
- *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *  Revision 2.3  2000/10/01 00:57:18  gans
+ *  Added #include <values.h> neeaded for MAXFLOAT
  *
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
+ *
+ *  Revision 2.3  2000/10/01 00:57:18  gans
  *  Added #include <values.h> neeaded for MAXFLOAT
  *
  *  Revision 2.2  2000/09/29 17:55:51  horsley
@@ -23,6 +26,7 @@
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
+ *  initial revision
  **********************************************************/
 
 #include "StRichRingPoint.h"
