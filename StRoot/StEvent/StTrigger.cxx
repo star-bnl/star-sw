@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.cxx,v 2.1 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StTrigger.cxx,v 2.2 2001/08/29 18:53:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrigger.cxx,v $
+ * Revision 2.2  2001/08/29 18:53:37  ullrich
+ * Changed trigger words to UInt_t (was UShort_t)
+ *
  * Revision 2.1  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -29,7 +32,7 @@ StTrigger::StTrigger()
     mTriggerWord = 0;
 }
 
-StTrigger::StTrigger(unsigned short aw, unsigned short w)
+StTrigger::StTrigger(unsigned int aw, unsigned int w)
 {
     mTriggerActionWord = aw;
     mTriggerWord = w;
@@ -50,14 +53,14 @@ StTrigger::operator!=(const StTrigger& t) const
     return !(t == *this);
 }
 
-unsigned short
+unsigned int
 StTrigger::triggerActionWord() const { return mTriggerActionWord; }
 
-unsigned short
+unsigned int
 StTrigger::triggerWord() const { return mTriggerWord; }
 
 void
-StTrigger::setTriggerActionWord(unsigned short val) { mTriggerActionWord = val; }
+StTrigger::setTriggerActionWord(unsigned int val) { mTriggerActionWord = val; }
 
 void
-StTrigger::setTriggerWord(unsigned short val) { mTriggerWord = val; }
+StTrigger::setTriggerWord(unsigned int val) { mTriggerWord = val; }
