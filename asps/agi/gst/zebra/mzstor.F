@@ -1,13 +1,15 @@
 *
-* $Id: mzstor.F,v 1.3 1998/04/16 16:58:08 fisyak Exp $
+* $Id: mzstor.F,v 1.4 1998/06/05 20:55:40 perev Exp $
 *
 * $Log: mzstor.F,v $
+* Revision 1.4  1998/06/05 20:55:40  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:08  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          25/03/98  17.51.27  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZSTOR (IXSTOR,CHNAME,CHOPT

@@ -8,16 +8,15 @@ Replace[LIST #;] with [ #1 _
  "Geant  "   GfKine,GfVert,GfPart,GfPath,GfHead,GDtoM,GMtoD,GlVolu,
              GpKine,GLast,GsHEAD,GsCKOV,GpIons,Grndm,Granor,Gfnhit,
  "vector "   vdist,vscale,vadd,vmod,sortzv,vfill,Ublank,Ufill,Uzero,IuLast,
- "tr-prop"   trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv,Ssmt5t,Xmm55,Dmmlt,
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,
  "random "   binomi,rngama,gauss,proxim,
  "comis  "   csjcal,csaddr,jumpad,Jbyt,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,
  "zebra  "   mzvolm,mzdred,zverif,
- "hbook  "   hplfun,hpagsz,hnoent,
+ "hbook  "   hplfun,hpagsz,hnoent,hnform,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
  " math   "  sortrq,dgmlt1,dgmlt2
  " sind,cosd "

@@ -1,13 +1,15 @@
 *
-* $Id: ztell.F,v 1.3 1998/04/16 16:58:12 fisyak Exp $
+* $Id: ztell.F,v 1.4 1998/06/05 20:55:45 perev Exp $
 *
 * $Log: ztell.F,v $
+* Revision 1.4  1998/06/05 20:55:45  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:12  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          17/10/97  12.42.42  by  Pavel Nevski
 *CMZ :  1.30/00 19/03/97  22.28.33  by  Pavel Nevski
 *-- Author :
