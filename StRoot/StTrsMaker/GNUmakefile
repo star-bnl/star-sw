@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.2 1998/11/12 22:40:33 lasiuk Exp $
+# $Id: GNUmakefile,v 1.3 1998/11/12 23:22:12 lasiuk Exp $
 #
 # Author: Thomas Ullrich, Mar 25 1998
 # --------------------------------------------------------------------------
@@ -8,6 +8,9 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
+# Revision 1.3  1998/11/12 23:22:12  lasiuk
+# make compatible with new local/ Makefiles
+#
 # Revision 1.2  1998/11/12 22:40:33  lasiuk
 # Yale/BNL friendly structure
 #
@@ -33,8 +36,8 @@
 
 name := StTrs
 
-include ../GNUmakefile.architecture
+include local/GNUmakefile.architecture
 CPPFLAGS += -I$(SCL_HOME)/include \
 	    -I./include
 
-include ../GNUmakefile.common
+include local/GNUmakefile.common
