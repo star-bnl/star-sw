@@ -50,6 +50,7 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   StiHit* stiHit;
   StiDetector* detector;
   if (!_hitContainer) throw runtime_error("StiSvtHitLoader::loadHits() -F- _hitContainer==0 ");
+  int hitCounter = 0;
   for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel)
     {
     StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
@@ -79,11 +80,14 @@ void StiSvtHitLoader::loadHits(StEvent* source,
             stiHit = _hitFactory->getInstance();
             stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(),hit->position().z(),hit->charge() );
             _hitContainer->add( stiHit );
+	    hitCounter++;
             }
           }
         }
       }
     }
+  cout <<"StiSvtHitLoader::loadHits() -I- SVT Hits added:"<<hitCounter<<endl;
+  cout <<"StiSvtHitLoader::loadHits() -I- Hit Container size:"<<_hitContainer->size()<<endl;
   cout <<"StiSvtHitLoader::loadHits() -I- Done"<<endl;
 }
 
