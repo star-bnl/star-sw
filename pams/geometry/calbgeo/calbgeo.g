@@ -1,7 +1,7 @@
 ******************************************************************************
 MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *                                                                            *
-   Author    W. J. Llope, Rice University
+   Author    K. Shestermanov, IHEP. First version W. Llope 
    Created   November 17 1995
 *
 *	Revisions:
@@ -512,26 +512,13 @@ EndBlock
                 Subroutine  etsphit(j,Hit)
 *
 +CDE,Typing,GCBANK,GCVOLU,GCKINE,GCTRAK,AgCSTEP.
-common Structure CALG { version, Rmin,     Etacut,   CrackWd,
-                       FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
-                       ScintThk, AbsorThk, AbPapThk, Sntchthk, g10SbThk,
-                       SmAlfWdh, SmAlfThk, SmGasThk, SmGasWdh, SmGasRad,
-                       SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
-                       Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
-                       NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2) }
 *
       integer j,iplane,ishape
       integer nlev_r,nlev_m,mycell,jmycell,jmypar
       character cname*4,mname*4
       data mname/'CSDA'/
       Real      Hit,xyzhm(3),xyzh(3),dxhw,dyhw,dzhw
-      logical first/.true./
       save nlev_r,nlev_m,dxhw,dyhw,dzhw
-*
-      if(first) then
-        use CALBGEO/CALG
-      endif
-      first=.false.
 *
       nlev_r=nlevel-2
       mycell=lvolum(nlev_r) 
