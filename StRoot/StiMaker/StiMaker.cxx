@@ -70,7 +70,7 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //Display
 					 mdisplay(0), mdrawablehits(0),
 					 //Utilities
-					 mhitfiller(0), mtrackseedfinder(0), mkalmanseedfinder(0),
+					 mhitfiller(0), mEvaluableSeedFinder(0), mkalmanseedfinder(0),
 					 //Test
 					 mtempseedfinder(0), mcompseedfinder(0),
 					 //Tracker
@@ -114,8 +114,8 @@ StiMaker::~StiMaker()
     delete mtrackfactory;
     mtrackfactory = 0;
 
-    delete mtrackseedfinder;
-    mtrackseedfinder = 0;
+    delete mEvaluableSeedFinder;
+    mEvaluableSeedFinder = 0;
     
     StiDetectorContainer::kill();
     mdetector = 0;
@@ -200,7 +200,6 @@ Int_t StiMaker::Init()
 
     //The hit container
     mhitstore = StiHitContainer::instance();
-
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
     mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
@@ -223,9 +222,9 @@ Int_t StiMaker::Init()
     mkalmantrackfactory->setMaxIncrementCount(10);
 
     //EvaluableTrack SeedFinder
-    mtrackseedfinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
-    mtrackseedfinder->setFactory(mtrackfactory);
-    mtrackseedfinder->setStTrackType(mStTrackType);
+    mEvaluableSeedFinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
+    mEvaluableSeedFinder->setFactory(mtrackfactory);
+    mEvaluableSeedFinder->setStTrackType(mStTrackType);
 
     //KalmanTrackSeedFinder
     mkalmanseedfinder = new StiTrackSeedFinder(mhitstore);
@@ -282,9 +281,10 @@ Int_t StiMaker::Init()
     
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
-    mtracker->setTrackNodeFactory(mktracknodefactory);
+    //mtracker->setTrackNodeFactory(mktracknodefactory);
+    mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
     //mtracker->setTrackSeedFinder(mkalmanseedfinder);
-    mtracker->setTrackSeedFinder(mcompseedfinder);
+    //mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
     
     return StMaker::Init();
@@ -337,16 +337,22 @@ Int_t StiMaker::Make()
 	cout <<"\tdone"<<endl;
 
 	//Initialize the SeedFinder, loop on tracks
-	cout <<"StiMaker::Make()\tFill drawable tracks"<<endl;
-	mtrackseedfinder->setEvent(mevent, mc);
-	while (mtrackseedfinder->hasMore()) {
-	    StiRootDrawableStiEvaluableTrack* thetrack =
-		dynamic_cast<StiRootDrawableStiEvaluableTrack*>(mtrackseedfinder->next());
-	    if (thetrack) {
-		thetrack->fillHitsForDrawing();
-	    }
-	}
+	mEvaluableSeedFinder->setEvent(mevent, mc);
+
+	//Test track finder
+	
+	/*
+	  cout <<"StiMaker::Make()\tFill drawable tracks"<<endl;
+	  while (mEvaluableSeedFinder->hasMore()) {
+	  StiRootDrawableStiEvaluableTrack* thetrack =
+	  dynamic_cast<StiRootDrawableStiEvaluableTrack*>(mEvaluableSeedFinder->next());
+	  if (thetrack) {
+	  thetrack->fillHitsForDrawing();
+	  }
+	  }
 	cout <<"\tdone"<<endl;
+	*/
+	
     }
 
     //TEMP !!!!!

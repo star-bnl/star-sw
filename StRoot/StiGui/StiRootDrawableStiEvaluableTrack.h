@@ -16,6 +16,7 @@ public:
     StiRootDrawableStiEvaluableTrack();
     virtual ~StiRootDrawableStiEvaluableTrack();
 
+    virtual void update();
     virtual void fillHitsForDrawing();
     virtual void reset();
     
