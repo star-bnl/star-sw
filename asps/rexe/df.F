@@ -34,5 +34,8 @@
 #include "math_constants.inc"
       datan2d = C_DEG_PER_RAD*atan2 (arg1,arg2)
       end
-
+      real function ran(dummy)
+      real dummy, rndm
+      ran = rndm(dummy)
+      end
 #endif
