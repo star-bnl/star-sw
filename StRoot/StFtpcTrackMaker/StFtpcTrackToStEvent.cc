@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.6 2004/08/13 23:41:37 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.7 2004/08/17 20:40:26 perev Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -40,9 +40,11 @@ using namespace std;
 #include "StFtpcTrackToStEvent.hh"
 
 StFtpcTrackToStEvent::StFtpcTrackToStEvent() : mEvent(0), mTrackStore(0), mTrkNodeMap() {
+  originD = 0;
+  physicalHelix = 0;
   
-  originD = new StThreeVectorD(0,0,0);
-  physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
+//VP not used  originD = new StThreeVectorD(0,0,0);
+//VP not used  physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
 
   // encoded method = 16 bits = 12 fitting and 4 finding, Refer
   // to StTrackMethod.h and StTrackDefinitions.h in pams/global/inc/
