@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.27 2000/11/15 14:41:51 posk Exp $
+// $Id: doFlowEvents.C,v 1.28 2000/12/06 15:51:17 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.28  2000/12/06 15:51:17  oldi
+// Including FTPC.
+//
 // Revision 1.27  2000/11/15 14:41:51  posk
 // Protected against running Finish() twice.
 //
@@ -334,12 +337,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowCutEvent::SetEtaSym(0., 0.);
   
   // Set the track cuts
-//   StFlowCutTrack::SetFitPts(0, 0);
+//   StFlowCutTrack::SetFitPtsTpc(0, 0);
+//   StFlowCutTrack::SetFitPtsFtpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSq(0., 0.);
 //   StFlowCutTrack::SetDca(0., 0.);
 //   StFlowCutTrack::SetPt(0., 0.);
-//   StFlowCutTrack::SetEta(0., 0.);
+//   StFlowCutTrack::SetEtaTpc(0., 0.);
+//   StFlowCutTrack::SetEtaFtpc(0., 0.);
 
   
   // Set the event plane selections
@@ -469,8 +474,11 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*.flowpicoevent.root";
   //Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root";
   
-  //Char_t* filePath="/star/rcf/reco/P00hi/2000/07/"; // data
-  //Char_t* fileExt="*.dst.root";
+  //Char_t* filePath="../Data/FtpcSim/Markus/";
+  //Char_t* fileExt="*.flowpicoevent.root";
+
+  //Char_t* filePath="/streisand/data1/FlowReco/"; // data
+  //Char_t* fileExt="*100_220evts.dst.root";
 
   // Both  
   //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
