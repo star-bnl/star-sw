@@ -1,12 +1,8 @@
+/*!\class EMC_BarrelReader
+/author Subhasis, Herbert Ward and Alexandre A. P. Suaide
 
-/***************************************************************************
- * $id: EMC Barrel SMD daq reader.
- * Author: Subhasis and Herbert Ward
- ***************************************************************************
- *  Navigates through pointers and Fills Barrel Smd Structs
- *
- **************************************
-************************************/
+EMC Barrel reader.
+*/ 
 
 #include "EMC_SmdReader.hh"
 #include <assert.h>
@@ -17,6 +13,7 @@
 #include <stdio.h>
 
 /////////////////////////////////////////////////////////////////////
+///EMC_SmdReader constructor
 EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP),ercpy(er)
 {
   EventInfo info=er->getEventInfo();
@@ -38,11 +35,13 @@ EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP)
   Initialize();
 }
 /////////////////////////////////////////////////////////////////////
+///EMC_SmdReader destructor
 EMC_SmdReader::~EMC_SmdReader()
 {
   if(decoder) delete decoder;
 }
 /////////////////////////////////////////////////////////////////////
+///Initialization of arrays
 void EMC_SmdReader::Initialize()
 {
   mTheSmdAdcR.NSmdHits = 0;
