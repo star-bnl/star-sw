@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.13 2000/06/30 21:53:40 perev Exp $
+ * $Id: StDAQReader.h,v 1.14 2000/07/13 22:35:10 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.14  2000/07/13 22:35:10  perev
+ * More accurate __CINT__ flags added
+ *
  * Revision 1.13  2000/06/30 21:53:40  perev
  * L3 stuff added
  *
@@ -66,6 +69,15 @@ typedef RICH_Reader StRICHReader;
 typedef L3_Reader   StL3Reader;
 
 #endif /*__CINT__*/
+
+#ifdef __CINT__
+
+class StRICHReader;
+class StL3Reader;
+
+#endif /*__CINT__*/
+
+
 //
 
  
