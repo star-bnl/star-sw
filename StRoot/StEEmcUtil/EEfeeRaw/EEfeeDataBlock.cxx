@@ -1,12 +1,13 @@
 #include <cassert>
 
+#include "EEdims.h"
+
 #include "EEfeeDataBlock.h"
 
 ClassImp(EEfeeDataBlock)
 
- 
-const int EEfeeDataBlock::DefaultMaxHead  =   4;
-const int EEfeeDataBlock::DefaultMaxData  = 256;
+static const int DefaultMaxHead=4;
+static const int DefaultMaxData=128;
 
 
 //--------------------------------------------------
@@ -15,9 +16,10 @@ const int EEfeeDataBlock::DefaultMaxData  = 256;
 
 EEfeeDataBlock ::  EEfeeDataBlock() {
   MaxHead =  DefaultMaxHead;
-  MaxData =  DefaultMaxData;
+  MaxData =  0 ; // DefaultMaxData;
   head = new UShort_t[MaxHead];
-  data = new UShort_t[MaxData];
+  //data = new UShort_t[MaxData];
+  data = NULL;
 }
 
 
@@ -25,8 +27,7 @@ EEfeeDataBlock::EEfeeDataBlock(const EEfeeDataBlock *b) {
   MaxData = b->getDataLen();
   MaxHead = b->getHeadLen();
   head = new UShort_t[MaxHead];
-  data = NULL;
-  MaxData=0;
+  data = new UShort_t[MaxData];
   set(b);
 }
 
@@ -40,19 +41,22 @@ EEfeeDataBlock ::  ~EEfeeDataBlock() {
   if(head) delete [] head;
   if(data) delete [] data;
 }
- 
+
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
 void EEfeeDataBlock :: print(int flag){
   printf("feeDataBlock Head: 0x%04hx 0x%04hx 0x%04hx 0x%04hx ",head[0],head[1],head[2],head[3]);
-  printf("\n --> token/hex=%2x  crateID=%x  trigType=%x NpositiveData=%d\n",
+  printf("\n --> token=0x%2x  crateID=0x%x  trigType=0x%x  NpositiveData=%d\n",
 	 getToken(),getCrateID(),getTrigType(),getNData(0));
   
   if(flag<=0) return;
 
-  printf("Data:");
-  for(int i=0;i<MaxData;i++) {
+  int nd=getValidDataLen();
+  if(flag>1) nd=getDataLen();
+  printf("Data[%3d]:",nd);
+  for(int i=0;i<nd;i++) {
     if( i%8 == 0 ) printf("\n");
     printf("0x%04hx ",data[i]);
 
@@ -80,6 +84,15 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
   memcpy(head,h,sizeof(head[0])*MaxHead);
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
+int EEfeeDataBlock ::getValidDataLen() const {
+  if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MaxTwCrateCh;
+  if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MaxMapmtCrateCh;
+  return 0;
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -87,7 +100,8 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
 int EEfeeDataBlock ::getNData(int thres) const {
   int n=0;
   int i;
-  for(i=0;i<MaxData;i++) if(data[i]>thres) n++;
+  const int nd=getValidDataLen();
+  for(i=0;i<nd;i++) if(data[i]>thres) n++;
   return n;
 }
 
@@ -140,5 +154,21 @@ void EEfeeDataBlock :: clear(){
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
+int  EEfeeDataBlock :: isValid(){
+  return (getCrateID()< MaxAnyCrate);// add more conditions as emerge
+}
 
+
+/*
+ * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.7  2003/12/02 17:22:07  balewski
+ * fix after version mixup
+ *
+ * Revision 1.5  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
+ * Revision 1.4  2003/11/20 16:01:46  balewski
+ * towars run 4
+ *
+ */
 

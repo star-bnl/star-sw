@@ -1,28 +1,9 @@
 #ifndef EEmcEventHeader_h
 #define EEmcEventHeader_h
 /*********************************************************************
- * $Id: EEmcEventHeader.h,v 1.7 2003/12/01 20:19:28 zolnie Exp $
- *********************************************************************
- * $Log: EEmcEventHeader.h,v $
- * Revision 1.7  2003/12/01 20:19:28  zolnie
- * fixed a huge memory leak in EEfeeRawEvent
- *
- * Revision 1.5  2003/09/11 19:41:01  zolnie
- * updates for gcc3.2
- *
- * Revision 1.4  2003/06/16 16:03:54  zolnie
- * updated root version number
- *
- * Revision 1.3  2003/06/02 18:55:00  zolnie
- * added run number to the header
- *
- * Revision 1.2  2003/05/27 19:11:44  zolnie
- * added dE/dx info
- *
- * Revision 1.1  2003/05/20 19:22:58  zolnie
- * new additions for ..... :)
- *
+ * $Id: EEmcEventHeader.h,v 1.8 2003/12/02 17:22:08 balewski Exp $
  *********************************************************************/
+
 #include <cstdio>
 #include <ctime>
 #include "TObject.h"
@@ -67,4 +48,29 @@ class EEmcEventHeader : public TObject {
 };
 #endif
 
+
+/*
+ * $Log: EEmcEventHeader.h,v $
+ * Revision 1.8  2003/12/02 17:22:08  balewski
+ * fix after version mixup
+ *
+ * Revision 1.6  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
+ * Revision 1.5  2003/09/11 19:41:01  zolnie
+ * updates for gcc3.2
+ *
+ * Revision 1.4  2003/06/16 16:03:54  zolnie
+ * updated root version number
+ *
+ * Revision 1.3  2003/06/02 18:55:00  zolnie
+ * added run number to the header
+ *
+ * Revision 1.2  2003/05/27 19:11:44  zolnie
+ * added dE/dx info
+ *
+ * Revision 1.1  2003/05/20 19:22:58  zolnie
+ * new additions for ..... :)
+ *
+ *********************************************************************/
 
