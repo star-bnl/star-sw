@@ -68,6 +68,13 @@
 	message '***** Problem with ems_interface *****'
    endif
      
+** 20-jan-1999 by PAI
+**  Mess ** work ems_summary_stat **
+  ami/module/call ems_summary_stat _
+                        [data]/emc/hits/ems_hits_bemc _
+                        [data]/emc/hits/ems_hits_bsmd _
+                        [data]/emc/hits/ems_summary
+   
  return
  
 ************************************************************
@@ -75,8 +82,8 @@
  macro dep_e_toadc
    exec dep_e_toadc_bemc
    exec dep_e_toadc_bsmd
-   exec dep_e_toadc_eemc
-   exec dep_e_toadc_esmd
+**   exec dep_e_toadc_eemc
+**   exec dep_e_toadc_esmd
  return
 
 ************************************************************

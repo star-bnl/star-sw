@@ -22,8 +22,10 @@
     tdm/newtable emc_hits_esmde     emc_hits	 20000
     tdm/newtable emc_hits_esmdp     emc_hits	 20000
     
+** 20-jan-1999 by PAI
+    tdm/newtable ems_summary	    ems_summary	 1
     cd /dui
-    
+    mess <I> Version of PAI => 30-Jan-1999 (create EMC tables only)      
  return
 
 * ************************************************************
