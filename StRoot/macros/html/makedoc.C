@@ -1,4 +1,7 @@
 {
+ //*-- Author :    Valery Fine   25/12/98
+ //  
+ // 
   gROOT.Reset();
   Char_t *libs[] = { "St_base","xdf2root","St_Tables"
                     ,"libmsg", "libtls",  "tpc.sl","St_tpc"
@@ -104,7 +107,7 @@
 
   Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
-                       ,"StParticleView", St_ObjectSet
+                       ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
@@ -113,7 +116,7 @@
                        ,"St_calib_Maker"
                        ,"St_tpctest_Maker","St_calib_Maker"
                         };
-  Int_t nclass = 21;
+  Int_t nclass = 23;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -157,6 +160,7 @@
   html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
   html.Convert("./STAR_Demos.C","The source of the STAR_demos macro");
+  html.Convert("./STAR_shapes.C","Test for the basic STAR GEOMETRY classes");
   html.Convert("./StarView.C","How to Draw the local STAR 3D geometry");
   html.Convert("./StarWebView.C","How to Draw the remote STAR 3D geometry");
   if (NT) {
