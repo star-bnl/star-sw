@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.cc,v 2.2 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcHitComparisons.cc,v 2.3 2000/06/09 19:52:07 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,10 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.cc,v $
+ * Revision 2.3  2000/06/09 19:52:07  calderon
+ * No longer use 2 different functions for SVT and TPC that do the same thing,
+ * just use one function for the base class
+ *
  * Revision 2.2  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -31,62 +35,37 @@
 #include "StMcFtpcHit.hh"
 #include "StMcRichHit.hh"
 #include "StMcHitComparisons.hh"
-
-bool compTpcHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
+bool compHit::operator()(const StHit* h1, const StHit* h2) const {
     if        (h1->position().z() != h2->position().z()) {
 	return h1->position().z() <  h2->position().z();
     }
     else if   (h1->position().y() != h2->position().y()) {
 	return h1->position().y() <  h2->position().y();
     }
-    else return h1->position().x() < h2->position().x();
-    
+    else return h1->position().x() < h2->position().x();    
 }
-bool compMcTpcHit::operator()(const StMcTpcHit* h1, const StMcTpcHit* h2) const {
+bool compMcHit::operator()(const StMcHit* h1, const StMcHit* h2) const {
     if        (h1->position().z() != h2->position().z()) {
 	return h1->position().z() <  h2->position().z();
     }
     else if   (h1->position().y() != h2->position().y()) {
 	return h1->position().y() <  h2->position().y();
     }
-    else return h1->position().x() < h2->position().x();
-    
+    else return h1->position().x() < h2->position().x();    
 }
-bool compSvtHit::operator()(const StSvtHit* h1, const StSvtHit* h2) const {
-    if        (h1->position().z() != h2->position().z()) {
-	return h1->position().z() <  h2->position().z();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().x() < h2->position().x();
-    
-}
-bool compMcSvtHit::operator()(const StMcSvtHit* h1, const StMcSvtHit* h2) const {
-    if        (h1->position().z() != h2->position().z()) {
-	return h1->position().z() <  h2->position().z();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().x() < h2->position().x();
-    
-}
-bool compFtpcHit::operator()(const StFtpcHit* h1, const StFtpcHit* h2) const {
-    // comparison is btw hits in the same plane, so
+bool compRPhi::operator()(const StThreeVectorF& p1, const StThreeVectorF& p2) const{
+    // for Ftpc comparison is btw hits in the same plane, so
     // z coordinate is irrelevant.  Use r and phi
     float phi1, phi2;
-    if ((phi1 = h1->position().phi()) != (phi2 = h2->position().phi())) 
+    if ((phi1 = p1.phi()) != (phi2 = p2.phi())) 
 	return  phi1 < phi2;
-    else return h1->position().perp() < h2->position().perp();
-    
+    else return p1.perp() < p2.perp();
+}
+bool compFtpcHit::operator()(const StFtpcHit* h1, const StFtpcHit* h2) const {
+    compRPhi crp;
+    return crp(h1->position(), h2->position());    
 }
 bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) const {
-    // comparison is btw hits in the same plane, so
-    // z coordinate is irrelevant
-    float phi1, phi2;
-    if ((phi1 = h1->position().phi()) != (phi2 = h2->position().phi())) 
-	return  phi1 < phi2;
-    else return h1->position().perp() < h2->position().perp();
-    
+    compRPhi crp;
+    return crp(h1->position(), h2->position());    
 }
