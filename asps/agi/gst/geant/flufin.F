@@ -1,19 +1,48 @@
 *
-* $Id: flufin.F,v 1.4 2000/01/06 22:09:14 nevski Exp $
+* $Id: flufin.F,v 1.5 2000/01/06 22:49:33 nevski Exp $
 *
 * $Log: flufin.F,v $
-* Revision 1.4  2000/01/06 22:09:14  nevski
-* unlimited track/vertex version
+* Revision 1.5  2000/01/06 22:49:33  nevski
+* flufin commons re-installed
 *
-* Revision 1.3  1998/10/24 04:52:16  nevski
-* corrections from Federico Carminati
+* Revision 1.3  1997/06/20 18:32:55  japost
+* A summary of the problem buf fix and its original report:
 *
-* Revision 1.2  1998/04/16 16:59:29  fisyak
-* 2nd pass with gstar
+* ------------------------------------------------------------------------------
+* From: Shawn McKee - (313) 764-4395 <mckee@pooh.physics.lsa.umich.edu>
+* Subject: RE: Problem with FLUKA interface
+* Date: Thu, 12 Jun 97 18:09:31 METDST
+*
+*
+* I have seen this error with FLUKA.  I traced it to
+* the following statement:
+*
+*      IF (RNDEVT .GE. SINE/FSIG) THEN
+*
+* Apparently FSIG (for this event) was not initialized
+* properly (it is 0.0).  My fix was to insert a check
+* on FSIG in the FLUFIN routine source.
+*
+* ------------------------------------------------------------------------------
+* From: pniemine@estwm0.wm.estec.esa.nl
+* Subject: Problem with FLUKA interface - cern.heplib #5667
+* Date: Thu, 12 Jun 97 17:21:14 METDST
+*
+* In trying to run a GEANT program with FLUKA interface in our VMS-AXP (Alpha)
+* cluster, I get the following error message (originating from FLUFIN) once
+* a hadronic interaction is to be simulated:
+*
+* arithmetic trap, floating/decimal divide by zero
+* ------------------------------------------------------------------------------
+*
+* Revision 1.2  1996/02/27 14:12:57  ravndal
+* Correction for overstopped antiprotons
+*
+* Revision 1.1.1.1  1995/10/24 10:19:53  cernlib
+* Geant
 *
 *
 #include "geant321/pilot.h"
-*CMZ :          29/01/98  13.12.38  by  Pavel Nevski
 *CMZ :  3.21/02 19/05/94  13.35.12  by  S.Ravndal
 *-- Author :
       SUBROUTINE FLUFIN
@@ -32,22 +61,48 @@
 #include "geant321/gcunit.inc"
 #include "geant321/gfkdis.inc"
 #include "geant321/dimpar.inc"
+
+#if !defined(CERNLIB_SINGLE)
 #include "geant321/finuct.inc"
-#include "geant321/part2t.inc"
-#include "geant321/comcont.inc"
-#include "geant321/fheavyt.inc"
-#include "geant321/papropt.inc"
+#endif
 #include "geant321/finuc.inc"
+      REAL RNDM(1)
+#if !defined(CERNLIB_SINGLE)
+      DOUBLE PRECISION AOCMBM, AMSS , ZTAR, RHO , ZLIN, ZLEL, ZLRAD,
+     +ZUL
+#endif
+      COMMON / FKMAPA / AOCMBM (MXXMDF), AMSS (MXXMDF), ZTAR   (MXXMDF),
+     +                  RHO    (MXXMDF), ZLIN (MXXMDF), ZLEL   (MXXMDF),
+     +                  ZLRAD  (MXXMDF), ZUL  (MXXMDF), MEDIUM (MXXRGN),
+     +                  MULFLG (MXXMDF),IFCOMP(MXXMDF), MSSNUM (MXXMDF),
+     +                  NREGS, NMATF, MTBSNM
+
+#if !defined(CERNLIB_SINGLE)
+#include "geant321/part2t.inc"
+#endif
 #include "geant321/part2.inc"
+#if !defined(CERNLIB_SINGLE)
+#include "geant321/comcont.inc"
+#endif
 #include "geant321/comcon.inc"
+#if !defined(CERNLIB_SINGLE)
+#include "geant321/fheavyt.inc"
+#endif
 #include "geant321/fheavy.inc"
+#if !defined(CERNLIB_SINGLE)
+#include "geant321/papropt.inc"
+#endif
 #include "geant321/paprop.inc"
+#include "geant321/gfkdis.inc"
 C
+#if !defined(CERNLIB_SINGLE)
       DOUBLE PRECISION POO,EKE,TXI,TYI,TZI,AMM,WE,ONE,PGEANT,DMOD
+#endif
       PARAMETER (ONE=1)
       DIMENSION IGTOFL(49),IFLTOG(39),IHVTOG(6),ZSAMP(50)
       DATA IGTOFL / 0, 0, 0, 0, 0, 0,23,13,14,12, 15,16, 8, 1, 2,19, 0,
      +17,21,22, 20, 34, 36, 38, 9,18, 31, 32, 33, 35, 37, 39, 17*0/
+
       DATA IFLTOG /14,15, 3, 2, 4, 4, 1,13,25, 5, 6,10, 8, 9,11,12,18,
      +26,16,21, 19,20, 7, 7*0, 27, 28, 29, 22, 30, 23, 31, 24, 32/
       DATA IHVTOG /13,14,45,46,49,47/
@@ -60,8 +115,10 @@ C     guhadr message - NREST positive
       IF (NDONE.GT.0 .AND. NREST.GT.0)  GO TO 81
       NDONE  = 0
       NREST  = 0
+*
       NP     = 0
       NPHEAV = 0
+*
 *    Stopped particles:
 *    o Neutral particles are sent to GHSTOP
 *    o pi+ and K+/K- are forced to decay
