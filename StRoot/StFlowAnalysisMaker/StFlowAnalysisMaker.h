@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.13 2000/05/03 16:38:35 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.14 2000/05/16 17:30:21 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.14  2000/05/16 17:30:21  snelling
+// removed the dependencies cint did not like
+//
 // Revision 1.13  2000/05/03 16:38:35  posk
 // Compatable with ROOT 2.24/02.
 //
@@ -62,12 +65,11 @@
 #ifndef StFlowAnalysisMaker_H
 #define StFlowAnalysisMaker_H
 #include <iostream.h>
-#include <stdlib.h>
 #include "StMaker.h"
-#include "StFlowMaker/StFlowEvent.h"
-#include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
+class StFlowEvent;
+class FlowTag_st;
 class StFlowSelection;
 class TH1F;
 class TH1D;
@@ -92,7 +94,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.13 2000/05/03 16:38:35 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.14 2000/05/16 17:30:21 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
