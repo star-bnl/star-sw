@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.10 2001/05/02 16:10:46 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.11 2001/05/16 20:57:03 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.11  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.10  2001/05/02 16:10:46  lansdell
 // changed some histogram limits
 //
@@ -52,8 +55,12 @@
 //#include "TSpectrum.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
+#include "StMcEventTypes.hh"
+#include "StMcEventMaker/StMcEventMaker.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StDbUtilities/StCoordinates.hh"
+// include this because it's not in StCoordinates.hh yet
+#include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "HitHistograms.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StarClassLibrary/StTimer.hh"
@@ -93,6 +100,11 @@ Int_t StEventQAMaker::Init() {
 Int_t StEventQAMaker::Make() {
 // StEventQAMaker - Make; fill histograms
   
+  n_prim_good = 0;
+  n_glob_good = 0;
+  nhit_prim_fit = 0;
+  nhit_glob_fit = 0;
+
   event = (StEvent *)GetInputDS("StEvent");
   if (event) {
     if (firstEvent) {
@@ -132,37 +144,11 @@ void StEventQAMaker::MakeHistEvSum() {
 
   //PrintInfo();
   if (Debug()) 
-    gMessMgr->Info(" *** in StEventQAMaker - filling event summary histograms ");
-
-  StEventSummary *event_summary = event->summary();
-  if (event_summary) {
-    Float_t trk_tot =   event_summary->numberOfTracks();
-    Float_t trk_good =  event_summary->numberOfGoodTracks();
-    Float_t trk_plus =  event_summary->numberOfGoodTracks(positive);
-    Float_t trk_minus = event_summary->numberOfGoodTracks(negative);
-
-    m_trk_tot_gd->Fill(trk_good/trk_tot,multClass); 
-    m_glb_trk_tot->Fill(trk_tot,multClass);
-    m_glb_trk_tot_sm->Fill(trk_tot,multClass);
-    m_glb_trk_plusminus->Fill(trk_plus/trk_minus,multClass);
-    m_glb_trk_plusminus_sm->Fill(trk_plus/trk_minus,multClass);
-    m_glb_trk_prim->Fill(event_summary->numberOfGoodPrimaryTracks(),multClass);
-    m_glb_trk_prim_sm->Fill(event_summary->numberOfGoodPrimaryTracks(),multClass);
-    m_vert_total->Fill(event_summary->numberOfVertices(),multClass);
-    m_vert_total_sm->Fill(event_summary->numberOfVertices(),multClass);
-    m_mean_pt->Fill(event_summary->meanPt(),multClass);
-    m_mean_pt_sm->Fill(event_summary->meanPt(),multClass);
-    m_mean_eta->Fill(event_summary->meanEta(),multClass);
-    m_rms_eta->Fill(event_summary->rmsEta(),multClass);
-
-    m_prim_vrtr->Fill(event_summary->primaryVertexPosition().perp(),multClass);
-    m_prim_vrtx0->Fill(event_summary->primaryVertexPosition()[0],multClass);
-    m_prim_vrtx1->Fill(event_summary->primaryVertexPosition()[1],multClass);
-    m_prim_vrtx2->Fill(event_summary->primaryVertexPosition()[2],multClass);
-  }
+    gMessMgr->Info(" *** in StEventQAMaker - filling software monitor histograms ");
 
   if (event->softwareMonitor()) {
     StTpcSoftwareMonitor *tpcMon = event->softwareMonitor()->tpc();
+    StFtpcSoftwareMonitor *ftpcMon = event->softwareMonitor()->ftpc();
     Float_t tpcChgWest=0;
     Float_t tpcChgEast=0;
     for (UInt_t i=0; i<24; i++) {
@@ -172,6 +158,7 @@ void StEventQAMaker::MakeHistEvSum() {
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
     m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,multClass);
+    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[0]/ftpcMon->chrg_ftpc_tot[1],multClass);
   }
 }
 
@@ -184,6 +171,11 @@ void StEventQAMaker::MakeHistGlob() {
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t cnttrk=0;
   Int_t cnttrkg=0;
+  Int_t cnttrkgT=0;
+  Int_t cnttrkgTS=0;
+  Int_t cnttrkgTTS=0;
+  Int_t cnttrkgFE=0;
+  Int_t cnttrkgFW=0;
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrack *globtrk = theNodes[i]->track(global);
@@ -196,6 +188,7 @@ void StEventQAMaker::MakeHistGlob() {
       StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
       const StTrackTopologyMap& map=globtrk->topologyMap();
 
+      n_glob_good++;
       cnttrkg++;
       Float_t pT = -999.;
       pT = geom->momentum().perp();
@@ -211,9 +204,17 @@ void StEventQAMaker::MakeHistGlob() {
 	                 (Float_t(detInfo->numberOfPoints()));
       Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
                          (Float_t(globtrk->numberOfPossiblePoints()));
+      nhit_glob_fit += fTraits.numberOfFitPoints();
       const StThreeVectorF& firstPoint = detInfo->firstPoint();
       const StThreeVectorF& origin = geom->origin();
       StThreeVectorF dif = firstPoint - origin;
+      Float_t xcenter = geom->helix().xcenter();
+      Float_t ycenter = geom->helix().ycenter();
+      Float_t rcircle = 1./geom->helix().curvature();
+      Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
+					pow(ycenter-firstPoint.y(),2));
+      Float_t azimdif = dif.perp();
+      if (rcircle<centerOfCircleToFP) azimdif *= -1.;
       Float_t radf = firstPoint.perp();
 
       Float_t logImpact = TMath::Log10(globtrk->impactParameter());
@@ -265,7 +266,7 @@ void StEventQAMaker::MakeHistGlob() {
       hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
       hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
       hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
-      if (map.trackTpcOnly()) hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+      hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
       hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
       if (origin.phi() < 0)
         hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
@@ -281,6 +282,8 @@ void StEventQAMaker::MakeHistGlob() {
 // now fill all TPC histograms ------------------------------------------------
       if (map.trackTpcOnly()) {
 
+	cnttrkgT++;
+	cnttrkgTTS++;
 // these are TPC only
 	// m_glb_f0 uses hist class StMultiH1F
         hists->m_glb_f0->Fill(dif.x(),0.);
@@ -290,8 +293,12 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_xf0->Fill(dif.x());
         hists->m_glb_yf0->Fill(dif.y());
         hists->m_glb_zf0->Fill(dif.z());
+	hists->m_glb_rzf0->Fill(azimdif,0.);
+        hists->m_glb_rzf0->Fill(dif.z(),1.);
         hists->m_glb_impactT->Fill(logImpact);
         hists->m_glb_impactrT->Fill(globtrk->impactParameter());
+        hists->m_glb_impactTTS->Fill(logImpact,1.);
+        hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
 
 	// TPC padrow histogram
 	StTpcCoordinateTransform transformer(gStTpcDb);
@@ -300,10 +307,10 @@ void StEventQAMaker::MakeHistGlob() {
 	transformer(globalHitPosition,padCoord);
         hists->m_glb_padfT->Fill(padCoord.row());
 
-// these are TPC & FTPC
         hists->m_pointT->Fill(detInfo->numberOfPoints());
         hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
+        hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),1.);
         hists->m_glb_chargeT->Fill(geom->charge());
 
         hists->m_glb_r0T->Fill(origin.perp());
@@ -311,6 +318,29 @@ void StEventQAMaker::MakeHistGlob() {
 	  hists->m_glb_phi0T->Fill(360+origin.phi()/degree);
 	else
 	  hists->m_glb_phi0T->Fill(origin.phi()/degree);
+
+	if (firstPoint.z() < 0 && geom->momentum().z() < 0) {
+	  hists->m_glb_padfTEW->Fill(padCoord.row(),0.);
+	  if (firstPoint.phi() < 0)
+	    hists->m_glb_phifT->Fill(360+firstPoint.phi()/degree,0.);
+	  else
+	    hists->m_glb_phifT->Fill(firstPoint.phi()/degree,0.);
+	}
+	else if (firstPoint.z() > 0 && geom->momentum().z() > 0) {
+	  hists->m_glb_padfTEW->Fill(padCoord.row(),1.);
+	  if (firstPoint.phi() < 0)
+	    hists->m_glb_phifT->Fill(360+firstPoint.phi()/degree,1.);
+	  else
+	    hists->m_glb_phifT->Fill(firstPoint.phi()/degree,1.);
+	}
+	else {
+	  hists->m_glb_padfTEW->Fill(padCoord.row(),2.);
+	  if (firstPoint.phi() < 0)
+	    hists->m_glb_phifT->Fill(360+firstPoint.phi()/degree,2.);
+	  else
+	    hists->m_glb_phifT->Fill(firstPoint.phi()/degree,2.);
+	}
+
         hists->m_glb_z0T->Fill(origin.z());
         hists->m_glb_curvT->Fill(logCurvature);
 
@@ -319,18 +349,24 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_zfT->Fill(firstPoint.z());
         hists->m_glb_radfT->Fill(radf);
         hists->m_glb_ratioT->Fill(nfitntot);
+        hists->m_glb_ratioTTS->Fill(nfitntot,1.);
         hists->m_glb_ratiomT->Fill(nfitnmax);
+        hists->m_glb_ratiomTTS->Fill(nfitnmax,1.);
         hists->m_psiT->Fill(geom->psi()/degree);
+        hists->m_psiTTS->Fill(geom->psi()/degree,1.);
         hists->m_tanlT->Fill(TMath::Tan(geom->dipAngle()));
         hists->m_glb_thetaT->Fill(thetad);
         hists->m_etaT->Fill(eta);
+        hists->m_etaTTS->Fill(eta,1.);
         hists->m_pTT->Fill(pT);
+        hists->m_pTTTS->Fill(pT,1.);
         hists->m_momT->Fill(gmom);
         hists->m_lengthT->Fill(globtrk->length());
         hists->m_chisq0T->Fill(chisq0);
+        hists->m_chisq0TTS->Fill(chisq0,1.);
         hists->m_chisq1T->Fill(chisq1);
+        hists->m_chisq1TTS->Fill(chisq1,1.);
 
-// these are for TPC & FTPC
         hists->m_globtrk_xf_yfT->Fill(firstPoint.x(),
 			       firstPoint.y());
         hists->m_eta_trklengthT->Fill(eta,globtrk->length());
@@ -339,7 +375,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_fpoint_lengthT->Fill(globtrk->length(),
 			       Float_t(fTraits.numberOfFitPoints()));
 
-// these are TPC only
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
 	  hists->m_tanl_zfT->Fill(firstPoint.z() -
@@ -376,6 +411,9 @@ void StEventQAMaker::MakeHistGlob() {
 
       else if (map.trackTpcSvt()) {
 
+	cnttrkgTS++;
+	cnttrkgTTS++;
+
         hists->m_glb_f0TS->Fill(dif.x(),0.);
         hists->m_glb_f0TS->Fill(dif.y(),1.);
         hists->m_glb_f0TS->Fill(dif.z(),2.);
@@ -383,12 +421,25 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_xf0TS->Fill(dif.x());
         hists->m_glb_yf0TS->Fill(dif.y());
         hists->m_glb_zf0TS->Fill(dif.z());
+	hists->m_glb_rzf0TS->Fill(azimdif,0.);
+        hists->m_glb_rzf0TS->Fill(dif.z(),1.);
         hists->m_glb_impactTS->Fill(logImpact);
         hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
+        hists->m_glb_impactTTS->Fill(logImpact,0.);
+        hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),0.);
+
+	// SVT barrel histogram - causes segmentation violation currently
+	//   => use m_glb_radfTS for now. -CPL
+	//StSvtCoordinateTransform transformer;
+	//StGlobalCoordinate globalHitPosition(firstPoint);
+	//StSvtLocalCoordinate layerCoord;
+	//transformer(globalHitPosition,layerCoord);
+        //hists->m_glb_layerfTS->Fill(layerCoord.layer())
 
         hists->m_pointTS->Fill(detInfo->numberOfPoints());
         hists->m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointTS->Fill(fTraits.numberOfFitPoints());
+        hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),0.);
         hists->m_glb_chargeTS->Fill(geom->charge());
 
         hists->m_glb_r0TS->Fill(origin.perp());
@@ -402,18 +453,30 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_xfTS->Fill(firstPoint.x());
         hists->m_glb_yfTS->Fill(firstPoint.y());
         hists->m_glb_zfTS->Fill(firstPoint.z());
+	if (firstPoint.phi() < 0)
+	  hists->m_glb_phifTS->Fill(360+firstPoint.phi()/degree);
+	else
+	  hists->m_glb_phifTS->Fill(firstPoint.phi()/degree);
+
         hists->m_glb_radfTS->Fill(radf);
         hists->m_glb_ratioTS->Fill(nfitntot);
+        hists->m_glb_ratioTTS->Fill(nfitntot,0.);
         hists->m_glb_ratiomTS->Fill(nfitnmax);
+        hists->m_glb_ratiomTTS->Fill(nfitnmax,0.);
         hists->m_psiTS->Fill(geom->psi()/degree);
+        hists->m_psiTTS->Fill(geom->psi()/degree,0.);
         hists->m_tanlTS->Fill(TMath::Tan(geom->dipAngle()));
         hists->m_glb_thetaTS->Fill(thetad);
         hists->m_etaTS->Fill(eta);
+        hists->m_etaTTS->Fill(eta,0.);
         hists->m_pTTS->Fill(pT);
+        hists->m_pTTTS->Fill(pT,0.);
         hists->m_momTS->Fill(gmom);
         hists->m_lengthTS->Fill(globtrk->length());
         hists->m_chisq0TS->Fill(chisq0);
+        hists->m_chisq0TTS->Fill(chisq0,0.);
         hists->m_chisq1TS->Fill(chisq1);
+        hists->m_chisq1TTS->Fill(chisq1,0.);
         hists->m_globtrk_xf_yfTS->Fill(firstPoint.x(),
 			       firstPoint.y());
         hists->m_eta_trklengthTS->Fill(eta,globtrk->length());
@@ -458,16 +521,42 @@ void StEventQAMaker::MakeHistGlob() {
 // now fill all FTPC East histograms ------------------------------------------
       else if (map.trackFtpcEast()) {
 
-// these are TPC & FTPC
+	cnttrkgFE++;
+
+	// east and west in same histogram
+        hists->m_pointF->Fill(detInfo->numberOfPoints(),0.);
+        hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),0.);
+        hists->m_glb_chargeF->Fill(geom->charge(),0.);
+        hists->m_glb_xfF->Fill(firstPoint.x(),0.);
+        hists->m_glb_yfF->Fill(firstPoint.y(),0.);
+        hists->m_glb_zfF->Fill(firstPoint.z(),0.);
+        hists->m_glb_radfF->Fill(radf,0.);
+        hists->m_glb_ratiomF->Fill(nfitnmax,0.);
+        hists->m_psiF->Fill(geom->psi()/degree,0.);
+        hists->m_etaF->Fill(eta,0.);
+        hists->m_pTF->Fill(pT,0.);
+        hists->m_momF->Fill(gmom,0.);
+        hists->m_lengthF->Fill(globtrk->length(),0.);
+        hists->m_chisq0F->Fill(chisq0,0.);
+        hists->m_glb_impactF->Fill(logImpact,0.);
+        hists->m_glb_impactrF->Fill(globtrk->impactParameter(),0.);
+
+	// FTPC plane histogram - there are no FTPC transformation utilities yet.
+	//   => use m_glb_zfF for now.  -CPL
+	//StFtpcCoordinateTransform transformer();
+	//StGlobalCoordinate globalHitPosition(firstPoint);
+	//StFtpcLocalCoordinate planeCoord;
+	//transformer(globalHitPosition,planeCoord);
+        //hists->m_glb_planefF->Fill(planeCoord.plane());  
+
+	// east and west in separate histograms
         hists->m_pointFE->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointFE->Fill(fTraits.numberOfFitPoints());
         hists->m_glb_chargeFE->Fill(geom->charge());
         hists->m_glb_xfFE->Fill(firstPoint.x());
         hists->m_glb_yfFE->Fill(firstPoint.y());
         hists->m_glb_zfFE->Fill(firstPoint.z());
         hists->m_glb_radfFE->Fill(radf);
-        hists->m_glb_ratioFE->Fill(nfitntot);
         hists->m_glb_ratiomFE->Fill(nfitnmax);
         hists->m_psiFE->Fill(geom->psi()/degree);
         hists->m_etaFE->Fill(eta);
@@ -475,32 +564,44 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momFE->Fill(gmom);
         hists->m_lengthFE->Fill(globtrk->length());
         hists->m_chisq0FE->Fill(chisq0);
-        hists->m_chisq1FE->Fill(chisq1);
 
-// these are for TPC & FTPC
         hists->m_pT_eta_recFE->Fill(eta,lmevpt);
         hists->m_globtrk_xf_yfFE->Fill(firstPoint.x(),
 			       firstPoint.y());
         hists->m_eta_trklengthFE->Fill(eta,globtrk->length());
         hists->m_npoint_lengthFE->Fill(globtrk->length(),
 	      		       Float_t(detInfo->numberOfPoints()));
-        hists->m_fpoint_lengthFE->Fill(globtrk->length(),
-			       Float_t(fTraits.numberOfFitPoints()));
-
       }
 // now fill all FTPC West histograms ------------------------------------------
       else if (map.trackFtpcWest()) {
 
-// these are TPC & FTPC
+	cnttrkgFW++;
+
+	// east and west in same histogram
+        hists->m_pointF->Fill(detInfo->numberOfPoints(),1.);
+        hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),1.);
+        hists->m_glb_chargeF->Fill(geom->charge(),1.);
+        hists->m_glb_xfF->Fill(firstPoint.x(),1.);
+        hists->m_glb_yfF->Fill(firstPoint.y(),1.);
+        hists->m_glb_zfF->Fill(firstPoint.z(),1.);
+        hists->m_glb_radfF->Fill(radf,1.);
+        hists->m_glb_ratiomF->Fill(nfitnmax,1.);
+        hists->m_psiF->Fill(geom->psi()/degree,1.);
+        hists->m_etaF->Fill(eta,1.);
+        hists->m_pTF->Fill(pT,1.);
+        hists->m_momF->Fill(gmom,1.);
+        hists->m_lengthF->Fill(globtrk->length(),1.);
+        hists->m_chisq0F->Fill(chisq0,1.);
+        hists->m_glb_impactF->Fill(logImpact,1.);
+        hists->m_glb_impactrF->Fill(globtrk->impactParameter(),1.);
+	// east and west in separate histograms
         hists->m_pointFW->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointFW->Fill(fTraits.numberOfFitPoints());
         hists->m_glb_chargeFW->Fill(geom->charge());
         hists->m_glb_xfFW->Fill(firstPoint.x());
         hists->m_glb_yfFW->Fill(firstPoint.y());
         hists->m_glb_zfFW->Fill(firstPoint.z());
         hists->m_glb_radfFW->Fill(radf);
-        hists->m_glb_ratioFW->Fill(nfitntot);
         hists->m_glb_ratiomFW->Fill(nfitnmax);
         hists->m_psiFW->Fill(geom->psi()/degree);
         hists->m_etaFW->Fill(eta);
@@ -508,25 +609,23 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momFW->Fill(gmom);
         hists->m_lengthFW->Fill(globtrk->length());
         hists->m_chisq0FW->Fill(chisq0);
-        hists->m_chisq1FW->Fill(chisq1);
 
-// these are for TPC & FTPC
         hists->m_pT_eta_recFW->Fill(eta,lmevpt);
         hists->m_globtrk_xf_yfFW->Fill(firstPoint.x(),
 			       firstPoint.y());
         hists->m_eta_trklengthFW->Fill(eta,globtrk->length());
         hists->m_npoint_lengthFW->Fill(globtrk->length(),
 	      		       Float_t(detInfo->numberOfPoints()));
-        hists->m_fpoint_lengthFW->Fill(globtrk->length(),
-			       Float_t(fTraits.numberOfFitPoints()));
-
       }
     }
   }
-  hists->m_globtrk_tot->Fill(cnttrk);
-  hists->m_globtrk_tot_sm->Fill(cnttrk);
+  hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
   hists->m_globtrk_good_sm->Fill(cnttrkg);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgT/(Float_t)cnttrkg,1.);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgTS/(Float_t)cnttrkg,0.);
+  hists->m_globtrk_goodTTS->Fill(cnttrkgTTS);
+  hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
 }
 
 //_____________________________________________________________________________
@@ -542,6 +641,18 @@ void StEventQAMaker::MakeHistPrim() {
 
   Int_t cnttrk=0;
   Int_t cnttrkg=0;
+  Int_t cnttrkgT=0;
+  Int_t cnttrkgTS=0;
+  Int_t cnttrkgFE=0;
+  Int_t cnttrkgFW=0; 
+  Float_t mean_ptT=0;
+  Float_t mean_ptTS=0;
+  Float_t mean_ptFE=0;
+  Float_t mean_ptFW=0;
+  Float_t mean_etaT=0;
+  Float_t mean_etaTS=0;
+  Float_t mean_etaFE=0;
+  Float_t mean_etaFW=0;
 
   StPrimaryVertex *primVtx = event->primaryVertex();
   UInt_t daughters=0;
@@ -571,6 +682,7 @@ void StEventQAMaker::MakeHistPrim() {
         StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
         const StTrackTopologyMap& map=primtrk->topologyMap();
 
+	n_prim_good++;
         cnttrkg++;
 	Float_t pT = -999.;
 	pT = geom->momentum().perp();
@@ -586,7 +698,7 @@ void StEventQAMaker::MakeHistPrim() {
 	                   (Float_t(primtrk->numberOfPossiblePoints()));
         Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints()))/
 	                   (Float_t(detInfo->numberOfPoints()));
-
+	nhit_prim_fit += fTraits.numberOfFitPoints();
 	Float_t logImpact = TMath::Log10(primtrk->impactParameter());
 	Float_t logCurvature = TMath::Log10(geom->curvature());
 
@@ -601,6 +713,13 @@ void StEventQAMaker::MakeHistPrim() {
 	StThreeVectorF dif = firstPoint -
 	                     geom->helix().at(s);
         Float_t radf = firstPoint.perp();
+	Float_t xcenter = geom->helix().xcenter();
+	Float_t ycenter = geom->helix().ycenter();
+	Float_t rcircle = 1./geom->helix().curvature();
+	Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
+					  pow(ycenter-firstPoint.y(),2));
+	Float_t azimdif = dif.perp();
+	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 
 	// check if the track has hits in a detector -CPL
 	if (map.hasHitInDetector(kUnknownId)) hists->m_pdet_id->Fill(kUnknownId);
@@ -632,6 +751,9 @@ void StEventQAMaker::MakeHistPrim() {
 // now fill all TPC histograms ------------------------------------------------
         if (map.trackTpcOnly()) {
 
+	  cnttrkgT++;
+	  mean_ptT += geom->momentum().perp();
+	  mean_etaT += eta;
 // these are TPC only
 	  hists->m_prim_f0->Fill(dif.x(),0.);
 	  hists->m_prim_f0->Fill(dif.y(),1.);
@@ -640,8 +762,12 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_xf0->Fill(dif.x());
 	  hists->m_prim_yf0->Fill(dif.y());
 	  hists->m_prim_zf0->Fill(dif.z());
+	  hists->m_prim_rzf0->Fill(azimdif,0.);
+	  hists->m_prim_rzf0->Fill(dif.z(),1.);
 	  hists->m_prim_impactT->Fill(logImpact);
 	  hists->m_prim_impactrT->Fill(primtrk->impactParameter());
+	  hists->m_prim_impactTTS->Fill(logImpact,1.);
+	  hists->m_prim_impactrTTS->Fill(primtrk->impactParameter(),1.);
 
 	  // TPC gains histograms
 	  if (event->summary()) {
@@ -673,14 +799,19 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_ratioT->Fill(nfitntot);
 	  hists->m_prim_ratiomT->Fill(nfitnmax);
 	  hists->m_ppsiT->Fill(geom->psi()/degree);
+	  hists->m_ppsiTTS->Fill(geom->psi()/degree,1.);
 	  hists->m_ptanlT->Fill(TMath::Tan(geom->dipAngle()));
 	  hists->m_prim_thetaT->Fill(thetad);
 	  hists->m_petaT->Fill(eta);
+	  hists->m_petaTTS->Fill(eta,1.);
 	  hists->m_ppTT->Fill(pT);
+	  hists->m_ppTTTS->Fill(pT,1.);
 	  hists->m_pmomT->Fill(gmom);
 	  hists->m_plengthT->Fill(primtrk->length());
 	  hists->m_pchisq0T->Fill(chisq0);
 	  hists->m_pchisq1T->Fill(chisq1);
+	  hists->m_pchisq0TTS->Fill(chisq0,1.);
+	  hists->m_pchisq1TTS->Fill(chisq1,1.);
 
 // these are for TPC & FTPC
 	  hists->m_primtrk_xf_yfT->Fill(firstPoint.x(),
@@ -722,6 +853,10 @@ void StEventQAMaker::MakeHistPrim() {
 
         else if (map.trackTpcSvt()) {
 
+	  cnttrkgTS++;
+	  mean_ptTS += geom->momentum().perp();
+	  mean_etaTS += eta;
+
 	  hists->m_prim_f0TS->Fill(dif.x(),0.);
 	  hists->m_prim_f0TS->Fill(dif.y(),1.);
 	  hists->m_prim_f0TS->Fill(dif.z(),2.);
@@ -729,8 +864,12 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_xf0TS->Fill(dif.x());
 	  hists->m_prim_yf0TS->Fill(dif.y());
 	  hists->m_prim_zf0TS->Fill(dif.z());
+	  hists->m_prim_rzf0TS->Fill(azimdif,0.);
+	  hists->m_prim_rzf0TS->Fill(dif.z(),1.);
 	  hists->m_prim_impactTS->Fill(logImpact);
 	  hists->m_prim_impactrTS->Fill(primtrk->impactParameter());
+	  hists->m_prim_impactTTS->Fill(logImpact,0.);
+	  hists->m_prim_impactrTTS->Fill(primtrk->impactParameter(),0.);
 
 	  hists->m_ppointTS->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointTS->Fill(primtrk->numberOfPossiblePoints());
@@ -752,14 +891,19 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_ratioTS->Fill(nfitntot);
 	  hists->m_prim_ratiomTS->Fill(nfitnmax);
 	  hists->m_ppsiTS->Fill(geom->psi()/degree);
+	  hists->m_ppsiTTS->Fill(geom->psi()/degree,0.);
 	  hists->m_ptanlTS->Fill(TMath::Tan(geom->dipAngle()));
 	  hists->m_prim_thetaTS->Fill(thetad);
 	  hists->m_petaTS->Fill(eta);
+	  hists->m_petaTTS->Fill(eta,0.);
 	  hists->m_ppTTS->Fill(pT);
+	  hists->m_ppTTTS->Fill(pT,0.);
 	  hists->m_pmomTS->Fill(gmom);
 	  hists->m_plengthTS->Fill(primtrk->length());
 	  hists->m_pchisq0TS->Fill(chisq0);
 	  hists->m_pchisq1TS->Fill(chisq1);
+	  hists->m_pchisq0TTS->Fill(chisq0,0.);
+	  hists->m_pchisq1TTS->Fill(chisq1,0.);
 
 	  hists->m_primtrk_xf_yfTS->Fill(firstPoint.x(),
 				  firstPoint.y());
@@ -798,16 +942,35 @@ void StEventQAMaker::MakeHistPrim() {
 // now fill all FTPC East histograms ------------------------------------------
         else if (map.trackFtpcEast()) {
 
+	  cnttrkgFE++;
+	  mean_ptFE += geom->momentum().perp();
+	  mean_etaFE += eta;
 // these are TPC & FTPC
+	  // east and west in same histogram
+	  hists->m_ppointF->Fill(detInfo->numberOfPoints(),0.);
+	  hists->m_pmax_pointF->Fill(primtrk->numberOfPossiblePoints(),0.);
+	  hists->m_prim_chargeF->Fill(geom->charge(),0.);
+	  hists->m_prim_xfF->Fill(firstPoint.x(),0.);
+	  hists->m_prim_yfF->Fill(firstPoint.y(),0.);
+	  hists->m_prim_zfF->Fill(firstPoint.z(),0.);
+	  hists->m_prim_radfF->Fill(radf,0.);
+	  hists->m_prim_ratiomF->Fill(nfitnmax,0.);
+	  hists->m_ppsiF->Fill(geom->psi()/degree,0.);
+	  hists->m_petaF->Fill(eta,0.);
+	  hists->m_ppTF->Fill(pT,0.);
+	  hists->m_pmomF->Fill(gmom,0.);
+	  hists->m_plengthF->Fill(primtrk->length(),0.);
+	  hists->m_pchisq0F->Fill(chisq0,0.);	
+	  hists->m_prim_impactF->Fill(logImpact,0.);
+	  hists->m_prim_impactrF->Fill(primtrk->impactParameter(),0.);
+	  // east and west in separate histograms
 	  hists->m_ppointFE->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointFE->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointFE->Fill(fTraits.numberOfFitPoints());
 	  hists->m_prim_chargeFE->Fill(geom->charge());
 	  hists->m_prim_xfFE->Fill(firstPoint.x());
 	  hists->m_prim_yfFE->Fill(firstPoint.y());
 	  hists->m_prim_zfFE->Fill(firstPoint.z());
 	  hists->m_prim_radfFE->Fill(radf);
-	  hists->m_prim_ratioFE->Fill(nfitntot);
 	  hists->m_prim_ratiomFE->Fill(nfitnmax);
 	  hists->m_ppsiFE->Fill(geom->psi()/degree);
 	  hists->m_petaFE->Fill(eta);
@@ -815,7 +978,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomFE->Fill(gmom);
 	  hists->m_plengthFE->Fill(primtrk->length());
 	  hists->m_pchisq0FE->Fill(chisq0);
-	  hists->m_pchisq1FE->Fill(chisq1);
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
@@ -824,23 +986,40 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_peta_trklengthFE->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthFE->Fill(primtrk->length(),
 				   Float_t(detInfo->numberOfPoints()));
-	  hists->m_pfpoint_lengthFE->Fill(primtrk->length(),
-				   Float_t(fTraits.numberOfFitPoints()));
 	}
 
 // now fill all FTPC West histograms ------------------------------------------
         else if (map.trackFtpcWest()) {
 
+	  cnttrkgFW++;
+	  mean_ptFW += geom->momentum().perp();
+	  mean_etaFW += eta;
 // these are TPC & FTPC
+	  // east and west in same histogram
+	  hists->m_ppointF->Fill(detInfo->numberOfPoints(),1.);
+	  hists->m_pmax_pointF->Fill(primtrk->numberOfPossiblePoints(),1.);
+	  hists->m_prim_chargeF->Fill(geom->charge(),1.);
+	  hists->m_prim_xfF->Fill(firstPoint.x(),1.);
+	  hists->m_prim_yfF->Fill(firstPoint.y(),1.);
+	  hists->m_prim_zfF->Fill(firstPoint.z(),1.);
+	  hists->m_prim_radfF->Fill(radf,1.);
+	  hists->m_prim_ratiomF->Fill(nfitnmax,1.);
+	  hists->m_ppsiF->Fill(geom->psi()/degree,1.);
+	  hists->m_petaF->Fill(eta,1.);
+	  hists->m_ppTF->Fill(pT,1.);
+	  hists->m_pmomF->Fill(gmom,1.);
+	  hists->m_plengthF->Fill(primtrk->length(),1.);
+	  hists->m_pchisq0F->Fill(chisq0,1.);
+	  hists->m_prim_impactF->Fill(logImpact,1.);
+	  hists->m_prim_impactrF->Fill(primtrk->impactParameter(),1.);
+	  // east and west in separate histograms
 	  hists->m_ppointFW->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointFW->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointFW->Fill(fTraits.numberOfFitPoints());
 	  hists->m_prim_chargeFW->Fill(geom->charge());
 	  hists->m_prim_xfFW->Fill(firstPoint.x());
 	  hists->m_prim_yfFW->Fill(firstPoint.y());
 	  hists->m_prim_zfFW->Fill(firstPoint.z());
 	  hists->m_prim_radfFW->Fill(radf);
-	  hists->m_prim_ratioFW->Fill(nfitntot);
 	  hists->m_prim_ratiomFW->Fill(nfitnmax);
 	  hists->m_ppsiFW->Fill(geom->psi()/degree);
 	  hists->m_petaFW->Fill(eta);
@@ -848,7 +1027,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomFW->Fill(gmom);
 	  hists->m_plengthFW->Fill(primtrk->length());
 	  hists->m_pchisq0FW->Fill(chisq0);
-	  hists->m_pchisq1FW->Fill(chisq1);
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFW->Fill(eta,lmevpt);
@@ -857,28 +1035,35 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_peta_trklengthFW->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthFW->Fill(primtrk->length(),
 				   Float_t(detInfo->numberOfPoints()));
-	  hists->m_pfpoint_lengthFW->Fill(primtrk->length(),
-				   Float_t(fTraits.numberOfFitPoints()));
 	}
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);
     hists->m_primtrk_good_sm->Fill(cnttrkg);
+    hists->m_primtrk_goodTTS->Fill(cnttrkgT+cnttrkgTS);
+    hists->m_primtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
   }
+  mean_ptT /= cnttrkgT;
+  mean_ptTS /= cnttrkgTS;
+  mean_ptFE /= cnttrkgFE;
+  mean_ptFW /= cnttrkgFW;
+  mean_etaT /= cnttrkgT;
+  mean_etaTS /= cnttrkgTS;
+  mean_etaFE /= cnttrkgFE;
+  mean_etaFW /= cnttrkgFW;
+  hists->m_primtrk_meanptTTS->Fill(mean_ptTS,0.);
+  hists->m_primtrk_meanptTTS->Fill(mean_ptT,1.);
+  hists->m_primtrk_meanptF->Fill(mean_ptFE,0.);
+  hists->m_primtrk_meanptF->Fill(mean_ptFW,1.);
+  hists->m_primtrk_meanetaTTS->Fill(mean_etaTS,0.);
+  hists->m_primtrk_meanetaTTS->Fill(mean_etaT,1.);
+  hists->m_primtrk_meanetaF->Fill(mean_etaFE,0.);
+  hists->m_primtrk_meanetaF->Fill(mean_etaFW,1.);
+
+  // MakeHistPrim() must be called after MakeHistGlob for the following to work
+  hists->m_primglob_good->Fill((Float_t)n_prim_good/(Float_t)n_glob_good);
+  hists->m_primglob_fit->Fill((Float_t)nhit_prim_fit/(Float_t)nhit_glob_fit);
 }
-
-//_____________________________________________________________________________
-void StEventQAMaker::MakeHistGen() {
-
-  //  StEvent does not have data corresponding to the DST particle table
-  //  so this method is not used in StEventQAMaker.  However, this
-  //  information can be found from StMcEvent.
-
-  if (Debug()) 
-    gMessMgr->Info(" *** in StEventQAMaker - filling particle histograms ");
-
-}
-
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPID() {
 
@@ -905,6 +1090,9 @@ void StEventQAMaker::MakeHistPID() {
 	double error = dedxPidTr->errorOnMean();
 	double p = abs(theTrack->geometry()->momentum());
 	if (dedxPidTr->detector() == kTpcId) {
+	  Float_t pionExpectedBB = betheBloch(theTrack->geometry()->momentum().mag()/
+					      pion_minus_mass_c2);
+	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
 	  hists->m_ndedxT->Fill(ndedx);
 	  hists->m_dedx0T->Fill(dedx);
 	  hists->m_dedx1T->Fill(error);
@@ -912,15 +1100,26 @@ void StEventQAMaker::MakeHistPID() {
 	    hists->m_p_dedx_rec->Fill((float)(p),(float)(dedx*1.e6));
 	  }
 	}
+	if (dedxPidTr->detector() == kTpcSvtId) {
+	  Float_t pionExpectedBB = betheBloch(theTrack->geometry()->momentum().mag()/
+					      pion_minus_mass_c2);
+	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
+	}
 	if (dedxPidTr->detector() == kFtpcWestId) {
+	  // east and west in same histogram
+	  hists->m_ndedxF->Fill(ndedx,1.);
+	  hists->m_dedx0F->Fill(dedx,1.);
+	  // east and west in separate histograms
 	  hists->m_ndedxFW->Fill(ndedx);
 	  hists->m_dedx0FW->Fill(dedx);
-	  hists->m_dedx1FW->Fill(error);
 	}
 	if (dedxPidTr->detector() == kFtpcEastId) {
+	  // east and west in same histogram
+	  hists->m_ndedxF->Fill(ndedx,0.);
+	  hists->m_dedx0F->Fill(dedx,0.);
+	  // east and west in separate histograms
 	  hists->m_ndedxFE->Fill(ndedx);
 	  hists->m_dedx0FE->Fill(dedx);
-	  hists->m_dedx1FE->Fill(error);
 	}
       }
     }
@@ -971,6 +1170,7 @@ void StEventQAMaker::MakeHistVertex() {
         hists->m_pv_pchi2->Fill(primVtx->chiSquared());
         hists->m_pv_r->Fill(primVtx->position().x()*primVtx->position().x() +
 		     primVtx->position().y()*primVtx->position().y());
+	hists->m_pv_xy->Fill(primVtx->position().x(),primVtx->position().y());
       }
       else {
         hists->m_v_vtxid->Fill(aPrimVtx->type());
@@ -1037,6 +1237,10 @@ void StEventQAMaker::MakeHistVertex() {
                        * 180./M_PI;
         if (phi<0.) phi += 360.;
         hists->m_vtx_phi_dist->Fill(phi);
+	hists->m_vtx_z_dist->Fill(v0->position().z() - primVtx->position().z());
+	Float_t r_dist = sqrt(pow(v0->position().x()-primVtx->position().x(),2)+
+			      pow(v0->position().y()-primVtx->position().y(),2));
+	hists->m_vtx_r_dist->Fill(r_dist);
 //        v0PhiHist.Fill(phi);
 //        if (phi<180.) phi += 360.;
 //        v0PhiHist2.Fill(phi);
@@ -1154,27 +1358,68 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t ftpcHitsW = 0;
 
   if (tpcHits) {
-    // z-dist of hits
-    for (UInt_t i=0; i<24; i++)
-      for (UInt_t j=0; j<45; j++)
-	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++)
-	  hists->m_z_hits->Fill(tpcHits->sector(i)->padrow(j)->hits()[k]->position().z());
+    // z and phi dist of hits
+    for (UInt_t i=0; i<tpcHits->numberOfSectors(); i++)
+      for (UInt_t j=0; j<tpcHits->sector(i)->numberOfPadrows(); j++)
+	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++) {
+	  Float_t z  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().z();
+	  Float_t phi = tpcHits->sector(i)->padrow(j)->hits()[k]->position().phi();
+	  hists->m_z_hits->Fill(z);
+	  if (z<0) {
+	    if (phi<0)
+	      hists->m_pnt_phiT->Fill(360+phi/degree,0.);
+	    else
+	      hists->m_pnt_phiT->Fill(phi/degree,0.);
+	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
+	  }
+	  else {
+	    if (phi<0)
+	      hists->m_pnt_phiT->Fill(360+phi/degree,1.);
+	    else
+	      hists->m_pnt_phiT->Fill(phi/degree,1.);
+	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
+	  }
+	}
     hists->m_pnt_tpc->Fill(tpcHits->numberOfHits());
     totalHits += tpcHits->numberOfHits();
   }
   if (svtHits) {
+    for (UInt_t i=0; i<svtHits->numberOfBarrels(); i++)
+      for (UInt_t j=0; j<svtHits->barrel(i)->numberOfLadders(); j++)
+	for (UInt_t k=0; k<svtHits->barrel(i)->ladder(j)->numberOfWafers(); k++)
+	  for (UInt_t l=0; l<svtHits->barrel(i)->ladder(j)->wafer(k)->hits().size(); l++) {
+	    Float_t z = svtHits->barrel(i)->ladder(j)->wafer(k)->hits()[l]->position().z();
+	    Float_t phi = svtHits->barrel(i)->ladder(j)->wafer(k)->hits()[l]->position().phi();
+	    hists->m_pnt_zS->Fill(z);
+	    if (phi<0)
+	      hists->m_pnt_phiS->Fill(360+phi/degree);
+	    else
+	      hists->m_pnt_phiS->Fill(phi/degree);
+	    hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
+	  }
     hists->m_pnt_svt->Fill(svtHits->numberOfHits());
     totalHits += svtHits->numberOfHits();
   }
   if (ftpcHits) {
     // StFtpcHitCollection doesn't differentiate between W and E FTPCs
     // so it is up to the user to check this via plane number -CPL
-    for (UInt_t i=0; i<20; i++) {
+    for (UInt_t i=0; i<ftpcHits->numberOfPlanes(); i++) {
+      for (UInt_t j=0; j<ftpcHits->plane(i)->numberOfSectors(); j++)
+	for (UInt_t k=0; k<ftpcHits->plane(i)->sector(j)->hits().size(); k++) {
+	  if (i<10)
+	    hists->m_pnt_planeF->Fill(i+1,1.); // physical numbering starts at 1
+	  else
+	    hists->m_pnt_planeF->Fill(i+1,0.); // physical numbering starts at 1
+	}
       if (i<10)
 	ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
       else
 	ftpcHitsE += ftpcHits->plane(i)->numberOfHits();
     }
+    // east and west in same histogram
+    hists->m_pnt_ftpc->Fill(ftpcHitsE,0.);
+    hists->m_pnt_ftpc->Fill(ftpcHitsW,1.);
+    // east and west in separate histograms
     hists->m_pnt_ftpcW->Fill(ftpcHitsW);
     hists->m_pnt_ftpcE->Fill(ftpcHitsE);
     totalHits += ftpcHits->numberOfHits();
@@ -1353,6 +1598,24 @@ void StEventQAMaker::MakeHistEval() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling Eval histograms ");
 
+  if (!(gROOT->GetClass("StMcEventMaker"))) return;
+  StMcEvent* mcEvent = 0;
+  StMcEventMaker* mcEventMaker = (StMcEventMaker*) GetMaker("StMcEvent");
+  if (mcEventMaker) mcEvent = mcEventMaker->currentMcEvent();
+  StMcVertex* mcprimaryVertex = mcEvent->primaryVertex();
+  StPrimaryVertex* primaryVertex = event->primaryVertex();
+  if ((primaryVertex) && (mcprimaryVertex)) {
+    Float_t geantX = mcprimaryVertex->position().x();
+    Float_t geantY = mcprimaryVertex->position().y();
+    Float_t geantZ = mcprimaryVertex->position().z();
+    Float_t recoX = primaryVertex->position().x();
+    Float_t recoY = primaryVertex->position().y();
+    Float_t recoZ = primaryVertex->position().z();
+    hists->m_geant_reco_pvtx_x->Fill(geantX-recoX);
+    hists->m_geant_reco_pvtx_y->Fill(geantY-recoY);
+    hists->m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
+    hists->m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);    
+  }
 }
 
 //_____________________________________________________________________________

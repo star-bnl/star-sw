@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.3 2001/04/25 21:35:25 genevb Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.4 2001/05/16 20:57:02 lansdell Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.4  2001/05/16 20:57:02  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.3  2001/04/25 21:35:25  genevb
 // Added V0 phi distributions
 //
@@ -18,13 +21,7 @@
 
      "TabQaNullPrimVtx",
      "TabQaMultClass",
-     "TabQaEvsumTrkGoodDTotal",
-     "TabQaEvsumTrkTot",
      "TabQaEvsumTotChg",
-     "TabQaEvsumTrkPrim",
-     "TabQaEvsumMeanPt",
-     "TabQaEvsumPrimVertR",
-     "TabQaEvsumPrimVertZ",
      "TabQaGtrkRnfT",
      "TabQaGtrkR0T",
      "TabQaGtrkPhi0T",

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.3 2000/08/25 16:04:09 genevb Exp $
+// $Id: HitHistograms.cxx,v 1.4 2001/05/16 20:57:02 lansdell Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.cxx,v $
+// Revision 1.4  2001/05/16 20:57:02  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 1.3  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -51,6 +54,7 @@ HitHistograms::HitHistograms(const char *name,const char *title,
   m_innerSectorDeDxHist = new TH1F(name1,title1,xbins,xmin,xmax);
   m_outerSectorDeDxHist = new TH1F(name2,title2,xbins,xmin,xmax);
   m_allSectorsDeDxHist = new StMultiH1F(name,title,nbinsx,xlow,xup,nbinsy);
+  m_allSectorsDeDxHist->SetStats(kFALSE);
   if (nbinsy == 2) {
     m_allSectorsDeDxHist->Rebin(0,"Outer");
     m_allSectorsDeDxHist->Rebin(1,"Inner");

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.2 2001/04/28 22:05:13 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.3 2001/05/16 20:57:03 lansdell Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.3  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.2  2001/04/28 22:05:13  genevb
 // Added EMC histograms
 //
@@ -33,7 +36,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.2 2001/04/28 22:05:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.3 2001/05/16 20:57:03 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -44,35 +47,15 @@ class StQAMakerBase : public StMaker {
   Int_t nmneta; 
   Int_t nxyz;   
 
-
 // ***************** Histogram Pointers ***************************
  public:
   // histogram for number of events without primary vertex
   TH1F     *mNullPrimVtx;         //!
   // histogram for number of events in mult classes
   TH1F     *mMultClass;           //!
-
-  // for method MakeEvSum - from table event_summary
-  TH2F     *m_trk_tot_gd;         //! num of good trks over total - global
-  TH2F     *m_glb_trk_tot;        //! # tracks total from globtrk
-  TH2F     *m_glb_trk_tot_sm;     //! # tracks total from globtrk, small range
-  TH2F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
-  TH2F     *m_glb_trk_plusminus_sm; //! # trks pos/neg., small range 
+  // for method MakeEvSum - from software monitor
   TH2F     *m_glb_trk_chg;        //! all charge east/west (TPC) 
-  TH2F     *m_glb_trk_prim;       //! # trks from primaries
-  TH2F     *m_glb_trk_prim_sm;    //! # trks from primaries, small range
-  TH2F     *m_vert_total;         //! total number of vertices
-  TH2F     *m_vert_total_sm;      //! total number of vertices, small range
-  TH2F     *m_mean_pt;            //! mean pt value
-  TH2F     *m_mean_pt_sm;         //! mean pt value, small range
-  TH2F     *m_mean_eta;           //! mean eta value 
-  TH2F     *m_rms_eta;            //! rms eta value 
-  TH2F     *m_prim_vrtr;          //! primary vrtx r position
-  TH2F     *m_prim_vrtx0;         //! primary vrtx x position
-  TH2F     *m_prim_vrtx1;         //! primary vrtx y position
-  TH2F     *m_prim_vrtx2;         //! primary vrtx z position
-
-
+  TH2F     *m_glb_trk_chgF;       //! all charge east/west (FTPC) 
 
 // **************** Members For Internal Use ***************************
  protected:
@@ -97,7 +80,6 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
   virtual void MakeHistPrim() = 0;
-  virtual void MakeHistGen() = 0;
   virtual void MakeHistPID() = 0;
   virtual void MakeHistVertex() = 0;
   virtual void MakeHistPoint() = 0;

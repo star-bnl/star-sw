@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_Cosmic.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $
+// $Id: QAhlist_QA_Cosmic.h,v 2.3 2001/05/16 20:57:02 lansdell Exp $
 // $Log: QAhlist_QA_Cosmic.h,v $
+// Revision 2.3  2001/05/16 20:57:02  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.2  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -14,13 +17,7 @@
 // must be recompiled
 
  "TabQaNullPrimVtx",
- "TabQaEvsumTrkTot",
- "TabQaEvsumTrkTotsm",
- "TabQaEvsumPlusMinusTrk",
- "TabQaEvsumPlusMinusTrksm",
  "TabQaEvsumTotChg",
- "TabQaEvsumMeanPt",
- "TabQaEvsumMeanPtsm",
  "TabQaGtrkGood",
  "TabQaGtrkGoodsm",
  "TabQaGtrkNPntT",

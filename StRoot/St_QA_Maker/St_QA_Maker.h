@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 2.0 2000/08/25 16:02:41 genevb Exp $
+// $Id: St_QA_Maker.h,v 2.1 2001/05/16 20:57:04 lansdell Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 2.1  2001/05/16 20:57:04  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.0  2000/08/25 16:02:41  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -36,7 +39,6 @@ class St_QA_Maker : public StQAMakerBase {
   virtual void   MakeHistGlob();
   virtual void   MakeHistDE();
   virtual void   MakeHistPrim();
-  virtual void   MakeHistGen();
   virtual void   MakeHistPID();
   virtual void   MakeHistVertex();
   virtual void   MakeHistPoint();
@@ -45,7 +47,7 @@ class St_QA_Maker : public StQAMakerBase {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.0 2000/08/25 16:02:41 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.1 2001/05/16 20:57:04 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker,0)
 };
