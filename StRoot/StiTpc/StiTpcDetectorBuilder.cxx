@@ -43,8 +43,8 @@ of these materials are extracted from the Particle Data Book.
 void StiTpcDetectorBuilder::buildMaterials()
 {
   _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _gas        = add(new StiMaterial("P10",  16.4, 36.2741,0.00156,12820.*0.00156, 15.48) ); 
-  _fcMaterial = add(new StiMaterial("Nomex", 6.24,12.40,  0.064,     39.984,  1.)        );
+  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.48) ); 
+  _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,  1.)        );
   _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Done" << endl;
 }
 
