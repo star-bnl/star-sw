@@ -4,7 +4,7 @@ C     EGR_FILL_GLOBTRK - fills the global track table
 C<--------------------------------------------------------------------
        INTEGER FUNCTION EGR_LOAD_GLOBTRK(globtrk_h,globtrk,globtrk_aux_h,
      +     globtrk_aux,igtrk,gtrk,tphit_h,tphit,svthit_h,svthit,
-     +     covar,itpct,isvtt)
+     +     covar,itpct,isvtt,ipriv)
        
 C>--------------------------------------------------------------------
 C
@@ -49,7 +49,7 @@ C     Local variables
       RECORD /track_pointers/ gtrk(mxtrack)
       
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
-      INTEGER imsg
+      INTEGER imsg,ipriv
       REAL    covar(3,3)
       DATA    imsg /0/
 
@@ -58,8 +58,6 @@ C     Local variables
       globtrk_aux_h.nok = globtrk_aux_h.nok +1
       iglob = globtrk_h.nok
       globtrk(iglob).id = iglob
-      globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +     flag)))*500.+gtrk(igtrk).flag
       globtrk(iglob).n_point = gtrk(igtrk).nhit
       globtrk(iglob).n_max_point = 0
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
@@ -123,10 +121,31 @@ C     Now find last point on track and calculate track length.
       endif
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
          globtrk(iglob).det_id = 3
+         if( ipriv .eq. 0) then
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*500.+gtrk(igtrk).flag 
+         else
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*600.+gtrk(igtrk).flag 
+         endif
       elseif( isvtt .eq. 0) then
          globtrk(iglob).det_id = 1
+         if( ipriv .eq. 0) then
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*100.+gtrk(igtrk).flag 
+         else
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*300.+gtrk(igtrk).flag 
+         endif
       elseif( itpct .eq. 0) then
          globtrk(iglob).det_id = 2
+         if( ipriv .eq. 0) then
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*200.+gtrk(igtrk).flag 
+         else
+            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +           flag)))*400.+gtrk(igtrk).flag 
+         endif
       endif
       if (globtrk(iglob).length.gt.99999.9) then
          globtrk(iglob).length=99999.9
