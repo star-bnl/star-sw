@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapper.hh,v 1.15 2002/10/11 15:45:03 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.16 2002/11/06 13:44:53 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.16  2002/11/06 13:44:53  oldi
+// Vertex handling simplifed.
+// Flag for clusters not to be used for tracking introduced.
+// Code clean ups.
+//
 // Revision 1.15  2002/10/11 15:45:03  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -159,6 +164,7 @@ private:
   Int_t mDiffHitsStill;    // different hits from fits could not be resolved
   Int_t mLengthFitNaN;     // argument of arcsin was higher than +1 (lower than -1)
   Int_t mClustersUnused;   // number of unused clusters
+  Int_t mBadClusters;      // number of clusters noy to be used for tracking ('bad' flag set)
 
   // setter
   void SetEtaMin(Double_t f) { mEtaMin = f; }  // sets min. value for eta
@@ -202,19 +208,19 @@ private:
 public:
             StFtpcConfMapper();  // default constructor
             StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, 
-			     Double_t vertexPos[6] = 0,
-			     Bool_t bench = (Bool_t)false,
+			     StFtpcVertex *vertex = 0,
+			     Bool_t bench = (Bool_t)kFALSE,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
             StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint,
 			     MIntArray *good_hits,
-			     Double_t vertexPos[6] = 0,
-			     Bool_t bench = (Bool_t)false,
+			     StFtpcVertex *vertex = 0,
+			     Bool_t bench = (Bool_t)kFALSE,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor to fill evaluated hits
             StFtpcConfMapper(TObjArray *hits, 
 			     StFtpcVertex *vertex = 0, 
-			     Bool_t bench = (Bool_t)false, 
+			     Bool_t bench = (Bool_t)kFALSE, 
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor which takes an CLonesArray of hits
   virtual  ~StFtpcConfMapper();  // destructor
@@ -252,6 +258,7 @@ public:
      Int_t  GetNumDiffHits()         { return mDiffHits;         }  // returns number of cases where length and circle fit are different
      Int_t  GetNumLengthFitNaN()     { return mLengthFitNaN;     }  // retruns number of settings of argumnet of arcsin to +/-1
      Int_t  GetNumClustersUnused()   { return mClustersUnused;   }  // returns number of unused clusters
+     Int_t  GetNumBadClusters()      { return mBadClusters;      }  // returns number of bad clusters
 
      Int_t  GetRowSegm(StFtpcConfMapPoint *hit);                      // returns number of pad segment of a specific hit
      Int_t  GetPhiSegm(StFtpcConfMapPoint *hit);                      // returns number of phi segment of a specific hit
@@ -282,7 +289,7 @@ public:
 StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff, Bool_t backward);            // returns next cluster to start cluster
               void  ExtendTracks();                                                                              // Loops over found tracks. Trys to extend them.
             Bool_t  TrackExtension(StFtpcTrack *track);                                                          // Trys to extend given track.
-      Bool_t const  TestExpression(Int_t sub_row_segm, Int_t end_row, Bool_t backward = (Bool_t)true);           // increments or decrements *sub_row_segm
+      Bool_t const  TestExpression(Int_t sub_row_segm, Int_t end_row, Bool_t backward = (Bool_t)kTRUE);          // increments or decrements *sub_row_segm
               void  LoopUpdate(Int_t *sub_row_segm, Bool_t backward);                                            // tests if loop should be continued
     Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit, Bool_t backward);      // returns angle
     Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 0);                                              // returns angle
@@ -291,7 +298,7 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
               void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                               // calculates a straight line fit for given clusters 
               void  CalcChiSquared(StFtpcTrack *track, StFtpcConfMapPoint *point, Double_t *chi2);               // calculates chi squared for cirlce and length fit
       Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, 
-			       const StFtpcConfMapPoint *newhit, Bool_t backward = (Bool_t)true);                // returns true if phi and eta cut holds
+			       const StFtpcConfMapPoint *newhit, Bool_t backward = (Bool_t)kTRUE);               // returns true if phi and eta cut holds
               void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);                // loops over tracks and looks for split tracks
               void  HandleSplitTracks();                                                                         // HandleSplitTracks() with default values
               void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                          // merges two tracks
@@ -338,7 +345,7 @@ inline void StFtpcConfMapper::RemoveTrack(StFtpcTrack *track)
 {
   // Removes track from ObjArry and takes care that the points are released again.
 
-  track->SetProperties(false, -1); // release points
+  track->SetProperties(kFALSE, -1); // release points
   mTrack->Remove(track);           // actual removement of TObjArray
   delete track;                    // delete track
 
@@ -402,10 +409,10 @@ inline Double_t StFtpcConfMapper::GetEta(Int_t segm)
 {
   // Returns the pseudorapidity eta of the given segment.
 
-  Bool_t minus_sign = (Bool_t)false;
+  Bool_t minus_sign = (Bool_t)kFALSE;
 
   if (segm >= mNumEtaSegment/2.) {
-    minus_sign = (Bool_t)true;
+    minus_sign = (Bool_t)kTRUE;
     segm -= mNumEtaSegment/2;
   }
 
