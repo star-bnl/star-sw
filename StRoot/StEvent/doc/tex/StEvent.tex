@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.27 2000/04/10 19:59:34 genevb Exp $
+% $Id: StEvent.tex,v 2.28 2000/04/20 13:31:25 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.27  2000/04/10 19:59:34  genevb
-% StRoot/StEvent/doc/tex/
+% Revision 2.28  2000/04/20 13:31:25  ullrich
+% Added description of changes to StTrackDetectorInfo.
 %
 % Revision 2.34  2000/05/24 15:43:38  ullrich
 % More on the StEventMaker (update).
@@ -175,8 +175,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -184,17 +184,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -209,8 +209,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -4359,7 +4359,9 @@ definition in the header file.
 
      where
      \begin{verbatim}
-
+     svt_track.flag = 1 good fit from primary track fit 
+                    = 2 good fit from secondary track fit 
+                    = 0 bad track 
      \end{verbatim}
     \verb+StTrack();+\\
      Matched SVT and TPC tracks:\\ 
@@ -4418,11 +4420,41 @@ definition in the header file.
     
     \verb+Float_t length() const;+\\
 
-    Returns the number of points on the track in
-    \emph{all} detectors.
+    \verb+UShort_t numberOfPossiblePoints() const;+\\
+    Returns number of the (theoretically) maximum number of
+    points along a track in \emph{all} detectors.
     
+    \verb+UShort_t numberOfPossiblePoints(StDetectorId det) const;+\\
+    Returns number of the (theoretically) maximum number of
+    points along a track in a given detector \texttt{det}.
+
+    \verb+const StTrackTopologyMap& topologyMap() const;+\\
 
     \verb+StTrackGeometry* geometry();+\\
+\item[Summary]
+    If you need curvature, angles or the momentum go there.
+    
+    \verb+StTrackDetectorInfo* detectorInfo();+\\
+\item[Description]
+    \verb+void setNode(StTrackNode*);+\\
+\end{Entry}
+\clearpage
+
+\subsection{StTrackDetectorInfo}
+\index{StTrackDetectorInfo|textbf}
+\item[Summary] Information on hits/points associated with a track.
+\item[Synopsis]
+    \verb+#include "StTrackDetectorInfo.h"+\\
+    \verb+class StTrackDetectorInfo;+\\
+\item[Description] This class holds all information related to hits
+    used to reconstruct a given track. The main component is a list of
+    pointers to those hits which are associated with the track.
+    Several tracks can in principle share the same instance of
+    \texttt{StTrackDetectorInfo}.  Note, that in case there are no
+    hits stored on a DST, this class won't provide a lot of info.
+    The only methods still valid are:
+    \begin{itemize}
+    \item \texttt{firstPoint()}
     \item \texttt{lastPoint()}
     \item \texttt{numberOfPoints()}
     \item \texttt{numberOfPoints(StDetectorId)}
@@ -4577,7 +4609,7 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     \verb+UInt_t numberOfHits(StDetectorId) const;+\\
     \verb+StTrackPidTraits(const dst_dedx_st&);+\\
 
-    may be stored in a TTree (TBranch does not support ULong_t),
+\item[Public Member\\ Functions]
     \verb+Short_t detector() const;+\\
     Returns the detector from which the PID is derived.
 
