@@ -2,15 +2,15 @@
 %
 % STAR Class Library - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StarClassLibrary.tex,v 1.5 1999/04/27 19:58:08 ullrich Exp $
+% $Id: StarClassLibrary.tex,v 1.6 1999/04/28 16:14:13 ullrich Exp $
 %
 % Author: LaTeX template by Thomas Ullrich, March 19 1998
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StarClassLibrary.tex,v $
-% Revision 1.5  1999/04/27 19:58:08  ullrich
-% Added description of StTimer
+% Revision 1.6  1999/04/28 16:14:13  ullrich
+% Added more examples
 %
 % Revision 1.19  2000/04/06 23:01:45  ullrich
 % Added reference section for StMath. Particle section updated.
@@ -159,8 +159,8 @@
   \mbox{\includegraphics[width=\textwidth]{StarClassLibraryTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.5 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/04/27 19:58:08 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.6 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/04/28 16:14:13 $ $}  % replaced by cvs with current revision  
   \vfill
 \end{center}
 \cleardoublepage
@@ -3631,6 +3631,9 @@ pseudo rapidity(c) = 0.364012
     StThreeVectorF inherits from TObject \index{TObject}
     if the SCL was compiled with the \name{\_\_ROOT\_\_} flag set.
 
+\item[Persistence]
+    Within the ROOT framework.
+
 \end{Entry}
 
 \clearpage
@@ -3662,6 +3665,74 @@ pseudo rapidity(c) = 0.364012
     calling \comp{stop()}.
     
     StTimer uses the system-dpendent function \comp{clock()} which
+    returns the number of "ticks" since it was first called. As a
+    result, StTimer will not be able to measure intervals longer than
+    some system-dependent value. (For instance, on several common UNIX
+    systems, this value is just under 36 minutes.)
+    
+    The resolution of the timer is given by the number of "ticks" per
+    second.  This value is system dependent and can be checked with
+    the \comp{resolution()} member function. Make sure that the CPU time
+    between the start and stop of the timer is significantly larger
+    than the resolution.
+
+    N.B. The interface of this class and its functionality were adapted
+    from the tools.h++ class library from RogueWave.
+    
+\item[Related Classes]
+    None
+    
+\item[Persistence]
+    None
+    
+\item[Public\\ Constructors]
+    \verb+StTimer();+ \\
+    Constructs a new timer. The timer will not start
+    running until until \comp{start()} is called.
+
+\item[Public Member\\ Functions]
+    \verb+double resolution() const+\\
+    Returns the minimal amount of time in seconds which can be
+    measured by the timer. This value is system dependent.
+    Typical values range from 10 $\mu$s to 10 ms.
+    
+    \verb+double elapsedTime() const+\\
+    Returns the amount of (CPU) time that has accumulated while
+    the timer was in the running state.
+ 
+    \verb+void reset()+\\
+    Resets (and stops) the timer.
+ 
+    \verb+void start()+\\
+    Puts the timer in the "running" state. Time accumulates while
+    in this state.
+
+    \verb+void stop()+\\
+    Puts the timer in the "stopped" state. Time will not accumulate
+    while in this state.
+
+\item[Example]
+{\footnotesize
+\begin{verbatim}
+#include "StTimer.hh"
+#include <time.h>
+#include <iostream.h>
+#include <math.h>
+
+int main()
+{   
+    StTimer timer, totalTimer;
+    
+    totalTimer.start();
+    timer.start();
+    
+    // Spend 5 busy sec.
+    time_t begin = time(0);
+    time_t now = begin;
+    while (now - begin < 5) now = time(0);
+    
+    timer.stop();
+    
     cout << "Test 1:" << endl;
     cout << "This test should require less than 5 sec CPU time. \n"
          << "The exact amount depends strongly on the system." << endl;
