@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.2  1998/06/21 19:36:16  fisyak
-#  Clean up for SL98c_1
+#  Revision 1.3  1998/06/22 00:36:27  fisyak
+#  cleanup for SL98c_1
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/21 19:36:16 $ 
+#             Last modification $Date: 1998/06/22 00:36:27 $ 
 #. default setings
 
 RM := rm -f
@@ -63,7 +63,7 @@ Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
 
-CPPFLAGS := $(UNAMES) $(STAF_ARCH) 
+CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH)
 OSFID    :=
 YACC     := yacc
 YACCLIB  := -ly
@@ -275,7 +275,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
 
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID :=  SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
+  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
   LD  := $(CXX)
@@ -296,7 +296,7 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID :=  SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
+  OSFID :=  sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
   CC       :=  /opt/SUNWspro/bin/cc
   CXX      := /opt/SUNWspro/bin/CC
   SO       := $(CXX)

@@ -1,4 +1,7 @@
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.18  1998/06/22 00:36:29  fisyak
+#  cleanup for SL98c_1
+#
 #  Revision 1.17  1998/06/21 19:36:19  fisyak
 #  Clean up for SL98c_1
 #
@@ -32,7 +35,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/21 19:36:19 $ 
+#             Last modification $Date: 1998/06/22 00:36:29 $ 
 #. default setings
 
 RM := rm -f
@@ -134,6 +137,7 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
   FLIBS   := -lxlf90 -lxlf
   FFLAGS  := -qextname  -qrndsngl -qcharlen=6000 
   FEXTEND := -e
+  NOROOT   := YES
 endif 
 
 ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
@@ -190,6 +194,7 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
   FLIBS    :=  -lUfor -lfor -lFutil 
   FFLAGS   :=  -pic  -static -fpe2 
   FEXTEND  :=  -extend_source 
+  NOROOT   := YES
 endif
 
 ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
@@ -234,6 +239,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   FLIBS     := /opt/fortran/lib/libU77.a 
   FFLAGS    := +DA1.0 +ppu +Z  +U77
   FEXTEND   := +es
+  NOROOT   := YES
 endif
 
 
@@ -254,6 +260,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
   SOFLAGS   :=  -shared
   CLIBS     := -lsun  -lm -lc -lPW -lXext
   FLIBS     :=   -lftn 
+  NOROOT   := YES
 
 endif
 
@@ -274,6 +281,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
   LDFLAGS   :=  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
   FLIBS     :=  -lftn 
+  NOROOT   := YES
 
 endif
 
