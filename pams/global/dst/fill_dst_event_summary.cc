@@ -103,12 +103,10 @@ long  type_of_call fill_dst_event_summary_ (
   /* Initialize dstEventSummary table */
   memset (dstEventSummary, 0, sizeof (dst_event_summary_st));
   nphirange = NRANGE ;
-#if 0
   if (!dstTrack_h->nok){
     fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...\n");
     //return STAFCV_BAD;
   }
-#endif  
 
   /* get magnetic field   */
   
