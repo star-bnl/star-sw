@@ -1,13 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.4 1999/11/24 18:14:07 posk Exp $
+// $Id: plot.C,v 1.5 1999/12/04 00:15:41 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
+//               If selN = 0 plot all selections and harmonics
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.5  1999/12/04 00:15:41  posk
+// Works with StFlowEvent which works with the new StEvent
+//
 // Revision 1.4  1999/11/24 18:14:07  posk
 // Now reads event quantities with StFlowEvent methods
 //
@@ -21,20 +25,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-TFile histFile("flow.hist.root");
+//TFile histFile("flow.hist.root");
 
-const Int_t nHarmonics = 4;
-const Int_t nSubEvents = 4;
+const Int_t nHars   = 4;
+const Int_t nSels   = 2;
+const Int_t nSubs   = 2;
 const Float_t twopi = 2. * 3.1416;
-
-TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
+Float_t etaMax      = 2.;
+Float_t ptMax       = 2.;
+TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
+    
+  TFile histFile("flow.hist.root");
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
-  const char *baseName[] = { "Flow_Res_Sel",
+  const char* baseName[] = { "Flow_Res_Sel",
+			     "Flow_EtaPtPhi3D",
+			     "Flow_EtaPtPhi2D.PhiEta",
+                             "Flow_EtaPtPhi2D.PhiPt",
+  			     "Flow_YieldAll2D",
+  			     "Flow_YieldAll.Eta",
+  			     "Flow_YieldAll.Pt",
+   			     "Flow_Bin_Eta",
+   			     "Flow_Bin_Pt",
 			     "Flow_Phi_Sel",
 			     "Flow_Phi_Weight_Sel",
 			     "Flow_Phi_Flat_Sel",
@@ -54,9 +70,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 			     "Flow_v2D_Sel",
 			     "Flow_v.Eta_Sel",
 			     "Flow_v.Pt_Sel"};
-  // 			     "Flow_Bin_Eta_Sel",
-  // 			     "Flow_Bin_Pt_Sel"};
   const Int_t nNames = sizeof(baseName) / sizeof(*baseName);
+  const Int_t nSingles = 8 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -68,13 +83,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
   }
 
   // input the page number
-  while (pageNumber <= 1 || pageNumber > nNames) {
-    if (pageNumber == -1) {     // plot all
-      plotAll(nNames, eventN, harN);
+  while (pageNumber <= nSingles || pageNumber > nNames) {
+    if (pageNumber == -1) {           // plot all
+      plotAll(nNames, selN, harN);
       return;
     }
-    if (pageNumber == 1) {     // plot profile
-      TCanvas* c = plotProfile();
+    if (pageNumber == 1) {            // plot resolution
+      TCanvas* c = plotResolution();
+      return c;
+    }
+    if (pageNumber > 0 && pageNumber <= nSingles) { // plot singles
+      TCanvas* c = plotSingles(shortName[pageNumber-1]);
       return c;
     }
     cout << "-1: \t All" << endl;
@@ -89,19 +108,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 
   // set the constants
   Float_t qMax   =     2.;
-  Float_t etaMax =     2.;
-  Float_t ptMax  =     2.;
   Float_t phiMax = twopi; 
   Int_t n_qBins  =    50;
 
   char* cp = strstr(shortName[pageNumber],"Subs");
-  Int_t columns = (cp) ? nSubEvents : nSubEvents/2;
+  Int_t columns = (cp) ? nSubs + nSels : nSels;
   Int_t rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
-    nHarmonics : nHarmonics -1;
+    nHars : nHars -1;
   Int_t pads = rows*columns;
 
   // make the plots
-  if (eventN == 0) {
+  if (selN == 0) {
     Int_t canvasWidth = 600, canvasHeight = 780;
   } else {
     Int_t canvasWidth = 780, canvasHeight = 600;
@@ -109,21 +126,21 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
   TCanvas* c = new TCanvas(shortName[pageNumber],shortName[pageNumber],
 			   canvasWidth,canvasHeight);
   c->ToggleEventStatus();
-  if (eventN==0) {
+  if (selN==0) {
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
     title->Draw();
   }
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
-  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.95,0.95);
+  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.95);
   graphPad->Draw();
   graphPad->cd();
-  if (eventN==0) {
+  if (selN==0) {
     graphPad->Divide(columns,rows);
     Int_t firstK = 0, firstJ = 0, lastK = columns, lastJ = rows;
   } else {
-    Int_t firstK = eventN -1, firstJ = harN -1, lastK = eventN, lastJ = harN;
+    Int_t firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
   }
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
   TLine* lineZeroPt = new TLine(0., 0., ptMax, 0.);
@@ -148,6 +165,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 	histProjName->Append(*countRows);
       } else {
 	TString* histName = new TString(baseName[pageNumber]);
+	TString* histProjName = new TString(baseName[pageNumber]); // not needed
       }
       histName->Append(*countColumns);
       histName->Append("_Har");
@@ -161,7 +179,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
       }
-      if (eventN == 0) graphPad->cd(padN);
+      if (selN == 0) graphPad->cd(padN);
       if (strstr(shortName[pageNumber],"2D")!=0) {             // 2D
  	if (strcmp(shortName[pageNumber],"Flow_v2D")==0 ||
 	    strcmp(shortName[pageNumber],"Flow_vObs2D")==0) {
@@ -189,7 +207,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],".Pt")!=0) { // 2D Y projection
 	TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999, "E"); 
 	projY->SetName(histProjName->Data());
-	projY->SetXTitle("Pt");
+	projY->SetXTitle("Pt (GeV)");
 	if (strcmp(shortName[pageNumber],"Flow_Yield.Pt")==0) {
 	  projY->SetYTitle("Counts");
 	  gPad->SetLogy();
@@ -267,11 +285,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
   return c;
 }
 
-// macro for the profile plots
-TCanvas* plotProfile(Int_t pageN=1){
-  pageN--;
+// macro for the resolution plots
+TCanvas* plotResolution(){
   char* profName[] = {"Flow_prof_Cos_Sel","Flow_Res_Sel"};
-  Int_t columns = nSubEvents/2;
+  Int_t columns = nSels;
   Int_t rows = 2;
   Int_t pads = rows*columns;
 
@@ -280,13 +297,13 @@ TCanvas* plotProfile(Int_t pageN=1){
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
-  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.95,0.99);
+  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
   graphPad->Draw();
   graphPad->cd();
   graphPad->Divide(columns,rows);
   for (int j = 0; j < rows; j++) {
     Int_t profNumber = j;
-    cout << "profile name= " << profName[profNumber] << endl;
+    cout << "resolution name= " << profName[profNumber] << endl;
     for (int k = 0; k < columns; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
@@ -304,21 +321,108 @@ TCanvas* plotProfile(Int_t pageN=1){
       }
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
-      if (hist) hist->Draw();
-      if (hist) hist->Print("all");
+      hist->Draw();
+      hist->Print("all");
       delete histName;
     }
   }
   return c;
 }
 
-void plotAll(Int_t nNames = 21, Int_t eventN = 0, Int_t harN = 0) {
+// macro for the single plots
+TCanvas* plotSingles(char* shortName){
+  cout << "  name= " << shortName << endl;
+  TCanvas* c = new TCanvas(shortName,shortName,780,600);
+  c->ToggleEventStatus();
+  TDatime now;
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  date->Draw();
+  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
+  graphPad->Draw();
+  graphPad->cd();
+  char* temp = new char[30];    // construct histName
+  strcpy(temp,shortName);
+  char* cproj = strstr(temp,".");
+  if (cproj) {                  // a projection
+    *cproj = '\0';              // remove from "." on
+    cproj = strstr(temp,"2");
+    if (cproj) {                // a 2D projection 
+      *cproj = '\0';            // remove from "2D" on
+      strcat(temp,"3D");
+    } else {
+      strcat(temp,"2D");
+    }
+    TString* histName = new TString(temp);
+    TString* histProjName = new TString(shortName);
+  } else {
+    TString* histName = new TString(shortName);
+  }
+  cout << histName->Data() << endl;
+  TH1* hist = (TH1*)histFile.Get(histName->Data());
+  if (!hist) {
+    cout << "### Can't find histogram " << histName->Data() << endl;
+    return;
+  }
+
+  if (strstr(shortName,".PhiEta")!=0) {        // 3D Phi Eta projection
+    TH2D* projZX = hist->Project3D("zxe");
+    projZX->SetName(histProjName->Data());
+    projZX->SetYTitle("azimuthal angle (rad)");
+    projZX->SetXTitle("pseudorapidity");
+    gStyle->SetOptStat(10);
+    if (projZX) projZX->Draw("COLZ");
+  } else if (strstr(shortName,".PhiPt")!=0) {  // 3D Phi Pt projection
+    TH2D* projZY = hist->Project3D("zye");
+    projZY->SetName(histProjName->Data());
+    projZY->SetYTitle("azimuthal angle (rad");
+    projZY->SetXTitle("Pt (GeV)");
+    gStyle->SetOptStat(10);
+    if (projZY) projZY->Draw("COLZ");
+  } else 
+  if (strstr(shortName,"2D")!=0) {      // 2D
+    gStyle->SetOptStat(10);
+    hist->Draw("COLZ");
+  } else if (strstr(shortName,".Eta")!=0) {    // 2D Eta projection
+    TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999, "E");
+    projX->SetName(histProjName->Data());
+    projX->SetXTitle("pseudorapidity");
+    projX->SetYTitle("Counts");
+    gStyle->SetOptStat(10);
+    if (projX) projX->Draw("H");
+  } else if (strstr(shortName,".Pt")!=0) {     // 2D Pt projection
+    TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999, "E"); 
+    projY->SetName(histProjName->Data());
+    projY->SetXTitle("Pt (GeV)");
+    projY->SetYTitle("Counts");
+    gPad->SetLogy();
+    gStyle->SetOptStat(100110);
+    if (projY) projY->Draw("H");
+  } else if (strstr(shortName,"Bin")!=0) {
+    if (strstr(shortName,"Pt")!=0) {
+      TLine* lineDiagonal  = new TLine(0., 0., ptMax, ptMax);
+    } else {
+      TLine* lineDiagonal = new TLine(-etaMax, -etaMax, etaMax, etaMax);
+    }
+    gStyle->SetOptStat(0);
+    hist->SetMarkerStyle(21);
+    hist->SetMarkerColor(2);
+    hist->Draw();
+    lineDiagonal->Draw();
+  } else {
+    hist->Draw();
+  }
+
+  return c;
+}
+
+void plotAll(Int_t nNames, Int_t selN = 0, Int_t harN = 0) {
+  char temp[3];
   for (int i =  1; i < nNames + 1; i++) {
-    TCanvas* c = plot(i, eventN, harN);
-    c->Print(".ps");
-    char temp[2];
-    cout << "Hit return" << endl;
+    TCanvas* c = plot(i, selN, harN);
+    c->Update();
+    cout << "save? y/[n]" << endl;
     fgets(temp, sizeof(temp), stdin);
+    if (strstr(temp,"y")!=0) c->Print(".ps");
     c->Delete();
   }
   cout << "  plotAll Done" << endl;
