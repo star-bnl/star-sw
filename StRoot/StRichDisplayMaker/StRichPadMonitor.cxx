@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.1 2000/08/09 23:26:58 gans Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.2 2000/08/11 20:20:43 gans Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,8 +7,11 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 2.1  2000/08/09 23:26:58  gans
- * Use TBoxes instead of TLines for Pad Monitor
+ * Revision 2.2  2000/08/11 20:20:43  gans
+ * Added use of StRichDrawableTControl
+ *
+ * Revision 2.4  2000/09/29 17:36:58  gans
+ * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  * Revision 2.1  2000/08/09 23:26:58  gans
  * Use TBoxes instead of TLines for Pad Monitor
@@ -40,6 +43,7 @@
 
 #include "StGlobals.hh"
 
+#include "TButton.h"
 #include "TLine.h"
 #include "TFile.h"
 #include "TNtuple.h"
@@ -66,7 +70,7 @@
 #include "StRichPIDMaker/StRichTrack.h"
 
 #include "StRichPadMonitorText.h"
-
+#include "StRichDrawableTControl.h"
 #include "StTrackGeometry.h"
 #include "StTrackFitTraits.h"
 
@@ -147,9 +151,10 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
 
 //     cout << "yco (41.82) " << yco << endl;
 //     cout << "yci (1.5)   " << yci << endl;
-    TLine aLine;
-    aLine.SetLineWidth(2);
-
+    // StRichDrawableTControls
+    static StRichDrawableTControl zoomIn(1.5,43,9,48,eZoomIn,this);
+    static StRichDrawableTControl zoomOut(10,43,18,48,eZoomOut,this);
+       
     TLine aLine;
     aLine.SetLineWidth(2);
 
@@ -770,10 +775,12 @@ void StRichPadMonitor::printCanvas(char * filename,int eventNum){
     if(filename[i] == '/')
 	i++;
       j++;
-    //  sprintf(tempChar,"%s_%d.ps",&filename[i],eventNum);
-    sprintf(tempChar,"/star/rcf/scratch/gans/plots/1185017_%d.ps",eventNum);
+    sprintf(tempChar,"%s_%d.ps",&filename[i],eventNum);
+    // sprintf(tempChar,"/star/rcf/scratch/gans/plots/1185017_%d.ps",eventNum);
     newFile[j]='\0';
     sprintf(tempChar,"%s_%s%d.ps",directory,newFile,eventNum);
+
+TCanvas * StRichPadMonitor::getRichCanvas(){ return mRichCanvas;}
     mRichCanvas->Print(tempChar);
     delete newFile;
 }
