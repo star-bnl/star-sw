@@ -35,7 +35,7 @@ Author    Rashid Mekhdiyev
       Structure  MSEC { Jsect, Swidth, Glayer, Mat, Med }
 *
       Integer    I_section,J_section,Ie,is,isec,ir,nleft,nright,
-                 imat,imed
+                 imat,imed,Neta
       Real       Secwid,Section,center,current,Plate,Gap,Cell,G10,
                  tan_low,tan_upp,Tanf,RBot,Rtop,Deta(0:12),etax,
                  d,dd,d2,d3,rshift,xleft,xright,yleft,yright,
@@ -292,9 +292,10 @@ Block EPER  is a EM section period (super layer)
 * --- Divide module (section) into radial blocks 
 * 
       Deta(0)=0	
-      Do ie = 1,nint(eetr_NEta)
+      Neta=eetr_Neta
+      Do ie = 1,Neta
 *
-        Deta(ie)=Deta(ie-1)+eetr_Eta(eetr_Neta-(ie-1)) 
+        Deta(ie)=Deta(ie-1)+eetr_Eta(Neta-(ie-1)) 
 
         RBot=max(section*Tanf(eetr_EtaRmx-Deta(ie-1)), _
                 (current+Gap+emcg_scint/2)*Tan_Low)
