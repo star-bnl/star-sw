@@ -1,10 +1,9 @@
-rdEz2SmdCal(  char *run="R5112017",  int mxEve=5000 ) {
-  TString calDir="../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter1/";
-  TString out="/star/data05/scratch/balewski/outXXX/";//BNL
-  out="/auto/pdsfdv34/starspin/balewski/calib2004/outE1/";
+rdEz2SmdCal(  char *run="R5109029",  int mxEve=200 ) {
+  TString calDir3="../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter3/";
+  TString out="/auto/pdsfdv34/starspin/balewski/calib2004/outEx/";
 
-  int firstSec=5;
-  int lastSec=8;
+  int firstSec=1;
+  int lastSec=12;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
     "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
@@ -16,7 +15,7 @@ rdEz2SmdCal(  char *run="R5112017",  int mxEve=5000 ) {
     "EEmcDb/libEEmcDb.so",
     "libPhysics"
   };
-   
+    
   gStyle->SetPalette(1,0);
   int i;
   for(i=0;i<sizeof(libL)/sizeof(char*);i++) {
@@ -89,7 +88,8 @@ rdEz2SmdCal(  char *run="R5112017",  int mxEve=5000 ) {
  //............  DB-reader .................
   EEmcDb *db=new EEmcDb() ;
   db->setThreshold(3.0); 
-  db->setPreferredFlavor("expoSlope1","eemcPIXcal");
+  //not needed
+  // db->setPreferredFlavor("sim","eemcPMTcal");
 
   // set all DB flags before DB request
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
@@ -99,20 +99,13 @@ rdEz2SmdCal(  char *run="R5112017",  int mxEve=5000 ) {
     int secID=firstSec+j;
     char tt1[100];
     sprintf(tt1,"%02d",secID);
-    TString tt=calDir+"gains"+tt1+"tower.dat";    
-    db->changeGains(tt.Data());
-    tt=calDir+"gains"+tt1+"PQR.dat";    
-    db->changeGains(tt.Data());
-    tt=calDir+"gains"+tt1+"Usmd.dat";    
-    db->changeGains(tt.Data());
-    tt=calDir+"gains"+tt1+"Vsmd.dat";    
-    db->changeGains(tt.Data());
-    tt=calDir+"mask"+tt1+".dat";    
-    db->changeMask(tt.Data());
+    TString tt;
+    tt=calDir3+"gains"+tt1+"tower.dat";   db->changeGains(tt.Data());
+    //tt=calDir1+"mask"+tt1+".dat";    db->changeMask(tt.Data());
   }
   
   // dump current DB content
-  //  db->exportAscii("dbDumpD1n.dat"); return;
+  //db->exportAscii("dbDump2004pp.dat"); return;
   //db->readAsciiDataBase("dbDumpD1h.dat"); //return;
   
   TObjArray  HList;
