@@ -26,8 +26,8 @@ void Load()
 };
 
 void GetEvent(Int_t numberOfEvent=4,
-	      Int_t firstEventNumber=150,
-	      const Char_t *RootFileName = "/disk00001/star/auau200//hijing135/jetq_on/b9_12/year_1b/hadronic_on/tfs/set0076_02_160evts.root",
+	      Int_t firstEventNumber=20,
+	      const Char_t *RootFileName = "/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0072_05_40evts.root",
 	      const Char_t *testedMakerName = "dst")
 {
   cout << "Usage:   \tGetEvent(Int_t numberOfEvent=\t"<<numberOfEvent<<"," << endl; 
