@@ -26,7 +26,7 @@ asu/malloc/level 0
 
 MESSAGE You should see ASU/MALLOC/LEVEL = ASU_MALLOC_FAST on line above
 MESSAGE
-asu/malloc/level 3
+*asu/malloc/level 3
 asu/malloc/level 0
 
 MESSAGE You should see ASU/MALLOC/LEVEL = ASU_MALLOC_TRACE on line above
