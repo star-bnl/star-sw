@@ -1,6 +1,9 @@
-#  $Log: Makefile,v $
-#  Revision 1.14  1998/03/09 14:36:31  fisyak
+#  $Log: MakePam.mk,v $
+#  Revision 1.2  1998/03/09 14:36:30  fisyak
 #  Switch varibales
+#
+#  Revision 1.1  1998/03/09 13:31:50  fisyak
+#  Remove environment Variables
 #
 #  Revision 1.13  1998/02/22 02:08:25  fisyak
 #  CPPFLAGS for HPX
@@ -37,26 +40,16 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/03/09 14:36:31 $ 
+#           Last modification $Date: 1998/03/09 14:36:30 $ 
+#  #. default setings
+include $(STAR)/mgr/MakeSYS.mk
+PWD       = /bin/pwd
+CWD      := $(shell $(PWD))
 ifdef SILENT #1
 .SILENT:
 endif        #1
-ALL_DEPS  = $^
-FIRST_DEP = $<
-FIRSTF    = $(<D)/$(<F)
-ALL_TAGS  = $@
-STEM      = $*
-STEMF     = $(*D)/$(*F)
-STIC      = stic
-KUIPC           := kuipc
-KUIPC_FLAGS     :=
-PWD       = /bin/pwd
-CWD      := $(shell $(PWD))
-EMPTY    :=
-FOUR     :=4
-TWO      :=2
 ifndef MAKEFILE #1
-MAKEFILE = $(STAR)/mgr/Makefile
+MAKEFILE = $(STAR)/mgr/MakePam.mk
 endif           #1
 ifndef INP_DIR  #1
 INP_DIR := $(CWD)
@@ -151,7 +144,7 @@ else                            #1
 ifndef RANLIB                   #2
 override RANLIB := /bin/true
 endif                           #2
-LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
+LIB_DIR := $(OUT_DIR)/$(STAR_HOST_SYS)
 DOMAIN  := $(notdir $(DOM_DIR))
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
 DIR_GEN := $(OUT_DIR)/share
@@ -235,8 +228,8 @@ FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
 endif                           #2
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/idl $(SRC_DIR) $(IDL_DIRS))
-ifneq ($(SYS_STAR),hp_ux102)    #2
-CPPFLAGS += -D$(SYS_STAR) $(strip -D$(shell uname)) 
+ifneq ($(STAR_SYS),hp_ux102)    #2
+CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                           #2
 CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc  \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
@@ -254,13 +247,13 @@ ifndef CERN_LIBS                #2
     CERN_LIBS := $(shell cernlib mathlib kernlib)
 endif                           #2
 ifndef LIBRARIES                #2
-ifeq ($(LIB_STAR),$(LIB_DIR))   #3
-		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_STAR)
+ifeq ($(STAR_LIB),$(LIB_DIR))   #3
+		LIBRARIES :=  $(STAR_LIB)/$(PKG_LIB) \
+               -L$(STAR)/asps/../lib/$(STAR_HOST_SYS) -L$(STAR_LIB)
 else                            #3
 		LIBRARIES :=  $(LIB_PKG)  \
-                $(shell test -f $(LIB_STAR)/$(PKG_LIB) && echo $(LIB_STAR)/$(PKG_LIB)) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_DIR) -L$(LIB_STAR)
+                $(shell test -f $(STAR_LIB)/$(PKG_LIB) && echo $(STAR_LIB)/$(PKG_LIB)) \
+               -L$(STAR)/asps/../lib/$(STAR_HOST_SYS) -L$(LIB_DIR) -L$(STAR_LIB)
 endif                           #3
 LIBRARIES +=  -lutil
 endif                           #2
@@ -281,7 +274,7 @@ $(LIB_PKG): $(FILES_O)
 endif                           #4
 ifneq ($(FILES_SL),$(EMPTY))    #4
 $(SL_PKG): $(FILES_SL) $(LIB_PKG)
-#ifneq ($(SYS_STAR),hp_ux102)
+#ifneq ($(STAR_SYS),hp_ux102)
 	$(LD) $(LDFLAGS) $(FILES_SL) -o $(SL_PKG) \
         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
 #else
@@ -417,13 +410,14 @@ test_files:
 	@echo "NAMES_F   =" $(NAMES_F)
 	@echo "NAMES_CDF =" $(NAMES_CDF)
 test_mk:
-	@echo "MAKE      =" $(MAKE)
-	@echo "MAKEFILES =" $(MAKEFILES)
+	@echo "STAR_HOST_SYS=" $(STAR_HOST_SYS) "; OPSYS =" $(OPSYS)
+	@echo "HOST      =" $(HOST)  "; STAR_SYS =" $(STAR_SYS)
+	@echo "MAKE      =" $(MAKE) 
 	@echo "VPATH     =" $(VPATH)
 	@echo "SHELL     =" $(SHELL)
 	@echo "MAKE      =" $(MAKE)
 	@echo "MAKELEVEL =" $(MAKELEVEL)
-	@echo "MAKEFILES =" $(MAKEFILES)"; MAKEFILE     ="      $(MAKEFILE)
+	@echo "MAKEFILE  =" $(MAKEFILE)
 	@echo "MAKFLAGS  =" $(MAKEFLAGS)
 	@echo "SUFFIXES  =" $(SUFFIXES)
 	@echo "STIC      =" $(STIC)	"; STICFLAGS	="	$(STICFLAGS)
@@ -441,6 +435,18 @@ test_mk:
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "LIBRARIES =" $(LIBRARIES)
 	@echo "DIRS      =" $(DIRS)
+	@echo "ALL_DEPS  =" $(ALL_DEPS)
+	@echo "FIRST_DEP =" $(FIRST_DEP)
+	@echo "FIRSTF    =" $(FIRSTF)
+	@echo "ALL_TAGS  =" $(ALL_TAGS)
+	@echo "STEM      =" $(STEM)
+	@echo "STEMF     =" $(STEMF)
+	@echo "STIC      =" $(STIC)
+	@echo "KUIPC     =" $(KUIPC)
+	@echo "KUIPC_FLAGS=" $(KUIPC_FLAGS)
+	@echo "EMPTY     =" $(EMPTY)
+	@echo "FOUR      =" $(FOUR)
+	@echo "TWO       =" $(TWO)
 test_dir:
 	@echo "CWD       =" $(CWD)  
 	@echo "ROOT      =" $(ROOT)
@@ -472,3 +478,12 @@ test_dir:
 	@echo "IDLS      =" $(IDLS)
 	@echo "IDLSD     =" $(IDLSD)
 	@echo "FILES_DD  =" $(FILES_DD)
+
+
+
+
+
+
+
+
+

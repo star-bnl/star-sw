@@ -1,8 +1,0 @@
-#!/bin/csh
-#
-echo "Setting up environment for STAF Test Suite."
-#
-mkdir data
-cd data
-ln -s /afs/rhic/star/users/tull/public/data/*.* .
-#

@@ -1,3 +1,0 @@
-FILENAME=dsu/doc/cuts_api.txt
-Please see the files cuts_example.c.txt and Makefile.txt in this
-same directory, especially the comments at the top of the former.

@@ -1,4 +1,0 @@
-cuts_example:	cuts_example.c /star/u2/ward/dsu/lib/irix/libdsu.a
-	cc -o cuts_example cuts_example.c \
-	/star/u2/ward/dsu/lib/irix/libdsu.a \
-	/afs/rhic/star/arch/irix/SL96b/sys/lib/libdsl.a
