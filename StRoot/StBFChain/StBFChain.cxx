@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.229 2001/09/14 01:35:53 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.230 2001/09/23 14:56:44 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -854,24 +854,24 @@ void StBFChain::SetInputFile (const Char_t *infile){
 	else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
       printf ("Use default input file %s for %s \n",fInFile->Data(),"fzin");
     }
-    if (fInFile) {
-      if (!GetOption("fzin")) {
-	fSetFiles= new StFile();
-	TObjArray Files;
-	ParseString((const TString )*fInFile,Files);
-	TIter next(&Files);
-	TObjString *File;
-	while ((File = (TObjString *) next())) {
-	  TString string = File->GetString();
-	  if (!strstr(string.Data(),"*") &&
-	      gSystem->AccessPathName(string.Data())) {// file does not exist
-	    printf (" *** NO FILE: %s, exit!\n", string.Data());
-	    gSystem->Exit(1); 
-	  }
-	  else fSetFiles->AddFile(File->String().Data());
+  }
+  if (fInFile) {
+    if (!GetOption("fzin")) {
+      fSetFiles= new StFile();
+      TObjArray Files;
+      ParseString((const TString )*fInFile,Files);
+      TIter next(&Files);
+      TObjString *File;
+      while ((File = (TObjString *) next())) {
+	TString string = File->GetString();
+	if (!strstr(string.Data(),"*") &&
+	    gSystem->AccessPathName(string.Data())) {// file does not exist
+	  printf (" *** NO FILE: %s, exit!\n", string.Data());
+	  gSystem->Exit(1); 
 	}
-	Files.Delete();
+	else fSetFiles->AddFile(File->String().Data());
       }
+      Files.Delete();
     }
   }
   if (fInFile) gMessMgr->QAInfo() << "Input file name = " << fInFile->Data() << endm;
