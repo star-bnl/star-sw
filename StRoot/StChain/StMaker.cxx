@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.113 2001/05/10 17:33:20 perev Exp $
+// $Id: StMaker.cxx,v 1.114 2001/05/10 17:43:20 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -159,9 +159,11 @@ TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
   if (!set) { // No dir, make it
     set = new TObjectSet(dir); Add(set);}
   if (!ds) return set;
-  if (ds->InheritsFrom(StMaker::Class())) {
-     Warning("AddData","To add Maker is NOT allowed: %s.%s\n"
-             ,ds->ClassName(),ds->GetName());
+  int dotMake = (strcmp(dir,".make")==0);
+  int inhMake = ds->InheritsFrom(StMaker::Class());
+  if (dotMake!=inhMake) {
+     Warning("AddData","Add to %s is NOT allowed: %s.%s\n"
+             ,dir,ds->ClassName(),ds->GetName());
      return 0;}
 
   TList *tl = set->GetList();
@@ -1054,6 +1056,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.114  2001/05/10 17:43:20  perev
+// Defence against saving maker added
+//
 // Revision 1.113  2001/05/10 17:33:20  perev
 // Defence against saving maker added
 //
