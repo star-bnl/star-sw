@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.64 2001/11/28 23:51:45 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.65 2001/11/29 00:43:10 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.65  2001/11/29 00:43:10  balewski
+// *** empty log message ***
+//
 // Revision 1.64  2001/11/28 23:51:45  balewski
 // *** empty log message ***
 //
@@ -255,9 +258,7 @@ ClassImp(StPrimaryMaker)
 StPrimaryMaker::~StPrimaryMaker(){
   UnFixVertex();
 }
-//_____________________________________________________________________________
-void StPrimaryMaker::ppLMVuse(float z) {// obsolete JB
-    zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
+
 //_____________________________________________________________________________
 void StPrimaryMaker::FixVertex(Float_t x, Float_t y, Float_t z){
   if (m_fixedVertex) {
