@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.9 2003/05/14 03:30:17 jeromel Exp $
+// $Id: StTagsMaker.cxx,v 1.10 2004/07/29 22:56:59 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.10  2004/07/29 22:56:59  fisyak
+// Add Global tags
+//
 // Revision 1.9  2003/05/14 03:30:17  jeromel
 // Zombied branch corrected . BugTracking #121
 //
@@ -38,12 +41,17 @@
 #include "TClass.h"
 #include "TDataMember.h"
 #include "TDataType.h"
-
+#include "St_GlobalTag.h"
+#include "StEvent.h"
+#include "StTriggerData.h"
+#include "StEventUtilities/StuRefMult.hh"
+#include "StEventUtilities/StuFtpcRefMult.hh"
 static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
 static St_DataSet *fTagsList =  new St_DataSet("TagList");
 
-ClassImp(StTagsMaker)
+TableClassImpl(St_GlobalTag,GlobalTag_st);
+ClassImp(StTagsMaker);
 //_____________________________________________________________________________
 StTagsMaker::StTagsMaker(const char *name):StMaker(name){
 }
@@ -56,7 +64,55 @@ Int_t StTagsMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StTagsMaker::Make(){
-  if (!fTree) InitRun(1);
+  St_GlobalTag *tagtab= new St_GlobalTag("GlobalTag",1); AddData(tagtab);
+  GlobalTag_st row;
+  memset (&row, 0, sizeof(GlobalTag_st));
+  StEvent* event = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
+  if (event) {
+    StPrimaryVertex *primVertex = event->primaryVertex();
+    if (primVertex) {//    Primary vertex (x,y,z), with some flag if not found
+      row.xPrimVertex =  primVertex->position().x();    // x-vertex
+      row.yPrimVertex =  primVertex->position().y();    // y-vertex
+      row.zPrimVertex =  primVertex->position().z();    // z-vertex
+    } else row.vertexFlag = 99;
+    StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
+    if ( theTriggers){
+      StCtbTriggerDetector &theCtb = theTriggers->ctb();
+#if 0
+      StZdcTriggerDetector &theZdc = theTriggers->zdc();
+#endif
+      //  Sum all CTB counter
+      float ctbsum = 0;
+      for (unsigned int islat=0; islat<theCtb.numberOfSlats(); islat++) 
+	for (unsigned int itray=0; itray<theCtb.numberOfTrays(); itray++)
+	  ctbsum += theCtb.mips(itray, islat, 0);
+      row.CTBsum = ctbsum;  //    CTB sum StCtbTriggerDetector::mMips[mMaxTrays][mMaxSlats][0]
+    }
+    row.uncorrectedNumberOfPrimaries         = uncorrectedNumberOfPrimaries(*event);  
+    row.uncorrectedNumberOfFtpcEastPrimaries = uncorrectedNumberOfFtpcEastPrimaries(*event);
+    row.uncorrectedNumberOfFtpcWestPrimaries = uncorrectedNumberOfFtpcWestPrimaries(*event);
+    StTriggerData *trigData = event->triggerData();
+    if (trigData) 
+      //      row.zdcWestHardSum = trigData->zdcAttenuated(west); Jamie said that this is wrong
+      row.zdcHardSum = trigData->zdcAtChannel(10);
+    StTriggerIdCollection *trgcol = event->triggerIdCollection();
+#if 0
+    const StTriggerId *l1 = trgcol->l1();
+    const StTriggerId *l2 = trgcol->l2();
+    const StTriggerId *l3 = trgcol->l3();
+#endif
+    const StTriggerId *nominal = trgcol->nominal();
+    if(nominal) {
+      vector<unsigned int> nominalVec = nominal->triggerIds();
+      Int_t i = 0;
+      for (vector<unsigned int>::iterator viter = nominalVec.begin();
+	   viter != nominalVec.end(); ++viter, i++) {
+	row.TriggerId[i++] = (*viter); //    Trigger Id's satisfied by an event
+      }
+    }
+  }
+  tagtab->AddAt(&row);
+  if (!fTree) InitTags();
   if (fTree && fTagsList && tabClass) {
     St_DataSetIter next(fTagsList);
     St_DataSet *set = 0;
@@ -197,7 +253,7 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
   return kContinue; 
 }
 //_____________________________________________________________________________
-Int_t StTagsMaker::InitRun(int runumber) {
+Int_t StTagsMaker::InitTags() {
   if (!fTree) {
     TFile *f = ((StBFChain* )GetChain())->GetTFile();
     if (f) {
