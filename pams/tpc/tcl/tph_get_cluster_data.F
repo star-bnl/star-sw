@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.7 1999/10/07 03:21:38 snelling Exp $
+* $Id: tph_get_cluster_data.F,v 1.8 2004/01/14 13:22:07 fisyak Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.8  2004/01/14 13:22:07  fisyak
+* add IdTruth information
+*
 * Revision 1.7  1999/10/07 03:21:38  snelling
 * changes related to StMessage
 *
@@ -27,6 +30,7 @@
         Subroutine tph_get_cluster_data(jseq, nseq, irow, isec, npads
      +,                            tpseq_h, tpseq 
      +,                            pixel_data_h, pixel_data
+     +,                            pixel_indx_h, pixel_indx
      +,                            nclspix, ipad, itdc, iadc, itrk
      +,				   nclpix_max
      +,				   npix_seq
@@ -106,6 +110,8 @@ C-----------------------------------------------------------------------
 #include "type_shortdata.inc"
       RECORD      /TABLE_HEAD_ST/               pixel_data_h
       RECORD     /TYPE_SHORTDATA_ST/            pixel_data(*)
+      RECORD      /TABLE_HEAD_ST/               pixel_indx_h
+      RECORD     /TYPE_SHORTDATA_ST/            pixel_indx(*)
 
 C-----------------------------------------------------------------------
 c passed variables:
@@ -144,6 +150,7 @@ C
         integer kseqpix               ! Number of time buckets in sequence
         integer ktrk                  ! Track number for MC data
         integer ldatum                ! tppixel word
+        integer id                    ! tppixel word
         integer nclpix_max            ! Max. pixels in cluster
         integer local_tdc_low
         integer local_tdc_high
@@ -179,7 +186,11 @@ C-----------------------------------------------------------------------
 c
 c          for MC data!
 c
-           itrk(iclspix) = 0
+           id     = 0
+           if (jpix .le. pixel_indx_h.nok) then
+              id     = pixel_indx(jpix).data
+           endif
+           itrk(iclspix) = id
 c new way to unpack data
 c           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
 CDH           kseqpix = local_tdc_high -local_tdc_low
@@ -216,7 +227,11 @@ c itdc(iclspix-1) = itdc(iclspix)-1
 c
 c             for MC data!
 c
-              itrk(iclspix) = 0
+              id     = 0
+              if (indx .le. pixel_indx_h.nok) then
+                 id     = pixel_indx(indx).data
+              endif
+              itrk(iclspix) = id
            enddo
         enddo
 

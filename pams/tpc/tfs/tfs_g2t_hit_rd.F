@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.11 1999/11/19 21:38:31 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.12 2004/01/14 13:22:08 fisyak Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.12  2004/01/14 13:22:08  fisyak
+* add IdTruth information
+*
 * Revision 1.11  1999/11/19 21:38:31  sakrejda
 * Hits with length below 100 microns are not processed by tfs.
 * This temporarily solves "double hit" problem of gstar.
@@ -157,6 +160,8 @@ C     DSW 03/13/97
             tphit(nok).id 	  = 0 
             tphit(nok).id_globtrk = 0 
             tphit(nok).track	  = 0 
+            tphit(nok).id_simtrk  = g2t_hit(ih).track_p
+            tphit(nok).id_quality = 100
 C     IMS 04/01/98
 C     Add initialisation of dq to that
             tphit(nok).dq         = 0 

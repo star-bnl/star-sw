@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.16 2000/03/17 08:39:13 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.17 2004/01/14 13:22:08 fisyak Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.17  2004/01/14 13:22:08  fisyak
+* add IdTruth information
+*
 * Revision 1.16  2000/03/17 08:39:13  sakrejda
 * Flag 5 assigned only to those hits with de<0 that had flag=0 before.
 *
@@ -125,13 +128,14 @@ C     IROW  - 2 number of hits
 
 
 C Local variables
-      INTEGER I,J,K,L,ISTART,IEND,IPAD,NUM_MARKED,NOK,ij
+      INTEGER I,J,K,L,KL,ISTART,IEND,IPAD,NUM_MARKED,NOK,ij
 
       REAL DZMIN, DRMIN
       REAL DZ, DR, ZLAP, RLAP, ZWID, RWID, ZSIZ, RSIZ
       REAL ZSIZK, RSIZK, ZSIZL, RSIZL
       REAL RMIN, RMAX, ZMIN, ZMAX, RMINK, RMINL
       REAL XOUTK(3),XOUTL(3),XGLOB(3)
+      real q
 
       integer  tpc_global_to_local, tpc_local_to_global
       integer  iret,irowl,i_rows(100),ii_rows, hit_id, counter
@@ -367,16 +371,21 @@ C     flag the lth hit, but don't discard it
                   tphit(l).flag = 1
                endif
 C     add the amplitudes and quadrature the errors
-               tphit(l).q = tphit(l).q + tphit(k).q
-               tphit(l).dq = tphit(l).dq**2 + tphit(k).dq**2
-                     if (tphit(l).dq.ge.0.) then
-                      tphit(l).dq = sqrt( tphit(l).dq )
-                     else
-                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
-     >                          //'set to 0.0  '  
-                      call Message( m132, 1, idI3 )
-                      tphit(l).dq = 0.
-                     endif
+               q = tphit(l).q + tphit(k).q
+               if (q .gt. 0.0) then
+                  kl = l
+                  if (tphit(l).q*tphit(l).id_quality .lt. 
+     &                 tphit(k).q*tphit(k).id_quality) then 
+                     kl = k
+                  endif
+*     yf   check geant track ids and zero it if they are not the same                        
+                  if (tphit(k).id_simtrk .ne. tphit(l).id_simtrk) then
+                     tphit(l).id_simtrk = tphit(kl).id_simtrk
+                     tphit(l).id_quality = tphit(kl).id_quality*tphit(kl).q/q
+                  endif
+               endif
+               tphit(l).q = q
+               tphit(l).dq = sqrt( tphit(l).dq**2 + tphit(k).dq**2 )
                xoutl(1) = (rmax + rmin) / 2.
                xoutl(2) = (xoutl(2) + xoutk(2))/2.
                xoutl(3) = (zmax + zmin) / 2.
@@ -387,24 +396,8 @@ C     add the amplitudes and quadrature the errors
                tphit(l).z = xglob(3)
                tphit(l).prf = rsiz / 2.
                tphit(l).zrf = zsiz / 2.
-               tphit(l).dx = tphit(l).dx**2 + tphit(k).dx**2
-                     if (tphit(l).dx.ge.0.) then
-                      tphit(l).dx = sqrt( tphit(l).dx )
-                     else
-                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
-     >                          //'set to 0.0  '  
-                      call Message( m132, 1, idI3 )
-                      tphit(l).dx = 0.
-                     endif
-               tphit(l).dy = tphit(l).dy**2 + tphit(k).dy**2
-                     if (tphit(l).dy.ge.0.) then
-                      tphit(l).dy = sqrt( tphit(l).dy )
-                     else
-                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
-     >                          //'set to 0.0  '  
-                      call Message( m132, 1, idI3 )
-                      tphit(l).dy = 0.
-                     endif
+               tphit(l).dx = sqrt( tphit(l).dx**2 + tphit(k).dx**2 )
+               tphit(l).dy = sqrt( tphit(l).dy**2 + tphit(k).dy**2 )
                
 C     update the g2t_hit table for this hit (instead)
 CCC   g2t_hit(tphit(k).id).recdig = tphit(l).id
