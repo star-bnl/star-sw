@@ -1,0 +1,34 @@
+ macro read
+   
+ macro/global/import *
+  
+  message 'init_spr_svt'
+  
+ cd [params]/svt
+ 
+* 
+* The table is not currently read in.
+* We can use the dummy table that is already created...just read
+* it in...Eventually we will want to create it in this kumac
+* 
+* 
+  dio/newfilestream    spr_par $STAR/params/svt/spr_pars.xdf r
+  dio/stream/getevent  spr_par
+  dio/stream/close     spr_par
+  
+  soc/object/oid spr_par 
+  oid = staf_result(1) 
+  soc/deleteoid [oid]
+
+  cd /dui
+  
+ return
+
+* ********************************************************
+ 
+ macro init
+   macro/global/import *
+ return
+ 
+* ***************************************************
+

@@ -1,0 +1,16 @@
+/*   tte_control.idl
+*
+*   Table: tte_control
+*
+*   description: Control switches for the evaluation     
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct tte_control{   
+       long       fit;        /* turn onn/off re-fitting...... */
+       long       pair;       /* Turn on/off evaluation of fragments */
+       long       res;        /* Turn on/off calculation of the residuals */
+   };
+/*  Last mod. for tte_control: $Date */
+

@@ -1,0 +1,170 @@
+<header>
+<title> Simple Database Manager  </title>
+<!-- Changed by: Vladimir Tikhomirov,  6-Jul-1998 -->
+</header>
+<body>
+<h1><center> Simple Database Manager </center></h1>
+<hr>
+Vladimir Tikhomirov, 6 July 1998 <p>
+
+Here we describe a SDBM (Simple DataBase Manager) package - programs to
+manage calibration database and other files in XDF format under STAF. 
+Package is written in FORTRAN and C languages. <p>
+Any comments, suggestion and questions send to
+<a href="mailto:tikhomir@sgi.lpi.msk.su">tikhomir@sgi.lpi.msk.su</a> <p>
+<hr>
+
+<ul>
+
+<li>OVERVIEW:  <p>
+
+Three FORTRAN routines, described here (CAL2MEM, PAR2MEM and XDF2MEM), do
+the same sequences of action: <p>
+
+<dl>
+<dd> - generate list of paths to calibration or other XDF files
+<dd> - build in memory under directory /dui the directory tree corresponding
+to these paths
+<dd> - read one or more XDF files from disk and put them to memory
+</dl> <p>
+
+  List of paths is generated automatically and contains all subdirectories
+under corresponding STAR environment
+($STAR_CALIB for calibration files, if you call CAL2MEM  and $STAR_PARAMS
+for params file if you call PAR2MEM) and under
+current user's directory PWD with the same root (/calib and /params 
+respectively). If some path exist in both user and STAR trees,
+user's path is searched first. For each path in the list, program builds
+the same path in memory under /dui directory. Then it looks on the disk for
+database calibration files (CAL2MEM), params files (PAR2MEM), or any XDF
+format files (XDF2MEM). CAL2MEM picks up just one calibration file,
+corresponding to requested date and time. PAR2MEM and XDF2MEM pick up any
+file in XDF format. The only difference between PAR2MEM and XDF2MEM is:
+PAR2MEM is looking for certain paths, defined by $STAR_PARAMS environment,
+and for XDF2MEM user can set any path. Any directories in path can be empty
+or contain any other files, except XDF, although it is not recommended. <p> 
+
+<li>USER ROUTINES:  <p>
+
+<h3> integer time; call cal2mem(time)</h3><p>
+Argument of CAL2MEM - time in second since 00:00:00 UTC, January 1, 1970.
+ See "man time" or "man -s 2 time". <p>
+Calibration  database is proposed by Yuri Fisyak and Akio Ogawa for a short
+term solution for calibration constants before the objectivity DB comes.
+  Calibration DB file name supposed do be like <p>
+   file_name.YYYYMMDD.hhmmssT (for example, bemc_pedA.19980221.1616060)<p>
+where Y=year, M=month, D=date, h=hour, m=minute, s=second.
+T=0 means normal time (winter time) and T=1 means summer time (day light saving
+time). Only files with such format of name are considered by CAL2MEM routine.
+The file_name field is ignored. CAL2MEM searches in each directory of the 
+generated path list
+and picks up most recent calibration database file for the requested time.
+ It also calculates validation time (i.e. time of next
+calibration file). If the requested time is earlier than the first file, it
+gives the first file. If the requested time is later than the last file,
+expiration date is 2147483647(22:14:07, January 18, 2038 - maximum
+system time in UNIX). <p>
+  CAL2MEM builds his own two tables in memory under /dui/calib. The tables
+names are sdbm_myco and sdbm_reco. The first one, apart of system variables,
+has an information on ncall - number of calls to routine; nupdate - number
+of updates the DB in memory; npath - number of paths searched; nfile - number
+of DB files (XDF tables); rtime - requested time for last call in 
+YYYYMMDD.hhmmssT format; tmin & tmax - time validation interval, common for
+all DB files accepted, in seconds. The table sdbm_reco consists of file -
+disk calibration file accepted; mpath - full path to the disk file; t1 & t2 -
+validation interval for this file in YYYYMMDD.hhmmssT format; it1 & it2 - the
+same interval in seconds - for the each path in the list. (Realy table 
+sdbm_reco have one more row - #0 is used for system purpose). <p>
+  CAL2MEM should be called on event-by-event basis. If the new requested time
+is inside the validation interval, routine just update counter ncall and
+rtime in the table sdbm_reco, but does not search new DB files. If the new
+requested time is outside validation interval, DB in memory will updated. <p>
+
+<h3> call par2mem </h3><p>
+ PAR2MEM routine has no arguments. It reads all XDF format files under path
+$STAR_PARAMS and under ./params directory, if it exists. XDF files name
+supposed to have an extension .xdf or .XDF. Only these files are considered
+by PAR2MEM (and XDF2MEM) routines. Like CAL2MEM, PAR2MEM builds his own two
+tables in memory (xdfm_myco and xdfm_reco) under /dui/params. Tables have the
+same meaning, like those
+created by CAL2MEM. For compatibility and future development, time parameters
+are kept in these tables, although they are meanness here. You should
+call PAR2ME only once per run.<p>
+
+<h3> character*80 dir_name; call xdf2mem(dir_name) </h3><p>
+ XDF2MEM has one argument at call - dir_name. Routine search all directories
+under ./dir_name and puts in memory all XDF files. The same directory tree
+in memory under /dui is built and two tables xdfm_myco and xdfm_reco are
+created in memory under /dui/dir_name. You should call XDF2MEM once per
+run and avoid to call it together with PAR2MEM (but you can call it or PAR2MEM
+together with CAL2MEM). <p>
+
+<li>EXAMPLE: <p>
+Let say, we have on the disk under $STAR_CALIB the such of structure:
+<pre>
+calib/tpc
+calib/tpc/geomconst
+calib/tpc/geomconst/tclpars.19801231.2000000
+calib/tpc/geomconst/tclpars.19901231.2000000
+calib/tpc/geomconst/tclpars.20001231.2000000
+calib/tpc/gain
+calib/tpc/gain/tidpars.19701231.2000000
+calib/tpc/gain/tidpars.19801231.2000000
+calib/tpc/gain/tidpars.19901231.2000000
+calib/tpc/pedestal
+calib/tpc/pedestal/tfspars.19901231.2000000
+calib/tpc/pedestal/tfspars.20001231.2000000
+calib/tpc/pedestal/tfspars.20101231.2000000 </pre><p>
+Suppose, under current user's directory we have:
+<pre>
+calib/xtpc
+calib/xtpc/geomconst
+calib/xtpc/geomconst/tclpars.19801231.2000000
+calib/xtpc/geomconst/tclpars.19901231.2000000
+calib/xtpc/geomconst/tclpars.20001231.2000000
+calib/xtpc/gain
+calib/xtpc/gain/tidpars.19701231.2000000
+calib/xtpc/gain/tidpars.19801231.2000000
+calib/xtpc/gain/tidpars.19901231.2000000
+calib/xtpc/pedestal
+calib/xtpc/pedestal/tfspars.19901231.2000000
+calib/xtpc/pedestal/tfspars.20001231.2000000
+calib/xtpc/pedestal/tfspars.20101231.2000000 </pre><p>
+After <h4> call cal2mem(946702800) </h4> (time 946702800 here corresponds to
+20000101.0000000 in YYYMMDD.hhmmssT format), you will have in memory:
+<pre>
+staf > du/du
+/dui ------------------------------------------------------- directory
+/dui/calib                                                   directory
+/dui/calib/tpc                                               directory
+/dui/calib/tpc/gain ---------------------------------------- directory
+/dui/calib/tpc/gain/tidpars                                  directory
+/dui/calib/tpc/gain/tidpars/tdeparm                       60 bytes       1 rows
+/dui/calib/tpc/gain/tidpars/tpipar --------------------- 132 bytes       1 rows
+/dui/calib/tpc/geomconst                                     directory
+/dui/calib/tpc/geomconst/tclpars                             directory
+/dui/calib/tpc/geomconst/tclpars/tclpar ----------------- 48 bytes       1 rows
+/dui/calib/tpc/geomconst/tclpars/type                     28 bytes       1 rows
+/dui/calib/tpc/pedestal                                      directory
+/dui/calib/tpc/pedestal/tfspars ---------------------------- directory
+/dui/calib/tpc/pedestal/tfspars/tfs_bmpar                 12 bytes       1 rows
+/dui/calib/tpc/pedestal/tfspars/tfs_fsctrl                32 bytes       1 rows
+/dui/calib/tpc/pedestal/tfspars/tfs_fspar -------------- 204 bytes       1 rows
+/dui/calib/xtpc                                              directory
+/dui/calib/xtpc/gain                                         directory
+/dui/calib/xtpc/gain/tidpars ------------------------------- directory
+/dui/calib/xtpc/gain/tidpars/tdeparm                      60 bytes       1 rows
+/dui/calib/xtpc/gain/tidpars/tpipar                      132 bytes       1 rows
+/dui/calib/xtpc/geomconst ---------------------------------- directory
+/dui/calib/xtpc/geomconst/tclpars                            directory
+/dui/calib/xtpc/geomconst/tclpars/tclpar                  48 bytes       1 rows
+/dui/calib/xtpc/geomconst/tclpars/type ------------------ 28 bytes       1 rows
+/dui/calib/xtpc/pedestal                                     directory
+/dui/calib/xtpc/pedestal/tfspars                             directory
+/dui/calib/xtpc/pedestal/tfspars/tfs_bmpar -------------- 12 bytes       1 rows
+/dui/calib/xtpc/pedestal/tfspars/tfs_fsctrl               32 bytes       1 rows
+/dui/calib/xtpc/pedestal/tfspars/tfs_fspar               204 bytes       1 rows
+/dui/calib/sdbm_myco ------------------------------------ 76 bytes       1 rows
+/dui/calib/sdbm_reco                                   1,696 bytes      10 rows
+                                     Total bytes       2,728
+</pre>

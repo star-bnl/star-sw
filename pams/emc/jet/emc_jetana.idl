@@ -1,0 +1,12 @@
+/* emc_jetana.idl		akio*/
+#include "PAM.idl"
+#include "ems_jetlist.idl"
+#include "emc_jet_eval.idl"
+
+interface emc_jetana : amiModule {
+	STAFCV_T call
+        ( in ems_jetlist ems_jetlist
+        , in ems_jetlist ideal_jetlist
+	, out emc_jet_eval emc_jet_eval
+	);
+};

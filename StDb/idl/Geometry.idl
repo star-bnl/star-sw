@@ -1,0 +1,56 @@
+/* TRS Geometry */
+struct Geometry {
+    long padRows;
+    long innerPadRows;
+    long innerPadRows48;
+    long innerPadRows52;
+    long outerPadRows;
+    long timeBuckets;
+    long sectors;
+    long ifcRadius;
+    long ofcRadius;
+    long endCapZ;
+    double innerSectorPadWidth;
+    double innerSectorPadLength;
+    double innerSectorPadPitch;
+    double innerSectorRowPitch1;
+    double innerSectorRowPitch2;
+    double firstPadRow;
+    double firstOuterSectorPadRow;
+    double lastOuterSectorPadRow;
+    double firstRowWidth;
+    double lastRowWidth;
+    double outerSectorPadWidth;
+    double outerSectorPadLength;
+    double outerSectorPadPitch;
+    double outerSectorRowPitch;
+    double outerSectorLength;
+    double ioSectorSeparation;
+    double frischGrid;
+    double maximumDriftDistance;
+    double innerSectorzOffSet;
+    double outerSectorzOffSet;
+    
+    double anodeWirePitch;
+    double frischGridWirePitch;
+    double gateWirePitch;
+    double anodeWireRadius;
+    double frischGridWireRadius;
+    double gateWireRadius;
+    double iSAnodeWirePadPlaneSeparation;
+    double iSFrischGridPadPlaneSeparation;
+    double iSGatingGridPadPlaneSeparation;
+    double oSAnodeWirePadPlaneSeparation;
+    double oSFrischGridPadPlaneSeparation;
+    double oSGatingGridPadPlaneSeparation;
+    double firstInnerSectorAnodeWire;
+    double lastInnerSectorAnodeWire;
+    double numberOfInnerSectorAnodeWires;
+    double firstOuterSectorAnodeWire;
+    double lastOuterSectorAnodeWire;
+    double numberOfOuterSectorAnodeWires;
+    double innerSectorEdge;
+    double outerSectorEdge;
+    long padsInRow[45];
+};
+/* $Id: Geometry.idl,v 1.1 2000/02/07 23:06:34 fisyak Exp $ */

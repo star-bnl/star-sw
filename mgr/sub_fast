@@ -1,0 +1,10 @@
+#!/usr/local/bin/tcsh
+set g2t_list  = `ls /star/mds/data/SD98/auau200/g2t/central/hijing/set0001/regular/*.xdf`
+foreach g2t ($g2t_list)
+  set g2t_p = `basename $g2t .xdf`
+  if (! -e /star/mds/data/SD98/auau200/fast/central/hijing/set0001/regular/${g2t_p}.xdf) then
+    set part = `echo $g2t_p | sed -e 's/auau_ce_b0-2_//g'`
+    echo "qqsub fast_new -p $part"
+    qqsub fast_new -p $part
+  endif
+end

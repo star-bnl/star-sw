@@ -1,0 +1,46 @@
+/**
+ * <hr>
+ * autocorrelation analysis control parameter table. <br>
+ *
+ * @parm id            - primary key
+ * @parm ctb_eta       - Number of eta bins in CTB
+ * @parm ctb_phi       - Number of phi bins in CTB
+ * @parm mwc_eta       - Number of eta bins per endcap
+ * @parm mwc_phi       - Number of phi bins per endcap
+ * @parm n_bins        - Number of compressed 1-D bins
+ * @parm on_off        - switch to turn module on
+ * @parm time_loop     - number of analysis loops to perform
+ * @parm bnd_width     - power spectrum band width 
+ * @parm nul_hyp       - switch for null hypothesis 
+ * @parm ctb_fact      - factor for CTB input data
+ * @parm mwc_fact      - factor for MWC input data
+ * @parm c_coef[100]   - cos coefficient
+ * @parm s_coef[100]   - sin coefficient
+ * @author         Zoran Milosevich
+ */
+
+/*   rl1_pw_ctrl.idl
+*   Table: rl1_pw_ctrl
+*        description: autocorrelation analysis control parameters     
+*             more..: 
+*/
+   struct rl1_pw_ctrl {   
+       long      id;                /* primary key */
+       long      ctb_eta;           /* Number of eta bins in CTB */
+       long      ctb_phi;           /* Number of phi bins in CTB */
+       long      mwc_eta;           /* Number of eta bins per endcap */
+       long      mwc_phi;           /* Number of phi bins per endcap */
+       long      n_bins;            /* Number of compressed 1-D bins. */
+       long      on_off;            /* switch to turn module on */
+       long      time_loop;         /* number of analysis loops to perform */
+       long      bnd_width;         /* power spectrum band width */
+       long      nul_hyp;           /* switch for null hypothesis */
+       float     ctb_fact;          /* factor for CTB input data */
+       float     mwc_fact;          /* factor for MWC input data */
+       float     c_coef[100];       /* cos coefficient */
+       float     s_coef[100];       /* sin coefficient */
+ 
+   };
+
+/*  Last mod. for pw_ctrl:   787946742 Tue Dec 20 13:05:42 1994 */
+

@@ -1,0 +1,15 @@
+/*  File :sal_rotran .idl
+*   Table: sal_rotran
+*   Description:  Table for the range for the sal_create_newgeom.        
+*            
+*/
+        struct sal_rotran {
+       float     dx;       /* x Range[-dx,dx] in micron . */
+       float     dy;       /* y Range[-dy,dy] . */
+       float     dz;       /* z Range[-dz,dz] . */
+       float     dthx;       /* Range[-dthx,dthx] in milirad . */
+       float     dthy;       /* Range[-dthy,dthy] . */
+       float     dthz;       /* Range[-dthz,dthz] . */
+   };
+/*  Last mod. for sal_rotran: $Date: 1997/12/31 14:33:39 $ */
+

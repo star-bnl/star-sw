@@ -1,0 +1,13 @@
+/*    tpcISGains.idl
+*
+*  Table: tpcISGains
+*
+*       description:
+*/ 
+
+
+struct tpcISGains { 
+
+   float  gain[1750];   /*   Pad-to-Pad corrections  */
+
+ };  

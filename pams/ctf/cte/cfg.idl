@@ -1,0 +1,15 @@
+//
+//        description: CFG
+//
+#include "PAM.idl"
+#include "tpt_track.idl"
+#include "egr_globtrk.idl"
+
+
+interface cfg: amiModule {
+        STAFCV_T call
+                ( inout tpt_track     tptrack
+                , inout egr_globtrk   globtrk 
+                );
+};
+

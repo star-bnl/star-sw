@@ -1,0 +1,14 @@
+/* bad_channels.idl
+ *    (onetasth.ace)
+ */
+/*****************************************************************************
+*   Table: bad_channels
+*   for system test - which of the          
+*   1152 channels should be ignored         
+*/
+   /*******************  Row struct *******************/
+  struct bad_channels {
+       long      channel;    /* channel number of bad channel */
+  };
+/*  Last mod. for tfc_bad_channels: $Date: 1998/05/08 15:18:31 $ */
+

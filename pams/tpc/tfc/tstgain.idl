@@ -1,0 +1,17 @@
+/* tstgain.idl - calculates gains from event-averaged pedestal and
+ * pulser runs (both packed into pedestal-style tables)
+ */
+#include "PAM.idl"
+#include "tstpar.idl"
+#include "bad_channels.idl"
+#include "tpc_pedestal.idl"
+#include "tfc_tpc_gain.idl"
+
+interface tstgain : amiModule {
+	STAFCV_T call(	inout tstpar tstpar,
+			inout bad_channels bad_channels,
+			in tpc_pedestal pedestal,
+			in tpc_pedestal pulser,
+			inout tfc_tpc_gain tpc_gain);
+};
+/* Last update for tstgain.idl: $Date: 1998/05/08 15:18:54 $ */

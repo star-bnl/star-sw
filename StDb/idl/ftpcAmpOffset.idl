@@ -1,0 +1,13 @@
+/*    ftpcAmpOffset.idl
+*
+*  Table: ftpcAmpOffset
+*
+*       description:
+*/ 
+
+
+struct ftpcAmpOffset { 
+
+   float  offset[960];   /*   amplitude offset for this channel  */
+
+ };  

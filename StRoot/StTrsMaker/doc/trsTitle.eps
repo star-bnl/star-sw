@@ -1,0 +1,95 @@
+%!PS-Adobe-2.0
+%%BoundingBox: -230 -200 210 75
+
+% String to be printed
+/Printstring (Tpc) def
+
+% calculate width of string and go to its beginning centered
+/cmove {stringwidth  pop -2 div 0 rmoveto} bind def
+
+% Procedure in for loop 
+/Printit {0 0 moveto Printstring show} bind def
+
+gsave
+
+/Times-Italic findfont 100 scalefont setfont
+
+
+% Move to middle of page
+0 5 moveto Printstring cmove
+
+/printit {gsave 0 0 moveto Printstring show grestore} def
+
+currentpoint translate
+
+.95 -.05 0 {setgray printit -.6 -.3 translate} for
+
+0 0 moveto Printstring true charpath
+gsave 1 setgray fill grestore
+stroke
+
+grestore
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% String to be printed
+/Printstring (Response) def
+
+% calculate width of string and go to its beginning centered
+/cmove {stringwidth  pop -2 div 0 rmoveto} bind def
+
+% Procedure in for loop 
+/Printit {0 0 moveto Printstring show} bind def
+
+gsave
+
+/Times-Italic findfont 100 scalefont setfont
+
+
+% Move to middle of page
+0 -90 moveto Printstring cmove
+
+/printit {gsave 0 0 moveto Printstring show grestore} def
+
+currentpoint translate
+
+.95 -.05 0 {setgray printit -.6 -.3 translate} for
+
+0 0 moveto Printstring true charpath
+gsave 1 setgray fill grestore
+stroke
+
+grestore
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% String to be printed
+/Printstring (Simulator) def
+
+% calculate width of string and go to its beginning centered
+/cmove {stringwidth  pop -2 div 0 rmoveto} bind def
+
+% Procedure in for loop 
+/Printit {0 0 moveto Printstring show} bind def
+
+gsave
+
+/Times-Italic findfont 100 scalefont setfont
+
+
+% Move to middle of page
+0 -180 moveto Printstring cmove
+
+/printit {gsave 0 0 moveto Printstring show grestore} def
+
+currentpoint translate
+
+.95 -.05 0 {setgray printit -.6 -.3 translate} for
+
+0 0 moveto Printstring true charpath
+gsave 1 setgray fill grestore
+stroke
+
+grestore
+
+showpage

@@ -1,0 +1,26 @@
+/**
+ * <hr>
+ * ks-test output table. <br>
+ *
+ * @parm id            - primary key
+ * @parm accept        - Accept - 1, or reject -0 event
+ * @parm ks_d          - K-S test d parameter
+ * @parm ks_sig        - K-S test significance value
+ * @author         Zoran Milosevich
+ */
+
+/*   rl1_ks_out.idl
+*   Table: rl1_ks_out
+*        description: ks-test output     
+*             more..: 
+*/
+   struct rl1_ks_out {   
+       long      id;                /* primary key */
+       long      accept;            /* Accept - 1, or reject -0 event. */
+       float     ks_d;              /* K-S test d parameter. */
+       float     ks_sig;            /* K-S test significance value. */
+ 
+   };
+
+/*  Last mod. for ks_out:   758570317 Fri Jan 14 12:58:37 1994 */
+

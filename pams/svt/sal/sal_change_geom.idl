@@ -1,0 +1,19 @@
+/***************************************************************
+             sal_change_geom.idl
+***************************************************************/
+#include "PAM.idl"
+#include "svg_config.idl"
+#include "sal_spt.idl"
+#include "sal_vrtx.idl"
+#include "sal_geom.idl"
+#include "svg_geom.idl"
+
+interface sal_change_geom: amiModule 
+{
+ STAFCV_T call(in svg_config config,
+               in sal_spt sal_spt, 
+               in sal_vrtx sal_vrtx,
+               in sal_geom sal_geom_real, 
+               in svg_geom geom
+               out  sal_spt sal_real_hits);
+};

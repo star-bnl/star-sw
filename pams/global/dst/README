@@ -1,0 +1,23 @@
+CC:>--------------------------------------------------------------------
+CC: ROUTINE:    DST_DEDX_FILLER
+CC: DESCRIPTION:
+CC:             This module reads the tpc track table, tpt_track, and
+CC:             determines which tracks have been assigned to a global
+CC:             track which are listed in the dst_track table.
+CC:             For all such tracks the module copies the dE/dx information
+CC:             in tpt_track into the dst_dedx table.  Note that the 
+CC:             global track refitter pkg, egr, must be run prior to 
+CC:             running this module.
+CC: AUTHOR:     R. L. Ray, ray@physics.utexas.edu
+CC: ARGUMENTS:
+CC:          IN:
+CC:        tpt_track     - TPC track table
+CC:      tpt_track_h     - Header Structure for tpt_track
+CC:       INOUT:
+CC:         OUT:
+CC:         dst_dedx     - DST dE/dx summary table 
+CC:       dst_dedx_h     - Header Structure for dst_dedx
+CC: RETURNS:    STAF Condition Value
+CC:>--------------------------------------------------------------------
+
+

@@ -1,0 +1,24 @@
+/*  svm_efficiency.idl
+*   Module svm_effic
+*   Investigates efficiency of svm module
+*/
+
+#include "PAM.idl"
+#include "scs_spt.idl"
+#include "stk_track.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+#include "tte_mctrk.idl"
+#include "svm_evt_match.idl"
+#include "svm_effic.idl"
+
+interface svm_efficiency : amiModule {
+        STAFCV_T call
+                (in scs_spt svt_spt,
+		 in stk_track stk_track,
+		 in tcl_tphit tpc_spt,
+                 in tpt_track tpc_track,
+	  	 in tte_mctrk tte_mctrk,
+                 in svm_evt_match evt_match,
+                 out svm_effic svm_effic);
+};

@@ -1,0 +1,13 @@
+/*    emcBTowAdc.idl
+*
+*  Table: emcBTowAdc
+*
+*       description: //  emc Barrel Tower/Preshower ADC channel
+*/ 
+
+
+struct emcBTowAdc { 
+
+   float  ch[20][2];   /*   Channel : channel number  */
+
+ };  

@@ -1,0 +1,13 @@
+/*   tcl_tpcluster
+* Table of clusters found in tpc
+*/
+   struct tcl_tpcluster { 
+       long      flag;       /* quality flag */
+       long      jseq;       /* offset into the sequence table */
+       long      nhits;      /* estimated # overlapping hits in cluster */
+       long      nseq;       /* number of sequences in this cluster */
+       long      tpc_row;    /* 100*sector + row */
+   };
+/*  Last mod. for tpcluster: $Date: 1998/01/06 23:57:34 $ */
+
+

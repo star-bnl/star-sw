@@ -1,0 +1,16 @@
+MACRO run_srs 
+   
+   macro/global/import *
+
+   ami/mod/call srs_am _
+        [data]/svt/hits/srs_result _
+        [geant_Event]/g2t_svt_hit _
+        [data]/svt/hits/scs_spt _
+        [params]/svt/svgpars/geom _
+        [params]/svt/svgpars/config _
+        [params]/svt/svgpars/shape _
+        [params]/svt/srspars/srs_srspar _
+        [params]/svt/srspars/srs_direct _
+        [params]/svt/srspars/srs_activea 
+   
+RETURN

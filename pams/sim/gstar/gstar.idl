@@ -1,0 +1,18 @@
+/*    $Id: gstar.idl,v 1.1 1998/05/14 02:19:07 nevski Exp $
+      $Log: gstar.idl,v $
+      Revision 1.1  1998/05/14 02:19:07  nevski
+      gstar_part update to set PDG code
+
+      Revision 1.1  1998/05/12 01:13:06  nevski
+      new user inputs - mm and staf
+
+      Fake module to make proper includes
+*/
+#include "PAM.idl"
+#include "particle.idl"
+#include "eg_gener.idl"
+#include "eg_event.idl"
+#include "eg_track.idl"
+#include "eg_vertex.idl"
+
+interface gstar: amiModule  { STAFCV_T call ( ); };

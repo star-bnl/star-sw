@@ -1,0 +1,30 @@
+/* stk_am_fill2.idl
+*  Module: stk_am_fill2
+*  	description: older version of track filling code
+*/
+#include "PAM.idl"
+#include "scs_spt.idl"
+#include "stk_vtx.idl"
+#include "stk_ctrack.idl"
+#include "stk_filler.idl"
+#include "svg_config.idl"
+#include "svg_geom.idl"
+
+interface stk_am_fill2 : amiModule {
+	STAFCV_T call
+		( in    scs_spt         spt
+		, in    stk_vtx		vtx
+		, inout stk_ctrack      track
+		, inout stk_filler      filler
+		, inout svg_config      config
+		, inout svg_geom        geom
+		);
+	};
+/* Last mod. for  stk_am_fill2: $Date: 1997/12/31 14:33:36 $ */
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+/**
+ * <hr>
+ * VPS simulation output table. <br>
+ *
+ * @parm id - primary key
+ * @parm photons[48] - number of photons generated
+ * @parm time[48] - time
+ * @author         Zoran Milosevich
+ */
+
+/*   vps_sim.idl
+*   Table: vps_sim
+*        description: VPD simulation output     
+*             more..:                                         
+*/
+   struct vps_sim {          
+       long      id;               /* primary key */
+       float     photons[48];      /* number of photons generated */
+       float     time[48];         /* time */
+
+   };
+
+/*  Last mod. for vps_sim:  Tue Oct 15 19:41:37 1996 */

@@ -1,0 +1,26 @@
+/* tstam.idl - reads minidaqs files, writes tables */
+/* note that I have renamed the minidaq table type to match
+   the wierd table type name given by Chuck/susanna */
+
+#include "PAM.idl"
+#include "tstpar.idl"
+#include "type_tmprcv0.idl"
+#include "tpc_pedestal.idl"
+#include "readout_map.idl"
+#include "bad_channels.idl"
+#include "tss_tppad.idl"
+#include "tss_tppixel.idl"
+#include "tfc_tpc_gain.idl"
+
+interface tstam : amiModule {
+	STAFCV_T call(	inout tstpar tstpar,
+			in type_tmprcv0 minidaq_pix,
+			inout tpc_pedestal tpc_pedestal,
+			inout tfc_tpc_gain tpc_gain,
+			inout readout_map readout_map,
+     			inout bad_channels bad_channels,
+			out tss_tppad tppad,
+			out tss_tppixel tppixel);
+};
+/* Last update for tstam.idl: $Date: 1998/05/08 15:18:53 $ */
+

@@ -1,0 +1,17 @@
+* sca_switch.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* and D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+*
+* last run under sl98e 8/1/98
+*
+* this file is used to initialize the values in the sca_switch
+* table -- it runs with sca_makeXdf.kumac
+* -------------------------------------------------------------
+
+
+  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      	0
+  tdm/table/cell/putvalue 'sca_switch[0].makeEnsembleAve'	0
+  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     	0	
+  tdm/table/cell/putvalue 'sca_switch[0].nEvents'        	0
+
+ 

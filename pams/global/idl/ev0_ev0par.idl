@@ -1,0 +1,15 @@
+/*   ev0_ev0par.idl
+*    Table: ev0_ev0par
+*        description: Parameter table for V0 reconstruction   
+*/
+   struct ev0_ev0par{
+       long       id;         /* parent geant id to search for. */
+       long       iflag;      /* Controls execution flow, i.e. evaluate done now or not. */
+       float     dca;        /* cut on dca between the two tracks */
+       float     dcav0;      /* cut on dca(impact parameter) of V0 from event vertex */
+       float     dlen;       /* cut on dist. of decay from prim. vertex */
+       float     dmass;      /* Mass cut for cascade search, secvert etc */
+       float     fit[3];     /* cut on fit's prob(chi^2,ndeg). */
+   } ;
+/*  Last mod. for ev0par: $Data: $  */
+

@@ -1,0 +1,54 @@
+#!/usr/bin/csh
+#  $Id: pythia_gen.batch,v 1.2 1998/04/04 14:45:52 fisyak Exp $
+#  $Log: pythia_gen.batch,v $
+#  Revision 1.2  1998/04/04 14:45:52  fisyak
+#  Fix bug with geant3.def
+#
+#  Revision 1.1  1998/03/23 02:34:29  fisyak
+#  Add pyhtia batch job
+#
+# This script is to submit an example job to execute  NQS queues.
+# You can submit it with the command: 
+#	qsub -q express star_nqs.batch
+# You can modify your copy of this script to suit your needs.
+#
+# When this script starts executing, assumes as default directory
+# the directory from where you submitted it. First compiles any
+# fortran files and after that creates the executable at the NQS
+# workspace. Several files are linked to the current directory to
+# create the default running environment.
+# 
+# During the execution output files are written at the directory you
+# submitted the script. Check if your quota space is enough.
+#
+#
+# NQS embedded directives  follow
+#@$-lt 1000      # time limit in seconds
+#@$-r  Pythia    # request name
+#@$-lf 90mb      # output file size limit
+#$-eo            # merge std error and out
+#$-me            # send mail upon termination
+#$-m bes         # Mail at beginning/end/on suspension
+#$-M $USER       # Send mail to these users
+#$-s /usr/local/bin/tcsh # under what shell to execute
+#
+# Go to the directory from where job was submitted.
+#
+#printenv
+echo Starting job execution at `date`
+#
+cd $SCRATCH
+staf -w 0 << EOF
+trace off
+def $STAR/kumacs/gen
+exec pythia nevent=1000 file=/star/mds/users/fisyak/data/gen/pythia/pythia_w_ej.xdr
+exit
+EOF
+#
+# Clean files/links not needed anymore...
+echo
+echo   Job finished at `date`
+#
+#END
+
+

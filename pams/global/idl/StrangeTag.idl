@@ -1,0 +1,25 @@
+//
+// Strangeness group tags
+//
+
+struct StrangeTag {
+    long  NV0;             // no. v0's
+
+    long  NbelowK0;        // no. v0's with mass just below k0
+    long  NK0;             // no. v0's with mass near k0
+    long  NaboveK0;        // no. v0's with mass just above k0
+    long  NbelowLa;        // no. v0's with mass just below lambda
+    long  NLa;             // no. v0's with mass near lambda
+    long  NaboveLa;        // no. v0's with mass just above lambda
+    long  NbelowLb;        // no. v0's with mass just below lambda-bar
+    long  NLb;             // no. v0's with mass near lambda-bar
+    long  NaboveLb;        // no. v0's with mass just above lambda-bar
+    long  NbelowXi;        // no. v0's with mass just below cascade
+    long  NXi;             // no. v0's with mass near cascade
+    long  NaboveXi;        // no. v0's with mass just above cascade
+
+    float range;           /* range used for defining below,near,above mass
+                            below = { mass(1 - 3*range) , mass(1 -   range) }
+                            near  = { mass(1 -   range) , mass(1 +   range) }
+                            below = { mass(1 +   range) , mass(1 + 3*range) } */
+};

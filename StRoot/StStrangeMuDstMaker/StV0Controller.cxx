@@ -1,0 +1,180 @@
+// $Id: StV0Controller.cxx,v 3.4 2000/09/18 19:25:19 genevb Exp $
+// $Log: StV0Controller.cxx,v $
+// Revision 3.4  2000/09/18 19:25:19  genevb
+// Additional protection for missing MC info
+//
+// Revision 3.3  2000/08/31 21:25:34  genevb
+// Adjustment for V0s used in Xis only
+//
+// Revision 3.2  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
+// Revision 3.1  2000/07/14 21:28:34  genevb
+// Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
+//
+// Revision 3.0  2000/07/14 12:56:50  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
+// Revision 2.1  2000/06/09 22:17:11  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
+// Revision 2.0  2000/06/05 05:19:44  genevb
+// New version of Strangeness micro DST package
+//
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// StV0Controller strangeness micro DST controller for V0s              //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+#include "TTree.h"
+#include "StEvent/StEvent.h"
+#include "StMcEventMaker/StMcEventMaker.h"
+#include "StAssociationMaker/StAssociationMaker.h"
+#include "StAssociationMaker/StTrackPairInfo.hh"
+#include "StTrack.h"
+#include "StGlobalTrack.h"
+#include "StV0Vertex.h"
+#include "StV0MuDst.hh"
+#include "StV0Mc.hh"
+#include "StMcEventTypes.hh"
+#include "StParticleDefinition.hh"
+#include "StTrackDetectorInfo.h"
+
+#include "StStrangeControllerInclude.h"  // Location of header for this class
+
+class StStrangeEvMuDst;
+
+//_____________________________________________________________________________
+StV0Controller::StV0Controller() : StStrangeControllerBase(v0T) {
+}
+//_____________________________________________________________________________
+StV0Controller::~StV0Controller() {
+}
+//_____________________________________________________________________________
+Int_t StV0Controller::MakeReadDst() {
+
+  StStrangeEvMuDst* ev = masterMaker->GetEvent();      // Tell the vertices
+  entries = GetN();                                    // about the event
+  for (Int_t j = 0; j<entries; j++) {
+    StV0MuDst* v0 = (StV0MuDst*) (*dataArray)[j];
+    v0->SetEvent(ev);
+  }
+  PrintNumCand("read",entries);
+  nEntries += entries;
+
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StV0Controller::MakeCreateDst(StEvent& event) {
+
+  // Loop over vertices to build array of candidates
+  StSPtrVecV0Vertex& v0Vertices = event.v0Vertices();
+  entries = v0Vertices.size();
+  Int_t asize = dataArray->GetSize();
+  if (entries > asize) dataArray->Expand(entries+increment);
+  StStrangeEvMuDst* ev = masterMaker->GetEvent();
+  Int_t j=0;
+  for (Int_t i=0; i<entries; i++) {
+    StV0Vertex* v0Vertex = v0Vertices[i];
+    if (v0Vertex->dcaParentToPrimaryVertex() >= 0)
+      new((*dataArray)[j++]) StV0MuDst(v0Vertex,ev);
+  }
+  entries = j;
+  PrintNumCand("found",entries);
+  nEntries += entries;
+
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {  
+
+  mcV0MapType* theMcV0Map = 0;
+  mcTrackMapType* theMcTrackMap = 0;
+  if (assocMaker) {
+    theMcV0Map = assocMaker->mcV0Map();
+    theMcTrackMap = assocMaker->mcTrackMap();
+  }
+  if (!((assocMaker)&&(theMcV0Map)&&(theMcTrackMap))) return kStOk;
+  StMcTrack *Pos = 0; 
+  StMcTrack *Neg = 0;
+  StV0Vertex* rcV0Partner = 0;
+  Int_t indexRecoArray = -1;
+  Int_t count = theMcV0Map->count(mcVert);
+  
+  if (count>0) {
+    pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
+    rcV0Partner = (*mcV0Bounds.first).second;
+    float x, y, z, delta;
+    x = mcVert->position().x();
+    y = mcVert->position().y();
+    z = mcVert->position().z();
+    delta = (x - rcV0Partner->position().x())*(x - rcV0Partner->position().x())+
+        (y - rcV0Partner->position().y())*(y - rcV0Partner->position().y())+
+        (z - rcV0Partner->position().z())*(z - rcV0Partner->position().z());
+
+    //Now loop over the bounds      
+    for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
+                    mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt) {
+      StV0Vertex *temp = (*mcV0MapIt).second;
+      if ((x - temp->position().x())*(x - temp->position().x())+
+          (y - temp->position().y())*(y - temp->position().y())+
+          (z - temp->position().z())*(z - temp->position().z()) < delta)
+		      rcV0Partner = (*mcV0MapIt).second;
+    }
+    // stupid way
+    for(Int_t i = 0; i < GetN(); i++) {
+      StV0MuDst* tmpV0 = (StV0MuDst*) dataArray->At(i);
+      if( fabs(rcV0Partner->position().x()-tmpV0->decayVertexV0X()) < 0.00001 &&
+          fabs(rcV0Partner->position().y()-tmpV0->decayVertexV0Y()) < 0.00001 &&
+          fabs(rcV0Partner->position().z()-tmpV0->decayVertexV0Z()) < 0.00001 )
+      { indexRecoArray = i; break; }
+    }
+  }
+
+  StSPtrVecMcTrack& Daughters = mcVert->daughters();
+  for (StMcTrackIterator DTrackIt = Daughters.begin();
+                         DTrackIt != Daughters.end(); DTrackIt++) {
+    if (((*DTrackIt)->geantId()==8)||((*DTrackIt)->geantId()==14)) 
+      Pos = (*DTrackIt);
+    else if (((*DTrackIt)->geantId()==9)||((*DTrackIt)->geantId()==15))
+      Neg = (*DTrackIt);
+  }
+  if ((Pos)&&(Neg)) {
+    StV0Mc* v0Mc = new((*mcArray)[mcEntries++]) StV0Mc(mcVert,Pos,Neg);
+    if((assocMaker)&&(count>0)) {
+      new((*assocArray)[assocEntries++]) 
+            StStrangeAssoc(indexRecoArray,mcEntries-1);
+
+      pair<mcTrackMapIter,mcTrackMapIter> mcTrackBounds = 
+            theMcTrackMap->equal_range(Pos);
+      StTrackPairInfo*   bestPairInfo = (*mcTrackBounds.first).second;
+      for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
+		         mcMapIt != mcTrackBounds.second; ++mcMapIt) {
+        if ((*mcMapIt).second->commonTpcHits() > bestPairInfo->commonTpcHits())
+	       bestPairInfo = (*mcMapIt).second;
+      } 
+      if (mcTrackBounds.first != mcTrackBounds.second) {
+        v0Mc->SetHitInfoPositive(bestPairInfo->commonTpcHits());
+      }
+
+      //		   pair<mcTrackMapIter,mcTrackMapIter> 
+      mcTrackBounds = theMcTrackMap->equal_range(Neg);
+      //		   StTrackPairInfo*   
+      bestPairInfo = (*mcTrackBounds.first).second;
+			
+      for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
+		         mcMapIt != mcTrackBounds.second; ++mcMapIt) {
+        if ((*mcMapIt).second->commonTpcHits() > bestPairInfo->commonTpcHits())
+              bestPairInfo = (*mcMapIt).second;
+      } 
+      if (mcTrackBounds.first != mcTrackBounds.second) {
+        v0Mc->SetHitInfoNegative(bestPairInfo->commonTpcHits());
+      }
+    }
+  }
+  
+  return kStOK;
+}
+//_____________________________________________________________________________
+ClassImp(StV0Controller)

@@ -1,0 +1,47 @@
+<html>
+<body bgcolor="#ffffff">
+<title>ThreeParticleHbt</title>
+
+<center>
+<h1>Three Particle Correlations in the StHbt Framework</h1>
+</center>
+
+The purpose of this document is to illustrate the changes made to the StHbtMaker in order to perform three-particle correlations.  Except for one change that is illustrated below, users of the code should not see any difference in calculating two-particle correlations   
+
+<hr>
+
+<ul>
+<li><a href="#Outline">Outline</a>
+<li><a href="#ThreeParticle">Calculating Three-Particle Correlations</a>
+<li><a href="#TwoParticle">Changes in Two-Particle Analyses</a>
+<li><a href="#Future">Additional Work</a>
+<li><a href="./index.html">Back to Main Page</a>
+</ul>
+
+
+<hr>
+<h2><a name="Outline">Outline</h2>
+
+In order to implement three-particle correlations, a different analysis class is needed to handle such things as triplets and triplet cuts.  Recently, operational analysis was moved from the manager to the analysis class.  The change made was to create a base class for all analyses, called StHbtBaseAnalysis.  Methods and variable common to all types of HBT would be placed in the base class, and those elements specific to a particle type of HBT would be placed in derived classes.  The two particle analysis is called StHbtAnalysis, to allow for compatibility with current macros.  StHbtThreeParticleAnalysis is the other derived analysis class.  Additional classes have been made to allow for triplets, triplet cuts, and three particle correlation functions.  Some changes have been made to other classes to be compatible with the new analysis base class.  These changes can be seen in the <A HREF="./StHbtUmlDiagram.jpg"> UML diagram </A>.  
+
+<hr>
+
+<h2><a name="ThreeParticle">Calculating Three-Particle Correlations</h2>
+
+Three particle analyses are constructed in much the same way as a two particle analysis, with event cuts and track cuts created, and then added to an analysis.  The difference is that three particle cuts must be entered into an StHbtThreeParticleAnalysis object.  An StHbtTripletCut object is used as the triplet cut.  Correlation Functions that are created must make use of triplets and associated functions in StHbtTriplet, which will be updated in the future.  Once the processing is completed, correlation functions are displayed and fitted in the same manner as any two-particle correlation function.
+
+<hr>
+
+<h2><a name="TwoParticle">Calculating Two-Particle Correlations</h2>
+
+As was stated before, no changes have to be made to previous macros, as all types that are explicitly referred to in CINT have not had their class names changed.  The one change that needs to be made is when referencing a particular analysis.  Since the analysis type is a derived class, when referencing a particle analysis from the collection, one must cast the analysis in the same way that a correlation function is cast once it is referenced from the collection.  
+
+<hr>
+
+<h2><a name="Future">Additional Work</h2>
+
+The physics additions will be in the correlation functions and the methods in StHbtTriplet.  One change that will have to be made in the future is in the calculations with the mixing buffer.  Currently, once the mixing buffer is full, every combination of triplets from the buffer that pass the cuts is used to calculate the correlation function and from there added to the denominator.  This results in a large amount of computations which can easily get out of hand.  An option will therefore need to be in place that allows the user to configure the way the mixing buffer is handled. 
+
+<p>
+<p>
+

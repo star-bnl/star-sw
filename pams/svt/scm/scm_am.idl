@@ -1,0 +1,27 @@
+/*  scm_am.idl
+*   Module: scm_am
+*   Description: Idl of the scm Ssd Cluster Matching module 
+*/
+
+#include "PAM.idl"
+#include "sdm_geom_par.idl"
+#include "sdm_condition_db.idl"
+#include "svg_geom.idl"
+#include "scf_cluster.idl"
+#include "sls_ctrl.idl"
+#include "scm_ctrl.idl"
+#include "scm_spt.idl"
+
+interface scm_am : amiModule {
+        STAFCV_T call
+                ( in sdm_geom_par           geom_par
+		, in sdm_condition_db       condition_db
+		, in svg_geom               geom
+		, in scf_cluster    	    cluster
+		, in sls_ctrl    	    sls_ctrl
+		, in scm_ctrl    	    scm_ctrl
+                , out scm_spt               spt );
+};
+/*  Last mod. for scm_am: $Date: 2000/07/21 15:05:03 $ */
+
+

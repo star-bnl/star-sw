@@ -1,0 +1,16 @@
+/*****************************************************************************/
+
+/*   fcl_timeoff.idl
+*
+*   Table: fcl_timeoff
+*        description: calibration time offset table 
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct fcl_timeoff { 
+       float offset;       /* time offset for this channel */   
+   };
+
+/*  Last mod. for fcl_timeoff: $Date: 1998/07/15 15:05:03 $ */
+

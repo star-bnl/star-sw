@@ -1,0 +1,12 @@
+/* tfc_calc_delta.idl - reads hit table and calculates relative separation
+ * between hits in the same row
+ */
+#include "PAM.idl"
+#include "tcl_tphit.idl"
+#include "tfc_delta.idl"
+
+interface tfc_calc_delta : amiModule {
+	STAFCV_T call(	in tcl_tphit tphit,
+			out tfc_delta delta);
+};
+/*  Last mod. for tfc_calc_delta: $Date: 1997/12/31 14:34:09 $ */

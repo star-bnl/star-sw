@@ -1,0 +1,10 @@
+/* ssf_8to10map.idl
+ * 
+ * Table: ssf_8to10map
+ * Conversion/Compression of 10 bits ADC to 8 bit ADC values
+ * 
+ */
+struct ssf_8to10map {
+  long adc10;  /* pixel value in ADC channel */
+};
+

@@ -1,0 +1,18 @@
+/* tdi_rdi.idl
+ *
+ * Module: tdi_rdi
+ *
+ * Description: Tpc DIstortions - Radial Distortion Integral
+ */
+#include "PAM.idl" 
+#include "tdi_rdi_pars.idl"
+#include "g2t_tpc_hit.idl"
+#include "g2t_track.idl"
+
+interface tdi_rdi : amiModule {
+	STAFCV_T call
+		( in    tdi_rdi_pars rdi_pars
+                , inout g2t_tpc_hit  g2t_tpc_hit
+                , inout g2t_track    g2t_track
+		);
+};

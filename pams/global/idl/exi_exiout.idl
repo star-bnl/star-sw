@@ -1,0 +1,31 @@
+/*   exi_exiout.idl
+*   Table: exi_exiout
+*        description: Table holding information about the     
+*             	               reconstructed cascades.                 
+*/
+
+   struct 	exi_exiout	{
+       long      id;         /* unique (foreign) key */
+       long      idba;       /* id of batchelor particle (pion,kaon) */
+       long      idv0;       /* id of V0 used from ev0out table */
+       long      itrue;      /* evaluation flag for backgr/contamination */
+       long      ndegf;      /* number of degrees of freedom for fit */
+       float     alpha;      /* Armenteros variable alpha */
+       float     chi2;       /* chi-squared for vertex fit */
+       float     cos_th_cm[4];/* cosinus of c.m. decay angle */
+       float     cov[6];     /* covariance matrix for vertex fit */
+       float     dcapn;      /* dca of two "trascks" at casc. vertex */
+       float     dcaxi;      /* measured dca of casc. from vertex */
+       float     inv_mass[4];/* inv. mass of rec. particle (X,Xb,Om,Ob) */
+       float     p[3];       /* px,py,pz of cascade at reconst. vertex */
+       float     p_true[3];  /* True px,py,pz of parent at its vertex */
+       float     pt;         /* Armenteros variable */
+       float     tau[4];     /* proper lifetime for cascade */
+       float     tmin[4];    /* life time correction due to acceptance */
+       float     x[3];       /* x,y,z of reconstructed vertex */
+       float     x_true[3];  /* x,y,z of true decay point*/
+   } ;
+
+/*  Last mod. for exi_exiout:  $Date: 1997/12/31 14:33:28 $ */
+
+

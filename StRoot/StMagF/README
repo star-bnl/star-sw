@@ -1,0 +1,33 @@
+StMagF
+==================
+
+ Provides STAR Magnet Field values in kilogauss
+
+
+Author: Bill Love, BNL,  with help from Yuri Fisyak
+
+Usage
+=====
+  Base Class StMagF provides Agufld(*x, *b) which
+ returns 3D field b in kG at the 3D point x (cm). 
+  Derived from the base StMagF class are two classes:
+
+  StMagFC provides for a constant field requiring
+ z<280 and r<240 (TPC+ volume).
+   Constructor is StMagFC(Name, Title, Factor)
+ with two const char * and one Float_t arg which is
+ a scale factor for the field, 1.0 = 5 kG in +z dir.
+
+  StMagFCM provides a field from interpolation over
+ a mesh with constant spacing.  The user must invoke
+ the ReadField() method before calling Agufld.  
+
+
+Mod history
+===========
+ 12 Jan 99 Created by WAL and YF.
+
+ToDo
+====
+ Could make a more sophisticated interpolation over
+ a finer mesh when needed.

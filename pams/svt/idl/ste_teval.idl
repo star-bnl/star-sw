@@ -1,0 +1,53 @@
+/*   ste_teval.idl
+*   Table: ste_teval
+*        description: track evaluation table for svt          
+*/
+ 	struct ste_teval {
+       long      evt;        /* event count */
+       long      id;         /* row index */
+       long      kppid;      /* particle id of parent if any */
+       long      ncspt;      /* number of candidate spts on track */
+       long      ngspt;      /* number of correct assignment (spt) */
+       long      nrspt;      /* number of real spts on track */
+       float     cchisq[2];  /* chi square */
+       float     cdedx;      /* candidate track dedx */
+       float     ceta;       /* eta from svt_track */
+       float     cp[3];      /* p(3) from svt_track */
+       float     cph;        /* azimuthal angle from track candidate */
+       float     cpid;       /* pid from svt_track */
+       float     cpt;        /* pt from svt_track */
+       float     cptot;      /* ptot from svt_track */
+       float     csec;       /* sec from svt_track */
+       float     cth;        /* polar angle for candidate track */
+       float     cy;         /* y from svt_track */
+       float     kdedx;      /* dedx from mkine */
+       float     keta;       /* eta from mkine */
+       float     kp[3];      /* particle 3-momentum from mkine */
+       float     kph;        /* real angle (azimuthal) from mkine */
+       float     kpid;       /* particle id from mkine */
+       float     kpt;        /* pt from mkine */
+       float     kptot;      /* ptot from mkine */
+       float     ksec;       /* 1 primary -1 secondary from mkine */
+       float     kth;        /* polar angle from mkine */
+       float     ky;         /* rapidity from mkine */
+       float     rchisq[2];  /* chisquare */
+       float     rdedx;      /* actual track dedx */
+       float     reta;       /* eta from svt_mctrack */
+       float     rp[3];      /* p(3) from svt_mctrack */
+       float     rph;        /* azimuthal angle from real track */
+       float     rpid;       /* pid from svt_track */
+       float     rpt;        /* pt from svt_track */
+       float     rptot;      /* total p for fitted track */
+       float     rsec;       /* sec from svt_mctrack */
+       float     rth;        /* polar angle from real track */
+       float     ry;         /* y from svt_mctrack */
+       float     x1[3];      /* spt on 1st layer */
+       float     x2[3];      /* spt on 2nd layer */
+       float     x3[3];      /* spt on last layer */
+       float     crdca;       /* radius of closest approach vtx */
+       float     czdca;       /* dist closest approach z */
+       float     krdca;       /* radius of closest approach vtx */
+       float     kzdca;       /* dist closest approach z */
+   };
+/*  Last mod. for ste_teval: $Date: 1997/12/31 14:33:40 $ */
+

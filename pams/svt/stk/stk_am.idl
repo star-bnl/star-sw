@@ -1,0 +1,45 @@
+/* stk_am.idl
+*  Module: stk_am
+*  	description: svt tracking main module, calls all others
+*/
+
+#include "PAM.idl"
+#include "stk_stkpar.idl"
+#include "g2t_track.idl"
+#include "g2t_event.idl"
+#include "g2t_vertex.idl"
+#include "scs_spt.idl"
+#include "stk_vtx.idl"
+#include "stk_vtx_direct.idl"
+#include "stk_track.idl"
+#include "stk_kine.idl"
+#include "stk_filler.idl"
+#include "svg_config.idl"
+#include "svg_geom.idl"
+#include "sgr_groups.idl"
+
+interface stk_am : amiModule {
+	STAFCV_T call
+		( inout stk_stkpar      stkpar
+		, in    g2t_track       g2t_track
+		, in    g2t_event	g2t_event
+		, in    g2t_vertex      g2t_vertex
+		, inout scs_spt         spt
+		, inout stk_vtx		vtx
+		, in    stk_vtx_direct	vtx_direct
+                , inout sgr_groups      groups
+		, inout stk_track       track
+		, out   stk_kine        kine
+	        , inout sgr_groups      mcgroups
+		, out   stk_track     	mctrack
+		, out   stk_kine      	mckine
+		, inout stk_filler      filler
+		, in    svg_config      config
+		, in    svg_geom        geom
+		);
+	};
+
+/* Last mod. for  stk_am: $Date: 1998/06/10 21:35:48 $ */
+
+
+

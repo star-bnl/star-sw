@@ -1,0 +1,19 @@
+ macro init nhits=400000 ntracks=5000
+ macro/global/import *
+ 
+cd [params]/l3
+*
+*   Book tracking monitoring table
+*
+newtable l3t_mon l3t_monitor 1000
+*
+*    Book data tables
+*
+cd [data]/l3
+newtable hit    tcl_tphit  [nhits]
+newtable track  tpt_track  [ntracks]
+
+cd /dui
+ 
+return
+ 

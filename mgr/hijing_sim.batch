@@ -1,0 +1,138 @@
+#!/usr/bin/csh
+#  $Id: hijing_sim.batch,v 1.4 1998/05/05 19:12:42 nevski Exp $
+#  $Log: hijing_sim.batch,v $
+#  Revision 1.4  1998/05/05 19:12:42  nevski
+#  directory patch-up
+#
+#  Revision 1.3  1998/04/13 16:03:49  fisyak
+#  Correct HPUX flags
+#
+#  Revision 1.2  1998/04/10 14:03:15  fisyak
+#  Add supermodule in shared libraries
+#
+#  Revision 1.1  1998/04/04 15:00:03  fisyak
+#  add hijing_sim.batch
+#
+#  Revision 1.1  1998/03/23 02:34:29  fisyak
+#  Add pyhtia batch job
+#
+# This script is to submit an example job to execute  NQS queues.
+# You can submit it with the command: 
+#	qsub -q express star_nqs.batch
+# You can modify your copy of this script to suit your needs.
+#
+# When this script starts executing, assumes as default directory
+# the directory from where you submitted it. First compiles any
+# fortran files and after that creates the executable at the NQS
+# workspace. Several files are linked to the current directory to
+# create the default running environment.
+# 
+# During the execution output files are written at the directory you
+# submitted the script. Check if your quota space is enough.
+#
+#
+# NQS embedded directives  follow
+#@$-lt 1000      # time limit in seconds
+#@$-r  hijing    # request name
+#@$-lf 90mb      # output file size limit
+#$-eo            # merge std error and out
+# QSUB-mb -me    # send mail at beginning and end of request execution
+#$-M $USER       # Send mail to these users
+#$-s /usr/local/bin/tcsh # under what shell to execute
+#
+# Go to the directory from where job was submitted.
+#
+#printenv
+echo Starting job execution at `date`
+set dir  = /star/mds/data/SD98/auau200
+set skip = 0
+set trig = 200
+set prefix = central/hijing/set0001/regular/auau_ce_b0-2
+set fev  = 1
+set lev = 200
+
+while ( $#argv > 0 )
+        switch ($1)
+        case -d:        # top level directory
+        shift; if ( $#argv > 0 ) set dir  = $1
+                breaksw
+        case -p:        # prefix
+        shift; if ( $#argv > 0 ) set prefix = $1
+                breaksw
+        case -f:        # first event no. on input
+        shift; if ( $#argv > 0 ) set fev = $1
+                breaksw
+        case -l:        # last event no. on input
+        shift; if ( $#argv > 0 ) set lev = $1
+                breaksw
+        case -s:        # No.of event to skip
+        shift; if ( $#argv > 0 ) set skip  = $1
+                breaksw
+        case -t:        # No.of event to process
+        shift; if ( $#argv > 0 ) set trig = $1
+                breaksw
+        default:
+                echo $1 unrecognised
+        endsw
+        shift
+end
+set part = ${fev}_${lev}_${skip}_${trig}
+set log  = gst_`date +"%d_%h_%Y"`
+#
+cd ${SCRATCH}
+if ( -d log == 0) mkdir log
+if ( -d log/${part} == 0) mkdir log/${part}
+cd ${SCRATCH}/log/${part}
+# ============================================
+staf -w 0 << EOF > $SCRATCH/log/${part}/${log}
+trace on full
+debug on
+Root  Geant
+* sets standard geant geometry and  parameters for "physics on" running
+def $STAR/kumacs/sim
+exec  set_hadr_phys_on
+make geometry sim/gstar/gstar_input
+*
+* make geant to save secondaries which produced TPC hits:
+Mode TRAC  SIMU 1
+detp TRAC  DCAY 210 210 0.1 0.01
+mode tpce  simu 2
+
+* keep track of memory/cpu consumption
+ghist star.his  STAR
+gstat time size mult stak
+*
+llev = ${fev}+${lev}-1
+user/input  U ${dir}/evg/${prefix}_${fev}_[llev].xdf
+skip ${skip}
+fev1 = ${fev}+${skip}
+last = [fev1]+[trig]-1
+on error goto exit
+do iev = [fev1], last, 10
+  ll=[iev]+10
+  if [ll]>[last] then
+    ll=[last]
+  endif
+    i1 = \$format([iev],i4.4)
+    i2 = \$format([ll],i4.4)
+  user/output oz ${dir}/gst/${prefix}_[i1]_[i2].fzd
+  do i = [iev], [ll]
+    trig 1
+    if \$iquest(1)<>0 goto exit
+  enddo
+enddo
+exit:
+
+* show histograms
+ge/rz/cd //PAWC
+hi/list
+exit
+EOF
+#
+# Clean files/links not needed anymore...
+echo
+echo   Job finished at `date`
+#
+#END
+
+

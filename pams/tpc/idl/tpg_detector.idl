@@ -1,0 +1,26 @@
+/*   tpg_detector.idl
+*
+*   Table: tpg_detector
+*         
+*        description: TPC detector-wide geometry parameters   
+*             more..: (valid for all TPC sectors)             
+*	Additions by Mlisa - It is not really the best place
+* 	  for it perhaps, but here we add VDRIFT = drift velocity
+*	 	      and BUCKET_LENGTH = time duration of a time bucket
+*/
+
+   /*******************  Row struct *******************/
+   struct tpg_detector {  
+       long       nsectors;       /* Number of sectors */
+       float     drift_length;    /* Drift length, along the beam */
+       float     radius_in;       /* Inner radius, to center of row. */
+       float     radius_out;      /* Outer radius, to outside of last-row end*/
+       float     sector_angle;    /* Angle between sectors, radians */
+       float	 vdrift;	  /* drift velocity (cm/s) */
+       float	 e_vdrift;	  /* error on thedrift velocity (cm/s) */
+       float	 clock_frequency; /* frequency of the clock driving FEE(1/s) */
+       float     trigger_offset;  /* time diff between the event and theRDO trigger */
+       float     z_inner_offset;  /* offset in z between the inner and the outer sector (cm) */
+   } ;
+/*  Last mod. for tpg_detector:   $Date: 1998/09/02 10:53:38 $ */
+

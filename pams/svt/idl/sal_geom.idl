@@ -1,0 +1,18 @@
+ /*   File : sal_geom.idl
+*    Table: sal_geom
+*    Description: SAL Detector geometry                  
+*/
+      struct sal_geom {
+       long      id;        /* wafer id number */
+       float     r;          /* radius */
+       float     phi;       /*  nominal(IDEAL) azimutal angle */
+       float     thx;       /*  rotation angle along x-axis */
+       float     thy;       /*  rotation angle along y-axis */
+       float     thz;       /*  rotation angle along z-axis */
+       float     rot[9];    /* rotation matrix */
+       float     inv[9];    /* inverse of the rotation matrix */
+       float     x[3];      /* coordinates of wafer center in GRF */
+       float     par[6];    /* dx,dy,dz,daxy,daxz,dayz alignment parameter */
+   };
+/*  Last mod. for sal_geom: $Date: 1997/12/31 14:33:39 $ */
+

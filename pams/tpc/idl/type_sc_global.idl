@@ -1,0 +1,4 @@
+struct type_sc_global {
+        char name[32];
+        long value;
+};

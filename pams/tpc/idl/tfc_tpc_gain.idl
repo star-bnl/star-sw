@@ -1,0 +1,10 @@
+/*****************************************************
+* Table tfc_tpc_gain - this table contains the electronics
+*			gains for the system test.
+*******************************************************/
+
+  struct tfc_tpc_gain{
+	long channel;	/* channel number from RDO board */
+	float gain;	/* (gain-equalized counts)/(raw counts) */
+  };
+/* Last mod. $Date: 1997/12/31 14:34:11 $ */

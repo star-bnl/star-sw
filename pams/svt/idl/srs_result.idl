@@ -1,0 +1,18 @@
+/*   srs_test.idl
+*   Table: srs_result
+*        description: Table to store srs results     
+*/
+	struct srs_result {    
+       long      chip_id;    /* id for chip */
+       long      n_anode_samps;/* number of anodes with signal */
+       long      n_time_samps;/* number of samples projected on time axis */
+       float     drift_distance;/* distance from hit to anode row */
+       float     offset;     /* offset=0 exactly in front of anode */
+       float     phi;        /* rotation about normal incidence */
+       float     sigma[3];   /* resolution vector in sdd coordinates */
+       float     theta;      /* angle wrt normal incidence */
+       float     x[3];       /* position vector of hit in tpc coord. */
+       float     x_local[3]; /* pos of hit in local coord */
+   };
+/*  Last mod. for srs_result : $Date: 1997/12/31 14:33:40 $ */
+

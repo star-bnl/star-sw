@@ -1,0 +1,8 @@
+/*****************************************************************************
+*   Table: emc_adcslope
+*        description: Table which contains adc slope
+*        auther:      OGAWA, Akio
+*/
+   struct emc_adcslope { 
+       float       p0;		/* adc slope for ADC channel */
+   };

@@ -1,0 +1,13 @@
+/*    tpcISTimeOffsets.idl
+*
+*  Table: tpcISTimeOffsets
+*
+*       description:
+*/ 
+
+
+struct tpcISTimeOffsets { 
+
+   float  offset[1750];   /*   pad-to-pad time offset corrections  */
+
+ };  

@@ -1,0 +1,13 @@
+StPidAmpMaker - STAR PID Amplitude Maker
+
+This code is based on Richard's FORTRAN version of PID package.
+The C++ version is written by Aihong Tang.
+
+Thanks Weiming for his help for the former version of the code. 
+
+Care taker of the code:  Aihong Tang.
+
+
+For documentation see doc/ directory, or see
+http://www.rhic.bnl.gov/~aihong/StPidAmpMakerDocument/
+

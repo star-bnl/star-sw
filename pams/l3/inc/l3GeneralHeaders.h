@@ -1,0 +1,4 @@
+#ifndef L3GENERALHEADER
+#define L3GENERALHEADER
+#define NSECTORS 24
+#endif

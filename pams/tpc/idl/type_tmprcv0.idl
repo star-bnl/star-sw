@@ -1,0 +1,14 @@
+/*************************************************************
+* Table: minidaq_pix
+* this is the pixel table put out by Chuck's minidaq
+* Written by hand malisa 13may96
+*
+* 14may96--- I change the table TYPE to match the wierd type name
+*            given by minidaq (type_tmprcv0)
+*/
+   /********** Row struct ******************/
+      struct type_tmprcv0 {
+	unsigned short data[512];	/* this is just an ADC array 1152 of these should come */
+	};
+/* last modified $Date: 1997/12/31 14:34:11 $ */
+

@@ -1,0 +1,30 @@
+struct cte_extra { 
+   long      id;         /* primary key */
+   long      id_globtrk; /* Pointer to global track */
+   long      ieta;       /* Eta TOF index */
+   long      iphi;       /* Phi TOF index */
+   long      nrow;       /* # rows in track */
+   long      nslat;      /* # slats associated with this track */
+   long      q;          /* Track charge */
+   float     beta;       /* Particle velocity */
+   float     drphi;      /* Distance impact slat in rphi */
+   float     dz;         /* Distance impact slat in z */
+   float     dz_lit;     /* Distance impact phototube in z */
+   float     e_phi_extra;// Error in extrapolated phi
+   float     e_z_extra  ;// Error in extrapolated z  
+   float     eta;        /* Pseudorapity */
+   float     nmip;       /* # mip thru slat */
+   float     p;          /* Track momentum */
+   float     phi;        /* Track azimuthal angle */
+   float     phi_extra ; /* Extrapolated phi */
+   float     rimp;       /* Impact parameter */
+   float     sdedx;      /* dedx from svt */
+   float     sleng;      /* Track length */
+   float     traw;       /* Raw time */
+   float     tcor;       /* Corrected time */
+   float     s_extra ;   /* Extrapolated distance */
+   float     x_extra;    /* Extrapolated x */
+   float     y_extra;    /* Extrapolated y */
+   float     z_extra;    /* Extrapolated z */
+   float     zimp;       /* Z distance track vertex and ip */
+} ;

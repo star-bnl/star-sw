@@ -1,0 +1,18 @@
+/* emc_erj.idl		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "ems_control.idl"
+#include "emc_energy.idl"
+#include "emc_jetpar.idl"
+#include "ems_jetlist.idl"
+
+interface emc_erj : amiModule {
+	STAFCV_T call
+        ( in ems_control ems_control
+        , in emc_energy emc_energy
+        , in emc_jetpar emc_jetpar
+        , out ems_jetlist ems_jetlist
+	);
+};
+
+

@@ -1,0 +1,23 @@
+* sca_ensemble_ave.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+*
+* last run under sl98f 8/7/98
+*
+* this file is used to initialize the values in the sca_ensemble_ave
+* table -- it runs with sca_makeXdf.kumac
+* -------------------------------------------------------------
+
+  cd [calib]/ebye/sca_ensemble_dir
+  tdm/table/rowcount   sca_ensemble_ave  1
+
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].index'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].scale_x'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].scale_y'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].rank'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].volume'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].entropy'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].dim'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].info'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].dim_lower'	0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].evn'		0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].run'		0

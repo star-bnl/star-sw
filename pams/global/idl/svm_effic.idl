@@ -1,0 +1,10 @@
+/* Table svm_effic.idl
+*/
+
+ struct svm_effic{
+	long  idsvt; /* id of svt reconstructed track */
+	long  idsvt_mc; /* id of matched mc svt track */
+	long  idtpc;  /* id of tpc reconstructed track */
+ 	long  idtpc_mc;  /* id of matched mc tpc track */
+	long good_match; /* is svt same as tpc trk =1 same =0 different */
+};

@@ -1,0 +1,25 @@
+/*  est_eval.idl
+*   Module est_eval
+*   EST evaluator
+*/
+
+#include "PAM.idl"
+#include "g2t_track.idl"
+#include "tpt_track.idl"
+#include "tte_mctrk.idl"
+#include "est_ctrl.idl"
+#include "est_match.idl"
+#include "est_ev.idl"
+#include "scs_spt.idl"
+
+interface est_eval : amiModule {
+	STAFCV_T call
+		(in g2t_track g2t_track,
+		 in tpt_track tptrack,
+		 in tte_mctrk ttemctrk,
+		 in est_ctrl est_ctrl,
+		 in est_match est_match,
+		 inout est_ev est_ev,
+		 in scs_spt scs_spt);
+};
+

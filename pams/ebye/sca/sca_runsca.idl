@@ -1,0 +1,23 @@
+/*  sca_runSca.idl
+*   This is the staf interface file for sca_runSca.cc
+*
+*   written by L. D. Carr -- lcarr@u.washington.edu
+*/
+#include "PAM.idl"
+#include "sca_in.idl"
+#include "sca_const.idl"
+#include "sca_switch.idl"
+#include "sca_prior.idl"
+#include "sca_out.idl"
+
+interface sca_runsca : amiModule{
+        STAFCV_T call (
+                 in     sca_switch	sca_switch,
+                 in     sca_const	sca_const ,
+                 in     sca_in 		sca_in,
+                 inout	sca_out		ensemble,
+		 inout	sca_prior	prior,
+                 out    sca_out		sca_out
+                );
+};
+/* last mod. for sca_runSca.idl : $Date: 1998/09/12 08:34:02 $ */

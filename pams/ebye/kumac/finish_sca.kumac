@@ -1,0 +1,10 @@
+*****************************************************************
+MACRO finish
+  macro/global/import *
+    
+  cd [params]/ebye/sca
+  tdm/table/cell/putvalue 'sca_switch[0].nEvents'  [nev_pass]
+  cd /dui 
+
+RETURN
+****************************************************************

@@ -1,0 +1,6 @@
+/*   pixelarray
+ * 
+*/
+struct pixelarray{
+    short      data;      /* 1 byte variable */
+};

@@ -1,0 +1,31 @@
+**********************************************************
+macro egr 
+  
+  macro/global/import *
+
+  message ' Calling EGR_fitter'
+
+ami/mod/call egr_fitter_
+        [data]/tpc/hits/tphit_
+        [dst]/vertex_
+        [data]/tpc/tracks/tptrack_
+        [data]/tpc/tracks/evaltrk_
+        [data]/svt/hits/scs_spt_
+        [params]/global/egrpars/egr_egrpar_
+        [data]/svt/tracks/stk_track_
+        [data]/svt/tracks/groups_
+        [data]/global/tracks/evt_match_
+        [dst]/globtrk_
+        [dst]/globtrk_aux
+
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from EGR_FITTER'
+endif
+
+
+message ' finished calling egr_fitter'
+
+return
+********************************************************
+

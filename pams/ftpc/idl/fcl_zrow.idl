@@ -1,0 +1,16 @@
+/*****************************************************************************/
+
+/*   fcl_zrow.idl
+*
+*   Table: fcl_zrow
+*        description: ftpc detector padrow z positions 
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct fcl_zrow {
+       float z;       /* z-position of padrow */
+   };
+
+/*  Last mod. for fcl_zrow: $Date: 1998/02/23 14:32:58 $ */
+

@@ -1,0 +1,13 @@
+/* ems_fake_egr.idl		W.J. Llope */
+
+#include "PAM.idl"
+#include "tpt_track.idl"
+#include "egr_globtrk.idl"
+
+interface ems_fake_egr : amiModule {
+	STAFCV_T call
+        ( in tpt_track tpt_track
+        , out egr_globtrk egr_globtrk
+	);
+};
+

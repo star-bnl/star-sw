@@ -1,0 +1,182 @@
+<BASE HREF="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/">
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>StRoot/St_QA_Maker histograms</title>
+<!-- Changed by: Curtis Lansdell, 26-May-2000 -->
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+    </td>
+    <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=center colspan=2><font size="+2"> <b>
+        StRoot/St_QA_Maker histograms
+        </b></font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+        <!-- lower left text --> &nbsp; 
+    </td>
+    <td align=right> <font size="-1"> 
+      <a href="/STAR/html/ofl_l/prodinfo.html">Maintained </a> 
+          by <a href="mailto:kathy@bnl.gov">K. Turner </a> 
+            </font>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 align=right> <font size="-1"> 
+         <script language="JavaScript">
+         <!-- Hide script from old browsers
+         document.write("Last modified "+ document.lastModified)
+         // end of script -->
+         </script>
+         </font>
+    </td>
+  </tr>
+</TABLE>
+
+<P>
+
+
+<FONT  size ="+1" color="red"> Described in this Document:  <FONT  size ="+1" color="black"> 
+<FONT  size ="+1" color="blue">
+  <UL>
+   <LI>      
+      The histograms of St_QA_Maker & StEventQAMaker
+  </UL>
+<FONT  size ="+1" color="black"> 
+
+
+<HR>
+
+<H3>
+  
+<P>
+<FONT  size ="+1" color="blue"> Methods in these classes:<FONT  size ="+1" color="black"> 
+   <UL>
+      <LI><FONT  size ="+1" color="green">  St_QA_Maker - methods  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> Histograms are filled in these methods (using tables or StEvent):
+  <H4>
+  <PRE>    MakeHistEvSum();  - event_summary
+    MakeHistGlob();   - globtrk
+    MakeHistPrim();   - dst_dedx
+    MakeHistDE();     - primtrk
+    MakeHistGen();    - particle
+    MakeHistPID();    - primtrk,dst_dedx
+    MakeHistVertex(); - dst_vertex,dst_xi_vertex,dst_v0_vertex,dst_kinkVertex
+    MakeHistPoint();  - point
+    MakeHistRich();   - g2t_rch_hit
+    MakeHistEval();   - dst_vertex,g2t_vertex 
+                        (g2t_vertex not on dst & only exists for simulated data)
+  </PRE>
+  </H4>
+         </UL>
+</H3>
+<FONT color="darkred">
+    Note : StEventQAMaker does not have access to Monte Carlo data,
+           thus StEvent histograms for MakeHistGen, MakeHistRich,
+           and MakeHistEval are empty.
+</FONT>
+   </UL>
+
+<HR>
+
+<P>
+<FONT  size ="+1" color="blue"> Histograms:<FONT  size ="+1" color="black"> 
+   <UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistEvSum()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> number of tracks (total, good, ratio pos. to neg., good primaries)
+             <LI> number of vertices, mean pT, mean eta, rms eta
+             <LI> x,y,z,r of primary vertex
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistGlob()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> number of tracks (total, good), iflag, detector id (good)
+             <LI> y vs x -dca of tracks to the beam axis,z-dca to beam axis
+             <LI> z-dca to beam axis vs tanl, vs z_first, vs psi, vs phi0
+             <LI> <FONT color="blue">TPC, TPC+SVT, FTPC East & West histograms (1D) :</FONT>
+             <BR> - number of points, max. points, fit points on track
+             <BR> - ratio of fit/tot, fit/max, charge
+             <BR> - x,y,z,r position of first hit on track
+             <BR> - track length, psi, eta, pT, momentum
+             <BR> - chi squared, chi squared probability
+             <BR> <FONT  size ="+1" color="red"> Not used for FTPC : <FONT  size ="+1" color="black"> 
+             <BR> - radius at start, azimuth at start (phi), z-coord. at start, log10 curvature
+             <BR> - x,y,z of first hit minus x,y,z of helix at start, theta, tanl (dip angle)
+             <BR> - overlayed histogram of first point: x,y,z_hit - x,y,z_helix
+             <BR> - padrow # of first hit
+             <BR> - impact param to primary vertex (log10 and not)
+             <LI><FONT color="blue"> TPC, TPC+SVT, FTPC East and West histograms (2D) :</FONT>
+             <BR> - log pT vs eta, Y vs X of first hit on track
+             <BR> - trk length vs eta, N pnts vs length, N fit pnts vs length
+             <BR> <FONT  size ="+1" color="red"> Not used for FTPC : <FONT  size ="+1" color="black">
+             <BR> - tanl vs zfirst-zvtx, log mom vs trk length
+             <BR> - chisq vs log mom, vs eta, vs phi, vs tanl, vs zfirst
+             <BR> - chisq prob vs log mom, vs eta, vs tanl, vs zfirst
+             <BR> - ratio Nfitpnt,Npnt vs log mom, vs Eta
+             <BR> - psi vs phi
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistPrim()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> <FONT color="darkred">Note : uses essentially the same histograms as in MakeHistGlob().  Currently, FTPC histograms are empty for primary tracks and so not drawn (soon to change). </FONT>
+             <LI> inner and outer sector TPC dE/dx histograms (drawn before event summary histograms)
+
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistDE()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> number of tracks
+             <LI> TPC,FTPC East & West histograms :
+             <BR> - number of points to define dE/dx
+             <BR> - dE/dx mean, sigma
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistGen()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> total num particles, num chg (e,mu,pi,K,p) part
+             <LI> charged pT (all & TPC only), charged eta, charged pT vs eta
+             <LI> generator prod vertex x,y,z
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistPID()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> p vs dedx (reconstructed)
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistVertex()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> number of vertices
+             <LI><FONT color="blue"> Primary Vertex, Secondary Vertices histograms :</FONT>
+             <BR> - vertex id, x, y, z, r, chisq/dof
+             <LI><FONT color="blue"> V0, Xi, Kink Vertices histograms :</FONT>
+             <BR> - number found, invariant mass (except for kinks)
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistPoint  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> number of hits (total, tpc, svt, ssd, ftpc east & west)
+             <LI> detector id of hits (not filled for StEvent)
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistRich()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> multiplicity
+         </UL>
+      <LI><FONT  size ="+1" color="green">  MakeHistEval()  <FONT  size ="+1" color="black"> 
+         <UL>
+             <LI> geant minus reconstructed x,y,z of primary vertex
+             <LI> reco primary vertex Z vs difference of geant and reco Z
+         </UL>
+   </UL>
+</H3>
+
+</BODY>
+</HTML>

@@ -1,0 +1,17 @@
+/* sgr_pixmap.idl
+*  Table       : sgr_pixmap
+*  Description : Describes but does not include pixmap.
+*              :
+*/
+       struct sgr_pixmap { 
+         long   NHitsMax;       /* Maximum number of hits per pixel. */
+         long   NPhi;           /* Number of bins in phi. */
+         long   NZ;             /* Number of bins in Zscaled. */
+         float  PhiMin;         /* Minimum Phi values in pixmap. */
+         float  PhiMax;         /* Maximum Phi values in pixmap. */
+         float  ZMin;           /* Minimum Zscaled values in pixmap. */
+         float  ZMax;            /* Maximum Zscaled values in pixmap. */
+      };
+/* Last mod. for sgr_pixmap:  Wed Dec  4 10:31:05 EST 1996*/
+
+

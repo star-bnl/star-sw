@@ -1,0 +1,28 @@
+
+Package: StDAQMaker
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Maker to read DAQ data.
+
+1) Inherited from StIOInterface class
+ 
+2) Wrapper for numerous DAQ Reader classes. 
+
+3) Hides from user houskeeping of DAQ classes: 
+   a) openenig/closing of files;
+   b) selection or skipping of the events
+   c) instantiation and deletion of needed DAQ readers and
+      central modification/improvement of policy of how and what
+      to keep and what and when to delete;
+   etc...
+
+4) provides via StDAQReader, StTPCReader ...  classes interface for
+   other makers to get DAQ data
+   
+5) Breaks dependency from DAQ classes, which could be modified without
+   touching user maker code. Only StDAQMaker must be modified to coop
+   with changes in DAQ classes
+
+
+
+

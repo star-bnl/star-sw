@@ -1,0 +1,25 @@
+/*  est_toglob2.idl
+*   Module est_toglob2
+*   converts est table to global track table
+*/
+
+#include "PAM.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+#include "scs_spt.idl"
+#include "sgr_groups.idl"
+#include "stk_track.idl"
+#include "svm_evt_match.idl"
+#include "est_match.idl"
+
+interface est_toglob2 : amiModule {
+	STAFCV_T call
+		(in est_match est_match,
+		 in tcl_tphit tphit,
+		 in tpt_track tptrack,
+ 		 inout scs_spt scs_spt,
+                 inout sgr_groups groups,
+		 inout stk_track stktrack,
+		 inout svm_evt_match match);
+};
+

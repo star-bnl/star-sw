@@ -1,0 +1,81 @@
+<html>
+<title>StHFillObject</title>
+<h1>StHFillObject></h1>
+
+<pre>
+Inheritance from this class allows simple manipulations of collections
+of these objects for histogramming and printing values from the derived
+class using the Print() and Draw() member functions. This ease-of-use
+is achieved by taking advantage of the fact that calling the Draw() or
+Print() member functions of a collection automatically loop through the
+collection calling the Print() and Draw() member functions of the individual
+objects (such objects must inherit from TObject, as StHFillObject does).
+
+The Print() and Draw() member functions work for individual instances too.
+For example, with a pointer to an instance of the derived class (dPtr), one
+can see the values of any member function or data member:
+
+   (if alpha() is a member function, i.e. dPtr->alpha();)
+   dPtr->Print("alpha");
+   dPtr->Print("alpha()");
+
+   (if alpha() takes arguments)
+   dPtr->Print("alpha(3.5,2.1)");
+
+One can specify multiple members, or even use formulas:
+(Spaces are generally ignored)
+
+   (if beta is a public data member, i.e. dPtr->beta;)
+   dPtr->Print("alpha:beta");
+   dPtr->Print("alpha+beta : 8*(alpha-beta)");
+
+Members which return pointers to float arrays are also supported:
+
+   (if gamma is a member function which returns float*)
+   dPtr->Print("alpha:gamma[0]");
+   dPtr->Print(" gamma()[8] : gamma[7] : gamma[0]+ gamma()[2]");
+
+For multiple sets of numbers, use a semicolon (";") or return ("\n")
+to separate sets. With Print(), multiple sets make multiple lines of output
+with a number in the first column indicating the set on that line.
+(A set with only spaces will cause an error.)
+
+   dPtr->Print("alpha:beta;alpha+beta:alpha - beta");
+
+Curly brackets around a particular formula indicate that it is to be used
+as a selection cut (print only if this value is non-zero, boolean expressions
+evaluate to 1 or 0):
+
+   dPtr->Print("alpha:beta:{alpha-beta}");
+
+Histograms can be filled using the Draw() method. This is identical to
+the Print() method except that the first portion of any set is the Root
+name of the histogram:
+
+   TH1F h1("hist1","This is a histogram",100,0.,100.);
+   dPtr->Draw("hist1:alpha");
+   TH2F h2("hist2","This is a 2-D histogram",100,0.,100.,10,-1.,1.);
+   dPtr->Draw("hist1:alpha ; hist2:alpha:beta");
+
+For histogramming, the number of colon-separated formulas following the
+histogram name within a set must match the number of dimensions of the
+histogram. Selection cuts can also be used, where a non-boolean expression
+evaluates to the weight used in filling the histogram.
+
+   dPtr->Draw("hist1:alpha:{beta>1}");
+
+Thus, an entire collection (TCollection or derived class) of these objects
+can be handled en masse:
+
+   (if cPtr is a pointer to a collection of StHFillObject-derived objects)
+   cPtr->Draw("hist1:alpha");
+   cPtr->Print("beta:(alpha*3.6)-2.3");
+
+Lastly, if the derived class has an Update() member function, then one can
+call it through ls("Update"). This is useful if one wants to do some sort
+of processing on an entire collection with one call, as ls() is implemented
+for collections just as Draw() and Print():
+
+   cPtr->ls("Update");
+</pre>
+</html>

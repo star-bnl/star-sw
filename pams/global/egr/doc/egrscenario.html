@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE> EGR scenarios</TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.0Gold (X11; I; AIX 1) [Netscape]">
+</HEAD>
+<BODY>
+
+<H2>EGR scenarios</H2>
+
+<P>This section describes the various egr running scenarios that have been
+implemented. </P>
+
+<P> </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #1: Real TPC Stand-Alone Tracking</H2>
+
+<P>Description: Use this when running the TPC only. EGR will refit the
+TPC tracks, reproducing the parameters in tptrack. </P>
+
+<P> Run this chain: tfs -&gt; tpt -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=2, usesvt=0, usevert=0, usetof=0,
+useemc=0, useglobal=0 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #2: Perfect TPC Stand-Alone Tracking</H2>
+
+<P>Description: Use this when running the TPC only. EGR will perform a
+direct copy of tptrack into globtrk. </P>
+
+<P> Run this chain: tfs -&gt; tpt -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=1, usesvt=0, usevert=0, usetof=0,
+useemc=0, useglobal=0 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #3: Real SVT Stand-Alone Tracking</H2>
+
+<P>Description: Use this when running the SVT only. EGR will refit the
+SVT tracks, reproducing the parameters in svt_track, sort of. Use of this
+scenario is not recommended (as of 6/6/97) use scenario 4 instead </P>
+
+<P> Run this chain: srs -&gt; sgr &amp;/or stk -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=0, usesvt=2, usevert=0, usetof=0,
+useemc=0, useglobal=0 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #4: Perfect SVT Stand-Alone Tracking</H2>
+
+<P>Description: Use this when running the SVT only. EGR will copy the svt_track
+table directly into globtrk. </P>
+
+<P> Run this chain: srs -&gt; sgr &amp;/or stk -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=0, usesvt=1, usevert=0, usetof=0,
+useemc=0, useglobal=0 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #5: Fit TPC tracks to the event vertex.</H2>
+
+<P>Description: Will refit the TPC tracks including the event vertex point.
+</P>
+
+<P> Run this chain: tfs -&gt; tpt -&gt; evr -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=2, usesvt=0, usevert=1 or
+-2, usetof=0, useemc=0, useglobal=0 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #6: Real SVT+TPC Matched Tracking</H2>
+
+<P>Description: Refits the SVT and TPC tracks matched by the svm matcher.
+Copies only tracks with a TPC track in it to globtrk. </P>
+
+<P> Run this chain: srs -&gt; sgr &amp;/or stk -&gt; tfs -&gt; tpt -&gt;
+svm -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=1, usesvt=0, usevert=0, usetof=0,
+useemc=0, useglobal=2 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #7: Perfect SVT+TPC Tracking</H2>
+
+<P>Description: Copies SVT and TPC tracks matched using the Monte Carlo
+ID. Copies only tracks with a TPC track in it to globtrk. Mtm from TPC
+angles from SVT</P>
+
+<P> Run this chain: srs -&gt; stk(perfect) -&gt; tfs -&gt; tpt (mctest=1)
+-&gt; tte -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=0, usesvt=0, usevert=0, usetof=0,
+useemc=0, useglobal=1 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #8: Improved Real SVT+TPC Matched Tracking</H2>
+
+<P>Description: Refits the SVT and TPC tracks matched by the svm matcher.
+Fills globtrk with all matched SVT+TPC tracks, followed by all leftover
+TPC tracks, followed by all leftover SVT tracks with a chi-square(1) fit
+better than egrpar.svtchicut (if svtchicut=0 ALL leftover SVT tracks are
+copied) </P>
+
+<P> Run this chain: srs -&gt; sgr &amp;/or stk -&gt; tfs -&gt; tpt -&gt;
+svm -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=1, usesvt=1, usevert=0, usetof=0,
+useemc=0, useglobal=2 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #9: Improved Perfect SVT+TPC Tracking</H2>
+
+<P>Description: Refits the SVT and TPC tracks matched using the Monte Carlo
+ID. Fills globtrk with all matched SVT+TPC tracks, followed by all leftover
+TPC tracks, followed by all leftover SVT tracks with a chi-square(1) fit
+better than egr_par.svtchicut (if svtchicut=0 ALL leftover SVT tracks are
+copied) </P>
+
+<P> Run this chain: srs -&gt; stk(perfect) -&gt; tfs -&gt; tpt (mctest=1)
+-&gt; tte -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=1, usesvt=1, usevert=0, usetof=0,
+useemc=0, useglobal=1 </P>
+
+<P> </P>
+
+<P> </P>
+
+<H2>SCENARIO #10: Ken Wilson's SVT+TPC tracking</H2>
+
+<P>Description: Refits the SVT and TPC matched tracks followed by unmatched
+tracks Fills globtrk with all matched SVT+TPC tracks, followed by all leftover
+TPC tracks copied from tptrack, followed by all leftover SVT tracks. These
+SVT tracks are straight copies of svt_track but with the 1/pt value taken
+from tptrack. </P>
+
+<P> Run this chain: srs -&gt; sgr &amp;/or stk -&gt;tfs -&gt; tpt -&gt;
+svm -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=1, usesvt=0, usevert=0, usetof=0,
+useemc=0, useglobal=3 </P>
+
+<P> </P>
+
+<P> </P>
+<H2>SCENARIO #11: Perfect SVT+TPC Tracking (mtm fit)</H2>
+
+<P>Description: Refits SVT and TPC tracks matched using the Monte Carlo
+ID. Copies only tracks with a TPC track in it to globtrk.</P>
+
+<P> Run this chain: srs -&gt; stk(perfect) -&gt; tfs -&gt; tpt (mctest=1)
+-&gt; tte -&gt; egr </P>
+
+<P> parameters set internally by egr: usetpc=-1, usesvt=-1, usevert=0, usetof=0,
+useemc=0, useglobal=1 </P>
+
+<P> </P>
+
+<P> </P>
+<H2>PRIMARY VERTEX INCLUSION:</H2>
+
+<P>In order to include the primary vertex in the fit on a single pass basis,
+simply set egrpar.usevert=1. </P>
+
+<P> To run in a mode where egr is first called and fits are made without
+the primary vertex included, then the evr package is run to determine the
+vertex using the initial global tracks, then egr is recalled for fits with
+the now determined vertex, set egrpar.usevert=2. </P>
+
+<P> </P>
+
+<P> </P>
+
+<P> </P>
+
+<P> </P>
+
+<ADDRESS> </ADDRESS>
+
+<H2>Contact Person: <A HREF="/star/starlib/doc/www/spb/caines.html">Helen
+Caines </A></H2>
+
+<P> </P>
+
+</BODY>
+</HTML>

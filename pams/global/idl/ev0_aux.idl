@@ -1,0 +1,43 @@
+/*   ev0_aux.h
+*   Table: ev0_aux
+*/
+   struct ev0_aux {
+	long id; /* Primary key id */
+	long id_vertex; /* vertex id */
+	long idneg; /* id of negative track of the decay */
+	long idpos; /* id of positive track of the decay */
+	long pidpos; /* global pid of positive track of the decay */
+	long pidneg; /* global pid of negative track of the decay */
+	long ndegf; /* number of degrees of freedom for fit */
+	float alpha; /* Armenteros variable */
+	float pt; /* Armenteros pt */
+	float dcan; /* dca of negative track from vertex */
+	float dcap; /* dca of positive track from vertex */
+	float dcapn; /* dca of two tracks at V0 vertex */
+	float dcav0; /* measured dca of V0 from vertex */
+	float inv_mass_la; /* Inv. mass of rec. lambda */
+	float inv_mass_lb; /* Inv. mass of rec. lambda-bar */
+	float inv_mass_k0; /* Inv. mass of rec. k0s */
+	float neg_px; /* measured momentum of neg track at v0 ver */
+	float neg_py;
+	float neg_pz;
+	float pos_px; /* measured momentum of pos. track at v0 vtx */
+	float pos_py;
+	float pos_pz;
+	float px; /* px,py,pz of V0 at reconstr. vertex */
+	float py;
+	float pz;
+	float tau_la; /* proper lifetime of V0 if lambda */
+	float tau_lb; /* proper lifetime of v0 if lambda-bar */
+	float tau_k0; /* proper lifetime of v0 if k0s */
+	float sagitta_pos; /* Sagitta of +ve track */
+	float sagitta_neg; /* Sagitta of -ve track */
+	float rapidity_la; /* Rapidity if a lambda */
+	float rapidity_lb; /* Rapidity if a lambda-bar */
+	float rapidity_k0; /* Rapidity if a k0s */
+	float theta; /* Opening angle of decay in the lab coords */
+   } ;
+/*  Last mod. for ev0_aux:   $Date: 1998/05/08 15:36:25 $ */
+
+
+

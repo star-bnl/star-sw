@@ -1,0 +1,40 @@
+/*   ev0_ev0out.h
+*   Table: ev0_ev0out
+*/
+   struct ev0_ev0out {
+       long      id;         /* unique id */
+       long      id_par_trk; /* track id of parent V0 came from, if any */
+       long      id_par_vtx; /* vertex id where V0 started, if any */
+       long      id_pr_vert; /* primary vertex id parent came from */
+       long      idneg;      /* id of negative track of the decay */
+       long      idpos;      /* id of positive track of the decay */
+       long      itrue;      /* evaluation flag for backgr./contaminat. */
+       long      ndegf;      /* number of degrees of freedom for fit */
+       float     alpha;      /* Armenteros variable */
+       float     chi2;       /* chi-squared for fit of sec. vertex */
+       float     cos_th_cm[3];/* cosinus of c.m. decay angle. */
+       float     cov[6];     /* covariance matrix for sec. vertex fit */
+       float     dcan;       /* dca of negative track from vertex */
+       float     dcap;       /* dca of positive track from vertex */
+       float     dcapn;      /* dca of two tracks at V0 vertex */
+       float     dcav0;      /* measured dca of V0 from vertex */
+       float     inv_mass[3];/* Inv. mass of rec. part. for K0,L,Lb case */
+       float     neg_al_p[3];/* fitted mom neg part anti-lambda hypo */
+       float     neg_k0_p[3];/* fitted momentum neg part k0 hypothesis */
+       float     neg_l_p[3]; /* fitted mom of neg part for lambda hypo */
+       float     neg_p[3];   /* measured momentum of neg track at v0 ver */
+       float     p[3];       /* px,py,pz of V0 at reconstr. vertex */
+       float     p_true[3];  /* px,py,pz of true parent momentum */
+       float     pos_al_p[3];/* fited mom of pos part anti-lam hypothes */
+       float     pos_k0_p[3];/* fitted mom pos part k0 hypothesis */
+       float     pos_l_p[3]; /* fitted mom of pos part for lambda hypoth */
+       float     pos_p[3];   /* measured momentum of pos track at v0 ver */
+       float     pt;         /* Armenteros variable */
+       float     pull[8];    /* pull variables (typically for lambda) */
+       float     tau[3];     /* proper lifetime of V0 */
+       float     tmin[3];    /* life time correction due to acceptance */
+       float     v0chi2[3];  /* chi2 from 3c fit of v0 kinematics */
+       float     x[3];       /* x,y,z of reconstructed sec. vertex */
+       float     x_true[3];  /* x,y,z of true decay point*/
+   };
+

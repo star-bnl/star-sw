@@ -1,0 +1,42 @@
+/* ste_am.idl
+*  Module: ste_am
+*  	description: svt tracking evaluation module
+*/
+#include "PAM.idl"
+#include "g2t_gepart.idl"
+#include "g2t_svt_hit.idl"
+#include "g2t_track.idl"
+#include "g2t_event.idl"
+#include "g2t_vertex.idl"
+#include "scs_spt.idl"
+#include "stk_vtx.idl"
+#include "stk_track.idl"
+#include "stk_kine.idl"
+#include "ste_teval.idl"
+#include "ste_teff.idl"
+#include "sgr_groups.idl"
+
+
+interface ste_am : amiModule {
+	STAFCV_T call
+		( in    g2t_gepart      g2t_gepart
+		, in    g2t_svt_hit     g2t_svt_hit
+		, in    g2t_track       g2t_track
+		, in    g2t_event	g2t_event
+		, in    g2t_vertex      g2t_vertex
+		, in    scs_spt         spt
+		, in    stk_vtx		vtx
+		, in    sgr_groups      groups
+		, inout stk_track       track
+		, inout stk_kine        kine
+		, in    sgr_groups      mcgroups
+		, in    stk_track       mctrack
+		, in    stk_kine        mckine
+		, out   ste_teval       teval
+		, out   ste_teff        teff
+		);
+	};
+/* Last mod. for  ste_am: $Date: 1998/01/26 22:12:49 $ */
+
+
+

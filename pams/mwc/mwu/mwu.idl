@@ -1,0 +1,18 @@
+/*        mwu.idl
+ *
+ *        description: MWC unpacks information into number of hits
+ */
+#include "PAM.idl"
+#include "mwc_cal.idl"
+#include "mwc_raw.idl"
+#include "mwc_cor.idl"
+
+interface mwu: amiModule {
+        STAFCV_T call
+                ( inout mwc_cal      cal
+                , inout mwc_raw      raw   
+                , inout mwc_cor      cor    
+                );
+};
+/* Last mod. for mws.idl: $Date: 1998/02/17 17:22:24 $ */
+

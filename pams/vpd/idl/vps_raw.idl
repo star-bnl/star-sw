@@ -1,0 +1,25 @@
+/**
+ * <hr>
+ * VPS raw output table. <br>
+ *
+ * @parm id - primary key
+ * @parm pmt - vpd pmt label
+ * @parm vpd_adc - vpd adc response
+ * @parm vpd_tdc - vpd tdc response
+ * @author         Zoran Milosevich
+ */
+
+/*   vps_raw.idl
+*   Table: vps_raw
+*        description: VPD simulated raw TDC and ADC output     
+*             more..:                                         
+*/
+   struct vps_raw {          
+       long      id;            /* primary key */
+       long      pmt;           /* vpd pmt label */
+       long      vpd_adc;       /* vpd adc response */
+       long      vpd_tdc;       /* vpd tdc response */
+
+   };
+
+/*  Last mod. for vps_raw:  Tue Oct 15 19:41:37 1996 */

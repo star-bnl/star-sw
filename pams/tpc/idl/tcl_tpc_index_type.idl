@@ -1,0 +1,15 @@
+/*   tcl_tpc_index_type
+ * Table defining the meaning of the key pairs in tpc_index
+*/
+   struct tcl_tpc_index_type {
+       long      tphit_mhitstpc;/* correlate tphit and mhits_tpc tables */
+       long      tphit_tpcluster;/* correlate tphit and tpcluster tables */
+       long      tphit_tpsegment;/* correlate tphit and tpsegment tables */
+       long      tphit_tptrack;/* correlate tphit and tptrack tables */
+       long      tpsegment_mctrack;/* correlate tpsegment and mctrack tables */
+       long      tptrack_mctrack;/* correlate tptrack and mctrack tables */
+       long      tptrack_tpsegment;/* correlate tptrack and tpsegment tables */
+   };
+/*  Last mod. for tpc_index_type: $Date: 1998/01/06 23:57:33 $ */
+
+

@@ -1,0 +1,49 @@
+*
+* 08/04/1998 - K. Turner       -- edited to make standard
+* 09/01/1998 - D. Weerasundara -- added separate macros to
+*	                          create tables (following
+*                                 STAR kumac standards).
+*
+* ***************************************************************
+
+ macro sca_io
+   
+  macro/global/import *
+
+  cd [data]/ebye/sca
+    tdm/newtable  sca_in            sca_in       10000
+    tdm/newtable  sca_out     	    sca_out      10000
+  cd /dui
+
+return
+
+*------------------------------------------------------------
+*------------------------------------------------------------
+ macro sca_prior
+   
+  macro/global/import *
+
+  cd    [calib]/ebye
+  mkdir sca_prior_dir
+  cd    sca_prior_dir
+    tdm/newtable   sca_prior         sca_prior   300000
+  cd /dui
+
+return
+
+*------------------------------------------------------------
+*------------------------------------------------------------
+ macro sca_ensemble_ave
+   
+  macro/global/import *
+
+  cd    [calib]/ebye
+  mkdir sca_ensemble_dir
+  cd    sca_ensemble_dir
+    tdm/newtable  sca_ensemble_ave      sca_out  10000
+  cd /dui
+
+return
+
+*------------------------------------------------------------
+*------------------------------------------------------------

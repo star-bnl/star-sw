@@ -1,0 +1,11 @@
+/**********************************************************************/
+/*   Table: tfc_native_gain    					      */
+/*   native-mapped gains for system test			      */
+/**********************************************************************/
+  struct tfc_native_gain {
+	long	sector;		/* sector number (1-24) */
+	long	RDO;		/* RDO board number (1-6) */
+	long	row;		/* row number (1-45) */
+	long	pad;		/* pad number in this row (1-181) */
+	float	gain;		/* gain for this pad */
+  };

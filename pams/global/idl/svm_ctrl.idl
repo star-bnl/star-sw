@@ -1,0 +1,40 @@
+/*   svm_svmctrl.idl
+*   Table: svm_svmctrl
+*/
+  struct svm_ctrl {
+       long      ktrl1;      /* control switch 1: allows errors in helix */
+       long      ktrl2;      /* chi-sq form:0->e1*e2,1->(e1**2 + e2**2) */
+       long      ktrl3;      /* control switch 3: =2 for level 2 matchin */
+       long      ktrl4;      /* control switch 4: selects MCS formula */
+       long      ktrl5;      /* .ne.0 limits # loops in bi-direc. match. */
+       float     arfinc;     /* search area increase factor */
+       float     bmag;       /* magnetic field (T) */
+       float     dacep;      /* not used at present */
+       float     efaca;      /* relative weight for direc. part of chisq */
+       float     efacp;      /* invpt cut-off for matched tpc tracks */
+       float     efacz;      /* chi-square cut-off for matching */
+       float     pmerr;      /* initial size of search area: momentum */
+       float     rifc;       /* radial position of tpc IFC (cm) */
+       float     rlgas;      /* radiation length of gas (cm) */
+       float     rlifc;      /* radiation length of tpc IFC (cm) */
+       float     rlsdd3;     /* rad. length for SDD outermost layer (cm) */
+       float     rltpc_gas;  /* Radiation length of TPC gas (cm) */
+       float     rltube;     /* rad. length of svt support tube (cm) */
+       float     rmatch;     /* matching radius from beam axis (cm) */
+       float     rming;      /* inner radial position of gas vessel (cm) */
+       float     rsdd3;      /* radial position of SDD outer layer (cm) */
+       float     rtpc_gas;   /* Inner radius of TPC gas vessel (cm) */
+       float     rtube;      /* radial position of svt support tube (cm) */
+       float     slpcut;     /* dip angle cut-off, 2nd level matching */
+       float     tgas;       /* thickness of gas vessel region (cm) */
+       float     tifc;       /* thickness of tpc inner field cage (cm) */
+       float     tsdd3;      /* thickness of SDD outermost layer (cm) */
+       float     ttpc_gas;   /* Thickness of TPC gas vessel */
+       float     ttube;      /* thickness of svt support tube (cm) */
+       float     xcut;       /* x cut-off for 2nd level matching (cm) */
+       float     ycut;       /* y cut-off for 2nd level matching (cm) */
+   } ;
+
+/*  Last mod. for svm_ctrl: $Date: 1997/12/31 14:33:28 $  */
+
+

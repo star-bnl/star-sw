@@ -1,0 +1,24 @@
+/*   File: sal_spt.idl
+ *   Module: sal
+ *   Input for alignment 
+ *   Table of the space points .
+ */
+  struct sal_spt {
+       long      id;         /* identification number of current point       */
+       long      wafer_id;   /* Identifier in svt_geom table of wafer        */
+       long      quality;     /* quality produced by the cluster finder 
+				flag 0=poor;100=good poit                    */
+       long      num ;         /*number of points on this w
+       float     cov[3];     /* Error covariance matrix in LRF               */
+       float     de[2];      /* energy (dE/dx) of the cluster;de[0]=deposited;
+				de[1]=estimate of the error on the de[0].    */
+       float     resl[2];     /* residu of fit in LRF                         */
+       float     res[3];     /* residu of fit in GRF                         */
+       float     xl;         /* Coordinates in wafer reference system        */
+       float     yl;         /* Coordinates in wafer reference system        */
+
+   };
+
+/* last modified $Date: 1997/12/31 14:33:39 $ */
+
+

@@ -1,0 +1,8 @@
+/* scp_bad_anode.idl    */
+/* List of bad andoes   */
+
+struct scp_bad_anodes{
+  long      anode;        /* anode index */  
+  long      n_pixels;     /* number of bad pixels on this anode */
+};
+

@@ -1,0 +1,8 @@
+/* scp_pedm.idl                         */
+/* SVT Calibration Pedestal Calculation */
+
+struct scp_pedm{
+  float m0;  /* 0th moment */
+  float m1;  /* 1st moment */
+  float m2;  /* 2nd moment */
+};

@@ -1,0 +1,30 @@
+* sca_const.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* and D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+*
+* last run under sl98e 8/1/98
+*
+* this file is used to initialize the values in the sca_const
+* table -- it runs with sca_makeXdf.kumac
+* -------------------------------------------------------------
+
+
+  tdm/table/cell/putvalue 'sca_const[0].num_dim'           1  
+  tdm/table/cell/putvalue 'sca_const[0].minbinsize_x'      0.006
+  tdm/table/cell/putvalue 'sca_const[0].maxbinsize_x'      2.0
+  tdm/table/cell/putvalue 'sca_const[0].minbinsize_y'     10 
+  tdm/table/cell/putvalue 'sca_const[0].maxbinsize_y'     10
+  tdm/table/cell/putvalue 'sca_const[0].step_binsize_x'    1.1
+  tdm/table/cell/putvalue 'sca_const[0].step_binsize_y'    1.0
+  tdm/table/cell/putvalue 'sca_const[0].auto_size'         0
+  tdm/table/cell/putvalue 'sca_const[0].xmin'              0.0
+  tdm/table/cell/putvalue 'sca_const[0].xmax'              1.0
+  tdm/table/cell/putvalue 'sca_const[0].ymin'             -2.0
+  tdm/table/cell/putvalue 'sca_const[0].ymax'              2.0
+  tdm/table/cell/putvalue 'sca_const[0].zmin'              0.0 
+  tdm/table/cell/putvalue 'sca_const[0].zmax'              6.3
+  tdm/table/cell/putvalue 'sca_const[0].num_ranks'         3
+  tdm/table/cell/putvalue 'sca_const[0].rank'      1 2 3 0 0 0 0 0 0 0 
+  tdm/table/cell/putvalue 'sca_const[0].dithmin'          15
+  tdm/table/cell/putvalue 'sca_const[0].dithscale'       150.0
+  tdm/table/cell/putvalue 'sca_const[0].perfectdither'     0.0

@@ -1,0 +1,35 @@
+
+Package: StChain
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Base classes to support user modules(makers)
+         To provide acces to DataSets and communication between the user modules.
+         Organization of modules as a production chain
+ 
+
+
+1)  StMaker
+
+    Base class for user maker class. Provide common functionality for all
+    makers(modules). Allows to arrange modules in a tree, consisting of modules
+    and produced datasets
+    Look on St_TLA_Maker/README for more info
+
+2)  StChain
+    Specific class, derived from StMaker. Top maker for chain of makers.
+    Provides execution of tree of modules. 
+    Regularly, there is only one top StChain maker. But in the cases of mixing
+    real and simulated data, parallel reading twodata streams, it could be
+    several of StChain makers with one of them on the top.
+
+3)  StIOInterFace   
+    Special I/O maker class. Provides common interface for all makers doing I/O
+    All I/O makers must be derived from this class. 
+
+4)  StEvtHddr
+
+    Simple class containing Run/Event info. Used to provide Run/Event information
+    for all makers.
+
+
+

@@ -1,0 +1,16 @@
+/*  rl0_data.idl
+*   Table: rl0_data
+*        description: Level 0 trigger data                    
+*/
+   struct rl0_data {          
+       long       bits;           /* Bit word */
+       long       fpga1_ctb[64];  /* Fpga sum for 1st tree CTB */
+       long       fpga1_mwc[64];  /* Fpga sum for 1st tree MWC */
+       long       mwc_tot[2];     /* MWC totals left and right endcaps */
+       long       ctb_tot[2];     /* CTB totals neg and pos eta for barrel segment */
+       float       mwc_ctb;        /* MWC to CTB ratio */
+       float       tot_mul;        /* Total Multiplicity */
+       float       fob;            /* Forward to Backward Ratio */
+   };
+/*  Last mod. for rl0_data:   $Date: 1998/02/05 21:29:47 $ */
+

@@ -1,0 +1,32 @@
+/* srs_am.idl
+*   Module: srs_am
+*        description: svt resolution simulator module
+*/
+
+#include "PAM.idl"
+#include "srs_result.idl"
+#include "g2t_svt_hit.idl"
+#include "scs_spt.idl"
+#include "svg_geom.idl"
+#include "svg_config.idl"
+#include "svg_shape.idl"
+#include "srs_srspar.idl"
+#include "srs_direct.idl"
+#include "srs_activea.idl"
+
+interface srs_am : amiModule {
+        STAFCV_T call
+                ( out   srs_result  result
+                , inout g2t_svt_hit svt_hit 
+                , out   scs_spt     spt
+                , in    svg_geom    geom 
+                , in    svg_config  config
+                , in    svg_shape   shape
+                , inout srs_srspar  srspar
+                , inout srs_direct  direct
+                , in    srs_activea activea
+        );
+};
+/*  Last mod. for srs_am: $Date: 1998/01/26 22:12:47 $ */
+
+

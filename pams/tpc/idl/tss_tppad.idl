@@ -1,0 +1,13 @@
+/*   tss_tppad
+ * Table containing pad id's and pointers to beginning of relevant
+ * info in the tppixel and tpmcpix tables.
+*/
+   struct tss_tppad{
+       long       jpix;       /* offset into the tppixel table */
+       long       nseq;       /* number of sequences for this pad */
+       long       secpad;     /* unique pad id within a sector */
+       long       tpc_row;    /* encoded sector-row = 100*sector + row */
+   };
+/*  Last mod. for tss_tppad: $Date: 1997/12/31 14:34:11 $ */
+
+

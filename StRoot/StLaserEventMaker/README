@@ -1,0 +1,19 @@
+St_LSEvent_Maker
+==================
+
+ Create an LSEvent TTree object by analysing
+ laser event data.
+
+
+Author: Bill Love 
+
+Usage
+=====
+ 
+
+Mod history
+===========
+ Created 27 April 99 - love
+ 
+ToDo
+====
