@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.4 2004/01/26 22:54:15 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.5 2004/01/27 16:26:14 zolnie Exp $
 
 /*!
  *                                                                     
@@ -24,45 +24,78 @@ class EEmcTower;
 
 class EEmcTTDisplay : public EEmcGeomSimple {
 public: 
-  /// the constructor
+  //! the constructor
+  /// \param name  the top EEMC volume (TGeoVolume) label
   EEmcTTDisplay(const char *name="eemc");
-  /// the destructor
+
+  //! the destructor
   ~EEmcTTDisplay();
   
-  /// returns top TGeoVolume 
+  /// returns top EEMC TGeoVolume 
   TGeoVolume* operator() () { return mEEmc; }; 
   /// returns top TGeoVolume 
   TGeoVolume* getVolume()   { return mEEmc; }; 
 
-  /// adds tower hit
+  //! adds tower hit to the list of hits
+  /// \param tile name (in the form of 05TC11) 
+  /// \return      kTRUE on success and kFALSE on failure
   Bool_t       towerHit(const char *tile);
 
-  /// adds tower hit
-  Bool_t       towerHit(int sec, int subsec, int eta) {   return towerHit(volumeName(sec,subsec,eta)); }  
+  //! adds tower hit to the list of hits
+  /// \param sec     sector index    [0,mNumSec)
+  /// \param sub     subsector index [0,mNumSSec)
+  /// \param eta     eta index       [0,mNumEta)
+  /// \return      kTRUE on success and kFALSE on failure
+  Bool_t       towerHit(int sec, int sub, int eta) {   return towerHit(volumeName(sec,sub,eta)); }  
 
-  /// adds tower hit
+  //! adds tower hit to the list of hits
+  /// \param tower a reference to EEmcTower 
+  /// \return      kTRUE on success and kFALSE on failure
   Bool_t       towerHit(const EEmcTower& tower)       ;
 
-  /// adds track hit
+  //! adds track hit to the list of hits
+  /// \param x     x-component of the track origin
+  /// \param y     y-component of the track origin
+  /// \param z     z-component of the track origin
+  /// \param px    x-component of the track momentum
+  /// \param py    y-component of the track momentum
+  /// \param pz    z-component of the track momentum
+  /// \param qB    sign sensitive product of the particle charge and magnetic field 
+  /// \return      kTRUE on success and kFALSE on failure
   Bool_t       trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB);
-  /// adds track hit
+  //! adds track hit to the list of hits
+  /// \param track a refence to StMuTrack
+  /// \return      kTRUE on success and kFALSE on failure
   Bool_t       trackHit(const StMuTrack& track);
 
   /// draws hits (towers/tracks)
+  //! adds tower hit to the list of hits
   void         DrawHits();
 
-  /// clears hits (towers/tracks)
+  /// clears hit (towers/tracks) list
+  /// \param option - not uset at the moment
   void         Clear(const Option_t *option);
   /// prints StMuTrack and EEmcTower to ostream
+  /// \param out    a reference to std::ostream
+  /// \param track  a reference to class  StMuTrack
+  /// \param tower  a reference to struct EEmcTower
   void         Out(ostream &out, const StMuTrack &track, const EEmcTower &tower);
 
 protected:
+  //! initializes EEMC geometry: sector,subsectors and towers
+  /// \param topName a label of a top most volume
   void  initGeometry(const char *topName);
+
+  /// volume name based on sec, subsector and eta
+  /// \param sec     sector index    [0,mNumSec)
+  /// \param sub     subsector index [0,mNumSSec)
+  /// \param eta     eta index       [0,mNumEta)
+  /// \return a pointer to a static string (fixit)
   char *volumeName(int sec, int sub=-1, int eta=-1);
 
   TGeoVolume* mEEmc; /**<- top TGeoVolume */
-  TList *mTowerHits; /**<- number of tracks */
-  TList *mTrackHits; /**<- number of tracks */
+  TList *mTowerHits; /**<- list of tower hits */
+  TList *mTrackHits; /**<- list of track hits */
 public:
   ClassDef(EEmcTTDisplay, 1)   // 
 };
@@ -72,6 +105,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.5  2004/01/27 16:26:14  zolnie
+// polished doxygen documentation
+//
 // Revision 1.4  2004/01/26 22:54:15  zolnie
 // after name cleanup
 //

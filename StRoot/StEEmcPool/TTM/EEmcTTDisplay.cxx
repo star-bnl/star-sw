@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.4 2004/01/26 22:54:14 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.5 2004/01/27 16:26:14 zolnie Exp $
 // doxygen info here
 
 #include "TList.h"
@@ -175,7 +175,8 @@ EEmcTTDisplay::towerHit(const EEmcTower& tower)
 Bool_t       
 EEmcTTDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
 {
-  THelix *helix = new THelix(x,y,z,px,py,pz,qB);
+  const double cLight = 3e10*centimeter/second;
+  THelix *helix = new THelix(x,y,z,px,py,pz,cLight*qB);
   helix->SetRange(z,mZ2);
   mTrackHits->Add(helix);
   return kTRUE;
@@ -185,7 +186,6 @@ Bool_t
 EEmcTTDisplay::trackHit(const StMuTrack& track)
 {
   const double Bfield = 0.5*tesla;
-  const double cLight = 3e10*centimeter/second;
   StPhysicalHelixD h = track.helix();
   StThreeVectorD o   = h.origin(); 
   StThreeVectorD p   = h.momentum(Bfield);
@@ -198,7 +198,7 @@ EEmcTTDisplay::trackHit(const StMuTrack& track)
   cerr << q << endl;
   cerr << "</TrackHit>"<< endl;
 #endif
-  return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),cLight*q*Bfield);
+  return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*Bfield);
 }
 
 
@@ -238,6 +238,9 @@ EEmcTTDisplay::volumeName (int sec, int sub, int eta)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.5  2004/01/27 16:26:14  zolnie
+// polished doxygen documentation
+//
 // Revision 1.4  2004/01/26 22:54:14  zolnie
 // after name cleanup
 //

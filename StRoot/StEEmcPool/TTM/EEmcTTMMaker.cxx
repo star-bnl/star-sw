@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.8 2004/01/26 22:54:15 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.9 2004/01/27 16:26:15 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -48,11 +48,30 @@
 
 
      \section example Example
-     see macros/ttm.C for detais         
+     see 
+      - macros/TTM/ttm.C   an example how to analyze MuDST data
+      - macros/TTM/show.C  an example how to display MuDST data (track/towers)
+
+      root -q -b \
+      './StRoot/StEEmcPool/macros/TTM/ttm.C("/star/2003/mudst/","","R4145010.root",50)'
+     
+      this will produce a simple tree file called R4145010.root
 
      \section final Final Analysis 
-     is done with macros e.g. mipcalib.C 
-     info to be written 
+     Final analysis is done with macros e.g. mipcalib.C 
+     
+     make -f StRoot/StEEmcPool/macros/TTM/Makefile
+     
+     ./mipcalib -f R4145010.root
+
+     ./mipcalib -h will print all the options
+     
+
+     \todo To Do List 
+     
+     
+
+     \bug     No known bugs at this moment
 
  */
 
@@ -606,6 +625,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.9  2004/01/27 16:26:15  zolnie
+// polished doxygen documentation
+//
 // Revision 1.8  2004/01/26 22:54:15  zolnie
 // after name cleanup
 //
