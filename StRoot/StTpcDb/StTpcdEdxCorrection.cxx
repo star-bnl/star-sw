@@ -101,21 +101,21 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   } // DriftDistanceCorrection
   if (TESTBIT(m_Mask,kAdcCorrection)) {
     gMessMgr->Warning() << "StTpcdEdxCorrection: Adc Correction is ON" << endm;
-    St_tpcCorrection *AdcCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcAdcCorrection"); 
+    St_tpcCorrection *AdcCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcAdcCorrectionB"); 
     assert(AdcCorrection); 
     assert(AdcCorrection->GetNRows());
     SetAdcCorrection(AdcCorrection);
   } // ADCorrection
   if (TESTBIT(m_Mask,kzCorrection)) {
     gMessMgr->Warning() << "StTpcdEdxCorrection: z Correction is ON" << endm;
-    St_tpcCorrection *zCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcZCorrection"); 
+    St_tpcCorrection *zCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcZCorrectionB"); 
     if (! zCorrection) cout << "=== TpcZCorrection is missing ===" << endl;
     else assert(zCorrection->GetNRows());
     SetzCorrection(zCorrection);
   }
   if (TESTBIT(m_Mask,kdXCorrection)) {
     gMessMgr->Warning() << "StTpcdEdxCorrection: dX Correction is ON" << endm;
-    St_tpcCorrection *dXCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcdXCorrection"); 
+    St_tpcCorrection *dXCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcdXCorrectionB"); 
     if (! dXCorrection) cout << "=== TpcdXCorrection is missing ===" << endl;
     else assert(dXCorrection->GetNRows());
     SetdXCorrection(dXCorrection);
@@ -129,7 +129,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   }
   if (TESTBIT(m_Mask,kTpcLengthCorrection)) {
     gMessMgr->Warning() << "StTpcdEdxCorrection: TPC Track Length Correction is ON" << endm;
-    St_tpcCorrection *TpcLengthCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcLengthCorrection"); 
+    St_tpcCorrection *TpcLengthCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcLengthCorrectionB"); 
     if (! TpcLengthCorrection) cout << "=== TpcLengthCorrection is missing ===" << endl;
     else assert(TpcLengthCorrection->GetNRows());
     SetTpcLengthCorrection(TpcLengthCorrection);
