@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.5 2001/01/30 16:38:43 horsley Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.6 2001/04/10 16:56:06 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
+ *  Revision 2.6  2001/04/10 16:56:06  lasiuk
+ *  Change parameters to bring into line with richgeo.g and CERN.
+ *
  *  Revision 2.5  2001/01/30 16:38:43  horsley
  *  updated PID maker for next production run, included new class for TTree
  *
@@ -29,6 +32,8 @@
   **********************************************************/
 
 #include "StRichMaterialsDb.h"
+
+#include "StGlobals.hh"
 #include "SystemOfUnits.h"
 
 #ifndef ST_NO_NAMESPACES
@@ -37,6 +42,7 @@ using namespace units;
 
 
 StRichMaterialsDb* StRichMaterialsDb::p2Db = 0;
+double StRichMaterialsDb::mHc = 1239.84270217*eV*nanometer;
 
 StRichMaterialsDb::StRichMaterialsDb() {
 
@@ -46,7 +52,8 @@ StRichMaterialsDb::StRichMaterialsDb() {
 
 void StRichMaterialsDb::my_fill() {
 
-    mVersion = 1.0;
+    
+    mVersion = 2.0;
  
     mLongestWavelength  = 220.0*nanometer;    // --> inner ring
     mMeanWavelength     = 177.4*nanometer;    // --> mode frequency  
@@ -58,111 +65,69 @@ void StRichMaterialsDb::my_fill() {
     mOuterWave = mShortestWavelength;
     mInnerWave = mLongestWavelength;
 
-    double numberOfEntries = 13;
-    mConversion  
-	= ((mLongestWavelength/nanometer-mShortestWavelength/nanometer)/(numberOfEntries-1));
-
     mMeanRadiatorDepth = 0.5; // normalized to unit pathlength in radiator
   
     // goes from long to short wavelength
     ////////// index of refraction  ////////////////////////////
-    int entries = static_cast<int>(numberOfEntries);
-    double index_freon[13] = { 1.269946, 
-			       1.271246, 
-			       1.272452, 
-			       1.273844,
-			       1.275236,
-			       1.276721, 
-			       1.278206, 
-			       1.279876,
-			       1.281546, 
-			       1.283402, 
-			       1.285444,
-			       1.2869634,
-			       1.2884828};
-    // the last two entries correspond to 164 and 159 nm
-    // gotten from a linear extrapolation of the CERN measurements
+    const int N = 26;
+    double energy[N] = {5.5, 5.6, 5.7, 5.8, 5.9,
+			6.0, 6.1, 6.2, 6.3, 6.4,
+			6.5, 6.6, 6.7, 6.8, 6.9,
+			7.0, 7.1, 7.2, 7.3, 7.4, 
+			7.5, 7.6, 7.7, 7.8, 7.9,
+			8.0};
+
+    double quartzN[N] = {1.52398, 1.52738, 1.5309, 1.5346, 1.53835,
+			 1.542302, 1.54641, 1.55067, 1.55513, 1.55976,
+			 1.56458, 1.56962, 1.57488, 1.58037, 1.58611,
+			 1.59212, 1.59842, 1.60503, 1.61197, 1.61927,
+			 1.62696, 1.63506, 1.64362, 1.65269, 1.662295,
+			 1.6725};
+
+    double quartzL[N] = {105.80, 65.520, 48.580, 42.850, 35.790,
+			 31.262, 28.598, 27.527, 25.007, 22.815,
+			 21.040, 19.266, 17.525, 15.878, 14.177,
+			 11.719, 9.282,   6.620,  4.0925, 2.601,
+			 1.149,  0.667,   0.3627, 0.192,  0.1497,
+			 0.10857};
     
+    double freonN[N] = {1.2716, 1.27332, 1.27504, 1.27676, 1.27848, 
+			1.2802, 1.28192, 1.28364, 1.28536, 1.28708,
+			1.2888, 1.29052, 1.29224, 1.29396, 1.29568,
+			1.2974, 1.29912, 1.30084, 1.30256, 1.30428, 
+			1.306,  1.30772, 1.30944, 1.31116, 1.31288, 
+			1.3146};
     
-    double index_quartz[13] = { 1.528309, 
-				1.533333, 
-				1.538243, 
-				1.544223,
-				1.550568, 
-				1.557770, 
-				1.565463, 
-				1.574765,
-				1.584831, 
-				1.597027, 
-				1.611858,
-				1.620049,
-				1.628240};
-    
-    // the last two entries correspond to 164 and 159 nm
-    // gotten from a linear extrapolation of the CERN measurements
-    
-    
+    double freonL[N] = {176.4219, 176.4219, 176.4219, 176.4219, 176.4219,
+			176.4219, 176.4219, 176.4219, 176.4219, 176.4219,
+			176.4219, 176.4219, 176.4219, 176.4219,  58.322,
+			41.6371,   22.5158,  10.9767,   4.01237,  1.65053,
+			0.783613,   0.452046, 0.312553, 0.15627,  0.0,
+			0.0};
+
+    double csiQE[N] = {0.0002,   0.0006, 0.0007, 0.005,   0.0075,
+		       0.010125, 0.0243, 0.0405, 0.06885, 0.1053,
+		       0.1215,   0.1435, 0.16,   0.164,   0.1681,
+		       0.17,     0.1785, 0.1811, 0.1836,  0.187,
+		       0.1904,   0.1921, 0.1938, 0.1955, 0.2125,
+		       0.221}; 
+
+
+    for(int ii=0; ii<N; ii++) {
+	mEnergy.push_back(energy[ii]*eV);
+	mFreonN.push_back(freonN[ii]);
+	mFreonL.push_back(freonL[ii]*centimeter);
+	mQuartzN.push_back(quartzN[ii]);
+	mQuartzL.push_back(quartzL[ii]*centimeter);
+	mCsIQE.push_back(csiQE[ii]);
+    }
+
+    mBinSize = ( (mEnergy.back() - mEnergy.front())/(mEnergy.size()-1));
+    PR(mBinSize/eV);
     
     mMethaneIndexOfRefraction  = 1.000444;
-    
-    
-    /////////// absorption length  (cm) ////////////////////////////////// 
-    double absco_freon[13]  = { 179.0987   * centimeter, 
-				179.0987   * centimeter,
-				179.0987   * centimeter,
-				179.0987   * centimeter,
-				179.0987   * centimeter,
-				121.9547   * centimeter, 
-				43.40067  * centimeter, 
-				15.7394   * centimeter,
-				9.417928 * centimeter, 
-				5.195241 * centimeter,  
-				1.415808 * centimeter,
-				1.415808 * centimeter,
-				1.415808 * centimeter};
-    
-    double absco_quartz[13] = { 1000000.    * centimeter,  
-				1000000.    * centimeter,  
-				1000000.    * centimeter,  
-				1000000.    * centimeter,  
-				1000000.    * centimeter,  
-				29.85  * centimeter,   
-				7.34  * centimeter,   
-				4.134 * centimeter,   
-				1.273 * centimeter,  
-				0.722 * centimeter,   
-				0.365 * centimeter,
-				0.365 * centimeter,
-				0.365 * centimeter };
-    
     mMethaneAbsCoeff = 1000000.0 * centimeter;
     
-    ////////// CsI quantum efficiency  //////////////
-    double effic_csi[13] = { 3.15e-4, 
-			     4.50e-4, 
-			     6.75e-3, 
-			     1.125e-2, 
-			     2.115e-2,
-			     3.60e-2, 
-			     8.46e-2,  
-			     .15533,   
-			     .20286,
-			     .24745,
-			     .27881,
-			     .27881, 
-			     .27881};
-    
-    // fill arrays
-    for (int i=0;i<entries;i++) {
-	
-	mC6F14IndexOfRefraction[i]  = index_freon[i];
-	mQuartzIndexOfRefraction[i] = index_quartz[i];
-	
-	mC6F14AbsCoeff[i]  = absco_freon[i];
-	mQuartzAbsCoeff[i] = absco_quartz[i];
-	
-	mCsIQE[i] = effic_csi[i];
-    }
 }
 
 StRichMaterialsDb* StRichMaterialsDb::getDb() {
@@ -171,39 +136,6 @@ StRichMaterialsDb* StRichMaterialsDb::getDb() {
 	p2Db = new StRichMaterialsDb();
 
     return p2Db;
-}
-
-void StRichMaterialsDb::print(ostream& os) const {
-  // os << "**************** StRichMaterialsDb::print() ****************" << endl;
-}
-
-
-double StRichMaterialsDb::meanWavelength() {
-  return mMeanWavelength;
-}
-
-
-double StRichMaterialsDb::longestWavelength() {
-  return mLongestWavelength;
-}
-
-
-double StRichMaterialsDb::shortestWavelength() {
-  return mShortestWavelength;
-}
-
-double StRichMaterialsDb::meanRadiatorDepth() {
-  return mMeanRadiatorDepth;
-}
-
-
-double StRichMaterialsDb::innerWavelength() {
-  return mInnerWave;
-}
-
-
-double StRichMaterialsDb::outerWavelength() {
-  return mOuterWave;
 }
 
 
@@ -216,120 +148,150 @@ void StRichMaterialsDb::setWavelengthRange(double shortwave, double longwave) {
        << mOuterWave/nanometer << "nm " << endl; 
 }
 
-
-double StRichMaterialsDb::indexOfRefractionOfC6F14At(double wavelength) {
+bool StRichMaterialsDb::boundsCheck(double index) const {
   
-  // convert wavelenght from centimeters (base unit) into nanometers
-
-  wavelength = wavelength/nanometer;
-
-  //
-  // this is a patch until we get a parameterization
-  // of the index of refraction to 165 nm
-  //
-  if (wavelength < 170) return 1.305;
-  
-  double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
-  if(boundsCheck(index)) {
-    double fraction = index - static_cast<int>(index);
-    return (1.0-fraction)*mC6F14IndexOfRefraction[static_cast<int>(index)]
-               + (fraction)*mC6F14IndexOfRefraction[static_cast<int>(index) + 1];
-  }
-  return 0;
+    bool status = true;
+    if ( (index>mEnergy.size()-1) || index<0) {
+	cerr << "StRichMaterialsDb::boundsCheck()\n";
+	cerr << "WARNING\n";
+	cerr << "\tindex = " << index << endl;
+	status = false;
+    }
+    
+    return status;
 }
 
-double StRichMaterialsDb::indexOfRefractionOfQuartzAt(double wavelength) {
+double StRichMaterialsDb::convertToEnergy(double lambda) const {
 
-  // convert wavelenght from centimeters (base unit) into nanometers
-  wavelength = wavelength/nanometer;
-  double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
-  if(boundsCheck(index)) {
-    double fraction = index - static_cast<int>(index);
-    return (1.0-fraction)*mQuartzIndexOfRefraction[static_cast<int>(index)]
-             + (fraction)*mQuartzIndexOfRefraction[static_cast<int>(index) + 1];
-  }
-  return 0;
+    return (mHc/lambda);
 }
 
-double StRichMaterialsDb::indexOfRefractionOfMethaneAt(double wavelength) {
+double StRichMaterialsDb::whichBin(double lambda) const {
+
+    double energy = this->convertToEnergy(lambda);
+    //PR(energy/eV);
+    
+//     double bin = -1;
+    if( (energy < mEnergy.front()) || (energy > mEnergy.back()) ) {
+	cout << "StRichMaterialsDb::whichBin()\n";
+	cout << "WARNING:\n";
+	cout << "\tEnergy Out of Range (" << (energy/eV) << " eV)" << endl;
+    }
+    return ( (energy - mEnergy.front())/mBinSize);
+}
+
+double StRichMaterialsDb::indexOfRefractionOfC6F14At(double wavelength) const {
+
+    double value = -999.;
+    double theBinIndex;
+    double fraction = modf(this->whichBin(wavelength), &theBinIndex);
+
+    int index = static_cast<int>(theBinIndex);
+//     PR(index);
+//     PR(fraction);
+    if(this->boundsCheck(index)) {
+	value = (mFreonN[index] + (mFreonN[index+1]-mFreonN[index])*fraction);
+    }
+    
+    return value;    
+}
+
+double StRichMaterialsDb::indexOfRefractionOfQuartzAt(double wavelength) const {
+
+    double value = -999.;
+    double theBinIndex;
+    double fraction = modf(this->whichBin(wavelength), &theBinIndex);
+
+    int index = static_cast<int>(theBinIndex);
+//     PR(index);
+//     PR(fraction);
+    
+    if(this->boundsCheck(index)) {
+	value = (mQuartzN[index] + (mQuartzN[index+1]-mQuartzN[index])*fraction);
+    }
+
+    return value;
+}
+
+double StRichMaterialsDb::indexOfRefractionOfMethaneAt(double wavelength) const {
   return mMethaneIndexOfRefraction;
 }
 						       
-double StRichMaterialsDb::absorptionCoefficientOfC6F14At(double wavelength) {
+double StRichMaterialsDb::absorptionCoefficientOfC6F14At(double wavelength) const {
 
-  // convert wavelenght from centimeters (base unit) into nanometers
-  wavelength = wavelength/nanometer;
-  
-   double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
-   
-   if(boundsCheck(index)) {
-     double fraction = index - static_cast<int>(index);
-     return (1.0-fraction)*mC6F14AbsCoeff[static_cast<int>(index)]
-	        + (fraction)*mC6F14AbsCoeff[static_cast<int>(index) + 1];
-   }
-   return 0;
-}
+    double value = -999.;
+    double theBinIndex;
+    double fraction = modf(this->whichBin(wavelength), &theBinIndex);
 
-double StRichMaterialsDb::absorptionCoefficientOfQuartzAt(double wavelength) {
+    int index = static_cast<int>(theBinIndex);
+//     PR(index);
+//     PR(fraction);
     
-  // convert wavelenght from centimeters (base unit) into nanometers
-  wavelength = wavelength/nanometer;
-  
-  double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
-  
-  if(boundsCheck(index)) {
-    double fraction = index - static_cast<int>(index);
-    return (1.0-fraction)*mQuartzAbsCoeff[static_cast<int>(index)]
-               + (fraction)*mQuartzAbsCoeff[static_cast<int>(index) + 1];
-  }
-  return 0.0;
+    if(this->boundsCheck(index)) {
+	value = (mFreonL[index] + (mFreonL[index+1]-mFreonL[index])*fraction);
+    }
+
+    return value;
 }
 
-
-double StRichMaterialsDb::quantumEfficiencyOfCsIAt(double wavelength)  {
+double StRichMaterialsDb::absorptionCoefficientOfQuartzAt(double wavelength) const {
     
-  // convert wavelenght from centimeters (base unit) into nanometers
-  wavelength = wavelength/nanometer;
-  
-  double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
- 
-  if(boundsCheck(index)) {
-    double fraction = index - static_cast<int>(index);
-    return (1.0-fraction)*mCsIQE[static_cast<int>(index)]
-      + (fraction)*mCsIQE[static_cast<int>(index) + 1];
-  }
+    double value = -999.;
+    double theBinIndex;
+    double fraction = modf(this->whichBin(wavelength), &theBinIndex);
 
-  return 0;
+    int index = static_cast<int>(theBinIndex);
+//     PR(index);
+//     PR(fraction);
+    
+    if(this->boundsCheck(index)) {
+	value = (mQuartzL[index] + (mQuartzL[index+1]-mQuartzL[index])*fraction);
+    }
+
+    return value;
 }
 
-bool StRichMaterialsDb::boundsCheck(double index) {
-  
-  
-  if (index>13.0 || index<0.0) {
-    cerr << "index = " << index << endl;
-  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!"
-	 << endl << "WARNING: StRichMaterialsDb passed invalid"
-	 << " wavelength = " <<  mLongestWavelength/nanometer - mConversion*index
-	 << " nm.  Expected Range between 220 - 159 nm." << endl
-	 << "!!!!!!!!!!!!!!!!!!!!!!!!!" << endl << endl;
-    return false;}
-  
-  return true;
+
+double StRichMaterialsDb::quantumEfficiencyOfCsIAt(double wavelength)  const {
+
+    double value = -999.;
+    double theBinIndex;
+    double fraction = modf(this->whichBin(wavelength), &theBinIndex);
+
+    int index = static_cast<int>(theBinIndex);
+//     PR(index);
+//     PR(fraction);
+
+    if(this->boundsCheck(index)) {
+	value =(mCsIQE[index] + (mCsIQE[index+1]-mCsIQE[index])*fraction);
+    }
+
+    return value;
 }
 
-double StRichMaterialsDb::version() const {
-  return mVersion;}
-
-double StRichMaterialsDb::absorptionCoefficientOfMethaneAt(double wavelength)  {
+double StRichMaterialsDb::absorptionCoefficientOfMethaneAt(double wavelength) const {
      return mMethaneAbsCoeff;
 }
 
+void StRichMaterialsDb::print(ostream& os) const {
 
+    os << "**************** StRichMaterialsDb::print() ****************" << endl;
+    os << "Version: " << this->version() << endl;
+    os << "                     Liquid         Quartz" << endl;
+    os << "Energy Lambda      n      Lo       n      Lo       CsI QE" << endl;
+    os << " (eV)   (nm)             (cm)            (cm)" << endl;
+    os << "-----------------------------------------------------------" << endl;
+    os.precision(5);
+    for(double lambda=160*nanometer; lambda<220*nanometer; lambda += 5.*nanometer) {
 
+	os << (this->convertToEnergy(lambda)/eV)                         << "\t"
+	   << (lambda/nanometer)                                         << "\t"
+	   << this->indexOfRefractionOfC6F14At(lambda)                   << "\t"
+	   << (this->absorptionCoefficientOfC6F14At(lambda)/centimeter)  << "\t"
+	   << this->indexOfRefractionOfQuartzAt(lambda)                  << "\t"
+	   << (this->absorptionCoefficientOfQuartzAt(lambda)/centimeter) << "\t"
+	   << this->quantumEfficiencyOfCsIAt(lambda)                     << endl;
+    }
+    os << "==========================================================="  << endl;
 
-
-
-
-
-
-
+}

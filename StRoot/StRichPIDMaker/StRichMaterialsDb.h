@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMaterialsDb.h,v 2.2 2001/04/10 16:56:06 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.h,v $
+ *  Revision 2.2  2001/04/10 16:56:06  lasiuk
+ *  Change parameters to bring into line with richgeo.g and CERN.
+ *
  *  Revision 2.1  2000/09/29 01:35:36  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
@@ -21,37 +24,40 @@
 
 #include "StRichMaterialsDbInterface.h"
 
+#include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
+
 class StRichMaterialsDb : public StRichMaterialsDbInterface {
 public:
 
-  static StRichMaterialsDb* getDb();
+    static StRichMaterialsDb* getDb();
   
-  // Interface
-  // common to all materials
-  double meanWavelength();
-  double shortestWavelength();
-  double longestWavelength();
-  double meanRadiatorDepth();  
-  double innerWavelength();
-  double outerWavelength();
-  void   setWavelengthRange(double, double);
+    double meanWavelength();
+    double shortestWavelength();
+    double longestWavelength();
+    double meanRadiatorDepth();  
+    double innerWavelength();
+    double outerWavelength();
+    void   setWavelengthRange(double, double);
 
-  // C6F14    
-  double indexOfRefractionOfC6F14At(double wavelength);
-  double absorptionCoefficientOfC6F14At(double wavelength);
+    // C6F14    
+    double indexOfRefractionOfC6F14At(double wavelength) const;
+    double absorptionCoefficientOfC6F14At(double wavelength) const;
   
-  // quartz 
-  double indexOfRefractionOfQuartzAt(double wavelength);
-  double absorptionCoefficientOfQuartzAt(double wavelength);
+    // quartz 
+    double indexOfRefractionOfQuartzAt(double wavelength) const;
+    double absorptionCoefficientOfQuartzAt(double wavelength) const;
   
-  // methane
-  double indexOfRefractionOfMethaneAt(double wavelength);
-  double absorptionCoefficientOfMethaneAt(double wavelength);
+    // methane
+    double indexOfRefractionOfMethaneAt(double wavelength) const;
+    double absorptionCoefficientOfMethaneAt(double wavelength) const;
   
-  double quantumEfficiencyOfCsIAt(double wavelength);
-
-  double version() const;
-  void   print(ostream& os = cout) const;
+    double quantumEfficiencyOfCsIAt(double wavelength) const;
+    
+    double version() const;
+    void   print(ostream& os = cout) const;
     
 protected:
     StRichMaterialsDb();
@@ -61,37 +67,37 @@ private:
     
     static StRichMaterialsDb* p2Db;   // handle to only instance
 
-    bool boundsCheck(double index);
+    bool boundsCheck(double)       const;
+    double convertToEnergy(double) const;
+    double whichBin(double)        const;
 
-  double mVersion;
-  double mLongestWavelength;
-  double mShortestWavelength;
-  double mMeanWavelength;  
-  double mConversion;
-  double mInnerWave;
-  double mOuterWave;
+    double mVersion;
+    double mLongestWavelength;
+    double mShortestWavelength;
+    double mMeanWavelength;  
+    double mInnerWave;
+    double mOuterWave;
 
+    double mMeanRadiatorDepth;
 
-  double mMeanRadiatorDepth;
-
-
-    ///////////    measured CERN data    /////////////
-    /* index of refraction measured at 11 different wavelengths  169 -- 220 */
-  //    static const int arraySize = 11;
-    double mC6F14IndexOfRefraction[13]; 
-    double mQuartzIndexOfRefraction[13];
-    double mMethaneIndexOfRefraction; 
-    
-    /* photon absorption coefficient measured at 11 different wavelengths  169 -- 220 */
-    double mC6F14AbsCoeff[13]; 
-    double mQuartzAbsCoeff[13];
+    static double mHc;
+    vector<double> mEnergy;
+    vector<double> mFreonN;
+    vector<double> mFreonL;
+    vector<double> mQuartzN;
+    vector<double> mQuartzL;
+    vector<double> mCsIQE;
+    double mMethaneIndexOfRefraction;
     double mMethaneAbsCoeff;
-
-    /* CsI QE measured at 11 different wavelengths  169 -- 220 */
-    double mCsIQE[13];
-      
+    
+    double mBinSize;
 };
 
+inline double StRichMaterialsDb::meanWavelength() { return mMeanWavelength;}
+inline double StRichMaterialsDb::longestWavelength() {return mLongestWavelength;}
+inline double StRichMaterialsDb::shortestWavelength() {return mShortestWavelength;}
+inline double StRichMaterialsDb::meanRadiatorDepth() {return mMeanRadiatorDepth;}
+inline double StRichMaterialsDb::innerWavelength() {return mInnerWave;}
+inline double StRichMaterialsDb::outerWavelength() {return mOuterWave;}
+inline double StRichMaterialsDb::version() const {return mVersion;}
 #endif
-
-
