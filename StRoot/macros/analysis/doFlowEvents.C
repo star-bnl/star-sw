@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.51 2003/11/14 20:01:22 oldi Exp $
+// $Id: doFlowEvents.C,v 1.52 2003/12/12 02:29:40 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -223,14 +223,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 
   Bool_t includeTpcTracks  = kTRUE;
   //Float_t ptRange_for_vEta[2] = {0.15, 2.};
-  //Float_t etaRange_for_vPt[2] = {-1.2, 1.2};
-  Float_t ptRange_for_vEta[2] = {0., 0.};
-  Float_t etaRange_for_vPt[2] = {0., 0.};
-  Bool_t includeFtpcTracks = kFALSE;
+  //Float_t etaRange_for_vPt[2] = {-1.2, 1.2}; // show only TPC particles in v(pt)
+  Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
+  Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
 
+  Bool_t includeFtpcTracks = kFALSE;
 //   Bool_t includeFtpcTracks = kTRUE;
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
-//   Float_t etaRange_for_vPt[2] = {2., 5.};
+//   Float_t etaRange_for_vPt[2] = {2., 5.}; // show only FTPC particles in v(pt)
   
   // To calculate v1{EP1,EP2} use the following switch.
   // Since v1{EP1} doesn't work very well at RHIC energies, v1{EP1,EP2} is set to be 
@@ -561,6 +561,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.52  2003/12/12 02:29:40  oldi
+// Minor code clean-ups. Some comments added.
+//
 // Revision 1.51  2003/11/14 20:01:22  oldi
 // Implementation of v1{EP1,EP2}. This method is set to be the default for v1 now!
 // Minor code clean-ups.
