@@ -4,11 +4,11 @@
 #include <sys/types.h>
 
 
-// ENDCAP constants; from Piotr
+// ENDCAP constants; 
 #define ETOW_MAXFEE      6
 #define ETOW_PRESIZE     4
 #define ETOW_DATSIZE   160
-#define ESMD_MAXFEE     30
+#define ESMD_MAXFEE     48
 #define ESMD_PRESIZE     4
 #define ESMD_DATSIZE   192
 
@@ -32,7 +32,6 @@ struct emc {
 
 	// ENDCAP TOWERS
 	u_char etow_in ;	// in this event?
-	u_short etow_max_ch ;	// constant ETOW_MAXFEE * ETOW_DATSIZE
 	u_short etow_ch ;	// channels above zero
 	u_short etow[ETOW_MAXFEE][ETOW_DATSIZE] ;	// ADC data...
 	u_short etow_pre[ETOW_MAXFEE][ETOW_PRESIZE]; // ETOW preamble
@@ -42,7 +41,6 @@ struct emc {
 
 	// ENDCAP Showermax & preshower(?)
 	u_char esmd_in ;	// in this event?
-	u_short esmd_max_ch ;	// 30 * 192
 	u_short esmd_ch ;	// channels above 0
 	u_short esmd[ESMD_MAXFEE][ESMD_DATSIZE] ;	// ADC data
 	u_short esmd_pre[ESMD_MAXFEE][ESMD_PRESIZE]; // ESMD preamble
