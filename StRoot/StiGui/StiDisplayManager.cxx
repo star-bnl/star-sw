@@ -24,17 +24,22 @@
 
 StiDisplayManager* StiDisplayManager::sinstance = 0;
 
-StiDisplayManager::StiDisplayManager()
+StiDisplayManager::StiDisplayManager(TCanvas* c)
+    : mcanvas(c), mzone(0), mnode(0)
 {
     cout <<"StiDisplayManager::StiDisplayManager(int, int, int)"<<endl;
-    mcanvas = new TCanvas("c1","Star Integrated Tracker", kXmin, kYmin, kXmax, kYmax);
+    if (!mcanvas) {
+	cout <<"StiDisplayManager::StiDisplayManager() ERROR:\t";
+	cout <<"Canvas null.  Seg-fault"<<endl;
+    }
+
+    mcanvas->cd();
 
     mnode = new TVolume();
     mnode->SetName("mainnode");
     mnode->SetTitle("mainnode");
     //mnode = new TVolume("mainnode","mainnode", mzone);
     //mnode->SetVisibility(TVolume::kThisUnvisible);
-    cd();
 
     cout <<"Leaving StiDisplayManager::StiDisplayManager()"<<endl;
     sinstance = this;
@@ -51,9 +56,9 @@ StiDisplayManager::~StiDisplayManager()
     mnode = 0;
 }
 
-StiDisplayManager* StiDisplayManager::instance()
+StiDisplayManager* StiDisplayManager::instance(TCanvas* c)
 {
-    return (sinstance) ? sinstance : new StiDisplayManager();
+    return (sinstance) ? sinstance : new StiDisplayManager(c);
 }
 
 void StiDisplayManager::kill()

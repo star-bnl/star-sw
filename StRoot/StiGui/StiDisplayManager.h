@@ -27,7 +27,7 @@ public:
     typedef stidrawablemap::value_type stiDrawableMapValType;
     
     //Singleton access
-    static StiDisplayManager* instance();
+    static StiDisplayManager* instance(TCanvas* c1=0);
     static void kill();
 
     //Action
@@ -66,17 +66,20 @@ private:
     enum StiCanvasSize {kXmin=200, kXmax=600, kYmin=100, kYmax=500};
     enum StiMainVolumeSize {kdx=200, kdy=200, kdz=240};
     
-    StiDisplayManager();
+    StiDisplayManager(TCanvas*);
+    StiDisplayManager(); //Not implemented
+    StiDisplayManager(const StiDisplayManager&); //Not implemented
+    
     virtual ~StiDisplayManager();
     
     void setup();
 
-    stidrawablemap mmap;
-    
     TCanvas* mcanvas;
     TShape* mzone;
     TVolume* mnode;
 
+    stidrawablemap mmap;
+    
 };
 
 #endif
