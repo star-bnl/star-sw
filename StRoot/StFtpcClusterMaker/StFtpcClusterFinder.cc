@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.56 2004/01/28 02:04:43 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.57 2004/04/06 18:36:51 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.57  2004/04/06 18:36:51  oldi
+// New data mebers for pad and time position and pad and time sigma filled.
+//
 // Revision 1.56  2004/01/28 02:04:43  jcs
 // replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
 //
@@ -1307,6 +1310,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  thispoint->SetNumberBins(Peak->Sequence.Length);
 	  thispoint->SetMaxADC((long)Peak->PeakHeight);
 	  thispoint->SetCharge(ChargeSum);
+	  thispoint->SetPadPos(Peak->PadPosition);
+	  thispoint->SetTimePos(Peak->TimePosition);
+	  thispoint->SetPadPosSigma(Peak->PadSigma);
+	  thispoint->SetTimePosSigma(Peak->TimeSigma);
 	  thispoint->SetX(Peak->x);
 	  thispoint->SetY(Peak->y);
 	  thispoint->SetZ(Peak->z);
@@ -1766,6 +1773,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      thispoint->SetMaxADC((long)Peak[iPeakIndex].PeakHeight);
 	      thispoint->SetCharge(ChargeSum*(long)(Peak[iPeakIndex].PeakHeight
 				   /PeakHeightSum));
+	      thispoint->SetPadPos(Peak[iPeakIndex].PadPosition);
+	      thispoint->SetTimePos(Peak[iPeakIndex].TimePosition);
+	      thispoint->SetPadPosSigma(Peak[iPeakIndex].PadSigma);
+	      thispoint->SetTimePosSigma(Peak[iPeakIndex].TimeSigma);
 	      thispoint->SetX(Peak[iPeakIndex].x);
 	      thispoint->SetY(Peak[iPeakIndex].y);
 	      thispoint->SetZ(Peak[iPeakIndex].z);

@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.64  2004/04/06 18:36:51  oldi
+// New data mebers for pad and time position and pad and time sigma filled.
+//
 // Revision 1.63  2004/02/12 19:38:46  oldi
 // Removal of intermediate tables.
 //
@@ -629,7 +632,6 @@ Int_t StFtpcClusterMaker::Make()
     }
   }
 
-  /* This should do it finally, but right now we still use StFtpcGlobalMaker.cxx (dst_tables)
   Int_t num_points = mHitArray->GetEntriesFast();
   if(num_points>0 && mFtpcHitColl) { // points found and hitCollection exists
     // Write hits to StEvent (not tested yet).
@@ -640,7 +642,7 @@ Int_t StFtpcClusterMaker::Make()
       point->ToStEvent(mFtpcHitColl); 
     }	
   }
-  */
+
 
   Int_t num_gpoints = ghitarray->GetEntriesFast();
   if(num_gpoints>0)
