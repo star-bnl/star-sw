@@ -30,8 +30,8 @@ typedef hitmap::value_type hitMapValType;
 class StiHitContainer
 {
 public:
-    virtual ~StiHitContainer();
-
+    friend class nobody;
+    
     //Singleton access
     static StiHitContainer* instance();
     static void kill();
@@ -82,6 +82,7 @@ public:
     
 protected:
     StiHitContainer();
+    virtual ~StiHitContainer();
 
 private:
     //Vertex implementation

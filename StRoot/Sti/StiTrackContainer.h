@@ -29,8 +29,8 @@ class StiTrackContainer
 public:
     typedef vector<StiTrack*> stitrackvec;
 
-    virtual ~StiTrackContainer();
-
+    friend class nobody;
+    
     //Singleton access
     static StiTrackContainer* instance();
     static void kill();
@@ -50,6 +50,7 @@ public:
     
 protected:
     StiTrackContainer();
+    virtual ~StiTrackContainer();
 
 private:
     static StiTrackContainer* sinstance;

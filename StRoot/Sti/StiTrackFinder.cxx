@@ -51,11 +51,6 @@ void StiTrackFinder::setMagneticField(StMagUtilities * magFieldDesc)
   magField = magFieldDesc;
 }
 
-void StiTrackFinder::findTracks()
-{
-    return;
-}
-
 void StiTrackFinder::setTrackSeedFinder(StiSeedFinder * finder)
 {
   //----------------------------------------------------------------- 
@@ -151,7 +146,8 @@ void StiTrackFinder::setGeometryContainer(StiDetectorContainer* newGeometry)
 
   // check whether a geometry currently exist, if so destroy it.
   if (geometryContainer!=0)
-    delete geometryContainer;
+      //delete geometryContainer;
+      //Can't delete the singleton!
  
   // set geometry used by this track finder to given value
   geometryContainer = newGeometry;
@@ -185,7 +181,8 @@ void StiTrackFinder::setHitContainer(StiHitContainer * newHitContainer)
 
   // check whether a hit container currently exist, if so destroy it.
   if (hitContainer!=0)
-    delete hitContainer;
+      //delete hitContainer;
+      //Can't delete the singleton
  
   // set hit container used by this track finder to given value
   hitContainer = newHitContainer;
@@ -219,7 +216,8 @@ void StiTrackFinder::setTrackContainer(StiTrackContainer * newTrackContainer)
 
   // check whether a track container currently exist, if so destroy it.
   if (trackContainer!=0)
-    delete trackContainer;
+      //delete trackContainer;
+      //Can't delete the singleton
  
   // set track container used by this track finder to given value
   trackContainer = newTrackContainer;
@@ -236,7 +234,8 @@ void StiTrackFinder::setTrackNodeFactory(StiTrackNodeFactory * factory)
   // 
   //----------------------------------------------------------------- 
   if (trackNodeFactory!=0 && trackNodeFactory!=factory)
-    delete trackNodeFactory;
+      //delete trackNodeFactory;
+      //shouldn't delete the static instance
   trackNodeFactory = factory;
 }
 

@@ -29,10 +29,9 @@ public:
     
     typedef map<unsigned int, double> padrow_radius_map;
     typedef padrow_radius_map::value_type padrow_radius_map_ValType;
-    
-    StiGeometryTransform();    
-    virtual ~StiGeometryTransform();
 
+    friend class nobody;
+    
     //Global access
     static StiGeometryTransform* instance();
     static void kill();
@@ -86,6 +85,9 @@ public:
 
     
 protected: 
+
+    StiGeometryTransform();    
+    virtual ~StiGeometryTransform();
 
     static StiGeometryTransform* sinstance;
 

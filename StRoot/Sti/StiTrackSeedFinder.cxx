@@ -53,20 +53,10 @@ void StiTrackSeedFinder::clear()
     return;
 }
 
-void StiTrackSeedFinder::init()
-{
-    miterator->init();
-    return;
-}
-
 void StiTrackSeedFinder::addLayer(double refangle, double position)
 {
     const hitvector& vec = mhitstore->hits(refangle, position);
-    //cout <<"StiTrackSeedFinder::addLayer(double, double)"<<endl;
-    //cout <<"refangle: "<<refangle<<"\tposition: "<<position<<"\tnhits: "<<vec.size()<<endl;
-
     miterator->push_back( vec);
-    //miterator->push_back( mhitstore->hits(refangle, position) );
     ++mnlayers;
     miterator->init();
     return;

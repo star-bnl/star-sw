@@ -25,7 +25,7 @@ class StiTrackFinder
   virtual ~StiTrackFinder();
   
   //_action methods_______________________________________________
-  virtual void findTracks();
+  virtual void findTracks()=0;
 
 
   //_accessor methods_____________________________________________

@@ -45,7 +45,6 @@ public:
     
     void addLayer(double refangle, double position);
     virtual void clear();
-    virtual void init();
     
     virtual void print() const; //Print contents of iterator
     int numberOfLayers() const;
