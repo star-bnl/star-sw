@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.hh,v 1.3 1999/07/30 15:01:13 genevb Exp $
+ * $Id: StV0MiniDst.hh,v 1.4 1999/08/03 02:31:45 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.hh,v $
+ * Revision 1.4  1999/08/03 02:31:45  genevb
+ * Better implementation of StHFillObject
+ *
  * Revision 1.3  1999/07/30 15:01:13  genevb
  * Switched from TObject to StHFillObject inheritance
  *
@@ -70,8 +73,6 @@ public:
   float ptotPosDaughter();      // Total momentum of pos. daughter
   float ptNegDaughter();        // Transverse momentum of neg. daughter
   float ptotNegDaughter();      // Total momentum of neg. daughter  
-
-  virtual void LearnMembers();
 
 protected:
   int   mRun;                   // These are written out
