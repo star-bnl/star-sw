@@ -1,5 +1,8 @@
-* $Id: tcl_get_row_seq.F,v 1.3 1999/07/17 00:32:05 genevb Exp $
+* $Id: tcl_get_row_seq.F,v 1.4 1999/07/19 16:28:00 genevb Exp $
 * $Log: tcl_get_row_seq.F,v $
+* Revision 1.4  1999/07/19 16:28:00  genevb
+* Edited some messages
+*
 * Revision 1.3  1999/07/17 00:32:05  genevb
 * Use StMessMgr
 *
@@ -127,7 +130,6 @@ C----------------------------------------------------------------------
 c local variables:
 c
 	INTEGER ADC
-	INTEGER IDE1
 	INTEGER Isequence             ! Index for pad sequences
         integer itpp
         integer itpp_1
@@ -148,12 +150,6 @@ C----------------------------------------------------------------------
 c Hypothetical functions:
 c	INTEGER TPG_Nrows_in_Sector
 c	INTEGER TPG_Nsectors
-
-C----------------------------------------------------------------------
-	SAVE    IDE1
-
-C----------------------------------------------------------------------
-	DATA    IDE1 /0/
 
 C----------------------------------------------------------------------
 c
@@ -214,9 +210,7 @@ c
 c
 c Check for overrun of the local array:
                  IF ( Nseqs+1 .GT. Nseqs_max ) THEN
-*                    CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
-*     +                   //'small.',1, IDE1 )
-                    call StError('Nseqs_max is too small')
+                    call StError('TCL_GET_ROW_SEQ - Nseqs_max is too small')
                     TCL_Get_Row_Seq = .FALSE. !Fail.
                     RETURN
                  END IF

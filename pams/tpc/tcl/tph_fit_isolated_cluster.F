@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.10 1999/07/17 00:32:06 genevb Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.11 1999/07/19 16:28:01 genevb Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.11  1999/07/19 16:28:01  genevb
+* Edited some messages
+*
 * Revision 1.10  1999/07/17 00:32:06  genevb
 * Use StMessMgr
 *
@@ -281,7 +284,7 @@ C time direction no longer a projection - WAL 13 Feb 98
            endif
         enddo
 	if (adc_sum.eq.0.) then
-	 call StError('Hey -- ADCSUM=0!!!!')
+	 call StError('TPHAM - Hey -- ADCSUM=0!!!!')
          write(m132,*) 'number of pixels in cluster = ',nclspix
          call StError(m132)
          write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
