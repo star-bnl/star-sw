@@ -1,5 +1,10 @@
-AAREADME - 30sep98 - CETull@lbl.gov
+AAREADME - 11nov98 - CETull@lbl.gov
 
 (cd lib; make)
 	...will make the DSL libraries.
+
+make -f star.mk
+	...will prepare the DSL package for installStaf.csh
+
+For programming documentation see doc/dsl.html
 
