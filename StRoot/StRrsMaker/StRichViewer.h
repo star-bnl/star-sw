@@ -1,5 +1,5 @@
 /*********************************************************
- * $Id: StRichViewer.h,v 1.3 2000/04/05 16:06:09 lasiuk Exp $
+ * $Id: StRichViewer.h,v 1.4 2000/05/17 22:30:14 lasiuk Exp $
  *
  * Description:
  *  Struct holds different histograms filled by different
@@ -9,6 +9,9 @@
  *
  ************************************************************
  * $Log: StRichViewer.h,v $
+ * Revision 1.4  2000/05/17 22:30:14  lasiuk
+ * add feedback diagnostics
+ *
  * Revision 1.3  2000/04/05 16:06:09  lasiuk
  * add histos
  *
@@ -48,6 +51,7 @@ public:
     TH1F    * mErrorDetection;   // Counts exceptions - desactivated
     TH1F    * mWires;            // wires with charge - obsolete
     TH1F    * mWhichWire;        // wires with charge
+    TH1F    * mTotalFeedback;    // total # of feedback photons b4 conversion
     TH1F    * mFeedback;         // feedback photons
     TH1F    * mPoissonMean;
     TH1F    * mPolia;            // Polia distribution

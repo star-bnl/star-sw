@@ -1,11 +1,14 @@
 /*******************************************************
- * $Id: StRichViewer.cxx,v 1.3 2000/04/05 16:06:05 lasiuk Exp $
+ * $Id: StRichViewer.cxx,v 1.4 2000/05/17 22:30:14 lasiuk Exp $
  *
  * Description:
  *  Implementation of the Viewer displaying module
  *
  ********************************************************
  * $Log: StRichViewer.cxx,v $
+ * Revision 1.4  2000/05/17 22:30:14  lasiuk
+ * add feedback diagnostics
+ *
  * Revision 1.3  2000/04/05 16:06:05  lasiuk
  * add histos
  *
@@ -58,7 +61,9 @@ StRichViewer::StRichViewer()
     mWires               = new TH1F("mWires","Charges on Wires",
 				    100,-20,220);
     mWhichWire           = new TH1F("mWhichWire","Wire number",
-				    100,0,195);
+				    100,0,195);    
+    mTotalFeedback       = new TH1F("mFeedbackTotal","Total Feedback photons",
+				    21,-0.5,20.5);
     mFeedback            = new TH1F("mFeedback","Feedback photons",
 				    21,-0.5,20.5);
     mPoissonMean         = new TH1F("mPoissonMean","Mean of Poisson",
