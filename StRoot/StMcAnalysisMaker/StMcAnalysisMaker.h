@@ -1,7 +1,14 @@
 /**********************************************
  *
- * $Id: StMcAnalysisMaker.h,v 1.5 1999/09/10 19:11:15 calderon Exp $
+ * $Id: StMcAnalysisMaker.h,v 1.6 2000/04/20 16:59:47 calderon Exp $
  * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.6  2000/04/20 16:59:47  calderon
+ * Pick up the makers with the new names
+ * Change the name from "McAnalysis" to "StMcAnalysisMaker"
+ * No longer use the helix, use the primary track momentum when available
+ * (also avoids dependency on StEventSummary)
+ * Denominator for mom. resolution histograms is now simulated momentum.
+ *
  * Revision 1.5  1999/09/10 19:11:15  calderon
  * Write the Ntuple in StMcAnalysisMaker into a file.
  * This way it can be accessed after the macro finishes,
@@ -49,8 +56,8 @@ class StMcAnalysisMaker : public StMaker {
  public:
 
     StMaker* currentChain;
-    StMcAnalysisMaker(const char* name = "McAnalysis",
-		       const char* title = "event/McAnalysis");
+    StMcAnalysisMaker(const char* name = "StMcAnalysisMaker",
+		       const char* title = "event/StMcAnalysisMaker");
     virtual ~StMcAnalysisMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
@@ -84,7 +91,7 @@ private:
     static const Float_t mMaxDeltaZ;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.5 1999/09/10 19:11:15 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.6 2000/04/20 16:59:47 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StMcAnalysisMaker, 1)
