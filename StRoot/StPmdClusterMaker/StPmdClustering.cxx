@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.11 2004/06/24 13:46:07 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.12 2004/06/29 07:13:02 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.12  2004/06/29 07:13:02  subhasis
+ * limit of clust_ fixed
+ *
  * Revision 1.11  2004/06/24 13:46:07  subhasis
  * several changes in clustering code
  *
@@ -540,7 +543,7 @@ void StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
   Double_t xxc[2000],yyc[2000];
   Double_t zzct[2000],cellsc[2000];
   Double_t str[2000],str1[2000], cln[2000];
-  Double_t xcl[2000], ycl[2000],clust_cell[100][2000];
+  Double_t xcl[2000], ycl[2000],clust_cell[500][2000];
   //Initialisation part starts
   for(i=0;i<=nclust;i++)
     {
@@ -555,7 +558,7 @@ void StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
       yy[i] = *(&y+i);
       zz[i] = *(&z+i);
     }
-  for(i=0;i<100;i++)
+  for(i=0;i<500;i++)
     {
     for(j=0;j<2000;j++)
       {
