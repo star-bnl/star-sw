@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdCollection.h,v 2.2 2002/01/09 15:37:55 ullrich Exp $
+ * $Id: StFpdCollection.h,v 2.3 2002/01/17 18:38:11 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdCollection.h,v $
+ * Revision 2.3  2002/01/17 18:38:11  ullrich
+ * Several new methods added. Bug fixed.
+ *
  * Revision 2.2  2002/01/09 15:37:55  ullrich
  * AdcSum functions and scaler infos added.
  *
@@ -38,29 +41,33 @@ public:
     unsigned int    numberOfPMTSmdY() const;
     unsigned int    numberOfScalers() const;
     
-    unsigned short* adc();
-    unsigned short* tdc();
-    unsigned short  registers(unsigned int) const;
-    unsigned short* pedestal();
-    unsigned int    scaler(unsigned int) const;
+    unsigned short*       adc();
+    const unsigned short* adc() const;
+    unsigned short*       tdc();
+    const unsigned short* tdc() const;
+    unsigned short        registers(unsigned int) const;
+    unsigned short*       pedestal();
+    const unsigned short* pedestal() const;
+    unsigned int          scaler(unsigned int) const;
 
-    unsigned short  north(unsigned int);
-    unsigned short  south(unsigned int);
-    unsigned short  top(unsigned int);
-    unsigned short  bottom(unsigned int);
-    unsigned short  smdx(unsigned int);
-    unsigned short  smdy(unsigned int);
-    unsigned short  pres1(unsigned int);
-    unsigned short  pres2(unsigned int);
+    unsigned short  north(unsigned int) const;
+    unsigned short  south(unsigned int) const;
+    unsigned short  top(unsigned int) const;
+    unsigned short  bottom(unsigned int) const;
+    unsigned short  smdx(unsigned int) const;
+    unsigned short  smdy(unsigned int) const;
+    unsigned short  pres1(unsigned int) const;
+    unsigned short  pres2(unsigned int) const;
+    unsigned short  southVeto() const;
 
-    unsigned int sumAdcNorth();
-    unsigned int sumAdcSouth();
-    unsigned int sumAdcTop();
-    unsigned int sumAdcBottom();
-    unsigned int sumAdcPreShower1();
-    unsigned int sumAdcPreShower2();
-    unsigned int sumAdcSmdX();
-    unsigned int sumAdcSmdY();
+    unsigned int sumAdcNorth() const;
+    unsigned int sumAdcSouth() const;
+    unsigned int sumAdcTop() const;
+    unsigned int sumAdcBottom() const;
+    unsigned int sumAdcPreShower1() const;
+    unsigned int sumAdcPreShower2() const;
+    unsigned int sumAdcSmdX() const;
+    unsigned int sumAdcSmdY() const;
     
     void setAdc(unsigned int, unsigned short);
     void setTdc(unsigned int, unsigned short);
