@@ -39,13 +39,15 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
+#include <sys/shm.h>  /*  Shared Memory.  */
 
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>
 
-msg_t msg;
-msg_t *Msg;
+msgData_t msg;
+msgData_t *Msg;
 FILE *JournalFILE;    /* Journal-file descriptor                          */
 
 control_t *control = &msg.control;
@@ -55,7 +57,6 @@ class_t   *class = &msg.class[0];
 int CPUtime0 = 0;
 int ELAtime0 = 0;
 
-typedef	void	(*funcPoint)(const char*, const char*, const int*);
 funcPoint MsgAlarmRoutine = NULL;
 
 char   m1000[1000];  /*  Some "scratch" message space.  */
@@ -82,7 +83,7 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
-	char	*MsgCCPU( 
+	char*	MsgCCPU( 
 /*  Input:                                                                        */
 	int CPU )  /*  CPU time, from MsgCPU                                      */
 {
@@ -120,7 +121,7 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
-	char	*MsgCela( 
+	char*	MsgCela( 
 /*  Input:                                                                        */
 	int Time )  /*  Elapsed time, from MsgTime                                */
 {
@@ -151,11 +152,11 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
-	char	*MsgCtime( void )
+	char*	MsgCtime( void )
 {
-/*  Description:
-	Return standard 23 character ASCII years, months, days,
-	hours, minutes and seconds, with an appended NULL (24th character).
+/*  Description: Return standard 23 character ASCII date and time.
+	ie: years, months, days, hours, minutes and seconds,
+	with an appended NULL (24th character).
 
     Returns:
 	23 character time & date: "dd-mmm-yy hh:mm:ss zone"
@@ -939,7 +940,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	firstNonBlank = 0;
 	C  = msg[firstNonBlank];            /*  Integer copy of a character for strchr.  */
 	while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
-	  C   = msg[++firstNonBlank];       /*  Integer copy of a character for strchr.  */
+	  C = msg[++firstNonBlank];       /*  Integer copy of a character for strchr.  */
 	}
 
 /*	firstNonBlank is index in msg to start of prefix or else points past msg.  */
@@ -971,7 +972,18 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	  if ( N > PREFIX_MAXLEN ) N = PREFIX_MAXLEN;
 	  strncpy( prefix, &msg[firstNonBlank], N+1 );            /*  Copy as much as is there or fits as a prefix. */
 	  prefix[N] = NULL;
-	  *sansPrefix = sepPoint + 1;                    /*  Point to everything after the separator.  */
+
+/*	  Scan for next non-separator:  */
+	  L  = strlen( sepPoint ) - 1;
+	  firstNonBlank = 0;
+	  C  = sepPoint[firstNonBlank]; /*  Integer copy of a character for strchr.  */
+	  while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
+	    C   = sepPoint[++firstNonBlank]; /*  Integer copy of a character for strchr.  */
+	  }
+	  if ( firstNonBlank >= L ) {   /*  No non-separators or only one at the very end.  */
+	    firstNonBlank = 1;
+	  }
+	  *sansPrefix = sepPoint + firstNonBlank;   /*  Point to everything after the separator.  */
 	}
 
 
@@ -1050,6 +1062,81 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	}
 
 	return;
+}
+
+
+
+
+	int	MsgShare(
+/*  Input:                                                                       */
+	const char *ImageName )  /* Preferably, the name of an executable.
+	                            This is critical when sharing memory;
+	                            it must be the same for all who share
+	                            one copy of msg memory.                      */
+{
+/* Description:  Set Msg up to share its memory.
+	         When this routine returns TRUE, the memory is being shared.
+	         This should be the very first Msg call.
+	         If a journal file was open at the time of this call, it is closed.
+	         The journal will need to be reopened if it had been open.
+
+   Returns:
+	shmid if successful,
+	-1 for failure.                                                          */
+
+	void *SharedAddress;
+	void *addr;
+	int size;
+	int i;
+
+	int shmid;
+	key_t key;
+	int shmflg;
+	unsigned long L;
+
+	const int ID = 1;
+
+	JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+
+	size = sizeof( msg );
+	addr = &msg;
+	addr = 0;
+
+/*	printf("MsgShare-d1  ID:%d ImageName:%s  Size:%d  addr:%d 0x%x\n", ID, ImageName, size, addr, addr);  */
+
+	key = ftok( ImageName, ID );
+
+	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
+/*	printf("MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
+
+	shmid = shmget( key, size, shmflg );  /*  unique key, size, read/write user/group.  */
+
+
+/*	printf("MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
+	if ( shmid < 0 ) {
+	  perror( "MsgShare-e1 system error:\n" );
+	  return( -1 );
+	}
+
+	SharedAddress = shmat( shmid, addr, shmflg );
+/*	printf( "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
+
+	Msg = SharedAddress;
+
+/*	printf( "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
+
+	control = &Msg->control;
+	prefix  = &Msg->prefix[0];
+	class   = &Msg->class[0];
+
+/*	printf( "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
+
+	if ( !SharedAddress ) {
+	  perror( "MsgShare-e2 system error:\n" );
+	  return( -1 );
+	}
+
+	return( shmid );
 }
 
 

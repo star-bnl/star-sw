@@ -5,7 +5,9 @@
 /*  Input:  */
 	int LUN ) /* Device on which the summary is output.  */
 {
-/*  Description:  Generate a CPU-usage MSG-summary table.
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgSummaryCPUFile instead.  <----
+	Generate a CPU-usage MSG-summary table.
 	Output a CPU-usage summary of the MSG-handled & marked messages
 	on the specified LUN.  "Marked" messages are messages whose occurances
 	were preceded, one-for-one, by calls to MSG_Mark, with the same

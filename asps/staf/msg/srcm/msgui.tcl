@@ -14,6 +14,7 @@ global Alarming
 global Line
 global PageLength
 global NodeName
+global Shmid
 
 proc initMsgVariables {} {
 	upvar #0 allPidsList allPidsList
@@ -30,9 +31,10 @@ proc initMsgVariables {} {
 	upvar #0 StoreTo StoreTo
 	upvar #0 ListInactives ListInactives
 	upvar #0 NodeName NodeName
+	upvar #0 Shmid Shmid
 	set allPidsList ""
 	set LoadFrom default.msg
-	set Executable "Msgstest"
+	set Executable "msgstest"
 	set Prefix ""
 	set Counts 0
 	set CountLimit 0
@@ -44,6 +46,7 @@ proc initMsgVariables {} {
 	set ListInactives 0
 	set StoreTo default.msg
 	set NodeName "No Node Name"
+	set Shmid    "-1"
 }
 
 
@@ -310,6 +313,19 @@ proc MsgQuit {root args} {
 
 
 
+proc MsgRemoveShmid { root } {
+	if {$root == "."} {
+	  set base ""
+	} else {
+	  set base $root
+	}
+	upvar #0 Shmid Shmid
+	if { $Shmid > 0 } { exec rmid $Shmid }
+}
+
+
+
+
 proc MsgSelectExecutable { root } {
 	if {$root == "."} {
 	  set base ""
@@ -397,6 +413,7 @@ proc MsgSummary { root } {
 	upvar #0 ListInactives ListInactives
 	upvar #0 PageLength PageLength
 	upvar #0 NodeName NodeName
+	upvar #0 Shmid Shmid
 
 	if { ![ MsgDo . "getLines" ] } {
 	  set PageLength [exec cat msg.tmp]
@@ -412,6 +429,11 @@ proc MsgSummary { root } {
 	if { ![ MsgDo . "getnode" ] } {
 	  set NodeName [exec cat msg.tmp]
 	  if { $NodeName == "" } { set NodeName "No Node Name" }
+	}
+
+	if { ![ MsgDo . "getshmid" ] } {
+	  set Shmid [exec cat msg.tmp]
+	  if { $Shmid == "" } { set Shmid "-1" }
 	}
 
 	MsgDo . "lines $PageLength"
@@ -430,6 +452,7 @@ proc MsgSummaryCPU { root } {
 	upvar #0 ListInactives ListInactives
 	upvar #0 PageLength PageLength
 	upvar #0 NodeName NodeName
+	upvar #0 Shmid Shmid
 
 	if { ![ MsgDo . "getLines" ] } {
 	  set PageLength [exec cat msg.tmp]
@@ -445,6 +468,11 @@ proc MsgSummaryCPU { root } {
 	if { ![ MsgDo . "getnode" ] } {
 	  set NodeName [exec cat msg.tmp]
 	  if { $NodeName == "" } { set NodeName "No Node Name" }
+	}
+
+	if { ![ MsgDo . "getshmid" ] } {
+	  set Shmid [exec cat msg.tmp]
+	  if { $Shmid == "" } { set Shmid "-1" }
 	}
 
 	MsgDo . "lines $PageLength"

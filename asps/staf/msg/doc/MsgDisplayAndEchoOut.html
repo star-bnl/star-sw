@@ -4,10 +4,11 @@
 
 /*   Inputs:                                                                               */
 	  const char *msg /* Character-string message, with prefix, submitted for display. */
-	, int       LUN ) /* FORTRAN logical unit number for msg to be echoed to;          */
-	                  /* The file refered to by LUN must be opened FORTRAN style.      */
+	, int       LUN ) /* Fortran logical unit number for msg to be echoed to;          */
+	                  /* The file refered to by LUN must be already opened.      */
 {
-/* Description:  Display a message on the terminal and echo on a FORTRAN LUN.
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgDisplayAndFileOut instead.  <----
 	Display (always) a message msg on standard out and echo it to LUN.
 	The message may not be disabled.
 	The message is not counted.

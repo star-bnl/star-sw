@@ -32,6 +32,7 @@
 
 static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcompiled "__DATE__" "__TIME__;
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -42,17 +43,14 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <sys/resource.h>
 #include <sys/stat.h>
 
-#include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
-#include <sys/shm.h>  /*  Shared Memory.  */
-
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>
 
 #define MAX_FILE_VERSIONS 999
 
-extern msg_t *Msg;
-extern msg_t msg;
+extern msgData_t *Msg;
+extern msgData_t msg;
 
 extern control_t *control;   /* See msgPrivate.c for address assignments of these.  */
 extern prefix_t  *prefix;
@@ -62,7 +60,6 @@ extern FILE *JournalFILE;    /* Journal-file descriptor                         
 extern int CPUtime0;
 extern int ELAtime0;
 
-typedef	void	(*funcPoint)(const char*, const char*, const int*);
 extern funcPoint MsgAlarmRoutine;
 
 extern char   m1000[1000];  /*  Some "scratch" message space.  */
@@ -79,7 +76,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	                     looking up or entering the prefix contained in MSG
 	                     (prefix is everything before the first space) in
 	                     the index of MSG message prefixes.
-	                     If ID is negative, ID remains unchanged, and lookup
+	                     If ID is negative or NULL, ID remains unchanged, and lookup
 	                     is then always by prefix.                                     */
 {
 /* Description:  Display and log a message.
@@ -98,7 +95,11 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	int Active, Counting, Alarming;
 	int LID;   /* Local copy of ID. */
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check or set the ID & flags.
 	Enter MSG's prefix in the index if needed.  */
@@ -117,7 +118,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  MsgAlarm( msg, prefix[LID].AlarmLevel );
 	}
 
-	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }
@@ -169,13 +172,14 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	char Prefix[PREFIX_MAXLEN+1];
 
 /*	Do this only if nothing's been declared:  */
-	if ( MsgAlarmRoutine != NULL )
-	{
-	  MsgParse( msg, Prefix, &sansPrefix );  /*  Get the prefix and the message-that-follows-prefix pointer.  */
-	  MsgAlarmRoutine( Prefix, sansPrefix, &severity );  /*  severity needs to be a pointer, for historical reasons.  */
+	if ( MsgAlarmRoutine ) {
+	  MsgParse(   msg, Prefix, &sansPrefix );  /*  Get the prefix and the message-that-follows-prefix pointer.  */
+	  MsgAlarmRoutine( Prefix,  sansPrefix, &severity );  /*  severity needs to be a pointer, for historical reasons.  */
 	}
 	return;
 }
+
+
 
 
 	void	MsgAlarmRegister(
@@ -186,6 +190,35 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 /* Description:  Register an alarm-routine to be called by active-alarm messages.
 */
 	MsgAlarmRoutine = AlarmRoutine;
+	return;
+}
+
+
+
+
+	void	MsgAlarmRoutineSample( char* Prefix, char* sansPrefix, int *Level )
+{
+/*  Description:  Msg sample alarm routine.  Specify in MsgAlarmRegister call.
+	Applications may create their own msg alarm routine, with the arguments being
+	the same as specified in this sample.
+
+	This routine will be called on the occurance of any (message) prefix which
+	is alarm-enabled (designated by "!Active!" on the summary listing,
+	enabled with the MsgEnableAlarm call).
+
+	All arguments are filled by Msg before this routine is called, and are
+	derived from the originating message.
+
+	Prefix     is the stripped off prefix from the alarm-originating message.
+	sansPrefix is the rest of the message (ie, without the prefix or intervening space).
+	Level      is the alarm level, set by a MsgSetLevel call, and has application-defined
+	           meaning (Level has no meaning in this sample routine).
+*/
+
+	MessageOut( "\nMsgAlarmRoutineSample-I1   Alarm!!!!!!!!!!!!!" );
+	MessageOut( Prefix );
+	MessageOut( sansPrefix );
+	MessageOut( "MsgAlarmRoutineSample-I1   Alarm!!!!!!!!!!!!!\n" );
 	return;
 }
 
@@ -451,6 +484,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 	return;
 }
+
+
+
 
 	void	MsgDisplay(
 
@@ -480,7 +516,11 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 	int LID;  /* Local copy of ID.  */
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check or set the ID & flags.
 	Enter MSG's prefix in the index if needed.  */
@@ -499,7 +539,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  MsgAlarm( msg, prefix[LID].AlarmLevel );
 	}
 
-	if ( *ID == 0 ) *ID = LID; /* Ensure it's changed only if zero.  */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }
@@ -568,7 +610,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 /*   Inputs:                                                                               */
 	  const char *msg /* Character-string message, with prefix, submitted for display. */
-	, FILE  *fileD    /* File Descriptor for msg to be echoed to;                      */
+	, FILE  *stream   /* Stream Descriptor for msg to be echoed to;                      */
 
 /*   Input/Output:                                                                         */
 	, int       *ID ) /* Fast-reference message ID.  Set to zero by caller 
@@ -579,8 +621,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	                     If ID is negative, ID remains unchanged, and lookup
 	                     is then always by prefix.                                     */
 {
-/* Description:  Display a message on standard out and echo on fileD.
-	Conditionally display the message msg on standard output and echo it to fileD.
+/* Description:  Display a message on standard out and echo on stream.
+	Conditionally display the message msg on standard output and echo it to stream.
 	The message is displayed unless disabled.
 	The message is counted unless counting is disabled.
 
@@ -593,7 +635,11 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	int Active, Alarming, Counting;
 	int LID;  /* Local copy of ID.  */
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check or set the ID & flags.
 	Enter MSG's prefix in the index if needed. */
@@ -604,7 +650,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	}
 
 	if ( Active ) {  /* Display it:  */
-	  MsgDisplayAndFileOut( msg, fileD );
+	  MsgDisplayAndFileOut( msg, stream );
 	  MsgAbortCheck( LID ); /*  Check if abort limit is exceeded, and maybe abort. */
 	}
 
@@ -612,7 +658,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  MsgAlarm( msg, prefix[LID].AlarmLevel );
 	}
 
-	if ( *ID == 0 ) *ID = LID; /* Ensure it's changed only if zero.  */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }
@@ -755,14 +803,20 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	int LID;   /* Local copy of ID.  */
 	int i;
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 /*	Check that the message-prefix is in the index, enter it
 	in the index if necessary, and return its ID:               */
 	MsgCheck( Prefix, &LID, &Active, &Alarming, &Counting );
 
 	if ( !Active && Counting) MsgIncr(LID); /*  Increment if not active, but counting. */
 
-	if ( *ID == 0 ) *ID = LID; /* Ensure it's changed only if zero.  */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return( Active );
 }
@@ -780,7 +834,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
-	FILE	*MsgFileOpen(
+	FILE*	MsgFileOpen(
 /*  Inputs:                                                                */
 	  const char* FileName  /* The file-name                           */
 	, const char* Type  )   /* The file's type, for an fopen.          */
@@ -831,13 +885,41 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
-	void 	MsgInit( void )
+	void 	MsgInit( const char *switches /*  One-letter switch string:                    */
+	                                      /*  "s"  shared msg -- default: not shared       */
+	                                      /*  "h"  hard initialize -- default: hard        */
+	                                      /*       initialize on first call, soft          */
+	                                      /*       initialize afterwards                   */
+	               , ... )
 {
-/* Description:  MSG package initializion.                                                     */
+/* Description:  MSG package initializion.
 
-	int ID;
+	Shared msg:
+	  Permits other processes to read and modify msg's prefix accounting.
+
+	Hard Initialize:
+	  Wipes out all msg prefix accounting;  starts with no prefixes defined.
+
+	Soft Initialize:
+	  Zeroes all msg prefix accounting, but retains all prefix definitions
+	  and states.                                                                          */
 
 	static int MsgInitialized = FALSE;
+	int ID;
+	char *shareName = "";
+	
+	control->shmid = -1;                            /*  Indicate msg memory not (yet) shared.  */
+	if ( switches ) {
+	  if ( strchr( switches, 's' ) ) {
+/*	    Variable argument list machinations to get optional shareName (executable file name):  */
+	    va_list ap;
+	    char *initArgs;
+	    va_start( ap, switches );        /*  Make ap point to 1st unnamed arg.                 */
+	    shareName = va_arg(   ap, char* );
+	    control->shmid = MsgShare( shareName );               /*  Share the msg memory.        */
+	  }
+	  if ( strchr( switches, 'h' ) ) MsgInitialized = FALSE;  /*  Force hard initialization.   */
+	}
 
 	if ( MsgInitialized ) {   /* Already initialized -- don't hose the existing prefixes:  */
 	  control->Nlookups = 0;   /* Count of all prefix (character-search) lookups.          */
@@ -926,7 +1008,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 }
 
 
-	FILE	*MsgJournalGet( void )
+	FILE*	MsgJournalGet( void )
 {
 /* Description:  Returns the journal file descriptor.  */
 	return(JournalFILE);
@@ -997,19 +1079,22 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 /*  Input/Output:                       */
 	, int *ID  )   /* Fast-reference MSG ID.  Uniquely assigned on first call */
 {
-/*   Description:
-	Set the given Prefix's "Marked CPU time" to current.  When this prefix
-	occurs in a call to an MSG routine which does MSG accounting (eg, Message),
-	and when that Prefix has had its "Marked CPU time" set (ie, to non-zero),
-	that prefix's "total CPU time" is incremented by Current CPU time, less
-	the "Marked CPU time".  The Marked CPU time is then zeroed.  */
+/*   Description: Set the given Prefix's "Marked CPU time" to current.
+	When this prefix occurs in a call to an MSG routine which does Msg accounting
+	(eg, Message), and when that Prefix has had its "Marked CPU time" set (ie,
+	to non-zero), that prefix's "total CPU time" is incremented by Current CPU
+	time, less the "Marked CPU time".  The Marked CPU time is then zeroed.  */
 
 	int i;
 	int Active, Alarming, Counting;
 	int LID;  /* Local copy of ID. */
 	int CPUtime;
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check that the message-prefix is in the index, enter it
 	in the index if necessary, and return its ID:               */
@@ -1023,7 +1108,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  prefix[LID].CPUmark = CPUtime;
 	}
 
-	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }
@@ -1265,11 +1352,34 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	by prefix, according to arguments contained in a single character-
 	string command contained in COM.  Commands take these forms:
 
+	To list a summary of msg prefixes' CPU usages:
+	CPU
+
 	To examine the summary page length:
 	GETLINES
 
+	To examine the shared memory ID (shmid):
+	GETSHMID
+
 	To examine the node name:
 	GETNODE
+
+	To list the available commands:
+	HELP
+
+	To list a summary of msg prefixes:
+	LIST
+
+	To have time-stamps occur on a changed CPU time (in addition to
+	getting them on changed real-time or node-name):
+	TIMESTAMP CPU
+
+	To have time-stamps not occur on a changed CPU time (ie, only
+	getting them on changed real-time or node-name):
+	TIMESTAMP NOCPU
+
+	To set the number of lines per page in the summary-output:
+	LINES line-count
 
 	To set the node name:
 	SETNODE <nodename>
@@ -1295,9 +1405,6 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	To stop counting of message occurances, whether or not disabled:
 	NOCOUNT prefix-1 prefix-2 ... prefix-n
 
-	To list a summary of msg prefixes' CPU usages:
-	CPU
-
 	To delete prefixes:
 	DELETE prefix-1 prefix-2 ... prefix-n
 
@@ -1316,22 +1423,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	To set message-limits on specific messages:
 	LIMIT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
 
-	To set the number of lines per page in the summary-output:
-	LINES line-count
-
-	To list a summary of msg prefixes:
-	LIST
-
 	To set the state of specific messages:
 	SET prefix-1=countLimit-1,level-1,abortLimit-1,active(T/F),counting(T/F),alarming(T/F)> 
-
-	To have time-stamps occur on a changed CPU time (in addition to
-	getting them on changed real-time or node-name):
-	TIMESTAMP CPU
-
-	To have time-stamps not occur on a changed CPU time (ie, only
-	getting them on changed real-time or node-name):
-	TIMESTAMP NOCPU
 
 	Spacing is not critical in the command line, provided at least one
 	or more spaces, tabs or commas separate the arguments.
@@ -1379,6 +1472,10 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  return(TRUE);
 	} else if ( !strcasecmp( com, "GETNODE" ) ) {
 	  sprintf( m1000, "%s", control->NodeName );
+	  MessageOut( m1000 );
+	  return(TRUE);
+	} else if ( !strcasecmp( com, "GETSHMID" ) ) {
+	  sprintf( m1000, "%d", control->shmid );
 	  MessageOut( m1000 );
 	  return(TRUE);
 	}
@@ -1494,12 +1591,12 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  MessageOut( s1000 );
 	  MessageOut( "\
   Legal commands are:\n\
+     CPU,  GETLINES,  GETNODE,  GETSHMID,  HELP,  LIST    (no arguments)\n\
+     LINES <value>,      TIMESTAMP <CPU or NOCPU>,    SETNODE <nodename>\n\
+     LOAD  <filename>,   STORE  <filename>\n\
      ALARM, NOALARM, COUNT, NOCOUNT, DISABLE, ENABLE, DELETE, GET  (all with prefix list)\n\
      ABORT, LEVEL, LIMIT                                (with a <prefix>=<value> list)\n\
-     SET <prefix>=<countLim>,<level>,<abortLim>,<active T/F>,<counting T/F>,<alarming T/F>\n\
-     LINES <value>,    TIMESTAMP <CPU or NOCPU>\n\
-     CPU, HELP, LIST    (no arguments)\n\
-     LOAD, STORE  (with a <filename>)" );
+     SET <prefix>=<countLim>,<level>,<abortLim>,<active T/F>,<counting T/F>,<alarming T/F>");
 
 	  if ( justHelping ) return(TRUE);
 	  return(FALSE);
@@ -1514,18 +1611,18 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 	int	MsgSetFromFile(
 /*  Input:  */
-	FILE * fileD ) /* File descriptor for which a command (ASCII)
-	                  file should be (already) open.  */
+	FILE  *stream )  /* Stream Descriptor for which a command (ASCII)
+	                    file should be (already) open.  */
 {
 /*  Description:  ASCII-file command interface to control MSG.
-	Reads lines from fileD and interprets them as MsgSetByCommand commands
+	Reads lines from stream and interprets them as MsgSetByCommand commands
 	until either an <EOF> or a line containing MSG_EXIT is encountered.
 
   Returns:
 	TRUE for successful completion of command,
 	FALSE for failure.                                                    */
 
-	while ( fgets( m1000, 1000, fileD ) ) {
+	while ( fgets( m1000, 1000, stream ) ) {
 	  if ( !strcasecmp( m1000, "MSG_EXIT" ) ) return(TRUE);
 	  if (!MsgSetByCommand( m1000 )) return(FALSE);   /*  Set the feature.  */
 	}
@@ -1735,81 +1832,6 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	control->TimeStampCPU = Mode;
 
 	return;
-}
-
-
-
-
-	int	MsgShare(
-/*  Input:                                                                       */
-	const char *ImageName )  /* Preferably, the name of an executable.
-	                            This is critical when sharing memory;
-	                            it must be the same for all who share
-	                            one copy of msg memory.                      */
-{
-/* Description:  Set Msg up to share its memory.
-	         When this routine returns TRUE, the memory is being shared.
-	         This should be the very first Msg call.
-	         If a journal file was open at the time of this call, it is closed.
-	         The journal will need to be reopened if it had been open.
-
-   Returns:
-	TRUE for success.
-	FALSE for failure.                                                       */
-
-	void *SharedAddress;
-	void *addr;
-	int size;
-	int i;
-
-	int shmid;
-	key_t key;
-	int shmflg;
-	unsigned long L;
-
-	const int ID = 1;
-
-	JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
-
-	size = sizeof( msg );
-	addr = &msg;
-	addr = 0;
-
-/*	printf("MsgShare-d1  ID:%d ImageName:%s  Size:%d  addr:%d 0x%x\n", ID, ImageName, size, addr, addr);  */
-
-	key = ftok( ImageName, ID );
-
-	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
-/*	printf("MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
-
-	shmid = shmget( key, size, shmflg );  /*  unique key, size, read/write user/group.  */
-
-
-/*	printf("MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
-	if ( shmid < 0 ) {
-	  perror( "MsgShare-e1 system error:\n" );
-	  return( FALSE );
-	}
-
-	SharedAddress = shmat( shmid, addr, shmflg );
-/*	printf( "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
-
-	Msg = SharedAddress;
-
-/*	printf( "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
-
-	control = &Msg->control;
-	prefix  = &Msg->prefix[0];
-	class   = &Msg->class[0];
-
-/*	printf( "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
-
-	if ( !SharedAddress ) {
-	  perror( "MsgShare-e2 system error:\n" );
-	  return( FALSE );
-	}
-
-	return( TRUE );
 }
 
 
@@ -2435,7 +2457,7 @@ Message-Prefix & Truncated Sample of last occurance              Total CPU Usage
 
 	    sprintf( s1000, "\f\n\
              --- Message Accounting Summary --- (%-23.23s)\n\
-Message-Prefix & Truncated Sample of last occurance                  Counts      Limit      Lookups  AbortLimit    State\n"
+Message-Prefix & Truncated Sample of last occurance                  Counts      Limit      Lookups  AbortLimit    State\r\n"
 	                , MsgCtime() );
 	    MsgToFileOut( s1000, fid );
 
@@ -2445,7 +2467,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts     
 	    sprintf( s1000, "\f\n\
              --- Message Accounting Summary --- (%-23.23s)\n\
 Message-Prefix & Truncated Sample of last occurance                  Counts   Counts/evt      Limit    Lookups  AbortLimit    State\
-\n"                , MsgCtime() );
+\r\n"                , MsgCtime() );
 	    MsgToFileOut( s1000, fid );
 
 	    PageLine = 2;
@@ -2513,13 +2535,13 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	    }
 
 	    if ( Nevents <= 0 ) {
-	      sprintf( s1000, "%-64.64s|%10d %10d   %10d %11d %c%c%c%c%c%c%c%c"
+	      sprintf( s1000, "%-64.64s|%10d %10d   %10d %11d %c%c%c%c%c%c%c%c\r"
 	             , Sample, prefix[SID].Counts
 	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
 	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
 	    } else {
 	      Fraction = ( (float) prefix[SID].Counts ) / ( (float) Nevents );
-	      sprintf( s1000, "%-64.64s|%10d %12.4f %10d  %9d %11d %c%c%c%c%c%c%c%c"
+	      sprintf( s1000, "%-64.64s|%10d %12.4f %10d  %9d %11d %c%c%c%c%c%c%c%c\r"
 	             , Sample, prefix[SID].Counts, Fraction
 	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
 	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
@@ -2721,7 +2743,11 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 
 	int LID;   /*  Local copy of ID.  */
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check or set the ID & flags.
 	Enter MSG's prefix in the index if needed.  */
@@ -2741,7 +2767,9 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	  MsgAlarm( msg, prefix[LID].AlarmLevel );
 	}
 
-	if ( *ID == 0 ) *ID = LID; /* Ensure it's changed only if zero.  */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }
@@ -2802,7 +2830,11 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 
 	int LID;  /* Local copy of ID.  */
 
-	LID = *ID;
+	if ( ID ) {
+	  LID = *ID;
+	} else {
+	  LID = 0;
+	}
 
 /*	Check or set the ID & flags.
 	Enter MSG's prefix in the index if needed.  */
@@ -2822,7 +2854,9 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	  MsgAlarm( msg, prefix[LID].AlarmLevel );
 	}
 
-	if ( *ID == 0 ) *ID = LID; /* Ensure it's changed only if zero.  */
+	if ( ID ) {
+	  if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
+	}
 
 	return;
 }

@@ -21,8 +21,6 @@
 
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
 	lines are defined with "\n" (newline) characters.
-	However, unlike standard C practice, the caller should NOT include a "\n" at
-	the very end, since this interfaces to FORTRAN, which effectively puts a
-	"\n" at the very end.  msg may have as many newlines as desired.
-*/
+	However, the caller should NOT include a "\n" at the very end, since msg puts
+	a "\n" at the very end.  msg may have as many newlines as desired.  */
 </pre>

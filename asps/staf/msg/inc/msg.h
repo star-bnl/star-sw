@@ -21,11 +21,15 @@
 #define FALSE 0
 #endif
 
+typedef	void	(*funcPoint)(const char*, const char*, const int*);
+
 
 	void	Message( const char *msg, int *ID );
 	void	MessageOut( const char *msg );
 	void	MsgAbortCheck( const int ID );
 	void	MsgAlarm( const char *msg, int  severity );
+	void	MsgAlarmRegister( funcPoint AlarmRoutine );
+	void	MsgAlarmRoutineSample( char* Prefix, char* sansPrefix, int *Level );
 	char	*MsgCela(int ELA);
 	void	MsgCheck( const char *msg, int *ID, int *Active, int *Alarming, int *Counting );
 	void	MsgClassDefine( const char *Class, const char *State, int CountLimit, int AbortLimit );
@@ -52,7 +56,7 @@
 	void	MsgGetClass( const char *Prefix, char *Class );
 	void	MsgIncr( const int ID );
 	void	MsgIni( int LUN );
-	void	MsgInit( void );
+	void	MsgInit( const char *switches, ... );
 	int	MsgJournalClose( void );
 	int	MsgJournalEnabled( void );
 	FILE	*MsgJournalGet( void );

@@ -1,6 +1,6 @@
 
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <msg.h>
 
 	void main( int argc, char*argv[] )
@@ -28,17 +28,13 @@
 	static int ID10=0;
 
 
-	MsgShare( argv[0] );    /*  Share the msg memory.  */
-
-	MsgIni( MSG_Journal_LUN_P );
-	if ( !MsgJournalOpen( "msg.jou" ) )
-	{
+	MsgInit( "s", argv[0] );
+	if ( !MsgJournalOpen( "msg.jou" ) ) {
 	  exit(1);
 	}
 
 	MsgMark( "msgTest-O4", &ID4 );
-	for ( i=0; i<1024; i++ )
-	{
+	for ( i=0; i<1024; i++ ) {
 	  Message( "msgTest-O6  Once    #6", &ID6 );
 	}
 	Message( "msgTest-I1  Message #1", &ID1 );

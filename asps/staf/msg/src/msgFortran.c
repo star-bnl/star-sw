@@ -50,9 +50,16 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <msgData.h>
 #include <msgf.h>
 
+#ifdef sgi
+#ifndef IRIX
+#define IRIX TRUE
+#error (This is not an error!)   Compiling maplun version (sgi only).
+#endif
+#endif
+
 #define MAX_FILE_VERSIONS 999
 
-extern msg_t msg;
+extern msgData_t msg;
 extern FILE *JournalFILE;    /* Journal-file descriptor                          */
 
 extern control_t *control;
@@ -62,14 +69,16 @@ extern class_t   *class;
 extern int CPUtime0;
 extern int ELAtime0;
 
-typedef	void	(*funcPoint)(const char*, const char*, const int*);
 extern funcPoint MsgAlarmRoutine;
 
 extern char   m1000[1000];  /*  Some "scratch" message space.  */
 extern char   s1000[1000];  /*  Some "scratch" string space.  */
 char f1000[1000];           /*  Some "scratch" Fortran-string conversion space. */
 
-FILE *maplun_( int *LUN );
+FILE* MsgMapLUN( int *LUN, const char *type );
+#ifdef IRIX
+int maplun_( int *LUN );
+#endif
 
 
 
@@ -132,7 +141,11 @@ FILE *maplun_( int *LUN );
 	}
 
 	if ( Alarming ) {         /* Alarm it:  */
-	  MsgAlarm( msg, prefix[LID].AlarmLevel );
+	  N = msglen;
+	  if ( N > 999 ) N = 999;
+	  strncpy( f1000, msg, N );
+	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
 	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
@@ -423,7 +436,11 @@ FILE *maplun_( int *LUN );
 	}
 
 	if ( Alarming ) {         /* Alarm it:  */
-	  MsgAlarm( msg, prefix[LID].AlarmLevel );
+	  N = msglen;
+	  if ( N > 999 ) N = 999;
+	  strncpy( f1000, msg, N );
+	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
 	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
@@ -444,8 +461,6 @@ FILE *maplun_( int *LUN );
 	INTEGER LINES  !Number of lines in MSG.
 
 *   Outputs: none
-
-*   Brief description:
 
 *   Description:  Display a message on the terminal (only);  bypass accounting.
 	Display a message msg, containing Lines lines, on the terminal.
@@ -497,7 +512,7 @@ FILE *maplun_( int *LUN );
 	int LID;   /* Local copy of ID. */
 	int L, N;
 	int i, j;
-	FILE *fileD;
+	FILE *stream;
 
 	LID = *ID;
 
@@ -517,7 +532,7 @@ FILE *maplun_( int *LUN );
 
 	if ( Active ) {           /* Display it:  */
 	  if ( ( *LUN != 0 ) && ( *LUN != 6 ) ) {
-	    fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
+	    stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
 	  }
 	  for ( i=0,j=0;  i<*Lines;  i++,j+=msglen ) {
 	    N = msglen;
@@ -529,14 +544,18 @@ FILE *maplun_( int *LUN );
 	    } else if ( *LUN == 0 ) { /* Journal File */
 	      MsgDisplayAndFileOut( f1000, JournalFILE );
 	    } else {
-	      MsgDisplayAndFileOut( f1000, fileD );
+	      MsgDisplayAndFileOut( f1000, stream );
 	    }
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
 	}
 
 	if ( Alarming ) {         /* Alarm it:  */
-	  MsgAlarm( msg, prefix[LID].AlarmLevel );
+	  N = msglen;
+	  if ( N > 999 ) N = 999;
+	  strncpy( f1000, msg, N );
+	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
 	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
@@ -565,14 +584,14 @@ FILE *maplun_( int *LUN );
 {
 	int L, N;
 	int i, j;
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 0 ) { /* Journal file  */
-	  fileD = JournalFILE;
+	  stream = JournalFILE;
 	} else if ( *LUN == 6 ) { /* Standard out */
-	  fileD = NULL;
+	  stream = NULL;
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
 	}
 
 	for ( i=0,j=0;  i<*Lines;  i++,j+=msglen ) {
@@ -584,7 +603,7 @@ FILE *maplun_( int *LUN );
 /*	  Send message to standard output: */
 	  printf( "%s\n", f1000 );
 
-	  MsgToFileOut( f1000, fileD );  /*  If LUN is 6, this will cause lines to be doubled. */
+	  MsgToFileOut( f1000, stream );  /*  If LUN is 6, this will cause lines to be doubled. */
 
 	}
 
@@ -766,6 +785,39 @@ FILE *maplun_( int *LUN );
 
 
 
+	FILE*	msg_file_open_( const char* FileName, const char* Type, int FileLen, int TypeLen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	INTEGER FUNCTION	MSG_File_Open( FileName, Type )
+
+*  Inputs:
+	CHARACTER*(*) FileName   ! The file-name.
+	CHARACTER*(*) Type       ! The file's type, for an fopen.
+
+*  Description:  Open a file with fopen, pushing old versions down a version stack.
+
+*  Returns:
+	NULL if failed,
+	File descriptor from fopen if succeeded.                           */
+{
+	int L, N;
+	char fType[10];
+
+	N = FileLen;
+	if ( N > 999 ) N = 999;
+	strncpy( f1000, FileName, N );
+	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+
+	N = TypeLen;
+	if ( N > 9 ) N = 9;
+	strncpy( fType, Type, N );
+	L = MsgLNB( fType, N );   fType[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+
+	return( MsgFileOpen( f1000, fType ) );
+}
+
+
+
+
 	void	msg_get_lun_( int *Terminal_LUN, int *Journal_LUN )
 /*  Fortran callable interface to msg;  Fortran equivalent to:
 	SUBROUTINE			MSG_Get_LUN( Terminal_LUN, Journal_LUN )
@@ -820,7 +872,7 @@ FILE *maplun_( int *LUN );
 *  Description:  MSG package initializion and journal-LUN specification.
 */
 {
-	MsgInit();
+	MsgInit("");
 	return;
 }
 
@@ -926,16 +978,16 @@ FILE *maplun_( int *LUN );
 *  Description:  Send a form-feed to a FORTRAN LUN.
 */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 0 ) { /* Journal file  */
-	  fileD = JournalFILE;
+	  stream = JournalFILE;
 	} else if ( *LUN == 6 ) { /* Standard out */
-	  fileD = NULL;
+	  stream = NULL;
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
 	}
-	MsgToFileOut( "\f", fileD );
+	MsgToFileOut( "\f", stream );
 
 	return;
 }
@@ -955,12 +1007,11 @@ FILE *maplun_( int *LUN );
 
 	INCLUDE 'msg_inc'
 
-*  Description:
-	Set the given Prefix's "Marked CPU time" to current.  When this prefix
-	occurs in a call to an MSG routine which does MSG accounting (eg, Message),
-	and when that Prefix has had its "Marked CPU time" set (ie, to non-zero),
-	that prefix's "total CPU time" is incremented by Current CPU time, less
-	the "Marked CPU time".  The Marked CPU time is then zeroed.
+*  Description:  Set the given Prefix's "Marked CPU time" to current.
+	When this prefix occurs in a call to an MSG routine which does Msg accounting
+	(eg, Message), and when that Prefix has had its "Marked CPU time" set (ie,
+	to non-zero), that prefix's "total CPU time" is incremented by Current CPU
+	time, less the "Marked CPU time".  The Marked CPU time is then zeroed.
 */
 {
 	int i;
@@ -1094,11 +1145,34 @@ FILE *maplun_( int *LUN );
 	by prefix, according to arguments contained in a single character-
 	string command contained in COM.  Commands take these forms:
 
+	To list a summary of msg prefixes' CPU usages:
+	CPU
+
 	To examine the summary page length:
 	GETLINES
 
+	To examine the shared memory ID (shmid):
+	GETSHMID
+
 	To examine the node name:
 	GETNODE
+
+	To list the available commands:
+	HELP
+
+	To list a summary of msg prefixes:
+	LIST
+
+	To have time-stamps occur on a changed CPU time (in addition to
+	getting them on changed real-time or node-name):
+	TIMESTAMP CPU
+
+	To have time-stamps not occur on a changed CPU time (ie, only
+	getting them on changed real-time or node-name):
+	TIMESTAMP NOCPU
+
+	To set the number of lines per page in the summary-output:
+	LINES line-count
 
 	To set the node name:
 	SETNODE <nodename>
@@ -1124,9 +1198,6 @@ FILE *maplun_( int *LUN );
 	To stop counting of message occurances, whether or not disabled:
 	NOCOUNT prefix-1 prefix-2 ... prefix-n
 
-	To list a summary of msg prefixes' CPU usages:
-	CPU
-
 	To delete prefixes:
 	DELETE prefix-1 prefix-2 ... prefix-n
 
@@ -1145,22 +1216,10 @@ FILE *maplun_( int *LUN );
 	To set message-limits on specific messages:
 	LIMIT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
 
-	To set the number of lines per page in the summary-output:
-	LINES line-count
-
-	To list a summary of msg prefixes:
-	LIST
-
 	To set the state of specific messages:
 	SET prefix-1=countLimit-1,level-1,abortLimit-1,active(T/F),counting(T/F),alarming(T/F)> 
 
-	To have time-stamps occur on a changed CPU time (in addition to
-	getting them on changed real-time or node-name):
-	TIMESTAMP CPU
 
-	To have time-stamps not occur on a changed CPU time (ie, only
-	getting them on changed real-time or node-name):
-	TIMESTAMP NOCPU
 
 	Spacing is not critical in the command line, provided at least one
 	or more spaces, tabs or commas separate the arguments.
@@ -1203,7 +1262,7 @@ FILE *maplun_( int *LUN );
 	TRUE for successful completion of command,
 	FALSE for failure.                                                    */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 6 ) { /* Standard Out -- can't read this! */
 	  static int id=0;
@@ -1214,8 +1273,8 @@ FILE *maplun_( int *LUN );
 	  Message( "Msg_Set_From_File-E2  Attempting to read from the journal file (LUN=0)", &id );
 	  return(FALSE);
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
-	  return(MsgSetFromFile( fileD ));
+	  stream = MsgMapLUN( LUN, "r" );    /*  Get stream descriptor for Fortran LUN. */
+	  return(MsgSetFromFile( stream ));
 	}
 }
 
@@ -1431,15 +1490,15 @@ FILE *maplun_( int *LUN );
 	LUN = 0 refers to the journal file, LUN = 6 is standard out.
 */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 6 ) {
 	  MsgSummaryCPUFile( NULL );  /*  This will put it on standard out.  */
 	} else if ( *LUN == 0 ) {
 	  MsgSummaryCPUFile( JournalFILE );
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
-	  MsgSummaryCPUFile( fileD );
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
+	  MsgSummaryCPUFile( stream );
 	}
 	return;
 }
@@ -1464,15 +1523,15 @@ FILE *maplun_( int *LUN );
 	LUN = 0 refers to the journal file, LUN = 6 is standard out.
 */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 6 ) {
 	  MsgSummaryEventFile( NULL, *Nevents );  /*  This will put it on standard out.  */
 	} else if ( *LUN == 0 ) {
 	  MsgSummaryEventFile( JournalFILE, *Nevents );
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
-	  MsgSummaryEventFile( fileD, *Nevents );
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
+	  MsgSummaryEventFile( stream, *Nevents );
 	}
 	return;
 }
@@ -1499,15 +1558,15 @@ FILE *maplun_( int *LUN );
 	only produce an actual time-stamp once each second.
 */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 6 ) {
 	  MsgTimeStampFile( NULL );  /*  This will put it on standard out.  */
 	} else if ( *LUN == 0 ) {
 	  MsgTimeStampFile( JournalFILE );
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
-	  MsgTimeStampFile( fileD );
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
+	  MsgTimeStampFile( stream );
 	}
 	return;
 }
@@ -1532,15 +1591,15 @@ FILE *maplun_( int *LUN );
 	Always produces output.
 */
 {
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 6 ) {
 	  MsgTimeStampFileOut( NULL );  /*  This will put it on standard out.  */
 	} else if ( *LUN == 0 ) {
 	  MsgTimeStampFileOut( JournalFILE );
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
-	  MsgTimeStampFileOut( fileD );
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
+	  MsgTimeStampFileOut( stream );
 	}
 	return;
 }
@@ -1604,7 +1663,11 @@ FILE *maplun_( int *LUN );
 	}
 
 	if ( Alarming ) {         /* Alarm it:  */
-	  MsgAlarm( msg, prefix[LID].AlarmLevel );
+	  N = msglen;
+	  if ( N > 999 ) N = 999;
+	  strncpy( f1000, msg, N );
+	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
 	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
@@ -1673,14 +1736,14 @@ FILE *maplun_( int *LUN );
 	int LID;   /* Local copy of ID. */
 	int L, N;
 	int i, j;
-	FILE *fileD;
+	FILE *stream;
 
 	if ( *LUN == 0 ) { /* Journal file  */
-	  fileD = JournalFILE;
+	  stream = JournalFILE;
 	} else if ( *LUN == 6 ) { /* Standard out */
-	  fileD = NULL;
+	  stream = NULL;
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
 	}
 
 	LID = *ID;
@@ -1705,13 +1768,17 @@ FILE *maplun_( int *LUN );
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
 	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
-	    MsgToFileOut( f1000, fileD );
+	    MsgToFileOut( f1000, stream );
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
 	}
 
 	if ( Alarming ) {         /* Alarm it:  */
-	  MsgAlarm( msg, prefix[LID].AlarmLevel );
+	  N = msglen;
+	  if ( N > 999 ) N = 999;
+	  strncpy( f1000, msg, N );
+	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
 	if ( *ID == 0 ) *ID = LID;   /* Ensure it's changed only if zero. */
@@ -1742,14 +1809,16 @@ FILE *maplun_( int *LUN );
 {
 	int L, N;
 	int i, j;
-	FILE *fileD;
+	FILE *stream;
+
+
 
 	if ( *LUN == 0 ) { /* Journal file  */
-	  fileD = JournalFILE;
+	  stream = JournalFILE;
 	} else if ( *LUN == 6 ) { /* Standard out */
-	  fileD = NULL;
+	  stream = NULL;
 	} else {
-	  fileD = maplun_( LUN );    /*  Get file descriptor for Fortran LUN. */
+	  stream = MsgMapLUN( LUN, "w" );    /*  Get stream descriptor for Fortran LUN. */
 	}
 
 	for ( i=0,j=0;  i<*Lines;  i++,j+=msglen ) {
@@ -1757,7 +1826,7 @@ FILE *maplun_( int *LUN );
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
 	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
-	  MsgToFileOut( f1000, fileD );
+	  MsgToFileOut( f1000, stream );
 	}
 	return;
 }
@@ -1765,3 +1834,52 @@ FILE *maplun_( int *LUN );
 
 
 
+	FILE*	MsgMapLUN( int *LUN, const char *type ) 
+{
+/*  Description:  Get the stream descriptor corresponding to a Fortran LUN.
+	This works absolutely correctly only on sgi.  On other platforms,
+	this routine returns NULL (for standard out) if LUN is 6.  Otherwise,
+	it returns the stream descriptor for the journal file if the journal
+	file is enabled and opened.
+	"type" is that of the fopen (stream i/o) call.                      */
+
+	FILE *stream;
+	int   fid;
+
+/*  from "man fdopen":   FILE *fdopen (int fildes, const char *type);       */
+
+#ifdef IRIX
+	if ( *LUN == 0 ) {
+/*	  Special value of *LUN == 0 refers to the journal file:  */
+	  if ( JournalFILE ) {
+	    stream = JournalFILE;
+	  } else {
+	    stream = NULL;
+	  }
+	} else {
+	  fid = maplun_(LUN);
+	  stream = fdopen ( fid, type );
+	}
+#else
+/*	Kludge in some probable values in the absence of maplun:   */
+	if ( *LUN == 6 ) {
+	  stream = NULL;
+	} else if ( JournalFILE ) {
+	  stream = JournalFILE;
+	} else {
+	  stream = NULL;
+	}
+#endif
+	return(stream);
+}
+
+
+
+	void	msgalarmroutinesample_( char* Prefix, char* sansPrefix, int *Level )
+{
+/*  Description:  Fortran-callable interface to MsgAlarmRoutineSample.  */
+
+	MsgAlarmRoutineSample( Prefix, sansPrefix, Level );
+
+	return;
+}
