@@ -1,4 +1,5 @@
 * created 6/5/98 Kathy Turner
+* editted 6/8/98 Kathy Turner - put tables in correct directories
 * 
 * **** 
 * This kumac reads from a file and runs gstar then g2t.
@@ -73,7 +74,11 @@ def [DEFAULT]
 * ***************** SETUP TABLE DIRECTORIES ******************
   exec setup_dir 
   
-   
+* ***************** OPEN OUTPUT FILE *******************
+ exec write_table_to_file#init outunit [output_file]
+ 
+ 
+ 
 * ******* INITIALIZATION & LOADING ************************
 * ******* Note: Geant library loading slightly different than other software*
  exec gstar#init_phys [phystype] 
@@ -85,22 +90,28 @@ def [DEFAULT]
 *  nothing now
  
  
+* *********** FOR DEBUGGING *********************************
 *  just for looking at output of gstar
  if [debugger].eq.on then
   swit 2 3
   next; dcut cave z 225 10 10 .04 .04
  endif
  
+* ************ OPEN INPUT FILE *********************************
 * open input file - this in in GEANT format!
   user/input tx [input_file]
   
-* open output file:
-* exec write_table_to_file#init outunit [output_file]
   
+
+* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********
+ exec gstar#mv_tables_Run
+  
+
+* ********** WRITE RUN INFO TO OUTPUT FILE ***************
 * write Run information to output file - already in staf format 
-* cd /dui/geant
-* exec write_table_to_file#write outunit Run
+ exec write_table_to_file#write outunit /dui/geant/Run
   
+
   
 *************** LOOP OVER EVENTS *****************************
   
@@ -110,21 +121,35 @@ def [DEFAULT]
      if [debugger].eq.on then
        next; dcut cave z 225 10 10 .04 .04
      endif
+     
+
 * if you want to generate particles by hand, do it here 
 *   using phase or gkin
+     
 * run gstar/g2t - automatically reads next event from input file 
-     exec gstar#process_event
-* write out Run information on first event only
-* cd /dui/geant
-* exec write_table_to_file#write outunit Event
+   exec gstar#process_event
+   
+* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********
+   exec gstar#mv_tables_Event
+   
+* write out Event information 
+   exec write_table_to_file#write outunit /dui/geant/Event
      
    enddo
    
 ******************* CLOSE OUTPUT ***************************
-* exec write_table_to_file#close outunit
+   
+   exec write_table_to_file#close outunit
 * 
 * ***********************************************************
    
+  return
+
+
+
+
+
+
 
 
 
