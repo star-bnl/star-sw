@@ -1,4 +1,4 @@
-#include "StiKalmanTrackFinderParameters.h" 
+#include "StiKalmanTrackFinderParameters.h"
 #include "Sti/StiToolkit.h" 
 #include "Sti/Base/Factory.h" 
 #include "Sti/Base/EditableParameter.h" 
@@ -91,7 +91,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
-                            50., 0., 20000., 0.1, 0)); 
+                            1000., 0., 20000., 0.1, 0)); 
   add(f->getInstance()->set("massHypothesis", 
                             "massHypothesis",  
                             &massHypothesis,  
@@ -100,10 +100,10 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("OuterScaling",
                             "OuterScaling",
                             &outerScaling,
-                            1.5, 0., 20., 0.1, 0)); 
+                            1.3, 0., 20., 0.1, 0));	///previously 1.5
   add(f->getInstance()->set("InnerScaling",
                             "InnerScaling",
                             &innerScaling,
-                            1.5, 0., 20., 0.1, 0)); 
+                            2.1, 0., 20., 0.1, 0)); 
   
 } 
