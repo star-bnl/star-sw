@@ -743,5 +743,4 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.110 2000/07/01 18:43:20 fisyak Exp $
-
+// @(#)root/base:$Name:  $:$Id: StBFChain.cxx,v 1.111 2000/07/01 19:57:44 fisyak Exp $
