@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.20 2000/03/29 03:52:07 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.21 2000/03/30 05:26:26 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.21  2000/03/30 05:26:26  sakrejda
+* Initialisation fir idi2 added.
+*
 * Revision 1.20  2000/03/29 03:52:07  sakrejda
 * Marking hits belonging to a track added here and the track length
 * calcualtion changed to allow for spirals.
@@ -117,9 +120,9 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       DATA nposOn /.TRUE./
 
       character*256 m132 
-      integer id1,id2
-      data id1,id2/2*0/
-      save id1 ,id2
+      integer id1,id2,idi2
+      data id1,id2, idi2/3*0/
+      save id1 ,id2,idi2
 C___________________________________________________________________
       if(ipt.gt.track_h.maxlen) then
          write(m132,*) "TPTLOAD-E1 too many tracks",track_h.maxlen,ipt
