@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.4 2004/08/06 01:37:04 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.5 2004/08/13 22:14:15 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -349,7 +349,6 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   //if (.13< massHyp<.14) 
   geantIdPidHyp = 0;
   unsigned short nFitPoints = EncodedStEventFitPoints(track);
-  if (gTrack->type()==primary) nFitPoints += 1; // the vertex is added as a fit point
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
   float chi2[2];
@@ -365,7 +364,8 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   // which does a memberwise copy.  Therefore, constructing a local instance of 
   // StTrackFitTraits is fine, as it will get properly copied.
   StTrackFitTraits fitTraits(geantIdPidHyp, nFitPoints, chi2, covMFloat);
-  fitTraits.setNumberOfFitPoints(nFitPoints, track->GetDetectorId());
+  fitTraits.setNumberOfFitPoints(nFitPoints, track->GetDetectorId());  // The vertex is not added as a fit point anymore.
+  fitTraits.setPrimaryVertexUsedInFit((gTrack->type() == primary) ? kTRUE : kFALSE);   // The fitTraits are flagged as primary or global.
   gTrack->setFitTraits(fitTraits); 
   return;
 }
