@@ -1,186 +1,4 @@
-// $Id: StMaker.cxx,v 1.75 1999/10/19 03:23:55 fine Exp $
-// $Log: StMaker.cxx,v $
-// Revision 1.75  1999/10/19 03:23:55  fine
-// Some new comments
-//
-// Revision 1.74  1999/09/24 16:32:40  fisyak
-// add return for Init/Finish Run
-//
-// Revision 1.73  1999/09/24 14:51:51  fisyak
-// Add implementation for InitRun/FinishRun
-//
-// Revision 1.72  1999/09/23 21:24:57  perev
-// recovered debug level init(lost)
-//
-// Revision 1.71  1999/09/21 15:05:17  perev
-// InitRun & FinishRun added
-//
-// Revision 1.70  1999/09/14 17:30:37  fine
-// some clean ups
-//
-// Revision 1.69  1999/09/13 23:22:53  fine
-// improved version of MakeDoc with MakeAssociatedClassList function
-//
-// Revision 1.68  1999/09/13 16:39:24  fine
-// MakeDoc ExpandPath removed to keep path short
-//
-// Revision 1.67  1999/09/13 13:30:46  fine
-// non-active new method MakeAssociatedClassList to be introduced new release
-//
-// Revision 1.66  1999/09/12 16:54:50  fine
-// StMaker::MakeDoc() adjusted to multi-level makers. Some bug fix also
-//
-// Revision 1.65  1999/09/12 15:02:53  fine
-// Multi-level maker source dirs introduced for MakeDoc method
-//
-// Revision 1.64  1999/09/12 01:42:14  fine
-// StMAker::MakeDoc has been adjusted to the new source tree
-//
-// Revision 1.63  1999/09/08 00:13:35  fisyak
-// Add static *GetChain()
-//
-// Revision 1.62  1999/09/03 23:11:48  perev
-// Add .runcont directory
-//
-// Revision 1.61  1999/09/02 22:27:11  fisyak
-// Add SetDEBUG
-//
-// Revision 1.60  1999/08/06 13:01:37  fisyak
-// Add Active flag
-//
-// Revision 1.59  1999/07/29 01:05:23  fisyak
-// move bfc to StBFChain
-//
-// Revision 1.58  1999/07/17 23:29:22  fisyak
-// Add Peter Jacobs QAInfo tag in printout
-//
-// Revision 1.57  1999/07/17 19:08:45  perev
-// StMemoryInfo added
-//
-// Revision 1.55  1999/07/15 13:56:47  perev
-// cleanup
-//
-// Revision 1.54  1999/07/13 02:19:34  perev
-// GetCVS,StEvtHddr,etc...
-//
-// Revision 1.53  1999/07/12 02:33:09  perev
-// Add SetMode
-//
-// Revision 1.52  1999/07/11 21:04:06  fisyak
-// Clash resolion
-//
-// Revision 1.51  1999/07/11 20:40:35  perev
-// Move Clear from StChain to StMaker
-//
-// Revision 1.50  1999/07/11 01:59:04  perev
-// add GetCVSTag again
-//
-// Revision 1.49  1999/07/11 01:33:33  fine
-// makedoc some corrections for MakeDoc
-//
-// Revision 1.48  1999/07/09 22:00:22  perev
-// GetCVS into StMaker
-//
-// Revision 1.47  1999/06/11 23:45:31  perev
-// cleanup
-//
-// Revision 1.46  1999/06/11 22:56:03  perev
-// Merge 2 updates
-//
-// Revision 1.45  1999/06/11 21:50:47  perev
-// garb->Delete()
-//
-// Revision 1.44  1999/06/11 17:45:57  perev
-// assert StMaker::Streamer to forbid to write it
-//
-// Revision 1.43  1999/05/23 04:05:02  fine
-// The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
-//
-// Revision 1.42  1999/05/23 03:25:07  perev
-// Start & Stop Timer instead of benchmark
-//
-// Revision 1.41  1999/05/22 17:50:18  perev
-// StMaker::EndMaker ps added
-//
-// Revision 1.40  1999/05/13 20:56:50  perev
-// Supress too much warnings
-//
-// Revision 1.39  1999/05/10 17:16:44  perev
-// AddHist typo
-//
-// Revision 1.38  1999/05/10 15:37:51  perev
-// Save of hisogramm in StMaker::Init
-//
-// Revision 1.37  1999/05/07 20:51:31  perev
-// AddData bug fix
-//
-// Revision 1.36  1999/05/07 15:46:10  perev
-// Added test for the same object into AddObj
-//
-// Revision 1.35  1999/05/06 22:15:32  perev
-// fix objLast should not be included in StMaker::Init
-//
-// Revision 1.34  1999/05/06 21:27:10  perev
-// StMaker remove his from hdirectory
-//
-// Revision 1.33  1999/05/06 00:47:43  fine
-// maker's histogram is removed from the ROOT system gDirectory
-//
-// Revision 1.32  1999/05/06 00:23:45  fine
-// StMaker::MakeDoc some extra comments have been introduced
-//
-// Revision 1.31  1999/05/06 00:19:04  fine
-// StMaker::MakeDoc method has been re-introduced for the 3d time
-//
-// Revision 1.30  1999/05/05 16:23:07  perev
-// add recreation of m_DataSet to keep old codes
-//
-// Revision 1.29  1999/05/03 22:29:28  perev
-// Bug in GetDataSet fix. Thanks to Bill Love
-//
-// Revision 1.28  1999/05/01 00:53:38  perev
-// GetDataSet bug fix NAME == NAME/.data
-//
-// Revision 1.26  1999/04/30 14:58:41  perev
-//  cd() added to StMaker class
-//
-// Revision 1.25  1999/04/16 14:22:00  fisyak
-// replace break in Makers loop from ==kStErr to >kStWarn to account EOF
-//
-// Revision 1.24  1999/03/28 02:57:51  perev
-// Add .const in searching path in GetDataSet
-//
-// Revision 1.23  1999/03/20 20:57:35  perev
-// add StEvtHddr.h and fix Get/SetNumber in maker
-//
-// Revision 1.22  1999/03/19 20:30:49  perev
-// GetCVSTag introduced
-//
-// Revision 1.21  1999/03/11 01:23:59  perev
-// new schema StChain
-//
-// Revision 1.14  1998/12/21 19:42:51  fisyak
-// Move ROOT includes to non system
-//
-// Revision 1.13  1998/11/19 01:23:57  fine
-// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
-//
-// Revision 1.12  1998/11/18 22:46:09  fine
-// The lost MakeDoc method has been re-introduced
-//
-// Revision 1.9  1998/09/23 20:22:52  fisyak
-// Prerelease SL98h
-//
-// Revision 1.10  1998/10/06 18:00:27  perev
-// cleanup
-// Revision 1.8  1998/09/22 01:39:07  fine
-// Some make up
-//
-// Revision 1.6  1998/08/18 14:05:02  fisyak
-// Add to bfc dst
-//
-// Revision 1.5  1998/07/20 15:08:09  fisyak
-// Add tcl and tpt
+// $Id: StMaker.cxx,v 1.76 1999/11/19 21:02:11 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -865,6 +683,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
               break;
             case 5:
               if (strcmp(thisClassName,className.Data())) {
+                printf(" MakeDoc: %s\n", className.Data());
                 TClass *cl = gROOT->GetClass(className.Data());
                 if (cl && !cl->InheritsFrom("StMaker") ) {
                     gHtml->MakeClass((Text_t *)className.Data());
@@ -1013,9 +832,10 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
       makeAllAtOnce = kFALSE;
       //  gHtml->MakeAll();  // VF 10/09/99
       for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
-      MakeAssociatedClassList(this, classDir.Data());
+//      MakeAssociatedClassList(this, classDir.Data());
   }
 
+  if (baseClasses)    MakeAssociatedClassList(this, classDir.Data());
   // Create the doc for this class
   printf(" Making html for <%s>\n",classname.Data());
   gHtml->MakeClass((Char_t *)classname.Data());
@@ -1111,3 +931,190 @@ void StMaker::SetDEBUG(Int_t l)
 Int_t StMaker::InitRun(int runumber) {return 0;}
 //_____________________________________________________________________________
 Int_t StMaker::FinishRun(int runumber) {return 0;}
+
+//_____________________________________________________________________________
+// $Log: StMaker.cxx,v $
+// Revision 1.76  1999/11/19 21:02:11  didenko
+// valeri's changes
+//
+// Revision 1.75  1999/10/19 03:23:55  fine
+// Some new comments
+//
+// Revision 1.74  1999/09/24 16:32:40  fisyak
+// add return for Init/Finish Run
+//
+// Revision 1.73  1999/09/24 14:51:51  fisyak
+// Add implementation for InitRun/FinishRun
+//
+// Revision 1.72  1999/09/23 21:24:57  perev
+// recovered debug level init(lost)
+//
+// Revision 1.71  1999/09/21 15:05:17  perev
+// InitRun & FinishRun added
+//
+// Revision 1.70  1999/09/14 17:30:37  fine
+// some clean ups
+//
+// Revision 1.69  1999/09/13 23:22:53  fine
+// improved version of MakeDoc with MakeAssociatedClassList function
+//
+// Revision 1.68  1999/09/13 16:39:24  fine
+// MakeDoc ExpandPath removed to keep path short
+//
+// Revision 1.67  1999/09/13 13:30:46  fine
+// non-active new method MakeAssociatedClassList to be introduced new release
+//
+// Revision 1.66  1999/09/12 16:54:50  fine
+// StMaker::MakeDoc() adjusted to multi-level makers. Some bug fix also
+//
+// Revision 1.65  1999/09/12 15:02:53  fine
+// Multi-level maker source dirs introduced for MakeDoc method
+//
+// Revision 1.64  1999/09/12 01:42:14  fine
+// StMAker::MakeDoc has been adjusted to the new source tree
+//
+// Revision 1.63  1999/09/08 00:13:35  fisyak
+// Add static *GetChain()
+//
+// Revision 1.62  1999/09/03 23:11:48  perev
+// Add .runcont directory
+//
+// Revision 1.61  1999/09/02 22:27:11  fisyak
+// Add SetDEBUG
+//
+// Revision 1.60  1999/08/06 13:01:37  fisyak
+// Add Active flag
+//
+// Revision 1.59  1999/07/29 01:05:23  fisyak
+// move bfc to StBFChain
+//
+// Revision 1.58  1999/07/17 23:29:22  fisyak
+// Add Peter Jacobs QAInfo tag in printout
+//
+// Revision 1.57  1999/07/17 19:08:45  perev
+// StMemoryInfo added
+//
+// Revision 1.55  1999/07/15 13:56:47  perev
+// cleanup
+//
+// Revision 1.54  1999/07/13 02:19:34  perev
+// GetCVS,StEvtHddr,etc...
+//
+// Revision 1.53  1999/07/12 02:33:09  perev
+// Add SetMode
+//
+// Revision 1.52  1999/07/11 21:04:06  fisyak
+// Clash resolion
+//
+// Revision 1.51  1999/07/11 20:40:35  perev
+// Move Clear from StChain to StMaker
+//
+// Revision 1.50  1999/07/11 01:59:04  perev
+// add GetCVSTag again
+//
+// Revision 1.49  1999/07/11 01:33:33  fine
+// makedoc some corrections for MakeDoc
+//
+// Revision 1.48  1999/07/09 22:00:22  perev
+// GetCVS into StMaker
+//
+// Revision 1.47  1999/06/11 23:45:31  perev
+// cleanup
+//
+// Revision 1.46  1999/06/11 22:56:03  perev
+// Merge 2 updates
+//
+// Revision 1.45  1999/06/11 21:50:47  perev
+// garb->Delete()
+//
+// Revision 1.44  1999/06/11 17:45:57  perev
+// assert StMaker::Streamer to forbid to write it
+//
+// Revision 1.43  1999/05/23 04:05:02  fine
+// The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
+//
+// Revision 1.42  1999/05/23 03:25:07  perev
+// Start & Stop Timer instead of benchmark
+//
+// Revision 1.41  1999/05/22 17:50:18  perev
+// StMaker::EndMaker ps added
+//
+// Revision 1.40  1999/05/13 20:56:50  perev
+// Supress too much warnings
+//
+// Revision 1.39  1999/05/10 17:16:44  perev
+// AddHist typo
+//
+// Revision 1.38  1999/05/10 15:37:51  perev
+// Save of hisogramm in StMaker::Init
+//
+// Revision 1.37  1999/05/07 20:51:31  perev
+// AddData bug fix
+//
+// Revision 1.36  1999/05/07 15:46:10  perev
+// Added test for the same object into AddObj
+//
+// Revision 1.35  1999/05/06 22:15:32  perev
+// fix objLast should not be included in StMaker::Init
+//
+// Revision 1.34  1999/05/06 21:27:10  perev
+// StMaker remove his from hdirectory
+//
+// Revision 1.33  1999/05/06 00:47:43  fine
+// maker's histogram is removed from the ROOT system gDirectory
+//
+// Revision 1.32  1999/05/06 00:23:45  fine
+// StMaker::MakeDoc some extra comments have been introduced
+//
+// Revision 1.31  1999/05/06 00:19:04  fine
+// StMaker::MakeDoc method has been re-introduced for the 3d time
+//
+// Revision 1.30  1999/05/05 16:23:07  perev
+// add recreation of m_DataSet to keep old codes
+//
+// Revision 1.29  1999/05/03 22:29:28  perev
+// Bug in GetDataSet fix. Thanks to Bill Love
+//
+// Revision 1.28  1999/05/01 00:53:38  perev
+// GetDataSet bug fix NAME == NAME/.data
+//
+// Revision 1.26  1999/04/30 14:58:41  perev
+//  cd() added to StMaker class
+//
+// Revision 1.25  1999/04/16 14:22:00  fisyak
+// replace break in Makers loop from ==kStErr to >kStWarn to account EOF
+//
+// Revision 1.24  1999/03/28 02:57:51  perev
+// Add .const in searching path in GetDataSet
+//
+// Revision 1.23  1999/03/20 20:57:35  perev
+// add StEvtHddr.h and fix Get/SetNumber in maker
+//
+// Revision 1.22  1999/03/19 20:30:49  perev
+// GetCVSTag introduced
+//
+// Revision 1.21  1999/03/11 01:23:59  perev
+// new schema StChain
+//
+// Revision 1.14  1998/12/21 19:42:51  fisyak
+// Move ROOT includes to non system
+//
+// Revision 1.13  1998/11/19 01:23:57  fine
+// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
+//
+// Revision 1.12  1998/11/18 22:46:09  fine
+// The lost MakeDoc method has been re-introduced
+//
+// Revision 1.9  1998/09/23 20:22:52  fisyak
+// Prerelease SL98h
+//
+// Revision 1.10  1998/10/06 18:00:27  perev
+// cleanup
+// Revision 1.8  1998/09/22 01:39:07  fine
+// Some make up
+//
+// Revision 1.6  1998/08/18 14:05:02  fisyak
+// Add to bfc dst
+//
+// Revision 1.5  1998/07/20 15:08:09  fisyak
+// Add tcl and tpt
