@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.3 1999/07/13 00:42:31 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.4 1999/07/17 00:48:45 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.4  1999/07/17 00:48:45  kathy
+// change check on dst_TrgDet to test on TrgDet table
+//
 // Revision 1.3  1999/07/13 00:42:31  kathy
 // updated all default input files, removed unneccessary macros, renamed other to make more standard
 //
@@ -92,7 +95,7 @@ const char *fname="qa_full_tables.txt")
    Int_t cnt_dst_xi_vertex=0;
    Int_t cnt_dst_dedx=0;
    Int_t cnt_particle=0;
-   Int_t cnt_dst_TrgDet=0;
+   Int_t cnt_TrgDet=0;
    Int_t cnt_monitor_soft=0;
    Int_t cnt_g2t_rch_hit=0;
 
@@ -148,8 +151,8 @@ const char *fname="qa_full_tables.txt")
                cnt_dst_dedx++;
             if (strcmp(obj->GetName(),"particle")==0) 
                cnt_particle++;
-            if (strcmp(obj->GetName(),"dst_TrgDet")==0) 
-               cnt_dst_TrgDet++;
+            if (strcmp(obj->GetName(),"TrgDet")==0) 
+               cnt_TrgDet++;
             if (strcmp(obj->GetName(),"monitor_soft")==0) 
                cnt_monitor_soft++;
             if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
@@ -240,10 +243,10 @@ const char *fname="qa_full_tables.txt")
 	 cnt_particle << endl;
 
 
-      cout << "QA-> total # dst_TrgDet tables = " << 
-         cnt_dst_TrgDet << endl;
-      fout << "QA-> total # dst_TrgDet tables = " << 
-	 cnt_dst_TrgDet << endl;
+      cout << "QA-> total # TrgDet tables = " << 
+         cnt_TrgDet << endl;
+      fout << "QA-> total # TrgDet tables = " << 
+	 cnt_TrgDet << endl;
 
 
       cout << "QA-> total # monitor_soft tables = " << 
