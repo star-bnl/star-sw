@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski 
-// $Id: StppLMVevalMaker.cxx,v 1.2 2001/04/23 21:54:24 balewski Exp $
+// $Id: StppLMVevalMaker.cxx,v 1.3 2001/04/23 21:55:52 balewski Exp $
 // $Log: StppLMVevalMaker.cxx,v $
+// Revision 1.3  2001/04/23 21:55:52  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/04/23 21:54:24  balewski
 // *** empty log message ***
 //
@@ -130,7 +133,7 @@ Int_t StppLMVevalMaker::Make(){
     if(fabs(dz)<1.5 && drxy<1.5) he[2]->Fill(NchG);
     he[3]->Fill(dz);
     ((TH2*) he[4])->Fill(NchG,dz);
-    ((TH2*) he[5])->Fill(NchG.drxy);
+    ((TH2*) he[5])->Fill(NchG,drxy);
   }
     
 
