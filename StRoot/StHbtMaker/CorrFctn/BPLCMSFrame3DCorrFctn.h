@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.h,v 1.4 2001/05/23 00:19:04 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.h,v 1.5 2002/06/07 22:51:39 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.h,v $
+ * Revision 1.5  2002/06/07 22:51:39  lisa
+ * Widely used BPLCMSFrame3DCorrFctn class now accumulates UNcorrected denominator and has a WriteOutHistos method
+ *
  * Revision 1.4  2001/05/23 00:19:04  lisa
  * Add in Smearing classes and methods needed for momentum resolution studies and correction
  *
@@ -50,6 +53,7 @@ public:
 
   StHbt3DHisto* Numerator();
   StHbt3DHisto* Denominator();
+  StHbt3DHisto* UncorrectedDenominator();
   StHbt3DHisto* Ratio();
   StHbt3DHisto* QinvHisto();
 
@@ -60,6 +64,8 @@ public:
   void SetNormRangeHi(float qHi);
   float GetNormRangeLo();
   float GetNormRangeHi();
+
+  void WriteOutHistos();
 
   void SetCoulombCorrection(StHbtCoulomb* Correction);
 
@@ -90,6 +96,7 @@ public:
 private:
   StHbt3DHisto* mNumerator;
   StHbt3DHisto* mDenominator;
+  StHbt3DHisto* mUncorrectedDenominator;
   StHbt3DHisto* mRatio;
   StHbt3DHisto* mQinvHisto;
 
@@ -120,6 +127,7 @@ private:
 
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Numerator(){return mNumerator;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Denominator(){return mDenominator;}
+inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::UncorrectedDenominator(){return mUncorrectedDenominator;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::Ratio(){return mRatio;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn::QinvHisto(){return mQinvHisto;}
 inline  void BPLCMSFrame3DCorrFctn::SetNormRangeLo(float qLo){mQinvNormLo = qLo;}
