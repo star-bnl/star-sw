@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.3 2003/01/18 02:35:53 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.4 2003/01/19 03:47:10 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.4  2003/01/19 03:47:10  zolnie
+// still further improvements
+//
 // Revision 1.3  2003/01/18 02:35:53  zolnie
 // further modifications
 //
@@ -29,7 +32,7 @@ ClassImp(EEmcGeomSimple)
 
 EEmcGeomSimple::EEmcGeomSimple() 
 {
-  InitDefaults();
+  useDefaultGeometry();
 }
 
 EEmcGeomSimple::~EEmcGeomSimple() 
@@ -44,7 +47,7 @@ EEmcGeomSimple::~EEmcGeomSimple()
 //     6:  285deg ->  255deg
 //     9:   15deg ->  345deg
 void
-EEmcGeomSimple::InitDefaults() 
+EEmcGeomSimple::useDefaultGeometry() 
 {
   // default EtaBins
   const Float_t defaultEtaBin[] = {
@@ -58,11 +61,12 @@ EEmcGeomSimple::InitDefaults()
   mNumSSec = kEEmcNumSubSectors;
   mNumEta  = kEEmcNumEtas;
 
+  if(mEtaBin) delete mEtaBin;
   mEtaBin = new Float_t[mNumEta+1];
   for(int i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
 
-  mZ1     =  270.190*centimeter;
-  mZ2     =  306.158*centimeter;
+  mZ1     =  270.190*centimeter; // preshower
+  mZ2     =  306.158*centimeter; // postshower
   mPhi0   =  75.0*degree;       
   mClock  =  CounterClockwise;  
 
@@ -70,7 +74,7 @@ EEmcGeomSimple::InitDefaults()
 
 // =========================================================================
 // gets a hit vector r checks if inside the EEmc
-// and returns sector (1..12), subsector (1..5) and eta(1..mNumEta)
+// and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) and eta(0..mNumEta)
 // 
 // =========================================================================
 int 

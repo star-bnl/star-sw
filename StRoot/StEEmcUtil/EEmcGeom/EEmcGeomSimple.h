@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.3 2003/01/18 02:35:54 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.4 2003/01/19 03:47:11 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.4  2003/01/19 03:47:11  zolnie
+ * still further improvements
+ *
  * Revision 1.3  2003/01/18 02:35:54  zolnie
  * further modifications
  *
@@ -33,6 +36,8 @@ public:
 
   EEmcGeomSimple();
   virtual ~EEmcGeomSimple();
+
+
   
   Int_t getHit(const StThreeVectorD& r,          StEmcRawHit& hit);//given r point return EmcRawHit
   Int_t getHit(const StTrack& track, Double_t z, StEmcRawHit& hit);//a wrapper for the above when
@@ -77,9 +82,10 @@ protected:
   Float_t  mPhi0;    // phi0 of the 0th sector 
   Chiral_t mClock;   // +1 == clockwise  -1 == counter-clockwise
 
+  void    useDefaultGeometry();
 
 private:
-  void InitDefaults();
+
   
   ClassDef(EEmcGeomSimple,1)   // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
    
