@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.15 1999/11/10 02:19:10 lbarnby Exp $
+// $Id: StV0Maker.cxx,v 1.16 1999/12/10 17:20:26 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.16  1999/12/10 17:20:26  genevb
+// No need to set 4 primary vertices, changed formula for table allocation
+//
 // Revision 1.15  1999/11/10 02:19:10  lbarnby
 // change in StV0Maker related to multiple primary vertices in vertex table
 //
@@ -177,19 +180,17 @@ Int_t StV0Maker::Make(){
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     // ev0
     if(Debug()) gMessMgr->Info() << "Calling ev0..." << endm;
-    Int_t v0_limit = globtrk->GetNRows();
-    v0_limit = (v0_limit*v0_limit)/6000;
-    if (v0_limit < 1000) v0_limit=1000;
+    Int_t v0_limit = globtrk->GetNRows()/80;
+    v0_limit = v0_limit*v0_limit;
+    if (v0_limit < 2048) v0_limit=2048;
     if (! dst_v0_vertex) {
       dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",v0_limit); 
       AddData(dst_v0_vertex);
     }
-    vertex->ReAllocate(3*v0_limit);
+    vertex->ReAllocate(v0_limit);
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
     AddGarb(ev0track2);
-    
-    vertex->SetNRows(4); 
-    
+        
     iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
     //       =========================================================
     
