@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.8 1999/02/04 19:22:23 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.9 1999/02/05 16:32:30 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.9  1999/02/05 16:32:30  fine
+// St_NodePostion::Draw() method has been implemented
+//
 // Revision 1.8  1999/02/04 19:22:23  fine
 // Severak drawing method have been added to draw STAR nodes
 //
@@ -160,118 +163,16 @@ Int_t St_NodePosition::DistancetoPrimitive(Int_t, Int_t)
 //*-*
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-#if 0 
-   const Int_t big = 9999;
-   const Int_t inaxis = 7;
-   const Int_t maxdist = 5;
- 
-   Int_t i;
- 
-   Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
-   Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
-   Int_t puxmax = gPad->XtoAbsPixel(gPad->GetUxmax());
-   Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
- 
-//*-*- return if point is not in the user area
-   if (px < puxmin - inaxis) return big;
-   if (py > puymin + inaxis) return big;
-   if (px > puxmax + inaxis) return big;
-   if (py < puymax - inaxis) return big;
- 
-   TView *view =gPad->GetView();
-   if (!view) return big;
- 
-//*-*- Update translation vector and rotation matrix for new level
-   if (gGeomLevel) {
-      Int_t ig = gGeomLevel;
-      UpdateTempMatrix(&(gTranslation[ig-1][0]),&gRotMatrix[ig-1][0]
-                      ,fX,fY,fZ,fMatrix->GetMatrix()
-                      ,&gTranslation[ig][0],&gRotMatrix[ig][0]);
- 
-   } else {
-      for (i=0;i<kVectorSize;i++) gTranslation[0][i] = 0;
-      for (i=0;i<kMatrixSize;i++) gRotMatrix[0][i] = 0;
-      gRotMatrix[0][0] = 1;   gRotMatrix[0][4] = 1;   gRotMatrix[0][8] = 1;
-   }
- 
-//*-*- Paint Referenced shape
-   Int_t dist = big;
-   if (fVisibility && fShape->GetVisibility()) {
-      gNode = this;
-      dist = fShape->DistancetoPrimitive(px,py);
-      if (dist < maxdist) {
-         gPad->SetSelected(this);
-         return 0;
-      }
-   }
-   if ( TestBit(kSonsInvisible) ) return dist;
- 
-//*-*- Loop on all sons
-   Int_t nsons = 0;
-   if (fNodes) nsons = fNodes->GetSize();
-   Int_t dnode = dist;
-   if (nsons) {
- 
-      Int_t levelsave = gGeomLevel;
-      gGeomLevel++;
-      St_NodePosition *node;
-      TObject *obj;
-      TIter  next(fNodes);
-      while ((obj = next())) {
-         node = (St_NodePosition*)obj;
-         dnode = node->DistancetoPrimitive(px,py);
-         if (dnode <= 0) break;
-         if (dnode < dist) dist = dnode;
-      }
-      gGeomLevel = levelsave;
-   }
- 
-   if (gGeomLevel==0 && dnode > maxdist) {
-      gPad->SetSelected(view);
-      return 0;
-   } else
-      return dnode;
-#else
-  return 999;
-#endif  
-      
+   return 99999;      
 }
  
 //______________________________________________________________________________
-void St_NodePosition::Draw(Option_t *)
+void St_NodePosition::Draw(Option_t *option)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
 //*-*                   =============================================
- 
- #if 0
-   Int_t i;
-   TString opt = option;
-   opt.ToLower();
-//*-*- Clear pad if option "same" not given
-   if (!gPad) {
-      if (!gROOT->GetMakeDefCanvas()) return;
-      (gROOT->GetMakeDefCanvas())();
-   }
-   if (!opt.Contains("same")) gPad->Clear();
- 
-//*-*- Draw Referenced node
-   gGeomLevel = 0;
-   for (i=0;i<kVectorSize;i++) gTranslation[0][i] = 0;
-   for (i=0;i<kMatrixSize;i++) gRotMatrix[0][i] = 0;
-   gRotMatrix[0][0] = 1;   gRotMatrix[0][4] = 1;   gRotMatrix[0][8] = 1;
- 
- 
-   AppendPad(option);
- 
-//*-*- Create a 3-D View
-   TView *view = gPad->GetView();
-   if (!view) {
-      view = new TView(1);
-      view->SetAutoRange(kTRUE);
-      Paint();
-      view->SetAutoRange(kFALSE);
-   }
-#endif   
+  St_Node *node = GetNode();
+  if (node) node->Draw(option);
 }
   
  
