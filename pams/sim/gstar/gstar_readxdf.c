@@ -63,8 +63,10 @@ void gstar_readxdf_()     { printf("  Gstar xdf format readout activated \n"); }
 void xdf_skip_(igate)
 int  *igate;
 {  
+/*
    if ( !xdr_dataset(&x,&d) )  
       { dsPerror("xdf_read: end of file "); *igate=-1; return; }
+ */
 }
 /*----------------------------------------------------------------------------*/
 
