@@ -21,40 +21,21 @@ my $debugOn=0;
 
 ###Set directories to be created for jobfiles
 my $DISK1 = "/star/rcf/disk00001/star";
-my $DISK2 =  "/star/rcf/data03/reco";
 my $DISKD = "/star/rcf";
 
-my $prodSr = "prod6";
+my $prodSr = "P00hi";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
-             "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
-             "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
-             "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla/central/year_1h/hadronic_on",
-             "auau200/single/default/central/year_1e/hadronic_on",
-             "auau200/single/default/halffield/year_1e/hadronic_on",
-             "auau200/rqmd/default/b0_14/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_cocktail/central/year_1h/hadronic_on,"
-             "auau130/mevsim/vanilla_flow/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_dynamic/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_dynamic/central/year_1h/hadronic_on", 
-             "auau130/mevsim/vanilla_omega/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_omega/central/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_trigger/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_trigger/central/year_1h/hadronic_on", 
-             "auau130/mevsim/vanilla_resonance/central/year_1h/hadronic_on", 
-             "auau130/nexus/default/b0_3/year_1e/hadronic_on",
-             "auau200/hijing135/default/b0_3/year_1h/hadronic_on", 
-#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
-             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
+            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b0_3/year_1e/halffield/hadronic_on",
+            "auau130/hijing/b3_6/year_1e/halffield/hadronic_on",
 );
 
-my @recoDir = ("tfs_7", "trs_7");
+my @recoDir = ("trs_1i", "tfs_7");
 
 
 struct JFileAttr => {
@@ -141,70 +122,7 @@ print "\nFinding reco files in HPSS\n";
 my $maccess; 
  my $mdowner;
  my $flname;
-my $nDiskFiles = 0;
-my @diskRecoDirs;
 
-$kl = 0;
-$kk = 0;
-# for  ( $kl = 0; $kl < 2 ; $kl++) {
-for( $ll = 0; $ll<scalar(@SetG) ; $ll++) { 
-  $diskRecoDirs[$kk] = $DISK2 . "/" . $SetG[$ll] . "/" . $recoDir[$kl];
-  print "diskRecoDir: $diskRecoDirs[$ll]\n";
- $kk++;
-}
-#}
-
-print "\nFinding reco files in disk\n";
- 
-foreach $diskDir (@diskRecoDirs) {
-  if (-d $diskDir) {
-  opendir(DIR, $diskDir) or die "can't open $diskDir\n";
-  while( defined($flname = readdir(DIR)) ) {
-     next if $flname =~ /^\.\.?$/;
-     next if $flname =~ /geant.root/;
-     next if $flname =~ /hold/;
-
-#        @fields = split(/\s+/, $diskDir);
-        $maccess = "-rw-r--r--"; 
-        $mdowner = "starreco";
-
-     $fullname = $diskDir."/".$flname;
-   
-     my @dirF = split(/\//, $diskDir); 
-     my $set = sprintf("%s\/%s\/%s\/%s\/%s\/%s",$dirF[5],$dirF[6],$dirF[7],
-                                                $dirF[8],$dirF[9],$dirF[10]);
-    ($size, $mTime) = (stat($fullname))[7, 9];
-    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-    $mo = sprintf("%2.2d", $mo+1);
-    $dy = sprintf("%2.2d", $dy);
-  
-    if( $yr > 98 ) {
-      $fullyear = 1900 + $yr;
-    } else {
-      $fullyear = 2000 + $yr;
-    }
-
-
-    $timeS = sprintf ("%4.4d%2.2d%2.2d",
-                      $fullyear,$mo,$dy);
-#  print "Set = ", $set, "File Name = ", $flname, "\n";
-    
-    $fObjAdr = \(FileAttr->new());
-    ($$fObjAdr)->filename($flname);
-    ($$fObjAdr)->fpath($diskDir);
-    ($$fObjAdr)->dset($set);
-    ($$fObjAdr)->dsize($size);
-    ($$fObjAdr)->timeS($timeS);
-    ($$fObjAdr)->faccess($maccess);
-    ($$fObjAdr)->fowner($mdowner);
-    $hpssRecoFiles[$nHpssFiles] = $fObjAdr;
-   $nHpssFiles++;
-   $nDiskFiles++;
-  }
-closedir DIR;
-}
-}
-print "Total reco files: $nDiskFiles\n";
 
 ### connect to the DB
 
@@ -212,7 +130,7 @@ print "Total reco files: $nDiskFiles\n";
 
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
+ $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'auau130%' AND jobStatus = 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -335,6 +253,7 @@ foreach my $jobnm (@jobSum_set){
        ($$fObjAdr)->NoEvt($mNev);
        ($$fObjAdr)->FstEvt($first_evts);
        ($$fObjAdr)->LstEvt($last_evts);               
+       ($$fObjAdr)->jobSt($mjobSt);       
 
       $jobFSum_set[$jobFSum_no] = $fObjAdr;
       $jobFSum_no++; 
@@ -371,6 +290,9 @@ my $mformat = "n\/a";
 my $msite = "n\/a";
 my $mhpss = "Y";
 my $mstatus = 0;
+my $mdtstat = "OK";
+my $mcomnt = " ";
+my $mcalib;
 my @prtFS; 
 
 ###=======================================================
@@ -399,7 +321,10 @@ my @prtFS;
   $mformat = "n\/a";
   $msite = "n\/a";
   $mhpss = "Y";
+  $mcalib = "n\/a";
   $mstatus = 0;
+  $mdtstat = "OK";
+  $mcomnt = " "; 
     
 ## end of reinitialization
 
@@ -454,17 +379,27 @@ foreach my $jobnm (@jobFSum_set){
       $mJobId   = ($$jobnm)->job_id;
       $mjobFname = ($$jobnm)->jbFile;
       $mNevts = ($$jobnm)->NoEvt; 
+      $mjobSt  =($$jobnm)->jobSt;
       $mNevtLo = 1;
       $mNevtHi = $mNevts;
       $jfile = $msumFile;
       $jfile =~ s/.sum//g;
       $newset = $mdataSet;
       $newset =~ s/\//_/g;
+     chop $mjobSt; 
     
      if ( $mfName =~ /$jfile/) {
+     if ( $mjobSt ne "Done") {
 
-      print "updating FileCatalogT table\n";
-  print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n"; 
+       $mdtStat = "notOK";
+       $mcomnt = $mjobSt;
+} else{
+  $mdtStat = "OK";
+  $mcomnt = " ";
+}
+
+  print "updating FileCatalogT table\n";
+  print "File = ",$mfName, " % ", $mpath," % " ,$mJobId ," % ",$mjobSt, " % ",$mdtStat, " % ",$mcomnt, "\n"; 
      &fillDbTable();
          last;
       }  else {
@@ -524,7 +459,9 @@ sub fillDbTable {
     $sql.="site='$msite',"; 
     $sql.="hpss='$mhpss',";
     $sql.="status= 0,";
-    $sql.="comment=''";
+    $sql.="calib='$mcalib',"; 
+    $sql.="dataStatus='$mdtStat',";
+    $sql.="comment='$mcomnt' ";
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
 
