@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.38 1999/06/30 16:29:04 fine Exp $
+// $Id: makedoc.C,v 1.39 1999/07/10 22:59:55 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.39  1999/07/10 22:59:55  fine
+// St_TLA_Maker docs was introduced
+//
 // Revision 1.38  1999/06/30 16:29:04  fine
 // New scheme to create gif directories. St_geom_Maker introduced
 //
@@ -105,6 +108,8 @@
     sourcedir += STAR;
     sourcedir += "/StRoot/StRootEvent:";
     sourcedir += STAR;
+    sourcedir += "/StRoot/St_TLA_Maker:";
+    sourcedir += STAR;
     sourcedir += "/StRoot/StPadDisplay:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StarClassLibrary:";
@@ -128,6 +133,8 @@
     lookup += "/.share/tables:";
     lookup += STAR;
     lookup += "/StRoot/St_base:";
+    lookup += STAR;
+    lookup += "/StRoot/St_TLA_Maker:";
     lookup += STAR;
     lookup += "/StRoot/St_io_Maker:";
     lookup += STAR;
