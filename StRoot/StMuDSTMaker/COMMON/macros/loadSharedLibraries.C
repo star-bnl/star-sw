@@ -19,6 +19,8 @@ void loadSharedLibraries() {
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StTofUtil");
+  gSystem->Load("StPmdUtil");
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");  
