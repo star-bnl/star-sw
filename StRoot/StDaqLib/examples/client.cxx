@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.10 2000/07/03 16:03:17 ward Exp $
+ * $Id: client.cxx,v 1.11 2003/01/29 13:55:18 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.11  2003/01/29 13:55:18  ward
+ * Turn off memory mapped operation in the examples, which appears to fail for 2003 daq files.
+ *
  * Revision 1.10  2000/07/03 16:03:17  ward
  * Minor improvements to client.cxx, eg a usage message.
  *
@@ -146,7 +149,7 @@ int main(int argc, char *argv[])
 
   while(offset != -1)
     {  
-      EventReader *er = getEventReader(fd,offset,(const char *)logfile,1);
+      EventReader *er = getEventReader(fd,offset,(const char *)logfile,0); // Mamory map appears not to work with 2003 daq files.
       if(!er) 
 	{
           cout << "============================================" << endl;
