@@ -16,6 +16,9 @@
   02.17.2002   ver 2.1  IOBroker hooks added
 */
 
+class HitError_st;
+
+
 class StiHitErrorCalculator
 {
  public:
@@ -28,18 +31,19 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 {
  public:
    StiDefaultHitErrorCalculator();
+   StiDefaultHitErrorCalculator(const StiDefaultHitErrorCalculator & calc);
+	 const StiDefaultHitErrorCalculator & operator=(const StiDefaultHitErrorCalculator & calc);
+	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
    inline void calculateError(StiKalmanTrackNode *node) const;
    inline void set(double intrinsicZ, double driftZ,
-		   double crossZ, double intrinsicX,
-		   double driftX, double crossX);
+									 double crossZ, double intrinsicX,
+									 double driftX, double crossX);
    inline void set(ifstream& iFle);
 
    inline void report();
 
  private:
-   void  SetSource(int);           
-   int   Source;                 //-1=error, 0=Default, 1=IOBroker, 2=User Defined 
    double coeff[6];              //0:intrinsicZ  1: driftZ   2: crossZ
                                  //3:intrinsicX  4: driftX   5: crossX
 };

@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.16 2003/10/28 15:58:01 andrewar Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.17 2004/01/30 21:39:38 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.17  2004/01/30 21:39:38  pruneau
+ * Added load method to fetch db data
+ *
  * Revision 2.16  2003/10/28 15:58:01  andrewar
  * Added set method to set parameters from input file.
  *
@@ -68,10 +71,44 @@
 //Sti inlcudes
 #include "StiKalmanTrackNode.h"
 #include "StiHitErrorCalculator.h"
+#include "HitError.h"
+
 
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
 {
   set(0.,0.,0.,0.,0.,0.); 
+}
+
+StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator(const StiDefaultHitErrorCalculator & e)
+{
+  coeff[0]= e.coeff[0];
+  coeff[1]= e.coeff[1];
+  coeff[2]= e.coeff[2];
+  coeff[3]= e.coeff[3];
+  coeff[4]= e.coeff[4];
+  coeff[5]= e.coeff[5];
+}
+
+const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const StiDefaultHitErrorCalculator & calc)
+{
+  coeff[0]= calc.coeff[0];
+  coeff[1]= calc.coeff[1];
+  coeff[2]= calc.coeff[2];
+  coeff[3]= calc.coeff[3];
+  coeff[4]= calc.coeff[4];
+  coeff[5]= calc.coeff[5];
+	return *this;
+}
+
+const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const HitError_st & e)
+{
+  coeff[0]= e.coeff[0];
+  coeff[1]= e.coeff[1];
+  coeff[2]= e.coeff[2];
+  coeff[3]= e.coeff[3];
+  coeff[4]= e.coeff[4];
+  coeff[5]= e.coeff[5];
+	return *this;
 }
 
 StiDefaultHitErrorCalculator::~StiDefaultHitErrorCalculator()
