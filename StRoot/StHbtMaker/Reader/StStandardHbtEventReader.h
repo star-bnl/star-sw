@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.14 2000/05/25 21:04:30 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.15 2000/07/16 21:14:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,12 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.15  2000/07/16 21:14:45  laue
+ * StStandardHbtEventReader modified to read primary tracks only
+ *
+ * Some unnecessary includes removed.
+ * Changes from StV0MiniDst to StStrangeMuDst
+ *
  * Revision 1.14  2000/05/25 21:04:30  laue
  * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
  *
@@ -100,9 +106,7 @@
 #define StStandardHbtEventReader_hh
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-//#include "StChain.h"
 #include "StMaker.h"
-//#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 
 class StPionPlus;
@@ -111,7 +115,6 @@ class StProton;
 class StTpcDedxPidAlgorithm;
 class StParticleDefinition;
 
-class TOrdCollection;
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
@@ -121,7 +124,6 @@ private:
   StStrangeMuDstMaker* mTheV0Maker; //! this is the chain where the StStrangeMuDstMaker is
 
  protected:
- TOrdCollection *mCollection; //!
 
 public:
   StStandardHbtEventReader();

@@ -3,7 +3,6 @@
 
 #include "StHbtMaker/Reader/StHbtMcEventReader.h"
 #include "StChain.h"
-#include "TOrdCollection.h"
 
 // StEvent stuff
 #include "StEventTypes.h"
@@ -20,9 +19,6 @@
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-// strangeness v0 stuff
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-#include "StV0MiniDstMaker/StV0MiniDst.hh"
 
 #include <iostream.h>
 #include <stdlib.h>
@@ -369,7 +365,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 	}
 	else continue;
 
-	// fill the V0MiniDst structure
+	// fill the StHbtV0 structure
 	StHbtV0* hbtv0 = new StHbtV0();
 	hbtv0->SetdecayLengthV0( abs(vertex->position()-VertexPosition) );
 	hbtv0->SetdecayVertexV0( vertex->position() );
@@ -421,7 +417,6 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
       }
     }
   }
-  //Store total number of v0s in v0minidst so can start from there next time
   cout << hbtEvent->V0Collection()->size() << " v0s pushed to collection" << endl;
   
   return hbtEvent;

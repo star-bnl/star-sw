@@ -9,7 +9,6 @@
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 
-class TOrdCollection;
 class StHbtMcEventReader : public StHbtEventReader{
   
  private:
@@ -21,7 +20,6 @@ class StHbtMcEventReader : public StHbtEventReader{
   time_t timeStamp; // to display the time/event
 
  protected:
-  TOrdCollection *mCollection; //!
   
  public:
   StHbtMcEventReader();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.h,v 1.4 2000/05/25 21:04:30 laue Exp $
+ * $Id: StHbtXDFReader.h,v 1.5 2000/07/16 21:14:45 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -69,8 +69,6 @@
 //class StTpcDedxPidAlgorithm;
 //class StParticleDefinition;
 
-class TOrdCollection;
-
 
 typedef list<int>            pdgIdList;
 typedef list<int>::iterator  pdgIdListIterator;
@@ -95,7 +93,6 @@ private:
   
 
  protected:
- TOrdCollection *mCollection; //!
 
 public:
   StHbtXDFReader(const char* dataSetName="dst", const char* particleTableDirectory="dst/particle");
