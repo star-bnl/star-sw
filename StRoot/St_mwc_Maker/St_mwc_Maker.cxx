@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.18 2000/06/26 22:15:38 fisyak Exp $
+// $Id: St_mwc_Maker.cxx,v 1.19 2000/06/30 23:43:52 fisyak Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.19  2000/06/30 23:43:52  fisyak
+// Remove access to gStTpcDb
+//
 // Revision 1.18  2000/06/26 22:15:38  fisyak
 // remove params
 //
@@ -120,6 +123,7 @@ Int_t St_mwc_Maker::Init(){
    partable->min_ion    = 0;
    m_mpar->AddAt(partable,0);
 
+#if 0
    mwc_geo_st *geotable = m_geom->GetTable();
    if (gStTpcDb) {
      StTpcWirePlaneI *radius = gStTpcDb->WirePlaneGeometry();
@@ -133,7 +137,7 @@ Int_t St_mwc_Maker::Init(){
      geotable->r2max = rad4;
    }
    m_geom->AddAt(geotable,0);
-   
+#endif   
 
 // Create Histograms
 
@@ -190,7 +194,7 @@ Int_t St_mwc_Maker::Make(){
    }
 
    mwc_sector_st *sec = sector->GetTable();
-   // mwc_raw_st    *rw  = raw->GetTable();
+   //mwc_raw_st    *rw  = raw->GetTable();
    /*   for (int ii=0;ii<=95;ii++)
      {
        if ( (rw+ii)->count )
