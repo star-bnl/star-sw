@@ -2,12 +2,12 @@
 //
 // StEmcSimpleSimulator
 //
-// This class provides simple transition from deposit energy to 
+// This class provides simple transition from deposit energy to
 // ADC using ADC's scale, energy scale and sample fraction
-// function. It is correct for case when the main fluctuations 
+// function. It is correct for case when the main fluctuations
 // come from shower fluctuations.
-// 
-// mode = 0; Testing mode. Keep trace the deposit energy instead 
+//
+// mode = 0; Testing mode. Keep trace the deposit energy instead
 //           of energy.
 // mode = 1; Simple transition.
 //
@@ -19,70 +19,91 @@
 #include "tables/St_controlEmcPmtSimulator_Table.h"
 #include <TRandom.h>
 
-class StEmcSimpleSimulator : public StEmcVirtualSimulator{
+class StEmcSimpleSimulator : public StEmcVirtualSimulator
+{
 private:
-  
+
 protected:
-  UInt_t                       mDetector;
-  St_controlEmcPmtSimulator    mControl;
+    UInt_t                       mDetector;
+    St_controlEmcPmtSimulator    mControl;
 
-  Int_t    mKeySet;
-  // for transition from energy to adc and vise versa
-  Int_t    mMode;
-  Int_t    mMaxAdc;
-  Double_t mMaxEnergy;
-  Double_t mC1;            // reverse for calibration coefficient
-  Double_t mC4;            // gain uncertainty
-  // for pedestal
-  UInt_t   mPedType;
-  Double_t mPedMean;
-  Double_t mPedRMS;
-  // sampling fraction coefficient
-  Double_t mSF[3];
-  // Working variable
-  Double_t mSinTheta;
-  Double_t mDe;
-  Double_t mRadc;
-  Int_t    mAdc;
-  
-  Bool_t   mPrint;
-  TRandom  mRandom;
+    Int_t    mKeySet;
+    // for transition from energy to adc and vise versa
+    Int_t    mMode;
+    Int_t    mMaxAdc;
+    Double_t mMaxEnergy;
+    Double_t mC1;            // reverse for calibration coefficient
+    Double_t mC4;            // gain uncertainty
+    // for pedestal
+    UInt_t   mPedType;
+    Double_t mPedMean;
+    Double_t mPedRMS;
+    // sampling fraction coefficient
+    Double_t mSF[3];
+    // Working variable
+    Double_t mSinTheta;
+    Double_t mDe;
+    Double_t mRadc;
+    Int_t    mAdc;
 
-  void  checkAdc();
+    Bool_t   mPrint;
+    TRandom  mRandom;
 
-public: 
-  StEmcSimpleSimulator(UInt_t det);
-  virtual ~StEmcSimpleSimulator() {/* nothing */};
-  void setControlDefault(UInt_t det);
-  void setControl(controlEmcPmtSimulator_st* var);
-  void setDetector(UInt_t var) {mDetector = var;}
+    void  checkAdc();
 
-  Double_t sampleFraction(const Double_t);
+public:
+    StEmcSimpleSimulator(UInt_t det);
+    virtual ~StEmcSimpleSimulator()
+    {/* nothing */
+    };
+    void setControlDefault(UInt_t det);
+    void setControl(controlEmcPmtSimulator_st* var);
+    void setDetector(UInt_t var)
+    {
+        mDetector = var;
+    }
 
-  St_controlEmcPmtSimulator* getControl()  {return &mControl;}
-  UInt_t                     getDetector() {return mDetector;}
+    Double_t sampleFraction(const Double_t);
 
-  virtual void    init();
-  virtual void    setPedestal(const UInt_t type, const Float_t pedMean, const Float_t pedRMS);
-  virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS, const Float_t gainUnc);  
+    St_controlEmcPmtSimulator* getControl()
+    {
+        return &mControl;
+    }
+    UInt_t                     getDetector()
+    {
+        return mDetector;
+    }
 
-  Int_t   getPedestalType() {return mPedType;}
+    virtual void    init();
+    virtual void    setPedestal(const UInt_t type, const Float_t pedMean, const Float_t pedRMS);
+    virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS, const Float_t gainUnc);
 
-  virtual Double_t getPedestal(const Int_t type, const Double_t pedMean, const Double_t pedRMS);
-  virtual Double_t deductPedestal(const Int_t type, const Int_t adc, const Double_t pedMean);
-  virtual Int_t    getAdc(const Double_t de, const Double_t eta);
-  virtual Float_t  getEnergy();
-  virtual void    print();
-  void            setPrint(Bool_t a) { mPrint = a;}
+    Int_t   getPedestalType()
+    {
+        return mPedType;
+    }
 
-  Double_t getSinTheta(Double_t eta);
+    virtual Double_t getPedestal(const Int_t type, const Double_t pedMean, const Double_t pedRMS);
+    virtual Double_t deductPedestal(const Int_t type, const Int_t adc, const Double_t pedMean);
+    virtual Int_t    getAdc(const Double_t de, const Double_t eta);
+    virtual Float_t  getEnergy();
+    virtual void    print();
+    void            setPrint(Bool_t a)
+    {
+        mPrint = a;
+    }
 
-  ClassDef(StEmcSimpleSimulator, 1)   // Simple Emc simulator
+    Double_t getSinTheta(Double_t eta);
+
+    ClassDef(StEmcSimpleSimulator, 1)   // Simple Emc simulator
 };
 #endif
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.h,v 1.4 2004/08/06 13:24:48 suaide Exp $
+//  $Id: StEmcSimpleSimulator.h,v 1.5 2005/03/21 21:36:39 suaide Exp $
 //  $Log: StEmcSimpleSimulator.h,v $
+//  Revision 1.5  2005/03/21 21:36:39  suaide
+//  fixed problem with chain
+//
 //  Revision 1.4  2004/08/06 13:24:48  suaide
 //  New features added and fixed some bugs in the database
 //
