@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.7 2003/09/11 18:14:04 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.8 2003/09/23 19:37:56 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -59,8 +59,38 @@ Int_t StTpcFourPMaker::Make() {
     float epr = ::sqrt(mpr*mpr + mommag2);
     float epi = ::sqrt(mpi*mpi + mommag2);
     float ek = ::sqrt(mk*mk + mommag2);
-    float energy = t->pidProbElectron()*ee + t->pidProbProton()*epr +
-      t->pidProbPion()*epi + t->pidProbKaon()*ek;
+    float probPion, probKaon, probProton, probElectron;
+    if(!t) { 
+      probPion = 1.0; 
+      probKaon = probProton = probElectron = 0; 
+      continue; }
+    probPion = t->pidProbPion();
+    if((probPion < 0) || (probPion > 1)) probPion = 0;
+    probKaon = t->pidProbKaon();
+    if((probKaon < 0) || (probKaon > 1)) probKaon = 0;
+    probProton = t->pidProbProton();
+    if((probProton < 0) || (probProton > 1)) probProton = 0;
+    probElectron = t->pidProbElectron();
+    if((probElectron < 0) || (probElectron > 1)) probElectron = 0;
+    if((probPion == 0) && (probKaon == 0) && 
+       (probProton == 0) && (probElectron == 0))
+      {
+	probPion = 1.0;
+	return;
+      }
+    double sum = probPion + probKaon + probProton + probElectron;
+    if(fabs(sum-1.0) < .01)
+      {
+	probPion /= sum;
+	probKaon /= sum;
+	probProton /= sum;
+	probElectron /= sum;
+      }
+    
+    float energy = probElectron*ee + probProton*epr + probPion*epi 
+      + probKaon*ek;
+    // float energy = t->pidProbElectron()*ee + t->pidProbProton()*epr +
+    //t->pidProbPion()*epi + t->pidProbKaon()*ek;
     StLorentzVectorF P(energy, mom);
     StMuTrackFourVec& track = tPile[i];
     track.Init(t, P, i);
