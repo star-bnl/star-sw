@@ -1,5 +1,8 @@
-//  $Id: StTpcEvalEvent.cxx,v 1.2 2000/05/25 20:38:09 snelling Exp $
+//  $Id: StTpcEvalEvent.cxx,v 1.3 2001/04/06 22:27:15 flierl Exp $
 //  $Log: StTpcEvalEvent.cxx,v $
+//  Revision 1.3  2001/04/06 22:27:15  flierl
+//  add zillion of comments
+//
 //  Revision 1.2  2000/05/25 20:38:09  snelling
 //  Added TPC evaluation histograms
 //
@@ -36,64 +39,62 @@
 
 #include "StTpcEvalEvent.h"
 
-//-----------------------------------------------------------------------
-    
+//-----------------------------------------------------------------------   
 MatchedHitPair::MatchedHitPair(StTpcDb* tpcDb)
     : mStTpcDb(tpcDb), mResolution(-999,-999,-999) { /*noop*/}
-
+//----------------------------------------------------------------------- 
 StThreeVectorF& MatchedHitPair::resolution() {return mResolution;}
-
-StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit,
-					 const StTpcHit* rcHit) {
-  // transform tpc hit positions from global to internal
-  StTpcLocalSectorCoordinate rcLocalHit, mcLocalHit;
-
-  StGlobalCoordinate rcGlobalHit(rcHit->position());
-  StGlobalCoordinate mcGlobalHit(mcHit->position());
-
-  StTpcCoordinateTransform mHitTransform(mStTpcDb);
-  mHitTransform(rcGlobalHit,rcLocalHit);
-  mHitTransform(mcGlobalHit,mcLocalHit);
-  StThreeVector<double> tmp(rcLocalHit.position() - mcLocalHit.position());
-  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
-  
-  return mResolution;
+//----------------------------------------------------------------------- 
+StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit, const StTpcHit* rcHit) 
+{
+    // transform tpc hit positions from global to internal
+    StTpcLocalSectorCoordinate rcLocalHit, mcLocalHit;
+    
+    StGlobalCoordinate rcGlobalHit(rcHit->position());
+    StGlobalCoordinate mcGlobalHit(mcHit->position());
+    
+    StTpcCoordinateTransform mHitTransform(mStTpcDb);
+    mHitTransform(rcGlobalHit,rcLocalHit);
+    mHitTransform(mcGlobalHit,mcLocalHit);
+    StThreeVector<double> tmp(rcLocalHit.position() - mcLocalHit.position());
+    for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
+    
+    return mResolution;
 }
-
-StThreeVectorF& MatchedHitPair::resolution(const StTpcHit* rcHit1,
-					 const StTpcHit* rcHit2) {
-  // transform tpc hit positions from global to internal
-  StTpcLocalSectorCoordinate rcLocalHit1, rcLocalHit2;
-
-  StGlobalCoordinate rcGlobalHit1(rcHit1->position());
-  StGlobalCoordinate rcGlobalHit2(rcHit2->position());
-
-  StTpcCoordinateTransform mHitTransform(mStTpcDb);
-  mHitTransform(rcGlobalHit1,rcLocalHit1);
-  mHitTransform(rcGlobalHit2,rcLocalHit2);
-  StThreeVector<double> tmp(rcLocalHit1.position() - rcLocalHit2.position());
-  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
+//----------------------------------------------------------------------- 
+StThreeVectorF& MatchedHitPair::resolution(const StTpcHit* rcHit1, const StTpcHit* rcHit2) 
+{
+    // transform tpc hit positions from global to internal
+    StTpcLocalSectorCoordinate rcLocalHit1, rcLocalHit2;
+    
+    StGlobalCoordinate rcGlobalHit1(rcHit1->position());
+    StGlobalCoordinate rcGlobalHit2(rcHit2->position());
+    
+    StTpcCoordinateTransform mHitTransform(mStTpcDb);
+    mHitTransform(rcGlobalHit1,rcLocalHit1);
+    mHitTransform(rcGlobalHit2,rcLocalHit2);
+    StThreeVector<double> tmp(rcLocalHit1.position() - rcLocalHit2.position());
+    for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
   
-  return mResolution;
+    return mResolution;
 }
-
-StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit1,
-					 const StMcTpcHit* mcHit2) {
-  // transform tpc hit positions from global to internal
-  StTpcLocalSectorCoordinate mcLocalHit1, mcLocalHit2;
-
-  StGlobalCoordinate mcGlobalHit1(mcHit1->position());
-  StGlobalCoordinate mcGlobalHit2(mcHit2->position());
-
-  StTpcCoordinateTransform mHitTransform(mStTpcDb);
-  mHitTransform(mcGlobalHit1,mcLocalHit1);
-  mHitTransform(mcGlobalHit2,mcLocalHit2);
-  StThreeVector<double> tmp(mcLocalHit1.position() - mcLocalHit2.position());
-  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
-  
-  return mResolution;
+//----------------------------------------------------------------------- 
+StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit1,const StMcTpcHit* mcHit2) 
+{
+    // transform tpc hit positions from global to internal
+    StTpcLocalSectorCoordinate mcLocalHit1, mcLocalHit2;
+    
+    StGlobalCoordinate mcGlobalHit1(mcHit1->position());
+    StGlobalCoordinate mcGlobalHit2(mcHit2->position());
+    
+    StTpcCoordinateTransform mHitTransform(mStTpcDb);
+    mHitTransform(mcGlobalHit1,mcLocalHit1);
+    mHitTransform(mcGlobalHit2,mcLocalHit2);
+    StThreeVector<double> tmp(mcLocalHit1.position() - mcLocalHit2.position());
+    for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
+    
+    return mResolution;
 }
-
 // TrackInfo Implementation
 //-----------------------------------------------------------------------
 ClassImp(TrackInfo)

@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.4 2000/08/07 03:25:15 snelling Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.5 2001/04/06 22:27:20 flierl Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.5  2001/04/06 22:27:20  flierl
+// * add zillion of comments
+// *
 // * Revision 1.4  2000/08/07 03:25:15  snelling
 // * Added selection on tracks
 // *
@@ -66,7 +69,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.4 2000/08/07 03:25:15 snelling Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.5 2001/04/06 22:27:20 flierl Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -77,28 +80,21 @@ ClassImp(StTpcEvalMaker)
 //-------------------------------------------------
 
 //-----------------------------------------------------------------------
-
 StTpcEvalMaker::StTpcEvalMaker(const char *name, const char *title):StMaker(name,title)
 {
-  //
+  // empty
 }
-
 //-----------------------------------------------------------------------
-
 StTpcEvalMaker::~StTpcEvalMaker()
 {
-  //
+  // empty
 }
-
 //-----------------------------------------------------------------------
-
 void StTpcEvalMaker::Clear(const char*)
 {
-  StMaker::Clear();
+    StMaker::Clear();
 }
-
 //-----------------------------------------------------------------------
-
 Int_t StTpcEvalMaker::Finish()
 {
     cout << " StTpcEvalMaker:  Writing out histograms..." <<endl;
@@ -109,9 +105,7 @@ Int_t StTpcEvalMaker::Finish()
 
     return StMaker::Finish();
 }
-
 //-----------------------------------------------------------------------
-
 Int_t StTpcEvalMaker::Init()
 {
     // Create the event structure.
@@ -138,395 +132,439 @@ Int_t StTpcEvalMaker::Init()
     return StMaker::Init();
 }
 //-----------------------------------------------------------------------
-
 Int_t StTpcEvalMaker::Make()
 {
-    
-    // get pointers to global variables defined in the analysis
-    // chain macro...
+    // get pointers to global variables 
     
     // TPC database
     mStTpcDb = ((StTpcDbMaker*) GetMaker("tpcDb"))->tpcDbInterface();
-    if (!mStTpcDb)  {
-	cout<<" StTpcDb NOT FOUND!!!"<<endl;
-	return kStErr;
-    }
-        
+    if (!mStTpcDb)  
+	{
+	    cout<<" StTpcDb NOT FOUND!!!"<<endl;
+	    return kStErr;
+	}
+    // StEvent    
     mStEvent = (StEvent*) GetInputDS("StEvent");
     mStMcEvent =  ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
-    if (!(mStEvent && mStMcEvent)) {
-	cout<<" NO EVENT DATA FOUND!!!"<<endl;
-	return kStWarn;
-    }
-    
+    if (!(mStEvent && mStMcEvent)) 
+	{
+	    cout<<" NO EVENT DATA FOUND!!!"<<endl;
+	    return kStWarn;
+	}
     // StAssociationMaker multimaps
-    StAssociationMaker* assoc = 
-	(StAssociationMaker*) GetMaker("StAssociationMaker");
-    if (!assoc) {
-	cout<<" NO StAssocationMaker DATA!!!"<<endl;
-	return kStWarn;
-    }
+    StAssociationMaker* assoc =  (StAssociationMaker*) GetMaker("StAssociationMaker");
+    if (!assoc) 
+	{
+	    cout<<" NO StAssocationMaker DATA!!!"<<endl;
+	    return kStWarn;
+	}
     mmcTpcHitMap = assoc->mcTpcHitMap();
     mmcTrackMap  = assoc->mcTrackMap();
     mrcTpcHitMap = assoc->rcTpcHitMap();
     mrcTrackMap  = assoc->rcTrackMap();
-    if (!mrcTpcHitMap || !mrcTrackMap ||
-	!mmcTpcHitMap || !mmcTrackMap) {
-	gMessMgr->Warning() << "Missing multimaps!!! " << endm;
-	return kStWarn;
-    }
-
-    // analyze data using StTpcEvalMaker methods
+    if (!mrcTpcHitMap || !mrcTrackMap || !mmcTpcHitMap || !mmcTrackMap) 
+	{
+	    gMessMgr->Warning() << "Missing multimaps!!! " << endm;
+	    return kStWarn;
+	}
+    
+    /////
+    // fill the matching information
+    ////
+    // prepare StTpcEvalEvent object
     fillHeader();
+    // fill matched hit info
     if (mHitIteration) HitIteration();
-    if (mHitSeparation) HitSeparation();
+    // fill distance to remaining hits
+    //if (mHitSeparation) HitSeparation();
+    // fill matched track info with mc hits as key
     mcTrackIteration();
-    rcTrackIteration();
+    // fill matched track info with Rc hits as key
+    //rcTrackIteration();
+    // fill tree with StTpcEvalEvent
+    //mTrackPairTree->Fill();
+    //mTpcEvalEvent->Clear();
     
-    mTrackPairTree->Fill();
-    mTpcEvalEvent->Clear();
-    
+    // go home
     return kStOK;
 }
-
 //-----------------------------------------------------------------------
-
-void StTpcEvalMaker::fillHeader() {
-
+void StTpcEvalMaker::fillHeader() 
+{
+    // fill header of StTpcEvalEvent object
     UInt_t globTrks, geantPrimaries, recoPrimaries, geantTpcHits, recoTpcHits;
     globTrks = geantPrimaries = recoPrimaries = geantTpcHits = recoTpcHits = 0;
 
-    // Only count g2t tracks.
+    // Only count g2t tracks
     StMcTrackIterator mcTrkIter2 = mStMcEvent->tracks().begin();
     while (mcTrkIter2 != mStMcEvent->tracks().end() && !((*mcTrkIter2)->key())) ++mcTrkIter2;
     //changed to old style distance function because of sun compiler
     unsigned int geantTrks = 0;
     distance(mcTrkIter2, mStMcEvent->tracks().end(), geantTrks);
     //    geantTrks = distance(mcTrkIter2, mStMcEvent->tracks().end());
-					 
+    
+    // get some numbers
     globTrks = mStEvent->trackNodes().size();
     geantPrimaries = mStMcEvent->primaryVertex()->daughters().size();
-    recoPrimaries  =   mStEvent->primaryVertex()->daughters().size();
+    recoPrimaries  = mStEvent->primaryVertex()->daughters().size();
     geantTpcHits   = mStMcEvent->tpcHitCollection()->numberOfHits();
-    recoTpcHits    =   mStEvent->tpcHitCollection()->numberOfHits();
-    
+    recoTpcHits    = mStEvent->tpcHitCollection()->numberOfHits();
+
+    // fill them
     mTpcEvalEvent->SetHeader(geantTrks, globTrks, geantPrimaries, recoPrimaries, geantTpcHits, recoTpcHits);
 }
-
 //-----------------------------------------------------------------------
+void StTpcEvalMaker::HitIteration() 
+{
+    ///////////
+    // loop over mc hits get matches and fill histos
+    // loop over rc hits get matches and fill histos
+    ///////////
+    cout << "_ TpcHit iteration __________________" << endl;
 
-void StTpcEvalMaker::HitIteration() {
-
-  cout << "_ TpcHit iteration __________________" << endl;
-  
-  StMcTpcHitCollection* mcTpcHitCollection = mStMcEvent->tpcHitCollection();
-  if (!mcTpcHitCollection) {
-    cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
-    return;
-  }
-  
-  // create hitpair and initialize transformations using database
-  MatchedHitPair hitPair(mStTpcDb);
-  
-  unsigned int nAssociatedHits[45];
-  unsigned int nReconstructedHits[45];
-  unsigned int nGeneratedHits[45];
-  for (unsigned int i = 0; i < 45; i++) {
-    nAssociatedHits[i] = 0;
-    nReconstructedHits[i] = 0;
-    nGeneratedHits[i] = 0;
-  }
-
-  for (unsigned int isec = 0;
-       isec < mcTpcHitCollection->numberOfSectors(); isec++) {
-    for (unsigned int irow = 0;
-	 irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-      for (StMcTpcHitIterator hitIter =
-	     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-	   hitIter !=
-	     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-	   hitIter++) {
-	// skip certain monte carlo Hits
-	//	if ((*hitIter)->parentTrack()->momentum().mag() < .1) continue;
-	//	if ((*hitIter)->parentTrack()->startVertex() != 
-	//	    mStMcEvent->primaryVertex()) continue;
-	// calculate the number of Generated Hits per padrow
-	nGeneratedHits[irow]++;
-	// access StAssociationMaker mc tpc hit map information
-	StMcTpcHit* mapKey = *hitIter;
-	pair<mcTpcHitMapIter,mcTpcHitMapIter> mapBounds =
-	  mmcTpcHitMap->equal_range(mapKey);
-	
-	histograms.mcHitPositionRad->Fill(mapKey->padrow());
-	histograms.mcHitPositionZ->Fill(mapKey->position().z());
-	
-	// iterate over matched rc hits
-	int nMatches = 0;
-	for (mcTpcHitMapIter mapIter = mapBounds.first;
-	     mapIter != mapBounds.second; mapIter++){
-	  nAssociatedHits[irow]++;
-	  nMatches++;
-	  hitPair.resolution((*mapIter).first,(*mapIter).second);
-	  histograms.tpcHitResX->Fill(hitPair.resolution().x());
-	  histograms.tpcHitResY->Fill(hitPair.resolution().y());
-	  histograms.tpcHitResZ->Fill(hitPair.resolution().z());
+    // get mc hits
+    StMcTpcHitCollection* mcTpcHitCollection = mStMcEvent->tpcHitCollection();
+    if (!mcTpcHitCollection) 
+	{
+	    cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
+	    return;
 	}
-	//
-	if (!nMatches) {
-	      histograms.mcUnmatchedHitPositionSector->Fill(mapKey->sector());
-	      histograms.mcUnmatchedHitPositionRad->Fill(mapKey->padrow());
-	      histograms.mcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+
+    // create hitpair and initialize transformations using database
+    MatchedHitPair hitPair(mStTpcDb);
+
+    // some counters
+    unsigned int nAssociatedHits[45];
+    unsigned int nReconstructedHits[45];
+    unsigned int nGeneratedHits[45];
+    for (unsigned int i = 0; i < 45; i++) 
+	{
+	    nAssociatedHits[i] = 0;
+	    nReconstructedHits[i] = 0;
+	    nGeneratedHits[i] = 0;
 	}
-	histograms.matchesToRcHits->Fill(nMatches);
-	//
-      }
-    }
-  }
+
+    /////
+    // loop over mc hits    
+    /////
+    for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
+	{
+	    for (unsigned int irow = 0; irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
+		{
+		    for (StMcTpcHitIterator hitIter = mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+			 hitIter !=mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+			 hitIter++) 
+			{
+			    // skip certain monte carlo Hits
+			    //	if ((*hitIter)->parentTrack()->momentum().mag() < .1) continue;
+			    //	if ((*hitIter)->parentTrack()->startVertex() != 
+			    //	    mStMcEvent->primaryVertex()) continue;
+
+			    // count the number of Generated Hits per padrow
+			    nGeneratedHits[irow]++;
+			    // access StAssociationMaker mc tpc hit map information
+			    StMcTpcHit* mapKey = *hitIter;
+			    pair<mcTpcHitMapIter,mcTpcHitMapIter> mapBounds = mmcTpcHitMap->equal_range(mapKey);
+			    
+			    // fill histos in StTpcEvalHistogramm object
+			    histograms.mcHitPositionRad->Fill(mapKey->padrow());
+			    histograms.mcHitPositionZ->Fill(mapKey->position().z());
+			    
+			    // iterate over matched rc hits
+			    int nMatches = 0;
+			    for (mcTpcHitMapIter mapIter = mapBounds.first; mapIter != mapBounds.second; mapIter++)
+				{
+				    // count number of associated hits per padrow
+				    nAssociatedHits[irow]++;
+				    // count number of matches per hit
+				    nMatches++;
+				    // calculate (pos of mc) - (pos of matched rc) 
+				    hitPair.resolution((*mapIter).first,(*mapIter).second);
+				    // fill histos in StTpcEvalHistogramm object
+				    histograms.tpcHitResX->Fill(hitPair.resolution().x());
+				    histograms.tpcHitResY->Fill(hitPair.resolution().y());
+				    histograms.tpcHitResZ->Fill(hitPair.resolution().z());
+				}
+			    //
+			    if (!nMatches) 
+				{
+				    // fill position of mc hits which where not matched at all
+				    histograms.mcUnmatchedHitPositionSector->Fill(mapKey->sector());
+				    histograms.mcUnmatchedHitPositionRad->Fill(mapKey->padrow());
+				    histograms.mcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+				}
+			    // fill number of matches
+			    histograms.matchesToRcHits->Fill(nMatches);
+			}
+		}
+	}// loop over mc hits
+    
+    ////
+    // loop over rc hits    
+    ////
+    // get rc hits
+    StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
+    if (!rcTpcHitCollection) 
+	{
+	    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
+	    return;
+	}
+  
+    // loop over rc hits
+    for (unsigned int isec=0; isec<rcTpcHitCollection->numberOfSectors(); isec++) 
+	{
+	    for (unsigned int irow=0;irow<rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
+		{
+		    for (StSPtrVecTpcHitIterator hitIter = rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+			 hitIter != rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+			 hitIter++) 
+			{
+			    
+			    // calculate the number of Reconstructed Hits per padrow
+			    nReconstructedHits[irow]++;
+			    // access StAssociationMaker recon tpc hit map information
+			    StTpcHit* mapKey = *hitIter;
+			    // fill histos in StTpcEvalHistogramm object
+			    histograms.rcHitPositionRad->Fill(mapKey->padrow());
+			    histograms.rcHitPositionZ->Fill(mapKey->position().z());
+			    // count matches 
+			    unsigned int nMatches = mrcTpcHitMap->count(mapKey);
+	
+			    // fill histograms
+			    if (nMatches) 
+				{
+				    if (nMatches==1) 
+					{ 
+					    // 1 to 1 matches
+					    histograms.mc1to1HitPositionRad->Fill(mapKey->padrow());
+					    histograms.mc1to1HitPositionZ->Fill(mapKey->position().z());
+					}
+				    else if (nMatches>1) 
+					{
+					    // Merged hits
+					    histograms.mcMergedHitPositionRad->Fill(mapKey->padrow());
+					    histograms.mcMergedHitPositionZ->Fill(mapKey->position().z());
+					}
+				}
+			    else 
+				{
+				    histograms.rcUnmatchedHitPositionSector->Fill(mapKey->sector());
+				    histograms.rcUnmatchedHitPositionRad->Fill(mapKey->padrow());
+				    histograms.rcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+				}
+			    // fill number of matches
+			    histograms.matchesToMcHits->Fill(nMatches);
+			}
+		}
+	} // loop over rc hits
     
     
-  StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
-  if (!rcTpcHitCollection) {
-    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
-    return;
-  }
-  
-  
-  for (unsigned int isec=0;
-       isec<rcTpcHitCollection->numberOfSectors(); isec++) {
-    for (unsigned int irow=0;
-	 irow<rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-      for (StSPtrVecTpcHitIterator hitIter =
-	     rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-	   hitIter !=
-	     rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-	   hitIter++) {
+    ///
+    // Fill efficiency and purity histograms
+    ///
+    float HitEfficiency = 0 ;
+    float HitPurity = 0 ;
 
-	// calculate the number of Reconstructed Hits per padrow
-	nReconstructedHits[irow]++;
-	// access StAssociationMaker recon tpc hit map information
-	StTpcHit* mapKey = *hitIter;
-	
-	histograms.rcHitPositionRad->Fill(mapKey->padrow());
-	histograms.rcHitPositionZ->Fill(mapKey->position().z());
-	
-	unsigned int nMatches = mrcTpcHitMap->count(mapKey);
-	
-	// fill histograms
-	if (nMatches) {
-	  if (nMatches==1) { // 1 to 1 matches
-	    histograms.mc1to1HitPositionRad->Fill(mapKey->padrow());
-	      histograms.mc1to1HitPositionZ->Fill(mapKey->position().z());
-	  }
-	  if (nMatches>1) { // Merged hits
-	    histograms.mcMergedHitPositionRad->Fill(mapKey->padrow());
-	    histograms.mcMergedHitPositionZ->Fill(mapKey->position().z());
-	  }
+    for (unsigned int i = 0; i < 45; i++) 
+	{
+	    // calculate efficiency and purity per padrow
+	    HitEfficiency = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
+	    HitPurity = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
+	    // fill histos
+	    histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
+	    histograms.mHitPurity->Fill((float) i+1, HitPurity);
 	}
-	else {
-	  histograms.rcUnmatchedHitPositionSector->Fill(mapKey->sector());
-	  histograms.rcUnmatchedHitPositionRad->Fill(mapKey->padrow());
-	  histograms.rcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+}
+//-----------------------------------------------------------------------
+void StTpcEvalMaker::mcTrackIteration() 
+{
+    //
+    // loop over mc tracks and fill histos
+    //
+    cout << "_ StMcTrack iteration ___________________" << endl;
+    
+    // get mc tracks
+    StMcVertex* mcPrimaryVertex = mStMcEvent->primaryVertex() ; 
+    StSPtrVecMcTrack mcTrackContainer = mStMcEvent->tracks() ;
+    // fill mc multiplicity
+    histograms.mMcMultiplicity = mcTrackContainer.size() ;
+    histograms.mPairMultiplicity = mmcTrackMap->size() ;
+
+    // loop over mc tracks
+    for (unsigned int iMcTrack = 0; iMcTrack < mcTrackContainer.size(); iMcTrack++) 
+	{
+	    // create empty track pair object	    
+	    MatchedTrackPair trackPair;
+	    // get mc track
+	    StMcTrack* mcTrack = mcTrackContainer[iMcTrack];
+
+	    // use the primary key from the g2t tables for the mc track id
+	    // use id = 0 for shower tracks
+	    // set sign to negative for non-primary vertex tracks
+	    signed long trackId = mcTrack->key();
+	    if (mcTrack->startVertex() != mcPrimaryVertex) 
+		{
+		    trackId *= -1;
+		}
+	    if (mcTrack->isShower())
+		{
+		    trackId = 0;
+		}
+	    trackPair.mcInfo()->setId(trackId);
+	    
+	    // add monte carlo information to the trackpair object
+	    addMcTrack(mcTrack,trackPair.mcInfo());
+	    
+	    // Count the number of recontstructed tracks associated with the mc track.
+	    unsigned int nMatchedRcTracks=mmcTrackMap->count(mcTrack);
+	    trackPair.mcInfo()->setMatchedTracks(nMatchedRcTracks);
+	    
+	    pair<mcTrackMapIter,mcTrackMapIter> mcMapBounds = mmcTrackMap->equal_range(mcTrack);
+
+	    // loop over associated rc tracks 
+	    for (mcTrackMapIter mcMapIter = mcMapBounds.first; mcMapIter != mcMapBounds.second; ++mcMapIter)
+		{
+		    
+		    //(*mcMapIter).first is the StMcTrack used as the map key
+		    StTrackPairInfo* assocPair = (*mcMapIter).second; //StAssociationMaker
+		    StGlobalTrack* rcTrack = assocPair->partnerTrack();
+		    
+		    // add rc information to the trackpair object
+		    addRcTrack(rcTrack,trackPair.rcInfo());
+		    
+		    // add number of common hits to the trackpair object
+		    trackPair.setCommonHits(assocPair->commonTpcHits());
+		    
+		    // how many StMcTrack are matched to rcTrack?
+		    unsigned int nMatchedMcTracks=mrcTrackMap->count(rcTrack);
+		    trackPair.rcInfo()->setMatchedTracks(nMatchedMcTracks);
+
+		    // defined below...
+		    scanTrackPair(&trackPair, mcTrack, rcTrack) ; 
+		    
+		    // ntuple row for the pair...
+		    histograms.fillTrackNtuple(&trackPair); 
+
+		    // fill also StTpcEvalEvent object
+		    mTpcEvalEvent->addTrackPair(trackPair);
+		    
+		} // iterate over matched StGlobalTrack
+	}   // iterate over StMcTrack   
+}
+//-----------------------------------------------------------------------
+void StTpcEvalMaker::rcTrackIteration() 
+{
+    //
+    // if we don't look at emmbedded events, but pure monte carlo :
+    // this pass should be used to pick up ghost tracks
+    // (the StGlobalTrack not matched to any StMcTrack)
+    //     
+    // loop over rc tracks and find mc matches
+    cout << "_ StGlobalTrack iteration ___________________" << endl;
+    
+    // get rc tracks
+    StSPtrVecTrackNode& rcTrackNodes = mStEvent->trackNodes();
+    // fill histo
+    histograms.mRcMultiplicity = rcTrackNodes.size();
+    
+    // loop over rc tracks
+    for (StSPtrVecTrackNodeIterator nodeIter = rcTrackNodes.begin(); nodeIter != rcTrackNodes.end(); ++nodeIter) 
+	{
+	    // get rc track
+	    StTrackNode* trackNode = *nodeIter ;
+	    StGlobalTrack* rcTrack = dynamic_cast<StGlobalTrack*>(trackNode->track(global)) ;
+	    
+	    if (!rcTrack) continue;
+	    
+	    // number of matched mc tracks
+	    unsigned int nMatchedMcTracks = mrcTrackMap->count(rcTrack);
+	    
+	    // fill histos in case we didn't find a match ( = this is a ghost in pure monte carlo events )
+	    if (nMatchedMcTracks == 0) 
+		{
+		    // dummy pair
+		    MatchedTrackPair trackPair;
+		    // fill info into trackpair object
+		    addRcTrack(rcTrack,trackPair.rcInfo());
+		    // fill StTpcEvalHiso with track pair object
+		    histograms.fillTrackNtuple(&trackPair);
+		    // fill eval event with track pair object
+		    mTpcEvalEvent->addTrackPair(trackPair);
+		}
+	} // iterate over track nodes   
+}
+//-----------------------------------------------------------------------
+void StTpcEvalMaker::addMcTrack(StMcTrack* mcTrack, mcTrackInfo* mcInfo) 
+{
+    //
+    // Fill mcTrackInfo
+    //
+    if (!mcTrack || !mcInfo) return;
+    
+    // momentum vector at start vertex
+    mcInfo->setFourMomentum(mcTrack->fourMomentum());
+    
+    // number of StMcTpcHit
+    StPtrVecMcTpcHit hitContainer = mcTrack->tpcHits();
+    mcInfo->setHits(hitContainer.size());
+
+    // count the track hits StMcTpcHit matched to any StTpcHit
+    unsigned int matchedHits = 0;
+    for (StMcTpcHitIterator i = hitContainer.begin(); i != hitContainer.end(); i++) 
+	{
+	    if ( mmcTpcHitMap->count(*i) ) matchedHits++;
 	}
-	histograms.matchesToMcHits->Fill(nMatches);
-      }
-    }
-  }
 
-
-  // Fill efficiency and purity histograms
-
-  float HitEfficiency;
-  float HitPurity;
-
-  for (unsigned int i = 0; i < 45; i++) {
-    HitEfficiency = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
-    HitPurity = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
-    histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
-    histograms.mHitPurity->Fill((float) i+1, HitPurity);
-  }
+    mcInfo->setMatchedHits(matchedHits);
 }
-
 //-----------------------------------------------------------------------
-
-void StTpcEvalMaker::mcTrackIteration() {
-
-  // this iteration is useful for calculating acceptances and
-  // efficiencies.
-  //
-  // nothing for vertices yet...
-
-  cout << "_ StMcTrack iteration ___________________" << endl;
-
-  StMcVertex* mcPrimaryVertex = mStMcEvent->primaryVertex();
-  StSPtrVecMcTrack mcTrackContainer = mStMcEvent->tracks();
-
-  histograms.mMcMultiplicity = mcTrackContainer.size();
-  histograms.mPairMultiplicity = mmcTrackMap->size();
-  for (unsigned int iMcTrack = 0;
-       iMcTrack < mcTrackContainer.size(); iMcTrack++) {
-
-      
-      MatchedTrackPair trackPair;
-      
-      StMcTrack* mcTrack = mcTrackContainer[iMcTrack];
-
-    // use the primary key from the g2t tables for the mc track id
-    // use id = 0 for shower tracks
-    // set sign to negative for non-primary vertex tracks
-    signed long trackId = mcTrack->key();
-    if (mcTrack->startVertex() != mcPrimaryVertex) {
-	trackId *= -1;
-    }
-    if (mcTrack->isShower()) {
-	trackId = 0;
-    }
-    trackPair.mcInfo()->setId(trackId);
+void StTpcEvalMaker::addRcTrack(StGlobalTrack* rcTrack, rcTrackInfo* rcInfo)
+{
+    //
+    // Fills rcTrackInfo
+    //
+    if (!rcTrack || !rcInfo) return;
     
-    addMcTrack(mcTrack,trackPair.mcInfo());
     
-    // Count the number of recontstructed tracks associated with the
-    // mc track.
-    unsigned int nMatchedRcTracks=mmcTrackMap->count(mcTrack);
-    trackPair.mcInfo()->setMatchedTracks(nMatchedRcTracks);
+    // To compare the right momentum, use primary tracks.
+    // Use the information directly from the primary track.
+    // If it is not a primary track, change the sign of the
+    // primary key and use the information from the global track.
+    StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(rcTrack->node()->track(primary));
+    if (pTrk) 
+	{
+	    rcInfo->setId(pTrk->key());
+	    rcInfo->setMomentum(pTrk->geometry()->momentum());
+	}
+    else 
+	{
+	    rcInfo->setId(-1*rcTrack->key());
+	    rcInfo->setMomentum(rcTrack->geometry()->momentum());     
+	}
 
-    pair<mcTrackMapIter,mcTrackMapIter> mcMapBounds =
-      mmcTrackMap->equal_range(mcTrack);
-
-    for (mcTrackMapIter mcMapIter = mcMapBounds.first;
-	 mcMapIter != mcMapBounds.second; ++mcMapIter){
-	
-	//(*mcMapIter).first is the StMcTrack used as the map key
-	StTrackPairInfo* assocPair = (*mcMapIter).second; //StAssociationMaker
-	StGlobalTrack* rcTrack = assocPair->partnerTrack();
-
-	addRcTrack(rcTrack,trackPair.rcInfo());
-
-	trackPair.setCommonHits(assocPair->commonTpcHits());
-	
-	// how many StMcTrack are matched to rcTrack?
-	unsigned int nMatchedMcTracks=mrcTrackMap->count(rcTrack);
-	trackPair.rcInfo()->setMatchedTracks(nMatchedMcTracks);
-	
-	scanTrackPair(&trackPair, mcTrack, rcTrack); // defined below...
-
-	histograms.fillTrackNtuple(&trackPair); // ntuple row for the pair...
-	mTpcEvalEvent->addTrackPair(trackPair);
-
-    } // iterate over matched StGlobalTrack
-  }   // iterate over StMcTrack
-
+    // The detector info. is shared by the primary & global,
+    // so it doesn't matter which one we use.
+    
+    // number of StTpcHit hits
+    rcInfo->setHits(rcTrack->detectorInfo()->numberOfPoints(kTpcId));
+    // number of Fit StTpcHit hits
+    rcInfo->setFitHits(rcTrack->fitTraits().numberOfFitPoints(kTpcId));
+    
+    // count the track's StTpcHits that are matched to any StMcTpcHit
+    // Note that here we just check whether the track's hit is matched,
+    // but we don't accumulate the number of matches each hit has.
+    StPtrVecHit hitContainer = rcTrack->detectorInfo()->hits(kTpcId);
+    int matchedHits = 0;
+    for (StPtrVecHitIterator i = hitContainer.begin(); i != hitContainer.end(); i++) 
+	{
+	    StTpcHit* hitKey = dynamic_cast<StTpcHit*>(*i);
+	    if (hitKey && mrcTpcHitMap->count(hitKey) ) matchedHits++;
+	}
+    rcInfo->setMatchedHits(matchedHits);
 }
-
 //-----------------------------------------------------------------------
-
-void StTpcEvalMaker::rcTrackIteration() {
-
-  // this pass should be used to pick up ghost tracks
-  // (the StGlobalTrack not matched to any StMcTrack)
-
-  cout << "_ StGlobalTrack iteration ___________________" << endl;
-
-  StSPtrVecTrackNode& rcTrackNodes = mStEvent->trackNodes();
-
-  histograms.mRcMultiplicity = rcTrackNodes.size();
-
-  for (StSPtrVecTrackNodeIterator nodeIter = rcTrackNodes.begin();
-       nodeIter != rcTrackNodes.end(); ++nodeIter) {
-
-    StTrackNode* trackNode = *nodeIter;
-    StGlobalTrack* rcTrack =
-      dynamic_cast<StGlobalTrack*>(trackNode->track(global));
-
-    if (!rcTrack) continue;
-
-    unsigned int nMatchedMcTracks = mrcTrackMap->count(rcTrack);
-
-    if (nMatchedMcTracks == 0) {
-	
-	MatchedTrackPair trackPair;
-	
-	addRcTrack(rcTrack,trackPair.rcInfo());
-	histograms.fillTrackNtuple(&trackPair);
-
-	mTpcEvalEvent->addTrackPair(trackPair);
-    }
-
-  } // iterate over track nodes
-
-}
-
-//-----------------------------------------------------------------------
-
-void StTpcEvalMaker::addMcTrack(StMcTrack* mcTrack, mcTrackInfo* mcInfo) {
-  //
-  // Fill mcTrackInfo
-  //
-  if (!mcTrack || !mcInfo) return;
-
-  // momentum vector at start vertex
-  mcInfo->setFourMomentum(mcTrack->fourMomentum());
-
-  // number of StMcTpcHit
-  StPtrVecMcTpcHit hitContainer = mcTrack->tpcHits();
-  mcInfo->setHits(hitContainer.size());
-
-  // count the track hits StMcTpcHit matched to any StTpcHit
-  unsigned int matchedHits = 0;
-  for (StMcTpcHitIterator i = hitContainer.begin();
-       i != hitContainer.end(); i++) 
-      if ( mmcTpcHitMap->count(*i) ) matchedHits++;
-
-  mcInfo->setMatchedHits(matchedHits);
-}
-
-//-----------------------------------------------------------------------
-
-void StTpcEvalMaker::addRcTrack(StGlobalTrack* rcTrack, rcTrackInfo* rcInfo) {
-  //
-  // Fills rcTrackInfo
-  //
-  if (!rcTrack || !rcInfo) return;
-
-  
-  // To compare the right momentum, use primary tracks.
-  // Use the information directly from the primary track.
-  // If it is not a primary track, change the sign of the
-  // primary key and use the information from the global track.
-  StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(rcTrack->node()->track(primary));
-  if (pTrk) {
-      rcInfo->setId(pTrk->key());
-      rcInfo->setMomentum(pTrk->geometry()->momentum());
-      
-  }
-  else {
-      rcInfo->setId(-1*rcTrack->key());
-      rcInfo->setMomentum(rcTrack->geometry()->momentum());     
-  }
-
-  // The detector info. is shared by the primary & global,
-  // so it doesn't matter which one we use.
-  
-  // number of StTpcHit hits
-  rcInfo->setHits(rcTrack->detectorInfo()->numberOfPoints(kTpcId));
-  // number of Fit StTpcHit hits
-  rcInfo->setFitHits(rcTrack->fitTraits().numberOfFitPoints(kTpcId));
-
-  // count the track's StTpcHits that are matched to any StMcTpcHit
-  // Note that here we just check whether the track's hit is matched,
-  // but we don't accumulate the number of matches each hit has.
-  StPtrVecHit hitContainer = rcTrack->detectorInfo()->hits(kTpcId);
-  int matchedHits = 0;
-  for (StPtrVecHitIterator i = hitContainer.begin();
-       i != hitContainer.end(); i++) {
-    StTpcHit* hitKey = dynamic_cast<StTpcHit*>(*i);
-    if (hitKey && mrcTpcHitMap->count(hitKey) ) matchedHits++;
-  }
-  rcInfo->setMatchedHits(matchedHits);
-}
-
-//-----------------------------------------------------------------------
-
-void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTrack, StGlobalTrack* rcTrack) {
+void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTrack, StGlobalTrack* rcTrack) 
+{
     //
     // calculate momentum resolution
     // count common, matched hits between mcInfo.track() and rcInfo.track()
@@ -555,112 +593,119 @@ void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTra
     
     StPtrVecHit rcTrackHitContainer = rcTrack->detectorInfo()->hits(kTpcId);
     
-    for (StHitIterator hitIter = rcTrackHitContainer.begin();
-	 hitIter != rcTrackHitContainer.end(); hitIter++) {
-	rcHit = dynamic_cast<StTpcHit*>(*hitIter);
-	if (!rcHit) continue;
+    for (StHitIterator hitIter = rcTrackHitContainer.begin();hitIter != rcTrackHitContainer.end(); hitIter++)
+	{
+	    rcHit = dynamic_cast<StTpcHit*>(*hitIter);
+	    if (!rcHit) continue;
 	
-	pair<rcTpcHitMapIter,rcTpcHitMapIter> mapBounds =
-	    mrcTpcHitMap->equal_range(rcHit);
-	
-	// iterate over the StMcTpcHits matched to rcHit...
-	for (rcTpcHitMapIter mapIter = mapBounds.first;
-	     mapIter != mapBounds.second; mapIter++){
-	  
-	    mcHit = (*mapIter).second; 
+	    pair<rcTpcHitMapIter,rcTpcHitMapIter> mapBounds = mrcTpcHitMap->equal_range(rcHit);
 	    
-	    // does this mcHit belong to the StMcTrack stored in trackPair?
-	    
-	    StMcTrack* mcTrkFromHit = mcHit->parentTrack();
-	    
-	    if (mcTrkFromHit == mcTrack) {
-		trackPair->addHitResolution(hitPair.resolution(mcHit,rcHit));
-		break;
-	    }
-	}
-	
-    
-    } // iterate over StTpcHit of StGlobalTrack
-    
+	    // iterate over the StMcTpcHits matched to rcHit...
+	    for (rcTpcHitMapIter mapIter = mapBounds.first; mapIter != mapBounds.second; mapIter++)
+		{
+		    
+		    mcHit = (*mapIter).second; 
+		    
+		    // does this mcHit belong to the StMcTrack stored in trackPair?
+		    
+		    StMcTrack* mcTrkFromHit = mcHit->parentTrack();
+		    
+		    if (mcTrkFromHit == mcTrack) 
+			{
+			    trackPair->addHitResolution(hitPair.resolution(mcHit,rcHit));
+			    break;
+			}
+		}
+	} // iterate over StTpcHit of StGlobalTrack
 }
-
 //-----------------------------------------------------------------------
-
-void StTpcEvalMaker::HitSeparation() {
-    
+void StTpcEvalMaker::HitSeparation() 
+{
+    //////
+    /// loop over mc hits and find distance to remaining hits
+    /// loop over rc hits and find distance to remaining hits
+    //////
     cout << " In Hit Separation module: Note very time consuming can be disabled in script" << endl;
     
+    ////
+    //  mc hits
+    ///
+    // get mc hits
     StMcTpcHitCollection* mcTpcHitCollection = mStMcEvent->tpcHitCollection();
-    if (!mcTpcHitCollection) {
-	cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
-	return;
-    }
-
+    if (!mcTpcHitCollection) 
+	{
+	    cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
+	    return;
+	}
+    
     // create hitpair and initialize transformations using database
     MatchedHitPair hitPair(mStTpcDb);
-    
-    for (unsigned int isec = 0;
-	 isec < mcTpcHitCollection->numberOfSectors(); isec++) {
-      cout << "In Sector: " << isec + 1 << endl;
-      cout << "In Row: ";
-      for (unsigned int irow = 0;
-	   irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-	cout << irow + 1 << " "; flush(cout);
-	for (StMcTpcHitIterator hitIter =
-	       mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-	     hitIter !=
-	       mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-	     hitIter++) {
-	  for (StMcTpcHitIterator hitIter2 = hitIter;
-	       ++hitIter2 != 
-		 mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
-	    {	
-	      // access StAssociationMaker mc tpc hit map information
-	      StMcTpcHit* mcTpcHit1 = *hitIter;
-	      StMcTpcHit* mcTpcHit2 = *hitIter2;
-	      hitPair.resolution(mcTpcHit1, mcTpcHit2);
-	      histograms.mcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()),
-						       fabs(hitPair.resolution().z()));
-	    }
+ 
+    // loop over hits
+    for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
+	{
+	    cout << "In Sector: " << isec + 1 << endl;
+	    cout << "In Row: ";
+	    for (unsigned int irow = 0; irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
+		{
+		    cout << irow + 1 << " "; flush(cout);
+		    for (StMcTpcHitIterator hitIter = mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+			 hitIter != mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+			 hitIter++) 
+			{
+			    // loop over remaining mc hits in this sector and padrow
+			    for (StMcTpcHitIterator hitIter2 = hitIter; ++hitIter2 != mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
+				{	
+				    // access StAssociationMaker mc tpc hit map information
+				    StMcTpcHit* mcTpcHit1 = *hitIter;
+				    StMcTpcHit* mcTpcHit2 = *hitIter2;
+				    // calculate distance
+				    hitPair.resolution(mcTpcHit1, mcTpcHit2);
+				    // fill histo
+				    histograms.mcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()), fabs(hitPair.resolution().z()));
+				}
+			}
+		}
+	    cout << " " << endl;
 	}
-      }
-      cout << " " << endl;
-    }
     
+    /////
+    //  rc hits
+    ////
+    // get rc hits
     StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
-    if (!rcTpcHitCollection) {
-      cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
-      return;
-    }
-    
-    for (unsigned int isec = 0;
-	 isec < rcTpcHitCollection->numberOfSectors(); isec++) {
-      cout << "In Sector: " << isec + 1 << endl;
-      cout << "In Row: ";
-      for (unsigned int irow = 0;
-	   irow < rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-	cout << irow + 1 << " "; flush(cout);
-	for (StSPtrVecTpcHitIterator hitIter =
-	       rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-	     hitIter !=
-	       rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-	     hitIter++) {
-	  for (StSPtrVecTpcHitIterator hitIter2 = hitIter;
-	       ++hitIter2 != 
-		 rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
-	    {
-	      
-	      // access StAssociationMaker recon tpc hit map information
-	      StTpcHit* rcTpcHit1 = *hitIter;
-	      StTpcHit* rcTpcHit2 = *hitIter2;
-	      hitPair.resolution(rcTpcHit1, rcTpcHit2);
-	      histograms.rcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()),
-						       fabs(hitPair.resolution().z()));
-	    }
+    if (!rcTpcHitCollection) 
+	{
+	    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
+	    return;
 	}
-      }
-      cout << " " << endl;
-    }
+    // loop over rc hits
+    for (unsigned int isec = 0; isec < rcTpcHitCollection->numberOfSectors(); isec++)
+	{
+	    cout << "In Sector: " << isec + 1 << endl;
+	    cout << "In Row: ";
+	    for (unsigned int irow = 0; irow < rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
+		{
+		    cout << irow + 1 << " "; flush(cout);
+		    for (StSPtrVecTpcHitIterator hitIter = rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+			 hitIter != rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+			 hitIter++) 
+			{
+			    // loop over remaining rc hits in this sector and padrow
+			    for (StSPtrVecTpcHitIterator hitIter2 = hitIter; ++hitIter2 != rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
+				{
+				    
+				    // access StAssociationMaker recon tpc hit map information
+				    StTpcHit* rcTpcHit1 = *hitIter;
+				    StTpcHit* rcTpcHit2 = *hitIter2;
+				    // calculate distance
+				    hitPair.resolution(rcTpcHit1, rcTpcHit2);
+				    // fill histogram
+				    histograms.rcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()), fabs(hitPair.resolution().z()));
+				}
+			}
+		}
+	    cout << " " << endl;
+	}
 }
-
 //-----------------------------------------------------------------------
