@@ -2,12 +2,15 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.2 1999/08/17 01:44:32 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.3 1999/08/17 18:55:55 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.3  1999/08/17 18:55:55  snelling
+ * Added two member funtions: setSector and setNrXbins
+ *
  * Revision 1.2  1999/08/17 01:44:32  snelling
  * changed ntuple projection to normal histogram filling
  *
@@ -25,6 +28,19 @@
 class StQACosmicMaker : public StMaker {
 
  private:
+
+  Int_t SelectedSector;
+  Int_t nXBins;
+  Bool_t bSectorSelectionOn;
+
+  virtual void   SectorSelection(Bool_t flag=kFALSE){bSectorSelectionOn=flag;}
+  virtual void   SectorSelectionOn() {SectorSelection(kTRUE);} 
+  virtual void   SectorSelectionOff(){SectorSelection();}
+  virtual Int_t  initHistograms();
+  virtual Int_t  fillHistograms();
+  virtual Int_t  calcHistograms();
+  virtual Int_t  initTNtuple();
+  virtual Int_t  fillTNtuple();
 
  protected:
 
@@ -55,19 +71,18 @@ class StQACosmicMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   PrintInfo();
-  virtual Int_t  initHistograms();
-  virtual Int_t  fillHistograms();
-  virtual Int_t  calcHistograms();
-  virtual Int_t  initTNtuple();
-  virtual Int_t  fillTNtuple();
+  virtual void   setSector(const Int_t sectorNumber);
+  virtual void   setNrXbins(const Int_t bins) {nXBins = bins;}
   virtual Int_t  Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.2 1999/08/17 01:44:32 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.3 1999/08/17 18:55:55 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQACosmicMaker, 1) //macro for rootcint
 };
 
 #endif
+
+
 
 
 
