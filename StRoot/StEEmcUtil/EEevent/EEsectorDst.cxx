@@ -1,5 +1,8 @@
-// $Id: EEsectorDst.cxx,v 1.1 2003/01/28 23:16:07 balewski Exp $
+// $Id: EEsectorDst.cxx,v 1.2 2003/02/20 05:15:14 balewski Exp $
 // $Log: EEsectorDst.cxx,v $
+// Revision 1.2  2003/02/20 05:15:14  balewski
+// reorganization
+//
 // Revision 1.1  2003/01/28 23:16:07  balewski
 // start
 //
@@ -98,7 +101,7 @@ void EEsectorDst::print(){
 //---------------------------------------------------
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsectorDst::addTwHit(int sub, int eta, float ener, TClonesArray *hitA) {
+void EEsectorDst::addTwHit(char sub, int eta, float ener, TClonesArray *hitA) {
  
   TClonesArray &hits = *hitA;
   int len=hits.GetEntries();
@@ -111,7 +114,7 @@ void EEsectorDst::addTwHit(int sub, int eta, float ener, TClonesArray *hitA) {
 //---------------------------------------------------
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsectorDst::addSmdHit(int strip, float ener, TClonesArray *hitA) {
+void EEsectorDst::addSmdHit(char strip, float ener, TClonesArray *hitA) {
  
   TClonesArray &hits = *hitA;
   int len=hits.GetEntries();
@@ -155,7 +158,7 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
   
   // copy tower hits above energy threshold
   for(j=0;j<mx;j++) {
-    int sub='A'+j/12;
+    char sub='A'+j/12;
     int eta=1+j%12;
     float ener1=sum1[j]; // layer 1
     float ener2=sum2[j]; // layer 2

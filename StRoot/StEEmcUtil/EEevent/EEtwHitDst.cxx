@@ -26,7 +26,7 @@ void EEtwHitDst::get(char &sub, int &eta, Float_t &ener) {
 //---------------------------------
 //---------------------------------
 //---------------------------------
-void EEtwHitDst::set(int sub, int eta, Float_t ener) {
+void EEtwHitDst::set(char sub, int eta, Float_t ener) {
   //  printf("add sub/int=%d eta=%d ener=%f\n",sub,eta,ener); 
   mSubSec=sub; assert(mSubSec>='A' && mSubSec<='E');
   mEta=eta; assert(mEta>=1 && mEta<=12);
