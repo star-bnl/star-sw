@@ -5,6 +5,8 @@ hitFilterType:		 StTpcPadrowHitFilter
 
 //min padrow
 mMinPadrow:		10
+//mMinPadrow:		1
 
 //max padrow
 mMaxPadrow:		35
+//mMaxPadrow:		45
