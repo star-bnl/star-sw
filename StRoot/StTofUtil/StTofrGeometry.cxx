@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.4 2004/03/09 16:45:16 dongx Exp $
+ * $Id: StTofrGeometry.cxx,v 1.5 2004/05/03 22:58:26 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.5  2004/05/03 22:58:26  dongx
+ * using a switch to set the ouput message
+ *
  * Revision 1.4  2004/03/09 16:45:16  dongx
  * Remove InitDaqMap() since a StTofrDaqMap is introduced
  *
@@ -35,6 +38,7 @@
 #include "TDataSetIter.h"
 #include "StMaker.h"
 //#include "TMemStat.h"
+#include "StMessMgr.h"
 
 //#include "Debugger.h"
 
@@ -1169,6 +1173,14 @@ StTofrGeometry::StTofrGeometry(const char* name, const char* title)
    mInitFlag       = kFALSE;
    mTopNode        = 0;
    mStarHall       = 0;
+
+   for(int i=0;i<mNTrays;i++) {
+     mTofrTray[i] = 0;
+     for(int j=0;j<mNModules;j++) {
+       mTofrSensor[i][j] = 0;
+     }
+   }
+
    //
    //We only need one instance of StTofrGeometry
    //
@@ -1187,6 +1199,16 @@ StTofrGeometry::~StTofrGeometry()
    cout << "Warning !! StTofrGeometry at pointer =" << (void*)gTofrGeometry
         << " is deleted" << endl;
    gTofrGeometry = 0;
+
+   for(int i=0;i<mNTrays;i++) {
+     if(mTofrTray[i]) delete mTofrTray[i];
+     mTofrTray[i] = 0;
+     for(int j=0;j<mNModules;j++) {
+       if(mTofrSensor[i][j]) delete mTofrSensor[i][j];
+       mTofrSensor[i][j] = 0;
+     }
+   }
+   
 }
 
 //_____________________________________________________________________________
@@ -1293,10 +1315,10 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
 
   // check tray-tofr or full-tofr
   TDataSetIter nextSector(mTopNode);
-  TVolumeView *sectorVolume = 0;
+  TVolumeView *secVolume = 0;
   mTrays = 0;     // non-emtry tray number
-  while ( (sectorVolume = (TVolumeView *)nextSector()) ) {
-    TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
+  while ( (secVolume = (TVolumeView *)nextSector()) ) {
+    TVolumeView *trayVolume = (TVolumeView *)secVolume->First();
     if ( trayVolume->GetListSize() ) {
       mTrays++;
       mModulesInTray = trayVolume->GetListSize();
@@ -1305,6 +1327,37 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   mTofrConf = 0;
   if (mTrays==120) mTofrConf = 1;
   //
+
+  /////////////////////////////
+  // save the sensors and trays
+  /////////////////////////////
+  gMessMgr->Info("","OS") << " # of trays = " << mTopNode->GetListSize() << endm;
+  TList *list = mTopNode->Nodes();
+  Int_t ibtoh =0;
+  TVolumeView *sectorVolume = 0;
+  mNValidTrays = 0;
+  mNValidModules = 0;
+  for(Int_t i=0;i<list->GetSize();i++) {
+    sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
+    TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
+    if( !trayVolume->GetListSize() ) continue;
+    if ( i>=60 ) ibtoh = 1;
+    //    gMessMgr->Info("","OS") << " test sector size = " << trayVolume->GetListSize() << endm;
+    mTofrTray[mNValidTrays] = new StTofrGeomTray(ibtoh, sectorVolume, mTopNode);
+    TList *list1 = trayVolume->Nodes();
+    //    gMessMgr->Info("","OS") << "   # of modules in tray " << mTofrTray[mNValidTrays]->Index() << " = " << trayVolume->GetListSize() << endm;
+    if (!list1 ) continue;
+    TVolumeView *sensorVolume = 0;
+    if(list1->GetSize()>mNValidModules) mNValidModules=list1->GetSize(); 
+    for(Int_t j=0;j<list1->GetSize();j++) {
+      sensorVolume = dynamic_cast<TVolumeView*> (list1->At(j));
+      mTofrSensor[mNValidTrays][j] = new StTofrGeomSensor(sensorVolume, mTopNode);
+    }
+    mNValidTrays++;
+  }
+  gMessMgr->Info("","OS") << "\n-------------------------------------------\n"
+			  << " Summary of initialization: "
+			  << "    NValidTrays = " << mNValidTrays << "   NValidModules = " << mNValidModules << endm;
 
 
 //   if ( !TofrConf ) {    // tray Tofr --- delete garbages
@@ -1452,107 +1505,6 @@ Bool_t  StTofrGeometry::InitFromRoot(const char* geofile)
    delete btofr_geo;
 
    return kTRUE;
-}
-*/
-/*
-//_____________________________________________________________________________
-void StTofrGeometry::InitDaqMap()
-{
-  cout << "StTofGeometry: Initializing default DAQ and CellId mappings" << endl;
-
-  for ( int i=0;i<120;i++ ) {
-    for ( int j=0;j<33;j++ ) {
-      for ( int k=0;k<6;k++ ) {
-	mTofDaqADCChanMap[i][j][k] = 255;
-	mTofDaqTDCChanMap[i][j][k] = 255;
-	if ( i+1 == 83 && ( 3<=j+1 && j+1<=5 ) ) {
-	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 48;
-	}
-	if ( i+1 == 83 && j+1 == 7 ) {
-	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 48;
-	}
-	if ( i+1 == 83 && ( 9<=j+1 && j+1<=14 ) ) {
-	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 48;
-	}
-	if ( i+1 == 83 && j+1 == 26 ) {
-	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 48;
-	}
-	if ( i+1 == 83 && j+1 == 32 ) {
-	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 48;
-	}
-
-      }
-    }
-  }
-
-  for ( int i=0; i<132; i++ ) {
-    mTofADCChan2TrayMap[i]   = 0;
-    mTofADCChan2ModuleMap[i] = 0;
-    mTofADCChan2CellMap[i]   = 0;
-    mTofTDCChan2TrayMap[i]   = 0;
-    mTofTDCChan2ModuleMap[i] = 0;
-    mTofTDCChan2CellMap[i]   = 0;
-
-    int iadc = i-60;
-    int itdc = i-48;
-    if ( 0<=iadc && iadc<18 ) {
-      mTofADCChan2TrayMap[i]   = 83;
-      mTofADCChan2ModuleMap[i] = iadc/6+3;
-      mTofADCChan2CellMap[i]   = 6-iadc%6;
-    }
-    if ( 18<=iadc && iadc<24 ) {
-      mTofADCChan2TrayMap[i]   = 83;
-      mTofADCChan2ModuleMap[i] = iadc/6+4;
-      mTofADCChan2CellMap[i]   = 6-iadc%6;
-    }
-    if ( 24<=iadc && iadc<60 ) {
-      mTofADCChan2TrayMap[i]   = 83;
-      mTofADCChan2ModuleMap[i] = iadc/6+5;
-      mTofADCChan2CellMap[i]   = 6-iadc%6;
-    }
-    if ( 60<=iadc && iadc<66 ) {
-      mTofADCChan2TrayMap[i]   = 83;
-      mTofADCChan2ModuleMap[i] = iadc/6+16;
-      mTofADCChan2CellMap[i]   = 6-iadc%6;
-    }
-    if ( 66<=iadc && iadc<72 ) {
-      mTofADCChan2TrayMap[i]   = 83;
-      mTofADCChan2ModuleMap[i] = iadc/6+21;
-      mTofADCChan2CellMap[i]   = 6-iadc%6;
-    }
-
-    if ( 0<=itdc && itdc<18 ) {
-      mTofTDCChan2TrayMap[i]   = 83;
-      mTofTDCChan2ModuleMap[i] = itdc/6+3;
-      mTofTDCChan2CellMap[i]   = 6-itdc%6;
-    }
-    if ( 18<=itdc && itdc<24 ) {
-      mTofTDCChan2TrayMap[i]   = 83;
-      mTofTDCChan2ModuleMap[i] = itdc/6+4;
-      mTofTDCChan2CellMap[i]   = 6-itdc%6;
-    }
-    if ( 24<=itdc && itdc<60 ) {
-      mTofTDCChan2TrayMap[i]   = 83;
-      mTofTDCChan2ModuleMap[i] = itdc/6+5;
-      mTofTDCChan2CellMap[i]   = 6-itdc%6;
-    }
-    if ( 60<=itdc && itdc<66 ) {
-      mTofTDCChan2TrayMap[i]   = 83;
-      mTofTDCChan2ModuleMap[i] = itdc/6+16;
-      mTofTDCChan2CellMap[i]   = 6-itdc%6;
-    }
-    if ( 66<=itdc && itdc<72 ) {
-      mTofTDCChan2TrayMap[i]   = 83;
-      mTofTDCChan2ModuleMap[i] = itdc/6+21;
-      mTofTDCChan2CellMap[i]   = 6-itdc%6;
-    }
-
-  }
 }
 */
 /*
@@ -2027,7 +1979,7 @@ const
    Int_t at = -1;
 
    //   TList *list = mTopNode->GetListOfNodes();
-
+   
    TDataSetIter nextSector(mTopNode);
    TVolumeView *sectorVolume = 0;
    //   StTofrGeomTray *tray = 0;
@@ -2092,10 +2044,31 @@ const
    xg[1] = point.y();
    xg[2] = point.z();
 
-   //   TObject *obj;
-
    //Loop over trays
    //
+
+   Int_t itray = -1, imodule = -1, icell = -1;
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mTofrTray[i]) continue;
+     if ( mTofrTray[i]->IsGlobalPointIn(point) ) {
+       itray = mTofrTray[i]->Index();
+       if ( !(mTofrTray[i]->GetfView()->GetListSize()) ) {
+	 cout << " No sensors in tray " << itray << endl;
+	 return cellId;
+       }
+       
+       for( int j=0;j<mNValidModules;j++) {
+	 if(!mTofrSensor[i][j]) continue;
+	 if ( mTofrSensor[i][j]->IsGlobalPointIn(point) ) {
+	   imodule = mTofrSensor[i][j]->Index();
+	   mTofrSensor[i][j]->Master2Local(xg,xl);
+	   icell = mTofrSensor[i][j]->FindCellIndex(xl);
+	 }
+       } // end for (j)
+     } // end if
+   } // end for (i)
+
+   /*
    TDataSetIter nextSector(mTopNode);
    TVolumeView *sectorVolume = 0;
    //   StTofrGeomTray *tray = 0;
@@ -2130,6 +2103,7 @@ const
      }
      delete tray;
    }
+   */
 
    if ( itray <= 0 || imodule <= 0 ) return cellId;
    cellId = CalcCellId(icell, imodule, itray);
@@ -2174,7 +2148,7 @@ const
 }
 
 //_____________________________________________________________________________
-Bool_t StTofrGeometry::HelixCross(const StHelixD &helix)
+Bool_t StTofrGeometry::HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec)
 const
 {
    //
@@ -2185,22 +2159,30 @@ const
    DoubleVec pathVec;
    PointVec crossVec;
 
-   Bool_t crossed = HelixCrossCellIds(helix,idVec,pathVec,crossVec);
+   Bool_t crossed = HelixCrossCellIds(helix,validModuleVec, projTrayVec, idVec,pathVec,crossVec);
 
    return crossed;
 }
 
 
 //_____________________________________________________________________________
-Bool_t StTofrGeometry::HelixCrossCellIds(const StHelixD &helix,
-                       IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec)
+Bool_t StTofrGeometry::HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec)
 const
 {
+  /////////////////////////////////////////////////////////
+  // optimized :
+  // input : helix, validModuleVec from DAQ, 
+  //         projTrayVec possible hit tray from this helix
+  //                                   Xin Dong
+  /////////////////////////////////////////////////////////
    //
    // return "kTRUE" if any cell is crossed by this helix
    //  and also fill the cellIds which are crossed by the helix
    //  and the path length of the helix before crossing the cell
    //
+
+   if(validModuleVec.size()==0) return kFALSE;
+   if(projTrayVec.size()==0) return kFALSE;
 
    Double_t pathLen;
    Int_t cellId;
@@ -2209,6 +2191,49 @@ const
    pathVec.clear();
    crossVec.clear();
 
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mTofrTray[i]) continue;
+     int trayId = mTofrTray[i]->Index();
+     bool itrayFind = kFALSE;
+
+     for(size_t it=0;it<projTrayVec.size();it++) {
+       int validtrayId = projTrayVec[it];
+       if(validtrayId==trayId) {
+	 itrayFind = kTRUE;
+	 break;
+       }
+     }
+     if(!itrayFind) continue;
+
+     //     cout << " Helix cross sensitive tray " << trayId << endl;
+
+     for(int j=0;j<mNValidModules;j++) {
+       if(!mTofrSensor[i][j]) continue;
+       int moduleId = mTofrSensor[i][j]->Index();
+       for(size_t iv=0;iv<validModuleVec.size();iv++) {
+	 int validtrayId = validModuleVec[iv]/100;
+	 int validmoduleId = validModuleVec[iv]%100;
+	 if(validtrayId==trayId&&validmoduleId==moduleId) {
+	   if ( mTofrSensor[i][j]->HelixCross(helix,pathLen,cross) ) {	   
+	     Double_t global[3], local[3];
+	     global[0] = cross.x();
+	     global[1] = cross.y();
+	     global[2] = cross.z();
+	     mTofrSensor[i][j]->Master2Local(global,local);
+	     Int_t icell = mTofrSensor[i][j]->FindCellIndex(local);
+	     cellId = CalcCellId(icell, moduleId, trayId);
+	     if (cellId>0) {    // reject hit in the edge of module;
+	       pathVec.push_back(pathLen);
+	       idVec.push_back(cellId);
+	       crossVec.push_back(cross);
+	     }
+	   }
+	 } // endif (tray && module)
+       } // end for (iv)
+     } // end for (j)
+   } // end for (i)
+
+   /*
    TDataSetIter nextSector(mTopNode);
    TVolumeView *sectorVolume = 0;
    //   StTofrGeomTray *tray = 0;
@@ -2267,7 +2292,7 @@ const
      delete tray;
      
    }
-
+   */
    /*
    TObject *obj;
    StTofrNode *node;
@@ -2326,6 +2351,53 @@ const
    }
 }
 
+//---------------------------------------------------------------------------
+// estimate the possible projection on the TOF tray
+Bool_t StTofrGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) const {
+
+  trayVec.clear();
+  double R_tof = 220.;
+  double res = 5.0;
+  double s1 = helix.pathLength(R_tof).first;
+  if(s1<0.) s1 = helix.pathLength(R_tof).second;
+  StThreeVectorD point = helix.at(s1);
+  double phi = point.phi()*180/3.14159;
+
+  // east ring, start from 108 deg (id=61) , clock-wise from east facing west
+  int itray_east = (255+(int)phi)%360/6+61;
+  trayVec.push_back(itray_east);
+
+  int itray_east1 = (255+(int)(phi+res))%360/6+61;
+  int itray_east2 = (255+(int)(phi-res))%360/6+61;
+  if(itray_east1!=itray_east) {
+    trayVec.push_back(itray_east1);
+  }
+  if(itray_east2!=itray_east&&itray_east2!=itray_east1) {
+    trayVec.push_back(itray_east2);
+  }
+  
+  // west ring, start from 72 deg (id=1) , clock-wise from west facing east
+  int itray_west = (435-(int)phi)%360/6+1;
+  trayVec.push_back(itray_west);
+
+  int itray_west1 = (435-(int)(phi+res))%360/6+1;
+  int itray_west2 = (435-(int)(phi-res))%360/6+1;
+  if(itray_west1!=itray_west) {
+    trayVec.push_back(itray_west1);
+  }
+  if(itray_west2!=itray_west&&itray_west2!=itray_west1) {
+    trayVec.push_back(itray_west2);
+  }
+
+//   cout << " proj tray id = ";
+//   for(size_t it=0;it<trayVec.size();it++) {
+//     cout << trayVec[it] << " ";
+//   }
+//   cout << endl;
+  
+  if(trayVec.size()>0) return kTRUE;
+  else return kFALSE;
+}
 
 /*
 //_____________________________________________________________________________

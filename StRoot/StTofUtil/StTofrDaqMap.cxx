@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.4 2004/04/09 15:17:19 jeromel Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.5 2004/05/03 22:58:26 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.5  2004/05/03 22:58:26  dongx
+ * using a switch to set the ouput message
+ *
  * Revision 1.4  2004/04/09 15:17:19  jeromel
  * void function returning a value is forbidden by standards
  *
@@ -82,7 +85,9 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
       mTrayId[id] = (Int_t)(moduleConf[0].iTray[i]);
       mModuleId[id] = (Int_t)(moduleConf[0].iModule[i]);
       mCellId[id] = j+1;
-      cout << " id=" << id << "  tray=" << mTrayId[id] << " module=" << mModuleId[id] << "  cell=" << mCellId[id] << endl;
+      if(maker->Debug()) {
+	cout << " id=" << id << "  tray=" << mTrayId[id] << " module=" << mModuleId[id] << "  cell=" << mCellId[id] << endl;
+      }
     }
   }
 
