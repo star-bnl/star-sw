@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.90 1999/07/15 18:23:35 fisyak Exp $
+// $Id: bfc.C,v 1.91 1999/07/15 18:35:48 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -870,6 +870,7 @@ void bfc(const Int_t First,
 	  treeMk->IntoBranch("l3tBranch","l3Tracks");
 	}
       }      
+      treeMk->SetBranch("histBranch");
     }
   }
   chain->PrintInfo();
