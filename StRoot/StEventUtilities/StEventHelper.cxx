@@ -568,9 +568,11 @@ int StFilterABC::fgDial=0;
 //______________________________________________________________________________
 StFilterABC::StFilterABC(const char *name):TNamed(name,"")
 {
+#ifndef R__QT
    char cbuf[200];
    sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",this);
    gROOT->ProcessLine(cbuf);
+#endif
 }
 //______________________________________________________________________________
 void StFilterABC::SetDefs()
@@ -582,6 +584,7 @@ void StFilterABC::SetDefs()
 //______________________________________________________________________________
 void   StFilterABC::Update()
 {
+#ifndef R__QT
    char cbuf[200];
    float       *pars    = GetPars();
    const float *defs    = GetDefs();
@@ -599,6 +602,7 @@ void   StFilterABC::Update()
    printf("StFilterABC::Update: %s\n",cbuf);
    gROOT->ProcessLine(cbuf);
    printf("StFilterABC::Update() update finished\n");
+#endif
 }
    
 //______________________________________________________________________________
@@ -612,19 +616,19 @@ StFilterDef::StFilterDef(const char *name):StFilterABC(name)
 const char  **StFilterDef::GetNams() const
 {
   static const char *nams[] = {
-   "  RandomSelect = ",
-   "  RxyMin       = ",
-   "  RxyMax       = ",
-   "  ZMin         = ",
-   "  ZMax         = ",
-   "  PhiMin       = ",
-   "  PhiMax       = ",
-   "  LenMin       = ",
-   "  LenMax       = ",
-   "  PtMin        = ",
-   "  PtMax        = ",
-   "  QMin         = ",
-   "  QMax         = ", 
+   "  RandomSelect ",
+   "  RxyMin       ",
+   "  RxyMax       ",
+   "  ZMin         ",
+   "  ZMax         ",
+   "  PhiMin       ",
+   "  PhiMax       ",
+   "  LenMin       ",
+   "  LenMax       ",
+   "  PtMin        ",
+   "  PtMax        ",
+   "  QMin         ",
+   "  QMax         ", 
    0};
   return nams;
 }
