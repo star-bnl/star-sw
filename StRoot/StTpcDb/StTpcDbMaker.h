@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.6 2000/02/23 15:09:58 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.7 2000/02/23 22:21:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.7  2000/02/23 22:21:09  hardtke
+ * add tpc_global_to_local_p
+ *
  * Revision 1.6  2000/02/23 15:09:58  hardtke
  * move tpg_detector and tpg_pad_plane from .const to .data
  *
@@ -44,6 +47,7 @@
 #define tpc_x_to_pad_ F77_NAME(tpc_x_to_pad,TPC_X_TO_PAD)
 #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL)
 #define tpc_global_to_local_ F77_NAME(tpc_global_to_local,TPC_GLOBAL_TO_LOCAL)
+#define tpc_global_to_local_p_ F77_NAME(tpc_global_to_local_p,TPC_GLOBAL_TO_LOCAL_P)
 #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
 #define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z)
 #define tpc_z_to_time_ F77_NAME(tpc_z_to_time,TPC_Z_TO_TIME)
@@ -69,6 +73,9 @@ R__EXTERN int type_of_call tpc_local_to_global_(int *,float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_global_to_local_p_(int *,float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_time_to_z_(int *,int *,int *,int *,float *);
@@ -112,7 +119,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.6 2000/02/23 15:09:58 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.7 2000/02/23 22:21:09 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
