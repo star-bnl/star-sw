@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.18 2004/05/25 15:32:37 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.19 2004/06/01 21:20:49 balewski Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -57,6 +57,15 @@ public:
   /// \param xphiBin
   /// \return direction as TVector3
   TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
+
+  /// gets tower ID from 'direction' vector from (0,0,0) toward a point on EEMC
+  /// \param  r - input direction
+  /// \param all the rest are output values, indexing is from zero
+  /// rPhi, rEta are fractions of the distance between center of the tower & direction   
+  void direction2tower( TVector3 r,
+			int &iSec, int &iSub, int &iEta, float &rPhi  , float &rEta );
+
+
   
   /// gets lower Z edge of EEMC (preshower)
   inline Float_t getZ1()     const { return mZ1;  };
@@ -178,6 +187,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.19  2004/06/01 21:20:49  balewski
+ * direction2tower ()
+ *
  * Revision 1.18  2004/05/25 15:32:37  zolnie
  * phi angles adjusted to [0,2pi] interval
  *

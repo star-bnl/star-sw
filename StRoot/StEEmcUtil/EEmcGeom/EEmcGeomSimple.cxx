@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.20 2004/05/25 15:32:36 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.21 2004/06/01 21:20:49 balewski Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -161,6 +161,42 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
 }
 
 
+// converts direction vector 'r' to sec/sub/eta bin. All counted from zero.
+void 
+EEmcGeomSimple::direction2tower( TVector3 r,
+	     int &iSec, int &iSub, int &iEta, float &rPhi  , float &rEta )
+{
+  // printf("in GetTowNo() \n");
+  
+  //printf("intersection at x/y/z=%f/%f/%f\n",r.x(),r.y(),r.z());
+  
+  float eta=r.Eta();
+  float phiDeg=180.*r.Phi()/3.14159;
+  float phi=phiDeg -75;
+  if(phi>0) phi-=360;
+  phi=-phi;
+
+  // printf("phiDeg=%f -->  phi=%f eta=%f\n",phiDeg,phi,eta);
+  int ix=((int)phi)/6;
+  iSec=ix/5;
+  iSub=ix%5;
+  rPhi   =phi-iSec*30-iSub*5 -2.5;
+
+  Float_t *dEB= mEtaBin;
+  iEta=-1;
+  rEta=-999;
+  for(int i=0;i<13;i++){
+    // printf(" %d %f %f %d \n",i,eta,defaultEtaBin[i],iEta);
+    if(eta<dEB[i]) continue;
+    iEta=i-1;
+    if(i>0 && i<=12) rEta= -(dEB[i]+dEB[i-1]-2*eta)/2./(dEB[i]-dEB[i-1]);
+    break;
+  }
+
+  // printf("  ix=%d sec=%d sub=%c  eta=%d\n",ix,iSec+1,iSub+'A',iEta+1);
+}
+
+
 
 #if 0
 // =========================================================================
@@ -261,6 +297,9 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.21  2004/06/01 21:20:49  balewski
+// direction2tower ()
+//
 // Revision 1.20  2004/05/25 15:32:36  zolnie
 // phi angles adjusted to [0,2pi] interval
 //
