@@ -1,5 +1,5 @@
 /******************************************************
- * $Id: StRichGeantReader.cxx,v 1.1 2000/01/18 21:32:01 lasiuk Exp $
+ * $Id: StRichGeantReader.cxx,v 1.2 2000/02/08 16:24:55 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichGeantReader input module.
@@ -21,14 +21,14 @@
  *
  *******************************************************
  * $Log: StRichGeantReader.cxx,v $
- * Revision 1.1  2000/01/18 21:32:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/02/08 16:24:55  lasiuk
+ * Remove from package next revision.  I/O handled by maker
  *
  * Revision 1.2  2000/02/08 16:24:55  lasiuk
  * Remove from package next revision.  I/O handled by maker
  *
  * Revision 1.1  2000/01/18 21:32:01  lasiuk
-
+ * Initial Revision
  *
  ******************************************************/
 #ifdef NEVER
@@ -118,6 +118,7 @@ extern "C" int agfhit1_ (int*, int*, int*, float*);
 	default: mNvl = -1;                 // if undefined
 	}
 	
+    }
 #ifndef ST_NO_NAMESPACES
 //}
 #endif
