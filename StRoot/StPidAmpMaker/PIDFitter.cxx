@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.3 2002/03/27 14:19:21 aihong Exp $
+// $Id: PIDFitter.cxx,v 1.4 2002/12/17 17:05:48 aihong Exp $
 //
 // Authors: Aihong Tang
 //
@@ -90,6 +90,7 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
   grName.Append((i<10) ? "0" : "");
   grName +=i;
   grName +=j;
+  grName.ReplaceAll(".root","");
 
    sigmaNSampleGraph->SetTitle(grName.Data());
    sigmaNSampleGraph->SetName(grName.Data());
@@ -139,7 +140,9 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
 
     if (mWriteSigmaNSampleGraph) {
         fitResoFile->cd();
-        sigmaNSampleGraph->Write();
+        sigmaNSampleGraph->SetMarkerColor(2);
+        sigmaNSampleGraph->SetMarkerStyle(20);
+        sigmaNSampleGraph->Write(grName.Data(),TObject::kOverwrite | TObject::kSingleKey);
         fitResoFile->Write();
     }
 
@@ -148,14 +151,14 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
     if (sigmaNSampleGraph) delete sigmaNSampleGraph;
     mSigmaOfSingleTrail[j]=theSigmaOfSingleTrail;
 
-    if (mWriteSigmaNSampleGraph) {  delete fitResoFile; fitResoFile=0;}
+
 
        SigmaFileOut<<j<<endl;
        SigmaFileOut<<theSigmaOfSingleTrail<<endl;//" +/- "<<theErrorOfSigmaOfSingleTrail<<endl;
 
 	} //integrated over all eta bins
 
-
+    if (mWriteSigmaNSampleGraph)  fitResoFile->Close();
        SigmaFileOut.close();
 
 
@@ -1091,6 +1094,9 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.4  2002/12/17 17:05:48  aihong
+// write out sigmaNsample graph
+//
 // Revision 1.3  2002/03/27 14:19:21  aihong
 // use two functions to fit e+/- amp. instead of one
 //
