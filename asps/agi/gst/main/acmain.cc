@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.8 1998/08/03 17:19:48 didenko Exp $
+ * $Id: acmain.cc,v 1.9 1998/08/11 01:41:00 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.9  1998/08/11 01:41:00  perev
+ * prototype change
+ *
  * Revision 1.8  1998/08/03 17:19:48  didenko
  * correction for NT version by Faine
  *
@@ -66,7 +69,7 @@ extern "C"  int  type_of_call  getarg_ (int*, char*, int);
 extern "C"  int   type_of_call iargc_ ();
 extern "C"  void  k_setar (int , char** );
 extern "C"  void  asuMallocInit();
-extern "C"  void  asuStack(void *);
+extern "C"  int  asuStack(void *);
  
 int main    (int argc, char *argv[])
 {
