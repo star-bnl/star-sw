@@ -11,24 +11,29 @@
 #endif
 
 #include "StDAQMaker/StDAQReader.h"
-//#include "StDaqLib/L3/L3_Reader.hh"
 #include "TTree.h"
 #include "Stl3MiniEvent.h"
-//#include "StEventTypes.h"
 
+// some foreward declaration since includes don't work
+// in these cases 
 class globalTrack ;
 class StL3Trigger ;
+class StPrimaryVertex ;
 
 class Stl3RawReaderMaker : public StMaker {
  
  private:
-  TDataSet* DAQReaderSet ;
-  // Mini Event
-  StL3Reader*  ml3reader ; 
-  Stl3MiniEvent*  mL3Event ;
-  TTree* mGlobalTrackTree ;
-  // StEvent
-  StL3Trigger* myStL3Trigger ;
+    // General stuff
+    TDataSet* DAQReaderSet ; //!
+    StL3Reader*  ml3reader ;  //!
+    // Mini Event
+    Stl3MiniEvent*  mL3Event ;  //!
+    TTree* mGlobalTrackTree ;  //!
+    // StEvent
+    StL3Trigger* myStL3Trigger ; //!
+    // switches
+    Int_t WriteMiniEvent ; //!
+    Int_t WriteStEvent ; //!
 
  protected:
  public: 
@@ -49,19 +54,16 @@ class Stl3RawReaderMaker : public StMaker {
    Int_t fillStEventWithi960Hits() ;
 
    // vertexd finding routines
-   Int_t findVertexMethod1(globalTrack* tracks, Int_t nOfTracks, Float_t* vertex) ;
-   
-   // switches
-   Int_t WriteMiniEvent ;
-   Int_t WriteStEvent ;
-
+   Int_t findVertexMethod1(StPrimaryVertex& ) ;
+   Int_t findVertexMethod2(StPrimaryVertex& ) ;
+ 
    // getters
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.1 2000/09/06 21:05:41 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.2 2000/09/13 14:57:26 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(Stl3RawReaderMaker, 0)   //StAF chain virtual base class for Makers
+   ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
