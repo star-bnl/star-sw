@@ -121,9 +121,9 @@ class St_TableSorter : public TNamed {
 // The last parameter below ",const St_Table &table=*((const St_Table *)0));" 
 // is useless but was introduced to make "g++" happy.
 
-    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0, const St_Table &table=*((const St_Table *)0));
-    St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0,const St_Table &table=*((const St_Table *)0));
-    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0,  const St_Table &table=*((const St_Table *)0));
+    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     virtual ~St_TableSorter();
     
     Int_t BinarySearch(Float_t  value );
