@@ -35,6 +35,7 @@ duiDispatcher:: duiDispatcher(const char * name)
    myCwd = (char*)ASUALLOC(strlen(name) +2);
    strcpy(myCwd,"/");
    strcat(myCwd,name);
+   pDSroot = NULL;
    if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
       dsPerror("duiDispatcher -- Error creating root dataset");
    }
