@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.6 2000/04/18 02:30:04 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.7 2000/04/27 14:13:04 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.7  2000/04/27 14:13:04  genevb
+// Added old tree deletion
+//
 // Revision 1.6  2000/04/18 02:30:04  genevb
 // Added multi-file capabilities
 //
@@ -120,6 +123,7 @@ Int_t StStrangeMuDstMaker::Init() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitReadDst() {
 
+  if (tree) delete tree;
   tree = (TTree*) muDst->Get("StrangeMuDst");
   if (!tree) {
     gMessMgr->Error() << "StStrangeMuDstMaker: no StrangeMuDst tree"
