@@ -42,7 +42,7 @@
 * input_file=auau_ce_b0-2_1_200.xdf _
 * 
  macro run__
-   TOP=$STAR _
+   TOP=/scr22/kathy/testdev _
    domain='geometry sim/gstar sim/g2t' _
    phystype=on _
    geomtype=all _   
