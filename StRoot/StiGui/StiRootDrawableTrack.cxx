@@ -18,19 +18,7 @@ StiRootDrawableTrack::~StiRootDrawableTrack()
 
 void StiRootDrawableTrack::draw()
 {
-  //cout <<"StiRootDrawableTrack::draw() -I- Started"<<endl;
-  //if (_visible)
-  //clear();
-  //  if (!_data)
-  //  {
-  //    cout << "_data is NULL"<<endl;
-  //    return;
-  //  }
-  //cout << "SRDT::draw() -I- copy deque.size()=="<< _data->size();
-  // copy(_data->begin(),_data->end(),begin());
-  //cout << " done"<<endl;
  _line->SetPolyLine(size()/3, &(this->operator[](0)));
- //cout << " and set"<<endl;
  _line->Draw();
 }
 
@@ -65,14 +53,17 @@ void StiRootDrawableTrack::setStyle(int val)
   _line->SetLineStyle(val);
 }
 
-void StiRootDrawableTrack::add(double x, double y, double z)
+void StiRootDrawableTrack::add(double x, double y, double z, int direction)
 {
   double r = sqrt(x*x+y*y+z*z);
-  //cout << "1r:"<<r<<" rMin:"<<_rMin<<" rMax:"<<_rMax<<endl;
-  if (r>_rMax) _rMax = r;
-  if (r<_rMin) _rMin = r;  
-  push_back(x);
-  push_back(y);
-  push_back(z);
+  //if (direction>0)
+  // {
+      push_back(x);
+      push_back(y);
+      push_back(z);
+      // }
+      //else
+      // {
+      //}
   //cout << "2r:"<<r<<" rMin:"<<_rMin<<" rMax:"<<_rMax<<endl;
 }

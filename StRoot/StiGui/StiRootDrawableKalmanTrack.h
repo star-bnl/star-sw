@@ -12,9 +12,10 @@ class StiRootDrawableKalmanTrack : public StiKalmanTrack, public StiRootDrawable
 public:
   StiRootDrawableKalmanTrack();
   virtual ~StiRootDrawableKalmanTrack();
-  virtual void reset();
-  virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
-  virtual StiKalmanTrackNode * add(StiKalmanTrackNode * node);
+  virtual void reset();  
+  virtual void draw();
+  //virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
+  //virtual StiKalmanTrackNode * add(StiKalmanTrackNode * node);
 };
 
 #endif

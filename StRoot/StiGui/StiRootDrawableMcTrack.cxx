@@ -37,3 +37,8 @@ void StiRootDrawableMcTrack::reset()
   this->StiRootDrawableTrack::reset();
 }
 
+void StiRootDrawableMcTrack::draw()
+{
+ _line->SetPolyLine((size()/3)-1, &(this->operator[](0)));
+ _line->Draw();
+}

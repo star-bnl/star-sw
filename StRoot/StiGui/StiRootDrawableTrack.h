@@ -20,7 +20,7 @@ public:
     virtual void setStyle(int val);
     virtual void setSize(double val);
     virtual void setVisible(bool val);
-    virtual void add(double x, double y, double z);
+    virtual void add(double x, double y, double z, int direction=1);
 protected:
     bool _visible;
     double _rMin;
