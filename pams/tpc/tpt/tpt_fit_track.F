@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.13 2000/07/25 06:37:49 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.14 2000/08/14 17:16:18 snelling Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.14  2000/08/14 17:16:18  snelling
+* changed hit errors to absolute values
+*
 * Revision 1.13  2000/07/25 06:37:49  sakrejda
 * Initialisation of errors added
 *
@@ -136,9 +139,9 @@ C          crossing angle
                 wlin(i)=1.0/sigz**2
                 xlocal(1)=sigx
                 iret=tpc_local_to_global(int(hit(ient).row/100),xlocal,xglobal)
-                hit(ient).dx=xglobal(1)
-                hit(ient).dy=xglobal(2)
-                hit(ient).dz=sigz
+                hit(ient).dx=abs(xglobal(1))
+                hit(ient).dy=abs(xglobal(2))
+                hit(ient).dz=abs(sigz)
            else if(ncir.eq.1) then
                 ient1 = ient
            else if(ncir.eq.2) then
