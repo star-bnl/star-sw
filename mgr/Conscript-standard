@@ -33,7 +33,6 @@ my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
 
 #my $so_pkg  = "";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
-printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n" if $param::debug;
 my $LIBS  = $env->{LIBS};
@@ -163,6 +162,7 @@ if ($#Defs > -1) {
   push @src, $cint;# print "+==========add $cint\n" if $param::debug; 
 }
 if ($#src > -1) {
+  printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
   if ($LIBPKG) {
     Library      $env2 $LIBPKG, @src;  
     Install $env2 $LIB, $LIBPKG;# print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
@@ -183,9 +183,9 @@ foreach my $Rep (@Repo) {
     foreach my $i (@idlR) {push @idlL, $i;}
   }
 }
-my @idlLL   = sortu (@idlL);# print "idl = @idl\n"; 
+my @idlL   = sortu (@idlL); #print "idlL = @idlL\n"; 
 
-if ($#idlLL > -1) {
+if ($#idlL > -1) {
   my @idlT = ();
   my @sourcesT = (); 
   my $objT = $OBJ . "/pams/tables";
@@ -193,20 +193,18 @@ if ($#idlLL > -1) {
   my $shareT  = "#.share/tables";# print "shareT = $shareT\n";
   my $includeT = $INCLUDE . "/tables";# print "includeT = $includeT\n";
   my $SHARET  = $DIR . "/.share/tables";
-#  Link $objT =>  $SHARET; print "Link $objT ===>  $SHARET\n" unless ($param::quiet);
-  foreach my $idl (@idlLL) {#  print "$idl\n";
-#    if (! grep (/idl\//,$idl)) {next;} 
-    #  my $IDL =  $DIR . "/" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
+  foreach my $idl (@idlL) {#  print "$idl\n";
     my $IDL = "#" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
     my $stem = basename ($IDL, ".idl");# print "stem = $stem\n";
     my $idlt = $includeT . "/" . basename($idl);
     push @idlT, $IDL; 
-  }# print "idlT = @idlT\n";
+  }
+  print "idlT = @idlT\n" if $param::debug;
   if ($#idlT > -1) {
-    my $PKGT = $pkg . "_Tables";
+    my $PKGT = "lib" . $pkg . "_Tables";
     my $SO_PKGT = $PKGT . "." . $env->{SUFSOLIB};# print "SO_PKGT = $SO_PKGT\n";
     my $LIBPKGT = $PKGT . "." . $env->{SUFLIB};
-    if ($Dir !~ /pams\//) {
+    if ($Dir =~ /StRoot\//) {
       $SO_PKGT = $SO_PKG;
       $LIBPKGT = $LIBPKG;
     }
@@ -218,11 +216,16 @@ if ($#idlLL > -1) {
     my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $shareT . ":" . $env->{ENV}->{ROOTSRC};
     #   $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" 
     my $CXXFLAGS = $env->{CXXFLAGS};
-    if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $objT_dir;}
+    my $LINKMODULECOM = $env->{LINKMODULECOM};
+    if ($STAR_SYS =~ /^sun4x_5.$/) {
+      $CXXFLAGS .= " -ptr" . $obj_dir . "/Tables" ;
+      $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Tables/Templates.DB/*.o %_LDIRS %LIBS";
+    }
     $env3 = $env->clone(
 			'DEBUG'      => ' ',
 			'CPPPATH'    =>$ROOTCINT_CPP,
-			'CXXFLAGS'   => $CXXFLAGS  
+			'CXXFLAGS'   => $CXXFLAGS,
+			'LINKMODULECOM'=> $LINKMODULECOM
 		       );
     my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
     my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";

@@ -82,7 +82,7 @@ if (/^i386_/) {
   $CFLAGS   = "-fPIC -Wall";
   $LDFLAGS  = "-Wl,-Bstatic";
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
-  $SOFLAGS  = "-shared";  
+  $SOFLAGS  = "-shared -Wl,-Bdynamic";  
   if (/egcs$/) {
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
@@ -97,9 +97,10 @@ if (/^i386_/) {
     $FEXTEND  = "-ffixed-line-length-132"; 
   }
   elsif (/kcc$/) {
-#    $OSFID    = "f2cFortran";
-#    $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
-#    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+    $OSFID    = "f2cFortran";
+    $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
+#   $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
     $DEBUG    = "-g";
     $CXXOPT   = "+K0 -O0 --no_exceptions";
     $CXX      = "KCC";
@@ -121,8 +122,8 @@ if (/^i386_/) {
   else {
     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
     $FC       = "pgf77";
-    $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
-    $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
+    $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A";
+    $FLIBS   .= " -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
     $FFLAGS   = "-DPGI";  
     $FEXTEND  = "-Mextend";
@@ -148,6 +149,7 @@ elsif (/^hp_ux102/) {
   $SO       = $CXX;
   $CXXFLAGS = " -z +Z  -Dextname";
   $CFLAGS   = " -Ae -z +Z -Dextname";  
+  $so       = "sl";
   if (defined($SCL_OPTIMISE)){ # from Brian
     $CXXFLAGS .= " +Olibcalls +Onolimit";
   }
@@ -173,7 +175,7 @@ elsif (/^sun4x_56_CC5$/) {
   $FC        = "/opt/WS5.0/bin/f77";
 # $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
   $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
-  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
+  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
   $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
   $FEXTEND   = "-e";
@@ -184,7 +186,7 @@ elsif (/^sun4x_56_CC5$/) {
   $SO        = $CXX;
   $SOFLAGS   = "-G";#
 }
-elsif (/^sun4x_55$/ ||  /^sun4x_56$/) {
+elsif (/^sun4x_5.$/) {
   $ROOTCINTD = "-DSOLARIS";
   $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
   $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
@@ -467,30 +469,6 @@ my @subdirs = ();
 foreach my $dir ("pams","StRoot"){#,"StDb") {
   next if ! -d $dir;
   my $db_dir  = "StDb/include"; #print "db_dir = $db_dir\n";
-  if ($dir =~ /^StDb$/) {
-    opendir (DIR, $db_dir) or die "Can't open $db_dir\n";
-    my @subdirS = readdir DIR; 
-    closedir DIR; #print "subdirS = @subdirS\n";
-    foreach my $sub_dir (@subdirS) {
-      next if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/); 
-      my $sub_DIR = $db_dir . "/" . $sub_dir;
-      if (-d $sub_DIR) { 
-	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	my @incDb = readdir DIR;
-	closedir DIR; #print "incDb = @incDb\n";
-	my @incsDb = ();
-	foreach my $inc (@incDb) {
-	  next if $inc !~ /\.h$/ && $inc !~ /\.hh$/;
-	  push @incsDb, $db_dir . "/" . $sub_dir . "/" . $inc;
-	}
-	if ($#incsDb > -1 && ! $param::rflag) {
-	  my $inc_sub_dir = $INCLUDE . "/" . $sub_dir; #print "Install in $inc_sub_dir : @incsDb\n";
-	  Install $env $inc_sub_dir, @incsDb;
-	} 
-      }
-    }
-    push @subdirs, $dir;  next;
-  }
   opendir (DIR, $dir) or die "Can't open $dir\n";
   my @subdirS = readdir DIR;
   closedir DIR; #print "subdirS = @subdirS\n";
@@ -566,9 +544,10 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
 	next;
       }
 #      next if ($sub_dir =~ /tables/);
-      if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  $sub_dir =~ /StHbtMaker/) {next;}
+      if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  
+	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StFlow/)) {next;}
       if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
-	  ($sub_dir =~ /StSpectraMaker/ ||  $sub_dir =~ /StSpectraTagsMaker/)) {next;}
+	  ($sub_dir =~ /StSpectraMaker/ || $sub_dir =~ /StSpectraTagsMaker/)) {next;}
       push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
     }
   }
