@@ -44,11 +44,12 @@ ClassImp(StEventQAMaker)
 Bool_t isTriggerInSubRange(const StTriggerId* tr, UInt_t lo, UInt_t hi) {
 // Only the last three digits matter...
 // ...according to Jeff Landgraf's triggerID scheme
+// (only for triggerIDs >= 10000)
   vector<unsigned int> idVec = tr->triggerIds();
   for (UInt_t i=lo; i<=hi; i++) {
     UInt_t j = i - ((i/1000)*1000);
     for (UInt_t k=0; k<idVec.size(); k++)
-      if (idVec[k] > 2000 &&
+      if (idVec[k] >= 10000 &&
           j == (idVec[k] - ((idVec[k]/1000)*1000))) return kTRUE;
   }
   return kFALSE;
@@ -2106,8 +2107,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.57 2004/03/03 01:19:29 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.58 2004/03/03 01:22:31 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.58  2004/03/03 01:22:31  genevb
+// Small addendum to previous checkin
+//
 // Revision 2.57  2004/03/03 01:19:29  genevb
 // Updated triggerIDs for Jeff Landgraf's scheme
 //
