@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.48 2003/03/17 20:46:55 posk Exp $
+// $Id: plot.C,v 1.49 2003/03/18 17:58:36 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -535,29 +535,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  delete funcCos1;
 	} else if (strstr(shortName[pageNumber],"Sub")!=0) { 
 	  TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi/order, 2);
-	  funcSubCorr->SetParNames("chiJYO", "har");
-	  funcSubCorr->SetParameters(0.5, order);            // initial value
+	  funcSubCorr->SetParNames("chi", "har");
+	  funcSubCorr->SetParameters(1., order);             // initial value
 	  funcSubCorr->SetParLimits(1, 1, 1);                // har is fixed
 	  hist->Fit("SubCorr");
 	  delete funcSubCorr;
-	  TF1* funcCos1 = new TF1("funcCos1",
-				  "1+[0]*2*cos([1]*x)", 0., twopi/order);
-	  funcCos1->SetParNames("res_sub", "har");
-	  funcCos1->SetParameters(0, order);                // initial values
-	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
-	  funcCos1->SetLineStyle(kDashed);
-	  hist->Fit("funcCos1", "+");
-	  delete funcCos1;
-	  TF1* gauss = new TF1("gauss", "gaus(0)+gaus(3)", 0., twopi/order);
-	  gauss->SetParameter(1, 0.);
-	  gauss->SetParameter(2, 1.);
-	  gauss->SetParameter(4, twopi/order);
-	  gauss->SetParameter(5, 1.);
-	  gauss->SetParLimits(1, 1, 1);
-	  gauss->SetParLimits(4, 1, 1);
-	  gauss->SetLineStyle(kDotted);
-	  hist->Fit("gauss", "+");
-	  delete gauss;
 	} else {
 	  TF1* funcCos3 = new TF1("funcCos3",
 	 "1+[0]*2/100*cos([3]*x)+[1]*2/100*cos(([3]+1)*x)+[2]*2/100*cos(([3]+2)*x)",
@@ -785,25 +767,119 @@ static Double_t qDist(double* q, double* par) {
 //-----------------------------------------------------------------------
 
 static Double_t SubCorr(double* x, double* par) {
-  // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
-  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6, with corrs.
-  // The Struve function is available stating with ROOT 3.03/08.
+  // Calculates the n(Psi_a - Psi_b) distribution by fitting chi
+  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6. with correc.
+  // The Struve functions are included.
 
-  double chi2 = par[0] * par[0];
+  double chi2 = par[0] * par[0] / 2;     // divide by two for SV chi
   double z = chi2 * cos(par[1]*x[0]);
   double TwoOverPi = 2./TMath::Pi();
 
   Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
-		    + z*(TMath::BesselI0(z) + TMath::Struve(0,z))
-		    + chi2*(TMath::BesselI1(z) + TMath::Struve(1,z)));
+                    + z*(TMath::BesselI0(z) + StruveL0(z))
+                    + chi2*(TMath::BesselI1(z) + StruveL1(z)));
+
   return dNdPsi;
 }
 
 //-----------------------------------------------------------------------
 
+static Double_t StruveL1(Double_t x)
+{
+  // Modified Struve Function of Order One
+  //
+
+  const Double_t pi=TMath::Pi();
+  Double_t a1,sl1,bi1,s;
+  Double_t r=1.0;
+  Int_t km;
+  
+  if (x<=20.) {
+    s=0.0;
+    for (int i=1; i<=60;i++){
+      r*=x*x/(4.0*i*i-1.0);
+      s+=r;
+      if(TMath::Abs(r)<TMath::Abs(s)*1.e-12)break;
+    }
+    sl1=2.0/pi*s;
+  }else{
+    s=1.0;
+    km=int(0.5*x);
+    if(x>50.0)km=25;
+    for (int i=1; i<=km; i++){
+      r*=(2*i+3)*(2*i+1)/x/x;
+      s+=r;
+      if(TMath::Abs(r/s)<1.0e-12)break;
+    }
+    sl1=2.0/pi*(-1.0+1.0/(x*x)+3.0*s/(x*x*x*x));
+    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
+    r=1.0;
+    bi1=1.0;
+    for (int i=1; i<=16; i++){
+      r=-0.125*r*(4.0-(2.0*i-1.0)*(2.0*i-1.0))/(i*x);
+      bi1+=r;
+      if(TMath::Abs(r/bi1)<1.0e-12)break;
+    }
+    sl1+=a1*bi1;
+  }
+  
+  return sl1;
+  
+}
+
+static Double_t StruveL0(Double_t x)
+{
+  // Modified Struve Function of Order Zero
+  //
+  
+  const Double_t pi=TMath::Pi();
+  
+  Double_t s=1.0;
+  Double_t r=1.0;
+  
+  Double_t a0,sl0,a1,bi0;
+  
+  Int_t km;
+  
+  if (x<=20.) {
+    a0=2.0*x/pi;
+    for (int i=1; i<=60;i++){
+      r*=(x/(2*i+1))*(x/(2*i+1));
+      s+=r;
+      if(TMath::Abs(r/s)<1.e-12)break;
+    }
+    sl0=a0*s;
+  }else{
+    km=int(5*(x+1.0));
+    if(x>=50.0)km=25;
+    for (int i=1; i<=km; i++){
+      r*=(2*i-1)*(2*i-1)/x/x;
+      s+=r;
+      if(TMath::Abs(r/s)<1.0e-12)break;
+    }
+    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
+    r=1.0;
+    bi0=1.0;
+    for (int i=1; i<=16; i++){
+      r=0.125*r*(2.0*i-1.0)*(2.0*i-1.0)/(i*x);
+      bi0+=r;
+      if(TMath::Abs(r/bi0)<1.0e-12)break;
+    }
+    
+    bi0=a1*bi0;
+    sl0=-2.0/(pi*x)*s+bi0;
+  }
+  
+  return sl0;
+  
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.49  2003/03/18 17:58:36  posk
+// Kirill Fillimonov's improved fit to the angle between subevent planes.
+//
 // Revision 1.48  2003/03/17 20:46:55  posk
 // Improved fit to q dist.
 //
