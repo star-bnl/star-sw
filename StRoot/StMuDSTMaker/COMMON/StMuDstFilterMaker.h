@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.7 2004/07/27 02:37:40 mvl Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.8 2004/07/27 04:31:37 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -14,9 +14,9 @@
 #include "StMuEvent.h"
 #include "StMuTrack.h"
 
-#include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
-#include "StStrangeMuDstMaker/StV0MuDst.hh"
-#include "StStrangeMuDstMaker/StXiMuDst.hh"
+class StStrangeEvMuDst;
+class StV0MuDst;
+class StXiMuDst;
 
 #include <string>
 
@@ -39,7 +39,7 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.7 2004/07/27 02:37:40 mvl Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.8 2004/07/27 04:31:37 mvl Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -84,6 +84,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.8  2004/07/27 04:31:37  mvl
+ * Changed includes to class StV0MuDst etc to reduce interdependence of makers
+ *
  * Revision 1.7  2004/07/27 02:37:40  mvl
  * Added includes for some Strange Mudst classes to rpovide base class for Strange Mudst filter
  *
