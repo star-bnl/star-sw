@@ -68,8 +68,7 @@ void StHbtBinaryReader::init(const char* dir, const char* file, const char* appe
 }
 //_______________________________
 StHbtBinaryReader::~StHbtBinaryReader(){
-  delete mFileName;
-  delete mFileList;
+  if (mFileList) delete mFileList;
 }
 //_______________________________
 StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
@@ -198,7 +197,7 @@ void StHbtBinaryReader::Finish(){
 }
 //_______________________________
 int StHbtBinaryReader::NextFile() {
-  mFileName="";
+  mFileName="\0";
   delete (mFileList->front());              // remove current file from list
   mFileList->pop_front();                   // remove current file from list
   if ( mFileList->empty() ) return ioEOL;
