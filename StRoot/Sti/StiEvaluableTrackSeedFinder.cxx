@@ -36,9 +36,13 @@ using std::for_each;
 
 ostream& operator<<(ostream&, const StiHit&);
 
+/*! We require a valid pointer to an StAssociationMaker object.  All other constructor
+  types are excplicity prohibited.  It is assumed, however, that the StAssociationMaker
+  object is owned by some other scope.
+*/
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
     : mAssociationMaker(assoc), mMcEvent(0), mFactory(0), mTpcHitFilter(0),
-      mBuildPath("empty"), mBuilt(false)
+      mBuildPath("empty"), mBuilt(false), mLowerBound(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
@@ -55,11 +59,18 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
     }
 }
 
-//No-op
+/*! This call is inherited from StiSeedFinder but does not make much sense in the context
+  of evaluable seeds.  That is, the internal state cannot be reset without a call to
+  setEvent().
+*/
 void StiEvaluableTrackSeedFinder::reset()
 {
 }
 
+/*! This should be called once per event.  The call to setEVent internally initializes
+  the seed finder for the event.  Without this call, the behavior of hasMore() and next()
+  is undefined.
+*/
 void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt) 
 {
     mMcEvent = mcevt;
@@ -78,6 +89,10 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
     return;
 }
 
+/*! A call to build builds the internal state from the text file specified by
+  buildPath.  If buildPath is not initialized, warning messages are streamed and
+  behavior of the seed-finder object is undefined.
+*/    
 void StiEvaluableTrackSeedFinder::build()
 {
     cout <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
@@ -92,6 +107,13 @@ void StiEvaluableTrackSeedFinder::build()
     }
 
     cout <<"StiEvalaubleTrackSeedFinder::build().  Build from:\t"<<mBuildPath<<endl;
+
+    StGetConfigValue(mBuildPath.c_str(), "lowerBound", mLowerBound);
+    if (mLowerBound==0) {
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\t";
+	cout <<"lowerBound==0.  ABORT"<<endl;
+	return;
+    }
 
     string hitFilterType="empty";
     StGetConfigValue(mBuildPath.c_str(), "hitFilterType", hitFilterType);
@@ -112,11 +134,19 @@ void StiEvaluableTrackSeedFinder::build()
     mBuilt=true;
 }
 
+/*! A call to hasMore() simply checks if there are more seeds to be generated.
+  It does not implement any increment or decrement calls, and thus may be called without
+  ever changing the internal state of the seed finder.
+*/
 bool StiEvaluableTrackSeedFinder::hasMore()
 {
     return (mCurrentMc!=mEndMc);
 }
 
+/*! A call to next() constructs a seed from the current m.c. track and increments
+  a pointer to the next available m.c. track.  The generation of the seed itself is
+  performed by the private makeTrack() method.
+*/
 StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 {
     StiKalmanTrack* track = 0;
@@ -126,20 +156,24 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
     return track;
 }
 
+/*! This function is the heart of the seed-finder.  It finds the best associated match
+  from the StAssociationMaker instance and initializes the StiKalmanTrack state with
+  the parameters from the m.c. track and the hits from the StGlobalTrack.
+*/
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
     StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(mFactory->getObject());
     if (!track) return 0;
     
     track->reset();
-  
+    
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
     if (!mcToStTrackMap) {
 	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
 	cout <<"McTrackMap==0"<<endl;
 	return 0;
     }
-
+    
     pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range =
 	mcToStTrackMap->equal_range(mcTrack);
     if (range.first==mcToStTrackMap->end()) {
@@ -151,8 +185,11 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     //Find bestTrack from association (linear search)
     //cout <<"New Track"<<endl;
-    BestCommonHits theBest = for_each(range.first, range.second, BestCommonHits());
-
+    mBestCommon.reset();
+    mBestCommon.setLowerBound(mLowerBound);
+    
+    BestCommonHits theBest = for_each(range.first, range.second, mBestCommon );
+    
     StTrackPairInfo* bestPair = theBest.pair();
     
     if (!bestPair) {
