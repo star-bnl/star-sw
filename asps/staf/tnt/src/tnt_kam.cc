@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 #include "kuip.h"
-
+#include "asuAlloc.h" 
 #include "emlLib.h"
 #include "tdmLib.h"
 #include "tntLib.h"
