@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.414 2004/05/11 14:44:02 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.415 2004/05/11 16:22:23 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -463,7 +463,7 @@ Bfc_st BFC1[] = {
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
+  {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
 
   {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
@@ -1025,7 +1025,7 @@ Bfc_st BFC2[] = {
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
+  {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
 
 
