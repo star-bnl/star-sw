@@ -35,15 +35,23 @@ StiGeometryTransform::StiGeometryTransform()
     cout <<"StiGeometryTransform::StiGeometryTransform()"<<endl;
 
     // read in svt geometry tables
-    cout <<"Read in svt geometry tables"<<endl;
+    cout <<"Read in svt geometry tables: preparing to seg-fualt"<<endl;
+
     St_DataSetIter local(StiMaker::instance()->GetInputDB("svt"));
-    
+    cout <<"Instantiated local"<<endl;
+
     svgConfig = 
-	dynamic_cast<St_svg_config *>(local("svgpars/config"))->GetTable()[0];  
+	dynamic_cast<St_svg_config *>(local("svgpars/config"))->GetTable()[0];
+    cout <<"Instantiated svgConfig"<<endl;
+
     aSvgGeom = dynamic_cast<St_svg_geom *>(local("svgpars/geom"))->GetTable();
+    cout <<"Instantiated aSvgGeom"<<endl;
+
     aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
+    cout <<"Instantiated aSvgShape"<<endl;
     
     // instantiate TPC coord x-form
+    cout <<"We didn't seg-fault!!!!"<<endl;
     cout <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
