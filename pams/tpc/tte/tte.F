@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.14 1998/07/02 19:20:17 sakrejda Exp $
+* $Id: tte.F,v 1.15 1998/07/09 12:47:31 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.15  1998/07/09 12:47:31  sakrejda
+* printing of warnings from tte reduced
+*
 * Revision 1.14  1998/07/02 19:20:17  sakrejda
 * B field obtained via gufld call
 *
@@ -197,7 +200,7 @@ C_____________________________________________________________________________
       call Msg_Enable( 'TTE-I9' )
       call Msg_Enable( 'TTE-I10' )
       call Msg_Enable( 'TTE-I11' )
-      call Msg_Enable( 'TTE-I12' )
+*      call Msg_Enable( 'TTEI12-E1' )
       call Msg_Enable( 'TTE-I13' )
       call Msg_Enable( 'TTE-I14' )
       event_number=event_number+1
@@ -587,10 +590,10 @@ c     translation table, clean up and zero the list_index_rec first
         if(tindex(i).key2.gt.0.and.tindex(i).key2.lt.list_size) then
           list_index_rec(tindex(i).key2)=i
         else if(tindex(i).key2.eq.0) then
-          write(m132,*)'TTE-I12 no reconstructed partner'
+          write(m132,*)'TTEI12-E1 no reconstructed partner'
           call Message(m132, 1, idI12)
         else
-          write(m132,*)'TTE-I12 list size not big enough', list_size,
+          write(m132,*)'TTEI12-E1 list size not big enough', list_size,
      >    tindex(i).key2                     
           call Message(m132, 1, idI12)
         endif
