@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.2 1999/12/19 00:12:45 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.3 1999/12/20 01:40:54 fine Exp $
 
 #include <assert.h>
 
@@ -37,13 +37,13 @@ static Float_t factor(Float_t &range,Int_t detId)
 //      parameter(detid_tpc  = 1)
 //      parameter(detid_svt  = 2)
 //      parameter(detid_ftpc = 3)
-//      parameter(detid_ssd  = 8)
+//      parameter(detid_ssd  = 8) // == 0
 
   const Float_t factors[]   = {2380 , 23800 , 2380 };
   const Float_t ranges[]    = { 220 ,  22   ,  270 };
 
-  Float_t ret = factors[0];
-  range =  ranges[0];
+  Float_t ret = factors[1];
+  range =  ranges[1];
   if (detId) {
     range = ranges[detId-1];
     ret = factors[detId-1]; 
@@ -147,6 +147,9 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
+// Revision 1.3  1999/12/20 01:40:54  fine
+// correction for detid_ssd
+//
 // Revision 1.2  1999/12/19 00:12:45  fine
 // some corrections for the packed tables
 //
