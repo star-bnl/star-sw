@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.25 2002/02/02 01:01:09 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.26 2002/02/02 02:05:30 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.26  2002/02/02 02:05:30  jhthomas
+ * Included gFactor explicitly in SpaceCharge call
+ *
  * Revision 1.25  2002/02/02 01:01:09  jeromel
  * Jim's modif for FC & SpaceCharge corrections.
  *
@@ -210,7 +213,7 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
 
   if ( fSpaceCharge != 0 )  // Get SpaceCharge so it can be printed, below.
     {
-      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs() ; 
+      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
     }
   else
     {
