@@ -1,5 +1,8 @@
-//! $Id: StRawTpcQaMaker.cxx,v 1.6 2000/08/04 21:03:47 perev Exp $
+//! $Id: StRawTpcQaMaker.cxx,v 1.7 2003/07/18 18:31:48 perev Exp $
 //! $Log: StRawTpcQaMaker.cxx,v $
+//! Revision 1.7  2003/07/18 18:31:48  perev
+//! test for nonexistance of XXXReader added
+//!
 //! Revision 1.6  2000/08/04 21:03:47  perev
 //! Leaks + Clear() cleanup
 //!
@@ -32,8 +35,6 @@
 
 #include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/TPC/trans_table.hh"
-
-#include "StDAQMaker/StDAQReader.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -111,7 +112,7 @@ Int_t StRawTpcQaMaker::Make(){
 
   //
   victor=victorPrelim->getTPCReader();
-  assert(victor);
+  if(!victor) return kStWarn;
 
 
   // Now you have a pointer named "victor".  It is a pointer to class
@@ -166,7 +167,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.6 2000/08/04 21:03:47 perev Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.7 2003/07/18 18:31:48 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

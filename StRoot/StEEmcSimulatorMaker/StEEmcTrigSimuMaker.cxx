@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.3 2003/04/30 20:36:37 perev Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.4 2003/07/18 18:31:46 perev Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.4  2003/07/18 18:31:46  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.3  2003/04/30 20:36:37  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -16,7 +19,6 @@
 #include "StEEmcTrigSimuMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
 
 #include <iostream.h>
 #include <math.h>

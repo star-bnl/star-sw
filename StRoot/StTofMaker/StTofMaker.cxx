@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.9 2003/02/06 05:02:05 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.10 2003/07/18 18:31:49 perev Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.10  2003/07/18 18:31:49  perev
+ * test for nonexistance of XXXReader added
+ *
  * Revision 1.9  2003/02/06 05:02:05  geurts
  * Added TOFr and extra pVPD-ADC channels to the datastream:
  * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
@@ -70,7 +73,7 @@
 #include "StEventTypes.h"
 #include "StTofUtil/StTofGeometry.h"
 #include "StTofDataCollection.h"
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "tables/St_TofTag_Table.h"

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.54 2003/07/15 09:35:41 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.55 2003/07/18 18:31:47 perev Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.55  2003/07/18 18:31:47  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.54  2003/07/15 09:35:41  jcs
 // do not re-flavor FTPC drift maps if already flavored to avoid creating
 // memory leak.
@@ -180,7 +183,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/fcntl.h>
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StFTPCReader.h"
 
 #include "StMessMgr.h"
@@ -444,9 +447,8 @@ Int_t StFtpcClusterMaker::Make()
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
-      assert(ftpcReader);
 
-      if (!ftpcReader->checkForData()) {
+      if (!ftpcReader || !ftpcReader->checkForData()) {
 	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
         delete paramReader;
         delete dbReader;

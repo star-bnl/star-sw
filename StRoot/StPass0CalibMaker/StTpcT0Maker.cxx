@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.3 2002/04/19 22:24:16 perev Exp $
+// $Id: StTpcT0Maker.cxx,v 1.4 2003/07/18 18:31:48 perev Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.4  2003/07/18 18:31:48  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.3  2002/04/19 22:24:16  perev
 // fixes for ROOT/3.02.07
 //
@@ -59,7 +62,6 @@
 #include "StTpcT0Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
@@ -298,7 +300,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.3 2002/04/19 22:24:16 perev Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.4 2003/07/18 18:31:48 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

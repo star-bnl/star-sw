@@ -57,7 +57,7 @@
 #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
 //#include "StDaqLib/TPC/trans_table.hh"
 #include "StTrsMaker/include/StTrsOstream.hh"
@@ -165,7 +165,7 @@ Int_t StMixerMaker::Make() {
     daqr1=(StDAQReader*)(dataset1->GetObject());
     assert(daqr1);
     tpcr1=daqr1->getTPCReader(); 
-    assert(tpcr1);
+    if(!tpcr1) return kStWarn;
   } else {
     // TRS
     // Get the TRS Event Data Set 
@@ -188,7 +188,7 @@ Int_t StMixerMaker::Make() {
     daqr2=(StDAQReader*)(dataset2->GetObject());
     assert(daqr2);
     tpcr2=daqr2->getTPCReader(); 
-    assert(tpcr2);
+    if(!tpcr2) return kStWarn;
   } else {
     // TRS
     // Get the TRS Event Data Set 
