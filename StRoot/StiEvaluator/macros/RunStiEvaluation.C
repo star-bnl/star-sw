@@ -28,28 +28,28 @@ void RunStiEvaluation(const char* evalFName="TestEvaluation.root",
   canvas1=new TCanvas("canvas1","Pi- Momentum Comparison", 100,50,800,700);
   canvas1->Divide(3,2);
   canvas1->cd(1);
-  TestTree->Draw("(stiTrackPx/500):globalTrackPx","mcTrackId==9");
+  TestTree->Draw("(stiTrackPx/500):globalTrackPx");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
   canvas1->cd(2);
-  TestTree->Draw("(stiTrackPy/500):globalTrackPy","mcTrackId==9");
+  TestTree->Draw("(stiTrackPy/500):globalTrackPy");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
   canvas1->cd(3);
-  TestTree->Draw("(stiTrackPz/500):globalTrackPz","mcTrackId==9");
+  TestTree->Draw("(stiTrackPz/500):globalTrackPz");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
 
   canvas1->cd(4);
-  TestTree->Draw("(stiTrackPx/500):globalTrackPx","(abs(stiTrackPx/500.)<2.)&&abs(globalTrackPx)<2.&&mcTrackId==9");
+  TestTree->Draw("(stiTrackPx/500):globalTrackPx","(abs(stiTrackPx/500.)<2.)&&abs(globalTrackPx)<2.");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
   canvas1->cd(5);
-  TestTree->Draw("(stiTrackPy/500):globalTrackPy","(abs(stiTrackPy/500.)<2.)&&abs(globalTrackPy)<2.&&mcTrackId==9");
+  TestTree->Draw("(stiTrackPy/500):globalTrackPy","(abs(stiTrackPy/500.)<2.)&&abs(globalTrackPy)<2.");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
   canvas1->cd(6);
-  TestTree->Draw("(stiTrackPz/500):globalTrackPz","(abs(stiTrackPz/500.)<2.)&&abs(globalTrackPz)<2. && (mcTrackId==9)");
+  TestTree->Draw("(stiTrackPz/500):globalTrackPz","(abs(stiTrackPz/500.)<2.)&&abs(globalTrackPz)<2.");
   htemp->SetYTitle("StiTrack Px");
   htemp->SetXTitle("Global Track Px");
 
