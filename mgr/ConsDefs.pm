@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.54 2003/09/02 18:00:21 perev Exp $
+# $Id: ConsDefs.pm,v 1.55 2003/09/09 13:46:49 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -166,10 +166,18 @@
 #	$CXXFLAGS    .= " -Werror";# warning==error;
 #	$CXXFLAGS    .= " -fnonnull-objects";
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-	  $DEBUG = "-O -g -march=pentium -mcpu=pentium -malign-loops=2";
-	  $DEBUG.= " -malign-jumps=2 -malign-functions=2";
-	  $FDEBUG = "-O -g";
-	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	    if ($STAR_HOST_SYS =~ /^gcc/){
+		# this naming convention starts at gcc 3.2 which happens to
+		# have a change in the options
+		$DEBUG = "-O -g -farch=pentium -fcpu=pentium -falign-loops=2";
+		$DEBUG.= " -falign-jumps=2 -falign-functions=2";
+		$FDEBUG = "-O -g";
+	    } else {
+		$DEBUG = "-O -g -march=pentium -mcpu=pentium -malign-loops=2";
+		$DEBUG.= " -malign-jumps=2 -malign-functions=2";
+		$FDEBUG = "-O -g";
+	    }
+	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         #                                             -fpipe
