@@ -28,6 +28,8 @@
 typedef long STAFCV_T;
 #define STAFCV_BAD	0
 #define STAFCV_OK	1
+#define STAFCV_ERR	2
+#define STAFCV_FATAL	3
 #endif				/*STAFCV_T*/
 
 /*- EMLCV - EML Condition Value -*/
