@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.11 2002/01/21 22:09:24 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.12 2002/02/12 18:42:00 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.12  2002/02/12 18:42:00  genevb
+// Additional FTPC histograms
+//
 // Revision 2.11  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -64,7 +67,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.11 2002/01/21 22:09:24 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.12 2002/02/12 18:42:00 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -151,7 +154,8 @@ class StQABookHist : public TObject {
 
   TH1F     *m_ftpc_chargestepW; //! Chargestep from ftpc west
   TH1F     *m_ftpc_chargestepE; //! Chargestep from ftpc east
-  TH1F     *m_ftpc_fcl_radius;  //! ftpc cluster radial position
+  TH1F     *m_ftpc_fcl_radialW;  //! ftpc west cluster radial position
+  TH1F     *m_ftpc_fcl_radialE;  //! ftpc east cluster radial position
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointTS;       //! number of points on the track - tpc+svt
@@ -269,6 +273,9 @@ class StQABookHist : public TObject {
   TH2F     *m_chisq0F;       //! chi square [0], ftpc
   TH1F     *m_chisq0FE;      //! chi square [0], ftpc east
   TH1F     *m_chisq0FW;      //! chi square [0], ftpc west
+  TH2F     *m_chisq1F;       //! chi square [1], ftpc
+  TH1F     *m_chisq1FE;      //! chi square [1], ftpc east
+  TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_chisq1T;       //! chi square [1], tpc
   TH2F     *m_chisq1TTS;     //! chi square [1], tpc,svt
   TH1F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
@@ -461,6 +468,9 @@ class StQABookHist : public TObject {
   TH2F     *m_pchisq0F;       //! chi square [0], ftpc
   TH1F     *m_pchisq0FE;      //! chi square [0], ftpc east
   TH1F     *m_pchisq0FW;      //! chi square [0], ftpc west
+  TH2F     *m_pchisq1F;       //! chi square [1], ftpc
+  TH1F     *m_pchisq1FE;      //! chi square [1], ftpc east
+  TH1F     *m_pchisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_pchisq1T;       //! chi square [1], tpc
   TH1F     *m_pchisq1TS;      //! chi square [1], tpc+svt
   TH2F     *m_pchisq1TTS;     //! chi square [1], tpc,tpc+svt
@@ -570,6 +580,8 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_phiS;    //! phi dist. of hits, svt
   TH2F     *m_pnt_padrowT; //! padrow dist. of hits, tpc
   TH1F     *m_pnt_barrelS; //! barrel dist. of hits, svt
+  TH2F     *m_pnt_xyFE;    //! xy dist. of hits, ftpcE
+  TH2F     *m_pnt_xyFW;    //! xy dist. of hits, ftpcW
   TH2F     *m_pnt_planeF;  //! plane dist. of hits, ftpc
   TH1F     *m_pnt_tot;     //! number of hits total
   TH1F     *m_pnt_tot_med; //! number of hits total, med range

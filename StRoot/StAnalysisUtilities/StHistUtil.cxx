@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.9 2002/01/26 03:04:05 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.10 2002/02/12 18:41:57 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.10  2002/02/12 18:41:57  genevb
+// Additional FTPC histograms
+//
 // Revision 2.9  2002/01/26 03:04:05  genevb
 // Fixed some problems with fcl histos
 //
@@ -330,7 +333,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    TH1F* tempHist = (TH1F*) obj;
 	    tempHist->SetLineWidth(2);
 	    tempHist->Draw();
-            if (!strcmp(obj->GetName(),"fcl_radius")) {
+            if (!strcmp(obj->GetName(),"fcl_radialW") ||
+                !strcmp(obj->GetName(),"fcl_radialE")) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
               ruler.DrawLine(7.73,0.,7.73,tempHist->GetMaximum());
@@ -985,7 +989,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
 	strcmp(sdefList[ilg],"fcl_chargestepW") &&
 	strcmp(sdefList[ilg],"fcl_chargestepE") &&
-	strcmp(sdefList[ilg],"fcl_radius")) {
+        strcmp(sdefList[ilg],"fcl_radialW") &&
+	strcmp(sdefList[ilg],"fcl_radialE")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());
@@ -1033,7 +1038,8 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
 	strcmp(sdefList[ilg],"fcl_chargestepW") &&
 	strcmp(sdefList[ilg],"fcl_chargestepE") &&
-	strcmp(sdefList[ilg],"fcl_radius")) {
+        strcmp(sdefList[ilg],"fcl_radialW") &&
+	strcmp(sdefList[ilg],"fcl_radialE")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogXList(listString.Data());

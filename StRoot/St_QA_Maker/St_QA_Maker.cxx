@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.9 2001/08/07 07:51:28 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.10 2002/02/12 18:42:00 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.10  2002/02/12 18:42:00  genevb
+// Additional FTPC histograms
+//
 // Revision 2.9  2001/08/07 07:51:28  lansdell
 // primvtx check for different multiplicities crashed for MC data, now fixed
 //
@@ -559,6 +562,7 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momF->Fill(gmom,0.);
         hists->m_lengthF->Fill(t->length,0.);
         hists->m_chisq0F->Fill(chisq0,0.);
+        hists->m_chisq1F->Fill(chisq1,0.);
 	// east and west in separate plots
         hists->m_pointFE->Fill(trkpnt);
         hists->m_max_pointFE->Fill(trkmpnt);
@@ -574,6 +578,7 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momFE->Fill(gmom);
         hists->m_lengthFE->Fill(t->length);
         hists->m_chisq0FE->Fill(chisq0);
+        hists->m_chisq1FE->Fill(chisq1);
 	
 // these are for tpc & ftpc
         hists->m_pT_eta_recFE->Fill(eta,lmevpt);
@@ -601,6 +606,7 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momF->Fill(gmom,1.);
         hists->m_lengthF->Fill(t->length,1.);
         hists->m_chisq0F->Fill(chisq0,1.);
+        hists->m_chisq1F->Fill(chisq1,1.);
 	// east and west in separate plots
         hists->m_pointFW->Fill(trkpnt);
         hists->m_max_pointFW->Fill(trkmpnt);
@@ -616,6 +622,7 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momFW->Fill(gmom);
         hists->m_lengthFW->Fill(t->length);
         hists->m_chisq0FW->Fill(chisq0);
+        hists->m_chisq1FW->Fill(chisq1);
 	
 // these are for tpc & ftpc
         hists->m_pT_eta_recFW->Fill(eta,lmevpt);
