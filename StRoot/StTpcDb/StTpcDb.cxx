@@ -10,7 +10,7 @@
 
 #include "StTpcDb.h"
 
-static StTpcDb* gStTpcDb = 0;
+StTpcDb* gStTpcDb = 0;
 
 //
 // C and Fortran routines:
@@ -35,16 +35,13 @@ temp = (StDbDataSet*)mk->GetData("StarDb");
  if (temp){
    temp1 = temp->Find("Calibrations");
    if(temp1){tpc_calibrations = temp1->Find("tpc");}
-   else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Calibrations database","E");}
+   else{gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");}
    temp1 = temp->Find("Geometry");
    if(temp1)tpc_geometry = temp1->Find("tpc");
-   else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Geometry database","E");}
+   else{gMessMgr->Message("StTpcDb::Error Getting TPC Geometry database","E");}
    temp1 = temp->Find("Conditions");
    if(temp1)tpc_conditions = temp1->Find("tpc");
-   else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Conditions database","E");}
+   else{gMessMgr->Message("StTpcDb::Error Getting TPC Conditions database","E");}
    
  }
  else{
