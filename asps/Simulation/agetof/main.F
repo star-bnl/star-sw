@@ -1,7 +1,10 @@
 *
-* $Id: main.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: main.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
 *
 * $Log: main.F,v $
+* Revision 1.2  2004/01/25 01:36:12  fisyak
+* Clean up unused variable to avoid waning by Victor request
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -28,7 +31,7 @@ C-page 7----============================================================
       EQUIVALENCE (O(1),B),(O(2),E),(O(3),R),(O(4),S), (O(5),V),(O(6),U)
      *,(O(7),W),(O(8),X),(C,O(12)),(MXC,O(43)),(O(22),M)
       INTEGER A/0/,D/0/,J/0/,N/0/,P/0/,Q/0/,T/0/,Y/0/,CS/0/,AA/0/,DD/0/,
-     *KB/0/,IW/0/,KC/0/,KP/0/,MQ/0/,KX/0/,N1/0/,N2/0/,N3/0/,I/0/,AO/0/,
+     *KB/0/,IW/0/,KC/0/,KP/0/,MQ/0/,KX/0/,N1/0/,N2/0/,N3/0/,AO/0/,
      *AC/0/,SK/0/,NB/0/,PP/0/,PS/0/,QQ/0/,QS/0/,WS/0/,VS/0/,JMP/0/,NUL/
      *0/,MBK/0/,MFL/0/,MXD/0/
 C PLN - 20-03-93 - no binary output. LONG->LLONG

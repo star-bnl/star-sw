@@ -1,7 +1,10 @@
 *
-* $Id: nxtcrd.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: nxtcrd.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
 *
 * $Log: nxtcrd.F,v $
+* Revision 1.2  2004/01/25 01:36:12  fisyak
+* Clean up unused variable to avoid waning by Victor request
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -25,7 +28,7 @@ C------------------------------------------------------------------
       INTEGER D/0/,K/0/,I/0/,J/0/,L/0/,M/0/,U/0/,T/0/,Y/0/,W/0/,LO/0/,
      *BF/0/,R2/0/,TL/0/,TF/0/,MF/0/,LL/0/,TFN/0/,TFM/0/,IBK/0/,KP/0/,
      *FCOM/0/,EXCL/0/,EXCLO/0/,QUOT/0/,WAIT/0/,CC/0/,COMMENT/0/,FORT/0/,
-     *FORTO/0/,F1/0/,F2/0/,F3/0/,FS(8)/8*0/
+     *F1/0/,F2/0/,F3/0/,FS(8)/8*0/
       INTEGER NERD,LINF,LLONG
       INTEGER NR
       COMMON /LINELEN/ NR

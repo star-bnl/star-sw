@@ -1,7 +1,10 @@
 *
-* $Id: linf.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: linf.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
 *
 * $Log: linf.F,v $
+* Revision 1.2  2004/01/25 01:36:12  fisyak
+* Clean up unused variable to avoid waning by Victor request
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -24,7 +27,7 @@ C-----------------------------------------------------------------------
       COMMON/NAMO/O
       INTEGER LINF,A,Z,IND,KIT/1/,LLONG,B0,SEQO/9999/
       INTEGER B/0/,C/0/,D/0/,H/0/,I/0/,J/0/,K/0/,KST/0/,NPL/0/,KUR/0/,
-     *KUT/0/,LAST/0/,LIMC/0/,KOFF/0/,TST/0/
+     *KUT/0/,LAST/0/,LIMC/0/,KOFF/0/
       LINF=A-1
       O(62)=0
       IF (O(A).EQ.O(96) .OR. (IND.EQ.12 .AND. (O(25).EQ.0.OR.O(10).EQ.1)

@@ -1,7 +1,10 @@
 *
-* $Id: rw.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: rw.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
 *
 * $Log: rw.F,v $
+* Revision 1.2  2004/01/25 01:36:12  fisyak
+* Clean up unused variable to avoid waning by Victor request
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -31,7 +34,7 @@ C------------------------------------------------------------------
       COMMON /LINELEN/ NR
       INTEGER I/0/,J/0/,K/0/,L/0/,P/0/,CX/0/,QC/0/,LAN/0/,STF/0/,LIL/0/,
      *LINL/0/,TABI/0/,IBK/0/,ICM/0/,IER/0/
-      INTEGER WICH/0/,NOC/0/,IUNI/0/,PV(5)/5*0/,LM(5)/5*0/,BUFI(200)/
+      INTEGER WICH/0/,NOC/0/,IUNI/0/,LM(5)/5*0/,BUFI(200)/
      *200*0/
       CHARACTER*66 STARS
       DATA STARS/' *****************************************************

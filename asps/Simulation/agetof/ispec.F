@@ -1,7 +1,10 @@
 *
-* $Id: ispec.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: ispec.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
 *
 * $Log: ispec.F,v $
+* Revision 1.2  2004/01/25 01:36:12  fisyak
+* Clean up unused variable to avoid waning by Victor request
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -23,7 +26,7 @@ C------------------------------------------------------------------
       INTEGERO(500000)
       COMMON/NAMO/O
       INTEGER ISPEC,PP,QQ,VV,IU,T
-      INTEGER A/0/,B/0/,C/0/,D/0/,E/0/,F/0/,J/0/,M/0/,N/0/,P/0/,Q/0/,R/
+      INTEGER B/0/,C/0/,E/0/,F/0/,J/0/,M/0/,N/0/,P/0/,Q/0/,R/
      *0/,U/0/,V/0/,W/0/,JMP/0/,NUL/0/
       P=PP
       Q=QQ
