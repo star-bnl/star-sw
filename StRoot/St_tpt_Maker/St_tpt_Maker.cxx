@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.70 2002/02/05 22:22:15 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.71 2002/02/22 17:56:20 hardtke Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.71  2002/02/22 17:56:20  hardtke
+// change order of instantiation for Jim
+//
 // Revision 1.70  2002/02/05 22:22:15  hardtke
 // Move Init code to InitRun
 //
@@ -447,7 +450,7 @@ Int_t St_tpt_Maker::Make(){
 	(void) printf("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option);
 	if ( m_ExB == 0 ) {
 	  TDataSet *RunLog = GetDataBase("RunLog");
-	  m_ExB = new StMagUtilities( option, gStTpcDb, RunLog ) ;
+	  m_ExB = new StMagUtilities( gStTpcDb, RunLog, option ) ;
         }
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
