@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.6 1998/05/26 04:15:12 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.7 1998/07/12 21:54:09 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.7  1998/07/12 21:54:09  sakrejda
+* protecion against 0 denominator
+*
 * Revision 1.6  1998/05/26 04:15:12  sakrejda
 * message type set to E to limit printing
 *
@@ -67,7 +70,7 @@ C     Local variables
       REAL    zp3
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
       REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
-      REAL    as,bs,ddr,fact,delrow,dummy
+      REAL    as,bs,ddr,fact,delrow,dummy, det_local
       LOGICAL h2good
 
 c     message related variables
@@ -99,6 +102,7 @@ C     find in what slice the hits for the next row are going to be
       delrow = 2.5
       if(ir2.lt.14) delrow = 6.0
       zp2 = zp3*(1.0-delrow/r3)
+      if(abs(zp2).gt.200.0) zp2=sign(200.0,zp2)
       irets=tpt_find_slic(zp2,tpar(ipass).nzslic,islic)
       is_pnt = slice_loc(isect,ir2,islic) 
       nh2 = slice_pnt(2,is_pnt)
@@ -152,15 +156,16 @@ c                   get the row parametrisation
                     iret = tgc_row_par(isect,real(ir1),as,bs,dummy,
      >              dummy)
 c                   calculate the track parametrisation as an*x+bn*y=1
-                    an=(hit(k).y-hit(i).y)/
-     >                 (hit(i).x*hit(k).y-hit(k).x*hit(i).y)
-                    bn=-(hit(k).x-hit(i).x)/
-     >                 (hit(i).x*hit(k).y-hit(k).x*hit(i).y)
+                    det_local=(hit(i).x*hit(k).y-hit(k).x*hit(i).y)
+                    if(abs(det_local).gt.0.0000001) then
+                    an=(hit(k).y-hit(i).y)/det_local
+                    bn=-(hit(k).x-hit(i).x)/det_local
 c                   calculate the prediction in x-y plane
                     iret = tpt_ptcrs(as,bs,an,bn,xp1,yp1)
 c                   calculate the prediction in the r-z plane
                     sl23 = delz23/delr23
                     zp1 = hit(i).z - sl23*(r2-sqrt(xp1**2+yp1**2))
+                    if(abs(zp1).gt.209.0) zp1=sign(209.0,zp1)
 c                   find the slice number for the prediction and look for a hit there
                     irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
                     js_pnt = slice_loc(isect,ir1,islic) 
@@ -190,6 +195,7 @@ c                              we have a good root
                       endif
                       j = next_hit(j)
                     enddo          ! loop over hits in ir1
+                    endif  ! endif on bad denominator
                   endif
                 endif
               endif
