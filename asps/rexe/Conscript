@@ -56,7 +56,7 @@ if ($env->{ENV}->{STAR}) {$LIBS .= " -lTable";}
 my $Libraries =  $env->{Libraries};
 my $FC        = $env->{FC};
 my $FEXTEND   = $env->{FEXTEND};
-if ($PGI && $STAR_SYS =~ /^rh/) {
+if ($PGI && $STAR_SYS =~ /^rh/ or  $STAR_SYS =~ /i386/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
@@ -66,7 +66,7 @@ if ($PGI && $STAR_SYS =~ /^rh/) {
 
 my $LIBSTDC = "";
 my $libstdc = "";
-if ($STAR_SYS =~ /^rh/) {
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /i386/) {
   my $libpath = `gcc -print-search-dirs`;
   my @lines  = split /^/m, $libpath;
   my @words  = split / /, $lines[0];
