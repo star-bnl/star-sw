@@ -1,5 +1,8 @@
-// $Id: bfcread_geantBranch.C,v 1.10 2000/05/31 21:25:28 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.11 2000/06/01 18:57:07 kathy Exp $
 // $Log: bfcread_geantBranch.C,v $
+// Revision 1.11  2000/06/01 18:57:07  kathy
+// updating to separate out BfcStatus stats
+//
 // Revision 1.10  2000/05/31 21:25:28  kathy
 // updated so it now finds all tables/objects (e.g. BfcStatus) under geantBranch
 //
@@ -70,19 +73,23 @@ void bfcread_geantBranch(
   int istat=0;
   int iev=0;
 
-  int countev=0;
+  Float_t countev=0.0;
 
   Float_t countevgB=0.0;
   Float_t countevg=0.0;
-  Float_t countevobj=0.0;
-  Float_t countevtab=0.0;
+  Float_t countevobjg=0.0;
+  Float_t countevtabg=0.0;
+  Float_t countevobjb=0.0;
+  Float_t countevtabb=0.0;
 
 
 // Event loop
 EventLoop: if (iev < nevents && !istat) {
 
-  Int_t Countevobj=0;
-  Int_t Countevtab=0;
+  Int_t Countevobjg=0;
+  Int_t Countevtabg=0;
+  Int_t Countevobjb=0;
+  Int_t Countevtabb=0;
 
 
     chain->Clear();
@@ -102,6 +109,7 @@ EventLoop: if (iev < nevents && !istat) {
     countev++;
 
     cout << " start event # " << countev << endl;
+    fout << " start event # " << countev << endl;
 
       dgeantBranch=chain->GetDataSet("geantBranch");
       TDataSetIter geantBIter(dgeantBranch);
@@ -117,30 +125,52 @@ EventLoop: if (iev < nevents && !istat) {
       cout << " QAInfo:   found object: " << ddb->GetName() << endl;
       fout << " QAInfo:   found object: " << ddb->GetName() << endl;
      
-       countevobj++;
-       Countevobj++;
+      TString dsName =  ddb->GetName();
+
+      if (dsName == "BfcStatus") {
+        countevobjb++;
+        Countevobjb++;
+      }
+      else {
+        countevobjg++;
+        Countevobjg++;
+    }
 
        if (ddb->InheritsFrom("TTable")) { 
-	 countevtab++;
-         Countevtab++;
+
+        if (dsName == "BfcStatus") {	
+          countevtabb++;
+          Countevtabb++;
+        }
+        else{
+          countevtabg++;
+          Countevtabg++;
+        }
 
          tabl = (TTable *)ddb;
          cout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+         fout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
        }
 
 
       } // while geantBranch
 
-    cout << endl << " QAInfo: event # " << countev << 
-            ", # objects found = " << Countevobj << 
-            ", # tables found = " <<  Countevtab << 
-             endl << endl;
+    cout << endl << " QAInfo: ev# " << countev << 
+            ", #geant obj/tab, #Bfc obj/tab found = " << 
+              Countevobjg << "  " << 
+              Countevtabg << "  " <<
+              Countevobjb << "  " <<  
+              Countevtabb << endl << endl;
 
-    fout << endl << " QAInfo: event # " << countev << 
-            ", # objects found = " << Countevobj << 
-            ", # tables found = " <<  Countevtab << 
-             endl << endl;
+    fout << endl << " QAInfo: ev# " << countev << 
+            ", #geant obj/tab, #Bfc obj/tab found = " << 
+              Countevobjg << "  " <<  
+              Countevtabg << "  " <<
+              Countevobjb << "  " <<  
+              Countevtabb << endl << endl;
+
 
       } // if geantBranch
 
@@ -155,8 +185,10 @@ EventLoop: if (iev < nevents && !istat) {
 
 }  // EventLoop
      
-   countevobj /= countev;
-   countevtab /= countev;
+   countevobjg /= countev;
+   countevtabg /= countev;
+   countevobjb /= countev;
+   countevtabb /= countev;
 
   cout << endl;
   cout << "QAInfo: End of Job " << endl; 
@@ -166,8 +198,10 @@ EventLoop: if (iev < nevents && !istat) {
                       countevgB << endl;
   //  cout << "QAInfo:   # events with geant dataset = " << 
   //                    countevg << endl;
-  cout << "QAInfo: avg # tables per event  = " << countevtab << endl;
-  cout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
+  cout << "QAInfo: avg # geant tables per event  = " << countevtabg << endl;
+  cout << "QAInfo: avg # geant objects per event = " << countevobjg << endl;
+  cout << "QAInfo: avg # Bfc tables per event    = " << countevtabb << endl;
+  cout << "QAInfo: avg # Bfc objects per event   = " << countevobjb << endl << endl;
 
 
   fout << endl;
@@ -178,9 +212,10 @@ EventLoop: if (iev < nevents && !istat) {
                       countevgB << endl;
   //fout << "QAInfo:   # events with geant dataset = " << 
   //                    countevg << endl;
-  fout << "QAInfo: avg # tables per event  = " << countevtab << endl;
-  fout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
-
+  fout << "QAInfo: avg # geant tables per event  = " << countevtabg << endl;
+  fout << "QAInfo: avg # geant objects per event = " << countevobjg << endl;
+  fout << "QAInfo: avg # Bfc tables per event    = " << countevtabb << endl;
+  fout << "QAInfo: avg # Bfc objects per event   = " << countevobjb << endl << endl;
 
  chain->Finish();   
 
