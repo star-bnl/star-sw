@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.cc,v 1.2 1999/01/18 10:23:10 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.cc,v 1.3 1999/02/04 18:34:01 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.cc,v $
- * Revision 1.2  1999/01/18 10:23:10  lasiuk
- * add StTrsDigitalSector
+ * Revision 1.3  1999/02/04 18:34:01  lasiuk
+ * remove digSector from constructor;
+ * add fillSector for designation
  *
+ * Revision 1.3  1999/02/04 18:34:01  lasiuk
+ * remove digSector from constructor;
+ * add fillSector for designation
  *
  * Revision 1.2  1999/01/18 10:23:10  lasiuk
  * add StTrsDigitalSector
@@ -24,11 +28,16 @@
  * initialization in base class
  * incorporate electronics db
  * sector by reference
-StTrsDigitalSignalGenerator::StTrsDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec, StTrsDigitalSector* digitalSec)
-    : mElectronicsDb(el), mSector(sec), mDigitalSector(digitalSec)
+ *
+ **************************************************************************/
 #include "StTrsDigitalSignalGenerator.hh"
 
 StTrsDigitalSignalGenerator::StTrsDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec)
+    : mElectronicsDb(el), mSector(sec)
+{/* nopt */}
+
+StTrsDigitalSignalGenerator::~StTrsDigitalSignalGenerator() {/* nopt */}
+
 void StTrsDigitalSignalGenerator::fillSector(StTrsDigitalSector* theDigitalSector)
 {
     mDigitalSector = theDigitalSector;
