@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.47 2002/12/24 19:12:32 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.48 2003/02/11 21:51:37 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -359,7 +359,8 @@
 #    $CPPFLAGS .= " " . $R_CPPFLAGS;
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $FLAGS ) );
 
-    $ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
+    #$ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
+    $ROOTSRC = $ROOTSYS . "/include";
     my @params = (
       'PLATFORM'    => $PLATFORM,
       'ARCH'        => $ARCH,
