@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.38 2001/02/13 02:28:52 nevski Exp $
+* $Id: geometry.g,v 1.39 2001/03/12 01:01:30 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.39  2001/03/12 01:01:30  nevski
+* mwc x-hits corrected
+*
 * Revision 1.38  2001/02/13 02:28:52  nevski
 * Y2B: extend CALB patch, add VPD
 *
@@ -7,7 +10,7 @@
 * 6 silicon layers in y_2b geometry
 *
 * Revision 1.36  2000/11/22 17:51:41  nevski
-* tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
+* tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
 *
 ***************************************************************************
    subroutine geometry
@@ -26,7 +29,7 @@
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr,Itof
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr,Itof,y/-1/
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -54,6 +57,7 @@ replace[;ON#{#;] with [
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    field=5; Nsi=7; Rv=2; Wfr=0; Itof=2; Wdm=6.0;       "defaults constants"
+   y=2; " keep y=1 for backward compibility : limited x in mwc hits (old) " 
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -89,25 +93,27 @@ If LL>1
                 }  
   on COMPLETE   { Complete STAR geometry;                     tof=on; Itof=2; }
   on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;          alpipe=on;
-                                         {ftpc,vpdd,calb,ecal}=off;    Nsi=0; }
+                  y=1;                   {ftpc,vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
-                                              {vpdd,calb,ecal}=off;    Nsi=0; }
+                  y=1;                        {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
                         {vpdd,ecal}=off;  {rich,ems,t1}=on; 
-                        nmod={12,0};  shift={87,0};  Itof=1;  Rv=1;    Nsi=0; }
-  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
+                  y=1;  nmod={12,0};  shift={87,0};  Itof=1;  Rv=1;    Nsi=0; }
+  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  
+                  y=1;                              {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
                         {vpdd,ecal}=off;  {rich,ems,t1}=on; nmod={12,0};
-                        shift={87,0}; Itof=1; Rv=2; Wdm=6.0; Nsi=-3;          }
+                  y=1;  shift={87,0};  Itof=1;  Rv=2;  Wdm=6.0;        Nsi=-3;}
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder(4);  
 *    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
                         {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; nmod={12,0}; 
-                        shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.0; Nsi=-3;   }
+                  y=1;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.0;    Nsi=-3;}
 
   on YEAR_2A    { asymptotic STAR;                                            }
+
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                         ecal=off;  {rich,ems,t1}=on;  nmod={24,0};
-                        shift={21,0}; Itof=2; Rv=2; Wfr=7; Wdm=6.305;  Nsi=6; }
+                  y=2;  shift={21,0};  Itof=2;  Rv=2;  Wdm=6.305;      Nsi=6; }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
@@ -167,10 +173,11 @@ If LL>1
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
+* - for year 1 X in mwc hits was limited, keep this (y=1)
 *  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
-
    If (LL>1) call AgDETP new ('TPCE')
-   If (tpce &.not.mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
+   if (.not.mwc) y=0
+   If (tpce &   y>=0 ) call AgDETP add ('tpcg(1).MWCread=',y,1)
    If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
    if (tpce) Call tpcegeo
    if (ftpc) Call ftpcgeo
