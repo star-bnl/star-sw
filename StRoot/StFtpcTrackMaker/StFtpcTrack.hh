@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.hh,v 1.14 2002/10/31 13:40:27 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.15 2002/11/06 13:46:04 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.15  2002/11/06 13:46:04  oldi
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
 // Revision 1.14  2002/10/31 13:40:27  oldi
 // Method GetSector() added.
 // Method GetMeanR() and GetMeanAlpha() added.
@@ -159,13 +163,13 @@ public:
       void   AddPoint(StFtpcPoint *point);                                        // adds a point to the track
       void   AddForwardPoint(StFtpcPoint* point);                                 // adds a point after all shifting all existing points by one slot
       void   Fit();                                                               // momentum fit
-      void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);  // momentum fit with vertex
+      void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit);     // momentum fit with vertex
       void   CalculateNMax();                                                     // calculates the max. possible number of points
   Double_t   CalcDca(StFtpcVertex *vertex, Bool_t primaryFit);                    // calculation of distance of closest approach (dca) to main vertex
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
       void   CalcResiduals();                                                     // calulates the residuals for each point on track
-     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
+     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, StFtpcVertex *vertex);   // writes track to table
 
   // momentum fit
   void MomentumFit(StFtpcVertex *vertex = 0);

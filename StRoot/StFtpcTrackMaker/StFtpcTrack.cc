@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.cc,v 1.22 2002/10/31 13:40:01 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.23 2002/11/06 13:45:59 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.23  2002/11/06 13:45:59  oldi
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
 // Revision 1.22  2002/10/31 13:40:01  oldi
 // Method GetSector() added.
 // Method GetMeanR() and GetMeanAlpha() added.
@@ -241,7 +245,7 @@ void StFtpcTrack::SetDefaults()
   SetPid(0);
   SetNMax(0);
 
-  ComesFromMainVertex(false);
+  ComesFromMainVertex(kFALSE);
 
   mP.SetX(0.);
   mP.SetY(0.);
@@ -285,7 +289,7 @@ void StFtpcTrack::AddPoint(StFtpcPoint* point)
 
   mPointNumbers->AddLast(point->GetHitNumber());
   mPoints->AddLast(point);
-  point->SetUsage(true);
+  point->SetUsage(kTRUE);
   point->SetTrackNumber(GetTrackNumber());
 
   return;
@@ -305,7 +309,7 @@ void StFtpcTrack::AddForwardPoint(StFtpcPoint* point)
   
   mPoints->AddFirst(point);
   mPointNumbers->ShiftByOneAndAddAtFirst(point->GetHitNumber());
-  point->SetUsage(true);
+  point->SetUsage(kTRUE);
   point->SetTrackNumber(GetTrackNumber());
 
   return;
@@ -357,7 +361,7 @@ Double_t StFtpcTrack::CalcAlpha0()
 void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber) 
 {
   // Sets number of next hit. Counting is started from the vertex. (The tracker finds hits on tracks vice versa!)
-  // Sets the usage of all points belonging to this track to the value of fUsage and
+  // Sets the usage of all points belonging to this track to the value of mUsage and
   // sets the track number of all points belonging to this track to the value of fTrackNumber.
 
   mRowsWithPoints = 0;
@@ -365,7 +369,7 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
     StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
 
-    if (usage == true) {
+    if (usage == kTRUE) {
       mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
 
       if (i != 0) {
@@ -528,7 +532,7 @@ void StFtpcTrack::Fit()
 }
 
 
-void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex)
+void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit)
 {
   // Fitting.
   
@@ -546,15 +550,15 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 
   mDca = distance(vertexPos);
 
-  if (id_start_vertex < 0 ) {    
+  if (!primary_fit) {    
     firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
     
     if (mDca > max_Dca) {
-      mFromMainVertex = (Bool_t)false;
+      mFromMainVertex = (Bool_t)kFALSE;
     }
     
     else {
-      mFromMainVertex = (Bool_t)true;
+      mFromMainVertex = (Bool_t)kTRUE;
     }
   }
   
@@ -562,14 +566,14 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
     
     if (mDca > max_Dca) { // no refit
       firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
-      mFromMainVertex = (Bool_t)false;
+      mFromMainVertex = (Bool_t)kFALSE;
     }
     
     else {
       MomentumFit(vertex); // refit
       
       firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
-      mFromMainVertex = (Bool_t)true;
+      mFromMainVertex = (Bool_t)kTRUE;
       mDca = distance(vertexPos); // change dca (even if this dca isn't very useful)
     }
   }
@@ -589,7 +593,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   mFitRadius = 1./curvature();
   mTheta = mP.Theta();
 
-  if (id_start_vertex == 0) { // no vertex found, tracking done with arbitray vertex at 0., 0., 0.
+  if (vertex->GetId() == 0) { // no vertex found, tracking done with arbitray vertex at 0., 0., 0.
     mDca = 0.; // set dca to zero
   }
 
@@ -599,29 +603,17 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 }
 
 
-Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
+Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, StFtpcVertex *vertex)
 {
   // Writes track to StAF table
   
   trackTableEntry->nrec = mPoints->GetEntriesFast();
   trackTableEntry->nfit = trackTableEntry->nrec;
 
-  if (mFromMainVertex) {
-    trackTableEntry->flag = 1;
-    trackTableEntry->id_start_vertex = id_start_vertex;
-  }
-
-  else {
-    trackTableEntry->flag = 0;
-    trackTableEntry->id_start_vertex = 0;
-  }
-  
   for(Int_t k=0; k<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); k++) {
     trackTableEntry->hitid[k] = -1;
   }
   
-  trackTableEntry->nrec = mPoints->GetEntriesFast();
-
   for(Int_t i=0; i<trackTableEntry->nrec; i++) {
     Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
     
@@ -632,22 +624,23 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
     trackTableEntry->hitid[rowindex-1] = mPointNumbers->At(i)+1;
   }
 
-  trackTableEntry->nfit = trackTableEntry->nrec;
-  trackTableEntry->nmax = mNMax;
-
   if (mFromMainVertex) {
     trackTableEntry->flag = 1;
-    trackTableEntry->id_start_vertex = id_start_vertex;
-    if (id_start_vertex > 0) {
+    trackTableEntry->id_start_vertex = vertex->GetId();
+    
+    if (vertex->GetId() > 0) {
        ++trackTableEntry->nrec;
        ++trackTableEntry->nmax;
        ++trackTableEntry->nfit;
+       
+       trackTableEntry->impact = mDca;
     }
   }
 
   else {
     trackTableEntry->flag = 0;
     trackTableEntry->id_start_vertex = 0;
+    trackTableEntry->impact = 0.;
   }
   
   trackTableEntry->q = mQ;
@@ -665,14 +658,6 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   trackTableEntry->nmax = mNMax;
   trackTableEntry->dedx = mdEdx;
   trackTableEntry->ndedx = mNumdEdxHits;
-
-  if (id_start_vertex != 0.) {
-    trackTableEntry->impact = mDca;
-  }
-
-  else {
-    trackTableEntry->impact = 0.;
-  }
 
   return 0;
 }
