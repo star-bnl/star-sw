@@ -8,6 +8,6 @@
 
 struct ftpcDeflection { 
 
-   float  psi[7610];   /*   deflection angle for each padrow, e-field. both at 20 degC, 1013.25hPa  */
+   float  psi[11010];   /*   deflection angle for each padrow, e-field. both at 20 degC, 1013.25hPa  */
 
  };  

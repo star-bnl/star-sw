@@ -8,6 +8,6 @@
 
 struct ftpcVDrift { 
 
-   float  v[7610];   /*   vdrift for each padrow, e-field bin  */
+   float  v[11010];   /*   vdrift for each padrow, e-field bin  */
 
  };  
