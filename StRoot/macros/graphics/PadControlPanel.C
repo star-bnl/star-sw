@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.16 2000/07/17 17:35:30 fine Exp $
+// $Id: PadControlPanel.C,v 1.17 2000/08/21 22:25:46 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -94,9 +94,9 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("Scale +","StPadControlPanel::Inscrease3DScale();","Change the scale of the image");
    bar->AddButton("Scale -","StPadControlPanel::Decrease3DScale();","Change the scale of the image");
    bar->AddSeparator();
-   bar->AddButton("Top View","StPadControlPanel::TopView();","Show the top view");
-   bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
-   bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
+   bar->AddButton("Top View (X-Y)","StPadControlPanel::TopView();","Show the top view (X-Y projection)");
+   bar->AddButton("Side View (Y-Z)","StPadControlPanel::SideView();","Show the side view (Y-Z projection)");
+   bar->AddButton("Front View (X-Z)","StPadControlPanel::FrontView();","Show the front view (X-Z projection)");
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
    bar->AddSeparator();
    bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
@@ -366,6 +366,9 @@ StPadControlPanel __aa__;
 void PadControlPanel(){}
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.17  2000/08/21 22:25:46  fine
+// XYZ labels were added to the panel buttons
+//
 // Revision 1.16  2000/07/17 17:35:30  fine
 // Adjusted to new ROOT requirements: float / double
 //
