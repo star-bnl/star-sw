@@ -17,6 +17,7 @@ class StiMakerParameters : public TObject
   bool useSsd;
   bool useTpc;
   bool useFtpc;
+  bool useResidualCalculator;
 
   bool useMcAsRec;
   bool useGui;

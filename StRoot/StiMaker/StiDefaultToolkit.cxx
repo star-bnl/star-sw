@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.13 2003/04/11 16:51:53 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.14 2003/04/30 15:39:32 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.14  2003/04/30 15:39:32  pruneau
+ * Integrating StiResidual in main stream Sti
+ *
  * Revision 2.13  2003/04/11 16:51:53  pruneau
  * various fixes
  *
@@ -73,6 +76,7 @@
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiHitErrorCalculator.h"
+#include "Sti/StiResidualCalculator.h"
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtHitLoader.h"
 #include "StiMaker/RootEditableParameter.h"
@@ -352,11 +356,19 @@ StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
 
 StiVertexFinder * StiDefaultToolkit::getVertexFinder()
 {
-	cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
+  cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
   if (_vertexFinder)
     return _vertexFinder;
   _vertexFinder = new StiDummyVertexFinder("StEventVertex");
   return _vertexFinder;
+}
+
+StiResidualCalculator  * StiDefaultToolkit::getResidualCalculator()
+{
+  if (_residualCalculator)
+    return _residualCalculator;
+  _residualCalculator = new StiResidualCalculator(getHitContainer());
+  return _residualCalculator;
 }
 
 StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
