@@ -13,20 +13,20 @@ ClassImp(StTreeMaker)
 
 //_____________________________________________________________________________
 StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeName )
-:StMaker(name)
+:StIOInterFace(name,"0")
 {
-  fFileName = ioFile; fIOMode="0";fTreeName=treeName;fTree=0;
+  fFile = ioFile; fIOMode="0";fTreeName=treeName;fTree=0;
 }
 //_____________________________________________________________________________
 StTreeMaker::~StTreeMaker(){
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Open(const char *file)
+Int_t StTreeMaker::Init()
 {
   assert(strchr("rw",fIOMode[0]));
+  assert(!fTree);
 
   if (fTreeName.IsNull()) SetTreeName();
-  if (file) fFileName = file;
 
   if (GetDebug()) 
     printf("<%s(%s)::Init> TreeName = %s\n",ClassName(),GetName(),GetTreeName());
@@ -39,9 +39,9 @@ Int_t StTreeMaker::Open(const char *file)
 
     if (!fTree) {//Make tree
 
-      TFile tf(fFileName,"read","BFC StTree file");
+      TFile tf(fFile,"read","BFC StTree file");
       if (tf.IsZombie()) {
-	Error("Init","Wrong input file %s\n",(const char*)fFileName);
+	Error("Init","Wrong input file %s\n",(const char*)fFile);
 	return kStErr;
       }
 
@@ -49,14 +49,14 @@ Int_t StTreeMaker::Open(const char *file)
       if (GetDebug()) 
 	printf("<%s(%s)::Init> FOUND Tree %s in file %s\n",
 	ClassName(),GetName(),
-	fTree->GetName(),fFileName.Data());
+	fTree->GetName(),fFile.Data());
 
       AddData(fTree);
 //		Register for outer world
       SetOutput(fTree);
-  }
-    fTree->UpdateFile(fFileName);
-    fTree->SetUKey(0);
+      fTree->UpdateFile(fFile);
+    }
+    Open();
     
   } else            { //Write mode  
 
@@ -77,44 +77,25 @@ Int_t StTreeMaker::Open(const char *file)
     } else {			// Create new tree
 
       fTree = new StTree(GetTreeName()); 
-      if (!fFileName.IsNull()) fTree->SetBaseName(fFileName);
+      if (!fFile.IsNull()) fTree->SetBaseName(fFile);
 
 //    		?????? Compatibility ???????
       if ( fTreeName=="bfcTree") SetBranch("dstBranch");
 
-//		Update Tree from .branches
-      St_DataSet *brin;
-      St_DataSet *branches = Find(".branches");
-      St_DataSetIter nextBr(branches);
-      while((brin=nextBr())) {	//branches loop
-	const char *brName = brin->GetName();
-        StBranch *br = (StBranch*)fTree->Find(brName);
-        if (!br) { br = new StBranch(brName,fTree); br->SetIOMode("w");}
-        
-        const char *brTitle = brin->GetTitle();
-        if (strncmp("SetBranch:",brTitle,10)) continue;
-        TString ts; const char *cc;int ncc;
-        cc = strstr(brTitle,"file=");
-        if (cc) { //File name found
-          ncc = strcspn(cc+5," "); ts.Replace(0,999,cc+5,ncc); br->SetFile(ts);}
-        cc = strstr(brTitle,"mode=");
-        if (cc) { //IO mode found
-          ncc = strcspn(cc+5," "); ts.Replace(0,999,cc+5,ncc); br->SetIOMode(ts);}
-        delete brin;
-      }//end of branches loop
     }//end of new tree
     
 
-    fTree->Open();
+    Open();
     fTree->Close("keep");
   } 
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Init()
+Int_t StTreeMaker::Open(const char *)
 {
-  assert(!fTree);
-  return Open();
+  UpdateTree();
+  fTree->SetUKey(0);
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t StTreeMaker::Make(){
@@ -179,12 +160,12 @@ Int_t StTreeMaker::MakeWrite()
 //_____________________________________________________________________________
 Int_t StTreeMaker::Finish()
 { 
-  return Close();
+  Close(); return 0;
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Close()
+void StTreeMaker::Close(Option_t *)
 { 
-  fTree->Close(); return 0;
+  fTree->Close(); fTree->SetUKey(0);
 }
 //_____________________________________________________________________________
 void StTreeMaker::Clear(Option_t *opt)
@@ -198,31 +179,45 @@ void StTreeMaker::Clear(Option_t *opt)
 void StTreeMaker::PrintInfo(){
   if (GetDebug()) printf("StTreeMaker\n"); //  %s %s \n",GetName(), GetTitle());
 }
-   StBranch *BranchOfMaker(StMaker* mk);
 
 //_____________________________________________________________________________
-void StTreeMaker::SetBranch(const Char_t *brName,const Char_t *file,const Char_t *mode)
+void StTreeMaker::UpdateTree()
 {
-StBranch *br;
-
-  if (fTree) {//Tree already exists
-     br = (StBranch*)fTree->Find(brName);
-     if (!br) br = new StBranch(brName);
-     if (file) br->SetFile(file);
-     if (mode) br->SetIOMode(mode);
-  } else { //Tree adoes not exist yet
-    TString ts("SetBranch:");
-
-    if (file) { ts += " file="; ts += file;}
-    if (mode) { ts += " mode="; ts += mode;}
-    IntoBranch(brName,ts);
-  }
+  StBranch *br;
+  St_DataSet *upd,*updList;
+  const char *updName,*updTitl,*cc;
+  TString updFile,updMode;
+      
+  if (!fTree) return;
+  updList = Find(".branches");
+  if (!updList) return;
+  St_DataSetIter nextUpd(updList);
+  while ((upd = nextUpd()))
+  {
+    updTitl = upd->GetTitle();
+    if (strncmp("SetBranch:",updTitl,10))	continue;
+    updName = upd->GetName();
+    updFile = ""; cc = strstr(updTitl,"file="); 
+    if (cc) updFile.Replace(0,0,cc+5,strcspn(cc+5," "));
+    updMode = ""; cc = strstr(updTitl,"mode="); 
+    if (cc) updMode.Replace(0,0,cc+5,strcspn(cc+5," "));
+    delete upd;
+  
+    if (updName[0]=='*') { //Wild Card
+      if (!updMode.IsNull()) fTree->SetIOMode(updMode);  
+      if (!updFile.IsNull()) fTree->SetFile  (updFile);  
+      continue;
+    } //endif *
+    
+    br = (StBranch*)fTree->Find(updName);
+    if (!br && fIOMode=="w") br = new StBranch(updName,fTree);
+    if (!br) 					continue;
+    if (!updMode.IsNull()) br->SetIOMode(updMode);  
+    if (!updFile.IsNull()) br->SetFile  (updFile);  
+  }//end updates  
+  
 }
-//_____________________________________________________________________________
-void StTreeMaker::IntoBranch(const Char_t *brName,const Char_t *logNames)
-{
- AddAlias(brName,logNames,".branches");  
-}
+
 
 
 
