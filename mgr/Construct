@@ -86,7 +86,6 @@ if (/^i386_/) {
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
-#    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66  -Wl,--whole-archive -lg2c -Wl,--no-whole-archive";
     $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
     $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&"; 
     $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f &&"; 
@@ -101,7 +100,6 @@ if (/^i386_/) {
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
     $FFLAGS   = "-DPGI";  
     $FEXTEND  = "-Mextend";
-    #  $FLIBS   .= "-lcrypt";
   }
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
 }
@@ -124,11 +122,8 @@ elsif (/^hp_ux102/) {
   $LDFLAGS   = "-z -Wl,+s -Wl,-E,+vnocompatwarnings";
   $EXEFLAGS  = $CXXFLAGS . " " . $LDFLAGS . " -Wl,-N"; 
   $SOFLAGS   = "-b -z";  
-  $CLIBS     = "-lXm -lXt -lX11 -lm -lPW -ldld";
+  $CLIBS     = "/usr/lib/libM.sl";
   $FC        = "fort77";
-  $FLIBS     = "/opt/fortran/lib/libU77.a";
-#  $FFLAGS    = "+DA1.0 +ppu +Z  +U77 -K";
-#  $FFLAGS    = "+DA1.0 +ppu +B +Z -K";
   $FFLAGS    = "-WF,-P +ppu +Z +B -K";
   $FEXTEND   = "+es";
   print "SHLIB_PATH = $SHLIB_PATH\n";
@@ -150,23 +145,10 @@ elsif (/^sun4x_56_CC5$/) {
   $FEXTEND   = "-e";
   $CFLAGS    = "-KPIC";
   $LD        = $CXX;
-#  $LDFLAGS   = "-Bstatic"; 
   $LDFLAGS   = $DEBUG . " -compat=4";
-#  $EXEFLAGS  = "-z muldefs -Bdynamic -t";
   $EXEFLAGS  = $LDFLAGS;
   $SO        = $CXX;
   $SOFLAGS   = "-G";
-#  my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
-#  $CXXEXTRA.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
-#  $CXXEXTRA.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
-#  $CXXEXTRA.= " -I/usr/openwin/include -I/usr/local/include";
-#  $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
-#  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
-#  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
-#  $LINKCOM       = "test -d %>:d/Templates.DB &&";
-#  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
-#  $LINKCOM      .= "%>:d/Templates.DB/*.o $ROOTSYS/obj/Templates.DB/*.o ||";  
-#  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
 }
 elsif (/^sun4x_55$/ ||  /^sun4x_56$/) {
   $ROOTCINTD = "-DSOLARIS";
@@ -295,14 +277,13 @@ if ($STAR_HOST_SYS !~ /^intel_wnt/) {
   $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib `;
   chop ($CERNLIBS);
   $Libraries = $ROOTLIBS . $ROOTGLIBS . $RINTLIBS . $CERNLIBS ." ";
-  if ($STAR_HOST_SYS !~ /^hp_ux/) {$Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";}
+  $Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";
   chop ($Libraries);
   print "Libraries     = \t$Libraries\n" unless ($param::quiet);
 }
 else {
   $CPPPATH  = "";
   $FCPPPATH = "";
-#  dfordll.lib";
   foreach my $dir ($DirPath, @Reps) {
     $INCLUDE_PATH .= ";" . $dir . "/include";
     $INCLUDE_PATH .= ";" . $dir . "/StRoot";
@@ -523,15 +504,11 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
     }
   }
 }
-#print "subdirs = @subdirs\n";
-#print "incT = @incT\n";
 my @Targets = ();
-#foreach $dir ("asps/Rexe","asps/geant","asps/rexe",@subdirs) {#,"cern/geant321","cern/minicern") {
-foreach $dir ("asps/rexe",@subdirs) {
+foreach $dir ("asps/rexe",@subdirs) {#,"cern/geant321","cern/minicern") {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
-#print "Targets: @Targets\n";
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);# Targets = @Targets\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
