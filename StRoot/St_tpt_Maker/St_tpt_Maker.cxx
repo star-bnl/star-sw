@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.49 2000/06/15 19:06:15 aihong Exp $
+// $Id: St_tpt_Maker.cxx,v 1.50 2000/06/20 19:21:44 wdeng Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.50  2000/06/20 19:21:44  wdeng
+// Plug in function estimateVertexZ.
+//
 // Revision 1.49  2000/06/15 19:06:15  aihong
 // ensemble truncation for de/dx calculation added
 //
@@ -172,7 +175,11 @@
 #include "TH3.h"
 #include "TNtuple.h"
 #include "tables/St_type_index_Table.h"
+#include "tables/St_dst_vertex_Table.h"
 #include "tpc/St_tfs_g2t_Module.h"  
+
+void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight);
+ 
 ClassImp(St_tpt_Maker)
   
   //_____________________________________________________________________________
@@ -282,8 +289,25 @@ Int_t St_tpt_Maker::Make(){
 // 		Clusters exist -> do tracking
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime(m_InputHitName);
- if (! tphit) return kStWarn;
- printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
+  if (! tphit) return kStWarn;
+  printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
+
+// cluster vertex
+  Float_t vertexZ, relativeHeight=0;
+  estimateVertexZ(tphit, vertexZ, relativeHeight); 
+
+  dst_vertex_st dstVertexRow;
+  ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
+  dstVertexRow.z = vertexZ;
+  dstVertexRow.id = 1;
+  dstVertexRow.iflag = 109;
+  dstVertexRow.det_id = 1;
+  dstVertexRow.vtx_id = 1;
+
+  St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
+  m_DataSet->Add(clusterVertex);
+  clusterVertex->AddAt(&dstVertexRow, 0);
+
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
       
