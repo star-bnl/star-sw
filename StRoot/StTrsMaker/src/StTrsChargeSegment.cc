@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.11 1999/03/16 02:00:40 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.12 1999/06/16 14:26:52 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,11 +12,14 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.12  1999/06/16 14:26:52  fisyak
+ * Add flags for egcs on Solaris
+ *
+ * Revision 1.12  1999/06/16 14:26:52  fisyak
+ * Add flags for egcs on Solaris
+ *
  * Revision 1.11  1999/03/16 02:00:40  lasiuk
  * use STL in ionization generation;
- * do not always use betaGamma as a scale factor;
- * still a problem with the neutrals depositing energy
- *
  * do not always use betaGamma as a scale factor;
  * still a problem with the neutrals depositing energy
  *
@@ -48,7 +51,7 @@
  * remove g2t pointer
  * add pid member; add systemofunits; mv access fcts to .hh
  * add ostream operator
-#ifdef __sun
+ *
  **************************************************************************/
 #include <algorithm>
 #if  defined(__sun) && ! defined(__GNUG__)

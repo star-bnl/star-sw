@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StROOTMagneticField.hh,v 1.1 1999/03/23 03:38:47 lasiuk Exp $
+ * $Id: StROOTMagneticField.hh,v 1.2 1999/06/16 14:26:51 fisyak Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StROOTMagneticField.hh,v $
+ * Revision 1.2  1999/06/16 14:26:51  fisyak
+ * Add flags for egcs on Solaris
+ *
  * Revision 1.1  1999/03/23 03:38:47  lasiuk
  * Initial Revision
  *
@@ -20,7 +23,7 @@
 
 #include <iostream.h>
 
-#ifdef __sun
+#if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>
 #endif
 #include "SystemOfUnits.h"

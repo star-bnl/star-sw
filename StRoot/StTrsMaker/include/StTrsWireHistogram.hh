@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.3 1999/02/10 18:03:27 lasiuk Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.4 1999/06/16 14:26:51 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
- * Revision 1.3  1999/02/10 18:03:27  lasiuk
- * gas gain manual setting
+ * Revision 1.4  1999/06/16 14:26:51  fisyak
+ * Add flags for egcs on Solaris
  *
+ *
+ * Revision 1.4  1999/06/16 14:26:51  fisyak
+ * Add flags for egcs on Solaris
  *
  * Revision 1.3  1999/02/10 18:03:27  lasiuk
  * gas gain manual setting
@@ -45,7 +48,7 @@
  *
  **************************************************************************/
 #ifndef ST_TRS_WIRE_HISTOGRAM_HH
-#ifdef __sun
+#define ST_TRS_WIRE_HISTOGRAM_HH
 
 #include <vector>
 

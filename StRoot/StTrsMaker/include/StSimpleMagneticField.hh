@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.3 1999/03/15 13:45:59 lasiuk Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.4 1999/06/16 14:26:51 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
+ * Revision 1.4  1999/06/16 14:26:51  fisyak
+ * Add flags for egcs on Solaris
+ *
  * Revision 1.3  1999/03/15 13:45:59  lasiuk
  * include SystemOfUnits from SCL
  *
@@ -31,7 +34,7 @@
 
 #include <iostream.h>
 
-#ifdef __sun
+#if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>
 #endif
 #include "SystemOfUnits.h"

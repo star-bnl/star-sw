@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.8 1999/04/07 00:51:46 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.9 1999/06/16 14:26:52 fisyak Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.8  1999/04/07 00:51:46  lasiuk
- * refine diffusion coefficients for P10
+ * Revision 1.9  1999/06/16 14:26:52  fisyak
+ * Add flags for egcs on Solaris
+ *
+ * Revision 1.9  1999/06/16 14:26:52  fisyak
+ * Add flags for egcs on Solaris
  *
  * Revision 1.8  1999/04/07 00:51:46  lasiuk
  * refine diffusion coefficients for P10
@@ -300,10 +303,10 @@ double StTrsDeDx::betheBloch(double bg) const
     return (I/Io);
 }
 
-#ifndef __sun
+void StTrsDeDx::print(ostream& os) const
+{
+    os << "=========== StTrsDeDx ================"           << endl;
 #if  defined(__sun) && ! defined(__GNUG__)
-#else
-    os << "==> " << mGas.c_str() << endl;
     os << "==> " << mGas.c_str() << endl;
 #else
     os << "==> " << mGas << endl;
