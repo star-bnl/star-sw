@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.51 2000/05/17 15:58:08 kathy Exp $
+// $Id: doEvents.C,v 1.52 2000/05/17 16:50:47 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -30,12 +30,186 @@
 // example multi-ROOT file invocation:
 // .x doEvents.C(9999,"some_directory","*.dst.root")
 //
+//////////////////////////////////////////////////////////////////////////////
+//
 // Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //  
 ///////////////////////////////////////////////////////////////////////////////
+
+Int_t    usePath = 0;
+Int_t    nFile = 0;
+TString  thePath;
+TString  theFileName;
+TString  originalPath;
+class    StChain;
+StChain  *chain=0;
+class StEventDisplayMaker;
+StEventDisplayMaker *dsMaker = 0;
+TBrowser *b=0;
+
+const char *dstFile = 0;
+const char *xdfFile = 0;
+const char *mdcFile = 0;
+const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
+
+void Help()
+{
+    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
+    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+}
+
+
+void doEvents(Int_t, const Char_t **, const Char_t *qaflag = "");
+
+void doEvents(Int_t nevents=2, 
+              const Char_t *path="-",
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *qaflag = "off", 
+              const Char_t *wrStEOut = "true");
+
+// ------------------ Here is the actual method -----------------------------------------
+void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Char_t *wrStEOut)
+{
+
+  cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
+  Int_t ilist=0;
+  while(fileList[ilist]){ 
+      cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
+      ilist++; 
+    }
+  cout << " doEvents -  input qaflag   = " << qaflag << endl;
+  cout << " doEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
+ 
+    //
+    // First load some shared libraries we need
+    //
+
+    gSystem->Load("St_base");
+    gSystem->Load("StChain");
+
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libsim_Tables");
+    gSystem->Load("libglobal_Tables");
+
+    gSystem->Load("StUtilities");
+    gSystem->Load("StIOMaker");
+    gSystem->Load("StTreeMaker");
+    gSystem->Load("StarClassLibrary");
+    gSystem->Load("StEvent");
+    gSystem->Load("StMagF");
+    gSystem->Load("StEventMaker");
+    gSystem->Load("StAnalysisMaker");
+
+    //
+    // Handling depends on whether file is a ROOT file or XDF file
+    //
+    chain  = new StChain("StChain");
+    StFileI *setFiles =0;
+    if (fileList) {	//Normal case
+      setFiles= new StFile(fileList);
+    } else        {	//Grand Challenge
+      gSystem->Load("StChallenger");
+      setFiles = StChallenger::Challenge();
+      setFiles->SetDebug();
+      Int_t Argc=4;
+      const char *Argv[4]= {
+        "-s","dst;hist;runco",
+        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+        };
+      setFiles->Init(Argc,Argv);
+    }
+    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+     IOMk->SetIOMode("r");
+     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+     IOMk->SetBranch("dstBranch",0,"r");
+     IOMk->SetBranch("runcoBranch",0,"r");
+     IOMk->SetDebug();
+
+    //
+    // Maker to read events from file or database into StEvent
+    //
+    StEventMaker *readerMaker =  new StEventMaker("events","title");
+
+
+    // WriteOut StEvent
+    if (wrStEOut) {
+      cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
+      StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
+        outMk->SetIOMode("w");
+        outMk->SetBranch("eventBranch","test.event.root","w");
+        outMk->IntoBranch("eventBranch","StEvent");
+    }
+    //
+
+    //
+    //  Sample analysis maker
+    //
+    StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
+
+    //
+    // Initialize chain
+    //
+    Int_t iInit = chain->Init();
+    if (iInit) chain->Fatal(iInit,"on init");
+    chain->PrintInfo();
+
+    //
+    // Event loop
+    //
+    int istat=0,i=1;
+ EventLoop: if (i <= nevents && istat!=2) {
+     cout << "============================ Event " << i
+	  << " start ============================" << endl;
+     chain->Clear();
+     istat = chain->Make(i);
+     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
+     i++;
+     goto EventLoop;
+ }
+
+    i--;
+    cout << "============================ Event " << i
+	 << " finish ============================" << endl;
+    if (nevents > 1) {
+	chain->Clear();
+	chain->Finish();
+    }
+    else {
+	if (!b) {
+	    b = new TBrowser;
+	}
+    }
+}
+
+//--------------------------------------------------------------------------
+
+void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
+              const Char_t *qaflag, const Char_t *wrStEOut)
+{
+    if (nevents==-1) { Help(); return;}
+    const char *fileListQQ[]={0,0};
+    if (strncmp(path,"GC",2)==0) {
+      fileListQQ=0;
+    } else if (path[0]=='-') {
+	fileListQQ[0]=file;
+    } else {
+	fileListQQ[0] = gSystem->ConcatFileName(path,file);
+    }
+    doEvents(nevents,fileListQQ,qaflag,wrStEOut);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.52  2000/05/17 16:50:47  kathy
+// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
+//
+// Revision 1.52  2000/05/17 16:50:47  kathy
+// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
+//
 // Revision 1.51  2000/05/17 15:58:08  kathy
 // added some print statements to beginning
 //
@@ -85,157 +259,6 @@
 // Updated for new StEvent/StEventMaker.
 //
 // owner: Torre Wenaus,Victor Perevoztchikov
-// what it does: reads .dst.root or .dst.xdf file or files, fills StEvent &
-//      then runs StAnalysisMaker 
-///////////////////////////////////////////////////////////////////////////////
-Int_t    usePath = 0;
-Int_t    nFile = 0;
-TString  thePath;
-TString  theFileName;
-TString  originalPath;
-class    StChain;
-StChain  *chain=0;
-class StEventDisplayMaker;
-StEventDisplayMaker *dsMaker = 0;
-TBrowser *b=0;
-
-const char *dstFile = 0;
-const char *xdfFile = 0;
-const char *mdcFile = 0;
-const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
-
-//void doEvents()
-//{
-//    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-//    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-//    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
-//}
-
-
-void doEvents(Int_t, const Char_t **, const char *qaflag = "");
-void doEvents(Int_t nevents=2, 
-              const Char_t *path="-",
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
-              const char *qaflag = "off");
-
-// ------------------ Here is the actual method -----------------------------------------
-void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
-{
-
-  cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
-  Int_t ilist=0;
-  while(fileList[ilist]){ 
-      cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
-      ilist++; 
-    }
-  cout << " doEvents -  input qaflag   = " << qaflag << endl << endl << endl;
- 
-
-    //
-    // First load some shared libraries we need
-    //
-
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-
-    gSystem->Load("libgen_Tables");
-    gSystem->Load("libsim_Tables");
-    gSystem->Load("libglobal_Tables");
-
-    gSystem->Load("StUtilities");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StEvent");
-    gSystem->Load("StMagF");
-    gSystem->Load("StEventMaker");
-    gSystem->Load("StAnalysisMaker");
-
-    //
-    // Handling depends on whether file is a ROOT file or XDF file
-    //
-    chain  = new StChain("StChain");
-    StFileI *setFiles =0;
-    if (fileList) {	//Normal case
-      setFiles= new StFile(fileList);
-    } else        {	//Grand Chalenge
-      gSystem->Load("StChallenger");
-      setFiles = StChallenger::Challenge();
-      setFiles->SetDebug();
-      Int_t Argc=4;
-      const char *Argv[4]= {
-        "-s","dst;hist;runco",
-        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
-        };
-      setFiles->Init(Argc,Argv);
-    }
-    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-     IOMk->SetIOMode("r");
-     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-     IOMk->SetBranch("dstBranch",0,"r");
-     IOMk->SetBranch("runcoBranch",0,"r");
-     IOMk->SetDebug();
-
-    //
-    // Maker to read events from file or database into StEvent
-    //
-    StEventMaker *readerMaker =  new StEventMaker("events","title");
-
-
-    //
-    //  Sample analysis maker
-    //
-    StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
-
-    //
-    // Initialize chain
-    //
-    Int_t iInit = chain->Init();
-    if (iInit) chain->Fatal(iInit,"on init");
-    chain->PrintInfo();
-
-    //
-    // Event loop
-    //
-    int istat=0,i=1;
- EventLoop: if (i <= nevents && istat!=2) {
-     cout << "============================ Event " << i
-	  << " start ============================" << endl;
-     chain->Clear();
-     istat = chain->Make(i);
-     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
-     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
-     i++;
-     goto EventLoop;
- }
-
-    i--;
-    cout << "============================ Event " << i
-	 << " finish ============================" << endl;
-    if (nevents > 1) {
-	chain->Clear();
-	chain->Finish();
-    }
-    else {
-	if (!b) {
-	    b = new TBrowser;
-	}
-    }
-}
-
-void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
-{
-    const char *fileListQQ[]={0,0};
-    if (strncmp(path,"GC",2)==0) {
-      fileListQQ=0;
-    } else if (path[0]=='-') {
-	fileListQQ[0]=file;
-    } else {
-	fileListQQ[0] = gSystem->ConcatFileName(path,file);
-    }
-    doEvents(nevents,fileListQQ,qaflag);
-}
-
-
 // what it does: reads .dst.root or .dst.xdf file or files, fills StEvent &
 //      then runs StAnalysisMaker 
 //////////////////////////////////////////////////////////////////////////
