@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.6  1999/03/10 19:18:17  ward
+// Correctly fill raw_sec_m table.
+//
 // Revision 1.5  1999/03/03 20:52:16  ward
 // Fix bug.  Pad number assignment was off by 1
 //
@@ -214,6 +217,7 @@ int St_tpcdaq_Maker::Output() {
   St_type_shortdata *pixel_data_in,*pixel_data_out,*pixel_data_gen;
   unsigned char *padlist;
   unsigned char *pointerToAdc;
+  char dataOuter[NSECT],dataInner[NSECT];
   St_DataSet *sector;
   St_DataSetIter raw_data_tpc(m_DataSet); // m_DataSet set from name in ctor
   raw_sec_m_st singlerow;
@@ -230,19 +234,11 @@ int St_tpcdaq_Maker::Output() {
     raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
 
-  singlerow.tfirst=1; 
-  singlerow.tlast=512;
-  singlerow.TimeRef='S';
-  singlerow.RowRefIn ='R'; 
-  singlerow.RowRefOut='R';
-  for(isect=1;isect<=NSECT;isect++) {  // first loop over sectors (small)
-    singlerow.SectorId=isect;
-    raw_sec_m->AddAt(&singlerow,isect-1);
-  }
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
-  for(isect=1;isect<=NSECT;isect++) { // second loop over sectors
+  for(isect=1;isect<=NSECT;isect++) {
+    dataOuter[isect-1]=0; dataInner[isect-1]=0;
     sector=raw_data_tpc(NameOfSector(isect));
     if(!sector) {
       raw_data_tpc.Mkdir(NameOfSector(isect));
@@ -269,7 +265,10 @@ int St_tpcdaq_Maker::Output() {
         seqStatus=mUnpacker->getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
-        if(nseq) numPadsWithSignal++;
+        if(nseq) {
+          numPadsWithSignal++; 
+          if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
+        }
         timeOff=1; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
@@ -296,6 +295,15 @@ int St_tpcdaq_Maker::Output() {
           numPadsWithSignal,pixTblWhere,ipadrow);
     }   // ipadrow loop
   }     // sector loop
+  singlerow.tfirst=1; 
+  singlerow.tlast=512;
+  singlerow.TimeRef='S';
+  for(isect=1;isect<=NSECT;isect++) {
+    singlerow.SectorId=isect;
+    if(dataInner[isect-1]) singlerow.RowRefIn ='R'; else singlerow.RowRefIn ='N';
+    if(dataOuter[isect-1]) singlerow.RowRefOut='R'; else singlerow.RowRefOut='N';
+    raw_sec_m->AddAt(&singlerow,isect-1);
+  }
   return 0;
 }
 /*------------------------------------------------------------------------
@@ -345,7 +353,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.5 1999/03/03 20:52:16 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.6 1999/03/10 19:18:17 ward Exp $ \n");
   // printf("* %s *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if(gStChain->Debug()) StMaker::PrintInfo();
