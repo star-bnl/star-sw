@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.7 2002/05/08 16:03:52 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.8 2002/05/08 23:07:54 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.8  2002/05/08 23:07:54  caines
+ * T0 jitter stuff
+ *
  * Revision 1.7  2002/05/08 16:03:52  caines
  * Fix again memory leak - accidentally pput back in data has to be a const() not data()
  *
@@ -113,7 +116,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
     mSvtHit[hit].setCharge(mSvtAnalysis->GetCluCharge(hit));
     
     // Take jitter out of t0 caused by SVT clock being 8 3rds of RHIC clock
-    mPos[hit].setX((float)mSvtAnalysis->GetMeanClusterTimeBin(hit)-T0Jitter);
+    mPos[hit].setX((float)mSvtAnalysis->GetMeanClusterTimeBin(hit)+T0Jitter);
     mPos[hit].setY((float)mSvtAnalysis->GetMeanClusterAnode(hit));
     mPos[hit].setZ(0.0);
     
