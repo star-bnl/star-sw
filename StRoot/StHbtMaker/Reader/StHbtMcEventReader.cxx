@@ -310,15 +310,15 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   for (StMcVertexIterator vIter=mcEvent->vertices().begin(); vIter!=mcEvent->vertices().end(); vIter++){
     StMcVertex*  vertex = *vIter;
     int nDaughters = vertex->numberOfDaughters();
-    long geantProcess = vertex->geantProcess();
     if ( nDaughters!=2) {
-#ifdef HBTDEBUG
+#ifdef STHBTDEBUG 
+      long geantProcess = vertex->geantProcess();
       cout << " geant Process : " << geantProcess  << endl;
       cout << " daughters : " << nDaughters  << endl;
 #endif
       continue; // not a v0
     }
-
+    
     //StMcTrack* parent = vertex->parent();
     StMcTrack* daughter1 = *(vertex->daughters().begin());
     StMcTrack* daughter2 = *(vertex->daughters().end()-1);
@@ -328,24 +328,24 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
       cout << " two daughters, but no parent " << endl;
       }
     */
-
+    
     double daughter1Charge = daughter1->particleDefinition()->charge();
     double daughter2Charge = daughter2->particleDefinition()->charge();
     double parentCharge = daughter1Charge+daughter2Charge;
- 
+    
     if (!( parentCharge+daughter1Charge+daughter2Charge==0 && daughter1Charge*daughter2Charge<0 )) {
       continue;  // not a v0
     }
     
-#ifdef HBTDEBUG
-      cout << " got a v0 "  << endl;
-      cout << " charge ";
-      cout << daughter1->particleDefinition()->charge() << " ";
-      cout << daughter2->particleDefinition()->charge() << " ";
-      cout << endl;
-      cout << " geantProcessId " << geantProcess << endl;
+#ifdef STHBTDEBUG
+    cout << " got a v0 "  << endl;
+    cout << " charge ";
+    cout << daughter1->particleDefinition()->charge() << " ";
+    cout << daughter2->particleDefinition()->charge() << " ";
+    cout << endl;
+    cout << " geantProcessId " << geantProcess << endl;
 #endif    
-
+    
     // fill the V0MiniDst structure
     StHbtV0* hbtv0 = new StHbtV0();
     hbtv0->SetdecayLengthV0( abs(vertex->position()-VertexPosition) );

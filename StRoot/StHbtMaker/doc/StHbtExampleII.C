@@ -17,10 +17,10 @@
 #define XDFREADER 0
 #define GSTARTXTREADER 0
 
-#define ASCIIWRITER 1
+#define ASCIIWRITER 0
 #define ASCIIREADER 0
 
-#define BINARYWRITER 1
+#define BINARYWRITER 0
 #define BINARYREADER 0
 
 #if ASCIIREADER
@@ -42,7 +42,6 @@
 #endif
 
 #define ANALYSIS
-
 
 // NOTE - chain needs to be declared global so for StHbtEventReader
 class StChain;
@@ -89,6 +88,7 @@ class StHbtAnalysis;
 StHbtAnalysis* phiAnal;
 StHbtAnalysis* phiAnal2;
 StHbtAnalysis* phiAnal3;
+StHbtAnalysis* phiAnalCopy;
 StHbtAnalysis* deltaAnal;
 StHbtAnalysis* rhoAnal;
 
@@ -127,7 +127,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const char*);
 void StHbtExampleII(const Int_t nevents=9999,
 	  const Char_t *path=venusPath,
 	  const Char_t *file=venusFile,
-	  const char* histoFile="testHisto")
+	  const char* histoFile="test.histo.root")
 { 
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {
@@ -163,6 +163,7 @@ gSystem->Load("StAssociationMaker");
 gSystem->Load("StMcAnalysisMaker");
 
 gSystem->Load("StHbtMaker");   
+gSystem->Load("StHbtTagMaker");   
 
 cout << " loading done " << endl;
 
@@ -245,6 +246,8 @@ cout << "StAssociationMaker instantiated"<<endl;
 
 StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
 cout << "StHbtMaker instantiated"<<endl;
+StHbtTagMaker* hbtTagMaker = new StHbtTagMaker("HBTTAG");
+cout << "StHbtMaker instantiated"<<endl;
 // -------------- set up of hbt stuff ----- //
 cout << "StHbtMaker::Init - setting up Reader and Analyses..." << endl;
 
@@ -305,8 +308,8 @@ cout << "READER SET UP.... " << endl;
  asciiFrontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
  asciiFrontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
  asciiFrontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
- asciiFrontLoadedTrackCut->SetP(0.0,2.0);               // range in P
- asciiFrontLoadedTrackCut->SetPt(0.0,2.0);              // range in Pt
+ asciiFrontLoadedTrackCut->SetP(0.0,5.0);               // range in P
+ asciiFrontLoadedTrackCut->SetPt(0.0,5.0);              // range in Pt
  asciiFrontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
  asciiFrontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
  asciiFrontLoadedTrackCut->SetCharge(0);                // no cut on charge
@@ -325,21 +328,22 @@ cout << "READER SET UP.... " << endl;
 #endif
 #if BINARYWRITER
  //   set up a microDstWriter 
- StHbtBinaryReader* binaryWriter = new StHbtBinaryReader(ioMaker);
+ StHbtBinaryReader* binaryWriter = new StHbtBinaryReader(ioMaker);  // retrieve filename from ioMaker
+ //StHbtBinaryReader* binaryWriter = new StHbtBinaryReader();           // specify filename
  binaryWriter->SetFileName("test1.bin");
  TheManager->AddEventWriter(binaryWriter);
  // set up the front loaded cuts
  mikesEventCut* binaryFrontLoadedEventCut = new mikesEventCut;
  binaryFrontLoadedEventCut->SetEventMult(0,100000);      // selected multiplicity range
- binaryFrontLoadedEventCut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
+ binaryFrontLoadedEventCut->SetVertZPos(-35.0,35.0);     // selected range of vertex z-position
  binaryWriter->SetEventCut(binaryFrontLoadedEventCut);
  franksTrackCut* binaryFrontLoadedTrackCut = new franksTrackCut;
  binaryFrontLoadedTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  binaryFrontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
  binaryFrontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
  binaryFrontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
- binaryFrontLoadedTrackCut->SetP(0.0,1.0);               // range in P
- binaryFrontLoadedTrackCut->SetPt(0.0,1.0);              // range in Pt
+ binaryFrontLoadedTrackCut->SetP(0.0,5.0);               // range in P
+ binaryFrontLoadedTrackCut->SetPt(0.0,5.0);              // range in Pt
  binaryFrontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
  binaryFrontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
  binaryFrontLoadedTrackCut->SetCharge(0);                // no cut on charge
@@ -350,8 +354,10 @@ cout << "READER SET UP.... " << endl;
 #if BINARYREADER
  //   set up a microDstWriter 
  StHbtBinaryReader* Reader = new StHbtBinaryReader;
- Reader->SetFileName("test1.bin");
- TheManager->SetEventReader(Reader);
+ //Reader->SetFileName("test1.bin");
+ //Reader->SetFileName(*fileList);
+ Reader->AddFileList(*fileList);
+  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
 #if XDFREADER  
@@ -360,6 +366,11 @@ cout << "READER SET UP.... " << endl;
  Reader->AddAcceptedParticle(-321);  // kaon+
  Reader->AddAcceptedParticle(+321);  // kaon-
  Reader->AddAcceptedMother(333);     // phi 
+
+ //Reader->AddAcceptedParticle(+211);  // pion+
+ //Reader->AddAcceptedParticle(+2212); // proton
+ //Reader->AddAcceptedMother(2224);    // delta++ 
+
  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
@@ -381,7 +392,7 @@ cout << "READER SET UP.... " << endl;
  aTrackCut->SetP(0.23,0.8);              // range in P
  aTrackCut->SetPt(0.0,5.0);             // range in Pt
  aTrackCut->SetRapidity(-1.5,1.5);      // range in rapidity
- aTrackCut->SetDCA(0.0,.5);             // range in Distance of Closest Approach to primary vertex
+ aTrackCut->SetDCA(0.0,2.);             // range in Distance of Closest Approach to primary vertex
  aTrackCut->SetCharge(+1);              // want positive kaons
  aTrackCut->SetMass(0.494);             // kaon mass
  // define example track cut monitor
@@ -413,7 +424,7 @@ cout << "READER SET UP.... " << endl;
  kaonTrkcut->AddCutMonitor( dedxMoniPosPass, dedxMoniPosFail);
  // new particle cut moni
  trackCutMonitor_P*    pMoni1 = new  trackCutMonitor_P;
- trackCutMonitor_P*    pMoni2 = new  trackCutMonitor_P("P","momentum (Gev/c)",20, 0., 4.);
+ trackCutMonitor_P*    pMoni2 = new  trackCutMonitor_P("P","momentum (GeV/c)",20, 0., 4.);
  kaonTrkcut->AddCutMonitor( pMoni1, pMoni2);
  // new particle cut moni
  trackCutMonitor_Pt*    ptMoni1 = new  trackCutMonitor_Pt;
@@ -441,16 +452,14 @@ cout << "READER SET UP.... " << endl;
  // 3) set the Pair cuts for the analysis
  mikesPairCut* phiPairCut = new mikesPairCut;  // use "frank's" pair cut object
  //franksPairCut* phiPairCut = new franksPairCut;  // use "frank's" pair cut object
- //phiPairCut->SetPDiff(0.,1000.);             // difference of pairs in momentum
- //    phiPairCut->SetAngle(0.,180.);           // opening angle
  phiAnal->SetPairCut(phiPairCut);         // this is the pair cut for this analysis
  // 4) set the number of events to mix (per event)
- phiAnal->SetNumEventsToMix(10); 
+ phiAnal->SetNumEventsToMix(25); 
  // ********************************************************************
  // 5) now set up the correlation functions that this analysis will make
  // ********************************************************************
  // define example Minv correlation function
- MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",100,0.98,1.18); 
+ MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",100,0.95,1.20); 
  phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
 
  MinvCorrFctnArmenteros* MinvCFArm = new MinvCorrFctnArmenteros("ArmenterosPodolanski",200,-1.,1.,300,0.,.3); 
@@ -485,78 +494,10 @@ cout << "READER SET UP.... " << endl;
  // now add as many more correlation functions to the Analysis as you like..
  // 6) add the Analysis to the AnalysisCollection
  TheManager->AddAnalysis(phiAnal);
+
+ //phiAnalCopy = new StHbtAnalysis( *phiAnal );
+ //TheManager->AddAnalysis(phiAnalCopy);
  
- // **************************** // 
- // * set up second phi analysis //
- // **************************** // 
- // 0) now define an analysis...
- phiAnal2 = new StHbtAnalysis;
- // 1) set the Event cuts for the analysis
- mikesEventCut* phiEvcut2 = new mikesEventCut;  // use "mike's" event cut object
- phiEvcut2->SetEventMult(0,10000);      // selected multiplicity range
- phiEvcut2->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
- phiAnal2->SetEventCut(phiEvcut2); // use same 
- // 2) set the Track (particle) cuts for the analysis
- // 1st particle cut
- franksTrackCut* kaonTrkcut2 = new franksTrackCut( *aTrackCut );
- kaonTrkcut2->SetNSigmaKaon(-2.,2.); // but tighter cut
- trackCutMonitor_P_vs_Dedx* dedxMoniPosPass2 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniPos); // copy cutMoni from example
- trackCutMonitor_P_vs_Dedx* dedxMoniPosFail2 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniPos); 
- kaonTrkcut2->AddCutMonitor( dedxMoniPosPass2, dedxMoniPosFail2);
- phiAnal2->SetFirstParticleCut(kaonTrkcut2);  // this is the track cut for the "first" particle
- // 2nd particle cut
- franksTrackCut* antikaonTrkcut2 = new franksTrackCut( *((franksTrackCut*)phiAnal2->FirstParticleCut()) );// copy from 1st cut
- antikaonTrkcut2->SetCharge(-1); // but set negative charge
- trackCutMonitor_P_vs_Dedx* dedxMoniNegPass2 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg); // copy cutMoni from example
- trackCutMonitor_P_vs_Dedx* dedxMoniNegFail2 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg);
- antikaonTrkcut2->AddCutMonitor( dedxMoniNegPass2, dedxMoniNegFail2);
- phiAnal2->SetSecondParticleCut(antikaonTrkcut2);  // this is the track cut for the "first" particle
- // 3) set the Pair cuts for the analysis
- phiAnal2->SetPairCut(phiPairCut); // use same
- // 4) set the number of events to mix (per event)
- phiAnal2->SetNumEventsToMix(10);        
- // 5) now set up the correlation functions that this analysis will make
- MinvCorrFctn* MinvCF2 = new MinvCorrFctn(*MinvCF); // copy from 1st analysis
- phiAnal2->AddCorrFctn(MinvCF2);
- // 6) add the Analysis to the AnalysisCollection
- //    TheManager->AddAnalysis(phiAnal2);
- 
- // **************************** // 
- // * set up second phi analysis //
- // **************************** // 
- // 0) now define an analysis...
- phiAnal3 = new StHbtAnalysis;
- // 1) set the Event cuts for the analysis
- mikesEventCut* phiEvcut3 = new mikesEventCut;  // use "mike's" event cut object
- phiEvcut3->SetEventMult(0,10000);      // selected multiplicity range
- phiEvcut3->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
- phiAnal3->SetEventCut(phiEvcut3); // use same 
- // 2) set the Track (particle) cuts for the analysis
- // 1st particle cut
- franksTrackCut* kaonTrkcut3 = new franksTrackCut( *aTrackCut );
- kaonTrkcut3->SetNSigmaKaon(-1.,1.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
- trackCutMonitor_P_vs_Dedx* dedxMoniPosPass3 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniPos); // copy cutMoni from example
- trackCutMonitor_P_vs_Dedx* dedxMoniPosFail3 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniPos); 
- kaonTrkcut3->AddCutMonitor( dedxMoniPosPass3, dedxMoniPosFail3);
- phiAnal3->SetFirstParticleCut(kaonTrkcut3);  // this is the track cut for the "first" particle
- // 2nd particle cut
- franksTrackCut* antikaonTrkcut3 = new franksTrackCut( *((franksTrackCut*)phiAnal3->FirstParticleCut()) );// copy from 1st cut
- antikaonTrkcut3->SetCharge(-1); // but set negative charge
- trackCutMonitor_P_vs_Dedx* dedxMoniNegPass3 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg); // copy cutMoni from example
- trackCutMonitor_P_vs_Dedx* dedxMoniNegFail3 = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg);
- antikaonTrkcut3->AddCutMonitor( dedxMoniNegPass3, dedxMoniNegFail3);
- phiAnal3->SetSecondParticleCut(antikaonTrkcut3);  // this is the track cut for the "first" particle
- // 3) set the Pair cuts for the analysis
- phiAnal3->SetPairCut(phiPairCut); // use same
- // 4) set the number of events to mix (per event)
- phiAnal3->SetNumEventsToMix(10);        
- // 5) now set up the correlation functions that this analysis will make
- MinvCorrFctn* MinvCF3 = new MinvCorrFctn(*MinvCF); // copy from 1st analysis
-  phiAnal3->AddCorrFctn(MinvCF3);
- // 6) add the Analysis to the AnalysisCollection
- //    TheManager->AddAnalysis(phiAnal3);
- 
- // ------------------ end of setting up hbt stuff ------------------ //
  
  // ****************************************** // 
  // * franks rho analysis - by Frank Laue, OSU //
@@ -593,7 +534,7 @@ cout << "READER SET UP.... " << endl;
  //    rhoPairCut->SetAngle(0.,180.);           // opening angle
  rhoAnal->SetPairCut(rhoPairCut);         // this is the pair cut for this analysis
  // 4) set the number of events to mix (per event)
- rhoAnal->SetNumEventsToMix(5);        
+ rhoAnal->SetNumEventsToMix(10);        
  // ********************************************************************
  // 5) now set up the correlation functions that this analysis will make
  // ********************************************************************
@@ -605,6 +546,59 @@ cout << "READER SET UP.... " << endl;
  // 6) add the Analysis to the AnalysisCollection
  //TheManager->AddAnalysis(rhoAnal);
  
+ // ******************************************** // 
+ // * franks delta analysis - by Frank Laue, OSU //
+ // ******************************************** // 
+ // 0) now define an analysis...
+ //StHbtAnalysis* deltaAnal = new StHbtAnalysis;
+ deltaAnal = new StHbtAnalysis;
+ // 1) set the Event cuts for the analysis
+ mikesEventCut* deltaEvcut = new mikesEventCut;  // use "mike's" event cut object
+ deltaEvcut->SetEventMult(0,100000);      // selected multiplicity range
+ deltaEvcut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
+ deltaAnal->SetEventCut(deltaEvcut);          // this is the event cut object for this analsys
+ // 2) set the Track (particle) cuts for the analysis
+ franksTrackCut* pionTrkcut = new franksTrackCut;  // use "frank's" particle cut object
+ pionTrkcut->SetNSigmaPion(-2.0,+2.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ pionTrkcut->SetNSigmaKaon(-1000.,+1000.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
+ pionTrkcut->SetNSigmaProton(-1000.,+1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ pionTrkcut->SetNHits(10,50);            // range on number of TPC hits on the track
+ pionTrkcut->SetP(0.1,0.5);              // range in P
+ pionTrkcut->SetPt(0.1,2.0);             // range in Pt
+ pionTrkcut->SetRapidity(-1.5,1.5);      // range in rapidity
+ pionTrkcut->SetDCA(0.0,2.);             // range in Distance of Closest Approach to primary vertex
+ pionTrkcut->SetCharge(+1);              // want positive kaons
+ pionTrkcut->SetMass(0.139);             // kaon mass
+ deltaAnal->SetFirstParticleCut(pionTrkcut);  // this is the track cut for the "first" particle
+ // copy second particle cut from first particle cut
+ franksTrackCut* protonTrkcut = new franksTrackCut( *((franksTrackCut*)deltaAnal->FirstParticleCut()) );  
+ protonTrkcut->SetNSigmaPion(-1000.0,+1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ protonTrkcut->SetNSigmaProton(-2.,+2.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ protonTrkcut->SetMass(0.938);             // kaon mass
+ deltaAnal->SetSecondParticleCut(protonTrkcut);  // this is the track cut for the "first" particle
+ // 3) set the Pair cuts for the analysis
+ mikesPairCut* deltaPairCut = new mikesPairCut;  // use "frank's" pair cut object
+ //franksPairCut* deltaPairCut = new franksPairCut;  // use "frank's" pair cut object
+ //deltaPairCut->SetPDiff(0.,1000.);             // difference of pairs in momentum
+ //    deltaPairCut->SetAngle(0.,180.);           // opening angle
+ deltaAnal->SetPairCut(deltaPairCut);         // this is the pair cut for this analysis
+ // 4) set the number of events to mix (per event)
+ deltaAnal->SetNumEventsToMix(10);        
+ // ********************************************************************
+ // 5) now set up the correlation functions that this analysis will make
+ // ********************************************************************
+ // define example Minv correlation function
+ MinvCorrFctn* MinvCFdelta = new MinvCorrFctn("Minv",100,1.0,1.4); 
+ deltaAnal->AddCorrFctn(MinvCFdelta);   // adds the just-defined correlation function to the analysis
+ 
+ // now add as many more correlation functions to the Analysis as you like..
+ // 6) add the Analysis to the AnalysisCollection
+ //TheManager->AddAnalysis(deltaAnal);
+ 
+
+
+ // ------------------ end of setting up hbt stuff ------------------ //
+
  chain->Init(); // This should call the Init() method in ALL makers
  chain->PrintInfo();
  
@@ -634,6 +628,9 @@ cout << "READER SET UP.... " << endl;
  MinvCFM_vs_Pt->Numerator()->Write();
  MinvCFM_vs_Pt->Denominator()->Write();
  MinvCFM_vs_Pt->Difference()->Write();
+ MinvCFArm->Numerator()->Write();
+ MinvCFArm->Denominator()->Write();
+ MinvCFArm->Difference()->Write();
 ((eventCutMonitor_Mult*)phiAnal->EventCut()->PassMonitor(0))->Histo()->Write();
  histoOutput->Write();
  histoOutput->Close();
