@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.5 2001/12/11 22:04:01 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.6 2001/12/18 19:27:27 posk Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -333,7 +333,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.5 2001/12/11 22:04:01 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.6 2001/12/18 19:27:27 posk Exp $");
 
   return StMaker::Init();
 }
@@ -764,11 +764,11 @@ Int_t StFlowCumulantMaker::Finish() {
       
       //TH1D* histOfMeanIntegV;
       TH1D* histOfMeanIntegV = new TH1D(*(histFull[k].mHist_v[0]));
-      histOfMeanIntegV->Reset(); // ?
+      histOfMeanIntegV->Reset();
       
       //TH1D* histOfMeanIntegV3;
       TH1D* histOfMeanIntegV3 = new TH1D(*(histFull[k].mHist_v[1]));
-      histOfMeanIntegV3->Reset(); // ?
+      histOfMeanIntegV3->Reset();
       
       for (int j = 1; j < Flow::nHars+1; j++) {
 	histOfMeanIntegV->SetBinContent(j, 1./(meanIntegV[j-1]*perCent));
@@ -794,11 +794,11 @@ Int_t StFlowCumulantMaker::Finish() {
       
       //TH1D* histOfMeanIntegV2;
       TH1D* histOfMeanIntegV2 = new TH1D(*(histFull[k].mHist_v[0]));
-      histOfMeanIntegV2->Reset(); // ?
+      histOfMeanIntegV2->Reset();
       
       //TH1D* histOfMeanIntegV4;
       TH1D* histOfMeanIntegV4 = new TH1D(*(histFull[k].mHist_v[1]));
-      histOfMeanIntegV4->Reset(); // ?
+      histOfMeanIntegV4->Reset();
       
       for (int j = 1; j < Flow::nHars+1; j++) {
 	histOfMeanIntegV2->SetBinContent(j, 1./(meanIntegV2[j-1]*perCent));
@@ -866,6 +866,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.6  2001/12/18 19:27:27  posk
+// "proton" and "antiproton" replaced by "pr+" and "pr-".
+//
 // Revision 1.5  2001/12/11 22:04:01  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.

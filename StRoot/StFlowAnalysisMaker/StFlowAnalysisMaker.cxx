@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.58 2001/12/11 22:03:41 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.59 2001/12/18 19:27:06 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -102,7 +102,7 @@ Int_t StFlowAnalysisMaker::Make() {
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
 
-  float ptMaxPart = 6.;
+  float ptMaxPart = Flow::ptMaxPart;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
@@ -511,7 +511,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // PID multiplicities selected
   mHistPidMult = new TProfile("Flow_PidMult", "Flow_PidMult",
 			      11, 0.5, 11.5, 0., 10000., "");
-  mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton, Pbar, K+, K-, d, dbar, e-, e+");
+  mHistPidMult->SetXTitle("all, pi+, pi-, pr+, pr-, K+, K-, d+, d-, e-, e+");
   mHistPidMult->SetYTitle("Multiplicity");
     
   // Centrality
@@ -1055,7 +1055,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.58 2001/12/11 22:03:41 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.59 2001/12/18 19:27:06 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1264,16 +1264,16 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     else { // Tpc track or otherwise!!!
       
       // For PID multiplicites
-      if (strcmp(pid, "pi+")    == 0)  piPlusN++;
-      if (strcmp(pid, "pi-")    == 0)  piMinusN++;
-      if (strcmp(pid, "proton") == 0)  protonN++;
-      if (strcmp(pid, "pbar")   == 0)  pbarN++;
-      if (strcmp(pid, "k+")     == 0)  kPlusN++;
-      if (strcmp(pid, "k-")     == 0)  kMinusN++;
-      if (strcmp(pid, "d")      == 0)  deuteronN++;
-      if (strcmp(pid, "dbar")   == 0)  dbarN++;
-      if (strcmp(pid, "e-")     == 0)  electronN++;
-      if (strcmp(pid, "e+")     == 0)  positronN++;
+      if (strcmp(pid, "pi+")  == 0)  piPlusN++;
+      if (strcmp(pid, "pi-")  == 0)  piMinusN++;
+      if (strcmp(pid, "pr+")  == 0)  protonN++;
+      if (strcmp(pid, "pr-")  == 0)  pbarN++;
+      if (strcmp(pid, "k+")   == 0)  kPlusN++;
+      if (strcmp(pid, "k-")   == 0)  kMinusN++;
+      if (strcmp(pid, "d+")   == 0)  deuteronN++;
+      if (strcmp(pid, "d-")   == 0)  dbarN++;
+      if (strcmp(pid, "e-")   == 0)  electronN++;
+      if (strcmp(pid, "e+")   == 0)  positronN++;
       
       mHistDcaGlobalTpc->Fill(dcaGlobal);
       mHistChi2Tpc     ->Fill(chi2);
@@ -1297,13 +1297,13 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	}
 	float proton  = pFlowTrack->PidProton();
 	mHistPidProton->Fill(proton);
-	if (strcmp(pid, "proton") == 0) {
+	if (strcmp(pid, "pr+") == 0) {
 	  mHistMeanDedxProton2D->Fill(logp, dEdx);
 	  mHistPidProtonPart->Fill(proton);
 	}
 	float deuteron  = pFlowTrack->PidDeuteron();
 	mHistPidDeuteron->Fill(deuteron);
-	if (strcmp(pid, "d") == 0) {
+	if (strcmp(pid, "d+") == 0) {
 	  mHistMeanDedxDeuteron2D->Fill(logp, dEdx);
 	  mHistPidDeuteronPart->Fill(deuteron);
 	}
@@ -1329,13 +1329,13 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	}
 	float antiproton  = pFlowTrack->PidAntiProton();
 	mHistPidAntiProton->Fill(antiproton);
-	if (strcmp(pid, "pbar") == 0) {
+	if (strcmp(pid, "pr-") == 0) {
 	  mHistMeanDedxPbar2D->Fill(logp, dEdx);
 	  mHistPidAntiProtonPart->Fill(antiproton);
 	}
 	float antideuteron  = pFlowTrack->PidAntiDeuteron();
 	mHistPidAntiDeuteron->Fill(antideuteron);
-	if (strcmp(pid, "dbar") == 0) {
+	if (strcmp(pid, "d-") == 0) {
 	  mHistMeanDedxAntiDeuteron2D->Fill(logp, dEdx);
 	  mHistPidAntiDeuteronPart->Fill(antideuteron);
 	}
@@ -1779,6 +1779,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.59  2001/12/18 19:27:06  posk
+// "proton" and "antiproton" replaced by "pr+" and "pr-".
+//
 // Revision 1.58  2001/12/11 22:03:41  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.
