@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.8  1998/08/20 15:42:40  fisyak
+#  Remove MakeSYS.mk
+#
 #  Revision 1.7  1998/08/19 22:26:04  fisyak
 #  Split base
 #
@@ -103,7 +106,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/19 22:26:04 $ 
+#           Last modification $Date: 1998/08/20 15:42:40 $ 
 #  default setings
 # Current Working Directory
 #
@@ -112,7 +115,7 @@ ifdef SILENT
 .SILENT:
 endif       
 include $(STAR)/mgr/MakeEnv.mk
-include $(STAR)/mgr/MakeSYS.mk
+include $(STAR)/mgr/MakeArch.mk
 EMPTY      :=
 ZERO       :=0
 ONE        :=1
