@@ -7,14 +7,8 @@
 
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
-   calib_dir=$STAR_CALIB/ebye _
-   tpc_sector_first=1 _
-   tpc_sector_last=24 _
-   ebye_prior_switch=0 _
-   ebye_ensemble_switch=0 _
-   ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
-   domain=' geometry tpc svt global strange  ' _
+   domain=' geometry tpc svt global strange ' _
    chain=' dstin ev02 ev0d sdst2 desum drsum ntup' _
    skip=0 _
    no_events=1 _
@@ -25,4 +19,5 @@
    nfile=psc180_02_48evts_j_dst_smdst.ntup _
    nid=111 _
    ntable=event/data/strange/smdst/smdst_v0
-
+   nid2=112 _
+   ntable2=event/data/global/dst/event_summary _
