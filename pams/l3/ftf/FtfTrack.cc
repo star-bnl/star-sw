@@ -113,12 +113,9 @@ void FtfTrack::add ( FtfTrack *piece )
   g1Xy  += piece->g1Xy   ;
   g2Xy  += piece->g2Xy   ;
 
-<<<<<<< FtfTrack.cc
   ddXy  =   s11Xy * s22Xy - square ( s12Xy ) ;
   a1Xy  = ( g1Xy * s22Xy - g2Xy * s12Xy ) / ddXy ;
   a2Xy  = ( g2Xy * s11Xy - g1Xy * s12Xy ) / ddXy ;
-=======
->>>>>>> 1.4
 //
 //     Now in the sz plane
 //
@@ -129,12 +126,9 @@ void FtfTrack::add ( FtfTrack *piece )
      g1Sz  += piece->g1Sz   ;
      g2Sz  += piece->g2Sz   ;
 
-<<<<<<< FtfTrack.cc
      ddSz  = s11Sz * s22Sz - square ( s12Sz ) ;
      a1Sz  = ( g1Sz * s22Sz - g2Sz * s12Sz ) / ddSz ;
      a2Sz  = ( g2Sz * s11Sz - g1Sz * s12Sz ) / ddSz ;
-=======
->>>>>>> 1.4
    }
 //
 //  Add space points to first track

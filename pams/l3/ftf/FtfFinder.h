@@ -19,9 +19,8 @@ public:
    FtfFinder( ) ;
    friend FtfTrack ;
 	
-<<<<<<< FtfFinder.h
    void    dEdx                    ( ) ;
-   void    getTracks               ( ) ;
+   int     getTracks               ( ) ;
    void    mergePrimaryTracks      ( ) ;
    double  process ( ) ;
    int     reset                   ( ) ;
@@ -29,16 +28,6 @@ public:
    int     setPointers             ( ) ;
    double  CpuTime                 ( ) ;
    double  RealTime                ( ) ;
-=======
-   void   dEdx                    ( ) ;
-   int    getTracks               ( ) ;
-   void   mergePrimaryTracks      ( ) ;
-   float  process ( ) ;
-   int    reset                   ( ) ;
-   int    setConformalCoordinates ( ) ;
-   int    setPointers             ( ) ;
-   float  time                    ( ) ;
->>>>>>> 1.5
 //
    void		printVols ( ) ;
    void		printRows ( ) ;
