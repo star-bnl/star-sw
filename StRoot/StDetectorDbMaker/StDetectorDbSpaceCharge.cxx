@@ -1,5 +1,16 @@
 #include "StDetectorDbSpaceCharge.h"
-#include "tables/St_spaceChargeCor_Table.h"
+//#include "tables/St_spaceChargeCor_Table.h"
+// Temp declaration of struct for autobuild not to choke!
+struct spaceChargeCor_st{
+    double fullFieldB;
+    double halfFieldB;
+    double zeroField;
+    double halfFieldA;
+    double fullFieldA;
+    double satRate;
+};
+
+
 #include "TUnixTime.h"
 #include "TTable.h"
 #include "StDetectorDbMagnet.h"
@@ -78,6 +89,16 @@ double StDetectorDbSpaceCharge::getSpaceChargeCorrection(){
 
 };
 
+/// Returns Space Charge Saturation Rate
+double StDetectorDbSpaceCharge::getSpaceChargeSatRate(){
+    double value = 0;
+    if(mSpaceCharge){
+	value = mSpaceCharge->satRate;
+    }
+    return value;
+    
+};
+
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
 
@@ -88,6 +109,8 @@ ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
     os << "Positive Half Field: " << v.getSpaceChargeCorrection(0.5) << endl;
     os << "Positive Full Field: " << v.getSpaceChargeCorrection(1.0) << endl;
     os << "Currerently Using:   " << v.getSpaceChargeCorrection() << endl;
+    os << endl;
+    os << "Saturation Rate:     " << v.getSpaceChargeSatRate() << endl; 
     
     return os;
 };
