@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.34 2002/12/02 21:20:12 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.35 2003/01/17 23:02:25 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.35  2003/01/17 23:02:25  suaide
+// small modification
+//
 // Revision 1.34  2002/12/02 21:20:12  suaide
 // modifications for new DB scheme
 //
@@ -102,7 +105,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mControlADCtoE->EnergyCutOff[i]=energyCut[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
   } 
-
+  mEmbedd=kFALSE;
 }
 //_____________________________________________________________________________
 /* 
@@ -421,7 +424,14 @@ Bool_t StEmcADCtoEMaker::getEmc()
 	}
       
   // check if there is event from StEvent
-  StEvent* event = (StEvent*)GetInputDS("StEvent");
+  StEvent* event=NULL;
+  if(!mEmbedd) event = (StEvent*)GetInputDS("StEvent");
+  else 
+  {
+    StMaker *m = GetMaker("embedIO");
+    if(!m) { cout<<"No embedIO maker"<<endl; return kFALSE; }
+    event = (StEvent*)m->GetInputDS("StEvent");  
+  }
   if(event)
 	{
   	mData->RunNumber = event->runId();
@@ -612,7 +622,15 @@ This method makes a clean up of StEvent before store it in the .data
 Bool_t StEmcADCtoEMaker::fillStEvent()
 {  
   // first need to clean hits with adc = 0
-	StEvent* event = (StEvent*)GetInputDS("StEvent");  
+  StEvent* event=NULL;
+  if(!mEmbedd) event = (StEvent*)GetInputDS("StEvent");
+  else
+  {
+    StMaker *m = GetMaker("embedIO");
+    if(!m) { cout<<"No embedIO maker"<<endl; return kFALSE; }
+    event = (StEvent*)m->GetInputDS("StEvent");  
+  }
+  
   mEmc = NULL;	
 	if(event) mEmc = event->emcCollection();
 	if(mEmc) clearOldEmc();
