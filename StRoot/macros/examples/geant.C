@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.6 1999/02/19 23:43:36 fisyak Exp $
+// $Id: geant.C,v 1.7 1999/02/22 23:28:14 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.7  1999/02/22 23:28:14  fisyak
+// Cleaning up for SL99a
+//
 // Revision 1.6  1999/02/19 23:43:36  fisyak
 // add parameters
 //
@@ -33,18 +36,19 @@ void Load(){
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
 }
-void geant(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd")
+void geant(const Int_t Nevents=2,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   // Create the main chain object
   if (! chain) chain = new StChain("bfc");
   //  Create the makers to be called by the current chain
-  St_TLA_Maker *geom = new St_TLA_Maker("geom","run/geant/Run");
+  St_geom_Maker *geom = new St_geom_Maker("geom","run/geant/Run");
   if (! geant) geant = new St_geant_Maker("geant","event/geant/Event");
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);
   //  geant->SetIwtype(1);
+  geant->Do("gdebug 1;");
   geant->SetIwtype(0);
   TString cmd("gfile p ");
   cmd += fzfile;
@@ -57,7 +61,6 @@ void geant(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049
   for (Int_t i =1; i <= Nevents; i++)
   {
     if (chain->Make(i)) break;
-    St_DataSet *dst = chain->DataSet("dst");
     if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
@@ -67,4 +70,5 @@ void geant(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049
     chain->Finish();
   }
   else {b = new TBrowser("GEANT",chain);}
+  gSystem->Exec("echo Run completed on `hostname` at `date`");
 }

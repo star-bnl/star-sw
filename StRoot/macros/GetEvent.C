@@ -48,7 +48,7 @@ void GetEvent(Int_t numberOfEvent=1,
     St_io_Maker *in    = new St_io_Maker("Input","all");
 //  St_TLA_Maker   *geant = new St_TLA_Maker(testedMakerName,"event/geant/Event");
 //  St_TLA_Maker    *dst   = new St_TLA_Maker("dst","event/geant/Event");
-    in->MakeDoc(); 
+//  in->MakeDoc(); 
 
     if (root_file) tree=(TTree *)root_file->Get("Output");
   }

@@ -1,4 +1,4 @@
-// $Id: bfcx.C,v 1.5 1999/02/19 22:38:15 fisyak Exp $
+// $Id: bfcx.C,v 1.6 1999/02/22 23:28:13 fisyak Exp $
 #define gtrack
 #define trs
 #define emc
@@ -69,8 +69,12 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
 {                              
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
+#ifdef gtrack
+  TString FileOut("gtrack.rootx");
+#else
   TString FileOut = gSystem->BaseName(fzfile);
-  FileOut.ReplaceAll(".fz",".root");
+  FileOut.ReplaceAll(".fz",".rootx");
+#endif
   TFile       *root_out  =  new TFile(FileOut.Data(),"RECREATE");
 
   // Create the main chain object
@@ -86,14 +90,8 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
 #ifdef gtrack
   geant->SetIwtype(1);
   geant->Do("debug on;");
-#else
-  TString cmd("gfile p ");
-  cmd += fzfile;
-  geant->Do(cmd.Data());
-#endif
-#ifdef  gtrack
   //  geant->LoadGeometry("detp geometry field_only");
-  geant->LoadGeometry("detp geometry complete");
+  geant->LoadGeometry("detp geometry YEAR_1B");
   geant->Do("subevent 0;");
   geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  -1. 1.;");
   geant->Do("mode g2tm prin 1;");
@@ -101,6 +99,10 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
   //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
   geant->Do("debug on;");
   geant->Do("swit 2 3;");
+#else
+  TString cmd("gfile p ");
+  cmd += fzfile;
+  geant->Do(cmd.Data());
 #endif
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
@@ -130,12 +132,12 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
   StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
   St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
 #ifdef ctf
-  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
+  St_l3t_Maker         *l3Tracks = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
 #endif
   St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
-  St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
-  St_dst_Maker         *dst_Maker = new St_dst_Maker("dst","dst");
+  St_glb_Maker         *global   = new St_glb_Maker("global","event/data/global");
+  St_dst_Maker         *dst      = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_QA_Maker          *qa         = new St_QA_Maker;  
@@ -153,7 +155,8 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
   //  chain->MakeTree("StChainTree","Title");
   //  chain->SetBranches();
   // Prepare TCanvas to show some histograms created by makers
-  out->Add(dst_Maker->GetName(),"dst_branch.root");
+  FileOut.ReplaceAll(".rootx","_dst.rootx");
+  if (dst) out->Add(dst->GetName(),FileOut.Data());
   if (root_out) {chain->Write();}
 
   gBenchmark->Start("bfc");
