@@ -1,5 +1,8 @@
-// $Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $
+// $Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $
 // $Log: StRareMaker.cxx,v $
+// Revision 1.6  2001/11/02 00:05:41  struck
+// major update: bug fixes in StRareMaker to get dca for l3 tracks and correct wrong l3 field setting in run 291023
+//
 // Revision 1.5  2001/10/16 01:26:14  struck
 // added filename parameter for tree file to constructors
 //
@@ -44,7 +47,7 @@ ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
 ClassImp(StL3RareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
@@ -104,8 +107,9 @@ Int_t StRareMaker::Make() {
     if (!mEvent) return kStOK; // If no event, we're done
 
     // test
-    // get event number
+    // get event number and run number
     cout << " event ID = " << mEvent->id() << endl;  
+    int runNumber = mEvent->runId();
 
     mRareEvent->clear();
 
@@ -124,14 +128,44 @@ Int_t StRareMaker::Make() {
 	  // now look for L3
 	  StL3Trigger* l3Event;
 	  l3Event = (StL3Trigger*) mEvent->l3Trigger();
+	  float l3zVertex = -999;
 	  if (mL3TrackCut && l3Event) {
 	        mRareEvent->fillL3Info(l3Event);
+		if (l3Event->primaryVertex())
+		      l3zVertex = l3Event->primaryVertex()->position().z();
 		// Loop over tracks
 		StGlobalTrack *l3trk;
 		StSPtrVecTrackNode& mtracknodes = (StSPtrVecTrackNode&) l3Event->trackNodes();
 		for (Int_t i=0; i<mtracknodes.size(); i++) {
 		      l3trk = (StGlobalTrack* )mtracknodes[i]->track(0);
-		      if (mL3TrackCut->Accept(l3trk)) mRareEvent->addL3Track(l3trk);
+		      // correct my bug in StEvent filling
+		      StGlobalTrack* newL3Track = new StGlobalTrack(*l3trk);
+		      StHelixModel* oldHelix = (StHelixModel*) l3trk->geometry();
+		      int charge = oldHelix->charge();
+		      short int h = oldHelix->helicity();
+		      // correct wrong field polarity in run 2291023
+		      if (runNumber==2291023) {
+			    charge *= -1;
+			    h *= -1;
+		      }
+		      float kapa = 0.001 * oldHelix->curvature();
+		      float lambda = atan(oldHelix->dipAngle());
+		      StHelixModel* newHelix = new StHelixModel(charge, (float) oldHelix->psi(),
+								kapa, lambda, oldHelix->origin(),
+								oldHelix->momentum(), h);
+		      newL3Track->setGeometry(newHelix);
+		      // get dca2d to l3zVertex
+		      if (l3zVertex!=-999) {
+			    StThreeVectorD vertex(0, 0, l3zVertex);
+			    float dca2d = newHelix->helix().distance(vertex);
+			    //cout << l3zVertex << " ==> dca = " << dca2d << endl;
+			    newL3Track->setImpactParameter(dca2d);
+		      }
+
+		      if (mL3TrackCut->Accept(newL3Track)) mRareEvent->addL3Track(newL3Track);
+
+		      // clean up this mess
+		      delete newL3Track;
 		}
 	  }
 
@@ -156,7 +190,7 @@ void StRareMaker::Report(){
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $\n");
   printf("**************************************************************\n");
 }
 

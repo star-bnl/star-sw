@@ -30,15 +30,15 @@ StRareTrack::StRareTrack(StPrimaryTrack* track){
   StSPtrVecTrackPidTraits& traits=track->pidTraits();
   StDedxPidTraits* dedxPidTr;
    for (int itrait = 0; itrait < traits.size(); itrait++){
-     dedxPidTr = 0;
-      if (traits[itrait]->detector() == kTpcId) {
-             StTrackPidTraits* thisTrait = traits[itrait];
-  	     dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
-	     if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
-              fdedx = 1e6*dedxPidTr->mean();
-              fndedx = dedxPidTr->numberOfPoints();
-             }
-      }
+         dedxPidTr = 0;
+	 if (traits[itrait]->detector() == kTpcId) {
+	       StTrackPidTraits* thisTrait = traits[itrait];
+	       dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
+	       if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
+		     fdedx = 1e6*dedxPidTr->mean();
+		     fndedx = dedxPidTr->numberOfPoints();
+	       }
+	 }
    }
 
 }

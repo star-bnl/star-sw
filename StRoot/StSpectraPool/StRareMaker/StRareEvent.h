@@ -27,6 +27,7 @@ class StRareEvent : public TObject {
   float magneticField() const;
   void  addTrack(StPrimaryTrack* track);
   void  addL3Track(StGlobalTrack* l3track);
+  float l3vertexZ() const;
   int   numberOfL3Tracks() const; 
   int   numberOfProccesedEvents() const;
   int   numberOfAcceptedEvents() const;
@@ -74,6 +75,7 @@ inline int StRareEvent::numberOfL3Tracks() const {return fNL3RareTrack;}
 inline int StRareEvent::numberOfProccesedEvents() const {return fNProcessed;}
 inline int StRareEvent::numberOfAcceptedEvents() const {return fNAccept;}
 inline int StRareEvent::numberOfBuildEvents() const {return fNBuild;}
+inline float StRareEvent::l3vertexZ() const {return fL3VertexZ;}
 inline TClonesArray* StRareEvent::getL3Tracks() const {return fL3RareTracks;}
 inline float StRareEvent::triggerData(int i) const {
       if (i>=0 && i<=9) return fTriggerData[i];
