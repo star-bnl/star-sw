@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/06/98  (E-mail:fine@bnl.gov)
-// $Id: CallMevSaveXDF.cxx,v 1.4 1998/07/25 00:31:49 fisyak Exp $
+// $Id: CallMevSaveXDF.cxx,v 1.5 1998/08/20 12:33:31 fisyak Exp $
 // $Log: CallMevSaveXDF.cxx,v $
+// Revision 1.5  1998/08/20 12:33:31  fisyak
+// Splitted base libraries
+//
 // Revision 1.4  1998/07/25 00:31:49  fisyak
 // Working versions of tutorials
 //
@@ -21,9 +24,10 @@
     if (gSystem.Load("libSt_mevsim.dll")) printf(" Loading DLL \"libSt_mevsim.dll\" failed \n");
   }
   else {
+    if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
     if (gSystem.Load("libasu.so"))      printf(" Loading DLL \"libasu.so\" failed \n");
     if (gSystem.Load("libdsl.so"))      printf(" Loading DLL \"libdsl.so\" failed \n");
-    if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
+    if (gSystem.Load("xdf2root.so"))      printf(" Loading DLL \"xdf2root.so\" failed \n");
     if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
     // Load dictionary for begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/dev/pams/doc/module.html#mevsim_mod">mevsim</a> end_html STAF module
     if (gSystem.Load("mev.sl")) printf(" Loading DLL \"mev.sl\" failed \n");

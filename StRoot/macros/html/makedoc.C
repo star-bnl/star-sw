@@ -1,9 +1,9 @@
 {
   gROOT.Reset();
-  Char_t *libs[] = {"libasu","libdsl","St_base","St_Tables", 
+  Char_t *libs[] = {"St_base","libasu","libdsl","xdf2root.so","St_Tables", 
   "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
   Char_t *suffix=0;
-  Int_t nlist = 11;
+  Int_t nlist = 12;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
      NT=kTRUE;
