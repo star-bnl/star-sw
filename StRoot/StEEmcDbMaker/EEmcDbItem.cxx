@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.1 2003/11/20 16:01:25 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.2 2003/11/22 05:35:36 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -33,9 +33,9 @@ void EEmcDbItem::print() const{
   }
 
   if(strchr(name,'U') || strchr(name,'V') )
-    printf(" %s crate=%d chan=%3d sec=%d  strip=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s\n",name,crate,chan,sec,strip,gain,ped,thr,stat,fail,tube);
+    printf(" %s crate=%d chan=%3d sec=%d  strip=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,strip,gain,ped,thr,stat,fail,tube,key);
   else
-    printf(" %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube);
+    printf(" %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
 }
 
 //--------------------------------------------------
@@ -52,6 +52,7 @@ void EEmcDbItem::clear() {
   thr=-6;
   strip=-299;
   stat=fail=0;
+  key=-999;
 }
 
 //--------------------------------------------------
@@ -75,11 +76,13 @@ void EEmcDbItem::setTube(char *text) {
 void EEmcDbItem::setName(char *text) {
   strncpy(name,text,StEEmcNameLen); 
   sec=atoi(text);
-  if(strchr(name,'U') || strchr(name,'V') ) {
+  if(name[2]=='U' || name[2]=='V' ) {
+    plane=name[2];
     strip=atoi(text+3);
   }else {  
-    eta=atoi(text+4);
+    assert(name[2]=='T' ||name[2]=='P' ||name[2]=='Q' ||name[2]=='R' );
     sub=text[3];
+    eta=atoi(text+4);
   }
   // cleanup termintaing character
   int i;
@@ -94,6 +97,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.2  2003/11/22 05:35:36  balewski
+// saves ped in DB format
+//
 // Revision 1.1  2003/11/20 16:01:25  balewski
 // towards run4
 //
