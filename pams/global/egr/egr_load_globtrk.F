@@ -64,6 +64,10 @@ C Adjust for ssd later
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = gtrk(igtrk).nmax
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
+      globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)/
+     +     real(globtrk(iglob).n_fit_point-3)
+      globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)/
+     +     real(globtrk(iglob).n_fit_point-2)
       if( ipriv .gt. 0) then
          globtrk(iglob).n_fit_point =   globtrk(iglob).n_fit_point-1
          globtrk(iglob).n_point     =  globtrk(iglob).n_point - 1000
@@ -108,10 +112,7 @@ C Adjust for ssd later
       globtrk(iglob).covar(14) = 0
       globtrk(iglob).covar(15) = 0
 
-      globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)/
-     +     real(globtrk(iglob).n_fit_point-3)
-      globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)/
-     +     real(globtrk(iglob).n_fit_point-2)
+  
       globtrk(iglob).length=9999.9
       if( isvtt .eq. 0) then
          firsthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)

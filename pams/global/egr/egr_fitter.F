@@ -26,10 +26,10 @@ C ***  6/6/97 - CAINES - Changed the code to try to make it more     **
 C ***                    transparent as I couldn't figure out what it** 
 C ***                      was up to before. Also changed            **
 C ***                    egrpar.perfect to egrpar.useglobal          **
-C ***  9/9/97 - CAINES - Updated the SVT track-hit  identification   **
+C ***  9/9/97 -  CAINES - Updated the SVT track-hit  identification   **
 C ***  12/2/97 - CAINES - Added message routine as official one now  **
 C ***                     unmanaged                                  **
-C ***  6/5/98 - CAINES - Changed globtrk to dst_track and dst_track_aux*
+C ***  6/5/98 -  CAINES - Changed globtrk to dst_track and dst_track_aux*
 C ***  9/29/00 - CAINES - Removed scenario setting,now just usetpc etc *
 C *********************************************************************
 
