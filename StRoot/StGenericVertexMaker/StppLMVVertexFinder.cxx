@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.15 2004/12/13 20:39:58 fisyak Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.16 2004/12/16 17:01:36 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -49,8 +49,8 @@ void StppLMVVertexFinder::Init() {
     gMessMgr->Info() << "The  ppLMV4 cuts have been activated" << endm; 
     mMaxTrkDcaRxy    = 3.9;
     mMinTrkPt        = 0.2;
-    mMinNumberOfFitPointsOnTrack = 10;
-    mMaxZrange       = 250;            // for tracks
+    mMinNumberOfFitPointsOnTrack = 15; // a typo (=10) was here before , JB
+    mMaxZrange       = 180;            // for tracksa;  typo (=250) was here before , JB
     mDVtxMax         = 4.0;            // max sigma multipl between tracks and current vertex, used for tracks rejection
     mMinMatchTr      = 1;              // minimal # of tracks matched to CTB 
     mBLequivNtr      = 100;            // equivalent # of tracks for BeamLine
@@ -598,6 +598,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.16  2004/12/16 17:01:36  balewski
+ * 2 cuts in ppLMV4 were slightly off what was in the TPT version
+ *
  * Revision 1.15  2004/12/13 20:39:58  fisyak
  * Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
  *
