@@ -5,12 +5,15 @@
      macro/global/import *
 
        message ' finish_dst: macro dst_run_summary '
-       
+       message '     #events total,good = ', [nevdsttot], [nevdstgood] 
+
   cd  [run_dst]
 
   tdm/table/cell/putvalue  'run_summary[0].n_events_tot'   [nevdsttot]
   tdm/table/cell/putvalue  'run_summary[0].n_events_good'  [nevdstgood]
 
+  tdm/table/cell/getvalue  'run_summary[0].n_events_tot'   
+  tdm/table/cell/getvalue  'run_summary[0].n_events_good'  
   cd /dui
 
  return
