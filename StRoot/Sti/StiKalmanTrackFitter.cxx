@@ -35,28 +35,29 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
       cout <<"track->getLastChild()==0, line 28. return"<<endl;
       //throw new Exception("StiKalmanTrackFitter::fit(): track->getLastChild() returned null");
     }
-    switch (fitMethod)	{
-    case Inward:
-			if (StiDebug::isReq(StiDebug::Flow))
-				cout << "Fit Inward" << endl;
-			fitInward(first);
-			track->setChi2(last->fChi2);
-			if (last->fP3>0)
-				track->setCharge(StiKalmanTrackNode::unitCharge);
-			else
-				track->setCharge(-StiKalmanTrackNode::unitCharge);
-			break;
-    case Outward:	
-			if (StiDebug::isReq(StiDebug::Flow))
-				cout << "Fit Outward" << endl;
-			fitOutward(last);
-			track->setChi2(first->fChi2);
-			if (last->fP3>0)
-				track->setCharge(StiKalmanTrackNode::unitCharge);
-			else
-				track->setCharge(-StiKalmanTrackNode::unitCharge);
-			break;
-    }
+    switch (fitMethod)	
+			{
+			case Inward:
+				if (StiDebug::isReq(StiDebug::Flow))
+					cout << "Fit Inward" << endl;
+				fitInward(first);
+				track->setChi2(last->fChi2);
+				if (last->fP3*StiKalmanTrackNode::getFieldConstant()>0)
+					track->setCharge(-1);
+				else
+					track->setCharge(1);				break;
+			case Outward:	
+				if (StiDebug::isReq(StiDebug::Flow))
+					cout << "Fit Outward" << endl;
+				fitOutward(last);
+				track->setChi2(first->fChi2);
+				if (first->fP3*StiKalmanTrackNode::getFieldConstant()>0)
+					track->setCharge(-1);
+				else
+					track->setCharge(1);
+				break;
+			}
+
 }
 
 void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) //throw (Exception)
