@@ -7,4 +7,5 @@
 #pragma link C++ class StChain-;
 #pragma link C++ class EvtHddr_st+;
 #pragma link C++ enum  EChainBits;
+#pragma link C++ class StMkDeb-;
 #endif
