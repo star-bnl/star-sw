@@ -68,11 +68,11 @@ class StBFChain : public StChain {
    virtual void        SetDbOptions();
    virtual void        SetGeantOptions();
    virtual void        SetTreeOptions();
-   virtual void        SetOption(const Int_t k);
-   virtual void        SetOption(const Char_t*  Opt) {SetOption(kOpt(Opt));}
-   virtual void        SetOption(const TString* Opt) {SetOption(kOpt(Opt));}
-   virtual void        SetOptionOff(const Char_t*  Opt) {SetOption(-kOpt(Opt));}
-   virtual void        SetOptionOff(const TString* Opt) {SetOption(-kOpt(Opt));}
+   virtual void        SetOption(const Int_t k, const Char_t *chain="Chain");
+   virtual void        SetOption(const Char_t*  Opt, const Char_t *chain="Chain") {SetOption(kOpt(Opt), chain);}
+   virtual void        SetOption(const TString* Opt, const Char_t *chain="Chain") {SetOption(kOpt(Opt),chain);}
+   virtual void        SetOptionOff(const Char_t*  Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
+   virtual void        SetOptionOff(const TString* Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
    virtual void        SetTFile(TFile *m) {fTFile = m;}
    virtual Int_t       Finish();
    virtual TFile      *GetTFile() {return fTFile;}
@@ -83,7 +83,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.28 2004/02/01 23:27:49 jeromel Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.29 2004/03/01 17:32:17 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
