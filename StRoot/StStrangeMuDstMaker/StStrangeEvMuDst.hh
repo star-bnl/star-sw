@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.6 2002/05/17 14:05:28 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.7 2003/02/10 16:00:29 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.7  2003/02/10 16:00:29  genevb
+ * Implement cleared events
+ *
  * Revision 3.6  2002/05/17 14:05:28  genevb
  * Added L3 unbiased trigger info
  *
@@ -66,7 +69,7 @@ public:
   StStrangeEvMuDst(StMcEvent&);
   void Fill(StEvent&);
   void Fill(StMcEvent&);
-  void Clear() {}
+  void Clear();
   void Clear(Option_t* option) {TObject::Clear(option);}
   static void SetCorrectionFile(char*);
   static void SetFractionFile(char*);
