@@ -7,6 +7,7 @@
 **   Other           5        */
 /* numbering scheme for vertex types */
 
+#define kUndefinedVertexIdentifier     0
 #define kEventVertexIdentifier         1
 #define kV0DecayIdentifier             2
 #define kXiDecayIdentifier             3
