@@ -352,8 +352,9 @@ void Run(Int_t firstEvent,
   pars->usePixel        = usePixel;
   pars->activePixel     = activePixel;
   pars->useResidualCalculator = useResidualCalculator;
+  pars->baseName        ="_pars.txt";
 
-
+  
   if(outfile=="") outfile = fileList[0];
   miniChain->run(firstEvent,nEvents,filePrefix,fileList,outfile);
 }
