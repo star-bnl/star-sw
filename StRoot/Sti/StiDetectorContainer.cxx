@@ -39,7 +39,7 @@ StiDetectorContainer::StiDetectorContainer(const string & name, const string & d
       mLeafIt(0),
       mMessenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-    cout <<"StiDetectorContainer::StiDetectorContainer() -I- Started/Done"<<endl;
+  //    cout <<"StiDetectorContainer::StiDetectorContainer() -I- Started/Done"<<endl;
 }
 
 StiDetectorContainer::~StiDetectorContainer()
@@ -80,11 +80,8 @@ void StiDetectorContainer::reset()
     mySameOrderKey.morderKey = tempOrderKey; //order is of type const StiOrderKey&    
     StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey); 
     
-    if (where==mroot->end()) {
-	//must abort!!! If this happens do not go on!!!
-	cout <<"StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0"<<endl;
-	abort();
-    }
+    if (where==mroot->end()) 
+      throw runtime_error("StiDetectorContainer::reset() const -F- mid-rapidity region not found");
     
     mregion = mregion = where;
     //This will seg fault if (*mregion)->begin()==(*mregion)->end() !!!!!!!
@@ -109,10 +106,10 @@ StiDetector* StiDetectorContainer::operator*() const
 
 bool StiDetectorContainer::moveToNextRegion()
 {
-    cout <<"StiDetectorContainer::moveToNextRegion()"<<endl;
+  //cout <<"StiDetectorContainer::moveToNextRegion()"<<endl;
     
     if ( (++mregion < mroot->end() )==false) { 
-	cout <<"StiDetectorContainer::moveToNextRegion():\tNowhere to go. return false"<<endl;
+      //cout <<"StiDetectorContainer::moveToNextRegion():\tNowhere to go. return false"<<endl;
 	--mregion; 
 	return false;
     }
@@ -126,7 +123,7 @@ bool StiDetectorContainer::moveToNextRegion()
 bool StiDetectorContainer::moveToPreviousRegion()
 {
     if (mregion == mroot->begin() ) {
-	cout <<"StiDetectorContainer::moveToPreviousRegion():\t Nowhere to go. return false"<<endl;
+      //cout <<"StiDetectorContainer::moveToPreviousRegion():\t Nowhere to go. return false"<<endl;
 	return false;
     }
 
@@ -263,8 +260,8 @@ void StiDetectorContainer::moveMinusPhi()
 void
 StiDetectorContainer::build(StiDetectorBuilder * builder)
 {
-    mMessenger <<"StiDetectorContainer::build() - INFO - Starting"<<endl;
-    mMessenger <<"StiDetectorContainer::build() - INFO - Building using builder:"<<builder->getName()<<endl;
+    mMessenger <<"StiDetectorContainer::build() -I- Starting"<<endl;
+    mMessenger <<"StiDetectorContainer::build() -I- Building using builder:"<<builder->getName()<<endl;
     // build the volumes
     builder->build();
     // pass volumes to TreeBuilder before we make like a tree and leave...
@@ -283,7 +280,7 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
       throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0");
       if (!(*where))
       throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - *where==0");
-      mMessenger <<"StiDetectorContainer::build() - INFO - Find Leaves and set mregion"<<endl;
+      mMessenger <<"StiDetectorContainer::build() -I- Find Leaves and set mregion"<<endl;
       //Sort by name for O(log(n)) calls to setDetector()
       //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<StiDetector>() );
       
@@ -292,15 +289,13 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
     
     mLeafIt = new StiCompositeLeafIterator<StiDetector>(mroot);
     
-    mMessenger <<"StiDetectorContainer::build() - INFO - reset()"<<endl;
+    mMessenger <<"StiDetectorContainer::build() -I- reset()"<<endl;
 
     //temp MLM
-    cout <<" \n---------------------------- Detector Container ---------------------\n"<<endl;
-    RecursiveStreamNode<StiDetector> myStreamer;
-    myStreamer( mroot );
+    //cout <<" \n---------------------------- Detector Container ---------------------\n"<<endl;
+    //RecursiveStreamNode<StiDetector> myStreamer;
+    //myStreamer( mroot );
     //end temp
-
-    
     return;
 }
 /*

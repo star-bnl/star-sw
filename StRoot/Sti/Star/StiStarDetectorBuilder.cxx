@@ -33,18 +33,10 @@ void StiStarDetectorBuilder::buildShapes()
   _beamPipeShape = new StiCylindricalShape;
   _beamPipeShape->setName("Star/pipe");
   _beamPipeShape->setThickness(0.1); // to be checked
-  _beamPipeShape->setHalfDepth( 100.);
+  _beamPipeShape->setHalfDepth( 200.);
   _beamPipeShape->setOpeningAngle( M_PI/6. );
   _beamPipeShape->setOuterRadius(4.00);// to be checked
   add(_beamPipeShape);
-  
-  // vacuum
-  _vacuumShape = new StiPlanarShape;
-  _vacuumShape->setName("Star/vacuum");
-  _vacuumShape->setThickness(1.); 
-  _vacuumShape->setHalfDepth( 100.);
-  _vacuumShape->setHalfWidth( 1.);
-  add(_vacuumShape);
   _messenger << "StiStarDetectorBuilder::buildShapes() - INFO - Done" << endl;
 }
 
@@ -62,7 +54,6 @@ void StiStarDetectorBuilder::buildDetectors()
       p->setNormalRep(sector*dPhi,4.,0.);
       p->setRegion(StiPlacement::kMidRapidity);
 
-      
       StiDetector *pipeVolume = _detectorFactory->getInstance();
       name="Star/Pipe/Sector_";
       name+=sector;
@@ -75,28 +66,7 @@ void StiStarDetectorBuilder::buildDetectors()
       pipeVolume->setPlacement(p);
       pipeVolume->setGas(_vacuumMaterial);
       pipeVolume->setMaterial(_pipeMaterial);
-      add(pipeVolume);
-
-      /*
-      p = new StiPlacement;
-      p->setZcenter(0.);
-      p->setLayerRadius(0.);
-      p->setNormalRep(sector*dPhi,0.,0.);
-      
-      StiDetector *vacuumVolume = _detectorFactory->getInstance();
-      name="Star/Vacuum/Sector_";
-      //name+=sector;
-      vacuumVolume->setName(name);
-      vacuumVolume->setIsOn(true);
-      vacuumVolume->setIsActive(new StiNeverActiveFunctor);
-      vacuumVolume->setIsContinuousMedium(true);
-      vacuumVolume->setIsDiscreteScatterer(false);
-      vacuumVolume->setShape(_vacuumShape);
-      vacuumVolume->setPlacement(p);
-      vacuumVolume->setGas(_vacuumMaterial);
-      vacuumVolume->setMaterial(_pipeMaterial);
-      add(0,sector,vacuumVolume);
-      */
+      add(0,sector,pipeVolume);
     }
  _messenger << "StiStarDetectorBuilder::buildDetectors() - INFO - Done" << endl;
 }
@@ -104,17 +74,9 @@ void StiStarDetectorBuilder::buildDetectors()
 void StiStarDetectorBuilder::loadDb()
 {
   //One row
-  //setNRows(1);
+  setNRows(1);
   //12 Sectors
-  //setNSectors(0,12);
-  /*
-    if (!gStStarDb) 
-		throw runtime_error("StiStarDetectorBuilder::buildShapes() - ERROR - gStStarDb==0");
-	_padPlane = gStStarDb->PadPlaneGeometry();
-  _transform = new StStarCoordinateTransform(gStStarDb);
-  if (!_transform)
-    throw runtime_error("StiStarDetectorBuilder::loadDb() - ERROR - gStStarDb==0");
-  */
+  setNSectors(0,12);
 }
 
 

@@ -158,7 +158,7 @@ const string HistoDocument::saveHistoAsTableFile(const string & dir, TH1*histo)
   string histoName = histo->GetName();
   fileName +="/";
   fileName +=histoName;
-  fileName += "_table.htm"; 
+  fileName += "_table"; 
   
   HtmlDocument * doc = new HtmlDocument(fileName,histoName,histoName);
   doc->addTable();

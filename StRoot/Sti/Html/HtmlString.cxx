@@ -10,7 +10,6 @@ HtmlString::~HtmlString()
 
 void HtmlString::write(ofstream& target)
 {
-  cout << "cell:"<< _text<<endl;
   target << _text;
 }
 

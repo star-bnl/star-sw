@@ -73,9 +73,9 @@ public:
     float y() const;
     ///Return the local/global z value.
     float z() const;
-    ///Return the local x value.
+    ///Return the global x value.
     float x_g() const;
-    ///Return the local y value.
+    ///Return the global y value.
     float y_g() const;
     ///Return the local/global z value.
     float z_g() const;

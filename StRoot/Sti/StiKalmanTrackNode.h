@@ -386,63 +386,6 @@ struct StreamX
   }
 };
 
-inline int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
-{
-  int position;
-  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-
-  //if (_refX<70. && _refX>57.)
-  //  cout << "_refX:"<<_refX<<" _p0:"<<_p0<<" p1:"<<_p1<<" NormalYoffset:"
-  // << place->getNormalYoffset()<<" zOff:"<< place->getZcenter() ;
-
-  yOff = _p0 - place->getNormalYoffset();
-  yAbsOff = fabs(yOff);
-  zOff = _p1 - place->getZcenter();
-  zAbsOff = fabs(zOff);
-  switch (sh->getShapeCode())
-    {
-    case kPlanar:
-      {
-	planarShape = static_cast<StiPlanarShape *>(sh);
-	detHW = planarShape->getHalfWidth();
-	detHD = planarShape->getHalfDepth();
-	//if (_refX<65. && _refX>57.) cout << "   detHW:"<< detHW<<" detHD:"<<detHD<<endl;
-	edge  = 4.;//shape->getEdgeHalfWidth();
-	break;
-      }
-    case kCylindrical:
-      {
-	StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
-	detHW = 100.; // will never be outside
-	detHD = cylinderShape->getHalfDepth();
-	edge  = 4.;//shape->getEdgeHalfWidth();
-	break;
-      }
-    default:
-      {
-	throw logic_error("SKTN::locate() - ERROR - Invalid detector shape code");
-      }
-    }
-  innerY = detHW - edge;
-  outerY = innerY + 2*edge;
-  innerZ = detHD - edge;
-  outerZ = innerZ + 2*edge;
-  if (yAbsOff<innerY && zAbsOff<innerZ)
-    position = kHit; 
-  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
-    // outside detector to positive or negative y (phi)
-    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
-  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
-    // outside detector to positive or negative z (west or east)
-    position = zOff>0 ? kMissZplus : kMissZminus;
-  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
-    // positive or negative phi edge
-    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
-  else
-    // positive or negative z edge
-    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
-  return position;
-}
 
 inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
 {
