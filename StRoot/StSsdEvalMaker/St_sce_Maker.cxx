@@ -1,25 +1,10 @@
-<<<<<<< St_sce_Maker.cxx
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
  *
  * $Log: St_sce_Maker.cxx,v $
- * Revision 1.7  2003/10/08 03:23:01  suire
- * *** empty log message ***
- *
- * Revision 1.5  2002/03/25 20:14:04  suire
- * Small memory leak fixes, doxygen documentation
- *
- *
- **************************************************************************/
-=======
-/**************************************************************************
- * Class      : St_sce_maker.cxx
- ***************************************************************************
- *
- * $Log: St_sce_Maker.cxx,v $
- * Revision 1.7  2003/10/08 03:23:01  suire
- * *** empty log message ***
+ * Revision 1.8  2003/10/08 15:44:19  suire
+ * Removed a bug that happen during last commit
  *
  * Revision 1.6  2003/09/02 17:59:03  perev
  * gcc 3.2 updates + WarnOff
@@ -30,7 +15,6 @@
  *
  **************************************************************************/
 #include <Stiostream.h>
->>>>>>> 1.6
 #include <stdlib.h>
 #include "St_sce_Maker.h"
 #include "StChain.h"
@@ -374,12 +358,9 @@ void St_sce_Maker::writeScmHistograms()
 //_____________________________________________________________________________
 void St_sce_Maker::PrintInfo()
 {
-<<<<<<< St_sce_Maker.cxx
-=======
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.7 2003/10/08 03:23:01 suire Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.8 2003/10/08 15:44:19 suire Exp $\n");
   printf("**************************************************************\n");
->>>>>>> 1.6
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
