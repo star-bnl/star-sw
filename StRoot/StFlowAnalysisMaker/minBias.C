@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.9 2003/06/27 21:25:44 posk Exp $
+// $Id: minBias.C,v 1.10 2003/08/26 21:10:12 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -24,7 +24,7 @@
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
-  const  int nCens = 9;
+  const  int nCens = 3;
   int    nSels = 2;
   const  int nHars = 6;
   char   fileName[80];
@@ -140,20 +140,21 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  }
 	}
 
-	int nBins;      // set by 2D of centrality 6
-	if (!hist[6]) continue;
-	int xBins = hist[6]->GetNbinsX();
+	const int lastHist = 3;
+	int nBins;      // set by 2D of centrality lastHist
+	if (!hist[lastHist]) continue;
+	int xBins = hist[lastHist]->GetNbinsX();
 	int yBins;
 	TH1F *yieldY, *yieldPt;
 	if (twoD) {
-	  yBins = hist[6]->GetNbinsY();
+	  yBins = hist[lastHist]->GetNbinsY();
 	  nBins = xBins + (xBins + 2) * yBins;
-	  float yMax  = hist[6]->GetXaxis()->GetXmax();
-	  float yMin  = hist[6]->GetXaxis()->GetXmin();
+	  float yMax  = hist[lastHist]->GetXaxis()->GetXmax();
+	  float yMin  = hist[lastHist]->GetXaxis()->GetXmin();
 	  yieldY = new TH1F("Yield_Y", "Yield_Y", xBins, yMin, yMax);
 	  yieldY->SetXTitle("Rapidity");
 	  yieldY->SetYTitle("Counts");
-	  float ptMax  = hist[6]->GetYaxis()->GetXmax();
+	  float ptMax  = hist[lastHist]->GetYaxis()->GetXmax();
 	  yieldPt = new TH1F("Yield_Pt", "Yield_Pt", yBins, 0., ptMax);
 	  yieldPt->SetXTitle("Pt (GeV/c)");
 	  yieldPt->SetYTitle("Counts");
@@ -300,6 +301,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.10  2003/08/26 21:10:12  posk
+// Calculates v8 if nHars=8.
+//
 // Revision 1.9  2003/06/27 21:25:44  posk
 // v4 and v6 are with repect to the 2nd harmonic event plane.
 //

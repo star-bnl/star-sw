@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.76 2003/08/06 20:54:06 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.77 2003/08/26 21:10:10 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1161,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.76 2003/08/06 20:54:06 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.77 2003/08/26 21:10:10 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1709,7 +1709,19 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  else { // cut is not used, fill in any case
 	    histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
 	  }
-	  histFull[k].mHist_vObs->Fill(order, vFlip);
+
+	  // v_
+	  Bool_t etaPtNoCut = kTRUE;
+	  if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0] && 
+	      (pt < mPtRange_for_vEta[0] || pt >= mPtRange_for_vEta[1])) {
+	    etaPtNoCut = kFALSE;
+	  }
+	  if (mEtaRange_for_vPt[1] > mEtaRange_for_vPt[0] && 
+	      (TMath::Abs(eta) < mEtaRange_for_vPt[0] || 
+	       TMath::Abs(eta) >= mEtaRange_for_vPt[1])) {
+	    etaPtNoCut = kFALSE;
+	  }
+	  if (etaPtNoCut) histFull[k].mHist_vObs->Fill(order, vFlip);
 	  
 	  // Correlation of Phi of all particles with Psi
 	  float phi_i = phi;
@@ -1798,6 +1810,7 @@ static Double_t resEventPlaneK2(double chi) {
 
   double besselOneHalf = sqrt(arg/halfpi) * sinh(arg)/arg;
   double besselThreeHalfs = sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
+
   Double_t res = con * chi * exp(-arg) * (besselOneHalf + besselThreeHalfs); 
 
   return res;
@@ -1814,6 +1827,24 @@ static Double_t resEventPlaneK3(double chi) {
 
   Double_t res = con * chi * exp(-arg) * (TMath::BesselI1(arg) +
 					  TMath::BesselI(2, arg)); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t resEventPlaneK4(double chi) {
+  // Calculates the event plane resolution as a function of chi
+  //  for the case k=4.
+
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+
+  double besselOneHalf = sqrt(arg/halfpi) * sinh(arg)/arg;
+  double besselThreeHalfs = sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
+  double besselFiveHalfs = besselOneHalf - 3*besselThreeHalfs/arg;
+
+  Double_t res = con * chi * exp(-arg) * (besselThreeHalfs + besselFiveHalfs); 
 
   return res;
 }
@@ -1878,7 +1909,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	  double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	  mRes[k][j]    = resSub;
 	  mResErr[k][j] = resSubErr;
-	} else if (order==4. || order==6.) { // 2nd harmonic event plane
+	} else if (order==4. || order==6.|| order==8.) { // 2nd harmonic event plane
 	    double deltaResSub = 0.005;  // differential for the error propergation
 	    double resSub = sqrt(cosPair[k][1]);
 	    double resSubErr = cosPairErr[k][1] / (2. * resSub);
@@ -1888,9 +1919,12 @@ Int_t StFlowAnalysisMaker::Finish() {
 	    if (order==4.) {
 	      mRes[k][j] = resEventPlaneK2(sqrt(2.) * chiSub); // full event plane res.
 	      mResDelta = resEventPlaneK2(sqrt(2.) * chiSubDelta);
-	    } else {
+	    } else if (order==6.) {
 	      mRes[k][j] = resEventPlaneK3(sqrt(2.) * chiSub); // full event plane res.
 	      mResDelta = resEventPlaneK3(sqrt(2.) * chiSubDelta);
+	    } else {
+	      mRes[k][j] = resEventPlaneK4(sqrt(2.) * chiSub); // full event plane res.
+	      mResDelta = resEventPlaneK4(sqrt(2.) * chiSubDelta);
 	    }
 	    mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
 	      / deltaResSub;
@@ -2127,10 +2161,12 @@ inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.77  2003/08/26 21:10:10  posk
+// Calculates v8 if nHars=8.
+//
 // Revision 1.76  2003/08/06 20:54:06  oldi
 // Introduction of possibility to exclude pt ranges for v(eta) and eta regions
 // for v(pt) histograms. Default behavior stays the same (all available tracks

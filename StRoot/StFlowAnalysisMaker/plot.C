@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.54 2003/07/30 22:03:26 oldi Exp $
+// $Id: plot.C,v 1.55 2003/08/26 21:10:13 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,7 +21,7 @@
 #include "TMath.h" 
 #include <iostream.h>
 
-//const Int_t nHars     = 6;
+//const    Int_t nHars    = 8;
 const    Int_t nHars    = 2;
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
@@ -47,7 +47,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
-  gStyle->SetOptStat(kFALSE);
+  //gStyle->SetOptStat(kFALSE);
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
@@ -301,7 +301,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     multiGraph  = kFALSE;
   }
   pageNumber--;
-  cout << "  graph name= " << shortName[pageNumber] << endl;
+  cout << pageNumber+1 << ":  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
   float twopi   = 2. * TMath::Pi();
@@ -454,7 +454,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TH2D* projZY = hist3D->Project3D("zy");
 	  projZY->SetName(histProjName->Data());
 	  projZY->SetYTitle("azimuthal angle (rad");
-	  projZY->SetXTitle("Pt (GeV)");
+	  projZY->SetXTitle("Pt (GeV/c)");
 	  gStyle->SetOptStat(0);
 	  if (projZY) projZY->Draw("COLZ");
 	} else	if (strstr(shortName[pageNumber],"XY")!=0) {    // Vertex XY
@@ -498,7 +498,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TH1D* projY = hist2D->ProjectionY(histName->Data(), -1, 9999, "E");
 	}
 	projY->SetName(histProjName->Data());
-	projY->SetXTitle("Pt (GeV)");
+	projY->SetXTitle("Pt (GeV/c)");
 	projY->SetYTitle("Counts");
 	gPad->SetLogy();
 	gStyle->SetOptStat(0);
@@ -621,7 +621,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  hist->SetMaximum(25.);
 	  hist->SetMinimum(-5.);
 	}
-	//gStyle->SetOptStat(100110);
+	gStyle->SetOptStat(100110);
 	hist->Draw();
 	if (strstr(shortName[pageNumber],"v")!=0) {
 	  TLine* lineZeroPt  = new TLine(0., 0., max, 0.);
@@ -872,6 +872,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.55  2003/08/26 21:10:13  posk
+// Calculates v8 if nHars=8.
+//
 // Revision 1.54  2003/07/30 22:03:26  oldi
 // Fit("pol4") taken out (which was in accidentally).
 //

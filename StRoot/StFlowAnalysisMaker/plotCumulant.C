@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.6 2003/06/27 21:25:46 posk Exp $
+// $Id: plotCumulant.C,v 1.7 2003/08/26 21:10:14 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h> 
-//const Int_t nHars    = 6;
+//const Int_t nHars    = 4;
 const  Int_t nHars    = 2;
 const  Int_t nSels    = 2;
 const  Int_t nOrders  = 2;
@@ -257,6 +257,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.7  2003/08/26 21:10:14  posk
+// Calculates v8 if nHars=8.
+//
 // Revision 1.6  2003/06/27 21:25:46  posk
 // v4 and v6 are with repect to the 2nd harmonic event plane.
 //
