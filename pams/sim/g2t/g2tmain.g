@@ -1,5 +1,8 @@
-* $Id: g2tmain.g,v 1.38 2000/12/01 22:48:01 nevski Exp $
+* $Id: g2tmain.g,v 1.39 2001/04/06 18:13:12 akio Exp $
 * $Log: g2tmain.g,v $
+* Revision 1.39  2001/04/06 18:13:12  akio
+* Modifications for FPD
+*
 * Revision 1.38  2000/12/01 22:48:01  nevski
 * phmd stuff added
 *
@@ -146,10 +149,16 @@ created   22 april 98
      csys  = 'ECAL'       ! Geant Subsystem
      cdet  = 'ESCI'       ! Sensitive detector
    fill dete       ! star subsystem
+     cdet  = 'EPCT'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'ELGR'       ! Sensitive detector
+
+   fill dete       ! star subsystem
      ctab  = 'esm'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'ECAL'       ! Geant Subsystem
-     cdet  = 'EXSE'       ! Sensitive detector
+     cdet  = 'EHMS'       ! Sensitive detector
+
    fill dete       ! star subsystem
      ctab  = 'zdc'        ! table name
      spec  = 'emc'        ! specification type
