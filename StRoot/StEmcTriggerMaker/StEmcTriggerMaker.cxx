@@ -41,7 +41,7 @@
 ClassImp(StEmcTriggerMaker)
 
 //_____________________________________________________________________________
-StEmcTriggerMaker::StEmcTriggerMaker(char *name):StMaker(name)
+StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
 {
   TitleHist="BEMC";
 
