@@ -3,24 +3,20 @@
 /*   fcl_padtrans.idl
 *
 *   Table: fcl_padtrans
-*        description: Parameters for the pad-bin to x-y transformation 
+*        description: drift parameter table 
 *
 */
 
    /*******************  Row struct *******************/
-   struct fcl_padtrans {    
-       float t0;         /* offset for time direction polynomial */
-       float t1;         /* 1st parameter for time direction polynomial */
-       float t2;         /* 2nd parameter for time direction polynomial */
-       float t3;         /* 3rd parameter for time direction polynomial */
-       float t4;         /* 4th parameter for time direction polynomial */
-       float p1;         /* 1st parameter for pad direction polynomial */
-       float p2;         /* 2nd parameter for pad direction polynomial */
-       float p3;         /* 3rd parameter for pad direction polynomial */
-       float p4;         /* 4th parameter for pad direction polynomial */
-       float p5;         /* 5th parameter for pad direction polynomial */
-       float p6;         /* 6th parameter for pad direction polynomial */
+   struct fcl_padtrans { 
+       float e;       /* electric field for this bin */   
+       float v[10];   /* vdrift for this padrow, e-field */
+       float psi[10]; /* deflection angle for this padrow, e-field */
+                      /* both at 20 degC, 1013.25hPa */
+       float dv_dp[10];   /* dvdrift/dpressure(normalized) */
+       float dpsi_dp[10]; /* dphi/dpressure(normalized) */
+                          /* pressures normalized to 20 degC etc. */
    };
 
-/*  Last mod. for fcl_padtrans: $Date: 1998/03/25 10:43:22 $ */
+/*  Last mod. for fcl_padtrans: $Date: 1998/04/22 14:24:56 $ */
 
