@@ -380,6 +380,7 @@ void StiKalmanTrack::initialize(double curvature,
     StiKalmanTrackNode * node  = 0;
     StiKalmanTrackNode * pNode = 0;
     int i =0;
+		eta = 0.;
     //cout <<"\tAdd Hits"<<endl;
     for (it=v.begin(); it!=v.end(); ++it)
 	{
@@ -399,9 +400,9 @@ void StiKalmanTrack::initialize(double curvature,
 		}
 	    node->reset();
 	    if (pNode==0)
-		alphaP = -99999.; // no parent, set crazy value
+				alphaP = -99999.; // no parent, set crazy value
 	    else
-		alphaP = pNode->fAlpha; // value of the parent
+				alphaP = pNode->fAlpha; // value of the parent
 	    if (alphaP!=alpha)
 		{
 		    //cout << "=================alphaP/alpha:" << alphaP;
