@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.0 2002/12/04 16:50:59 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.1 2003/01/22 21:12:15 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.1  2003/01/22 21:12:15  calderon
+ * Restored encoded method, uses enums but stores the value in constructor
+ * as a data member so bit operations are only done once.
+ * Fixed warnings.
+ *
  * Revision 2.0  2002/12/04 16:50:59  pruneau
  * introducing version 2.0
  *
@@ -145,6 +150,20 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
+
+  // encoded method = 16 bits = 12 fitting and 4 finding, Refer
+  // to StTrackMethod.h and StTrackDefinitions.h in pams/global/inc/
+  // and StEvent/StEnumerations.h
+  // For the IT tracks use:
+  // Fitting: kITKalmanFitId     (should be something like 7, but don't hardwire it)
+  // Finding: tpcOther           (should be 9th LSB, or shift the "1" 8 places to the left, but also don't hardwire it) 
+  // so need this bit pattern:
+  // finding 000000010000     
+  // fitting             0111 
+  //               256  +   7 = 263;
+  unsigned short bit = 1 << tpcOther;  // shifting the "1" exactly tpcOther places to the left
+  mStiEncoded = kITKalmanFitId + bit; // adding that to the proper fitting Id
+
 }
 
 StiStEventFiller::~StiStEventFiller()
@@ -466,8 +485,8 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
     origin.rotateZ(node->getRefAngle());
     StThreeVectorF p = node->getGlobalMomentumF();
-    short int h = node->getHelicity();
-    phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
+    short h = static_cast<short>(node->getHelicity()); //StHelixModel wants a short
+    phase = (p.y()==0 && p.x()==0) ? (1.-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
     phase += h*halfpi;
     double curv=fabs(node->getCurvature());
 //     cout <<"Curvature: "<<curv<<endl;;
@@ -607,30 +626,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     
     //     }
     
-    // encoded method = 16 bits = 12 fitting and 4 finding, for the moment use:
-    // kKalmanFitId
-    // bit 15 for finding, (needs to be changed in StEvent).
-    // change: make sure bits are ok, are the bits set up one in each position and nothing else?
-    // this would mean that the encoded method is wasting space!
-    // the problem is that in principle there might be combinations of finders for each tracking detector
-    // but the integrated tracker will use only one for all detectors maybe
-    // so need this bit pattern:
-    // finding 100000000000     
-    // fitting             0010 
-    //            32768    +    2 = 32770;
-    //
-    // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
-    
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    //BUGBUGBUGBUGBUGBUGBUGBUGBU
-    unsigned short int mStiEncoded = 0;////kITKalmanFitId + (1<< tpcOther);
-    unsigned short int bit = 1<< tpcOther;
-    gTrack->setEncodedMethod(mStiEncoded);
+    gTrack->setEncodedMethod(mStiEncoded); // set this as the encoded method.
 //     cout <<"Encoded Method ID: "<<mStiEncoded
 // 	 <<"kId: "<< kITKalmanFitId
 // 	 <<"bit: "<<bit
