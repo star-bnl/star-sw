@@ -125,7 +125,12 @@ created   22 april 98
  endif
 *
       G2T_MAIN = 0
-      Call AGSTRUT(' ','Run')
+*     map detm family banks:
+      Call AGSTRUT(' ',' ')
+
+      check NVERTX>0
+*     map hepe_gent particle table:
+      call agstrut('/evnt/gene/gent@HEPE','Event')
 *
       Use GTTC
 *
@@ -142,29 +147,28 @@ created   22 april 98
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
       i = AMI_MODULE_CALL ('g2t_get_kine'//o,2,names)
-      prin3 i; (' g2tmain: get_kine done with i=',i6)
+      prin5 i; (' g2tmain: get_kine done with i=',i6)
 
       do j=1,GTTC_Nsys
 
-        use dete(j)   " Stat=Istat "
-*        if (Istat!=ok) break
+        use dete(j) 
 
         call  GFNHIT  (dete_Csys(1:3)//'H',dete_Cdet,Nhits)
         Check dete_onoff>0 & Nhits>0
         ctab='g2t_'//dete_ctab(1:3)//'_hit'//o
-        prin1 ctab,dete_Csys,dete_Cdet,nhits
+        prin3 ctab,dete_Csys,dete_Cdet,nhits
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
 
         if (ctabo .ne. ctab ) nnhits = 0
         ctabo  = ctab
         nnhits = nnhits + Nhits
         i = G2T_NEW_TABLE (ctab, dete_spec, nnhits)
-        prin3 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
+        prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
         
         Check agfhit0 (dete_Csys,dete_Cdet) == ok
         names(3)=ctab
         i = AMI_CALL ('g2t_get_hits'//o,3,names)
-        prin3 i; (' g2tmain ===> ami_call g2t_get_hits  = ',i6)
+        prin5 i; (' g2tmain ===> ami_call g2t_get_hits  = ',i6)
 
       enddo
       if (ld>0) i = DUI_CDIR ('/dui'//o)
