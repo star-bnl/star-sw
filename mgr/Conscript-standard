@@ -70,21 +70,14 @@ my $LIBPATH = $env->{LIBPATH};
 my $EXTRA_CPPFLAGS = $env->{EXTRA_CPPFLAGS};
 my ($i, $obj);
 my $LIBPKG = "";
-if ($FC eq 'pgf77') {
-  # switch from pgf77 to g77 
-  my @g77pkgs = qw(gcalor geant321 agetof StBichsel Bichsel geometry gen StEeFit); 
-  my $g77pkgs = join('|', @g77pkgs);
-  if ($pkg =~ /$g77pkgs/) {
-      $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-      $FFLAGS   = $env->{G77FLAGS}; 
-      $FEXTEND  = $env->{G77EXTEND};
-  }
-}
-if ($STAR_SYS =~ '^rh80_g77' && $DirPath =~ /pams|StRoot/ || 
-    $STAR_SYS =~ '^rh80_gcc' && $DirPath =~ /\/sim\//) { 
+my @g77pkgs = qw(gcalor geant321 agetof StBichsel Bichsel geometry gen sim StEeFit); 
+my $g77pkgs = join('|', @g77pkgs);
+if ($FC eq 'pgf77' && $pkg =~ /$g77pkgs/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
+} 
+if ($FC eq 'g77' and ($pkg eq 'gen' or $pkg eq 'sim' or  $DirPath =~ /pams|StRoot/ and ! ($pkg =~ /$g77pkgs/))) {
   $FCCOM    = $env->{FCviaAGETOFCOM};
 }
 
