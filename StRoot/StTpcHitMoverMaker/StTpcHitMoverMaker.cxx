@@ -132,12 +132,11 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
 
   // align sector
   if (mAlignSector) { 
-    mSectorAligner = new StSectorAligner(gStTpcDb);
+    if (! mSectorAligner) mSectorAligner = new StSectorAligner(gStTpcDb);
     mSectorAligner->moveHit(pos,posMoved,sector,row);
     pos[0] = posMoved[0];
     pos[1] = posMoved[1];
     pos[2] = posMoved[2];
-    delete mSectorAligner;
   }
 
   // ExB corrections
