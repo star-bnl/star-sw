@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.12 2003/04/04 14:48:34 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.13 2003/04/25 21:42:47 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.13  2003/04/25 21:42:47  andrewar
+ * corrected DCA bug and added temp fix for helicity problem. This will
+ * have to be modified when the helicity convention in StiStKalmanTrack
+ * is updated.
+ *
  * Revision 2.12  2003/04/04 14:48:34  pruneau
  * *** empty log message ***
  *
@@ -161,6 +166,7 @@ using namespace std;
 #include "StDetectorId.h"
 #include "StHelix.hh"
 
+
 #include "StEventUtilities/StuFixTopoMap.cxx"
 //Sti
 #include "Sti/StiTrackContainer.h"
@@ -180,7 +186,18 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   dEdxTpcCalculator.setDetectorFilter(kTpcId);
   dEdxSvtCalculator.setDetectorFilter(kSvtId);
   
-  helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
+  //helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
+
+  
+  origin=new StThreeVectorF(0,0,0);
+  mom=new StThreeVectorF(0,0,0);
+  //use origin, a zero vector (currently) to init StHelixModel
+  helix = new StHelixModel(0,0.,0.,0.,*origin,*mom,-1);
+
+  originD = new StThreeVectorD(0,0,0);
+  physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
+ 
+
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
 
@@ -202,7 +219,6 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 StiStEventFiller::~StiStEventFiller()
 {
   cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
-  //mResMaker.writeResiduals();
   delete helix;
 }
 
@@ -463,7 +479,9 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 					      node->getDipAngle(),
 					      origin, 
 					      node->getGlobalMomentumF(), 
-					      node->getHelicity());
+					      -1*node->getHelicity());
+
+  //cout <<"Helix: "<<geometry->helix()<<endl;
   if (outer)
     gTrack->setOuterGeometry(geometry);
   else
@@ -571,6 +589,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   //            32768    +    2 = 32770;
   //
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
+
   gTrack->setEncodedMethod(mStiEncoded);
   double impactParam = impactParameter(track);
 
@@ -646,36 +665,21 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
   StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-  //cout << "primary vertex " << vxD << endl;
 
-  //StPhysicalHelix physical(fabs(node->getCurvature()),
-  //		   node->getDipAngle(), 
-  //		   node->getPhase(), 
-  //		   origin,
-  //		   int(node->getHelicity()));
-  
-  //  StThreeVector<double> phyMom = physical.momentum(0.5*tesla);
-  //cout << "HELIX:  px:"<< phyMom.x() << " py:"<<  phyMom.y() << " pz:"<< phyMom.z()<<endl;
 
-  *helix = StHelix(fabs(node->getCurvature()),
-		   node->getDipAngle(),
-		   node->getPhase(),
-		   origin,
-		   int(node->getHelicity()));
+  originD->setX(node->getX());
+  originD->setY(node->getY());
+  originD->setZ(node->getZ());
+  StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
+  originD->rotateZ(node->getRefAngle());
+  physicalHelix->setParameters(fabs(node->getCurvature()),
+			       node->getDipAngle(),
+			       node->getPhase()+node->getHelicity()*M_PI/2.,
+			       *originD,
+			       -1*node->getHelicity());
+  cout <<"PHelix: "<<*physicalHelix<<endl;
+  float dca = static_cast<float>(physicalHelix->distance(vxDD));
 
-  //cout << "helix " << *helix << endl;
-  float dca = static_cast<float>(helix->distance(vxD));
-  //if (track->isPrimary())
-  //  {
-  //    cout << " PRIMARY ---- MYDCA:"<< track->getDca() << " StHelix:"<< dca<<endl;
-  //  }
-  //else
-  //  {
-  //    cout << " GLOBAL  ---- StHelix:"<< dca<<endl;
-  //  }
-
-  //cout << "  dcaHelix : " << dca << endl;  
-  //cout << "dcaPhysical : " << static_cast<float>(physical.distance(vxD) ) << endl;  
   track->setDca(dca);
   return dca;
 }
