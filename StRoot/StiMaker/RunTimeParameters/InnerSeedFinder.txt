@@ -6,16 +6,16 @@ filterType:	StiRectangular2HitComboFilter
 
 //Hit Filter members
 deltaD:			2.
-deltaZ:			5.
+deltaZ:			10.
 
 //Track Seed Finder type
 seedFinderType:		StiTrackSeedFinder
 
 //Number of padrows
-nPadrows:		3
+nPadrows:		2
 
 //The Padrows
-thePadrows:		14 15 16
+thePadrows:		15 16
 
 //Number of sectors
 nSectors:		12
