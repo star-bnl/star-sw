@@ -1,5 +1,9 @@
-// $Id: St_LSEvent_Maker.h,v 1.1.1.1 1999/04/27 14:29:31 love Exp $
+// $Id: St_LSEvent_Maker.h,v 1.2 1999/05/10 13:41:31 love Exp $
 // $Log: St_LSEvent_Maker.h,v $
+// Revision 1.2  1999/05/10 13:41:31  love
+// Two passes to try to get event number from IT tables, Clean up code
+//  to erase previous event data.
+//
 // Revision 1.1.1.1  1999/04/27 14:29:31  love
 // First release of Laser Event
 //
@@ -48,6 +52,7 @@ public:
 
   virtual Int_t  Init();
   virtual Int_t  Make();
+  virtual void   Clear(Option_t *option="");
   virtual void   SetRun(Int_t run) {m_runno = run;} 
   virtual void   SetDate(Int_t date) {m_date = date;} 
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}

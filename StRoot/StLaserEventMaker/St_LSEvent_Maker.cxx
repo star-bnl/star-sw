@@ -1,5 +1,9 @@
-// $Id: St_LSEvent_Maker.cxx,v 1.1.1.1 1999/04/27 14:29:31 love Exp $
+// $Id: St_LSEvent_Maker.cxx,v 1.2 1999/05/10 13:41:30 love Exp $
 // $Log: St_LSEvent_Maker.cxx,v $
+// Revision 1.2  1999/05/10 13:41:30  love
+// Two passes to try to get event number from IT tables, Clean up code
+//  to erase previous event data.
+//
 // Revision 1.1.1.1  1999/04/27 14:29:31  love
 // First release of Laser Event
 //
@@ -26,8 +30,8 @@
 #include "St_type_index_Table.h"
 
 ClassImp(St_LSEvent_Maker)
-  
-  //_____________________________________________________________________________
+
+//_____________________________________________________________________________
   St_LSEvent_Maker::St_LSEvent_Maker(const char *name):
     StMaker(name),
     m_tpg_pad_plane(0),
@@ -41,6 +45,11 @@ ClassImp(St_LSEvent_Maker)
 }
 //_____________________________________________________________________________
 St_LSEvent_Maker::~St_LSEvent_Maker(){}
+//_____________________________________________________________________________
+void St_LSEvent_Maker::Clear(Option_t *option){
+  event->Clear(option);
+  StMaker::Clear(option);
+}
 //_____________________________________________________________________________
 Int_t St_LSEvent_Maker::Init(){
   // Create tables
@@ -99,7 +108,10 @@ Int_t St_LSEvent_Maker::Make(){
     Int_t Res_tpt = tpt_sts(m_tpt_spars,tphit,res1,res2,tptrack);
 //                      ==============================
     
-    if (Res_tpt != kSTAFCV_OK) {cout << "Problem with tpt_sts.." << endl;}
+    if (Res_tpt != kSTAFCV_OK) {
+     cout << "Problem with tpt_sts.." << endl;
+      return kStErr;}
+    
     if (Debug()) cout << " finish tpt_sts run " << endl;
 
   MakeHistograms(); // tracking histograms
@@ -115,8 +127,11 @@ Int_t St_LSEvent_Maker::Make(){
      if (raw) { 
         St_DataSetIter nex(raw);
         St_type_index *I1 = (St_type_index *) nex("IT1");
-        type_index_st *ii = I1->GetTable();
-        evno = ii->data_row;
+        if(!I1) I1 = (St_type_index *) nex("IT2");
+        if (I1) {
+          type_index_st *ii = I1->GetTable();
+          evno = ii->data_row;
+        }
      }
      // Fill the event header.  Run number and date passed in from macro.
      event->SetHeader(evno, m_runno, m_date);
@@ -137,7 +152,6 @@ Int_t St_LSEvent_Maker::Make(){
        for (int i = 0;i<n_hit->GetNRows();i++,h++){
           event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag);
        }
-       event->SetLastHit(n_hit->GetNRows()-1);          
        cout << n_hit->GetNRows() << " hits, " ; 
      }
      // Create an iterator for the track dataset
@@ -153,7 +167,6 @@ Int_t St_LSEvent_Maker::Make(){
           event->AddTrack(t->trk,t->npnt,ax, t->az, x0, y0, z0, 
 			       t->chisqxy,t->chisqz);
      } //end of itk for loop - fix the maximum counter
-         event->SetLastTrack(ntks-1);          
      cout <<  ntks << " tracks, ";
      // Find the adc table.
      St_DataSet *tpc_raw = GetDataSet("tpc_raw");
@@ -172,7 +185,6 @@ Int_t St_LSEvent_Maker::Make(){
 	     npixwrit++;
 	   }
 	 }
-         event->SetLastPixel(npixwrit-1);          
 	 cout << npixwrit <<" pixels written to event " << evno << endl;
      }
      m_stks->Fill(); //Fill the Tree
@@ -181,7 +193,7 @@ Int_t St_LSEvent_Maker::Make(){
 //_____________________________________________________________________________
 void St_LSEvent_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_LSEvent_Maker.cxx,v 1.1.1.1 1999/04/27 14:29:31 love Exp $\n");
+  printf("* $Id: St_LSEvent_Maker.cxx,v 1.2 1999/05/10 13:41:30 love Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
