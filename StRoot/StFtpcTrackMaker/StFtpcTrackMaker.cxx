@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.34 2002/06/04 13:39:26 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.35 2002/06/06 15:59:18 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.35  2002/06/06 15:59:18  oldi
+// Local -> global transformation is only done if the event isn't simulated.
+//
 // Revision 1.34  2002/06/04 13:39:26  oldi
 // After tracking local coordinates are transformed to global coordinates.
 // Points are written to the table again. This causes a loss of symmetry which
@@ -413,7 +416,12 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->LaserTracking();
 
   // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
-  if (kTRUE /* future test for simulated events */) {
+
+  // get geant information to evaluate if this event is simulated
+  St_DataSet *geant = GetInputDS("geant");  
+  St_DataSetIter geantI(geant);
+
+  if (!geantI("g2t_ftp_hit")) {
     // not a simulated event
     
     fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
@@ -469,8 +477,6 @@ Int_t StFtpcTrackMaker::Make()
   
   // Uncomment this block to get information about the quality 
   // of the found tracks in comparison to the simulated input event.
-  
-  St_DataSet *geant = GetInputDS("geant");  
   
   StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, ftpc_data, tracker->GetVertex(), tracker->GetClusters(), tracker->GetTracks(), "ftpc_evaluator.root", "RECREATE");
   
@@ -587,7 +593,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.34 2002/06/04 13:39:26 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.35 2002/06/06 15:59:18 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
