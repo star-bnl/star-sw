@@ -1,5 +1,14 @@
 #ifndef STAR_StKinkMaker
 #define STAR_StKinkMaker
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// St_kink_Maker virtual base class for Maker                           //
+//                                                                      //
+//                                                                      //  
+//////////////////////////////////////////////////////////////////////////
+#ifndef StMaker_H
+#include "StMaker.h"
+#endif
 
 #define kaonMass 0.493677
 #define pionMass 0.139569
@@ -13,20 +22,8 @@
 #define radToDeg        57.2957795131
 #define degToRad        0.0174532925199                 
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_kink_Maker virtual base class for Maker                           //
-//                                                                      //
-//                                                                      //  
-//////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
-
 #include "StKinkLocalTrack.hh"
 #include "StPhysicalHelixD.hh"
-
-#include "TH1.h"
 
 #include <tables/St_tkf_tkfpar_Table.h>
 #include <tables/St_dst_track_Table.h>
@@ -52,7 +49,8 @@ using namespace std;
 
 class StKinkMaker : public StMaker {
 private:
-// static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.2 1999/07/01 17:30:45 fisyak Exp $";
+  Bool_t m_kinkEvalOn;   //switch for the evaluation
+// static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.3 1999/07/02 19:56:16 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
   StKinkLocalTrack *mKinkLocalTrack;   //!
 protected:
@@ -68,6 +66,9 @@ public:
   virtual  Int_t  Init();
   virtual  Int_t  Make();
   virtual  void   PrintInfo();
+  virtual  void   kinkEval(Bool_t flag=kTRUE){m_kinkEvalOn=flag;} // *MENU*
+  virtual  void   kinkEvalOn() {kinkEval();} 
+  virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
 ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
 
