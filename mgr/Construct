@@ -314,6 +314,7 @@ foreach my $dir ("StRoot","pams") {
 #          $sub_dir =~ /^trg$/        ||
 #	  $sub_dir =~ /^StTrsMaker$/ ||
           $sub_dir =~ /^test$/)  {next;}
+      if ($STAR_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
       if (-d $sub_DIR) {
 	if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 

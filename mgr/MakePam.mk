@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.111 1999/08/22 23:09:35 fisyak Exp $
+# $Id: MakePam.mk,v 1.112 1999/09/03 17:49:51 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.112  1999/09/03 17:49:51  fisyak
+# Make makel and cons compartible in OBJ
+#
 # Revision 1.111  1999/08/22 23:09:35  fisyak
 # remove dir path from library linkage
 #
@@ -325,12 +328,19 @@ FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
 FILES_F  := $(wildcard $(addsuffix /*.F , $(SRC_DIRS)))
 FILES_CDF:= $(wildcard $(addsuffix /*.cdf , $(SRC_DIRS)))
 
-NAMES_G  := $(basename $(notdir $(FILES_G)))
-NAMES_CC := $(basename $(notdir $(FILES_CC)))
-NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(notdir $(FILES_CXX))))
-NAMES_C  := $(basename $(notdir $(FILES_C)))
-NAMES_F  := $(basename $(notdir $(FILES_F)))
-NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
+#NAMES_G  := $(basename $(notdir $(FILES_G)))
+#NAMES_CC := $(basename $(notdir $(FILES_CC)))
+#NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(notdir $(FILES_CXX))))
+#NAMES_C  := $(basename $(notdir $(FILES_C)))
+#NAMES_F  := $(basename $(notdir $(FILES_F)))
+#NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
+
+NAMES_G  := $(basename $(subst $(SRC_DIR),,$(FILES_G)))
+NAMES_CC := $(basename $(subst $(SRC_DIR),,$(FILES_CC)))
+NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(subst $(SRC_DIR),,$(FILES_CXX))))
+NAMES_C  := $(basename $(subst $(SRC_DIR),,$(FILES_C)))
+NAMES_F  := $(basename $(subst $(SRC_DIR),,$(FILES_F)))
+NAMES_CDF:= $(basename $(subst $(SRC_DIR),,$(FILES_CDF)))
 #.________________________  modules ____________________________________________
 FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 ifneq (,$(FILES_IDM))
@@ -351,13 +361,13 @@ ifneq (,$(FILES_IDT))
   FILES_THH := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
 endif
-FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
+FILES_O  := $(strip $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
   FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
   FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
-NAMES_O   = $(notdir $(FILES_O))
+DIRS_O    = $(sort $(dir $(FILES_O)))
 # *.cc moved to sl $(NAMES_CC)
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
@@ -378,19 +388,19 @@ ifneq (,$(NAMES_IDM))
   FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
 endif                      
 ifneq (,$(NAMES_CDF))          
-  FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
+  FILES_O    += $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CDF)))
 endif                          
 ifneq (,$(NAMES_G))            
-  FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_G)))
+  FILES_OG    := $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_G)))
   FILES_O     += $(FILES_OG) 
   FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
 endif
 ifneq (,$(NAMES_CC))            
-  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CC))))
   FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
 endif                          
 ifneq (,$(NAMES_CXX))            
-  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CXX))))
   FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
 endif                          
 ifneq (,$(strip $(FILES_O) $(FILES_OG)))
@@ -405,7 +415,6 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
   endif                           
 endif                           
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
-#OBJS    := $(LIB_PKG)($(NAMES_O))
 OBJS    := $(FILES_O);
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
   all:
@@ -484,17 +493,23 @@ $(GEN_TAB)/St_%_Table.h:
   endif #ALL_TAB
 #--- compilation -
 $(OBJ_DIR)/%.$(O):%.g
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cxx
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cc
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.F
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.c
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.cdf
+	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(OBJ_DIR)/$(STEM).c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(OBJ_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
 #_______________________dependencies_________________________________
@@ -636,3 +651,4 @@ test_dir:
 	@echo NAMES_IDM     = $(NAMES_IDM)
 	@echo NAMES_IDMS    = $(NAMES_IDMS)
 	@echo STAF_SYS_INCS = $(STAF_SYS_INCS)
+	@echo DIRS_O        = $(DIRS_O)
