@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.6 1999/09/08 04:15:52 lisa Exp $
+ * $Id: StHbtEventReader.hh,v 1.7 2000/01/07 23:21:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.7  2000/01/07 23:21:17  laue
+ * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
+ * 1.) unnecessary includes of 'StMaker.h' deleted
+ *
  * Revision 1.6  1999/09/08 04:15:52  lisa
  * persistent microDST implementation tweaked to please fickle solaris details
  *
@@ -40,7 +44,6 @@
 
 #ifndef StHbtEventReader_hh
 #define StHbtEventReader_hh
-#include "StMaker.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 

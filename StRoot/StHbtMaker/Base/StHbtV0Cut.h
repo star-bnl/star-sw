@@ -34,8 +34,9 @@ public:
 
   virtual StHbtParticleType Type(){return hbtV0;}
 
+#ifdef __ROOT__
   ClassDef(StHbtV0Cut, 0)
-
+#endif
 };
 
 #endif
