@@ -9,9 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.7 2001/08/29 20:30:40 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.8 2001/09/25 01:42:51 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.8  2001/09/25 01:42:51  struck
+//  cs: l3 vertex now put into StL3Trigger
+//
 //  Revision 1.7  2001/08/29 20:30:40  struck
 //  and don't forget to delete your array ;-)
 //
@@ -440,9 +443,18 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   delete [] totalAlgCounter;
 
   // call filling routines
-  // global tracks
+  // global tracks and vertex
   if (ml3reader->getGlobalTrackReader()) {
-        if (fillStEventWithL3GlobalTracks()!=0) return 1; 
+ 
+       if (fillStEventWithL3GlobalTracks()!=0) return 1;
+
+	// vertex position
+	StPrimaryVertex* myL3Vertex = new StPrimaryVertex;
+	vertex vert = ml3reader->getGlobalTrackReader()->getVertex();
+	StThreeVectorF* pos = new StThreeVectorF(vert.x, vert.y, vert.z);
+	myL3Vertex->setPosition(*pos);
+	myStL3Trigger->addPrimaryVertex(myL3Vertex);
+	
   }
 
   // i960 hits
