@@ -18,7 +18,8 @@ StFarmSpy::StFarmSpy(const char *host, int port)
    if (!fgError) {
      printf("Socket opened \n"); 
    } else {
-     printf("*** Socket FAILED***\n");
+     //     printf("*** Socket FAILED***\n");
+     printf("*** Warning: Root spy system is not running ***\n");
      fgError = 1998;
    };
 }
