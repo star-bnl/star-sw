@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.11 2003/07/30 20:33:36 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.12 2003/08/27 18:08:38 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -95,6 +95,9 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
   fakePoints.resize(maxHits);
   useType = Hits;
   EMCSanityThreshold = 200.0;
+  maxPoints = 10000;
+  minPointThreshold = .01;
+  towerProxy = new SafetyArray("towerProxy");
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -102,6 +105,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   cout <<" Start StEmcTpcFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
   binmap.clearall();
 
+  aborted = true;
   // Construct tracks out of (primary) tracks and EMC points. 
   // Must calculate the eta shift of the EMC
   StMuDst* uDst = muDst->muDst();
@@ -128,6 +132,8 @@ Int_t StEmcTpcFourPMaker::Make() {
   {
     StMuTrack* track = uDst->primaryTracks(i);
     if(track->flag() < 0) continue;
+    if(track->eta() < GetEtaLow()) continue;
+    if(track->eta() > GetEtaHigh()) continue;
     double pt = track->pt();
     double R = pt/(0.3*mField);
     if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
@@ -213,6 +219,7 @@ Int_t StEmcTpcFourPMaker::Make() {
     }
   else // useType == Hits
     {
+      unsigned int runNumber = uEvent->runNumber();
       int pointIndex = 0;
       int& hitId = pointIndex;
       StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
@@ -224,7 +231,11 @@ Int_t StEmcTpcFourPMaker::Make() {
 	{
 	  float eta, phi, energy;
 	  if(data->TowerStatus[hitId-1] != 1) continue;
-	  energy = data->TowerEnergy[hitId-1];
+	  if(towerProxy->isGood(runNumber, hitId-1) == false) continue;
+	  energy = towerProxy->energyFunction(
+		   runNumber, hitId-1, data->TowerADC[hitId-1], 
+		   data->TowerEnergy[hitId-1]);
+	  sumEMC += energy;
 	  if(energy < 0.01) continue;
 	  geom->getEtaPhi(hitId, eta, phi);
 	  while(phi < 0) phi += twoPi;
@@ -236,7 +247,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  point.setPhi(phi);
 	  point.setEnergy(energy);
 	  binmap.insertPoint(&point, pointIndex);
-	  sumEMC += point.getEnergy();
+	  //sumEMC += point.getEnergy();
 	}
     }
 
@@ -246,6 +257,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   // Connect the points with the tracks when they are within radiussqr 
   binmap.correlate(radiussqr);
   numCoincidences = binmap.t2p.size(); // == binmap.pt2.size();
+  cout << "Number Coincidences " << numCoincidences << endl;
 
   // Veto the guess of Tpc particle identification using the 
   // Point correlations
@@ -278,6 +290,18 @@ Int_t StEmcTpcFourPMaker::Make() {
       continue;
     }
   }
+
+  numberPoints = 0;
+  for(pointMap::iterator point = binmap.moddPoints.begin(); 
+      point != binmap.moddPoints.end(); ++point)
+    {
+      pointMap::value_type &point_val = *point;
+      StCorrectedEmcPoint &cPoint = point_val.second;
+      if(cPoint.P().e() > minPointThreshold)
+	numberPoints++;
+    }
+  if(numberPoints > maxPoints)  // If there are too many points
+    return kStOK; // don't try to analyze this event
 
   // Add TPC tracks
   long index = 0;
@@ -332,6 +356,8 @@ Int_t StEmcTpcFourPMaker::Make() {
 			(binmap.trackPointRadiusSqr(track, point), 
 			 (*trackit).second));
     }
+  cout << "sumTheorySubtracted: " << sumTheorySubtracted << endl;
+  cout << "sumSubtracted: " << sumSubtracted << endl;
 
   // Add neutral pion and eta tracks using the remaining energy in the 
   // reducedPointEnergies array - not coded
@@ -341,27 +367,28 @@ Int_t StEmcTpcFourPMaker::Make() {
   // reducedPointEnergies array 
   for(pointMap::iterator point = binmap.moddPoints.begin(); 
       point != binmap.moddPoints.end(); ++point)
-  {
-    pointMap::value_type &point_val = *point;
-    StMuTrackFourVec& newTrack = tPile[index++];
-    StCorrectedEmcPoint &cPoint = point_val.second;
-    //cout << "FourP E: " << cPoint.P().e() << endl;
-    //cout << "FourP Phi: " << cPoint.P().phi() << endl;
-    //cout << "FourP Eta: " << cPoint.P().pseudoRapidity() << endl;
-    //cout << "Point/Track E: " << cPoint.E() << endl;
-    //cout << "Point/Track Phi: " << cPoint.Phi() << endl;
-    //cout << "Point/Track Eta: " << cPoint.Eta() << endl;
-    if(cPoint.P().e() > .01)
-      {
-	newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
-	tracks.push_back(&newTrack);  
-      }
-  }  
+    {
+      pointMap::value_type &point_val = *point;
+      StMuTrackFourVec& newTrack = tPile[index++];
+      StCorrectedEmcPoint &cPoint = point_val.second;
+      if(cPoint.P().e() > minPointThreshold)
+	{
+	  //cout << "FourP E: " << cPoint.P().e() << endl;
+	  //cout << "FourP Phi: " << cPoint.P().phi() << endl;
+	  //cout << "FourP Eta: " << cPoint.P().pseudoRapidity() << endl;
+	  //cout << "Point/Track E: " << cPoint.E() << endl;
+	  //cout << "Point/Track Phi: " << cPoint.Phi() << endl;
+	  //cout << "Point/Track Eta: " << cPoint.Eta() << endl;
+	  newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
+	  tracks.push_back(&newTrack);  
+	}
+    }  
   //stop = clock();
   //timeLengths[timeindex] += static_cast<double>(stop-start)
   ///static_cast<double>(CLOCKS_PER_SEC);
   //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
 
+  aborted = false;
   return kStOk;
 }
 
