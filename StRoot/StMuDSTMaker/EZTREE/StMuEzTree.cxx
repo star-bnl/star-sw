@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuEzTree.cxx,v 1.1 2004/10/28 00:10:20 mvl Exp $
+ * $Id: StMuEzTree.cxx,v 1.2 2004/11/10 17:21:57 mvl Exp $
  *
  * Author: Wei-Ming Zhang             KSU  Aug. 2004
  *
@@ -99,12 +99,13 @@ EztEmcRawData* StMuEzTree::copyESmd(StEmcRawData *inp){
 EztEmcRawData* StMuEzTree::copy(StEmcRawData *inp, int ib1, int ib2){
   EztEmcRawData* raw = new EztEmcRawData;
    
-  for (int i = ib1; i <ib2; i++) {
+  int j=0;
+  for (int i = ib1; i <ib2; i++,j++) {
     if(i>=inp->getNBlocks()) break;// do not read beyond existing data
     if(inp->sizeData(i) <= 0) continue;
-    raw->createBank(i,inp->sizeHeader(i),inp->sizeData(i));
-    raw->setHeader(i,inp->header(i));
-    raw->setData(i,inp->data(i));
+    raw->createBank(j,inp->sizeHeader(i),inp->sizeData(i));
+    raw->setHeader(j,inp->header(i));
+    raw->setData(j,inp->data(i));
   }
   return raw;
   
