@@ -10,24 +10,35 @@
 
 #include "TObject.h"
 
-#define FORCEDDEBUGMESSAGE(x)  cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
-#define DEBUGMESSAGE(x)  if (StMuDebug::level()>0)    cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
-#define DEBUGMESSAGE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
-#define DEBUGMESSAGE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
-#define DEBUGMESSAGE3(x) if (StMuDebug::level()>=3) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
-#define FORCEDDEBUGVALUE(x)  cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
-#define DEBUGVALUE(x)  if (StMuDebug::level()>0)    cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
-#define DEBUGVALUE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
-#define DEBUGVALUE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
-#define DEBUGVALUE3(x) if (StMuDebug::level()>=3) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
-#define IFDEBUG(x)  if (StMuDebug::level()>0)    { DEBUGMESSAGE(""); (x);} 
-#define IFDEBUG1(x) if (StMuDebug::level()>=1) { DEBUGMESSAGE(""); (x);} 
-#define IFDEBUG2(x) if (StMuDebug::level()>=2) { DEBUGMESSAGE(""); (x);} 
-#define IFDEBUG3(x) if (StMuDebug::level()>=3) { DEBUGMESSAGE(""); (x);} 
+#if defined(__GNUC__) && ! defined(__CINT__)
+# define __PRETTYF__  __PRETTY_FUNCTION__
+#else
+# define __PRETTYF__  __FILE__
+#endif
+
+
+
+#define FORCEDDEBUGMESSAGE(x)                       cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+#define DEBUGMESSAGE(x)  if (StMuDebug::level()> 0) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+#define DEBUGMESSAGE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+#define DEBUGMESSAGE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+#define DEBUGMESSAGE3(x) if (StMuDebug::level()>=3) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+
+#define FORCEDDEBUGVALUE(x)                         cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+#define DEBUGVALUE(x)    if (StMuDebug::level()> 0) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+#define DEBUGVALUE1(x)   if (StMuDebug::level()>=1) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+#define DEBUGVALUE2(x)   if (StMuDebug::level()>=2) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+#define DEBUGVALUE3(x)   if (StMuDebug::level()>=3) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+
+#define IFDEBUG(x)       if (StMuDebug::level()> 0) { DEBUGMESSAGE(""); (x);} 
+#define IFDEBUG1(x)      if (StMuDebug::level()>=1) { DEBUGMESSAGE(""); (x);} 
+#define IFDEBUG2(x)      if (StMuDebug::level()>=2) { DEBUGMESSAGE(""); (x);} 
+#define IFDEBUG3(x)      if (StMuDebug::level()>=3) { DEBUGMESSAGE(""); (x);} 
 
 
 /** 
-    @class StMuDebug 
+    \class StMuDebug 
+
     Helper class used to control the amount of output. 
     All datamembers and functions are static, so you can use them everywhere using 
     'StMuDebug::xxxxx()`
@@ -73,6 +84,12 @@ class StMuDebug : public TObject{
 /***********************************************************************
  *
  * $Log: StMuDebug.h,v $
+ * Revision 1.6  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.5  2003/09/19 01:45:18  jeromel
  * A few problems hopefully fixed i.e. one constructor lacked zeroing
  * emcArrays were not  zeroed, mStMuDst not zeroed.

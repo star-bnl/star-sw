@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.47 2003/11/17 22:16:55 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.48 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -101,7 +101,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   if ( ! mStMuDst || ! mEmcUtil)
-    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
+    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
 
@@ -148,7 +148,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   if ( ! mStMuDst || ! mEmcUtil)
-    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
+    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
   
@@ -284,7 +284,7 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int 
     p = new TClonesArray(type, size);
     counter=0;
   }
-  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",PF);
+  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",__PRETTYF__);
   return p;
 }
 //-----------------------------------------------------------------------
@@ -442,30 +442,31 @@ int StMuDstMaker::Finish() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::setBranchAddresses(TChain* chain) {
   // muDst stuff
-
-  chain->SetBranchStatus("*",0);
-  TString ts;
-  for ( int i=0; i<__NARRAYS__; i++) {
-    chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
-    ts = StMuArrays::arrayNames[i]; ts +="*";
-    chain->SetBranchStatus (ts,1);
-  } 
+  if (chain){
+    chain->SetBranchStatus("*",0);
+    TString ts;
+    for ( int i=0; i<__NARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
+      ts = StMuArrays::arrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    } 
   
-  // strange stuff
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
-    ts = StMuArrays::strangeArrayNames[i]; ts +="*";
-    chain->SetBranchStatus (ts,1);
-  } 
+    // strange stuff
+    for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
+      ts = StMuArrays::strangeArrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    } 
   
-  // emc stuff
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
-    ts = StMuArrays::emcArrayNames[i]; ts +="*";
-    chain->SetBranchStatus (ts,1);
-  } 
+    // emc stuff
+    for ( int i=0; i<__NEMCARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
+      ts = StMuArrays::emcArrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    } 
   
-  mTTree = mChain->GetTree();
+    mTTree = mChain->GetTree();
+  }
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -477,32 +478,38 @@ void StMuDstMaker::openRead() {
  
   StMuChainMaker* chainMaker = new StMuChainMaker("MuDst");
   mChain = chainMaker->make(mDirName, mFileName, mFilter, mMaxFiles);
+
   delete chainMaker;
-  DEBUGVALUE3(mChain);
 
-  setBranchAddresses(mChain);
+  if (mChain){
+    DEBUGVALUE3(mChain);
+    setBranchAddresses(mChain);
 
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);  
+    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);  
+  }
 
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::read(){
-  DEBUGMESSAGE2("");
-  if (mChain->GetCurrentFile()) {
-    DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
-  } 
-  int bytes = 0;
-  while (bytes==0 ) {
-    DEBUGVALUE3(mEventCounter);
-    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",PF);
-    bytes = mChain->GetEntry(mEventCounter++);
-    DEBUGVALUE3(bytes);
+  if (!mChain){
+    DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
+  } else {
+    DEBUGMESSAGE2("");
+    if (mChain->GetCurrentFile()) {
+      DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
+    } 
+    int bytes = 0;
+    while (bytes==0 ) {
+      DEBUGVALUE3(mEventCounter);
+      if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
+      bytes = mChain->GetEntry(mEventCounter++);
+      DEBUGVALUE3(bytes);
+    }
+    mStMuDst->set(this);
+    //  mEventCounter++;
   }
-  mStMuDst->set(this);
-  //  mEventCounter++;
-  
   return;
 }
 //-----------------------------------------------------------------------
@@ -522,7 +529,7 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("now create file");
   mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
   
-  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",PF);
+  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
   
   mCurrentFile->SetCompressionLevel(mCompression);
   
@@ -535,7 +542,7 @@ void StMuDstMaker::openWrite(string fileName) {
 
   //  muDst stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
-  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",PF);
+  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
   DEBUGMESSAGE2("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -625,7 +632,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE2("");
   StMuEvent *typeOfEvent=0;
-  if (!ev) throw StMuExceptionNullPointer("no StEvent",PF);
+  if (!ev) throw StMuExceptionNullPointer("no StEvent",__PRETTYF__);
   StTimer timer;
   timer.start();
   if (!cut || cut->pass(ev)) {
@@ -641,14 +648,14 @@ void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
 void StMuDstMaker::fillEmc(StEvent* ev) {
   DEBUGMESSAGE2("");   
   StEmcCollection* emccol=(StEmcCollection*)ev->emcCollection();
-  if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",PF);
+  if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
   
   TClonesArray *tca = mEmcArrays[muEmc];
   new((*tca)[0]) StMuEmcCollection();
   StMuEmcCollection* muEmcColl = (StMuEmcCollection*)tca->At(0);
-  if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",PF);
+  if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",__PRETTYF__);
   mEmcUtil->fillMuEmc(muEmcColl,emccol);
   
   timer.stop();
@@ -766,7 +773,7 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
   /// if (!tca || !track) return index; /// I made sure that the array anf the track is there
   int counter = tca->GetEntries();
   try{
-    if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",PF);
+    if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",__PRETTYF__);
     // add StRichSpectra if StRichPidTraits are found 
     // we have to do this more elegant
     StRichSpectra* rich = richSpectra(track);
@@ -796,7 +803,7 @@ StRichSpectra* StMuDstMaker::richSpectra(const StTrack* track) {
 void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   /// now fill the strangeness stuff
-  if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",PF);
+  if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",__PRETTYF__);
  
   StStrangeEvMuDst *ev=0;
   StV0MuDst *v0=0;     
@@ -946,6 +953,12 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.48  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.47  2003/11/17 22:16:55  perev
  * THack::DeleteClonesArray used for deleting, to avoid ROOT bad features
  *

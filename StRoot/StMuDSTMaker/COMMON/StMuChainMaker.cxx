@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.21 2003/08/04 18:43:19 perev Exp $
+ * $Id: StMuChainMaker.cxx,v 1.22 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -107,15 +107,19 @@ string StMuChainMaker::dirname(string s){
    "MuDst:st_physics_2:raw_0001" will accept only files which have all of 
    the sub-strings "MuDst", "st_physics_2" and "raw_0001" in them.
 
-   If 'file' is empty, the directory 'dir' will be scanned for files.
-   If 'file' has a substring "MuDst.root" a single file will be opened.
-   If 'file' has a substring ".lis" the file will be expected to be a list.
-   In the case 'file' is not empty, 'dir' will be ignored, hence the filenames
-   provided have to be full filenames (including path)
+   - If 'file' is empty, the directory 'dir' will be scanned for files.
+   - If 'file' has a substring "MuDst.root" a single file will be opened.
+   - If 'file' has a substring ".lis" the file will be expected to be a list.
+   - In the case 'file' is not empty, 'dir' will be ignored, hence the filenames
+     provided have to be full filenames (including path)
 
    A TChain will be built for files matching the sub filters (in all cases).
    The chain will be returned.
-  
+
+   There are a few caveats 
+   - Directories 'dir' MUST be slash terminated !!!
+   - You should NOT pass wildcard in any of the syntax but rather use 'dir'
+     name, empty 'file' and a valid 'filter' as explained above.
    
  */
 TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
@@ -132,7 +136,10 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
   else if (dirFile.find(".files")!=string::npos)        fromList(dirFile);
   else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
   else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
-  else                                                  FORCEDDEBUGMESSAGE(" don't know how to read input ");
+  else {
+    FORCEDDEBUGMESSAGE("ATTENTION: don't know how to read input (you may have used a bogus constructor syntax)");
+    return NULL;
+  }
 
   add( mFileList );
   
@@ -179,6 +186,7 @@ void StMuChainMaker::add( StMuStringIntPairVector fileList ) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// This method contains a hidden assumption for STAR Scheduler purposes
 void StMuChainMaker::add( StMuStringIntPair filenameEvents) { 
     string file = filenameEvents.first;
     int entries = filenameEvents.second;
@@ -190,6 +198,7 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	// get local machine name 
 	string machine(gSystem->Getenv("HOST"));
 	if (machine.find("rcas")!=string::npos) machine += ".rcf.bnl.gov";
+	if (machine.find("rcrs")!=string::npos) machine += ".rcf.bnl.gov";
 	if (machine.find("pdsf")!=string::npos) machine += ".nersc.gov";
 	//cout << machine.c_str() << endl;
 	// get name of machine holding the file
@@ -361,6 +370,12 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.22  2004/02/17 04:56:36  jeromel
+  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+  * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+  * NULL mChain.
+  *
   * Revision 1.21  2003/08/04 18:43:19  perev
   * warnOff
   *

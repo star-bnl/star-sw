@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.6 2003/10/20 19:50:13 perev Exp $
+ * $Id: StMuEvent.cxx,v 1.7 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -68,10 +68,10 @@ void StMuEvent::clear(){
 //-----------------------------------------------------------------------
 void StMuEvent::fill(const StEvent* event){
   DEBUGMESSAGE("");
-  if ( !event ) throw StMuExceptionNullPointer("no StEvent",PF);
-  if ( !event->info() ) throw StMuExceptionNullPointer("no event info",PF);
-  if ( !event->runInfo() ) throw StMuExceptionNullPointer("no run info",PF);
-  if ( !event->summary() ) throw StMuExceptionNullPointer("no event summary",PF);
+  if ( !event ) throw StMuExceptionNullPointer("no StEvent",__PRETTYF__);
+  if ( !event->info() ) throw StMuExceptionNullPointer("no event info",__PRETTYF__);
+  if ( !event->runInfo() ) throw StMuExceptionNullPointer("no run info",__PRETTYF__);
+  if ( !event->summary() ) throw StMuExceptionNullPointer("no event summary",__PRETTYF__);
 //  if (event->numberOfPrimaryVertices() != 1 ) throw StMuExceptionBadValue("!= 1 primary vertex");
 
 
@@ -114,6 +114,12 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.7  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.6  2003/10/20 19:50:13  perev
  * workaround added for TClonesArray::Delete + some cleanup of MuEmc
  *
