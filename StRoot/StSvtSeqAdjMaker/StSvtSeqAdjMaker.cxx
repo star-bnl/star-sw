@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.10 2000/09/14 22:13:56 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.11 2000/10/02 13:48:10 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.11  2000/10/02 13:48:10  caines
+ * Adjusting donw hybrid by hybrid
+ *
  * Revision 1.10  2000/09/14 22:13:56  caines
  * Move histogram creation to better place
  *
@@ -119,7 +122,7 @@ Int_t StSvtSeqAdjMaker::Init()
 
   inseqfile.open(mProbFile,ios::in);
 
-  mInvProd->FillProbTable(inseqfile);
+  mInvProd->FillProbTable(inseqfile,mTotalNumberOfHybrids);
 
   inseqfile.close();
 
@@ -402,7 +405,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	      
 	      //Perform E896 type zero-suppresion (look for non-noise like signals
 	      if(m_inv_prod_lo){
-		mInvProd->FindInvProducts(mPedOffSet,Anode);
+		mInvProd->FindInvProducts(index,mPedOffSet,Anode);
 		MakeHistogramsProb(index,Anode);
 		AdjustSequences2(Anode);
 

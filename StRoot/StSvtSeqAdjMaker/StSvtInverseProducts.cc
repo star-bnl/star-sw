@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.cc,v 1.2 2000/07/11 18:36:15 caines Exp $
+ * $Id: StSvtInverseProducts.cc,v 1.3 2000/10/02 13:48:10 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.cc,v $
+ * Revision 1.3  2000/10/02 13:48:10  caines
+ * Adjusting donw hybrid by hybrid
+ *
  * Revision 1.2  2000/07/11 18:36:15  caines
  * Updates to save more of sequence for fitting
  *
@@ -34,7 +37,9 @@ StSvtInverseProducts::StSvtInverseProducts()
 }
 
 StSvtInverseProducts::~StSvtInverseProducts()
-{}
+{
+  delete [] mProbTable;
+}
 
 void StSvtInverseProducts::SetHybridPointer(StSvtHybridData* hybData)
 {
@@ -43,18 +48,25 @@ void StSvtInverseProducts::SetHybridPointer(StSvtHybridData* hybData)
    mBuffer[j] = 0;
 }
 
-void StSvtInverseProducts::FillProbTable(ifstream & inseqFile)
+void StSvtInverseProducts::FillProbTable(ifstream & inseqFile, int TotalNumberOfHybrids)
 {
-  for( int j=0; j<14; j++)
-   {
-     inseqFile >> mProbTable[j];
-     //cout<<mProbTable[j]<<endl;
-   }
+
+ mProbTable = (double**) new double[TotalNumberOfHybrids];
+
+
+  for( int Hybrid=0; Hybrid<TotalNumberOfHybrids; Hybrid++){
+    mProbTable[Hybrid] = (double*) new double[14];
+    for( int j=0; j<14; j++)
+      {
+	inseqFile >> mProbTable[Hybrid][j];
+	// cout<<mProbTable[Hybrid][j]<<endl;
+      }
+  }
 }
 
 
 
-void StSvtInverseProducts::FindInvProducts( int PedOffSet, int Anode)
+void StSvtInverseProducts::FindInvProducts( int HybIndex, int PedOffSet, int Anode)
 {
  StSequence* mSequence;
  unsigned char*  adcValue;
@@ -84,10 +96,10 @@ void StSvtInverseProducts::FindInvProducts( int PedOffSet, int Anode)
 	   else{
 	     k = (int)adcValue[j] - PedOffSet;
 	   }
-	   if( k >= 0 && k < 13) mProdOfInvProb *= mProbTable[k]; 
-	   else if(k >= -13 && k < 0) mProdOfInvProb *= 1/(1 - 1/mProbTable[abs(k)]);
-	   else if(k > 13) mProdOfInvProb *= mProbTable[13];
-	   else  mProdOfInvProb *= 1/(1 - 1/mProbTable[13]);
+	   if( k >= 0 && k < 13) mProdOfInvProb *= mProbTable[HybIndex][k]; 
+	   else if(k >= -13 && k < 0) mProdOfInvProb *= 1/(1 - 1/mProbTable[HybIndex][abs(k)]);
+	   else if(k > 13) mProdOfInvProb *= mProbTable[HybIndex][13];
+	   else  mProdOfInvProb *= 1/(1 - 1/mProbTable[HybIndex][13]);
 	   }
          //cout<<mProdOfInvProb<<endl;
 	 // cout<< log(mProdOfInvProb)<<endl;
