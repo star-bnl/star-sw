@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.36 1999/11/19 22:44:45 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.37  1999/11/23 19:00:51  lansdell
+//! Reorganized Make() and include files (Gene)
+//!
 //! Revision 1.36  1999/11/19 22:44:45  kathy
 //! took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
 //!
@@ -132,71 +135,60 @@
 //! Revision 1.2  1998/07/20 15:08:15  fisyak
 //! Add tcl and tpt
 //
+///////////////////////////////////////////////////////////////////////////
+//                                                                       //
+//  St_QA_Maker class for QA Histograms using dst tables                 //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
+
 #ifndef STAR_St_QA_Maker
 #define STAR_St_QA_Maker
-//////////////////////////////////////////////////////////////////////////
-//!                                                                      //
-//! St_QA_Maker virtual base class for Maker                            //
-//!                                                                      //
-//////////////////////////////////////////////////////////////////////////
 
-#ifndef ROOT_TH1
-#include "TH1.h"
-#endif
+#include "StQABookHist.h"
 
-#ifndef ROOT_TH2
-#include "TH2.h"
-#endif
-
-#include "TList.h"
-#include "TString.h"
-
-#include "St_QA_Maker/StQABookHist.h"
+class St_DataSet;
 
 //////////////////////////////////////////////////////////////////////////
 
 class St_QA_Maker : public StQABookHist {
  private:
-  Bool_t drawinit;
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $";
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.36 1999/11/19 22:44:45 kathy Exp $";
-
+  St_DataSet *dst;      //! Pointer to current dataset
+  
 //------------------------------------------------------------------------
   
  public: 
+
   St_QA_Maker(const char *name="QA", const char *title="event/QA");
   virtual       ~St_QA_Maker();
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
-  virtual void   MakeHistEvSum(St_DataSet *dst);
-  virtual void   MakeHistGlob(St_DataSet *dst);
-  virtual void   MakeHistDE(St_DataSet *dst);
-  virtual void   MakeHistPrim(St_DataSet *dst);
-  virtual void   MakeHistGen(St_DataSet *dst);
-  virtual void   MakeHistV0(St_DataSet *dst);
-  virtual void   MakeHistPID(St_DataSet *dst);
-  virtual void   MakeHistVertex(St_DataSet *dst);
-  virtual void   MakeHistXi(St_DataSet *dst);
-  virtual void   MakeHistPoint(St_DataSet *dst);
-  virtual void   MakeHistKink(St_DataSet *dst);
-  virtual void   MakeHistL3(St_DataSet *dst);
-  virtual void   MakeHistV0Eval(St_DataSet *dst);
-  virtual void   MakeHistRich(St_DataSet *dst);
 
-  virtual void   SetDraw(Bool_t drawFlag=kTRUE);
+  virtual void   MakeHistEvSum();
+  virtual void   MakeHistGlob();
+  virtual void   MakeHistDE();
+  virtual void   MakeHistPrim();
+  virtual void   MakeHistGen();
+  virtual void   MakeHistV0();
+  virtual void   MakeHistPID();
+  virtual void   MakeHistVertex();
+  virtual void   MakeHistXi();
+  virtual void   MakeHistPoint();
+  virtual void   MakeHistKink();
+  virtual void   MakeHistL3();
+  virtual void   MakeHistV0Eval();
+  virtual void   MakeHistRich();
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.36 1999/11/19 22:44:45 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
     
 #endif
-    
-inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
-                         { drawinit = drawFlag;}
 
 
 

@@ -1,41 +1,32 @@
-//! $Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.3  1999/11/23 19:00:51  lansdell
+//! Reorganized Make() and include files (Gene)
+//!
 //! Revision 1.2  1999/11/22 22:46:41  lansdell
 //! update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
 //!
 //! Revision 1.1  1999/11/19 22:44:43  kathy
 //! took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
 //!
-
+///////////////////////////////////////////////////////////////////////////
+//                                                                       //
+//  StQABookHist abstract base class for QA Histogram Makers             //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
 
 #ifndef STAR_StQABookHist
 #define STAR_StQABookHist
 
-//////////////////////////////////////////////////////////////////////////
-//!                                                                      //
-//! 
-//!                                                                      //
-//////////////////////////////////////////////////////////////////////////
-
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-
-#ifndef ROOT_TH1
-#include "TH1.h"
-#endif
-
-#ifndef ROOT_TH2
-#include "TH2.h"
-#endif
-
-#include "TList.h"
 #include "TString.h"
+class TH1F;
+class TH2F;
 
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -270,6 +261,9 @@ class StQABookHist : public StMaker {
    TH1F     *m_rich_tot;   //! number of rich hits
   
  protected:
+
+   Bool_t drawinit;
+
    TString QAHistType;   // character string to prepend to each hist name/title
    TString QAHistName;   // character string for each hist name
    TString QAHistTitle;  // character string for each hist title
@@ -289,8 +283,24 @@ class StQABookHist : public StMaker {
   StQABookHist(const char *name, const char *title, const char *type);
   virtual       ~StQABookHist();
   virtual Int_t  Init();
+  virtual Int_t  Make();
 
  protected:
+
+  virtual void   MakeHistEvSum() = 0;
+  virtual void   MakeHistGlob() = 0;
+  virtual void   MakeHistDE() = 0;
+  virtual void   MakeHistPrim() = 0;
+  virtual void   MakeHistGen() = 0;
+  virtual void   MakeHistV0() = 0;
+  virtual void   MakeHistPID() = 0;
+  virtual void   MakeHistVertex() = 0;
+  virtual void   MakeHistXi() = 0;
+  virtual void   MakeHistPoint() = 0;
+  virtual void   MakeHistKink() = 0;
+  virtual void   MakeHistL3() = 0;
+  virtual void   MakeHistV0Eval() = 0;
+  virtual void   MakeHistRich() = 0;
 
   virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
@@ -309,9 +319,11 @@ class StQABookHist : public StMaker {
   
  public:
 
+  virtual void   SetDraw(Bool_t drawFlag=kTRUE) {drawinit = drawFlag;}
+
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
