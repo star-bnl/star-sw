@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.21 2003/08/05 18:26:15 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.22 2003/08/21 21:21:56 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.22  2003/08/21 21:21:56  andrewar
+ * Added trap for non-finite dEdx. Added logic to fillGeometry so
+ * info is for innerMostHitNode on a detector, not vertex (note:
+ * Primaries only)
+ *
  * Revision 2.21  2003/08/05 18:26:15  andrewar
  * DCA track update logic modified.
  *
@@ -516,11 +521,25 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     throw runtime_error("StiStEventFiller::fillGeometry() -F- gTrack==0");
   if (!track) 
     throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
+
+
   StiKalmanTrackNode* node;
   if (outer)
     node = track->getOuterMostHitNode();
-  else
+  else{
     node = track->getInnerMostHitNode();
+    //if it's a Primary, innerMostHitNode=vertex. So, to get detector info,
+    //we have to do vertexNode->getParent() 
+    if(track->isPrimary()) {
+      node = static_cast<StiKalmanTrackNode*>(node->getParent());
+    //now, we want last node with a hit, so keep backing up until a hit
+    //is found
+      while(!node->getHit()) 
+        node =static_cast<StiKalmanTrackNode*>(node->getParent());
+    }
+  }
+
+
   StThreeVectorF origin(node->getX(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
   // making some checks.  Seems the curvature is infinity sometimes and
@@ -620,6 +639,21 @@ void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* 
   if (track) {
     dEdxCalculator.getDedx(track, dEdx, errordEdx, nPoints);
   }
+
+  if(!finite(dEdx) || dEdx>9999)
+    {
+      dEdx = 9999;
+      errordEdx= dEdx;
+      nPoints=0;
+      cout <<"StiStEventFiller::Error: dEdx non-finite."<<endl;
+    }
+  else if(!finite(errordEdx))
+    {
+      dEdx = 9999;
+      errordEdx= dEdx;
+      nPoints=0;
+      cout <<"StiStEventFiller::Error: errordEdx non-finite."<<endl;
+    }
 
   StTrackPidTraits* pidTrait = new StDedxPidTraits(dEdxCalculator.whichDetId(),
 						   static_cast<short>(kTruncatedMeanId),
