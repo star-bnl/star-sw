@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.27 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEvent.h,v 2.28 2002/12/20 22:41:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.28  2002/12/20 22:41:30  ullrich
+ * Added PMD.
+ *
  * Revision 2.27  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -119,6 +122,7 @@ class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
 class StFpdCollection;
+class StPhmdCollection;
 class StSoftwareMonitor;
 class StTpcHitCollection;
 class StFtpcHitCollection;
@@ -184,6 +188,8 @@ public:
     const StTofCollection*              tofCollection() const;
     StFpdCollection*                    fpdCollection();
     const StFpdCollection*              fpdCollection() const;
+    StPhmdCollection*                   phmdCollection();
+    const StPhmdCollection*             phmdCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -248,6 +254,7 @@ public:
     void setRichCollection(StRichCollection*);
     void setTofCollection(StTofCollection*);
     void setFpdCollection(StFpdCollection*);
+    void setPhmdCollection(StPhmdCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
     void setL0Trigger(StL0Trigger*);
     void setL1Trigger(StL1Trigger*);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.10 2002/02/19 16:42:05 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.11 2002/12/20 22:41:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.11  2002/12/20 22:41:30  ullrich
+ * Added PMD.
+ *
  * Revision 2.10  2002/02/19 16:42:05  ullrich
  * Fixed bug: StDetectorState now StSPtrVecDetectorState.
  *
@@ -44,7 +47,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.10 2002/02/19 16:42:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.11 2002/12/20 22:41:30 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -74,6 +77,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
     setBranch("StFpdCollection",             "evt_aux",      7);
+    setBranch("StPhmdCollection",            "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
     setBranch("StTpcHitCollection",          "evt_hits",     8);
@@ -104,6 +108,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecTrackDetectorInfo",  "event", 1);
     setBranch("StSPtrVecPrimaryVertex",      "event", 1);
     setBranch("StSPtrVecTrackNode",          "event", 1);
+    setBranch("StPhmdCollection",            "event", 1);
 } 
 
 void
