@@ -3,11 +3,10 @@
 #ifndef ROOT_Stypes
 #define ROOT_Stypes
  
- 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-//                                                                      //
+// $Id: Stypes.h,v 1.10 2000/01/12 18:07:24 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -82,4 +81,8 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
   TableImp(name)                                                   \
   TableStreamerImp(name)
 
+// $Log: Stypes.h,v $
+// Revision 1.10  2000/01/12 18:07:24  fine
+// cvs symbols have been added and copyright class introduced
+//
 #endif 
