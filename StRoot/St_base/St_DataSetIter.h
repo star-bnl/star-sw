@@ -60,7 +60,7 @@ public:
   virtual St_DataSet    *operator()(const Char_t *path) { return Next(path); }
   virtual Int_t          GetDepth() const {return fDepth;}
   virtual St_DataSet    *Dir(Char_t *dirname);
-  virtual Int_t          Du() const {return 0;} // summarize dataset usage
+  virtual Int_t          Du() const;  // summarize dataset usage
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
 
   virtual St_DataSet    *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
@@ -92,4 +92,4 @@ public:
   ClassDef(St_DataSetIter,0)
 };
  
-#endif
+#endif/
