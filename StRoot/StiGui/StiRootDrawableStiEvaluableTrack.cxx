@@ -38,7 +38,7 @@ void StiRootDrawableStiEvaluableTrack::reset()
 
 void StiRootDrawableStiEvaluableTrack::update()
 {
-    cout <<"void StiRootDrawableStiEvaluableTrack::update()"<<endl;
+    //cout <<"void StiRootDrawableStiEvaluableTrack::update()"<<endl;
     fillHitsForDrawing();
 }
 
