@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.15 1999/09/24 01:23:30 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.16 1999/10/04 16:22:33 long Exp $
  *
  * Author: brian May 18, 1998
  *
  ***************************************************************************
  *
- * Description: Input charge segment...much like a g2t_tpc_hit but
+ * Description:   Input charge segment...much like a g2t_tpc_hit but
  *              with added functionality
  *
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.16  1999/10/04 16:22:33  long
+ * straight line model in case of de<0
+ *
  * Revision 1.15  1999/09/24 01:23:30  fisyak
  * Reduced Include Path
  *
@@ -355,10 +358,18 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 #endif
 
     //
-    // Calculate the number of electrons in complete segment
+    // Calculate the numser of electrons in complete segment
     //
+  
     if (mNumberOfElectrons<0)
-	mNumberOfElectrons = (mDE)/(gasDb->W());
+      //	mNumberOfElectrons = (mDE)/(gasDb->W());
+
+                                      
+      mNumberOfElectrons = fabs(mDE)/(gasDb->W());//HL,9/10/99
+    
+ 
+  
+                                      
 
     //PR(mDE/eV);
     //PR(gasDb->W());
@@ -384,6 +395,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
     //
     // Minimum ioinizing is a 3GeV proton!
     //
+    
     double minimumIonizingdEdx =
 	gasDb->betheBlochTSS(3.*GeV,1,.938*GeV);
     //PR(minimumIonizingdEdx/(keV/centimeter));
@@ -404,7 +416,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 
     //PR(this->momentum());
     //PR(particleMass/MeV);
-    //PR(charge);
+    
 
     if(charge != 0) {
 	double numberOfSubSegmentsInCurrentLevel;
@@ -416,7 +428,8 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	    
 	double mip = dEdxBethe/minimumIonizingdEdx;
 	    
-	double xBinary;	
+	double xBinary;
+      	
 	for(ii=1; ii<numberOfLevels; ii++) {
 	    numberOfSubSegmentsInCurrentLevel = pow(2.,ii);
 	    float dL = mDs/numberOfSubSegmentsInCurrentLevel;
@@ -424,7 +437,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 		
 	    // In this level you must create "numberOfSubSegments" subsegments
 	    // Loop over the existing ones...
-	    numberOfSubSegmentsInPreviousLevel = pow(2.,(ii-1));
+	      numberOfSubSegmentsInPreviousLevel = pow(2.,(ii-1)); 
 	    for(jj=0; jj<numberOfSubSegmentsInPreviousLevel; jj++) {
 		double parentdEdx = ionizationSegments[(ii-1)][jj];
 		
@@ -460,7 +473,8 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	//To decompose track use the helix parameterization.
 	//StPhysicalHelix(p,x,B,+/-)
 	// Need some track info from pid:
-	    
+       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>0.01){    //HL,9/4/99,if mDe<0,helix model is not good
+	 
 	StPhysicalHelix
 	    track(mMomentum,
 		  mSector12Position,
@@ -488,9 +502,32 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	    
 	    newPosition += deltaS;
 	} // loop over subsegments
+
+      }//if field on  
+    else{// if mDe<0 ,HL,9/4/99
+         double newS;
+         newS=-mDs/2. + deltaS/2.;
+         StThreeVector<double> miniHitPosition; 
+        
+	for(ii=0; ii<ionizationSegments[(numberOfLevels-1)].size(); ii++) {
+            
+	    miniHitPosition.setX(mSector12Position.x()+newS*mMomentum.x()/mMomentum.mag()); 
+            miniHitPosition.setY(mSector12Position.y()+newS*mMomentum.y()/mMomentum.mag()); 
+            miniHitPosition.setZ(mSector12Position.z()+newS*mMomentum.z()/mMomentum.mag());
+	    StTrsMiniChargeSegment aMiniSegment(miniHitPosition,
+						ionizationSegments[(numberOfLevels-1)][ii],
+						deltaS);
+	 
+	    listOfMiniSegments->push_back(aMiniSegment); 
+	    
+	    newS += deltaS;
+	} // loop over subsegments
+       
+      }   //field off 
+          
     } // charge !=0
     else {
-	//
+	//   
 	// Not sure what to do with this?
 	//
 	StTrsMiniChargeSegment aBadMiniSegment(mPosition,
