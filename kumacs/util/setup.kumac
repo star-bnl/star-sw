@@ -55,7 +55,7 @@ macro dir
  mkdir  [geantR]
  mkdir  [geant_Run]
  mkdir  [params]
-  for sys in ctf emc ftpc global l3 mwc svt tpc trg
+  for sys in ctf emc ftpc global l3 mwc svt tpc trg ebye
     mkdir [params]/[sys]
     mkdir [calib]/[sys]
   endfor
@@ -78,11 +78,15 @@ macro dir
  
 *  data tables ----------------------------------------
  mkdir  [data]  
- for sys in ctf emc ftpc global l3 mwc svt tpc trg
-  mkdir  [data]/[sys]
-  mkdir  [data]/[sys]/tracks
+ for sys in ctf emc ftpc global l3 mwc svt tpc trg ebye
+   mkdir  [data]/[sys]
+   if [sys].ne.ebye then
+     mkdir  [data]/[sys]/tracks
+   endif   
   if [sys]=global then
     mkdir  [data]/global/vertices
+  elseif [sys]=ebye then
+    mkdir [data]/ebye/sca
   else
     mkdir  [data]/[sys]/hits
   endif
@@ -90,6 +94,8 @@ macro dir
  
 *  dst information ---------------------------------------
  mkdir  [dst]
+ 
+ 
  
  
 return
