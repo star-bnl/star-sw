@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.3 1999/01/28 02:50:28 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.4 1999/02/10 18:02:24 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.3  1999/01/28 02:50:28  lasiuk
- * beta gamma for particle mass
+ * Revision 1.4  1999/02/10 18:02:24  lasiuk
+ * verbose output and ostream
+ *
+ * Revision 1.6  1999/02/16 18:15:41  fisyak
+ * Check in the latest updates to fix them
  *
  * Revision 1.5  1999/02/12 01:26:37  lasiuk
  * Limit debug output
@@ -119,17 +122,17 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 
 	// what is the subsegment length?
     gasDb->setPadLength(deltaS*centimeter);
-    cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
-    cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
-    cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
-    cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
-    cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position))    << " T"  <<endl;
-    PR(mSector12Position);
+	double deltaS = mDs/static_cast<double>(subSegments);
+//     PR(deltaS);
+//     PR(deltaS/millimeter);
+	 // what is the subsegment length?
+	 
+	gasDb->setPadLength(deltaS*centimeter);
     
     // Number of electrons in complete segment
     if (mNumberOfElectrons<0)
 	mNumberOfElectrons = (mDE)/(gasDb->W());
-    PR(mNumberOfElectrons);
+//     PR(mNumberOfElectrons);
 //     cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
 //     cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
 //     cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
@@ -155,13 +158,13 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     case 3:
 	particleMass = .939*GeV;
 	break;
-    default:
+    default:  // a pion is default
 	particleMass = .1395*GeV;
 	break;
     }
     
     double betaGamma = abs(mMomentum)/particleMass;
-    PR(mMomentum);
+    //PR(mMomentum);
     PR(betaGamma);
 	    break;
     // number of segments to split given by command line argument (default 1):
@@ -173,7 +176,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     // calculate the offset to the start position
     //
     double newPosition = -mDs/2. + deltaS/2.;
-    PR(newPosition);
+    //PR(newPosition);
     
     //
     // loop over all subSegments and distribute charge
@@ -193,7 +196,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 
 // 	PR(ionization[StTrsDeDx::primaries]);
 // 	PR(ionization[StTrsDeDx::secondaries]);
-	PR(ionization[StTrsDeDx::total]);
+// 	PR(ionization[StTrsDeDx::total]);
 
 	if(!ionization[StTrsDeDx::total]) continue;
 
@@ -205,9 +208,9 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	    numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
 	}
 	    if(ionization[StTrsDeDx::total] > ionizationLeft) {
-	PR(numberOfElectronsOnMiniSegment);
-	PR(newPosition);
-	PR(track.at(newPosition));
+		numberOfElectronsOnMiniSegment = ionizationLeft;
+	    }
+	    else {
 		numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
 	StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 					    numberOfElectronsOnMiniSegment,
@@ -219,14 +222,14 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 						numberOfElectronsOnMiniSegment,
 	if(!ionizationLeft) break;
 		newPosition += deltaS;
-	PR(newPosition);
+						theIonization[ii],
     }
     //
     // last subsegment -- assign remaining ionizaiton
     // GEANT energy is conserved by this (exactly!)
     //
-    PR(newPosition);
-    PR(track.at(newPosition));
+	    newPosition += deltaS;
+
     if(ionizationLeft) {
 	StTrsMiniChargeSegment aNewMiniSegment(track.at(newPosition),
 					       ionizationLeft,
@@ -236,7 +239,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     else {
 	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
 						  mNumberOfElectrons,
-ostream& operator<<(ostream& os, StTrsChargeSegment& seg)
+						  mDs);
 	listOfMiniSegments->push_back(aSingleMiniSegment);
     }
 // 	PR(mNumberOfElectrons);
