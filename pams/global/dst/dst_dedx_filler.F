@@ -84,7 +84,7 @@ c
                  dst_dedx(j).dedx(2)   =  tpc_dedx(i).dedx(2)
             else if(dst_dedx_h.nok .ge. dst_dedx_h.maxlen) then
                  write(6,10) dst_dedx_h.nok
-10               Format(2x,'No. DST DEDX entries .ge. maximum')
+10               Format(2x,'No. DST DEDX entries=',I10,' .ge. maximum')
                  DST_DEDX_FILLER = STAFCV_BAD
                  Return
             end if
