@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.h,v 2.3 2003/10/28 15:55:42 andrewar Exp $  
+ * $Id: StiTrackingParameters.h,v 2.4 2004/01/30 21:29:42 pruneau Exp $  
  *
  * $Log: StiTrackingParameters.h,v $
+ * Revision 2.4  2004/01/30 21:29:42  pruneau
+ * Added load function to load values from db
+ *
  * Revision 2.3  2003/10/28 15:55:42  andrewar
  * Added set method for parameters from input txt file.
  *
@@ -15,10 +18,13 @@
 #define StiTrackingParameters_H 1
 
 #include "Sti/Base/EditableParameters.h"
+#include "TDataSet.h"
 #include "Stiostream.h"
+
 class StiTracking;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
+class TrackingParameters_st;
 
 using std::iostream;
 using std::ifstream;
@@ -27,8 +33,9 @@ using std::ifstream;
 class StiTrackingParameters : public EditableParameters
 {
 public: 
-  StiTrackingParameters(const string & name,
-			const string & description);
+  StiTrackingParameters();
+	StiTrackingParameters(const string & name,
+												const string & description);
   StiTrackingParameters(const string & name,
 			const string & description,
 			double minSearchWindow,
@@ -38,8 +45,10 @@ public:
   StiTrackingParameters(const StiTrackingParameters & pars);
   ~StiTrackingParameters();
   const StiTrackingParameters & operator=(const StiTrackingParameters & p);
+  const StiTrackingParameters & operator=(const TrackingParameters_st & p);
 
   virtual void initialize();
+	void load(TDataSet*);
 
   void setMaxChi2ForSelection(double chi);
   void setMinSearchWindow(double val);

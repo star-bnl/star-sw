@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.cxx,v 2.3 2003/10/28 15:55:15 andrewar Exp $  
+ * $Id: StiTrackingParameters.cxx,v 2.4 2004/01/30 21:29:42 pruneau Exp $  
  *
  * $Log: StiTrackingParameters.cxx,v $
+ * Revision 2.4  2004/01/30 21:29:42  pruneau
+ * Added load function to load values from db
+ *
  * Revision 2.3  2003/10/28 15:55:15  andrewar
  * Added method to set parameters from a txt input file.
  *
@@ -12,8 +15,19 @@
  */
 
 
+#include "tables/St_TrackingParameters_Table.h"
 #include "StiTrackingParameters.h"
 #include "Sti/Base/EditableParameter.h"
+
+StiTrackingParameters::StiTrackingParameters()
+  : EditableParameters("noName","noName"),
+    _minSearchWindow(1.),
+    _maxSearchWindow(5.),
+    _searchWindowScaling(4.),
+    _maxChi2ForSelection(5.)
+{
+	initialize();
+}
 
 StiTrackingParameters::StiTrackingParameters(const string & name,
 					     const string & description)
@@ -60,6 +74,15 @@ const StiTrackingParameters & StiTrackingParameters::operator=(const StiTracking
   return *this;
 }
 
+const StiTrackingParameters & StiTrackingParameters::operator=(const TrackingParameters_st & pars)
+{
+  _minSearchWindow = pars.minSearch;
+  _maxSearchWindow = pars.maxSearch;
+  _searchWindowScaling = pars.scaling;
+  _maxChi2ForSelection = pars.maxChi2;
+  return *this;
+}
+
 void StiTrackingParameters::initialize()
 { 
   add(new EditableParameter("MinSearch", "Minimum Search Window",&_minSearchWindow,_minSearchWindow,0.,10.,0.1,0));
@@ -82,11 +105,21 @@ void StiTrackingParameters::setPar(ifstream& inFile)
   return;
 }
 
+void StiTrackingParameters::load(TDataSet *ds)
+{
+	// validate source
+	if (!ds) throw runtime_error("StiTrackingParameters::load(TDataSet * ds)");
+	St_TrackingParameters * a = dynamic_cast<St_TrackingParameters*>(ds->Find(getName().c_str() ));
+  if (!a) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet * ds) -E- a==0");
+	TrackingParameters_st * b = a->GetTable();
+	if (!b) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet * ds) -E- b==0");
+	*this = *b;
+}
 
 
 ostream& operator<<(ostream& os, const StiTrackingParameters& par)
 {
-  return os  <<"Tracking Parameters set:" << endl
+  return os  <<"StiTracking Parameters - " << par.getName() << endl
        <<"\tActive:\t"                 << par.active() <<endl
        <<"\tMaxChi2ForSelection:\t "   << par.getMaxChi2ForSelection() <<endl
        <<"\tMinSearchWindow:\t "       << par.getMinSearchWindow()     <<endl
