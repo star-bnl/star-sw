@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.1 2000/01/24 20:35:37 ward Exp $
+ * $Id: StTRGReader.cxx,v 1.2 2000/06/12 15:04:02 perev Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.2  2000/06/12 15:04:02  perev
+ * SVT + cleanup
+ *
  * Revision 1.1  2000/01/24 20:35:37  ward
  * Access trigger data.
  *
@@ -37,7 +40,7 @@ StTRGReader::StTRGReader(StDAQReader *daqr) {
 }
 void StTRGReader::Update() {
   delete fTRGImpReader;
-  fTRGImpReader = ::getTRGReader(fDAQReader->fEventReader);
+  fTRGImpReader = ::getTRGReader(fDAQReader->getEventReader());
   assert(fTRGImpReader);
 }
 StTRGReader::~StTRGReader() {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.h,v 1.1 2000/01/24 20:35:37 ward Exp $
+ * $Id: StTRGReader.h,v 1.2 2000/06/12 15:04:02 perev Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.h,v $
+ * Revision 1.2  2000/06/12 15:04:02  perev
+ * SVT + cleanup
+ *
  * Revision 1.1  2000/01/24 20:35:37  ward
  * Access trigger data.
  *
@@ -30,15 +33,14 @@ class StDAQReader;
 class  StTRGReader {
   public:
 
-  friend class StDAQReader;  // Not sure what good this does.
   StTRGReader(StDAQReader *rd);
   char thereIsTriggerData(); // returns FALSE if there is no trigger data in the .daq file
   virtual ~StTRGReader();
   virtual  int close();
   TRG_Reader  *fTRGImpReader; // Making this public saves a double layer of accessor functions.
 
-protected:
   virtual void Update();
+protected:
 
   StDAQReader *fDAQReader;
 };

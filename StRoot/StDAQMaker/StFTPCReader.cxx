@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.cxx,v 1.1 2000/01/24 14:39:33 perev Exp $
+ * $Id: StFTPCReader.cxx,v 1.2 2000/06/12 15:04:02 perev Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.cxx,v $
+ * Revision 1.2  2000/06/12 15:04:02  perev
+ * SVT + cleanup
+ *
  * Revision 1.1  2000/01/24 14:39:33  perev
  * FTPC (HolmMade) is added
  *
@@ -114,7 +117,7 @@ void StFTPCReader::setSector(int sector)
       
       if (sector == -1) {
 	delete fFTPCImpReader;
-	fFTPCImpReader = ::getDetectorReader(fDAQReader->fEventReader,fDAQReader->fFTPCVersion);
+	fFTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getFTPCVersion());
 	fSector = -1999;
       }
 
