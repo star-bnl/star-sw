@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.13 2004/05/05 22:04:16 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.14 2004/05/05 23:00:57 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -58,88 +58,100 @@ public:
   /// default value for the maximum distance in eta from the tower center
   static const Double_t kDefDeltaEtaCut    ;
   
-  //! the TTM constructor
+  /// the TTM constructor
   /// \param self     this maker name (const char*)
   /// \param mumaker a pointer to a StMuDstMaker 
   /// \param dbmaker a pointer to a StEEmcDbMaker 
-  EEmcTTMMaker(const char          *self    = "EEmcTTMMaker", 
-		       class StMuDstMaker  *mumaker =  NULL,
-		       class StEEmcDbMaker *dbmaker =  NULL);
+  EEmcTTMMaker(const char          *self    = "ttmmk", 
+	       class StMuDstMaker  *mumaker =  NULL,
+	       class StEEmcDbMaker *dbmaker =  NULL);
 
+  /// the destructor
   virtual       ~EEmcTTMMaker();
 
   // MAKER STUFF 
+  /// initialize maker 
   virtual Int_t  Init();   
+  /// process one event
   virtual Int_t  Make();   
+  /// clears maker
+  /// \param option not used at the moment
   virtual void   Clear(Option_t *option = ""); 
+  /// cleans up at the end
   virtual Int_t  Finish(); 
   
-  /// clear z positions array
-  void     ResetZPositionsArray()                           { mZ.clear(); }
+  /// clears z positions array
+  void     ResetZPositionsArray()                              { mZ.clear(); }
   /// adds a z position to z positions array
-  void     AddZPosition(const TString s, const double zpos) { mZ[zpos]=s; }
+  /// \param name  position name
+  /// \param zpos  position depth
+  void     AddZPosition(const TString name, const double zpos) { mZ[zpos]=name; }
 
 
-  /// returns max CTB sum allowed
-  Int_t    GetMaxCTBSum     () const  { return mMaxCTBsum   ; }
-  /// sets max track eta cut value
+  /// gets maximum CTB sum allowed
+  Int_t    GetMaxCTBSum     ()     const  { return mMaxCTBsum   ; }
+  /// sets maximum CTB sum allowed
   void     SetMaxCTBSum     (Int_t    v) { mMaxCTBsum=v     ; }
 
 
-  /// returns min hits/track cut value
+  /// gets minimum number of hits/track required
   Int_t    GetMinTrackHits  () const  { return mMinTrackHits; }
-  /// sets min hits/track cut value
+  /// sets minimum number of hits/track required
   void     SetMinTrackHits  (Int_t    v) { mMinTrackHits=v  ; }
 
 
-  /// returns min track length cut value
+  /// gets minimum track length required
   Double_t GetMinTrackLength() const  { return mMinTrackLength ; }
-  /// sets min track length cut value
+  /// sets minimum track length required
   void     SetMinTrackLength(Double_t v) { mMinTrackLength=v   ; }
 
-  /// returns min pt cut value
+  /// gets minimum track pT required
   Double_t GetMinTrackPt    () const  { return mMinTrackPt    ; }
-  /// sets min pt cut value
+  /// sets minimum track pT required
   void     SetMinTrackPt    (Double_t v) { mMinTrackPt=v      ; }
 
-  /// returns min track eta cut value
+  /// gets minimum pseudorapidity at the origin required
   Double_t GetMinTrackEta   () const  { return mMinTrackEta   ; }
-  /// sets min track eta cut value
+  /// sets minimum pseudorapidity at the origin required
   void     SetMinTrackEta   (Double_t v) { mMinTrackEta=v     ; }
 
-  /// returns max track eta cut value
+  /// gets minimum pseudorapidity at the origin required
   Double_t GetMaxTrackEta   () const  { return mMaxTrackEta   ; }
-  /// sets max track eta cut value
+  /// sets minimum pseudorapidity at the origin required
   void     SetMaxTrackEta   (Double_t v) { mMaxTrackEta=v     ; }
 
   
-  /// gets delta phi cut
+  /// gets delta phi cut see \ref matchparams
   Double_t GetDeltaPhiCut() const { return mPhiFac; }
-  /// sets delta phi cut
+  /// sets delta phi cut see \ref matchparams
   void     SetDeltaPhiCut(Double_t v=1.0) { mPhiFac=v;  }
 
-  /// gets delta eta cut
+  /// gets delta eta cut see \ref matchparams
   Double_t GetDeltaEtaCut() const { return mEtaFac; }
-  /// sets delta eta cut
+  /// sets delta eta cut see \ref matchparams
   void     SetDeltaEtaCut(Double_t v=1.0) { mEtaFac=v;  }
 
-  /// set output file name 
+  /// \depreciated
+  /// set output file name obsolete
   void     SetFileName( const char *string) { mFileName=TString(string); }
+
 
   /// returns number of matched tracks
   ULong_t  GetNMatched() const { return mNMatched; };
 
-  /// returns a list of good StMuTracks
+  /// returns a list of accepted StMuTracks objects
   TList *GetTracks() { return mTrackList; };
-  /// returns a list of good EEmcTower
+  /// returns a list of accepted EEmcTower objects
   TList *GetTowers() { return mTowerList; };
-  /// returns a list of matches
+
+  /// returns a list of matches (EEmcTTMatch objects)
   TList *GetMatchList()  { return mMatchList ; }; 
 
-  /// prints a summary of run
+
+  /// prints matching cuts and statistics summary
   ostream&   Summary    ( ostream &out ) const ;
 
- protected:
+private:
   Int_t    mMaxCTBsum            ;  /**<- max CTB sum allowed                 */
   Int_t    mMinTrackHits         ;  /**<- min hits per track required         */
   Double_t mMinTrackLength       ;  /**<- min track length required           */
@@ -152,9 +164,10 @@ public:
 
   /// resets the collected statistics 
   void     ResetStats() { mNMatched=mNEvents=0L; };  
+  /// whether accept the track or not
   Bool_t   AcceptTrack( const StMuTrack *track);
+  /// whether track matches or not
   Bool_t   MatchTrack ( const double dphi,   const double deta,  const double phihw,  const double etahw); 
-
 
 
   // control histograms for tracks
@@ -166,7 +179,7 @@ public:
   TH1F *hTrackDCA[3];/**<- tracks DCA           */
   TH1F *hVertex[3]  ;/**<- vertex               */
 
- private:
+  // private:
   StMuDstMaker   *mMuDstMaker; // toplevel muDST maker
   StEEmcDbMaker  *mEEmcDb;     // EEMC database maker
   EEmcGeomSimple *mGeom;       // tower geometry
@@ -191,7 +204,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.13 2004/05/05 22:04:16 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.14 2004/05/05 23:00:57 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -203,6 +216,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.14  2004/05/05 23:00:57  zolnie
+// more docs
+//
 // Revision 1.13  2004/05/05 22:04:16  zolnie
 // forgor about EEmcTower
 //
