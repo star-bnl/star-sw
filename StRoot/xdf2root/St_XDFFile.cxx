@@ -171,7 +171,7 @@ St_DataSet *St_XDFFile::NextEventGet()
  // this method to avoid any memory leak
  //
  fMethodName = "NextEvent()";
- printf("%s \n",fMethodName);
+ // printf("%s \n",fMethodName);
  if (!fFile) return 0;
  if (strchr(fType,'r')) {
    if (!::xdr_dataset(fStream,&fDataSet))
@@ -206,11 +206,11 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   DS_DATASET_T *dt;
   St_DataSet *dataset = 0;
   dataset = new St_DataSet(ds->name);
-
+#if 0
    printf (" dir: ds=0x%x  \n", ds);
    printf ("      tid  - %d     \n", ds->tid);
    printf ("      name - %s     \n", ds->name);
-
+#endif
   if (ds->tid) 
   {
       Char_t *data;
