@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.8 2002/06/28 22:15:12 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.9 2003/05/08 02:11:43 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,12 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.9  2003/05/08 02:11:43  calderon
+ * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
+ * fit points for the RcTrack.
+ * Use primary track for the fit points in all cases, not the global tracks.
+ * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
+ *
  * Revision 1.8  2002/06/28 22:15:12  calderon
  * Changes to deal with seg. faults in the file name handling:
  * Conventions:
@@ -42,6 +48,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.9  2003/05/08 02:11:43  calderon
+ * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
+ * fit points for the RcTrack.
+ * Use primary track for the fit points in all cases, not the global tracks.
+ * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
+ *
  * Revision 1.8  2002/06/28 22:15:12  calderon
  * Changes to deal with seg. faults in the file name handling:
  * Conventions:
@@ -73,7 +85,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.8 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.9 2003/05/08 02:11:43 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -93,6 +105,8 @@
 #include <iostream>
 #include <assert.h>
 #include "StMiniMcEvent/StMiniMcEvent.h"
+#include "StMiniMcEvent/StMiniMcPair.h"
+#include "StMiniMcEvent/StContamPair.h"
 
 #include "StMessMgr.h"
 #include "PhysicalConstants.h"
@@ -1101,7 +1115,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   }
   else{
     cout << "Error: no hits?" << endl;
-    cout << "tpc points : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+    cout << "tpc points : " << prTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
   }
   if (fitHits.first) {
     tinyRcTrack->setFirstFitPadrow(fitHits.first->padrow());
@@ -1109,10 +1123,17 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   }
   else {
     cout << "Error: no hit with usedInFit()>0" << endl;
-    cout << "fit pts :" << glTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
+    cout << "fit pts :" << prTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
   }
   
-  tinyRcTrack->setFitPts(glTrack->fitTraits().numberOfFitPoints(kTpcId));
+  tinyRcTrack->setFitPts(prTrack->fitTraits().numberOfFitPoints(kTpcId));
+  tinyRcTrack->setFitSvt(prTrack->fitTraits().numberOfFitPoints(kSvtId));
+  size_t ftpcFitPts = 0;
+  if (tinyRcTrack->etaGl()>1.8)
+      ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcWestId);
+  if (tinyRcTrack->etaGl()<-1.8)
+      ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcEastId);
+  tinyRcTrack->setFitFtpc(ftpcFitPts);
   short nDedxPts = (pid) ? pid->numberOfPoints() : 0;
   tinyRcTrack->setDedxPts(nDedxPts);
   tinyRcTrack->setAllPts(glTrack->detectorInfo()->numberOfPoints(kTpcId));
@@ -1145,6 +1166,8 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
   tinyMcTrack->setEtaMc(mcMom.pseudoRapidity());
   tinyMcTrack->setPhiMc(mcMom.phi());
   tinyMcTrack->setNHitMc(mcTrack->tpcHits().size());
+  tinyMcTrack->setNSvtHitMc(mcTrack->svtHits().size());
+  tinyMcTrack->setNFtpcHitMc(mcTrack->ftpcHits().size());
   tinyMcTrack->setGeantId(mcTrack->geantId());
   tinyMcTrack->setChargeMc(static_cast<short>(mcTrack->particleDefinition()->charge()));
 
