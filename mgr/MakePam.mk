@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.47 1998/08/25 02:34:27 fisyak Exp $
+# $Id: MakePam.mk,v 1.48 1998/08/26 01:59:22 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.48  1998/08/26 01:59:22  fisyak
+# Remove system from ROOT path
+#
 # Revision 1.47  1998/08/25 02:34:27  fisyak
 # Library directory nodeb -> LIB
 #
@@ -297,7 +300,7 @@ $(GEN_TAB)/.rootrc:
 	@echo '# Path used by dynamic loader to find shared libraries and macros '>>  $(ALL_TAGS)
 	@echo '# Paths are different for Unix and Windows. The example shows the defaults'>>  $(ALL_TAGS)
 	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
-	@echo 'Unix.*.Root.DynamicPath:    .:$$(ROOTSYS)/lib:.$$(STAR_SYS)/lib:$$(STAR_LIB):$$(STAF_LIB)'>>  $(ALL_TAGS)
+	@echo 'Unix.*.Root.DynamicPath:    .:$$(ROOTSYS)/lib:.$$(STAR_SYS)/lib:$$(STAR)/lib:$$(STAF_LIB)'>>  $(ALL_TAGS)
 	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
