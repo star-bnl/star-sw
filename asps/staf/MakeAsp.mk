@@ -1,10 +1,18 @@
 #
-#SHELL := csh -v
-ifndef STAF_HOME
-  STAF_HOME := $(shell pwd)
+#	Make file to make one ASP or PAM.  Victor.Perev Apr 1998
+#
+CWD := $(shell pwd)
+MAKESTAFLOGON :=$(CWD)/makestaflogon.mk
+ifMAKESTAFLOGON := $(strip $(wildcard $(MAKESTAFLOGON)))
+ifdef ifMAKESTAFLOGON
+  include $(MAKESTAFLOGON)
+endif
+#
+
+ifndef STAF_MAKE_HOME
+  STAF_MAKE_HOME := $(shell pwd)
 endif
 
-TOPDIR := $(shell pwd)
 
 SUFF_IDM := idl
 SUFF_IDL := idl
@@ -12,7 +20,8 @@ SUFF_IDL := idl
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAF_HOME)/MakeArch.mk
+include $(STAF_MAKE_HOME)/MakeEnv.mk
+include $(STAF_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -27,9 +36,17 @@ endif
 #	Upper INP directory
 #
 UPP_INP_DIR := $(subst / ,,$(dir $(INP_DIR)) )
+DOMAIN 	    := $(notdir $(UPP_INP_DIR))
+
+SYSTEM_DOMAIN := $(strip $(filter staf sys asps, $(DOMAIN)))
+
+DOM := ana
+ifdef SYSTEM_DOMAIN
+ DOM :=sys
+endif
 
 ifndef OUT_DIR
-  override OUT_DIR := $(dir $(UPP_INP_DIR))
+  override OUT_DIR := GEN$(DOM)
 endif
 
 
@@ -37,7 +54,7 @@ ifeq (,$(strip $(filter /%,$(OUT_DIR))))
   override OUT_DIR := $(CWD)/$(OUT_DIR)
 endif
 
-PKGNAME := $(notdir $(INP_DIR))
+PKGNAME := $(strip $(subst / ,,$(notdir $(INP_DIR)) ))
 
 PKG_SDD :=
 ifeq ($(PKGNAME),sdd)
@@ -49,8 +66,8 @@ endif
 #
 SRC_DIR := $(INP_DIR)/src
 SRC_GEN_DIR := $(OUT_DIR)/srg/$(PKGNAME)
-ifneq (YES,$(shell if { test -d $(SRC_DIR); } then { echo YES; } fi ))
-  SRC_DIR :=
+SRC_DIR :=$(strip $(wildcard $(SRC_DIR)))
+ifndef  SRC_DIR
   SRC_GEN_DIR :=
 endif
 
@@ -59,10 +76,8 @@ endif
 #	Define .srcm dir. If does not exist EMPTY
 #
 SRM_DIR     := $(INP_DIR)/srcm
-#SRM_GEN_DIR := $(OUT_DIR)/SRG/$(PKGNAME)
-ifneq (YES,$(shell if { test -d $(SRM_DIR); } then { echo YES; } fi))
-  SRM_DIR :=
-endif
+SRM_GEN_DIR := $(OUT_DIR)/srgm/$(PKGNAME)
+SRM_DIR := $(strip $(wildcard $(SRM_DIR)))
 
 CDF_DIR := $(SRC_DIR)
 
@@ -70,27 +85,38 @@ INC_DIR := $(INP_DIR)/inc
 IDL_DIR := $(INC_DIR)
 IDM_DIR := $(SRC_DIR)
 
-LIB_DIR := $(OUT_DIR)/lib
-OBJ_DIR := $(OUT_DIR)/obj/$(PKGNAME)
+LIB_DIR := $(OUT_DIR)/.$(STAF_ARCH)/lib
+OBJ_DIR := $(OUT_DIR)/.$(STAF_ARCH)/obj/$(PKGNAME)
 TMP_DIR := $(OUT_DIR)/tmp
 INC_GEN_DIR := $(OUT_DIR)/inc
 
 
 
 #	Includes
-INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN_ROOT)/include/cfortran
+#INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
+#INCLUDES := $(wildcard $(UPP_INP_DIR)/*/inc)
+INCLUDES := $(SRC_DIR)
+INCLUDES += $(INC_GEN_DIR)
+ifndef SYSTEM_DOMAIN
+  INCLUDES += $(STAF_ANA_INCS)
+endif
+INCLUDES += $(STAF_SYS_INCS)
+INCLUDES += $(STAF_CERN_INCS)
+INCLUDES += $(STAF_UTILS_INCS)
 
+INCLUDES := $(addprefix -I,$(INCLUDES))
 
-BIN_DIR := $(OUT_DIR)/bin
+BIN_DIR := $(OUT_DIR)/.$(STAF_ARCH)/bin
 #
 #	Do we need BIN_DIR ???
 #
-ifndef PKG_SDD   
-  ifeq ($(SRM_DIR),)
-     BIN_DIR :=
+ifdef SYSTEM_DOMAIN
+  ifndef PKG_SDD   
+    ifeq ($(SRM_DIR),)
+       BIN_DIR :=
+    endif
   endif
 endif
-
 
 #
 #	If NO source , NOTHING to do
@@ -100,7 +126,7 @@ DOIT := $(strip $(SRC_DIR) $(SRM_DIR))
 ifdef DOIT
 
 
-DEP_DIR := $(OUT_DIR)/dep/$(PKGNAME)
+DEP_DIR := $(OUT_DIR)/.$(STAF_ARCH)/dep/$(PKGNAME)
 
 OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(SRC_GEN_DIR) $(INC_GEN_DIR) 
 INPUT_DIRS := $(SRC_DIR) $(SRM_DIR) $(IDL_DIR) $(IDM_DIR) 
@@ -114,25 +140,24 @@ MAKEDIRS := $(shell mkdir -p $(OUPUT_DIRS))
 
 VPATH =  $(INPUT_DIRS) $(OUPUT_DIRS)
 
-
-FILES_IDM := $(wildcard $(IDM_DIR)/*.$(SUFF_IDM))
-FILES_IDL := $(wildcard $(IDL_DIR)/*.$(SUFF_IDL))
+ifndef SYSTEM_DOMAIN
+  FILES_IDM := $(wildcard $(IDM_DIR)/*.$(SUFF_IDM))
+  FILES_IDL := $(wildcard $(IDL_DIR)/*.$(SUFF_IDL))
+  FILES_IDH := $(FILES_IDL) $(FILES_IDM)
+  FILES_IDH := $(addprefix $(INC_GEN_DIR)/,$(addsuffix .h,$(notdir $(basename $(FILES_IDH)))))
+#  FILES_SRG := $(SRC_GEN_DIR)/$(PKGNAME)_init.cc
+endif
 FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cc *.f *.F *.l *.y ))
 FILES_SRC := $(filter-out %-lex.c %-yacc.c, $(FILES_SRC))
 
 FILES_CDF := $(wildcard $(CDF_DIR)/*.cdf)
-FILES_SRM := $(wildcard $(addprefix $(SRM_DIR)/,*c  *.cc))
+FILES_SRM := $(wildcard $(addprefix $(SRM_DIR)/,*.c  *.cc))
 FILES_SRM := $(filter-out %-lex.c %-yacc.c, $(FILES_SRM))
-#
-#	Test for main() it MUST NOT be in src but .....
-#	I hope it is temporary check
-#ifdef FILES_SRC
-#  QWE1 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRC))
-#endif
+
+
 ifdef FILES_SRM
-  QWE2 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRM))
+  QWE2 := $(shell grep -l -e '.*main *(.*)' $(FILES_SRM))
 endif
-#FILES_SRC := $(filter-out $(QWE1),$(FILES_SRC) )
 FILES_SRM := $(filter     $(QWE2),$(FILES_SRM) )
 
 
@@ -151,18 +176,40 @@ ASPS := $(notdir $(subst / , ,$(dir $(wildcard $(UPP_INP_DIR)/*/src)) ))
 FILES_A := $(wildcard $(LIB_DIR)/lib*.a)
 FILES_S := $(addprefix $(LIB_DIR)/lib,$(addsuffix .$(SOEXT),$(ASPS)))
 
-NAMES_EXE := $(notdir $(basename $(FILES_SRM)))
+#
+#	List of all libs
+ALL_LIBS := $(FILES_A) $(STAF_ANA_LIBS) $(STAF_SYS_LIBS) $(STAF_UTILS_LIBS) 
+#
+#	Make -Ldir list to simplify output messages of compilation
+LIB_DIRS :=$(addprefix -L,$(sort $(subst / , ,$(dir $(ALL_LIBS) ))))
+
+
+ifndef SYSTEM_DOMAIN
+ALL_LIBS := $(subst lib,-l,$(basename $(notdir $(ALL_LIBS)))) $(STAF_CERN_LIBS) $(FLIBS) $(CLIBS)
+else
+ALL_LIBS := $(subst lib,-l,$(basename $(notdir $(ALL_LIBS)))) $(CLIBS)
+endif
+
+ALL_LIBS := $(LIB_DIRS) $(ALL_LIBS)
+#
+#	Executables
+NAMES_EXE := $(FILES_SRM) 
+NAMES_EXE := $(notdir $(basename $(NAMES_EXE)))
+ifndef SYSTEM_DOMAIN
+  NAMES_EXE := $(PKGNAME)Staf
+endif
+
 ifdef PKG_SDD
   NAMES_EXE += stic
 endif 
 FILES_EXE := $(addprefix $(BIN_DIR)/,$(NAMES_EXE))
 
-FILES_D := $(FILES_SRC) $(FILES_SRM) 
+FILES_D := $(FILES_SRC) $(FILES_SRM) $(FILES_IDL)
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_D)))))
 
 FILES_C_CDF := $(addsuffix .c, $(addprefix $(SRC_GEN_DIR)/,$(basename $(notdir $(FILES_CDF)))))
 
-FILES_O := $(FILES_SRC)  $(FILES_CDF)
+FILES_O := $(FILES_SRC) $(FILES_SRG) $(FILES_CDF)
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o, $(notdir $(basename $(FILES_O)))))
 
 FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_IDLM)))))
@@ -170,20 +217,27 @@ FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(
 MY_LIB := $(LIB_DIR)/lib$(PKGNAME).a 
 MY_SO  := $(LIB_DIR)/lib$(PKGNAME).$(SOEXT)
 
+#	for SDD only
+ifdef PKG_SDD
+  NAMES_EXE += stic
+  MY_LIB := 
+  MY_SO  :=
+endif 
+
 #
 ##	Include .d and .didlm files
 ifndef PKG_SDD
 -include $(FILES_D) 
 endif
 
-.PHONY : all  CDFtoC  Libraries Executables DeleteDirs
+.PHONY : all  CDFtoC  IdlToH lib exe DeleteDirs
 
 
 
 
-all:  CDFtoC Libraries Executables DeleteDirs
+all:   lib exe DeleteDirs
 
-Executables : $(FILES_EXE)
+exe : $(FILES_EXE)
 
 
 ###############################################################################
@@ -192,22 +246,18 @@ Executables : $(FILES_EXE)
 #	********************************
 #
 $(BIN_DIR)/stic:        $(OBJ_DIR)/idl-yacc.o $(OBJ_DIR)/templateStuff.o
-ifeq ($(OSFID),lnx)
-	$(LD) $(LDFLAGS) -o $(ALL_TAGS) $(ALL_DEPS) /usr/lib/libfl.a
-else
-	$(LD) $(LDFLAGS) -o $(ALL_TAGS) $(ALL_DEPS) -ly -ll 
-endif
+	$(LD) $(LDFLAGS) -o $(ALL_TAGS) $(ALL_DEPS) $(YACCLIB) $(LEXLIB) 
 #
 $(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
 	cd $(TMP_DIR);\
         $(RM) idl-yacc.c;\
-	yacc -v $(SRC_DIR)/idl.y;\
+	$(YACC) -v $(SRC_DIR)/idl.y;\
 	cat y.tab.c \
         | sed 's/#ifndef YYSTYPE/#ifndef BUG_IN_AIX/' \
         | sed 's/#define YYSTYPE/#define BUG_IN_AIX/' \
         > idl-yacc.c;\
 	$(RM) y.tab.c ;\
-        lex $(SRC_DIR)/idl.l;\
+        $(LEX) $(SRC_DIR)/idl.l;\
         $(RM) idl-lex.c;\
         cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' > idl-lex.c;\
         $(RM) lex.yy.c;\
@@ -217,32 +267,42 @@ $(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
 $(filter-out $(BIN_DIR)/stic,$(FILES_EXE)) : $(FILES_A)
 
 $(BIN_DIR)/% : $(SRM_DIR)/%.cc
-	$(CXX)  $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES)  $(SRM_DIR)/$(STEM).cc $(FILES_A) $(CLIBS) -o $(ALL_TAGS)
+	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(INCLUDES)  $(SRM_DIR)/$(STEM).cc $(ALL_LIBS) -o $(ALL_TAGS)
 
 $(BIN_DIR)/% : (SRM_DIR)/%.c
-	$(CXX)  $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(SRM_DIR)/$(STEM).c  $(FILES_A) $(CLIBS) -o $(ALL_TAGS)
+	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(INCLUDES) $(SRM_DIR)/$(STEM).c   $(ALL_LIBS) -o $(ALL_TAGS)
+
+#	PAM.exe
+$(BIN_DIR)/$(PKGNAME)Staf : $(MY_LIB)
+	cd $(SRC_GEN_DIR); $(RM) $(PKGNAME).cc $(PKGNAME)_init.cc; \
+	$(STAFGEN) -p $(PKGNAME) > $(PKGNAME)Staf.cc; \
+	$(PAMIGEN) $(PKGNAME) $(SRC_DIR)/*.idl > $(PKGNAME)_init.cc; \
+	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES)  $(PKGNAME)Staf.cc $(PKGNAME)_init.cc $(ALL_LIBS) -o $(ALL_TAGS)
 
 CDFtoC: $(FILES_C_CDF)
 
+IdlToH: $(FILES_IDH)
 
-#Libraries : $(MY_LIB) $(MY_SO)
-Libraries : $(MY_LIB) 
+lib : CDFtoC IdlToH $(MY_LIB)
+#lib : CDFtoC IdlToH $(MY_LIB) $(MY_SO)
 
 $(MY_LIB) : $(FILES_O)
 	$(AR) $(ARFLAGS) $(MY_LIB) $(FILES_O)
-#	OBJS := $(foreach  OBJ, $(FILES_O), $(shell test -z `nm -p $OBJ |  $(GREP) ' T main' ` || echo $(OBJ)))
-#	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
-#	@OBJS=; for OBJ in $(FILES_O)/ ; do x=`nm -p $$OBJ | $(GREP) ' T main' `; if test "$$x"="" ; then OBJS="$$OBJS $$OBJ"; fi done;\
-#	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
+	touch $(MY_LIB)
 
-$(LIB_DIR)/lib$(PKGNAME).$(SOEXT) : $(FILES_O)
+$(MY_SO) : $(FILES_O)
 	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(SOEXT) $(FILES_O)
 
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
 
+$(SRC_GEN_DIR)%.c : %.y
+	cd $(TMP_DIR);\
+	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(SRC_GEN_DIR)/$(STEM).c
+
 %.c : %.y
-	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(STEM).c
+	cd $(TMP_DIR);\
+	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(SRC_GEN_DIR)/$(STEM).c
 
 $(OBJ_DIR)/%.o : %.c 
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
@@ -251,10 +311,10 @@ $(OBJ_DIR)/%.o : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(OBJ_DIR)/%.o : %.F 
-	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(OBJ_DIR)/%.o : %.f 
-	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(SRC_GEN_DIR)/%-lex.c : $(SRC_DIR)/%.l 
 	lex $(ALL_DEPS)
@@ -271,30 +331,33 @@ $(SRC_GEN_DIR)/%-lex.c : $(SRM_DIR)/%.l
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
-        > $(ALL_TAGS)
+	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cc 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
-        > $(ALL_TAGS)
+	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
 
 
 $(DEP_DIR)/%.d:  %.F
 	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS)  | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
-        > $(ALL_TAGS)
+	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(ALL_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
 
-####%.d:  %.cdf
+$(DEP_DIR)/%.d:  $(IDL_DIR)/%.idl
+	$(RM)  $(ALL_TAGS)
+	$(STIC)  -M   $(ALL_DEPS)  | sed -e '1d' > $(ALL_TAGS)
+
+$(INC_GEN_DIR)/%.h:  %.idl
+	cd $(INC_GEN_DIR) ; cp $(1ST_DEPS) .;\
+	$(STIC)  -f $(INCLUDES)   $(1ST_DEPS)  
+
+
+
 
 $(DEP_DIR)/%.didlm : $(IDM_DIR)%.$(SUFF_IDM) 
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
         $(GCC)  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
         sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | $(GREP) ":" >> $(GEN_DIR)/$(STEM).didlm
+	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
@@ -311,53 +374,60 @@ clean :
 endif # end of DoIt
 
 show: 
-	@echo MAKE        := $(MAKE)
-	@echo MAKEFLAGS   := $(MAKEFLAGS)
-	@echo MAKEFILES   := $(MAKEFILES)
-	@echo STAF_HOME   := $(STAF_HOME)
-	@echo SUFF_IDM    := $(SUFF_IDM) 
-	@echo SUFF_IDL    := $(SUFF_IDL) 
-	@echo INP_DIR     := $(INP_DIR) 
-	@echo OUT_DIR     := $(OUT_DIR) 
-	@echo PKGNAME     := $(PKGNAME) 
-	@echo PKG_SDD     := $(PKG_SDD)
-	@echo SRC_DIR     := $(SRC_DIR)
-	@echo SRC_GEN_DIR := $(SRC_GEN_DIR) 
-	@echo SRM_DIR     := $(SRM_DIR) 
-	@echo SRM_GEN_DIR := $(SRM_GEN_DIR) 
-	@echo INC_DIR     := $(INC_DIR)
-	@echo IDL_DIR     := $(IDL_DIR)
-	@echo IDM_DIR     := $(IDM_DIR) 
-	@echo LIB_DIR     := $(LIB_DIR)
-	@echo OBJ_DIR     := $(OBJ_DIR)
-	@echo DEP_DIR     := $(DEP_DIR) 
-	@echo TMP_DIR     := $(TMP_DIR)
-	@echo INC_GEN_DIR := $(INC_GEN_DIR) 
-	@echo BIN_DIR     := $(BIN_DIR) 
-	@echo DOIT        := $(DOIT)
-	@echo OUPUT_DIRS  := $(OUPUT_DIRS)
-	@echo INPUT_DIRS  := $(INPUT_DIRS)
-	@echo FILES_IDM   := $(FILES_IDM)
-	@echo FILES_IDL   := $(FILES_IDL)
-	@echo FILES_SRC   := $(FILES_SRC)
-	@echo FILES_SRM   := $(FILES_SRM)
-	@echo NAMES_EXE   := $(NAMES_EXE)
-	@echo FILES_EXE   := $(FILES_EXE)
-	@echo CDF_DIR     := $(CDF_DIR)
-	@echo FILES_D     := $(FILES_D)
-	@echo FILES_O     := $(FILES_O)
-	@echo FILES_CDF   := $(FILES_CDF)
-	@echo INCLUDES    := $(INCLUDES)
-	@echo TOPDIR      := $(TOPDIR)
-	@echo VPATH       := $(VPATH)
-	@echo ASPS        := $(ASPS)
-	@echo FILES_A   := $(FILES_A)
-	@echo OSFID     := $(OSFID)
-	@echo UNDERSCORES      := $(UNDERSCORES)
-	@echo NOUNDERSCOR      := $(NOUNDERSCOR)
-	@echo ONLYOSFID        := $(ONLYOSFID)
-	@echo QWE1        := $(QWE1)
-	@echo QWE2        := $(QWE2)
-	@echo CXXFLAGS    := $(CXXFLAGS)
-	@echo CFLAGS      := $(CFLAGS)
-	@echo FFLAGS      := $(FFLAGS)
+	@echo MAKE        	:= $(MAKE)
+	@echo MAKEFLAGS   	:= $(MAKEFLAGS)
+	@echo MAKEFILES   	:= $(MAKEFILES)
+	@echo STAF_MAKE_HOME   	:= $(STAF_MAKE_HOME)
+	@echo SUFF_IDM    	:= $(SUFF_IDM) 
+	@echo SUFF_IDL    	:= $(SUFF_IDL) 
+	@echo SOEXT    		:= $(SOEXT) 
+	@echo INP_DIR     	:= $(INP_DIR) 
+	@echo OUT_DIR     	:= $(OUT_DIR) 
+	@echo PKGNAME     	:= $(PKGNAME) 
+	@echo PKG_SDD     	:= $(PKG_SDD)
+	@echo SRC_DIR     	:= $(SRC_DIR)
+	@echo SRC_GEN_DIR 	:= $(SRC_GEN_DIR) 
+	@echo SRM_DIR     	:= $(SRM_DIR) 
+	@echo SRM_GEN_DIR 	:= $(SRM_GEN_DIR) 
+	@echo INC_DIR     	:= $(INC_DIR)
+	@echo IDL_DIR     	:= $(IDL_DIR)
+	@echo IDM_DIR     	:= $(IDM_DIR) 
+	@echo LIB_DIR     	:= $(LIB_DIR)
+	@echo OBJ_DIR     	:= $(OBJ_DIR)
+	@echo DEP_DIR     	:= $(DEP_DIR) 
+	@echo TMP_DIR     	:= $(TMP_DIR)
+	@echo INC_GEN_DIR 	:= $(INC_GEN_DIR) 
+	@echo BIN_DIR     	:= $(BIN_DIR) 
+	@echo DOIT        	:= $(DOIT)
+	@echo OUPUT_DIRS  	:= $(OUPUT_DIRS)
+	@echo INPUT_DIRS  	:= $(INPUT_DIRS)
+	@echo FILES_IDM   	:= $(FILES_IDM)
+	@echo FILES_IDL   	:= $(FILES_IDL)
+	@echo FILES_SRC   	:= $(FILES_SRC)
+	@echo FILES_SRM   	:= $(FILES_SRM)
+	@echo NAMES_EXE   	:= $(NAMES_EXE)
+	@echo FILES_EXE   	:= $(FILES_EXE)
+	@echo CDF_DIR     	:= $(CDF_DIR)
+	@echo FILES_D     	:= $(FILES_D)
+	@echo FILES_O     	:= $(FILES_O)
+	@echo FILES_CDF   	:= $(FILES_CDF)
+	@echo INCLUDES    	:= $(INCLUDES)
+	@echo VPATH       	:= $(VPATH)
+	@echo ASPS        	:= $(ASPS)
+	@echo FILES_A   	:= $(FILES_A)
+	@echo OSFID     	:= $(OSFID)
+	@echo UNDERSCORES      	:= $(UNDERSCORES)
+	@echo NOUNDERSCOR      	:= $(NOUNDERSCOR)
+	@echo ONLYOSFID        	:= $(ONLYOSFID)
+	@echo MY_LIB        	:= $(MY_LIB)
+	@echo MY_SO        	:= $(MY_SO)
+	@echo FC        	:= $(FC)
+	@echo CC        	:= $(CC)
+	@echo CXX        	:= $(CXX)
+	echo QWE1        	:= $(QWE1)
+	@echo QWE2        	:= $(QWE2)
+	@echo INCLUDES        	:= $(INCLUDES)
+	@echo STIC        	:= $(STIC)
+
+
+

@@ -1,8 +1,8 @@
 #ifndef __CDL_H__
 #define __CDL_H__
 
-#if defined(HPUX)
 #include <stdlib.h>
+#if defined(HPUX)
 #include <dl.h>
 void perror();
 #elif defined(AIX)

@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.24 1998/05/18 17:58:20 dave Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.25 1998/05/19 16:36:41 perev Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -332,10 +332,8 @@ socCatalog::bind (const char * pname) {
 
    status = soc_dl_load((char*)pname);
 
-#ifdef NO_AUTO_INIT_DL
-   status = soc_dl_init((char*)pname);
-   status = soc_dl_start((char*)pname);
-#endif
+//VP   status = soc_dl_init((char*)pname);
+//VP   status = soc_dl_start((char*)pname);
 
    return status;
 }
