@@ -24,7 +24,7 @@
       g2t_rch_hit_h.nok = 0
 
 *      open(unit=21,file='a.txt',status='unknown')
-      do Isys=1,2
+      do Isys=1,4
 
        if (isys.eq.1) call G2R_GET_SYS ('RICH','RGAP',Iprin,Idigi)
        if (isys.eq.2) call G2R_GET_SYS ('RICH','RCSI',Iprin,Idigi)
