@@ -33,11 +33,14 @@
 /*	Make "standard I/O" definitions:      */
 
 #include <stdio.h>
+#include <string.h>
 
+
+	void	strend_( char *, int *, size_t );
 
 /*	Define file-wide-global pointers fpr and fpw and function-pointer fopen,  type FILE, defined in stdio.h:     */
 
-FILE *fpr, *fpw, *fopen();
+FILE *fpr, *fpw;
 
 #define TRUE -1
 #define FALSE 0
@@ -96,7 +99,7 @@ A null is appended to the string.
 
 
 
-strbyte_closer_()
+void strbyte_closer_()
 {
 	if (fpr)
 	  fclose(fpr);
@@ -107,7 +110,7 @@ strbyte_closer_()
 
 
 
-strbyte_closew_()
+void strbyte_closew_()
 {
 	if (fpw)
 	  fclose(fpw);
@@ -154,7 +157,6 @@ int strbyte_openr_(
 	static char local_filename[256];  /* fopen needs a local (non-pointer) filename. */
 	int dummy;
 
-	void strfc( char *ftext, int ftext_length, char *ctext, int ctext_length, int *dummy ); /*  Prototype */
 
 	strfc( filename, filename_length, local_filename, 256, &dummy );
 
@@ -214,8 +216,6 @@ int strbyte_openw_(
 	static char local_filename[256];  /* fopen needs a local (non-pointer) filename. */
 	int dummy;
 
-	void strfc( char *ftext, int ftext_length, char *ctext, int ctext_length, int *dummy ); /*  Prototype */
-
 	strfc( filename, filename_length, local_filename, 256, &dummy );
 
 
@@ -239,7 +239,7 @@ int strbyte_openw_(
 
 
 
-strbyte_read_( int *Nbytes, void *buffer )
+void strbyte_read_( int *Nbytes, void *buffer )
 {
 	int Nbytes_from_file;
 
@@ -270,7 +270,7 @@ strbyte_read_( int *Nbytes, void *buffer )
 
 
 
-strbyte_write_( int *Nbytes, void *buffer )
+void strbyte_write_( int *Nbytes, void *buffer )
 {
 	int Nbytes_to_file;
 
