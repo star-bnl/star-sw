@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.10 2002/04/19 22:24:12 perev Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.11 2002/09/13 13:44:55 fsimon Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.11  2002/09/13 13:44:55  fsimon
+// Commented out anglefactor
+//
 // Revision 1.10  2002/04/19 22:24:12  perev
 // fixes for ROOT/3.02.07
 //
@@ -59,6 +62,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   innerRadius = mDb->sensitiveVolumeInnerRadius();
   outerRadius = mDb->sensitiveVolumeOuterRadius();
   angleFactor = mParam->lorentzAngleFactor();
+  
   grid_point = new grid_data[mParam->numSlowSimGridPoints()];
   
   int i;
@@ -135,6 +139,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];
   
   float deltaP = mParam->slowSimPressure()-mParam->standardPressure();
+  
   {for(int i=0; i<nMagboltzBins; i++)
     {
       preciseEField[i] = mDb->magboltzEField(i);
