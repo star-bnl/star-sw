@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexAnalysis.cxx,v 1.1 2000/07/16 21:44:11 laue Exp $
+ * $Id: StHbtVertexAnalysis.cxx,v 1.2 2000/07/16 22:23:17 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexAnalysis.cxx,v $
+ * Revision 1.2  2000/07/16 22:23:17  laue
+ * I forgot that we moved memberfunctions out of StHbtBaseAnalysis.
+ * So my previous check-ins didn't compile with the library.
+ * Now they do.
+ *
  * Revision 1.1  2000/07/16 21:44:11  laue
  * Collection and analysis for vertex dependent event mixing
  *
@@ -94,7 +99,6 @@ StHbtVertexAnalysis::StHbtVertexAnalysis(unsigned int bins, double min, double m
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
-  mThirdParticleCut  = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
@@ -111,7 +115,6 @@ StHbtVertexAnalysis::StHbtVertexAnalysis(const StHbtVertexAnalysis& a) : StHbtBa
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
-  mThirdParticleCut  = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
