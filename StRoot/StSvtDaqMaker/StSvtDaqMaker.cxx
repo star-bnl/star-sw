@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.9 2001/09/16 22:08:44 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.10 2001/10/24 16:49:42 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.10  2001/10/24 16:49:42  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.9  2001/09/16 22:08:44  caines
  * Add extra checks for when SVT isnt in every event
  *
@@ -211,10 +214,6 @@ Int_t StSvtDaqMaker::GetSvtData()
   fSvtData->setRunNumber(daqReader->getRunNumber()); 
   fSvtData->setEventNumber(daqReader->getEventNumber()); 
   fSvtData->setTrigWord(daqReader->getTrigWord()); 
-  fSvtData->setSCAZero(svtReader->getSCAZero());
-  for( int i=1; i<=N_SECTORS; i++){
-    fSvtData->setTimeZero(128*40-(32*105)-(12*105)+svtReader->getTimeZero(),i); 
-  }
   fSvtData->setUnixTime(daqReader->getUnixTime());
 
   return kStOK;
@@ -343,7 +342,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.9 2001/09/16 22:08:44 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.10 2001/10/24 16:49:42 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridDaqData.cc,v 1.2 2001/07/11 23:29:48 munhoz Exp $
+ * $Id: StSvtHybridDaqData.cc,v 1.3 2001/10/24 16:49:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridDaqData.cc,v $
+ * Revision 1.3  2001/10/24 16:49:43  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.2  2001/07/11 23:29:48  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
@@ -129,5 +132,8 @@ int StSvtHybridDaqData::setHybridData(StSVTReader* reader, char* option)
     }
   }
 
+  mSCAZero = (unsigned char)reader->getSCAZero();
+  mTimeZero = (unsigned char)reader->getTimeZero(); 
+  
   return status;
 }

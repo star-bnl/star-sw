@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.hh,v 1.4 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtData.hh,v 1.5 2001/10/24 16:48:50 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.hh,v $
+ * Revision 1.5  2001/10/24 16:48:50  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.4  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -49,16 +52,12 @@ public:
   void setRunNumber(int run)   { mRunNumber = run;}
   void setEventNumber(int evt) { mEventNumber = evt;}
   void setTrigWord(int trigger) { mTriggerWord = trigger;}
-  void setSCAZero(int SCAZero){ mSCAZero = SCAZero;}
-  void setTimeZero(int t0, int sector){ mTimeZero[sector-1] = t0;}
   void setPedOffset(int offset){mPedOffset = offset;}
   void setUnixTime(int time) {mUnixTime = time;}
 
   int getRunNumber()   {return mRunNumber;}
   int getEventNumber() {return mEventNumber;}
   int getTrigWord() {return mTriggerWord;}
-  int getSCAZero(){return mSCAZero;}
-  int getTimeZero(int sector){return mTimeZero[sector-1];}
   int getPedOffset(){return mPedOffset;}
   int getUnixTime() {return mUnixTime;}
 
@@ -68,8 +67,6 @@ protected:
   int mRunNumber;   // Run Number
   int mEventNumber; // Event Number
   int mTriggerWord; // Trigger Type
-  int mSCAZero;     // Number of SCA capacitor for time bucket zero
-  int mTimeZero[N_SECTORS];    // Time zero given by each read out box (fiber header)
   int mPedOffset; //Pedestal offset added so can see zero
   int mUnixTime;  // Unix time
 
