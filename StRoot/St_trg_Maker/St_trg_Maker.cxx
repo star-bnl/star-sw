@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.7 2000/01/26 18:55:37 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.8 2000/02/04 18:57:17 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.8  2000/02/04 18:57:17  ward
+// Added dst_L1_Trigger and dst_L2_Trigger to output.
+//
 // Revision 1.7  2000/01/26 18:55:37  ward
 // Changed name of L0 table from TrgDet2 to L0_Trigger.
 //
@@ -55,6 +58,8 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StTRGReader.h"
 #include "tables/St_dst_L0_Trigger_Table.h" // 24dec99
+#include "tables/St_dst_L1_Trigger_Table.h" // 02feb00
+#include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_TrgDet_Table.h" // 24dec99
 #include "trg/St_trg_fillDst_Module.h"
 
@@ -110,13 +115,17 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
 }
 Int_t St_trg_Maker::Make(){
 
-  St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);      if(!dst1) return kStWarn; dst1->SetNRows(1);
+  St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);         if(!dst1) return kStWarn; dst1->SetNRows(1);
   St_dst_L0_Trigger *dst2 = new St_dst_L0_Trigger("L0_Trigger",1); if(!dst2) return kStWarn; dst2->SetNRows(1);
+  St_dst_L1_Trigger *dst3 = new St_dst_L1_Trigger("L1_Trigger",1); if(!dst3) return kStWarn; dst3->SetNRows(1);
+  St_dst_L2_Trigger *dst4 = new St_dst_L2_Trigger("L2_Trigger",1); if(!dst4) return kStWarn; dst4->SetNRows(1);
   m_DataSet->Add(dst1);
   m_DataSet->Add(dst2);
+  m_DataSet->Add(dst3);
+  m_DataSet->Add(dst4);
 
   St_DataSet *herb = GetDataSet("StDAQReader");
-  if(herb) return Daq(herb,dst1,dst2); else return Sim(dst1,dst2);
+  if(herb) return Daq(herb,dst1,dst2,dst3,dst4); else return Sim(dst1,dst2,dst3,dst4);
 
 }
 void St_trg_Maker::CtbMwcDaq(St_dst_TrgDet *dst1) { // For real data, this takes the place of the trg_fillDst module.
@@ -127,7 +136,8 @@ void St_trg_Maker::CtbMwcDaq(St_dst_TrgDet *dst1) { // For real data, this takes
                                        //     of RAW.CTB. Hank is sending email to startrg-l.
   for(i=0;i< 96;i++) tt->nMwc[i]=GraceSlick->RAW.MWC[i];
 }
-int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2) {
+int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
+      St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
   char *ptr;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
@@ -145,11 +155,24 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   VpdDaq(dst1);       // The function
   ZdcDaq(dst1);       // St_trg_Maker::Sim
   CtbMwcDaq(dst1);    // has four lines
-  SecondDstDaq(dst2);      // which are analogous to these four.
+  SecondDstDaq(dst2); // which are analogous to these four.
+  TakeCareOfL1andL2Daq(dst3,dst4);
 
   return kStOK;
 }
-int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2) {
+void St_trg_Maker::TakeCareOfL1andL2Daq(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
+  int i;
+  dst_L1_Trigger_st *tt1 = dst3->GetTable();
+  dst_L2_Trigger_st *tt2 = dst4->GetTable();
+  for(i=0;i<32;i++) {
+    tt1->L1_result[i] = GraceSlick->TrgSum.L1Result[i];
+    tt2->L2_result[i] = GraceSlick->TrgSum.L2Result[i];
+  }
+}
+void St_trg_Maker::TakeCareOfL1andL2Sim(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
+  // bbb Like the rest of the sim stuff, this needs to be filled in.
+}
+int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
   St_DataSet *ctf = GetInputDS("ctf");
   St_DataSet *mwc = GetInputDS("mwc");
@@ -162,6 +185,7 @@ int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2) {
   ZdcSim(dst1);
   Int_t Res = trg_fillDst(ctu_cor,mwc_raw,dst1); if (Res != kSTAFCV_OK) return kStWarn;
   SecondDstSim(dst2);
+  TakeCareOfL1andL2Sim(dst3,dst4);
 
   return kStOK;
 }
