@@ -166,6 +166,36 @@ int kam_socobject_type()
 
 /*
 *:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_version_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/OBJECT/VERSION IDREF
+*:<---------------------------------------------------------------------
+*/
+void kam_socobject_version_(){kam_socobject_version();}
+int kam_socobject_version()
+{
+   long npars = ku_npar();	// number of KUIP parameters 
+   long idref = ku_geti();	// idRef of object 
+
+   if( !VALID_IDREF(idref) ){
+      EML_ERROR(KAM_INVALID_IDREF);
+   }
+
+   socObject* p;
+   if( !soc->getObject(idref,p) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+   char *t;
+   printf("SOC:\tObject version = %s \n",t=p->version());
+   delete[] t;
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_soc_count_
 *:DESCRIPTION:  KUIP Action Module to show number of registered objects
 *:ARGUMENTS:    -- NONE --

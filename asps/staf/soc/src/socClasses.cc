@@ -75,6 +75,7 @@ socObject:: socObject(long n, const char* type) {
    soc->signIn(this,myIdRef);
 }
 
+//----------------------------------
 char *id2name(char *base, long id)
 {
    char *name;
@@ -111,6 +112,14 @@ char * socObject::  name () {
 char * socObject::  type () {
    char *c = (char*)ASUALLOC(strlen(myType->show())+1);
    strcpy(c,myType->show());
+   return c;
+}
+
+//----------------------------------
+char * socObject::  version () {
+   char *myVersion="dev";
+   char *c = (char*)ASUALLOC(strlen(myVersion)+1);
+   strcpy(c,myVersion);
    return c;
 }
 
@@ -252,6 +261,12 @@ socCatalog:: ~socCatalog() {
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
+char * socCatalog:: version() {
+	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.6 1996/07/18 23:34:50 tull Exp $";
+	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
+	strcpy(c,myVersion);
+	return c;
+}
 
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T socCatalog:: deleteID (IDREF_T id) {

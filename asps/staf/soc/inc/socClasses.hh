@@ -38,6 +38,7 @@ public:
    virtual IDREF_T idRef ();
    virtual char * name ();
    virtual char * type ();
+   virtual char * version ();
    virtual SOC_PTR_T ptr ();
    virtual char * soRef ();
    virtual void lock (unsigned char lock);
@@ -107,6 +108,7 @@ public:
    virtual ~socCatalog();
 
 //:----------------------------------------------- ATTRIBUTES         --
+   virtual char * version (); // override virtual
 
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual char * list (); // override virtual
