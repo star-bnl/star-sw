@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.4 2000/11/27 02:26:51 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.5 2000/11/27 22:47:02 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -356,7 +356,7 @@ Int_t StdEdxMaker::Make(){
       dx = TMath::Abs(s_out-s_in);
       if (dx < 0.5 || dx > 25.) continue;
       // Corrections
-      if (m_tpcGain) {
+      if (m_tpcGain && ! point->TestBit(kIsCalibrated)) {
 	Int_t pad = Pad.pad();
 	tpcGain_st *gain = m_tpcGain->GetTable() + sector - 1;
 	dE *= gain->Gain[padrow-1][pad-1]; 
