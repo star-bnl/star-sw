@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.h,v 1.4 2003/04/29 16:22:44 perev Exp $
+ * $Id: StTPCReader.h,v 1.5 2004/01/23 16:06:43 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.h,v $
+ * Revision 1.5  2004/01/23 16:06:43  jeromel
+ * Added friend class for FCF
+ *
  * Revision 1.4  2003/04/29 16:22:44  perev
  * non TPCoriented cleanup
  *
@@ -79,7 +82,8 @@ class StFTPCReader;
 
 class  StTPCReader
 {
-  friend class St_tpcdaq_Maker; // Herb Oct 2002 for DAQ100, for access to ptrTPCP.
+  friend class St_tpcdaq_Maker;      // Herb Oct 2002 for DAQ100, for access to ptrTPCP.
+  friend class StRTSClientFCFMaker;  // allow RTSClient to access ptrTPCP
   public:
 
   StTPCReader(StDAQReader *rd);
