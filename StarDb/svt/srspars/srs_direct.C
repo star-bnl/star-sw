@@ -9,8 +9,8 @@ srs_direct_st row;
 St_srs_direct *tableSet = new St_srs_direct("srs_direct",2);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.sd	 =      0.002; // sigma in drift direction ;
-    row.st	 =      0.002; // sigma transverse direction ;
+    row.sd	 =      0.008; // sigma in drift direction ;
+    row.st	 =      0.008; // sigma transverse direction ;
 tableSet->AddAt(&row,0);
 memset(&row,0,tableSet->GetRowSize());
     row.sd	 =      0.002; // sigma of SSD in the trans. direction ;
