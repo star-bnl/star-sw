@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.2 1998/07/12 21:21:35 sakrejda Exp $
+* $Id: tph_get_cluster_data.F,v 1.3 1999/06/09 14:45:43 hardtke Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.3  1999/06/09 14:45:43  hardtke
+* add 1 to kseqpix
+*
 * Revision 1.2  1998/07/12 21:21:35  sakrejda
 * protection against unphysical time buckets
 *
@@ -167,7 +170,8 @@ c
            itrk(iclspix) = 0
 c new way to unpack data
 *           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
-           kseqpix = local_tdc_high -local_tdc_low
+CDH           kseqpix = local_tdc_high -local_tdc_low
+           kseqpix = local_tdc_high -local_tdc_low + 1
          
 *           itdc(iclspix) = tpseq(kseq).tdc_low
            itdc(iclspix) = local_tdc_low
