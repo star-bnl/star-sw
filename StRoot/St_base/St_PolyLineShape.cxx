@@ -1,4 +1,4 @@
-// $Id: St_PolyLineShape.cxx,v 1.21 1999/12/21 18:57:14 fine Exp $ 
+// $Id: St_PolyLineShape.cxx,v 1.22 2000/01/28 04:44:41 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to define an abstract 3D shape os STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -21,7 +21,6 @@
 #include "St_PolyLineShape.h"
 
 #include "St_Points3D.h"
-#include "St_PolyLine3D.h"
 #include <TPolyLine3D.h>
 #include <TPolyMarker3D.h>
 #include "St_Node.h"
@@ -862,6 +861,9 @@ void St_PolyLineShape::Sizeof3D() const
 
 //______________________________________________________________________________
 // $Log: St_PolyLineShape.cxx,v $
+// Revision 1.22  2000/01/28 04:44:41  fine
+// include St_PolyLine3D has been removed
+//
 // Revision 1.21  1999/12/21 18:57:14  fine
 // compilation warning plus new type for SizeAttribute
 //
