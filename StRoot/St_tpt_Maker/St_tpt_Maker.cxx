@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.34 1999/05/21 21:40:34 liq Exp $
+// $Id: St_tpt_Maker.cxx,v 1.35 1999/06/02 01:28:22 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.35  1999/06/02 01:28:22  sakrejda
+// comment before tte_track corrected (was about residuals instead of tte_track)
+//
 // Revision 1.34  1999/05/21 21:40:34  liq
 // set protection for no selected tracks from mctrk
 //
@@ -232,7 +235,7 @@ Int_t St_tpt_Maker::Make(){
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
       if (g2t_tpc_hit && g2t_track) {
-	if (Debug()) cout << "start run_tpt_residuals" << endl;
+	if (Debug()) cout << "start run_tte_track" << endl;
 	Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
 	if (Res_tte_track != kSTAFCV_OK) {cout << " Problem running tte_track " << endl;}
 	if (Debug()) cout << " finish run_tte_track " << endl; 
@@ -619,7 +622,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.34 1999/05/21 21:40:34 liq Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.35 1999/06/02 01:28:22 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
