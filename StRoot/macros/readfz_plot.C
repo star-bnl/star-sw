@@ -1,0 +1,36 @@
+// readfz_plot.C
+//
+// reads in geant fz file, gives a browser and then you can make a plot
+
+{
+gROOT->LoadMacro("geant.C");
+Load();
+geant(1,"/disk1/star/test/psc0049_08_40evts.fzd");
+//this will run 1 event and give you a browser
+// if you want to plot something from geant/event/g2t_track then
+
+St_DataSet *yp = chain->DataSet("geant");
+//pointer to geant set
+
+St_DataSetIter geantIter(yp);
+// iterator
+
+St_g2t_track *pt = (St_g2t_track *) geantIter.Find("g2t_track");
+// pointer to g2t_track
+
+g2t_track_st *t = pt->GetTable();
+// pointer to table
+
+TH1F *h1 = new TH1F("g2t_rap","rapidity",100,-7.0,7.0);
+//define histogram
+
+for (Int_t i = 0; i < pt->GetNRows(); i++,t++){ h1->Fill(t->rapidity);}
+//fill histogram
+
+TCanvas *c1 = new TCanvas("c1","c1");
+// make canvas
+
+h1->Draw();
+// on screen
+}
+
