@@ -17,9 +17,9 @@ void Example_tagDB(const Char_t * selection = NULL)
 //////////////////////////////////////////////////////////////////////////
 
 
-  // start timer
-  TStopwatch timer;
-  timer.Start();
+  // start benchmarks
+  gBenchmark = new TBenchmark();
+  gBenchmark->Start("total");
    
   TSQLServer *db = TSQLServer::
        Connect("mysql://duvall.star.bnl.gov/fcMDC3", "", "");
@@ -41,6 +41,8 @@ void Example_tagDB(const Char_t * selection = NULL)
   cout<<"Selected "<<nFiles<<" files from the tagDB"<<endl;
   if  (nFiles==0) return;
 
+  // set loop optimization level
+  gROOT->ProcessLine(".O4");
   // gather all files from the same Run into one chain for loading to tagDB
   TChain chain("Tag");
   TString fileName;
@@ -89,35 +91,39 @@ void Example_tagDB(const Char_t * selection = NULL)
   gPad->Update();
   //return;
 
+  gBenchmark->Start("loop");
   //loop over all events
   for (Int_t k=0;k<chain->GetEntries();k++) {
 
-    //test that all events can be read in
+    //test that all events can be read in (read in all the tags)
     chain->GetEntry(k);
 
     //print values only for the first event in each file of the chain
-    if (k == *(chain.GetTreeOffset()+chain.GetTreeNumber()))
-      {
-	file = (files->UncheckedAt(chain.GetTreeNumber()))->GetTitle();
-	cout<<"chain event "<< k 
-	    <<", start of file "<< chain.GetTreeNumber()+1
-	    <<": "<< file.Data() <<endl;
+    if (k == *(chain.GetTreeOffset()+chain.GetTreeNumber())) {
+      file = (files->UncheckedAt(chain.GetTreeNumber()))->GetTitle();
+      cout<<"chain event "<< k 
+	  <<", start of file "<< chain.GetTreeNumber()+1 <<endl;
+//       cout<<": "<< file.Data() <<endl;
 
-	//must renew pointers for each file
-	branches = chain.GetListOfBranches();	
-	leaves = chain.GetListOfLeaves();
-
-	for (l=0;l<nleaves;l++) {
-	  leaf = (TLeaf*)leaves->UncheckedAt(nleaves-l-1);
- 	  branch = leaf->GetBranch();
-	    	  if(branches->IndexOf(branch)!=2)
-	   	    cout<<leaf->GetName()<<" = "<<leaf->GetValue()<<endl;
-	}
+      //printout NLa value
+      leaf = chain.GetLeaf("NLa");
+      cout<<leaf->GetName()<<" = "<<leaf->GetValue()<<endl;
 	
-      }
+      //uncomment lines below to printout all tag values
+//       branches = chain.GetListOfBranches();//renew pointers for each file
+//       leaves = chain.GetListOfLeaves();
+//       for (l=0;l<nleaves;l++) {
+// 	leaf = (TLeaf*)leaves->UncheckedAt(nleaves-l-1);
+// 	branch = leaf->GetBranch();
+// 	if(branches->IndexOf(branch)!=2)
+// 	  cout<<leaf->GetName()<<" = "<<leaf->GetValue()<<endl;
+//       }
+    }
   }
   
-  // stop timer and print results
-  timer.Stop();
-  cout<<"RealTime="<<timer.RealTime()<<" seconds, CpuTime="<<timer.CpuTime()<<" seconds"<<endl;
+  // stop timer and print benchmarks
+  gBenchmark->Stop("loop");
+  gBenchmark->Print("loop");  
+  gBenchmark->Stop("total");
+  gBenchmark->Print("total");  
 }
