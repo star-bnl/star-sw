@@ -49,7 +49,8 @@ ClassImp(StKinkMaker)
   StKinkMaker::StKinkMaker(const char *name, TrackerUsage use):StMaker(name),m_tkfpar(0)
 {
   mTrack1=0;          
-  mTrack2=0;     
+  mTrack2=0;   
+  mGlobalTrks=0;
   mParentTrackCandidate=0;             
   mDaughterTrackCandidate=0;
   event=0;
@@ -120,19 +121,26 @@ Int_t StKinkMaker::Make(){//called for each event
  //### global tracks to use
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   nNodes = theNodes.size();
-
+  mGlobalTrks=0;
   for (i=0;i<nNodes;i++){
     for (j=0; j<theNodes[i]->entries(global);j++){
       StTrack* trk = theNodes[i]->track(global,j);
       if(!acceptTrack(trk,ITTFflag,UseTracker))continue;
 
      //******* find the magnetic field
-      StThreeVectorD p11 = trk->geometry()->momentum();
-      StThreeVectorD p22 = trk->geometry()->helix().momentum(mBfield);
-      if(p22.x() != 0) mBfield *= p11.x()/p22.x();
-      else mBfield *= p11.y()/p22.y();
-      
+      StTrackGeometry* trkGeom = trk->geometry();
+      if(!trkGeom) continue; //ignore the track if it has no geometry 
+
+      if(!mGlobalTrks)//calculate mBfield only for the first global trk from the event
+        {
+
+         StThreeVectorD p11 = trk->geometry()->momentum();
+         StThreeVectorD p22 = trk->geometry()->helix().momentum(mBfield);
+         if(p22.x() != 0) mBfield *= p11.x()/p22.x();
+         else mBfield *= p11.y()/p22.y();
+	}
       //### cut: fiducial volume
+
       Float_t trkStartRadius2D = trk->geometry()->origin().perp();
       Float_t trkEndRadius2D = trk->outerGeometry()->origin().perp();
       if (trkStartRadius2D < tkfpar->vertexRMin2D && //cut [133,179]
@@ -142,6 +150,7 @@ Int_t StKinkMaker::Make(){//called for each event
 	    trkEndRadius2D > tkfpar->vertexRMin2D ){
 	tempTrack = new StKinkLocalTrack(trk);
 	trackArray.Add(tempTrack);//keep the track if ok
+	mGlobalTrks++;
       }
       }//for each track in the node
   }   //for each node
