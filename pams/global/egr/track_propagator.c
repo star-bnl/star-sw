@@ -64,9 +64,9 @@ long type_of_call track_propagator_(
           /* message('Error, invpt); */
           pt = 99999.;
         }
-      
-      trk[0] = gtrack[i].x0;
-      trk[1] = gtrack[i].y0;
+
+      trk[0] = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG);
+      trk[1] = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG);
       trk[2] = gtrack[i].z0;
       trk[3] = gtrack[i].psi*C_RAD_PER_DEG;
       trk[4] = gtrack[i].tanl;
@@ -90,10 +90,13 @@ long type_of_call track_propagator_(
                   printf("new z,psi %f , %f \n",xout[0],xout[1]);  */
           /*	  prop_project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); */
 	  
-	  ptrack[i].x0 = xpr[0];
-	  ptrack[i].y0 = xpr[1];
-	  ptrack[i].z0 = xout[0];
-	  ptrack[i].psi= xout[1]*C_DEG_PER_RAD;
+	  ptrack[i].r0   = sqrt(xpr[0]*xpr[0]+xpr[1]*xpr[1]);
+	  ptrack[i].phi0 = atan2(xpr[1],xpr[0]);
+          if(ptrack[i].phi0 < 0. ) 
+            ptrack[i].phi0 = ptrack[i].phi0 + C_2PI;
+          ptrack[i].phi0 = ptrack[i].phi0*C_DEG_PER_RAD;
+	  ptrack[i].z0   = xout[0];
+	  ptrack[i].psi  = xout[1]*C_DEG_PER_RAD;
           
 	  if (target->iflag == 2)
 	    {
@@ -109,16 +112,19 @@ long type_of_call track_propagator_(
 	      trk[3] = xout[1];
 	      prop_track_mom_(trk, p);  
 	      prop_fine_approach_(xv, x1, p, &xx0); 
-	      ptrack[i].x0 = xx0[0];
-	      ptrack[i].y0 = xx0[1];
+              ptrack[i].r0   = sqrt(xx0[0]*xx0[0]+xx0[1]*xx0[1]);
+              ptrack[i].phi0 = atan2(xx0[1],xx0[0]);
+              if(ptrack[i].phi0 < 0. ) 
+                ptrack[i].phi0 = ptrack[i].phi0 + C_2PI;
+              ptrack[i].phi0 = ptrack[i].phi0*C_DEG_PER_RAD;
 	      ptrack[i].z0 = xx0[2];
 	    }
 	}
       
       if(target->iflag == 3)
 	{
-          x0   = gtrack[i].x0 ;
-          y0   = gtrack[i].y0 ;
+          x0   = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG) ;
+          y0   = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG) ;
           z0   = gtrack[i].z0;
 	  prop_circle_param_(trk, xc1, &r1); 
 	  xc2[0] = xc2[1] = 0.;
@@ -154,23 +160,31 @@ long type_of_call track_propagator_(
 	  ev0_project_track_(xc, &r1, xp, xpr); 
           prop_update_track_param_(xc, &r1, xpr, trk, xout, &bfld);
 	  
-	  ptrack[i].x0 = xpr[0];
-	  ptrack[i].y0 = xpr[1];
+	  ptrack[i].r0   = sqrt(xpr[0]*xpr[0]+xpr[1]*xpr[1]);
+	  ptrack[i].phi0 = atan2(xpr[1],xpr[0]);
+          if(ptrack[i].phi0 < 0. ) 
+            ptrack[i].phi0 = ptrack[i].phi0 + C_2PI;
+          ptrack[i].phi0 = ptrack[i].phi0*C_DEG_PER_RAD;
 	  ptrack[i].z0 = xout[0];
 	  ptrack[i].psi= xout[1]*C_DEG_PER_RAD;
 	}
       
       if(target->iflag == 4)
 	{
-          x0   = gtrack[i].x0 ;
-          y0   = gtrack[i].y0 ;
+          x0   = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG) ;
+          y0   = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG) ;
           z0   = gtrack[i].z0;
 	  phi0 = atan2(y0,x0);
           if(fabs(trk[4]) <= 0.001) trk[4]=0.001;
           dphi = - trk[5]*(target->z-z0)/(trk[4]*r1); 
 	  phi  = phi0 + dphi;
-	  ptrack[i].x0 = x0 + r1*(cos(phi)-cos(phi0));
-	  ptrack[i].y0 = y0 + r1*(sin(phi)-sin(phi0));
+	  xpr[0] = x0 + r1*(cos(phi)-cos(phi0));
+	  xpr[1] = y0 + r1*(sin(phi)-sin(phi0));
+	  ptrack[i].r0   = sqrt(xpr[0]*xpr[0]+xpr[1]*xpr[1]);
+	  ptrack[i].phi0 = atan2(xpr[1],xpr[0]);
+          if(ptrack[i].phi0 < 0. ) 
+            ptrack[i].phi0 = ptrack[i].phi0 + C_2PI;
+          ptrack[i].phi0 = ptrack[i].phi0*C_DEG_PER_RAD;
 	  ptrack[i].z0 = target->z;
 	  temppsi = trk[3]+dphi*C_DEG_PER_RAD;
 	  if(temppsi<0.)
@@ -187,8 +201,8 @@ long type_of_call track_propagator_(
       
       if(target->iflag == 5)
 	{
-          x0   = gtrack[i].x0 ;
-          y0   = gtrack[i].y0 ;
+          x0   = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG) ;
+          y0   = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG) ;
           z0   = gtrack[i].z0;
 	  xv[0] = target->x[0];
 	  xv[1] = target->x[1];
@@ -199,8 +213,11 @@ long type_of_call track_propagator_(
 	  pStraight[1] = sin(psi);
 	  pStraight[2] = tanl;
 	  prop_fine_approach_(xv, x0, pStraight, &xx0);
-	  ptrack[i].x0 = xx0[0];
-	  ptrack[i].y0 = xx0[1];
+          ptrack[i].r0   = sqrt(xx0[0]*xx0[0]+xx0[1]*xx0[1]);
+          ptrack[i].phi0 = atan2(xx0[1],xx0[0]);
+          if(ptrack[i].phi0 < 0. ) 
+            ptrack[i].phi0 = ptrack[i].phi0 + C_2PI;
+          ptrack[i].phi0 = ptrack[i].phi0*C_DEG_PER_RAD;
 	  ptrack[i].z0 = xx0[2]; 
 	}
     }
