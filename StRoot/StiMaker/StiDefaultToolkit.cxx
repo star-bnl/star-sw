@@ -40,6 +40,7 @@
 #include "Sti/StiKalmanTrackFitter.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackMerger.h"
+#include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDisplayManager.h"
@@ -80,6 +81,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackFinder(0),
   _trackFitter(0),
   _trackMerger(0),
+	_vertexFinder(0),
   _displayManager(0),
   _ioBroker(0),
   _hitLoader(0),
@@ -354,6 +356,15 @@ StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
     return _trackMerger;
   _trackMerger = new StiLocalTrackMerger(getTrackContainer());
   return _trackMerger;
+}
+
+StiVertexFinder * StiDefaultToolkit::getVertexFinder()
+{
+	cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
+  if (_vertexFinder)
+    return _vertexFinder;
+  _vertexFinder = new StiDummyVertexFinder("StEventVertex");
+  return _vertexFinder;
 }
 
 StiDisplayManager    * StiDefaultToolkit::getDisplayManager()
