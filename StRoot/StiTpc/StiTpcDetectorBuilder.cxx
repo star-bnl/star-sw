@@ -21,7 +21,7 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
-  : StiDetectorBuilder("TpcBuilder",active)
+  : StiDetectorBuilder("Tpc",active)
 {
   _innerCalc = new StiDefaultHitErrorCalculator();
   _innerCalc->set(.066, 1.2e-04, 0.0004,
@@ -38,10 +38,10 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   //8.02775e-03,3.55219e-05,6.45610e-02);
   //2.02775e-04,3.55219e-05,6.45610e-02);  //original C.P. 5/1/03 
   StiTrackingParameters * trackingPars = getTrackingParameters();
-  trackingPars->setMaxChi2ForSelection(25.);
-  trackingPars->setMinSearchWindow(2.);
-  trackingPars->setMaxSearchWindow(8.);
-  trackingPars->setSearchWindowScaling(12.);
+  trackingPars->setMaxChi2ForSelection(10.);
+  trackingPars->setMinSearchWindow(1.6);
+  trackingPars->setMaxSearchWindow(7.);
+  trackingPars->setSearchWindowScaling(10.);
 }
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
