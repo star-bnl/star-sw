@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.hh,v 1.2 2004/07/18 14:12:45 jcs Exp $
+//   $Id: StFtpcGasUtilities.hh,v 1.3 2005/03/14 22:57:18 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -9,6 +9,10 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.hh,v $
+//   Revision 1.3  2005/03/14 22:57:18  jcs
+//   clean up code
+//   use body + extra temperature readings starting with y2005
+//
 //   Revision 1.2  2004/07/18 14:12:45  jcs
 //   use adjustAverageWest/East from database
 //   always output temperature calculation information since this is a critical value for the FTPC
@@ -23,6 +27,7 @@
 #define STAR_StFtpcGasUtilities
 
 #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
+#include "tables/St_ftpcTemps_Table.h"
 
 class StFtpcGasUtilities
 {
@@ -41,6 +46,8 @@ class StFtpcGasUtilities
    Int_t barometricPressure();      //!
    Int_t averageTemperatureWest(Int_t dbDate,Int_t runNumber);  //!
    Int_t averageTemperatureEast(Int_t dbDate,Int_t runNumber);  //!
+   Int_t averageTemperatureWest(Int_t dbDate,Int_t runNumber,St_ftpcTemps *ftpcTemps);  //!
+   Int_t averageTemperatureEast(Int_t dbDate,Int_t runNumber,St_ftpcTemps *ftpcTemps);  //!
    Int_t defaultTemperatureWest(Int_t dbDate,Bool_t SVT_On); //!
    Int_t defaultTemperatureEast(Int_t dbDate,Bool_t SVT_On); //!
 
