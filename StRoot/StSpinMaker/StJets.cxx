@@ -1,7 +1,24 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.2 2003/05/09 19:28:13 thenry Exp $
+// $Id: StJets.cxx,v 1.3 2003/05/15 17:48:26 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.3  2003/05/15 17:48:26  thenry
+// Previous versions of StJets expected only primary TPC tracks to be used by
+// the jet maker.  That changed with the introduction of EMC points.
+// Therefore, a bug existed in jetParticles, because this function
+// assumed that all the TrackToJetIndices were valid primary TPC track indices.
+// This bug has been fixed, so that if the TrackToJetIndex is greater than
+// the number of primary tracks, that index is skipped in the construction
+// of the StJets::TrackVec.  Therefore, the StJets::jetParticles function NOW
+// does exactly what it did before, completely ignoring EMC Points, even when
+// they contribute to the jet.
+//
+// In addition, a new function was added: jetTrackIndices(), which returns a
+// vector of integers corresponding to TPC track indices with the addition of
+// (EMC Point index + number TPC primary tracks)).  This function then allows
+// us to determine which tracks and which points (their indexes at least) are
+// part of each jet, even if we do not have a correctly filled StppEvent*.
+//
 // Revision 1.2  2003/05/09 19:28:13  thenry
 // No changes.
 //
@@ -113,10 +130,12 @@ StJets::TrackVec StJets::jetParticles(StppEvent* event, int jetIndex)
     int size = mTrackToJetIndices->GetLast()+1;
     
     TClonesArray& tracks = *(event->tracks);
-    
+    Int_t maxNumTracks = event->nPrimTrack;   
+
     for (int i=0; i<size; ++i) {
 	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
 	int trackIndex = id->trackIndex();
+        if (trackIndex >= maxNumTracks) continue;  // Probably an emc point
 	if (id->jetIndex() == jetIndex ) {
 	    StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
 	    vec.push_back( track );
