@@ -64,7 +64,7 @@ void StHbtBinaryReader::init(const char* dir, const char* file, const char* appe
   mRetrieve = 0;
   mStHbtEventVersion = 2;
   mStHbtTrackVersion = 2,
-  mStHbtV0Version = 2;
+  mStHbtV0Version = 3;
 }
 //_______________________________
 StHbtBinaryReader::~StHbtBinaryReader(){
@@ -101,6 +101,59 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
       event=0;
     }
   }
+
+  // Pass through track cut if there is one
+  if( mTrackCut && event){
+    StHbtTrackIterator pIter;
+    StHbtTrack* pParticle;
+    StHbtTrackCollection NewTrackCollection;
+
+    for (pIter=event->TrackCollection()->begin();
+	 pIter!=event->TrackCollection()->end();pIter++){
+      pParticle = *pIter;
+      bool tmpPassParticle = mTrackCut->Pass(pParticle);
+      if (tmpPassParticle){
+	NewTrackCollection.push_back(pParticle);
+      }
+      else{
+	delete *pIter;
+      }
+    }
+    event->TrackCollection()->clear();
+
+    for (pIter=NewTrackCollection.begin();
+	 pIter!=NewTrackCollection.end();pIter++){
+      event->TrackCollection()->push_back(*pIter);
+    }
+    NewTrackCollection.clear();
+  }
+
+ //Pass through v0 cut if there is one
+ if( mV0Cut && event){
+   StHbtV0Iterator pIter;
+   StHbtV0* pParticle;
+   StHbtV0Collection NewV0Collection;
+   
+
+  for (pIter=event->V0Collection()->begin();
+	 pIter!=event->V0Collection()->end();pIter++){
+      pParticle = *pIter;
+      bool tmpPassParticle = mV0Cut->Pass(pParticle);
+      if (tmpPassParticle){
+	NewV0Collection.push_back(pParticle);
+      }
+      else{
+	delete *pIter;
+      }
+    }
+  event->V0Collection()->clear();
+  for (pIter=NewV0Collection.begin();
+       pIter!=NewV0Collection.end();pIter++){
+    event->V0Collection()->push_back(*pIter);
+  }
+  NewV0Collection.clear();
+ }
+
 #ifdef STHBTDEBUG
   cout << " StHbtBinaryReader::ReturnHbtEvent() -  bytes read : " << binaryIO->bytesRead() << endl;
 #endif

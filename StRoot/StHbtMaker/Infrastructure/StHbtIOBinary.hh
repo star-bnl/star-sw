@@ -87,8 +87,10 @@ public:
   // StHbtV0 Versions
   int read_V1(StHbtV0&);
   int read_V2(StHbtV0&);
+  int read_V3(StHbtV0&);
   int write_V1(const StHbtV0&);
   int write_V2(const StHbtV0&);
+  int write_V3(const StHbtV0&);
 
   int outputStreamStatus();
   int inputStreamStatus();
