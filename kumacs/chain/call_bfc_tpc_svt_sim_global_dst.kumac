@@ -6,8 +6,8 @@
 * - run global packages
 * - write xdf file containing full directories
 
- exec ./kumacs/chain/bfc _
-   TOP=/scr22/kathy/test8 _
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _

@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.41 1998/09/03 19:47:42 kathy Exp $
+* $Id: bfc.kumac,v 1.42 1998/09/10 18:33:01 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.42  1998/09/10 18:33:01  kathy
+* add new chain variable - dout - and make new output file output_dst_file; changed steering kumac for ftpc from call_bfc_reco_ftpc to call_bfc_reco_trk_ftpc; cleaned up call_bfc_tpc_svt_sim_global_dst.kumac
+*
 * Revision 1.41  1998/09/03 19:47:42  kathy
 * fixed skipping events in bfc, added 2 new example chains
 *
@@ -152,6 +155,8 @@
 *                                   dpnt  - dst point filler
 *                                   desum - dst event summary - now works
 * 
+* editted 9/10/98 K. Turner - add new calculation to bfc: output_dst_file
+*                             for use with new chain variable dout
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -241,6 +246,7 @@
 * drhd  - dst run header
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
+*  dout - write run/dst and event/data/global/dst directories into xdf file
 *
 * 
 * 
@@ -344,7 +350,8 @@ MACRO bfc _
  
   output_xdf_file = [output_file].xdf
   output_fzd_file = [output_file].fzd
-  
+  output_dst_file = [output_file]_dst.xdf  
+
 ***********************************************************
 * PRINT OUT INPUT VALUES
 ***********************************************************
@@ -357,6 +364,7 @@ MACRO bfc _
  message ' *** gstar settings          --> ' [gstar_settings]
  message ' *** output xdf (evout)file name  --> ' [output_file].xdf
  message ' *** output fzd (fzout)file name  --> ' [output_file].fzd
+ message ' *** output dst (dout) file name  --> ' [output_file]_dst.xdf
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
 
@@ -373,7 +381,8 @@ MACRO bfc _
  macro/global/create gstar_settings   [gstar_settings]
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
-
+ macro/global/create output_dst_file  [output_dst_file]
+ 
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -411,7 +420,7 @@ MACRO bfc _
      nw=$words([test])
      do i=1,[nw]
        mod=$word([test],[i],1)
-       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin  then 
+       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin then 
            message ' SKIP EVENTS FOR ' [mod]
 	   do ievent = 1,[skip]
 	       message 'skip event # ',[ievent]
@@ -431,6 +440,10 @@ MACRO bfc _
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
    if (STAF_STATUS(1).ne. 1) goto ABEND
+   if ($vexist(havedstrunsum).ne.0) then
+     message ' in bfc, skip to bfc_finish because run_summary exists'
+     goto FINISH
+   endif
    nevents = [nevents] + 1
  enddo
 
@@ -438,6 +451,7 @@ MACRO bfc _
 *  FINISH
 * ****************************************
  
+FINISH:
   exec bfc_util#bfc_finish [chain]
   if (STAF_STATUS(1).ne. 1) goto ABEND
   goto END
