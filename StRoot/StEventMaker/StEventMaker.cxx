@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.1 1999/05/04 22:40:35 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.2  1999/05/05 22:38:00  fisyak
+// Add gulfd for magnetic field
+//
 // Revision 1.1  1999/05/04 22:40:35  fisyak
 // Initial revision of persistent StEventMaker
 //
@@ -87,8 +90,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.1 1999/05/04 22:40:35 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.2  1999/05/05 22:38:00  fisyak
+// Add gulfd for magnetic field
+//
 // Revision 1.1  1999/05/04 22:40:35  fisyak
 // Initial revision of persistent StEventMaker
 //
@@ -167,7 +173,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.1 1999/05/04 22:40:35 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $";
 #include "StEventManager.h"
 StEventManager MakerEventManager;
  * Revision 2.23  2000/05/22 21:53:41  ullrich
@@ -188,8 +194,13 @@ gen_header_st genHeader;
 particle_st particle;
 dst_TriggerDetectors_st dstTriggerDetectors;
 long i;
-
+//#include "fortranc.h"
+//#define gufld_ F77_NAME(gufld,GUFLD)
+//R__EXTERN  void type_of_call gufld_(Float_t *x, Float_t *b);
 // Option to suppress loading of StEvent, for debugging & leak checking
+#define gufld   gufld_
+//#define gufld   GUFLD
+extern "C" {void gufld(Float_t *, Float_t *);}
 Bool_t doLoad = kTRUE;
 #include "StTrack.h"
 
@@ -441,8 +452,10 @@ Int_t StEventMaker::Make(){
 	  // Extract fit params: curv, dip, phase, origin
 	  dst_track_st& tktbl = dstTrack[i];
 	  // $$$ get field from somewhere!
-	  double B     = 0.5*tesla;
-	  
+	  Float_t x[3] = {0,0,0};
+	  Float_t b[3];
+	  gufld(x,b);
+	  double B     = b[2]*kilogauss;
 	  //
 	  //   Derive the helix parameter from the variables
 	  //   stored in the table.
@@ -673,7 +686,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.1 1999/05/04 22:40:35 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
