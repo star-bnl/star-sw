@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.4 1998/03/25 16:13:53 nevski Exp $
+#  $Id: MakeSYS.mk,v 1.5 1998/03/27 14:32:54 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.5  1998/03/27 14:32:54  fisyak
+#  Simplify MakePam
+#
 #  Revision 1.4  1998/03/25 16:13:53  nevski
 #  old fashion gstar setup
 #
@@ -35,7 +38,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/03/25 16:13:53 $ 
+#             Last modification $Date: 1998/03/27 14:32:54 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -46,8 +49,12 @@ STIC        = stic
 KUIPC      := kuipc
 KUIPC_FLAGS+=
 EMPTY      :=
-FOUR       :=4
+ZERO       :=0
+ONE        :=1
 TWO        :=2
+THREE      :=3
+FOUR       :=4
+FIVE       :=5
 #
 CC         := gcc
 CXX        := gcc
