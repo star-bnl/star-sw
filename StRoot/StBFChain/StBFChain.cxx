@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.441 2004/09/03 00:04:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.442 2004/09/03 01:51:42 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -291,7 +291,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"tables"      ,""  ,"",
-"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","","","",kFALSE},
+   "StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T",
+                                                                                           "","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T"       ,""  ,"","",""                                  ,"libctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT"       ,""  ,"","",""                                ,"libebye_Tables","Load ebye_Tables",kFALSE},
@@ -779,7 +780,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
   // 
-  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,noHistos","",""
+  {"B2004"       ,""        ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
@@ -838,6 +839,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
+  {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
@@ -901,7 +903,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"tables"      ,""  ,"",
-"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","","","",kFALSE},
+   "StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T",
+                                                                                           "","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T"       ,""  ,"","",""                                  ,"libctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT"       ,""  ,"","",""                                ,"libebye_Tables","Load ebye_Tables",kFALSE},
@@ -1325,15 +1328,15 @@ Int_t StBFChain::Load()
 	     TMemStat::PrintMem(ts.Data());
 	  }
 	  if (iok < 0)  {
-	    printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
-		   ,libe->GetString().Data(),fBFC[i].Key);
+	    (void) printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
+			  ,libe->GetString().Data(),fBFC[i].Key);
 	    fBFC[i].Flag = kFALSE;
 	    status = kStErr;
 	    break;
+	  } else {
+	    (void) printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
+			  gSystem->DynamicPathName(libe->GetString().Data()));
 	  }
-	  else printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
-		      gSystem->DynamicPathName(libe->GetString().Data()));
-	  //	  }
 	ENDL: //yf ? continue;
 	  LoadedLibs.Delete();
 	}
@@ -1826,7 +1829,8 @@ Int_t StBFChain::Instantiate()
   if (GetOption("Debug"))    SetDEBUG(1);
   if (GetOption("Debug1"))   SetDEBUG(1);
   if (GetOption("Debug2"))   SetDEBUG(2);
-  if (GetOption("nohisto"))  SetAttr(".histos=0","*");
+  if (GetOption("nohistos")) SetAttr(".histos",0,"*");
+  else                       SetAttr(".histos",1,"*");
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats(); 
   return status;
 }
@@ -1937,6 +1941,7 @@ Int_t StBFChain::kOpt (const TString *tag) const {
   }
 #endif
   (void) printf (" Option %s has not been recognized\n", Tag.Data());
+  assert(1);
   return 0;
 }
 
