@@ -1,5 +1,8 @@
-# $Id: MakeFun.mk,v 1.4 1999/09/22 15:26:52 fisyak Exp $
+# $Id: MakeFun.mk,v 1.5 2002/05/23 17:46:29 perev Exp $
 # $Log: MakeFun.mk,v $
+# Revision 1.5  2002/05/23 17:46:29  perev
+# new root
+#
 # Revision 1.4  1999/09/22 15:26:52  fisyak
 # Add definition of STAR_MAKE_HOME
 #
@@ -72,7 +75,7 @@ INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
 endif
-INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
+INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/include
 
 INCINT := $(INC_DIRS)
 ifdef NT
@@ -105,8 +108,8 @@ OBJS          = $(FNameO)
 
 
 $(MY_SO):     $(FNameO) 
-	$(SO) $(SOFLAGS) $(LDFLAGS) $(FNameO) $(OutPutOpt) $(SL_NEW); \
-        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO);  
+	$(SO) $(SOFLAGS) $(LDFLAGS) $(FNameO) $(OutPutOpt) $(SL_NEW);
+	$(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO);  
 	@echo "$(SO_LIB) done"
 
 
@@ -130,6 +133,7 @@ $(FNameCint).$(SrcSuf): $(FName).h $(FName)LinkDef.h
 clean:
 		@rm -f $(OBJS) $(FNameCint).$(SrcSuf) $(FNameCint).h core $(FName)LinkDef.h $(MY_SO)*
 show:
+	@echo FNameO = $(FNameO)
 	@echo $(UNAME).$(UNAMER) CXX=$(CXX) KASE=$(KASE)
 	@echo INCLUDES = $(INCLUDES)
 	@echo CPPFLAGS = $(CPPFLAGS)

@@ -19,11 +19,11 @@ echo OUT_DIR = $OUT
 
 # define where all Make*.mk are. Here the place is the same as input area
 if ( ! $?STAR_MAKE_HOME ) then
-  if ( -e $cwd/mgr/MakeArch.mk ) then
-    setenv STAR_MAKE_HOME $cwd/mgr
-  else
+#  if ( -e $cwd/mgr/MakeArch.mk ) then
+#    setenv STAR_MAKE_HOME $cwd/mgr
+#  else
     setenv STAR_MAKE_HOME ${STAR}/mgr
-  endif
+#  endif
 endif
 echo installStaf: STAR_MAKE_HOME = $STAR_MAKE_HOME
 #
