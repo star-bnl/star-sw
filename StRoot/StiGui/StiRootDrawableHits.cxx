@@ -76,3 +76,9 @@ void StiRootDrawableHits::setVisibility(bool val)
     return;
 }
 
+void StiRootDrawableHits::add(double x, double y, double z)
+{
+  push_back(x);
+  push_back(y);
+  push_back(z);
+}

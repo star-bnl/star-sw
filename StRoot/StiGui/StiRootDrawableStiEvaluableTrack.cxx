@@ -73,7 +73,7 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     
     bool go = true;
     StiKalmanTrackNode * lastNode = getLastNode();
-    double xLocal = lastNode->fX;
+    double xLocal = lastNode->getRefPosition();
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
     
@@ -89,11 +89,11 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 	}
 	else {
 	    StiKalmanTrackNode& next = *it;
-	    while (xLocal<next.fX) {
-		double xx = node.fX;
-		double yy = node.fP0;
-		double zz = node.fP1;
-		double alpha = node.fAlpha;
+	    while (xLocal<next.getRefPosition() ) {
+		double xx = node.getRefPosition();
+		double yy = node.getY();
+		double zz = node.getZ();
+		double alpha = node.getRefAngle();
 		double ca = cos(alpha);
 		double sa = sin(alpha);
 		double gx = ca*xx-sa*yy;

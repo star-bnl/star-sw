@@ -33,24 +33,20 @@ StiRootDisplayManager* StiRootDisplayManager::sinstance = 0;
 StiRootDisplayManager::StiRootDisplayManager(TCanvas* c)
     : mcanvas(c), mzone(0), mnode(0)
 {
-    cout <<"StiRootDisplayManager::StiRootDisplayManager(int, int, int)"<<endl;
-    if (!mcanvas) {
-	cout <<"StiRootDisplayManager::StiRootDisplayManager() ERROR:\t";
-	cout <<"Canvas null.  Seg-fault"<<endl;
+  cout <<"StiRootDisplayManager::StiRootDisplayManager(int, int, int)"<<endl;
+  if (!mcanvas) {
+    cout <<"StiRootDisplayManager::StiRootDisplayManager() ERROR:\t";
+    cout <<"Canvas null.  Seg-fault"<<endl;
+  }
+  else 
+    {
+      mcanvas->cd();
+      mnode = new TVolume();
+      mnode->SetName("mainnode");
+      mnode->SetTitle("mainnode");
     }
-
-    else {
-	mcanvas->cd();
-	
-	mnode = new TVolume();
-	mnode->SetName("mainnode");
-	mnode->SetTitle("mainnode");
-	//mnode = new TVolume("mainnode","mainnode", mzone);
-	//mnode->SetVisibility(TVolume::kThisUnvisible);
-    }
-    
-    cout <<"Leaving StiRootDisplayManager::StiRootDisplayManager()"<<endl;
-    sinstance = this;
+  cout <<"Leaving StiRootDisplayManager::StiRootDisplayManager()"<<endl;
+  sinstance = this;
 }
 
 StiRootDisplayManager::~StiRootDisplayManager()
@@ -69,21 +65,20 @@ StiDisplayManager* StiRootDisplayManager::instance(TCanvas* c)
 
 void StiRootDisplayManager::cd()
 {
-  //mnode->cd();
   mcanvas->cd();
-  return;
 }
 
 void StiRootDisplayManager::draw()
 {
+  cout <<"StiRootDisplayManager::draw() - INFO - Started"<<endl;
   mnode->Draw();
   StiDrawableHits* val;
   for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
       val = dynamic_cast<StiDrawableHits*>((*it).second);
-      if (val) val->draw();
+      if (val) 
+	val->draw();
     }
-  return;
 }
 
 void StiRootDisplayManager::reset()
@@ -91,20 +86,13 @@ void StiRootDisplayManager::reset()
   cout << "StiRootDisplayManager::reset() - INFO - Starting" << endl;
   for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
-      if ((*it).second->canBeRemoved()) 
-	{
-	  //cout << "StiRootDisplayManager::reset() - INFO - Element to be removed" << endl;
-	  mmap.erase(it);
-	}
-      //cout << "StiRootDisplayManager::reset() - INFO - Element NOT removed" << endl;
-
+      if ((*it).second->canBeRemoved()) mmap.erase(it);
     }
 }
 
 void StiRootDisplayManager::update()
 {
   mcanvas->Update();
-  return;
 }
 
 void StiRootDisplayManager::setVisible(bool value)
@@ -113,10 +101,8 @@ void StiRootDisplayManager::setVisible(bool value)
   for (stidrawablemap::const_iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
       det = dynamic_cast<StiDetector*>( (*it).second);
-      if (det && det->isOn())
-	  (*it).second->setVisibility(value);
+      if (det && det->isOn()) (*it).second->setVisibility(value);
     }
-  return;
 }
 
 void StiRootDisplayManager::setVisible(const StiDrawable* val, bool value)
@@ -127,13 +113,9 @@ void StiRootDisplayManager::setVisible(const StiDrawable* val, bool value)
     {
       cout <<"StiRootDisplayManager::setVisible(const StiDrawable* val, bool value) - Error - Object: "
 	   <<name<<" not found"<<endl;
-      return;
     }
   else 
-    {
       (*where).second->setVisibility(value);
-    }
-  return;
 }
 
 void StiRootDisplayManager::setVisible(const char * name, bool value)

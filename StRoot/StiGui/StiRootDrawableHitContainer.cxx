@@ -46,11 +46,12 @@ void StiRootDrawableHitContainer::update()
 	hitvector::const_iterator end = (*it).second.theEffectiveEnd;
 	for (hitvector::const_iterator vit=tempvec.begin(); vit!=end; ++vit) {
 	    const StThreeVectorF& pos = (*vit)->globalPosition();
+	    add(pos.x(),pos.y(),pos.z());
 	    
 	    //StiRootDrawableHits::push_back( StThreeVector<double>(pos.x(), pos.y(), pos.z() ) );
-	    StiRootDrawableHits::push_back( pos.x() );
-	    StiRootDrawableHits::push_back( pos.y() );
-	    StiRootDrawableHits::push_back( pos.z() );
+	    //StiRootDrawableHits::push_back( pos.x() );
+	    //StiRootDrawableHits::push_back( pos.y() );
+	    //StiRootDrawableHits::push_back( pos.z() );
 	    
 	}
     }

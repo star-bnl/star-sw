@@ -2,6 +2,7 @@
 //M.L. Miller (Yale Software)
 //04/01
 
+#include <stdexcept>
 #include <iostream>
 
 //Root
@@ -44,79 +45,103 @@ void StiRootDrawableDetector::update()
 
 void StiRootDrawableDetector::build()
 {
-    //cout <<"StiRootDrawableDetector::build()"<<endl;
-    StiDetector::build();
-    makeShape();
-    StiDrawable::setName( StiDetector::getName().c_str() );
-    StiRootDisplayManager::instance()->addDrawable(this);
-    //cout <<(*this)<<endl;
-    return;
+  //cout <<"StiRootDrawableDetector::build() - INFO - Starting to build:"<<endl;
+  //cout <<(*this)<<endl;
+  StiDetector::build();
+  makeShape();
+  StiDrawable::setName( StiDetector::getName().c_str() );
+  StiRootDisplayManager::instance()->addDrawable(this);
+  return;
 }
 
 void StiRootDrawableDetector::makeShape()
 {
-    //cout <<"StiRootDrawableDetector::makeShape()"<<endl;
-
-    //Make Shape
-    
-    //Make sure that our shape get's hung on the main node
-    StiRootDisplayManager::instance()->cd();
+  //cout <<"StiRootDrawableDetector::makeShape() - INFO - Started"<<endl;
+  //Make sure that our shape get's hung on the main node
+  StiRootDisplayManager::instance()->cd();
+  //cout <<"StiRootDrawableDetector::makeShape() - INFO - Set Placement"<<endl;
 
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",StiDetector::getName().c_str());
     // make rectangular or cylindrical shapes based on shape code
     StiPlacement *pPlacement = getPlacement();
-    StiShapeCode code = getShape()->getShapeCode();
-    if(code == kPlanar){
-      StiPlanarShape *pPlane = 
+    if (!pPlacement)
+      throw runtime_error("StiRootDrawableDetector::makeShape() - FATAl - pPlacement==0");
+    //else
+    //cout << "StiRootDrawableDetector::makeShape() - INFO - Placement OK"<<endl; 
+    StiShape * shape = getShape();
+    if (!shape)
+      {
+	string message="StiRootDrawableDetector::makeShape() - FATAL - shape==0 for ";
+	message+=_name;
+	throw runtime_error(message);
+      }
+    StiShapeCode code = shape->getShapeCode();
+    if(code == kPlanar)
+      {
+	//cout << "StiRootDrawableDetector::makeShape() - INFO - Shape==kPlanar"<<endl; 
+	StiPlanarShape *pPlane = 
           dynamic_cast<StiPlanarShape *>( getShape() );
-      mshape = new TBRIK(shapename,"BRIK","void", 
-                         pPlane->getThickness()/2.,
-                         pPlane->getHalfWidth(), 
-                         pPlane->getHalfDepth());
-    }else if(code == kCylindrical){
-      StiCylindricalShape *pCyl = 
+	if (!pPlane)
+	  throw runtime_error("StiRootDrawableDetector::makeShape() - FATAl - pPlane==0");
+	mshape = new TBRIK(shapename,"BRIK","void", 
+			   pPlane->getThickness()/2.,
+			   pPlane->getHalfWidth(), 
+			   pPlane->getHalfDepth());
+      }
+    else if(code == kCylindrical)
+      {
+	//cout << "StiRootDrawableDetector::makeShape() - INFO - Shape==kCylindrical"<<endl; 
+	StiCylindricalShape *pCyl = 
           dynamic_cast<StiCylindricalShape *>( getShape() );
-      // R00T expects these angles in degrees, of all things
-      float fHalfOpening = pCyl->getOpeningAngle()/2.;
-      float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
-      if(fStarting < 0) fStarting += 2*M_PI;
-      float fMinRadius = pCyl->getOuterRadius() - pCyl->getThickness();
-      float fMaxRadius = pCyl->getOuterRadius();
-
-      mshape = new TPCON(shapename,"PCON","void", 
-                         180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
-      ((TPCON *)mshape)->DefineSection(
-          0, pPlacement->getZcenter() - pCyl->getHalfDepth(), 
-          fMinRadius, fMaxRadius);
-      ((TPCON *)mshape)->DefineSection(
-          1, pPlacement->getZcenter() + pCyl->getHalfDepth(), 
-          fMinRadius, fMaxRadius);
-    }else if(code == kConical){
-      StiConicalShape *pCone = 
+	if (!pCyl)
+	  throw runtime_error("StiRootDrawableDetector::makeShape() - FATAl - pCyl==0");
+	// R00T expects these angles in degrees, of all things
+	float fHalfOpening = pCyl->getOpeningAngle()/2.;
+	float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
+	if(fStarting < 0) fStarting += 2*M_PI;
+	float fMinRadius = pCyl->getOuterRadius() - pCyl->getThickness();
+	float fMaxRadius = pCyl->getOuterRadius();
+	
+	mshape = new TPCON(shapename,"PCON","void", 
+			   180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
+	((TPCON *)mshape)->DefineSection(
+					 0, pPlacement->getZcenter() - pCyl->getHalfDepth(), 
+					 fMinRadius, fMaxRadius);
+	((TPCON *)mshape)->DefineSection(
+					 1, pPlacement->getZcenter() + pCyl->getHalfDepth(), 
+					 fMinRadius, fMaxRadius);
+      }
+    else if(code == kConical)
+      {
+	//cout << "StiRootDrawableDetector::makeShape() - INFO - Shape==kConical"<<endl; 
+	StiConicalShape *pCone = 
           dynamic_cast<StiConicalShape *>( getShape() );
-      // R00T expects these angles in degrees, of all things
-      float fHalfOpening = pCone->getOpeningAngle()/2.;
-      float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
-      if(fStarting < 0) fStarting += 2*M_PI;
-      float fMinRadiusEast = pCone->getOuterRadiusEast() - 
+	if (!pCone)
+	  throw runtime_error("StiRootDrawableDetector::makeShape() - FATAl - pCone==0");
+	// R00T expects these angles in degrees, of all things
+	float fHalfOpening = pCone->getOpeningAngle()/2.;
+	float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
+	if(fStarting < 0) fStarting += 2*M_PI;
+	float fMinRadiusEast = pCone->getOuterRadiusEast() - 
           pCone->getThickness();
-      float fMaxRadiusEast = pCone->getOuterRadiusEast();
-      float fMinRadiusWest = pCone->getOuterRadiusWest() - 
+	float fMaxRadiusEast = pCone->getOuterRadiusEast();
+	float fMinRadiusWest = pCone->getOuterRadiusWest() - 
           pCone->getThickness();
-      float fMaxRadiusWest = pCone->getOuterRadiusWest();
-
-      mshape = new TPCON(shapename,"PCON","void", 
-                         180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
-      ((TPCON *)mshape)->DefineSection(
-          0, pPlacement->getZcenter() - pCone->getHalfDepth(), 
-          fMinRadiusEast, fMaxRadiusEast);
-      ((TPCON *)mshape)->DefineSection(
-          1, pPlacement->getZcenter() + pCone->getHalfDepth(), 
-          fMinRadiusWest, fMaxRadiusWest);
+	float fMaxRadiusWest = pCone->getOuterRadiusWest();
+	
+	mshape = new TPCON(shapename,"PCON","void", 
+			   180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
+	((TPCON *)mshape)->DefineSection(
+					 0, pPlacement->getZcenter() - pCone->getHalfDepth(), 
+					 fMinRadiusEast, fMaxRadiusEast);
+	((TPCON *)mshape)->DefineSection(
+					 1, pPlacement->getZcenter() + pCone->getHalfDepth(), 
+					 fMinRadiusWest, fMaxRadiusWest);
     }
+    //cout << "StiRootDrawableDetector::makeShape() - INFO - Set color"<<endl; 
+
     mshape->SetLineColor(1);
-    
 
     //Hang shape on a drawable node in local coordinates of shape
     //cout <<"Make Local Volume"<<endl;
@@ -125,7 +150,7 @@ void StiRootDrawableDetector::makeShape()
             getPlacement()->getCenterRadius(), 
             getPlacement()->getCenterRefAngle());
     mselfnode = new TVolume(localnodename,"", mshape);
-
+    
     //Now hand shape on node that is rotated w.r.t. global coordinates
     //cout <<"Rotate shape w.r.t. local center"<<endl;
     char* localmatrixname = new char[200];
