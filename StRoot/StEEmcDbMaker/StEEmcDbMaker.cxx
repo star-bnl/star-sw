@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.30 2004/05/04 16:24:18 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.31 2004/05/05 22:01:44 jwebb Exp $
  
 
 #include <time.h>
@@ -704,7 +704,7 @@ template <class St_T, class T_st> void StEEmcDbMaker
 
 const EEmcDbItem*  
 StEEmcDbMaker::getByStrip0(int isec, int iuv, int istrip){
-  // printf("isec=%d iuv=%d istrip=%d \n",isec,iuv,istrip);
+  //  printf("isec=%d iuv=%d istrip=%d \n",isec,iuv,istrip);
   assert(isec>=0 & isec<MaxSectors);
   assert(iuv>=0 && iuv<MaxSmdPlains);
   assert(istrip>=0 && istrip<MaxSmdStrips);
@@ -822,10 +822,22 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
     // assert(2==311);
   }
   
+  //--
+  //-- Initialize the byStrip lookup table
+  //--
+  for ( Int_t mySec = 1; mySec <= 12; mySec++ ) 
+    for ( Char_t uv = 'U'; uv <= 'V'; uv++ ) 
+      for ( Int_t myStrip = 1; myStrip <= 288; myStrip++ ) byStrip[mySec-1][uv-'U'][myStrip-1] = getStrip(mySec,uv,myStrip);
+
+      
+      
+
+
+
+
+
+  //--
   printf("setAsciiDataBase() done, found %d valid records\n",nd);
-
-
-
 
   return;
 
@@ -839,6 +851,9 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.31  2004/05/05 22:01:44  jwebb
+// byStrip[] is now initialized when reading database from a file.
+//
 // Revision 1.30  2004/05/04 16:24:18  balewski
 // ready for analysis of 62GeV AuAU production
 //
