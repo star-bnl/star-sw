@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.15 2004/09/10 22:09:21 perev Exp $
+ * $Id: StTofMaker.cxx,v 1.16 2004/09/19 00:09:02 perev Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.16  2004/09/19 00:09:02  perev
+ * Small Walgrind leak fixed
+ *
  * Revision 1.15  2004/09/10 22:09:21  perev
  * more defence agains corrupted DAQ data
  *
@@ -135,8 +138,8 @@ Int_t StTofMaker::FinishRun(int runnumber){
 Int_t StTofMaker::Make(){
   // 
   cout << "StTofMaker::Make() -- All Your Base Are Belong To Us --"  << endl;
-
-  mDataCollection = new StTofDataCollection; 
+  StTofDataCollection myDataCollection;
+  mDataCollection = &myDataCollection; 
   mTofCollectionPresent  = 0;
   mDataCollectionPresent = 0;
 
@@ -310,7 +313,7 @@ Int_t StTofMaker::Make(){
 //--- fill StEvent, clean-up, and return...
 //
   if (mEvent) this->fillStEvent();
-  delete mDataCollection;
+  mDataCollection=0;
   cout << "StTofMaker::Make() -- see you next event --" << endl;
 
   return kStOK;
