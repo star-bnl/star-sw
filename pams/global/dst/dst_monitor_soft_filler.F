@@ -23,11 +23,11 @@ CC:<--------------------------------------------------------------------
      7     svm_evt_match_h,     svm_evt_match ,
      8           ctu_cor_h,           ctu_cor ,
      9        dst_vertex_h,        dst_vertex ,
-     0   dst_event_summary_h, dst_event_summary ,
-     1   dst_monitor_soft_ftpc_h,  dst_monitor_soft_ftpc , 
-     2   dst_monitor_soft_global_h,  dst_monitor_soft_global , 
-     3   dst_monitor_soft_svt_h,  dst_monitor_soft_svt , 
-     4   dst_monitor_soft_tpc_h,  dst_monitor_soft_tpc ) 
+     9   dst_event_summary_h, dst_event_summary ,
+     9   dst_monitor_soft_ftpc_h,  dst_monitor_soft_ftpc , 
+     9   dst_monitor_soft_global_h,  dst_monitor_soft_global , 
+     9   dst_monitor_soft_svt_h,  dst_monitor_soft_svt , 
+     9   dst_monitor_soft_tpc_h,  dst_monitor_soft_tpc ) 
 
       IMPLICIT NONE
 #include "dst_monitor_soft_filler.inc"
@@ -78,7 +78,7 @@ CC:>--------------------------------------------------------------------
 
 CC:  Local Variable Type Declarations:
 
-      integer*4 i, secnum, padrow, clusterrow,zindex,ntpc_max
+      integer*4 i, j, secnum, padrow, clusterrow,zindex,ntpc_max
       integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf
       parameter (ntpc_max = 20000)
       integer*4 track_index(ntpc_max), tpc_trk_row
@@ -470,10 +470,10 @@ CC:           to both be of order 0.5 .
 CC:  Fraction of SVT hits used in SVT tracks
 CC:  Hit fraction should now be per layer also. How to do this? (LSB)
 
-      dst_monitor_softsvt(1).hit_frac_svt(1) = 0.0
-      dst_monitor_softsvt(1).hit_frac_svt(2) = 0.0
-      dst_monitor_softsvt(1).hit_frac_svt(3) = 0.0
-      dst_monitor_softsvt(1).hit_frac_svt(4) = 0.0
+      dst_monitor_soft_svt(1).hit_frac_svt(1) = 0.0
+      dst_monitor_soft_svt(1).hit_frac_svt(2) = 0.0
+      dst_monitor_soft_svt(1).hit_frac_svt(3) = 0.0
+      dst_monitor_soft_svt(1).hit_frac_svt(4) = 0.0
 
       if(scs_spt_h.nok .gt. 0) then
          do i = 1,scs_spt_h.nok
@@ -635,9 +635,9 @@ CC:     1            int(dst_vertex(i).pchi2)
      1            dst_vertex(i).n_daughters
                dst_monitor_soft_global(1).prim_vrtx_chisq =
      1            dst_vertex(i).chisq(1)
-               do i = 1,6
-                  dst_monitor_soft_global(1).prim_vrtx_cov(i) =
-     1                dst_vertex(i).covar(i)
+               do j = 1,6
+                  dst_monitor_soft_global(1).prim_vrtx_cov(j) =
+     1                dst_vertex(i).covar(j)
                end do
             end if
          end do
