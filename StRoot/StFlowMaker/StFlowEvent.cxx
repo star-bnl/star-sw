@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.24 2001/08/08 10:35:07 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.25 2001/11/02 04:49:52 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -216,6 +216,220 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
   return psi;
 }
 
+
+//-----------------------------------------------------------------------
+Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
+//Generatting Fcn for the new cumulant paper.
+
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  Double_t order = (Double_t)(harN + 1);
+
+  Double_t  mMult4Q = (Double_t)Mult(pFlowSelect);
+  Double_t  theG=1.;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+
+      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+			Float_t pt = pFlowTrack->Pt();
+			phiWgt *= pt;
+      }
+    
+      theG *=(1. + (phiWgt/mMult4Q) *(2.*Zx*cos(mPhi * order) + 
+                    2. *Zy*sin(mPhi * order) ) );
+
+
+    }
+  }
+
+  return theG;
+}
+
+
+//-----------------------------------------------------------------------
+Double_t StFlowEvent::G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
+//Generatting Fcn for the old cumulant paper.
+//if expand this in Taylor series,one recovers G_New() in new new cumu. method.
+
+  TVector2 normQ=NormQ(pFlowSelect);
+
+  return exp(2*Zx*normQ.X()+2*Zy*normQ.Y());
+
+}
+
+//-------------------------------------------------------------
+
+TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) { 
+  //return normalized Q. NormQ = Q / sqrt(sum of weights**2)
+
+  TVector2 mQ;
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  Double_t mQx=0., mQy=0.;
+  Double_t SumOfWeightSqr=0;
+  Double_t order = (Double_t)(harN + 1);
+
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+
+      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+			Float_t pt = pFlowTrack->Pt();
+			phiWgt *= pt;
+      }
+        SumOfWeightSqr +=phiWgt*phiWgt;
+      mQx += phiWgt * cos(mPhi * order);
+      mQy += phiWgt * sin(mPhi * order);
+    }
+  }
+
+  if ( SumOfWeightSqr )
+  mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+  else mQ.Set(0.,0.);
+
+  return mQ;
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect){
+ //return (sum of weights**2)
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  Double_t SumOfWeightSqr=0;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+
+      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+			Float_t pt = pFlowTrack->Pt();
+			phiWgt *= pt;
+      }
+        SumOfWeightSqr +=phiWgt*phiWgt;
+    }
+  }
+
+  return SumOfWeightSqr;
+}
+
+
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::WgtMult_q4(StFlowSelection* pFlowSelect) { 
+
+  //used only for the old cumulant method. for getting q4 when weight is on.
+  //replace multiplicity in Eq.(74b) by this quantity when weight is on.
+  //this is derived based on (A4) in the old cumulant paper.
+
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  double theMult=0.;
+  double theMeanWj4=0.;
+  double theMeanWj2=0.;
+  double theSumOfWgtSqr=0;
+
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+
+      double phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+			float pt = pFlowTrack->Pt();
+			phiWgt *= pt;
+      }
+                        theSumOfWgtSqr +=phiWgt*phiWgt;
+                        theMeanWj4 +=phiWgt*phiWgt*phiWgt*phiWgt;
+                        theMeanWj2 +=phiWgt*phiWgt;
+                        theMult +=1.;
+
+    }
+  }
+
+  theMeanWj4 /= theMult;
+  theMeanWj2 /= theMult;
+
+  if (theMult>0)
+
+  return (theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(-theMeanWj4+2*theMeanWj2*theMeanWj2));
+  else return theMult;
+
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) { 
+  //used only for the old cumulant method. for getting q6 when weight is on.
+  //replace multiplicity in Eq.(74c) by this quantity when weight is on.
+  //this is derived based on (A4) in the old cumulant paper.
+
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  double theMult=0.;
+  double theMeanWj6=0.;
+  double theMeanWj4=0.;
+  double theMeanWj2=0.;
+  double theSumOfWgtSqr=0;
+
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+
+
+      double phiWgt =  PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+			float pt = pFlowTrack->Pt();
+			phiWgt *= pt;
+      }
+                        theSumOfWgtSqr +=phiWgt*phiWgt;
+                        theMeanWj6 +=phiWgt*phiWgt*phiWgt*phiWgt*phiWgt*phiWgt;
+                        theMeanWj4 +=phiWgt*phiWgt*phiWgt*phiWgt;
+                        theMeanWj2 +=phiWgt*phiWgt;
+                        theMult +=1.;
+
+    }
+  }
+
+  theMeanWj6 /= theMult;
+  theMeanWj4 /= theMult;
+  theMeanWj2 /= theMult;
+
+  if (theMult>0)
+
+  return 4.*(theSumOfWgtSqr*theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(theMeanWj6-9.*theMeanWj2*theMeanWj4+12.*theMeanWj2*theMeanWj2*theMeanWj2));
+  else return theMult*theMult;
+
+}
+
 //-------------------------------------------------------------
 
 Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
@@ -226,6 +440,8 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
 
   return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
 }
+
+
 
 //-----------------------------------------------------------------------
 
@@ -622,6 +838,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.25  2001/11/02 04:49:52  aihong
+// add func. for cumulant maker
+//
 // Revision 1.24  2001/08/08 10:35:07  oldi
 // Typo in output statement of cut lists fixed (mEtaTpcCuts[1][j][k] -> mEtaFtpcCuts[1][j][k]).
 //

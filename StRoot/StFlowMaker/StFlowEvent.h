@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.30 2001/08/01 19:39:35 snelling Exp $
+// $Id: StFlowEvent.h,v 1.31 2001/11/02 04:49:52 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -48,6 +48,12 @@ public:
   Float_t        q(StFlowSelection*);
   Float_t        MeanPt(StFlowSelection*);
   Float_t        Psi(StFlowSelection*);
+  Double_t       G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
+  Double_t       G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
+  Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q4(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q6(StFlowSelection* pFlowSelect);
+  TVector2       NormQ(StFlowSelection* pFlowSelect);
   Float_t        CTB() const;
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
@@ -297,6 +303,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.31  2001/11/02 04:49:52  aihong
+// add func. for cumulant maker
+//
 // Revision 1.30  2001/08/01 19:39:35  snelling
 // Added the trigger word
 //
