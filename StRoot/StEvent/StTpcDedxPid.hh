@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.hh,v 1.2 1999/05/20 16:17:37 ogilvie Exp $
+ * $Id: StTpcDedxPid.hh,v 1.3 1999/05/20 21:42:56 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.hh,v $
+ * Revision 1.3  1999/05/20 21:42:56  ogilvie
+ * *** empty log message ***
+ *
  * Revision 1.2  1999/05/20 16:17:37  ogilvie
  * added static dedx calibration data members, set, get functions
  *
@@ -25,7 +28,6 @@ class StTpcDedxPid : public StDedxPid {
 
 public: 
     StTpcDedxPid(const StGlobalTrack&);
-    StTpcDedxPid();
     ~StTpcDedxPid();
     
     int detectorInfoAvailable() const;
