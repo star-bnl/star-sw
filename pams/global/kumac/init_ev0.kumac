@@ -1,8 +1,9 @@
 macro init_ev0
+macro/global/import *
 
 message 'Initialising ev0 tables'
 
-cd /dui/constants/global/params
+cd [params]/global
 
 tdm/newtable ev0par ev0_ev0par 3
 tdm/table/rowcount ev0par 3
@@ -28,21 +29,22 @@ tdm/table/cell/putvalue 'ev0par[2].dcav0' 0.4
 tdm/table/cell/putvalue 'ev0par[2].dlen'  0.6
 tdm/table/cell/putvalue 'ev0par[2].dmass' 10
 
-cd /dui/data/global/vertices
+cd [data]/global/vertices
 tdm/newtable ev0out ev0_aux 100000
 tdm/newtable vertex dst_vertex 100000
 
-rowcount /dui/data/global/tracks/globtrk 
+rowcount [data]/global/tracks/globtrk 
 if ( staf_result(1) .eq. 0 ) then
-tdm/newtable /dui/data/global/tracks/globtrk egr_globtrk 100000
+cd [data]/global/tracks
+tdm/newtable globtrk egr_globtrk 100000
 endif
 
-cd /dui/data/global/tracks
+cd [data]/global/tracks
 maxrowcount globtrk
 
 tdm/newtable ev0track ev0_track  staf_result(1)
 
-cd /dui/constants/global/magnetic_field
+cd [params]/global/magnetic_field
 
 tdm/newtable magf mft_control 1
 rowcount magf 1
@@ -50,7 +52,11 @@ tdm/table/cell/putvalue 'magf[0].field_type' 1
 tdm/table/cell/putvalue 'magf[0].B' 0.5
 
 return
-
-
+ 
+macro init_ev0_eval2
+macro/global/import *
+ cd [data]/global/vertices
+ tdm/newtable ev0_eval ev0_eval 100000
+return
 
 
