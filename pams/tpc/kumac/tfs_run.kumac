@@ -14,9 +14,9 @@ message 'start tfs_run'
   ami/module/call tfs_g2t _
 		/dui/geant/Event/g2t_tpc_hit _
 		/dui/geant/Event/g2t_track _
-		/dui/constants/tpc/params/tfspar/tfs_fspar _ 
-  		/dui/constants/tpc/params/tfspar/tfs_bmpar _
-		/dui/constants/tpc/params/tfspar/tfs_fsctrl _
+		/dui/constants/tpc/params/tfspars/tfs_fspar _ 
+  		/dui/constants/tpc/params/tfspars/tfs_bmpar _
+		/dui/constants/tpc/params/tfspars/tfs_fsctrl _
 		/dui/data/tpc/hits/index _
 	        /dui/constants/tpc/params/tclpars/type _
 		/dui/data/tpc/hits/tphit

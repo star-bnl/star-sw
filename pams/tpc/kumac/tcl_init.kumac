@@ -4,15 +4,14 @@
  
 macro init
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC
+  macro/global/import PARAMS_TPC
 
 cd /dui/constants/tpc/params
 
-* Define some Cluster-Finder Switches
-dio/newfilestream tclp [PARAMS_TPC]tcl_pars.xdf r
-dio/stream/getevent    tclp
-dio/stream/close       tclp
+
+  dio/newfilestream tclp [PARAMS_TPC]tcl_pars.xdf r
+  dio/stream/getevent    tclp
+  dio/stream/close       tclp
 
 cd /dui
 
