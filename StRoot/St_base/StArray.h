@@ -169,7 +169,7 @@ class StPtrVec ## QWERTY : public StRefArray \
 public: \
 StPtrVec ## QWERTY(Int_t sz=0):StRefArray(sz){};\
 StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){};\
-virtual        ~StPtrVec ## QWERTY ##(){};\
+virtual        ~StPtrVec ## QWERTY(){};\
 \
  St ## QWERTY * const &at(Int_t idx) const {return (St ## QWERTY  * const &)fV[idx];}\
  St ## QWERTY *       &at(Int_t idx)       {return (St ## QWERTY  *       &)fV[idx];}\
