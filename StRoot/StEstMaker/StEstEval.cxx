@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstEval.cxx,v 1.1 2000/12/07 11:14:21 lmartin Exp $
+ * $Id: StEstEval.cxx,v 1.2 2001/01/25 17:43:07 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,14 +10,24 @@
  ***************************************************************************
  *
  * $Log: StEstEval.cxx,v $
+ * Revision 1.2  2001/01/25 17:43:07  lmartin
+ * Histogram filling removed
+ * Evaluation result dumping into an external file removed
+ * Defined as a method of the StEstTracker class
+ *
  * Revision 1.1  2000/12/07 11:14:21  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker.h"
+#include "StEstTracker.h"
+#include "StEstParams.hh"
+#include "Infrastructure/StEstWafer.hh"
+#include "Infrastructure/StEstBranch.hh"
+#include "Infrastructure/StEstHit.hh"
+#include "Infrastructure/StEstTrack.hh"
+#include "Infrastructure/StEstTPCTrack.hh"
 
-void StEstMaker::Eval(int onoffmatrix, int nminhit) {
-
+void StEstTracker::Eval(int onoffmatrix, int nminhit) {
   long i,j,k,jb,lm,lm2,lm3,found,found2;
   long bad_in_ideal,bad_in_ideal_pri,bad_in_ideal_sec;
   long bad_notin_ideal,bad_notin_ideal_pri,bad_notin_ideal_sec;
@@ -46,7 +56,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
   int nPerfectHit;
 
   double maxdist;
-  ofstream sortie("out.log",ios::app);
 
 
   if(mParams[0]->debug>2) cout << "Eval :: Start"<<endl;
@@ -55,12 +64,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
   cout <<"| EVAL for onoffmatrix= "<<onoffmatrix
        <<" and nminhit="<<nminhit<<" \t |"<<endl;
   cout<<"+------------------------------------------------+"<<endl;
-  if (sortie) {
-    sortie<<"+------------------------------------------------+"<<endl;
-    sortie<<"| EVAL for onoffmatrix= "<<onoffmatrix
-	   <<" and nminhit="<<nminhit<<" \t |"<<endl;
-    sortie<<"+------------------------------------------------+"<<endl;
-  }
   lmideal_tot = 0;
   lmideal_pri_tot = 0;
   lmideal_sec_tot = 0;
@@ -127,31 +130,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
 	  lmideal_tot++;
 	  if (mTrack[i]->mTPCTrack->mType==1) lmideal_pri_tot++;	
 	  if (mTrack[i]->mTPCTrack->mType==2) lmideal_sec_tot++;	
-	  idealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elidealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Muidealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Piidealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kaidealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Pridealpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->mType==1) {
-	    idealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elidealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Muidealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Piidealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kaidealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Pridealpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  }
-	  if (mTrack[i]->mTPCTrack->mType==2) {
-	    idealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elidealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Muidealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Piidealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kaidealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	    if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Pridealpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  }
-	  idealphi->Fill(atan(mTrack[i]->mTPCTrack->GetHelix()->y(0.)/mTrack[i]->mTPCTrack->GetHelix()->x(0.)));
-	  idealntpc->Fill(mTrack[i]->mTPCTrack->GetNHits());
-	  idealrtpc->Fill(sqrt(mTrack[i]->mTPCTrack->mR[0]->x()*mTrack[i]->mTPCTrack->mR[0]->x()+mTrack[i]->mTPCTrack->mR[0]->y()*mTrack[i]->mTPCTrack->mR[0]->y()));
     }
   }// for (i=0;i<mNTrack; i++...
   
@@ -212,33 +190,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
 	badmatr[matrix]++;
 	//	if (matrix2==0) cout<<"ideal pattern=0 : track_id= "<<mTrack[i]->mTPCTrack->GetId()<<endl;
 	badimatr[matrix2]++;
-	badpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elbadpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mubadpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pibadpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kabadpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prbadpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->mType==1) {
-	  badpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elbadpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mubadpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pibadpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kabadpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prbadpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	}
-	if (mTrack[i]->mTPCTrack->mType==2) {
-	  badpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elbadpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mubadpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pibadpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kabadpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prbadpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	}
-	badphi->Fill(atan(mTrack[i]->mTPCTrack->GetHelix()->y(0.)/mTrack[i]->mTPCTrack->GetHelix()->x(0.)));
-	badchi->Fill(mTrack[i]->GetBranch(0)->GetChiSq()/mTrack[i]->GetBranch(0)->GetNHits()); 
-	badmaxdist->Fill(maxdist);
-	badStep->Fill(1.*(mTrack[i]->GetBranch(0)->GetStep())); 
-	
 	lmbad_id[lmbad_tot]=mTrack[i]->mTPCTrack->mId;
 	lmbad_i[lmbad_tot]=i;
 	lmbad_pat[lmbad_tot]=matrix;
@@ -250,33 +201,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
 	good[mTrack[i]->GetBranch(_NBR)->GetNHits()]++;
 	goodmatr[matrix]++;
 	goodimatr[matrix2]++;
-	goodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elgoodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mugoodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pigoodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kagoodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prgoodpt->Fill(mTrack[i]->mTPCTrack->mPt);
-	if (mTrack[i]->mTPCTrack->mType==1) {
-	  goodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elgoodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mugoodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pigoodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kagoodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prgoodpt_p->Fill(mTrack[i]->mTPCTrack->mPt);
-	}
-	if (mTrack[i]->mTPCTrack->mType==2) {
-	  goodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==2 || mTrack[i]->mTPCTrack->GetPid()==3) Elgoodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==5 || mTrack[i]->mTPCTrack->GetPid()==6) Mugoodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==8 || mTrack[i]->mTPCTrack->GetPid()==9) Pigoodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==11 || mTrack[i]->mTPCTrack->GetPid()==12) Kagoodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	  if (mTrack[i]->mTPCTrack->GetPid()==14 || mTrack[i]->mTPCTrack->GetPid()==15) Prgoodpt_s->Fill(mTrack[i]->mTPCTrack->mPt);
-	}
-	goodchi->Fill(mTrack[i]->GetBranch(0)->GetChiSq()/mTrack[i]->GetBranch(0)->GetNHits());
-	goodphi->Fill(atan(mTrack[i]->mTPCTrack->GetHelix()->y(0.)/mTrack[i]->mTPCTrack->GetHelix()->x(0.)));
-	goodmaxdist->Fill(maxdist);
-	goodStep->Fill(1.*(mTrack[i]->GetBranch(0)->GetStep())); 
-	
 	lmgood_id[lmgood_tot]=mTrack[i]->mTPCTrack->mId;
 	lmgood_i[lmgood_tot]=i;
 	lmgood_pat[lmgood_tot]=matrix;
@@ -319,39 +243,6 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
   }
 
   cout<<endl;
-  if (sortie) {
-    gd=0; 
-    bd=0; 
-    ps=0; 
-    sortie <<"*****  RESULTS VERSUS THE TRACK LENGTH *****"<<endl;
-    sortie <<"Tracks\t\tPOSS\tOK\tNOK"<<endl;
-    for (i=1;i<10;i++) {
-      sortie <<"with "<<i<<" hits :\t"<<poss[i]<<"\t"<<good[i]<<"\t"<<bad[i]<<endl;
-      gd += good[i];
-      bd += bad[i];
-      ps += poss[i];
-    }
-  sortie <<"TOTAL:\t\t"<<ps<<"\t"<<gd<<"\t"<<bd<<endl;
-  sortie <<endl;
-  sortie <<"*****  RESULTS VERSUS THE HIT LAYERS *****"<<endl;
-  sortie <<"GOOD: slay[0]="<<slay_good[0]<<" slay[1]="<<slay_good[1]<<" slay[2]="<<slay_good[2]<<" slay[3]="<<slay_good[3]<<endl;
-  sortie <<"BAD:  slay[0]="<<slay_bad[0]<<" slay[1]="<<slay_bad[1]<<" slay[2]="<<slay_bad[2]<<" slay[3]="<<slay_bad[3]<<endl;
-  sortie <<endl;
-  sortie <<"*****  RESULTS VERSUS THE SEGMENT PATTERNS *****"<<endl;
-  sortie << "\t\t| final\tpattern\t| ideal\tpattern"<<endl;
-  sortie << "1234\t| POSS\t| GOOD\tBAD\t| GOOD\tBAD"<<endl;
-  for (i=0;i<16;i++) {
-    for (j=0;j<4;j++) {
-      if (i & int(pow(2,j))) 
-	sortie << "1";
-      else
-	sortie << "0";
-    }
-    sortie << "\t| "<<possmatr[i]<<"\t| "<<goodmatr[i]<<"\t"<<badmatr[i]<<"\t| "<<goodimatr[i]<<"\t"<<badimatr[i]<<endl;
-  }
-
-  sortie<<endl;
-  }
 
   cout<<"counting the good tracks found twice"<<endl;
   good_found_twice=0;
@@ -543,50 +434,18 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
   cout<<"             Real purity (%)     : \t"<<(real_good*100)/(lmgood_tot*1.+lmbad_tot*1.)<<"\t"<<(real_good_pri*100)/(lmgood_pri_tot*1.+lmbad_pri_tot*1.)<<"\t"<<(real_good_sec*100)/(lmgood_sec_tot*1.+lmbad_sec_tot*1.)<<endl;
   cout<<"------------------------------------------------------------------------------------------"<<endl;
 
-  if (sortie) {
-  sortie<<"---------- 1st level analysis -----------------------------------------------"<<endl;
-  sortie<<"number of ideal tracks : "<<ps<<"\t all ideal tracks with a hit in the SVT/SSD"<<endl;
-  sortie<<"number of good tracks  : "<<lmgood_tot<<"\t all reconstructed tracks with correct hits"<<endl;
-  sortie<<"number of bad tracks   : "<<lmbad_tot<<"\t all reconstructed tracks with at least one wrong hit"<<endl;
-  sortie<<"Efficiency             : "<< lmgood_tot*100/(ps*1.)<<" %"<<endl;
-  sortie<<"Purity                 : "<<lmgood_tot*100/(lmgood_tot*1.+lmbad_tot*1.)<<" %"<<endl;
-  sortie<<"---------- detailled analysis ------------------------------------------------------------"<<endl;
-  sortie<<"Initial number of ideal tracks   : \t"<<lmideal_tot<<"\t"<<lmideal_pri_tot<<"\t"<<lmideal_sec_tot<<"\t total primaries secondaries"<<endl;
-  sortie<<"Ideal not found but unique       : \t"<<ideal_not_found<<"\t"<<ideal_not_found_pri<<"\t"<<ideal_not_found_sec<<"\t ideal track not reconstructed (no other copies)"<<endl;
-  sortie<<"Ideal not found but copy in good : \t"<<ideal_not_found_in_good<<"\t"<<ideal_not_found_in_good_pri<<"\t"<<ideal_not_found_in_good_sec<<"\t (with possibly other copies in ideal not found or bad)"<<endl;
-  sortie<<"Ideal not found but copy in bad  : \t"<<ideal_not_found_in_bad<<"\t"<<ideal_not_found_in_bad_pri<<"\t"<<ideal_not_found_in_bad_sec<<"\t (with possibly other copies in ideal not found)"<<endl;
-  sortie<<"Ideal not found but copy in ideal: \t"<<ideal_not_found_in_ideal<<"\t"<<ideal_not_found_in_ideal_pri<<"\t"<<ideal_not_found_in_ideal_sec<<"\t (without other copies in good or bad)"<<endl;
-  sortie<<"Real ideal tracks                : \t"<<real_ideal<<"\t"<<real_ideal_pri<<"\t"<<real_ideal_sec<<"\t (initial minus the copies)"<<endl;
-  sortie<<endl;
-  sortie<<"Number of bad tracks             : \t"<<lmbad_tot<<"\t"<<lmbad_pri_tot<<"\t"<<lmbad_sec_tot<<"\t total primaries secondaries"<<endl;
-  sortie<<"Bad in ideal                     : \t"<<bad_in_ideal<<"\t"<<bad_in_ideal_pri<<"\t"<<bad_in_ideal_sec<<endl;
-  sortie<<"Bad not in ideal                 : \t"<<bad_notin_ideal<<"\t"<<bad_notin_ideal_pri<<"\t"<<bad_notin_ideal_sec<<endl;
-  sortie<<"Bad found twice in bad           : \t"<<bad_found_twice<<"\t"<<bad_found_twice_pri<<"\t"<<bad_found_twice_sec<<endl;
-  sortie<<endl;
-  sortie<<"Initial number of good tracks    : \t"<<lmgood_tot<<"\t"<<lmgood_pri_tot<<"\t"<<lmgood_sec_tot<<"\t total primaries secondaries"<<endl;
-  sortie<<"Good found twice in good         : \t"<<good_found_twice<<"\t"<<good_found_twice_pri<<"\t"<<good_found_twice_sec<<"\t (correct reconstructed tracks with copies in good)"<<endl;
-  sortie<<"Real good tracks                 : \t"<<real_good<<"\t"<<real_good_pri<<"\t"<<real_good_sec<<"\t Initial minus the good found twice"<<endl;
-  sortie<<endl;
-  sortie<<"                Real ideal tracks: \t"<<real_ideal<<"\t"<<real_ideal_pri<<"\t"<<real_ideal_sec<<endl;
-  sortie<<"                Real good tracks : \t"<<real_good<<"\t"<<real_good_pri<<"\t"<<real_good_sec<<endl;
-  sortie<<"                Real bad tracks  : \t"<<lmbad_tot+good_found_twice<<"\t"<<lmbad_pri_tot+good_found_twice_pri<<"\t"<<lmbad_sec_tot+good_found_twice_sec<<endl;
-  sortie<<"             Real efficiency (%) : \t"<<(real_good*100)/(real_ideal*1.)<<"\t"<<(real_good_pri*100)/(real_ideal_pri*1.)<<"\t"<<(real_good_sec*100)/(real_ideal_sec*1.)<<endl;
-  sortie<<"             Real purity (%)     : \t"<<(real_good*100)/(lmgood_tot*1.+lmbad_tot*1.)<<"\t"<<(real_good_pri*100)/(lmgood_pri_tot*1.+lmbad_pri_tot*1.)<<"\t"<<(real_good_sec*100)/(lmgood_sec_tot*1.+lmbad_sec_tot*1.)<<endl;
-  sortie<<"------------------------------------------------------------------------------------------"<<endl;
-  }
 
 
   i=0;
   bd=0;
   gd=0;
 
-  long jbgood=0,jbmin,lowchi[200];
+  long jbgood=0,jbmin;
   double chimin;
 
   for (i=0;i<200;i++) {
     bad[i]  = 0;
     good[i] = 0;
-    lowchi[i] = 0;
     poss[i]=0;
   }
 
@@ -627,20 +486,14 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
 	jbmin = jb;
       }      
     }
-    //    if(mTrack[i]->GetBranch(0)->GetNHits()>0 && _tmpgood!=i)
-    //      cout << "bad track mTrack["<<i<<"]= "<< mTrack[i]<<endl;
-    lowchi[jbmin]++;
   }
 
-  //  cout <<"branch\tnbr\tgood\tbad\tlowchi"<<endl;
   gd=bd=ps=0;
   for (i=0;i<mParams[0]->nbranch[0];i++) {
-    //    cout << i<<"\t"<<poss[i]<<"\t"<<good[i]<<"\t"<<bad[i]<<"\t"<<lowchi[i]<<endl;
     gd += good[i];
     bd += bad[i];
     ps += poss[i];
   }
-  //  cout <<endl<<"\t"<<ps<<"\t"<<gd<<"\t"<<bd<<endl;
 
   int brhit, brnohit;
   long nbrfull=0, br5=0;
@@ -673,207 +526,3 @@ void StEstMaker::Eval(int onoffmatrix, int nminhit) {
 
 }
 
-void StEstMaker::EvalOnLine(int lay) {
-
-  long i,j,k,jb;
-  long bad[200], good[200],poss[200],slay[200];
-  long gd=0,bd=0,ps=0, ok;
-  int matrix, onoffmatrix=0,goodlocal,goodpertrack[64];
-  long possmatr[64],badmatr[64],goodmatr[64];
-
-  onoffmatrix = int(pow(2,lay));
-
-  if(mParams[0]->debug>2) cout << "StEstMaker::EvalOnLine ****START****"<<endl;
-  for (i=0;i<200;i++) {
-    bad[i]  = 0;
-    good[i] = 0;
-    poss[i] = 0;
-    slay[i] = 0;
-  }
-  for (i=0;i<64;i++) {
-    possmatr[i] = 0;
-    goodmatr[i] = 0;
-    badmatr[i] = 0;
-    goodpertrack[i] = 0;
-  }
-
-  cout <<endl<<"*****  RESULTS *****"<<endl;  
-  gd=0;
-  bd=0;
-  ps=0;
-  for (i=0;i<mNTrack; i++) {
-    matrix = 0;
-    if (mTrack[i]->mTPCTrack->mPt > mParams[mPass]->ptmax || mTrack[i]->mTPCTrack->mPt <= mParams[mPass]->ptmin || mTrack[i]->mTPCTrack->GetFlag()<=0)
-      continue;
-    j=0;
-    while (Eval_mchits[i][j]!=NULL && j<10) {      
-      matrix = matrix | int(pow(2,Eval_mchits[i][j]->GetWafer()->GetLayer()));
-      j++;    
-    }
-    if (j>0 && (matrix & onoffmatrix)) {
-      poss[j]++;
-      possmatr[matrix]++;
-    }
-    for(k=0;k<mTrack[i]->GetNBranches(); k++) 
-      if(mTrack[i]->GetBranch(k)->GetNHits()==0) bd++;
-    gd++;
-    ps+=mTrack[i]->GetNBranches();
-  }
-
-  cout << "Number of tracks:         " <<gd<<endl;
-  cout << "Number of branches:       " <<ps<<endl;
-  cout << "Number of empty branches: " <<bd<<endl;  
-  gd=0;
-  bd=0;
-  ps=0;
-
-  for (i=0;i<mNTrack; i++) {    
-    //    nohits = 0;
-    ok = 1;
-    matrix = 0;
-    if (mTrack[i]->mTPCTrack->mPt>mParams[mPass]->ptmax || mTrack[i]->mTPCTrack->mPt<=mParams[mPass]->ptmin || mTrack[i]->mTPCTrack->GetFlag()<=0)
-      continue;
-
-    int _NBR=0;
-    for(_NBR=0; _NBR<mTrack[i]->GetNBranches(); _NBR++) {
-      ok = 1;
-      matrix = 0;
-      for (j=0;j<mTrack[i]->GetBranch(_NBR)->GetNHits();j++) {
-	k=0;
-	while (mTrack[i]->GetBranch(_NBR)->GetHit(j) != Eval_mchits[i][k] && Eval_mchits[i][k]!=NULL)
-	  k++;
-	matrix |= int(pow(2,mTrack[i]->GetBranch(_NBR)->GetHit(j)->GetWafer()->GetLayer()));
-	if (Eval_mchits[i][k]==NULL) ok = 0;
-      } // for(j...
-      if (mTrack[i]->GetBranch(_NBR)->GetNHits()>0) {
-	if (ok==0 || !(matrix & onoffmatrix)) {
-	  bad[mTrack[i]->GetBranch(_NBR)->GetNHits()]++;
-	  badmatr[matrix]++;
-	}
-	else {
-	  good[mTrack[i]->GetBranch(_NBR)->GetNHits()]++;
-	  goodmatr[matrix]++;
-	}
-      }
-    } // for(_NBR...
-  } // for(i...
-
-  gd=0; 
-  bd=0;
-  ps=0;
-  cout <<"Tracks\t\tPOSS\tOK\tNOK"<<endl;
-  for (i=1;i<10;i++) {
-    cout <<"with "<<i<<" hits :\t"<<poss[i]<<"\t"<<good[i]<<"\t"<<bad[i]<<endl;
-    gd += good[i];
-    bd += bad[i];
-    ps += poss[i];
-  }
-  cout << endl << "TOTAL:\t\t" << ps << "\t" << gd << "\t" << bd << endl;
-
-  bd=0;
-  gd=0;
-  ps=0;
-  cout <<endl<<"1234\tPOSS\tGOOD\tBAD"<<endl;
-  for (i=1;i<16;i++) {
-    for (j=0;j<4;j++) {
-      if (i & int(pow(2,j))) 
-	cout << "1";
-      else
-	cout << "0";
-    }
-    cout << "\t"<<possmatr[i]<<"\t"<<goodmatr[i]<<"\t"<<badmatr[i]<<endl;
-
-    gd += goodmatr[i];
-    bd += badmatr[i];
-    ps += possmatr[i];
-  }  
-  cout <<endl<<"TOTAL:\t"<<ps<<"\t"<<gd<<"\t"<<bd<<endl<<endl;
-
-  i=0;
-  bd=0;
-  gd=0;
-  ps=0;
-
-  long jbgood=0,jbmin, maxjb, lowchi[200], chiideal[200];
-  double chimin;
-  long _tmp;
-
-  for (i=0;i<200;i++) {
-    bad[i]      = 0;
-    good[i]     = 0;
-    lowchi[i]   = 0;
-    chiideal[i] = 0;
-    poss[i]     = 0;
-  }
-  maxjb = 0;
-
-  for (i=0;i<mNTrack; i++) {
-    goodlocal =0;
-    if (mTrack[i]->mTPCTrack->mPt>mParams[mPass]->ptmax || mTrack[i]->mTPCTrack->mPt<=mParams[mPass]->ptmin || mTrack[i]->mTPCTrack->GetFlag()<=0)
-      continue;
-    jbmin = -1;
-    chimin = 10000000;
-    jbgood=-1;
-    if(maxjb<mTrack[i]->GetNBranches()) maxjb=mTrack[i]->GetNBranches();
-    if (mTrack[i]->GetBranch(0)->GetNHits()>0)
-      poss[mTrack[i]->GetNBranches()]++;
-    for (jb=0;jb<mTrack[i]->GetNBranches();jb++) {
-      if (mTrack[i]->GetBranch(jb)->GetNHits()==0) continue;
-      ok = 1;
-      matrix = 0;
-      for (j=0;j<mTrack[i]->GetBranch(jb)->GetNHits();j++) {
-	k=0;
-	while (mTrack[i]->GetBranch(jb)->GetHit(j) != Eval_mchits[i][k] && Eval_mchits[i][k]!=NULL && k<10)
-	  k++;
-	matrix |= int(pow(2,mTrack[i]->GetBranch(jb)->GetHit(j)->GetWafer()->GetLayer()));
-	if (Eval_mchits[i][k]==NULL || k==10)	 
-	  ok = 0;
-      }
-      if (mTrack[i]->GetBranch(jb)->GetNHits()>0) {
-	if (ok==0 || !(matrix & onoffmatrix))	 
-	  bad[jb]++;
-	else {
-	  good[jb]++;
-	  if(jbgood!=-1) {
-	    if(mTrack[i]->GetBranch(jb)->GetChiSq()<mTrack[i]->GetBranch(jbgood)->GetChiSq())
-	      jbgood = jb;
-	  }
-	  else 
-	    jbgood = jb;
-	  goodlocal++;
-	}
-      }
-
-      if (mTrack[i]->GetBranch(jb)->GetChiSq() < chimin) {
-	chimin = mTrack[i]->GetBranch(jb)->GetChiSq();
-	jbmin = jb;
-      }      
-    } //for (jb=...
-
-    goodpertrack[goodlocal]++;
-    _tmp = 0;
-    if(jbgood != -1){
-      for (jb=0;jb<mTrack[i]->GetNBranches();jb++) 
-	if(mTrack[i]->GetBranch(jb)->GetChiSq()<mTrack[i]->GetBranch(jbgood)->GetChiSq())
-	  _tmp++;
-      chiideal[_tmp]++;
-    }
-
-    lowchi[jbmin]++;
-  } //for (i=...
-
-  cout <<"branch\tnbr\tgood\tbad\tlowchi\tchiideal"<<endl;
-  gd=bd=ps=0;
-  for (i=0;i<maxjb+1;i++) {
-    cout << i<<"\t"<<poss[i]<<"\t"<<good[i]<<"\t"<<bad[i]<<"\t"<<lowchi[i]<<"\t"<<chiideal[i]<<endl;
-    gd += good[i];
-    bd += bad[i];
-    ps += poss[i]*i;
-  }
-  cout <<endl<<"TOTAL:\t"<<ps<<"\t"<<gd<<"\t"<<bd<<endl<<endl;
-  
-  cout << "Good branches in one track:"<<endl;
-  cout << "no of branches\ttotal"<<endl;
-  for (i=0;i<10;i++) 
-    cout <<i<<"\t"<<goodpertrack[i]<<endl;
-}
