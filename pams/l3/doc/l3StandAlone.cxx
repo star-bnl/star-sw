@@ -95,21 +95,28 @@ void runL3() {
    printf ( " l3Hit2tpcHit: ended with status %d \n ", result ) ;
 
 //
+   int nBad = 0 ;
    for ( int i = 0 ; i < counter ; i++ ) {
   //  printf ( " Hit1: row x y z %d %f %f %f\n",tpHitT[i].row,tpHitT[i].x,tpHitT[i].y,tpHitT[i].z);
  //   printf ( " Hit2: row x y z %d %f %f %f\n",tpHitCT[i].row,tpHitCT[i].x,tpHitCT[i].y,tpHitCT[i].z);
 
       if ( fabs(tpHitT[i].x-tpHitCT[i].x) > 0.03 ) {
          printf ( " bad x hit1 %f hit2 %f \n",tpHitT[i].x, tpHitCT[i].x ) ;
+         nBad++ ;
+         continue ;
       }
       if ( fabs(tpHitT[i].y-tpHitCT[i].y) > 0.03 ) {
          printf ( " bad y hit1 %f hit2 %f \n",tpHitT[i].y, tpHitCT[i].y ) ;
+         nBad++ ;
+         continue ;
       }
       if ( fabs(tpHitT[i].z-tpHitCT[i].z) > 0.10 ) {
          printf ( " bad z hit1 %f hit2 %f \n",tpHitT[i].z, tpHitCT[i].z ) ;
+         nBad++ ;
+         continue ;
       }
-
    }
+   printf ( " nBad hits %d\n", nBad ) ;
 //
    sl3Para = new St_sl3TpcPara("sl3Para",1);
    sl3TpcPara_st *para  = sl3Para->GetTable();
@@ -159,4 +166,11 @@ void runL3() {
    printf ( " infoLevel %d \n", para->infoLevel ) ;
    result = sl3Tpc ( sl3Para, l3Hit, l3Track ) ;
 //
+   printf ( " ******************************************* \n" ) ;
+   printf ( " if you get 7 bad hits and ~383 tracks  \n" ) ;
+   printf ( "      the test has been successful      \n" ) ;
+   printf ( " ******************************************* \n" ) ;
+   printf ( " if that's the case: Congratulations!!! \n" ) ;
+   printf ( " if not, keep trying, perseverance pays off \n" ) ;
+   printf ( " ******************************************* \n" ) ;
 }
