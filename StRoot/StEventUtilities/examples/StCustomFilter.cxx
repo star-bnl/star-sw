@@ -80,10 +80,10 @@ Int_t StCustomFilter::Accept(StPoints3DABC *pnt, Color_t&color, Size_t&size, Sty
    //   StRoot/StEventUtilities/StEventHelper.cxx:StFilterDef::Accept()
    // method
    //
-   // Input:   pnt - the inetrface to the object 3D coordinate
+   // Input:    pnt - the interface to the object 3D coordinate
    //         color - the default color
    //         size  - the default size  (it if the line width for trach and the dot diameter for the hits)
-   //         style - the default style (it is the line style or ROOT market style)
+   //         style - the default style (it is the line style or ROOT marker style)
    //
    // Output  color - the custom color if any
    //         size  - the custom size  if any
