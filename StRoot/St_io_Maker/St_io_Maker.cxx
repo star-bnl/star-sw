@@ -93,7 +93,9 @@ void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
 #if 0
   b = tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0); 
 #endif
-  StIOHeader *o =  new StIOHeader(dataName,tree);
+  TString dataname(dataName);
+  //  StIOHeader *o =  new StIOHeader(dataName,tree);
+  StIOHeader *o =  new StIOHeader(dataname,tree);
   m_BranchName += ".root";
   b = o->GetBranch();
   if (fileName && strlen(fileName)) b->SetFile(fileName);
@@ -284,7 +286,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.4 1999/01/26 16:04:50 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.5 1999/02/08 16:51:24 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
