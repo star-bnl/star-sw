@@ -45,6 +45,7 @@ my $FLIBS    = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
 my $CPPPATH  = "";
+my $INCLUDE_PATH = $INCLUDE;
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
 if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/) {
@@ -112,6 +113,7 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SOFLAGS   =  " -G";
 }
 elsif (/^intel_wnt/) {
+  $DEBUG    = "-Zi";
   $EXESUF   = ".exe";
   $O        = "obj";
   $A        = "lib";
@@ -136,12 +138,12 @@ elsif (/^intel_wnt/) {
   $CC        = "cl";
   $CXX       = "cl";
   $FC        = "fl32";
-  $CXXFLAGS  =  $DEBUG . "  -KPIC -features=no%castop -features=no%anachronisms +w";
   $CLIBS     = "ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
   $FLIBS     = "DFORDLL.LIB";
-  $FFLAGS    =  $DEBUG . " -MD -G5 -Zi -fpp -Oxp -nokeep -nologo";
+  $FFLAGS    =  $DEBUG . " -MD -G5 -fpp -Oxp -nokeep -nologo";
   $FEXTEND   = "-extend_source";
-  $CFLAGS    =  $DEBUG . " -MD -G5 -Zi -nologo -DASU_MALLOC_OFF";
+  $CFLAGS    =  $DEBUG . " -MD -G5 -nologo -DASU_MALLOC_OFF";
+  $CXXFLAGS  =  $CFLAGS;
   $LD        =  $CXX;
 #  $LDFLAGS   =  $DEBUG . $(conlflags); 
   $SO        =  "link";
@@ -175,12 +177,33 @@ print "CPPPATH = ",$CPPPATH,"\n";
 print " STAR = ",$STAR,"\n";
 push @Reps, $STAR;
 Repository ($STAR);
+(my $DirPath  = cwd()) =~ s/\/$//g;
+print " in DirPath=$DirPath\n";
+if ($STAR_SYS !~ /^intel_wnt/) {
+  $INCLUDE_PATH = "";
+}
+else {
+  $CPPPATH = "";
+  $FCPPPATH = "";
+  foreach my $dir ($DirPath, @Reps) {
+    $INCLUDE_PATH .= ";" . $dir;
+    $INCLUDE_PATH .= ";" . $dir . "/inc";
+    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
+    $INCLUDE_PATH .= ";" . $dir . "/pams";
+    $INCLUDE_PATH .= ";" . $dir . "/.share/tables";
+    foreach my $inc (@includes) {
+      $INCLUDE_PATH .= ";" . $dir . "/StRoot/" . $inc;
+    }
+  }
+  $INCLUDE_PATH .= ";" . $ROOTSYS . "/src";
+  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
+}
 my @Repo = Repository_List; print "Repositories = @Repo\n";
 my $STICFLAGS = "-H -q";
 $env = new cons(
 		'STIC'         => $STIC,
 		'STICFLAGS'    => $STICFLAGS,
-		'STICCOM'      => 'cd %<:d;  %STIC %STICFLAGS %_IFLAGS %<', 
+		'STICCOM'      => 'cd %<:d &&  %STIC %STICFLAGS %_IFLAGS %<', 
 		'CPPPATH'      => $CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
 		'DEBUG'        => $DEBUG,
@@ -194,15 +217,15 @@ $env = new cons(
 		'Cout'         => $Cout,
 		'Lout'         => $Lout,
 		'SoOUT'        => $SoOUT,
-		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
+		'FCCOM'        => 'cd %<:d && %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
+		'GEANT3COM'    => 'cd %<:d && %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
+		'CCCOM'        => 'cd %<:d && %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%<:f %Cout%>:f',
+		'CXXCOM'       => 'cd %<:d && %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%<:f %Cout%>:f',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
 		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS %Lout%> %<:f %_LDIRS %LIBS',
@@ -242,7 +265,8 @@ $env = new cons(
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
-				     'STAR_BIN' => $STAR_BIN
+				     'STAR_BIN' => $STAR_BIN,
+				     'INCLUDE' => $INCLUDE_PATH
 				   },
 	       );
 #Command $env 
@@ -253,8 +277,6 @@ $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
-my $DirPath  = cwd();
-print " in DirPath=$DirPath\n";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 #if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
@@ -382,7 +404,8 @@ package script;
 *topmode        = *File::Find::topmode;
 *topnlink       = *File::Find::topnlink;
 sub find_sources {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  my $pwd = cwd();
+  if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
   @search_files   = ();
   if (-d $_[0]) {
     &File::Find::find(\&wanted, @_);
