@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.7 1999/07/07 19:55:43 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.8 1999/07/21 21:15:41 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -27,6 +27,11 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.8  1999/07/21 21:15:41  levine
+ * TPCV2P0_ZS_SR.cxx changed to include the TPCV2P0_ZS_SR::getSpacePts()
+ * (cluster-finder reader). TPCV1P0_ZS_SR.cxx changed to include empty
+ * version of the same method.
+ *
  * Revision 1.7  1999/07/07 19:55:43  levine
  * Now behaves correctly when encountering a partially populated (e.g., one RB) sector
  *
@@ -357,6 +362,9 @@ TPCV2P0_ZS_SR::~TPCV2P0_ZS_SR()
       if (memaddr) free(memaddr);
     }
   }
+  for (int rrow=0; rrow<TPC_PADROWS; rrow++) {
+    if (RowSpacePts[rrow]) free(RowSpacePts[rrow]);
+  }
 }
 
 int TPCV2P0_ZS_SR::getPadList(int PadRow, u_char **padList)
@@ -394,6 +402,62 @@ int TPCV2P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,
   *SeqData = Pad_array[PadRow-1][Pad-1].seq;  // pass back pointer to Sequence array 
   return 0;
 }
+
+
+// Read the clusters (space points) found in the mezzanine cluster-finder
+int TPCV2P0_ZS_SR::getSpacePts(int PadRow, int *nSpacePts, SpacePt **SpacePts)
+{
+  int rb, row;
+  classname(Bank_TPCMZCLD) *cld;
+  int numSpPts = 0; // keep running total for malloc
+
+  for (row=0; row<TPC_PADROWS; nsptrow[row++]=0);
+
+  for (rb=0; rb<6; rb++) {
+    for (int mz=0; mz<3; mz++) {
+      //pointer to TPCMZCLD bank
+      cld_p[rb][mz] = detector->getBankTPCMZCLD(sector,rb,mz) ; 
+      cld = cld_p[rb][mz];
+      if (!cld) continue;
+      int *ptr = (int *)&cld->stuff;
+      for (int ir=0; ir<cld->NumRows; ir++){
+	int row = *ptr++;
+	int nsp = *ptr++; // bump pointer to beginning of space points
+	nsptrow[row-1] += nsp;  // add num space pts to running total
+	ptr += 2*nsp;
+      }
+    }
+  }
+  if (detector->ercpy->verbose) cout << "sector "<<sector<<": found " 
+				     <<numSpPts<<" space pts" <<endl;
+  
+  for (row=0; row<TPC_PADROWS; row++) {
+    RowSpacePts[row] = (SpacePt *)malloc(nsptrow[row]*sizeof(struct SpacePt));
+    if (RowSpacePts[row]==NULL) {
+      cout << "failed to malloc() Space Point structures " << endl;
+      return FALSE;
+    }
+  }
+
+  for (rb=0; rb<6; rb++) {
+    for (int mz=0; mz<3; mz++) {
+      cld = cld_p[rb][mz];  // pointer to TPCMZCLD bank
+      if (!cld) continue;
+      int *ptr = &cld->stuff[0];
+      for (int ir=0; ir<cld->NumRows; ir++){
+	int row = *ptr++;
+	int nsp = *ptr++;   // bump pointer to beginning of space points
+	for (int isp=0; isp<nsp; isp++, ptr+=2) {
+	  RowSpacePts[row-1][isp] = *(SpacePt *)ptr;
+	}
+      }
+    }
+  }
+  *nSpacePts = nsptrow[PadRow-1];
+  *SpacePts = RowSpacePts[PadRow-1];
+  return TRUE;
+}
+
 
 int TPCV2P0_ZS_SR::MemUsed()
 {
