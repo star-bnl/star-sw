@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.21 2000/06/27 17:47:26 jseger Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.22 2001/09/14 17:49:01 perev Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.22  2001/09/14 17:49:01  perev
+ * Removed references to StRun.
+ *
  * Revision 1.21  2000/06/27 17:47:26  jseger
  * Removed default production of Ebyesca.out file
  *
@@ -76,7 +79,7 @@
  **************************************************************************/
 #include "StEbyeScaTagsMaker.h"
 #include "StChain.h"
-#include "StRun.h"
+//-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StGlobalTrack.h"
 
@@ -106,8 +109,8 @@ Int_t StEbyeScaTagsMaker::Make() {
   StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
   if (!mEvent) return kStOK; // If no event, we're done
   StEvent& ev = *mEvent;
-  StRun *run;
-  run = (StRun *) GetInputDS("StRun");
+  //-tu  StRun *run;
+  //-tu  run = (StRun *) GetInputDS("StRun");
 
   // OK, we've got the event. Do what thou wilst.
 
