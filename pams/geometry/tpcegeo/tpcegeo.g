@@ -16,6 +16,7 @@ module   TPCEGEO  is the TPC system in GSTAR
 *  PN  10/28/98: two more pseudo-padrows in the outer sector for Iwona      *
 *  PN  11/10/99: full gap between gating grid and the padplane is sensitive *
 *  PN  03/10/01: TMSE hit x-size determined automatically with MWCread>=2   *
+*  PN  06/04/02: TPSM membrane material changed to mylar, copper was a bug  *
 *****************************************************************************
 +cde,AGECOM,GCUNIT,GCONST.     " - standart geant commons "
 Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
