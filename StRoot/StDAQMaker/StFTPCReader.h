@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.h,v 1.2 2000/06/12 15:04:02 perev Exp $
+ * $Id: StFTPCReader.h,v 1.3 2000/11/24 17:56:18 fisyak Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.h,v $
+ * Revision 1.3  2000/11/24 17:56:18  fisyak
+ * Replace St_fss_Maker by StFtpcSlowSimMaker
+ *
  * Revision 1.2  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -25,7 +28,7 @@
 #include "StTPCReader.h"
 #endif
 
-#include "St_fss_Maker/StFssSectorReader.hh"
+#include "StFtpcSlowSimMaker/StFssSectorReader.hh"
 
 class  StFTPCReader 
 {
