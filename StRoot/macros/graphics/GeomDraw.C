@@ -4,7 +4,7 @@ void GeomDrawUsage() {
           printf("\n");
           printf("Usage: root4star \'GeomDraw.C(const char *geomDescriptor)\' \n");
           printf("-----  where \"geomDescriptor\" can be either \n");
-          printf("        1. star geometry version like \"year2003\" (see: http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html) \n");
+          printf("        1. STAR geometry version like \"year2003\" (see: http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html) \n");
           printf("            example: root4star \'GeomDraw.C(\"year2003\")\'\n");                
           printf("        2. the proper ZEBRA fz file, for example \n");
           printf("            example: root4star \'GeomDraw.C(\"/star/u/potekhin/gstardata/y2003x_complete.fz \")\'\n\n"); 
@@ -21,8 +21,12 @@ void GeomDrawUsage() {
           printf("                         0 - everything visible,\n");
           printf("                         2 - this invisible, but sons are visible\n");
           printf("                         1 - this visible but sons\n");
-          printf("                         3 - neither this nor its sons are visible\n\n");       
-          printf(" $Id: GeomDraw.C,v 1.3 2004/07/23 20:00:20 fine Exp $\n");
+          printf("                         3 - neither this nor its sons are visible\n\n"); 
+          printf("---------------\n"); 
+          printf(" To get the OpenGL view one has to\n");
+          printf("    1. Turn Qt ROOT Layer on (see: http://www.rhic.bnl.gov/~fine/EventDisplay \n");
+          printf("    2. Select \"OpenGL view\" from the \"View\" menu of ROOT TCanvas \n");                
+          printf("\n$Id: GeomDraw.C,v 1.4 2004/07/23 20:16:04 fine Exp $\n");
 }                 
 
 void GeomDraw(const char *fzFile="complete") 
@@ -36,7 +40,7 @@ void GeomDraw(const char *fzFile="complete")
   {
      // Check 
      geomAccess.Strip(TString::kBoth);
-     if (!geomAccess.CountChar(' ') && (geomAccess.Contains("y") || geomAccess.Contains("complete")) ) {
+     if (!geomAccess.CountChar(' ') && (geomAccess.First('y')==0 || geomAccess.First("complete") == 0 ) ) {
        geomKuipCmd = "detp geometry ";
        geomKuipCmd += geomAccess; geomAccess = "" ;
      } else {
