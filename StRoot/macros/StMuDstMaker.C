@@ -65,6 +65,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
+  gSystem->Load("StBichsel");
   gSystem->Load("StTriggerDataMaker");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");

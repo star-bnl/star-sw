@@ -5,6 +5,9 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
+// Revision 1.5  2003/05/02 23:16:44  jeromel
+// StBichsel
+//
 // Revision 1.4  2002/09/20 22:46:10  jeromel
 // Misisng StEventMaker instance
 //
@@ -55,6 +58,7 @@ void WriteStiEvents(Int_t nevents=1,
     gSystem->Load("StarClassLibrary");
 
     gSystem->Load("StIOMaker");
+    gSystem->Load("StBichsel");
     gSystem->Load("StEvent");
     gSystem->Load("StEmcUtil"); 
     gSystem->Load("StMcEvent");
