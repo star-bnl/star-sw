@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.4 1999/07/28 20:27:45 calderon Exp $
+// $Id: StAssociator.C,v 1.5 1999/07/28 21:29:34 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.5  1999/07/28 21:29:34  calderon
+// Modified event loop: use 'if' and 'goto' to avoid using 'for'
+//
 // Revision 1.4  1999/07/28 20:27:45  calderon
 // Version with SL99f libraries
 //
@@ -84,7 +87,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     EventLoop: if (iev<=nevents && !istat) {
 	chain->Clear();
 	istat = chain->Make(iev); // This should call the Make() method in ALL makers
-	if (iret) {
+	if (istat) {
 	    cout << "Last Event Processed. Status = " << istat << endl;
 	}
 	iev++; goto EventLoop;
