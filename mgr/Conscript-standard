@@ -9,7 +9,7 @@ $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @Repo = ();
 @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
-my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
+my $pkg  = basename($Dir);# print "Run cons in $Dir for pkg\n";
 my $PKG = $pkg;
 my $i;
 my @idlML    = find_idlM($Dir);     #$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}
@@ -88,7 +88,12 @@ if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
 if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {$CPPP .= ":/usr/local/include";}
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
-if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
+if ($STAR_SYS =~ /^sun4x_5(5|6)$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
+#print "STAR_SYS = $STAR_SYS pkg = $pkg\n";
+if ($STAR_SYS =~ /^sun4x_56_CC5$/ and $pkg =~ /^StarClassLibrary$/)
+  {$LIBS  .= "/opt/WS5.0/SC5.0/lib/libCstd.a";}
+if ($STAR_SYS =~ /^sun4x_56_CC5$/ and  $pkg =~ /^StMcEvent$/) 
+  {$LIBS  .= "/opt/WS5.0/SC5.0/lib/libCstd.a /opt/WS5.0/SC5.0/lib/libiostream.a";}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
