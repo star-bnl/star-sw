@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.5 2001/02/07 19:16:30 caines Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.6 2001/02/14 17:51:48 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.6  2001/02/14 17:51:48  perev
+ * delete [] added
+ *
  * Revision 1.5  2001/02/07 19:16:30  caines
  * Fix sun non compilation for non-fixed size array
  *
@@ -265,6 +268,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
       if (isok[j]==1) lastgood=j;
     // now we kill all but the good branches...
     for (j=nbr-1;j>lastgood;j--) mTrack[i]->RemoveBranch(j);
+    delete [] isok;
   }
 }
 
