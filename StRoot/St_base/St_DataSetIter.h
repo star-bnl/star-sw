@@ -28,7 +28,7 @@
 
 //----- dataset flags
 enum ESetBits {
-     kMark        = BIT(22),   // if object is marked
+     kMark        = BIT(22)   // if object is marked
 };
 enum EBitOpt { 
                kSet   = kTRUE,

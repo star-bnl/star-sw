@@ -41,7 +41,7 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
 St_DataSet::~St_DataSet()
 {
    Delete();
-}
+} 
 //______________________________________________________________________________
 void St_DataSet::Add(St_DataSet *dataset)
 {
@@ -49,7 +49,7 @@ void St_DataSet::Add(St_DataSet *dataset)
  
   if (!fList) {
        fList = new TList;
-       if (fMother) fList->SetParent(fMother);
+   //    if (fMother) fList->SetParent(fMother);
   }
  
   // Check whether this new child has got any partent yet
@@ -107,8 +107,13 @@ void  St_DataSet::ls(Option_t *option)
  
   if (option && !strcmp(option,"*")) ls(Int_t(0));
   else {
-    St_DataSetIter local(this);
-    St_DataSet *set = local(option);
+    St_DataSet *set = 0;
+    if (option && strlen(option) > 0) {
+      St_DataSetIter local(this);
+      St_DataSet *set = local(option);
+    }
+    else
+      set = this;
     if (set) set->ls(Int_t(1));
     else 
       if (option) Warning("ls","Dataset <%s> not found",option);
@@ -120,13 +125,13 @@ void St_DataSet::ls(Int_t depth)
 {
  /////////////////////////////////////////////////////////////////////
  //                                                                 //
- //  ls(Int_t depth)                                                 //
+ //  ls(Int_t depth)                                                //
  //                                                                 //
  //  Prints the list of the this St_DataSet.                        //
  //                                                                 //
  //  Parameter:                                                     //
  //  =========                                                      //
- //    Int_t depth >0 the number of levels to be printed             //
+ //    Int_t depth >0 the number of levels to be printed            //
  //               =0 all levels will be printed                     //
  //            No par - ls() prints only level out                  //
  //                                                                 //
@@ -143,7 +148,7 @@ void St_DataSet::ls(Int_t depth)
         DecreaseDirLevel();
     }
   }
-}
+} 
 #if 0
 //______________________________________________________________________________
 Bool_t    St_DataSet::IsEmpty() const 
@@ -269,14 +274,13 @@ void  St_DataSet::SetParent(St_DataSet *parent){
 //  Break the "parent" relationship with the current object parent if present
 //  Set the new parent if any
 //
-  if (fList) {
-    St_DataSet *oldparent = GetParent();
+   St_DataSet *oldparent = GetParent();
     // Each St_DataSet object must have only parent, therefore ...
-    if (oldparent)
+   if (oldparent)
        oldparent->Remove(this);       // Break relations with the current parents
-    fList->SetParent(parent);         // Establish a new relationships
-  }
-  SetMother(parent);                  // Adjust St_DataSet::fMother pointer as well
+//   if (fList) 
+//      fList->SetParent(parent);       // Establish a new relationships
+   SetMother(parent);                 // Adjust St_DataSet::fMother pointer as well
 }
 //______________________________________________________________________________
 void St_DataSet::SetWrite()
@@ -286,11 +290,13 @@ void St_DataSet::SetWrite()
  // the backward fMother pointer (otherwise ROOT follows this links
  // and will pull fMother out too.
  //
-  St_DataSet *mothersav = GetParent();
-  SetParent();
+  TObject *mothersav = fMother; // GetParent();
+  fMother = 0;
+//  SetParent();
   Write();
   // Restore the fMother pointer
-  SetParent(mothersav);
+  // SetParent(mothersav);
+  fMother = mothersav;
 }
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
@@ -300,7 +306,7 @@ void St_DataSet::Shunt(St_DataSet *dataset)
  
   if (!fList) {
        fList = new TList;
-       if (fMother) fList->SetParent(fMother);
+//       if (fMother) fList->SetParent(fMother);
   }
  
   // Check whether this new child has got any parent yet
