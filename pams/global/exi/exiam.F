@@ -393,7 +393,7 @@ C             Check that Xi points away from primary vertex
                 iflag=2
               ELSE
                 call helixDCA(charge,xpp(1),pxi(1),bxi)
-                IF(bxi.le.bxi_max(id_det)) THEN
+                IF(abs(bxi).le.bxi_max(id_det)) THEN
 		  iflag = 0
 		ELSE
 		  iflag = 1
