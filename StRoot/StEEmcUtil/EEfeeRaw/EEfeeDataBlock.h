@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.6 2003/12/04 18:29:25 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.7 2004/01/27 15:13:57 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -48,14 +48,18 @@ public:
   UChar_t   getCrateID()  const { return  head[CRATE] & 0x00FF ; }
   int       getNData(int thres) const;
   void      maskCrate() {head[CRATE]=0xFFFF;}
+  void      setCrateID(UShort_t id ) { head[CRATE]= (head[CRATE]&0xFF00) + ( id& 0x00FF);}
   int       isValid();
-
+  
   ClassDef(EEfeeDataBlock,1) // Endcap Emc event
 };
 #endif
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.7  2004/01/27 15:13:57  balewski
+ * it is tricky with BTOW
+ *
  * Revision 1.6  2003/12/04 18:29:25  balewski
  * I forgot
  *
