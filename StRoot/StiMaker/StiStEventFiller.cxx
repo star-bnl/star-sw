@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.17 2002/08/22 21:46:00 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.18 2002/08/29 21:09:22 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.18  2002/08/29 21:09:22  andrewar
+ * Fixed seg violation bug.
+ *
  * Revision 1.17  2002/08/22 21:46:00  pruneau
  * Made a fix to StiStEventFiller to remove calls to StHelix and StPhysicalHelix.
  * Currently there is one instance of StHelix used a calculation broker to
@@ -213,6 +216,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
     
     mEvent = e;
     mTrackStore = t;
+    mTrkNodeMap.clear();  // need to reset for this event
     
     // loop
     StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
