@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.13 2001/05/09 02:23:06 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.14 2001/07/24 23:43:08 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.14  2001/07/24 23:43:08  caines
+ * Better flagging of hits out of drift range
+ *
  * Revision 1.13  2001/05/09 02:23:06  caines
- * Fix axis limits
+ *  Fix axis limits
  *
  * Revision 1.12  2001/05/04 14:20:05  caines
  * Improved historgramming
@@ -91,6 +94,7 @@ Int_t StSvtHitMaker::Init()
 
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Init() ..."  << endm;
 
+  //  iWrite=1;
 
  // Get pointer to StSvtData
 
@@ -179,11 +183,14 @@ Int_t StSvtHitMaker::Init()
     m_waf_no[barrel]->SetXTitle("Z cm");
   }
 
-  if( iWrite == 1){
-    m_hfile = new TFile("clusters.root","RECREATE","Clusters");
+  if( iWrite >0){
+    m_hfile = new TFile("/home/scratch/caines/clusters.root","RECREATE","Clusters");
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
-    cluInfo.open("ClusterInfo.dat",ios::out);    
+    
+    if( iWrite > 1){
+      cluInfo.open("ClusterInfo.dat",ios::out);    
+    }
   }
 
   if (mSvtGeantHitColl){
@@ -273,11 +280,11 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
 
 	    // Flag aas bad those hits not in the drift region
-	    if( (localCoord.position().x() < -0.1 && localCoord.hybrid()==2)
-		|| (localCoord.position().x() > 0.1 && localCoord.hybrid()==1)
-		|| fabs(localCoord.position().x())> 3.1){
+	    if( (localCoord.position().x() < -0.01 && localCoord.hybrid()==2)
+		|| (localCoord.position().x() > 0.01 && localCoord.hybrid()==1)
+		|| fabs(localCoord.position().x())> 3.01){
 	      mSvtBigHit->svtHit()[clu].setFlag( 
-				      	mSvtBigHit->svtHit()[clu].flag()+3);
+				      	mSvtBigHit->svtHit()[clu].flag()+5);
 	    }
 	    
 	    SvtGeomTrans->operator()(localCoord,globalCoord);
@@ -298,7 +305,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	  if( mSvtBigHit->numOfHits() > 0){
 	    SaveIntoTable(mSvtBigHit->numOfHits(), index);
 
-	    if( iWrite == 1){
+	    if( iWrite > 0){
 	      SaveIntoNtuple(mSvtBigHit->numOfHits(),index);
 	    }
 	  }
@@ -350,7 +357,6 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
 	*mSvtBigHit->svtHit()[i].positionError().y();
       spt->cov[2]= mSvtBigHit->svtHit()[i].positionError().z()
 	*mSvtBigHit->svtHit()[i].positionError().z();
-
       for( int j=0; j<3; j++){
 	spt->res[j]= 0;
       }
@@ -389,7 +395,7 @@ Int_t StSvtHitMaker::FillHistograms(){
 	  
 	  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 	    
-	    if( mSvtBigHit->svtHit()[clu].flag() < 255){
+	    if( mSvtBigHit->svtHit()[clu].flag() < 4){
 	      int layer = mSvtBigHit->getLayerID()-1;
 	      int ladder = (int)(mSvtBigHit->svtHit()[clu].ladder());
 	   
@@ -410,35 +416,37 @@ Int_t StSvtHitMaker::FillHistograms(){
 {
 
   for( int i=0; i<numOfClusters; i++){
-    
-    m_ClusTuple->Fill(mSvtBigHit->svtHit()[i].flag(),
-		      mSvtBigHit->WaferPosition()[i].x(),
-		      mSvtBigHit->WaferPosition()[i].y(),
-		      mSvtBigHit->svtHit()[i].position().x(),
-		      mSvtBigHit->svtHit()[i].position().y(),
-		      mSvtBigHit->svtHit()[i].position().z(),
-		      mSvtBigHit->svtHit()[i].charge(),
-		      mSvtBigHit->svtHitData()[i].mom2[0],
-		      mSvtBigHit->svtHitData()[i].mom2[1],
-		      mSvtBigHit->svtHitData()[i].numOfAnodesInClu,
-		      mSvtBigHit->svtHitData()[i].numOfPixelsInClu,
-		      mSvtBigHit->svtHitData()[i].peakAdc,
-		      index,
-		      mSvtData->getEventNumber());
-    cluInfo<<mSvtData->getEventNumber()
-	   <<setw(13)<<  index
-	   <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
-	   <<setw(13)<<  mSvtBigHit->WaferPosition()[i].x()
-	   <<setw(13)<<  mSvtBigHit->WaferPosition()[i].y()
-	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().x()
-	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().y()
-	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().z()
-	   <<setw(13)<<  mSvtBigHit->svtHit()[i].charge()
-	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[0]
-	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[1]
-	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfAnodesInClu
-	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfPixelsInClu
-	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
+    if( mSvtBigHit->svtHit()[i].flag() < 255)
+      m_ClusTuple->Fill(mSvtBigHit->svtHit()[i].flag(),
+			mSvtBigHit->WaferPosition()[i].x(),
+			mSvtBigHit->WaferPosition()[i].y(),
+			mSvtBigHit->svtHit()[i].position().x(),
+			mSvtBigHit->svtHit()[i].position().y(),
+			mSvtBigHit->svtHit()[i].position().z(),
+			mSvtBigHit->svtHit()[i].charge(),
+			mSvtBigHit->svtHitData()[i].mom2[0],
+			mSvtBigHit->svtHitData()[i].mom2[1],
+			mSvtBigHit->svtHitData()[i].numOfAnodesInClu,
+			mSvtBigHit->svtHitData()[i].numOfPixelsInClu,
+			mSvtBigHit->svtHitData()[i].peakAdc,
+			index,
+			mSvtData->getEventNumber());
+    if( iWrite > 1){
+      cluInfo<<mSvtData->getEventNumber()
+	     <<setw(13)<<  index
+	     <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
+	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].x()
+	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].y()
+	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().x()
+	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().y()
+	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().z()
+	     <<setw(13)<<  mSvtBigHit->svtHit()[i].charge()
+	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[0]
+	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[1]
+	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfAnodesInClu
+	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfPixelsInClu
+	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
+    }
   }
 }
 
