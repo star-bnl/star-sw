@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.18 2001/07/12 23:20:42 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.19 2001/07/16 13:16:41 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.19  2001/07/16 13:16:41  laue
+ * new constructor added [ StHbtTrack(const StEvent*, cons StTrack*) ]
+ *
  * Revision 1.18  2001/07/12 23:20:42  laue
  * mDCAGlobal,mPGlobal,mPtGlobal added
  *
@@ -115,6 +118,7 @@
 /***/
 
 class StTrack;
+class StEvent;
 class StHbtTTreeTrack;
 class StHbtTTreeEvent;
 
@@ -124,6 +128,7 @@ public:
   StHbtTrack(const StHbtTrack&);// copy constructor
 #ifdef __ROOT__
   StHbtTrack(const StTrack*, StHbtThreeVector);   // c-tor from StTrack of STAR DSTs
+  StHbtTrack(const StEvent*, const StTrack*);   // c-tor from StTrack of STAR DSTs
   StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t);
 #endif
   ~StHbtTrack(){/* no-op*/};
