@@ -11,8 +11,6 @@
 
 //Sti
 #include "StiPolygon.h"
-
-//ClassImp(StiPolygon)
     
 StiPolygon::StiPolygon()
 {

@@ -18,9 +18,6 @@
 #ifndef StiDetPolygon_HH
 #define StiDetPolygon_HH
 
-//Temp
-//#include "TObject.h"
-
 #include <map>
 #include "StiPolygon.h"
 
@@ -86,7 +83,6 @@ protected:
     det_polygon_map::const_iterator mcurrent; //!
     
 private:
-    //ClassDef(StiDetPolygon, 1)
 };
 
 #endif

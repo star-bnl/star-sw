@@ -10,8 +10,6 @@
 #include "StiDetector.h"
 #include "StiDetPolygonSide.h"
 #include "StiDetPolygon.h"
-
-//ClassImp(StiDetPolygon)
     
 StiDetPolygon::StiDetPolygon()
 {
