@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.10 1999/03/02 03:34:43 fisyak Exp $
+// $Id: doEvents.C,v 1.11 1999/03/10 14:28:17 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.10  1999/03/02 03:34:43  fisyak
-// Set LD_LIBRARY_PATH to Root.DynamicPath
+// Revision 1.11  1999/03/10 14:28:17  fisyak
+// Clean up for SL99c
+//
+// Revision 1.11  1999/03/10 14:28:17  fisyak
+// Clean up for SL99c
 //
 // Revision 1.10  1999/03/02 03:34:43  fisyak
 // Set LD_LIBRARY_PATH to Root.DynamicPath
@@ -105,7 +108,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
 void doEvents(const Int_t nevents=999,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/disk00001/star/auau200//hijing135/jetq_on/b9_12/year_1b/hadronic_on/tfs/set0076_02_160evts.root")
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
   // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
