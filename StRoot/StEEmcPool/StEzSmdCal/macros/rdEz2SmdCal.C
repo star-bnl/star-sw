@@ -1,7 +1,9 @@
 rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
-  TString out="outX/";
+  TString calDir="./calD1/";
+  TString out="/star/data05/scratch/balewski/outD2/";
+
   int firstSec=5;
-  int lastSec=5;
+  int lastSec=8;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
     "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
@@ -49,9 +51,9 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
     printf("%d =%s=\n",i,text);
   }
 
-
+  int mSect=lastSec-firstSec+1;
   int nEntries = (Int_t)chain->GetEntries();
-  printf("Sort %d  of total Events %d\n",mxEve, nEntries);
+  printf("Sort %d  of total Events %d, mSect=%d\n",mxEve, nEntries,mSect);
   int nEve=0;
   //  return;  
 
@@ -80,24 +82,34 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
 
   // set all DB flags before DB request
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
-  db->changeGains("janbCalib2/towgains.dat");
-  db->changeGains("janbCalib2/PQR_gains1.dat");
-  db->changeGains("janbCalib2/gains05U.dat5");
-  db->changeGains("janbCalib2/gains05V.dat5");
 
-  db->changeMask("janbCalib2/mask05.dat4");
+  int j;  
+  for(j=0;j<mSect;j++) {
+    int secID=firstSec+j;
+    char tt1[100];
+    sprintf(tt1,"%02d",secID);
+    TString tt=calDir+"gains"+tt1+"tower.dat";    
+    db->changeGains(tt.Data());
+    tt=calDir+"gains"+tt1+"PQR.dat";    
+    db->changeGains(tt.Data());
+    tt=calDir+"gains"+tt1+"Usmd.dat";    
+    db->changeGains(tt.Data());
+    tt=calDir+"gains"+tt1+"Vsmd.dat";    
+    db->changeGains(tt.Data());
+
+    tt=calDir+"mask"+tt1+".dat";    
+    db->changeMask(tt.Data());
+  }
   
   TObjArray  HList;
   //........... sorters ..........
   float thrMipSmdE=0.3/1000.;
   int emptyStripCount=6;
   float offCenter=0.8; // fiducial area of tower =offCenter^2
-  float twMipRelEneLow=0.3, twMipRelEneHigh=3.;
+  float twMipRelEneLow=0.3, twMipRelEneHigh=2.;
 
-  int mSect=lastSec-firstSec+1;
   EzEEsmdCal **sorterA=new  EzEEsmdCal *[mSect];
 
-  int j;
   for(j=0;j<mSect;j++) {
     sorterA[j]=new  EzEEsmdCal(firstSec+j); // sectID
     sorterA[j]->set(&HList,db,eFee,eHead);
@@ -106,8 +118,9 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
     sorterA[j]->init();
     sorterA[j]->initRun(eHead->getRunNumber());
   }
+
   // dump current DB content
-  // db->exportAscii("dbDump2.dat"); return;
+  db->exportAscii("dbDumpD1.dat"); return;
    
   printf("Sort %d  of total Events %d\n",mxEve, nEntries);
 
@@ -159,12 +172,15 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
   
   // HList.ls(); 
 
-  h=(TH1F *) HList.FindObject("myStat05");   assert(h);
-  float *my=h->GetArray();
-  printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
-
-  printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
-
+  for(j=0;j<mSect;j++) {
+    int secID=firstSec+j;
+    char tt1[100];
+    sprintf(tt1,"myStat%02d",secID);
+    h=(TH1F *) HList.FindObject(tt1);   assert(h);
+    float *my=h->GetArray();
+    printf("sec=%d nInp=%d  -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",secID,nEve,my[2],my[3],my[4],my[5]);
+    printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
+  }
    return;
  } 
 
