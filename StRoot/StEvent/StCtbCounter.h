@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbCounter.h,v 1.3 1999/04/27 01:24:16 fisyak Exp $
+ * $Id: StCtbCounter.h,v 1.4 1999/04/28 22:27:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StCtbCounter.h,v $
- * Revision 1.3  1999/04/27 01:24:16  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:29  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:29  fisyak
  * New version with pointer instead referencies
@@ -21,7 +21,6 @@
  *
  **************************************************************************/
 #define StCtbCounter_hh
-
 class StCtbCounter : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -42,12 +41,9 @@ public:
     void setTime(Float_t);
     
 protected:
-    ClassDef(StCtbCounter,1)  //StCtbCounter structure
+    Short_t mId;
     Float_t mMips;
-
     Float_t mTime;
-
-//________________________________________________
   ClassDef(StCtbCounter,1)  //StCtbCounter structure
 };
 StCollectionDef(CtbCounter)

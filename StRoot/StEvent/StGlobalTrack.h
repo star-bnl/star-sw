@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 1.3 1999/04/27 01:24:20 fisyak Exp $
+ * $Id: StGlobalTrack.h,v 1.4 1999/04/28 22:27:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
- * Revision 1.3  1999/04/27 01:24:20  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
+ *
+ * the hits are not stored on the DST. Sync changes in
+ * StEvent with StRootEvent.
  *
  * Revision 1.4  1999/04/28 22:27:33  fisyak
  * New version with pointer instead referencies
@@ -46,19 +49,32 @@
  * Revision 1.3  1999/01/30 23:03:12  wenaus
  * table load intfc change; include ref change
  *
+ * Revision 1.2  1999/01/15 22:53:45  wenaus
+ * version with constructors for table-based loading
+ *
  * Revision 2.0  1999/10/12 18:42:15  ullrich
-class StTpcHit;
+ * Completely Revised for New Version
+ *
+ **************************************************************************/
 class StSvtHit;
+class StTpcHit;
+class StFtpcHit;
 class StSvtHitCollection;
+class StTpcHitCollection;
 class StFtpcHitCollection;
-class StVecPtrSvtHit;
 class StFtpcHitIterator;
+class StSvtHitIterator;
+class StTpcHitIterator;
+class StVecPtrFtpcHit;
 class StVecPtrSvtHit;
 class StVecPtrTpcHit;
 #include "StArray.h"
 #ifndef __ROOT__
 #include <vector>
+#endif
+#include "StFtpcHit.h"
 #include "StTpcHit.h"
+#include "StSvtHit.h"
 #include "StDedx.h"
 #include "tables/dst_track.h"
 #include "StFtpcHit.h"
@@ -71,7 +87,7 @@ using namespace std;
 #define StGlobalTrack_hh
 
 #include "StTrack.h"
-                  StThreeVectorF& origin,
+                  Double_t curvature,
                   Double_t dip,
                   Double_t phase,
                   double curvature,
@@ -79,9 +95,10 @@ using namespace std;
                   double phase,
                   StThreeVectorD& origin,
 		  int h);
-    virtual StDedx*                   svtDedx();
-    virtual StDedx*                   tpcDedx();
-    virtual StDedx*                   ftpcDedx();
+    virtual const StVecPtrTpcHit*     tpcHits() const;
+    virtual const StVecPtrSvtHit*     svtHits() const;
+    virtual const StVecPtrFtpcHit*    ftpcHits() const;
+    virtual const StDedx*             svtDedx() const;
     virtual const StDedx*             tpcDedx() const;
     virtual const StDedx*             ftpcDedx() const;
     virtual const StTrackPidTraits*   pidTraits() const;
@@ -100,21 +117,20 @@ using namespace std;
     //
     virtual void addTpcHit(StTpcHit*);
     virtual void addFtpcHit(StFtpcHit*);
-    StVecPtrTpcHit*  mTpcHits;
-    StVecPtrSvtHit*  mSvtHits;
-    StVecPtrFtpcHit* mFtpcHits;
-    StDedx*         mTpcDedx;
-    StDedx*         mFtpcDedx;
-    StDedx*         mSvtDedx;       
-    ClassDef(StGlobalTrack,1)  //StGlobalTrack structure
+    virtual void addSvtHit(StSvtHit*);
+    virtual void removeTpcHit(StTpcHit*);
+    virtual void removeFtpcHit(StFtpcHit*);
+    virtual void removeSvtHit(StSvtHit*);
+
+protected:
+    StVecPtrTpcHit*   mTpcHits;
+    StVecPtrSvtHit*   mSvtHits;
     StVecPtrFtpcHit*  mFtpcHits;
     StDedx*           mTpcDedx;
-
   ClassDef(StGlobalTrack,1)  //StGlobalTrack structure
     unsigned char     mNumberOfFtpcHits;
     
     ClassDef(StGlobalTrack,1)  //StGlobalTrack structure
-
     const StVertex* vertex() const;
 StCollectionDef(GlobalTrack)
 typedef StGlobalTrackIterator        StTrackIterator; 
@@ -122,11 +138,13 @@ typedef StGlobalTrackIterator        StTrackIterator;
 inline const StVecPtrTpcHit* StGlobalTrack::tpcHits() const { return mTpcHits; }
 
 inline const StVecPtrSvtHit* StGlobalTrack::svtHits() const { return mSvtHits; }
-inline StDedx* StGlobalTrack::svtDedx() { return mSvtDedx; }
+
+inline const StVecPtrFtpcHit* StGlobalTrack::ftpcHits() const { return mFtpcHits; }
+
 inline const StDedx* StGlobalTrack::svtDedx() const { return mSvtDedx; }
-inline StDedx* StGlobalTrack::tpcDedx() { return mTpcDedx; }
+
 inline const StDedx* StGlobalTrack::tpcDedx() const { return mTpcDedx; }
-inline StDedx* StGlobalTrack::ftpcDedx() { return mFtpcDedx; }
+
 inline const StDedx* StGlobalTrack::ftpcDedx() const { return mFtpcDedx; }
 
 inline const StTrackPidTraits* StGlobalTrack::pidTraits() const { return mPidTraits; }

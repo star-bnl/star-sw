@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.cxx,v 1.3 1999/04/27 01:24:31 fisyak Exp $
+ * $Id: StVpdSummary.cxx,v 1.4 1999/04/28 22:27:40 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.cxx,v $
- * Revision 1.3  1999/04/27 01:24:31  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:40  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:40  fisyak
  * New version with pointer instead referencies
@@ -26,12 +26,9 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-
-#ifdef __ROOT__
 #include "StVpdSummary.h"
 
-#endif
-static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.3 1999/04/27 01:24:31 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.4 1999/04/28 22:27:40 fisyak Exp $";
 ClassImp(StVpdSummary)
 
 StVpdSummary::StVpdSummary()

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
+ * $Id: StMwcSector.h,v 1.4 1999/04/28 22:27:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.h,v $
- * Revision 1.3  1999/04/27 01:24:21  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -38,11 +38,10 @@ public:
     void setId(Short_t);
     void setMips(Float_t);
     
-    ClassDef(StMwcSector,1)  //StMwcSector structure
+protected:
     Short_t mId;
     Float_t mMips;
   ClassDef(StMwcSector,1)  //StMwcSector structure
-typedef StVecPtrMwcSector StVecMwcSector;
 };
 StCollectionDef(MwcSector)
 

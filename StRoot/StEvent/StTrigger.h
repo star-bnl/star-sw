@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.h,v 1.3 1999/04/27 01:24:28 fisyak Exp $
+ * $Id: StTrigger.h,v 1.4 1999/04/28 22:27:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrigger.h,v $
- * Revision 1.3  1999/04/27 01:24:28  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:38  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:38  fisyak
  * New version with pointer instead referencies
@@ -23,9 +23,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
 class StTrigger : public TObject {
 
 #include "StObject.h"
@@ -45,9 +43,7 @@ public:
     virtual void setTriggerActionWord(UShort_t);
     virtual void setTriggerWord(UShort_t);
     
-#ifdef __ROOT__
-	ClassDef(StTrigger,1)  //StTrigger structure
-#endif
+protected:
     UShort_t mTriggerActionWord;
     UShort_t mTriggerWord;
   ClassDef(StTrigger,1)  //StTrigger structure

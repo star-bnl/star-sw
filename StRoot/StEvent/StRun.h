@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.h,v 1.3 1999/04/27 01:24:22 fisyak Exp $
+ * $Id: StRun.h,v 1.4 1999/04/28 22:27:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRun.h,v $
- * Revision 1.3  1999/04/27 01:24:22  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -38,9 +38,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
 #define StRun_hh
 
 #include "tables/dst_run_header.h"
@@ -90,7 +88,7 @@ public:
     Short_t         mWestZ;
     StRunSummary  *mSummary;
     
-    ClassDef(StRun,1)  //StRun structure
+private:
     const StRun& operator=(const StRun&);
     StRun(const StRun&);
   ClassDef(StRun,1)  //StRun structure

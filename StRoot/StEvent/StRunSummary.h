@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.h,v 1.3 1999/04/27 01:24:23 fisyak Exp $
+ * $Id: StRunSummary.h,v 1.4 1999/04/28 22:27:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.h,v $
- * Revision 1.3  1999/04/27 01:24:23  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:35  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:35  fisyak
  * New version with pointer instead referencies
@@ -34,7 +34,7 @@
  **************************************************************************/
 #include "TObject.h"
 #define StRunSummary_hh
-#ifndef __CINT__
+
 #include "St_DataSet.h"
 #include "TString.h"
 #ifndef __ROOT__
@@ -78,7 +78,7 @@ protected:
     Long_t        mStopTime;
     ULong_t mCpuSeconds;
 #if 0
-    ClassDef(StRunSummary,1)  //StRunSummary structure
+    StVecTH1F     mHistograms1D;
     StVecTH2F     mHistograms2D;                 
 #endif
   ClassDef(StRunSummary,1)  //StRunSummary structure

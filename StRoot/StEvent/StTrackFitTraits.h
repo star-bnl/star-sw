@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 1.3 1999/04/27 01:24:28 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 1.4 1999/04/28 22:27:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 1.3  1999/04/27 01:24:28  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -25,9 +25,7 @@
  * Revision 1.2  1999/01/15 22:54:07  wenaus
  * version with constructors for table-based loading
  *
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
  * Adapted new StArray version. First version to compile on Linux and Sun.
 #include "tables/dst_track.h"
  * Revision 2.0  1999/10/12 18:43:02  ullrich
@@ -64,9 +62,7 @@ private:
     Float_t           mChiSquaredInXY;
     Float_t           mChiSquaredInPlaneZ;
     Short_t           mDegreesOfFreedom;
-#ifdef __ROOT__
-	ClassDef(StTrackFitTraits,1)  //StTrackFitTraits structure
-#endif
+    Short_t           mNumberOfFitPoints;
     Short_t           mNumberOfPossiblePoints;
     Short_t           mQualityBitmap;                      
   ClassDef(StTrackFitTraits,1)  //StTrackFitTraits structure

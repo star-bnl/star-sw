@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $
+ * $Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cxx,v $
- * Revision 1.3  1999/04/27 01:24:22  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -22,12 +22,10 @@
  * Revision 1.2  1999/01/15 22:53:51  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
  * Modified to cope with new compiler version on Sun (CC5.0).
-#ifdef __ROOT__
  * Revision 2.1  1999/10/28 22:26:30  ullrich
-static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
 StRunSummary::StRunSummary()
  * Completely Revised for New Version
   StRunSummary::StRunSummary():

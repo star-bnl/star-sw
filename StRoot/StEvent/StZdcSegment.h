@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSegment.h,v 1.3 1999/04/27 01:24:32 fisyak Exp $
+ * $Id: StZdcSegment.h,v 1.4 1999/04/28 22:27:41 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSegment.h,v $
- * Revision 1.3  1999/04/27 01:24:32  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:41  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies
@@ -21,7 +21,6 @@
  *
 
 #ifndef StZdcSegment_hh
-
 class StZdcSegment : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -42,10 +41,10 @@ public:
     void setTdc(Float_t);
     
 protected:
-    ClassDef(StZdcSegment,1)  //StZdcSegment structure
+    Short_t mId;
     Float_t mAdc;
     Float_t mTdc;
-typedef  StVecPtrZdcSegment StVecZdcSegment;
+  ClassDef(StZdcSegment,1)  //StZdcSegment structure
 };
 StCollectionDef(ZdcSegment)
 

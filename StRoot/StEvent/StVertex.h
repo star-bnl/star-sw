@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.3 1999/04/27 01:24:31 fisyak Exp $
+ * $Id: StVertex.h,v 1.4 1999/04/28 22:27:39 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.3  1999/04/27 01:24:31  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:39  fisyak
  * New version with pointer instead referencies
@@ -60,6 +63,7 @@ class StVertex : public TObject {
     virtual const StGlobalTrack*        parent();
     virtual const StThreeVectorF& position();
     virtual const StThreeVectorF& positionError();
+    virtual StVecPtrGlobalTrack&        daughters() {return *mDaughters;};
     virtual ULong_t               qualityBitmask();
     virtual Float_t                       chiSquared();         
     virtual const StGlobalTrack*        parent(){ return mParent; };
@@ -81,9 +85,10 @@ protected:
     StThreeVectorF   mPositionError;
     ULong_t          mQualityBitmask;
     Float_t                  mChiSquared;                
-    ClassDef(StVertex,1)  //StVertex structure
+    virtual void setPosition(const StThreeVectorF&);       
     virtual void setPositionError(const StThreeVectorF&);  
     virtual void setQualityBitmask(ULong_t); 
+
 inline StVertexType StVertex::type() { return mType; }
 
 inline StVecPtrGlobalTrack& StVertex::daughters(){ return mDaughters; }       

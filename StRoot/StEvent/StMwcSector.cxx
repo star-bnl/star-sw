@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.cxx,v 1.3 1999/04/27 01:24:21 fisyak Exp $
+ * $Id: StMwcSector.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.cxx,v $
- * Revision 1.3  1999/04/27 01:24:21  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -22,7 +22,8 @@
  **************************************************************************/
 #include "StMwcSector.h"
 
-static const Char_t rcsid[] = "$Id: StMwcSector.cxx,v 1.3 1999/04/27 01:24:21 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StMwcSector.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
+
 ClassImp(StMwcSector)
 
 StCollectionImp(MwcSector)
@@ -40,8 +41,6 @@ StMwcSector::StMwcSector(Short_t id, Float_t m)
 
 StMwcSector::~StMwcSector() { /* noop */ }
 
-
-StCollectionImp(MwcSector)
 void StMwcSector::setId(Short_t val) { mId = val; }
 
 void StMwcSector::setMips(Float_t val) { mMips = val; }

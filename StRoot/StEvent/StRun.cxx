@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $
+ * $Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
- * Revision 1.3  1999/04/27 01:24:22  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -31,12 +31,10 @@
  * Revision 1.2  1999/01/15 22:53:49  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
  **************************************************************************/
-#ifdef __ROOT__
 #include "tables/run_header.h"
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.3 1999/04/27 01:24:22 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
 StRun::StRun()
   StRun::StRun():
 St_DataSet("Run"),

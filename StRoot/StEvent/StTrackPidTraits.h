@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 1.3 1999/04/27 01:24:28 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 1.4 1999/04/28 22:27:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 1.3  1999/04/27 01:24:28  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:38  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:38  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/04/08 15:01:18  ullrich
  * Added dE/dx PID from TPC.
@@ -20,23 +23,24 @@
  * version with constructors for table-based loading
  *
  * Revision 2.2  1999/11/15 18:48:28  ullrich
-#ifdef __ROOT__
+ * Adapted new enums for dedx and track reco methods.
+ *
+ *
 #include "TObject.h"
-#endif
 class StTrackPidTraits : public TObject {
  * Completely Revised for New Version
-//     StTrackPidTraits();
-//     StTrackPidTraits(const StTrackPidTraits&);
-//     ~StTrackPidTraits();
-//     const StTrackPidTraits & operator=(const StTrackPidTraits&);
-//     Int_t operator==(const StTrackPidTraits&) const;
-//     Int_t operator!=(const StTrackPidTraits&) const;
-protected:
+    StTrackPidTraits(const StGlobalTrack*);
+    ~StTrackPidTraits();
+  StTrackPidTraits() : mTpcDedxPid() {/* noop */};
+    const StDedxPid* tpcDedxPid() const;
+  ~StTrackPidTraits();
     StTrackPidTraits();
-#ifdef __ROOT__
-	ClassDef(StTrackPidTraits,1)  //StTrackPidTraits structure
-#endif
+    StDedxPid *mTpcDedxPid;
+    // StDedxPid *mSvtDedxPid;  
+private:
   StDedxPid *mTpcDedxPid;
+  // StDedxPid *mSvtDedxPid;  
+  ClassDef(StTrackPidTraits,1)  //StTrackPidTraits structure
     StDedxMethod method() const;
 
 inline const StDedxPid* StTrackPidTraits::tpcDedxPid() const {return mTpcDedxPid;}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
+ * $Id: StL0Trigger.h,v 1.4 1999/04/28 22:27:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
- * Revision 1.3  1999/04/27 01:24:21  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:33  fisyak
  * New version with pointer instead referencies
@@ -28,29 +28,30 @@
  * Revision 1.2  1999/01/15 22:53:47  wenaus
  * version with constructors for table-based loading
  *
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
 #ifndef StL0Trigger_hh
+#define StL0Trigger_hh 
 #include "StObject.h"
+#include "StTrigger.h"
 #ifndef __ROOT__
 #include <vector>
 #endif
-
+#if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
 #ifndef __ROOT__ 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<Long_t, allocator<Long_t> > VecLong;
-
+#else
 typedef vector<Long_t> VecLong;
 #endif
 #endif
 class StL0Trigger : public StTrigger {
 public:
     StL0Trigger();
-    
+    ~StL0Trigger();
     // StL0Trigger(const StL0Trigger&);    use default
+    // const StL0Trigger & operator=(const StL0Trigger&);
 #ifndef __ROOT__    
     VecLong&      coarsePixelArray();
 #endif
@@ -62,17 +63,18 @@ public:
     void setMwcCtbMultiplicity(Long_t);    
     void setMwcCtbDipole(Long_t);              
     void setMwcCtbTopology(Long_t);            
+    void setMwcCtbMoment(Long_t);
     
+protected:
 #ifndef __ROOT__
     VecLong      mCoarsePixelArray;
 #endif
     Long_t         mMwcCtbMultiplicity;
-#ifdef __ROOT__
-	ClassDef(StL0Trigger,1)  //StL0Trigger structure
-#endif
+    Long_t         mMwcCtbDipole;
     Long_t         mMwcCtbTopology;
-
+    Long_t         mMwcCtbMoment;           
   ClassDef(StL0Trigger,1)  //StL0Trigger structure
+};
 #ifndef __ROOT__
 inline VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
 #endif
@@ -80,7 +82,6 @@ inline VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
 inline Long_t StL0Trigger::mwcCtbMultiplicity() const { return mMwcCtbMultiplicity;}
 
 inline Long_t StL0Trigger::mwcCtbDipole() const { return mMwcCtbDipole;}
-
 
 inline Long_t StL0Trigger::mwcCtbTopology() const { return mMwcCtbTopology;}
 
