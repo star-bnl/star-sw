@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.16 2003/10/21 15:18:48 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.17 2003/11/03 14:46:16 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -552,7 +552,7 @@ Int_t StdEdxY2Maker::Init(){
 			   100,0.,5., NoRow,1.,NoRow+1,200,-5.,5.);
     dXdEA = new TH3D("dXdEA","log(dEdx/Pion) just after correction versus dX and row",
 			   100,0.,5., NoRow,1.,NoRow+1,200,-5.,5.);
-    dXdEC = new TH3D("dXdE","log(dEdx/Pion) corrected versus dX and row",
+    dXdEC = new TH3D("dXdEC","log(dEdx/Pion) corrected versus dX and row",
 			   100,0.,5., NoRow,1.,NoRow+1,200,-5.,5.);
     // Create a ROOT Tree and one superbranch
     if (TMath::Abs(m_Calibration) > 2) { 
@@ -713,6 +713,7 @@ Int_t StdEdxY2Maker::Make(){
   Double_t TimeScale = 1;
   Double_t PressureScaleI = 1;
   Double_t PressureScaleO = 1;
+  if (! m_DoNotCorrectdEdx) {
 #ifdef PressureScaleFactorOld
   if (m_tpcGas && m_tpcPressure) {
     if (m_tpcPressure->GetNRows() == 1) 
@@ -736,6 +737,7 @@ Int_t StdEdxY2Maker::Make(){
     PressureScaleI = TMath::Exp(-CalcCorrection(cor+1,LogPressure));
   }
 #endif // PressureScaleFactor
+  }
 #ifdef GetTpcGainMonitor
   if (m_Calibration != 0 && m_tpcGainMonitor) {
     if (Center) {
@@ -979,6 +981,12 @@ Int_t StdEdxY2Maker::Make(){
 	      TpcSecRowCor_st *gain = m_TpcSecRow->GetTable() + sector - 1;
 	      gc =  gain->GainScale[row-1];
 	      CdEdx[NdEdx].SigmaFee = gain->GainRms[row-1];
+#if 0
+	      if (row <= 1) {
+		cout << "Sector/row" << sector << "/" << row << "\tgc = " << gc << endl;
+		assert(row > 0);
+	      }
+#endif
 	    }
 #endif // TpcSecRow
 	    if (gc < 0.0) continue;
@@ -1004,9 +1012,9 @@ Int_t StdEdxY2Maker::Make(){
 #ifdef DriftDistanceCorrection
 	    if (m_zCorrection) {
 	      tpcCorrection_st *cor = m_zCorrection->GetTable()+kTpcOutIn;
-	      if (cor->min <= CdEdx[NdEdx].ZdriftDistance && CdEdx[NdEdx].ZdriftDistance <= cor->max) 
-		dE *= TMath::Exp(-CalcCorrection(cor,CdEdx[NdEdx].ZdriftDistance));
-	      else continue;
+	      if (cor->min > 0 && cor->min > CdEdx[NdEdx].ZdriftDistance) continue;
+	      if (cor->max > 0 && CdEdx[NdEdx].ZdriftDistance > cor->max) continue;
+	      dE *= TMath::Exp(-CalcCorrection(cor,CdEdx[NdEdx].ZdriftDistance));
 	    }
 #endif // DriftDistanceCorrection
 	    dEZ = dE;
@@ -1537,7 +1545,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  if (Z3C)  Z3C->Fill(SectN,FdEdx[k].ZdriftDistance,  FdEdx[k].dEdxN);
 	  if (ETA)  ETA->Fill(SectN,eta,FdEdx[k].dEdxN);
 	  if (ETA3)ETA3->Fill(SectN,eta,FdEdx[k].dEdxN);
-	  if (m_trig) {
+	  if (m_trig && m_trig->mult > 0) {
 	    if (MulRow)   MulRow->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row+0.5,FdEdx[k].dEZdxN);
 	    if (MulRowC) MulRowC->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row+0.5,FdEdx[k].dEdxN);
 	  }
