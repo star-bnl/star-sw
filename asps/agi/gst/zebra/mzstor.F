@@ -1,12 +1,15 @@
 *
-* $Id: mzstor.F,v 1.1 1998/04/10 15:31:10 fisyak Exp $
+* $Id: mzstor.F,v 1.2 1998/04/16 16:11:46 fisyak Exp $
 *
 * $Log: mzstor.F,v $
+* Revision 1.2  1998/04/16 16:11:46  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:10  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :          25/03/98  17.51.27  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZSTOR (IXSTOR,CHNAME,CHOPT

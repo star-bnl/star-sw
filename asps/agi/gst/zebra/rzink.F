@@ -1,12 +1,15 @@
 *
-* $Id: rzink.F,v 1.1 1998/04/10 15:31:11 fisyak Exp $
+* $Id: rzink.F,v 1.2 1998/04/16 16:11:48 fisyak Exp $
 *
 * $Log: rzink.F,v $
+* Revision 1.2  1998/04/16 16:11:48  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:11  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :  1.30/00 15/04/97  17.42.11  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZINK(KEYU,ICYCLE,CHOPT)

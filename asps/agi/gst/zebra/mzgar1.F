@@ -1,12 +1,15 @@
 *
-* $Id: mzgar1.F,v 1.1 1998/04/10 15:31:07 fisyak Exp $
+* $Id: mzgar1.F,v 1.2 1998/04/16 16:11:42 fisyak Exp $
 *
 * $Log: mzgar1.F,v $
+* Revision 1.2  1998/04/16 16:11:42  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:07  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 #if defined(CERNLIB_TEST)
 *CMZ :  1.30/00 16/03/97  22.41.45  by  Pavel Nevski
 *-- Author :

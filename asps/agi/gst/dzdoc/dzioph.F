@@ -1,13 +1,16 @@
 *
-* $Id: dzioph.F,v 1.1 1998/04/10 15:31:06 fisyak Exp $
+* $Id: dzioph.F,v 1.2 1998/04/16 16:11:40 fisyak Exp $
 *
 * $Log: dzioph.F,v $
+* Revision 1.2  1998/04/16 16:11:40  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:06  fisyak
 * Move gstar into CVS
 *
 *
 * -----------------------------------------------------------------
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :  1.30/00 11/02/96  22.08.12  by  Pavel Nevski
 *CMZU:  1.00/01 22/01/96  00.49.05  by  Sasha Vanyashin
 *-- Author :

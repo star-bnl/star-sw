@@ -1,12 +1,15 @@
 *
-* $Id: rzfile.F,v 1.1 1998/04/10 15:31:11 fisyak Exp $
+* $Id: rzfile.F,v 1.2 1998/04/16 16:11:47 fisyak Exp $
 *
 * $Log: rzfile.F,v $
+* Revision 1.2  1998/04/16 16:11:47  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:11  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :          18/03/98  17.12.00  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZFILE(LUNIN,CHDIR,CHOPT)
