@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.12 2001/05/30 17:45:55 perev Exp $
+ * $Id: StTrack.h,v 2.13 2001/09/28 22:20:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.13  2001/09/28 22:20:50  ullrich
+ * Added helix geometry at last point.
+ *
  * Revision 2.12  2001/05/30 17:45:55  perev
  * StEvent branching
  *
@@ -89,6 +92,8 @@ public:
     const StTrackTopologyMap&      topologyMap() const;
     StTrackGeometry*               geometry();
     const StTrackGeometry*         geometry() const;
+    StTrackGeometry*               outerGeometry();
+    const StTrackGeometry*         outerGeometry() const;
     StTrackDetectorInfo*           detectorInfo();
     const StTrackDetectorInfo*     detectorInfo() const;
     StTrackFitTraits&              fitTraits();
@@ -106,6 +111,7 @@ public:
     void         setLength(float);
     void         setTopologyMap(const StTrackTopologyMap&);
     void         setGeometry(StTrackGeometry*);
+    void         setOuterGeometry(StTrackGeometry*);
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
@@ -121,6 +127,7 @@ protected:
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
     StTrackGeometry         *mGeometry;
+    StTrackGeometry         *mOuterGeometry;
 //  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
 //  StTrackNode                 *mNode;                 //$LINK
 #ifdef __CINT__
@@ -134,6 +141,6 @@ protected:
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
     virtual StObject*       clone() const = 0;
-    ClassDef(StTrack,2)
+    ClassDef(StTrack,3)
 };
 #endif
