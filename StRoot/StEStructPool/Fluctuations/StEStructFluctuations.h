@@ -1,4 +1,4 @@
-#define PPDATA
+#define AUAUDATA
 
 #ifndef __STESTRUCTFLUCTUATIONS__H
 #define __STESTRUCTFLUCTUATIONS__H
