@@ -2188,7 +2188,7 @@ void LocalSeedFinderIO::makeNumberEntries()
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 10.);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
-    fLabel.push_back( new TGLabel(fF.back(), "Search Window in Local Y (cm)") );
+    fLabel.push_back( new TGLabel(fF.back(), "Connection Search Window in Local Y (cm)") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
     //Z-Window
@@ -2201,7 +2201,7 @@ void LocalSeedFinderIO::makeNumberEntries()
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 20.);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
-    fLabel.push_back( new TGLabel(fF.back(), "Search Window in Global Z (cm)") );
+    fLabel.push_back( new TGLabel(fF.back(), "Connection Search Window in Global Z (cm)") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
     //Seed Length
@@ -2214,7 +2214,59 @@ void LocalSeedFinderIO::makeNumberEntries()
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 45);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
-    fLabel.push_back( new TGLabel(fF.back(), "Length of Seed") );
+    fLabel.push_back( new TGLabel(fF.back(), "Length of Connection") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Extrapolation Y-Window
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapYWindow",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapYWindow() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 10.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Extrapolation Search Window in Local Y (cm)") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Extrapolation Z-Window
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapZWindow",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapZWindow() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 20.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Extrapolation Search Window in Global Z (cm)") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max skipped during Extrapolation
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapMaxSkipped",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapMaxSkipped() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Largest Gap During Extrapolation") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Extrapolation Length
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapLength",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapLength() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Length of Extrapolation") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
     //Add a toggle to include the vertex
@@ -2231,7 +2283,8 @@ void LocalSeedFinderIO::makeNumberEntries()
     //Add a toggle to turn on/off the fit option
     fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
     fF1->AddFrame(fF.back(), fL2);
-    TGCheckButton* tempButton2 = new TGCheckButton(fF.back(), new TGHotString("Do Helix Fit \n (default==calulate helix)"), -1);
+    TGCheckButton* tempButton2 =
+	new TGCheckButton(fF.back(), new TGHotString("Do Helix Fit \n (default==calulate helix)"), -1);
     if ( broker->ltsfDoHelixFit()==true) {
 	tempButton2->SetState(kButtonDown);
     }
@@ -2242,10 +2295,6 @@ void LocalSeedFinderIO::makeNumberEntries()
 
 LocalSeedFinderIO::~LocalSeedFinderIO()
 {
-    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
-	cout <<"LocalSeedFinderIO::~LocalSeedFinderIO. ERROR:\t"
-	     <<"Mismatch in cleanup vector size"<<endl;
-    }
     for (unsigned int i=0; i<fNumericEntries.size(); ++i) {
 	delete fNumericEntries[i].second;
 	fNumericEntries[i].second=0;
@@ -2297,6 +2346,18 @@ void LocalSeedFinderIO::SetLimits()
 	}
 	else if (name=="SeedLength") {
 	    broker->setLTSFSeedLength( (*it).second->GetNumber() );
+	}
+	else if (name=="ExtrapYWindow") {
+	    broker->setLTSFExtrapYWindow( (*it).second->GetNumber() );
+	}
+	else if (name=="ExtrapZWindow") {
+	    broker->setLTSFExtrapZWindow( (*it).second->GetNumber() );
+	}
+	else if (name=="ExtrapMaxSkipped") {
+	    broker->setLTSFExtrapMaxSkipped( (*it).second->GetNumber() );
+	}
+	else if (name=="ExtrapLength") {
+	    broker->setLTSFExtrapLength( (*it).second->GetNumber() );
 	}
 	else {
 	    cout <<"LocalSeedFinderIO::SetLimits(). ERROR:\t"

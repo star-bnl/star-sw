@@ -12,7 +12,7 @@ void RunStiMaker(Int_t nevents=1,
 		 const char* outfile = "Evaluation.root",
 		 //This file points to 30 events of 10 neg muons w/ pt=.9 
 		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
-    //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Sat/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
+		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Sat/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
     //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
     
@@ -175,6 +175,12 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setLTSFZWindow(5.);
     stiIO->setLTSFYWindow(2.);
     stiIO->setLTSFSeedLength(4);
+    
+    stiIO->setLTSFExtrapYWindow(1.);
+    stiIO->setLTSFExtrapZWindow(2.);
+    stiIO->setLTSFExtrapMaxSkipped(3);
+    stiIO->setLTSFExtrapLength(3);
+    
     stiIO->setLTSFUseVertex(true);
     
     //Add sectors:
