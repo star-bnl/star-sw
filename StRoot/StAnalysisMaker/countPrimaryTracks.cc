@@ -1,5 +1,8 @@
-// $Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $
+// $Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $
 // $Log: countPrimaryTracks.cc,v $
+// Revision 1.3  1999/02/22 20:49:22  wenaus
+// Protect against null primary vertex
+//
 // Revision 1.2  1999/02/11 15:39:15  wenaus
 // cleanup
 //
@@ -22,10 +25,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent/StEvent.hh"
  *
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $";
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $";
   // First, we have to establish a primary vertex.
     //  in many different ways. Here we demonstrate
   // Count vertex daughters, and arbitrarily set the primary vertex
@@ -45,10 +48,14 @@ static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:1
   event.setPrimaryVertex(vtxMax);
     for (unsigned int i=0; i<theNodes.size(); i++) {
   StVertex *primaryV = event.primaryVertex();
-  cout << "Primary vertex: " <<
-    " index= " << primaryV->index() <<
-    " nDaughters= " << primaryV->daughters().size() <<
-    endl;
+  if ( primaryV ) {
+    cout << "Primary vertex: " <<
+      " index= " << primaryV->index() <<
+      " nDaughters= " << primaryV->daughters().size() <<
+      endl;
+  } else {
+    cout << "No primary vertex" << endl;
+  }
 
   // Thomas's Example 1
   long counter = 0;
