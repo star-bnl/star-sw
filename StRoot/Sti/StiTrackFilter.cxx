@@ -1,38 +1,9 @@
-#include "StiTrack.h"
 #include "StiTrackFilter.h"
 
+/// ctor
 StiTrackFilter::StiTrackFilter()
-{
-  //----------------------------------------------------------
-  //setDefaults(); this would do nothing in the base class
-  //----------------------------------------------------------
-  reset();
-}
+  : analyzedTrackCount(0),
+    acceptedTrackCount(0)
+{}
   
-void StiTrackFilter::reset()
-{
-  //----------------------------------------------------------
-  // Reset counters to zero
-  //----------------------------------------------------------
-  analyzedTrackCount = 0;
-  acceptedTrackCount = 0;
-}
-
-int StiTrackFilter::getAnalyzedTrackCount()
-{
-  //----------------------------------------------------------
-  // Returns the number of tracks analyzed by this filter
-  // since last reset.
-  //----------------------------------------------------------
-  return analyzedTrackCount;
-}
-
-int StiTrackFilter::getAcceptedTrackCount()
-{
-  //----------------------------------------------------------
-  // Returns the number of tracks accpeted by this filter
-  // since last reset.
-  //----------------------------------------------------------
-  return acceptedTrackCount;
-}
 

@@ -42,32 +42,31 @@ class StiSimpleTrackFilter : public StiTrackFilter
 {
  public:
 	
-	enum StiTrackFilterIdentifier {kChi2=0,
-																 kPhi,
-																 kPt,
-																 kP,
-																 kPseudoRap,
-																 kNPts,
-																 kNGaps,
-																 kNToNmaxPts,
-																 kNTpcPts,
-																 kNSvtPts,
-																 kTpcDedx,
-																 kSvtDedx};
+  enum StiTrackFilterIdentifier {kChi2=0,
+				 kPhi,
+				 kPt,
+				 kP,
+				 kPseudoRap,
+				 kNPts,
+				 kNGaps,
+				 kNToNmaxPts,
+				 kNTpcPts,
+				 kNSvtPts,
+				 kTpcDedx,
+				 kSvtDedx};
   StiSimpleTrackFilter();
   virtual ~StiSimpleTrackFilter();
-  void reset();
   void setDefaults();
-  bool accept(StiTrack * track);
-	void set(int id, const char * name, bool use, double minimum, double maximum);
-
-protected:
-
-	int    n;
-	bool   used[100];
+  bool accept(StiTrack * track) const;
+  void set(int id, const char * name, double minimum=1, double maximum=0, bool use=false);
+  void set(int id, double minimum, double maximum, bool use=true);
+  
+ protected:
+  
+  bool   used[100];
   double low[100];
-	double hi[100];
-	string * names[100];
+  double hi[100];
+  string * names[100];
 };
 
 

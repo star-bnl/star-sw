@@ -3,6 +3,7 @@
 
 class StiHit;
 class StiTrack;
+class StiTrackFilter;
 
 /*!
 A purely abstract class defining  the interface to a track finder.
@@ -23,8 +24,11 @@ public:
   virtual void fitNextTrack()=0;
   virtual void reset()=0;
   virtual bool isValid(bool debug=false) const = 0;
-
+  virtual int getTrackSeedFoundCount() const=0;
+  virtual int getTrackFoundCount() const=0;
+  virtual int getTrackFoundCount(StiTrackFilter * filter) const=0;
   virtual bool find(StiTrack *track, int direction) = 0;
+
 protected:
 
 };

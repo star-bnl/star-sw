@@ -5,82 +5,87 @@
 #include <stdlib.h>
 
 class StiTrack;
-
+/*! Base class defining a track filtering mechanism
+<p>
+Abstract base class defining a track filtering mechanism. This class cannot be 
+instantiated given it features pure virtual methods. As such it provides the
+basic elements of a track filter without actually doing filtering itself - the
+method <b>bool accept( StiTrack * track)</b> which does the filtering is 
+pure virtual, i.e. must be implemented in a derived class to satisfy the 
+specific needs of an application.
+<p>
+The class features two protected data members 
+<b>analyzedTrackCount</b> and <b>acceptedTrackCount</b> corresponding respectively
+to the number of tracks analyzed and accepted by this filter. The values can 
+reset to zero by a call to the <b>void reset()</b> method. They can be accessed 
+with the <b>int  getAnalyzedTrackCount()</b> and <b>int  getAcceptedTrackCount()</b>
+accessor methods respectively. Note that these two counters are not incremented 
+by the <b>bool accept(StiTrack * track)</b> method. Users wishing to the use 
+these variables for accounting should use the inlined method <b>filter(StiTrack * track)</b>
+which internally calls the "accept" method and also increments <b>analyzedTrackCount</b>
+for all tracks analyzed, and <b>acceptedTrackCount</b> for tracks for which 
+"accept" return true.
+<p>
+Note: The <b>accept</b> method is declared "const" to emphasize that it does 
+not increment counters but only returns a bool value representative of the
+acceptability of this track.
+*/
 class StiTrackFilter 
 {
-    /** 
-     * Base class defining a track filtering mechanism
-     *
-     * This class does not implement a particular filter but rather simply
-     * define an interface for track filtering classes which should inherit from
-     * it. 
-     *
-     * Usage: Derived classes should use the following methods to 
-     * implement the functionality of the filter.
-     * "setDefaults()"           shall be overloaded to set the default values of the filter.
-     * "reset()"                 shall be overloaded to set the filter counters to zero
-     * "accept(StiTrack * track) shall be overloaded to determine whether given
-     *                           tracks pass the filter requirements.
-     * "incrementAccepted"       shall be called to count accepted tracks
-     * "incrementRejected"       shall be called to count rejected tracks
-     * "getAnalyzedTrackCount()  shall be called to obtain the number of tracks analyzed
-     *                           by the filter.
-     * "getAcceptedTrackCount()  shall be called to obtain the number of tracks accepted
-     *                           by the filter. 
-     *
-     * Recommandation:
-     * In order to make full use of the interface, it is recommanded derived classes 
-     * implementing the "accept" method should include the following code to perform
-     * proper accounting of the track accpeted and analyzed.
-     *
-     * Example:
-     * bool accept(StiTrack * track)
-     * {
-     *    bool accepted = false;
-     *    // your code here to possibly change the "accepted" state variable
-     *    if (accepted)
-     *      incrementAccepted(); return accepted;
-     *    else
-     *      incrementRejected(); return accepted;
-     **/
 public:
 
     StiTrackFilter();
   
-    //virtual void setDefaults();
-    virtual bool accept(StiTrack * track)
-    {
-	return true;
-    }
+    virtual bool accept(StiTrack * track) const =0;
 
-    bool filter(StiTrack * track)
-    {
-	analyzedTrackCount++;
-	bool acc = accept(track);
-	if (acc) acceptedTrackCount++;
-	return acc;
-    }
-
+    bool filter(StiTrack * track);
     void reset();
     
-    void incrementAccepted()  
-    {
-	analyzedTrackCount++;
-	acceptedTrackCount++;
-    }
-    void incrementRejected()  
-    {
-	analyzedTrackCount++;
-    }
-
-    int  getAnalyzedTrackCount();
-    int  getAcceptedTrackCount();
+    int  getAnalyzedTrackCount() const;
+    int  getAcceptedTrackCount() const;
 
 protected:
-
+    
+    /// Number of tracks analyzed since last reset.
     int analyzedTrackCount;
+    /// Number of tracks found acceptable since last reset.
     int acceptedTrackCount;
 
 };
+
+/*! Filter the given track and return true it is found acceptable.
+<p>
+Determine whether the given track is found acceptable
+by a call to the <b>accept</b> method. Increments 
+<b>analyzedTrackCount</b> by one for all tracks analyzed. 
+Increments <b>acceptedTrackCount</b> by one if 
+<b>accept</b> returns true.
+*/
+inline bool StiTrackFilter::filter(StiTrack * track)
+{
+  analyzedTrackCount++;
+  bool acc = accept(track);
+  if (acc) acceptedTrackCount++;
+  return acc;
+}
+
+/// Reset counters to zero
+inline void StiTrackFilter::reset()
+{
+  analyzedTrackCount = 0;
+  acceptedTrackCount = 0;
+}
+
+/// Returns the number of tracks analyzed by this filter since last reset.
+inline int StiTrackFilter::getAnalyzedTrackCount() const
+{
+  return analyzedTrackCount;
+}
+
+/// Returns the number of tracks accpeted by this filter since last reset.
+inline int StiTrackFilter::getAcceptedTrackCount() const
+{
+  return acceptedTrackCount;
+}
 
 #endif
