@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.3 2004/09/16 23:37:25 chunhuih Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.4 2005/03/03 01:30:43 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -20,8 +20,8 @@
  *
  *
  ***********************************************************************/
-#ifndef __STEBYE2PTCORRELATIONS__H
-#define __STEBYE2PTCORRELATIONS__H
+#ifndef __STESTRUCT2PTCORRELATIONS__H
+#define __STESTRUCT2PTCORRELATIONS__H
 
 
 #include "TROOT.h"
@@ -67,60 +67,74 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int mpossiblePairs[6];
 
   TH1F* mHNEvents[2];
+  TH1F** mHpt;
 
-  deltaMtBins mDeltaMt[6]; //!
-  TH1F * mHDeltaMt[6];//!
- 
-  // -> 1D hists....
-  dmtBins mdmts[6];
-  smtBins msmts[6];
-  detaBins mdetas[6];
-  setaBins msetas[6];
-  dphiBins mdphis[6];
-  sphiBins msphis[6];
-
-  TH1F* mHdmts[6];
-  TH1F* mHsmts[6];
-  TH1F* mHdetas[6];
-  TH1F* mHsetas[6];
-  TH1F* mHdphis[6];
-  TH1F* mHsphis[6];
+  // HBT parameters
+  qBins *mQinv[6]; //!  1D
+  TH1F ** mHQinv[6];//!  1D hist
 
   //-> X vs X 
-  mtBins **mMtMt[6]; //!
+  ytBins **mYtYt[6]; //!
+  ptBins **mPtPt[6]; //!
   etaBins **mEtaEta[6]; //!
   phiBins **mPhiPhi[6]; //!
 
-  TH2F ** mHMtMt[6]; //!
+  etaBins **mPrEtaEta[6]; //! weight = pt1*pt2
+  phiBins **mPrPhiPhi[6]; //!  "
+
+  etaBins **mSuEtaEta[6]; //! weight = pt1+pt2
+  phiBins **mSuPhiPhi[6]; //!  "
+
+
+  TH2F ** mHYtYt[6]; //!
+  TH2F ** mHPtPt[6]; //!
   TH2F ** mHEtaEta[6]; //!
   TH2F ** mHPhiPhi[6]; //!
 
-  // Delta Y vs Delta X
-  dphiBins **mJtDMtDPhi[6]; //!
-  dmtBins  **mJtDEtaDMt[6]; //!
-  dphiBins **mJtDEtaDPhi[6]; //!
+  TH2F ** mHPrEtaEta[6]; //!
+  TH2F ** mHPrPhiPhi[6]; //!
+  TH2F ** mHSuEtaEta[6]; //!
+  TH2F ** mHSuPhiPhi[6]; //!
 
-  TH2F ** mHJtDMtDPhi[6];
-  TH2F ** mHJtDEtaDMt[6];
+  // Delta Y vs Delta X
+  dphiBins **mJtDYtDPhi[6]; //!
+  detaBins **mJtDYtDEta[6]; //!
+  dphiBins **mJtDEtaDPhi[6]; //!
+  dphiBins **mPrJtDEtaDPhi[6]; //!
+  dphiBins **mSuJtDEtaDPhi[6]; //!
+
+  TH2F ** mHJtDYtDPhi[6];
+  TH2F ** mHJtDYtDEta[6];
   TH2F ** mHJtDEtaDPhi[6];
+  TH2F ** mHPrJtDEtaDPhi[6];
+  TH2F ** mHSuJtDEtaDPhi[6];
 
   // Sum Y vs Delta X
-  dmtBins  **mAtSMtDMt[6];     //! smt array of dmt bins
-  detaBins **mAtSEtaDEta[6];  //! seta array of deta bins
-  dphiBins **mAtSPhiDPhi[6];  //! sphi array of dphi bins
+  dytBins  **mAtSYtDYt[6];     //! smt array of dmt bins
+  dptBins  **mAtSPtDPt[6];     //! smt array of dmt bins
 
-  TH2F ** mHAtSMtDMt[6];
-  TH2F ** mHAtSEtaDEta[6];
-  TH2F ** mHAtSPhiDPhi[6];
+  TH2F ** mHAtSYtDYt[6];
+  TH2F ** mHAtSPtDPt[6];
 
   // Sum Y vs Sum X
-  sphiBins **mJtSMtSPhi[6]; //!
-  smtBins  **mJtSEtaSMt[6]; //!
-  sphiBins **mJtSEtaSPhi[6];//! 
+  dphiBins **mJtSEtaDPhi[6];//! 
+  dphiBins **mPrJtSEtaDPhi[6];//! 
+  dphiBins **mSuJtSEtaDPhi[6];//! 
 
-  TH2F ** mHJtSMtSPhi[6];//!
-  TH2F ** mHJtSEtaSMt[6];//!
-  TH2F ** mHJtSEtaSPhi[6];//!
+  TH2F ** mHJtSEtaDPhi[6];//!
+  TH2F ** mHPrJtSEtaDPhi[6];//!
+  TH2F ** mHSuJtSEtaDPhi[6];//!
+
+  // generic histogram create functions to simplify the code
+  //
+
+  char* bName[6];
+  char* bTitle[6];
+
+  void createHist2D(TH2F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
+  void createHist1D(TH1F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
+
+
 
   void  moveEvents();
 
@@ -198,7 +212,12 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.4  2005/03/03 01:30:43  porter
+ * updated StEStruct2ptCorrelations to include pt-correlations and removed
+ * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
+ *
  * Revision 1.3  2004/09/16 23:37:25  chunhuih
+ *
  * changed a number of methods to be virtual, so that its behavior can
  * be dynamically changed.
  *

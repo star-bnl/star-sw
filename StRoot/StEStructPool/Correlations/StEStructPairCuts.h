@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.4 2004/06/25 03:11:50 porter Exp $
+ * $Id: StEStructPairCuts.h,v 1.5 2005/03/03 01:30:44 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -99,6 +99,7 @@ const  StEStructTrack*      Track2() const;
        float                 DeltaYt()   const;
        float                 DeltaEta()   const;
        float                 DeltaPhi()   const;
+       float                 DeltaPt()   const;
        float                 SigmaMt()   const;
        float                 SigmaXt()   const;
        float                 SigmaYt()   const;
@@ -228,6 +229,9 @@ inline float StEStructPairCuts::DeltaPhi() const {
   return (delphi<M_PI) ? delphi : (2*M_PI)-delphi;
 }
 
+inline float StEStructPairCuts::DeltaPt() const {
+  return mTrack1->Pt()-mTrack2->Pt();
+}
 inline float StEStructPairCuts::mInv() const {
   return abs(mTrack1->FourMomentum()+mTrack2->FourMomentum());
 }
@@ -466,6 +470,10 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.5  2005/03/03 01:30:44  porter
+ * updated StEStruct2ptCorrelations to include pt-correlations and removed
+ * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
+ *
  * Revision 1.4  2004/06/25 03:11:50  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *

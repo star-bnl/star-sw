@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.1 2004/06/25 03:11:49 porter Exp $
+ * $Id: StEStructCutBin.h,v 1.2 2005/03/03 01:30:44 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -18,7 +18,7 @@
 #include "TObject.h"
 
 class StEStructPairCuts;
-
+class StEStructTrack;
 
 class StEStructCutBin : public TObject {
 
@@ -28,6 +28,10 @@ class StEStructCutBin : public TObject {
   int mnumBins;
   char* mcutModeName;
 
+  int mPtBins[100]; // returned list of indexes terminated by -1
+  float mPtBinMax[100];
+  float mPtBinMin[100];
+
   static StEStructCutBin* mInstance;
   StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0) { setMode(0); };
   //  StEStructCutBin(int mode){ setMode(mode); };
@@ -35,7 +39,13 @@ class StEStructCutBin : public TObject {
   int getCutBinMode1(StEStructPairCuts *pc);
   int getCutBinMode2(StEStructPairCuts *pc);
   int getCutBinMode3(StEStructPairCuts *pc);
+  int getCutBinMode4(StEStructPairCuts *pc);
 
+  void initPtBinMode0();
+  void initPtBinMode1();
+  void initPtBinMode2();
+  void initPtBinMode3();
+  void initPtBinMode4();
 
  public:
 
@@ -47,6 +57,7 @@ class StEStructCutBin : public TObject {
   void setMode(int mode);
   int  getNumBins();
   int  getCutBin(StEStructPairCuts *pc);
+  int*  getPtBins(float pt);
   char* printCutBinName();
 
   ClassDef(StEStructCutBin,1)
@@ -81,6 +92,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
 	retVal=getCutBinMode3(pc);
 	break;
       }
+  case 4:
+      {
+	retVal=getCutBinMode4(pc);
+	break;
+      }
   default:
       {
     
@@ -90,12 +106,34 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
  return retVal;
 }
 
+//-----------------------------------------------------------
+inline int* StEStructCutBin::getPtBins(float pt){
+
+  if(mcutMode>0){  
+   int j=0;
+   for(int i=0;i<mnumBins;i++){
+    if(pt>=mPtBinMin[i] && pt<mPtBinMax[i]){
+      mPtBins[j]=i;
+      j++;
+    }
+   } 
+   mPtBins[j]=-1;
+  }
+ 
+  return mPtBins;
+}
+
+
 #endif
 
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.2  2005/03/03 01:30:44  porter
+ * updated StEStruct2ptCorrelations to include pt-correlations and removed
+ * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
+ *
  * Revision 1.1  2004/06/25 03:11:49  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *
