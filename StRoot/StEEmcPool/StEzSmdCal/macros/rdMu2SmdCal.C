@@ -71,10 +71,10 @@ int rdMu2SmdCal( int nEve=100 ){
   HList=new TObjArray;
 
   //........... sorters ..........
-  float thrMipSmdE=0.1; // MeV
-  int emptyStripCount=8;
-  float twMipRelEneLow=0.3, twMipRelEneHigh=2.5;
-  float presMipElow=0.3, presMipEhigh=3.;
+  float thrMipSmdE=0.3/1000.;
+  int emptyStripCount=6;
+  float offCenter=0.8; // fiducial area of tower =offCenter^2
+  float twMipRelEneLow=0.3, twMipRelEneHigh=2.;
 
   const int mSect=1+lastSec-firstSec; assert(mSect>0); assert(mSect<=12);
   StEEsmdCalMaker **sorterA=new  StEEsmdCalMaker * [mSect];

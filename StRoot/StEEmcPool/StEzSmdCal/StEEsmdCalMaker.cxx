@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.5 2004/10/21 13:31:31 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.6 2005/03/11 15:44:25 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -73,6 +73,7 @@ Int_t StEEsmdCalMaker::Init(){
   printf("%s has MCflag=%d\n",GetName(),MCflag);
   return StMaker::Init();
 }
+
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::InitRun(int runNo){
@@ -263,6 +264,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.6  2005/03/11 15:44:25  balewski
+// works with muEzt, cucu200
+//
 // Revision 1.5  2004/10/21 13:31:31  balewski
 // to match new name of emcCollection in muDst
 //

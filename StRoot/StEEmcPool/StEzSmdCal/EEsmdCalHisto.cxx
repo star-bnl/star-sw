@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.13 2004/11/02 21:29:06 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.14 2005/03/11 15:44:25 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -41,7 +41,11 @@ void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"%s(%c) %s , %s; ADC-ped",cTile[iT],cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	TH1F *h=new TH1F(tt1,tt2,400,-200,200.);
+	TH1F *h;
+	if(cT[iT]=='T') 
+	  h=new TH1F(tt1,tt2,220,-20,200.);
+	else
+	  h=new TH1F(tt1,tt2,400,-200,200.);
 	h->SetLineColor(col);
 	HList->Add(h);
 	hT[iCut][iT][iEta][iPhi]=h;
