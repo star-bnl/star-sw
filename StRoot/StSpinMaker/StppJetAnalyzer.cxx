@@ -134,7 +134,8 @@ void StppJetAnalyzer::clear()
     //clearAndDestroy four list
     for (FourList::iterator it=mFourList.begin(); it!=mFourList.end(); ++it) {
 	AbstractFourVec* temp = *it;
-	delete temp;
+        if(temp != NULL)
+	  delete temp;
 	temp=0;
     }
     mFourList.clear();
@@ -247,7 +248,9 @@ void StppJetAnalyzer::setEvent(StppEvent* e)
 
 void StppJetAnalyzer::setFourVec(StMuTrackFourVec* tracks, int numTracks)
 {
-    clear();
+    mFourList.clear();
+    mProtoJets.clear();
+
     fillLists(tracks, numTracks);
 }
 
