@@ -94,7 +94,8 @@ my $STIC_CPP = "";
 foreach my $cpp ($Dir,@cpps) {
   if ($cpp =~ /cern/ ||
       $cpp eq "/usr/include" ||
-      $cpp =~ /ospace/
+      $cpp =~ /ospace/ || 
+      $cpp =~ /openwin/
      )  {next;}
   if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
   else               {$ROOTCINT_CPP .= $cpp;}
