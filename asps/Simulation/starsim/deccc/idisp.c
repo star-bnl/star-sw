@@ -1,7 +1,10 @@
 /*
-* $Id: idisp.c,v 1.2 2004/03/01 17:26:33 fisyak Exp $
+* $Id: idisp.c,v 1.3 2004/08/12 19:12:04 fisyak Exp $
 * $Name:  $
 * $Log: idisp.c,v $
+* Revision 1.3  2004/08/12 19:12:04  fisyak
+* remove memcpy_
+*
 * Revision 1.2  2004/03/01 17:26:33  fisyak
 * Get rid of staf
 *
@@ -22,9 +25,10 @@ int idisp1_ (a,b)   char  *a,*b;     { return (b-a)+1; }
 int idisp2_ (a,b)   short *a,*b;     { return (b-a)+1; }
 int idisp4_ (a,b)   int   *a,*b;     { return (b-a)+1; }
 int iponter_(a,b)   int   *a,**b;    { return (*b-a);  }
+#if 0
 #include <stdlib.h>
 int malloc_(int  *size){return (int) malloc((size_t) *size);}
 void  free_(int  *ptr) { int i = *ptr;  free  ((char *)i);}
 #include <string.h>
 void memcpy_(void *dest, const void *src, size_t *n) { memcpy (dest, src, *n); }
-
+#endif
