@@ -205,8 +205,8 @@ double StiGeometryTransform::phiForWestSector(int iSector, int nSectors) const
   
   // make phi ~ sector (not -sector) and correct offset
   double dPhi = (offset - iSector)*deltaPhi;
-  while(dPhi >= 2.*M_PI){ dPhi -= 2.*M_PI; }
-  while(dPhi <  0.){      dPhi += 2.*M_PI; }
+  while(dPhi >=  M_PI){ dPhi -= 2.*M_PI; }
+  while(dPhi <  -M_PI){ dPhi += 2.*M_PI; }
 
   return dPhi;
     
@@ -221,8 +221,8 @@ double StiGeometryTransform::phiForEastSector(int iSector, int nSectors) const
 
     // correct offset
     double dPhi = (iSector - offset)*deltaPhi;
-    while(dPhi >= 2.*M_PI){ dPhi -= 2.*M_PI; }
-    while(dPhi <  0.){      dPhi += 2.*M_PI; }
+    while(dPhi >=  M_PI){ dPhi -= 2.*M_PI; }
+    while(dPhi <  -M_PI){ dPhi += 2.*M_PI; }
 
     return dPhi;
 
@@ -346,8 +346,6 @@ void StiGeometryTransform::operator() (const StPrimaryVertex* vtx, StiHit* stihi
     double pos = sqrt(position.x()*position.x() + position.y()*position.y() );
     double refangle = atan2( position.y(), position.x() );
 
-    if (refangle<0.) refangle+=2.*M_PI;
-    
     stihit->setRefangle( refangle );
     stihit->setPosition( pos );
     stihit->setX( pos );
@@ -553,8 +551,8 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
-  while(dPhi<0.){      dPhi += 2.*M_PI; };
-  while(dPhi>2.*M_PI){ dPhi -= 2.*M_PI; };
+  while(dPhi <  -M_PI){ dPhi += 2.*M_PI; };
+  while(dPhi >=  M_PI){ dPhi -= 2.*M_PI; };
   //*(Messenger::instance(MessageType::kGeometryMessage)) << "phi=" << dPhi << endl;
 
   // finally, need the sense of rotation.  Here we need the fact that

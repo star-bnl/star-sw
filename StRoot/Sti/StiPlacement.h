@@ -61,10 +61,10 @@ public:
 protected:
 
     // store both representations
-    float normalRefAngle; // in [0,2pi)
+    float normalRefAngle; // in [-pi, pi)
     float normalRadius;   // >= 0
     float normalYoffset;
-    float centerRefAngle; // in [0,2pi)
+    float centerRefAngle; // in [-pi, pi)
     float centerRadius;   // >= 0
     float centerOrientation;  // in [-pi/2, pi/2)
 

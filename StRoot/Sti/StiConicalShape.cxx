@@ -22,7 +22,7 @@ void StiConicalShape::setOuterRadiusWest(float val){
 }// setOuterRadiusWest()
 
 void StiConicalShape::setOpeningAngle(float val){
-  while (val < 0.){ val += 2*M_PI; }
-  while (val >= 2*M_PI){ val -= 2*M_PI; }
+  while (val <      0.){ val += 2*M_PI; }
+  while (val > 2.*M_PI){ val -= 2*M_PI; }
   openingAngle = val;
 }// setOpeningAngle()
