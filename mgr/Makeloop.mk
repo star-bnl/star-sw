@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.23  1998/10/08 15:57:37  fisyak
+#  Remove trailing blanks
+#
 #  Revision 1.22  1998/10/08 15:39:51  perev
 #  add strip
 #
@@ -145,7 +148,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/08 15:39:51 $ 
+#           Last modification $Date: 1998/10/08 15:57:37 $ 
 #  default setings
 # Current Working Directory
 #
@@ -163,28 +166,28 @@ THREE      :=3
 FOUR       :=4
 FIVE       :=5
 
-MakePam := $(strip $(wildcard $(CWD)/MakePam.mk))
+MakePam :=$(strip $(wildcard $(CWD)/MakePam.mk))
 ifndef MakePam
-  MakePam := $(strip $(wildcard $(CWD)/mgr/MakePam.mk))  
+  MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
 endif
 ifndef MakePam
-  MakePam := $(strip $(wildcard $(STAR)/mgr/MakePam.mk))  
+  MakePam :=$(strip $(wildcard $(STAR)/mgr/MakePam.mk))
 endif
 
-MakeDll := $(strip $(wildcard $(CWD)/MakeDll.mk))
+MakeDll :=$(strip $(wildcard $(CWD)/MakeDll.mk))
 ifndef MakeDll
-  MakeDll := $(strip $(wildcard $(CWD)/mgr/MakeDll.mk))  
+  MakeDll :=$(strip $(wildcard $(CWD)/mgr/MakeDll.mk))
 endif
 ifndef MakeDll
-  MakeDll := $(strip $(wildcard $(STAR)/mgr/MakeDll.mk))  
+  MakeDll :=$(strip $(wildcard $(STAR)/mgr/MakeDll.mk))
 endif
 
-Makeloop := $(strip $(wildcard $(CWD)/Makeloop.mk))
+Makeloop :=$(strip $(wildcard $(CWD)/Makeloop.mk))
 ifndef Makeloop
-  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk))
+  Makeloop :=$(strip $(wildcard $(CWD)/mgr/Makeloop.mk))
 endif
 ifndef Makeloop
-  Makeloop := $(strip $(wildcard $(STAR)/mgr/Makeloop.mk)) 
+  Makeloop :=$(strip $(wildcard $(STAR)/mgr/Makeloop.mk))
 endif
 
 ifndef INP_DIR 
@@ -364,11 +367,14 @@ endif
 endif
 test: test_level
 test_level:
-	@echo "LEVEL     =" $(LEVEL)
-	@echo "SUBDIRS   =" $(SUBDIRS)
-	@echo "INP_DIR   =" $(INP_DIR)
-	@echo "ROOT_DIR  =" $(ROOT_DIR)
-	@echo "CWD       =" $(CWD)
-	@echo "NAME      =" $(NAME)
-	@echo "ROOT_DIR  =" $(ROOT_DIR)
-	@echo "TARGETS   =" $(TARGETS)
+	@echo "LEVEL     = |"$(LEVEL)"|"
+	@echo "SUBDIRS   = |"$(SUBDIRS)"|"
+	@echo "INP_DIR   = |"$(INP_DIR)"|"
+	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
+	@echo "CWD       = |"$(CWD)"|"
+	@echo "NAME      = |"$(NAME)"|"
+	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
+	@echo "TARGETS   = |"$(TARGETS)"|"
+	@echo "Makeloop  = |"$(Makeloop)"|"	
+	@echo "MakePam   = |"$(MakePam)"|"	
+	@echo "MakeDll   = |"$(MakeDll)"|"
