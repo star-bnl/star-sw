@@ -32,7 +32,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
-     nsys    = 16                 ! number of subsystems
+     nsys    = 17                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
    fill dete       ! star subsystem
@@ -107,6 +107,12 @@ created   22 april 98
      spec  = 'ftp'        ! specification type
      csys  = 'FTPC'       ! Geant Subsystem
      cdet  = 'FSEN'       ! Sensitive detector
+   fill dete       ! star subsystem
+     onoff = 13           ! system number
+     ctab  = 'ftp'        ! table name
+     spec  = 'ftp'        ! specification type
+     csys  = 'FTPC'       ! Geant Subsystem
+     cdet  = 'FSEC'       ! Sensitive detector
    fill dete       ! star subsystem
      onoff = 14           ! system number
      ctab  = 'vpd'        ! table name
