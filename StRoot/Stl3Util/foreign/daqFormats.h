@@ -191,11 +191,11 @@ typedef unsigned char UINT8 ;
 #define CHAR_TRGP       "TRGP    "
 
 
-#pragma align 1
+
 #ifndef UNIX
 #ifdef CPU
 #if (CPU == I960HX)
-#pragma pack 1
+
 #endif
 #endif
 #endif
@@ -247,6 +247,25 @@ struct LOGREC {
 // Tonko, 7/13/00 noticed that detectorMask and TRG_DAQ_cmds were
 // swapped in real trigger data. Swapped them!
 
+#ifdef UNIX_LITTLE_ENDIAN
+struct EventDescriptor {
+  UINT8  format_version;
+  UINT8  tag;                   // 'E'
+  UINT16 byteCount;             // 28
+  UINT32  bx_hi;                // Bunch Xing hi 32 bits
+  UINT32  bx_lo;                // Bunch Xing lo 32 bits
+  UINT8  detectorMask;          // makes the Action Word with TRG_DAQ_cmds
+  UINT8  TRG_DAQ_cmds;          // 16*TRG_cmd | DAQ_cmd
+  UINT16  token;
+  UINT16 dsm_address;           // address of raw data for this crossing
+  UINT16 dsm_data;              // output of last DSM
+  UINT16 TRG_word;
+  UINT8 add_bits;               // bit 7 - fake data; bit 6 - L2.5 abort; bit 1 - priority;  bit 0 - pileup
+  UINT8 busy;                   // BUSY at start of this Xing
+  UINT16 npost;
+  UINT16 npre;
+};
+#else
 struct EventDescriptor {
   UINT16 byteCount;		// 28
   UINT8  tag;			// 'E'
@@ -264,6 +283,7 @@ struct EventDescriptor {
   UINT16 npre;
   UINT16 npost;
 } ;
+#endif
 
 struct DATAP {
 	struct bankHeader bh ;
@@ -671,11 +691,11 @@ struct EMCRBP {
 #ifndef UNIX
 #ifdef CPU
 #if (CPU == I960HX)
-#pragma pack 0
+
 #endif
 #endif
 #endif
-#pragma align 0
+
 
 
 #ifdef VERIFY_SIZES

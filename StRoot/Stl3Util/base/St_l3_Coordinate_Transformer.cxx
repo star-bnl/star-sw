@@ -72,6 +72,13 @@ St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
 int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
 {
 
+#ifdef Solaris
+    ftfLog("Transformation tables not available under Solaris\n");
+
+    return -1;
+#else
+
+
     if (TPCmap) free(TPCmap);
     TPCmap = NULL;
     
@@ -121,7 +128,7 @@ int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
     memcpy(TPCmap, (float *)file+headerSize, filesize - headerSize*4);
 
 
-    if (munmap(file, filesize))  
+    if (munmap((char*)file, filesize))  
 	ftfLog("St_l3_Coordinate_Transformer: error munmapping %s\n", 
 	       mapfilename);
     if (close(fd))   
@@ -133,11 +140,23 @@ int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
 	   mapfilename);
 
     return 0;
+
+#endif
 }
 
 //______________________________
 void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &raw ,St_l3_xyz_Coordinate &global)
 {
+
+#ifdef Solaris
+    St_l3_xyz_Coordinate local;
+    
+    raw_to_local(raw, local);
+    local_to_global(raw, local, global);
+    
+    return;
+    
+#else
 
     if(!TPCmap) {
 	// no lookup table loaded -> using pure geometrical conversion
@@ -149,11 +168,9 @@ void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &ra
 	return;
     }
 
-
     float (*binmap)[45][npad+1][ntb+1][3];
     binmap = (float (*)[45][npad+1][ntb+1][3])TPCmap;
-
-
+    
     // grid coordinates
     int ipad = (int)floor(raw.Getp()/dpad);
     int itb  = (int)floor(raw.Gett()/dtb);
@@ -188,6 +205,8 @@ void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &ra
 	+ wpad*wtb*z3 + (1-wpad)*wtb*z4;
 
     global.Setxyz(x,y,z);
+
+#endif
 
 }
 //______________________________
@@ -420,10 +439,9 @@ void St_l3_Coordinate_Transformer::local_to_raw( int row ,const St_l3_xyz_Coordi
     raw.Setr(row);
 }
 //______________________________
-void St_l3_Coordinate_Transformer::Set_parameters_by_hand(
-							  const double mlengthPerTb = 0.584, 
-							  const double mdrift_length_inner = 201., 
-							  const double mdrift_length_outer = 201.)
+void St_l3_Coordinate_Transformer::Set_parameters_by_hand(const double mlengthPerTb, 
+							  const double mdrift_length_inner, 
+							  const double mdrift_length_outer)
 {
     lengthPerTb = mlengthPerTb ;
     drift_length_inner = mdrift_length_inner ;

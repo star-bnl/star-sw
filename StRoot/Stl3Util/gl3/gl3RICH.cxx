@@ -75,6 +75,8 @@ int gl3RICH::setParameters(int maxAbsVertZ, int minNoOfHits, int are, int place 
  // eta
  if(minimumAbsEta>0.0 && minimumAbsEta<0.5)  minAbsEta=minimumAbsEta;
  else minAbsEta=2;
+
+ return 0;
 }
 
 

@@ -189,7 +189,7 @@ double gl3Histo::Integral(int minBin, int maxBin)
 //####################################################################
 // calculates (fast) the fuckin weighted mean of a gl3Histo
 //####################################################################
-double gl3Histo::getWeightedMean(double sigmaWidthBins=4)
+double gl3Histo::getWeightedMean(double sigmaWidthBins)
 {
   // Weighted mean of Histo
   
