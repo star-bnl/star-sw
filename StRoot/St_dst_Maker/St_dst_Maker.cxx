@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.32 1999/11/15 21:54:24 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.33 1999/11/17 15:22:53 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.33  1999/11/17 15:22:53  fisyak
+// Add soft monitor tables removed from dst_monitor_soft_filler
+//
 // Revision 1.32  1999/11/15 21:54:24  lbarnby
 // changes in idl file to fix St_dst_Maker
 //
@@ -97,9 +100,12 @@
 #include "global/St_fill_dst_event_summary_Module.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
+#include "tables/St_dst_mon_soft_ctb_Table.h"
+#include "tables/St_dst_mon_soft_emc_Table.h"
+#include "tables/St_dst_mon_soft_l3_Table.h"
+#include "tables/St_dst_mon_soft_rich_Table.h"
 
-
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.32 1999/11/15 21:54:24 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.33 1999/11/17 15:22:53 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
