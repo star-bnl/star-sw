@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.37 1999/08/07 19:47:07 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.38 1999/08/12 17:04:12 ogilvie Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.38  1999/08/12 17:04:12  ogilvie
+// changed to tde, added tpc_dedx table
+//
 // Revision 1.37  1999/08/07 19:47:07  fisyak
 // cleanup check of kFALSE
 //
@@ -121,7 +124,7 @@
 #include "tpc/St_tpt_Module.h"
 #include "tpc/St_tpt_residuals_Module.h"
 #include "tpc/St_tte_track_Module.h"
-#include "tpc/St_tde_new_Module.h"
+#include "tpc/St_tde_Module.h"
 #include "tpc/St_tte_Module.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -182,6 +185,7 @@ Int_t St_tpt_Maker::Init(){
 // 		TID parameters
   m_tdeparm = (St_tdeparm*) gime("tidpars/tdeparm");
   m_tpipar  = (St_tpipar* ) gime("tidpars/tpipar" );
+
   if (!(m_tdeparm && m_tpipar)) 
     Error("Init","tid parameters have not been initialized");
   assert(m_tdeparm && m_tpipar);
@@ -266,9 +270,12 @@ Int_t St_tpt_Maker::Make(){
 
 //		TID
   if (Debug()) cout << " start tid_run " << endl;
-  Int_t Res_tde = tde_new(m_tdeparm,tphit,tptrack,m_tpg_pad_plane);
+  St_dst_dedx  *tpc_dedx = new St_dst_dedx("tpc_dedx",2*maxNofTracks); 
+  m_DataSet->Add(tpc_dedx);
+
+  Int_t Res_tde = tde(m_tdeparm,tphit,tptrack,m_tpg_pad_plane,tpc_dedx);
 //	   	      ================================================
-  if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde_new.. " << endl;}
+  if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde.. " << endl;}
   else {if (Debug()) cout << " finish tid_run " << endl;}
 
 
