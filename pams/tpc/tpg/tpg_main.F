@@ -1,4 +1,6 @@
-      integer function tpg_main(pad_plane_h,pad_plane)
+      integer function tpg_main(pad_plane_h,pad_plane,
+     +     tpg_detector_h, tpg_detector,
+     +     tpg_pad_h, tpg_pad)
       implicit none
 
 #include "tpg_main.inc"
@@ -8,10 +10,20 @@ C     Description: In the debug mode it verifies the transformations.
 C     Input arguments:
 C     pad_plane_h - header of the pad plane table
 C     pad_plane  - pad plane table 
+c
+c added by malisa 05feb97:
+c     tpg_detector_h
+c     tpg_detector - contains drift velocity and bucket length
+c     tpg_pad_h
+c     tpg_pad - contains t0_offset (and other info) for each pad
+c
+c 
+
 
       real    dummy1, dummy2, dummy3, dummy4
       integer tgc_pad_to_x, tgc_row_to_y, tgc_x_to_pad
       integer tgc_y_to_row
+      integer tgc_time_to_z,tgc_z_to_time ! added 05feb97 - mal
       integer iret
       integer init_flag, idebug
 
@@ -23,7 +35,7 @@ CCCCCCCCCCCC
 
       save
 
-      data init_flag/0/, idebug/1/
+      data init_flag/0/, idebug/0/
 *
       if(init_flag.eq.0) then
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
@@ -31,6 +43,10 @@ CCCCCCCCCCCC
          iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_y_to_row(60.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_plane_h,pad_plane)
+*         iret=tgc_time_to_z(1.0,1.0,1.0,1.0,dummy2,
+*     +        tpg_pad_h,tpg_pad,tpg_detector_h,tpg_detector)
+*         iret=tgc_z_to_time(1.0,1.0,1.0,1.0,dummy2,
+*     +        TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
          init_flag=1
       endif
 CCCCC
@@ -57,7 +73,7 @@ CCCCC
       do i=1,24
          do j=1,45
          iret=tgc_row_par(i,real(j),xlocal(1),xlocal(2),dummy1,dummy2)
-         write(66,*)i,j,xlocal(1),xlocal(2)
+c         write(66,*)i,j,xlocal(1),xlocal(2)
          end do
       enddo
 
@@ -68,6 +84,7 @@ CCCCCC
 
       integer function tgc_local_to_global(isect,xlocal,xglobal)
       implicit none
+#include "PAM.inc"
 
       integer isect
       real xlocal(3), xglobal(3)
@@ -92,10 +109,12 @@ C
       endif
       xglobal(1)=xlocal(1)*cos(b_rot)+xlocal(2)*sin(b_rot)
       xglobal(2)=xlocal(2)*cos(b_rot)-xlocal(1)*sin(b_rot)
+      tgc_local_to_global=STAFCV_OK
       end
 
       integer function tgc_global_to_local(isect,xglobal,xlocal)
       implicit none
+#include "PAM.inc"
       integer isect
       real xlocal(3), xglobal(3)
 C
@@ -137,11 +156,13 @@ C
       endif
       xlocal(1)=xglobal(1)*cos(b_rot)-xglobal(2)*sin(b_rot)
       xlocal(2)=xglobal(1)*sin(b_rot)+xglobal(2)*cos(b_rot)
+      tgc_global_to_local=STAFCV_OK
       end
 
       integer function tgc_sector_row_pad_time_to_local(isector,
      >pad,row,time,xlocal)
       implicit none
+#include "PAM.inc"
 
       integer isector
       real    pad, row, time, xlocal(3)
@@ -164,6 +185,7 @@ C
       iret=tgc_pad_to_x(pad,row,xlocal(1),dummy1,dummy2)
       iret=tgc_row_to_y(row,xlocal(2),dummy1,dummy2)
       iret=tgc_time_to_z(time,xlocal(3))
+      tgc_sector_row_pad_time_to_local=STAFCV_OK
       end
 
       integer function tgc_pad_to_x(pad,row,x,pad_plane_h,pad_plane)
@@ -207,7 +229,7 @@ C     x - x coordinate in the local coordinate system
       pad_half=pad_num(int(row+0.5))/2.0
       pad_dif=pad-pad_int
       x=(pad_int-pad_half-0.5+pad_dif)*pitch
-
+      tgc_pad_to_x=STAFCV_OK
       end
       integer function tgc_row_to_y(row,y,pad_plane_h,pad_plane)
 
@@ -249,25 +271,146 @@ C     y - y coordinate in the local coordinate system
       if(int_row.ge.14) wid=row_wid_in
       dif_row=row-real(int_row)
       y=row_cent(int_row)+dif_row*wid
+      tgc_row_to_y=STAFCV_OK
       end
 
-      integer function tgc_time_to_z(time,z)
+      integer function tgc_time_to_z(time,pad,padrow,sector,z,
+     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
       implicit none
+#include "PAM.inc"
+#include "tpg_pad.inc"
+#include "tpg_detector.inc"
 
-      real time, z
+      RECORD / table_head_st /tpg_pad_h
+      RECORD / tpg_pad_st /tpg_pad(*) 
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
 
-C     Description: Converts time to z in the local coordinate system
-C     Not ready yet.
+
+C     Description: Converts TIME BUCKET NUMBER to z in the local coordinates
+c     mal 05feb97
+c
 C     Input arguments:
 C     time - time bucket number
+C     pad, padrow, sector - identifies electronics channel
+C     TPG_PAD - tells t0_offset of electronics channel
+C     TPG_DETECTOR - tells drift velocity
 C     Returns:
 C     z - z coodinate in the local coordinate system
 
-      z=0.0
+      real time                 ! note this is time bucket! 1..512
+      real pad,padrow,sector
+      real z                    ! z coordinate in local system (z>0)
+                                ! z_local = 0 at padplane
+      integer iflag/1/
+      integer ipadrow,isector,ipad
+      integer jj
+      real t0_offset(1:24,1:45,1:184)
+      real vdrift,buck_length
+      integer*2 jsec,jrow,jpad
+      save
+
+	tgc_time_to_z = 1
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         do jj=1,tpg_pad_h.nok
+            jsec = tpg_pad(jj).sector
+            jrow = tpg_pad(jj).padrow
+            jpad = tpg_pad(jj).pad
+            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
+         enddo
+         vdrift = tpg_detector(1).vdrift
+         buck_length = tpg_detector(1).bucket_length
+      endif
+ccc
+      isector = int(sector)
+      ipadrow = int(padrow)
+      ipad = int(pad)
+
+      z = vdrift*(time*buck_length - t0_offset(isector,ipadrow,ipad))
+
+      if (z.lt.0.0) then
+         write(6,*)'TGC_TIME_TO_Z - z < 0 ! setting to 0'
+         z = 0.0
+      elseif (z.gt.tpg_detector(1).drift_length) then
+         write(6,*)'TGC_TIME_TO_Z - z > drift ! setting to ',
+     +        tpg_detector(1).drift_length
+         z= tpg_detector(1).drift_length
+      endif
+
+      end
+
+      integer function tgc_z_to_time(z,pad,padrow,sector,time,
+     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
+      implicit none
+#include "PAM.inc"
+#include "tpg_pad.inc"
+#include "tpg_detector.inc"
+      RECORD / table_head_st /tpg_pad_h
+      RECORD / tpg_pad_st /tpg_pad(*) 
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
+
+
+C     Description: Converts z in the local coordinates to TIME BUCKET NUMBER
+c     mal 05feb97
+c
+C     Input arguments:
+C     z - z coodinate in the local coordinate system
+C     pad, padrow, sector - identifies electronics channel
+C     TPG_PAD - tells t0_offset of electronics channel
+C     TPG_DETECTOR - tells drift velocity
+C     Returns:
+C     time - time bucket number
+
+      real time                 ! note this is time bucket! 1..512
+      real pad,padrow,sector
+      real z                    ! z coordinate in local system (z>0)
+                                ! z_local = 0 at padplane
+      integer iflag/1/
+      integer ipadrow,isector,ipad
+      integer jj
+      real t0_offset(1:24,1:45,1:184)
+      real vdrift,buck_length
+      integer*2 jsec,jrow,jpad
+      save
+
+	tgc_z_to_time = 1
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         do jj=1,tpg_pad_h.nok
+            jsec = tpg_pad(jj).sector
+            jrow = tpg_pad(jj).padrow
+            jpad = tpg_pad(jj).pad
+            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
+         enddo
+         vdrift = tpg_detector(1).vdrift
+         buck_length = tpg_detector(1).bucket_length
+      endif
+ccc
+      isector = int(sector)
+      ipadrow = int(padrow)
+      ipad = int(pad)
+
+      time = (z/vdrift + t0_offset(isector,ipadrow,ipad))/buck_length
+
+      if (time.lt.0.0) then
+         write(6,*)'Time < 0 ! setting to 0'
+         time=0.0
+      elseif (time.ge.513.0) then
+         write(6,*)'Time > 513! setting to 512.9'
+         time=0.0
+      endif
+
       end
 
       integer function tgc_local_to_global_p(isect,plocal,pglobal)
       implicit none
+#include "PAM.inc"
       integer isect
       real plocal(3), pglobal(3)
 C     Description: Converts momentum from local to global
@@ -287,10 +430,13 @@ C
       endif
       pglobal(1)=plocal(1)*cos(b_rot)+plocal(2)*sin(b_rot)
       pglobal(2)=plocal(2)*cos(b_rot)-plocal(1)*sin(b_rot)
+      tgc_local_to_global_p=STAFCV_OK
       end
 
       integer function tgc_global_to_local_p(isect,pglobal,plocal)
       implicit none
+#include "PAM.inc"
+
       integer isect
       real plocal(3)
       real pglobal(3)
@@ -310,12 +456,13 @@ C     plocal - momentum in local coordinate system
       endif
       plocal(1)=pglobal(1)*cos(b_rot)-pglobal(2)*sin(b_rot)
       plocal(2)=pglobal(1)*sin(b_rot)+pglobal(2)*cos(b_rot)
-
+      tgc_global_to_local_p=STAFCV_OK
       end
 
       integer function tgc_local_to_row_pad_time(xlocal,
      >pad,row,time)
       implicit none
+#include "PAM.inc"
 
       real xlocal(3)
       real pad, row, time
@@ -336,6 +483,7 @@ C
       time=0
       iret=tgc_x_to_pad(row,xlocal(1),pad,dummy1,dummy2)
       iret=tgc_y_to_row(xlocal(2),row,dummy1,dummy2)
+      tgc_local_to_row_pad_time=STAFCV_OK
       end
       
 
@@ -381,7 +529,7 @@ C
           pitch=pitch_out
       endif
       pad = x/pitch+0.5+0.5*pad_num(int(row+0.5))
-
+      tgc_x_to_pad=STAFCV_OK
       end
 
       integer function tgc_y_to_row(y,row,pad_plane_h,pad_plane)
@@ -431,18 +579,7 @@ C     row - row number
          endif
       end do
 50    continue
-      end
-
-      integer function tgc_z_to_time(z,time)
-      implicit none
-      real z, time
-C     Description: Converts z (local coordinates) to time
-C     Input arguments:
-C     z - z coordinate in local coordinate system
-C     Returns:
-C     time - time bucket number
-C
-      time=0
+      tgc_y_to_row=STAFCV_OK
       end
       
       integer function tgc_row_par(isect,row,a,b,pad_plane_h,pad_plane)
@@ -496,6 +633,37 @@ C     a,b - row parameterisation
           tgc_row_par = STAFCV_BAD
       endif
       end
+
+      integer function tgc_cross_and_dip(sector,pglobal,cross,dip)
+      implicit none
+
+#include "PAM.inc"
+
+C     Description: Calculates the dip and the crossing angle 
+C     of a track characterized by a vector pglobal that is tangent to it
+C     in a sector
+C     Input arguments: 
+C     sector     - sector number
+c     pglobal    - vector tangent to the track
+C     Output arguments:
+c     cross      - crossing angle
+c     dip        - dip angle 
+
+      integer sector, iret
+      real    pglobal(3), plocal(3), cross, dip
+      integer tgc_global_to_local_p
+
+      iret=tgc_global_to_local_p(sector,pglobal,plocal)
+      if(plocal(2)**2/(plocal(1)**2+plocal(2)**2+plocal(3)**2)
+     >    .lt.0.00001) then
+        tgc_cross_and_dip = STAFCV_BAD
+      else
+        cross=atan(plocal(1)/plocal(2))
+        dip=atan(plocal(3)/plocal(2))
+        tgc_cross_and_dip = STAFCV_OK
+      endif
+      end
+
 
 
 

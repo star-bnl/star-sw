@@ -190,7 +190,7 @@ c  regardless of mcid so as to make a distribution of distance to all
 c  neighboring hits in the sector/padrow  (comparing histograms of the
 c  ntuples 800+ and 850+ will tell us what is the "merging" distance)
          integer max_nhits_in_row
-         parameter (max_nhits_in_row=300)
+         parameter (max_nhits_in_row=600)
          integer mc_ptr_list(mxhits*24,0:max_nhits_in_row)
          integer rec_ptr_list(mxhits*24,0:max_nhits_in_row)
 c (as usual index2=0 tells *number* of hits in the list for that sector/padrow)
@@ -551,8 +551,8 @@ c also store in overall pointer list
             
 c     collect comparison statistics for all mc/rec hits on itrk
 c     
-            do isect=1,24
-               do irow = 1, 45
+            do isect=tsspar(1).min_sect,tsspar(1).max_sect    ! only make evaluation
+               do irow = tsspar(1).min_row,tsspar(1).max_row  ! for part that is simulated
 c keep track of whether all hits claiming to belong to this track that are
 c   in this sector/row end up being associated with a mc hit.... if not, then
 c   they are a "ghost" hit, and get put in ntuple with clus.ne.0 but mhit=0
@@ -746,8 +746,8 @@ c so now we store it as a POSSIBLE ghost (of type 2) and fill in
 c  a ghost entry (if appropriate) in ntuple 300+ihisto after clean-up
                      endif
                   enddo
-               enddo            ! do irow = 1, 45
-            enddo               ! do isect=1,24
+               enddo            ! do irow = min_row,max_row
+            enddo               ! do isect= min_sect,max_sect
             
 ***********
             
@@ -777,8 +777,8 @@ c  may wind up as "lost"+"ghost" if the  MCID for the
 c reconstructed hit is
 c  incorrectly assigned, which is easy enough)
 
-         do isect=1,24
-            do irow=1,45
+         do isect=tsspar(1).min_sect,tsspar(1).max_sect   ! only make evaluation
+            do irow = tsspar(1).min_row,tsspar(1).max_row ! for part that is simulated
                idummy=(isect-1)*mxrow+irow
                do i_maybe_lost=1,n_maybe_lost(idummy)
                   lost_is_found(i_maybe_lost)=.false.
@@ -979,8 +979,8 @@ c find out how many mc tracks contributed to this hit's cluster...
                      call hfn(300+ihisto,vec)
                   endif
                enddo            ! i_maybe_ghost
-            enddo               ! irow
-         enddo                  ! isect
+            enddo               ! irow=min_row,max_row
+         enddo                  ! isect=min_sect,max_sect
 
          call hrout(300+ihisto,icycle,' ')
 
@@ -990,8 +990,8 @@ c
 c for MC and for recon hits, fill hisogram with distance to all neighbors
 c  on a padrow for each hit on that padrow...
 
-         do isect=1,24
-            do irow=1,45
+         do isect=tsspar(1).min_sect,tsspar(1).max_sect   ! only make evaluation
+            do irow = tsspar(1).min_row,tsspar(1).max_row ! for part that is simulated
                idummy=(isect-1)*45+irow
 c first do MC hits on this padrow/sector
                if (mc_ptr_list(idummy,0).ne.0) 

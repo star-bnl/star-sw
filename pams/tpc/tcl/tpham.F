@@ -13,7 +13,6 @@ C                        **     *     **
 C                       **    *****    **
 C                      **   **     **   **
 C                     **                 **
-C
 C----------------------------------------------------------------------
 C
       INTEGER FUNCTION TPHAM( tclpar_h, tclpar
@@ -1470,8 +1469,12 @@ C
 C   Originally written 25 November 1994 by Mike Lisa
 C   Copyright 1994    Lawrence Berkeley Laboratory
 c   
-c   modificattions:
-c   ==============
+c   modifications :
+c   =============
+C
+C   Modified: 20-DEC-1996 by R.Bossingham, Lawrence Berkeley Natl. Laboratory
+C             If the Gaussian width is more than 83% of the pad width,
+C             return a function value of -2; do not calculate position.
 C
 C   Error conditions : 
 C   ================
@@ -1479,6 +1482,9 @@ C
 C     If the distribution is not well described by a gaussian, (i.e.
 C	it has a peak on one edge and is not monotonic) the function
 C       returns a value of -1
+C
+C     If the width is so large that a weighted mean algorithm is likely
+C       to be more accurate, the function returns a value of -2
 C
 C-----------------------------------------------------------------------
 	real y(*),x(*),dy(*)
@@ -1545,7 +1551,16 @@ C-----------------------------------------------------------------------
            call message('TPH_3POINT_GAUSS bad shape - r213',
      +          1,id)
            return
+C
+C From Monte Carlo, if the fitted Gaussian is wider than about 83%
+C of the pad pitch in X, the weighted mean algorithm is more accurate;
+C we return a diagnostic to force its use.  [ 1/sqrt(1.452)=0.83 ].
+	elseif (r213.le.1.452) then
+           id = 0
+           tph_3point_gauss = -2
+           return
         endif
+
 	x0 = (delta/2.0) * log(y3/y1)/r213
 	centroid = x(istart+1) + x0
 	sigma = delta/sqrt(r213)

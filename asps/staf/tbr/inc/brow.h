@@ -1,4 +1,4 @@
-#define MAX_LINES_CLICK_PART 8000
+#define MAX_LINES_CLICK_PART 800
 typedef int myBool;
 #define VWSTRING	0
 #define VWNUMBER	1
@@ -10,7 +10,7 @@ void SetToDatasetInfo(int,char*,int);
 void SetToTableInfo(char*,size_t*,int,char*,int);
 void DatasetList(int*,int*,int,char *x,int size);
 void TableList(char*,int,int*,int*,int,char *x,int size);
-void ColumnList(char,int*,char*,int,int*,int*,int,char*,int,int*);
+void ColumnList(char*,int,int*,int*,int,char*,int,int*);
 /* #define STANDALONE */
 #define PP printf(
 void Err(int x);

@@ -54,8 +54,6 @@ char *gMess0=
     which contains this column.";
 Widget gSecondLabel,gCutsPopup,gProgressPopup,gCutsText,gProgressScale;
 /******************************************************  PROTOTYPES  **/
-void SetHilite(int control,int whWin,int lineNum);
-myBool TableHasMoreThanZeroRows(int tlm);
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad);
 myBool TableHasMoreThanZeroCols(int tlm);
 XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad);
@@ -70,7 +68,7 @@ void DrawString(float xf,float yf,char *cc);
 void DrawStringXOnly(int x,int y,char *cc);
 void AddPs(char *x);
 void RunTheRows(myBool,int whWin,void (*fnct)());
-void MakeWindow(int,int,int);
+void MakeWindow(int,int);
 Widget Column(Widget parent);
 Widget Row(Widget parent);
 void CreateMenuItems(Widget mbar,int whichWindow);
@@ -401,7 +399,7 @@ myBool IsOperator(char *xx,int pp) {
 void BreakIntoLines(char *xx) {
   int len,ii,chos=0,bufPos=0,lastPrint=-1;
   char buf[MAX_CUTS_STRING],save;
-  len=strlen(xx); if(len>800) Err(996); *buf='\0';
+  len=strlen(xx); if(len>800) Err(770); *buf='\0';
   for(ii=0;ii<len;ii++) {
     if(IsOperator(xx,ii)&&chos>CUTS_WIDTH-15) {
       chos=0; save=xx[ii]; xx[ii]='\0';
@@ -580,7 +578,7 @@ void DrawHist(int whWin) {
   float x2c,x1c,x1,y1,x2,y2,tsY,tsX,minnX,maxxY,minnY,maxxX;
   float y1c,y2c;
   char label[111],name[40],buf[40];
-  if(gNGraphicsUp>0) {Complain2(); return;} MakeWindow(0,0,WIN_TYPE_GRAPHICS);
+  if(gNGraphicsUp>0) { Complain2(); return; } MakeWindow(0,WIN_TYPE_GRAPHICS);
   InitPs();
   maxI=0; for(ii=HIST-1;ii>=0;ii--) if(maxI<gHist[ii]) maxI=gHist[ii];
   gUp=TOPMARGIN; gDown=GRAPHHITE-BOTTOMMARGIN; gLeft=LEFTMARGIN;
@@ -641,10 +639,6 @@ void BotLongerCB(Widget ww,caddr_t cld,caddr_t cad) {
 void CloseThisWindowCB(Widget w,caddr_t cld,caddr_t cad) {
   int whWin; whWin=(int)cld;
   if(gWin[whWin]->win_type==WIN_TYPE_GRAPHICS) gNGraphicsUp--;
-  if(gWin[whWin]->win_type==WIN_TYPE_TABLE) {
-    /* unhighlight line in primary window when corres table win pops down */
-    SetHilite(HILITE_TURN_OFF,0,gWin[whWin]->nolipw);
-  }
   XtPopdown(gWin[whWin]->shell); XtDestroyWidget(gWin[whWin]->shell);
 }
 void RunNull(size_t row) { /* Menu item just counts selected rows. */
@@ -739,16 +733,12 @@ void RunValue(size_t row) {
   }
   else if(gRunNRowsDone==0) SayError0();
 }
-int NumRows(int whWin) {
-  return ((int)(gWin[whWin]->nRow));
-}
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   int whAct,whWin; char act[111];
   static int whActS,whWinS;
   void (*runFunc)();
   if((int)w==2&&(int)cld==5&&(int)cad==14) { whAct=whActS; whWin=whWinS; }
   else { whWin=((int)cld)%1000; whAct=((int)cld)/1000; }
-  if(NumRows(whWin)<1) { Say("This table has zero rows."); return; }
   gLastWhWin=whWin;
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
   switch(whAct) {
@@ -798,7 +788,6 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   char act[30],tt2[45],format[30];
   void (*runFunc)();
   whWin=((int)cld)%1000; whAct=((int)cld)/1000;
-  if(NumRows(whWin)<1) { Say("This table has zero rows."); return; }
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(120);
   /*Write("------------------------------------------------\n",whWin);*/
   switch(whAct) {
@@ -1131,7 +1120,7 @@ void AddToHiliteList(int whWin,int lineNum) {
       /*------- so user can click twice on same line in primary window
       PP"I am being asked to add line# %d to my highlight list for\n",lineNum);
       PP"window %d, but it is already on the list.\n",whWin);
-      Err(xxx);
+      Err(772);
       -----------------------------------------------*/
     }
   }
@@ -1145,7 +1134,7 @@ void SetHilite(int control,int whWin,int lineNum) {
   char buf[WIDE*MCOL+EXT+1]; /* see comments in x.h for meaning of MCOL etc */
   char tmp[111],format[22];
   char cp[43],*otext; int num=0,len,ii,ln; myBool doReturn=FALSE;
-  int hlLstIx,lnfhl; /* line number from highlight list */
+  int hlLstIx,lnfhl; /* line number from hilite list */
   XmTextPosition left,right;
   Widget txtWid;
   txtWid=gWin[whWin]->txtWidClick;
@@ -1154,10 +1143,7 @@ void SetHilite(int control,int whWin,int lineNum) {
   for(ii=0;ii<len;ii++) {
     if(otext[ii]=='\n') { right=ii; if(ln==lineNum) break; left=ii+1; ln++; }
   }
-  if( (control!=HILITE_TURN_OFF)
-      &&
-      (control==HILITE_TURN_ON||!gWin[whWin]->isHilited[lineNum])
-  ) {
+  if(control==HILITE_TURN_ON||!gWin[whWin]->isHilited[lineNum]) {
     AddToHiliteList(whWin,lineNum);
     gWin[whWin]->isHilited[lineNum]=TRUE;
     XmTextSetHighlight(txtWid,left,right,XmHIGHLIGHT_SELECTED);
@@ -1200,8 +1186,6 @@ void ResetTheTriangles(int wds) {
   else if(wds==-15) { for(ii=0;ii<gNDs;ii++) ExpandExceptCase(ii); }
   else if(wds==-20) { for(ii=0;ii<gNDs;ii++) ContractCase(ii); }
   else Err(123);
-  gWin[0]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-  if(!gWin[0]->textClickPart) Err(777);
   PrimaryList(junk,0,&nLines,gWin[0]->tlm,MAX_LINES_CLICK_PART,
               gWin[0]->textClickPart,TEXT_SIZE_PART_2);
   gWin[0]->nlcpwtto=nLines;
@@ -1241,7 +1225,7 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
   switch(gWin[whWin]->win_type) {
     case WIN_TYPE_D_TREE: /* does not work yet */
       Err(192); /* June 28 1995 see err(552) */
-      MakeWindow(0,tlm,WIN_TYPE_PRIMARY);
+      MakeWindow(tlm,WIN_TYPE_PRIMARY);
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
       break;
     case WIN_TYPE_PRIMARY:
@@ -1249,10 +1233,9 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
       if(inTri) { ResetTheTriangles(tlm); return NULL; }
       if(!ATable(tlm)) { Say(gBlurb7); return; }
       if(!TableHasMoreThanZeroCols(tlm)) return;
-      /* 961003 if(!TableHasMoreThanZeroRows(tlm)) return; */
-      if(whWin!=0) Err(993); /* for sake of, eg, 0 in CloseThisWindowCB */
+      if(!TableHasMoreThanZeroRows(tlm)) return;
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
-      MakeWindow(lineNumber,tlm,WIN_TYPE_TABLE);
+      MakeWindow(tlm,WIN_TYPE_TABLE);
       break;
     case WIN_TYPE_TABLE: /* user has selected a column */
       SetHilite(HILITE_TOGGLE,whWin,lineNumber); /*tlmUsedInRunAverage()Etc*/
@@ -1399,12 +1382,11 @@ void MakeRowSelectionWidget(Widget parent) {
   if(Q!=NUM_RADIO) Err(117);
   XtManageChild(rb);
 }
-void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
+void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   ARGS
-  Widget hor,ls,ver,mbar,mw; int nbytes,mm,ii,nLines; size_t nRow;
-  char name[NAME+2],header[100],reportSpaceNeeded;
+  Widget hor,ls,ver,mbar,mw; int ii,nLines; size_t nRow;
+  char name[NAME+2],header[100];
   nn=0;
-  if(gNWin>=MAXWIN) Err(994);
   if(type==WIN_TYPE_PRIMARY) {
     gMainWindow=XmCreateMainWindow(gAppShell,"0hhh",args,nn); mw=gMainWindow;
   } else {
@@ -1429,8 +1411,6 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       Err(552); /* June 28 1995 */
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToPrimaryInfo(gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
-      gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-      if(!gWin[gNWin]->textClickPart) Err(708);
       DatasetList(&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
       gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,48);
@@ -1442,8 +1422,6 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       if(wh_gDs!=0) Err(554); /*6-28-95*/
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToDatasetInfo(wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1); /*BBB*/
-      gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-      if(!gWin[gNWin]->textClickPart) Err(717);
       PrimaryList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
       /* gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,T41+2); */
@@ -1452,24 +1430,13 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       gWin[gNWin]->txtWidWrite=NULL;
       break;
     case WIN_TYPE_TABLE: /* we are making a window for browsing a TAS table */
-      gWin[gNWin]->nolipw=nolipw;
       gWin[gNWin]->rowSel=ROW_SEL_ALL; gWin[gNWin]->wh_gDs=wh_gDs;
       SetToTableInfo(name,&nRow,wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
       gWin[gNWin]->nRow=nRow; strncpy(gWin[gNWin]->tableName,name,NAME);
       gWin[gNWin]->tableName[NAME-1]='\0';
-      for(mm=0;mm<2;mm++) { /* pass 1 malloc, pass 2 use malloc'd memory */
-        if(mm==0) reportSpaceNeeded=7; else reportSpaceNeeded=0;
-        ColumnList(
-            reportSpaceNeeded,&nbytes,
-            header,wh_gDs,&nLines,
-            gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
-            gWin[gNWin]->textClickPart,nbytes,
-            gWin[gNWin]->subscript);
-        if(mm==0) {
-          gWin[gNWin]->textClickPart=malloc((size_t)nbytes);
-          if(!gWin[gNWin]->textClickPart) Err(188);
-        }
-      }
+      ColumnList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
+          gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2,
+          gWin[gNWin]->subscript);
       gWin[gNWin]->textOutput=malloc(TEXT_SIZE_PART_3);
       if(gWin[gNWin]->textOutput==NULL) {
         PP"Table browser:  no more dynamic memory.\n"); Err(118);
@@ -1529,7 +1496,7 @@ void DoXStuff(void) {
   gAppShell=XtAppCreateShell("Dataset Catalog Browser",
   "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
   PP"MakeWindow()\n");
-  MakeWindow(0,0,WIN_TYPE_PRIMARY);
+  MakeWindow(0,WIN_TYPE_PRIMARY);
   PrepareProgressPopup(); PrepareCutsPopup();
   PP"XtRealizeWidget()\n");
   haveInited=TRUE;

@@ -33,7 +33,7 @@ char gPs[PS],gSumCol[100];
 #define NOTUSED 0
 #define XtCP XtCallbackProc
 #define TEXT_SIZE_PART_1 400
-#define TEXT_SIZE_PART_2 2000
+#define TEXT_SIZE_PART_2 34000
 #define TEXT_SIZE_PART_3 50000
 int gNPs,gNWin,gNGraphicsUp,gHistWhLine;
 size_t gLast;
@@ -43,7 +43,6 @@ Widget gVer2;
 #define GRAPHHITE 400
 #define HILITE_TURN_ON 0
 #define HILITE_TOGGLE  1
-#define HILITE_TURN_OFF 2
 #define WIN_TYPE_D_TREE  0
 #define WIN_TYPE_PRIMARY  1
 #define WIN_TYPE_TABLE    2
@@ -82,10 +81,9 @@ typedef struct {
   int    win_type;	/* one of WIN_TYPE_XXX */
   int    rowSel;	/* one of ROW_SEL_XXX */
   char   tableName[NAME];
-  char   textTop[TEXT_SIZE_PART_1],*textClickPart;
+  char   textTop[TEXT_SIZE_PART_1],textClickPart[TEXT_SIZE_PART_2];
   char   *textOutput;
   int    nlcpwtto; /* num line clickable part window type table only */
-  int nolipw; /*Number Of Line In Primary Window clicked to make this window*/
   /* BBB compare to MAX_LINES_CLICK_PART */
   int    tlm[MAX_LINES_CLICK_PART]; /* See 6tx.  This is wh_gDs or colNum. */
   int    wh_gDs;  /* See 7tx. */
@@ -99,6 +97,5 @@ typedef struct {
   size_t nRow;
   int    whichRadio; /* 0 to NUM_RADIO-1, good if win_type==WIN_TYPE_TABLE */
 } WINDOW_INFO;
-WINDOW_INFO *gWin[MAXWIN]; /* the memory is malloc'ed, except for the small
-                           ** amount needed to hold the MAXWIN pointers. */
+WINDOW_INFO *gWin[MAXWIN];
 #define ARGS Arg args[50]; int nn;

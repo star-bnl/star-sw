@@ -8,7 +8,7 @@ int gNDs,gIndent;
 #define INDENT_INIT (-1)
 #define MAX_DATASET        200
 #define DATASET_NAME_SIZE   42
-#define SLACK 15
+#define SLACK 5
 typedef struct {
   char triText[3]; /* two-letter substitute for Mac's rotating triangles */
   int triStat;

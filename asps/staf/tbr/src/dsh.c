@@ -111,7 +111,7 @@ myBool TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
   size_t arraysize;       /* x[arraysize] */
   if(!Array(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) Err( 21);
   if(!dsCellAddress(&pData,tp,row,colNum)) {
-    /* 961003 Err( 22); */ *fv=0.0; return FALSE;
+    Err( 22); return FALSE;
   }
   if(!strcmp(tn,  "long")) {
     *iv=*((  long*)(pData+off*sizeof(long))); *dType=INTEGER;
@@ -158,7 +158,6 @@ static float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
   row_size_t=row;
   if(!TableValue(&dataType,gStr,&fv,&iv,row_size_t,colNum,tp,ss))
       gTableValueError=TRUE; else gTableValueError=FALSE;
-  if(gTableValueError) return 0.0;
   *dt=dataType;
   if(dataType==FLOAT)   return fv;
   else if(dataType==INTEGER) { fv=iv; return fv; }
@@ -273,7 +272,6 @@ float MinMax(int control,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   size_t nRow_size_t; int dataType,nRowInt,rowInt; float rv,cv;
   if(!dsTableRowCount(&nRow_size_t,pp)) Err( 35);
   nRowInt=nRow_size_t;
-  if(nRowInt<=0) return 0.0;
   if(control==0) rv=+1e28; else rv=-1e28;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
     cv=Value(&dataType,pp,whichCol,rowInt,subscript);
@@ -293,7 +291,6 @@ float Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   size_t nRow_size_t; int dataType,nRowInt,rowInt; float ave,cv,sum2;
   if(!dsTableRowCount(&nRow_size_t,pp)) Err( 24);
   nRowInt=nRow_size_t;
-  if(nRowInt<=0) { *stdDev=0.0; return 0.0; }
   ave=0.0;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
     ave+=Value(&dataType,pp,whichCol,rowInt,subscript);
@@ -336,17 +333,16 @@ void MakeAbbreviations(char *out,const char *in) {
   if(*out==0) strcpy(out,in);
   if(strlen(out)>7) out[7]='\0';
 }
-#define CONST 160
-#define SLOPE 63
-void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
+void ColumnList(char *header,
   int wh_gDs,int *tot,int *tlm,int ml,char *xx,int max,
   int *subscript) {
-  int asi,jj,rr,lineCnt=0,ii; char gg[25],ss[20],*dd,*cc,bf2[100],doBreak=0;
+  int asi,jj,rr,lineCnt=0,ii; char gg[25],ss[20],*dd,*cc,bf2[100];
   size_t whichCol,rr_size_t,dimensionality,arraySize;
   float minFloat,maxFloat,aveFloat,stdFloat;
   char typeA[100],totalName[100];
   char minString[FORMAT],maxString[FORMAT],aveString[FORMAT],stdString[FORMAT];
   DS_DATASET_T *pp; int progNow=0,progTot=0;
+  *xx='\0';
   pp=gDs[wh_gDs]->dsPtr;
   if(gDs[wh_gDs]->type!=TYPE_DS_TABLE) Err( 25);
   if(!dsTableColumnCount(&rr_size_t,pp)) Err( 26); rr=rr_size_t;
@@ -356,8 +352,8 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     strcpy(minString,"???"); strcpy(maxString,"???");
     strcpy(stdString,"???"); strcpy(aveString,"???");
   }
-  if(reportSpaceNeeded||gCalculateAverages) {
-    if(!reportSpaceNeeded) Progress(-5,10,"ferences\" menu to speed this up.",
+  if(gCalculateAverages) {
+    Progress(-5,10,"ferences\" menu to speed this up.",
     "Doing min/max/averages.  See the \"Pre-");
     for(ii=0;ii<rr;ii++) { /* 1st pass for progTot */
       whichCol=ii;
@@ -374,10 +370,6 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       if(gTableValueError) break;
     }
   }
-  if(reportSpaceNeeded) { /* nbytes will return soon as max, so we have  */
-    *nbytes=CONST+SLOPE*progTot; return; /* a good check. */
-  }
-  *xx='\0';
   for(ii=0;ii<rr;ii++) { /* 2nd pass, loop over columns */
     if(gTableValueError) break;
     whichCol=ii;
@@ -413,13 +405,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       if(strcmp(typeA,"char")) strcpy(gg,typeA); else strcpy(gg,"string");
       sprintf(bf2,COLUMN_LIST_FORMAT,totalName,gg,minString,maxString,
       aveString,stdString);
-      if(strlen(xx)+strlen(bf2)>max-SLACK) {
-        PP"ii%d,jj%d,rr%d,asi%d,max%d,strl(xx)%d,strlen(bf2)%d,SLACK%d,\n",
-        ii,jj,rr,asi,max,strlen(xx),strlen(bf2),SLACK);
-        Err( 16); doBreak=7; break;
-      }
-      strcat(xx,bf2);
-      /* PP"(%2d,%2d) len=%4d bf2=%s\n",ii,jj,strlen(xx),bf2); Sleep(2); */
+      if(strlen(xx)+strlen(bf2)>max-SLACK) Err( 16); strcat(xx,bf2);
       if(lineCnt>=ml) {
         PP"Table browser error.\n");
         PP"lineCnt=%d, maxLines=%d.\n",lineCnt,ml); gDone=7; return;
@@ -428,10 +414,9 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       subscript[lineCnt]=jj-1; /* www */
       strcat(xx,"\n"); /* using the SLACK */
       lineCnt++;
-      if(gDataType==STRING) break; /* asi = len of data string in dsl 66d */
+      if(gDataType==STRING) break; /* asi is len of string 66d */
     }           /* loop over array members */
     if(gTableValueError) break;
-    if(doBreak) break;
   }	/* loop over columns */
   if(gCalculateAverages) Progress(-10,progTot,NULL,NULL);
   *tot=lineCnt;
@@ -513,7 +498,7 @@ void DatasetList(int *tot,int *wh_DsA,int maxLines,char *out,int max) {
     else Err( 13);
     if(strlen(out)+strlen(bf2)>max-SLACK) Err( 14); strcat(out,bf2);
     if(lineCnt>=maxLines) {
-      PP"Error in the table browser error.\n");
+        PP"Table browser error.\n");
       PP"lineCnt=%d, maxLines=%d.\n",lineCnt,maxLines); gDone=7; return;
     }
     wh_DsA[lineCnt]=ii; strcat(out,"\n"); /*using SLACK*/ lineCnt++;
@@ -575,7 +560,7 @@ void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   UpdateUsageLog();
   gAlreadyErr=0; gDone=0; gNumDatasetWindows=0; /* June 28 1995 */
   gIndent=INDENT_INIT; gNDs=0;
-  PP"Version %s %s.\n",__DATE__,__TIME__);
+  PP"Version %s.\n",__DATE__);
   Ose(); PP"%s",gTheBlurb); Ose();
   for(ii=0;ii<nDsPtr;ii++) FillgDs("No parent",dsPtrs[ii]);
   TouchUpType();

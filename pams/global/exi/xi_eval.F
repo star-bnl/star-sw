@@ -1,11 +1,10 @@
-C
+C-------------------------------------------------------------------------
       INTEGER FUNCTION XI_EVAL(nok,idd,trak,
      +                         exipar_h,exipar,
      +                         exiout_h,exiout,
-     +                         mkine_h,  mkine,
-     +                         mvert_h,  mvert)
-
-      IMPLICIT NONE
+     +                         g2t_track_h,  g2t_track,
+     +                         g2t_vertex_h,  g2t_vertex)
+C>---------------------------------------------------------------------
 C   Functional Description : Search for secondary vertices. 
 C			     K_0_short and Lambda particles
 C			     and anti-particles are 
@@ -13,26 +12,22 @@ C			     considered. Only charged decay modes.
 C   Created  MARCH-1994	  S. Margetis 
 C   Error conditions	: None-Yet
 C   Status		: Tested with svt_hits
+C<---------------------------------------------------------------------
+      IMPLICIT NONE
+#include "PAM.inc"
+#include "exi_exipar.inc"
+#include "exi_exiout.inc"
+#include "g2t_vertex.inc"
+#include "g2t_track.inc"
 C----------------------------------------------------------------------
-#include "/star/starlib/star/dev/sys/inc/tas_structures.inc"
-#include "/star/starlib/star/dev/sys/inc/tas_user_codes.inc"
-#include "exi_exipar_pars.inc"
-#include "exi_exipar_st.inc"
-#include "exi_exiout_pars.inc"
-#include "exi_exiout_st.inc"
-#include "mct_mvert_pars.inc"
-#include "mct_mvert_st.inc"
-#include "mct_mkine_pars.inc"
-#include "mct_mkine_st.inc"
-C----------------------------------------------------------------------
-      RECORD/ table_head_st/ exipar_h
-      RECORD/ exipar_row_st/ exipar(*)
-      RECORD/ table_head_st/ exiout_h
-      RECORD/ exiout_row_st/ exiout(*)
-      RECORD/ table_head_st/ mvert_h
-      RECORD/ mvert_row_st/ mvert(*)
-      RECORD/ table_head_st/ mkine_h
-      RECORD/ mkine_row_st/ mkine(*)
+      RECORD/ TABLE_HEAD_ST/ exipar_h
+      RECORD/ EXI_EXIPAR_ST/ exipar(*)
+      RECORD/ TABLE_HEAD_ST/ exiout_h
+      RECORD/ EXI_EXIOUT_ST/ exiout(*)
+      RECORD/ TABLE_HEAD_ST/ g2t_vertex_h
+      RECORD/ G2T_VERTEX_ST/ g2t_vertex(*)
+      RECORD/ TABLE_HEAD_ST/ g2t_track_h
+      RECORD/ G2T_TRACK_ST/ g2t_track(*)
 
 C---for testing purposes only
       STRUCTURE/local_track/
@@ -50,7 +45,7 @@ C---------------
  
       INTEGER nok,id,idd(10000),id1,id2
       INTEGER ierr,ii,kk,ll,iflag,iflag1
-      INTEGER i,j,k,l,q,iv1,iv2
+      INTEGER i,j,k,l,iv1,iv2
  
       REAL degrad,raddeg,trki(6),pi,ok
       REAL masst(50),mass1(3),mass2(3),qqt(50)
@@ -76,16 +71,16 @@ C---------------
 *
 * check if daughter particles came from a secondary vertex
 *
-        iv1=mkine(exiout(i).idba).ivor
-        iv2=mkine(exiout(i).idv0).ivor
+        iv1=g2t_track(exiout(i).idba).start_vertex_p
+        iv2=g2t_track(exiout(i).idv0).start_vertex_p
         IF( (iv1.eq.iv2).and.(iv1.ne.1).and.(iv2.ne.1) ) THEN
          exiout(i).itrue=1
-         exiout(i).x_true(1)=mvert(iv1).x(1)
-         exiout(i).x_true(2)=mvert(iv1).x(2)
-         exiout(i).x_true(3)=mvert(iv1).x(3)
-         exiout(i).p_true(1)=mkine(mvert(iv1).orgtrk).p(1)
-         exiout(i).p_true(2)=mkine(mvert(iv1).orgtrk).p(2)
-         exiout(i).p_true(3)=mkine(mvert(iv1).orgtrk).p(3)
+         exiout(i).x_true(1)=g2t_vertex(iv1).ge_x(1)
+         exiout(i).x_true(2)=g2t_vertex(iv1).ge_x(2)
+         exiout(i).x_true(3)=g2t_vertex(iv1).ge_x(3)
+         exiout(i).p_true(1)=g2t_track(g2t_vertex(iv1).parent_p).p(1)
+         exiout(i).p_true(2)=g2t_track(g2t_vertex(iv1).parent_p).p(2)
+         exiout(i).p_true(3)=g2t_track(g2t_vertex(iv1).parent_p).p(3)
         ELSE
          exiout(i).itrue=0
         ENDIF
