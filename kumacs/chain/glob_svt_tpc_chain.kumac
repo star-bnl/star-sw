@@ -94,14 +94,6 @@ $STAR/pams/trg/kumac
  def [DEFAULT]
  message 'Define default kumac search path as' def
 
-*******************************
-* SETUP GLOBAL MACROS
-*****************************
-
-* need this because the tpc init kumacs use them
- exec setup_global_macros
-
- macro/global/import  PARAMS_TPC
 
 ****************************************
 *  LOAD LIBRARIES
