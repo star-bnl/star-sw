@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.33 1998/11/15 21:12:57 fisyak Exp $
+# $Id: MakeDll.mk,v 1.34 1998/11/16 01:26:45 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.34  1998/11/16 01:26:45  fisyak
+# New merging with NT
+#
 # Revision 1.33  1998/11/15 21:12:57  fisyak
 # fix shared libraries versioning for St_Root
 #
@@ -70,7 +73,12 @@ LIB_DIR := $(SYS_DIR)/lib
 OBJ_DIR := $(SYS_DIR)/obj/$(PKGNAME)
 STAR_OBJ_DIR := $(STAR)/obj/$(PKGNAME)
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
+ifndef NT
 TMP_DIR := $(SYS_DIR)/tmp
+else
+TMP_DIR := $(TEMP)/tmp
+endif # /NT/
+
 SRC_DIR := $(INP_DIR)
 #.
 ifndef NT
@@ -82,12 +90,12 @@ ifndef NT
     check_gen   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
 
 else #/* NT */
-    check_out   := $(shell $(MKDIR) $(subst /,\,$(OUT_DIR))) 
-    check_sys   := $(shell $(MKDIR) $(subst /,\,$(SYS_DIR)))
-    check_lib   := $(shell $(MKDIR) $(subst /,\,$(LIB_DIR)))
-    check_obj   := $(shell $(MKDIR) $(subst /,\,$(OBJ_DIR)))
-    check_dep   := $(shell $(MKDIR) $(subst /,\,$(DEP_DIR)))
-    check_neg   := $(shell $(MKDIR) $(subst /,\,$(GEN_DIR)))
+    check_out   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(OUT_DIR))))
+    check_sys   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(SYS_DIR))))
+    check_lib   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(LIB_DIR))))
+    check_obj   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(OBJ_DIR))))
+#    check_dep   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(DEP_DIR))))
+#    check_neg   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_DIR))))
 endif #/* NT */
 #	Includes
 
@@ -250,7 +258,7 @@ MY_SO  := $(SO_LIB)
 ifndef NT
   QWE    := $(strip $(wildcard $(MY_SO).*))
   SL_NEW := $(MY_SO).1000
-ifdef QWE
+ifneq (,$(QWE))
   NQWE := $(words $(QWE))
   QWE  := $(word $(NQWE),$(QWE))
   QWE  := $(subst $(MY_SO).,,$(QWE))
@@ -279,7 +287,7 @@ ifndef NT
 	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 else
-	pushd $(subst \,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 endif
 
@@ -295,7 +303,7 @@ ifndef NT
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF))
 else
-	pushd $(subst \,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF))
 endif
@@ -308,7 +316,7 @@ ifndef NT
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) \
          $(notdir $(LINKDEF))
 else
-	pushd $(subst \,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) \
 	 $(notdir $(LINKDEF))
 endif
@@ -324,7 +332,7 @@ ifndef NT
 	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 else
-	pushd $(subst \,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
 
@@ -338,7 +346,7 @@ ifndef NT
 	cd $(GEN_DIR); \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 else
-	pushd $(subst \,\\,$(subst \,/,$(GEN_DIR) & )) \
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
 #  $(INCLUDES)
@@ -374,14 +382,13 @@ LIBRARY     :=  mathlib.lib packlib.lib wsock32.lib user32.lib kernel32.lib
 $(MY_DEF): $(FILES_O)
 	@echo MY_DLLNAME = $(MY_DLLNAME)
 	@echo MY_SO = $(MY_SO)
-	BINDEXPLIB $(MY_DLLNAME)  $(OBJ_DIR)/*.$(O) > $(subst \,\\,$(subst /,\,$(MY_DEF) ))
-#	BINDEXPLIB $(MY_DLLNAME)  $(FILES_O) > $(subst \,\\,$(subst /,\,$(MY_DEF) ))
+	BINDEXPLIB $(MY_DLLNAME)  $(OBJ_DIR)/*.$(O) > $(subst /,\\,$(subst \,/,$(MY_DEF) ))
+#	BINDEXPLIB $(MY_DLLNAME)  $(FILES_O) >  $(subst /,\\,$(subst \,/,$(MY_DEF) ))
 #	$(subst \,\\,$(subst /,\,BINDEXPLIB $(MY_DLLNAME) $(OBJ_DIR)/*.obj > $(MY_DEF) ))
 #	( cd $(OBJ_DIR) & BINDEXPLIB  $(MY_DLLNAME) $(FILES_O) > $(TMP)\\$(MY_DEFLIB))
 
 $(MY_EXPLIB): $(MY_DEF)
-	$(AR) $(ARFLAGS) $(subst \,\\,$(subst /,\,$(LOUT)$(MY_IMPLIB) $(OBJ_DIR)/*.$(O) -def:$(MY_DEF)))
-#	$(AR) $(ARFLAGS) $(subst \,\\,$(subst /,\,$(LOUT)$(MY_IMPLIB) $(OBJ_DIR)/*.obj  -def:$(MY_DEF)))
+	$(AR) $(ARFLAGS) $(subst /,\\,$(subst \,/,$(LOUT)$(MY_IMPLIB) $(OBJ_DIR)/*.$(O) -def:$(MY_DEF)))
 
 $(MY_SO) : $(MY_EXPLIB)
 	@echo MY_SO     : = $(MY_SO)
@@ -389,9 +396,9 @@ $(MY_SO) : $(MY_EXPLIB)
 	@echo LIBS      : = $(LIBS)
 	@echo LIBRARY   : = $(LIBRARY)
 	@echo MY_PDB    : = $(MY_PDB)
-	$(SO) $(SOFLAGS) $(subst \,\\,$(subst /,\,$(SoOUT)$(MY_SO)  $(OBJ_DIR)/*.$(O)  $(STAR_OBJ_DIR)/*.$(O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
-#	$(SO) $(SOFLAGS) $(subst \,\\,$(subst /,\,$(SoOUT)$(MY_SO) $(FILES_O)  $(STAR_FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
-#	$(SO) $(SOFLAGS) $(subst \,\\,$(subst /,\,$(SoOUT)$(SL_NEW) $(FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
+	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO)  $(OBJ_DIR)/*.$(O)  $(STAR_OBJ_DIR)/*.$(O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
+#	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO) $(FILES_O)  $(STAR_FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
+#	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(SL_NEW) $(FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
 #        $(RM) $(MY_SO)
 endif
 	@echo "           Shared library " $(MY_SO) " has been created"   
@@ -410,7 +417,7 @@ endif
 
 $(OBJ_DIR)/%.$(O) : %.cc 
 ifdef NT
-	$(CXX) -c $(subst \,/,$(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)  -Fd$(OBJ_DIR))
+	$(CXX) -c $(subst \,/,$(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS) -Fd$(OBJ_DIR))
 else
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 endif
@@ -422,6 +429,9 @@ else
 endif
 
 $(FILES_DCINT): $(DEP_DIR)/%Cint.d: %.h 
+ifdef NT
+	@echo $(FILES_DCINT) $<
+endif #/* NT */
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND)  $(CPPFLAGS) $(INCLUDES) -x c $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.h\.$(O)/$(subst .,\.,$(subst /,\/,$(GEN_DIR)/$(STEM)Cint.cxx)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
@@ -449,14 +459,14 @@ DeleteDirs :
 ifndef NT
 	$(RMDIR)  $(TMP_DIR)
 else #/* NT */
-	$(RMDIR)  $(subst /,\,$(TMP_DIR))
+	if exist $(subst /,\\,$(subst \,/,$(TMP_DIR)/.)) $(RMDIR) $(subst /,\\,$(subst \,/,$(TMP_DIR)))
 endif #/* NT */
 
 clean :
 ifndef NT
 	-$(RMDIR)  $(OUTPUT_DIRS)
 else #/* NT */
-	-$(RMDIR)  $(subst \,/,$(OUTPUT_DIRS))
+	-for %i in ($(subst /,\\,$(subst \,/,$(OUTPUT_DIRS)))) if exist %i\\. $(RMDIR)  %i
 endif #/* NT */
 
 
@@ -475,7 +485,7 @@ test:
 	@echo INP_DIR     := $(INP_DIR) 
 	@echo PKGNAME     := $(PKGNAME) 
 	@echo SRC_DIR     := $(SRC_DIR)
-	@echo GEN_DIR := $(GEN_DIR) 
+	@echo GEN_DIR     := $(GEN_DIR) 
 	@echo LIB_DIR     := $(LIB_DIR)
 	@echo OBJ_DIR     := $(OBJ_DIR)
 	@echo DEP_DIR     := $(DEP_DIR) 
