@@ -45,7 +45,7 @@ if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) ||
 	$com = $ssh . " "  . $comp . ".usatlas.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^atlas/) ) {
 	$com = $ssh . " "  . $comp . ".usatlas.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
-} elsif (($comp =~ /^starlx/ || $comp =~ /^stars/) ) {
+} elsif (($comp =~ /^starlx/ || $comp =~ /^stars/ || $comp =~ /^pdsflx/) ) {
 	$com = $ssh . " "  . $comp . ".nersc.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
          ($comp =~ /^robinson/) || ($comp =~ /^pickford/))
