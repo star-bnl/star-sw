@@ -53,7 +53,19 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   my $dummy;
   my $class;
   my $includes = "";
+  my $com = 0;
   while ($line = <In>) {
+    if ($line =~ /\/\//) {$line =~ s/\/\/*$//;}
+    if ($line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
+    next if ($com); 
+    if ($line =~ /\/\*/) {
+      $com = 1; 
+      if ($line =~ /\*\//) {
+	$line =~ s/\/\**\*\///; 
+	$com = 0;
+      }
+      else {$line =~ s/\/\**$//;}
+    }
     if ($line =~ /\#include/ && $line !~ /(<>)/) {
       (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
       $inc_h =~ s/\"//g; 
