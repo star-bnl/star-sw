@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.8 2000/04/25 17:02:06 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.9 2000/04/27 01:39:15 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.9  2000/04/27 01:39:15  pavlinov
+ * Cleanup for SUN
+ *
  * Revision 1.8  2000/04/25 17:02:06  pavlinov
  * Added methods for gettinng x,y,z from volume ID
  *
@@ -303,7 +306,8 @@ inline Int_t StEmcGeom::getXYZfromGeant(const Int_t ivid,Float_t &x,Float_t &y,F
 {
   Int_t m, e, s, det;
   if(getVolId(ivid, m,e,s,det) == 0){
-    return getXYZ(m,e,s, x,y,z);
+    getXYZ(m,e,s, x,y,z);
+    return 0;
   }
   else return 1;
 }
