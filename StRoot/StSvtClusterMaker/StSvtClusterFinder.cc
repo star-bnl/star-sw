@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.5 2000/10/31 16:19:37 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.6 2000/11/30 20:43:17 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.6  2000/11/30 20:43:17  caines
+ * Use database
+ *
  * Revision 1.5  2000/10/31 16:19:37  caines
  * Improved speed of zeroing arrays
  *
@@ -18,6 +21,9 @@
  *  now runs faster.
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.6  2000/11/30 20:43:17  caines
+ * Use database
+ *
  * Revision 1.5  2000/10/31 16:19:37  caines
  * Improved speed of zeroing arrays
  *
@@ -358,7 +364,6 @@ int StSvtClusterFinder::getSeqOnLeft(int mAnode, int& breakAn,int mSeqStart, int
 
 int StSvtClusterFinder::ClusterIndex()
   {
-   cout<<"mNumOfClusters = "<<mNumOfClusters<<endl;
    return mNumOfClusters;
   }       
 

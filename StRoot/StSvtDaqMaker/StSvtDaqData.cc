@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.2 2000/07/03 02:07:55 perev Exp $
+ * $Id: StSvtDaqData.cc,v 1.3 2000/11/30 20:44:33 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.3  2000/11/30 20:44:33  caines
+ * Use database
+ *
  * Revision 1.2  2000/07/03 02:07:55  perev
  * StEvent: vector<TObject*>
  *
@@ -30,7 +33,25 @@
 
 ClassImp(StSvtDaqData)
 
-StSvtDaqData::StSvtDaqData(char* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
+StSvtDaqData::StSvtDaqData() : 
+  StSvtData()
+{}
+
+StSvtDaqData::StSvtDaqData(const char* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
+  StSvtData(config, run, event, trigger)
+{
+  // The Same as StSvtHybridCollection, with two additional parameters: 
+  //    event number and trigger type
+
+  mRunNumber = run;
+  mEventNumber = event;
+  mTriggerWord = trigger;
+
+  if (reader)
+    setData(reader,option);
+}
+
+StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
   StSvtData(config, run, event, trigger)
 {
   // The Same as StSvtHybridCollection, with two additional parameters: 
@@ -52,7 +73,7 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
     for (int ladder = 1;ladder <= getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= getNumberOfWafers(barrel);wafer++) {
 	for (int hybrid = 1;hybrid <= getNumberOfHybrids();hybrid++) {
-  
+
 	  if (getHybridIndex(barrel,ladder,wafer,hybrid) < 0) continue;
 	  
 	  //printf("StSvtDaqMaker::barrel = %d, ladder = %d, wafer = %d, hybrid = %d\n",barrel,ladder,wafer,hybrid);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.6 2000/08/23 22:29:08 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.7 2000/11/30 20:44:33 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.7  2000/11/30 20:44:33  caines
+ * Use database
+ *
  * Revision 1.6  2000/08/23 22:29:08  munhoz
  * add time to StSvtData object
  *
@@ -83,12 +86,17 @@ Int_t StSvtDaqMaker::Init()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::SetSvtData()
 {
-  fSvtSet = new TObjectSet("StSvtData");
-  AddConst(fSvtSet);  
-  SetOutput(fSvtSet); //Declare for output
+  fSvtSet = new TObjectSet("StSvtRawData");
+  AddData(fSvtSet);  
+
+  St_DataSet *dataSet;
+  dataSet = GetDataSet("StSvtConfig");
 
   if (!fSvtData) {
-    fSvtData = new StSvtDaqData(fConfig);
+    if (dataSet)
+      fSvtData = new StSvtDaqData((StSvtConfig*)(dataSet->GetObject()));
+    else
+      fSvtData = new StSvtDaqData(fConfig);
     fSvtSet->SetObject((TObject*)fSvtData);
   }
 
@@ -99,9 +107,8 @@ Int_t StSvtDaqMaker::SetSvtData()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::SetHybridData()
 {
-  fHybridSet = new TObjectSet("StHybridData");
-  AddConst(fHybridSet);  
-  SetOutput(fHybridSet); //Declare for output
+  fHybridSet = new TObjectSet("StHybridRawData");
+  AddData(fHybridSet);  
 
   return kStOK;
 }
@@ -143,6 +150,7 @@ Int_t StSvtDaqMaker::GetSvtData()
     fSvtData->setTimeZero(128*40-(32*105)-(12*105)+svtReader->getTimeZero(),i); 
   }
   fSvtData->setUnixTime(daqReader->getUnixTime());
+
   return kStOK;
 }
 
@@ -167,6 +175,15 @@ Int_t StSvtDaqMaker::GetHybridData(int barrel, int ladder, int wafer, int hybrid
     status = fData->setHybridData(svtReader, fDataType);
   
   return kStOK;
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::GetUnixTime()
+{
+  if (daqReader)
+    return daqReader->getUnixTime();
+  else
+    return 0;
 }
 
 //_____________________________________________________________________________
@@ -211,7 +228,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.6 2000/08/23 22:29:08 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.7 2000/11/30 20:44:33 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
