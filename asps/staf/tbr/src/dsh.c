@@ -200,6 +200,7 @@ int DoCutsWrapper(int max8,char *ba,char *cuts,int wh_gDs) {
 void SetToDatasetInfo(int wh_gDs,char *xx,int max) { /* BBB max unused */
   char buf[100]; size_t nCol;
   strcpy(xx,"June 29 1995"); return;
+#if 0
   strcpy(xx,"**** MIDDLE WINDOW: CHOOSE TABLE ****\n");
   sprintf(buf,"        Dataset Name: %s\n",gDs[wh_gDs]->name);
   strcat(xx,buf);
@@ -209,6 +210,7 @@ void SetToDatasetInfo(int wh_gDs,char *xx,int max) { /* BBB max unused */
   sprintf(buf,"    Number of Tables: %d\n",nCol); strcat(xx,buf);
   /* if(!dsDatasetMaxEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) dsu_Err( 37); */
   sprintf(buf,"Max Number of Tables: %s\n","???"); strcat(xx,buf);
+#endif
 }
 void TableName(int wh_gDs,char *name) {
   strcpy(name,gDs[wh_gDs]->name);
