@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.17 2000/01/31 13:40:40 ullrich Exp $
+% $Id: StEvent.tex,v 2.18 2000/02/11 16:23:45 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.17  2000/01/31 13:40:40  ullrich
-% Added Helens description of iflag (see StTrack::flag()).
+% Revision 2.18  2000/02/11 16:23:45  ullrich
+% Add info on order in which primary vertices are stored
+% and added description of StPrimaryVertex::flag().
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -146,8 +147,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -171,8 +172,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -180,17 +181,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -205,8 +206,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -1800,7 +1801,10 @@ MyTpcAlgo::operator() (const StTrack& t, const StSPtrVecTrackPidTraits& traits)
            mTraits = pid;
            break;
         }
-to give the index.
+   }
+   return 0;
+}
+\end{verbatim}
 
 This now works really as a filter. We added three things which
 \texttt{StPidAlgorithm} does not require: A private data member
@@ -2495,7 +2499,10 @@ definition in the header file.
     \verb+StEvent();+\\
     
     \verb+StEvent(const event_header_st&,+\\
-    defaults to the first (\texttt{i=0}).
+    \verb+        const dst_event_summary_st&,+\\
+    \verb+        const dst_summary_param_st&);+\\
+    
+    \verb+void Browse(TBrowser*);+\\
     Overwrite inherited \texttt{Browse()} method from \texttt{St\_DataSet}.
     Method is invoked from ROOT to allow interactive browsing of \StEvent. 
     
@@ -2510,18 +2517,34 @@ definition in the header file.
     \verb+ULong_t bunchCrossingNumber(Uint_t i) const;+\\       
     Returns the bunch crossing numbers, i.e.~two 32 bit words.
     \texttt{i = 0} returns the lower and \texttt{i = 1} the upper number.
+    \verb+StEventInfo* info();+\\
     \verb+StEmcCollection* emcCollection();+\\
+    \verb+const StEmcCollection* emcCollection() const;+\\
 
+    \verb+StRichCollection* richCollection();+\\
     \verb+const StRichCollection* richCollection() const;+\\
-    \verb+const StEventInfo* info() const;+\\
-    \texttt{StEventInfo} provides no additional information but is solely
-    StEvent. See also \ref{sec:StEventInfo}.
 
+    \verb+const StEventInfo* info() const;+\\
+    Returns a pointer to the one and only instance of \texttt{StEventInfo}.
+    \texttt{StEventInfo} provides no additional information but is solely
+    used to hold the header data. All info can be directlyobtained  from
+    StEvent. See also \ref{sec:StEventInfo}.
+    \index{StEventInfo}
+
+    \verb+StSoftwareMonitor* softwareMonitor();+\\
     \verb+const StSoftwareMonitor* softwareMonitor() const;+\\
+    Returns pointer to the software-monitor collection. This class
     holds ``monitors'' for every detector which contain information
+    gathered during the event reconstruction. Mostly statistic on
     number of hits, tracks etc.
+    
     \verb+StTpcHitCollection* tpcHitCollection();+\\
+    \verb+const StTpcHitCollection* tpcHitCollection() const;+\\
     Pointer to the TPC hit collection. If no hits are stored on the
+    DST this pointer is \texttt{NULL}. You better check for this.
+    
+    \verb+StFtpcHitCollection* ftpcHitCollection();+\\
+    \verb+const StFtpcHitCollection* ftpcHitCollection() const;+\\
     Pointer to the FTPC hit collection. If no hits are stored on the
     DST this pointer is \texttt{NULL}. You better check for this.
 
@@ -3126,19 +3149,59 @@ definition in the header file.
     \verb+UInt_t numberOfMwcSectors() const;+\\
     \verb+Float_t mips(UInt_t) const;+\\
     \verb+void setMips(UInt_t, Float_t);+\\
+\item[Public Member\\ Functions]
     \verb+UInt_t numberOfSectors() const;+\\
+    Number of MWC sectors (usually 24).
+    
     \verb+UInt_t numberOfSubSectors() const;+\\
     Number of MWC subsectors (usually 4).
     
+    \verb+UInt_t numberOfPreSamples() const;+\\
     Number of pre-samples available.
     
     \verb+UInt_t numberOfPostSamples() const;+\\
+    Number of post-samples available.
+    
+    \verb+UInt_t numberOfAuxWords() const;+\\
+    Number of auxiliary words (usually 32).  No physical significance
+    at present, these data are simple reserved for possible future
+    use.
+    
+    \verb+Float_t mips(UInt_t sec, UInt_t subsec, UInt_t evt = 0) const;+\\
+    Return MIPS for sector \texttt{sec} and subsector \texttt{subsec}.
+    The sectors run from 0 -- \texttt{numberOfSectors()}-1, the
+    subsectors from 0 -- \texttt{numberOfSubSectors()}-1. The first
+    half of the sector numbers are for the west side, the second half
+    for the east side (usually 0-11 west, 12-23 east). Each sector has
+    4 subsectors, counting from the beam pipe outwards. The last
+    argument \texttt{evt} has
+    the following meaning:\\
+    0 is the triggered event, and
+    \texttt{1-(1+npresamples+npostsamples-1)} are the other "events",
+    in chronological order.  For example, assuming 3 pre events and 2
+    post events:
+    \begin{description}
+    \item[evt = 0] triggered event at t = 0
+    \item[evt = 1] 1st pre event at t = -3
+    \item[evt = 2] 2nd pre event at t = -2
+    \item[evt = 3] 3rd pre event at t = -1
+    \item[evt = 4] 1st post event at t = +1
+    \item[evt = 5] 2nd post event at t = +2
+    \end{description}    
+       
+    \verb+Float_t aux(UInt_t i, UInt_t evt = 0) const;+\\
+    Argument \texttt{i} has no physical significance at present, these
     data are simple reserved (on request of Hank Crawford) for
     possible future use.  For the second argument (\texttt{evt}) see
+    \texttt{mips()} above.
     
+    \verb+void setMips(UInt_t, UInt_t, UInt_t, Float_t);+\\
     \verb+void setAux(UInt_t, UInt_t, Float_t);+\\
     \verb+void setNumberOfPreSamples(UInt_t);+\\
+    \verb+void setNumberOfPostSamples(UInt_t);+\\
 \end{Entry}
+\clearpage
+
 
 \subsection{StPrimaryTrack}
 \index{StPrimaryTrack|textbf}
@@ -3846,7 +3909,7 @@ definition in the header file.
     \verb+#include "StTpcSoftwareMonitor.h"+\\
     \verb+class StTpcSoftwareMonitor;+\\
 \item[Description]
-    \index{track quality flag}\index{iflag}
+\item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StTpcSoftwareMonitor();+\\
     \verb+StTpcSoftwareMonitor(const dst_mon_soft_tpc_st&);+\\
@@ -4221,22 +4284,39 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     else is wrong the method returns \texttt{-1} to indicate failure.\\
     Example: \\
     Assume a track has hits in row 24, 25, 26, 30, 35, 36, 38
+    the method will return 4 since the largest gap is formed by the
     missing rows 31, 32, 33, and 34. All other gaps are smaller.
+    
 \item[Global Operators]
+    \verb+ostream& operator<< (ostream& os, +\\
     \verb+                     const StTrackTopologyMap& m);+\\
+    Prints the topology map \texttt{m} to output stream \texttt{os}, i.e.~the whole
     bit pattern starting at the least significant bit (0) up to bit 63.\\
+    Example:\\
     {\footnotesize
+        \verb+    cout << track->topologyMap() << endl;+\\
     }
+    prints\\
     {\footnotesize
+        \verb+    0000000000000000001011111111111111111111111111000011000000000000+\\
     }
+\end{Entry}
 \clearpage
 
+
+\subsection{StTrigger}
 \index{StTrigger|textbf}
+\label{sec:StTrigger}
 \begin{Entry}
+\item[Summary]
 \item[Synopsis]
+    \verb+#include "StTrigger.h"+\\
     \verb+class StTrigger;+\\
+\item[Description]
 \item[Related Classes]
+\item[Public\\ Constructors]
     \verb+StTrigger();+\\
+    \verb+StTrigger(UShort_t aw, UShort_t w);+\\
 \item[Public Member\\ Functions]
     \verb+UShort_t triggerActionWord() const;+\\
     \verb+UShort_t triggerWord() const;+\\
@@ -4257,9 +4337,13 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 \item[Synopsis]
     \verb+#include "StTriggerDetectorCollection.h"+\\
     \verb+class StTriggerDetectorCollection;+\\
-    \verb+ULong_t flag() const;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
     \verb+StTriggerDetectorCollection();+\\
+    \verb+StTriggerDetectorCollection(const dst_TrgDet_st&);+\\
 \item[Public Member\\ Functions]
+    \verb+StCtbTriggerDetector& ctb();+\\
     \verb+const StCtbTriggerDetector& ctb() const;+\\
     \verb+StMwcTriggerDetector& mwc();+\\
     \verb+const StMwcTriggerDetector& mwc() const;+\\
@@ -4267,15 +4351,19 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     \verb+const StVpdTriggerDetector& vpd() const;+\\
     \verb+StZdcTriggerDetector& zdc();+\\
     \verb+const StZdcTriggerDetector& zdc() const;+\\
+\end{Entry}
 \clearpage
 
+
 \subsection{StV0Vertex}
+\index{StV0Vertex|textbf}
 \label{sec:StV0Vertex}
 \begin{Entry}
 \item[Summary]
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
+    \verb+StV0Vertex();+\\
     \verb+StV0Vertex(const dst_vertex_st&, const dst_v0_vertex_st&);+\\
 \item[Public Member\\ Functions]
     \verb+StVertexId type() const;+\\
