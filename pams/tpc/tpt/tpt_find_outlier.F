@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.6 2000/01/21 07:55:46 sakrejda Exp $
+* $Id: tpt_find_outlier.F,v 1.7 2000/03/10 05:02:07 sakrejda Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.7  2000/03/10 05:02:07  sakrejda
+* Track length calculation fixed, was not going past 90 deg before....
+*
 * Revision 1.6  2000/01/21 07:55:46  sakrejda
 * Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
 *
@@ -62,7 +65,7 @@ C_________________________________________________________________
       INTEGER ibad, ipt, ncir, i, ibig,ipass
       REAL    xcir(*),ycir(*),zcir(*),wcir(*),wlin(*)
       REAL    zn1,resbig,restot,phi0,dz,ri,rr
-      REAL    stot,dsxy,dsz,acent,bcent
+      REAL    stot,dsxy,stot_old,dsz,acent,bcent
       REAL    refx,refy,refmod,curx,cury,curmod
       integer idI1, idI2, idI3       ! Message ID
       character*132 m132  ! And some message-generating space.
@@ -88,6 +91,7 @@ cc      chisqr=0
       refmod=sqrt(refx**2+refy**2)
       dz  = 0.0
       chiz=trk(ipt).p(8)/(ncir-3).lt.trk(ipt).p(9)/(ncir-2)
+      stot_old = -1.0
       do i=1,ncir
         if(chiz)then
           if(abs(trk(ipt).p(7)).lt.0.0000001) then
@@ -110,6 +114,9 @@ cc      chisqr=0
              curmod=sqrt(curx**2+cury**2)
              dsxy = abs(refx*cury-refy*curx)/(refmod*curmod)
              stot = asin(dsxy)*rr
+             if(stot.lt.stot_old) then
+                 stot = rr*(C_PI-dsxy)
+             endif
              dz = trk(ipt).p(6) + stot*trk(ipt).p(7)-zcir(i)
              restot=dz**2*wlin(i)
 CC             chisqz=chisqz+restot
