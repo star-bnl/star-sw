@@ -1,6 +1,6 @@
       INTEGER  kUndefinedFitterId,kHelix2StepId
       INTEGER  kHelix3DId,kKalmanFitId
-      INTEGER  kLine2StepId,kLine3DId
+      INTEGER  kLine2StepId,kLine3DId,kL3FitId
 
 #include "StTrackDefinitions.h" 
 
