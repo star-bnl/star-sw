@@ -28,14 +28,16 @@ export CFLAGS += -g
 endif
 #
 # C++
-export CXX := CC
-export CXXFLAGS += -w -fPIC
+###export CXX := CC
+###export CXXFLAGS += -w -fPIC
+export CXX := g++
+export CXXFLAGS :=
 ifeq ($(DEBUG),$(TRUE))
 export CXXFLAGS += -g
 endif
 #
 # Loader
-export LD := CC
+export LD := $(CXX)
 ifeq ($(STATIC),$(TRUE))
 export LDFLAGS += -non_shared
 else
@@ -53,7 +55,7 @@ export ARFLAGS := srv
 export RANLIB := /bin/true
 #
 # OS Libraries
-export OS_LIBS += $(EMPTY)
+export OS_LIBS := -lm -ldl
 #
 # Fortran Libraries
 SUNLIBDIR1 := /opt/SUNWspro/lib 
@@ -67,17 +69,11 @@ export FOR_LIBS += -L$(SUNLIBDIR1) -L$(SUNLIBDIR2) \
 # X-Motif Libraries
 export XM_LIBS += 
 #
-# Load PAM Libraries
-ifdef PAMS
-export LLIBS += $(PAMS:%=-l%)
-endif #PAMS
-#
-# Load ASP Libraries
-ifdef ASPS
-export LLIBS += $(ASPS:%=-l%)
-endif #ASPS
-#
-export LLIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+ifeq ($(MOTIF),$(TRUE))
+export LOAD_LIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)
+else
+export LOAD_LIBS += $(FOR_LIBS) $(OS_LIBS)
+endif
 #
 endif #SUN4OS5_MK
 #
