@@ -482,7 +482,7 @@ Bool_t StEmcFilter::accept(Int_t rid)
   for(Int_t i = -size; i<= size; i++)
     for(Int_t j = -size; j<= size; j++)
     {
-      if(i!=0 && j!=0)
+      if(!(i==0 && j==0))
 			{
 				Int_t rid1 = mEmcPosition->getNextTowerId(eta,phi,i,j);
       	if(rid1>0) if(mNTracksTower[rid1-1]>0) return kFALSE;
