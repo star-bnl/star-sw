@@ -192,6 +192,14 @@ Int_t StBranch::UpdateFile(const Char_t *file)
 TString outFile = file; gSystem->ExpandPathName(outFile);
 TString outDir  = gSystem->DirName (outFile);
 TString outBas  = gSystem->BaseName(outFile);
+
+if (strncmp(".none",GetFile(),4)==0) {//FileName was corrupted by old bug
+  TString ts("/.nowhere/"); 	ts += outBas; 	
+  ts.ReplaceAll(".root","");	ts.Replace(ts.Last('.')+1,999,"");
+  ts += GetName();	   	ts.ReplaceAll("Branch","");
+  ts +=".root";			SetFile(ts);
+}
+
 TString intDir  = gSystem->DirName (GetFile());
 TString intBas  = gSystem->BaseName(GetFile());
 Char_t * newFile = gSystem->ConcatFileName(outDir,intBas);
@@ -221,7 +229,7 @@ void StBranch::Close(const char *)
 { 
   if (!fIOMode) return;
   if (!fTFile) 	return;
-  if (strcmp(".none",GetFile())==0) return;
+  if (strncmp(".none",GetFile(),4)==0) return;
   TFile *tf = fTFile;
   fTFile = 0;
   TString ts(tf->GetTitle());
@@ -234,7 +242,10 @@ void StBranch::Close(const char *)
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
   delete tf;
-  SetFile(".none");
+  if (fIOMode&2) return;
+  ts = GetFile();
+  ts.Replace(0,0,".none ");
+  SetFile((const char*)ts);
 }
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
@@ -255,7 +266,7 @@ Int_t StBranch::Open()
 {
   if (!fIOMode) return 0;
   if (fTFile)   return 0;
-  if (strcmp(".none",GetFile())==0) return 1;
+  if (strncmp(".none",GetFile(),4)==0) return 1;
   OpenTFile();
   return 0;
 }  
