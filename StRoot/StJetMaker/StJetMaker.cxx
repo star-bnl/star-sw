@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.2 2004/08/06 14:15:09 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -120,9 +120,14 @@ Int_t StJetMaker::Make()
 	    cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
 	    abort();
 	}
+	
 	FourList &tracks = fourPMaker->getTracks();
+	if (tracks.size()<2) {
+	    cout <<"\tless than 2 protoJets in event.  Skip jet clustering"<<endl;
+	    return kStOk;
+	}
 	thisAna->setFourVec(tracks);
-	//cout << "AnaNum = " << (*jb).first << " Tracks = " << fourPMaker->numTracks() << endl;
+	cout << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endl;
 	thisAna->findJets();
 	
 	typedef StppJetAnalyzer::JetList JetList;
