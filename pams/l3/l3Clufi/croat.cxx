@@ -13,14 +13,6 @@
 #include <Rtypes.h> /* use ROOT variables: ..._t */
 
 
-
-
-/*  must be present before the TPC defines... */
-/*  these defines go into offset.h            */
-//#define ROWS		45
-//#define PADS_PER_ROW	182 
-/* Max_PADS = 184 !!! */
-
 #include "trans_table.h"
 #include "padfinder.h"
 #include "croat.h"
@@ -38,7 +30,7 @@ struct resx
 } ;
 
 
-
+/* no meaning in linux just used online */
 void preburst(UInt_t where)
 {
     return ;
@@ -131,8 +123,8 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	{
 	    /* Define variables */
 	    Int_t j ;
-	    register Int_t pres_cou1, pres_cou2 ;
-	    register UInt_t *r1, *r2 ;
+	    Int_t pres_cou1, pres_cou2 ;
+	    UInt_t *r1, *r2 ;
 
 	    /* check if this row is to be done */
 	    if(rowAbs[i] == 0) break ;
@@ -153,10 +145,10 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    /******************************/
 	    for(j=rowStart[i]; j<=rowEnd[i]; j++) 
 		{
-		    register UInt_t start, stop ;
-		    register UShort_t *cv ;
-		    register UChar_t *val ;
-		    register Int_t start_new ;
+		    UInt_t start, stop ;
+		    UShort_t *cv ;
+		    UChar_t *val ;
+		    Int_t start_new ;
 		    Int_t go_on ;
 
 		    /* HACK */
@@ -167,8 +159,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 		    val = adcin + adcOff[rowAbs[i]-1][j-1];
 		    cv  = cppin + cppOff[rowAbs[i]-1][j-1];
 
-		    /*  ??? just needed online*/
-		    //preburst((UInt_t)cv) ;
+		    /* just needed online : preburst((UInt_t)cv) ; */
 
 		    /* the old results are always in r1 the new go into r2              */
 		    /* but one time r2 uses the array pres2 the next time it uses pres1 */
@@ -182,9 +173,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    r1 = pres1 ;
 			    r2 = pres2 ;
 			}
-		
-		    /*  ???? */
-		    preburst((UInt_t)cv+16) ;
+		    /* just needed online : preburst((UInt_t)cv+16) ; */
 
 		    /* counters to result pointers                                               */
 		    /* pres_cou1 knows how many entries on previous pad : r1[0..prescou1]        */
@@ -211,13 +200,13 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 		    /**********************/
 		    while((start = (UInt_t)*cv++) < (MAX_T-1)) 
 			{
-			    register UChar_t *val1 ;
-			    register UInt_t av, charge ;
-			    register Int_t mean ;
-			    register UInt_t flags ;
-			    register Int_t last_falling ;
-			    register Int_t k ;
-			    register UInt_t *ri ;
+			    UChar_t *val1 ;
+			    UInt_t av, charge ;
+			    Int_t mean ;
+			    UInt_t flags ;
+			    Int_t last_falling ;
+			    Int_t k ;
+			    UInt_t *ri ;
 			    UInt_t tmp_charge ;
 			
 			    /* Set flag */
@@ -282,7 +271,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    // block to introduce new variables 
 			    {
 				// this variable we need for a deconvolusion in time	
-				register UInt_t last_a ;
+				UInt_t last_a ;
 				last_a = 0 ;
 				
 				/**************************/
@@ -291,8 +280,8 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 				for(;start<=stop;start++) 
 				    {
 					// this variable holds actual adc value					
-					register UInt_t a ;
-					register UInt_t aa  ;
+					UInt_t a ;
+					UInt_t aa  ;
 					
 					// go get the adc value
 					aa = *val1++ ;
@@ -350,10 +339,10 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    for(k=0;k<pres_cou1;k++) 
 				{
 				    // variable to store differenz 
-				    register Int_t v ;
+				    Int_t v ;
 				    
 				    // struct which contains means(+more) of last pad(s) 
-				    register struct resx *rr_tmp ;
+				    struct resx *rr_tmp ;
 			    
 				    // go get it 
 				    rr_tmp = (struct resx *) *ri ;
