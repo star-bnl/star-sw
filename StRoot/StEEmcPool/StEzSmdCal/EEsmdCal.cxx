@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.9 2004/09/11 04:57:33 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.10 2004/09/14 19:38:43 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -9,7 +9,6 @@
 #include <TH1.h> 
 #include <TH2.h> 
 #include <TFile.h> 
-
 
 #include "EEsmdCal.h"
 #include "EEsmdPlain.h"
@@ -78,7 +77,6 @@ void EEsmdCal::init( ){
   initSmdHist('b',"ADC, tag: best MIP",kBlue);
   initSmdEneHist('d',"Energy (K): best MIP",kMagenta);
   initSmdEneHist('e',"Energy (K)+(K+1)*tgh(eta): best MIP",kBlack);
-  //  initSmdAttenHist();  // take it out soon, JB
 
   //.................... initialize MIP finding algo for SMD
   int i;

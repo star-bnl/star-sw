@@ -1,8 +1,7 @@
-// $Id: EzEEsmdCal.cxx,v 1.7 2004/09/11 04:57:34 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.8 2004/09/14 19:38:43 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
-
 
 #include <TClonesArray.h>
 
@@ -160,7 +159,7 @@ void EzEEsmdCal:: unpackEzSmd(){
       smdAdc[x->plane-'U'][x->strip-1]=adc;
       
       if(x->gain<=0)continue; // drop channels w/o gains
-      smdEne[x->plane-'U'][x->strip-1]=adc/x->gain;
+      smdEne[x->plane-'U'][x->strip-1]=adc/x->gain;     
     }
   }
   
