@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.55 2000/02/02 21:21:19 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.56 2000/02/03 16:14:39 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.56  2000/02/03 16:14:39  fisyak
+// Add Kathy's histograms
+//
 // Revision 1.55  2000/02/02 21:21:19  fisyak
 // Hack for CC5
 //
@@ -379,8 +382,11 @@ Int_t St_geant_Maker::Init(){
     z_iq   = (Int_t    *) geant3->Iq();
     z_lq   = (Int_t    *) geant3->Lq();
     z_q    = (Float_t  *) geant3->Q();
-  }
 // Create Histograms    
+       BookHist();
+  }
+
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -562,6 +568,9 @@ Int_t St_geant_Maker::Make()
     addrfun address  = (addrfun ) csaddr(g2t);
     if (address) csjcal(&address,&narg);
 #endif
+
+// Fill Histograms    
+   FillHist();
 
   if (cflag->ieorun) {return kStEOF;} 
   else               {return kStOK;}
@@ -1091,3 +1100,62 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 	  one,two,three,iw PASSCHARL(path) PASSCHARL(opt));
 }
 
+//_____________________________________________________________________________
+
+void St_geant_Maker::BookHist(){
+  
+// cout << "********************88********************************" << endl; 
+// cout << "********************88********************************" << endl; 
+// cout << "********************88********************************" << endl;
+  cout << "***********  St_geant_Maker - bookhist!!!! *********" << endl;
+
+  m_histvx =0;
+  m_histvy =0;
+  m_histvz =0;
+
+  m_histvx = new TH1F("GeantPVtxX"," geant vertex: primary X (cm)",
+        50, -5.0,5.0);
+  m_histvy = new TH1F("GeantPVtxY"," geant vertex: primary Y (cm)",
+        50, -5.0,5.0);
+  m_histvz = new TH1F("GeantPVtxZ"," geant vertex: primary Z (cm)",
+        50, -50.0,50.0);
+
+}
+
+//_____________________________________________________________________________
+
+void St_geant_Maker::FillHist(){
+  
+  //cout << "********************88********************************" << endl;
+  //cout << "********************88********************************" << endl;
+  //cout << "********************88********************************" << endl;
+
+  //cout << "***********  geant - fillhist!!!! *********" << endl;
+  //  cout << " St_geant_Maker::FillHist - Will now fill histograms! " << endl;
+
+
+// get geant event vertex
+  St_DataSet *geant = GetDataSet("geant"); 
+  if( !geant ){
+    cout << " No pointer to GEANT DataSet \n" << endl; 
+  }
+ 
+  St_g2t_vertex *geantVertex=(St_g2t_vertex *) geant->Find("g2t_vertex"); 
+  if( !geantVertex ){
+    cout << " NULL pointer to St_g2t_vertex table\n"<< endl;
+  }
+ 
+  if( geantVertex->GetNRows()<=0) { 
+   cout << " empty St_g2t_vertex table\n" << endl; 
+  } 
+
+  g2t_vertex_st *gvt=geantVertex->GetTable();
+
+  cout << " geant event vertex: " << 
+     gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endl;
+
+  m_histvx->Fill(gvt->ge_x[0]);
+  m_histvy->Fill(gvt->ge_x[1]);
+  m_histvz->Fill(gvt->ge_x[2]);
+
+}
