@@ -16,7 +16,7 @@ $SSYS = $ENV{STAR_SYS};
 $PATH = $ENV{GROUP_DIR};
 $LNDIR= "$PATH/lndir";
 
-if( ! defined($SYS) ){ die "No value set for STAR_SYS\n";}
+if( ! defined($SYS) ){ die "No value set for STAR__HOST_SYS\n";}
 if( ! -e $LNDIR){      die "We rely on lndir ... Could not find it\n";}
 
 if( ! -d "root"){      die "Could not find any ./root directory\n";}
