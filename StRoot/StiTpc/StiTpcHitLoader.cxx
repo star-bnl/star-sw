@@ -86,6 +86,7 @@ void StiTpcHitLoader::loadHits(StEvent* source)
 	      stiHit = _hitFactory->getInstance();
 	      if(!stiHit)
 		throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");
+	      stiHit->reset();
 	      stiHit->setGlobal(detector, 
 				hit, 
 				hit->position().x(),
@@ -133,9 +134,10 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
       const StPtrVecMcTpcHit& hits = stMcTrack->tpcHits();
       int nPts = hits.size();
       mcTrack = _mcTrackFactory->getInstance();
+      mcTrack->reset();
       mcTrack->setStMcTrack( (*iter) );
       double charge = mcTrack->getCharge();
-      if (fabs(eta)<1.5 && pt<10. && pt>0.1 && nPts>10) // && charge<0)
+      if (fabs(eta)<1.5 && pt<20. && pt>0.3 && nPts>30 && charge>0)
 	{      
 	  _mcTrackContainer->add(mcTrack);
 	  nTracks++;
@@ -174,6 +176,7 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
 		  throw runtime_error("StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- stiHit==0");
 		}
 	      //cout << "StiKalmanTrackFinder::loadMcHits() -I- copy hit info to StiHit"<<endl;
+	      stiHit->reset();
 	      stiHit->setGlobal(detector, 
 				0, 
 				hit->position().x(),
