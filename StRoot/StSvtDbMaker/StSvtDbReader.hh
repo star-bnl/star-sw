@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.hh,v 1.6 2004/07/26 00:06:08 munhoz Exp $
+ * $Id: StSvtDbReader.hh,v 1.7 2004/07/31 00:50:27 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.hh,v $
+ * Revision 1.7  2004/07/31 00:50:27  munhoz
+ * adding anode drift veloc correction factor
+ *
  * Revision 1.6  2004/07/26 00:06:08  munhoz
  * read drift curve
  *
@@ -78,6 +81,7 @@ class StSvtDbReader
   StSvtConfig* getConfiguration();
   StSvtHybridCollection* getDriftVelocity();
   StSvtHybridCollection* getDriftCurve();
+  StSvtHybridCollection* getAnodeDriftCorr();
   StSvtHybridCollection* getPedestals();
   StSvtHybridCollection* getRms();
   StSvtHybridCollection* getBadAnodes();
