@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.388 2004/03/03 02:09:01 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.389 2004/03/05 17:44:14 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -550,7 +550,7 @@ Bfc_st BFC1[] = {
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
-  {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -994,8 +994,6 @@ Bfc_st BFC2[] = {
 
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
-  {"Sti"         ,"Sti","","SCL,StEvent,tables","StiMaker",
-      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1088,7 +1086,9 @@ Bfc_st BFC2[] = {
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
-  {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
+      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
