@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.7 2000/04/24 20:25:45 posk Exp $
+// $Id: doFlowEvents.C,v 1.8 2000/05/09 19:38:22 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.8  2000/05/09 19:38:22  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.7  2000/04/24 20:25:45  posk
 // Added doEvents.C updates.
 //
@@ -74,18 +77,20 @@ const char *xdfFile = 0;
 const char *mdcFile = 0;
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
-void doFlowEvents()
-{
-    cout << "Usage: doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-    cout << "       doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-    cout << "       doFlowEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
-}
+//void doFlowEvents()
+//{
+//    cout << "Usage: doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
+//    cout << "       doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+//    cout << "       doFlowEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+//}
 
 void doFlowEvents(Int_t,const Char_t **,const char *qaflag = "");
-void doFlowEvents(Int_t nevents=999, const Char_t *path, const Char_t *file,
-              const char *qaflag = "off");
-void doFlowEvents(Int_t);
+void doFlowEvents(Int_t nevents=2,
+           const Char_t *path="-",
+           const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+           const char *qaflag = "off");
 
+void doFlowEvents(Int_t);
 
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {

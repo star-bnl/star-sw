@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.11 2000/04/13 21:46:34 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.12 2000/05/09 19:38:01 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.12  2000/05/09 19:38:01  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.11  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -75,7 +78,7 @@ class StChain;
 StChain *chain;
 
 void bfcread_dst_EventQA_outhistfile(
-     Int_t nevents=10, 
+     Int_t nevents=2, 
      const Char_t *MainFile=
      "/afs/rhic/star/data/samples/gstar.dst.root",
      const Char_t *outHistFile="StEQAMaker",

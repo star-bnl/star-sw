@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEventsOut.C,v 1.2 2000/04/28 03:47:42 perev Exp $
+// $Id: doEventsOut.C,v 1.3 2000/05/09 19:38:21 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -56,12 +56,13 @@ void Help()
     cout << "       doEventsOut.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEventsOut.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 }
+
 void doEventsOut(Int_t,const Char_t **,const char *qaflag = "");
 
-void doEventsOut(Int_t nevents=-1
-                ,const Char_t *path="/star/data03/reco/auau200/mevsim/vcascade/resonance/year_1h/hadronic_on/tfs_6/rcf0097_106_50evts.dst.root"
-                ,const Char_t *file="",const char *qaflag="off");
-
+void doEventsOut(Int_t nevents=2,
+                const Char_t *path="-",
+                const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+                const char *qaflag="off");
 
 void doEventsOut(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
@@ -180,16 +181,12 @@ void doEventsOut(Int_t nevents,const Char_t *path,const Char_t *file,const char 
 
 
 
-
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEventsOut.C,v $
+// Revision 1.3  2000/05/09 19:38:21  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.2  2000/04/28 03:47:42  perev
 // Change EvOut.root name to more regular
 //
