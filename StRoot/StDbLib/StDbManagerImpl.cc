@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.4 2001/02/22 23:01:55 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.5 2001/03/30 18:48:26 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.5  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.4  2001/02/22 23:01:55  porter
  * Re-introduced many-to-one name-to-table capability
  * & robustness for query errors
@@ -415,8 +419,9 @@ if(xmlfile3){
  delete [] xmlfile3;
 }
  cos <<"********************************************************" << endl<<ends;
+
  printInfo(cos.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
- delete [] cos.str();
+ cos.freeze(0);
 
 mhasServerList = true;
 
@@ -489,7 +494,7 @@ char tmpline[256];
 bool done = false;
 bool started = false;
 char* id;
-//ostrstream os(line,10240);
+
  char* line=0;
  ostrstream os;
 
@@ -497,10 +502,7 @@ while(!done){
 
    if(is.eof()){
      done = true; 
-     if(started) delete [] os.str();
      return line;
-     //     delete [] line;
-     //     line = 0; // and no new complete string was found
    } else {
      is.getline(tmpline,255);
 
@@ -523,7 +525,9 @@ while(!done){
    } // eof check 
  } // while loop
 
- line=os.str();
+ line= new char[strlen(os.str())+1];
+ strcpy(line,os.str());
+ os.freeze(0);
 
 return line;
 }
@@ -1339,9 +1343,8 @@ for(ServerList::iterator itr = mservers.begin();
 
  cos<<"********************************************************************************"<<endl<<ends;
 
- char* tstats=cos.str();
- printInfo(tstats,dbMConnect,__LINE__,__CLASS__,__METHOD__);
- delete [] tstats;
+ printInfo(cos.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
+ cos.freeze(0);
 #undef __METHOD__
 }
 
@@ -1365,9 +1368,10 @@ char* id;
  ostrstream ni;
  ni<<" Found dbType="<<type<<" & dbDomain="<<domain;
  ni<<" from DataBase Name="<<dbName<<ends;
- char* nameInfo = ni.str();
- printInfo(nameInfo,dbMDebug,__LINE__,__CLASS__,__METHOD__);
- delete [] nameInfo;
+
+ printInfo(ni.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+ ni.freeze(0);
+
 return true;
 #undef __METHOD__
 }
@@ -1386,12 +1390,19 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
+ 
+  int slen = strlen(typeName);
+  int slen2=0;
+  if(strcmp(domainName,"Star") !=0)slen2=strlen(domainName)+1;
+  slen+=slen2+1;
 
-  ostrstream dbname;
+  char* retName = new char[slen];
+  ostrstream dbname(retName,slen);
   dbname<<typeName;
-  if(strcmp(domainName,"Star") != 0)dbname<<"_"<<domainName;
+  if(slen2 != 0)dbname<<"_"<<domainName;
   dbname<<ends;
-  return dbname.str();
+
+  return retName;
 }
 
 #undef __CLASS__

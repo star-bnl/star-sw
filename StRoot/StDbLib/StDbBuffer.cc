@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.12 2001/01/22 18:37:50 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.13 2001/03/30 18:48:26 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.13  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.12  2001/01/22 18:37:50  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -292,7 +296,7 @@ genwritemem(unsigned long);
 genwritemem(float);
 genwritemem(double);
 
-#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; delete [] sStream.str(); };break
+#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; sStream.freeze(0); };break
 
 bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   bool tRetVal=true;

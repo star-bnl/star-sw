@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.6 2001/02/23 18:35:47 porter Exp $
+ * $Id: StDbSql.cc,v 1.7 2001/03/30 18:48:26 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.7  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.6  2001/02/23 18:35:47  porter
  * cleaned up a warning messages when compiled under HP's aCC
  *
@@ -58,6 +62,10 @@
 
 #define __CLASS__ "StDbSql"
 
+static const char* qFailed = "Query Failed = ";
+static const char* qInfo   = " Query = ";
+static const char* qResult = " Query Result = ";
+
 //////////////////////////////////////////////////////////////////
 
 StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer) : StDataBaseI(), mretString(0), mtableCatalog(0), mdefaultEndDateTime(0),Db(db), buff(buffer) { mgr=StDbManager::Instance();}
@@ -95,26 +103,24 @@ StDbSql::QueryDb(StDbConfigNode* node) {
  curNode.setDbDomain(mdbDomain);
  int NodeID;
  int branchID=node->getBranchID();
- bool debug=mgr->IsVerbose();
 
  if(!((NodeID)=prepareNode(node)))return 0;
  
  // Build node query string
- ostrstream qn;
- qn<<"Select subNode.*, NodeRelation.ID as branchID from Nodes ";
- qn<<"LEFT JOIN NodeRelation ON Nodes.ID=NodeRelation.ParentID ";
- qn<<"LEFT JOIN Nodes as subNode ON NodeRelation.NodeID=subNode.ID ";
- qn<<" Where Nodes.ID="<<NodeID<<" and NodeRelation.BranchID="<<branchID<<ends;
 
- char* queryNodes = qn.str();
- if(debug)mgr->printInfo(queryNodes,dbMDebug,__LINE__,__CLASS__,__METHOD__);
- Db<<queryNodes<<endsql;
- delete [] queryNodes;
- if(!Db.QueryStatus())
-    return mgr->printInfo(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
+ Db<<"Select subNode.*, NodeRelation.ID as branchID from Nodes ";
+ Db<<"LEFT JOIN NodeRelation ON Nodes.ID=NodeRelation.ParentID ";
+ Db<<"LEFT JOIN Nodes as subNode ON NodeRelation.NodeID=subNode.ID ";
+ Db<<" Where Nodes.ID="<<NodeID;
+ Db<<" and NodeRelation.BranchID="<<branchID<<endsql;
 
- if(Db.NbRows()==0 && debug)
-    mgr->printInfo(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
+ if(!Db.QueryStatus()) 
+    return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+
+ if(!Db.NbRows())
+    sendMess(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
+
+ sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
 //
 // Loop over rows in Configuration
@@ -126,9 +132,8 @@ StDbSql::QueryDb(StDbConfigNode* node) {
       ostrstream fs;
       fs<<"Found "<<curNode.printNodeType()<<" Node "<<curNode.printName();
       fs<<" of parent "<<node->printName()<<ends;
-      char* foundStatus= fs.str();
-      if(debug)mgr->printInfo(foundStatus,dbMDebug,__LINE__,__CLASS__,__METHOD__);
-      delete [] foundStatus;
+      sendMess(qResult,fs.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+      fs.freeze(0);
 
       if(strcmp(curNode.printNodeType(),"table")!=0){ // it is a ConfigNode
 
@@ -175,21 +180,20 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   //
   int retVal=1;
   if(!table) return 0;
-
-  bool debug=mgr->IsVerbose();
   char* tName = table->printName(); 
   table->clearStoreInfo();
   int nodeID;
   if(!((nodeID)=table->getNodeID())){
     if(!(prepareNode((StDbNode*)table)))
-    return mgr->printInfo(tName," Table not found in DB",dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return sendMess(tName," Table not found in DB",dbMErr,__LINE__,__CLASS__,__METHOD__);
  
     readTableInfo(table);
     clear();    
   }
   
   char* checkString=checkTablePrepForQuery(table,true); // returns null if ok
-  if(checkString) return mgr->printInfo(tName,checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
+  if(checkString) 
+     return sendMess(tName,checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
 
  // start preparing the queries
 
@@ -204,33 +208,29 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
    bs<<" "<<ends;
 
    char* baseString = bs.str();
+   bs.freeze(0);
+
  //--> add element ID list part of query
   int numRows;
   int* elementID=table->getElementID(numRows);
-  if(!elementID){
-    delete [] baseString;
-    return mgr->printInfo(tName,"doesn't have an Element List",dbMErr,__LINE__,__CLASS__,__METHOD__);
-  }   
+  if(!elementID)
+    return sendMess(tName,"doesn't have an Element List",dbMErr,__LINE__,__CLASS__,__METHOD__);
+
   char* elementString=getElementList(elementID,numRows);
   char* dataTable=getDataTable(table,reqTime);
 
  // Query DB for the endtime -> earliest time of next row 
-  ostrstream etq;
-  etq << " select beginTime + 0 as mendDateTime, ";
-  etq << " unix_timestamp(beginTime) as mendTime from "<<dataTable;
-  etq << baseString <<" AND beginTime>from_unixtime("<<reqTime<<")"; 
-  etq << " And elementID In("<<elementString<<")";
-  etq << " Order by beginTime limit 1"<<ends; 
+  Db << " select beginTime + 0 as mendDateTime, ";
+  Db << " unix_timestamp(beginTime) as mendTime from "<<dataTable;
+  Db << baseString <<" AND beginTime>from_unixtime("<<reqTime<<")"; 
+  Db << " And elementID In("<<elementString<<")";
+  Db << " Order by beginTime limit 1"<<endsql; 
     
-  if(debug)mgr->printInfo(etq.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
-  Db<<etq.str()<<endsql;
-  if(!Db.QueryStatus()){
-    mgr->printInfo("Query Failed ",etq.str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
-    delete [] etq.str();
-    return 0;
-  }
+  sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
-  delete [] etq.str();
+  if(!Db.QueryStatus())
+     return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+
   if(Db.NbRows()==1 && Db.Output(&buff)){
     char* edTime=0; 
     int eTime;
@@ -272,25 +272,21 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 
   int rowsLeft=numRows;
   bool done=false;
-  while(!done){  //done if all elementIDs are found or (break) if null returned
+  while(!done){  //done if all elementIDs are found or (break) if null
 
-   ostrstream dq;
-   dq <<" select unix_timestamp(beginTime) as bTime,"<<dataTable<<".* from ";
-   dq << dataTable << baseString;
-   dq <<" AND beginTime<=from_unixtime("<<reqTime<<")";
-   dq <<" AND elementID In("<<elementString<<") "; 
-   dq <<" Order by beginTime desc limit "<< rowsLeft <<ends;
+   Db <<" select unix_timestamp(beginTime) as bTime,"<<dataTable<<".* from ";
+   Db << dataTable << baseString;
+   Db <<" AND beginTime<=from_unixtime("<<reqTime<<")";
+   Db <<" AND elementID In("<<elementString<<") "; 
+   Db <<" Order by beginTime desc limit "<< rowsLeft <<endsql;
 
-   Db<<dq.str()<<endsql;
-   if(debug)mgr->printInfo(dq.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+   sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
   if(!Db.QueryStatus()){
-    mgr->printInfo("Query Failed ",dq.str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
-    delete [] dq.str();
+    sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
     break;
   }
   
-   delete [] dq.str();
    if(Db.NbRows()==0)break;     
 
    int numRowsFound=0;
@@ -335,16 +331,15 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   } // --> end of while loop
 
   if(rowsLeft==numRows){
-     mgr->printInfo(tName,"has no data satisying this query",dbMWarn,__LINE__,__CLASS__,__METHOD__);
+     sendMess(tName," has No data for query",dbMWarn,__LINE__,__CLASS__,__METHOD__);
      setDefaultBeginTime(table,reqTime);
      retVal=0;
    } else if(rowsLeft>0){
      ostrstream tp;
      tp<<" Not all rows filled from DB, Requested="<<numRows;
      tp<<" Returned="<<numRows-rowsLeft<<" for Table="<<ends;
-     char* tmp2 = tp.str();
-     mgr->printInfo(tmp2,tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-     delete [] tmp2;
+     mgr->printInfo(tp.str(),tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+     tp.freeze(0);
    }
 
   if(retVal){
@@ -360,7 +355,6 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
-  delete [] baseString;
 
   Db.Release();  
   return retVal;
@@ -403,7 +397,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
 
   char* checkString=checkTablePrepForQuery(table);
   if(checkString){  // then error message
-    mgr->printInfo(tName,checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
+    sendMess(tName,checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
     return retVal;
   }
 
@@ -415,28 +409,24 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
 
    char* columnList=getColumnList(table);
    if(!columnList){
-     mgr->printInfo(tName," has no elements ????",dbMErr,__LINE__,__CLASS__,__METHOD__);
-    return retVal;
+     sendMess(tName," has no elements?",dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return retVal;
    }
 
    char** dataTables=getDataTables(table,numTables);
    int i;
    for(i=0;i<numTables;i++){
 
-     ostrstream qs;
-     qs<<" select unix_timestamp(beginTime) as bTime,";
-     qs<<" "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
-     if(numRows)qs<<" limit "<<numRows;
-     qs<<ends;
-     char* qString = qs.str();
-     mgr->printInfo(qString,dbMDebug,__LINE__,__CLASS__,__METHOD__);
-     Db<<qString<<endsql;
+     Db<<" select unix_timestamp(beginTime) as bTime,";
+     Db<<" "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
+     if(numRows)Db<<" limit "<<numRows;
+     Db<<endsql;
+     sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
      if(!Db.QueryStatus()){
-      mgr->printInfo(" Query Failed", qString,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-      delete [] qString;
+      sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
       return retVal;
      }
-     delete [] qString;
+
      int retRows=Db.NbRows();
      if(retRows==0) continue;
 
@@ -471,15 +461,12 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      Db.Release();
 
      if(table->IsIndexed() && t1>0){
-       ostrstream qet;
-       qet<<" select unix_timestamp(beginTime) as eTime from "<<dataTables[i];
-       qet<<" where beginTime>from_unixtime("<<t1<<")";
-       qet<<" and elementID In("<<getElementList(elements,retRows)<<")";
-       qet<<" Order by beginTime desc limit 1"<<ends;
+       Db<<" select unix_timestamp(beginTime) as eTime from "<<dataTables[i];
+       Db<<" where beginTime>from_unixtime("<<t1<<")";
+       Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
+       Db<<" Order by beginTime desc limit 1"<<endsql;
      
-       mgr->printInfo(qet.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
-       Db<<qet.str()<<endsql;
-       delete [] qet.str();
+       sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
        if(Db.Output(&buff)){
          unsigned int eTime;
@@ -517,7 +504,8 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
   */
 
   char* checkString=checkTablePrepForQuery(table); // null is good
-  if(checkString)mgr->printInfo(table->printName(),checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
+  if(checkString)
+     return sendMess(table->printName(),checkString,dbMErr,__LINE__,__CLASS__,__METHOD__);
 
    int numTables;
    int numRowsReturned=0;
@@ -530,17 +518,14 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
    for(i=0;i<numTables;i++){
 
      ostrstream qs;
-     qs<<" select "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause<<ends;
-     char* qString = qs.str();
-     mgr->printInfo(qString,dbMDebug,__LINE__,__CLASS__,__METHOD__);
+     Db<<" select "<<columnList<<" from "<<dataTables[i];
+     Db<<" "<<whereClause<<endsql;
 
-     Db<<qString<<endsql;
-     if(!Db.QueryStatus()){
-        mgr->printInfo("Query Failed ",qString,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-        delete [] qString;
-        return 0;
-     }
-     delete [] qString;
+     sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+
+     if(!Db.QueryStatus())
+        return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+
      int retRows=Db.NbRows();
      if(retRows==0) continue;
      numRowsReturned+=retRows;
@@ -566,32 +551,32 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
   char* tName=table->printName();
 
   if(!table->hasData())
-    return mgr->printInfo(tName," has no data to store",dbMWarn,__LINE__,__CLASS__,__METHOD__)+1;
+    return sendMess(tName," has no data to store",dbMWarn,__LINE__,__CLASS__,__METHOD__)+1;
 
   int nodeID;
   if(!((nodeID)=table->getNodeID()))
     if(!(prepareNode((StDbNode*)table)))
-         return mgr->printInfo(tName," Not found in DB",dbMErr,__LINE__,__CLASS__,__METHOD__);
+         return sendMess(tName," Not found in DB",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   readTableInfo(table);
   clear();    
 
   char* dataTable;
   if(!((dataTable)=getDataTable(table,storeTime)))
-     return mgr->printInfo(tName," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return sendMess(tName," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   if(table->IsBaseLine() && hasInstance(table)) 
-     return mgr->printInfo("BaseLine instance already exists",tName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return sendMess("BaseLine instance already exists",tName,dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   if(!QueryDescriptor(table))
-     return mgr->printInfo(tName," doesn't have a descriptor",dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return sendMess(tName," doesn't have a descriptor",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   table->setRowNumber(); // set to 0
   int numRows;
   int* elements = table->getElementID(numRows);
 
   if(!elements)
-    return mgr->printInfo(tName,"doesn't have an Element List",dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return sendMess(tName,"doesn't have an Element List",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   int* storedData = new int[numRows];
   memset(storedData,0,numRows*sizeof(int));
@@ -680,7 +665,7 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
   table->setRowNumber();
   delete [] dataTable;  
 
-  if(!retVal)mgr->printInfo(" Write failed for table=",tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+  if(!retVal)sendMess(" Write failed for table=",tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
   return retVal;
 #undef __METHOD__
 }
@@ -697,16 +682,10 @@ StDbSql::QueryDescriptor(StDbTable* table){
 if(table->hasDescriptor())return 1;
 
     clear();    
-    ostrstream stq;
 
-    stq<<" SELECT structure.lastSchemaID, structure.ID ";
-    stq<<" from structure left join Nodes on structure.name=Nodes.structName";
-    stq<<" WHERE Nodes.name='"<<table->printName() <<"'"<<ends;
+    Db<<" SELECT structure.lastSchemaID, structure.ID from structure left join Nodes on structure.name=Nodes.structName";
+    Db<<" WHERE Nodes.name='"<<table->printName() <<"'"<<endsql;
     
-    char* structQuery = stq.str();
-    Db<<structQuery<<endsql;
-    delete [] structQuery;
-
     if(!Db.Output(&buff))return 0;
     
     int schemaID;
@@ -726,22 +705,17 @@ if(table->hasDescriptor())return 1;
 
     if(descriptor->IsValid())return 1;
 
-    ostrstream  scq;
+    Db<<"SELECT  schema.schemaID, schema.name, schema.type, schema.length, ";
+    Db<<"schema.position from schema WHERE schema.structID="<<structID;
+    Db<<" AND schema.schemaID="<<requestSchemaID;
+    Db<<" ORDER by schema.position"<<endsql;
 
-    scq<<"SELECT  schema.schemaID, schema.name, schema.type, schema.length, ";
-    scq<<"schema.position from schema WHERE schema.structID="<<structID;
-    scq<<" AND schema.schemaID="<<requestSchemaID;
-    scq<<" ORDER by schema.position"<<ends;
+    sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
-    char* schemaQuery = scq.str();
-    Db<<schemaQuery<<endsql;   
-    mgr->printInfo(schemaQuery,dbMDebug,__LINE__,__CLASS__,__METHOD__);
-    delete [] schemaQuery;
-    if(!Db.QueryStatus()){
-        mgr->printInfo("Query Failed",schemaQuery,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-       delete [] schemaQuery;
-       return 0;
-    }
+    if(!Db.QueryStatus())
+       return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+
+
     if(Db.NbRows()==0) {
       deleteDescriptor(structID,requestSchemaID);
       return 0;
@@ -751,6 +725,7 @@ if(table->hasDescriptor())return 1;
       descriptor->fillElement(&buff,requestSchemaID);
       buff.Raz();
     }
+
     Db.Release();
     addDescriptor(descriptor);
 
@@ -768,17 +743,20 @@ StDbSql::WriteDb(StDbConfigNode* node, int parentID, int& configID){
   char* nName = node->printName();
 
   if(!parentID){
+
     if(strcmp(node->printNodeType(),"Config")!=0)
-      return mgr->printInfo("No Config tag for new config=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+      return sendMess("No Config tag for new config=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+
     if(!node->printVersion())
-      return mgr->printInfo("No version label for new config=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+      return sendMess("No version label for new config=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+
   } else {
     node->setNodeType("directory");
   }
 
   int nodeID;
   if(!((nodeID)=storeConfigNode(node)))
-      return mgr->printInfo(" Could not store ",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+      return sendMess(" Could not store ",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
   
   // write this node
   if(parentID) { 
@@ -795,7 +773,7 @@ StDbSql::WriteDb(StDbConfigNode* node, int parentID, int& configID){
       StDbTable* table= itr->next();
       table->setNodeType("table");
       if(!((childID)=storeTableNode(table)))
-	  return mgr->printInfo(" Could not store table in Node=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
+	  return sendMess(" Could not store table in Node=",nName,dbMErr,__LINE__,__CLASS__,__METHOD__);
       insertNodeRelation(configID,nodeID,childID);
     }	
   }
@@ -807,26 +785,18 @@ return nodeID;
 bool
 StDbSql::writeOldIndex(int nodeID, int schemaID, const char* sTime,int elementID,const char* flavor, int dataID){
 
-  ostrstream inStr;
-  inStr<<"insert into dataIndex set nodeID="<<nodeID<<", dataID="<<dataID;
-  inStr<<", schemaID="<<schemaID<<", beginTime='"<<sTime<<"'";
-  inStr<<", elementID="<<elementID<<", flavor='"<<flavor<<"'"<<ends;
+  Db<<"insert into dataIndex set nodeID="<<nodeID<<", dataID="<<dataID;
+  Db<<", schemaID="<<schemaID<<", beginTime='"<<sTime<<"', elementID=";
+  Db<<elementID<<", flavor='"<<flavor<<"'"<<endsql;
 
-  char* insertString = inStr.str();
-  Db<<insertString<<endsql;
-  delete [] insertString;
   return Db.QueryStatus();
 }
 
 ////////////////////////////////////////////////////////////////////
 void
 StDbSql::deleteOldIndex(int* dataIDs, int numRows, int nodeID){
-
-  ostrstream ds;
-  ds<<" delete from dataIndex where nodeID="<<nodeID;
-  ds<<" and dataID In("<<getElementList(dataIDs,numRows)<<")"<<ends;
-  Db<<ds.str()<<endsql; 
-  delete [] ds.str();
+  Db<<" delete from dataIndex where nodeID="<<nodeID;
+  Db<<" and dataID In("<<getElementList(dataIDs,numRows)<<")"<<endsql;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -834,12 +804,8 @@ void
 StDbSql::deleteRows(const char* tableName, int* rowID, int nrows){
 
   if(!rowID || nrows==0)return;
-  ostrstream ds;
-  
-  ds<<" delete from "<<tableName;
-  ds<<" where dataID In("<<getElementList(rowID,nrows)<<")"<<ends; 
-  Db<<ds.str()<<endsql;
-  delete [] ds.str();
+  Db<<" delete from "<<tableName;
+  Db<<" where dataID In("<<getElementList(rowID,nrows)<<")"<<endsql; 
 }
 
 /////////////////////////////////////////////////////////////////
@@ -847,12 +813,7 @@ bool
 StDbSql::rollBack(StDbNode* node){
 
   if(!(node->canRollBack()) || !(node->getNodeID())) return false;
-  ostrstream ds;
-  ds<<"delete from Nodes where ID="<<node->getNodeID()<<ends;
-
-  char* tmpString = ds.str();
-  Db<<tmpString<<endsql;
-  delete [] tmpString;
+  Db<<"delete from Nodes where ID="<<node->getNodeID()<<endsql;
   return Db.QueryStatus();
 }
 
@@ -866,13 +827,11 @@ StDbSql::rollBack(StDbTable* table){
   char* elementList = getElementList(numWrittenRows,numRows);
   
   Db<<"delete from "<<dataTable<<" where dataID In("<<elementList<<")"<<endsql;
+  Db.Release();
 
   //TEMPORARY
-  ostrstream ds;
-  ds<<" delete from dataIndex where nodeID="<<table->getNodeID();
-  ds<<" AND dataID In("<<elementList<<")"<<ends;
-
-  Db<<ds.str()<<endsql; delete [] ds.str();
+  Db<<" delete from dataIndex where nodeID="<<table->getNodeID();
+  Db<<" AND dataID In("<<elementList<<")"<<endsql;
 
   bool retVal=Db.QueryStatus();
   Db.Release();
@@ -899,22 +858,17 @@ StDbSql::selectElements(const char* elementName, StDbElementIndex* inval, int& n
   }
 
   int numIndeces = inval->getNumIndeces();
-
   clear();
-  ostrstream hq;
 
-  hq<<" select elementID from "<<elementName<<"IDs";
+  Db<<" select elementID from "<<elementName<<"IDs";
   if(numIndeces>0){
-    hq<<" where "<<inval->printIndexName(0)<<"="<<inval->getIndexVal(0);
+    Db<<" where "<<inval->printIndexName(0)<<"="<<inval->getIndexVal(0);
     for(int i=1; i<numIndeces; i++)
-      hq<<" AND "<<inval->printIndexName(i)<<"="<<inval->getIndexVal(i);
+      Db<<" AND "<<inval->printIndexName(i)<<"="<<inval->getIndexVal(i);
   }
-  hq<<ends;
-
-  char* eQuery = hq.str();
-  Db<<eQuery<<endsql;
+  Db<<endsql;
   numElements=Db.NbRows();
-  delete [] eQuery;
+
   if(numElements==0) return retElements;
   
   retElements = new int[numElements];
@@ -1150,17 +1104,14 @@ return true;
 char*
 StDbSql::insertNodeString(StDbNode* node){
 
-  if(mretString)delete [] mretString;
-
   ostrstream dqs;
-
   dqs<<"insert into Nodes set name='"<<node->printName()<<"' ";
   if(!StDbDefaults::Instance()->IsDefaultVersion(node->printVersion()))
      dqs<<", versionKey='"<<node->printVersion()<<"' ";
 
   dqs<<", nodeType='"<<node->printNodeType()<<"'"<<ends;
 
-  return mretString=dqs.str();
+  return mRetString(dqs);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1172,15 +1123,12 @@ StDbSql::storeConfigNode(StDbConfigNode* node){
   Db<<insertNodeString((StDbNode*) node);
 
   if(node->getNumIndeces()){
-    ostrstream ts;
     char* ename=0; int eid;
     node->getElementIndexInfo(ename,eid);
-    ts<<", indexName='"<<ename<<"'";
-    ts<<", indexVal="<<eid<<ends;
-    Db<<ts.str(); delete [] ts.str();
+    Db<<", indexName='"<<ename<<"'";
+    Db<<", indexVal="<<eid;
     if(ename) delete [] ename;
   }
-
   Db<<endsql;
 
   if(Db.QueryStatus())retVal=Db.GetLastInsertID();
@@ -1215,17 +1163,12 @@ StDbSql::storeTableNode(StDbTable* table){
 bool
 StDbSql::insertNodeRelation(int configID, int parent, int child){
 
-  bool retVal=false;
-  ostrstream nr;
+  Db<<" insert into NodeRelation set ParentID="<<parent;
+  Db<<", NodeID="<<child<<", ConfigID="<<configID<<endsql;
 
-  nr<<" insert into NodeRelation set ParentID="<<parent;
-  nr<<", NodeID="<<child<<", ConfigID="<<configID<<ends;
-
-  char* noderelation = nr.str();
-  Db<< noderelation <<endsql;
-  retVal=Db.QueryStatus();
+  bool retVal=Db.QueryStatus();
   Db.Release();
-  delete [] noderelation;
+
   return retVal;
 }
 
@@ -1244,15 +1187,16 @@ return retVal;
 /////////////////////////////////////////////////////////////////
 char*
 StDbSql::getDateTime(unsigned int time){
-char* retVal=0;
- ostrstream os; os<<time<<ends; char* thisTime=os.str();
 
+  char* retVal=0;
 // note the " + 0" part formats result without delimiters 
 // e.g. 1999-01-01 00:12:20 becomes 19990101001220
-  Db<<"select from_unixtime("<<thisTime<<") + 0 as requestTime"<<endsql;
+
+  Db<<"select from_unixtime("<<time<<") + 0 as requestTime"<<endsql;
   if(Db.Output(&buff)) buff.ReadScalar(retVal,"requestTime");
+
   clear();
-  delete [] thisTime;
+
 return retVal;
 }
 
@@ -1273,7 +1217,6 @@ char*
 StDbSql::getFlavorQuery(const char* flavor){
 
 // prepares SQL of " flavor In('flav1','flav2',...)"
- if(mretString) delete [] mretString;
 
  char *id1,*id2,*id3;
  id1 = new char[strlen(flavor)+1];
@@ -1292,8 +1235,7 @@ StDbSql::getFlavorQuery(const char* flavor){
  fs<<"'"<<id3<<"')"<<ends;
  delete [] id1;
 
- mretString=fs.str();
-return mretString;
+ return mRetString(fs);
 }
 
 ///////////////////////////////////////////////
@@ -1301,8 +1243,6 @@ char*
 StDbSql::getProdTimeQuery(unsigned int prodTime){
 
 // prepares SQL of " entryTime<="
-
-if(mretString) delete [] mretString;
 ostrstream pt;
   if(prodTime==0){
     pt<<" deactive=0 "<<ends;
@@ -1310,8 +1250,7 @@ ostrstream pt;
     pt<<" (deactive=0 OR deactive>="<<prodTime<<")";
     pt<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
   } 
-
-return mretString=pt.str();
+  return mRetString(pt);
 }
 
 ///////////////////////////////////////////////
@@ -1319,14 +1258,11 @@ char*
 StDbSql::getElementList(int* e, int num){
 
 // prepares comma separated list of integers
-
- if(mretString) delete [] mretString;
-
  ostrstream es;
  for(int i=0;i<num-1;i++)es<<e[i]<<",";
  es<<e[num-1]<<ends;
 
-return mretString=es.str();
+ return mRetString(es);
 }
 
 ////////////////////////////////////////////////
@@ -1336,7 +1272,6 @@ StDbSql::getColumnList(StDbTable* table,char* funcName){
   StTableDescriptorI* desc=table->getDescriptor();
   int numElements=desc->getNumElements();
 
-  if(mretString) delete [] mretString;
   ostrstream es; es<<" ";
 
   int icount=0;
@@ -1352,35 +1287,30 @@ StDbSql::getColumnList(StDbTable* table,char* funcName){
   }
 
  es<<ends;
- mretString=es.str();
- if(icount==0){
-   delete mretString;
-   mretString=0;
- }
-   
-return mretString;
+ if(icount) return mRetString(es);
+ return (char*) 0;
 }
   
 ////////////////////////////////////////////////
 char*
 StDbSql::checkTablePrepForQuery(StDbTable* table, bool checkIndexed){
 
-  if(mretString){ delete [] mretString; mretString=0;}
-  ostrstream rs;
+  if(mretString){ 
+     delete [] mretString; 
+     mretString=new char[256];
+  }
 
-  if(!QueryDescriptor(table)){
-    rs<<" doesn't have a descriptor "<<ends;
-    return mretString=rs.str();
-  }
-  if(table->IsBinary()){ 
-    rs<<" Binary Store is currently disabled "<<ends;
-    return mretString=rs.str();
-  }
-  if(checkIndexed && !table->IsIndexed()){
-    rs<<" Table is not time indexed"<<ends;
-    return mretString=rs.str();
-  }
-  return mretString;
+  if(!QueryDescriptor(table))
+     return strcpy(mretString," doesn't have a descriptor ");
+
+  if(table->IsBinary()) 
+    return strcpy(mretString," Binary Store is currently disabled ");
+
+  if(checkIndexed && !table->IsIndexed())
+    return strcpy(mretString," Table is not time indexed");
+
+  delete [] mretString;
+  return mretString=0;
 }
 
 ////////////////////////////////////////////////
@@ -1401,20 +1331,14 @@ StDbSql::getDataTable(StDbTable* table, unsigned int time){
 // as of now, just use name... later maybe more so I've sent in StDbTable*
 char* tableName=table->printName();
 
-ostrstream qs;
-
-qs<<" select * from tableCatalog where nodeName='"<<tableName<<"'";
-qs<<" AND unix_timestamp(beginTime)<="<<time;
-qs<<" Order by beginTime desc limit 1"<<ends;
-
- char* qString = qs.str();
-Db<<qString<<endsql;
- delete [] qString;
+Db<<" select * from tableCatalog where nodeName='"<<tableName<<"'";
+Db<<" AND unix_timestamp(beginTime)<="<<time;
+Db<<" Order by beginTime desc limit 1"<<endsql;
 
 if(Db.Output(&buff))buff.ReadScalar(retVal,"tableName");
 clear();
-if(!retVal)retVal=table->getCstructName();
-return retVal;
+
+return (retVal) ? retVal : table->getCstructName();
 }
 
 //////////////////////////////////////////////////
@@ -1466,20 +1390,15 @@ StDbSql::hasInstance(StDbTable* table){
 
  for(int i=0; i<numTables;i++){
 
-   ostrstream dq;
-   dq<<" select * from "<<dataTables[i];
-   dq<<" where "<<getFlavorQuery(table->getFlavor());
-   dq<<" AND "<<getProdTimeQuery(table->getProdTime());
-
-   Db<<dq.str()<<endsql;
-   delete [] dq.str();
+   Db<<" select * from "<<dataTables[i];
+   Db<<" where "<<getFlavorQuery(table->getFlavor());
+   Db<<" AND "<<getProdTimeQuery(table->getProdTime())<<endsql;
 
    if(Db.NbRows() !=0 ){
      retVal=true;
      break;
    }
  }
-
  for(int k=0;k<numTables;k++) delete [] dataTables[k];
  delete [] dataTables;
  return retVal;

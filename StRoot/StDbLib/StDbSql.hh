@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.1 2001/01/22 18:37:59 porter Exp $
+ * $Id: StDbSql.hh,v 1.2 2001/03/30 18:48:26 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.2  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.1  2001/01/22 18:37:59  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -92,6 +96,11 @@ protected:
   void  deleteRows(const char* tableName, int* rowID, int nrows);
   void  initEndTime();
 
+  char* mRetString(ostrstream& rs);
+  int   sendMess(const char* a, const char* b, StDbMessLevel m, 
+                 int lineNum=0, const char* className=" ",
+                 const char* methName=" ");
+
 public:
 
   StDbSql(MysqlDb &db, StDbBuffer& buffer);
@@ -141,6 +150,19 @@ MysqlDb& Db;
 StDbBuffer& buff;
 
 };
+
+inline char* StDbSql::mRetString(ostrstream& rs){
+   if(mretString)delete [] mretString;
+   mretString = new char[strlen(rs.str())+1];
+   strcpy(mretString,rs.str());
+   rs.freeze(0);
+   return mretString;
+}
+
+inline int StDbSql::sendMess(const char* a, const char* b, StDbMessLevel m, int lineNum, const char* className, const char* methName){
+  if(m==dbMDebug && !(mgr->IsVerbose()))return 0;
+  return mgr->printInfo(a,b,m,lineNum,className,methName);
+}
 
 inline void StDbSql::use()   { Db.setDefaultDb(mdbName); };
 inline void StDbSql::close() { Db.Close(); };

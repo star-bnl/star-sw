@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.11 2001/02/09 23:06:24 porter Exp $
+ * $Id: MysqlDb.h,v 1.12 2001/03/30 18:48:26 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.12  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.11  2001/02/09 23:06:24  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -82,7 +86,10 @@ typedef  char MYSQL_ROW;
 typedef  char MYSQL;
 typedef  int MYSQL_FIELD;
 #endif
+
 #include <string.h>
+#include <iostream.h>
+#include <strstream.h>
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
 
@@ -109,9 +116,6 @@ public:
   //  MysqlResult &operator >>(char *aString);
 
  protected:
-  //virtual MYSQL_RES *Res () {return mRes;}; // debug  - must not be use
-  //virtual MYSQL_ROW Row () {return mRow;}; // debug  - must not be use
-  // virtual char* NextRowAscii();
   
   friend class MysqlDb; 	      
 };
@@ -138,11 +142,11 @@ private:
   MYSQL mData;
   char* mQuery;
   unsigned long int mQueryLen;
-  char* mQueryMess;
-  char* mQueryLast;
+  char* mQueryLast; // for printing query after execution
   MysqlResult* mRes;
   bool mqueryState;
   bool mhasConnected;
+  bool mhasBinaryQuery;
 
   char* mdbhost;
   char* mdbName;
@@ -164,11 +168,11 @@ public:
 	const char *aPasswd, const char *aDb, const int aPort=0);
   virtual bool reConnect();
 
-  virtual unsigned NbRows () {return mRes->NbRows();};
-  virtual unsigned NbFields () {return mRes->NbFields();};
+  virtual unsigned NbRows (){if(mqueryState)return mRes->NbRows(); return 0;};
+  virtual unsigned NbFields(){if(mqueryState)return mRes->NbFields(); return 0;};
   virtual void Release() {mRes->Release();};
 
-  //  virtual char* Query();
+  virtual char* printQuery();
   //    virtual char* LastQuery();
 
   virtual bool Input(const char *aName,StDbBuffer *aBuff);
@@ -176,6 +180,14 @@ public:
   virtual bool Output(StDbBuffer *aBuff);  
   MysqlDb &operator<<(const char *c);
   MysqlDb &operator<<(const MysqlBin *aBin);
+
+  MysqlDb &operator<<(const short aq);
+  MysqlDb &operator<<(const unsigned short aq);
+  MysqlDb &operator<<(const int aq);
+  MysqlDb &operator<<(const unsigned int aq);
+  MysqlDb &operator<<(const float aq);
+  MysqlDb &operator<<(const double aq);
+
   char **DecodeStrArray(char* strinput , int &aLen) ; 
   char* CodeStrArray(char** strarr , int aLen);
   virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
@@ -199,14 +211,45 @@ protected:
 
 };  
 
-inline
-void
-MysqlDb::Close(){
-if(mhasConnected){
-  //cout << "Closing Connection to database="<< mData.db << endl;
-  mysql_close(&mData);
+inline void MysqlDb::Close(){
+  if(mhasConnected)mysql_close(&mData);
+  mhasConnected=false;
 }
-mhasConnected=false;
+
+inline MysqlDb &MysqlDb::operator<<( const short aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
+inline MysqlDb &MysqlDb::operator<<( const unsigned short aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
+inline MysqlDb &MysqlDb::operator<<( const int aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
+inline MysqlDb &MysqlDb::operator<<( const unsigned int aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
+inline MysqlDb &MysqlDb::operator<<( const float aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
+}
+
+inline MysqlDb &MysqlDb::operator<<( const double aq){
+  ostrstream ts;  ts<<aq<<ends;
+  char* mStrBuff=ts.str(); ts.freeze(0);
+  return *this<<mStrBuff;
 }
 
 

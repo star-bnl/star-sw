@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.14 2001/03/22 19:39:17 porter Exp $
+ * $Id: MysqlDb.cc,v 1.15 2001/03/30 18:48:26 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.15  2001/03/30 18:48:26  porter
+ * modified code to keep Insure from wigging-out on ostrstream functions.
+ * moved some messaging into a StDbSql method.
+ *
  * Revision 1.14  2001/03/22 19:39:17  porter
  * make a check to avoid mysql bug on linux where selecting an
  * unknown database hangs the connection
@@ -120,15 +124,17 @@
 
 #define __CLASS__ "MysqlDb"
 
+
+static const char* binaryMessage = {"Cannot Print Query with Binary data"};
+
+
 ////////////////////////////////////////////////////////////////////////
 
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
 
 mhasConnected=false;
 mQuery=0;
-mQueryMess=0;
 mQueryLast=0;
-RazQuery();
 RazQuery();
 mRes= new MysqlResult;
 }
@@ -136,14 +142,14 @@ mRes= new MysqlResult;
 
 MysqlDb::~MysqlDb(){
 if(mQuery) delete [] mQuery;
-if(mQueryMess) delete [] mQueryMess;
 if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
+
 if(mdbhost) delete [] mdbhost;
 if(mdbuser) delete [] mdbuser;
-if(mdbpw) delete [] mdbpw;
+if(mdbpw)   delete [] mdbpw;
 if(mdbName) delete [] mdbName;
 
 }
@@ -214,19 +220,28 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   return tRetVal;
 #undef __METHOD__
 }
+
 ////////////////////////////////////////////////////////////////////////
 
+char* MysqlDb::printQuery(){ return mQueryLast; };
+
+////////////////////////////////////////////////////////////////////////
 void MysqlDb::RazQuery() {
   
-  if (mQueryLast) delete [] mQueryLast;
-  mQueryLast=mQueryMess;
-  if(mQuery) delete [] mQuery;  
+  if (mQueryLast)delete [] mQueryLast;
+  if(mhasBinaryQuery){
+     mQueryLast = new char[strlen(binaryMessage)+1];
+     strcpy(mQueryLast,binaryMessage);
+     if(mQuery)delete [] mQuery;
+  } else {
+     mQueryLast=mQuery;
+  }
+
   mQuery = new char[1];
-  mQueryMess = new char[1];
   mQueryLen=0;
   strcpy(mQuery,"");
-  strcpy(mQueryMess,"");
-  
+
+  mhasBinaryQuery=false;
 }
 
 bool MysqlDb::checkForTable(const char* tableName){
@@ -290,27 +305,21 @@ unsigned int mysqlError;
 
 MysqlDb &MysqlDb::operator<<( const char *aQuery){ 
    
-  //cout << "debug in ---"<< mQueryMess << "|" << mQueryLast << endl; 
   if (strcmp(aQuery,";")==0){
     ExecQuery();
     RazQuery();
   } else {
 
     char *tQuery = new char[mQueryLen+strlen(aQuery)+1];
-    char *tQueryMess = new char[strlen(mQueryMess)+strlen(aQuery)+1];
     memcpy(tQuery,mQuery,mQueryLen);
     strcpy(&tQuery[mQueryLen],aQuery);
-    strcpy(tQueryMess,mQueryMess);
     
-    strcat(tQueryMess,aQuery);
-    //cout <<"debug 2 --->"<< mQueryMess << "|" << mQueryLast <<"|" << tQueryMess << endl;
     if(mQuery)delete [] mQuery;
     mQuery=tQuery;
     mQueryLen=mQueryLen+strlen(aQuery);
-    if(mQueryMess)delete [] mQueryMess;
-    mQueryMess=tQueryMess;    
+
   };
-  //cout <<"debug out --->"<< mQueryMess << "|" << mQueryLast << endl;
+
   return *this;
 }
 
@@ -318,20 +327,16 @@ MysqlDb &MysqlDb::operator<<( const char *aQuery){
 
 MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
 
-  const char *tMess="#BIN#";
+  mhasBinaryQuery=true;
+
   char *tQuery = new char[mQueryLen+aBin->mLen+1];
-  char *tQueryMess = new char[strlen(mQueryMess)+strlen(tMess)+1];
   memcpy(tQuery,mQuery,mQueryLen);
   memcpy(&tQuery[mQueryLen],aBin->mBinData,aBin->mLen);
   tQuery[mQueryLen+aBin->mLen]='\0';
-  strcpy(tQueryMess,mQueryMess);
-  strcat(tQueryMess,tMess); 
   if(mQuery)delete [] mQuery;
   mQuery=tQuery;
   mQueryLen=mQueryLen+aBin->mLen;
-  if(mQueryMess)delete [] mQueryMess;
-  mQueryMess=tQueryMess;    
-  
+ 
   return *this;
 };
 
