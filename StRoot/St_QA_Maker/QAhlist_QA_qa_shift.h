@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.1 2000/08/25 16:04:10 genevb Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.2  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.1  2000/08/25 16:04:10  genevb
 // Introduction of files
 //
@@ -23,7 +26,6 @@
      "TabQaGtrkR0T",
      "TabQaGtrkPhi0T",
      "TabQaGtrkZ0T",
-     "TabQaGtrkRfT",
      "TabQaGtrkf0",
      "TabQaGtrkLengthT",
      "TabQaGtrkPsiT",
@@ -81,7 +83,6 @@
      "TabLMQaGtrkR0T",
      "TabLMQaGtrkPhi0T",
      "TabLMQaGtrkZ0T",
-     "TabLMQaGtrkRfT",
      "TabLMQaGtrkf0",
      "TabLMQaGtrkLengthT",
      "TabLMQaGtrkPsiT",
@@ -139,7 +140,6 @@
      "TabMMQaGtrkR0T",
      "TabMMQaGtrkPhi0T",
      "TabMMQaGtrkZ0T",
-     "TabMMQaGtrkRfT",
      "TabMMQaGtrkf0",
      "TabMMQaGtrkLengthT",
      "TabMMQaGtrkPsiT",
@@ -197,7 +197,6 @@
      "TabHMQaGtrkR0T",
      "TabHMQaGtrkPhi0T",
      "TabHMQaGtrkZ0T",
-     "TabHMQaGtrkRfT",
      "TabHMQaGtrkf0",
      "TabHMQaGtrkLengthT",
      "TabHMQaGtrkPsiT",

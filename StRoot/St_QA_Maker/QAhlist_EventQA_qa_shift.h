@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.1 2000/08/25 16:04:09 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.2 2001/04/24 22:53:50 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.2  2001/04/24 22:53:50  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.1  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -33,7 +36,6 @@
      "StEQaGtrkR0T",
      "StEQaGtrkPhi0T",
      "StEQaGtrkZ0T",
-     "StEQaGtrkRfT",
      "StEQaGtrkPadfT",
      "StEQaGtrkf0",
      "StEQaGtrkLengthT",
@@ -102,7 +104,6 @@
      "StELMQaGtrkR0T",
      "StELMQaGtrkPhi0T",
      "StELMQaGtrkZ0T",
-     "StELMQaGtrkRfT",
      "StELMQaGtrkPadfT",
      "StELMQaGtrkf0",
      "StELMQaGtrkLengthT",
@@ -171,7 +172,6 @@
      "StEMMQaGtrkR0T",
      "StEMMQaGtrkPhi0T",
      "StEMMQaGtrkZ0T",
-     "StEMMQaGtrkRfT",
      "StEMMQaGtrkPadfT",
      "StEMMQaGtrkf0",
      "StEMMQaGtrkLengthT",
@@ -240,7 +240,6 @@
      "StEHMQaGtrkR0T",
      "StEHMQaGtrkPhi0T",
      "StEHMQaGtrkZ0T",
-     "StEHMQaGtrkRfT",
      "StEHMQaGtrkPadfT",
      "StEHMQaGtrkf0",
      "StEHMQaGtrkLengthT",

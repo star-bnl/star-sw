@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.3 2001/04/24 19:59:08 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.4 2001/04/24 22:53:51 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.4  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.3  2001/04/24 19:59:08  genevb
 // Use det_id to identify detectors
 //
@@ -438,8 +441,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_glb_phi0T->Fill(t->phi0);
         hists->m_glb_z0T->Fill(t->z0);
         hists->m_glb_curvT->Fill(logCurvature);
-        hists->m_glb_rfT->Fill(sqrt((t->x_first[0]*t->x_first[0])+
-			     (t->x_first[1]*t->x_first[1])));
         hists->m_glb_xfT->Fill(t->x_first[0]);
         hists->m_glb_yfT->Fill(t->x_first[1]);
         hists->m_glb_zfT->Fill(t->x_first[2]);
@@ -507,8 +508,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_glb_phi0TS->Fill(t->phi0);
         hists->m_glb_z0TS->Fill(t->z0);
         hists->m_glb_curvTS->Fill(logCurvature);
-        hists->m_glb_rfTS->Fill(sqrt((t->x_first[0]*t->x_first[0])+
-			      (t->x_first[1]*t->x_first[1])));
         hists->m_glb_xfTS->Fill(t->x_first[0]);
         hists->m_glb_yfTS->Fill(t->x_first[1]);
         hists->m_glb_zfTS->Fill(t->x_first[2]);
@@ -555,8 +554,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_max_pointFE->Fill(trkmpnt);
         hists->m_fit_pointFE->Fill(trkfpnt);
         hists->m_glb_chargeFE->Fill(t->icharge);
-        hists->m_glb_rfFE->Fill(sqrt((t->x_first[0]*t->x_first[0])+
-			      (t->x_first[1]*t->x_first[1])));
         hists->m_glb_xfFE->Fill(t->x_first[0]);
         hists->m_glb_yfFE->Fill(t->x_first[1]);
         hists->m_glb_zfFE->Fill(t->x_first[2]);
@@ -584,8 +581,6 @@ void St_QA_Maker::MakeHistGlob(){
         case (kFtpcWestId) : {
 
 // these are tpc & ftpc
-        hists->m_glb_rfFW->Fill(sqrt((t->x_first[0]*t->x_first[0])+
-			      (t->x_first[1]*t->x_first[1])));
         hists->m_pointFW->Fill(trkpnt);
         hists->m_max_pointFW->Fill(trkmpnt);
         hists->m_fit_pointFW->Fill(trkfpnt);

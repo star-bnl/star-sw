@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.1 2000/09/08 18:55:54 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.2  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.1  2000/09/08 18:55:54  lansdell
 // turned on FTPC primary track histograms
 //
@@ -34,7 +37,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.1 2000/09/08 18:55:54 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -146,10 +149,6 @@ class StQABookHist : public TObject {
   TH1F     *m_glb_phi0TS;    //! azimuthal angle at start (deg), tpc+svt
   TH1F     *m_glb_z0T;       //! z-coord at start (cm), tpc 
   TH1F     *m_glb_z0TS;      //! z-coord at start (cm), tpc+svt
-  TH1F     *m_glb_rfT;       //! radial position of first hit,tpc
-  TH1F     *m_glb_rfFE;      //! radial position of first hit,ftpc east
-  TH1F     *m_glb_rfFW;      //! radial position of first hit,ftpc west
-  TH1F     *m_glb_rfTS;      //! radial position of first hit,tpc+svt
   TH1F     *m_glb_padfT;     //! y-coord. of first hit on trk, tpc
   TH1F     *m_glb_curvT;     //! curvature (1/cm), tpc
   TH1F     *m_glb_curvTS;    //! curvature (1/cm), tpc+svt

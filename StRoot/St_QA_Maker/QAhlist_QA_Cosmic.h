@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_Cosmic.h,v 2.1 2000/08/25 16:04:09 genevb Exp $
+// $Id: QAhlist_QA_Cosmic.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $
 // $Log: QAhlist_QA_Cosmic.h,v $
+// Revision 2.2  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.1  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -29,7 +32,6 @@
  "TabQaGtrkPhi0T",
  "TabQaGtrkZ0T",
  "TabQaGtrkCurvT",
- "TabQaGtrkRfT",
  "TabQaGtrkPadfT",
  "TabQaGtrkXfT",
  "TabQaGtrkXf0",
