@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.5 2004/01/27 16:26:14 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.6 2004/01/27 20:38:41 zolnie Exp $
 
 /*!
  *                                                                     
@@ -11,10 +11,12 @@
  *
  * \brief  EEMC tower display
  *
+ * Full Info
+ * \image html snapshot.jpg 
  */                                                                      
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
-
+class TString;
 class TGeoVolume;
 class TGeoMatrix;
 class TList;
@@ -80,6 +82,7 @@ public:
   /// \param track  a reference to class  StMuTrack
   /// \param tower  a reference to struct EEmcTower
   void         Out(ostream &out, const StMuTrack &track, const EEmcTower &tower);
+  void         Out(TString &out, const StMuTrack &track, const EEmcTower &tower);
 
 protected:
   //! initializes EEMC geometry: sector,subsectors and towers
@@ -92,6 +95,11 @@ protected:
   /// \param eta     eta index       [0,mNumEta)
   /// \return a pointer to a static string (fixit)
   char *volumeName(int sec, int sub=-1, int eta=-1);
+  /// volume name based on tower structure
+  /// \param tower  a reference to tower structure
+  /// \return a pointer to a static string (fixit)
+  char *volumeName(const EEmcTower& tower);
+
 
   TGeoVolume* mEEmc; /**<- top TGeoVolume */
   TList *mTowerHits; /**<- list of tower hits */
@@ -105,6 +113,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.6  2004/01/27 20:38:41  zolnie
+// more docs
+//
 // Revision 1.5  2004/01/27 16:26:14  zolnie
 // polished doxygen documentation
 //
