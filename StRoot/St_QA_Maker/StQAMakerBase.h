@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.10 2003/02/20 20:09:54 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.11 2003/02/28 06:17:56 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.11  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
 // Revision 2.10  2003/02/20 20:09:54  genevb
 // Several changes for new trigger scheme, dAu data
 //
@@ -67,7 +70,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.10 2003/02/20 20:09:54 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.11 2003/02/28 06:17:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -110,6 +113,7 @@ class StQAMakerBase : public StMaker {
   Int_t eventClass;
   Bool_t firstEvent;
   Bool_t firstEventClass;
+  Bool_t fillHists;
 
   virtual void NewQABookHist();
   virtual TH2F* MH1F(const Text_t* name, const Text_t* title,

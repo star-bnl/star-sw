@@ -216,11 +216,15 @@ Int_t StEventQAMaker::Make() {
     }
 
     int makeStat = kStOk;
-    float vertExists = 1.;
+    float vertExists;
  
     // only process if a primary vertex exists !!!
-    if (!(event->primaryVertex())) {
+    if (event->primaryVertex()) {
+      vertExists = 1.;
+      fillHists = kTRUE;
+    } else {
       vertExists = -1.;
+      fillHists = kFALSE;
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
     }
     mNullPrimVtx->Fill(vertExists);
@@ -229,7 +233,7 @@ Int_t StEventQAMaker::Make() {
     
     for (int i=0; i<nEvClasses; i++) {
       eventClass = evClasses[i];
-      if (event->primaryVertex()) makeStat = StQAMakerBase::Make();
+      makeStat = StQAMakerBase::Make();
       if ((eventClass) && (histsSet != StQA_MC))
         hists->mNullPrimVtxClass->Fill(vertExists);
       if (makeStat != kStOk) break;
@@ -1999,8 +2003,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.44 2003/02/20 20:09:53 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.45 2003/02/28 06:17:55 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.45  2003/02/28 06:17:55  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
 // Revision 2.44  2003/02/20 20:09:53  genevb
 // Several changes for new trigger scheme, dAu data
 //

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.13 2003/02/20 20:09:54 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.14 2003/02/28 06:17:56 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.14  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
 // Revision 2.13  2003/02/20 20:09:54  genevb
 // Several changes for new trigger scheme, dAu data
 //
@@ -149,6 +152,7 @@ Int_t St_QA_Maker::Make(){
           } else {
             eventClass = 1;
           }
+          fillHists = kTRUE;
 	  int makeStat = StQAMakerBase::Make();
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
@@ -162,9 +166,11 @@ Int_t St_QA_Maker::Make(){
   if (foundPrimVtx == kFALSE) {
     cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
     mNullPrimVtx->Fill(-1);
+    fillHists = kFALSE;
+    int makeStat = StQAMakerBase::Make();
     if (histsSet == StQA_AuAu)
       hists->mNullPrimVtxClass->Fill(-1);
-    return kStOk;
+    return makeStat;
   }
   else {
     cout << "Error in St_QA_Maker::Make(): no dst dataset found!" << endl;

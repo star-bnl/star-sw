@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.21 2003/02/20 20:09:54 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.22 2003/02/28 06:17:56 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.22  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
 // Revision 2.21  2003/02/20 20:09:54  genevb
 // Several changes for new trigger scheme, dAu data
 //
@@ -149,6 +152,7 @@ Int_t StQAMakerBase::Make() {
   if (!hists) NewQABookHist();
     
 
+  if (!fillHists) return kStOk;
   // Call methods to fill histograms
 
 
