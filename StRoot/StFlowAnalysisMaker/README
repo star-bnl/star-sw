@@ -25,11 +25,13 @@ you have to copy the root file to flowPhiWgt.hist.root . If the file
 flowPhiWgt.hist.root is missing the PhiWgts are set to 1.0 .
 
 Plot.C is a macro for plotting the histograms and their
-projections. It presents you with a menu of possible plots. If you
-know the plot number you want you can invoke the macro with that
-number as an argument. If you execute the macro with all three
-arguments (plot number, selection number, harmonics number) for a
-graph that has multiple harmonics and selections, it will plot only
-the selected histogram. For better graphics you can first execute
-boldStyle.C or videoStyle.C .
+projections. It asks for a run number which will be printed at the
+bottom left of the plot. It presents you with a menu of possible
+plots. If you know the plot number you want you can invoke the macro
+with that number as an argument. If you execute the macro with all
+three arguments (plot number, selection number, harmonics number) for
+a graph that has multiple harmonics and selections, it will plot only
+the histogram for that selection and harmonic. After it has been
+loaded and executed once it can be rerun simply with plot(). For
+better graphics you can first execute boldStyle.C or videoStyle.C .
 
