@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.35 1999/04/15 20:36:40 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.36 1999/04/19 06:25:35 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.36  1999/04/19 06:25:35  nevski
+// update of user parameter extraction
+//
 // Revision 1.35  1999/04/15 20:36:40  fine
 // St_geant::Work() was void becomes St_Node *
 //
@@ -454,7 +457,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.35 1999/04/15 20:36:40 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.36 1999/04/19 06:25:35 nevski Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -731,7 +734,7 @@ St_Node *St_geant_Maker::Work()
     { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   St_Node  *node=0;
   Float_t  *volu=0, *position=0, *mother=0, *p=0;
-  Int_t    who=0, irot=0, mcopy=0, ivol=0;
+  Int_t    who=0, copy=0, npar=0;
   Int_t    nvol=cnum->nvolum;
   Float_t  theta1,phi1, theta2,phi2, theta3,phi3, type;
 
@@ -740,9 +743,9 @@ St_Node *St_geant_Maker::Work()
   GtHash *H = new GtHash;
  
   printf(" looping on agvolume \n");
-  //   ======================================================
-  while (agvolume_(&node,&volu,&position,&mother,&who,&mcopy,&p)) 
-  { // ======================================================
+  //   ===============================================================
+  while (agvolume_(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) 
+  { // ===============================================================
   
     typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
                         PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
@@ -760,19 +763,15 @@ St_Node *St_geant_Maker::Work()
     if (mother)  nin = (Int_t) mother[2];
     St_Node *Hp      = 0;
 
-    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
-    strncpy(name,(const Char_t*)(volu-5),4);
+  strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
+  strncpy(name,(const Char_t*)(volu-5),4);
 
-    if (np==0)
-    { 
-       Hp = (St_Node *) H->GetPointer(p,3);
-       // printf(" 0-object %s %s %f %f %f %p \n",name,nick,p[0],p[1],p[2],Hp);
-    }
+  Hp = (St_Node *) H->GetPointer(p,npar);
 
-   if (nodes[who]==0 || np==0 && Hp==0)
-   {
+  if (nodes[who]==0 || Hp==0)
+  {
     t=(TShape*)gGeometry->GetListOfShapes()->FindObject(nick);
-    if (t==0 || np==0 && Hp==0) 
+    if (t==0 || Hp==0) 
     { 
       printf(" creating object %s  %f  %f  %f  %f \n",
                            name,p0[0],p[0],p[1],p[2]);
@@ -792,28 +791,22 @@ St_Node *St_geant_Maker::Work()
                          p[0],p[1],p[2],p[3],p[4]);               break;
         case CONE: t=new TCONE(nick,"CONE","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
-        case CONS: t=new TCONS(nick,"CONS","void",
+        case CONS: t=new TCONS(nick,"CONS","void",    // take care !
                          p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
         case SPHE: t=new TSPHE(nick,"SPHE","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PARA: t=new TPARA(nick,"PARA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PGON: t=new TPGON(nick,"PGON","void",
-                         p[0],p[1],p[2],p[3]);  
-                   {
-                    Float_t *pp = p+4;
-                    for(Int_t i=0;i<p[3];i++) 
-                       (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
-                   }
-                                                                  break;
-        case PCON: t=new TPCON(nick,"PCON","void",
-                         p[0],p[1],p[2]);                         
-                   {
-                     Float_t *pp = p+3;
-                     for(Int_t i=0;i<p[2];i++)
-                        ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
-                   }
-                                                                  break;
+        case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],p[2],p[3]);  
+                   { Float_t *pp = p+4;
+                     for (Int_t i=0; i<p[3]; i++) 
+                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                   }                                              break;
+        case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],p[2]);
+                   { Float_t *pp = p+3;
+                     for (Int_t i=0; i<p[2]; i++)
+                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                   }                                              break;
         case ELTU: t=new TELTU(nick,"ELTU","void",
                          p[0],p[1],p[2]);                         break;
 //      case HYPE: t=new THYPE(nick,"HYPE","void",
@@ -830,32 +823,29 @@ St_Node *St_geant_Maker::Work()
       t->SetLineColor(att[4]);
     };
 
-    ivol  = (Int_t) *(position+1);
-    irot  = (Int_t) *(position+3);
-
-//     strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
+    // Int_t ivol   = (Int_t) *(position+1);
+    // Int_t irot   = (Int_t) *(position+3);
+    // strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
 
     // to build a compressed tree, name should be checked for repetition
     newNode = new St_Node(name,nick,t);
     newNode -> SetVisibility(att[1]);
-    //if newNode -> Flag();
 
-//  --------------------
     nodes[who]=newNode;
    }
-   if (np>0)     { newNode = (St_Node *)nodes[who]; }
-   else if (Hp)  { newNode = Hp; }
-   else          { printf(" New 0-object \n"); H->SetPointer(newNode); }
-//  --------------------
+   //  if (np>0)  { newNode = (St_Node *)nodes[who]; }
+
+   if (Hp)       { newNode = Hp; }
+   else          { H->SetPointer(newNode); }
 
     gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
                     &theta2,&phi2, &theta3,&phi3, &type);
 
      if (node)
      {  TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
-       node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(mcopy)); // Copy to add       
+       node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy)); // Copy to add       
        if (strcmp(name,"BANG")==0) 
-          printf(" BANG: %d. %f %f %f %f %f %f \n",mcopy,
+          printf(" BANG: %d. %f %f %f %f %f %f \n",copy,
                    theta1,phi1,theta2,phi2,theta3,phi3);
      }
     node = newNode;

@@ -32,19 +32,20 @@
  end
 *
 *----------------------------------------------------------------------------
- function agvolume(node,par,pos,mot,who,mcopy,par1)
+ function agvolume(node,par,pos,mot,who,copy,par1,npar)
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
- integer  agvolume,node,par,pos,mot,old,LOCB,par1,npar,natt
+ integer  agvolume,node,par,pos,mot,old,LOCB,par1,np,ish,npar,natt,npr
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
  Integer item(20),count(20),list(20),nodes(0:20),
          Lnam(20),Lnum(20),Iax(20),Lvol(20);
  Integer birth(50000);
- save    k,mother,daughter,where,found,copy,birth;
+ save    k,mother,daughter,where,found,birth;
  save    item,count,list,nodes;
-* integer i;
+
  character cn*4;
- real    para(100),attr(100);
+ real    para(100),attr(100),parb(100),vdist;
+ integer i;
 
  agvolume=0;
  If node==0
@@ -66,20 +67,36 @@
    who=Q(where+2); 
  }
    daughter=LQ(JVOLUM-who); found+=1; 
-   par=LOCB(Q(daughter+1)); pos=LOCB(Q(where+1)); 
+   par=LOCB(Q(daughter+1)); np=Q(daughter+5); ish=Q(daughter+2);
+   pos=LOCB(Q(where+1)); 
    mot=0; mcopy=1;  
    if (k>1) { mot=LOCB(Q(mother+1)); mcopy=Lnum(k-1); }
    node=nodes(k-1); agvolume=1;
    Lnam(k)=IQ(JVOLUM+who); Lnum(k)=copy; Lvol(k)=who;
 
    Call GLVOLU(k,Lnam, Lnum, ier)
-   par1=LOCB(Q(LQ(JGPAR-Nlevel)+1))
-   call UHTOC(Lnam(k),4,cn,4)
-   call GFPARA(Cn,copy,0,npar,natt,para,attr)
-   par1=LOCB(para);
-*   if (count(k)<0) print *,count(k),copy,Nlevel,(GRMAT(i,Nlevel),i=1,9);
-*   if (count(k)=-30 & iax(k)==2) _
-*   print *,count(k),copy,Nlevel,cn,(GRMAT(i,Nlevel),i=1,9);
+
+* have to check JGPAR later
+   if np==0  { npar=Q(where+9); call UCOPY (Q(where+10),para,npar)  }
+   else      { npar=np; call UCOPY (Q(LQ(JGPAR-Nlevel)+1),para,np)  }
+
+   IF      ISH==28   {  NPAR = 12 }
+   ELSE IF ISH==4       " trap "
+   {  NPAR = 11
+      call AgXY2RF(PARA(2),PARA(3))
+      call AgT2A(PARA(7))
+      call AgT2A(PARA(11))
+   }
+   ELSE IF ISH==10      " para "
+   {  call AgXY2RF(PARA(5),PARA(6))
+      call AgT2A(PARA(4))
+   }
+
+   par1=LOCB(para); 
+  
+*  call UHTOC(Lnam(k),4,cn,4)
+*  call GFPARA (cn,copy,0,npr,natt,parb,attr)
+*  if (vdist(parb,para,3)>.001) print *,'****',cn,np,(para(i),parb(i),i=1,3)
 
    if (k>1 & birth(Lvol(k-1))>0) node=0;
 end
@@ -90,4 +107,21 @@ end
   while agvolume(node,i1,i2,moth,old)>0  {  found+=1; node=found; }
   print *,' found objects =',found;
   end
+
+
+   subroutine AgT2A(t)
++CDE,typing,GCONST.
+   real alp,x,y,phi,r,t
+      alp = ATAN(t)*RADDEG
+      if (alp>90.) alp-=180.
+      t = alp
+      return
+   entry    AgXY2RF(x,y)
+      phi = 0
+      r   = SQRT(x*x+y*y)
+      if (r  > 0.) phi = ATAN2(y,x)*RADDEG
+      if (phi< 0.) phi+= 360.
+      x=ATAN(r)*RADDEG; y=phi
+      return
+   end
 
