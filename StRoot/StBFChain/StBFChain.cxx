@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.205 2001/06/22 20:23:03 balewski Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.206 2001/06/24 16:24:22 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -275,7 +275,7 @@ Bfc_st BFC[] = {
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"l3onl"       ,"","",""                      ,"Stl3RawReaderMaker","St_l3,Stl3RawReaderMaker","",kFALSE},
-  {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
+  {"analysis"    ,"","","Event"          ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
@@ -323,7 +323,8 @@ class StTreeMaker;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
-StBFChain::StBFChain(const char *name):StChain(name),fXdfOut(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+StBFChain::StBFChain(const char *name):
+StChain(name),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
    fBFC = new Bfc_st[NoChainOptions];
    memcpy (fBFC, &BFC, sizeof (BFC));
 }
