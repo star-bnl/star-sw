@@ -560,20 +560,30 @@ Int_t StMixerMaker::Make() {
 
 void StMixerMaker::Clear(Option_t *opt)
 {
+  if (mAllTheDataMixer) mAllTheDataMixer->clear();
+  if (aDigitalSector) aDigitalSector->clear();
   StMaker::Clear();
-  delete mAllTheDataMixer;
-  delete tdr1;
-  delete tdr2;
-  delete aDigitalSector;
-  delete mSector;
-  delete mSector1;
-  delete mSector2;
 }
 
 Int_t StMixerMaker::Finish()
 {
   //Clean up all the pointers that were initialized in StTrsMaker::Init()
-  //if(mOutputStreamMixer) delete mOutputStream;
+  //if (mOutputStreamMixer) delete mOutputStream;
+  //mOutputStream = 0;
+  if (mSector) delete mSector;
+  mSector = 0;
+  if (mSector1) delete mSector1;
+  mSector1 = 0;
+  if (mSector2) delete mSector2;
+  mSector2 = 0;
+  if (mAllTheDataMixer) delete mAllTheDataMixer;
+  mAllTheDataMixer = 0;
+  if (tdr1) delete tdr1;
+  tdr1 = 0;
+  if (tdr2) delete tdr2;
+  tdr1 = 0;
+  if (aDigitalSector) delete aDigitalSector;
+  aDigitalSector = 0;
   return kStOK;
 }
 

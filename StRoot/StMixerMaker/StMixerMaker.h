@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.4 2000/08/07 15:05:03 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.5 2000/08/09 15:07:09 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,7 +11,7 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
- * Revision 1.4  2000/08/07 15:05:03  pfachini
+ * Revision 1.5  2000/08/09 15:07:09  pfachini
  * Fixing possible memory leak...
  *
  * Revision 1.3  2000/03/15 17:26:09  pfachini
@@ -114,7 +114,7 @@ class StMixerMaker : public StMaker {
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.4 2000/08/07 15:05:03 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.5 2000/08/09 15:07:09 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 1)   //StAF chain virtual base class for Makers
 };
