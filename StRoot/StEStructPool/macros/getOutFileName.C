@@ -30,7 +30,7 @@ char* getOutFileName(const char* baseDir, const char* jobName, const char* type)
     createDir+=outArea.Data();
     system(createDir.Data());
  
-    char* exten[]={".root",".estruct.root"};
+    char* exten[]={".root",".estruct.root",".txt"};
     int iext = 0;
        
     TString outputFile(outArea.Data());
@@ -38,6 +38,9 @@ char* getOutFileName(const char* baseDir, const char* jobName, const char* type)
       outputFile+="cutHists";
     } else if(strstr(type,"data")){
       outputFile+="dataHists";
+    } else if(strstr(type,"stats")){
+      outputFile+="stats";
+      iext=2;
     } else {
       outputFile+="events";
       iext=1;
@@ -53,7 +56,6 @@ char* getOutFileName(const char* baseDir, const char* jobName, const char* type)
   
     return retVal;
 };
-
 
 
 

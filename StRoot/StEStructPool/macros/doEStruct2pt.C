@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2pt.C,v 1.3 2004/04/15 18:46:31 msd Exp $
+ * $Id: doEStruct2pt.C,v 1.4 2004/06/25 03:14:55 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,123 +12,131 @@
  *               This example (from PP) contains 3 selections on event mult
  *
  *************************************************************************/
-void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* jobName=0, int nset=3, int maxNumEvents=0){
-
-  // input cut files presumed to be in cwd or use full path 
-  char* evtCutFile[]={"PPCuts01.txt","PPCuts02.txt","PPCuts03.txt"};
-
-  // data and cut directories sub to outputDir/jobName 
-  char* datadirs[]  ={"data/01","data/02","data/03"};
-  char* cutdirs[]   ={"cuts/01","cuts/02","cuts/03"}; 
-
-  // in this example, all cuts (event, track, pair) are in same file
-  char* trackCutFile=evtCutFile[0];
-  char* pairCutFile =evtCutFile[0];
+void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* cutFile, const char* jobName=0, int nset=3, int maxNumEvents=0){
 
   // libraries required and helper macros in $STAR/StRoot/StEStructPool/macros
   gROOT->LoadMacro("load2ptLibs.C");
   load2ptLibs();
   gROOT->LoadMacro("getOutFileName.C");
+  gROOT->LoadMacro("support.C");
+
+  /* *******************************************************************
+     changed the use model of the cut file. I found that I always keep 
+     the cuts for a given pass the same except for the centrality cut. 
+     Now I add this cut directly and I use only 1 cut file, PPCutsAll.txt, 
+     and with the centrality cut set below
+  ************************************************************************/
+
+  // in this example, all cuts (event, track, pair) are in same file
+  const char* evtCutFile=cutFile;
+
+  const char* trackCutFile=evtCutFile;
+  const char* pairCutFile =evtCutFile;
+
+  char** datadirs=getDirNames("data",nset);
+  char** cutdirs=getDirNames("cuts",nset);
   
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const double temp[4]={0,4,7,50};
+  const double temp[4]={2,4,8,99}; //=3 centralies
   cent->setCentralities(temp,4);
 
+  // choose the mode for the binning
+  StEStructCutBin* cb=StEStructCutBin::Instance();
+  cb->setMode(0);
+
   // create the low-level reader (here for MuDst)
-  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500); 
-  
+  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",5000);   
+
   // create the generic EStructAnalysisMaker
   StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2pt");
 
   // Set up the EStruct data Readers and Writer codes
-  char* outputFile[3];
-  StEStructEventCuts* ecuts[3];
-  StEStructTrackCuts* tcuts[3];
-  StEStruct2ptCorrelations*  analysis[3];
-  StEStructMuDstReader* readers[3];
+  char** outputFile                    = new char*[nset];
+  StEStructEventCuts** ecuts           = new StEStructEventCuts*[nset];
+  StEStructTrackCuts** tcuts           = new StEStructTrackCuts*[nset];
+  StEStruct2ptCorrelations**  analysis = new StEStruct2ptCorrelations*[nset];
+  StEStructMuDstReader** readers       = new StEStructMuDstReader*[nset];
 
   // only 1 reader actually reads the event, the others just pull from mem.
   // this 'skipMake' ensures this to be the case
-  bool skipMake[3];
+  bool* skipMake=new bool[nset];
   skipMake[0]=false;
-  skipMake[1]=true;
-  skipMake[2]=true;
+  for(int i=1;i<nset;i++)skipMake[i]=true;
 
-
-  //  build the 3 readers & 3 analysis objects
+  //  build the NSET readers & NSET analysis objects
   //  analysis = analysis interface & contains pair-cut object (needs file)
   //  reader = reader interface + pointer to StMuDstMaker + cut classes
-
   for(int i=0;i<nset;i++){
 
      outputFile[i]=getOutFileName(outputDir,jobName,datadirs[i]);
-     analysis[i]=new StEStruct2ptCorrelations(1);
+     analysis[i]=new StEStruct2ptCorrelations();
      analysis[i]->setCutFile(pairCutFile);
      analysis[i]->setOutputFileName(outputFile[i]);
 
-     ecuts[i]=new StEStructEventCuts(evtCutFile[i]);
+     /* here's the new way to set the numTracks cut */
+      ecuts[i]=new StEStructEventCuts(evtCutFile);
+      int min=floor(cent->minCentrality(i));
+      int max=floor(cent->maxCentrality(i));
+      char** tmp=getNumTracksStrings(min,max);  // find in support.C
+      ecuts[i]->loadBaseCuts("numTracks",tmp,2);
+ 
      tcuts[i]=new StEStructTrackCuts(trackCutFile);
      readers[i]=new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i]);
      estructMaker->SetReaderAnalysisPair(readers[i],analysis[i]);
   }
  
-  //
   // --- now do the work ---
-  //
+  doTheWork(estructMaker,maxNumEvents);
 
-    int istat=0,i=1;
-    estructMaker->Init();
-    estructMaker->startTimer();
+  //--- now write out stats and cuts ---
+  char* statsFileName=getOutFileName(outputDir,jobName,"stats");
+  ofstream ofs(statsFileName);
 
-    int counter=0;
-  while(istat!=2){
+  ofs<<endl;
+  estructMaker->logAnalysisTime(ofs);
+  estructMaker->logInputEvents(ofs);
+  estructMaker->logOutputEvents(ofs);
+  estructMaker->logOutputRate(ofs);
+  estructMaker->logAnalysisStats(ofs);
 
-      istat=estructMaker->Make();
-      i++; counter++;
-      if(counter==200){ 
-        cout<<"doing event ="<<i<<endl;
-        counter=0;
-      }
-      if( maxNumEvents!=0 && i>=maxNumEvents )istat=2;
-   }
-  estructMaker->stopTimer();
-
-  // write event-stats to log file 
-  cout<<endl;
-  estructMaker->logAnalysisTime(cout);
-  estructMaker->logInputEvents(cout);
-  estructMaker->logOutputEvents(cout);
-  estructMaker->logOutputRate(cout);
-
-  // 
-  // --> cuts stats streamed to stdout (logfile)
-  //
   for(int i=0;i<nset;i++){
-     ecuts[i]->printCuts(cout);
-     tcuts[i]->printCuts(cout);
-     StEStructPairCuts& pcuts=analysis[i]->getPairCuts();
-     pcuts.printCuts(cout);
+    ofs<<"  *************** ";
+    ofs<<" Cut Stats for Analysis Number = "<<i;
+    ofs<<"  *************** "<<endl;
+     ecuts[i]->printCuts(ofs);
+     tcuts[i]->printCuts(ofs);
 
-     // 
+     StEStructPairCuts* pcuts=NULL;
+     if(analysis){
+        pcuts=&analysis[i]->getPairCuts();
+        pcuts->printCuts(ofs);
+     }
+
      // --> root cut file 
-     // 
      char* rootCutFile=getOutFileName(outputDir,jobName,cutdirs[i]);
      TFile* tf=new TFile(rootCutFile,"RECREATE");
      ecuts[i]->writeCutHists(tf);
      tcuts[i]->writeCutHists(tf);
-     pcuts.writeCutHists(tf);
+     if(pcuts)pcuts->writeCutHists(tf);
      tf->Close();
+
   }
+  ofs.close();
 
-
+  // --- write out the data 
   estructMaker->Finish();
 }
 
 /**********************************************************************
  *
  * $Log: doEStruct2pt.C,v $
+ * Revision 1.4  2004/06/25 03:14:55  porter
+ * modified basic macro to take only 1 cutfile and moved some common
+ * features into a new macro=support.C.....   this cleaned up the
+ * doEStruct macro somewhat
+ *
  * Revision 1.3  2004/04/15 18:46:31  msd
  * Updated centrality variable types
  *
