@@ -544,7 +544,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumNear(double x)
     return p3;
 }
 
-StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
+StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
     double px,py,pz;
     px = 0;
