@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.2 1999/03/02 19:47:38 ullrich Exp $
+ * $Id: StHelix.hh,v 1.3 1999/03/07 14:52:14 wenaus Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
- * Revision 1.2  1999/03/02 19:47:38  ullrich
- * Added method to find dca between two helices
+ * Revision 1.3  1999/03/07 14:52:14  wenaus
+ * Add missing 'using namespace std'
+ *
+ * Revision 1.3  1999/03/07 14:52:14  wenaus
+ * Add missing 'using namespace std'
  *
  * Revision 1.2  1999/03/02 19:47:38  ullrich
  * Added method to find dca between two helices
@@ -30,6 +33,9 @@
 #define ST_HELIX_HH
 
 #include <math.h>
+#include <utility>
+#include <algorithm>
+#include "StThreeVector.hh"
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
