@@ -247,13 +247,24 @@ void TTreeHelper::GetInfo(const TBranch *tbp, const char *&tyName
        des = nxt;
    } }
 
+   int max = 0;
    if (tb->IsA()==TBranchElement::Class()) {
      TBranchElement *te = (TBranchElement*)tb;
-     int max = te->GetMaximum();
+     max = te->GetMaximum();
      brType  = te->GetType();
-     if (max) units = max;
-     if (brType==3) units=0;
+   } else {
+
+     TLeaf *lf = (TLeaf*)tb->GetListOfLeaves()->First();
+     TLeaf *lc = 0;
+     if (lf) lc = lf->GetLeafCount();
+     if (lc) max = lc->GetMaximum();
    }
+   if (max) {if (!units) units = 1; units *= max;}
+   if (brType==3) units=0;
+   
+
+
+
 
    TObjArray *lfList = tb->GetListOfLeaves();
    TLeaf *tl = (lfList) ? (TLeaf*)lfList->UncheckedAt(0):0;
