@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.3 1998/12/27 02:33:16 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.4 1998/12/27 03:16:52 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.4  1998/12/27 03:16:52  fine
+// Flag WIN32 has been introduced for St_Node / St_NodePosition agaist of crashes
+//
 // Revision 1.3  1998/12/27 02:33:16  fine
 // St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
 //
@@ -98,7 +101,7 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
  
    if (strlen(matrixname)) fMatrix = gGeometry->GetRotMatrix(matrixname);
    else {
-     fMatrix = gGeometry->GetRotMatrix("Identity");
+     fMatrix  = gGeometry->GetRotMatrix("Identity");
      if (!fMatrix) {
         new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
         fMatrix  = gGeometry->GetRotMatrix("Identity");
@@ -134,6 +137,9 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //______________________________________________________________________________
 void St_NodePosition::Browse(TBrowser *b)
 {
+#ifndef WIN32
+   Inspect();
+#endif
    if (GetNode()) {
         TShape *shape = GetNode()->GetShape();
         b->Add(GetNode(),shape?shape->GetName():GetNode()->GetName());

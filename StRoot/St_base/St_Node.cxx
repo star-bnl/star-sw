@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.3 1998/12/27 02:33:16 fine Exp $
+// $Id: St_Node.cxx,v 1.4 1998/12/27 03:16:51 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.4  1998/12/27 03:16:51  fine
+// Flag WIN32 has been introduced for St_Node / St_NodePosition agaist of crashes
+//
 // Revision 1.3  1998/12/27 02:33:16  fine
 // St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
 //
@@ -255,7 +258,9 @@ void St_Node::Browse(TBrowser *b)
 //       GetList()->Browse( b );
 //    }
    else {
+#ifndef WIN32
       Inspect();
+#endif
  //      Draw();
  //      gPad->Update();
     }
