@@ -1,5 +1,8 @@
-* $Id: tpi_pid.F,v 1.5 1998/11/17 15:29:48 ogilvie Exp $
+* $Id: tpi_pid.F,v 1.6 1999/02/19 21:14:38 ogilvie Exp $
 * $Log: tpi_pid.F,v $
+* Revision 1.6  1999/02/19 21:14:38  ogilvie
+* added new method 3 = use weights to calc de/dx
+*
 * Revision 1.5  1998/11/17 15:29:48  ogilvie
 * corrected foreign key pointing to global tracks
 *
@@ -70,7 +73,7 @@ C***********************************************************************
       method = parm(1).method(2)
 
 c      method = 0  ! test
-
+      write(6,*) 'temporary check on method', method
 c
 c a quick loop to see if hypo_h is long enough
 c
@@ -198,7 +201,7 @@ c
             enddo
             if (found.eq..false.) then
               write (6,20)
- 20           format(2x,'global track indedx by dst_dedx.id_track not found')
+ 20           format(2x,'global track indexed by dst_dedx.id_track not found')
               tpi_pid = STAFCV_BAD
               return
              endif         
