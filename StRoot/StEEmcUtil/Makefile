@@ -1,5 +1,5 @@
 LIBNAME= StEEmcUtil
-SUBDIRS= EEevent EEfeeRaw EEmcGeom  
+SUBDIRS= EEevent EEfeeRaw EEmcGeom EEmcSmdMap 
 AR     = ar rul
 ARX    = ar x
 CXX    = g++
