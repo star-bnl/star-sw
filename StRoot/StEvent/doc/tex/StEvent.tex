@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.18 2000/02/11 16:23:45 ullrich Exp $
+% $Id: StEvent.tex,v 2.19 2000/02/17 18:16:18 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,9 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.18  2000/02/11 16:23:45  ullrich
-% Add info on order in which primary vertices are stored
-% and added description of StPrimaryVertex::flag().
+% Revision 2.19  2000/02/17 18:16:18  ullrich
+% Add documentation of new SVT hit storage layout.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -147,8 +146,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -172,8 +171,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -181,17 +180,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -206,8 +205,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/11 16:23:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -336,7 +335,7 @@ enum StTrackModel           {helixModel, kalmanModel};
 
 enum StDetectorId           {kUnknownId,
                              kTpcId,
-at 1.  Examples are TPC sectors and padrows, SVT layers, ladders and
+                             kSvtId,
                              kRichId,
                              kFtpcWestId,
                              kFtpcEastId,
@@ -2003,30 +2002,33 @@ Fig.~\ref{fig:tpc}. You get the idea when you look at the following
 example:
 \begin{verbatim}
 const int isec = 3;    // 4th sector
-\index{SVT hits}
-\index{StSvtHit}
-\index{ladder}
-\index{layer}
-\index{wafer}
-The SVT consist of 6 layers (or 3 barrels) with up to 8 ladders each. Each ladder
-has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides methods to
-return the local coordinates exactly in these ``units'': \texttt{barrel()}
-returns 1--3, \texttt{layer()} returns 1--6, \texttt{ladder()} returns 1--8,
-and \texttt{wafer()} returns 1--7. If you are puzzled why these numbers start at
-1 have a look at section \ref{sec:conventionsNumbering}.
-Because of the more detailed local coordinates
-there is not enough space to store any further details on the hits as it is the case
-for the TPC and FTPC.
-The SVT hits are stored in a tree organized as shown in Fig.~\ref{fig:svt}. 
-The top collection (\texttt{StSvtHitCollection}), the layer collection
-(\texttt{StSvtLayerHitCollection}), and the 
-(\texttt{StSvtLadderHitCollection}) provide a method to return the number
-of hits stored in the referring subcomponent (\texttt{numberOfHits()}).
-The hits are stored per wafer.
+const int irow = 24;   // 25th row
+
+cout << "sector " << isec << " contains "
+     << event->tpcHitCollection()->sector(isec)->numberOfHits()
+     << " hits" << endl;
+
+StSPtrVecTpcHit& theHits =
+event->tpcHitCollection()->sector(isec)->padrow(irow)->hits();
+
+cout << "sector " << isec << " padrow " << irow << " contains "
+     << theHits.size() << " hits" << endl;
+
+for (int i=0; i<theHits.size(); i++) {
+    cout << theHits[i]->position() << endl;
+    cout << theHits[i]->charge() << endl;
+    cout << theHits[i]->padsInHit() << endl << endl;
+    cout << theHits[i]->pixelsInHit() << endl << endl;
+    assert(theHits[i]->padrow() == irow);
+    assert(theHits[i]->sector() == isec);
+}
+\end{verbatim}
+The top collection (\texttt{StTpcHitCollection}) and each sector 
+(\texttt{StTpcSectorHitCollection}) provide a method
 \texttt{numberOfHits()} which returns just that, the number of all TPC
 hits and the number of hits in the corresponding sector.
 
-        \caption{Class diagrams of the SVT hit storage scheme: layer/ladder/wafer.}
+This organization scheme makes it much easier to perform gain and
 residual studies and can be better integrated into the reconstruction
 phase than a long flat list of hits. The disadvantage is that looping
 over \emph{all} hits does require somewhat more code but selecting
@@ -2034,25 +2036,25 @@ hits in certain rows or sectors is easy and very efficient.
 
 \subsubsection{FTPC hits}
 \index{FTPC hits}
-const int ilayer   = 1;
-const int iladder  = 2;
+\index{FTPC planes and sectors}
+\index{StFtpcHit}
 \index{sectors}
 \index{planes}
-cout << "layer " << ilayer << " contains "
-     << event->svtHitCollection()->layer(ilayer)->numberOfHits()
+
+The FTPC hit class \texttt{StFtpcHit} is very similar to the TPC
 version.  However, because of the different detector geometry the hits
 are stored according to planes (20) and then sectors (6). This is
 depicted in Fig.~\ref{fig:ftpc}. Other than the TPC hit the FTPC hit
-event->svtHitCollection()->layer(ilayer)->ladder(iladder)->wafer(iwafer).hits();
+has a method to return the size of the hit in time direction
 (\texttt{timebinsInHit()}) but no method to return the number of
-cout << "layer " << ilayer << ", ladder " << iladder
+pixels per hit. See \ref{sec:StFtpcHit} for details.  You probably
 should also read the warnings in section
 \ref{sec:conventionsNumbering} on the numbering schemes.
 
 \begin{figure}[htb]
     \begin{center}
         \includegraphics{ftpc.eps}
-    assert(theHits[i]->layer() == ilayer);
+        \caption{Class diagrams of the FTPC hit storage scheme: plane/sector.}
         \label{fig:ftpc}
     \end{center}
 \end{figure}
@@ -2060,16 +2062,17 @@ The following is the equivalent example to the one above but for the FTPC:
 \begin{verbatim}
 const int iplane = 11;
 const int isec   = 3;
-\index{SSD hits} \index{StSsdHit} \index{ladder} \index{wafer} The SSD
-consist of one layer of 20 ladders with 16 wafers each.  The
+
+cout << "plane " << iplane << " contains "
+     << event->ftpcHitCollection()->plane(iplane)->numberOfHits()
      << " hits" << endl;
 
 StSPtrVecFtpcHit& theHits =
 event->ftpcHitCollection()->plane(iplane)->sector(isec)->hits();
-member functions to return the strip number and the cluster size
-of the p and n side, respectively.  The SSD hits are stored in a tree
+
+cout << "plane " << iplane << " sector " << isec << " contains "
      << theHits.size() << " hits" << endl;
-layer collection (there's only one).  The hits are stored per wafer.
+
 for (int i=0; i<theHits.size(); i++) {
     cout << theHits[i]->position() << endl;
     cout << theHits[i]->charge() << endl;
@@ -3490,6 +3493,26 @@ definition in the header file.
 \item[Summary]
 \item[Synopsis]
     \verb+#include "StSsdHit.h"+\\
+    \verb+class StSsdHit;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StSsdHit();+\\
+    \verb+StSsdHit(const StThreeVectorF&,+\\
+    \verb+const StThreeVectorF&,+\\
+    \verb+ULong_t, Float_t, UChar_t = 0);+\\
+    \verb+StSsdHit(const dst_point_st&);+\\
+\item[Public Member\\ Functions]
+    \verb+ULong_t ladder() const;+\\
+    Returns ladder number in the range 1--20.
+    
+    \verb+ULong_t wafer() const;+\\
+    Returns wafer number in the range 1--16.
+    
+    \verb+ULong_t centralStripNSide() const;+\\
+    \verb+ULong_t centralStripPSide() const;+\\
+    \verb+ULong_t clusterSizeNSide() const;+\\
+    \verb+ULong_t clusterSizePSide() const;+\\
 \end{Entry}
 \clearpage
 
@@ -3511,7 +3534,8 @@ definition in the header file.
     \verb+UInt_t numberOfLadders() const;+\\
     \verb+StSsdLadderHitCollection* ladder(UInt_t);+\\
     \verb+const StSsdLadderHitCollection* ladder(UInt_t) const;+\\
-    Ladder number runs from 1--8.
+\end{Entry}
+\clearpage
 
 \subsection{StSsdLadderHitCollection}
 \index{StSsdLadderHitCollection|textbf}
@@ -3537,11 +3561,15 @@ definition in the header file.
 \index{StSsdWaferHitCollection|textbf}
 \label{sec:StSsdWaferHitCollection}
 \begin{Entry}
+\item[Summary]
 \item[Synopsis]
+    \verb+#include "StSsdWaferHitCollection.h"+\\
     \verb+class StSsdWaferHitCollection;+\\
-    \verb+UInt_t numberOfLayers() const;+\\
-    \verb+StSvtLayerHitCollection* layer(UInt_t);+\\
-    \verb+const StSvtLayerHitCollection* layer(UInt_t) const;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StSsdWaferHitCollection();+\\
+\item[Public Member\\ Functions]
     \verb+StSPtrVecSsdHit& hits();+\\
     \verb+const StSPtrVecSsdHit& hits() const;+\\
 \end{Entry}
@@ -3563,33 +3591,9 @@ definition in the header file.
     \verb+ULong_t numberOfHits() const;+\\
     \verb+UInt_t numberOfLadders() const;+\\
     \verb+StSvtLadderHitCollection* ladder(UInt_t);+\\
-    \verb+void setLayerNumber(Int_t);+\\
     \verb+const StSvtLadderHitCollection* ladder(UInt_t) const;+\\
 \end{Entry}
 \clearpage
-
-\subsection{StSvtLayerHitCollection}
-\index{StSvtLayerHitCollection|textbf}
-\label{sec:StSvtLayerHitCollection}
-\begin{Entry}
-\item[Summary]
-\item[Synopsis]
-    \verb+#include "StSvtLayerHitCollection.h"+\\
-    \verb+class StSvtLayerHitCollection;+\\
-\item[Description]
-\item[Related Classes]
-\item[Public\\ Constructors]
-    \verb+StSvtLayerHitCollection();+\\
-\item[Public Member\\ Functions]
-    \verb+ULong_t numberOfHits() const;+\\
-    \verb+UInt_t numberOfLadders() const;+\\
-    \verb+StSvtLadderHitCollection* ladder(UInt_t);+\\
-    \verb+const StSvtLadderHitCollection* ladder(UInt_t) const;+\\
-    \verb+void setLayerNumber(Int_t);+\\
-\end{Entry}
-\clearpage
-
-
 
 \subsection{StSvtHit}
 \index{StSvtHit|textbf}
@@ -3599,25 +3603,28 @@ definition in the header file.
 \item[Synopsis]
     \verb+#include "StSvtHit.h"+\\
     \verb+class StSvtHit;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
     \verb+StSvtHit();+\\
     \verb+StSvtHit(const StThreeVectorF&,+\\
     \verb+         const StThreeVectorF&,+\\
     \verb+         ULong_t, Float_t, UChar_t = 0);+\\
     \verb+StSvtHit(const dst_point_st&);+\\
 \item[Public Member\\ Functions]
-    Total number clusters in each SVT layer.
+    \verb+ULong_t layer() const;+\\
     Layer in which hit is located. Layer number runs from 1--6.
 
-    Total number of space points in each SVT layer.
+    \verb+ULong_t ladder() const;+\\
     Ladder number runs from 1--16. Ladders
     are counted per barrel.
     
     \verb+ULong_t wafer() const;+\\
     Wafer number runs from 1--7.
-    Total charge deposition in each SVT layer.
+    
     \verb+ULong_t barrel() const;+\\
     Barrel number runs from 1--3.
-    Fraction of hits used in each SVT layer.
+    
     \verb+ULong_t hybrid() const;+\\
 \end{Entry}
 \clearpage
@@ -3626,8 +3633,6 @@ definition in the header file.
 \subsection{StSvtHitCollection}
 \index{StSvtHitCollection|textbf}
 \label{sec:StSvtHitCollection}
-    
-    
 \begin{Entry}
 \item[Summary]
 \item[Synopsis]
