@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.3 1999/03/07 14:56:28 wenaus Exp $
+ * $Id: StHelixD.cc,v 1.4 1999/08/18 12:37:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.3  1999/03/07 14:56:28  wenaus
- * fix scope problem
+ * Revision 1.4  1999/08/18 12:37:57  ullrich
+ * Fixed bug in pathLength(double). Swap of first and second
+ * wasn't done correctly.
  *
  * Revision 1.8  2000/05/22 21:38:32  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -266,7 +267,7 @@ pairD StHelixD::pathLength(double r) const
 	double t17 = t8*t8;
 	double t19 = t11*t11;
 	double t21 = t11*t3;
-	value.second = value.first;
+	double t23 = t5*t5;
 	double t32 = t14*t14;
 	double t35 = t14*t3;
 	double t38 = 8.0*t4*t6 - 4.0*t1*t2*t8 - 4.0*t11*mCurvature*t6 +
