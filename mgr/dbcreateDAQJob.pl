@@ -17,7 +17,7 @@ use File::Find;
 use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
-require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
+#require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 my $debugOn=0;
 
@@ -28,13 +28,15 @@ my @SetD = (
              "daq/2000/09",
 );
 
-my $prodPeriod = "P00hi"; 
-my @chName = ("p00h7", "p00h1");              
+my $prodPeriod = "P00hm"; 
+my @chName = ("p00h11", "p00h1");              
 my $chainDir = "daq";
+my $jobTrg = "minbias";
 
 ###Set directories to be created for jobfiles
 
-my $DISK1        = "/star/rcf/disk00001/star/";
+#my $DISK1        = "/star/rcf/disk00001/star/";
+my $DISK1        = "/star/rcf/prodlog/";
 my $TOPHPSS_SINK = "/home/starsink/raw/daq";
 my $TOPHPSS_RECO = "/home/starreco/reco";
 my @JOB_LOG;
@@ -62,15 +64,15 @@ struct OptAttr => {
  my @jobDOpt;
  my $njobDOpt = 0;
 
-#####  connect to RunLog DB
+#####  connect to production DB
 
- &StDbDescriptorConnect();
+ &StDbProdConnect();
 
 my $myRun;
 my @runSet;
 my $nrunSet = 0;
 
- $sql="SELECT runNumber FROM $runDescriptorT WHERE category = 'physics'";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE trigger = '$jobTrg' ";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -84,13 +86,12 @@ my $nrunSet = 0;
            my $fname=$cursor->{NAME}->[$i];
 #        print "$fname = $fvalue\n" ;
        
-         $myRun = $fvalue     if( $fname eq 'runNumber'); 
+         $myRun = $fvalue     if( $fname eq 'runID'); 
 	 }
         $runSet[$nrunSet] = $myRun;
         $nrunSet++;
  }
 
- &StDbDescriptorDisconnect();         
  
  my $jb_news;
  my $jb_archive;
@@ -123,8 +124,6 @@ my $nrunSet = 0;
 
  my $filename;
 
-###  connect to the Production DB
- &StDbProdConnect();
 
 ##### insert first line to JobStatusT table get last ID 
 
@@ -177,7 +176,7 @@ my $nrunSet = 0;
  $jobDIn_no = 0; 
  for ($ii=0; $ii< scalar(@SetD); $ii++)  { 
 
-  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND runID > '1231000' AND hpss = 'Y'";
+  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND hpss = 'Y'";
     $cursor =$dbh->prepare($sql)
      || die "Cannot prepare statement: $DBI::errstr\n";
            $cursor->execute;
@@ -203,8 +202,6 @@ my $nrunSet = 0;
 
  }
 
-
-
 #####  start loop over input files
 my $jbset;
 my @flsplit;
@@ -224,9 +221,9 @@ my $mrunId;
      }else {
        $mrunId = 0;
      }
-        if ( $mrunId > 1222001 ) {
+#        if ( $mrunId > 1177000 ) {
         if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
-#      if ( $mrunId == 1244036 ) {
+      if ( $mrunId == 1241030 ) {
       foreach my $runNum (@runSet) {
 
         if ( $mrunId eq $runNum) {      
@@ -248,7 +245,7 @@ my $mrunId;
            $mchName = $mNikName;
           @parts =  split ("/", $jpath);
            next if ($mflName =~ /st_physics_1176008/);
-    $jbset = $prodPeriod . "_" . $parts[5] . "_" . $parts[6];
+    $jbset = $prodPeriod . "_" . $jobTrg . "_" . $parts[5] . "_" . $parts[6];
           $mjobFname = $jbset ."_". $jfile;
 
     $jb_fstat = 1;
@@ -270,11 +267,11 @@ my $mrunId;
 #####  fill  JobStatus table
       print "filling JobStatus table\n";
  
-       &fillJSTable();   
+#       &fillJSTable();   
 
 #####  fill  jobRelations table
        print "filling jobRelations table\n";
-        &fillJRelTable();
+#       &fillJRelTable();
 
 	}
         }
@@ -347,12 +344,15 @@ my $mrunId;
 
    $fchain =~ s/_/,/g;
  
-    $Jsetn = $Jset;
+#   $fchain = "p00h,-Kalman";
+#    $Jsetn = $Jset;
 #    $Jsetn =~ s/_/\//g;
 
     @pts = split ("_",$Jset);
-    $Jsetr = $pts[1] . "/" .$pts[2]; 
-    $Jsetd = $prodPeriod . "/" . $Jsetr;     
+    $Jsetr = $pts[2] . "/" .$pts[3]; 
+#    $Jsetd = $prodPeriod . "/" . $Jsetr;     
+    $Jsetd = $Jset;
+    $Jsetd =~ s/_/\//g; 
     $inFile =  $gfile . ".daq";
     $logDir = $JOB_LOG[0];   
 
@@ -370,7 +370,7 @@ my $mrunId;
       my $hpss_dst_file3 = $gfile . ".runco.root";
       my $hpss_dst_file4 = $gfile . ".event.root";
       my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcc.csh";
-      my $executableargs = $fchain;
+      my $executableargs = $fchain; 
       my $log_dir       = $logDir;
       my $log_name      = $gfile . ".log";
       my $err_log       = $gfile . ".err";
