@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.10 1999/09/02 21:47:12 fisyak Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.11 1999/12/07 23:10:46 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -28,6 +28,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.11  1999/12/07 23:10:46  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.10  1999/09/02 21:47:12  fisyak
  * HP corrections
  *
@@ -204,8 +207,8 @@ int TPCV2P0_ZS_SR::initialize()
 	// Second fill in the Sequence structs
 
 	// get a pointer to the CPPr bank for debugging only
-	classname(Bank_TPCCPPR) *cppr =
-	  detector->getBankTPCCPPR(sector,rcb,mz) ; //pointer to CPP raw bank
+	//	classname(Bank_TPCCPPR) *cppr =
+	//detector->getBankTPCCPPR(sector,rcb,mz) ; //pointer to CPP raw bank
 	// get a pointer to the PADK bank for debugging only
 	//	TPCV2P0_PADK_SR *padkr = detector->getPADKReader(sector);
 

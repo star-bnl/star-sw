@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: fee_pin.h,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * $Id: fee_pin.h,v 1.3 1999/12/07 23:10:47 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC sector readout hardware configuration
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: fee_pin.h,v $
+ * Revision 1.3  1999/12/07 23:10:47  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.2  1999/07/02 04:43:24  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -2209,6 +2212,7 @@ static unsigned short pad_vs_fee[182][32] = {
 },
 };
 
+#ifdef MAKE_THE_DAMNED_COMPILER_SILENT
 static unsigned short rdo_vs_fee[182][32] = {
 /* fee 0 */ 
 {6, 6, 6, 6, 6, 6, 6, 6, 
@@ -5493,4 +5497,4 @@ static unsigned short offset_vs_fee[182][32] = {
 354, 358, 362, 366, 370, 374, 378, 382, 
 },
 };
-
+#endif

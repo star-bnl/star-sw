@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.15 1999/12/07 20:24:45 levine Exp $
+ * $Id: EventReader.cxx,v 1.16 1999/12/07 23:10:30 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -20,6 +20,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.16  1999/12/07 23:10:30  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.15  1999/12/07 20:24:45  levine
  * add #include <time.h> to make compile warning go away
  *
@@ -517,7 +520,7 @@ char * EventReader::findBank(char *bankid)
   int i;
   for (i=0; i<len; i++, ptr++) {
     if (ptr->length==0) continue;//invalid entry
-    if (ptr->length== 0xfeedf00d) continue; // EVB fills DATAP with this
+    if ((unsigned int)ptr->length== 0xfeedf00d) continue; // EVB fills DATAP with this
     pBank = (Bank_Header *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
     if(!strncmp(bankid,pBank->BankType,4)) break;
   }
