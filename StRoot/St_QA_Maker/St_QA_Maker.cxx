@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.2 2000/09/08 18:55:54 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.3 2001/04/24 19:59:08 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.3  2001/04/24 19:59:08  genevb
+// Use det_id to identify detectors
+//
 // Revision 2.2  2000/09/08 18:55:54  lansdell
 // turned on FTPC primary track histograms
 //
@@ -26,6 +29,7 @@
 #include "St_DataSetIter.h"
 #include "St_QA_Maker.h"
 #include "StQABookHist.h"
+#include "StDetectorId.h"
 
 #include "StVertexId.h"
 #include "StDetectorDefinitions.h"
@@ -408,8 +412,9 @@ void St_QA_Maker::MakeHistGlob(){
 		
          hists->m_det_id->Fill(t->det_id);
 
+        switch (t->det_id) {
 //  now fill all TPC histograms ------------------------------------------------
-        if (t->iflag>=100 && t->iflag<200 ) {
+        case (kTpcId) : {
 
 // these are tpc only
         hists->m_glb_f0->Fill(xdif,0.);
@@ -473,11 +478,15 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_nfptonpt_momT->Fill(lmevmom,nfitntot);
         hists->m_nfptonpt_etaT->Fill(eta,nfitntot);
         hists->m_psi_phiT->Fill(t->phi0,t->psi);
-        }
+        break; }
 
 
 //  now fill all TPC+SVT histograms ------------------------------------------------
-        if (t->iflag>=500 && t->iflag<600 ) {
+        case (kSvtId) :
+        case (kTpcSsdId) :
+        case (kTpcSvtId) :
+        case (kTpcSsdSvtId) :
+        case (kSsdSvtId) : {
 
 	// use multihist class StMultiH1F
         hists->m_glb_f0TS->Fill(xdif,0);
@@ -536,10 +545,10 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
         hists->m_nfptonpt_etaTS->Fill(eta,nfitntot);
         hists->m_psi_phiTS->Fill(t->phi0,t->psi);
-        }
+        break; }
 
 //  now fill all FTPC East histograms ------------------------------------------------
-        if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
+        case (kFtpcEastId) : {
 	
 // these are tpc & ftpc
         hists->m_pointFE->Fill(trkpnt);
@@ -569,10 +578,10 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_npoint_lengthFE->Fill(t->length,Float_t(trkpnt));
         hists->m_fpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
 
-        }
+        break; }
 
 //  now fill all FTPC West histograms ------------------------------------------------
-        if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
+        case (kFtpcWestId) : {
 
 // these are tpc & ftpc
         hists->m_glb_rfFW->Fill(sqrt((t->x_first[0]*t->x_first[0])+
@@ -601,8 +610,8 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_eta_trklengthFW->Fill(eta,t->length);
         hists->m_npoint_lengthFW->Fill(t->length,Float_t(trkpnt));
         hists->m_fpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
-        }
-
+        break; }
+       }
       }
     }
     hists->m_globtrk_good->Fill(cnttrkg);
@@ -775,8 +784,9 @@ void St_QA_Maker::MakeHistPrim(){
 		
          hists->m_pdet_id->Fill(t->det_id);
 
+        switch (t->det_id) {
 //  now fill all TPC histograms ------------------------------------------------
-        if (t->iflag>=300 && t->iflag<400) {
+        case (kTpcId) : {
 
 // these are tpc only
         hists->m_prim_f0->Fill(xdif,0);
@@ -835,11 +845,15 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
         hists->m_pnfptonpt_etaT->Fill(eta,nfitntot);
         hists->m_ppsi_phiT->Fill(t->phi0,t->psi);
-        }
+        break; }
 
 
 //  now fill all TPC+SVT histograms ------------------------------------------------
-        if (t->iflag>=600 && t->iflag<700) {
+        case (kSvtId) :
+        case (kTpcSsdId) :
+        case (kTpcSvtId) :
+        case (kTpcSsdSvtId) :
+        case (kSsdSvtId) : {
 
         hists->m_prim_f0TS->Fill(xdif,0);
         hists->m_prim_f0TS->Fill(ydif,1);
@@ -894,10 +908,10 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
         hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
         hists->m_ppsi_phiTS->Fill(t->phi0,t->psi);
-        }
+        break; }
 
 //  now fill all FTPC East histograms ------------------------------------------------
-        if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
+        case (kFtpcEastId) : {
 	
 // these are tpc & ftpc
         hists->m_ppointFE->Fill(trkpnt);
@@ -925,10 +939,10 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pnpoint_lengthFE->Fill(t->length,Float_t(trkpnt));
         hists->m_pfpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
 
-        }
+        break; }
 
 //  now fill all FTPC West histograms ------------------------------------------------
-        if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
+        case (kFtpcWestId) : {
 
 // these are tpc & ftpc
         hists->m_ppointFW->Fill(trkpnt);
@@ -955,7 +969,8 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_peta_trklengthFW->Fill(eta,t->length);
         hists->m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
         hists->m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
-        }
+        break; }
+       }
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);
