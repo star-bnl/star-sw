@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.1.1.1 2000/01/29 16:23:06 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.2 2000/01/31 15:14:52 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.2  2000/01/31 15:14:52  fisyak
+// Try to find out memory leak
+//
 // Revision 1.1.1.1  2000/01/29 16:23:06  fisyak
 // First release of StLaserAnalysisMaker
 //
@@ -13,6 +16,7 @@
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StSequence.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
+#include "StMemoryInfo.hh"
 #include "TTree.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -29,7 +33,7 @@
 #include "tables/St_tpg_detector_Table.h"
 #define g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
 extern "C" {Int_t g2t_volume_id(char*, int*, int);}
-static TGeant3 *geant3 = TGeant3::Geant3();
+static TGeant3 *geant3 = 0;
 ClassImp(StLaserAnalysisMaker)
   
 LaserTrack LaserTracks[] = {
@@ -49,8 +53,8 @@ Ertrio_t *certrio;
 Eropts_t *ceropts;
 Int_t *z_iq, *z_lq; 
 Float_t *z_q; 
-const Int_t NY = 7;
-const Int_t NZ = 7;
+const Int_t NY = 5;
+const Int_t NZ = 5;
 const Int_t NYT = 2*NY + 1;
 const Int_t NZT = 2*NZ + 1;
 TH1F *fRatio;
@@ -71,6 +75,7 @@ Int_t StLaserAnalysisMaker::Init(){
   // Create tables
   //   St_DataSetIter       local(GetDataBase("params"));
   // Create Histograms    
+  geant3 = TGeant3::Geant3();
   if (geant3) {
     cquest = (Quest_t  *) geant3->Quest();
     clink  = (Gclink_t *) geant3->Gclink();
@@ -96,9 +101,20 @@ Int_t StLaserAnalysisMaker::Init(){
   fPredictions = new TClonesArray("Prediction", 1000);
   TClonesArray &predictions = *fPredictions;
   const Char_t *PredictionFile  = "Prediction.root";
+  TBranch *branch = 0;
   TFile *fPred = new TFile(PredictionFile);
-  if (!fPred->IsOpen()) {
-    delete fPred;
+  if (fPred->IsOpen()) {
+    fTree = (TTree*) fPred->Get("P");
+    if (fTree) {
+      branch = fTree->GetBranch("Predictions");
+      if (branch) {
+	branch->SetAddress(&fPredictions);
+	fTree->GetEntry(0);  //read complete event in memory
+      }
+    }
+  }
+  if (!branch) {
+    SafeDelete (fPred);
     fPred = new TFile(PredictionFile,"RECREATE");
     // Need to get some data from tables, e.g. globtrk for momentum etc,
     // Also primary vertex. Make a loop over tracks too.
@@ -239,9 +255,11 @@ Int_t StLaserAnalysisMaker::Init(){
 			     << xyzL[1] << "\t" 
 			     << xyzL[2] << endm;
 	  }
-	  if (Debug()) gMessMgr->Info() << "\tg2t_id \t" << g2t_id << endm;
-	  gMessMgr->Info() << "\tSector \t" << sector << "\t PadRow \t" 
-			   << padrow << "\t isdet \t" << isdet <<  "\tpad \t" << pad << endm;
+	  if (Debug()) {
+	    gMessMgr->Info() << "\tg2t_id \t" << g2t_id << endm;
+	    gMessMgr->Info() << "\tSector \t" << sector << "\t PadRow \t" 
+			     << padrow << "\t isdet \t" << isdet <<  "\tpad \t" << pad << endm;
+	  }
 	  //      TMath::Normalize(pxyzL);
 	  new(predictions[fNPrediction++]) Prediction(i,++Id, sector, padrow, pad, TimeBin,
 			pxyzL[1]/pxyzL[0], pxyzL[2]/pxyzL[0], X, Z);
@@ -249,22 +267,27 @@ Int_t StLaserAnalysisMaker::Init(){
 	  memcpy (p1,p2,12);
 	}
       }
-      gMessMgr->Info() << "Done with track no." << i << endm;
+      if (Debug()) gMessMgr->Info() << "Done with track no." << i << endm;
     }
-    gMessMgr->Info() << "Tracks loop is over with " << Id << " predictions" << endm;
+    gMessMgr->Info() << "Tracks loop is over with " << Id << "/" << fNPrediction << " predictions" << endm;
     TObjArrayIter next(fPredictions);
     Prediction *pred, *pred2;
-    while ((pred = (Prediction *) next())) {
-      pred->Print();
-      TObjArrayIter next2(fPredictions);
-      while ((pred2 = (Prediction *) next2())) {
+    Int_t i,j;
+    //    while ((pred = (Prediction *) next())) {
+    for (i=0;i<fNPrediction-1; i++){
+      pred = (Prediction *) fPredictions->UncheckedAt(i);
+      if (Debug()) pred->Print();
+      //      TObjArrayIter next2(fPredictions);
+      //      while ((pred2 = (Prediction *) next2())) {
+      for (j=i+1;j<fNPrediction;j++){
+	pred2 = (Prediction *) fPredictions->UncheckedAt(j);
 	if (pred->GetId() == pred2->GetId()) continue;
 	if (pred->GetSector() != pred2->GetSector()) continue;
 	if (pred->GetPadrow() != pred2->GetPadrow()) continue;
 	if (TMath::Abs(pred->GetPadNo() - pred2->GetPadNo()) > NYT) continue;
 	if (TMath::Abs(pred->GetTimeBin() - pred2->GetTimeBin()) > NZT) continue;
-	pred->DisActivate(); cout << "Disactivate"; pred->Print();
-	pred2->DisActivate(); cout << "Disactivate"; pred2->Print();
+	pred->DisActivate();// cout << "Disactivate"; pred->Print();
+	pred2->DisActivate();// cout << "Disactivate"; pred2->Print();
       }
     }
     fPred->cd();
@@ -272,25 +295,23 @@ Int_t StLaserAnalysisMaker::Init(){
     fTree->Branch("Predictions", &fPredictions);
     fTree->Fill();
     fPred->Write();
-    delete fPred;
-    fPred = new TFile(PredictionFile);
   }
   fTree = (TTree*) fPred->Get("P");
-  TBranch *branch = fTree->GetBranch("Predictions");
-  branch->SetAddress(&fPredictions);
-  fTree->GetEntry(0);  //read complete event in memory
-  delete fPred;
+  branch = fTree->GetBranch("Predictions");
+  fNPrediction = fPredictions->GetEntries(); cout << "Read " << fNPrediction << " predictions" << endl;
+  SafeDelete (fPred);
   // Open DAQ file
   OpenDAQ();
   //Histograms
+  fevent = new LEvent;
   TFile *f = (TFile *) ((StBFChain *)GetChain())->GetTFile();
   if (f) {
     f->cd();
     fTree        = new TTree("L","Tpc laser track tree");
-    fevent = new LEvent;
-    Int_t bufsize= 64000;
-    fTree->Branch("LEvent", "LEvent",&fevent, bufsize, 1);
+    //    fTree->SetAutoSave(10000000);
+    fTree->Branch("LEvent", "LEvent",&fevent);
   }
+#if 0
   fADC      = new TH1F("ADC","ADC sum",500,0,10000.);
   fADC3x3   = new TH1F("ADC3x3","ADC sum 3x3",500,0,10000.);
   fRatio    = new TH1F("Ratio","Ratio ADC3x3/ADC",100,0.,1.0);
@@ -298,6 +319,7 @@ Int_t StLaserAnalysisMaker::Init(){
   fPadO     = new TH2F("PadO","space distribution for outer sectors",10*NYT,-NY-0.5,NY+0.5,100,0.,1.);  
   fTimeI    = new TH2F("TimeI","time distribution for inner sectors",10*NZT,-NZ-0.5,NZ+0.5,100,0.,1.);  
   fTimeO    = new TH2F("TimeO","time distribution for outer sectors",10*NZT,-NZ-0.5,NZ+0.5,100,0.,1.);  
+#endif
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -309,36 +331,41 @@ Int_t StLaserAnalysisMaker::OpenDAQ()
 }
 //_____________________________________________________________________________
 Int_t StLaserAnalysisMaker::Make(){
-  gMessMgr->Info() << "StLaserAnalysisMaker running in chain" << endm;
   fTPCReader = fDAQReader->getTPCReader();   assert(fTPCReader); 
   // clean and fill tree
   Option_t *Option = "";
   // Predictions
   Float_t adc[NZT][NYT];
-  TObjArrayIter next(fPredictions);
+  //  TObjArrayIter next(fPredictions);
   Prediction *pred;
-  while ((pred = (Prediction *) next())) {
+  //  while ((pred = (Prediction *) next())) {
+  Int_t l;
+#if 0
+  StMemoryInfo::instance()->snapshot();
+#endif
+  for (l=0;l<fNPrediction-1; l++){
+    pred = (Prediction *) fPredictions->UncheckedAt(l);
     if (pred->GetId() <= 0) continue;
     fevent->Clear(Option);
     Int_t noLT         = pred->GetLT();
     fevent->SetPred(pred);
-    fevent->SetLTrack(&LaserTracks[noLT]);
+    fevent->SetLTrack(LaserTracks[noLT]);
     Int_t sectorNumber =  pred->GetSector();
     Int_t padRowNumber =  pred->GetPadrow();
     Int_t padNumber    =  pred->GetPadNo();
     Int_t timeBin      =  pred->GetTimeBin();
     Float_t Y          =  pred->GetY();
     Float_t Z          =  pred->GetZ();
-    Float_t tY         =  pred->GettY();
-    Float_t tZ         =  pred->GettZ();
+    //    Float_t tY         =  pred->GettY();
+    //    Float_t tZ         =  pred->GettZ();
     Float_t ADC        = 0;
     Float_t ADC3x3     = 0; 
     Int_t   overflow   = 0;
     u_char  *padlist; 
-    if (TMath::Abs(tY) > 0.05 || TMath::Abs(tZ) > 0.1) continue;
+    //    if (TMath::Abs(tY) > 0.05 || TMath::Abs(tZ) > 0.1) continue;
     memset (adc, 0, sizeof(adc));
     int count = fTPCReader->getPadList(sectorNumber,padRowNumber, padlist);
-    if (!count) continue; // any pads with data?
+     if (!count) continue; // any pads with data?
     for (int padnum = 0; padnum<count && !overflow; padnum++) {
       int pad = padlist[padnum];
       if (!pad) continue;
@@ -361,26 +388,16 @@ Int_t StLaserAnalysisMaker::Make(){
 	}
       }
     }
+    //    continue;
     if (overflow) continue;
     Float_t ratio = 0;
     if (ADC > 0) {
-      fADC->Fill(ADC);
-      fADC3x3->Fill(ADC3x3);
+      //      fADC->Fill(ADC);
+      //      fADC3x3->Fill(ADC3x3);
       ratio = ADC3x3/ADC;
-      fRatio->Fill(ratio);
-      if (ADC < 100) continue;
+      //      fRatio->Fill(ratio);
       int i,j;
-#if 0
-      printf ("===================================\n");
-      printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
-	      ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
-      if (ratio < 0.5) continue;
-      for (i=0;i<NYT;i++){
-	printf ("%i",i-NY);
-	for (j=0;j<NZT;j++) printf ("|\t%5.0f",adc[j][i]);
-	printf ("\n");
-      }
-#endif
+      if (ratio < 0.4) continue;
       if (ADC < 200 || ADC > 10000) continue;
       Float_t Yadc[NYT];
       Float_t Zadc[NZT];
@@ -423,33 +440,52 @@ Int_t StLaserAnalysisMaker::Make(){
       DYY -= Yav*Yav;
       CYZ -= Yav*Zav;
       DZZ -= Zav*Zav;
+#if 0
       fevent->SetAverage(ADC,ADC3x3,ratio,nY1,nY2,nZ1,nZ2,Yav,Zav,DYY,CYZ,DZZ);
       TH2F *hPad  = fPadO;
       TH2F *hTime = fTimeO;
       if (padRowNumber <= 13) {hPad  = fPadI; hTime = fTimeI;}
+#endif
       for (i=0; i<NYT; i++) {
 	yy = i - NY;
 	y  = yy - Y;
-	if (Yadc[i] > 0) {
-	  hPad->Fill(y,Yadc[i]);
-	  fevent->AddYProf(y,Yadc[i]);
-	}
+	//	if (Yadc[i] > 0) {
+	//	  hPad->Fill(y,Yadc[i]);
+	fevent->AddYProf(y,Yadc[i]);
+	  //	}
       }
       for (j=0; j<NZT; j++) {
 	zz = j - NZ;
 	z  = zz - Z;
-	if (Zadc[j] > 0) {
-	  hTime->Fill(j-NZ-Z,Zadc[j]);
-	  fevent->AddZProf(Z,Zadc[j]);
-	}
+	//	if (Zadc[j] > 0) {
+	//	hTime->Fill(j-NZ-Z,Zadc[j]);
+	fevent->AddZProf(Z,Zadc[j]);
+	  //	}
       }
-    }
 #if 0
-    if (NoEvents%100 == 0) fevent->Print();
-    NoEvents++;
+      printf ("===================================\n");
+      printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
+	      ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
+      printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
+      printf ("|\tidx");
+      for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
+      for (i=0;i<NYT;i++){
+	printf ("%i",i-NY);
+	for (j=0;j<NZT;j++) printf ("|\t%5.0f",1000*adc[j][i]);
+	printf ("|\t%5.0f",1000*Yadc[i]); 
+	if (i == NZ) printf("<=== Y %f dY %f" ,Y, Yav-Y);
+	printf("\n");
+      }
+      for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
 #endif
-    fTree->Fill();
+      ////      if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 0.1)     fTree->Fill();
+    //    else                           fevent->Print();
+    }
   }
-  
+  //  fTree->AutoSave();
+#if 0
+  StMemoryInfo::instance()->snapshot();
+  StMemoryInfo::instance()->print();
+#endif
   return kStOK;
 }
