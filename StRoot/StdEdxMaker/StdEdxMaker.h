@@ -1,75 +1,44 @@
-//  StdEdxMakerSt.h
-//  M.L. Miller
-// 5/00
+// $Id: StdEdxMaker.h,v 1.2 2000/11/25 23:19:53 fisyak Exp $
+#ifndef STAR_StdEdxMaker
+#define STAR_StdEdxMaker
 
-#ifndef StdEdxMaker_HH
-#define StdEdxMaker_HH
-
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// StdEdxMaker virtual base class for Maker                            //
+//                                                                      //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+//
+//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
-//Forward Declarations
-class TFile;
-class TNtuple;
-class TCanvas;
-class TH2F;
-class TrackEntry;
-class StEvent;
-class StPrimaryVertex;
-class StTrack;
-class AnaTrackId;
-class TrMean;
-class VertexEntry;
-class EventEntry;
-class DeDxPreparation;
-
+static  Double_t Sirrf(Double_t poverm);
+class St_tpcGain;
+class St_TpcTimeGain;
+class St_TpcDriftDistCorr;
+class StThreeVectorD;
 class StdEdxMaker : public StMaker {
- public:
+ private:
+  St_tpcGain          *m_tpcGain;      //!
+  St_TpcTimeGain      *m_tpcTime;      //!
+  St_TpcDriftDistCorr *m_drift;        //!
+  StThreeVectorD      *mNormal[24];    //!
+ protected:
+ public: 
+                  StdEdxMaker(const char *name="dEdx");
+   virtual       ~StdEdxMaker();
+   virtual Int_t Init();
+   virtual Int_t  Make();
+// virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
+// virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+   void    SortdEdx(Double_t *dEdxS, Int_t NPoints);
+   Double_t MyDate(Int_t date,Int_t time);
+   void DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
+   virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StdEdxMaker.h,v 1.2 2000/11/25 23:19:53 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-    //Maker-Chain Stuff
-    StMaker* currentChain;
+   ClassDef(StdEdxMaker, 1)   //StAF chain virtual base class for Makers
+};
 
-    //Constructor-Destructor
-    StdEdxMaker(const char* name = "PionSpec");
-    virtual ~StdEdxMaker();
-    
-    //Standard Maker Methods
-    virtual Int_t Init();
-    virtual Int_t Make();
-    
-    //Encapsulated Analysis Result (Implemented as a singleton)
-    //    AnaResult* m_AnaResult; //!
-    static void kill();             //Delete the singleton instance
-    TrackEntry* m_Track;            //!Data collection for root tree
-    TTree* m_EventTree;             //!The data tree
-    
-    //    EvtAna* m_EvtAna; //!
-    // Methods------------------------------------------------------
-    void clear();
-    void clearAll();
-    void run(StEvent*);
-    void primaryProcess(StEvent*);     //Loop over primary vertices
-    void globalProcess(StEvent* rEvent);     //Loop over global tracks
-    void vertexAna(StPrimaryVertex*);     //Loop over primary tracks
-    void trackAna( StTrack* );  //analyze a track
-    void fillHitVector(const DeDxPreparation*); //store hits from tracks
-    void printHitVector();
-private:
-    int m_PrimTrackNumber;       //!A Simple Counter
-    int m_GlobTrackNumber;       //!
-    VertexEntry *m_Vertex;       //!This really shouldn't be a member
-    EventEntry *m_Event;         //!
-
-    DeDxPreparation* dedxprep;   //!
-    TrMean* trmean;              //!
-    
-    StEvent* m_StEvent;          //!
- public:
-    //More Maker Stuff
-    virtual const char* GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StdEdxMaker.h,v 1.1.1.1 2000/11/08 02:18:21 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
-    ClassDef(StdEdxMaker, 1)
-	
-	};
 #endif
+
