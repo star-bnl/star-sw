@@ -21,16 +21,19 @@
 # This needs to be 
 # first in the script so that this special mode doesn't clobber the output
 # directory or other files.
-if test $1 = watchProgress
+if test $# -ge 1
 then
-  while true
-  do
-    echo ooooooooooooooooooooooooooooooooooooooo
-    ls -l jjTempDir
-    date
-    echo Use control-C to stop this.
-    sleep 15
-  done
+  if test $1 = watchProgress
+  then
+    while true
+    do
+      echo ooooooooooooooooooooooooooooooooooooooo
+      ls -l jjTempDir
+      date
+      echo Use control-C to stop this.
+      sleep 15
+    done
+  fi
 fi
 ################################# Set up variables for later use.
 STARTTIME=`date`
@@ -47,7 +50,7 @@ then
 fi
 ################################# Clean up the temp directory.
 echo Cleaning up the temp directory.
-rm -r jjTempDir
+rm -r jjTempDir 2> /dev/null
 mkdir jjTempDir
 ################################# Prompt user for the title.
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
