@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.20 1999/01/20 23:44:47 fine Exp $
+// $Id: StChain.h,v 1.21 1999/02/20 18:48:56 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.21  1999/02/20 18:48:56  fisyak
+// Add event/run information to Chain
+//
 // Revision 1.20  1999/01/20 23:44:47  fine
 // The special Input/Output makers and the static variable StChain::g_Chain have been introduced
 //
@@ -107,8 +110,21 @@ private:
    Int_t               m_VersionDate;       //StChain version date
    Int_t               m_Run;               //Run number 
    Int_t               m_Event;             //Event event number
-   Int_t               m_Mode;              //Run mode
-   Char_t              m_EvenType;          //Event type: Au+Au, p+p, laser..
+   Int_t               m_Mode;              //Run mode -- Event generator accoringly Ron numenclature 
+   Char_t             *m_EvenType;          //Event type: Au+Au, p+p, laser..
+   Float_t             m_BImpact;           //Impact parameter
+   Float_t             m_PhImpact;          //Phi angle of impact
+   TDatime             m_DateTime;          //Run date
+   ULong_t             mAwest;
+   ULong_t             mAeast;
+/*  isthep = 10
+    idhep  = 9999999
+    jmohep = (103073, 56) 
+    jdahep = (990122, 1)    ? Date
+    phep   = (2.732848, 5.861712, 31.0, 200.0, 165.162)
+    vhep   = (412.0, 1.0, 103129.3, 0.0)*/
+
+   Float_t             mCenterOfMassEnergy; //
    ULong_t             mBunchCrossingNumber;//
    ULong_t             mTriggerMask;        //
    TDatime             mTimeStapm;          //time stamp for event
@@ -144,7 +160,7 @@ public:
    virtual void       FillClone();
    virtual void       FillXDF(St_XDFFile &file);
    virtual Int_t      Finish();
-   virtual Int_t      GetEvent(Int_t event=1);  // *MENU*
+   virtual Int_t      GetEvent(Int_t event=1);  
    St_XDFFile        *GetXDF_in(){return m_File;} 
    St_XDFFile        *GetXDF_out(){ return m_FileOut;} 
    virtual Int_t Init();
@@ -174,17 +190,35 @@ public:
 
    Int_t             Run()   {return m_Run;}
    Int_t             Event() {return m_Event;}
+   Char_t           *EvenType() {return m_EvenType;}
+   Float_t           BImpact(){return m_BImpact;}
+   Float_t           PhImpact(){return m_PhImpact;}
    Int_t             Mode()  {return m_Mode;}
-
+   Float_t           CenterOfMassEnergy(){return mCenterOfMassEnergy;}
+   Int_t             Date() {return m_DateTime.GetDate();}
+   Int_t             Time() {return m_DateTime.GetTime();}
+   Int_t             ProcessDate() {return mProcessTime.GetDate();}
+   Int_t             ProcessTime() {return mProcessTime.GetTime();}
+   ULong_t           Awest(){return mAwest;}
+   ULong_t           Aeast() {return mAeast;}
 //    Setters for flags and switches
 
    virtual void   SetBranches();
-   virtual void   SetRun(Int_t run=1)     {m_Run=run;}
-   virtual void   SetEvent(Int_t event=1) {m_Event=event;}
-   
-   virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;}
+   virtual void   SetRun(Int_t run=1)     {m_Run=run;} // *MENU*
+   virtual void   SetEvent(Int_t event=1) {m_Event=event;} // *MENU*
+   virtual void   SetEvenType(Char_t const *type=""){m_EvenType=type;} // *MENU*
+   virtual void   SetBImpact(Float_t b=0) {m_BImpact=b;} // *MENU*
+   virtual void   SetPhImpact(Float_t Phi=0) {m_PhImpact=Phi;} // *MENU*
+   virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;} // *MENU*
+   virtual void   SetCenterOfMassEnergy(Float_t s=0){mCenterOfMassEnergy=s;} // *MENU*
+   virtual void   SetDateTime(Int_t date=0, Int_t time=0) {m_DateTime.Set(date,time);} // *MENU*
+   virtual void   SetProcessDateTime(Int_t date, Int_t time) {mProcessTime.Set(date,time);} // *MENU*
+   virtual void   SetProcessDateTime() {mProcessTime.Set();} 
+   virtual void   SetAwest(ULong_t a=1) {mAwest = a;} // *MENU*
+   virtual void   SetAeast(ULong_t a=1) {mAeast = a;} // *MENU*
+ 
    virtual void   SetTree(TTree *tree)   {m_Tree=tree;}
-
+   
    Int_t          FillTree();
    void           InitChain(TChain *chain);
    virtual void   MakeBranch();   
