@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.7 2003/10/23 04:24:14 perev Exp $
+ * $Id: StPmdClustering.cxx,v 1.8 2004/03/09 14:19:59 jeromel Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,6 +11,9 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.8  2004/03/09 14:19:59  jeromel
+ * Ambigous eval corrected (Insure++)
+ *
  * Revision 1.7  2003/10/23 04:24:14  perev
  * Stiostream again
  *
@@ -308,7 +311,7 @@ void StPmdClustering::order(Int_t idet)
     for(i1=0; i1 < j ; i1++){
       if(adum > d[i1] && itst == 0){
         itst=1;
-        for(i2=j-1; i2 >= i1 ; i2=i2--){   
+        for(i2=j-1; i2 >= i1 ; i2--){   
           d[i2+1]=d[i2]; iord1[i2+1]=iord1[i2];
         }
         d[i1]=adum; iord1[i1]=idum;
