@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.2 1999/11/16 14:11:41 ullrich Exp $
+ * $Id: StDedxPidTraits.h,v 2.3 1999/11/23 15:56:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
- * Revision 2.2  1999/11/16 14:11:41  ullrich
- * Changed variance to sigma.
+ * Revision 2.3  1999/11/23 15:56:25  ullrich
+ * Added clone() method. Was pure virtual.
  *
  * Revision 2.4  1999/11/29 17:07:27  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -43,6 +43,7 @@ public:
     UShort_t     numberOfPoints() const;
     Float_t      mean() const;
     Float_t      sigma() const;
+    
 protected:
     Float_t  mDedx;
     Float_t  mSigma;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.3 1999/11/16 14:11:38 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.4 1999/11/23 15:56:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
- * Revision 2.3  1999/11/16 14:11:38  ullrich
- * Changed variance to sigma.
+ * Revision 2.4  1999/11/23 15:56:23  ullrich
+ * Added clone() method. Was pure virtual.
  *
  * Revision 2.5  1999/11/29 17:07:24  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -52,6 +52,9 @@ StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
 
 UShort_t
 StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints; }
+
+Float_t
+StDedxPidTraits::mean() const { return mDedx; }
 
 Float_t
 StDedxPidTraits::sigma() const { return mSigma; }
