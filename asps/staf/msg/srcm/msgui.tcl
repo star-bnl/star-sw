@@ -1,8 +1,14 @@
+global msgHelp
+global env
 global allPidsList
 global LoadFrom
 global ProcessID
 global StoreTo
 global ListInactives
+global AutoUpdateSummary
+global AutoUpdateSummaryCPU
+global AutoUpdateActive
+global AutoUpdatePeriodSecs
 global Prefix
 global Counts
 global CountLimit
@@ -30,6 +36,10 @@ proc initMsgVariables {} {
 	upvar #0 Alarming Alarming
 	upvar #0 StoreTo StoreTo
 	upvar #0 ListInactives ListInactives
+	upvar #0 AutoUpdateActive AutoUpdateActive
+	upvar #0 AutoUpdatePeriodSecs AutoUpdatePeriodSecs
+	upvar #0 AutoUpdateSummary AutoUpdateSummary
+	upvar #0 AutoUpdateSummaryCPU AutoUpdateSummaryCPU
 	upvar #0 NodeName NodeName
 	upvar #0 Shmid Shmid
 	set allPidsList ""
@@ -44,6 +54,10 @@ proc initMsgVariables {} {
 	set Counting 0
 	set Alarming 0
 	set ListInactives 0
+	set AutoUpdateActive 0
+	set AutoUpdatePeriodSecs 10
+	set AutoUpdateSummary 0
+	set AutoUpdateSummaryCPU 0
 	set StoreTo default.msg
 	set NodeName "No Node Name"
 	set Shmid    "-1"
@@ -207,7 +221,7 @@ proc MsgPrefixGet { root } {
 
 	set Error ""
 	set word [MsgExtractNext]
-	if { $Prefix != $word } { set Error "MsgPrefixGet-F2 prefix unexpected" }
+	if { $Prefix != $word } { set Error "MsgPrefixGet-F2 (msgui.tcl) prefix ($Prefix) unexpected.  Expected ($word)" }
 
 	if { $Error != "" } {
 	  set header "\n$Error"
@@ -299,6 +313,25 @@ proc MsgPrefixSet { root } {
 
 
 
+proc MsgHelp {root args} {
+
+	upvar env env
+	upvar msgHelp msgHelp
+
+	if {$root == "."} {
+		set base ""
+	} else {
+		set base $root
+	}
+#	set fullPath $env(HOME)msg.help
+	set fullPath ${msgHelp}msg.help
+	listFill $base [exec cat $fullPath]
+
+}
+
+
+
+
 proc MsgQuit {root args} {
 
 	if {$root == "."} {
@@ -321,7 +354,10 @@ proc MsgRemoveShmid { root } {
 	  set base $root
 	}
 	upvar #0 ProcessID ProcessID
-	if { $ProcessID > 0 } { exec rmid $ProcessID }
+	if { $ProcessID > 0 } {
+	  exec rmid $ProcessID >& msg.err
+	  catch { rm msg.err } 
+	}
 }
 
 
@@ -412,9 +448,23 @@ proc MsgSummary { root } {
 	  set base $root
 	}
 	upvar #0 ListInactives ListInactives
+	upvar #0 AutoUpdateSummary AutoUpdateSummary
+	upvar #0 AutoUpdateSummaryCPU AutoUpdateSummaryCPU
+	upvar #0 AutoUpdateActive AutoUpdateActive
+	upvar #0 AutoUpdatePeriodSecs AutoUpdatePeriodSecs
 	upvar #0 PageLength PageLength
 	upvar #0 NodeName NodeName
 	upvar #0 Shmid Shmid
+
+	set AutoUpdateSummaryCPU 0
+	set AutoUpdateSummary    1
+
+	set where [$base.listbox#1 yview]
+        set where [string trimleft $where]
+        set wordend [expr [string first " " $where] - 1 ]
+        if { $wordend < 0 } { set wordend [expr [string length $where] - 1 ]  }
+        set where [string range $where 0 $wordend]
+
 
 	if { ![ MsgDo . "getLines" ] } {
 	  set PageLength [exec cat msg.tmp]
@@ -438,7 +488,22 @@ proc MsgSummary { root } {
 	}
 
 	MsgDo . "lines $PageLength"
+	$base.listbox#1 yview moveto $where
 	update
+
+	if { $AutoUpdateActive == 1 } {
+#	  Convert AutoUpdatePeriodSecs to milliseconds, for the "after" command:
+#	  (And subtract off 3 secs of "overhead".)
+	  set secs [expr $AutoUpdatePeriodSecs-3]
+	  if { $secs < 1 }  {set secs 1}
+	  set ms [expr $secs*1000]
+	  after $ms {
+	    if { $AutoUpdateSummary == 1 } {
+#	      This might have been turned off during the wait:
+	      MsgSummary .
+	    }
+	  }
+	}
 }
 
 
@@ -451,9 +516,22 @@ proc MsgSummaryCPU { root } {
 	  set base $root
 	}
 	upvar #0 ListInactives ListInactives
+	upvar #0 AutoUpdateSummary AutoUpdateSummary
+	upvar #0 AutoUpdateSummaryCPU AutoUpdateSummaryCPU
+	upvar #0 AutoUpdateActive AutoUpdateActive
+	upvar #0 AutoUpdatePeriodSecs AutoUpdatePeriodSecs
 	upvar #0 PageLength PageLength
 	upvar #0 NodeName NodeName
 	upvar #0 Shmid Shmid
+
+	set AutoUpdateSummary    0
+	set AutoUpdateSummaryCPU 1
+
+	set where [$base.listbox#1 yview]
+        set where [string trimleft $where]
+        set wordend [expr [string first " " $where] - 1 ]
+        if { $wordend < 0 } { set wordend [expr [string length $where] - 1 ]  }
+        set where [string range $where 0 $wordend]
 
 	if { ![ MsgDo . "getLines" ] } {
 	  set PageLength [exec cat msg.tmp]
@@ -477,7 +555,48 @@ proc MsgSummaryCPU { root } {
 	}
 
 	MsgDo . "lines $PageLength"
+	$base.listbox#1 yview moveto $where
 	update
+
+	if { $AutoUpdateActive == 1 } {
+#	  Convert AutoUpdatePeriodSecs to milliseconds, for the "after" command:
+#	  (And subtract off 3 secs of "overhead".)
+	  set secs [expr $AutoUpdatePeriodSecs-3]
+	  if { $secs < 1 }  {set secs 1}
+	  set ms [expr $secs*1000]
+	  after $ms {
+	    if { $AutoUpdateSummaryCPU == 1 } {
+#	      This might have been turned off during the wait:
+	      MsgSummaryCPU .
+	    }
+	  }
+	}
+}
+
+
+
+
+proc MsgAutoUpdateStart { root } {
+	if {$root == "."} {
+	  set base ""
+	} else {
+	  set base $root
+	}
+	upvar #0 AutoUpdateActive AutoUpdateActive
+	upvar #0 AutoUpdateSummary AutoUpdateSummary
+	upvar #0 AutoUpdateSummaryCPU AutoUpdateSummaryCPU
+
+	if { $AutoUpdateActive == 0 } {
+#	  It's been turned off.
+	  set AutoUpdateSummary 0
+	  set AutoUpdateSummaryCPU 0
+	} elseif { $AutoUpdateSummary == 1 } {
+	  set AutoUpdateSummary 0
+	  MsgSummary .
+	} elseif { $AutoUpdateSummaryCPU == 1 } {
+	  set AutoUpdateSummaryCPU 0
+	  MsgSummaryCPU .
+	}
 }
 
 
@@ -509,7 +628,7 @@ proc listFill { root wholetext } {
 	    set text [string range $text [expr $next+1] end]
 	  }
 	}
-	$base.listbox#1 selection set 0
+	$base.listbox#1 selection clear 0 end
 
 }
 

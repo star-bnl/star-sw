@@ -30,7 +30,7 @@
 
 */
 
-static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcompiled "__DATE__" "__TIME__;
+static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:06, \tcompiled "__DATE__" "__TIME__;
 
 #include <stdio.h>
 #include <string.h>
@@ -64,23 +64,20 @@ extern FILE *JournalFILE;    /* Journal-file descriptor                         
 
 extern control_t *control;
 extern prefix_t  *prefix;
-extern class_t   *class;
 
 extern int CPUtime0;
 extern int ELAtime0;
 
 extern funcPoint MsgAlarmRoutine;
 
-extern char   m1000[1000];  /*  Some "scratch" message space.  */
-extern char   s1000[1000];  /*  Some "scratch" string space.  */
-char f1000[1000];           /*  Some "scratch" Fortran-string conversion space. */
 
 FILE* MsgMapLUN( int *LUN, const char *type );
-#ifdef IRIX
+#ifdef UNDEF
 int maplun_( int *LUN );
 #endif
 
 
+static char f1000[1000];  /*  Some "scratch" Fortran-string conversion space. */
 
 
 	void	message_( const char *msg, int *Lines, int *ID, int msglen )
@@ -112,14 +109,26 @@ int maplun_( int *LUN );
 	int LID;   /* Local copy of ID. */
 	int L, N;
 	int i, j;
+	int NeedCopy;
 
 	LID = *ID;
 
-	if ( (LID<=0) || (prefix[LID].Active) ) {
+	if (LID<=0) {
+	  NeedCopy = TRUE;
+	} else if ( prefix[LID].Active) {
+	  NeedCopy = TRUE;
+	} else if (!prefix[LID].Counting) {
+	  NeedCopy = FALSE;
+	} else if ( prefix[LID].Counts <= 0 ) {  /* This happens for counting class prefixes, if MsgMark defined prefix LID.   */
+	  NeedCopy = TRUE;
+	} else {
+	  NeedCopy = FALSE;
+	}
+	if ( NeedCopy ) {
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check or set the ID & flags.
@@ -134,7 +143,7 @@ int maplun_( int *LUN );
 	    N = msglen;
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
-	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	    L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	    MessageOut( f1000 );
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
@@ -144,7 +153,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
@@ -180,7 +189,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message on standard output: */
 	  fprintf(stderr, "%s\n", f1000 );
@@ -213,7 +222,7 @@ int maplun_( int *LUN );
 /*	Do this only if an alarm routine has been declared:  */
 	if ( MsgAlarmRoutine != NULL ) {
 	  strncpy( f1000, msg, msglen );
-	  f1000[msglen] = NULL;
+	  f1000[msglen] = 0;
 	  MsgParse( f1000, Prefix, &Message );
 	  MsgAlarmRoutine( Prefix, Message, severity );
 	}
@@ -294,12 +303,12 @@ int maplun_( int *LUN );
 	N = ClassLen;
 	if ( N > CLASS_MAXLEN ) N = CLASS_MAXLEN;
 	strncpy( Fclass, Class, N );
-	L = MsgLNB( Fclass, N );   Fclass[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( Fclass, N );   Fclass[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 	N = StateLen;
 	if ( N > 8 ) N = 8;
 	strncpy( Fstate, State, N );
-	L = MsgLNB( Fstate, N );   Fstate[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( Fstate, N );   Fstate[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 	MsgClassDefine( Fclass, Fstate, *CountLimit, *AbortLimit );
 	return;
@@ -324,7 +333,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgCount( f1000 );
 	return;
 }
@@ -349,7 +358,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgDisable( f1000 );
 	return;
 }
@@ -373,7 +382,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgDisableAlarm( f1000 );
 	return;
 }
@@ -415,7 +424,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check or set the ID & flags.
@@ -430,7 +439,7 @@ int maplun_( int *LUN );
 	    N = msglen;
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
-	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	    L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	    MsgDisplayOut( f1000 );
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
@@ -440,7 +449,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
@@ -474,7 +483,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message on standard output: */
 	  fprintf(stderr, "%s\n", f1000 );
@@ -522,7 +531,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check or set the ID & flags.
@@ -540,7 +549,7 @@ int maplun_( int *LUN );
 	    N = msglen;
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
-	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	    L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	    if ( *LUN == 6 ) { /* Standard Out */
 	      MsgDisplayAndFileOut( f1000, NULL );
 	    } else if ( *LUN == 0 ) { /* Journal File */
@@ -556,7 +565,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
@@ -600,7 +609,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message to standard output: */
 	  fprintf(stderr, "%s\n", f1000 );
@@ -631,7 +640,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgEnable( f1000 );
 	return;
 }
@@ -655,7 +664,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgEnableAlarm( f1000 );
 	return;
 }
@@ -696,7 +705,7 @@ int maplun_( int *LUN );
 	  N = length;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, Prefix, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 	return( MsgEnabled( f1000, ID ) );
 }
@@ -753,7 +762,7 @@ int maplun_( int *LUN );
 	  N = length;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, Prefix, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	This prevents a test with Msg_Enabled_Trace from automatically
@@ -808,12 +817,12 @@ int maplun_( int *LUN );
 	N = FileLen;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, FileName, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 	N = TypeLen;
 	if ( N > 9 ) N = 9;
 	strncpy( fType, Type, N );
-	L = MsgLNB( fType, N );   fType[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( fType, N );   fType[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 	return( MsgFileOpen( f1000, fType ) );
 }
@@ -1002,7 +1011,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, FileName, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	return( MsgJournalOpen( f1000 ) );
 }
 
@@ -1081,7 +1090,7 @@ int maplun_( int *LUN );
 	  N = length;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, Prefix, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check that the message-prefix is in the index, enter it
@@ -1122,7 +1131,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, NodeName, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgNameNode( f1000 );
 	return;
 }
@@ -1148,7 +1157,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgNoCount( f1000 );
 	return;
 }
@@ -1180,7 +1189,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgSetAbortLimit( f1000, *Limit );
 	return;
 }
@@ -1293,7 +1302,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, com, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	return(MsgSetByCommand( f1000 ));
 }
 
@@ -1354,7 +1363,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgSetLevel( f1000, *Limit );
 	return;
 }
@@ -1382,7 +1391,7 @@ int maplun_( int *LUN );
 	N = length;
 	if ( N > 999 ) N = 999;
 	strncpy( f1000, Prefix, N );
-	L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	MsgSetLimit( f1000, *Limit );
 	return;
 }
@@ -1696,7 +1705,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check or set the ID & flags.
@@ -1711,7 +1720,7 @@ int maplun_( int *LUN );
 	    N = msglen;
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
-	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	    L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	    MsgToJournalOut( f1000 );
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
@@ -1721,7 +1730,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
@@ -1754,7 +1763,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 /*	  Display time & message on journal file:  */
 	  MsgToFileOut( f1000, JournalFILE );
 	}
@@ -1807,7 +1816,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	}
 
 /*	Check or set the ID & flags.
@@ -1822,7 +1831,7 @@ int maplun_( int *LUN );
 	    N = msglen;
 	    if ( N > 999 ) N = 999;
 	    strncpy( f1000, &msg[j], N );
-	    L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	    L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	    MsgToFileOut( f1000, stream );
 	  }
 	  MsgAbortCheck( LID );   /* Check if abort limit is exceeded, and maybe abort.  */
@@ -1832,7 +1841,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, msg, N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgAlarm( f1000, prefix[LID].AlarmLevel );
 	}
 
@@ -1880,7 +1889,7 @@ int maplun_( int *LUN );
 	  N = msglen;
 	  if ( N > 999 ) N = 999;
 	  strncpy( f1000, &msg[j], N );
-	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
+	  L = MsgLNB( f1000, N );   f1000[L+1] = 0;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 	  MsgToFileOut( f1000, stream );
 	}
 	return;
@@ -1892,6 +1901,11 @@ int maplun_( int *LUN );
 	FILE*	MsgMapLUN( int *LUN, const char *type ) 
 {
 /*  Description:  Get the stream descriptor corresponding to a Fortran LUN.
+
+	Not Fortran callable !  This is an interface to the maplun_ routine,
+	which may or may not exist on a given platform.  If it does not
+	exist, this routine forces a "sensible" behaviour.
+
 	This works absolutely correctly only on sgi.  On other platforms,
 	this routine returns NULL (for standard out) if LUN is 6.  Otherwise,
 	it returns the stream descriptor for the journal file if the journal
@@ -1903,7 +1917,7 @@ int maplun_( int *LUN );
 
 /*  from "man fdopen":   FILE *fdopen (int fildes, const char *type);       */
 
-#ifdef IRIX
+#ifdef UNDEF
 	if ( *LUN == 0 ) {
 /*	  Special value of *LUN == 0 refers to the journal file:  */
 	  if ( JournalFILE ) {
@@ -1932,7 +1946,8 @@ int maplun_( int *LUN );
 
 	void	msgalarmroutinesample_( char* Prefix, char* sansPrefix, int *Level )
 {
-/*  Description:  Fortran-callable interface to MsgAlarmRoutineSample.  */
+/*  Description:  Fortran-callable interface to MsgAlarmRoutineSample.
+*/
 
 	MsgAlarmRoutineSample( Prefix, sansPrefix, Level );
 

@@ -40,7 +40,7 @@
 
 */
 
-static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcompiled "__DATE__" "__TIME__;
+static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:03, \tcompiled "__DATE__" "__TIME__;
 
 #include <stdio.h>
 #include <string.h>
@@ -67,16 +67,11 @@ extern FILE *JournalFILE;    /* Journal-file descriptor                         
 
 extern control_t *control;
 extern prefix_t  *prefix;
-extern class_t   *class;
 
 extern int CPUtime0;
 extern int ELAtime0;
 
 extern funcPoint MsgAlarmRoutine;
-
-extern char   m1000[1000];  /*  Some "scratch" message space.  */
-extern char   s1000[1000];  /*  Some "scratch" string space.  */
-extern char   f1000[1000];  /*  Some "scratch" Fortran-string conversion space. */
 
 
 	void	MsgGetLUN(

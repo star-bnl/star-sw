@@ -1,5 +1,7 @@
 /*	Created:  22oct1996   R. Hackenburg                                          */
 
+static const char sccsid_msgH[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 02:07:33, \tcompiled "__DATE__" "__TIME__;
+
 
 /*
 	This contains prototypes for the msg library, C-interface.
@@ -99,7 +101,7 @@ typedef	void	(*funcPoint)(const char*, const char*, const int*);
 	void	MsgSetSummaryModeInactive( int Mode );
 	void	MsgSetSummaryPageLength( int Page_Length );
 	void	MsgSetTimeStampCPU( int Mode );
-	int	MsgShare( const pid_t ProcessID );
+	int	MsgShare( void );
 	int	MsgShareNoCreate( const pid_t ProcessID );
 	void	MsgSort( void );
 	void	MsgState( int Counts, int Limit, int Level, int AbortLimit, int Active, int Counting, int Alarming, char State[9] );

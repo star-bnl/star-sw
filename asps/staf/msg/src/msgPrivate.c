@@ -31,7 +31,7 @@
 
 */
 
-static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcompiled "__DATE__" "__TIME__;
+static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:12, \tcompiled "__DATE__" "__TIME__;
 
 #include <stdio.h>
 #include <string.h>
@@ -45,10 +45,6 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
 
-#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
-#include <sys/systeminfo.h>
-#endif
-
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>
@@ -58,20 +54,18 @@ msgData_t *Msg;
 FILE *JournalFILE;    /* Journal-file descriptor                          */
 int   JournalEnabled; /* Journal-file enabled-flag                        */
 
-control_t *control = &msg.control;
-prefix_t  *prefix  = &msg.prefix[0];
-class_t   *class   = &msg.class[0];
+control_t *control  = &msg.control;
+prefix_t  *prefix   = &msg.prefix[0];
+class_t   *msgClass = &msg.class[0];
 
 extern int MsgInitialized; /* This starts out FALSE, and is set to TRUE when initialized.  */
 
 int CPUtime0 = 0;
 int ELAtime0 = 0;
 
- 
 funcPoint MsgAlarmRoutine = NULL;
 
-char   m1000[1000];  /*  Some "scratch" message space.  */
-char   s1000[1000];  /*  Some "scratch" string space.  */
+static char   s1001[1000];  /*  Some "scratch" string space.  */
 
 
 	void	MsgClean(
@@ -186,7 +180,7 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
         t      = time(NULL);
 	length = strftime ( str, sizeof(str), "%d-%b-%y %T %Z", localtime(&t) );
 	if ( length <= 0 ) return(NULL);
-	str[50] = NULL;  /*  Make it bullet proof.                                */
+	str[50] = 0;  /*  Make it bullet proof.                                */
 	return( str );
 }
 
@@ -194,7 +188,8 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 	long	MsgCPU(void)
-/*  Description:  Returns the integer number of user CPU clock ticks.  */
+/*  Description:  Returns the integer number of user CPU clock ticks.
+*/
 {
 	struct tms CPU;
 	times( &CPU );   /*  Fill the "cpu" structure (tms).  */
@@ -256,11 +251,11 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	int L;
 	L = MsgLNB( string, Size );
 	if ( L < 1 ) {
-	  string[0] = NULL;
+	  string[0] = 0;
 	} else if ( L >= Size ) {
-	  string[Size] = NULL;
+	  string[Size] = 0;
 	} else {
-	  string[L+1] = NULL;
+	  string[L+1] = 0;
 	}
 	return;
 }
@@ -269,7 +264,8 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 	long	MsgTime(void)
-/*  Description:  Returns the integer number of seconds since 01jan70.  */
+/*  Description:  Returns the integer number of seconds since 01jan70.
+*/
 {
 	time_t t;
 	t = time( NULL );
@@ -277,7 +273,8 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 }
 
 	long	MsgTPS(void)
-/*  Description: Inquires from the system and returns the number of CPU ticks-per-second. */
+/*  Description: Inquires from the system and returns the number of CPU ticks-per-second.
+*/
 {
 	return(sysconf( _SC_CLK_TCK ));
 }
@@ -308,16 +305,16 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	L  = strlen( msg ) - 1;
 	firstNonBlank = 0;
 	C  = msg[firstNonBlank]; /*  Integer copy of a character for strchr.  */
-	while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
+	while (  ( strchr( seplist, C ) != 0 )  && ( firstNonBlank < L )  ) {
 	  C   = msg[++firstNonBlank]; /*  Integer copy of a character for strchr.  */
 	}
 	if ( firstNonBlank >= L ) {   /*  No non-separators or only one at the very end.  */
 	  C   = msg[L]; /*  Integer copy of a character for strchr.  */
-	  if ( strchr( seplist, C ) != NULL ) {  /*  Last is a blank etc. */
+	  if ( strchr( seplist, C ) != 0 ) {  /*  Last is a blank etc. */
 	    strcpy( Prefix, " " );
 	  } else {                               /*  Last is a non-blank. */
 	    Prefix[0] = msg[L];
-	    Prefix[1] = NULL;
+	    Prefix[1] = 0;
 	  }
 	  return;
 	}
@@ -325,14 +322,14 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 /*	Scan for the next separator:  */
 	sepPoint = strpbrk( &msg[firstNonBlank], seplist );  /*  Find, in &msg[firstNonBlank], any char. in seplist.  */
 
-	if ( sepPoint == NULL ) {   /* Prefix with no following separator (it's all prefix):  */
+	if ( sepPoint == 0 ) {   /* Prefix with no following separator (it's all prefix):  */
 	  strncpy( Prefix, &msg[firstNonBlank], PREFIX_MAXLEN+1 );
-	  Prefix[PREFIX_MAXLEN] = NULL;
+	  Prefix[PREFIX_MAXLEN] = 0;
 	} else {
 	  L = (int)sepPoint-(int)&msg[firstNonBlank];      /*  Number of characters before last separator or max. */
 	  if ( L > PREFIX_MAXLEN ) L = PREFIX_MAXLEN;
 	  strncpy( Prefix, &msg[firstNonBlank], L+1 );
-	  Prefix[L] = NULL;
+	  Prefix[L] = 0;
 	}
 
 	return;
@@ -377,7 +374,7 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 /*	L is an index, for CLASS_MAXLEN = 1, L = 0 always, if not Found (LID=0;  L+1 is the count (ie, 1),  */
 
 	while (  !Found && ( LID <= control->Nclasses ) ) {
-	  if ( !strncmp( class[LID].Class, Class, L+1 ) ) {   /* It's the right one:  */
+	  if ( !strncmp( msgClass[LID].Class, Class, L+1 ) ) {   /* It's the right one:  */
 	    Found = TRUE;
 	  } else {
 	    LID += 1;
@@ -416,14 +413,14 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 /*	Scan for the separator:  */
 	sepPoint = strpbrk( Prefix, "-" );  /*  Find a dash in Prefix.  */
 
-	if ( sepPoint == NULL ) {   /* Prefix with no "-"  -- blank class:  */
-	  Class[0] = NULL;
-	} else if ( sepPoint[1] == NULL ) {   /* Prefix ending in "-"  -- blank class:  */
-	  Class[0] = NULL;
+	if ( sepPoint == 0 ) {   /* Prefix with no "-"  -- blank class:  */
+	  Class[0] = 0;
+	} else if ( sepPoint[1] == 0 ) {   /* Prefix ending in "-"  -- blank class:  */
+	  Class[0] = 0;
 	} else {
 /*	  Class is everything after separator to end-of-prefix, up to CLASS_MAXLEN:  */
 	  strncpy( Class, &sepPoint[1], CLASS_MAXLEN ); /*  Class is dimensioned CLASS_MAXLEN+1. */
-	  Class[CLASS_MAXLEN] = NULL;        /*  Append NULL.  */
+	  Class[CLASS_MAXLEN] = 0;        /*  Append NULL.  */
 	}
 
 	return;
@@ -490,12 +487,12 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	  MsgFindClass( Class, &CID );             /*  Find the class in the index.           */
 	}
 	if ( CID > 0 ) {                           /*  Have the class -- set class defaults:  */
-	  prefix[ID].Active     = class[CID].Active;
-	  prefix[ID].Alarming   = class[CID].Alarming;
-	  prefix[ID].Counting   = class[CID].Counting;
-	  prefix[ID].CountLimit = class[CID].CountLimit;
-	  prefix[ID].AbortLimit = class[CID].AbortLimit;
-	  prefix[ID].AlarmLevel = class[CID].AlarmLevel;
+	  prefix[ID].Active     = msgClass[CID].Active;
+	  prefix[ID].Alarming   = msgClass[CID].Alarming;
+	  prefix[ID].Counting   = msgClass[CID].Counting;
+	  prefix[ID].CountLimit = msgClass[CID].CountLimit;
+	  prefix[ID].AbortLimit = msgClass[CID].AbortLimit;
+	  prefix[ID].AlarmLevel = msgClass[CID].AlarmLevel;
 	  prefix[ID].Iclass     = CID;
 	} else {                                   /* Don't have the class:                   */
 	  prefix[ID].Active     = control->Active;
@@ -512,6 +509,34 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
+
+	void	MsgSampleCopy(
+/*  Inputs:  */
+	  const char *msg  /* A message, with prefix.  msg can be just a prefix.     */
+	, const int   ID ) /* Message ID.  Must be set;  it does not get looked up.  */
+{
+/*   Description:  Get a sample from the message, and record it as the latest message sample.
+*/
+
+	int firstNonBlank;
+	int C;
+	int L;
+	const char seplist[] = " \t\n\f\0";  /* Space, tab, newline, form-feed, null */
+
+	if ( ID <= 0 ) return;
+
+/*	Left-justify the message-sample -- don't want indentations in the table.
+	Scan for first non-separator:  */
+	L  = strlen( msg ) - 1;
+	firstNonBlank = 0;
+	C  = msg[firstNonBlank]; /*  Integer copy of a character for strchr.  */
+	while (  ( strchr( seplist, C ) != 0 )  && ( firstNonBlank < L )  ) {
+	  C   = msg[++firstNonBlank]; /*  Integer copy of a character for strchr.  */
+	}
+
+	strncpy( prefix[ID].Sample, &msg[firstNonBlank], SAMPLE_MAXLEN+1 );
+	return;
+}
 
 	int	MsgFind(
 /*  Input:  */
@@ -572,11 +597,11 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	  } else if (prefix[LID].CountLimit <= 0 ) {  /* No counting limit.  */
 	  } else if (prefix[LID].Counts >= prefix[LID].CountLimit) {
 /*	    Turn off messages -- continue counting, of course:  */
+            char   mtemp[1000];  /*  Some "scratch" message space.  */
 	    prefix[LID].Active = FALSE;
 /*	    And display a message-shut-off warning:  */
-/*	    MessageOut( "%s Disabled -- count limit reached", prefix[LID].Prefix ); */
-	    sprintf( m1000, "%s Disabled -- count limit reached", prefix[LID].Prefix );
-	    MessageOut( m1000 );
+	    sprintf( mtemp, "%s Disabled -- count limit reached", prefix[LID].Prefix );
+	    MessageOut( mtemp );
 	  } /*  !Active  */
 	  *Active   = prefix[LID].Active;
 	  *Alarming = prefix[LID].Alarming;
@@ -617,17 +642,18 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	  prefix[*ID].Iclass = 0;
 	  MsgResetID( *ID );        /*  Reset counters, flags and default limits (class determined).  */
 	} else {   /* There's no room -- message:  */
+	  char   mtemp[1000];  /*  Some "scratch" message space.  */
 	  *ID = 0;
 
-	  sprintf( m1000, "\
+	  sprintf( mtemp, "\
 MsgEnter-E1 No room left for new prefixes;  prefix not entered:\n\
             [%s]\n\
             Change parameter MAXPREFIXES in msgdata.h", Prefix );
-	  MessageOut( m1000 );
+	  MessageOut( mtemp );
 
 	  Found = MsgFind( "MsgEnter-E1", &EID, &Active, &Alarming, &Counting );
-	  if ( Found && Active   ) MessageOut( m1000 );
-	  if ( Found && Alarming ) MsgAlarm( m1000, prefix[EID].AlarmLevel );  /* Level 3 alarm.  */
+	  if ( Found && Active   ) MessageOut( mtemp );
+	  if ( Found && Alarming ) MsgAlarm( mtemp, prefix[EID].AlarmLevel );  /* Level 3 alarm.  */
 	  if ( Found && Counting ) MsgIncr( EID );
 	}
 
@@ -697,32 +723,22 @@ MsgEnter-E1 No room left for new prefixes;  prefix not entered:\n\
 	check that ID is in the index and a check that
 	MSG's prefix agrees with the stored message
 	prefix selected by ID are made.  If the stored prefix
-	does not agree with msg's prefix, MsgCheck issues an error
-	message (which indicates a program bug!), then zeros ID and starts
-	again, with ID set to the correct index ID if MSG's prefix is in the
-	index, and entering MSG's prefix if it is not in the index.
-	If not found, the prefix is entered in the index.
+	does not agree with msg's prefix, MsgCheck assumes that
+	the caller has lost track of the prefix, or has deleted the prefix,
+	and attempts to look it up or define it, if not found.
 	The flags Active and Counting are set according to the whether the
 	message is active (output enabled) and enabled for counting.
 */
 
 
 	int Found;
-	int E_Found, E_Active, E_Alarming, E_Counting, CallerBug;
 	char Prefix[PREFIX_MAXLEN], *PrefixGiven, *PrefixStored;
 
-	int firstNonBlank, L, LID;
-	int C;
-	int LastNonBlank;
-
-	static int EID=0;
-
-	const char seplist[] = " \t\n\f\0";  /* Space, tab, newline, form-feed, null */
+	int LID;
 
 
 
 	LID = *ID;   /* Make a local copy.  */
-	CallerBug = FALSE;
 
 	if        ( LID <= 0 ) { /* Look up the message in the index: */
 	  if ( !MsgInitialized ) MsgInit( "" );
@@ -733,59 +749,28 @@ MsgEnter-E1 No room left for new prefixes;  prefix not entered:\n\
 	  *Active   = prefix[LID].Active;
 	  *Alarming = prefix[LID].Alarming;
 	  *Counting = prefix[LID].Counting;
+	  if ( !(*Counting) ) { /* Do nothing.  */
+	  } else if ( prefix[LID].Counts <= 0 ) {  /* This happens for counting class prefixes, if MsgMark defined prefix LID.   */
+	    MsgSampleCopy( msg, LID ); /* This will set the message sample (this essentially becomes a title for count-prefixes. */
+	  }
 	  if ( !*Active ) {  /* Waste no more time unless active.  */
 	    return;
 	  } else { /* It's active -- it's OK to spend some time:  */
 	    MsgGetPrefix( msg, Prefix );
 	    if ( !strncmp( Prefix, prefix[LID].Prefix, PREFIX_MAXLEN+1 ) ) {   /* It's the right one:  */
-	    } else {  /* It's wrong -- this is a caller-bug:  */
-	      CallerBug = TRUE;
-/*	      First check if this message is disabled:  */
-	      E_Found = MsgFind( "MsgCheck-B1", &EID, &E_Active, &E_Alarming, &E_Counting );
-	      if ( !E_Found ) {   /* Enter the prefix in the index.  */
-	        MsgEnter( "MsgCheck-B1", &EID );
-	        E_Active   = TRUE;
-	        E_Alarming = FALSE;
-	        E_Counting = TRUE;
-	        prefix[EID].Active   = E_Active;  /* Overwrite usual defaults.  */
-	        prefix[EID].Alarming = E_Alarming;
-	        prefix[EID].Counting = E_Counting;
-	      }
-	      if ( E_Active || E_Alarming ) {
-	        PrefixGiven  = Prefix;
-	        PrefixStored = prefix[LID].Prefix;
-
-/*	        This is a nice long message -- it should only occur if someone misuses
-	        the message library (msglib) routines in code, and as such should only
-	        occur "once", after which the programmer should fix the problem (he
-	        should feel glad the thing didn't crash!  So don't complain.)            */
-
-	        sprintf( m1000, "\
-MsgCheck-B1 Program bug in caller.  The given ID: %d\n\
-doesn't select the given prefix: [%s]\n\
-The prefix stored as that ID is: [%s]\n\
-Note that each message needs to have its own ID variable."
-	               , LID, PrefixGiven, PrefixStored );
-
-	        if ( E_Active ) {
-	          MessageOut( m1000 );
-	        }
-	        if ( E_Alarming ) {
-	          MsgAlarm( m1000, 3 ); /* Alarm level 3. */
-	        }
-	      }
-	      if ( E_Counting ) {
-	        MsgIncr( EID );
-	      }
+	    } else {  /* It's wrong -- this is possible a caller-bug:  */
+	      LID = 0;
 	      Found = MsgFind( Prefix, &LID, Active, Alarming, Counting ); /* Set the ID & flags. */
 	    }
 	  }       /*  if ( !*Active )  */
 	} else {  /*  if ( LID <= 0 )  */
+	    LID = 0;
 	    Found = FALSE;
 	}         /*  if ( LID <= 0 )  */
 
 	if ( !Found ) {  /* Enter the prefix in the index. */
 	  MsgEnter( Prefix, &LID );
+	  MsgSampleCopy( msg, LID ); /* This will set the message sample. */
 	}
 
 /*	Check whether it's exceeded its counting limit:  */
@@ -797,12 +782,12 @@ Note that each message needs to have its own ID variable."
 	  } else if ( prefix[LID].CountLimit <= 0 )  { /* No counting limit.  */
 	  } else if ( prefix[LID].Counts >= prefix[LID].CountLimit ) {
 /*	    Turn off messages -- continue counting, of course:  */
+            char   mtemp[1000];  /*  Some "scratch" message space.  */
 	    prefix[LID].Active = FALSE;
 	    *Active            = FALSE;
 /*	    Display a message-shut-off warning:  */
-/*	    MessageOut( "%s Disabled -- count limit reached", prefix[LID].Prefix );  */
-	    sprintf( m1000, "%s Disabled -- count limit reached", prefix[LID].Prefix );
-	    MessageOut( m1000 );
+	    sprintf( mtemp, "%s Disabled -- count limit reached", prefix[LID].Prefix );
+	    MessageOut( mtemp );
 	  } /* !prefix[LID].Active */
 	} else { /* Not found, not entered -- total failure.  Just set these false:  */
 	  *Active   = FALSE;
@@ -810,24 +795,15 @@ Note that each message needs to have its own ID variable."
 	  *Counting = FALSE;
 	}
 
-	if ( Found && *Active ) { /*  Make the latest message this one's sample:  */
-/*	  Left-justify the message-sample -- don't want indentations in the table.
-	  Scan for first non-separator:  */
-	  L  = strlen( msg ) - 1;
-	  firstNonBlank = 0;
-	  C  = msg[firstNonBlank]; /*  Integer copy of a character for strchr.  */
-	  while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
-	    C   = msg[++firstNonBlank]; /*  Integer copy of a character for strchr.  */
-	  }
-
-	  strncpy( prefix[LID].Sample, &msg[firstNonBlank], SAMPLE_MAXLEN+1 );
-
+	if ( !Found ) { /* Do nothing.  */
+	} else if ( *Active ) { /*  Make the latest message this one's sample:  */
+	  MsgSampleCopy(msg,LID);
+	} else if ( !(*Counting) ) { /* Do nothing.  */
+	} else if ( prefix[LID].Counts <= 0 ) {  /* This happens for inactive, counting class prefixes.          */
+	  MsgSampleCopy( msg, LID ); /* This will set the message sample (this essentially becomes a title for count-prefixes. */
 	}
 
-	if ( CallerBug ) { /*  Don't set the given ID.  */
-	} else {            /*  Set it. */
-	  *ID = LID;
-	}
+	*ID = LID;
 
 
 	return;
@@ -906,19 +882,20 @@ Note that each message needs to have its own ID variable."
 	  } else {
 	    control->Nclasses += 1;
 	    *ID = control->Nclasses;
-	    strncpy( class[*ID].Class, Class, L+2 );  /*  See note in MsgParsePrefix, about firstDigit.  */
+	    strncpy( msgClass[*ID].Class, Class, L+2 );  /*  See note in MsgParsePrefix, about firstDigit.  */
 	  }
 	  return(TRUE);
 	} else {   /* There's no room -- message: */
+	  char   mtemp[1000];  /*  Some "scratch" message space.  */
 
-	  sprintf( m1000, "\
+	  sprintf( mtemp, "\
 MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
                  [%s]\n\
                  Change parameter MAXCLASSES in msgdata.h", Class );
 
 	  Found = MsgFind( "MsgEnterClass-E1", &EID, &Active, &Alarming, &Counting );
-	  if ( Found && Active   ) MessageOut( m1000 );
-	  if ( Found && Alarming ) MsgAlarm( m1000, prefix[EID].AlarmLevel );  /* Level 3 alarm.  */
+	  if ( Found && Active   ) MessageOut( mtemp );
+	  if ( Found && Alarming ) MsgAlarm( mtemp, prefix[EID].AlarmLevel );  /* Level 3 alarm.  */
 	  if ( Found && Counting ) MsgIncr( EID );
 	  return(FALSE);
 	}
@@ -950,19 +927,19 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	L  = strlen( msg ) - 1;  /*  Index to last character in msg, before null.  */
 	firstNonBlank = 0;
 	C  = msg[firstNonBlank];            /*  Integer copy of a character for strchr.  */
-	while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
+	while (  ( strchr( seplist, C ) != 0 )  && ( firstNonBlank < L )  ) {
 	  C = msg[++firstNonBlank];       /*  Integer copy of a character for strchr.  */
 	}
 
 /*	firstNonBlank is index in msg to start of prefix or else points past msg.  */
 	if ( firstNonBlank >= L ) {   /*  No non-separators or only one at the very end.  */
 	  C   = msg[L];    /*  Integer copy of a character for strchr.  */
-	  if ( strchr( seplist, C ) != NULL ) {  /*  Last is a blank etc. */
-	    prefix[0]  = NULL;                   /*  It has no prefix.  */
+	  if ( strchr( seplist, C ) != 0 ) {  /*  Last is a blank etc. */
+	    prefix[0]  = 0;                   /*  It has no prefix.  */
 	    *sansPrefix    = NULL;                   /*  It has no message.  */
 	  } else {                               /*  Last is a non-blank. */
 	    prefix[0] = msg[L];                  /*  It has only a one-char prefix.  */
-	    prefix[1] = NULL;                    /*  It has only a one-char prefix.  */
+	    prefix[1] = 0;                    /*  It has only a one-char prefix.  */
 	    *sansPrefix   = NULL;                    /*  It has no message.  */
 	  }
 	  return;
@@ -973,22 +950,22 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	sepPoint = strpbrk( &msg[firstNonBlank], seplist );  /*  Find, in &msg[firstNonBlank], any char. in seplist.  */
 	Isep = (int)sepPoint - (int)msg;          /* Index to separator.     */
 
-	if ( sepPoint == NULL ) {   /* Prefix with no following separator (it's all prefix):  */
+	if ( sepPoint == 0 ) {   /* Prefix with no following separator (it's all prefix):  */
 	  strncpy( prefix, &msg[L], PREFIX_MAXLEN+1 ); /*  Copy as much as is there or fits as a prefix. */
-	  prefix[PREFIX_MAXLEN] = NULL;
+	  prefix[PREFIX_MAXLEN] = 0;
 	  *sansPrefix = NULL;                           /*  No message.  */
 	} else {
 	  prefixEnd = Isep - 1;   /*  Prefix last-char is one before the separator.  */
 	  N = prefixEnd + 1;      /*  Character count is one more than index (index 0 is first). */
 	  if ( N > PREFIX_MAXLEN ) N = PREFIX_MAXLEN;
 	  strncpy( prefix, &msg[firstNonBlank], N+1 );            /*  Copy as much as is there or fits as a prefix. */
-	  prefix[N] = NULL;
+	  prefix[N] = 0;
 
 /*	  Scan for next non-separator:  */
 	  L  = strlen( sepPoint ) - 1;
 	  firstNonBlank = 0;
 	  C  = sepPoint[firstNonBlank]; /*  Integer copy of a character for strchr.  */
-	  while (  ( strchr( seplist, C ) != NULL )  && ( firstNonBlank < L )  ) {
+	  while (  ( strchr( seplist, C ) != 0 )  && ( firstNonBlank < L )  ) {
 	    C   = sepPoint[++firstNonBlank]; /*  Integer copy of a character for strchr.  */
 	  }
 	  if ( firstNonBlank >= L ) {   /*  No non-separators or only one at the very end.  */
@@ -1055,21 +1032,21 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 	if        ( Ndigits <= 0 ) {                       /*   Found no trailing digits:                                   */
 	  strncpy( PrefixStripped, Prefix, lastDigit+2 );  /*     Copy over the whole prefix.                               */
-	  PrefixStripped[lastDigit+1] = NULL;              /*     Append NULL.                                              */
+	  PrefixStripped[lastDigit+1] = 0;              /*     Append NULL.                                              */
 	  *PrefixNumber = 0;                               /*     Take zero for the prefix number.                          */
 	} else if ( Ndigits > 11 ) {                       /*   Found too many trailing digits:                             */
 	  strncpy( PrefixStripped, Prefix, lastDigit+2 );  /*     Copy over the whole prefix.                               */
-	  PrefixStripped[lastDigit+1] = NULL;              /*     Append NULL.                                              */
+	  PrefixStripped[lastDigit+1] = 0;              /*     Append NULL.                                              */
 	  *PrefixNumber = 0;                               /*     Take zero for the prefix number.                          */
 	} else                     {                       /*   Just right.. .                                              */
 	  strncpy( Cnumber, &Prefix[firstDigit], Ndigits ); /*    Put it here so a null can be placed after the digits.     */
-	  Cnumber[Ndigits] = NULL;                         /*     Append NULL.                                              */
+	  Cnumber[Ndigits] = 0;                         /*     Append NULL.                                              */
 	  *PrefixNumber = strtoul( Cnumber, NULL, 10 );    /*     Set the prefix number from the digits.                    */
 	  if ( firstDigit == 0 ) {                         /*   Wierd case -- all digits (NULL prefix):                     */
 	  } else {                                         /*   Common case -- prefix and digits:                           */
 	    strncpy( PrefixStripped, Prefix, firstDigit ); /*     Copy over the prefix without the digits.                  */
 	  }                                                /*       (firstdigit is an index, one less than the count.)      */
-	  PrefixStripped[firstDigit] = NULL;               /*   Append NULL.                                                */
+	  PrefixStripped[firstDigit] = 0;               /*   Append NULL.                                                */
 	}
 
 	return;
@@ -1078,9 +1055,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 
 
-	int	MsgShare(
-/*  Input:                                                                          */
-	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
+	int	MsgShare(void)
 {
 /* Description:  Set Msg up to share its memory.
 	         When this routine returns >0, the memory is being shared.
@@ -1113,14 +1088,11 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	addr = &msg;
 	addr = 0;
 
-	if ( ProcessID <= 0 ) {
-	  pid = getpid();
-	} else {
-	  pid = ProcessID;
-	}
+	pid = getpid();
+
 	key = (key_t)( pid );
 
-/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
+/*	fprintf(stderr,"MsgShare-d1  ID:%d pid:%d  Size:%d  addr:%d 0x%x\n", ID, pid, size, addr, addr);  */
 
 	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
 /*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
@@ -1141,9 +1113,9 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 /*	fprintf(stderr, "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
 
-	control = &Msg->control;
-	prefix  = &Msg->prefix[0];
-	class   = &Msg->class[0];
+	control  = &Msg->control;
+	prefix   = &Msg->prefix[0];
+	msgClass = &Msg->class[0];
 
 /*	fprintf(stderr, "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
 
@@ -1156,12 +1128,8 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	control->shmid     = shmid;
 
 /*	Need to re-establish this:  */
-#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
-	if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
-#else
-	if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
-#endif
-	MsgNodeNameSet( s1000 );
+	if ( gethostname( s1001, 1000) < 0 ) s1001[0] = 0;
+	MsgNodeNameSet( s1001 );
 
 	shmidLogFILE = fopen( "msg.shmid", "a" );  /* Append to this log file -- keep track of shmids!  */
 	MsgTimeStampFileOut( shmidLogFILE );       /* Put a time stamp on it.                           */
@@ -1209,8 +1177,6 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	addr = &msg;
 	addr = 0;
 
-/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
-
 	if ( ProcessID <= 0 ) {
 	  pid = getpid();
 	} else {
@@ -1219,37 +1185,35 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	key = (key_t)( pid );
 
 	shmflg = 0660;  /*  Read/Write Owner/Group  */
-/*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
 
 	shmid = shmget( key, size, shmflg );  /*  unique key, size, read/write user/group.  */
 
-
-/*	fprintf(stderr,"MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
 	if ( shmid < 0 ) {
-	  perror( "MsgShare-e1 system error:\n" );
+	  perror( "MsgShareNoCreate-e1 system error:\n" );
 	  return( -1 );
 	}
 
 	SharedAddress = shmat( shmid, addr, shmflg );
-/*	fprintf(stderr, "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
 
 	Msg = SharedAddress;
 
-/*	fprintf(stderr, "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
-
-	control = &Msg->control;
-	prefix  = &Msg->prefix[0];
-	class   = &Msg->class[0];
-
-/*	fprintf(stderr, "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
+	control  = &Msg->control;
+	prefix   = &Msg->prefix[0];
+	msgClass = &Msg->class[0];
 
 	if ( !SharedAddress ) {
-	  perror( "MsgShare-e2 system error:\n" );
+	  perror( "MsgShareNoCreate-e2 system error:\n" );
 	  return( -1 );
 	}
 
-	control->ProcessID = pid;
-	control->shmid     = shmid;
+	MsgInitialized  =  TRUE;  /*  Force this true, else things'll get wiped on first MsgCheck call! */
+
+	if ( control->ProcessID != pid ) {
+	  fprintf( stderr, "MsgShareNoCreate-w1  Possible corruption!  Stored pid:%d (expected:%d)\n",control->ProcessID,pid);
+	}
+	if ( control->shmid != shmid ) {
+	  fprintf( stderr, "MsgShareNoCreate-w2  Possible corruption!  Stored shmid:%d (expected:%d)\n",control->shmid,shmid);
+	}
 
 	return( shmid );
 }
@@ -1311,9 +1275,21 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 	FILE *shmidLogFILE; /* shmid log-file descriptor                         */
 
-	key_t key    = (key_t)( ProcessID );
-	int   shmflg = 0660;  /*  Read/Write Owner/Group  */
-	int   shmid  = shmget( key, 0, shmflg );  /*  unique key, size, read/write user/group.  */
+	key_t key;
+	int   shmflg;
+	int   shmid;
+
+	if        ( getpid()   == ProcessID  ) { /* Ce est moi!  I'm allowed to kill my own shmid.                    */
+	} else if ( getpgid(ProcessID) == -1 ) { /* The process doesn't exist!  I'm allowed to kill an unused shmid.  */
+	} else                                 { /* Run away!  Don't touch that guy's shmid, he's still running.      */
+	  return( 0 );
+	}
+
+/*	Either I'm killing my own shmid, or somebody's who is no longer running:  */
+
+	key    = (key_t)( ProcessID );
+	shmflg = 0660;  /*  Read/Write Owner/Group  */
+	shmid  = shmget( key, 0, shmflg );  /*  unique key, size, read/write user/group.  */
 	if ( shmid < 0 ) {
 	  perror( "MsgRemoveSharedMemory-E1  Shared Memory Segment not found" );
 	  return( 0 );
@@ -1322,6 +1298,16 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	MsgTimeStampFileOut( shmidLogFILE );       /* Put a time stamp on it.                           */
 	fprintf( shmidLogFILE, "msg Shared Memory segment removed, shmid:%d  pid:%d\n", shmid, key );
 	fclose( shmidLogFILE );
+
+	if ( control->ProcessID != ProcessID ) {
+	  fprintf( stderr, "MsgRemoveSharedMemory-w1  Possible corruption!  Stored pid:%d (expected:%d)\n",control->ProcessID,ProcessID);
+	}
+	if ( control->shmid != shmid ) {
+	  fprintf( stderr, "MsgRemoveSharedMemory-w2  Possible corruption!  Stored shmid:%d (expected:%d)\n",control->shmid,shmid);
+	}
+
+	control->shmid     = 0;
+	control->ProcessID = 0;
 
 	shmctl( shmid, IPC_RMID, NULL );  /* It's actually removed here.  */
 

@@ -1,3 +1,6 @@
+
+static const char sccsid_msgfH[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 02:07:38, \tcompiled "__DATE__" "__TIME__;
+
 	void message_( const char *msg, int *one, int *ID, int len );
 	void message_out_( const char *msg, int *one, int len );
 	void msg_class_define_( const char *Class, const char *State, int *CountLimit, int *AbortLimit, int Clen, int Slen );
