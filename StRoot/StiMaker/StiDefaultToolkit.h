@@ -15,7 +15,7 @@
  */
 #ifndef StiDefaultToolkit_H
 #define StiDefaultToolkit_H 1
-#include "../Sti/StiToolkit.h"
+#include "Sti/StiToolkit.h"
 
 /** 
  * @class StiDefaultToolkit

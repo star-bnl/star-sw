@@ -10,7 +10,7 @@
 #include <string>
 #include <map>
 
-#include "../Sti/StiDisplayManager.h"
+#include "Sti/StiDisplayManager.h"
 
 using std::map;
 using std::multimap;
