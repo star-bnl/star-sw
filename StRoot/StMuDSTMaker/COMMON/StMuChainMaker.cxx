@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.20 2003/04/28 14:02:49 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.21 2003/08/04 18:43:19 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -327,6 +327,7 @@ void StMuChainMaker::fromList(string list) {
       if  ( inputStream->good() ) {
 	  int numberOfEvents = 0;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
+          if(iret) {/*warnOff*/}
 	  if ( pass(name,mSubFilters) ) {
 	      mFileList.push_back( StMuStringIntPair( name, numberOfEvents) );
 	  }
@@ -360,6 +361,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.21  2003/08/04 18:43:19  perev
+  * warnOff
+  *
   * Revision 1.20  2003/04/28 14:02:49  laue
   * Reversed faulty check in from Friday. Reading directories should work again
   *
