@@ -260,16 +260,14 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 block rGAP is METANOL gap
     material  Methane       
-    Medium    Methane_Gap    Isvol=Isopt
+    Medium    Methane_Gap    Isvol=1
     Attribute RGAP  seen=1   colo=4
     shape     BOX   dx=42.45  dy=0.2   dz=66.15
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
-    if (Isopt>0) then
     HITS rGAP  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                Slen:.1:(0,500)   ptot:18:(0,100),
                Tof:16:(0,1.e-6)  Step:16:(0,10),
                Eloss:32:(0,0.1) 
-    endif
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
