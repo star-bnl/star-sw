@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.0 2000/08/25 16:02:40 genevb Exp $ 
+// $Id: StQABookHist.cxx,v 2.1 2000/09/06 15:31:13 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 2.1  2000/09/06 15:31:13  lansdell
+// changed FTPC radial position of first hit histogram limits
+//
 // Revision 2.0  2000/08/25 16:02:40  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -769,8 +772,8 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomFW = QAH::H1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_glb_chargeFE = QAH::H1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
   m_glb_chargeFW = QAH::H1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
-  m_glb_rfFE     = QAH::H1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east", 100,40,200.);
-  m_glb_rfFW     = QAH::H1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west", 100,40,200.);
+  m_glb_rfFE     = QAH::H1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east",40,0.,40.);
+  m_glb_rfFW     = QAH::H1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west",40,0.,40.);
   m_glb_xfFE     = QAH::H1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_xfFW     = QAH::H1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_glb_yfFE     = QAH::H1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
