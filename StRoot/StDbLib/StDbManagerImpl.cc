@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.16 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.17 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.17  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.16  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.15  2003/09/02 17:57:49  perev
@@ -423,15 +426,15 @@ void StDbManagerImpl::lookUpServers(){
  char* xmlFile[3]={NULL,NULL,NULL};
  dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
 
- ostringstream cos;
- cos<<endl<<"******** Order of Files searched for dbServers ********* "<<endl;
+ StString cos;
+ cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
 
  for(int i=0;i<3; i++){
    xmlFile[i]=StDbDefaults::Instance()->getServerFileName(mode[i]);
    if(xmlFile[i]){
      ifstream is(xmlFile[i]);
      if(is){
-       cos<<"  "<<i+1<<". "<< xmlFile[i] <<endl;
+       cos<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
        findServersXml(is);
        is.close();
      }
@@ -440,7 +443,7 @@ void StDbManagerImpl::lookUpServers(){
    }
  }
 
- cos <<"********************************************************" << endl;
+ cos <<"********************************************************" << stendl;
 
  printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 
@@ -517,7 +520,7 @@ bool started = false;
 char* id;
 
  char* line=NULL;
- ostringstream os;
+ StString os;
 
 while(!done){
 
@@ -1272,7 +1275,7 @@ void
 StDbManagerImpl::printTimeStats(){
 #define __METHOD__ "printTimeStats()"
 
-if(!misTimeLogged){ cout<< "Timing Not Logged"<<endl; return; }
+if(!misTimeLogged){ cout<< "Timing Not Logged"<<stendl; return; }
 double queryTimes=0;
 double socketTimes=0;
  double connectTimes[10];
@@ -1299,24 +1302,24 @@ for(ServerList::iterator itr = mservers.begin();
  // double dbTF=100.0*((socketTimes+queryTimes)/dbTotalTimes);
  double dbCF=100.0*(dbTotalConnect/dbTotalTimes);
 
- ostringstream cos;
- cos<<endl<<"*************************** DataBase ClockTime Stats *************************** "<<endl;
+ StString cos;
+ cos<<stendl<<"*************************** DataBase ClockTime Stats *************************** "<<stendl;
 
- cos<<"Total Time in DB-API       = "<<dbTotalTimes<<"\t sec"<<endl;
- cos<<" --------------------- In aggregate ------------------"<<endl;
- cos<<" - Prepare Nodes & Servers = "<<dbNodeTotal<<"\t sec --> "<<dbNF<<"% of total"<<endl;
- cos<<" - Select & Retrieve data  = "<<mdataLog.getTotalTimes()<<"\t sec --> "<<dbDF<<"% of total"<<endl;
- cos<<" --------------- In MySQL C-API (approximate) ---------"<<endl;
- cos<<" - Connecting to Servers   = "<<dbTotalConnect<<"\t sec --> "<<dbCF<<"% of total"<<endl;
+ cos<<"Total Time in DB-API       = "<<dbTotalTimes<<"\t sec"<<stendl;
+ cos<<" --------------------- In aggregate ------------------"<<stendl;
+ cos<<" - Prepare Nodes & Servers = "<<dbNodeTotal<<"\t sec --> "<<dbNF<<"% of total"<<stendl;
+ cos<<" - Select & Retrieve data  = "<<mdataLog.getTotalTimes()<<"\t sec --> "<<dbDF<<"% of total"<<stendl;
+ cos<<" --------------- In MySQL C-API (approximate) ---------"<<stendl;
+ cos<<" - Connecting to Servers   = "<<dbTotalConnect<<"\t sec --> "<<dbCF<<"% of total"<<stendl;
  if(j>1){
   cos<<" [ Connections per Server; ";
   for(i=0;i<j;i++)cos<<serverID[i]<<"="<<connectTimes[i]<<" sec ";
-  cos<<" ] "<<endl;
+  cos<<" ] "<<stendl;
   }
- cos<<" - SQL Query Times         = "<<queryTimes<<"\t sec --> "<<dbQF<<"% of total"<<endl;
- cos<<" - socket transfer Times   = "<<socketTimes<<"\t sec --> "<<dbSF<<"% of total"<<endl;
+ cos<<" - SQL Query Times         = "<<queryTimes<<"\t sec --> "<<dbQF<<"% of total"<<stendl;
+ cos<<" - socket transfer Times   = "<<socketTimes<<"\t sec --> "<<dbSF<<"% of total"<<stendl;
 
- cos<<"********************************************************************************"<<endl;
+ cos<<"********************************************************************************"<<stendl;
 
  printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 
@@ -1340,7 +1343,7 @@ char* id;
     id--; *id='_';
     delete [] tmpName;
  }
- ostringstream ni;
+ StString ni;
  ni<<" Found dbType="<<type<<" & dbDomain="<<domain;
  ni<<" from DataBase Name="<<dbName;
 
@@ -1365,7 +1368,7 @@ return true;
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
  
-  ostringstream dbname;
+  StString dbname;
   dbname<<typeName;
   if(strcmp(domainName,"Star")!=0)dbname<<"_"<<domainName;
   char* retName = mstringDup((dbname.str()).c_str());

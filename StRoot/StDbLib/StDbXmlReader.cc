@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.11 2003/09/16 22:44:18 porter Exp $
+ * $Id: StDbXmlReader.cc,v 1.12 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.12  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.11  2003/09/16 22:44:18  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.10  2003/09/02 17:57:50  perev
@@ -406,7 +409,7 @@ if(p1){
      ilist =e->iend - e->istart;
      iline =0;
      for(j=2;j<ilist;j++)iline += strlen(loca[e->istart+j]);
-     ostringstream fs;
+     StString fs;
      for(j=2;j<ilist;j++) fs<<loca[e->istart+j]; //<<endl;
      string fs2=fs.str();
      e->val.data = new char[fs2.length()+1];
@@ -560,7 +563,11 @@ StDbXmlReader::pass(char* name, unsigned long& i,  int& len){
 void
 StDbXmlReader::pass(char* name, long long& i,  int& len){
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+#ifndef __osf__
  if(strcmp(e->type,"LongLong")==0)i=atoll((e->val).data);
+#else
+ if(strcmp(e->type,"LongLong")==0)i=atol((e->val).data);
+#endif
 }
 void
 StDbXmlReader::pass(char* name, long long*& i,  int& len){

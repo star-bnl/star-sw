@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.22 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbManager.hh,v 1.23 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.23  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.22  2003/09/16 22:44:17  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -118,7 +121,7 @@
 #define STDBMANAGER_HH
 
 #include <string.h>
-#include <sstream>
+#include "StString.h"
 
 #include "stdb_streams.h"
 

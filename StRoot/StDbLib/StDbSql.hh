@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.8 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbSql.hh,v 1.9 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.9  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.8  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.7  2003/04/11 22:47:36  porter
@@ -127,7 +130,7 @@ protected:
   void  deleteRows(const char* tableName, int* rowID, int nrows);
   void  initEndTime();
 
-  char* mRetString(ostringstream& rs);
+  char* mRetString(StString& rs);
   int   sendMess(const char* a, const char* b, StDbMessLevel m, 
                  int lineNum=0, const char* className=" ",
                  const char* methName=" ");
@@ -191,7 +194,7 @@ StDbBuffer& buff;
 
 };
 
-inline char* StDbSql::mRetString(ostringstream& rs){
+inline char* StDbSql::mRetString(StString& rs){
    if(mretString)delete [] mretString;
    string srs=rs.str();
    mretString = new char[srs.length()+1];

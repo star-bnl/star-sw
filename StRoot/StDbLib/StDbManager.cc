@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.30 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbManager.cc,v 1.31 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.31  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.30  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.29  2003/09/02 17:57:49  perev
@@ -189,7 +192,7 @@ StDbManager::printInfo(const char* m1, StDbMessLevel ml, int lineNumber, const c
 int
 StDbManager::printInfo(const char* m1, const char* m2, StDbMessLevel ml, int lineNumber, const char* className, const char* methodName){
 
-   ostringstream ms;
+   StString ms;
    ms<<m1<<" "<<m2;
    printInfo((ms.str()).c_str(),ml,lineNumber,className,methodName);
    return 0;

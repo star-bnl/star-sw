@@ -4,12 +4,12 @@
 #ifdef __STDB_STANDALONE__
 #include <iostream>
 #include <fstream>
-#include <sstream>
+#include "StString.h"
 #include <string>
 using namespace std;
 #else
-#include <Stiostream.h>
-#include <sstream>
+#include "Stiostream.h"
+#include "StString.h"
 #endif
 
 

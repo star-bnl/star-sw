@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.23 2003/10/28 20:58:31 perev Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.24 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,11 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.24  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.23  2003/10/28 20:58:31  perev
- * Linux ==> __linux__
+ *  Linux ==> __linux__
  *
  * Revision 1.22  2003/09/16 22:44:18  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.21  2003/09/02 17:57:50  perev

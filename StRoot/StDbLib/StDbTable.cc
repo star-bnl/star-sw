@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.36 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbTable.cc,v 1.37 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.37  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.36  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.35  2003/09/02 17:57:49  perev
@@ -162,8 +165,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.37  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.36  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.35  2003/09/02 17:57:49  perev
@@ -928,7 +934,7 @@ float* mfloat; double* mdouble;
   switch (type) {
   case Stchar:
     {
-        ostringstream cn;
+        StString cn;
         cn<<name<<".text"; const char* commentName = (cn.str()).c_str();
         mchar = 0;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
@@ -1341,7 +1347,7 @@ unsigned int size = mdescriptor->getTotalSizeInBytes();
 
 void StDbTable::printNoDataReturned(const char* elementName){
 
-  ostringstream emess;
+  StString emess;
   emess<<" No data return from table="<<printName()<<" column="<<elementName;
   StDbManager::Instance()->printInfo((emess.str()).c_str(),dbMWarn,__LINE__,__CLASS__,"ReadElement(ptr,name,len,type,buffer)");
 }
