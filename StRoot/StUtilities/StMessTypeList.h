@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.7 1999/12/28 21:29:55 porter Exp $
+// $Id: StMessTypeList.h,v 1.8 2000/01/26 19:04:48 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.8  2000/01/26 19:04:48  genevb
+// Adjust use of namespaces
+//
 // Revision 1.7  1999/12/28 21:29:55  porter
 // added 'using std::vector' and a (char*) cast to allow compilation
 // using solaris CC5.  Many warnings of const char* vs char* still
@@ -38,12 +41,15 @@
 #define ClassStMessTypeList
 
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+#endif
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 // Syntax currently required by Solaris compiler
 #define StVector(T) vector<T, allocator<T> >
 typedef vector<int, allocator<int> > intVector;
 #else
-using std::vector;
 #define StVector(T) vector<T>
 typedef vector<int> intVector;
 #endif
