@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.14 2004/08/10 22:38:30 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.15 2004/08/11 00:51:54 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -155,7 +155,7 @@ unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
   // Backward compatibility for old files
   if (mNHitsPossTpc==255) {
     if (det==kTpcId || det==kFtpcEastId || det==kFtpcWestId)
-      return mNHitsPoss;
+      return mTopologyMap.hasHitInDetector(det)*mNHitsPoss;
     else 
       return 0;
   }
@@ -187,7 +187,7 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
   // Backward compatibility for old files
   if (mNHitsFitTpc==255) {
     if (det==kTpcId || det==kFtpcEastId || det==kFtpcWestId)
-      return mNHitsFit;
+      return mTopologyMap.hasHitInDetector(det)*mNHitsFit;
     else 
       return 0;
   }
@@ -289,6 +289,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.15  2004/08/11 00:51:54  mvl
+ * Added topologyMap check for nHitsFit(StDetectorId) and nHitsPoss(StDetectorId) to better handle existing MuDst
+ *
  * Revision 1.14  2004/08/10 22:38:30  mvl
  * Extended support for fitspoints in Svt and Tpc to work for old files + fixed some types in previous version.
  *
