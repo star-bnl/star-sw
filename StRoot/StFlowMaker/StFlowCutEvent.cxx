@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.14 2000/07/12 17:54:33 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.15 2000/07/14 23:49:03 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.15  2000/07/14 23:49:03  snelling
+// Changed to ConstIterator for new StEvent and removed comparison int uint
+//
 // Revision 1.14  2000/07/12 17:54:33  posk
 // Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 // Apply cuts when reading picoevent file.
@@ -95,7 +98,7 @@ StFlowCutEvent::~StFlowCutEvent() {
 Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if StEvent survives all the cuts
   
-  // Primary vertix
+  // Primary vertex
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
   if (nvtx == 0) return kFALSE;
 
@@ -152,7 +155,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   mEventN++;
 
   // Multiplicity
-  UInt_t mult = pPicoEvent->OrigMult();
+  Int_t mult = pPicoEvent->OrigMult();
   if (mMultCuts[1] > mMultCuts[0] && 
      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
     mMultCut++;
