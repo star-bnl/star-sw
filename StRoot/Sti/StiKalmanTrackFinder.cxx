@@ -26,6 +26,7 @@
 */
 
 //Sti
+#include "StiDebug.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -49,18 +50,20 @@ ostream& operator<<(ostream&, const StiTrack&);
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
 {
-    cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl; 
+    if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl; 
     StiTrack::setTrackFitter(new StiKalmanTrackFitter());
     reset();
+		StiDebug::debug=StiDebug::All;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
-	cout <<"StiKalmanTrackFinder::~StiKalmanTrackFinder()"<<endl;
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::~StiKalmanTrackFinder()"<<endl;
 }
 
 void StiKalmanTrackFinder::reset()
 {
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::reset()"<<endl;
 	singleNodeDescent    = true;
 	singleNodeFrom       = 20;
 	mcsCalculated        = false;
@@ -85,56 +88,69 @@ bool StiKalmanTrackFinder::hasMore()
 
 void StiKalmanTrackFinder::doTrackFit()
 {
-    try {
-	StiKalmanTrack* track = 0;
-	if (trackSeedFinder->hasMore())	{ //Redundant check, but it protectes against naive calls
-	    track = trackSeedFinder->next();
-	    if (!track) 	    {
-		cout <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort"
-		     <<endl;
-		return;
-	    }
-	    else 	    {
-		cout <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
-		track->fit();
-		trackContainer->push_back(track);
-		track->update();  //This updates the track on the display
-		cout <<*track<<endl;
-	    }
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::doTrackFit()"<<endl;
+	try 
+		{
+			StiKalmanTrack* track = 0;
+			if (trackSeedFinder->hasMore())	
+				{ //Redundant check, but it protectes against naive calls
+					track = trackSeedFinder->next();
+					if (!track) 	    
+						{
+							cout <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort"
+									 <<endl;
+							return;
+						}
+					else 	    {
+						if (StiDebug::isReq(StiDebug::Flow))
+							cout <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
+						track->fit();
+						trackContainer->push_back(track);
+						track->update();  //This updates the track on the display
+						cout <<*track<<endl;
+					}
+				}
+			else {
+				if (StiDebug::isReq(StiDebug::Flow))
+					cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+			}
+		}
+	catch (Exception & e) {
+    cout << "StiKalmanTrackFinder::doTrackFit() - Exception: " << e << endl;
 	}
-	else {
-	    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-	}
-    }
-    catch (Exception & e) {
-	cout << "StiKalmanTrackFinder::doTrackFit() - Exception: " << e << endl;
-    }
 }
 
 void StiKalmanTrackFinder::doTrackFind()
 {
-    StiKalmanTrack* track = 0;
-    if (trackSeedFinder->hasMore())	
-	{ //Redundant check, but it protectes against naive calls
-	    track = trackSeedFinder->next();
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::doTrackFind()"<<endl;
+	StiKalmanTrack* track = 0;
+	if (trackSeedFinder->hasMore())	
+		{ //Redundant check, but it protectes against naive calls
+			track = trackSeedFinder->next();
 	    if (!track) 
 	      {
-		  cout <<"StiKalmanTrackFinder::doTrackFind()\t Track==0. Abort"
-		       <<endl;
-		  return;
+					if (StiDebug::isReq(StiDebug::Flow))
+						cout <<"StiKalmanTrackFinder::doTrackFind()\t Track==0. Abort"
+								 <<endl;
+					return;
 	      }
-	    else {
-		cout <<"\nStiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
-		findTrack(track);
-		cout << " StiKalmanTrackFinder::doTrackFind() - Track Parameters" << endl;
-		cout << *track <<endl;
-		trackContainer->push_back(track);
-		track->update();  //This updates the track on the display
-	    }
-	}
-    else {
-	cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-    }
+	    else 
+	      {
+					if (StiDebug::isReq(StiDebug::Flow))
+						cout <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
+					findTrack(track);
+					if (StiDebug::isReq(StiDebug::Track))
+						cout << " StiKalmanTrackFinder::doTrackFind() - Track Parameters" << endl
+								 << *track;
+					trackContainer->push_back(track);
+					track->update();  //This updates the track on the display
+				}
+		}
+	else 
+		{
+	    if (StiDebug::isReq(StiDebug::Flow))
+				cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+		}
 }
 
 void StiKalmanTrackFinder::findTracks()
@@ -176,35 +192,34 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t) //throw ( Exception)
   //                or if input data are invalid or if some other 
   //                internal error has occured.
   //-----------------------------------------------------------------
-    cout << "StiKalmanTrackFinder::findTrack(StiTrack * t) - Beginning" << endl;
-    StiKalmanTrack * tt = dynamic_cast<StiKalmanTrack *> (t);
-    if (!tt) 		{
-	cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t tt==0. Abort"
-	     <<endl;
-	return;  
-    }
-    StiKalmanTrackNode * lastNode = tt->getLastNode();
-    if (!lastNode) 	{
-	cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t lastNode==0. Abort"
-	     <<endl;
-	return;  
-    }
-    else {
-	cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t follow last node" << endl;
-    }
-    lastNode = followTrackAt(lastNode);
-    cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t - Prune nodes" << endl;
-    pruneNodes(lastNode);
-    cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t - Set last node" << endl;
-    tt->setLastNode(lastNode);
-    tt->setChi2(lastNode->fChi2);
-    if (lastNode->fP3>0)
-	tt->setCharge(StiKalmanTrackNode::unitCharge);
-    else
-	tt->setCharge(-StiKalmanTrackNode::unitCharge);
-    
-    //extendToMainVertex(lastNode);
-    cout <<"StiKalmanTrackFinder::find()Track(StiTrack * t)\t - Done" << endl;
+	if (StiDebug::isReq(StiDebug::Flow))
+		cout << "StiKalmanTrackFinder::findTrack(StiTrack * t) - Beginning" << endl;
+  StiKalmanTrack * tt = dynamic_cast<StiKalmanTrack *> (t);
+	if (!tt) 
+		{
+			cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - ERROR - tt==0. Abort"
+					 <<endl;
+			return;  
+			}
+	StiKalmanTrackNode * lastNode = tt->getLastNode();
+	if (!lastNode) 
+		{
+			cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - ERROR - lastNode==0. Abort"
+					 <<endl;
+			return;  
+		}
+  lastNode = followTrackAt(lastNode);
+	pruneNodes(lastNode);
+  tt->setLastNode(lastNode);
+	tt->setChi2(lastNode->fChi2);
+	if (lastNode->fP3>0)
+		tt->setCharge(-StiKalmanTrackNode::unitCharge);
+	else
+		tt->setCharge(StiKalmanTrackNode::unitCharge);
+
+  //extendToMainVertex(lastNode);
+	if (StiDebug::isReq(StiDebug::Flow))
+		cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - Done" << endl;
 }
 
 StiKalmanTrackNode *
@@ -235,28 +250,34 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
   sDet  = sNode->getHit()->detector();
 	if (sDet==0)
 		{
-			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - sDet==null" << endl;
+			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - ERROR - sDet==null" << endl;
 			return 0;
 		}
 	if (detectorContainer==0)
 		{
-			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - detectorContainer==null" << endl;
+			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - ERROR - detectorContainer==null" << endl;
 			return 0;
 		}
-  detectorContainer->setToDetector(sDet);
-  detectorContainer->moveIn();
-
-	tDet = **detectorContainer;
-	if (tDet==0)
-		{
-			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - tDet==null" << endl;
-			return 0;
-		}
-  if (tDet==sDet)
-    return sNode; // track cannot be prolongued any further
+	detectorContainer->setToDetector(sDet);
 
   while (!trackDone)   // search track until done
     {
+			cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - INFO - Search Track" << endl;
+
+			detectorContainer->moveIn();
+			
+			tDet = **detectorContainer;
+			cout << *tDet;
+			if (tDet==0)
+				{
+					cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - ERROR - tDet==null" << endl;
+					return 0;
+				}
+			if (tDet==sDet)
+				{
+					cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - INFO - tDet==sDet"  << endl;
+					return sNode; // track cannot be prolongued any further
+				}
       //sHit = sNode->getHit();
       //yWindow = getYWindow(sNode, sHit);
       //zWindow = getZWindow(sNode, sHit);
@@ -269,6 +290,7 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
       scanningDone = false;
       while (!scanningDone)
 				{
+					cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) - INFO - Scanning" << endl;
 					visitedDet++;
 					if (visitedDet>4)
 						{
@@ -280,33 +302,46 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
 							if (tNode==0)
 								{
 									cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
-											 << " - tNode==null" << endl;
+											 << "\t- ERROR - tNode==null" << endl;
 									return 0;
 								}
 							tNode->reset();
+							cout << "sNode==========="
+									 << *sNode;
 							position = tNode->propagate(sNode, tDet); // 
 							if (position==kFailed) 
 								{
-									cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
-											 << " - position==kFailed" << endl;
+									if (StiDebug::isReq(StiDebug::Flow))
+										cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+												 << " - position==kFailed" << endl;
 									return sNode;
 								}
 							if (tDet->isActive())  // active vol, look for hits
-								{
+								{	
+									cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+											 << "\t- tDet isActive()" << endl;
 									if (position<=kEdgeZplus)
 										{
+											cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+													 << "Near HIT " << endl;
 											hitContainer->setDeltaD(5.); //yWindow);
 											hitContainer->setDeltaZ(5.); //zWindow);
+											cout << "tNode===========" 
+													 <<*tNode;
 											hitContainer->setRefPoint(tNode->fAlpha,
 																								tNode->fX,
 																								tNode->fP0,
 																								tNode->fP1);
 											while (hitContainer->hasMore())
 												{
+													cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+															 << "\t- hitContainer->hasMore()" << endl;
 													tNode->setHit(hitContainer->getHit());
 													chi2 = tNode->evaluateChi2();
 													if (chi2<maxChi2ForSelection && chi2 < bestChi2)
 														{
+															cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+																	 << "\t chi2:" << chi2 << endl;
 															bestChi2 = chi2;
 															bestNode = tNode;
 														}
@@ -314,9 +349,16 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
 											if (position==kHit)
 												scanningDone = true;
 										}
+									else
+										{
+											cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+													 << "MISSED DET" << endl;						
+										}
 								}
 							else  // inactive, keep only if position==0
 								{
+									cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+											 << "\t- tDet is NOT Active()" << endl;
 									if (position==kHit)
 										scanningDone = true;
 								}
@@ -335,6 +377,8 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
       
       if (bestChi2<maxChi2ForSelection && bestNode)
 				{
+					cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+							 << "-  Node selected for addition to track" << endl;
 					// found hit(s), update track info, 
 					// update counters.
 					tNode->updateNode();
@@ -348,6 +392,9 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
       else
 				{
 					// update null counters
+					cout << "StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)"
+							 << "-  Node WAS NOT selected for addition to track" << endl;
+					cout << "bestChi2:" << bestChi2 << " while max for selection is " << maxChi2ForSelection << endl;
 					contiguousNullCount++;
 					nullCount++;
 					if (nullCount>maxNullCount ||
@@ -356,13 +403,14 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) //throw (Exceptio
 				}
 			
       
-      detectorContainer->moveIn();
+			/*      detectorContainer->moveIn();
       StiDetector * newDet = **detectorContainer;
       if (newDet==tDet)
-	{
-	  // same det implies track is  done
-	  trackDone = true;
-	}
+				{
+					// same det implies track is  done
+					trackDone = true;
+				}
+			*/
     }
   return sNode;
 }
@@ -380,13 +428,17 @@ void StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node)
   // All siblings of the given node, are removed, and iteratively
   // all siblings of its parent are removed from the parent of the
   // parent, etc.
+	if (StiDebug::isReq(StiDebug::Flow)) 
+		cout <<"StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node) - Beginning"<<endl;
+
 
 
   StiKalmanTrackNode * parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
   while (parent)
     {
-			cout << "StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node) -"
-					 << "node has childCount:" << parent->getChildCount() << endl;
+			if (StiDebug::isReq(StiDebug::Finding)) 
+				cout << "StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node) -"
+						 << "node has childCount:" << parent->getChildCount() << endl;
       parent->removeAllChildrenBut(node);
       node = parent;
       parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
