@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.18 2003/01/14 12:58:01 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.19  2003/02/27 22:56:58  jcs
+// use the ftpc body temperature readings to make temperature/pressure corrections
+//
 // Revision 1.18  2003/01/14 12:58:01  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -74,6 +77,7 @@
 class TH1F;
 class TH2F;
 
+class St_db_Maker;
 class DetectorReader;
 class St_ftpcClusterPars;
 class St_ftpcFastSimGas;
@@ -96,7 +100,8 @@ class St_ftpcElectronics;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.18 2003/01/14 12:58:01 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $";
+   St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -146,7 +151,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.18 2003/01/14 12:58:01 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
