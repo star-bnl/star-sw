@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.3 2002/01/31 23:42:36 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.4 2002/02/25 19:32:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.4  2002/02/25 19:32:47  ullrich
+ * Added more RHIC related info.
+ *
  * Revision 2.3  2002/01/31 23:42:36  ullrich
  * Added member to hold BBC coincidence rate.
  *
@@ -22,7 +25,7 @@
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.3 2002/01/31 23:42:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.4 2002/02/25 19:32:47 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -31,13 +34,7 @@ StRunInfo::StRunInfo()
     mRunId = 0;
     mProductionTime = 0;
     mCenterOfMassEnergy = 0;
-    mBeamMassNumber[east] = 0;
-    mBeamMassNumber[west] = 0;
-    mBeamCharge[east] = 0;
-    mBeamCharge[west] = 0;
     mMagneticFieldZ = 0;
-    mTpcDriftVelocity[east] = 0;
-    mTpcDriftVelocity[west] = 0;
 
     mZdcEastRate = 0;
     mZdcWestRate = 0;
@@ -45,6 +42,15 @@ StRunInfo::StRunInfo()
     mBbcCoincidenceRate = 0;
     mBackgroundRate = 0;
     mL0RateToRich = 0;
+
+    for (int i=0; i<2; i++) {
+	mBeamMassNumber[i] = 0;
+	mTpcDriftVelocity[i] = 0;
+	mBeamEnergy[i] = 0;
+	mInitialBeamIntensity[i] = 0;
+	mBeamLifeTime[i] = 0;
+	mBeamFillNumber[i] = 0;
+    }
 }
 
 StRunInfo::~StRunInfo() {/* noop */}
@@ -69,9 +75,21 @@ int
 StRunInfo::beamMassNumber(StBeamDirection dir) const
 {return mBeamMassNumber[dir];}
 
-int
-StRunInfo::beamCharge(StBeamDirection dir) const
-{return mBeamCharge[dir];}
+float
+StRunInfo::beamEnergy(StBeamDirection dir) const
+{return mBeamEnergy[dir];}
+
+float
+StRunInfo::initialBeamIntensity(StBeamDirection dir) const
+{return mInitialBeamIntensity[dir];}
+
+float
+StRunInfo::beamLifeTime(StBeamDirection dir) const
+{return mBeamLifeTime[dir];}
+
+float
+StRunInfo::beamFillNumber(StBeamDirection dir) const
+{return mBeamFillNumber[dir];}
 
 double
 StRunInfo::magneticField() const
@@ -125,8 +143,20 @@ StRunInfo::setBeamMassNumber(StBeamDirection dir, int val)
 {mBeamMassNumber[dir] = val;}
 
 void
-StRunInfo::setBeamCharge(StBeamDirection dir, int val)
-{mBeamCharge[dir] = val;}    
+StRunInfo::setBeamEnergy(StBeamDirection dir, float val)
+{mBeamEnergy[dir] = val;}    
+
+void
+StRunInfo::setInitialBeamIntensity(StBeamDirection dir, float val)
+{mInitialBeamIntensity[dir] = val;}    
+
+void
+StRunInfo::setBeamLifeTime(StBeamDirection dir, float val)
+{mBeamLifeTime[dir] = val;}    
+
+void
+StRunInfo::setBeamFillNumber(StBeamDirection dir, float val)
+{mBeamFillNumber[dir] = val;}    
 
 void
 StRunInfo::setMagneticField(double val)
