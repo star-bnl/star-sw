@@ -4,9 +4,13 @@
 
 macro init
 
+  macro/global/import _
+         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+
+
 cd /dui/constants/tpc/geometry
 
-dio/newfilestream geom /afs/rhic/star/packages/SL98b/params/tpc/tpg_pars.xdf r
+dio/newfilestream   geom [PARAMS_TPC]tpg_pars.xdf r
 dio/stream/getevent geom 
 dio/stream/close    geom
 
