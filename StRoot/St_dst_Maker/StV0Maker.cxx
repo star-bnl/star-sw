@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.14 1999/11/02 11:27:56 macl Exp $
+// $Id: StV0Maker.cxx,v 1.15 1999/11/10 02:19:10 lbarnby Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.15  1999/11/10 02:19:10  lbarnby
+// change in StV0Maker related to multiple primary vertices in vertex table
+//
 // Revision 1.14  1999/11/02 11:27:56  macl
 // added n_point quality cut to V0 daughter tracks
 //
@@ -185,7 +188,7 @@ Int_t StV0Maker::Make(){
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
     AddGarb(ev0track2);
     
-    vertex->SetNRows(1); 
+    vertex->SetNRows(4); 
     
     iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
     //       =========================================================
