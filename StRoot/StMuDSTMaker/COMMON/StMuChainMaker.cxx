@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.12 2002/12/31 19:52:11 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.13 2003/01/10 16:37:37 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -245,7 +245,7 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { ///< no yet im
     string name = full.substr(split+1);
     string path = full.substr(0,split);
     cout << path << " " << name << endl;
-    if (path.find("/star/data/")==0) // if it's a local disk, then add the machine name to the query
+    if (path.find("/star/data/")==string::npos) // if it's a local disk, then add the machine name to the query
       files += " || (filePath='" + path + "'&&fileName='" + name +"')";
     else
       files += " || (filePath='" + path + "'&&fileName='" + name + "'&&nodeName='" + machine + "')";
@@ -332,6 +332,11 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.13  2003/01/10 16:37:37  laue
+ * Bug fix for FileCatalog look-up. Don't require machine for NFS files on
+ * /star/data... . I know a hard-wired string this is not the nice way to do
+ * it, I'll improve this once I find the time.
+ *
  * Revision 1.12  2002/12/31 19:52:11  laue
  * bug fix in built of filters
  *
