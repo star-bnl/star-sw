@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.18 2004/12/15 21:35:06 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.19 2005/02/05 01:08:12 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -120,7 +120,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
   mChiSqXY = track->fitTraits().chi2(0);
   mChiSqZ = track->fitTraits().chi2(1);
 
-  if ( track->geometry() ) {
+  if ( track->geometry() && track->geometry()->charge()) {
     mHelix = StMuHelix(track->geometry()->helix(),event->runInfo()->magneticField());
     if (event->primaryVertex()) {
       mP = momentumAtPrimaryVertex(event,track);
@@ -295,6 +295,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.19  2005/02/05 01:08:12  perev
+ * zero charge skip
+ *
  * Revision 1.18  2004/12/15 21:35:06  mvl
  * Added initialisaion of eta, phi and pt. Affects events without main vertex.
  *
