@@ -1,12 +1,11 @@
 /******************************************************
- * $Id: StRichASCIIReader.cxx,v 1.3 2000/02/08 16:20:20 lasiuk Exp $
+ * $Id: StRichASCIIReader.cxx,v 1.4 2000/02/11 13:09:56 lasiuk Exp $
  *
  * Description:
  *******************************************************
  * $Log: StRichASCIIReader.cxx,v $
- * Revision 1.3  2000/02/08 16:20:20  lasiuk
- * for standalone __ROOT__ defn'd.
- * switch order of arguments, remove quadrant algebra
+ * Revision 1.4  2000/02/11 13:09:56  lasiuk
+ * new version ASCII reader (include track_p)
  *
  * Revision 1.3  2000/02/08 16:20:20  lasiuk
  * for standalone __ROOT__ defn'd.
@@ -49,7 +48,7 @@ int StRichASCIIReader::operator()(StRichGHit& hit )
     if ( read() == 0 ) {
 	hit.fill( mX.x(), mX.y(), mX.z(), mQuadrant,
 		  (mP.x()/abs(mP)), (mP.y()/abs(mP)), (mP.z()/abs(mP)),
-		  mdS, mdE, mHitID , mGV );
+		  mdS, mdE, mTrackP , mGV );
 	hit.addGlobal(mXX.x(), mXX.y(), mXX.z());
 	return 0;
     }
@@ -97,7 +96,7 @@ int StRichASCIIReader::read()
     float p[3];
     mIfs >> x[0] >> x[1] >> x[2] >> xx[0] >> xx[1];
     mIfs >> xx[2] >> p[0] >> p[1] >> p[2] >> mTof;
-    mIfs >> mdE >> mdS >> mVolume;
+    mIfs >> mdE >> mdS >> mVolume >> mTrackP >> mNumber;
     mX = StThreeVector<double>(x[0],x[1],x[2]);
     mXX = StThreeVector<double>(xx[0],xx[1],xx[2]);
     mP = StThreeVector<double>(p[0],p[1],p[2]);
@@ -107,6 +106,8 @@ int StRichASCIIReader::read()
      PR(mdE);
      PR(mdS);
      PR(mVolume);
+     PR(mTrackP);
+     PR(mNumber);
     mQuadrant = whichVolume(mVolume);
     return 0;
 }
