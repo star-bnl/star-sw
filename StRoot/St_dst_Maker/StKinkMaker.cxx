@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.11 1999/07/15 22:27:43 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.12 1999/07/17 00:31:24 genevb Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.12  1999/07/17 00:31:24  genevb
+// Use StMessMgr
+//
 // Revision 1.11  1999/07/15 22:27:43  wdeng
 // debug
 //
@@ -36,6 +39,8 @@
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
+
+#include "StMessMgr.h"
 
 #include "pams/global/inc/StDetectorId.h"
 #include "pams/global/inc/StVertexId.h"
@@ -118,25 +123,25 @@ Int_t StKinkMaker::Make(){
 
   St_DataSet *match = GetDataSet("match"); 
   if (!match) {
-    cout << " StKinkMaker: match is missing" << endl;
+    gMessMgr->Warning() << " StKinkMaker: match is missing" << endm;
     return kStWarn;
   }  
   St_DataSetIter matchI(match);         
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    cout << " StKinkMaker: globtrk is missing" << endl;
+    gMessMgr->Warning() << " StKinkMaker: globtrk is missing" << endm;
     return kStWarn;
   }
 
   St_DataSet     *primary = GetDataSet("primary"); 
   if (!primary) {
-    cout << " StKinkMaker: primary is missing" << endl;
+    gMessMgr->Warning() << " StKinkMaker: primary is missing" << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    cout << " StKinkMaker: vertex is missing" << endl;
+    gMessMgr->Warning() << " StKinkMaker: vertex is missing" << endm;
     return kStWarn;
   }
   
@@ -146,7 +151,7 @@ Int_t StKinkMaker::Make(){
     if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
   }
   if( whichRow == vertex->GetNRows() ) {
-    cout << " StKinkMaker: no primary vertex." << endl;
+    gMessMgr->Warning() << " StKinkMaker: no primary vertex." << endm;
     return kStWarn;
   }
 
@@ -586,7 +591,7 @@ Int_t StKinkMaker::Make(){
 	}
     }
   trackArray->Delete();
-  cout << " kinkCandidate is " << kinkCandidate << endl;
+  gMessMgr->Info() << " kinkCandidate is " << kinkCandidate << endm;
   
   return kStOK; 
 }

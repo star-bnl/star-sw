@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.7 1999/07/06 18:59:08 sakrejda Exp $
+* $Id: tcl_clusters_in_row.F,v 1.8 1999/07/17 00:32:04 genevb Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.8  1999/07/17 00:32:04  genevb
+* Use StMessMgr
+*
 * Revision 1.7  1999/07/06 18:59:08  sakrejda
 * PadOffset and SeqOffset handling changed to accound for the fact that they are unsigned shorts in C
 *
@@ -231,12 +234,14 @@ c
 
 c see if it is worth it first...
         if (tpcluster_h.nok.ge.tpcluster_h.maxlen) then		!!!VP /eq/ge/
-           write(6,*)'TPCLUSTER table full - not searching sec,row',sector,row
+           write(m132,*)'TPCLUSTER table full - not searching sec,row',sector,row
+           call StWarning(m132)
            return
         endif
 
         if (tpseq_h.nok.ge.tpseq_h.maxlen) then			!!!VP /eq/ge/
-           write(6,*)'TPSEQ table full - not searching sec,row',sector,row
+           write(m132,*)'TPSEQ table full - not searching sec,row',sector,row
+           call StError(m132)
            return
         endif
 c
@@ -264,7 +269,8 @@ CDH now loop over all pads in this row and sequences on these pads
 CIS raw_row(row_table).ipad is unsigned short but it can be at most
 C   3941, sth must be very wrong...
         if(raw_row(row_table).ipad.lt.0) then
-           write(6,*) "Bad value for raw_row.ipad",raw_row(row_table).ipad
+           write(m132,*) "Bad value for raw_row.ipad",raw_row(row_table).ipad
+           call StError(m132)
            stop
         endif
 
@@ -454,13 +460,14 @@ c ok, at this point, all sequences in cluster have had their chance to be seed.
 c  The cluster is finished... store it...
 
 	if (nseq_in_cluster.eq.0) then	! should not happen!
-	  write(6,*)'Hey--- ERROR in clustering algorithm! do not ignore!'
+	  call StError('Hey--- ERROR in clustering algorithm! do not ignore!')
 	endif
 
 	if (nseq_in_cluster.ge.2) then	! do not store 1-sequence "clusters"
            if (tpcluster_h.nok.ge.tpcluster_h.maxlen) then	!!!VP /eq/ge/
-              write(6,*)'TPCLUSTER table full- abort sec,row',
+              write(m132,*)'TPCLUSTER table full- abort sec,row',
      +             sector,row
+              call StError(m132)
               return
            endif
 c
@@ -481,8 +488,9 @@ c
            tpcluster(tpcluster_h.nok).flag = 0
            do iseq=1,nseq_in_cluster
               if (tpseq_h.nok.ge.tpseq_h.maxlen) then		!!!VP /eq/ge/
-                 write(6,*)'TPSEQ table full- abort sec,row',
+                 write(m132,*)'TPSEQ table full- abort sec,row',
      +                sector,row
+                 call StError(m132)
                  tpcluster_h.nok = tpcluster_h.nok -1 ! don't store half-baked cluster
                  return
               endif

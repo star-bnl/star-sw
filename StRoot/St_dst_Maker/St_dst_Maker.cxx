@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.20 1999/07/15 13:57:55 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.21 1999/07/17 00:31:25 genevb Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.21  1999/07/17 00:31:25  genevb
+// Use StMessMgr
+//
 // Revision 1.20  1999/07/15 13:57:55  perev
 // cleanup
 //
@@ -49,6 +52,8 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
+#include "StMessMgr.h"
+
 #include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_fill_ftpc_dst_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
@@ -59,7 +64,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.20 1999/07/15 13:57:55 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.21 1999/07/17 00:31:25 genevb Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -166,7 +171,9 @@ Int_t St_dst_Maker::Make(){
     dst = m_DataSet;
     if (strcmp(name,"dst")) dst = m_DataSet->Find("dst");
     if (dst) ds->Shunt(dst);
-    if (Debug()) printf("\n*** <%s::Make> *** selected %s%s\n",ClassName(),mkname,name);
+    if (Debug()) {
+      gMessMgr->Debug() << "\n*** <" << ClassName() << "::Make> *** selected ";
+      *gMessMgr << mkname << name << endm;}
   }
   return Filler();
 }
@@ -220,7 +227,7 @@ Int_t  St_dst_Maker::Filler(){
   if (! scs_cluster) {scs_cluster = new St_scs_cluster("scs_cluster",1); AddGarb(scs_cluster);}
   if (!scs_spt)      {scs_spt     = new St_scs_spt("scs_spt",1);         AddGarb(scs_spt);}
   
-  if(Debug()) cout << " run_dst: Calling dst_point_filler" << endl;
+  if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
   // dst_point_filler
   St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
   St_fcl_fppoint *fcl_fppoint = 0;
@@ -232,8 +239,8 @@ Int_t  St_dst_Maker::Filler(){
   //	   ========================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
-    cout << "Problem on return from DST_POINT_FILLER" << endl;
-    if(Debug()) cout << " run_dst: finished calling dst_point_filler" << endl;
+    gMessMgr->Warning() << "Problem on return from DST_POINT_FILLER" << endm;
+    if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_point_filler" << endm;
   }
   // dst_dedx_filler
   St_dst_dedx       *dst_dedx    = 0;
@@ -253,22 +260,22 @@ Int_t  St_dst_Maker::Filler(){
   // Case silicon not there
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
 
-  if(Debug()) cout << " run_dst: Calling dst_dedx_filler" << endl;
+  if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_dedx_filler" << endm;
   dst_dedx = new St_dst_dedx("dst_dedx",20000); dstI.Add(dst_dedx);
     
   iRes = dst_dedx_filler(tptrack,stk_track,dst_dedx);
     //     ===========================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
-    cout << "Problem on return from DST_DEDX_FILLER" << endl; 
-    if(Debug()) cout << " run_dst: finshed calling dst_dedx_filler" << endl;
+    gMessMgr->Warning() << "Problem on return from DST_DEDX_FILLER" << endm;
+    if(Debug()) gMessMgr->Debug() << " run_dst: finshed calling dst_dedx_filler" << endm;
   }
   
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
   if (fcl_fppoint &&  fpt_fptrack) {
-    if(Debug()) cout<<" run_dst: Calling fill_ftpc_dst"<<endl;
+    if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
     globtrk->ReAllocate(No_of_Tracks);
     globtrk_aux->ReAllocate(No_of_Tracks);
@@ -278,8 +285,8 @@ Int_t  St_dst_Maker::Filler(){
     //             ==========================================================
     if (iRes != kSTAFCV_OK) {
       iMake = kStWarn;
-      cout << "Problem on return from FILL_FTPC_DST" << endl;
-      if(Debug()) cout << " run_dst: finished calling fill_ftpc_dst" << endl;
+      gMessMgr->Warning() << "Problem on return from FILL_FTPC_DST" << endm;
+      if(Debug()) gMessMgr->Debug() << " run_dst: finished calling fill_ftpc_dst" << endm;
     }
   }
   
@@ -289,13 +296,13 @@ Int_t  St_dst_Maker::Filler(){
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
   if (!ctf) {
-    if(Debug()) cout << "St_ctf_Maker has not been called " << endl;
+    if(Debug()) gMessMgr->Debug() << "St_ctf_Maker has not been called " << endm;
   } else {
     ctb_cor = (St_ctu_cor *)ctf->Find("ctb_cor"); 
   }
   if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); AddGarb(ctb_cor);}
  
-  if(Debug()) cout << " run_dst: Calling dst_monitor_soft_filler" << endl;
+  if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_monitor_soft_filler" << endm;
     
   St_dst_monitor_soft  *monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
   dstI.Add(monitor_soft);
@@ -308,8 +315,8 @@ Int_t  St_dst_Maker::Filler(){
     //     ===========================================================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
-    cout << "Problem on return from DST_MONITOR_SOFT_FILLER" << endl;
-    if(Debug()) cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
+    gMessMgr->Warning() << "Problem on return from DST_MONITOR_SOFT_FILLER" << endm;
+    if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_monitor_soft_filler" << endm;
   }
  //--------------- ????????? --------------
   St_dst_run_header    *run_header    = (St_dst_run_header *)    m_ConstSet->Find("run_header");
@@ -332,17 +339,17 @@ Int_t  St_dst_Maker::Filler(){
     run_header->AddAt(&run,0);
   }
   if (summary_param && run_header) {
-    if(Debug()) cout << " run_dst: Calling fill_dst_event_summary" << endl;
+    if(Debug()) gMessMgr->Debug() << " run_dst: Calling fill_dst_event_summary" << endm;
     
     iRes = fill_dst_event_summary(summary_param, run_header, event_header,
                                   globtrk,vertex,event_summary);
     //     ================================================================
     
     if (iRes !=kSTAFCV_OK) {
-      cout << "Problem on return from FILL_DST_EVENT_SUMMARY" << endl;
+      gMessMgr->Warning() << "Problem on return from FILL_DST_EVENT_SUMMARY" << endm;
       iMake = kStWarn;
     }
-    if(Debug()) cout << " run_dst: finished calling fill_dst_event_summary" << endl;
+    if(Debug()) gMessMgr->Debug() << " run_dst: finished calling fill_dst_event_summary" << endm;
   }
   return kStOK;
 }
