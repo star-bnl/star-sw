@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.156 2000/11/26 20:23:30 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.157 2000/12/14 14:32:54 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -89,6 +89,9 @@ Bfc_st BFC[] = {
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
+  {"OutTree"     ,""  ,"","Tree",""                                  ,"","bfcTree Output Tree name",kFALSE},
+  {"DstOut"      ,""  ,"","Tree"                                       ,"","","Write dst to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
@@ -141,12 +144,13 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"DbVNone"     ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
+  {"DbV"         ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
   {"DbV0614"     ,""  ,"","db,calib,ry1h"                  ,"","","20000614/0 Db Version for p00hd",kFALSE},
   {"DbV0624"     ,""  ,"","db,calib,ry1h"                ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
   {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
   {"DbV0727"     ,""  ,"","db,calib,ry1h"                  ,"","","20000727/0 Db Version for p00he",kFALSE},
   {"DbV0819"     ,""  ,"","db,calib,ry1h"                  ,"","","20000819/0 Db Version for p00hg",kFALSE}, 
+  {"DbV1123"     ,""  ,"","db,calib,ry1h" ,"","","20001123/0 Db w/o TpcDriftVel. from StTpcT0Maker",kFALSE}, 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -203,7 +207,7 @@ Bfc_st BFC[] = {
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
+  {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker,dstOut" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dEdx"       ,"dEdx","globalChain","globT,tpcDb","StdEdxMaker","StTableUtilities,StdEdxMaker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
@@ -244,12 +248,12 @@ Bfc_st BFC[] = {
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
-  {"Tree"        ,""  ,"",""    ,"StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
+  {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
 };
 Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
 class StEvent;
 StEvent *Event;
-class StIOMaker; StIOMaker *inpMk=0;     
+class StIOMaker; 
 class St_geant_Maker; St_geant_Maker *geantMk = 0;   
 class St_db_Maker;    
 static St_db_Maker *dbMk    = 0; 
@@ -257,7 +261,6 @@ static St_db_Maker *calibMk = 0;
 //St_db_Maker *RunLogMk = 0;
 static StMaker *tpcDBMk = 0;
 class StTreeMaker;    
-StTreeMaker    *treeMk  = 0;
 static Bool_t kMagF = kFALSE; 
 ClassImp(StBFChain)
 
@@ -379,7 +382,14 @@ Int_t StBFChain::Instantiate()
 	  continue;
 	}
 	if (maker == "StIOMaker" && fSetFiles) {
-	  inpMk = new StIOMaker("inputStream","r",fSetFiles);
+	  StIOMaker *inpMk=0;     
+	  if (GetOption("InTree")) {
+	    Char_t line[80] = "bfcTree";
+	    Int_t k = kOpt("InTree");
+	    sscanf(fBFC[k].Comment,"%s",line);
+	    inpMk = new StIOMaker("inputStream","r",fSetFiles,line);
+	  }
+	  else inpMk = new StIOMaker("inputStream","r",fSetFiles);
 	  if (inpMk) {
 	    strcpy (fBFC[i].Name,(Char_t *) inpMk->GetName());
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
@@ -389,7 +399,14 @@ Int_t StBFChain::Instantiate()
 	  continue;
 	}
 	if (maker == "StTreeMaker" && fFileOut) {
-	  treeMk = new StTreeMaker("tree",fFileOut->Data());
+	  StTreeMaker    *treeMk  = 0;
+	  if (GetOption("OutTree")) {
+	    Char_t line[80] = "bfcTree";
+	    Int_t k = kOpt("OutTree");
+	    sscanf(fBFC[k].Comment,"%s",line);
+	    treeMk = new StTreeMaker("outputStream",fFileOut->Data(),line);
+	  }
+	  else treeMk = new StTreeMaker("Tree",fFileOut->Data());
 	  if (treeMk) {
 	    strcpy (fBFC[i].Name,(Char_t *) treeMk->GetName());
 	    treeMk->SetIOMode("w");
@@ -598,15 +615,31 @@ void StBFChain::SetFlags(const Char_t *Chain)
   gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   TString tChain(Chain);
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
-  tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
   TObjArray Opts;
   ParseString(tChain,Opts);
   TIter next(&Opts);
   TObjString *Opt;
   while ((Opt = (TObjString *) next())) {
     TString string = Opt->GetString();
-    Int_t kgo = kOpt(string.Data());
-    if (kgo != 0) SetOption(kgo);
+    Int_t in = string.Index("=");
+    Int_t kgo;
+    if (in <= 0) {
+      string.ToLower(); //printf ("Chain %s\n",tChain.Data());
+      kgo = kOpt(string.Data());
+      if (kgo != 0) SetOption(kgo);
+    }
+    else {// string with  "="
+      TString substring(string.Data(),in);
+      substring.ToLower(); //printf ("Chain %s\n",tChain.Data());
+      kgo = kOpt(substring.Data());
+      if (kgo > 0) {
+	memset(fBFC[kgo].Comment,0,200); // be careful size of Comment
+	SetOption(kgo);
+	TString Comment(string.Data()+in+1,string.Capacity()-in-1);
+	strcpy (fBFC[kgo].Comment, Comment.Data());
+	printf (" Set        %s = %s\n", fBFC[kgo].Key,fBFC[kgo].Comment);
+      }
+    }
   }
   Opts.Delete();
   // Check flags consistency   
@@ -640,7 +673,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (GetOption(k)) {
       gMessMgr->QAInfo() << "================== " << k << "\t" 
 			 << fBFC[k].Key << "\tis ON \t:" << fBFC[k].Comment << endm;
-      Bfc->AddAt(&BFC[k]);
+      Bfc->AddAt(&fBFC[k]);
     }
   }
   //  gSystem->Exit(1);
@@ -891,8 +924,10 @@ void StBFChain::SetDbOptions(){
 //_____________________________________________________________________
 void StBFChain::SetTreeOptions()
 {
+  StTreeMaker *treeMk = (StTreeMaker *) GetMaker("outputStream");
+  if (!treeMk) return;
   treeMk->SetBranch("histBranch");
-  if (GetOption("dst"))      {
+  if (GetOption("dstOut"))      {
     treeMk->IntoBranch("dstBranch","dst");
     if (GetOption("HitsBranch")) {
       treeMk->SetBranch("dstHitsBranch");
