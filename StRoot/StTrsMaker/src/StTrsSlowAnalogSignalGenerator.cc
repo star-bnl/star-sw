@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.13 1999/02/26 18:26:09 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.14 1999/02/28 20:12:50 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.13  1999/02/26 18:26:09  lasiuk
- * to offset must be used uniformly.  Correction to
- * "timeOfSignal" should be merged with coordinate transform
+ * Revision 1.14  1999/02/28 20:12:50  lasiuk
+ * threshold/noise additions
  *
  * Revision 1.14  1999/02/28 20:12:50  lasiuk
  * threshold/noise additions
@@ -314,7 +313,6 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 
 	// StTrsWireHistogram defines typedefs:
 	// ABOVE: typedef vector<StTrsWireBinEntry> aTpcWire
-//  	PR(currentWire.size());
 	aTpcWire currentWire = wireHistogram->getWire(jj);
 	aTpcWire::iterator iter;
 
@@ -324,8 +322,8 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 	    
 	    // What is the location of the avalanche
 	    // center of Pad that is being processed?
-// 	    PR(*iter);
-//   	    PR(ycoord);  // ycoord of Wire
+	    // the y coordinate is the position of the wire
+
 	    float ycoord = wireHistogram->wireCoordinate(jj);
 //  	    PR(*iter);
 //    	    PR(ycoord);  // ycoord of Wire
@@ -346,11 +344,11 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 
 // 	    cout << "**Transform2Raw" << endl;
 	    transformer(xyCoord,tpcRaw);
-// 	    cout << "AnsigGen r/p " << centralRow << '/' << centralPad << endl;
-	    //PR(centralRow);
+//  	    PR(tpcRaw);
+	    int centralPad = tpcRaw.pad();
+	    int centralRow = tpcRaw.row();
 //  	    cout << "AnsigGen r/p " << centralRow << '/' << centralPad << endl;
-// 	    //PR(mDeltaRow);
-// 	    PR(mDeltaPad);
+// 	    PR(centralRow);
 //  	    PR(mDeltaRow);
 // 	    PR(centralPad);
 //   	    PR(mDeltaPad);
@@ -378,8 +376,8 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 
 	    // Loop over the cross coupled rows(irow)/pads(ipad)
 	    for(int irow=mRowLimits.first; irow<=mRowLimits.second; irow++) {
-// 		PR(mPadLimits.first);
-// 		PR(mPadLimits.second);
+		mPadLimits.second =
+		    (centralPad < (mGeomDb->numberOfPadsAtRow(irow) - mDeltaPad)) ?
 		    centralPad + mDeltaPad : mGeomDb->numberOfPadsAtRow(irow);
 //  		PR(mPadLimits.first);
 //  		PR(mPadLimits.second);
@@ -435,17 +433,11 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 			(iter->position().z() + mElectronicsDb->tZero()*mSCDb->driftVelocity())
 			/mSCDb->driftVelocity();
 		    // OH-OH OFFSET (replaced!...)
-//  		    PR(*iter);
-
 		    //timeOfSignal = iter->position().z()/mSCDb->driftVelocity();
 
 
 		    // Check the threshold before you
 		    // make and store an analog signal
-//  		    PR(ipad);
-//   		    PR(irow);
-//     		    PR(padSignal);
-
 		    //if() continue;
 		    StTrsAnalogSignal padSignal(timeOfSignal, chargeOfSignal);
 
@@ -773,30 +765,35 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 		    //
 		    // The current time bin will be filled with
 		    // charge from any signal that is within
-//  		    PR(mTimeSequenceIterator->time()/nanosecond);
-//  		    PR(timeBinT-mTimeSequenceIterator->time()/nanosecond);
 		    // 10 time bins.  This should be a settable
 		    // parameter.
 //  		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
-		    //if(itbin/freq
-		    //discreteAnalogTimeSequence[itbin].second +=
+
 		    if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)
 			continue;
 //   		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
+		    pulseHeight +=
 			signalSampler(itbin, *mTimeSequenceIterator);
-//  		if(pulseHeight > 1.e-5)
-// 		cout << itbin << " pulse Height: " << pulseHeight << endl;
-
+		}
 // 		cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << endl;
-		// 
-		//pulseHeight += abs(gauss.shoot(0.,.1));
+
+		//
+		// Add noise here 
+		//
+		// : Everywhere
 		if(!mAddNoiseUnderSignalOnly && mAddNoise) {
 		    pulseHeight += generateNoise(); // noise;
 		}
 
-//  		if(pulseHeight < mSignalThreshold)
-//  		    continue;
+		//Do not store analog Signal if it is not above a
 		// minimal threshold (should read value from database)
+// 	        *********************************************************
+  		//if(pulseHeight < mSignalThreshold) continue;
+// 	        *********************************************************
+		//
+		// : Only Under Signal
+		if(mAddNoiseUnderSignalOnly && mAddNoise) {
+		    //double noise = generateNoise();
 		    pulseHeight += generateNoise(); //noise;
 		}
 // 		cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << endl;
@@ -808,8 +805,7 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 // 			 << (mElectronicSignal.amplitude()) << '\t'
 // 			 << (mElectronicSignal.amplitude()/(.001*volt)) << endl;
 // 		}
-//  	    cout << " Finished Time Bins: irow: " << irow << " ipad " << ipad << endl;
-// 	    cout << "--> mSector->timeBinsOfRowAndPad(irow,ipad).size() " <<  mSector->timeBinsOfRowAndPad(irow,ipad).size() << endl;
+		mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
 
 	    } // loop over time bins
 
