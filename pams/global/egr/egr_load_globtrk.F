@@ -220,7 +220,7 @@ C
 
       rr=1./(C_D_CURVATURE*bf*invpt)
 
-      length=(rr*asin(seed/(2*rr)))/cos(atan(tanl))
+      length=(2.*rr*asin(seed/(2.*rr)))/cos(atan(tanl))
 
       RETURN
       END
