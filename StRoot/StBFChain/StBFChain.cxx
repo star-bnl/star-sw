@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.402 2004/03/30 03:06:51 calderon Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.403 2004/04/01 15:13:19 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -364,7 +364,6 @@ Bfc_st BFC1[] = {
                                                                         "Cluster Finder (from raw)",kFALSE},
   {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
-  {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
@@ -914,7 +913,6 @@ Bfc_st BFC2[] = {
                                                                         "Cluster Finder (from raw)",kFALSE},
   {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
-  {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
