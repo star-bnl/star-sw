@@ -1,6 +1,6 @@
 #define SPT_PTR_NMAX 20000
-#define SPT_X 40
-#define SPT_Z 1000
+#define SPT_X 60
+#define SPT_Z 1400
 #define PIX_NMAX SPT_X*SPT_Z
 #define DEBUG 0
   
