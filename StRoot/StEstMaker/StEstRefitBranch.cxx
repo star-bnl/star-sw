@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.2 2001/01/25 18:02:18 lmartin Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.3 2001/02/23 13:46:12 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.3  2001/02/23 13:46:12  lmartin
+ * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
+ *
  * Revision 1.2  2001/01/25 18:02:18  lmartin
  * Method renamed and declared as StEstTracker method.
  * gtrk deleted at the end of the refit.
@@ -44,7 +47,7 @@ extern "C" {int type_of_call egr_helix_fit_(int&,StEstGtrk*,float*,float*,float*
 extern "C" {int type_of_call egr_find_outlier_(int&,StEstGtrk*,float*,float*,float*,float*,float*,int&,int&, table_head_st*,egr_egrpar_st*);}
 
 
-int StEstTracker::RefitBranch(StEstBranch *br, StEstHit *hittmp, int exclhit, int usevertex, int *fitstatus) {
+int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
 
   // details on the fit status (called flag in this method)
   // flag = -1 not enough hits for the fit
@@ -302,7 +305,6 @@ int StEstTracker::RefitBranch(StEstBranch *br, StEstHit *hittmp, int exclhit, in
     }
   }
   if (enough==0) {
-    if (exclhit==1) cout<<"hit failed ?? flag="<<gtrk[0].flag<<endl;
     *fitstatus=gtrk[0].flag;
     br->mLastFitStatus=0;
     delete[] gtrk;
@@ -356,21 +358,6 @@ int StEstTracker::RefitBranch(StEstBranch *br, StEstHit *hittmp, int exclhit, in
   br->SetChiSqLin(chi2_lin); // ??? sprawdzic ???
   br->SetNFit(gtrk[0].nfit);
   br->mLastFitStatus=gtrk[0].flag;
-  if (exclhit==1) {
-    cout<<"Refit  : x0= "<<x0<<endl
-	<<"         y0= "<<y0<<endl
-	<<"       radi= "<<1./c<<endl
-	<<"       phi0= "<<gtrk[0].p[4]<<endl
-	<<"         z0= "<<z0<<endl
-        <<"        dip= "<<dip<<endl
-        <<"      phase= "<<phase<<endl
-        <<"       chit= "<<chi2_cir<<endl
-        <<"       chil= "<<chi2_lin<<endl
-        <<"       nfit= "<<gtrk[0].nfit<<endl
-        <<"       nhit= "<<gtrk[0].nhit<<endl
-        <<"         pt= "<<1./(5.0*0.000299792458*fabs(gtrk[0].p[1]))<<endl
-	<<"       flag= "<<tpctr->GetFlag()<<endl;
-  }
   *fitstatus=gtrk[0].flag;
   delete [] gtrk;
   return(1);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.3 2001/01/31 16:59:30 lmartin Exp $
+ * $Id: StEstTracking.cxx,v 1.4 2001/02/23 13:46:13 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.4  2001/02/23 13:46:13  lmartin
+ * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
+ *
  * Revision 1.3  2001/01/31 16:59:30  lmartin
  * mParams[]->debug replaced by mDebug.
  *
@@ -184,7 +187,7 @@ int StEstTracker::Tracking(int slay) {
 	      cout <<"  nBranch= "<<branch_new->mTrack->GetNBranches()<<endl;
 	    if (hitbra[distind[k]]->JoinBranch(branch_new,mTrack[i])==1) {
 	      branch_new->AddHit(hitbra[distind[k]],distbra[distind[k]]);
-	      RefitBranch(branch_new,NULL,-1,0,&fitstatus);
+	      RefitBranch(branch_new,0,&fitstatus);
 	      branch_new->SetStep(10*mSuperPass+mPass);
 	      if (mIdealTracking==1) {
 		branch_new->mHitPosition=HitPosition;
@@ -230,7 +233,7 @@ int StEstTracker::Tracking(int slay) {
 
 	if (hitbra[distind[k]]->JoinBranch(branch,mTrack[i])==1) {
 	  branch->AddHit(hitbra[distind[k]],distbra[distind[k]]);
-	  RefitBranch(branch,NULL,-1,0,&fitstatus);
+	  RefitBranch(branch,0,&fitstatus);
 	  branch->SetStep(10*mSuperPass+mPass);
 	  if (mIdealTracking==1) {
 	    branch->mHitPosition=HitPosition;

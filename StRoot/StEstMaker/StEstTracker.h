@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.3 2001/02/01 12:59:02 lmartin Exp $
+ * $Id: StEstTracker.h,v 1.4 2001/02/23 13:46:13 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.4  2001/02/23 13:46:13  lmartin
+ * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
+ *
  * Revision 1.3  2001/02/01 12:59:02  lmartin
  * Correction of the cvs keywords to get the log in the file header.
  * 
@@ -110,7 +113,7 @@ class StEstTracker {
 
   int  Preprojection(StEstBranch&, int);
   int  Tracking(int);
-  int  RefitBranch(StEstBranch *br, StEstHit* hit=NULL, int exclhit=-1, int usevertex=0, int *fitstatus=NULL);
+  int  RefitBranch(StEstBranch *br, int usevertex=0, int *fitstatus=NULL);
   int  Projection(StEstBranch* branch, long slay);
   void RemoveOneHitTracks();
   void ChooseBestBranch(StEstTrack *tr, int overPass);
