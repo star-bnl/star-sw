@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.17 2001/04/23 19:37:40 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.18 2001/06/24 21:08:22 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.18  2001/06/24 21:08:22  jcs
+// Change Hit rejected message since this also occurs for FTPC daq data
+//
 // Revision 1.17  2001/04/23 19:37:40  oldi
 // Output will be sent to StMessMgr.
 //
@@ -1160,8 +1163,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	}
 
       if (Peak->x == 0. && Peak->y == 0.) {
-	// This if-statement can be deleted as soon as the slow simulator is fixed.
-	gMessMgr->Message("Hit rejected because of an error in the FTPC slow simulator. (x, y, z) = (0. ,0., z)", "W", "OST");
+	// This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
+	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
       }
 
       if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
@@ -1595,8 +1598,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    }
 	  
 	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
-	    // This if-statement can be deleted as soon as the slow simulator is fixed.
-	    gMessMgr->Message("Hit rejected because of an error in the FTPC slow simulator. (x, y, z) = (0. ,0., z)", "W", "OST");
+	    // This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
+	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
 	  }
 	  
 	  /* in very complicated clusters some hits may have been unfolded
