@@ -31,6 +31,8 @@ template<class T> int binaryRead(ifstream* myStream, T& x){
   return sizeof(x);
 }
 
+enum ioStatus { ioERR=-1, ioOK, ioEOF, ioEOL, ioERROpen }; 
+
 class StHbtIOBinary /*: friend StHbtEvent, friend StHbtTrack, friend StHbtV0*/ {
 
 public:

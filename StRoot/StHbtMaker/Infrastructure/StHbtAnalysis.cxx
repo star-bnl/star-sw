@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.5 2000/02/13 17:17:12 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.6 2000/03/16 02:07:04 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.6  2000/03/16 02:07:04  laue
+ * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
+ *
+ * StHbtBinaryReader can now derive filename from StIOMaker and read a list
+ * of files.
+ *
+ * StHbtManager now holds a collection of StHbtEventWriters (multiple writes
+ * possible now)
+ *
  * Revision 1.5  2000/02/13 17:17:12  laue
  * Calls to the EventBegin() and EventEnd() functions implemented
  * The actual analysis is moved from StHbtManager to StHbtAnalysis
@@ -48,6 +57,11 @@
 #ifdef __ROOT__ 
 ClassImp(StHbtAnalysis)
 #endif
+
+StHbtEventCut*    copyTheCut(StHbtEventCut*);
+StHbtParticleCut* copyTheCut(StHbtParticleCut*);
+StHbtPairCut*     copyTheCut(StHbtPairCut*);
+StHbtCorrFctn*    copyTheCorrFctn(StHbtCorrFctn*);
 
 // this little function used to apply ParticleCuts (TrackCuts or V0Cuts) and fill ParticleCollections of picoEvent
 //  it is called from StHbtAnalysis::ProcessEvent()
@@ -97,7 +111,6 @@ void FillHbtParticleCollection(StHbtParticleCut*         partCut,
     cout << "FillHbtParticleCollection function (in StHbtAnalysis.cxx) - undefined Particle Cut type!!! \n";
   }
 }
-
 //____________________________
 StHbtAnalysis::StHbtAnalysis(){
   //  mControlSwitch     = 0;
@@ -109,7 +122,71 @@ StHbtAnalysis::StHbtAnalysis(){
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
 }
+//____________________________
 
+StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) {
+  //StHbtAnalysis();
+  mEventCut          = 0;
+  mFirstParticleCut  = 0;
+  mSecondParticleCut = 0;
+  mPairCut           = 0;
+  mCorrFctnCollection= 0;
+  mCorrFctnCollection = new StHbtCorrFctnCollection;
+  mMixingBuffer = new StHbtPicoEventCollection;
+
+  // find the right event cut
+  mEventCut = copyTheCut(a.mEventCut);
+  // find the right first particle cut
+  mFirstParticleCut = copyTheCut(a.mFirstParticleCut);
+  // find the right second particle cut
+  if (a.mFirstParticleCut==a.mSecondParticleCut!=0) 
+    SetSecondParticleCut(mSecondParticleCut); // identical particle hbt
+  else
+    mSecondParticleCut = copyTheCut(a.mSecondParticleCut);
+  mPairCut = copyTheCut(a.mPairCut);
+  
+  if ( mEventCut && mFirstParticleCut && mSecondParticleCut && mPairCut ) {
+    SetEventCut(mEventCut); // this will set the myAnalysis pointer inside the cut
+  cout << " event cut set " << endl;
+    SetFirstParticleCut(mFirstParticleCut); // this will set the myAnalysis pointer inside the cut
+  cout << " first particle cut set " << endl;
+    SetSecondParticleCut(mSecondParticleCut); // this will set the myAnalysis pointer inside the cut
+  cout << " second particle cut set " << endl;
+    SetPairCut(mPairCut); // this will set the myAnalysis pointer inside the cut
+  cout << " pair cut set " << endl;
+  }
+
+  StHbtCorrFctnIterator iter;
+  for (iter=a.mCorrFctnCollection->begin(); iter!=a.mCorrFctnCollection->end();iter++){
+    cout << " looking for correlation functions " << endl;
+    StHbtCorrFctn* fctn = copyTheCorrFctn(*iter);
+    if (fctn) AddCorrFctn(fctn);
+    else cout << " correlation function not found " << endl;
+  }
+
+  mNumEventsToMix = a.mNumEventsToMix;
+
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+  cout << " here we are" << endl;
+      
+
+}
 //____________________________
 StHbtAnalysis::~StHbtAnalysis(){
   //delete mControlSwitch     ;
@@ -289,14 +366,16 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 void StHbtAnalysis::EventBegin(const StHbtEvent* ev){
   mFirstParticleCut->EventBegin(ev);
   mSecondParticleCut->EventBegin(ev);
+  mPairCut->EventBegin(ev);
   for (StHbtCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->EventBegin(ev);
   }
 }
 //_________________________
 void StHbtAnalysis::EventEnd(const StHbtEvent* ev){
-  mFirstParticleCut->EventBegin(ev);
-  mSecondParticleCut->EventBegin(ev);
+  mFirstParticleCut->EventEnd(ev);
+  mSecondParticleCut->EventEnd(ev);
+  mPairCut->EventEnd(ev);
   for (StHbtCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->EventEnd(ev);
   }
@@ -310,3 +389,70 @@ void StHbtAnalysis::Finish(){
 }
 
 
+
+
+//____________________________
+#include "StHbtMaker/Cut/mikesEventCut.h"
+#include "StHbtMaker/Cut/ParityEventCut.h"
+StHbtEventCut* copyTheCut(StHbtEventCut* c) {
+  StHbtEventCut* cut=0;
+  if (!c) cout << "no cut" << endl;
+  else if (dynamic_cast<mikesEventCut*>(c)!=0 )     cut = new mikesEventCut( *(mikesEventCut*)c );
+  else if (dynamic_cast<ParityEventCut*>(c)!=0 )    cut = new ParityEventCut( *(ParityEventCut*)c );
+  if (cut) cout << " event cut copied " << endl;
+  return cut;
+}
+//____________________________
+#include "StHbtMaker/Cut/mikesTrackCut.h"
+#include "StHbtMaker/Cut/franksTrackCut.h"
+#include "StHbtMaker/Cut/helensV0Cut.h"
+#include "StHbtMaker/Cut/dummyV0Cut.h"
+StHbtParticleCut* copyTheCut(StHbtParticleCut* c) {
+  StHbtParticleCut* cut=0;
+  if (!c) cout << "no cut" << endl;
+  else if (dynamic_cast<mikesTrackCut*>(c) )        cut = new mikesTrackCut( *(mikesTrackCut*)c );
+  else if (dynamic_cast<franksTrackCut*>(c) )       cut = new franksTrackCut( *(franksTrackCut*)c );
+  else if (dynamic_cast<helensV0Cut*>(c) )          cut = new helensV0Cut( *(helensV0Cut*)c );
+  else if (dynamic_cast<dummyV0Cut*>(c ) )          cut = new dummyV0Cut( *(dummyV0Cut*)c );
+  if (cut) cout << " particle cut copied " << endl;
+  return cut;
+}
+//____________________________
+#include "StHbtMaker/Cut/mikesPairCut.h"
+#include "StHbtMaker/Cut/franksPairCut.h"
+StHbtPairCut* copyTheCut(StHbtPairCut* c) {
+  StHbtPairCut* cut=0;
+  if (!c) cout << "no cut" << endl;
+  else if (dynamic_cast<mikesPairCut*>(c) )         cut = new mikesPairCut( *(mikesPairCut*)c );
+  else if (dynamic_cast<franksPairCut*>(c) )         cut = new franksPairCut( *(franksPairCut*)c );
+  if (cut) cout << " pair cut copied " << endl;
+  return cut;
+}
+//____________________________
+#include "StHbtMaker/CorrFctn/ExitSepCorrFctn.h"
+#include "StHbtMaker/CorrFctn/MinvCorrFctn.h"
+#include "StHbtMaker/CorrFctn/MinvCorrFctnArmenteros.h"
+#include "StHbtMaker/CorrFctn/MinvCorrFctnM_vs_Pt.h"
+#include "StHbtMaker/CorrFctn/MinvCorrFctnY_vs_Pt.h"
+#include "StHbtMaker/CorrFctn/OpeningAngleCorrFctn.h"
+#include "StHbtMaker/CorrFctn/ParityCorrFctn.h"
+#include "StHbtMaker/CorrFctn/QinvCorrFctn.h"
+#include "StHbtMaker/CorrFctn/QinvCorrFctnC.h"
+#include "StHbtMaker/CorrFctn/QvecCorrFctn.h"
+StHbtCorrFctn* copyTheCorrFctn(StHbtCorrFctn* f) {
+  StHbtCorrFctn* fctn=0;
+  if (!f) cout << "no fctn" << endl;
+  //  else if (dynamic_cast<ExitSepCorrFctn*>(f))        fctn = new ExitSepCorrFctn( *(ExitSepCorrFctn*)f );
+  else if (dynamic_cast<MinvCorrFctn*>(f))           fctn = new MinvCorrFctn( *(MinvCorrFctn*)f );
+  else if (dynamic_cast<MinvCorrFctnArmenteros*>(f)) fctn = new MinvCorrFctnArmenteros( *(MinvCorrFctnArmenteros*)f );
+  //  else if (dynamic_cast<MinvCorrFctnM_vs_Pt*>(f) )   fctn = new MinvCorrFctnM_vs_Pt( *(MinvCorrFctnM_vs_Pt*)f );
+  else if (dynamic_cast<MinvCorrFctnY_vs_Pt*>(f) )   fctn = new MinvCorrFctnY_vs_Pt( *(MinvCorrFctnY_vs_Pt*)f );
+  //  else if (dynamic_cast<OpeningAngleCorrFctn*>(f) )  fctn = new OpeningAngleCorrFctn( *(OpeningAngleCorrFctn*)f );
+  //  else if (dynamic_cast<ParityCorrFctn*>(f) )        fctn = new ParityCorrFctn( *(ParityCorrFctn*)f );
+  //  else if (dynamic_cast<QinvCorrFctn*>(f) )          fctn = new QinvCorrFctn( *(QinvCorrFctn*)f );
+  //  else if (dynamic_cast<QinvCorrFctnC*>(f) )         fctn = new QinvCorrFctnC( *(QinvCorrFctnC*)f );
+  //  else if (dynamic_cast<QvecCorrFctn*>(f) )          fctn = new QvecCorrFctn( *(QvecCorrFctn*)f );
+  if (fctn) cout << " correlation function copied " << endl;
+  if (!fctn) cout << " correlation function not found " << endl;
+  return fctn;
+}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.16 2000/02/26 19:04:52 laue Exp $
+ * $Id: StHbtManager.cxx,v 1.17 2000/03/16 02:07:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.17  2000/03/16 02:07:05  laue
+ * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
+ *
+ * StHbtBinaryReader can now derive filename from StIOMaker and read a list
+ * of files.
+ *
+ * StHbtManager now holds a collection of StHbtEventWriters (multiple writes
+ * possible now)
+ *
  * Revision 1.16  2000/02/26 19:04:52  laue
  * Some unnecessary includes removed.
  * StThreeVectorD replace by StHbtThreeVector.
@@ -254,7 +263,9 @@ int StHbtManager::ProcessEvent(){
   // loop over all the EventWriters
   StHbtEventWriterIterator EventWriterIter;
   for (EventWriterIter=mEventWriterCollection->begin();EventWriterIter!=mEventWriterCollection->end();EventWriterIter++){
+#ifdef STHBRDEBUG
     cout << " *EventWriterIter " <<  *EventWriterIter << endl;
+#endif
     (*EventWriterIter)->WriteHbtEvent(currentHbtEvent);
   } 
 
