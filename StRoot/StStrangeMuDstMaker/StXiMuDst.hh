@@ -15,7 +15,7 @@
 class StXiVertex;
 class StPhysicalHelixD;
 
-class StXiMuDst : public virtual StXiI, public StV0MuDst {
+class StXiMuDst : public StV0MuDst, public virtual StXiI {
 public:
   StXiMuDst();
   ~StXiMuDst();
@@ -88,7 +88,7 @@ protected:
   Float_t mErrDedxBachelor;
   UShort_t mNumDedxBachelor;
 
-  ClassDef(StXiMuDst,5)
+  ClassDef(StXiMuDst,6)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -136,8 +136,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.6 2003/08/26 22:36:28 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.7 2003/10/20 17:20:19 perev Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.7  2003/10/20 17:20:19  perev
+ * Change the order of inheritance and increased version numbers
+ *
  * Revision 3.6  2003/08/26 22:36:28  genevb
  * Calculate Xi momenta at/near primary vertex
  *
