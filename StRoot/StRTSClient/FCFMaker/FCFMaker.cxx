@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.19 2004/04/21 20:30:54 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.20 2004/05/10 17:33:35 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.20  2004/05/10 17:33:35  tonko
+ * Fixed small bug with cl_id and data dump in saveClusters
+ *
  * Revision 1.19  2004/04/21 20:30:54  tonko
  * Added back-annotation and misc. cleanup
  *
@@ -1015,7 +1018,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   }
 
 #ifdef FCF_ANNOTATE_CLUSTERS
-  {
+  if(cl_id != -1) {	// there was a valid CLuster ID passed to this routing!
 	int i, j ;
 
 	int sec = hit.row/100 - 1 ;
