@@ -34,6 +34,9 @@ return
 *********************************************************************
  macro init
    macro/global/import *
+   cd [params]/tpc/tpgpar
+   tdm/newtable tpg_pad tpg_pad 1
+   cd /dui
      
  return
  
