@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.5 2000/08/28 17:08:58 didenko Exp $
+ * $Id: StEnumerations.h,v 2.6 2000/08/28 16:28:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
  *
- * Description:
+ * Description: Enumerations for StEvent.
+ *              Note that lots of code depend on this file and
+ *              any change will force a recompilation of almost
+ *              all of StEvent.
  *
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.5  2000/08/28 17:08:58  didenko
- * get back revision 2.2
+ * Revision 2.6  2000/08/28 16:28:45  ullrich
+ * Added enum tpt and removed CINT pragmas.
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -29,19 +32,6 @@
  * get back revision 2.2
  *
  * Revision 2.2  1999/12/01 15:58:05  ullrich
-#ifdef __CINT__
-#pragma link C++ enum StBeamDirection;
-#pragma link C++ enum StBeamPolarizationAxis;
-#pragma link C++ enum StChargeSign;
-#pragma link C++ enum StDetectorId;
-#pragma link C++ enum StVertexId;
-#pragma link C++ enum StTrackType;
-#pragma link C++ enum StTrackModel;
-#pragma link C++ enum StDedxMethod;
-#pragma link C++ enum StTrackFinderMethod;
-#pragma link C++ enum StTrackFittingMethod;
-#endif
-
  * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.1  1999/11/15 18:48:16  ullrich
@@ -53,7 +43,7 @@
  **************************************************************************/
 #ifndef StEnumerations_hh
 #define StEnumerations_hh
-enum StTrackType {global, primary, secondary};
+
 #include "StDetectorId.h"
 #include "StVertexId.h"
 #include "StDedxMethod.h"
