@@ -90,6 +90,12 @@ int StHbtIOBinary::readTrackList(StHbtEvent& ev, unsigned short trVersion){
   iret =  read(NtracksInCollection);
   //#ifdef STHBTDEBUG
   cout << " reading " << NtracksInCollection << " tracks " << endl;
+  if (NtracksInCollection > 1e7) {
+    for ( int i=0; i<10; i++) {
+      cout << " StHbtIOBinaryReader::readTrackList(...) - unreasonable number of tracks, returning ioERR " << endl;
+    }
+    return(ioERR);
+  }
   //#endif
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
@@ -320,8 +326,8 @@ int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned sh
     return ioERR;
   } 
   // tracks & v0s
-  iret = readTrackList(ev,trVersion);
-  iret = readV0List(ev,v0Version);
+  iret = readTrackList(ev,trVersion); if (iret!=ioOK) return iret;
+  iret = readV0List(ev,v0Version);    if (iret!=ioOK) return iret;
   return ioOK;
 };
 int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
@@ -377,8 +383,8 @@ int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned sh
     return ioERR;
   } 
   // tracks & v0s
-  iret = readTrackList(ev,trVersion);
-  iret = readV0List(ev,v0Version);
+  iret = readTrackList(ev,trVersion); if (iret!=ioOK) return iret;
+  iret = readV0List(ev,v0Version);    if (iret!=ioOK) return iret;
   return ioOK;
 };
 int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
@@ -438,8 +444,8 @@ int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned sh
     return ioERR;
   } 
   // tracks & v0s
-  iret = readTrackList(ev,trVersion);
-  iret = readV0List(ev,v0Version);
+  iret = readTrackList(ev,trVersion); if (iret!=ioOK) return iret;
+  iret = readV0List(ev,v0Version);    if (iret!=ioOK) return iret;
   return ioOK;
 };
 int StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){

@@ -81,17 +81,20 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
   }
   if (mReaderStatus == ioEOF || mReaderStatus == ioERR ) {  // end of file reached
     if (mFileList) {
-      delete event; event = new StHbtEvent; // in case we read an incomplete event
-      if ( binaryIO ) delete binaryIO; // this closes the file
-      mReaderStatus = NextFile();      // write next file from list into mFileName
-      if (mReaderStatus == ioOK ) mReaderStatus = Init("r",mTheMessage); // instantiate new reader, open file mFileName
-      if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->read(*event,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
+      while (mReaderStatus !=ioEOL && mReaderStatus !=ioOK ) {
+	if (event) delete event; event = new StHbtEvent; // in case we read an incomplete event
+	if ( binaryIO ) delete binaryIO; // this closes the file
+	mReaderStatus = NextFile();      // write next file from list into mFileName
+	cout << mReaderStatus << endl;
+	if (mReaderStatus == ioOK ) mReaderStatus = Init("r",mTheMessage); // instantiate new reader, open file mFileName
+	if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->read(*event,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
+      }
     }
   }
   if (mReaderStatus != ioOK) {
     cout << " StHbtBinaryReader::ReturnHbtEvent() -  event read with status " << mReaderStatus << endl;
     cout << " StHbtBinaryReader::ReturnHbtEvent() -  fileName: " << mFileName << endl;
-    delete event; // we do not return events when reader status is not ioOk
+    if (event) delete event; event=0;// we do not return events when reader status is not ioOk
     return 0;
   }    
   // parse event throu event cut
@@ -154,10 +157,13 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
   NewV0Collection.clear();
  }
 
-#ifdef STHBTDEBUG
-  cout << " StHbtBinaryReader::ReturnHbtEvent() -  bytes read : " << binaryIO->bytesRead() << endl;
-#endif
-  return event;
+ //#ifdef STHBTDEBUG
+ cout << " StHbtBinaryReader::ReturnHbtEvent() - current filename: " << mFileName << endl;
+ cout << " StHbtBinaryReader::ReturnHbtEvent() -  bytes read : " << binaryIO->bytesRead() << endl;
+  //#endif
+ cout << " StHbtBinaryReader::ReturnHbtEvent() - #tracks/#V0s : " << event->TrackCollection()->size() << "/";
+ cout << event->V0Collection()->size() << endl;
+ return event;
 }
 
 //_______________________________
