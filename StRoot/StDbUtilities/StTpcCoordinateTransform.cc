@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.8 2000/04/03 16:23:51 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.9 2000/04/04 20:32:27 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.9  2000/04/04 20:32:27  hardtke
+ * use correct drift velocity from database in time to z conversion
+ *
  * Revision 1.8  2000/04/03 16:23:51  calderon
  * Fix bug in rowFromLocal.  Boundary btw inner and outer sector is now
  * taken as midpoint of last inner row (plus half its row pitch) and
@@ -221,7 +224,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 	mOuterSectorzOffset
 	:mInnerSectorzOffset;
     double t0zoffset = 
-      gTpcDbPtr->SlowControlSim()->driftVelocity()*
+      gTpcDbPtr->DriftVelocity()*
       (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
 
@@ -238,7 +241,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 	:mInnerSectorzOffset;
 
     double t0zoffset = 
-      gTpcDbPtr->SlowControlSim()->driftVelocity()*
+      gTpcDbPtr->DriftVelocity()*
       (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
 
@@ -487,7 +490,7 @@ double StTpcCoordinateTransform::zFromTB(const int tb) const
 {
     double timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
     double z = 
-	gTpcDbPtr->SlowControlSim()->driftVelocity()*(-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
+	gTpcDbPtr->DriftVelocity()*(-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
    
     return(z);
 }
@@ -501,7 +504,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
    
     double time = (
 		   (gTpcDbPtr->Electronics()->tZero()) +
-		   ( z / (gTpcDbPtr->SlowControlSim()->driftVelocity()))
+		   ( z / (gTpcDbPtr->DriftVelocity()))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
   return((int)(time/(mTimeBinWidth)));//time bin starts at 0,HL,9/1/99
