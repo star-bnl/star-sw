@@ -1,4 +1,4 @@
-      INTEGER*4 FUNCTION STK_AM_FILL4(
+       INTEGER*4 FUNCTION STK_AM_FILL4(
      1               spt_h,               spt ,
      2               vtx_h,               vtx ,
      3            groups_h,            groups ,
@@ -244,7 +244,7 @@ c     wkw: make cthij parameters
                end do
             end do
          end do
-         write(6,*)'stk_am_fill3 : end of initialisation'
+         write(6,*)'stk_am_fill4 : end of initialisation'
       end if  ! end of fast_search
          
       if (spt_h.nok.eq.0) then
@@ -624,7 +624,8 @@ c     -------------------------------------------------
       
       do while (.not.done(4))
  4       continue
-                 
+                
+         layer = 4
          if (layers(3)) then
             layerp = 3
             if (layers(2)) then
@@ -809,7 +810,8 @@ c     -------------------------------------------------
             else 
                ispts(5) = sptkey(jspt(5),iwafer(5))
                if (spt(ispts(5)).flag.eq.0) then
-                  ilayer = 5
+c                  ilayer = 5
+                  layer = 5
                   if (layers(4)) then
                      layerp = 4
                      if (layers(3)) then
@@ -1319,7 +1321,7 @@ c            if ((islayer_hits.ge.4)) then ! least 3 super layer hits
                track(itrack).nspt       = ispt
                track(itrack).id         = itrack
                ispt = 0
-               do k = 0, 7
+               do k = 1, 7
                   if (ispts(k).gt.0) then
                      ispt = ispt + 1
 C     spt(ispts(k)).id_track     = itrack
@@ -1327,12 +1329,23 @@ C     spt(ispts(k)).id_track     = itrack
                      groups(n_groups).id1 = itrack
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
+                     if( n_groups .gt. groups_h.maxlen) then
+                        write(6,*)'Too many groups', n_groups
+                        done(1)   = .true.
+                        done(2)   = .true.
+                        done(3)   = .true.
+                        done(4)   = .true.
+                        done(5)   = .true.
+                        done(6)   = .true.
+                        goto 117
+                     endif
                      if (ispt.eq.1) then
 C                        track(itrack).id_mctrack = 
 C     &                       spt(ispts(k)).id_mctrack
                      end if
                   end if
                end do
+ 117           continue
             end if
          end if 
          
