@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.15 2001/03/22 20:47:10 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.16 2001/03/28 21:49:38 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.16  2001/03/28 21:49:38  caines
+ * Correct bug that allowed AdjustSeq1 code to fall off end
+ *
  * Revision 1.15  2001/03/22 20:47:10  caines
  * Comment out some of the QA histograms
  *
@@ -532,7 +535,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int Anode){
 
   mHybridAdjData->setListSequences(Anode, mNumOfSeq, tempSeq1);
   
-  if (nSeqNow)
+  //if (nSeqNow)
   //cout << "For Anode=" << Anode << " Number sequnces was=" << nSeqOrig << " Number now=" << nSeqNow << endl;
   
   //  data << endl;
