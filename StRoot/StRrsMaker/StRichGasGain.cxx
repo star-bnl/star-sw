@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.8 2000/04/05 16:00:33 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.9 2000/05/17 22:25:23 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 1.9  2000/05/17 22:25:23  lasiuk
+ * feedback correction
+ *
  * Revision 1.8  2000/04/05 16:00:33  lasiuk
  * viewer, gid, update
  *
@@ -123,15 +126,19 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
     double elec2feed = mPhotonFeedback*q;
     //
     // put 2 in for solid angle effects
-    double phot2elec = elec2feed*(mPhotoConversion)/2.;
-    //double phot2elec = .95;
-    int P = mRandom.Poisson(phot2elec);
+//     double phot2elec = elec2feed*(mPhotoConversion)/2.;
+//     int P = mRandom.Poisson(phot2elec);
+
+    double numberOfFeedBackPhotons = mRandom.Poisson(mPhotonFeedback*q);
+    double P = (numberOfFeedBackPhotons*(mPhotoConversion)/2.);
+    
     if(RRS_DEBUG)
 	cout << "StRichGasGain::feedbackPhoton() P = " << P << endl;
 #ifdef RICH_WITH_VIEWER
     if ( StRichViewer::histograms ) {
+	StRichViewer::getView()->mTotalFeedback->Fill(numberOfFeedBackPhotons);
 	StRichViewer::getView()->mFeedback->Fill(P);
-	StRichViewer::getView()->mPoissonMean->Fill(phot2elec);	
+	StRichViewer::getView()->mPoissonMean->Fill(mPhotonFeedback*q);	
     }
 #endif
     double dist, x, y, z, cost, phi;
