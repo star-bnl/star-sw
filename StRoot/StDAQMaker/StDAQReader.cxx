@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.44 2004/08/07 02:39:00 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.45 2004/09/10 22:07:44 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.45  2004/09/10 22:07:44  perev
+ * more defence agains corrupted DAQ data
+ *
  * Revision 1.44  2004/08/07 02:39:00  perev
  * Traditional Clear added
  *
@@ -411,7 +414,9 @@ StRICHReader *StDAQReader::getRICHReader()
   if (!RICHPresent()) return 0;
   if (!fRICHReader) {
     fRICHReader = ::getRICHReader(fEventReader);
+    if (!fRICHReader) fEventInfo->RICHPresent=0;
   }
+
   return fRICHReader;
 }
 //_____________________________________________________________________________
@@ -420,6 +425,7 @@ StL3Reader *StDAQReader::getL3Reader()
   if (!L3Present()) return 0;
   if (!fL3Reader) {
     fL3Reader = ::getL3Reader(fEventReader);
+    if (!fL3Reader) fEventInfo->L3Present=0;
   }
   return fL3Reader;
 }
@@ -439,6 +445,7 @@ StTOFReader *StDAQReader::getTOFReader()
   if (!TOFPresent()) return 0;
   if (!fTOFReader) {
     fTOFReader = ::getTOFReader(fEventReader);
+    if(!fTOFReader) fEventInfo->TOFPresent=0;
   }
   return fTOFReader;
 }
@@ -448,6 +455,7 @@ StFPDReader *StDAQReader::getFPDReader()
   if (!FPDPresent()) return 0;
   if (!fFPDReader) {
     fFPDReader = ::getFPDReader(fEventReader);
+    if (!fFPDReader) fEventInfo->FPDPresent=0;
   }
   return fFPDReader;
 }

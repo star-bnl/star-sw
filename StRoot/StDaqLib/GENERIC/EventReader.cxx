@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.48 2004/03/01 18:05:47 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.49 2004/09/10 22:08:01 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.49  2004/09/10 22:08:01  perev
+ * more defence agains corrupted DAQ data
+ *
  * Revision 1.48  2004/03/01 18:05:47  fisyak
  * Account for new place for rts.h, add osf
  *
@@ -738,7 +741,11 @@ void EventReader::setVerbose(int v)
 char * EventReader::findBank(char *bankid)
 {
   // Fix up DATAP
-  Bank_DATAP *pBankDATAP = (Bank_DATAP *)this->getDATAP();
+  Bank_DATAP *pBankDATAP = (Bank_DATAP *)getDATAP();
+  if (!pBankDATAP) {
+    printf("DATAP not found: %s %d\n",__FILE__,__LINE__) ;
+    return FALSE;
+  }
   if (!pBankDATAP->test_CRC()) {
     printf("CRC error in DATAP: %s %d\n",__FILE__,__LINE__) ;
     return FALSE;
