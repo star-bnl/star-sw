@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.33  1999/09/29 16:46:32  kathy
+//! changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
+//!
 //! Revision 1.32  1999/09/23 18:54:11  kathy
 //! fix some histogram limits, add about 10 histograms - just so we know number rows in each table - had to include some more tables to do this
 //!
@@ -153,7 +156,7 @@ class St_QA_Maker : public StMaker {
   Bool_t drawinit;
 //  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $";
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -362,14 +365,14 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_v_x;     //! vertex coordinates in
   TH1F     *m_v_y;     //!  STAR reference 
   TH1F     *m_v_z;     //!   system
-  TH1F     *m_v_pchi2; //! P(chi^2,ndf) of vertex fit
+  TH1F     *m_v_pchi2; //! chisq per dof of vertex fit
   
   TH1F     *m_pv_detid; //! row1-detector id where vertex was found 
   TH1F     *m_pv_vtxid; //! row1-vertex type
   TH1F     *m_pv_x;     //! row1-vertex coordinates in
   TH1F     *m_pv_y;     //!  STAR reference 
   TH1F     *m_pv_z;     //!   system
-  TH1F     *m_pv_pchi2; //! row1-P(chi^2,ndf) of vertex fit
+  TH1F     *m_pv_pchi2; //! row1-chisq per dof of vertex fit
   
   
   // for method MakeHistXi
@@ -434,7 +437,7 @@ class St_QA_Maker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
