@@ -1,6 +1,6 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
- 
+// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
 //*KEEP,TDataset,T=C++.
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"

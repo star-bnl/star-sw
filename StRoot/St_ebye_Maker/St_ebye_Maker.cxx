@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.2 1998/08/07 19:26:10 dhammika Exp $
+// $Id: St_ebye_Maker.cxx,v 1.3 1998/09/15 20:55:20 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.3  1998/09/15 20:55:20  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.2  1998/08/07 19:26:10  dhammika
 // event by event chain in root
 //
@@ -21,7 +24,7 @@
 #include <stdlib.h>
 #include "St_ebye_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 
 #include "St_sca_switch_Table.h"
@@ -143,7 +146,7 @@ Int_t St_ebye_Maker::Make(){
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.2 1998/08/07 19:26:10 dhammika Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.3 1998/09/15 20:55:20 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

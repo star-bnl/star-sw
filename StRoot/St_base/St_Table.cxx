@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.13 1998/09/14 01:01:20 fine Exp $ 
+// $Id: St_Table.cxx,v 1.14 1998/09/15 20:55:33 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.13  1998/09/14 01:01:20  fine
-// some corrections for the brand-new St_Table::Update() method
+// Revision 1.14  1998/09/15 20:55:33  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
 //
 // Revision 1.11  1998/09/07 19:23:39  fine
 // St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
@@ -17,6 +17,10 @@
 // Revision 1.8  1998/07/23 21:09:14  fisyak
 // Adjust for ROOT 2.09
 // 
+//*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
+//*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
+// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_Table                                                             //
@@ -916,18 +920,20 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
 
   if (set->HasData()) 
   {
-   // Check whether the new table has the same type 
-   if (strcmp(GetTitle(),set->GetTitle()) == 0 ) 
-   {
-     St_Table *table = (St_Table *)set;
-    *s_TableHeader   =*(table->GetHeader());
-     Adopt(table->GetSize(),table->GetArray());
-     // mark that object lost STAF table and can not delete it anymore
-     table->SetBit(kCanDelete); 
-   }
-   else
-      Error("Update",
-            "This table is <%s> but the updating one has a wrong type <%s>",GetTitle(),set->GetTitle());
+    // Check whether the new table has the same type 
+    if (strcmp(GetTitle(),set->GetTitle()) == 0 ) 
+    {
+      St_Table *table =  (St_Table *)set;
+     *s_TableHeader   = *(table->GetHeader());
+      Adopt(table->GetSize(),table->GetArray());
+      // mark that object lost the STAF table and can not delete it anymore
+      table->SetBit(kCanDelete);
+      // mark we took over of this STAF table
+      ResetBit(kCanDelete);
+    }
+    else
+       Error("Update",
+             "This table is <%s> but the updating one has a wrong type <%s>",GetTitle(),set->GetTitle());
   }
   St_DataSet::Update(set,opt);
 }

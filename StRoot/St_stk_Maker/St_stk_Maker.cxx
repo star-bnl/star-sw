@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.3 1998/08/26 12:15:10 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.4 1998/09/15 20:55:26 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.4  1998/09/15 20:55:26  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.3  1998/08/26 12:15:10  fisyak
 // Remove asu & dsl libraries
 //
@@ -25,7 +28,7 @@
 #include <stdlib.h>
 #include "St_stk_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 #include "svt/St_stk_am_Module.h"
 #include "svt/St_ste_am_Module.h"
 #include "svt/St_stk_am_Module.h"
@@ -135,37 +138,38 @@ void St_stk_Maker::Init(){
 Int_t St_stk_Maker::Make(){
   //  PrintInfo();
   if (!m_DataSet->GetList()){  
-     St_DataSetIter local(m_DataSet);// event/data/svt/tracks
-     St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",30000);
-          local.Add(candidate_groups);
-     St_sgr_groups *groups      = new St_sgr_groups("groups",30000); local.Add(groups);
-     St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",30000); local.Add(mcgroups);
-     St_stk_track  *stk_track   = new St_stk_track("stk_track",6000); local.Add(stk_track);
-     St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",6000); local.Add(stk_kine);
-     St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",6000); local.Add(stk_mctrack);
-     St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",6000); local.Add(stk_mckine);
-     St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",10000); local.Add(ste_teval);
-     St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1); local.Add(ste_teff);
-
      St_DataSetIter geant(gStChain->GetGeant());
      St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
      St_g2t_event   *g2t_event    = (St_g2t_event  *) geant("Event/g2t_event");
-     St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *)geant("Event/g2t_vertex");
+     St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
      St_g2t_svt_hit *g2t_svt_hit  = (St_g2t_svt_hit *)geant("Event/g2t_svt_hit");
+     if (g2t_track && g2t_event && g2t_vertex && g2t_svt_hit) {
+       St_DataSetIter local(m_DataSet);// event/data/svt/tracks
+       St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",30000);
+          local.Add(candidate_groups);
+       St_sgr_groups *groups      = new St_sgr_groups("groups",30000); local.Add(groups);
+       St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",30000); local.Add(mcgroups);
+       St_stk_track  *stk_track   = new St_stk_track("stk_track",6000); local.Add(stk_track);
+       St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",6000); local.Add(stk_kine);
+       St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",6000); local.Add(stk_mctrack);
+       St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",6000); local.Add(stk_mckine);
+       St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",10000); local.Add(ste_teval);
+       St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1); local.Add(ste_teff);
+
      //
-     St_DataSetIter run(gStChain->GetRun());
-     St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
-     if (!g2t_gepart){
-       g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
-       St_DataSetIter loc(run("geant/Run"));
-       loc.Add(g2t_gepart);
-     }
+       St_DataSetIter run(gStChain->GetRun());
+       St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
+       if (!g2t_gepart){
+         g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
+         St_DataSetIter loc(run("geant/Run"));
+        loc.Add(g2t_gepart);
+       }
      //
-     St_DataSetIter data(gStChain->GetData());
-     St_scs_spt    *scs_spt      = (St_scs_spt *) data("svt/hits/scs_spt");
+       St_DataSetIter data(gStChain->GetData());
+       St_scs_spt    *scs_spt      = (St_scs_spt *) data("svt/hits/scs_spt");
 				      // exec run_stk  
-     if (m_ifstk){
-       Int_t Res_stk = stk_am(m_stk_stkpar,
+       if (m_ifstk){
+         Int_t Res_stk = stk_am(m_stk_stkpar,
                             g2t_track,g2t_event,g2t_vertex,
                             scs_spt,
                             m_stk_vtx,m_stk_vtx_direct,
@@ -173,36 +177,37 @@ Int_t St_stk_Maker::Make(){
                             stk_mctrack,stk_mckine,
                             m_stk_filler,m_config,m_geom);
 				      //eval_stk
-       Int_t res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
+         Int_t res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
                             scs_spt,
                             m_stk_vtx,
                             groups,stk_track,stk_kine,mcgroups,
                             stk_mctrack,stk_mckine,
                             ste_teval,ste_teff);
-     }
-     else{			      //sgr 
-       Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
+       }
+       else{			      //sgr 
+         Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
                                 groups,stk_track,stk_kine,mcgroups,
                                 stk_mctrack,stk_mckine);
-       if (Res_stk_init !=  kSTAFCV_OK) {
+         if (Res_stk_init !=  kSTAFCV_OK) {
 	   cout << "Problem on return from STK_AM_INIT" << endl;
-       }
-       Int_t Res = sgr_am(m_stk_vtx,m_geom,scs_spt,
+         }
+         Int_t Res = sgr_am(m_stk_vtx,m_geom,scs_spt,
                        groups,
                        m_pix_info,candidate_groups,stk_track);
   
 //        if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
 		   //eval
-       cout << "Calling STE_AM..." << endl;
+         cout << "Calling STE_AM..." << endl;
 
-       Int_t Res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
+         Int_t Res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
                               scs_spt,m_stk_vtx,
                               groups,stk_track,stk_kine,mcgroups,
                               stk_mctrack,stk_mckine,
                               ste_teval,ste_teff);
 
-       if (Res_ste != kSTAFCV_OK) {
-        cout << "Problem on return from STE_AM" << endl;
+         if (Res_ste != kSTAFCV_OK) {
+           cout << "Problem on return from STE_AM" << endl;
+	 }
        }
      }	  
    } 
@@ -211,7 +216,7 @@ return kSTAFCV_OK;
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.3 1998/08/26 12:15:10 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.4 1998/09/15 20:55:26 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

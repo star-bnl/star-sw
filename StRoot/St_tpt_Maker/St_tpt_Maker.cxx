@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.5 1998/08/18 14:05:04 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.6 1998/09/15 20:55:29 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.6  1998/09/15 20:55:29  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.5  1998/08/18 14:05:04  fisyak
 // Add to bfc dst
 //
@@ -20,7 +23,7 @@
 #include "iostream.h"
 #include "St_tpt_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "tpc/St_tpt_Module.h"
 #include "tpc/St_tte_track_Module.h"
@@ -131,13 +134,17 @@ Int_t St_tpt_Maker::Make(){
 	 //tpt
        if (!m_iftte) Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
 	 //tte_track
-       else Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
+       else {
+         if (g2t_tpc_hit && g2t_track) Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
+       }
 	 //tid
        Int_t Res_tde = tde_new(m_tdeparm,tphit,tptrack,m_tpg_pad_plane);
   	 //tte
-       Int_t Res_tte = tte(tptrack,tphit,
+       if (g2t_tpc_hit && g2t_track) {
+         Int_t Res_tte = tte(tptrack,tphit,
                            g2t_tpc_hit,g2t_track,
                            index,m_type,evaltrk,mctrk,res,m_tte_control);
+       }
      }
    }
  return kSTAFCV_OK;
@@ -145,7 +152,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.5 1998/08/18 14:05:04 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.6 1998/09/15 20:55:29 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

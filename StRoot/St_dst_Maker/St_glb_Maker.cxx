@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.3 1998/09/08 22:43:10 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.4 1998/09/15 20:55:20 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.4  1998/09/15 20:55:20  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.3  1998/09/08 22:43:10  fisyak
 // Modify St_dst_Maker to account new calling sequence
 //
@@ -25,8 +28,7 @@
 #include <stdlib.h>
 #include "St_dst_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 
 #include "global/St_svm_am_Module.h"
 #include "global/St_svm_eval2_Module.h"
@@ -130,39 +132,41 @@ Int_t St_dst_Maker::Make(){
   //svm
   St_DataSet  *global_track = global.Mkdir("tracks");
   St_DataSetIter track(global_track);
-  St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000); track.Add(evt_match);
-
   St_tpt_track  *tptrack   = (St_tpt_track *) data("tpc/tracks/tptrack");
   St_stk_track  *stk_track = (St_stk_track *) data("svt/tracks/stk_track");
-  Int_t res_svm =  svm_am (stk_track, tptrack,
-                           m_svm_ctrl, evt_match);
-  cout << "Calling SVM_EVAL2.." << endl;
-     //
-  St_DataSetIter run(gStChain->GetRun());
-  St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
-  if (!g2t_gepart){
-    g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
-    St_DataSetIter loc(run("geant/Run"));
-    loc.Add(g2t_gepart);
-  }
-  St_svm_eval_par *svm_eval_par = new St_svm_eval_par("svm_eval_par",1); track.Add(svm_eval_par);
-  St_svm_eval_svt *svm_eval_svt = new St_svm_eval_svt("svm_eval_svt",3000); track.Add(svm_eval_svt);
-  St_svm_eval_tpc *svm_eval_tpc = new St_svm_eval_tpc("svm_eval_tpc",3000); track.Add(svm_eval_tpc);
-  St_scs_spt      *scs_spt      = (St_scs_spt *) data("svt/hits/scs_spt");
+  St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000); track.Add(evt_match);
+  St_tte_eval     *evaltrk      = (St_tte_eval   *) data("tpc/tracks/evaltrk");
+  St_scs_spt      *scs_spt      = (St_scs_spt    *) data("svt/hits/scs_spt");
   St_sgr_groups   *groups       = (St_sgr_groups *) data("svt/tracks/groups");
-  St_tte_eval     *evaltrk      = (St_tte_eval *)   data("tpc/tracks/evaltrk");
+  if (tptrack && stk_track) {
 
-  Int_t Res_svm_eval = svm_eval2(g2t_gepart,scs_spt,groups,stk_track,tptrack,
+    Int_t res_svm =  svm_am (stk_track, tptrack,
+                           m_svm_ctrl, evt_match);
+    cout << "Calling SVM_EVAL2.." << endl;
+  
+     //
+    St_DataSetIter run(gStChain->GetRun());
+    St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
+    if (!g2t_gepart){
+      g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
+      St_DataSetIter loc(run("geant/Run"));
+      loc.Add(g2t_gepart);
+    }
+    St_svm_eval_par *svm_eval_par = new St_svm_eval_par("svm_eval_par",1); track.Add(svm_eval_par);
+    St_svm_eval_svt *svm_eval_svt = new St_svm_eval_svt("svm_eval_svt",3000); track.Add(svm_eval_svt);
+    St_svm_eval_tpc *svm_eval_tpc = new St_svm_eval_tpc("svm_eval_tpc",3000); track.Add(svm_eval_tpc);
+
+    Int_t Res_svm_eval = svm_eval2(g2t_gepart,scs_spt,groups,stk_track,tptrack,
 		                 evaltrk,evt_match,svm_eval_par,
 		                 svm_eval_svt,svm_eval_tpc);
 
-  cout << " Calling SVM_SVT_EVAL " << endl;
+    cout << " Calling SVM_SVT_EVAL " << endl;
   // What is [data]/glosvm_eval_strkbal/tracks/svm_eval_strk ?
-  St_svm_eval_strk *svm_eval_strk = new St_svm_eval_strk("svm_eval_strk",100000);
+    St_svm_eval_strk *svm_eval_strk = new St_svm_eval_strk("svm_eval_strk",100000);
                                  track.Add(svm_eval_strk);
-
-  Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
+    Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
                                         evt_match, svm_eval_par,svm_eval_strk);
+  }
   St_DataSet    *global_dst = global("dst");
   if (!global_dst) global_dst = global.Mkdir("dst");
   St_DataSetIter dst(global_dst); // dst
@@ -251,20 +255,22 @@ Int_t St_dst_Maker::Make(){
                                                               dst.Add(monitor_soft);
   cout << " run_dst: Calling dst_monitor_soft_filler" << endl;
   St_tcl_tpcluster  *tpcluster = (St_tcl_tpcluster *) data("tpc/tpcluster");
-  // What is [data]/svt/hits/scs_cluster
-  St_ctu_cor *ctb_cor = (St_ctu_cor *) data("ctf/ctb_cor");
-#if 0
+  // What is [data]/svt/hits/scs_cluster ?
+  St_scs_cluster *scs_cluster = new St_scs_cluster("scs_cluster",1); data.Add(scs_cluster,"svt/hits");
+  St_ctu_cor *ctb_cor = (St_ctu_cor *) data("ctf/ctb_cor"); 
+
   Int_t Res_dst_monitor =  dst_monitor_soft_filler(tpcluster,
-                            [data]/svt/hits/scs_cluster,
+                            scs_cluster,
                             tphit,scs_spt,tptrack,stk_track,evt_match,
                             ctb_cor,vertex,event_summary,monitor_soft);
+
   if (Res_dst_monitor  != kSTAFCV_OK){
     cout << "Problem on return from DST_MONITOR_SOFT_FILLER" << endl;
   }
   cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
 
-       cout << " run_dst: Calling fill_dst_event_summary" << endl;
-#endif       
+  cout << " run_dst: Calling fill_dst_event_summary" << endl;
+
   Int_t Res_fill_dst_event_summary = fill_dst_event_summary(m_run_header,event_header,
                                                             globtrk,vertex,event_summary);
 
@@ -287,7 +293,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.3 1998/09/08 22:43:10 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.4 1998/09/15 20:55:20 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

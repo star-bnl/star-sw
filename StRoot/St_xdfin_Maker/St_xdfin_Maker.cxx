@@ -5,6 +5,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "StChain.h"
+#include "St_DataSetIter.h"
 #include "St_xdfin_Maker.h"
 #include "St_particle_Table.h"
 #include "St_XDFFile.h"
@@ -32,20 +33,20 @@ void St_xdfin_Maker::Finish(){
 void St_xdfin_Maker::Init(){
 // Get run parameters from input file
   St_DataSet *set = gStChain->XDFFile()->NextEventGet(); 
-  SafeDelete(set);// quick and dirty
+  //  SafeDelete(set);// quick and dirty
   if (set) {
     if (strcmp(set->GetName(),"run")==0){ 
       St_DataSet *RunSet = gStChain->GetRun();
       SafeDelete(RunSet);
-      gStChain->DataSet()->Add(set); 
+      gStChain->DataSet()->Update(set); SafeDelete(set);
     }
     else {// GEANT type of events
       if (strcmp(set->GetName(),"Run")==0){
         St_DataSetIter local( gStChain->DataSet());
         St_DataSet *RunSet = local.Mkdir("run");
         St_DataSet *geant = local.Mkdir("run/geant");
-        geant->Add(set);
-      }
+        geant->Update(set); SafeDelete(set);
+      } 
       else {//Raw data format
 	//Skip a ROSIE_RESET record.
         if (strcmp(set->GetName(),"ROSIE_RESET")==0){
