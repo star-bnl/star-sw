@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.13 2000/01/07 10:45:27 ullrich Exp $
+% $Id: StEvent.tex,v 2.14 2000/01/11 16:31:56 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -20,7 +20,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% $Log
+% $Log: StEvent.tex,v $
+% Revision 2.14  2000/01/11 16:31:56  ullrich
+% Regular update.
+%
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
 % of new RICH methods to class StEvent.
@@ -143,8 +146,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +171,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +180,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,8 +205,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -2551,7 +2554,10 @@ definition in the header file.
     Number of primary vertices (aka event vertices).  Usually there is
     check the number before dealing with the event.
     \verb+void setSummary(StEventSummary*);+\\
+
     
+    (i.e.~primary tracks) they hold. The first in the list is always the
+    \verb+void setSsdHitCollection(StSsdHitCollection*);+\\
 
     \verb+void setEmcCollection(StEmcCollection*);+\\
 
@@ -3194,7 +3200,10 @@ definition in the header file.
 \item[Summary]
 \item[Synopsis]
     \verb+#include "StRichPixelCollection.h"+\\
+    \verb+class StRichPixelCollection;+\\
 \item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
     \verb+StRichPixelCollection();+\\
     \verb+StRichPixelCollection(dst_rch_pixel_st*, int);+\\
 \item[Public Member\\ Functions]
@@ -3601,14 +3610,23 @@ definition in the header file.
 \index{StSvtSoftwareMonitor|textbf}
 \label{sec:StSvtSoftwareMonitor}
 \begin{Entry}
+\item[Description] 
+\item[Related Classes] \texttt{StTpcDedxPidAlgorithm} inherits directly from
     \verb+StSvtSoftwareMonitor(const dst_mon_soft_svt_st&);+\\
     \verb+Long_t n_clus_svt[4];+\\
     \verb+StTpcDedxPidAlgorithm();+\\
+    Total charge deposition in each SVT/SSD barrel/layer. 
     
+    \verb+Float_t hit_frac_svt[4];+\\
     Fraction of hits used in each SVT/SSD barrel/layer. 
     
+    \verb+Float_t avg_trkL_svt;+\\
+    Average track length (cm) SVT \\
     or average number of points assigned.
+    
+    \verb+Float_t res_pad_svt;+\\
     Average residual, pad direction, SVT \\
+    or average chisq(1) of fit.
 
     \verb+Float_t res_drf_svt;+\\
     Average residuals, drift direction, SVT \\
@@ -3799,13 +3817,34 @@ definition in the header file.
 \item[Summary]
 \item[Synopsis]
     \verb+#include "StTpcSectorHitCollection.h"+\\
+    \verb+class StTpcSectorHitCollection;+\\
+\item[Description]
+\item[Related Classes]
 \item[Public\\ Constructors]
+    \verb+StTpcSectorHitCollection();+\\
+\item[Public Member\\ Functions]
+    \verb+ULong_t numberOfHits() const;+\\
+    Total number of hits in the sector.
     
+    \verb+UInt_t numberOfPadrows() const;+\\
+    Always 45.
+    
+    Returns foreign key as defined in the dst_track table.
+    \verb+const StTpcPadrowHitCollection* padrow(UInt_t) const;+\\
     Returns padrow hit collection. Note that \texttt{i}=0--44.
+    
+\end{Entry}
+\clearpage
+
+
 \subsection{StTpcSoftwareMonitor}
+\index{StTpcSoftwareMonitor|textbf}
 \label{sec:StTpcSoftwareMonitor}
+\begin{Entry}
     Quality control flag (sort of). Most important: \texttt{flag()} $> 0$ good,
+    \texttt{flag()} $< 0$ bad. Contains which detectors were used in the refit,
     the status of the refit and much more. For a detailed (and actual) description
+    see the referring reconstruction web pages.    
     \verb+class StTpcSoftwareMonitor;+\\
     The last two digits indicate the status of the refit:
     \begin{description}
@@ -3817,8 +3856,12 @@ definition in the header file.
     \item[-x06] Bad fit, outlier could not be identified 
     \item[-x10] Bad fit, not enough points to start 
     \end{description} 
+
     If no refit is performed by \texttt{egr} then the return value of flag()
     is defined as follows: 
+
+    TPC only tracks:\\
+    \texttt{sign(1,tpc\_track.flag)*100+tpc\_track.flag}
 
     where 
   
