@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.63  2004/02/12 19:38:46  oldi
+// Removal of intermediate tables.
+//
 // Revision 1.62  2004/01/28 02:04:43  jcs
 // replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
 //
@@ -222,6 +225,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TObjArray.h"
+#include "TObjectSet.h"
 #include "PhysicalConstants.h"
 
 #ifndef gufld
@@ -229,7 +233,6 @@
 extern "C" void gufld(float *, float *);
 #endif
 
-#include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
@@ -240,6 +243,9 @@ extern "C" void gufld(float *, float *);
 
 #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
 #include "St_db_Maker/St_db_Maker.h"
+
+#include "StEvent.h"
+#include "StFtpcHitCollection.h"
 
 ClassImp(StFtpcClusterMaker)
 
@@ -368,6 +374,11 @@ Int_t StFtpcClusterMaker::Make()
   int iMake=kStOK;
 
   int using_FTPC_slow_simulator = 0;
+
+  mCurrentEvent = (StEvent*) GetInputDS("StEvent");
+  if(mCurrentEvent){
+    mFtpcHitColl = mCurrentEvent->ftpcHitCollection();
+  } else mFtpcHitColl = 0;
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -535,7 +546,9 @@ Int_t StFtpcClusterMaker::Make()
      delete gasUtils; 
     }
 
-  TObjArray *hitarray = new TObjArray(10000);  
+  mHitArray = new TObjArray(10000);
+  mHitArray->SetOwner(kTRUE); // make sure that delete calls ->Delete() as well
+  AddData(new TObjectSet("ftpcClusters", mHitArray));
 
   // ghitarray will only be used if fast simulator is active
   TObjArray *ghitarray = new TObjArray(10000);  
@@ -574,7 +587,7 @@ Int_t StFtpcClusterMaker::Make()
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
                                                        dbReader,
-						       hitarray,
+						       mHitArray,
 						       m_hitsvspad,
 						       m_hitsvstime,
                                                        m_csteps,
@@ -608,7 +621,7 @@ Int_t StFtpcClusterMaker::Make()
       StFtpcFastSimu *ffs = new StFtpcFastSimu(geantReader,
 					       paramReader,
                                                dbReader,
-					       hitarray,
+					       mHitArray,
 					       ghitarray);
       if(Debug()) gMessMgr->Message("", "I" "OS") << "finished running StFtpcFastSimu" << endm;
       delete ffs;
@@ -616,25 +629,19 @@ Int_t StFtpcClusterMaker::Make()
     }
   }
 
-  Int_t num_points = hitarray->GetEntriesFast();
-  if(num_points>0)
-    {
-      St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",num_points);
-      m_DataSet->Add(fcl_fppoint);
-      
-      fcl_fppoint_st *pointTable= fcl_fppoint->GetTable();
-      
-      StFtpcConfMapPoint *point;
-      
-      for (Int_t i=0; i<num_points; i++) 
-	{
-	  point = (StFtpcConfMapPoint *)hitarray->At(i);
-	  point->ToTable(&(pointTable[i]));    
-	}
-      
-      fcl_fppoint->SetNRows(num_points);
-    }
-  
+  /* This should do it finally, but right now we still use StFtpcGlobalMaker.cxx (dst_tables)
+  Int_t num_points = mHitArray->GetEntriesFast();
+  if(num_points>0 && mFtpcHitColl) { // points found and hitCollection exists
+    // Write hits to StEvent (not tested yet).
+    StFtpcPoint *point;
+    
+    for (Int_t i=0; i<num_points; i++) {
+      point = (StFtpcPoint *)mHitArray->At(i);
+      point->ToStEvent(mFtpcHitColl); 
+    }	
+  }
+  */
+
   Int_t num_gpoints = ghitarray->GetEntriesFast();
   if(num_gpoints>0)
     {
@@ -656,14 +663,15 @@ Int_t StFtpcClusterMaker::Make()
   
   ghitarray->Delete();
   delete ghitarray;
-  hitarray->Delete();
-  delete hitarray;
+  // mHitArray and its contents will be deleted by StMaker::Clear() since it is sitting in a TDataSet
   delete paramReader;
   delete dbReader;
 // Deactivate histograms for MDC3
   MakeHistograms(); // FTPC cluster finder histograms
   return iMake;
 }
+
+
 //_____________________________________________________________________________
 void StFtpcClusterMaker::MakeHistograms() 
 {
@@ -671,16 +679,10 @@ void StFtpcClusterMaker::MakeHistograms()
   //cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
 
 
-  // Create an iterator
-  St_DataSetIter fcl_points(m_DataSet);
-
-  //Get the table
-  St_fcl_fppoint *ppointh;
-  ppointh = (St_fcl_fppoint *) fcl_points.Find("fcl_fppoint");
-  if (! ppointh) 	return;
-  fcl_fppoint_st *r = ppointh->GetTable();
-  for (Int_t i=0; i<ppointh->GetNRows();i++,r++) {
-    Int_t flag = r->flags;
+  if (!mHitArray) return;
+  for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
+    StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);
+    Int_t flag = hit->GetFlags();
     if (flag > 0) {
       Int_t bin = 6;
       for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
@@ -691,9 +693,9 @@ void StFtpcClusterMaker::MakeHistograms()
       }//end loop twofac
     }//endif flag
 
-   Float_t nrow = r->row;
+   Float_t nrow = hit->GetPadRow();
    m_row->Fill(nrow);
-   Float_t nsec = r->sector;
+   Float_t nsec = hit->GetSector();
    m_sector->Fill(nsec);
    m_row_sector->Fill(nrow,nsec);
 
@@ -704,23 +706,21 @@ void StFtpcClusterMaker::MakeHistograms()
 //  m_npad_nbin->Fill(npad,nbin);
   
    // Fill cluster radius histograms
-   Float_t rpos = ::sqrt(r->x*r->x + r->y*r->y);
-   if (r->row <=10 ) 
+   Float_t rpos = ::sqrt(hit->GetX()*hit->GetX() + hit->GetY()*hit->GetY());
+   if (hit->GetPadRow() <=10 ) 
      {
        m_cluster_radial_West->Fill(rpos);
-       m_maxadc_West->Fill(r->max_adc);
-       m_charge_West->Fill(r->charge);	 
-       m_padvstime_West->Fill(r->n_bins,r->n_pads);
+       m_maxadc_West->Fill(hit->GetMaxADC());
+       m_charge_West->Fill(hit->GetCharge());	 
+       m_padvstime_West->Fill(hit->GetNumberBins(),hit->GetNumberPads());
      }
-   else if (r->row >=11 ) 
+   else if (hit->GetPadRow() >=11 ) 
      {
        m_cluster_radial_East->Fill(rpos);
-       m_maxadc_East->Fill(r->max_adc);
-       m_charge_East->Fill(r->charge);
-       m_padvstime_East->Fill(r->n_bins,r->n_pads);
+       m_maxadc_East->Fill(hit->GetMaxADC());
+       m_charge_East->Fill(hit->GetCharge());
+       m_padvstime_East->Fill(hit->GetNumberBins(),hit->GetNumberPads());
      }
    
   }//end rows loop 
 }
-                                   
-
