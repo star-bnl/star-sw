@@ -7,18 +7,14 @@
 #define STI_MATERIAL_HH
 
 #include <iostream>
-#include "TObject.h"
-#include "THashTable.h"
 
-class StiMaterial : public TObject{
+class StiMaterial{
 
   public:
 
   // con/destructor
-  StiMaterial(){ 
-    if(gMaterials == NULL){ gMaterials = new THashTable(); }
-    StiMaterial::gMaterials->Add(this); }
-  virtual ~StiMaterial(){ StiMaterial::gMaterials->Remove(this); }
+  StiMaterial();
+  virtual ~StiMaterial();
 
   // accessors
   double getDensity() const { return dDensity; }
@@ -30,10 +26,9 @@ class StiMaterial : public TObject{
   void setRadLength(double val){ dRadLength = val; }
   void setName(char *val){ szName = val; }
 
-  // override hash for storing in static hashtable
-  ULong_t Hash(){ TString str(szName); return str.Hash(); };
-  static StiMaterial* findMaterial(const char *name) { 
-    return (StiMaterial *)gMaterials->FindObject(name); }
+  // utility
+  void build(const char *szFileName);
+  void write(const char *szFileName);
 
   protected:
 
@@ -41,18 +36,11 @@ class StiMaterial : public TObject{
   double dRadLength; // cm
   char *szName;
 
-  static THashTable *gMaterials;
 };
-
-
 
 //Non-members--------------------------
 
-inline ostream& operator<<(ostream& os, const StiMaterial& m){
-  return os << m.getDensity() << " " 
-            << m.getRadLength() << " "
-            << m.getName();
-}
+ostream& operator<<(ostream& os, const StiMaterial& m);
 
 #endif
 
