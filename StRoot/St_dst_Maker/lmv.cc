@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.9 2000/01/25 16:01:49 fisyak Exp $
+// $Id: lmv.cc,v 1.10 2000/01/26 02:41:36 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.10  2000/01/26 02:41:36  nystrand
+// Fixed bug in path length calculation
+//
 // Revision 1.9  2000/01/25 16:01:49  fisyak
 // Devorce with StAF
 //
@@ -70,7 +73,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.9 2000/01/25 16:01:49 fisyak Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.10 2000/01/26 02:41:36 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -238,12 +241,14 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
       StThreeVectorD xpos;
       xpos = helices[jj].at(ifcpath);
+      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
 
-      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double incang = acos( (xpos.x()/xmagn)*(pmom.x()/pmom.mag()) + (xpos.y()/xmagn)*(pmom.y()/pmom.mag()) );
       double lpath_ifc = X_X0_Ifc/cos(incang); 
+      if( lpath_ifc <= 0.0 )cout<<"lmv: ERROR lpath_ifc= "<<lpath_ifc<<endl;
       lpath_tot = lpath_tot + lpath_ifc;
 
     }
@@ -263,12 +268,14 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt3path);
+      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt3path, bfield*tesla);
 
-      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double incang = acos( (xpos.x()/xmagn)*(pmom.x()/pmom.mag()) + (xpos.y()/xmagn)*(pmom.y()/pmom.mag()) );
       double lpath_svt3 = X_X0_SVTBarrel/cos(incang); 
+      if( lpath_svt3 <= 0.0 )cout<<"lmv: ERROR lpath_svt3= "<<lpath_svt3<<endl;
       lpath_tot = lpath_tot + lpath_svt3;
     }
     if( (Is_SVT == 1) && (R1St > R_SVT_Barrel3) ){
@@ -285,12 +292,14 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt2path);
+      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt2path, bfield*tesla);
 
-      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double incang = acos( (xpos.x()/xmagn)*(pmom.x()/pmom.mag()) + (xpos.y()/xmagn)*(pmom.y()/pmom.mag()) );
       double lpath_svt2 = X_X0_SVTBarrel/cos(incang); 
+      if( lpath_svt2 <= 0.0 )cout<<"lmv: ERROR lpath_svt2= "<<lpath_svt2<<endl;
       lpath_tot = lpath_tot + lpath_svt2;
     }
     if( (Is_SVT == 1) && (R1St > R_SVT_Barrel2) ){
@@ -307,12 +316,14 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt1path);
+      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt1path, bfield*tesla);
 
-      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double incang = acos( (xpos.x()/xmagn)*(pmom.x()/pmom.mag()) + (xpos.y()/xmagn)*(pmom.y()/pmom.mag()) );
       double lpath_svt1 = X_X0_SVTBarrel/cos(incang); 
+      if( lpath_svt1 <= 0.0 )cout<<"lmv: ERROR lpath_svt1="<<lpath_svt1<<endl;
       lpath_tot = lpath_tot + lpath_svt1;
     }
 
@@ -330,17 +341,21 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
 
     StThreeVectorD xpos = helices[jj].at(bpipepath);
+    double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
     // Find momentum at this point
     StThreeVectorD pmom = helices[jj].momentumAt(bpipepath, bfield*tesla);
 
-    double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.z()/xpos.mag())*(pmom.y()/pmom.mag()) );
+    double incang = acos( (xpos.x()/xmagn)*(pmom.x()/pmom.mag()) + (xpos.y()/xmagn)*(pmom.y()/pmom.mag()) );
     double lpath_bp = X_X0_BPipe/cos(incang); 
+    if( lpath_bp <= 0.0 )cout<<"lmv: ERROR lpath_bp= "<<lpath_bp<<endl;
     lpath_tot = lpath_tot + lpath_bp;
 
     // Do the rescattering in the gas
     double lpath_gas = fabs(spath)/X0_N2;
+    if( lpath_gas <= 0.0 )cout<<"lmv: ERROR lpath_gas= "<<lpath_gas<<endl;
     lpath_tot = lpath_tot + lpath_gas;
 
+    if( lpath_tot <= 0.0 )cout<<"lmv: ERROR lpath_tot= "<<lpath_tot<<endl;
     // From Particle Data Booklet
     double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion
 
