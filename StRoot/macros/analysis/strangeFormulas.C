@@ -9,12 +9,23 @@
 //          to examine the data in multiple files). In the latter
 //          two cases, a pointer to the strangeness TTree is returned.
 //          See documentation for more information.
+//
+//          After initial execution of the macro, the user may utilize
+//          the global pointers TTree* strangeTree or TChain* strangeChain.
+//          Additonal files can be added to the chain by calling
+//          strangeFormulas(filename) again.
+//
 // examples:
 //        .x strangeFormulas.C("myfile.root");
 //          Opens a file named "myfile.root", loads the formulas needed,
 //          and returns a pointer to the TTree.
 //        .x strangeFormulas.C("/path/to/otherfiles*.root");
 //          Opens all the files matching the pattern using a TChain.
+//          The returned pointer is the TChain cast to a TTree pointer.
+//        .x strangeFormulas.C("listfile.lis");
+//          Opens all the files specified in the file listfile.lis,
+//          whose format may simply be one filename per line, or the
+//          output of a call to: get_file_list.pl -keys path,filename ...
 //          The returned pointer is the TChain cast to a TTree pointer.
 //        .x strangeFormulas.C;
 //          Opens a file named "evMuDst.root", loads the formulas needed,
@@ -121,18 +132,55 @@ void formulate(const char* name, const char* formula) {
 //-----------------------------------------------------
 
 TTree* strangeFormulas(const char* fname, char* tname) {
+  if (!fname) {
+    fname = defaultFile;
+  } else {
+    
+    // Check for list files...
+    TString fnamestr = fname;
+    if (!(fnamestr.EndsWith(".root"))) {
+      ifstream inlist(fname);
+      if (!inlist) {
+        cout << "\nERROR!!! Cannot find list file: " << fname << endl;
+	return strangeTree;
+      }
+      char iname[256];
+      TString inamestr;
+      inlist >> iname;
+      while (! inlist.eof()) {
+	inamestr = iname;
+	inamestr.ReplaceAll("::","/");
+	inamestr.ReplaceAll("//","/");
+	strangeFormulas(inamestr.Data(),tname);
+	if (!strangeTree) {
+	  cout << "\nERROR!!! Trouble with first file: "
+	       << inamestr.Data() << endl;
+          return 0;
+	}
+        inlist >> iname;
+      }
+      return strangeTree;
+    }
+  }
+
+  // If we already have a chain and are just adding files...
+  if (strangeChain) {
+    strangeChain->Add(fname);
+    return strangeTree;
+  }
+
+  // Start chain with the first filename...
   prep();
   if (!tname) {
     tname = defaultTree;
   }
   printf("Looking for tree with name %s\n",tname);
   strangeChain = new TChain(tname);
-  if (!fname) {
-    fname = defaultFile;
-  }
   strangeChain->Add(fname);
   if (strangeChain->LoadTree(0)) {
     delete strangeChain;
+    strangeChain = 0;
+    // Try again with altTree
     if (!(strcmp(tname,defaultTree))) return strangeFormulas(fname,altTree);
     return 0;
   }
@@ -863,8 +911,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.9 2004/04/06 21:27:51 genevb Exp $
+// $Id: strangeFormulas.C,v 3.10 2004/04/12 19:50:06 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.10  2004/04/12 19:50:06  genevb
+// Allow use of list files
+//
 // Revision 3.9  2004/04/06 21:27:51  genevb
 // Avoid PmdCollection branch
 //
