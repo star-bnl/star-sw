@@ -180,6 +180,8 @@ public:
     StiHit* getCurrentHit(); //get current
     ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
     StiHit* getHit();  //get current hit and increment
+    ///Return the number of hits satisfying the current reference and search domain.
+    int getHitCandidateCount() const;  
     ///Add a vertex to the hit-container.
     void addVertex(StiHit*); //push_back
     ///Return the number of vertices stored in the container.
@@ -249,6 +251,11 @@ inline double StiHitContainer::deltaD() const
 inline double StiHitContainer::deltaZ() const 
 {
     return mdeltaz;
+}
+
+inline int StiHitContainer::getHitCandidateCount() const
+{
+  return mcandidatevec.size();
 }
 
 inline bool StiHitContainer::hasMore() const
