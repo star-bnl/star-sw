@@ -9,13 +9,21 @@ int total=0;
 void RunPythia(
 	       int nevents = 100,
 	       const char *dir ="",
-	       const char* file ="/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.MuDst.root",
-	       const char *fname="/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.geant.root",
-	       const char *filter = "",
-	       const char* outfile = "Simu.jet.root",
-	       const char *soutfile="Simu_out.root"
-	       )
+	       const char* infile ="/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.MuDst.root",
+	       const char* outdir = "./processed/")
 {
+    /*
+    TString ofile = TString(outdir) + TString(infile) + TString("_simu.jet.root");
+    TString sofile = TString(outdir) + TString(infile) + TString("_simu.out.root");
+    */
+    
+    TString ofile = "blah_simu.jet.root";
+    TString sofile = "blah_simu.out.root";
+    const char* outfile = ofile.Data();
+    const char *soutfile = sofile;
+
+    cout <<"write files:\t"<<outfile<<"\tand:\t"<<soutfile<<endl;
+    
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
@@ -45,7 +53,8 @@ void RunPythia(
 
     // StIOMaker - to read geant files
     StIOMaker* ioMaker = new StIOMaker();
-    ioMaker->SetFile(fname);
+    ioMaker->SetFile(infile);
+    //ioMaker->SetFile(fname);
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
@@ -57,17 +66,11 @@ void RunPythia(
 
     //Instantiate the MuDstReader
     StMuDebug::setLevel(1); 
-    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");
+    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,infile,"",10,"MuDst");
 
     //Database
     St_db_Maker *dbMk =new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
     dbMk->SetDateTime(20031120,0);
-    dbMk->SetFlavor("sim","bemcPed");
-    dbMk->SetFlavor("sim","bemcStatus");
-    dbMk->SetFlavor("sim","bemcCalib");
-    dbMk->SetFlavor("sim","bemcGain");
-    dbMk->SetFlavor("sim","eemcPMTcal");
-    dbMk->SetFlavor("sim","eemcPIXcal");
 
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
@@ -129,9 +132,8 @@ void RunPythia(
     //Creat jet finders
     //emcJetMaker->addAnalyzer(anapars, cpars, pythiaFourPMaker, "PythiaConeJetsPt02R07");  //cone + pythia
     //emcJetMaker->addAnalyzer(anapars, ktpars, pythiaFourPMaker, "PythiaKtJet"); //kt + pythia
-    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "RecoConeJetsPt02R07"); //cone + reco
+    //emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "RecoConeJetsPt02R07"); //cone + reco
     emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "RecoKtJet"); //kt + Reco
-
     
     chain->Init();
     chain->PrintInfo();

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.6 2005/01/27 18:39:03 mmiller Exp $
+// $Id: StJets.cxx,v 1.7 2005/03/23 14:59:20 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.7  2005/03/23 14:59:20  mmiller
+// Update to add PythiaAssociator, correct EMC simulation path
+//
 // Revision 1.6  2005/01/27 18:39:03  mmiller
 // Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
 //
@@ -120,7 +123,7 @@ StJets::~StJets()
     mTrackToJetIndices->Delete();
     delete mTrackToJetIndices;
     mTrackToJetIndices = 0;
-} 
+}
 
 void StJets::Clear(bool clearAll)
 {

@@ -50,6 +50,10 @@ public:
     ///An example analysis method, look here for a demonstration of jet/track histogramming
     void exampleEventAna();
 
+    void doJetAssoc();
+
+    TTree* tree() {return mTree;}
+
 private:
     JetBranchesMap mStJetsMap;
     TFile* mFile;

@@ -6,6 +6,8 @@ using namespace std;
 #include <math.h>
 #include <sys/times.h>
 
+//ROOT:
+
 //STAR
 #include "TFile.h"
 #include "StChain.h"
@@ -44,14 +46,19 @@ using namespace std;
 
 //StJetMaker
 #include "StJetMaker/StMuTrackFourVec.h"
+#include "StJetMaker/StJetHist/StJetHistMaker.h"
 
+//local subdirectory
 #include "StMuEmcPosition.h"
 #include "StBET4pMaker.h"
 
 ClassImp(StBET4pMaker)
     
-    StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e)
-	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mAdc2E(adc2e)
+//StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e)
+//: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mAdc2E(adc2e), mTables(new StBemcTables()
+    
+    StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker)
+	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables())
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
@@ -59,6 +66,39 @@ ClassImp(StBET4pMaker)
     mField = 0.;
     mMuPosition = new StMuEmcPosition();
 
+}
+
+Int_t StBET4pMaker::InitRun(Int_t runId)
+{
+    cout <<"Welcome to HistMaker::InitRun()"<<endl;
+    mTables->loadTables((StMaker*)this);
+
+    /*
+    cout <<"id\tadc\teta\tphi\tpedestal\trms\tgain\tstatus"<<endl;
+    cout <<"--\t---\t---\t---\t--------\t---\t----\t------\n"<<endl;
+
+    for (int id=1; id<24; ++id) {
+	float pedestal, rms;
+	int CAP=0; //this arument matters only for SMD
+	mTables->getPedestal(BTOW, id, CAP, pedestal, rms);
+	
+	//get eta/phi
+	float eta, phi;
+	//geom->getEtaPhi(id,eta,phi);
+	
+	//get gain
+	float gain = -1;
+	mTables->getCalib(BTOW,id,1,gain);
+
+	cout <<id<<"\t"<<"-"<<"\t"<<"-"<<"\t"<<"-"<<"\t"<<pedestal<<"\t"<<rms<<"\t"<<gain<<"\t"<<"-"<<endl;
+
+    }
+
+    abort();
+    */
+    
+    return kStOk;
+    
 }
 
 Int_t StBET4pMaker::Init()
@@ -115,7 +155,6 @@ Int_t StBET4pMaker::Make()
     StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
     assert(geom);
 
-
     //next fill Barrel hit array, subtract energy later:
     fillBarrelHits();
 
@@ -127,13 +166,36 @@ Int_t StBET4pMaker::Make()
     }
     
     
-
+    //First look at global tracks to remove MIP response from BTOWers
+    TClonesArray& gtracks = *(uDst->globalTracks());
+    int nglobals =  gtracks.GetLast()+1;
+    
+    for(int t=0; t<nglobals; ++t)  {
+	
+	StMuTrack *track = static_cast<StMuTrack*>( gtracks[t] );
+	if(!track || track->momentum().mag()<0.2 || track->nHitsFit()<15)  continue;
+	
+	//check projection to BEMC and remember for later: ---------------------------------------------
+	StThreeVectorD momentumAt,positionAt;
+	
+	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
+	if(tok) {
+	    int m,e,s,id=0;
+	    float eta=positionAt.pseudoRapidity();
+	    float phi=positionAt.phi();
+	    int stat = geom->getBin(phi,eta,m,e,s);
+	    stat = geom->getId(m,e,s,id);
+	    if(stat==0) {
+		mNtracksOnTower[id]++; //increment number of tracks on this tower
+	    }
+	}
+    }
+    
     //next, loop on tracks and add to the 4p list:
     long nTracks = uDst->numberOfPrimaryTracks();
 
     int ntkept, badflag, ftpc, loweta, higheta, badr, badhits;
     ntkept = badflag = ftpc = loweta = higheta = badr = badhits = 0;
-    
     for(int i = 0; i < nTracks; i++)	{
 	StMuTrack* track = uDst->primaryTracks(i);
 	assert(track);
@@ -161,20 +223,6 @@ Int_t StBET4pMaker::Make()
 
 
 
-	//check projection to BEMC and remember for later: ---------------------------------------------
-	StThreeVectorD momentumAt,positionAt;
-	
-	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
-	if(tok) {
-	    int m,e,s,id=0;
-	    float eta=positionAt.pseudoRapidity();
-	    float phi=positionAt.phi();
-	    int stat = geom->getBin(phi,eta,m,e,s);
-	    stat = geom->getId(m,e,s,id);
-	    if(stat==0) {
-		mNtracksOnTower[id]++; //increment number of tracks on this tower
-	    }
-	}
 
 	//construct four momentum
 	StThreeVectorF momentum = track->momentum();
@@ -206,9 +254,11 @@ Int_t StBET4pMaker::Make()
 	    float eta, phi;
 	    geom->getEtaPhi(id,eta,phi); // to convert software id into eta/phi
 
+	    float pedestal, rms;
+	    int CAP=0; //this arument matters only for SMD (capacitor?)
+	    mTables->getPedestal(BTOW, id, CAP, pedestal, rms);
 	    
 	    //construct four momentum
-	    //double mass = 0.1349764; //assume pi-zero mass for now
 	    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
 	    
 	    double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
@@ -219,6 +269,18 @@ Int_t StBET4pMaker::Make()
 	    double nMipsOnTower = static_cast<double>(mNtracksOnTower[id]);
 	    double corrected_energy = energy - nMipsOnTower*MipE;
 	    //cout <<"Subtracting:\t"<<nMipsOnTower*MipE<<"\tfrom energy:\t"<<energy<<"\tfrom:\t"<<nMipsOnTower<<"\tmips"<<endl;
+	    
+	    //quick, fill some histograms here:
+	    StJetHistMaker* histMaker = dynamic_cast<StJetHistMaker*>(GetMaker("StJetHistMaker"));
+	    if (histMaker!=0) {
+		if (nMipsOnTower==1) {
+		    histMaker->mipHistVsEta->Fill(eta, hit->adc() - pedestal);
+		    histMaker->mipEvsEta->Fill( eta, hit->energy() );
+		}
+		histMaker->towerEvsId->Fill(id, hit->energy());
+		histMaker->towerAdcvsId->Fill(id, hit->adc());
+	    }
+	    
 	    if (corrected_energy<=0.) continue;
 
 	    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
@@ -314,10 +376,27 @@ void StBET4pMaker::fillBarrelHits()
     assert(geom);
 
     //Get status tables.
-    assert(mAdc2E);
-    StBemcTables* tables = mAdc2E->getBemcData()->getTables();
+    StBemcTables* tables = mTables;
     assert(tables);
 
+    //new loop on data:
+    /*first look for StEvent in memory.  This should only happen if
+      (a) StEmcADC2EMaker is running (e.g., year 2003 and before)
+      (b) StEmcSimulatorMaker is running (all pythia!).  In this case simulator recalculates ADC from
+      scratch using DB gains, so we _don't_ take what's in the MuDst collection
+    */
+    StEmcCollection* emc = 0;
+    StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+    if (event) {
+	cout <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endl;
+	emc = event->emcCollection();
+    }
+    else {
+	cout <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from MuDst"<<endl;
+	emc = uDst->emcCollection();
+    }
+
+    /*
     //Now loop on emc data
     StEmcCollection *emc = uDst->emcCollection();
     if (!emc) {
@@ -330,6 +409,8 @@ void StBET4pMaker::fillBarrelHits()
 	    cout <<"StBET4pMaker::Make().  Could not find StEvent in memory"<<endl;
 	}
     }
+    */
+
     assert(emc);
     
     // now it is like StEvent, getting energies for towers
@@ -385,6 +466,9 @@ void StBET4pMaker::fillBarrelHits()
 	    //if the status is good, add it to the array, otherwise add a null pointer
 	    if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
 		mBTowHits[id] = tempRawHit;
+
+		//fill ADC and energy hists:
+		
 	    }
 	    else { //marked as bad:
 		mBTowHits[id] = 0;
