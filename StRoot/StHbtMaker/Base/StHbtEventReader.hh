@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.8 2000/02/18 21:25:00 laue Exp $
+ * $Id: StHbtEventReader.hh,v 1.9 2001/05/10 21:00:24 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.9  2001/05/10 21:00:24  laue
+ * new member 'mDebug' in order to reduce output
+ *
  * Revision 1.8  2000/02/18 21:25:00  laue
  * Implementation of a collections of StHbtEventWriters.
  * We now can write multiple microDsts at a time.
@@ -61,11 +64,11 @@ protected:
   StHbtTrackCut* mTrackCut; //!
   StHbtV0Cut* mV0Cut; //!
   int mReaderStatus;     // 0="good"
-
+  int mDebug;
 public:
   // even tho it's only a base class and never constructed, if you don't have an implementation,
   // you get "StHbtEventReader type_info node" upon dynamical loading
-  StHbtEventReader(){ mEventCut=0; mTrackCut=0; mV0Cut=0; }
+  StHbtEventReader() : mEventCut(0), mTrackCut(0), mV0Cut(0), mDebug(1) { /* no-op */ }
   virtual ~StHbtEventReader(){/* no-op */}
 
   virtual StHbtEvent* ReturnHbtEvent() =0;
@@ -90,7 +93,14 @@ public:
   virtual StHbtTrackCut* TrackCut(){return mTrackCut;}
   virtual StHbtV0Cut*    V0Cut(){return mV0Cut;}
 
-
+  /* control of debug informations print out, my rule is: */
+  /* 0: no output at all                                  */
+  /* 1: once (e.g. in constructor, finsh                  */
+  /* 2: once per event                                    */
+  /* 3: once per track                                    */
+  /* 4: once per pair                                     */
+ int Debug(){return mDebug;} 
+  void SetDebug(int d){mDebug=d;}
 #ifdef __ROOOT__
   ClassDef(StHbtEventReader,0)
 #endif
