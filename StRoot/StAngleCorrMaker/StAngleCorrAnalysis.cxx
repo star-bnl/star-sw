@@ -13,7 +13,7 @@
 // correlation functions
 #include "StOpeningAngle.h"
 #include "StAzimuthalAngle.h"
-#include "StRhoMassFunction.h"
+#include "StMassFunction.h"
 
 // diagnostic functions
 #include "StDiagnosticTool.h"
@@ -55,7 +55,7 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   // add functions to correlations library here  
   functionLibrary.push_back(new StOpeningAngle());
   functionLibrary.push_back(new StAzimuthalAngle());
-  functionLibrary.push_back(new StRhoMassFunction());
+  functionLibrary.push_back(new StMassFunction());
   
   // add functions to diagnostics library here
   diagnosticsLibrary.push_back(new StDiagnosticTool());
@@ -95,7 +95,7 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
  // add functions to correlations library here  
   functionLibrary.push_back(new StOpeningAngle());
   functionLibrary.push_back(new StAzimuthalAngle());
-  functionLibrary.push_back(new StRhoMassFunction());
+  functionLibrary.push_back(new StMassFunction());
   
   // add functions to diagnostics library here
   diagnosticsLibrary.push_back(new StDiagnosticTool());

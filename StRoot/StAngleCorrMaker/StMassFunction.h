@@ -1,9 +1,9 @@
-#ifndef StRhoMassFunction_HH
-#define StRhoMassFunction_HH
+#ifndef StMassFunction_HH
+#define StMassFunction_HH
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StRhoMassFunction
+// StMassFunction
 //
 // Description: 
 //
@@ -22,9 +22,9 @@
 #include <TH1.h>
 
 
-class StRhoMassFunction: public StAngleCorrFunction {
+class StMassFunction: public StAngleCorrFunction {
 public:
-          ~StRhoMassFunction();
+          ~StMassFunction();
   void    Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist);
   TString GetName();
 private:
