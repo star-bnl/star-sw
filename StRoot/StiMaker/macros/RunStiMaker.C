@@ -6,7 +6,7 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 const char *MainFile="/star/data15/reco/central/P01hbOS/2000/09/*.dst.root")
+		 const char *MainFile="/star/data03/reco/central/P01hbOS/2000/09/*.dst.root")
     //const char *MainFile="/star/rcf/scratch/haibin/geantTest/muon_10.dst.root")
 {    
     // Dynamically link needed shared libs
