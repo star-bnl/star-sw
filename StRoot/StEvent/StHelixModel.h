@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.7 2002/11/26 02:19:11 perev Exp $
+ * $Id: StHelixModel.h,v 2.8 2003/04/09 17:59:39 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.8  2003/04/09 17:59:39  genevb
+ * Add setMomentum function
+ *
  * Revision 2.7  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -68,6 +71,7 @@ public:
     void setPsi(double);
     void setDipAngle(double);
     void setOrigin(const StThreeVectorF&);
+    void setMomentum(const StThreeVectorF&);
      
     StTrackGeometry*       copy() const;     // virtual constructor
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.6 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTrackGeometry.h,v 2.7 2003/04/09 17:59:39 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.7  2003/04/09 17:59:39  genevb
+ * Add setMomentum function
+ *
  * Revision 2.6  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -67,6 +70,7 @@ public:
     virtual void setPsi(double) = 0;
     virtual void setDipAngle(double) = 0;
     virtual void setOrigin(const StThreeVectorF&) = 0;
+    virtual void setMomentum(const StThreeVectorF&) = 0;
     
     virtual StTrackGeometry*       copy() const = 0;     // virtual constructor
 
