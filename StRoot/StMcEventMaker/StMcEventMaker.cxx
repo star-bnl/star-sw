@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.23 2000/04/19 17:45:22 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.24 2000/04/20 15:56:16 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.24  2000/04/20 15:56:16  calderon
+ * If particle & g2t_rch_hit table are not found in geant branch,
+ * look for them in dst branch (for backwards compatibility).
+ *
  * Revision 1.23  2000/04/19 17:45:22  calderon
  * particle table and g2t_rch_hit table are now in geant branch
  *
@@ -130,7 +134,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.23 2000/04/19 17:45:22 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.24 2000/04/20 15:56:16 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -237,15 +241,19 @@ Int_t StMcEventMaker::Make()
     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
     St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
-    
-    
-    
+
+    // For backwards compatibility, look for the last 2 tables also in the dstBranch
+    St_DataSetIter dstDstI(GetDataSet("dst"));
+    if (!particleTablePointer)
+	particleTablePointer    = (St_particle    *) dstDstI("particle");
+    if (!g2t_rch_hitTablePointer)
+	g2t_rch_hitTablePointer = (St_g2t_rch_hit *) dstDstI("g2t_rch_hit");
 
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
     if (g2t_vertexTablePointer && g2t_trackTablePointer
-	&& g2t_tpc_hitTablePointer ){
-
+	&& g2t_tpc_hitTablePointer && particleTablePointer){
+	
 	//
 	// g2t_event Table
 	//
@@ -759,6 +767,17 @@ Int_t StMcEventMaker::Make()
 	//_______________________________________________________________
 	// At this point StMcEvent should be loaded.
 		
+    }
+    else {
+	gMessMgr->Warning() << "Could not find the Table(s): " << endm;
+    if (!g2t_vertexTablePointer)
+	gMessMgr->Warning() << "g2t_vertex  Table Not found " << endm;
+    if (!g2t_trackTablePointer)
+	gMessMgr->Warning() << "g2t_track   Table Not found " << endm;
+    if (!g2t_tpc_hitTablePointer)
+	gMessMgr->Warning() << "g2t_tpc_hit Table Not found " << endm;
+    if (!particleTablePointer)
+	gMessMgr->Warning() << "particle    Table Not found " << endm;
     }
     if (doPrintEventInfo) printEventInfo();
     if (doPrintMemoryInfo) {
