@@ -28,40 +28,27 @@ using std::binary_search;
 #include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 
-StiDetectorContainer* StiDetectorContainer::sinstance = 0;
-
 ostream& operator<<(ostream&, const NameMapKey&);
 ostream& operator<<(ostream*, const StiDetector&);
 
-StiDetectorContainer* StiDetectorContainer::instance()
-{
-    return (sinstance) ? sinstance : new StiDetectorContainer();
-}
-
-void StiDetectorContainer::kill()
-{
-    if (sinstance) {
-	delete sinstance;
-	sinstance = 0;
-    }
-    return;
-} 
-
-StiDetectorContainer::StiDetectorContainer()
-    : mroot(0), mregion(0), mLeafIt(0),
+StiDetectorContainer::StiDetectorContainer(const string & name, const string & description)
+    : Named(name),
+      Described(description),
+      mroot(0), 
+      mregion(0), 
+      mLeafIt(0),
       mMessenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-    cout <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
-    sinstance = this;
+  cout <<"StiDetectorContainer::StiDetectorContainer() -I- Started/Done"<<endl;
 }
 
 StiDetectorContainer::~StiDetectorContainer()
 {
-    mMessenger <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
-    if (mLeafIt) {
-	delete mLeafIt;
-	mLeafIt=0;
-    }
+  mMessenger <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
+  if (mLeafIt) {
+    delete mLeafIt;
+    mLeafIt=0;
+  }
 }
 
 void StiDetectorContainer::setToDetector(double radius)
@@ -290,12 +277,12 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
     mMessenger <<"StiDetectorContainer::build() - INFO - Done"<<endl;
     return;
 }
-
+/*
 void StiDetectorContainer::print() const
 {
     RecursiveStreamNode<StiDetector> myStreamer;
     myStreamer( mroot );
-}
+    }*/
 
 //We assume that the node is a leaf in phi
 void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)

@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.3 2003/04/04 14:43:44 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.4 2003/04/10 12:02:12 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.4  2003/04/10 12:02:12  pruneau
+ * various changes
+ *
  * Revision 2.3  2003/04/04 14:43:44  pruneau
  * Fix to the hit error calculator and the getCharge methods.
  *
@@ -61,10 +64,10 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   if (cosCA==0.)
     cosCA=1.e-10;
   double tanCA = sinCA/cosCA;
-  double ecross=coeff[0]-coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
+  double ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
   double tanDip=node->getTanL();
-  double cosDipInv=sqrt(1+tanDip*tanDip);
-  double edip=coeff[3]-coeff[4]*dz*cosDipInv+coeff[5]*tanDip*tanDip;
+  double cosDipInv2=1+tanDip*tanDip;
+  double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>20.e-2) ecross = 20.e-2; // cp 04/02/2003
   if (edip>20.e-2) edip = 20.e-2;     // in meters here
   node->eyy = 10000.*ecross; // in centimeters here...

@@ -104,8 +104,10 @@
 #include <iostream.h>
 #include <fstream.h>
 
-#include "StiMapUtilities.h"
-#include "StiHit.h"
+#include "Sti/Base/Named.h"
+#include "Sti/Base/Described.h"
+#include "Sti/StiMapUtilities.h"
+#include "Sti/StiHit.h"
 
 using std::map;
 using std::vector;
@@ -131,11 +133,11 @@ typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> hitmap;
 ///We define this globally for convenience of users.
 typedef hitmap::value_type hitMapValType;
 
-class StiHitContainer
+class StiHitContainer : public Named, public Described
 {
 public:
     
-    StiHitContainer();
+    StiHitContainer(const string & name, const string & description);
     virtual ~StiHitContainer();
     ///Set the half-width of the search window in distance along the pad.
     void setDeltaD(double);

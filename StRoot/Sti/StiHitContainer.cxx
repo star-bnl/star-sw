@@ -20,13 +20,15 @@ using std::stable_partition;
 ostream& operator<<(ostream& os, const StiHit& hit);
 ostream& operator<<(ostream&, const HitMapKey&);
 
-StiHitContainer::StiHitContainer()
-    : mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
+StiHitContainer::StiHitContainer(const string & name, const string & description)
+  : Named(name),
+    Described(description),
+    mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
 {
-  cout <<"StiHitContainer::StiHitContainer()"<<endl;
+  cout <<"StiHitContainer::StiHitContainer() -I- Started with name:"<<name<<endl;
   mminpoint = new StiHit();
   mmaxpoint = new StiHit();
-  //mMessenger <<"\tLeaving StiHitContainer()"<<endl;
+  //mMessenger <<"\tLeaving StiHitContainer() -I- Done"<<endl;
 }
 
 StiHitContainer::~StiHitContainer()

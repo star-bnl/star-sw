@@ -8,19 +8,13 @@ StiMasterDetectorBuilder::StiMasterDetectorBuilder()
 StiMasterDetectorBuilder::~StiMasterDetectorBuilder()
 {}
 
-/// Add a detector group builder to this composite builder.
-void StiMasterDetectorBuilder::addBuilder(StiDetectorBuilder *builder)
-{
-  _builders.push_back(builder);
-}
-
 /*! Reset this builder to a  null state. 
  <p>
  A reset erases all detectors held by this builder.
 */
 void StiMasterDetectorBuilder::reset()
 {
-  _builders.clear();
+  clear();
 }
 
 /*! Build all the detector groups and their elementary detector components registered with this builder.
@@ -30,8 +24,8 @@ void StiMasterDetectorBuilder::build()
   _messenger << "StiMasterDetectorBuilder::build() - INFO - Started"<<endl;
   vector<StiDetectorBuilder*>::iterator iter;
   unsigned int nRows=0;
-  for (iter=_builders.begin();
-       iter!=_builders.end();
+  for (iter=begin();
+       iter!=end();
        iter++)
     {
       _messenger << "StiMasterDetectorBuilder::build() - INFO - Calling Group Builder named:" << (*iter)->getName()<<endl;
@@ -41,8 +35,8 @@ void StiMasterDetectorBuilder::build()
   _messenger << "StiMasterDetectorBuilder::build() - INFO - Will build local array"<<endl;
   setNRows(nRows);
   unsigned int row=0;
-  for (iter=_builders.begin();
-       iter!=_builders.end();
+  for (iter=begin();
+       iter!=end();
        iter++)
     {
       _messenger << "StiMasterDetectorBuilder::build() - INFO - Builder:"<<(*iter)->getName()<<endl;
@@ -67,8 +61,8 @@ bool StiMasterDetectorBuilder::hasMore() const
 { 
   //_messenger << "StiMasterDetectorBuilder::build() - INFO - Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
-  for (iter=_builders.begin();
-       iter!=_builders.end();
+  for (iter=begin();
+       iter!=end();
        iter++)
     {
       //_messenger << "StiMasterDetectorBuilder::hasMore() - INFO - Calling Group Builder named:" << (*iter)->getName()<<endl;
@@ -84,12 +78,17 @@ StiDetector * StiMasterDetectorBuilder::next()
 {
   //_messenger << "StiMasterDetectorBuilder::next() - INFO - Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
-  for (iter=_builders.begin();
-       iter!=_builders.end();
+  for (iter=begin();
+       iter!=end();
        iter++)
     {
       //_messenger << "StiMasterDetectorBuilder::next() - INFO - Calling Group Builder named:" << (*iter)->getName()<<endl;
       if((*iter)->hasMore()) return (*iter)->next();
     }
   return 0;
+}
+
+void StiMasterDetectorBuilder::add(StiDetectorBuilder *builder)
+{
+  this->Vectorized<StiDetectorBuilder>::add(builder);
 }

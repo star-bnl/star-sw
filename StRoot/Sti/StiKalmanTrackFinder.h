@@ -71,7 +71,7 @@ public:
   virtual void extendTracksToVertex(StiHit* vertex);
   /// Reset the tracker
   virtual void reset();
-  virtual void update();
+  //virtual void update();
   /// Clear the tracker
   virtual void clear();
   /// Get the number of number of track seed used by the seed finder

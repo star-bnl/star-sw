@@ -70,6 +70,14 @@ template <class Concrete, class Abstract>
 const int VectorizedFactory<Concrete,Abstract>::defaultOriginalSize = 100000;
 
 template <class Concrete, class Abstract>
+ostream& operator<<(ostream& os, const VectorizedFactory<Concrete,Abstract> & f)
+{
+  os  << "                Name :"<< f.name<<endl
+      << "       Current  Size :"<< f.getCurrentSize()<<endl;
+  return os;
+}
+
+template <class Concrete, class Abstract>
 VectorizedFactory<Concrete,Abstract>::VectorizedFactory(const string& name,
 					int original, 
 					int incremental, 

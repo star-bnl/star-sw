@@ -11,9 +11,11 @@ using namespace std;
 #include "StiTrackContainer.h"
 #include "Sti/Base/Filter.h"
 
-StiTrackContainer::StiTrackContainer()
+StiTrackContainer::StiTrackContainer(const string & name, const string & description)
+  : Named(name),
+    Described(description)
 {
-    cout <<"StiTrackContainer::StiTrackContainer()"<<endl;
+  cout <<"StiTrackContainer::StiTrackContainer() -I- Started with name:"<< name <<endl;
 }
 
 StiTrackContainer::~StiTrackContainer()

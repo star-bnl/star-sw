@@ -18,7 +18,8 @@
 
 #ifndef StiTrackContainer_HH
 #define StiTrackContainer_HH
-
+#include "Sti/Base/Named.h"
+#include "Sti/Base/Described.h"
 #include <map>
 using namespace std;
 
@@ -34,7 +35,7 @@ struct StiTrackLessThan
 typedef map<StiTrack*, StiTrack*, StiTrackLessThan> TrackMap;
 typedef TrackMap::value_type TrackMapValType;
 
-class StiTrackContainer : public TrackMap
+class StiTrackContainer : public TrackMap, public Named, public Described
 {
 public:
     
@@ -44,7 +45,7 @@ public:
     ///Preserve simple interface to add tracks
     void push_back(StiTrack*);
     
-    StiTrackContainer();
+    StiTrackContainer(const string & name, const string & description);
     virtual ~StiTrackContainer();  
     int getTrackCount(Filter<StiTrack> * filter) const;
     
