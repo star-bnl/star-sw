@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.46 2004/12/01 03:57:08 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.46 2004/12/01 03:57:08 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.47 2004/12/01 18:04:32 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.47 2004/12/01 18:04:32 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.47  2004/12/01 18:04:32  perev
+ * test for -ve and too big track length added
+ *
  * Revision 2.46  2004/12/01 03:57:08  pruneau
  * d<4
  *
@@ -756,7 +759,17 @@ double StiKalmanTrack::getTrackLength() const
 		            inNode->getPhase(),
 		            in,
 		            inNode->getHelicity());
-  return hlx.pathLength(ot);
+  double per = hlx.period();
+  double len = hlx.pathLength(ot);
+//  StHelix can return negative length if -ve path is shorter then +ve one
+//  period ia added in this case;
+  while(len<0  ) {len+=per;}
+//  StHelix can return length > period id dip is almost zero and by chance
+//  this length is more suitable for Z distance. It is wrong solution even
+//  it has better distance to end point. Subtruct period in this case
+  while(len>per) {len-=per;}
+
+  return len;
 }
 
 
