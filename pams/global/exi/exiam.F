@@ -64,7 +64,7 @@ C<----------------------------------------------------------------------
       REAL      epi, ek, ela, exi, eom
       REAL	ptrk, trkb(6), bdotx, vdotx, pv0(3), ppar, npar, pper
       REAL	trki(6), trkj(6)
-      REAL	xc1(2), r1, r2, xcom(2), ycom(2), bxi, bb, bv0
+      REAL	xc1(2), r1, r2, xcom(2), ycom(2), bxi, bb, bv0, check
       REAL      invs_xi, invms_om, mala, malb, v0_mass
       REAL	xp(2), xn1(2), xn2(2), dca, xpp(3), pxi(3)
       REAL      energy_v0, beta_v0, gamma_v0, ep, ppar_cm, vmain(3)
@@ -121,6 +121,9 @@ c*** pgj: loop to find main vertex and maximum key value
           last_vertex = max(last_vertex,vertex(i).id)
         enddo
       endif
+
+      call setPrimVert(vmain(1))
+      call setBfield(bfield(3))
 
 c*** pgj: loop over all v0 vertices
 
@@ -285,6 +288,11 @@ c*** loop over the two intersection points
 
           DO jk = 1,2
 
+C           Check that V0 points away from Xi vertex
+            check=(xv0(1)-xcom(jk))*pv0(1)+
+     +            (xv0(2)-ycom(jk))*pv0(2)+(xv0(3)-zcom(jk))*pv0(3)
+            IF(check.gt.0.0) THEN
+
             xp(1)=xcom(jk)
             xp(2)=ycom(jk)
 
@@ -316,9 +324,22 @@ c*** Not any more HLC 3/3/98
               pxi(2) = pv0(2) + pb(2)
               pxi(3) = pv0(3) + pb(3)
 
-              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag,charge,bfield(3))
+c              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag,charge,bfield(3))
+C             Check that Xi points away from primary vertex
+              check=(xpp(1)-vmain(1))*pxi(1)+
+     +              (xpp(2)-vmain(2))*pxi(2)+(xpp(3)-vmain(3))*pxi(3)
+              IF(check.lt.0.0) THEN
+                iflag=2
+              ELSE
+                call helixDCA(charge,xpp(1),pxi(1),bxi)
+                IF(bxi.le.bxi_max(id_det)) THEN
+		  iflag = 0
+		ELSE
+		  iflag = 1
+		ENDIF
+              ENDIF !if(check<0)
 
-              IF( (bxi.le.bxi_max(id_det)) .and. (iflag.ne.2) ) THEN
+              IF( iflag.eq.0 ) THEN
 
 c*** wkw: breakout if n_xi=maxlen
 
@@ -381,12 +402,13 @@ c*** calculate Armenteros variables
 
 c*** calculate daughter impact parameters (wkw)
 
-                CALL ev0_project_track(xc1,r1,vmain,xn1)
-                CALL update_track_param(xc1,r1,xn1,trki,trkb)
+C               CALL ev0_project_track(xc1,r1,vmain,xn1)
+C               CALL update_track_param(xc1,r1,xn1,trki,trkb)
 
-                bb = sqrt( (xn1(1)-vmain(1))**2 + 
-     >                     (xn1(2)-vmain(2))**2 +
-     >                     (trkb(3)-vmain(3))**2 )
+C               bb = sqrt( (xn1(1)-vmain(1))**2 + 
+C    >                     (xn1(2)-vmain(2))**2 +
+C    >                     (trkb(3)-vmain(3))**2 )
+                bb = globtrk(i).impact
 
 C                CALL ev0_v0_impact_param(vmain,xpp,pxi,ptot_2,bv0,iflag)
 C                bv0=sqrt(bv0)
@@ -470,6 +492,8 @@ c                  exiaux(n_xi).costh   =
               ENDIF				! bxi and iflag check
 
             ENDIF				! dca and rv check
+
+            ENDIF				! V0 pointing away from Xi
 
             IF( iflag1.eq.3 ) GO TO 30		! touching circles-loop once
 
