@@ -21,6 +21,7 @@ class StTrackPairInfo;
 
 class TClonesArray;
 
+
 class TrackEntry
 {
 public:
@@ -37,27 +38,39 @@ public:
     void clear();
 
 private:
-
     //temp kinematic info : MC
     double mcTrackId;
     double mcTrackPsi;
-    double mcTrackPt;
-    double mcTrackChi2;
-    
+    double mcTrackRapidity;
+    double mcTrackE;
+    double mcTrackPx;
+    double mcTrackPy;
+    double mcTrackPz;
+
     //temp kinematic info : global
     short  globalTrackQ;
     double globalTrackM;
-    double globalTrackPt;
     double globalTrackPsi;
     double globalTrackChi2;
     double globalTrackNHit;
-    
+    double globalTrackPx;
+    double globalTrackPy;
+    double globalTrackPz;
+    double globalTrackEta;
+    double globalTrackFitPoints;
+
     //temp kinematic info : Sti
     double stiTrackM;
-    double stiTrackPt;
+    double stiTrackQ;
     double stiTrackPsi;
     double stiTrackChi2;
     double stiTrackNHit;
+    double stiTrackY;
+    double stiTrackTanL;
+    double stiTrackPx;
+    double stiTrackPy;
+    double stiTrackPz;
+
 
     ClassDef(TrackEntry,1) 
 };
@@ -80,7 +93,9 @@ class StiEvaluator
 
  private:
     void build();
-    
+
+    void fillTree(StiTrack*, StTrackPairInfo*);
+
     TFile* mFile;
     TTree* mTree;
     TrackEntry* mEntry;

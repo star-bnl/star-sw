@@ -108,58 +108,48 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 
 
 ClassImp(TrackEntry)
-    
+
 TrackEntry::TrackEntry() 
 {
 }
 
-void TrackEntry::clear()
-{
-    mcTrackId = mcTrackPsi = mcTrackPt = mcTrackChi2 = 0.;
-    globalTrackQ = 0;
-    globalTrackM = globalTrackPt = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
-    stiTrackM = stiTrackPt = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
-}
-
-/*void TrackEntry::addArrayEntry(const ArrayEntry& val)
-{
-    TClonesArray& cArr = *mArray;
-    new(cArr[mCounter++]) ArrayEntry(val);
-    }
-*/
-
-double TrackEntry::getMcTrackId()
-{
-  return mcTrackId;
-}
-
-double TrackEntry::getMcTrackPt()
-{
-  return mcTrackPt;
-}
-
-void TrackEntry::setGlobalTrack(StTrack *newtrack)
-{
-  const StThreeVectorF& mom = newtrack->geometry()->momentum();
-  globalTrackPt = mom.perp();
-  globalTrackQ  = newtrack->geometry()->charge();
-  globalTrackPsi = newtrack->geometry()->psi();
-}
-
 void TrackEntry::setStiTrack(StiTrack *newtrack)
 {
-    stiTrackPt = newtrack->getPt();
-    /*
-      stiTrackEta = newtrack->
-      const StThreeVectorD& mom = newtrack->geometry()->momentum();
-      StiTrackPt = mom.perp();
-      StiTrackQ  = newtrack->geometry()->charge();
-      StiTrackPsi = newtrack->geometry()->psi();*/
+  stiTrackQ          = newtrack->getCharge();
+  stiTrackPsi        = newtrack->getPhi();
+  stiTrackM          = newtrack->getMass();
+  stiTrackChi2       = newtrack->getChi2();
+  stiTrackNHit       = newtrack->getFitPointCount();
+  stiTrackY          = newtrack->getRapidity();
+  stiTrackTanL       = newtrack->getTanL();
+ 
 }
 
 void TrackEntry::setMcTrack(StMcTrack *newtrack)
 {
   //cout << "Setting MC ID " << newtrack->geantId();
-  mcTrackPt  = newtrack->pt();
-  mcTrackId  = newtrack->geantId();
+  mcTrackId       = newtrack->geantId();
+  mcTrackE        = newtrack->energy();
+  mcTrackRapidity = newtrack->rapidity();
+}
+
+void TrackEntry::clear()
+{
+    mcTrackId = mcTrackPsi = 0.;
+    globalTrackQ = 0;
+    globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
+    stiTrackM = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
+}
+
+void TrackEntry::setGlobalTrack(StTrack *newtrack)
+{
+  const StThreeVectorF& mom = newtrack->geometry()->momentum();
+  globalTrackPx = mom.x();
+  globalTrackPy = mom.y();
+  globalTrackPz = mom.z();
+  globalTrackEta  = mom.pseudoRapidity();
+  globalTrackQ  = newtrack->geometry()->charge();
+  globalTrackPsi = newtrack->geometry()->psi();
+  //globalTrackFitPoints = (double)newtrack->fitTraits()->numberOfFitPoints;
+  
 }
