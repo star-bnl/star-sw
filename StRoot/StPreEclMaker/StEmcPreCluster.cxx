@@ -1,7 +1,19 @@
-// $Id: StEmcPreCluster.cxx,v 1.5 2000/09/08 22:55:05 suaide Exp $
+// $Id: StEmcPreCluster.cxx,v 1.6 2000/12/01 21:15:40 suaide Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.6  2000/12/01 21:15:40  suaide
+// Small fixes in StPreEclMaker::Make()
+//       if some detector fails to find clusters it was aborting the chain
+//
+// Small fixes in StEmcPreClusterCollection::findClustersInModule()
+// Small fixes in StEmcPreClusterCollection::testOnNeighbor()
+//
+// Small fixes in StEmcPreCluster::calcMeanAndRms()
+//
 // Revision 1.5  2000/09/08 22:55:05  suaide
+//
+//
+//
 // some modifications to compile on Solaris
 //
 // Revision 1.4  2000/08/24 22:11:34  suaide
@@ -103,6 +115,8 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
   }
   else{
     Float_t E;
+    Float_t phi0,MPI=3.1415926;
+    Float_t MPI2=2*MPI;
     for(int i=0; i<mNhits; i++)
     {
       m=mStEventHits[1]->module();
@@ -112,6 +126,11 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
       E = mStEventHits[mHitsID[i]]->energy();
       emcgeo->getEta(m,e, etah);      
       emcgeo->getPhi(m,s, phih);      
+      
+      if(i==0)phi0=phih;
+      phih=phih-phi0;
+      if(phih>MPI) phih-=MPI2;
+      if(phih<-MPI)phih+=MPI2;
 
       mEnergy   += E;
       mEta      += etah*E;

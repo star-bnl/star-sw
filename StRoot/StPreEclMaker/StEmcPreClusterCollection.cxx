@@ -2,6 +2,15 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.8  2000/12/01 21:15:42  suaide
+// Small fixes in StPreEclMaker::Make()
+//       if some detector fails to find clusters it was aborting the chain
+//
+// Small fixes in StEmcPreClusterCollection::findClustersInModule()
+// Small fixes in StEmcPreClusterCollection::testOnNeighbor()
+//
+// Small fixes in StEmcPreCluster::calcMeanAndRms()
+//
 // Revision 1.7  2000/10/17 19:37:17  suaide
 // Small bug fixed
 //
@@ -213,7 +222,8 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
   hitsid.Set(10);
   hitsid.Reset();
 
-  Int_t i, ii;
+  Int_t i, ii,l;
+  Int_t loop=1;
   for(i=nh-1; i>=0; i--) //loop from the more energetic hit to the less one
   { 
     Int_t j = index.GetIndex(i); //get index of the hit
@@ -228,8 +238,11 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
       keyEta=0; 
       keyPhi=0;
 
-      for(ii=i-1; ii>=0; ii--)
+      for(l=0;l<loop;l++)
       {
+       if(l==1 &&nhit==4) break;
+       for(ii=i-1; ii>=0; ii--)
+       {
         int jj = index.GetIndex(ii);
         if(energyw[jj] < mEnergyThresholdAll) break;
         if(used[jj] == 0)
@@ -242,6 +255,7 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
             if(nhit == mSizeMax) break;
           }
         }
+       }
       }
       if(nhit>0)
       {
@@ -261,6 +275,7 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
 Int_t StEmcPreClusterCollection::testOnNeighbor(Int_t jn)
 {
   static Int_t   etaFirst, etaLast;
+  static Float_t Second;
   static Int_t   phiFirst, phiLast, etaSeed;
   extern Int_t   nhit;
   extern TArrayI ew,hitsid,sw;
@@ -324,6 +339,7 @@ Int_t StEmcPreClusterCollection::testOnNeighbor(Int_t jn)
           printf(" testOnNeighbor => sw(seed) %i sw(neigbour) %i \n",sw[js],sw[jn]);
         }
         if(nhit == 1) keyEta = 1; 
+        Second=energyw[jn];
         return 0;
       }
       else if(sw[js] == sw[jn] && abs(ew[js]-ew[jn]) == 1 && keyPhi==0)
@@ -331,6 +347,7 @@ Int_t StEmcPreClusterCollection::testOnNeighbor(Int_t jn)
         if     (nhit == 1) 
         {
           keyPhi=1; 
+          Second=energyw[jn];
           return 0;
         }
         else if(nhit == 2) 
@@ -340,7 +357,11 @@ Int_t StEmcPreClusterCollection::testOnNeighbor(Int_t jn)
         }
         else if(nhit == 3) 
         {
-          if(keyDir == ew[js]-ew[jn]) return 0; // 4th hit must be at the same side as 3th !!! 
+          if(keyDir == ew[js]-ew[jn]) 
+          {
+            if(energyw[jn]>Second*3) return 1;
+            else return 0;
+          } 
           else return 1;
         }
       }
@@ -540,7 +561,7 @@ Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
 //_____________________________________________________________________________
 Float_t StEmcPreClusterCollection::calcChiSqrt(Int_t nc,TArrayF en,TArrayF xavg,Int_t nh,TArrayF x,TArrayF y)
 {
-  Float_t chi=0.0,yprofile;
+  Float_t chi=0.0;
   for(Int_t i=0;i<nh;i++)
   {
     Float_t yprofile=0.0;
