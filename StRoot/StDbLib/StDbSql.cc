@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.7 2001/03/30 18:48:26 porter Exp $
+ * $Id: StDbSql.cc,v 1.8 2001/04/23 19:24:31 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.8  2001/04/23 19:24:31  porter
+ * fixed row limit & initial buffer contents for query by where clause
+ *
  * Revision 1.7  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -413,6 +416,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      return retVal;
    }
 
+   //table->zeroData();
    char** dataTables=getDataTables(table,numTables);
    int i;
    for(i=0;i<numTables;i++){
@@ -428,13 +432,16 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      }
 
      int retRows=Db.NbRows();
+     cout<<"Number of Rows at start " << table->GetNRows()<<endl; 
+     cout<< " Number of Rows = "<<retRows<<endl;
      if(retRows==0) continue;
 
      int* elements = new int[retRows];
      int* dataIDList = new int[retRows];
      unsigned int* timeList = new unsigned int[retRows];
      numRowsReturned+=retRows;
-     table->addNRows(retRows);
+     table->addNRows(retRows-table->GetNRows());
+     table->setRowNumber();
 
      int j=0;
      while(Db.Output(&buff)){
