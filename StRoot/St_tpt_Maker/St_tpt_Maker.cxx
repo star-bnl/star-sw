@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.48 2000/05/30 19:19:53 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.49 2000/06/15 19:06:15 aihong Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.49  2000/06/15 19:06:15  aihong
+// ensemble truncation for de/dx calculation added
+//
 // Revision 1.48  2000/05/30 19:19:53  sakrejda
 // A debyg cout statement removed
 //
@@ -161,6 +164,7 @@
 #include "tpc/St_tpt_residuals_Module.h"
 #include "tpc/St_tte_track_Module.h"
 #include "tpc/St_tde_Module.h"
+#include "tpc/St_ensemble_Module.h"
 #include "tpc/St_tte_Module.h"
 #include "TH1.h"
 #include "TF1.h"
@@ -186,6 +190,7 @@ ClassImp(St_tpt_Maker)
   m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
+  m_ensembleOn=kTRUE;
   printf("\n TPT CONSTRUCTOR name=\"%s\"\n",GetName());
   SetInputHits("tpc_hits","tphit"); // initialize default input
 }
@@ -334,6 +339,21 @@ Int_t St_tpt_Maker::Make(){
 //	   	      ================================================
   if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde.. " << endl;}
   else {if (Debug()) cout << " finish tid_run " << endl;}
+
+//		TID ENSEMBLE
+  
+  if (m_ensembleOn){
+  if (Debug()) cout << " start tid_ensemble_run " << endl;
+  St_type_floatdata* ensemblePar= new St_type_floatdata("ensemblePar",1);
+  type_floatdata_st* ensemblePar_stf=ensemblePar->GetTable(); 
+   ensemblePar_stf[0].data=8.7e-07;
+  Int_t Res_tid_ensemble = ensemble(m_tdeparm,tphit,tptrack,tpc_dedx,ensemblePar);
+//	                   ====================================================
+  if (Res_tid_ensemble != kSTAFCV_OK) {cout << " Problem with tde ensemble.. " << endl;}
+  else {if (Debug()) cout << " finish tid_ensemble_run " << endl;}
+  delete ensemblePar;
+  }
+
 
 
 //		TTE
