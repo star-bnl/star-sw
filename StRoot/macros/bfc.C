@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.81 1999/07/09 18:40:58 fisyak Exp $
+// $Id: bfc.C,v 1.82 1999/07/09 18:57:18 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -162,12 +162,12 @@ Examples:
 \t root4star  bfc.C                   \t// Create this message
 \t root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"
 \t root4star 'bfc.C(1,1)'             \t// the same
-\t root4star 'bfc.C(2,40,\"y1a fzin\")\t// run for configuration year_1a, 
+\t root4star 'bfc.C(2,40,\"y1a fzin\")'\t// run for configuration year_1a, 
 \t                                    \t// reading /disk1/star/test/psc0049_08_40evts.fzd
 \t                                    \t// skipping the 1-st event for the rest 39 events
-\t root4star 'bfc.C(2,40,\"y1a fzin -l3\")\t// the as above but remove L3 from chain
+\t root4star 'bfc.C(2,40,\"y1a fzin -l3\")'\t// the as above but remove L3 from chain
 \t root4star 'bfc.C(1,\"off xin tpc No_Field sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"
-\t root4star 'bfc.C(2,40,\"y1a fzin\",\"/disk1/star/test/psc0049_08_40evts.fzd\")\t// the same
+\t root4star 'bfc.C(2,40,\"y1a fzin\",\"/disk1/star/test/psc0049_08_40evts.fzd\")'\t// the same
 \t root4star 'bfc.C(5,10,\"y1a xin xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'
 \t                                    \t// skipping the 4 events for the rest 6 events
 \n");
