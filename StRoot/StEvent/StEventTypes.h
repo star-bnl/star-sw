@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.25 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.26 2004/04/19 17:37:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.26  2004/04/19 17:37:32  ullrich
+ * Updated to include recent additions to StEvent.
+ *
  * Revision 2.25  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -104,6 +107,7 @@
 #include "StEmcPoint.h"
 #include "StEmcRawHit.h"
 #include "StEmcSoftwareMonitor.h"
+#include "StEmcTriggerDetector.h"
 #include "StEnumerations.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
@@ -174,6 +178,7 @@
 #include "StTofCell.h"
 #include "StTofData.h"
 #include "StTofSoftwareMonitor.h"
+#include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"
 #include "StTpcPadrowHitCollection.h"
