@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.12 2000/02/23 22:21:09 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.13 2000/02/24 18:21:51 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.13  2000/02/24 18:21:51  hardtke
+ * re-define drift distance as central membrane to gating grid
+ *
  * Revision 1.12  2000/02/23 22:21:09  hardtke
  * add tpc_global_to_local_p
  *
@@ -140,7 +143,7 @@ int type_of_call tpc_drift_velocity_(float *dvel){
 return 1;
 }
 int type_of_call tpc_drift_volume_length_(float *length){
-  *length = gStTpcDb->Dimensions()->outerEffectiveDriftDistance();
+  *length = gStTpcDb->Dimensions()->gatingGridZ();
   return 1;
 }
 int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
