@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.12 2003/09/17 19:54:28 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.13 2004/01/27 23:12:23 dongx Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.13  2004/01/27 23:12:23  dongx
+ * *** empty log message ***
+ *
+ *
+ * New year run year4(TOFp+pVPD+TOFr') raw data
+ *  - Additional ADCs and TDCs put in
+ *  - TOTs of TOFr' added in, combined with TDCs
+ *
  * Revision 1.12  2003/09/17 19:54:28  geurts
  * zeroed geometry pointer
  *
@@ -94,8 +102,8 @@ StTofMaker::~StTofMaker(){/* nope */}
 /// Init method, book histograms
 Int_t StTofMaker::Init(){
   //  create histograms
-  nAdcHitHisto = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",121,-0.5,120);
-  nTdcHitHisto = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",121,-0.5,120);
+  nAdcHitHisto = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",181,-0.5,180.5);
+  nTdcHitHisto = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",185,-0.5,184.5);
   return StMaker::Init();
 }
 
@@ -195,6 +203,7 @@ Int_t StTofMaker::Make(){
       if (MyTest) MyTest->printRawData();
       if (MyTest->year2Data()) cout << "StTofMaker: year2 data - TOFp+pVPD" << endl;
       if (MyTest->year3Data()) cout << "StTofMaker: year3 data - TOFp+pVPD+TOFr" << endl;
+      if (MyTest->year4Data()) cout << "StTofMaker: year4 data - TOFp+pVPD+TOFrprime" << endl;
 #endif
 
 //
@@ -207,7 +216,7 @@ Int_t StTofMaker::Make(){
       // set limits on basic event statistics
       int tdcHitMax=1600;
       int pvpdStrobeMin=1500;
-      if (mTheTofReader->year3Data()){
+      if (mTheTofReader->year3Data()||mTheTofReader->year4Data()){
 	tdcHitMax=880;
 	pvpdStrobeMin=950;
       }
@@ -241,6 +250,25 @@ Int_t StTofMaker::Make(){
 	  mDataCollection->push_back(rawTofData);
 	  if ((i>59) && (rawAdc>50))    nadchit++;
 	  if ((i<120) && (rawTdc<tdcHitMax)) ntdchit++; 
+	}
+      }
+
+      if (mTheTofReader->year4Data()){
+	for (int i=48;i<184;i++){
+	  //arbitrary id, start from at 100.
+	  unsigned short id = (100-48)+i;
+	  unsigned short rawAdc = 0;
+	  if(i<180) {
+	    rawAdc = mTheTofReader->GetAdc(i);
+	  }
+
+	  unsigned short rawTdc = 0;
+	  rawTdc = mTheTofReader->GetTdc(i);
+
+	  StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0);
+	  mDataCollection->push_back(rawTofData);
+	  if ((i>59) && (rawAdc>50))    nadchit++;
+	  if ((rawTdc<tdcHitMax)) ntdchit++; 
 	}
       }
 
