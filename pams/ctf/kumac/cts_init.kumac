@@ -64,7 +64,7 @@ tdm/table/cell/putvalue 'cts_ctb[0].elec_noise'          0
 tdm/table/cell/putvalue 'cts_ctb[0].gain'                1.
 tdm/table/cell/putvalue 'cts_ctb[0].gate_t0'             3.e-9
 tdm/table/cell/putvalue 'cts_ctb[0].gate_width'         66.e-9
-tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      0        
+tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      1
 tdm/table/cell/putvalue 'cts_ctb[0].GeV_2_n_photons'     1.e+7
 tdm/table/cell/putvalue 'cts_ctb[0].nphe_yield'         16. 
 tdm/table/cell/putvalue 'cts_ctb[0].nphe_to_adc'         0.027
@@ -125,7 +125,7 @@ tdm/table/cell/putvalue 'cts_tof[0].gate_t0'           3.e-9
 tdm/table/cell/putvalue 'cts_tof[0].gate_width'      200.e-9 
 tdm/table/cell/putvalue 'cts_tof[0].adc_overflow'    2048.0  
 tdm/table/cell/putvalue 'cts_tof[0].tdc_overflow'    2048.0  
-tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      0   
+tdm/table/cell/putvalue 'cts_tof[0].geo_from_geant'     1
 tdm/table/cell/putvalue 'cts_tof[0].position_tolerance' 0.3  
 tdm/table/cell/putvalue 'cts_tof[0].phys_noise'         0    
 tdm/table/cell/putvalue 'cts_tof[0].start_res'  50.e-12 
