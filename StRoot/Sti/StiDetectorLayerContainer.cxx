@@ -142,6 +142,21 @@ bool StiDetectorLayerContainer::padrowStepPlus()
   }
 }
 
+bool StiDetectorLayerContainer::setRefDetector(const StiDetector* layer)
+{
+    mkey.padrow = layer->getPadrow();
+    mkey.sector = layer->getSector();
+    mkey.z = layer->getZCenter();
+    detectormap::const_iterator where = find(mkey);
+    if (where!=end()) {
+	mcurrent = where;
+	return true;
+    }
+    else {
+	return false;
+    }
+}
+
 void StiDetectorLayerContainer::setRefDetector(int sector)
 {
   mkey.sector = sector;
