@@ -10,8 +10,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "TH2.h"
-#include "TH1.h"
+#include <TH2.h>
+#include <TH1.h>
+#include <TCanvas.h>
 #include "StEmcUtil/emcInternalDef.h"
 #include "StEmcUtil/StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
@@ -28,6 +29,9 @@ private:
   UInt_t  mHistControl;     // Do histogramms (1) or no (0)
 
   StEmcGeom *mGeom[MAXDET]; //! Geometry 
+  
+  Bool_t  mCompare;
+  TCanvas *mC1;             //!
 
 protected:
   StMcEmcHitCollection*  mEmcMcHits[MAXDET];  //! For convinience 
@@ -41,6 +45,10 @@ protected:
   TH2F *m_hits[MAXDET];   //!
   TH2F *m_energy[MAXDET]; //!
   TH1F *m_adc[MAXDET];    //!
+
+  TH1F *mModule[MAXDET];    //! For testing only
+  TH1F *mDiffNumHits[4];    //! 
+  TH1F *mDiffDe[4];         //!
 public: 
   StEmcSimulatorMaker(const char *name="EmcSimulator"); 
   ~StEmcSimulatorMaker();
@@ -70,12 +78,18 @@ public:
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;}
   void                  clearStEventStaf() {mEmcCollection = 0;}
   void                  Browse(TBrowser* b); // StEvent staf will be visible in browser
+  void   pictureAllDetectors(Int_t print=0);          // *MENU* 
+  void   pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
+  //  void   print(const char *filename, Option_t *option) {if(mC1) mC1->Print(filename,option);}
+
+  void   compareOldSimulator();
+  void   pictureCompareDe(Int_t print=0);             // *MENU* 
 
   void   printmBEMC();
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.3 2001/02/03 00:00:01 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.4 2001/03/22 22:04:45 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -83,8 +97,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.3 2001/02/03 00:00:01 pavlinov Exp $ 
+// $Id: StEmcSimulatorMaker.h,v 1.4 2001/03/22 22:04:45 pavlinov Exp $ 
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.4  2001/03/22 22:04:45  pavlinov
+// Clean up for mdc4
+//
 // Revision 1.3  2001/02/03 00:00:01  pavlinov
 // New function Browse() and cleanup for new version of BFC
 //

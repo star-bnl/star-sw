@@ -9,6 +9,7 @@
 #include <math.h>
 #include <TRandom.h>
 #include <TBrowser.h>
+#include <TPad.h>
 #include <StMessMgr.h>
 
 #include "StEmcSimulatorMaker.h"
@@ -21,13 +22,15 @@
 #include "StEmcDetector.h"
 #include "StEmcModule.h"
 #include "StEmcRawHit.h"
+#include "StBFChain.h"
 
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_controlEmcSimulatorMaker_Table.h"
+#include "tables/St_ems_hits_Table.h"
 
 ClassImp(StEmcSimulatorMaker)
 
-TDataSet  *geaIn;
+TDataSet  *geaIn, *ems;
 St_g2t_emc_hit *g2t_emc_hit, *g2t_smd_hit;
 
 #include "../StEmcUtil/emcDetectorName.h"
@@ -45,8 +48,8 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    mEEMC        = 0;  // EEMC  of
    mHistControl = 1;  // Hist  on
    SetDebug(0);       // Debug of
+   mCompare     = kFALSE;
    gMessMgr->SetLimit("StEmcSimulator",100);
-
 }
 
 StEmcSimulatorMaker::~StEmcSimulatorMaker() 
@@ -56,6 +59,11 @@ StEmcSimulatorMaker::~StEmcSimulatorMaker()
 
 Int_t StEmcSimulatorMaker::Init()
 {
+  // 21-mar-2001 for comparing
+  StBFChain *chain = (StBFChain*)(GetParent()->GetParent());
+  // Old simulator exist => switch on comparing
+  if(chain && chain->GetOption("ems")) mCompare = kTRUE;
+  printf("<I> #### Compare mode => %i ##### \n",mCompare);
   //
   // Get data from StarDb ( if exist)
   // 
@@ -118,6 +126,7 @@ Int_t StEmcSimulatorMaker::Init()
 
     }
   }
+  Histograms()->SetName("SimuHist");
 
   if(mEEMC){ /* nothing */ }
 
@@ -143,6 +152,9 @@ void StEmcSimulatorMaker::saveRunco()
 
 void StEmcSimulatorMaker::bookHistograms(const Int_t i)
 {
+  //
+  // i - array index (det = i + 1) !!! 
+  //
   const Char_t* tit[]={"Barrel ","Endcap "};
 
   const Int_t   nx[] = {40,40,300,20,12,12,12,12};
@@ -150,8 +162,8 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
   const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
   const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
   if(!m_nhit){
-    m_nhit = new TH2F("EmcNHitsVsDet(ems)" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
-    m_etot = new TH2F("EmcEtotVsDet(ems)" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
+    m_nhit = new TH2F("EmcNHitsVsDet" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
+    m_etot = new TH2F("EmcEtotVsDet" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
   }
 
   gMessMgr->Info()<<" Book hist for detector " << detname[i].Data() <<endm;
@@ -164,17 +176,57 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
   TString title_e  = tit[ind] + detname[i] + " energy dist.";
   TString title_adc= tit[ind] + detname[i] + " ADC dist.";
 
-  Float_t rpi = M_PI + 0.00001; 
-  m_hits[i]   = new TH2F(name_h,title_h, nx[i],xl[i],xu[i], ny[i],-rpi, rpi);
-  m_energy[i] = new TH2F(name_e,title_e, nx[i],xl[i],xu[i], ny[i],-rpi, rpi);
-  m_adc[i]    = new TH1F(name_adc,title_adc, 5001, -0.5, 5000.5);
+  Float_t rpiMax = M_PI-0.0001, rpiMin = -M_PI-0.0001; // -pi<=phi<pi 
+  if(i==2) {
+  // For SMDE only
+    Int_t neta = mGeom[i]->NEta(), iw1, iw2;
+    Float_t* eb = mGeom[i]->Eta();
+    TArrayD xb(2*neta+1); 
+    xb[neta]   = 0.0;
+    for(Int_t ik=0; ik<neta; ik++){
+      iw1 = neta + 1 + ik;
+      iw2 = neta-ik-1;
+      Float_t x1 = eb[ik], x2, xw;
+      if(ik<neta-1) {
+        x2 = eb[ik+1];
+        xw = (x1+x2)*0.5;
+      }
+      else xw = 0.99;
+      xb[iw1] = +xw;
+      xb[iw2] = -xw;
+      printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,xb[iw1], iw2,xb[iw2], eb[ik]);
+    }
+    // Be carefull with array size !!! 
+    m_hits[i]   = new TH2F(name_h,title_h, xb.GetSize()-1, xb.GetArray(), ny[i],rpiMin,rpiMax);
+    m_energy[i] = new TH2F(name_e,title_e, xb.GetSize()-1, xb.GetArray(), ny[i],rpiMin,rpiMax);
+  }
+  else {
+    m_hits[i]   = new TH2F(name_h,title_h, nx[i],xl[i],xu[i], ny[i],rpiMin,rpiMax);
+    m_energy[i] = new TH2F(name_e,title_e, nx[i],xl[i],xu[i], ny[i],rpiMin,rpiMax);
+  }
+  Int_t maxAdc= mGeom[i]->getMaxAdc();
+  m_adc[i]    = new TH1F(name_adc,title_adc, maxAdc+1, -0.5, float(maxAdc)+0.5); // ??
+
+  TString nameM    = detname[i] + "M";
+  TString titModule= tit[ind] + detname[i] + " #Module dist.";
+  mModule[i]       = new TH1F(nameM,titModule, 121, -0.5, 120.5);
+
+  if(mCompare){
+    TString name=detname[i] + "NDif";
+    TString tit=detname[i] + " Diff. of hits number";
+    mDiffNumHits[i] = new TH1F(name,tit, 11,-5.5,+5.5);
+    name = detname[i] + "DifDe";
+    tit  = detname[i] + " Difference of DE"; 
+    mDiffDe[i] = new TH1F(name,tit, 11,-5.5e-5,+5.5e-5);
+  }
+
 }
 
 void StEmcSimulatorMaker::makeHistograms(const Int_t det)
 {
   Float_t energysum=0.0, etsum=0.0; 
   Float_t E, eta, phi; 
-  Int_t nhit=0, id,m,e,s, adc;
+  Int_t nhit=0, m,e,s, adc;
 
   St_emc_hits* emc_hits = mEmcRawHits[det-1];
   Int_t n = emc_hits->GetNRows();
@@ -189,21 +241,21 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
        adc = (Int_t)hit[i].adc;  // For testing only
        E   =        hit[i].energy;
 
-       Int_t check=mGeom[det-1]->getId(m, e, s, id);   // Check bound of index
-       if(check == 0){
-         Int_t ieta=mGeom[det-1]->getEta(m, e, eta); 
-         Int_t iphi=mGeom[det-1]->getPhi(m, s, phi);
-         if(E>0.0 && ieta==0 && iphi==0){
+       Int_t ieta=mGeom[det-1]->getEta(m, e, eta); 
+       Int_t iphi=mGeom[det-1]->getPhi(m, s, phi);
+       if(ieta==0 && iphi==0) {
+         if(E){
            m_hits[det-1]->Fill(eta,phi); 
            m_energy[det-1]->Fill(eta,phi,E); 
            m_adc[det-1]->Fill((float)adc); 
            nhit      += 1; 
            energysum += E; 
            etsum     += E/cosh(eta);  // Et = E*sin(theta); sin(theta) = 1./cos(eta)
+           mModule[det-1]->Fill(float(m));
          }
        }
        else gMessMgr->Warning()<<"StEmcSimulatorMaker::makeHistograms=>bad index det "
-			      <<det<<" m "<<m<<" e "<<e<<" s "<<s<<" id "<<id<<endm;         
+			      <<det<<" m "<<m<<" e "<<e<<" s "<<s<<endm;         
     }
     m_nhit->Fill(log10((Double_t)nhit), (Float_t)det);
     m_etot->Fill(log10((Double_t)energysum), (Float_t)det);
@@ -272,6 +324,8 @@ Int_t StEmcSimulatorMaker::makeBemc()
     makeHistograms(BSMDE);
     makeHistograms(BSMDP);
   }
+  
+  if(mCompare) compareOldSimulator();
   
   return kStOK;
 }
@@ -445,9 +499,140 @@ void StEmcSimulatorMaker::printmBEMC()
   else       gMessMgr->Info()<<" BEMC     in CHAIN  mBEMC="<<mBEMC<<endl;
 }
 
+void StEmcSimulatorMaker::compareOldSimulator()
+{
+  //
+  // 21-mar-2001 for comparing "new" and "old" simulator (deposit energy)
+  //
+  ems = GetDataSet("emc_raw/.data");
+  St_ems_hits *bemc;
+  ems_hits_st *tab;
+  StMcEmcHitCollection* bemcM;
+  StMcEmcModuleHitCollection* module;
+  StMcCalorimeterHit* hMC;
+
+  Int_t nbemc[4]={0,0,0,0}; 
+  Int_t det, m, e, s;
+  Float_t de;
+
+  bemc = (St_ems_hits*)ems->FindByName("ems_hits_bemc"); // bemc + bprs
+  for(Int_t ibr=1; ibr<=2; ibr++){ // bemc+bprs and bsmde+bsmdp
+    tab = bemc->GetTable();
+
+    for(Int_t nh=0; nh<bemc->GetNRows(); nh++){
+      det = tab[nh].det;
+      m   = tab[nh].module;
+      e   = tab[nh].eta;
+      s   = tab[nh].sub;
+      de  = tab[nh].energy;
+
+      bemcM  = getEmcMcHits(det);
+      module = bemcM->module(m-1);
+      nbemc[det-1]++;
+
+      StSPtrVecMcCalorimeterHit& hits = module->hits(); 
+      for(Int_t mh=0; mh<hits.size(); mh++){
+        hMC = hits[mh];
+        if(m==hMC->module() && e==hMC->eta() && s==hMC->sub()) {
+          mDiffDe[det-1]->Fill(de-hMC->dE());
+          goto ENDCYCLE;
+        }
+      }
+      printf("<W> Did not find New hit for OLD !!!\n");      
+      ENDCYCLE:
+      continue;
+    }
+    bemc = (St_ems_hits*)ems->FindByName("ems_hits_bsmd"); // shower max
+  }
+  for(Int_t i=0; i<4; i++){
+    Int_t det=i+1;
+    Int_t nOld = nbemc[i];
+    Int_t nNew = getEmcMcHits(det)->numberOfHits();
+    mDiffNumHits[i]->Fill(float(nOld-nNew));
+  }
+}
+
+void StEmcSimulatorMaker::pictureAllDetectors(Int_t print)
+{
+  //
+  // 22-mar-2001 for convinience
+  //
+  if(!mC1) mC1 = new TCanvas("mC1","Picture for all detectors",0,25,600,800);
+  else     mC1->SetTitle("Picture for all detectors");
+
+  mC1->Clear();
+  mC1->Divide(1,2);
+
+  mC1->cd(1); 
+  m_nhit->SetLineWidth(4);
+  m_nhit->Draw();
+  mC1->cd(2);
+  m_etot->SetLineWidth(4);
+  m_etot->Draw();
+  mC1->Update();
+  if(print) mC1->Print("ps/newSim/allDetectors.ps");
+}
+
+void StEmcSimulatorMaker::pictureForDetector(Int_t det, Int_t logy, Int_t print)
+{
+  if(!mC1) mC1 = new TCanvas("mC1","Picture for detector",0,25,600,800);
+  else     mC1->SetTitle("Picture for detector");
+
+  mC1->Clear();
+  mC1->Divide(1,3);
+
+  Int_t i = det-1;
+  i = (i<0)?0:((i>3)?3:i);
+
+  mC1->cd(1); 
+  m_hits[i]->SetLineWidth(4);
+  m_hits[i]->Draw();
+  mC1->cd(2);
+  m_energy[i]->SetLineWidth(4);
+  m_energy[i]->Draw();
+  mC1->cd(3);
+  m_adc[i]->SetLineWidth(4);
+  gPad->SetLogy(logy);
+  m_adc[i]->Draw();
+  mC1->Update();
+  if(print) {
+    TString name("ps/newSim/Det");
+    name += detname[i] + ".ps";
+    mC1->Print(name.Data());
+  }
+}
+
+void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
+{
+  //
+  // 22-mar-2001 for comparing "new" and "old" simulator (deposit energy)
+  //
+  if(mCompare){
+    if(!mC1) mC1 = new TCanvas("mC1","DE comparing for OLD and NEW Simulator",0,25,600,800);
+    else     mC1->SetTitle("DE comparing for OLD and NEW Simulator");
+
+    mC1->Clear();
+    mC1->Divide(2,4);
+    for(Int_t i=0; i<4; i++){
+      mC1->cd(2*i+1); 
+      mDiffNumHits[i]->SetLineWidth(4);
+      mDiffNumHits[i]->Draw();
+      mC1->cd(2*i+2);
+      mDiffDe[i]->SetLineWidth(4);
+      mDiffDe[i]->Draw();
+    }
+    mC1->Update();
+    if(print) mC1->Print("ps/newSim/CompareOldNewDe.ps");
+  }
+  else printf("<I> Picture unavailable : mCompare is zero \n");
+}
+
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.3 2001/03/15 17:21:32 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.4 2001/03/22 22:04:38 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.4  2001/03/22 22:04:38  pavlinov
+// Clean up for mdc4
+//
 // Revision 1.3  2001/03/15 17:21:32  pavlinov
 // Fixed error for module=1
 //
