@@ -25,6 +25,7 @@ R__EXTERN  int type_of_call numberOfPadsAtRow_(int *row);
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
+#include "StRTpcElectronics.h"
 #include "StRTpcGain.h"
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
@@ -38,6 +39,7 @@ class StTpcDb {
  StTpcWirePlaneI* WirePlane;
  StTpcDimensionsI* dimensions;
  StTpcSlowControlSimI* slowControlSim;
+ StTpcElectronicsI* electronics;
  StTpcGainI* gain[24];
  StTpcT0I* t0[24];
  St_DataSet* tpc_geometry;
@@ -53,6 +55,7 @@ class StTpcDb {
    StTpcWirePlaneI* WirePlaneGeometry();
    StTpcDimensionsI* Dimensions();
    StTpcSlowControlSimI* SlowControlSim();
+   StTpcElectronicsI* Electronics();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
 
