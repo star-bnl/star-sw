@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.90 2000/02/10 21:31:30 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.91 2000/02/10 23:02:45 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.91  2000/02/10 23:02:45  kathy
+// changed limits on linear impact param hist; added new hist of detector id values for dst_point table
+//
 // Revision 1.90  2000/02/10 21:31:30  kathy
 // add another set of impact param hist so we can see them in linear scale too
 //
@@ -1244,10 +1247,20 @@ void St_QA_Maker::MakeHistPoint(){
 
     Int_t cntrows=0;
     cntrows = pt->GetNRows();
-    m_pnt_tot->Fill(cntrows);
-    m_pnt_tot_med->Fill(cntrows);
-    m_pnt_tot_sm->Fill(cntrows);
+      m_pnt_tot->Fill(cntrows);
+      m_pnt_tot_med->Fill(cntrows);
+      m_pnt_tot_sm->Fill(cntrows);
 
+    dst_point_st  *t   = pt->GetTable();
+
+    Int_t id = 0;
+    for (Int_t i = 0; i < pt->GetNRows(); i++,t++){
+
+// unpack detector ID value:
+      id = (t->hw_position) & 15;
+
+      m_pnt_id->Fill(id);
+    }
   }
 
 }

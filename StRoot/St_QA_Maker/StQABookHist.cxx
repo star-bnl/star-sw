@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.36 2000/02/10 21:31:29 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.37 2000/02/10 23:02:44 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.37  2000/02/10 23:02:44  kathy
+// changed limits on linear impact param hist; added new hist of detector id values for dst_point table
+//
 // Revision 1.36  2000/02/10 21:31:29  kathy
 // add another set of impact param hist so we can see them in linear scale too
 //
@@ -466,9 +469,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
     m_pnt_tot=0;     //! number of hits
     m_pnt_tot_med=0; //! number of hits, med range
     m_pnt_tot_sm=0;  //! number of hits, small range
-    m_pnt_tpc=0;   //! number of hits tpc
-    m_pnt_svt=0;   //! number of hits svt
-    m_pnt_ssd=0;   //! number of hits ssd
+    m_pnt_id=0;      //! detector id of the hit
+    m_pnt_tpc=0;     //! number of hits tpc
+    m_pnt_svt=0;     //! number of hits svt
+    m_pnt_ssd=0;     //! number of hits ssd
     m_pnt_ftpcE=0;   //! number of hits ftpcE
     m_pnt_ftpcW=0;   //! number of hits ftpcW
 
@@ -783,7 +787,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
                             120,-3.0,3.0);
   m_glb_impactrTS = QAH1F("QaGtrkImpactrTS", "globtrk: impact param from prim vtx, tpc+svt",
-                            100,0.,500.);
+                            100,0.,50.);
 
 
 // 2D - tpc + silicon (svt + ssd)
@@ -981,7 +985,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq1     = QAH1F("QaPtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPtrkLength",  "primtrk: track length", 50,0.,300.);
   m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: log10 impact param from prim vtx ", 120,-3.,3.0);
-  m_prim_impactr = QAH1F("QaPtrkImpactr",  "primtrk: impact param from prim vtx ", 100,0.,100.);
+  m_prim_impactr = QAH1F("QaPtrkImpactr",  "primtrk: impact param from prim vtx ", 100,0.,10.);
 
 
 // 2D
@@ -1159,6 +1163,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_tot     = QAH1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
   m_pnt_tot_med = QAH1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
   m_pnt_tot_sm  = QAH1F("QaPointTotsm", "point: # hits total ",100, 0.,250.);
+  m_pnt_id      = QAH1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
   m_pnt_tpc     = QAH1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
   m_pnt_svt     = QAH1F("QaPointSvt",  "point: # hits svt ",100, 0.,250000.);
