@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.10 2002/10/11 15:45:12 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.11 2002/10/31 13:39:09 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.11  2002/10/31 13:39:09  oldi
+// InstallationPointZ() changed to InstallationPointZ(i) where i specifies FTPC east or west.
+//
 // Revision 1.10  2002/10/11 15:45:12  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -258,13 +261,13 @@ void StFtpcPoint::TransformFtpc2Global()
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
-      org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ());
+      org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
       
       // actual rotation
       org = StFtpcTrackingParams::Instance()->FtpcRotation() * org;
       
       // set z-position back to original value
-      org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ());
+      org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
     }
     
     StThreeVectorD transform = StFtpcTrackingParams::Instance()->TpcToGlobalRotation() * org + StFtpcTrackingParams::Instance()->TpcPositionInGlobal();
@@ -303,13 +306,13 @@ void StFtpcPoint::TransformGlobal2Ftpc()
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
-      transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ());
+      transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
       
       // actual rotation
       transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse() * transform;
       
       // set z-position back to original value
-      transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ());
+      transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
     }
     
     mCoord.SetX(transform.x());
