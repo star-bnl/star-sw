@@ -300,12 +300,15 @@ void ConvertFromCtoFortran(char *xx) {
     }
   }
 }
+#define SHOW 35
 myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
-  size_t numRows; long ii; char copy[COPY];
+  size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
   strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
   if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
   gAlreadyDidIt=FALSE;
-  Progress(0);
+  strncpy(litCopy,cuts,SHOW+1); litCopy[SHOW]='\0';
+  if(strlen(cuts)>SHOW) strcat(litCopy,"...");
+  Progress(-5,(int)numRows,"Cuts Progress                       ",litCopy);
   if(sizeof(char)!=1) {
     /* If you get this error message, you may have to adjust BITSPERCHAR */
     Say1("This is DoCuts(). I need 8 bit chars."); return FALSE;
@@ -314,7 +317,7 @@ myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   for(ii=nBytes-1;ii>=0;ii--) ba[ii]=0;
   gTableError=FALSE;
   for(ii=0;ii<numRows;ii++) {
-    if(ii%300==0) Progress(ii);
+    if(ii%150==0) Progress(ii,(int)numRows,NULL,NULL);
     if(gTableError) { Say1("Error 66d in DoCuts()."); return FALSE; }
     switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
@@ -323,6 +326,7 @@ myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
       default: Say1("Error 66c in DoCuts()."); return FALSE;
     }
   }
+  Progress(-10,(int)numRows,NULL,NULL);
   return TRUE;
 }
 myBool RowPassedCuts(char *ba,long row) {
