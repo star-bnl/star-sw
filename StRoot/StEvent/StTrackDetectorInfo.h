@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.9 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.10 2004/08/05 19:25:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.10  2004/08/05 19:25:03  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.9  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -78,18 +81,26 @@ public:
 
     void setFirstPoint(const StThreeVectorF&);
     void setLastPoint(const StThreeVectorF&);
-    void setNumberOfPoints(unsigned short);
+    void setNumberOfPoints(unsigned short, StDetectorId);
     void addHit(StHit*);
     void removeHit(StHit*&);
     int  bad() const;
     
+protected:
+    void setNumberOfPoints(unsigned short);  // obsolete since ITTF
+    
 private:
     StThreeVectorF mFirstPoint;
     StThreeVectorF mLastPoint;
-    UShort_t       mNumberOfPoints;
+    UShort_t       mNumberOfPoints; // obsolete since ITTF
+    UChar_t        mNumberOfPointsTpc;
+    UChar_t        mNumberOfPointsFtpcWest;
+    UChar_t        mNumberOfPointsFtpcEast;
+    UChar_t        mNumberOfPointsSvt;
+    UChar_t        mNumberOfPointsSsd;
     StPtrVecHit    mHits;
 
-    ClassDef(StTrackDetectorInfo,1)
+    ClassDef(StTrackDetectorInfo,2)
 };
 
 #endif

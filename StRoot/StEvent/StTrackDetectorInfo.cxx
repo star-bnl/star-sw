@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.10 2004/08/05 19:25:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.10  2004/08/05 19:25:03  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.9  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
  * Revision 2.8  2003/10/30 20:07:32  perev
  * Check of quality added
  *
- * Revision 2.7  2001/04/05 04:00:58  ullrich
+ * Revision 2.7  2001/04/05 04:00:58  ullrich`
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
  * Revision 2.6  2001/03/24 03:35:00  perev
@@ -45,13 +48,20 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.10 2004/08/05 19:25:03 ullrich Exp $";
 
-StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
+StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
+					     mNumberOfPointsTpc(0),
+					     mNumberOfPointsFtpcWest(0),
+					     mNumberOfPointsFtpcEast(0),
+					     mNumberOfPointsSvt(0),
+					     mNumberOfPointsSsd(0)
 { /* noop */ }
 
 StTrackDetectorInfo::StTrackDetectorInfo(const dst_track_st& t) :
-    mFirstPoint(t.x_first),  mLastPoint(t.x_last), mNumberOfPoints(t.n_point)
+    mFirstPoint(t.x_first),  mLastPoint(t.x_last), mNumberOfPoints(t.n_point),
+    mNumberOfPointsTpc(0), mNumberOfPointsFtpcWest(0), mNumberOfPointsFtpcEast(0),
+    mNumberOfPointsSvt(0), mNumberOfPointsSsd(0)
 { /* noop */ }
 
 StTrackDetectorInfo::~StTrackDetectorInfo() { /* noop */ }
@@ -65,29 +75,61 @@ StTrackDetectorInfo::lastPoint() const { return mLastPoint; }
 unsigned short
 StTrackDetectorInfo::numberOfPoints() const
 {
-    return (numberOfPoints(kTpcId) +
-            numberOfPoints(kSvtId) +
-            numberOfPoints(kSsdId));
+    if (mNumberOfPoints) {
+	return (numberOfPoints(kTpcId) +
+		numberOfPoints(kSvtId) +
+		numberOfPoints(kSsdId));
+    }
+    else {
+	return (numberOfPoints(kTpcId) +
+		numberOfPoints(kFtpcWestId) +
+		numberOfPoints(kFtpcEastId) +
+		numberOfPoints(kSvtId) +
+		numberOfPoints(kSsdId));	
+    }
 }
 
 unsigned short
 StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 {
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    switch (det) {
-    case kFtpcWestId:
-    case kFtpcEastId:
-    case kTpcId:
-        return mNumberOfPoints%1000;
-        break;
-    case kSvtId:
-        return (mNumberOfPoints%10000)/1000;
-        break;
-    case kSsdId:
-        return mNumberOfPoints/10000;
-        break;
-    default:
-        return 0;
+    if (mNumberOfPoints) {    
+	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+	switch (det) {
+	case kFtpcWestId:
+	case kFtpcEastId:
+	case kTpcId:
+	    return mNumberOfPoints%1000;
+	    break;
+	case kSvtId:
+	    return (mNumberOfPoints%10000)/1000;
+	    break;
+	case kSsdId:
+	    return mNumberOfPoints/10000;
+	    break;
+	default:
+	    return 0;
+	}
+    }
+    else {
+	switch (det) {
+	case kFtpcWestId:
+	    return mNumberOfPointsFtpcWest;
+	    break;
+	case kFtpcEastId:
+	    return mNumberOfPointsFtpcEast;
+	    break;
+	case kTpcId:
+	    return mNumberOfPointsTpc;
+	    break;
+	case kSvtId:
+	    return mNumberOfPointsSvt;
+	    break;
+	case kSsdId:
+	    return mNumberOfPointsSsd;
+	    break;
+	default:
+	    return 0;
+	}
     }
 }
 
@@ -146,6 +188,29 @@ void
 StTrackDetectorInfo::setNumberOfPoints(unsigned short val)
 {
     mNumberOfPoints = val;
+}
+
+void
+StTrackDetectorInfo::setNumberOfPoints(unsigned short val, StDetectorId det)
+{
+    mNumberOfPoints = 0;  // make sure old method is NOT active
+    switch (det) {
+    case kFtpcWestId:
+	mNumberOfPointsFtpcWest = val;
+	break;
+    case kFtpcEastId:
+	mNumberOfPointsFtpcEast = val;
+	break;
+    case kTpcId:
+	mNumberOfPointsTpc = val;
+	break;
+    case kSvtId:
+	mNumberOfPointsSvt = val;
+	break;
+    case kSsdId:
+	mNumberOfPointsSsd = val;
+	break;
+    }
 }
 
 void
