@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.2 2000/03/07 17:50:59 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.3 2000/03/21 00:22:02 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.3  2000/03/21 00:22:02  posk
+//  Added GetCVS and some print commands.
+//
 //  Revision 1.2  2000/03/07 17:50:59  snelling
 //  Added Nano DST
 //
@@ -81,6 +84,9 @@ public:
   StFlowEvent*    FlowEventPointer() const;  // returns pointer to the StFlowEvent
   virtual void    NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
   virtual void    NanoFlowEventOff(){NanoFlowEvent();} 
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.3 2000/03/21 00:22:02 posk Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;}
 
 protected:
 
