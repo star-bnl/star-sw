@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.143 2000/08/15 23:39:57 fisyak Exp $
+// $Id: bfc.C,v 1.144 2000/08/29 19:26:58 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -97,13 +97,18 @@ void bfc(const Int_t First,
     }
   }
   if (chain->GetOption("TPT")) {
-    St_tpt_Maker *tptMk= (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
+    St_tpt_Maker *tptMk = (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
     if (tptMk && chain->GetOption("MINIDAQ"))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
     if (tptMk && chain->GetOption("Eval")) {
       tptMk->tteEvalOn();   //Turn on the tpc evaluation
       tptMk->tptResOn();    // Turn on the residual table
     }
   }
+  if (chain->GetOption("TpcT0")) {
+    StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("TpcT0");
+    if (t0mk) t0mk->SetDesiredEntries(10);
+  }
+      
   if (chain->GetOption("McAss")) {
     // Define the cuts for the Associations
     
