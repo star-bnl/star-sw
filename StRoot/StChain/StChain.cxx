@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.8 1998/07/20 15:08:08 fisyak Exp $
+// $Id: StChain.cxx,v 1.9 1998/07/23 11:32:11 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.9  1998/07/23 11:32:11  fisyak
+// Add comments
+//
 // Revision 1.8  1998/07/20 15:08:08  fisyak
 // Add tcl and tpt
 //
@@ -33,6 +36,13 @@
 //                                                                      //
 //    Maker name        Save in Tree                                    //
 //    ==========        ============                                    //
+//   xdfin              event/geant                                     //
+//   evg_Maker          event                                           //
+//   tss_Maker          event/raw_data/tpc                              //
+//   srs_Maker          event/raw_data/svt                              //
+//   tcl_Maker          event/data/tpc/hits                             //
+//   tpt_Maker          event/data/tpc/tracks                           //
+//                                                                      //
 //                                                                      //
 // Makers must derive from the base class StMaker.                      //
 // StMaker provides a common interface to all Makers.                   //
@@ -41,14 +51,13 @@
 // Each Maker has its own list of histograms.                           //
 // Each Maker has an associated companion class corresponding to the    //
 // type of physics object reconstructed by the Maker.                   //
-// For example, ATLFClusterMaker creates ATLFCluster objects.           //
-//              ATLFTriggerMaker creates one single ATLFTrigger object. //
+// For example, St_tcl_Maker     fill   event/data/tpc/hits DataSet     //
+//              St_tpt_Maker     fill   event/data/tpc/tracks FataSet   // 
 // The pointer supporting the created object(s) is defined in ATLFMaker //
-//   m_Fruits may point to a single object (eg. ATLFTrigger) or to a    //
-//           TClonesArray of objects (eg. ATLFCluster).                 //
+//   m_DataSet points to a DataSet owned by the Maker                   //
 //                                                                      //
 // The function StChain::Maketree must be called after the creation     //
-// of the StChain object to create a Root Tree.                         //
+// of the StChain object to create a Root Tree (not yet implemented).   //
 //                                                                      //
 // An example of main program/macro to use StChain is given below:      //
 //========================================================================
@@ -64,6 +73,11 @@
 //   
 //   StChain chain("StChain");     // create main object to run StChain
 //   St_xdfin_Maker xdfin("XdfIn","test"); // create xdfin object to run in StChain
+//   St_evg_Maker evg_Maker("evg_Maker","event"); // event generator
+//   St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc"); // TPC slow simulator
+//   St_srs_Maker srs_Maker("srs_Maker","event/data/svt"); // SVT fast simulator
+//   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits"); // TPC clustering
+//   St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks"); // TPVC tracking
 //   St_xdfout_Maker xdfout("XdfOut","test"); // create xdfin object to run in StChain
 //   chain.SetInputXDFile(&xdffile_in);      // pass file to xdfin
 //   chain.SetOutputXDFile(&xdffile_out);    // pass file to xdfout
@@ -446,7 +460,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.8 1998/07/20 15:08:08 fisyak Exp $    *\n");
+   printf("* $Id: StChain.cxx,v 1.9 1998/07/23 11:32:11 fisyak Exp $    *\n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
