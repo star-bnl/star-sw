@@ -188,7 +188,7 @@ my $ndbOnFiles = 0;
  }
  
  print "\nFinding daq DST files in HPSS\n";
- my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>400)
+ my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>500)
    or die "HPSS access failed";
  $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
