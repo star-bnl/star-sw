@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 1.5 1999/04/28 22:27:32 fisyak Exp $
+ * $Id: StGlobalTrack.cxx,v 1.6 1999/06/11 17:28:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
- * Revision 1.5  1999/04/28 22:27:32  fisyak
- * New version with pointer instead referencies
+ * Revision 1.6  1999/06/11 17:28:28  fisyak
+ * Update remove member functions
+ *
+ * the hits are not stored on the DST. Sync changes in
+ * StEvent with StRootEvent.
  *
  * Revision 1.6  1999/06/11 17:28:28  fisyak
  * Update remove member functions
@@ -52,13 +55,13 @@
  * Revision 1.3  1999/02/10 21:50:30  wenaus
  * Plug memory leaks
  *
-static const Char_t rcsid[] = "$Id: StGlobalTrack.cxx,v 1.5 1999/04/28 22:27:32 fisyak Exp $";
+ * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StGlobalTrack.cxx,v 1.5 1999/04/28 22:27:32 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StGlobalTrack.cxx,v 1.6 1999/06/11 17:28:28 fisyak Exp $";
  * Completely Revised for New Version
 #include "StGlobalTrack.h"
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.5 1999/04/28 22:27:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.6 1999/06/11 17:28:28 fisyak Exp $";
  
 #include "tables/dst_track.h"
 #include "StVertex.h"
@@ -90,7 +93,7 @@ StGlobalTrack::StGlobalTrack()
     mNumberOfSvtHits = 0;
     mNumberOfFtpcHits = 0; 
 }
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.5 1999/04/28 22:27:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.6 1999/06/11 17:28:28 fisyak Exp $";
 StGlobalTrack::~StGlobalTrack() {
     //
     //   If a track gets deleted make sure
@@ -130,36 +133,29 @@ void StGlobalTrack::addFtpcHit(StFtpcHit* hit)
 void StGlobalTrack::addSvtHit(StSvtHit* hit)
 {
     mSvtHits->push_back(hit);
-#if 0
-    StVecPtrTpcHitIterator iter = find(mTpcHits->begin(), mTpcHits->end(), hit);
-    if (iter != mTpcHits->end()) mTpcHits->erase(iter);
+    hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
+    mNumberOfSvtHits++;
 }
   while (mTpcHits->Contains(hit)) {
-#endif
+    mTpcHits->Remove(hit);
     Int_t i = hit->trackReferenceCount();
     hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
   }
 	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
-#if 0
-    StVecPtrFtpcHitIterator iter = find(mFtpcHits->begin(), mFtpcHits->end(), hit);
-    if (iter != mFtpcHits->end()) {
-	mFtpcHits->erase(iter);
-	Int_t i = hit->trackReferenceCount();
-	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+	mNumberOfTpcHits--;
     }
-#endif
+}
+  while (mFtpcHits->Contains(hit)) {
+    mFtpcHits->Remove(hit);
     Int_t i = hit->trackReferenceCount();
     hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
   }
 	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
-#if 0
-    StVecPtrSvtHitIterator iter = find(mSvtHits->begin(), mSvtHits->end(), hit);
-    if (iter != mSvtHits->end()) {
-	mSvtHits->erase(iter);
-	Int_t i = hit->trackReferenceCount();
-	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+	mNumberOfFtpcHits--;
     }
-#endif
+}
+  while (mSvtHits->Contains(hit)) {
+    mSvtHits->Remove(hit);
     Int_t i = hit->trackReferenceCount();
     hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
   }
