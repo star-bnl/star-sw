@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_hist_to_ps.C,v 1.2 1999/07/13 00:29:53 kathy Exp $
+// $Id: QA_bfcread_hist_to_ps.C,v 1.3 1999/07/13 00:42:32 kathy Exp $
 // $Log: QA_bfcread_hist_to_ps.C,v $
+// Revision 1.3  1999/07/13 00:42:32  kathy
+// updated all default input files, removed unneccessary macros, renamed other to make more standard
+//
 // Revision 1.2  1999/07/13 00:29:53  kathy
 // updated macros to take out StRootEvent
 //
@@ -33,7 +36,7 @@ StTreeMaker *treeMk=0;
 
 
 void QA_bfcread_hist_to_ps(
-  const Char_t *MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.hist.root",
+  const Char_t *MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.hist.root",
   const Char_t *psFile="QA_hist.ps")
 {
 

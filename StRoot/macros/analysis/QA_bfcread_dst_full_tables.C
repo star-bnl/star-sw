@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.2 1999/07/13 00:29:52 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.3 1999/07/13 00:42:31 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.3  1999/07/13 00:42:31  kathy
+// updated all default input files, removed unneccessary macros, renamed other to make more standard
+//
 // Revision 1.2  1999/07/13 00:29:52  kathy
 // updated macros to take out StRootEvent
 //
@@ -36,7 +39,7 @@ St_DataSet *Event;
 // /disk00001/star/augas100/venus412/hydrogen/b0_10/year_1b/hadronic_on/tfs/rcf062_01_1522evts.dst.root
 
 void QA_bfcread_dst_full_tables(Int_t nevents=10, const char 
-*MainFile="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/rcf070_01_25000evts.dst.root",
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
 const char *fname="qa_full_tables.txt")
 
 {
