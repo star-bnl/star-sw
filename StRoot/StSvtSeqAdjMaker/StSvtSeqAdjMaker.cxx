@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.31 2001/10/02 22:55:57 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.32 2001/10/04 02:56:01 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.32  2001/10/04 02:56:01  caines
+ * Change default pedoffset and black anodes to current values
+ *
  * Revision 1.31  2001/10/02 22:55:57  caines
  * Jun was coorect about B2L8D2H2
  *
@@ -152,7 +155,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   // Set up some defaults
 
   mPedFile = NULL;
-  mPedOffSet = 10;
+  mPedOffSet = 20;
   m_thresh_lo = 3+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
   m_n_seq_lo  = 2;
@@ -589,7 +592,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	    }
 	  }
 	  
-	  status= mHybridRawData->getSequences(2,nSequence,Seq);
+	  status= mHybridRawData->getSequences(240,nSequence,Seq);
 	  length = 0;
 	  
 	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
@@ -668,7 +671,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	  }
 	
 	  //for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
-	  for( int iAnode= 2; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
+	  for( int iAnode= 1; iAnode<mHybridRawData->getAnodeList(anolist)-1; iAnode++)
             {
 	      Anode = anolist[iAnode];
 
