@@ -54,6 +54,7 @@ ClassImp(StKinkMaker)
   mGlobalTrks = 0;
   mParentTrackCandidate=0;             
   mDaughterTrackCandidate=0;
+  mDaughterTrackUnic=0;
   mUseTracker = kTrackerUseBOTH;
   event       = 0;
   kinkVertex  = 0;
