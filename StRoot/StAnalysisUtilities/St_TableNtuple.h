@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.1 1999/09/08 16:36:55 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.2 2000/03/27 19:08:01 fine Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.2  2000/03/27 19:08:01  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.1  1999/09/08 16:36:55  genevb
 // Move St_TableNtuple from xdf2root to StAnalysisUtilities
 //
@@ -50,8 +53,8 @@
 #endif
 
 #include "TTree.h"
+#include "St_Table.h"
 
-class St_Table;
 class TFile;
 class St_XDFFile;
 class TBrowser;
