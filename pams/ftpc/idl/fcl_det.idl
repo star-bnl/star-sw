@@ -34,8 +34,6 @@
        float rad_per_gap;     /* phi angle of sector gap, def 0.05047541 */
        float p_standard;      /* standard air pressure (1013.25hPa) */
        float p_normalized;    /* normalized air pressure (in hPa) */
-       float padtrans_e_min;  /* lowest e-field in padtrans database */
-       float padtrans_e_max;  /* highest e-field in padtrans database */
        float t_zero;          /* time collision to 1st timebin [usec]*/
        float angle_factor;    /* lorentz angle correction factor */
        float pad_err_diff[3]; /* point error[cm] in pad direction as */
@@ -67,4 +65,4 @@
        float percent_he;      /* percentage of helium in chamber gas */
    };
 
-/*  Last mod. for fcl_det: $Date: 2000/11/22 16:54:04 $ */
+/*  Last mod. for fcl_det: $Date: 2000/11/27 12:59:36 $ */
