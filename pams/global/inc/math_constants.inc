@@ -1,5 +1,8 @@
-* $Id: math_constants.inc,v 1.3 1999/05/10 21:04:54 fisyak Exp $
+* $Id: math_constants.inc,v 1.4 1999/06/09 21:34:01 ward Exp $
 * $Log: math_constants.inc,v $
+* Revision 1.4  1999/06/09 21:34:01  ward
+* Replace definition of C_DEG_PER_RAD.
+*
 * Revision 1.3  1999/05/10 21:04:54  fisyak
 * remove double defintion of C_DEG_PER_RAD
 *
@@ -19,7 +22,7 @@
      > C_2_SQRTPI, C_E, C_LN10, C_LN2, C_LOG10E, C_LOG2E, C_PI, C_PI_2,
      > C_PI_4, C_SQRT1_2, C_SQRT2
 
-
+      PARAMETER(  C_DEG_PER_RAD= 57.295779513082320876798155)
       PARAMETER(  C_RAD_PER_DEG=  0.017453292519943295769237)
       PARAMETER(  C_2PI=          6.28318530717958648)
       PARAMETER(  C_EULER=        0.577215664901532860606512)
