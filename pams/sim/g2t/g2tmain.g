@@ -22,7 +22,7 @@ created   22 april 98
 *
       structure GTTC { int version, int nsys , char edir(3), char rdir(3) }
       structure dete { onoff, char ctab, char spec, char csys, char cdet }
-      Integer        G2T_MAIN,AgFHIT0,DUI_CDIR
+      Integer        G2T_MAIN,AgHITSET,DUI_CDIR
       Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
       External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
       Integer        i,j,ld,nhits,nnhits,Iprin
@@ -195,9 +195,11 @@ created   22 april 98
       do j=1,GTTC_Nsys
 
         use dete(j) 
+        Check dete_onoff>0 
 
-        call  GFNHIT  (dete_Csys(1:3)//'H',dete_Cdet,Nhits)
-        Check dete_onoff>0 & Nhits>0
+        Nhits = AgHITSET (dete_Csys(1:3)//'H',dete_Cdet)
+        check  Nhits>0
+
         ctab='g2t_'//dete_ctab(1:3)//'_hit'//o
         prin3 ctab,dete_Csys,dete_Cdet,nhits
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
@@ -208,7 +210,6 @@ created   22 april 98
         i = G2T_NEW_TABLE (ctab, dete_spec, nnhits)
         prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
         
-        Check agfhit0 (dete_Csys,dete_Cdet) == ok
         names(3)=ctab
         i = AMI_CALL ('g2t_get_hits'//o,3,names)
         prin5 i; (' g2tmain ===> ami_call g2t_get_hits  = ',i6)
