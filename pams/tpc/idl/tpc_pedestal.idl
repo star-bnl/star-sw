@@ -13,5 +13,5 @@
        float     ave;        /* average pedestal over sample events */
        float     rms;        /* rms (over samples) of pedestals */
   };
-/*  Last mod. for tfc_tpc_pedestal: $Date: 1997/12/31 14:34:11 $ */
+/*  Last mod. for tfc_tpc_pedestal: $Date: 1998/05/08 15:18:34 $ */
 

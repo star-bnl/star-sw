@@ -13,5 +13,5 @@
        long      row;        /* row number of channel */
        long      sector;     /* sector number of channel */
   };
-/*  Last mod. for tfc_readout_map: $Date: 1997/12/31 14:34:11 $ */
+/*  Last mod. for tfc_readout_map: $Date: 1998/05/08 15:18:32 $ */
 
