@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.6 2004/11/30 19:01:42 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.7 2004/12/07 20:03:49 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -302,12 +302,13 @@ Int_t StEmcTpcFourPMaker::Make()
 	    if(energy < 0.01) continue;
 	    
 	    // now add a fake point to the binmap
-	    //int hitId = m+1000*k; //module+1000*hit, dummy value now, MLM 10/25/04
-	    StMuEmcPoint& point = fakePoints[hitId];
+	    StMuEmcPoint& point = fakePoints[id];
+	    //StMuEmcPoint& point = fakePoints[hitId]; //changed to try to pass tower-index along (actually software id)
 	    point.setEta(eta);
 	    point.setPhi(phi);
 	    point.setEnergy(energy);
-	    binmap.insertPoint(&point, hitId);
+	    //binmap.insertPoint(&point, hitId); //changed to try to pass tower-index along (actually software id)
+	    binmap.insertPoint(&point, id);
 	    //sumEMC += point.getEnergy();
 	    
 	    ++hitId;
@@ -316,12 +317,6 @@ Int_t StEmcTpcFourPMaker::Make()
 
     // Now Bail if the energy is absurd
     cout <<"sumEMC:\t"<<sumEMC<<"\tGeV"<<endl;
-    if(!noAbortions) {
-	if(sumEMC >= EMCSanityThreshold) {
-	    cout <<"StEmcTpcFourPMaker::Maker():\tsumEmc >= EMCSanityThreshold.  return"<<endl;
-	    return kStOK;
-	}
-    }
 
     // Connect the points with the tracks when they are within radiussqr 
     binmap.correlate(radiussqr);
@@ -330,23 +325,21 @@ Int_t StEmcTpcFourPMaker::Make()
 
     // Veto the guess of Tpc particle identification using the 
     // Point correlations
-    for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
-	trackit != binmap.t2p.end(); ++trackit)
-	{
-	    // If the energy of the point is close to the energy of the track,
-	    // then it is most likely an electron:
-	    StMuTrack* track= (*trackit).first;
-	    StProjectedTrack &pTrack = binmap.moddTracks[track];
-	    StMuEmcPoint* point = (*trackit).second;
-	    double trackE = pTrack.E();
-	    double pointE = binmap.moddPoints[point].E();
-	    double ediff = fabs(trackE - pointE);
-	    if(ediff < 0.5*pointE)
-		pTrack.probEIsOne();
-	    if(trackE < 0.3*pointE)
-		pTrack.probEIsZero();
-	    break;
-	}
+    for(trackToPoints::iterator trackit = binmap.t2p.begin(); trackit != binmap.t2p.end(); ++trackit)	{
+	// If the energy of the point is close to the energy of the track,
+	// then it is most likely an electron:
+	StMuTrack* track= (*trackit).first;
+	StProjectedTrack &pTrack = binmap.moddTracks[track];
+	StMuEmcPoint* point = (*trackit).second;
+	double trackE = pTrack.E();
+	double pointE = binmap.moddPoints[point].E();
+	double ediff = fabs(trackE - pointE);
+	if(ediff < 0.5*pointE)
+	    pTrack.probEIsOne();
+	if(trackE < 0.3*pointE)
+	    pTrack.probEIsZero();
+	break;
+    }
 
     // It can't be an electron if there is no point:
     for(trackMap::iterator trackit = binmap.moddTracks.begin();
@@ -359,42 +352,19 @@ Int_t StEmcTpcFourPMaker::Make()
 		    continue;
 		}
 	}
-
+    
     numberPoints = 0;
     double maxEtValue = 0;
-    for(pointMap::iterator point = binmap.moddPoints.begin(); 
-	point != binmap.moddPoints.end(); ++point)
-	{
-	    pointMap::value_type &point_val = *point;
-	    StCorrectedEmcPoint &cPoint = point_val.second;
-	    double eta = cPoint.P().pseudoRapidity();
-	    double et = cPoint.P().e()*sqrt(1.0-tanh(eta)*tanh(eta));
-	    if(et > minPointThreshold)
-		numberPoints++;
-	    if(et > maxEtValue)
-		maxEtValue = et;
-	}
-    if(!noAbortions)
-	if(numberPoints > maxPoints) { // If there are too many points
-	    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tnumberPoints > maxPoints.  return"<<endl;
-	    return kStOK; // don't try to analyze this event
-	}
-    // If it is a hightower trigger event, but somehow the high tower
-    // is missing from the points, skip the event to avoid weird emc biases.
-    if(!noAbortions)
-	{
-	    const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
-	    if(trigger.isTrigger(1101) || trigger.isTrigger(2201))
-		if(maxEtValue < 2.5) {
-		    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tmaxEtValue<2.5.  return"<<endl;
-		    return kStOK;
-		}
-	    if(trigger.isTrigger(1102) || trigger.isTrigger(2202))
-		if(maxEtValue < 3.5) {
-		    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tmaxEtValue<3.5.  return"<<endl;
-		    return kStOK;
-		}
-	}
+    for(pointMap::iterator point = binmap.moddPoints.begin(); point != binmap.moddPoints.end(); ++point) {
+	pointMap::value_type &point_val = *point;
+	StCorrectedEmcPoint &cPoint = point_val.second;
+	double eta = cPoint.P().pseudoRapidity();
+	double et = cPoint.P().e()*sqrt(1.0-tanh(eta)*tanh(eta));
+	if(et > minPointThreshold)
+	    numberPoints++;
+	if(et > maxEtValue)
+	    maxEtValue = et;
+    }
     
     // Add TPC tracks
     long index = 0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.8 2004/11/30 19:01:37 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.9 2004/12/07 20:03:26 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -170,15 +170,15 @@ Int_t StJetMaker::Make()
 
 	int ijet=0;
 	
-	cout <<"Number Jets Found:\t"<<cJets.size()<<endl;
+	cout <<"Number Jets Found(a):\t"<<cJets.size()<<endl;
 	for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
 	    
 	    StProtoJet& pj = (*it);
 	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
-	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.	    
+	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
 	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
 		AbstractFourVec* v = (*it2);
-		cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
+		//cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
 	    }
 	    
 	    /*
@@ -201,14 +201,11 @@ Int_t StJetMaker::Make()
 	    ++ijet;
 	}
 	
-	/*
-	cout << "Number Jets Found: " << muDstJets->nJets() << endl;
-	
+	cout << "Number Jets Found (b): " << muDstJets->nJets() << endl;	
 	for(int i = 0; i < muDstJets->nJets(); i++) {
 	    StJet* jet = (StJet*) muDstJets->jets()->At(i);
-	    cout<<"jet "<<i<<"\t\t"<<jet->E()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
+	    cout<<"jet "<<i<<"\t\t"<<jet->Pt()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
 	}
-	*/
     }
     
     jetTree->Fill();
