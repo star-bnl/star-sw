@@ -102,6 +102,11 @@ unsigned char tdmObject:: isTable () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- Use this function ONLY in a collocated process.
+DS_DATASET_T * tdmObject:: dslPointer() {
+   return pDSthis;
+}
+
 //:----------------------------------------------- PROT FUNCTIONS     --
 
 //:=============================================== CLASS              ==

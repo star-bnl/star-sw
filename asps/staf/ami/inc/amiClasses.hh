@@ -40,7 +40,9 @@ public:
    virtual STAFCV_T init ();
    virtual STAFCV_T start ();
    virtual STAFCV_T stop ();
+
    virtual char * tableSpec (long ntbl);
+   virtual AMI_IO_MODE_T tableMode (long ntbl);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --

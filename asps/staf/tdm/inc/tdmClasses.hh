@@ -38,6 +38,8 @@ public:
    virtual unsigned char isDataset ();
    virtual unsigned char isTable ();
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- Use this function ONLY in a collocated process.
+   virtual DS_DATASET_T * dslPointer();
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --

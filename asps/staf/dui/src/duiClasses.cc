@@ -168,7 +168,7 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
    ||  !isDataset
    ){
       ASUFREE(bName); ASUFREE(nName);
-      EML_ERROR(DSL_ERROR);
+      EML_DSPERROR(DSL_ERROR);
    }
    ASUFREE(bName); ASUFREE(nName);
    EML_SUCCESS(STAFCV_OK);
@@ -292,7 +292,7 @@ STAFCV_T duiDispatcher:: newTable (const char * name, const char * spec
    if( soc->idObject(name,"tdmTable",id) ){
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   tdmTable* p;
+   tdmTable* p=NULL;
    if( !findTable(name,p) ){		//- create object from pointer
       if( !mkTable(name,spec,rows)	//- create pointer
       ||  !findTable(name,p)		//- create object from pointer
