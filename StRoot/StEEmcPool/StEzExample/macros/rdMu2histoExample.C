@@ -39,9 +39,8 @@ int rdMu2histoExample( int nEve=100 ){
 
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
   myDb=new StEEmcDbMaker("eemcDb");
-  myDb->setSectors(5,6);
   gMessMgr->SwitchOff("D");
-  gMessMgr->SwitchOff("I");
+  //gMessMgr->SwitchOff("I");
 
   myMk3=new StEEtowerExampleMaker("eeExample","MuDst");
 
@@ -76,12 +75,6 @@ int rdMu2histoExample( int nEve=100 ){
    // save output histograms
 
    HList.ls();
-   TString outName="bhla";
-   outName+=".hist.root";
-   TFile f( outName,"recreate");
-   assert(f.IsOpen());
-   printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),outName.Data());
-   HList.Write();
-   f.Close();
+   myMk3->saveHisto("aaa");
 
 }
