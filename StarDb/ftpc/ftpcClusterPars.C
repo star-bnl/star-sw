@@ -20,7 +20,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.timeDiffusionErrors[1]	  =      1e-05;
     row.timeDiffusionErrors[2]	  =          0;
     row.lorentzAngleFactor        =          1; // multiplicative lorentz angle correction;
-    row.mDvdpCalcOffset	          =       20.0; // offset for dv/dp-calculation (in Torr) ;
+    row.dvdpCalcOffset	          =       20.0; // offset for dv/dp-calculation (in Torr) ;
     row.padBadFitError	          =      0.095; // additional error for bad-fit clusters;
     row.timeBadFitError	          =      0.033; // additional error for bad-fit clusters;
     row.padUnfoldError	          =      0.019; // additional error for unfolded clusters;
