@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.2 1999/12/04 00:13:36 posk Exp $
+// $Id: StFlowTagMaker.hh,v 1.3 1999/12/15 21:56:23 posk Exp $
 //
 // Description: 
 //  Maker to fill Tag database for flow analysis
@@ -19,6 +19,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.3  1999/12/15 21:56:23  posk
+// Increased number of harmonics from 4 to 6.
+//
 // Revision 1.2  1999/12/04 00:13:36  posk
 // Works with StFlowEvent which works with the new StEvent
 //
@@ -40,8 +43,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
-#include "../StFlowMaker/StFlowEvent.hh"
 #include "FlowTag.h"
+#include "../StFlowMaker/StFlowConstants.hh"
+class StFlowEvent;
 class TH1F;
 class TH1D;
 class TProfile;
@@ -51,13 +55,14 @@ class StFlowTagMaker : public StMaker
 
 public:
 
-               StFlowTagMaker(const Char_t *name="FlowTag");
+               StFlowTagMaker(const Char_t* name = "FlowTag");
   virtual      ~StFlowTagMaker();
+
   Int_t        Init();
   Int_t        Make();
   void         PrintInfo();
   Int_t        Finish();
-  FlowTag_st*  TagPointer() const;        // returns pointer to the tag table
+  FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
 
 private:
 
@@ -67,11 +72,6 @@ private:
 
   FlowTag_st*  pFlowTag;    //! the tag table to fill
   StFlowEvent* pFlowEvent;  //! the event to fill from
-
-  enum {nHars = 4, nSels = 2, nSubs = 2};
-
-  // limits of histograms
-  enum {nPsiBins = 100, nMeanPtBins = 100, nMultBins = 100, n_qBins = 100}; 
 
   struct histHarmonic {
     TH1F *mHistPsi;
@@ -83,15 +83,15 @@ private:
   struct histSubEvent;
   friend struct histSubEvent;
   struct histSubEvent {
-    struct histHarmonic histHarmonics[nHars];
+    struct histHarmonic histHarmonics[Flow::nHars];
   };
 
-  struct histSubEvent histSubEvents[nSels+nSubs]; //!
+  struct histSubEvent histSubEvents[Flow::nSels+Flow::nSubs]; //!
 
   ClassDef(StFlowTagMaker, 1)                     // macro for rootcint
 };
 
-inline FlowTag_st* StFlowTagMaker::TagPointer() const {return pFlowTag;}
+inline FlowTag_st* StFlowTagMaker::TagPointer() const { return pFlowTag; }
 
 #endif
 
