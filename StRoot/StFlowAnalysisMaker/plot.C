@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.33 2001/05/22 20:11:20 posk Exp $
+// $Id: plot.C,v 1.34 2001/11/09 21:15:04 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -15,7 +15,6 @@
 //               Place a symbolic link to this file in StRoot/macros/analysis .
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
 #include <math.h> 
 //const Int_t nHars    = 6;
@@ -46,6 +45,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // also projections of some of these histograms
   const char* baseName[] = {
     "Flow_Res_Sel",
+    "Flow_Trigger",
     "Flow_VertexZ",
     "Flow_VertexXY2D",
     "Flow_EtaSymVerZ2D",
@@ -58,7 +58,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultEta",
     "Flow_MultPart",
     "Flow_Charge",
-    "Flow_Dca_Tpc",
     "Flow_Dca_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
@@ -182,7 +181,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
-  float twopi   = 2. * 3.1416;
+  float twopi   = 2. * TMath::Pi();
   float etaMax  =   1.5;
   float qMax    =   3.5;
   float phiMax  = twopi; 
@@ -421,6 +420,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Draw("E1");
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
+      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
+	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+	gStyle->SetOptStat(0);
+	hist->Draw();
+	lineZeroHar->Draw();
       } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
        	hist->SetMinimum(0.9*(hist->GetMinimum()));
 	if (strstr(shortName[pageNumber],"Weight")!=0) {
@@ -435,14 +439,16 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(10);
 	hist->Draw("E1"); 
       } else if (strstr(shortName[pageNumber],"Eta")!=0) {    // Eta distibutions
+	gStyle->SetOptStat(100110);
  	if (strstr(shortName[pageNumber],"_v")!=0 ) {
 	  hist->SetMaximum(10.);
 	  hist->SetMinimum(-10.);
+	  hist->Draw();
+	  lineYcm->Draw();
+	} else {
+	  hist->Draw();
 	}
-	gStyle->SetOptStat(100110);
-	hist->Draw();
-  	lineZeroY->Draw();
-  	lineYcm->Draw();
+	lineZeroY->Draw();
       } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
  	if (strstr(shortName[pageNumber],"_v")!=0 ) {
 	  hist->SetMaximum(15.);
@@ -465,11 +471,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->SetMarkerColor(2);
 	hist->Draw();
 	lineDiagonal->Draw();
-      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
-	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
-	gStyle->SetOptStat(0);
-	hist->Draw();
-	lineZeroHar->Draw();
       } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
 	gPad->SetLogy();
 	gStyle->SetOptStat(0);
@@ -566,6 +567,9 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.34  2001/11/09 21:15:04  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.33  2001/05/22 20:11:20  posk
 // Changed dEdx graphs.
 //

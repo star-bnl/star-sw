@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: centrality.C,v 1.1 2001/05/22 20:07:56 posk Exp $
+// $Id: centrality.C,v 1.2 2001/11/09 21:14:59 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot flow, etc. as a function of centrality.
@@ -13,7 +13,6 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
 #include <iomanip.h>
 Int_t runNumber      = 0;
@@ -179,6 +178,9 @@ void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: centrality.C,v $
+// Revision 1.2  2001/11/09 21:14:59  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.1  2001/05/22 20:07:56  posk
 // Plots vs. centrality.
 //

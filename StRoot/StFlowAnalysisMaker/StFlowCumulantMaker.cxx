@@ -1,15 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.2 2001/11/08 03:12:24 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.3 2001/11/09 21:14:50 posk Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using the latest cumulant method.
 //                refer to Phy. Rev. C63 (2001) 054906 (new new method)
 //                and      Phy. Rev. C62 (2000) 034902 (old new method)
 //            all Eq. number tag are from new method paper if not specified.
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -368,7 +370,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.2 2001/11/08 03:12:24 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.3 2001/11/09 21:14:50 posk Exp $");
 
   return StMaker::Init();
 }
@@ -960,7 +962,6 @@ Int_t StFlowCumulantMaker::Finish() {
 
   // Write all histograms
   TFile histFile("flow.cumulant.root", "RECREATE");
-  //histFile.SetFormat(1);
   TList* hisList = GetHistList(); 
   for (int k = 0; k < Flow::nSels; k++) 
     for (int j =0; j < Flow::nHars; j++)
@@ -1007,6 +1008,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.3  2001/11/09 21:14:50  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.2  2001/11/08 03:12:24  aihong
 // clean up redundant histograms
 //

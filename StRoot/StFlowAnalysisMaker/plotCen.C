@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.8 2001/05/22 20:11:24 posk Exp $
+// $Id: plotCen.C,v 1.9 2001/11/09 21:15:11 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -16,8 +16,9 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
+#include <math.h>
+ 
 const  Int_t nCens = 8;
 int    runNumber   = 0;
 char   runName[6];
@@ -57,7 +58,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_MultEta",
     "Flow_MultPart",
     "Flow_Charge",
-    "Flow_Dca_Tpc",
     "Flow_Dca_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
@@ -178,7 +178,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   pageNumber--;
 
   // set constants
-  float twopi   = 2. * 3.1416;
+  float twopi   = 2. * TMath::Pi();
   float etaMax  =   1.5;
   float yMin    =  -4.5;
   float yMax    =   4.5;
@@ -497,6 +497,9 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.9  2001/11/09 21:15:11  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.8  2001/05/22 20:11:24  posk
 // Changed dEdx graphs.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.54 2001/08/02 20:42:01 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.55 2001/11/09 21:14:33 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -38,8 +38,6 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
-extern "C" float besi0_(const float&);
-extern "C" float besi1_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
 
@@ -115,13 +113,13 @@ Int_t StFlowAnalysisMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  // Commit with these values.
-  const float triggerMin      =    0.;
-  const float triggerMax      =   10.;
   const float etaMin          =  -4.5;
   const float etaMax          =   4.5;
+  const float triggerMin      =    0.;
+  const float triggerMax      =   10.;
   const float ptMin           =    0.;
-  const float ptMax           =    2.;
+  //const float ptMax           =    2.;
+  const float ptMax           =    8.;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
@@ -173,11 +171,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float dEdxMax       = 0.00004;
 
 
-  enum { // commit with this value
+  enum { //nEtaBins          = 30,
 	 nTriggerBins      = 11,
-	 nEtaBins          = 90,
-         //nEtaBins          = 30,
-	 nPtBins           = 40,
+	 //nPtBins           = 40,
 	 nChargeBins       = 50,
 	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
@@ -217,12 +213,6 @@ Int_t StFlowAnalysisMaker::Init() {
     
 
   // Distance of closest approach
-  // Tpc
-  mHistDcaTpc = new TH1F("Flow_Dca_Tpc", "Flow_Dca_Tpc",
-      nDcaBins, dcaMin, dcaMax);
-  mHistDcaTpc->SetXTitle("Track dca to Vertex (cm)");
-  mHistDcaTpc->SetYTitle("Counts");
-    
   // Ftpc
   mHistDcaFtpc = new TH1F("Flow_Dca_Ftpc", "Flow_Dca_Ftpc",
       nDcaBins, dcaMin, dcaMax);
@@ -357,7 +347,7 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // EtaPtPhi
   mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
-      nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax, nPhi3DBins,
+      Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMax, nPhi3DBins,
       phiMin, phiMax);
   mHistEtaPtPhi3D->SetXTitle("Eta");
   mHistEtaPtPhi3D->SetYTitle("Pt (GeV)");
@@ -365,27 +355,27 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // Yield for all particles
   mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
-    nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
+    Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMax);
   mHistYieldAll2D->Sumw2();
   mHistYieldAll2D->SetXTitle("Pseudorapidty");
   mHistYieldAll2D->SetYTitle("Pt (GeV)");
 
   // Yield for particles correlated with the event plane
   mHistYieldPart2D = new TH2D("Flow_YieldPart2D", "Flow_YieldPart2D",
-    nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart);
+    Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, ptMin, ptMaxPart);
   mHistYieldPart2D->Sumw2();
   mHistYieldPart2D->SetXTitle((char*)xLabel.Data());
   mHistYieldPart2D->SetYTitle("Pt (GeV)");
 
   // Mean Eta in each bin
   mHistBinEta = new TProfile("Flow_Bin_Eta", "Flow_Bin_Eta",
-    nEtaBins, etaMin, etaMax, etaMin, etaMax, "");
+    Flow::nEtaBins, etaMin, etaMax, etaMin, etaMax, "");
   mHistBinEta->SetXTitle((char*)xLabel.Data());
   mHistBinEta->SetYTitle("<Eta>");
   
   // Mean Pt in each bin
   mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
-    nPtBins, ptMin, ptMaxPart, ptMin, ptMaxPart, "");
+    Flow::nPtBins, ptMin, ptMaxPart, ptMin, ptMaxPart, "");
   mHistBinPt->SetXTitle("Pt (GeV)");
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
@@ -904,7 +894,8 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
-        histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
+        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax,
+			   Flow::nPtBins, ptMin, ptMax);
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
       histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
@@ -916,8 +907,8 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
-        histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart,
-							       -100., 100., "");
+        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax, Flow::nPtBins, 
+		 ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -928,7 +919,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), nEtaBins, etaMin, etaMax, -100., 100., "");
+        histTitle->Data(), Flow::nEtaBins, etaMin, etaMax, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
@@ -938,7 +929,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), nPtBins, ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), Flow::nPtBins, ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -947,7 +938,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.54 2001/08/02 20:42:01 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.55 2001/11/09 21:14:33 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1168,7 +1159,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       if (strcmp(pid, "e-")     == 0)  electronN++;
       if (strcmp(pid, "e+")     == 0)  positronN++;
       
-      mHistDcaTpc      ->Fill(dca);
       mHistDcaGlobalTpc->Fill(dcaGlobal);
       mHistChi2Tpc     ->Fill(chi2);
       mHistFitPtsTpc   ->Fill((float)fitPts);
@@ -1402,7 +1392,7 @@ static Double_t qDist(double* q, double* par) {
 
   double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
   Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-    (double)besi0_(2.*q[0]*par[0]*perCent*sqrt(par[1])));
+    TMath::BesselI0(2.*q[0]*par[0]*perCent*sqrt(par[1])));
 
   return dNdq;
 }
@@ -1414,9 +1404,9 @@ static Double_t resEventPlane(double chi) {
 
   double con = 0.626657;                   // sqrt(pi/2)/2
   double arg = chi * chi / 4.;
-  float farg = (float)arg;
 
-  Double_t res = con * chi * exp(-arg) * (double)(besi0_(farg) + besi1_(farg)); 
+  Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) +
+					  TMath::BesselI1(arg)); 
 
   return res;
 }
@@ -1653,6 +1643,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.55  2001/11/09 21:14:33  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.54  2001/08/02 20:42:01  snelling
 // removed hist title conflict
 //

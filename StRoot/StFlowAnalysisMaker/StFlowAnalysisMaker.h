@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.32 2001/08/02 17:41:50 snelling Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.33 2001/11/09 21:14:46 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,7 +45,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.32 2001/08/02 17:41:50 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.33 2001/11/09 21:14:46 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -73,7 +73,6 @@ private:
   // for single histograms
   TH1F*     mHistTrigger;              //!
   TH1F*     mHistCharge;               //!
-  TH1F*     mHistDcaTpc;               //!
   TH1F*     mHistDcaFtpc;              //!
   TH1F*     mHistDcaGlobalTpc;         //!
   TH1F*     mHistDcaGlobalFtpc;        //!
@@ -205,6 +204,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.33  2001/11/09 21:14:46  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.32  2001/08/02 17:41:50  snelling
 // Added trigger histogram
 //

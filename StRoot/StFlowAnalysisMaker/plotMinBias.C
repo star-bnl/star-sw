@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotMinBias.C,v 1.1 2001/05/22 20:03:22 posk Exp $
+// $Id: plotMinBias.C,v 1.2 2001/11/09 21:15:17 posk Exp $
 //
 // Author:       Sergei Voloshin, Art Poskanzer, and Alexander Wetzler Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
@@ -17,7 +17,6 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
 Int_t runNumber      = 0;
 const Int_t nCens    = 8;
@@ -236,6 +235,9 @@ void plotMinBiasAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotMinBias.C,v $
+// Revision 1.2  2001/11/09 21:15:17  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.1  2001/05/22 20:03:22  posk
 // Formerly called minBias.C
 //
