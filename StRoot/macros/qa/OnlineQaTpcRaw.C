@@ -1,6 +1,6 @@
-// $Id: OnlineQaTpcRaw.C,v 1.3 2000/06/12 15:19:02 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.4 2000/06/12 15:20:51 kathy Exp $
 // $Log: OnlineQaTpcRaw.C,v $
-// Revision 1.3  2000/06/12 15:19:02  kathy
+// Revision 1.4  2000/06/12 15:20:51  kathy
 // put in Sergei's code to set output hist file name correctly
 //
 // Revision 1.2  2000/06/09 18:53:28  kathy
@@ -51,9 +51,9 @@ void OnlineQaTpcRaw(
 
 
 // define other values needed:
-  //   const Char_t *outHistFile="OnlineQaTpcRaw";
    const Char_t *topTree="OnlQaTpcTree";
    const Char_t *makerName="RawTpcQa";
+
 
    cout << " OnlineQaTpcRaw.C: output hist file name set to " << 
            outHistFile << ".hist.root" << endl;
