@@ -318,7 +318,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 
   StiKalmanTrackNode * leadNode;
   StiKalmanTrackNode testNode;
-  bool debug= true;
+  bool debug= false;
   if (lastMove>100) debug=false;
   int nAdded       = 0;
   int position;
