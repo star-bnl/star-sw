@@ -249,10 +249,52 @@ C----------------------------------------------------------------------
 
       END
 
+C**********************************************************************
+C----------------------------------------------------------------------
+      SUBROUTINE PROP_FINE_APPROACH(xv,x,p,x0)
+C----------------------------------------------------------------------
+      IMPLICIT NONE
+C   Input arguments   	xv	! 3-dimensional position vector 
+C				! of the main vertex
+C   		   	x	! 3-dimensional position vector 
+C				! of the secondary track
+C			p	! 3-dimensional momentum vector of the 
+C				! reconstructed secondary particle
+C   Output arguments :	x0      ! coordinates of closest approach
+C
+C   Functional Description:	Finds the coordinates of the point of
+C				closest approach from the main vertex
+C				The input vectors must be calculated
+C				at a point close to the vertex.
+C   Created  JUN-1992  S.Margetis
+C   Error conditions 		: None
+C   Status	     		: Tested
+C----------------------------------------------------------------------
+      REAL 	xv(3),x(3),p(3),x0(3),nom
+*----------------------------------------------------------------------
 
-**********
+	nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+	nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
+	x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
 
-      SUBROUTINE prop_track_mom(trk,rc,iflag,p,beta)
+	IF(p(1).ne.0.) THEN
+	 x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
+	 x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+	ELSE
+	 x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
+		IF(p(2).eq.0.) THEN
+		 x0(2)=x(2)
+		ELSE
+		 x0(2)=-x0(3)*p(3)/p(2)
+		ENDIF
+	ENDIF
+
+ 999  RETURN
+      END
+
+C*********************************************************************
+
+      SUBROUTINE PROP_TRACK_MOM(trk,rc,iflag,p,beta)
       IMPLICIT NONE
 C   Input arguments  :	trk(6)	!helix parameters of the track
 C			iflag	!if =5 it is a neutral particle and
@@ -296,3 +338,8 @@ C-------check if it is a neutral particle------------------------------
   999 CONTINUE
       RETURN
       END
+
+
+C******************************************************************************
+
+
