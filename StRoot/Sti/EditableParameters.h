@@ -4,8 +4,8 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-#include "Parameters.h"
-#include "SubjectObserver.h"
+#include "Sti/Parameters.h"
+#include "Sti/Base/SubjectObserver.h"
 
 class EditableParameters : public Parameters, public Subject
 {

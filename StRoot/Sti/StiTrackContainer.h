@@ -23,6 +23,7 @@
 using namespace std;
 
 class StiTrack;
+template<class Filtered>class Filter;
 
 ///Define the Less-Than operator for track ordering in the track container.
 struct StiTrackLessThan
@@ -44,7 +45,8 @@ public:
     void push_back(StiTrack*);
     
     StiTrackContainer();
-    virtual ~StiTrackContainer();
+    virtual ~StiTrackContainer();  
+    int getTrackCount(Filter<StiTrack> * filter) const;
     
 };
 

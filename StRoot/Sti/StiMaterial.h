@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 using namespace std;
-#include "Named.h"
+#include "Sti/Base/Named.h"
 
 class StiMaterial : public Named
 {    
@@ -17,57 +17,52 @@ public:
     
     // con/destructor
     StiMaterial();
+    StiMaterial(const string &name,
+		double z,
+		double a,
+		double density,
+		double radLength,
+		double ionization);
     virtual ~StiMaterial();
     
     /// Get the material density in grams/cubic centimeter
     double getDensity() const { return _density; }
-    /// Get the radiation length in centimeter
+    /// Get the radiation length in g/cm^2
     double getRadLength() const { return _radLength; }
+    /// Get the radiation length in centimeter
+    double getX0() const { return _x0; }
     /// Get the effective atomic mass of the material
     double getA() const { return _a;}
     /// Get the effective atomic number of the material
     double getZ() const { return _z;}
     /// Get the effectice ionization potential of the material
     double getIonization() const { return _ionization;}
-    
-    /// Set all material attributes.
+    /// Get Z over A ratio
+    double getZOverA() { return _zOverA;}
+
     void set(const string& name,
-	     double density,
-	     double radLength,
 	     double a,
 	     double z,
-	     double ionization)
-      {
-	_name = name;
-	_density = density;
-	_radLength = radLength;
-	_a = a;
-	_z = z;
-	_ionization = ionization;
-      }
-    /// Set the density of the material in units of grams/cubic centimeter
-    void setDensity(double val){ _density = val; }
-    /// Set the radiation length of the material in centimeters
-    void setRadLength(double val){ _radLength = val; }
-    /// Set the effective atomic numbere of the material
-    void setA(double val) { _a = val; }
-    /// Set the effective atomic number of the material
-    void setZ(double val) { _z = val; }
-    /// Set the ionization potential of the material in eV
-    void setIonization(double val) { _ionization = val; }
-
+	     double density,
+	     double radLength,
+	     double ionization);
+    
 protected:
     
-    /// g/cm^3
-    double _density;
-    /// cm
-    double _radLength;
     /// Effective Z
     double _z;
     /// Effective A
     double _a;
+    /// g/cm^3
+    double _density;
+    /// radiation length in g/cm^2
+    double _radLength;
     /// Effective ionization (in eV)
     double _ionization;
+    /// zOverA
+    double _zOverA;
+    /// radiation length in cm.
+    double _x0;
 };
 
 //Non-members--------------------------

@@ -1,7 +1,7 @@
 //StiResidualMaker.cxx
 /***************************************************************************
  *
- * $Id: StiResidualMaker.cxx,v 1.3 2002/11/19 22:32:26 andrewar Exp $
+ * $Id: StiResidualMaker.cxx,v 2.0 2002/12/10 21:59:58 pruneau Exp $
  *
  * \class  StiResidualMaker provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.cxx,v $
+ * Revision 2.0  2002/12/10 21:59:58  pruneau
+ * Introducing version 2.0
+ *
  * Revision 1.3  2002/11/19 22:32:26  andrewar
  * Fixed bug with vector of node pointers.
  *

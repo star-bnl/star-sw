@@ -33,41 +33,43 @@ class StiDetector;
 class StiLocalTrackSeedFinder : public StiTrackSeedFinder
 {
 public:
-    StiLocalTrackSeedFinder(StiDetectorContainer*, StiHitContainer*);
-    virtual ~StiLocalTrackSeedFinder();
-
-    //Implementation of Observer pattern
-    virtual void getNewState();
-    
-    //Inherited interface
-    virtual bool hasMore();
-    virtual StiKalmanTrack* next();
-    virtual void reset();
-
-    virtual void addLayer(StiDetector*);
-    virtual void print() const;
-
-private:
-    void increment();
-    void initHitVec();
-
-    ///Extend hit looking for closest neighbor in z
-    bool extendHit(StiHit* hit);
-
-    ///Extrapolate to next layer using straight line, add hit closest in z
-    bool extrapolate();
-
-    StiKalmanTrack* initializeTrack(StiKalmanTrack*);
-    void calculate(StiKalmanTrack*);
-    void calculateWithOrigin(StiKalmanTrack*);
-    
-    //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
-    bool fit(StiKalmanTrack*);
-    
-    //This is just for testing
-    void triggerPartition();
-
-
+  StiLocalTrackSeedFinder(const string& name,
+			  Factory<StiKalmanTrack> * trackFactory,
+			  StiHitContainer         * hitContainer,
+			  StiDetectorContainer    * detectorContainer);
+  virtual ~StiLocalTrackSeedFinder();
+  
+  //Implementation of Observer pattern
+  virtual void getNewState();
+  
+  //Inherited interface
+  virtual bool hasMore();
+  virtual StiKalmanTrack* next();
+  virtual void reset();
+  
+  virtual void addLayer(StiDetector*);
+  virtual void print() const;
+  
+ private:
+  void increment();
+  void initHitVec();
+  
+  ///Extend hit looking for closest neighbor in z
+  bool extendHit(StiHit* hit);
+  
+  ///Extrapolate to next layer using straight line, add hit closest in z
+  bool extrapolate();
+  
+  StiKalmanTrack* initializeTrack(StiKalmanTrack*);
+  void calculate(StiKalmanTrack*);
+  void calculateWithOrigin(StiKalmanTrack*);
+  
+  //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
+  bool fit(StiKalmanTrack*);
+  
+  //This is just for testing
+  void triggerPartition();
+  
 protected:
     typedef vector<StiDetector*> DetVec;
     typedef vector<StiHit*> HitVec;

@@ -18,7 +18,7 @@
 #ifndef StiCircleCalculator_HH
 #define StiCircleCalculator_HH
 
-#include "Messenger.h"
+#include "Sti/Base/Messenger.h"
 #include "StThreeVector.hh"
 
 class StiCircleCalculator

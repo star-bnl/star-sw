@@ -1,6 +1,6 @@
 #ifndef StiTrackMerger_HH
 #define StiTrackMerger_HH
-#include "SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 
 class StiTrackContainer;
 

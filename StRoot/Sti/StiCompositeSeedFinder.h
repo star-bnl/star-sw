@@ -5,24 +5,22 @@
 
 #ifndef StiCompositeSeedFinder_HH
 #define StiCompositeSeedFinder_HH
-
 #include <vector>
 using std::vector;
-
 #include "StiSeedFinder.h"
 
-class StiKalmanTrack;
-class StTrack;
-class StiTrackSeedFinder;
-class StiHitContainer;
-
+/*! Concrete class implementing the StiSeedFinder abstract interface
+  and providing a composite finder, i.e. an extensible collection
+  of finders called sequentially to find track seeds.
+ */
 class StiCompositeSeedFinder : public StiSeedFinder
 {
 public:
-    StiCompositeSeedFinder(Factory<StiKalmanTrack>*,
-			   StiHitContainer*);
+    StiCompositeSeedFinder(const string&            name,
+			   Factory<StiKalmanTrack>* trackFactory,
+			   StiHitContainer*         hitContainer,
+			   StiDetectorContainer*    detectorContainer);
     virtual ~StiCompositeSeedFinder();
-
     //Inherited interface
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
@@ -34,16 +32,11 @@ protected:
 private:
     //Not implemented
     StiCompositeSeedFinder();
-    
     typedef vector<StiTrackSeedFinder*> SeedFinderVec;
-
     //The seedvec holds pointers to objects on the heap, owned by mSeedVec
-    SeedFinderVec mSeedVec;
-    SeedFinderVec::iterator mCurrent;
-    
+    SeedFinderVec           _trackSeedFinders;
+    SeedFinderVec::iterator _currentTrackSeedFinder;
 };
-
-
 
 #endif
 

@@ -30,10 +30,6 @@ using namespace std;
 #include "StThreeVectorF.hh"
 
 //Sti
-#include "StiTrackFinder.h"
-#include "StiTrackFitter.h"
-#include "Filter.h"
-
 class StiHit;
 class StHit;
 class StMeasuredPoint;
@@ -48,9 +44,6 @@ class StiTrack;
     used in track finding and fitting.
 */
 enum StiDirection {kOutsideIn=0, kInsideOut};
-
-typedef Filter<StiTrack> StiTrackFilter;
-
 
 /*! 
    \class StiTrack

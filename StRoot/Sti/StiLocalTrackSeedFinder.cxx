@@ -1,14 +1,8 @@
 //StiLocalTrackSeedFinder.cxx M.L. Miller (Yale Software) 10/01
-
-//std
 #include <math.h>
-
-//scl
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVector.hh"
-
-//Sti
 #include "StiIOBroker.h"
 #include "StiHit.h"
 #include "StiHitContainer.h"
@@ -17,21 +11,27 @@
 #include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 #include "StiLocalTrackSeedFinder.h"
+#include "Sti/Base/MessageType.h"
+#include "Sti/Base/Messenger.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
-StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(StiDetectorContainer* det,
-						 StiHitContainer* hits)
-    : StiTrackSeedFinder(det, hits), mDoHelixFit(false)
+StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
+						 Factory<StiKalmanTrack> * trackFactory,
+						 StiHitContainer         * hitContainer,
+						 StiDetectorContainer    * detectorContainer)
+  : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer),
+    mDoHelixFit(false)
 {
-    mMessenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder()"<<endl;
-    mSubject->attach(this);
-    getNewState();
+  _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Started"<<endl;
+  mSubject->attach(this);
+  getNewState();
+  _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Done"<<endl;
 }
 
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()"<<endl;
     if (mSubject) {
 	mSubject->detach(this);
     }
@@ -39,19 +39,21 @@ StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 
 bool StiLocalTrackSeedFinder::hasMore()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::hasMore()"<<endl;
-    
-    bool val = (mCurrentDet>=mDetVec.begin() && mCurrentDet<mDetVec.end())
-	&& (mCurrentHit>=mHitsBegin && mCurrentHit<mHitsEnd );
+  _messenger <<"StiLocalTrackSeedFinder::hasMore()"<<endl;
+  _messenger << "mCurrentDet>=mDetVec.begin() :" << (mCurrentDet>=mDetVec.begin())<<endl;
+  _messenger << "   mCurrentDet<mDetVec.end() :" << (mCurrentDet!=mDetVec.end())   <<endl;
+  _messenger << "     mCurrentHit>=mHitsBegin :" << (mCurrentHit>=mHitsBegin)     <<endl;
+  _messenger << "        mCurrentHit<mHitsEnd :" << (mCurrentHit!=mHitsEnd)        <<endl;
 
-    mMessenger <<"\t returning:\t"<<val<<endl;
-    
-    return val;
+  bool val = (mCurrentDet>=mDetVec.begin() && mCurrentDet!=mDetVec.end())
+    && (mCurrentHit>=mHitsBegin && mCurrentHit!=mHitsEnd );
+  _messenger <<"StiLocalTrackSeedFinder::hasMore() - INFO - returning:"<<val<<endl;
+  return val;
 }
 
 void StiLocalTrackSeedFinder::reset()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::reset()"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder::reset()"<<endl;
 
     //Set to first detector
     mCurrentDet = mDetVec.begin();
@@ -63,7 +65,7 @@ void StiLocalTrackSeedFinder::reset()
     //Cleanup the base-class
     StiTrackSeedFinder::reset();
 
-    mMessenger <<"\t leaving StiLocalTrackSeedFinder::reset()"<<endl;
+    _messenger <<"\t leaving StiLocalTrackSeedFinder::reset()"<<endl;
 }
 
 void StiLocalTrackSeedFinder::triggerPartition()
@@ -74,97 +76,97 @@ void StiLocalTrackSeedFinder::triggerPartition()
 	cout <<"Partition Triggered. "
 	     <<"OldRadius: "<<mCurrentRadius<<"\tNewRadius: "<<newRadius<<endl;
 	mCurrentRadius=newRadius;
-	mHitStore->partitionUsedHits();
+	_hitContainer->partitionUsedHits();
 	cout <<"\tdone"<<endl;
     }
 }
 
 void StiLocalTrackSeedFinder::initHitVec()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::initHitVec()"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder::initHitVec()"<<endl;
 
     bool go=true;
     while (mCurrentDet<mDetVec.end() && go) {
 
-	mMessenger <<"\tCurrent detector: "<<**mCurrentDet<<endl;
-	mHitsBegin = mHitStore->hitsBegin(*mCurrentDet);
-	mHitsEnd = mHitStore->hitsEnd(*mCurrentDet);
+	_messenger <<"\tCurrent detector: "<<**mCurrentDet<<endl;
+	mHitsBegin = _hitContainer->hitsBegin(*mCurrentDet);
+	mHitsEnd = _hitContainer->hitsEnd(*mCurrentDet);
 
 	if (mHitsBegin<mHitsEnd) {
 	    go=false;
 	    mCurrentHit = mHitsBegin;
-	    mMessenger <<"\tStopping on this detector"<<endl;
+	    _messenger <<"\tStopping on this detector"<<endl;
 	}
 	else {
 	    
-	    mMessenger <<"\tGo to next detector"<<endl;
+	    _messenger <<"\tGo to next detector"<<endl;
 	    ++mCurrentDet;
 	    //triggerPartition();
 	}
     }
-    mMessenger <<"\t leaving StiLocalTrackSeedFinder::initHitVec()"<<endl;
+    _messenger <<"\t leaving StiLocalTrackSeedFinder::initHitVec()"<<endl;
 }
 
 void StiLocalTrackSeedFinder::increment()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::increment()"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder::increment()"<<endl;
     //Check for hit increment:
     if ( mCurrentHit<mHitsEnd ) {
 	
-	mMessenger <<"\tincrementing mCurrentHit"<<endl;
+	_messenger <<"\tincrementing mCurrentHit"<<endl;
 	++mCurrentHit;
     }
     
     //Check to see if we went past the end
     if ( mCurrentHit<mHitsEnd==false) {
-	mMessenger <<"\tincrementing mCurrentDet"<<endl;
+	_messenger <<"\tincrementing mCurrentDet"<<endl;
 	
 	++mCurrentDet;
 	//triggerPartition();
 
-	mMessenger <<"\tcalling initHitVec()"<<endl;
+	_messenger <<"\tcalling initHitVec()"<<endl;
 	initHitVec();
     }
-    mMessenger <<"\t leaving StiLocalTrackSeedFinder::increment()"<<endl;
+    _messenger <<"\t leaving StiLocalTrackSeedFinder::increment()"<<endl;
     
 }
 
 StiKalmanTrack* StiLocalTrackSeedFinder::next()
 {
-    mMessenger <<"StiLocalTrackSeedFinder::next()"<<endl;
-    mMessenger <<"\t Using hits from: "<<**mCurrentDet<<endl;
-    StiKalmanTrack* track = 0;
-
-    while (hasMore() && track==0) {
-	//For now, do one hit at a time, regardless of validity
-	if ( (*mCurrentHit)->timesUsed()==0 ) {
-	    track =makeTrack(*mCurrentHit);
-	}
-	increment();
+  _messenger <<"StiLocalTrackSeedFinder::next()"<<endl;
+  _messenger <<"\t Using hits from: "<<**mCurrentDet<<endl;
+  StiKalmanTrack* track = 0;
+  
+  while (hasMore() && track==0) {
+    //For now, do one hit at a time, regardless of validity
+    if ( (*mCurrentHit)->timesUsed()==0 ) {
+      track =makeTrack(*mCurrentHit);
     }
-    mMessenger <<"\t leaving StiLocalTrackSeedFinder::next()"<<endl;
-    return track;
+    increment();
+  }
+  _messenger <<"\t leaving StiLocalTrackSeedFinder::next()"<<endl;
+  return track;
 }
 
 bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
 {
     //Now look for a hit in the next layer in:
-    mDetStore->setToDetector( hit->detector() );
+    _detectorContainer->setToDetector( hit->detector() );
     
     //Test to see if move in worked
-    if ( mDetStore->moveIn()==false ) {
-	mMessenger<<"StiLocalTrackSeedFinder::makeTrack(StiHit* hit). ERROR:\t"
+    if ( _detectorContainer->moveIn()==false ) {
+	_messenger<<"StiLocalTrackSeedFinder::makeTrack(StiHit* hit). ERROR:\t"
 		  <<"Nowhere to move in to.  Abort"<<endl;
 	return false;
     }
     
-    const StiDetector* newLayer = **mDetStore;
-    mMessenger <<"query hit container for extension hits"<<endl;
+    const StiDetector* newLayer = **_detectorContainer;
+    _messenger <<"query hit container for extension hits"<<endl;
 
     //Now get hits:
-    mHitStore->setDeltaD(mDeltaY);
-    mHitStore->setDeltaZ(mDeltaZ);
-    mHitStore->setRefPoint(newLayer->getPlacement()->getCenterRadius(),
+    _hitContainer->setDeltaD(mDeltaY);
+    _hitContainer->setDeltaZ(mDeltaZ);
+    _hitContainer->setRefPoint(newLayer->getPlacement()->getCenterRadius(),
 			   newLayer->getPlacement()->getCenterRefAngle(),
 			   hit->y(), hit->z());
     
@@ -176,9 +178,9 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
     StiHit* closestHit = 0;
     double dz = DBL_MAX;
     
-    while (mHitStore->hasMore()) {
+    while (_hitContainer->hasMore()) {
 	++nhits;
-	StiHit* theHit = mHitStore->getHit();//Get hit and increment
+	StiHit* theHit = _hitContainer->getHit();//Get hit and increment
 	//if (theHit->isUsed()==false) {
 	if (theHit->timesUsed()==0) {
 	    double theDeltaZ = fabs( theHit->z()-hit->z() );
@@ -189,10 +191,10 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
 	}
     }
     
-    mMessenger <<"StiLocalTrackSeedFinder.  Found "<<nhits<<" Candidate hits"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder.  Found "<<nhits<<" Candidate hits"<<endl;
     //Check if we satisfied the search:
     if ( !closestHit ) {
-	mMessenger<<"StiLocalTrackSeedFinder::makeTrack(StiHit* hit). ERROR:\t"
+	_messenger<<"StiLocalTrackSeedFinder::makeTrack(StiHit* hit). ERROR:\t"
 		  <<"No hits found in next layer.  Abort"<<endl;
 	return false;
     }
@@ -203,55 +205,40 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
 
 StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 {
-    mMessenger <<"StiLocalTrackSeedFinder::makeTrack()"<<endl;
-    StiKalmanTrack* track = 0;
-    mSeedHitVec.clear();
-    mSeedHitVec.push_back(hit);
-
-    //Recursively extend track:
-    bool go=true;
-    while ( go && mSeedHitVec.size()<mSeedLength) {
-	go = extendHit( mSeedHitVec.back() );
-    }
-
-    //Check to see if we failed
-    if ( mSeedHitVec.size()<mSeedLength ) {
-	mMessenger <<"StiLocalTrackSeedFidnder::makeTrack(). ERROR:\t"
-		   <<"Hit extension failed"<<endl;
-	return track;
-    }
-
-    //now use straight line propogation to recursively extend
-    mSkipped = 0;
-    go=true;
-    while ( go && mSkipped<=mMaxSkipped && mSeedHitVec.size()<=mSeedLength+mExtrapMaxLength) {
-	go = extrapolate();
-    }
-    
-    //Check to see if we failed
-    if ( mSeedHitVec.size()<=mSeedLength+mExtrapMinLength) {
-	return track;
-    }
-    
-    //else, seed the track:
-    if (!mFactory) {
-	cout <<"StiLocalTrackSeedFidnder::makeTrack(). ERROR:\t"
-	     <<"Factory is null pointer!"<<endl;
-    }
-
-    //This should be moved into the fit method.  If it fails, we've wasted a served track!
-    track = mFactory->getInstance();
-    track->reset();
-
-    //Test: Scale the errors (MLM 12/10/01)
-    for_each( mSeedHitVec.begin(), mSeedHitVec.end(), ScaleHitError(10.) );
-    //End test
-    
-    track = initializeTrack(track);
-
-    mMessenger <<"\t leaving StiLocalTrackSeedFinder::makeTrack()"<<endl;
-    
+  _messenger <<"StiLocalTrackSeedFinder::makeTrack()"<<endl;
+  StiKalmanTrack* track = 0;
+  mSeedHitVec.clear();
+  mSeedHitVec.push_back(hit);
+  
+  //Recursively extend track:
+  bool go=true;
+  while ( go && mSeedHitVec.size()<mSeedLength) {
+    go = extendHit( mSeedHitVec.back() );
+  }
+  
+  //Check to see if we failed
+  if ( mSeedHitVec.size()<mSeedLength ) {
+    _messenger <<"StiLocalTrackSeedFidnder::makeTrack(). ERROR:\t"
+	       <<"Hit extension failed"<<endl;
     return track;
+  }
+  
+  //now use straight line propogation to recursively extend
+  mSkipped = 0;
+  go=true;
+  while ( go && mSkipped<=mMaxSkipped && mSeedHitVec.size()<=mSeedLength+mExtrapMaxLength) {
+    go = extrapolate();
+  }
+  
+  //Check to see if we failed
+  if ( mSeedHitVec.size()<=mSeedLength+mExtrapMinLength) {
+    return track;
+  }
+  //Test: Scale the errors (MLM 12/10/01)
+  for_each( mSeedHitVec.begin(), mSeedHitVec.end(), ScaleHitError(10.) );
+  track = initializeTrack(_trackFactory->getInstance());
+  _messenger <<"\t leaving StiLocalTrackSeedFinder::makeTrack()"<<endl;
+  return track;
 }
 
 /* We define the following picture
@@ -284,7 +271,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 bool StiLocalTrackSeedFinder::extrapolate()
 {
     //This is a little ugly, but it's faster than manipulating 3-vectors
-    mMessenger <<"StiLocalTrackSeedFinder::extrapolate()"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder::extrapolate()"<<endl;
     //Calculate slope and offset in r-z and r-y projections, then extend
     const StiHit* hit1 = *( mSeedHitVec.begin()+mSeedHitVec.size() -2 ); //second to last
     const StiHit* hit2 = mSeedHitVec.back();
@@ -301,17 +288,17 @@ bool StiLocalTrackSeedFinder::extrapolate()
     }
 
     //Now look for a hit in the next layer in:
-    mDetStore->setToDetector( hit2->detector() );
+    _detectorContainer->setToDetector( hit2->detector() );
     //Test to see if move in worked
     for (unsigned int i=0; i<=mSkipped; ++i) {
-	if ( mDetStore->moveIn()==false) {
-	    mMessenger<<"StiLocalTrackSeedFinder::extrapolate(). ERROR:\t"
-		      <<"Nowhere to move in to.  Abort"<<endl;
-	    return false;
-	}
+      if ( _detectorContainer->moveIn()==false) {
+	_messenger<<"StiLocalTrackSeedFinder::extrapolate(). ERROR:\t"
+		  <<"Nowhere to move in to.  Abort"<<endl;
+	return false;
+      }
     }
 
-    const StiDetector* newLayer = **mDetStore;
+    const StiDetector* newLayer = **_detectorContainer;
     double r3 = newLayer->getPlacement()->getCenterRadius();
     //Temp hack by Mike
     if (r3<=60.) { return false; }
@@ -328,8 +315,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
     double tanplus_ry = tan(beta_ry+alpha_ry);
     double tanminus_ry = tan(beta_ry-alpha_ry);
     if (tanplus_ry==0. || tanminus_ry==0.) {
-	mMessenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
-		  <<"tanplus_ry==0. || tanminus_ry==0."<<endl;
+      _messenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
+		<<"tanplus_ry==0. || tanminus_ry==0."<<endl;
     }
     double y3_minus = (r3-hit1->x())/tanplus_ry + hit1->y();
     double y3_plus = (r3-hit1->x())/tanminus_ry + hit1->y();
@@ -338,31 +325,30 @@ bool StiLocalTrackSeedFinder::extrapolate()
     double m_rz = dr/dz;
     double b_rz = hit2->x() - m_rz * hit2->z();
     double z3 = (r3 - b_rz) / m_rz;
-
+    
     double beta_rz = atan2(dr, dz);
     double rho_rz = sqrt(dr*dr + dz*dz);
     double alpha_rz = atan2(mExtrapDeltaZ, 2.*rho_rz);
     double tanplus_rz = tan(beta_rz+alpha_rz);
     double tanminus_rz = tan(beta_rz-alpha_rz);
     if (tanplus_rz==0. || tanminus_rz==0.) {
-	mMessenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
-		  <<"tanplus_rz==0. || tanminus_rz==0."<<endl;
+      _messenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
+		<<"tanplus_rz==0. || tanminus_rz==0."<<endl;
     }
     double z3_minus = (r3-hit1->x())/tanplus_rz + hit1->z();
     double z3_plus = (r3-hit1->x())/tanminus_rz + hit1->z();
-
-    mMessenger<<"beta_ry: "<<beta_ry<<" alpha_ry: "<<alpha_ry
-	      <<" y3+: "<<y3_plus<<" y3: "<<y3<<" y3-: "<<y3_minus<<endl;
-    mMessenger<<"beta_rz: "<<beta_rz<<" alpha_rz: "<<alpha_rz
-	      <<" z3+: "<<z3_plus<<" z3: "<<z3<<" z3-: "<<z3_minus<<endl;
     
-    mMessenger <<"query hit container for extension hits"<<endl;
+    _messenger<<"beta_ry: "<<beta_ry<<" alpha_ry: "<<alpha_ry
+	      <<" y3+: "<<y3_plus<<" y3: "<<y3<<" y3-: "<<y3_minus<<endl;
+    _messenger<<"beta_rz: "<<beta_rz<<" alpha_rz: "<<alpha_rz
+	      <<" z3+: "<<z3_plus<<" z3: "<<z3<<" z3-: "<<z3_minus<<endl;
+    _messenger <<"query hit container for extension hits"<<endl;
     
     //Now get hits:
-    mHitStore->setDeltaD( fabs(y3_plus-y3_minus) /2.);
-    mHitStore->setDeltaZ( fabs(z3_plus-z3_minus) /2. );
-    mHitStore->setRefPoint(r3, newLayer->getPlacement()->getCenterRefAngle(),
-			   y3, z3);
+    _hitContainer->setDeltaD( fabs(y3_plus-y3_minus) /2.);
+    _hitContainer->setDeltaZ( fabs(z3_plus-z3_minus) /2. );
+    _hitContainer->setRefPoint(r3, newLayer->getPlacement()->getCenterRefAngle(),
+			       y3, z3);
     
     //Loop on hits, find closest to z3 prediction:
     //This too should be replaced by an algorithm call which can be inlined.
@@ -372,15 +358,15 @@ bool StiLocalTrackSeedFinder::extrapolate()
     StiHit* closestHit = 0;
     double dist_max = DBL_MAX;
     
-    while (mHitStore->hasMore()) {
+    while (_hitContainer->hasMore()) {
 	++nhits;
-	StiHit* theHit = mHitStore->getHit(); //Get hit and increment
+	StiHit* theHit = _hitContainer->getHit(); //Get hit and increment
 	//if (theHit->isUsed()==false) {
 	if (theHit->timesUsed()==0) {
 	    double theDeltaZ = fabs( theHit->z() - z3 );
 	    double theDeltaY = fabs( theHit->y() - y3 );
-	    double dist = theDeltaZ*theDeltaZ/max(theHit->z(),z3) +
-		theDeltaY*theDeltaY/max(theHit->y(),y3);
+	    double dist = theDeltaZ*theDeltaZ/max(double(theHit->z()),z3) +
+		theDeltaY*theDeltaY/max(double(theHit->y()),y3);
 	    
 	    if ( dist < dist_max ) {
 		closestHit = theHit;
@@ -388,17 +374,14 @@ bool StiLocalTrackSeedFinder::extrapolate()
 	    }
 	}
     }
-
-    mMessenger <<"StiLocalTrackSeedFinder.  Found "<<nhits<<" Candidate hits"<<endl;
+    _messenger <<"StiLocalTrackSeedFinder.  Found "<<nhits<<" Candidate hits"<<endl;
     //Check if we satisfied the search:
     if ( !closestHit ) {
-	mMessenger<<"StiLocalTrackSeedFinder::extrapolate(extrapolate). ERROR:\t"
+	_messenger<<"StiLocalTrackSeedFinder::extrapolate(extrapolate). ERROR:\t"
 		  <<"No hits found in next layer.  Abort"<<endl;
 	++mSkipped;
 	return true;
     }
-
-    //else
     mSkipped=0;
     mSeedHitVec.push_back(closestHit);
     return true;
@@ -406,99 +389,94 @@ bool StiLocalTrackSeedFinder::extrapolate()
 
 StiKalmanTrack* StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
 {
-    mMessenger <<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*)"<<endl;
-
-    if (mDoHelixFit) {
-	if (mSeedHitVec.size()>=3) { //if false, continue on to calculate
-	    fit(track);
-	    return (fit(track)==true) ? track : 0;
-	}
+  _messenger <<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*)"<<endl;
+  if (mDoHelixFit) {
+    if (mSeedHitVec.size()>=3) { //if false, continue on to calculate
+      fit(track);
+      return (fit(track)==true) ? track : 0;
     }
-
-    if (mUseOrigin==false && mSeedHitVec.size()>=3) { 
-	calculate(track);
-	return track;
-    }
-    else { //No choice!, too few points to exclude vertex assumption
-	calculateWithOrigin(track);
-	return track;
-    }
-
-    mMessenger<<"done."<<endl;
-
+  }
+  if (mUseOrigin==false && mSeedHitVec.size()>=3) { 
+    calculate(track);
+    return track;
+  }
+  else { //No choice!, too few points to exclude vertex assumption
+    calculateWithOrigin(track);
+    return track;
+  }
+  _messenger<<"done."<<endl;
 }
 
 bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
 {
-    mMessenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*)"<<endl;
-
-    mHelixFitter.reset();
-    mHelixFitter.fit( mSeedHitVec );
-    
-    if (mHelixFitter.valid()==false ) {
-	mMessenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*). ERROR:\t"
-		  <<"Helix Fit failed.  abort"<<endl;
-	return false;
-    }
-
-    mMessenger <<"origin: "<<mHelixFitter.xCenter()<<" "<<mHelixFitter.yCenter()<<" "
-	       <<mHelixFitter.z0()<<" "
-	       <<" curvature: "<<mHelixFitter.curvature()<<" "
-	       <<" tanLambda: "<<mHelixFitter.tanLambda()<<endl;
-    mMessenger<<"\tInitialzie Track:\t";
-    
-    track->initialize( mHelixFitter.curvature(), mHelixFitter.tanLambda(),
-		       StThreeVectorD(mHelixFitter.xCenter(), mHelixFitter.yCenter(), 0.),
-		       mSeedHitVec);
-    return true;
+  _messenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*)"<<endl;
+  
+  mHelixFitter.reset();
+  mHelixFitter.fit( mSeedHitVec );
+  
+  if (mHelixFitter.valid()==false ) {
+    _messenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*). ERROR:\t"
+	      <<"Helix Fit failed.  abort"<<endl;
+    return false;
+  }
+  
+  _messenger <<"origin: "<<mHelixFitter.xCenter()<<" "<<mHelixFitter.yCenter()<<" "
+	     <<mHelixFitter.z0()<<" "
+	     <<" curvature: "<<mHelixFitter.curvature()<<" "
+	     <<" tanLambda: "<<mHelixFitter.tanLambda()<<endl;
+  _messenger<<"\tInitialzie Track:\t";
+  track->initialize( mHelixFitter.curvature(), mHelixFitter.tanLambda(),
+		     StThreeVectorD(mHelixFitter.xCenter(), mHelixFitter.yCenter(), 0.),
+		     mSeedHitVec);
+  return true;
 }
 
 void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
 {
-    mMessenger<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*)"<<endl;
-
-    const StThreeVectorF& outside = mSeedHitVec.front()->globalPosition();
-    const StThreeVectorF& middle = (*(mSeedHitVec.begin()+mSeedHitVec.size()/2))->globalPosition();
-    const StThreeVectorF& inside = mSeedHitVec.back()->globalPosition();
-
-    mMessenger<<"\tCalculate circle parameters:\t";
-    mHelixCalculator.calculate( StThreeVector<double>( inside.x(), inside.y(), inside.z() ),
-				StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
-				StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
-
-    mMessenger<<"\tdone."<<endl;
-    mMessenger <<"origin: "<<mHelixCalculator.xCenter()<<" "<<mHelixCalculator.yCenter()<<" "
-	       <<mHelixCalculator.z0()<<" "
-	       <<" curvature: "<<mHelixCalculator.curvature()<<" "
-	       <<" tanLambda: "<<mHelixCalculator.tanLambda()<<endl;
-
-    mMessenger<<"\tInitialzie Track:\t";
-    track->initialize( mHelixCalculator.curvature(), mHelixCalculator.tanLambda(),
-		       StThreeVectorD(mHelixCalculator.xCenter(), mHelixCalculator.yCenter(), 0.),
-		       mSeedHitVec);    
+  _messenger<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*)"<<endl;
+  
+  const StThreeVectorF& outside = mSeedHitVec.front()->globalPosition();
+  const StThreeVectorF& middle = (*(mSeedHitVec.begin()+mSeedHitVec.size()/2))->globalPosition();
+  const StThreeVectorF& inside = mSeedHitVec.back()->globalPosition();
+  
+  _messenger<<"\tCalculate circle parameters:\t";
+  mHelixCalculator.calculate( StThreeVector<double>( inside.x(), inside.y(), inside.z() ),
+			      StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
+			      StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
+  
+  _messenger<<"\tdone."<<endl;
+  _messenger <<"origin: "<<mHelixCalculator.xCenter()<<" "<<mHelixCalculator.yCenter()<<" "
+	     <<mHelixCalculator.z0()<<" "
+	     <<" curvature: "<<mHelixCalculator.curvature()<<" "
+	     <<" tanLambda: "<<mHelixCalculator.tanLambda()<<endl;
+  
+  _messenger<<"\tInitialzie Track:\t";
+  track->initialize( mHelixCalculator.curvature(), mHelixCalculator.tanLambda(),
+		     StThreeVectorD(mHelixCalculator.xCenter(), mHelixCalculator.yCenter(), 0.),
+		     mSeedHitVec);    
 }
 
 void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
 {
-    mMessenger<<"StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack*)"<<endl;
-    const StThreeVectorF& outside = mSeedHitVec.front()->globalPosition();
-    const StThreeVectorF& middle = mSeedHitVec.back()->globalPosition();
-
-    mMessenger<<"\tCalculate circle parameters:\t";
-    mHelixCalculator.calculate( StThreeVector<double>(0., 0., 0.),
-				StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
-				StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
-
-    mMessenger<<"\tdone."<<endl;
-    mMessenger <<"origin: "<<mHelixCalculator.xCenter()<<" "<<mHelixCalculator.yCenter()<<" "
-	       <<mHelixCalculator.z0()<<" "
-	       <<" curvature: "<<mHelixCalculator.curvature()<<" "
-	       <<" tanLambda: "<<mHelixCalculator.tanLambda()<<endl;
-
-    mMessenger<<"\tInitialzie Track:\t";
-    track->initialize( mHelixCalculator.curvature(), mHelixCalculator.tanLambda(),
-		       StThreeVectorD(mHelixCalculator.xCenter(), mHelixCalculator.yCenter(), 0.),
-		       mSeedHitVec);    
+  _messenger<<"StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack*)"<<endl;
+  const StThreeVectorF& outside = mSeedHitVec.front()->globalPosition();
+  const StThreeVectorF& middle = mSeedHitVec.back()->globalPosition();
+  
+  _messenger<<"\tCalculate circle parameters:\t";
+  mHelixCalculator.calculate( StThreeVector<double>(0., 0., 0.),
+			      StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
+			      StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
+  
+  _messenger<<"\tdone."<<endl;
+  _messenger <<"origin: "<<mHelixCalculator.xCenter()<<" "<<mHelixCalculator.yCenter()<<" "
+	     <<mHelixCalculator.z0()<<" "
+	     <<" curvature: "<<mHelixCalculator.curvature()<<" "
+	     <<" tanLambda: "<<mHelixCalculator.tanLambda()<<endl;
+  
+  _messenger<<"\tInitialzie Track:\t";
+  track->initialize( mHelixCalculator.curvature(), mHelixCalculator.tanLambda(),
+		     StThreeVectorD(mHelixCalculator.xCenter(), mHelixCalculator.yCenter(), 0.),
+		     mSeedHitVec);    
 }
 
 void StiLocalTrackSeedFinder::getNewState()
@@ -518,8 +496,8 @@ void StiLocalTrackSeedFinder::getNewState()
 
 void StiLocalTrackSeedFinder::addLayer(StiDetector* det)
 {
-    mDetVec.push_back(det);
-    sort(mDetVec.begin(), mDetVec.end(), RPhiLessThan());
+  mDetVec.push_back(det);
+  sort(mDetVec.begin(), mDetVec.end(), RPhiLessThan());
 }
 
 

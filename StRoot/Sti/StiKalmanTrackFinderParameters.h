@@ -8,129 +8,112 @@ class StiKalmanTrack;
 class StiKalmanTrackFinderParameters
 {
 public: 
-
-
-    StiKalmanTrackFinderParameters()
+  StiKalmanTrackFinderParameters()
     {
-	//setDefaults();
+      //setDefaults();
     }
-
-    ~StiKalmanTrackFinderParameters()
+  
+  ~StiKalmanTrackFinderParameters()
     {}
-
-    void setUseTrackFilter(bool option)
+  
+  void setUseTrackFilter(bool option)
     {
-	useTrackFilter = option;
+      useTrackFilter = option;
     }
-
-    void setXtrapolateToMainVertex(bool option)
+  
+  void setElossCalculated(bool option)
     {
-	xtrapolateToMainVertex = option;
+      elossCalculated = option;
     }
-
-    void setElossCalculated(bool option)
+  
+  void setMCSCalculated(bool option)
     {
-	elossCalculated = option;
+      mcsCalculated = option;
     }
-	
-    void setMCSCalculated(bool option)
+  
+  void setField(double f)
     {
-	mcsCalculated = option;
+      field = f;
     }
-
-    void setField(double f)
+  
+  void setMassHypothesis(double m)
     {
-	field = f;
+      massHypothesis = m;
     }
-
-    void setMassHypothesis(double m)
+  
+  void   setMinContiguousHitCount(int count)
     {
-	massHypothesis = m;
+      minContiguousHitCountForNullReset = count;
     }
-
-    void   setMinContiguousHitCount(int count)
+  
+  void   setMaxNullCount(int count)
     {
-	minContiguousHitCountForNullReset = count;
+      maxNullCount = count;
     }
-	
-    void   setMaxNullCount(int count)
+  
+  void   setMaxContiguousNullCount(int count)
     {
-	maxNullCount = count;
+      maxContiguousNullCount = count;
     }
-	
-    void   setMaxContiguousNullCount(int count)
+  
+  void   setMaxChi2ForSelection(double chi)
     {
-	maxContiguousNullCount = count;
+      maxChi2ForSelection = chi;
     }
-	
-    void   setMaxChi2ForSelection(double chi)
+  
+  void   setMinSearchWindow(double val)
     {
-	maxChi2ForSelection = chi;
+      minSearchWindow = val;
     }
-	
-    void   setMinSearchWindow(double val)
+  
+  void   setMaxSearchWindow(double val)
     {
-	minSearchWindow = val;
+      maxSearchWindow = val;
     }
-	
-    void   setMaxSearchWindow(double val)
+  
+  void   setSearchWindowScale(double val)
     {
-	maxSearchWindow = val;
+      searchWindowScale = val;
     }
-	
-    void   setSearchWindowScale(double val)
+  
+  bool     getUseTrackFilter()
     {
-	searchWindowScale = val;
+      return useTrackFilter;
     }
-	
-    bool     getXtrapolateToMainVertex()
+  
+  double   getMinSearchWindow()
     {
-	return xtrapolateToMainVertex;
+      return minSearchWindow;
     }
-
-    bool     getUseTrackFilter()
+  
+  double   getMaxSearchWindow()
     {
-	return useTrackFilter;
+      return maxSearchWindow;
     }
-
-    double   getMinSearchWindow()
+  
+  double   getSearchWindowScale()
     {
-	return minSearchWindow;
+      return searchWindowScale;
     }
-	
-    double   getMaxSearchWindow()
+  
+  double   getMassHypothesis()
     {
-	return maxSearchWindow;
+      return massHypothesis;
     }
-	
-    double   getSearchWindowScale()
-    {
-	return searchWindowScale;
-    }
-
-    double   getMassHypothesis()
-    {
-	return massHypothesis;
-    }
-
-    friend StiKalmanTrackFinder;
-    friend StiKalmanTrack;
-    friend StiKalmanTrackNode;
-	
-protected:
+  
+  friend StiKalmanTrackFinder;
+  friend StiKalmanTrack;
+  friend StiKalmanTrackNode;
+  
+ protected:
 	
     bool   useTrackFilter;
-    bool   xtrapolateToMainVertex;
-
-    //The following are set by StiKalmanTrackFinder::getNewState()
     bool   elossCalculated; //check
     bool   mcsCalculated; //check
     double field; //check
-    
     int    maxNullCount; //check
     int    maxContiguousNullCount; //check
     int    minContiguousHitCountForNullReset; //check
-    
     double minSearchWindow; //check
     double maxSearchWindow; //check
     double searchWindowScale; //check

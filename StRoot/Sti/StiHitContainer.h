@@ -26,8 +26,7 @@
   make any distinction between hits that come from different sides of the TPC
   central membrane.  This is motivated by the fact that the east and west
   sectors mark a clear distinction in data taking, but that distinction is
-  unimportant in pattern recognition.  For more on the nature of the mapping
-  see StiGeometryTransform.
+  unimportant in pattern recognition.  
   <p>
   First we describe the storage of the hits.  StiHitContainer treats the hits
   from a common detector plane (e.g., TPC padrow 13, sector 12) as a sorted
@@ -54,8 +53,8 @@
   of the hits from a given detector plane.  Perhaps it is easier to
   elucidate via an example.  Suppose one is interested in the hits
   corresponding to TPC sector 12, padrow 13.  Then, this sector/padrow
-  combination can be easily mapped to a position and refAngle (see
-  StiGeometryTransform).  In this detector one can always specify a
+  combination can be easily mapped to a position and refAngle.  
+  In this detector one can always specify a
   'local' coordinate system where any hit is then fully described by two
   numbers: local y and z (see StiHit for more inforamtion), where y is
   the distance along the plane (padrow) and z is the global z.  Now,
@@ -68,11 +67,10 @@
   the hits within the specified volume, and they can be retreived via the
   iterator like interface specified by hasMore() and getHit().
   <p>
-  Additionally, StiHitContainer has been modified to provide a similair
+  Additionally, StiHitContainer has been modified to provide a similar
   interface to the primary vertices in a STAR event.  Access to the
   verices is via the methods addVertex() and vertices().  Each vertex is
-  mapped to an StiHit object (see StiGeometryTransform) and stored in a
-  hit-vector.
+  mapped to an StiHit object and stored in a  hit-vector.
   <p>
   StiHitContainer must be cleared, filled, and sorted for each
   event.  A manual call to sortHits() is necessary to achieve the most
@@ -336,8 +334,7 @@ inline StiHit* StiHitContainer::getHit()
 
 //vertex inlines
 
-/*! Each vertex can be mapped to a StiHit object (see
-  the documentation for StiGeometryTransform).
+/*! Each vertex can be mapped to a StiHit object
 */
 inline void StiHitContainer::addVertex(StiHit* val)
 {

@@ -3,8 +3,8 @@
 
 /*! Pure virtual class defining an editable filter. */
 
-#include "Filter.h"
-#include "EditableParameters.h"
+#include "Sti/Base/Filter.h"
+#include "Sti/EditableParameters.h"
 
 template <class Filtered>
 class EditableFilter : public Filter<Filtered>, public EditableParameters

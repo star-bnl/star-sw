@@ -13,7 +13,7 @@
 
 //Sti
 #include "StiIOBroker.h"
-#include "Messenger.h"
+#include "Sti/Base/Messenger.h"
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 #include "StiCompositeTreeNode.h"

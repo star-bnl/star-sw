@@ -17,39 +17,36 @@
 #define StiToolkit_H 1
 
 class   StEvent;
+template<class Event>class StiDetectorGroup;
 class   StiDetector;
 class   StiTrack;
 class   StiKalmanTrack;
 class   StiKalmanTrackNode;
 class   StiHit;
 class   StiMcTrack;
+class   StiDetectorBuilder;
+class   StiMasterDetectorBuilder;
 template<class Factorized> class Factory;
 template<class Filtered>   class Filter;
 template<class T>          class StiCompositeTreeNode;
 template<class X,class y>  class StiHitLoader;
+template<class X,class y>  class StiMasterHitLoader;
 
 
 // common object containers
 
 class 	StiDetectorContainer;
 class 	StiHitContainer;
-class 	StiHitFiller;
 class 	StiTrackContainer;
 // service and convenience class objects.
-class 	StiGeometryTransform;
-class 	StiCoordinateTransform;
 class 	StiDetectorFinder;
 class 	StiSeedFinder;
 class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
-//class 	StiDisplayManager;
-//class 	StiEvaluator;
-//class 	StiEventAssociator;
 class   StiIOBroker;
 class   StiDisplayManager;
 class   StAssociationMaker;
-class   StiHitErrorCalculator;
 class   Parameter;
 
 /** 
@@ -68,31 +65,26 @@ public:
   virtual Factory<Parameter>  * getParameterFactory()=0;
   virtual Factory< Filter<StiTrack>   >  * getTrackFilterFactory()=0;
   
-  // common object containers
+  // common object containers 
+  virtual StiMasterDetectorBuilder * getDetectorBuilder()=0;
   virtual StiDetectorContainer  * getDetectorContainer()=0;
   virtual StiHitContainer       * getHitContainer()=0;
   virtual StiTrackContainer     * getTrackContainer()=0;
   virtual StiTrackContainer     * getMcTrackContainer()=0;
   
   // service and convenience class objects.
-  virtual StiGeometryTransform * getGeometryTransform()=0;
-  virtual StiCoordinateTransform * getCoordinateTransform()=0;
   virtual StiDetectorFinder    * getDetectorFinder()=0;
   virtual StiSeedFinder        * getTrackSeedFinder()=0;
   virtual StiTrackFinder       * getTrackFinder()=0;
   virtual StiTrackFitter       * getTrackFitter()=0;
   virtual StiTrackMerger       * getTrackMerger()=0;
   virtual StiDisplayManager    * getDisplayManager()=0;
-  //	virtual StiEvaluator         * getEvaluator(const string&)=0;
-  //virtual StiEvaluator         * getEvaluator()=0;
-  //virtual StiEventAssociator   * getEventAssociator()=0;
   virtual StiIOBroker * getIOBroker()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
-  virtual StiHitLoader<StEvent,StiGeometryTransform> * getHitLoader()=0;
-  virtual StiHitFiller * getHitFiller()=0;
+  virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
   
-  virtual StiHitErrorCalculator * getHitErrorCalculator() = 0;
+  virtual void add(StiDetectorGroup<StEvent>* detectorGroup)=0;
 
   static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();

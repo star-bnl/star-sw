@@ -1,19 +1,11 @@
 //StiHit.cxx
 //M.L. Miller (Yale Software)
 //04/01
-
-//STD
 #include <iostream.h>
-
-//SCL
-#include "StThreeVectorD.hh"
-#include "StThreeVectorF.hh"
-
-//StEvent
 #include "StEventTypes.h"
-
-//Sti
 #include "StiHit.h"
+#include "StiDetector.h"
+#include "StiPlacement.h"
 
 StiHit::StiHit()
 {
@@ -21,13 +13,7 @@ StiHit::StiHit()
 }
 
 StiHit::~StiHit()
-{
-}
-
-const StThreeVectorF& StiHit::globalPosition() const
-{
-    return msthit->position();
-}
+{}
 
 void StiHit::setError(const StMatrixF& matrix)
 {
@@ -37,27 +23,11 @@ void StiHit::setError(const StMatrixF& matrix)
     msxx = matrix(x,x);
     msyy = matrix(y,y);
     mszz = matrix(z,z);
-
     //Off Diagonal
     msxy = matrix(x,y);
     msxz = matrix(x,z);
     msyz = matrix(y,z);
-    
     return;
-}
-
-double StiHit::getEloss()
-{
-	if (msthit)
-		{
-			StHit * hit = dynamic_cast<StHit *>(msthit);
-			if (hit)
-				return hit->charge();
-			else
-				return -1;// signals error condition or absence of data
-		}
-	else
-		return -2;// signals error condition or absence of data
 }
 
 
@@ -71,3 +41,5 @@ ostream& operator<<(ostream& os, const StiHit& hit)
 	      <<hit.detector() //pointer to detector
 	      <<"times Used: "<<hit.timesUsed();
 }
+
+

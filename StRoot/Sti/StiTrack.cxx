@@ -2,14 +2,13 @@
 #include <stdexcept>
 #include <stdlib.h>
 
-//StEvent
-#include "StEventTypes.h"
-
-//Sti
-#include "StiHit.h"
-#include "StiConstants.h"
-#include "StiTrack.h"
-#include "StiTrackFitter.h"
+//#include "StEventTypes.h"
+#include "Sti/StiHit.h"
+#include "Sti/StiTrack.h"
+#include "Sti/StiTrackFitter.h"
+#include "Sti/StiTrackFinder.h"
+#include "Sti/StiTrackFitter.h"
+#include "Sti/Base/Filter.h"
 
 StiTrackFinder * StiTrack::trackFinder = 0;
 StiTrackFitter * StiTrack::trackFitter = 0;

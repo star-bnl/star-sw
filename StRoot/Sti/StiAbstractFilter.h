@@ -18,7 +18,7 @@
 #include <iostream>
 using namespace std;
 
-#include "SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 class StiIOBroker;
 
 template <class T>

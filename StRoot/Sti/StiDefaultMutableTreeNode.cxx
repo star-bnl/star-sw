@@ -1,4 +1,4 @@
-
+#include <stdexcept>
 #include "StiDefaultMutableTreeNode.h"
 
 
@@ -40,52 +40,25 @@ void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * no
   children = node->children;
 }
 
+/// Removes <code>newChild</code> from its present parent (if it has a
+/// parent), sets the child's parent to this node, and then adds the child
+/// to this node's child array at index <code>childIndex</code>.
+/// <code>newChild</code> must not be null and must not be an ancestor of
+/// this node.
+///
+/// @param	newChild	the StiTreeNode * to insert under this node
+/// @param	childIndex	the index in this node's child array
+///				where this node is to be inserted
+/// @see	#isNodeDescendant
 void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
-  //--------------------------------------------------------------
-  /// Removes <code>newChild</code> from its present parent (if it has a
-  /// parent), sets the child's parent to this node, and then adds the child
-  /// to this node's child array at index <code>childIndex</code>.
-  /// <code>newChild</code> must not be null and must not be an ancestor of
-  /// this node.
-  ///
-  /// @param	newChild	the StiTreeNode * to insert under this node
-  /// @param	childIndex	the index in this node's child array
-  ///				where this node is to be inserted
-  /// @see	#isNodeDescendant
-  //--------------------------------------------------------------
 {
-	/*
-  if (!allowsChildren) 
-    {
-      cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
-	   << "     Attempting to insert a node into a node " << endl
-	   << "     which does not accept children" << endl;
-      return;
-			}
-	*/
-	if (newChild == 0) 
-    {
-      cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
-	   << "     Attempting to insert null object " << endl;
-      return;
-    } 
+  if (newChild == 0) 
+      throw runtime_error("StiDefaultMutableTreeNode::insert() - ERROR - Attempting to insert null object");
   else if (isNodeAncestor(newChild)) 
-    {
-      cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
-	   << "     Attempting to insert node which is an ancestor" << endl;
-      return;
-    }
-  
+      throw runtime_error("StiDefaultMutableTreeNode::insert() - ERROR - Attempting to insert node which is an ancestor");
   StiDefaultMutableTreeNode * oldParent = (StiDefaultMutableTreeNode *) newChild->getParent();
-  
-  if (oldParent != 0) 
-    {
-      oldParent->remove(newChild);
-    }
+  if (oldParent != 0) oldParent->remove(newChild);
   newChild->setParent(this);
-  //newChild->setDepth(1+mDepth);
-  
-  // insert the child at the end of the queue for now....
   children.push_back(dynamic_cast<StiDefaultMutableTreeNode *>(newChild));
 }
 

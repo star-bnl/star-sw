@@ -1,7 +1,7 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResiduals.h,v 1.2 2002/11/15 17:06:31 andrewar Exp $
+ * $Id: StiResiduals.h,v 2.0 2002/12/10 21:59:59 pruneau Exp $
  *
  * /author Andrew Rose, Wayne State University 
  * October 2002
@@ -11,6 +11,9 @@
  *
  ******************
  * $Log: StiResiduals.h,v $
+ * Revision 2.0  2002/12/10 21:59:59  pruneau
+ * Introducing version 2.0
+ *
  * Revision 1.2  2002/11/15 17:06:31  andrewar
  * Fixed bug with virtual base class destructor.
  *

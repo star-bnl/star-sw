@@ -1,10 +1,8 @@
-#include "Parameters.h"
-#include "Parameter.h"
+#include "Sti/Base/Parameter.h"
+#include "Sti/Base/Factory.h"
+#include "Sti/Parameters.h"
 #include "StiToolkit.h"
-#include "Factory.h"
 #include <stdexcept>
-
-//Factory<Parameter> * Parameters::_factory = 0;
 
 Parameters::Parameters()
   : Named("noName"),
