@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.208 2001/07/03 21:53:39 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.209 2001/07/12 23:35:03 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -82,10 +82,15 @@ Bfc_st BFC[] = {
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
+  
   {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
-  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,ftpc,svt,emcY2,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                                           ,"Production chain for summer 2001 data (incomplete)",kFALSE},
+  //  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,ftpc,svt,emcY2,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+  //                                                         ,"Production chain for summer 2001 data (incomplete)",kFALSE},
+  {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
+                                                                              "SVT makers for Data",kFALSE}, 
+  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                                           ,"Production chain for summer 2001 data (temptative)",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -264,7 +269,7 @@ Bfc_st BFC[] = {
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
