@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.23 2000/02/18 20:07:57 snelling Exp $
+* $Id: tph.F,v 1.24 2000/02/26 01:51:45 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.24  2000/02/26 01:51:45  snelling
+* cleanup related to Db
+*
 * Revision 1.23  2000/02/18 20:07:57  snelling
 * Changed tph function into tpc functions y(using database)
 *
@@ -339,18 +342,16 @@ c     Put q (magnitude of hit) into units of energy loss
               tphit(tphit_h.nok).dq = 0.
               
 c     Transform x(ihit) to local x coordinates invec(1)              
-              istatus = tpc_pad_to_x(x(ihit),
-     &             float(irow), invec(1), pad_plane_h, pad_plane)
+              istatus = tpc_pad_to_x(x(ihit), float(irow), invec(1))
               
 c     Transform row to y coordinate invec(2)              
               invec(2) = 0.
-              istatus = tpc_row_to_y(float(irow),
-     &             invec(2), pad_plane_h, pad_plane)
+              istatus = tpc_row_to_y(float(irow), invec(2))
 
 c     Correct z for weighted mean function used to determine it 
 c     (using the drift velocity and tau)
               invec(3) = z(ihit)
-              istatus = tpc_drift_velocity(dvel, dummy1, dummy1)
+              istatus = tpc_drift_velocity(dvel)
               if (tclpar(1).tfit .eq. 0) then 
                  invec(3) = z(ihit) - 
      &                3.0 * tsspar(1).tau * dvel * 1.0E-6
