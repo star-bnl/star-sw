@@ -1,5 +1,8 @@
-// $Id: read_bfc_hist_list.C,v 1.3 1999/06/22 18:14:26 kathy Exp $ 
+// $Id: read_bfc_hist_list.C,v 1.4 1999/07/13 00:29:54 kathy Exp $ 
 // $Log: read_bfc_hist_list.C,v $
+// Revision 1.4  1999/07/13 00:29:54  kathy
+// updated macros to take out StRootEvent
+//
 // Revision 1.3  1999/06/22 18:14:26  kathy
 // change default input files and fix name of macro
 //
@@ -31,8 +34,8 @@ void read_bfc_hist_list(Int_t nevents=1, const char
     gSystem->Load("St_Tables");
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
    
+
 //  Input Tree
   StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
   treeMk->SetIOMode("r");

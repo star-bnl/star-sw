@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_file_to_ps.C,v 1.2 1999/06/22 18:14:25 kathy Exp $
+// $Id: bfcread_hist_file_to_ps.C,v 1.3 1999/07/13 00:29:54 kathy Exp $
 // $Log: bfcread_hist_file_to_ps.C,v $
+// Revision 1.3  1999/07/13 00:29:54  kathy
+// updated macros to take out StRootEvent
+//
 // Revision 1.2  1999/06/22 18:14:25  kathy
 // change default input files and fix name of macro
 //
@@ -44,7 +47,6 @@ void bfcread_hist_file_to_ps(Int_t nevents=1,
     gSystem->Load("StTreeMaker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
 
 
 //  Input Tree

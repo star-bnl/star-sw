@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_hist_to_ps.C,v 1.1 1999/06/25 19:43:47 kathy Exp $
+// $Id: QA_bfcread_hist_to_ps.C,v 1.2 1999/07/13 00:29:53 kathy Exp $
 // $Log: QA_bfcread_hist_to_ps.C,v $
+// Revision 1.2  1999/07/13 00:29:53  kathy
+// updated macros to take out StRootEvent
+//
 // Revision 1.1  1999/06/25 19:43:47  kathy
 // new macros for official QA use
 //
@@ -41,7 +44,7 @@ void QA_bfcread_hist_to_ps(
     gSystem->Load("StTreeMaker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
+
 
 
 //  Input Tree

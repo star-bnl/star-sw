@@ -1,5 +1,8 @@
-// $Id: DrawDstHistNew.C,v 1.2 1999/06/11 20:07:39 kathy Exp $
+// $Id: DrawDstHistNew.C,v 1.3 1999/07/13 00:29:52 kathy Exp $
 // $Log: DrawDstHistNew.C,v $
+// Revision 1.3  1999/07/13 00:29:52  kathy
+// updated macros to take out StRootEvent
+//
 // Revision 1.2  1999/06/11 20:07:39  kathy
 // changed default output file name
 //
@@ -43,7 +46,7 @@ StChain *chain;
 TBrowser *brow=0;
 
 void DrawDstHistNew(Int_t nevents=1, 
-             const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root",
+             const char *MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
              const Char_t *psFile="QA_hist_DrawDstHistNew.ps")
 {
 //
@@ -57,7 +60,7 @@ void DrawDstHistNew(Int_t nevents=1,
     gSystem->Load("StTreeMaker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
+
 
 
 //  Setup top part of chain
