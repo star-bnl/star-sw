@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.4 2000/04/06 14:51:11 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.5 2000/04/07 18:18:30 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.5  2000/04/07 18:18:30  genevb
+// Additional crash protection
+//
 // Revision 1.4  2000/04/06 14:51:11  genevb
 // Fixed bug with storing event info when making subDST
 //
@@ -393,9 +396,10 @@ Int_t StStrangeMuDstMaker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
                                << GetName() << endm; 
   
-//  tree->Print();
-  if (rw == StrangeWrite) muDst->Write();
-  if (muDst) muDst->Close();
+  if (muDst) {
+    if (rw == StrangeWrite) muDst->Write();
+    muDst->Close();
+  }
   if (doV0) gMessMgr->Info() << "StStrangeMuDstMaker: "
                              << nV0Entries << " V0 Entries" << endm;
   if (doXi) gMessMgr->Info() << "StStrangeMuDstMaker: "
