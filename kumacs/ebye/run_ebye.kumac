@@ -2,18 +2,22 @@
 * run_ebye.kumac
 * 
 * written by D. Weerasundara -- dhammika@npl.washington.edu
-* modified by L.D. Carr -- lcarr@u.washington.edu
-* 8/4/98 K. Turner - editted to make it standard
+* 8/1/98 L.D. Carr -- lcarr@u.washington.edu
+* 8/4/98 K. Turner - edited to make it standard
+* 8/7/98 L.D. Carr -- lcarr@u.washington.edu
 * 
 ************************************************************************
 ************************************************************************
 
  macro run__
-          TOP=$STAR _
+          TOP=/star/u2d/lcarr/research/stafWork/dev _
           domain='geometry tpc svt global ebye' _
           input_data_dir=/star/u2/dhammika/data/ _
           input_data_file=DST_prodrun2_evt1-99.xdf _
           num_events=1 _
+	  prior_switch=1 _
+	  ensemble_switch=0 _
+	  analysis_switch=0 _
           funit=21 _
           nfile=ebye.ntup _
           nid=111 _
@@ -33,6 +37,9 @@
   message ' *** Data Sample directory -->              ' [input_data_dir]
   message ' *** Input data file -->                    ' [input_data_file]
   message ' *** Num Events to process -->              ' [num_events]
+  message ' *** Prior Switch -->                       ' [prior_switch]
+  message ' *** Ensemble Switch -->                    ' [ensemble_switch]
+  message ' *** Analysis Switch -->                    ' [analysis_switch]
   message ' *** ntup file unit -->                     ' [funit]
   message ' *** output Ntuple filename  -->            ' [nfile]
   message ' *** Ntuple ID # -->                        ' [nid]
@@ -77,17 +84,8 @@
   
   exec create_tables_global#sca
   
-  exec init_sca#init
+  exec init_sca#init [prior_switch] [ensemble_switch] [analysis_switch]
   
-* set switches to make prior
-  cd [params]/ebye
-  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
-  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
-  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
-  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
-  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
-  cd /dui 
-
 *------------------- process events ------------------------------*
 
 * read event and then process thru analysis

@@ -23,7 +23,7 @@ long type_of_call sca_runsca_(
   char *sca_data_name = "sca";
   long iret;
   static int callcnt=0;
-  printf(" 16:35:14 This is call number %d.\n",++callcnt);
+  printf(" This is call number %d.\n",++callcnt);
   if(callcnt==20) printf("\007\n");
   if (!sca_switch->makePrior   && 
       !sca_switch->doAnalysis  &&
@@ -40,23 +40,18 @@ long type_of_call sca_runsca_(
 	return STAFCV_BAD;
       }
   }
-  /* bbb below */
   if ( !sca_switch->useDeltaD ) {
-    printf("We are taking the big if()\n");
     Dataset dataSet(sca_const_h, sca_const,
 		    sca_prior_h, sca_prior,
 		    sca_in_h,    sca_in,
                     raw_data_name,
 		    sca_data_name );
-    printf("Calling the suspect dataSet.CalcEntropy\n");
     iret = dataSet.CalcEntropy();
-    printf("Back from the suspect dataSet.CalcEntropy\n");
     if (iret)
       {
 	cerr << "CalcEntropy failed. Exit " << endl;
 	return STAFCV_BAD;
       }
-    /* bbb above */
     if ( sca_switch->doAnalysis )
       {
 	cout<<endl<<"Made it to CalcDimension"<<endl;

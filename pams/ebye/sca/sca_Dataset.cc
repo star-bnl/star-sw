@@ -70,11 +70,7 @@ int Dataset::CalcEntropy()
   static int callcount=0;
   double rank;			// for shorter notation
   sca_info_t *cur_info;
-  printf("17:28:30 Dataset::CalcEntropy, call count = %d\n",++callcount);
-  /* bbb below */
-  // if(callcount==20) {
-  //   printf("Skipping the rest of CalcEntropy.\n"); return 0;
-  // }
+  printf("Dataset::CalcEntropy, call count = %d\n",++callcount);
   cout << debug("Trace") << "CalcEntropy() called.\n";
   if( !data || !validnum )
     {
@@ -82,7 +78,6 @@ int Dataset::CalcEntropy()
 	"There is no valid data in the server to analyze.\n";
       return 1;
     }
-  /* bbb above here */
   alloc_info();
   double maxbinsize_x = constants->maxbinsize_x;
   double maxbinsize_y = constants->maxbinsize_y;
@@ -93,7 +88,6 @@ int Dataset::CalcEntropy()
       return 1;
   }
   int is = 0;			// index to the scale value
-  /* bbb above here */
   while(binsize_x <= maxbinsize_x && binsize_y <= maxbinsize_y)
     { 
       CalcVolume(is, binsize_x, binsize_y);
