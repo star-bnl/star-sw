@@ -1,5 +1,9 @@
-// $Id: St_tpt_Maker.cxx,v 1.43 1999/11/19 02:01:40 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.44 1999/12/17 23:40:49 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.44  1999/12/17 23:40:49  sakrejda
+// Add message suppression:
+// gMessMgr->SetLimit("TPTRSP-E1",10);
+//
 // Revision 1.43  1999/11/19 02:01:40  sakrejda
 // if (! tphit) return kStWarn;
 // added after:
@@ -176,6 +180,7 @@ Int_t St_tpt_Maker::Init(){
   //Suppress annoying messages
 gMessMgr->SetLimit("TPTROOT1-E1",10);
 gMessMgr->SetLimit("TPTOUT2-E1",10);
+gMessMgr->SetLimit("TPTRSP-E1",10);
 
   // Create tables
   
