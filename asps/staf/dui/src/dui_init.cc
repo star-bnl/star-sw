@@ -34,7 +34,9 @@ extern "C" void type_of_call dui_def_();
 //:<--------------------------------------------------------------------
 int dui_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DUI:Initializing. ");
+#endif
 
 /*- Define the DUI KUIP commands. -*/
    dui_def_();
@@ -50,7 +52,9 @@ int dui_init()
 //:<--------------------------------------------------------------------
 int dui_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DUI:Starting. ");
+#endif
 
 /*- Create the DUI Dispatcher. -*/
    dui = new duiFactory("dui");
@@ -61,9 +65,11 @@ int dui_start()
       return TRUE;
    }
    tdmFactory *t = (tdmFactory*)(obj->ptr());
-/*- Superceed the TDM Factory. -*/
+/*- Supersede the TDM Factory. -*/
    if( t != NULL ){
+#ifndef QUIET_ASP
       EML_WARNING("DUI:Superceeding TDM. ");
+#endif
       t->lock(FALSE);
       soc->deleteObject("tdm","tdmFactory");
       t = dui;
@@ -81,7 +87,9 @@ int dui_start()
 //:<--------------------------------------------------------------------
 int dui_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DUI:Stopping. ");
+#endif
 
 /*- Delete the DUI Dispatcher.
    delete dui;

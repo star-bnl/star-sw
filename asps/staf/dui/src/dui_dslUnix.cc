@@ -65,7 +65,10 @@ int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
 {
    bool_t isDataset;
    char *name;
-   size_t elcount, maxelcount;
+   size_t elcount;
+#ifdef OLD_DSL
+   size_t maxelcount;
+#endif
 
    if( !dsIsDataset(&isDataset, pDS)
    ||  !isDataset
@@ -99,6 +102,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
    bool_t isDataset,isTable;
    DS_DATASET_T *pEntry;
    size_t elcount;
+   int i;
 
    if( !dsIsDataset(&isDataset, pDS)
    ||  !isDataset
@@ -108,7 +112,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
       return FALSE;
    }
    dui_ls_l_Header(listing);
-   for( int i=0;i<elcount;i++ ){
+   for( i=0;i<(int)elcount;i++ ){
       if( !dsDatasetEntry(&pEntry,pDS,i)
       ||  !dsIsTable(&isTable, pEntry)
       ||  !dsIsDataset(&isDataset, pEntry)
