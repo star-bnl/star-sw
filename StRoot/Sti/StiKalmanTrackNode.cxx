@@ -211,12 +211,10 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
     double ss = sinPhi*sinPhi;
     if (ss>1.)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage))
+	    *s_pMessenger
 		<< "StiKalmanTrackNode::getMomentum - ERROR - sin(phi)^2 > 1" << endl
 		<< " fP3/fx/fP2/sin(phi):" << fP3 << "\t" << fX << "\t" 
 		<< fP2 << "\t" << sinPhi << endl;
-#endif
 	    ss = 1.;
 	}
     p[0] = pt*sqrt(1-ss);
@@ -228,11 +226,9 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
     double sa = 1-ss;
     if (sa<0)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) 
+	    *s_pMessenger 
 		<< "StiKalmanTrackNode::getMomentum() - Error - sa<0 - Value was:" 
 		<< sa << " - reset to sa=0." << endl;
-#endif
 	    sa = 0.;
 	}
     double c = fP3;
@@ -410,9 +406,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   c1sq = c1*c1; 
   if (c1sq>=1.) 
     {
-#ifdef DEBUG
-      *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
-#endif
+      *s_pMessenger << "c1sq:" << c1sq << endl;
       throw runtime_error("SKTN::propagate() - c1sq>=1");
     }
   r1=sqrt(1.-c1sq);		
@@ -482,11 +476,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       }
     case kConical:
       {
-#ifdef DEBUG
-	*(Messenger::instance(MessageType::kNodeMessage)) 
+	*s_pMessenger 
 	  << "SKTN::propagate() - Encountered Conical Volume "
 	  << "- Option not currently supported - abort track" << endl;
-#endif
 	throw runtime_error("SKTN::propagate() - c1sq>=1");
       }
     }
@@ -495,9 +487,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   c2sq = c2*c2; 
   if (c2sq>=1.) 
     {
-#ifdef DEBUG
-      *(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
-#endif
+      *s_pMessenger << "c2sq>=1 value:" << c2sq << endl;
       throw runtime_error("SKTN::propagate() - c2sq>=1");
     }
   r2=sqrt(1.- c2sq );	
@@ -507,10 +497,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   double dddd = c1*r2 + c2*r1;
   if (fabs(dddd)==0)
     {
-#ifdef DEBUG
-      *(Messenger::instance(MessageType::kNodeMessage)) 
+      *s_pMessenger 
 	<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
-#endif
       throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
     }
   fP1 += dx*fP4*cSum/dddd;
@@ -543,10 +531,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       }
     default:
       {
-#ifdef DEBUG
-	*(Messenger::instance(MessageType::kNodeMessage)) 
+	*s_pMessenger 
 	  << "SKTN::propagate() - Severe Error" << endl;
-#endif
 	throw runtime_error("SKTN::propagate() - Bad shape code");
       }
     }
@@ -554,8 +540,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   outerY = innerY + 2*edge;
   innerZ = detHD - edge;
   outerZ = innerZ + 2*edge;
-#ifdef DEBUG
-  *(Messenger::instance(MessageType::kNodeMessage)) 
+  *s_pMessenger 
     << tDet->getName() << ":" << endl
     << " innerY:"  << innerY
     << " outerY:"  << outerY
@@ -563,7 +548,6 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
     << " outerZ:"  << outerZ << endl
     << " yOffset:" << yOff 
     << " zOffset:" << zOff << endl;
-#endif
   if (yAbsOff<innerY && zAbsOff<innerZ)
     position = kHit; 
   else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
@@ -731,18 +715,14 @@ void  StiKalmanTrackNode::propagate(double xk)//, double _radThickness,double _d
     double c1sq = c1*c1; 
     if (c1sq>=1.) 
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
-#endif
+	    *s_pMessenger << "c1sq:" << c1sq << endl;
 	    throw runtime_error("SKTN::propagate() - c1sq>=1");
 	}
     c2=fP3*x2 - fP2; 
     double c2sq = c2*c2; 
     if (c2sq>=1.) 
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
-#endif
+	    *s_pMessenger << "c2sq>=1 value:" << c2sq << endl;
 	    throw runtime_error("SKTN::propagate() - c2sq>=1");
 	}
     double cSum = c1+c2;
@@ -752,10 +732,8 @@ void  StiKalmanTrackNode::propagate(double xk)//, double _radThickness,double _d
     double dddd = c1*r2 + c2*r1;
     if (fabs(dddd)==0)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) 
+	    *s_pMessenger 
 		<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
-#endif
 	    throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
 	}
     fP1 += dx*fP4*cSum/dddd;
@@ -774,18 +752,14 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
     double c1sq = c1*c1; 
     if (c1sq>=1.) 
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
-#endif
+	    *s_pMessenger << "c1sq:" << c1sq << endl;
 	    throw runtime_error("SKTN::propagate() - c1sq>=1");
 	}
     c2=fP3*x2 - fP2; 
     double c2sq = c2*c2; 
     if (c2sq>=1.) 
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
-#endif
+	    *s_pMessenger << "c2sq>=1 value:" << c2sq << endl;
 	    throw runtime_error("SKTN::propagate() - c2sq>=1");
 	}
     double cSum = c1+c2;
@@ -799,10 +773,8 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
     double dddd = c1*r2 + c2*r1;
     if (fabs(dddd)==0)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) 
+	    *s_pMessenger 
 		<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
-#endif
 	    throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
 	}
     zz = fP1 + dx*fP4*cSum/dddd;
@@ -827,19 +799,13 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
     //-----------------------------------------------------------------
     // Update Measurement Error Matrix, calculate its determinant
     if (isnan(fC00)) {
-#ifdef DEBUG
-	*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC00 NaN " << endl;
-#endif
+	*s_pMessenger << "SKTN::evaluateChi2() fC00 NaN " << endl;
     }
     if (isnan(fC10)) {
-#ifdef DEBUG
-	*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC10 NaN " << endl;
-#endif
+	*s_pMessenger << "SKTN::evaluateChi2() fC10 NaN " << endl;
     }
     if (isnan(fC11)) {
-#ifdef DEBUG
-	*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC11 NaN " << endl;
-#endif
+	*s_pMessenger << "SKTN::evaluateChi2() fC11 NaN " << endl;
     }
     
     double r00=hit->syy()+fC00;
@@ -847,18 +813,14 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
     double r11=hit->szz()+fC11;
     double det=r00*r11 - r01*r01;
     
-#ifdef DEBUG
-    *(Messenger::instance(MessageType::kNodeMessage)) 
+    *s_pMessenger 
 	<< "chi2()  fC00;fC10;fc11:" << fC00 << "\t" << fC10 << "\t" << fC11 << endl
 	<< "           syy;syz;szz:" << hit->syy() << "\t" << hit->syz() << "\t" << hit->szz() << "\t" << det << endl
 	<< "       r00;r01;r11;det:" << r00 << "\t" << r01 << "\t" << r11 << "\t" << det << endl;
-#endif
     if (fabs(det)==0.)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
-	    *(Messenger::instance(MessageType::kNodeMessage)) <<"det test failed line 535.  return 0."<<endl;
-#endif
+	    *s_pMessenger <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
+	    *s_pMessenger <<"det test failed line 535.  return 0."<<endl;
 	    throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
 	}
     // inverse matrix
@@ -879,11 +841,9 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
     // Update Measurement Error Matrix, calculate its determinant
     if (hit==0)		
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) 
+	    *s_pMessenger 
 		<< "StiKalmanTrackNode::updateNode(). ERROR:\t"
 		<<" - Null HIT, line 558.  return" << endl;
-#endif
 	    throw runtime_error("SKTN::updateNode() - Error - No hit associated to node!\n");
 	}
     double r00=hit->syy()+fC00;
@@ -908,10 +868,8 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
     double ddd = cur*fX-eta;
     if (fabs(ddd) >= 1.)
 	{
-#ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
-	    *(Messenger::instance(MessageType::kNodeMessage)) <<" - extrapolation failed line 588. return"<< endl;
-#endif
+	    *s_pMessenger << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+	    *s_pMessenger <<" - extrapolation failed line 588. return"<< endl;
 	    throw runtime_error("SKTN:updateNode() - Filtering failed !\n");
 	}
     
@@ -921,8 +879,7 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
     fP2  = eta;
     fP3  = cur;
     fP4 += k40*dy + k41*dz;
-#ifdef DEBUG
-    *(Messenger::instance(MessageType::kNodeMessage))
+    *s_pMessenger
 	<< "fx;fP0;fp1;fP2;fP3;fP4:" 
 	<< "\t" << fX 
 	<< "\t" << fP0 
@@ -931,7 +888,6 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
 	<< "\t" << fP3 
 	<< "\t" << fP4
 	<< endl;
-#endif
     
     // update error matrix
     double c01=fC10, c02=fC20, c03=fC30, c04=fC40;
@@ -965,11 +921,9 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
     if (fAlpha < -M_PI) fAlpha += 2*M_PI;
     if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
     
-#ifdef DEBUG
-    *(Messenger::instance(MessageType::kNodeMessage))  
+    *s_pMessenger  
 	<< "rotate() - new fAlpha:" << fAlpha*180/M_PI 
 	<< " degs" << endl;
-#endif
     double x1=fX;
     double y1=fP0;
     double ca=cos(alpha);
@@ -1048,7 +1002,7 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 	    newChild->contiguousHitCount   = 0;//contiguousHitCount; 
 	}
     /*
-     *(Messenger::instance(MessageType::kNodeMessage))
+     *s_pMessenger
      << "SKTN::add()"
      << "            hitCount:" << newChild->hitCount << endl
      << "  contiguousHitCount:" << newChild->contiguousHitCount << endl

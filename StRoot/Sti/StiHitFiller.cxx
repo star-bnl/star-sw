@@ -91,11 +91,9 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store,
 	    StiDetector* layer =
 		StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
-#ifdef DEBUG
 		mMessenger <<"StiHitFiller::fillTpcHits(). ERROR:\t";
 		mMessenger <<"Detector for (sector,padrow): (";
 		mMessenger <<sector<<","<<prow<<") not found.  Abort"<<endl;
-#endif
 		mtimer.stop();
 		return;
 	    }

@@ -65,9 +65,7 @@ void StiRDLocalTrackSeedFinder::reset()
 
 StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 {
-#ifdef DEBUG
     mMessenger <<"StiRDLocalTrackSeedFinder::makeTrack()"<<endl;
-#endif
 
     mdrawablehits->clear();
     StiKalmanTrack* track = StiLocalTrackSeedFinder::makeTrack(hit);
@@ -75,9 +73,7 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 	return track;
     }
 
-#ifdef DEBUG
     mMessenger<<"\tGet Global positions:\t";
-#endif
 
     for (HitVec::const_iterator it=mSeedHitVec.begin(); it!=mSeedHitVec.end(); ++it) {
 	const StThreeVectorF& pos = (*it)->globalPosition();
@@ -86,9 +82,7 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 	mdrawablehits->push_back( pos.z() );
     }
 
-#ifdef DEBUG
     mMessenger <<"done."<<endl;
-#endif
     
     mdrawablehits->fillHitsForDrawing();
     if (StiGuiIOBroker::instance()->updateEachTrack()) {
@@ -96,17 +90,13 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 	StiDisplayManager::instance()->update();
     }
 
-#ifdef DEBUG
     mMessenger <<"\t leaving StiRDLocalTrackSeedFinder::makeTrack()"<<endl;
-#endif
     
     return track;
 }
 
 void StiRDLocalTrackSeedFinder::getNewState()
 {
-#ifdef DEBUG
     mMessenger <<"StiRDLocalTrackSeedFinder::getNewState()"<<endl;
-#endif
     StiLocalTrackSeedFinder::getNewState();
 }

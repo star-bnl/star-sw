@@ -335,19 +335,15 @@ void StiHitContainer::partitionUsedHits()
     for (hitmap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	hitvector& tempvec = (*it).second.theHitVec;
 	
-#ifdef DEBUG
 	mMessenger <<"-- Hits before partition --"<<endl;
 	mMessenger <<(*it).second.theHitVec<<endl;
-#endif
 	
 	hitvector::iterator where =
 	    stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
 	(*it).second.theEffectiveEnd = where;
 	
-#ifdef DEBUG
 	mMessenger <<"-- Hits after partition --"<<endl;
 	mMessenger <<(*it).second.theHitVec<<endl;
-#endif
 
     }
 }

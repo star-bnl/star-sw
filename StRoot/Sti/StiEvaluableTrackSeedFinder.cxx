@@ -93,9 +93,7 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
     }
 
     //Get StMcTrack list from StMcEvent
-#ifdef DEBUG
     mMessenger <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
-#endif
     StSPtrVecMcTrack& tracks = mMcEvent->tracks();
     mBeginMc = tracks.begin();
     mEndMc = tracks.end();
@@ -151,10 +149,8 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
     if (!mcToStTrackMap) {
-#ifdef DEBUG
 	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
 	mMessenger <<"McTrackMap==0"<<endl;
-#endif
 	return 0;
     }
     
@@ -200,9 +196,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 	return 0;
     }
     else {
-#ifdef DEBUG
 	mMessenger <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
-#endif
     }
     track->setStTrackPairInfo(bestPair);
 
@@ -214,10 +208,8 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     //the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {
-#ifdef DEBUG
 	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
 	mMessenger <<"node==0.  return;"<<endl;
-#endif
 	return 0;
     }
     else {

@@ -567,9 +567,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
 	}
     catch (runtime_error & rte) 
 	{
-#ifdef DEBUG
 	    cout << "SKT::getMomentumAtOrigin() - runtime_error - " << rte.what() << endl;
-#endif
 	    return -1;
 	}
 }

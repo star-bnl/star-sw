@@ -68,10 +68,8 @@ void StiDetectorContainer::setToDetector(double radius)
     mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), theKey);
     if (mphi_it == mregion->end()) {
 	
-#ifdef DEBUG
 	mMessenger <<"StiDetectorContainer::setToDetector(double)\tError:\t";
 	mMessenger <<"Find radius failed"<<endl;
-#endif
 	
 	mradial_it = mregion->begin();
     }
@@ -94,10 +92,8 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
 				   (*mradial_it)->end(), theKey);
     if (mphi_it == (*mradial_it)->end()) {
 
-#ifdef DEBUG
 	mMessenger <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
 	mMessenger <<"Find Phi failed"<<endl;
-#endif
 	
 	mphi_it = (*mradial_it)->begin();
     }
