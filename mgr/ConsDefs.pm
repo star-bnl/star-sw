@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.29 2001/02/04 00:45:34 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.30 2001/02/10 20:31:09 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -89,7 +89,8 @@
  $SYSLIBS  = "";
  $OSFID    = "";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
- $date    = `date +\%d\%b-%T`;
+ $date     = `date +\%d\%b-%T`;
+ $CXXCOM   = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
 # $MAKELIB = "test -f %> && mv %> %>.$date;";
  $MAKELIB.= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
@@ -222,7 +223,7 @@
  elsif (/^sun4x_56_CC5$/) {
    $PLATFORM = "solaris"; 
    $ARCH     = "solarisCC5";
-   $OSFID     = "__CC5__ __SunOS_5_6";
+   $OSFID     = "__SunOS_5_6";
    $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
    if ($STAR) {
      $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
@@ -231,8 +232,11 @@
    $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
+   $CXXCOM   = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";      
    $FC        = "/opt/WS5.0/bin/f77";
-   $CXXFLAGS  = "-KPIC -D__SunOS_5_6";#xs -library=iostream,no%%Cstd";
+   $CXXFLAGS  = "-KPIC";# -library=iostream,no%%Cstd";
+   $EXTRA_CXXFLAGS = " -D__CC5__";
+   $EXTRA_CFLAGS = " -D__CC5__";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
@@ -247,7 +251,7 @@
    $LD        = $CXX;
    $LDFLAGS   = " -Bdynamic"; #-library=iostream
    $SO        = $CXX;
-   $SOFLAGS   = "-G";#
+   $SOFLAGS   = "-G -ptr%ObjDir";;#
    if (defined($ARG{INSURE})){
      print "***Use INSURE++***\n";
      $CC       = "insure -g -Zoi \"compiler_c cc\"";
@@ -429,7 +433,7 @@
 		'CXXFLAGS'     => $CXXFLAGS,
 		'CINTCXXFLAGS' => $CINTCXXFLAGS,
 		'EXTRA_CXXFLAGS'     => $EXTRA_CXXFLAGS,
-		'CXXCOM'       => '%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
+		'CXXCOM'       => $CXXCOM,
 		'CLIBS'        => $CLIBS,
 		'FLIBS'        => $FLIBS,
 		'XLIBS'        => $XLIBS,
