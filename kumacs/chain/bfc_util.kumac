@@ -181,6 +181,8 @@
 * 11/25/98 K. Turner - change ev0d chain to use ev0_dst code & kumacs
 *                      instead of just kumacs
 *                    - add tcc code to "tcl" chain
+* 12/3/98 K. Turner  - for "ev0d" chain, after running ev0d,
+*                      set rowcount ev0out table to 0 instead of deleting it 
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -430,7 +432,6 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
    (ev0_e)  exec create_tables_global#ev0_eval2
    (ev0d)   exec create_tables_global#ev0d
             exec init_ev0#init_ev0d
-* exec init_ev0#ev0_dst
     (ctf)   exec create_tables_ctf#init
             exec ctg_init#init
             exec ctg_init#ctg
@@ -762,8 +763,7 @@ return
      (ev02)    exec run_ev0#ev0_am2
     (ev0_e)    exec run_ev0#ev0_eval2
     (ev0d)     exec run_ev0#ev0d  
-* exec run_ev0#ev0_dst
-               rm [dst]/ev0out
+               rowcount [dst]/ev0out 0
       (ctf)    exec cts_run
                exec ctu_run 
       (mwc)    exec mws_run
