@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.3 1999/03/30 20:32:23 wenaus Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.4 1999/05/01 00:56:59 fisyak Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.4  1999/05/01 00:56:59  fisyak
+ * Change Clear function to defualt
+ *
  * Revision 1.3  1999/03/30 20:32:23  wenaus
  * Update for new Maker; explicit StGlobalTrack include
  *
@@ -60,7 +63,7 @@ Int_t StEbyeScaTagsMaker::Make() {
 }
 
 void StEbyeScaTagsMaker::PrintInfo() {
-  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.3 1999/03/30 20:32:23 wenaus Exp $" << endl;
+  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.4 1999/05/01 00:56:59 fisyak Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -226,7 +229,7 @@ void StEbyeScaTagsMaker::Clear(Option_t *opt) {
     delete theTag;
     theTag = 0;
   }
-  SafeDelete(m_DataSet);
+  StMaker::Clear();
 }
 
 Int_t StEbyeScaTagsMaker::Finish() {
