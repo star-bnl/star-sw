@@ -1,5 +1,5 @@
 /***************************************
- * $Id: StHbtSmearPair.h,v 1.5 2003/05/08 17:22:12 magestro Exp $
+ * $Id: StHbtSmearPair.h,v 1.6 2003/05/22 20:59:03 perev Exp $
  *
  * Author: Mike Lisa, Ohio State lisa@mps.ohio-state.edu
  ****************************************
@@ -13,6 +13,9 @@
  ******************************************
  *
  * $Log: StHbtSmearPair.h,v $
+ * Revision 1.6  2003/05/22 20:59:03  perev
+ * virtual dtr to avoid warning
+ *
  * Revision 1.5  2003/05/08 17:22:12  magestro
  * Un-made change for the second time that causes library not to load
  *
@@ -41,7 +44,7 @@ class StHbtSmearPair{
 
   StHbtSmearPair();
   StHbtSmearPair(const StHbtPair* unSmearedPair);
-  ~StHbtSmearPair();
+  virtual ~StHbtSmearPair(){};
 
   void SetUnsmearedPair(const StHbtPair* unSmearedPair);  // essentially same as c'tor
 
