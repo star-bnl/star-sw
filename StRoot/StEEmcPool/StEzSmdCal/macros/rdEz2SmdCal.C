@@ -1,19 +1,15 @@
-//#include "StRoot/StEEmcUtil/EEfeeRaw/EEname2Index.h"
-//.L StRoot/StEEmcUtil/EEfeeRaw/EEname2Index.cxx+
-class EEmcDbItem;
+rdEz2SmdCal(
+	    char *runL="R5107005 R5112004 R5107008  R5109025 R5109026 ",
+	    char *outname="R5107005"
+	    ) {
 
-rdEz2SmdCal( int nDot=16,int mxEve=5000000,
-	     //  R5107005_1 R5109035 R5109034 R5109031 R5109030  
-       char *runL="R5107005 R5112004 R5107008  R5109025 R5109026 ",
-       TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/",
-       int firstSec=5,
-       int lastSec=5,
-       int oflTrigId=0
-      ) {
-  //  iPath="/tmp/balewski/";  
-  //  runL="R5107005";
-   runL="R5107008";
 
+  TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
+  int mxEve=100000;
+  int nDot=8;
+  int firstSec=5;
+  int lastSec=5;
+  int oflTrigId=0;;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
     "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
@@ -23,7 +19,7 @@ rdEz2SmdCal( int nDot=16,int mxEve=5000000,
     "StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
     "EEmcDb/libEEmcDb.so",
     "libPhysics"
- };
+  };
   
   int i;
   for(i=0;i<sizeof(libL)/sizeof(char*);i++) {
@@ -85,9 +81,10 @@ rdEz2SmdCal( int nDot=16,int mxEve=5000000,
   sorter->set(&HList,db,eFee,eHead,eTrig);
   float thrMipSmdE=0.2;
   int emptyStripCount=nDot;
-  int iTagLayer=3; //0-3 means T,P,Q,R
-  sorter->setMipCuts(thrMipSmdE,emptyStripCount,iTagLayer);
+  float twMipEdev=0.2;
+  sorter->setMipCuts(thrMipSmdE,emptyStripCount, twMipEdev);
   sorter->init();
+  sorter->initRun(eHead->getRunNumber());
 
    
   printf("Sort %d  of total Events %d, use trigId=%d\n",mxEve, nEntries,oflTrigId);
@@ -97,7 +94,13 @@ rdEz2SmdCal( int nDot=16,int mxEve=5000000,
   for(nEve=0; nEve<nEntries && nEve<mxEve; nEve++) {
     chain->GetEntry(nEve);
    if(nEve%2000==0)printf("in %d, acc %d  ok=%d\n",nEve,nAcc,nOK);
-   if(oflTrigId>0 && ! eTrig->isTrigID(oflTrigId) ){ continue;}
+   //if(oflTrigId>0 && ! eTrig->isTrigID(oflTrigId) ){ continue;}
+   //   printf("%d %d %d\n",  eTrig->isTrigID(10), eTrig->isTrigID(45010), eTrig->isTrigID(45020));
+
+   if(! eTrig->isTrigID(10) &&
+      ! eTrig->isTrigID(45010) &&
+      ! eTrig->isTrigID(45020) ) continue;
+   // this is for sure minB events
     nAcc++;
     // verify data block consistency
     int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
@@ -110,12 +113,29 @@ rdEz2SmdCal( int nDot=16,int mxEve=5000000,
   if(t2==t1) t2=t1+1;
   float tMnt=(t2-t1)/60.;
   float rate=1.*nEve/(t2-t1);
-  printf("sorting done, nEve=%d, CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,rate,tMnt);
+  printf("sorting done, nEve=%d, acc=%d CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,nAcc,rate,tMnt);
 
   sorter->finish();
 
   // save output histograms
-  TString out="out/bbbRx-nD";
+
+  TString out="out/";
+  out+=outname;
+  //out+="_";
+  //out+=nDot;
+  sorter->saveHisto(out);
+  // HList.ls(); 
+
+  h=(TH1F *) HList.FindObject("myStat");   assert(h);
+  float *my=h->GetArray();
+  printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
+
+  printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
+
+   return;
+  gStyle->SetPalette(1,0);
+  printf("drawing ...\n");  TString out=outname;
+  out+="_";
   out+=nDot;
   sorter->saveHisto(out);
   // HList.ls(); 
