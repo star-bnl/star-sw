@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.16 2003/09/02 17:58:10 perev Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.17 2004/08/24 20:22:39 oldi Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -411,7 +411,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.16 2003/09/02 17:58:10 perev Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.17 2004/08/24 20:22:39 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -532,8 +532,8 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       pFlowSelect->SetSelection(k);
       double cumuTemp[Flow::nCumulDiffOrders];
       double cumuTempFlip[Flow::nCumulDiffOrders];
-      double order;
-      double phiWgt;
+      double order = 0.;
+      double phiWgt = 0.;
       for (int j = 0; j < Flow::nHars; j++) {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
@@ -1049,6 +1049,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.17  2004/08/24 20:22:39  oldi
+// Minor modifications to avoid compiler warnings.
+//
 // Revision 1.16  2003/09/02 17:58:10  perev
 // gcc 3.2 updates + WarnOff
 //

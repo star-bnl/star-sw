@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.85 2004/08/18 00:18:59 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.86 2004/08/24 20:22:36 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1161,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.85 2004/08/18 00:18:59 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.86 2004/08/24 20:22:36 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1281,8 +1281,8 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	  histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
 
 	} else if (k == 1) {
-	  float psi1;
-	  float psi2;
+	  float psi1 = 0.;
+	  float psi2 = 0.;
 	  
 	  if (j == 0) {
 	    psi1 = mPsi[0][0];
@@ -1320,7 +1320,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
       }
 
       if (j < Flow::nHars - 1) { // subevents of different harmonics
-	int j1, j2;
+	int j1 = 0, j2 = 0;
 	float psiSubCorrDiff;
 	if (j==0) {
 	  j1 = 1, j2 = 2;	
@@ -1381,8 +1381,8 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float phi         = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
     float eta         = pFlowTrack->Eta();
-    float zFirstPoint;
-    float zLastPoint;
+    float zFirstPoint = 0.;
+    float zLastPoint = 0.;
     if (pFlowEvent->FirstLastPoints()) {
       zFirstPoint = pFlowTrack->ZFirstPoint();
       zLastPoint  = pFlowTrack->ZLastPoint();
@@ -1543,7 +1543,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	double order  = (double)(j+1);
-	float psi_i, psi_2;
+	float psi_i = 0., psi_2 = 0.;
 	if (pFlowEvent->EtaSubs()) { // particles with the other subevent
 	  int i = Flow::nSels*k;
 	  psi_i = (eta > 0.) ? mPsiSub[i+1][j] : mPsiSub[i][j];
@@ -2231,7 +2231,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   
   // Write PhiWgt histograms preceded by documenting text
   TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
-  TText* textInfo;
+  TText* textInfo = 0;
   if (pFlowEvent->FirstLastPoints()) {
     char chInfo[400];
     sprintf(chInfo, "%s%d%s%d%s", " pt weight= ", pFlowEvent->PtWgt(),
@@ -2306,6 +2306,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.86  2004/08/24 20:22:36  oldi
+// Minor modifications to avoid compiler warnings.
+//
 // Revision 1.85  2004/08/18 00:18:59  oldi
 // Several changes were necessary to comply with latest changes of MuDsts and StEvent:
 //

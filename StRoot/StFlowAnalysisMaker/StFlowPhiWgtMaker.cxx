@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.cxx,v 1.4 2004/05/31 20:09:25 oldi Exp $
+// $Id: StFlowPhiWgtMaker.cxx,v 1.5 2004/08/24 20:22:40 oldi Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -309,7 +309,7 @@ Int_t StFlowPhiWgtMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowPhiWgt", 2);
-  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.4 2004/05/31 20:09:25 oldi Exp $");
+  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.5 2004/08/24 20:22:40 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -338,8 +338,8 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
     if (phi < 0.) phi += twopi;
     float eta         = pFlowTrack->Eta();
     float pt          = pFlowTrack->Pt();
-    float zFirstPoint;
-    float zLastPoint;
+    float zFirstPoint = 0.;
+    float zLastPoint = 0.;
     if (pFlowEvent->FirstLastPoints()) {
       zFirstPoint = pFlowTrack->ZFirstPoint();
       zLastPoint  = pFlowTrack->ZLastPoint();
@@ -550,7 +550,7 @@ Int_t StFlowPhiWgtMaker::Finish() {
   //GetHistList()->ls();
   
   // Make text object
-  TText* textInfo;
+  TText* textInfo = 0;
   if (pFlowEvent->FirstLastPoints()) {
     char chInfo[400];
     sprintf(chInfo, "%s%d%s%d%s", " pt weight= ", pFlowEvent->PtWgt(),
@@ -579,6 +579,9 @@ Int_t StFlowPhiWgtMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.cxx,v $
+// Revision 1.5  2004/08/24 20:22:40  oldi
+// Minor modifications to avoid compiler warnings.
+//
 // Revision 1.4  2004/05/31 20:09:25  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.
