@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapPoint.hh,v 1.4 2004/02/12 19:37:09 oldi Exp $
+// $Id: StFtpcConfMapPoint.hh,v 1.5 2004/04/06 18:36:13 oldi Exp $
 // $Log: StFtpcConfMapPoint.hh,v $
+// Revision 1.5  2004/04/06 18:36:13  oldi
+// New data mebers for pad and time position and pad and time sigma added.
+// Reference to StFtpcHit added.
+// Possibility to update StFtpcHit coordinates directly included.
+//
 // Revision 1.4  2004/02/12 19:37:09  oldi
 // *** empty log message ***
 //
@@ -82,7 +87,11 @@ public:
 			       Long_t    n_pads, 
 			       Long_t    n_bins, 
 			       Long_t    max_adc, 
-			       Long_t    charge, 
+			       Long_t    charge,
+			       Float_t   padpos,
+			       Float_t   timepos,
+			       Float_t   padpossigma,
+			       Float_t   timepossigma,
 			       Double_t  x, 
 			       Double_t  y, 
 			       Double_t  z, 

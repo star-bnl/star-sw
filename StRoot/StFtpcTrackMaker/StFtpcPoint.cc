@@ -1,5 +1,10 @@
-// $Id: StFtpcPoint.cc,v 1.18 2004/02/12 19:37:10 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.19 2004/04/06 18:36:13 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.19  2004/04/06 18:36:13  oldi
+// New data mebers for pad and time position and pad and time sigma added.
+// Reference to StFtpcHit added.
+// Possibility to update StFtpcHit coordinates directly included.
+//
 // Revision 1.18  2004/02/12 19:37:10  oldi
 // *** empty log message ***
 //
@@ -129,6 +134,11 @@ StFtpcPoint::StFtpcPoint()
   SetMaxADC(0);
   SetCharge(0);
 
+  SetPadPos(0);
+  SetTimePos(0);
+  SetPadPosSigma(0);
+  SetTimePosSigma(0);
+
   SetX(0);
   SetY(0);
   SetZ(0);
@@ -174,7 +184,11 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 			 Long_t   n_pads, 
 			 Long_t   n_bins, 
 			 Long_t   max_adc, 
-			 Long_t   charge, 
+			 Long_t   charge,
+			 Float_t  padpos,
+			 Float_t  timepos,
+			 Float_t  padpossigma,
+			 Float_t  timepossigma,
 			 Double_t x, 
 			 Double_t y, 
 			 Double_t z, 
@@ -201,6 +215,11 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 
   SetMaxADC(max_adc);
   SetCharge(charge);
+
+  SetPadPos(padpos);
+  SetTimePos(timepos);
+  SetPadPosSigma(padpossigma);
+  SetTimePosSigma(timepossigma);
 
   SetX(x);
   SetY(y);
@@ -243,6 +262,11 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
 
   SetMaxADC(-1);
   SetCharge(0);
+
+  SetPadPos(0);
+  SetTimePos(0);
+  SetPadPosSigma(0);
+  SetTimePosSigma(0);
 
   SetX(x[0]);
   SetY(x[1]);
@@ -374,6 +398,26 @@ Int_t StFtpcPoint::ToStEvent(StFtpcHitCollection* ftpcHitCollection)
   SetStFtpcHit(point); // let this StFtpcPoint know its pointer in StEvent
 
   return 1;
+}
+
+
+void StFtpcPoint::SetStFtpcHitCoord() 
+{
+  // Overwrites hit positions with new ones (most likely the rotated ones).
+
+  StFtpcHit *hit = GetStFtpcHit();
+
+  if (!hit) {
+    gMessMgr->Message("", "W", "OS") << "StFtpcPoint: StFtpcHit does not exist! No changes done." << endm;
+    return;
+  }
+
+  StThreeVectorF hitPos(GetX(), GetY(), GetZ());
+  StThreeVectorF hitErr(GetXerr(), GetYerr(), GetZerr());
+  hit->setPosition(hitPos);
+  hit->setPositionError(hitErr);
+
+  return;
 }
 
 
