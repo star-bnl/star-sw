@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.cc,v 1.3 1999/09/24 01:23:32 fisyak Exp $
+ * $Id: StXiMiniDst.cc,v 1.4 1999/11/19 19:44:48 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.cc,v $
+ * Revision 1.4  1999/11/19 19:44:48  genevb
+ * Modified for StEvent 2.0
+ *
  * Revision 1.3  1999/09/24 01:23:32  fisyak
  * Reduced Include Path
  *
@@ -25,7 +28,8 @@
 #include "phys_constants.h"
 #include "StXiMiniDst.hh"
 #include "StXiVertex.h"
-#include "SystemOfUnits.h"
+#include "StTrack.h"
+#include "StTrackFitTraits.h"
 ClassImp(StXiMiniDst)
 
 StXiMiniDst::StXiMiniDst() { 
@@ -36,9 +40,7 @@ StXiMiniDst::StXiMiniDst(StXiVertex* xiVertex,
 			 StEvMiniDst* event) : 
              StV0MiniDst(v0Vertex, event) {
 
-  double B=0.5*tesla; // Hardwired - fix later
-
-  mCharge = xiVertex->chargeOfBachelor(B);
+  mCharge = xiVertex->chargeOfBachelor();
   mDecayVertexXi[0] = xiVertex->position().x();
   mDecayVertexXi[1] = xiVertex->position().y();
   mDecayVertexXi[2] = xiVertex->position().z();
@@ -50,7 +52,7 @@ StXiMiniDst::StXiMiniDst(StXiVertex* xiVertex,
   mMomBachelor[2] = xiVertex->momentumOfBachelor().z();
 
   mTpcHitsBachelor = 
-    ((StGlobalTrack *) xiVertex->bachelor())->numberOfTpcHits();
+    xiVertex->bachelor()->fitTraits().numberOfFitPoints(kTpcId);
 
   this->UpdateXi();
 }
