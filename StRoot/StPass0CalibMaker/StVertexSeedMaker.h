@@ -1,8 +1,9 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.1 2002/01/26 18:55:34 jeromel Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.2 2002/01/27 01:56:14 genevb Exp $
  *
+ * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
  * primary vertex positions (helpful for low               
  * multiplicity events like pp collisions)                 
@@ -31,6 +32,8 @@ class StVertexSeedMaker : public StMaker {
    virtual void fitData();
    int GetValidityDate();
    int GetValidityTime();
+   void UseEventDateTime();
+   void UseFillDateTime();
    St_vertexSeed* vertexSeedTable();
    void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
    void SetMinEntries(int entries);  //minimum number of valid events for seed
@@ -42,11 +45,13 @@ class StVertexSeedMaker : public StMaker {
    void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.1 2002/01/26 18:55:34 jeromel Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.2 2002/01/27 01:56:14 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
  protected:
+   Int_t FillAssumed();
+   void FillDateTime();
 
  private:
   TH1F* xdist;
@@ -70,12 +75,14 @@ class StVertexSeedMaker : public StMaker {
   float zVertexMax; //maximum allowed z vertex for mean calculation
   float zVertexMin; //minimum allowed z vertex for mean calculation
   float r2VertexMax; //minimum allowed radius^2 vertex for mean calculation
+  int    fill;
   int    date;
   int    time;
   int    minEntries;
   float    maxX0Err;
   float    maxY0Err;
   Bool_t   mHistOut;
+  Bool_t   useEventDateTime;
   double p[4];
   double ep[4];
   double chi;
@@ -85,6 +92,8 @@ class StVertexSeedMaker : public StMaker {
 };
 
 
+inline void StVertexSeedMaker::UseEventDateTime() {useEventDateTime = kTRUE;}
+inline void StVertexSeedMaker::UseFillDateTime() {useEventDateTime = kFALSE;}
 inline void StVertexSeedMaker::SetMinEntries(int entries){minEntries = entries; }
 inline void StVertexSeedMaker::SetMaxX0Err(float err){maxX0Err = err;}
 inline void StVertexSeedMaker::SetMaxY0Err(float err){maxY0Err = err;}

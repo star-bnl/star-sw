@@ -1,5 +1,8 @@
-// $Id: StVertexSeedMaker.cxx,v 1.1 2002/01/26 18:55:33 jeromel Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.2 2002/01/27 01:56:14 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.2  2002/01/27 01:56:14  genevb
+// Write db files with date/time for fill
+//
 // Revision 1.1  2002/01/26 18:55:33  jeromel
 // StTpcT0Maker moved from directory of the same name. First version
 // of StVertexSeedMaker.
@@ -113,6 +116,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name):StMaker(name){
   r2VertexMax = 15.0;
   nsize = 0;
   setArraySize(512);
+  UseFillDateTime(); // By default, use the data & time from the start of the fill
 }
 //_____________________________________________________________________________
 StVertexSeedMaker::~StVertexSeedMaker(){
@@ -154,31 +158,12 @@ void StVertexSeedMaker::Clear(Option_t *option){
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Make(){
-  if (date==0) {date = GetDate();cout << "date = " << date << endl;}
-  if (time==0) {time = GetTime();cout << "time = " << time << endl;}
+  if (date==0) FillDateTime();
+
+  // Currently only finds database values for first event
   if (x0_assumed == -888) {
-    // Currently only finds database values for first event
-    TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
-    if (!dbDataSet) {
-      gMessMgr->Error("StVertexSeedMaker: could not find Calibrations/rhic database");
-      return kStErr;
-    }
-    St_vertexSeed* dbTableC =
-      (St_vertexSeed*) (dbDataSet->FindObject("vertexSeed"));
-    if (!dbTableC) {
-      gMessMgr->Error("StVertexSeedMaker: could not find vertexSeed in database");
-      return kStErr;
-    }
-    vertexSeed_st* dbTable = dbTableC->GetTable();
-    x0_assumed   = dbTable->x0;
-    dxdz_assumed = dbTable->dxdz;
-    y0_assumed   = dbTable->y0;
-    dydz_assumed = dbTable->dydz;
-    gMessMgr->Info() << "StVertexSeedMaker: assumed values:"
-      << "\n     x0 assumed = " << x0_assumed
-      << "\n   dxdz assumed = " << dxdz_assumed 
-      << "\n     y0 assumed = " << y0_assumed
-      << "\n   dydz assumed = " << dydz_assumed << endm;
+    Int_t status = FillAssumed();
+    if (status != kStOk) return status;
   }
 
   // Get primary vertex from evr
@@ -258,7 +243,7 @@ Int_t StVertexSeedMaker::Finish() {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.1 2002/01/26 18:55:33 jeromel Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.2 2002/01/27 01:56:14 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -293,7 +278,7 @@ St_vertexSeed* StVertexSeedMaker::vertexSeedTable(){
   row->err_y0 = ep[2];
   row->err_dydz = ep[3];
   row->chisq_dof = chi;
-  row->weight = 25.0; // Fixed for now!!!
+  row->weight = 100.0; // Fixed for now!!!
   table->SetNRows(1);
   return table;
 }
@@ -305,6 +290,86 @@ void StVertexSeedMaker::WriteHistFile(){
   GetHistList()->Write();
   resNtuple->Write();
   out.Close();
+}
+//_____________________________________________________________________________
+Int_t StVertexSeedMaker::FillAssumed(){
+  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+  if (!dbDataSet) {
+    gMessMgr->Error("StVertexSeedMaker: could not find Calibrations/rhic database");
+    return kStErr;
+  }
+  St_vertexSeed* dbTableC =
+    (St_vertexSeed*) (dbDataSet->FindObject("vertexSeed"));
+  if (!dbTableC) {
+    gMessMgr->Error("StVertexSeedMaker: could not find vertexSeed in database");
+    return kStErr;
+  }
+  vertexSeed_st* dbTable = dbTableC->GetTable();
+  x0_assumed   = dbTable->x0;
+  dxdz_assumed = dbTable->dxdz;
+  y0_assumed   = dbTable->y0;
+  dydz_assumed = dbTable->dydz;
+  gMessMgr->Info() << "StVertexSeedMaker: assumed values:"
+    << "\n     x0 assumed = " << x0_assumed
+    << "\n   dxdz assumed = " << dxdz_assumed 
+    << "\n     y0 assumed = " << y0_assumed
+    << "\n   dydz assumed = " << dydz_assumed << endm;
+  return kStOk;
+}
+//_____________________________________________________________________________
+void StVertexSeedMaker::FillDateTime(){
+  date = GetDate();
+  time = GetTime();
+  gMessMgr->Info() << "StVertexSeedMaker: event date = " << date << endm;
+  gMessMgr->Info() << "StVertexSeedMaker: event time = " << time << endm;
+  if (!useEventDateTime) {
+    int datef = 0;
+    int timef = 0;
+    int fillf = -1;
+    char filename[128];
+    sprintf(filename,"./StRoot/StPass0CalibMaker/fillNumberTimes.txt");
+    ifstream in(filename);
+    if (!in) { 
+      sprintf(filename,
+        gSystem->ExpandPathName("${STAR}/StRoot/StPass0CalibMaker/fillNumberTimes.txt"));
+      in.open(filename);
+    }
+    if (in) {
+      gMessMgr->Info() << "StVertexSeedMaker: using fill date/time file: " << filename << endm;
+      const int maxc = 128;
+      char inbuf[maxc];
+      inbuf[2] = ' ';
+      while ((in.getline(inbuf,maxc)) && (inbuf[2] != ' ')) {}  // loop until line with 5th char a space
+      if (inbuf[2] == ' ') {
+          gMessMgr->Error("StVertexMaker: format of date/time file incorrect. Uh-oh....");
+      }
+      // Format from here should look like:
+      // |  FFFF |  DDDDDDDDTTTTTT |
+      // where the only length constraint is that the date D should have only 8 characters
+      int datep = 0;
+      int timep = 0;
+      int fillp = -1;
+      while ((date > datef) || ((date == datef) && (time > timef))) {
+        fillp = fillf; datep = datef; timep = timef;
+        char* start = &(inbuf[2]);
+        fillf = atoi(start);
+        start = strchr(start,'|');
+        while ((*start == ' ') || (*start == '|')) { start++; } // get past spaces and bars
+        timef = atoi(&(start[8]));  // date portion is 8 characters. Read time first,
+        start[8] = 0;               // then get date by ending string where time starts.
+        datef = atoi(start);
+        in.getline(inbuf,maxc);
+      }
+      in.close();
+      fill = fillp; date = datep; time = timep;
+      gMessMgr->Info() << "StVertexSeedMaker: using fill no.  = " << fill << endm;
+      gMessMgr->Info() << "StVertexSeedMaker: using fill date = " << date << endm;
+      gMessMgr->Info() << "StVertexSeedMaker: using fill time = " << time << endm;
+    } else {
+      gMessMgr->Warning("StVertexSeedMaker: no fill date/time file found, using event date/time.");
+      UseEventDateTime();
+    }
+  }
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::fitData(){
