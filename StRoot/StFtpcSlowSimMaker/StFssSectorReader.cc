@@ -66,7 +66,7 @@ int StFssSectorReader::initialize()
   int softRow=2*(int)((mSector-1)/6);
 
   // initialize pad arrays
-  int row, thisSoftSec, thisSoftRow;
+  int row, thisSoftSec=0, thisSoftRow=0;
   for (row=0; row<FTP_PADROWS; row++) 
     {
       Row_array[row].pad = &Pad_array[row][0];
@@ -158,7 +158,7 @@ int StFssSectorReader::initialize()
   padrow=-1; 
   pad=-1; 
   lastbin=-2; 
-  int pad_seq; 
+  int pad_seq=0; 
   oldstart = 0;
   
   u_char *adc_locn = (u_char *)(adcTable);
