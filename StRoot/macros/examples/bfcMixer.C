@@ -1,7 +1,10 @@
-$Log: bfcMixer.C,v $
-Revision 1.2  2000/05/09 20:15:43  kathy
-transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
-
+// $Log: bfcMixer.C,v $
+// Revision 1.3  2000/06/30 20:08:34  lansdell
+// fixed problem with Log and Revision not being commented
+//
+// Revision 1.2  2000/05/09 20:15:43  kathy
+// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
+// 
 //////////////////////////////////////////////////////////////////////////
 //
 //
@@ -11,7 +14,7 @@ transfer obsolete macros to /macros/obsolete;  update other macros so that they 
 //
 //
 //
-// $Id: bfcMixer.C,v 1.2 2000/05/09 20:15:43 kathy Exp $
+// $Id: bfcMixer.C,v 1.3 2000/06/30 20:08:34 lansdell Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
