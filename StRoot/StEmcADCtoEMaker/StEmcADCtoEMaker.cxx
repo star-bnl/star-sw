@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.62 2003/10/14 13:36:41 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.63 2004/01/26 22:50:13 perev Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.63  2004/01/26 22:50:13  perev
+// WarnOff
+//
 // Revision 1.62  2003/10/14 13:36:41  suaide
 // small change
 //
@@ -815,7 +818,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 	Float_t TOTALE=0;
 	Int_t   NHITS=0;
 	Int_t cap = 0;
-  Int_t date = mData->EventDate;
+//VPnotused  Int_t date = mData->EventDate;
   //if(date<20030501 && det>=2) MAX=9000; //just to save CPU time
 	for(Int_t id=1;id<=MAX;id++)
 	{

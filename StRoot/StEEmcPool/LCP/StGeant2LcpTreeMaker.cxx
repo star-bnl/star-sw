@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StGeant2LcpTreeMaker.cxx,v 1.1 2004/01/06 17:25:26 balewski Exp $
+// $Id: StGeant2LcpTreeMaker.cxx,v 1.2 2004/01/26 22:49:37 perev Exp $
 
 #include <math.h>
 #include <TFile.h>
@@ -68,7 +68,7 @@ void StGeant2LcpTreeMaker::clearLCP(){
 //________________________________________________
 void StGeant2LcpTreeMaker::InitRunFromMake  (int runNumber){
   if(runID==runNumber)  return ;
-  if(runID==888999)  return kStOK; // special run number
+  if(runID==888999)  return ; // special run number
   
 
   if(runID !=101) {
@@ -265,6 +265,9 @@ particle_st* StGeant2LcpTreeMaker::findGeantLcp( St_particle    *tab) {
 
 
 // $Log: StGeant2LcpTreeMaker.cxx,v $
+// Revision 1.2  2004/01/26 22:49:37  perev
+// WarnOff
+//
 // Revision 1.1  2004/01/06 17:25:26  balewski
 // get LCP from Geant info
 //
