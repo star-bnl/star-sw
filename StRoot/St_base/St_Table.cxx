@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.10 1998/08/18 14:05:07 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.11 1998/09/07 19:23:39 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.11  1998/09/07 19:23:39  fine
+// St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
+// St_DataSet::~St_DataSet has been changed to take in account the "strutural" links. Some opt have been done too
+//
 // Revision 1.10  1998/08/18 14:05:07  fisyak
 // Add to bfc dst
 //
@@ -318,17 +322,21 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const
       return strbuf;
   }
   IndentLevel();
-
+ 
   if (lenbuf>0) {
   // cut of the "_st" suffix 
-      Char_t *typenam =  (Char_t *)malloc(strlen(m.Name()));
-      strcpy(typenam,m.Name());
-      Char_t *eon = strstr(typenam,"_st");
-      if (eon) *eon = '\0';
-//      out << "struct " << typenam << " {";
-        iOut += sprintf(strbuf+iOut,"struct %s {",typenam);
-
-      free(typenam);
+     Char_t *typenam =  new Char_t [strlen(m.Name())+1];
+     strcpy(typenam,m.Name());
+  // look for the last "_"
+     Char_t *last = strrchr(typenam,'_');
+  // Check whether it is "_st"
+     Char_t *eon = 0;
+     if (last) eon = strstr(last,"_st");
+  // Cut it off if any
+     if (eon) *eon = '\0';
+ //====      out << "struct " << typenam << " {";
+     iOut += sprintf(strbuf+iOut,"struct %s {",typenam);
+     delete [] typenam;
    }
    else
       cout << "struct " << m.Name() << " {" << endl;
@@ -343,9 +351,9 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const
 
     if (lenbuf>0) {
 //        out << " " << t->Name() << " " << data.Name();
-    TString name = t->Name();
-    name.ReplaceAll("unsigned char","octet");
-        iOut += sprintf(strbuf+iOut," %s %s",name.Data(),data.Name());
+       TString name = t->Name();
+       name.ReplaceAll("unsigned char","octet");
+       iOut += sprintf(strbuf+iOut," %s %s",name.Data(),data.Name());
     }
     else
         cout << '\t'<< t->Name() << '\t'<< data.Name();

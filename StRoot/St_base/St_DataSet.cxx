@@ -508,18 +508,31 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
-St_DataSet::~St_DataSet(){
- // Delete list of the St_DataSet
-  if (fMother) {
-   // First we should break our relationship with the parent if any
+St_DataSet::~St_DataSet()
+{
+  // First we should break our relationship with the parent if any
+  if (fMother && !TestBit(kCanDelete) ) 
+  {
     St_DataSet *parent = GetParent();
     if (parent) parent->Remove(this);
-    if (fList) {
-      fList->Delete();
-      delete fList;
-      fList = 0;
+  }
+
+  // Delete list of the St_DataSet
+  if (fList) {
+    TIter next(fList);   
+    St_DataSet *son = 0;
+ // Delete the sons of this St_DataSet only
+    while (son = (St_DataSet *)next()) {
+       if (this == son->GetParent()) {
+       // mark the object is deleted from the St_DataSet dtor
+          son->SetBit(kCanDelete);
+          delete son;        
+       }
     }
-   }
+//    fList->Delete();
+    delete fList;
+    fList = 0;
+  }
 }
 //______________________________________________________________________________
 void St_DataSet::Add(St_DataSet *dataset)
