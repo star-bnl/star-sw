@@ -1,7 +1,10 @@
-// $Id: St_trs_Maker.cxx,v 1.1 1998/11/10 17:11:57 fisyak Exp $
+// $Id: St_trs_Maker.cxx,v 1.2 1998/11/25 21:58:30 fisyak Exp $
 // $Log: St_trs_Maker.cxx,v $
-// Revision 1.1  1998/11/10 17:11:57  fisyak
-// Put Brian trs versin into StRoot
+// Revision 1.2  1998/11/25 21:58:30  fisyak
+// Cleanup
+//
+// Revision 1.2  1998/11/25 21:58:30  fisyak
+// Cleanup
 //
 // Revision 1.1  1998/11/10 17:11:57  fisyak
 // Put Brian trs versin into StRoot
@@ -210,7 +213,7 @@ Int_t St_trs_Maker::Make(){
     St_DataSetIter geant(gStChain->DataSet("geant"));
     // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-      printf("id =%f  de%f  tof=%f \n",tpc_hit->id,tpc_hit->de,tpc_hit->tof);
+    Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows(); // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
     g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
     for (Int_t i=0; i< no_tpc_hits; i++){
       printf("id =%i  de%f  tof=%f \n",tpc_hit->id,tpc_hit->de,tpc_hit->tof);
@@ -279,10 +282,10 @@ Int_t St_trs_Maker::Make(){
 }
  return kStOK;
 }
-  printf("* $Id: St_trs_Maker.cxx,v 1.1 1998/11/10 17:11:57 fisyak Exp $\n");
+//_____________________________________________________________________________
 void St_trs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_trs_Maker.cxx,v 1.1 1998/11/10 17:11:57 fisyak Exp $\n");
+  printf("* $Id: St_trs_Maker.cxx,v 1.2 1998/11/25 21:58:30 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

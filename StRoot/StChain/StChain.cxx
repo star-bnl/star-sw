@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $
+// $Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.21  1998/11/25 21:58:21  fisyak
+// Cleanup
+//
 // Revision 1.20  1998/11/22 18:28:05  fisyak
 // Add name of tag
 //
@@ -255,7 +258,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $"),
 m_VersionTag("$Name:  $")
 {
    SetName(name);
@@ -375,7 +378,6 @@ Int_t StChain::Init()
    TIter next(m_Makers);
    StMaker *maker;
    TObject *objfirst, *objlast;
-   SafeDelete(m_EventSet);
    while ((maker = (StMaker*)next())) {
      // save last created histogram in current Root directory
       objlast = gDirectory->GetList()->Last();
@@ -438,7 +440,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -529,9 +531,6 @@ Int_t StChain::Make(Int_t i)
 // Create event 
    //   St_DataSetIter nextDataSet(m_DataSet);
    //   nextDataSet.Cd(gStChain->GetName());
-   //   m_EventSet = nextDataSet("event");
-   //   SafeDelete(m_EventSet);
-   //   m_EventSet = nextDataSet.Mkdir("event");
 //   Loop on all makers
    Int_t ret;
    TIter nextMaker(m_Makers);

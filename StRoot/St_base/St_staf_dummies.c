@@ -4,11 +4,15 @@
 void *ReAllocate(TABLE_HEAD_ST *h, int newsize);
 void *ami;
 
-void type_of_call F77_NAME(hbook1,HBOOK1)(){printf("***DUMMY HBOOK1****");}
+void type_of_call F77_NAME(hbook1,HBOOK1)(int i1,int i2,int i3,int i4,int i5,int i6,int i7){printf("***DUMMY HBOOK1****");}
 void type_of_call F77_NAME(hbook2,HBOOK2)(){printf("***DUMMY HBOOK2****");}
 void type_of_call F77_NAME(hbookn,HBOOKN)(){printf("***DUMMY HBOOKN****");}
+void type_of_call F77_NAME(hdelet,HDELET)(int i1){printf("***DUMMY HDELET****");}
+void type_of_call F77_NAME(hexist,HEXIST)(int i1){printf("***DUMMY HEXIST****");}
+void type_of_call F77_NAME(hf1,HF1)(int i1,int i2,int i3){printf("***DUMMY HF1****");}
 void type_of_call F77_NAME(hfill,HFILL)(){printf("***DUMMY HFILL****");}
 void type_of_call F77_NAME(hfn,HFN)(){printf("***DUMMY HFN****");}
+void type_of_call F77_NAME(hreset,HRESET)(int i1,int i2,int i3){printf("***DUMMY HRESET****");}
 void type_of_call F77_NAME(hrend,HREND)(){printf("***DUMMY HREND****");}
 void type_of_call F77_NAME(hropen,HROPEN)(){printf("***DUMMY HROPEN****");}
 void type_of_call F77_NAME(hrout,HROUT)(){printf("***DUMMY HROUT****");}

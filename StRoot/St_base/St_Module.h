@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.3 1998/08/25 23:07:24 didenko Exp $
+// $Id: St_Module.h,v 1.4 1998/11/25 21:58:34 fisyak Exp $
 // $Log: St_Module.h,v $
+// Revision 1.4  1998/11/25 21:58:34  fisyak
+// Cleanup
+//
 // Revision 1.3  1998/08/25 23:07:24  didenko
 // New base with Tree
 //
@@ -159,7 +162,8 @@ public:
 
   virtual      ~St_Module(); 
 
-  virtual void  Call(){Int_t i=ExecuteModule();}
+  //  virtual void  Call(){Int_t i=ExecuteModule();}
+  virtual void  Call(){ExecuteModule();}
   virtual Int_t CheckParameters(const Char_t *names[]=0);
   virtual Int_t CheckResults(Int_t res, const Char_t *names[]=0);
   virtual Int_t ExecuteModule();
