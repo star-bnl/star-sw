@@ -9,7 +9,7 @@
 #include "StMaker.h"
 #include "StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
-#include "St_io_Maker/St_io_Maker.h"
+//#include "St_io_Maker/St_io_Maker.h"
 #include "St_xdfin_Maker/St_xdfin_Maker.h"
 
 enum { kStTREE=1,kStXDF=2,kStMDC2=3,kStDAQ=4 };
@@ -143,6 +143,13 @@ Int_t StIOMaker::MakeRead(){
   StUKey uk  = fFileSet->GetNextEvent();
   if (uk.EOK())	return kStEOF;
 
+  return MakeRead(uk);
+}    
+//_____________________________________________________________________________
+Int_t StIOMaker::MakeRead(const StUKey &uk){
+
+  if (!fCurrMk) Open();
+  if (!fCurrMk) return kStEOF;
   return fCurrMk->MakeRead(uk);
 }    
 //_____________________________________________________________________________
