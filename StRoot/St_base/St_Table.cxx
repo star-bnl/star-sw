@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.76 1999/08/30 00:54:54 fine Exp $ 
+// $Id: St_Table.cxx,v 1.77 1999/08/30 23:15:08 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.77  1999/08/30 23:15:08  fine
+// St_Table::Fit method has been introduced
+//
 // Revision 1.76  1999/08/30 00:54:54  fine
 // Working version of St_Table::Draw NO crash on either system
 //
@@ -767,7 +770,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
   const Char_t *funcName = "SelectionQWERTY";  
 #define BYTECODE
 #ifdef BYTECODE
-  const Char_t *argtypes = "Float_t *,void **";
+  const Char_t *argtypes = "Float_t *,float **";
   long offset;
   G__ClassInfo globals;
   G__MethodInfo func = globals.GetMethod(funcName,argtypes,&offset);
@@ -784,7 +787,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
   int i;
   St_tableDescriptor  *tabsDsc   = GetRowDescriptors();
   tableDescriptor_st  *descTable = tabsDsc->GetTable();
-  Float_t  results[]    = {1990,1991,1992,1993,1994};
+  Float_t  results[]    = {1,1,1,1,1};
   Char_t **addressArray = (Char_t **)new ULong_t[tabsDsc->GetNRows()];
   Char_t *thisTable     = (Char_t *)GetArray();
 #ifdef BYTECODE
@@ -811,7 +814,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             descTable = tabsDsc->GetTable();                                                \
             for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ )                            \
                addressArray[i] = thisTable + descTable->m_Offset + GetRowSize()*firstentry; \
-            for(i=firstentry;i<lastEntry;i++) {                                            \
+            for(i=firstentry;i<lastEntry;i++) {                                             \
             CALLMETHOD
 
 #define TAKEACTION_END  for (int j=0; j < tabsDsc->GetNRows(); j++ ) addressArray[j] += GetRowSize(); }                                                                     \
@@ -827,8 +830,10 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
       switch ( action ) {
         case -1: {
              TAKEACTION_BEGIN
-                if (fVmin[0] > results[0]) fVmin[0] = results[0];
-                if (fVmax[0] < results[0]) fVmax[0] = results[0];
+              if (results[1]) {
+                 if (fVmin[0] > results[0]) fVmin[0] = results[0];
+                 if (fVmax[0] < results[0]) fVmax[0] = results[0];
+              }
              TAKEACTION_END
  
              nchans = fNbins[0];
@@ -844,10 +849,12 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             break;
         case  -2:
             TAKEACTION_BEGIN
-              if (fVmin[0] > results[1]) fVmin[0] = results[1];
-              if (fVmax[0] < results[1]) fVmax[0] = results[1];
-              if (fVmin[1] > results[0]) fVmin[1] = results[0];
-              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              if (results[2]) {
+                if (fVmin[0] > results[1]) fVmin[0] = results[1];
+                if (fVmax[0] < results[1]) fVmax[0] = results[1];
+                if (fVmin[1] > results[0]) fVmin[1] = results[0];
+                if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              }
             TAKEACTION_END
             nchans = fNbins[0];
             if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
@@ -880,10 +887,12 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             break;
         case -4:
             TAKEACTION_BEGIN
-              if (fVmin[0] > results[1]) fVmin[0] = results[1];
-              if (fVmax[0] < results[1]) fVmax[0] = results[1];
-              if (fVmin[1] > results[0]) fVmin[1] = results[0];
-              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              if (results[2]) {
+                if (fVmin[0] > results[1]) fVmin[0] = results[1];
+                if (fVmax[0] < results[1]) fVmax[0] = results[1];
+                if (fVmin[1] > results[0]) fVmin[1] = results[0];
+                if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              }
             TAKEACTION_END
             nchans = fNbins[1];
             if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
@@ -891,15 +900,17 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             ((TProfile*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1]);
         case  4:
             TAKEACTION_BEGIN
-               if (results[2]) ((TProfile*)obj)->Fill(Axis_t(results[0]),Axis_t(results[0]),Stat_t(results[2]));
+               if (results[2]) ((TProfile*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
             TAKEACTION_END
             break;
         case -12:
             TAKEACTION_BEGIN
-              if (fVmin[0] > results[1]) fVmin[0] = results[1];
-              if (fVmax[0] < results[1]) fVmax[0] = results[1];
-              if (fVmin[1] > results[0]) fVmin[1] = results[0];
-              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              if (results[2]) {
+                if (fVmin[0] > results[1]) fVmin[0] = results[1];
+                if (fVmax[0] < results[1]) fVmax[0] = results[1];
+                if (fVmin[1] > results[0]) fVmin[1] = results[0];
+                if (fVmax[1] < results[0]) fVmax[1] = results[0];
+              }
             TAKEACTION_END
             nchans = fNbins[0];
             if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
@@ -923,15 +934,19 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
             Float_t umax = gPad->GetUxmax();
             Float_t vmin = gPad->GetUymin();
             Float_t vmax = gPad->GetUymax();
+            Int_t pointIndex = 0;
             TAKEACTION_BEGIN
-              u = gPad->XtoPad(results[0]);
-              v = gPad->YtoPad(results[1]);
-              if (u < umin) u = umin;
-              if (u > umax) u = umax;
-              if (v < vmin) v = vmin;
-              if (v > vmax) v = vmax;
-              x[i] = u;
-              y[i] = v;
+             if (results[2]) {
+                u = gPad->XtoPad(results[0]);
+                v = gPad->YtoPad(results[1]);
+                if (u < umin) u = umin;
+                if (u > umax) u = umax;
+                if (v < vmin) v = vmin;
+                if (v > vmax) v = vmax;
+                x[pointIndex] = u;
+                y[pointIndex] = v;
+                pointIndex++;
+             }
             TAKEACTION_END
             if (!strstr(option,"goff")) pm->Draw();
             if (!((TH2F*)obj)->TestBit(kCanDelete)) 
@@ -941,12 +956,14 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
           break; 
         case -13:
             TAKEACTION_BEGIN
-              if (fVmin[0] > results[2]) fVmin[0] = results[2];
-              if (fVmax[0] < results[2]) fVmax[0] = results[2];
-              if (fVmin[1] > results[1]) fVmin[1] = results[1];
-              if (fVmax[1] < results[1]) fVmax[1] = results[1];
-              if (fVmin[2] > results[0]) fVmin[2] = results[0];
-              if (fVmax[2] < results[0]) fVmax[2] = results[0];
+              if (results[3]) {
+                if (fVmin[0] > results[2]) fVmin[0] = results[2];
+                if (fVmax[0] < results[2]) fVmax[0] = results[2];
+                if (fVmin[1] > results[1]) fVmin[1] = results[1];
+                if (fVmax[1] < results[1]) fVmax[1] = results[1];
+                if (fVmin[2] > results[0]) fVmin[2] = results[0];
+                if (fVmax[2] < results[0]) fVmax[2] = results[0];
+              }
             TAKEACTION_END
             rmin[0] = fVmin[2]; rmin[1] = fVmin[1]; rmin[2] = fVmin[0];
             rmax[0] = fVmax[2]; rmax[1] = fVmax[1]; rmax[2] = fVmax[0];
@@ -958,8 +975,12 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
 //            pm3d->SetMarkerStyle(GetMarkerStyle());
 //            pm3d->SetMarkerColor(GetMarkerColor());
 //            pm3d->SetMarkerSize(GetMarkerSize());
+            Int_t pointIndex = 0;
             TAKEACTION_BEGIN
-                pm3d->SetPoint(i,results[0],results[1],results[2]);
+                if (results[3]) {
+                  pm3d->SetPoint(pointIndex,results[0],results[1],results[2]);
+                  pointIndex++;
+                }
             TAKEACTION_END
             pm3d->Draw();
           }  
@@ -1184,7 +1205,6 @@ void St_Table::Clear(Option_t *opt)
     fN = mx;
     return;}
 }
-
 //______________________________________________________________________________
 void St_Table::Delete(Option_t *opt)
 {
@@ -1250,6 +1270,40 @@ Long_t St_Table::GetTableSize() const {
 // Returns the number of the allocated rows 
 return fN;
 }
+//______________________________________________________________________________
+void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *selection,Option_t *option ,Option_t *goption,Int_t nentries, Int_t firstentry)
+{
+//*-*-*-*-*-*-*-*-*Fit a projected item(s) from a St_Table*-*-*-*-*-*-*-*-*-*
+//*-*              =======================================
+//
+//  formula is a TF1 expression.
+//
+//  See St_Table::Draw for explanations of the other parameters.
+//
+//  By default the temporary histogram created is called htemp.
+//  If varexp contains >>hnew , the new histogram created is called hnew
+//  and it is kept in the current directory.
+//  Example:
+//    table.Fit(pol4,"sqrt(x)>>hsqrt","y>0")
+//    will fit sqrt(x) and save the histogram as "hsqrt" in the current
+//    directory.
+//
+ 
+   Int_t nch = strlen(option) + 10;
+   char *opt = new char[nch];
+   if (option) sprintf(opt,"%sgoff",option);
+   else        strcpy(opt,"goff");
+ 
+   Draw(varexp,selection,opt,nentries,firstentry);
+ 
+   delete [] opt;
+ 
+   TH1 *hfit = gCurrentHist;
+   printf("hname=%s, formula=%s, option=%s, goption=%s\n",hfit->GetName(),formula,option,goption);
+   if (hfit) hfit->Fit(formula,option,goption);   
+   else      printf("ERROR hfit=0\n");
+}
+
 //______________________________________________________________________________
 void  *St_Table::GetArray() const {
 //  return the void pointer to the C-structure
@@ -1627,6 +1681,31 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
   return 0;
  }
 //______________________________________________________________________________
+void St_Table::Project(const Text_t *hname, const Text_t *varexp, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
+{
+//*-*-*-*-*-*-*-*-*Make a projection of a St_Table using selections*-*-*-*-*-*-*
+//*-*              =============================================
+//
+//   Depending on the value of varexp (described in Draw) a 1-D,2-D,etc
+//   projection of the St_Table will be filled in histogram hname.
+//   Note that the dimension of hname must match with the dimension of varexp.
+//
+ 
+   Int_t nch = strlen(hname) + strlen(varexp);
+   char *var = new char[nch+5];
+   sprintf(var,"%s>>%s",varexp,hname);
+   nch = strlen(option) + 10;
+   char *opt = new char[nch];
+   if (option) sprintf(opt,"%sgoff",option);
+   else        strcpy(opt,"goff");
+ 
+   Draw(var,selection,opt,nentries,firstentry);
+ 
+   delete [] var;
+   delete [] opt;
+}
+
+//______________________________________________________________________________
 Int_t St_Table::Purge(Option_t *opt)
 {
   ReAllocate();
@@ -1902,11 +1981,8 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
    St_tableDescriptor *dsc = GetRowDescriptors();
    const tableDescriptor_st *descTable  = dsc->GetTable();
    // Create function
-   str << "void SelectionQWERTY(float *"<<resID<<", void **address)"   << endl;
+   str << "void SelectionQWERTY(float *"<<resID<<", float **address)"   << endl;
    str << "{"                                                        << endl;
-//print   str << " printf(\" Selection  : " << GetName() <<":  %x %f \\n\","<<resID<<",*"<<resID<<");" << endl; 
-   str << "void *topr = address[0];" << endl;
-//print   str << "printf(\" First address: Ox%x \\n\",topr);" << endl;
    int i = 0;
    for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
     // Take the column name
@@ -1914,26 +1990,27 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
     const Char_t *type = 0;
     // First check whether we do need this column
     for (Int_t exCount = 0; exCount < nExpressions; exCount++) {
-       if (strstr(expressions[exCount],columnName)) {goto LETSTRY;}
+       if (expressions[exCount] && expressions[exCount][0] && strstr(expressions[exCount],columnName)) goto LETSTRY;
     }
     continue;
 LETSTRY:
+    Bool_t isScalar = !(descTable->m_Dimensions);
+    Bool_t isFloat = descTable->m_Type == kFloat;
     type = typeNames[descTable->m_Type];
-    str << "topr = address[" << i << "];" << endl;
-//print     str << "printf(\" " << columnName << " Ox%x \\n\",topr);" << endl;
-    if (descTable->m_Dimensions) {
-        str << type  << " *" << columnName << " = (" << type << "*)topr;" << endl;
-//print        str << "printf(\" " << columnName << ":: 0x%x  %f \\n\"," << descTable->m_ColumnName << ","
-//print                            << columnName << "[0]);" << endl;
-    }
-    else 
-        str << type  << " " << columnName << " = *((" << type << "*)topr);" << endl;
+                    str << type << " ";
+    if (!isScalar)  str << "*";
+    
+                    str << columnName << " = " ;
+    if (isScalar)   str << "*(";
+    if (!isFloat)   str << "(" << type << "*)";
+                    str << "address[" << i << "]";
+    if (isScalar)   str << ")" ;
+                    str << ";" << endl;
    }
    // Create expressions
-   for (i=nExpressions-1; i >= 0; i-- ) {
-//print       str << " printf(\" Expression %f \\n\",float(" << expressions[i] << "));" << endl; 
-       str << " "<<resID<<"["<<i<<"]=(float)(" << expressions[i] << ");"  << endl;
-//print       str << " printf(\" result  %f %x \\n\","<<resID<<"["<<i<<"],&"<<resID<<"["<<i<<"]);" << endl; 
+   for (i=0; i < nExpressions; i++ ) {
+      if (expressions[i] && expressions[i][0]) 
+                   str << " "<<resID<<"["<<i<<"]=(float)(" << expressions[i] << ");"  << endl;
 //      if (i == nExpressions-1 && i !=0 ) 
 //          str  << "  if ("<<resID<<"["<<i<<"] == 0){ return; }" << endl;
    };

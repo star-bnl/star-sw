@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.34 1999/08/20 13:22:25 fine Exp $
+// $Id: St_Table.h,v 1.35 1999/08/30 23:15:09 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.35  1999/08/30 23:15:09  fine
+// St_Table::Fit method has been introduced
+//
 // Revision 1.34  1999/08/20 13:22:25  fine
 // new method St_Table::Draw
 //
@@ -172,6 +175,9 @@ public:
    virtual     St_tableDescriptor *GetTableDescriptors() const;
    virtual     St_tableDescriptor *GetRowDescriptors() const;
    virtual     const Char_t *GetType() const;
+   virtual     void       Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *selection="",Option_t *option="" ,Option_t *goption=""
+                              ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
+
    virtual     Long_t     HasData() const { return 1; }
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
@@ -183,6 +189,9 @@ public:
    virtual  const Char_t *Print(Int_t row, Int_t rownumber=10,
                                 const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
    virtual  const Char_t *PrintHeader() const; // *MENU*
+   virtual     void       Project(const Text_t *hname, const Text_t *varexp, const Text_t *selection="", Option_t *option=""
+                                 ,Int_t nentries=1000000000, Int_t firstentry=0);
+
    virtual Int_t         Purge(Option_t *opt="");   
 
                void      *ReAllocate(Int_t newsize);
