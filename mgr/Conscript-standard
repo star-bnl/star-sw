@@ -315,6 +315,7 @@ if ($#idlL > -1) {
   }
 }
 if ($#sourcesT > -1) {
+  Keep $SO_PKGT;
   LinkedModule $env3 $SO_PKGT, @sourcesT;
   Install $env3 $LIB, $SO_PKGT;
 }
@@ -326,6 +327,7 @@ if ($#src > -1) {
     my $libpkg = $LIB . "/" . basename($LIBPKG);
     Depends $env2 $SO_PKG, $libpkg;
   }
+  Keep $SO_PKG;
   LinkedModule $env2 $SO_PKG, @src;
   Install $env2 $LIB, $SO_PKG;
   if ($pkg eq "Star2Root"   or

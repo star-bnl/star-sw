@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.18 2000/06/27 20:38:45 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.19 2000/07/01 23:06:21 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -88,7 +88,9 @@
  $SYSLIBS  = "";
  $OSFID    = "";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
- $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+ $date    = `date +\%d\%b-%T`;
+# $MAKELIB = "test -f %> && mv %> %>.$date;";
+ $MAKELIB.= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
  $LINKCOM  = "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";

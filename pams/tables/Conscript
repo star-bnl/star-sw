@@ -29,6 +29,7 @@ my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};#print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 printf ("Run Conscript          in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 Depends $env3 $SO_PKG, @Deps;
+Keep $SO_PKG;
 LinkedModule $env3 $SO_PKG;
 Install $env3 $LIB, $SO_PKG;
 #

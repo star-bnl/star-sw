@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 use Env; 
+use English;
 use File::Basename;
 use File::Find;
 use POSIX;
@@ -12,13 +13,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.46 2000/06/29 22:48:11 fisyak Exp $
+# $Id: cons,v 1.47 2000/07/01 23:06:21 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = ".1";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.46 2000/06/29 22:48:11 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.47 2000/07/01 23:06:21 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -192,7 +193,7 @@ $param::rep_sig_times_ok = 1;	# Repository .consign times are in sync
 $param::quiet = 0;		# should we show the command being executed.
 $param::debug = 0;		# should we print out debug information
 $param::noRepository = 0;       # should we use sources from repository
-
+$param::keep  = 0;
 #
 $indent = '';
 
@@ -476,8 +477,14 @@ sub Override {
 package main;
 # Check script inclusion regexps
 my $pwd = cwd();# print "Pwd = $pwd\n"; 
-(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root|StDb)\/.*//;# print "Root pwd = $Rpwd\n";
-if ($1) {
+my $Rpwd = $pwd;
+if ($pwd =~ /ROOT/) {
+  $Rpwd =~ s/\/root.*//;
+}
+else {
+  $Rpwd =~ s/\/(pams|StRoot|asps|ROOT\/root|StDb).*//;
+}
+if ($Rpwd ne $pwd) {
   chdir($Rpwd) if $Rpwd;
   (my $Lpwd = $pwd) =~ s/$Rpwd\///;#print "Local pwd = $Lpwd\n";
   if ($Lpwd) {
@@ -1157,6 +1164,12 @@ sub cutdir($$) {
 sub Precious {
     map($_->{precious} = 1, map($dir::cwd->lookup($_), @_));
 }
+# Mark files (or directories) to not be kept before building.
+sub Keep {
+  if (param::keep) {
+    map($_->{keep} = 1, map($dir::cwd->lookup($_), @_));
+  }
+}
 
 # These methods are callable from Conscript files, via a cons
 # object. Procs beginning with _ are intended for internal use.
@@ -1596,6 +1609,13 @@ sub action {
 
     if ($param::build) {
 	futil::mkdir($tgt->{dir});
+	if (-f $tgt->path &&  $tgt->keep) {
+	  my $date = `date +\%d\%b-%T`; 
+	  my $file = $tgt->path;
+	  my $newfile = $file . "." . $date;
+	  my $cmd = "mv $file $newfile"; print "$cmd,\b";
+	  my $exit = `$cmd`;
+	}
 	unlink($tgt->path) if ! $tgt->precious;
     }
 
@@ -2832,6 +2852,10 @@ sub rfile {
 # returns the "precious" status of this file.
 sub precious {
     return $_[0]->{precious};
+}
+# returns the "keep" status of this file.
+sub keep {
+    return $_[0]->{keep};
 }
 
 # "Erase" reference to a Repository file,
@@ -4999,6 +5023,17 @@ The C<Precious> method asks cons not to delete the specified file or
 list of files before building them again.  It is invoked as:
 
   Precious <files>;
+
+This is especially useful for allowing incremental updates to libraries
+or debug information files which are updated rather than rebuilt anew each
+time.  Cons will still delete the files when the C<-r> flag is specified.
+
+=head2 The C<Keep> method
+
+The C<Keep> method asks cons not to keep the old specified file or
+list of files wiht time tag before building them again.  It is invoked as:
+
+  Keep <files>;
 
 This is especially useful for allowing incremental updates to libraries
 or debug information files which are updated rather than rebuilt anew each
