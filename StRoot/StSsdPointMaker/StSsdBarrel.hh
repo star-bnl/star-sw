@@ -4,6 +4,8 @@
 class TFile;
 class ssdDimensions_st;
 class ssdConfiguration_st;
+class ssdWafersPosition_st;
+
 class St_ssdWafersPosition;
 class St_ssdStripCalib;
 class St_spa_strip;
@@ -19,13 +21,14 @@ class StSsdHitCollection;
 class StSsdBarrel
 {
  public:
-  StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *configuration);
+  StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config);
   ~StSsdBarrel();
 
   StSsdBarrel(const StSsdBarrel & originalBarrel);
   StSsdBarrel& operator=(const StSsdBarrel  originalBarrel);
 
   void  initLadders(St_ssdWafersPosition *wafpos);
+  void  initLadders(ssdWafersPosition_st *position);
 //   int   readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db); 
   int   readStripFromTable(St_spa_strip *spa_strip);
   int   readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicControl *dynamicControl);

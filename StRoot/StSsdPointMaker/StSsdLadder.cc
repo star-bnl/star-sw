@@ -48,6 +48,26 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *wafpos)
     }
 }
 
+
+
+void StSsdLadder::initWafers(ssdWafersPosition_st *position)
+{
+  int idWafer = 0;
+  int iWaf    = 0;
+  for (int i = 0; i < 10*mNWaferPerLadder ; i++)    // need to be change
+    {
+      idWafer = position[i].id;
+      iWaf = idWaferToWaferNumb(idWafer);
+      if (
+	  (idWafer > mSsdLayer*1000)&&
+	  (mLadderNumb == idWafer - mSsdLayer*1000 - (iWaf+1)*100 - 1)
+	  )
+	mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);
+    }
+}
+
+
+
 int StSsdLadder::idWaferToWaferNumb(int idWafer)
 {
    int iW = (int)((idWafer - mSsdLayer*1000)/100);

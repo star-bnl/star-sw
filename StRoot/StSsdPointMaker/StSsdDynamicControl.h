@@ -11,14 +11,21 @@
 
 #ifndef STAR_StSsdDynamicControl
 #define STAR_StSsdDynamicControl
+/* #include "StDbLib/StDbDefs.hh" */
 
+/* class StDbManager; */
+/* class StDbConfigNode; */
 class St_slsCtrl;
+class StSsdPointMaker;
 class StSsdDynamicControl{
  public:
   StSsdDynamicControl();
   StSsdDynamicControl(St_slsCtrl *slsCtrl);
   ~StSsdDynamicControl();
   
+/*   StDbManager* mDbMgr;           //! */
+/*   StDbConfigNode* maccess;      //! */
+
   int       getNElectronInAMip();
   int       getADCDynamic();
   int       getA128Dynamic();
@@ -30,7 +37,14 @@ class StSsdDynamicControl{
   void      setADCDynamic(int val);          
   void      setA128Dynamic(int val);          
   void      setNBitEncoding(int val);
+  void      setNStripInACluster(int val);
   void      setPairCreationEnergy(double val);         
+  void      setParDiffP(double val);
+  void      setParDiffN(double val);
+  void      setParIndRightP(double val);
+  void      setParIndRightN(double val);
+  void      setParIndLeftP(double val);
+  void      setParIndLeftN(double val);
   void      setDAQCutValue(float val);
   void      printParameters();
 
@@ -61,7 +75,14 @@ inline void     StSsdDynamicControl::setNElectronInAMip(int val)       { mNElect
 inline void     StSsdDynamicControl::setADCDynamic(int val)            { mADCDynamic = val ;}
 inline void     StSsdDynamicControl::setA128Dynamic(int val)           { mA128Dynamic = val ;}
 inline void     StSsdDynamicControl::setNBitEncoding(int val)          { mNBitEncoding = val ;}
+inline void     StSsdDynamicControl::setNStripInACluster(int val)      { mNStripInACluster = val ;}
 inline void     StSsdDynamicControl::setPairCreationEnergy(double val) { mPairCreationEnergy = val ;}
+inline void     StSsdDynamicControl::setParDiffP(double val)              { mparDiffP = val ;}
+inline void     StSsdDynamicControl::setParDiffN(double val)              { mparDiffN = val ;}
+inline void     StSsdDynamicControl::setParIndRightP(double val)          { mparIndRightP = val ;}
+inline void     StSsdDynamicControl::setParIndRightN(double val)          { mparIndRightN = val ;}
+inline void     StSsdDynamicControl::setParIndLeftP(double val)           { mparIndLeftP = val ;}
+inline void     StSsdDynamicControl::setParIndLeftN(double val)           { mparIndLeftN = val ;}
 inline void     StSsdDynamicControl::setDAQCutValue(float val)         { mDAQCutValue = val ;}
 
 #endif

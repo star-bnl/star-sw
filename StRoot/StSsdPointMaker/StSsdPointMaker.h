@@ -33,6 +33,11 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "StDbLib/StDbDefs.hh"
+
+class StChain;
+class StDbManager;
+class StDbConfigNode;
 class TFile;
 class TH1F;
 class TH1S;
@@ -56,12 +61,15 @@ class StSsdBarrel;
 
 class StSsdPointMaker : public StMaker {
  private:
+  StDbManager* mDbMgr;           //!
+  StDbConfigNode* maccess;      //!
   St_sdm_calib_db       *m_noise;         //!< Pointer to the calib_db table (noise values) 
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
   St_sdm_condition_db   *m_condition_db;  //!< Pointer to the condition_db table (active/inactive strip)
   St_ssdDimensions      *m_dimensions;    //!< Pointer to the ssdDimensions table (wafer size)
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
+  //  St_ssdWafersPosition  *position;        //!< Pointer to the ssdWaferPosition table (wafer positions)
   St_ssdLaddersPosition *m_ladpos;        //!< Pointer to the ssdLadderPosition table (ladder positions)
   St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
   St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
@@ -101,7 +109,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.2 2004/07/20 14:04:10 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.3 2004/08/13 07:07:31 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

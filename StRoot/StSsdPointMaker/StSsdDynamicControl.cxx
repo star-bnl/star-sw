@@ -2,24 +2,28 @@
 #include "StSsdDynamicControl.h"
 #include "StMessMgr.h"
 #include "tables/St_slsCtrl_Table.h"
+#include "StDbLib/StDbManager.hh"                      // Database Libraries
+#include "StDbLib/StDbConfigNode.hh"                   //
+#include "StDbLib/StDbTable.h"       
 /*! 
 Basic constructor. The members are filled in the code
 */
+
 StSsdDynamicControl::StSsdDynamicControl()
 {
-  mNElectronInAMip      =   22500; 
-  mADCDynamic           =      20;
-  mA128Dynamic          =      12;    
-  mNBitEncoding         =      10; 
-  mNStripInACluster     =       4;
-  mPairCreationEnergy   = 3.6e-09;
-  mparDiffP             = 0.00123;
-  mparDiffN             = 0.00094; 
-  mparIndRightP         =   0.021; 
-  mparIndRightN         =   0.026; 
-  mparIndLeftP	        =   0.013; 
-  mparIndLeftN	        =    0.01; 
-  mDAQCutValue          =       4;
+//   mNElectronInAMip      =   22500; 
+//   mADCDynamic           =      20;
+//   mA128Dynamic          =      12;    
+//   mNBitEncoding         =      10; 
+//   mNStripInACluster     =       4;
+//   mPairCreationEnergy   = 3.6e-09;
+//   mparDiffP             = 0.00123;
+//   mparDiffN             = 0.00094; 
+//   mparIndRightP         =   0.021; 
+//   mparIndRightN         =   0.026; 
+//   mparIndLeftP	        =   0.013; 
+//   mparIndLeftN	        =    0.01; 
+//   mDAQCutValue          =       4;
 }
 /*!
 Constructor loading the parameters from the Db table
@@ -51,16 +55,19 @@ The destructor deletes nothing
 StSsdDynamicControl::~StSsdDynamicControl()
 {
 }
+
 /*!
 Printing the major parameters
  */
 void  StSsdDynamicControl::printParameters(){
   cout<<"**** **** SSD Dynamic Control Parameters **** ****"<<endl;
-  cout<<"**** NElectronInAMip = "<<this->getNElectronInAMip()<<"  ****"<<endl;
-  cout<<"****mADCDynamic = "<<this->getADCDynamic()<<"  ****"<<endl;
-  cout<<"****mA128Dynamic = "<<this->getA128Dynamic()<<"  ****"<<endl;
-  cout<<"****mNBitEncoding = "<<this->getNBitEncoding()<<"  ****"<<endl;
-  cout<<"****mPairCreationEnergy = "<<this->getPairCreationEnergy()<<"  ****"<<endl;
-  cout<<"****mDAQCutValue = "<<this->getDAQCutValue()<<"  ****"<<endl;
+  cout<<"**** NElectronInAMip     = "<<this->getNElectronInAMip()<<" ****"<<endl;
+  cout<<"**** ADCDynamic          = "<<this->getADCDynamic()<<"      ****"<<endl;
+  cout<<"**** A128Dynamic         = "<<this->getA128Dynamic()<<"     ****"<<endl;
+  cout<<"**** NBitEncoding        = "<<this->getNBitEncoding()<<"    ****"<<endl;
+  cout<<"**** PairCreationEnergy  = "<<this->getPairCreationEnergy()<<"  ****"<<endl;
+  cout<<"**** DAQCutValue         = "<<this->getDAQCutValue()<<"  ****"<<endl;
   cout<<"**************************************"<<endl;
 }
+
+
