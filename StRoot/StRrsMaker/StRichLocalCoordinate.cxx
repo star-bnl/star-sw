@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StRichLocalCoordinate.cxx,v 1.2 2000/02/08 23:45:47 lasiuk Exp $
+ * $Id: StRichLocalCoordinate.cxx,v 1.3 2000/02/29 18:05:50 lasiuk Exp $
  *
  * Author: brian Jan 20, 2000
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StRichLocalCoordinate.cxx,v $
+ * Revision 1.3  2000/02/29 18:05:50  lasiuk
+ * change operator<< to reflect x,y,z
+ *
  * Revision 1.2  2000/02/08 23:45:47  lasiuk
  * Default constructor initializer changed for CC4.2
  *
@@ -33,8 +36,8 @@ StRichLocalCoordinate::~StRichLocalCoordinate() {/* nopt */}
 // Non-member Functions
 ostream& operator<<(ostream& os, const StRichLocalCoordinate& a)
 {
-    return os << "RICH_Local: "
-              << a.position().z() << ", "
+    return os << "RICH_Local: x,y,z "
+              << a.position().x() << ", "
               << a.position().y() << ", "
-              << a.position().x();
+              << a.position().z();
 }
