@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.24 2001/01/03 23:08:35 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.25 2001/03/20 01:43:14 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.25  2001/03/20 01:43:14  perev
+ * first event skip fixed
+ *
  * Revision 1.24  2001/01/03 23:08:35  perev
  * Skip over EOF added
  *
@@ -168,8 +171,9 @@ int StDAQReader::readEvent()
   fEventReader->setVerbose(fVerbose);
   //  fEventReader->InitEventReader(fFd, fOffset, 0);
   fEventReader->InitEventReader(fFd, fOffset);
+  int oldOffset = fOffset;
   fOffset = fEventReader->NextEventOffset();
-  if(fEventReader->eventIsCorrupted(fFd,fOffset)) return kStErr; // Herb, Aug 28 2000
+  if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
