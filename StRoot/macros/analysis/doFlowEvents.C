@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.38 2002/02/05 17:00:37 posk Exp $
+// $Id: doFlowEvents.C,v 1.39 2002/02/13 22:37:09 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -291,11 +291,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // Make Eta subevents
 //   StFlowEvent::SetEtaSubs();
 
-  // Use a Pt weight in the event plane calcualtion
+  // Enable weights in the event plane calcualtion
   StFlowEvent::SetPtWgt(kTRUE);
+  StFlowEvent::SetEtaWgt(kTRUE);
 
   // Use Aihong's probability PID method
-//  StFlowEvent::SetProbPid();
+//   StFlowEvent::SetProbPid();
 
   // Have the CumulantMaker use the old method
 //   StFlowCumulantMaker::SetOldMethod(kTRUE); 
@@ -341,9 +342,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // Chain Finish
   //
   if (nevents > 1) {
-    chain->Clear();
+    //chain->Clear();
     chain->Finish();
-    //delete chain;
+    delete chain;
   }
   else {
     if (!b) {
@@ -463,6 +464,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.39  2002/02/13 22:37:09  posk
+// Added SetEtaWeight(bool) command.
+//
 // Revision 1.38  2002/02/05 17:00:37  posk
 // Added commands for SetPtBinsPart and h+/h-
 //
