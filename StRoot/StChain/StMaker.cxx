@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.137 2004/01/14 22:33:12 fisyak Exp $
+// $Id: StMaker.cxx,v 1.138 2004/01/26 22:47:26 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -422,8 +422,10 @@ void StMaker::Clear(Option_t *option)
    
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
+   int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)next())) {
       Assert(maker->TestBit(kCleaBeg)==0);
+      StMkDeb::SetCurrent(maker,3);
       maker->SetBit(kCleaBeg);
       maker->StartTimer();
       if (maker->fMemStatClear) maker->fMemStatClear->Start();
@@ -431,6 +433,7 @@ void StMaker::Clear(Option_t *option)
       if (maker->fMemStatClear) maker->fMemStatClear->Stop();
       maker->StopTimer();
       maker->ResetBit(kCleaBeg);
+      StMkDeb::SetCurrent(curr);
    }
    return;
 
@@ -444,7 +447,7 @@ Int_t StMaker::Init()
    
    TIter nextMaker(tl);
    StMaker *maker;
-
+   int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)nextMaker())) {
 
      // save last created histogram in current Root directory
@@ -454,6 +457,7 @@ Int_t StMaker::Init()
       // Initialise maker
 
       Assert(maker->TestBit(kInitBeg|kInitEnd)==0);
+      StMkDeb::SetCurrent(maker,1);
       maker->SetBit(kInitBeg);
       maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
@@ -488,6 +492,7 @@ Int_t StMaker::Init()
       ::doPs(maker->GetName(),"Init");
       maker->ResetBit(kInitBeg);
       maker->SetBit  (kInitEnd);
+      StMkDeb::SetCurrent(curr);
     }
   return kStOK; 
 }
@@ -565,15 +570,18 @@ Int_t StMaker::Finish()
    }
 
    next.Reset();
+   int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)next())) 
    {
       if (maker->TestBit(kFiniEnd)) 
         maker->Warning("Finish","maker %s.%s Finished twice"
                ,maker->GetName(),maker->ClassName());
+      StMkDeb::SetCurrent(maker,4);
       maker->SetBit(kFiniBeg);
       if ( maker->Finish() ) nerr++;
       maker->ResetBit(kFiniBeg);
       maker->SetBit  (kFiniEnd);
+      StMkDeb::SetCurrent(curr);
    }
    if (!GetParent()) {// Only for top maker
 
@@ -610,10 +618,12 @@ Int_t StMaker::Make()
    TIter nextMaker(tl);
    StMaker *maker;
    fgFailedMaker = 0;
+   int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
      Assert(maker->TestBit(kMakeBeg)==0);
      maker->SetBit(kMakeBeg);
+     StMkDeb::SetCurrent(maker,2);
      oldrun = maker->m_LastRun;
      if (hd && hd->GetRunNumber()!=oldrun) {
        if (oldrun>-1) maker->FinishRun(oldrun);
@@ -623,7 +633,6 @@ Int_t StMaker::Make()
      }
 // 		Call Maker
      maker->StartMaker();
-     StMkDeb::SetCurrent(maker);
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
@@ -631,6 +640,7 @@ Int_t StMaker::Make()
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
      maker->ResetBit(kMakeBeg);
+     StMkDeb::SetCurrent(curr);
      if ((ret%10)>kStWarn) { 
        fgFailedMaker = maker;
        return ret;}
@@ -1202,6 +1212,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.138  2004/01/26 22:47:26  perev
+// Account stage (init,make,..)
+//
 // Revision 1.137  2004/01/14 22:33:12  fisyak
 // restore built time
 //
