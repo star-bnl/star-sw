@@ -25,14 +25,14 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 my $prodSr = "P00hi"; 
 
 my @Sets = (
-#             "2000/06",
+             "2000/06",
              "2000/07",
              "2000/08",
              "2000/09",
 );
 
 my @DirD = (
-#            "P00hi/2000/06",
+            "P00hi/2000/06",
             "P00hi/2000/07",
             "P00hi/2000/08",
             "P00hi/2000/09",

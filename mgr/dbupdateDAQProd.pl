@@ -28,21 +28,21 @@ my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-#             "P00hg/2000/06",
+             "P00hi/2000/06",
              "P00hi/2000/07",
              "P00hi/2000/08", 
              "P00hi/2000/09", 
 );
 
 my @SetS = (
-#             "daq/2000/06",
+             "daq/2000/06",
              "daq/2000/07",
              "daq/2000/08",
              "daq/2000/09", 
 );
 
 my @DirD = (
-#            "2000/06",
+            "2000/06",
             "2000/07",
             "2000/08",
             "2000/09",
@@ -500,14 +500,15 @@ my $daqType = 0;
  }
   $mtype = "daq_reco";
 
-  $daqType = 0; 
+#  $daqType = 0; 
+  $mevtType = 3;
 
-  foreach my $daqFile (@dbOnFiles){
-        $daqName =  ($$daqFile)->dName;
-        $daqType =  ($$daqFile)->evType;
-        $daqName =~ s/.daq//g; 
- 	if ($mfName =~ /$daqName/) {
-           $mevtType = $daqType;
+#  foreach my $daqFile (@dbOnFiles){
+#        $daqName =  ($$daqFile)->dName;
+#        $daqType =  ($$daqFile)->evType;
+#        $daqName =~ s/.daq//g; 
+# 	if ($mfName =~ /$daqName/) {
+#           $mevtType = $daqType;
 
  foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
@@ -531,11 +532,11 @@ my $daqType = 0;
         next;
      }
    }   
-    last;
-  }else{
-  next;
-   } 
-  }
+#    last;
+#  }else{
+#  next;
+#   } 
+#  }
  }else{
   next;
  }
