@@ -186,7 +186,7 @@ public:
    static StMessMgr*  CurrentMessager();
    static StMessMgr*  Instance();
    static StMessMgr*  Instance(const char *);
-   virtual       void SetCurrentMessager(StMessMgr *mgr=0);
+   static StMessMgr*  SetCurrentMessager(StMessMgr *mgr=0);
 protected:
    virtual StMessMgr*  Instantiate();
    virtual StMessMgr*  Instantiate(const char *);
@@ -250,12 +250,41 @@ public:
 #endif
 };
 
+//______________________________________________________________________________
+//
+//  StTurnLogger - an aux class to simply "save/restore the "current" logger
+//______________________________________________________________________________
+class StTurnLogger 
+{
+   private:
+     StMessMgr* fMessager; // hold the messager to restore it at dtor
+   public:
+      StTurnLogger(StMessMgr* msg=0);
+      StTurnLogger(const StTurnLogger& push);
+     ~StTurnLogger();
+};
+   
 // Global pointers:
 R__EXTERN StMessMgr* gMessMgr;
 R__EXTERN StMessage* gMessage;
 R__EXTERN StMessage* endm;
 // R__EXTERN StMessMgr& gMess;
 
+//______________________________________________________________________________
+inline StTurnLogger::StTurnLogger(StMessMgr* msg): fMessager(0) 
+{
+  if (msg) fMessager = StMessMgr::SetCurrentMessager(msg);
+}
+
+//______________________________________________________________________________
+inline StTurnLogger::StTurnLogger(const StTurnLogger& push) : fMessager(push.fMessager) 
+{ ((StTurnLogger*)&push)->fMessager=0; }
+
+//______________________________________________________________________________
+inline StTurnLogger::~StTurnLogger()
+{if (fMessager) StMessMgr::SetCurrentMessager(fMessager);} 
+
+     
 //______________________________________________________________________________
 inline ostream& operator<<(ostream& os, StMessage* stm) {
    return gMessMgr->OperatorShift(os,stm);
@@ -283,4 +312,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.5 2004/11/03 16:39:17 fine Exp $
+// $Id: StMessMgr.h,v 1.6 2004/11/04 22:25:56 fine Exp $

@@ -22,7 +22,13 @@ StMessMgr*  StMessMgr::Instance() { return (gMessMgr)?gMessMgr->Instantiate():0;
 StMessMgr*  StMessMgr::Instance(const char *loggerName)
 {return (gMessMgr)?gMessMgr->Instantiate(loggerName):0; }
 //______________________________________________________________________________
-void        StMessMgr::SetCurrentMessager(StMessMgr *mgr){gMessMgr=mgr;}
+StMessMgr*  StMessMgr::SetCurrentMessager(StMessMgr *mgr)
+{
+   // Set the new value for the current logger manager and return the previous one
+   StMessMgr* old = gMessMgr;
+   gMessMgr=mgr;
+   return old;
+}
 //______________________________________________________________________________
 StMessMgr*  StMessMgr::Instantiate()            {return gMessMgr;     }
 //______________________________________________________________________________
@@ -248,4 +254,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.4 2004/11/03 16:39:17 fine Exp $
+// $Id: StMessMgr.cxx,v 1.5 2004/11/04 22:25:56 fine Exp $
