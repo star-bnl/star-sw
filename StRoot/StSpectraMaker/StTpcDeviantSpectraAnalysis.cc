@@ -19,7 +19,15 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   int Ndevbins = 50;
 
   // use abscissa and ordinate types
-  string hlab2DSpectra = "YPt";
+
+  string hlab2DSpectra = "";
+  if (mAbscissa == kRapidity && mOrdinate == kPperp) {
+    hlab2DSpectra= "YPt";
+  } else if (mAbscissa == kRapidity && mOrdinate == kTransverseMass) {
+    hlab2DSpectra= "YMt";
+  } else if (mAbscissa == kPseudoRapidity && mOrdinate == kPperp) {
+    hlab2DSpectra= "EtaPt";
+  } 
 
   hlab2DSpectra = hlab2DSpectra + mTitle;
   const char* h2DSpectra = hlab2DSpectra.c_str(); 
@@ -34,7 +42,7 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
   mDedxvsP->Sumw2();
 
-  string hlab2DSpectraDev = "YPtDeviant";
+  string hlab2DSpectraDev = hlab2DSpectra+"Deviant";
 
   hlab2DSpectraDev = hlab2DSpectraDev + mTitle;
   const char* h2DSpectraDev = hlab2DSpectraDev.c_str(); 
@@ -109,11 +117,25 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 	    if (effic > 0. && effic <= 1.) {
 		float weight = 1./effic;
 		double pperp = mom.perp();
-		// double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
+		double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
 		double E = sqrt(p*p+mMassPid*mMassPid);
 		double pz = mom.z();
-		double y = 0.5*log((E+pz)/(E-pz)); 
-		m2DSpectraDeviant->Fill(y,pperp,deviant,weight);
+		double y = 0.5*log((E+pz)/(E-pz));
+		double pseudoy = 0.;
+                double xvalue=-1000.;
+		double yvalue=0.;
+		if (mAbscissa == kRapidity) {
+		  xvalue = y;
+		} else if (mAbscissa == kPseudoRapidity) {
+		  xvalue = pseudoy;
+		  // calc this!!!!
+		} 
+		if (mOrdinate == kPperp) {
+		  yvalue = pperp;
+		} else if (mOrdinate == kTransverseMass) {
+		  yvalue = mt;
+		} 
+		m2DSpectraDeviant->Fill(xvalue,yvalue,deviant,weight);
 	    }
        }       
   }   
