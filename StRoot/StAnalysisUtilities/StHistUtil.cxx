@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.16 2003/09/02 17:55:26 perev Exp $
+// $Id: StHistUtil.cxx,v 2.17 2004/02/10 16:31:15 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.17  2004/02/10 16:31:15  genevb
+// A few extra histo lines, features
+//
 // Revision 2.16  2003/09/02 17:55:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -338,6 +341,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 // Limit x range for some histograms
           if (oName.EndsWith("QaPointTpc") ||
               oName.EndsWith("QaPointSvt") ||
+              oName.EndsWith("QaPointSvtLaser") ||
               oName.EndsWith("QaPointSsd") ||
               oName.EndsWith("QaPointFtpc") ||
               oName.EndsWith("QaRichTot") ||
@@ -372,7 +376,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // actually draw,print
           if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("box");
-	    if (oName.EndsWith("trkGoodF")) {
+	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
               ruler.DrawLineNDC(0.1,0.1,0.9,0.9);
@@ -383,7 +387,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               hobj->SetBarOffset();
             }
 	    hobj->SetLineWidth(2);
-	    hobj->Draw();
+            if (oName.EndsWith("Mass")) hobj->Draw("e");
+	    else hobj->Draw();
             if (!oName.CompareTo("fcl_radialW") ||
                 !oName.CompareTo("fcl_radialE")) {
               ruler.SetLineColor(46);
