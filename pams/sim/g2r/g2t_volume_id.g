@@ -197,7 +197,7 @@ c* else  to be filled.
 	eta=idigi(2)+1
         strip=idigi(3)+1
         n=n+1
-        print *,'in g2t idigi=',n,(idigi(i),i=1,5)
+*        print *,'in g2t idigi=',n,(idigi(i),i=1,5)
         If (forw_back==4) forw_back=3
         If (rileft==1) then
           phi=60-phi+1
