@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.36 1999/07/15 13:58:27 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.37 1999/08/07 19:47:07 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.37  1999/08/07 19:47:07  fisyak
+// cleanup check of kFALSE
+//
 // Revision 1.36  1999/07/15 13:58:27  perev
 // cleanup
 //
@@ -199,7 +202,7 @@ Int_t St_tpt_Maker::Init(){
 
 // if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
   cout<<"my make init m_tteEvalOn="<<m_tteEvalOn<<endl;
-  cout<<"kFALSE="<<kFALSE<<endl;
+  //  cout<<"kFALSE="<<kFALSE<<endl;
 
   if(m_tteEvalOn){VertexEffResolutionInit();}
   return StMaker::Init();
