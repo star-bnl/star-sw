@@ -20,7 +20,9 @@ return
 *********************************************************************
  macro init
    macro/global/import *
-     
+   cd [params]/tpc/tptpars
+       tdm/table/cell/putvalue 'tpt_pars[0].prob' 50 50
+   cd /dui  
  return
  
 **********************************************************************
