@@ -1,3 +1,8 @@
+// $Id: bfcread.C,v 1.11 1999/05/20 18:43:21 kathy Exp $
+// $Log: bfcread.C,v $
+// Revision 1.11  1999/05/20 18:43:21  kathy
+// removing unecessary macros
+//
 //======================================================================
 //   bfcread.C
 //
