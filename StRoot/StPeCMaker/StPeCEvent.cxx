@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.13 2003/03/18 21:20:28 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.14 2003/03/20 20:10:58 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.14  2003/03/20 20:10:58  yepes
+// double counting of tracks corrected
+//
 // Revision 1.13  2003/03/18 21:20:28  yepes
 // correcting problem with bField
 //
@@ -161,7 +164,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   if ( NGlobal > StPeCnMaxTracks ) return 1 ; 
 
   nPrim             = NPrimaries ;
-  nTot              = NGlobal + NPrimaries  ;
+  nTot              = NGlobal  ;
   qTot = SumQ ;
   pt   = sqrt( SumPx*SumPx + SumPy*SumPy );
 
