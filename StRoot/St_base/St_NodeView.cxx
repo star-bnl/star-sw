@@ -335,14 +335,14 @@ void St_NodeView::Paint(Option_t *option)
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
  
 //*-*- Paint all sons
-  TList *fNodes =  GetList();
-  Int_t nsons = fNodes?fNodes->GetSize():0;
+  TList *Nodes =  GetList();
+  Int_t nsons = Nodes?Nodes->GetSize():0;
 
   if(!nsons) return;
  
   gGeometry->PushLevel();
   St_NodeView *node;
-  TIter  next(fNodes);
+  TIter  next(Nodes);
   while ((node = (St_NodeView *)next())) {
      if (view3D)  view3D->PushMatrix();
 
@@ -438,4 +438,31 @@ const Char_t *sceleton[] = {
 //   cout << " " << endl;
    out << " " << endl;
  }
+}
+
+//______________________________________________________________________________
+void St_NodeView::SetVisibility(Int_t vis)
+{
+ St_Node *node = GetNode();
+ if (node) node->SetVisibility(vis);
+}
+
+//______________________________________________________________________________
+void St_NodeView::Sizeof3D() const
+{
+//*-*-*-*-*-*-*Return total size of this 3-D Node with its attributes*-*-*
+//*-*          ==========================================================
+ 
+   St_Node *thisNode  = GetNode();
+   if (thisNode) {
+     TShape *shape = thisNode->GetShape();
+     if (shape && GetVisibility() && shape->GetVisibility()) 
+        shape->Sizeof3D();     
+   }
+   
+//   if ( TestBit(kSonsInvisible) ) return;
+ 
+  St_NodeView *node;
+  St_DataSetIter next((St_NodeView *)this);
+  while ((node = (St_NodeView *)next())) node->Sizeof3D();  
 }

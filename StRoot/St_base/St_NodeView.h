@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.11 1999/04/23 00:09:19 fine Exp $
+// $Id: St_NodeView.h,v 1.12 1999/04/23 22:47:36 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.12  1999/04/23 22:47:36  fine
+// Node family has been adjusted for St_PolyLineShape class
+//
 // Revision 1.11  1999/04/23 00:09:19  fine
 // Working verion of PolyLineShape. Some correction for St_Node family as well
 //
@@ -44,15 +47,20 @@ public:
   St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition);
   virtual ~St_NodeView();
   virtual St_Node *AddNode(St_Node *node);
-  virtual void Browse(TBrowser *b);
-  virtual void Draw(Option_t *option); // *MENU* 
-  virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
-  virtual Bool_t IsMarked();
+  virtual void     Browse(TBrowser *b);
+  virtual void     Draw(Option_t *option); // *MENU* 
+  virtual Int_t    DistancetoPrimitive(Int_t px, Int_t py);
   virtual St_NodePosition *GetPosition() const { return (St_NodePosition *)GetObject();}
-  virtual St_Node         *GetNode() const ;
-  virtual void             Paint(Option_t *option="");
-  virtual TString          PathP() const;
-  virtual void             SavePrimitive(ofstream &out, Option_t *option="");
+  virtual St_Node *GetNode() const ;
+  virtual Int_t    GetVisibility() const {return GetNode() ? GetNode()->GetVisibility():0;}
+  virtual Bool_t   IsMarked();
+  virtual Bool_t   Is3D()  {return kTRUE;}
+  virtual TList   *Nodes(){ return GetList();}
+  virtual void     Paint(Option_t *option="");
+  virtual TString  PathP() const;
+  virtual void     SavePrimitive(ofstream &out, Option_t *option="");
+  virtual void     SetVisibility(Int_t vis=1); // *MENU*
+  virtual void     Sizeof3D() const;
   ClassDef(St_NodeView,1)
 };
 

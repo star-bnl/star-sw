@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.15 1999/04/13 14:26:40 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.16 1999/04/23 22:47:34 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.16  1999/04/23 22:47:34  fine
+// Node family has been adjusted for St_PolyLineShape class
+//
 // Revision 1.15  1999/04/13 14:26:40  fine
 // Geometry-based dataset implementation, next step
 //
@@ -325,3 +328,9 @@ void St_NodePosition::UpdatePosition(Option_t *)
   }
 }
 
+//______________________________________________________________________________
+void St_NodePosition::SetVisibility(Int_t vis)
+{
+ St_Node *node = GetNode();
+ if (node) node->SetVisibility(vis);
+}
