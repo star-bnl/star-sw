@@ -9,12 +9,14 @@
 #include <math.h>
 #include "phys_constants.h"
 #include "math_constants.h"
+/* Add comments for fun */
 
 #define tls_index_sort_i_ F77_NAME(tls_index_sort_i,TLS_INDEX_SORT_I)
-extern void type_of_call tls_index_sort_i_(long *, long *,long *,long *,long *);
+extern void type_of_call tls_index_sort_i_(long *, void *, void *,long *,long *);
 #define gufld_ F77_NAME(gufld,GUFLD)
 extern void type_of_call gufld(long *, long *);
 
+int type_of_call ds2ReallocTable(TABLE_HEAD_ST** ,char** , int);
 long type_of_call tpt_residuals_(
   TABLE_HEAD_ST            *hit_h,      TCL_TPHIT_ST              *hit ,
   TABLE_HEAD_ST          *track_h,      TPT_TRACK_ST            *track ,
@@ -39,7 +41,6 @@ long type_of_call tpt_residuals_(
 **:               res_h   - header Structure for res
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-float xlocal[]={0,0,0}; /* scratch position */
 #define LEN 600000
 long  loc_hit[LEN]; /* array to index the hit table sorted by track */
 long  mylen=LEN; /* variable holding length of loc_hit array */
@@ -141,7 +142,7 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
         l++;
     	if (res_h->nok >= res_h->maxlen) { /* Increase table length*/
              newmaxlen = res_h->maxlen*1.3;
-             ds2ReallocTable(&res_h,&res,newmaxlen);}
+             ds2ReallocTable(&res_h,(char **)&res,newmaxlen);}
         if(l>=hit_h->nok) break;
       }
     }
