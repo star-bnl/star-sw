@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:33 ullrich Exp $
+ * $Id: StSoftwareMonitor.cxx,v 2.3 1999/11/05 11:36:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.cxx,v $
- * Revision 2.2  1999/10/28 22:26:33  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/05 11:36:00  ullrich
+ * Added non-const version of methods
  *
  * Revision 2.2  1999/10/28 22:26:33  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -38,7 +38,7 @@
 #include "tables/St_dst_mon_soft_glob_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 
-static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.3 1999/11/05 11:36:00 ullrich Exp $";
 
 ClassImp(StSoftwareMonitor)
 
@@ -223,6 +223,30 @@ StSoftwareMonitor::global() const { return mGlobalMonitor; }
 
 const StL3SoftwareMonitor*
 StSoftwareMonitor::l3() const { return mL3Monitor; }
+
+StTpcSoftwareMonitor*
+StSoftwareMonitor::tpc() { return mTpcMonitor; }
+
+StSvtSoftwareMonitor*
+StSoftwareMonitor::svt() { return mSvtMonitor; }
+
+StFtpcSoftwareMonitor*
+StSoftwareMonitor::ftpc() { return mFtpcMonitor; }
+
+StEmcSoftwareMonitor*
+StSoftwareMonitor::emc() { return mEmcMonitor; }
+
+StRichSoftwareMonitor*
+StSoftwareMonitor::rich() { return mRichMonitor; }
+
+StCtbSoftwareMonitor*
+StSoftwareMonitor::ctb() { return mCtbMonitor; }
+
+StGlobalSoftwareMonitor*
+StSoftwareMonitor::global() { return mGlobalMonitor; }
+
+StL3SoftwareMonitor*
+StSoftwareMonitor::l3() { return mL3Monitor; }
 
 void
 StSoftwareMonitor::setTpcSoftwareMonitor(StTpcSoftwareMonitor* val)

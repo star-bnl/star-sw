@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.h,v 2.1 1999/10/13 19:43:40 ullrich Exp $
+ * $Id: StSoftwareMonitor.h,v 2.2 1999/11/05 11:36:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.h,v $
- * Revision 2.1  1999/10/13 19:43:40  ullrich
- * Initial Revision
+ * Revision 2.2  1999/11/05 11:36:04  ullrich
+ * Added non-const version of methods
  *
  * Revision 2.1  1999/10/13 19:43:40  ullrich
  * Initial Revision
@@ -54,13 +54,21 @@ public:
     StSoftwareMonitor(const StSoftwareMonitor&);
     virtual ~StSoftwareMonitor();
                       
+    StTpcSoftwareMonitor*          tpc();
     const StTpcSoftwareMonitor*    tpc() const;
+    StSvtSoftwareMonitor*          svt();
     const StSvtSoftwareMonitor*    svt() const;
+    StFtpcSoftwareMonitor*         ftpc();
     const StFtpcSoftwareMonitor*   ftpc() const;
+    StEmcSoftwareMonitor*          emc();
     const StEmcSoftwareMonitor*    emc() const;
+    StRichSoftwareMonitor*         rich();
     const StRichSoftwareMonitor*   rich() const;
+    StCtbSoftwareMonitor*          ctb();
     const StCtbSoftwareMonitor*    ctb() const;
+    StGlobalSoftwareMonitor*       global();
     const StGlobalSoftwareMonitor* global() const;
+    StL3SoftwareMonitor*           l3();
     const StL3SoftwareMonitor*     l3() const;
 
     void setTpcSoftwareMonitor(StTpcSoftwareMonitor*);
