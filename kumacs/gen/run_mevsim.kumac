@@ -9,6 +9,7 @@
 * 
 * 6/22/98 Kathy Turner
 * 7/30/98 K. Turner - change to use utility kumacs 
+* 10/14/98 K. Turner - put in read_default_params 
 * ************************************************************************
 
  MACRO run__
@@ -42,7 +43,7 @@
  macro/global/import *
    
  exec load_libraries#run  [domain]  
- 
+ exec read_default_params#init 
 **************************************************************
 * OPEN FILES
 * ***************************************************************
