@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.12  1998/07/13 00:37:39  perev
-#  *.mk and *.csh
+#  Revision 1.13  1998/07/13 23:08:00  perev
+#  small modif in mgr
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/13 00:37:39 $ 
+#             Last modification $Date: 1998/07/13 23:08:00 $ 
 #. default setings
 
 RM := rm -f
@@ -236,8 +236,8 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CC      := cc
     LD      := $(CXX)
     SO      := $(CXX)
-    CXXFLAGS  := $(DEBUG) +a1 -z +Z -w -Dextname  -D_HPUX_SOURCE
-    CFLAGS   :=  $(DEBUG) -Ae -z +Z -Dextname   -D_HPUX_SOURCE
+    CXXFLAGS  := $(DEBUG) +a1 -z +Z -w -Dextname  -D_HPUX_SOURCE +DAportable
+    CFLAGS   :=  $(DEBUG) -Ae -z +Z -Dextname   -D_HPUX_SOURCE +DAportable
     LDFLAGS   := $(DEBUG) +a1 -z -Wl,+s -Wl,-E 
     SOFLAGS   := $(DEBUG) -b +a1 -z 
     CLIBS   :=   -L/usr/lib/X11R5 -lXm -lXt -lX11 -lm -lPW -ldld
@@ -246,7 +246,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   FC        :=fort77
 ##FLIBS     := /opt/fortran/lib/libU77.a /opt/langtools/lib/end.o
   FLIBS     := /opt/fortran/lib/libU77.a 
-  FFLAGS    := $(DEBUG) +DA1.0 +ppu +Z  +U77
+  FFLAGS    := $(DEBUG) +DA1.0 +ppu +Z  +U77 -K
   FEXTEND   := +es
 endif
 
