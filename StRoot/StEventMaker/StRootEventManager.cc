@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.10 2002/04/18 23:29:35 jeromel Exp $
+ * $Id: StRootEventManager.cc,v 2.11 2003/01/22 21:42:00 genevb Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.11  2003/01/22 21:42:00  genevb
+ * Fix solaris compilation
+ *
  * Revision 2.10  2002/04/18 23:29:35  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -50,6 +53,7 @@
 #include "StRootEventManager.hh"
 #include "StChain.h"
 #include <string>
+#include <strstream.h>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 #endif
