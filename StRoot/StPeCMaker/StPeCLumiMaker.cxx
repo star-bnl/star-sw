@@ -1,7 +1,7 @@
-// $Id: StPeCLumiMaker.cxx,v 1.4 2002/06/03 23:07:44 meissner Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.5 2002/06/04 17:55:01 meissner Exp $
 // $Log: StPeCLumiMaker.cxx,v $
-// Revision 1.4  2002/06/03 23:07:44  meissner
-// return flag of Make() for filtering
+// Revision 1.5  2002/06/04 17:55:01  meissner
+// filtering: filter all  UPC triggerwords
 //
 // Revision 1.3  2002/04/18 19:02:09  meissner
 // Change Init to  InitRun
@@ -59,7 +59,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.4 2002/06/03 23:07:44 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.5 2002/06/04 17:55:01 meissner Exp $";
 
 ClassImp(StPeCLumiMaker)
 
@@ -155,6 +155,14 @@ Int_t StPeCLumiMaker::Make() {
     cout<<"StPeCLumiMaker: Event has no tracks!"<<endl;
     flag = kStErr;
   }
+
+  int tw = event->l0Trigger()->triggerWord();
+  cout << "Trigger word " << tw << endl;
+  if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
+    cout << "UPC trigger filter event"  << endl;
+    flag= kStOk;
+  }
+    
   // put runnumber to fill function
   //   LumiEntry->fill(  event , filenumber);
   LumiEntry->fill(  event );
