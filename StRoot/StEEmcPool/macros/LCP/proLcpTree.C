@@ -1,7 +1,7 @@
 // projects TTree in to histos using cuts (if any)
 // former rdLcpTree()
 
-proLcpTree( int cut=0, TString run="R3012008", int maxEve=10000,
+proLcpTree( int cut=0, TString run="R3010006", int maxEve=10000,
 	    TString wrkDir="/star/data04/sim/balewski/LcpRun2/maxEta1.0/",
 	    TString outPath="fixMe/"
 	    ){
@@ -15,7 +15,6 @@ proLcpTree( int cut=0, TString run="R3012008", int maxEve=10000,
   
   TChain *chain = new TChain("T-LCP","dummName");
   
-  TString item=wrkDir+"/tree/"+run;
   TString item=wrkDir+"/tree/"+run;
   item=item+".tree.root";
   printf("#tree %s\n", item.Data());
@@ -36,8 +35,8 @@ proLcpTree( int cut=0, TString run="R3012008", int maxEve=10000,
 
   //...........................  QA histo 
   h1[0]=new TH1F("bx","rates vs. bXing",129,-0.5,128.5);
-  //  h1[1]=new TH1F("pt","Leading Particle pT (GeV/c)",100,0.,10.);
-  h1[1]=new TH1F("pt","Leading Particle pT (GeV/c)",135,0.025,6.775); // Olga's definition
+  h1[1]=new TH1F("pt","Leading Particle pT (GeV/c)",100,0.,10.);
+  //h1[1]=new TH1F("pt","Leading Particle pT (GeV/c)",135,0.025,6.775); // Olga's definition
   h1[2]=new TH1F("Zv","Z vertex/cm",100,-250.,250.);
   h1[3]=new TH1F("nPrim","No.of valid prim TPC tracks ",50,-0.5,49.5);
   h1[4]=new TH1F("cosm", "Mike's Cosmics  Rejector return value",5,-0.5,4.5);
@@ -136,6 +135,10 @@ proLcpTree( int cut=0, TString run="R3012008", int maxEve=10000,
     int ret=chain->GetEntry(k);  
     assert(ret);
     if(k%1000==0)printf("%d %d %d %f id=%d nFit=%d\n",k,ret,nPrim  ,vz,id,nFit);
+    // new final cuts
+    if(nPrim<3 ) continue;
+    if( pt>5. ) continue;
+
     if(cut==1 && (nPrim<5 || nPrim>20) ) continue;
     if(cut==2 && fabs(vz) >50) continue;
     if(cut==3 && (pt<1. || pt>3.) ) continue;

@@ -5,13 +5,65 @@ const int  nObs=3;
 char *obsL[nObs]={ "A_n", "A_s", "A_d"};
 
 
-compSelection() {
+instrAsy() {
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
+  
+  TGraphErrors *gr =new  TGraphErrors;
+  gr->SetName("insyAsy");
+  gr->SetTitle("Instrumental Asymmetries");
+  //gr->SetMarkerColor(ampCol[iam]);
+  gr->SetMarkerSize(0.8);
+  gr->SetMarkerStyle(21);
+  TGraphErrors *gr1=gr;
+  
 
   TString  wrkDir="final/";
-  const int  nSel=11;
-  char *selL[nSel]={ "defaultB-H/", "default-H/", "maxEta1.4-H/", "highPol-H/", "nPrim5_20-H/","zVert50-H/", "pT1_3-H/", "posCharge-H/","shiftPatt-H/","swapPatt-H/","randPatt-H/" };
+  TString  fname=wrkDir+"defaultB-H/asyVer1.hist.root";
+  TFile *inpH=new TFile(fname);
+  assert(inpH->IsOpen());
+  //inpH->ls();
+  const int  nSel=5;
+  char *selL[nSel]={ "a0*All","b0*All","a2*All","b2*All","c1*All"};
+  int isel;
+  for (isel=0;isel<nSel;isel++) {
+    TGraphErrors *gr =(TGraphErrors *) inpH->Get(selL[isel]);
+    assert(gr);
+    //gr->Print();
+    //gr->Draw("AP");
+    float x1=0;
+    if(isel<2) x1=2189;
+    gr->Fit("pol0","","",x1,3000);
+    TF1 *ff=gr->GetFunction("pol0");
+    if(ff==0) continue; // no fit was made
+    float val=ff->GetParameter(0);
+    float err=ff->GetParError(0);
+    printf("pol0= %f +/- %f\n",val,err);
+        int n=gr1->GetN();
+      float x=isel+1;
+      gr1->SetPoint(n,x,val);
+      gr1->SetPointError(n,0,err); 
+    }
+
+
+  gr1->Print();
+
+  // return;
+  gr1->Draw("AP");
+
+  // save Tgraph
+  TString fname=wrkDir+"instAsy.hist.root";
+  TFile *outH=new TFile(fname,"RECREATE");
+  assert(outH->IsOpen());
+  printf("save outH -->%s\n", fname.Data());
+  gr1->Write();
+  outH->ls();
+  outH->Write();
+
+
+    return;
+}
+#if 0
 
   createTgr();
 
@@ -103,4 +155,4 @@ void createTgr() {
   }
 }
 
-
+#endif

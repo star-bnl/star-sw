@@ -32,11 +32,11 @@ doRatio(TString fill="F2201x", TString wrkDir="./") {
   // just trig func expansion
   double  PI=3.141592654;
   TF1 *ff;
-  //ff = new TF1("fCos012",Cos012,-PI ,PI,3);
-  //  ff->SetParameters(0,0,0);  ff->SetParNames("a0","a1","a2");
+  ff = new TF1("fCos012",Cos012,-PI ,PI,3);
+  ff->SetParameters(0,0,0);  ff->SetParNames("a0","a1","a2");
 
-  ff = new TF1("fCos012",Cos012,-PI ,PI,4);
-  ff->SetParameters(0,0,0,0);  ff->SetParNames("a0","a1","a2","phi0");
+  //ff = new TF1("fCos012",Cos012,-PI ,PI,4);
+  //ff->SetParameters(0,0,0,0);  ff->SetParNames("a0","a1","a2","phi0");
 
   ff->SetLineColor(kGreen);
   
@@ -240,8 +240,7 @@ Double_t Cos012(Double_t *x, Double_t *par)
   Float_t A0=par[0];
   Float_t A1=par[1];
   Float_t A2=par[2];
-  Float_t phi0=par[3]/180*3.1416;
-  //  phi0=par[3];
+  Float_t phi0=0; //par[3]/180*3.1416;
 
   Double_t  f =A0 +A1*cos(phi-phi0) + A2*cos(2*(phi-phi0));
   return f;
