@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.34 2004/05/04 00:09:17 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.35 2004/09/18 01:28:18 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -142,7 +142,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.34 2004/05/04 00:09:17 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.35 2004/09/18 01:28:18 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -219,7 +219,8 @@ virtual   void closeRead();
 
   void clear(TClonesArray* &t, int& counter,int del=1);
   void clear(int del=0);
-  
+
+  void assignArrays();
   void zeroArrays();
   void createArrays();
   TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
@@ -268,13 +269,16 @@ virtual   void closeRead();
  
   friend class StMuDst;
   friend class StMuDstFilterMaker;
-    
-  TClonesArray* mArrays       [__NARRAYS__       ];
-  TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];
-  TClonesArray* mEmcArrays    [__NEMCARRAYS__    ];
-  TClonesArray* mPmdArrays    [__NPMDARRAYS__    ];
-  TClonesArray* mTofArrays    [__NTOFARRAYS__    ];
-  char          mStatusArrays [__NALLARRAYS__    ];
+
+  // Beware that this was added to counteract contiguous memory.
+  // See implementation for caveat
+  TClonesArray*  mAArrays         [__NALLARRAYS__];
+  TClonesArray** mArrays;       //[__NARRAYS__       ];
+  TClonesArray** mStrangeArrays;//[__NSTRANGEARRAYS__];
+  TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
+  TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
+  TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
+  char           mStatusArrays    [__NALLARRAYS__    ];
 
   ClassDef(StMuDstMaker, 0)
 }; 
@@ -310,7 +314,11 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.35  2004/09/18 01:28:18  jeromel
+ * *** empty log message ***
+ *
  * Revision 1.34  2004/05/04 00:09:17  perev
+ *
  * //  Selecting SetBranchStatus for particular MuDst branches
  * //  Special names:
  * //  MuEventAll - all branches related to StMuEvent

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.60 2004/05/04 13:26:23 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.61 2004/09/18 01:28:11 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -71,7 +71,6 @@ ClassImp(StMuDstMaker)
 #endif
 
 
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -96,6 +95,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0)
 {
+  assignArrays();
+
   mDirName="./";
   mFileName="";
   streamerOff();
@@ -124,10 +125,25 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 
 }
 
+/*! 
+ * This method assigns individual TCloneArrays location from one
+ * big global one. Dirty init MUST follow the order in StMuArrays.
+ * This allows for block initialization/zeroing without problems
+ * or side effects such as the one cause by array boundary overwrite
+ * if the first TClone in a list of declared variables is used.
+ */
+void StMuDstMaker::assignArrays()
+{
+  mArrays         = mAArrays       + 0;       
+  mStrangeArrays  = mArrays        + __NARRAYS__;
+  mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
+  mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
+  mTofArrays      = mPmdArrays     + __NPMDARRAYS__;    
+}
 
 void StMuDstMaker::zeroArrays()
 {
-  memset(mArrays,0,sizeof(void*)*__NALLARRAYS__);
+  memset(mAArrays,0,sizeof(void*)*__NALLARRAYS__);
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
   
 }
@@ -200,6 +216,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0)
 {
+  assignArrays();
   streamerOff();
   zeroArrays();
   if (mIoMode==ioRead) openRead();
@@ -260,9 +277,9 @@ void  StMuDstMaker::streamerOff() {
 void StMuDstMaker::createArrays() {
   /// all stuff
   for ( int i=0; i<__NALLARRAYS__; i++) {
-    DEBUGVALUE2(mArrays[i]);
-    clonesArray(mArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-    DEBUGVALUE2(mArrays[i]);
+    DEBUGVALUE2(mAArrays[i]);
+    clonesArray(mAArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
+    DEBUGVALUE2(mAArrays[i]);
   }
   mStMuDst->set(this);
   // commecnted to include tof again (subhasis) 
@@ -277,7 +294,7 @@ void StMuDstMaker::clear(int del){
   int dell = 1; if (del) dell = 999;
 
   for ( int i=0; i<__NALLARRAYS__; i++) {
-    clear(mArrays[i],StMuArrays::arrayCounters[i],dell);
+    clear(mAArrays[i],StMuArrays::arrayCounters[i],dell);
   }
   DEBUGMESSAGE2("out");
 }
@@ -503,8 +520,8 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
     ts = bname; ts +="*";
     chain->SetBranchStatus (ts,1);
-    chain->SetBranchAddress(bname,mArrays+i);
-    assert(tb->GetAddress() == (char*)(mArrays+i));
+    chain->SetBranchAddress(bname,mAArrays+i);
+    assert(tb->GetAddress() == (char*)(mAArrays+i));
   }
 
   mTTree = mChain->GetTree();
@@ -589,7 +606,7 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
-    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], bufsize, mSplit);
+    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, mSplit);
   }
 
   mCurrentFileName = fileName;
@@ -1038,7 +1055,7 @@ void StMuDstMaker::printArrays()
   TClonesArray *tcl;
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
-    tcl = mArrays[i];
+    tcl = mAArrays[i];
     printf(" Array %s\t = %s::%s(%d)\n",
     StMuArrays::arrayNames[i],
     tcl->ClassName(),tcl->GetName(),tcl->GetEntriesFast());
@@ -1079,6 +1096,9 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.61  2004/09/18 01:28:11  jeromel
+ * *** empty log message ***
+ *
  * Revision 1.60  2004/05/04 13:26:23  jeromel
  * Oops .. Conflict resolution fixed.
  *
