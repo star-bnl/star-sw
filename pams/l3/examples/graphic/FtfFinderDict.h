@@ -31,11 +31,9 @@ extern void G__set_cpp_environmentFtfFinderDict();
 #endif
 
 extern G__linked_taginfo G__FtfFinderDictLN_TClass;
+extern G__linked_taginfo G__FtfFinderDictLN_FtfContainer;
 extern G__linked_taginfo G__FtfFinderDictLN_FtfPara;
 extern G__linked_taginfo G__FtfFinderDictLN_FtfTrack;
 extern G__linked_taginfo G__FtfFinderDictLN_FtfHit;
-extern G__linked_taginfo G__FtfFinderDictLN_VOLUME;
-extern G__linked_taginfo G__FtfFinderDictLN_ROW;
-extern G__linked_taginfo G__FtfFinderDictLN_AREA;
 extern G__linked_taginfo G__FtfFinderDictLN_FtfFinder;
 extern G__linked_taginfo G__FtfFinderDictLN_FtfMcTrack;

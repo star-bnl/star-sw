@@ -124,6 +124,16 @@ inline int localToRaw ( int row,
   double pad2move = xLocal / pitch + .5 ;
   pad             = pad2move + numberOfPadsAtRow[row-1]/2; 
   tb              = (driftLength - zLocal) / lengthPerTb ;
+  if ( pad < 0 ) {
+//   printf ( "xLocal %e pad2move %e pad %e nPads %d \n",
+//             xLocal, pad2move, pad, numberOfPadsAtRow[row-1] ) ;
+     return 1 ;
+  }
+  if ( tb < 0 ) {
+//   printf ( "zLocal %e tb %e  \n", zLocal, tb ) ;
+//   printf ( "localtoRaw !!!!!! \n" ) ;
+     return 1 ;
+  }
   return 0;
 }
 
@@ -137,10 +147,9 @@ inline int localToGlobal ( int sector, double xLocal, double yLocal, double zLoc
   *x = SectorCos[sector-1] * xLocal + SectorSin[sector-1] * yLocal;
   // caution: sector>12 needs x->-x and y->y (east side!)
   // ==> set sector to sector-12
-  int eastsector = (sector>12) ? 
-          sector-12 : sector;
-//*y = -1.*SectorSin[eastsector-1] *xLocal + SectorCos[eastsector-1] * yLocal;
-  *y = -1.*SectorSin[sector-1] *xLocal + SectorCos[sector-1] * yLocal;
+  int eastsector = (sector>12) ? sector-12 : sector;
+  *y = -1.*SectorSin[eastsector-1] *xLocal + SectorCos[eastsector-1] * yLocal;
+//*y = -1.*SectorSin[sector-1] *xLocal + SectorCos[sector-1] * yLocal;
   *z = (sector<13) ? zLocal : -zLocal ;
   return 0;
 }

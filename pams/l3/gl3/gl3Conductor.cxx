@@ -208,10 +208,8 @@ int gl3Conductor::setCommunications (  ){
 
    gl3Address.sin_family = AF_INET;         /* host byte order */
    gl3Address.sin_port = htons(gl3Port);     /* short, network byte order */
-   gl3Address.sin_addr.s_addr = INADDR_ANY; /* automatically fill with my
-					    IP */
-   bzero(&(gl3Address.sin_zero), 8);        /* zero the rest of the
-					    struct */
+   gl3Address.sin_addr.s_addr = INADDR_ANY; /* automatically fill with my IP */
+   bzero(&(gl3Address.sin_zero), 8);        /* zero the rest of the struct */
 
    if (bind(socketFd, (struct sockaddr *)&gl3Address, 
                        sizeof(struct sockaddr)) == -1) {
@@ -258,11 +256,12 @@ int gl3Conductor::setup ( int maxEventsIn, int maxAnalysesIn ) {
 //####################################################################
 //
 //####################################################################
-long gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
+int gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
    gl3Histo* hPointer ;
 
    gl3HistoContainer* container = (gl3HistoContainer *)buffer ;
 
+   printf ( "nHistos %d \n", histoList.size() ) ;
    container->nHistos = histoList.size();
    
    char* pointer = (char *)&(container->buffer) ;

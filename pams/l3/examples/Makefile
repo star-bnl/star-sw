@@ -14,11 +14,11 @@ GRAPHSRC = graphic
 #
 #    Option for graphic, debug version
 #
-CFLAGS    = -g -D DEBUG -D SL3ROOT -I$(ROOTSYS)/include
+CFLAGS    = -g -D DEBUG -D SL3ROOT -I$(ROOTSYS)/include -I$(ROOTSYS)/src    
 #
 #   Option for stand alone versions
 # for alphas -mcpu=ev6 should be added, much faster!!! :)
-CFLAGS	  = -O2  -I/DAQ/include 
+#CFLAGS	  = -O2  -I/DAQ/include 
 LIBS      = -lm
 
 #-----------------------------------
@@ -32,7 +32,7 @@ TRACKER 	= FtfFinder.o FtfTrack.o FtfHit.o FtfPara.o \
 	  	  FtfUtilities.o 
 
 GRAPHTRACK      = FtfGraphic.o FtfBaseHitDict.o FtfHitDict.o FtfBaseTrackDict.o \
-		  FtfTrackDict.o FtfFinderDict.o FtfParaDict.o \
+		  FtfTrackDict.o FtfFinderDict.o FtfParaDict.o FtfSl3Dict.o \
 		  FtfGraphicDict.o
 
 SL3TRACKER     	= $(TRACKER) FtfSl3.o sl3Swap.o 
@@ -55,8 +55,8 @@ sl3D:$(SL3TRACKER) sl3DumpTracks.o
 sl3Daq: $(SL3TRACKER) sl3Daq.o
 	$(CC) sl3Daq.o $(SL3TRACKER) $(CFLAGS) $(LIBS) -I $(INC) -I $(SRC) -o sl3Daq
 
-Ftf.so:$(TRACKER) $(GRAPHTRACK)
-	$(CC) -shared -o Ftf.so -I$(ROOTSYS)/include $(TRACKER) $(GRAPHTRACK) -lm
+Ftf.so:$(SL3TRACKER) $(GRAPHTRACK)
+	$(CC) -shared -o Ftf.so -I$(ROOTSYS)/include $(SL3TRACKER) $(GRAPHTRACK) -lm
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -90,20 +90,32 @@ FtfGraphic.o: $(GRAPHSRC)/FtfGraphic.h
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfGraphic.cxx
 FtfBaseHitDict.o: $(GRAPHSRC)/FtfBaseHitDict.h 
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfBaseHitDict.cxx
-FtfHitDict.o: $(GRAPHSRC)/FtfHitDict.h 
+FtfHitDict.o: $(GRAPHSRC)/FtfHitDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfHitDict.cxx
-FtfBaseTrackDict.o: $(GRAPHSRC)/FtfBaseTrackDict.h 
+FtfBaseTrackDict.o: $(GRAPHSRC)/FtfBaseTrackDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfBaseTrackDict.cxx
-FtfTrackDict.o: $(GRAPHSRC)/FtfTrackDict.h 
+FtfTrackDict.o: $(GRAPHSRC)/FtfTrackDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfTrackDict.cxx
-FtfFinderDict.o: $(GRAPHSRC)/FtfFinderDict.h 
+FtfFinderDict.o: $(GRAPHSRC)/FtfFinderDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfFinderDict.cxx
-FtfParaDict.o: $(GRAPHSRC)/FtfParaDict.h 
+FtfParaDict.o: $(GRAPHSRC)/FtfParaDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfParaDict.cxx
-FtfSl3Dict.o: $(GRAPHSRC)/FtfSl3Dict.h 
+FtfSl3Dict.o: $(GRAPHSRC)/FtfSl3Dict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfSl3Dict.cxx
-FtfGraphicDict.o: $(GRAPHSRC)/FtfGraphicDict.h 
+FtfGraphicDict.o:  $(GRAPHSRC)/FtfGraphicDict.cxx
 	$(CC) $(CFLAGS) -I$(INC) -I $(SRC) -I $(GRAPHSRC) -c $(GRAPHSRC)/FtfGraphicDict.cxx
+
+$(GRAPHSRC)/FtfSl3Dict.cxx: $(INC)/FtfSl3.h
+	cd $(GRAPHSRC)
+	rm FtfSl3Dict.*
+	rootcint FtfSl3Dict.cxx -c FtfSl3.h
+	cd ..
+$(GRAPHSRC)/FtfBaseTrackDict.cxx: $(INC)/FtfBaseTrack.h
+	rm $(GRAPHSRC)/FtfBaseTrackDict.*
+	rootcint $(GRAPHSRC)/FtfBaseTrackDict.cxx -c $(INC)/FtfBaseTrack.h
+$(GRAPHSRC)/FtfGraphicDict.cxx: $(GRAPHSRC)/FtfGraphic.h
+	rm $(GRAPHSRC)/FtfGraphicDict.*
+	rootcint $(GRAPHSRC)/FtfGraphicDict.cxx -c $(GRAPHSRC)/FtfGraphic.h
 
 #==================================
 clean:

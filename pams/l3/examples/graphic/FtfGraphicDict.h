@@ -31,7 +31,9 @@ extern void G__set_cpp_environmentFtfGraphicDict();
 #endif
 
 extern G__linked_taginfo G__FtfGraphicDictLN_TClass;
-extern G__linked_taginfo G__FtfGraphicDictLN_FtfFinder;
-extern G__linked_taginfo G__FtfGraphicDictLN_FtfSl3;
+extern G__linked_taginfo G__FtfGraphicDictLN_TObject;
+extern G__linked_taginfo G__FtfGraphicDictLN_TView;
 extern G__linked_taginfo G__FtfGraphicDictLN_TCanvas;
+extern G__linked_taginfo G__FtfGraphicDictLN_TDialogCanvas;
+extern G__linked_taginfo G__FtfGraphicDictLN_TSlider;
 extern G__linked_taginfo G__FtfGraphicDictLN_FtfGraphic;

@@ -55,6 +55,7 @@
        short     rowInnerMost;    // Row where end track search 
        short     rowOuterMost;    // Outer most row to consider tin tracking
        short     rowStart;        // Row where start track search
+       short     rowEnd  ;        // Row where end   track search
        short     szFitFlag;       // Switch for sz fit 
        float     bField      ;    // Magnetic field  
        float     hitChi2Cut;      // Maximum hit chi2 

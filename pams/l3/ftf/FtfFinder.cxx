@@ -137,6 +137,7 @@ int FtfFinder::getTracks ( ) {
 //
 //           Loop over hits in this particular row
 //
+      if ( rowC[ir].first &&  ((FtfHit *)rowC[ir].first)->row < para.rowEnd ) break ;
       for ( FtfHit *firstHit = (FtfHit *)rowC[ir].first ;
             firstHit != 0 ;
             firstHit = firstHit->nextRowHit ) {

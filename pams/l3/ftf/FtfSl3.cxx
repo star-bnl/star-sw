@@ -28,7 +28,10 @@
 **:           dec 21, 1999  ppy maxChi2Primary =10 in setParameters
 **:           jan 27, 2000  ppy canItMerged beefed up
 **:           feb 10, 2000  ppy add xyError and zError
+**:           feb 10, 2000  ppy add xyError and zError
 **:           feb 14, 2000  ppy track length filled for tracks type 2 and 3
+**:           feb 17, 2000  ppy check ratiox and ratioy are no division by zero
+**:           feb 24, 2000  ppy hit id in readMezzaninne should be nHits+counter
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 #include <iostream.h>
@@ -82,10 +85,12 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 	 r1 = sqrt(x1*x1+y1*y1);
 
 //	 printf ( " x1 y1 %e %e cos sin %e %e\n", x1, y1, cosPhi, sinPhi ) ; 
-//	 double ratiox = x1/cosPhi ;
-//	 double ratioy = y1/sinPhi ;
+  	 double ratiox = 0 ;
+         if ( cosPhi != 0 ) ratiox = x1/cosPhi ;
+  	 double ratioy = 0 ;
+         if ( sinPhi != 0 ) ratiox = y1/sinPhi ;
 //	 printf ( " ratiox ratioy %e %e \n", ratiox, ratioy ) ;
-	 if ( (x1/cosPhi)> 0 && (y1/sinPhi)> 0 && 
+	 if ( ratiox >= 0 && ratioy >= 0 && 
 	      r1 > rTpcMin   &&  r1 < rTpcMax ) {
 //	    printf ( "phi %f boundary crossed !!!!\n", localPhi[i] ) ;
 	    return 1 ;
@@ -94,11 +99,13 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 	 x2 = 0.5 * (-b - rootB2Minus4ac) / a ;
 	 y2 = x2 * tanPhi ;
 	 r2 = sqrt(x2*x2+y2*y2);
-//	 ratiox = x2/cosPhi ;
-//	 ratioy = y2/sinPhi ;
+         ratiox = 0 ;
+         if ( cosPhi != 0 ) ratiox = x2/cosPhi ;
+  	 ratioy = 0 ;
+         if ( sinPhi != 0 ) ratioy = y2/sinPhi ;
 //	 printf ( " ratiox ratioy %e %e \n", ratiox, ratioy ) ;
 //	 printf ( " x2 y2 %e %e cos sin %e %e\n", x2, y2, cosPhi, sinPhi ) ; 
-	 if ( (x2/cosPhi) > 0 && (y2/sinPhi) > 0 &&  
+	 if ( ratiox >= 0 && ratioy >= 0 &&  
 	      r2 > rTpcMin   &&  r2 < rTpcMax ) {
 //	    printf ( "phi %f boundary crossed !!!!\n", localPhi[i] ) ;
 	    return 1 ;
@@ -165,6 +172,7 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
     int nBytes = (pointer4-buff) ; 
     if ( nBytes > maxBytes ) {
        fprintf ( stderr, "FtfSl3::fillTracks: %d bytes needed, %d max, too short a buffer \n ",  nBytes, maxBytes ) ;
+       return 0 ;
     }
 //
 //  Fill header
@@ -501,7 +509,14 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 //	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
 //	   	                     sector, row, x, y, z);
 
-	 hitP->id  = counter ;
+	 if ( (nHits+counter)>=maxHits ) {
+	    fprintf (stderr, 
+                     "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
+		      counter, maxHits ) ;
+	    return -1;
+	 }
+
+	 hitP->id  = nHits+counter ;
 	 hitP->row = row ;
 	 hitP->x   = (float) x;
 	 hitP->y   = (float) y;
@@ -513,11 +528,6 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 	 hitP++;
 
 	 counter++;
-	 if ( (nHits+counter)>maxHits ) {
-	    fprintf (stderr, "Error - FtfSl3:read: Hit array too small: nHits+counter %d maxHits %d \n",
-		  counter, maxHits ) ;
-	    return -1;
-	 }
       }
    }
    return counter;

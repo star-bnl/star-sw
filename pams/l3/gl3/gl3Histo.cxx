@@ -19,7 +19,7 @@ ClassImp(gl3Histo)
 //
 //####################################################################################
 gl3Histo::gl3Histo ( char iId[10], char iTitle[100], 
-      long iNBins,  double iXMin, double iXMax ) {
+      int iNBins,  double iXMin, double iXMax ) {
    info = 0 ;
    if ( iNBins < 0 ) {
       fprintf ( stderr, " %d bins, not valid value \n", (int)iNBins );
@@ -51,8 +51,8 @@ gl3Histo::~gl3Histo ( ) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-long gl3Histo::Fill ( double x, double weight ) {
-   long iBin = (long)((x-header.xMin)/header.xStep)+1 ;
+int gl3Histo::Fill ( double x, double weight ) {
+   int iBin = (int)((x-header.xMin)/header.xStep)+1 ;
    if ( iBin < 1 ) iBin = 0 ;
    else if ( iBin > header.nBins ) iBin = header.nBins + 1 ; 
    info[iBin] += weight ;
@@ -67,14 +67,14 @@ long gl3Histo::Fill ( double x, double weight ) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-double gl3Histo::GetY ( long iBin ) {
+double gl3Histo::GetY ( int iBin ) {
    if ( iBin < 0 || iBin > header.nBins+2 ) return 0 ;
    return info[iBin] ;
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-long gl3Histo::Print ( short level  ) {
+int gl3Histo::Print ( short level  ) {
    printf ( "gl3Histo::Print: id %s title %s nBins %d \n", 
              header.id, header.title, (int)header.nBins ) ;
    return 0 ;
@@ -82,29 +82,64 @@ long gl3Histo::Print ( short level  ) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-long gl3Histo::Read ( char* input ) {
-   char* contents = input  ;
-   size_t length_1 = sizeof(gl3HistoHeader); 
-   memcpy ( this, input, length_1 ) ;
-// printf ( "gl3Histo::Read nBins %d\n",nBins ) ;
-   contents = contents+ length_1 ;
-   size_t length_2 = (header.nBins+2)*sizeof(double) ;
-   if ( info != 0 ) delete[] info ;
-   info = new double[header.nBins+2] ;
-   memcpy ( info, contents, length_2 ) ; 
-// printf ( "length 1 2 %d %d \n",length_1, length_2 ) ;
-   return length_1 + length_2 ;
+int gl3Histo::Read ( char* input ) {
+   char* contents  = input  ;
+   memcpy ( header.id, contents, 64*sizeof(char) ) ;
+   contents += 64 * sizeof(char) ;
+   memcpy ( header.title, contents, 128*sizeof(char) ) ;
+   contents += 128 * sizeof(char) ;
+   header.nEntries = *(int *)contents ;
+   contents += sizeof(int) ;
+   header.nBins = *(int *)contents ;
+   contents += sizeof(int) ;
+   header.sum =  *(double *)contents ;
+   contents += sizeof(double);
+   header.yMin = *(double *)contents ;
+   contents += sizeof(double);
+   header.yMax = *(double *)contents ;
+   contents += sizeof(double);
+   header.xMin = *(double *)contents ;
+   contents += sizeof(double);
+   header.xMax = *(double *)contents ;
+   contents += sizeof(double);
+   header.xStep = *(double *)contents ;
+   contents += sizeof(double);
+   size_t length_2 = (header.nBins+2)*sizeof(double) ; 
+   memcpy ( info, contents, length_2 ) ;
+   contents += (header.nBins+2)*sizeof(double);
+// printf ( "length 2 %d \n", length_2 ) ;
+
+   return (contents - input ) ;
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-long gl3Histo::Write ( char* output ) {
+int gl3Histo::Write ( char* output ) {
    char* contents  = output  ;
-   size_t length_1 = sizeof(gl3HistoHeader) ; 
+   memcpy ( contents, header.id, 64*sizeof(char) ) ;
+   contents += 64 * sizeof(char) ;
+   memcpy ( contents, header.title, 128*sizeof(char) ) ;
+   contents += 128 * sizeof(char) ;
+   *(int *)contents = header.nEntries ;
+   contents += sizeof(int) ;
+   *(int *)contents = header.nBins    ;
+   contents += sizeof(int) ;
+   *(double *)contents = header.sum ;
+   contents += sizeof(double);
+   *(double *)contents = header.yMin ;
+   contents += sizeof(double);
+   *(double *)contents = header.yMax ;
+   contents += sizeof(double);
+   *(double *)contents = header.xMin ;
+   contents += sizeof(double);
+   *(double *)contents = header.xMax ;
+   contents += sizeof(double);
+   *(double *)contents = header.xStep;
+   contents += sizeof(double);
    size_t length_2 = (header.nBins+2)*sizeof(double) ; 
-// printf ( "length 1 2 %d %d \n",length_1, length_2 ) ;
-   memcpy ( contents, this, length_1 ) ;
-   contents = contents + length_1 ;
    memcpy ( contents, info, length_2 ) ;
-   return length_1 + length_2 ;
+   contents += (header.nBins+2)*sizeof(double);
+// printf ( "length 2 %d \n", length_2 ) ;
+
+   return (contents - output ) ;
 }

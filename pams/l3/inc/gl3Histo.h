@@ -18,13 +18,13 @@
 
 class gl3HistoHeader {
 public:
-   char      id[50];      /* histo id */
-   char      title[100];
-   long      nEntries ;
+   char      id[64];      /* histo id */
+   char      title[128];
+   int       nEntries ;
    double    sum ;
    double    yMin ;
    double    yMax ;
-   long      nBins;   /* Number of points assigned to that track */
+   int       nBins;   /* Number of points assigned to that track */
    double    xMin ;
    double    xMax ;
    double    xStep ;
@@ -36,13 +36,13 @@ public:
    double*   info ;
 public:
    gl3Histo ( char iId[10]="id", char iTitle[100]="default", 
-                   long iNBins=100,  double iXMin=0., double iXMax=100. ) ;
+                   int iNBins=100,  double iXMin=0., double iXMax=100. ) ;
    ~gl3Histo ( ) ;
-   long   Fill   ( double x, double weight ) ;
-   double GetY   ( long iBin ) ;
-   long   Print  ( short Level=1 ) ;
-   long   Read   ( char* input  ) ; 
-   long   Write  ( char* output ) ; 
+   int   Fill   ( double x, double weight ) ;
+   double GetY   ( int iBin ) ;
+   int   Print  ( short Level=1 ) ;
+   int   Read   ( char* input  ) ; 
+   int   Write  ( char* output ) ; 
 
    ClassDef(gl3Histo,1)
 
