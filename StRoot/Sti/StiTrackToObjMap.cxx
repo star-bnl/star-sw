@@ -7,7 +7,9 @@ StiTrackToObjMap::StiTrackToObjMap()
 {}
 
 StiTrackToObjMap::~StiTrackToObjMap()
-{}
+{
+  clear();
+}
 
 void StiTrackToObjMap::build(StiTrackContainer* trackContainer, 
 			     StiHitToHitMap* hitToHitMap,
@@ -65,11 +67,12 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
   double matched1  = 0;
   double matched2  = 0;
   double matched3  = 0;
-  double matchedPrimary  = 0;
-  double matchedPrimaryGoodDca  = 0;
+  double matchedPrimary1  = 0;
+  double matchedPrimary2  = 0;
+  double matchedPrimary3  = 0;
   for(StiTrackToObjMap::iterator iter=begin();iter!=end(); ++iter)
     {
-      cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
+      //cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
       StiTrack * first = iter->first;
       if(!first) continue;
       StiTrack * second; 
@@ -78,46 +81,49 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
 	{
 	  ++accepted;
 	  bool firstPrimary = first->isPrimary();
+	  double nPtsFirst = first->getPointCount();
+	  double nCommon;
+	  double ratio;
 	  if (firstPrimary)
 	    ++acceptedPrimary;
 	  
 	  StiTrackToIntMap * trackToIntMap = iter->second;
-	  if (trackToIntMap)
+	  if (trackToIntMap && nPtsFirst>0)
 	    {
 	      //cout << "Number of cnadidates:"<<trackToIntMap->getSize()<<endl;
-	      if (trackToIntMap->getBestTrackHitCount()>5)
-		++matched1;
-	      if (trackToIntMap->getBestTrackHitCount()>5 && trackToIntMap->getSize()<2)
-		++matched2;
-	      if (trackToIntMap->getBestTrackHitCount()>5 && trackToIntMap->getSize()<3)
-		++matched3;
-	      second = trackToIntMap->getBestTrack();
+	      nCommon = trackToIntMap->getBestTrackHitCount();
+	      ratio = nCommon/nPtsFirst;
+	      if (nCommon>5) ++matched1;
+	      if (nCommon>5 && ratio>0.5) ++matched2;
+	      if (nCommon>5 && ratio>0.75) ++matched3;
 	      if (firstPrimary)
 		{
-		  ++matchedPrimary;
-		  if (vertex && second->getDca(vertex)<3.)
-		    ++matchedPrimaryGoodDca;
+		  if (nCommon>5) ++matchedPrimary1;
+		  if (nCommon>5 && ratio>0.5) ++matchedPrimary2;
+		  if (nCommon>5 && ratio>0.75) ++matchedPrimary3;
 		}
 	    }
+	  else cout << " BUG!" <<endl;
 	}
     }  
-  cout << "Analysis Results:" << endl
-       << "   analyzed:" << analyzed << endl
-       << "   accepted:" << accepted << endl
-       << "    matched1:" << matched1 <<endl
-       << "    matched2:" << matched2 <<endl
-       << "    matched3:" << matched3 <<endl;
-  if (accepted>0)
-    {
-      cout << " efficiency1:" << matched1/accepted << endl;
-      cout << " efficiency2:" << matched2/accepted << endl;
-      cout << " efficiency3:" << matched3/accepted << endl;
-    }
-  cout << "Primaries Results"<<endl
-       << "  accepted primaries" << acceptedPrimary << endl
-       << "  matched  primaries" << matchedPrimary << endl
-       << "  good dca primaries" << matchedPrimaryGoodDca << endl;
-  if (acceptedPrimary>0)
-    cout << " matched primary  eff:"<< matchedPrimary/acceptedPrimary << endl
-	 << " good dca primary eff:"<< matchedPrimaryGoodDca/acceptedPrimary << endl;
+    if (accepted>0)
+      cout << "Analysis Results:" << endl
+	   << "   analyzed: " << analyzed << endl
+	   << "   accepted: " << accepted << endl
+	   << "   matched1: " << matched1 <<" efficiency1: " << matched1/accepted <<endl
+	   << "   matched2: " << matched2 <<" efficiency2: " << matched2/accepted <<endl
+	   << "   matched3: " << matched3 <<" efficiency3: " << matched3/accepted <<endl;
+    else
+      cout  << "Analysis Results:" << endl
+	    << "   analyzed: " << analyzed << endl
+	    << "   accepted:" << accepted << endl;
+    if (acceptedPrimary>0)
+      cout << "Primaries Results"<<endl
+	   << "  accepted primaries" << acceptedPrimary << endl
+	   << "   matched1: " << matchedPrimary1 <<" efficiency1: " << matchedPrimary1/acceptedPrimary <<endl
+	   << "   matched2: " << matchedPrimary2 <<" efficiency2: " << matchedPrimary2/acceptedPrimary <<endl
+	   << "   matched3: " << matchedPrimary3 <<" efficiency3: " << matchedPrimary3/acceptedPrimary <<endl;
+    else
+      cout << "Primaries Results"<<endl
+	   << "  accepted primaries" << acceptedPrimary << endl;
 }
