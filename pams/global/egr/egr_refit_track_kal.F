@@ -163,7 +163,7 @@ C     load the fitting arrays for the primary vertex
             ncir = ncir + 1
             write(6,*) ' EGR not designed to work this way'
             good_hit_tpc(ncir) = .true.
-            i_index(ncir) = i   ! store index for reference
+            i_index(ncir) = ncir ! Store index for reference
             xcir(ncir) = prim_vrtx_x
             ycir(ncir) = prim_vrtx_y 
             zcir(ncir) = prim_vrtx_z
@@ -181,7 +181,8 @@ C     Load the fitting arrays with the SVT space points
                   write(6,*) ' EGR not designed to work this way!!!!!'
                   ncir = ncir + 1
                   good_hit_tpc(ncir) = .true.
-                  i_index(ncir) = i ! store index for reference
+                  i_index(ncir) = gtrk(igtrk).pos(iplane)
+                                ! store index for reference
                   isvth = gtrk(igtrk).ipnt(iplane)
                   xcir(ncir) = svt_spt(isvth).x(1)
                   ycir(ncir) = svt_spt(isvth).x(2)
