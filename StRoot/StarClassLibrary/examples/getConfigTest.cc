@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: getConfigTest.cc,v 1.1 1999/02/17 12:43:56 ullrich Exp $
+ * $Id: getConfigTest.cc,v 1.2 1999/05/19 21:14:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: getConfigTest.cc,v $
- * Revision 1.1  1999/02/17 12:43:56  ullrich
- * New Revision
+ * Revision 1.2  1999/05/19 21:14:42  ullrich
+ * Corrected path of input file
  *
  * Revision 1.2  1999/05/19 21:14:42  ullrich
  * Corrected path of input file
@@ -28,7 +28,7 @@
 #include "StThreeVector.hh"
 #include <vector>
 #include <unistd.h>
-    const char* filename = "../example.conf";
+
 int main()
 {
     const char* filename = "example.conf";
