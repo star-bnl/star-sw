@@ -308,7 +308,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 /// Return Ok      if operation was successful
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
-  cout << "SKTF::find(StiTrack * t) -I- Started" << endl;
+  //cout << "SKTF::find(StiTrack * t) -I- Started" << endl;
   const double degToRad = 3.1415927/180.;
   const double radToDeg = 180./3.1415927;
   const double ref1  = 50.*degToRad;
