@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.15 2000/08/30 12:55:19 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.16 2000/10/24 15:19:58 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.16  2000/10/24 15:19:58  aihong
+ * fix bug in fillPIDByLookUpTable()
+ *
  * Revision 1.15  2000/08/30 12:55:19  aihong
  * upgrade lowRigPID()
  *
@@ -1206,7 +1209,7 @@ void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(int myCharge, double myDca
 
 
 
-
+     if (positionPointer<mTheReportTable->GetEntries()) {
      StuObjPidReport* myReport=(StuObjPidReport *)(mTheReportTable->At(positionPointer));
     
 
@@ -1216,7 +1219,8 @@ void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(int myCharge, double myDca
 	    }
 
             mExtrap=myReport->GetExtrapTag();
-          
+     }          
+
 }
 
 //-------------------------------
