@@ -92,13 +92,13 @@ class StTObjArray : public TSeqCollection {
             virtual void Delete(Option_t* option=""){fArr->Delete(option);}
             virtual void Expand(Int_t newSize){fArr->Expand(newSize);}
         virtual TObject* First() const {return fArr->First() ;}
-                   Int_t GetEntries() const {return fArr->GetEntries();}
-                   Int_t GetEntriesFast() const {return fArr->GetEntriesFast();}
-                   Int_t GetLast() const {return fArr->GetLast();}
-                   Int_t GetSize() const {return fArr->GetSize();}
+           virtual Int_t GetEntries() const {return fArr->GetEntries();}
+           virtual Int_t GetEntriesFast() const {return fArr->GetEntriesFast();}
+           virtual Int_t GetLast() const {return fArr->GetLast();}
+           virtual Int_t GetSize() const {return fArr->GetSize();}
            virtual Int_t IndexOf(TObject* obj) const {return fArr->IndexOf(obj);}
         virtual TObject* Last() const {return fArr->Last();}
-                   Int_t LowerBound() const {return fArr->LowerBound();}
+        virtual    Int_t LowerBound() const {return fArr->LowerBound();}
       virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const {return fArr->MakeIterator(dir);}
 //VP supressed       virtual TObject*& operator[](Int_t i)
         virtual TObject* Remove(TObject* obj){return fArr->Remove(obj);}
@@ -113,6 +113,7 @@ ClassDef(StTObjArray,1)
 
 class StObjArray : public StTObjArray
 {
+friend class StObjArrayIter;
 public:
             StObjArray(Int_t s = TCollection::kInitCapacity):StTObjArray(s,0){fOrBrowser=this;};
             StObjArray(const StObjArray& from):StTObjArray(from){fOrBrowser=this;};
@@ -121,6 +122,7 @@ public:
 virtual        ~StObjArray(){};
 
 virtual void 	Browse(TBrowser *b);
+virtual Bool_t  IsFolder();
 virtual void 	Clean(StObject *obj=0);
 virtual void 	Clean(StObjArrayIter *iter);
 virtual void 	Erase(StObject *obj);
@@ -149,7 +151,7 @@ class StObjArrayIter : public TObjArrayIter
 public:
 StObjArrayIter(const StObjArray* col=0, Bool_t dir = kIterForward) :  TObjArrayIter(0, dir)
 { 
-  fColl = col; if (col) { SetCollection(fColl); Reset();}
+  fColl = col; if (col) { SetCollection(fColl->fArr); Reset();}
 };
 
 StObjArrayIter(const StObjArrayIter &init) :  TObjArrayIter(0,kIterForward)

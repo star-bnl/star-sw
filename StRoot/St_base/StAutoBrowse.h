@@ -4,10 +4,10 @@ class TObject;
 
 class StAutoBrowse  
 {
+protected:
  StAutoBrowse(){};
 ~StAutoBrowse(){};
 public:
-friend class NOBODY;
-static void  Browse(TObject *obj, TBrowser *browser);
+static Int_t Browse(TObject *obj, TBrowser *browser);
 };
 #endif //  _STAUTOBROWSE_
