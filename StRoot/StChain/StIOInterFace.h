@@ -21,8 +21,8 @@ public:
    virtual        ~StIOInterFace(){};
    virtual  Int_t MakeRead() {assert(0);return 1999;};
    virtual  Int_t MakeWrite(){assert(0);return 1999;};
-   virtual  Int_t Open(const char *filename=0){assert(0);return 1999;};
-   virtual  void  Close(Option_t *opt=0){assert(0);};
+   virtual  Int_t Open(const char *filename=0){assert(0&&filename);return 1999;};
+   virtual  void  Close(Option_t *opt=0){assert(0&&opt);};
 
    TString         fIOMode;	//!r=read,w=write,u=update
    TString         fTreeName;	//!Tree name

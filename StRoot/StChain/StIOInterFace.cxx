@@ -3,7 +3,7 @@
 ClassImp(StIOInterFace)
 
 //_____________________________________________________________________________
-StIOInterFace::StIOInterFace(const char *name="",const char *iomode="r")
+StIOInterFace::StIOInterFace(const char *name,const char *iomode)
 :StMaker(name)
 {
   if (iomode) SetIOMode(iomode);
