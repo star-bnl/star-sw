@@ -29,6 +29,7 @@ class StiToolkit;
 class StiTrackingPlots;
 class StiMakerParameters;
 class StiVertexFinder;
+class EventDisplay;
 
 class StiMaker : public StMaker 
 {
@@ -44,12 +45,17 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.6 2003/03/31 17:19:30 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.7 2003/04/10 12:10:10 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
     void setParameters(StiMakerParameters * pars);
     StiMakerParameters * getParameters();
+
+    void setEventDisplay(EventDisplay* eventDisplay) 
+      { _eventDisplay = eventDisplay;}
+    EventDisplay* getEventDisplay() 
+      { return _eventDisplay; }
 
 private:
     StiMakerParameters * _pars;
@@ -66,6 +72,7 @@ private:
     StAssociationMaker*   mAssociationMaker; //!
     StiTrackingPlots*     _recPlotter;
     StiTrackingPlots*     _mcPlotter;
+    EventDisplay *        _eventDisplay;
     ClassDef(StiMaker, 1)
 };
 

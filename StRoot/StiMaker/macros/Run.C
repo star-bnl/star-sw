@@ -41,7 +41,7 @@ void loadLibrairies(bool doProfile)
 }
 
 void Run(int firstEvent=0,
-	 int nEvents=300,
+	 int nEvents=1,
 	 //const char * filePrefix = "st_physics_",
 	 const char * filePrefix = "rcf",
 	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
@@ -52,8 +52,8 @@ void Run(int firstEvent=0,
 	 //const char * file="rcf0183_12_300evts.event.root",
 	 const char * file="rcf0183_05_300evts.geant.root",
 	 
-	 bool useGui=false,
-	 bool useMcAsRec=false,
+	 bool useGui=true,
+	 bool useMcAsRec=true,
 	 bool doPlots=true,
 	 bool doSimulation=true,
 	 bool doAssociation=true,

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.10 2003/04/09 21:16:19 andrewar Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.11 2003/04/10 12:10:08 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.11  2003/04/10 12:10:08  pruneau
+ * Changed StiMaker and Default Toolkit to accomodate the new Event Display
+ *
  * Revision 2.10  2003/04/09 21:16:19  andrewar
  * Changed limits for StiHitFactory: maxIncrements (from 10 to 20)
  *
@@ -173,17 +176,11 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   cout << "StiDefaultToolkit::getTrackFactory() -I- "; 
   if (_guiEnabled)
     {
-      if (_evaluatorEnabled)
-	  _trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
-      else 
-	  _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
+      _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
     }
   else // no gui needed
     {	
-      if (_evaluatorEnabled)
-	  _trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
-      else 
-	  _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
+      _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
     }
   return _trackFactory;
 }
@@ -252,7 +249,7 @@ void StiDefaultToolkit::add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)
   if (builder)
     {
       cout << "StiDefaultToolkit::add() -I- Adding builder for detector group:"<< detectorGroup->getName()<<endl;
-      masterBuilder->addBuilder(builder);
+      masterBuilder->add(builder);
     }
   else
     cout << "StiDefaultToolkit::add() -I- Not adding builder for detector group:"<< detectorGroup->getName()<<endl;
@@ -270,9 +267,9 @@ StiDetectorContainer  * StiDefaultToolkit::getDetectorContainer()
 {
   if (_detectorContainer)
     return _detectorContainer;
-  _detectorContainer = StiDetectorContainer::instance();
-  _detectorContainer->build(getDetectorBuilder());
-  _detectorContainer->reset();
+  _detectorContainer = new StiDetectorContainer("DetectorContainer","Detector Container");
+  //  _detectorContainer->build(getDetectorBuilder());
+  //_detectorContainer->reset();
   return _detectorContainer;
 }
 
@@ -283,12 +280,12 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
   cout << "StiDefaultToolkit::getHitContainer() -I- "; 
   if (_guiEnabled)
     {
-      _hitContainer = new StiRootDrawableHitContainer();
-      cout << "instantiating StiRootDrawableHitContainer" << endl;
+      _hitContainer = new StiHitContainer("HitContainer","Reconstructed Hits");
+      cout << "instantiating StiHitContainer" << endl;
     }
   else 
     {
-      _hitContainer = new StiHitContainer();			
+      _hitContainer = new StiHitContainer("HitContainer","Reconstructed Hits");			
       cout << "instantiating StiHitContainer" << endl;
     }
   return _hitContainer;
@@ -302,12 +299,12 @@ StiHitContainer       * StiDefaultToolkit::getMcHitContainer()
   cout << "StiDefaultToolkit::getMcHitContainer() -I- "; 
   if (_guiEnabled)
     {
-      _mcHitContainer = new StiRootDrawableHitContainer();
+        _mcHitContainer = new StiHitContainer("McHitContainer","MC Hits");
       cout << "instantiating StiRootDrawableHitContainer" << endl;
     }
   else 
     {
-      _mcHitContainer = new StiHitContainer();			
+      _mcHitContainer = new StiHitContainer("McHitContainer","MC Hits");			
       cout << "instantiating StiHitContainer" << endl;
     }
   return _mcHitContainer;
@@ -320,7 +317,7 @@ StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
   if (_trackContainer)
     return _trackContainer;
   cout << "StiDefaultToolkit::getTrackContainer() -I- Instantiating Container" << endl;
-  _trackContainer = new StiTrackContainer();
+  _trackContainer = new StiTrackContainer("TrackContainer","Reconstructed Tracks");
   return _trackContainer;
 }
 
@@ -330,7 +327,7 @@ StiTrackContainer     * StiDefaultToolkit::getMcTrackContainer()
   if (_mcTrackContainer)
     return _mcTrackContainer;
   cout << "StiDefaultToolkit::getMcTrackContainer() -I- Instantiating Container" << endl;
-  _mcTrackContainer = new StiTrackContainer();
+  _mcTrackContainer = new StiTrackContainer("McTrackContainer","MC Tracks");
   return _mcTrackContainer;
 }
 
@@ -348,42 +345,41 @@ StiTrackSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
   if (_trackSeedFinder)
     return _trackSeedFinder;
   cout << "StiDefaultToolkit::getTrackSeedFinder() -I- "; 
-  if (_evaluatorEnabled)
+  //if (_evaluatorEnabled)
+  //  {
+  //    cout << "instantiating StiEvaluableTrackSeedFinder" << endl;
+  //    _trackSeedFinder = new StiEvaluableTrackSeedFinder("EvaluableTrackSeedFinder",
+  //						 getTrackFactory(),
+  //						 getHitContainer(),
+  //						 getDetectorContainer(),
+  //						 getAssociationMaker());
+  //}
+  //else 
+  // {
+  //StiCompositeSeedFinder * compositeTrackSeedFinder;
+  //compositeTrackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
+  //																											getTrackFactory(),
+  //																											getHitContainer(), 
+  //																											getDetectorContainer());  
+  //StiTrackSeedFinder * trackSeedFinder;																																					
+  if (_guiEnabled)
     {
-      cout << "instantiating StiEvaluableTrackSeedFinder" << endl;
-      _trackSeedFinder = new StiEvaluableTrackSeedFinder("EvaluableTrackSeedFinder",
-																												 getTrackFactory(),
-																												 getHitContainer(),
-																												 getDetectorContainer(),
-																												 getAssociationMaker());
+      cout << "instantiating StiLocalTrackSeedFinder" << endl;
+      _trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
+						     getTrackFactory(),
+						     getHitContainer(), 
+						     getDetectorContainer());  
     }
-  else 
+  else
     {
-			//StiCompositeSeedFinder * compositeTrackSeedFinder;
-			//compositeTrackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
-			//																											getTrackFactory(),
-			//																											getHitContainer(), 
-			//																											getDetectorContainer());  
-			//StiTrackSeedFinder * trackSeedFinder;																																					
-			if (_guiEnabled)
-				{
-					cout << "instantiating StiRDLocalTrackSeedFinder" << endl;
-					_trackSeedFinder = new StiRDLocalTrackSeedFinder("RDLocalTrackSeedFinder",
-																													 getTrackFactory(),
-																													 getHitContainer(), 
-																													 getDetectorContainer());  
-				}
-			else
-				{
-					cout << "instantiating StiLocalTrackSeedFinder" << endl;
-					_trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
-																												 getTrackFactory(),
-																												 getHitContainer(), 
-																												 getDetectorContainer());  
-					//compositeTrackSeedFinder->Vectorized<StiTrackSeedFinder>::add(trackSeedFinder);
-					//compositeTrackSeedFinder->reset();
-					//_trackSeedFinder = compositeTrackSeedFinder;
-				}
+      cout << "instantiating StiLocalTrackSeedFinder" << endl;
+      _trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
+						     getTrackFactory(),
+						     getHitContainer(), 
+						     getDetectorContainer());  
+      //compositeTrackSeedFinder->Vectorized<StiTrackSeedFinder>::add(trackSeedFinder);
+      //compositeTrackSeedFinder->reset();
+      //_trackSeedFinder = compositeTrackSeedFinder;
     }
   return _trackSeedFinder;
 }

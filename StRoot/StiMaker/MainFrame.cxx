@@ -60,10 +60,10 @@ const char *filetypes[] = { "All files",     "*",
 
 ClassImp(MainFrame)
 
-MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
-  : TGMainFrame(p, w, h),
-		_toolkit(StiToolkit::instance()),
-    mchain(0), mIoMaker(0)
+  MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
+    : TGMainFrame(p, w, h),
+      _toolkit(StiToolkit::instance()),
+      mchain(0), mIoMaker(0)
 {
   s_instance = this;
   createMenu();
@@ -631,7 +631,7 @@ void MainFrame::moveIn()
 	//cout <<"Function Not Currently Implemented"<<endl;
 	//cout <<"MainFrame::moveIn()"<<endl;
 	setCurrentDetectorToDefault();
-	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer() );
 
 	cout <<"\t DetectorContainer returned: "<<rdet.moveIn()<<endl;
 	//rdet.moveIn();
@@ -644,7 +644,7 @@ void MainFrame::movePlusPhi()
 {
 	//cout <<"Function Not Currently Implemented"<<endl;
 	setCurrentDetectorToDefault();
-	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer() );
 	rdet.movePlusPhi();
 	showCurrentDetector();
 }
@@ -653,14 +653,14 @@ void MainFrame::moveMinusPhi()
 {
 	//cout <<"Function Not Currently Implemented"<<endl;
 	setCurrentDetectorToDefault();
-	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer() );
 	rdet.moveMinusPhi();
 	showCurrentDetector();
 }
 
 void MainFrame::printHitContainerForDetector()
 {
-	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer() );
 	StiDetector* layer = *rdet;
 	if (!layer)
 		throw runtime_error("MainFrame::printHitContainerForDetector() - FATAL - Failed to get detector");
@@ -672,12 +672,12 @@ void MainFrame::printHitContainerForDetector()
 void MainFrame::showCurrentDetector()
 {
 	//cout <<"Function Not Currently Implemented"<<endl;
-	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer() );
 	StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     
 	if (!layer) 
 		throw runtime_error("MainFrame::showCurrentDetector() - FATAL - Failed to get drawable detector");
-	layer->setVisibility(true);
+	layer->setVisible(true);
 	layer->setColor(2);
 	cout<<"MainFrame::showCurrentDetector() - Layer:"<<*layer<<endl;
 	StiRootDisplayManager::instance()->draw();

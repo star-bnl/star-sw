@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.118  2003/04/10 12:10:09  pruneau
+// Changed StiMaker and Default Toolkit to accomodate the new Event Display
+//
 // Revision 1.117  2003/03/31 17:19:27  pruneau
 // various
 //
@@ -113,6 +116,7 @@
 #include "StiMaker/StiStEventFiller.h"
 
 #include "StiGui/StiRootDisplayManager.h"
+#include "StiGui/EventDisplay.h"
 
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
@@ -149,8 +153,8 @@ void StiMaker::Clear(const char*)
     {
       cout <<"StiMaker::Clear( ) -I- Initialized - call tracker reset"<<endl;
       _tracker->clear();
-      if (_toolkit->isGuiEnabled() )
-	_toolkit->getDisplayManager()->reset();
+      //if (_toolkit->isGuiEnabled() )
+      //_toolkit->getDisplayManager()->reset();
     }
   cout <<"StiMaker::Clear( ) -I- Call base class clear"<<endl;
   StMaker::Clear();
@@ -224,11 +228,7 @@ Int_t StiMaker::Make()
       _tracker->clear();
       if (_toolkit->isGuiEnabled())
 	{
-	  cout << "StiMaker::Make() -I- Instantiate/Setup DisplayManager" <<  endl;
-	  _toolkit->getDisplayManager()->cd();
-	  _toolkit->getDisplayManager()->setView(0);
-	  _toolkit->getDisplayManager()->draw();
-	  _toolkit->getDisplayManager()->update();
+	  _eventDisplay->draw();
 	}
       if (_pars->doPlots)
 	{
@@ -246,7 +246,7 @@ Int_t StiMaker::Make()
     {
       mcEvent= mMcEventMaker->currentMcEvent();
       if (!mcEvent)
-				throw runtime_error("StiMaker::Make() - ERROR - mcEvent == 0");
+	throw runtime_error("StiMaker::Make() - ERROR - mcEvent == 0");
     }
   else 
     mcEvent = 0;
@@ -256,8 +256,7 @@ Int_t StiMaker::Make()
       _tracker->clear();
       _hitLoader->loadEvent(event,mcEvent);
       _seedFinder->reset();
-      _toolkit->getDisplayManager()->draw();
-      _toolkit->getDisplayManager()->update();
+      _eventDisplay->draw();
     }
   else
     {

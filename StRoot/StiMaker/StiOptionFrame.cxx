@@ -182,6 +182,7 @@ StiOptionFrame::~StiOptionFrame()
 
 void StiOptionFrame::closeWindow()
 {
+  apply();
   delete this;
 }
 
