@@ -58,9 +58,7 @@ class TTreeIter : public TNamed{
 
 protected:
     Int_t         fEntry;             	//!  current entry number
-    Int_t         fTreeNumb;            //!  current TTree number
-    TTree        *fTree;	      	//!  pointer to TTree/TChain object
-    TChain       *fChain;             	//!  
+    TChain       *fTree;	      	//!  pointer to TTree/TChain object
     TObjArray     fMemList;		//!  list of mem objects
     TObjArray     fBraList;		//!  list of uset branches
     Int_t         fUnits;		//!  current number of units
@@ -79,8 +77,8 @@ TTreeIterCast &operator() (const TString varname);
 #ifndef __CINT__
 TTreeIterCast &operator() (const char   *varname);
 #endif
-    TBranch          *GetBranch(const char* brName){return GetBranch(brName,fTree);};     
     Int_t             AddFile(const char *file);
+    TBranch          *GetBranch(int idx) const;     
     Int_t             Next(Int_t ient=-1);
     virtual void      Print(Option_t* option) const;
     virtual void      ls(Option_t* option) const;
@@ -98,10 +96,7 @@ static void GetInfo(const TBranch *tb, const char *&tyName,Int_t &units,void  *&
 
 private:
 void Init();
-void SetBranchObject(const TObjArray *brList);
 void WhichTree(const char *fileName);
-static TBranch *GetBranch(const char* brName,TTree *tree);     
-static TBranch *GetBranch(const char* brName,TSeqCollection *brList,Int_t flag); 
 
 ClassDef(TTreeIter,0)    
 };

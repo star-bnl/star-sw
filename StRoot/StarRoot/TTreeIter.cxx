@@ -209,8 +209,12 @@ ClassImp(TTreeIter)
 
 TTreeIter::TTreeIter(TTree *tree):fCast(&fNErr)
 {
-  fTree   = tree;
   fNFiles = 0;
+  fTree   = 0;
+  if (tree) {
+    fTree  = new TChain(tree->GetName());
+    if (tree->IsA() == TChain::Class()) fTree->Add((TChain*)tree);
+  }
   Init();
 }
 //______________________________________________________________________________
@@ -230,23 +234,19 @@ void TTreeIter::Init()
   fNErr  = 0;
   fEntry = 0;
   fUnits = 0;
-  fChain = 0;
-  fTreeNumb = -2002;
   if (fTree==0) return;
-  if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
 #ifndef __OLDROOT__
   fTree->SetMakeClass(1);
 #endif
-  SetBranchObject(fTree->GetListOfBranches());
   fTree->SetBranchStatus("*",0);
-  if (fChain) fChain->SetNotify(this);
+  fTree->SetNotify(this);
 
 }
 //______________________________________________________________________________
 TTreeIter::~TTreeIter()
 {
   fEntry = 0;
-  fTree  = 0;
+  delete fTree;
   fMemList.Delete();
   
 }
@@ -302,56 +302,15 @@ void TTreeIter::GetInfo(const TBranch *tbp, const char *&tyName
    tyName= (tl) ? tl->GetTypeName():0;
 }
 //______________________________________________________________________________
-TBranch *TTreeIter::GetBranch(const char* brName,TTree *tree)
+TBranch *TTreeIter::GetBranch(int idx) const
 {
-  TBranch *branch=0;
-  if (!tree) return 0;
-  branch = GetBranch(brName,tree->GetListOfBranches(),0);
-  if (branch) return branch;
-  branch = GetBranch(brName,tree->GetListOfLeaves()  ,1);
-  if (branch) return branch;
-#ifndef __OLDROOT__
-  branch = GetBranch(brName,tree->GetListOfFriends() ,2);
-#endif
-  return branch;
+   TObjArray *ll = fTree->GetListOfLeaves();
+   if (!ll) return 0;
+   if (idx>ll->GetLast()) return 0;
+
+   return ((TLeaf*)ll->At(idx))->GetBranch();
 }
-//______________________________________________________________________________
-TBranch *TTreeIter::GetBranch(const char* brName,TSeqCollection *brList,Int_t flag)
-{
-   TBranch *branch;
-   TTree   *tree;
-   TObject *to;
-   int otLen = strcspn(brName,"[ " );
-   int otDot = strcspn(brName,"[ .");
-   int otDOT = (otDot != otLen);
-   TIter next(brList);
-   while((to=next())) {
-      switch(flag) {
-        case 0: branch = (TBranch*)to; 			break;
-        case 1: branch = ((TLeaf*)to)->GetBranch();	break;
-#ifndef __OLDROOT__
-        case 2: tree = ((TFriendElement*)to)->GetTree();
-                branch = GetBranch(brName,tree);
-                if (branch) return branch;		break;
-#endif
-      }
-      int inLen = strcspn(branch->GetName(),"[ ");
-      int inDot = strcspn(branch->GetName(),"[ .");
-      int inDOT = (inDot != inLen);
-      if (inDOT==otDOT) {	// both same complexity
-        if (otLen == inLen 
-        && strncmp(brName,branch->GetName(),inLen)==0) 	return branch;
-      } else if (inDOT) {	// in more complex
-        if (otLen == inLen-inDot-1 
-        && strncmp(brName,branch->GetName()+inDot+1,otLen)==0) 
-        						return branch;
-      }   
-     
-      branch = GetBranch(brName,branch->GetListOfBranches(),0);
-      if (branch)  					return branch;
-   }
-   return 0;
-}
+
 //______________________________________________________________________________
 TTreeIterCast &TTreeIter::operator() (const TString varname)
 {
@@ -389,7 +348,7 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
      mem = new TTreeIterMem(br->GetName(),tyCode,fUnits);
      fMemList.Add(mem);
      pddr = mem->GetMem();
-     br->ResetBit  (kDoNotProcess);
+     fTree->SetBranchStatus(br->GetName(),1);
      br->SetBit(1);
      fTree->SetBranchAddress(br->GetName(),*pddr);
      fBraList.Add(br);
@@ -413,29 +372,18 @@ Int_t TTreeIter::Next(Int_t entry)
   if (fNErr) {
     Warning("Next","It was %d errors in Init. Loop ignored",fNErr);
     fEntry=0; return 0;}
+  if (!TestBit(1)) { SetBit(1); Notify();}
 
-  int ientry,jentry;
-  ientry = jentry = (entry >= 0) ? entry:fEntry++;
-  if (fChain) {
-    ientry = fChain->LoadTree(jentry);
-    if (ientry<0) return 0;
-    if (fTreeNumb != fChain->GetTreeNumber()) {
-      fTreeNumb = fChain->GetTreeNumber();
-      Notify();
-  } }
+  int ientry =  (entry >= 0) ? entry:fEntry++;
 
   Int_t ans = 0;
-  if (ientry==0) {
-//		1st time standard read
-    ans = fTree->GetEntry(jentry);
-  }  else	 {
-//   		more fast read all other times
-    int n = fBraList.GetEntriesFast();
-    for (int i=0;i<n;i++) {
-      TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
-      ans +=b->GetEntry(ientry); 
-  } }
 
+  ans = fTree->GetEntry(ientry);
+//     int n = fBraList.GetEntriesFast();
+//     for (int i=0;i<n;i++) {
+//       TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
+//       ans +=b->GetEntry(ientry); 
+//     }
   Assert(!IsCorrupted());
   if (ans) return ans;
   fEntry=0;
@@ -449,25 +397,51 @@ Bool_t TTreeIter::Notify()
   Int_t units,brType;
   void  *add;
   Assert(!IsCorrupted());
+  fTree->SetBranchStatus("*",0);
   fBraList.Clear();
   int n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
     TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
-//VP    TBranch *b = GetBranch(t->GetName());
+    fTree->SetBranchStatus(t->GetName(),1);
     TBranch *b = fTree->GetBranch(t->GetName());
     Assert(b);
-    b->ResetBit  (kDoNotProcess);
-//    Assert(!b->TestBit(1));
-    b->SetBit(1);
     GetInfo(b,tyName,units,add,brType);
     void **pddr = t->GetMem();
       if (units > t->fUnits) {
       pddr = t->Alloc(units);
     }
-    b->SetAddress(*pddr);
+    fTree->SetBranchAddress(t->GetName(),*pddr);
+  }
+
+  TBranch *br=0;
+  int added = 1;
+  while(added) {
+    added = 0;
+    for (int idx=0;(br=GetBranch(idx));idx++) {
+      if (br->TestBit(kDoNotProcess)) 		continue;
+      if (fMemList.FindObject(br->GetName())) 	continue;
+      added++;
+
+      GetInfo(br,tyName,units,add,brType);
+      if (brType==3 || brType==4) {//add counter
+        (*this)(br->GetName());   
+        printf("Branch %s activated\n",br->GetName());
+      } else {// We are here because of ROOT bug. Do workaround
+        fTree->SetBranchStatus(br->GetName(),0);
+        printf("Branch %s desactivated\n",br->GetName());
+      }  
+
+    }
+  }
+
+  fMemList.Sort();
+  n = fMemList.GetEntriesFast();
+  for (int i=0;i<n;i++) {
+    TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
+    TBranch *b = fTree->GetBranch(t->GetName());
+    Assert(b);
     fBraList.Add(b);
   }
-  fTreeNumb = fChain->GetTreeNumber();
   return 0;
 }
 //______________________________________________________________________________
@@ -496,21 +470,6 @@ void TTreeIter::ls(const TObjArray *brList,Int_t lvl,Option_t* option)
       if (!branch)	continue;
       Print(branch,lvl,option);
       ls(branch->GetListOfBranches(),lvl+1,option);
-   }
-}
-//______________________________________________________________________________
-void TTreeIter::SetBranchObject(const TObjArray *brList)
-{
-   TBranch *branch;
-   if (!brList) return;
-   
-   Int_t nb = brList->GetEntriesFast();
-   for (int iBr=0;iBr<nb;iBr++) {
-      branch = (TBranch*)brList->UncheckedAt(iBr);
-      if (!branch)	continue;
-      if (strcmp(branch->ClassName(),"TBranchObject")==0) 
-          fTree->SetBranchAddress(branch->GetName(),(void*)(-1));
-      SetBranchObject(branch->GetListOfBranches());
    }
 }
 //______________________________________________________________________________
@@ -586,8 +545,8 @@ Int_t TTreeIter::AddFile(const Char_t *file)
    while((fullname=dirIter.NextFile())) { 
      fNFiles++; num++;
      printf("%04d -  TTreeIter::AddFile %s\n",fNFiles,fullname);
-     if (fChain == 0) WhichTree(fullname);
-     fChain->Add(fullname);
+     if (fTree == 0) WhichTree(fullname);
+     fTree->Add(fullname);
    }
    
   Init();
