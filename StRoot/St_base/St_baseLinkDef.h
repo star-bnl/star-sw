@@ -19,6 +19,7 @@
 #pragma link C++ class StRegistry-!;
 #pragma link C++ class StVectorInt-!;
 #pragma link C++ class StObjArrayIter-!;
+#pragma link C++ class StTObjArray-!;
 #pragma link C++ class StObjArray-!;
 #pragma link C++ class StRefArray-!;
 #pragma link C++ class StStrArray-!;

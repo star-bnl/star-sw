@@ -1,7 +1,7 @@
-// $Id: StArray.cxx,v 1.22 2000/04/20 14:24:08 perev Exp $
+// $Id: StArray.cxx,v 1.23 2000/04/23 01:00:45 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.22  2000/04/20 14:24:08  perev
-// StArray fixes
+// Revision 1.23  2000/04/23 01:00:45  perev
+// StEvent monolitic I/O
 //
 // Revision 1.21  2000/04/18 02:57:25  perev
 // StEvent browse
@@ -60,33 +60,91 @@
 #include "TDatime.h"
 #include "TBrowser.h"
 
-TObjArray *StRegistry::fReg  = 0;
-TList     *StRegistry::fNon  = 0;
-Int_t      StRegistry::fFree = 0;
+TObjArray *StRegistry::fgReg  = 0;
+Int_t      StRegistry::fgFree = 0;
 //______________________________________________________________________________
 ClassImp(StTObjArray)
+//______________________________________________________________________________
+void StTObjArray::Streamer(TBuffer &b)
+{
+  fName.Streamer(b);
+  fArr->Streamer(b);
+}
+//______________________________________________________________________________
+void StTObjArray::SetTitle(const char *title)
+{ fArr->SetName(title);}
+//______________________________________________________________________________
+const char *StTObjArray::GetTitle() const
+{ return fArr->GetName();}
+
 //______________________________________________________________________________
 ClassImp(StRegistry)
 //______________________________________________________________________________
 void StRegistry::Clear()
 {
-  if (fReg) fReg->Clear();
-  fFree = 0;
+  if (fgReg) fgReg->Clear();
+  fgFree = 0;
 }
 //______________________________________________________________________________
-UInt_t StRegistry::Ident(UInt_t colidx,UInt_t objidx)
+UInt_t StRegistry::Ident(Int_t colidx,Int_t objidx)
 {
- assert(colidx <= 0xffff);
- assert(objidx <= 0xffff);
- return (colidx<<16)|objidx;
+  UInt_t u;
+  int kase = 0;
+  if (colidx > 0x7fff  || objidx > 0xffff) kase =1;
+  if (kase && colidx > objidx ) kase +=2;
+  switch (kase) {
+
+    case 0:	// col=15bit obj=16bit
+    u = (colidx<<17)|(objidx<<1)|0;
+    break;
+
+    case 1: 	// col=12bit obj=18bit
+    assert(colidx <   0xfff);
+    assert(objidx < 0x3ffff);
+    u = (colidx<<20)|(objidx<<2)|kase;        
+    break;
+
+    case 3: 	// col=18bit obj=12bit
+    assert(colidx < 0x3ffff);
+    assert(objidx <   0xfff);
+    u = (colidx<<14)|(objidx<<2)|kase;        
+    break;
+
+    default: assert(0);
+  }
+//  Int_t colqq,objqq;
+//  StRegistry::Ident(u,colqq,objqq);
+//  assert(colqq==colidx && objqq == objidx);
+  return u;
+
 }
 //______________________________________________________________________________
-void    StRegistry::Ident(UInt_t ident,UInt_t &colidx,UInt_t &objidx)
+void StRegistry::Ident(UInt_t ident,Int_t &colidx,Int_t &objidx)
 {
-  colidx = ident>>16;  objidx = ident & 0x0000ffff;
+  int kase = ident&3;
+  switch (kase) {
+
+    case 0:; case 2:
+      objidx = (ident>>1)&0xffff; 
+      colidx = ident>>17;
+      { UInt_t u = StRegistry::Ident(colidx,objidx);
+        assert(u==ident); }
+      
+      return;
+
+    case 1:;
+      objidx = (ident>>2)&0x3ffff;
+      colidx = ident>>20;
+      return;
+    case 3:;  
+      objidx = (ident>>2)&0xfff;
+      colidx = ident>>14;
+      return;
+    default: assert(0);  
+  }
 }  
 //______________________________________________________________________________
-Int_t StRegistry::GetNColl(){return (fReg) ? fReg->GetLast()+1:0;}				// Number of collections
+Int_t StRegistry::GetNColl(){return (fgReg) ? fgReg->GetLast()+1:0;}				// Number of collections
 //______________________________________________________________________________
 void StRegistry::Streamer(TBuffer &){assert(0);}
 
@@ -96,33 +154,36 @@ Int_t StRegistry::SetColl(StStrArray *coll)
 {
   Int_t n;
   assert(coll);
-  if (!fReg) fReg = new TObjArray(10);
+  if (!fgReg) fgReg = new TObjArray(100);
   
-  if (!fFree) {	//No free places
-    fReg->AddLast(coll);
-    n = fReg->GetLast()+1;
+  if (!fgFree) {	//No free places
+    fgReg->AddLast(coll);
+    n = fgReg->GetLast()+1;
   } else {
-    n = fFree;
-    fFree = -(int)fReg->At(n-1);
-    fReg->AddAt(coll,n-1);
+    n = fgFree;
+    fgFree = -(int)fgReg->At(n-1);
+    fgReg->AddAt(coll,n-1);
   }
-  coll->SetUniqueID(StRegistry::Ident(0,n));
+  coll->SetUniqueID(StRegistry::Ident(1999,n));
   
   return n;
 }
 //______________________________________________________________________________
 void StRegistry::RemColl(StStrArray *coll)  
 {
-  UInt_t colIdx,objIdx;
-  assert(fReg); 
-  StRegistry::Ident(coll->GetUniqueID(), colIdx, objIdx);
+  UInt_t id;
+  Int_t colIdx,objIdx;
+  assert(fgReg); 		//Reg collection does not exist
+  id = coll->GetUniqueID();
+  assert(id);			//Collection removed twice
+  StRegistry::Ident(id, colIdx, objIdx);
   assert(objIdx); 
-  assert(!colIdx);
-  assert( fReg->At(objIdx-1)==coll);
-  fReg->RemoveAt(objIdx-1);
-  if (objIdx-1 < (UInt_t)fReg->GetLast()) {
-    fReg->AddAt((TObject*)(-fFree),objIdx-1);
-    fFree = objIdx;
+  assert(colIdx==1999);		//No collection for collection (???)
+  assert( fgReg->At(objIdx-1)==coll);
+  fgReg->RemoveAt(objIdx-1);
+  if (objIdx-1 < fgReg->GetLast()) {
+    fgReg->AddAt((TObject*)(-fgFree),objIdx-1);
+    fgFree = objIdx;
   }
 
   coll->SetUniqueID(0);
@@ -133,12 +194,12 @@ Int_t StRegistry::GetColl(const char *collname)
 // get index of container
 {
   assert(collname);
-  if (!fReg) return 0;
+  if (!fgReg) return 0;
 
-  int i=0,n=fReg->GetLast();  
+  int i=0,n=fgReg->GetLast();  
   for (i=0;i<=n;i++) 
   {
-    StStrArray *koll = (StStrArray*)fReg->At(i);
+    StStrArray *koll = (StStrArray*)fgReg->At(i);
     if (!koll) continue;
     if(strcmp(collname,koll->GetIDName())) continue;
     return (i+1);
@@ -148,7 +209,7 @@ Int_t StRegistry::GetColl(const char *collname)
 //______________________________________________________________________________
 StStrArray *StRegistry::GetColl (Int_t idx )
 // get collection  by index
-{ assert(fReg); return (StStrArray*)fReg->At(idx-1);} 
+{ assert(fgReg); return (StStrArray*)fgReg->At(idx-1);} 
 
 //______________________________________________________________________________
 const char *StRegistry::GetCollName (Int_t idx ) 
@@ -159,28 +220,12 @@ const char *StRegistry::GetCollName (Int_t idx )
 }
  
 //______________________________________________________________________________
- void  StRegistry::AddNon(StRefArray *coll)
-{
-  if (!fNon) fNon = new TList();
-  fNon->Add(coll);
-}
-//______________________________________________________________________________
- void  StRegistry::Init()
-{
-  if (!fNon) return;
-  StRefArray *coll;
-  while((coll = (StRefArray*)fNon->First())) 
-  { coll->Decode(); fNon->Remove(coll); }
-  delete fNon; fNon = 0;
-  
-}
-//______________________________________________________________________________
 void StRegistry::List() 
 {
 
   printf("\n\tList of StRegistry\n");
-  if (!fReg) return;
-  int n = fReg->GetLast();
+  if (!fgReg) return;
+  int n = fgReg->GetLast();
   for (int i=1;i<=n;i++) {
     StObjArray *coll = GetColl(i);
     if (!coll) continue;
@@ -216,7 +261,7 @@ TObject** StObjArray::GetCell(Int_t idx) const{return &((*fArr)[idx]);}
 
 //______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &b)
-{TCollection::Streamer(b);}
+{StTObjArray::Streamer(b);}
 //______________________________________________________________________________
 // void StObjArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
@@ -238,7 +283,6 @@ void StObjArray::Browse(TBrowser *b)
    //         This means TObject::Inspect() will be invoked indirectly
  
    if (!b) return;
-   StRegistry::Init();
    TIter next(fArr);
    TObject *obj;
     
@@ -374,102 +418,78 @@ void StObjArrayIter::operator=(const StObjArrayIter &iter)
 
 //______________________________________________________________________________
 ClassImp(StRefArray)
-//______________________________________________________________________________
-//void StRefArray::ShowMembers(TMemberInspector &, char *){}
+
 //______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
+#ifdef NONMOMO
 {
    // Stream all objects in the array to or from the I/O buffer.  
 
-   Int_t nobjects,newcol,i;
-   UInt_t ulong,objidx,colidx,kolidx,nkoll=0; 
-   TObject *obj; TString *colname;
+   Int_t nobjects,i,objidx,colidx;
+   TObject *obj;
 
+   colidx = 0;
+   char cbuf[100];
    if (R__b.IsReading()) {
       R__b.ReadVersion();   // Version_t v = R__b.ReadVersion();
       R__b >> nobjects;
-//    R__b >> fLowerBound;
-      char cbuf[100];
+      Clear();
+      StStrArray *ar =0;
       for (i = 0; i < nobjects; i++) {
-        R__b >> ulong;
-        colname = 0;
-        if (ulong) {; 
-          StRegistry::Ident(ulong,kolidx,objidx);
-          if (kolidx > nkoll) {
-            R__b.ReadString(cbuf,100);
-            colname = new TString(cbuf);
-            nkoll = kolidx;
-          }
+        R__b >> objidx;
+        if (!objidx) 	continue;
+        if (objidx<0) {	//Read the name
+          objidx = -objidx;
+          R__b.ReadString(cbuf,100);
+          colidx = StRegistry::GetColl(cbuf);
+//          StStrArray *ar = 0;
+//          R__b >> (TObject *&)ar;
+          colidx = StRegistry::GetColl(cbuf);
+          if (!colidx) Warning("Streamer"," StrArray %s NOT found ",cbuf );
+          if (!colidx) 	continue;
+          ar = StRegistry::GetColl(colidx); 
+          assert(ar);
         }
-        AddLast((TObject*)ulong);
-        if (colname) Add((TObject*)colname);
+        obj = ar->At(objidx-1);
+        assert(obj);
+        Add(obj);
       }
-      StRegistry::AddNon(this);
+
+
    } else {
 
       R__b.WriteVersion(StRefArray::IsA());
-      Int_t ncoll = StRegistry::GetNColl();
-      Int_t *icolls = (Int_t*)calloc(ncoll+1,sizeof(Int_t)); 
-      memset(icolls,0,sizeof(Int_t)*(ncoll+1));
       nobjects = GetLast()+1;
       R__b << nobjects;
-//    R__b << fLowerBound;
-//		First pass, collect different collections
-
-      for (i=0;i<nobjects;i++)
-      {
-        ulong=0; newcol=0; obj = At(i); 
-        if (obj) {
-          StRegistry::Ident(obj->GetUniqueID(),colidx,objidx);
-          if (!icolls[colidx]) { newcol = 1999; icolls[colidx]=++nkoll;}
-          ulong = StRegistry::Ident(icolls[colidx],objidx);
-        }
-      
-        R__b << ulong;
-        if (newcol) //Write Name of collection
+      int lastColl = -1999;
+//		fill array of different collections
+      for (i=0;i< nobjects; i++) {
+        colidx = lastColl; objidx = 0; obj = At(i);            
+        if (obj) StRegistry::Ident(obj->GetUniqueID(),colidx,objidx);
+        if (colidx != lastColl) objidx = -objidx;	//new Str Collection
+        lastColl = colidx;
+        R__b << objidx; 
+        if (objidx < 0) {
           R__b << StRegistry::GetCollName(colidx);
+          StStrArray *ar = StRegistry::GetColl(colidx);
+          assert(ar);
+//        R__b << ar;               
+        }
       }
-      free(icolls);
    }
 }
-//______________________________________________________________________________
-void StRefArray::Decode()
-{
-  int i,j,colidx;
-  UInt_t ulong,kolidx,objidx,nkoll=0;
-  int nobjects = GetLast() + 1 ;
-  TString *colname;
-  int mcolls =  StRegistry::GetNColl(); 
-  int *icolls = (int *)calloc(mcolls,sizeof(int));
-  TObject *obj;
-  StStrArray *coll;
-  
-  for (i = 0,j=0; i < nobjects; i++) {
-    ulong = (UInt_t)At(i); AddAt(0,i);
-    if (! ulong) continue; 
-    StRegistry::Ident(ulong,kolidx,objidx);
-    if (kolidx > nkoll) {
-      colname= (TString*)At(++i);  AddAt(0,i); assert(colname);
-      colidx = StRegistry::GetColl((const char*)*colname);
-      if(!colidx) Warning("Decode","Collection %s Not Loaded.",(const char*)colname);
-      delete colname; colname=0;
-      assert(colidx<mcolls);      
-      icolls[kolidx]=colidx; nkoll = kolidx;
-    }
-    colidx = icolls[kolidx];  assert(colidx);
-    coll = StRegistry::GetColl(colidx); 
-    assert(coll);
-    obj = coll->At(objidx);
-    AddAt(obj, j++);
-  }
-  free(icolls);
-}
+#endif 
+#ifndef NONMONO
+{ StObjArray::Streamer(R__b);}
+#endif
+
 //______________________________________________________________________________
 ClassImp(StStrArray)
 //______________________________________________________________________________
 StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 
-  if (name) SetName(name); SetIDName(0); 
+//NONMONO  StRegistry::SetColl(this);
+  if (name) SetName(name); 
 }
 //______________________________________________________________________________
 StStrArray::StStrArray(const StStrArray &from )
@@ -494,74 +514,83 @@ StStrArray::StStrArray(const StStrArray &from )
   }
 } 
 //______________________________________________________________________________
- void StStrArray::Book(TObject* obj,int idx)
- { obj->SetUniqueID(StRegistry::Ident(fIdx,idx));}
+//NONMONO void StStrArray::Book(TObject* obj,int idx)
+//NONMONO{ 
+//NONMONO   Int_t kolidx,colidx;
+//NONMONO   StRegistry::Ident(GetUniqueID(),kolidx,colidx);
+//NONMONO   assert(kolidx==1999);
+//NONMONO   obj->SetUniqueID(StRegistry::Ident(colidx,idx));
+//NONMONO}
 
-//______________________________________________________________________________
- const Char_t *StStrArray::GetName() const {return fName;}
-//______________________________________________________________________________
- void          StStrArray::SetName(const char* name) {fName = name;} 
 //______________________________________________________________________________
  void StStrArray::AddFirst(TObject* obj)
- { StObjArray::AddFirst(obj); Book(obj,0);}
+{ 
+  StObjArray::AddFirst(obj);
+//NONMONO  Book(obj,1);
+}
 
 //______________________________________________________________________________
- void StStrArray::AddLast(TObject* obj)
- { StObjArray::AddLast(obj); Book(obj,GetLast());}
+void StStrArray::AddLast(TObject* obj)
+{ 
+  StObjArray::AddLast(obj);
+//NONMONO  Book(obj,GetLast()+1);
+}
 
 //______________________________________________________________________________
  void StStrArray::AddAt(TObject* obj, Int_t idx)
- { StObjArray::AddAt(obj,idx); Book(obj,idx);}
+{
+  StObjArray::AddAt(obj,idx);
+//NONMONO Book(obj,idx+1);
+}
  
 //______________________________________________________________________________
  void StStrArray::AddAtAndExpand(TObject* obj, Int_t idx)
- { StObjArray::AddAtAndExpand(obj,idx); Book(obj,idx);};
+ {
+  StObjArray::AddAtAndExpand(obj,idx);
+//NONMONO  Book(obj,idx+1);
+ };
 //______________________________________________________________________________
 //void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 StStrArray::~StStrArray()
 {
   Delete(); 
-  StRegistry::RemColl(this);
+//NONMONO StRegistry::RemColl(this);
 }
 
 //______________________________________________________________________________
 const Char_t *StStrArray::GetIDName() const 
 {
-  assert(!fIDName.IsNull()); return fIDName;
+  return GetTitle();
 }
  
 //______________________________________________________________________________
 void StStrArray::SetIDName(const Char_t *idname)
 {
-  int isNull = fIDName.IsNull();
   if (idname) 
   {
-    fIDName = idname; 
-  } else {
+    SetTitle(idname); 
+  } else if (!*GetTitle()) {
 
-    char buf[20]; sprintf(buf,"%p",this); fIDName = buf;
-
-    fIDName += " ";
-    TDatime dt; fIDName += dt.AsString();
+    char buf[100]; strcpy(buf,ClassName()); strcat(buf," ");
+    
+    sprintf(buf+strlen(buf),"%p", this);
+    TDatime dt;   
+    sprintf(buf+strlen(buf),"%x", dt.Get()); 
+    SetTitle(buf);
   }
-
-  if (isNull) fIdx=StRegistry::SetColl(this);
 }
 //______________________________________________________________________________
 void StStrArray::Streamer(TBuffer &R__b)
 {
    // Stream an object of class StStrArray.
-
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
-      TString name; name.Streamer(R__b);SetName(name);
-      name.Streamer(R__b);SetIDName(name);
       StObjArray::Streamer(R__b);
+//    Warning("Streamer"," Read %s\n",GetIDName());
    } else {
       R__b.WriteVersion(StStrArray::IsA());
-      fName.Streamer(R__b);
-      fIDName.Streamer(R__b);
+      SetIDName(0);
       StObjArray::Streamer(R__b);
    }
 

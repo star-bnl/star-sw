@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.8 2000/04/20 14:24:09 perev Exp $
+// $Id: StObject.cxx,v 1.9 2000/04/23 01:00:45 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.9  2000/04/23 01:00:45  perev
+// StEvent monolitic I/O
+//
 // Revision 1.8  2000/04/20 14:24:09  perev
 // StArray fixes
 //
@@ -37,14 +40,14 @@ ClassImp(StObject)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
-  UInt_t colIdx,objIdx,u;
+  Int_t colIdx,objIdx; UInt_t u;
   u = GetUniqueID();
   if (!u) return;
   StRegistry::Ident(u,colIdx,objIdx);
   if (!colIdx) return;
   StStrArray *ar = StRegistry::GetColl(colIdx);
   if (!ar) return;
-  unsigned int n = ar->GetSize();
+  int n = ar->GetSize();
   if (objIdx>=n)			return;
   if (ar->At(objIdx) != (TObject*)this) return;
   ar->RemoveAt(objIdx);
