@@ -22,6 +22,7 @@
 
 <li><a href="#Performance">Performance</a>
 <li><a href="#Tutorial">Tutorial</a>
+<li><a href="#FAQ">FAQ</a>
 
 
 
@@ -35,11 +36,36 @@
 The StPidAmpMaker is designed to be used with StuProbabilityPidAlgorithm, which is a functor in StEventUtilities.
 <p>
 The StPidAmpMaker loop through StEvents, and output a bunch of   *.root files.
-What those .root files contain are the parameters for describing the Bethe-Block curve, the statistic information for describing the amplitude and resolution's variation along p/z, which can be used to do the Particle Identification. Also this package generates  parameters for calibration of de/dx vs p/z.
+What those .root files contain are the parameters for describing the Bethe-Bloch curve, the statistic information for describing the amplitude and resolution's variation along p/z, which can be used to do the Particle Identification. Also this package generates  parameters for calibration of de/dx vs p/z.
 </p>
 <hr>
 <h2><a name="Algorithm">Algorithm</h2>
-Richard Witt, who wrote the initial Fortran version of amplitude PID, has a nice page describing the algorithm. Click <a href="http://cnr2.kent.edu/~witt/pid/"> here </a>to go to his page.
+<p>The de/dx~p plots for tracks consists of several individual bands, namely the pion band, the kaon band,the proton band and the electron band. Our task is, given a track with de/dx and rigidity(p/z), figure out wich individual band that track mostly likely belongs to.</p>
+<p>To do so, we can try to establish the amplitude for each band. What is the amplitude here? Loosely speaking, the amplitude represents the density of dots  on the de/dx~p plot. If you fill de/dx and p into a 2D histogram and draw it as LEGO, the amplitude is the height of each cell on x-y plane. So you can imagine each band as a "ridge". See following graph of reconstructed "ridge" for pion band.</p>
+<center><img src="ampRecoPionBand.gif"></a></center>
+<p>Note that If we cut the "ridge" above at a given rigidity, we will get a gaussian curve. </p>
+<p>The picture above shows only the pion band, we can reconstruct all other bands as such "ridge" as well. By putting them together, we have sth. like following(not very clear, but, you got the ideal):</p>
+
+<center><img src="ampRecoAllBands.gif"></a></center>
+<p>The blue ridge is pion band, the red ridge is kaon band, the green is for proton, the magenta is for electron(such color convention will be used through this document).</p>
+
+<p>Then how to get the PID probability? Now surppose we have a track with rigidity(p/z)=0.68, de/dx=0.175e-05(Gev/cm). We make a vertical plane at rigidity=0.68 to cut the picture above, the cross-section we get is sth. like following:</p>
+<center><img src="pidAlgo.gif"></a></center>
+<p>On the plot, the color dash line represents amplitudes due to different band(The gaussian curve from electron band at this rigidity is so tiny that we can just see a flat line). Now we say:
+<p>The probability of this track(de/dx=0.175e-05Gev/cm, rigidity=0.68) to be a kaon = height of red dash line / sum of heights from all dash lines </p>
+
+<p>Sounds easy? But in the code we have to do thousands fittings to reach the goal!</p>
+
+<p>Now we can do even better. Let's take a look at de/dx~p plot for different nhits range(nhits=# of tpc hits used in mean de/dx calculation):</p>
+
+<center><img src="demoNHits.gif"></a></center>
+<p>The blue area is the <a href="regions.gif">overlapping</a> area.The  blue areas show that a fuzzy semi-overlapping area in de/dx~p plot for low nhits tracks could come to be clearn area in plot for high nhits tracks. So if we do PID without nhits binning, some signal could be washed out by fuzzy low nhits tracks. The reasonable way is to let high nhits band compete with high nhits band, low nhits band compete with low nhits band, and that is the way we implemented in the package.</p>
+
+<p>Now we included the nhits dependence for PID, in the code we consider the Dca dependence as well. Another PID dependence is pt dependence, which is not implemented in the package at the moment.</p>
+
+<p>So you've got some ideal of the Probability PID algorithm. What the StPidAmpMaker does is to produce a set of parameters which can be used to reconstruct those "ridges". The parameters will be read in by StuProbabilityPIDAlgorithm, wich will be constructed in your analysis code. Then StuProbilityPIDAlgorithm reconstructe the expected amplitude and yield the probability PID for each track.</p>
+
+<p> <a href="http://cnr2.kent.edu/~witt/pid/"> Wanna know more about the algorithm? Richard Witt, who wrote the initial Fortran version of amplitude PID, has a nice page describing the algorithm. Clickhereto go to his page. </a>
 
 <hr>
 
@@ -71,78 +97,172 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <hr>
 
 <h2><a name="Performance">Performance</h2>
-The Bethe-Block curve based on the result of StPidAmpMaker:
-<center><a href="bandCenter.gif"><img src="bandCentersmall.gif"></a></center>
-Particle Identification result:
-<br>
-<br><font color=green>1.result from NHitsNetSet:</font>
-<center>Channel Nhits 0-10</center>
-<center><a href="NHits0_10PID.gif"><img src="NHits0_10PIDsmall.gif"></a></center>
-<center>Channel Nhits 10-20</center>
-<center><a href="NHits10_20PID.gif"><img src="NHits10_20PIDsmall.gif"></a></center>
-<center>Channel Nhits 20-45</center>
-<center><a href="NHits20_45PID.gif"><img src="NHits20_45PIDsmall.gif"></a></center>
-<center>Combine All 3 channels</center>
-<center><a href="NHitsTotalPID.gif"><img src="NHitsTotalPIDsmall.gif"></a></center>
-<br><font color=green>2. result from defaultNetSet:</font>
-<center><a href="defaultPID.gif"><img src="defaultPIDsmall.gif"></a></center>
-BetheBlock curve fitting:
-<br>
-<br><font color=green>1. low beta*gamma region:</font>
-<center><a href="bandFittingLow.gif"><img src="bandFittingLowsmall.gif"></a></center>
-<br><font color=green>2. high beta*gamma region:</font>
-<center><a href="bandFittingTotal.gif"><img src="bandFittingTotalsmall.gif"></a></center>
-<br><font color=green>3. contribution due to different particle types:</font>
-<center><a href="bandMultiLow.gif"><img src="bandMultiLowsmall.gif"></a></center>
-<center><a href="bandMultiTotal.gif"><img src="bandMultiTotalsmall.gif"></a></center>
+<p> <font color=#EE1110>The current overall PID efficiency (correctly identified tracks / identified tracks) is 87.6% for global tracks, 88.9% for primary tracks (dca<2cm).</font> (I assume you run the option which consider both nhits and dca dependences. Number gotten is based on MDC3 data.</p>
+<p>Following are some plots based on the result of StPidAmpMaker:</p>
+<p>The Bethe-Bloch curve: (Bethe-Bloch fitting is a must-done in this package)</p>
+<center><img src="bandCenter.gif"></center>
+
+<p>Pid at different confidence level :</p>
+<center><img src="5090pid.gif"></center>
+<p>In the plots above, blue dots represent pion tracks, red -> kaons, green -> protons, magenta -> e+/-, black -> tracks whose probability of the most likehood type is less than 50%/90% (declared as non-identified). The light blue dots are pions in the overlapping area.The StuProbabilityPidAlgorithm can give out a warning flag if a track in the overlapping area is identified. The plots show that as our confidence requirement increase, more tracks becomes non-identified (black), which is as expected.</p>
+
 
 <hr>
 <h2><a name="Tutorial">Tutorial</h2>
-<p> <font size=5 color=#EE1110>1. How to run StPidAmpMaker?</font></p>
-Following is a piece of code showing how to run StPidAmpMaker:(I assume you drive it by doEvents.C)
-<br>
+<p> <font size=5 color=#EE1110>How to do the PID?</font></p>
+<p>If you have less than 300 events dst files and wanna do PID by using probability algorithm, my suggestion is do not do it. This is a tool that rely on STATISTICS heavily</p>
+<p>In order to use StuProbabilityPidAlgorithm, we have to use StPidAmpMaker to produce a set of parameters that can be used by StuProbabilityPidAlgorithm. So, before do PID, we should: </p>
 
-void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
-<br>
-{
+<p> <font size=5 color=#EE1110>First,Run StPidAmpMaker to produce parameters:</font></p>
+
+<p> follow the step by step guidance below:</p>
+
+<p><font color=blue>1.Decide which channel collection type are you going to use. There are three channel collection types available in StPidAmpMaker:</font></p>
+<p><img src="hand-right.gif"> StPidAmpMaker::AddDefaultChannelCollection( <a href="option.html">"your fit options"</a>)</p>
+<p>The default channel collection does not consider any PID dependence. It requires at least 400 events (~3k tracks per event).  For 1k events, it costs ~4 hrs.</p>
+<p><img src="hand-right.gif">StPidAmpMaker::AddNHitsChannelCollection(yourNHitsBin1, yourNHitsBin2,etc.<a href="option.html">"your fit options"</a>)</p>
+<p>The NHits channel collection consider NHits dependence for PID. It requires ~1k events.For 1k events, it costs ~5 hrs to run. The maximum # of NHits bins you can set is 4. The recommended input is: AddNHitsChannelCollection(0,10,20,45,"A").</p>
+<p><img src="hand-right.gif">StPidAmpMaker::AddNHitsDcaChannelCollection(yourNHitsBin1Start, yourNHitsBin1End, yourNHitsBin2End, etc.<a href="option.html">"your fit options"</a>,yourDcaBin1Start, yourDcaBin1End, yourDcaBin2End)</p>     
+<p>The NHitsDca channel collection consider both Dca and NHits dependences for PID. It requires ~1.5k events. For 1.5k events, it costs ~7 hrs to run. The maximum # of NHits bins you can set is 4. yourDcaBin1Start should be 0 always, yourDcaBin2End should be infinity (a large number like 50000 would be good). The recommended input is : AddNHitsDcaChannelCollection(0,10,20,45,"A",0,2.0,50000)</p>
+
+
+<br> 
+<p>The last channel collection (NHitsDca) has the best performance, but it requires more data sample and more time to run. The first channel collection has the worst performance if compare to the other two, but it requires less data sample and less run time.
+
+<br><p>Now, suppose we have 2k events on disk, and we do not care about the run time. We decide to use the NHitsDcaChannelCollection. Then, the next thing is:</p>
+
+<p><font color=blue>2.Modify doEvents.C so that your StPidAmpMaker can be added to the chain.</font></p>
+
+<p>We need to check out the doEvents.C, replace the analysis maker by our StPidAmpMaker, comment out StEventMaker related stuff.(You may ask why comment out StEventMaker? that is because StEventMaker drags our speed down. The StPidAmpMaker read directly from dst tables instead of read through StEvent. It will keep read this way untill we have bulk of data written in StEvent Object. Refer back to this page then.)</p>
+
+<p>Our modified doEvents.C looks like following:(commentted out as green, added as red)</p>
+
+
+<br>void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
+<br>{
 <br>    //
 <br>    // First load some shared libraries we need
 <br>    //
+
 <br>    gSystem->Load("St_base");
 <br>    gSystem->Load("StChain");
-<br>    gSystem->Load("St_Tables");
+<br>
+<br>    gSystem->Load("libgen_Tables");
+<br>    gSystem->Load("libsim_Tables");
+<br>    gSystem->Load("libglobal_Tables");
+<br>
 <br>    gSystem->Load("StUtilities");
 <br>    gSystem->Load("StIOMaker");
 <br>    gSystem->Load("StarClassLibrary");
 <br>    gSystem->Load("StEvent");
 <br>    gSystem->Load("StMagF");
-<br>    gSystem->Load("StEventMaker");
-<br>  <font color=red>  gSystem->Load("StPidAmpMaker");</font>
+<br> <font color=green> //   gSystem->Load("StEventMaker"); </font> 
+<br> <font color=green> //     gSystem->Load("StAnalysisMaker"); </font>
+<br> <font color=red>   gSystem->Load("StPidAmpMaker");</font>
 
- <br>   chain  = new StChain("StChain");
-
-<br>    StFile *setFiles= new StFile();
-
-<br>    for (int ifil=0; fileList[ifil]; ifil++)
-<br>	{ setFiles->AddFile(fileList[ifil]);}
+<br>    //
+<br>    // Handling depends on whether file is a ROOT file or XDF file
+<br>    //
+<br>    chain  = new StChain("StChain");
+<br>    StFileI *setFiles =0;
+<br>    if (fileList) {     //Normal case
+<br>      setFiles= new StFile(fileList);
+<br>    } else        {     //Grand Chalenge
+<br>      gSystem->Load("StChallenger");
+<br>      setFiles = StChallenger::Challenge();
+<br>      setFiles->SetDebug();
+<br>      Int_t Argc=4;
+<br>      const char *Argv[4]= {
+<br>        "-s","dst;hist;runco",
+<br>        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+<br>        };
+<br>      setFiles->Init(Argc,Argv);
+<br>    }
 <br>    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-<br>        IOMk->SetBranch("runcoBranch",0,"r");
-<br>    StEventMaker *readerMaker =  new StEventMaker("events","title");
-<br>   <font color=red>  StPidAmpMaker *ampMaker = new StPidAmpMaker("pidAmp");</font>
-<br>  <font color=red>   ampMaker->AddDefaultChannelCollection("BAR","BAR");</font><font color=green>//add a default StPidAmpChannelCollection(no PID dependence thus only 1 channel) to StPidAmpManager. Its fit <a href="option.html">option</a> is "BAR", draw  <a href="option.html">option </a>is "BAR".</font>
-<br> <font color=red>// ampMaker->SetNHitsFilter2LastCollection(5);</font><font color=green>//get rig of noise ( tracks with nhits<5 ) when fitting de/dx~beta*gamma.</font>
-<br>  <font color=red>  //   ampMaker->AddNHitsChannelCollection(0,10,20,45,"BAR","BAR");</font><font color=green>//add a nhits StPidAmpChannelCollection to StPidAmpManager. Here we have 3 channels in the collection, the corresponding nhits slices for each channel are 0-10,10-20,20-45.</font>
+<br>     IOMk->SetIOMode("r");
+<br>     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+<br>     IOMk->SetBranch("dstBranch",0,"r");
+<br>     IOMk->SetBranch("runcoBranch",0,"r");
+<br>     IOMk->SetDebug();
 
- <br>   //
+<br>    //
+<br>    // Maker to read events from file or database into StEvent
+<br>    //
+<br> <font color=green> //  StEventMaker *readerMaker =  new StEventMaker("events","title");</font>
+
+
+<br>    //
+<br>    //  Sample analysis maker
+<br>    //
+<br>  <font color=green> // StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");</font>
+<br> <font color=red> StPidAmpMaker *myPidAmpMaker = new StPidAmpMaker("pidAmp");
+<br>    myPidAmpMaker->AddNHitsDcaChannelCollection(0,10,20,45,"A",0.0,2.0,50000);</font>
+<br>
+<br>    //
 <br>    // Initialize chain
 <br>    //
-<br>    Int_t iInit = chain->Init();
-<br>    if (iInit) chain->Fatal(iInit,"on init");
-<br>    chain->PrintInfo();
-<br>    <font size=100>......</font>
-<br><br>
+<br>  ......
+<br>
+<br>
 
-<p> <font size=5 color=#EE1110>2. How to read out the parameters from "Bands.root" file and draw the Bethe-Block curve?</font></p>
+
+<br>
+<br>
+<p>Then, </p>
+<p><font color=blue>3.In root4star, run doEvents.C over a certain number of events. (in our example, we run 2k events)</font></p>
+<p>After the run, we should see two files, one is <br>"nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root" <br>the other is <br>"nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root". 
+<br>What we need here is the first one. The second one is for band parameters only. We can ignore it for the moment.</p>
+<p>We have got the parameters, Now we can do:</p>
+<p> <font size=5 color=#EE1110>The second, do PID in the user's analysis code.</font></p>
+<p><br>Following a few lines of code will give you the ideal:</p>
+<br><font color=green>//  In your macro(sth. like doEvents.C), do not forget : </font>
+<br>gSystem->Load("StEvent"); 
+<br>gSystem->Load("StEventUtilities"); 
+<br>gSystem->Load("StPidAmpMaker"); <font color=green> // This line will not be needed when the bad dependence of StEventUtilities on StPidAmpMaker get removed.This should happen in a few weeks.</font>
+<br><font color=green> // and load some other libraries as well.</font>
+<br>
+<br>
+<br> <font color=green>// In your source code:</font>
+<br>#include "StEventTypes.h"
+<br>#include "StuProbabilityPidAlgorithm.h"
+<br>
+<br><font color=green>//put the following line some where before your event loop:</font>
+<br>StuProbabilityPidAlgorithm::readInputFile("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root");<font color=green>//read in the parameters.</font>
+<br>
+<br><font color=green>//inside your event loop (but outside the track loop): </font>
+<br>StuProbabilityPidAlgorithm myPID(event);<font color=green>   //define a functor.</font>
+
+<br><font color=green>//inside your track loop: </font>
+<br>StParticleDefinition* def=theTrack->pidTraits(myPID);<font color=green>  //invoke functor. </font>
+<br> if( def->name()=="e-" && myPID.getProbability(0) > 0.9 ) 
+<br>printf("Got an electron at 90% confidence!\n");  
+<br>if( def->name()=="pi-" && myPID.getProbability(0) > 0.8 && myPID.isExtrap()==1) 
+<br>printf("got a pi- with 80% confidence, probability caculated based on the extrapolation\n");
+<br> <font color=green> // an extrapolation is a resonable extend of the fitting from clean region to overlapping region </font>
+<br>
+<br>
+<br>
+
+<hr>
+
+<h2><a name="FAQ">FAQ</h2>
+
+<li><a href="#howToCut">I wanna do a PID probability cut, how do I know my cut is tight or loose?</a>
+<li><a href="#howToDraw">How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</a>
+<br>
+<br>
+<br>
+<br><a name="howToCut"><img src="hand-right.gif"> <font size=4 color=#EE1110>I wanna do a PID probability cut, how do I know my cut is tight or loose?</font></p>
+
+<br>The two plots below will answer the question.(plot are based on result from NHitsDca channel collection).
+<br>
+<br>
+<center><img src="globalRatioOfSurvival.gif"></a></center>
+<br>
+<center><img src="primaryRatioOfSurvival.gif"></a></center>
+
+
+<p> <font size=5 color=#EE1110><a name="howToDraw"><img src="hand-right.gif"> How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</font></p>
 <br><font color=green>In your source code, the following lines of code will do the job. Later version will make it work at the command line.</font>
 <br>
 <br><font color=red>in your header file</font>
@@ -150,15 +270,15 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 <br>#include "TF1.h"
 <br>#include "TFile.h"
 <br>#include "TCanvas.h"
-<br>#include "StPidAmpMaker/Include/BetheBlock.hh"
-<br>#include "StPidAmpMaker/StPidAmpNetOut.h"
+<br>#include "StPidAmpMaker/Include/BetheBloch.hh" <font color=green>//include path will change later</font>
+<br>#include "StPidAmpMaker/StPidAmpNetOut.h"     <font color=green> //include path will change later</font>
 
-<br>double ( *funcBandPointer) (double *, double *); //declare a funtion pointer.
+<br>double ( *funcBandPointer) (double *, double *);<font color=green> //declare a funtion pointer.</font>
 
 
-<br><font color=red>in your source file</font>
+<br><font color=red>in your implementation file</font>
 
-<br> TFile f("nhitsBin_0_45_ptBin_0_Infinity_BGBands.root","READ","nhitsBin_0_45_ptBin_0_Infinity_BGBands.root"); <font color=green>//open a file produced by StPidAmpMaker.</font>
+<br> TFile f("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root","READ","nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root"); <font color=green>//open a file produced by StPidAmpMaker.</font>
 
 <br> StPidAmpNetOut*  electronNetOut=(StPidAmpNetOut *)f.Get("e-");<font color=green> //read in band parameters for electron band.</font>
 
@@ -168,7 +288,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
 <br> for ( int i=0; i<NParameters; i++)
 
-<br>      electronBandCenter->SetParameter(i,(electronNetOut->GetBandParArray()).At(i)); <font color=green>//set parameters.</font>
+<br>      electronBandCenter->SetParameter(i,(electronNetOut->GetBandParArray())->At(i)); <font color=green>//set parameters.</font>
 
 
 
@@ -178,7 +298,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
 <br> electronBandCenter->Draw("L");<font color=green>//done.</font>
 
-<br><font color=red> what if I want to draw a pure dedx~beta*gamma curve?</font>
+<br><font color=red> what if I want to draw a pure de/dx~beta*gamma curve?</font>
 <br><font color=green>Just replace the line </font>
 <br>StPidAmpNetOut*  electronNetOut=(StPidAmpNetOut *)f.Get("e-");
 <br><font color=green>by</font>
@@ -186,40 +306,13 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 <br><font color=green>in the example above.</font>
 <br>
 
-<p> <font size=5 color=#EE1110>3. How to identify a track in StEvent?</font></p>
-
-<br><font color=green> In your macro, do not forget : </font>
-<br>gSystem->Load("StEvent"); 
-<br>gSystem->Load("StEventUtilities"); 
-<br><font color=green> and load some other libraries as well.</font>
-<br>
-<br>
-<br> <font color=green>In your source code:</font>
-<br>
-
-<br>#include "StEventTypes.h"
-
-<br>#include "StuProbabilityPidAlgorithm.h"
-<br>
-<br><font color=green>//put the following line some where before your event loop:</font>
-<br>StuProbabilityPidAlgorithm::readInputFile("nhitsBin_0_45_ptBin_0_Inf_Amp.root");<font color=green>//read in the parameters.</font>
-<br>
-<br><font color=green>//inside your track loop: </font>
-<br>StuProbabilityPidAlgorithm ampPid;<font color=green>   //define a functor.</font>
-<br>StParticleDefinition* def=theTrack->pidTraits(ampPid);<font color=green>  //invoke functor. </font>
-<br> if( def->name()=="e-" && ampPid.getProbability(0) > 0.9 ) 
-<br>printf("Got an electron at 90% confidence!\n");  
-<br>if( def->name()=="pi-" && ampPid.getProbability(0) > 0.8 && ampPid.isExtrap()==1) 
-<br>printf("got a pi- with 80% confidence, probability caculated based on the extrapolation\n");//<font color=green>an extrapolation is a resonable extend of the fitting from clear region to unclear region </font>
-<br>
-<br>
 <br>
 
 <hr>
   <address><a href="mailto:aihong@cnr.physics.kent.gov">Aihong Tang</a></address>
 <!-- Created: Mon Feb 14 12:52:08 EST 2000 -->
 <!-- hhmts start -->
-Last modified: Thu Mar  9 10:01:57 EST 2000
+Last modified: Fri May  5 16:33:51 EDT 2000
 <!-- hhmts end -->
   </body>
 </html>
