@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $
+// $Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.30  1999/02/27 21:18:36  fine
+// Minor fix for Maker timers
+//
 // Revision 1.29  1999/02/27 20:13:45  fine
 // Total job time and relative time have been introduced
 //
@@ -282,7 +285,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -449,7 +452,10 @@ Int_t StChain::Init()
         makerset = new St_DataSet(name);
         maker->SetDataSet(makerset);
       }
-      if ( maker->Init()) return kStErr;
+      if ( maker->Init()) {
+         maker->StopTimer();
+         return kStErr;
+      }
       maker->StopTimer();
      // Add the Maker histograms in the Maker histograms list
       if (objlast) objfirst = gDirectory->GetList()->After(objlast);
@@ -498,7 +504,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
