@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.2 2001/01/26 14:48:41 porter Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.3 2001/04/23 14:01:58 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.3  2001/04/23 14:01:58  porter
+ * fixed bug in messages
+ *
  * Revision 1.2  2001/01/26 14:48:41  porter
  * fixed tag so verbose output works correctly
  *
@@ -77,8 +80,7 @@ StDbWrappedMessenger::printMessage(const char* message, const char* levelString,
   ostrstream mtxt;  
   mtxt<<className<<"::"<<methodName<<" line="<<lineNumber<<" "<<message<<ends;
   mMessenger->Message(mtxt.str(),levelString);
-  delete mtxt.str();
-
+  mtxt.freeze(0);
 }
 
 
