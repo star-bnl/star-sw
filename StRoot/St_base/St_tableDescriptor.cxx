@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.7 2000/01/24 03:55:47 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.8 2000/01/24 04:02:53 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.8  2000/01/24 04:02:53  fine
+// CreateLeafList(): some extra protection
+//
 // Revision 1.7  2000/01/24 03:55:47  fine
 // new nethod CreateLeafList() to create text descriptor compatible with TBranch ctor
 //
@@ -87,6 +90,11 @@ TString St_tableDescriptor::CreateLeafList() const
   Int_t maxRows = GetNumberOfColumns();
   TString string;
   for (Int_t i=0;i<maxRows;i++){
+    if (GetDimensions()) {
+       string = ""; 
+       Error("CreateLeafList()","Can not create leaflist for arrays");
+       break;
+    }
     if (i) string += ":";
     string += GetColumnName(i);
     string += "/";
