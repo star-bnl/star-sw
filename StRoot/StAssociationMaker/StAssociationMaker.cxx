@@ -68,7 +68,7 @@ using std::vector;
 
 #include "StEventMaker/StEventMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"
-bool compHit::operator()(const StTpcHit* h1, const StTpcHit* h2) {
+bool compHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
     if (h1->position().x() != h2->position().x()) {
 	return h1->position().x() < h2->position().x();
 bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) const {
@@ -80,7 +80,7 @@ bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) con
     }
     else return h1->position().z() < h2->position().z();
     
-bool compTrack::operator()(const StGlobalTrack* t1, const StGlobalTrack* t2) {
+}
     // return t1->startVertex()->position().x() < t2->startVertex()->position().x();
     
     // I was using the x position of the start vertex before, but somehow, when you use
@@ -291,7 +291,6 @@ Int_t StAssociationMaker::Finish()
     typedef StTpcHitIterator StVecPtrTpcHitIterator;// needed because dev version was lacking it!! Yuri is fixing it
 #endif
     
-    StVecPtrTpcHitIterator recHitIter;
 
 
     StTpcHit*  keyHit;    // key on the reconstructed Tpc Hit
@@ -346,13 +345,15 @@ Int_t StAssociationMaker::Finish()
 	// Clear the candidate vector
 	candidates.clear();
 	const StVecPtrTpcHit& recTpcHits = recTrack->tpcHits();
-// 	for (int i=0; i<recTpcHits.size(); i++) { // Had to put this in here because we don't have 
-// 	  keyHit = recTpcHits[i];                 // a const iterator for the hits of a track.  HP complains
-	for (recHitIter  = recTpcHits.begin();
-	     recHitIter != recTpcHits.end();
-	     recHitIter++) { // Loop over the hits of the track
+// 	StVecPtrTpcHitIterator recHitIter;
+
+	for (int i=0; i<recTpcHits.size(); i++) { // Had to put this in here because we don't have 
+	  keyHit = recTpcHits[i];                 // a const iterator for the hits of a track.  HP complains
+// 	for (recHitIter  = recTpcHits.begin();
+// 	     recHitIter != recTpcHits.end();
+// 	     recHitIter++) { // Loop over the hits of the track
 	// Loop over the East FTPC hits of the track
-	    keyHit = *recHitIter;
+// 	    keyHit = *recHitIter;
 	    bounds = mTpcHitMap->equal_range(keyHit);
 		
 	    
