@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.94 2004/08/05 16:40:12 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.95 2004/11/24 04:09:42 jeromel Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.95  2004/11/24 04:09:42  jeromel
+// Loss of one GtHash object per call fixed
+//
 // Revision 1.94  2004/08/05 16:40:12  potekhin
 // Propagating Pythia event characterization data
 //
@@ -1109,11 +1112,12 @@ TDataSet *St_geant_Maker::Work()
       node = newVolume;
     };
   
-  //  fVolume=volume;
-  //  gGeometry->GetListOfNodes()->Add(volume);
-  fVolume=node;
-  gGeometry->GetListOfNodes()->Add(node);
-  return GetVolume();
+    //  fVolume=volume;
+    //  gGeometry->GetListOfNodes()->Add(volume);
+    delete H;
+    fVolume=node;
+    gGeometry->GetListOfNodes()->Add(node);
+    return GetVolume();
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Mark(TVolume *topvol) {
