@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.5 1998/12/30 22:30:17 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.6 1999/01/30 04:24:21 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.6  1999/01/30 04:24:21  fine
+// St_Table: Print memory leak fixed
+//
 // Revision 1.5  1998/12/30 22:30:17  fine
 // St_Table::PrintHrader method has been introduced
 //
@@ -102,14 +105,8 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
    counter++;
    if(!(counter%1000))cout<<"St_NodePosition count="<<counter<<" name="<<node->GetName()<<endl;
  
-   if (strlen(matrixname)) fMatrix = gGeometry->GetRotMatrix(matrixname);
-   else {
-     fMatrix  = gGeometry->GetRotMatrix("Identity");
-     if (!fMatrix) {
-        new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-        fMatrix  = gGeometry->GetRotMatrix("Identity");
-     }
-   }
+   if (matrixname && strlen(matrixname)) fMatrix = gGeometry->GetRotMatrix(matrixname);
+   if (!fMatrix) fMatrix = St_Node::GetIdentity();
 }
  
  
@@ -126,15 +123,8 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*    matrix  is the pointer to the rotation matrix
 //*-*
 //*-*    This new node is added into the list of sons of the current node
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
-   if(!fMatrix) {
-     fMatrix =gGeometry->GetRotMatrix("Identity");
-     if (!fMatrix) {
-        new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-        fMatrix  = gGeometry->GetRotMatrix("Identity");
-     }
-   }
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
+   if (!fMatrix) fMatrix = St_Node::GetIdentity();
 }
   
 //______________________________________________________________________________
