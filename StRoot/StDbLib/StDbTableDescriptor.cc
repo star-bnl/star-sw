@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.13 2000/03/01 20:56:16 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.14 2000/03/06 17:11:49 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.14  2000/03/06 17:11:49  porter
+ * - WriteDb(table) returns true if no data is in table
+ * - fixed memory leak introduced in 2/18/00 update.
+ * - modified descriptor algorythm for OnlRunDescriptor.
+ *
  * Revision 1.13  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -297,9 +302,9 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
   fillLengths(length,i);
   int space = 4-(offsetToNextEmptyByte-offsetToLast4Bytes);
 
-  int j;
+  int j,jj;
   StTypeE type = mcols[i].type;
-
+  j=0;
   mcols[i].size = getSize(mcols[i].type);
   int k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(j));
   for(j=0;j<k;j++)mcols[i].size*=mcols[i].dimensionlen[j];
@@ -316,22 +321,29 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 
      mcols[i].offset=offsetToNextEmptyByte;
      offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-     j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
-     offsetToLast4Bytes = offsetToLast4Bytes+j;//+4;
+     jj=mcols[i].offset+mcols[i].size-offsetToLast4Bytes;
+     if(jj>1)  
+     j = 4* ((int) floor ((float) (jj-1)/4 ));
+     // j= number of bytes (in 4s) past last offset
+      if(j)
+      offsetToLast4Bytes = offsetToLast4Bytes+j;
 
   } else if( (space>=2) && (type == Stshort || type == Stushort) ){
 
       mcols[i].offset=offsetToLast4Bytes+2;
       j = 4* ((int) floor ((float) (mcols[i].size-2-1)/4 ));    // note the 2
       offsetToNextEmptyByte=mcols[i].offset+mcols[i].size;
-      offsetToLast4Bytes = offsetToLast4Bytes+j;//+4;  // 4 is for the 1st "row"
+     jj=mcols[i].offset+mcols[i].size-offsetToLast4Bytes;
+     if(jj>1)  
+     j = 4* ((int) floor ((float) (jj-1)/4 ));
+     // j= number of bytes (in 4s) past last offset
+      if(j)
+      offsetToLast4Bytes = offsetToLast4Bytes+j;
 
   } else {
 
 
     if(type==Stdouble && lastType != Stdouble && padsize < 8){
-      //      offsetToLast4Bytes+=4;
-      //      offsetToNextEmptyByte+=4;
       offsetToLast4Bytes+=padsize;
       offsetToNextEmptyByte+=padsize;
     }

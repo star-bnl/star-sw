@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.20 2000/03/01 20:56:16 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.21 2000/03/06 17:11:49 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.21  2000/03/06 17:11:49  porter
+ * - WriteDb(table) returns true if no data is in table
+ * - fixed memory leak introduced in 2/18/00 update.
+ * - modified descriptor algorythm for OnlRunDescriptor.
+ *
  * Revision 1.20  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -96,6 +101,7 @@ mportNumber = portNumber;
 mysqlAccessor::~mysqlAccessor(){
 
 if(mdbName) delete [] mdbName;
+if(mserverName) delete [] mserverName;
 
 }
 
@@ -331,9 +337,14 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     table->setEndTime(getUnixTime(eTime));
   } else {
     table->setEndTime(getEndTime()); // simply use dec-31st 2037, 11:59:59
-    table->setEndTime(getEndDateTime()); // simply use dec-31st 2037, 11:59:59
+    eTime=getEndDateTime();
+    table->setEndTime(eTime); // simply use dec-31st 2037, 11:59:59
   }
 
+  if(eTime) {
+     delete [] eTime;
+     eTime=0;
+  }
   unsigned int t1,t2;
   t1=t2=0;
   int countRows = 0;
@@ -482,6 +493,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
                break;
             }
           }
+     buff.Raz();
      }
 
      Db.Release(); buff.Raz();
@@ -552,6 +564,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   if(eTime)delete [] eTime;
   if(rTime)delete [] rTime;
   if(elementID) delete [] elementID;
+  buff.Raz();
   Db.Release();
 
   return 1; 
@@ -640,7 +653,9 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
 
     if(!table->hasData() && !table->IsStoreMode()){
       table->commitData(); // prevents rollback on this table
-      return 0;
+      if(!StDbManager::Instance()->IsQuiet()) 
+         cout<<"WriteDb::Info no data in table="<<table->getMyName()<<". No write done"<<endl;
+      return 1;
     }
   
   StDbNodeInfo currentNode;
