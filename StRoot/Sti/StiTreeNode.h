@@ -1,0 +1,54 @@
+#ifndef StiTreeNode_H
+#define StiTreeNode_H 1
+#include <iostream.h>
+#include <stdlib.h>
+#include "TObject.h"
+
+class StiTreeNode : public TObject
+{
+ public:
+  //
+  // Returns the child <code>StiTreeNode</code> at index 
+  // <code>childIndex</code>.
+  ///
+  virtual StiTreeNode * getChildAt(int childIndex)=0;
+  
+  //
+  // Returns the number of children <code>StiTreeNode</code>s the receiver
+  // contains.
+  ///
+  virtual int getChildCount()=0;
+  
+  //
+  // Returns the parent <code>StiTreeNode</code> of the receiver.
+  ///
+  virtual StiTreeNode * getParent()=0;
+  
+  //
+  // Returns the index of <code>node</code> in the receivers children.
+  // If the receiver does not contain <code>node</code>, -1 will be
+  // returned.
+  ///
+  virtual int getIndex(StiTreeNode * node)=0;
+  
+  //
+  // Returns true if the receiver allows children.
+  ///
+  virtual bool getAllowsChildren()=0;
+  
+  //
+  // Returns true if the receiver is a leaf.
+  ///
+  virtual bool isLeaf()=0;
+
+
+  virtual void setParent(StiTreeNode * newParent)=0;
+
+  ClassDef(StiTreeNode,1)
+  
+};
+
+#endif
+
+
+
