@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.32 2001/05/17 22:46:37 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.33 2001/07/17 22:21:50 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.33  2001/07/17 22:21:50  ullrich
+ * Use B from event summary to set helicity of tracks.
+ *
  * Revision 2.32  2001/05/17 22:46:37  ullrich
  * Removed loading of event summary params.
  *
@@ -149,7 +152,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.32 2001/05/17 22:46:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.33 2001/07/17 22:21:50 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -386,7 +389,12 @@ StEventMaker::makeEvent()
 	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
     if (dstEventSummary)
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary));
-        
+    else {
+        gMessMgr->Error() << "StEventMaker::makeEvent(): no event summary and hence no magnetic field info. Bad event.";
+	return kStErr;
+    }
+	
+    
     //
     //  Setup the software monitors.
     //
@@ -429,7 +437,8 @@ StEventMaker::makeEvent()
     StTrackDetectorInfo        *info;
     StTrackNode                *node;
     unsigned int               id, k, nfailed;
-    int                        i;
+    int                        i, h;
+    int signOfField = mCurrentEvent->summary()->magneticField() < 0 ? -1 : 1;
     
     //
     //  Create global tracks.
@@ -448,6 +457,8 @@ StEventMaker::makeEvent()
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
+	h =  gtrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
+	gtrack->geometry()->setHelicity(h);
         info = new StTrackDetectorInfo(dstGlobalTracks[i]);
         gtrack->setDetectorInfo(info);
         detectorInfo.push_back(info);
@@ -496,6 +507,8 @@ StEventMaker::makeEvent()
         vecPrimaryTracks[dstPrimaryTracks[i].id]   = ptrack;
         vecPrimaryVertexId[dstPrimaryTracks[i].id] = id;
         ptrack->setGeometry(new StHelixModel(dstPrimaryTracks[i]));
+	h =  ptrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
+	ptrack->geometry()->setHelicity(h);
         id = ptrack->key();
         if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
             info = vecGlobalTracks[id]->detectorInfo();
@@ -544,6 +557,8 @@ StEventMaker::makeEvent()
 	ttrack = new StTptTrack(dstTptTracks[i]);
 	vecTptTracks[dstTptTracks[i].id] = ttrack;
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
+	h =  ttrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
+	ttrack->geometry()->setHelicity(h);
 	id = ttrack->key();
 	//
 	//   Tpt tracks come in late. Good chance that there is already
