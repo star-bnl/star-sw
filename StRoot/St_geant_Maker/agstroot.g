@@ -3,7 +3,7 @@
 *-- Author :    Pavel Nevski   25/11/97
 ***************************************************************************
 *                                                                         *
-            Subroutine   A G S T R O O T (Source,Destin)
+            Subroutine   A G S T R O O T 
 *                                                                         *
 * Description: Given a path, dump the whole structure below into STAF     *
 *     request a la UNIX: sys/bank - very combersome for the moment :      *
@@ -60,10 +60,12 @@ C     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 I,J,L,K,M,N,Ia,Lc,Lp,Mj,NDDD,NCCC
   Character     Csys*4,Table*10,Cbank*4
   Character*80  Cpath,Cdest,Spec,format
-  Character*(*) Source,Destin
+  Character*1 Source,Destin
   EQUIVALENCE   (L,Lpar)
   common /agcstaffor/ nddd,nccc,format
 *
+  Source = '*';
+  Destin = '*';
 * reduce to the standard path and dest:
   Iprin=Idebug;         Cpath=Source;
   if (Cpath(1:1)!='/')

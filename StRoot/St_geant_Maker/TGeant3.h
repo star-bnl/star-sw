@@ -638,7 +638,7 @@ extern "C" void type_of_call agxuser();
 extern "C" void type_of_call agxinit();
 extern "C" void type_of_call geometry();
 extern "C" Int_t  type_of_call agvolume(St_Node**,Float_t**,Float_t**,Float_t**);
-extern "C" Int_t  type_of_call agstroot(Char_t*,Char_t*);
+extern "C" Int_t  type_of_call agstroot();
 extern "C" void type_of_call kuexel   (const Char_t*,Int_t);
 extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
 extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
