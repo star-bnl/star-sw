@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.1 2000/06/15 20:04:54 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.2 2000/07/16 22:32:23 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.2  2000/07/16 22:32:23  caines
+// Now also saves RAW data
+//
 // Revision 1.1  2000/06/15 20:04:54  caines
 // Initial versions of sequence adjusting codes
 //
@@ -8,7 +11,7 @@
 #define STAR_StSvtSeqAdj
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StSvtSeqAdj base class                                     //
+// StSvtSeqAdj base class                                               //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -25,6 +28,8 @@ class StSvtData;
 class StSvtHybridData;
 class StSvtInverseProducts;
 class StSvtPedSub;
+class TObjectSet;
+class StSvtHybridCollection;
 
 
 class StSvtSeqAdjMaker : public StMaker
@@ -39,7 +44,8 @@ class StSvtSeqAdjMaker : public StMaker
   virtual Int_t Finish();
 
 
-  Int_t GetSvtEvent();
+  Int_t SetSvtRawEvent();
+  Int_t GetSvtToBeAdjEvent();
   Int_t SetInputFiles(char* table, char* PedFile,int PedOffset);
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistograms(int index,int Anode);
@@ -49,11 +55,14 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t AdjustSequences2(int Anode); //adjust sequences base on LowInvProd
     
  protected:
-  StSvtData* mSvtEvent;      //!
-  StSvtHybridData* mHybridData ;           //!
-  StSvtInverseProducts* mInvProd;  //!
-  StSvtPedSub* mSvtPedSub;   //!
-  StSequence* tempSeq1; //!
+  St_ObjectSet* mRawEventSet;             //!
+  StSvtData* mSvtToBeAdjEvent;            //!
+  StSvtHybridCollection* mSvtRawEvent;    //!
+  StSvtHybridData* mHybridRawData ;       //!
+  StSvtHybridData* mHybridToBeAdjData ;   //!
+  StSvtInverseProducts* mInvProd;         //!
+  StSvtPedSub* mSvtPedSub;                //!
+  StSequence* tempSeq1;                   //!
   char* mPedFile;
 
   TH1D** mInvProdSeqAdj;  //!
@@ -68,7 +77,6 @@ class StSvtSeqAdjMaker : public StMaker
   int mTotalNumberOfHybrids;
   int mPedOffSet;
 
- 
  private:
 
   ClassDef(StSvtSeqAdjMaker,1)   //virtual base class for Makers
