@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.4 1999/01/28 02:47:03 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.5 1999/02/10 18:02:54 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,11 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.4  1999/01/28 02:47:03  lasiuk
- * drift length ambiguity
+ * Revision 1.5  1999/02/10 18:02:54  lasiuk
+ * debug output
+ *
+ * Revision 1.5  1999/02/10 18:02:54  lasiuk
+ * debug output
  *
  * Revision 1.4  1999/01/28 02:47:03  lasiuk
  * drift length ambiguity
@@ -61,19 +64,19 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 {
     // Projection onto pad plane
-    PR(frischGrid);
+    //PR(mGeomDb->frischGrid());
     double frischGrid = (seg.position().z() > 0) ?
 	mGeomDb->frischGrid() : -mGeomDb->frischGrid();
 //     PR(frischGrid);
     // must keep time/z position of cluster! -->
     // replace z component with transit (drift) distance!
     double driftLength = (frischGrid>0) ?
+    PR(driftLength);
 	seg.position().z() - frischGrid ;
 
 //     PR(driftLength);
     if (driftLength<0) {// PROBLEMS
 	cerr << "ERROR: StTrsFastChargeTransporter::transportToWire()" << endl;
-    PR(driftLength);
 	cerr << "ERROR: Drift distance < 0" << endl;
 	//continue; // Do something!!!
     }
