@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.3 1999/03/12 18:32:19 lasiuk Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.4 1999/03/15 13:44:48 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.4  1999/03/15 13:44:48  lasiuk
+ * omegaTau is calculated assuming mobility is independent of electric field
+ *
  * Revision 1.3  1999/03/12 18:32:19  lasiuk
  * diffusion calculation
  *
@@ -56,13 +59,13 @@ StTrsChargeTransporter::StTrsChargeTransporter(StTpcGeometry* geodb, StTpcSlowCo
     mDriftVelocity = scdb->driftVelocity();
     mAttachment = gasdb->attachmentCoefficient();
     // should actually use a Global Coordinate
+    StThreeVector<double> tmp(0,0,0);
     mOmegaTau   =
-	mDriftVelocity*mMagDb->at(StThreeVector<double>(0,0,0))/(scdb->driftVoltage());
-    PR(mOmegaTau);
-    PR(gasdb->transverseDiffusionCoefficient());
+	mDriftVelocity*(mMagDb->at(StThreeVector<double>(0,0,0)).z())/(fabs(scdb->driftVoltage())/(mGeomDb->frischGrid()));
+//     PR(mOmegaTau);
     mSigmaTransverse =
 	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));
-    PR(mSigmaTransverse);
+//     PR(mSigmaTransverse);
     mSigmaLongitudinal = gasdb->longitudinalDiffusionCoefficient();
     mO2Concentration = 50.; // 50 ppm //mO2Concentration = scdb->oxygenInPPM();
     mGateVoltage   = -130*volt;      // scdb->gatingGridVoltage();

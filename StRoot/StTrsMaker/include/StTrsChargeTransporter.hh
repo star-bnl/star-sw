@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.hh,v 1.1 1998/11/10 17:12:09 fisyak Exp $
+ * $Id: StTrsChargeTransporter.hh,v 1.2 1999/03/15 13:45:08 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.hh,v $
+ * Revision 1.2  1999/03/15 13:45:08  lasiuk
+ * omegaTau is calculated assuming mobility is independent of electric field
+ *
  * Revision 1.1  1998/11/10 17:12:09  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -91,6 +94,7 @@ protected:
     double mTransparency;
     double mSigmaTransverse;
     double mSigmaLongitudinal;
+    double mOmegaTau;
     double mDriftVelocity;
     double mO2Concentration; // should be from SC
 
