@@ -7,17 +7,10 @@
 #include "fill_dst_run_summary.h"
 
 #define  PI_MASS     0.139569
-#define  PT_MIN      0.0
-#define  PT_MAX      1.5
-#define  MT_MIN      0.
-#define  MT_MAX      1.5
-#define  ETA_MIN    -2.0
-#define  ETA_MAX     2.0
 #define  PHI_MIN     0.0
 #define  PHI_MAX   360.0 
 #define  NBINS      30
 #define  NRANGE      6
-#define  NPHIRANGE   8
 #define  NETARANGE   3
 
 #ifdef DEBUG
@@ -25,7 +18,9 @@
 #endif
 #define DEBUG 0
 
+
 long  type_of_call fill_dst_run_summary_ (
+  TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
   TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
   TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dst_eventheader,
   TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary,
@@ -56,6 +51,8 @@ long  type_of_call fill_dst_run_summary_ (
    *:             dst_track_h          - Header Structure for dst_track
    *:             dst_vertex           - DST vertex table
    *:             dst_vertex_h         - Header Structure for dst_vertex 
+   *:             dst_summaryparam     - DST summary parameter table 
+   *:             dst_summary_param_h  - Header Structure for dst_summaryparam
    *:       INOUT:
    *:             dst_runsummary       - DST run summary table 
    *:             dst_run_summary_h    - Header Structure for dst_runsummary
@@ -74,6 +71,11 @@ long  type_of_call fill_dst_run_summary_ (
    *:                                       misunderstanding. The values of
    *:                                       eta_bin, pt_bin & mt_bins are
    *:                                       filled in an initialization  kumac.
+   *:      Nov 18, 1998       Dhammika W.   Add dst_summary_param table.
+   *:                                       Load kinematic ranges from
+   *:                                       dst_summary_param table into 
+   *:                                       dst_run_summary table at the
+   *:                                       very end of the event loop.
    *:
    *:
    *:>--------------------------------------------------------------------
@@ -86,8 +88,8 @@ long  type_of_call fill_dst_run_summary_ (
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
-  /* double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS];  */
-  /* float   pt_binsize, mt_binsize, eta_binsize, phi_binsize;    */
+  /* double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS]; */  
+  /* float   pt_binsize, mt_binsize, eta_binsize, phi_binsize;   */  
   float   dmt, deta1, deta2, mtweight1, mtweight2;
   float   pt, mt, eta ,phi, theta;
   float   n_events_good, mean, stddev;
@@ -102,25 +104,20 @@ long  type_of_call fill_dst_run_summary_ (
   if (first_event) {
     dst_run_summary_h->nok = 1;  
     dst_runsummary->prod_run          = 0;
-    /* dst_runsummary->version[0]        = "u"; */
     dst_runsummary->n_events_tot      = 0;
     dst_runsummary->n_events_good     = 0;
     for (i=0; i<2; i++) {
       dst_runsummary->date[i]         = 0;
       dst_runsummary->time[i]         = 0;
-    }
+    } 
     dst_runsummary->cpu_total         = 0;
     
-    /* Commented out initializing eta_bins, pt_bins & mt_bins. They represents
-     * the ranges in eta, pt & mt and n_phi_bins are filled in an initialiation
-     * kumac.  DSW  Nov 05, 1998.
-     */
-    /* for (i=0; i<6; i++) {                         */
-    /*   dst_runsummary->eta_bins[i]     = 0;        */
-    /*   dst_runsummary->pt_bins[i]      = 0;        */
-    /*   dst_runsummary->mt_bins[i]      = 0;        */
-    /*  }                                            */
-    /* dst_runsummary->n_phi_bins        = 0;        */
+    for (i=0; i<6; i++) {                         
+      dst_runsummary->eta_bins[i]     = 0;        
+      dst_runsummary->pt_bins[i]      = 0;        
+      dst_runsummary->mt_bins[i]      = 0;        
+    }                                            
+    dst_runsummary->n_phi_bins        = 0;
     for (i=0; i<2; i++) {
       dst_runsummary->mean_eta[i]     = 0;
       dst_runsummary->mean_pt[i]      = 0;
@@ -211,6 +208,17 @@ long  type_of_call fill_dst_run_summary_ (
   dst_runsummary->num_vert[0]      = mean; 
   dst_runsummary->num_vert[1]      = sqrt(stddev);
   
+  /* 
+     Load kinematic ranges from dst_summaryparam into dst_runsummary.
+     DSW  Nov. 18 , 1998
+   */
+  for (i=0; i<6; i++) {                         
+    dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
+    dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
+    dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
+  }                                            
+  dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
+
  NextEvent:
   return STAFCV_OK;
 }  /*  End of fill_dst_run_summary  */

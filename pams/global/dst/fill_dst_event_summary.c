@@ -6,19 +6,12 @@
 #include "fill_dst_event_summary.h"
 
 #define  PI_MASS     0.139569
-#define  PT_MIN      0.
-#define  PT_MAX      1.5
-#define  MT_MIN      0.
-#define  MT_MAX      1.5
-#define  ETA_MIN    -4.0
-#define  ETA_MAX     4.0
 #define  PHI_MIN     0.0
 #define  PHI_MAX   360.0 
 #define  NBINS      50
 #define  NRANGE      5
 #define  NPHIBINS   40
 #define  NETARANGE   3
-#define  NPHIRANGE   8
 
 #ifdef DEBUG
 #undef DEBUG
@@ -31,8 +24,8 @@ float  pt_min, pt_max, mt_min, mt_max, eta_min, eta_max;
 float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop);
 
 long  type_of_call fill_dst_event_summary_ (
+  TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
   TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
-  TABLE_HEAD_ST  *dst_run_summary_h,   DST_RUN_SUMMARY_ST    *dst_runsummary,
   TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dst_eventheader,
   TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
   TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
@@ -59,8 +52,8 @@ long  type_of_call fill_dst_event_summary_ (
    *:             dst_track_h           - Header Structure for dst_track
    *:             dst_vertex            - DST vertex table
    *:             dst_vertex_h          - Header Structure for dst_vertex 
-   *:             dst_runsummary        - DST run summary table 
-   *:             dst_run_summary_h     - Header Structure for dst_runsummary
+   *:             dst_summaryparam      - DST summary parameter table 
+   *:             dst_summary_param_h   - Header Structure for dst_summaryparam
    *:       INOUT:
    *:         OUT:
    *:             dst_eventsummary      - DST event summary table 
@@ -80,14 +73,15 @@ long  type_of_call fill_dst_event_summary_ (
    *:      Sep 08, 1998       Dhammika W.   Fixed the check on global track
    *:                                       iflag to make it work properly
    *:                                       with fastdst chain.
-   *:      Nov 05, 1998       Dhammika W.   Modified to allow user to define 
+   *:      Nov 18, 1998       Dhammika W.   Add dst_summary_param table.
+   *:                                       Modified to allow user to define 
    *:                                       the ranges in pt, mt & eta via
-   *:                                       dst_run_summary table. Number of 
+   *:                                       dst_summary_param table. Number of 
    *:                                       ranges(NRANGE) is fixed and 
    *:                                       hardwired. User cannot change this.
    *:                                       #of ranges in phi (asymuth of the
    *:                                       p_T vector) is set via
-   *:                                       dst_run_summary->n_phi_bins.
+   *:                                       dst_summaryparam->n_phi_bins.
    *:
    *:>-------------------------------------------------------------------- 
    */
@@ -146,7 +140,7 @@ long  type_of_call fill_dst_event_summary_ (
   for (irange=0; irange<NETARANGE; irange++) {
     dst_eventsummary->T_eta_bins[irange]      = 0;
   }
-  for (irange=0; irange<NPHIRANGE; irange++) {
+  for (irange=0; irange<nphirange; irange++) {
     dst_eventsummary->mult_phi[irange]        = 0;
     dst_eventsummary->energy_emc_phi[irange]  = 0;
   }
@@ -172,17 +166,18 @@ long  type_of_call fill_dst_event_summary_ (
   memset (&eta2_mt_histo, 0, sizeof(double)*NBINS);
   memset (&eta3_mt_histo, 0, sizeof(double)*NBINS);
   /* 
-     Get the min/max values for pt, mt & eta ranges from dst_runsummary table. 
+     Get the min/max values for pt, mt & eta ranges from dst_summaryparam 
+     table. 
      This allows user(s) to set desired min/max values for pt, mt & eta 
      multiplicity bin widths & ranges. 
      DSW -- Nov. 10, 1998 
   */
-  pt_min = dst_runsummary->pt_bins[0];
-  pt_max = dst_runsummary->pt_bins[5];
-  mt_min = dst_runsummary->mt_bins[0];
-  mt_max = dst_runsummary->mt_bins[5];
-  eta_min = dst_runsummary->eta_bins[0];
-  eta_max = dst_runsummary->eta_bins[5];
+  pt_min  = dst_summaryparam->pt_bins[0];
+  pt_max  = dst_summaryparam->pt_bins[5];
+  mt_min  = dst_summaryparam->mt_bins[0];
+  mt_max  = dst_summaryparam->mt_bins[5];
+  eta_min = dst_summaryparam->eta_bins[0];
+  eta_max = dst_summaryparam->eta_bins[5];
 
   /* Claculate  histogram bin size */
   pt_binsize  = (pt_max  - pt_min )/NBINS;
@@ -198,7 +193,7 @@ long  type_of_call fill_dst_event_summary_ (
   mtweight2   = 1./(deta2*dmt);
   
   /* Get double precision pi */
-  pi = acos(-1.);
+  pi    = acos(-1.);
   piov2 = pi/2;
   
   /* Initialize global track counters & sum variables  */
@@ -235,7 +230,7 @@ long  type_of_call fill_dst_event_summary_ (
     if (0 <= iphibin && iphibin<NPHIBINS)  
       phi_histo[iphibin]++;  /* phi histogram   */
     /*  weight the mt bin by  1/(mt*dy*dmt)     */
-    if (0 <= imtbin && imtbin<NBINS) {
+    if (0<=imtbin && imtbin<NBINS) {
       /* dN/mt*dy*dmt histogram */
       mt_histo[imtbin] += mtweight1/mt; 
       /*  Fill mt historgrams for three eta bins  */
@@ -255,14 +250,14 @@ long  type_of_call fill_dst_event_summary_ (
   
   /* Fill pt, mt, eta  range multiplicities  */
   /* Modified to allow user to define the ranges in pt, mt & eta via     */
-  /* dst_run_summary table --  DSW  Nov. 05, 1998                        */
+  /* dst_summaryparam table --  DSW  Nov. 18, 1998                       */
   /* Number of ranges(NRANGE) is fixed and hardwired. User cannot change */
   /* this.                                                               */
   for (irange=0; irange<NRANGE; irange++) { /* begin  looping over ranges  */
     /* pt bins */
-    /* get the ranges from dst_run_summary table */
-    minval = dst_runsummary->pt_bins[irange];
-    maxval = dst_runsummary->pt_bins[irange+1];
+    /* get the ranges from dst_summaryparam table */
+    minval = dst_summaryparam->pt_bins[irange];
+    maxval = dst_summaryparam->pt_bins[irange+1];
     /* determine the min & max bin numbers */
     minbin = (int) ((minval - pt_min)/pt_binsize);
     maxbin = (int) ((maxval - pt_min)/pt_binsize);
@@ -275,9 +270,9 @@ long  type_of_call fill_dst_event_summary_ (
     }
 
     /* Fill inverse slope for mt bins   */
-    /* get the ranges from dst_run_summary table */
-    minval = dst_runsummary->mt_bins[irange];
-    maxval = dst_runsummary->mt_bins[irange+1];
+    /* get the ranges from dst_summaryparam table */
+    minval = dst_summaryparam->mt_bins[irange];
+    maxval = dst_summaryparam->mt_bins[irange+1];
     /* determine the min & max bin numbers */
     minbin = (int) ((minval - mt_min)/mt_binsize);
     maxbin = (int) ((maxval - mt_min)/mt_binsize);
@@ -288,9 +283,9 @@ long  type_of_call fill_dst_event_summary_ (
       mt_inverse_slope(mt_histo, minbin, maxbin); /* mt inverse slope */
 
     /* eta bins */
-    /* get the ranges from dst_run_summary table */
-    minval = dst_runsummary->eta_bins[irange];
-    maxval = dst_runsummary->eta_bins[irange+1];
+    /* get the ranges from dst_summaryparam table */
+    minval = dst_summaryparam->eta_bins[irange];
+    maxval = dst_summaryparam->eta_bins[irange+1];
     /* determine the min & max bin numbers */
     minbin = (int) ((minval - eta_min)/eta_binsize);   
     maxbin = (int) ((maxval - eta_min)/eta_binsize);
@@ -319,9 +314,7 @@ long  type_of_call fill_dst_event_summary_ (
     }
   }  /* end of looping over ranges */
   
-  nphirange = dst_runsummary->n_phi_bins;
-  if (nphirange < 1) nphirange = 1;
-  if (nphirange > NPHIRANGE)  nphirange = NPHIRANGE;
+  nphirange = dst_summaryparam->n_phi_bins;
   binrange = (int) (NPHIBINS/nphirange); 
   
   /* Fill  phi  bin multiplicities  */
