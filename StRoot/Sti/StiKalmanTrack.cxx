@@ -1,10 +1,30 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.31 2004/03/23 23:10:37 calderon Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.32 2004/03/31 00:23:41 calderon Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.32  2004/03/31 00:23:41  calderon
+ * -Fixed memory leak in StiDetectorTreeBuilder::hangWhere (100 chars were lost
+ *  every time this function was called)
+ * -Changed algorithm to count fit points in StiKalmanTrack.  Now it is based
+ *  on counting the nodes that have a chi2 < chi2Max from
+ *  StiKalmanTrackFitterParameters.
+ * -Which meant that I had to somehow introduce a pointer to it so that the
+ *  track could know about the chi2Max used in the fitter.
+ * -And I also added a method to retrieve the pointer to the fitterParams
+ *  to be used in StiStEventFiller.
+ * -Which was then modified to calculate the encoded fit points based on
+ *  a similar algorithm (chi2<chi2Max test).
+ * -Cleaned up the includes in StiKalmanTrack.h, left only the ones
+ *  needed to keep the code compiling.
+ * -Which required a slight modification in the include of StiKalmanTrackFinder
+ * -StiTrackKalmanTrackFitter now also sets a pointer to itself in
+ *  static StiKalmanTrack::setFitParameters()
+ * -Removed some print outs from VectorizedFactory to reduce the size of the log
+ *  files.
+ *
  * Revision 2.31  2004/03/23 23:10:37  calderon
  * Check for nan's in getTrackLength() calculation.  When the argument for the
  * asin() is >1, the code instead calculates a length iteratively.
@@ -83,30 +103,37 @@
 
 //Std
 #include <stdexcept>
-#include <math.h>
+#include <cmath>
+
+//SCL
+#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
 
 #include "StHit.h"
 
 //Sti
 #include "StiToolkit.h"
-#include "Sti/Base/Factory.h"
 #include "StiTrackFinder.h"
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
-#include "StiKTNIterator.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
 #include "StiHitErrorCalculator.h"
 #include "StPhysicalHelixD.hh"
 #include "StHelix.hh"
+#include "StiKalmanTrackFitterParameters.h"
+#include "StiKalmanTrackFinderParameters.h"
+#include "StiHitContainer.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
+StiKalmanTrackFitterParameters* StiKalmanTrack::fitpars = 0;
 
 int debugCount=0;
 
@@ -577,7 +604,18 @@ int    StiKalmanTrack::getGapCount()    const
 */
 int StiKalmanTrack::getFitPointCount()    const  
 {
-  return getPointCount();
+    int fitPointCount  = 0;
+    double maxChi2 = fitpars->getMaxChi2();
+    if (firstNode) {
+	StiKTNBidirectionalIterator it;
+	for (it=begin();it!=end();it++) {
+	    StiKalmanTrackNode& ktn = (*it);
+	    if (ktn.getChi2() < maxChi2) {
+		fitPointCount++;
+	    }
+	}
+    }    
+  return fitPointCount;
 }
 
 /*! Calculate and return the track length.
@@ -1037,6 +1075,11 @@ bool StiKalmanTrack::find(int direction)
 void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)
 {
   pars = parameters;
+}
+
+void StiKalmanTrack::setFitParameters(StiKalmanTrackFitterParameters *parameters)
+{
+  fitpars = parameters;
 }
 
 vector<StiHit*> StiKalmanTrack::getHits()

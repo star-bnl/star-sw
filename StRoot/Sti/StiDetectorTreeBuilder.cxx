@@ -180,7 +180,7 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
 	temp->setName(newname);
 	temp->setOrderKey(order);
 	parent->add(temp);
-	delete tempname;
+	delete [] tempname; //fixing leak, MCBS.
 	return temp;
     }
     else {

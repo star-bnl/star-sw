@@ -18,6 +18,7 @@ using namespace std;
 #include "Sti/Base/EditableFilter.h"
 #include "StiToolkit.h"
 #include "StiHit.h"
+#include "StiHitContainer.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackContainer.h"
