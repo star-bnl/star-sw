@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.5 1999/02/06 00:15:46 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.6 1999/02/23 01:09:47 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.6  1999/02/23 01:09:47  fisyak
+// Add Bill Llope dst tables
+//
 // Revision 1.5  1999/02/06 00:15:46  fisyak
 // Add adc/tdc histograms
 //
@@ -46,6 +49,7 @@
 #include "ctf/St_ctg_Module.h"
 #include "ctf/St_cts_Module.h"
 #include "ctf/St_ctu_Module.h"
+#include "ctf/St_fill_dst_tof_Module.h"
 #include "TH1.h"
 
 ClassImp(St_ctf_Maker)
@@ -124,6 +128,32 @@ Int_t St_ctf_Maker::Make(){
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
 			      tof_event, tof_mslat, tof_raw);
+      St_DataSet *tpc_tracks = gStChain->DataSet("tpc_tracks");
+      St_tpt_track  *tptrack = 0;
+      St_tte_mctrk  *mctrk   = 0;
+      if (tpc_tracks) {
+	St_DataSetIter tpcI(tpc_tracks);
+	tptrack = (St_tpt_track *) tpcI["tptrack"];
+	mctrk   = (St_tte_mctrk *) tpcI["mctrk"];
+      }
+      St_DataSet *global = gStChain->DataSet("global");
+      St_dst_vertex     *vertex      = 0;
+      if (global) {
+	St_DataSetIter globalI(global);
+	vertex  = (St_dst_vertex *) globalI["dst/vertex"];
+      }
+      if (g2t_track && tptrack && mctrk && vertex ) {
+	St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",1000);
+	m_DataSet->Add(dst_tof_trk);
+	St_dst_tof_evt *dst_tof_evt = new St_dst_tof_evt("dst_tof_evt",1);
+	m_DataSet->Add(dst_tof_evt);
+	Int_t Res_fill_dst_tof = fill_dst_tof(g2t_tof_hit,g2t_track,
+					      tptrack,mctrk,vertex,
+					      m_tof,m_tof_slat,
+					      m_tof_slat_phi,m_tof_slat_eta,
+					      m_cts_tof,tof_mslat,
+					      dst_tof_trk,dst_tof_evt);
+      }	 
       Int_t Res_ctu_tof =  ctu(m_tof,  m_tof_slat,
 			       tof_raw, tof_cor);
     }
@@ -133,7 +163,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.5 1999/02/06 00:15:46 fisyak Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.6 1999/02/23 01:09:47 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
