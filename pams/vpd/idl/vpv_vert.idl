@@ -9,12 +9,12 @@
  * @author         Zoran Milosevich
  */
 
-/*   vps_vert.idl
+/*   vpv_vert.idl
 *   Table: vps_vert
 *        description: VPD calculated vertex position     
 *             more..:                                         
 */
-   struct vps_vert {          
+   struct vpv_vert {          
        long      id;            /* primary key */
        long      neg_time;      /* vpd minimum time eta<0 */
        long      pos_time;      /* vpd minimum time eta>0 */
