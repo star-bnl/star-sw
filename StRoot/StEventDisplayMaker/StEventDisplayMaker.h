@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.31 2003/01/26 17:23:03 jeromel Exp $
+// $Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.32  2003/01/26 23:54:36  fine
+// Add Riostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
+//
 // Revision 1.31  2003/01/26 17:23:03  jeromel
 // Missing iostream
 //
@@ -60,7 +63,6 @@
 
 #include "StMaker.h"
 #include "StDefaultFilter.h"
-#include <iostream>
 
 class    TVolume;
 class    TVolumeView;
@@ -79,7 +81,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.31 2003/01/26 17:23:03 jeromel Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -183,7 +185,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.31 2003/01/26 17:23:03 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
