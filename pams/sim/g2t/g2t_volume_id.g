@@ -1,4 +1,4 @@
-* $Id: g2t_volume_id.g,v 1.42 2003/05/19 14:15:44 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.43 2003/10/02 22:38:27 potekhin Exp $
 *  g2t_volume_id.g,v 
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
@@ -59,7 +59,7 @@
 * 
       Character*3      Csys
       Integer          NUMBV(15)
-      Integer          i,ibublic,zsubsect,zsublayer,eemc_depth
+      Integer          i,iWheel,zsubsect,zsublayer,eemc_depth
       Integer          sector_hash(6,2) / 4, 5, 6, 7, 8, 9, 
                                          10,11,12, 1, 2, 3/
 
@@ -401,17 +401,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             rileft    = numbv(1)
             shift     = 1
           endif
-
-	  if (emcg_version = 5) then ! need to look at fillmode:
+* we may have versions later than 5, that's why this has been changed to >=
+	  if (emcg_version >= 5) then ! need to look at fillmode:
             if (emcg_FillMode <= 2 ) then
-                ibublic = 1
+                iWheel = 1
             else
-                ibublic = numbv(1+shift) 
+                iWheel = numbv(1+shift) 
                 shift  += 1 
             endif
 
             section   = numbv(1+shift)                        ! ECVO
-            phi_30d   = sector_hash(numbv(2+shift),ibublic)   ! EMOD
+            phi_30d   = sector_hash(numbv(2+shift),iWheel)    ! EMOD
             zsubsect  = numbv(3+shift)                        ! ESEC (no readout)
             zsublayer = numbv(4+shift)                        ! EMGT (no readout)
             phi       = numbv(5+shift)                        ! EPER (5 fingers)
@@ -454,19 +454,19 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             rileft    = numbv(1)
             shift     = 1
           endif
-
-	  if (emcg_version = 5) then
+* see comment above about >=
+	  if (emcg_version >= 5) then
 
             if (emcg_FillMode <= 2 ) then
-                ibublic = 1
+                iWheel = 1
             else
-                ibublic = numbv(1+shift) 
+                iWheel = numbv(1+shift) 
                 shift  += 1 
             endif
 
           depth     = numbv(1+shift)
 *         phi       = numbv(2+shift) 
-          phi_30d   = sector_hash(numbv(2+shift),ibublic)
+          phi_30d   = sector_hash(numbv(2+shift),iWheel)
           strip     = numbv(3+shift) 
 
         else
