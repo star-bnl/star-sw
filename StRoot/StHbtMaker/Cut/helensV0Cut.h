@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.h,v 1.2 1999/10/05 11:37:40 lisa Exp $
+ * $Id: helensV0Cut.h,v 1.3 1999/10/15 01:57:02 lisa Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,23 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.h,v $
+ * Revision 1.3  1999/10/15 01:57:02  lisa
+ * Important enhancement of StHbtMaker - implement Franks CutMonitors
+ * ----------------------------------------------------------
+ * This means 3 new files in Infrastructure area (CutMonitor),
+ * several specific CutMonitor classes in the Cut area
+ * and a new base class in the Base area (StHbtCutMonitor).
+ * This means also changing all Cut Base class header files from .hh to .h
+ * so we have access to CutMonitor methods from Cint command line.
+ * This last means
+ * 1) files which include these header files are slightly modified
+ * 2) a side benefit: the TrackCuts and V0Cuts no longer need
+ * a SetMass() implementation in each Cut class, which was stupid.
+ * Also:
+ * -----
+ * Include Franks StHbtAssociationReader
+ * ** None of these changes should affect any user **
+ *
  * Revision 1.2  1999/10/05 11:37:40  lisa
  * Helens realistic V0Cut and Franks memory-sealed McReader
  *
@@ -27,7 +44,7 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtV0Cut.hh"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"	//9-17-99 seems like good idea
 
 class helensV0Cut : public StHbtV0Cut {
@@ -55,8 +72,6 @@ public:
   void SetPt(const float& lo, const float& hi);
   void SetRapidity(const float& lo, const float& hi);
 
-  virtual void SetMass(const double& mass);  // need this in derived class so 
-						//Cint can handle it
 
 private:   // here are the quantities we want to cut on...
 
@@ -82,7 +97,6 @@ private:   // here are the quantities we want to cut on...
 
 };
 
-inline void helensV0Cut::SetMass(const double& mass) {mMass = mass;}
 
 inline void helensV0Cut::SetV0MassRange(const float& lo, const float& hi) {
 mV0MassRange[0] =lo; mV0MassRange[1]=hi;}

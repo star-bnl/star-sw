@@ -5,9 +5,9 @@
 #include "StMaker.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"
-#include "StHbtMaker/Base/StHbtEventCut.hh"
-#include "StHbtMaker/Base/StHbtTrackCut.hh"
-#include "StHbtMaker/Base/StHbtV0Cut.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class TOrdCollection;
 class StHbtMcEventReader : public StHbtEventReader{

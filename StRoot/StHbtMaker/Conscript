@@ -24,6 +24,12 @@ my $PKG = $pkg;
 		  Cut/ParityEventCut.cxx
 		  Cut/franksTrackCut.cxx
 		  Cut/helensV0Cut.cxx
+		   Cut/trackCutMonitor_DCA.cxx        
+		   Cut/trackCutMonitor_P_vs_Dedx.cxx  
+		   Cut/trackCutMonitor_Y_vs_Pt.cxx
+		   Cut/trackCutMonitor_P.cxx          
+		   Cut/trackCutMonitor_Pt.cxx
+		   Cut/eventCutMonitor_Mult.cxx
 		  Infrastructure/StHbtAnalysis.cxx
 		  Infrastructure/StHbtIO.cc
 		  Infrastructure/StHbtPair.cc
@@ -33,12 +39,19 @@ my $PKG = $pkg;
 		  Infrastructure/StHbtManager.cxx
 		  Infrastructure/StHbtCoulomb.cxx
 		  Infrastructure/StHbtParticle.cc
+		   Infrastructure/StHbtCutMonitorHandler.cxx
+		   Reader/StHbtAssociationReader.cxx
 		  Reader/StHbtMcEventReader.cxx
 		  Reader/StStandardHbtEventReader.cxx
 		  Reader/StHbtAsciiReader.cxx
 		  StHbtMaker.cxx
 		 );# print "src = @src\n";
 my @h_files = qw (StHbtMaker.h
+		  Base/StHbtParticleCut.h
+		  Base/StHbtTrackCut.h
+		  Base/StHbtEventCut.h
+		  Base/StHbtPairCut.h
+		  Base/StHbtV0Cut.h
 		  CorrFctn/ExitSepCorrFctn.h
 		  CorrFctn/MinvCorrFctn.h
 		  CorrFctn/OpeningAngleCorrFctn.h
@@ -53,12 +66,20 @@ my @h_files = qw (StHbtMaker.h
 		  Cut/mikesEventCut.h
 		  Cut/mikesPairCut.h
 		  Cut/mikesTrackCut.h
+		  Cut/eventCutMonitor_Mult.h
+		  Cut/trackCutMonitor_DCA.h
+		  Cut/trackCutMonitor_P_vs_Dedx.h  
+		  Cut/trackCutMonitor_Y_vs_Pt.h
+		  Cut/trackCutMonitor_P.h
+		  Cut/trackCutMonitor_Pt.h
 		  Infrastructure/StHbtAnalysis.h
 		  Infrastructure/StHbtCoulomb.h
 		  Infrastructure/StHbtManager.h
+		  Infrastructure/StHbtCutMonitorHandler.h
 		  Reader/StHbtAsciiReader.h
 		  Reader/StHbtMcEventReader.h
 		  Reader/StStandardHbtEventReader.h
+		  Reader/StHbtAssociationReader.h
 		 );# print "h_files = @h_files\n";
 printf ("Run Conscript  in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  #print "obj = $obj\n";
@@ -68,6 +89,7 @@ my $LIBPATH = $env->{LIBPATH};
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/StRoot//g;
 my $CPPP =  $INCLUDE . "/" . $pkg 
   .  ":" . $Dir  
+  .  ":" . $Dir . "/Base"
   .  ":" . $Dir . "/CorrFctn" 
   .  ":" . $Dir . "/Cut" 
   .  ":" . $Dir . "/Infrastructure"
