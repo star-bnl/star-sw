@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.69  1999/04/18 21:22:28  wenaus
+#  Builds HTML to browse CVS commit history
+#
 #  Revision 1.68  1999/04/13 20:36:21  fisyak
 #  clean up St_run_summary_Maker
 #
@@ -283,7 +286,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/13 20:36:21 $ 
+#           Last modification $Date: 1999/04/18 21:22:28 $ 
 #  default setings
 # Current Working Directory
 #
@@ -344,6 +347,7 @@ ifndef SUBDIRS
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
+   SUBDIRS := $(filter-out StPeCMaker, $(SUBDIRS))
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
