@@ -64,17 +64,17 @@ extern "C" void ami_module_register_ ()    {}
 #include <stream.h>
 #include <stdlib.h>
 #include <string.h>
-#include "asuLib.h"
-#include "asuAlloc.h"
-#include "emlLib.h"
-#include "socLib.h"
-#include "spxLib.h"
-#include "tdmLib.h"
-#include "duiLib.h"
-#include "dioLib.h"
-#include "amiLib.h"
-#include "tntLib.h"
-#include "topLib.h"
+#include <asuLib.h>
+#include <asuAlloc.h>
+#include <emlLib.h>
+#include <socLib.h>
+#include <spxLib.h>
+#include <tdmLib.h>
+#include <duiLib.h>
+#include <dioLib.h>
+#include <amiLib.h>
+#include <tntLib.h>
+#include <topLib.h>
 #ifndef DS_ADVANCED
 #define DS_ADVANCED 141198 /* VP 14Nov98*/
 #endif
