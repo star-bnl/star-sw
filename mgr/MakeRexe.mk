@@ -1,7 +1,10 @@
-# $Id: MakeRexe.mk,v 1.19 1999/04/30 13:20:56 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.20 1999/04/30 14:48:02 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.20  1999/04/30 14:48:02  fisyak
+# replace Root.exe by rootPstar for persistent StEvent
+#
 # Revision 1.19  1999/04/30 13:20:56  fisyak
-# Split root4star into two version root4star with StEvent and Root.exe without it
+# Split root4star into two version root4star with StEvent and rootPstar without it
 #
 # Revision 1.18  1999/04/24 13:15:24  fisyak
 # Add --sillent mode for set SILENT environmnet variable
@@ -133,13 +136,13 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cxx   .F
-#all: Root.exe root4star 
+#all: rootPstar root4star 
 ifndef STEVENT_OBJS
 all: root4star 
 else
-all: root4star Root.exe
+all: root4star rootPstar
 endif
-Root.exe: $(FILES_O) $(STCLASS_OBJS)
+rootPstar: $(FILES_O) $(STCLASS_OBJS)
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 root4star: $(FILES_O) $(STCLASS_OBJS) $(STEVENT_OBJS)
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  

@@ -40,13 +40,7 @@ gmake -f ${STAR_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 set StarBin = ${OUT}/.${STAR_SYS}/bin
 set mach_os = ` uname -sr | sed -e 's/ //g' -e 's/\.//g' `
-switch ($mach_os)
-case "SunOS5*"
-	breaksw	
-default:
 if ( ! -f  $StarBin/root4star) ln -s $StarBin/root4star $StarBin/Root.exe 
-	breaksw
-endsw
 
 #real run of makefile. It creates executable
 
