@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.12 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.13 2001/04/03 21:04:36 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.13  2001/04/03 21:04:36  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.12  2000/10/05 23:09:05  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -68,7 +74,9 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StPhysicalHelixD.hh"
-
+// ***
+class StHbtHiddenInfo;
+// ***
 class StHbtParticle{
 public:
   StHbtParticle();
@@ -102,9 +110,10 @@ public:
 
 
   StHbtThreeVector mNominalPosSample[11];  // I make this public for convenience and speed of StHbtPair()
-
-
-
+  // ***
+  const StHbtHiddenInfo*  HiddenInfo() const;
+  void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
+  // ***
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
@@ -115,6 +124,7 @@ private:
   int mNhits;
   StHbtThreeVector mNominalTpcExitPoint;
   StHbtThreeVector mNominalTpcEntrancePoint;
+  StHbtHiddenInfo* mHiddenInfo;  // ***
 
 
 };
@@ -130,4 +140,10 @@ inline StHbtV0* StHbtParticle::V0() const { return mV0; }
 inline unsigned short StHbtParticle::NegTrackId() const { return mV0->idNeg(); }
 inline unsigned short StHbtParticle::PosTrackId() const { return mV0->idPos(); }
 inline const StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mV0->decayVertexV0(); }
+// ***
+inline const StHbtHiddenInfo* StHbtParticle::HiddenInfo() const
+{return mHiddenInfo;}
+inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
+{ mHiddenInfo = aHiddenInfo;}
+// ***
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.13 2001/03/28 22:35:23 flierl Exp $
+ * $Id: StHbtPair.hh,v 1.14 2001/04/03 21:04:36 kisiel Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.14  2001/04/03 21:04:36  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.13  2001/03/28 22:35:23  flierl
  * changes and bugfixes in qYKP*
  * add pairrapidity
@@ -109,6 +115,10 @@ public:
   double qOutCMS() const;
   double qLongCMS() const;
 
+  double dKSide() const;
+  double dKOut() const;
+  double dKLong() const;
+
   // Bertsch-Pratt momentum components in a longitudinally boosted frame
   // the argument is the beta of the longitudinal boost (default is 0.0, meaning lab frame)
   // - written by Bekele/Humanic
@@ -137,18 +147,52 @@ public:
 
   double NominalTpcAverageSeparation() const;
 
+
+  double pInv() const;
+  double KStar() const;
+  double KStarFlipped() const;
+  double CVK() const;
+  double CVKFlipped() const;
+  double qInvFlippedXY() const;
+
   double OpeningAngle() const;
 
 private:
   StHbtParticle* mTrack1;
   StHbtParticle* mTrack2;
 
+  mutable short mNonIdParNotCalculated;
+  mutable double mDKSide;
+  mutable double mDKOut;
+  mutable double mDKLong;
+  mutable double kStarCalc;
+
+  void calcNonIdPar() const;
 };
 
-inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){mTrack1=(StHbtParticle*)trkPtr;}
-inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){mTrack2=(StHbtParticle*)trkPtr;}
+inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){
+  mTrack1=(StHbtParticle*)trkPtr;
+  mNonIdParNotCalculated=1;
+}
+inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){
+  mTrack2=(StHbtParticle*)trkPtr;
+  mNonIdParNotCalculated=1;  
+}
 
 inline StHbtParticle* StHbtPair::track1() const {return mTrack1;}
 inline StHbtParticle* StHbtPair::track2() const {return mTrack2;}
+
+inline double StHbtPair::dKSide() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKSide;
+}
+inline double StHbtPair::dKOut() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKOut;
+}
+inline double StHbtPair::dKLong() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKLong;
+}
 
 #endif
