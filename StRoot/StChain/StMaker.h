@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.5 1998/08/18 14:05:02 fisyak Exp $
+// $Id: StMaker.h,v 1.6 1998/09/22 01:32:36 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.6  1998/09/22 01:32:36  fine
+// StMaker::MakeDoc() method has been introduced to generate HTML docs for all base classes and Makers
+//
 // Revision 1.5  1998/08/18 14:05:02  fisyak
 // Add to bfc dst
 //
@@ -59,6 +62,7 @@ public:
    TObject       *Clones() {return m_Clones;}
    virtual void   FillClone();
    virtual Int_t  Make() = 0;
+   virtual void   MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev/",const TString &outdir="$(star)/StRoot/html");
    virtual void   PrintInfo();
    virtual void   MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}
