@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.5 2004/03/11 11:30:44 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.6 2004/03/23 08:49:27 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,8 +11,8 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
- * Revision 1.5  2004/03/11 11:30:44  subhasis
- * Board status based mapping added
+ * Revision 1.6  2004/03/23 08:49:27  subhasis
+ * biardDetail put by had
  *
  * Mapping modified according to final mounting of FEE : Dipak
  *
@@ -310,7 +310,7 @@ void StPmdGeom::Cell_eta_phi(Float_t xreal,Float_t yreal,Float_t& eta,Float_t& p
       }
     }
 // Function used for mapping from Chain#, Channel# to Detector SM, Col, Row
-Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
+Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t&chmod)
 {
   //Bedanga and pawan changed the chain mapping conditions
 
@@ -318,18 +318,21 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   Int_t col1,row1;
   chain = chainno;
   Int_t chtemp=ch;
-	  Int_t brd=int((ch-1)/64)+1;
+	 // Int_t brd=int((ch-1)/64)+1;
+	  Int_t brd=int((ch)/64)+1;
 	  Int_t missing=0;
 	  Int_t brdCount=0;
 	  for(Int_t ibrd=0;ibrd<27;ibrd++){
+
 		  if(brdCount<brd){
-		  if(status[chainno][ibrd]==0)missing++;
-		  brdCount+=status[chainno][ibrd];
+		  if(status[chainno-1][ibrd]==0)missing++;
+		  brdCount+=status[chainno-1][ibrd];
 		  }
 	  }
 	  chtemp=ch+missing*64;
-	  if(chtemp>1728)return kStWarn;
-  
+	  chmod=chtemp;
+
+	  if(chtemp>=1728)return kStWarn;
   switch(chain){
 
   case 1:
@@ -343,8 +346,8 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       chain3(chtemp,supmod,col,row);
     break;
   case 4:
-    chain2(chtemp,supmod,col,row);
-    col = col; row = row + 24;
+    chain2(chtemp,supmod,col1,row1);
+    col = col1; row = row1 + 24;
     break;
   case 5:
     chain5(chtemp,supmod,col,row);
@@ -360,8 +363,8 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     col = col1; row = row1 + 24; supmod = 4;
     break;
   case 8:
-    chain2(chtemp,supmod,col,row);
-    col = 73 - col; row = 25 - row; supmod = 5;
+    chain2(chtemp,supmod,col1,row1);
+    col = 73 - col1; row = 25 - row1; supmod = 5;
     break;
   case 9:
   chain9(chtemp,supmod,col,row);
@@ -370,17 +373,17 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain10(chtemp,supmod,col,row);
     break;
   case 11:
-      chain10(chtemp,supmod,col,row);
-      if(supmod==4)col = col - 24;
-      if(supmod==6)row = row + 24;
+      chain10(chtemp,supmod,col1,row1);
+      row=row1;col=col1;
+      if(supmod==4)col = col1 - 24;
+      if(supmod==6)row = row1 + 24;
     break;
-    //chain 12 & 13 have 1st 9 boards missing(SM-5 & SM-6 not mounted)
-
   case 12:
     chain12(chtemp,supmod,col,row);
     break;
   case 13:
     chain12(chtemp,supmod,col1,row1);
+    row=row1;col=col1;
     if(supmod==5) {row = row1 -24; supmod = 6;} 
     if(supmod==7) row = row1 + 24;	
     break;
@@ -393,16 +396,16 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       chain15(chtemp,supmod,col,row);
     break;
   case 16:
-      chain5(chtemp,supmod,col,row);
-      supmod = 8; col = col -24;
+      chain5(chtemp,supmod,col1,row1);
+      supmod = 8; col = col1 -24; row=row1;
     break;
 
   case 17:
     chain17(chtemp,supmod,col,row);
     break;
   case 18:
-  chain5(chtemp,supmod,col,row);
-    supmod = 10; col = col + 24;
+  chain5(chtemp,supmod,col1,row1);
+    supmod = 10; col = col1 + 24; row=row1;
     break;
   case 19:
       chain2(chtemp,supmod,col,row);
@@ -416,16 +419,14 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain21(chtemp,supmod,col,row);
     break;
   case 22:
-    // 1st FEE board is missing because some problem in LV power cable
     chain22(chtemp,supmod,col,row);
     break;
   case 23:
-    // 1st FEE board is missing because some problem in LV power cable
     chain23(chtemp,supmod,col,row);
     break;
   case 24:
-    chain5(chtemp,supmod,col,row);
-    supmod = 12; col = 121 - col; row = 73 - row;
+    chain5(chtemp,supmod,col1,row1);
+    supmod = 12; col = 121 - col1; row = 73 - row1;
     break;
   case 25:
     chain15(chtemp,supmod, col1, row1);
@@ -462,6 +463,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     break;
   case 33: 
     chain22(chtemp,supmod,col1,row1);
+    row=row1;col=col1;
     if(supmod==11){supmod = 15;
     col = 49 - row1; row = 73 - col1;}
     if(supmod==12){supmod = 17; col = 73 - row1;
@@ -471,20 +473,23 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain34(chtemp,supmod,col,row);
     break;
   case 35: 
-    chain34(chtemp,supmod,col,row);
-    if(supmod == 16) col = col - 24;
-    if(supmod == 18) row = row + 24;
+    chain34(chtemp,supmod,col1,row1);
+    row=row1;col=col1;
+    if(supmod == 16) col = col1 - 24;
+    if(supmod == 18) row = row1 + 24;
     break;
   case 36: 
-    chain34(chtemp,supmod,col,row);
-    if(supmod == 16) {col = 121-col;row = 97 - row;}
+    chain34(chtemp,supmod,col1,row1);
+    row=row1;col=col1;
+    if(supmod == 16) {col = 121-col1;row = 97 - row1;}
     supmod = supmod + 1;
     break;
   case 37: 
-    chain34(chtemp,supmod,col,row);
-    if(supmod==18){row = row + 24;supmod = 19;}
+    chain34(chtemp,supmod,col1,row1);
+    row=row1;col=col1;
+    if(supmod==18){row = row1 + 24;supmod = 19;}
     if(supmod == 16){
-      col = 121-col; row = 73 - row; 
+      col = 121-col1; row = 73 - row1; 
       supmod = 18;}
     break;
   case 38:
@@ -520,19 +525,13 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain45(chtemp,supmod,col,row);
     break;
   case 46:
-    //Only one UM has been connected and 6 brds are working
-    chain46(chtemp,supmod,col1,row1);
-    if(supmod==3){
-      col = 73 - row1; row = 49 - col1;
-      supmod = 23;}
-    if(supmod==5){
-      col =97 - row1; row = 73 - col1;
-      supmod = 24;}
+    chain46(chtemp,supmod,col,row);
     break;
   case 47:
-      chain45(chtemp,supmod,col,row);
-      if(supmod ==22){col = 49 - col; row = 73 -row;}
-      if(supmod==24){col = 48 + col; row = row - 48;}
+      chain45(chtemp,supmod,col1,row1);
+      row=row1;col=col1;
+      if(supmod ==22){col = 49 - col1; row = 73 -row1;}
+      if(supmod==24){col = 48 + col1; row = row1 - 48;}
       supmod = 24;
     break;
   case 48:
@@ -1225,55 +1224,24 @@ void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
 void StPmdGeom::readBoardDetail()
 {
 
-
-FILE *fp1 = fopen("StRoot/StPmdUtil/BoardDetail.txt","r");
-cout<<"file opened "<<endl;
-
  for(Int_t i=0;i<48;i++){
-Int_t ncols1;
-Int_t st0,st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11,st12,st13,st14,st15,st16,st17,st18,st19,st20,st21,st22,st23,st24,st25,st26; 
- ncols1 = fscanf(fp1,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d  %d %d %d %d %d %d %d",&st0,&st1,&st2,&st3,&st4,&st5,&st6,&st7,&st8,&st9,&st10,&st11,&st12,&st13,&st14,&st15,&st16,&st17,&st18,&st19,&st20,&st21,&st22,&st23,&st24,&st25,&st26);
- //cout<<st0<<" "<<st1<<" "<<st2<<" "<<st3<<" "<<st4<<" "<<st5<<" "<<st6<<" "<<st7<<" "<<st8<<" "<<st9<<" "<<st10<<" "<<st11<<" "<<st12<<" "<<st13<<" "<<st14<<" "<<st15<<" "<<st16<<" "<<st17<<" "<<st18<<" "<<st19<<" "<<st20<<" "<<st21<<" "<<st22<<" "<<st23<<" "<<st24<<" "<<st25<<" "<<st26<<endl;
- Int_t chainNo=i;
- status[chainNo][0]=st0;
- status[chainNo][1]=st1;
- status[chainNo][2]=st2;
- status[chainNo][3]=st3;
- status[chainNo][4]=st4;
- status[chainNo][5]=st5;
- status[chainNo][6]=st6;
- status[chainNo][7]=st7;
- status[chainNo][8]=st8;
- status[chainNo][9]=st9;
- status[chainNo][10]=st10;
- status[chainNo][11]=st11;
- status[chainNo][12]=st12;
- status[chainNo][13]=st13;
- status[chainNo][14]=st14;
- status[chainNo][15]=st15;
- status[chainNo][16]=st16;
- status[chainNo][17]=st17;
- status[chainNo][18]=st18;
- status[chainNo][19]=st19;
- status[chainNo][20]=st20;
- status[chainNo][21]=st21;
- status[chainNo][22]=st22;
- status[chainNo][23]=st23;
- status[chainNo][24]=st24;
- status[chainNo][25]=st25;
- status[chainNo][26]=st26;
- }
- fclose(fp1);
- cout<<"file closed "<<endl;
+   for(Int_t ib=0;ib<27;ib++){
+   status[i][ib]=1;
+   }
+  }
 }
 
 void StPmdGeom::readBoardDetail(Int_t runno1)
 {
-//cout << "@@@@@@@@@@@@@@@@@@@@@@@ Run number @@@@@@@" <<runno1 <<endl;
-
  char *runfile = new char[20];
  sprintf(runfile,"%d",runno1);
 
+ //Initialise satus array as 1 (good board)
+ for(Int_t i=0;i<48;i++){
+   for(Int_t ib=0;ib<27;ib++){
+   status[i][ib]=1;
+   }
+  }
   // Fetch from the run # the day
    char iRun[8];
    for (Int_t ik=0; ik<2; ik++)
@@ -1282,76 +1250,215 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
      }
 
      Int_t rn = atoi(iRun);
-//     cout << rn <<endl;
-    char *inputfile = new char[80];
+cout<<"runno, rn1 "<<runno1<<" "<<rn<<endl;
+
 // Once the day is know choose the mapping file
-     if( rn >=1 && rn <21)
+//     if( rn >=1 && rn <21)
+     if( rn >=1)
        {
-          inputfile = "StRoot/StPmdUtil/0121_BoardDetail.txt";
+       //chain 0
+       for(Int_t i=3;i<6;i++)status[0][i]=0;
+       for(Int_t i=12;i<18;i++)status[0][i]=0;
+       //chain 1
+       status[1][19]=0;
+       //chain 3
+       status[3][22]=0; status[3][25]=0; status[3][26]=0;
+       //chain 5
+       status[5][1]=0;for(Int_t i=24;i<27;i++)status[5][i]=0;
+       //chain 6
+       status[6][24]=0;for(Int_t i=6;i<9;i++)status[6][i]=0;
+       //chain 7
+       for(Int_t i=0;i<27;i++)status[7][i]=0;
+       //chain 8
+       status[8][22]=0;
+       //chain 9
+       for(Int_t i=0;i<27;i++)status[9][i]=0;
+       //chain10 
+       for(Int_t i=0;i<27;i++)status[10][i]=0;
+       //chain11 
+       for(Int_t i=0;i<9;i++)status[11][i]=0;
+       //chain12 
+       for(Int_t i=0;i<9;i++)status[12][i]=0;
+       //chain13 
+       for(Int_t i=0;i<27;i++)status[13][i]=0;
+       //chain14 
+       for(Int_t i=0;i<27;i++)status[14][i]=0;
+       //chain15 
+       for(Int_t i=0;i<27;i++)status[15][i]=0;
+       //chain16 
+       for(Int_t i=0;i<9;i++)status[16][i]=0;
+       //chain17 
+       for(Int_t i=6;i<12;i++)status[17][i]=0;
+       for(Int_t i=24;i<27;i++)status[17][i]=0;
+       //chain19 
+       for(Int_t i=3;i<6;i++)status[19][i]=0;
+       for(Int_t i=21;i<24;i++)status[19][i]=0;
+       status[19][12]=0;
+       //chain20 
+       status[20][18]=0;
+       //chain21 
+       status[21][0]=0;
+       //chain22 
+       status[22][0]=0;
+       //chain23 
+       status[23][6]=0;status[23][24]=0;
+       //chain25 
+       status[25][16]=0;
+       //chain31 
+       status[31][8]=0;
+       //chain38 
+       status[38][24]=0;status[38][25]=0;
+       //chain39 
+       status[39][24]=0;
+       //chain40 
+       status[40][7]=0;
+       //chain44 
+       status[44][14]=0;
+       //chain46 
+       status[46][16]=0;
+
        }
 
-     if( rn >=21 && rn <27)
+//     if( rn >=21 && rn <27)
+     if( rn >=21)
        {
-         inputfile = "StRoot/StPmdUtil/2126_BoardDetail.txt";
+       //chain30 
+       status[30][21]=0;
+       //chain38 
+       status[38][5]=0;
+       //chain43 
+       status[43][20]=0;
+       //chain44 
+       for(Int_t i=18;i<27;i++)status[44][i]=0;
+       //chain45 
+       for(Int_t i=3;i<6;i++)status[45][i]=0;
+       for(Int_t i=9;i<27;i++)status[45][i]=0;
        }
 
-     if( rn >=27 && rn <35)
+//     if( rn >=27 && rn <35)
+     if( rn >=27)
        {
-         inputfile = "StRoot/StPmdUtil/2734_BoardDetail.txt";
-        // cout << inputfile <<endl;
+       //chain 24
+       status[24][1]=0;
+       status[24][25]=0;
+       //chain35 
+       status[35][14]=0;
+       //chain44 
+       for(Int_t i=18;i<27;i++)status[44][i]=1;
+       //chain45 
+       status[45][6]=0;
+       for(Int_t i=9;i<27;i++)status[45][i]=1;
+       //chain46 
+       status[46][16]=0;
+
        }
 
-     if( rn >=35 && rn <43)
+//     if( rn >=35 && rn <43)
+     if( rn >=35)
        {
-         inputfile = "StRoot/StPmdUtil/3542_BoardDetail.txt";
+       //chain 0
+       for(Int_t i=0;i<21;i++)status[0][i]=0;
+       status[0][18]=1;
+       //chain 1
+       status[1][19]=1;status[1][9]=0;
+       //chain 2
+       status[2][3]=0;status[2][6]=0;
+       status[2][7]=0;status[2][8]=0;
+       status[2][10]=0;status[2][13]=0;
+       //chain 3
+       status[3][25]=1; status[3][26]=1;
+       status[3][13]=0; status[3][15]=0;
+       status[3][18]=0; status[3][19]=0;
+       status[3][20]=0; status[3][22]=0;
+       status[3][24]=0;
+       //chain 4
+       status[4][2]=0; status[4][17]=0;
+       //chain 5
+       status[5][1]=0; 
+       for(Int_t i=21;i<27;i++)status[5][i]=0;
+       status[5][23]=1; 
+       //chain 6
+       for(Int_t i=6;i<9;i++)status[6][i]=0;
+       for(Int_t i=2;i<4;i++)status[6][i]=0;
+       status[6][15]=0; status[6][17]=0;
+       status[6][18]=0; status[6][19]=0;
+       status[6][20]=0; status[6][24]=0;
+       //chain 8
+       status[8][9]=0; status[8][11]=0;
+       //chain11 
+       status[11][14]=0; status[11][26]=0;
+       //chain17 
+       for(Int_t i=5;i<13;i++)status[17][i]=0;
+       status[17][14]=0; status[17][18]=0;
+       status[17][21]=0; status[17][22]=0;
+       for(Int_t i=24;i<27;i++)status[17][i]=0;
+       //chain18 
+       status[18][1]=0; status[18][6]=0;
+       status[18][18]=0; status[18][24]=0;
+       status[18][25]=0; status[18][26]=0;
+       //chain 20
+       status[20][2]=0; status[20][8]=0;
+       status[20][9]=0; status[20][18]=0;
+       status[20][20]=0; status[20][24]=0;
+       status[20][25]=0;
+       //chain 24
+       status[24][1]=0; status[24][25]=0;
+       //chain 28
+       status[28][23]=0; status[28][24]=0;
+       //chain 36
+       status[36][25]=0;
+       //chain44 
+       for(Int_t i=18;i<27;i++)status[44][i]=1;
+       status[44][3]=0; status[44][4]=0;
+       status[44][14]=0;
+       //chain45 
+       for(Int_t i=3;i<6;i++)status[45][i]=1;
        }
-    if( rn >=43 && rn <49)
+//    if( rn >=43 && rn <49)
+    if( rn >=43)
        {
-         inputfile = "StRoot/StPmdUtil/4349_BoardDetail.txt";
+       //chain33 
+       status[33][2]=0;
        }
 
      if( rn >=49 )
        {
-         inputfile = "StRoot/StPmdUtil/49xx_BoardDetail.txt";
+       //chain 38
+       status[38][5]=0; status[38][19]=0;
+       status[38][22]=0; status[38][24]=0;
+       status[38][25]=0;
+       //chain 8
+       status[8][22]=0;
        }
+     if( rn >=78 )
+       {
+	//chain 25    
+	status[24][12]=0;
+	//chain 30    
+	status[30][18]=0;
+	//chain 32    
+	status[32][21]=0;
+	//chain 35    
+	status[35][12]=0;
+	//chain 36    
+	status[36][24]=0;
+	//chain 38    
+	status[38][7]=0;
+	//chain 42    
+	status[42][7]=0;
+	//chain 45    
+	status[45][8]=0;
+	//chain 44    
+	status[44][6]=0;status[44][11]=0;
+	//chain 46    
+	status[46][8]=0;status[46][16]=0;
+	//chain 47    
+	status[47][11]=0;status[47][19]=0;
+	status[47][20]=0;
 
-  fp1 = fopen(inputfile,"r");
 
 
- for(Int_t i=0;i<48;i++){
-Int_t ncols1;
-Int_t st0,st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11,st12,st13,st14,st15,st16,st17,st18,st19,st20,st21,st22,st23,st24,st25,st26; 
-ncols1 = fscanf(fp1,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d  %d %d %d %d %d %d %d",&st0,&st1,&st2,&st3,&st4,&st5,&st6,&st7,&st8,&st9,&st10,&st11,&st12,&st13,&st14,&st15,&st16,&st17,&st18,&st19,&st20,&st21,&st22,&st23,&st24,&st25,&st26);
- Int_t chainNo=i;
- status[chainNo][0]=st0;
- status[chainNo][1]=st1;
- status[chainNo][2]=st2;
- status[chainNo][3]=st3;
- status[chainNo][4]=st4;
- status[chainNo][5]=st5;
- status[chainNo][6]=st6;
- status[chainNo][7]=st7;
- status[chainNo][8]=st8;
- status[chainNo][9]=st9;
- status[chainNo][10]=st10;
- status[chainNo][11]=st11;
- status[chainNo][12]=st12;
- status[chainNo][13]=st13;
- status[chainNo][14]=st14;
- status[chainNo][15]=st15;
- status[chainNo][16]=st16;
- status[chainNo][17]=st17;
- status[chainNo][18]=st18;
- status[chainNo][19]=st19;
- status[chainNo][20]=st20;
- status[chainNo][21]=st21;
- status[chainNo][22]=st22;
- status[chainNo][23]=st23;
- status[chainNo][24]=st24;
- status[chainNo][25]=st25;
- status[chainNo][26]=st26;
- }
- fclose(fp1);
+       }
 }
 
 
