@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.7 2000/02/18 22:11:58 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.8 2000/05/10 21:39:01 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.8  2000/05/10 21:39:01  porter
+ * fixed delete[] bug in reading from table where input schema includes fields that
+ * are not in the database by checking buffer status for reads
+ *
  * Revision 1.7  2000/02/18 22:11:58  porter
  * modified buffer read of unsigned char array
  *
@@ -364,7 +368,7 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
     for (i=0;i<len;i++)\
       { if (!(WriteMem(&s[i],(void*)(((char*)mCol[mCur].val)+i*mycsize[mCol[mCur].type]),mCol[mCur].type))) break;}\
       if (i==(int)mCol[mCur].length) tRetVal=true;};}\
- else { cerr << " field " << aName << " doesnt exist in this Buffer" << endl; }\
+ else { cerr << "WARNING:: field " << aName << " doesnt exist in this Buffer" << endl; }\
  return tRetVal;\
 }
 
@@ -389,7 +393,8 @@ bool  StDbBuffer::ReadArray(char* &s, int &len,const char *aName)
    MemSwapCpy((char*)s,(char*)mCol[mCur].val,len,mycswapl[mCol[mCur].type],Auto);
    tRetVal=true;
  } else { 
-   cerr << " field " << aName << " doesnt exist in this Buffer" << endl; 
+   s=0;
+   cerr << "WARNING:: field " << aName << " doesnt exist in this Buffer" << endl; 
  };
  return tRetVal;\
 };
@@ -414,6 +419,9 @@ Warray(unsigned long,_ulong );
 Warray(float,_float );
 Warray(double,_double);
 Warray(char*,_string);
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.16 2000/04/25 18:26:03 porter Exp $
+ * $Id: StDbTable.cc,v 1.17 2000/05/10 21:39:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.17  2000/05/10 21:39:02  porter
+ * fixed delete[] bug in reading from table where input schema includes fields that
+ * are not in the database by checking buffer status for reads
+ *
  * Revision 1.16  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -65,6 +69,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.17  2000/05/10 21:39:02  porter
+ * fixed delete[] bug in reading from table where input schema includes fields that
+ * are not in the database by checking buffer status for reads
+ *
  * Revision 1.16  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -660,68 +668,75 @@ float* mfloat; double* mdouble;
     }
   case Stuchar:
     {
-       buff->ReadArray(muchar,len,name);
-    memcpy(ptr,muchar,len*sizeof(unsigned char));
-    delete [] muchar;
-    // delete [] tmp;
+      if(buff->ReadArray(muchar,len,name)){
+        memcpy(ptr,muchar,len*sizeof(unsigned char));
+       delete [] muchar;
+      }
     break;
     }
   case Stshort:
     {
-    buff->ReadArray(mshort,len,name);
-    memcpy(ptr,mshort,len*sizeof(short));
-    delete [] mshort;
+ 
+      if(buff->ReadArray(mshort,len,name)){
+        memcpy(ptr,mshort,len*sizeof(short));
+        delete [] mshort;
+      }
     break;
     }
   case Stushort:
     {
-    buff->ReadArray(mushort,len,name);
-    memcpy(ptr,mushort,len*sizeof(unsigned short));
-    delete [] mushort;
+      if(buff->ReadArray(mushort,len,name)){
+        memcpy(ptr,mushort,len*sizeof(unsigned short));
+        delete [] mushort;
+      }
     break;
     }
   case Stint:
     {
-    buff->ReadArray(mint,len,name);
-    memcpy(ptr,mint,len*sizeof(int));
-    delete [] mint;
+      if(buff->ReadArray(mint,len,name)){
+         memcpy(ptr,mint,len*sizeof(int));
+         delete [] mint;
+      }
     break;
     }
   case Stuint:
     {
-    buff->ReadArray(muint,len,name);
-    memcpy(ptr,muint,len*sizeof(unsigned int));
-    delete [] muint;
+      if(buff->ReadArray(muint,len,name)){
+       memcpy(ptr,muint,len*sizeof(unsigned int));
+       delete [] muint;
+      }
     break;
     }
   case Stlong:
     {
-    buff->ReadArray(mlong,len,name);
-    //if(len==1)cout<<name<<" = "<<*mlong<<endl;
-    memcpy(ptr,mlong,len*sizeof(long));
-    delete [] mlong;
+      if(buff->ReadArray(mlong,len,name)){
+       memcpy(ptr,mlong,len*sizeof(long));
+       delete [] mlong;
+      }
     break;
     }
   case Stulong:
     {
-    buff->ReadArray(mulong,len,name);
-    memcpy(ptr,mulong,len*sizeof(unsigned long));
-    delete [] mulong;
+      if(buff->ReadArray(mulong,len,name)){
+       memcpy(ptr,mulong,len*sizeof(unsigned long));
+       delete [] mulong;
+      }
     break;
     }
   case Stfloat:
     {
-    buff->ReadArray(mfloat,len,name);
-    //if(len==1)cout<<name<<" = "<<*mfloat<<endl;
-    memcpy(ptr,mfloat,len*sizeof(float));
-    delete [] mfloat;
+      if(buff->ReadArray(mfloat,len,name)){
+       memcpy(ptr,mfloat,len*sizeof(float));
+       delete [] mfloat;
+      }
     break;
     }
   case Stdouble:
     {
-    buff->ReadArray(mdouble,len,name);
-    memcpy(ptr,mdouble,len*sizeof(double));
-    delete [] mdouble;
+      if(buff->ReadArray(mdouble,len,name)){
+       memcpy(ptr,mdouble,len*sizeof(double));
+       delete [] mdouble;
+      }
     break;
     }
   }
