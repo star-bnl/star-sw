@@ -4,16 +4,6 @@
 #include <cstdio>
 
 #include "EEname2Index.h"
-//__________________________________________________
-//__________________________________________________
-void  EEindexRange(int secID,int &ix1, int &ix2){
-  // returns range of valid index for given sector
-  assert(secID>=0);
-  assert(secID<=12);
-  ix1=(secID-1)*1000;
-  ix2=ix1+999;
-}
-
 
 //__________________________________________________
 //__________________________________________________
@@ -79,8 +69,9 @@ void  EEindex2Name(int ix,char *name){
 
 //__________________________________________________
 //__________________________________________________
-int  EEname2Index(const char *name){
+int  EEname2Index(char *name0){
 
+  char *name=name0;
   int index=-1;
 
   int sec=atoi(name);
@@ -110,11 +101,11 @@ int  EEname2Index(const char *name){
   } break;
   
   default:
-    printf("EEname2Index(%s)  Logical Error3: invalid index=%d\n",name,index);
+    printf("EEname2Index(%s)  Logical Error3: invalid index=%d\n",name0,index);
     exit(-1);
   }
 
-  //  printf("EEname2Index(%s)-->%d\n",name,index);
+  //  printf("EEname2Index(%s)-->%d\n",name0,index);
   
   assert(index>=0);
   assert(index<EEindexMax);

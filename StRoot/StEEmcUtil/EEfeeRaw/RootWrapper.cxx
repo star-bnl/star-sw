@@ -11,8 +11,7 @@
 
 #include "EEfeeDataBlock.h"
 #include "EEfeeRawEvent.h"
-//#include "EEfeeRunDescr.h"
-#include "EEmcEventHeader.h"
+#include "EEfeeRunDescr.h"
 
 
 // A simple wrapper for Fortran xsort program
@@ -21,18 +20,18 @@
 // 2002-2003
 
 
-//#define DEBUG 0
+#define DEBUG 0
 static const int MaxCommentLen=1024;
 
 static TFile   *file  = NULL ;
 static TTree   *tree  = NULL ;
 
 static TBranch *beve  = NULL ;
-static TBranch *bhead  = NULL ;
+static TBranch *bdes  = NULL ;
 
 static EEfeeDataBlock *b   = NULL ;
 static EEfeeRawEvent  *eve = NULL ;
-static EEmcEventHeader *ehead = NULL ;
+static EEfeeRunDescr  *des = NULL ;
 
 static int   evnum                   = 0;
 static char *filename = NULL;
@@ -57,23 +56,22 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
     fprintf(stderr,"rootopen: off-line data <%s>\n",basefile);
     char *idt  = strchr(basefile,'.');  *idt = 0x00; // locate first dot
   }
-  sprintf(filename,"%s/%s.ez.root",rootdir,basefile); 
+  sprintf(filename,"%s/%s.root",rootdir,basefile); 
   sprintf(comment,"run:%05ld, time:%s ",run,ctime(&runtime));
 
   file  = new TFile(filename,"RECREATE");
-  tree  = new TTree("ezstar","A tree with FEE events");
+  tree  = new TTree("fee","A tree with FEE events");
   eve   = new EEfeeRawEvent();
-  ehead   = new EEmcEventHeader();
+  des   = new EEfeeRunDescr();
   b     = new EEfeeDataBlock();
 
-  bhead  = tree->Branch("head","EEmcEventHeader",&ehead,10000,99);
-  beve  = tree->Branch("eemc" ,"EEfeeRawEvent",&eve,10000,99);
+  bdes  = tree->Branch("desc","EEfeeRunDescr",&des,10000,99);
+  beve  = tree->Branch("evt" ,"EEfeeRawEvent",&eve,10000,99);
 
-  ehead->clear();
-  ehead->setRunNumber(run);
-  ehead->setProcessingTime(time(0));
-  ehead->setTimeStamp(runtime);
-  ehead->setComment(comment);
+  des->clear();
+  des->setProcessingTime(time(0));
+  des->setTimeStamp(runtime);
+  des->setComment(comment);
 
   fprintf(stderr,"rootopen: file=%s\n",filename);
   fprintf(stderr,"rootopen: comment=%s\n",comment);
@@ -85,10 +83,9 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
 
 
 extern "C" void 
-eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short& size , unsigned short *e, int &eveID, int *ierr)
+eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short& size , unsigned short *e, int *ierr)
 { 
   UShort_t *head = new UShort_t[EEfeeDataBlock::DefaultMaxHead];
-  static int nTotErr=0;
 
   *ierr=0;
   b->clear();
@@ -98,11 +95,11 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
   if(evnum%10000==0) 
     fprintf(stderr,"EVENT %6dk %6d 0x%04hx\r",evnum/10000,size,evtype);
 
-#ifdef DEBUG
+#if DEBUG
   fprintf(stderr,"\nEVENT %08d %06d 0x%04hx\n",evnum,size,evtype);
 #endif
 
-#ifdef DEBUG
+#if DEBUG
   int i=0;
   while(i<size) {
     for(int k=0; i<size && k<2  ; k++,i++) fprintf(stderr,"[%03d] 0x%04hx ",i,e[i]);
@@ -123,11 +120,8 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
     unsigned short token   = *p++;    // 2
     unsigned short cratrig = *p++;    // 3
     if(token!=evtoken) {
-      nTotErr++;
-      if(nTotErr%10000==0) {
-	fprintf(stderr,"eemcfeerootfill: *** token mismatch, \n  so far   %d-th data blocks  in %d events\n",nTotErr, eveID);
-	fprintf(stderr," (event token=%hd crate token=%hd)\n",evtoken,token);
-      }
+      fprintf(stderr,"eemcfeerootfill: *** token mismatch in crate %d",cratrig);
+      fprintf(stderr," (event token=%hd crate token=%hd)\n",evtoken,token);
     }
     if(wordcnt>4) wordcnt -= 4;
     head[EEfeeDataBlock::EVTYPE] = evtype;
@@ -145,11 +139,11 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
   }
 
 
-  ehead->setProcessingTime(time(0));
-  ehead->setToken(evtoken);
-  ehead->setEventNumber(eveID);
+  des->setProcessingTime(time(0));
   tree->Fill();  
   *ierr=0;
+  if (head!=NULL) delete [] head;
+
   return;
 }
 
@@ -166,5 +160,8 @@ eemcfeerootclose_()
   }
   fprintf(stderr,"eemcfeerootclose: OK (total events=%8d)\n",evnum); 
   if(filename) delete [] filename;
+  if(b)        delete b;
+  if(eve)      delete eve;
+  if(des)      delete des;
   return;
 }
