@@ -72,6 +72,8 @@ public:
     StiHit* lastVertex() const; //last in container
     StiHit* nextVertex(); //next in container
     StiHit* previousVertex(); //previous
+
+    void printVertices() const;
     
 protected:
     StiHitContainer();

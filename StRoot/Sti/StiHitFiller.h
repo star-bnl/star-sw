@@ -17,6 +17,7 @@ class StiHitContainer;
 class StiGeometryTransform;
 class StTpcCoordinateTransform;
 class StEvent;
+class StPrimaryVertex;
 
 class StiHitFiller
 {
@@ -40,9 +41,11 @@ public:
 private:
     void fillTpcHits(StiHitContainer*, StiHitFactory*);
     void fillSvtHits(StiHitContainer*, StiHitFactory*);
+    void fillPrimaryVertices(StiHitContainer*, StiHitFactory*);
 
     //Temporary patch, should be in GeometryTransform
     void operator() (const StTpcHit*, StiHit*);
+    void operator() (const StPrimaryVertex*, StiHit*);
     
 private:
     StiGeometryTransform* mtranslator;

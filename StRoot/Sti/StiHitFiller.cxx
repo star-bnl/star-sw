@@ -60,6 +60,7 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory)
 	if ( *it == kTpcId) fillTpcHits(store, factory);
 	if ( *it == kSvtId) fillSvtHits(store, factory);
     }
+    fillPrimaryVertices(store, factory);
     return;
 }
 
@@ -100,6 +101,22 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
     return;
 }
 
+void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, StiHitFactory* factory)
+{
+    StPrimaryVertex* primVtx = 0;
+    for(unsigned int i=0; i<mevent->numberOfPrimaryVertices(); i++) {
+	primVtx = mevent->primaryVertex(i);
+	
+	StiHit* stihit = factory->getObject();
+	stihit->reset();
+	
+	this->operator() ( primVtx, stihit);
+	store->addVertex(stihit);
+	//cout <<primVtx->position()<<endl;
+    }
+    return;
+}
+
 ostream& operator<<(ostream& os, const StiHitFiller& h)
 {
     for (StiHitFiller::det_id_vector::const_iterator it=h.mvec.begin();
@@ -107,6 +124,29 @@ ostream& operator<<(ostream& os, const StiHitFiller& h)
 	os <<static_cast<int>( (*it) )<<" ";
     }
     return os;
+}
+
+void StiHitFiller::operator() (const StPrimaryVertex* vtx, StiHit* stihit)
+{
+    //A primary vertex doesn't come from a detector, so it doesn't have a well defined refAngle and centerRadius
+    //We'll define these two from global position in cylindrical coordinates
+    //refAngle = arctan(global_y / global_x)
+    //centerRadius = sqrt (global_x^2 + global_y^2)
+    //We'll then say that Sti_x = centerRadius and Sti_y = 0, with Sti_z begin global z, as usual
+
+    const StThreeVectorF& position = vtx->position();
+    double pos = sqrt(position.x()*position.x() + position.y()*position.y() );
+    double refangle = atan2( position.y(), position.x() );
+
+    if (refangle<0.) refangle+=2.*M_PI;
+    
+    stihit->setRefangle( refangle );
+    stihit->setPosition( pos );
+    stihit->setX( pos );
+    stihit->setY( 0. );
+    stihit->setZ( position.z() );
+    
+    return;
 }
 
 void StiHitFiller::operator() (const StTpcHit* tpchit, StiHit* stihit)
