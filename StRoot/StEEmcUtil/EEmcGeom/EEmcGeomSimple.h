@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.20 2004/06/03 20:59:54 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.21 2005/02/05 00:57:38 perev Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -14,7 +14,6 @@
 
 
 #include "TObject.h"
-#include "TMath.h"
 #include "TVector3.h"
 
 
@@ -198,6 +197,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.21  2005/02/05 00:57:38  perev
+ * TMath is namespace now
+ *
  * Revision 1.20  2004/06/03 20:59:54  zolnie
  * - phi angle now adjusted to [-pi,pi] interval in accordace to TVecror3 convention
  * - replaced Jan's interesting implementation of direction2tower method with
