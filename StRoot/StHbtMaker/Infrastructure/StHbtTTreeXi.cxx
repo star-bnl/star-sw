@@ -17,16 +17,16 @@
 //----------------------------------------------------------------------------
 StHbtTTreeXi::StHbtTTreeXi(const StHbtEvent* event, const StHbtXi* xi) : StHbtTTreeV0(event, xi) {
   mCharge = xi->mCharge;      
-  mDecayVertexXiX = xi->mDecayVertexXiX;
-  mDecayVertexXiY = xi->mDecayVertexXiY;
-  mDecayVertexXiZ = xi->mDecayVertexXiZ;
+  mDecayVertexXiX = xi->mDecayVertexXi.x();
+  mDecayVertexXiY = xi->mDecayVertexXi.y();
+  mDecayVertexXiZ = xi->mDecayVertexXi.z();
   
   mDcaXiDaughters = xi->mDcaXiDaughters;
   mDcaBachelorToPrimVertex = xi->mDcaBachelorToPrimVertex;
   mDcaXiToPrimVertex = xi->mDcaXiToPrimVertex;
-  mMomBachelorX = xi->mMomBachelorX;
-  mMomBachelorY = xi->mMomBachelorY;
-  mMomBachelorZ = xi->mMomBachelorZ;
+  mMomBachelorX = xi->mMomBachelor.x();
+  mMomBachelorY = xi->mMomBachelor.y();
+  mMomBachelorZ = xi->mMomBachelor.z();
   
   mKeyBachelor = xi->mKeyBachelor;
   mTopologyMapBachelor[0] = xi->mTopologyMapBachelor[0];
@@ -47,8 +47,8 @@ ClassImp(StHbtTTreeXi)
 /***********************************************************************
  *
  * $Log: StHbtTTreeXi.cxx,v $
- * Revision 1.1  2001/09/05 20:41:43  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.2  2001/12/05 15:10:34  laue
+ * Boris' updates (mainly access functions)
  *
  *
  *

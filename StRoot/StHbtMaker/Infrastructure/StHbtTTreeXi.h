@@ -12,7 +12,6 @@
 #include "TObject.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTTreeV0.h"
-#include "StHbtMaker/Infrastructure/StHbtTTreeXi.h"
 
 class StHbtEvent;
 class StHbtXi;
@@ -20,7 +19,7 @@ class StHbtXi;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-class StHbtTTreeXi : public StHbtTTreeV0 {
+class StHbtTTreeXi : public StHbtTTreeV0  {
 public:
   StHbtTTreeXi(){/* no-op */}
   StHbtTTreeXi(const StHbtEvent*, const StHbtXi* ); // copy constructor
@@ -61,8 +60,8 @@ protected:
 /***********************************************************************
  *
  * $Log: StHbtTTreeXi.h,v $
- * Revision 1.1  2001/09/05 20:41:43  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.2  2001/12/05 15:10:34  laue
+ * Boris' updates (mainly access functions)
  *
  *
  ***********************************************************************/
