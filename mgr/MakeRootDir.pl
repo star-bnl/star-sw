@@ -100,10 +100,10 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    # 6.1 support
    #if( ! -l ".i386_linux22"){ symlink(".i386_redhat61",".i386_linux22");}
    # 7.x support
-   if( ! -l ".i386_redhat72"){ symlink(".i386_linux24",".i386_redhat72");}
-   if( ! -l ".rh73_gcc296"){   symlink(".i386_linux24",".rh73_gcc296");}
+   #if( ! -l ".i386_redhat72"){ symlink(".i386_linux24",".i386_redhat72");}
+   #if( ! -l ".rh73_gcc296"){   symlink(".i386_linux24",".rh73_gcc296");}
    # 8.0 support. Starting here, the sysname changed
-   if( ! -l ".i386_redhat80"){ symlink(".rh80_gcc32",".i386_redhat80");}
+   #if( ! -l ".i386_redhat80"){ symlink(".rh80_gcc32",".i386_redhat80");}
 
 
    # Little extra message for guidance
