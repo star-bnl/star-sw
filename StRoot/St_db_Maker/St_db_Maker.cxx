@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.74 2003/11/09 20:58:33 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.75 2003/11/13 02:55:39 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.75  2003/11/13 02:55:39  perev
+// Safe destructor of TDataSet like object used
+//
 // Revision 1.74  2003/11/09 20:58:33  jeromel
 // new timestamps
 //
@@ -184,7 +187,7 @@ St_db_Maker::St_db_Maker(const char *name
 St_db_Maker::~St_db_Maker()
 {
 delete fDBBroker; fDBBroker =0;
-delete fDataBase; fDataBase =0;
+                  fDataBase =0;
 delete fHierarchy;fHierarchy=0;
 }
 //_____________________________________________________________________________
@@ -304,7 +307,6 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
-   assert(fHierarchy);
    thy = fDBBroker->InitConfig(dbname,nrows);
    if (!thy || !nrows){
      Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
@@ -466,7 +468,7 @@ SWITCH:  switch (kase) {
               kase=4; goto SWITCH;
 
     case 2:   newGuy = mk->LoadTable(left);
-              if (!val->fDat) { val->fDat = newGuy;}
+              if (!val->fDat) { val->fDat = newGuy; val->AddFirst(newGuy);}
               else            { val->fDat->Update(newGuy); delete newGuy;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
               ds->GetParent()->AddFirst(val->fDat);
@@ -498,6 +500,7 @@ SWITCH:  switch (kase) {
 TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 {
 
+//      Search left object among ONLY CINT_DB objects. MySQL objects ignored here
 //	Start loop
   UInt_t uevent = GetDateTime().Get();
   
@@ -507,6 +510,7 @@ TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
   TDataSet *left=0,*rite=0,*set=0; 
   TListIter next(val->GetList());
   while ((set = (TDataSet*)next())) {
+    if (set == val->fDat) continue;  //MySQL object ignored
     const char *filename = set->GetName();
     UInt_t ucur = St_db_Maker::Time(filename).Get();
     if (uevent < ucur) 
@@ -628,11 +632,8 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
       pseudo = new St_ValiSet(psname,ds); //VP strcat(psname,".");
     }
 
-    if (isSql) { 	// save SQL  object
-      pseudo->fDat=set; set->Shunt(0);
-    } else     {	// save Cint object 
-      set->Shunt(pseudo);
-    }   
+    set->Shunt(pseudo);
+    if (isSql) pseudo->fDat=set; // save SQL  object
   }
   return kContinue;
 }
