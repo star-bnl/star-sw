@@ -21,7 +21,9 @@ void NavigationMenuGroup::create(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   //cout<<"NavigationMenuGroup::create() -I- Started"<<endl;
   TGPopupMenu * menu = new TGPopupMenu(getClient()->GetRoot());
   menu->AddEntry("Navigator",          _offset+_cmdNavigator);
-  menu->AddSeparator();  
+  menu->AddSeparator();
+  menu->AddEntry("&Next Region",       _offset+_cmdMoveToNextRegion);
+  menu->AddEntry("&Previous Region",   _offset+_cmdMoveToPreviousRegion);
   menu->AddEntry("Move &In",           _offset+_cmdMoveIn);
   menu->AddEntry("Move &Out",          _offset+_cmdMoveOut);
   menu->AddEntry("Move &Plus Phi",     _offset+_cmdMovePlusPhi);
@@ -33,11 +35,14 @@ void NavigationMenuGroup::create(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   //cout<<"NavigationMenuGroup::create() -I- Done"<<endl;
 }
 
+
 void NavigationMenuGroup::dispatch(int option)
 {
   switch (option-_offset)
     {
     case _cmdNavigator:        launchNavigator(); break;
+    case _cmdMoveToNextRegion:  moveToNextRegion(); break;
+    case _cmdMoveToPreviousRegion: moveToPreviousRegion(); break;	
     case _cmdMoveIn:           moveIn(); break;
     case _cmdMoveOut:          moveOut(); break;
     case _cmdMovePlusPhi:      movePlusPhi(); break;
@@ -45,6 +50,24 @@ void NavigationMenuGroup::dispatch(int option)
     case _cmdSetLayer:         setLayer(); break;
     case _cmdSetLayerAndAngle: setLayerAndAngle(); break;
     }
+}
+
+void NavigationMenuGroup::moveToNextRegion()
+{
+  hideCurrentDetector();
+  StiDetectorContainer* detectorContainer = getToolkit()->getDetectorContainer();
+  if (!detectorContainer->moveToNextRegion())
+    cout <<"Navigation::moveToNextRegion() -I- Reached inner most volume."<<endl;
+  showCurrentDetector();
+}
+
+void NavigationMenuGroup::moveToPreviousRegion()
+{
+  hideCurrentDetector();
+  StiDetectorContainer* detectorContainer = getToolkit()->getDetectorContainer();
+  if (!detectorContainer->moveToPreviousRegion())
+    cout <<"Navigation::moveToPreviousRegion() -I- Reached inner most volume."<<endl;
+  showCurrentDetector();
 }
 
 void NavigationMenuGroup::moveIn()
@@ -138,19 +161,31 @@ TGCompositeFrame * NavigationMenuGroup::getCompositeFrame()
   TGCompositeFrame * frame = new TGCompositeFrame(getDisplay(), 60, 20, kHorizontalFrame | kSunkenFrame);
   TGTextButton * button;
   TGLayoutHints * layout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2);
+
+  button = new TGTextButton(frame, "Next Region", _offset+_cmdMoveToNextRegion);
+  button->Associate(getDisplay()); 
+  frame->AddFrame(button,layout);
+  
+  button = new TGTextButton(frame, "Previous Region", _offset+_cmdMoveToPreviousRegion);
+  button->Associate(getDisplay()); 
+  frame->AddFrame(button,layout);
+  
   button = new TGTextButton(frame, "Move In", _offset+_cmdMoveIn);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
+  
   button = new TGTextButton(frame, "Move Out", _offset+_cmdMoveOut);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
+  
   button = new TGTextButton(frame, "Move Plus Phi", _offset+_cmdMovePlusPhi);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
+  
   button = new TGTextButton(frame, "Move Minus Phi", _offset+_cmdMoveMinusPhi);
   button->Associate(getDisplay()); 
   frame->AddFrame(button,layout);
-  frame->AddFrame(button,layout);
+  //frame->AddFrame(button,layout);
   //frame->Resize(button->GetDefaultWidth()+40, frame->GetDefaultHeight());
   return frame;
 }
@@ -165,6 +200,7 @@ void NavigationMenuGroup::showCurrentDetector()
       return;
     }
   StiRootDrawableDetector * det = dynamic_cast<StiRootDrawableDetector *>(currentDetector);
+  cout <<"Current Detector:\t"<<det->getName()<<endl;
   //store current visibility and color state
   _colorSave = det->getColor();
   _visibleSave = det->isVisible();
