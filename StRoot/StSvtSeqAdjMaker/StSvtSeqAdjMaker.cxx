@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.3 2000/07/11 18:36:15 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.4 2000/07/13 14:50:13 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.4  2000/07/13 14:50:13  caines
+ * Fixed up problem when pointer went past 128
+ *
  * Revision 1.3  2000/07/11 18:36:15  caines
  * Updates to save more of sequence for fitting
  *
@@ -256,12 +259,13 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int Anode){
       }
       if( count2 > m_n_seq_hi && count1 > m_n_seq_lo){
 	//	cout << "Adjusting Sequences for Anode=" << Anode<<  endl;
-	tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - 3];
-	tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count1 -3;
-	if( tempSeq1[nSeqNow].startTimeBin < 0){
+	tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - 1];
+	tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count1 -1;
+	if((startTimeBin + j - count1 -3)  < 0){
 	  tempSeq1[nSeqNow].startTimeBin=0;
+	  tempSeq1[nSeqNow].firstAdc=&adc[0];
 	}
-	tempSeq1[nSeqNow].length=count1+5;
+	tempSeq1[nSeqNow].length=count1+3;
 	if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
 	  tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
 	nSeqNow++;
@@ -313,14 +317,15 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
                     ++count;
                     ++j;
                     tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
-                    if(count >  m_n_seq_lo && (tempBuffer < m_inv_prod_lo || j == len))
+                    if(count >  0 && (tempBuffer < m_inv_prod_lo || j == len))
 		      {
-			tempSeq1[nSeqNow].firstAdc=&adc[j- count - 3];
+			tempSeq1[nSeqNow].firstAdc=&adc[j- count - 1];
 			tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count -3;
-			if( tempSeq1[nSeqNow].startTimeBin < 0){
+			if( (startTimeBin + j - count -1) < 0){
 			  tempSeq1[nSeqNow].startTimeBin=0;
+			  tempSeq1[nSeqNow].firstAdc=&adc[0];
 			}
-			tempSeq1[nSeqNow].length=count+5;
+			tempSeq1[nSeqNow].length=count+3;
 			if( tempSeq1[nSeqNow].length + 
 			    tempSeq1[nSeqNow].startTimeBin>128)
 			  tempSeq1[nSeqNow].length=128-
