@@ -40,7 +40,7 @@ long type_of_call track_propagator_(
   float trk[7], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
   float phi0, phi, dphi, temppsi, test=1. ;
   long  q, psiftr;
-  float xlocal(3),bfield(3);
+  float xlocal[3],bfield[3];
   
 
   /* get magnetic field   */
