@@ -32,6 +32,8 @@ public:
 
     //Action
     void addDrawable(StiDrawable*);
+    //clean up after each event (e.g., remove tracks)
+    void reset();
     
     void cd();
     void update();
@@ -56,7 +58,8 @@ private:
 
     static StiDisplayManager* sinstance;
 
-    //dx, dy, and dz define the volume within which objects are drawn.  The volume is a rectangle of lengths 2*dx, 2*dy, 2*dz
+    //dx, dy, and dz define the volume within which objects are drawn.
+    //The volume is a rectangle of lengths 2*dx, 2*dy, 2*dz
     enum StiCanvasSize {kXmin=200, kXmax=600, kYmin=100, kYmax=500};
     enum StiMainVolumeSize {kdx=200, kdy=200, kdz=240};
     

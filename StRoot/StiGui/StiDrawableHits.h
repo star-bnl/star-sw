@@ -10,8 +10,9 @@
 #include "StiDrawable.h"
 
 class StiHit;
+class StThreeVectorD;
 
-typedef vector<StiHit const*> const_hit_vector;
+typedef vector<StiHit*> const_hit_vector;
 
 class StiDrawableHits : public StiDrawable, public const_hit_vector
 {
@@ -20,11 +21,6 @@ public:
     StiDrawableHits();
     virtual ~StiDrawableHits();
 
-    //Interface to container of hits to be drawn
-    //virtual void push_back(const StiHit*);
-    //virtual unsigned int size() const;
-    //virtual void clear();
-    
     //Most drawing libraries require an array of points to be drawn
     virtual void fillHitsForDrawing() = 0;
     
