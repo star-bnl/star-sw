@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.1 2004/01/28 02:47:45 dongx Exp $
+* $Id: TOF_Reader.cxx,v 2.2 2004/08/07 02:43:32 perev Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.2  2004/08/07 02:43:32  perev
+* more test for corruption added
+*
 * Revision 2.1  2004/01/28 02:47:45  dongx
 * change for year4 run (pVPD+TOFp+TOFr')
 *  - Addtional TOFr' ADCs and TDCs put in
@@ -24,6 +27,7 @@
 * First release
 *
 **************************************************************************/
+#include <assert.h>
 #include "TOF_Reader.hh"
 
 bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
@@ -289,6 +293,7 @@ unsigned short TOF_Reader::GetTofrTdc(int padId){
     }
     return mTheTofArray.TdcData[48+offset+padId];
   }
+  assert(0); return 0;
 }
 
 unsigned short TOF_Reader::GetTofrTOT(int totId){

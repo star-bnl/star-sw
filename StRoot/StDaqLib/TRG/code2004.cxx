@@ -62,18 +62,13 @@ int Bank_TRGD::HerbSwap2004(char *ptr) {
   swapHerb2bytes(&(gs2004->TrgSum.L2SumHeader),1);
   swapHerb4bytes(&(gs2004->TrgSum.L2Result[0]),32);
   
-  // Herb, Mar 28 2003.  There is a bug, from which the npre/npost numbers in the 
-  // trigger data (5/5) sometimes do not agree with the bank len in the TRGD header, which causes a seg vio
-  // in the for() loop below.  Here I check for the bug, and if it's present, I override npre and npost.
-  if( 4*header.BankLength < int((1+gs2004->EvtDesc.npre+gs2004->EvtDesc.npost) * sizeof(RawTrgDet2004)) ) {
-    gs2004->EvtDesc.npre=0; gs2004->EvtDesc.npost=0;
-  }
-
   numToSwap=1+gs2004->EvtDesc.npost+gs2004->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
   assert(numToSwap>=0&&numToSwap<=PREPOST);
+  int maxToSwap = 4*header.BankLength-(sizeof(EvtDescData2004)+sizeof(TrgSumData2004));
+  maxToSwap/=sizeof(RawTrgDet2004);
+  if (numToSwap>maxToSwap)  return -1;
 
-
-  for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
+    for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
     swapHerb2bytes(&(gs2004->RAW[i].RawDetBytes),1);
     swapHerb2bytes(&(gs2004->RAW[i].CTBdataBytes),1);
     swapHerb2bytes(&(gs2004->RAW[i].MWCdataBytes),1);
