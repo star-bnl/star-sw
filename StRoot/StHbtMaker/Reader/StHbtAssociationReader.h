@@ -5,7 +5,6 @@
 #include "StMaker.h"
 #include "StHbtMaker/Infrastructure/StHbtCheckPdgIdList.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 
@@ -16,7 +15,7 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
   StMaker* mTheEventMaker;        //! this is the chain where the StEventReaderMaker is
   StMaker* mTheMcEventMaker;      //! this is the chain where the StMcEventReaderMaker is
   StMaker* mTheAssociationMaker;  //! this is the chain where the StAssociationEventReaderMaker is
-  StV0MiniDstMaker* mTheV0Maker;  //! this is the chain where the StV0MiniDstMaker is
+  //  StMaker* mTheV0Maker;       //! this is the chain where the StStrangeMuDstMaker is
 
   // some monitor histograms
   StHbt1DHisto* mDiffCurrent;   //! momenta diff distribution
@@ -30,7 +29,6 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
   time_t timeStamp;
   
  protected:
-  TOrdCollection *mCollection; //!
 
  public:
 
@@ -44,11 +42,11 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
   void SetTheEventMaker(StMaker*);
   void SetTheMcEventMaker(StMaker*);
   void SetTheAssociationMaker(StMaker*);
-  void SetTheV0Maker(StV0MiniDstMaker*);
+  //void SetTheV0Maker(StMaker*);
   StMaker* TheEventMaker();
   StMaker* TheMcEventMaker();
   StMaker* TheAssociationMaker();
-  StV0MiniDstMaker* TheV0Maker();
+  //StMaker* TheV0Maker();
 
   ClassDef(StHbtAssociationReader, 0)
 };
@@ -56,10 +54,11 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
 inline void StHbtAssociationReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
 inline void StHbtAssociationReader::SetTheMcEventMaker(StMaker* mcMaker){mTheMcEventMaker=mcMaker;}
 inline void StHbtAssociationReader::SetTheAssociationMaker(StMaker* associationMaker){mTheAssociationMaker=associationMaker;}
+//inline void StHbtAssociationReader::SetTheV0Maker(StMaker* theV0Maker) { mTheV0Maker = theV0Maker; };
 inline StMaker* StHbtAssociationReader::TheEventMaker(){return mTheEventMaker;}
 inline StMaker* StHbtAssociationReader::TheMcEventMaker(){return mTheMcEventMaker;}
 inline StMaker* StHbtAssociationReader::TheAssociationMaker(){return mTheAssociationMaker;}
-inline StV0MiniDstMaker* StHbtAssociationReader::TheV0Maker(){return mTheV0Maker;}
+//inline StMaker* StHbtAssociationReader::TheV0Maker(){return mTheV0Maker;}
 
 #endif
 

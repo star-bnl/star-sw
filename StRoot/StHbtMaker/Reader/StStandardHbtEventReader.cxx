@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.23 2000/07/03 02:07:51 perev Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.24 2000/07/16 21:14:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,8 +20,11 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
- * Revision 1.23  2000/07/03 02:07:51  perev
- * StEvent: vector<TObject*>
+ * Revision 1.24  2000/07/16 21:14:45  laue
+ * StStandardHbtEventReader modified to read primary tracks only
+ *
+ * Some unnecessary includes removed.
+ * Changes from StV0MiniDst to StStrangeMuDst
  *
  * Revision 1.22  2000/06/08 16:12:11  laue
  * StStandardHbtEventReader.cxx: Topology map for V0 fixed
@@ -105,20 +108,15 @@
  * Installation of StHbtMaker
  *
  **************************************************************************/
-#define HBT_BFIELD 0.5*tesla
+#define HBT_BFIELD 0.25*tesla
  
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain.h"
-#include "TOrdCollection.h"
-#include "StTrackDetectorInfo.h"
 
-// these StEvent files keep oscillating between ".hh" and ".h" files
-// fortunatey, they are used only here
 
 #include "StEvent.h"
+#include "StEventSummary.h"
 #include "StGlobalTrack.h"
-// <<<<< #include "StTpcDedxPid.h"
-// <<<<< #include "StDedxPid.h"
 #include "StTrackNode.h"
 #include "StContainers.h"
 #include "StPrimaryVertex.h"
@@ -127,27 +125,17 @@
 #include "StDedxPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StTrackGeometry.h"
-
+#include "StTrackDetectorInfo.h"
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StHit.h"
 
-//#include <typeinfo>
 #include <math.h>
 
 
-/* .hh files
-//   #include "StEvent/StEvent.hh"
-//   #include "StEvent/StGlobalTrack.hh"
-//   #include "StEvent/StTpcDedxPid.hh"
-//   #include "StEvent/StDedxPid.hh"
-*/
-//
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-//#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-//#include "StV0MiniDstMaker/StV0MiniDst.hh"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 
@@ -219,15 +207,20 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     cout << " StStandardHbtEventReader::ReturnHbtEvent() - No StEvent!!! " << endl;
     return 0;
   }
-
-
+  /*
+  StEventSummary* summary = rEvent->summary();
+  if (!summary){
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() - No StEventSummary!!! " << endl;
+    return 0;
+  }
+  */
   StHbtEvent* hbtEvent = new StHbtEvent;
 
-  //int mult = rEvent->trackCollection()->size();
   int mult = rEvent->trackNodes().size();
-  hbtEvent->SetNumberOfTracks(mult);
-  hbtEvent->SetNumberOfGoodTracks(mult);  // same for now
+
   if ( rEvent->numberOfPrimaryVertices() != 1) {
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() -  rEvent->numberOfPrimaryVertices()=" << 
+      rEvent->numberOfPrimaryVertices() << endl;
     delete hbtEvent;
     return 0;
   }
@@ -244,7 +237,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     }
   }
 
-  StTrack* rTrack;
+  StTrack* pTrack; // primary
+  StTrack* gTrack; // global
   cout << "StStandardHbtReader::ReturnHbtEvent() - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
   StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
@@ -257,29 +251,56 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
 
+  int iNoPrimary = 0;
   int iNoGlobal = 0;
   int iNoHits = 0;
   int iNoPidTraits = 0;
   int iFailedCut =0;
   int iNoBestGuess =0;
+  int iBadFlag =0;
+  int iPrimary = 0;
+  int iGoodPrimary = 0;
   // loop over all the tracks, accept only global
   for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
+    pTrack = rEvent->trackNodes()[icount]->track(primary);
+    if (pTrack) {
+      iPrimary++;
+      if (pTrack->flag()>=0) { 
+	iGoodPrimary++;
+      }
+    }
+  }
+  
+  hbtEvent->SetNumberOfTracks(iPrimary);
+  hbtEvent->SetNumberOfGoodTracks(iGoodPrimary);
+  
 
-
+  for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
     //cout << " track# " << icount << endl;
-    rTrack = rEvent->trackNodes()[icount]->track(global);
+    pTrack = rEvent->trackNodes()[icount]->track(primary);
+    gTrack = rEvent->trackNodes()[icount]->track(global);
 
 
-    // don't make a hbtTrack if not a global track
-    if (!rTrack) {
+    // don't make a hbtTrack if not a primary track
+    if (!pTrack) {
+      iNoPrimary++;
+      //cout << " No primary track -- skipping track" << endl;
+      continue;
+    }
+    if (pTrack->flag() < 0) {
+      iBadFlag++;
+      cout << " Flag < 0 -- skipping track" << endl;
+      continue;
+    }
+    if (!gTrack) {
       iNoGlobal++;
-      //cout << "No global track -- skipping track" << endl;
+      cout <<  " Primary track, but no global track -- skipping track" << endl;
       continue;
     }
 
 
     // check number points in tpc
-    int nhits = rTrack->detectorInfo()->numberOfPoints(kTpcId);
+    int nhits = pTrack->detectorInfo()->numberOfPoints(kTpcId);
     //cout << "nhits\t" << nhits << endl;
     if (nhits==0) {
       iNoHits++;
@@ -287,19 +308,19 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       continue;
     }
     // get dedxPidTraits
-    //cout << " number of pidTraits " << rTrack->pidTraits().size();
-    //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
+    //cout << " number of pidTraits " << pTrack->pidTraits().size();
+    //cout << " number of pidTraits for tpc: " << pTrack->pidTraits(kTpcId).size() << endl;
     StTrackPidTraits* trackPidTraits=0; 
     size_t iPidTraitsCounter=0;
 
-    //for ( int ihit = 0; ihit < rTrack->detectorInfo()->hits(kTpcId).size(); ihit++) {
-    //  cout << rTrack->detectorInfo()->hits(kTpcId)[ihit]->position() << endl;
+    //for ( int ihit = 0; ihit < pTrack->detectorInfo()->hits(kTpcId).size(); ihit++) {
+    //  cout << pTrack->detectorInfo()->hits(kTpcId)[ihit]->position() << endl;
     //}
 
     do {
-      trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
+      trackPidTraits = pTrack->pidTraits(kTpcId)[iPidTraitsCounter];
       iPidTraitsCounter++;
-    } while (iPidTraitsCounter < rTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
+    } while (iPidTraitsCounter < pTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
     if (!trackPidTraits) {
       iNoPidTraits++;
       //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
@@ -318,7 +339,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
     // pointers to track and pidTraits are set 
     //cout << "look for best guess " << endl;
-    StParticleDefinition* BestGuess = (StParticleDefinition*)rTrack->pidTraits(*PidAlgorithm);
+    StParticleDefinition* BestGuess = (StParticleDefinition*)pTrack->pidTraits(*PidAlgorithm);
     //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
     
     if (!BestGuess){
@@ -331,7 +352,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
 
     // get fitTraits
-    StTrackFitTraits fitTraits = rTrack->fitTraits();
+    StTrackFitTraits fitTraits = pTrack->fitTraits();
     //cout << " got fitTraits " << endl;
 
     //cout << "Getting readty to instantiate new StHbtTrack " << endl;
@@ -343,7 +364,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
     
-    hbtTrack->SetTrackId(rTrack->key());
+    hbtTrack->SetTrackId(pTrack->key());
 
     hbtTrack->SetNHits(nhits);
 
@@ -371,23 +392,24 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << "dEdx\t" << dEdx << endl; 
     hbtTrack->SetdEdx(dEdx);
     
-    double pathlength = rTrack->geometry()->helix().pathLength(vp);
+    double pathlength = pTrack->geometry()->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_BFIELD);
+    StHbtThreeVector p = pTrack->geometry()->momentum();
+    //StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
 
 
-    StHbtThreeVector  DCAxyz = rTrack->geometry()->helix().at(pathlength)-vp;
+    StHbtThreeVector  DCAxyz = pTrack->geometry()->helix().at(pathlength)-vp;
     //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
     hbtTrack->SetDCAxy( DCAxyz.perp() );
     hbtTrack->SetDCAz(  DCAxyz.z()  );
 
-    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chi2(0) );
-    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chi2(1) ); 
+    hbtTrack->SetChiSquaredXY( pTrack->fitTraits().chi2(0) );
+    hbtTrack->SetChiSquaredZ( pTrack->fitTraits().chi2(1) ); 
 
-    StPhysicalHelixD  helix = rTrack->geometry()->helix();
+    StPhysicalHelixD  helix = pTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
 
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
@@ -396,12 +418,12 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     
     hbtTrack->SetPt(pt);
     
-    int charge = (rTrack->geometry()->charge());
+    int charge = (pTrack->geometry()->charge());
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
-    hbtTrack->SetTopologyMap( 0, rTrack->topologyMap().data(0) );
-    hbtTrack->SetTopologyMap( 1, rTrack->topologyMap().data(1) );
+    hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
+    hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
 
     //cout << "pushing..." <<endl;
 
@@ -420,13 +442,13 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   delete PidAlgorithm;
 
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-global tracks skipped \n",iNoGlobal);
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks skipped because of nHits=0 \n",iNoHits);
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks skipped because of not tpcPidTraits \n",iNoPidTraits);
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks failed the track cuts \n",iFailedCut);
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) tracks pushed into collection \n",
-	 hbtEvent->TrackCollection()->size(),
-	 mult); 
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-primary,        tracks skipped \n",iNoPrimary);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-global,         tracks skipped \n",iNoGlobal);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i no hits,            tracks skipped \n",iNoHits);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i no tpcPidTraits,    tracks skipped \n",iNoPidTraits);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i failed tracks cuts, track skipped \n",iFailedCut);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i bad flag,           track skipped \n",iBadFlag);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) tracks pushed into collection \n",hbtEvent->TrackCollection()->size(),	 mult); 
 
   //Now do v0 stuff
 
