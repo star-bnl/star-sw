@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.9 2000/03/02 23:02:38 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.10 2000/05/11 20:00:31 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,17 +9,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.10  2000/05/11 20:00:31  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.9  2000/03/02 23:02:38  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.8  2000/02/29 22:00:51  posk
-// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.7  2000/02/11 20:53:06  posk
-// Commented out random_shuffle and cout formatting so as to work under CC5.
-//
-// Revision 1.6  2000/01/13 22:19:16  posk
-// Updates and corrections.
 //
 // Revision 1.5  1999/12/15 22:01:22  posk
 // Added StFlowConstants.hh
@@ -143,8 +137,7 @@ Int_t StFlowCutEvent::CheckEtaSymmetry() {
 
   float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
   float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
-  float etaSym = (etaSymPosN - etaSymNegN) / 
-    (etaSymPosN + etaSymNegN);
+  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
   StFlowCutTrack::EtaSymClear();
   if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
       (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {

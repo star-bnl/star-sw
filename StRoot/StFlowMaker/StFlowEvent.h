@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.2 2000/03/15 23:28:51 posk Exp $
+// $Id: StFlowEvent.h,v 1.3 2000/05/11 20:00:34 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.3  2000/05/11 20:00:34  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.2  2000/03/15 23:28:51  posk
 // Added StFlowSelection.
 //
@@ -75,6 +78,7 @@ public:
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
   UInt_t         EventNumber() const;
   UInt_t         OrigMult() const;
+  UInt_t         TotalMult() const;
   UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
   UInt_t         Mult(StFlowSelection*);
@@ -105,14 +109,14 @@ public:
 
 private:
 
-  UInt_t          mEventNumber;                        // number of the event
-  UInt_t          mOrigMult;                           // number of tracks
-  UInt_t          mCentrality;                         // centrality bin
-  StThreeVectorF  mVertexPos;                          // primary vertex position
-  static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels]; // range absolute values
-  static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels];  // range
+  UInt_t          mEventNumber;                         // number of the event
+  UInt_t          mOrigMult;                            // number of tracks
+  UInt_t          mCentrality;                          // centrality bin
+  StThreeVectorF  mVertexPos;                           // primary vertex position
+  static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
+  static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels]; // range
   Flow::PhiWgt_t  mPhiWgt;
-  static Float_t  mPiPlusCuts[2];                      // PID cuts
+  static Float_t  mPiPlusCuts[2];                       // PID cuts
   static Float_t  mPiMinusCuts[2];
   static Float_t  mProtonCuts[2];
 
@@ -128,6 +132,8 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
 inline UInt_t StFlowEvent::EventNumber() const { return mEventNumber; }
 
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
+
+inline UInt_t StFlowEvent::TotalMult() const { return pTrackCollection->size(); }
 
 inline UInt_t StFlowEvent::Centrality() const { return mCentrality; }
 

@@ -1,14 +1,17 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.1 2000/03/02 23:02:57 posk Exp $
+// $Id: StFlowTrack.h,v 1.2 2000/05/11 20:00:39 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
-//////////////////////////////////////////////////////////////////////
 //
 // Description: part of StFlowTrackCollection
+//
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.2  2000/05/11 20:00:39  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.1  2000/03/02 23:02:57  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -17,9 +20,6 @@
 //
 // Revision 1.9  2000/02/18 22:49:57  posk
 // Added PID and centrality.
-//
-// Revision 1.8  2000/01/13 22:19:21  posk
-// Updates and corrections.
 //
 // Revision 1.7  1999/12/21 01:11:02  posk
 // Added more quantities to StFlowEvent.

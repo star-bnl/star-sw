@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.9 2000/03/15 23:28:49 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.10 2000/05/11 20:00:32 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.10  2000/05/11 20:00:32  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.9  2000/03/15 23:28:49  posk
 // Added StFlowSelection.
 //
@@ -17,12 +20,6 @@
 //
 // Revision 1.7  2000/02/29 22:00:52  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.6  2000/02/11 20:53:08  posk
-// Commented out random_shuffle and cout formatting so as to work under CC5.
-//
-// Revision 1.5  2000/01/13 22:19:17  posk
-// Updates and corrections.
 //
 // Revision 1.4  1999/12/15 22:01:23  posk
 // Added StFlowConstants.hh

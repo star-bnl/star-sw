@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.2 2000/03/15 23:28:50 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.3 2000/05/11 20:00:33 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.3  2000/05/11 20:00:33  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.2  2000/03/15 23:28:50  posk
 // Added StFlowSelection.
 //
@@ -30,12 +33,6 @@
 //
 // Revision 1.12  2000/01/31 22:16:58  posk
 // CC5 compliant.
-//
-// Revision 1.11  2000/01/24 23:00:59  posk
-// Merged updates
-//
-// Revision 1.10  2000/01/13 22:19:18  posk
-// Updates and corrections.
 //
 // Revision 1.9  1999/12/21 17:31:50  posk
 // Fixed random_shuffle in making the sub events.
@@ -74,9 +71,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
-//#if defined(ST_NO_TEMPLATE_DEF_ARGS)
-//#include <ospace/stl/src/randgen.cpp>
-//#endif
 #if !defined(ST_NO_NAMESPACES)
 using std::random_shuffle;
 #endif

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowNanoEvent.cxx,v 1.2 2000/03/08 15:10:48 posk Exp $
+// $Id: StFlowNanoEvent.cxx,v 1.3 2000/05/11 20:00:37 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -29,11 +29,16 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowNanoEvent.cxx,v $
+// Revision 1.3  2000/05/11 20:00:37  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.2  2000/03/08 15:10:48  posk
-// Added $Id$ and $Log$.
+// Added $Id: StFlowNanoEvent.cxx,v 1.3 2000/05/11 20:00:37 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
+// Added $Id$ and Revision 1.3  2000/05/11 20:00:37  posk
+// Added $Id$ and Preparation for micro and nano DSTs.
+// Added $Id$ and.
 //
 //
-// 
 //////////////////////////////////////////////////////////////////////////
 
 #include "StFlowNanoEvent.h"
