@@ -1,5 +1,15 @@
-// $Id: StFtpcPoint.hh,v 1.2 2000/06/13 14:49:25 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.3 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.3  2000/07/18 21:22:16  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.2  2000/06/13 14:49:25  oldi
 // Added SetTrackedFlag(Bool_t tracked) and GetTrackedFlag() to take care of the
 // bit 5 of mFlags.
@@ -28,12 +38,14 @@
 
 #include "StFtpcTrack.hh"
 
+class StFtpcTrack;
+
 class StFtpcPoint : public TObject {
   
 private:
   
-  StThreeVector<double> mCoord;  // vector of cluster coordinates
-  StThreeVector<double> mError;  // vector of errors on cluster coordinates
+  StThreeVector<double> mCoord;  //! vector of cluster coordinates
+  StThreeVector<double> mError;  //! vector of errors on cluster coordinates
   
   Bool_t    mUsed;          // flag that indicates if the hit is assigned to a track 
   Int_t     mHitNumber;     // number of this cluster in this event
@@ -56,6 +68,7 @@ public:
   
                  StFtpcPoint();                                 // default constructor
                  StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
+                 StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
   virtual Int_t  Write();                                       // writes cluster to disc
   
@@ -113,5 +126,32 @@ public:
   
   ClassDef(StFtpcPoint, 1)   //Ftpc point class
 };
+
+
+inline StFtpcTrack *StFtpcPoint::GetTrack(TClonesArray *tracks) const
+{
+  // Returns the pointer to the track to which this hit belongs.
+
+  return (StFtpcTrack*)tracks->At(this->GetTrackNumber());
+}
+
+
+inline void StFtpcPoint::SetTrackedFlag(Bool_t tracked) 
+{
+  // Sets flag, if the cluster was used for tracking.
+  // This has to be done due to consitency with the point bank.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFEF) | ((Long_t)tracked*16));
+}
+
+
+inline Bool_t StFtpcPoint::GetTrackedFlag()
+{
+  // Returns true, if 'tracked flag' ist set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)16);
+}
+
 
 #endif

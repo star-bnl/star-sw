@@ -1,5 +1,15 @@
-// $Id: StFtpcTracker.hh,v 1.4 2000/07/03 12:48:14 jcs Exp $
+// $Id: StFtpcTracker.hh,v 1.5 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.5  2000/07/18 21:22:17  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.4  2000/07/03 12:48:14  jcs
 // use (pre)Vertex id to access vertex coordinates for unconstrained fit and
 // for constrained fit
@@ -49,8 +59,9 @@ protected:
 public:
 
             StFtpcTracker();  // default constructor
-            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);             // real constructor
-            StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t dca);                    // constructor if everything is already there
+            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);            // real constructor
+            StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t max_Dca = 100.);         // constructor if everything is already there
+            StFtpcTracker(TClonesArray *hits, Double_t vertexPos[3], Double_t max_Dca = 100.);                            // constructor to handle arbitrary hits 
             StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca);  // constructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
@@ -71,5 +82,21 @@ public:
 
   ClassDef(StFtpcTracker, 1)  //Ftpc tracker interface class
 };
+
+
+inline Int_t StFtpcTracker::Write()
+{
+  // Writes tracks and clusters in ROOT file.
+  // In the moment this makes no sense because the important information
+  // about momentum of tracks and coordinates of clusters or stored in
+  // StThreeVerctor<double> which does not inherit from TObject. So it
+  // is not written out!
+
+  mHit->Write();
+  mTrack->Write();
+  
+  return 0;
+}
+
 
 #endif

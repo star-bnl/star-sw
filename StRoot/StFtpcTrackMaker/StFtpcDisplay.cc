@@ -1,5 +1,15 @@
-// $Id: StFtpcDisplay.cc,v 1.5 2000/06/07 11:33:01 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.6 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.6  2000/07/18 21:22:16  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.5  2000/06/07 11:33:01  oldi
 // Changed 0 pointers to NULL pointers.
 // Names of variables changed to make the code easier to understand.
@@ -27,7 +37,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 18.05.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcDisplay.hh"
@@ -61,18 +71,18 @@ StFtpcDisplay::StFtpcDisplay()
 {
   // Default constructor.
   
-  mNumRowSegment = 20;
+  mNumRowSegment =  20;
   mNumPhiSegment = 100;
   mNumEtaSegment = 200;
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
   mTrack = NULL;
-  mHit = NULL;
+  mHit   = NULL;
   mGeantTrack = NULL;
-  mGeantHit = NULL;
+  mGeantHit   = NULL;
   
-  mX_Y_Z = NULL;
-  mX_Y_Zplus = NULL;
+  mX_Y_Z      = NULL;
+  mX_Y_Zplus  = NULL;
   mX_Y_Zminus = NULL;
 
   mNode0 = NULL;
@@ -80,47 +90,52 @@ StFtpcDisplay::StFtpcDisplay()
   mNode2 = NULL;
 
   current_line = NULL;
-  line = NULL;
+  found_line   = NULL;
+  geant_line   = NULL;
 
-  found_hit = new TPolyMarker3D();
-  found_hit_plus = new TPolyMarker3D();
-  found_hit_minus = new TPolyMarker3D();
-  unused_hit = new TPolyMarker3D();
-  unused_hit_plus = new TPolyMarker3D();
+  found_hit        = new TPolyMarker3D();
+  found_hit_plus   = new TPolyMarker3D();
+  found_hit_minus  = new TPolyMarker3D();
+  geant_hit        = new TPolyMarker3D();
+  geant_hit_plus   = new TPolyMarker3D();
+  geant_hit_minus  = new TPolyMarker3D();
+  unused_hit       = new TPolyMarker3D();
+  unused_hit_plus  = new TPolyMarker3D();
   unused_hit_minus = new TPolyMarker3D();
-  wrong_hit = new TPolyMarker3D();
-  wrong_hit_plus = new TPolyMarker3D();
-  wrong_hit_minus = new TPolyMarker3D();
+  wrong_hit        = new TPolyMarker3D();
+  wrong_hit_plus   = new TPolyMarker3D();
+  wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value = NULL;
-  found_value_minus = NULL;
-  found_value_plus = NULL;
-  unused_value = NULL;
+  found_value        = NULL;
+  found_value_minus  = NULL;
+  found_value_plus   = NULL;
+  geant_value        = NULL;
+  geant_value_minus  = NULL;
+  geant_value_plus   = NULL;
+  unused_value       = NULL;
   unused_value_minus = NULL;
-  unused_value_plus = NULL;
-  wrong_value = NULL;
-  wrong_value_minus = NULL;
-  wrong_value_plus = NULL;
-
-  mIsGeant = (Bool_t) false;
+  unused_value_plus  = NULL;
+  wrong_value        = NULL;
+  wrong_value_minus  = NULL;
+  wrong_value_plus   = NULL;
 }
 
 
 StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks) 
 {
   // Ususal constructor.
-  mNumRowSegment = 20;
+  mNumRowSegment =  20;
   mNumPhiSegment = 100;
   mNumEtaSegment = 200;
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
 
   mTrack = tracks;
-  mHit = hits;
-  mGeantHit = NULL;
+  mHit   = hits;
+  mGeantHit   = NULL;
   mGeantTrack = NULL;
 
-  mX_Y_Z = NULL;
-  mX_Y_Zplus = NULL;
+  mX_Y_Z      = NULL;
+  mX_Y_Zplus  = NULL;
   mX_Y_Zminus = NULL;
 
   mNode0 = NULL;
@@ -128,29 +143,34 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
   mNode2 = NULL;
 
   current_line = NULL;
-  line = NULL;
+  found_line   = NULL;
+  geant_line   = NULL;
 
-  found_hit = new TPolyMarker3D();
-  found_hit_plus = new TPolyMarker3D();
-  found_hit_minus = new TPolyMarker3D();
-  unused_hit = new TPolyMarker3D();
-  unused_hit_plus = new TPolyMarker3D();
+  found_hit        = new TPolyMarker3D();
+  found_hit_plus   = new TPolyMarker3D();
+  found_hit_minus  = new TPolyMarker3D();
+  geant_hit        = new TPolyMarker3D();
+  geant_hit_plus   = new TPolyMarker3D();
+  geant_hit_minus  = new TPolyMarker3D();
+  unused_hit       = new TPolyMarker3D();
+  unused_hit_plus  = new TPolyMarker3D();
   unused_hit_minus = new TPolyMarker3D();
-  wrong_hit = new TPolyMarker3D();
-  wrong_hit_plus = new TPolyMarker3D();
-  wrong_hit_minus = new TPolyMarker3D();
+  wrong_hit        = new TPolyMarker3D();
+  wrong_hit_plus   = new TPolyMarker3D();
+  wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value = NULL;
-  found_value_minus = NULL;
-  found_value_plus = NULL;
-  unused_value = NULL;
+  found_value        = NULL;
+  found_value_minus  = NULL;
+  found_value_plus   = NULL;
+  geant_value        = NULL;
+  geant_value_minus  = NULL;
+  geant_value_plus   = NULL;
+  unused_value       = NULL;
   unused_value_minus = NULL;
-  unused_value_plus = NULL;
-  wrong_value = NULL;
-  wrong_value_minus = NULL;
-  wrong_value_plus = NULL;
-
-  mIsGeant = (Bool_t) false;
+  unused_value_plus  = NULL;
+  wrong_value        = NULL;
+  wrong_value_minus  = NULL;
+  wrong_value_plus   = NULL;
 }
 
 
@@ -158,18 +178,18 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
 {
   // Constructor for evaluator output.
 
-  mNumRowSegment = 20;
+  mNumRowSegment =  20;
   mNumPhiSegment = 100;
   mNumEtaSegment = 200;
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
   mTrack = tracks;
-  mHit = hits;
+  mHit   = hits;
   mGeantTrack = geanttracks;
-  mGeantHit = geanthits;
+  mGeantHit   = geanthits;
 
-  mX_Y_Z = NULL;
-  mX_Y_Zplus = NULL;
+  mX_Y_Z      = NULL;
+  mX_Y_Zplus  = NULL;
   mX_Y_Zminus = NULL;
 
   mNode0 = NULL;
@@ -177,29 +197,34 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
   mNode2 = NULL;
 
   current_line = NULL;
-  line = NULL;
+  found_line   = NULL;
+  geant_line   = NULL;
 
-  found_hit = new TPolyMarker3D();
-  found_hit_plus = new TPolyMarker3D();
-  found_hit_minus = new TPolyMarker3D();
-  unused_hit = new TPolyMarker3D();
-  unused_hit_plus = new TPolyMarker3D();
+  found_hit        = new TPolyMarker3D();
+  found_hit_plus   = new TPolyMarker3D();
+  found_hit_minus  = new TPolyMarker3D();
+  geant_hit        = new TPolyMarker3D();
+  geant_hit_plus   = new TPolyMarker3D();
+  geant_hit_minus  = new TPolyMarker3D();
+  unused_hit       = new TPolyMarker3D();
+  unused_hit_plus  = new TPolyMarker3D();
   unused_hit_minus = new TPolyMarker3D();
-  wrong_hit = new TPolyMarker3D();
-  wrong_hit_plus = new TPolyMarker3D();
-  wrong_hit_minus = new TPolyMarker3D();
+  wrong_hit        = new TPolyMarker3D();
+  wrong_hit_plus   = new TPolyMarker3D();
+  wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value = NULL;
-  found_value_minus = NULL;
-  found_value_plus = NULL;
-  unused_value = NULL;
+  found_value        = NULL;
+  found_value_minus  = NULL;
+  found_value_plus   = NULL;
+  geant_value        = NULL;
+  geant_value_minus  = NULL;
+  geant_value_plus   = NULL;
+  unused_value       = NULL;
   unused_value_minus = NULL;
-  unused_value_plus = NULL;
-  wrong_value = NULL;
-  wrong_value_minus = NULL;
-  wrong_value_plus = NULL;
-
-  mIsGeant = (Bool_t) false;
+  unused_value_plus  = NULL;
+  wrong_value        = NULL;
+  wrong_value_minus  = NULL;
+  wrong_value_plus   = NULL;
 } 
 
 
@@ -212,6 +237,9 @@ StFtpcDisplay::~StFtpcDisplay()
   delete found_hit;
   delete found_hit_plus;
   delete found_hit_minus;
+  delete geant_hit;
+  delete geant_hit_plus;
+  delete geant_hit_minus;
   delete unused_hit;
   delete unused_hit_plus;
   delete unused_hit_minus;
@@ -231,12 +259,12 @@ void StFtpcDisplay::TrackInfo()
 
   TCanvas *track_canvas = new TCanvas("track_canvas", "Tracks", 1580, 600);
   track_canvas->Divide(3,1);
-  TH2F *phi_frame = new TH2F("phi_frame", "phi_frame", 60, -30, 30, 60, -30, 30);
+  TH2F *phi_frame  = new TH2F("phi_frame",  "phi_frame",   60, -30,    30, 60, -30, 30);
   TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -30, 30);
-  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120, 150, 270, 60, -30, 30);
+  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120,  150,  270, 60, -30, 30);
 
-  TH2F *circle_frame = new TH2F("circle_frame", "circle_frame", 60, -0.15, 0.15, 60, -0.15, 0.15);
-  TH2F *z_frame = new TH2F("z_frame", "z_frame",  540, -270, 270, 700, -7, 7);
+  TH2F *circle_frame = new TH2F("circle_frame", "circle_frame",  60,   -0.15,   0.15,  60, -0.15, 0.15);
+  TH2F *z_frame      = new TH2F("z_frame",      "z_frame",      540, -270,    270,    700, -7,    7);
 
   TCanvas *fit_canvas = new TCanvas("fit_canvas", "Conformal Mapping Coordinates", 1000, 600);
   fit_canvas->Divide(2,1);
@@ -269,14 +297,14 @@ void StFtpcDisplay::TrackInfo()
     eta_value = (4.165-2.396)/(mNumEtaSegment/2.) * i + 2.396;
     
     eta_line[i*2] = TLine(-270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.),
-			-270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.), 
-			270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
-			270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.));
-    
-    eta_line[2*i+1] = TLine(270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
 			  -270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.), 
-			  -270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
-			  270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.));
+			   270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
+			   270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.));
+    
+    eta_line[2*i+1] = TLine( 270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
+			    -270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.), 
+			    -270*TMath::Cos(TMath::ATan(TMath::Exp(-eta_value))*2.), 
+			     270*TMath::Sin(TMath::ATan(TMath::Exp(-eta_value))*2.));
   }
   
   TObjArray *hits;
@@ -799,18 +827,18 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   // Showtracks(trackanz, x[trackanz]) displays all tracks given by the numbers in the array x[] and all clusters
 
   // create 3 canvases (for +, -, and both Ftpcs)
-  TCanvas *X_Y_Zplus = new TCanvas("X_Y_Zplus", "Event +", 600, 600);
+  TCanvas *X_Y_Zplus  = new TCanvas("X_Y_Zplus",  "Event +", 600, 600);
   TCanvas *X_Y_Zminus = new TCanvas("X_Y_Zminus", "Event -", 600, 600);
-  TCanvas *X_Y_Z = new TCanvas("X_Y_Z", "Event", 600, 600);
+  TCanvas *X_Y_Z      = new TCanvas("X_Y_Z",      "Event",   600, 600);
 
   // create point of origin (our vertex has the shape of a cube, of course)
-  TBRIK *origin = new TBRIK("origin","origin","void",0.1,0.1,0.1);
+  TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
   TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc1_in = new TTUBE("ftpc1_in", "Ftpc + (in)", "void", 8, 8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_in =  new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
   TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_in = new TTUBE("ftpc2_in", "Ftpc - (in)", "void", 8, 8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_in =  new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -826,17 +854,17 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   ftpc2_in->SetLineColor(4);
 
   // create 3 nodes (+, -, both) to generate the dependencies of the different geometric shapes
-  TNode *node0 = new TNode("node0","node0","origin");
-  TNode *node2 = new TNode("node2","node2","origin");
-  TNode *node1 = new TNode("node1","node1","origin");
+  TNode *node0 = new TNode("node0", "node0", "origin");
+  TNode *node2 = new TNode("node2", "node2", "origin");
+  TNode *node1 = new TNode("node1", "node1", "origin");
 
   // create dependencies for 'both' Ftpcs
   X_Y_Z->cd();
   node0->cd();  
-  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0, 162.75+(256.45-162.75)/2.);
-  TNode *node01_in = new TNode("node01_in", "node01_in", "ftpc1_in", 0, 0, 162.75+(256.45-162.75)/2.);
+  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  162.75+(256.45-162.75)/2.);
+  TNode *node01_in  = new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  162.75+(256.45-162.75)/2.);
   TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -162.75-(256.45-162.75)/2.);
-  TNode *node02_in = new TNode("node02_in", "node02_in", "ftpc2_in", 0, 0, -162.75-(256.45-162.75)/2.);  
+  TNode *node02_in  = new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -162.75-(256.45-162.75)/2.);  
 
   // create dependencies for '-' Ftpc
   X_Y_Zminus->cd();
@@ -848,7 +876,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   X_Y_Zplus->cd();
   node1->cd();
   TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, 162.75+(256.45-162.75)/2.);
-  TNode *node1_in = new TNode("node1_in", "node1_in", "ftpc1_in", 0, 0, 162.75+(256.45-162.75)/2.);
+  TNode *node1_in  = new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, 162.75+(256.45-162.75)/2.);
 
   // The following lines are unnecessary. They avoid compiler warnings. They can be simply deleted.
   node0->cd();
@@ -877,7 +905,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      line = new TPolyLine3D[track_entries];
+      found_line = new TPolyLine3D[track_entries];
       
       // loop over all tracks
       for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -901,7 +929,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	}
 	
 	// fill PolyLine for this track
-	current_line = &(line[tracks]);
+	current_line = &(found_line[tracks]);
 	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
@@ -921,7 +949,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      line = new TPolyLine3D[track_entries];
+      found_line = new TPolyLine3D[track_entries];
       
       // loop over all tracks specified by the given trackarray      
       for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -945,7 +973,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	}
 
 	// fill PolyLine for this track
-	current_line = &(line[tracks]);
+	current_line = &(found_line[tracks]);
 	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
@@ -964,9 +992,9 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     Int_t cluster_anz = mHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    found_value_plus = new Float_t[3*cluster_anz];
+    found_value_plus =  new Float_t[3*cluster_anz];
     found_value_minus = new Float_t[3*cluster_anz];
-    found_value = new Float_t[3*cluster_anz];
+    found_value =       new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -1052,7 +1080,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   delete X_Y_Zminus;
   delete X_Y_Z;
 
-  Delete();
+  DeleteFound();
 
   return;
 }
@@ -1063,18 +1091,18 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   // Displays the tracks and the clusters in a nice 3D view (GEANT ant found!).
 
   // create 3 canvases (for +, -, and both Ftpcs)
-  mX_Y_Zplus = new TCanvas("X_Y_Zplus", "Event +", 600, 600);
+  mX_Y_Zplus  = new TCanvas("X_Y_Zplus",  "Event +", 600, 600);
   mX_Y_Zminus = new TCanvas("X_Y_Zminus", "Event -", 600, 600);
-  mX_Y_Z = new TCanvas("X_Y_Z", "Event", 600, 600);
+  mX_Y_Z      = new TCanvas("X_Y_Z",      "Event",   600, 600);
 
   // create point of origin (our vertex has the shape of a cube, of course)
-  TBRIK *origin = new TBRIK("origin","origin","void",0.1,0.1,0.1);
+  TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
   TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc1_in = new TTUBE("ftpc1_in", "Ftpc + (in)", "void", 8, 8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc1_in  = new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
   TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", 30, 30, (256.45-162.75)/2., 1);
-  TTUBE *ftpc2_in = new TTUBE("ftpc2_in", "Ftpc - (in)", "void", 8, 8, (256.45-162.75)/2., 1);
+  TTUBE *ftpc2_in  = new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void",  8,  8, (256.45-162.75)/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -1090,29 +1118,29 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   ftpc2_in->SetLineColor(4);
 
   // create 3 nodes (+, -, both) to generate the dependencies of the different geometric shapes
-  mNode0 = new TNode("node0","node0","origin");
-  mNode2 = new TNode("node2","node2","origin");
-  mNode1 = new TNode("node1","node1","origin");
+  mNode0 = new TNode("node0", "node0", "origin");
+  mNode2 = new TNode("node2", "node2", "origin");
+  mNode1 = new TNode("node1", "node1", "origin");
 
   // create dependencies for 'both' Ftpcs
   mX_Y_Z->cd();
   mNode0->cd();  
-  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0, 162.75+(256.45-162.75)/2.);
-  TNode *node01_in = new TNode("node01_in", "node01_in", "ftpc1_in", 0, 0, 162.75+(256.45-162.75)/2.);
+  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  162.75+(256.45-162.75)/2.);
+  TNode *node01_in =  new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  162.75+(256.45-162.75)/2.);
   TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -162.75-(256.45-162.75)/2.);
-  TNode *node02_in = new TNode("node02_in", "node02_in", "ftpc2_in", 0, 0, -162.75-(256.45-162.75)/2.);  
+  TNode *node02_in =  new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -162.75-(256.45-162.75)/2.);  
 
   // create dependencies for '-' Ftpc
   mX_Y_Zminus->cd();
   mNode2->cd();
   TNode *node2_out = new TNode("node2_out", "node2_out", "ftpc2_out", 0, 0, -162.75-(256.45-162.75)/2.);
-  TNode *node2_in = new TNode("node2_in", "node2_in", "ftpc2_in", 0, 0, -162.75-(256.45-162.75)/2.);
+  TNode *node2_in  = new TNode("node2_in",  "node2_in",  "ftpc2_in",  0, 0, -162.75-(256.45-162.75)/2.);
 
   // create dependencies for '+' Ftpc
   mX_Y_Zplus->cd();
   mNode1->cd();
   TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, 162.75+(256.45-162.75)/2.);
-  TNode *node1_in = new TNode("node1_in", "node1_in", "ftpc1_in", 0, 0, 162.75+(256.45-162.75)/2.);
+  TNode *node1_in =  new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, 162.75+(256.45-162.75)/2.);
 
   // The following lines are unnecessary. They avoid compiler warnings. They can be simply deleted.
   mNode0->cd();
@@ -1129,14 +1157,17 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 
   Char_t a;
   
-  Bool_t electrons = (Bool_t) true;
-  Bool_t non_vtx = (Bool_t) true;
+  Bool_t geant =      (Bool_t) false;
+  Bool_t found =      (Bool_t) true;
+  Bool_t electrons =  (Bool_t) true;
+  Bool_t non_vtx =    (Bool_t) true;
   Bool_t geant_hits = (Bool_t) true;
-  Bool_t good = (Bool_t) true;
+  Bool_t good_geant = (Bool_t) true;
   Bool_t good_found = (Bool_t) true;
-  Bool_t split = (Bool_t) true;
-  Bool_t unclean = (Bool_t) true;
+  Bool_t split =      (Bool_t) true;
+  Bool_t unclean =    (Bool_t) true;
   Bool_t found_hits = (Bool_t) true;
+  Bool_t blue =       (Bool_t) false;
 
   Float_t eta_low_geant = 2.0;
   Float_t eta_up_geant  = 4.4;
@@ -1150,125 +1181,100 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 
   while (1) {
     //gSystem->Exec("/usr/bin/clear");
+
+    cout << endl << endl;
+    cout << "Display (f)found tracks.................: ";
+    OnOff(found);
+    cout << "---------------------------------------------" << endl;
+    cout << "   Show (g)ood tracks..............[red]: ";
+    OnOff(good_found);
+    cout << "        (s)plit tracks...........[green]: ";
+    OnOff(split);
+    cout << "        (u)nclean tracks........[yellow]: ";
+    OnOff(unclean);
+    cout << "        (c)lusters......................: ";
+    OnOff(found_hits);
+    cout << endl;
+    cout << "Display (G)EANT tracks..................: ";
+    OnOff(geant);
+    cout << "---------------------------------------------" << endl;
+    cout << "   Show (e)lectron tracks..........[red]: ";
+    OnOff(electrons);
+    cout << "        (n)on main vertex tracks [green]: ";
+    OnOff(non_vtx);
+    cout << "        g(o)od tracks...........[yellow]: ";
+    OnOff(good_geant);
+    cout << "        c(l)usters................[grey]: ";
+    OnOff(geant_hits);
+    cout << "Color of tracks changed to (b)lue.......: ";
+    OnOff(blue);
+    cout << endl;
+    cout << "(E)ta range              (2.0 - 4.4)    : " << eta_low_geant << " - " << eta_up_geant << endl;
+    cout << "(p)t range               (0.0 - 5.0 GeV): " << pt_low_geant << " - " << pt_up_geant << endl;
+    cout << endl;
+    cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
+    cin >> a;
     
-    if (mIsGeant) {
-      cout << "Display of GEANT tracks (type 'f' for found tracks)" << endl;
-      cout << endl;
-      cout << "Show (e)lectron tracks..........[red]: ";
-      OnOff(electrons);
-      cout << "     (n)on main vertex tracks [green]: ";
-      OnOff(non_vtx);
-      cout << "     (g)ood tracks...........[yellow]: ";
-      OnOff(good);
-      cout << "     (c)lusters................[grey]: ";
-      OnOff(geant_hits);
-      cout << "------------------------------------------" << endl;
-      cout << "(E)ta range           (2.0 - 4.4)    : " << eta_low_geant << " - " << eta_up_geant << endl;
-      cout << "(p)t range            (0.0 - 5.0 GeV): " << pt_low_geant << " - " << pt_up_geant << endl;
-      cout << endl;
-      cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
-      cin >> a;
-
-      if (a == 'e' || a == 'n' || a == 'g' || a == 'c' || a == 'G' || a == 'f' || a == 'E' || a == 'p') {
-	
-	if (a == 'e') electrons = !electrons;
-	if (a == 'n') non_vtx = !non_vtx;
-	if (a == 'g') good = !good;
-	if (a == 'c') geant_hits = !geant_hits;
-	if (a == 'G') mIsGeant = (Bool_t)true;
-	if (a == 'f') mIsGeant = (Bool_t)false;
-	
-	if (a == 'E') {
-	  cout << endl;
-	  cout << "Enter eta lower and upper limit (" << eta_low_geant << " - " << eta_up_geant << "): ";
-	  cin >> eta_low_geant >> eta_up_geant;
-	}
-	  
-	if (a == 'p') {
-	  cout << endl;
-	  cout << "Enter pt lower and upper limit (" << pt_low_geant << " - " << pt_up_geant << "): ";
-	  cin >> pt_low_geant >> pt_up_geant;
-	}  
+    if (a == 'f' || a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'e' || a == 'n' || a == 'o' || a == 'l' || a== 'E' || a == 'p' ||a == 'b') {
+      
+      if (a == 'f') found = !found;
+      if (a == 'g') good_found = !good_found;
+      if (a == 's') split = !split  ;
+      if (a == 'u') unclean = !unclean;
+      if (a == 'c') found_hits = !found_hits;
+      if (a == 'G') geant = !geant;
+      if (a == 'e') electrons = !electrons;
+      if (a == 'n') non_vtx = !non_vtx;
+      if (a == 'o') good_geant = !good_geant;
+      if (a == 'l') geant_hits = !geant_hits;
+      if (a == 'b') blue = !blue;
+      
+      
+      if (a == 'E') {
+	cout << endl;
+	cout << "Enter eta lower and upper limit (" << eta_low_geant << " - " << eta_up_geant << "): ";
+	cin >> eta_low_geant >> eta_up_geant;
       }
-
-      else {
-	if (a == 'q') break;
-	
-	else {
-	  FillGeant(electrons, non_vtx, good, geant_hits, eta_low_geant, eta_up_geant, pt_low_geant, pt_up_geant);
+      
+      if (a == 'p') {
+	cout << endl;
+	cout << "Enter pt lower and upper limit (" << pt_low_geant << " - " << pt_up_geant << "): ";
+	cin >> pt_low_geant >> pt_up_geant;
+      }  
+    }
     
-	  // call the x3d function (this does the actual 3D displaying) for the right canvas
-	  if (a == '+') mX_Y_Zplus->x3d();
-	  if (a == '-') mX_Y_Zminus->x3d();
-	  if (a == 'b') mX_Y_Z->x3d();
-	}
-      }
-    }  
-
     else {
-      cout << "Display of found tracks (type 'G' for GEANT tracks)" << endl;
-      cout << endl;
-      cout << "Show (g)ood tracks..........[red]: ";
-      OnOff(good_found);
-      cout << "     (s)plit tracks...... [green]: ";
-      OnOff(split);
-      cout << "     (u)nclean tracks....[yellow]: ";
-      OnOff(unclean);
-      cout << "     (c)lusters..................: ";
-      OnOff(found_hits);
-      cout << "------------------------------------------" << endl;
-      cout << "(E)ta range           (2.0 - 4.4)    : " << eta_low_found << " - " << eta_up_found << endl;
-      cout << "(p)t range            (0.0 - 5.0 GeV): " << pt_low_found << " - " << pt_up_found << endl;
-      cout << endl;
-      cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
-      cin >> a;
 
-      if (a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'f' || a == 'E' || a == 'p') {
+      if (a == 'q') break;
+      
+      else {
+	cout << endl;
+	MIntArray *sp = NULL;
+	MIntArray *uncl = NULL;
+	MIntArray *hits = NULL;
 	
-	if (a == 'g') good_found = !good_found;
-	if (a == 's') split = !split  ;
-	if (a == 'u') unclean = !unclean;
-	if (a == 'c') found_hits = !found_hits;
-	if (a == 'G') mIsGeant = (Bool_t)true;
-	if (a == 'f') mIsGeant = (Bool_t)false;
-
-	if (a == 'E') {
-	  cout << endl;
-	  cout << "Enter eta lower and upper limit (" << eta_low_found << " - " << eta_up_found << "): ";
-	  cin >> eta_low_found >> eta_up_found;
+	if (split) sp = splitArr;
+	if (unclean) uncl = uncleanArr;
+	if (found_hits) hits = clusterArr;
+	
+	DrawNodes();
+	
+	if (geant) {
+	  FillGeant(electrons, non_vtx, good_geant, geant_hits, eta_low_geant, eta_up_geant, pt_low_geant, pt_up_geant, blue);
 	}
-	  
-	if (a == 'p') {
-	  cout << endl;
-	  cout << "Enter et lower and upper limit (" << pt_low_found << " - " << pt_up_found << "): ";
-	  cin >> pt_low_found >> pt_up_found;
-	}  
-      }
-
-      else{
-	if (a == 'q') break;
 	
-	else {
-	  cout << endl;
-	  MIntArray *sp = NULL;
-	  MIntArray *uncl = NULL;
-	  MIntArray *hits = NULL;
-
-	  if (split) sp = splitArr;
-	  if (unclean) uncl = uncleanArr;
-	  if (found_hits) hits = clusterArr;
-
+	if (found) {
 	  FillFound(good_found, sp, uncl, hits, eta_low_found, eta_up_found, pt_low_found, pt_up_found);
-    
-	  // call the x3d function (this does the actual 3D displaying) for the right canvas
-	  if (a == '+') mX_Y_Zplus->x3d();
-	  if (a == '-') mX_Y_Zminus->x3d();
-	  if (a == 'b') mX_Y_Z->x3d();
 	}
+	
+	// call the x3d function (this does the actual 3D displaying) for the right canvas
+	if (a == '+') mX_Y_Zplus->x3d();
+	if (a == '-') mX_Y_Zminus->x3d();
+	if (a == 'b') mX_Y_Z->x3d();
       }
-    } 
-  }
-    
+    }
+  }  
+  
   // cleanup
   delete mX_Y_Zplus;
   delete mX_Y_Zminus;
@@ -1280,25 +1286,12 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 }
 
 
-void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up)
+void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up, Bool_t blue)
 {
   // Fill histograms with tracks and clusters.
 
-  // draw nodes
-  mX_Y_Zplus->cd();
-  mNode1->cd();
-  mNode1->Draw("");
+  DeleteGeant();
 
-  mX_Y_Zminus->cd();
-  mNode2->cd();
-  mNode2->Draw("");
-
-  mX_Y_Z->cd();
-  mNode0->cd();
-  mNode0->Draw("");
-
-  Delete();
-  
   StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
   
@@ -1307,8 +1300,10 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
   Float_t y[100];
   Float_t z[100];
 
+  Float_t shift = .05;
+
   Int_t track_entries = mGeantTrack->GetEntriesFast();   
-  line = new TPolyLine3D[track_entries];
+  geant_line = new TPolyLine3D[track_entries];
   
   // loop over all tracks
   for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -1331,8 +1326,8 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
 	cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	
 	// fill point array
-	x[clusters] = (Float_t)(cluster->GetX());
-	y[clusters] = (Float_t)(cluster->GetY());
+	x[clusters] = (Float_t)(cluster->GetX()-shift);
+	y[clusters] = (Float_t)(cluster->GetY()-shift);
 	z[clusters] = (Float_t)(cluster->GetZ());
 	
 	// decide in which canvas (+,-) this track belongs
@@ -1341,27 +1336,34 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       }
       
       // fill PolyLine for this track
-      current_line = &(line[tracks]);
+      current_line = &(geant_line[tracks]);
       current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
       Int_t color;
       
-      if (track->GetPid()<=3) {
-	color = 2;
+      if (blue) {
+	color = 4;
       }
-      
+
       else {
 	
-	if (track->ComesFromMainVertex()) {
-	  color = 5;
+	if (track->GetPid()<=3) {
+	  color = 2;
 	}
 	
 	else {
-	  color = 3;
+	  
+	  if (track->ComesFromMainVertex()) {
+	    color = 5;
+	  }
+	  
+	  else {
+	    color = 3;
+	  }
 	}
       }
-      
+
       current_line->SetLineColor(color);
   
       // draw track in the right canvas
@@ -1371,15 +1373,15 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       current_line->Draw("same");
     }  
   }
-
+  
   // show clusters
   if (geant_hits) {
     Int_t cluster_anz = mGeantHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    found_value_plus = new Float_t[3*cluster_anz];
-    found_value_minus = new Float_t[3*cluster_anz];
-    found_value = new Float_t[3*cluster_anz];
+    geant_value_plus  = new Float_t[3*cluster_anz];
+    geant_value_minus = new Float_t[3*cluster_anz];
+    geant_value       = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -1391,39 +1393,39 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       h = (StFtpcConfMapPoint *)mGeantHit->At(i);
       
       // fill (+, -, both) cluster arrays
-      found_value[cl++] = h->GetX();
-      found_value[cl++] = h->GetY();
+      geant_value[cl++] = h->GetX()-shift;
+      geant_value[cl++] = h->GetY()-shift;
       
-      if ((found_value[cl++] = h->GetZ())>0) {
-	found_value_plus[cl_plus++] = h->GetX();
-	found_value_plus[cl_plus++] = h->GetY();
-	found_value_plus[cl_plus++] = h->GetZ();
+      if ((geant_value[cl++] = h->GetZ())>0) {
+	geant_value_plus[cl_plus++] = h->GetX()-shift;
+	geant_value_plus[cl_plus++] = h->GetY()-shift;
+	geant_value_plus[cl_plus++] = h->GetZ();
       }
       
       else {
-	found_value_minus[cl_minus++] = h->GetX();
-	found_value_minus[cl_minus++] = h->GetY();
-	found_value_minus[cl_minus++] = h->GetZ();
+	geant_value_minus[cl_minus++] = h->GetX()-shift;
+	geant_value_minus[cl_minus++] = h->GetY()-shift;
+	geant_value_minus[cl_minus++] = h->GetZ();
       }
     }
     
     // create PolyMarkers
-    found_hit->SetPolyMarker(cl/3, found_value, 1);      
-    found_hit_plus->SetPolyMarker(cl_plus/3, found_value_plus, 1);      
-    found_hit_minus->SetPolyMarker(cl_minus/3, found_value_minus, 1);      
+    geant_hit->SetPolyMarker(cl/3, geant_value, 1);      
+    geant_hit_plus->SetPolyMarker(cl_plus/3, geant_value_plus, 1);      
+    geant_hit_minus->SetPolyMarker(cl_minus/3, geant_value_minus, 1);      
 
     // set colors
-    found_hit->SetMarkerColor(1);
-    found_hit_plus->SetMarkerColor(1);
-    found_hit_minus->SetMarkerColor(1);
+    geant_hit->SetMarkerColor(1);
+    geant_hit_plus->SetMarkerColor(1);
+    geant_hit_minus->SetMarkerColor(1);
     
     // switch to right canvas and draw clusters
     mX_Y_Z->cd();
-    found_hit->Draw("same");
+    geant_hit->Draw("same");
     mX_Y_Zplus->cd();
-    found_hit_plus->Draw("same");
+    geant_hit_plus->Draw("same");
     mX_Y_Zminus->cd();
-    found_hit_minus->Draw("same");
+    geant_hit_minus->Draw("same");
   }
   
   // update canvases
@@ -1439,20 +1441,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 {
   // Fill histograms with tracks and clusters.
 
-  // draw nodes
-  mX_Y_Zplus->cd();
-  mNode1->cd();
-  mNode1->Draw("");
-
-  mX_Y_Zminus->cd();
-  mNode2->cd();
-  mNode2->Draw("");
-
-  mX_Y_Z->cd();
-  mNode0->cd();
-  mNode0->Draw("");
-
-  Delete();
+  DeleteFound();
 
   StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
@@ -1465,7 +1454,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
   Int_t track_entries = mTrack->GetEntriesFast();
   Bool_t *good_track_to_show = new Bool_t[track_entries];
 
-  line = new TPolyLine3D[track_entries];
+  found_line = new TPolyLine3D[track_entries];
   
   for (Int_t good_counter = 0; good_counter < track_entries; good_counter++) {
    StFtpcTrack *track = (StFtpcTrack *)mTrack->At(good_counter);
@@ -1521,7 +1510,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       }
       
       // fill PolyLine for this track
-      current_line = &(line[entry++]);
+      current_line = &(found_line[entry++]);
       current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
@@ -1562,7 +1551,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       }
       
       // fill PolyLine for this track
-      current_line = &(line[entry++]);
+      current_line = &(found_line[entry++]);
       current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
@@ -1606,7 +1595,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 	}
 	
 	// fill PolyLine for this track
-	current_line = &(line[tracks]);
+	current_line = &(found_line[tracks]);
 	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
@@ -1753,13 +1742,13 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 }
 
 
-void StFtpcDisplay::Delete()
+void StFtpcDisplay::DeleteFound()
 {
-  // Deletes objects.
+  // Deletes objects of found tracks.
 
-  if (line) {
-    delete[] line;
-    line = NULL;
+  if (found_line) {
+    delete[] found_line;
+    found_line = NULL;
   }
 
   if (found_value) {
@@ -1811,16 +1800,28 @@ void StFtpcDisplay::Delete()
 }
 
 
-void StFtpcDisplay::OnOff(Bool_t on)
+void StFtpcDisplay::DeleteGeant()
 {
-  // Prints "On" or "Off".
+  // Deletes objects of geant tracks.
 
-  if (on) {
-    cout << "On" << endl;
+  if (geant_line) {
+    delete[] geant_line;
+    geant_line = NULL;
   }
-  
-  else {
-    cout << "Off" << endl;
+
+  if (geant_value) {
+    delete[] geant_value;
+    geant_value = NULL;
+  }
+
+  if (geant_value_plus) {
+    delete[] geant_value_plus;
+    geant_value_plus = NULL;
+  }
+
+  if (geant_value_minus) {
+    delete[] geant_value_minus;
+    geant_value_minus = NULL;
   }
 
   return;
