@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.39 2002/07/15 13:31:09 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.40 2002/08/02 11:24:29 oldi Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.40  2002/08/02 11:24:29  oldi
+// Used database values are printed to screen, now.
+//
 // Revision 1.39  2002/07/15 13:31:09  jcs
 // incorporate charge step histos into cluster finder and remove StFtpcChargeStep
 //
@@ -337,6 +340,12 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_driftfield,
                                                 m_gas,
                                                 m_electronics);
+
+  cout<<"Using the following values from database:"<<endl;
+  cout<<"          tzero                     = "<<dbReader->tZero()<<endl;
+  cout<<"          temperatureDifference     = "<<dbReader->temperatureDifference()<<endl;
+  cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
+  cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
 
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
