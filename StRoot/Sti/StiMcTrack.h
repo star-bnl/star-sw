@@ -46,10 +46,16 @@ class StiMcTrack : public StiTrack
   const StMcTrack * getStMcTrack(const StMcTrack * track) const;
   bool extendToVertex(StiHit* vertex);
   vector<StiHit*> getHits();
+  void addHit(StiHit*hit);
  protected:
   const StMcTrack * mcTrack;
   vector<StiHit*> _hits;
 };
+
+inline void  StiMcTrack::addHit(StiHit*hit)
+{
+  _hits.push_back(hit);
+}
 
 inline vector<StiHit*> StiMcTrack::getHits()
 {

@@ -44,6 +44,8 @@ public:
     StiShape* getShape() const { return shape; }
     StiPlacement* getPlacement() const { return placement; }
 
+    StiIsActiveFunctor* getIsActiveFunctor();
+
     // mutators
     void setIsOn(bool val) {on = val;}
     void setIsActive(StiIsActiveFunctor *val){ isActiveFunctor = val; }
@@ -153,7 +155,7 @@ inline bool StiDetector::isActive(double dYlocal, double dZlocal) const
 
 inline bool StiDetector::isActive() const 
 {
-  return isActive(placement->getNormalYoffset(), placement->getZcenter());
+  return isActiveFunctor->isActive();
 } // isActive
 
 
@@ -167,5 +169,10 @@ inline const StiTrackingParameters * StiDetector::getTrackingParameters() const
   return _pars;
 }
 
+
+inline StiIsActiveFunctor* StiDetector::getIsActiveFunctor()
+{
+  return isActiveFunctor;
+}
 
 #endif

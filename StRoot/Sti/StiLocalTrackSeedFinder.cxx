@@ -44,14 +44,14 @@ void StiLocalTrackSeedFinder::initialize()
 	    cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl;
 	    throw logic_error("StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null");
 	}
-    add(f->getInstance()->set("DeltaY",    "Delta-Y",        &mDeltaY,        4., 0.5, 20., 0.1, 0));
-    add(f->getInstance()->set("DeltaZ",     "Delta-Z",       &mDeltaZ,       10., 0.5, 20., 0.1, 0));
+    add(f->getInstance()->set("DeltaY",    "Delta-Y",        &mDeltaY,        7., 0.5, 20., 0.1, 0));
+    add(f->getInstance()->set("DeltaZ",     "Delta-Z",       &mDeltaZ,       15., 0.5, 20., 0.1, 0));
     add(f->getInstance()->set("SeedLength", "Seed Length",   &mSeedLength,    2,  2, 6, 1, 0));
     add(f->getInstance()->set("extraDeltaY","extra-Delta-Y", &mExtrapDeltaY, 1., 0.5, 10., 0.1, 0));
     add(f->getInstance()->set("extraDeltaZ","extra-Delta-Z", &mExtrapDeltaZ, 2., 0.5, 10., 0.1, 0));
   
     add(f->getInstance()->set("MaxSkipped","Max Layers Skipped",  &mMaxSkipped, 2, 0, 5, 1, 0));
-    add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 4, 1, 10, 1, 0));
+    add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 3, 1, 10, 1, 0));
     add(f->getInstance()->set("ExtrapMaxLength","Max Length of Extrapolation", &mExtrapMaxLength,  5, 1, 10, 1, 0));
     add(f->getInstance()->set("UseOrigin","Use Origin in Fit", &mUseOrigin, true, 0));
     add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));
@@ -59,58 +59,34 @@ void StiLocalTrackSeedFinder::initialize()
     StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
     if (!builder) throw runtime_error("StiCompositeSeedFinder::build() -F- builder==0 ");
 
-    //new (MLM 5/5/03
     vector<StiDetectorBuilder*>::iterator bIter;
-    for (bIter=builder->begin(); bIter!=builder->end(); bIter++) {
+    for (bIter=builder->begin(); bIter!=builder->end(); bIter++) 
+      {
 	string name = (*bIter)->getName();
 	cout << "Detector:"<< name<<endl;
-
-	//temp hack (didn't use group ID because I don't want to include StEnumerations.h
 	unsigned int where = name.find("Tpc");
-	if (where==name.npos) {
+	if (where==name.npos) 
+	  {
 	    cout <<"\n\tStiLocalTrackSeedFinder:\tSKIPPING DETECTOR GROUP:\t"<<name<<endl;
 	    continue;
-	}
-	
+	  }
 	int nRows = (*bIter)->getNRows();
-	for (int row=0;row<nRows;row++)	{
+	for (int row=0;row<nRows;row++)	
+	  {
 	    int nSectors = (*bIter)->getNSectors(row);
-	    for (int sector=0; sector<nSectors; sector++) {
+	    for (int sector=0; sector<nSectors; sector++) 
+	      {
 		StiDetector* detector = (*bIter)->getDetector(row,sector);
-		if (!detector) {
-		    cout << "StiLocalSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
-		    throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
-		}
-		string dname = detector->getName();
-		//cout <<"StiLocalTrackSeedFinder adding detector:\t"<<dname<<endl;
-		addLayer(detector);
-		if (!detector->isActive()) {
-		    cout <<"StiLocalTrackSeedFinder::initialize() -I- NOT Adding detector:"
-			 <<detector->getName()<<endl;
-		}
-	    }
-	}
+		if (!detector) 
+		  throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
+		if (detector->isActive()) 
+		  {
+		    cout << " Adding detector:"<< detector->getName()<<endl;
+		    addLayer(detector);
+		  }
+	      }
+	  }
     }
-    
-    /* old (commented out by MLM 5/5/03
-       for (unsigned int row=0;row<builder->getNRows();row++)
-       {
-       for (unsigned int sector=0;sector<builder->getNSectors(row);sector++)	      {
-       StiDetector * detector = builder->getDetector(row,sector);
-       if (!detector)
-       {
-       cout << "StiLocalSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
-       throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
-       }
-       string name = detector->getName();
-       cout <<"StiLocalTrackSeedFinder adding detector:\t"<<name<<endl;
-       addLayer(detector);
-       if (!detector->isActive()) 
-       cout <<"StiLocalTrackSeedFinder::initialize() -I- NOT Adding detector:"<<detector->getName()<<endl;
-       }
-       }
-    */
-    
     cout << "StiLocalTrackSeedFinder::initialize() -I- Done" << endl;
 }
 

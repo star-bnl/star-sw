@@ -27,15 +27,15 @@ class AssociationFilter
  public:
   AssociationFilter();
   virtual ~AssociationFilter();
-  virtual bool accept(const Filtered *f1,const Filtered *f2) const;
+  virtual bool accept(const Filtered *f1,const Filtered *f2);
   virtual bool operator()(const Filtered *f1,const Filtered *f2) const;
   virtual void reset();
   bool filter(const Filtered *f1,const Filtered *f2);
   int  getAnalyzedCount();
   int  getAcceptedCount();  
-  int  getQuality();
+  double getQuality();
  protected:
-  int _quality;
+  double _quality;
   int _analyzedCount;
   int _acceptedCount;
 };
@@ -62,7 +62,7 @@ inline bool AssociationFilter<Filtered>::filter(const Filtered *f1,const Filtere
 }
 
 template<class Filtered>
-inline bool AssociationFilter<Filtered>::accept(const Filtered *f1,const Filtered *f2) const
+inline bool AssociationFilter<Filtered>::accept(const Filtered *f1,const Filtered *f2)
 {
   return true;
 }
@@ -93,7 +93,7 @@ bool AssociationFilter<Filtered>::operator()(const Filtered *f1,const Filtered *
 }
 
 template<class Filtered>
-int  AssociationFilter<Filtered>::getQuality()
+double  AssociationFilter<Filtered>::getQuality()
 { 
   return _quality; 
 }

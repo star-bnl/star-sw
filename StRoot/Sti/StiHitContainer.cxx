@@ -168,16 +168,16 @@ HitVectorType::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
   a member StiHit object, and passes this to the method setRefPoint(StiHit*).
  */
 void StiHitContainer::setRefPoint(double position, double refAngle,
-				  double y, double z)
+				  double y, double z, bool fetchAll)
 {
   mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl
 	     <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t"
 	     <<"y: "<<y<<"\tz: "<<z<<endl;
   mUtilityHit.set(position,refAngle,y,z);
-  setRefPoint(&mUtilityHit);
+  setRefPoint(&mUtilityHit,fetchAll);
 }
 
-void StiHitContainer::setRefPoint(StiKalmanTrackNode & node)
+void StiHitContainer::setRefPoint(StiKalmanTrackNode & node, bool fetchAll)
 {
   mdeltad = node.getWindowY();
   mdeltaz = node.getWindowZ();
@@ -185,7 +185,7 @@ void StiHitContainer::setRefPoint(StiKalmanTrackNode & node)
 		  node.getRefAngle(),
 		  node.getY(),
 		  node.getZ());
-  setRefPoint(&mUtilityHit);
+  setRefPoint(&mUtilityHit,fetchAll);
 }
 
 
@@ -215,7 +215,7 @@ void StiHitContainer::setRefPoint(StiKalmanTrackNode & node)
   order (search in y, then z instead of z, then y).  See the source code for
   the necessary conversion actions.
  */
-void StiHitContainer::setRefPoint(StiHit* ref)
+void StiHitContainer::setRefPoint(StiHit* ref, bool fetchAll)
 {
     mcandidatevec.clear();
     
@@ -257,7 +257,7 @@ void StiHitContainer::setRefPoint(StiHit* ref)
 	if (fabs( (*cit)->y() - ref->y() ) < mdeltad)
 	{
 	  StiHit * hit = *cit;
-	  if (hit->timesUsed()==0 && hit->detector()->isActive())
+	  if (fetchAll || (hit->timesUsed()==0 && hit->detector()->isActive()) )
 	    {
 	      mcandidatevec.push_back(hit);
 	    }
@@ -333,21 +333,16 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 HitVectorType StiHitContainer::getAllHits()
 {
   HitVectorType allHits;
-  // HitMapToVectorAndEndType & tempMap= mmap.hits();
-
   for(HitMapToVectorAndEndType::const_iterator iter= mmap.begin(); iter !=mmap.end(); iter++)
     {
-      // cout<<"first loop of get all hits entered"<<endl;
       const HitVectorType & t_hits = (*iter).second.theHitVec;
       for (vector<StiHit*>::const_iterator it=t_hits.begin();
 	   it!=t_hits.end();
 	   ++it)
 	{
 	  allHits.push_back(*it);
-	  
 	}
-    }
-  return allHits;
+    }  return allHits;
 }
 
 

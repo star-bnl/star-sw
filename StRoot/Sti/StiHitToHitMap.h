@@ -1,8 +1,11 @@
 #ifndef StiHitToHitMap_H_INCLUDED
 #define StiHitToHitMap_H_INCLUDED
-#include "StiHitContainer.h"
-#include "AssociationFilter.h"
+#include <map>
+class StiHit;
+class StiHitContainer;
 typedef map<StiHit*,StiHit*> HitToHitMap;
+template<class FILTERED> class AssociationFilter;
+
 
 class StiHitToHitMap : public HitToHitMap
 {
@@ -13,7 +16,7 @@ class StiHitToHitMap : public HitToHitMap
   void build(StiHitContainer * firstContainer,
 	     StiHitContainer * secondContainer,
 	     AssociationFilter<StiHit> * associationFilter);
-  
+  void analyze();
 };
 
 

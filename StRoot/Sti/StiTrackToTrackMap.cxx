@@ -1,4 +1,6 @@
 #include "Sti/StiTrackToTrackMap.h"
+#include "Sti/StiTrackContainer.h"
+#include "Sti/StiHitContainer.h"
 
 StiTrackToTrackMap::StiTrackToTrackMap(Factory<StiTrackAssociation> * associationFactory)
 {

@@ -59,7 +59,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxContiguousNullCount",  
                             "maxContiguousNullCount",  
                             &maxContiguousNullCount,   
-                            8, 
+                            5, 
                             0, 
                             20, 
                             1, 
@@ -67,18 +67,43 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("minContiguousHitCountForNullReset",     
                             "minContiguousHitCountForNullReset",  
                             &minContiguousHitCountForNullReset, 
-                            2, 
+                            1, 
                             1, 
                             10, 
                             1, 
                             0)); 
-
+  add(f->getInstance()->set("minSearchWindow",     
+                            "minSearchWindow",   
+                            &minSearchWindow,  
+                            1.6, 0.5, 20., 0.1, 0)); 
+  add(f->getInstance()->set("maxSearchWindow", 
+                            "maxSearchWindow", 
+                            &maxSearchWindow,         
+                            6., 0.5, 20., 0.1, 0)); 
+  add(f->getInstance()->set("searchWindowScale", 
+                            "searchWindowScale",  
+                            &searchWindowScale, 
+                            10.0, 0.5, 20., 0.1, 0)); 
+  add(f->getInstance()->set("maxChi2ForSelection",  
+                            "maxChi2ForSelection",   
+                            &maxChi2ForSelection, 
+                            200., 0.5, 200., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
-                            20., 0., 20000., 0.1, 0)); 
+                            1000., 0., 20000., 0.1, 0)); 
   add(f->getInstance()->set("massHypothesis", 
                             "massHypothesis",  
                             &massHypothesis,  
                             0.139, 0.1, 20., 0.01, 0)); 
+  
+  add(f->getInstance()->set("OuterScaling",
+                            "OuterScaling",
+                            &outerScaling,
+                            1., 0., 20., 0.1, 0));	///previously 1.5
+  add(f->getInstance()->set("InnerScaling",
+                            "InnerScaling",
+                            &innerScaling,
+                            1.5, 0., 20., 0.1, 0)); 
+  
 } 

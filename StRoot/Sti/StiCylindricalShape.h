@@ -1,6 +1,6 @@
 #ifndef STI_CYLINDRICAL_SHAPE_H
 #define STI_CYLINDRICAL_SHAPE_H
-#include <math.h>
+
 #include "StiShape.h"
 
 /*!
@@ -11,21 +11,21 @@ class StiCylindricalShape: public StiShape{
 public:
 
   // constructor
-  StiCylindricalShape(): StiShape(), _outerRadius(0.), _openingAngle(0.){}
-  StiCylindricalShape(const string &name,
-		      float halfDepth_, 
-		      float thickness_,
-		      float outerRadius_, 
-		      float openingAngle_);
-  // accessors
-  float getOuterRadius() const { return _outerRadius; }
-  float getOpeningAngle() const { return _openingAngle; }
-  float getHalfWidth() const;
-  StiShapeCode getShapeCode() const { return kCylindrical; };
-  
-  // mutators
-  void setOuterRadius(float val);
-  void setOpeningAngle(float val);
+    StiCylindricalShape(): StiShape(), _outerRadius(0.), _openingAngle(0.){}
+    StiCylindricalShape(const string &name,
+			float halfDepth_, 
+			float thickness_,
+                        float outerRadius_, 
+			float openingAngle_);
+    // accessors
+    float getOuterRadius() const { return _outerRadius; }
+    float getOpeningAngle() const { return _openingAngle; } 
+    float getHalfWidth() const;
+    StiShapeCode getShapeCode() const { return kCylindrical; };
+
+    // mutators
+    void setOuterRadius(float val);
+    void setOpeningAngle(float val);
 
 protected:
     

@@ -173,11 +173,11 @@ public:
     const HitMapToVectorAndEndType& hits() const;
     HitMapToVectorAndEndType& hits();
     ///Set the reference point to define sub-volume of hits to be accessed.
-    void setRefPoint(StiHit* ref);
+    void setRefPoint(StiHit* ref, bool fetchAll=false);
     ///Set the reference point to define sub-volume of hits to be accessed.
-    void setRefPoint(double position, double refAngle, double y, double z);
+    void setRefPoint(double position, double refAngle, double y, double z, bool fetchAll=false);
     ///Set reference point to be the location of the given node
-    void setRefPoint(StiKalmanTrackNode &);
+    void setRefPoint(StiKalmanTrackNode &, bool fetchAll=false);
     ///Return a boolean that reflects whether there are more hits available in the specified sub-volume.
     bool hasMore() const;
     ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
