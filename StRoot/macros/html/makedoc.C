@@ -4,8 +4,8 @@
  // 
   gROOT.Reset();
   Char_t *libs[] = { "St_base","xdf2root","St_Tables"
-                    ,"libmsg", "libtls", 
-                    ,"svt.sl", "St_svt",  "StChain"};
+                    ,"libmsg", 
+                    , "StChain"};
   
  TString AFS; // STAR root directory
 
@@ -34,15 +34,13 @@
      gSystem->Load("xdf2root");
      gSystem->Load("St_Tables");
   
+     gSystem->Load("St_io_Maker.so");
      gSystem->Load("libmsg.so");
      gSystem->Load("libtls.so");
-     gSystem->Load("svt.sl");
-     gSystem->Load("St_svt");
+   
 //     gSystem->Load("global.sl");
 //     gSystem->Load("St_global");
      gSystem->Load("StChain");
-
-     gSystem->Load("St_srs_Maker");
    
      gSystem->Load("St_xdfin_Maker");
      gSystem->Load("St_evg_Maker");
@@ -106,9 +104,10 @@
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
                        ,"table_head_st","St_NodeViewIter", "St_PolyLineShape"
+                       ,"St_io_Maker"
                        ,"St_srs_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 17;
+  Int_t nclass = 19;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
