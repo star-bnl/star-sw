@@ -6,8 +6,8 @@ set TOP_TEST     =  /star/scr2f/starreco/MDC1/tests/auau200/hijing135/default
 set REQUEST      =  /star/u2e/starreco/MDC1/requests
 set JOB_SUMMARY  =  /star/u2e/starreco/MDC1/summary
 set JOB_LOG      =  /star/scr2h/starreco/MDC1/auau200/hijing135/default
-#set SET          =   b0_3/year2a/hadronic_on
-set SET          =   b0_20/year2a/hadronic_on
+set SET          =   b0_3/year2a/hadronic_on
+#set SET          =   b0_20/year2a/hadronic_on
 set input_file = `basename $1 .xdf`
 set input_dir  = /disk1/star/auau200/hijing135/default/${SET}/g2t
 set output_dir = /disk1/star/auau200/hijing135/default/${SET}/root
@@ -23,7 +23,9 @@ if (-f ${batch}) rm -f ${batch}
 cat > ${batch} <<EOF
 #! /usr/local/bin/tcsh -f
 #BSUB -R cas
-source ${GROUP_DIR}/.stardev
+unsetenv NODEBUG
+stardev
+
 cd  ${REQUEST}/${PROCESS}
 Root.exe -b -q <<EOD
 {
@@ -41,4 +43,5 @@ chmod +x ${batch}
 set jobname = `basename ${batch}`
 set jobname = `echo ${jobname} | cut -c1-9`
 echo qsub -R cas -o ${log_file} -e ${log_file}  -J ${jobname} ${batch} 
-bsub -R cas -o ${log_file} -e ${log_file}  -J ${jobname} ${batch}
+#bsub -R cas -o ${log_file} -e ${log_file}  -J ${jobname} ${batch}
+#csh -x ${batch}
