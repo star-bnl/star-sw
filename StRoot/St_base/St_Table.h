@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.43 2000/01/21 02:09:53 fine Exp $
+// $Id: St_Table.h,v 1.44 2000/01/28 04:45:28 fine Exp $
 #ifndef STAF_St_Table
 #define STAF_St_Table
   
@@ -104,6 +104,7 @@ public:
               const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
+               Int_t      CopyRows(const St_Table *srcTable, Int_t srcRow=0, Int_t dstRow=0, Int_t nRows=0, Bool_t expand=kFALSE);
    virtual     void       Draw(Option_t *opt);
    virtual     TH1       *Draw(TCut varexp, TCut selection, Option_t *option=""
                          ,Int_t nentries=1000000000, Int_t firstentry=0);
@@ -211,6 +212,9 @@ inline void St_Table::Draw(Option_t *opt)
 { Draw(opt, "", "", 1000000000, 0); }
 
 // $Log: St_Table.h,v $
+// Revision 1.44  2000/01/28 04:45:28  fine
+// new method CopyRows has been introduced
+//
 // Revision 1.43  2000/01/21 02:09:53  fine
 // several parameters were converted to be const
 //
