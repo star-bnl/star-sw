@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.13 2003/01/10 16:37:37 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.14 2003/01/22 13:49:12 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -244,7 +244,8 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { ///< no yet im
     int split = full.rfind("/");
     string name = full.substr(split+1);
     string path = full.substr(0,split);
-    cout << path << " " << name << endl;
+    DEBUGVALUE(path);
+    DEBUGVALUE(name);
     if (path.find("/star/data/")==string::npos) // if it's a local disk, then add the machine name to the query
       files += " || (filePath='" + path + "'&&fileName='" + name +"')";
     else
@@ -252,7 +253,7 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { ///< no yet im
   }
   in.close();
 	  
-  cout << files << endl;
+  DEBUGVALUE(files);
 
   // now query the database
   StMuTimer timer;
@@ -332,6 +333,9 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.14  2003/01/22 13:49:12  laue
+ * debug message removed
+ *
  * Revision 1.13  2003/01/10 16:37:37  laue
  * Bug fix for FileCatalog look-up. Don't require machine for NFS files on
  * /star/data... . I know a hard-wired string this is not the nice way to do
