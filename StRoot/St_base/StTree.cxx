@@ -70,27 +70,34 @@ Int_t StIO::Write(TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj)
   return 0;  
 }
 //_______________________________________________________________________________
-TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
+TObject *StIO::Read(TFile *file, const Char_t *name)
 {
   assert(file);
 
-  StIOEvent *event = 0;  
-  TObject   *retn  = 0;
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
 
-   if (!gFile) { 
-     printf("<StIO::Read> No file open \n"); 
-     gFile=bakfile; gDirectory=bakdir;return 0; }
-
-   TKey *key = (TKey*)gDirectory->GetListOfKeys()->FindObject((const char*)MakeKey(name,ukey));
-   if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
-   event = (StIOEvent*)key->ReadObj();
-   gFile=bakfile; gDirectory=bakdir;
-   if (!event) 		return 0;
-   retn = event->fObj; 
-   assert( !retn || event->GetUniqueID()==ukey);
-   delete event;
-   return retn;
+  if (!gFile) { 
+    printf("<StIO::Read> No file open \n"); 
+    gFile=bakfile; gDirectory=bakdir;return 0; }
+  TKey *key = 0;
+  if (name[0]=='*') 
+       key = (TKey*)gDirectory->GetListOfKeys()->First();
+  else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
+  if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
+  gFile=bakfile; gDirectory=bakdir;
+  return key->ReadObj();
+}
+//_______________________________________________________________________________
+TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
+{
+  StIOEvent *event = 0;  
+  TObject   *retn  = 0;
+  event = (StIOEvent*)Read(file,(const char*)MakeKey(name,ukey));
+  if (!event) 		return 0;
+  retn = event->fObj; 
+  assert( !retn || event->GetUniqueID()==ukey);
+  delete event;
+  return retn;
 }
 //_______________________________________________________________________________
 ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
