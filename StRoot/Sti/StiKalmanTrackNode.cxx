@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.49 2004/12/11 22:17:49 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.49  2004/12/11 22:17:49  pruneau
+ * new eloss calculation
+ *
  * Revision 2.48  2004/12/11 04:31:36  perev
  * set of bus fixed
  *
@@ -153,7 +156,6 @@ using namespace std;
 #include "StiTrackingParameters.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
-#include "Sti/StiElossCalculator.h"
 #ifdef Sti_DEBUG
 #include "TRMatrix.h"
 #include "TRVector.h"
@@ -170,7 +172,6 @@ using namespace std;
 
 StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
-const StiElossCalculator * StiKalmanTrackNode::_elossCalculator = new StiElossCalculator();
 
 int    StiKalmanTrackNode::shapeCode = 0;
 double StiKalmanTrackNode::x1=0;
@@ -1035,7 +1036,13 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   else
     sign = -1.;
   const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-  double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,I2Ar);
+  StiElossCalculator * calculator = tDet->getElossCalculator();
+  if ( !calculator) 
+    {
+      cout <<" merde happens" << endl;
+      throw logic_error("CALCULATOR");
+    }
+  double eloss = tDet->getElossCalculator()->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
   if(!finite(dxEloss) || !finite(beta2) || !finite(m) || m==0 || !finite(eloss) || !finite(_p3) || p2==0 )
     {
@@ -1270,7 +1277,8 @@ int StiKalmanTrackNode::updateNode()
       double d_p2 = parent->_p2 - eta;
       double d_p3 = parent->_p3 - cur;
       double d_p4 = parent->_p4 - tanl;
-      if ( (d_p4*d_p4/16.>_c44) || (d_p3*d_p3/16. > _c33) || (d_p2*d_p2/16.>_c22) ) return 1;
+      //cannot test on p2 here because parent and this node may not be in same reference frame...
+      if ( (d_p4*d_p4/16.>_c44) || (d_p3*d_p3/16. > _c33) ) return 1;
       //if (fabs(eta-parent->_p2)>3 || fabs(tanl-parent->_p4)>0.27) return 2;
     }
   
