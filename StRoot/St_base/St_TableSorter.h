@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.14 1999/05/14 00:30:38 fine Exp $
+// $Id: St_TableSorter.h,v 1.15 1999/05/14 22:20:56 fine Exp $
 // $Log: St_TableSorter.h,v $
+// Revision 1.15  1999/05/14 22:20:56  fine
+// CountKey and CountKeys methods have been introduced
+//
 // Revision 1.14  1999/05/14 00:30:38  fine
 // GetLastFound method has been introduced
 //  
@@ -124,6 +127,9 @@ class St_TableSorter : public TNamed {
     St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     virtual ~St_TableSorter();
     
+    virtual Int_t CountKey(const void *key, Int_t firstIndx=0) const;
+    virtual Int_t St_TableSorter::CountKeys() const;
+ 
     Int_t BinarySearch(Float_t  value );
     Int_t BinarySearch(Int_t    value );
     Int_t BinarySearch(ULong_t  value );
@@ -135,14 +141,15 @@ class St_TableSorter : public TNamed {
     Int_t BinarySearch(UChar_t  value );
     Int_t BinarySearch(Char_t   value );
  
-    virtual const Text_t *GetColumnName() const { return m_colName.Data();}
-    virtual       Int_t   GetIndex(UInt_t index) const;
-    virtual       Int_t   GetLastFound()  const { return m_LastFound; }
-    virtual const Text_t *GetTableName()  const;
-    virtual const Text_t *GetTableTitle() const;
-    virtual const Text_t *GetTableType()  const;
-    virtual       Int_t   GetNRows()      const { return m_numberOfRows;}
-    virtual       Int_t   GetFirstRow()   const { return m_firstRow;}
+    virtual const Text_t   *GetColumnName() const { return m_colName.Data();}
+    virtual       Int_t     GetIndex(UInt_t index) const;
+    virtual       Int_t     GetLastFound()  const { return m_LastFound; }
+    virtual const Text_t   *GetTableName()  const;
+    virtual const Text_t   *GetTableTitle() const;
+    virtual const Text_t   *GetTableType()  const;
+    virtual       St_Table *GetTable() const;
+    virtual       Int_t     GetNRows()      const { return m_numberOfRows;}
+    virtual       Int_t     GetFirstRow()   const { return m_firstRow;}
 
     Int_t operator[](Int_t value)    { return BSearch(value); }
     Int_t operator[](Double_t value) { return BSearch(value); } 

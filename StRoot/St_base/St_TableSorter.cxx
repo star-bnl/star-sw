@@ -484,6 +484,34 @@ int St_TableSorter::CompareChar   (const void *elem1, const void *elem2)
 }
 #endif
 //_____________________________________________________________________________
+Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx) const
+{
+  Int_t count = 0;
+  if (m_searchMethod) {
+    Int_t indx = firstIndx;  
+    Int_t nRows = GetNRows();
+    while ( indx < nRows && m_searchMethod(key,&m_SortIndex[indx])){indx++;}
+    while ( indx < nRows &&!m_searchMethod(key,&m_SortIndex[indx])){indx++; count++;}
+  }
+  return count;
+}
+
+//_____________________________________________________________________________
+Int_t St_TableSorter::CountKeys() const
+{
+  Int_t count = 0;
+  if (m_SortIndex && m_SortIndex[0]) {
+    void *key = m_SortIndex[0];
+    Int_t indx = 0;
+    while (indx < GetNRows()){
+      indx += CountKey(key,indx); 
+      count++; 
+      key = m_SortIndex[indx];
+    }
+  }
+  return count;
+}
+//_____________________________________________________________________________
 void St_TableSorter::FillIndexArray(){
   if (!m_SortIndex) return;
   for (Int_t i=m_firstRow; i < m_firstRow+m_numberOfRows;i++) 
@@ -496,6 +524,8 @@ const Text_t * St_TableSorter::GetTableName() const { return m_ParentTable.GetNa
 const Text_t * St_TableSorter::GetTableTitle() const { return m_ParentTable.GetTitle();}
 //_____________________________________________________________________________
 const Text_t * St_TableSorter::GetTableType() const { return m_ParentTable.GetType();}
+//_____________________________________________________________________________
+St_Table *St_TableSorter::GetTable() const { return &m_ParentTable;}
 
 //_____________________________________________________________________________
 void  St_TableSorter::SetSearchMethod()
