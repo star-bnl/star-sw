@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.169 2001/02/12 17:46:50 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.170 2001/02/13 01:31:52 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -53,7 +53,7 @@ Bfc_st BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
-  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,EvOut.NoHits"
+  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,EvOut,NoHits"
                                                                               ,"","","Year 1 chain",kFALSE}, 
   {"C2default"   ,""  ,"","C1default,ftpc,svt"                                ,"","","Year 2 chain",kFALSE}, 
   {"CAdefault"   ,""  ,"","tpc,l0,l3,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
