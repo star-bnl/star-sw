@@ -21,19 +21,35 @@ ostream& operator<<(ostream& out, StHbtTrack& trk){
   // sometimes ChiSqXY is infinity, so output largest number instead
   float ChiSqXYtemp = (fabs(trk.mChiSqXY)>FLT_MAX) ? FLT_MAX : trk.mChiSqXY;
 
-  return (out
-	  << trk.mCharge     << " " << trk.mNHits        << " "
-	  << trk.mNHitsPoss  << " " << trk.mNSigmaPion   << " "
-	  << trk.mNSigmaKaon << " " << trk.mNSigmaProton << " "
-	  << trk.mdEdx       << " " << trk.mDCAxy        << " "
-	  << trk.mDCAz       << " " << ChiSqXYtemp       << " "
-	  << trk.mChiSqZ     << " " << trk.mP.x()        << " "
-	  << trk.mP.y()      << " " << trk.mP.z()        << " "
+  return (
+	  out
+	  << trk.mTrackId << " " 
+	  << trk.mCharge << " " 
+	  << trk.mNHits << " " 
+	  << trk.mNHitsPoss << " " 
+	  << trk.mNSigmaElectron << " " 
+	  << trk.mNSigmaPion << " " 
+	  << trk.mNSigmaKaon << " " 
+	  << trk.mNSigmaProton << " "
+	  << trk.mdEdx << " " 
+	  << trk.mDCAxy << " "
+	  << trk.mDCAz << " " 
+	  << ChiSqXYtemp << " "
+	  << trk.mChiSqZ << " " 
+	  << trk.mP.x() << " "
+	  << trk.mP.y() << " " 
+	  << trk.mP.z() << " "
 	  // now for the StPhysicalHelixD...
-	  << trk.mHelix.curvature() << " " << trk.mHelix.dipAngle() << " "
-	  << trk.mHelix.phase()     << " " 
-	  << trk.mHelix.origin().x() << " " << trk.mHelix.origin().y() << " " << trk.mHelix.origin().z() << " "
-	  << trk.mHelix.h());
+	  << trk.mHelix.curvature() << " " 
+	  << trk.mHelix.dipAngle() << " "
+	  << trk.mHelix.phase() << " " 
+	  << trk.mHelix.origin().x() << " " 
+	  << trk.mHelix.origin().y() << " " 
+	  << trk.mHelix.origin().z() << " "
+	  << trk.mHelix.h() << " " 
+          << trk.mMap[0] << " " 
+	  << trk.mMap[1]
+	  );
 }
 
 istream& operator>>(istream& in,  StHbtTrack& trk){
@@ -42,18 +58,31 @@ istream& operator>>(istream& in,  StHbtTrack& trk){
   double xorigin,yorigin,zorigin;     // for PhysicalHelix
   int h;                              // for PhysicalHelix
   in
-    >> trk.mCharge     >> trk.mNHits       
-    >> trk.mNHitsPoss  >> trk.mNSigmaPion  
-    >> trk.mNSigmaKaon >> trk.mNSigmaProton
-    >> trk.mdEdx       >> trk.mDCAxy       
-    >> trk.mDCAz       >> trk.mChiSqXY     
-    >> trk.mChiSqZ     >> x
-    >> y               >> z
+    >> trk.mTrackId 
+    >> trk.mCharge     
+    >> trk.mNHits       
+    >> trk.mNHitsPoss  
+    >> trk.mNSigmaPion  
+    >> trk.mNSigmaKaon 
+    >> trk.mNSigmaProton
+    >> trk.mdEdx       
+    >> trk.mDCAxy       
+    >> trk.mDCAz       
+    >> trk.mChiSqXY     
+    >> trk.mChiSqZ     
+    >> x
+    >> y               
+    >> z
     // now for the StPhysicalHelixD...
-    >> curvature       >> dipAngle
-    >> phase           >> xorigin
-    >> yorigin         >> zorigin
-    >> h;
+    >> curvature       
+    >> dipAngle
+    >> phase           
+    >> xorigin
+    >> yorigin         
+    >> zorigin
+    >> h
+    >> trk.mMap[0]
+    >> trk.mMap[1];
   // set up P
   trk.mP.setX(x); 
   trk.mP.setY(y); 

@@ -4,7 +4,7 @@
 
 #ifndef __CINT__
 #include <iostream.h>
-#include <cstdio>
+#include <stdio>
 #include <math.h>
 #ifdef GNU_GCC
 #   include <stddef.h>

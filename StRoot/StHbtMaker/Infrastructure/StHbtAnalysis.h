@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.9 2000/03/17 17:23:05 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.10 2000/04/03 16:21:50 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.10  2000/04/03 16:21:50  laue
+ * some include files changed
+ * Multi track cut added
+ *
  * Revision 1.9  2000/03/17 17:23:05  laue
  * Roberts new three particle correlations implemented.
  *
@@ -114,6 +118,7 @@ public:
 
   virtual void Finish();
 
+  friend StHbtLikeSignAnalysis;
 
 private:
   StHbtPairCut*       mPairCut;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.7 2000/03/16 02:07:05 laue Exp $
+ * $Id: StHbtParticle.hh,v 1.8 2000/04/03 16:21:51 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,14 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
- * Revision 1.7  2000/03/16 02:07:05  laue
- * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
- *
- * StHbtBinaryReader can now derive filename from StIOMaker and read a list
- * of files.
- *
- * StHbtManager now holds a collection of StHbtEventWriters (multiple writes
- * possible now)
+ * Revision 1.8  2000/04/03 16:21:51  laue
+ * some include files changed
+ * Multi track cut added
  *
  * Revision 1.6  2000/02/26 19:04:52  laue
  * Some unnecessary includes removed.
@@ -63,20 +58,27 @@ public:
   StHbtParticle(const StHbtV0* const hbtV0, const double& mass);
   ~StHbtParticle();
 
-  const StHbtLorentzVector FourMomentum() const;
+  const StHbtLorentzVector& FourMomentum() const;
 
-  StPhysicalHelixD Helix();
+  StPhysicalHelixD& Helix();
 
-  const StHbtThreeVector DecayVertexPosition() const;
+  const StHbtThreeVector& DecayVertexPosition() const;
+
+  unsigned long TopologyMap(const int word) const;
+  int NumberOfHits() const;
 
 private:
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
   StHbtThreeVector mDecayVertexV0;
+  unsigned long mMap[2];
+  int mNhits;
 
 };
 
-inline const StHbtLorentzVector StHbtParticle::FourMomentum() const {return mFourMomentum;}
-inline StPhysicalHelixD StHbtParticle::Helix() {return mHelix;}
-inline const StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
+inline const StHbtLorentzVector& StHbtParticle::FourMomentum() const {return mFourMomentum;}
+inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
+inline const StHbtThreeVector& StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
+inline unsigned long StHbtParticle::TopologyMap(const int word) const {return mMap[word];}
+inline int StHbtParticle::NumberOfHits() const {return mNhits;}
 #endif

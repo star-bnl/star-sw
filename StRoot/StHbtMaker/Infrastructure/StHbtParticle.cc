@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.6 1999/12/11 15:58:29 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.7 2000/04/03 16:21:51 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.7  2000/04/03 16:21:51  laue
+ * some include files changed
+ * Multi track cut added
+ *
  * Revision 1.6  1999/12/11 15:58:29  lisa
  * Add vertex decay position datum and accessor to StHbtParticle to allow pairwise cuts on seperation of V0s
  *
@@ -51,6 +55,9 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
+  mMap[0] = hbtTrack->TopologyMap(0);
+  mMap[1] = hbtTrack->TopologyMap(1);
+  mNhits = hbtTrack->NHits();
 
   mHelix = hbtTrack->Helix();
 }

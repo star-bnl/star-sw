@@ -8,13 +8,13 @@
 
 typedef unsigned int colSizeType;
 
-StHbtIOBinary::StHbtIOBinary(const char* fileName, const char* readWrite) {
+StHbtIOBinary::StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite) {
   //cout << " StHbtIOBinary(const char* fileName, const char* readWrite " << endl;
   byteCounterTotal=0;
   byteCounterEvent=0;
   if (((*readWrite)=='w')|| ((*readWrite)=='W')){  // this object will be a writer
     mOStream = new ofstream;
-    mOStream->open(fileName);
+    mOStream->open( parseDirFile(dirName, fileName, appendix) );
     if (!mOStream){
       cout << "StHbtIOBinary::Init() - Cannot open output file! " << endl;
       exit(-1);
@@ -23,7 +23,7 @@ StHbtIOBinary::StHbtIOBinary(const char* fileName, const char* readWrite) {
   }
   else {
     mIStream = new ifstream;
-    mIStream->open(fileName); 
+    mIStream->open( parseDirFile( dirName, fileName, appendix) ); 
     if (!mIStream){
       cout << "StHbtIOBinary::Init() - Cannot open input file! " << endl;
       exit(-1);
@@ -231,3 +231,23 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
   return ioOK;
 } 
 
+// **********************************************************************
+char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char* appendix) {
+  cout << dir << endl;
+  cout << file << endl;
+  cout << appendix << endl;
+
+  if (!dir) return file;  // no dir specified
+  StHbtString theDir = (char*)dir;
+  StHbtString theFile = (char*)file;
+  StHbtString theAppendix = (char*)appendix;
+  while ( theFile.find("/") != string::npos ) {
+    cout << theFile.c_str() << " ";
+    string::size_type pos =  theFile.find("/");
+    cout << pos << endl;
+    theFile.erase(0, pos+1 );
+    cout << theFile.c_str() << endl;
+  }
+  cout << (theDir+theFile+theAppendix).c_str() << endl;
+  return (theDir+theFile+theAppendix).c_str();
+}

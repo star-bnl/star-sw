@@ -5,7 +5,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "PhysicalConstants.h"
-#include <cstdio>
+//#include <cstdio>
 
 
 double gamovCorrect(const StHbtPair* pair,
