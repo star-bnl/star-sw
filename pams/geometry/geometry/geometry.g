@@ -1,3 +1,8 @@
+* $Id: geometry.g,v 1.36 2000/11/22 17:51:41 nevski Exp $
+* $Log: geometry.g,v $
+* Revision 1.36  2000/11/22 17:51:41  nevski
+* tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
+*
 ***************************************************************************
    subroutine geometry
 *                                                                         *
@@ -14,8 +19,8 @@
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
-   real       Par(1000),field,dcay(5),shift(2)
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr
+   real       Par(1000),field,dcay(5),shift(2),wdm
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr,Itof
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -42,7 +47,7 @@ replace[;ON#{#;] with [
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
-   field=5;  Nsi=7;  Rv=1;  Wfr=0;                     "defaults constants"
+   field=5; Nsi=7; Rv=2; Wfr=0; Itof=2; Wdm=6.0;       "defaults constants"
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -76,20 +81,26 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
-  on COMPLETE   { Complete STAR geometry;                             tof=on; }
+  on COMPLETE   { Complete STAR geometry;                     tof=on; Itof=2; }
   on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;          alpipe=on;
                                          {ftpc,vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
-                                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=0; }
-  on YEAR_1H    { even better y1:  TPC+CTB+FTPC+caloPatch+svtLadder;  
-                          Rv=2;   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=-3;}
-  on YEAR_1E    { even better y1:  TPC+CTB+caloPatch+svtLadder(4);  
-*    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
-                  Wfr=7; Rv=2; {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; Nsi=-3;}
+                        {vpdd,ecal}=off;  {rich,ems,t1}=on;
+                        Itof=1;  Rv=1;  Nsi=0;                                }
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
-  on YEAR_2A    { asymptotic STAR;                                   tof=off; }
+  on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
+                        {vpdd,ecal}=off;  {rich,ems,t1}=on; 
+                        Itof=1;  Rv=2;  Wdm=6.0;  Nsi=-3;                     }
+  on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder(4);  
+*    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
+                        {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on;
+                        Itof=1;  Rv=2;  Wfr=7;  Wdm=6.0;  Nsi=-3;             }
+  on YEAR_2A    { asymptotic STAR;                                            }
+  on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
+                        {vpdd,ecal}=off;  {rich,ems,t1}=on;  
+                        Itof=2;  Rv=2;  Wfr=7;  Wdm=6.305;                    }
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
@@ -143,6 +154,8 @@ If LL>1
    If (LL>1) call AgDETP new ('SVTT')
    if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',   Nsi,1)
    if (svtt & Wfr > 0) call AgDETP add ('svtl(3).nwafer=',wfr,1)
+   if (svtt & wdm > 0) call AgDETP add ('swca.WaferWid=', wdm,1)
+   if (svtt & wdm > 0) call AgDETP add ('swca.WaferLen=', wdm,1)
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
@@ -160,7 +173,7 @@ If LL>1
    if (tof)  call AgDETP add ('btog.choice=',2,1)
    if (t25)  call AgDETP add ('btog.choice=',3,1)
    if (t1)   call AgDETP add ('btog.choice=',4,1)
-   if (btof) Call btofgeo
+   if btof { If Itof==1 { call btofgeo1 } else { call btofgeo2 }}
      
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
