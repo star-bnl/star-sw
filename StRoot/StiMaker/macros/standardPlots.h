@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlots.h,v 1.1 2002/06/12 20:22:02 andrewar Exp $
+ * $Id: standardPlots.h,v 1.2 2002/06/26 14:34:13 andrewar Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.2  2002/06/26 14:34:13  andrewar
+ * Added cut handles.
+ *
  * Revision 1.1  2002/06/12 20:22:02  andrewar
  * Initial commit. Template for standard evaluation plot generation.
  * Current version includes few real plots and no cut capability.
@@ -620,7 +623,17 @@ class standardPlots {
 
    standardPlots(TTree *tree=0, char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
    ~standardPlots();
-   Int_t  Cut(Int_t entry);
+
+   //cut arrays
+   float  multCut[2];
+   float  zCut[2];
+   float  ptCut[2];
+   float  etaCut[2];
+   float  nHitCut[2];
+   float  dca[2];
+   float  primary;
+   float  global;
+
    Int_t  GetEntry(Int_t entry);
    Int_t  LoadTree(Int_t entry);
    void   Init(TTree *tree);
@@ -628,6 +641,19 @@ class standardPlots {
    Bool_t Notify();
    void   Show(Int_t entry = -1);
 
+   void    SetEventCutMult(float low, float high){multCut[0]=low;multCut[1]=high;};
+   void    SetEventCutZ(float low, float high){zCut[0]=low;zCut[1]=high;};
+   Int_t  Cut(Int_t entry);
+
+   void    SetTrackCutPt(float low, float high){ptCut[0]=low;ptCut[1]=high;};
+   void    SetTrackCutEta(float low, float high){etaCut[0]=low;etaCut[1]=high;};
+   void    SetTrackCutNHit(float low, float high){nHitCut[0]=low;nHitCut[1]=high;};   
+   void    SetTrackCutDca(float low, float high){dca[0]=low;dca[1]=high;};
+   int    trackCut(int entry, int track);
+   void   showCuts();
+
+   //functions to make plots
+   void   makeTrackEffPlots();
    void   makeMomentumPlots();
    void   makeHitEffPlots();
    void   makeFitPointsPlots();
@@ -650,6 +676,13 @@ standardPlots::standardPlots(TTree *tree, char* infile)
 
    }
    Init(tree);
+
+   SetTrackCutPt(0.,20.);
+   SetTrackCutEta(-1.5,1.5);
+   SetTrackCutNHit(25.,55.);
+   SetTrackCutDca(0.,20.);
+   SetEventCutMult(0.,10000.);
+   SetEventCutZ(-30.,30.);
 }
 
 standardPlots::~standardPlots()
@@ -1291,12 +1324,66 @@ void standardPlots::Show(Int_t entry)
    if (!fChain) return;
    fChain->Show(entry);
 }
+
 Int_t standardPlots::Cut(Int_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
-   return 1;
+   if(mMatchedPairs_>multCut[0] && mMatchedPairs_<multCut[1]
+      && mVertexZ>zCut[0] && mVertexZ<zCut[1]) return 1;
+
+   return 0;
+}
+
+int standardPlots::trackCut(int entry, int track)
+{
+// This function may be called from Loop.
+// returns  1 if entry is accepted.
+// returns 0 otherwise.
+  if(   mMatchedPairs_mPtPr[track]       > ptCut[0] 
+     && mMatchedPairs_mPtPr[track]       < ptCut[1]
+     && mMatchedPairs_mEtaPr[track]      > etaCut[0]
+     && mMatchedPairs_mEtaPr[track]      < etaCut[1]
+     && mMatchedPairs_mNCommonHit[track] > nHitCut[0] 
+     && mMatchedPairs_mNCommonHit[track] < nHitCut[1]
+     && mMatchedPairs_mDcaGl[track]      > dca[0] 
+     && mMatchedPairs_mDcaGl[track]      < dca[1]) return 1;
+
+   return 0;
+}
+
+int standardPlots::mcTrackCut(int entry, int track)
+{
+// This function may be called from Loop.
+// returns  1 if entry is accepted.
+// returns 0 otherwise.
+  if(  mMcTracks_mPtMc[track]        > ptCut[0]
+     &&mMcTracks_mPtMc[track]        < ptCut[1]
+     &&(mMcTracks_mEtaMc[track]      > etaCut[0]
+     &&mMcTracks_mEtaMc[track]       < etaCut[1]) 
+     &&mMcTracks_mNHitMc[track]      > nHitCut[0] 
+     && mMcTracks_mNHitMc[track]     < nHitCut[1] 
+     &&mMcTracks_mChargeMc[track]!=0)
+     return 1;
+
+   return 0;
+}
+
+void standardPlots::showCuts()
+{
+  cout <<"The Event cuts currently defined are:\t\tlow\thigh"<<endl
+       <<"\tVertex Z :\t"
+       <<"\t\t\t"<<zCut[0]<<"\t"<<zCut[1]<<endl
+       <<"\tMultiplicity :\t"
+       <<"\t\t\t"<<multCut[0]<<"\t"<<multCut[1]<<endl<<endl
+       <<"The Track Cuts currently defined are:\t\tlow\thigh"<<endl    
+       <<"\tTransverse Momentum :\t"
+       <<"\t\t"<<ptCut[0]<<"\t"<<ptCut[1]<<endl
+       <<"\tEta :\t"
+       <<"\t\t\t\t"<<etaCut[0]<<"\t"<<etaCut[1]<<endl
+       <<"\tTpc Hits :\t"
+       <<"\t\t\t"<<nHitCut[0]<<"\t"<<nHitCut[1]<<endl;
 }
 #endif // #ifdef standardPlots_cxx
 
