@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.19 1999/11/16 20:58:42 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.20 1999/11/18 22:18:38 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.20  1999/11/18 22:18:38  fisyak
+// Spiros decided to open this cut from 1cm (~1sigma for year1) to 3cm (~3sigma).
+//
 // Revision 1.19  1999/11/16 20:58:42  wdeng
 // Spiros's temporary solution to id_start_vertex puzzle
 //
@@ -112,7 +115,7 @@ Int_t StPrimaryMaker::Init(){
     evr_evrpar_st row;
     //
     memset(&row,0,m_evr_evrpar->GetRowSize());
-    row.vcut	 =          1; // distance below where track is marked as default primary ;
+    row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
     row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;
     row.cutxy	 =          1; // select tracks for vertex fitting ;
