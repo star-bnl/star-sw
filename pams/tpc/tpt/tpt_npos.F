@@ -108,9 +108,9 @@ C***  Arrange possible solutions in increasing y-order
          DO 45 i=1,8
             hit(i)=0.
             IF( (trk(5).ne.0.).and.
-     +          (y(i).gt.((zpl-abs(trk(3)))/abs(trk(5)))) 
+     +(y(i).gt.(abs(trk(1)*sin(trk(2)))+(zpl-abs(trk(3)))/abs(trk(5))))
      +        ) THEN
-               hit(i) = (zpl-abs(trk(3)))/abs(trk(5))
+      hit(i) = abs(trk(1)*sin(trk(2)))+(zpl-abs(trk(3)))/abs(trk(5))
             ELSE
                hit(i) = y(i)
             ENDIF
