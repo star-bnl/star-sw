@@ -2,5 +2,5 @@
 cvs co StRoot/StEEmcDbMaker
 cvs co StRoot/StEEmcUtil
 cvs co StRoot/StEEmcSimulatorMaker
-cvs co StRoot/StEEmcCalibrationMaker
+cvs co StRoot/StEEmcDataMaker
 cons
