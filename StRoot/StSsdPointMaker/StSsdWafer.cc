@@ -634,7 +634,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[4]);
+ 	  newPointC->setEnergyLoss(Adc[4], Adc[1]-Adc[0]-Adc[4]);
           newPointC->setFlag(100);
  	  mPoint->addNewPoint(newPointC);
           nSolved++;
