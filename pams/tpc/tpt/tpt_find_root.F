@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.5 1998/04/23 17:13:01 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.6 1998/05/26 04:15:12 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.6  1998/05/26 04:15:12  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.5  1998/04/23 17:13:01  sakrejda
 * more comments added and speed improved by removing sqrt and sqaring tolerances
 *
@@ -178,7 +181,7 @@ c                              we have a good root
 		  	       root(nroot).hit(2) = i
 			       root(nroot).hit(3) = j
                                if(nroot.eq.mxroot) then
-                                   write(m132,*) 'TPT-ROOT1 root limit!',nroot
+                                   write(m132,*) 'TPTROOT1-E1 root limit!',nroot
                                    call Message(m132, 1, idR1)
                                    go to 999
                                endif

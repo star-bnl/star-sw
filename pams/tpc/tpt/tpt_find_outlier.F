@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.3 1998/04/06 19:23:45 sakrejda Exp $
+* $Id: tpt_find_outlier.F,v 1.4 1998/05/26 04:15:12 sakrejda Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.4  1998/05/26 04:15:12  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.3  1998/04/06 19:23:45  sakrejda
 * write replaced by message calls
 *
@@ -75,7 +78,7 @@ c
       do i=1,ncir
          ri = abs(sqrt((xcir(i)-acent)**2+(ycir(i)-bcent)**2)- rr)
          if(abs(trk(ipt).p(7)).lt.0.0000001) then
-             write(m132,*)'TPT-OUT1 Midrapidity track'
+             write(m132,*)'TPTOUT1-E1 Midrapidity track'
              call Message( m132, 1, idI1 )
              tpt_find_outlier = STAFCV_BAD
              return
@@ -83,7 +86,7 @@ c
          dsz = (zcir(i) - zn1)/trk(ipt).p(7)
          if(dsz.ge.C_2PI*rr) then
 *            it's a very special case
-             write (m132,*)'TPT-OUT2 special case in the outliers removal',dsz
+             write (m132,*)'TPTOUT2-E1 special case in the outliers removal',dsz
              call Message( m132, 1, idI2 )
              tpt_find_outlier = STAFCV_BAD
          else
@@ -107,7 +110,7 @@ c
       end do
       ibad = ibig
       if(ibad.eq.0) then
-          write(m132by100(1),*)'TPT-OUT3 ',ibad, ipt, ncir, ri, dz
+          write(m132by100(1),*)'TPTOUT3-E1',ibad, ipt, ncir, ri, dz
           do i=1,ncir
           write(m132by100(i+1),*)wlin(i),wcir(i)
           end do
