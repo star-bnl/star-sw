@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 
 #ifdef __ROOT__
 
@@ -19,7 +20,14 @@
 
 // Version: 1.0; 17Sep2003; Tonko
 //
-
+void *lastAfter=0;
+int myNext = 0;
+fcfAfterburner::fcfAfterburner() 
+{ 
+	last_n = last_count = last_i = last_stage = 0; 
+	do_merge = do_cuts = 1 ; verbose = true; 
+    	lastAfter=this;
+};
 void fcfAfterburner::print_hit(char *str, struct fcfHit *h)
 {
         if(str) {
@@ -287,7 +295,7 @@ int fcfAfterburner::next(fcfHit *h)
 			else if(hit.p2 == edge[2]) list = 2 ;
 			else if(hit.p1 == edge[3]) list = 3 ;
 				
-			if(list >= 0) {
+			if(list >= 0 && cou_broken[list]<kMax_fcfHit) {
 				memcpy(&(broken[list][cou_broken[list]]),&hit,sizeof(hit)) ;
 				cou_broken[list]++ ;
 				//print_hit("Broken",&hit) ;
