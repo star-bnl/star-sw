@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.10 2005/03/18 14:59:32 lmartin Exp $
+// $Id: StSsdWafer.cc,v 1.11 2005/03/18 16:42:18 lmartin Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.11  2005/03/18 16:42:18  lmartin
+// setMatcheds method modified to transmit the cluster Ids to the point
+//
 // Revision 1.10  2005/03/18 14:59:32  lmartin
 // setPedestalSigmaStrip method added, setSigmaStrip removed
 //
@@ -2398,6 +2401,8 @@ int StSsdWafer::setMatcheds(ssdDimensions_st *dimensions, StSsdPoint *Point, StS
 {// strip(1) -> Upos(0)...
   Point->setPositionU((pMatched->getStripMean()-1)*dimensions[0].stripPitch,0);
   Point->setPositionU((nMatched->getStripMean()-1)*dimensions[0].stripPitch,1);
+  Point->setIdClusterP(pMatched->getNCluster());
+  Point->setIdClusterN(nMatched->getNCluster());
 
   // for evaluation only !!!
   int pHitIndex   = 0;
