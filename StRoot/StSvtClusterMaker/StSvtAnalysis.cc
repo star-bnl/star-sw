@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.5 2000/08/24 04:27:56 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.6 2000/08/29 22:46:26 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -81,6 +81,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.6  2000/08/29 22:46:26  caines
+ * Fixed some memory leaks
+ *
  * Revision 1.5  2000/08/24 04:27:56  caines
  * Fixed casting warnings so compiles without errors on linux
  *
@@ -610,9 +613,13 @@ void StSvtAnalysis::MomentAnalysis()
    // Print_Pixels(iRows, iCols, clu);                         //creates nice picture of cluster with 0's padding the edges
       
    //if (hit_id<4) {                                        //only good hits. NO NO. Look at all hits.
-   m_countBadAn[m_hybIndex][(int)(.5+fAnodeMom1)]++;         //count the noisy anodes and time for all hits whether good or bad
-   m_countBadTb[m_hybIndex][(int)(.5+fDriftMom1)]++;         //invstigate this.
-   //}  
+   if( (int)(.5+fAnodeMom1) >= 0 && (int)(.5+fAnodeMom1) <= 240 ||
+       (int)(.5+fDriftMom1) >= 0 && (int)(.5+fDriftMom1) <= 128){
+     m_countBadAn[m_hybIndex][(int)(.5+fAnodeMom1)]++;         //count the noisy anodes and time for all hits whether good or bad
+     m_countBadTb[m_hybIndex][(int)(.5+fDriftMom1)]++;         //invstigate this.
+   }
+     //}  
+
 
  }  //end loop over cluster for this hybrid
  m_clu++;   //make equal to numOfClus     
@@ -1235,9 +1242,13 @@ void StSvtAnalysis::SetBadAnTb(int nClus)
     iHyb = mHybridNum[i];
     iAn  = (int)(.5+mMeanClusterAnode[i]);
     iTb  = (int)(.5+mMeanClusterTimeBin[i]);
-    if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
-    if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}// cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
-    //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
+    if( iAn >=0 && iAn < 241){
+      if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
+    }
+    if( iTb >=0 && iTb < 129){
+      if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}// cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
+      //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
+    }
   }
 
 }

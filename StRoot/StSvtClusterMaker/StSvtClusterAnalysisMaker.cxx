@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.4 2000/08/21 13:06:58 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.5 2000/08/29 22:46:26 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.5  2000/08/29 22:46:26  caines
+ * Fixed some memory leaks
+ *
  * Revision 1.4  2000/08/21 13:06:58  caines
  * Much improved hit finding and fitting
  *
@@ -85,7 +88,8 @@ StSvtClusterAnalysisMaker::~StSvtClusterAnalysisMaker(){
 //_____________________________________________________________________________________________
 Int_t StSvtClusterAnalysisMaker::Init()
 {
-  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"<<endm;
+  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"
+				 << GetName() <<endm;
 
   mNoEvents=0;
   
@@ -229,8 +233,9 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
 
 Int_t StSvtClusterAnalysisMaker::Make()
 {
-  cout<<" In StSvtClusterAnalysisMaker::Make()"<<endl;
 
+  if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Make() ..."
+				 <<  GetName() << endm;
   SetClusterAnalysis();
 
   MakeHistograms();
@@ -376,10 +381,8 @@ Int_t StSvtClusterAnalysisMaker::GetRawData(int index)
 
   int counter = 0;
 
-  cout<<"\n\n";
   int an  = 0;
   int seq = 0, mseq = 0;
-
   do 
     {
      while(an + 1)
@@ -498,7 +501,8 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 	         }
 	       
 	      }
-          }
+	   }
+	 delete [] tempMemberInfo;
 	} //hybrid loop
       } //wafer loop
    } //ladder loop
@@ -513,7 +517,8 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 
 Int_t StSvtClusterAnalysisMaker::Finish(){
 
-  printf("In StSvtClusterAnalysisMaker::Finish() ...\n"); 
+ if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Finish() ..."
+				<<   GetName() << endm;
 
   return kStOK;
 }

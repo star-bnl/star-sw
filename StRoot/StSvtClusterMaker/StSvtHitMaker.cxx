@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.3 2000/08/26 20:36:28 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.4 2000/08/29 22:46:26 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.4  2000/08/29 22:46:26  caines
+ * Fixed some memory leaks
+ *
  * Revision 1.3  2000/08/26 20:36:28  caines
  * Adjustments for StSvtCoordinateTransform calls
  *
@@ -375,7 +378,8 @@ Int_t StSvtHitMaker::FillHistograms(){
 //_____________________________________________________________________________
 Int_t StSvtHitMaker::Finish(){
 
- if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Finish() ..."  << endm;
+ if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Finish() ..." 
+				<<  GetName() << endm;
 
  if( iWrite == 1){
    m_hfile->Write();
