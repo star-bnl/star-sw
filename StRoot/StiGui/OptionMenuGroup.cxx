@@ -1,5 +1,5 @@
 #include "Sti/Base/EditableParameters.h"
-#include "Sti/StiTrackSeedFinder.h"
+//#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrackFitter.h"
 #include "StiGui/OptionMenuGroup.h"
