@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.8 2000/12/30 21:06:50 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.9 2001/03/21 16:25:22 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -29,10 +29,11 @@
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpcGain_Table.h"
-#include "tables/St_tpcFeeGainCor_Table.h"
+#include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_TpcTimeGain_Table.h"
 #include "tables/St_TpcDriftDistCorr_Table.h"
 #include "tables/St_fee_vs_pad_row_Table.h"
+#include "tables/St_tpcBadPad_Table.h"
 // global
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
@@ -70,73 +71,58 @@ struct dEdx_t {
   Int_t sector;
   Int_t row;
   Int_t pad;
+  Int_t Fee;
   Double_t dE;
   Double_t dEU; // before correction
   Double_t dx;
   Double_t dEdx; 
   Double_t dEdxU; 
+  Double_t dEdxP; // after pulser correction only
   Double_t dEdxL; // log of dEdx
   Double_t dEdxLU; // log of dEdx
   Double_t dEdxN; // normolized to BB
+  Double_t dEdxNP; // normolized to BB
   Double_t xyz[3];
   Double_t Prob; 
+  Double_t SigmaFee;
+  Double_t xscale;
+  Double_t zdev; 
 };
+enum EFitCase {kVal, kGrad};
+enum ESector  {kTpcInner, kTpcOuter};
 dEdx_t CdEdx[60]; // corrected
 dEdx_t FdEdx[60]; // fit
 Int_t NdEdx = 0, NPoints = 0;
 Double_t dEdxS[60]; // dEdx sorted
-Double_t dE, dx, dEdx, Sigma_dEdx;
+Double_t dE, dEP, dx, dEdx, Sigma_dEdx;
 
 TF1 *fFunc = 0;
 TCanvas *fCanvas = 0;
 TH1F    *h1 = 0;
 TMinuit *gMinuit = new TMinuit(2);
-const Int_t NpGaus = 12;
-// pow(x,0.36) parameters
-Double_t parGaus[NpGaus] = { 0.626630,-0.196071,0.374226,
-			     0.204128, 0.097587,0.674559,
-			     0.023837, 1.018181,1.135371,
-			    -0.001196,-1.539197,0.275564};
-Double_t perGaus[NpGaus] = { 0.001127, 0.000277,0.000397,
-			     0.001034, 0.002307,0.000891,
-			     0.000131, 0.003892,0.001164,
-			     0.000158, 0.034256,0.017512};
-// Double_t sigmaI[2]       = { 9.57206e-01,-6.09601e-03};
-// Double_t sigmaO[6]       = {-8.58965e-01, 2.95273e+00,-1.81994e+00, 5.45927e-01,-7.99525e-02, 4.60043e-03};
-// Double_t muIO[6]  = {-2.79379e-01, 4.95047e-01,-3.22628e-01, 9.85297e-02,-1.42366e-02, 7.74382e-04};
-// length correction in range [17,115]
-Double_t CLength[6] = {-3.85006e-01, 3.12105e-02,-9.40609e-04, 1.33017e-05,-8.88061e-08, 2.26305e-10};
-Double_t CPull[2]   = { 1.35893e+00, -1.27034e-03}; // pull vs length [50,140]
-#if 0
-// sqrt(x) parameters
-Double_t parGaus[NpGaus] = {0.486236,-0.204430,0.460330,
-			    0.016537,1.642435,1.085395,
-			    0.198163,0.102950,0.790066,
-			    0.000863,-2.143906,0.698302};
-Double_t perGaus[NpGaus] = {0.001589,0.000449,0.000624,
-			    0.000382,0.028459,0.007643,
-			    0.001293,0.003442,0.002275,
-			    0.000042,0.051532,0.020009};
-#endif
-
+// correction for signal width versus Half Fee no.
+Double_t FeeSigma[2][3] = {
+     {  3.57800e-01, -9.97264e-05,  4.85553e-07},
+     {  1.11623e+00, -5.02868e-03,  9.04828e-06}
+};
 extern    void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *u, Int_t flag);
-extern    Double_t fGaus(Double_t x);
-extern    Double_t gGaus(Double_t x);
+extern    void fGaus(Double_t x, Double_t *val, ESector l = kTpcInner);
+extern    void MDFcorrOw(Double_t *x, Double_t *y);
 // Histograms
-TH3F *Z = 0, *ETA = 0, *SecRow = 0, *TPoints = 0, *Fee = 0;// *sXY = 0, *SXY = 0;
-TH2F *Time = 0, *CTime = 0, *Points70 = 0, *Points60 = 0, *Points70B = 0, *Points60B = 0, *SR = 0, *PointsFit = 0;
+TH3F *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *TPoints = 0, *Fee = 0, *FeeC = 0;// *sXY = 0, *SXY = 0;
+TH2F *Time = 0, *Points70 = 0, *Points60 = 0, *Points70B = 0, *Points60B = 0, *SR = 0, *PointsFit = 0;
 TH2F *FShapeI = 0, *FShapeO = 0, *FShapeIC = 0, *FShapeOC = 0;
-TH2F *corrI = 0, *corrO = 0, *corrI2 = 0, *corrO2 = 0, *corrI5 = 0, *corrO5 = 0, *corrIc = 0, *corrOc = 0;
-TH2F *corrIU = 0, *corrOU = 0;
-TH2D *hist70[NHYPS], *hist60[NHYPS], *histz[NHYPS], *histzC[NHYPS];
-TH2F *FitPull = 0, *CFitPull = 0;
+TH2F *corrI = 0, *corrO = 0, *corrI2 = 0, *corrO2 = 0, *corrI5 = 0, *corrO5 = 0;
+TH2D *hist70[NHYPS][2], *hist60[NHYPS][2], *histz[NHYPS][2];
+TH2F *FitPull = 0;
 TH2F *corrIw = 0, *corrOw = 0, *corrI2w = 0, *corrO2w = 0, *corrI5w = 0, *corrO5w = 0;
-TProfile *histB[NHYPS], *histBB[NHYPS]; 
+TH1F *corrI1w = 0, *corrO1w = 0;
+TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
 ClassImp(StdEdxMaker)  
 
 //_____________________________________________________________________________
-StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), m_tpcGain(0), m_tpcFeeGain(0), 
-m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0) {}
+StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), m_tpcGain(0), 
+m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0) {}
 //_____________________________________________________________________________
 StdEdxMaker::~StdEdxMaker(){}
 //_____________________________________________________________________________
@@ -157,14 +143,16 @@ Int_t StdEdxMaker::Init(){
   m_fee_vs_pad_row = (St_fee_vs_pad_row *) tpc_daq->Find("fee_vs_pad_row");
   if (!m_tpcTime) {
     cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
-    //    assert(m_tpcTime); 
+    assert(m_tpcTime); 
   }
   m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
   if (!m_drift) {
     cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
-    //    assert(m_drift); 
+    assert(m_drift); 
   }
-  m_tpcFeeGain = (St_tpcFeeGainCor *) tpc_calib->Find("tpcFeeGain"); assert(m_tpcFeeGain); 
+  m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
+  if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
+  m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
   if (m_Mode > 0) {// calibration mode
     StMaker *tpcdaq = GetMaker("tpc_raw");
     if (!tpcdaq) {
@@ -174,60 +162,46 @@ Int_t StdEdxMaker::Init(){
     if (f) {
       f->cd();
       Z   = new TH3F("Z","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
-		     2*NoSector,1,2*NoSector+1,125,-25.,225., 200,-5.,5.);
+		     2*NoSector,1,2*NoSector+1,100,0.,200., 200,-5.,5.);
+      ZC  = new TH3F("ZC","dEdxN versus sector(inner <= 24 and outter > 24)  and Z",
+		     2*NoSector,1,2*NoSector+1,100,0.,200., 200,-5.,5.);
       ETA   = new TH3F("ETA","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and #{eta}",
 		       2*NoSector,1,2*NoSector+1, 125,-.25,2.25, 200,-5.,5.);
-#if 0
-      sXY = new TH3F("sXY","XY for sector from points (input)",
-		     50,-200,200,50,-200,200,
-		     NoSector,1,NoSector+1);
-      SXY = new TH3F("SXY","XY for sector from Pad transformation",
-		     50,-200,200,50,-200,200,
-		     NoSector,1,NoSector+1);
-#endif
       SR = new TH2F("SR","sector and row from points (input)",
 		       NoSector,1,NoSector+1, NoRow,1.,NoRow+1);
       SecRow = new TH3F("SecRow","log(dEdx/Pion) versus sector  and row",
 		       NoSector,1,NoSector+1, NoRow,1.,NoRow+1, 200,-5.,5.);
       Int_t noFee = 182;
-      Fee    = new TH3F("Fee","dEdx versus sector and Fee",
+      Fee    = new TH3F("Fee","dEdx versus sector and Fee after pulser correction only",
 			NoSector,1,NoSector+1,  2*noFee,0,2*noFee, 200,-5.,5.);
-#if 0
-      CORR   = new TH3F("CORR","Correlation in <(z[row]-zfit)*(z[row+1]-zfit)> vs row nomber",
-			44,1,45, 200,-5.,5., 200,-5.,5.);
-#endif
+      FeeC   = new TH3F("FeeC","dEdx versus sector and Fee",
+			NoSector,1,NoSector+1,  2*noFee,0,2*noFee, 200,-5.,5.);
       corrI   = new TH2F("corrI","Correlation for Inner Sector for pair of nearest rows",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrO   = new TH2F("corrO","Correlation for Outer Sector for pair of nearest rows",
-			200,-5.,5., 200,-5.,5.);
-      corrIU  = new TH2F("corrIU","Correlation for Inner Sector for pair of nearest rows before corrections",
-			200,-5.,5., 200,-5.,5.);
-      corrOU  = new TH2F("corrOU","Correlation for Outer Sector for pair of nearest rows before corrections",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrI2   = new TH2F("corrI2","Correlation for Inner Sector for pair rows & row + 2",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrO2   = new TH2F("corrO2","Correlation for Outer Sector for pair rows & row + 2",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrI5   = new TH2F("corrI5","Correlation for Inner Sector for pair rows & row + 5",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrO5   = new TH2F("corrO5","Correlation for Outer Sector for pair rows & row + 5",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrIw   = new TH2F("corrIw","Weighted correlation for Inner Sector for pair of nearest rows",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrOw   = new TH2F("corrOw","Weighted correlation for Outer Sector for pair of nearest rows",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
+      corrI1w   = new TH1F("corrI1w","Weighted distribution for Inner Sector",100,-10.,10.);
+      corrO1w   = new TH1F("corrO1w","Weighted distribution for Outer Sector",100,-10.,10.);
       corrI2w   = new TH2F("corrI2w","Weighted correlation for Inner Sector for pair rows & row + 2",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrO2w   = new TH2F("corrO2w","Weighted correlation for Outer Sector for pair rows & row + 2",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrI5w   = new TH2F("corrI5w","Weighted correlation for Inner Sector for pair rows & row + 5",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       corrO5w   = new TH2F("corrO5w","Weighted correlation for Outer Sector for pair rows & row + 5",
-			200,-5.,5., 200,-5.,5.);
-      corrIc   = new TH2F("corrIc","Correlation for Inner Sector for pair of nearest row after correction",
-			200,-5.,5., 200,-5.,5.);
-      corrOc   = new TH2F("corrOc","Correlation for Outer Sector for pair of nearest row after correction",
-			200,-5.,5., 200,-5.,5.);
+			100,-10.,10., 100,-10.,10.);
       Points70 = new TH2F("Points70","dEdx(I70) versus no. of measured points",50,0,50.,200,-1.,1.);
       Points60 = new TH2F("Points60","dEdx(I60) versus no. of measured points",50,0,50.,200,-1.,1.);
       Points70B = new TH2F("Points70B","dEdx(I70) versus no. of measured points BB",50,0,50.,200,-1.,1.);
@@ -236,65 +210,58 @@ Int_t StdEdxMaker::Init(){
 			    50,0,50., 200,-1.,1.);
       TPoints  = new TH3F("TPoints","dEdx(fit) versus no. of measured points and length", 
 			  50,0,50., 150,10.,160., 200,-1.,1.);
-      FShapeI  = new TH2F("FShapeI","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Inner Sector", 80,0, 4., 300,-7.5,7.5);
-      FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 80,0, 4., 300,-7.5,7.5);
-#if 0
-      FShapeIC = new TH2F("FShapeIC","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus dx for Inner Sector corrected", 
-			  40,1, 5., 300,-7.5,7.5);
-      FShapeOC = new TH2F("FShapeOC","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus dx for Outer Sector corrected", 
-			  80,2,10., 300,-7.5,7.5);
-#endif
+      FShapeI  = new TH2F("FShapeI","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Inner Sector", 
+			  80,0, 4., 400,-10.,10.);
+      FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 
+			  80,0, 4., 400,-10.,10.);
       for (int hyp=0; hyp<NHYPS;hyp++) {
-	TString name = Names[hyp];
-	name += "70";
-	TString title = "log(dE/dx70/I(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	hist70[hyp] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
-	name = Names[hyp];
-	name += "60";
-	title = "log(dE/dx60/I(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	hist60[hyp] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
-	name = Names[hyp];
-	name += "z";
-	title = "zFit - log(I(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	histz[hyp] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
-	name = Names[hyp];
-	name += "zClean";
-	title = "zFit - log(I(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	histzC[hyp] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
-	name = Names[hyp];
-	name += "B";
-	title = "log(I_{Sirrf}(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	histB[hyp] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
-	name += "B";
-	title = "log(I_{BB}(";
-	title += Names[hyp];
-	title += ")) versus log10(p/m)";
-	histBB[hyp] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
+	for (int sCharge = 0; sCharge < 2; sCharge++) {
+	  TString nameP = Names[hyp];
+	  if (sCharge == 0) nameP += "P";
+	  else        nameP += "N";
+	  TString name = nameP;
+	  name += "70";
+	  TString title = "log(dE/dx70/I(";
+	  title += Names[hyp];
+	  title += ")) versus log10(p/m)";
+	  hist70[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
+	  name = nameP;
+	  name += "60";
+	  title = "log(dE/dx60/I(";
+	  title += nameP;
+	  title += ")) versus log10(p/m)";
+	  hist60[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
+	  name = nameP;
+	  name += "z";
+	  title = "zFit - log(I(";
+	  title += nameP;
+	  title += ")) versus log10(p/m)";
+	  histz[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
+	  name = nameP;
+	  name += "B";
+	  title = "log(I_{Sirrf}(";
+	  title += nameP;
+	  title += ")) versus log10(p/m)";
+	  histB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
+	  name += "B";
+	  title = "log(I_{BB}(";
+	  title += nameP;
+	  title += ")) versus log10(p/m)";
+	  histBB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
+	}
       }
       Time   = new TH2F("Time","zFit - log(I(pi)) versus Date& Time", 280,0.,70., 200,-1.,1.);
-      CTime  = new TH2F("CTime","zFit(Cleaned) - log(I(pi)) versus Date& Time", 280,0.,70., 200,-1.,1.);
       FitPull= new TH2F("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
 			150,10.,160, 200,-5.,5.);
-      CFitPull= new TH2F("CFitPull","(zFit(Cleaned) - log(I(pi)))/dzFit  versus track length", 
-			 150,10.,160, 200,-5.,5.);
     }
   }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
-  Double_t Scale70 = TMath::Exp(2.15435500000000002e-01);
-  Double_t Scale60 = TMath::Exp(2.79098499999999972e-01);
+  Double_t Scale2keV = 1.7428;
+  Double_t Scale70   = 1.2315;
+  Double_t Scale60   = 1.3146;
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
   St_DataSet *dst = Dst->Find(".data/dst");
   if (!dst) dst = Dst;
@@ -390,6 +357,14 @@ Int_t StdEdxMaker::Make(){
     if (!helix) {
       helix = globtrkC->MakeHelix(iglob);
       NoFitPoints = globTrk->n_fit_point;
+      if (m_Mode > 0) {
+	Double_t tanl  = globTrk->tanl;
+	pTinv  = globtrkC->Invpt(iglob);
+	p = 1.e6;
+	if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
+	Double_t Theta = TMath::ATan(tanl);
+	Eta = - TMath::Log(TMath::Tan(Theta/2.));
+      }
     }
     dst_dedx_st dedx;
     NPoints = 0;
@@ -406,7 +381,6 @@ Int_t StdEdxMaker::Make(){
       NFitPoints++;
       if (pointC->GetFlag(ipoint)) continue;
       if (pointC->DetectorId(ipoint) != kTpcId) continue;
-      dE = pointC->GetCharge(ipoint);
       Int_t sector = pointC->Sector(ipoint);
       Int_t row = pointC->PadRow(ipoint);
       Double_t pointX = pointC->GetX(ipoint);
@@ -415,7 +389,7 @@ Int_t StdEdxMaker::Make(){
       
       StGlobalCoordinate global(pointX,pointY,pointZ);
       StTpcPadCoordinate Pad;      transform(global,Pad);
-#if 0
+#ifdef DEBUG
       if (sector != Pad.sector() || 
 	  row != Pad.row()) {
 	gMessMgr->Warning() << "StdEdxMaker::" <<
@@ -451,7 +425,8 @@ Int_t StdEdxMaker::Make(){
 	  TMath::Abs(Pad.pad()-PadOnPlane.pad()) > 5) {
 	if (iprim >= 0  && Debug() > 1) {
 	  gMessMgr->Warning() << "StdEdxMaker::" <<
-	    " Sector = " << PadOnPlane.sector() << "/"  << "/" << Pad.sector() << "/" << sector <<
+	    " Sector = " << PadOnPlane.sector() << "/"  << "/" << Pad.sector() << 
+	    "/" << sector <<
 	    " Row = " << PadOnPlane.row() << "/" << Pad.row() << "/" << row << 
 	    " Pad = " << PadOnPlane.pad() << "/" << Pad.pad() <<
 	    " from Helix  is not matched with point/" << endm;;
@@ -490,42 +465,32 @@ Int_t StdEdxMaker::Make(){
       double s_in  = helix->pathLength(gBotPos, normal);
       dx = TMath::Abs(s_out-s_in);
       if (dx < 0.5 || dx > 25.) continue;
+      dE = pointC->GetCharge(ipoint)*Scale2keV;
       // Correctionsd
+      dE *= TimeScale;
       Int_t pad = Pad.pad();
-      if (m_tpcGain) {// && ! point->TestBit(kIsCalibrated)) {
-	tpcGain_st *gain = m_tpcGain->GetTable() + sector - 1;
-	dE *= gain->Gain[row-1][pad-1]; 
-      }
+      dEP = dE;
       double gc = 1;
       Int_t fee = -1;
-      if (m_tpcFeeGain && m_fee_vs_pad_row) {
-	fee_vs_pad_row_st  *fee_vs_pad_row = m_fee_vs_pad_row->GetTable() + row - 1;
-	fee = (Int_t) fee_vs_pad_row->fee[pad-1];
-	tpcFeeGainCor_st *gain = m_tpcFeeGain->GetTable() + sector - 1;
-	gc =  gain->Gain[fee][row%2];
+      CdEdx[NdEdx].SigmaFee = 1;
+      if (m_TpcSecRow) {
+	TpcSecRowCor_st *gain = m_TpcSecRow->GetTable() + sector - 1;
+	gc =  gain->GainScale[row-1];
+	CdEdx[NdEdx].SigmaFee = gain->GainRms[row-1];
       }
       if (gc < 0.0) continue;
       dE *= gc;
-      dE *= TimeScale;
       Int_t SectN = sector; // drift distance
       if (row < 14) SectN += 24;
       Double_t z = pointZ;
       if (sector > 12) z = - z;
       if (m_drift) {
-	TpcDriftDistCorr_st *cor = m_drift->GetTable() + SectN - 1;
-	//	Double_t DriftCorr = TMath::Exp(-(cor->a0+z*(cor->a1 + z*cor->a2)));
-	Double_t zz = z/190;
-	Double_t DriftCorr = -7.40365e-02 + 
-	  cor->a[0]+cor->a[1]*(2*zz-1)+cor->a[2]*TMath::Exp(cor->a[3]*(zz-1));
+	TpcDriftDistCorr_st *cor = m_drift->GetTable();
+	if (row <= 13) cor++;
+	Double_t DriftCorr = 8.26477e-02 + 
+	  cor->a[0]+z*(cor->a[1]+z*cor->a[2]);
 	dE *= TMath::Exp(-DriftCorr);
       }
-#if 0 
-      // dx correction
-      if (dx < 1.8) dE *= TMath::Exp(-( 1.77818e-02+6.24927e-02*dx
-				       -2.91655e-02-3.14485e-03*dx));
-      else          dE *= TMath::Exp(-(-3.13286e-02+2.47879e-03*dx
-				       -5.37064e-02+2.50372e-02*dx)); 
-#endif
       TrackLength += dx;
       CdEdx[NdEdx].sector = sector;
       CdEdx[NdEdx].row = row;
@@ -533,13 +498,15 @@ Int_t StdEdxMaker::Make(){
       CdEdx[NdEdx].dx = dx;
       CdEdx[NdEdx].dEU= pointC->GetCharge(ipoint);;
       CdEdx[NdEdx].dE = dE; // corrected
-      CdEdx[NdEdx].dEdxU= CdEdx[NdEdx].dEU/CdEdx[NdEdx].dx;
-      CdEdx[NdEdx].dEdx = CdEdx[NdEdx].dE/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdxU = CdEdx[NdEdx].dEU/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdx  = CdEdx[NdEdx].dE/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdxP = dEP/CdEdx[NdEdx].dx;
       CdEdx[NdEdx].dEdxLU= TMath::Log(CdEdx[NdEdx].dEdxU);
       CdEdx[NdEdx].dEdxL = TMath::Log(CdEdx[NdEdx].dEdx);
       CdEdx[NdEdx].xyz[0] = pointX;
       CdEdx[NdEdx].xyz[1] = pointY;
       CdEdx[NdEdx].xyz[2] = pointZ;
+      CdEdx[NdEdx].Fee    = -1;
       avrgZ += CdEdx[NdEdx].dEdxL;
       NdEdx++;
     }
@@ -586,60 +553,48 @@ Int_t StdEdxMaker::Make(){
     }
     Double_t chisq, fitZ, fitdZ;
     DoFitZ(chisq, fitZ, fitdZ);
+    fitdZ *= 1.32920; // scale errors
     if (chisq > 0 && chisq < 10000.0) {
-      Double_t TrkL = TrackLength;
-#if 0
-      if (TrkL <  17) TrkL =  17.;
-      if (TrkL > 140) TrkL = 140.;
-      Double_t CTrkL =   CLength[0]    + TrkL*(CLength[1]    + TrkL*(CLength[2]    + 
-	           TrkL*(CLength[3]    + TrkL*(CLength[4]    + TrkL*(CLength[5])))));
-      fitZ -= CTrkL;
-#endif
-#if 1
-      if (TrkL <  50) TrkL =  50.;
-      Double_t Cpull =   CPull[0]    + TrkL*(CPull[1]    + TrkL*(CPull[2]    + 
-	           TrkL*(CPull[3]    + TrkL*(CPull[4]    + TrkL*(CPull[5])))));
-      fitdZ *= Cpull;
-#endif
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kLikelihoodFitIdentifier;
       dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
       dedx.dedx[0]   =  TMath::Exp(fitZ);
       if (fitdZ >= 1.) fitdZ = 0.999;
-      dedx.dedx[1]   =  fitdZ; //((int)(chisq*100)) + fitdZ;
+      dedx.dedx[1]   =  fitdZ; 
       dst_dedx->AddAt(&dedx);
     }
-    if (iprim >= 0 && m_Mode > 0) {
+    if (primtrkC && iprim >= 0&& m_Mode > 0) {
       Double_t Pred[NHYPS], PredBB[NHYPS];
+      Int_t sCharge = 0;
+      if (primtrkC->Charge(iprim) < 0) sCharge = 1;
       for (int l = 0; l < NHYPS; l++) {
-	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,0);
+	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,l==3); 
 	PredBB[l] = BB(p/Masses[l]);
       }
       for (k = 0; k < NdEdx; k++) {
 	FdEdx[k].dEdxN = TMath::Log(FdEdx[k].dEdx/Pred[2]);
+	FdEdx[k].dEdxNP = TMath::Log(FdEdx[k].dEdxP/Pred[2]);
 	if (SR) SR->Fill(FdEdx[k].sector,FdEdx[k].row);
 	if (chisq > 0 && chisq < 10000.0) {
-	  Double_t zk  = (TMath::Log(FdEdx[k].dEdx ) - fitZ)*pow(FdEdx[k].dx,0.36);
-	  Double_t zkU = (TMath::Log(FdEdx[k].dEdxU) - fitZ)*pow(FdEdx[k].dx,0.36);
+	  Double_t zk  = FdEdx[k].zdev;
+	  if (FdEdx[k].Prob > 1.e-6) {
+	    if (FdEdx[k].row > 13) corrO1w->Fill(zk,1./FdEdx[k].Prob);
+	    else                   corrI1w->Fill(zk,1./FdEdx[k].Prob);
+	  }
 	  for (int l = 0; l < NdEdx; l++){
 	    if (k == l) continue;
-	    Double_t zl  = (TMath::Log(FdEdx[l].dEdx ) - fitZ)*pow(FdEdx[l].dx,0.36);
-	    Double_t zlU = (TMath::Log(FdEdx[l].dEdxU) - fitZ)*pow(FdEdx[l].dx,0.36);
+	    Double_t zl  = FdEdx[l].zdev;
 	    if (FdEdx[l].row%2 == 1 && FdEdx[l].row - FdEdx[k].row  == 1) {
 	      if (FdEdx[k].row > 13) {
 		corrO->Fill(zk,zl); 
-		corrOU->Fill(zkU,zlU); 
 		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
 		  corrOw->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
-		corrOc->Fill(zk,zl-0.272*zk); 
 	      }
 	      else {
 		corrI->Fill(zk,zl); 
-		corrIU->Fill(zkU,zlU); 
 		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
 		  corrIw->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
-		corrIc->Fill(zk,zl-0.046*zk); 
 	      }
 	    }
 	    if (FdEdx[l].row%2 == 1 && FdEdx[l].row - FdEdx[k].row  == 2) {
@@ -668,24 +623,24 @@ Int_t StdEdxMaker::Make(){
 	    }
 	  }
 	}
-      //      if (sXY) sXY->Fill(CdEdx[k].x[0],CdEdx[k].x[0],CdEdx[k].sector);
+      //      if (sXY) sXY->Fill(FdEdx[k].x[0],FdEdx[k].x[0],FdEdx[k].sector);
 	if (Z && NoFitPoints >= 30) {
 	  Double_t eta =  Eta;
-	  Int_t SectN = CdEdx[k].sector; // drift distance
-	  if (CdEdx[k].row < 14) SectN += 24;
-	  Z->Fill(SectN,CdEdx[k].xyz[2],CdEdx[k].dEdxN);
-	  if (CdEdx[k].sector > 12) eta = -eta;
-	  if (ETA) ETA->Fill(SectN,eta,CdEdx[k].dEdxN);
-	  if (SecRow) SecRow->Fill(CdEdx[k].sector+0.5,CdEdx[k].row+0.5,CdEdx[k].dEdxN);
-	  if (m_tpcFeeGain && m_fee_vs_pad_row) {
-	    fee_vs_pad_row_st  *fee_vs_pad_row = 
-	      m_fee_vs_pad_row->GetTable() + CdEdx[k].row - 1;
-	    Int_t fee = (Int_t) fee_vs_pad_row->fee[CdEdx[k].pad-1];
-	    if (Fee && fee >= 0) {
-	      Double_t fee1   = 2*fee + CdEdx[k].row%2 + 0.5;
-	      Double_t Sect = CdEdx[k].sector + 0.5;
-	      Fee->Fill(Sect,fee1,CdEdx[k].dEdxN);
-	    }
+	  Int_t SectN = FdEdx[k].sector; // drift distance
+	  Double_t z = FdEdx[k].xyz[2];
+	  if (SectN > 12) z = -z;
+	  if (FdEdx[k].row < 14) SectN += 24;
+	  Z->Fill(SectN,z,FdEdx[k].dEdxN);
+	  ZC->Fill(SectN,z,FdEdx[k].zdev);
+	  if (FdEdx[k].sector > 12) eta = -eta;
+	  if (ETA) ETA->Fill(SectN,eta,FdEdx[k].dEdxN);
+	  if (SecRow) SecRow->Fill(FdEdx[k].sector+0.5,FdEdx[k].row+0.5,FdEdx[k].dEdxNP);
+	  if (Fee && FdEdx[k].Fee >= 0) {
+	    Double_t fee1 =  FdEdx[k].Fee + 0.5;
+	    Double_t Sect = FdEdx[k].sector + 0.5;
+	    Double_t z = FdEdx[k].dEdxP;
+	    Fee->Fill(Sect,fee1,z);
+	    if (FeeC && FdEdx[k].SigmaFee > 0.) FeeC->Fill(Sect,fee1,FdEdx[k].dEdxN/FdEdx[k].SigmaFee);
 	  }
 	}
       }
@@ -697,17 +652,29 @@ Int_t StdEdxMaker::Make(){
       TPoints->Fill(NdEdx,TrackLength,fitZ-TMath::Log(Pred[2]));
       if (NdEdx > 30) {
 	for (k = 0; k < NdEdx; k++) {
-	  Double_t xscale = pow(CdEdx[k].dx,0.36);
-	  Double_t dEdxLog = CdEdx[k].dEdxL;
-	  Double_t dxLog   = TMath::Log(CdEdx[k].dx);
-	  if (CdEdx[k].row <= 13) FShapeI->Fill(dxLog,(dEdxLog-fitZ)*xscale);
-	  else                    FShapeO->Fill(dxLog,(dEdxLog-fitZ)*xscale);
+	  if (FdEdx[k].SigmaFee > 0) {
+	    Double_t xscale = 1;
+	    if (FdEdx[k].row > 13) xscale = pow(FdEdx[k].dx,0.41);
+	    else                   xscale = pow(FdEdx[k].dx,0.31);
+	    xscale /= FdEdx[k].SigmaFee;
+	    Double_t dEdxLog = FdEdx[k].dEdxL + 8.26477e-02;
+	    Double_t dxLog   = TMath::Log(FdEdx[k].dx);
+	    Double_t Shift   = (dEdxLog-fitZ)*xscale;
+	    if (FdEdx[k].row <= 13) {
+	      Shift -=  -1.84183e-01 + 1.62618e-01*dxLog;
+	      FShapeI->Fill(dxLog,Shift);
+	    }
+	    else {
+	      Shift -= -1.58130e-01 -4.87002e-02*dxLog;
+	      FShapeO->Fill(dxLog,Shift);
+	    }
+	  }
 	}
 	Int_t best = -1; Double_t valBest = 9999.;
 	Int_t good = -1; Double_t valGood = 9999.;
 	for (int hyp=0; hyp<NHYPS;hyp++) {
-	  hist70[hyp]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(I70/Pred[hyp]));
-	  hist60[hyp]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(I60/Pred[hyp]));
+	  hist70[hyp][sCharge]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(I70/Pred[hyp]));
+	  hist60[hyp][sCharge]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(I60/Pred[hyp]));
 	  Double_t dev = 9999.;
 	  if (fitdZ > 0.) dev = TMath::Abs((fitZ - TMath::Log(Pred[hyp]))/fitdZ);
 	  if (dev < valBest) {
@@ -717,18 +684,13 @@ Int_t StdEdxMaker::Make(){
 	  if (hyp != best && dev < valGood) {
 	    good = hyp; valGood = dev;
 	  }
-	  histz[hyp]->Fill(TMath::Log10(p/Masses[hyp]),fitZ - TMath::Log(Pred[hyp]));
-	  histB[hyp]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(Pred[hyp]));
-	  histBB[hyp]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(PredBB[hyp]));
+	  histz[hyp][sCharge]->Fill(TMath::Log10(p/Masses[hyp]),fitZ - TMath::Log(Pred[hyp]));
+	  histB[hyp][sCharge]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(Pred[hyp]));
+	  histBB[hyp][sCharge]->Fill(TMath::Log10(p/Masses[hyp]),TMath::Log(PredBB[hyp]));
 	}
 	Double_t date = MyDate(GetDate(),GetTime());
 	Time->Fill(date,fitZ - TMath::Log(Pred[2]));
 	FitPull->Fill(TrackLength,(fitZ - TMath::Log(Pred[2]))/fitdZ);
-	if (valBest < 3 && valGood > 5.0) {
-	  histzC[best]->Fill(TMath::Log10(p/Masses[best]),fitZ - TMath::Log(Pred[best]));
-	  CTime->Fill(date,fitZ - TMath::Log(Pred[best]));
-	  CFitPull->Fill(TrackLength,(fitZ - TMath::Log(Pred[best]))/fitdZ);
-	}
       }
      SafeDelete(helix);
     }
@@ -771,127 +733,158 @@ Double_t StdEdxMaker::MyDate(Int_t date,Int_t time) {// combine date in time in 
   Double_t Date = dd + (H + (M + S/60)/60)/24;             // printf("Date %f\n",Date);
   return Date;
 }
-
 //________________________________________________________________________________
-Double_t fGaus(Double_t x) {
-  Double_t val = 0;
+void fGaus(Double_t x, Double_t *val, ESector l){
+  static const Int_t NpGaus = 12;
+  static Double_t parGaus[2][NpGaus] = {
+  {0.023172, 1.437271, 2.460729, // inner
+   0.103880, 0.242696, 1.577239,
+   0.195327,-0.024190, 0.889409,
+   0.007452,-1.433872, 0.582710},
+  {0.014107, 2.636221, 2.435468, // outer
+   0.073707, 0.963552, 1.515737,
+   0.048300,-0.318190, 1.308623,
+   0.200573,-0.038547,-0.945790}
+  };
+  val[0] = val[1] = 0;
   for (Int_t j=0; j<NpGaus; j+=3){
-    Double_t dev = (x - parGaus[j+1])/parGaus[j+2];
-    //      printf ("dev = %f\n",dev);
-    val += parGaus[j]*exp(-0.5*dev*dev);
+    Double_t dev = (x - parGaus[l][j+1])/parGaus[l][j+2];
+    val[1] += parGaus[l][j]*exp(-0.5*dev*dev)*(-dev/parGaus[l][j+2]);
+    val[0] += parGaus[l][j]*exp(-0.5*dev*dev);
   }
-  return val;
 }
 //________________________________________________________________________________
-Double_t gGaus(Double_t x) {//derivatives
-  Double_t val = 0;
-  for (Int_t j=0; j<NpGaus; j+=3){
-    Double_t dev = (x - parGaus[j+1])/parGaus[j+2];
-    //      printf ("dev = %f\n",dev);
-    val += parGaus[j]*exp(-0.5*dev*dev)*(-dev/parGaus[j+2]);
+void MDFcorrOw(Double_t *x, Double_t *Value) {
+  // Static data variables
+  static Int_t    gNVariables    = 2;
+  static Int_t    gNCoefficients = 12;
+  static Double_t gDMean         = -2.13744407349024695e-01;//2.11349e-05;
+  static Double_t gXMin[] = {  -7.3, -7.3 };
+  static Double_t gXMax[] = {  9.9, 9.9 };
+  static Double_t gCoefficient[] = {  0.200633,  6.14428,  0.477188, -0.699637,
+				     -0.705071, -2.41774, -1.00517,  -4.03022,
+				      2.25038,  -2.53387,  3.29628,   0.214115};
+// The powers are stored row-wise, that is p_ij = gPower[i * NVariables + j];
+  static Int_t    gPower[] = {
+    1,  1,  2,  2,  1,  2,  3,  1,  1,  3,  3,  2,
+    2,  3,  4,  2,  3,  3,  2,  4,  5,  2,  2,  1};
+
+  Value[0] = gDMean;
+  Value[1] = Value[2] = 0;
+  Int_t i,j,k;
+  for (i = 0; i < gNCoefficients ; i++) {
+    // Evaluate the ith term in the expansion
+    Double_t term[3];
+    term[0] = gCoefficient[i];
+    term[1] = gCoefficient[i];
+    term[2] = gCoefficient[i];
+    for (j = 0; j < gNVariables; j++) {
+      // Evaluate the polynomial in the jth variable.
+      Int_t power = gPower[gNVariables * i + j]; 
+      Double_t p1 = 1, p2 = 0, p3 = 0, r = 0, px = 0;
+      Double_t v =  1 + 2. / (gXMax[j] - gXMin[j]) * (x[j] - gXMax[j]);
+      Double_t vg =     2. / (gXMax[j] - gXMin[j]);
+      // what is the power to use!
+      switch(power) {
+      case 1: r = 1; px = 0; break; 
+      case 2: r = v; px = 1; break; 
+      default: 
+        p2 = v; 
+	px = 1;
+        for (k = 3; k <= power; k++) { 
+	  px = p2;
+          p3 = p2 * v;
+          p1 = p2; p2 = p3; 
+        }
+        r = p3;
+      }
+      // multiply this term by the poly in the jth var
+      term[0] *= r; 
+      for (int l = 0; l < gNVariables; l++) {
+	if (j == l) term[l+1] *= (power-1)*px*vg;
+	else        term[l+1] *= r;
+      } 
+    }
+    // Add this term to the final result
+    for (j = 0; j < 3; j ++) Value[j] += term[j];
   }
-  return val;
 }
 //________________________________________________________________________________
 void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
-#if 0
-  static Double_t corrI = 0.046, corrO = 0.272;
-#endif
   f = 0.;
   gin[0] = 0.;
   gin[1] = 0.;
+  Double_t Val[2];
   for (int i=0;i<NdEdx; i++) {
-    Double_t mu = 0, sigma = 1;
     Double_t dx =FdEdx[i].dx; 
     if (dx <  1.) dx = 1.;
     if (dx > 10.) dx = 10.;
+    ESector l = kTpcInner;
+    if (FdEdx[i].row > 13) l = kTpcOuter;
+    FdEdx[i].xscale = 1;
+    switch (l) {
+    case kTpcInner: FdEdx[i].xscale = pow(FdEdx[i].dx,0.31);      break;
+    default:   FdEdx[i].xscale = pow(FdEdx[i].dx,0.41);
+    }
+    FdEdx[i].xscale /= FdEdx[i].SigmaFee;
+    Double_t dEdxLog = FdEdx[i].dEdxL + 8.26477e-02;
+    Double_t dxLog   = TMath::Log(FdEdx[i].dx);
+    FdEdx[i].zdev   = (dEdxLog-par[0])*FdEdx[i].xscale;
+    switch (l) {
+    case kTpcInner: FdEdx[i].zdev -= -1.84183e-01 + 1.62618e-01*dxLog; break;
+    default:        FdEdx[i].zdev -= -1.58130e-01 - 4.87002e-02*dxLog;
+    }
+    fGaus(FdEdx[i].zdev,Val,l);
+    FdEdx[i].Prob = Val[0];
+    f -= TMath::Log( FdEdx[i].Prob );
+    Double_t gg = Val[1];
+    gin[0] +=  FdEdx[i].xscale*gg/FdEdx[i].Prob;
 #if 0
-    static Double_t muI[2]    = {-5.91052e-02, 4.16490e-02};
-    static Double_t sigmaI[2] = {  9.62084e-01,-1.17671e-02};
-    static Double_t muO[6]    = {-7.44921e-01, 1.24020e+00,-7.79951e-01, 2.32879e-01,-3.31352e-02,1.79072e-03};
-    static Double_t sigmaO[6] = {-1.01100e+00, 3.22655e+00,-2.01124e+00, 6.11038e-01,-9.07746e-02,5.30432e-03};
-    if (dx < 1.) dx = 1.;
-    if (dx > 5.) dx = 5.;
-    if (dx < 1.9) {
-      mu    = muI[0]    + dx*muI[1];
-      sigma = sigmaI[0] + dx*sigmaI[1];
-    }
-    else {
-      mu    = muO[0]    + dx*(muO[1]    + dx*(muO[2]    + 
-	  dx*(muO[3]    + dx*(muO[4]    + dx*(muO[5])))));
-      sigma = sigmaO[0] + dx*(sigmaO[1] + dx*(sigmaO[2]    + 
-	  dx*(sigmaO[3] + dx*(sigmaO[4] + dx*(sigmaO[5])))));
-    }
-#else
-    Double_t dxL = TMath::Log(dx);
-    if (FdEdx[i].row < 14) {
-      mu    =  -1.40510e-02 + 8.20908e-02*dxL;
-      sigma = 1. - 4.61981e-02 - 3.81961e-02*dxL;
-    }
-    else {
-      mu    =  -5.02804e-01 + dxL*(2.14729e+00 +dxL*(-3.32605e+00 +dxL*(2.22391e+00 + dxL*-5.47997e-01)));
-      sigma = 1. +  1.30637e-01 + dxL*(-2.45438e-01 +dxL*1.18801e-01);
-    }
-#endif
-    Double_t xp = pow(dx,0.36);
-    Double_t z  = FdEdx[i].dEdxL;
-    Double_t corr = 0;
-#if 0
-    Double_t zI = 0;
-    if (i > 0) {
-      if (FdEdx[i].sector == FdEdx[i-1].sector &&
-	  FdEdx[i].row - FdEdx[i-1].row == 1) {
-	if (FdEdx[i-1].row > 13) {// Outer
-	  zI = FdEdx[i-1].dEdxL;
-	  corr = corrO;
-	  continue;
-	}
-	if (FdEdx[i].row <= 13) {//Inner
-	  zI = FdEdx[i-1].dEdxL;
-	  corr = corrI;
-	}
-
+    // correlations
+    if (i > 0 && FdEdx[i].row > 14) {
+      Int_t j = i - 1;
+      if (FdEdx[i].sector == FdEdx[j].sector &&
+	  FdEdx[i].row    == FdEdx[j].row + 1) {
+	Double_t x[2];
+	x[0] =  FdEdx[j].zdev;
+	x[1] =  FdEdx[i].zdev;
+	Double_t Corr[3];
+	MDFcorrOw(x,Corr);
+	f -= Corr[2];
+	gin[0] -= FdEdx[j].xscale*Corr[1] + FdEdx[i].xscale*Corr[2];
       }
     }
-    Double_t zz = (z - par[0]) - corr*(zI - par[0]);
-#else
-    Double_t zz = z - par[0];
 #endif
-    Double_t xx = (zz*xp - mu)*sigma;
-    Double_t sc = (1. - corr)*xp*sigma;
-    FdEdx[i].Prob = fGaus(xx);
-    f -= TMath::Log( FdEdx[i].Prob );
-    Double_t gg = gGaus(xx);
-    gin[0] +=  gg/FdEdx[i].Prob*sc;
-
-   }
+  }
 }
 //________________________________________________________________________________
 void StdEdxMaker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ)
 {
-  if (NdEdx>10) {
-    Double_t avz = 0;
-    for (int i=0;i<NdEdx;i++) {
-      FdEdx[i] = CdEdx[i];
-      FdEdx[i].dEdxL = FdEdx[i].dEdxL;
-      avz += FdEdx[i].dEdxL;
-      for (int j=0;j<i;j++) {// order by rowsto account correlations
-	if (FdEdx[i].sector == FdEdx[j].sector &&
-	    FdEdx[i].row    <  FdEdx[j].row) {
-	  dEdx_t temp = FdEdx[j];
-	  FdEdx[j] = FdEdx[i];
-	  FdEdx[i] = temp;
-	}
+  Double_t avz = 0;
+  for (int i=0;i<NdEdx;i++) {
+    FdEdx[i] = CdEdx[i];
+    FdEdx[i].dEdxL = FdEdx[i].dEdxL;
+    avz += FdEdx[i].dEdxL;
+    for (int j=0;j<i;j++) {// order by rowsto account correlations
+      if (FdEdx[i].sector == FdEdx[j].sector &&
+	  FdEdx[i].row    <  FdEdx[j].row) {
+	dEdx_t temp = FdEdx[j];
+	FdEdx[j] = FdEdx[i];
+	FdEdx[i] = temp;
       }
     }
+  }
+  if (NdEdx>5) {
     avz /= NdEdx;
     Double_t arglist[10];
     Int_t ierflg = 0;
     gMinuit->SetFCN(fcn);
     //    gMinuit->SetPrintLevel(-1);
+#if 1
     arglist[0] = -1;
     gMinuit->mnexcm("set print",arglist, 1, ierflg);
+#endif
     gMinuit->mnexcm("set NOW",arglist, 0, ierflg);
     gMinuit->mnexcm("CLEAR",arglist, 0, ierflg);
     arglist[0] = 0.5;
@@ -900,8 +893,11 @@ void StdEdxMaker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ)
 //     gMinuit->mnparm(1, "scale", 1.0, 0.01, 0.2, 20.0, ierflg);
 //     arglist[0] = 2;
 //     gMinuit->mnexcm("FIX",arglist,1,ierflg);
-    
+#if 1    
     arglist[0] = 1.;   // 1.
+#else
+    arglist[0] = 0.;   // Check gradient 
+#endif
     gMinuit->mnexcm("SET GRAD",arglist,1,ierflg);
     //    gMinuit->mnexcm("SET STRAT",arglist,1,ierflg);
     arglist[0] = 500;
@@ -913,25 +909,9 @@ void StdEdxMaker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ)
     Double_t edm,errdef;
     Int_t nvpar,nparx,icstat;
     gMinuit->mnstat(chisq,edm,errdef,nvpar,nparx,icstat);
-    
-    //Print Results to screen
     gMinuit->GetParameter(0, fitZ, fitdZ);
-    //    gMinuit->GetParameter(1, fitS, fitdS);
-//     gMinuit->mnprin(3,chisq);
-//     cout <<"mean:\t\t"<<fitZ<<"\t +- "<<fitdZ<<endl;
-    //    cout <<"scale:\t\t"<<fitS<<"\t +- "<<fitdS<<endl;
   }
   else {
     fitZ = fitdZ = chisq =  -999.;
   }
-  //  cout <<"\narithmeticMean:\t"<< avz <<endl;
 }
-
-
-
-
-
-
-
-
-
