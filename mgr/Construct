@@ -36,9 +36,9 @@ my $LDFLAGS  = "";
 my $SO       = $CXX;
 my $SOFLAGS  = "";
 my $EXEFLAGS = "NONE";
-my $STIC     = $STAR_BIN . "/" . "stic";
+my $STIC     = $STAF_BIN . "/" . "stic";
 my $STICFLAGS= "";
-my $GEANT3   = $STAR_BIN . "/" . "geant3";
+my $GEANT3   = $STAF_BIN . "/" . "geant3";
 my $ROOTCINT = $ROOTSYS . "/bin/rootcint";
 my $CLIBS    = "";
 my $FLIBS    = "";
@@ -170,7 +170,7 @@ my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary",
 foreach my $inc (@includes) {
   $CPPPATH .= ":StRoot/" . $inc;
 }
-$CPPPATH .= ":" . $ROOTSYS . "/src:/opt/star/include";
+$CPPPATH .= ":" . $ROOTSYS . "/src:" . $STAF . "/inc:/opt/star/include";
 #$CPPPATH =~ s/:/$PATH_SEPARATOR/g;
 $FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
@@ -196,6 +196,7 @@ else {
     }
   }
   $INCLUDE_PATH .= ";" . $ROOTSYS . "/src";
+  $INCLUDE_PATH .= ";" . $STAF . "/inc";
   $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
 my @Repo = Repository_List; print "Repositories = @Repo\n";
@@ -265,6 +266,7 @@ $env = new cons(
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
+				     'STAF' => $STAF,
 				     'STAR_BIN' => $STAR_BIN,
 				     'INCLUDE' => $INCLUDE_PATH
 				   },
@@ -280,7 +282,7 @@ my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 #if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-my @dirs = ("StRoot", "pams","pams/tables");
+my @dirs = ("StRoot","pams","pams/tables");
 for my $dir (@dirs) {
   if (-d $dir) {
     my $target = $OBJ . "/" . $dir . "/Conscript";
@@ -480,27 +482,6 @@ sub find_idlM {
   }
 #  print "find_source found $#search_files + 1 files\n";
   return @search_files;
-}
-#________________________________________
-sub cpppath {
-  my $ENV = $_[0]; 
-  my @cpp = split /:/, $ENV->{CPPPATH};
-#  my @cpp = split /$PATH_SEPARATOR/, $ENV->{CPPPATH};
-  my @repositories = Repository_List;
-  my $PWD = cwd(); # print "cpppath PWD = $PWD\n";
-  my $CPPPATH = "";
-  for my $d (@cpp) {
-    if ($d) {
-      for my $repository ($PWD,@repositories) {
-	if ($repository) {$CPPPATH .= " -I$repository/" . $d;}
-      }
-    }
-  }
-  return $CPPPATH;
-}
-#________________________________________
-sub cppflags {
-  return  cpppath($_[0]) . $ENV->{CPPFLAGS};
 }
 #________________________________________
 sub script::wanted {

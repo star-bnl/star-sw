@@ -26,7 +26,8 @@ for my $idl (@idl) {#  print "$idl \n";
 Install $my_env $share, @idlT;
 #___________________________________
 (my $build = $obj) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-my $CPPFLAGS = cppflags($my_env);
+my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
 foreach my $stem (sort keys %idl) { 
   my $idll = ($idl{$stem}); #print "@idll\n";
   my $dir  = dirname ($idll); #print "dir = $dir\n"; 
@@ -95,7 +96,7 @@ foreach my $stem (sort keys %idl) {
      $cmdCint.= "echo \"#pragma link C++ class St_\"$stem\"-;\" >> LinkDef.h;";
      $cmdCint.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h;";
      $cmdCint.= "echo \"#endif\" >> LinkDef.h;";
-     $cmdCint.= " rootcint -f $idlcintC -c $CPPFLAGS  $idlhh LinkDef.h;"; #print "$cmdCint\n";
+     $cmdCint.= " rootcint -f $idlcintC -c $CPPPATH  $idlhh LinkDef.h;"; #print "$cmdCint\n";
   Command $my_env [$idlCintC, $idlCintH], @Deps,  qq ($cmdCint);
   push @sources, $idlCintC; 
 }

@@ -22,6 +22,7 @@ if ($PKG eq "StRoot") {
   for $src (@sources) {
     (my $dir = $src) =~ s/\/\S*/$1/g; #print "$src => $dir\n";
     if (grep (/$dir/,$dirlist)) {next;}
+    if (!grep (/StEvent/,$dir))  {next;}
     if (grep (/StTpcDb/,$dir))  {next;}
     $dirlist .= $dir . ": "; #print "dirlist = $dirlist\n";
   }
@@ -49,9 +50,8 @@ elsif ($PKG eq "pams") {
 }
 else {
   my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-  my $CPPFLAGS = $cscanner->iflags;  #print "CPPFLAGS = $CPPFLAGS\n";
-  if ($Dir =~ /^pams/) {$PKG = "St_" . $PKG;}
-  print "Run Conscript-standard in $Dir for $PKG\n";
+  my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
+  if ($Dir =~ /^pams/) {$PKG = "St_" . $PKG;}#  print "Run Conscript-standard in $Dir for $PKG\n";
   my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
   my @CintFiles = ($PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h"); 
   my @src  = find_sources($Dir);  #my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
@@ -62,10 +62,6 @@ else {
   my $line;
   
   if ($#idlM > -1) {
-    my @repo =  Repository_List;# print "Repositories = @repo\n";
-    my $DirPath  = cwd();# print " in DirPath=$DirPath\n";
-    my $STICFLAGS = "-I" . $DirPath . "/.share/tables -I" . $repo[0] . "/.share/tables" .
-                    " -I" . $DirPath . "/inc -I" . $repo[0] . "/inc";
     for $idl (@idlM) {
       my $stem = basename($idl,".idl");# print "stem = $stem\n";
       my $idm  = $stem . ".idl";
@@ -84,9 +80,10 @@ else {
       push @Deps,$DIR . $stem . ".inc";
       push @Deps,$DIR . "St_" . $stem . "_Module.h";
       push @Deps,$DIR . "St_" . $stem . "_Module.cxx";#    print "@Deps\n";
+      my $cmd = "cd $dir &&  stic -r $CPPPATH -q $idl"; print "stic cmd: $cmd\n";
       Command $env [@Deps], @idlS, 
       qq(
-	 cd $dir; stic -r $STICFLAGS -q $idl;
+	 $cmd
 	);  
       my @incs = ($Deps[0],$Deps[1]); 
       Install $env $INCLUDE, @incs;  #print "Install incs = @incs in $INCLUDE\n";
@@ -98,7 +95,8 @@ else {
     }
   }
   if ($#Defs > -1) {
-    Command $env [@CintFiles], @Defs,  qq( RootCint.pl "%>" "%<" "$CPPFLAGS" );
+#    Command $env [@CintFiles], @Defs,  qq(perl mgr/RootCint.pl "%>" "%<" "$CPPPATH" );
+    Command $env [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$CPPPATH" );
     push @src, $CintFiles[0]; #print "+==========add $CintFiles[0]\n"; 
   }
   LinkedModule $env $SO_PKG, @src;
