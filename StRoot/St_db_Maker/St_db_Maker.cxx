@@ -33,16 +33,19 @@
 
 static Int_t AliasDate(const char *alias);
 static Int_t AliasTime(const char *alias);
-static const char *aliases[]={"sd97",   "sd98",   "year_1a","year_1b","year_1c"
-			     ,"es99",   "er99",   "dc99"
-                             ,"year_1d","year_1e","year_1h","year_2a", 0};   
+static const char *aliases[]={
+"sd97",   "sd98",   "year_1a","year_1b","year_1c",
+"es99",   "er99",   "dc99"   ,"year_1d","year_1e",
+"year_1h","year_2a", 0};   
 
-static const int   dates[]=  {19970101, 19980101, 19990101, 19990501, 19991001
-			     ,19990615, 19990616, 19991206
-                             ,19991101, 19991201, 20000301, 20010610, 20230501};
-static const int   times[]=  {       0,        0,        0,        0,        0
-			     ,       0,   120000,    80000
-                             ,       0,        0,        0,        0,        0};
+static const int   dates[]=  {
+19970101, 19980101, 19990101, 19990501, 19991001,
+19990615, 19990616, 19991206, 19991101, 19991201,
+20000301, 20010610, 0};
+static const int   times[]=  {
+       0,        0,        0,        0,        0,
+       0,   120000,    80000,        0,        0,
+       0,        0,        0};
 
 /////////////////////////////////////////////////////////////////////////
 //                                          
@@ -400,7 +403,7 @@ St_DataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 //	Start loop
   UInt_t uevent = GetDateTime().Get();
   
-  vals[0].Set(950101  ,0);
+  vals[0].Set(kMinTime,0);
   vals[1].Set(kMaxTime,0);
   UInt_t utmp,udifleft=(UInt_t)(-1),udifrite=(UInt_t)(-1); 
   St_DataSet *left=0,*rite=0,*set=0; 
