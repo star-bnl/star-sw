@@ -267,8 +267,6 @@ macro bfc_finish _
       (rgst)  ge/rz/cd //PAWC;
 	        hi/list;  | show histograms
      (evout) exec write_table_to_file#close evout;
-              oid = staf_result(1); 
-              soc/deleteoid [oid] 
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
   enddo
