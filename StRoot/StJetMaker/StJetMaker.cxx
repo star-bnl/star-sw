@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.3 2004/09/10 18:13:53 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.4 2004/09/14 17:27:15 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -31,6 +31,14 @@
 #include "TFile.h"
 #include "TTree.h"
 
+//StEmc
+#include "StEmcClusterCollection.h"
+#include "StEmcPoint.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcADCtoEMaker/StBemcData.h"
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+
 //St_base
 #include "StChain.h"
 
@@ -47,12 +55,15 @@
 #include "StJet.h"
 #include "StFourPMaker.h"
 
+double gDeltaPhi(double p1, double p2);
+double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track);
+
 ClassImp(StJetMaker)
   
     StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
 			   StMuDstMaker* uDstMaker, const char *outputName) 
 	: StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
-	  outName(outputName), mGoodCounter(0), mBadCounter(0)
+	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
 {
     infoLevel = 0;
     mudst=0;
@@ -101,8 +112,8 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-    cout <<" Start StJetMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
-
+    cout <<" Start StJetMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;
+    ++mEventCounter;
     if(muDstMaker != NULL) {
 	mudst = muDstMaker->muDst();
     }
@@ -120,14 +131,12 @@ Int_t StJetMaker::Make()
 	    cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
 	    abort();
 	}
+
+	//clear...
+	thisAna->clear();
 	
 	FourList &tracks = fourPMaker->getTracks();
-	/*
-	if (tracks.size()<2) {
-	    cout <<"\tless than 2 protoJets in event.  Skip jet clustering"<<endl;
-	    return kStOk;
-	}
-	*/
+
 	thisAna->setFourVec(tracks);
 	cout << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endl;
 	thisAna->findJets();
@@ -138,9 +147,7 @@ Int_t StJetMaker::Make()
 	StJets *muDstJets = thisAna->getmuDstJets();
 	muDstJets->Clear();
 
-	if (mudst) {
-	    muDstJets->setMuDst(mudst);
-	}
+	muDstJets->setMuDst(mudst);
 	
 	if (cJets.size() > 0) hadJets = true;
 	
@@ -152,6 +159,55 @@ Int_t StJetMaker::Make()
 	for(int i = 0; i < muDstJets->nJets(); i++) {
 	    StJet* jet = (StJet*) muDstJets->jets()->At(i);
 	    cout<<"jet "<<i<<"\t\t"<<jet->E()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
+
+	    /*
+	    // begin test......................................................................................................
+	    StJet* j = jet;
+	    //Get pointers to retreive the emc info
+	    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+	    StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
+	    assert(adc2e);
+	    StBemcData* data = adc2e->getBemcData();
+	    
+	    StJets* stjets = muDstJets;
+	    typedef StJets::TrackVec TrackVec;
+	    StMuDst* muDst = muDstMaker->muDst();
+	    TrackVec tracks = stjets->jetParticles(muDst, i);
+	    
+	    int itrack = 0;
+	    for (TrackVec::iterator tit = tracks.begin(); tit!=tracks.end(); ++tit) {
+		StMuTrack *muTrack = *tit;
+		
+		//cout <<"\t--track "<<itrack<<endl;
+		const StThreeVectorF& mom = muTrack->momentum();
+		double dR = gDeltaR(j, mom);
+		cout <<"\tPt_track:\t"<<mom.perp()
+		     <<"\tEta_track:\t"<<mom.pseudoRapidity()
+		     <<"\tPhi_track:\t"<<mom.phi()
+		     <<"\tdR:\t"<<dR<<endl;
+		
+		++itrack;
+	    }
+	    //now get the bemc info:
+	    vector<int> towerIndices = stjets->jetBemcTowerIndices(i);
+	    const int maxHits = 4800;
+
+	    for (vector<int>::iterator bit=towerIndices.begin(); bit!=towerIndices.end(); ++bit) {
+		int towerIndex = (*bit);
+		if (towerIndex>maxHits) {
+		    cout <<"StJetReader::exampleEventAna(). ERROR:\ttowerIndex out of bounds. abort()"<<endl;
+		    abort();
+		}
+		float eta, phi;
+		geom->getEtaPhi(towerIndex, eta, phi);
+		double e = data->TowerEnergy[towerIndex];
+		double dphi = gDeltaPhi(j->Phi(), phi);
+		double deta = j->Eta()-eta;
+		double dR = sqrt( dphi*dphi  +  deta*deta );
+		cout <<"\tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
+	    }
+	    //end test.............................................................................................................
+	    */
 	}
     }
     

@@ -80,6 +80,7 @@ StppJetAnalyzer::~StppJetAnalyzer()
 
 void StppJetAnalyzer::clear()
 {
+    /*
     //clearAndDestroy four list
     int ngone = 0;
     for (FourList::iterator it=mFourList.begin(); it!=mFourList.end(); ++it) {
@@ -90,12 +91,11 @@ void StppJetAnalyzer::clear()
 	    ++ngone;
 	}
     }
-    mFourList.clear();
-    
-    //clear protoJets
-    mProtoJets.clear();
-
     cout <<"StppJetAnzlyzer::clear().  Deleted:\t"<<ngone<<"\tobjects"<<endl;
+    */
+    
+    mFourList.clear();
+    mProtoJets.clear();
 }
 
 void StppJetAnalyzer::print()

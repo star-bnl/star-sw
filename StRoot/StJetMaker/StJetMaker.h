@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+ * $Id: StJetMaker.h,v 1.2 2004/09/14 17:27:15 mmiller Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.2  2004/09/14 17:27:15  mmiller
+ * Fixed bug (lack of StFourPMaker::Clear()).
+ *
  * Revision 1.1  2004/07/08 15:41:03  mmiller
  * First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
  *
@@ -123,6 +126,7 @@ private:
     TFile           *m_outfile;   //!
     TTree           *jetTree;      //!
     Int_t            infoLevel;
+    int mEventCounter;
     ClassDef(StJetMaker,0)
 	};
 

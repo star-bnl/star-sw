@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.2 2004/09/10 18:13:53 mmiller Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.3 2004/09/14 17:27:15 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -97,7 +97,9 @@ Int_t StTpcFourPMaker::Make() {
     //t->pidProbPion()*epi + t->pidProbKaon()*ek;
     StLorentzVectorF P(energy, mom);
     StMuTrackFourVec& track = tPile[i];
+
     track.Init(t, P, i, kTpcId);
+    //cout <<"StTpc4P\tInitTrack kTpcId:\t"<<track<<endl;
     tracks.push_back(&track);
   }
 

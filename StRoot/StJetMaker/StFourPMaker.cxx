@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.cxx,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+ * $Id: StFourPMaker.cxx,v 1.2 2004/09/14 17:27:15 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -74,6 +74,8 @@ Int_t StFourPMaker::Finish()
   return StMaker::Finish();
 }
 
-
-
-
+void StFourPMaker::Clear(const Option_t* o)
+{
+    tracks.clear();
+    return StMaker::Clear();
+}
