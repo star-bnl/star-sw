@@ -46,7 +46,7 @@ void doCorr(Int_t nevents,const Char_t **fileList,const char *qaflag)
   StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
 
   StEventMaker *readerMaker =  new StEventMaker("events","title");
-  StMyAngleCorrMaker *corr    = new StMyAngleCorrMaker("corr");
+  StAngleCorrMaker *corr    = new StAngleCorrMaker("corr");
 
      TString analysis1 = "analysis1";
      TString func1        = "InvariantMass";
