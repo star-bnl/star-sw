@@ -27,7 +27,7 @@ class StXiFinderMaker : public StV0FinderMaker {
   virtual Bool_t UseV0();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StXiFinderMaker.h,v 1.1 2003/04/09 16:44:36 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StXiFinderMaker.h,v 1.2 2003/04/30 19:15:55 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   St_exi_exipar* exipar;           //!
@@ -42,9 +42,9 @@ class StXiFinderMaker : public StV0FinderMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.h,v 1.1 2003/04/09 16:44:36 faivre Exp $
+// $Id: StXiFinderMaker.h,v 1.2 2003/04/30 19:15:55 faivre Exp $
 // $Log: StXiFinderMaker.h,v $
-// Revision 1.1  2003/04/09 16:44:36  faivre
-// First version of xxx
+// Revision 1.2  2003/04/30 19:15:55  faivre
+// Fix storage part. ITTF vs TPT Xis.
 //
 //
