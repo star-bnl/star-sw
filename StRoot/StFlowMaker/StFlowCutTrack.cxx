@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.25 2001/07/27 01:26:04 snelling Exp $
+// $Id: StFlowCutTrack.cxx,v 1.26 2001/08/22 19:23:28 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -391,39 +391,45 @@ void StFlowCutTrack::PrintCutList() {
        << "%\t (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
   cout << "#   FitPts (Ftpc) cuts= " << mFitPtsFtpcCuts[0] << ", " << mFitPtsFtpcCuts[1] 
        << " :\t\t " << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mTrackN/perCent 
-       << "%\t (" << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mFitPtsFtpcCutN/(float)mFtpcTrackN/perCent) 
+       << "% Ftpc) cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " << mFitOverMaxCuts[1]
        << " :\t " << setprecision(3) << (float)mFitOverMaxCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << (float)mFitOverMaxTpcCutN/(float)mTpcTrackN/perCent << "% Tpc, "
-       << setprecision(3) << (float)mFitOverMaxFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
+       << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mFitOverMaxFtpcCutN/(float)mFtpcTrackN/perCent) 
+       << "% Ftpc) cut" << endl;
   cout << "#   ChiSq (Tpc) cuts= " << mChiSqTpcCuts[0] << ", " << mChiSqTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mChiSqTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mChiSqTpcCutN/(float)mTpcTrackN/perCent  <<" % Tpc) cut" << endl;
+       << "%\t (" << setprecision(3) << (float)mChiSqTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
   cout << "#   ChiSq (Ftpc) cuts= " << mChiSqFtpcCuts[0] << ", " << mChiSqFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mChiSqFtpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mChiSqFtpcCutN/(float)mFtpcTrackN/perCent  <<" % Ftpc) cut" << endl;
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mChiSqFtpcCutN/(float)mFtpcTrackN/perCent)  
+       << "% Ftpc) cut" << endl;
   cout << "#   Dca (Tpc) cuts= " << mDcaTpcCuts[0] << ", " << mDcaTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mDcaTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mDcaTpcCutN/(float)mTpcTrackN/perCent  <<" % Tpc) cut" << endl;
+       << "%\t (" << setprecision(3) << (float)mDcaTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
   cout << "#   Dca (Ftpc) cuts= " << mDcaFtpcCuts[0] << ", " << mDcaFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mDcaFtpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mDcaFtpcCutN/(float)mFtpcTrackN/perCent  <<" % Ftpc) cut" << endl;
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mDcaFtpcCutN/(float)mFtpcTrackN/perCent)  
+       <<"% Ftpc) cut" << endl;
   cout << "#   Pt (Tpc) cuts= " << mPtTpcCuts[0] << ", " << mPtTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mPtTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mPtTpcCutN/(float)mTpcTrackN/perCent  <<" % Tpc) cut" << endl;
+       << "%\t (" << setprecision(3) << (float)mPtTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
   cout << "#   Pt (Ftpc) cuts= " << mPtFtpcCuts[0] << ", " << mPtFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mPtFtpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mPtFtpcCutN/(float)mFtpcTrackN/perCent  <<" % Ftpc) cut" << endl;
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mPtFtpcCutN/(float)mFtpcTrackN/perCent)  
+       << "% Ftpc) cut" << endl;
   cout << "#   Eta (Tpc) cuts= " << mEtaTpcCuts[0] << ", " << mEtaTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mEtaTpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << (float)mEtaTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
   cout << "#   Eta (Ftpc) cuts= " << mEtaFtpcCuts[0] << ", " << mEtaFtpcCuts[1]
        << "; " << mEtaFtpcCuts[2] << ", " << mEtaFtpcCuts[3] 
        << " :\t " << setprecision(3) << (float)mEtaFtpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mEtaFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mEtaFtpcCutN/(float)mFtpcTrackN/perCent) 
+       << "% Ftpc) cut" << endl;
   cout << "# Good Tpc Tracks =\t " << (float)mGoodTpcTrackN/(float)mTpcTrackN/perCent
        << "%" << endl;
-  cout << "# Good Ftpc Tracks =\t " << (float)mGoodFtpcTrackN/(float)mFtpcTrackN/perCent
+  cout << "# Good Ftpc Tracks =\t " << ((mFtpcTrackN == 0)?0.:(float)mGoodFtpcTrackN/(float)mFtpcTrackN/perCent)
        << "%" << endl;
   cout << "# Good Tracks =\t\t " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;
@@ -434,6 +440,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.26  2001/08/22 19:23:28  oldi
+// Fix to avoid 'nan' in text output if no FTPC tracks found.
+//
 // Revision 1.25  2001/07/27 01:26:04  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //
