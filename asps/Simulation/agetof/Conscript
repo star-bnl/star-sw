@@ -22,21 +22,27 @@ my $CLIBS = $env->{CLIBS};
 print "build $pkg with cons\n";
 my $FC        = $env->{FC};
 my $FEXTEND   = $env->{FEXTEND};
-my $LD        = $env->{FC}; #!
+my $LD        = $env->{LD}; #!
 my $LDFLAGS   = $env->{LDFLAGS};
 my $CERNLIBS  = $env->{CERNLIBS};
-if ($PGI) { 
-  $LD = "g77";
-  $LDFLAGS .= " -Wl,-Bstatic";
-  $FC = "g77"; #print "set FC => $FC ==============================\n";
-  $FFLAGS   = " -fno-second-underscore -Wall -W -Wsurprising -fPIC";
-  $FEXTEND  = ""; 
+if ($FC eq 'pgf77') { 
+#  $LD = "g77";
+#  $LDFLAGS .= " -Wl,-Bstatic";
   $CERNLIBS = `cernlib kernlib`;
   chomp($CERNLIBS);
   $CERNLIBS .= " -Wl,-Bdynamic";
+  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+  $FFLAGS   = $env->{G77FLAGS}; 
+  $FEXTEND  = $env->{G77EXTEND};
 }
+my $LD        = $env->{LD}; #!
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
-if ($LD eq 'g77' or $LD eq 'ifort') { $Libraries .= " ". $env->{LIBG2C}; }
+#if ($FC eq 'g77' or $FC eq 'ifort') { $Libraries .= " ". $env->{LIBG2C} . " -lfrtbegin"; }
+if ($FC eq 'g77') { $Libraries .= " ". $env->{LIBG2C} . " -lfrtbegin"; }
+if ($FC eq 'ifort') { 
+  my $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
+  $Libraries .= " " . $LIBIFCPATH . "/for_main.o"; 
+}
 $env2 = $env->clone('FC'           => $FC,
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
