@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.63  1999/03/21 20:41:01  fisyak
+#  Cleanup for SL99d
+#
 #  Revision 1.62  1999/03/12 01:33:41  fisyak
 #  Take out -lI77 -lF77 for RedHat 5.1/5.2
 #
@@ -265,7 +268,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/03/12 01:33:41 $ 
+#           Last modification $Date: 1999/03/21 20:41:01 $ 
 #  default setings
 # Current Working Directory
 #
@@ -327,9 +330,10 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker, $(SUBDIRS)) 
   SUBDIRS := $(filter-out objy, $(SUBDIRS))
-  SUBDIRS := $(filter-out StTreeMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_emc_Maker St_evg_Maker St_ebye_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_io_Maker St_laser_Maker St_run_summary_Maker St_tpctest_Maker St_xdfin_Maker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StTreeMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_emc_Maker St_io_Maker, $(SUBDIRS))
+#                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out  St_laser_Maker St_run_summary_Maker St_tpctest_Maker , $(SUBDIRS))
 #endif
 #  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))

@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.70 1999/03/12 01:33:40 fisyak Exp $
+# $Id: MakeDll.mk,v 1.71 1999/03/21 20:41:00 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.71  1999/03/21 20:41:00  fisyak
+# Cleanup for SL99d
+#
 # Revision 1.70  1999/03/12 01:33:40  fisyak
 # Take out -lI77 -lF77 for RedHat 5.1/5.2
 #
@@ -147,7 +150,12 @@ ifndef SO_LIB
         LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
       endif
     endif
-  endif
+  endif 
+#  ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+#    ifneq (,$(findstring $(PKG),StTrsMaker))
+#       LIBRARY += /afs/rhic/star/packages/ObjectSpace/2.0m/lib/libospace.a
+#    endif
+#  endif
 endif
 
 
@@ -284,6 +292,7 @@ ifdef FILES_ORD
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
   ifneq (,$(LinkDef))
     NAMES_DEF    := $(shell  grep C++ $(LinkDef) | grep class | awk '{print $$5}')
+    NAMES_DEF    += $(shell  grep C++ $(LinkDef) | grep global | awk '{print $$5}')
     NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
     NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
     NAMES_DEF    := $(subst !, ,$(NAMES_DEF))   
@@ -631,3 +640,5 @@ ifdef NT
 
 endif #/* NT */
 	@echo DOIT        := $(DOIT)
+	@echo PKGNAME     := $(PKGNAME)	
+	@echo PKG         := $(PKG)

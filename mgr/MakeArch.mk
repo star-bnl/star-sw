@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.68  1999/03/21 20:41:00  fisyak
+#  Cleanup for SL99d
+#
 #  Revision 1.67  1999/03/18 01:55:32  fisyak
 #  remove path for pgf77
 #
@@ -179,7 +182,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/03/18 01:55:32 $ 
+#             Last modification $Date: 1999/03/21 20:41:00 $ 
 #. default setings
 
 MAKE  := gmake
@@ -392,6 +395,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   STRID    := lnx
   FC       := pgf77
+  FOREXE      := g77 -fno-second-underscore
   LD       := $(CXX)
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
@@ -679,7 +683,13 @@ ifdef OBJY_HOME
 endif
 endif
 
-FOR72 := $(FC)
+ifndef FOR72 
+  FOR72:= $(FC)
+endif
+ifndef FOREXE 
+  FOREXE:= $(FC)
+endif
+
 FC  := $(FC) $(FEXTEND)
 
 ifeq ($(EXEFLAGS),NONE)
