@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.6 2003/06/25 23:03:31 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.7 2003/06/26 22:37:32 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.7  2003/06/26 22:37:32  thenry
+ * Fixed a bug in the indexing of the points
+ *
  * Revision 1.6  2003/06/25 23:03:31  thenry
  * Fixed indexes
  *
@@ -122,14 +125,16 @@ public:
       return phi;
     };
     inline double pTheta(void) { return asinh(Eta()); };
+    inline double Theta(void) { return asinh(Eta()); };
     inline double pPhi(void) { return Phi(); };
     inline void SetE(double newE) { correctedE = newE; };
     inline void SubE(double subE) { correctedE -= subE; };
     inline bool PhotonRemaining(void) { return correctedE > 0.0; };
     inline StLorentzVectorD P(void)
     {
-      double pt = correctedE/sqrt(1.0+sinh(Eta())*sinh(Eta()));
-      return StLorentzVectorD(correctedE, pt*cos(Phi()), pt*sin(Phi()), pt*sinh(Eta()));
+      return StLorentzVectorD(correctedE, correctedE*cos(Phi())*cos(Theta()), 
+			      correctedE*sin(Phi())*cos(Theta()), 
+			      correctedE*sin(Theta()));
     };
     inline StMuEmcPoint* getPoint(void) const{ return mPoint; };
     inline double getEtaShift(void) const{ return etaShift; };
