@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.6 1999/07/02 04:43:24 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.7 1999/07/07 19:55:43 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -22,10 +22,14 @@
  *   Now skip sequences
  *   until next "switch=1" sequence
  * 23-Jun-99 MJL most output now supressed with EventReader.verbose
-
+ * 07-Jul-99 MJL if no banks found for a given rcb,mz just skip it. 
+ *           No longer return FALSE
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.7  1999/07/07 19:55:43  levine
+ * Now behaves correctly when encountering a partially populated (e.g., one RB) sector
+ *
  * Revision 1.6  1999/07/02 04:43:24  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -97,13 +101,16 @@ int TPCV2P0_ZS_SR::initialize()
 	//TPCSEQD bank doesn't exist
 	// set up raw data pointers
 	TPCV2P0_PADK_SR *padkr = detector->getPADKReader(sector);
-	if (!padkr) return FALSE;
+	//	if (!padkr) return FALSE;
+	if (!padkr) continue;
 	classname(Bank_TPCADCR) *adcr =
 	  detector->getBankTPCADCR(sector,rcb,mz) ; //pointer to ADC raw bank
-	if (!adcr) return FALSE;
+	//	if (!adcr) return FALSE;
+	if (!adcr) continue;
 	classname(Bank_TPCCPPR) *cppr =
 	  detector->getBankTPCCPPR(sector,rcb,mz) ; //pointer to CPP raw bank
-	if (!cppr) return FALSE;
+	//	if (!cppr) return FALSE;
+	if (!cppr) continue;
 
 	// go through the CPPR/ADCR banks
 	if (detector->ercpy->verbose) 
