@@ -9,6 +9,7 @@
 #include "StDAQMaker.h"
 #include "StDAQReader.h"
 #include "StTPCReader.h"
+#include "StBFChain.h"
 
 ClassImp(StDAQMaker)
 
@@ -88,7 +89,8 @@ Int_t StDAQMaker::Make(){
 
   if (GetDebug()<=1) return 0;
 
-  StTPCReader *myTPCReader = fDAQReader->getTPCReader(mMergeSequences);
+
+  StTPCReader *myTPCReader = fDAQReader->getTPCReader();
   for (int sector =1; sector <=12; sector++)
   {
     unsigned char* padList;
@@ -102,3 +104,5 @@ Int_t StDAQMaker::Make(){
   }
   return 0;
 }
+
+
