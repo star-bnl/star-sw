@@ -1,4 +1,4 @@
-// $Id: StFtpcTrackFilter.cxx,v 1.1 2000/09/25 01:30:26 fine Exp $
+// $Id: StFtpcTrackFilter.cxx,v 1.2 2000/09/26 02:34:32 fine Exp $
 #include "StFtpcTrackFilter.h"
 #include "StDetectorId.h"
 
@@ -22,12 +22,14 @@ Int_t StFtpcTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_
   long detector = track.GetTable(rowNumber)->det_id;
   if (detector == kFtpcWestId || detector == kFtpcEastId) {
      color = StDefaultFilter::SubChannel(track,rowNumber,size,style);
-     printf(" %d FTPC track found\n", rowNumber);
   }
   return color;
 }
 //_____________________________________________________________________________
 // $Log: StFtpcTrackFilter.cxx,v $
+// Revision 1.2  2000/09/26 02:34:32  fine
+// debug print removed
+//
 // Revision 1.1  2000/09/25 01:30:26  fine
 // new StFtpcTrackFilter for Janet has been introdcued
 //
