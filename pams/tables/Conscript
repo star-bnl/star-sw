@@ -36,10 +36,13 @@ Install $env $INCLUDE, @idlT; #print "Install $env $INCLUDE, @idlT\n";
 #___________________________________
 my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $share;
    $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" . $env->{ENV}->{ROOTSRC};
+my $CXXFLAGS = $env->{CXXFLAGS};
+if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
    $env2 = $env->clone(
 		    'DEBUG'      => ' ',
-		    'CPPPATH'    =>$ROOTCINT_CPP
-		    );
+		    'CPPPATH'    =>$ROOTCINT_CPP,
+		    'CXXFLAGS'   => $CXXFLAGS  
+		      );
 my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
 my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
 
