@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.9 1999/05/05 21:52:11 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.10 1999/07/28 20:24:01 liq Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.10  1999/07/28 20:24:01  liq
+* change the loop or ir2, and ir1 to make gap work
+*
 * Revision 1.9  1999/05/05 21:52:11  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -99,14 +102,17 @@ C     get information about the seed
        
 C     set maximum allowable gap 
       gap_2 = tpar(ipass).g2
-      ir2 = ir3-1
       nh2 = 0
-    
+      ir2=ir3 ! initial it
 
 C     outer do-loop for second hit on a root
       do while ( gap_2.ge.0 .and. nroot.eq.0 )
 
 C     find in what slice the hits for the next row are going to be
+      ir2 = ir2-1
+      gap_2 = gap_2 - 1
+      if( gap_2 .lt. -1 ) go to 999
+
       delrow = 2.5
       if(ir2.lt.14) delrow = 6.0
       zp2 = zp3*(1.0-delrow/r3)
@@ -114,26 +120,24 @@ C     find in what slice the hits for the next row are going to be
       irets=tpt_find_slic(zp2,tpar(ipass).nzslic,islic)
       is_pnt = slice_loc(isect_trunc,ir2,islic) 
       nh2 = slice_pnt(2,is_pnt)
-      gap_2 = gap_2 - 1
 c
       if( nh2 .eq. 0 ) then
 C       total of tpar(ipass).g2 rows 
 C       allowed between the last two hits
         ir2 =ir2 - 1
         if( ir2 .le. tpar(ipass).irow_seg_end ) go to 999
-      else if( gap_2 .lt. -1 ) then
-        go to 999
       else if( nh2 .ne. 0 ) then
 C       UPSTREAM point: set maximum allowable gap
         gap_1 = tpar(ipass).g1
-        ir1 = ir2 - 1
+        ir1=ir2 ! initial it
         nh1 = 0
 
 C       inner do-loop for first hit on a root
         do while ( gap_1.ge.0 .and. nroot.eq.0 )
-	  if( ir1 .le. tpar(ipass).irow_seg_end ) go to 999
+          ir1 = ir1 - 1
           gap_1 = gap_1 - 1
           if ( gap_1 .lt. -1 ) go to 999
+	  if( ir1 .le. tpar(ipass).irow_seg_end ) go to 999
 C         Start looking for a link - down to business
           i = slice_pnt(1,is_pnt)
 C         loop over all hits in slice-next i'th hit is set at enddo
@@ -147,7 +151,7 @@ C               make tolerance proportional to the gap size
                 if( ir2 .lt. 14 ) fact=2.5
                 tol23 = real(ir3 - ir2)*fact
 C               calculate prediction
-	        zp2 = (hit(k).z - zorigl) * r2 / r3 + zorigl
+                zp2 = (hit(k).z - zorigl) * r2 / r3 + zorigl
 c               squared distance between the prediction and the track (r-z projection)
 	        delz2p = (hit(i).z-zp2)**2/(1.0+((hit(k).z-zorigl)/r3)**2)
                 if(delz2p.lt.(tpar(ipass).delzlm*tol23)**2)
