@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.10 1999/07/14 14:58:33 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.11 1999/07/15 22:27:43 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.11  1999/07/15 22:27:43  wdeng
+// debug
+//
 // Revision 1.10  1999/07/14 14:58:33  wdeng
 // Check if there is primary vertex. Uncomment PrintInfo().
 //
@@ -323,8 +326,8 @@ Int_t StKinkMaker::Make(){
 	  StThreeVectorD p1Project = myTrack1->helix().at(p1PathLength);
 	  StThreeVectorD p2Project = myTrack2->helix().at(p2PathLength);
 	  
-	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B/tesla);
-	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B/tesla);
+	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B);
+	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B);
 	  
 	  decayAngle = 57.3*parentMom.angle(daughterMom);
 	  if(decayAngle<tkfpar->thetaMin) continue;
@@ -544,7 +547,7 @@ Int_t StKinkMaker::Make(){
 		
 		startIdDaughter = g2tTrackPtr->start_vertex_p;
 		
-		if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<1 )  {
+		if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<0 )  {
 		  goto WRONGFILL; 	    
 		}
 		if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
