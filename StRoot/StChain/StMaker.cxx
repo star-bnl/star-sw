@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.43 1999/05/23 04:05:02 fine Exp $
+// $Id: StMaker.cxx,v 1.44 1999/06/11 17:45:57 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.44  1999/06/11 17:45:57  perev
+// assert StMaker::Streamer to forbid to write it
+//
 // Revision 1.43  1999/05/23 04:05:02  fine
 // The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
 //
@@ -118,7 +121,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.43 1999/05/23 04:05:02 fine Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.44 1999/06/11 17:45:57 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -760,4 +763,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
      while ((maker = (StMaker*)nextMaker())) 
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
+}
+//_____________________________________________________________________________
+void StMaker::Streamer(TBuffer &b)
+{ Error("Streamer"," attempt to write %s\n ",GetName());
+  assert(0);
 }

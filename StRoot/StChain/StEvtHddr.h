@@ -1,6 +1,7 @@
 #ifndef StEvtHddr_h
 #define StEvtHddr_h
 
+#include "St_DataSet.h"
 class StEvtHddr : public St_DataSet
 {
 public:
