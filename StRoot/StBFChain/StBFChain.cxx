@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.429 2004/07/30 20:15:09 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.430 2004/07/30 23:05:40 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -555,9 +555,10 @@ Bfc_st BFC1[] = {
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
   {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
+  {"HighPtTags"  ,"","TagsChain","StEVent"              ,"StHighPtTagsMaker","StHighPtTagsMaker","",kFALSE},
   //{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag"
+  {"tags"        ,"","TagsChain","TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag,HighPtTags"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
@@ -1163,10 +1164,11 @@ Bfc_st BFC2[] = {
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
   {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
+  {"HighPtTags"  ,"","TagsChain","StEVent"              ,"StHighPtTagsMaker","StHighPtTagsMaker","",kFALSE},
   //{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag,HighPtTags"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
