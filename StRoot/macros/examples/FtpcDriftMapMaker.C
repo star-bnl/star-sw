@@ -1,7 +1,7 @@
-// $Id: FtpcDriftMapMaker.C,v 1.5 2001/05/17 21:09:15 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.6 2001/07/20 09:29:18 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
-// Revision 1.5  2001/05/17 21:09:15  jcs
-// macro for calculating FTPC drift map calibration files using StMagUtilities
+// Revision 1.6  2001/07/20 09:29:18  jcs
+// change timestamp for Y2001 real data
 //
 // Revision 1.4  2001/05/16 18:34:18  jcs
 // select timestamp
@@ -54,8 +54,8 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
   StChain *chain =  new StChain();
 
   St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
-  //  dbMk->SetDateTime(20001100,10000);
-  dbMk->SetDateTime("year_2b");
+  dbMk->SetDateTime(20010701,10000);
+//  dbMk->SetDateTime("year_2b");
   dbMk->Init();
   dbMk->Make();
 
