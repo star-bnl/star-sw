@@ -4,9 +4,11 @@
 #              Input     : list of h-files
 #              Output    : 
 #
+use Env;
 use File::Basename;
 #
-#print "RootCint.pl ================\n";
+#print "RootCint.pl ================\n"; my $rootcint = `which rootcint`; 
+#print "ROOTSYS = $ROOTSYS rootcint = $rootcint\n";
 my $Cint_cxx = shift;
 (my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
 my $DirName = dirname($Cint_cxx); print "DirName = $DirName\n";
@@ -21,12 +23,14 @@ my @classes = 0; # list of classes
 # count no. of classes i LinkDef's
 my $ListOfWrittenClasses = ":"; 
 my $ListOfDefinedClasses = "";
+my $off = 0;
 open (Out, ">$LinkDef") or die "Can't open $LinkDef";
 for my $def  (split / /,$sources) {#  print "SRC:", $def, "\n";
   if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
     open (In, $def) or die "Can't open $def";
     while ($line = <In>) {
       print Out $line; print $line; 
+      if ($line =~ /link off all/) {$off++;}
       if ($line =~ / class / && $line  =~ /\#pragma/) {
 	my @words = split /([ \(,\)\;\-\!])/, $line;
 	my $class = $words[8];
@@ -102,9 +106,11 @@ for my $class (@classes) {
       if (!$opened) {
 	open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
 	print Out "#ifdef __CINT__\n";                  print  "#ifdef __CINT__\n";
-	print Out "#pragma link off all globals;\n";    print  "#pragma link off all globals;\n";
-	print Out "#pragma link off all classes;\n";    print  "#pragma link off all classes;\n";
-	print Out "#pragma link off all functions;\n";  print  "#pragma link off all functions;\n";
+	if (! $off) {
+	  print Out "#pragma link off all globals;\n";    print  "#pragma link off all globals;\n";
+	  print Out "#pragma link off all classes;\n";    print  "#pragma link off all classes;\n";
+	  print Out "#pragma link off all functions;\n";  print  "#pragma link off all functions;\n";
+	}
 	$opened = "YES";
       }
       print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";
@@ -128,6 +134,8 @@ for my $class (@classes) {
   my $hh = basename($h); #print "hh = $hh\n";
   if (!grep(/$hh/,$h_files)) {$h_files .= " " . $hh;}
 }
+my $hfile = $DirName . "/Stypes.h";
+if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
   $h_files .= " " . "LinkDef.h";# print "files = ",$files,"\n";
   my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
