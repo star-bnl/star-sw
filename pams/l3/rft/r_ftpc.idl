@@ -5,14 +5,14 @@
 */
 #include "PAM.idl"
 #include "r_ftpc_ctrl.idl"
-#include "fcl_fppoint.idl"
+#include "trg_fcl_fppoint.idl"
 #include "tpt_track.idl"
 
 interface r_ftpc : amiModule{
 	STAFCV_T call
 		( in    r_ftpc_ctrl ctrl
-		, inout fcl_fppoint hit
-		, out   tpt_track   track
+		, inout trg_fcl_fppoint point
+		, out   tpt_track   fptrack
 		);
 };
 /* Last mod. for r_ftpc: $Data$ */

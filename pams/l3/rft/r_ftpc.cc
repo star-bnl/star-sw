@@ -6,9 +6,6 @@
 **:<------------------------------------------------------------------*/
 #include "PAM.h"
 #include "r_ftpc.h"
-#include "r_ftpc_ctrl.h"
-#include "fcl_fppoint.h"
-#include "tpt_track.h"
 #include "FTFinder.h"
 #include "TrackerFrame.h"
 #include "FTF_Mc_Track.h"
