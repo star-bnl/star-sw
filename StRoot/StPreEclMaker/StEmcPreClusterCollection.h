@@ -2,91 +2,125 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.2  2000/08/24 11:26:48  suaide
+// by A. A. P. Suaide - 2000/08/24 07:25:00
+//
+// Notes:
+//
+// 1. Full StEvent Compatible
+// 2. Read hits from StEvent object
+// 3. Write clusters in StEvent format and old format to keep background
+//    compatibility
+// 4. Do clustering in bemc, bprs, bsmde, bsmdp
+// 5. Included method StPreEclMaker::SetClusterCollection
+//
+// Removed Files:
+//
+//    StBemcPreCluster.cxx StBemcPreCluster.h
+//    StBsmdePreCluster.cxx StBsmdePreCluster.h
+//    StBsmdpPreCluster.cxx StBsmdpPreCluster.h
+//    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
+//    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
+//    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
+//
+//
+// PreClusters Finder Maker for EMC
+// Revision 1.2  2000/08/22 05:30:00  A. A. P. Suaide
+//     Full StEvent compatible
+//     Do clustering on bemc, bprs, bsmde and bsmdp
+//     StBemcPreClusterCollection  now obsolete
+//     StBsmdePreClusterCollection now obsolete
+//     StBsmdpPreClusterCollection now obsolete
+//
 // Revision 1.1  2000/05/15 21:24:00  subhasis
 // initial version
 //
-// PreClusters Finder Maker for EMC
-//
-//
-// Author: Subhasis Chattopadhyay,
+// Author: Alexandre A. P. Suaide (version 2.0)
+//         Subhasis Chattopadhyay,
 //         Aleksei Pavlinov , July 1999
 //
+// 08/15/2000 - By A. A. P. Suaide
+// included method checkClustersInModule to check the clusters
+
 
 #ifndef STAR_StEmcPreClusterCollection
 #define STAR_StEmcPreClusterCollection
 
 #include "TObjArray.h"
+#include "TMatrix.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "St_TableSorter.h"
 #include "StEmcPreCluster.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
+#include "StEvent/StEmcDetector.h"
 
 class StEmcPreClusterCollection : public St_DataSet {
-  friend class StBemcPreClusterCollection;
-  friend class StBsmdePreClusterCollection;
-  friend class StBsmdpPreClusterCollection;
 private:
-  Int_t     mDetector;
-  Float_t   mEnergySeed;
-  Float_t   mEnergyAdd;
-  Float_t   mEnergyThresholdAll;
-  Int_t     mSizeMax;
-  Int_t     mNclusters;
-  TObjArray mClusters;
+  Int_t           mDetector;
+  Float_t         mEnergySeed;
+  Float_t         mEnergyAdd;
+  Float_t         mEnergyThresholdAll;
+  Int_t           mSizeMax;
+  Int_t           mNclusters;
+  TObjArray       mClusters;
+  Bool_t          kIsOk;
+  Bool_t          kStEvOk;
+ 
 protected:   
 public: 
 
-  StEmcPreClusterCollection();
-  StEmcPreClusterCollection(const Char_t *);
-  virtual ~StEmcPreClusterCollection();
+                  StEmcPreClusterCollection();  
+                  StEmcPreClusterCollection(const Char_t *);
+                  StEmcPreClusterCollection(const Char_t *,StEmcDetector*);
+  virtual         ~StEmcPreClusterCollection();
 
-  Int_t Detector() const;
-  Float_t EnergySeed() const;
-  Float_t EnergyAdd() const;
-  Float_t EnergyThresholdAll() const;
-  Int_t SizeMax() const;
-  Int_t Nclusters() const;
-  TObjArray* Clusters();
+  Int_t           Detector() const;
+  Float_t         EnergySeed() const;
+  Float_t         EnergyAdd() const;
+  Float_t         EnergyThresholdAll() const;
+  Int_t           SizeMax() const;
+  Int_t           Nclusters() const;
+  TObjArray*      Clusters();
+  Bool_t          IsOk();
 
-  void setDetector(Int_t);
-  void setEnergySeed(Int_t);
-  void setEnergyAdd(Int_t);
-  void setEnergyThresholdAll(Int_t);
-  void setSizeMax(Int_t);
-  void setNclusters(Int_t);
-  //  void setClusters(TObjArray&);
-  void Browse(TBrowser *b);
-  Int_t findClusters(StEmcHitCollection*); // Find clusters in all detectors
+  void            setDetector(Int_t);
+  void            setEnergySeed(Float_t);
+  void            setEnergyAdd(Float_t);
+  void            setEnergyThresholdAll(Float_t);
+  void            setSizeMax(Int_t);
+  void            setNclusters(Int_t);
+  void            Browse(TBrowser *b);
+  Int_t           findClusters(); // Find clusters in all detectors
 
-  virtual  void findClustersInModule(StEmcHitCollection*); // Find clusters in one module
-  virtual Int_t testOnNeighbor(Int_t);
-  virtual  void addPreCluster(StEmcHitCollection* , TArrayI*);
-  virtual void printCluster(Int_t, StEmcPreCluster*);
-  virtual void printClusters(Int_t n=5, Int_t start=5);
-  virtual void printClustersAll();
-  //  virtual Long_t HasData() const {return 1;}   // Non zero means it has data
-  //  virtual Bool_t IsFolder() {return kFALSE;}   // KTRUE means it is directory
-  ClassDef(StEmcPreClusterCollection,1)// Base class for electromagnetic calorimeter cluster collection 
+  virtual  void   findClustersInModule(Int_t);   // Find clusters in one module
+  virtual  void   checkClustersInModule(Int_t);  // by A. A. P. Suaide
+  virtual Float_t profile(Float_t,Float_t,Float_t);
+  virtual  Int_t  testOnNeighbor(Int_t);
+  virtual  void   addPreCluster(Int_t , TArrayI*);
+  virtual  void   printCluster(Int_t, StEmcPreCluster*);
+  virtual  void   printClusters(Int_t n=5, Int_t start=5);
+  virtual  void   printClustersAll();
+           void   printConf();
+  
+  ClassDef(StEmcPreClusterCollection,2)// Base class for electromagnetic calorimeter cluster collection 
 };
 
-inline StEmcPreClusterCollection::~StEmcPreClusterCollection() {/* Nobody */}
-inline Int_t StEmcPreClusterCollection::Detector()   const  {return mDetector;}
-inline Float_t StEmcPreClusterCollection::EnergySeed() const  {return mEnergySeed;}
-inline Float_t StEmcPreClusterCollection::EnergyAdd()  const {return mEnergyAdd;}
-inline Float_t StEmcPreClusterCollection::EnergyThresholdAll() const{return mEnergyThresholdAll;}
-inline Int_t StEmcPreClusterCollection::Nclusters()   const {return mNclusters;}
-inline Int_t StEmcPreClusterCollection::SizeMax() const {return mSizeMax;} 
-inline TObjArray*  StEmcPreClusterCollection::Clusters() {return &mClusters;}
+inline            StEmcPreClusterCollection::~StEmcPreClusterCollection() {/* Nobody */}
+inline Int_t      StEmcPreClusterCollection::Detector()   const  {return mDetector;}
+inline Float_t    StEmcPreClusterCollection::EnergySeed() const  {return mEnergySeed;}
+inline Float_t    StEmcPreClusterCollection::EnergyAdd()  const {return mEnergyAdd;}
+inline Float_t    StEmcPreClusterCollection::EnergyThresholdAll() const{return mEnergyThresholdAll;}
+inline Int_t      StEmcPreClusterCollection::Nclusters()   const {return mNclusters;}
+inline Int_t      StEmcPreClusterCollection::SizeMax() const {return mSizeMax;} 
+inline TObjArray* StEmcPreClusterCollection::Clusters() {return &mClusters;}
 
-inline void StEmcPreClusterCollection::setDetector(Int_t var)  {mDetector = var;}
-inline void StEmcPreClusterCollection::setEnergySeed(Int_t var){mEnergySeed = var;}
-inline void StEmcPreClusterCollection::setEnergyAdd(Int_t var) {mEnergyAdd = var;}
-inline void StEmcPreClusterCollection::setEnergyThresholdAll(Int_t var){mEnergyThresholdAll = var;}
-inline void StEmcPreClusterCollection::setNclusters(Int_t var) {mNclusters = var;}
-inline void StEmcPreClusterCollection::setSizeMax(Int_t var) {mSizeMax = var;}
-//inline void StEmcPreClusterCollection::setClusters(TObjArray &var) {mClusters = var;}
-
+inline void       StEmcPreClusterCollection::setDetector(Int_t var)  {mDetector = var;}
+inline void       StEmcPreClusterCollection::setEnergySeed(Float_t var){mEnergySeed = var;}
+inline void       StEmcPreClusterCollection::setEnergyAdd(Float_t var) {mEnergyAdd = var;}
+inline void       StEmcPreClusterCollection::setEnergyThresholdAll(Float_t var){mEnergyThresholdAll = var;}
+inline void       StEmcPreClusterCollection::setNclusters(Int_t var) {mNclusters = var;}
+inline void       StEmcPreClusterCollection::setSizeMax(Int_t var) {mSizeMax = var;}
+inline Bool_t     StEmcPreClusterCollection::IsOk(){return kIsOk;}
 #endif
 
 

@@ -1,14 +1,43 @@
 //
-// $Id: StEmcPreCluster.h,v 1.1 2000/05/15 21:24:00 subhasis Exp $
+// $Id: StEmcPreCluster.h,v 1.2 2000/08/24 11:26:48 suaide Exp $
 //
 // $Log: StEmcPreCluster.h,v $
+// Revision 1.2  2000/08/24 11:26:48  suaide
+// by A. A. P. Suaide - 2000/08/24 07:25:00
+//
+// Notes:
+//
+// 1. Full StEvent Compatible
+// 2. Read hits from StEvent object
+// 3. Write clusters in StEvent format and old format to keep background
+//    compatibility
+// 4. Do clustering in bemc, bprs, bsmde, bsmdp
+// 5. Included method StPreEclMaker::SetClusterCollection
+//
+// Removed Files:
+//
+//    StBemcPreCluster.cxx StBemcPreCluster.h
+//    StBsmdePreCluster.cxx StBsmdePreCluster.h
+//    StBsmdpPreCluster.cxx StBsmdpPreCluster.h
+//    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
+//    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
+//    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
+//
+// Revision 1.2  000/08/22 05:30:00  A. A. P. Suaide
+//     Some modifications to be StEventCompatible
+//     Modifications on constructor and CalMeanAndRms methods
+//     StBemcPreCluster  now obsolete
+//     StBsmdePreCluster now obsolete
+//     StBsmdpPreCluster now obsolete
+//
 // Revision 1.1  2000/05/15 21:24:00  subhasis
 // initial version
 //
 // PreClusters Finder Maker for EMC
 //
 //
-// Authors: Subhasis Chattopadhyay,
+// Authors: Alexandre A. P. Suaide (version 2.0)
+//          Subhasis Chattopadhyay,
 //          Aleksei Pavlinov , July 1999.
 //          initial version from Akio Ogawa    
 //    
@@ -20,50 +49,50 @@
 #include <iostream.h>
 #include "TArrayI.h"
 #include "TObject.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
-
+#include "StEvent/StEmcDetector.h"
 class StEmcPreCluster : public TObject {
-  friend class StBemcPreCluster;
-  friend class StBsmdePreCluster;
-  friend class StBsmdpPreCluster;
+
 private:
-  Float_t mEta;
-  Float_t mPhi;
-  Float_t mSigmaEta;
-  Float_t mSigmaPhi;
-  Float_t mEnergy;
-  Int_t   mNhits;
-  TArrayI mHitsID;  
+  Int_t             mModule;
+  Float_t           mEta;
+  Float_t           mPhi;
+  Float_t           mSigmaEta;
+  Float_t           mSigmaPhi;
+  Float_t           mEnergy;
+  Int_t             mNhits;
+  TArrayI           mHitsID;  
 public: 
-  StEmcPreCluster(TArrayI*);
-  ~StEmcPreCluster();
-  Float_t Eta() const;
-  Float_t Phi() const;
-  Float_t SigmaEta() const;
-  Float_t SigmaPhi() const;
-  Float_t Energy() const;
-  Int_t   Nhits() const;
-  Int_t   ID(Int_t);
-  TArrayI* HitsID();
+                    StEmcPreCluster(TArrayI*);
+                    StEmcPreCluster(Int_t,TArrayI*,Int_t);
+                    ~StEmcPreCluster();
+  Float_t           Eta() const;
+  Float_t           Phi() const;
+  Float_t           SigmaEta() const;
+  Float_t           SigmaPhi() const;
+  Float_t           Energy() const;
+  Int_t             Nhits() const;
+  Int_t             Module() const;
+  Int_t             ID(Int_t);
+  TArrayI*          HitsID();
 
-  virtual void calcMeanAndRms(StEmcHitCollection*);
-  virtual void print(ostream *os);
+  virtual void      calcMeanAndRms(StEmcDetector*,Int_t);
+  virtual void      print(ostream *os);
 
-  ClassDef(StEmcPreCluster,1)// Base class for electromagnetic calorimeter cluster
+  ClassDef(StEmcPreCluster,2)// Base class for electromagnetic calorimeter cluster
 };
 
 ostream &operator<<(ostream&, StEmcPreCluster&); // Printing operator
 
-inline            StEmcPreCluster::~StEmcPreCluster(){ /* Nobody */ }
-inline   Float_t  StEmcPreCluster::Eta() const     {return mEta;} 
-inline   Float_t  StEmcPreCluster::Phi() const    {return mPhi;}
-inline   Float_t  StEmcPreCluster::SigmaEta() const{return mSigmaEta;}
-inline   Float_t  StEmcPreCluster::SigmaPhi() const{return mSigmaPhi;}
-inline   Float_t  StEmcPreCluster::Energy() const  {return mEnergy;}
-inline   Int_t    StEmcPreCluster::Nhits() const {return mNhits;}
-
-inline   Int_t    StEmcPreCluster::ID(Int_t i) {return mHitsID[i];}
-inline   TArrayI *StEmcPreCluster::HitsID() {return &mHitsID;}
+inline              StEmcPreCluster::~StEmcPreCluster(){ /* Nobody */ }
+inline   Float_t    StEmcPreCluster::Eta() const     {return mEta;} 
+inline   Float_t    StEmcPreCluster::Phi() const    {return mPhi;}
+inline   Float_t    StEmcPreCluster::SigmaEta() const{return mSigmaEta;}
+inline   Float_t    StEmcPreCluster::SigmaPhi() const{return mSigmaPhi;}
+inline   Float_t    StEmcPreCluster::Energy() const  {return mEnergy;}
+inline   Int_t      StEmcPreCluster::Nhits() const {return mNhits;}
+inline   Int_t      StEmcPreCluster::Module() const {return mModule;}
+inline   Int_t      StEmcPreCluster::ID(Int_t i) {return mHitsID[i];}
+inline   TArrayI    *StEmcPreCluster::HitsID() {return &mHitsID;}
 
 #endif
 

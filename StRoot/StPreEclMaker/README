@@ -7,13 +7,13 @@
 Maintained by ::Subhasis Chattopadhyay (WSU)
 Proposed On :: 05/04/00
 --------------------------------------------
+Rewriten by:: Alexandre A. P. Suaide on 08/24/2000 (See bottom for details)
 
 
 
+     This Maker replaces StEclmaker present now in the repository.
 
-        This Maker replaces StEclmaker present now in the repository.
-
-   Some of the main changes made on the existing makers are,
+     Some of the main changes made on the existing makers are,
 
 
      (a) Because of the conflict in class name with StEmcCluster 
@@ -24,20 +24,28 @@ Proposed On :: 05/04/00
    bugs are fixed.
 
 
-     Just to remind,
-     --------------
+Just to remind,
+--------------
 
-    This Maker is to take StEmcHitCollection from "emc" and perform clustering
+     This Maker is to take StEmcHitCollection from "emc" and perform clustering
    for each module in each subdetectors in EMC.
 
-   These clusters are then stored as StEmcPreCluster objects in 
+     These clusters are then stored as StEmcPreCluster objects in 
    StEmcPreClusterCollection.
 
-   These classes are quite similar to StEmcCluster and StEmcClusterCollection
+     These classes are quite similar to StEmcCluster and StEmcClusterCollection
    being used in StEvent, only part missing is the connection of pointers 
    of Rawhits generating the clusters. As soon as writing in StEvent is made
    for StEmcRawHits and StEmcClusters, we can make those connections. 
 
 
-
+New Modifications (08/24/2000) by A. A. P. Suaide
+-----------------
+     
+     This Maker is now modificated to take the emc hits from StEvent object
+   and should run after St_emc_Maker and StEventMaker. If there is no emc
+   hits in StEvent this maker creates a new StEmcCollection and fill it with
+   emc hits taken from St_emc_Maker. The clusters are stored in the StEvent
+   object but the old storage format (StEmcPreCluster) is kept for background
+   compatibility.
          
