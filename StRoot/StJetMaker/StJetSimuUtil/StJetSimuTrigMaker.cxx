@@ -215,25 +215,28 @@ Int_t StJetSimuTrigMaker::Make()
 	det=1;
 	emcGeom = StEmcGeom::getEmcGeom("bemc");
 	for (int n=1; n<=BemcTow; n++){
-	    emcGeom->getBin(n,Bmod,Beta,Bsub);
+	  emcGeom->getBin(n,Bmod,Beta,Bsub);
 	    BTowADC =  muEmcCol->getTowerADC(n,det);
 	    if (BTowADC>0) {
 		if (print) printf("n=%d, mod=%d, sub=%d, Beta=%d adc=%d\n",n,Bmod,Bsub,Beta,BTowADC);
-
+		
 		int jpBindex=(Bmod+Bsub+5)/10;
-		if (((Bmod+Bsub+5)>=60)&&((Bmod+Bsub+5)<=66)) {
-		    jpBindex=0;
+		if (((Bmod+Bsub+5)>=60)&&((Bmod+Bsub+5)<=67)) {
+		  jpBindex=0;
 		}
-		if ((Bmod == 60)&&(Bsub==2)) jpBindex=0;
+		if (((Bmod+Bsub+5)>=120)&&((Bmod+Bsub+5)<=127)) {
+		  jpBindex=6;
+		}
+	       
 
 		int tpBindex=((Bmod+Bsub-3)/2) + 30*((Beta-1)/4);
 		if ((Bmod==1)&&(Bsub==1)) {
 		    tpBindex=(29 + 30*((Beta-1)/4));
 		}  
 		if (Bmod>60){//need to add 150 to tp# for east side 
-		    tpBindex=150 + ((Bmod+Bsub-3)/2) + 30*((Beta-1)/4);
+		  tpBindex=120 + ((Bmod+Bsub-3)/2) + 30*((Beta-1)/4);
 		    if ((Bmod==61)&&(Bsub==1)) {
-			tpBindex=150 + (59 + 30*((Beta+-1)/4));
+			tpBindex=150 + (29+ 30*((Beta-1)/4));
 		    }  
 		}
 		Sum(&jpBsum[jpBindex],&BTowADC);
@@ -247,6 +250,7 @@ Int_t StJetSimuTrigMaker::Make()
 	}
     
 	for (int q=0; q < 6; q++){
+	  //for (int q=0; q < 12; q++){//use this for whole barrel
 	    Sum(&BJPsumt,&jpBsum[q]);
 	    Max(&BHTmaxt,&jpBmax[q]);
 	    Max(&BJPmaxt,&jpBsum[q]);
