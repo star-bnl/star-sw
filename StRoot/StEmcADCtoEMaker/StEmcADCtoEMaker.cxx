@@ -1,6 +1,10 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.64 2004/03/24 00:09:50 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.65 2004/03/31 23:56:25 jeromel Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.65  2004/03/31 23:56:25  jeromel
+// Initialize mPedRMS, mPed and added a value to an empty return statement in
+// a non-void context (ANSI C++ forbids this). Should fix valgrind messages.
+//
 // Revision 1.64  2004/03/24 00:09:50  suaide
 // small bug fixed and PSD is added to the maker
 //
@@ -186,7 +190,8 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   Int_t   cutType[]    = {0, 1, 1, 1, 0, 0, 0, 0};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
-  for(Int_t i=0; i<MAXDETBARREL; i++)
+  int i,j;
+  for(i=0; i<MAXDETBARREL; i++)
   {
     mControlADCtoE->DeductPedestal[i]=pedSub[i];  
     mControlADCtoE->Calibration[i]=calib[i];
@@ -203,6 +208,14 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mEn1d[i] = NULL;  //!           
     mADCSpec[i] = NULL;          //!         
     mGeo[i] = NULL; 
+    for (j=0 ; j < 18001 ; j++){
+      mPed[i][j][0]    = 0.0;
+      mPed[i][j][1]    = 0.0;
+      mPed[i][j][2]    = 0.0;
+      mPedRMS[i][j][0] = 0.0;
+      mPedRMS[i][j][1] = 0.0;
+      mPedRMS[i][j][2] = 0.0;
+    }
   } 
   mNhit = NULL;           //! 
   mEtot = NULL;           //!
@@ -1062,7 +1075,7 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   
   bool save = false;
   for(Int_t det=0;det<MAXDETBARREL;det++) if(mSave[det]) save = true;
-  if(!save) return; 
+  if(!save) return kFALSE; 
   if(!mEmc) mEmc =new StEmcCollection();
     
   for(Int_t det=0;det<MAXDETBARREL;det++) 
@@ -1144,14 +1157,15 @@ Check if this hit is ok to be saved on StEvent
 Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh, Int_t cap)
 {  
   Float_t ADC = 0;
-	Float_t E = 0;
-	Char_t S = 0;
-  Float_t PED= mPed[det][idh-1][cap];
-  Float_t RMS= mPedRMS[det][idh-1][cap];
-	if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = STATUS_OK; } // save all for towers
-	if(det==1) {ADC = mData->PsdADC[idh-1]; E = mData->PsdEnergy[idh-1]; S = mData->PsdStatus[idh-1]; } 
-	if(det==2) {ADC = (Float_t)mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
-	if(det==3) {ADC = (Float_t)mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
+  Float_t E   = 0;
+  Char_t  S   = 0;
+  Float_t PED = mPed[det][idh-1][cap];
+  Float_t RMS = mPedRMS[det][idh-1][cap];
+
+  if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = STATUS_OK; } // save all for towers
+  if(det==1) {ADC = mData->PsdADC[idh-1]; E = mData->PsdEnergy[idh-1]; S = mData->PsdStatus[idh-1]; } 
+  if(det==2) {ADC = (Float_t)mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
+  if(det==3) {ADC = (Float_t)mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
   
   Bool_t save = kTRUE;  
   if(ADC<=0) save = kFALSE;   
