@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.116  2003/03/17 17:44:49  pruneau
+// *** empty log message ***
+//
 // Revision 1.115  2003/03/13 18:59:42  pruneau
 // various updates
 //
@@ -86,6 +89,7 @@
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 // StEvent
+#include "StDetectorId.h"
 #include "StEventTypes.h"
 //StMcEventMaker
 #include "StMcEventMaker/StMcEventMaker.h"
@@ -174,14 +178,19 @@ Int_t StiMaker::Init()
 
 Int_t StiMaker::InitDetectors()
 {
+  StiDetectorGroup<StEvent> * tpc;
+  StiDetectorGroup<StEvent> * svt;
+  StiDetectorGroup<StEvent> * emc;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
   _toolkit->add(new StiStarDetectorGroup());
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-  _toolkit->add(new StiTpcDetectorGroup(true));
+  _toolkit->add(tpc = new StiTpcDetectorGroup(true));
   cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-  _toolkit->add(new StiSvtDetectorGroup(true));
+  _toolkit->add(svt = new StiSvtDetectorGroup(true));
   //cout<<"StiMaker::Init() -I- Adding detector group:EMC"<<endl;
-  //toolkit->add(new StiEmcDetectorGroup(true));
+  //toolkit->add(emc = new StiEmcDetectorGroup(true));
+  tpc->setGroupId(kTpcId);
+  svt->setGroupId(kSvtId);
   return kStOk;
 }
 
