@@ -216,7 +216,9 @@ void RunGui(int firstEvent = 0,
 	doProfile);
 } 
 
-void Run(int nEvents,
+// ---------------------------------------------------------------------
+// ISOLATED 2 methods for production
+void StiRun(int nEvents,
 	 int IuseSvt,
 	 int IactiveSvt,
 	 const char *ifile){    
@@ -224,7 +226,7 @@ void Run(int nEvents,
 }
 
 
-void Run(int firstEvent,
+void StiRun(int firstEvent,
 	 int nEvents,
 	 int IuseSvt,
 	 int IactiveSvt,
@@ -254,7 +256,7 @@ void Run(int firstEvent,
 
   }
 }
-
+// ---------------------------------------------------------------------
 
 
 
