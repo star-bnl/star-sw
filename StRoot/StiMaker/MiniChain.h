@@ -24,6 +24,7 @@ class MiniChain : public TObject
   
   void setupInput(const char ** fileList);
   void setupOutput(const char * filePrefix,
+		   const char * infile,
 		   const char * fileTemplate);
   void setupSimulation();
   void setupDatabase();
