@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.10 2000/03/17 14:55:15 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.11 2000/04/14 22:37:22 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,6 +15,9 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
+ *  Revision 1.11  2000/04/14 22:37:22  lasiuk
+ *  Recommit code
+ *
  *  Revision 1.10  2000/03/17 14:55:15  lasiuk
  *  Large scale revisions after ROOT dependent memory leak
  *
@@ -182,7 +185,7 @@ private:
     int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.10 2000/03/17 14:55:15 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.11 2000/04/14 22:37:22 lasiuk Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
