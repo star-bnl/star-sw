@@ -1,13 +1,18 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.11 1999/12/04 00:15:39 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.12 1999/12/21 01:19:26 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
-// Description:  Maker to analyze Flow using the FlowTags
+////////////////////////////////////////////////////////////////////////////
+//
+// Description:  Maker to analyze Flow using the FlowTags and StFlowEvent
 //
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.12  1999/12/21 01:19:26  posk
+// Added more histograms.
+//
 // Revision 1.11  1999/12/04 00:15:39  posk
 // Works with StFlowEvent which works with the new StEvent
 //
@@ -40,7 +45,6 @@
 // corrections and polishing
 //
 // Revision 1.1.1.1  1999/08/09 19:50:37  posk
-// ver. 1.0
 //
 // Revision 1.0  1999/08/02 
 //
@@ -54,9 +58,8 @@
 #include "StFlowAnalysisMaker.hh"
 #include "../StFlowMaker/StFlowMaker.hh"
 #include "../StFlowMaker/StFlowEvent.hh"
-#include "../StFlowMaker/StFlowCutEvent.hh"
-#include "../StFlowMaker/StFlowCutTrack.hh"
 #include "../StFlowTagMaker/StFlowTagMaker.hh"
+#include "../StFlowMaker/StFlowConstants.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
@@ -73,28 +76,16 @@ extern "C" float besi0_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
 
-const Float_t StFlowAnalysisMaker::phiMin    =    0.;
-const Float_t StFlowAnalysisMaker::phiMax    = twopi; 
 const Float_t StFlowAnalysisMaker::etaMin    =   -2.;
 const Float_t StFlowAnalysisMaker::etaMax    =    2.;
 const Float_t StFlowAnalysisMaker::ptMin     =    0.;
 const Float_t StFlowAnalysisMaker::ptMax     =    2.;
-const Float_t StFlowAnalysisMaker::psiMin    =    0.;
-const Float_t StFlowAnalysisMaker::psiMax    = twopi; 
-const Float_t StFlowAnalysisMaker::meanPtMin =    0.;
-const Float_t StFlowAnalysisMaker::meanPtMax =    1.;
-const Float_t StFlowAnalysisMaker::multMin   =    0.;
-const Float_t StFlowAnalysisMaker::multMax   = 2000.;
-const Float_t StFlowAnalysisMaker::qMin      =    0.;
 const Float_t StFlowAnalysisMaker::qMax      =    2.;
-const Int_t StFlowAnalysisMaker::nPhi3DBins  =    18;
-//const Int_t StFlowAnalysisMaker::nPhiBins    =    60;
-const Int_t StFlowAnalysisMaker::nEtaBins    =    20;
-const Int_t StFlowAnalysisMaker::nPtBins     =    10;
-const Int_t StFlowAnalysisMaker::nPsiBins    =    36;
-const Int_t StFlowAnalysisMaker::nMeanPtBins =    50;
-const Int_t StFlowAnalysisMaker::nMultBins   =    50;
-const Int_t StFlowAnalysisMaker::n_qBins     =    50;
+
+enum { nEtaBins    = 20,
+       nPtBins     = 10,
+       n_qBins     = 50,};
+// nPhiBins is in StFlowConstants.h
 
 //-----------------------------------------------------------------------
 
@@ -112,35 +103,40 @@ StFlowAnalysisMaker::~StFlowAnalysisMaker() {
 Int_t StFlowAnalysisMaker::Make() {
   // Make histograms
 
+  // Get a pointer to the flow tags
   StFlowTagMaker* pFlowTagMaker = 0;
   pFlowTag = 0;
-  int fillFlag = 0;
-  // Get a pointer to the flow tags
   pFlowTagMaker = (StFlowTagMaker*)GetMaker("FlowTag");
   if (pFlowTagMaker) pFlowTag = pFlowTagMaker->TagPointer();
-  if (!pFlowTag) {
-    cout << "$$$$$ null FlowTag pointer" << endl;
-  } else if (kStOK == fillFromTags()) { // get event quantities
-    fillEventHistograms();              // fill from Flow Tags
-    fillFlag = 1;
-  }
 
   // Get a pointer to StFlowEvent
-  StFlowMaker* pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  StFlowMaker* pFlowMaker = 0;
+  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
-  if (!pFlowEvent) {
-    cout << "$$$$$ null FlowEvent pointer" << endl;
+
+  // Event quantities
+  if (pFlowTag) {
+    fillFromTags();                        // get event quantities
+    fillEventHistograms();                 // fill from Flow Tags
+  } else if (pFlowEvent) {
+    cout << "$$$$$ null FlowTag pointer" << endl;
+    fillFromFlowEvent();                   // get event quantities
+    fillEventHistograms();                 // fill from FlowEvent
+  } else {
+    cout << "$$$$$ null FlowEvent and FlowTag pointers" << endl;
     return kStOK;
-  } else if (!fillFlag) {
-    if (kStOK == fillFromFlowEvent()) { // get event quantities
-      fillEventHistograms();            // fill from FlowEvent
-      fillFlag = 1;
-    }
   }
-  if (fillFlag) fillParticleHistograms(); // fill particle histograms
+
+  // Particle quantities
+  if (pFlowEvent) fillParticleHistograms(); // fill particle histograms
    
   PrintInfo();
-  
+
+  // Clean up
+  if (pFlowEvent) {
+    delete pFlowEvent;    // it deletes pTrackCollection;
+  }
+
   return kStOK;
 }
 
@@ -148,7 +144,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.11 1999/12/04 00:15:39 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.12 1999/12/21 01:19:26 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -157,8 +153,128 @@ void StFlowAnalysisMaker::PrintInfo() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowAnalysisMaker::Init() {
-  // Book the histograms
+  // Book histograms
 
+  static const int& nHars    = Flow::nHars;
+  static const int& nSels    = Flow::nSels;
+  static const int& nSubs    = Flow::nSubs;
+  static const int& nPhiBins = Flow::nPhiBins;
+
+  const float chargeMin       =   -3.;
+  const float chargeMax       =    3.; 
+  const float impactParMin    =    0.;
+  const float impactParMax    =    3.; 
+  const float chi2Min         =    0.;
+  const float chi2Max         =    3.; 
+  const float fitPtsMin       =    0.;
+  const float fitPtsMax       =  100.; 
+  const float maxPtsMin       =    0.;
+  const float maxPtsMax       =  100.; 
+  const float fitOverMaxMin   =    0.;
+  const float fitOverMaxMax   =    3.; 
+  const float origMultMin     =    0.;
+  const float origMultMax     = 2000.; 
+  const float multOverOrigMin =    0.;
+  const float multOverOrigMax =    1.; 
+  const float vertexZMin      = -100.;
+  const float vertexZMax      =  100.; 
+  const float vertexXYMin     =  -1.;
+  const float vertexXYMax     =   1.; 
+  const float etaSymMin       =  -0.2; 
+  const float etaSymMax       =   0.2; 
+  const float phiMin          =    0.;
+  const float phiMax          = twopi; 
+  const float psiMin          =    0.;
+  const float psiMax          = twopi; 
+  const float meanPtMin       =    0.;
+  const float meanPtMax       =    1.;
+  const float multMin         =    0.;
+  const float multMax         = 2000.;
+  const float qMin            =    0.;
+
+  enum { nChargeBins       = 50,
+	 nImpactParBins    = 50,
+	 nChi2Bins         = 50,
+	 nFitPtsBins       = 50,
+	 nMaxPtsBins       = 50,
+	 nFitOverMaxBins   = 50,
+	 nOrigMultBins     = 50,
+	 nMultOverOrigBins = 50,
+	 nVertexZBins      = 50,
+	 nVertexXYBins     = 50,
+	 nEtaSymBins       = 50,
+	 nPhi3DBins        = 18,
+	 nPsiBins          = 36,
+	 nMultBins         = 50,
+	 nMeanPtBins       = 50 };
+  
+  // Charge
+  mHistCharge = new TH1F("Flow_Charge", "Flow_Charge",
+      nChargeBins, chargeMin, chargeMax);
+  mHistCharge->SetXTitle("Charge");
+  mHistCharge->SetYTitle("Counts");
+    
+  // ImpactPar
+  mHistImpactPar = new TH1F("Flow_ImpactPar", "Flow_ImpactPar",
+      nImpactParBins, impactParMin, impactParMax);
+  mHistImpactPar->SetXTitle("Impact Parameter");
+  mHistImpactPar->SetYTitle("Counts");
+    
+  // Chi2
+  mHistChi2 = new TH1F("Flow_Chi2", "Flow_Chi2",
+      nChi2Bins, chi2Min, chi2Max);
+  mHistChi2->SetXTitle("Chi square");
+  mHistChi2->SetYTitle("Counts");
+    
+  // FitPts
+  mHistFitPts = new TH1F("Flow_FitPts", "Flow_FitPts",
+      nFitPtsBins, fitPtsMin, fitPtsMax);
+  mHistFitPts->SetXTitle("Fit Points");
+  mHistFitPts->SetYTitle("Counts");
+    
+  // MaxPts
+  mHistMaxPts = new TH1F("Flow_MaxPts", "Flow_MaxPts",
+      nMaxPtsBins, maxPtsMin, maxPtsMax);
+  mHistMaxPts->SetXTitle("Max Points");
+  mHistMaxPts->SetYTitle("Counts");
+    
+  // FitOverMax
+  mHistFitOverMax = new TH1F("Flow_FitOverMax", "Flow_FitOverMax",
+      nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
+  mHistFitOverMax->SetXTitle("Fit Points / Max Points");
+  mHistFitOverMax->SetYTitle("Counts");
+    
+  // OrigMult
+  mHistOrigMult = new TH1F("Flow_OrigMult", "Flow_OrigMult",
+      nOrigMultBins, origMultMin, origMultMax);
+  mHistOrigMult->SetXTitle("Original Mult");
+  mHistOrigMult->SetYTitle("Counts");
+    
+  // MultOverOrig
+  mHistMultOverOrig = new TH1F("Flow_MultOverOrig", "Flow_MultOverOrig",
+      nMultOverOrigBins, multOverOrigMin, multOverOrigMax);
+  mHistMultOverOrig->SetXTitle("Mult / Orig. Mult");
+  mHistMultOverOrig->SetYTitle("Counts");
+    
+  // VertexZ
+  mHistVertexZ = new TH1F("Flow_VertexZ", "Flow_VertexZ",
+      nVertexZBins, vertexZMin, vertexZMax);
+  mHistVertexZ->SetXTitle("Vertex Z");
+  mHistVertexZ->SetYTitle("Counts");
+    
+  // VertexXY
+  mHistVertexXY2D = new TH2F("Flow_VertexXY2D", "Flow_VertexXY2D",
+			     nVertexXYBins, vertexXYMin, vertexXYMax,
+			     nVertexXYBins, vertexXYMin, vertexXYMax);
+  mHistVertexXY2D->SetXTitle("Vertex X");
+  mHistVertexXY2D->SetYTitle("Vertex Y");
+    
+  // EtaSym
+  mHistEtaSym = new TH1F("Flow_EtaSym", "Flow_EtaSym",
+      nEtaSymBins, etaSymMin, etaSymMax);
+  mHistEtaSym->SetXTitle("Eta Symmetry");
+  mHistEtaSym->SetYTitle("Counts");
+    
   // EtaPtPhi
   mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
       nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax, nPhi3DBins,
@@ -418,10 +534,16 @@ Int_t StFlowAnalysisMaker::Init() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowAnalysisMaker::fillFromTags() {
+void StFlowAnalysisMaker::fillFromTags() {
 //   Get the flow tags and calculate the full event quantities
+
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  static const int& nSubs = Flow::nSubs;
+
   for (int j = 0; j < nHars; j++) {
     float order  = (float)(j+1);
+
     // sub-event quantities
     mQSub[0][j].Set( pFlowTag->qxa[j], pFlowTag->qya[j] );
     mQSub[1][j].Set( pFlowTag->qxb[j], pFlowTag->qyb[j] );
@@ -446,43 +568,63 @@ Int_t StFlowAnalysisMaker::fillFromTags() {
       mQ[k][j]      = mQSub[2*k][j] + mQSub[2*k+1][j];
       mPsi[k][j]    = mQ[k][j].Phi() / order;
       mMult[k][j]   = mMultSub[2*k][j] + mMultSub[2*k+1][j];
-      m_q[k][j]     = (mMult[k][j] > 0.) ? mQ[k][j].Mod()/sqrt(mMult[k][j]) : 0.;
+      m_q[k][j]     = (mMult[k][j] > 0) ? mQ[k][j].Mod()/sqrt((float)mMult[k][j])
+	: 0.;
       mMeanPt[k][j] = (mMeanPtSub[2*k][j] + mMeanPtSub[2*k+1][j])/2.;
     }
   }
 
-  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowAnalysisMaker::fillFromFlowEvent() {
+void StFlowAnalysisMaker::fillFromFlowEvent() {
   // Get event quantities from StFlowEvent
+
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  static const int& nSubs = Flow::nSubs;
   
    for (int k = 0; k < nSels; k++) {
     for (int j = 0; j < nHars; j++) {
       for (int n = 0; n < nSubs; n++) {
 	int i = 2*k + n;
 	// sub-event quantities
-	mPsiSub[i][j] = pFlowEvent->Psi(j, k, n+1);
+	mPsiSub[i][j] = pFlowEvent->Psi(j, k, n);
       }
 
       // full event quantities
       mQ[k][j]      = pFlowEvent->Q(j, k);
       mPsi[k][j]    = pFlowEvent->Psi(j, k);
       m_q[k][j]     = pFlowEvent->q(j, k);
-      mMult[k][j]   = (float)(pFlowEvent->Mult(j, k));
+      mMult[k][j]   = pFlowEvent->Mult(j, k);
       mMeanPt[k][j] = pFlowEvent->MeanPt(j, k);
     }
   }
 
-  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
 void StFlowAnalysisMaker::fillEventHistograms() {
   // Fill histograms with event quantities
+
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  static const int& nSubs = Flow::nSubs;
+
+  // no selections: OrigMult, MultOverOrig, VertexZ, VertexXY
+  int origMult = pFlowEvent->OrigMult();
+  mHistOrigMult->Fill((float)origMult);
+
+  if (origMult) {
+    int totalMult = pFlowEvent->TrackCollection()->size();
+    mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
+  }
+
+  StThreeVectorF vertex = pFlowEvent->VertexPos();
+  mHistVertexZ->Fill(vertex.z());
+  mHistVertexXY2D->Fill(vertex.x(), vertex.y());
 
   // sub-event Psi_Subs
   for (int i = 0; i < nSubs + nSels; i++) {
@@ -521,13 +663,14 @@ void StFlowAnalysisMaker::fillEventHistograms() {
 	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->
 	  Fill(psiSubCorrDiff);
       }
-      histFull[k].histFullHar[j].mHistMult->Fill(mMult[k][j]);
+      histFull[k].histFullHar[j].mHistMult->Fill((float)mMult[k][j]);
       histFull[k].histFullHar[j].mHist_q->Fill(m_q[k][j]);
-      if (mMult[k][j] > 0.) {
+      if (mMult[k][j] > 0) {
 	histFull[k].histFullHar[j].mHistMeanPt->Fill(mMeanPt[k][j]);
       }
     }
   }
+
 }
 
 //-----------------------------------------------------------------------
@@ -535,63 +678,89 @@ void StFlowAnalysisMaker::fillEventHistograms() {
 void StFlowAnalysisMaker::fillParticleHistograms() {
   // Fill histograms from the particles
 
-  // Initialize Iterator, loop variables, and arrays
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+
+  float etaSymPosN = 0.;
+  float etaSymNegN = 0.;
+
+  // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   StFlowTrackIterator itr;
   
-  // Track loop
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    Float_t mPhi =  pFlowTrack->Phi();
-    if (mPhi < 0.) mPhi += twopi;
-    Float_t mEta =  pFlowTrack->Eta();
-    Float_t mPt  =  pFlowTrack->Pt();
+    float phi       = pFlowTrack->Phi();
+    if (phi < 0.) phi += twopi;
+    float eta       = pFlowTrack->Eta();
+    float pt        = pFlowTrack->Pt();
+    int   charge    = pFlowTrack->Charge();
+    float impactPar = pFlowTrack->ImpactPar();
+    float chi2      = pFlowTrack->Chi2();
+    int fitPts      = pFlowTrack->FitPts();
+    int maxPts      = pFlowTrack->MaxPts();
 
-    // no selections
-    mHistEtaPtPhi3D->Fill(mEta, mPt, mPhi);
-    mHistYieldAll2D->Fill(mEta, mPt);
-    mHistBinEta->Fill(mEta, mEta);
-    mHistBinPt->Fill(mPt, mPt);
+    // no selections: Charge, ImpactPar, Chi2, FitPts, MaxPts, FitOverMax
+    mHistCharge->Fill((float)charge);
+    mHistImpactPar->Fill(impactPar);
+    mHistChi2->Fill(chi2);
+    mHistFitPts->Fill((float)fitPts);
+    mHistMaxPts->Fill((float)maxPts);
+    if (maxPts) mHistFitOverMax->Fill(fitPts/maxPts);
+
+    // Yield3D, Yield2D, BinEta, BinPt
+    mHistEtaPtPhi3D->Fill(eta, pt, phi);
+    mHistYieldAll2D->Fill(eta, pt);
+    mHistBinEta->Fill(eta, eta);
+    mHistBinPt->Fill(pt, pt);
+
+    //For Eta symmetry
+    if (eta > 0.) { etaSymPosN++; }
+    else { etaSymNegN++; }
 
     for (int k = 0; k < nSels; k++) {
       for (int j = 0; j < nHars; j++) {
 	float order  = (float)(j+1);
-	Float_t psi_i = mQ[k][j].Phi() / order;
+	float psi_i = mQ[k][j].Phi() / order;
 	//if (psi_i < 0.) psi_i += twopi / order;
 	if (pFlowTrack->Select(j, k)) {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
-	  Double_t phiWgt = pFlowEvent->PhiWeight(mPhi, k, j);
-	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(mPhi, phiWgt);
-	  if (mEta < 0 && (j+1) % 2 == 1) phiWgt *= -1.;
-	  Q_i.Set(phiWgt * cos(mPhi * order), phiWgt * sin(mPhi * order));
+	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j);
+	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
+	  if (eta < 0 && (j+1) % 2 == 1) phiWgt *= -1.;
+	  Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
 	  TVector2 mQ_i = mQ[k][j] - Q_i;
 	  psi_i = mQ_i.Phi() / order;
 	  if (psi_i < 0.) psi_i += twopi / order;
 	  // Fill histograms with selections
-	  histFull[k].histFullHar[j].mHistPhi->Fill(mPhi);
-	  histFull[k].histFullHar[j].mHistYield2D->Fill(mEta, mPt);
+	  histFull[k].histFullHar[j].mHistPhi->Fill(phi);
+	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	}
  	//cout << "k= " << k << " j= " << j << " Psi= " <<
 	//  mQ[k][j].Phi() / order << "\t Psi_i= " << psi_i << endl;
 
        	// Caculate v for all particles
-	Float_t v = cos(order * (mPhi - psi_i))/perCent;
-	histFull[k].histFullHar[j].mHistSum_v2D->Fill(mEta, mPt, v);
+	float v = cos(order * (phi - psi_i))/perCent;
+	histFull[k].histFullHar[j].mHistSum_v2D->Fill(eta, pt, v);
 
 	// Correlation of Phi of all particles with Psi
-	if (mEta < 0 && (j+1) % 2 == 1) {
-	  mPhi += pi; // backward particle and odd harmonic
-	  if (mPhi > twopi) mPhi -= twopi;
+	if (eta < 0 && (j+1) % 2 == 1) {
+	  phi += pi; // backward particle and odd harmonic
+	  if (phi > twopi) phi -= twopi;
 	}
-	float dPhi = mPhi - psi_i;
+	float dPhi = phi - psi_i;
 	if (dPhi < 0.) dPhi += twopi;
 	histFull[k].histFullHar[j].mHistPhiCorr->
 	  Fill(fmod(dPhi, twopi / order));
       }
     }  
-    // Finish track loop
   }
+
+  // EtaSym
+  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  mHistEtaSym->Fill(etaSym);
+
 }
 
 //-----------------------------------------------------------------------
@@ -599,7 +768,7 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 static Double_t qDist(double* q, double* par) {
   // Calculates the q distribution given the parameters v, mult, area
 
-  Double_t expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
+  double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
   Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
     besi0_(2*q[0]*par[0]*perCent*sqrt(par[1])));
 
@@ -612,6 +781,10 @@ Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
   // Fits q distribution and outputs phiWgt values
 
+  static const int& nHars    = Flow::nHars;
+  static const int& nSels    = Flow::nSels;
+  static const int& nPhiBins = Flow::nPhiBins;
+
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(nSels*nHars);
 
@@ -620,12 +793,12 @@ Int_t StFlowAnalysisMaker::Finish() {
     etaMin, etaMax, nPtBins, ptMin, ptMax);
   histYield2DZero->Sumw2();
   mHistYieldAll2D->Copy(*histYield2DZero);
-  Double_t zero[nEtaBins+2][nPtBins+2] = {{0.}};
+  double zero[nEtaBins+2][nPtBins+2] = {{0.}};
   histYield2DZero->SetError(&zero[0][0]);
 
   // Calculate resolution = sqrt(2)*sqrt(mHistCos)
-  Float_t cosPair[nSels][nHars];
-  Float_t cosPairErr[nSels][nHars];
+  float cosPair[Flow::nSels][Flow::nHars];
+  float cosPairErr[Flow::nSels][Flow::nHars];
   for (int k = 0; k < nSels; k++) {
     for (int j = 0; j < nHars; j++) {
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
@@ -652,14 +825,14 @@ Int_t StFlowAnalysisMaker::Finish() {
       if (mRes[k][j] != 0.) {
 	histFull[k].histFullHar[j].mHist_v2D->Scale(1. / mRes[k][j]);
       } else {
-	cout << "### Resolution of the " << j+1 << "th harmonic was zero. ###"
+	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
       }
 
       // Fit q distribution
-      Float_t area = histFull[k].histFullHar[j].mHist_q->
+      float area = histFull[k].histFullHar[j].mHist_q->
 	Integral() * qMax / (float)n_qBins; 
-      Float_t mult = histFull[k].histFullHar[j].mHistMult->GetMean();
+      float mult = histFull[k].histFullHar[j].mHistMult->GetMean();
       TF1* func_q = new TF1("qDist", qDist, 0., qMax, 3); // fit q dist
       func_q->SetParNames("v", "mult", "area");
       func_q->SetParameters(1., mult, area); // initial values
@@ -668,7 +841,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_q->Fit("qDist", "0");
 
       // Calculate PhiWgt
-      Double_t mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
+      double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
 	/ (double)nPhiBins;
       for (int i = 0; i < nPhiBins; i++) {
 	histFull[k].histFullHar[j].mHistPhiWgt->SetBinContent(i+1, mean);
@@ -692,9 +865,5 @@ Int_t StFlowAnalysisMaker::Finish() {
   phiWgtNewFile.Close();
   delete phiWgtHistNames;
 
-  // Print the cut list
-  StFlowCutTrack::PrintCutList();
-  StFlowCutEvent::PrintCutList();
-  
   return StMaker::Finish();
 }
