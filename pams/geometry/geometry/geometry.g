@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.60 2003/09/17 23:10:42 potekhin Exp $
+* $Id: geometry.g,v 1.61 2003/09/18 22:09:34 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.61  2003/09/18 22:09:34  potekhin
+* Corrected a small comment typo and added the full
+* endcap wheel to the  new flagship geometry, y2003b.
+* This is done with fill mode 3.
+*
 * Revision 1.60  2003/09/17 23:10:42  potekhin
 * Small improvements to the Correction Level
 * logic.
@@ -329,7 +334,7 @@ If LL>1
 * In y2003a:
 *    removed serious bugs from SUPOGEO
 *    corrected ECAL -- the shift variable
-*    corrected CVT  -- the layer radii correction
+*    corrected SVT  -- the layer radii correction
 
   on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
@@ -360,7 +365,7 @@ If LL>1
 
 ***********************************************************************
 * Corrections and enhancements in y2003b:
-*    extra material in SVT
+*    extra material in SVT (see web page)
 *    added the Photon Multiplicity Detector (PHMD)
 *    added newly installed parts of ECAL (to be done)
 
@@ -380,7 +385,7 @@ If LL>1
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
-                     ecal_fill=1     " sectors 2-5 filled "
+                     ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
                      bbcm=on
                   "forward pion detector "
