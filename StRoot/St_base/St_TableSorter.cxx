@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.cxx,v 1.21 1999/12/01 14:03:35 fine Exp $
+// $Id: St_TableSorter.cxx,v 1.22 1999/12/05 06:34:16 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -309,7 +309,7 @@ St_TableSorter::~St_TableSorter()
 //*-*                                                               
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*  
 
-#define BINARYSEARCH(valuetype) Int_t St_TableSorter::BinarySearch(valuetype value) {\
+#define BINARYSEARCH(valuetype) Int_t St_TableSorter::BinarySearch(valuetype value) const {\
    switch (m_colType) {                               \
          case  kFloat:                                \
            return SelectSearch(Float_t(value));       \
@@ -336,7 +336,7 @@ St_TableSorter::~St_TableSorter()
            break;                                     \
       };                                              \
 }                                                     \
-Int_t St_TableSorter::BSearch(valuetype value) {      \
+Int_t St_TableSorter::BSearch(valuetype value) const{ \
   union {  Char_t   Char;                             \
            UChar_t  UChar;                            \
            Short_t  Short;                            \
@@ -376,7 +376,7 @@ Int_t St_TableSorter::BSearch(valuetype value) {      \
    };                                                 \
    return BSearch(&Value);                            \
 }                                                     \
-Int_t St_TableSorter::SelectSearch(valuetype value) {               \
+Int_t St_TableSorter::SelectSearch(valuetype value) const {         \
    valuetype **array = (valuetype **)m_SortIndex;                   \
    Int_t nabove, nbelow, middle;                                    \
    nabove = m_numberOfRows+1;                                       \
@@ -388,7 +388,7 @@ Int_t St_TableSorter::SelectSearch(valuetype value) {               \
       else                           nbelow = middle;               \
    }                                                                \
    nbelow--;                                                        \
-   m_LastFound    = nbelow;                                         \
+   ((St_TableSorter *)this)->m_LastFound    = nbelow;                                         \
    if (nbelow < 0) return nbelow;                                   \
    return GetIndex(nbelow);                                         \
 }
@@ -447,7 +447,7 @@ BINARYSEARCH(valuetype)
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(const void *value) {
+Int_t St_TableSorter::BSearch(const void *value) const {
   Int_t index = -1;
   if (m_searchMethod) {
     void **p = (void **)bsearch( value,  // Object to search for
@@ -455,10 +455,10 @@ Int_t St_TableSorter::BSearch(const void *value) {
                    m_numberOfRows,       // Number of elements
                    sizeof(void *),       // Width of elements
                    CALLQSORT(m_searchMethod));
-    m_LastFound = -1;
+    ((St_TableSorter *)this)->m_LastFound = -1;
     if (p) {
        const Char_t *res = (const Char_t *)(*p);
-       m_LastFound = ((Char_t *)p - (Char_t *)m_SortIndex)/sizeof(void *);
+       ((St_TableSorter *)this)->m_LastFound = ((Char_t *)p - (Char_t *)m_SortIndex)/sizeof(void *);
         // calculate index:
        if (!m_simpleArray) 
           index =  m_firstRow + 
@@ -508,7 +508,7 @@ int St_TableSorter::CompareChar   (const void *elem1, const void *elem2)
 }
 #endif
 //_____________________________________________________________________________
-Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch, Int_t *firstRow)
+Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch, Int_t *firstRow) const
 {
  //
  //  CountKey counts the number of rows with the key value equal "key"
@@ -542,7 +542,7 @@ Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch,
 }
 
 //_____________________________________________________________________________
-Int_t St_TableSorter::CountKeys()
+Int_t St_TableSorter::CountKeys() const
 {
  //
  // Counts the number of different key values 
@@ -567,7 +567,7 @@ void St_TableSorter::FillIndexArray(){
  
 }
 //_____________________________________________________________________________
-Int_t St_TableSorter::FindFirstKey(const void *key)
+Int_t St_TableSorter::FindFirstKey(const void *key) const
 {
  //
  // Looks for the first index of the "key" 
@@ -792,8 +792,10 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 //______________________________________________________________________________
 //______________________________________________________________________________
 // $Log: St_TableSorter.cxx,v $
+// Revision 1.22  1999/12/05 06:34:16  fine
+// Several const methods for St_TableSorter introduced
+//
 // Revision 1.21  1999/12/01 14:03:35  fine
 // operator[] fixed for mixed types
 //
-//______________________________________________________________________________
-
+//_________________________________________________________________ _____________

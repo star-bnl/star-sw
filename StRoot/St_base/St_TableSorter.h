@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: St_TableSorter.h,v 1.21 1999/12/04 22:41:37 fine Exp $
+//  $Id: St_TableSorter.h,v 1.22 1999/12/05 06:34:17 fine Exp $
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
 //                    The class provides an interface to the standard "C/C++"
@@ -74,20 +74,20 @@ class St_TableSorter : public TNamed {
     static int CompareUChar_t     (const void **, const void **);
     static int CompareChar_t      (const void **, const void **);
 
-    Int_t  BSearch(const void *value);
+    Int_t  BSearch(const void *value) const;
 
-    Int_t BSearch(Float_t  value );
-    Int_t BSearch(Int_t    value );
-    Int_t BSearch(ULong_t  value );
-    Int_t BSearch(Long_t   value );
-    Int_t BSearch(UInt_t   value );
-    Int_t BSearch(Short_t  value );
-    Int_t BSearch(Double_t value );
-    Int_t BSearch(UShort_t value );
-    Int_t BSearch(UChar_t  value );
-    Int_t BSearch(Char_t   value );
+    Int_t BSearch(Float_t  value ) const;
+    Int_t BSearch(Int_t    value ) const;
+    Int_t BSearch(ULong_t  value ) const;
+    Int_t BSearch(Long_t   value ) const;
+    Int_t BSearch(UInt_t   value ) const;
+    Int_t BSearch(Short_t  value ) const;
+    Int_t BSearch(Double_t value ) const;
+    Int_t BSearch(UShort_t value ) const;
+    Int_t BSearch(UChar_t  value ) const;
+    Int_t BSearch(Char_t   value ) const;
 
-  //  Int_t BSearch(const Char_t *value);
+  //  Int_t BSearch(const Char_t *value) const;
   //  Int_t BSearch(TString &value)     ;
 
     void   FillIndexArray();
@@ -105,16 +105,16 @@ class St_TableSorter : public TNamed {
     static int SearchUChar_t     (const void *, const void **);
     static int SearchChar_t      (const void *, const void **);
 
-    Int_t SelectSearch(Float_t  value );
-    Int_t SelectSearch(Int_t    value );
-    Int_t SelectSearch(ULong_t  value );
-    Int_t SelectSearch(Long_t   value );
-    Int_t SelectSearch(UInt_t   value );
-    Int_t SelectSearch(Short_t  value );
-    Int_t SelectSearch(Double_t value );
-    Int_t SelectSearch(UShort_t value );
-    Int_t SelectSearch(UChar_t  value );
-    Int_t SelectSearch(Char_t   value );
+    Int_t SelectSearch(Float_t  value ) const;
+    Int_t SelectSearch(Int_t    value ) const;
+    Int_t SelectSearch(ULong_t  value ) const;
+    Int_t SelectSearch(Long_t   value ) const;
+    Int_t SelectSearch(UInt_t   value ) const;
+    Int_t SelectSearch(Short_t  value ) const;
+    Int_t SelectSearch(Double_t value ) const;
+    Int_t SelectSearch(UShort_t value ) const;
+    Int_t SelectSearch(UChar_t  value ) const;
+    Int_t SelectSearch(Char_t   value ) const;
 
     void  SetSearchMethod();
     void  SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t numberRows);
@@ -128,20 +128,20 @@ class St_TableSorter : public TNamed {
     St_TableSorter(const Long_t   *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     virtual ~St_TableSorter();
     
-    virtual Int_t CountKey(const void *key, Int_t firstIndx=0,Bool_t bSearch=kTRUE,Int_t *firstRow=0);
-    virtual Int_t CountKeys();
-    virtual Int_t FindFirstKey(const void *key);
+    virtual Int_t CountKey(const void *key, Int_t firstIndx=0,Bool_t bSearch=kTRUE,Int_t *firstRow=0) const;
+    virtual Int_t CountKeys() const;
+    virtual Int_t FindFirstKey(const void *key) const;
  
-    Int_t BinarySearch(Float_t  value );
-    Int_t BinarySearch(Int_t    value );
-    Int_t BinarySearch(ULong_t  value );
-    Int_t BinarySearch(Long_t   value );
-    Int_t BinarySearch(UInt_t   value );
-    Int_t BinarySearch(Short_t  value );
-    Int_t BinarySearch(Double_t value );
-    Int_t BinarySearch(UShort_t value );
-    Int_t BinarySearch(UChar_t  value );
-    Int_t BinarySearch(Char_t   value );
+    Int_t BinarySearch(Float_t  value ) const;
+    Int_t BinarySearch(Int_t    value ) const;
+    Int_t BinarySearch(ULong_t  value ) const;
+    Int_t BinarySearch(Long_t   value ) const;
+    Int_t BinarySearch(UInt_t   value ) const;
+    Int_t BinarySearch(Short_t  value ) const;
+    Int_t BinarySearch(Double_t value ) const;
+    Int_t BinarySearch(UShort_t value ) const;
+    Int_t BinarySearch(UChar_t  value ) const;
+    Int_t BinarySearch(Char_t   value ) const;
  
     virtual const Text_t   *GetColumnName() const { return m_colName.Data();}
     virtual       Int_t     GetIndex(UInt_t sortedIndex) const;
@@ -154,11 +154,11 @@ class St_TableSorter : public TNamed {
     virtual       Int_t     GetNRows()      const { return m_numberOfRows;}
     virtual       Int_t     GetFirstRow()   const { return m_firstRow;}
 
-    Int_t operator[](Int_t value)    { return BSearch(value); }
-    Int_t operator[](Long_t value)   { return BSearch(value); }
-    Int_t operator[](Double_t value) { return BSearch(value); } 
-//    Int_t operator[](const Char_t *value) { return BSearch(value); }
-//    Int_t operator[](TString &value) { return BSearch(value); }  // to be implemented
+    Int_t operator[](Int_t value)    const { return BSearch(value); }
+    Int_t operator[](Long_t value)   const { return BSearch(value); }
+    Int_t operator[](Double_t value) const { return BSearch(value); } 
+//    Int_t operator[](const Char_t *value) const { return BSearch(value); }
+//    Int_t operator[](TString &value) const { return BSearch(value); }  // to be implemented
 
     Int_t operator()(Float_t value)  { return BinarySearch(value); }
     Int_t operator()(Int_t value)    { return BinarySearch(value); }
@@ -171,6 +171,9 @@ class St_TableSorter : public TNamed {
 };
 //______________________________________________________________________
 // $Log: St_TableSorter.h,v $
+// Revision 1.22  1999/12/05 06:34:17  fine
+// Several const methods for St_TableSorter introduced
+//
 // Revision 1.21  1999/12/04 22:41:37  fine
 // clean up sole const methods
 //
