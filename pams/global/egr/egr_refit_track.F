@@ -206,7 +206,10 @@ C     omit points that were marked as outliers
 
                if(good_hit(i)) then
                   ient = gtrk(igtrk).ipnt(i)
-                  if( ient .ne. 0) then
+                  if( ient .gt. 0 .and. tphit(ient).flag .ne. 0) then
+                     good_hit(i) = .false.
+                  endif
+                  if( ient .ne. 0 .and. good_hit(i)) then
                      ncir = ncir+1
                      xcir(ncir) = tphit(ient).x
                      ycir(ncir) = tphit(ient).y
@@ -303,7 +306,7 @@ C     could not identify the outlier
                   endif
                else
                   gtrk(igtrk).flag=-4 ! Error from helix fit
-                  ntry = egrpar(1).mxtry+1 ! Leave fit hsve s bsd track
+                  ntry = egrpar(1).mxtry+1 ! Leave fit have a bad track
                endif
             endif
          endif
