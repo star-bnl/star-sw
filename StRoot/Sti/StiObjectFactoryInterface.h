@@ -21,6 +21,7 @@ public:
     
 protected:
     virtual void* makeNewObject() const = 0;
+    virtual void destroyObject(void*);
     
 private:
     StiObjectFactoryInterface(); //Not implemented
@@ -38,6 +39,15 @@ StiObjectFactoryInterface<T>::StiObjectFactoryInterface(const string& newName,
 template <class T>
 StiObjectFactoryInterface<T>::~StiObjectFactoryInterface()
 {
+    clearAndDestroy();
+}
+
+template <class T>
+inline void StiObjectFactoryInterface<T>::destroyObject(void* obj)
+{
+    T* temp = static_cast<T*>(obj);
+    delete temp;
+    temp=0;
 }
 
 template <class T>
