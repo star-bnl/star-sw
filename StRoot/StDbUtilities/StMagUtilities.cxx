@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.37 2003/09/30 04:05:12 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.38 2003/10/25 00:36:49 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.38  2003/10/25 00:36:49  perev
+ * Defence against divergency added (????)
+ *
  * Revision 1.37  2003/09/30 04:05:12  jhthomas
  * Explicity initialize "static ilow = 0" parameters that are used in Search(blah,blah,ilow)
  *
@@ -198,6 +201,7 @@ To do:  <br>
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
+
 
 //________________________________________
 
@@ -969,18 +973,25 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	    {
 	      r = eRadius[j] ;
 	      Double_t IntegralOverZ = 0 ;
+	      shiftEr[i][j] = IntegralOverZ ; 	    
+              if (r<IFCRadius) continue; //VP defence against divergency. NOt sure is is correct
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = (2*n-1) * TMath::Pi() / TPC_Z0 ;
 		  Double_t Cn = -4.0 * IFCShift / ( k * TPC_Z0 ) ;
-		  Double_t Numerator =
-		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI1( k*r ) +
-		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*OFCRadius ) ;
+                  Double_t BK0kOFCRadius = TMath::BesselK0( k*OFCRadius );
+		  Double_t BI0kOFCRadius = TMath::BesselI0( k*OFCRadius );
+                  Double_t Numerator =
+		    BK0kOFCRadius * TMath::BesselI1( k*r ) +
+		    BI0kOFCRadius * TMath::BesselK1( k*r ) ;
 		  Double_t Denominator =
-		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
-		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
+		    BK0kOFCRadius * TMath::BesselI0( k*IFCRadius ) -
+		    BI0kOFCRadius * TMath::BesselK0( k*IFCRadius );
+                  double qwe = Numerator / Denominator;
 		  Double_t zterm = 1 + TMath::Cos( k*z ) ;
-		  IntegralOverZ += Cn * zterm * Numerator / Denominator ;
+		  IntegralOverZ += (Cn * zterm *qwe) ;
+                  if (n>10 && fabs(IntegralOverZ)*1.e-10>fabs(qwe)) break;
+                  printf("i,j,n=%d,%d,%d Sum,qwe = %f %f %f\n",i,j,n,IntegralOverZ,qwe,k*r);
 		}
 	      if  ( eZList[i] < 0 )  IntegralOverZ = -1 * IntegralOverZ ;  // Force AntiSymmetry of solutions in Z
 	      shiftEr[i][j] = IntegralOverZ ; 	    }
@@ -1038,6 +1049,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	    {
 	      r = eRadius[j] ;
 	      Double_t IntegralOverZ = 0 ;
+	      spaceEr[i][j] = 0. ; 
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = n * TMath::Pi() / TPC_Z0 ;  // Integrated Charge Density
@@ -1935,12 +1947,3 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   p_new[2] *= Pt_new / ( Rotation * R0_new * count ) ;
 
 }
-
-
-
-
-
-
-
-
-
