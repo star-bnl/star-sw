@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.9 2001/06/19 21:07:54 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.10 2001/07/10 18:12:47 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,11 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.10  2001/07/10 18:12:47  jeromel
+ * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
+ * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
+ * Changes implements TOF DAQ Reader.
+ *
  * Revision 1.9  2001/06/19 21:07:54  jeromel
  * Activate getFTPCReader (Janet S.)
  *
@@ -59,7 +64,7 @@
 #include "RICH/RICH_Reader.hh"
 #include "FTPC/FTPV1P0_Reader.hh"
 #include "L3/L3_Reader.hh"
-
+#include "TOF/TOF_Reader.hh"
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
 {
@@ -180,6 +185,21 @@ L3_Reader *getL3Reader(EventReader *er)
 				 __FILE__,__LINE__);
     pL3P->header.CRC = 0;
     return new L3_Reader(er,pL3P);
+  }
+  return FALSE;
+}
+
+TOF_Reader *getTOFReader(EventReader *er)
+{
+  Bank_TOFP *pTOFP;
+  pTOFP = (Bank_TOFP *)er->findBank("TOFP");
+  if (pTOFP)  {
+    if (!pTOFP->test_CRC())  printf("CRC error in TOFP: %s %d\n",
+                                      __FILE__,__LINE__) ;
+    if (pTOFP->swap() < 0)   printf("swap error in TOFP: %s %d\n",
+                                      __FILE__,__LINE__) ;
+    pTOFP->header.CRC = 0;
+    return new TOF_Reader(er,pTOFP);
   }
   return FALSE;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.26 2001/06/19 21:10:26 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.27 2001/07/10 18:13:04 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.27  2001/07/10 18:13:04  jeromel
+ * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
+ * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
+ * Changes implements TOF DAQ Reader.
+ *
  * Revision 1.26  2001/06/19 21:10:26  jeromel
  * Changes for FTPCReader (Janet S.)
  *
@@ -117,6 +122,7 @@ StDAQReader::StDAQReader(const char *file)
   fL3Reader 	= 0;
   fSVTReader 	= 0;
   fFTPCReader   = 0;
+  fTOFReader    = 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -170,7 +176,8 @@ int StDAQReader::readEvent()
 {  
   delete fEventReader;	fEventReader=0;
   delete fRICHReader; 	fRICHReader = 0;
-  delete fL3Reader; 	fL3Reader = 0;
+  delete fL3Reader; 	fL3Reader   = 0;
+  delete fTOFReader;    fTOFReader  = 0;
   if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
   fEventReader->setVerbose(fVerbose);
@@ -281,6 +288,14 @@ StFTPCReader *StDAQReader::getFTPCReader()
     fFTPCReader->Update();
   }
   return fFTPCReader;
+}
+//_____________________________________________________________________________
+StTOFReader *StDAQReader::getTOFReader()
+{
+  if (!fTOFReader) {
+    fTOFReader = ::getTOFReader(fEventReader);
+  }
+  return fTOFReader;
 }
 //_____________________________________________________________________________
 StTRGReader *StDAQReader::getTRGReader()
