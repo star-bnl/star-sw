@@ -8,6 +8,10 @@
 // -------------change log ------------------------
 // 31-May-99 MJL terminate on encountering pad 255
 // 03-Jun-99 MJL added return TRUE to TPCV1P0_ZS_SR::initialize()
+// 10-Jun-99 IS (Iwona Sakrejda) - The compiler we are using currently in Root
+// cannot contain the scope of the "for" loop index within parenthesis.
+// So if the next loop uses same index, it cannot be Declared again.
+// I made 3 changes: 2 for rcg, one for row and marked them all in  the code.
 
 TPCV1P0_ZS_SR::TPCV1P0_ZS_SR(int s, TPCV1P0_Reader *det)
 {
