@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.114 2001/05/10 17:43:20 perev Exp $
+// $Id: StMaker.cxx,v 1.115 2001/05/31 02:40:29 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -574,7 +574,7 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
   return kContinue; 
 }
 //_____________________________________________________________________________
-void StMaker::PrintInfo() const
+void StMaker::PrintInfo() 
 {
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
@@ -1056,6 +1056,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.115  2001/05/31 02:40:29  perev
+// const(ing)
+//
 // Revision 1.114  2001/05/10 17:43:20  perev
 // Defence against saving maker added
 //

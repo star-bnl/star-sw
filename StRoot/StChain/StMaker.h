@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.50 2001/05/04 19:15:59 perev Exp $
+// $Id: StMaker.h,v 1.51 2001/05/31 02:40:30 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.51  2001/05/31 02:40:30  perev
+// const(ing)
+//
 // Revision 1.50  2001/05/04 19:15:59  perev
 // Fatal() -> FatalErr()
 //
@@ -195,7 +198,7 @@ public:
    virtual Int_t  	Finish();
    virtual Int_t  	FinishRun(int oldrunumber);
    virtual void	       	FatalErr(int Ierr, const char *Com);  
-   virtual void   	PrintInfo() const;
+   virtual void   	PrintInfo();
    virtual void         AddMaker (StMaker *mk);
 
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
@@ -293,7 +296,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.50 2001/05/04 19:15:59 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.51 2001/05/31 02:40:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
