@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.30 2001/06/20 22:25:26 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.31 2001/08/14 18:18:03 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.31  2001/08/14 18:18:03  hardtke
+ * Add sector position structures
+ *
  * Revision 1.30  2001/06/20 22:25:26  hardtke
  * Get TRS gain parameters from tsspar table
  *
@@ -98,6 +101,7 @@ ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
 ClassImp(StTpcGlobalPositionI)
+ClassImp(StTpcSectorPositionI)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(St_DataSet* input) {
@@ -354,6 +358,31 @@ StTpcT0I* StTpcDb::T0(int sector){
    }
   }
  return t0[sector-1];
+}
+
+//_____________________________________________________________________________
+StTpcSectorPositionI* StTpcDb::SectorPosition(int sector){
+  
+  if(sector<1||sector>24){
+    gMessMgr->Message("StTpcDb::SectorPosition request for invalid sector","E");
+    return 0;
+  }
+  if(!sect[sector-1]){
+   const int dbIndex = kGeometry;
+   char dbname[40];
+   sprintf(dbname,"Sector_%.2d/tpcSectorPosition",sector);
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Sector Position","E");
+     return 0;
+    }
+    StRTpcSectorPosition* wptemp = new StRTpcSectorPosition((St_tpcSectorPosition*)tpd);
+    assert(wptemp);
+    sect[sector-1] = (StTpcSectorPositionI*)wptemp;
+   }
+  }
+ return sect[sector-1];
 }
 
 //_____________________________________________________________________________
