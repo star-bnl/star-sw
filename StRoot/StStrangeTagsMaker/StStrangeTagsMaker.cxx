@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.2 1999/02/22 16:44:16 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.3 1999/02/24 02:03:38 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.3  1999/02/24 02:03:38  genevb
+ * Add Xi vertices
+ *
  * Revision 1.2  1999/02/22 16:44:16  genevb
  * Switched to PhysicalConstants.h
  *
@@ -21,6 +24,7 @@
 #include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StEvent/StEvent.hh"
 #include "StEvent/StV0Vertex.hh"
+#include "StEventReaderMaker/StXiVertex.hh"
 #include "StChain/StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
@@ -39,12 +43,13 @@ StStrangeTagsMaker::~StStrangeTagsMaker()
     delete mTagTable;    // clean up
 }
 
-StStrangeTagsMaker::Init()
+Int_t StStrangeTagsMaker::Init()
 {
-    mRange = 0.02;
+    mRange = 0.025;
     m2Range = 2*mRange;
     mMasspi2 = pion_plus_mass_c2 * pion_plus_mass_c2;
     mMasspr2 = proton_mass_c2 * proton_mass_c2;
+    mMassla2 = lambda_mass_c2 * lambda_mass_c2;
 
     return StMaker::Init();
 }
@@ -64,7 +69,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.2 1999/02/22 16:44:16 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.3 1999/02/24 02:03:38 genevb Exp $" << endl;
     if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
@@ -91,41 +96,61 @@ void StStrangeTagsMaker::fillTag()
 
     for (StVertexIterator vertices = mEvent->vertexCollection()->begin();
                     vertices != mEvent->vertexCollection()->end(); vertices++) {
-      if ( (*vertices)->type() != V0 ) continue;
-      v0tot++;
-      StV0Vertex *vertex = (StV0Vertex *) *vertices;
-      StThreeVector<float> nMom = vertex->momentumOfDaughter(negativeTrack);
-      StThreeVector<float> pMom = vertex->momentumOfDaughter(positiveTrack);
-      StThreeVector<float> vMom = nMom + pMom;
-      Float_t pN2 = nMom.mag2();
-      Float_t pP2 = pMom.mag2();
-      Float_t pV2 = vMom.mag2();
-      Float_t eNpi = TMath::Sqrt(pN2 + mMasspi2);
-      Float_t eNpr = TMath::Sqrt(pN2 + mMasspr2);
-      Float_t ePpi = TMath::Sqrt(pP2 + mMasspi2);
-      Float_t ePpr = TMath::Sqrt(pP2 + mMasspr2);
-      Float_t eK0 = eNpi + ePpi;
-      Float_t eLa = eNpi + ePpr;
-      Float_t eLb = eNpr + ePpi;
-      Float_t maK0 = TMath::Sqrt(eK0*eK0 - pV2);
-      Float_t maLa = TMath::Sqrt(eLa*eLa - pV2);
-      Float_t maLb = TMath::Sqrt(eLb*eLb - pV2);
+      if ( (*vertices)->type() == V0 ) {
+        v0tot++;
+        StV0Vertex *vertex = (StV0Vertex *) *vertices;
+        const StThreeVector<float>& nMom = vertex->momentumOfDaughter(negativeTrack);
+        const StThreeVector<float>& pMom = vertex->momentumOfDaughter(positiveTrack);
+        StThreeVector<float> vMom = nMom + pMom;
+        Float_t pN2 = nMom.mag2();
+        Float_t pP2 = pMom.mag2();
+        Float_t pV2 = vMom.mag2();
+        Float_t eNpi = TMath::Sqrt(pN2 + mMasspi2);
+        Float_t eNpr = TMath::Sqrt(pN2 + mMasspr2);
+        Float_t ePpi = TMath::Sqrt(pP2 + mMasspi2);
+        Float_t ePpr = TMath::Sqrt(pP2 + mMasspr2);
+        Float_t eK0 = eNpi + ePpi;
+        Float_t eLa = eNpi + ePpr;
+        Float_t eLb = eNpr + ePpi;
+        Float_t maK0 = TMath::Sqrt(eK0*eK0 - pV2);
+        Float_t maLa = TMath::Sqrt(eLa*eLa - pV2);
+        Float_t maLb = TMath::Sqrt(eLb*eLb - pV2);
 
-      Float_t perc = (maK0/kaon_0_short_mass_c2) - 1.;
-      if (TMath::Abs(perc) < mRange) nK0++;
-      else if (TMath::Abs(perc + m2Range) < mRange) nbelowK0++;
-      else if (TMath::Abs(perc - m2Range) < mRange) naboveK0++;
+        Float_t perc = (maK0/kaon_0_short_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nK0++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowK0++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveK0++;
 
-      perc = (maLa/lambda_mass_c2) - 1.;
-      if (TMath::Abs(perc) < mRange) nLa++;
-      else if (TMath::Abs(perc + m2Range) < mRange) nbelowLa++;
-      else if (TMath::Abs(perc - m2Range) < mRange) naboveLa++;
+        perc = (maLa/lambda_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nLa++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLa++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveLa++;
 
-      perc = (maLb/antilambda_mass_c2) - 1.;
-      if (TMath::Abs(perc) < mRange) nLb++;
-      else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
-      else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
+        perc = (maLb/antilambda_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nLb++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
 
+      } else if ( (*vertices)->type() == threeBody ) {
+
+        StXiVertex *vertex = (StXiVertex *) *vertices;
+        const StThreeVector<float>& pMom = vertex->momentumOfBachelor();
+        StThreeVector<float>& lMom = vertex->momentumOfV0();
+        StThreeVector<float> xMom = lMom + pMom;
+        Float_t pP2 = pMom.mag2();
+        Float_t pL2 = lMom.mag2();
+        Float_t pX2 = xMom.mag2();
+        Float_t epi = TMath::Sqrt(pP2 + mMasspi2);
+        Float_t ela = TMath::Sqrt(pL2 + mMassla2);
+        Float_t eXi = ela + epi;
+        Float_t maXi = TMath::Sqrt(eXi*eXi - pX2);
+
+        Float_t perc = (maXi/xi_minus_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nXi++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowXi++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveXi++;
+
+      }
     }
 
     mTagTable->NV0 = v0tot;
@@ -150,19 +175,20 @@ void StStrangeTagsMaker::printTag(ostream& os)
     if (!mTagTable) 
 	os << "(empty)" << endl;
     else {
+        os << "Range used:  +/-" << mTagTable->range << " * M" << endl;
         os << "No. V0's:       " << mTagTable->NV0 << endl;
         os << "No. K0's:       " << mTagTable->NK0 << endl;
         os << "No. La's:       " << mTagTable->NLa << endl;
         os << "No. Lb's:       " << mTagTable->NLb << endl;
-//        os << "No. Xi's:       " << mTagTable->NXi << endl;
-        os << "Range used:     " << mTagTable->range << endl;
+        os << "No. Xi's:       " << mTagTable->NXi << endl;
+        od << "Backgrounds: (same bin size)" << endl;
         os << "No. below K0's: " << mTagTable->NbelowK0 << endl;
         os << "No. above K0's: " << mTagTable->NaboveK0 << endl;
         os << "No. below La's: " << mTagTable->NbelowLa << endl;
         os << "No. above La's: " << mTagTable->NaboveLa << endl;
         os << "No. below Lb's: " << mTagTable->NbelowLb << endl;
         os << "No. above Lb's: " << mTagTable->NaboveLb << endl;
-//        os << "No. below Xi's: " << mTagTable->NbelowXi << endl;
-//        os << "No. above Xi's: " << mTagTable->NaboveXi << endl;
+        os << "No. below Xi's: " << mTagTable->NbelowXi << endl;
+        os << "No. above Xi's: " << mTagTable->NaboveXi << endl;
     }   
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.1 1999/02/21 23:35:12 genevb Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.2 1999/02/24 02:03:39 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.2  1999/02/24 02:03:39  genevb
+ * Add Xi vertices
+ *
  * Revision 1.1  1999/02/21 23:35:12  genevb
  * Strangeness Tags Maker
  *
@@ -46,6 +49,7 @@ private:
     Float_t         m2Range;
     Float_t         mMasspi2;
     Float_t         mMasspr2;
+    Float_t         mMassla2;
     
     ClassDef(StStrangeTagsMaker, 1)   // macro for rootcint
 };
