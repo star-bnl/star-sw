@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.386 2004/03/02 15:30:36 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.387 2004/03/03 00:36:05 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1550,9 +1550,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1);
 
 	  if (maker == "StEventQAMaker") {
-	    if ( GetOption("alltrigger") ||
-		 GetOption("P2004")           // THIS IS A HACK TO BE REMOVED LATER
-		 ){
+	    if ( GetOption("alltrigger") ){
 	      StEventQAMaker *QAmk = (StEventQAMaker *) mk;
 	      QAmk->AllTriggers();
 	    }
