@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.10 2002/02/02 01:10:12 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.11 2002/02/19 14:42:18 jeromel Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -18,6 +18,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 #include "StMaker.h"
 #include "StFlowCumulantMaker.h"
 #include "StFlowMaker/StFlowMaker.h"
@@ -38,6 +39,7 @@
 #include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
+
 #define PR(x) cout << "##### FlowCumulantAnalysis: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowCumulantMaker)
@@ -402,7 +404,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.10 2002/02/02 01:10:12 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.11 2002/02/19 14:42:18 jeromel Exp $");
 
   return StMaker::Init();
 }
@@ -1007,6 +1009,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.11  2002/02/19 14:42:18  jeromel
+// Added float.h for Linux 7.2
+//
 // Revision 1.10  2002/02/02 01:10:12  posk
 // Added documentation
 //
