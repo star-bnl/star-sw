@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.3 2004/04/01 19:19:00 dongx Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.4 2004/04/09 19:26:25 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.4  2004/04/09 19:26:25  dongx
+ * Add some missing updates for year4, add AdcLoRes in ntuple
+ *
  * Revision 1.3  2004/04/01 19:19:00  dongx
  * update for year4 run
  *
@@ -184,7 +187,7 @@ Int_t StTofpNtupleMaker::Make(){
   // build pVPD ntuple
   if (!(mTupleFileName=="")){
     int k(0);
-    float tuple[25];
+    float tuple[31];
     tuple[k++] = event->runId();    // the run number
     tuple[k++] = event->id();       // the event number
     tuple[k++] = triggerWord;
@@ -200,6 +203,7 @@ Int_t StTofpNtupleMaker::Make(){
     tuple[k++] = nTdcTofp;          // TOFp hits
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdTdc[i];
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdc[i];
+    for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
 
     cout << " pVPD update ..." << endl;
     mPvpdTuple->Fill(tuple);
@@ -271,7 +275,7 @@ Int_t StTofpNtupleMaker::Make(){
       mSlatData.te1 = (int)mPvpdTdc[0]; mSlatData.te2 = (int)mPvpdTdc[1];
       mSlatData.te3 = (int)mPvpdTdc[2]; mSlatData.tw1 = (int)mPvpdTdc[3];
       mSlatData.tw2 = (int)mPvpdTdc[4]; mSlatData.tw3 = (int)mPvpdTdc[5];
-      if (mYear3) {
+      if (mYear3||mYear4) {
 	mSlatData.ae1 = (int)mPvpdAdcLoRes[0]; mSlatData.ae2 = (int)mPvpdAdcLoRes[1];
 	mSlatData.ae3 = (int)mPvpdAdcLoRes[2]; mSlatData.aw1 = (int)mPvpdAdcLoRes[3];
 	mSlatData.aw2 = (int)mPvpdAdcLoRes[4]; mSlatData.aw3 = (int)mPvpdAdcLoRes[5];
@@ -352,7 +356,7 @@ Int_t StTofpNtupleMaker::getTofData(StTofCollection* tofCollection){
     mTofpTdc[i] = tofData[i]->tdc();
   }
 
-  if (!mYear3){
+  if (mYear2){
     // swap ADC channels 3 and 4 ... this should move to the DAQreader!
     float tmp   = mTofpAdc[3];
     mTofpAdc[3] = mTofpAdc[2];
