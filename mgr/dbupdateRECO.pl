@@ -26,7 +26,7 @@ my @Sets = (
              "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on", 
-             "auau200/vni/default/b0_3/year_1h/hadronic_on",
+#             "auau200/vni/default/b0_3/year_1h/hadronic_on",
              "auau200/vni/default/b0_3/year_1h1/hadronic_on",
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
@@ -234,7 +234,7 @@ print "Total reco files: $nDiskFiles\n";
  &StDbProdConnect();
 
 
- $sql="SELECT dataset, fName, path, size, createTime FROM $cpFileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%mdc3%' ";
+ $sql="SELECT dataset, fName, path, size, createTime FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%mdc3%' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -260,9 +260,9 @@ print "Total reco files: $nDiskFiles\n";
 
  }
 
-### select reco files status from cpJobStatus
+### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $cpJobStatusT WHERE prodSeries = '$prodSr' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -579,7 +579,7 @@ elsif ( $gflag eq 2) {
 ###########
 sub updateJSTable {
 
-    $sql="update $cpJobStatusT set ";
+    $sql="update $JobStatusT set ";
     $sql.="jobStatus='$mjobSt',";
     $sql.="NoEvents='$mNev',";
     $sql.="mem_size_MB='$mmemSz',";
@@ -598,7 +598,7 @@ sub updateJSTable {
 ###########
 sub fillDbTable {
 
-    $sql="insert into $cpFileCatalogT set ";
+    $sql="insert into $FileCatalogT set ";
     $sql.="jobID='$mJobId',";
     $sql.="runID='$mrunId',";
     $sql.="fileSeq='$mfileSeq',";
@@ -629,7 +629,7 @@ sub fillDbTable {
 ###======================================================================
 sub updateDbTable {
 
-    $sql="update $cpFileCatalogT set ";
+    $sql="update $FileCatalogT set ";
     $sql.="size='$msize',";
     $sql.="createTime='$mcTime',";
     $sql.="Nevents='$mNevts',";

@@ -75,7 +75,7 @@ my @hpssGeantDirs;
 my @hpssGeantFiles;
 my @checkedSimuDirs;
 
-my $nHpssDirs = 1;
+my $nHpssDirs = 3;
 my $nHpssFiles = 0;
 
 my @jobIn_set;
@@ -85,9 +85,11 @@ my $jobIn_no = 0;
 ########## Find GEANT files in HPSS
 
  $hpssGeantDirs[0] = $topHpssSink . "/" . "auau200";
-# $hpssGeantDirs[1] = $topHpssSink . "/" . "auau100";
+ $hpssGeantDirs[1] = $topHpssSink . "/" . "pau200";
+ $hpssGeantDirs[2] = $topHpssSink . "/" . "pp200";
  $checkedSimuDirs[0] = 0; 
-# $checkedSimuDirs[1] = 0; 
+ $checkedSimuDirs[1] = 0;
+ $checkedSimuDirs[2] = 0;
 my $ftpSimu = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
   or die "HPSS access failed";
 $ftpSimu->login("starsink","MockData") or die "HPSS access failed";
@@ -101,13 +103,7 @@ print "Total files: ".@hpssGeantFiles."\n";
 ###### Find GEANT files in Files Catalog
  &StDbProdConnect();
 
-# $sql="delete from $cpFileCatalogT WHERE dataset = 'auau200/mevsim/vanilla_central/year_1h/hadronic_on' ";
-# $cursor =$dbh->prepare($sql)
-#    || die "Cannot prepare statement: $DBI::errstr\n";
-# $cursor->execute;
-
-
- $sql="SELECT dataset, fName, size, createTime FROM $cpFileCatalogT  WHERE fName LIKE '%fzd' OR fName LIKE '%fz' AND hpss = 'Y' ";
+ $sql="SELECT dataset, fName, size, createTime FROM $FileCatalogT  WHERE fName LIKE '%fzd' OR fName LIKE '%fz' AND hpss = 'Y' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -279,7 +275,7 @@ elsif ( $gflag eq 2) {
 ###########
 sub fillDbTable {
 
-    $sql="insert into $cpFileCatalogT set ";
+    $sql="insert into $FileCatalogT set ";
     $sql.="jobID='$mJobId',";
     $sql.="runID='$mrunId',";
     $sql.="fileSeq='$mfileSeq',";
@@ -310,7 +306,7 @@ sub fillDbTable {
 ###======================================================================
 sub updateDbTable {
 
-    $sql="update $cpFileCatalogT set ";
+    $sql="update $FileCatalogT set ";
     $sql.="size='$msize',";
     $sql.="createTime='$mcTime',";
     $sql.="Nevents='$mNevts',";
@@ -387,6 +383,7 @@ sub walkHpss {
        }else{
          $fname = $dirs->[$ii]."/".$name;
           $ppath = $dirs->[$ii];
+         next if ($ppath =~ /special/) ;
           @dirF = split(/\//, $dirs->[$ii]);
          if( $ppath =~ /gstardata/) {         
 	  if($dirF[9] eq 'gstardata') {
