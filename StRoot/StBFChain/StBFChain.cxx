@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.403 2004/04/01 15:13:19 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.404 2004/04/02 03:23:31 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -304,9 +304,11 @@ Bfc_st BFC1[] = {
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
+  {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
-  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil","",               "StMuDSTMaker","Load MuDST library",kFALSE},
+  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
+                                                                "StMuDSTMaker","Load MuDST library",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -853,9 +855,11 @@ Bfc_st BFC2[] = {
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
+  {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
-  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil","",               "StMuDSTMaker","Load MuDST library",kFALSE},
+  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
+                                                                "StMuDSTMaker","Load MuDST library",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
