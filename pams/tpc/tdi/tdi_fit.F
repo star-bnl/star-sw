@@ -1,5 +1,8 @@
-* $Id: tdi_fit.F,v 1.3 1999/10/15 00:53:55 nevski Exp $
+* $Id: tdi_fit.F,v 1.4 1999/12/17 16:33:14 sakrejda Exp $
 * $Log: tdi_fit.F,v $
+* Revision 1.4  1999/12/17 16:33:14  sakrejda
+* Introduced additional variable to avoid mod(short,int)
+*
 * Revision 1.3  1999/10/15 00:53:55  nevski
 * pgf->g77 cleanup
 *
@@ -90,7 +93,7 @@ c-----------------------------------------------------------------------
       data chtags2 /'track_id','nhit','nfit','row','res_xy','res_yz',
      >              'last_row','alpha','lambda','z','z_last'/
 
-      integer istat, icycle
+      integer istat, icycle, longrow
 
       logical NTUPLE, FIT_OK
       save NTUPLE
@@ -159,7 +162,8 @@ c*** loop over hits and make selection
         do ihit = nhfirst(itrack), nhfirst(itrack)+nhtot(itrack)-1
           isec = int(tphit(ihit).row/100)
           if( isec .eq. fit_pars(1).sector ) then
-            irow = mod(tphit(ihit).row,100)
+            longrow=tphit(ihit).row
+            irow = mod(longrow,100)
             nhit = nhit + 1
             if( nhit .le. mxhit ) then
               ih(nhit) = ihit 
@@ -234,7 +238,8 @@ c            if( alpha .gt. 90. ) alpha = 180. - alpha
             strack(strack_h.nok).slope_yz = slope_yz
             strack(strack_h.nok).z0 = z0
             strack(strack_h.nok).chisq_yz = chisq_yz
-            strack(strack_h.nok).last_row = mod(tphit(ih(lhit)).row,100)
+            longrow=tphit(ih(lhit)).row
+            strack(strack_h.nok).last_row = mod(longrow,100)
             strack(strack_h.nok).z_last = tphit(ih(lhit)).z
             strack(strack_h.nok).res_xy = ( tphit(ih(lhit)).x -
      >          slope_xy*tphit(ih(lhit)).y - x0 ) * cosd(alpha)
