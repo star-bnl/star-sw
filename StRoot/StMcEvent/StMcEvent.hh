@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.4 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.5 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.5  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.4  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -38,12 +41,17 @@
 
 #include <iostream.h>
 
-#include "StMcTpcHitCollection.hh"
-#include "StMcFtpcHitCollection.hh"
-#include "StMcRichHitCollection.hh"
-#include "StMcSvtHitCollection.hh"
+// #include "StMcTpcHitCollection.hh"
+// #include "StMcFtpcHitCollection.hh"
+// #include "StMcRichHitCollection.hh"
+// #include "StMcSvtHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "TString.h"
+
+class StMcTpcHitCollection;
+class StMcFtpcHitCollection;
+class StMcRichHitCollection;
+class StMcSvtHitCollection;
 
 class StMcVertex;
 class g2t_event_st;
