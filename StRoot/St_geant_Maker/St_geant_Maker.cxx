@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.63 2000/07/19 16:57:34 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.64 2000/12/19 18:35:11 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.64  2000/12/19 18:35:11  fisyak
+// make proper allocation for cgnam
+//
 // Revision 1.63  2000/07/19 16:57:34  fisyak
 // Protection against double resetting the same run no. (Sasha)
 //
@@ -412,7 +415,6 @@ Int_t St_geant_Maker::Make()
     Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
     Float_t  vert[4],weigh;
 
-    Char_t   cgnam[20];
     int iRes = 0; if(iRes) {/*touch*/};
   
     Do("trig");
@@ -425,6 +427,7 @@ Int_t St_geant_Maker::Make()
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
+    Char_t   cgnam[21] = "                   \0";                               
     Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
     geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
     if (clink->jhead) {
