@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.62 2004/10/19 01:42:29 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.63 2004/10/21 02:58:17 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -576,13 +576,6 @@ void StMuDstMaker::read(){
   }
   if (GetDebug()>1) printArrays();
 
-  if (mEmcCollectionArray && mEmcCollectionArray->GetEntries() > 0)
-    mEmcCollection=(StMuEmcCollection*) (*mEmcCollectionArray)[0];
-
-  if (mPmdCollectionArray && mPmdCollectionArray->GetEntries() > 0)
-    mPmdCollection=(StMuPmdCollection*) (*mPmdCollectionArray)[0];
-
-  mStMuDst->set(this);
   fillHddr();
   return;
 }
@@ -1137,6 +1130,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.63  2004/10/21 02:58:17  mvl
+ * Removed some code from Make() (backward compatible EMc mode), to fix StMuIOMaker
+ *
  * Revision 1.62  2004/10/19 01:42:29  mvl
  * Changes for splitting Emc and Pmd collections. Emc clusters and points dropped
  *
