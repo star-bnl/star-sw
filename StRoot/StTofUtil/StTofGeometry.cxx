@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.8 2004/04/28 18:58:16 dongx Exp $
+ * $Id: StTofGeometry.cxx,v 1.9 2004/06/09 21:26:32 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.9  2004/06/09 21:26:32  dongx
+ * add function projTrayVector(..) to increase the matching speed
+ *
  * Revision 1.8  2004/04/28 18:58:16  dongx
  * fix a bug on the mis-matching by the opposite direction tracks
  *
@@ -754,3 +757,50 @@ float StTofGeometry::slatPhiPosition(StThreeVectorD* hitPoint){
   return -100.;
 }
 
+//---------------------------------------------------------------------------
+// estimate the possible projection on the TOF tray
+Bool_t StTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) const {
+
+  trayVec.clear();
+  double R_tof = 220.;
+  double res = 5.0;
+  double s1 = helix.pathLength(R_tof).first;
+  if(s1<0.) s1 = helix.pathLength(R_tof).second;
+  StThreeVectorD point = helix.at(s1);
+  double phi = point.phi()*180/3.14159;
+
+  // east ring, start from 108 deg (id=61) , clock-wise from east facing west
+  int itray_east = (255+(int)phi)%360/6+61;
+  trayVec.push_back(itray_east);
+
+  int itray_east1 = (255+(int)(phi+res))%360/6+61;
+  int itray_east2 = (255+(int)(phi-res))%360/6+61;
+  if(itray_east1!=itray_east) {
+    trayVec.push_back(itray_east1);
+  }
+  if(itray_east2!=itray_east&&itray_east2!=itray_east1) {
+    trayVec.push_back(itray_east2);
+  }
+  
+  // west ring, start from 72 deg (id=1) , clock-wise from west facing east
+  int itray_west = (435-(int)phi)%360/6+1;
+  trayVec.push_back(itray_west);
+
+  int itray_west1 = (435-(int)(phi+res))%360/6+1;
+  int itray_west2 = (435-(int)(phi-res))%360/6+1;
+  if(itray_west1!=itray_west) {
+    trayVec.push_back(itray_west1);
+  }
+  if(itray_west2!=itray_west&&itray_west2!=itray_west1) {
+    trayVec.push_back(itray_west2);
+  }
+
+//   cout << " proj tray id = ";
+//   for(size_t it=0;it<trayVec.size();it++) {
+//     cout << trayVec[it] << " ";
+//   }
+//   cout << endl;
+  
+  if(trayVec.size()>0) return kTRUE;
+  else return kFALSE;
+}
