@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.357 2003/10/01 21:46:05 potekhin Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.358 2003/10/01 21:50:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -2077,7 +2077,7 @@ void StBFChain::SetDbOptions(){
 	// svt shift. Small hack to make it work.
 	else if (GetOption("Y2001n"))db->SetDateTime("year2001");
 	else if (GetOption("Y2003")) db->SetDateTime("year2003");
-	else if (GetOption("Y2003X"))db->SetDateTime("year2003x");
+	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
 	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
       }
 
