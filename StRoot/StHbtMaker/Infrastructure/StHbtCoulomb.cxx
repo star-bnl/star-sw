@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.14 2000/10/26 19:48:54 rcwells Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.15 2003/01/31 19:44:00 magestro Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.15  2003/01/31 19:44:00  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.14  2000/10/26 19:48:54  rcwells
  * Added functionality for Coulomb correction of <qInv> in 3D correltions
  *
@@ -376,7 +379,7 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const double& mass1, const doubl
   StHbt1DHisto* correction = new StHbt1DHisto("correction","Coulomb correction",nBins,low,high);
   const double reducedMass = mass1*mass2/(mass1+mass2);
   double qInv = low;
-  double dQinv = (high-low)/( (double)nBins );
+  //double dQinv = (high-low)/( (double)nBins );
   double eta;
   for (int ii=1; ii<=nBins; ii++) 
     {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAihongPid.cxx,v 1.2 2002/01/14 16:10:58 laue Exp $
+ * $Id: StHbtAihongPid.cxx,v 1.3 2003/01/31 19:44:00 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAihongPid.cxx,v $
+ * Revision 1.3  2003/01/31 19:44:00  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.2  2002/01/14 16:10:58  laue
  * Location of PID table not hardwired anymore
  *
@@ -56,7 +59,7 @@ void StHbtAihongPid::updateEvent(int refMult) {
   else mAihongCentrality = 0.99;
 }
 
-void StHbtAihongPid::updateTrack(int charge, double p, double eta, double nHitsDedx, double dedx) {
+void StHbtAihongPid::updateTrack(int charge, double p, double eta, int nHitsDedx, double dedx) {
   mAihongPid->processPIDAsFunction(mAihongCentrality, 0., charge, p, eta, nHitsDedx, dedx);
 }
     
@@ -64,13 +67,13 @@ StuProbabilityPidAlgorithm* StHbtAihongPid::aihongPid() {
   return mAihongPid;
 }
 
-StuProbabilityPidAlgorithm* StHbtAihongPid::aihongPid(int refMult, int charge, double p, double eta, double nHitsDedx, double dedx){
+StuProbabilityPidAlgorithm* StHbtAihongPid::aihongPid(int refMult, int charge, double p, double eta, int nHitsDedx, double dedx){
   updateEvent(refMult);
   updateTrack(charge, p, eta, nHitsDedx, dedx);
   return mAihongPid;
 }
 
-StuProbabilityPidAlgorithm* StHbtAihongPid::aihongPid(int charge, double p, double eta, double nHitsDedx, double dedx) {
+StuProbabilityPidAlgorithm* StHbtAihongPid::aihongPid(int charge, double p, double eta, int nHitsDedx, double dedx) {
   updateTrack(charge, p, eta, nHitsDedx, dedx);
   return mAihongPid;
 }
