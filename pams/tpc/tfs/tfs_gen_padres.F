@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.14 2000/02/22 20:06:26 hardtke Exp $
+* $Id: tfs_gen_padres.F,v 1.15 2000/02/23 22:20:35 hardtke Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.15  2000/02/23 22:20:35  hardtke
+* use tpc_global_to_local_p
+*
 * Revision 1.14  2000/02/22 20:06:26  hardtke
 * replace tgc functions with tpc functions
 *
@@ -130,7 +133,7 @@ C     General physical constants now in math_constants and phys_constants
 C  
       
       integer i,j,k, isect, istart, iend, ipad, iret
-      integer tgc_global_to_local_p
+      integer tpc_global_to_local_p
       
       real px, py, pz
       real xi, yi, zi
@@ -210,7 +213,7 @@ C     pad-crossing angle.  -- Apr 10, 96  --- DSW ---
                p_global(1) = px 
                p_global(2) = py
                p_global(3) = pz
-               iret  = tgc_global_to_local_p(i,p_global,p_local)
+               iret  = tpc_global_to_local_p(i,p_global,p_local)
 C
                if(abs(p_local(2)).gt.0.001) then
                     alpha = atan(p_local(1)/p_local(2)) ! angle wrt normal
