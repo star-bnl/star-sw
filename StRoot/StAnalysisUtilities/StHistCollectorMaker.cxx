@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.2 2000/11/30 19:37:26 fine Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.3 2000/11/30 20:13:27 fine Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -9,7 +9,7 @@
 //                                                                        //
 // use $STAR/StRoot/macro/analysis/doHists.C macro to see hot it works    //
 //                                                                        //
-// This maker collects histograms from histBranch                         //
+// This maker collects non-empty histograms from histBranch               //
 //             calling GetDataSet("hist")                                 //
 // and accumulates it under ".const/Merged" sub-dataset.                  //
 // The "Merged" dataset preserves the dataset structure of the original   //
@@ -85,8 +85,16 @@ TDataSet *StHistCollectorMaker::AddHists()
         // remove the histogram from its directories
         TIter  nextDonor(newList);
         TH1 *donorHist = 0;
-        while ( (donorHist = (TH1 *)nextDonor()) ) donorHist->SetDirectory(0);      
-        donor->Shunt(rec);
+        Int_t count = 0;
+        while ( (donorHist = (TH1 *)nextDonor()) ) {
+           if (donorHist->GetEntries() > 0) {
+             donorHist->SetDirectory(0);
+             count++; // count non-empty histograms
+           } else { 
+             newList->Remove(donorHist); 
+           }
+        }
+        if (count) donor->Shunt(rec); // accept this if it contains one non-empty hist at least
       }
     }
   }
@@ -118,7 +126,7 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 
       // If the new "set" contains some new dataset with brand-new name
       // move it into the our dataset and remove it from its old location
-      if (!found) { // move histogram to this 
+      if (!found && donor->GetEntries() > 0 ) { // move histogram to this 
         oldList->Add(donor);
         newList->Remove(donor);
         donor->SetDirectory(0);
@@ -128,6 +136,9 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.3  2000/11/30 20:13:27  fine
+// Get rid of the empty histograms (thanks Fisyak)
+//
 // Revision 2.2  2000/11/30 19:37:26  fine
 // Reference to doHists.C macro has been added
 //
