@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.44 2003/02/25 04:45:22 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.45 2003/02/27 01:42:26 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.45  2003/02/27 01:42:26  jcs
+// reactivate use of body4East temperature - offline database values now correct
+//
 // Revision 1.44  2003/02/25 04:45:22  jcs
 // comment out body4East temperature for AuAu central production
 //
@@ -459,14 +462,11 @@ Int_t StFtpcClusterMaker::Make()
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody3East() = "<<gas->getBody3East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-/*   ignore Body4East temperature for AuAu central production
- cout<<"testing Body4East !!!! this should be ignored"<<endl;
 	 if (gas->getBody4East() >= paramReader->minGasTemperature() && gas->getBody4East()<= paramReader->maxGasTemperature() ) {
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody4East();
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-     end of ignore Body4East temperature for AuAu central production */	 
 		 
 	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
 	 if (averageBodyTemperatureEast >= paramReader->minGasTemperature() && averageBodyTemperatureEast <= paramReader->maxGasTemperature()) {
