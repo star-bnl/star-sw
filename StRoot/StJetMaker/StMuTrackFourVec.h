@@ -5,53 +5,66 @@
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
+#include <iostream>
+#include <string>
+using namespace std;
+
 #include "StJetFinder/FourVec.h"
 #include "StarClassLibrary/StParticleDefinition.hh"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StarClassLibrary/StLorentzVectorF.hh"
+#include "StDetectorId.h"
 
 class StMuTrackFourVec : public AbstractFourVec
 {
 public:
     
-    StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i);
+    StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
     StMuTrackFourVec(StMuTrack*);
     StMuTrackFourVec(StMuTrack*, Int_t i);
     StMuTrackFourVec();
     virtual ~StMuTrackFourVec() {};
     
-    //momenta
+    ///momenta
     virtual double pt() const;
     virtual double px() const;
     virtual double py() const;
     virtual double pz() const;
     virtual double p() const;
 
-    //angles
+    ///angles
     virtual double theta() const;
     virtual double phi() const;
     virtual double eta() const;
     virtual double rapidity() const;
 
-    //4-th component
+    ///4-th component
     virtual double eT() const;
     virtual double eZ() const;
     virtual double e() const;
     virtual double mass() const;
 
-    //charge
+    ///charge
     virtual double charge() const;
 
+    ////Mu Track (null if it's an emc tower/hit/point) this will change soon
     StMuTrack* particle() const {return mTrack;}
 
-    Int_t getIndex(void) { return index; };
+    ///Index of the track/tower/cluster/point in the container that it came from
+    Int_t getIndex(void) const { return index; }
     
-    void Init(StMuTrack* track, StLorentzVectorF P, Int_t i);
+    ///Id of the detector that generated this 4-vector
+    StDetectorId detectorId() const {return mDetId;}
+    
+    void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
 
+    const StLorentzVectorF& vec() const {return mVec;}
+    
 protected:
     StMuTrack* mTrack;
     StLorentzVectorF mVec;
     Int_t index;
+    StDetectorId mDetId;
 };
 
 // --- inlines
@@ -130,4 +143,21 @@ inline double StMuTrackFourVec::charge() const
     return static_cast<double>( mTrack->charge() );
 }
 
+inline ostream& operator<<(ostream& os, const StMuTrackFourVec& f)
+{
+    string idstring;
+    StDetectorId mDetId = f.detectorId();
+    if (mDetId==kTpcId) {
+	idstring = "kTpcId";
+    }
+    else if (mDetId==kBarrelEmcTowerId) {
+	idstring = "kBarrelEmcTowerId";
+    }
+    else {
+	idstring = "kUnknown";
+    }
+    
+    return os <<"index:\t"<<f.getIndex()<<"\tP:\t"<<f.vec()<<"\tdetId:\t"<<f.detectorId()<<"\t"<<idstring;
+
+}
 #endif

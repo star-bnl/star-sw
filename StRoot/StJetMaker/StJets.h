@@ -1,7 +1,15 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.1 2004/07/08 15:41:04 mmiller Exp $
+// $Id: StJets.h,v 1.2 2004/09/10 18:13:53 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.2  2004/09/10 18:13:53  mmiller
+// Two fixes:
+// 1) add StDetectorId to the TTree to allow sorting of jet particles into
+// StMuTrack and BemcTowers.  See StJetReader::exampleEventAna() for usage
+//
+// 2) removed a continue line in StJetMaker::Make that created a non-synch between
+// the jet tree and the MuDst
+//
 // Revision 1.1  2004/07/08 15:41:04  mmiller
 // First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
 //
@@ -62,10 +70,13 @@
 #define StJets_h
 
 #include <vector>
+#include <iostream>
+#include <string>
 using std::vector;
 #include <cmath>
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "StDetectorId.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 class StProtoJet;
@@ -75,7 +86,7 @@ class StMuDst;
 class TrackToJetIndex : public TObject
 {
 public:
-    TrackToJetIndex(int ji=-1, int ti=-1) : mJetIndex(ji), mTrackIndex(ti) {};
+    TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId) : mJetIndex(ji), mTrackIndex(ti) , mDetId(id) {};
     virtual ~TrackToJetIndex() {};
     
     void setJetIndex(int n) {mJetIndex=n;}
@@ -83,13 +94,34 @@ public:
     
     void setTrackIndex(int n) {mTrackIndex=n;}
     int trackIndex() const {return mTrackIndex;}
+
+    void setDetectorId(StDetectorId v) {mDetId=v;}
+    StDetectorId detectorId() const {return mDetId;}
     
 private:
     int mJetIndex;
     int mTrackIndex;
+    StDetectorId mDetId;
     
     ClassDef(TrackToJetIndex,1)
 };
+
+inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
+{
+    string idstring;
+    StDetectorId mDetId = t.detectorId();
+    if (mDetId==kTpcId) {
+	idstring = "kTpcId";
+    }
+    else if (mDetId==kBarrelEmcTowerId) {
+	idstring = "kBarrelEmcTowerId";
+    }
+    else {
+	idstring = "kUnknown";
+    }
+    
+    return os <<"jetIndex:\t"<<t.jetIndex()<<"\ttrackIndex:\t"<<t.trackIndex()<<"\tdetId:\t"<<t.detectorId()<<"\t"<<idstring;
+}
 
 /*!
   \class StJets
@@ -126,7 +158,10 @@ public:
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StMuDst*, int jetIndex);
 
-    vector<int> jetTrackIndices(int jetIndex);
+    ///Access to the indices of the BEMC towers in the jet:
+    vector<int> jetBemcTowerIndices(int jetIndex);
+
+    //vector<int> jetTrackIndices(int jetIndex);
 
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
     int eventId();
