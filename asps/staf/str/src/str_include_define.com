@@ -1,4 +1,0 @@
-$ DEFINE strlib_inc STR_REF:STRLIB.INC
-$ DEFINE strterm_vms_inc STR_REF:STRTERM_VMS.INC
-$ DEFINE str_ret_inc STR_REF:STR_RET.INC
-$ DEFINE str_nextarg_ret_inc STR_REF:STR_NEXTARG_RET.INC

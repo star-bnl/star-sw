@@ -102,7 +102,7 @@ insure++.leak_sort size
 insure++.leak_sweep off
 insure++.leak_trace off
 insure++.summarize leaks outstanding
-insure++.report_file $ofiledir/$FILOUT
+insure++.report_file $ofile
     ~;
 	close(FO); 
 	print "$mess\n";

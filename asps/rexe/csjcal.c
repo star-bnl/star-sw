@@ -77,7 +77,7 @@ int  *narg,             /* number   of arguments      			*/
 
 void type_of_call *csaddr_(char *name, int l77name)
 {
-  char bname[100];
+  char bname[100],*c;
   void *a;int i;
   
   for (i=0;i<l77name && name[i] && !isspace(name[i]);i++){bname[i]=tolower(name[i]);}

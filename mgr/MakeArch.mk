@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.92  2001/04/04 18:04:16  didenko
+#  adjust for .sun4x_58
+#
 #  Revision 1.91  2000/09/20 13:11:17  fisyak
 #  Make correction for PGI and /opt/star request by Janet
 #
@@ -251,7 +254,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 2000/09/20 13:11:17 $ 
+#             Last modification $Date: 2001/04/04 18:04:16 $ 
 #. default setings
 
 MAKE  := gmake
@@ -648,7 +651,7 @@ ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
 endif
 
 
-ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56 sun4x_58))
   ROOTCINTD = -DSOLARIS
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   STRID :=  sun
@@ -680,6 +683,13 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
     OSFID += ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
   endif
   ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
+    CC :=  /opt/WS5.0/bin/cc
+    CXX := /opt/WS5.0/bin/CC
+    FC  := /opt/WS5.0/bin/f77
+    CXXFLAGS :=  $(DEBUG)  -KPIC +w
+    CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  endif
+  ifeq ($(STAR_HOST_SYS),sun4x_58)
     CC :=  /opt/WS5.0/bin/cc
     CXX := /opt/WS5.0/bin/CC
     FC  := /opt/WS5.0/bin/f77

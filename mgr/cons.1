@@ -1,11 +1,8 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.13 $$Date: 2001/03/08 16:29:43 $
+''' $RCSfile: cons.1,v $$Revision: 1.12 $$Date: 2001/01/24 14:40:59 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.13  2001/03/08 16:29:43  fisyak
-''' Clean up comments
-'''
-''' Revision 1.1.1.14  2001/03/08 16:15:05  fisyak
+''' Revision 1.12  2001/01/24 14:40:59  fisyak
 ''' *** empty log message ***
 '''
 ''' Revision 1.1.1.13  2001/01/24 14:38:25  fisyak
@@ -108,7 +105,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.3.0" "8/Mar/2001" "Cons - Software Construction System"
+.TH CONS 1 "2.3.0" "24/Jan/101" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1204,11 +1201,10 @@ in the \s-1MD5\s0 signature calculation for the target file, so the target will
 not be recompiled if the compilation command changes due to a directory
 coming into existence.)
 .PP
-Because Cons relies on the compiler's \f(CW-I\fR flags to communicate the
-order in which repository directories must be searched, Cons\*(R' handling
-of repository directories is fundamentally incompatible with using
-double-quotes on the \f(CW#include\fR directives in any C source code that
-you plan to modify:
+Because Cons relies on the compiler's \f(CW-I\fR flags to communicate the order
+in which repository directories must be searched, Cons\*(R' handling of
+repository directories is fundamentally incompatible with using
+double-quotes on the \f(CW#include\fR directives in your C source code:
 .PP
 .Vb 1
 \&  #include "file.h"     /* DON'T USE DOUBLE-QUOTES LIKE THIS */
@@ -1218,16 +1214,13 @@ always first search the directory containing the source file.  This
 undermines the elaborate \f(CW-I\fR options that Cons constructs to make the
 preprocessor conform to its preferred search path.
 .PP
-Consequently, when using repository trees in Cons, \fBalways\fR use
-angle-brackets for included files in any C source (.c or .h) files that
-you plan to modify locally:
+Consequently, when using repository trees in Cons,
+\fBalways\fR use angle-brackets for included files:
 .PP
 .Vb 1
 \&  #include <file.h>     /* USE ANGLE-BRACKETS INSTEAD */
 .Ve
-Code that will not change can still safely use double quotes on #include
-lines.
-.Sh "Repository_List"
+.Ip "\fBRepository_List\fR" 0
 Cons provides a \f(CWRepository_List\fR command to return a list of all
 repository directories in their current search order.  This can be used for
 debugging, or to do more complex Perl stuff:
@@ -1778,7 +1771,7 @@ the following suffixes to select a portion of the expanded path name:
 \&  :s    the file name suffix
 \&  :F    the file name stripped of any suffix
 .Ve
-Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
+Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
 There are additional \f(CW%\fR elements which affect the command \fIline\fR\|(s):

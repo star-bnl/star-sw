@@ -1,11 +1,17 @@
-* $Id: ecalgeo.g,v 1.8 2001/03/16 22:09:12 nevski Exp $
+* $Id: ecalgeo.g,v 1.10 2001/04/09 14:20:24 akio Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
+* Revision 1.10  2001/04/09 14:20:24  akio
+* set default to de, not cherenkov, for fpd
+*
+* Revision 1.9  2001/04/06 18:12:20  akio
+* Include the first version of FPD
+*
 * Revision 1.8  2001/03/16 22:09:12  nevski
 * some clean-up
 *
 * Revision 1.7  2001/03/15 01:14:19  nevski
-* first approach to forward pion detector
+* first approach to forward pion detector. 
 *
 ******************************************************************************
 Module ECALGEO is the EM EndCap Calorimeter GEOmetry
@@ -30,9 +36,10 @@ Author    Rashid Mehdiyev
 * Version 3.0, O. Rogachevski                                 28.11.99
 *               - New proposal for calorimeter SN 0401
 *
-* Version 4.0, O. Akio                                        23 Jan 01
+* Version 4.1, O. Akio                                        23 Jan 01
 *               - Include forward pion detectors
-* 		      
+* 		- EMCG_ChkvSim to do either cherenkov photon simulation
+*                 or just take de above thresholds.
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -40,7 +47,7 @@ Author    Rashid Mehdiyev
                  ESSP,ETAR,EGTN,ESCI,ELED,EMOD,EXGT,EXSG,EALP,EHMS,
 		 ELGD,ELGT,EWAL,ELGR,ESRB,EPCT,EUMT
 *
-      Structure  EMCG { Version,OnOff(3)}
+      Structure  Emcg { Version,Onoff(3),ChkvSim }
       Structure  EMCS { Type,ZOrig,ZEnd,EtaMin,EtaMax,
 			PhiMin,PhiMax,Offset,
 			Nsupsec,Nsector,Nsection,Nslices,
@@ -55,7 +62,7 @@ Author    Rashid Mehdiyev
 *
       Structure  EXSE {Jsect,Swidth,Aplate}
 *
-      Structure  ELGG {Width,Depth,ZPos,DGap,NPhi,NEta,RDis,
+      Structure  ELGG {Width,Depth,ZPos,DGap,NPhi,NEta,RDis,DipAng,
 	               AlThick,SiRubDz,PhCathDz,PhCathR,MuMetDz,MuMetR}
 *
       Structure  ELGM {Density,RadLen,Index,PbContent,CritEne,MoliereR}
@@ -69,7 +76,7 @@ Author    Rashid Mehdiyev
 		 curcl,EtaTop,EtaBot,
 		 xleft,xright,yleft,yright,
 		 sq2,sq3,rth,tng,len,p,xc,yc,diff,
-		 xx,yy,zz
+		 xx,yy,ztot
 
 
     Integer    N
@@ -90,18 +97,20 @@ Author    Rashid Mehdiyev
     real absco_Alm(N)     /N*0.0001/
     real absco_MuMet(N)   /N*0.0001/
 * ---- Detection efficiencies (quantum efficiency for Photo Cathode)
+*    real effic_PhCath(N)  / N*1.0/
     real effic_PhCath(N)  / 0.09,   0.13,   0.175,   0.195,  0.2,    0.18,
                             0.165,  0.155,  0.14,    0.1,    0.08,   0.06/
-    real effic_all(N)    /N*1./
+    real effic_all(N)    /N*0.0/
+    EXTERNAL  EFPDSTEP,EPCTSTEP
 * 
     Tanf(etax) = tan(2*atan(exp(-etax)))
 *
 * ----------------------------------------------------------------------------
 *
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
-      Version  = 4                  ! Geometry version 
-      OnOff    = {0,2,2}            ! =0 no, =1 west, =2 east, =3 both
-				    ! for endcap, fpd and PbG		
+      Version  = 4.1                ! Geometry version 
+      OnOff    = {1,2,2}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
+      ChkvSim  = 0                  ! = 0 de, = 1 Cherenkov simulation for PbG
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
       ZOrig    = 273.5              ! calorimeter origin in z
@@ -200,17 +209,18 @@ Fill EXSE           ! Second SMD section
 Fill ELGG                                    ! PbG detector geometry
       Width    = 3.8			     ! PbG width	
       Depth    = 45.0			     ! PbG depth
-      DGap     = 0.1			     ! Gap between PbG
+      DGap     = 0.01			     ! Gap between PbG
       Zpos     = 800.0                       ! Z position
       NPhi     = 4			     ! # of tower in phi
       NEta     = 4                           ! # of tower in eta
-      RDis     = 30.0			     ! distance from beam
+      RDis     = 30.0	 		     ! distance from beam
+      DipAng   = 15.0                        ! Dip angle
       AlThick  = 0.002			     ! almunim wrap thinkness
       SiRubDz  = 2.0			     ! silicon lubber thinkness
       PhCathDz = 2.0 			     ! Photo Cathode thinkness
-      PhCathR  = 1.7 			     ! Photo Cathode radius
+      PhCathR  = 1.8 			     ! Photo Cathode radius
       MuMetDz  = 11.0 			     ! Mu Metal Length
-      MuMetR   = 1.8 			     ! Mu metal outer Radius
+      MuMetR   = 1.9 			     ! Mu metal outer Radius
 *
 Fill ELGM				     ! PbG detector materials
       Density  = 3.86			     ! gdensity [/cm^3]
@@ -222,8 +232,9 @@ Fill ELGM				     ! PbG detector materials
 *----------------------------------------------------------------------------
 *
       Use    EMCG
-      Use    ELGG
+      Use    ELGG    
 *
+ 	
       prin1 emcg_version 
 	('ECALGEO version ', F4.2)
 
@@ -287,35 +298,36 @@ Fill ELGM				     ! PbG detector materials
       endif
 
 * PbG detectors
+*      call  AgSSTEP(EFPDSTEP) 
       if(EMCG_OnOff(3)>0) then
-	zz = (ELGG_Depth+ELGG_AlThick+ELGG_MuMetDz)/2.0
+	ztot = (ELGG_Depth+ELGG_AlThick+ELGG_MuMetDz)/2.0
         yy = (ELGG_NEta*ELGG_Width + (ELGG_NEta+1)*ELGG_DGap)/2.0
 
         if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
-		Create and Position ELGD in CAVE z=ELGG_ZPos+zz y=ELGG_Rdis+yy x=0, 
-			       phix=180  phiy=90   phiz=0,
-			       thetax=90 thetay=90 thetaz=0 
-		Create and Position ELGD in CAVE z=ELGG_ZPos+zz x=ELGG_Rdis+yy y=0,
- 			       phix=90   phiy=0    phiz=0,
-			       thetax=90 thetay=90 thetaz=0 
-		Create and Position ELGD in CAVE z=ELGG_ZPos+zz y=-(ELGG_Rdis+yy) x=0,
- 			       phix=0    phiy=-90  phiz=0,
-			       thetax=90 thetay=90 thetaz=0 
-		Create and Position ELGD in CAVE z=ELGG_ZPos+zz x=-(ELGG_Rdis+yy) y=0,
- 			       phix=-90  phiy=-180 phiz=0,
-			       thetax=90 thetay=90 thetaz=0 
-	endif
+                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot y=ELGG_Rdis+yy x=0, 
+                               phix=0    phiy=90               phiz=90,
+                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng
+                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot x=-ELGG_Rdis+yy y=0,
+                               phix=90   phiy=180              phiz=0,
+                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
+                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot y=-(ELGG_Rdis+yy) x=0,
+                               phix=180  phiy=270              phiz=-90,
+                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
+                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot x=(ELGG_Rdis+yy) y=0,
+                               phix=270  phiy=0                phiz=-180,
+                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
+        endif
         if(emcg_OnOff(2)==2 | emcg_OnOff(2)==3) then
-		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=ELGG_Rdis+yy x=0,
- 			       phix=180  phiy=90   phiz=0,
-			       thetax=90 thetay=90 thetaz=180 
-		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) x=ELGG_Rdis+yy y=0,
- 			       phix=90   phiy=0    phiz=0,
-			       thetax=90 thetay=90 thetaz=180 
-		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=-(ELGG_Rdis+yy) x=0,
- 			       phix=0    phiy=-90  phiz=0,
-			       thetax=90 thetay=90 thetaz=180 
-	endif
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) y=ELGG_Rdis+yy x=0,
+                               phix=180  phiy=90               phiz=90,
+                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) x=ELGG_Rdis+yy y=0,
+                               phix=90   phiy=0                phiz=0,
+                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) y=-(ELGG_Rdis+yy) x=0,
+                               phix=0    phiy=-90              phiz=-90,
+                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
+        endif
 
       endif
       prin1
@@ -817,19 +829,19 @@ endblock
 *                  draw emdi 105 0 160  2 13  .2 .1
 *                  draw emdi 120 180 150  1 14  .12 .12
 * ---------------------------------------------------------------------------
-Block ELGD is one Pb-Grass fpd detector
+Block ELGD is one Pb-Glass fpd detector
       Material  Air
       Medium    standard
       Attribute ELGD seen=1 colo=1
-      shape box dz= zz,
-                dy=(ELGG_NEta*ELGG_Width + (ELGG_NEta+1)*ELGG_DGap)/2.0,
-                dx=(ELGG_NPhi*ELGG_Width + (ELGG_NPhi+1)*ELGG_DGap)/2.0
+      shape box dz= ztot,
+                dy=(ELGG_NEta*ELGG_Width + (ELGG_NEta+1.0)*ELGG_DGap)/2.0,
+                dx=(ELGG_NPhi*ELGG_Width + (ELGG_NPhi+1.0)*ELGG_DGap)/2.0
 
       do ii=1, ELGG_NEta
 	yy = (ii-ELGG_NEta/2.0-0.5)*(ELGG_Width+ELGG_DGap)
         do jj=1, ELGG_NPhi
-	  xx = -(jj-ELGG_NPhi/2.0-0.5)*(ELGG_Width+ELGG_DGap)
-            Create and Position ELGT x=xx y=yy 
+	  xx = (jj-ELGG_NPhi/2.0-0.5)*(ELGG_Width+ELGG_DGap)
+            Create and Position ELGT x=xx y=yy z=0 
 	enddo
       enddo
 EndBlock
@@ -837,27 +849,28 @@ EndBlock
 Block ELGT is one PbG Tower
       material Air
       Attribute ELGT seen=1 colo=2
-      Shape box	dz=zz,
+      Shape box	dz=ztot,
 		dx=ELGG_Width/2.0+ELGG_AlThick,
 		dy=ELGG_Width/2.0+ELGG_AlThick 
 
-      Create and Position EWAL z=-zz+ELGG_AlThick+ELGG_depth/2.0
-      Create and Position EUMT z=-zz+ELGG_AlThick+ELGG_depth+ELGG_MuMetDz/2.0
-      Create and Position ESRB z=-zz+ELGG_AlThick+ELGG_depth+ELGG_SiRubDz/2.0
-      Create and Position EPCT z=-zz+ELGG_AlThick+ELGG_depth+ELGG_SiRubDz+ELGG_PhCathDz/2.0
+      Create and Position EWAL z=-ztot+(ELGG_AlThick+ELGG_depth)/2.0
+      Create and Position EUMT z=-ztot+ELGG_AlThick+ELGG_depth+ELGG_MuMetDz/2.0
+      Create and Position ESRB z=-ztot+ELGG_AlThick+ELGG_depth+ELGG_SiRubDz/2.0
+      Create and Position EPCT z=-ztot+ELGG_AlThick+ELGG_depth+ELGG_SiRubDz
+     +                           +ELGG_PhCathDz/2.0
 Endblock
 * ----------------------------------------------------------------------------
 Block EWAL is almunum wrapper
       material Aluminium
       Attribute EWAL seen=1 colo=3
-      Shape box	dz=ELGG_Depth/2.0+ELGG_AlThick,
+      Shape box	dz=ELGG_Depth/2.0+ELGG_AlThick/2.0,
 		dx=ELGG_Width/2.0+ELGG_AlThick,
 		dy=ELGG_Width/2.0+ELGG_AlThick 
-      CALL GSCKOV(%Imed,N,E,ABSCO_Alm,EFFIC_all,RINDEX_Alm)
-      Create and Position ELGR
+      if(emcg_ChkvSim==1) CALL GSCKOV(%Imed,N,E,ABSCO_Alm,EFFIC_all,RINDEX_Alm)
+      Create and Position ELGR z=+ELGG_AlThick/2.0
 Endblock
 * ----------------------------------------------------------------------------
-Block ELGR is Lead Grass detector
+Block ELGR is Lead Glass detector
 *     PbG is about 65% Pb 
       Component Pb    A=207.19 Z=82   W=.60712
       Component K     A=39.102 Z=19   W=.02324
@@ -865,36 +878,74 @@ Block ELGR is Lead Grass detector
       Component O     A=15.999 Z=8    W=.22041
       Component As    A=74.922 Z=33   W=.00152
       Mixture   PbG   Dens=ELGM_Density Radl=ELGM_RadLen
+      Medium leadglass ISVOL=1
       Attribute ELGR  seen=1    colo=4		! red
       Shape     box dz=ELGG_depth/2 dx=ELGG_Width/2 dy=ELGG_Width/2
-      CALL GSCKOV(%Imed,N,E,ABSCO_PbG,EFFIC_All,RINDEX_PbG)
+
+      if(emcg_ChkvSim==1) then
+	CALL GSCKOV(%Imed,N,E,ABSCO_PbG,EFFIC_All,RINDEX_PbG)
+      else 
+        Call GSTPAR (ag_imed,'CUTELE', elgm_CritEne)
+	HITS ELGR  ELoss:0:(0,10)
+      endif
 Endblock
 * ----------------------------------------------------------------------------
 Block ESRB is silicon rubber
       material silicon
       Attribute ESRB seen=1 colo=5
       Shape tube dz=ELGG_SiRubDz/2.0 rmin=0 rmax=ELGG_PhCathR
-      CALL GSCKOV(%Imed,N,E,ABSCO_SiRub,EFFIC_All,RINDEX_SiRub)
+      if(emcg_ChkvSim==1) CALL GSCKOV(%Imed,N,E,ABSCO_SiRub,EFFIC_All,RINDEX_SiRub)
 Endblock
 * ----------------------------------------------------------------------------
 Block EPCT is Photo Cathode
       material Air
+      Medium PhotCath ISVOL=1
       Attribute LPCT seen=1 colo=6
       Shape tube dz=ELGG_SiRubDz/2.0 rmin=0 rmax=ELGG_PhCathR
-      CALL GSCKOV(%Imed,N,E,ABSCO_PhCath,EFFIC_PhCath,RINDEX_PhCath)
-
-      HITS EPCT  x:.005:   y:.01:   z:.005:   cx:10:   cy:10:   cz:10:,
-                 Slen:.1:(0,500)    Lptot:18:(-3,2),
-                 Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
-*                 Step:16:(0,10)     USER:32:(-0.01,0.01)
+      if(emcg_ChkvSim==1) then
+	CALL GSCKOV(%Imed,N,E,ABSCO_PhCath,EFFIC_PhCath,RINDEX_PhCath)
+	HITS EPCT USER:0:(0,10000)
+      endif
 Endblock
 * ----------------------------------------------------------------------------
 Block EUMT is mu metal
       material iron
       Attribute LUMT  seen=1    colo=1
       Shape tube dz=ELGG_MuMetDz/2.0 rmin=ELGG_PhCathR rmax=ELGG_MuMetR
-      CALL GSCKOV(%Imed,N,E,ABSCO_MuMet,EFFIC_All,RINDEX_MuMet)
+      if(emcg_ChkvSim==1) CALL GSCKOV(%Imed,N,E,ABSCO_MuMet,EFFIC_All,RINDEX_MuMet)
 Endblock
 * ----------------------------------------------------------------------------
+end
 
-End
+      subroutine EFPDSTEP
+* discard cerenkov photon absorption hits everywhere except for
+* photocathode
++CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTMED,GCTRAK,GCKINE,GCSETS,AGCSTEP.
+      character  Cmed*13
+
+      check ISVOL>0 
+      CALL UHTOC(NATMED,4,Cmed,8)
+*     if (istop==2) write (*,*) '***',Cmed,isvol,Ipart,AdEstep,istop,destep
+*      if(Cmed=='ECAL_PhotCath') then
+*	 if(Ipart!=50) then
+*          {Step,dEstep,aStep,AdEstep} = 0
+*         endif
+*      else if(Cmed=='ECAL_ELGR') then
+*      endif
+      return
+      end
+
+      subroutine EPCTSTEP(JJ,HIT)
+* define hit element USER as # of cherenkov photon detected
++CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTRAK,GCKINE,GCSETS,AGCSTEP.
+      Integer JJ
+      Real    HIT
+      if(Ipart == 50 & Istop ==2 & deStep>0.0) then
+	hit=1.0
+	return
+      endif
+      hit = 0.0
+      return
+      end 
+      
+ 

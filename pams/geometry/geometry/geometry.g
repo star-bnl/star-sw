@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.44 2001/03/16 22:09:13 nevski Exp $
+* $Id: geometry.g,v 1.45 2001/04/09 15:31:35 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.45  2001/04/09 15:31:35  nevski
+* second version of cerenkov light properties introduced
+*
 * Revision 1.44  2001/03/16 22:09:13  nevski
 * some clean-up
 *
@@ -79,7 +82,7 @@ replace[;ON#{#;] with [
    mwx=2                 " for Geom=_1 mwx=1 limites x in mwc hits (<Y2K) "
    Itof=2                " use btofgeo2 - default starting from Y2000     "
    Rv=2                  " add non-sensetive hits to RICH system          "
-   Rp=2                  " select real RICH position instead of nominal   "
+   Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
    Commands=' '; Geom=' '
 *
@@ -247,6 +250,7 @@ If LL>1
       call AgDETP new ('Rich')
       if (Rv>0) call AgDETP add ('Rich.Version=', Rv,1) 
       if (Rp>0) call AgDETP add ('Rich.Position=',Rp,1)
+      if (Rp>0) call AgDETP add ('Rich.Cversion=',Rp,1)
    endif
    if (rich) Call richgeo
 

@@ -1,5 +1,8 @@
-# $Id: MakeAsp.mk,v 1.19 1999/09/20 17:55:54 fisyak Exp $
+# $Id: MakeAsp.mk,v 1.20 2001/04/04 15:25:06 jeromel Exp $
 # $Log: MakeAsp.mk,v $
+# Revision 1.20  2001/04/04 15:25:06  jeromel
+# lex adjustment (broke)
+#
 # Revision 1.19  1999/09/20 17:55:54  fisyak
 # Add /usr/include
 #
@@ -339,7 +342,7 @@ $(MY_SO) : $(FILES_O)
 	$(SO) $(SOFLAGS) -o $(NEW_MY_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
 	$(RM) $(MY_SO)
 	$(LN) $(NEW_MY_SO) $(MY_SO)
-	
+
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
 
@@ -367,17 +370,17 @@ $(SRC_GEN_DIR)/%.c : %.y
 	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
 $(SRC_GEN_DIR)/%-lex.c : $(SRC_DIR)/%.l 
-	lex $(ALL_DEPS)
+	$(LEX) $(ALL_DEPS)
 	$(RM) $(ALL_TAGS)
 	cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' > $(ALL_TAGS)
 	$(RM) -f lex.yy.c
- 
+
 $(SRC_GEN_DIR)/%-lex.c : $(SRM_DIR)/%.l 
-	lex $(ALL_DEPS)
+	$(LEX) $(ALL_DEPS)
 	$(RM) $(ALL_TAGS)
 	cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' > $(ALL_TAGS)
 	$(RM) lex.yy.c
- 
+
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)

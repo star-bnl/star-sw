@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.33 2001/03/20 02:12:07 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.32 2001/03/12 23:19:43 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -136,7 +136,7 @@
         }
         $R_CPPFLAGS .=
 " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-        $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";# -march=pentiumpro";
+        $CXXFLAGS     = "-pipe -fPIC -Wall";             # -march=pentiumpro";
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
 
         #                                             -fpipe

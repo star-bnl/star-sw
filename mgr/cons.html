@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
+<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
 </HEAD>
 
 </TITLE> 
@@ -1667,7 +1667,7 @@ changes due to a directory coming into existence.)
 <P>
 Because Cons relies on the compiler's <CODE>-I</CODE> flags to communicate the order in which repository directories must be
 searched, Cons' handling of repository directories is fundamentally
-incompatible with using double-quotes on the <CODE>#include</CODE> directives in any C source code that you plan to modify:
+incompatible with using double-quotes on the <CODE>#include</CODE> directives in your C source code:
 
 
 <P>
@@ -1684,8 +1684,6 @@ preferred search path.
 
 
 <P>
-Consequently, when using repository trees in Cons, <STRONG>always</STRONG> use angle-brackets for included files in any C source (.c or .h) files that
-you plan to modify locally:
 
 Consequently, when using repository trees in Cons,
 <STRONG>always</STRONG> use angle-brackets for included files:
@@ -1697,14 +1695,11 @@ Consequently, when using repository trees in Cons,
 </PRE>
 
 <P>
-Code that will not change can still safely use double quotes on #include
-lines.
 
-<P>
-<HR>
-<H2><A NAME="Repository_List">Repository_List</A></H2>
-<P>
-Cons provides a <CODE>Repository_List</CODE> command to return a list of all repository directories in their current
+<DT><STRONG><A NAME="item_Repository_List">Repository_List
+
+</A></STRONG><DD>
+Cons provides a <A HREF="#item_Repository_List">Repository_List</A> command to return a list of all repository directories in their current
 search order. This can be used for debugging, or to do more complex Perl
 stuff:
 
