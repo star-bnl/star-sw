@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.8 2004/08/06 21:00:01 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.9 2004/08/18 20:08:04 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -281,11 +281,11 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   n1++;	
 
-  StPhysicalHelixD TrkHlx=track->geometry()->helix();
+  StPhysicalHelixD TrkHlxIn=track->geometry()->helix();
 
   //           check Rxy_min condition  close to beam    
-  double spath = TrkHlx.pathLength(mX0, mY0 );
-  StThreeVectorD posDCA = TrkHlx.at(spath);
+  double spath = TrkHlxIn.pathLength(mX0, mY0 );
+  StThreeVectorD posDCA = TrkHlxIn.at(spath);
   //  cout<<" DCA Position: "<<posDCA<<endl;
   double x_m = posDCA.x(), y_m = posDCA.y();
   double dmin = ::sqrt(x_m*x_m + y_m*y_m);
@@ -306,7 +306,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   //  cout<<"\n\n DCA to beam at 0x0: "<<posDCA<<endl;
        
   //Find momentum direction at vertex point
-  StThreeVectorD pmom = TrkHlx.momentumAt(spath,mBfield*tesla );
+  StThreeVectorD pmom = TrkHlxIn.momentumAt(spath,mBfield*tesla );
   double beta = pmom.mag()/::sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion 
 
   // old formula from TPT chain
@@ -322,9 +322,11 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   //  printf("stragling=%f %f p=%f %f nFp=%d nPp=%d\n",strag,beta,pmom.mag(),spath, track->fitTraits().numberOfFitPoints(),nPoss );
   
-  pairD  d2;
-  d2 = TrkHlx.pathLength(Rctb);
-  //  printf(" path 1=%f, 2=%f, period=%f, R=%f\n",d2.first ,d2.second,TrkHlx.period(),1./TrkHlx.curvature());
+
+  if ( !track->outerGeometry() )  return false;
+  StPhysicalHelixD TrkHlxOut=track->outerGeometry()->helix();
+  pairD  d2 = TrkHlxOut.pathLength(Rctb);
+  //  printf(" path 1=%f, 2=%f, period=%f, R=%f\n",d2.first ,d2.second,TrkHlx.period(),1./TrkHlxOut.curvature());
   
   // assert(d2.first<0); // propagate backwards
   //assert(d2.second>0); // propagate forwards
@@ -337,7 +339,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   }
   
   
-  StThreeVectorD posCTB = TrkHlx.at(d2.second);
+  StThreeVectorD posCTB = TrkHlxOut.at(d2.second);
   //  double xmagn = ::sqrt( posCTB.x()*posCTB.x() + posCTB.y()*posCTB.y() );//tmp, out
   // printf(" punch2 x,y,z=%.1f, %.1f, %.1f, Rxy=%.1f\n",posCTB.x(),posCTB.y(),posCTB.z(),xmagn);
   
@@ -570,6 +572,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.9  2004/08/18 20:08:04  balewski
+ * outerGeometry()->helix() used by ppLMV for extrapolation to CTB
+ *
  * Revision 1.8  2004/08/06 21:00:01  balewski
  * now should be fine for 2004 pp200 data,
  * high pT & small path cat-off included
