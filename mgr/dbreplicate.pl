@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbreplicate.pl,v 1.1 1999/09/21 12:29:36 wenaus Exp $
+# $Id: dbreplicate.pl,v 1.2 2000/01/25 21:35:15 porter Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbreplicate.pl 
 #
 # $Log: dbreplicate.pl,v $
+# Revision 1.2  2000/01/25 21:35:15  porter
+# added Calibrations_ftpc, Calibrations_emc, Geometry_ftpc to replicate on db1
+#
 # Revision 1.1  1999/09/21 12:29:36  wenaus
 # Database replicator
 #
@@ -44,12 +47,15 @@ $debugOn = 0;
                'mysql' => 1,
                'Calibrations' => 1,
                'Calibrations_tpc' => 1,
+               'Calibrations_ftpc' => 1,
+               'Calibrations_emc' => 1,
                'Conditions' => 1,
                'Conditions_tpc' => 1,
                'Configurations' => 1,
                'Configurations_daq' => 1,
                'Geometry' => 1,
                'Geometry_tpc' => 1,
+               'Geometry_ftpc' => 1,
                'RunParams' => 1,
                'RunParams_tpc' => 1,
                'StarDb' => 1
