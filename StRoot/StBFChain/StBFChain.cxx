@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.446 2004/10/19 23:17:17 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.447 2004/10/20 21:31:59 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -35,9 +35,13 @@
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
+
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
+
+#define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
+
 Bfc_st BFC1[] = { // standard chains
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -277,8 +281,7 @@ Bfc_st BFC1[] = { // standard chains
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
 
-  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                                            "Use pp-like + makers *** OBSOLETE ***",kFALSE},
+  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA",      "","",STR_OBSOLETE,kFALSE},
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
   {"SvtMatchVtx" ,""  ,"","",""                ,"","Use SVT matched tracks to find  Primary Vertex",kFALSE},
@@ -445,8 +448,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
 
-  {"Fglobal"     ,"","","","",""                                         ,"OBSOLETE option Fglobal",kFALSE},
-  {"Fprimary"    ,"","","","",""                                        ,"OBSOLETE option Fprimary",kFALSE},
+  {"Fglobal"     ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
+  {"Fprimary"    ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -498,8 +501,9 @@ Bfc_st BFC1[] = { // standard chains
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"emcRaw","emcY2","daq,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                               "EMC raw data interface for B/E EMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
   {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
 
 
@@ -527,8 +531,7 @@ Bfc_st BFC1[] = { // standard chains
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
-                                                                                  "EEMC data maker",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
@@ -883,8 +886,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
 
-  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                                       "Use pp-like + Spin makers *** OBSOLETE ***",kFALSE},
+  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA",      "","",STR_OBSOLETE,kFALSE},
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
@@ -1059,8 +1061,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
 
-  {"Fglobal"     ,"","","","",""                                         ,"OBSOLETE option Fglobal",kFALSE},
-  {"Fprimary"    ,"","","","",""                                        ,"OBSOLETE option Fprimary",kFALSE},
+  {"Fglobal"     ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
+  {"Fprimary"    ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -1120,8 +1122,9 @@ Bfc_st BFC2[] = { // ITTF Chains
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"emcRaw","emcY2","daq,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                               "EMC raw data interface for B/E EMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
   {"emcAtoE"  ,"","","db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker",  "B-EMC ADC to E converter",kFALSE},
 
 
@@ -1151,8 +1154,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
-                                                                                  "EEMC data maker",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
 
 
 
