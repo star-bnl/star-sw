@@ -230,10 +230,11 @@ long ctg_i_eta ( float z,
 //      Look for right slat, chose last closest to hit
 //
    long  i_sel = 0 ;
+   int i_eta = 0;
 //
 //      Look for write slat
 //
-   for ( int i_eta = 0 ; i_eta < slat_eta_h->nok ; i_eta++ ) {
+   for ( i_eta = 0 ; i_eta < slat_eta_h->nok ; i_eta++ ) {
       if ( z > 0 ) {
          if ( (z>slat_eta[i_eta].z_min &&  
                z<slat_eta[i_eta].z_max  ) ||
