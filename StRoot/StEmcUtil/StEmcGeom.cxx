@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.1 2000/06/20 17:11:25 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.2 2001/03/22 21:50:40 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.2  2001/03/22 21:50:40  pavlinov
+ * Clean up for mdc4
+ *
  * Revision 1.1  2000/06/20 17:11:25  pavlinov
  * Move StEmcGeom.h from St_emc_Maker to StEmcUtil
  *
@@ -89,6 +92,8 @@ void StEmcGeom::initGeom(const Int_t det)
 
   defineDefaultCommonConstants();
   defineModuleGridOnPhi();
+
+  mMaxAdc = 1024; if(det==1) mMaxAdc = 4096;
 
   switch (det){
   case 1:
@@ -238,13 +243,23 @@ void StEmcGeom::defineCommonConstants()
 // _____________________________________________________________________
 void StEmcGeom::defineModuleGridOnPhi()
 {
+  //
+  // -pi <= phi < pi
+  //
+  Int_t   mw,ew,sw;
+  Float_t etaw=-0.1;
   mPhiModule.Set(mNModule);
-  for(Int_t i=0; i<mNModule; i++){
-    Int_t im = 2*i/mNModule;
-    Float_t phiW=mPhiOffset[im]+mPhiStep[im]*i;
-    while(phiW >=  C_PI) phiW -= C_2PI;
-    while(phiW <  -C_PI) phiW += C_2PI;
+  Int_t im = 0;
+  for(Int_t i=0; i<mNModule/2; i++){
+    //    Int_t im = 2*i/mNModule;
+    Double_t phiW = mPhiOffset[im] + mPhiStep[im]*i;
+    while(phiW >= C_PI) phiW -= C_2PI;
+    while(phiW < -C_PI) phiW += C_2PI;
+    if(phiW > (C_PI-0.0001)) phiW = -C_PI; // -pi<=phi<phi
     mPhiModule[i] = phiW;
+    Int_t cond = getBin(mPhiModule[i], etaw, mw,ew,sw);
+    if   (!cond) mPhiModule[mw-1] = phiW; // Second barrel
+    else printf("<W> Something wrong in StEmcGeom::defineModuleGridOnPhi()\n");
   }
 }
 // _____________________________________________________________________
@@ -643,6 +658,7 @@ void  StEmcGeom::printGeom()
       <<mPhiOffset[1]<<"("<<toDeg(mPhiOffset[0])<<")"<<endl;
   cout<<" mPhiStep   "<<mPhiStep[0]<<"("<<toDeg(mPhiStep[0])<<")   "
       <<mPhiStep[1]<<"("<<toDeg(mPhiStep[1])<<")"<<endl;
+  cout<<" Max ADC    "<<mMaxAdc<<endl;
 
   Int_t i;
   cout<<"\n Z grid and Eta grid "<<endl;
@@ -653,10 +669,19 @@ void  StEmcGeom::printGeom()
   for(i=0; i<mNSub; i++){
     cout<<" i "<<i<<" Yl "<<mYlocal[i]<<" Phi "<<mPhi[i]<<endl;
   }
-  cout<<"\n Phi grid for center of module in STAR system "<<endl;
-  for(i=0; i<mNModule; i++){
-    if(i==60) cout<<"\n == "<<endl;
-    printf(" %i phi %7.4f (%5.0f) \n",i+1,mPhiModule[i],mPhiModule[i]*C_DEG_PER_RAD);
+  cout<<"\n   Phi grid of center of modules in STAR system\n";
+  cout<<"   =============================================\n";
+  Int_t   mw,ew,sw;
+  Float_t etaw=-0.1;
+  for(i=0; i<mNModule/2; i++){
+    printf(" %3i phi %10.7f (%6.1f)",      // First  barrel
+    i+1,mPhiModule[i],mPhiModule[i]*C_DEG_PER_RAD);
+    Int_t cond = getBin(mPhiModule[i], etaw, mw,ew,sw);
+    if(!cond) {
+      printf(" => %3i phi %10.7f (%6.1f)", // Second barrel
+      mw,mPhiModule[mw-1],mPhiModule[mw-1]*C_DEG_PER_RAD);
+    }
+    printf("\n");
   }
   cout<<"\n == "<<endl; 
 }
