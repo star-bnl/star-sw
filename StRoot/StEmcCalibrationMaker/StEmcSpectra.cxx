@@ -6,6 +6,7 @@
 ***********************************************************************/
 #include "StEmcSpectra.h"
 #include "iostream.h"
+#include "fstream.h"
 #include "math.h"
 #include "emc_def.h"
 #include "TCanvas.h"

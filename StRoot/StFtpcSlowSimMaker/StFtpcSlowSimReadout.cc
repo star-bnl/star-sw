@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.7 2001/04/24 07:17:12 oldi Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.8 2002/04/19 22:24:13 perev Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.8  2002/04/19 22:24:13  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.7  2001/04/24 07:17:12  oldi
 // Renaming of some variables (slice->sslice, gnch->ggnch, glow->gglow,
 // ghigh->gghigh,  gdelta->ggdelta) to avoid compiler warnings (and bad coding
@@ -38,7 +41,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-
+#include <iostream.h>
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"

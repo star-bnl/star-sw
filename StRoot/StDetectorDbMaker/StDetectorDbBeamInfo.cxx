@@ -1,3 +1,4 @@
+#include <iostream.h>
 #include "StDetectorDbBeamInfo.h"
 #include "tables/St_beamInfo_Table.h"
 

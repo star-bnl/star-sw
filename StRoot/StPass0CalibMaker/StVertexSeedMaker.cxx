@@ -9,6 +9,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include <fstream.h>
 #include "StVertexSeedMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -253,7 +254,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.9 2002/03/23 01:05:15 jeromel Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.10 2002/04/19 22:24:16 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -534,8 +535,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.9 2002/03/23 01:05:15 jeromel Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.10 2002/04/19 22:24:16 perev Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.10  2002/04/19 22:24:16  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.9  2002/03/23 01:05:15  jeromel
 // Create files with extension .ROOT instead of .root (db_Maker will read the .root
 // and crash otherwise). Will fix this with a more elegant scheme later.

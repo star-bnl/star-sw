@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.9 2001/04/27 13:19:00 jcs Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.10 2002/04/19 22:24:12 perev Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.10  2002/04/19 22:24:12  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.9  2001/04/27 13:19:00  jcs
 // cleanup comments
 //
@@ -37,6 +40,8 @@
 //          02/27/98    Janet Seyboth   correct definition of new arrays
 ///////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
+#include <fstream.h>
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"

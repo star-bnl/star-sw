@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.10 2001/04/27 13:18:19 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.11 2002/04/19 22:24:13 perev Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.11  2002/04/19 22:24:13  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.10  2001/04/27 13:18:19  jcs
 // cleanup comments, use SystemOfUnits for conversion
 //
@@ -36,7 +39,7 @@
 //
 // This is the main routine  for the FTPC Simulator
 //
-
+#include <iostream.h>
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimulator.hh"
