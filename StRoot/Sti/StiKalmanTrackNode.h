@@ -66,7 +66,7 @@ public:
     int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
 
     /// Propagates a track encapsulated by the given node "p" to the given vertex
-    int  propagate(const StiKalmanTrackNode *p, const StiHit * vertex);
+    void  propagate(const StiKalmanTrackNode *p, const StiHit * vertex);
 
     /// Evaluates, stores and returns the dedx associated with this node.
     /// Possible returned values are:
@@ -77,9 +77,9 @@ public:
     double  evaluateDedx();
 
     void propagate(double x);
-		   /*void propagate(double x, 
-		   double x0,   
-		   double rho); */
+    void propagateCylinder(double x);
+    void propagateError();
+		void propagateMCS(double density, double radThickness, double massHypo);
 
     /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
     /// the track at that point.
@@ -98,6 +98,30 @@ public:
 
     /// Return center of helix circle in global coordinates
     StThreeVector<double> getHelixCenter() const;
+
+    // static methods
+    
+
+		static void   setParameters(StiKalmanTrackFinderParameters *parameters)
+			{
+				pars = parameters;
+			}
+    friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+
+		// we have many friends...
+		friend class StiKalmanTrack;
+		friend class StiKalmanTrackLessThan;
+		friend class StiKalmanTrackFinder;
+		friend class StiKalmanTrackFitter;
+		friend class StiKTNXLessThan;
+		friend class StreamX;
+		friend class StiGeometryTransform;
+		friend class StiLocalTrackMerger;
+		friend class StiMaterialInteraction;
+		friend class StiTrackContainer;
+		friend class StiEvaluator;
+		friend class StiEventAssociator;
+
 
     /// rotation angle of local coordinates wrt global coordinates
     double fAlpha;
@@ -129,22 +153,13 @@ public:
     int contiguousHitCount;
     int contiguousNullCount;
     
-    // static methods
-    
-
-		static void   setParameters(StiKalmanTrackFinderParameters *parameters)
-			{
-				pars = parameters;
-			}
-
     static double  getFieldConstant()         { return pars->field;}; 
-    friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
     
+ protected:   
     static bool  recurse;
     
 		static StiKalmanTrackFinderParameters * pars;
     
- protected:   
     //const StiDetector * targetDet; // not persistent
     static int   shapeCode;
     static const StiDetector * det;
