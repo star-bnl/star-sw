@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.6 2002/03/27 03:47:27 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.7 2002/03/28 05:10:34 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -53,7 +53,7 @@ class TChain;
 class TClonesArray;
 
 enum ioMode {ioRead, ioWrite};
-enum ioNameMode {ioFix, ioAuto};
+enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
 class StMuDstMaker : public StMaker {
  public:
@@ -211,6 +211,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.7  2002/03/28 05:10:34  laue
+ * update for running in the production
+ *
  * Revision 1.6  2002/03/27 03:47:27  laue
  * better filter options
  *

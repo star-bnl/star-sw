@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.6 2002/03/27 03:47:27 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.7 2002/03/28 05:10:34 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -37,6 +37,8 @@
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuCut.h"
+#include "StMuFilter.h"
+#include "StMuL3Filter.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -47,6 +49,7 @@
 #include "TChain.h"
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
+
 
 ClassImp(StMuDstMaker)
 
@@ -59,11 +62,12 @@ ClassImp(StMuDstMaker)
 //-----------------------------------------------------------------------
 StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
-  mIoMode(1), mIoNameMode(1),
+  mIoMode(1), mIoNameMode((int)ioTreeMaker),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
+  StMuDebug::setLevel(2);
   mDirName="";
   mFileName="";
   streamerOff();
@@ -73,6 +77,14 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStMuDst = new StMuDst();
   createArrays();
   
+  setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+  DEBUGMESSAGE("ATTENTION: pid table hardwired to /afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+  StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
+  StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
+  DEBUGMESSAGE("ATTENTION: use standard MuFilter");
+  DEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
+
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -88,7 +100,6 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   streamerOff();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-  
   
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -242,20 +253,24 @@ void StMuDstMaker::write(){
   }
 
   string ioMakerFileName;
-  string theFileName;
-  if (mIoNameMode==0) {
-    theFileName = buildFileName(dirname(mDirName),basename(mFileName),".MuDst.root");  }
-  else {
-    if (mIOMaker) { 
-      ioMakerFileName = string(mIOMaker->GetFile()); 
-      theFileName = buildFileName(dirname(mDirName),basename(ioMakerFileName),".MuDst.root"); 
-    }    
-    if (mTreeMaker) {  
-      ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
-      theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
-    }
+  string theFileName("/dev/null");
+  switch (mIoNameMode) {
+  case ioFix:  
+    theFileName = buildFileName(dirname(mDirName),basename(mFileName),".MuDst.root");
+    break;
+  case ioIOMaker:
+    ioMakerFileName = string(mIOMaker->GetFile()); 
+    theFileName = buildFileName(dirname(mDirName),basename(ioMakerFileName),".MuDst.root"); 
+    break;
+  case ioTreeMaker:
+    ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
+    theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
+    break;
+  default:
+    DEBUGMESSAGE("do not know where to get the filename from");
   }
-  DEBUGVALUE1(ioMakerFileName.c_str());
+  
+  DEBUGVALUE1(theFileName.c_str());
 
   if (theFileName != mCurrentFileName) {
     closeWrite();
@@ -639,8 +654,8 @@ int StMuDstMaker::addType(TClonesArray* tcaTo , U u, T t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 string StMuDstMaker::buildFileName(string dir, string fileName, string extention){
-  DEBUGMESSAGE1("");
-  fileName = dir + "/" + fileName + extention;
+  DEBUGMESSAGE2("");
+  fileName = dir + fileName + extention;
   return fileName;
 }
 //-----------------------------------------------------------------------
@@ -653,6 +668,7 @@ string StMuDstMaker::basename(string s){
   if (pos!=string::npos ) name.erase(0, pos+1 );
   pos = name.find_first_of(".");
   if (pos!=string::npos ) name.erase(pos,name.length() );
+  DEBUGVALUE2(name);
   return name;
 } 
 //-----------------------------------------------------------------------
@@ -660,9 +676,13 @@ string StMuDstMaker::basename(string s){
 //-----------------------------------------------------------------------
 string StMuDstMaker::dirname(string s){
   string name(s);
+  string base(basename(s));
+  name.erase(name.find(base),base.length());
   size_t pos;
   pos = name.find_last_of("/");
   if (pos!=string::npos ) name.erase(pos, name.length());
+  if (name=="/") name = "";
+  DEBUGVALUE2(name);
   return name;
 } 
  
@@ -729,6 +749,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.7  2002/03/28 05:10:34  laue
+ * update for running in the production
+ *
  * Revision 1.6  2002/03/27 03:47:27  laue
  * better filter options
  *
