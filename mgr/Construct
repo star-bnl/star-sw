@@ -351,6 +351,7 @@ $env = new cons(
 				  },
 		'SUFOBJ'	=> "." . $O,
 		'ENV'	        => { 'PATH' => $PATH,
+				     'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 				     'INCLUDE' => $INCLUDE_PATH,
 				     'ROOTSYS' => $ROOTSYS,
 				     'ROOTSRC' => $ROOTSRC,
