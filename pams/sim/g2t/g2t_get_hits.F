@@ -115,8 +115,10 @@ C :>--------------------------------------------------------------------
          if (col(1:i-1) .eq.  'n_'//Csys(1:3)//'_hit') in=n+1
          n=n+e
       enddo
+      if (Iprin.gt.0) then
       if (ip.eq.0) print *,'hit_'//Csys(1:3)//'_p not found in g2t_track'
       if (in.eq.0) print *,'n_'//Csys(1:3)//'_hit not found in g2t_track'
+      endif
 *
 *     3. prepare map to unfold an input hit into the full hit
 *     Each filled variable in the extended hit is flagged by iflg - 
