@@ -1,5 +1,8 @@
 // 
 // $Log: Prediction.h,v $
+// Revision 1.4  2000/06/10 23:15:12  fisyak
+// Add new W.Loeve table with Laser tracks
+//
 // Revision 1.3  2000/01/31 23:50:10  fisyak
 // Clean up
 //
@@ -10,6 +13,7 @@
 #define STAR_Prediction
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "tables/St_LaserTrack_Table.h"
 class Prediction : public TObject {
   
  private:
@@ -122,27 +126,10 @@ class Adc : public TObject {
   virtual Float_t GetAdc(){return fAdc;}
   ClassDef(Adc,1)  //A track segment
 };
-struct LaserTrack  {
-  Int_t Sector;
-  Int_t Mirror;
-  Int_t ZBoundle;
-  Int_t NoTracks; // no of laser tracks reconstracted by tpt
-  Float_t psi;
-  Float_t Dpsi;
-  Float_t tanl;
-  Float_t Dtanl;
-  Float_t xl;
-  Float_t Dxl;
-  Float_t yl;
-  Float_t Dyl;
-  Float_t zl;
-  Float_t Dzl;
-};
-
 class LTrack : public TObject {
  public: 
   LTrack(){};
-  LTrack(const LaserTrack &L);
+  LTrack(const LaserTrack_st &L);
   ~LTrack() {};
  private:
   Int_t Sector;
@@ -178,7 +165,7 @@ class LEvent : public TObject {
   virtual ~LEvent() { }
   virtual void Clear(Option_t *Option);
   virtual void SetPred(const Prediction *pred=0) {if (pred) fPred = *pred;}
-  virtual void SetLTrack(const LaserTrack &laser) {fLTrack = laser;}
+  virtual void SetLTrack(const LaserTrack_st &laser) {fLTrack = laser;}
   virtual void SetAverage(Float_t ADC = 0, Float_t ADC3x3 = 0, Float_t ratio = 0,
 			  Int_t nY1 = 0,Int_t nY2 = 0,Int_t nZ1 = 0,Int_t nZ2 = 0,
 			  Float_t Yav = 0,Float_t Zav = 0,

@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.4 2000/02/09 21:38:14 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.5 2000/06/10 23:15:12 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.5  2000/06/10 23:15:12  fisyak
+// Add new W.Loeve table with Laser tracks
+//
 // Revision 1.4  2000/02/09 21:38:14  fisyak
 // Increase cluster size
 //
@@ -42,13 +45,14 @@ extern "C" {Int_t g2t_volume_id(char*, int*, int);}
 static TGeant3 *geant3 = 0;
 ClassImp(StLaserAnalysisMaker)
   
-LaserTrack LaserTracks[] = {
+LaserTrack_st LaserTracks[] = {
   //#include "Yuri.table"
   //#include "Y2k.table"
-#include "Y2kchop.table"
-  {  24,   7,   1,       0,  127.358,  0.439,  -0.0222,  0.0009,   -2.260,  0.114,  197.376,  0.088,  -33.480,  0.170 }
+  //#include "Y2kchop.table"
+#include "Y2006noExB.table"
+  //  {  24,   7,   1,       0,  127.358,  0.439,  -0.0222,  0.0009,   -2.260,  0.114,  197.376,  0.088,  -33.480,  0.170 }
 };
-Int_t NoLaserTracks = sizeof (LaserTracks)/sizeof (LaserTrack);
+Int_t NoLaserTracks = sizeof (LaserTracks)/sizeof (LaserTrack_st);
 Quest_t  *cquest; 
 Gclink_t *clink; 
 Gcflag_t *cflag; 
@@ -98,11 +102,11 @@ Int_t StLaserAnalysisMaker::Init(){
     z_lq   = (Int_t    *) geant3->Lq();
     z_q    = (Float_t  *) geant3->Q();
   }
-  St_DataSet *tpg =  GetInputDB("params/tpc/tpgpar"); assert(tpg);
-  ftpg_pad_plane = (St_tpg_pad_plane *) tpg->Find("tpg_pad_plane");  
+  //  St_DataSet *tpg =  GetInputDB("params/tpc/tpgpar"); assert(tpg);
+  ftpg_pad_plane = (St_tpg_pad_plane *) GetChain()->FindObject("tpg_pad_plane");  
   assert(ftpg_pad_plane);
   St_tpg_pad_plane &tpg_pad_plane = *ftpg_pad_plane;
-  ftpg_detector = (St_tpg_detector *) tpg->Find("tpg_detector");  
+  ftpg_detector = (St_tpg_detector *) GetChain()->FindObject("tpg_detector");  
   assert(ftpg_detector);
   St_tpg_detector &tpg_detector = *ftpg_detector;
   // Predicions
@@ -156,6 +160,9 @@ Int_t StLaserAnalysisMaker::Init(){
     //Loop over tracks
     Int_t Id = 0;
     Int_t No = NoLaserTracks;
+    St_LaserTrack *tracks = new St_LaserTrack("LaserTrack",NoLaserTracks);    
+    AddConst(tracks);
+    tracks->Adopt(NoLaserTracks,&LaserTracks);
     for(i=0; i < No; i++){
       if (! LaserTracks[i].NoTracks) continue;
       pt = 1000;
@@ -365,8 +372,8 @@ Int_t StLaserAnalysisMaker::Make(){
       Int_t timeBin      =  pred->GetTimeBin();
       Float_t Y          =  pred->GetY();
       Float_t Z          =  pred->GetZ();
-      //    Float_t tY         =  pred->GettY();
-      //    Float_t tZ         =  pred->GettZ();
+      Float_t tY         =  pred->GettY();
+      Float_t tZ         =  pred->GettZ();
       Float_t ADC        = 0;
       Float_t ADC3x3     = 0; 
       Int_t   overflow   = 0;
@@ -388,7 +395,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	  int len   = Seq[seq].Length;
 	  UChar_t *p = Seq[seq].FirstAdc;
 	  for (int j=0; j<len; j++) {
-	    Int_t iT = start + j - timeBin + NZ;
+	    Int_t iT = start + j - timeBin + 2*NZ + 1;
 	    if (iT < 0 || iT >= NZT) continue;
 	    adc[iT][iY] += log8to10_table[*(p++)];
 	    if (adc[iT][iY] == 920) {overflow = 1; break;}
@@ -407,7 +414,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	fRatio->Fill(ratio);
 	int i,j;
 	if (ratio < 0.4) continue;
-	if (ADC < 200 || ADC > 10000) continue;
+	if (ADC < 200 || ADC > 100000) continue;
 	Float_t Yadc[NYT];
 	Float_t Zadc[NZT];
 	memset (Yadc, 0, sizeof(Yadc));
@@ -469,22 +476,22 @@ Int_t StLaserAnalysisMaker::Make(){
 	  fevent->AddZProf(Z,Zadc[j]);
 	  //	}
 	}
-#if 0
-	printf ("===================================\n");
-	printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
-		ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
-	printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
-	printf ("|\tidx");
-	for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
-	for (i=0;i<NYT;i++){
-	  printf ("%i",i-NY);
-	  for (j=0;j<NZT;j++) printf ("|\t%5.0f",1000*adc[j][i]);
-	  printf ("|\t%5.0f",1000*Yadc[i]); 
-	  if (i == NZ) printf("<=== Y %f dY %f" ,Y, Yav-Y);
-	  printf("\n");
+	if (Debug()) {
+	  printf ("===================================\n");
+	  printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
+		  ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
+	  printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
+	  printf ("|\tidx");
+	  for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
+	  for (i=0;i<NYT;i++){
+	    printf ("%i",i-NY);
+	    for (j=0;j<NZT;j++) printf ("|\t%5.0f",1000*adc[j][i]);
+	    printf ("|\t%5.0f",1000*Yadc[i]); 
+	    if (i == NZ) printf("<=== Y %f dY %f" ,Y, Yav-Y);
+	    printf("\n");
+	  }
+	  for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
 	}
-	for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
-#endif
 	if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 2.5)     fTree->Fill();
 	//    else                           fevent->Print();
       }
