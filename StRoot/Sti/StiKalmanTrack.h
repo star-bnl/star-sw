@@ -8,10 +8,9 @@
 #include <math.h>
 
 //Sti
+#include "StiObjectFactoryInterface.h"
 #include "StiTrack.h"
-#include "StiObjectFactory.h"
 #include "StiKalmanTrackNode.h"
-#include "StiHit.h" //For hit factory
 #include "StiHitContainer.h"
 
 class StiKalmanTrack : public StiTrack 
@@ -28,7 +27,7 @@ class StiKalmanTrack : public StiTrack
     {
     };
 
-    static void setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory*);
+    static void setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>*);
 
     //Action method for polymorphic graphical behavior
     virtual void update();
@@ -78,16 +77,13 @@ class StiKalmanTrack : public StiTrack
   
 protected:
     
-  static StiKalmanTrackNodeFactory * trackNodeFactory;
+  static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
 
   StiKalmanTrackNode * firstNode;
   StiKalmanTrackNode * lastNode;
   double svtDedx;
   double tpcDedx;
 };
-
-typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory; 
-
 
 #endif
 

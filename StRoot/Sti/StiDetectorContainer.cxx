@@ -163,7 +163,8 @@ void StiDetectorContainer::moveMinusPhi()
 }
 
 // Recursively load all detector definition files from the given directory.
-void StiDetectorContainer::buildDetectors(data_node_factory* nodefactory, detector_factory* detfactory)
+void StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
+					  StiObjectFactoryInterface<StiDetector>* detfactory)
 {
     StiDetectorTreeBuilder mybuilder;
     mroot = mybuilder.build(nodefactory, detfactory);

@@ -15,9 +15,10 @@ using std::vector;
 using std::map;
 #include "StiMapUtilities.h"
 
-#include "Sti/StiCompositeTreeNode.h" //For factory
-#include "Sti/StiCompositeLeafIterator.h"
-#include "StiGui/StiRootDrawableDetector.h" //For factory
+#include "StiFactoryTypes.h"
+#include "StiObjectFactoryInterface.h"
+#include "StiCompositeTreeNode.h"
+#include "StiCompositeLeafIterator.h"
 
 using std::map;
 
@@ -34,7 +35,8 @@ public:
     static void kill();
     
     //Build functions
-    virtual void buildDetectors(data_node_factory* nodefactory,	detector_factory* detfactory);
+    virtual void buildDetectors(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
+				StiObjectFactoryInterface<StiDetector>* detfactory);
 
     //Action
     void reset(); //full internal reset of interator structure

@@ -37,7 +37,7 @@ public:
     const Sti2HitComboFilter* getHitComboFilter() const;
     
     //SetFactory
-    void setFactory(StiKalmanTrackFactory* val);
+    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
     
     //Enforced User interface
     virtual bool hasMore();
@@ -58,7 +58,7 @@ protected:
     //Shallow members
     StiHitContainer* mhitstore;
     combo_iterator miterator;
-    StiKalmanTrackFactory* mtrackfactory;
+    StiObjectFactoryInterface<StiKalmanTrack>* mtrackfactory;
     int mnlayers;
     StiRootDrawableHits* mdrawablehits;
     Sti2HitComboFilter* mhitcombofilter;
@@ -110,7 +110,7 @@ inline const Sti2HitComboFilter* StiTrackSeedFinder::getHitComboFilter() const
     return mhitcombofilter;
 }
 
-inline void StiTrackSeedFinder::setFactory(StiKalmanTrackFactory* val)
+inline void StiTrackSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
 {
     mtrackfactory=val;
 }

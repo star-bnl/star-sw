@@ -1,8 +1,9 @@
 #ifndef StiTrackNode_H
 #define StiTrackNode_H 1
+
 #include <iostream.h>
 #include <stdlib.h>
-#include "StiObjectFactory.h"
+
 #include "StiDefaultMutableTreeNode.h"
 
 class StiHit;
@@ -30,10 +31,6 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   StiHit      * hit;  
   StiDetector * detector; // used if not hit for node
 };
-
-typedef StiObjectFactory<StiTrackNode>   StiTrackNodeFactory;
-
-
 
 #endif
 
