@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.32 1999/12/01 01:07:54 sakrejda Exp $
+* $Id: tte.F,v 1.33 2000/01/24 05:59:53 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.33  2000/01/24 05:59:53  sakrejda
+* nfstm counts hits with non-zero flag
+*
 * Revision 1.32  1999/12/01 01:07:54  sakrejda
 * In  the tte_eval table values for the MC track associated with a reconstructed
 * track were not recovered correctly. The problem was fixed thanks to help
@@ -534,9 +537,12 @@ c
 c             add a reconstructed hit
 
               evmc(evmc_h.nok).nfst=evmc(evmc_h.nok).nfst+1
-              if(rec_hit_on_mc_track(2,j).gt.1) evmc(evmc_h.nok).nfstm=
-     >        evmc(evmc_h.nok).nfstm+1
+c              if(rec_hit_on_mc_track(2,j).gt.1) evmc(evmc_h.nok).nfstm=
+c     >        evmc(evmc_h.nok).nfstm+1
 
+c             check whether it's a clean hit
+              if(hit(ip_real).flag.ne.0)evmc(evmc_h.nok).nfstm=
+     >        evmc(evmc_h.nok).nfstm+1
 c             check whether this point was assigned to a track
               id_track=hit(ip_real).track/1000
               if(id_track.gt.big_id_of_rec_tracks) then
