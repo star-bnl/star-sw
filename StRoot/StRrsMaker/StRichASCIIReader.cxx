@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRichASCIIReader.cxx,v 1.4 2000/02/11 13:09:56 lasiuk Exp $
+ * $Id: StRichASCIIReader.cxx,v 1.5 2000/06/07 01:42:23 lasiuk Exp $
  *
  * Description:
  *******************************************************
  * $Log: StRichASCIIReader.cxx,v $
+ * Revision 1.5  2000/06/07 01:42:23  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.4  2000/02/11 13:09:56  lasiuk
  * new version ASCII reader (include track_p)
  *
@@ -30,7 +33,7 @@
 StRichASCIIReader::StRichASCIIReader()
 {
     cout << "StRichASCIIReader::StRichASCIIReader()" << endl;
-    exit(9);
+    abort();
 }
 
 StRichASCIIReader::StRichASCIIReader(string& file)
@@ -39,7 +42,7 @@ StRichASCIIReader::StRichASCIIReader(string& file)
     if(!mIfs || mIfs.bad()) {
 	cout << "StRichASCIIReader::StRichASCIIReader(string&)" << endl;
 	cout << "Cannot Open file " << file.c_str() << endl;
-	exit(9);
+	abort();
     }
 }
 

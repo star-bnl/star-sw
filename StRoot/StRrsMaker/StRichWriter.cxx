@@ -1,10 +1,13 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.10 2000/05/17 22:21:51 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.11 2000/06/07 01:42:23 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 1.11  2000/06/07 01:42:23  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.10  2000/05/17 22:21:51  lasiuk
  * cleanup() does digitization
  * check before adding MCinfo
@@ -61,7 +64,7 @@ StRichWriter::StRichWriter()
     : mStorage(0), mPhysicsDb(0)
 { /* NEVER CAN CALL */
     cerr << "StRichWriter::StRichWriter()--> Never called" << endl;
-    exit(-9);
+    abort();
 }
 
 StRichWriter::StRichWriter(StRichPadPlane* aPadPlane)
