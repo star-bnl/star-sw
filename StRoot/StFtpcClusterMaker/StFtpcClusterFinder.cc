@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.35 2002/06/04 12:33:09 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.36 2002/07/15 13:30:35 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.36  2002/07/15 13:30:35  jcs
+// incorporate charge step histos into cluster finder and remove StFtpcChargeStep
+//
 // Revision 1.35  2002/06/04 12:33:09  putschke
 // new 2-dimenisional hitfinding algorithm
 // correct error in padposition numbering
@@ -126,13 +129,19 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          StFtpcDbReader *dbReader,
 					 TObjArray *pointarray,
 					 TH2F *hpad,
-					 TH2F *htime)
+					 TH2F *htime,
+                                         TH2F *histo,
+                                         TH1F *histoW,
+                                         TH1F *histoE)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
   mPoint = pointarray;
+  mHisto=histo;
+  mHistoW=histoW;
+  mHistoE=histoE;
 
   MAXSEQPEAKS = mParam->maxNumSeqPeaks();
   MAXPEAKS = mParam->maxNumPeaks();
@@ -382,6 +391,29 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      for(iNewSeqIndex=0; iNewSeqIndex < iNewSeqNumber; 
 		  iNewSeqIndex++)
 		{
+//+++++++++++++++++++ fill charge step histograms +++++++++++++++
+              int iSeqIndex;
+              for(iSeqIndex=0; iSeqIndex < iNewSeqNumber; iSeqIndex++)
+                {
+                  int entry;
+                  for(entry=0; entry<NewSequences[iSeqIndex].Length; entry++)
+                    {
+                      mHisto->Fill(iHardSec-1, // sector
+                                   entry+NewSequences[iSeqIndex].startTimeBin, //bin
+                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+                      if (iHardSec >= 1 && iHardSec <= 30 ) {
+                         mHistoW->Fill( entry+NewSequences[iSeqIndex].startTimeBin, //bin
+                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+                      }
+                      if (iHardSec >= 31 && iHardSec <= 60 ) {
+                         mHistoE->Fill( entry+NewSequences[iSeqIndex].startTimeBin, //bin
+
+                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+                      }
+                    }
+                }
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		  // mark sequence as unused 
 		  SequenceInCUC = 0;
