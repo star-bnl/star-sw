@@ -655,18 +655,12 @@ sub find_sources {
 sub find_inc {
   @search_files   = ();
   &File::Find::find(\&wanted_inc, @_);
-#  for my $dir (@_) {
-#    if ( -d $dir ) { 
-#      my $i = 0;
-#      for ($i=0;$i<=$#search_files;$i++) {
-#	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-#	my $file = $search_files[$i];
-#	$file =~ s/$dir\///g;
-#	$search_files[$i] = $file;
-#      }
-#    }
-#  }
-#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub find_obj {
+  @search_files   = ();
+  &File::Find::find(\&wanted_obj, @_);
   return @search_files;
 }
 #________________________________________
@@ -755,6 +749,27 @@ sub script::wanted_inc {
 	/^wrk$/)
      ) {$prune = 1; return;}
   if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) {# print "$name\n"; 
+      push @search_files, $name;
+  }
+}
+#________________________________________
+sub script::wanted_obj {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if ( /^.*\.o$/|| /^.*\.obj$/) {# print "$name\n"; 
       push @search_files, $name;
   }
 }

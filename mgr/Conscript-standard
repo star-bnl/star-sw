@@ -119,8 +119,8 @@ if ($#idlM > -1) {
 #    
     my @objmod = ($modC);
     Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n";
-    $mod =~  s/$share/$obj/g;
-    push @src, $modC; #print "src: @src\n";
+    (my $mod = $modC) =~  s/$share/$obj/g; 
+    push @src, $mod; print "src + $mod: @src\n";
     push @Defs, $modH;
   }
 }
