@@ -43,24 +43,20 @@ StRoot/StSpectraMaker/efficYPt.config
     full access to mass, decay etc. 
   <LI>piplus is the base title used for all histograms. Don't use any non alphanumeric 
     characters. This title should reflect both the particle and the centrality 
-    cut.
-  <LI>Each analysis owns an StEfficiency object. The efficiency numbers are obtained 
-    by a separate embedding run, and the output of this is stored in a root histogram. 
+    cut. 
   <LI>The file efficYPt.config will be the output from the embedding/associator 
     job and first lists the track cuts, or V0 cuts that were used in the embedding/associator 
     job. The current .config file lists the cuts nhits&gt;10 on a track or dca_primary_vertex 
-    &lt; 2.0cm. 
-  <LI>Storing these cuts with the efficiency information ensures that the calculation 
-    of spectra uses the same track cuts as were used in the embedding/association 
-    task.
-  <LI>Also in efficYPt.config is the name of a .root file that contains a 2-D 
-    histogram of efficiency numbers. 
+    &lt; 2.0cm. The efficiency numbers are stored in a root histogram. 
+  <LI>Storing track, V0 cuts with the efficiency information ensures that the 
+    calculation of spectra uses the same track cuts as were used in the embedding/association 
+    task. 
   <LI>The label of the efficiency histogram controls whether the abscissa is y, 
     or eta, and whether the ordinate is mt or pt. 
   <LI>The ranges and bin sizes of the spectra histograms are the same as those 
-    in the efficiency histogram.
+    in the efficiency histogram. 
   <LI>To change the binning, the user must generate a new efficiency histogram, 
-    presumably in the final step of the association task.
+    presumably in the final step of the association task. 
 </UL>
 
 <P><u>Output and Extracting Invariant Spectra</u>
@@ -72,7 +68,7 @@ StRoot/StSpectraMaker/efficYPt.config
   will critically depend on the S/B of the PID variable in each phase-space bin. 
   It is expected that each user will need to refine this for each project. An 
   example cint macro projectSpectra.C loops over the (y,pt) bins and for each 
-  phase-space bin fits the tpc_deviant axis and puts the extracted signal into 
-  a invariant spectra as a function of (y,pt).
+  phase-space bin, fits the tpc_deviant axis and puts the extracted signal into 
+  a invariant spectrum.
 </BODY>
 </HTML>
