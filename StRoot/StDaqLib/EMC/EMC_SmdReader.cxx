@@ -38,6 +38,7 @@ void EMC_SmdReader::Initialize()
 {
   mTheSmdAdcR.NSmdHits = 0;
   for(int RDO=0;RDO<8;RDO++) mTheSmdAdcR.TimeBin[RDO]=999;
+  for(int RDO=0;RDO<8;RDO++) mTheSmdAdcR.HasData[RDO]=0;
 
   // Initialize SMDDATA array to 0's
   for(int i = 0 ; i <120 ; i++) 
@@ -180,7 +181,8 @@ int EMC_SmdReader::FillBarrelSmd(Bank_SMDADCR* pADCR,int RDO)
   mTheSmdAdcR.SMDErrorFlag=0;                      // Error from SMD (0=good)
   mTheSmdAdcR.TimeBin[RDO]=pADCR->fiberHeader[32]; // To be taken from header
   cout <<"SMD Time bin for RDO "<<RDO<<" = "<<mTheSmdAdcR.TimeBin[RDO]<<endl;
-
+  for(int i=0;i<128;i++) mTheSmdAdcR.SmdHeader[RDO][i]=pADCR->fiberHeader[i];
+  int sum =0;
   //SMD_data
   //fiberdata
   for(int i=0;i<4800;i++)
@@ -190,6 +192,7 @@ int EMC_SmdReader::FillBarrelSmd(Bank_SMDADCR* pADCR,int RDO)
     int det=0,mod=0,eta=0,sub=0;
     
     mTheSmdAdcR.SMDADCArray[RDO][i]=pADCR->fiberData[index];
+    sum+=mTheSmdAdcR.SMDADCArray[RDO][i];
     mTheSmdAdcR.BankType="BSMDADCR\n";
     if(pADCR->fiberData[index]>0)mTheSmdAdcR.NSmdHits++;
     int binstat=decoder->GetSmdCoord(RDO,index,det,mod,eta,sub);
@@ -208,6 +211,7 @@ int EMC_SmdReader::FillBarrelSmd(Bank_SMDADCR* pADCR,int RDO)
       }
     }
   }
+  if(sum>0) mTheSmdAdcR.HasData[RDO] = 1;
   return 1;
 }
 /////////////////////////////////////////////////////////////////////

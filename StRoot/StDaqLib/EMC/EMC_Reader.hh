@@ -77,6 +77,7 @@ struct BTOWERDATA
   
   unsigned short TowerMatrix[120][20][2];     ///< Matrix of ADC's in Physical Positions
   unsigned short TowerADCArray[4800];         ///< Matrix of ADC's as obtained from daq
+  unsigned short TDCHeader[120];              ///< This is the TDC event header
 };
 
 // similar banks for ADCR, ADCD, PED and RMS
@@ -116,6 +117,8 @@ struct BSMDDATA
   unsigned short  SMDADCArray[8][4800] ;        ///< Matrix of ADC's as obtained from daq
   unsigned short  SmdE_ADCMatrix[120][150] ;    ///< Matrix of ADC's in Physical Positions for SMD_Eta
   unsigned short  SmdP_ADCMatrix[120][10][15] ; ///< Matrix of ADC's in Physical Positions for SMD_Phi
+  unsigned short  SmdHeader[8][128];            ///< SMDHeader for each fiber
+  unsigned short  HasData[8]; ///< 1 if there is data for that fiber
 };
 
 
