@@ -138,7 +138,8 @@ CC:   Load primary vertex position coordinates:
       prim_vrtx_z = 0.0
       if(privert_h.nok .gt. 0) then
          do i = 1,privert_h.nok
-            if(privert(i).vtx_id .eq. 1) then
+            if(privert(i).vtx_id .eq. 1 .and. 
+     +           privert(i).iflag .eq. 1) then
                prim_vrtx_x = privert(i).x
                prim_vrtx_y = privert(i).y
                prim_vrtx_z = privert(i).z
