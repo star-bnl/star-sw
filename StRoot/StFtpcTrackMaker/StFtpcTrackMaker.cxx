@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.68 2004/09/07 14:06:19 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.69 2004/09/27 14:17:03 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.69  2004/09/27 14:17:03  jcs
+// pad vs. time histograms moved to St_QA_Maker
+//
 // Revision 1.68  2004/09/07 14:06:19  jcs
 // use the IAttr(".histos") to control histogramming
 //
@@ -413,13 +416,6 @@ Int_t StFtpcTrackMaker::Init()
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
 
-     m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 
-			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-     m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 
-			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-
      m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
      m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
 
@@ -733,7 +729,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	
 	   m_maxadc_West->Fill(mhit->GetMaxADC());
 	   m_charge_West->Fill(mhit->GetCharge());
-	   m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
 	   if (mhit->GetUsage()) {
 	     m_rres_vs_r_west->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
@@ -745,7 +740,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	
 	   m_maxadc_East->Fill(mhit->GetMaxADC());
 	   m_charge_East->Fill(mhit->GetCharge());
-	   m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
 	   if (mhit->GetUsage()) {
 	     m_rres_vs_r_east->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
@@ -841,7 +835,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.68 2004/09/07 14:06:19 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.69 2004/09/27 14:17:03 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
