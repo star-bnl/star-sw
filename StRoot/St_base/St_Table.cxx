@@ -1,7 +1,10 @@
-// $Id: St_Table.cxx,v 1.50 1999/03/30 23:24:50 fine Exp $ 
+// $Id: St_Table.cxx,v 1.51 1999/04/01 20:17:20 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.51  1999/04/01 20:17:20  fine
+// St_Table::Browse uses GetNRows rows at most now
+//
 // Revision 1.50  1999/03/30 23:24:50  fine
-// Some comments fixed
+//  Some comments fixed
 //
 // Revision 1.49  1999/03/11 00:34:45  perev
 // St_base in new maker schema
@@ -396,7 +399,8 @@ Char_t *St_Table::Create()
 //______________________________________________________________________________
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
-  Print(0,6);
+  Int_t nrows = TMath::Min(GetNRows(),6);
+  Print(0,nrows);
 }
 //______________________________________________________________________________
 void St_Table::Clear(Option_t *opt)
@@ -887,7 +891,8 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
      out << "// The output table was bad-defined!" << endl
          << " fprintf(stderr, \"Bad table found. Please remove me\\n\");" << endl
          << " return 0; } "    << endl;
-     return;}
+     return;
+  }
 
   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
 
@@ -941,7 +946,8 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
       Int_t arrayLength  = 1;
       for (int indx=0;indx < dim ;indx++){
          arraySize[indx] = member->GetMaxIndex(indx);
-         arrayLength *= arraySize[indx];}
+         arrayLength *= arraySize[indx];
+      }
 
 //			Special case, character array
       int charLen = (memberType.CompareTo("char")==0);
@@ -953,19 +959,22 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
           charLen = strlen((const char*)pointer)+1;
           if (charLen>arrayLength) charLen = arrayLength;
         } else {
-          for(;charLen && !pointer[charLen-1];charLen--){}        
-          if (!charLen) charLen=1;}
+          for(;charLen && !pointer[charLen-1];charLen--){;}
+          if (!charLen) charLen=1;
+        }
 
         out << " memcpy(&" << rowId << "." << (const char*)memberName;      
         out << ",\"";      
-        for (int i=0; i<charLen;i++) {      
-	  ic = pointer[i];
+        for (int ii=0; ii<charLen;ii++) {      
+	  ic = pointer[ii];
 	  if (ic && (isalnum(ic) 
 	  || strchr("!#$%&()*+-,./:;<>=?@{}[]_|~",ic))) {//printable
 	    out << ic;
 	  } else {					//nonprintable
 	    out << "\\x" << setw(2) << setfill('0') << hex << (unsigned)ic ; 
-	    out << setw(1) << setfill(' ') << dec;}} 
+	    out << setw(1) << setfill(' ') << dec;
+          }
+        } 
         out << "\"," << dec << charLen << ");";
         out << "// " << (const char*)memberTitle << endl;
         continue;
