@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.32 1999/11/15 23:46:22 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.33 1999/11/16 16:10:01 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.33  1999/11/16 16:10:01  fisyak
+// Remove ambiguity between dst maker and dst chain (Cdst)
+//
 // Revision 1.32  1999/11/15 23:46:22  fisyak
 // Separate time stamps and chains
 //
@@ -170,13 +173,13 @@ BfcItem BFC[] = {
   // chains
   {"doEvents","" ,""  ,"xin,event,analysis,FiledOn"                                       ,"","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
-  {"dst"         ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,dst,tree"                 ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,ftpc,l0,l3t,ems,emc,rich,dst,tree"        ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3t,dst,tree"                 ,"","","Turn on chain y1c",kFALSE},
-  {"Cy1d"        ,""  ,"","y1d,tpc,global,dst,qa,event,analysis,tree"    ,"","","Turn on chain y1d",kFALSE},
-  {"cy1e"        ,""  ,"","y1e,tpc,dst,tree"                             ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,"","","y2a,tpc,svt,ftpc,l0,l3t,ems,emc,rich,dst,tree ,","","","Turn on chain y2a",kFALSE},
+  {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
+  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,ftpc,l0,l3t,ems,emc,rich,Cdst,tree"       ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
+  {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,"" ,"","y2a,tpc,svt,ftpc,l0,l3t,ems,emc,rich,Cdst,tree","","","Turn on chain y2a",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   //Options
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
@@ -357,13 +360,7 @@ Int_t StBFChain::Instantiate()
 	  if (treeMk) {
 	    BFC[i].Name = (Char_t *) treeMk->GetName();
 	    treeMk->SetIOMode("w");
-	    if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
-	    else {
-	      if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
-	    }
-	    if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
-	    if (GetOption("AllEvent")) SetTreeOptions();
-	    treeMk->SetBranch("histBranch");
+	    SetTreeOptions();
 	    continue;
 	  }
 	}
@@ -676,18 +673,25 @@ void StBFChain::SetDbOptions(){
 		   << dbMk->GetDateTime().GetTime() << endm;
 }
 //_____________________________________________________________________
-void StBFChain::SetTreeOptions(){
-  if (geant) {
-    treeMk->IntoBranch("geantBranch","geant");
-    treeMk->IntoBranch("geantBranch","geant/.data/particle");
-    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
+void StBFChain::SetTreeOptions()
+{
+  treeMk->SetBranch("histBranch");
+  if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
+  if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
+  if (GetOption("AllEvent")) {
+    if (geant) {
+      treeMk->IntoBranch("geantBranch","geant");
+      treeMk->IntoBranch("geantBranch","geant/.data/particle");
+      treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
+    }
+    if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
+    if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
+    if (GetOption("tss") || GetOption("Trs"))
+                             treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
+    if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
+    if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
+    if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
+    if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
+    if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
   }
-  if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-  if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-  if (GetOption("tss") || GetOption("Trs"))
-    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-  if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
-  if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
-  if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
-  if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
 }
