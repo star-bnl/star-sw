@@ -1,0 +1,284 @@
+//*-- Author : Jan Balewski
+//  
+// JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
+//
+// $Id: StppLPfindMaker.cxx,v 1.1 2001/04/21 00:56:55 fisyak Exp $
+// $Log: StppLPfindMaker.cxx,v $
+// Revision 1.1  2001/04/21 00:56:55  fisyak
+// Restore StppLPfindMaker.cxx
+//
+// Revision 1.5  2001/04/13 20:15:13  balewski
+// *** empty log message ***
+//
+// Revision 1.4  2001/04/12 21:05:46  balewski
+// *** empty log message ***
+//
+// Revision 1.3  2001/04/12 15:19:09  balewski
+// *** empty log message ***
+//
+// Revision 1.2  2001/02/28 19:06:12  balewski
+// some reorganizations
+//
+// Revision 1.1.1.1  2001/01/31 14:00:07  balewski
+// First release
+//
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+//   Search for the leading charge particle in the event                //
+//   use DST as output
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+
+#include <strings.h>
+#include <math.h>
+
+#include "StppLPfindMaker.h"
+#include "StChain.h"
+#include "St_DataSetIter.h"
+#include "StEventTypes.h"
+#include "TH2.h"
+
+#include "StppMiniDst.h"  
+
+#include "tables/St_dst_track_Table.h"
+#include "tables/St_tpt_track_Table.h" 
+
+// for Helix model
+#include "StarCallf77.h"
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
+#define gufld F77_NAME(gufld,GUFLD)
+#include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
+
+ClassImp(StppLPfindMaker)
+//void StppLPfindMaker::Streamer(TBuffer &b){};  // do NOT change it J.B.
+
+//_____________________________________________________________________________
+StppLPfindMaker::StppLPfindMaker(const char *name):StMaker(name)
+{
+  //cout <<" Cccccccccccccccccccccccccccccccccccc construct::"<<GetName() <<endl;
+}
+//_____________________________________________________________________________
+StppLPfindMaker::~StppLPfindMaker()
+{
+}
+
+//_____________________________________________________________________________
+Int_t StppLPfindMaker::Init()
+{
+  cout <<" Iiiiiiiiiiiiiiiiiiiiiiiiiiiii init ::"<<GetName() <<endl;
+  init_histo();
+  nEVtot=nEVfound=0;
+  // setup params
+  EtaCut=1.4; // tracks with larger eta are not considered
+
+  return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+Int_t StppLPfindMaker::Finish()
+{
+  cout <<" Finish fffffffffffffffff ::"<<GetName() <<endl;
+  printf(" nEve tot=%d \n", nEVtot);
+  //printStat();
+  return  kStOK;
+}
+
+
+//_____________________________________________________________________________
+Int_t StppLPfindMaker::Make()
+{
+  int i;
+  nEVtot++;
+  primV=NULL;
+  stEvent=NULL;
+  hv[6]->Fill(0);
+  cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
+  stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
+  int EventId=stEvent->id();
+
+  printf("  EventID=%d \n",EventId);
+
+  //   G E T   D A T A
+  St_DataSet    *ds1=GetDataSet("tpc_tracks"); assert(ds1);
+  St_tpt_track  *tptr=(St_tpt_track   *) ds1->Find("tptrack");
+
+  if(tptr==NULL)printf(" NULL pointer to St_tpt_track table\n"); 
+
+  //  G E T     P R I M     V E R T E X 
+  primV=stEvent->primaryVertex();
+  if(!primV)
+    printf("primaryVertex()=NULL\n");
+  else {
+    printf("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters());  
+  }
+
+  //  G E T     P R I M     T R A C K S 
+  St_DataSet    *dst=GetInputDS("dst"); assert(dst); 
+  St_DataSetIter dstIter(dst);
+  St_dst_track     *dstPrimTr=(St_dst_track *) dstIter("primtrk");
+  if(dstPrimTr==NULL) printf(" NULL pointer to primtrk St_Table \n");
+  //if(dstPrimTr)dstPrimTr->Print(0,10);
+
+  cout <<" Mmmmmmmmmmmmmmmmmmmmmm   all tables OK ::"<<GetName() <<endl;
+
+  //------------------------------------------------
+  //   A C T I O N :    find reconstructed Leading Particle
+  //------------------------------------------------
+ 
+  hv[6]->Fill(1);
+
+  if(!primV) return kStOK; // no primary vertex
+  hv[6]->Fill(2);
+  if(!dstPrimTr) return kStOK; // no primary tracks
+  hv[6]->Fill(3);
+
+  // search for reconstructed LP  ......................
+  dst_track_st *DSTT=dstPrimTr->GetTable(); 
+  dst_track_st *rLP=NULL;
+  for(i=1;i<dstPrimTr->GetNRows();i++,DSTT++) {
+    if(DSTT->iflag<=0) continue; // not a valid track
+    float reta=asinh(DSTT->tanl);// rec eta
+    //printf("rID=%d rPt=%f, reta=%f \n",DSTT->id,1./DSTT->invpt,reta);
+    if(fabs(reta)>EtaCut) continue; // those tracks were also not considered for M-C
+    if(rLP==NULL) { rLP=DSTT; continue;}
+    if(rLP->invpt<DSTT->invpt) continue;
+    rLP=DSTT;
+    }
+  if(!rLP) {
+    printf("No rLP found among %d rPrim tracks\n",(int)dstPrimTr->GetNRows());
+    return kStOK; 
+  }
+  
+  hv[6]->Fill(4);
+
+  float  rPt=1./rLP->invpt;  
+  printf(" rLP pT=%f , nPts=%d found among  %d rPrim tracks\n",rPt,(int)rLP->n_point,(int)dstPrimTr->GetNRows());
+
+
+  //  if(rPt<1. )   return kStOK;  // disqualify events with too low rLP PT
+
+  // find this primary rLP among TPT-tracks
+  // count all valid TPT tracks for histo only
+  int nTPTtr=0;
+  tpt_track_st *rTPT=NULL, *TPTR=tptr->GetTable();
+  for(i=0;i<tptr->GetNRows(); i++,TPTR++) {
+    if(TPTR->flag>0) nTPTtr++; 
+    if(TPTR->id_globtrk != rLP->id) continue;
+    printf(" FOUND ID: prim=%d, tpt=%d, tpt chi2[0]=%f/f, [1]=%f/f, pT=%f \n",(int)rLP->id,(int)TPTR->id,TPTR->chisq[0]/(TPTR->nrec-2),TPTR->chisq[1]/(TPTR->nrec-2),1./TPTR->invp);
+    rTPT=TPTR;
+    break;
+  } 
+  assert(rTPT);
+
+  float delZ, lpRxy, delRxy;
+  DcaTract2Vert(rLP,delZ, lpRxy, delRxy);
+
+  nEVfound++;
+  
+  printf("nEve tot=%d, nFound=%d delRxy=%f\n", nEVtot, nEVfound, delRxy);
+  //if(nEVtot%20==0) printStat();
+  
+  // =========================================================
+  printf(" ppMiniDst   U p d a t e     . . .\n");
+  // =========================================================
+
+  StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my); 
+  printf("ppMiniDst back: pT=%f \n",my->rLP.pt);
+
+  my->rLP.vert.x=primV->position().x();
+  my->rLP.vert.y=primV->position().y();
+  my->rLP.vert.z=primV->position().z();
+  my->rLP.nPrim=primV->numberOfDaughters();
+
+  my->rLP.pt=rPt;
+  my->rLP.eta=asinh(rLP->tanl);
+  my->rLP.psi=rLP->psi;
+  my->rLP.nTclHit=rTPT->nrec;
+  my->rLP.chi2f=TPTR->chisq[0]/(TPTR->nrec-2);
+  my->rLP.PrimId=rLP->id; // for evaluation only
+
+  my->rLP.Dz=delZ; // LP - vert
+  my->rLP.DRxy=delRxy;// LP - vert
+  my->rLP.Rxy=lpRxy;// LP - vert
+  // =========================================================
+  printf(" ppTag   U p d a t e     . . . NOT implemented\n");
+  // =========================================================
+
+  //-----------------------------
+  //    H I S T O
+  //-----------------------------
+  hv[0]->Fill(my->rLP.vert.z);
+  hv[1]->Fill(my->rLP.Dz);
+  hv[2]->Fill(my->rLP.DRxy);
+  hv[3]->Fill(my->rLP.nPrim);
+  hv[4]->Fill(my->rLP.pt);
+  hv[5]->Fill(nTPTtr);
+  
+
+return kStOK;
+}
+
+
+//_____________________________________________________________________________
+void  StppLPfindMaker::DcaTract2Vert(dst_track_st *rLP,float &delZ, float &lpRxy, float &delRxy)
+{
+  delRxy=-1;
+  
+  // get DCA of rLP vs, rVertex
+  double spath,h;
+  double x0,y0,z0;
+  double ptinv,psi,tanl;
+  double px,py,pz;
+  
+  // Get BField from gufld(,) 
+  //  cout<<"Trying to Get the BField the old way..."<<endl;
+  float x[3] = {0,0,0};
+  float b[3];
+  gufld(x,b);
+  double bfield = 0.1*b[2]; //This is now Tesla.
+  
+  // First point on Helix
+  x0 = rLP->r0*cos(rLP->phi0* degree);
+  y0 = rLP->r0*sin(rLP->phi0* degree);
+  z0 = rLP->z0;
+  
+  StThreeVectorD origin(x0*centimeter, y0*centimeter, z0*centimeter);
+  
+  // Helicity / Sense of Curvatutre
+  h  = 1.0;  if( bfield*rLP->icharge > 0.0 )h=-1.0;
+  double qtrk = 1.0; if( h*bfield > 0.0)qtrk=-1.0;
+  
+  // Track direction at first point
+  ptinv  = rLP->invpt;
+  tanl   = rLP->tanl;
+  psi    = rLP->psi* degree; 
+  if(psi<0.0){psi=psi+2.*M_PI;}
+  
+  px   = (1./ptinv)*cos(psi);
+  py   = (1./ptinv)*sin(psi);
+  pz   = (1./ptinv)*tanl;
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  StPhysicalHelixD TrkHlx(MomFstPt, origin, bfield*tesla, qtrk);
+  
+  double xorigin = primV->position().x();
+  double yorigin = primV->position().y();
+  spath = TrkHlx.pathLength(xorigin, yorigin);
+  StThreeVectorD XMinVec = TrkHlx.at(spath);
+  cout<<"XYZ of rLP at DCA to vertex= "<<XMinVec<<endl;
+  delZ=primV->position().z()-XMinVec.z();
+  float dx=primV->position().x()-XMinVec.x();
+  float dy=primV->position().y()-XMinVec.y();
+  lpRxy=sqrt(XMinVec.x()*XMinVec.x() +XMinVec.y()*XMinVec.y() );
+  delRxy=sqrt(dx*dx+dy*dy);
+  printf("zVert-ZrLP =%f cm, delRxy/cm=%f, lpRxy/cm=%f\n",delZ,delRxy,lpRxy);
+  
+}
+
+
+//------------  N O T   U S E D   -------------------------------
+
