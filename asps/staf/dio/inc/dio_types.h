@@ -81,28 +81,31 @@ extern CC_P void kam_diosockstream_state_();
 extern CC_P void kam_diosockstream_host_();
 extern CC_P void kam_diosockstream_port_();
 extern CC_P void kam_diosockstream_maxhandshakes_();
-/*-*/
-extern CC_P int kam_dio_count();
-extern CC_P int kam_dio_list();
-extern CC_P int kam_dio_newfilestream();
-extern CC_P int kam_dio_newsockstream();
-extern CC_P int kam_diofilestream_open();
-extern CC_P int kam_diofilestream_close();
-extern CC_P int kam_diofilestream_getevent();
-extern CC_P int kam_diofilestream_putevent();
-extern CC_P int kam_diofilestream_mode();
-extern CC_P int kam_diofilestream_state();
-extern CC_P int kam_diofilestream_filename();
-extern CC_P int kam_diosockstream_open();
-extern CC_P int kam_diosockstream_close();
-extern CC_P int kam_diosockstream_getevent();
-extern CC_P int kam_diosockstream_putevent();
-extern CC_P int kam_diosockstream_mode();
-extern CC_P int kam_diosockstream_state();
-extern CC_P int kam_diosockstream_host();
-extern CC_P int kam_diosockstream_port();
-extern CC_P int kam_diosockstream_maxhandshakes();
 #endif /*NOKUIP*/
+
+extern CC_P STAFCV_T dio_count();
+extern CC_P STAFCV_T dio_list();
+extern CC_P STAFCV_T dio_newfilestream(char* name, char* file
+		, char* mode);
+extern CC_P STAFCV_T dio_newsockstream(char* name, char* host
+		, long port);
+extern CC_P STAFCV_T diofilestream_open(char* name, char* mode);
+extern CC_P STAFCV_T diofilestream_close(char* name);
+extern CC_P STAFCV_T diofilestream_getevent(char* name, char* dest);
+extern CC_P STAFCV_T diofilestream_putevent(char* name, char* sour);
+extern CC_P STAFCV_T diofilestream_mode(char* name);
+extern CC_P STAFCV_T diofilestream_state(char* name);
+extern CC_P STAFCV_T diofilestream_filename(char* name);
+extern CC_P STAFCV_T diosockstream_open(char* name, char* mode);
+extern CC_P STAFCV_T diosockstream_close(char* name);
+extern CC_P STAFCV_T diosockstream_getevent(char* name, char* dest);
+extern CC_P STAFCV_T diosockstream_putevent(char* name, char* sour);
+extern CC_P STAFCV_T diosockstream_mode(char* name);
+extern CC_P STAFCV_T diosockstream_state(char* name);
+extern CC_P STAFCV_T diosockstream_host(char* name);
+extern CC_P STAFCV_T diosockstream_port(char* name);
+extern CC_P STAFCV_T diosockstream_maxhandshakes(char* name
+		, long count);
 
 #endif /* DIO_TYPES_H */
 

@@ -4,6 +4,7 @@
 //:DESCRIPTION: DIO Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//HISTORY:      30dec96-v020a-cet- NEW_DSL -> OLD_DSL option
 //:HISTORY:     21aug96-v010a-cet- debug xdrrec_create for Sun4OS5
 //:HISTORY:     12dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
@@ -98,7 +99,11 @@ STAFCV_T dioStream:: getEvent (tdmDataset* destination) {
 //-(" Read data here. \n");
 DS_DATASET_T *pDS=NULL;
 bool_t result;
+#ifndef OLD_DSL
+   if( !xdr_dataset_type(&myXDR, &pDS)		/* get descriptor */
+#else  /*OLD_DSL*/
    if( !xdr_dataset_type(&myXDR, &pDS,0)	/* get descriptor */
+#endif /*OLD_DSL*/
    ||  !dsIsDataset(&result,pDS) ||  !result	/* sanity check */
    ||  !dio_mapHierarchy(pDest,pDS)		/* map onto memory */
    ||  !dsAllocTables(pDS)			/* no-opt */
@@ -448,7 +453,7 @@ STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
 	 while( (!requestAcknowledge()) 
 	 		&& (retrys++ < maxHandshakes())
 	 ){
-	    printf(".");		//- heartbeat();	
+	    printf(".");fflush(0);	//- heartbeat();	
 	    if( retrys >= maxHandshakes() ){
 	       printf("\n");
 	       EML_ERROR(HANDSHAKE_FAILED);
