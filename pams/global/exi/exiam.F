@@ -41,6 +41,8 @@ C<----------------------------------------------------------------------
 #include "exiam.inc"
 #include "math_constants.inc"
 #include "phys_constants.inc"
+#include "StDetectorId.inc"
+#include "StVertexId.inc"
 
 #define MXDET 3
 #define TPC_ONLY 1
@@ -62,7 +64,7 @@ C<----------------------------------------------------------------------
       INTEGER   i, j, k, jk
       INTEGER   id_vertex, id_v0
       INTEGER   n_v, n_xi
-      INTEGER   idet_v0, idet_b, id_det
+      INTEGER   idet_daughter(2), idet_v0, idet_b, id_det
  
       REAL	dca_max(MXDET), rv_xi(MXDET), rv_v0(MXDET)
       REAL      bxi_max(MXDET), dmass(MXDET), bpn_v0(MXDET)
@@ -161,20 +163,32 @@ c*** pgj: slow failsafe method for locating vertex index
 
 c*** pgj: check detector id
 
-        if( vertex(k).det_id.eq.33 ) then
-          idet_v0 = TPC_PLUS_SVT
-        elseif( vertex(k).det_id.eq.11 .or. 
-     >          vertex(k).det_id.eq.31 .or.
-     >          vertex(k).det_id.eq.13 ) then
+        idet_daughter(2) = mod(vertex(k).det_id,100)
+        idet_daughter(1) = (vertex(k).det_id - idet_daughter(2))/100
+
+        do i=1,2
+          if( idet_daughter(i) .eq. kTpcId ) then
+            idet_daughter(i) = TPC_ONLY
+          elseif( idet_daughter(i) .eq. kSvtId    .or.
+     >            idet_daughter(i) .eq. kSsdSvtId ) then
+            idet_daughter(i) = SVT_ONLY
+          elseif( idet_daughter(i) .eq. kTpcSsdId .or.
+     >            idet_daughter(i) .eq. kTpcSvtId .or.
+     >            idet_daughter(i) .eq. kTpcSsdSvtId ) then
+            idet_daughter(i) = TPC_PLUS_SVT
+          else
+            GO TO 10
+          endif         
+        enddo
+
+        if( idet_daughter(1).eq.TPC_ONLY .and.
+     >      idet_daughter(2).eq.TPC_ONLY ) then
           idet_v0 = TPC_ONLY
-        elseif( vertex(k).det_id.eq.22 .or.
-     >          vertex(k).det_id.eq.12 .or.
-     >          vertex(k).det_id.eq.21 .or.
-     >          vertex(k).det_id.eq.32 .or.
-     >          vertex(k).det_id.eq.23 ) then
+        elseif( idet_daughter(1).eq.SVT_ONLY .or.    !* Notice .or. not .and.
+     >          idet_daughter(2).eq.SVT_ONLY ) then
           idet_v0 = SVT_ONLY
         else
-          GO TO 10
+          idet_v0 = TPC_PLUS_SVT
         endif
 
 c*** pgj: apply M_LAMBDA mass check
@@ -228,11 +242,14 @@ c*** pgj: don't use tracks already used in the v0
           IF( v0_vertex(j).idneg .eq. globtrk(i).id .or.
      >        v0_vertex(j).idpos .eq. globtrk(i).id ) GO TO 20
 
-          if( globtrk(i).det_id .eq. 1 ) then
+          if( globtrk(i).det_id .eq. kTpcId ) then
             idet_b = TPC_ONLY
-          elseif( globtrk(i).det_id .eq. 2 ) then
+          elseif( globtrk(i).det_id .eq. kSvtId    .or.
+     >            globtrk(i).det_id .eq. kSsdSvtId ) then
             idet_b = SVT_ONLY
-          elseif( globtrk(i).det_id .eq. 3 ) then
+          elseif( globtrk(i).det_id .eq. kTpcSsdId .or.
+     >            globtrk(i).det_id .eq. kTpcSvtId .or.
+     >            globtrk(i).det_id .eq. kTpcSsdSvtId ) then
             idet_b = TPC_PLUS_SVT
           else
             GO TO 20
@@ -335,8 +352,8 @@ c*** wkw: breakout if n_xi=maxlen
 c*** pgj: fill vertex table
 
                 vertex(n_v).id = id_vertex + n_xi
-                vertex(n_v).det_id = 100*idet_b+vertex(k).det_id
-                vertex(n_v).vtx_id = 3
+                vertex(n_v).det_id = 100*vertex(k).det_id+globtrk(i).det_id
+                vertex(n_v).vtx_id = kXiVtxId
                 vertex(n_v).x = xpp(1)
                 vertex(n_v).y = xpp(2)
                 vertex(n_v).z = xpp(3)
