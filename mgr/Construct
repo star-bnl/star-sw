@@ -135,12 +135,10 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
   $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
   $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
-  $CC        = "/opt/SUNWspro/bin/cc";
-  $CXX       = "/opt/SUNWspro/bin/CC";
-  $FC        = "/opt/SUNWspro/bin/f77";
+  $CC        = "cc";
+  $CXX       = "CC";
+  $FC        = "f77";
   $CXXFLAGS  = "-KPIC +w -features=no_anachronisms -features=rtti";
-#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
-#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
@@ -152,7 +150,8 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SO        = $CXX;
   $SOFLAGS   = "-G";
   my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
-  $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
+  $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
+  $CXXFLAGS .= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
   $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
