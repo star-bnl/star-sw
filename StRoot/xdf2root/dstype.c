@@ -600,10 +600,14 @@ static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 static int dsSearchScope(DS_TYPE_T **ppType, char *name,
 	DS_TYPE_T **scope, unsigned level, int top)
 {
+        const char* intName  = "int";
+        const char* longName = "long";
 	unsigned c, i;
 	DS_FIELD_T *field;
 	DS_TYPE_T *type;
 
+        // treat all  "int" as "long"
+        if (!dsCmpName(name,intName)) name = (char *)longName;
 	for (; level-- > 0;) {
 		type = scope[level];
 		field = DS_FIELD_PTR(type);
