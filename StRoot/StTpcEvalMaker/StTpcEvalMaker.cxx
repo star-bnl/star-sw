@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.7 2001/06/19 12:49:37 flierl Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.8 2001/07/10 09:21:47 flierl Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.8  2001/07/10 09:21:47  flierl
+// * add posibility to cut on vertex z-positions
+// *
 // * Revision 1.7  2001/06/19 12:49:37  flierl
 // * add l3 option
 // *
@@ -75,7 +78,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.7 2001/06/19 12:49:37 flierl Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.8 2001/07/10 09:21:47 flierl Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -89,6 +92,7 @@ ClassImp(StTpcEvalMaker)
 StTpcEvalMaker::StTpcEvalMaker(const char *name, const char *title):StMaker(name,title)
 {
   mL3TriggerOn = false ;
+  mVertexConstraint = 0 ;
 }
 //-----------------------------------------------------------------------
 StTpcEvalMaker::~StTpcEvalMaker()
@@ -167,6 +171,18 @@ Int_t StTpcEvalMaker::Make()
 		return kStWarn;
 	    }
 	}  
+
+    // vertex constraint for l3
+    if(mVertexConstraint)
+      {
+	Double_t mMcVertexZ = mStMcEvent->primaryVertex()->position().z() ;
+	if( fabs(mMcVertexZ) > mVertexConstraint )
+	  {
+	    cout << "Event rejected due to z vertex consraint : z-vertex :" 
+		 <<  mMcVertexZ << "\t limit :" << mVertexConstraint << endl ;
+	    return kStWarn ;
+	  }
+      }
     
     // StAssociationMaker multimaps
     StAssociationMaker* assoc =  (StAssociationMaker*) GetMaker("StAssociationMaker");
