@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.cc,v 1.19 2004/04/06 18:36:13 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.20 2004/05/07 14:18:46 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.20  2004/05/07 14:18:46  oldi
+// const added to GedtDetectorId() and GetHardwarePosition().
+// Creation of StEvent/StFtpcHit removed. This is done in a new constructor of StFtpcit itself, now.
+//
 // Revision 1.19  2004/04/06 18:36:13  oldi
 // New data mebers for pad and time position and pad and time sigma added.
 // Reference to StFtpcHit added.
@@ -387,12 +391,7 @@ Int_t StFtpcPoint::ToStEvent(StFtpcHitCollection* ftpcHitCollection)
 {
   // Writes cluster information into StFtpcHit class inside StEvent.
 
-  StFtpcHit *point = new StFtpcHit(StThreeVectorF(GetX(), GetY(), GetZ()), 
-				   StThreeVectorF(GetXerr(), GetYerr(), GetZerr()), 
-				   GetHardwarePosition(), mCharge, 
-				   0); // hit is not used for tracking (yet)
-
-  point->setFlag(GetFlags());
+  StFtpcHit *point = new StFtpcHit(*this);
 
   ftpcHitCollection->addHit(point);
   SetStFtpcHit(point); // let this StFtpcPoint know its pointer in StEvent
@@ -446,7 +445,7 @@ StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const
 }
 
 
-Int_t StFtpcPoint::GetDetectorId() 
+Int_t StFtpcPoint::GetDetectorId() const
 {
   // Returns the detector id of this hit.
   
@@ -459,7 +458,7 @@ Int_t StFtpcPoint::GetDetectorId()
 }
 
 
-Long_t StFtpcPoint::GetHardwarePosition()
+Long_t StFtpcPoint::GetHardwarePosition() const
 {
   // Returns the hardware position of this hit.
   //    hw_position  (32 bits)

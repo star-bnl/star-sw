@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.hh,v 1.14 2004/04/06 18:36:13 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.15 2004/05/07 14:19:25 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.15  2004/05/07 14:19:25  oldi
+// const added to GedtDetectorId() and GetHardwarePosition().
+// Creation of StEvent/StFtpcHit removed. This is done in a new constructor of StFtpcit itself, now.
+//
 // Revision 1.14  2004/04/06 18:36:13  oldi
 // New data mebers for pad and time position and pad and time sigma added.
 // Reference to StFtpcHit added.
@@ -217,8 +221,8 @@ public:
   Long_t   GetMaxADC()        const { return mMaxADC;          }
   Long_t   GetCharge()        const { return mCharge;          }
   Long_t   GetFlags()         const { return mFlags;           }
-   Int_t   GetDetectorId();
-  Long_t   GetHardwarePosition();
+   Int_t   GetDetectorId() const;
+  Long_t   GetHardwarePosition() const;
   
   Double_t GetXPrimResidual()     const { return mXPrimResidual;       }
   Double_t GetYPrimResidual()     const { return mYPrimResidual;       }
