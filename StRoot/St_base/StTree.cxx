@@ -150,11 +150,14 @@ TObject *StIO::ReadNext(TFile *file, const Char_t *name, ULong_t  &ukey)
 ClassImp(StBranch)
 
 //_______________________________________________________________________________
-StBranch::StBranch(const Char_t *name, StTree *parent):St_DataSet(name,parent)
+StBranch::StBranch(const Char_t *name, StTree *parent,Option_t *opt):St_DataSet(name,parent)
 {
 
   SetTitle(".StBranch");
   fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fDebug=0;
+  if (opt) 						SetOption(opt);
+  else if (strstr("histBranch runcoBranch",name))	SetOption("SINGLE");
+
 }
 StBranch::~StBranch()
 {
@@ -164,7 +167,8 @@ StBranch::~StBranch()
 //_______________________________________________________________________________
 void StBranch::SetOption(Option_t *opt)
 { 
-  fOption = opt;
+  if (opt) fOption = opt;
+  fOption.ToUpper();
 }    
 //_______________________________________________________________________________
 void StBranch::SetIOMode(Option_t *iomode)
@@ -295,8 +299,16 @@ Int_t StBranch::GetEvent(Int_t mode)
   if (!(fIOMode&1)) return 0;
   Delete(); if (fList) delete fList; fList=0; 
   if(Open()) return 1; 
-  if (mode) { obj = StIO::ReadNext(fTFile,GetName(),fUKey);
-  } else    { obj = StIO::Read    (fTFile,GetName(),fUKey);}
+
+  if (IsOption("SINGLE"){//Read singleton
+    obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = 0;}
+
+  else if (mode) 	{//Read next
+    obj = StIO::ReadNext(fTFile,GetName(),fUKey);
+
+  } else    		{//Read this one
+    obj = StIO::Read    (fTFile,GetName(),fUKey);
+  }
 
   if (obj == 0) 		return kStEOF;
   if (obj == (TObject*)(-1))	return kStErr;
