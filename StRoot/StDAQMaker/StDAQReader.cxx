@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.34 2003/05/14 18:25:08 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.35 2003/05/15 19:25:47 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.35  2003/05/15 19:25:47  jeromel
+ * Missing Update() ??
+ *
  * Revision 1.34  2003/05/14 18:25:08  perev
  * Remove error for No TPC
  *
@@ -223,6 +226,7 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
+  if (fTPCReader)       fTPCReader->Update();
   if (fFTPCReader)	fFTPCReader->Update();  
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
