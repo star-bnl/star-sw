@@ -100,16 +100,22 @@ void StHbtThPairDoubleGauss::SetMomentum_PID( const StHbtPair* aPair ){
 	if (tSmearedHidInf1==0) {
 	  StHbtMomRes *mMomRes1 = new StHbtMomRes(mPid1);
 	  mMomRes1->setMult(mResMult);
-	  aPair->track1()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track1()->FourMomentum(), *GenerateFreezeOut(1), mPid1, &mRand, mMomRes1));
+	   StHbtLorentzVector *temp;
+	   temp = GenerateFreezeOut(1);
+	   aPair->track1()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track1()->FourMomentum(), *temp, mPid1, &mRand, mMomRes1));
 	  tSmearedHidInf1 = dynamic_cast< StHbtSmearedHiddenInfo*>(aPair->track1()->getHiddenInfo());
 	  delete mMomRes1;
+	   delete temp;
 	} 
 	if (tSmearedHidInf2==0) {
 	  StHbtMomRes *mMomRes2 = new StHbtMomRes(mPid2);
 	  mMomRes2->setMult(mResMult);
-	  aPair->track2()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track2()->FourMomentum(), *GenerateFreezeOut(2), mPid2, &mRand, mMomRes2));
+	   StHbtLorentzVector *temp;
+	   temp = GenerateFreezeOut(2);
+	  aPair->track2()->SetHiddenInfo(new StHbtSmearedHiddenInfo(aPair->track2()->FourMomentum(), *temp, mPid2, &mRand, mMomRes2));
 	  tSmearedHidInf2 = dynamic_cast< StHbtSmearedHiddenInfo*>(aPair->track2()->getHiddenInfo());
 	  delete mMomRes2;
+	   delete temp;
 	} 
       }
     }
@@ -204,16 +210,21 @@ void StHbtThPairDoubleGauss::SetPosition( const StHbtPair* aPair) {
     }
   else
     {
-      mPos1 = *GenerateFreezeOut(1);
-      mPos2 = *GenerateFreezeOut(2);
+       StHbtLorentzVector* temp;
+       temp = GenerateFreezeOut(1);
+       mPos1 = *temp;
+       delete temp;
+       temp = GenerateFreezeOut(2);
+       mPos2 = *temp;
+       delete temp;
       //      cout << mPos1.x() << " " << mPos1.y() << endl;
     }
 
 };
 
-inline StHbtLorentzVector* StHbtThPairDoubleGauss::GenerateFreezeOut(int partno) {
+StHbtLorentzVector* StHbtThPairDoubleGauss::GenerateFreezeOut(int partno) {
 
-  StHbtLorentzVector *mPos;
+  StHbtLorentzVector* mPos;
   mPos = new StHbtLorentzVector();
   float x,y,z,t;
 
@@ -324,8 +335,6 @@ inline StHbtLorentzVector* StHbtThPairDoubleGauss::GenerateFreezeOut(int partno)
       mPosDist2->Fill(mPos->x(),mPos->y(),mPos->z());
       //      mPosPtDist2->Fill(hypot(mPos->x(),mPos->y()), hypot(partMom->y(),partMom->x()));
     }
-  return mPos;
-  //  cout << "X: " << mPos->x() << "   Y: " << mPos->y() << "   Z: " << mPos->z() << "   T: " << mPos->t() << endl;
   return mPos;
 }
 
