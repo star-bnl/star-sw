@@ -29,6 +29,15 @@ extern "C" {
    int rfio_unlink(const char *filepath);
    int rfio_parse(const char *name, char **host, char **path);
 };
+class Cat : public TNamed {
+public:
+  Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
+  double fSize;
+  int    fNGeant;
+  int    fNKeys;
+  int    fNRecs;
+  int    fNFiles;
+};
 
 ClassImp(StIOEvent)
 StIOEvent::StIOEvent():TObject(){fObj=(TObject*)(-1);};
@@ -924,15 +933,6 @@ RETN:;
 void StFile::ls(Option_t *opt)
 {
 
-class Cat : public TNamed {
-public:
-Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
-double fSize;
-int    fNGeant;
-int    fNKeys;
-int    fNRecs;
-int    fNFiles;
-};
 
 
   TList blist;
