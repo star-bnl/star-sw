@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.12 2002/10/29 21:40:39 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.13 2002/11/14 17:43:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.13  2002/11/14 17:43:00  porter
+ * added dbEemc to enumerated domain list
+ *
  * Revision 1.12  2002/10/29 21:40:39  porter
  * Added dbScalers as a dbType; dbScaler is a dbDomain from before but now
  * use as a dbType is more in line with how it will be handled
@@ -258,6 +261,7 @@ addDbDomain(dbSsd,"ssd");
 addDbDomain(dbRts,"rts"); 
 addDbDomain(dbTof,"tof"); 
 addDbDomain(dbFpd,"fpd"); 
+addDbDomain(dbEemc,"eemc"); 
 
 }
 
