@@ -102,8 +102,8 @@ c      y_privert = dst_vertex(1).y
       x_privert = 0.
       y_privert = 0.
       z_privert = dst_vertex(1).z
-c      write(*,'(1x,a36,3f9.3)')' FILL_DST_TOF: primary vertex posn =',
-c     1         x_privert,y_privert,z_privert
+      write(*,'(1x,a36,3f9.3)')' FILL_DST_TOF: primary vertex posn =',
+     1         x_privert,y_privert,z_privert
 
 c---- set up lookup from tptrack table to tte_mctrk table...
       if(tpt_track_h.nok.gt.15000)then
