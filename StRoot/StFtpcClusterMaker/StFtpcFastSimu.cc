@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.4 2000/01/03 12:48:57 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.5 2000/01/05 13:23:40 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.5  2000/01/05 13:23:40  hummler
+// make cc5 happy
+//
 // Revision 1.4  2000/01/03 12:48:57  jcs
 // Add CVS Id strings
 //
@@ -111,8 +114,8 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 
     //mk Check: is s_rad=0 and s_azi=0 then no hit-shifting is wanted. 
 
-    check1 = abs(s_rad[0])+abs(s_rad[1])+abs(s_rad[2])+abs(s_rad[3]);
-    check2 = abs(s_azi[0])+abs(s_azi[1])+abs(s_azi[2])+abs(s_azi[3]);
+    check1 = abs((int)s_rad[0])+abs((int)s_rad[1])+abs((int)s_rad[2])+abs((int)s_rad[3]);
+    check2 = abs((int)s_azi[0])+abs((int)s_azi[1])+abs((int)s_azi[2])+abs((int)s_azi[3]);
 	
     if(check1==0. && check2 == 0. ) 
       {
@@ -176,7 +179,7 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 	    // dip-angle:
             theta = C_DEG_PER_RAD*atan2((pt*cos(twist*C_RAD_PER_DEG)),
 				       ((g2t_ftp_hit[k].x[2]
-					 /abs(g2t_ftp_hit[k].x[2]))*
+					 /fabs(g2t_ftp_hit[k].x[2]))*
 					g2t_ftp_hit[k].p[2]));
 
 	    // crossing-angle: 
@@ -572,9 +575,9 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
  		   (fcl_fppoint[id_2].sector!=fcl_fppoint[id_1].sector))
  		  continue;
 		
-		delta_azi = abs(phi1[id_1]-phi1[id_2])
+		delta_azi = fabs(phi1[id_1]-phi1[id_2])
 		  *((r1[id_1]+r1[id_2])/2);
-		delta_r = abs(r1[id_1]-r1[id_2]);
+		delta_r = fabs(r1[id_1]-r1[id_2]);
 		
 		if((delta_r < (2 * sigrad[id_1])) &&
 		   (delta_azi < (2 * sigazi[id_1])))
