@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.4 2003/09/12 21:32:17 jeromel Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.5 2003/09/17 02:54:37 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -20,14 +20,14 @@ class StEvent;
 class StMuDst2StEventMaker : public StMaker {
  public:
     /// Default constructor; get pointer to StMuDstMaker
-    StMuDst2StEventMaker(const char* self="muDst2StEventMaker", const char* muDstMakerName="muDstMaker");
+    StMuDst2StEventMaker(const char* self="muDst2StEventMaker", const char* muDstMakerName="MuDst");
     ~StMuDst2StEventMaker();
     
     void Clear(const char*);  
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
     StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.4 2003/09/12 21:32:17 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.5 2003/09/17 02:54:37 jeromel Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -48,6 +48,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.5  2003/09/17 02:54:37  jeromel
+ * Name clash. Added warning in case this happens in future
+ *
  * Revision 1.4  2003/09/12 21:32:17  jeromel
  * No changes (misspelled)
  *
