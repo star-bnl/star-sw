@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.89  2000/03/02 18:47:45  fisyak
+#  Add i386_redhat61
+#
 #  Revision 1.88  1999/10/28 17:03:37  fisyak
 #  remove no%castop for Sun
 #
@@ -242,7 +245,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/10/28 17:03:37 $ 
+#             Last modification $Date: 2000/03/02 18:47:45 $ 
 #. default setings
 
 MAKE  := gmake
@@ -449,7 +452,7 @@ ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60 i386_redhat61))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
