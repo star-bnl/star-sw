@@ -35,6 +35,14 @@ using namespace log4cxx::helpers;
 using namespace log4cxx::db;
 using namespace log4cxx::spi;
 
+class testkit {
+public:
+  testkit(){ fprintf(stderr,"testkit\n");}
+};
+
+static testkit ttttt;
+
+
 IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________

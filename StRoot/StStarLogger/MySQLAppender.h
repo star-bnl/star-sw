@@ -148,7 +148,7 @@ namespace log4cxx
 			std::list<spi::LoggingEventPtr> buffer;
 			
 		public:				
-         DECLARE_LOG4CXX_OBJECT(MySQLAppender)
+                        DECLARE_LOG4CXX_OBJECT(MySQLAppender)
 			BEGIN_LOG4CXX_CAST_MAP()
 				LOG4CXX_CAST_ENTRY(MySQLAppender)
 				LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
@@ -238,7 +238,6 @@ namespace log4cxx
 			* Returns pre-formated statement eg: insert into LogTable (msg) values ("%m")
 			*/
 			inline const String& getSql() const
-//			inline const String& getSql()
 				{ return sqlStatement; }
 			
 			
@@ -258,25 +257,21 @@ namespace log4cxx
 				{ bufferSize = newBufferSize; }
 			
 			inline const String& getUser() const
-//			inline const String& getUser() 
 				{ return databaseUser; }
 			
 			
-//			inline const String& getURL()
 			inline const String& getURL() const
 				{ return databaseURL; }
 			
 			
 			inline const String& getPassword() const
-//			inline const String& getPassword()
 				{ return databasePassword; }
 			
 			inline size_t getBufferSize() const
-//			inline size_t getBufferSize()
 				{ return bufferSize; }
 		}; // class MySQLAppender
     } // namespace db
 }; // namespace log4cxx
 
 #endif // HAVE_MYSQL
-#endif // _LOG4CXX_NET_SOCKET_APPENDER_H
+#endif // _LOG4CXX_DB_MYSQL_APPENDER_H
