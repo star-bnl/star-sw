@@ -18,8 +18,6 @@
 #pragma link C++ class QWERTYRef-;
 #pragma link C++ class QWERTYStr-;
 #pragma link C++ class QWERTYIter-;
-#pragma link C++ class St_Points3DABC-;
-#pragma link C++ class St_AttributesABC-;
 #pragma link C++ class St_PolyLine3D-;
 #pragma link C++ class St_PointsArray3D-;
 #pragma link C++ enum  EReturnCodes;
