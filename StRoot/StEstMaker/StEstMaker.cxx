@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.15 2002/04/30 22:49:19 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.16 2002/05/21 20:33:28 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.16  2002/05/21 20:33:28  caines
+ * Fix radii determination
+ *
  * Revision 1.15  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -257,40 +260,40 @@ Int_t StEstMaker::Init(){
   mParams[4]->geomcutl[3] = 1.0;
   mParams[4]->geomcutw[3] = 1.0;
 
-  mParams[0]->geomcutl[2] = 5.0;
-  mParams[0]->geomcutl[1] = 5.;
-  mParams[0]->geomcutl[0] = 5.;
-  mParams[0]->geomcutw[2] = 5.0;
-  mParams[0]->geomcutw[1] = 5.;
-  mParams[0]->geomcutw[0] = 5.;
+  mParams[0]->geomcutl[2] = 1.0;
+  mParams[0]->geomcutl[1] = 1.;
+  mParams[0]->geomcutl[0] = 1.;
+  mParams[0]->geomcutw[2] = 1.0;
+  mParams[0]->geomcutw[1] = 1.;
+  mParams[0]->geomcutw[0] = 1.;
 
-  mParams[1]->geomcutl[2] = 5.0;
-  mParams[1]->geomcutl[1] = 5.;
-  mParams[1]->geomcutl[0] = 5.;
-  mParams[1]->geomcutw[2] = 5.0;
-  mParams[1]->geomcutw[1] = 5.;
-  mParams[1]->geomcutw[0] = 5.;
+  mParams[1]->geomcutl[2] = 1.0;
+  mParams[1]->geomcutl[1] = 1.;
+  mParams[1]->geomcutl[0] = 1.;
+  mParams[1]->geomcutw[2] = 1.0;
+  mParams[1]->geomcutw[1] = 1.;
+  mParams[1]->geomcutw[0] = 1.;
   
-  mParams[2]->geomcutl[2] = 5.0;
-  mParams[2]->geomcutl[1] = 5.;
-  mParams[2]->geomcutl[0] = 5.;
-  mParams[2]->geomcutw[2] = 5.0;
-  mParams[2]->geomcutw[1] = 5.;
-  mParams[2]->geomcutw[0] = 5.;
+  mParams[2]->geomcutl[2] = 1.0;
+  mParams[2]->geomcutl[1] = 1.;
+  mParams[2]->geomcutl[0] = 1.;
+  mParams[2]->geomcutw[2] = 1.0;
+  mParams[2]->geomcutw[1] = 1.;
+  mParams[2]->geomcutw[0] = 1.;
   
-  mParams[3]->geomcutl[2] = 7.0;
-  mParams[3]->geomcutl[1] = 5.;
-  mParams[3]->geomcutl[0] = 5.;
-  mParams[3]->geomcutw[2] = 7.0;
-  mParams[3]->geomcutw[1] = 5.;
-  mParams[3]->geomcutw[0] = 5.;
+  mParams[3]->geomcutl[2] = 1.0;
+  mParams[3]->geomcutl[1] = 1.;
+  mParams[3]->geomcutl[0] = 1.;
+  mParams[3]->geomcutw[2] = 1.0;
+  mParams[3]->geomcutw[1] = 1.;
+  mParams[3]->geomcutw[0] = 1.;
   
-  mParams[4]->geomcutl[2] = 7.0;
-  mParams[4]->geomcutl[1] = 5.;
-  mParams[4]->geomcutl[0] = 5.;
-  mParams[4]->geomcutw[2] = 7.0;
-  mParams[4]->geomcutw[1] = 5.;
-  mParams[4]->geomcutw[0] = 5.;
+  mParams[4]->geomcutl[2] = 1.0;
+  mParams[4]->geomcutl[1] = 1.;
+  mParams[4]->geomcutl[0] = 1.;
+  mParams[4]->geomcutw[2] = 1.0;
+  mParams[4]->geomcutw[1] = 1.;
+  mParams[4]->geomcutw[0] = 1.;
 
 
   // superpass settings
@@ -303,7 +306,7 @@ Int_t StEstMaker::Init(){
   mSegments[0]->minhits=3;
   mSegments[0]->rminTPC=500;
   mSegments[0]->minTPChits=0;
-  mSegments[0]->slay[3]=1;
+  mSegments[0]->slay[3]=0;
   mSegments[0]->slay[2]=2;
   mSegments[0]->slay[1]=2;
   mSegments[0]->slay[0]=2;
@@ -447,22 +450,22 @@ Int_t StEstMaker::Make() {
   int index;
 
   for (int i=0;i<mNPass;i++){
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(11);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(6);
     mParams[i]->lrad[0][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(3);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(2);
     mParams[i]->lrad[0][1] =sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(72);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(41);
     mParams[i]->lrad[1][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(66);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(35);
     mParams[i]->lrad[1][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(114);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(115);
     mParams[i]->lrad[2][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
-    waferGeom = (StSvtWaferGeometry*)m_geom->at(106);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(108);
     mParams[i]->lrad[2][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     /*
