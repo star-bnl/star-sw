@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.62 2004/06/18 09:07:03 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.63 2004/06/18 12:07:41 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.63  2004/06/18 12:07:41  jcs
+// replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
+//
 // Revision 1.62  2004/06/18 09:07:03  jcs
 // add code to write out a root file for calibration
 //
@@ -514,7 +517,8 @@ Int_t StFtpcTrackMaker::Make()
     if (Debug()) {
        gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
      }       
-#elif LASERTRACKING
+#endif    
+#ifdef LASERTRACKING
     tracker->LaserTracking();
     if (Debug()) {
        gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
@@ -819,7 +823,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.62 2004/06/18 09:07:03 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.63 2004/06/18 12:07:41 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {

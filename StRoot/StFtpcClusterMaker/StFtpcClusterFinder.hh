@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.19 2004/06/18 09:04:40 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.20 2004/06/18 12:04:57 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.20  2004/06/18 12:04:57  jcs
+// replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
+//
 // Revision 1.19  2004/06/18 09:04:40  jcs
 // replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
 //
@@ -184,7 +187,8 @@ class StFtpcClusterFinder
                       TH2F *histo,
                       TH1F *histoW,
                       TH1F *histoE);
-#elif DEBUGFILE
+#endif
+#ifdef DEBUGFILE
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
