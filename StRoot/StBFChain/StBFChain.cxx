@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.12 1999/09/24 01:22:51 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.13 1999/09/24 14:50:46 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.13  1999/09/24 14:50:46  fisyak
+// Write and Close TFile if any
+//
 // Revision 1.12  1999/09/24 01:22:51  fisyak
 // Reduced Include Path
 //
@@ -770,6 +773,6 @@ Bool_t StBFChain::GetOption(Int_t k) {return (k>0 && k <=NoChainOptions) ? Chain
 Int_t StBFChain::Finish()
 {
   SafeDelete (xdf_out);
-  SafeDelete (m_TFile);
+  if (m_TFile) {m_TFile->Write(); m_TFile->Close(); SafeDelete (m_TFile);}
   return StMaker::Finish();
 }
