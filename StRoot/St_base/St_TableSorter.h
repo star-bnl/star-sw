@@ -58,7 +58,11 @@ class St_TableSorter : public TNamed {
     Int_t    *m_IndexArray;   // "parsed" indecis
     Int_t     m_colDimensions;// The number of the dimensions for array (=-1 means it is a "simple" array)
     const Char_t *m_simpleArray;    // Pointer to the "simple" array;
+#ifndef __CINT__
     const St_Table &m_ParentTable;  // the back pointer to the sorted table
+#else
+    const St_Table *m_ParentTable;  // the back pointer to the sorted table
+#endif
     SEARCHMETHOD  m_searchMethod;   // Function selected to serach values
     EColumnType   m_colType;        // data type of the selected column
 

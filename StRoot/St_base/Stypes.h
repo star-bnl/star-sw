@@ -21,7 +21,14 @@
  
 #include "Rtypes.h"
 
-enum EReturnCodes { kStOK=0, kStOk=0, kStWarn, kStErr };  
+enum EReturnCodes { 
+  kStOK=0, 	// OK
+  kStOk=0, 	// OK
+  kStEOF, 	// End Of File 
+  kStWarn, 	// Warning, something wrong but work can be continued
+  kStErr, 	// Error, drop this and go to the next event
+  kStFatal      // Fatal error, processing impossible
+};  
 #ifdef ANSICPP
 #   define _QUOTE2_(name1,name2) _QUOTE_(name1##name2)
 #else

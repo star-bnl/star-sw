@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.6 1999/02/24 17:10:57 fine Exp $
+// $Id: St_Module.cxx,v 1.7 1999/03/11 00:34:44 perev Exp $
 // $Log: St_Module.cxx,v $
+// Revision 1.7  1999/03/11 00:34:44  perev
+// St_base in new maker schema
+//
 // Revision 1.6  1999/02/24 17:10:57  fine
-// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
 //
 // Revision 1.5  1998/11/25 21:58:33  fisyak
 // Cleanup
@@ -358,7 +361,7 @@ Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
           indx--;
           const Char_t *name = names ? names[odd] : "unknown" ;
           fprintf(stderr, "\t %i-%s <%s> %s has used %d with %d allocated\n"
-                   ,odd+1,suffix[indx],name,title[i&1],h->nok,h->maxlen);
+          ,odd+1,suffix[indx],name,title[i&1],(int)h->nok,(int)h->maxlen);
         }
        }
        headfl = -headfl;

@@ -1,7 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
-// $Id: St_FileSet.cxx,v 1.5 1998/12/26 21:40:38 fisyak Exp $
+// $Id: St_FileSet.cxx,v 1.6 1999/03/11 00:34:43 perev Exp $
 // $Log: St_FileSet.cxx,v $
+// Revision 1.6  1999/03/11 00:34:43  perev
+// St_base in new maker schema
+//
 // Revision 1.5  1998/12/26 21:40:38  fisyak
 // Add Id and Log
 // 
@@ -55,12 +58,13 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
   St_FileSet *set = 0;
   Long_t id, size, flags, modtime;
   TString dirbuf = dirname;
+
   if (expand) gSystem->ExpandPathName(dirbuf);
-  const Char_t *name = dirbuf.Data();
+  const char *name= dirbuf;
   if (gSystem->GetPathInfo(name, &id, &size, &flags, &modtime)==0) {
-    TString nextobj = name;
-    if (!setname) SetName(name);
-    else          SetName(setname);
+
+    if (!setname) {setname = strrchr(name,'/')+1;}
+    SetName(setname);
 
     // Check if "dirname" is a directory.
     void *dir = 0;
@@ -77,12 +81,12 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
       SetTitle("directory");
       while (name = gSystem->GetDirEntry(dir)) {
          // skip some "special" names
-         if (strcmp(name,"..")!=0 && strcmp(name,".")!=0) {
-           Char_t *file = gSystem->ConcatFileName(dirbuf,name);
-           TString nextdir = file;
-           delete [] file;
-           Add(new St_FileSet(nextdir,name,kFALSE));
-         }
+         if (strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
+         Char_t *file = gSystem->ConcatFileName(dirbuf,name);
+         TString nextdir = file;
+         delete [] file;
+         Add(new St_FileSet(nextdir,name,kFALSE));
+         
       }
       gSystem->FreeDirectory(dir);
     }

@@ -37,7 +37,6 @@ enum EBitOpt {
 class St_DataSetIter : public TObject{
 protected:
    TIter           *fNext;            // "standard" ROOT iterator for containers
-//   TList          *fNextSet;        // the list of the TList iterators to bypass the whole dataset
    TIter           *fNextSet[100];    // the list of the TList iterators to bypass the whole dataset
    Int_t            fDepth;           // the current depth of the passing
    Int_t            fMaxDepth;        // the max depth of the passing (=1 by default)
@@ -67,6 +66,7 @@ public:
 
   virtual St_DataSet    *Find(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
   virtual St_DataSet    *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
+  virtual St_DataSet    *FindObject(St_DataSet *set,const Char_t *path,Option_t *opt="");
   virtual Int_t          Flag(UInt_t flag=kMark,EBitOpt reset=kSet){return Flag((St_DataSet *)0,flag,reset);}
   virtual Int_t          Flag(const Char_t *path,UInt_t flag=kMark,EBitOpt reset=kSet);
   virtual Int_t          Flag(St_DataSet *dataset,UInt_t flag=kMark,EBitOpt reset=kSet);
