@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.3 2002/06/07 02:21:48 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.4 2002/06/11 19:09:34 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,9 +10,21 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.4  2002/06/11 19:09:34  calderon
+// Bug fix: the filename that was set in the macro was being overwritten
+// in InitRun, so the emb80x string which was added to the filename was lost.
+// This was fixed by not replacing the filename in InitRun and only replacing
+// the current filename starting from st_physics.
+//
 // Revision 1.3  2002/06/07 02:21:48  calderon
 // Protection against empty vector in findFirstLastHit
-// $Log$ and $Id$ plus header comments for the macros
+// $Log: StMiniEmbed.C,v $
+// Revision 1.4  2002/06/11 19:09:34  calderon
+// Bug fix: the filename that was set in the macro was being overwritten
+// in InitRun, so the emb80x string which was added to the filename was lost.
+// This was fixed by not replacing the filename in InitRun and only replacing
+// the current filename starting from st_physics.
+// and $Id: StMiniEmbed.C,v 1.4 2002/06/11 19:09:34 calderon Exp $ plus header comments for the macros
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -133,7 +145,7 @@ void StMiniEmbed(Int_t nevents=2,
   filename.Prepend("emb");
   krap->setFileName(filename);
   cout << "outdir : " << outDirName << endl;
-  cout << "Output File: " << filename << endl;
+  cout << "Output : " << filename << endl;
 
   // Define the cuts for the Associations
   

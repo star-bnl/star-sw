@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.5 2002/06/07 02:22:00 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.6 2002/06/11 19:09:35 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,9 +7,21 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.6  2002/06/11 19:09:35  calderon
+ * Bug fix: the filename that was set in the macro was being overwritten
+ * in InitRun, so the emb80x string which was added to the filename was lost.
+ * This was fixed by not replacing the filename in InitRun and only replacing
+ * the current filename starting from st_physics.
+ *
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
- * $Log$ and $Id$ plus header comments for the macros
+ * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.6  2002/06/11 19:09:35  calderon
+ * Bug fix: the filename that was set in the macro was being overwritten
+ * in InitRun, so the emb80x string which was added to the filename was lost.
+ * This was fixed by not replacing the filename in InitRun and only replacing
+ * the current filename starting from st_physics.
+ * and $Id: StMiniMcMaker.cxx,v 1.6 2002/06/11 19:09:35 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -135,7 +147,7 @@ StMiniMcMaker::InitRun(int runID) {
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
 
   mIOMaker = (StIOMaker*)GetMaker("IO");
-  if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+  //if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
 
   //
   // instantiate the event object here (embedding or simulation?)
@@ -192,13 +204,15 @@ StMiniMcMaker::Make()
   //
   TString curFileName;
   if(mIOMaker) curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
-  if(mInFileName!=curFileName){
+  if(!mInFileName.Contains(curFileName)){
     if(mDebug) {
       cout << "\tNew file found : " << curFileName << endl
 	   << "\tReplacing " << mInFileName << endl;
     }
     closeFile();
-    mInFileName = curFileName;
+    int fileBeginIndex = mInFileName.Index("st_physics",0);
+    mInFileName.Remove(fileBeginIndex);
+    mInFileName.Append(curFileName);
     stat = openFile();
     if(!stat) return stat;
   }
