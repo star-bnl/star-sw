@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.5 1999/08/06 14:26:37 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.6 1999/08/06 18:57:31 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.6  1999/08/06 18:57:31  fisyak
+// Put MinidaqMaker after TPC
+//
 // Revision 1.5  1999/08/06 14:26:37  fisyak
 // put back xdf out option
 //
@@ -241,9 +244,6 @@ Int_t StBFChain::Load()
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
   }
-  if (ChainFlags[kMINIDAQ]) {
-    gSystem->Load("StMinidaqMaker");
-  }
 
   if (ChainFlags[kTPC]) {
     gSystem->Load("St_tpc");
@@ -257,6 +257,9 @@ Int_t StBFChain::Load()
     else {
       if (ChainFlags[kTSS]) gSystem->Load("St_tss_Maker");
     }
+  }
+  if (ChainFlags[kMINIDAQ]) {
+    gSystem->Load("StMinidaqMaker");
   }
   if (ChainFlags[kFTPC]) {
     gSystem->Load("St_ftpc");
