@@ -261,16 +261,25 @@ void showFoundCluster(Bool_t clusters) {
     TPolyMarker3D *p;
     
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;2");
-    canvas->cd(3);
-    p->Draw("same");
+    
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(3);
+      p->Draw("same");
+    }
     
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;3");
-    canvas->cd(2);
-    p->Draw("same");
     
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(2);
+      p->Draw("same");
+    }
+
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;1");
-    canvas->cd(1);
-    p->Draw("same");
+    
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(1);
+      p->Draw("same");
+    }
     
     fo = p->Size();
   }
@@ -283,16 +292,25 @@ void showUnusedCluster(Bool_t clusters) {
     TPolyMarker3D *p;
     
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;5");
-    canvas->cd(3);
-    p->Draw("same");
+    
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(3);
+      p->Draw("same");
+    }
     
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;6");
-    canvas->cd(2);
-    p->Draw("same");
+
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(2);
+      p->Draw("same");
+    }
     
     p = (TPolyMarker3D *)file->Get("TPolyMarker3D;4");
-    canvas->cd(1);
-    p->Draw("same");
+    
+    if (p->Size() > 1) { // to avoid crashes due to ROOT problem
+      canvas->cd(1);
+      p->Draw("same");
+    }
     
     un = p->Size();
   }
