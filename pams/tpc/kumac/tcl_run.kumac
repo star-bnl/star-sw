@@ -15,7 +15,9 @@ message 'start run_tcl'
 
 do j = [tpc_sector_first],[tpc_sector_last] 
   cd  [params]/tpc/tclpars
+  rowcount tcl_sector_index 1
   tdm/table/cell/putvalue 'tcl_sector_index[0].CurrentSector' [j]
+  cd /dui
  ami/module/call tcl_
         [geometry]/tpc/tpgpar/tpg_pad_plane_
         [params]/tpc/tclpars/tcl_sector_index_
