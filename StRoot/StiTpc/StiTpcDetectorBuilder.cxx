@@ -193,7 +193,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setGas(_gas);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
-	  if (row<20)
+	  if (row<13)
 	    pDetector->setHitErrorCalculator(&_innerCalc);
 	  else
 	    pDetector->setHitErrorCalculator(&_outerCalc);
