@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpChannel.hh,v 1.2 2000/04/09 16:46:05 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.hh,v $
+ * Revision 1.2  2000/04/09 16:46:05  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -35,6 +38,7 @@
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollection.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpDefaultNet.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpNHitsNet.hh"
+#include "StPidAmpMaker/Infrastructure/StPidAmpNHitsDcaNet.hh"
 #include "StPidAmpMaker/Include/StPidAmpEnum.hh"
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
 #include "StPidAmpMaker/StPidAmpChannelInfoOut.h"
