@@ -13,9 +13,9 @@ struct tofSimPars {
   float d_inner; /* thickness of inner glass (mm) */
   float d_outer; /* thickness of outer glass (mm) */
   float d_gap; /* thickness of gap (mm) */
-  short nGaps; /* number of gaps */
+  long nGaps; /* number of gaps */
   float alpha; /* effective Tompson coefficient */
-  short nClustersMax; /* saturation value of number of clusters */
+  long nClustersMax; /* saturation value of number of clusters */
   float vDriftMean; /* mean drifting velocity (mm/ps) */
   float vDriftErr; /* window size of difting velocity with uniform sampling 
 		      (relative ratio w.r.t. mean velocity */

@@ -6,9 +6,11 @@
  */
 
 struct tofModuleConfig {
-  short iTray; /* number Id of the tray */
-  short iModule; /* number Id(local in the tray) of the module */
-  short iStatModule; /* status of this module */
-  octet iStatCells; /* status of 6 cells in bitwise: (hightest)6-->1(lowest) */
-  long iChannel[6]; /* daq channel Id of cell 1-6 (0-5) */
+  long entries;
+  short iTray[4000]; /* number Id of the tray */
+  short iModule[4000]; /* number Id(local in the tray) of the module */
+  short iStatModule[4000]; /* status of this module */
+  short iStatCells[4000]; /* status of 6 cells in bitwise: (hightest)6-->1(lowest) 
+                             --- changed to long */
+  short iChannel[6][4000]; /* daq channel Id of cell 1-6 (0-5) */
 };
