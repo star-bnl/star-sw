@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.18 2004/02/02 00:41:24 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.19 2004/08/11 02:09:35 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.19  2004/08/11 02:09:35  deph
+ * added zdc domain
+ *
  * Revision 1.18  2004/02/02 00:41:24  deph
  * Added bbc and tracker domains
  *
@@ -280,6 +283,7 @@ addDbDomain(dbEemc,"eemc");
 addDbDomain(dbPmd,"pmd"); 
 addDbDomain(dbBbc,"bbc"); 
 addDbDomain(dbTracker,"tracker"); 
+addDbDomain(dbZdc,"zdc"); 
 
 }
 
