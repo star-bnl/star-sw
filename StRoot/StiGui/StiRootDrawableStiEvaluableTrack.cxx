@@ -112,6 +112,7 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     double step = 1.; //cm
     
     bool go = true;
+    StiKalmanTrackNode * lastNode = getLastNode();
     double xLocal = lastNode->fX;
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
