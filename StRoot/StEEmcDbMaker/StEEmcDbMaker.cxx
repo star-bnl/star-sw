@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.33 2004/05/20 16:40:14 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.34 2004/05/26 21:30:36 jwebb Exp $
  
 
 #include <time.h>
@@ -132,10 +132,13 @@ void StEEmcDbMaker::setThreshold(float x){
 
 //------------------
 //------------------
-void StEEmcDbMaker::setPreferedFlavor(const char *flavor, const char *nameMask){
+void StEEmcDbMaker::setPreferredFlavor(const char *flavor, const char *nameMask){
   strncpy(dbFlavor.flavor,flavor,DbFlavor::mx);
   strncpy(dbFlavor.nameMask,nameMask,DbFlavor::mx);
   printf("SET %s::preferFlavor(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
+}
+void StEEmcDbMaker::setPreferedFlavor(const char *flavor, const char *nameMask){
+    setPreferredFlavor( flavor, nameMask);
 }
 
 
@@ -867,6 +870,10 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.34  2004/05/26 21:30:36  jwebb
+// Fixed typo, added setPreferredFlavor method.  Kept setPreferedFlavor for
+// backwards compatibility.
+//
 // Revision 1.33  2004/05/20 16:40:14  balewski
 // fix of strnlen --> strlen
 //
