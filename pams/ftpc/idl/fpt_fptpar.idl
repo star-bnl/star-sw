@@ -19,7 +19,8 @@
        float     inner_r;    /* inner radius of the sensitive volume */
        float     outer_r;    /* outer radius of the sensitive volume */
        float     cord_crit;  /* tolerance by comparing the two cord lengths */
+       float     primary_vertex[3];  /* primary vertex position */
    };
 
-/*  Last mod. for fpt_fptpar: $Date: 1998/01/19 02:25:13 $ */
+/*  Last mod. for fpt_fptpar: $Date: 1999/06/09 12:35:27 $ */
 
