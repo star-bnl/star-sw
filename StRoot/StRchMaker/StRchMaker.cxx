@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.10 2002/02/22 21:46:46 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 2.11 2002/02/22 21:55:22 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -434,6 +434,10 @@ Int_t StRchMaker::Make() {
 		    else {
 			// ...from data
 			thePixelPointer->push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
+		    }
+		    if(saturatedPad) {
+			thePixelPointer->back()->setBit(eSaturatedPixel);
+			//cout << "p/r/q " << iPad << "/" << iRow << "/" << theADCValue << endl;
 		    }
 
 #ifdef RCH_DEBUG
@@ -950,7 +954,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.10 2002/02/22 21:46:46 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.11 2002/02/22 21:55:22 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -995,6 +999,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.11  2002/02/22 21:55:22  dunlop
+ * Fixed bug in saturated pad.  Wasn't being filled for one type of data
+ *
  * Revision 2.10  2002/02/22 21:46:46  dunlop
  * Remove picket fence pixels from cluster finding once and for all.
  * Switchable.
