@@ -18,13 +18,14 @@ void type_of_call F77_NAME(hropen,HROPEN)(){printf("***DUMMY HROPEN****");}
 void type_of_call F77_NAME(hrout,HROUT)(){printf("***DUMMY HROUT****");}
 
 void sig_die(){printf("***DUMMY SIG_DIE****");}
-
+#if 0
 void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b){
 printf("***DUMMY GUFLD 0 0 5****");
   b[0] = 0.;
   b[1] = 0.;
   b[2] = 5.;
 }
+#endif
 int ds2ReallocTable (TABLE_HEAD_ST **h, char** ppData, int newsize){
   *ppData = (char *) ReAllocate(*h,newsize); return 1;
 }
