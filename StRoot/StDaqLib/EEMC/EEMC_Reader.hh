@@ -1,17 +1,8 @@
-/***************************************************************************
- *  
- * Authors: Herbert Ward, 
- ***************************************************************************
- * Description: common definitions for EEMC Bank and EEMC_Reader
- ***************************************************************************
- *  
+/*!
+ * \class EEMC_Reader
+ * \author Herbert Ward 
  *
- **************************************************************************/
-
-/*!\class EEMC_Reader
-\author Herbert Ward 
-
-Main EEMC reader for towers and SMD.
+ * Main EEMC reader for towers and SMD and ommon definitions for EEMC Bank and EEMC_Reader
 */ 
 
 #ifndef EEMC_READER_HH
@@ -26,26 +17,10 @@ struct Bank_EEMCP: public Bank
   struct Pointer EEMCSecPointer[6] ;
 };
 
-struct Bank_EEMCSECP: public Bank
-{
-  struct Pointer FiberPointer[8] ; /* No of fibere to daq from each subdetector, can be maximum 8 */
-};
-
-struct Bank_EEMCRBP: public Bank
-{
-  struct Pointer EEMCADCR;  /* RAW DATA */
-  struct Pointer EEMCADCD ; /* one tower block*/
-  struct Pointer EEMCPEDR; 
-  struct Pointer EEMCRMSR ; /* one tower block*/
-};
-
-
-
 
 class EEMC_Reader 
 {
-  void              ProcessEvent(const Bank_EEMCP *EmcPTR);///<Process EEMC (tower+SMD) event
-  
+
 public:
   
   EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP);///<EEMC_Reader constructor
@@ -68,3 +43,8 @@ EEMC_Reader *getEEMCReader(EventReader *er);
 
 
 #endif
+
+/**************************************************************************
+ *  
+ *
+ **************************************************************************/
