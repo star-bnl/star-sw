@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.23 2000/04/12 15:06:53 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.24 2000/06/12 19:58:54 lansdell Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.24  2000/06/12 19:58:54  lansdell
+// loaded global shared library
+//
 // Revision 1.23  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -143,6 +146,7 @@ void bfcread_hist_to_ps(
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
 
