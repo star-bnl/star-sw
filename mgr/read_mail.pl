@@ -8,8 +8,8 @@
 ###############################################################################
 
 
-my $dir_arch = "/star/u2e/starreco/mdc3/requests/tfs/archive";
-my $dir_job = "/star/u2e/starreco/mdc3/requests/tfs/jobfiles";
+my $dir_arch = "/star/u2e/starreco/P00hd/requests/daq/archive";
+my $dir_job = "/star/u2e/starreco/P00hd/requests/daq/jobfiles";
 my @maifile;
 my $boxfile = "mbox";
 my $mail_line;
