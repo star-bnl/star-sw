@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.3 2001/08/17 22:10:17 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.4 2002/09/11 21:33:42 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.4  2002/09/11 21:33:42  posk
+// Different S2 cuts for the two beam energies.
+//
 // Revision 1.3  2001/08/17 22:10:17  posk
 // Now also can do 40 GeV data.
 //
@@ -43,6 +46,7 @@ Float_t  StFlowCutEvent::mVertexXCuts[2]   = {-0.5, 0.5};
 Float_t  StFlowCutEvent::mVertexYCuts[2]   = {-0.5, 0.3};
 Float_t  StFlowCutEvent::mVertexZCuts[2]   = {-579.5, -578.3};
 Float_t  StFlowCutEvent::mEtaSymCuts[2]    = {0.35, 0.75};
+Int_t    StFlowCutEvent::mAdcS3Cut         = 83;
 UInt_t   StFlowCutEvent::mEventN           = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN       = 0;
 UInt_t   StFlowCutEvent::mGoodFinalEventN  = 0;
@@ -123,16 +127,9 @@ Bool_t StFlowCutEvent::CheckEvent(StEbyeEvent* pMicroEvent) {
   }
 
   // S3 ADC
-  if (Flow::eBeam == 158) {
-    if (pMicroEvent->ADCS3() >= 83) {
-      mAdcS3CutN++;
-      return kFALSE;
-    }
-  } else if (Flow::eBeam == 40) {
-    if (pMicroEvent->ADCS3() >= 24) {
-      mAdcS3CutN++;
-      return kFALSE;
-    }
+  if (mAdcS3Cut > 0 &&pMicroEvent->ADCS3() >= mAdcS3Cut) {
+    mAdcS3CutN++;
+    return kFALSE;
   }
   
   mGoodEventN++;
@@ -209,7 +206,7 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#   EtaSym cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
        << " :\t Events Cut= " << mEtaSymCutN << "\t (" <<  setprecision(3)
        << (float)mEtaSymCutN/(float)mEventN/perCent << "% cut)" << endl;
-  cout << "#   S3 ADC cut= 83 :\t\t Events Cut= " << mAdcS3CutN <<
+  cout << "#   S3 ADC cut= " << mAdcS3Cut << " :\t\t Events Cut= " << mAdcS3CutN <<
     "\t (" << setprecision(3) << (float)mAdcS3CutN/(float)mEventN/perCent
        << "% cut)" << endl; 
   cout << "# Good Events = " << mGoodEventN << ", " << setprecision(3) <<

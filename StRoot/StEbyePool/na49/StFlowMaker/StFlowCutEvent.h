@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.3 2001/08/17 22:10:21 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.4 2002/09/11 21:33:43 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.4  2002/09/11 21:33:43  posk
+// Different S2 cuts for the two beam energies.
+//
 // Revision 1.3  2001/08/17 22:10:21  posk
 // Now also can do 40 GeV data.
 //
@@ -50,6 +53,7 @@ class StFlowCutEvent {
   static void   SetVertexY(const Float_t lo, const Float_t hi);
   static void   SetVertexZ(const Float_t lo, const Float_t hi);
   static void   SetEtaSym(Float_t lo, Float_t hi);
+  static void   SetAdcS3(Int_t hi);
   
  private:
 
@@ -78,8 +82,10 @@ class StFlowCutEvent {
   static UInt_t  mEtaSymCutN;            // number not accepted
   static Float_t mEtaSymCuts[2];         // range
 
-  static UInt_t  mVertexFlagCutN;         // number of not accepted events
-  static UInt_t  mAdcS3CutN;              // number of not accepted events
+  static UInt_t  mVertexFlagCutN;        // number of not accepted events
+
+  static UInt_t  mAdcS3CutN;             // number of not accepted events
+  static Int_t   mAdcS3Cut;              // upper limit of accepted adcS3
 
   ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
@@ -104,5 +110,8 @@ inline void StFlowCutEvent::SetVertexZ(const Float_t lo, const Float_t hi) {
 
 inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) {
   mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi; }
+
+inline void StFlowCutEvent::SetAdcS3(Int_t hi) {
+  mAdcS3Cut = hi; }
 
 #endif
