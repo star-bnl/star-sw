@@ -93,12 +93,18 @@ int gl3Event::readEvent  ( int maxLength, char* buffer ){
    memset ( trackContainer, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(FtfContainer) ) ;
 
    int i ;
+   L3_SECP* sectorP ;
    for ( i = 0 ; i < NSECTORS ; i++ ) {
       length = header->sector[i].len ;
       if ( !length ) continue ;
-      offset = header->sector[i].off ;
-      pointer = &(buffer[offset]);
-      readSector ( pointer ) ;
+      offset = 4 * header->sector[i].off ;
+      sectorP  = (L3_SECP *)&(buffer[offset]);
+      pointer  = (char *)sectorP + sectorP->trackp.off * 4 ;
+      printf ( "FtfSl3:readEvent:reading sector %d\n", i+1 ) ;
+      if ( readSector ( pointer ) ) {
+         printf ( "FtfSl3::readEvent: problems reading sector %d, quit\n", i ) ;
+         break ;
+      }
    }
    //
    //   Copy merging tracks to gl3Tracks

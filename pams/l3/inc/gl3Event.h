@@ -29,9 +29,9 @@
 
 class gl3HistoContainer {
 public:
-   long nBytes ;
-   long nHistos ;
-   long buffer ;
+   int nBytes ;
+   int nHistos ;
+   int buffer ;
 };
 
 

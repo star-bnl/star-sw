@@ -68,6 +68,7 @@ void FtfPara::setDefaults (void)
    rowInnerMost      = 1      ;
    rowOuterMost      = 45     ;
    rowStart          = 45     ;
+   rowEnd            =  1     ;
    segmentMaxAngle   = 10.F/toDeg ;
    szFitFlag         = 1      ;
    xyErrorScale      = 1.0F   ;

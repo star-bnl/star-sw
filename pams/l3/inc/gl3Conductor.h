@@ -59,7 +59,7 @@ public:
    int       releaseToken ( int token ) ;
 
    int  setCommunications (  ) ; 
-   long writeHistos ( int maxBytes, char *buffer ) ;
+   int  writeHistos ( int maxBytes, char *buffer ) ;
    int  setup  ( int maxEvents=1, int maxAnalysis=10 ) ;
 
 

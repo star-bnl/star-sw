@@ -32,5 +32,5 @@ extern void G__set_cpp_environmentFtfSl3Dict();
 
 extern G__linked_taginfo G__FtfSl3DictLN_TClass;
 extern G__linked_taginfo G__FtfSl3DictLN_FtfFinder;
-extern G__linked_taginfo G__FtfSl3DictLN_sl3MPTrack;
+extern G__linked_taginfo G__FtfSl3DictLN_sectorGeometry;
 extern G__linked_taginfo G__FtfSl3DictLN_FtfSl3;

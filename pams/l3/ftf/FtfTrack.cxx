@@ -9,6 +9,7 @@
 //:           19nov1999 ppy add maxChi2Primary to decide whether track is primary
 //:           27jan2000 ppy refHit replaced by xRefHit and yRefHit
 //:           27jan2000  VOLUME, ROW and AREA classes replaced by FtfContainer
+//:           17feb2000 ddXy and ddSz trying to catch divisions by zero
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -77,10 +78,15 @@ void FtfTrack::add ( FtfHit *thisHit, int way )
   if ( nHits > para->minHitsForFit  )
   {
      ddXy  = s11Xy * s22Xy - square ( s12Xy ) ;
-     a1Xy  = ( g1Xy * s22Xy - 
-                g2Xy * s12Xy ) / ddXy ;
-     a2Xy  = ( g2Xy * s11Xy - 
-                g1Xy * s12Xy ) / ddXy ;
+     if ( ddXy != 0 ) {
+        a1Xy  = ( g1Xy * s22Xy - g2Xy * s12Xy ) / ddXy ;
+        a2Xy  = ( g2Xy * s11Xy - g1Xy * s12Xy ) / ddXy ;
+     }
+     else {
+        if ( para->infoLevel > 0 ) {
+           fprintf ( stderr, "FtfTrack:add: ddXy = 0 \n" ) ;
+        }
+     }
   }
 //
 //     Now in the sz plane
@@ -95,21 +101,16 @@ void FtfTrack::add ( FtfHit *thisHit, int way )
      if ( nHits > para->minHitsForFit ) {
 		
         ddSz  = s11Sz * s22Sz -  s12Sz * s12Sz ;
-#ifdef TRDEBUG
 	if ( ddSz != 0 ) {
-#endif
-           a1Sz  = ( g1Sz * s22Sz - 
-                   g2Sz * s12Sz ) / ddSz ;
-           a2Sz  = ( g2Sz * s11Sz - 
-                   g1Sz * s12Sz ) / ddSz ;
-#ifdef TRDEBUG
+           a1Sz  = ( g1Sz * s22Sz - g2Sz * s12Sz ) / ddSz ;
+           a2Sz  = ( g2Sz * s11Sz - g1Sz * s12Sz ) / ddSz ;
          }
          else
          {
-            printf ( " \n Something strange going on " ) ;
-            printf ( " \n Track %d ", id ) ;
+            if ( para->infoLevel > 0 ) {
+               fprintf ( stderr, "FtfTrack:add: ddSz = 0 \n" ) ;
+            }
          }
-#endif
       }
    }
 }

@@ -1,7 +1,12 @@
 #ifndef FTFGRAPHIC
 #define FTFGRAPHIC
-#include "FtfSl3.h"
+#include "FtfHit.h"
+#include "FtfTrack.h"
+#include "TObject.h"
 #include "TCanvas.h"
+#include "TDialogCanvas.h"
+#include "TSlider.h"
+#include "TView.h"
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
@@ -9,9 +14,17 @@
 #define ClassDef(a,b)
 #endif
 
-class FtfGraphic: public FtfSl3 {
+
+class FtfGraphic: public TObject {
 public:   
    TCanvas *ftfCanvas ;
+
+   TDialogCanvas *control ;
+   TSlider* phiSlider ;
+   TSlider* thetaSlider ;
+   TSlider* psiSlider ;
+   
+   TView   *mView ;
    float  bField ;
    float  phi   ;
    float  theta ;
@@ -47,10 +60,91 @@ public:
    int  plotFitsa    ( int thisTrack ) ;
    int  plotFitsa    ( int firstTrack, int lastTrack ) ;
    int  plotFit      ( FtfTrack *lTrack, float rMin, float rMax ) ;
+   void ExecuteEvent ( Int_t event, Int_t px, Int_t py ) ;
+   int  set          ( int nHitsIn, int nTracksIn, 
+                       FtfHit* hitArray, FtfTrack* trackArray ) ;
 
    long setDefaults  ( ) ;
-   void setXy ( ) { phi = 180. ; theta =  0. ; psi = 90. ; } ;
-   void setYz ( ) { phi = 180. ; theta = 90. ; psi = 90. ; } ;
+   void setXy ( ) { 
+      phi = 180. ; theta =  0. ; psi = 90. ; 
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+   void setYz ( ) { 
+      phi = 180. ; theta = 90. ; psi = 90. ; 
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+   void setXz ( ) { 
+      phi = 90. ; theta = 90. ; psi = 90. ; 
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftX ( float dX ) { 
+      xMin = xMin + dX * (xMax-xMin) ;
+      xMax = xMax + dX * (xMax-xMin) ;
+      mView->SetRange( xMin, yMin, zMin, xMax, yMax, zMax );
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftY ( float dY ) { 
+      yMin = yMin + dY * (yMax-yMin) ;
+      yMax = yMax + dY * (yMax-yMin) ;
+      mView->SetRange( xMin, yMin, zMin, xMax, yMax, zMax );
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftZ ( float dZ ) { 
+      zMin = zMin + dZ * (zMax-zMin) ;
+      zMax = zMax + dZ * (zMax-zMin) ;
+      mView->SetRange( xMin, yMin, zMin, xMax, yMax, zMax );
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftPhi ( float dPhi ) { 
+      phi  += dPhi ;
+      phi  = fmod(phi,360);
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftTheta ( float dTheta ) { 
+      theta  += dTheta ;
+      theta  = fmod(theta,360);
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+
+   void shiftPsi ( float dPsi ) { 
+      psi    += dPsi ;
+      psi    = fmod(psi,360);
+      int irep ;
+      mView->SetView ( phi, theta, psi, irep ) ;
+      ftfCanvas->Draw();
+   } ;
+
+   void zoom ( float factor ) {
+      xMin *= factor ;
+      xMax *= factor ;
+      yMin *= factor ;
+      yMax *= factor ;
+      zMin *= factor ;
+      zMax *= factor ;
+      mView->SetRange( xMin, yMin, zMin, xMax, yMax, zMax );
+      ftfCanvas->Draw();
+   };
+
+   //
+   int           nHits ;
+   void*         hitP ;
+   void*         trackP ;
+   int           nTracks ;
 //
   ClassDef(FtfGraphic,1)
 };
