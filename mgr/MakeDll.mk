@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.106 1999/08/24 13:27:28 fisyak Exp $
+# $Id: MakeDll.mk,v 1.107 1999/08/26 16:23:36 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.107  1999/08/26 16:23:36  fisyak
+# Allow partitial modules build
+#
 # Revision 1.106  1999/08/24 13:27:28  fisyak
 # Fix St_Tables name
 #
@@ -435,7 +438,7 @@ FILES_CINT += $(FILES_CINT_ORD) $(FILES_CINT_DEF) $(FILES_CINT_MOD)
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_SRC) $(FILES_ORD) $(FILES_CINT)))))
 FILES_O := $(sort $(FILES_O))
 ifneq (tables,$(PKGNAME))
-STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Table*.$(O))
+STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Table*.$(O)  $(STAR_OBJ_DIR)/St_*Module*.$(O))
 FILTER  := $(addprefix  $(STAR_OBJ_DIR)/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filter-out $(FILTER),$(STAR_FILES_O))
 endif
