@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $
+ * $Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.5  1999/02/15 16:17:02  wenaus
- * fix double& -> double referencing bug
+ * Revision 1.6  1999/02/22 03:49:43  wenaus
+ * more careful deletion handling
+ *
+ * Revision 1.9  1999/02/23 21:24:32  ullrich
+ * Removed obsolete EMC/SMD hit information (future cluster).
  *
  * Revision 1.8  1999/02/22 19:53:51  wenaus
  * cleaner deleting
@@ -28,7 +31,7 @@
  * Revision 1.5  1999/02/15 16:17:02  wenaus
  * fix double& -> double referencing bug
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -39,19 +42,19 @@ static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wen
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
 #include "StEvent/StGlobalTrack.hh"
 StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
                              double curvature,
-  if (mTpcDedx) delete mTpcDedx;
-  if (mFtpcDedx) delete mFtpcDedx;
-  if (mSvtDedx) delete mSvtDedx;
+  if (mTpcDedx) delete mTpcDedx; mTpcDedx=0;
+  if (mFtpcDedx) delete mFtpcDedx; mFtpcDedx=0;
+  if (mSvtDedx) delete mSvtDedx; mSvtDedx=0;
 			     int h) : 
 
 void StGlobalTrack::setEmcHit(StEmcHit* val) { mEmcHit = val; }
