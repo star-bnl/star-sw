@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcCollection.cxx,v 2.4 2001/04/05 04:00:48 ullrich Exp $
+ * $Id: StEmcCollection.cxx,v 2.5 2003/09/12 21:54:53 jeromel Exp $
  *
  * Author: Akio Ogawa, Nov 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.cxx,v $
+ * Revision 2.5  2003/09/12 21:54:53  jeromel
+ * Zeroing
+ *
  * Revision 2.4  2001/04/05 04:00:48  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -28,9 +31,11 @@
 
 ClassImp(StEmcCollection)
 
-static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.4 2001/04/05 04:00:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.5 2003/09/12 21:54:53 jeromel Exp $";
 
-StEmcCollection::StEmcCollection() {/* noop*/}
+StEmcCollection::StEmcCollection() {
+  for(int i=0; i<8; i++) mDetector[i] = 0;
+}
 
 StEmcCollection::~StEmcCollection(){
   for(int i=0; i<8; i++){
