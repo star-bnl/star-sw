@@ -471,10 +471,11 @@ void StiKalmanTrackFinder::doNextDetector()
 	    trackMes << "SKTF::doNextDetector()\t - position==kFailed" << endl;
 	    scanningDone = true;
 	    trackDone = true;
-	    throw runtime_error("SKTF::doNextDetector()\t- RunTimeError - newNode==null");
-	}
-    if (tDet->isActive()) 
-	{ // active vol, look for hits
+			return;
+	    //throw runtime_error("SKTF::doNextDetector()\t- RunTimeError - newNode==null");
+		}
+	if (tDet->isActive()) 
+		{ // active vol, look for hits
 	    //trackMes << "SKTF::followTrackAt()\t- tDet isActive() - Position:" << position << endl;
 	    if (position<=kEdgeZplus) 
 		{

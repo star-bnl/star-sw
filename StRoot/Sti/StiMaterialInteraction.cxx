@@ -55,14 +55,14 @@ StiIntersection StiMaterialInteraction::findIntersection(
   switch(pDetector->getShape()->getShapeCode()){
   case kPlanar:  
     return findPlanarIntersection(pNode, pDetector, 
-				  dXlocal, dThickness, dDensity, dDistance);
-    case kCylindrical:
-      return findCylindricalIntersection(pNode, pDetector, 
-					 dXlocal, dThickness, dDensity,
-                                         dDistance);
+																	dXlocal, dThickness, dDensity, dDistance);
+	case kCylindrical:
+		return findCylindricalIntersection(pNode, pDetector, 
+																			 dXlocal, dThickness, dDensity,
+																			 dDistance);
   case kConical:
     return findConicalIntersection(pNode, pDetector, 
-				   dXlocal, dThickness, dDensity, dDistance);
+																	 dXlocal, dThickness, dDensity, dDistance);
   default:
     return kFailed;
   }
