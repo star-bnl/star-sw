@@ -141,6 +141,27 @@ Get data from TABLE and append to existing NTUPLE.
 >ACTION KAM_TNTCWNTUPLE_APPEND
 ** 
 ** ---------------------------------------------------------------------
+** ** TNT/CWNTUPLE/IMPORT NTUPLE TABLE
+>COMMAND IMPORT
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' I
+TABLE 'tdmTable name.' C
+>GUIDANCE
+Get data from TABLE and put it in existing NTUPLE.
+.
+2>ACTION KAM_TNTCWNTUPLE_IMPORT
+** 
+** ---------------------------------------------------------------------
+** ** TNT/CWNTUPLE/CLEAR NTUPLE
+>COMMAND CLEAR
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' I
+>GUIDANCE
+Reset NTUPLE.
+.
+>ACTION KAM_TNTCWNTUPLE_CLEAR
+** 
+** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/PUTTABLE NTUPLE TABLE
 ** >COMMAND PUTTABLE
 ** >PARAMETERS

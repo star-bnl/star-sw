@@ -330,15 +330,15 @@ STAFCV_T topjoin_fastjoin(char* agent, char* table1, char* table2
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
    if( NULL == (tbl1 = tdm->findTable(table1)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    tdmTable* tbl2=NULL;
    if( NULL == (tbl2 = tdm->findTable(table2)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
    switch (select[0]) {
@@ -363,7 +363,7 @@ STAFCV_T topjoin_fastjoin(char* agent, char* table1, char* table2
    }
 //- Join tables
    if( !join->fastjoin(tbl1,tbl2,tbl3) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }

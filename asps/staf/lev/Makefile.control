@@ -12,8 +12,8 @@ PAMS := pam
 #USER_LIBS := -ldsu -ldsl -lasu
 #
 # Choose flags controlling make.
-DEBUG := TRUE
-SHARE := FALSE
+DEBUG := FALSE
+SHARE := TRUE
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.

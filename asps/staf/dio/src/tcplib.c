@@ -5,6 +5,8 @@
 /*
 modification history
 --------------------
+01d,21nov97,cet  more honest defines
+01c,02oct97,hjw  server mode (socket write)
 01b,17sep97,cet  -incorporate Carl Lionberger code from cosmic test
 01a,30may92,whg  written.
 */
@@ -29,16 +31,23 @@ typedef unsigned int u_int;
 #include <netdb.h>
 #endif						/* VXWORKS */
 #include <sys/ioctl.h>
-#ifdef						sparc
-#include <sys/filio.h>
-#endif						/* sparc */
+#ifdef						sun
+#include <sys/filio.h>    /* contains definition of FIONREAD */
+#endif						/* sun */
 #include "tcplib.h"
+
+#ifdef sun
+#ifdef i386
+#define s5x86
+#endif
+#endif
 
 /* #ifdef craig
 int connect(int socket, struct sockaddr *name, int namelen);
 #endif */
 
 #define INET_ADDR_ERROR -1
+#define PP printf(
 /**********************************************************************
 *
 * hostGetByName - return the internet address of a host
@@ -60,6 +69,39 @@ char *name;
 	return INET_ADDR_ERROR;
 }
 #endif
+/**********************************************************************
+*
+* tcpStartServer - start server (writer) and wait for connection from client
+* (reader).
+*
+* RETURNS: zero for ok
+* written by hjw,  04aug97
+*
+*/
+int tcpStartServer(int serverPort, int *pSocket) {
+
+  struct sockaddr_in serv_addr,cli_addr;
+  int clilen,tempSocket,realSocket;
+
+  tempSocket = socket(AF_INET, SOCK_STREAM, 0);
+  if(tempSocket<0) return 1;
+
+/* bbb void *memset(void *s, int c, size_t n); */
+  memset((char *) &serv_addr, 0, sizeof(serv_addr));
+  serv_addr.sin_family      = AF_INET;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serv_addr.sin_port        = htons(serverPort);
+  if(bind(tempSocket,(struct sockaddr*)&serv_addr,sizeof(serv_addr))) {
+    return 2;
+  }
+
+  listen(tempSocket,5);
+  clilen=sizeof(cli_addr);
+  realSocket=accept(tempSocket,(struct sockaddr*)&cli_addr,&clilen);
+  close(tempSocket);
+  *pSocket=realSocket;
+  return 0;
+}
 /**********************************************************************
 *
 * tcpConnect - connect to remote host
@@ -102,15 +144,21 @@ int *pSocket;
 *
 */
 #ifdef							__sgi
-int tcpRead(void *fd, void *buf, u_int len)
+int tcpRead(void *herb, void *buf, u_int len)
 #else							/*__sgi*/
-#ifdef							sun4os5pc
-int tcpRead(void *fd, char *buf, int len)
-#else							/*sun4os5pc*/
+#ifdef							s5x86
+int tcpRead(void *herb, char *buf, int len)
+#else							/*s5x86*/
 int tcpRead(int *fd, char *buf, int len)
-#endif							/*sun4os5pc*/
+#endif							/*s5x86*/
 #endif							/*__sgi*/
 {
+#ifdef s5x86
+        int *fd=herb;  /* To compile on intel Solaris.  */
+#endif
+#ifdef __sgi
+        int *fd=herb;  /* To compile on irix.  */
+#endif
         int locallen, timeout = 0;
 
         ioctl(*fd, FIONREAD, (caddr_t)&locallen);
@@ -144,16 +192,22 @@ int tcpRead(int *fd, char *buf, int len)
 *
 */
 #ifdef							__sgi
-int tcpWrite(void *fd, void *buf, u_int len)
+int tcpWrite(void *herb, void *buf, u_int len)
 #else							/*__sgi*/
-#ifdef sun4os5pc
-int tcpWrite(void *fd, char *buf, int len)
-#else							/*sun4os5pc*/
+#ifdef s5x86
+int tcpWrite(void *herb, char *buf, int len)
+#else							/*s5x86*/
 int tcpWrite(int *fd, char *buf, int len)
-#endif							/*sun4os5pc*/
+#endif							/*s5x86*/
 #endif							/*__sgi*/
 {
         int i, cnt;
+#ifdef s5x86
+        int *fd=herb;   /* to compile on irix */
+#endif
+#ifdef __sgi
+        int *fd=herb;   /* to compile on irix */
+#endif
 
         for (cnt = len; cnt > 0; cnt -= i, buf += i) {
                 if ((i = write(*fd, buf, cnt)) == -1) {

@@ -4,13 +4,13 @@
 //:DESCRIPTION: DIO Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
-//HISTORY:      30dec96-v020a-cet- NEW_DSL -> OLD_DSL option
+//:HISTORY:     02oct97-v030a-hjw- support for socket writing (server mode)
+//:HISTORY:     30dec96-v020a-cet- NEW_DSL -> OLD_DSL option
 //:HISTORY:     21aug96-v010a-cet- debug xdrrec_create for Sun4OS5
 //:HISTORY:     12dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
-//- NEEDED FOR openServer() -??
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -106,7 +106,7 @@ STAFCV_T dioStream:: close () {
    myState = DIO_UNKNOWN_STATE;
 
 /*- Destroy xdr. -*/
-   if( &myXDR != NULL ) XDR_DESTROY(&myXDR);
+   /* hjw 03oct97 always true: if( &myXDR != NULL ) */  XDR_DESTROY(&myXDR);
 
    if( DIO_OPEN_STATE == saveState ){
       saveState = DIO_CLOSE_STATE;
@@ -122,6 +122,8 @@ STAFCV_T dioStream:: getEvent (tdmDataset* destination) {
    if( !(DIO_OPEN_STATE == myState)
    ||  !(DIO_READ_MODE == myMode || DIO_UPDATE_MODE == myMode)
    ){
+      EML_CONTEXT("Read-write mode must be READ or UPDATE\n"
+      "Open-close state must be OPEN\n");
       EML_ERROR(BAD_MODE_OR_STATE);
    }
    myState = DIO_READ_STATE;
@@ -492,15 +494,38 @@ STAFCV_T dioSockStream:: close () {
 STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
    int status;
+   char *cc, *ccc;
+
+  if( !(myMode == DIO_UNKNOWN_MODE)
+  &&  !(mode == myMode)
+  ){
+    EML_CONTEXT("dioSockStream mode cannot change from (%s) to (%s)\n"
+		,cc=dio_mode2text(myMode)
+		,ccc=dio_mode2text(mode));
+    FREE(cc); FREE(ccc);
+    EML_ERROR(BAD_MODE);
+  }
 
 //- Open network socket. -**
    if( !(DIO_OPEN_STATE == myState)
    &&  !(DIO_CONNECT_STATE == myState)
    ){
-      if( (status = tcpConnect(myHost, myPort, &mySocket)) ){
-	 perror("tcpConnect failed");
-	 myState = DIO_UNKNOWN_STATE;
-	 EML_ERROR(CONNECTION_FAILURE);
+      if(mode==DIO_READ_MODE) {
+        if( (status = tcpConnect(myHost, myPort, &mySocket)) ){
+           perror("tcpConnect failed");
+           myState = DIO_UNKNOWN_STATE;
+           EML_ERROR(CONNECTION_FAILURE);
+        }
+      } else if(mode==DIO_WRITE_MODE) {
+        EML_MESSAGE("Waiting for connection from client.\n");
+        if( (status = tcpStartServer(myPort, &mySocket)) ){
+           perror("tcpStartServer failed");
+           myState = DIO_UNKNOWN_STATE;
+           EML_ERROR(BEGIN_SERVER_FAILURE);
+        }
+        EML_MESSAGE("Connection made.\n");
+      } else {
+        EML_ERROR(UNSUPPORTED_READWRITE_MODE);
       }
       myState = DIO_CONNECT_STATE;
    }
@@ -508,6 +533,7 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 //- Create XDR pointer. -**
    memset((char*)&myXDR, 0, sizeof(myXDR));
 //-21aug96- xdrrec_create(&myXDR, 0, 0, &mySocket, tcpRead, tcpWrite);
+   // xdrrec_create was here, I moved it down about 17 lines hjw 02oct97
    xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, tcpRead, tcpWrite);
 //-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
 
@@ -526,9 +552,31 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
       break;
    }
 
+   // Moved the create to after setting myXDR.x_op, in analogy with
+   // dioFileStream::open.   hjw 02oct97
+   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, tcpRead, tcpWrite);
+
    myMode = mode;
    myState = DIO_OPEN_STATE;
    EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+// hjw 02oct97
+STAFCV_T dioSockStream:: putEvent (tdmDataset* destination) { 
+
+   STAFCV_T status;
+
+   status = acknowledgeRequest();
+   if( status != STAFCV_OK ) EML_ERROR(ACKNOWLEDGEREQUEST_FAILURE);
+
+   status = dioStream::putEvent(destination);
+   if( status != STAFCV_OK ) EML_ERROR(PUTEVENT_FAILURE)
+   if( !xdrrec_endofrecord(&myXDR, 1) ){
+      EML_ERROR(ENDOFRECORD_FAILURE);
+   }
+
+   return status;
 }
 
 //----------------------------------
@@ -559,47 +607,38 @@ STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
    return dioStream::getEvent(destination);
 }
 
-//----------------------------------
-//?STAFCV_T dioSockStream:: putEvent (tdmDataset* destination) {
-//?   STAFCV_T status = dioStream::putEvent(destination);
-//?   if( !xdrrec_endofrecord(&myXDR, 1) ){
-//?      EML_ERROR(ENDOFRECORD_FAILURE);
-//?   }
-//?   return status;
-//?}
-
 //:----------------------------------------------- PROT FUNCTIONS     --
-int dioSockStream:: openServer() {
-   extern int errno;
-   int length, listenSocket, acceptSocket;
-   struct sockaddr_in localAddr, remoteAddr;
-
-   if ((listenSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-   		return socketCallFailed;
-
-   memset((char *) &localAddr, 0, sizeof(localAddr));
-   localAddr.sin_family = htons(AF_INET);;
-   localAddr.sin_port = htons(port());
-
-   if (bind(listenSocket, (struct sockaddr *) & localAddr,
-   		sizeof(localAddr)) < 0) {
-      klose(listenSocket);
-      return bindFailure;
-   }
-   if (listen(listenSocket, 5) < 0) {
-      perror("listen failed\n");
-      return listenFailure;
-   }
-
-/* signal(SIGCHLD, reaper);// eliminate zombies */
-   signal_reaper();
-   return 1;		//INS++: RETURN_INCONSISTENT - BUGFIX?
-}
+// int dioSockStream:: openServer() {
+//    extern int errno;
+//    int length, listenSocket, acceptSocket;
+//    struct sockaddr_in localAddr, remoteAddr;
+// 
+//    if ((listenSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+//    		return socketCallFailed;
+// 
+//    memset((char *) &localAddr, 0, sizeof(localAddr));
+//    localAddr.sin_family = htons(AF_INET);;
+//    localAddr.sin_port = htons(port());
+// 
+//    if (bind(listenSocket, (struct sockaddr *) & localAddr,
+//    		sizeof(localAddr)) < 0) {
+//       klose(listenSocket);
+//       return bindFailure;
+//    }
+//    if (listen(listenSocket, 5) < 0) {
+//       perror("listen failed\n");
+//       return listenFailure;
+//    }
+// 
+// /* signal(SIGCHLD, reaper);// eliminate zombies */
+//    signal_reaper();
+//    return 1;		//INS++: RETURN_INCONSISTENT - BUGFIX?
+// }
 
 //----------------------------------
-int dioSockStream:: openClient() {
-   return tcpConnect(myHost, myPort, &mySocket);
-}
+// int dioSockStream:: openClient() {
+//    return tcpConnect(myHost, myPort, &mySocket);
+// }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
@@ -820,7 +859,7 @@ dioSockStream *  dioFactory:: newSockStream (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-/***
+/***      The open is performed in the kam function.
    if( !p->open(mode) ){
       p->close();
       soc->deleteObject(name,"dioSockStream");

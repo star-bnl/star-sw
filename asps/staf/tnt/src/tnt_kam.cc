@@ -260,12 +260,12 @@ tntcwntuple_gettable(long hid, char* tname)
 }
  
 /*---------------------------------------------------------------------
-** TNT/CWNTUPLE/GETTABLE NTUPLE TABLE
+** TNT/CWNTUPLE/APPEND NTUPLE TABLE
 */
 void kam_tntcwntuple_append_()
 {
   long npars = ku_npar();	/* no. of KUIP param.s */
-  long hid = ku_geti();	/* hid of CWNtuple */
+  long hid = ku_geti();		/* hid of CWNtuple */
   char *tname = ku_gets();	/* name of tdmTable */
 
   STAFCV_T status = tntcwntuple_append(hid, tname);
@@ -281,6 +281,56 @@ tntcwntuple_append(long hid, char* tname)
     EML_ERROR(KAM_FAILURE);
   }
   tuple->append(table);
+
+  EML_SUCCESS(STAFCV_OK);
+}
+ 
+/*---------------------------------------------------------------------
+** TNT/CWNTUPLE/IMPORT NTUPLE TABLE
+*/
+void kam_tntcwntuple_import_()
+{
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();		/* hid of CWNtuple */
+  char *tname = ku_gets();	/* name of tdmTable */
+
+  STAFCV_T status = tntcwntuple_import(hid, tname);
+}
+
+STAFCV_T 
+tntcwntuple_import(long hid, char* tname)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+  tdmTable* table = tdm->findTable(tname);
+  
+  if (tuple == NULL || table == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->import(table);
+
+  EML_SUCCESS(STAFCV_OK);
+}
+ 
+/*---------------------------------------------------------------------
+** TNT/CWNTUPLE/CLEAR NTUPLE 
+*/
+void kam_tntcwntuple_clear_()
+{
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();		/* hid of CWNtuple */
+
+  STAFCV_T status = tntcwntuple_clear(hid);
+}
+
+STAFCV_T 
+tntcwntuple_clear(long hid)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+  
+  if (tuple == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->clear();
 
   EML_SUCCESS(STAFCV_OK);
 }

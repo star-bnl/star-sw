@@ -8,7 +8,7 @@ endif
 #
 .PHONY: all clean test install
 #
-VERSION := "$Id: Makefile,v 1.4 1997/08/18 22:47:04 tull Exp $"
+VERSION := "$Id: Makefile,v 1.5 1997/12/12 20:00:40 tull Exp $"
 # 
 PAMTYPE := PAM
 ASPTYPE := ASP
@@ -57,8 +57,8 @@ test:
 install:
 #
 #-- Lifecycle routines for analysis module package
-%_init.cc:
-	pamiGen $* $(SRCDIR)/*.idl > $@
+%_init.cc: $(wildcard $(SRCDIR)/*.idl)
+	pamiGen $(*F) $^ > $@
 #
 Makefile: $(SLM_DIR)/SLMakefile.src
 	cp $< $@

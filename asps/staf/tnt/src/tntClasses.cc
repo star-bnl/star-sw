@@ -156,7 +156,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
       chforms[iBlock] = tntColumnChform(table, i);
     } else {
       cp = tntColumnChform(table, i);
-      newlen = strlen(chforms[iBlock]) + strlen(cp) + 1;
+      newlen = strlen(chforms[iBlock]) + strlen(cp) + 2;
       chforms[iBlock] = (char *) realloc(chforms[iBlock], newlen); 
       strcat(chforms[iBlock], ",");
       strcat(chforms[iBlock], cp);
@@ -176,6 +176,9 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
       hbkCWNscalarBlock(hid(),_blockName[i],(int *)_blockPtr[i],chforms[i]);
     }
   }
+
+  // Now that the CWN is booked, put some data in it
+  import(table);
 }
 
 //:---------------------------------
@@ -266,7 +269,7 @@ tntCWNtuple::append (tdmTable* table) {
     bufferPtr = (long *)rowBuffer;
 
     // ... and loop over the columns of each row
-    for (j = 0; j < columnCount(); j++) {
+    for (j = 0; j < table->columnCount(); j++) {
 
       // Figure out the longword aligned size
       colSize = tntLongwordifyColumnSize(table,j);
@@ -293,50 +296,51 @@ tntCWNtuple::append (tdmTable* table) {
 	// involve a conversion of the type.  Perhaps there's a way to
 	// optimize this better.
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *data.data.o;
+	  *bufferPtr = *(data.data.o+k);
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_SHORT:
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *data.data.s;
+	  *bufferPtr = *(data.data.s+k);
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_U_SHORT:
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *data.data.us;
+	  *bufferPtr = *(data.data.us+k);
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_LONG:
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *data.data.l;
+	  *bufferPtr = *(data.data.l+k);
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_U_LONG:
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *data.data.ul;
+	  *bufferPtr = *(data.data.ul+k);
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_FLOAT:
 	// Make sure the real types aren't converted to longs.
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *(float *)bufferPtr = *data.data.f;
+	  *(float *)bufferPtr = *(data.data.f+k);
 	  bufferPtr += sizeof(float)/sizeof(long);
 	}
 	break;
       case DS_TYPE_DOUBLE:
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *(double *)bufferPtr = *data.data.d;
+	  *(double *)bufferPtr = *(data.data.d+k);
 	  bufferPtr += sizeof(double)/sizeof(long);
 	}
 	break;
+      default:
+        printf("\nSEVERE ERROR DURING TABLE TO NTUPLE CONVERSION.\007\n");
       }
     }
-
     // Once the rowBuffer has been filled, call HFNT.
     hbkCWNputRow(hid());
   }
