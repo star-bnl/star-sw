@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.48 2003/08/06 20:54:26 oldi Exp $
+// $Id: doFlowEvents.C,v 1.49 2003/08/26 21:18:12 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -138,7 +138,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
 //   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
 //   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-//   flowSelect->SetDcaGlobalPart(0., 0.5);       // for parts. wrt plane
+//   flowSelect->SetDcaGlobalPart(0., 0.5);      // for parts. wrt plane
 //   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
   // Uncomment next line if you make a selection object
@@ -179,8 +179,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");	//deactivate all branches
     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    IOMk->SetBranch("dstBranch",0,"r");
-    IOMk->SetBranch("runcoBranch",0,"r");
+    //IOMk->SetBranch("dstBranch",0,"r");
+    //IOMk->SetBranch("runcoBranch",0,"r");
     //IOMk->SetDebug();
     
     // Maker to read events from file or database into StEvent
@@ -219,14 +219,16 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   }
 
   Bool_t includeTpcTracks  = kTRUE;
+  //Float_t ptRange_for_vEta[2] = {0.15, 2.};
+  //Float_t etaRange_for_vPt[2] = {-1.2, 1.2};
   Float_t ptRange_for_vEta[2] = {0., 0.};
   Float_t etaRange_for_vPt[2] = {0., 0.};
   Bool_t includeFtpcTracks = kFALSE;
-  /*
-  Bool_t includeFtpcTracks = kTRUE;
-  Float_t ptRange_for_vEta[2] = {0., 2.};
-  Float_t etaRange_for_vPt[2] = {2., 5.};
-  */
+
+//   Bool_t includeFtpcTracks = kTRUE;
+//   Float_t ptRange_for_vEta[2] = {0., 2.};
+//   Float_t etaRange_for_vPt[2] = {2., 5.};
+
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
@@ -277,7 +279,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowMaker->SetPicoEventDir("./");
   
   // Set Debug status
-//  flowMaker->SetDebug();
+//   flowMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
 //  flowPhiWgtMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
@@ -488,20 +490,20 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 //    }
 
   // ProductionMinBias P02gd
-  Char_t* filePath="/auto/stardata/pDST/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044";
-  if (nevents < 250) {
-    Char_t* fileExt="st_physics_2258044_raw_0205.flowpicoevent.root";
-   } else {
-     Char_t* fileExt="*.flowpicoevent.root";
-   }
+//   Char_t* filePath="/auto/stardata/pDST/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2258044_raw_0205.flowpicoevent.root";
+//    } else {
+//      Char_t* fileExt="*.flowpicoevent.root";
+//    }
 
   // MinBiasVertex P02ge
-//   Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
-//   if (nevents < 250) {
-//     Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
-//    } else {
-//      Char_t* fileExt="*/*.flowpicoevent.root";
-//    }
+  Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
+  if (nevents < 250) {
+    Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
+   } else {
+     Char_t* fileExt="*/*.flowpicoevent.root";
+   }
 
   // 130 GeV
 //   Char_t* filePath="/auto/pdsfdv10/starprod/DST/kirll_flow_pDST_minbias/";
@@ -538,6 +540,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.49  2003/08/26 21:18:12  posk
+// update
+//
 // Revision 1.48  2003/08/06 20:54:26  oldi
 // Introduction of possibility to exclude pt ranges for v(eta) and eta regions
 // for v(pt) histograms. Default behavior stays the same (all available tracks
