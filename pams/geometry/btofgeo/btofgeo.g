@@ -68,7 +68,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 4         ! 1=CTB, 2=TOF, 3=1 tray TOF+rest CTB
+         choice    = 4         ! 1=CTB, 2=TOF, 3=25% TOF+CTB, 4=1 tray TOF+CTB
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height
@@ -118,12 +118,12 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          SlatWid   = 4.0         ! scintillator slab width
          SlatAng   = 8.          ! slat assy. angle w.r.t. tray
          PmtLen    = 5.0         ! PMT length
-         PmtMaxR   = 1.9         ! PMT max radius
+         PmtMaxR   = 1.91        ! PMT max radius
          PmtMinR   = 1.8         ! PMT min radius
-         BaseLen   = 8.0         ! Base length
-         BaseMaxR  = 2.1         ! Base max radius
-         baseMinR  = 1.97        ! Base min radius  
-         ElecX     = 4.19        ! FEE Board x position
+         BaseLen   = 5.1         ! Base length
+         BaseMaxR  = 1.91        ! Base max radius
+         baseMinR  = 1.8         ! Base min radius  
+         ElecX     = 4.1         ! FEE Board x position
          Elec1z    = 104.0       ! FEE Board 1 z position
          ElecDz    = toff_SlatDz ! FEE Board Dz (Same as toff_SlatDz)
          ElecThck  = 0.17        ! FEE Board thickness (67 mils)
@@ -131,8 +131,8 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          ElecLen   = 16.0        ! FEE Board length
          RailThck  = 0.2         ! Cooling loop rail thickness
          RailWid   = 1.0         ! Cooling loop rail width
-         CoolOutR  = 0.32        ! Cooling loop pipe outer radius
-         CoolInnR  = 0.28        ! Cooling loop pipe inner radius
+         CoolOutR  = 0.375       ! Cooling loop pipe outer radius
+         CoolInnR  = 0.350       ! Cooling loop pipe inner radius
       EndFill
 *
       USE   BTOG
@@ -169,6 +169,7 @@ Block BTOH is a half of trigger system (west-east)
 
       do is=1,60
          tof=0
+         if (choice==2)                    tof=1
          if (choice==3 & 51<=is&is<=65)    tof=1
          if (choice==4 &     is==23   )    tof=1
          Create and Position BSEC  alphaz = 102+6*is
@@ -184,9 +185,9 @@ Block BSEC is a sector of CTB/TOF Trigger Barrel Scintillators
 EndBlock
 *
 *------------------------------------------------------------------------------
+*     remember that volume attributes are inherited, no need to redefine serial
 *
 Block BTRA is one full tray plus supporting structure for CTB/TOF
-*     remember that volume attributes are inherited, no need to redefine serial
       Attribute BTRA      seen=0   colo=2
       Shape     BOX       dx=(tray_SupFullH+tray_height+tray_StripT)/2,
                           dy=tray_Width/2
@@ -264,7 +265,7 @@ EndBlock
 *
 *-------------------------------------------------------------------------------
 Block BTTC  is  the Main Tray Cavity filled with MANY details for TOF
-      Attribute  BTTC      seen=1  colo=5
+      Attribute  BTTC      seen=1  colo=6
       Component  C         A=12 Z=6 W=1
       Component  H2        A=1  Z=1 W=2
       Mixture    LastAFoam Dens=0.048
@@ -330,7 +331,7 @@ Block BASS is a single TOF Slat Assembly (slat+PMT+base)
       Create BCEL               Rmin=0             Rmax=toff_PmtMinR,
                                 Dz=toff_ElecThck/2
       zpos = zpos + 0.4 - toff_BaseLen/2
-      Do i = 1,6
+      Do i = 1,4
        Position BCEL  Z=zpos + i
       Enddo
 EndBlock
@@ -512,7 +513,7 @@ EndBlock
 Block BANG  is  an angled part of TPC cooling structure ( Aile )
       Attribute BANG      seen=1   colo=2
       Shape     PARA   dx=tray_SupArmT/2   Dy=support_aile_width/2,
-                       Alph=-60   thet=0   phi=0
+                      Alph=-60   thet=0   phi=0
 EndBlock
 *
 Block BASE  is  a bottom of TPC coolant structure       
@@ -536,3 +537,4 @@ EndBlock
 *
 * ----------------------------------------------------------------------------
    end
+
