@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.48 2002/05/01 01:08:31 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.49 2002/05/02 03:07:18 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.49  2002/05/02 03:07:18  ullrich
+ * Changed mechanism to reject EST tracks without SVT hits.
+ *
  * Revision 2.48  2002/05/01 01:08:31  ullrich
  * Add SVT dE/dx only to EST tracks.
  *
@@ -203,7 +206,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.48 2002/05/01 01:08:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.49 2002/05/02 03:07:18 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -455,7 +458,7 @@ StEventMaker::makeEvent()
     StSPtrVecKinkVertex        &kinkVertices = mCurrentEvent->kinkVertices();
     StTrackDetectorInfo        *info;
     StTrackNode                *node;
-    unsigned int               id, k, nfailed, idvtx;
+    unsigned int               id, k, nfailed, nfailed2, idvtx;
     int                        i, h;
     int signOfField = mCurrentEvent->summary()->magneticField() < 0 ? -1 : 1;
 
@@ -639,9 +642,10 @@ StEventMaker::makeEvent()
 	dstEstGlobalTracks = mEventManager->returnTable_EstGlobal(nrows);
     if (!dstEstGlobalTracks) nrows = 0;
     maxId = dstEstGlobalTracks && nrows>0 ? max((long) dstEstGlobalTracks[nrows-1].id, nrows) : 0;
-    StVector(StEstGlobalTrack*) vecEstGlobalTracks(maxId+1, egtrack);
-	
+    StVector(StEstGlobalTrack*) vecEstGlobalTracks(maxId+1, egtrack);	
     nfailed = 0;
+    nfailed2 = 0;
+    
     for (i=0; i<nrows; i++) {
 	//
 	//   For each EST global track there must be already a node
@@ -660,18 +664,13 @@ StEventMaker::makeEvent()
 	}
 	
 	//
-	//   If the detector info is the same as for a global
-	//   track then there was no match with the SVT found.
-	//   In this case we simply do not store this track;
-	//   it is identical with the global which already exist.
+	//   If there are no SVT hits on this track we do not store this track.
+	//   It would be identical with the global which is already stored.
 	//
-	if (info) {
-	    StThreeVectorF firstPoint(dstEstGlobalTracks[i].x_first);
-	    StThreeVectorF lastPoint(dstEstGlobalTracks[i].x_last);
-	    if (firstPoint != info->firstPoint() || lastPoint != info->lastPoint()) info = 0;
-	}
-	if (info)
+	if ((dstEstGlobalTracks[i].n_point%10000)/1000 == 0) {
+	    nfailed2++;
 	    continue;
+	}
 	else {
 	    info = new StTrackDetectorInfo(dstEstGlobalTracks[i]);
 	    detectorInfo.push_back(info);
@@ -689,6 +688,10 @@ StEventMaker::makeEvent()
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " EST global tracks, no referring track node found." << endm;
+    if (nfailed2)
+        gMessMgr->Warning() << "StEventMaker::makeEvent(): " << nfailed2
+			    << " (out of " << nrows
+			    << ") EST global tracks had no SVT hits and were not stored." << endm;
     
     //
     //  Create EST primary tracks.
