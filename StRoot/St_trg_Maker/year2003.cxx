@@ -12,11 +12,13 @@ TrgDataType *gs2003;
 #include "tables/St_mwc_raw_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11
+unsigned short gActionWord;
 void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   int i;
+  
   dst_L0_Trigger_st *tt = dst2->GetTable();
   tt->TrgToken         = gs2003->EvtDesc.TrgToken;
-  tt->TriggerActionWd  = gs2003->EvtDesc.actionWdDetectorBitMask; // bbb chk with Zoran.
+  tt->TriggerActionWd  = gActionWord;
   tt->DSMInput         = gs2003->EvtDesc.DSMInput;
   tt->DSMAddress       = gs2003->EvtDesc.DSMAddress;
   tt->TriggerWd        = gs2003->EvtDesc.TriggerWord;
@@ -176,6 +178,10 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   assert(ptr);
   ptr+=40; // Skip 10-word DAQ bank header.
   gs2003=(TrgDataType*)ptr;
+  gActionWord=
+    ( (unsigned short)(gs2003->EvtDesc.actionWdTrgCommand) * 16 * 16 * 16 ) +
+    ( (unsigned short)(gs2003->EvtDesc.actionWdDaqCommand) * 16 * 16      ) +
+    (            gs2003->EvtDesc.actionWdDetectorBitMask & 0x00ff       );
   Int_t Iret = SanityCheck2003();
   if (Iret !=  kStOK) {
     printf("St_trg_Maker failed sanity check.\n"); 
@@ -183,11 +189,11 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   }
   printf("St_trg_Maker passed sanity check.\n"); 
   if(  
-       (((gs2003->EvtDesc.actionWdDetectorBitMask)&0xf000)==0x9000 ) && // bbb chk with Zoran
-       (((gs2003->EvtDesc.actionWdDetectorBitMask)&0x0001)==0x0001 ) && // bbb chk with Zoran
+       (((gActionWord)&0xf000)==0x9000 ) &&
+       (((gActionWord)&0x0001)==0x0001 ) &&
        ( gs2003->EvtDesc.TriggerWord          ==0xf200 )
   ) isLaser=7; // See comment 77y above.
-  if(gs2003->EvtDesc.actionWdDetectorBitMask>>12==4) isPhysics=7;
+  if(gActionWord>>12==4) isPhysics=7;
   if(gs2003->EvtDesc.TriggerWord==0xf101) isPulser=7;
 
   if((m_Mode  )==0)         thisEventOk=7;
@@ -199,8 +205,8 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   oo="";
   if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
   printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
-      oo,gs2003->EvtDesc.actionWdDetectorBitMask,
-      gs2003->EvtDesc.TriggerWord,thisEventOk?"kStOK":"kStErr",m_Mode); // bbb chk with Zoran
+      oo,gActionWord,
+      gs2003->EvtDesc.TriggerWord,thisEventOk?"kStOK":"kStErr",m_Mode);
 
   if (!thisEventOk) return kStErr; // Skip this event.
 
