@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.40 2003/05/15 06:08:41 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.41 2003/06/18 17:00:49 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -27,55 +27,23 @@
 
 ClassImp(StFlowEvent)
 
-Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
-                                                                   {0.,0.} },
-// 								   {0.,0.5} },
-// 								   {0.,0.},
-// 								   {0.,0.5},
-// 								   {0.,0.}},
-							          {{1.0,2.},
-								   {1.0,1.} }};
-// 							   	   {1.0,2.} }};
-// 								   {1.0,1.},
-// 								   {1.0,2.},
-// 								   {1.0,1.}}};
-Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
-								    {2.7,2.7} },
-// 								    {2.7,2.7} },
-// 								    {2.7,2.7},
-// 								    {2.7,2.7},
-// 								    {2.7,2.7}},
-							           {{4.0,4.0},
-								    {4.0,4.0} }};
-// 								    {4.0,4.0} }};
-// 								    {4.0,4.0},
-// 								    {4.0,4.0},
-// 								    {4.0,4.0}}};
+Float_t  StFlowEvent::mEtaTpcCuts[2][2][Flow::nSels] = {{{0.,0.5},
+                                                         {0.,0.} },
+							{{1.0,2.},
+							 {1.0,1.} }};
+Float_t  StFlowEvent::mEtaFtpcCuts[2][2][Flow::nSels] = {{{2.7,2.7},
+							  {2.7,2.7} },
+							 {{4.0,4.0},
+							  {4.0,4.0} }};
 
-Float_t  StFlowEvent::mPtTpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
-								   {0.1,0.1} },
-// 								   {0.1,0.1} },
-// 								   {0.1,0.1},
-// 								   {0.1,0.1},
-//   								   {0.1,0.1}},
-							          {{2.,2.},
-								   {2.,2.} }};
-// 								   {2.,2.} }};
-// 								   {2.,2.},
-// 								   {2.,2.},
-// 								   {2.,2.}}};
-Float_t  StFlowEvent::mPtFtpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
-								    {0.1,0.1} },
-// 								    {0.1,0.1} },
-// 								    {0.1,0.1},
-// 								    {0.1,0.1},
-// 								    {0.1,0.1}},
-							           {{2.,2.},
-								    {2.,2.} }};
-// 								    {2.,2.} }};
-// 								    {2.,2.},
-// 								    {2.,2.},
-// 								    {2.,2.}}};
+Float_t  StFlowEvent::mPtTpcCuts[2][2][Flow::nSels] =  {{{0.1,0.1},
+							 {0.1,0.1} },
+							{{2.,2.},
+							 {2.,2.} }};
+Float_t  StFlowEvent::mPtFtpcCuts[2][2][Flow::nSels] =  {{{0.1,0.1},
+							  {0.1,0.1} },
+							 {{2.,2.},
+							  {2.,2.} }};
 
 Float_t StFlowEvent::mPiPlusCuts[2]        = {-3., 3.};
 Float_t StFlowEvent::mPiMinusCuts[2]       = {-3., 3.};
@@ -567,32 +535,32 @@ void StFlowEvent::SetSelections() {
 	    // Tpc track or TopologyMap not available
 	    
 	    // Eta
-	    if (mEtaTpcCuts[1][harN][selN] > mEtaTpcCuts[0][harN][selN] && 
-		(fabs(eta) < mEtaTpcCuts[0][harN][selN] || 
-		 fabs(eta) >= mEtaTpcCuts[1][harN][selN])) continue;
-	    // 	    (eta < mEtaTpcCuts[0][harN][selN]         || both subs at +eta
-	    // 	     eta >= mEtaTpcCuts[1][harN][selN])) continue;
+	    if (mEtaTpcCuts[1][harN%2][selN] > mEtaTpcCuts[0][harN%2][selN] && 
+		(fabs(eta) < mEtaTpcCuts[0][harN%2][selN] || 
+		 fabs(eta) >= mEtaTpcCuts[1][harN%2][selN])) continue;
+	    // 	    (eta < mEtaTpcCuts[0][harN%2][selN]         || both subs at +eta
+	    // 	     eta >= mEtaTpcCuts[1][harN%2][selN])) continue;
 	    
 	    // Pt
-	    if (mPtTpcCuts[1][harN][selN] > mPtTpcCuts[0][harN][selN] && 
-		(Pt < mPtTpcCuts[0][harN][selN] ||
-		 Pt >= mPtTpcCuts[1][harN][selN])) continue;
+	    if (mPtTpcCuts[1][harN%2][selN] > mPtTpcCuts[0][harN%2][selN] && 
+		(Pt < mPtTpcCuts[0][harN%2][selN] ||
+		 Pt >= mPtTpcCuts[1][harN%2][selN])) continue;
 	  }
 	  
 	  else if (map.trackFtpcEast() || map.trackFtpcWest()) {
 	    // Ftpc track
 	    
 	    // Eta
-	    if (mEtaFtpcCuts[1][harN][selN] > mEtaFtpcCuts[0][harN][selN] && 
-		(fabs(eta) < mEtaFtpcCuts[0][harN][selN] || 
-		 fabs(eta) >= mEtaFtpcCuts[1][harN][selN])) continue;
-	    // 	    (eta < mEtaTpcCuts[0][harN][selN]         || both subs at +eta
-	    // 	     eta >= mEtaTpcCuts[1][harN][selN])) continue;
+	    if (mEtaFtpcCuts[1][harN%2][selN] > mEtaFtpcCuts[0][harN%2][selN] && 
+		(fabs(eta) < mEtaFtpcCuts[0][harN%2][selN] || 
+		 fabs(eta) >= mEtaFtpcCuts[1][harN%2][selN])) continue;
+	    // 	    (eta < mEtaTpcCuts[0][harN%2][selN]         || both subs at +eta
+	    // 	     eta >= mEtaTpcCuts[1][harN%2][selN])) continue;
 	    
 	    // Pt
-	    if (mPtFtpcCuts[1][harN][selN] > mPtFtpcCuts[0][harN][selN] && 
-		(Pt < mPtFtpcCuts[0][harN][selN] ||
-		 Pt >= mPtFtpcCuts[1][harN][selN])) continue;	
+	    if (mPtFtpcCuts[1][harN%2][selN] > mPtFtpcCuts[0][harN%2][selN] && 
+		(Pt < mPtFtpcCuts[0][harN%2][selN] ||
+		 Pt >= mPtFtpcCuts[1][harN%2][selN])) continue;	
 	  }
 	  
 	  pFlowTrack->SetSelect(harN, selN);
@@ -924,7 +892,7 @@ void StFlowEvent::PrintSelectionList() {
   cout << "# Global Dca Ftpc cuts= " << mDcaGlobalFtpcCuts[0] << ", " 
        << mDcaGlobalFtpcCuts[1] << endl;
   for (int k = 0; k < Flow::nSels; k++) {
-    for (int j = 0; j < Flow::nHars; j++) {
+    for (int j = 0; j < 2; j++) {
       cout << "#  selection= " << k+1 << " harmonic= " 
 	   << j+1 << endl;
       cout << "#    abs(Eta) Tpc cuts= " << mEtaTpcCuts[0][j][k] << ", " 
@@ -944,6 +912,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.41  2003/06/18 17:00:49  posk
+// Event plane cuts now only odd and even, instead of different for each harmonic.
+//
 // Revision 1.40  2003/05/15 06:08:41  aihong
 // default PID is changed from none to NA, SetDedxPtsPart() added
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.43 2003/04/01 00:27:07 posk Exp $
+// $Id: StFlowEvent.h,v 1.44 2003/06/18 17:00:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -147,10 +147,10 @@ private:
   Float_t             mCTB;                                      // CTB value sum
   Float_t             mZDCe;                                     // ZDC east
   Float_t             mZDCw;                                     // ZDC west
-  static Float_t      mEtaTpcCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
-  static Float_t      mEtaFtpcCuts[2][Flow::nHars][Flow::nSels]; // range absolute values
-  static Float_t      mPtTpcCuts[2][Flow::nHars][Flow::nSels];   // range
-  static Float_t      mPtFtpcCuts[2][Flow::nHars][Flow::nSels];  // range
+  static Float_t      mEtaTpcCuts[2][2][Flow::nSels];            // range absolute values
+  static Float_t      mEtaFtpcCuts[2][2][Flow::nSels];           // range absolute values
+  static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
+  static Float_t      mPtFtpcCuts[2][2][Flow::nSels];            // range
   Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights
   Flow::PhiWgt_t      mPhiWgtFarEast;                            //!flattening weights FarEast
   Flow::PhiWgt_t      mPhiWgtEast;                               //!flattening weights East
@@ -373,6 +373,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.44  2003/06/18 17:00:59  posk
+// Event plane cuts now only odd and even, instead of different for each harmonic.
+//
 // Revision 1.43  2003/04/01 00:27:07  posk
 // Little q is now unweighted by pt or eta. Big Q is unaffected.
 //
