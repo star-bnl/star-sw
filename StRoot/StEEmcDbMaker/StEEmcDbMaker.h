@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -148,8 +148,8 @@ class StEEmcDbMaker : public StMaker {
   const EEmcDbItem* getP(int sec, char sub, int eta){return getTile(sec,sub,eta,'P');}
   const EEmcDbItem* getQ(int sec, char sub, int eta){return getTile(sec,sub,eta,'Q');}
   const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
-  const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,strip,'U');}
-  const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,strip,'V');}
+  const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,'U',strip);}
+  const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,'V',strip);}
 
 
   //
@@ -178,7 +178,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -189,6 +189,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.28  2004/09/01 04:16:39  balewski
+// bug fix for getU(...), getV()  - order of argument was wrong in implementation
+//
 // Revision 1.27  2004/07/27 22:00:19  balewski
 // can overwrite gains & stat from DB
 //
