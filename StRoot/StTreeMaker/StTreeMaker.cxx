@@ -226,8 +226,9 @@ void StTreeMaker::UpdateTree(Int_t flag)
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
     if (!updOpt.IsNull()) br->SetOption((const char*)updOpt);  
     
-    if (flag==0) 	continue;
-    
+    if (flag==0) 		continue;    
+    if (*br->GetIOMode()=='0')	continue;
+
     isHist = (updName=="hist"); 
     if ( (flag==1) != (!isHist)) 	continue;
 
