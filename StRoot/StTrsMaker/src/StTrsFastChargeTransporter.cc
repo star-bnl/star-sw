@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.8 1999/04/07 00:49:36 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.9 1999/04/07 15:05:08 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.9  1999/04/07 15:05:08  lasiuk
+ * typo
+ *
  * Revision 1.8  1999/04/07 00:49:36  lasiuk
  * use the z offset for drift length
  *
@@ -81,9 +84,9 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 	seg.position().z() - frischGrid ;
 
     if (seg.position().y() > mGeomDb->firstOuterSectorAnodeWire())
-	driftLength += mGeometryDb->outerSectorzOffSet();
+	driftLength += mGeomDb->outerSectorzOffSet();
     else
-	driftLength += mGeometryDb->innerSectorzOffSet();
+	driftLength += mGeomDb->innerSectorzOffSet();
     
 //     PR(driftLength);
     if (driftLength<0) {// PROBLEMS
