@@ -2,7 +2,6 @@
  * Translate tppad/tppixel tables into adc/x,y,z info (for diagnostic)
 */
 #include "PAM.idl"
-#include "tpg_pad_plane.idl"
 #include "tpg_detector.idl"
 #include "tcl_sector_index.idl"
 #include "raw_sec_m.idl"
@@ -14,8 +13,7 @@
 
 interface xyz_newtab: amiModule{
 	STAFCV_T call
-		( in tpg_pad_plane	pad_plane
-		, in tpg_detector	detector
+		( in tpg_detector	detector
                 , in tcl_sector_index tcl_sector_index
                 , in raw_sec_m      raw_sec_m
                 , in raw_row        raw_row_in
@@ -30,5 +28,5 @@ interface xyz_newtab: amiModule{
 		);
 	};
 
-/* Created 25Nov96 Last modification: $Date: 1998/07/10 00:46:18 $ */
+/* Created 25Nov96 Last modification: $Date: 1998/12/17 19:33:56 $ */
 

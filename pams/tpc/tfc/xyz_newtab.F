@@ -1,7 +1,10 @@
-* $Id: xyz_newtab.F,v 1.1 1998/07/10 00:46:17 kathy Exp $
+* $Id: xyz_newtab.F,v 1.2 1998/12/17 19:33:53 sakrejda Exp $
 * $Log: xyz_newtab.F,v $
+* Revision 1.2  1998/12/17 19:33:53  sakrejda
+* unused geometry tables deleted from the header
+*
 * Revision 1.1  1998/07/10 00:46:17  kathy
-* put in xyz_newtab.idl & xyz_newtab.F - makes adcxyz table in new tpc table format - code & kumac by David Hardtke
+*  put in xyz_newtab.idl & xyz_newtab.F - makes adcxyz table in new tpc table format - code & kumac by David Hardtke
 *
 * Revision 1.5  1998/01/27 01:14:52  fisyak
 * Split sources
@@ -21,7 +24,6 @@ CC:                     data table format.
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION XYZ_NEWTAB(
-     2         pad_plane_h,         pad_plane ,
      3         detector_h,          detector ,
      4         tcl_sector_index_h,   tcl_sector_index,
      5         raw_sec_m_h,         raw_sec_m,
@@ -46,8 +48,6 @@ CC:
 CC: AUTHOR:     N.T.B. Stone
 CC: ARGUMENTS:
 CC:          IN:
-CC:        pad_plane     - Pad Plane description
-CC:      pad_plane_h     - Header Structure for pad_plane
 CC:         detector     - Detector hardware info
 CC:       detector_h     - Header Structure for detector 
 CC:      tcl_sector_index_h  - Header Structure for sector index
@@ -94,6 +94,7 @@ CC:>--------------------------------------------------------------------
 	real		time_bin	! size (usec) of time bucket
 	real		Xlocal(3)	! local cartesian coordinates
 	real		Xglobal(3)	! global cartesian coordinates
+        real            dummy           ! dummy argument for the tgc calls
 
 	logical		first_call/.true./
 
@@ -133,14 +134,6 @@ c -----	TPG function calls
 	  seq_fact = 2**20
 	  buck_fact = 2**10
 	endif
-
-
-	if ((pad_plane_h.maxlen.le.0) .or. 
-     2	    (pad_plane_h.nok.gt.pad_plane_h.maxlen)) then
-	  write (6,*) 'XYZ: !!! Poorly defined table: PAD_PLANE !!!'
-	  goto 999
-	endif
-
 
 	if ((adcxyz_h.maxlen.le.0) .or. 
      2	    (adcxyz_h.nok.gt.adcxyz_h.maxlen)) then
@@ -225,11 +218,10 @@ c mal 31aug97
      +          chip_pad(adcxyz(adcxyz_h.nok).row,adcxyz(adcxyz_h.nok).pad)
             
 	      istatus = tgc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
-     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1), 
-     +          pad_plane_h, pad_plane)
+     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1),dummy,dummy) 
 
 	      istatus = tgc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
-     + 	      Xlocal(2), pad_plane_h, pad_plane)
+     + 	      Xlocal(2), dummy, dummy)
 
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
               istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
@@ -325,11 +317,10 @@ c mal 31aug97
      +          chip_pad(adcxyz(adcxyz_h.nok).row,adcxyz(adcxyz_h.nok).pad)
             
 	      istatus = tgc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
-     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1), 
-     +          pad_plane_h, pad_plane)
+     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1), dummy, dummy)
 
 	      istatus = tgc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
-     + 	      Xlocal(2), pad_plane_h, pad_plane)
+     + 	      Xlocal(2), dummy, dummy)
 
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
               istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,

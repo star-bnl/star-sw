@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.8 1998/09/12 00:17:35 sakrejda Exp $
+* $Id: tph.F,v 1.9 1998/12/17 19:33:02 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.9  1998/12/17 19:33:02  sakrejda
+* unused geometry tables deleted from the header
+*
 * Revision 1.8  1998/09/12 00:17:35  sakrejda
 * errors in hit finder changed to produce a more reasonable chisq
 *
@@ -40,7 +43,6 @@
       INTEGER FUNCTION TPH(tcl_sector_index_h, tcl_sector_index
      +,                       tclpar_h,        tclpar
      +,			      tsspar_h,        tsspar
-     +,                       detector_h,      detector
      +,                       pad_plane_h,     pad_plane
      +,                       pixel_data_in_h,   pixel_data_in
      +,                       pixel_data_out_h,  pixel_data_out
@@ -71,8 +73,6 @@ C   Input arguments  (One to a line with definition after ! )
 C
 C     tsspar_h:
 C     tsspar:
-C     detector_h:
-C     detector:
 C     pad_plane_h:
 C     pad_plane:
 C     pad_data_in_h
