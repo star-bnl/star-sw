@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.39 1999/12/02 23:10:03 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.40 1999/12/08 21:10:36 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.40  1999/12/08 21:10:36  lbarnby
+// bug fix: pointer to summary_param now obtained correctly as it is in different dir.
+//
 // Revision 1.39  1999/12/02 23:10:03  lbarnby
 // put summary_param into runco branch
 //
@@ -120,7 +123,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.39 1999/12/02 23:10:03 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.40 1999/12/08 21:10:36 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -445,7 +448,7 @@ Int_t  St_dst_Maker::Filler(){
   }
  //--------------- ????????? --------------
   St_run_header    *run_header    = (St_run_header *)    m_ConstSet->Find("run_header");
-  St_dst_summary_param *summary_param = (St_dst_summary_param *) m_ConstSet->Find("summary_param");
+  St_dst_summary_param *summary_param = (St_dst_summary_param *) m_Runco->Find("summary_param");
   
   if (!run_header) {
     StEvtHddr * evthdr = (StEvtHddr*)GetDataSet("EvtHddr");
