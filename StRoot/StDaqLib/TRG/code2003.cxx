@@ -88,23 +88,14 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
   assert(header.ByteOrder==0x04030201);
   return returnValue;
 }
-void TRG_Reader::SanityCheck2003(char *ptr) { // Helps ensure we actually have the trigger data.
+void TRG_Reader::SanityCheck2003(char *ptr) {
   gs2003=(MarilynMonroe*)ptr;
-  unsigned short x;
-
-  x=gs2003->TrgSum.L1SumBytes; assert(x==0x0084||x==0x8400);
-  x=gs2003->TrgSum.L2SumBytes; assert(x==0x0084||x==0x8400);
-
-  /* As of Jan 14 2003, the trigger data is messed up, and this sanity check
-  ** will fail.  Under pressure to get the chain running, I'm commenting it
-  ** out.  We'll depend upon the above checks, which are not messed up.
-  assert( gs2003->RAW[0].RawDetHeader[0]=='R');   If one of these asserts()s
-  assert( gs2003->RAW[0].RawDetHeader[1]=='D');   fails, it probably means that the
-  assert(gs2003->RAW[0].CTBdataHeader[0]=='C');   trigger group wrote the .daq bank
-  assert(gs2003->RAW[0].CTBdataHeader[1]=='T');   with a new version of trgStructures.h.
-  assert(gs2003->RAW[0].MWCdataHeader[0]=='M');   If so, then you will have to modify all
-  assert(gs2003->RAW[0].MWCdataHeader[1]=='W');   the offline code to 
-  assert(gs2003->RAW[0].BEMCdataHeader[0]=='E');  switch
-  assert(gs2003->RAW[0].BEMCdataHeader[1]=='M');  between versions of trgStructures.h.
-  -----------------------*/
+  assert( gs2003->RAW[0].RawDetHeader[0]=='R');  // If one of these asserts()s
+  assert( gs2003->RAW[0].RawDetHeader[1]=='D');  // fails, it probably means that the
+  assert(gs2003->RAW[0].CTBdataHeader[0]=='C');  // trigger group wrote the .daq bank
+  assert(gs2003->RAW[0].CTBdataHeader[1]=='T');  // with a new version of trgStructures.h.
+  assert(gs2003->RAW[0].MWCdataHeader[0]=='M');  // If so, then you will have to modify all
+  assert(gs2003->RAW[0].MWCdataHeader[1]=='W');  // the offline code to 
+  assert(gs2003->RAW[0].BEMCdataHeader[0]=='E');  // switch
+  assert(gs2003->RAW[0].BEMCdataHeader[1]=='M');  // between versions of trgStructures.h.
 }
