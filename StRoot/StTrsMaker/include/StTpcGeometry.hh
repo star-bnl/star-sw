@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcGeometry.hh,v 1.1 1998/11/10 17:12:06 fisyak Exp $
+ * $Id: StTpcGeometry.hh,v 1.2 1998/12/15 11:20:36 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcGeometry.hh,v $
- * Revision 1.1  1998/11/10 17:12:06  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/12/15 11:20:36  lasiuk
+ * add i/o sector spacing = 3 mm
  *
  * Revision 1.1  1998/11/10 17:12:06  fisyak
  * Put Brian trs versin into StRoot
@@ -71,6 +71,7 @@ public:
     // Sector Dimensions
     virtual double innerSectorEdge()        const = 0;
     virtual double outerSectorEdge()        const = 0;
+    virtual double ioSectorSpacing()        const = 0;
     
     // Wire Plane
     virtual double anodeWireRadius()                         const = 0;

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.1 1998/11/10 17:12:07 fisyak Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.2 1998/12/15 11:20:38 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,8 +12,8 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
- * Revision 1.1  1998/11/10 17:12:07  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/12/15 11:20:38  lasiuk
+ * add i/o sector spacing = 3 mm
  *
  * Revision 1.1  1998/11/10 17:12:07  fisyak
  * Put Brian trs versin into StRoot
@@ -71,6 +71,7 @@ public:
     double innerSectorRowPitch1()          const;
     double innerSectorRowPitch2()          const;
     double outerSectorRowPitch()           const;
+    double ioSectorSpacing()               const;
 
     // TimeBuckets
     int    numberOfTimeBuckets()           const;
@@ -163,6 +164,7 @@ private:
     double mOuterSectorLength;
     double mIoSectorSeparation;
     double mOuterSectorEdge;
+    double mIoSectorSpacing;
     
     double mFrischGrid;
     double mDriftDistance;
@@ -248,7 +250,7 @@ inline double StTpcSimpleGeometry::firstOuterSectorAnodeWire() const{ return (mF
 inline double StTpcSimpleGeometry::lastOuterSectorAnodeWire() const{ return (mLastOuterSectorAnodeWire);}
 inline int StTpcSimpleGeometry::numberOfOuterSectorAnodeWires() const { return (mNumberOfOuterSectorAnodeWires);}
 
-inline double StTpcSimpleGeometry::innerSectorEdge() const{ return (mInnerSectorEdge);}
-inline double StTpcSimpleGeometry::outerSectorEdge() const{ return (mOuterSectorEdge);}
-
+inline double StTpcSimpleGeometry::innerSectorEdge() const { return (mInnerSectorEdge);}
+inline double StTpcSimpleGeometry::outerSectorEdge() const { return (mOuterSectorEdge);}
+inline double StTpcSimpleGeometry::ioSectorSpacing() const { return (mIoSectorSpacing);}
 #endif
