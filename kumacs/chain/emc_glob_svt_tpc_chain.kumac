@@ -6,7 +6,7 @@
 *
 *  1. stardev (or whichever version you want)
 *  2. staf++
-*  3. exec /afs/rhic/star/packages/dev/kumacs/chain/emc_glob_svt_tpc_chain
+*  3. exec $STAR/kumacs/chain/emc_glob_svt_tpc_chain
 * 
 * if you want to change anything, copy kumac to your area and change:
 *  4. input values on macro command line
