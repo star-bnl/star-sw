@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.11 2003/02/13 21:11:31 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.12 2003/03/10 13:02:04 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -853,24 +853,24 @@ Int_t StdEdxY2Maker::Make(){
 	dER = dEU;
 	ESector kTpcOutIn = kTpcOuter;
 	if (row <= 13) kTpcOutIn = kTpcInner;
-#ifdef AdcCorrection 
-	if (m_AdcCorrection) {
-	  tpcCorrection_st *cor = m_AdcCorrection->GetTable();
-#ifdef LogAdcCorrection
-	  // parameterization for log10
-	  dER = TMath::Power(10.,CalcCorrection(cor+2+kTpcOutIn, TMath::Log10(dE)+6)-6.); // to GeV
-#else
-#if 1
-	  // correction using positive tracks with built it drift time correction
-	  // x:x*pow(10.,mu+7.6e-7*y); x = predicted; y = DriftLength*ppOx
-#endif
-	  dER = 1.e-6*CalcCorrection(cor+4+kTpcOutIn,1.e6*dE);
-#endif
-	  dE = dER;
-	}
-#endif
 	Double_t RMS = 1;
 	if (!m_Simulation) {
+#ifdef AdcCorrection 
+	  if (m_AdcCorrection) {
+	    tpcCorrection_st *cor = m_AdcCorrection->GetTable();
+#ifdef LogAdcCorrection
+	    // parameterization for log10
+	    dER = TMath::Power(10.,CalcCorrection(cor+2+kTpcOutIn, TMath::Log10(dE)+6)-6.); // to GeV
+#else
+#if 1
+	    // correction using positive tracks with built it drift time correction
+	    // x:x*pow(10.,mu+7.6e-7*y); x = predicted; y = DriftLength*ppOx
+#endif
+	    dER = 1.e-6*CalcCorrection(cor+4+kTpcOutIn,1.e6*dE);
+#endif
+	    dE = dER;
+	  }
+#endif
 	  Double_t DriftDistance;
 	  if (row<14) DriftDistance = gStTpcDb->Dimensions()->innerEffectiveDriftDistance();
 	  else        DriftDistance = gStTpcDb->Dimensions()->outerEffectiveDriftDistance();
