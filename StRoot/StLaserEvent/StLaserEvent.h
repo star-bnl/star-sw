@@ -1,8 +1,8 @@
-//$Id: StLaserEvent.h,v 1.9 2001/12/18 21:48:27 pfachini Exp $
+//$Id: StLaserEvent.h,v 1.10 2001/12/23 20:07:09 pfachini Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
-//Revision 1.9  2001/12/18 21:48:27  pfachini
-//Adding date and time stamp to Bill's tree
+//Revision 1.10  2001/12/23 20:07:09  pfachini
+//*** empty log message ***
 //
 //Revision 1.7  2001/12/12 20:49:35  love
 //Added //-> to clones array declarations
@@ -173,25 +173,25 @@ class Hit : public TObject {
 public:
    Hit() { }
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, 
-       Int_t row, Int_t track, Int_t flag);
+                        Int_t row, Int_t track, Int_t flag);
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
-       Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
-   
-   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
-       Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
-       Float_t prf,Float_t zrf);
-   
-   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
-       Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
-       Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy);
-   
+  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
+  Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
+  
+    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+   Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+   Float_t prf,Float_t zrf);
+
+  Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+  Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+  Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy);
+
    virtual ~Hit() { }      
    ClassDef(Hit,1)  //A TPC TPhit object
 };
-     
+
 class Pixel : public TObject {
 private:
    Int_t frow;
