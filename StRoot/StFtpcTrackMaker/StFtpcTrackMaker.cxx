@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.10 2000/07/18 21:22:17 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.11 2000/08/07 00:20:03 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.11  2000/08/07 00:20:03  jcs
+// save prevertex information correctly
+//
 // Revision 1.10  2000/07/18 21:22:17  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -158,14 +161,23 @@ Int_t StFtpcTrackMaker::Make()
   //pointer to preVertex
   St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
   gMessMgr->Message("", "I", "OST") << "Using primary vertex coordinates "; 
+    
+  Float_t primary_vertex_x = 0.0;
+  Float_t primary_vertex_y = 0.0;
+  Float_t primary_vertex_z = 0.0;
+  Int_t   primary_vertex_id;
   
   if (preVtx) {
     dst_vertex_st *preVtxPtr = preVtx->GetTable();
-    
+
     for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
       
       if (preVtxPtr->iflag == 101) {
-	iflag = 101;
+   	iflag = 101;
+        primary_vertex_x =  preVtxPtr->x;
+        primary_vertex_y =  preVtxPtr->y;
+        primary_vertex_z =  preVtxPtr->z;
+        primary_vertex_id = preVtxPtr->id;
 	*gMessMgr << "(preVertex): ";
       }
     }
@@ -212,30 +224,24 @@ Int_t StFtpcTrackMaker::Make()
       preVtxPtr->x = 0.0;
       preVtxPtr->y = 0.0;
       preVtxPtr->z = vertex->GetZ();
+      primary_vertex_z =  preVtxPtr->z;
       preVtxPtr->iflag = 301;
       preVtxPtr->det_id = 4;
       preVtxPtr->id = preVtx->GetNRows();
+      primary_vertex_id = preVtxPtr->id; 
       preVtxPtr->vtx_id = kEventVtxId;  
     }
 
     delete vertex;
   }
   
-    dst_vertex_st *preVtxPtr = preVtx->GetTable();
-    
-    for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
-      
-      if (preVtxPtr->iflag == 101) {
-        break;
-      }
-    }
 
-  *gMessMgr << " " << preVtxPtr->x << ", " << preVtxPtr->y << ", " << preVtxPtr->z << "." << endm;
+  *gMessMgr << " " << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z << "." << endm;
   
 
   // check for the position of the main vertex
 
-  Double_t z = TMath::Abs(preVtxPtr->z);
+  Double_t z = TMath::Abs(primary_vertex_z);
   
   if (z > 50.) {
     
@@ -259,7 +265,7 @@ Int_t StFtpcTrackMaker::Make()
     }
   }
 
-  Double_t vertexPos[3] = {preVtxPtr->x, preVtxPtr->y, preVtxPtr->z};
+  Double_t vertexPos[3] = {primary_vertex_x, primary_vertex_y, primary_vertex_z};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
 
   // tracking 
@@ -282,7 +288,7 @@ Int_t StFtpcTrackMaker::Make()
 
   fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
   m_DataSet->Add(fpt_fptrack);
-  tracker->FitAndWrite(fpt_fptrack, -preVtxPtr->id);
+  tracker->FitAndWrite(fpt_fptrack, -primary_vertex_id);
   
   // dE/dx calculation
   if (Debug()) {
@@ -392,7 +398,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.10 2000/07/18 21:22:17 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.11 2000/08/07 00:20:03 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
