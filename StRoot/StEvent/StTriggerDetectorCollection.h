@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.3 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.4 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.4  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.3  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -39,11 +42,13 @@
 #include "StEmcTriggerDetector.h"
 
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StTriggerDetectorCollection : public StObject {
 public:
     StTriggerDetectorCollection();
     StTriggerDetectorCollection(const dst_TrgDet_st&);
+    StTriggerDetectorCollection(const StTriggerData&);
     // StTriggerDetectorCollection(const StTriggerDetectorCollection&);            use default
     // StTriggerDetectorCollection& operator=(const StTriggerDetectorCollection&); use default
     virtual ~StTriggerDetectorCollection();

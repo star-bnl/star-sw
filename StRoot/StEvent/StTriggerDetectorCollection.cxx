@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.5 2003/01/29 23:59:12 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.6 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.6  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.5  2003/01/29 23:59:12  ullrich
  * Changed order of instantiation in constructor.
  *
@@ -30,9 +33,10 @@
  *
  **************************************************************************/
 #include "StTriggerDetectorCollection.h"
+#include "StTriggerData.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.5 2003/01/29 23:59:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.6 2004/02/11 01:42:09 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
@@ -40,6 +44,10 @@ StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
 
 StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
     mCtb(t), mMwc(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t) {/* noop */}
+
+// Note: VPD and MWC are purposely not filled here. tu 2/10/2004
+StTriggerDetectorCollection::StTriggerDetectorCollection(const StTriggerData& t) :
+    mCtb(t), mZdc(t), mBbc(t), mEmc(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.8 2002/03/05 17:11:52 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.9 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.9  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.8  2002/03/05 17:11:52  ullrich
  * Corrected bug in constructor. Wrong table entry was used.
  *
@@ -38,12 +41,13 @@
 #include <algorithm>
 #include "StZdcTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
+#include "StTriggerData.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.8 2002/03/05 17:11:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.9 2004/02/11 01:42:09 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -64,6 +68,45 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
     mSumAdc[west] = t.adcZDCWest;
     mSum          = t.adcZDCsum;
     mVertexZ      = t.ZDCvertexZ;
+}
+
+StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
+{
+    //
+    //  This is a temporary fix only. In future this
+    //  class will become obsolete and users should
+    //  get this info from StTriggerData.
+    //  This info is only a subset of what is available
+    //  in StTriggerData.
+    //  tu 2/10/2004
+    //
+    
+    // unattenuated
+    mAdc[0] = t.zdcUnAttenuated(west); 
+    mAdc[1] = t.zdcADC(west, 3);
+    mAdc[2] = t.zdcADC(west, 2);
+    mAdc[3] = t.zdcADC(west, 2);
+    mAdc[4] = t.zdcUnAttenuated(east); 
+    mAdc[5] = t.zdcADC(east, 3);
+    mAdc[6] = t.zdcADC(east, 2);
+    mAdc[7] = t.zdcADC(east, 2);
+    // TDC
+    mAdc[8] = t.zdcTDC(east);
+    mAdc[9] = t.zdcTDC(west);
+    // attenuated
+    mAdc[10] = t.zdcAttenuated(west);
+    mAdc[11] = t.zdcAtAddress(11);
+    mAdc[12] = t.zdcAtAddress(12);
+    mAdc[13] = t.zdcAttenuated(east);
+    mAdc[14] = t.zdcAtAddress(14);
+    mAdc[15] = t.zdcAtAddress(15);
+    mVertexZ = t.zdcVertexZ();
+
+    mSumAdc[east] = t.zdcAttenuated(east);
+    mSumAdc[west] = t.zdcAttenuated(west);
+    mSum          = t.zdcAtAddress(14);
+
+    fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0); // always 0
 }
 
 StZdcTriggerDetector::~StZdcTriggerDetector() {/* noop */}
