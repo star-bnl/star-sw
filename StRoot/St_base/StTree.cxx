@@ -19,7 +19,7 @@ static TString GetBranchByFile(const Char_t *file);
 static int AreSimilar(const Char_t *fileA, const Char_t *fileB);
 
 ClassImp(StIOEvent)
-StIOEvent::StIOEvent():TObject(){};
+StIOEvent::StIOEvent():TObject(){fObj=(TObject*)(-1);};
 //______________________________________________________________________________
 void StIOEvent::Browse(TBrowser *b)
 {
@@ -84,7 +84,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name)
        key = (TKey*)gDirectory->GetListOfKeys()->First();
   else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
 
-  if (!key)  { printf("<StIO::Read> Key not found\n"); goto RETURN; }
+  if (!key)  { printf("<StIO::Read> Key %s not found\n",name); goto RETURN; }
 
   toread = key->ReadObj();
 
@@ -98,7 +98,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
   event = (StIOEvent*)Read(file,(const char*)MakeKey(name,ukey));
   if (!event) 		return 0;
   retn = event->fObj; 
-  assert( !retn || event->GetUniqueID()==ukey);
+  assert( !retn || retn==(TObject*)(-1) || event->GetUniqueID()==ukey);
   delete event;
   return retn;
 }
@@ -291,13 +291,20 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
 //_______________________________________________________________________________
 Int_t StBranch::GetEvent(Int_t mode)
 {
+  TObject *obj=0;
   if (!(fIOMode&1)) return 0;
   Delete(); if (fList) delete fList; fList=0; 
   if(Open()) return 1; 
-  if (mode) { fList = (TList*)StIO::ReadNext(fTFile,GetName(),fUKey);
-  } else    { fList = (TList*)StIO::Read    (fTFile,GetName(),fUKey);}
+  if (mode) { obj = StIO::ReadNext(fTFile,GetName(),fUKey);
+  } else    { obj = StIO::Read    (fTFile,GetName(),fUKey);}
+
+  if (obj == 0) 		return kStWarn;
+  if (obj == (TObject*)(-1))	return kStErr;
+  fList = (TList*)obj;
+
   SetParAll(this,0);
-  return (!fList);
+  
+  return 0;
 }  
 //_______________________________________________________________________________
 Int_t StBranch::ReadEvent(ULong_t ukey)
@@ -464,9 +471,13 @@ Int_t StTree::WriteEvent(ULong_t  ukey)
 //_______________________________________________________________________________
 Int_t StTree::ReadEvent(ULong_t  ukey)
 {  
+  Int_t iret=0;
   SetUKey(ukey); Open();
   St_DataSetIter next(this);StBranch *br;
-  while ((br=(StBranch*)next())) br->ReadEvent(fUKey);
+  while ((br=(StBranch*)next())) {	//Read all branches 
+    iret=br->ReadEvent(fUKey); 
+    if(iret==kStErr) return kStErr;
+  }
   return 0;
 }  
   
@@ -479,12 +490,19 @@ Int_t StTree::NextEvent(ULong_t  &ukey)
 //_______________________________________________________________________________
 Int_t StTree::NextEvent()
 {
-  Open();
+  int iret=0;
+  if (Open()) return kStEOF;
   St_DataSetIter next(this); int num=0; StBranch *br;
   while ((br=(StBranch*)next())) {
     if (! br->fIOMode&1) continue;
-    if (!num++) {br->NextEvent(fUKey); if(fUKey==kUMAX) return kStEOF; continue;}    
-    br->ReadEvent(fUKey);}
+    if (!num++) {	//Read only 1st branch
+      iret = br->NextEvent(fUKey); 
+      if(iret) return iret;
+      continue;
+    }    
+    iret = br->ReadEvent(fUKey);
+    if (iret==kStErr) return iret;
+  }
   
   return (num) ?0 : kStEOF;
 }  
@@ -516,6 +534,7 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
   TString treeKey(treeName);
   ret = (StTree*)StIO::Read(file,(const char*)treeKey,u);
   if(!ret) {ret = (StTree*)StIO::Read(file,"bfc.tree",u);}
+  if ((Long_t)ret == -1) ret = 0;
   if (ret) ret->SetIOMode("r");
   return ret;
 }
@@ -573,7 +592,7 @@ ClassImp(StFile)
 Int_t StFile::AddFile(const Char_t **fileList)
 { 
   if (!fileList) return 0;
-  for(int i=0;const Char_t *file = fileList[i];i++) SetFile(file);
+  for(int i=0;const Char_t *file = fileList[i];i++) AddFile(file);
   return 0;
 }
 //_____________________________________________________________________________
@@ -605,11 +624,12 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   if (dot>0) famy.Replace(dot,999,""); 
   dot = famy.Last('.');
   if (dot>0) famy.Replace(dot+1,999,""); 
+  
   St_DataSetIter next(this);
   St_DataSet *dss;
   while((dss = next())) {
-    if (strncmp(famy,dss->GetName(),dot+1)) 	continue;
-    Warning("AddFile","Files %s and %s are frome the same family \n",
+    if (strncmp(famy,dss->GetName(),famy.Length())) 	continue;
+    Warning("AddFile","Files %s and %s are from the same family \n",
     (const Char_t *)tfile,dss->GetName());
   }
   
