@@ -1,31 +1,66 @@
 ////////////////////////////////////////////////////////////////////
 
 class StChain;
-StChain *chain=0;
 class StEmcOnl;
-StEmcOnl *emcIo = 0;
 class St_db_Maker;        
-St_db_Maker *dbMk = 0;
 class StEmcCalibrationMaker;
-StEmcCalibrationMaker *calib = 0;
 class StSmdPedMaker;
+StChain *chain=0;
+StEmcOnl *emcIo = 0;
+St_db_Maker *dbMk = 0;
+StEmcCalibrationMaker *calib = 0;
 StSmdPedMaker *smdPed = 0;
 
 int nEventsProc = 0;
 int MaxEvents = 0;
 int ntries = 0;
-int delaytime = 10;
+int delaytime = 1;
 int delay = delaytime;
 
 Bool_t realOnline = kFALSE;
+Bool_t debug = kFALSE;
 
 TTimer time(delaytime);
+time.Stop();
 
-void Start(int miliseconds = 10) { time.Start(miliseconds,kFALSE); delaytime = miliseconds; ntries=0; }
+void Fake() 																			{ if(calib) calib->SetFakeRun(kTRUE);  if(smdPed) smdPed->SetFakeRun(kTRUE);}
+void Real() 																			{ if(calib) calib->SetFakeRun(kFALSE); if(smdPed) smdPed->SetFakeRun(kFALSE);}
+void SetField(float field)  											{ if(emcIo) emcIo->setField(field);}
+void Start(int miliseconds = 1) 									{ time.Start(miliseconds,kFALSE); delaytime = miliseconds; ntries=0; }
+void Stop() 																			{ time.Stop(); }
+void NextEvent()  																{ int istat = ProcessEvent(); time.Start(delay,kFALSE); }
+void ProcessNewFile(char* file,char* dir = "/evp"){ realOnline = kFALSE; if(emcIo) { emcIo->createEvPool(file,dir); Start(delaytime); } }
+void SetDebug(Bool_t d)                           { debug = d; }
+void GoOnline()                                   { realOnline = kTRUE; if(emcIo) { emcIo->createEvPool("","/evp"); Start(delaytime); } }
 
-void Stop() { time.Stop(); }
+void ProcessAll(char* dirN)
+{
+	time.Stop();
+	realOnline = kFALSE;
+	int nfiles = 0;
+	gSystem->ChangeDirectory(dirN);
+	void *dir = gSystem->OpenDirectory(dirN);
+	const char* entry;
+	do
+	{
+		entry = gSystem->GetDirEntry(dir);
+		if(entry)
+		{
+			char completeName[200];
+			sprintf(completeName,"%s%s",dirN,entry);
+			emcIo->createEvPool(completeName,"");
+			int istat =0 ;
+			do
+			{
+			  cout <<"Reading from file "<<entry<<endl;
+				istat = ProcessEvent();
+				time.Stop();
+			} while(istat==0);
+		}
+	} while(entry!=0);
+}
 
-void Reset(char* file = "", Int_t nevents = 0)
+void Reset(char* file = "", char* dir = "/evp", Int_t nevents = 0)
 {
     time.Stop();
     
@@ -41,7 +76,7 @@ void Reset(char* file = "", Int_t nevents = 0)
    
     // create StEmcOnl    
     emcIo = new StEmcOnl();
-    emcIo->createEvPool(file,"/evp");
+    emcIo->createEvPool(file,dir);
 //    emcIo->setPrintInfo(kFALSE);
     if(!strcmp(file,"")) realOnline = kTRUE;
         
@@ -63,7 +98,7 @@ void Reset(char* file = "", Int_t nevents = 0)
     Bool_t GAIN  = kTRUE;
     Bool_t MIP   = kTRUE;
     
-    Bool_t isFake= kTRUE;
+    Bool_t isFake= kFALSE;
     
     calib->SetDoEqual(EQUAL);           
     calib->SetDoGain(GAIN);            
@@ -73,35 +108,38 @@ void Reset(char* file = "", Int_t nevents = 0)
               
     calib->SetDoUseL3(kTRUE);           
     calib->SetSubPedestal(kTRUE);
-    calib->SetPedInterval(6); //in hours
-    calib->SetWaitForPed(kTRUE);        
-    calib->SetUseLocalPed(kTRUE);       
+    calib->SetPedInterval(12); //in hours
+    calib->SetWaitForPed(kFALSE);        
+    calib->SetUseLocalPed(kFALSE);       
     calib->SetGainMode(0);           
     calib->SetDetNum(0);                        
     calib->SetZVertexMax(40);       
-    calib->SetNEtaBins(5);           
-    calib->SetEtaBinSize(4);         
+    calib->SetNEtaBins(10);           
+    calib->SetEtaBinSize(2);         
+		
+		calib->SetDir("~/EmcOnline/Calibration/");
     
     // options for SMD pedestal calculator
     if(smdPed)
     {
-      smdPed->SetPedInterval(6); //in hours
-      smdPed->SetMinEvents(10000);
+      smdPed->SetPedInterval(12); //in hours
+      smdPed->SetMinEvents(5000);
     }
     // options fto save information on OFFLINE DATABASE
     
-    calib->SetSavePedToDB(kFALSE);
+    calib->SetSavePedToDB(kTRUE);
     calib->SetSaveCalibToDB(kFALSE);
     
     if(smdPed) 
     {
-      smdPed->SetSavePedToDB(kFALSE);
+      smdPed->SetSavePedToDB(kTRUE);
       smdPed->SetFakeRun(isFake);
     }
     // initializing chain
     Int_t initStat = chain->Init(); 
     if (initStat) chain->Fatal(initStat, "during Init()");
-    
+    chain->PrintInfo();
+		
     // specific paremeters should be done here after chain is initialized
     StEmcPedSpectra    *ped   = NULL;
     StEmcEqualSpectra  *equal = NULL;
@@ -116,70 +154,79 @@ void Reset(char* file = "", Int_t nevents = 0)
     if(GAIN)
     {
       gain = calib->GetGainSpec();
-      gain->SetMinHits(4000);
+      gain->SetMinHits(4000000);
     }
     if(EQUAL)
     {
       equal = calib->GetEqualSpec();
-      equal->SetMinHits(4000);      
+      equal->SetMinHits(4000000);      
     }
     if(MIP)
     {
       mip = calib->GetMipSpec();
-      mip->SetMinHits(4000);      
+      mip->SetMinHits(4000000);      
       mip->SetMaxMultiplicity(1000);
       mip->SetMinMomentum(1.2);
     }
   
 }
-
-void ProcessEvent()
+int ProcessEvent()
 {  
-  int istat=0;
+	int istat=0;
   chain->Clear();
   
   if(emcIo)
   {
-    istat = emcIo->Make(); // This should call the Make() method in ALL makers
-    if(istat!=2 && istat!=3 && istat!=4) 
+		istat = emcIo->Make(); // This should call the Make() method in ALL makers
+		if(debug) cout <<"ntries = "<<ntries<<"  istat = "<<istat<<endl;
+		ntries++;
+		if(istat==1) return 1;
+    if(istat==0) 
     {
         cout << "---------------------- Processing Event : " << nEventsProc+1 << " ----------------------" << endl;
-        dbMk->Make();
-        calib->Make();
-        smdPed->Make();
+        if(dbMk)   dbMk->Make();
+        if(calib)  calib->Make();
+        if(smdPed) smdPed->Make();
         nEventsProc++;
     }
   } else istat =4;
 
-  if(!realOnline && (istat==2 || istat ==4 || (nEventsProc>=MaxEvents && MaxEvents!=0))) // reading file.... should stop
+  if(!realOnline && (istat>0 || (nEventsProc>=MaxEvents && MaxEvents!=0))) // reading file.... should stop
   {
      time.Stop();
      if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
      if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
      if (istat == 4) { cout << "Fatal Event Processed. Status = " << istat << endl; }
      if (nEventsProc>=MaxEvents && MaxEvents!=0) { cout << "Last Event requested" <<  endl; }
-  }
+     time.Stop();
+		 return istat;
+	}
+	
+	if(realOnline && istat>1)
+	{
+		if(debug) cout <<"Online problem istat = "<<istat<<"  ntries = "<<ntries<<endl;
+		if(emcIo) emcIo->createEvPool("","/evp");
+	}
 
   if(istat == 0) ntries = 0;
   else 
   {
     ntries++;
-    if(delay!=delaytime) cout <<" EMC Online CALIBRATION: No events in event pool... ntries = "<<ntries<<". will try again in "<<(float)delay/1000.0<<" seconds \n";
+    if(debug) if(delay>0) cout <<" EMC Online CALIBRATION: No events in event pool... ntries = "<<ntries<<". will try again in "<<(float)delay/1000.0<<" seconds \n";
   }
 
-  time.Start(delay,kFALSE);
   
-  if(ntries==0)    delay = delaytime;
+  if(ntries==0)     delay = delaytime;
   if(ntries>1000)  delay = 1000;
-  if(ntries>1050)  delay = 10000;
-  if(ntries>1100)  delay = 60000;
+  //if(ntries>11000)  delay = 10000;
+  //if(ntries>11000)  delay = 60000;
   
-  if(istat==3 || istat==4) time.Stop();
-  
-  return;
+  //if((istat==3 || istat==4) && !realOnline) time.Stop();
+	  
+  return istat;
 }
 
-void DoCalibOnline(char* file = "", Int_t nevents = 0)
+void DoCalibOnline(char* file = "", char* dir = "/evp", Int_t nevents = 0)
 {
 // Load needed shared libs
     gSystem->Load("St_base");
@@ -207,12 +254,12 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
     gSystem->Load("StEmcCalibrationMaker");
 
 
-    Reset(file, nevents); // create and initializs chain
+    Reset(file, dir, nevents); // create and initializs chain
     
 ///////////////////////////////////////////////////////////////
     MaxEvents = nevents;
     
-    time.SetCommand("ProcessEvent()");
+    time.SetCommand("NextEvent()");
     time.Start(delaytime,kFALSE);
 }
 

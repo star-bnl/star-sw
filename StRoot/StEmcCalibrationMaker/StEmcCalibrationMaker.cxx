@@ -11,11 +11,7 @@
 #include "TStopwatch.h"
 #include <fstream.h>
 #include "TFile.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcUtil/filters/StEmcFilter.h"
-#include "StEmcUtil/projection/StEmcPosition.h"
 #include "StMessMgr.h"
-#include "StEmcUtil/others/emcDetectorName.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "tables/St_MagFactor_Table.h"
 #include "stdlib.h"
@@ -26,6 +22,12 @@
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbTable.h"
 #include "StDbLib/StDbConfigNode.hh"
+
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcUtil/voltageCalib/VoltCalibrator.h"
 
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
@@ -67,6 +69,10 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   mPedInterval = 6; //in hours
   
   mFakeRun = kFALSE;
+	
+	mDir = "./";
+	mHVDatabase = "oldHVDatabase.dat";
+	mHVCalibration = "pmtGainVsHV.dat";
 }
 //_____________________________________________________________________________
 StEmcCalibrationMaker::~StEmcCalibrationMaker()
@@ -200,8 +206,10 @@ Int_t StEmcCalibrationMaker::Make()
     }
   }
   else mWaitForPed = kFALSE;
+	
+	Bool_t vertexOk=CalcZVertex();
   
-  if(!mWaitForPed)
+  if(!mWaitForPed) if(fabs(mZVertex)<mZVertexMax)
   {  
     if(!CheckPedestal()) return kStWarn;
     if(mDoEqual) 
@@ -226,7 +234,7 @@ Int_t StEmcCalibrationMaker::Make()
       }
     }
   
-    if(mDoMip)
+    if(mDoMip && vertexOk)
     {
       if(mMipSpec->Fill(mHitsAdc, mEvent))
       {
@@ -250,8 +258,9 @@ Int_t StEmcCalibrationMaker::Make()
       SaveCalibration(mFirstEventDate,mFirstEventTime);
     }
 
-    if(((Int_t)mEvNumber%200)==0) SaveSpectra("Recovery");
   }
+  if(((Int_t)mEvNumber%200)==0) SaveSpectra((char*)mDir.Data());
+  cout <<"Number of events processed = "<<mEvNumber<<endl;
   clock.Stop();
   cout <<"Time to run StEmcCalibrationMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
 	
@@ -261,8 +270,8 @@ Int_t StEmcCalibrationMaker::Make()
 Int_t StEmcCalibrationMaker::Finish()
 {
   gMessMgr->Info("StEmcCalibrationMaker::Finish()");
-	SaveTables();
-	SaveSpectra("Spec");
+	//SaveTables();
+	//SaveSpectra((char*)mDir.Data());
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -275,30 +284,21 @@ Bool_t StEmcCalibrationMaker::GetEvent()
 	  StL0Trigger* trg = mEvent->l0Trigger();
 	  Int_t trigger=0;
 	  if(trg) trigger = trg->triggerWord();
-	  if(trigger!=8192 && trigger!=4096) return kFALSE;
+		cout <<"Trigger word = 0x"<<hex<<trigger<<dec<<endl;
+	  //if(trigger!=0x2001 && trigger!=0x2002) return kFALSE;
   }
 	
   // reading B field from Database//////////
-  TDataSet *RunLog=GetInputDB("RunLog");
   mBField=0.5;
-  if(RunLog)
+	StEventSummary *sum = mEvent->summary();
+	
+  if(sum)
   {
-    St_MagFactor *mag=(St_MagFactor*)RunLog->Find("MagFactor");
-    if(mag)
-    {
-      MagFactor_st *magst=mag->GetTable();
-      mBField=0.5*magst[0].ScaleFactor;
-    }
+    mBField=sum->magneticField()/10.;
   }
   cout <<"Magnetic Field = "<<mBField<<" Tesla\n";
   mFilter->setBField(mBField);
   //////////////////////////////////////////
-  if(!mFakeRun)
-  {
-	  if(!CalcZVertex()) return kFALSE;
-    if(fabs(mZVertex)>mZVertexMax) return kFALSE;
-  }
-  
   if(!FillEmcVector()) return kFALSE;  
   
   Int_t mode=0;
@@ -335,7 +335,7 @@ Bool_t StEmcCalibrationMaker::ReadStEvent()
         StSPtrVecTrackNode& tracks=mEvent->l3Trigger()->trackNodes();
         mNTracks=tracks.size();
       }
-      else return kFALSE; 
+      else mNTracks=0; 
     }
     else
     {
@@ -349,6 +349,7 @@ Bool_t StEmcCalibrationMaker::ReadStEvent()
 Bool_t StEmcCalibrationMaker::CalcZVertex()
 {
   mZVertex=0;
+	if(!mEvent->l3Trigger()) return kFALSE;
   if(mDoUseL3) 
   {
     StPrimaryVertex* Vertex=mEvent->l3Trigger()->primaryVertex();
@@ -396,6 +397,7 @@ Bool_t StEmcCalibrationMaker::CheckPedestal()
 			Float_t y  = mHitsAdc->GetBinContent(ibin);
       y-=p;
       if(y<2.*rms) y=0;
+		  if(p==0 || rms==0) y=0;
 			mHitsAdc->SetBinContent(ibin,y);
     }
   }
@@ -423,6 +425,7 @@ Bool_t StEmcCalibrationMaker::CheckPedestal()
           Float_t rms= (Float_t)pedst[0].AdcPedestalRMS[i]/100.;
 				  y-=p;
           if(y<2.*rms) y=0;
+					if(p==0 || rms==0) y=0;
 				  mHitsAdc->SetBinContent(ibin,y);
         }
       }
@@ -441,9 +444,10 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
     Float_t eta,phi;
     mCalibGeo->getEtaPhi(id,eta,phi);
     Float_t theta=2.*atan(exp(-eta));
+		Float_t MipE;
     if(mMipSpec)
     {
-      Float_t MipE = mEoverMIP*(1.+0.056*eta*eta)/sin(theta);
+      MipE = mEoverMIP*(1.+0.056*eta*eta)/sin(theta);
       Float_t ADC,ERR;
       if(mMipSpec->GetMipPosition(id,&ADC,&ERR))
       {
@@ -461,10 +465,12 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
     if(np==1 && x[1]!=0) // one point only
     {
       A[0] = 0;
-      A[1] = y[1]/x[1];
+      if(x[0]>0) A[1] = y[0]/x[0]; else A[1] = 0;
       status = 1;
     }
-    
+    char line[200];
+		sprintf(line,"ID = %4d  MIP E = %7.5f MipADC = %7.5f E = %7.5f  + %7.5f * ADC ",id,MipE,x[0],A[0],A[1]);
+		if(status!=1 && id<=2400) cout <<line<<endl;
     for(Int_t i=0;i<5;i++)
     {
       Int_t ibin = mCalib->FindBin((Float_t)id,(Float_t)i);
@@ -477,17 +483,17 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
   return kTRUE;
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::SaveSpectra(char* flag)
+Bool_t StEmcCalibrationMaker::SaveSpectra(char* dir)
 {
-	char spec[200];
+	char spec[300];
 	if(mEqualSpec)
 	{
-		sprintf(spec ,"%sEqual%s.%08d.%06d.data.root",detname[mDetNum].Data(),flag,mFirstEventDate,mFirstEventTime);
+		sprintf(spec ,"%s%sEqualSpec.%08d.%06d.data.root",dir,detname[mDetNum].Data(),mFirstEventDate,mFirstEventTime);
     mEqualSpec->SaveAll(spec);
   }
 	if(mMipSpec)
 	{
-		sprintf(spec ,"%sMip%s.%08d.%06d.data.root",detname[mDetNum].Data(),flag,mFirstEventDate,mFirstEventTime);
+		sprintf(spec ,"%s%sMipSpec.%08d.%06d.data.root",dir,detname[mDetNum].Data(),mFirstEventDate,mFirstEventTime);
     mMipSpec->SaveAll(spec);
   }
 	return kTRUE;
@@ -521,7 +527,7 @@ void StEmcCalibrationMaker::SetStatus()
 		//if (i>=1941 && i<=2400) status[i-1]=1; // pp conf
 		//if (i>=1    && i<=180 ) status[i-1]=1; // pp conf
 		
-    if (i>=1 && i<=2400) status[i-1]=1; // initial Y3 configuration for towers
+    if (i>=1 && i<=2400) status[i-1]=1; // initial Y2003 configuration for towers
   }
   
   //year 2001 dead channels
@@ -532,6 +538,22 @@ void StEmcCalibrationMaker::SetStatus()
   //status[2150-1]=0;
   //status[1986-1]=0;
   //status[1979-1]=0;
+	
+	//y2003 run	
+	Int_t bad[] = {36,39,49,176,184,246,263,282,288,415,460,508,541,542,553,561,691,775,789,844,846,1008,1014,1052,
+	               1062,1115,1137,1151,1176,1259,1286,1390,1407,1421,1422,1423,1444,1456,1457,1459,1460,1501,1502,
+								 1518,1538,1540,1565,1764,1776,1795,1830,1868,1978,2002,2003,2004,2071,2089,2107,2108,2148,2149,
+								 2150,2151,2183,2226,2249,2278,
+								 1393,1394,1395,1396,1413,1414,1415,1416,1433,1434,1435,1436,1453,1454,1455,1456,1473,1474,1475,1476,
+								 1493,1494,1495,1496,1513,1514,1515,1516,1533,1534,1535,1536,
+								 -1};
+								 
+  Int_t index=0;
+	do
+	{
+		if(bad[index]!=-1)  status[bad[index]-1] = 0;
+		index++;
+	} while (bad[index]!=-1);
 	
 	for(Int_t i=1;i<=mNBins;i++)
 	{
@@ -550,6 +572,39 @@ void StEmcCalibrationMaker::SetStatus()
 		if(status[i-1]==1) nc++;
   }
 	cout << " valid channels = "<<nc<<endl;
+	
+	// this is just for creating starting status tables
+	/*
+	char timestamp[]="2003-01-01 00:00:00";
+	emcStatus_st *tnew=mBemc->GetTable();
+  StDbManager* mgr=StDbManager::Instance();
+	StDbConfigNode* node=mgr->initConfig(dbCalibrations,dbEmc);
+	StDbTable* tab=node->addDbTable("bemcStatus");
+	tab->SetTable((char*)tnew,1);
+	mgr->setStoreTime(timestamp);
+	mgr->storeDbTable(tab);
+	
+	smdStatus_st tnew1;
+	for(int i=0;i<18000;i++) tnew1.Status[i] = 1;
+	StDbTable* tab1=node->addDbTable("bsmdeStatus");
+	tab1->SetTable((char*)&tnew1,1);
+	mgr->setStoreTime(timestamp);
+	mgr->storeDbTable(tab1);
+	
+	smdStatus_st tnew2;
+	for(int i=0;i<18000;i++) tnew2.Status[i] = 1;
+	StDbTable* tab2=node->addDbTable("bsmdpStatus");
+	tab2->SetTable((char*)&tnew1,1);
+	mgr->setStoreTime(timestamp);
+	mgr->storeDbTable(tab2);
+	
+	emcStatus_st tnew3;
+	for(int i=0;i<4800;i++) tnew3.Status[i] = 0;
+	StDbTable* tab3=node->addDbTable("bprsStatus");
+	tab3->SetTable((char*)&tnew3,1);
+	mgr->setStoreTime(timestamp);
+	mgr->storeDbTable(tab3);*/
+	
 }
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::FillEmcVector()
@@ -591,12 +646,14 @@ void StEmcCalibrationMaker::LoadSpectra(char *time)
 	char spec[200];
 	if(mEqualSpec)
 	{
-		sprintf(spec ,"%sEqualSpectra.%s.data.root",detname[mDetNum].Data(),time);
-    mEqualSpec->LoadAll(spec);
+		sprintf(spec ,"%s%sEqualSpec.%s.data.root",mDir.Data(),detname[mDetNum].Data(),time);
+    cout <<"Loading ... "<<spec<<endl;
+		mEqualSpec->LoadAll(spec);
   }
 	if(mMipSpec)
 	{
-		sprintf(spec ,"%sMipSpectra.%s.data.root",detname[mDetNum].Data(),time);
+		sprintf(spec ,"%s%sMipSpec.%s.data.root",mDir.Data(),detname[mDetNum].Data(),time);
+    cout <<"Loading ... "<<spec<<endl;
     mMipSpec->LoadAll(spec);
   }
 	return;
@@ -758,23 +815,74 @@ void StEmcCalibrationMaker::SaveCalibration(Int_t date, Int_t time)
   }
 }
 //_____________________________________________________________________________
-void StEmcCalibrationMaker::CorrectGain(char* file,Int_t outGain,Int_t mode)
+void StEmcCalibrationMaker::GenerateHV(Float_t outGain,char* outfile,Int_t mode)
 {
-  ofstream out(file);
-  
-  for(Int_t id = 1;id<=mNBins;id++)
-  {
+  char GainShift[]="HVGainShift.dat";
+	
+	ofstream out1("EmcGain.dat");
+	ofstream out(GainShift);
+	ifstream inp(mHVDatabase.Data());
+  TH1F *h = new TH1F("Gain","Current Gain Distribution",100,0,0.02);
+	do
+	{
+	  Int_t a,b,c,d,e,f,id;
+		Float_t v;
+		inp>>a>>id>>b>>c>>d>>e>>f>>v;
+		
     Int_t ibin = mCalib->FindBin((Float_t)id,1.0);
     Float_t gain =  mCalib->GetBinContent(ibin);
-    Float_t a = 1;
+    Float_t a0 = 1;
     Float_t eta,phi;
     mCalibGeo->getEtaPhi(id,eta,phi);
     Float_t theta=2.*atan(exp(-eta));
-    if(mode==1) a = 1./sin(theta); // gain equalized in Et
-    Float_t gainShift = (outGain/gain)*a;
-    out <<id<<"  "<<eta<<"  "<<phi<<"  "<<gain<<"  "<<outGain<<"  "<<gainShift<<endl;
-  }
+    if(mode==1) a0 = sin(theta); // gain equalized in Et
+		Float_t outGain1 = outGain/a0;
+    Float_t gainShift = gain/outGain1;
+		char line[200];
+		sprintf(line,"%4d  %6.3f  %6.3f  %7.5f  %7.5f  %7.5f",id,eta,phi,gain,outGain1,gainShift);
+		if(gain>0) h->Fill(gain);
+    out1 <<line<<endl;
+		//if(gainShift==0) gainShift=1;
+		sprintf(line,"%2d %5d  %5d  %5d  %5d  %5d  %5d  %7.5f",a,id,b,c,d,e,f,gainShift);
+		out <<line<<endl;
+		
+	} while(!inp.eof());	
   out.close();
+	out1.close();
+	
+  // Instantiate the voltage calibrator class
+  VoltCalibrator vc;
+  // Select the file that contains the Gain vs HV data
+  vc.setRefFile(mHVCalibration.Data());
+  // Select the file that contains the relative gains to be
+  // be achieved
+  vc.setGainFile(GainShift);
+  // Select the file that containe the current voltages
+  vc.setVoltInputFile(mHVDatabase.Data());
+  // Select the file that will contain the new request voltages
+  vc.setVoltOutputFile(outfile);
+  // Perform the calculation
+  vc.process();
+	
+	ifstream inp1(mHVDatabase.Data());
+	ifstream inp2(outfile);
+  TH1F *h1 = new TH1F("HVShift","High Voltages shift (NEW-OLD)",200,-100,100);
+	do
+	{
+	  Int_t a,b,c,d,e,f,id;
+		Float_t v,v1;
+		inp1>>a>>id>>b>>c>>d>>e>>f>>v;
+		inp2>>a>>id>>b>>c>>d>>e>>f>>v1;
+		if(v1>0)h1->Fill(v1-v);
+		
+	} while(!inp1.eof());	
+	
+	TFile f("EmcGain.root","RECREATE");
+	h->Write();
+	h1->Write();
+	f.Close();
+	delete h;
+		
   return;
 }
 
