@@ -25,7 +25,6 @@ void StHbtSectoredExample(Int_t nevents=100,  const char *MainFile="/direct/star
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
-    gSystem->Load("StV0MiniDstMaker");
 
     cout << "Dynamic loading done" << endl;
 
