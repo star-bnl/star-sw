@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.10 1998/06/06 17:38:58 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.11 1998/06/23 15:52:43 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1222,7 +1222,7 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
       PP"for table\n");
       PP"type '%s', which is mentioned in %s.\n",
       gModuleTable[i],gOrigInputFile); 
-      PP"Press return to continue.   "); fgets(junk, 10, stdin);
+      /* PP"Press return to continue.   "); fgets(junk, 10, stdin); */
     }
   }
 }
