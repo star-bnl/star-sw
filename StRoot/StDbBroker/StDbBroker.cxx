@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.9 2000/01/24 15:12:19 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.10 2000/01/27 05:56:03 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.10  2000/01/27 05:56:03  porter
+ * update for compiling on CC5+HPUX-aCC+KCC
+ *
  * Revision 1.9  2000/01/24 15:12:19  porter
  * verbose check before resetting StDbManager verbose setting
  * + timestamp check from St_db_Maker where time and date are
@@ -134,14 +137,21 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
 void
 StDbBroker::SetDateTime(UInt_t date, UInt_t time)
 {
-
+  // 20000127  002502
    m_DateTime[0] = date; 
    m_DateTime[1]= time;
+
    char dateTime[16];
    ostrstream os(dateTime,16);
+   char timeCheck[7];
+   ostrstream ts(timeCheck,7);
+
+   ts<<m_DateTime[1]<<ends;
+   int len = strlen(timeCheck);
    os<<m_DateTime[0];
-   if(time<=99999) os<<"0"; // time must be 2 digits for hr
+   for(int i=0;i<6-len;i++)os<<"0";
    os<<m_DateTime[1]<<ends;
+
    mgr->setRequestTime(dateTime);
 
 }
