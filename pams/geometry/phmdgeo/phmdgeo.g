@@ -1,3 +1,12 @@
+* $Id: phmdgeo.g,v 1.9 2003/10/14 13:38:27 potekhin Exp $
+* $Log: phmdgeo.g,v $
+* Revision 1.9  2003/10/14 13:38:27  potekhin
+* Added the Id and Log tags for better documentation.
+* The oprevious check-in featured:
+* 1. CUTGAM and CUTELE values are introduced in the
+*    sensitive medium
+* 2. Proper mixture of Ar+CO2(70:30) has been introduced.
+*
 *****************************************************************
  Module  PHMDGEO  is the geometry of photon multiplicity detector
 *****************************************************************
