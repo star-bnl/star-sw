@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.2 2000/05/15 20:24:00 kathy Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.3 2000/06/02 20:26:03 lansdell Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.3  2000/06/02 20:26:03  lansdell
+// added check on Make() return codes
+//
 // Revision 1.2  2000/05/15 20:24:00  kathy
 // correct Log,Id so they get written out
 //
@@ -114,11 +117,18 @@ void bfcread_event_QA_outhistfile(
  
 // loop over events:
   int iev=0,iret=0, evnum=0;
- EventLoop: if (iev<nevents && !iret) {  // goto loop code
+ EventLoop: if (iev<nevents && iret!=2) {  // goto loop code
    evnum=iev+1;
    cout <<  " !!! bfcread_event_QA_outhistfile.C, processing event !!! " << evnum << endl ;
    chain->Clear();
-   iret = chain->Make();
+   switch (iret = chain->Make()) {
+     case 0: break;
+     case 2: { gMessMgr->Info("Last event from input."); break; }
+     case 3: { gMessMgr->Error() << "Event " << evnum << " had error " <<
+	       iret << ". Now skipping event."; gMessMgr->Print(); break; }
+     default: { gMessMgr->Warning() << "Event " << evnum << " returned status "
+	        << iret << ". Continuing."; gMessMgr->Print(); }
+   }
    iev++;                                // goto loop code
    goto EventLoop;                       // goto loop code
  }
