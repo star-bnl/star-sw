@@ -1,11 +1,11 @@
-// $Id: St_geant_Maker.h,v 1.9 1999/02/22 19:27:23 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.10 1999/03/11 00:15:23 perev Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_geant_Maker virtual base class for Maker                            //
+// St_geant_Maker virtual base class for Maker                          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -23,18 +23,17 @@ class St_Node;
 #endif
 class TRotMatrix;
 class St_geant_Maker : public StMaker {
- private:
-  Bool_t drawinit;
+protected:
   Int_t  nwgeant;     // No. of words in GCBANK common block
   Int_t  nwpaw;       // No. of words in PAWC  common block
   Int_t  iwtype;      // HIGZ interface (=0 no HIGZ)
   St_Node*   fNode;   //!
-  Char_t   mGnam[20]; //!
- protected:
+  TString fInputFile; // 
+  StEvtHddr *fEvtHddr;//! pointer to Event Header
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
   virtual St_Node *MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
- public: 
-                  St_geant_Maker(const char *name="geant", const char *title="run/geant/Run");
+public: 
+                  St_geant_Maker(const char *name="geant");
    virtual       ~St_geant_Maker();
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
@@ -54,9 +53,17 @@ class St_geant_Maker : public StMaker {
                                  float theta2, float phi2,
                                  float theta3, float phi3);
 
+   virtual void  SetDebug(EDebugLevel dbl=kDebug); 
+   void  SetInputFile(const char* file);
+
+
    St_Node* GetNode() { return fNode; }
    //----------------------------------------------------------------------
-   ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
+static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq);
+
+protected:
+   static St_DataSet *fgGeom;
+ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif

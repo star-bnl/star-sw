@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.26 1999/03/04 19:32:16 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.27 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.27  1999/03/11 00:15:22  perev
+// St_geant_Maker in new maker schema
+//
 // Revision 1.26  1999/03/04 19:32:16  nevski
 // esm/eem corrected
 //
@@ -180,8 +183,10 @@ extern "C" long int type_of_call csjcal_(
 addrfun *fun,           /* addres of external routine,                  */
 int  *narg,             /* number   of arguments                        */
 ...);                   /* other narg arguments                         */
-static Int_t nnodes = 1;
-static Int_t nlevel = 0;
+
+//unused static Int_t nnodes = 1;
+//unused static Int_t nlevel = 0;
+
 static Int_t irot = 0;
 static St_Node *topnode=0;
 typedef struct {
@@ -212,170 +217,212 @@ extern "C" void     type_of_call  agnzgete_(int* ILK,int* IDE,
 */
 ClassImp(St_geant_Maker)
 
+St_DataSet *St_geant_Maker::fgGeom = 0;
 //_____________________________________________________________________________
-St_geant_Maker::St_geant_Maker(const Char_t *name, const Char_t *title):
-StMaker(name,title){
-  drawinit= kFALSE;
+St_geant_Maker::St_geant_Maker(const Char_t *name):
+StMaker(name){
   nwgeant = 2000000;
   nwpaw   =       0;
   iwtype  =       0;
+  fgGeom = new St_DataSet("geom");  
+  m_ConstSet->Add(fgGeom);
+
+  fEvtHddr = new StEvtHddr(m_ConstSet);
 }
+
 //_____________________________________________________________________________
 St_geant_Maker::~St_geant_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
 // Initialize GEANT
-  if (! geant) {
+  
+  if (! TGeant3::fgGeant) {
     PrintInfo();
-    geant  = new TGeant3("Geant","C++ Interface to Geant3",nwgeant,nwpaw,iwtype); 
+    new TGeant3("Geant","C++ Interface to Geant3",nwgeant,nwpaw,iwtype); 
   }
 // Create Histograms    
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make(){
-  if (!m_DataSet->GetList()){ 
+Int_t St_geant_Maker::Make()
+{
     Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
     Float_t  vert[4],weigh;
-    St_DataSet *geom = gStChain->DataSet("geom");
-    if (geom && !geom->GetList()) {agstroot_();}
-    gtrigi();
+  Char_t   cgnam[20];
+  int iRes = 0; if(iRes){/*touch*/};
+  
+  
+  agstroot_();
     gtrig();
     // check EoF
-    if (cquest->iquest[0]) {return kStErr;}
+    if (cquest->iquest[0]) {return kStEOF;}
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
-    agnzgete_(&link,&ide,&npart,&irun,&ievt,mGnam,vert,&iwtfl,&weigh);
-    gStChain->SetRun(irun);
-    gStChain->SetEvent(ievt);
-    gStChain->SetEvenType(mGnam);
-    if (npart>0){
-      St_particle  *particle   = new St_particle("particle",npart);
-      Int_t Res_part = g2t_particle(particle);
-      m_DataSet->Add(particle);
+  agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
+
+    fEvtHddr->SetRunNumber(irun);
+    fEvtHddr->SetEventNumber(ievt);
+    fEvtHddr->SetEventType(cgnam);
+
+  if (npart>0) {  
+  
+    St_particle  *particle   = new St_particle("particle",npart);
+    m_DataSet->Add(particle);
+
+    iRes = g2t_particle(particle);
+//         =======================
+
       particle_st *p = particle->GetTable();
       if (p->isthep == 10 && p->idhep  == 9999999) {
-	gStChain->SetBImpact(p->phep[0]);
-	gStChain->SetPhImpact(p->phep[1]);
-	gStChain->SetMode(p->phep[2]);
-	gStChain->SetCenterOfMassEnergy(p->phep[3]);
-	Int_t west = p->phep[4];
-	Int_t east = (1000.*p->phep[4]-1000.*((float )west));
-	gStChain->SetAwest(west);
-	gStChain->SetAeast(east);
-	gStChain->SetRun(p->vhep[0]);
-	gStChain->SetEvent(p->vhep[1]);
+	fEvtHddr->SetBImpact  (p->phep[0]);
+	fEvtHddr->SetPhImpact (p->phep[1]);
+	fEvtHddr->SetGenerType(p->phep[2]);
+	fEvtHddr->SetCenterOfMassEnergy(p->phep[3]);
+	Int_t west = (int)p->phep[4];
+	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
+	fEvtHddr->SetAWest(west);
+	fEvtHddr->SetAEast(east);
+	fEvtHddr->SetRunNumber(p->vhep[0]);
+	fEvtHddr->SetEventNumber(p->vhep[1]);
 	ULong_t  t = p->jdahep[1];
-	if (t > 99999) t = 999999;
-	gStChain->SetDateTime(p->jdahep[0],t);
-	gStChain->SetProcessDateTime();
+	if (t > 99999) t = 0;
+	fEvtHddr->SetDateTime(p->jdahep[0],t);
+	fEvtHddr->SetProdDateTime();
       }
     }
     St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
     m_DataSet->Add(g2t_vertex);
     St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
     m_DataSet->Add(g2t_track);
-    Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
+
+    iRes = g2t_get_kine(g2t_vertex,g2t_track);
     
     
     //---------------------- inner part -------------------------//
+
     gfnhit_ ("SVTH","SVTD", &nhit1, 4,4);
     gfnhit_ ("SVTH","SFSD", &nhit2, 4,4);
     nhits=nhit1+nhit2;
-     if (nhits>0) 
-      { St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
+    if (nhits>0) { 
+      St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
       m_DataSet->Add(g2t_svt_hit);
-      Int_t Res_svt = g2t_svt(g2t_track,g2t_svt_hit);
-      }
+
+      iRes = g2t_svt(g2t_track,g2t_svt_hit);
+//	     ===============================
+    }
+
     gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
-    if (nhits>0)
-      { St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
+    if (nhits>0){ 
+      St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
       m_DataSet->Add(g2t_tpc_hit);
-      Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
-      }
+
+      iRes = g2t_tpc(g2t_track,g2t_tpc_hit);
+//	     ==============================
+    }
+
     gfnhit_ ("TPCH","TMSE", &nhits, 4,4);
-    if (nhits>0)
-      { St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
+    if (nhits>0) { 
+      St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
       m_DataSet->Add(g2t_mwc_hit);
-      Int_t Res_mwc = g2t_mwc(g2t_track,g2t_mwc_hit);
-      }
+      iRes = g2t_mwc(g2t_track,g2t_mwc_hit);
+//	     ==============================
+    }
+
     gfnhit_ ("FTPH","FSEC", &nhits, 4,4);
-    if (nhits>0)
-      { St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
+    if (nhits>0){
+      St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
       m_DataSet->Add(g2t_ftp_hit);
-      Int_t Res_ftp = g2t_ftp(g2t_track,g2t_ftp_hit);
-      }
+      iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
+//           ===============================
+    }
+
     gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
+    if (nhits>0) { 
+      St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
       m_DataSet->Add(g2t_ctb_hit);
-      Int_t Res_ctb = g2t_ctb(g2t_track,g2t_ctb_hit);
-      }
+      iRes = g2t_ctb(g2t_track,g2t_ctb_hit);
+//           ==============================
+    }
+
     gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
+    if (nhits>0) {
+      St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
       m_DataSet->Add(g2t_tof_hit);
-      Int_t Res_tof = g2t_tof(g2t_track,g2t_tof_hit);
-      }
+      iRes = g2t_tof(g2t_track,g2t_tof_hit);
+//           ==============================
+    }
+
     gfnhit_ ("RICH","RGAP", &nhit1, 4,4);
     gfnhit_ ("RICH","RCSI", &nhit2, 4,4);
     nhits=nhit1+nhit2;
-    if (nhits>0) 
-      { St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
+    if (nhits>0) {
+      St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
       m_DataSet->Add(g2t_rch_hit);
-      Int_t Res_rch = g2t_rch(g2t_track,g2t_rch_hit);
-      }
+      iRes = g2t_rch(g2t_track,g2t_rch_hit);
+//           ==============================
+    }
     
     //---------------------- calorimeters -------------------------//
     gfnhit_ ("CALH","CSUP", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
+    if (nhits>0) {
+      St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
       m_DataSet->Add(g2t_emc_hit);
-      Int_t Res_emc = g2t_emc(g2t_track,g2t_emc_hit);
-      }
+      iRes = g2t_emc(g2t_track,g2t_emc_hit);
+//           ==============================
+    }
+
     gfnhit_ ("CALH","CSDA", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
+    if (nhits>0) {
+      St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
       m_DataSet->Add(g2t_smd_hit);
-      Int_t Res_smd = g2t_smd(g2t_track,g2t_smd_hit);
-      }
+      iRes = g2t_smd(g2t_track,g2t_smd_hit);
+//           ==============================
+    }
+
     gfnhit_ ("ECAH","ESCI", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
+    if (nhits>0) {
+      St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
       m_DataSet->Add(g2t_eem_hit);
-      Int_t Res_eem = g2t_eem(g2t_track,g2t_eem_hit);
-      }
+      iRes = g2t_eem(g2t_track,g2t_eem_hit);
+//           ==============================
+    }
+
     gfnhit_ ("ECAH","EXSE", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
+    if (nhits>0) {
+      St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
       m_DataSet->Add(g2t_esm_hit);
-      Int_t Res_esm = g2t_esm(g2t_track,g2t_esm_hit);
-      }
+      iRes = g2t_esm(g2t_track,g2t_esm_hit);
+//           ==============================
+    }
+
     gfnhit_ ("VPDH","VRAD", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
+    if (nhits>0) {
+      St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
       m_DataSet->Add(g2t_vpd_hit);
-      Int_t Res_vpd = g2t_vpd(g2t_track,g2t_vpd_hit);
-      }
+      iRes = g2t_vpd(g2t_track,g2t_vpd_hit);
+//           ==============================
+    }
+
     gfnhit_ ("ZCAH","QSCI", &nhits, 4,4);
-    if (nhits>0) 
-      { St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
+    if (nhits>0) {
+      St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
       m_DataSet->Add(g2t_zdc_hit);
-      Int_t Res_zdc = g2t_zdc(g2t_track,g2t_zdc_hit);
-      }
-    //------------------------all bloody detectors done--------------------//
+      iRes = g2t_zdc(g2t_track,g2t_zdc_hit);
+//           ==============================
+    }
+
+
+//------------------------all bloody detectors done--------------------//
 #if 0
     Char_t *g2t = "g2t_";
     Int_t  narg = 0;
     addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
     if (address) csjcal(&address,&narg);
 #endif
-  }
   gtrigc();
-  if (cflag->ieorun) {return kStErr;} 
-  else {return kStOK;}
+  return (cflag->ieorun)?kStEOF : kStOK; 
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
@@ -386,9 +433,9 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.26 1999/03/04 19:32:16 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.27 1999/03/11 00:15:22 perev Exp $\n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Draw()
@@ -407,14 +454,14 @@ void St_geant_Maker::Do(const Char_t *job)
 //_____________________________________________________________________________
 void St_geant_Maker::G2root()
 {  
-  const Int_t MAXPOS = 250000;
+//unused  const Int_t MAXPOS = 250000;
   TRotMatrix* rotm=0;
-  TRotMatrix* rotd=0;
-  Float_t* volu=0, *position=0, *mother=0;
-  Int_t copy=0;
+//unused  TRotMatrix* rotd=0;
+//unused  Float_t* volu=0, *position=0, *mother=0;
+//unused  Int_t copy=0;
   Char_t astring[20];
-  Int_t   icopy   = 0;
-  Int_t   mrot    = 0;
+//unused  Int_t   icopy   = 0;
+//unused  Int_t   mrot    = 0;
   Int_t   jmate   = clink->jmate;
   Int_t   nmate   = 0;   if (jmate)  nmate  = z_iq[jmate-2];
   
@@ -425,7 +472,7 @@ void St_geant_Maker::G2root()
   for (Int_t imat=1; imat<= nmate; imat++){
     Int_t jma = z_lq[jmate-imat];
     if (! jma) continue;
-    Int_t nmixt = z_q[jma+11];
+    Int_t nmixt = (int)z_q[jma+11];
     TString MatName((const Char_t *) &(z_iq[jma+1]), 20); 
     TString Matname(MatName.Strip());
     Int_t nm = TMath::Abs(nmixt);
@@ -467,7 +514,7 @@ void St_geant_Maker::G2root()
   //---------- Shapes ---------------------
   Int_t   jvolum  = clink->jvolum;
   Int_t   nvolum  = 0;   if (jvolum) nvolum = z_iq[jvolum-2];
-  Int_t   jtmed   = clink->jtmed;
+//unused  Int_t   jtmed   = clink->jtmed;
   Int_t   ivo = 0;
   for (ivo = 1; ivo <= nvolum; ivo++){
     Int_t jvo = z_lq[jvolum-ivo];
@@ -477,7 +524,8 @@ void St_geant_Maker::G2root()
     t = (TShape *) gGeometry->GetListOfShapes()->FindObject(name.Data());
     if (!t) {t = MakeShape(&name,ivo);}
   }
-  //----------- Nodes -------------------  
+
+//----------- Nodes -------------------  
   Int_t Nlevel = 0;
   Int_t Names[15];
   Int_t Numbers[15];
@@ -504,13 +552,13 @@ St_Node *St_geant_Maker::MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t 
       if (!shape ) {shape = MakeShape(name,ivo);}
       node = new St_Node(name->Data(), name->Data(), shape);
     }
-    Int_t nin = z_q[jvo+3];
+    Int_t nin = (int)z_q[jvo+3];
     if (nin > 0) {
       Nlevel++;
       for (Int_t in=1; in<= nin; in++) {
-	Int_t jin = z_lq[jvo-in];
-	Int_t ivom = z_q[jin+2];
-	Int_t nuser = z_q[jin+3];
+	Int_t jin   = z_lq[jvo-in];
+	Int_t ivom  = (int)z_q[jin+2];
+	Int_t nuser = (int)z_q[jin+3];
 	TString  namem((const Char_t *) &(z_iq[jvolum+ivom]), 4);
 	Names[Nlevel] = z_iq[jvolum+ivom];
 	Numbers[Nlevel] = nuser;
@@ -546,21 +594,22 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
   Int_t jvo = z_lq[jvolum-ivo];
   TShape*  t;
   shapes   shape  = (shapes) z_q[jvo+2];
-  Int_t    nin    =          z_q[jvo+3];
-  Int_t    numed  =          z_q[jvo+4];
+//unused  Int_t    nin    =          (int)z_q[jvo+3];
+  Int_t    numed  =          (int)z_q[jvo+4];
   
-  Int_t    npar   =          z_q[jvo+5];
-  Int_t    natt   =          z_q[jvo+6];
+  Int_t    npar   =          (int)z_q[jvo+5];
+//unused  Int_t    natt   =          (int)z_q[jvo+6];
+
   params  *p;
   p               = (params *)&z_q[jvo+7];
   attributes *att;
   att             = (attributes *)(&z_q[jvo+7] + npar);
   Int_t    jtmed  = clink->jtmed;
   Int_t    jtm    =          z_lq[jtmed-numed];
-  Int_t    nmat   =          z_q[jtm+6];
+  Int_t    nmat   =          (int)z_q[jtm+6];
   Int_t    jmate  = clink->jmate;
   Int_t    jma    =          z_lq[jmate-nmat];
-  Int_t    nmixt  =          z_q[jma+11];
+  Int_t    nmixt  =          (int)z_q[jma+11];
   Int_t        nm = TMath::Abs(nmixt);
   Char_t   astring[20];
   if (nm <= 1) {
@@ -633,6 +682,9 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
     //      default:   t = new TBRIK((Char_t *) name->Data(),"BRIK",(Char_t *) Astring.Data(),
     //			       p->par[0],p->par[1],p->par[2]);
     //      break;
+
+    default: assert(0);
+
     } 
     if (att->lseen  != 1) t->SetVisibility(att->lseen);
     if (att->lstyle != 1) t->SetLineStyle(att->lstyle);
@@ -646,20 +698,20 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
 void St_geant_Maker::Call(const Char_t *name)
 {  
   Int_t  narg = 0;
-  addrfun address  = (addrfun ) csaddr(name,strlen(name));
+  addrfun address  = (addrfun ) csaddr((char*)name,strlen(name));
   if (address) csjcal(&address,&narg);
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Work()
 {  
-  St_Node*   node=0;
+  St_Node*    node=0;
   TRotMatrix* rotm=0;
-  TRotMatrix* rotd=0;
+//unused  TRotMatrix* rotd=0;
   Float_t* volu=0, *position=0, *mother=0;
   Char_t ss[12];
-  Int_t   icopy   = 0;
+//unused  Int_t   icopy   = 0;
   Int_t   irot    = 0;
-  Int_t   mrot    = 0;
+//unused  Int_t   mrot    = 0;
   Int_t   nrot    = 0;
   Int_t   jrotm   = clink->jrotm;
   if (jrotm) {nrot = z_iq[jrotm-2];}
@@ -678,7 +730,7 @@ void St_geant_Maker::Work()
     //if(irot >= 100) printf("%i %f %f %f %f %f %f \n", irot, te1[irot],fi1[irot], te2[irot],fi2[irot], te3[irot],fi3[irot]);
   }
   printf(" found %d rotation matrices \n",irot);
-  Int_t       copy=0;
+//unused  Int_t       copy=0;
 
   printf(" looping on agvolume \n");
   //   ==================================================
@@ -690,14 +742,14 @@ void St_geant_Maker::Work()
     TShape*  t;
     shapes   shape   = (shapes) volu[1];
     Int_t    nin     = 0;
-    Int_t    np      = volu[4];
+    Int_t    np      = (int)volu[4];
     Float_t* p       = volu+6;
     Float_t* att     = volu+6+np; 
     Char_t   name[]  = {0,0,0,0,0};
     Char_t   nick[]  = {0,0,0,0,0};
     float    xx[3]   = {0.,0.,0.};
 
-    if (mother) nin = mother[2];
+    if (mother) nin = (int)mother[2];
 
     strncpy(name,(const Char_t*)(volu-5),4);
     t=(TShape*)gGeometry->GetListOfShapes()->FindObject(name);
@@ -745,14 +797,15 @@ void St_geant_Maker::Work()
       };
       t->SetLineColor(att[4]);
     };
-    Int_t    ivol = *(position+1);
+    Int_t    ivol = (int)*(position+1);
+//unused    Int_t    irot = (int)*(position+3);
     Float_t* xyz  =   position+4;
-    irot = *(position+3);
     strncpy(nick,(const Char_t*)(cvolu+ivol),4);
 
     gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
                     &theta2,&phi2, &theta3,&phi3, &type);
-    float vect[] = {theta1,phi1,theta2,phi2,theta3,phi3};
+//unused    float vect[] = {theta1,phi1,theta2,phi2,theta3,phi3};
+
 
     xyz   = xx;
     // to build a compressed tree, name should be checked for repetition
@@ -785,7 +838,7 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
                                       thet1,phii1,thet2,phii2,thet3,phii3);
    
    TRotMatrix *matrix=0; TIter nextmatrix(list);
-   while (matrix=(TRotMatrix *) nextmatrix())  
+   while ((matrix=(TRotMatrix *) nextmatrix())) 
    { if (matrix!=pattern) 
      { if (CompareMatrix(*matrix,*pattern)) 
        { list->Remove(pattern); delete pattern; return matrix; }
@@ -793,13 +846,14 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    return pattern;
 }
 //------------------------------------------------------------------------
-void type_of_call rootmaptable_(Char_t *,Char_t *Table, Char_t*, Int_t *k, Char_t *iq){
-// void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq){
+void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq)
+{St_geant_Maker::RootMapTable(Cdest,Table, Spec, k, iq); }
+
+void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq)
+{
   TString TableName(Table); 
   TString t = TableName.Strip();
   t.ToLower();
-  St_DataSet *geom = gStChain->DataSet("geom");
-#if 0
   Char_t cmd[80];
   Int_t Nchar = sprintf(cmd,"St_%s",t.Data());
   if (gClassTable->GetID(cmd) < 0){
@@ -808,14 +862,21 @@ void type_of_call rootmaptable_(Char_t *,Char_t *Table, Char_t*, Int_t *k, Char_
   else {
     Nchar = sprintf(cmd,"new St_%s(\"%s\",%i)",t.Data(),t.Data(),*k);
     St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
-    if (table) {geom->Add(table); table->Adopt(*k,iq); table->SetBit(kIsNotOwn);}
+    if (table) {fgGeom->Add(table); table->Adopt(*k,iq); table->SetBit(kIsNotOwn);}
   }
-#else
-  // Use St_Table::New(...)  when it is available as follows:
-   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,*k);
-   if (table) {geom->Add(table); table->SetBit(kIsNotOwn);}
-   else
-     cout << "Dictionary for table :" << t.Data() << " has not yet been defined. Skip it" << endl;
-#endif
-
 }
+//------------------------------------------------------------------------
+void  St_geant_Maker::SetDebug(EDebugLevel dbl)
+{
+  StMaker::SetDebug(dbl);
+  if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
+}
+//------------------------------------------------------------------------
+void  St_geant_Maker::SetInputFile(const char *file)
+{
+  fInputFile = file;
+  TString kuip("gfile p "); kuip += fInputFile;
+  Do((const char*)kuip);
+}
+//------------------------------------------------------------------------
+

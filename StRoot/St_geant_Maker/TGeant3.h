@@ -127,11 +127,15 @@ public:
    virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
                          Float_t *upar, Int_t np); 
    virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
+
+
+   static TGeant3 *fgGeant; 
+
    virtual  Float_t* Gufld(Float_t *x, Float_t *bf);  
    ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
+    TGeant3 *geant; 
 }; 
  
-EXTERN TGeant3 *geant; 
  
 //----------GCBANK
 //      PARAMETER (KWBANK=69000,KWWORK=5200)
