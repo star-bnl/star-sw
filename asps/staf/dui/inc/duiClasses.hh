@@ -21,13 +21,14 @@
 #include "dui_macros.h"
 #include "dui_types.h"
 
+//:#####################################################################
 //:=============================================== CLASS              ==
-class duiDispatcher: public virtual tdmFactory {
+class duiFactory: public virtual tdmFactory {
 
 public:
 //:----------------------------------------------- CTORS & DTOR       --
-   duiDispatcher(const char * name);
-   virtual ~duiDispatcher();
+   duiFactory(const char * name);
+   virtual ~duiFactory();
 
 //:----------------------------------------------- ATTRIBUTES         --
    virtual void cwd (const char * cwd);
@@ -35,6 +36,9 @@ public:
    tdmDataset* cwdDO ();
    tdmDataset* rootDO ();
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
 //----------------------------------
 // Unix-Like commands
    virtual STAFCV_T cd (const char * dirPath);
@@ -72,7 +76,7 @@ protected:
 };
 
 //----------------------------------------------------------------------
-CORBA_TIE(duiDispatcher)
+CORBA_TIE(duiFactory)
 
 #endif /*DUICLASSES_HH*/
 #endif /*__cplusplus*/

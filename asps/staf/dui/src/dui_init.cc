@@ -13,7 +13,7 @@
 #include "duiClasses.hh"
 #include "dui_globals.h"
 
-   duiDispatcher *dui;
+   duiFactory *dui;
 //- This is a global that may not be preserved. --
    DS_DATASET_T *dui_pDScwd;
 
@@ -29,7 +29,7 @@
 //:<--------------------------------------------------------------------
 int dui_init()
 {
-   EML_MESSAGE(DUI: Initializing.);
+   EML_MESSAGE("DUI:Initializing. ");
 
 /*- Define the DUI KUIP commands. -*/
    dui_def_();
@@ -45,10 +45,10 @@ int dui_init()
 //:<--------------------------------------------------------------------
 int dui_start()
 {
-   EML_MESSAGE(DUI: Starting.);
+   EML_MESSAGE("DUI:Starting. ");
 
 /*- Create the DUI Dispatcher. -*/
-   dui = new duiDispatcher("dui");
+   dui = new duiFactory("dui");
 
 /*- Find the TDM Factory. -*/
    socObject *obj=NULL;
@@ -58,7 +58,7 @@ int dui_start()
    tdmFactory *t = (tdmFactory*)(obj->ptr());
 /*- Superceed the TDM Factory. -*/
    if( t != NULL ){
-      EML_MESSAGE(DUI: Superceeding TDM.);
+      EML_WARNING("DUI:Superceeding TDM. ");
       t->lock(FALSE);
       soc->deleteObject("tdm","tdmFactory");
       t = dui;
@@ -76,7 +76,7 @@ int dui_start()
 //:<--------------------------------------------------------------------
 int dui_stop()
 {
-   EML_MESSAGE(DUI: Stopping.);
+   EML_MESSAGE("DUI:Stopping. ");
 
 /*- Delete the DUI Dispatcher.
    delete dui;
