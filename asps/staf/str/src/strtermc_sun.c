@@ -1,7 +1,7 @@
 
 /*
 
-	         This file is:  strtermc_sgi.c
+	         This file is:  strtermc_sun.c
 
 	              Version:  1.00
 

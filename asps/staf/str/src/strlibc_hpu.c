@@ -1,13 +1,13 @@
 /*/
+static const char sccsid[] = "@(#)"__FILE__"\t\t1.6\tCreated 05 Sep 1995 19:14:00, \tcompiled "__DATE__;
 /*  General Description of this package:
 
 	Filename: strlibc_hpu.c  created 3-Jan-1994  R. Hackenburg
-
+	Added strcpuuser_ and strcputps_ from strlibc_sgi.c,  created 3-Sep-1995  R. Hackenburg
 */
 
 /*	Define structures, types etc., from the system:      */
 
-#define _INCLUDE_POSIX_SOURCE
 #include <sys/times.h>
 #include <sys/unistd.h>  /* This appears in the wrong place -- man pages say no "sys/" */
 
@@ -19,8 +19,7 @@
 /**/
 long	mclock_()
 
-/*	This routine is made to look like the AT&T V.3 routine of the same
-	name.
+/*  Description:  This routine is made to look like the AT&T V.3 routine of the same name.
 
   FORTRAN callable:
 
@@ -41,23 +40,42 @@ long	mclock_()
 	return( cpu.tms_utime );   /* user CPU times. */
 }
 /**/
-long	STRCPUTPS_()
+long	strcpuuser_()
 
-/*	This routine returns the clock resolution.
+/*  Description:  Returns the integer number of user CPU clock ticks.
 
   FORTRAN callable:
 
+	INTEGER CPU_ticks
 	REAL    CPU_seconds
-	INETEGR CPU_ticks
-	INTEGER STR_CPUTPS
+	INTEGER STRCPUUSER
+	INTEGER STRCPUTPS
 
+	CPU_ticks   = STRCPUUSER()  !Get CPU usage platform-dependent ticks.
 	CPU_seconds = CPU_ticks / STRCPUTPS() !Divide by platform's CPU Ticks per Second.
 */
 
 {
-	long ticks_per_second;
+	static struct tms cpu;
 
-	ticks_per_second = sysconf( _SC_CLK_TCK );
+	times( &cpu );   /*  Fill the "cpu" structure (tms).  */
 
-	return( ticks_per_second );
+	return( cpu.tms_utime );   /* user CPU time. */
 }
+/**/
+long	strcputps_()
+
+/*  Description: Inquires from the system and returns the number of CPU ticks-per-second.
+
+  FORTRAN callable:
+
+	INTEGER CPU_ticks
+	INTEGER STRCPUTPS
+
+	CPU_ticks   = STRCPUTPS()  !Get platform-dependent CPU ticks-per-second.
+*/
+
+{
+	return(sysconf( _SC_CLK_TCK ));
+}
+/**/

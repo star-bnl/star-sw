@@ -11,11 +11,11 @@
 *  Description:
 *	Obtain the total CPU time since counter-initialization:
 
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
-	TCPU=MCLOCK()-NATCPU_T0
+	TCPU=STRCPUUSER()-NATCPU_T0
 	
 	RETURN
 	END
@@ -37,11 +37,11 @@
 *	TCPU being an array instead of single-element.  TCPU(2)
 *	always comes back zero.
 
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
-	TCPU(1)=MCLOCK()-NATCPU_T0
+	TCPU(1)=STRCPUUSER()-NATCPU_T0
 	TCPU(2)=0
 	
 	RETURN
@@ -58,9 +58,9 @@
 
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 
-	NATCPU_T0=MCLOCK()
+	NATCPU_T0=STRCPUUSER()
 
 	RETURN
 	END
@@ -69,17 +69,19 @@
 
 
 
-	INTEGER FUNCTION STRCPUTPS()
-
-	IMPLICIT NONE
-
-*  Description:
-*	Return Native cpu clock ticks-per-second.
-
-	STRCPUTPS=100 !On OSF, it's 100 per second.
-
-	RETURN
-	END
+*	This is now replaced with a C routine which inquires the system
+*	with the sysconf call.
+*	INTEGER FUNCTION STRCPUTPS()
+*
+*	IMPLICIT NONE
+*
+**  Description:
+**	Return Native cpu clock ticks-per-second.
+*
+*	STRCPUTPS=100 !On OSF, it's 100 per second.
+*
+*	RETURN
+*	END
 
 
 
