@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.5 1999/12/17 16:35:26 sakrejda Exp $
+* $Id: tde.F,v 1.6 1999/12/28 20:10:08 ogilvie Exp $
 * $Log: tde.F,v $
+* Revision 1.6  1999/12/28 20:10:08  ogilvie
+* adde scaled dedx, changed to error on mean
+*
 * Revision 1.5  1999/12/17 16:35:26  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -100,6 +103,7 @@ C-----------------------------------------------------------------------
                 REAL charge
                 REAL adedx
                 REAL sorta_dedx
+                INTEGER row
       END STRUCTURE
 
 C-----------------------------------------------------------------------
@@ -117,12 +121,16 @@ C-----------------------------------------------------------------------
       REAL    x1,y1,xc,yc,radius,psic,cosl
       REAL    xa,xb,ya,yb,a,b,bi,bo,ai,ao,ds,half_pad
       REAL    rowtmp
-      real weight,sum_weight
+      real weight,sum_weight,sumsq,mean
       REAL fndedx,fract,frndm
       real z(10),erf(10),frachalf(10),zcut,nontrunc,slope
-      real average,sigma,dedx_upper,rndm
-      INTEGER iseed, nde_old, ipos,nzero
+      real average,sigma,dedx_upper,rndm,mean_scaled,sigma_scaled
+      INTEGER iseed, nde_old, ipos,nzero,kk
+
+      real ascale, bscale, scale, meanscale, arms, brms, rms 
+
       INTEGER longrow
+
 C
 c     variables for maximumum likeihood
 c
@@ -198,6 +206,7 @@ c  this only once on initialisation-
 c field is uniform enough in the TPC)
 
 c
+c
 c as a test for the likelihood method
 c book a histigram, fill it, fit, then delete
 c if this works, find a more efficient way later
@@ -208,6 +217,9 @@ c      tdpar(1).truncopt=4
 c      tdpar(1).truncfact=0.3
 c       tdpar(1).truncopt = 5
 
+c
+c setup for option 5 likelihood fit
+c
        if (tdpar(1).truncopt.eq.5) then
         nontrunc = 2.*( (1 - tdpar(1).truncfact) - 0.5)
         do i=1, 10
@@ -226,7 +238,9 @@ c       tdpar(1).truncopt = 5
            zcut = z(ipos)
         endif
        endif
-      
+c
+c end of setup
+c     
       write(m132,*)  'TDE - averaging, truncation methods: ',
      >     tdpar(1).averaging_method, tdpar(1).truncopt   
       call StInfo(m132)        
@@ -305,9 +319,9 @@ C        tdpar.averaging_method=0   calculate dE/dx=(sum of q)/(sum of s)
 C
 C        tdpar.averaging_method=1   calculate dE/dx=(sum of q/s)/(# of pnts)
 c     
-c        tdpar.averaging_method=2   calculate dE/dx as maximum likelihood
+c        tdpar.averaging_method=3   calculate dE/dx as maximum likelihood
 C
-c        tdpar.averaging_method=3   dE/dx=(sum of weight*q/s)/(# of weight)
+c        tdpar.averaging_method=4   dE/dx=(sum of weight*q/s)/(# of weight)
 c                           weight = sqrt(s)
 c
 C        tdpar.usemerge=0   skipp point flagged as merged 
@@ -400,15 +414,32 @@ c              endif
                  call StInfo(m132)
                endif  
                     nde=nde+1
-c
-c test
-c                    ds=1.
-c
                     dedx(nde).length=ds
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
-                    if (tdpar(1).averaging_method.eq.3) then
-                       dedx(nde).sorta_dedx = dedx(nde).adedx/sqrt(ds)
+                    dedx(nde).row=irow
+                    if (tdpar(1).averaging_method.eq.4) then
+c
+c first scale the dedx by path-length dependence
+c    dedx = a(1-b/dx) 
+c     
+                       if (irow.lt.13) then
+                          ascale= 0.636 
+                          bscale = 0.34 
+                          arms = 0.195
+                          brms = 0.050
+                       else   
+                          ascale = 0.632 
+                          bscale = 0.26
+                          arms = 0.170
+                          brms = 0.053  
+                       endif
+                       meanscale = 0.632*(1-0.26/2.2)
+                       scale = ascale*(1-bscale/ds)/meanscale
+                       rms = arms + brms/sqrt(ds)
+                       weight = 1./rms
+c                      weight = sqrt(ds)                       
+                       dedx(nde).sorta_dedx = dedx(nde).adedx*weight/scale
                     else
                       dedx(nde).sorta_dedx = dedx(nde).adedx
                     endif  
@@ -503,29 +534,68 @@ c
 c options for dE/dx calc
 c
          if(tdpar(1).averaging_method.eq.0.and.nde.gt.0) then
+
+            sumsq = 0
             do k=1,nde
                track(j).dedx(1)=track(j).dedx(1)+ dedx(k).length
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
+               sumsq = sumsq + (dedx(k).charge)**2
             end do
+            mean = track(j).dedx(2)/nde
+            sigma = sqrt(sumsq/nde - mean**2)
             track(j).dedx(1)=track(j).dedx(2)/track(j).dedx(1)
-         else if(tdpar(1).averaging_method.eq.1.and.nde.gt.0) then
+            track(j).dedx(2)=sigma/sqrt(real(nde))/track(j).dedx(1)
+
+         else if((tdpar(1).averaging_method.eq.1..or.
+     >          tdpar(1).averaging_method.eq.4).and.nde.gt.0) then
+            sumsq = 0
             do k=1,nde
                track(j).dedx(1)= track(j).dedx(1)+ dedx(k).adedx
-               track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
+               sumsq = sumsq + (dedx(k).adedx)**2
             end do
             track(j).dedx(1)=track(j).dedx(1)/real(nde)
-         elseif (tdpar(1).averaging_method.eq.3.and.nde.gt.0) then
+            sigma = sqrt(sumsq/real(nde) - (track(j).dedx(1))**2)
+            track(j).dedx(2)=sigma/sqrt(real(nde))
+c
+c calc weighted as well
+c 
             sum_weight = 0.
+            sumsq = 0.
+            mean=0.
+
             do k=1,nde
-               weight = sqrt(abs(dedx(k).length))
-               track(j).dedx(1)=track(j).dedx(1)+weight*dedx(k).adedx
+c
+c first scale the dedx by path-length dependence
+c    dedx = a(1-b/dx) 
+c                     
+               irow = dedx(k).row
+               ds=dedx(k).length
+               if (irow.lt.13) then
+                     ascale= 0.636 
+                     bscale = 0.34 
+                     arms = 0.195
+                     brms = 0.050
+                else   
+                     ascale = 0.632 
+                     bscale = 0.26
+                     arms = 0.170
+                     brms = 0.053 
+               endif
+               meanscale = 0.632*(1-0.26/2.2)
+               scale = ascale*(1-bscale/ds)/meanscale
+               rms = arms + brms/sqrt(ds)
+c               weight = 1./rms
+               weight = sqrt(ds)
+               mean=mean+weight*(dedx(k).adedx/scale)
+               sumsq=sumsq+weight*(dedx(k).adedx/scale)**2
                sum_weight=sum_weight+weight
-               track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
             if (sum_weight.gt.0) then
-               track(j).dedx(1)=track(j).dedx(1)/sum_weight
+               mean_scaled=mean/sum_weight
+               sigma = sqrt(sumsq/sum_weight - mean_scaled**2)
+               sigma_scaled=sigma/sqrt(sum_weight)
             endif
-         elseif (tdpar(1).averaging_method.eq.2.and.nde.gt.10) then
+         elseif (tdpar(1).averaging_method.eq.3.and.nde.gt.10) then
 c
 c likelihood method
 c get standard (0.7) mean dE/dx (hxamp) 
@@ -577,16 +647,38 @@ c            write(6,*) 'resoultion' , hsig(2)/hparam(2)
 c
 c
 c fill tpcdedx table
-         tpcdedx_h.nok = tpcdedx_h.nok+1
-         k=tpcdedx_h.nok
-         tpcdedx(k).ndedx = nde
-         tpcdedx(k).dedx(1) = track(j).dedx(1)
-         tpcdedx(k).dedx(2) = track(j).dedx(2)
-         tpcdedx(k).id_track = track(j).id
-         tpcdedx(k).method = tdpar(1).averaging_method 
+         if (tdpar(1).averaging_method.eq.1.or.
+     >           tdpar(1).averaging_method.eq.4) then
+            tpcdedx_h.nok = tpcdedx_h.nok+1
+            kk=tpcdedx_h.nok
+            tpcdedx(kk).ndedx = nde
+            tpcdedx(kk).dedx(1) = track(j).dedx(1)
+            tpcdedx(kk).dedx(2) = track(j).dedx(2)
+            tpcdedx(kk).id_track = track(j).id
+            tpcdedx(kk).method = 1  
+c
+c write out scaled as well
+c
+             tpcdedx_h.nok = tpcdedx_h.nok+1
+             kk=tpcdedx_h.nok
+             tpcdedx(kk).ndedx = nde
+             tpcdedx(kk).dedx(1) = mean_scaled
+             tpcdedx(kk).dedx(2) = sigma_scaled
+             tpcdedx(kk).id_track = track(j).id
+             tpcdedx(kk).method = 4
+          else
+            tpcdedx_h.nok = tpcdedx_h.nok+1
+            kk=tpcdedx_h.nok
+            tpcdedx(kk).ndedx = nde
+            tpcdedx(kk).dedx(1) = track(j).dedx(1)
+            tpcdedx(kk).dedx(2) = track(j).dedx(2)
+            tpcdedx(kk).id_track = track(j).id
+            tpcdedx(kk).method = tdpar(1).averaging_method
+          endif
+            
   
        end do 
-c      if (tdpar(1).averaging_method.eq.2) then
+c      if (tdpar(1).averaging_method.eq.3) then
 c         call hdelet(hhid)
 c      endif
        write(m132,*)  'TDE - num_tptracks, num_tpcdedx, nzeroes: ',
@@ -596,6 +688,12 @@ c      endif
 
       tde=STAFCV_OK
       end
+
+
+
+
+
+
 
 
 
