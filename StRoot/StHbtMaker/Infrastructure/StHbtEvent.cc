@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtEvent.cc,v 1.2 1999/07/19 14:24:05 hardtke Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.2  1999/07/19 14:24:05  hardtke
+ * modifications to implement uDST
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -21,11 +24,11 @@
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 //___________________
 StHbtEvent::StHbtEvent(){
-  mMult=0;
   mPrimVertPos[0]=-999.0;
   mPrimVertPos[1]=-999.0;
   mPrimVertPos[2]=-999.0;
   mTrackCollection = new StHbtTrackCollection;
+  mV0TrackCollection = new StHbtV0TrackCollection;
 }
 //___________________
 StHbtEvent::~StHbtEvent(){
@@ -34,6 +37,12 @@ StHbtEvent::~StHbtEvent(){
     delete *iter;
   }
   delete mTrackCollection;
+  //must do the same for the V0 track collection
+  StHbtV0TrackIterator V0iter;
+  for (V0iter=mV0TrackCollection->begin();V0iter!=mV0TrackCollection->end();V0iter++){
+    delete *V0iter;
+  }
+  delete mV0TrackCollection;
 }
 //___________________
 

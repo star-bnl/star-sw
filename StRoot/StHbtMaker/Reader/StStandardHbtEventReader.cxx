@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.3 1999/07/06 22:33:24 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.4 1999/07/19 14:24:07 hardtke Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.4  1999/07/19 14:24:07  hardtke
+ * modifications to implement uDST
+ *
  * Revision 1.3  1999/07/06 22:33:24  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -89,7 +92,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
   int mult = rEvent->trackCollection()->size();
-  hbtEvent->SetMult(mult);
+  hbtEvent->SetNumberOfTracks(mult);
+  hbtEvent->SetNumberOfGoodTracks(mult);  // same for now
   StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
   
@@ -146,11 +150,11 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
     float DCA = abs(rTrack->helix().at(pathlength)-vp);
     //cout << "DCA\t\t" << DCA << endl;
-    hbtTrack->SetDCA(DCA);
+    //    hbtTrack->SetDCA(DCA);
 
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
     //cout << "pt\t\t\t" << pt << endl;
-    hbtTrack->SetPt(pt);
+    //    hbtTrack->SetPt(pt);
 
     int charge = ((rTrack->helix().charge(HBT_B_FIELD)>0) ? 1 : -1);
     //cout << "charge\t\t\t\t" << charge << endl;
