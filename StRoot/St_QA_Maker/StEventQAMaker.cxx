@@ -941,9 +941,9 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t ycenter = geom->helix().ycenter();
 	Float_t rcircle = 1./geom->helix().curvature();
 	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
-					  ::pow(ycenter-firstPoint.y(),2));
+					    ::pow(ycenter-firstPoint.y(),2));
 	Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
-					  ::pow(ycenter-lastPoint.y(),2));
+					    ::pow(ycenter-lastPoint.y(),2));
 	Float_t azimdif = dif.perp();
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 	Float_t azimdifl = difl.perp();
@@ -958,7 +958,7 @@ void StEventQAMaker::MakeHistPrim() {
 	StThreeVectorF outerDifl = lastPoint - outerGeom->helix().at(sLastOuter);
 	Float_t outerXcenter = outerGeom->helix().xcenter();
 	Float_t outerYcenter = outerGeom->helix().ycenter();
-	Float_t outerRcircle = 1./outerGeom->helix().curvature();
+	Float_t outerRcircle = 1./(outerGeom->helix().curvature()+1.e-10);
 	Float_t outerCenterOfCircleToFP = ::sqrt(::pow(outerXcenter-firstPoint.x(),2) +
 					       ::pow(outerYcenter-firstPoint.y(),2));
 	Float_t outerCenterOfCircleToLP = ::sqrt(::pow(outerXcenter-lastPoint.x(),2) +
@@ -2015,8 +2015,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.52 2003/11/25 04:19:38 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.53 2003/12/04 03:56:26 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.53  2003/12/04 03:56:26  perev
+// 1/0 fix
+//
 // Revision 2.52  2003/11/25 04:19:38  perev
 // FPE protection
 //
