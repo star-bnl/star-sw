@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.10 1999/11/01 07:09:05 sakrejda Exp $
+* $Id: tpt_project.F,v 1.11 1999/11/07 05:53:39 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.11  1999/11/07 05:53:39  sakrejda
+* Calculation of the dip and crossing angle moved to tpt_load_track.F
+*
 * Revision 1.10  1999/11/01 07:09:05  sakrejda
 * Information about the first point on a track updated.
 *
@@ -196,25 +199,8 @@ C              a hit found
       save_flag=trk(itrk).flag
       iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
       if(iret.eq.STAFCV_OK) then
-         ixpnt = trk(itrk).nhit
-         l = trk(itrk).ipnt(ixpnt)
-         track(itrk).hitid = hit(l).id
-         xold = hit(l).x
-         yold = hit(l).y
-         do i=trk(itrk).nhit-1,1,-1
-            ient = trk(itrk).ipnt(i)
-            iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
-     >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
-            xold = hit(ient).x
-            yold = hit(ient).y
-            hit(ient).lambda=atand(trk(itrk).p(7))
-         end do
-         hit( trk(itrk).ipnt(trk(itrk).nhit)).alpha =
-     >   hit( trk(itrk).ipnt(trk(itrk).nhit-1)).alpha
-         hit( trk(itrk).ipnt(trk(itrk).nhit)).lambda =
-     >   hit( trk(itrk).ipnt(trk(itrk).nhit-1)).lambda
          trk(itrk).flag=save_flag
-         iret = tpt_load_track(itrk,track_h,track,trk)
+         iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit)
          tpt_project = STAFCV_OK
       else
          tpt_project = STAFCV_BAD
