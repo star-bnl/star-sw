@@ -285,7 +285,7 @@ C     Prevent mixing Kalman error flag with det_id (L.Barnby 06/00)
       endif
       globtrk(iglob).impact = 0.
 CSM      globtrk(iglob).id_start_vertex = 0
-      globtrk(iglob).method = 2**kKalmanFitId
+      globtrk(iglob).method = 2**tpcStandard + kKalmanFitId
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
       globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield*

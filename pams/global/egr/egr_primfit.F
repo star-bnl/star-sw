@@ -106,7 +106,7 @@ C -- make copy as default
        primtrk(index).iflag = globtrk(i).iflag
        if(globtrk(i).iflag.gt.0)then ! work with good tracks only
 C --    this will only work if Kalman fit was used
-        if(iand(globtrk(i).method,2**kKalmanFitId).ne.0)then
+        if(iand(globtrk(i).method,kKalmanFitId).ne.0)then
 CCC --- restore this when substituting for egr_impactcl
 CCC         globtrk(i).chisq(2) = 0.0 ! preset in case of failure
          primtrk(index).chisq(2) = 0.0 ! preset in case of failure
@@ -171,7 +171,8 @@ C     SM modifying this to comply to iflag scheme we have
                  primtrk(index).iflag = globtrk(i).iflag + 100
               endif
 C     
-              primtrk(index).method =2**kKalmanFitId
+              primtrk(index).method = globtrk(i).method
+              call sbyt(primtrk(index).method,kKalmanFitId,1,4)
               ndegf = ndef+2   ! two extra df for fit
               primtrk(index).id=globtrk(i).id
               primtrk(index).n_max_point=globtrk(i).n_max_point + 1

@@ -338,8 +338,8 @@ CC:
 CC:        h) For primary track candidate marker, use 3D DCA from final
 CC:           vertex with evrpar(1).vcut as before.
 CC:
-CC: (25)  Track fit covariance matrix automatically used if globtrk.method
-CC:       is 2**kKalmanFitId (i.e., if the Kalman track fitter was used).
+CC: (25)  Track fit covariance matrix automatically used if jbyt(globtrk.method,1,4)
+CC:       is kKalmanFitId (i.e., if the Kalman track fitter was used).
 CC:
 CC: (26)  Changed minimum track number and track ratio requirements to:
 CC:        a) minimum number of tracks at each step must be .ge. ntrkcut (=3)
@@ -383,6 +383,7 @@ CC:
 CC:>----------------------------------------------------------------------
 
 CC:  Variables in common with Subroutines:
+      integer   jbyt
       INTEGER   maxtr
       PARAMETER (maxtr=5000)
       REAL*8    vtrv(6,maxtr)
@@ -757,7 +758,7 @@ CCC  track position uncertainty at the DCA point:
 
               derror = 0.0
               if(covariance .eq. 1 .OR.
-     1           globtrk(i).method .eq. (2**kKalmanFitId)) then
+     1           jbyt(globtrk(i).method,1,4) .eq. kKalmanFitId) then
                  xsave(1) = x(1)
                  xsave(2) = x(2)
                  xsave(3) = x(3)
