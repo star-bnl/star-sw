@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.46 1999/11/18 13:21:45 fine Exp $
+// $Id: makedoc.C,v 1.47 1999/12/11 00:27:14 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.47  1999/12/11 00:27:14  fine
+// StNFChain has been added
+//
 // Revision 1.46  1999/11/18 13:21:45  fine
 // Adjusted to the new source tree
 //
@@ -118,7 +121,7 @@
     sourcedir += ":";
     sourcedir = STAR;
     sourcedir += "/StRoot/St_base:";
-    sourcedir = STAR;
+    sourcedir += STAR;
     sourcedir += "/StRoot/St_baseTest:";
     sourcedir += "$STAR";
     sourcedir += "/.share/tables:";
@@ -126,6 +129,10 @@
     sourcedir += "/include:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StEvent:";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StBFChain:";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StChain:";
     sourcedir += STAR;
     sourcedir += "/StRoot/St_TLA_Maker:";
     sourcedir += STAR;
@@ -160,11 +167,15 @@
     lookup += STAR;
     lookup += "/StRoot/St_base:";
     lookup += STAR;
+    lookup += "/StRoot/StChain:";
+    lookup += STAR;
+    lookup += "/StRoot/StBFChain:";
+    lookup += STAR;
     lookup += "/StRoot/St_baseTest:";
     lookup += STAR;
     lookup += "/StRoot/St_TLA_Maker:";
     lookup += STAR;
-    lookup += "/StRoot/St_io_Maker:";
+    lookup += "/StRoot/St_io_Maker:"; 
     lookup += STAR;
     lookup += "/StRoot/St_geom_Maker:";
     lookup += STAR;
@@ -189,7 +200,7 @@
 
   Char_t *classes[] = { "St_TableSorter","StCL", "StMicky", "St_tableDescriptor"
                        ,"St_XDFFile",    "St_Module",       "St_Table"
-                       ,"St_DataSet",    "St_DataSetIter", "St_FileSet"
+                       ,"St_DataSet",    "St_DataSetIter",  "St_FileSet"
                        ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
                        ,"StMaker",       "StChain",         "St_NodeView"
                        ,"table_head_st", "St_NodeViewIter", "St_PolyLineShape"
@@ -200,9 +211,9 @@
                        ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
                        ,"StEventDisplayMaker"
-                       ,"St_srs_Maker",  "St_xdfin_Maker"
+                       ,"St_srs_Maker",  "St_xdfin_Maker",   "StBFChain"
                       };
-  Int_t nclass = 38;
+  Int_t nclass = 39;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
