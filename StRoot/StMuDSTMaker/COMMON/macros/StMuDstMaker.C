@@ -30,98 +30,81 @@ void StMuDstMaker(const Int_t nevents=10,
 //==========================================================================================
 void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirName, const Char_t* fileName)
 {
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StMagF");
-  gSystem->Load("StUtilities");  // new addition 22jul99
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities"); 
-  gSystem->Load("StMcEvent"); 
-  gSystem->Load("StMcEventMaker"); 
-  gSystem->Load("StAssociationMaker");
-  gSystem->Load("StMcAnalysisMaker");
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StEmcUtil");
-  gSystem->Load("StMuDSTMaker");
+  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
 
-//  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
-//  gSystem->Load("/afs/rhic/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
-cout << " loading done " << endl;
+  //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
+  //  gSystem->Load("/afs/rhic/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
+  cout << " loading done " << endl;
 
-chain = new StChain("StChain"); 
-chain->SetDebug();
+  chain = new StChain("StChain"); 
+  chain->SetDebug();
 
 
-StFile *setFiles= new StFile();
-for (int ifil=0; fileList[ifil]; ifil++)
-setFiles->AddFile(fileList[ifil]);
+  StFile *setFiles= new StFile();
+  for (int ifil=0; fileList[ifil]; ifil++)
+    setFiles->AddFile(fileList[ifil]);
 
 
-// ********************************
-// Now we add Makers to the chain... 
-// ********************************
-
-// *************
-// file handling
-// *************
-StIOMaker* ioMaker = new StIOMaker("IOMaker","r",setFiles,"bfcTree");
-ioMaker->SetDebug();
-
-ioMaker->SetIOMode("r");
-ioMaker->SetDebug();
-ioMaker->SetBranch("*",0,"0");         //deactivate all branches
-ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
-ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
-ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
-
-// ***********************
-// the StStrangeMuDstMaker
-// ***********************
-
- StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("strangeMuDst");
- v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
- v0dst->DoXi(); //Set v0MiniDstMaker to find only v0s
- v0dst->DoKink(); //Set v0MiniDstMaker to find only v0s
- v0dst->SetNoKeep(); 
- //v0dst->SetWrite("depp.root"); // Set V0muDStMaker output file and Event output file
- // v0dst->SetWrite("StrangemuEventHBTPeriphdst.root","Strangemuv0HBTPeriphdst.root"); // Set V0muDStMaker output file and Event output file
-
-
-// *********
-// Hbt Maker
-// *********
-
- StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
-//  maker->setSplit(500);
-//  maker->setBufferSize(4000);
- maker->setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
-
- StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
- StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
-//  filter->addEncodedMethod(32770);
-//  filter->addEncodedMethod(8,7);
- StMuDebug::setLevel(0);
-
- chain->Init(); // This should call the Init() method in ALL makers
- chain->PrintInfo();
- for (Int_t iev=0;iev<nevents; iev++) {
-   cout << "StExample -- Working on eventNumber " << iev << endl;
-   chain->Clear();
-   int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
-   if (iret) {
-     cout << "Bad return code!" << endl;
-     break;
-   }
- } // Event Loop
- chain->Finish(); // This should call the Finish() method in ALL makers
-
- cout << " End of Analysis " << endl;
+  // ********************************
+  // Now we add Makers to the chain... 
+  // ********************************
+  
+  // *************
+  // file handling
+  // *************
+  StIOMaker* ioMaker = new StIOMaker("IOMaker","r",setFiles,"bfcTree");
+  ioMaker->SetDebug();
+  
+  ioMaker->SetIOMode("r");
+  ioMaker->SetDebug();
+  ioMaker->SetBranch("*",0,"0");         //deactivate all branches
+  ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+  ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
+  ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
+  
+  // ***********************
+  // the StStrangeMuDstMaker
+  // ***********************
+  
+  StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("strangeMuDst");
+  v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
+  v0dst->DoXi(); //Set v0MiniDstMaker to find only v0s
+  v0dst->DoKink(); //Set v0MiniDstMaker to find only v0s
+  v0dst->SetNoKeep(); 
+  //v0dst->SetWrite("depp.root"); // Set V0muDStMaker output file and Event output file
+  // v0dst->SetWrite("StrangemuEventHBTPeriphdst.root","Strangemuv0HBTPeriphdst.root"); // Set V0muDStMaker output file and Event output file
+  
+  
+  // *********
+  // Hbt Maker
+  // *********
+  
+  StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
+  //  maker->setSplit(500);
+  //  maker->setBufferSize(4000);
+  maker->setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+  
+  StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
+  StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
+  //  filter->addEncodedMethod(32770);
+  //  filter->addEncodedMethod(8,7);
+  StMuDebug::setLevel(0);
+  
+  chain->Init(); // This should call the Init() method in ALL makers
+  chain->PrintInfo();
+  for (Int_t iev=0;iev<nevents; iev++) {
+    cout << "StExample -- Working on eventNumber " << iev << endl;
+    chain->Clear();
+    int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
+    if (iret) {
+      cout << "Bad return code!" << endl;
+      break;
+    }
+  } // Event Loop
+  chain->Finish(); // This should call the Finish() method in ALL makers
+  
+  cout << " End of Analysis " << endl;
 }
 
 

@@ -6,6 +6,8 @@ void loadSharedLibraries() {
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");  // new addition 22jul99
+  gSystem->Load("StTreeMaker");
+  gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
