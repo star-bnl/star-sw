@@ -18,14 +18,52 @@
 //                                                                      //
 // St_DataSet class is to create a special compound object-container:   //
 //                                                                      //
-//    St_DataSet object ::= the named list of St_DataSet objects        //
-//                                                                      //
+//    St_DataSet object ::= the "named" list of St_DataSet objects      //
+//    ============================================================      //
 //  where the "list" may contain no object                              //
+//                                                                      //
+//  St_DataSet object has a back pointer to its "parent" St_DataSet     //
+//  object                                                              //
 //                                                                      //
 // St_DataSet class is a base class to implement the directory-like     //
 // data structures and maintain it via St_DataSetIter class iterator    //
 //                                                                      //
 // St_DataSet can be iterated using an iterator object (see St_DataSetIter) //
+//                                                                      //
+//  Terms:    Dataset       - any object from the list above            //
+//  =====     Member          is called "DataSet Member"                //
+//                                                                      //
+//          Structural      - the "Dataset Member" is its               //
+//            member          "Structural member" if its "back pointer" //         
+//                            points to this object                     //
+//                                                                      //
+//           Dataset        - we will say this St_DataSet object "OWNs" //
+//            Owner           (or is an OWNER of ) another St_DataSet   //
+//                            object if the last one is its             //
+//                            "Structural Member"                       //
+//                                                                      //
+//          Associated      - If some object is not "Structural member" //
+//            member          of this object we will say it is an       //
+//                            "Associated Member" of this dataset       //
+//                                                                      //
+// - Any St_DataSet object may be "Owned" by one and only one another   //
+//   St_DataSet object if any.                                          //
+//                                                                      //
+// - Any St_DataSet object can be the "Structural Member" of one and    //
+//   only one another St_DataSet                                        //
+//                                                                      //
+// - Any St_DataSet object may be an "Associated Member" for any number //
+//   of other St_DataSet objects if any                                 //
+//                                                                      //
+// - Each "dataset member" is in possesion of the some "alpha-numerical"//
+//   name.                                                              //
+//   The name may contain any "printable" symbols but "SLASH" - "/"     //
+//   The symbol "RIGHT SLASH" - "/" can not be used as any part of the  //
+//   "DataSet Member" name                                              //
+//                                                                      //
+// - It is NOT required those all "DataSet Members" are in possession   //
+//   of the unique names, i.e. any number of "DataSet Members"          // 
+//   may bear one and the same name                                     //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
@@ -125,8 +163,13 @@ TObject *St_DataSet::Clone() {
    return new St_DataSet(*this);
 }
 //______________________________________________________________________________
-void St_DataSet::Delete(Option_t *opt){
-// 	First we should break our relationship with the parent if any
+void St_DataSet::Delete(Option_t *opt)
+{
+//
+// Delete - deletes the list of the St_DataSet objects and all "Structural Members"
+//          as well
+//          This method doesn't affect the "Associated Members"
+//
   if(opt){/*unused*/}
 
 // 	Delete list of the St_DataSet
@@ -156,7 +199,7 @@ St_DataSet *St_DataSet::Find(const Char_t *path) const
   //
   // Full description see: St_DataSetIter::Find
   //
-  // Note. This is method is quite expansive. 
+  // Note. This method is quite expansive. 
   // ----- It is done to simplify the user's code when one wants to find ONLY object.
   //       If you need to find more then 1 object in this dataset,
   //       regard using St_DataSetIter class yourself.
