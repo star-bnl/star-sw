@@ -1,7 +1,10 @@
 *
-* $Id: gcalor.F,v 1.4 2001/11/23 21:24:10 jeromel Exp $
+* $Id: gcalor.F,v 1.5 2001/11/25 23:39:10 jeromel Exp $
 *
 * $Log: gcalor.F,v $
+* Revision 1.5  2001/11/25 23:39:10  jeromel
+* Preceeding patch undone. Works on Solaris but not on Linux :(
+*
 * Revision 1.4  2001/11/23 21:24:10  jeromel
 * Pavel approved fix to gcalor in case CERNLIB_GCALOR is not defined.
 * This will prevent Solaris f77 compiler from crashing.
@@ -372,9 +375,12 @@ C score kinetic energy of recoil nucleus (given in MeV)
 CZ      DESTEP = DESTEP + ERMED * 1.E-3
   170 RETURN
       END
-#else
-      SUBROUTINE GCALOR
-      print *,' No GCALOR available in this version'
-      end
 #endif
+C#if !defined(CERNLIB_GCALOR)
+C      SUBROUTINE GCALOR
+C      print *,' No GCALOR available in this version'
+C      RETURN
+C      END
+C#endif
+
 
