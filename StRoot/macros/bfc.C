@@ -1,139 +1,9 @@
-// $Id: bfc.C,v 1.76 1999/07/02 20:21:41 didenko Exp $
-// $Log: bfc.C,v $
-// Revision 1.76  1999/07/02 20:21:41  didenko
-// get back ftpc
-//
-// Revision 1.75  1999/07/01 15:09:28  didenko
-// switch off ftpc
-//
-// Revision 1.74  1999/06/30 14:15:39  didenko
-// switch on ctf and off Uttility
-//
-// Revision 1.72  1999/06/28 15:31:13  fisyak
-// Add ev0EvalOn, Setting of time stamp
-//
-// Revision 1.71  1999/06/27 22:45:32  fisyak
-// Merge StRootEvent and StEvent
-//
-// Revision 1.70  1999/06/23 12:20:27  fisyak
-// Herb's & Iwona's change to read event from DAQ
-//
-// Revision 1.69  1999/06/22 14:23:50  fisyak
-// Add StDaqLib to St_tpcdaq_Maker
-//
-// Revision 1.68  1999/06/21 20:06:12  fisyak
-// Add StDaqLib for for TDAQ
-//
-// Revision 1.67  1999/06/21 14:14:05  fisyak
-// Add TDAQ chain
-//
-// Revision 1.66  1999/06/20 08:49:23  fisyak
-// Put back dst alias
-//
-// Revision 1.65  1999/06/17 19:53:58  didenko
-// switch off CTF
-//
-// Revision 1.64  1999/06/16 12:43:29  fisyak
-// Add OFF option to switch off default chain
-//
-// Revision 1.63  1999/06/11 23:27:04  fisyak
-// Change Event type from St_DataSet to StEvent
-//
-// Revision 1.62  1999/06/10 17:01:41  snelling
-// changed order switches so Eval would not turn on defaultchain
-//
-// Revision 1.61  1999/06/09 01:15:06  snelling
-// added switches for year1a,b,c and 2a geometry (y1a,..,y2a)
-//
-// Revision 1.60  1999/05/29 20:42:41  fine
-// type fixed
-//
-// Revision 1.59  1999/05/21 23:25:40  didenko
-// Remove capital letters from Branch name because of HPSS
-//
-// Revision 1.58  1999/05/21 15:33:56  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
-//
-// Revision 1.57  1999/05/21 14:46:39  fisyak
-// More Iwona's correction
-//
-// Revision 1.56  1999/05/20 01:33:18  fisyak
-// Iwona's changes of access to TPC parameters
-//
-// Revision 1.55  1999/05/14 15:48:01  didenko
-// correct error in input_file
-//
-// Revision 1.54  1999/05/14 00:16:16  fisyak
-// take out analysis of input_file environment variable and redefiniton no. event to process from file name
-//
-// Revision 1.53  1999/05/13 23:48:24  snelling
-// changed switch QA to SQA because -qa at end of input would not work: changed EvalTPC to Eval to make it more general
-//
-// Revision 1.52  1999/05/13 20:34:54  snelling
-// added a ChainFlag for TPC evaluation
-//
-// Revision 1.51  1999/05/12 12:52:38  fisyak
-// be sure that default calls once, add printout
-//
-// Revision 1.50  1999/05/11 12:43:51  fisyak
-// gtrack -> gstar
-//
-// Revision 1.49  1999/05/11 12:40:38  fisyak
-// Add tree for SL99c
-//
-// Revision 1.48  1999/05/10 19:15:41  fisyak
-// Remove bfc_*.C
-//
-// Revision 1.47  1999/05/09 21:45:12  fisyak
-// change default chain
-//
-// Revision 1.46  1999/05/09 02:12:53  fisyak
-// Add to Loac Chain as a parameter
-//
-// Revision 1.45  1999/05/08 03:16:51  fisyak
-// Merged version of bfc
-//
-// Revision 1.44  1999/05/06 12:39:39  fisyak
-// Generic version of bfc
-//
-// Revision 1.43  1999/05/06 03:21:24  fisyak
-// synchronize FTPC and TPC slow/fast
-//
-// Revision 1.42  1999/05/06 03:14:02  fisyak
-// Merged version of bfc's
-//
-// Revision 1.18  1999/05/04 22:42:29  fisyak
-// bfc with StEvent
-//
-// Revision 1.17  1999/05/01 01:47:37  fisyak
-// Add new set of bfc s'
-//
-// Revision 1.16  1999/04/29 23:54:18  fisyak
-// Add StRootEvent and test on existing of input file
-//
-// Revision 1.15  1999/04/27 21:01:11  snelling
-// fixed a few switches
-//
-// Revision 1.14  1999/04/20 12:56:08  fisyak
-// Add ctf/mwc
-//
-// Revision 1.12  1999/04/19 13:43:19  fisyak
-// Take out L3
-//
-// Revision 1.11  1999/04/18 23:45:05  fisyak
-// New schema
-//
-// macro to read fz files, xdf files and minidaq data 
-//
-//=======================================================================
-// owner:  Yuri Fisyak
-// what it does: Macro for running chain with different inputs   
-//=======================================================================
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Macro for running chain with different inputs                        //
+// owner:  Yuri Fisyak                                                  //
 //                                                                      //
+// $Id: bfc.C,v 1.77 1999/07/09 01:22:03 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -156,7 +26,12 @@ class St_tcl_Maker;   St_tcl_Maker   *tclMk   = 0;
 class St_tpt_Maker;   St_tpt_Maker   *tptMk   = 0;
 class St_ems_Maker;   St_ems_Maker   *emsMk   = 0;    
 class St_l3t_Maker;   St_l3t_Maker   *l3tMk   = 0;    
-class St_glb_Maker;   St_glb_Maker   *glbMk   = 0;     
+class StMaker;        StMaker        *glbMk   = 0;     
+class StMatchMaker;   StMatchMaker   *matchMk = 0;
+class StPrimaryMaker; StPrimaryMaker *primaryMk = 0;
+class StV0Maker;      StV0Maker      *v0Mk = 0;
+class StKinkMaker;    StKinkMaker    *kinkMk = 0;
+class StXiMaker;      StXiMaker      *xiMk = 0;
 class St_dst_Maker;   St_dst_Maker   *dstMk   = 0;     
 class StEventMaker;   StEventMaker   *evMk    = 0;
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
@@ -164,27 +39,45 @@ TString *InFile = 0;
 TString *FileOut= 0;
 TString *XdfFile = 0;
 Int_t NoEvents = 0;
-Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kFIRST   ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,kEval    ,kOFF     ,
-  kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kTDAQ    ,kFZIN    ,kGEANT   ,kCTEST   ,
-  kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
-  kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
-  kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
+  kFIRST   ,
+  kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,kES99     ,kER99    ,kY1d     ,
+  kY1e     ,kY2a     ,kEval    ,kOFF     ,
+  kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kTDAQ    ,kFZIN     ,kGEANT   ,kCTEST   ,
+  kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS      ,kFPC     ,
+  kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT      ,kGLOBAL  ,
+  kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent ,kLAST    ,kDefault
 };
-Char_t *ChainOptions[] = {
-  "FIRST   ","Y1a     ","Y1b     ","Y1c     ","Y2a     ","Eval    ","OFF     ",
-  "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","TDAQ    ","FZIN    ","GEANT   ","CTEST   ",
-  "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
-  "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
-  "DST     ","SQA     ","EVENT   ","ANALYS  ","TREE    ","AllEvent","LAST    "
+Char_t  *ChainOptions[] = {
+ "FIRST"   ,
+ "sd97"    ,"sd98"   ,"Y1a"    ,"Y1b"    ,"Y1c"    ,"es99"    ,"er99"   ,"Y1d"    ,
+ "Y1e"     ,"Y2a"    ,"Eval"   ,"OFF"    ,
+ "XIN"     ,"XOUT"   ,"GSTAR"  ,"MINIDAQ","TDAQ"   ,"FZIN"    ,"GEANT"  ,"CTEST"  ,
+ "FieldOn" ,"NoField","TPC"    ,"TSS"    ,"TRS"    ,"TFS"     ,"FPC"    ,
+ "FSS"     ,"EMC"    ,"CTF"    ,"L3"     ,"RICH"   ,"SVT"     ,"GLOBAL" ,
+ "DST"     ,"SQA"    ,"EVENT"  ,"ANALYS" ,"TREE"   ,"AllEvent","LAST"   ,"Default"
+};
+UChar_t  ChainFlags[] = {
+  kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE  
 };
 Char_t *ChainComments[] = {
   "Nothing to comment",
+  "Turn on Year 1a geometry and 1997 test parameters (and corresponding Makers)",
+  "Turn on Year 1a geometry and 1998 test parameters (and corresponding Makers)",
   "Turn on Year 1a geometry (and corresponding Makers)",
   "Turn on Year 1b geometry (and corresponding Makers)",
   "Turn on Year 1c geometry (and corresponding Makers)",
+  "Turn on Year 1a geometry and 1999 engineering run simulation parameters",
+  "Turn on Year 1a geometry and 1999 engineering run real data parameters",
+  "Turn on Year 1d geometry (and corresponding Makers)",
+  "Turn on Year 1e geometry (and corresponding Makers)",
   "Turn on Year 2a geometry (and corresponding Makers)",
   "Turn on evaluation switch for different makers",
   "Turn off default chain",
@@ -217,201 +110,177 @@ Char_t *ChainComments[] = {
   "write event to StTree",
   "Write whole event to StTree",
   "Nothing to comment",
-};
-UChar_t  ChainFlags[] = {
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE  ,
-  kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
-  kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
-  kFALSE   ,kFALSE   ,kTRUE    ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE  
+  "Default Set has been set"
 };
 //_____________________________________________________________________
+void SetOptionOff(EChainOptions k){// set all OFF
+  ChainFlags[k] = kFALSE;
+  printf (" Switch Off %s\n", ChainOptions[k]);
+}
+//_____________________________________________________________________
+void SetOption(EChainOptions k){// set all OFF
+  ChainFlags[k] = kTRUE;
+  printf (" Switch On  %s\n", ChainOptions[k]);
+}
+//_____________________________________________________________________
 void SetChainOff(){// set all OFF
-  for (Int_t k = kFIRST;k<=kLAST;k++) ChainFlags[k] = kFALSE;
+  for (EChainOptions k = kFIRST;k<=kLAST;k++) SetOptionOff(k);
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
-  if (! DefaultSet) {
+  if (! ChainFlags[kDefault]) {
     printf ("Set default options\n");
-    for (Int_t k = kTPC; k<kLAST; k++) {
-      if (k != kTSS && k != kTFS) {
-	ChainFlags[k] = kTRUE;
-      }
-    }
-    DefaultSet = kTRUE;
+    for (EChainOptions k = kTPC; k<kLAST; k++) if (k != kTSS && k != kTFS) SetOption(k);
+    SetOption(kDefault);
   } 
 }
 //_____________________________________________________________________
 void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString STAR_VERSION("$STAR_VERSION");
   gSystem->ExpandPathName(STAR_VERSION);
-  if (!strcmp("SL99c",STAR_VERSION.Data())) ChainFlags[kEVENT] = kTRUE; 
+  if (!strcmp("SL99c",STAR_VERSION.Data())) SetOption(kEVENT); 
   printf ("==============================================\n");
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
-  if (!strlen(Chain)) {
+  if (!Chain || !strlen(Chain)) {
     printf ("============= \tPossible Chain Options are: \n");
-    for (k=kFIRST;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
+    for (k=kFIRST;k<kLAST;k++) printf ("============ %2d \t[-]%s   \t:%s \n",
+				       k,ChainOptions[k],ChainComments[k]);
+    printf ("============= \tImportant two changes:
+                           \tIt is required exact matching in Chain definition
+                           \tAll Chain options set in supplyed order\n");
     gSystem->Exit(1);
   }
-  TString opt;
-  TString nopt;
   TString tChain(Chain);
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
-  SetChainOff();
-  for (k = kFIRST; k<kLAST; k++) {
-    opt = TString(ChainOptions[k],3);
-    opt.ToLower();
-    if (!strstr(tChain.Data(),opt.Data())) continue;
-    kgo = k;
-    nopt = TString("-");
-    nopt += opt;
-    if (strstr(tChain.Data(),nopt.Data())) kgo = -k;
-
-    switch (kgo) {
-    case kOFF:
-      SetChainOff();
-      DefaultSet = kTRUE;
-      break;
-    case kMINIDAQ:
-      SetChainOff();
-      ChainFlags[kXINDF]   = kTRUE;
-      ChainFlags[kMINIDAQ] = kTRUE;
-      ChainFlags[kTPC]     = kTRUE;
-      ChainFlags[kCTEST]   = kTRUE;
-      ChainFlags[kNo_Field]= kTRUE;
-      ChainFlags[kEval] = kTRUE;
-      printf(" Switch off everything but\n");
-      printf(" Switch on  %s\n",ChainOptions[kXINDF]);
-      printf(" Switch on  %s\n",ChainOptions[kMINIDAQ]);
-      printf(" Switch on  %s\n",ChainOptions[kTPC]);
-      printf(" Switch on  %s\n",ChainOptions[kCTEST]);
-      printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
-      printf(" Switch on  %s\n",ChainOptions[kEval]);
-      break;
-    case kTDAQ:
-      SetChainOff();
-      ChainFlags[kY1a]     = kTRUE;
-      ChainFlags[kTDAQ]    = kTRUE;
-      ChainFlags[kTPC]     = kTRUE;
-      DefaultSet = kTRUE;
-      break;
-    case  kY1a:
-      ChainFlags[kY1a] = kTRUE;
-      ChainFlags[kTPC] = kTRUE;
-      ChainFlags[kFPC] = kTRUE;
-      ChainFlags[kCTF] = kTRUE;
-      printf(" Switch on  %s\n",ChainOptions[kY1a]);
-      break;
-    case  kY1b:
-      ChainFlags[kY1b] = kTRUE;
-      ChainFlags[kTPC] = kTRUE;
-      ChainFlags[kFPC] = kTRUE;
-      ChainFlags[kCTF] = kTRUE;
-      ChainFlags[kEMC] = kTRUE;
-      ChainFlags[kRICH] = kTRUE;
-      printf(" Switch on  %s\n",ChainOptions[kY1b]);
-      break;
-    case  kY1c:
-      ChainFlags[kY1c] = kTRUE;
-      ChainFlags[kTPC] = kTRUE;
-      ChainFlags[kFPC] = kTRUE;
-      ChainFlags[kCTF] = kTRUE;
-      printf(" Switch on  %s\n",ChainOptions[kY1c]);
-      break;
-    case  kY2a:
-      ChainFlags[kY2a] = kTRUE;
-      SetDefaultChain();
-      printf(" Switch on  %s\n",ChainOptions[kY2a]);
-      break;
-    case kGSTAR:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
+  Ssiz_t begin, index, end, end2;
+  begin = index = end = end2 = 0;
+  TRegexp separator("[^ ;,\\t\\s]+");
+  const Ssiz_t kNPOS        = ~(Ssiz_t)0;
+  TString Tag, opt, nopt;
+  while ( (begin < tChain.Length()) && (index != kNPOS) ) { // loop over given Chain options 
+    index = tChain.Index(separator,&end,begin);
+    if (index >= 0) {
+      Tag = tChain(index,end);
+    }
+    begin += end+1;
+    for (k = kFIRST+1; k<kLAST; k++) {
+      opt = TString(ChainOptions[k]);
+      opt.ToLower();
+      if (!strstr(Tag.Data(),opt.Data())) continue;
+      kgo = k;
+      nopt = TString("-");
+      nopt += opt;
+      if (strstr(Tag.Data(),nopt.Data())) kgo = -k;
+      
+      switch (kgo) {
+      case kOFF:
+	SetOption(kDefault);
+	break;
+      case kMINIDAQ:
+	SetOption(kDefault);
+	SetOption(kXINDF);
+	SetOption(kMINIDAQ);
+	SetOption(kTPC);
+	SetOption(kNo_Field);
+	SetOption(kSD97);
+	SetOption(kEval);
+	break;
+      case kTDAQ:
+	SetOption(kDefault);
+	SetOption(kY1a);
+	SetOption(kTDAQ);
+	SetOption(kTPC);
+	SetOption(kER99);
+	SetOption(kDefault);
+	break;
+      case  kY1b:
+	SetOption(kEMC);
+	SetOption(kRICH);
+      case kSD97:
+      case kSD98:
+      case  kY1a:
+      case kES99:
+      case kER99:
+      case  kY1c:
+	SetOption(kDefault);
+	SetOption(k);
+	SetOption(kTPC);
+	SetOption(kFPC);
+	SetOption(kCTF);
+	break;
+      case  kY2a:
+	SetOption(kDefault);
+	SetOption(kY2a);
+	SetDefaultChain();
+	break;
+      case kGSTAR:
+	if (!ChainFlags[kDefault]) {
+	  printf ("no setup defined ==> use Y2a\n");
+	  SetOption(kY2a);
+	  SetDefaultChain(); 
+	}
+	SetOption(kGEANT);
+	SetOption(kGSTAR);
+	break;
+      case kTSS:
+	if (!ChainFlags[kDefault]) {
+	  SetDefaultChain();
+	}
+	SetOption(k);
+	SetOptionOff(kTRS);
+	break;
+      case -kTSS:
+	if (!ChainFlags[kDefault]) {
+	  SetDefaultChain();
+	}
+	SetOptionOff(kTSS);
+	SetOption(kTRS);
+	break;
+      case kTRS:
+	if (!ChainFlags[kDefault]) {
+	  SetDefaultChain();
+	}
+	SetOptionOff(kTSS);
+	SetOption(kTRS);
+	break;
+      case -kTRS:
+	if (!ChainFlags[kDefault]) {
+	  SetDefaultChain();
+	}
+	SetOption(kTSS);
+	SetOptionOff(kTRS);
+	break;
+      case  kTFS:
+	if (!ChainFlags[kDefault]) {
+	  SetDefaultChain();
+	}
+	SetOption(kTFS);
+	SetOptionOff(kTSS);
+	SetOptionOff(kTRS);
+	SetOptionOff(kFSS);
+	break;
+      default:
+	if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
+	if (kgo<0) SetOptionOff(k);
+	else       SetOption(k);
       }
-      ChainFlags[kGEANT]   = kTRUE;
-      ChainFlags[kGSTAR]   = kTRUE;
-      printf(" Switch on  %s\n",ChainOptions[kGEANT]);
-      printf(" Switch on  %s\n",ChainOptions[kGSTAR]);
-      break;
-    case kTSS:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
-      }
-      ChainFlags[k]    = kTRUE;
-      ChainFlags[kTRS] = kFALSE;
-      printf(" Switch on  %s\n",ChainOptions[kTSS]);
-      printf(" Switch off %s\n",ChainOptions[kTRS]);
-      break;
-    case -kTSS:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
-      }
-      ChainFlags[kTSS] = kFALSE;
-      ChainFlags[kTRS] = kTRUE;
-      printf(" Switch off %s\n",ChainOptions[kTSS]);
-      printf(" Switch on  %s\n",ChainOptions[kTRS]);
-      break;
-    case kTRS:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
-      }
-      ChainFlags[kTSS] = kFALSE;
-      ChainFlags[kTRS] = kTRUE;
-      printf(" Switch off %s\n",ChainOptions[kTSS]);
-      printf(" Switch on  %s\n",ChainOptions[kTRS]);
-      break;
-    case -kTRS:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
-      }
-      ChainFlags[kTSS] = kTRUE;
-      ChainFlags[kTRS] = kFALSE;
-      printf(" Switch on  %s\n",ChainOptions[kTSS]);
-      printf(" Switch off %s\n",ChainOptions[kTRS]);
-      break;
-    case  kTFS:
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
-      }
-      ChainFlags[kTFS] = kTRUE;
-      ChainFlags[kTSS] = kFALSE;
-      ChainFlags[kTRS] = kFALSE;
-      ChainFlags[kFSS] = kFALSE;
-      printf(" Switch on  %s\n",ChainOptions[kTFS]);
-      printf(" Switch off %s\n",ChainOptions[kTSS]);
-      printf(" Switch off %s\n",ChainOptions[kTRS]);
-      printf(" Switch off %s\n",ChainOptions[kFSS]);
-      break;
-    default:
-      if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-	SetDefaultChain(); 
-	printf ("no setup defined: using all existing Makers with GSTAR input \n");
-      }
-      if (kgo<0) {ChainFlags[k] = kFALSE; printf(" Switch off %s\n",ChainOptions[k]);}
-      else       {ChainFlags[k] = kTRUE;  printf(" Switch on  %s\n",ChainOptions[k]);}
     }
   }
-
-  if (!strcmp("SL99c",STAR_VERSION.Data())) {
-    //    ChainFlags[kTREE]     = kFALSE;
-    ChainFlags[kEVENT]    = kFALSE;
-    ChainFlags[kANALYS]   = kFALSE;
-  }
+  
   if (!ChainFlags[kXINDF] && !ChainFlags[kGSTAR] &&!ChainFlags[kTDAQ]) {
-    ChainFlags[kFZIN]  = kTRUE;
-    ChainFlags[kGEANT] = kTRUE;
+    SetOption(kFZIN);
+    SetOption(kGEANT);
   }
   if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) { 
-    ChainFlags[kField_On] = kTRUE;
+    SetOption(kField_On);
   }
   if (ChainFlags[kAllEvent]) {
-    ChainFlags[kEval] = kTRUE; 
-    printf(" Switch on  %s\n",ChainOptions[kEval]);
+    SetOption(kEval); 
   }
   for (k = kFIRST; k<kLAST;k++) {
     if (ChainFlags[k]) {
-      printf ("================== %2d \t%s \tis ON: \t%s \n",k,ChainOptions[k],ChainComments[k]);
+      printf ("================== %2d \t%s \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
     }
   }
   //  gSystem->Exit(1);
@@ -506,11 +375,11 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   if (!infile) {
     if (ChainFlags[kMINIDAQ])
       infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
-      //      infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
+    //infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
     else {
       if (ChainFlags[kFZIN])  
-	//infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
-	infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
+	infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
+      //infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
       else 
 	if (!ChainFlags[kGSTAR]) 
 	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
@@ -518,7 +387,6 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
   if (infile) {
     InFile = new TString(infile);
-    //      Check the input file
     if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
       printf(" *** NO FILE: %s, exit!\n", InFile->Data());
       gSystem->Exit(1); 
@@ -547,53 +415,47 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Int_t First,
+	  const Int_t Nevents=1,
+	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
-  // Only the first 3 symbols are significant
+  // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
   // Chain = "minidaq" read miniDAQ xdf file and process 
   NoEvents = Nevents;
-  // Create the main chain object
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load(Chain);
   Set_IO_Files(infile,outfile);
+  // Create the main chain object
   if (!chain) delete chain;
   chain = new StChain("bfc");
-  printf ("Run chain version %s on %s in %s\n",chain->GetCVSTag(),gSystem->HostName(),gSystem->WorkingDirectory());
+  printf ("Run chain version %s on %s in %s\n",
+	  chain->GetCVSTag(),
+	  gSystem->HostName(),
+	  gSystem->WorkingDirectory());
   chain->SetDebug();
 
 //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
   dbMk = new St_db_Maker("db",mainDB);
   dbMk->SetDebug();
-//if (ChainFlags[ksd97]) { dbMk->SetDateTime("sd97");}
-//if (ChainFlags[ksd98]) { dbMk->SetDateTime("sd98");}
-  if (ChainFlags[kY1a]) { dbMk->SetDateTime("year_1a");}
-  if (ChainFlags[kY1b]) { dbMk->SetDateTime("year_1b");}
-  if (ChainFlags[kY1c]) { dbMk->SetDateTime("year_1c");}
-//if (ChainFlags[kY1d]) { dbMk->SetDateTime("year_1d");}
-//if (ChainFlags[kY1e]) { dbMk->SetDateTime("year_1e");}
-  if (ChainFlags[kY2a]) { dbMk->SetDateTime("year_2a");}
-  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),dbMk->GetDateTime().GetTime());
+  if (ChainFlags[kSD97]) { dbMk->SetDateTime("sd97");}
+  if (ChainFlags[kSD98]) { dbMk->SetDateTime("sd98");}
+  if (ChainFlags[kY1a])  { dbMk->SetDateTime("year_1a");}
+  if (ChainFlags[kY1b])  { dbMk->SetDateTime("year_1b");}
+  if (ChainFlags[kY1c])  { dbMk->SetDateTime("year_1c");}
+  if (ChainFlags[kES99]) { dbMk->SetDateTime("es99");}
+  if (ChainFlags[kER99]) { dbMk->SetDateTime("er99");}
+  if (ChainFlags[kY1d])  { dbMk->SetDateTime("year_1d");}
+  if (ChainFlags[kY1e])  { dbMk->SetDateTime("year_1e");}
+  if (ChainFlags[kY2a])  { dbMk->SetDateTime("year_2a");}
+  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
+	                                 dbMk->GetDateTime().GetTime());
   const char *calibDB = "$STAR_ROOT/calib";
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
   calibMk->SetDebug();  
-  if (ChainFlags[kCTEST]){// ChainFlags[kTPC] test Data Base
-    //Switch off baseline files
-    dbMk->SetOff("params/tpc/trspars/Trs");
-    dbMk->SetOff("params/tpc/tsspars/tsspar");
-    dbMk->SetOff("params/tpc/tptpars/tpt_pars");
-    dbMk->SetOff("params/tpc/tpgpar/tpg_detector"); 
-  }
-  else{
-    //Switch off TestData files
-    dbMk->SetOff("params/tpc/trspars/TrsTestData");
-    dbMk->SetOff("params/tpc/tsspars/tssparTestData");
-    dbMk->SetOff("params/tpc/tptpars/tpt_parsTestData");
-    dbMk->SetOff("params/tpc/tpgpar/tpg_detectorTestData");
-  } 
   if (ChainFlags[kXINDF]) {
     xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
     chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
@@ -609,12 +471,23 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     //  geant->SetIwtype(1);
     //  geant->SetDebug();
     if (ChainFlags[kGSTAR]) {
-      if (ChainFlags[kY1a]) { geant->LoadGeometry("detp geometry YEAR_1A");}
-      if (ChainFlags[kY1b]) { geant->LoadGeometry("detp geometry YEAR_1B");}
-      if (ChainFlags[kY1c]) { geant->LoadGeometry("detp geometry YEAR_1C");}
-      if (ChainFlags[kY2a]) { geant->LoadGeometry("detp geometry YEAR_2A");}
-      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-	geant->LoadGeometry("detp geometry YEAR_2A");
+      if (ChainFlags[kSD97] || ChainFlags[kSD98] || ChainFlags[kY1a] || 
+	  ChainFlags[kES99] || ChainFlags[kER99]) geant->LoadGeometry("detp geometry YEAR_1A");
+      else {
+	if (ChainFlags[kY1b])                     geant->LoadGeometry("detp geometry YEAR_1B");
+	else {
+	  if (ChainFlags[kY1c])                   geant->LoadGeometry("detp geometry YEAR_1C");
+	  else {
+	    if (ChainFlags[kES99])                geant->LoadGeometry("detp geometry YEAR_1A");
+	    else {
+	      if (ChainFlags[kER99])              geant->LoadGeometry("detp geometry YEAR_1A");
+	      else {
+		if (ChainFlags[kY2a])             geant->LoadGeometry("detp geometry YEAR_2A");
+		else                              geant->LoadGeometry("detp geometry YEAR_2A");
+	      }
+	    }
+	  }
+	}
       }
       geant->Do("subevent 0;");
       // gkine #particles partid ptrange yrange phirange vertexrange 
@@ -629,6 +502,8 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     if (ChainFlags[kFZIN]) geant->SetInputFile(InFile->Data());
   }
   if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
+  if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
+  if (ChainFlags[kField_On]) field   = new StMagFC("field","STAR Normal field",1.);
   if (ChainFlags[kField_On]) field   = new StMagFC("field","STAR Normal field",1.);
   //  S I M U L A T I O N  or D A Q
   if (ChainFlags[kMINIDAQ]) {
@@ -661,7 +536,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
       }
     }
   }
-  if (ChainFlags[kFSS]) {//		fss
+  if (ChainFlags[kFPC] && ChainFlags[kFSS]) {//		fss
     St_fss_Maker *fssMk 	= new St_fss_Maker("ftpc_raw");
     fssMk->SetDebug();
   }
@@ -721,13 +596,20 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc");
     St_trg_Maker         *trg      = new St_trg_Maker("trg");
   }
-  // G L O B A L
+  // G L O B A L chain
   if (ChainFlags[kGLOBAL]) {//		global
-    glbMk = new St_glb_Maker("global");
-    chain->SetInput("dst",".make/global/.data/dst");
+    glbMk = new StMaker("global");
+    //    chain->SetInput("dst",".make/global/.data/dst");
     glbMk->SetDebug();
+    StMaker *saveMK = glbMk->cd();
+    matchMk   = new StMatchMaker();
+    primaryMk = new StPrimaryMaker();
+    v0Mk      = new StV0Maker();
+    xiMk      = new StXiMaker();
+    kinkMk    = new StKinkMaker();
+    saveMK->cd();
     if (ChainFlags[kEval]) {//Additional switches 
-      glbMk->ev0EvalOn();   //Turn on the ev0 evaluation  
+      v0Mk->ev0EvalOn();   //Turn on the ev0 evaluation  
     }
   }
   if (ChainFlags[kL3]) {//		l3t
@@ -748,6 +630,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
 	anaMk->SetDebug(0);
       }
     }
+    if (ChainFlags[kSQA]) St_QA_Maker *qa = new St_QA_Maker;  
     if (ChainFlags[kSQA]) St_QA_Maker *qa = new St_QA_Maker;  
   }
   if (ChainFlags[kTREE]) {//		Tree
@@ -814,7 +697,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     printf ("Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
   }
   Int_t iMake = 0;
-  for (Int_t i =1; i <= NoEvents; i++){
+  for (Int_t i =First; i <= NoEvents; i++){
     chain->Clear();
     iMake = chain->Make(i);
     if (iMake <kStEOF && xdf_out){
@@ -832,6 +715,12 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     printf ("Run completed ");
     gSystem->Exec("date");
   }
-  else Event = (StEvent *) chain->GetInputDS("StEvent");
+  else {if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");}
   //  else {b = new TBrowser("BFC chain",chain);}
+}
+//_____________________________________________________________________
+void bfc (const Int_t Nevents=1, 
+	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+{
+  bfc(1,Nevents,Chain,infile,outfile);
 }

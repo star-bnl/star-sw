@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.7 1999/06/27 22:45:33 fisyak Exp $
+// $Id: rootlogon.C,v 1.8 1999/07/09 01:22:03 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.8  1999/07/09 01:22:03  fisyak
+// CleanUp, set sequantial processing of Chain flags, flags are not truncated to 3 characters any more
+//
 // Revision 1.7  1999/06/27 22:45:33  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -27,8 +30,6 @@
    printf("\nType \".x STAR_Demos.C\" to get a toolbar from which to execute the STAR demos\n");
    printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
    printf("\nType \".x demoshelp.C\" to see the help window\n\n");
-#pragma includepath "./StRoot"
-#pragma includepath "/afs/rhic/star/packages/dev/StRoot"
    {
  TDatime start;
  
