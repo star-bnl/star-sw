@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.10 1999/11/19 20:13:21 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.11 1999/11/29 20:25:56 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.11  1999/11/29 20:25:56  kathy
+// remove call to method SetDraw - doesn't do anything
+//
 // Revision 1.10  1999/11/19 20:13:21  kathy
 // cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
 //
@@ -138,7 +141,7 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   cout <<  " bfcread_dst_QAhist.C, passed chain->Make !!!" << endl ;
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-   QA->SetDraw(kTRUE);
+//   QA->SetDraw(kTRUE);
 
 // Set the default canvas style to plain (so it won't print out grey!)
     gROOT->SetStyle("Plain");
