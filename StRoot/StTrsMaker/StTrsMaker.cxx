@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.48 1999/11/10 15:45:39 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.49 1999/11/11 19:42:24 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.49  1999/11/11 19:42:24  calderon
+// Add #ifdef HISTOGRAM for Ntuple Diagnostics.
+// Use ROOT_DATABASE_PARAMETERS.  As soon as Jeff and Dave give Ok,
+// we will switch to TPC_DATABASE_PARAMETERS.
+//
 // Revision 1.48  1999/11/10 15:45:39  calderon
 // Made changes to reduce timing, including:
 // Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
@@ -166,11 +171,12 @@
 //                                                                      //
 #define uNPACK_ALL 1
 #define vERBOSITY  0
+#define hISTOGRAM
 //
 // You must select a data base initializer method
 //#define tPC_DATABASE_PARAMETERS
-//#define ROOT_DATABASE_PARAMETERS
-#define ASCII_DATABASE_PARAMETERS
+#define ROOT_DATABASE_PARAMETERS
+//#define ASCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -192,8 +198,10 @@
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
+
 #ifdef HISTOGRAM
-#include "StHbook.hh"
+#include "TNtuple.h"
+#include "TFile.h"
 #endif
 
 // General TRS
@@ -270,7 +278,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.48 1999/11/10 15:45:39 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.49 1999/11/11 19:42:24 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -289,7 +297,12 @@ mLastSectorToProcess(24),
 mWriteToFile(0),
 mReadFromFile(0),
 mUseParameterizedSignalGenerator(1) // test trial,Hui Long
-{/* nopt */ }
+{
+#ifdef HISTOGRAM
+    mTrsNtupleFile = 0;
+    mWireNtuple = mContinuousAnalogNtuple = mDiscreteAnalogNtuple = mDigitalNtuple = 0;
+#endif
+}
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
 
@@ -483,6 +496,10 @@ Int_t StTrsMaker::Init()
    // Any options that are needed can go here:
    //*******************************************************
    mAnalogSignalGenerator->setDeltaPad(2);
+   mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
+   mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
+   mAnalogSignalGenerator->addNoise(false);
+   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
    }
    else {
 
@@ -539,7 +556,14 @@ Int_t StTrsMaker::Init()
    mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
    AddConst(new St_ObjectSet("Event"  , mAllTheData));
 
+#ifdef HISTOGRAM
+   mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");
+   mWireNtuple             = new TNtuple("WireNtuple", "Wire Histogram Info.", "electrons:wire:sector");
+   mContinuousAnalogNtuple = new TNtuple("CAnalogNtuple", "Cont. Analog Sector", "charge:time:pad:row");
+   mDiscreteAnalogNtuple   = new TNtuple("DAnalogNtuple", "Disc. Analog Sector", "charge:timebin:pad:row");
+   mDigitalNtuple    = new TNtuple("DigitalSignalNtuple", "Digital Sector", "adc:timebin:pad:row");
    
+#endif
    return StMaker::Init();
 }
 
@@ -559,6 +583,7 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 	
 }
 Int_t StTrsMaker::Make(){
+    
     //  PrintInfo();
 
     
@@ -824,7 +849,24 @@ Int_t StTrsMaker::Make(){
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
 	
-
+#ifdef HISTOGRAM
+	float* wireValues = new float[3];
+	// Loop over Wire Histogram
+	for(int jj=mWireHistogram->minWire(); jj<=mWireHistogram->maxWire(); jj++) {
+	    aTpcWire currentWire = mWireHistogram->getWire(jj);
+	    aTpcWire::iterator iter;
+	    for(iter  = currentWire.begin();
+		iter != currentWire.end();
+		iter++) {
+		wireValues[0] = iter->numberOfElectrons();
+		wireValues[1] = jj;
+		wireValues[2] = currentSectorProcessed;
+		mWireNtuple->Fill(wireValues);
+	    }
+	}
+	delete [] wireValues;
+	mWireNtuple->Write();
+#endif
 	PR(currentSectorProcessed);
 	cout << endl;
 	//
@@ -837,6 +879,30 @@ Int_t StTrsMaker::Make(){
 	double inducedChargeTime = difftime(inducedChargeEnd,inducedChargeBegin);
 	cout << "Time to process induced Charge: " << inducedChargeTime << " sec\n\n";
 
+#ifdef HISTOGRAM
+	tpcTimeBins continuousAnalogTimeSequence;
+	timeBinIterator timeSeqIter;
+	float* cAnalogValues = new float[4];
+	// Loop over Continuous Analog Sector
+	for(int jrow=1; jrow<=mGeometryDb->numberOfRows(); jrow++) {
+	    for (int jpad=1; jpad<=mGeometryDb->numberOfPadsAtRow(jrow); jpad++){
+		continuousAnalogTimeSequence = mSector->timeBinsOfRowAndPad(jrow,jpad);
+		if(!continuousAnalogTimeSequence.size()) continue; 
+		for(timeSeqIter  = continuousAnalogTimeSequence.begin();
+		    timeSeqIter != continuousAnalogTimeSequence.end();
+		    timeSeqIter++) {
+		    cAnalogValues[0] = timeSeqIter->amplitude();
+		    cAnalogValues[1] = timeSeqIter->time();
+		    cAnalogValues[2] = jpad;
+		    cAnalogValues[3] = jrow;
+		    mContinuousAnalogNtuple->Fill(cAnalogValues);
+		}
+	    }
+	}
+	delete [] cAnalogValues;
+	mContinuousAnalogNtuple->Write();
+#endif
+
 	time_t sampleAnalogSignalBegin = time(0);
 	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
@@ -844,6 +910,30 @@ Int_t StTrsMaker::Make(){
 	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
 	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
 
+#ifdef HISTOGRAM
+	tpcTimeBins discreteAnalogTimeSequence;
+	timeBinIterator timeBinIter;
+	float* dAnalogValues = new float[4];
+	// Loop over Discrete Analog Sector
+	for(int drow=1; drow<=mGeometryDb->numberOfRows(); drow++) {
+	    for (int dpad=1; dpad<=mGeometryDb->numberOfPadsAtRow(drow); dpad++){
+		discreteAnalogTimeSequence = mSector->timeBinsOfRowAndPad(drow,dpad);
+		if(!discreteAnalogTimeSequence.size()) continue; 
+		for(timeBinIter  = discreteAnalogTimeSequence.begin();
+		    timeBinIter != discreteAnalogTimeSequence.end();
+		    timeBinIter++) {
+		    dAnalogValues[0] = timeBinIter->amplitude();
+		    dAnalogValues[1] = timeBinIter->time();
+		    dAnalogValues[2] = dpad;
+		    dAnalogValues[3] = drow;
+		    mDiscreteAnalogNtuple->Fill(dAnalogValues);
+		}
+	    }
+	}
+	delete [] dAnalogValues;
+	mDiscreteAnalogNtuple->Write();
+#endif
+	
 	//
 	// Digitize the Signals
 	//
@@ -860,7 +950,6 @@ Int_t StTrsMaker::Make(){
 	time_t digitizeSignalBegin = time(0);
 	cout << "--->digitizeSignal()..." << endl;
 	mDigitalSignalGenerator->digitizeSignal();
-
 	cout<<"--->digitizeSignal() Finished..." << endl;
 	time_t digitizeSignalEnd= time(0);
 	double digitizeSignalTime = difftime(digitizeSignalEnd,digitizeSignalBegin);
@@ -896,64 +985,70 @@ Int_t StTrsMaker::Make(){
   // Access the data with
   //   *mDetectorReader 
 
-   string version = "TrsDRv1.0";
-   StTrsDetectorReader mDetectorReader(mAllTheData, version);
+  string version = "TrsDRv1.0";
+  StTrsDetectorReader mDetectorReader(mAllTheData, version);
     //
     // Loop around the sectors: (should be from db, or size of the structure!)
     //
-    for(int isector=1; isector<=mGeometryDb->numberOfSectors(); isector++) {
-	ZeroSuppressedReader* zsr = mDetectorReader.getZeroSuppressedReader(isector);
-	if(!zsr) continue; 
+  //  for(int isector=1; isector<=mGeometryDb->numberOfSectors(); isector++) {
+  for(int isector=mFirstSectorToProcess; isector<=mLastSectorToProcess; isector++) {
+      ZeroSuppressedReader* zsr = mDetectorReader.getZeroSuppressedReader(isector);
+      if(!zsr) continue; 
 // 	PR(isector);
-	// otherwise, let's decode it
-	unsigned char* padList;
-	for(int irow=1; irow<=mGeometryDb->numberOfRows(); irow++) {
-//   	  PR(irow);
-	    int numberOfPads = zsr->getPadList(irow, &padList);
-// 	    PR(numberOfPads);
-
-	    // If there are no pads, go to the next row...
-	    if(!numberOfPads) continue;
-	    for(int ipad = 0; ipad<numberOfPads; ipad++) {
-		//PR(static_cast<int>(padList[ipad]));
-		int nseq;
-		  
-		//StSequence* listOfSequences;
-		Sequence* listOfSequences;
-		zsr->getSequences(irow,
-				  static_cast<int>(padList[ipad]),
-				  &nseq,
-				  &listOfSequences);
-	      //PR(getSequencesStatus);
-#ifdef VERBOSITY
-		for(int kk=0; kk<nseq; kk++) {
-		    PR(listOfSequences[kk].Length);
-		    for(int zz=0; zz<listOfSequences[kk].Length; zz++) {
-
-			cout << " " << kk
-			     << " " << zz << '\t'
-			     << static_cast<int>(*(listOfSequences[kk].FirstAdc)) << endl;
-
-			listOfSequences[kk].FirstAdc++;
-		    } // zz
-
-		} // Loop kk
-#endif
-	    } // loop over pads
-	    //
-	    // One would do the data manipulation here!
-	    // Then deallocate the memory
-// 	    dynamic_cast<StTrsZeroSuppressedReader*>(zsr);
-//  	    zsr->clear();
-	} // Loop over rows!
-    } // Loop over sectors
-#endif
-  
-    //cout << "Got to the end of the maker" << endl;
+      // otherwise, let's decode it
+      unsigned char* padList;
 #ifdef HISTOGRAM
-    cout << "Save and close " << endl;
-    hbookFile->saveAndClose();
-#endif    
+      float* digitalValues = new float[4];
+      for (int irow=1; irow<=mGeometryDb->numberOfRows();irow++) {
+	  int numberOfPads = zsr->getPadList(irow, &padList);
+	  // If there are no pads, go to the next row...
+	  if(!numberOfPads) continue;
+	  for(int ipad = 0; ipad<numberOfPads; ipad++) {
+	      //PR(static_cast<int>(padList[ipad]));
+	      int nseq;
+	      
+	      //StSequence* listOfSequences;
+	      Sequence* listOfSequences;
+	      zsr->getSequences(irow,
+				static_cast<int>(padList[ipad]),
+				&nseq,
+				&listOfSequences);
+	      //PR(getSequencesStatus);
+	      for(int kk=0; kk<nseq; kk++) {
+#ifdef VERBOSITY
+		  PR(listOfSequences[kk].Length);
+#endif
+		  for(int zz=0; zz<listOfSequences[kk].Length; zz++) {
+		      
+#ifdef VERBOSITY
+		      cout << " " << kk
+			   << " " << zz << '\t'
+			   << static_cast<int>(*(listOfSequences[kk].FirstAdc)) << endl;
+#endif
+		      digitalValues[0] = static_cast<int>(*(listOfSequences[kk].FirstAdc));
+		      digitalValues[1] = listOfSequences[kk].startTimeBin+zz;
+		      digitalValues[2] = static_cast<int>(padList[ipad]);
+		      digitalValues[3] = irow;
+		      mDigitalNtuple->Fill(digitalValues);
+		      
+		      listOfSequences[kk].FirstAdc++;
+		  } // zz
+		  
+	      } // Loop kk
+	  } // loop over pads
+	  //
+	  // One would do the data manipulation here!
+	  // Then deallocate the memory
+	  // 	    dynamic_cast<StTrsZeroSuppressedReader*>(zsr);
+	  //  	    zsr->clear();
+      } // Loop over rows!
+      delete [] digitalValues;
+      mDigitalNtuple->Write();
+#endif
+  } // Loop over sectors
+#endif
+    
+    //cout << "Got to the end of the maker" << endl;
     // CAUTION: ROOT is resposible for the memory at this point
     // ROOT deletes m_DataSet in the chain after every event.
     time_t trsMakeEnd = time(0);

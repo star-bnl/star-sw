@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $
+// $Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.14  1999/11/11 19:42:25  calderon
+// Add #ifdef HISTOGRAM for Ntuple Diagnostics.
+// Use ROOT_DATABASE_PARAMETERS.  As soon as Jeff and Dave give Ok,
+// we will switch to TPC_DATABASE_PARAMETERS.
+//
 // Revision 1.13  1999/11/05 22:10:13  calderon
 // Added Clear() method in StTrsMaker.
 // Removed StTrsUnpacker from maker.
@@ -99,11 +104,16 @@ class StTrsRawDataEvent;
 class StTrsIstream;
 class StTrsOstream;
 
+#ifdef HISTOGRAM
+class TFile;
+class TNtuple;
+#endif
+
 class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -149,7 +159,14 @@ class StTrsMaker : public StMaker {
 
 protected:
 
-public: 
+public:
+#ifdef HISTOGRAM    
+    TFile*   mTrsNtupleFile; //!
+    TNtuple* mWireNtuple; //!
+    TNtuple* mContinuousAnalogNtuple;
+    TNtuple* mDiscreteAnalogNtuple; //!
+    TNtuple* mDigitalNtuple; //!
+#endif
     StTrsMaker(const char *name="Trs");
     ~StTrsMaker();
     Int_t  Init();
@@ -166,7 +183,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
