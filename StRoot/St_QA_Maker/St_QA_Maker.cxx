@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.87 2000/02/09 19:22:23 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.88 2000/02/10 19:49:41 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.88  2000/02/10 19:49:41  kathy
+// use kEventVtxId to select primary verteices instead of value 1
+//
 // Revision 1.87  2000/02/09 19:22:23  kathy
 // protect MakeHistEval method so that if there is no geant dataset, it skips out
 //
@@ -283,6 +286,7 @@
 #include "St_DataSetIter.h"
 #include "St_QA_Maker.h"
 
+#include "StVertexId.h"
 
 // tables  on DST
 #include "tables/St_dst_event_summary_Table.h" // event_summary (1 row)
@@ -1135,7 +1139,9 @@ void St_QA_Maker::MakeHistVertex(){
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       //         if (t->iflag>0) {  
-      if (t->iflag==1 && t->vtx_id==1){                           // plot of primary vertex only
+
+         if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
+	   // if (t->iflag==1 && t->vtx_id==1){                    // plot of primary vertex only
 	m_pv_detid->Fill(t->det_id); 
 	m_pv_vtxid->Fill(t->vtx_id);
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
@@ -1143,7 +1149,7 @@ void St_QA_Maker::MakeHistVertex(){
 	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
 	m_pv_pchi2->Fill(t->chisq[0]);
       }
-      else {                                                         // plot of 2ndary vertex only
+      else {                                              // plot of 2ndary vertex only
       m_v_detid->Fill(t->det_id); 
       m_v_vtxid->Fill(t->vtx_id);
       if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
