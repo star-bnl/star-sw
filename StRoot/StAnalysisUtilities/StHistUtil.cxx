@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.14 2003/02/15 22:00:14 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.15 2003/02/20 20:08:36 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.15  2003/02/20 20:08:36  genevb
+// Add new prefixes, other small modifications
+//
 // Revision 2.14  2003/02/15 22:00:14  genevb
 // Add tpcSectors
 //
@@ -79,14 +82,19 @@
 
 typedef TH1* TH1ptr;
 
-Int_t numOfPosPrefixes = 4;
-char* possiblePrefixes[4] = {"","LM","MM","HM"};
-char* possibleSuffixes[4] = {
+Int_t numOfPosPrefixes = 6;
+char* possiblePrefixes[6] = {"","LM","MM","HM","HP","XX"};
+char* possibleSuffixes[6] = {
   "General",
   "Low Mult",
   "Mid Mult",
-  "High Mult"
+  "High Mult",
+  "High Pt",
+  "Other Physics"
 };
+
+int sizeOfCharPtr = sizeof(Char_t*);
+int sizeOfTH1Ptr = sizeof(TH1*);
 
 
 ClassImp(StHistUtil)
@@ -106,7 +114,7 @@ StHistUtil::StHistUtil(){
 
   maxHistCopy = 512;
   newHist = new TH1ptr[maxHistCopy];
-  memset(newHist,0,maxHistCopy*sizeof(TH1*));
+  memset(newHist,0,maxHistCopy*sizeOfTH1Ptr);
 
 }
 //_____________________________________________________________________________
@@ -400,6 +408,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   if (psf) {
     psf->Close();
     delete psf;
+    psf = 0;
   } else cout << "StHistUtil::Draw(): No PostScript output" << endl;
   return histCounter;
 }
@@ -628,8 +637,8 @@ Int_t StHistUtil::CopyHists(TList *dirList)
        if (ijk>=maxHistCopy){
          Int_t newMaxHistCopy = maxHistCopy * 4;
          TH1** temp1 = new TH1ptr[newMaxHistCopy];
-         memset(temp1,0,newMaxHistCopy*sizeof(TH1*));
-         memcpy(temp1,newHist,maxHistCopy*sizeof(TH1*));
+         memset(temp1,0,newMaxHistCopy*sizeOfTH1Ptr);
+         memcpy(temp1,newHist,maxHistCopy*sizeOfTH1Ptr);
          delete newHist;
          newHist = temp1;
          maxHistCopy = newMaxHistCopy;
@@ -1023,7 +1032,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     #include "St_QA_Maker/QAhlist_logy.h"
   };
 
-  Int_t lengofList = sizeof(sdefList)/4;
+  Int_t lengofList = sizeof(sdefList)/sizeOfCharPtr;
   Int_t numLog = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
@@ -1072,7 +1081,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
     #include "St_QA_Maker/QAhlist_logx.h"
   };
 
-  Int_t lengofList = sizeof(sdefList)/4;
+  Int_t lengofList = sizeof(sdefList)/sizeOfCharPtr;
   Int_t numLog = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
@@ -1123,7 +1132,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_Cosmic.h"
     };
     sdefList = sdefList1;
-    lengofList = sizeof(sdefList1)/4;
+    lengofList = sizeof(sdefList1)/sizeOfCharPtr;
   }
 
 // Test Table QA list.........................................................
@@ -1132,7 +1141,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_TestQATable.h"
     };
     sdefList = sdefList2;
-    lengofList = sizeof(sdefList2)/4;
+    lengofList = sizeof(sdefList2)/sizeOfCharPtr;
   }
 
 // FTPC Table QA list.........................................................
@@ -1141,7 +1150,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_Ftpc.h"
     };
     sdefList = sdefList3;
-    lengofList = sizeof(sdefList3)/4;
+    lengofList = sizeof(sdefList3)/sizeOfCharPtr;
   }
 
 // FTPC Table QA list.........................................................
@@ -1150,7 +1159,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_MDC3.h"
     };
     sdefList = sdefList4;
-    lengofList = sizeof(sdefList4)/4;
+    lengofList = sizeof(sdefList4)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms without svt and ftpc histograms.....................
@@ -1159,7 +1168,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_year1.h"
     };
     sdefList = sdefList5;
-    lengofList = sizeof(sdefList5)/4;
+    lengofList = sizeof(sdefList5)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms without the svt and ftpc histograms.................
@@ -1168,7 +1177,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_EventQA_year1.h"
     };
     sdefList = sdefList6;
-    lengofList = sizeof(sdefList6)/4;
+    lengofList = sizeof(sdefList6)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for QA shift........................................
@@ -1177,7 +1186,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_QA_qa_shift.h"
     };
     sdefList = sdefList7;
-    lengofList = sizeof(sdefList7)/4;
+    lengofList = sizeof(sdefList7)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for QA shift........................................
@@ -1186,7 +1195,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_EventQA_qa_shift.h"
     };
     sdefList = sdefList8;
-    lengofList = sizeof(sdefList8)/4;
+    lengofList = sizeof(sdefList8)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for tpcSectors......................................
@@ -1195,7 +1204,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       #include "St_QA_Maker/QAhlist_tpcSectors.h"
     };
     sdefList = sdefList9;
-    lengofList = sizeof(sdefList9)/4;
+    lengofList = sizeof(sdefList9)/sizeOfCharPtr;
   }
 
   Int_t numPrt = 0;
