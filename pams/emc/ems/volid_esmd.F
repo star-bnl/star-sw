@@ -14,6 +14,6 @@
       phi  = smd_chid(2)        ! pseudorapidity bin number [1,12]
       sphi = smd_chid(3)        !
       seta = smd_chid(4)        !
-      print *,'ESMD:rl,phi,sphi,seta',rl,phi,sphi,seta
+c      print *,'ESMD:rl,phi,sphi,seta',rl,phi,sphi,seta
       return
       end

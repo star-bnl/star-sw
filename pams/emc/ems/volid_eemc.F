@@ -14,7 +14,7 @@
       phi  = emc_chid(2)        ! module phi [1,60]
       eta  = emc_chid(3)        ! pseudorapidity bin number [1,12]
       dep  = emc_chid(4)        ! depth section [1,4]
-      print *,'EEMC:rl,eta,phi,dep',rl,eta,phi,dep
+c      print *,'EEMC:rl,eta,phi,dep',rl,eta,phi,dep
       if(rl.eq.1) then
          eta=13-eta
       else

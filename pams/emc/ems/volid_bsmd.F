@@ -15,11 +15,11 @@
       phi  = smd_chid(3)        ! module phi [1,60]
       type = smd_chid(4)
       strip= smd_chid(5)
-      print *,'BSMD:rl,eta,phi,type,strip',rl,eta,phi,type,strip
+c      print *,'BSMD:rl,eta,phi,type,strip',rl,eta,phi,type,strip
       if(rl.eq.2) then
          eta=-eta
 c         phi=121-phi
       endif
-      print *,'BSMD:eta,phi',eta,phi
+c      print *,'BSMD:eta,phi',eta,phi
       return
       end
