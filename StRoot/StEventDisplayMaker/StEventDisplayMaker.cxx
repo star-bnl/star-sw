@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.89 2003/01/21 23:49:50 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.90 2003/01/22 15:42:05 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -158,7 +158,6 @@ ClassImp(StEventDisplayMaker)
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
-  fEventControlPanel = 0;
   mEventHelper    =  0;
   m_Hall          =  0;  
   m_FullView      =  0;  
@@ -238,7 +237,6 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      delete m_VolumeList;
      m_VolumeList = 0;
   }
-  delete fEventControlPanel;
 }
 
 //_____________________________________________________________________________
@@ -1107,6 +1105,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.90  2003/01/22 15:42:05  fine
+// fix compilation prpblem with no Qt
+//
 // Revision 1.89  2003/01/21 23:49:50  fine
 // The all knowm problems have been fixed
 //
