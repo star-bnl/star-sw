@@ -105,8 +105,8 @@ long  type_of_call fill_dst_event_summary_ (
   nphirange = NRANGE ;
 #if 0
   if (!dstTrack_h->nok){
-    fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
-    return STAFCV_BAD;
+    fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...\n");
+    //return STAFCV_BAD;
   }
 #endif  
 
