@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.1 2000/01/27 17:13:10 lasiuk Exp $
+# $Id: GNUmakefile,v 2.0 2000/08/09 16:17:29 gans Exp $
 #
 # Author: brian
 # --------------------------------------------------------------------------
@@ -11,6 +11,10 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
+# Revision 2.0  2000/08/09 16:17:29  gans
+# Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
+# for StRichDrawableT(foo)
+#
 # Revision 1.1  2000/01/27 17:13:10  lasiuk
 # Initial Revisions
 #
