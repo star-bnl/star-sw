@@ -3,6 +3,12 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *                                                                            *
    Author    K. Shestermanov, IHEP. First version W. Llope 
    Created   November 17 1995
+* $Id: calbgeo.g,v 1.20 2004/01/19 21:19:42 potekhin Exp $
+* $Log: calbgeo.g,v $
+* Revision 1.20  2004/01/19 21:19:42  potekhin
+* Had to separate a couple of subs into separate source files to avoid
+* clashes when building with the new version of calbgeo1
+*
 *
 *	Revisions:
 *	Version 1.1, W.J. Llope 17-Nov-96
@@ -62,6 +68,7 @@ external etsphit
 *
       Content CALB,CHLV,CPHI,CSUP,CPBP,CSCI,CSMD,CSMG,CSDA,CSMC,CSMB,CSME,
               CSHI,CBTW
+
       Structure CALG { version,  Rmin,     Etacut,   CrackWd,
                        FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
                        ScintThk(2),        AbsorThk, AbPapThk, g10SbThk,
@@ -126,7 +133,10 @@ external etsphit
       Netsecon = 75.         ! Number of strip in second part eta=0.5-1.0
       Nmodule  = {60,60}     ! number of modules
       Shift    = {75,105}    ! starting azimuth of the first module   
+*      ModMap   = 
    Endfill
+*
+
    USE    CALG
 *
 * ---------------------------------------------------------------------------
@@ -501,72 +511,6 @@ Block CSHI is a sensiteve Ar/CO2 box
 
 *
 EndBlock
-*
-      end
-******************************************************************************
-      subroutine  CALBPAR(imed,medium)
-*
-      integer   imed
-      character medium*(*)
-*
-      if      ( medium=='ABSORBER' ) then    
-* --- cuts for EMC absorber and scintillator 
-        Call GSTPAR (imed,'CUTGAM',0.00008)
-        Call GSTPAR (imed,'CUTELE',0.001)
-        Call GSTPAR (imed,'BCUTE' ,0.0001)
-      else if ( medium=='SENSITIVE' ) then   
-* --- cuts for SMD light material and gas
-        Call GSTPAR (imed,'CUTGAM',0.00001)
-        Call GSTPAR (imed,'CUTELE',0.00001)    
-      endif
-
-*--- common cuts for hadrons and muons in EMC&SMD
-
-      Call GSTPAR (imed,'CUTNEU',0.001)
-      Call GSTPAR (imed,'CUTHAD',0.001)
-      Call GSTPAR (imed,'CUTMUO',0.001)
-*
-      end
-
-******************************************************************************
-                Subroutine  etsphit(j,Hit)
-*
-+CDE,Typing,GCBANK,GCVOLU,GCKINE,GCTRAK,AgCSTEP.
-*
-      integer j,iplane,ishape
-      integer nlev_r,nlev_m,mycell,jmycell,jmypar
-      character cname*4,mname*4
-      data mname/'CSDA'/
-      Real      Hit,xyzhm(3),xyzh(3),dxhw,dyhw,dzhw
-      save nlev_r,nlev_m,dxhw,dyhw,dzhw
-*
-      nlev_r=nlevel-2
-      mycell=lvolum(nlev_r) 
-      jmycell=LQ(jvolum-mycell)
-      call uhtoc(IQ(jmycell-4),4,cname,4)
-      if(cname==mname) then
-        ishape=Q(jmycell+2)
-        if(ishape==1) then
-          jmypar=LQ(jgpar-nlev_r)
-          dxhw=Q(jmypar+1)
-          dyhw=Q(jmypar+2)
-          dzhw=Q(jmypar+3)
-        endif
-      else
-        print *,'There are some problem with level volume in the CSDA'        
-      endif
-      nlev_m=nlevel
-      call gdtom(xloc(1),xyzhm(1),1)
-      hits(1)=hit
-      iplane=hit
-      nlevel=nlev_r
-      call gmtod(xyzhm(1),xyzh(1),1)
-      nlevel=nlev_m
-      if(iplane.le.2) then
-        hit=xyzh(3)+dzhw
-      else
-        hit=xyzh(2)+dyhw
-      endif
 *
       end
 
