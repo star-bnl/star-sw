@@ -145,7 +145,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     goto FEE;
   }
   
-  if(date >= 20011202) // SMD modules connection after this date
+  if(date >= 20011202 && date <20021001) // SMD modules connection after this date
   {
     int SmdModules_tmp[8][15]={
                               {49,54,48,46,50,51,52,53,47,55,56,57,58,59,60},                //RDO 0
