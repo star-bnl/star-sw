@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.73 1998/10/20 21:08:09 kathy Exp $
+* * $Id: bfc.kumac,v 1.74 1998/10/26 21:45:43 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.74  1998/10/26 21:45:43  kathy
+* add input to run bfc_cleanup at end of job
+*
 * Revision 1.73  1998/10/20 21:08:09  kathy
 * changed default settings
 *
@@ -300,7 +303,8 @@ MACRO bfc _
    nunit=21 _
    nfile=globtrk.ntup _
    nid=111 _
-   ntable=global/dst/globtrk 
+   ntable=global/dst/globtrk _
+   cleanup=0
   
 * **********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
@@ -340,7 +344,7 @@ MACRO bfc _
  message ' *** Ebye Ensemble Switch    --> ' [ebye_ensemble_switch]
  message ' *** Ebye Analysis Switch    --> ' [ebye_analysis_switch] 
  message ' *** log                     --> ' [log]
-
+ message ' *** run cleanup at end 1=yes --> ' [cleanup] 
 ***********************************************************
 * GLOBAL VARIABLES - created from macro inputs 
 ***********************************************************
@@ -456,7 +460,11 @@ FINISH:
   
   message ' =====> BFC FINAL: #events total,processed,passed = ' _
       [nev_total] [nev_proc] [nev_pass]
- 
+  
+  if ([cleanup].eq.1) then
+    exec bfc_cleanup#run [chain]
+  endif
+  
   
  goto END
   
