@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.15 2003/09/11 18:14:04 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.16 2003/09/15 20:07:10 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -36,6 +36,8 @@ using namespace std;
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcADCtoEMaker/StBemcData.h"
+//#include "St_db_Maker/St_db_Maker.h"
+
 
 ClassImp(StEmcTpcFourPMaker)
   
@@ -141,7 +143,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 
   // Retreive the points
   StEmcCollection *emc = NULL;
-  if((useType != Hits) || (adc2E == NULL))
+  if(useType != Hits)
     { 
       if(adc2E == NULL)
 	{
@@ -161,21 +163,24 @@ Int_t StEmcTpcFourPMaker::Make() {
     }
   else
     {
-      emc = adc2E->getEmcCollection();
+      if(adc2E == NULL)
+	muEmc = uDst->emcCollection();
+      else
+	emc = adc2E->getEmcCollection();
     }
   int numPoints = 0;
   int numClusters = 0;
   double twoPi = M_PI*2.0;
 
   // Add the points
-  if((useType != Hits) || (adc2E == NULL))
+  if(useType != Hits)
     {
       numPoints = muEmc->getNPoints();
       numClusters = muEmc->getNClusters(1);
       cout << "NumPoints: " << numPoints << endl;
       cout << "NumClusters: " << numClusters << endl;
       // This just prints for debugging purposes:
-      if(useType != Clusters) for(int i = 0; i < numPoints; i++)
+      if(useType == Points) for(int i = 0; i < numPoints; i++)
 	{
 	  StMuEmcPoint* point = muEmc->getPoint(i);
 	  cout << "Point[" << i << "] eta: " << point->getEta() - etaShift;
@@ -195,7 +200,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  cout << "  phi: " << phi;
 	  cout << "  energy: " << cluster->getEnergy() << endl;
 	}
-      if(useType != Clusters) for(int i = 0; i < numPoints; i++)
+      if(useType == Points) for(int i = 0; i < numPoints; i++)
 	{
 	  StMuEmcPoint* point = muEmc->getPoint(i);
 	  binmap.insertPoint(point, i);
@@ -217,33 +222,97 @@ Int_t StEmcTpcFourPMaker::Make() {
   else // useType == Hits
     {
       unsigned int runNumber = uEvent->runNumber();
-      int pointIndex = 0;
-      int& hitId = pointIndex;
+      int hitId = 0;
       StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
-      StBemcData* data = adc2E->getBemcData();
-      int numHits = data->NTowerHits;
-      cout << "Number Hits: " << numHits;
+      StBemcData* data = NULL;
+      int numHits = 0;
+      TDataSet *mDb = NULL;
+      emcCalib_st* emccalibtbl = NULL;
+      emcGain_st* emcgaintbl = NULL;
+      emcPed_st* emcpedtbl = NULL;
+      
+      if(adc2E)
+	{
+	  data = adc2E->getBemcData();
+	  numHits = data->NTowerHits;
+	  cout << "Number Hits: " << numHits;
+	}
+      else
+	{
+	  mDb = NULL;
+	  TString DbName = "Calibrations/emc/y3"+detname[0];
+	  mDb = GetInputDB(DbName.Data());
+	  if(!mDb) return kFALSE;
+	  TString TableName;
+
+	  TableName = detname[0] + "Calib";
+	  St_emcCalib* cptr = (St_emcCalib*) mDb->Find(TableName.Data());
+	  if(cptr) emccalibtbl = cptr->GetTable();
+	  if(!emccalibtbl) return kFALSE;
+
+	  TableName = detname[0] + "Gain";
+	  St_emcGain* gptr = (St_emcGain*) mDb->Find(TableName.Data());
+	  if(gptr) emcgaintbl = gptr->GetTable();
+
+	  TableName = detname[0] + "Ped";
+	  St_emcPed* pptr = (St_emcPed*) mDb->Find(TableName.Data());
+	  if(pptr) emcpedtbl = pptr->GetTable();
+	  if(!emcpedtbl) return kFALSE;
+	}
 
       for(hitId = 1; hitId <= maxHits; hitId++)
 	{
 	  float eta, phi, energy;
-	  if(data->TowerStatus[hitId-1] != 1) continue;
 	  if(towerProxy->isGood(runNumber, hitId-1) == false) continue;
-	  energy = towerProxy->energyFunction(
-		   runNumber, hitId-1, data->TowerADC[hitId-1], 
-		   data->TowerEnergy[hitId-1]);
+	  if(adc2E)
+	    {
+	      if(data->TowerStatus[hitId-1] != 1) continue;
+	      energy = towerProxy->energyFunction(
+						  runNumber, 
+						  hitId-1, 
+						  data->TowerADC[hitId-1], 
+						  data->TowerEnergy[hitId-1]);
+	    }
+	  else // Calibration!!!!  MuDst does not contain energy.
+	    {
+	      float ADC = 0; 
+	      float PED = 0;
+	      ADC = muEmc->getTowerADC(hitId, bemc);
+	      PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
+		/100.0;
+	      //PED = static_cast<double>(static_cast<int>(PED));
+	      float ADCSUB = ADC-PED;
+	      energy = 0;
+	      float ADCPOWER = 1;
+	      for(int i = 0; i < 5; i++)
+		{
+		  float c = 0;
+		  c = emccalibtbl[0].AdcToE[hitId-1][i];
+		  energy += c*ADCPOWER;
+		  ADCPOWER *= ADCSUB;
+		}
+	      if(PED <= 0) energy = 0;
+	      float gain = 1;
+	      if(emcgaintbl != NULL)
+		gain = emcgaintbl[0].Gain[hitId-1];
+	      if(gain < .1)  // gain shouldn't have a large or negative effect
+		gain = 1;
+	      energy *= gain;
+	      //cout << "Energy calibrated: " << energy << endl;
+	    }
+
 	  sumEMC += energy;
 	  if(energy < 0.01) continue;
 	  geom->getEtaPhi(hitId, eta, phi);
 	  while(phi < 0) phi += twoPi;
 	  while(phi > twoPi) phi -= twoPi;
-
+	  
 	  // now add a fake point to the binmap
-	  StMuEmcPoint& point = fakePoints[pointIndex];
+	  StMuEmcPoint& point = fakePoints[hitId];
 	  point.setEta(eta);
 	  point.setPhi(phi);
 	  point.setEnergy(energy);
-	  binmap.insertPoint(&point, pointIndex);
+	  binmap.insertPoint(&point, hitId);
 	  //sumEMC += point.getEnergy();
 	}
     }
@@ -315,8 +384,12 @@ Int_t StEmcTpcFourPMaker::Make() {
 
 
   // Now subtract the energy deposited by the tracks:
-  StMuTrack* lasttrack = (*(binmap.t2p.begin())).first;
-  double deposit = (binmap.moddTracks[lasttrack]).depE();
+  StMuTrack* lasttrack = NULL;
+  if(binmap.t2p.size() > 0)
+    lasttrack = (*(binmap.t2p.begin())).first;
+  double deposit = 0;
+  if(lasttrack != NULL)
+    deposit = (binmap.moddTracks[lasttrack]).depE();
   DistanceToPointMap pointsDist;
   for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
       trackit != binmap.t2p.end(); ++trackit)
