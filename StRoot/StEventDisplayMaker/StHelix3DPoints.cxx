@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.cxx,v 1.2 1999/11/16 14:41:03 fine Exp $
+// $Id: StHelix3DPoints.cxx,v 1.3 1999/11/22 18:42:15 fine Exp $
 // $Log: StHelix3DPoints.cxx,v $
+// Revision 1.3  1999/11/22 18:42:15  fine
+// Protection in DistancetoPrimitive canceled
+//
 // Revision 1.2  1999/11/16 14:41:03  fine
 // TObject::Distancetoprimitive implementation, GetXYZ has been removed
 //
@@ -94,7 +97,7 @@ StHelix3DPoints::~StHelix3DPoints(){ if (m_Owner) delete m_Helix; }
 
 //______________________________________________________________________________
 Int_t StHelix3DPoints::DistancetoPrimitive(Int_t px, Int_t py)
-{  assert(kFALSE); return -1; }
+{ return -1; assert(kFALSE); return -1; }
 
 //________________________________________________________________________________
 Int_t  StHelix3DPoints::GetLastPosition()const {
