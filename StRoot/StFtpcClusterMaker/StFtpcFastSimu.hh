@@ -1,10 +1,8 @@
-// $Id: StFtpcFastSimu.hh,v 1.9 2000/11/24 14:57:02 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.10 2000/11/24 15:02:33 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
-// Revision 1.9  2000/11/24 14:57:02  hummler
-// - remove tables from StFtpcFastSimu
-// - remove memory leak
-// - general cleanup
+// Revision 1.10  2000/11/24 15:02:33  hummler
+// commit changes omitted in last commit
 //
 // Revision 1.8  2000/09/18 14:26:49  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
@@ -38,7 +36,7 @@
 #include "fcl_fppoint.h"
 #include "TClonesArray.h"
 #include "StFtpcGeantPoint.hh"
-#include "StFtpcTrackMaker/StFtpcPoint.hh"
+#include "StFtpcReducedPoint.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -54,7 +52,7 @@ class StFtpcFastSimu
  private:
   StFtpcParamReader *mParam;
   StFtpcGeantReader *mGeant;
-  StFtpcPoint *mPoint;
+  StFtpcReducedPoint *mPoint;
   StFtpcGeantPoint *mGeantPoint;
   int nPoints;
 

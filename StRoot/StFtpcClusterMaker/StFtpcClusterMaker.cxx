@@ -1,9 +1,7 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.15 2000/11/24 14:57:02 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.16 2000/11/24 15:02:33 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
-// Revision 1.15  2000/11/24 14:57:02  hummler
-// - remove tables from StFtpcFastSimu
-// - remove memory leak
-// - general cleanup
+// Revision 1.16  2000/11/24 15:02:33  hummler
+// commit changes omitted in last commit
 //
 // Revision 1.14  2000/11/20 11:39:12  jcs
 // remove remaining traces of fspar table
