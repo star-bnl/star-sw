@@ -1,5 +1,8 @@
-// $Id: MakeHtmlTables.cxx,v 1.10 1999/11/19 21:20:23 fine Exp $
+// $Id: MakeHtmlTables.cxx,v 1.11 2001/09/02 00:03:22 fine Exp $
 // $Log: MakeHtmlTables.cxx,v $
+// Revision 1.11  2001/09/02 00:03:22  fine
+// type fixed
+//
 // Revision 1.10  1999/11/19 21:20:23  fine
 // Extra path to /afs/rhic/star/packages/SL99i include dirictory was added
 //
@@ -98,5 +101,5 @@
    }
    gSystem->FreeDirectory(dirhandle);
    // Make html for itself
-   html->Convert("$STAR/StRoot/htm/MakeHtmlTables.cxx","How to create the HTML doc for the STAF table wrappers");
+   html->Convert("$STAR/StRoot/html/MakeHtmlTables.cxx","How to create the HTML doc for the STAF table wrappers");
 }
