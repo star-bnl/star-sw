@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.2 2000/07/03 12:45:23 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.3 2001/02/21 13:14:09 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.3  2001/02/21 13:14:09  jcs
+// Add CVS Id strings in correct place
+//
 // Revision 1.2  2000/07/03 12:45:23  jcs
 // get (pre)Vertex coordinates directly from (pre)Vertex table instead of from
 // fptpars
@@ -27,8 +30,6 @@ class St_fde_fdepar;
 class StFtpcTrackMaker : public StMaker {
 
  private:
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.2 2000/07/03 12:45:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   protected:
        TH1F          *m_q;          //! charge
@@ -45,8 +46,11 @@ class StFtpcTrackMaker : public StMaker {
    virtual       ~StFtpcTrackMaker();                               // destructor
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.3 2001/02/21 13:14:09 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
+
 
    ClassDef(StFtpcTrackMaker, 1)   //StAF chain virtual base class for Makers
 };
