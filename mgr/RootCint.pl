@@ -35,7 +35,7 @@ open (Out, ">$LinkDef") or die "Can't open $LinkDef";
 
 # do not change the comment format  for the library version 
 # It matches the one in stic and ConstructTable
-print Out "/* This was generated generated for version '".$ENV{STAR_VERSION}."' */\n";
+print Out "/* This was generated for version '".$ENV{STAR_VERSION}."' */\n";
 print Out "#pragma link off all globals;\n";
 print Out "#pragma link off all classes;\n";
 print Out "#pragma link off all functions;\n";;
