@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $
+// $Id: St_tpt_Maker.h,v 1.14 2000/03/07 05:14:55 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.14  2000/03/07 05:14:55  sakrejda
+// Jan's modifications to run on L3 clusters (I think)
+//
 // Revision 1.13  2000/02/23 03:41:39  sakrejda
 // Histograms names in EVAL changed to TptTte* by Kathy.
 // Also comments added.
@@ -73,7 +76,10 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $";
+  TString m_InputDataSetName; //! 
+  TString m_InputHitName; //!
+
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.14 2000/03/07 05:14:55 sakrejda Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -181,6 +187,7 @@ protected:
 public: 
   St_tpt_Maker(const char *name="tpc_tracks");
   virtual       ~St_tpt_Maker();
+  void SetInputHits(  TString , TString );
   virtual void   tteEval(Bool_t flag=kFALSE){m_tteEvalOn=flag;}
   virtual void   tteEvalOn() {tteEval(kTRUE);}                       // *MENU*
   virtual void   tteEvalOff(){tteEval();}                            // *MENU
@@ -196,7 +203,7 @@ public:
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.14 2000/03/07 05:14:55 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
