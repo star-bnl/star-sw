@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.8 2004/04/09 22:02:53 subhasis Exp $
+ * $Id: StMuIOMaker.cxx,v 1.9 2004/04/14 17:15:57 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -276,8 +276,8 @@ int StMuIOMaker::Make(int index){
   if (!mChain) return kStEOF;
   int bytes = mChain->GetEntry(mCurrentIndex);
   DEBUGVALUE3(bytes);
-  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
   mEventCounter++;
   return kStOk;
 }
@@ -367,6 +367,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.9  2004/04/14 17:15:57  subhasis
+ * Xin's TOF reinclusion
+ *
  * Revision 1.8  2004/04/09 22:02:53  subhasis
  * after tof createevent fix by Xin
  *

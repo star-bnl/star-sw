@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.25 2004/04/09 22:04:55 subhasis Exp $
+ * $Id: StMuDst.cxx,v 1.26 2004/04/14 17:15:56 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -278,7 +278,6 @@ StEvent* StMuDst::createStEvent() {
           }
   tofcoll->addData(aData);
 	      }
-	  cout << " TOF data stored " << nTofData << " entries ! " << endl;
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -355,6 +354,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.26  2004/04/14 17:15:56  subhasis
+ * Xin's TOF reinclusion
+ *
  * Revision 1.25  2004/04/09 22:04:55  subhasis
  * after tof createevent fix by Xin
  *
