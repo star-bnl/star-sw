@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.28 2000/03/14 23:42:46 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.29 2000/10/10 20:09:43 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.29  2000/10/10 20:09:43  wdeng
+// TObjArray instances deleted. I am not sure if this is related to the problem Akio reported.
+//
 // Revision 1.28  2000/03/14 23:42:46  wdeng
 // Avoid memory leak. Some cleaning up.
 //
@@ -400,6 +403,8 @@ Int_t StKinkMaker::Make(){
 	}
     }
   trackArray->Delete();
+  delete trackArray;
+
   gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
 
   // Check if two or more parents (daughters) have the same dst_track id. 
@@ -472,7 +477,8 @@ Int_t StKinkMaker::Make(){
     }
 
   trkIdChkArray->Delete();
-  
+  delete trkIdChkArray;
+
   return kStOK; 
 }
 
