@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.3 2003/11/20 22:59:40 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.4 2003/11/22 05:35:39 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -30,6 +30,9 @@ public:
 #endif
 
 /* $Log: EEfeeRawEvent.h,v $
+ * Revision 1.4  2003/11/22 05:35:39  balewski
+ * *** empty log message ***
+ *
  * Revision 1.3  2003/11/20 22:59:40  balewski
  * *** empty log message ***
  *
