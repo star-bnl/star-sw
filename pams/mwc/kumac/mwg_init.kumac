@@ -1,14 +1,13 @@
-MACRO callgeo 
+macro mwg_init
 macro/global/import *
 
-mkdir mws
-cd   mws 
+
+cd [params]/mwc
+
 newtable geom mwc_geo 1         
 newtable cal  mwc_cal 384       
 *
 *    Initialize geo 
-*
-fill:
 *
 rowcount geom 1
 *
@@ -26,7 +25,6 @@ tdm/table/cell/putvalue 'cal[0].cc'        1.00
 *
 ami/module/call mwg geom cal 
 
-cd ..
+cd /dui
 
 RETURN
-

@@ -1,0 +1,11 @@
+macro mwu_run 
+macro/global/import *
+*
+*   
+*    Call mwu
+*
+ami/mod/call mwu [params]/mwc/cal _ 
+                 [data]/mwc/raw   _
+                 [data]/mwc/cor     
+
+return
