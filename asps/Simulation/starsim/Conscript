@@ -12,6 +12,7 @@ my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $FEXTEND = $env->{FEXTEND};
+my $FDEBUG = $env->{FDEBUG};
 my $CPPFLAGS = $env->{CPPFLAGS};
 my $CPPPATH = $env->{CPPPATH};
 my $pkg  = "starsim"; 
@@ -22,8 +23,6 @@ $FCPATH  = "#asps/Simulation/starsim/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 $FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
-my $CPP_DATE = "031201";
-my $CPP_TIME = "1937";
 $FPPFLAGS .= " -D__ROOT_ -DCERNLIB_TYPE -DCERNLIB_UNIX " .
   "-DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL " .
   "-DCERNLIB_NONEWL -DCERNLIB_HIGZ  -DCERNLIB_CG  " .
@@ -37,10 +36,14 @@ $CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
-$CPPFLAGS  = "-Df2cFortran -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG -DCERNLIB_MYSQL";
-if ($STAR_SYS =~ /^rh/) {
-  $FPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_MYSQL";
-  $CPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_MYSQL";
+$CPPFLAGS  = "-Df2cFortran -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/) {
+  $FPPFLAGS .= " -DCERNLIB_LINUX";
+  $CPPFLAGS .= " -DCERNLIB_LINUX";
+}
+if ($STAR_SYS =~ /^rh80/) {
+  $FPPFLAGS .= " -DCERNLIB_MYSQL";
+  $CPPFLAGS .= " -DCERNLIB_MYSQL";
 }
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
@@ -52,24 +55,14 @@ $env2 = $env->clone('FC'           => $FC,
 		    'FFLAGS'       => $FFLAGS,
 		    'FCPATH'       => $FCPATH,
 		    'FEXTEND'      => "",
+		    'FDEBUG'       => $FDEBUG,
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CPPPATH'      => $CPPPATH,
-		    #		    'LIBPATH'      => $LIBPATH,
+		    'AGETOFLAGS'   => "",
 		    'LIBS'         => $LIBS,
 		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries
 		   );
-#my @Sources = qw(aversion.F 
-		 #		 atmain/*.age atmain/*.F atmain/*.c atmain/*.cxx 
-		 #		 atgeant/*.age 
-		 #		 atutil/*.age atutil/*.F
-		 #		 agzio/*.age agzio/*.F  
-		 #		 rebank/*.age  
-		 #		 dzdoc/*.F  
-		 #		 geant/*.F geant/*.c  
-		 #		 comis/*.F  
-		 #		 deccc/*.c
-#		);
 my @src  = find_sources($Dir);
 my $pwd = Cwd::cwd();# print "pwd = $pwd  Dir => $Dir\n";
 my @sources = ();
@@ -79,55 +72,59 @@ foreach my $s (@src) {
     $ss =~ s/$Dir\///;# print "$ss\n";
     next if $ss =~ /atlroot/;
     next if $ss =~ /acmain\.cxx/;
-    #    next if $ss =~ /deccc\/traceqc\.c/;
+    next if $ss =~ /deccc\/traceqc\.c/;
+    next if $ss =~ /deccc\/mykuip\.c/;
+    next if $ss =~ /atmain\/traceq\.age/;
     next if $ss =~ /atmain\/etime\.F/ and $FC !~ /g77/;
+    next if $ss =~ /deccc\/idisp\.c/ and $FC !~ /g77/;
     next if $ss =~ /atmain\/agxinit\.cdf/;
     next if $ss =~ /atmain\/guinti\.cdf/;
-    #    next if $ss =~ /deccc\/fputools\.c/ and $CC !~ /gcc/;
+    next if $ss =~ /atmain\/sterror\.age/;
+    next if $ss =~ /deccc\/fputools\.c/ and $FC !~ /g77/;
     push @sources, $ss; 
   }
 }
-#print "source = @sources\n";
 if ($#sources > -1) {
-  Library      $env2 $LIBPKG, @sources;  
-  Install $env2 $LIB, $LIBPKG;
-}
-#my @starsim = qw(acmain.cxx deccc/traceqc.c);
-my @starsim = qw(acmain.cxx);
+  if ($STAR_SYS !~ /alpha/) {
+    Library      $env2 $LIBPKG, @sources;  
+    Install $env2 $LIB, $LIBPKG;
+  } else {
+    my @objfiles = Objects $env2  @sources;# print "+++++++++++  $STAR_SYS ********* @objfiles \n";
+    Command $env2 ("input_object.list"), @objfiles, qq([perl] open(F, ">%>"); print F "%<"; close(F); 1);
+    Command $env2 ($LIBPKG), ("input_object.list"), qq(%ARCOM);
+    Install $env2 $LIB, $LIBPKG;
+  }
+}  
+my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age deccc/mykuip.c);# deccc/idisp.c);
 my $pgm = "starsim";
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
-#if ($PGI) {
-#  $PGILIBS .= " -L$PGI/linux86/lib";
-#  $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
-#  if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-#    $PGILIBS .= " -lpgftnrtl";
-#  }
-#  if ( -e "$PGI/linux86/lib/libpgc.a"){
-#    $PGILIBS .= " -lpgc";
-#  }
-#  if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
-#    $PGILIBS .= " -lpgnod_prof";
-#  }
-#  $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
-#}
 script::Keep $pgm;
+my $LD = $env->{LD};
+if ($LD eq 'g++') {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
-$LDFLAGS .= " -export-dynamic -rdynamic -Wl,-noinhibit-exec,-Bdynamic";
+$LDFLAGS .= $env->{LDEXPORT};
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
-#$LIBPATH .= $env->{Packages}->{QT}->{LIBDIR};
-$LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 my $LIBS    = $env->{LIBS};
-if ($PGILIBS) {$LIBS .= " " . $PGILIBS;}
-$LIBS .= " -Wl,--whole-archive -Wl,-Bstatic -lstarsim -lg2c -lstdc++ -Wl,--no-whole-archive -Wl,-Bdynamic";# -lg2c";
+if ($PGILIBS) {$LIBS .= " " . $PGILIBS;}  
+$LIBS .= $env->{LDALL};
+$LIBS .= " -lstarsim";
+if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc' ) {
+  if ($env->{LIBG2C}) {
+    $LIBPATH .= $main::PATH_SEPARATOR . File::Basename::dirname($env->{LIBG2C});
+    $LIBS .= " " . $env->{LIBG2C};
+    if ( $LD eq 'gcc' or $LD eq 'g++' ) {$LIBS .= " " . $env->{LIBSTDC};}
+  }
+}
+$LIBS .= $env->{LDNONE};
 $LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
 my $Libraries = $env->{Libraries};
-		 my $LD = $env->{CC};
-		 $Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} . " " . 
-		 $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS};
+$LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
+$Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} .
+$Libraries .=  " " .   $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS};
 $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 		     'LIBPATH'   => $LIBPATH,
 		     'LIBS'      => $LIBS,
@@ -135,36 +132,13 @@ $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 		     'FEXTEND'      => "",
 		     'Libraries' => $Libraries
 		    );
-#print "LIBPATH = $envP->{LIBPATH}\n";
-Program      $envP $pgm . ".new", @starsim;
-#InstallAs $envP $BIN . "/gstar", $pgm;
+Program      $envP $pgm, @starsim;
 my $d = $Dir . "/";
 my @list = glob $d . "atlsim.*";# print "Dir  = $Dir; list = @list\n";
-my @Deps = ($pgm . ".new","#" . $d . "atlsim.makefile","#" . $d . "atlsim.bank","#" . $d . "atlsim.logon.kumac");
 foreach my $l (@list) {
   my $f = File::Basename::basename($l); 
   my $s = $f; $s =~ s/atlsim/starsim/; #  print "$l => $s\n";
-#  InstallAs $envP $BIN ."/". $s, "#" . $d ."/". $f;
-  Command $envP $BIN ."/". $s, "#" . $d ."/". $f, qq(cp -v %< %>);
-  push @Deps, $BIN . "/" . $s;
+  Command $envP $BIN ."/". $s, "#" . $d ."/". $f, qq(cp %< %>);
+  InstallAs $envP $s, $f;
 }		 
-# Command      $env  $pgm, @Deps, 
-# 		 q(
-# 		   cp     %1  %>
-# 		   echo  '#######.makefile########' >> %>
-# 		   echo  '#chto v imeni tebe moem#' >> %>
-# 		   echo  '#######.makefile.#######' >> %>
-# 		   cat      %2      >> %>
-# 		   echo  '#######.endfile.########' >> %>
-# 		   echo  '#########.bank##########' >> %>
-# 		   echo  '#chto v imeni tebe moem#' >> %>
-# 		   echo  '#########.bank.#########' >> %>
-# 		   cat      %3          >> %>
-# 		   echo  '#######.endfile.########' >> %>
-# 		   echo  '#chto v imeni tebe moem#' >> %>
-# 		   echo  '#####.logon.kumac#######' >> %>
-# 		   cat      %4   >> %>
-# 		   echo  '#######.endfile.########' >> %>
-# );
-#Install $envP $BIN, $pgm;
-Command $envP $BIN . "/" . $pgm, $pgm, qq(cp -v %< %>);
+Command $envP $BIN . "/" . $pgm, $pgm, qq(cp %< %>);

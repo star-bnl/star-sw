@@ -1,5 +1,8 @@
-* $Id: gentit.inc,v 1.2 2004/01/15 02:39:23 fisyak Exp $
+* $Id: gentit.inc,v 1.3 2004/03/01 17:26:33 fisyak Exp $
 * $Log: gentit.inc,v $
+* Revision 1.3  2004/03/01 17:26:33  fisyak
+* Get rid of staf
+*
 * Revision 1.2  2004/01/15 02:39:23  fisyak
 * Bug fixes
 *
@@ -22,7 +25,8 @@
      >  'e', '_', '_','de','de','de','de','comp','res',
      >   Lnams*'    '/
 *     - - - - - - - - -
-      integer         Lnam,jX,jP,iX,iC,iPT,iLP,iET,iE,xD2M,pD2M,iflg,iadr
+      integer         Lnam,jX,jP,iX,iC,iPT,iLP,iET,iE,xD2M,pD2M,iflg,
+     >                iadr
       common /gentit/ Lnam,jX,jP,iX,iC,iPT,iLP,iET,iE,xD2M,pD2M,
      >                iflg(Lnmax), iadr(Nmh)
       character*4     Cset,Cdet,Chit

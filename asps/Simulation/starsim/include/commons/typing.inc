@@ -1,5 +1,3 @@
-* $Id: typing.inc,v 1.1.1.1 2004/01/12 23:49:49 potekhin Exp $
+* $Id: typing.inc,v 1.2 2004/03/01 17:26:34 fisyak Exp $
 * $Name:  $
-#if defined(ATLAS_TYPE)
       IMPLICIT NONE
-#endif

@@ -1,6 +1,10 @@
-* $Id: afname.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: afname.age,v 1.2 2004/03/01 17:26:33 fisyak Exp $
 * $Log: afname.age,v $
+* Revision 1.2  2004/03/01 17:26:33  fisyak
+* Get rid of staf
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.5  2001/11/24 17:44:49  nevski
 * bug fix (makefile moves up)
@@ -48,8 +52,8 @@
         INTEGER           ICSDEBUG
         COMMON /CSDEBUG/  ICSDEBUG
 *
-        call getarg(0,prog)
-*       call getarg(2,exten)
+        call getargf(0,prog)
+*       call getargf(2,exten)
 
 * local copy of 'name.exten' or just 'exten'
         L=Lenocc(prog); j=0; Idot=L+1

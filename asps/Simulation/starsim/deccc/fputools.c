@@ -33,6 +33,7 @@
 void inline fpustack_(int *fputag,  int *fpustatus, 
                       int *fpuused, int *fpuoverflow)
 {
+#if defined(__GNUC__) 
   static int stats[10];
   int i,stat;
   
@@ -50,26 +51,31 @@ void inline fpustack_(int *fputag,  int *fpustatus,
     if ((stat&3)!=3) (*fpuused)++;
     stat=stat>>2;
   }
+#endif
 }
-
+#if defined(__GNUC__)
 /* Taken from glibc 2.1 /usr/include/fpu_control.h  */
 #define _FPU_GETCW(cw) __asm__ ("fnstcw %0" : "=m" (*cw))
 #define _FPU_SETCW(cw) __asm__ ("fldcw %0" : : "m" (*cw))
 
 typedef unsigned int fpu_control_t __attribute__ ((__mode__ (__HI__)));
-
+#endif
 /* Fortran wrappers */
 
 void inline fpugetcw_(int *cword) {
+#if defined(__GNUC__)
   fpu_control_t  cw;
   _FPU_GETCW(&cw);
   *cword = cw;
+#endif
 }
 
 void inline fpusetcw_(int *cword) {
+#if defined(__GNUC__)
   fpu_control_t cw;
   cw = *cword;
   _FPU_SETCW(&cw);
   *cword = cw;
+#endif
 }
 

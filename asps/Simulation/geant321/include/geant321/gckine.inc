@@ -1,26 +1,16 @@
+*
+* $Id: gckine.inc,v 1.2 2004/03/01 17:26:25 fisyak Exp $
+*
+* $Log: gckine.inc,v $
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
+* Revision 1.1.1.1  1995/10/24 10:20:31  cernlib
+* Geant
+*
+*
 #ifndef CERNLIB_GEANT321_GCKINE_INC
 #define CERNLIB_GEANT321_GCKINE_INC
-# if defined (__cplusplus) || defined (__STDC__)  /* C++ or ANSI C */
-#define gckine gckine_
-extern struct
-{
-  int ikine;
-  float pkine[10];
-  int itra;
-  int istak;
-  int ivert;
-  int ipart;
-  int itrtyp;
-  int napart[5];
-  float amass;
-  float charge;
-  float tlife;
-  float vert[3];
-  float pvert[4];
-  int ipaold;
-} gckine;
-
-#else
 *
 *
 * gckine.inc
@@ -43,5 +33,4 @@ C
 #include "geant321/incend.inc"
 #endif
 
-#endif
 #endif

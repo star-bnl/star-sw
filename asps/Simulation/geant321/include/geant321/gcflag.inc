@@ -1,25 +1,16 @@
+*
+* $Id: gcflag.inc,v 1.2 2004/03/01 17:26:25 fisyak Exp $
+*
+* $Log: gcflag.inc,v $
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
+* Revision 1.1.1.1  1995/10/24 10:20:31  cernlib
+* Geant
+*
+*
 #ifndef CERNLIB_GEANT321_GCFLAG_INC
 #define CERNLIB_GEANT321_GCFLAG_INC
-# if defined (__cplusplus) || defined (__STDC__)  /* C++ or ANSI C */
-#define gcflag gcflag_
-extern struct
-{
-  int IDEBUG;
-  int IDEMIN;
-  int IDEMAX;
-  int ITEST;
-  int IDRUN;
-  int IDEVT;
-  int IEORUN;
-  int IEOTRI;
-  int IEVENT;
-  int ISWIT[10];
-  int IFINIT[20];
-  int NEVENT;
-  int NRNDM[2];
-} gcflag;
-
-#else
 *
 *
 * gcflag.inc
@@ -44,5 +35,4 @@ C
 #include "geant321/incend.inc"
 #endif
 
-#endif
 #endif

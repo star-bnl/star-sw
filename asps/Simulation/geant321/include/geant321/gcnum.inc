@@ -1,31 +1,16 @@
+*
+* $Id: gcnum.inc,v 1.2 2004/03/01 17:26:25 fisyak Exp $
+*
+* $Log: gcnum.inc,v $
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
+* Revision 1.1.1.1  1995/10/24 10:20:32  cernlib
+* Geant
+*
+*
 #ifndef CERNLIB_GEANT321_GCNUM_INC
 #define CERNLIB_GEANT321_GCNUM_INC
-# if defined (__cplusplus) || defined (__STDC__)  /* C++ or ANSI C */
-#define gcnum gcnum_
-extern struct
-{
-  int nmate;
-  int nvolum;
-  int nrotm;
-  int ntmed;
-  int ntmult;
-  int ntrack;
-  int npart;
-  int nstmax;
-  int nvertx;
-  int nhead;
-  int nbit;
-} gcnum;
-
-#define gcnumx gcnumx_
-extern struct
-{
-  int nalive;
-  int ntmsto;
-} gcnumx;
-
-
-#else
 *
 *
 * gcnum.inc
@@ -49,5 +34,4 @@ C
 #include "geant321/incend.inc"
 #endif
 
-#endif
 #endif

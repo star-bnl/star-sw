@@ -1,6 +1,10 @@
-* $Id: agxuser.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agxuser.age,v 1.2 2004/03/01 17:26:33 fisyak Exp $
 * $Log: agxuser.age,v $
+* Revision 1.2  2004/03/01 17:26:33  fisyak
+* Get rid of staf
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.26  2003/11/16 20:15:19  nevski
 * new control feature
@@ -550,6 +554,7 @@
   }
   Else If Command=='FPU_CONTROL' 
   {  
+#if defined(__GNUC_)
     if (NPAR==0)  
     { call  FPUGETCW(ICW)
       Call  FPUSTACK(iFPUTAG,iFPUSTATUS,iFPUUSED,iFPUOVERFLOW)
@@ -569,6 +574,7 @@
          ICW+=iic*iC1; ic0/=10;  iic*=8
     } }
     call FPUSETCW(ICW); Prin1 ICW; ('FPU Control Word = ',o6)
+#endif
   }
   Else If Command=='BUG_REPORT'
   {   call BUGREPRT; }
