@@ -9,8 +9,15 @@
 
 #include <stdlib.h>
 #include "dstype.h"
+#include "dsuType.h"
+#include "asuAlloc.h"
+#include "emlLib.h"
+#include "tbr_types.h"
 #include "dsxdr.h"
 #include "ds.h"
+#ifdef EXTERN
+#undef EXTERN
+#endif
 #define EXTERN
 #include "brow.h"
 #include "dscuts.h"
@@ -170,6 +177,8 @@ static float dsu_Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
   else if(dataType==DSU_STRING)  return 0;
   else if(dataType==DSU_HEX) { fv=iv; return fv; }
   else dsu_Err( 43);
+
+  return STAFCV_BAD;
 }
 float ValueWrapper(int wh_gDs,size_t colNum,int row,int subscript) {
   int dt;  /* dt = Data Type */
@@ -179,10 +188,14 @@ float ValueWrapper(int wh_gDs,size_t colNum,int row,int subscript) {
   else if(dt==DSU_INTEGER||dt==DSU_FLOAT) { gVWType=VWNUMBER; return rv; }
   else if(dt==DSU_HEX)                { gVWType=VWHEX; return rv; }
   else dsu_Err(552);
+
+  return STAFCV_BAD;
 }
 int DoCutsWrapper(int max8,char *ba,char *cuts,int wh_gDs) {
-  if(dsuDoCuts(max8,ba,cuts,gDs[wh_gDs]->dsPtr)) return TRUE;
-  else return FALSE;
+  if(dsuDoCuts(max8,ba,cuts,gDs[wh_gDs]->dsPtr)) 
+    return TRUE;
+  else 
+    return FALSE;
 }
 void SetToDatasetInfo(int wh_gDs,char *xx,int max) { /* BBB max unused */
   char buf[100]; size_t nCol;
@@ -540,7 +553,9 @@ void DumpDatasetInfo(void) {
   }
 }
 void dsu_Blurb(void) {
+#ifndef QUIET_ASP
  Sss(gTheBlurb);
+#endif
 }
 void tbrNewDSTree(DS_DATASET_T **dsPtr,long nDsPtr) {
   PP"Function tbrNewDTree() in the table browser does not work yet.\n");
@@ -548,7 +563,7 @@ void tbrNewDSTree(DS_DATASET_T **dsPtr,long nDsPtr) {
 void tbrNewTbView(DS_DATASET_T *dsPtr) {
 
   /********************************************************
-  /* Calling this function before gMainWindow is defined is probably
+  ** Calling this function before gMainWindow is defined is probably
   ** work-aroundable.  However, the fact that the number of the primary
   ** window is hardcoded as 0 presents more of a hurdle.  Also there is
   ** the problem of entering the main loop in a way that would be compat-
@@ -584,8 +599,10 @@ void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   UpdateUsageLog();
   gAlreadyErr=0; dsu_gDone=0; gNumDatasetWindows=0; /* June 28 1995 */
   gIndent=INDENT_INIT; gNDs=0;
+#ifndef QUIET_ASP
   PP"Version %s %s.\n",__DATE__,__TIME__);
   Ose(); PP"%s",gTheBlurb); Ose();
+#endif
   for(ii=0;ii<nDsPtr;ii++) FillgDs("No parent",dsPtrs[ii]);
   TouchUpType();
   if(gIndent!=INDENT_INIT) dsu_Err(  7);

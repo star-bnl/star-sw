@@ -32,7 +32,9 @@ tbrMotifViewer *tbr_MotifViewer;	/* HACK */
 //:<--------------------------------------------------------------------
 int tbr_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TBR:Initializing. ");
+#endif
 
 /*- Define the TBR KUIP commands. -*/
    tbr_def_();
@@ -51,7 +53,9 @@ int tbr_init()
 //:<--------------------------------------------------------------------
 int tbr_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TBR:Starting. ");
+#endif
 
 /*- Create the TBR Viewers. -*/
    tbr = new tbrFactory("tbr");
@@ -63,13 +67,17 @@ int tbr_start()
 /*  Define dummy for WIN32 */
 int tbr_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TBR:Initializing.  Dummy ! ! ! ");
+#endif
    return FALSE;
 }
 
 int tbr_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TBR:Starting. It is dummy under WIN32");
+#endif
    return FALSE;
 }
 
@@ -82,7 +90,9 @@ int tbr_start()
 //:<--------------------------------------------------------------------
 int tbr_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TBR:Stopping. ");
+#endif
 
    return TRUE;
 }

@@ -1,3 +1,4 @@
+#define QUIET_ASP
 /* Motif (gui) part of the STAR browser.  Begun April 22 1995, Herb Ward. */
 /***********************************************************  INCLUDES  **/
 #ifndef WIN32
@@ -7,6 +8,8 @@
 #include <stdlib.h>
 #include "dstype.h"
 #include "dscuts.h"
+#include "asuAlloc.h"
+#include "dsuType.h" 
 #include "dsxdr.h"
 #include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
@@ -68,9 +71,12 @@ void SetHilite(int control,int whWin,int lineNum);
 int TableHasMoreThanZeroRows(int tlm);
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad);
 int TableHasMoreThanZeroCols(int tlm);
-XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad);
-XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad);
-XtCP ContractCB(Widget w,caddr_t cld,caddr_t cad);
+/* was XtCP */
+void ExpandCB(Widget w,caddr_t cld,caddr_t cad);
+/* was XtCP */
+void ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad);
+/* was XtCP */
+void ContractCB(Widget w,caddr_t cld,caddr_t cad);
 int ToggleCase(int wds);
 int ATable(int x);
 void dsu_Blurb(void),AuxOutputFromOneLn(int whWin,int whAct);
@@ -94,7 +100,9 @@ void SaveValueOfCalcAve(void) {
   fprintf(ff,"%d\n",gCalculateAverages); fclose(ff);
 }
 void Ose(void) {
-  PP"------------------------------------------------  STAR TABLE BROWSER\n");
+#ifndef QUIET_ASP
+  PP"------------------------------------------------  STAF TABLE BROWSER\n");
+#endif
 }
 void DrawXaxisTicks(float minn,float maxx,float ts) {
   float frac,xx;  int ii,cc;
@@ -233,10 +241,14 @@ void DoOnce2(void) {
   ReadCalcAve(); /* SendMail(); */
   gLast=-1; gNGraphicsUp=0; gNWin=0; gColor="White";
 }
-XtCP CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=63;
 }
-XtCP CutsOkCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+CutsOkCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=7;
 }
 char *Color(int ii) {
@@ -250,18 +262,24 @@ char *Color(int ii) {
     }
   return color;
 }
-XtCP RadioCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+RadioCB(Widget w,caddr_t cld,caddr_t cad) {
   int which = (int) cld;
   XmToggleButtonCallbackStruct *state=(XmToggleButtonCallbackStruct*) cad;
   if(state->set) {
     gColor=Color(which);
   }
 }
-XtCP ColorSelOkCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+ColorSelOkCB(Widget w,caddr_t cld,caddr_t cad) {
   XtPopdown(gColorSelPopup);
   OneLnPerRowCB((Widget)100,(caddr_t)gCallBackData,(caddr_t)100);
 }
-XtCP ColorSelCancelCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+ColorSelCancelCB(Widget w,caddr_t cld,caddr_t cad) {
   XtPopdown(gColorSelPopup);
 }
 void PrepareColorSelPopup() {
@@ -454,7 +472,7 @@ int IsOperator(char *xx,int pp) {
   return FALSE;
 }
 void BreakIntoLines(char *xx) {
-  int len,ii,chos=0,bufPos=0,lastPrint=-1;
+  int len,ii,chos=0,lastPrint=-1;
   char buf[MAX_CUTS_STRING],save;
   len=strlen(xx); if(len>800) dsu_Err(996); *buf='\0';
   for(ii=0;ii<len;ii++) {
@@ -469,7 +487,7 @@ void BreakIntoLines(char *xx) {
   strcpy(xx,buf);
 }
 void GetRidOfNewlines(char *xx) {
-  int len,ii,bufPos=0,lastPrint=-1;
+  int len,ii,lastPrint=-1;
   char buf[MAX_CUTS_STRING];
   len=strlen(xx); if(len<0||len>800) dsu_Err(770); *buf='\0';
   for(ii=0;ii<len;ii++) {
@@ -499,7 +517,7 @@ void SaveCutsInFile(char *tableName,char *xx) {
   system("mv bRoWsER.tmp browser.cuts");
 }
 int UserMod(char *tableName,char *xx) {
-  XEvent event; XmString cuts;
+  XEvent event;
   BreakIntoLines(xx); XmTextSetString(gCutsText,xx);
   XtPopup(gCutsPopup,XtGrabNone);
   gDone2=0;
@@ -672,8 +690,9 @@ void SayError0(int codePos) {
  See \"Using this window\" under \"Help\".\n\
  ");
 }
-void WrBotCB(Widget ww,caddr_t cld,caddr_t cad) {
-  ARGS
+void 
+WrBotCB(Widget ww,caddr_t cld,caddr_t cad) 
+{
   FILE *ff; XmString scratch;
   int whWin; whWin=(int)cld;
   ff=fopen("browDump.txt","w"); if(ff==NULL) {
@@ -752,7 +771,7 @@ void ConvertToHex(char *out,float val) {
   buf[WIDE-4]='\0'; strcat(buf,out); strcpy(out,buf);
 }
 void RunValue(size_t row) {
-  int i,fo=0,tt,hlLstIx,lnfhl,irow=row;
+  int fo=0,tt,hlLstIx,lnfhl,irow=row;
   float val;
   char tt2[60],format[22],tmp[100],buf[BUF+2];
   if(gOutType==15) *buf=0;
@@ -812,7 +831,7 @@ int NumRows(int whWin) {
   return ((int)(gWin[whWin]->nRow));
 }
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
-  int e,whAct,whWin; char act[311];
+  int whAct,whWin; char act[311];
   static int whActS,whWinS;
   void (*runFunc)();
   if((int)w==2&&(int)cld==5&&(int)cad==14) { whAct=whActS; whWin=whWinS; }
@@ -972,7 +991,6 @@ void Complain6(void) {
  ");
 }
 void RunTheRows(int skipInit,int whWin,void (*fnct)()) {
-  int h,nsave,save[MAX_LINES_CLICK_PART];
   size_t row,start,end; char cuts[MAX_CUTS_STRING];
   static char ba[MAXROW_DIV_BY_8];
   if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(109);
@@ -1082,7 +1100,7 @@ void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
 #define QUITSTRING "Close all browser windows"
 #endif
 void CreateMenuItems(char *tableName,Widget mbar,int type) {
-  register int nn; Arg args[19]; Widget mpane;
+  Arg args[19]; Widget mpane;
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
   if(type==WIN_TYPE_PRIMARY) {
     MakeMenuItem(NOTUSED,mpane,QUITSTRING,(XtCP)QuitCB);
@@ -1264,7 +1282,7 @@ void SetHilite(int control,int whWin,int lineNum) {
 }
 void ResetTheTriangles(int wds) {
   XmTextPosition pos;
-  char junk[100]; int len,ii,nLines;
+  char junk[100]; int ii,nLines;
   if(wds>=0) {
     if(!ToggleCase(wds)) {
       Sss(
@@ -1287,16 +1305,24 @@ void ResetTheTriangles(int wds) {
   XmTextSetTopCharacter(gWin[0]->txtWidClick,pos);
   XmTextEnableRedisplay(gWin[0]->txtWidClick);
 }
-XtCP ContractCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+ContractCB(Widget w,caddr_t cld,caddr_t cad) {
   ResetTheTriangles(-20);
 }
-XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad) {
   ResetTheTriangles(-15);
 }
-XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad) {
+/* was XtCP */
+void
+ExpandCB(Widget w,caddr_t cld,caddr_t cad) {
   ResetTheTriangles(-10);
 }
-XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
+
+XtCP
+TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
   int whWin,tlm; int inTri;
   /* tlm is either an index for gDs
   or it is an arg (cast to size_t) for dsColumnName (column number). */
@@ -1323,8 +1349,11 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
     case WIN_TYPE_PRIMARY:
       if(tlm<0) { Sss(gMess0); return NULL; }
       if(inTri) { ResetTheTriangles(tlm); return NULL; }
-      if(!ATable(tlm)) { Sss(gBlurb7); return; }
-      if(!TableHasMoreThanZeroCols(tlm)) return;
+
+      /* Added `return NULL' since this function is supposed to return a value. */
+      if(!ATable(tlm)) { Sss(gBlurb7); return NULL; }
+      if(!TableHasMoreThanZeroCols(tlm)) return NULL;
+
       /* 961003 if(!TableHasMoreThanZeroRows(tlm)) return; */
       if(whWin!=0) dsu_Err(993); /* for sake of, eg, 0 in CloseThisWindowCB */
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
@@ -1335,6 +1364,8 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
       break;
     default: dsu_Err(106);
   }
+
+  return NULL;
 }
 Widget TxtWid(Widget par,char *itxt,int topMidBot,int nRow,int nCol) {
   ARGS
@@ -1581,37 +1612,51 @@ void DoXStuff(void) {
   ARGS
   XEvent event; static int haveInited=FALSE;
   XButtonEvent *bev;
-  Widget j1; caddr_t j2,j3; int zero=0;
+  int zero=0;
   DoOnce2();
 #ifdef STANDALONE
   PP"Doing X Toolkit init.\n"); XtToolkitInitialize();
 #else
+#ifndef QUIET_ASP
   PP"Skipping X Toolkit init.\n");
 #endif
+#endif
   gBlurb2=FALSE; gBlurb1=FALSE;
+#ifndef QUIET_ASP
   PP"XtCreateApplicationContext()\n");
+#endif
   if(!haveInited) { gAppCon=XtCreateApplicationContext(); }
+#ifndef QUIET_ASP
   PP"XtOpenDisplay()\n");
+#endif
   if(!haveInited) {
     gDisplay=XtOpenDisplay(gAppCon,NULL,"Dataset Catalog Browser",
       "1hhh",(XrmOptionDescRec*)NULL,0,&zero,NULL);
   }
   if(!gDisplay) {
-    PP"STAR Table Browser is an X-windows program.\n");
+    PP"STAF Table Browser is an X-windows program.\n");
     PP"I can't open a display.\n");
     PP"Have you set your DISPLAY env var?\n"); dsu_gDone=7; return;
   }
   nn=0;
+#ifndef QUIET_ASP
   PP"XtAppCreateShell()\n");
+#endif
   gAppShell=XtAppCreateShell("Dataset Catalog Browser",
   "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
+#ifndef QUIET_ASP
   PP"MakeWindow()\n");
+#endif
   MakeWindow(0,0,WIN_TYPE_PRIMARY);
   PrepareProgressPopup(); PrepareCutsPopup(); PrepareColorSelPopup();
+#ifndef QUIET_ASP
   PP"XtRealizeWidget()\n");
+#endif
   haveInited=TRUE;
   XtRealizeWidget(gAppShell);
+#ifndef QUIET_ASP
   PP"main loop\n");
+#endif
   for(;;) {
     XtAppNextEvent(gAppCon,&event);
     if(event.type==ButtonPress) {
