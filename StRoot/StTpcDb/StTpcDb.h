@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.18 2000/08/09 14:54:54 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.19 2000/08/10 18:41:34 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.19  2000/08/10 18:41:34  hardtke
+ * only look for L0_trigger table once per event -- improves timing
+ *
  * Revision 1.18  2000/08/09 14:54:54  hardtke
  * Add Clear option, set trigger table pointer to 0 after each event
  *
@@ -124,7 +127,7 @@ class StTpcDb {
    //small pieces of data:
    float DriftVelocity();
    float triggerTimeOffset();
-
+   int dvelcounter;
 
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
