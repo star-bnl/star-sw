@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.h,v 1.1.1.1 2000/08/01 13:57:55 jgreid Exp $
+ * $Id: StEbyeEvent.h,v 1.2 2000/08/03 20:12:13 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.h,v $
+ * Revision 1.2  2000/08/03 20:12:13  jgreid
+ * added CTBm() convenience function
+ *
  * Revision 1.1.1.1  2000/08/01 13:57:55  jgreid
  * EbyE DST creation and access tools
  *
@@ -71,6 +74,7 @@ class StEbyeEvent : public TObject {
   Float_t Vz() const { return mVz; }
 
   Int_t CTBarray(Int_t i) const { return mCTBarray[i]; } 
+  Int_t CTBm() const { Int_t m=0; for(Int_t i=0; i<32; i++) m+=mCTBarray[i]; return m; }
 
   Float_t ZDCe() const { return mZDCe; }
   Float_t ZDCw() const { return mZDCw; }
