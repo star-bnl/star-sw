@@ -13,7 +13,7 @@ macro run__
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
-          table=/dui/data/tpc/hits/tphit_
+          table=tpc/hits/tphit_
           adcxyzon=0
   
   
@@ -27,7 +27,6 @@ macro run__
 *    -   exec run_tpc_slow_sim
 *
 *
-macro/global/import *
 
 message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->         ' [input_g2t_file]
@@ -79,6 +78,7 @@ $STAR/pams/trg/kumac
 
 * generic inits
   exec setup_dir
+  macro/global/import *
   exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA
@@ -115,7 +115,7 @@ $STAR/pams/trg/kumac
            [i] [adcxyzon] [tpc_sector_first] [tpc_sector_last]
     exec tpc_clustering#process_event _
       [i] [tpc_sector_first] [tpc_sector_last]    
-    exec write_table_to_ntuple#write_event_disk [nid] [table]
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
   enddo
 
   ENDOFDATA:
