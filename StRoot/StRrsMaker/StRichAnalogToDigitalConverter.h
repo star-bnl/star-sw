@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: StRichAnalogToDigitalConverter.h,v 2.0 2000/08/09 16:16:59 gans Exp $
+ * $Id: StRichAnalogToDigitalConverter.h,v 2.1 2002/04/01 21:55:22 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogToDigitalConverter is the function object containing
@@ -15,6 +15,9 @@
  *
  ********************************************************************
  * $Log: StRichAnalogToDigitalConverter.h,v $
+ * Revision 2.1  2002/04/01 21:55:22  lasiuk
+ * pedestal convolution
+ *
  * Revision 2.0  2000/08/09 16:16:59  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -51,6 +54,8 @@ using std::unary_function;
 //namespace StRichRawData {
 #endif
 #include "StRichRrsMacros.h"
+#include "StRichOtherAlgorithms.h"
+
 class StRichPhysicsDb;
 
 class StRichAnalogToDigitalConverter : public unary_function<double,double> {
@@ -72,6 +77,7 @@ private:
     double            mAdcConversion;
     double            mElectronCharge;
     int               mAddPedestal;
+    Randoms           mGenerator;
 };
 inline
 void StRichAnalogToDigitalConverter::setAddPedestal(int v) {mAddPedestal = v;}
@@ -81,3 +87,7 @@ void StRichAnalogToDigitalConverter::setAddPedestal(int v) {mAddPedestal = v;}
 #endif
 
 #endif
+
+
+
+
