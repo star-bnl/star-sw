@@ -83,7 +83,7 @@ event-mixed particle pairs.
 <p>
 A user defines his own correlation function by writing a class.  In order
 to interface with StHbt, this class must inherit from the base class
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Base/StHbtCorrFctn.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Base/StHbtCorrFctn.hh">
 StHbtCorrFctn</a>, which defines a few basic
 member functions which must be implemented, and which are called by the
 StHbt infrastructure.  These are:
@@ -111,9 +111,9 @@ StHbt infrastructure.  These are:
 <p>
 <h4>Example of a Correlation Function - QinvCorrFctn</h4>
 An example of a correlation function class is QinvCorrFctn (click to see
-the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/CorrFctn/QinvCorrFctn.h">
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/CorrFctn/QinvCorrFctn.h">
 header</a> and 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/CorrFctn/QinvCorrFctn.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/CorrFctn/QinvCorrFctn.cxx">
 implementation</a> files).
 <p>
 In addition to the methods required of all StHbtCorrFctn-derived classes
@@ -147,7 +147,7 @@ multiplicy*z-position*(#kaons at forward rapidity) !).
 <p>
 Therefore, the user must write his own EventCut class, which must inherit
 from the base class 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Base/StHbtEventCut.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Base/StHbtEventCut.hh">
 StHbtEventCut</a>.
 EventCut classes may have whatever methods and data members the user desires,
 but must have at least the following two methods:
@@ -167,8 +167,8 @@ but must have at least the following two methods:
 <h4>Example of an Event Cut - mikesEventCut</h4>
 A very simple example of an Event Cut is mikesEventCut (click to see
 the 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesEventCut.h">header</a>
-and <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesEventCut.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesEventCut.h">header</a>
+and <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesEventCut.cxx">
 implementation</a> files).
 <p>
 A mikesEventCut object will cut on event multiplicity and z-position of the
@@ -188,7 +188,7 @@ to be associated with each Analysis.  See further discussion below.
 <p>
 Similar to the EventCut class discussed above, the goal is to provide
 maximum flexibility to the user.  Therefore, a general base class,
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Base/StHbtParticleCut.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Base/StHbtParticleCut.hh">
 StHbtParticleCut</a> is defined, and the
 user should define his own class that inherits from this.  Again, similar
 to EventCuts, a ParticleCut class can have any data members and methods
@@ -211,9 +211,9 @@ assign the particle a mass based on this.
 <p>
 <h4>Example of a Particle Cut - mikesParticleCut</h4>
 A very simple example of a Particle Cut is mikesParticleCut (click to see
-the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesParticleCut.h">
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesParticleCut.h">
 header</a> and 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesParticleCut.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesParticleCut.cxx">
 implementation</a> files).
 <p>
 An object of type mikesParticleCut attempts to select tracks that are negative
@@ -229,7 +229,7 @@ of the Correlation Functions associated with that Analysis.
 <p>
 Again, the user has full control over the pair-wise cut employed.  As with
 the other cuts, a general base class, 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Base/StHbtPairCut.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Base/StHbtPairCut.hh">
 StHbtPairCut</a>
 is defined, and users should implement their own PairCut classes inheriting
 from this.  It has the by-now familiar required methods:
@@ -240,9 +240,9 @@ from this.  It has the by-now familiar required methods:
 </ul>
 <h4>Example of a Pair Cut - mikesPairCut</h4>
 A way-too-simple example of a Pair cut is mikesPairCut (click to see
-the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesPairCut.h">
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesPairCut.h">
 header</a> and 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Cut/mikesPairCut.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Cut/mikesPairCut.cxx">
 implementation</a> files).
 <p>
 mikesPairCut makes NO cuts on the pair, and so Pass() simply returns "true"
@@ -256,9 +256,9 @@ a specification of the number of events
 to mix, and by a collection of correlation functions associated with the
 analysis.  It is implemented in the StHbtAnalysis class (click for
 the 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtAnalysis.h">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtAnalysis.h">
 header</a> and 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtAnalysis.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtAnalysis.cxx">
 implementation</a> files.
 <p>
 Users do not write their own analysis class.  To define an analysis, a user
@@ -282,7 +282,7 @@ localized to the StHbtEventReader object.
 To accommodate the many possible input sources and formats in a general way,
 inheritance is again used.  For any input source/format, a class must be
 written, which inherits from the base clase 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Base/StHbtEventReader.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Base/StHbtEventReader.hh">
 StHbtEventReader</a>.  From the header file, it is seen that every class
 derived from StHbtEventReader must have a method <br>
 <ul>StHbtEvent* ReturnHbtEvent()</ul><br>
@@ -291,9 +291,9 @@ methods (which set the ASCII file to be read, for example).
 <p>
 <h4>Example of a StHbtEventReader - StStandardHbtEventReader</h4>
 The class StStandardHbtEventReader (click to see the
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Reader/StStandardHbtEventReader.h">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Reader/StStandardHbtEventReader.h">
 header</a> and 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Reader/StStandardHbtEventReader.cxx">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Reader/StStandardHbtEventReader.cxx">
 implementation</a> files) is
 the StHbtEventReader-derived class that reads the input from StEvent in
 the root4star/Maker framework.  Aside from the required ReturnHbtEvent()
@@ -314,7 +314,7 @@ current Maker chain, and methods to set and get that pointer.
 <h4><a name="ManagerGeneral">General</h4>
 The overall processing of data is handled by the Manager, an instantiation
 of class StHbtManager (click 
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtManager.h">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtManager.h">
 here</a> for the header).
 Only one StHbtManager object is instantiated.  Its only data members are
 pointers:<br>
@@ -353,7 +353,7 @@ Int_t StHbtMaker::Make()<br>
 <p>
 This makes for a trivial StHbtMaker, and one that is easy
 to replace in a non-root4star/Maker framework.  Click
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/StHbtMaker.cxx">here</a> 
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/StHbtMaker.cxx">here</a> 
 for the StHbtMaker.cxx implemenation file.
 <p>
 <h4><a name="ManagerProcess">Event Processing</h4>
@@ -470,9 +470,9 @@ However, I believe these need further discussion, and should be a top priority
 for the group.
 <p>
 Click to see the current structure of the
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtEvent.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtEvent.hh">
 StHbtEvent class</a> and the
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtTrack.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtTrack.hh">
 StHbtTrack class</a>.
 <p>
 <h3>picoDST</h3>
@@ -491,9 +491,9 @@ Like the microEvent class the structure and information content of the picoEvent
 StHbtParticles needs to be discussed in detail.
 <p>
 Click to see the current structure of the
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtPicoEvent.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtPicoEvent.hh">
 StHbtPicoEvent class</a> and the
-<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbt/Infrastructure/StHbtParticle.hh">
+<a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StHbtMaker/Infrastructure/StHbtParticle.hh">
 StHbtParticle class</a>.
 <hr>
 <h2><a name="rootExample">Example of a run involving several simultaneous Analyses and Correlation Functions
@@ -568,6 +568,9 @@ further work.
 <ul>
 <li>The transient HBT microDST (StHbtEvent) structure and content, mentioned above
 <li>The HBT picoEvent, mentioned above.
+<li>The need for/possibility of a hierarchical EventMixingBuffer structure associated
+	   with an Analysis.  This would be to handle things like mixing events only
+	if they have a "similar" primary vertex position.
 <li>A class of Fitting objects to fit Correlation Functions.
 <li>Persistent storage of Correlation Functions and Cuts.
 </ul>

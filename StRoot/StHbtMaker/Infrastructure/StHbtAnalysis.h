@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtAnalysis.h,v 1.2 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.2  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -25,7 +28,8 @@
 #endif
 
 
-#include <string>
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+//#include <string>
 //#include "base/StHbtControlSwitch.hh"        // base class
 #include "StHbtMaker/Base/StHbtEventCut.hh"             // base class 
 #include "StHbtMaker/Base/StHbtParticleCut.hh"          // base class
@@ -66,7 +70,7 @@ public:
   void AddCorrFctn(StHbtCorrFctn*);
 
   bool AnalyzeIdenticalParticles();
-  string Report();       // returns reports of all cuts applied and correlation functions being done
+  StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
 
   void Finish();
 

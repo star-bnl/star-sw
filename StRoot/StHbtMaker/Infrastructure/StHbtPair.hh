@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.2 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.2  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -25,20 +28,21 @@
 #include <utility>
 
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 
 class StHbtPair {
 public:
   StHbtPair();
-  StHbtPair(StHbtParticle&, StHbtParticle&);
+  StHbtPair(StHbtParticle*, StHbtParticle*);
   
 
   ~StHbtPair();
   //StHbtPair(const StHbtPair&);
   //StHbtPair& operator=(const StHbtPair&);
 
-  StLorentzVector<double> fourMomentum() const;
-  StHbtParticle& track1() const;
-  StHbtParticle& track2() const;
+  StHbtLorentzVector fourMomentum() const;
+  StHbtParticle* track1() const;
+  StHbtParticle* track2() const;
 
   double qInv() const;
   double kT()   const;
@@ -47,8 +51,8 @@ public:
   double mInv() const;
 
 private:
-  StHbtParticle& mTrack1;
-  StHbtParticle& mTrack2;
+  StHbtParticle* mTrack1;
+  StHbtParticle* mTrack2;
 
 };
 

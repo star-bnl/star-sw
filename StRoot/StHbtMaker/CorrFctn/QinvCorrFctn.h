@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctn.h,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: QinvCorrFctn.h,v 1.2 1999/07/06 22:33:20 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctn.h,v $
+ * Revision 1.2  1999/07/06 22:33:20  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -20,14 +23,14 @@
 #define QinvCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class QinvCorrFctn : public StHbtCorrFctn {
 public:
   QinvCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi);
   virtual ~QinvCorrFctn();
 
-  virtual string Report();
+  virtual StHbtString Report();
   virtual void AddRealPair(const StHbtPair*);
   virtual void AddMixedPair(const StHbtPair*);
 

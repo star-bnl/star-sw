@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QvecCorrFctn.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: QvecCorrFctn.cxx,v 1.2 1999/07/06 22:33:20 lisa Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,13 +11,16 @@
  ***************************************************************************
  *
  * $Log: QvecCorrFctn.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:20  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
  **************************************************************************/
 
 #include "StHbtMaker/CorrFctn/QvecCorrFctn.h"
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -70,7 +73,7 @@ void QvecCorrFctn::Finish(){
 }
 
 //____________________________
-string QvecCorrFctn::Report(){
+StHbtString QvecCorrFctn::Report(){
   string stemp = "Qvec Correlation Function Report:\n";
   char ctemp[100];
   sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumerator->GetEntries());
@@ -80,7 +83,8 @@ string QvecCorrFctn::Report(){
   sprintf(ctemp,"Number of entries in ratio:\t%E\n",mRatio->GetEntries());
   stemp += ctemp;
   //  stemp += mCoulombWeight->Report();
-  return stemp;
+  StHbtString returnThis = stemp;
+  return returnThis;
 }
 //____________________________
 void QvecCorrFctn::AddRealPair(const StHbtPair* pair){

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.2 1999/07/06 22:33:19 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:19  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -18,7 +21,7 @@
 
 
 #include "StHbtMaker/CorrFctn/MinvCorrFctn.h"
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
 ClassImp(MinvCorrFctn)
@@ -66,7 +69,7 @@ void MinvCorrFctn::Finish(){
 }
 
 //____________________________
-string MinvCorrFctn::Report(){
+StHbtString MinvCorrFctn::Report(){
   string stemp = "Minv Correlation Function Report:\n";
   char ctemp[100];
   sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumerator->GetEntries());
@@ -75,7 +78,8 @@ string MinvCorrFctn::Report(){
   stemp += ctemp;
   sprintf(ctemp,"Number of entries in difference:\t%E\n",mDifference->GetEntries());
   stemp += ctemp;
-  return stemp;
+  StHbtString returnThis = stemp;
+  return returnThis;
 }
 //____________________________
 void MinvCorrFctn::AddRealPair(const StHbtPair* pair){

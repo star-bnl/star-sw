@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.h,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: MinvCorrFctn.h,v 1.2 1999/07/06 22:33:20 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.h,v $
+ * Revision 1.2  1999/07/06 22:33:20  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -20,14 +23,14 @@
 #define MinvCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class MinvCorrFctn : public StHbtCorrFctn {
 public:
   MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, const float& MinvHi);
   virtual ~MinvCorrFctn();
 
-  virtual string Report();
+  virtual StHbtString Report();
   virtual void AddRealPair(const StHbtPair*);
   virtual void AddMixedPair(const StHbtPair*);
 

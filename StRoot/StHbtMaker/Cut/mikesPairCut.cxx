@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesPairCut.cxx,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: mikesPairCut.cxx,v 1.2 1999/07/06 22:33:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesPairCut.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:21  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -37,11 +40,12 @@ bool mikesPairCut::Pass(const StHbtPair* pair){
   return true;
 }
 //__________________
-string mikesPairCut::Report(){
+StHbtString mikesPairCut::Report(){
   string Stemp = "Mikes Pair Cut - total dummy-- always returns true\n";
   char Ctemp[100];
   sprintf(Ctemp,"Number of pairs which passed:\t%ld  Number which failed:\t%ld\n",mNPairsPassed,mNPairsFailed);
   Stemp += Ctemp;
-  return Stemp;
+  StHbtString returnThis = Stemp;
+  return returnThis;
 }
 //__________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.2 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -55,7 +58,7 @@ StHbtAnalysis::~StHbtAnalysis(){
   delete mMixingBuffer;
 }
 //____________________________
-string StHbtAnalysis::Report()
+StHbtString StHbtAnalysis::Report()
 {
   cout << "StHbtAnalysis - constructing Report..."<<endl;
   string temp = "-----------\nHbt Analysis Report:\n";
@@ -74,7 +77,8 @@ string StHbtAnalysis::Report()
     temp += "\n";
   }
   temp += "-------------\n";
-  return temp;
+  StHbtString returnThis=temp;
+  return returnThis;
 }
 //_________________________
 void StHbtAnalysis::Finish(){

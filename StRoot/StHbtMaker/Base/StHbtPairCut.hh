@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.hh,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: StHbtPairCut.hh,v 1.2 1999/07/06 22:33:19 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.hh,v $
+ * Revision 1.2  1999/07/06 22:33:19  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -22,6 +25,7 @@
 
 #include <string>
 
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 
 class StHbtPairCut{
@@ -33,7 +37,8 @@ public:
 
   virtual bool Pass(const StHbtPair* pair) =0;  // true if passes, false if not
 
-  virtual string Report() =0;    // user-written method to return string describing cuts
+  //  virtual string Report() =0;    // user-written method to return string describing cuts
+  virtual StHbtString Report() =0;    // user-written method to return string describing cuts
 
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctn.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: QinvCorrFctn.cxx,v 1.2 1999/07/06 22:33:20 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,13 +11,16 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctn.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:20  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
  **************************************************************************/
 
 #include "StHbtMaker/CorrFctn/QinvCorrFctn.h"
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
 ClassImp(QinvCorrFctn)
@@ -66,7 +69,7 @@ void QinvCorrFctn::Finish(){
 }
 
 //____________________________
-string QinvCorrFctn::Report(){
+StHbtString QinvCorrFctn::Report(){
   string stemp = "Qinv Correlation Function Report:\n";
   char ctemp[100];
   sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumerator->GetEntries());
@@ -76,7 +79,8 @@ string QinvCorrFctn::Report(){
   sprintf(ctemp,"Number of entries in ratio:\t%E\n",mRatio->GetEntries());
   stemp += ctemp;
   //  stemp += mCoulombWeight->Report();
-  return stemp;
+  StHbtString returnThis = stemp;
+  return returnThis;
 }
 //____________________________
 void QinvCorrFctn::AddRealPair(const StHbtPair* pair){

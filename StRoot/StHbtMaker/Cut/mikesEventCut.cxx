@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesEventCut.cxx,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: mikesEventCut.cxx,v 1.2 1999/07/06 22:33:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: mikesEventCut.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:21  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -33,7 +36,7 @@ mikesEventCut::mikesEventCut(){
 bool mikesEventCut::Pass(const StHbtEvent* event){
   int mult =  event->Mult();
   double VertexZPos = event->PrimVertPos().z();
-  cout << "mikesEventCut::Pass -- mult, VertexZPos : " << mult << VertexZPos << endl;
+  //  cout << "mikesEventCut::Pass -- mult, VertexZPos : " << mult << VertexZPos << endl;
   bool goodEvent =
     ((mult > mEventMult[0]) && 
      (mult < mEventMult[1]) && 
@@ -43,7 +46,7 @@ bool mikesEventCut::Pass(const StHbtEvent* event){
   return (goodEvent);
 }
 //------------------------------
-string mikesEventCut::Report(){
+StHbtString mikesEventCut::Report(){
   string Stemp;
   char Ctemp[100];
   sprintf(Ctemp,"Multiplicity:\t %d-%d\n",mEventMult[0],mEventMult[1]);
@@ -52,5 +55,6 @@ string mikesEventCut::Report(){
   Stemp += Ctemp;
   sprintf(Ctemp,"Number of events which passed:\t%ld  Number which failed:\t%ld\n",mNEventsPassed,mNEventsFailed);
   Stemp += Ctemp;
-  return (Stemp);
+  StHbtString returnThis = Stemp;
+  return returnThis;
 }
