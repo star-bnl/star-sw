@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 1.2  2000/05/19 19:06:10  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *  Revision 1.3  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
  *
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *
+ *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
@@ -77,15 +80,6 @@ double StRichMinimization::getMeanPathInQuartz()   { return mMeanPathInQuartz;}
 
 //
 // this is the numerical recipes minimization routine brent
-void NEWnrerror(char error_text[])
-/* Numerical Recipes standard error handler */
-{
-	fprintf(stderr,"Numerical Recipes run-time error...\n");
-	fprintf(stderr,"%s\n",error_text);
-	fprintf(stderr,"...now exiting to system...\n");
-	exit(1);
-}
-
  
 
 /* CAUTION: This is the ANSI C (only) version of the Numerical Recipes
@@ -100,6 +94,7 @@ void NEWnrerror(char error_text[])
 #define ITMAX 200
 #define CGOLD 0.3819660
 #define ZEPS  1.0e-10
+#define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
 
 
 double StRichMinimization::brent(double ax, double bx, double cx,double *xmin)
@@ -153,7 +148,7 @@ double StRichMinimization::brent(double ax, double bx, double cx,double *xmin)
 			if (u < x) a=u; else b=u;
 			if (fu <= fw || w == x) {
 				v=w;
-	NEWnrerror("Too many iterations in brent");
+				w=u;
 				fv=fw;
 				fw=fu;
 			} else if (fu <= fv || v == x || v == w) {

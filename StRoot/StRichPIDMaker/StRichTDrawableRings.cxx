@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTDrawableRings.cxx,v 1.1 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichTDrawableRings.cxx,v 1.2 2000/05/22 15:14:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTDrawableRings.cxx,v $
+ *  Revision 1.2  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *
  *  Revision 1.1  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
@@ -31,18 +34,19 @@ StRichTDrawableRings::StRichTDrawableRings() {}
 StRichTDrawableRings::StRichTDrawableRings(StRichRings& ring) {
   
   mTrack = ring.getTrack();
-  StParticleDefinition* mParticle = ring.getParticle();
+  mParticle = ring.getParticle();
 
   if (!mTrack) {
     cout << "StRichTDrawableRings:: passed null pointer! " << endl;
     abort();
   } 
-  
-  vector<StThreeVector<double> > in  = ring.getInnerPoints();
-  vector<StThreeVector<double> > out = ring.getOuterPoints();
+ 
+  const Int_t innerSize = 360; 
+  const Int_t outerSize = 360;
+ 
+  vector<StThreeVector<double> > in  = ring.getInnerPoints(innerSize);
+  vector<StThreeVector<double> > out = ring.getOuterPoints(outerSize);
 
-  int innerSize = in.size();
-  int outerSize = out.size();
   Float_t ix[innerSize];
   Float_t iy[innerSize];
   
