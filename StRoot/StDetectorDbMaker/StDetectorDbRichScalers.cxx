@@ -3,6 +3,7 @@
 #include "TDataSet.h"
 #include "TTable.h"
 #include "StMaker.h"
+#include "TUnixTime.h"
 
 /// Needs a StMaker* passed in. This is because GetDatabase only works in a maker class. So this must be declared inside a maker.
 StDetectorDbRichScalers::StDetectorDbRichScalers(StMaker* maker){
@@ -20,7 +21,11 @@ StDetectorDbRichScalers::StDetectorDbRichScalers(StMaker* maker){
     mL0 = 0;
 
     if(maker){
-	mEventTime = maker->GetDateTime().Convert() - 14400; //convert to GMT
+	// Time conversions to avoid root automatically converting timezones
+	TDatime rootTime = maker->GetDateTime();
+	TUnixTime unixTime;
+	unixTime.SetGTime(rootTime.GetDate(),rootTime.GetTime());
+	mEventTime = unixTime.GetUTime();
 	
 	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
