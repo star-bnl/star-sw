@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.26 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcTracker.cc,v 1.27 2003/09/16 16:52:48 jeromel Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.27  2003/09/16 16:52:48  jeromel
+// Multiple constructor entry, zeroing mBench everywhere + doxygenized
+//
 // Revision 1.26  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -149,11 +152,10 @@
 ClassImp(StFtpcTracker)
 
 
+  
+/// Default constructor. Sets the pointers to 0 an cut for momnetum fit loosely.
 StFtpcTracker::StFtpcTracker()
 {
-  // Default constructor.
-  // Sets the pointers to 0 an cut for momnetum fit loosely.
-
   mBench  = 0;
   mTime = 0.;
 
@@ -171,11 +173,10 @@ StFtpcTracker::StFtpcTracker()
 }
 
 
+/// Usual used constructor. Sets up the pointers and the cut value for the momentum fit.
 StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
-  // Usual used constructor.
-  // Sets up the pointers and the cut value for the momentum fit.
-
+  mBench  = 0;
   if (bench) {
     mBench = new TBenchmark();
   }
@@ -204,11 +205,10 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, 
   mVertexWest = new StFtpcVertex();
 }
 
-
+/// Constructor to take care of arbitrary hits.
 StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
-  // Constructor to take care of arbitrary hits.
-
+  mBench  = 0;
   if (bench) {
     mBench = new TBenchmark();
   }
@@ -225,11 +225,10 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
   mVertexCreated = (Bool_t)kFALSE;
 }
 
-
+/// Constructor to handle the case where everything is there already.
 StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *track, Bool_t bench, Double_t max_Dca)
 {
-  // Constructor to handle the case where everything is there already.
-
+  mBench  = 0;
   if (bench) {
     mBench = new TBenchmark();
   }
@@ -248,10 +247,11 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 }
 
 
+/// Constructor to handle the case where everything is there already but only in StAF tables.
 StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Bool_t bench, Double_t max_Dca)
 {
-  // Constructor to handle the case where everything is there already but only in StAF tables.
 
+  mBench  = 0;
   if (bench) {
     mBench = new TBenchmark();
   }
@@ -290,10 +290,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
 }
 
 
+/// Destructor.
 StFtpcTracker::~StFtpcTracker()
 {
-  // Destructor.
-
   if (mTrack) {
     mTrack->Delete();
     delete mTrack;
@@ -319,9 +318,9 @@ StFtpcTracker::~StFtpcTracker()
 }
 
 
+/// Vertex estimation with fit tracks for FTPC east and west.
 void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, UChar_t iterations)
 {
-  // Vertex estiamtion with fit tracks for FTPC east and west.
   EstimateVertex(vertex, -1, iterations);
   EstimateVertex(vertex, +1, iterations);
 
@@ -329,9 +328,9 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, UChar_t iterations)
 }
 
 
+/// Vertex estimation with fit tracks.
 void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations)
 {
-  // Vertex estimation with fit tracks.
   StFtpcVertex v = *vertex;
 
   for (Int_t i = 0; i < iterations; i++) {
@@ -352,10 +351,10 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UCha
 }
 
 
+/// Vertex estimation with fit tracks for different sectors.
 StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, 
 					   Char_t sector, UChar_t iterations)
 {
-  // Vertex estimation with fit tracks for different sectors.
   StFtpcVertex v = *vertex;
   TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
 
@@ -381,12 +380,13 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 }
 
 
+
+/// Vertex estimation with fit tracks for different areas.
 StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere,
 					   Double_t lowAngle, Double_t highAngle,
 					   Double_t lowRadius, Double_t highRadius, 
 					   UChar_t iterations)
 {
-  // Vertex estimation with fit tracks for different areas.
   StFtpcVertex v = *vertex;
 
   TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
@@ -415,12 +415,13 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 }
 
 
+/*!
+  Calculates dE/dx.
+  This function replaces the old pams/ftpc/fde-module, but it is no 
+  longer used as everything happens in FitAnddEdxAndWrite().
+*/  
 void StFtpcTracker::CalcEnergyLoss()
 {
-  // Calculates dE/dx.
-  // This function replaces the old pams/ftpc/fde-module, but it is no 
-  // longer used as everything happens in FitAnddEdxAndWrite().
-    
   Int_t itrk_ok ;                   // number of acepted tracks  
   Double_t total_charge = 0.0 ;     // total charges
   
@@ -755,11 +756,13 @@ void StFtpcTracker::CalcEnergyLoss()
 }
 
 
+
+/*!
+  Sorts hits in ascending order (depending on dE/dx).
+  This function is needed to replace pams/ftpc/fde.
+*/
 void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 {
-  // Sorts hits in ascending order (depending on dE/dx).
-  // This function is needed to replace pams/ftpc/fde.
- 
   Int_t i, j;
   Double_t temp;
   Int_t itemp;
@@ -782,11 +785,12 @@ void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 
 
 
+/*!
+  Writes tracks to STAF table.
+  This function is no longer used. Everything is done now in FitAnddEdexAndWrite().
+*/
 Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
-  // Writes tracks to STAF table.
-  // This function is no longer used. Everything is done now in FitAnddEdexAndWrite().
-  
   fpt_fptrack_st *trackTable= trackTableWrapper->GetTable();
 
   if (mTrack) {
@@ -825,10 +829,9 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t prima
 }
 
 
+/// Calculates the momentum fit, the dE/dx, and writes the tracks to their STAF table, finally.
 Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
-  // Calculates the momentum fit, the dE/dx, and writes the tracks to their STAF table, finally.
-    
   if (mBench) {
     mBench->Start("fit");
   }
@@ -1161,14 +1164,16 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
   }
 }
 
+
+/*!
+  Writes tracks and clusters in ROOT file.
+  In the moment this makes no sense because the important information
+  about momentum of tracks and coordinates of clusters or stored in
+  StThreeVerctor<double> which does not inherit from TObject. So it
+  is not written out!
+*/
 Int_t StFtpcTracker::WriteTracksAndClusters()
 {
-  // Writes tracks and clusters in ROOT file.
-  // In the moment this makes no sense because the important information
-  // about momentum of tracks and coordinates of clusters or stored in
-  // StThreeVerctor<double> which does not inherit from TObject. So it
-  // is not written out!
-
   mHit->Write();
   mTrack->Write();
   
