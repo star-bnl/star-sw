@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.6 2000/03/17 17:22:40 laue Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.7 2000/06/09 14:21:21 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.7  2000/06/09 14:21:21  laue
+ * check of specific analysis type added
+ *
  * Revision 1.6  2000/03/17 17:22:40  laue
  * Roberts new three particle correlations implemented.
  *
@@ -43,6 +46,11 @@
 //#endif
 
 #include "StHbtMaker/CorrFctn/MinvCorrFctn.h"
+
+#include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
+#include "StHbtMaker/Cut/mikesEventCut.h"
+#include "StHbtMaker/Cut/rotateToReactionPlaneEventCut.h"
+
 #include <cstdio>
 
 #ifdef __ROOT__
@@ -51,7 +59,7 @@ ClassImp(MinvCorrFctn)
 
 //____________________________
 MinvCorrFctn::MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, const float& MinvHi){
-  mTagWriter = StHbtTagWriter::Instance();  // get the singleton
+  //mTagWriter = StHbtTagWriter::Instance();  // get the singleton
 
   char theTitle[100];
   // set up numerator
@@ -89,12 +97,13 @@ MinvCorrFctn::~MinvCorrFctn(){
 }
 //_________________________
 void MinvCorrFctn::Finish(){
-  cout << " alive in finish " << endl;
-  cout << HbtAnalysis() << endl;
-  cout << HbtAnalysis()->EventCut() << endl;
-
-  int NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
-  cout << " alive in finish " << endl;
+  long NEvents = 1;
+  if (   dynamic_cast<StHbtAnalysis*>( HbtAnalysis() )   ) {
+    if (   dynamic_cast<mikesEventCut*>( HbtAnalysis()->EventCut() )   )
+      NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+    if (   dynamic_cast<rotateToReactionPlaneEventCut*>( HbtAnalysis()->EventCut() )   )
+      NEvents = ((rotateToReactionPlaneEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+  }
 
   mNumerator->Scale(1./NEvents);
   mDenominator->Scale(1./NEvents);
@@ -121,7 +130,7 @@ StHbtString MinvCorrFctn::Report(){
 //____________________________
 inline void MinvCorrFctn::AddRealPair(const StHbtPair* pair){
   mNumerator->Fill(pair->mInv());
-  mTagWriter->SetTag("positiveKaonsMeans",2, (float)pair->mInv() );  // <-- this is how to fill the tag
+  //mTagWriter->SetTag("positiveKaonsMeans",2, (float)pair->mInv() );  // <-- this is how to fill the tag
 }
 //____________________________
 inline void MinvCorrFctn::AddMixedPair(const StHbtPair* pair){
