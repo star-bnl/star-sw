@@ -33,13 +33,30 @@
     
  return
  
-* ****************************************
+*****************************************
+ 
+ macro load_lib
+   
+   cd /dui/geant
+   make geometry
+   cd /dui/geant
+   make sim/g2t
+   cd /dui/geant
+   make sim/gstar
+   cd /dui
+   
+ return
+ 
+**********************************************
  
  macro process_event
    
+* must go to directory geant!
+     cd /dui/geant
 * read in another event from input_file
      trig 1
-*  write out in staf table format
+* write out in staf table format
+     cd /dui/geant
      for/call g2t
      
  return

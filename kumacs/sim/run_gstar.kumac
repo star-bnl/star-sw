@@ -1,6 +1,10 @@
 * created 6/5/98 Kathy Turner
 * 
-* ************************************************************
+* **** 
+* This kumac reads from a file and runs gstar then g2t.
+* The input file can be from an event generator or a txt file.
+* The default value of the test program is to read from a txt file.
+*************************************************************
 * ***** IMPORTANT NOTE *************
 * - See also notes from Pavel Nevski on his WWW page about this:
 * - The extension of the input file (first letter) tells Geant
@@ -70,17 +74,12 @@ def [DEFAULT]
   exec setup_dir 
   
    
-* ******* INITIALIZATION BEFORE LOADING ************************
+* ******* INITIALIZATION & LOADING ************************
+* ******* Note: Geant library loading slightly different than other software*
  exec gstar#init_phys [phystype] 
  exec gstar#init_geom [geomtype]
+ exec gstar#load_lib
  
-* LOAD LIBRARIES
- if $vexist(make_done)=0 then
-   make geometry
-   make sim/g2t
-   make sim/gstar
-   vec/cre make_done
- endif
 
 ******** INITIALIZATION AFTER LOADING ************************
 *  nothing now
@@ -96,11 +95,11 @@ def [DEFAULT]
   user/input tx [input_file]
   
 * open output file:
-  exec write_table_to_file#init outunit [output_file]
+* exec write_table_to_file#init outunit [output_file]
   
 * write Run information to output file - already in staf format 
-  cd /dui/geant
-  exec write_table_to_file#write outunit Run
+* cd /dui/geant
+* exec write_table_to_file#write outunit Run
   
   
 *************** LOOP OVER EVENTS *****************************
@@ -116,13 +115,13 @@ def [DEFAULT]
 * run gstar/g2t - automatically reads next event from input file 
      exec gstar#process_event
 * write out Run information on first event only
-     cd /dui/geant
-     exec write_table_to_file#write outunit Event
+* cd /dui/geant
+* exec write_table_to_file#write outunit Event
      
    enddo
    
 ******************* CLOSE OUTPUT ***************************
-   exec write_table_to_file#close outunit
+* exec write_table_to_file#close outunit
 * 
 * ***********************************************************
    
