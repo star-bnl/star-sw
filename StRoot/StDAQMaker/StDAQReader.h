@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.17 2001/07/10 18:13:04 jeromel Exp $
+ * $Id: StDAQReader.h,v 1.18 2001/07/16 21:38:44 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.18  2001/07/16 21:38:44  perev
+ * EMC added
+ *
  * Revision 1.17  2001/07/10 18:13:04  jeromel
  * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
  * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
@@ -69,6 +72,7 @@ struct  EventInfo;
 typedef  EventInfo DAQEventInfo;
 class EventReader ;  
 class StTPCReader ;  
+class StEMCReader ;  
 class StFTPCReader;  
 class StTRGReader ;
 class StSVTReader ;
@@ -128,6 +132,7 @@ public:
   virtual const char *getTPCVersion()  const {return fTPCVersion ;} 
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
   StTPCReader  *getTPCReader (); 
+  StEMCReader  *getEMCReader (); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
   StTRGReader  *getTRGReader ();
@@ -143,6 +148,7 @@ protected:
   int fVerbose;
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  
+  StEMCReader  *fEMCReader;  
   StFTPCReader *fFTPCReader;  
   StRICHReader *fRICHReader;
   StTRGReader  *fTRGReader;
@@ -159,5 +165,6 @@ protected:
 #ifndef __CINT__
 #include "StTPCReader.h"
 #include "StFTPCReader.h"
+#include "StEMCReader.h"
 #endif /*__CINT__*/
 #endif /*end*/

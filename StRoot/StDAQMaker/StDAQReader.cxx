@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.27 2001/07/10 18:13:04 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.28 2001/07/16 21:38:44 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.28  2001/07/16 21:38:44  perev
+ * EMC added
+ *
  * Revision 1.27  2001/07/10 18:13:04  jeromel
  * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
  * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
@@ -104,6 +107,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQReader.h"
 #include "StTPCReader.h"
+#include "StEMCReader.h"
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
 #include "StSVTReader.h"
@@ -118,6 +122,7 @@ StDAQReader::StDAQReader(const char *file)
   fVerbose = 0;
   fEventReader	= 0;
   fTPCReader 	= 0;
+  fEMCReader 	= 0;
   fRICHReader 	= 0;
   fL3Reader 	= 0;
   fSVTReader 	= 0;
@@ -159,6 +164,7 @@ int StDAQReader::close()
   delete fEventReader;	fEventReader 	= 0;  
 
   if(fTPCReader) 	fTPCReader ->close();  
+  if(fEMCReader) 	fEMCReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
   if(fFTPCReader)       fFTPCReader->close();
@@ -194,6 +200,7 @@ int StDAQReader::readEvent()
   if (fFTPCReader)	fFTPCReader->Update();  
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
+  if (fEMCReader) 	fEMCReader ->Update();
   return 0;
 }
 //_____________________________________________________________________________
@@ -264,6 +271,15 @@ StTPCReader *StDAQReader::getTPCReader()
   }
   return fTPCReader;
 }
+//_____________________________________________________________________________
+StEMCReader *StDAQReader::getEMCReader()
+{
+  if (!fEMCReader) {
+    printf("bbb StDAQReader is about to instantiate StEMCReader.\n");
+    fEMCReader = new StEMCReader(this);
+  }
+  return fEMCReader;
+} 
 //_____________________________________________________________________________
 StRICHReader *StDAQReader::getRICHReader() 
 {
