@@ -72,4 +72,10 @@ enum EReturnCodes {
    } \
    _TableImp_(name)
 
+#define TableStreamerImp(name) \
+void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
+   if (!R__b.IsReading()) R__b.WriteVersion(_NAME2_(St_,name)::IsA());   \
+   St_Table::Streamer(R__b); }                                             
+
+
 #endif 
