@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.h,v 1.2 2003/01/28 17:16:55 magestro Exp $
+ * $Id: calculateEventPlaneEventCut.h,v 1.3 2004/02/17 17:05:37 jeromel Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.h,v $
+ * Revision 1.3  2004/02/17 17:05:37  jeromel
+ * Bug fix
+ *
  * Revision 1.2  2003/01/28 17:16:55  magestro
  * Removed inheritance from StMaker, caused compilation warnings
  *
@@ -73,8 +76,7 @@ private:   //
 inline int  calculateEventPlaneEventCut::NEventsPassed() {return mNEventsPassed;}
 inline int  calculateEventPlaneEventCut::NEventsFailed() {return mNEventsFailed;}
 inline void calculateEventPlaneEventCut::SetFlowMaker(char* title){
-  StMaker tempMaker;
-  mFlowMaker = (StFlowMaker*)tempMaker.GetMaker(title);
+  mFlowMaker = (StFlowMaker*)StMaker::GetChain()->GetMaker(title);
   if (!mFlowMaker) {
     cout << "No StFlowMaker found!" << endl;
     assert(0);
