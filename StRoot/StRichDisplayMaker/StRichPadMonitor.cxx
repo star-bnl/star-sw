@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.6 2000/12/08 04:59:12 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.7 2001/02/07 16:08:26 lasiuk Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.7  2001/02/07 16:08:26  lasiuk
+ * saturated pads are now black
+ *
  * Revision 2.6  2000/12/08 04:59:12  lasiuk
  * unambiguate hiliteHits(flag) by requiring user
  * to specify which ring is of interest
@@ -605,11 +608,17 @@ Color_t StRichPadMonitor::GetColorAttribute(double amp)
     //return Color_t(50+(log(static_cast<int>((amp/200.)*50))) );
 
     double tmpAmp;
+    //
     // linear color scale
+    // If the pad is saturated, make it black
+    //
      tmpAmp = (amp>256) ? 256 : amp;
      Color_t ret = (50+(static_cast<int>((tmpAmp/256.)*50)) );
      if(ret <= 50)
  	ret +=1;
+
+     if(amp==1024)
+	 ret = 1;
      return ret;
 
     // log color scale
