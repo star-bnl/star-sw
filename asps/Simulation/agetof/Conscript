@@ -61,4 +61,6 @@ if ($#src > -1) {
   Depends $env2 $pkg, $BIN . "/agetof.def";
   Install $env2 $BIN, $pkg;
   Install $env2 $BIN, "agetof.def";
+  InstallAs $env2 $BIN . "/geant3", $BIN . "/" . $pkg;
+  InstallAs $env2 $BIN . "/geant3.def", $BIN . "/agetof.def";
 }  
