@@ -55,12 +55,41 @@ StGenericVertexMaker::~StGenericVertexMaker()
 {
 }
 
-//_____________________________________________________________________________
+/*!
+  The Init() method instantiates the VertexFinder() method. 
+  Since this is  a Maker, the switch between the diverse methods
+  will be made as part of the m_Mode mechanism. m_Mode will be
+  a bit set to later allow multiple vertex finder running in the
+  same pass. The structure does not allow this to happen for now
+  (will need to have stack-like of VertexFinders and loop over
+  them adding vertices in the collection)
+
+  m_Mode = 0x1     Minuit
+  m_Mode = 0x2     ppLMV
+
+  Default          Minuit  (to preserver bacward compatibility)
+
+  All VertexFinder-s need to have the same methods (like DoUseITTF()
+  NCtbMatches() etc ...) described in the GenericVertexFinder() class).
+  Currentely, methods are not part of the base class and need
+  cleanup.
+  
+*/
 Int_t StGenericVertexMaker::Init()
 {
   // setup params
   EtaCut=1.4; // Sensible default cut
-  theFinder=new StMinuitVertexFinder();
+
+  if ( m_Mode & 0x1){
+    theFinder= new StMinuitVertexFinder();
+  } else if ( m_Mode & 0x2){
+    theFinder= new StMinuitVertexFinder();
+  } else {
+    // Later, this would NEVER make multiple possible vertex
+    // finder unlike for option 0x1 .
+    theFinder= new StMinuitVertexFinder();
+  }
+
   if (use_ITTF) theFinder->DoUseITTF();
   //    theFinder->CTBforSeed();
   //    theFinder->UseVertexConstraint(-0.265,0.4088,-0.00135,0.0004333,0.0001);
@@ -90,11 +119,11 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      dydz = vSeed->dydz;
      }
      else {
-       cout << "StGenericVertexMaker -- No Database for beamline" << endl;
+       gMessMgr->Info() << "StGenericVertexMaker -- No Database for beamline" << endm;
      }   
-     cout << "BeamLine Constraint: " << endl;
-     cout << "x(z) = " << x0 << " + " << dxdz << " * z" << endl;
-     cout << "y(z) = " << y0 << " + " << dydz << " * z" << endl << endl;
+     gMessMgr->Info() << "BeamLine Constraint: " << endm;
+     gMessMgr->Info() << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+     gMessMgr->Info() << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
      theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
   }
   return StMaker::InitRun(runnumber);
@@ -105,9 +134,10 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
 Int_t StGenericVertexMaker::Finish()
 {
   //LSB TODO change over to using message manager
-  cout <<" Finish::"<<GetName() <<endl;
-  printf(" Total events: %d \n", nEvTotal);
-  printf(" Good events: %d \n", nEvGood);
+  gMessMgr->Info() << "StGenericVertexMaker::Finish " <<GetName() <<endm;
+  gMessMgr->Info() << " Total events: " << nEvTotal << endm;
+  gMessMgr->Info() << " Good events:  " << nEvGood  << endm; 
+
 
   //LSB TODO Leave this for now. Should really be using STAR/ROOT I/O scheme?
   if (eval) {
@@ -135,7 +165,7 @@ Bool_t StGenericVertexMaker::DoFit(){
     myvertex = theFinder->result();
     theFinder->printInfo();
   }  else {
-    cout << "Error: vertex fit failed, no vertex." << endl;
+    gMessMgr->Error() << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
     return kFALSE;
   }
   return kTRUE;
@@ -150,11 +180,11 @@ Bool_t StGenericVertexMaker::DoFit(){
 Int_t StGenericVertexMaker::Make()
 {
   nEvTotal++;
-  primV=NULL;
-  mEvent=NULL;
+  primV  = NULL;
+  mEvent = NULL;
   mEvent = (StEvent *)GetInputDS("StEvent"); 
-  cout << "StGenericVertexMaker : StEvent pointer " << mEvent << endl;
-  cout << "StGenericVertexMaker : external find use " << externalFindUse << endl;
+  gMessMgr->Debug() << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
+  gMessMgr->Debug() << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;
 
   if(!externalFindUse){
     DoFit();
