@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.3 2002/02/06 00:10:45 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.4 2002/03/04 17:06:48 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
+ * Revision 1.4  2002/03/04 17:06:48  willson
+ * Laser spot positions recorded
+ *
  * Revision 1.3  2002/02/06 00:10:45  willson
  * File entries, variable names.
  *
@@ -49,10 +52,13 @@ class StSvtDriftVelocityMaker : public StMaker {
   TH1D* mGlobalDriftVelocityHisto; //!
   TH2D* mGlobalDriftVelocity2DHisto; //!
   TH1D* mCalculatedDriftVelocity; //!
+  TH1D* mLaserSpotDistL07B3_1; //!
+  TH1D* mLaserSpotDistL15B3_1; //!
+  TH1D* mLaserSpotDistL15B3_2; //!
   Int_t mEventCounter;
   Int_t mHitCounter;
   Int_t mNumTimeBins;    // Number of time bins to use in drift velocity calculation.  Default=128
-  Int_t mMaximumTB;      // Max Time Bin to look at. Default=127
+  Int_t mMaximumTB;      // Max Time Bin to look at. Default=128
   Int_t mMinimumTB;      // Min Time Bin to look at. Default=0
   bool  mRaw;            // Raw data?  false=StEvent data
   bool mDebug;           // If true, make 2D histos, and keep everything.  Also, save to TH1D instead of ascii file
@@ -110,6 +116,9 @@ class StSvtDriftVelocityMaker : public StMaker {
   TH1D* GetGlobalHisto() {return mGlobalDriftVelocityHisto;}; //!
   TH2D* GetGlobal2DHisto() {return mGlobalDriftVelocity2DHisto;}; //!
   TH1D* GetFinalHisto() {return mCalculatedDriftVelocity;}; //!
+  TH1D* GetLaserSpotDistL07B3_1() {return mLaserSpotDistL07B3_1;}; //!
+  TH1D* GetLaserSpotDistL15B3_1() {return mLaserSpotDistL15B3_1;}; //!
+  TH1D* GetLaserSpotDistL15B3_2() {return mLaserSpotDistL15B3_2;}; //!
   Int_t GetNumEvents() {return mEventCounter;}; //!
   Int_t GetNumHits() {return mHitCounter;}; //!
   Int_t GetNumTimeBins() {return mNumTimeBins;}; //!

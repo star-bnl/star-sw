@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.cxx,v 1.3 2002/02/06 00:10:45 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.cxx,v 1.4 2002/03/04 17:06:48 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.cxx,v $
+ * Revision 1.4  2002/03/04 17:06:48  willson
+ * Laser spot positions recorded
+ *
  * Revision 1.3  2002/02/06 00:10:45  willson
  * File entries, variable names.
  *
@@ -56,7 +59,7 @@ ClassImp(StSvtDriftVelocityMaker)
   mSvtRawData = NULL;
   mEventCounter = mHitCounter = 0;
   mNumTimeBins = 128;
-  mMaximumTB = 127;
+  mMaximumTB = 128;
   mMinimumTB = 0;
   mDebug = false;
   mFraction = 0.5;
@@ -112,7 +115,7 @@ Int_t StSvtDriftVelocityMaker::Init()
 	  mHybridDriftVelocityHisto[indexHybrid] = hybridHisto;
 
 	  if (mDebug) {
-	    hybrid2DHisto = new TH2D(CharString1, CharString1, 128, 0, 127, 240, 0, 239);
+	    hybrid2DHisto = new TH2D(CharString1, CharString1, 128, 0, 128, 240, 0, 240);
 	    mHybridDriftVelocity2DHisto[indexHybrid] = hybrid2DHisto;
 	  }
 
@@ -122,11 +125,14 @@ Int_t StSvtDriftVelocityMaker::Init()
   }  // end of loop over barrels
   
   if (mDebug) {
-    mGlobalDriftVelocityHisto = new TH1D("Global1", "Global1", 640, 0, 127); 
-    mGlobalDriftVelocity2DHisto = new TH2D("Global2", "Global2", 640, 0, 127, 1200, 0, 240); 
+    mGlobalDriftVelocityHisto = new TH1D("Global1", "Global1", 640, 0, 128); 
+    mGlobalDriftVelocity2DHisto = new TH2D("Global2", "Global2", 640, 0, 128, 1200, 0, 240); 
   }
     
   mCalculatedDriftVelocity = new TH1D("Final", "Final", 432, 0, 431);
+  mLaserSpotDistL07B3_1 = new TH1D("L07B3 Laser Distribution 1", "L07B3 Laser Distribution 1", 1280, 0, 128); 
+  mLaserSpotDistL15B3_1 = new TH1D("L15B3 Laser Distribution 1", "L15B3 Laser Distribution 1", 1280, 0, 128); 
+  mLaserSpotDistL15B3_2 = new TH1D("L15B3 Laser Distribution 2", "L15B3 Laser Distribution 2", 1280, 0, 128); 
 
   return StMaker::Init();
 }
@@ -138,14 +144,18 @@ Int_t StSvtDriftVelocityMaker::SetSvtRawData()
   dataSet = GetDataSet("StSvtRawData");
   if( !dataSet) {
     gMessMgr->Warning() << " No Svt Raw data set" << endm;
+    dataSet = new St_ObjectSet("DriftVelocity");
+    mSvtRawData = new StSvtData("FULL");
     return kStWarn;
   }
+    
 
   mSvtRawData = (StSvtData*)(dataSet->GetObject());
   if( !mSvtRawData) {
     gMessMgr->Warning() << " No Svt Raw data " << endm;
     return kStWarn;
   }
+  
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -229,6 +239,18 @@ Int_t StSvtDriftVelocityMaker::FillHistogramsRaw()
 	    
 	    if (accept(hybridData->svtHit())) {
 	      mHybridDriftVelocityHisto[indexHybrid]->Fill(hybridData->WaferPosition()[index].x());
+	      
+	      if (indexHybrid==293) {
+		if (hybridData->WaferPosition()[index].y()>196.5 && hybridData->WaferPosition()[index].y()<200.5 && hybridData->WaferPosition()[index].x()>60)
+		  mLaserSpotDistL07B3_1->Fill(hybridData->WaferPosition()[index].x());
+	      }
+
+	      if (indexHybrid==416) {
+		if (hybridData->WaferPosition()[index].y()>198.5 && hybridData->WaferPosition()[index].y()<200.5 && hybridData->WaferPosition()[index].x()>60)
+		  mLaserSpotDistL15B3_1->Fill(hybridData->WaferPosition()[index].x());
+		if (hybridData->WaferPosition()[index].y()>196.5 && hybridData->WaferPosition()[index].y()<198.5 && hybridData->WaferPosition()[index].x()>60)
+		  mLaserSpotDistL15B3_2->Fill(hybridData->WaferPosition()[index].x());
+	      }
 
 	      if (mDebug) {
 		mHybridDriftVelocity2DHisto[indexHybrid]->Fill(hybridData->WaferPosition()[index].x(), hybridData->WaferPosition()[index].y());
@@ -319,8 +341,7 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
 
   sprintf(filename, "Run%d_DV.out", mSvtRawData->getRunNumber());
 
-  if (!mDebug)       
-    file.open(filename);
+  file.open(filename);
 
   for (i=0; i<mSvtDriftVeloc->getTotalNumberOfHybrids(); i++) {
     
@@ -358,15 +379,20 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
 
     if (mDebug)
       mCalculatedDriftVelocity->Fill(i, DriftVelocity);
-    else 
-      file << i << "\t" << DriftVelocity << "\t\t" << j*128.0/mNumTimeBins << "\n";
+  
+    file << i << "\t" << DriftVelocity << "\t\t" << j*128.0/mNumTimeBins << "\n";
     
     Aver=Num=0;
 
   }
 
-  if (!mDebug)
-    file.close();
+  file << "Laser Spot Time Bucket Positions:\n";
+
+  file << "L07B3_1" << "\t" << mLaserSpotDistL07B3_1->GetMean() << "\n";
+  file << "L15B3_1" << "\t" << mLaserSpotDistL15B3_1->GetMean() << "\n";
+  file << "L15B3_2" << "\t" << mLaserSpotDistL15B3_2->GetMean() << "\n";
+
+  file.close();
 
   return kStOK;
 }
