@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.9 1999/10/19 14:30:41 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.10 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.10  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.9  1999/10/19 14:30:41  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -677,9 +682,10 @@ return atoi(nodeName);
   
                                                */
 ////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 int*
-mysqlAccessor::getElementID(char* nodeName, int numRows){
+mysqlAccessor::getElementID(char* nodeName, int& numRows){
 
 numRows=1;
 int * retVal = 0;
@@ -691,78 +697,82 @@ if(id)return retVal;
 //   but we may want to also allow 1-800 and/or 1,2,6-12,15,19
 //   so I should remake string so that 1-800 = 1,2,3,4,...,799,800
 //
+// cout << "My elementID = " << nodeName << endl;
 
-id = strstr(nodeName,"-");
 char* tmpName = new char[strlen(nodeName)+1];
 strcpy(tmpName,nodeName);
-id = strstr(tmpName,"-");
-
-  while(id){
-
-   char *ip1,*ip2=0;
-   int n1,n2;
-
-   ip1=strstr(tmpName,",");
-
-   while(ip1){
-     n1=id-ip1;
-     ip2=ip1;
-     if(n1>0){
-       ip1=strstr(ip2,",");
-     } else {
-       ip1=0;
-     }
-   }
-
-   if(ip2)ip2++;  // ip2 either is 0 for 1st part of string or points to ","
-   *id='\0';
-   n1 = atoi(ip2);
-   id++;
-   ip1=strstr(id,",");
-   if(ip1)*ip1='\0';
-   n2 = atoi(id);  
-
-   char myNodeName[2048];
-   ostrstream mnn(myNodeName,2048);
-
-   mnn << tmpName;
-   for(int k=n1+1;k<=n2;k++)mnn<<","<<k;
-   if(ip1){
-     ip1++;
-     mnn << ip1;  
-   }
-
-   mnn << ends;
-   delete [] tmpName;
-   tmpName = new char[strlen(myNodeName)+1];
-   strcpy(tmpName, myNodeName);
-   id = strstr(tmpName,"-");
-  }
-
 
 int numElements = 1;
 id = strstr(tmpName,",");
- while(id){
-   numElements++;
-   id=strstr(id,",");
+char* id1;
+char* id2;
+
+id2 = strstr(tmpName,"-");
+char islist[2048];
+ostrstream sl(islist,2048);
+
+if(id2 && id && id2<id){
+  id=id2;
+  id[0]=',';
+  sl<<"r";
+} else {
+  sl<<"l";
+}
+
+int numEntries = 1;
+if(id)id++;
+while(id){
+  //  cout << "id = " << id << endl;
+   numEntries++;
+   id1=strstr(id,",");
+   id2=strstr(id,"-");
+   id = id1;
+   if(id && id2 && id2<id){
+       id=id2;
+       id[0]=',';
+       sl<<"r";
+   } else {
+       sl<<"l";
+   }
+   if(id)id++;
+}
+ sl << ends;
+
+ // cout << "My string list = " << islist << endl;
+
+ int* tmpElements = new int[100000];
+ char* p1=&tmpName[0];
+ char* anID;
+ anID = getNextID(p1);
+ tmpElements[0] = atoi(anID);
+ numElements = 1;
+ int iEnd, iStart, k;
+ for(int ient=1;ient<numEntries;ient++){
+   anID = getNextID(p1);
+   if(islist[ient-1]=='r'){
+     iEnd = atoi(anID);
+     iStart = tmpElements[numElements-1];
+     int irange=iEnd-iStart;
+     for(int ir=1;ir<=irange;ir++){
+       numElements++;
+       tmpElements[numElements-1]=iStart+ir;
+     }
+   } else {
+     numElements++;
+     tmpElements[numElements-1]=atoi(anID);
+   }
+   if(anID) delete [] anID;
  }
 
  retVal = new int[numElements];
- char* p1=&tmpName[0];
- char* anID;
+ for(k=0;k<numElements;k++)retVal[k]=tmpElements[k];
+ numRows = numElements;
+ delete [] tmpElements;
+ delete [] tmpName; 
 
- int num=0;
- while(p1){
-   anID = getNextID(p1);
-   retVal[num]=atoi(anID);
-   num++;
-   if(anID)delete [] anID;
- }
+ // for(k=0;k<numElements;k++)cout<<"retRow="<<k<<" & retID="<<retVal[k]<<endl;
 
-numRows=numElements;
-delete [] tmpName;
 return retVal;
-
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.cc,v 1.9 1999/10/19 14:30:39 porter Exp $
+ * $Id: StDbManager.cc,v 1.10 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.10  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.9  1999/10/19 14:30:39  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -608,6 +613,8 @@ return retVal;
 
 }
 
+////////////////////////////////////////////////////////////////
+
 void
 StDbManager::fetchDbTable(StDbTableI* table){
 
@@ -625,6 +632,31 @@ StDbManager::fetchDbTable(StDbTableI* table){
 
 ////////////////////////////////////////////////////////////////
 
+void
+StDbManager::fetchAllTables(StDbConfigNode* node){
+
+  if(!mcheckTime.munixTime && !mcheckTime.mdateTime){
+    cerr<< "No storage time set"; return;
+  }
+
+  if(node->hasData()){
+    TableIter* itr = node->getTableIter();
+    StDbTableI* table = 0;
+    while(!itr->done()){
+      table = itr->next();
+      fetchDbTable(table);
+    }
+  delete itr;
+  }
+
+  if(node->hasChildren())fetchAllTables(node->getFirstChildNode());
+  StDbConfigNode* nextNode = 0;
+  if((nextNode=node->getNextNode()))fetchAllTables(nextNode);
+
+}
+    
+
+////////////////////////////////////////////////////////////////
 
 void
 StDbManager::storeDbTable(StDbTableI* table){
@@ -659,7 +691,7 @@ StDbManager::storeAllTables(StDbConfigNode* node){
       table = itr->next();
       storeDbTable(table);
     }
-  delete [] itr;
+  delete itr;
   }
 
   if(node->hasChildren())storeAllTables(node->getFirstChildNode());

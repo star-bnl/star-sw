@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.7 1999/10/19 14:30:39 porter Exp $
+ * $Id: StDbManager.hh,v 1.8 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.8  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.7  1999/10/19 14:30:39  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -131,6 +136,7 @@ public:
 
   virtual bool IsValid(StDbTableI* table);
   virtual void fetchDbTable(StDbTableI* table);
+  virtual void fetchAllTables(StDbConfigNode* node);
   virtual void storeDbTable(StDbTableI* table);
   virtual void storeAllTables(StDbConfigNode* node);
 

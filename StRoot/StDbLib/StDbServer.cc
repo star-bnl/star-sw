@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.5 1999/09/30 02:06:08 porter Exp $
+ * $Id: StDbServer.cc,v 1.6 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.6  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.5  1999/09/30 02:06:08  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -82,7 +87,7 @@ cout << " on host = " << mhostName << endl;
 
     mdatabase = new mysqlAccessor();
     //    mdatabase->initDbQuery(mdbName,"dummy","duvall.star.bnl.gov", 0);
-    mdatabase->initDbQuery(mdbName,mserverName,mhostName, 0);
+    mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber);
     mconnectState = true;
 
   }

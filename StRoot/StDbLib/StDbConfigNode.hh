@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.7 1999/10/19 14:30:38 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.8 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.8  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.7  1999/10/19 14:30:38  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -118,6 +123,7 @@ public:
   virtual StDbTable* addDbTable(const char* tableName, char* version="default", bool isBaseLine = false);
   virtual StDbTable* addTable(const char* tableName, char* version="default", bool isBaseLine = false);
   // virtual StDbTable* findTable(const char* tableName, const char* version, int elementID);
+  virtual StDbTable* findLocalTable(const char* name);
   virtual void removeTable(StDbTable* table);
   virtual TableIter* getTableIter();
   virtual StDbConfigNode* findConfigNode(StDbType type, StDbDomain domain);
