@@ -3,18 +3,15 @@
 
 StSpectraAnalysis::StSpectraAnalysis() {
 
-  mTitle    = new char[20]; 
-  mYBinSize = new double;
-  mMtBinSize = new double;
-  mEffic = new StEfficiency;
-  mNumEvent = new int;
+  // mTitle    = new char[20]; 
 
 }
 
 StSpectraAnalysis::~StSpectraAnalysis() {
+  //delete mTitle;
 }
 
-void StSpectraAnalysis::setParticle(char particle[20]) {
+void StSpectraAnalysis::setParticle(string particle) {
 
  mParticle = StParticleTable::instance()->findParticle(particle) ;
  if (mParticle) {
@@ -29,27 +26,16 @@ StParticleDefinition* StSpectraAnalysis::getParticle() {
  return mParticle;
 }
 
-void StSpectraAnalysis::setTitle(char title[20]) {
- strcpy(mTitle,title);
+void StSpectraAnalysis::setTitle(string title) {
+  // strcpy(mTitle,title)
+  mTitle = title;
 }
 
-void StSpectraAnalysis::setYBinSize(double ybin) {
-  *mYBinSize = ybin;
-}
-double StSpectraAnalysis::getYBinSize() {
-  return *mYBinSize;
-}
-void StSpectraAnalysis::setMtBinSize(double mtbin) {
-  *mMtBinSize = mtbin;
-}
-double StSpectraAnalysis::getMtBinSize() {
-  return *mMtBinSize;
-}
-void StSpectraAnalysis::setEfficiencyParam(StEfficiency* effic) {
+void StSpectraAnalysis::setEfficiencyParam(StEfficiency effic) {
   mEffic = effic;
 }
 StEfficiency* StSpectraAnalysis::getEfficiencyParam() {
-  return mEffic;
+  return &(mEffic);
 }
 
 

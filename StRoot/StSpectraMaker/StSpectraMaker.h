@@ -1,7 +1,11 @@
 
-// $Id: StSpectraMaker.h,v 1.1 1999/11/03 21:22:42 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.2 1999/11/05 18:58:49 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.2  1999/11/05 18:58:49  ogilvie
+// general tidy up following Mike Lisa's review. List of analyses conntrolled via
+// analysis.dat, rather than hardcoded into StSpectraMaker.cxx
+//
 // Revision 1.1  1999/11/03 21:22:42  ogilvie
 // initial version
 //
@@ -40,10 +44,10 @@ class StSpectraMaker : public StMaker {
 
 private:
 
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-vector<StTpcDeviantSpectraAnalysis*> mSpectraAnalysisContainer;//!
-#else
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
 vector<StTpcDeviantSpectraAnalysis*, allocator<StTpcDeviantSpectraAnalysis*> > mSpectraAnalysisContainer;//!
+#else
+vector<StTpcDeviantSpectraAnalysis*> mSpectraAnalysisContainer;//!
 #endif
 TFile* mOutput;
 
@@ -61,7 +65,7 @@ public:
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.1 1999/11/03 21:22:42 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.2 1999/11/05 18:58:49 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StSpectraMaker, 1)
 };

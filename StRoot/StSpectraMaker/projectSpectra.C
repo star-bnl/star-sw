@@ -70,8 +70,8 @@
        if (ndeg > 0 ){
         cout << " chi2 per ndegf "<< chi2/ndeg << endl;
         if (chi2/ndeg < 2 && f1->GetParameter(1)< 0.2 
-	  && TMath::Abs(f1->GetParameter(2)) < 1.5 ) {
-	  double content = f1->GetParameter(0);
+	  && fabs(f1->GetParameter(2)) < 1.5 ) {
+	  double content = fabs(f1->GetParameter(0));
 	  double err =  f1->GetParError(0);
 	  YMtpiplus->SetCellContent(iYFirst,iMtFirst,content);
 	  YMtpiplus->SetCellError(iYFirst,iMtFirst,err);

@@ -23,16 +23,31 @@ class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
   TH1D* mPIDDeviant;  
   TH2D* mDedxvsP;
 
+  double mYBinSize;
+  double mMtBinSize;
+
  protected:
 
  public:
 
- StTpcDeviantSpectraAnalysis();
- ~StTpcDeviantSpectraAnalysis();
- void bookHistograms();
- void fillHistograms(StEvent& event);
- void projectHistograms();
+  StTpcDeviantSpectraAnalysis();
+  ~StTpcDeviantSpectraAnalysis();
+  void bookHistograms();
+  void fillHistograms(StEvent& event);
+  void projectHistograms();
+
+  void setYBinSize(double ybin);
+  double getYBinSize();
+  void setMtBinSize(double mtbin);
+  double getMtBinSize();
 
 };
 
 #endif
+
+
+
+
+
+
+

@@ -7,9 +7,22 @@ StTpcDeviantSpectraAnalysis::StTpcDeviantSpectraAnalysis() {
 StTpcDeviantSpectraAnalysis::~StTpcDeviantSpectraAnalysis() {
 }
 
+void StTpcDeviantSpectraAnalysis::setYBinSize(double ybin) {
+  mYBinSize = ybin;
+}
+double StTpcDeviantSpectraAnalysis::getYBinSize() {
+  return mYBinSize;
+}
+void StTpcDeviantSpectraAnalysis::setMtBinSize(double mtbin) {
+  mMtBinSize = mtbin;
+}
+double StTpcDeviantSpectraAnalysis::getMtBinSize() {
+  return mMtBinSize;
+}
+
 void StTpcDeviantSpectraAnalysis::bookHistograms() {
  
-  *mNumEvent = 0;
+  mNumEvent = 0;
 
   float massParticle = mParticle->mass();
  
@@ -18,44 +31,47 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   int Ndevbins = 50;
   float lybin =-2. ;
   float uybin = 2.;
-  int NYbins = int(0.5+(uybin - lybin)/(*mYBinSize));
+  int NYbins = int(0.5+(uybin - lybin)/(mYBinSize));
   float lmtbin = massParticle ;
   float umtbin = massParticle + 1.;
-  int NMtbins = int(0.5+(umtbin - lmtbin)/(*mMtBinSize));
+  int NMtbins = int(0.5+(umtbin - lmtbin)/(mMtBinSize));
 
-  char* hlab = new char[100];
-
-  strcpy(hlab,"YMtDeviant"); 
-  strcat(hlab,mTitle);
-  mYMtDeviant = new TH3D(hlab,"number sigma from PID band, y,mt",
+ 
+  string hlabYMtDev = "YMtDeviant";
+  hlabYMtDev = hlabYMtDev + mTitle;
+  const char* hYMtDev = hlabYMtDev.data(); 
+  mYMtDeviant = new TH3D(hYMtDev,"number sigma from PID band, y,mt",
 			 NYbins, lybin,uybin,
 			 NMtbins,lmtbin,umtbin,
 			 Ndevbins,ldevbin,udevbin);
-  mYMtDeviant->Sumw2();
-  
-  strcpy(hlab,"YMt"); 
-  strcat(hlab,mTitle);
-  mYMt = new TH2D(hlab,"y,mt",
+  mYMtDeviant->Sumw2();  
+
+  string hlabYMt = "YMt";
+  hlabYMt = hlabYMt + mTitle;
+  const char* hYMt = hlabYMt.data(); 
+  mYMt = new TH2D(hYMt,"y,mt",
 			 NYbins, lybin,uybin,
 			 NMtbins,lmtbin,umtbin);
   mYMt->Sumw2();
-  
-  strcpy(hlab,"PIDDeviant"); 
-  strcat(hlab,mTitle);
-  mPIDDeviant = new TH1D(hlab,"number sigma from pid band",
+
+  string hlabPID = "PIDDeviant";
+  hlabPID = hlabPID + mTitle;
+  const char* hPID = hlabPID.data(); 
+  mPIDDeviant = new TH1D(hPID,"number sigma from pid band",
 		Ndevbins,ldevbin,udevbin);
   mPIDDeviant->Sumw2();
 
-  strcpy(hlab,"dedxvsP"); 
-  strcat(hlab,mTitle);
-  mDedxvsP = new TH2D(hlab,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
+  string hlabDedx = "dedxvsP";
+  hlabDedx = hlabDedx + mTitle;
+  const char* hDedx = hlabDedx.data(); 
+  mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
   mDedxvsP->Sumw2();
 
 }
 
 void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 
-  (*mNumEvent)++ ;  
+  mNumEvent++ ;  
   double mMassPid = mParticle->mass();
   cout << mParticle->charge() << endl;
   int pidStatus = 1;
@@ -85,15 +101,15 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 	  // check to see if track satisfies the quality cuts set up
 	  // for this analysis
 	  //
-	  if (nhit > mEffic->nhitCut() && 
-	      dca < mEffic->dcaCut() && 
+	  if (nhit > mEffic.nhitCut() && 
+	      dca < mEffic.dcaCut() && 
 	      fabs(mParticle->charge() - track->helix().charge(bField)) < 0.01) {
 
             double dedx = tpc->mean();
 	    double deviant = 
 	      track->pidTraits().tpcDedxPid()->numberOfSigma(mMassPid);
 
-	    double effic = mEffic->efficiency(track);
+	    double effic = mEffic.efficiency(track);
             if (effic > 0. && effic < 1.) {
 	      float weight = 1./effic;
               double pperp = mom.perp();
@@ -117,8 +133,8 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 }
 void StTpcDeviantSpectraAnalysis::projectHistograms() {
 
-  if (*mNumEvent==0) return;
-  float xnorm = 1./float(*mNumEvent);
+  if (mNumEvent==0) return;
+  float xnorm = 1./float(mNumEvent);
   mYMtDeviant->Scale(xnorm);
 
   // check for histograms
@@ -137,22 +153,32 @@ void StTpcDeviantSpectraAnalysis::projectHistograms() {
   TH1D* deviant = new TH1D[NYbins*NMtbins];
 
   int ihist = 0;
-  char hlabel[100];
-  char hlab[100]; 
+  char hlab[100];
+ 
   for (Int_t iYSlice =1 ; iYSlice < NYbins+1; iYSlice++){ 
     int iYFirst = iYSlice ;
     int iYLast  = iYSlice + 1 ;
     for (Int_t iMtSlice =1 ; iMtSlice < NMtbins+1; iMtSlice++){ 
       int iMtFirst = iMtSlice ;
       int iMtLast  = iMtSlice + 1 ;
-      sprintf(hlabel,"deviant%iY%i",iYSlice,iMtSlice);
-      strcpy(hlab,hlabel); 
-      strcat(hlab,mTitle);   
+      sprintf(hlab,"deviant%iY%i",iYSlice,iMtSlice);
+      string hlabel=hlab;
+      hlabel=hlabel+mTitle;
+      // strcpy(hlab,hlabel); 
+      // strcat(hlab,mTitle);
+      const char* h = hlabel.data();    
       // project here
-      deviant[ihist] = *(mYMtDeviant->ProjectionZ(hlab, iYFirst, iYLast,
+      deviant[ihist] = *(mYMtDeviant->ProjectionZ(h, iYFirst, iYLast,
 					   iMtFirst, iMtLast,"E"));       
       ihist++;
     }
   }
 }
+
+
+
+
+
+
+
 
