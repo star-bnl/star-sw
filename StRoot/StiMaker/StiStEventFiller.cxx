@@ -1,11 +1,17 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.8 2002/05/29 19:14:45 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.9 2002/06/05 20:31:15 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.9  2002/06/05 20:31:15  calderon
+ * remove some redundant statements, the call to
+ * StTrackNode::addTrack()
+ * already calls
+ * track->SetNode(this), so I don't need to do it again
+ *
  * Revision 1.8  2002/05/29 19:14:45  calderon
  * Filling of primaries, in
  * StiStEventFiller::fillEventPrimaries()
@@ -194,15 +200,16 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		    detInfoVec.push_back(detInfo);
 		    trNodeVec.push_back(trackNode);
 		    gTrack->setDetectorInfo(detInfo);
-		    gTrack->setNode(trackNode);
-		    trackNode->addTrack(gTrack);
+		    trNodeVec.back()->addTrack(gTrack);
 		    
 		    // reuse the utility to fill the topology map
 		    // this has to be done at the end as it relies on
 		    // having the proper track->detectorInfo() relationship
 		    // and a valid StDetectorInfo object.
 		    StuFixTopoMap(gTrack);
-		    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trackNode) );
+		    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
+		    if (trackNode->entries(global)<1)
+			cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! " << endl;
 		}
 		catch (runtime_error & rte ) {
 		    cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception filling track: "
@@ -254,7 +261,11 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	}
 	if (kTrack->isPrimary()) {
 	    StTrackNode* currentTrackNode = (*itKtrack).second;
-	    
+
+	    if (currentTrackNode->entries(global)<1) {
+		cout << "skipping Node: this node should have a global track but doesn't" << endl;
+		continue;
+	    }
 	    // detector info
 	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	    fillDetectorInfo(detInfo,kTrack);
@@ -268,8 +279,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 		// set up relationships between objects
 		detInfoVec.push_back(detInfo);
 		pTrack->setDetectorInfo(detInfo);
-		pTrack->setNode(currentTrackNode);
-		currentTrackNode->addTrack(pTrack);
+		currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
 		vertex->addDaughter(pTrack);
 	    
 		StuFixTopoMap(pTrack);
