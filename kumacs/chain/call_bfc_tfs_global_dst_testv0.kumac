@@ -38,6 +38,10 @@
   exec write_table_to_ntuple#close_disk 21 121
 *
 * Now read in ntuple and make plot
+  hi/file 31 testv0.ntup 0
+  nt/li
+  nt/plot 121.inv_mass_la (inv_mass_la>1.1).and.(inv_mass_la<1.14)
+* 
 
 
 
