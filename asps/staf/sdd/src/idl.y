@@ -1,4 +1,5 @@
-/* Yacc code for Scientific Table IDL compiler, begun October 5 1995 by Herb Ward.
+/* Yacc code for Staf IDL compiler, 
+   begun October 5 1995 by Herb Ward.
 ** See bottom of file for mnemonicity tables (whatever those are).
 */
 /******************************************************** yacc declarations */
@@ -46,7 +47,7 @@
 #define INFILE  70   /* Max # of input files, including recursive includes */
 #define INFILES 170  /*  Max size of any input, including path */
 #define COL 300
-#define COMMENTS 1000
+#define COMMENTS 1200
 #define OLC 82
 #define SINGL (int)yytext[0]
 #define TSIZE 21 /* big enuf for "unsigned short" */
@@ -88,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.8 1998/06/05 23:26:19 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.9 1998/06/06 17:35:28 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -151,10 +152,13 @@ char *StrippedInFileName(int uppercase) {
 }
 void DoComment(int codeLineNum,char *xx) {
   char *cc;
+  static len=-10;
+  char *rr="\nCOMMENTS TRUNCATED";
+  if(len<0) len=strlen(rr)+5;
   if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
   if(gNoMoreComments) return;
-  if(strlen(cc)+strlen(gComments)>COMMENTS-13) {
-    strcat(gComments,"\nCOMMENTS TRUNCATED"); gNoMoreComments=7;
+  if(strlen(cc)+strlen(gComments)>COMMENTS-len) {
+    strcat(gComments,rr); gNoMoreComments=7;
   }
   strcat(gComments,cc);
 }
@@ -190,7 +194,10 @@ void OutputCommentsFromIdlFile(int fortranOrC,FILE *ff) {
   if(fortranOrC==1) {                                           /* FORTRAN */
     FF"C COMMENTS FROM IDL FILE:\n"); strcpy(buf,gComments);
     cc=strtok(buf,"\n");
-    while(cc) { FF"C %s\n",cc); cc=strtok(NULL,"\n"); }
+    while(cc) {
+      FF"C %s\n",cc); 
+      cc=strtok(NULL,"\n");
+    }
   }
   if(fortranOrC==2) {                                                 /* C */
     FF"/* COMMENTS FROM IDL FILE:\n");
@@ -425,7 +432,8 @@ void Tbl(void) {
   }
   OpenAllTblOutput();
   if(gOptionM || gOptionT) return;
-  DotHFileTbl(); DotIncFileTbl();
+  DotHFileTbl(); 
+  DotIncFileTbl();
 }
 DumpGlobalsPam(void) {
   int ii,jj; char buf[5];
@@ -984,7 +992,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1)
        FF"   o%d->GetHeader(),o%d->GetTable()",jj,jj);
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
        }
-    FF" );\n}\n"); /* bbb wrking here */
+    FF" );\n}\n");
   }  
   FF"//_______________________________________________________________\n");
   FF"Int_t St_%s::operator()(\n",sifn);
@@ -1371,7 +1379,7 @@ void OpenAllTblOutput(void) {
   } else {
     gFpInc=fopen(fn,mode); /* gOptionf OK */
     if(gFpInc==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM && !gOptionT && !strcmp(mode,"w") && !gOptionq) P"  out: %s\n",fn);
+    if(!gOptionM&&!gOptionT&&!strcmp(mode,"w")&&!gOptionq) P"  out: %s\n",fn);
     StandardBlurb(1,mode,gFpInc);
   }
 
@@ -1381,7 +1389,7 @@ void OpenAllTblOutput(void) {
   } else {
     gFpH=fopen(fn,mode); /* gOptionf OK */
     if(gFpH==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM && !gOptionT && !strcmp(mode,"w") && !gOptionq) P"  out: %s\n",fn); 
+    if(!gOptionM&&!gOptionT&&!strcmp(mode,"w")&&!gOptionq) P"  out: %s\n",fn); 
     StandardBlurb(2,mode,gFpH);
   }
 }
@@ -1557,7 +1565,10 @@ void HandleOneInputFile(char *inFile) { /* maybe inFile=gInFileName */
   if(strstr(inFile,"PAM.idl")) { gHaveIncludedPamIdl=7; return; }
 
   SetYyinFilePtr(gInFileName); PreParseScanOfFile(); fclose(yyin);
-  SetYyinFilePtr(gInFileName); Init2(); yyparse();   fclose(yyin);
+  SetYyinFilePtr(gInFileName); 
+  Init2(); 
+  yyparse();   
+  fclose(yyin);
   if(gNInFile>=INFILE) Err(__LINE__);
   if(strlen(inFile)>INFILES) Err(__LINE__);
   strcpy(gInFile[gNInFile++],inFile);
@@ -1571,7 +1582,7 @@ void HandleOneInputFile(char *inFile) { /* maybe inFile=gInFileName */
       fclose(gFpH); 
   }
   RecursiveProcessingOfIncludeFiles(buffer);
-  if(!gOptionM && ! gOptionT && !gOptionq) PP"----- finished with %s\n",buffer);
+  if(!gOptionM&&!gOptionT&&!gOptionq) PP"----- finished with %s\n",buffer);
 } /* save inFile buffer gInFileName */
 void FixVersionInfo(void) {
   int ii;
@@ -1587,7 +1598,7 @@ int main(int nnn,char *aaa[]) {
   sprintf(gOptioniTempFile,"/tmp/stic.option.i.%d",getpid());
   if(nnn<2) Usage();
   ReadOptions(nnn,aaa);
-  if(!gOptionM && !gOptionT && !gOptionq) P"For help, type \"%s help\".\n",gExeName);
+  if(!gOptionM&&!gOptionT&&!gOptionq) P"For help type %s help.\n",gExeName);
   if(!strcmp(gInFileName,"help")) Help();
   HandleOneInputFile(gInFileName);
   CheckThatAllTablesHaveBeenIncluded();
@@ -1603,7 +1614,7 @@ int main(int nnn,char *aaa[]) {
   if (gOptionT) {
     for(i=1;i<gNInFile;i++) { PP"%s",gInFile[i]); if(i<gNInFile-1) PP" "); }
     PP"\n");
-}
+  }
   fflush(stdout); 
   exit(0);
 }
