@@ -1,5 +1,5 @@
 // 
-// $Id: StEmcRawMaker.cxx,v 1.5 2004/11/02 03:23:09 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.6 2004/11/22 12:46:22 suaide Exp $
 
 #include <math.h>
 
@@ -55,6 +55,7 @@ Int_t StEmcRawMaker::Init()
 {     
   //................BEMC stuff ..............
   mBemcRaw->initHisto();
+  mBemcRaw->printConf();
 
   //................EEMC stuff ..............
   eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
@@ -274,6 +275,11 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.6  2004/11/22 12:46:22  suaide
+// added new flags for hit reconstruction. Status are not checked
+// dureing production anymore in order to avoid bad status loaded in
+// DB
+//
 // Revision 1.5  2004/11/02 03:23:09  suaide
 // small changes in order to fix a bug
 //
