@@ -69,12 +69,13 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
   : StiDetectorBuilder("SvtBuilder",active)
 {
   _calc = new StiDefaultHitErrorCalculator();
-  _calc->set(1.,0.,0.,1.,0.,0.);
+  _calc->set(0.25,0.,0.,0.25,0.,0.);
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
 {
   delete _calc;
+
 }
 
 void StiSvtDetectorBuilder::buildMaterials()
