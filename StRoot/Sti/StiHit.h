@@ -33,8 +33,12 @@ public:
     double syz() const;
     double refangle() const;
     double position() const;
+    
     const StiDetector* detector() const;
+    StiDetector* detector();
+    
     const StHit* stHit() const;
+    
     bool   isUsed() const;
     StThreeVectorD globalPosition() const;
 
@@ -114,6 +118,8 @@ inline double StiHit::position() const {return mposition;}
 inline const StHit* StiHit::stHit() const {return msthit;}
 
 inline const StiDetector* StiHit::detector() const {return mdetector;}
+
+inline StiDetector* StiHit::detector() {return mdetector;}
 
 inline bool   StiHit::isUsed() const { return mused;}
 

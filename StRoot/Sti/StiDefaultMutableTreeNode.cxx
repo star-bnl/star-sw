@@ -190,7 +190,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getParent()
 //						is out of bounds
 // @return	the StiTreeNode in this node's child array at  the specified index
 //--------------------------------------------------------------
-StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index) 
+StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index) const
 {
   return children[index];
 }
@@ -200,7 +200,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index)
 //
 // @return	an int giving the number of children of this node
 //--------------------------------------------------------------
-int StiDefaultMutableTreeNode::getChildCount() 
+int StiDefaultMutableTreeNode::getChildCount() const
 {
   return children.size();
 }

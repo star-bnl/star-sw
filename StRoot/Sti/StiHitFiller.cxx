@@ -88,24 +88,20 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 		return;
 	    }
 	    
-	    //Loop over hits	    
-	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
-		StTpcHit* hit = dynamic_cast<StTpcHit*>(*iter);
-		if (hit) {
-		    
-		    //Now we have the hit
-		    StiHit* stihit = factory->getObject();
-		    stihit->reset();
-		    
-		    mtranslator->operator()(hit, stihit);
-		    stihit->setDetector( layer );
-		    
-		    //Now Fill the Hit Container!
-		    store->push_back( stihit );
-		    ++nhit;
-		    if (fmod(nhit, nprint)==0.) {
-			cout <<"Filling TpcHit:\t"<<nhit<<endl;
-		    }
+	    //Loop over hits   
+	    for (vector<StTpcHit*>::const_iterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
+		//Now we have the hit
+		StiHit* stihit = factory->getObject();
+		stihit->reset();
+		
+		mtranslator->operator()( *iter, stihit);
+		stihit->setDetector( layer );
+		
+		//Now Fill the Hit Container!
+		store->push_back( stihit );
+		++nhit;
+		if (fmod(nhit, nprint)==0.) {
+		    cout <<"Filling TpcHit:\t"<<nhit<<endl;
 		}
 	    }
 	}	    

@@ -10,13 +10,13 @@ class StiTreeNode
   // Returns the child <code>StiTreeNode</code> at index 
   // <code>childIndex</code>.
   ///
-  virtual StiTreeNode * getChildAt(int childIndex)=0;
+  virtual StiTreeNode * getChildAt(int childIndex) const =0;
   
   //
   // Returns the number of children <code>StiTreeNode</code>s the receiver
   // contains.
   ///
-  virtual int getChildCount()=0;
+  virtual int getChildCount() const =0;
   
   //
   // Returns the parent <code>StiTreeNode</code> of the receiver.

@@ -42,17 +42,18 @@
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
 
 double gRefAnleForSector(unsigned int sector);
-
-template <class T>
-T g2dEulerRotation(const T& x, double beta)
-{
-    //xprime = cos(beta)*x.x() + sin(beta)*x.y()
-    //yprime = -1.*sin(beta)*x.x() + cos(beta)*x.y()
-    return T( cos(beta)*x.x() + sin(beta)*x.y(),
-	      -1.*sin(beta)*x.x() + cos(beta)*x.y(),
-	      x.z()
-	      );
-}
+/*
+  template <class T>
+  T g2dEulerRotation(const T& x, double beta)
+  {
+  //xprime = cos(beta)*x.x() + sin(beta)*x.y()
+  //yprime = -1.*sin(beta)*x.x() + cos(beta)*x.y()
+  return T( cos(beta)*x.x() + sin(beta)*x.y(),
+  -1.*sin(beta)*x.x() + cos(beta)*x.y(),
+  x.z()
+  );
+  }
+*/
 
 //Given a rotation R and error matrix E about the z-axis, we take E'=R*E*R_transpose
 template <class T>
@@ -122,8 +123,7 @@ StiGeometryTransform::StiGeometryTransform()
         10, gStTpcDb->Dimensions()->ifcRadius()) );
     for (unsigned int padrow=1; padrow<=45; ++padrow) {
 	double center = centerForTpcPadrow(1, padrow).perp();
-        mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow + 100, 
-                                                            center ) );	
+        mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow + 100, center ) );	
     }
 
     cout <<"\nPadrow\tRadius"<<endl;
@@ -162,7 +162,8 @@ void StiGeometryTransform::kill()
 // a good idea at the time....]
 //
 // returns in [0,2pi)
-double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
+double StiGeometryTransform::phiForWestSector(int iSector, int nSectors) const
+{
     
   int offset = nSectors/4;
   double deltaPhi = 2.*M_PI/nSectors;
@@ -177,7 +178,8 @@ double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
 } // phiForWestSector
 
 // as above, but numbering _increases_ with increasing phi.
-double StiGeometryTransform::phiForEastSector(int iSector, int nSectors){
+double StiGeometryTransform::phiForEastSector(int iSector, int nSectors) const
+{
     
     int offset = 3*nSectors/4;
     double deltaPhi = 2.*M_PI/nSectors;
@@ -191,7 +193,8 @@ double StiGeometryTransform::phiForEastSector(int iSector, int nSectors){
 
 } // phiForEastSector
 
-int StiGeometryTransform::westSectorForPhi(double phi, int nSectors){
+int StiGeometryTransform::westSectorForPhi(double phi, int nSectors) const
+{
     
     int offset = nSectors/4;
     double deltaPhi = 2.*M_PI/nSectors;  
@@ -207,7 +210,8 @@ int StiGeometryTransform::westSectorForPhi(double phi, int nSectors){
     
 } // westSectorForPhi
 
-int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors){
+int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors) const
+{
     
     int offset = nSectors/4;
     double deltaPhi = 2.*M_PI/nSectors;  
@@ -224,7 +228,7 @@ int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors){
 } // eastSectorForPhi
 
 // returns a vector (with z==0) pointing from the origin to  the center of the given padrow or ladder.
-StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int padrow)
+StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int padrow) const
 {
     double radius = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
     double phi = phiForSector(sector, 12);
@@ -234,7 +238,7 @@ StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int p
 
 // this uses the database convention of 6 svt layers + 1 ssd layer.
 // Every other svt ladder is thus bogus (1,3,5,7 on layer 1, eg), but the xform  works regardless
-StThreeVector<double> StiGeometryTransform::centerForSvgLadder(int layer, int ladder)
+StThreeVector<double> StiGeometryTransform::centerForSvgLadder(int layer, int ladder) const
 {
     double radius = svgConfig.layer_radius[layer - 1];
     int nLadders = 2*svgConfig.n_ladder[layer - 1];
@@ -243,19 +247,19 @@ StThreeVector<double> StiGeometryTransform::centerForSvgLadder(int layer, int la
     return StThreeVector<double>(radius*cos(phi), radius*sin(phi), 0.);
 }
     
-int StiGeometryTransform::sectorForTpcCoords(const StThreeVector<double> &vec)
+int StiGeometryTransform::sectorForTpcCoords(const StThreeVector<double> &vec) const
 {
     return tpcTransform->sectorFromCoordinate(vec);
 }
 
-int StiGeometryTransform::padrowForTpcCoords(const StThreeVector<double> &vec)
+int StiGeometryTransform::padrowForTpcCoords(const StThreeVector<double> &vec) const
 {
     int sector = sectorForTpcCoords(vec);
     return tpcTransform->rowFromLocal( tpcTransform->rotateToLocal(vec, sector));
 }
 
 // finds nearest real ladder (as above, could be bogus [electronics instead  of wafers]) and layer.
-int StiGeometryTransform::layerForSvgCoords(const StThreeVector<double> &vec)
+int StiGeometryTransform::layerForSvgCoords(const StThreeVector<double> &vec) const
 {
     double minDeltaR = 200.;
     int minLayer = 0;
@@ -268,14 +272,14 @@ int StiGeometryTransform::layerForSvgCoords(const StThreeVector<double> &vec)
     return minLayer + 1;
 }
 
-int StiGeometryTransform::ladderForSvgCoords(const StThreeVector<double> &vec)
+int StiGeometryTransform::ladderForSvgCoords(const StThreeVector<double> &vec) const
 {
     int layer = layerForSvgCoords(vec);
     int nLadders = svgConfig.n_ladder[layer - 1];    
     return westSectorForPhi(vec.phi(), nLadders);
 }
     
-double StiGeometryTransform::phiForSector(int iSector, int nSectors)
+double StiGeometryTransform::phiForSector(int iSector, int nSectors) const
 {
     double phi;
     if(iSector>nSectors){
@@ -504,21 +508,26 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
 }
 
 //Go from global->Sti, expect refAngle positive
-StThreeVector<double> StiGeometryTransform::operator() (const StThreeVector<double>& globalPosition, double refAngle)
+/*
+  StThreeVector<double> StiGeometryTransform::operator() (const StThreeVector<double>& globalPosition, double refAngle)
+  {
+  return g2dEulerRotation(globalPosition, refAngle);
+  }
+  
+  StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPosition, double refAngle)
+  {
+  return g2dEulerRotation(globalPosition, refAngle);
+  }
+*/
+
+pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit) const
 {
-    return g2dEulerRotation(globalPosition, refAngle);
-}
-
-StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPosition, double refAngle)
-{
-    return g2dEulerRotation(globalPosition, refAngle);
-}
-
-pair<double, double> StiGeometryTransform::angleAndPosition(
-    const StTpcHit *pHit) const{
-
   double dRefAngle = phiForSector( pHit->sector(), 12 );
-  double dPosition = mpadrowradiusmap[pHit->padrow() + 100]; // 1-indexed
+  padrow_radius_map::const_iterator where = mpadrowradiusmap.find(pHit->padrow()+100);
+  if (where==mpadrowradiusmap.end()) {
+      cout <<"StiGeometryTransform::angleAndPosition(). ERROR:\tpadrow not found"<<endl;
+  }
+  double dPosition = (*where).second;
 
   return pair<double, double>(dRefAngle, dPosition);
 } // angleAndPosition
