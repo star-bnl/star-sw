@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.38 1999/11/22 18:41:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.39 1999/11/24 03:06:46 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -456,25 +456,28 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
                                      , "the closed bracket missed"
                                     };
     const Int_t lenExpr = sizeof(errorMessages)/sizeof(Char_t *);
-    const Char_t openBracket  = '(';
-    const Char_t closeBracket = ')';
-    const Char_t comma        = ',';
-    const Char_t collon       = ':';
-    const Char_t delimiters[] = {openBracket,comma,collon,collon,closeBracket };
+    const Char_t *openBracket  = "(";
+    const Char_t *closeBracket = ")";
+    const Char_t *comma        = ",)";
+    const Char_t *collon       = ":";
+    const Char_t *delimiters[] = {openBracket,comma,collon,collon,closeBracket };
     pos = positions[nParsed] = inName;
-    for (nParsed=1; (nParsed <= lenExpr) && 
-                    ((pos = strchr(pos+1,delimiters[nParsed-1])) ||
-                     (pos = strchr(pos+1,delimiters[lenExpr-1])) );
-         nParsed++)  
+    UInt_t idx = 0;
+    nParsed = 1;
+    Bool_t hasClosed = kFALSE;
+    for (nParsed = 1; nParsed <= lenExpr; nParsed ++ ) 
     {
+      if  ( (idx = strcspn(pos+1,delimiters[nParsed-1])) >=  strlen(pos+1) ) break;
+      pos = pos+idx+1;
       positions[nParsed] = pos+1;
+      // Is it close bracket
+      if (*pos == *closeBracket) { *pos = 0 ; hasClosed = kTRUE; break; }
       *pos = 0;
     }
     if (nParsed > 1) {
-      nParsed--;
-      for (Int_t i=1;i<nParsed;i++) 
+      for (Int_t i=1;i<nParsed-1;i++) 
          if (!positions[i]) cerr << "StEventDisplayMaker::ParseName" << errorMessages[i-1] << endl;
-      if (nParsed < lenExpr) nParsed = 0;
+         if ( (nParsed <= lenExpr) && !hasClosed ) nParsed = 0;
     }
   }
   return nParsed;
@@ -761,7 +764,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            int h = t.q > 0 ? -1 : 1;  
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
-	   Int_t nSteps = Int_t(4*t.length*t.curvature + 1); 
+	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
@@ -937,6 +940,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.39  1999/11/24 03:06:46  fine
+// Improved Helix parameters and parser
+//
 // Revision 1.38  1999/11/22 18:41:45  fine
 // Parser for single parameter fixed
 //
