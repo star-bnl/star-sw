@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.15 2000/02/28 22:02:51 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.16 2000/02/29 20:20:29 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -31,9 +31,13 @@
  *               correctly. Thanks to Herb Ward.
  * 24-Feb-00 MJL clean up loop structure, add comments everywhere
  * 28-Feb-00 MJL protect against hardware quirks in VRAM
+ * 29-Feb-00 MJL change loop logic line 220 (test seqCnt, not i)
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.16  2000/02/29 20:20:29  levine
+ * corrected loop logic line 220
+ *
  * Revision 1.15  2000/02/28 22:02:51  levine
  * add protection against illegal CPP sequences - was causing unitialized pointers
  *
@@ -174,7 +178,7 @@ int TPCV2P0_ZS_SR::initialize()
 	    int i, start, stop=-1, newseq;
 	    for (i=0; i<TPC_MXSEQUENCE; i++) { //loop over ASIC sequences
 	      start = clusters[i].start_time_bin;
-	      if ((start < 0)||(start==511)||(start<=stop)) break;
+    	      if ((start < 0)||(start==511)||(start<=stop)) break;
 	      //protect against hardware quirks in VRAM
 	      newseq = (start>lastbin+1);//sequence not broken in pieces by MZ
 	      stop = clusters[i].stop_time_bin;
@@ -216,7 +220,7 @@ int TPCV2P0_ZS_SR::initialize()
 	    int seqCnt = 0;   
 
 	    // loop over sequences, filling in structs
-	    for (i=0; i<nseq; i++) { //loop over ASIC sequences
+	    for (i=0; seqCnt<nseq; i++) { //loop over ASIC sequences
 	      if (i<TPC_MXSEQUENCE) {
 		start = clusters[i].start_time_bin;
 		if ((start < 0)||(start==511)) break;
