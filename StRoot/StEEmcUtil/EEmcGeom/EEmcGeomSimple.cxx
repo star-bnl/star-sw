@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.12 2003/05/23 22:13:04 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.13 2003/07/01 14:13:25 balewski Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.13  2003/07/01 14:13:25  balewski
+// simplified formulano clue
+//
 // Revision 1.12  2003/05/23 22:13:04  zolnie
 // SUN does not like inlines (why??)
 //
@@ -131,12 +134,13 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
   Double_t  phi   = getPhiMean(isec,isub) - (xphiBin-iphiBin)*2*getPhiHalfWidth(isec,isub) ;
 
   Double_t  eta   = getEtaMean(ietaBin) - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
-  // printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f\n",xetaBin,xphiBin,eta,phi);
+  //  printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f\n",xetaBin,xphiBin,eta,phi);
   
   if(eta<0.0) return TVector3();
   Double_t  z     = getZMean();
-  Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+  Double_t  rho   = z/sinh(eta);  
 
+  //printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f, x=%f, y=%f z=%f\n",xetaBin,xphiBin,eta,phi,rho*cos(phi),rho*sin(phi),z);
   // create vector pointing toward the center of the tower
   return TVector3(rho*cos(phi),rho*sin(phi),z);
 }
