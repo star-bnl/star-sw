@@ -1,4 +1,4 @@
-#define AUAUDATA
+#define HIJING
 
 #ifndef __STESTRUCTSIGMAS__H
 #define __STESTRUCTSIGMAS__H
