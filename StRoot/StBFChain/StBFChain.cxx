@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.393 2004/03/15 23:57:27 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.394 2004/03/16 21:01:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -439,7 +439,7 @@ Bfc_st BFC1[] = {
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"fpt"      ,"ftpc_tracks","globalChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
@@ -509,6 +509,10 @@ Bfc_st BFC1[] = {
 
   {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
   {"tofsim"     ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
+  {"tofrMatch"   ,"","","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
+                                                                       "TPC to TOFr track matching",kFALSE},
+  {"tofpMatch"   ,"","","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
+                                                                       "TPC to TOFp track matching",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
@@ -965,7 +969,7 @@ Bfc_st BFC2[] = {
   {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
 
-
+  //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -978,7 +982,7 @@ Bfc_st BFC2[] = {
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"         ,"v0","globalChain","SCL,globT,tls" ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"         ,"xi","globalChain","SCL,globT,tls" ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"fpt"      ,"ftpc_tracks","globalChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
@@ -996,8 +1000,16 @@ Bfc_st BFC2[] = {
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,tpUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
+  //  Reminder: You are within the ITTF chain definitions
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
+  {"genvtx"     ,"","","",      "StGenericVertexMaker","StGenericVertexMaker","Minuit Vertex Finder",kFALSE},
+  {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
+  {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
+  {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
+  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
+      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1014,7 +1026,7 @@ Bfc_st BFC2[] = {
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
 
-
+  //  Reminder: You are within the ITTF chain definitions
   {"Kink2"       ,"kink2","","db,MuDST","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
@@ -1039,7 +1051,7 @@ Bfc_st BFC2[] = {
   {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
                                                                                   "EEMC data maker",kFALSE},
 
-
+  // Reminder: You are within the ITTF chain definitions
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
@@ -1047,6 +1059,10 @@ Bfc_st BFC2[] = {
 
   {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
   {"tofsim"     ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
+  {"tofrMatch"   ,"","","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
+                                                                       "TPC to TOFr track matching",kFALSE},
+  {"tofpMatch"   ,"","","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
+                                                                       "TPC to TOFp track matching",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
@@ -1080,19 +1096,13 @@ Bfc_st BFC2[] = {
   {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST",         "StMuDstMaker","","Writes Common MuDST",kFALSE},
 
 
-
+  // Reminder: You are within the ITTF chain definitions
   {"QA"          ,"QA","","globT,SCL,global"  ,"St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
   {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
                        "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
-  {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
-  {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
-  {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
-  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
-  {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
-      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -1554,6 +1564,11 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StRchMaker") {
 	    if (GetOption("Rrs")) mk->SetMode(1); // rrs
 	    else                  mk->SetMode(0); // daq
+	  }
+
+	  // Place-holder. Would possibly be a bitmask
+	  if (maker == "StTofrMatchMaker"){
+	    mk->SetMode(0);
 	  }
 
 	  // Turn on alternative V0 method
