@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.134 2000/05/26 13:44:09 fisyak Exp $
+// $Id: bfc.C,v 1.135 2000/06/13 23:17:20 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -127,7 +127,7 @@ if (Last >= 0) {
   St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
   St_XDFFile *xdf_out = chain->GetXdfOut();
   if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-  if (geant && First > 1) geant->Skip(First-1);
+  if (geant && First > 1 && geant->IsActive()) geant->Skip(First-1);
   else {
     StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
     if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
