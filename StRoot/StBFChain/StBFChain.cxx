@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.246 2001/11/13 15:58:34 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.247 2001/11/13 18:50:50 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -64,11 +64,11 @@ Bfc_st BFC[] = {
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
-  //{"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
-  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt"
+  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
+  //{"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt"
                                                                               ,"","","Year 2 chain",kFALSE},
-  //{"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
-  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
+  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
+   //{"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
                                                                          ,"","","Assymptotic chain",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
