@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.1 2003/03/27 21:37:46 calderon Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.2 2003/04/29 13:20:18 putschke Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.2  2003/04/29 13:20:18  putschke
+ * use now dca of global track
+ *
  * Revision 1.1  2003/03/27 21:37:46  calderon
  * Joern's code for reference multiplicity using the FTPC.
  *
@@ -82,7 +85,7 @@ uncorrectedNumberOfFtpcEastPrimaries(const StEvent& evt)
    // check pt
    if (track->geometry()->momentum().perp()>=3) continue; 
    // finally, check dca, if a track satisfies gets inside the if, count it.
-   if (track->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
+   if (track->node()->track(global)->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
     return countedTracks;
 }
@@ -105,7 +108,7 @@ uncorrectedNumberOfFtpcWestPrimaries(const StEvent& evt)
    // check pt
    if (track->geometry()->momentum().perp()>=3) continue; 
    // finally, check dca, if a track satisfies gets inside the if, count it.
-   if (track->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
+   if (track->node()->track(global)->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
     return countedTracks;
 }
