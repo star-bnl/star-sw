@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.98  2002/06/26 23:05:31  pruneau
+// changed macro
+//
 // Revision 1.97  2002/06/18 18:08:34  pruneau
 // some cout statements removed/added
 //
@@ -334,7 +337,7 @@ void StiMaker::finishEvent()
 	  //
 	  clock.start();  
 	  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
-	  mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+	  //mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
 	  clock.stop();
 	  cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
