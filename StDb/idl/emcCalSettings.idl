@@ -1,0 +1,32 @@
+/*    emcCalSettings.idl
+*
+*  Table: emcCalSettings
+*
+*       description: //:  Table which contains the calibration settings
+*/ 
+
+
+struct emcCalSettings { 
+
+   long  DataType;   /*   data type (0=simulation, 1=real)  */
+   long  UseL3Tracks;   /*   1 = use L3 tracks, 0 = use normal recontructed tracks  */
+   float  ZVertexCut;   /*   z vertex cut  */
+   long  NEtaBins;   /*   number of eta bins  */
+   float  EtaBinWidth;   /*   width of eta bin  */
+   long  DoEqualization;   /*   1 - Equalize eta bins, 0 - dont equalize  */
+   long  EqualizationMethod;   /*   0 - mean and RMS, 1 = fit  */
+   float  EqEventsPerBin;   /*   minimum number of events per bin for Equalization  */
+   float  EqMinNumberOfTracks;   /*   minimum number of tracks for a equalization event  */
+   float  EqMinOccupancy;   /*   minimum occupancy for hole detector for equalization  */
+   long  UseMipCalib;   /*   1 - use MIP peak for calibration, 0 - Dont use MIP  */
+   long  UseMipEtaBin;   /*   1 - use Etabin (requires equalization), 0 - Dont use Etabin  */
+   float  EOverMipCte;   /*   e/MIP = (1-0.054*eta)*sin(teta)/EOverMipCte (see V.Rykov for details)  */
+   long  MipPeakFitFuntion;   /*   function used to fit the MIP peak, 0 = two gaussians  */
+   float  MipEventsPerBin;   /*   minimum number of events per bin for calibration  */
+   float  MipMaxNumberOfTracks;   /*   maximum number of tracks for a calibration event  */
+   float  MipMinOccupancy;   /*   minimum occupancy for hole detector for calibration  */
+   float  MipMinimumMomentum;   /*   minimum momentum for a MIP track  */
+   long  UsePi0Calib;   /*   1 - use Pi0 for calibration, 0 - Dont use Pi0  */
+   long  UseElectronCalib;   /*   1 - use Electron for calibration, 0 - Dont use Electron  */
+
+ };  
