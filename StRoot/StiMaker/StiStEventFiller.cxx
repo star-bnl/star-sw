@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.39 2004/08/17 04:53:05 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.40 2004/08/17 20:04:28 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.40  2004/08/17 20:04:28  perev
+ * small leak fixed, delete physicalHelix,originD
+ *
  * Revision 2.39  2004/08/17 04:53:05  calderon
  * When filling fit traits for primary tracks, set the new flag
  * mPrimaryVertexUsedInFit.
@@ -347,7 +350,9 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 
 StiStEventFiller::~StiStEventFiller()
 {
-  cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
+ delete physicalHelix; physicalHelix=0;
+ delete originD;       originD      =0;
+   cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
 }
 
 //Helper functor, gotta live some place else, just a temp. test of StiKalmanTrack::stHits() method
