@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.11 1999/07/19 16:28:01 genevb Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.12 1999/08/07 16:42:08 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.12  1999/08/07 16:42:08  sakrejda
+* commented out a message that could write past an array boundary, cluster finder was crashing there
+*
 * Revision 1.11  1999/07/19 16:28:01  genevb
 * Edited some messages
 *
@@ -287,8 +290,10 @@ C time direction no longer a projection - WAL 13 Feb 98
 	 call StError('TPHAM - Hey -- ADCSUM=0!!!!')
          write(m132,*) 'number of pixels in cluster = ',nclspix
          call StError(m132)
-         write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
-         call StError(m132)
+cIS 08/07 commented the following two lines as a potential source of
+c         writting past the array boundary
+c         write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
+c         call StError(m132)
          ierr = 1
          return
         endif
