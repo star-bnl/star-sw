@@ -17,26 +17,8 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.3 2002/04/28 00:10:27 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.4 2003/02/18 22:19:09 jeromel Exp $
  *
- */
-
-/* -------------------------------------------------------------------------
- * $Log: StAnalysisMaker.cxx,v $
- * Revision 2.3  2002/04/28 00:10:27  jeromel
- * doxygen basic dox added. GetCVS() had wrong signature : corrected to avoid
- * propagation of this typo in new makers.
- *
- * Revision 2.2  2000/07/12 05:23:28  ullrich
- * Updated for better use as template for actual analysis.
- *
- * Revision 2.1  1999/12/30 01:54:57  ogilvie
- * added countPrimaryPions as example how to use PID
- *
- * Revision 2.0  1999/11/04 16:10:03  ullrich
- * Revision for new StEvent
- *
- * -------------------------------------------------------------------------
  */
 
 
@@ -79,9 +61,8 @@ long countPrimaryPions(StEvent&);
 //
 ClassImp(StAnalysisMaker)
 
-//    
-//  The constructor. Initialize you data members here.
-//    
+
+/// The constructor. Initialize you data members here.
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
 {
     mEventCounter = 0;
@@ -200,6 +181,53 @@ StAnalysisMaker::Make()
     tuple[k++] = event->primaryVertex()->position().y();    // y-vertex
     tuple[k++] = event->primaryVertex()->position().z();    // z-vertex
 
+
+    // Y3 trigger Id dump
+    const StTriggerId *l1 = event->triggerIdCollection()->l1();
+    const StTriggerId *l2 = event->triggerIdCollection()->l2();
+    const StTriggerId *l3 = event->triggerIdCollection()->l3();
+    const StTriggerId *nominal = event->triggerIdCollection()->nominal();
+
+    if(l1) {
+      vector<unsigned int> l1Vec = l1->triggerIds();
+      cout << "L1: Mask " <<l1->mask() << " " ;
+      for (vector<unsigned int>::iterator viter = l1Vec.begin();
+	   viter != l1Vec.end(); ++viter) {
+	cout << (*viter) << "," ;
+      }
+      cout << endl;
+    }
+    if(l2) {
+      vector<unsigned int> l2Vec = l2->triggerIds();
+      cout << "L2: Mask " <<l2->mask() << " " ;
+      for (vector<unsigned int>::iterator viter = l2Vec.begin();
+	   viter != l2Vec.end(); ++viter) {
+	cout << (*viter) << "," ;
+      }
+      cout << endl;
+    }
+    if(l3) {
+      vector<unsigned int> l3Vec = l3->triggerIds();
+      cout << "L3: Mask " <<l3->mask() << " " ;
+      for (vector<unsigned int>::iterator viter = l3Vec.begin();
+	   viter != l3Vec.end(); ++viter) {
+	cout << (*viter) << "," ;
+      }
+      cout << endl;
+    }
+
+    if(nominal) {
+      vector<unsigned int> nominalVec = nominal->triggerIds();
+      cout << "NOMINAL: Mask " <<nominal->mask() << " " ;
+      for (vector<unsigned int>::iterator viter = nominalVec.begin();
+	   viter != nominalVec.end(); ++viter) {
+	cout << (*viter) << "," ;
+      }
+      cout << endl;
+    }
+
+
+
     //
     //  Get the ZDC and CTB data.
     //  
@@ -273,3 +301,28 @@ bool StAnalysisMaker::accept(StTrack* track)
     //
     return track && track->flag() >= 0;
 }
+
+
+
+
+/* -------------------------------------------------------------------------
+ * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.4  2003/02/18 22:19:09  jeromel
+ * Added dump of Y3 triggers
+ *
+ * Revision 2.3  2002/04/28 00:10:27  jeromel
+ * doxygen basic dox added. GetCVS() had wrong signature : corrected to avoid
+ * propagation of this typo in new makers.
+ *
+ * Revision 2.2  2000/07/12 05:23:28  ullrich
+ * Updated for better use as template for actual analysis.
+ *
+ * Revision 2.1  1999/12/30 01:54:57  ogilvie
+ * added countPrimaryPions as example how to use PID
+ *
+ * Revision 2.0  1999/11/04 16:10:03  ullrich
+ * Revision for new StEvent
+ *
+ * -------------------------------------------------------------------------
+ */
+
