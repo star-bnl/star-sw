@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.21 2003/09/02 17:58:04 perev Exp $
+ * $Id: StEstMaker.cxx,v 1.22 2003/10/11 03:16:18 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.22  2003/10/11 03:16:18  perev
+ * Cleanup+bugfix: test for zer pointer, initialization added.
+ *
  * Revision 1.21  2003/09/02 17:58:04  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -133,38 +136,39 @@ Int_t StEstMaker::Finish() {
 		  <<"\t"<<mCumulNIdealPrim
 		  <<"\t"<<mCumulNIdealSeco
 		  <<"\t (all/prim/seco)"<<endm;
-  gMessMgr->Info()<<" Number of ideal tracks/event \t"<<(mCumulNIdealPrim+mCumulNIdealSeco)/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNIdealPrim/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNIdealSeco/(mCumulNEvents*1.)
+  double cum = (mCumulNEvents) ? mCumulNEvents:1;
+  gMessMgr->Info()<<" Number of ideal tracks/event \t"<<(mCumulNIdealPrim+mCumulNIdealSeco)/cum
+		  <<"\t"<<mCumulNIdealPrim/cum
+		  <<"\t"<<mCumulNIdealSeco/cum
 		  <<"\t (all/prim/seco)"<<endm;
   gMessMgr->Info()<<"  Total number of good tracks \t"<<mCumulNGoodPrim+mCumulNGoodSeco
 		  <<"\t"<<mCumulNGoodPrim
 		  <<"\t"<<mCumulNGoodSeco
 		  <<"\t (all/prim/seco)"<<endm;
-  gMessMgr->Info()<<"  Number of good tracks/event \t"<<(mCumulNGoodPrim+mCumulNGoodSeco)/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNGoodPrim/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNGoodSeco/(mCumulNEvents*1.)
+  gMessMgr->Info()<<"  Number of good tracks/event \t"<<double(mCumulNGoodPrim+mCumulNGoodSeco)/cum
+		  <<"\t"<<mCumulNGoodPrim/cum
+		  <<"\t"<<mCumulNGoodSeco/cum
 		  <<"\t (all/prim/seco)"<<endm;
   gMessMgr->Info()<<"   Total number of bad tracks \t"<<mCumulNBadPrim+mCumulNBadSeco
 		  <<"\t"<<mCumulNBadPrim
 		  <<"\t"<<mCumulNBadSeco
 		  <<"\t (all/prim/seco)"<<endm;
-  gMessMgr->Info()<<"   Number of bad tracks/event \t"<<(mCumulNBadPrim+mCumulNBadSeco)/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNBadPrim/(mCumulNEvents*1.)
-		  <<"\t"<<mCumulNBadSeco/(mCumulNEvents*1.)
+  gMessMgr->Info()<<"   Number of bad tracks/event \t"<<(mCumulNBadPrim+mCumulNBadSeco)/cum
+		  <<"\t"<<mCumulNBadPrim/cum
+		  <<"\t"<<mCumulNBadSeco/cum
 		  <<"\t (all/prim/seco)"<<endm;
   if ((mCumulNIdealPrim+mCumulNIdealSeco)!=0)
-    Efficiency=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/(1.*(mCumulNIdealPrim+mCumulNIdealSeco));
+    Efficiency=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/((mCumulNIdealPrim+mCumulNIdealSeco+1.e-10));
   if (mCumulNIdealPrim!=0)
-    EfficiencyPrim=100.*mCumulNGoodPrim/(1.*mCumulNIdealPrim);
+    EfficiencyPrim=100.*mCumulNGoodPrim/(mCumulNIdealPrim+1.e-10);
   if (mCumulNIdealSeco!=0)
-    EfficiencySeco=100.*mCumulNGoodSeco/(1.*mCumulNIdealSeco);
+    EfficiencySeco=100.*mCumulNGoodSeco/(mCumulNIdealSeco+1.e-10);
   if ((mCumulNGoodPrim+mCumulNGoodSeco+mCumulNBadPrim+mCumulNBadSeco)!=0)
-    Purity=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/(1.*(mCumulNGoodPrim+mCumulNGoodSeco+mCumulNBadPrim+mCumulNBadSeco));
+    Purity=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/((mCumulNGoodPrim+mCumulNGoodSeco+mCumulNBadPrim+mCumulNBadSeco)+1.e-10);
   if ((mCumulNGoodPrim+mCumulNBadPrim)!=0)
-    PurityPrim=100.*(mCumulNGoodPrim)/(1.*(mCumulNGoodPrim+mCumulNBadPrim));
+    PurityPrim=100.*(mCumulNGoodPrim)/((mCumulNGoodPrim+mCumulNBadPrim)+1.e-10);
   if ((mCumulNGoodSeco+mCumulNBadSeco)!=0)
-    PuritySeco=100.*(mCumulNGoodSeco)/(1.*(mCumulNGoodSeco+mCumulNBadSeco));
+    PuritySeco=100.*(mCumulNGoodSeco)/((mCumulNGoodSeco+mCumulNBadSeco)+1.e-10);
 
   gMessMgr->Info()<<"      Tracking efficiency (%) \t"<<Efficiency
 		  <<"\t"<<EfficiencyPrim
