@@ -91,6 +91,7 @@ TGeant3::~TGeant3()
 } 
 void TGeant3::LoadAddress() { 
 #ifndef Geant3Dummy
+  cbank =&gcbank;
   cquest=&quest; 
   clink=&gclink; 
   ccuts=&gccuts; 
@@ -560,6 +561,8 @@ void  TGeant3::Gsrotm(Int_t nmat, Float_t theta1, Float_t phi1, Float_t theta2, 
 void  TGeant3::Gprotm(Int_t n)  {}
 Int_t TGeant3::Gsvolu(const char *name, const char *shape, Int_t nmed, 
                    Float_t *upar, Int_t np)
+Int_t TGeant3::Glvolu(const Nlev, Int_t *Lnam, Int_t *Lnum)
+
 #endif /* Geant3Dummy */
 { 
 #ifndef Geant3Dummy
@@ -682,6 +685,13 @@ Int_t TGeant3::Gsvolu(const char *name, const char *shape, Int_t nmed,
    Int_t ivolu = 0; 
    gsvolu(PASSCHARD(name), PASSCHARD(shape), nmed, upar, np, ivolu PASSCHARL(name) PASSCHARL(shape)); 
    return ivolu; 
+} 
+//___________________________________________ 
+Int_t TGeant3::Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum)
+{ 
+   Int_t Ierr = 0; 
+   glvolu(&Nlev, Lnam, Lnum, &Ierr);
+   return Ierr; 
 } 
 #endif /* Geant3Dummy */
  

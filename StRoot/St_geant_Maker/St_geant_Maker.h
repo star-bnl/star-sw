@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.6 1999/02/12 04:09:34 nevski Exp $
+// $Id: St_geant_Maker.h,v 1.7 1999/02/12 14:18:27 nevski Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -23,6 +23,8 @@ class St_geant_Maker : public StMaker {
   St_Node*   fNode;   //!
  
  protected:
+  virtual TShape  *MakeShape(TString *name, Int_t ivo);
+  virtual St_Node *MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
  public: 
                   St_geant_Maker(const char *name="geant", const char *title="run/geant/Run");
    virtual       ~St_geant_Maker();
@@ -30,7 +32,8 @@ class St_geant_Maker : public StMaker {
    virtual Int_t  Init();
    virtual void   Clear(Option_t *option){}; // No clearance for parameters
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
-   virtual void   Draw();  
+   virtual void   Draw();
+   virtual void   G2root();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
