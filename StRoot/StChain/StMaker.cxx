@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.145 2004/04/09 21:10:20 jeromel Exp $
+// $Id: StMaker.cxx,v 1.146 2004/04/15 00:21:32 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -631,7 +631,7 @@ Int_t StMaker::Make()
    Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
+   StEvtHddr *hd = GetEvtHddr();   
    TIter nextMaker(tl);
    StMaker *maker;
    fgFailedMaker = 0;
@@ -727,23 +727,20 @@ void StMaker::PrintInfo()
 /// Returns the current event number
 Int_t        StMaker::GetIventNumber() const 
 {
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return -1;
+   StEvtHddr *hd = GetEvtHddr();
    return hd->GetIventNumber();
 }
 
 //_____________________________________________________________________________
 void         StMaker::SetIventNumber(Int_t iv)  
 {
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return;
+   StEvtHddr *hd = GetEvtHddr();
    hd->SetIventNumber(iv);
 }
 //_____________________________________________________________________________
 Int_t        StMaker::GetEventNumber() const 
 {
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return -1;
+   StEvtHddr *hd = GetEvtHddr();
    return hd->GetEventNumber();
 }
 
@@ -751,8 +748,7 @@ Int_t        StMaker::GetEventNumber() const
 /// Returns the current RunNumber
 Int_t        StMaker::GetRunNumber() const 
 {
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return -1;
+   StEvtHddr *hd = GetEvtHddr();
    return hd->GetRunNumber();
 }
 //_____________________________________________________________________________
@@ -765,9 +761,7 @@ StMaker     *StMaker::GetParentChain() const
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
 {    
-   TDatime td;    
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return td;
+   StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
 //_____________________________________________________________________________
@@ -777,8 +771,7 @@ Int_t    StMaker::GetTime()  const {return GetDateTime().GetTime();}
 //_____________________________________________________________________________
 const Char_t *StMaker::GetEventType() const
 {
-   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (!hd) return 0;
+   StEvtHddr *hd = GetEvtHddr();
    return hd->GetEventType();
 }
 
@@ -1172,6 +1165,19 @@ int StMaker::Cleanup(TDataSet *ds)
    if (!to->InheritsFrom(TDataSet::Class()))	return kount;	
    return kount + Cleanup((TDataSet*)to);   
 }
+//_____________________________________________________________________________
+StEvtHddr *StMaker::GetEvtHddr() const
+{
+  StEvtHddr *hddr = (StEvtHddr*)GetDataSet("EvtHddr");
+  if(!hddr) hddr = new StEvtHddr((TDataSet*)m_ConstSet);
+  return hddr;
+}
+//_____________________________________________________________________________
+  void StMaker::SetDateTime(int idat,int itim)
+{
+  StEvtHddr *hddr = GetEvtHddr();
+  hddr->SetDateTime(idat,itim);
+}
 
 //_____________________________________________________________________________
 StMakerIter::StMakerIter(StMaker *mk,int secondary)
@@ -1234,6 +1240,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.146  2004/04/15 00:21:32  perev
+// SetDateTime(int,int) added
+//
 // Revision 1.145  2004/04/09 21:10:20  jeromel
 // Print Info only in debug mode
 //
