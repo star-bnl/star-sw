@@ -45,7 +45,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
 
-#ifndef _AIX
+#if !defined(_AIX) && !defined(Linux)
 #include <sys/systeminfo.h>
 #endif
 
@@ -1155,7 +1155,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	control->shmid     = shmid;
 
 /*	Need to re-establish this:  */
-#ifndef _AIX
+#if !defined(_AIX) && !defined(Linux)
 	if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
 #else
 	if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
