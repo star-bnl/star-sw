@@ -61,8 +61,7 @@ class St_ValiSet : public St_DataSet{
 public:
    TDatime fTimeMin;
    TDatime fTimeMax;
-   St_DataSet *fDatCnt;
-   St_DataSet *fDatSql;
+   St_DataSet *fDat;
    St_ValiSet(const char *name,St_DataSet *parent);
    virtual ~St_ValiSet(){};
    virtual void ls(Int_t lev=1);
@@ -74,7 +73,8 @@ St_ValiSet::St_ValiSet(const char *name,St_DataSet *parent): St_DataSet(name,par
   SetTitle(".Val");
   fTimeMin.Set(kMaxTime,0);
   fTimeMax.Set(kMinTime,0);
-  fDatCnt =0;fDatSql =0;
+  fDat =0;
+  Modified(0);
 }
 
 //_____________________________________________________________________________
@@ -82,7 +82,7 @@ void St_ValiSet::ls(Int_t lev)
 {
   printf("  %s.Validity = %s ",GetName(),fTimeMin.AsString());
   printf(" <-> %s\n",     fTimeMax.AsString());
-  if (fDatCnt) printf("  Contains DataSet %s\n",fDatCnt->GetName());
+  if (fDat) printf("  Contains DataSet %s\n",fDat->GetName());
   St_DataSet::ls(lev);
 }
 
@@ -93,13 +93,14 @@ St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userd
 :StMaker(name)
 {
 
-   m_DBBroker = 0;
+   fDBBroker = 0;
 
-   m_Hierarchy = 0;
+   fHierarchy = 0;
    fIsDBTime = 0;
-   m_MainDir = maindir;
-   if (userdir) m_UserDir=userdir;
-   m_DataBase = 0;
+   fMainDir = maindir;
+   if (userdir) fUserDir=userdir;
+   fDataBase = 0;
+   fUpdateMode = 0;
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker(){
@@ -110,47 +111,56 @@ Int_t St_db_Maker::Init()
    St_FileSet *fileset;
    TString fullpath,topdir;
 
-   m_DataBase=0;
-   if (!m_MainDir.IsNull() && strncmp("MySQL:",(const char*)m_MainDir,6)==0){
-     m_DataBase = OpenMySQL(((const char*)m_MainDir)+6);
-     if (m_DataBase) m_DataBase->Pass(PrepareDB,0);
+   fDataBase=0;
+   if (!fMainDir.IsNull() && strncmp("MySQL:",(const char*)fMainDir,6)==0){
+     fDataBase = OpenMySQL(((const char*)fMainDir)+6);
+     if (fDataBase) fDataBase->Pass(PrepareDB,0);
    }
 
 // 		recreate a memory resided data-structure
-   m_CurrentDir = m_MainDir;
-   if (!m_DataBase && !m_CurrentDir.IsNull()) {
-     fileset = new St_FileSet(m_CurrentDir);
+   fCurrentDir = fMainDir;
+   if (!fDataBase && !fCurrentDir.IsNull()) {
+     fileset = new St_FileSet(fCurrentDir);
      fileset->Purge(); 
      fileset->Sort(); 
-     fileset->Pass(PrepareDB,&m_CurrentDir);
+     fileset->Pass(PrepareDB,&fCurrentDir);
      fileset->Purge(); 
-     if (m_DataBase) {
-       assert(strcmp(m_DataBase->GetName(),fileset->GetName())==0);
-       m_DataBase->Update(fileset); delete fileset;
-     } else          {m_DataBase = fileset; }
+     if (fDataBase) {
+       assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+       fDataBase->Update(fileset); delete fileset;
+     } else          {fDataBase = fileset; }
    }
 
-   m_CurrentDir = m_UserDir; fileset = 0;
-   if (!m_CurrentDir.IsNull()) {
-     fileset = new St_FileSet(m_CurrentDir);
+   fCurrentDir = fUserDir; fileset = 0;
+   if (!fCurrentDir.IsNull()) {
+     fileset = new St_FileSet(fCurrentDir);
      fileset->Purge();
      fileset->Sort(); 
-     fileset->Pass(PrepareDB,&m_CurrentDir);
+     fileset->Pass(PrepareDB,&fCurrentDir);
      fileset->Purge();
-     if (m_DataBase) {
-       assert(strcmp(m_DataBase->GetName(),fileset->GetName())==0);
-       m_DataBase->Update(fileset); delete fileset;
-     } else          {m_DataBase = fileset; }
+     if (fDataBase) {
+       assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+       fDataBase->Update(fileset); delete fileset;
+     } else          {fDataBase = fileset; }
    }
-   m_DataBase->Sort();
+   fDataBase->Sort();
 
-   AddData(m_DataBase);
-   SetOutput(m_DataBase); //  
+   AddData(fDataBase);
+   SetOutput(fDataBase); //  
 
-   if (Debug()) m_DataBase->ls("*");
+   if (Debug()) fDataBase->ls("*");
    OnOff();
    return 0;
 }
+//_____________________________________________________________________________
+Int_t St_db_Maker::Make()
+{
+  fUpdateMode = 1;
+  UpdateDB(fDataBase);  
+  fUpdateMode = 0;
+  return kStOK;
+}
+
 //_____________________________________________________________________________
 TDatime St_db_Maker::Time(const char *filename)
 {
@@ -199,22 +209,22 @@ St_DataSet *St_db_Maker::OpenMySQL(const char *dbname)
    tables_hierarchy_st *thy,*ihy,*jhy;
    St_DataSet *top,*node,*ds;
    
-   m_DBBroker  = new StDbBroker();
+   fDBBroker  = new StDbBroker();
 
-   if (!m_DBBroker) {
+   if (fDBBroker) {
      Warning("OpenDB","***Can not open MySQL DB %s ***");
      return 0;
    }
 
    TString ts(dbname); ts+="_hierarchy";
-   m_Hierarchy = (St_tables_hierarchy*)St_Table::New((const char*)ts,"tables_hierarchy",0,0);    
-   assert(m_Hierarchy);
-   int ierr = UpdateTable(m_Hierarchy,vals);
+   fHierarchy = (St_tables_hierarchy*)St_Table::New((const char*)ts,"tables_hierarchy",0,0);    
+   assert(fHierarchy);
+   int ierr = UpdateTable(fHierarchy,vals);
    if (ierr) return 0;
    
       
-   nrows = m_Hierarchy->GetNRows();
-   thy 	 = m_Hierarchy->GetTable();
+   nrows = fHierarchy->GetNRows();
+   thy 	 = fHierarchy->GetTable();
    if (!thy) return 0;
    
    top = new St_DataSet(thy->parname);
@@ -281,8 +291,8 @@ St_DataSet *St_db_Maker::UpdateDB(St_DataSet* ds)
 int St_db_Maker::UpdateTable(St_Table* dat, TDatime val[2] )
 {
 
-  assert(m_DBBroker);assert(dat);
-  m_DBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
+  assert(fDBBroker);assert(dat);
+  fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
   St_tableDescriptor *rowTL = ((St_Table*)dat)->GetRowDescriptors();
   int nElements = rowTL->GetNRows();
 
@@ -291,24 +301,24 @@ int St_db_Maker::UpdateTable(St_Table* dat, TDatime val[2] )
   assert(sizeof(StDbBroker::Descriptor)==sizeof(tableDescriptor_st));
 
   StDbBroker::Descriptor *descriptor = (StDbBroker::Descriptor *)elem;
-  m_DBBroker->SetDictionary(nElements,descriptor);
-  m_DBBroker->SetTableName (dat->GetName());
-  m_DBBroker->SetStructName(dat->GetTitle());
-  m_DBBroker->SetStructSize(dat->GetRowSize());
+  fDBBroker->SetDictionary(nElements,descriptor);
+  fDBBroker->SetTableName (dat->GetName());
+  fDBBroker->SetStructName(dat->GetTitle());
+  fDBBroker->SetStructSize(dat->GetRowSize());
 
 // 		if descriptor filled, no need for newdat
-  void *dbstruct = m_DBBroker->Use();
+  void *dbstruct = fDBBroker->Use();
   if (!dbstruct) {
     Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
     return 1;
   }
 
-  int nRows = m_DBBroker->GetNRows();
+  int nRows = fDBBroker->GetNRows();
 //		Adopt DB data in the new St_Table
   dat->Adopt(nRows,dbstruct);
 //  dat->Print(0,1);
-  val[0].Set(m_DBBroker->GetBeginDate(),m_DBBroker->GetBeginTime());
-  val[1].Set(m_DBBroker->GetEndDate  (),m_DBBroker->GetEndTime  ());
+  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
+  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
 
 //  printf("BegVal=%s\n",val[0].AsString());
 //  printf("EndVal=%s\n",val[1].AsString());
@@ -321,20 +331,21 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
 {
   St_DataSet *left;
   St_ValiSet *val;
-  TDatime timeMin,timeMax,valsCINT[2],valsSQL[2];
+  TDatime valsCINT[2],valsSQL[2];
    
-  if (strcmp(".Val",ds->GetTitle()))	return kContinue;
+  if (strcmp(".Val",ds->GetTitle()))		return kContinue;
 //
 //	It is our place.
   val = (St_ValiSet*)ds;    
   St_db_Maker *mk = (St_db_Maker*)user;    
+  if (mk->fUpdateMode && !val->IsModified()) 	return kPrune;
+
   TDatime currenTime = mk->GetDateTime();
   UInt_t uevent = currenTime.Get();
 
 // 		Check validity
     if (val->fTimeMin.Get() <= uevent 
-     && val->fTimeMax.Get() >  uevent) return kPrune;
-    if (val->fDatCnt) delete val->fDatCnt; val->fDatCnt=0;
+     && val->fTimeMax.Get() >  uevent) 		return kPrune;
 
 //	Start loop
   
@@ -343,30 +354,31 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
   val->fTimeMin.Set(kMaxTime,0);
   val->fTimeMax.Set(kMinTime,0);
 
-  delete val->fDatCnt; val->fDatCnt=0;
-  ds->GetParent()->Remove(val->fDatSql);
+  ds->GetParent()->Remove(val->fDat);
 
   int kase = 0;
-  if (val->fDatSql) {	// Try to load from MySQL
+  if (mk->fDBBroker && val->fDat) {	// Try to load from MySQL
      
-    int ierr = mk->UpdateTable((St_Table*)val->fDatSql, valsSQL );
+    int ierr = mk->UpdateTable((St_Table*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
   }
   
   left = mk->FindLeft(val,valsCINT);
   if (left) kase+=2;
-  
+  St_DataSet *newGuy=0;
 SWITCH:  switch (kase) {
   
     case 0:   break;  
     
     case 1:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
-              ds->GetParent()->AddFirst(val->fDatSql);
+              ds->GetParent()->AddFirst(val->fDat);
     break;
 
-    case 2:   val->fDatCnt = mk->LoadTable(left);
+    case 2:   newGuy = mk->LoadTable(left);
+              if (!val->fDat) { val->fDat = newGuy;}
+              else            { val->fDat->Update(newGuy); delete newGuy;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
-              ds->GetParent()->AddFirst(val->fDatCnt); break;
+              ds->GetParent()->AddFirst(val->fDat); break;
   
     case 3:   if (valsCINT[0].Get()>=valsSQL[0].Get()) {
                 kase = 2; 
@@ -378,7 +390,7 @@ SWITCH:  switch (kase) {
               goto SWITCH;
     default:  assert(0);
   }
-  
+  val->Modified(1);  
   return kPrune;  
 }
 //_____________________________________________________________________________
@@ -506,7 +518,7 @@ EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
     }
 
     if (isSql) { 	// save SQL  object
-      pseudo->fDatSql=set; set->Shunt(0);
+      pseudo->fDat=set; set->Shunt(0);
     } else     {	// save Cint object 
       set->Shunt(pseudo);
     }   
@@ -515,10 +527,10 @@ EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
 }
 //_____________________________________________________________________________
 void    St_db_Maker::SetMainDir(const Char_t *db)
-{m_MainDir = db; gSystem->ExpandPathName(m_MainDir);}
+{fMainDir = db; gSystem->ExpandPathName(fMainDir);}
 //_____________________________________________________________________________
 void    St_db_Maker::SetUserDir(const Char_t *db)
-{m_UserDir = db; gSystem->ExpandPathName(m_UserDir);}
+{fUserDir = db; gSystem->ExpandPathName(fUserDir);}
 //_____________________________________________________________________________
 TDatime St_db_Maker::GetDateTime()
 { 
@@ -528,8 +540,8 @@ TDatime St_db_Maker::GetDateTime()
 //_____________________________________________________________________________
 void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 { 
-  fIsDBTime=1;
-  fDBTime.Set(idat,itim);
+  fIsDBTime=0; if (idat==0) return;
+  fIsDBTime=1; fDBTime.Set(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -550,7 +562,7 @@ void   St_db_Maker::SetOff(const char *path)
 void St_db_Maker::OnOff()
 {
   int Off,len;
-  if (!m_DataBase) return;
+  if (!fDataBase) return;
   St_DataSet *onoff = Find(".onoff");
   if (!onoff) return;
   
