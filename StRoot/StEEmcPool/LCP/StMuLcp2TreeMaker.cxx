@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.1 2003/09/16 19:18:35 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.2 2003/10/20 17:04:39 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -17,10 +17,11 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "MikesRejector/ExampleUsage.h"
+//#include "MikesRejector/ExampleUsage.h"
+
+#include "CtbMatching.h"
 
 #include "StThreeVector.hh"
-
 
 ClassImp(StMuLcp2TreeMaker)
 
@@ -31,7 +32,7 @@ StMuLcp2TreeMaker::StMuLcp2TreeMaker(const char* self ,const char* muDstMakerNam
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
 
-  //rejector=new  ExampleUsage; // Mike's cosmic/laser rejector
+  // rejector=new  ExampleUsage; // Mike's cosmic/laser rejector
   primTrA=0;
 
   runID=9999;// default not initialized value
@@ -40,12 +41,14 @@ StMuLcp2TreeMaker::StMuLcp2TreeMaker(const char* self ,const char* muDstMakerNam
   SetMinNFitPoint(15); 
   SetMaxDCAxy(3.);// cm
   SetMaxEta(1.4);
-  SetMinPt(0.2); // GeV/c
-  SetMinFitPfrac(0.55); // (%)
+  SetMinPt(0.4); // GeV/c
+  SetMinFitPfrac(0.55);
+  SetMaxZvert(100.); // (cm)
+  ctb=new CtbMatching();
 }
 
 
-//________________________________________________
+//___________________ _____________________________
 //________________________________________________
 StMuLcp2TreeMaker::~StMuLcp2TreeMaker(){
 if(tree) tree->Print();
@@ -72,7 +75,7 @@ Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
   treeName+="/R";
   treeName+=runID;
   treeName+=".tree.root";
-  printf("%s::InitRunFromMake() \n   runID=%d Setup output tree & histo to '%s' , use BXoff48=%d , CUTS: minNFitPoint=%d maxDCAxy/cm=%.2f maxEta=%.2f minPt/GeV/c=%.2f, minFitPfrac=%.2f\n",GetName(),runID,treeName.Data(),off48,C_minNFitPoint,C_maxDCAxy,C_maxEta,C_minPt,C_minFitPfrac);
+  printf("%s::InitRunFromMake() \n   runID=%d Setup output tree & histo to '%s' , use BXoff48=%d , CUTS: minNFitPoint=%d maxDCAxy/cm=%.2f maxEta=%.2f minPt/GeV/c=%.2f, minFitPfrac=%.2f maxZvert=%f\n",GetName(),runID,treeName.Data(),off48,C_minNFitPoint,C_maxDCAxy,C_maxEta,C_minPt,C_minFitPfrac,C_maxZvertex);
   
   hfile=new TFile(treeName,"RECREATE"," histograms & trees with LCP ");
   assert(hfile->IsOpen());
@@ -88,6 +91,8 @@ Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
 
   h[7]   = new TH1F("phi"," phi/rad  of LCP", 240,-Pi,Pi);
   h[8]   = new TH1F("pT","pT/GeV of LCP",100,0,10.);
+  h[9]   = new TH1F("pTm1","pT/GeV of LCP, CTB match any",100,0,10.);
+  h[10]   = new TH1F("pTm2","pT/GeV of LCP, CTB match LCP",100,0,10.);
   
 
   if (runNumber>10000) {   
@@ -99,7 +104,7 @@ Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
     tree->Branch("sb",   &eve_sb,"sb/I");
     tree->Branch("nPrim",&eve_nPrim,"nPrim/I");
     tree->Branch("vz",   &eve_vz ,"vz/F");
-    tree->Branch("cosm",   &eve_cosm ,"cosm/F");
+    tree->Branch("cosm", &eve_cosm ,"cosm/F");
     
     tree->Branch("pt",&lcp_pt ,"pt/F");
     tree->Branch("phi",&lcp_phi ,"phi/F");
@@ -165,31 +170,35 @@ Int_t StMuLcp2TreeMaker::Make(){
   StL0Trigger &trig=muEve->l0Trigger();
   StEventInfo &info=muEve->eventInfo();
   StEventSummary &smry=muEve->eventSummary();
+  ctb->loadHits(muEve);
   StThreeVectorF ver=smry.primaryVertexPosition();
   if(runID>1000) InitRunFromMake(info.runId());
-  
+
+
   // use only minB trigger events 
   if(trig.triggerWord()!=0x2000)  return kStOK;
   
   // reject events without primtracks
   if(primTrA->GetEntries()<=0)  return kStOK;
-  
-  int bx7=trig.bunchCrossingId7bit(info.runId());
-  
+ 
   // fill eve-related tree values
+  eve_vz=ver.z(); 
+  if(fabs(eve_vz)>C_maxZvertex) return kStOK;
+
+  int bx7=trig.bunchCrossingId7bit(info.runId());
   eve_id=info.id();
   eve_bx48 = trig.bunchCrossingId();
   eve_bx120 =(trig.bunchCrossingId()+off48 )%120;
   eve_sb=trig.spinBits();
-  eve_vz=ver.z();
-  
+ 
   // test for false vertex
   //eve_cosm=rejector->acceptEvent(dst);
-  
+  eve_cosm=0;
+
   // search for LCP  
   clearLCP();
   StMuTrack* lcp= findLCP(C_minPt,C_minNFitPoint, C_maxDCAxy, C_maxEta,C_minFitPfrac);
-  
+
   // fill histo 1:1
   h[0]->Fill(bx7);
   h[1]->Fill(eve_bx48);
@@ -204,15 +213,17 @@ Int_t StMuLcp2TreeMaker::Make(){
     lcp_pt= lcp->pt();
     lcp_q = lcp->charge();
     lcp_nFit=lcp->nHitsFit();     
-    
+
     // fill those histo only for LCP
     h[6]->Fill(lcp_eta);
     h[7]->Fill(lcp_phi);
     h[8]->Fill(lcp_pt);
+    if(eve_cosm) h[9]->Fill(lcp_pt);
+    if(eve_cosm>1000) h[10]->Fill(lcp_pt);
   }
   
    if(tree)tree->Fill();
-   if(kEve%500==0)printf("%s::Make(%d) nPrim=%d lcp: pt=%f nFit=%d TTRee=%p\n",GetName(),kEve,eve_nPrim,lcp_pt,lcp_nFit,tree);
+   if(kEve%500==0)printf("%s::Make(%d) nPrim=%d lcp: pt=%f nFit=%d \n",GetName(),kEve,eve_nPrim,lcp_pt,lcp_nFit);
    
    // extra tests of cuts
    //   examinCut(lcp);
@@ -224,15 +235,17 @@ Int_t StMuLcp2TreeMaker::Make(){
 //________________________________________________
 StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDCAxy, float XmaxEta, float XminFitPfrac) {
   
+  eve_cosm=0;
   StMuTrack* lp=0;  
   int nTr=primTrA->GetEntries();
   int nTr0=0,nTr1=0; // counts valid prim TPC tracks
+  int lpMatch=0;
   float maxPt=XminPt;// init pT  
   for (int i=0; i<nTr; i++) {
     StMuTrack* pTr = (StMuTrack*)primTrA->UncheckedAt(i);
     if(pTr->flag() <=0) continue;
     if(!pTr->topologyMap().trackTpcOnly()) continue;
-    nTr0++;
+    if(pTr->globalTrack()->nHitsFit()>15 ) nTr0++; // was just: nTr0++;
     // printf("itr=%d pT=%f nFit=%d\n",i, pTr->pt(),pTr->nHitsFit());
     
     StThreeVectorF dca=pTr->dcaGlobal();
@@ -248,17 +261,22 @@ StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDC
     float frac=1.*gTr->nHitsFit()/gTr->nHitsPoss();
     if ( frac < XminFitPfrac) continue;
     nTr1++;
-
+    
+    int match=ctb->match(gTr);
+    if(match>0) eve_cosm++;
+    //printf("itr=%d pT=%f nFit=%d match=%d\n",i, pTr->pt(),pTr->nHitsFit(),match);
     // now search for high pT
     if ( gTr->pt() < maxPt ) continue;
     maxPt=gTr->pt();
     lp=gTr;
+    if(match>0)lpMatch++;
   }
   // tmp - apply pT cut on LCP
   //if(maxPt<1.5 || maxPt>3) lp=0;
 
   eve_nPrim=nTr0;
-  //  printf("nTr0=%d nTr1=%d\n",nTr0,nTr1);
+  if(lpMatch) eve_cosm+=1000;
+  //  printf("nTr0=%d nTr1=%d lp=%p match=%d\n",nTr0,nTr1,lp,eve_cosm);
   return lp;
 }
 
@@ -321,6 +339,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.2  2003/10/20 17:04:39  balewski
+// LCP analysis code
+//
 // Revision 1.1  2003/09/16 19:18:35  balewski
 // extraction of LCP from muDst
 //
