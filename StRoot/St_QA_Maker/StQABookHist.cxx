@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.15 2001/05/29 23:23:06 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.16 2001/06/06 18:44:59 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.16  2001/06/06 18:44:59  lansdell
+// changed domain on some qa_shift histograms
+//
 // Revision 2.15  2001/05/29 23:23:06  lansdell
 // removed impact param plots for FTPC from qa_shift list
 //
@@ -606,12 +609,12 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
   m_det_id           = QAH::H1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
   m_dcaToBeamXY      = QAH::H2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
-  m_dcaToBeamZ1      = QAH::H1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
-  m_dcaToBeamZ2      = QAH::H1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
+  m_dcaToBeamZ1      = QAH::H1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,200);
+  m_dcaToBeamZ2      = QAH::H1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis",100,-50,50);
   m_dcaToBeamZ3      = QAH::H1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
-  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc,tpc+svt",80,-20,20,32,-4,4);
-  m_zDcaZf           = QAH::H2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
-  m_zDcaPsi          = QAH::H2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
+  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc,tpc+svt",100,-25,25,32,-4,4);
+  m_zDcaZf           = QAH::H2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",100,-25,25,50,-300,300);
+  m_zDcaPsi          = QAH::H2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",100,-25,25,64,0,360);
   m_zDcaPhi0         = QAH::H2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
   m_glb_ratioTTS     = QAH::MH1F("QaGtrkRnfTTS","globtrk: ratio Nfit/tot pnt, tpc,svt", 55,0.,1.1,2);
   m_glb_ratioTTS->SetMinimum(10);
