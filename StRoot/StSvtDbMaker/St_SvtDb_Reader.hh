@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.2 2002/02/15 22:45:43 munhoz Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.3 2003/04/14 15:51:55 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.3  2003/04/14 15:51:55  munhoz
+ * reading t0 from DB
+ *
  * Revision 1.2  2002/02/15 22:45:43  munhoz
  * introducing drift velocity reading capability
  *
@@ -35,6 +38,7 @@ class StSvtHybridCollection;
 class StSvtHybridDriftVelocity;
 class StSvtConfig;
 class StSvtGeometry;
+class StSvtT0;
 
 class St_SvtDb_Reader 
 {
@@ -59,6 +63,8 @@ class St_SvtDb_Reader
   StSvtHybridCollection* getPedestals();
   StSvtGeometry* getGeometry();
   StSvtHybridCollection* getBadAnodes();
+  int getElectronics();
+  StSvtT0* getT0();
 
 #ifdef __ROOT__
   ClassDef(St_SvtDb_Reader, 1)   //StAF chain virtual base class for Makers
