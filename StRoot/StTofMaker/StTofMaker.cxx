@@ -1,23 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.7 2001/10/09 03:06:38 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.8 2002/01/22 06:50:34 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
- *
- *		+ StTofDataCollection added
- *		+ ADC and TDC data for pVPD and Ramp now being saved...
- *		+ Confirmed proper fill of DataCollection...
- *		+ TOFP_DEBUG switch added to StTofMaker.h for print statements...
- *		+ Changed or Prettified all print statements (TOFP_DEBUG directive)...
- *		+ Changed histograms filled & saved (TOFP_HISTOS directive)...
- *		- Track extrapolation removed...	(for future version)
- *		- Track matching removed...      	(for future version)
- *		- SlatCollection fill removed...	(for future version)
- *		- HitCollection fill removed... 	(for future version)
- *		- PIDTraits fill removed...     	(for future version)
- *      + Overloaded << operator for dumping data to screen... 
- *		+ Added direct check of StTofCollection entries in fillStEvent()...
- *		+ Added tofTag variable...
  *
  ***************************************************************************
  *
@@ -26,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.8  2002/01/22 06:50:34  geurts
+ * modifications for STAR dBase access and doxygenized
+ *
  * Revision 1.7  2001/10/09 03:06:38  geurts
  * TofTag introduced
  *
@@ -40,7 +28,39 @@
  *
  *
  **************************************************************************/
+//! Time-of-Flight Raw Data Maker
+/*! \class StTofMaker
+    \author  W.J. Llope, Wei-Ming Zhang, Frank Geurts
 
+    <p>TOF offline software. This maker inserts the TOFp raw data onto the DST.
+    It distinguishes between so-called beam and strobe event. If available
+    the raw data is unpacked into a tofDataCollection() which is part of the
+    StEvent::tofCollection(). Based on a rough estimate of the number of hits
+    a tofTag is constructed and stored.</p>
+
+    <p> Currently the tofSlatCollection() and tofHitCollection() are not filled.
+    They will be once parts of the analysis code moves into this Maker. Also, the
+    Maker only deals with m_Mode=0 (DAQ Reader).</p>
+
+    <p>History:
+    <ul>
+    <li> StTofDataCollection added </li>
+    <li> ADC and TDC data for pVPD and Ramp now being saved </li>
+    <li> Confirmed proper fill of DataCollection </li>
+    <li> TOFP_DEBUG switch added to StTofMaker.h for print statements  </li>
+    <li> Changed or Prettified all print statements (TOFP_DEBUG directive) </li>
+    <li> Changed histograms filled & saved (TOFP_HISTOS directive) </li>
+    <li> Track extrapolation removed...	(for future version)  </li>
+    <li> Track matching removed...      	(for future version) </li>
+    <li> SlatCollection fill removed...	(for future version) </li>
+    <li> HitCollection fill removed... 	(for future version) </li>
+    <li> PIDTraits fill removed...     	(for future version) </li>
+    <li> Overloaded << operator for dumping data to screen  </li>
+    <li> Added direct check of StTofCollection entries in fillStEvent()  </li>
+    <li> Added tofTag variable </li>
+    </ul>
+    </p>
+*/
 #include "StTofMaker.h"
 #include <stdlib.h>
 #include "StEventTypes.h"
@@ -55,37 +75,49 @@
 
 ClassImp(StTofMaker)
 
-//_____________________________________________________________________________
 
+/// default (almost) empty constructor
 StTofMaker::StTofMaker(const char *name):StMaker(name) { drawinit=kFALSE; }
 
-//_____________________________________________________________________________
+/// default empty destructor
+StTofMaker::~StTofMaker(){/* nope */}
 
-StTofMaker::~StTofMaker(){}
 
-//_____________________________________________________________________________
 
+/// Init method, book histograms
 Int_t StTofMaker::Init(){
-
-//fg Will add additional checks on return values later.
-  mGeomDb = new StTofGeometry();
-  mGeomDb->init();
-    
-//  create histograms
+  //  create histograms
   nAdcHitHisto = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",51,-1.,50.);
   nTdcHitHisto = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",51,-1.,50.);
-
   return StMaker::Init();
 }
 
-//_____________________________________________________________________________
 
+
+/// InitRun method, (re)initialize TOFp data from STAR dBase
+Int_t StTofMaker::InitRun(int runnumber){
+  cout << "StTofMaker::InitRun  -- initializing TofGeometry --" << endl;
+  mTofGeom = new StTofGeometry();
+  mTofGeom->init(this);
+  return kStOK;
+}
+
+
+
+/// FinishRun method, clean up TOFp dBase entries
+Int_t StTofMaker::FinishRun(int runnumber){
+  cout << "StTofMaker::FinishRun -- cleaning up TofGeometry --" << endl;
+  if (mTofGeom) delete mTofGeom;
+  mTofGeom=0;
+  return 0;
+}
+
+
+
+//_________________________________________________________________________
+/// Make method, check for collections; create and fill them according to m_Mode
 Int_t StTofMaker::Make(){
-
-#ifdef TOFP_DEBUG
-  cout << "===============================================================================" << endl;
-#endif
-  cout << "StTofMaker Make() starting..................................."  << endl;
+  cout << "StTofMaker::Make() starting..................................."  << endl;
 
   mDataCollection = new StTofDataCollection; 
   mTofCollectionPresent  = 0;
@@ -149,6 +181,7 @@ Int_t StTofMaker::Make(){
       if (!mTheTofReader) {
 	cout << "StTofMaker Failed to getTofReader()...." << endl;
       }
+
 #ifdef TOFP_DEBUG
       TOF_Reader* MyTest = dynamic_cast<TOF_Reader*>(mTheDataReader->getTOFReader());
       if (MyTest) MyTest->printRawData();
@@ -156,12 +189,11 @@ Int_t StTofMaker::Make(){
 //
 //--- copy daq data to collection. (TOFp and pVPD)
 //
-      cout << "StTofMaker Unpacking data..." << endl;
       int nadchit=0;
       int ntdchit=0;
       int iStrobe = 0;
       for (int i=0;i<48;i++){
-	unsigned short slatid = mGeomDb->daqToSlatId(i);
+	unsigned short slatid = mTofGeom->daqToSlatId(i);
 	unsigned short rawAdc = mTheTofReader->GetAdcFromSlat(i);
 	unsigned short rawTdc = mTheTofReader->GetTdcFromSlat(i);  
 	short rawTc  = 0;
@@ -182,13 +214,13 @@ Int_t StTofMaker::Make(){
 //
 //--- 
       if (iStrobe>4) {
-	cout << "StTofMaker ...This is a Strobe Event... " << iStrobe << endl;
+	cout << "StTofMaker ... Strobe Event:" << iStrobe << endl;
 	tofTag = -1;     	// set tag to show this was a strobe event   
 	nAdcHitHisto->Fill(-1.);
-	nTdcHitHisto->Fill(-1.);
+ 	nTdcHitHisto->Fill(-1.);
       } else {
-	cout << "StTofMaker ...Saw Roughly " << nadchit << " ADC Hits and " 
-	     << ntdchit << " TDC Hits in TRAY..." << endl;
+	cout << "StTofMaker ... Beam Event: ~" << nadchit << " ADC and ~" 
+	     << ntdchit << " TDC Raw Hits in TRAY" << endl;
 	tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
 	nAdcHitHisto->Fill(nadchit);
 	nTdcHitHisto->Fill(ntdchit);
@@ -215,18 +247,17 @@ Int_t StTofMaker::Make(){
 //
   if (mEvent) this->fillStEvent();
   delete mDataCollection;
-  cout << "StTofMaker Make() finished..................................." << endl;
-#ifdef TOFP_DEBUG
-  cout << " = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-#endif
+  cout << "StTofMaker::Make() finished..................................." << endl;
+
   return kStOK;
 }
               
 
 //_________________________________________________________________________
+/// Fill and store TOF Collections in StEvent. Create TofCollection if necessary
 void StTofMaker::fillStEvent() {
 
-  cout << "StTofMaker fillStEvent() Starting..." << endl;
+  cout << "StTofMaker::fillStEvent() Starting..." << endl;
 
 //--- make sure we have a tofcollection
   if(!mTheTofCollection){
@@ -236,7 +267,7 @@ void StTofMaker::fillStEvent() {
 
 //--- fill mTheTofCollection with ALL RAW DATA 
   if(mDataCollectionPresent != 1) {
-    cout << "StTofMaker Size of mDataCollection = " << mDataCollection->size() << endl;
+    cout << "StTofMaker::fillStEvent()  Size of mDataCollection = " << mDataCollection->size() << endl;
     for(size_t jj = 0; jj < mDataCollection->size(); jj++)
       mTheTofCollection->addData(mDataCollection->getData(jj));
   }
@@ -248,7 +279,7 @@ void StTofMaker::fillStEvent() {
 // collections) Here, we would just make sure that raw data is really in
 // TofCollection.  WMZ
 //
-  cout << "StTofMaker Verifying TOF StEvent data ..." << endl;
+  cout << "StTofMaker::fillStEvent() Verifying TOF StEvent data ..." << endl;
   StTofCollection* mmTheTofCollection = mEvent->tofCollection();
   if(mmTheTofCollection){
     cout << " + StEvent tofCollection Exists" << endl;
@@ -272,6 +303,7 @@ void StTofMaker::fillStEvent() {
 }
 
 //_____________________________________________________________________________
+/// store tofTag in StEvent structure.
 void StTofMaker::storeTag(){
   // instantiate new TofTag class
   St_TofTag *tagTable = new St_TofTag("TofTag",1);
@@ -284,15 +316,17 @@ void StTofMaker::storeTag(){
 
   if (pTofTag) {
     pTofTag->tofEventType = tofTag;
-    cout << "StTofMaker tofTag stored" << endl;
+    cout << "StTofMaker::storeTag()  tofTag stored" << endl;
   }
   else
-    cout << "StTofMaker unable to store tofTag" << endl;
+    cout << "StTofMaker::storeTag()  unable to store tofTag" << endl;
 
 }
 
 //_____________________________________________________________________________
+/// default Finish method (empty)
 Int_t StTofMaker::Finish(){
+  //fg: no need for private file: histograms are collected.
   // TFile theFile("tof.root","RECREATE","tofstudy");
   // theFile.cd();
   // nAdcHitHisto->Write();
