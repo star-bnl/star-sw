@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.55 1999/09/29 16:46:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.56 1999/09/30 21:48:39 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.56  1999/09/30 21:48:39  kathy
+// fix for phi0 being in degrees in globtrk
+//
 // Revision 1.55  1999/09/29 16:46:29  kathy
 // changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
 //
@@ -187,6 +190,7 @@
 #include "PhysicalConstants.h"
 #include <math.h>
 #include "TMath.h"
+#include "SystemOfUnits.h"
 
 #include "St_QA_Maker/St_QA_Maker.h"
 #include "St_QA_Maker/StHistUtil.h"
@@ -997,8 +1001,8 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
-        Float_t x0s  =  t->r0 * TMath::Sin(theta) * TMath::Cos(t->phi0);
-        Float_t y0s  =  t->r0 * TMath::Sin(theta) * TMath::Sin(t->phi0);
+        Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
+        Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
         Float_t ydif =  (t->x_first[1])-y0s;
         Float_t zdif =  (t->x_first[2])-(t->z0);
@@ -1127,8 +1131,8 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
-        Float_t x0s  =  t->r0 * TMath::Sin(theta) * TMath::Cos(t->phi0);
-        Float_t y0s  =  t->r0 * TMath::Sin(theta) * TMath::Sin(t->phi0);
+        Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
+        Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
         Float_t ydif =  (t->x_first[1])-y0s;
         Float_t zdif = (t->x_first[2]) - (t->z0);
