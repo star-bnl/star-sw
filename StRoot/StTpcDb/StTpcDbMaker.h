@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.12 2001/10/25 22:59:36 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.13 2002/01/03 00:01:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.13  2002/01/03 00:01:09  hardtke
+ * Add switches for type of drift velocity data (i.e. laser vs. t0 analysis).  Default to use either.
+ *
  * Revision 1.12  2001/10/25 22:59:36  hardtke
  * Add function tpc_localsector_to_local
  *
@@ -145,6 +148,7 @@ class StTpcDbMaker : public StMaker {
   StTpcDb* m_TpcDb;               //! tpc database class
   St_tpg_pad_plane* m_tpg_pad_plane; //!
   St_tpg_detector* m_tpg_detector; //! 
+  Int_t m_dvtype;  //! 0= use all, 1=only StTpcT0Maker, 2=only laser;
  protected:
  public: 
                   StTpcDbMaker(const char *name="TLA");
@@ -154,15 +158,21 @@ class StTpcDbMaker : public StMaker {
    virtual void Clear(const char *opt);
    virtual void Update_tpg_pad_plane();
    virtual void Update_tpg_detector();
+   virtual void UseOnlyLaserDriftVelocity();
+   virtual void UseOnlyCathodeDriftVelocity();
+   virtual void UseAnyDriftVelocity();
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.12 2001/10/25 22:59:36 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.13 2002/01/03 00:01:09 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
 
 inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
+inline void StTpcDbMaker::UseOnlyLaserDriftVelocity() {m_dvtype=2;}
+inline void StTpcDbMaker::UseOnlyCathodeDriftVelocity() {m_dvtype=1;}
+inline void StTpcDbMaker::UseAnyDriftVelocity() {m_dvtype=0;}
 
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.25 2001/10/25 22:59:36 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.26 2002/01/03 00:01:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.26  2002/01/03 00:01:09  hardtke
+ * Add switches for type of drift velocity data (i.e. laser vs. t0 analysis).  Default to use either.
+ *
  * Revision 1.25  2001/10/25 22:59:36  hardtke
  * Add function tpc_localsector_to_local
  *
@@ -322,6 +325,7 @@ int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
  m_TpcDb = 0;
+ m_dvtype = 0;
 }
 //_____________________________________________________________________________
 StTpcDbMaker::~StTpcDbMaker(){
@@ -336,6 +340,22 @@ Int_t StTpcDbMaker::Init(){
      SetFlavor("sim","tpcGlobalPosition");
      SetFlavor("sim","tpcSectorPosition");
    }
+   if (m_dvtype==0) {
+   SetFlavor("ofl+laserDV","tpcDriftVelocity");
+   gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
+   }
+   else if (m_dvtype==1) {
+   SetFlavor("ofl","tpcDriftVelocity");
+   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
+   }
+   else if (m_dvtype==2) {
+   SetFlavor("laserDV","tpcDriftVelocity");
+   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
+   }
+   else {
+     gMessMgr->Info() << "StTpcDbMaker::Undefined drift velocity flavor requested" << endm;
+   }
+
 // Create Needed Tables:    
    if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
