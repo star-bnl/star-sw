@@ -114,11 +114,11 @@ StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix){
   double sideLength;  // this is how much length to go to leave through sides of TPC
   double endLength;  // this is how much length to go to leave through endcap of TPC
   // figure out how far to go to leave through side...
-  candidates = hel.pathLength(2.0);
+  candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
 
-  static StHbtThreeVector WestEnd(0.,0.,2.);
-  static StHbtThreeVector EastEnd(0.,0.,-2.);
+  static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
+  static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
   static StHbtThreeVector EndCapNormal(0.,0.,1.0);
 
   endLength = hel.pathLength(WestEnd,EndCapNormal);
