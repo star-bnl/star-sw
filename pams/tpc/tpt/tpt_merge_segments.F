@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.14 2000/03/06 04:19:24 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.15 2000/03/07 04:39:32 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.15  2000/03/07 04:39:32  sakrejda
+* Track merging in field cleaned up.
+*
 * Revision 1.14  2000/03/06 04:19:24  sakrejda
 * Fixed bug in track indexing in the merge part.
 *
@@ -189,9 +192,8 @@ c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(varc).lt.min(3)) then
 C                   write(17,*)"merged",lxi,lxj
-C                  flag the j=th track as "admerged"
-                   trk(lxj).flag=-77
-                   track(lxj).flag=-77
+                   track_h.nok=track_h.nok+1
+
 C                  store hits from both tracks in a local struct
                    do k=1,trk(lxi).nhit
                       rhits(k).lhit=trk(lxi).ipnt(k)
@@ -208,18 +210,34 @@ c                      write(6,*)hit(rhits(k).lhit).x,hit(rhits(k).lhit).y,hit(r
                       rhits(k+trk(lxi).nhit).y=hit(rhits(k+trk(lxi).nhit).lhit).y
                       rhits(k+trk(lxi).nhit).z=hit(rhits(k+trk(lxi).nhit).lhit).z
                    end do
-                   trk(lxi).nhit=trk(lxi).nhit+trk(lxj).nhit
+                   trk(track_h.nok).nhit=trk(lxi).nhit+trk(lxj).nhit
 C                  sort hits in z
-                   iret=tls_Quick_Sort_r(trk(lxi).nhit, rhits(1).z, rhits(2).z, rhits)
+                   iret=tls_Quick_Sort_r(trk(track_h.nok).nhit, rhits(1).z, rhits(2).z, rhits)
 C                  re-load trk(lxi)
-                   do  k=1,trk(lxi).nhit
-                      trk(lxi).ipnt(k)=rhits(k).lhit
-                      hit(rhits(k).lhit).track=1000*lxi+k
+                   do  k=1,trk(track_h.nok).nhit
+                      trk(track_h.nok).ipnt(k)=rhits(k).lhit
+                      hit(rhits(k).lhit).track=1000*track_h.nok+k
                    end do
 c                  refit track
 c                call the fitting and loading
-                 iret = tpt_fit_track(lxi,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
-                 iret = tpt_load_track(lxi,track_h,track,trk,hit_h,hit)
+                 iret = tpt_fit_track(track_h.nok,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
+                 if(trk(track_h.nok).flag.gt.0)then
+                    iret = tpt_load_track(track_h.nok,track_h,track,trk,hit_h,hit)
+C                   flag the contributing track as "admerged"
+                    trk(lxj).flag=-77
+                    track(lxj).flag=-77
+                    trk(lxi).flag=-77
+                    track(lxi).flag=-77
+                 else
+C                   if fit fails
+                    track_h.nok=track_h.nok-1
+                    do  k=1,trk(lxi).nhit
+                      hit(trk(lxi).ipnt(k)).track=1000*lxi+k
+                    end do
+                    do  k=1,trk(lxj).nhit
+                      hit(trk(lxj).ipnt(k)).track=1000*lxj+k
+                    end do
+                 endif
 C                 write(17,*)track(lxi).flag, track(lxi).id, track(lxi).nrec
               endif   ! p(7) or tanl
             endif   ! cuta,b
