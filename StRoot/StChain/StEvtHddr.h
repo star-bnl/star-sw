@@ -11,7 +11,8 @@ public:
   StEvtHddr(TDataSet *parent=0);
  ~StEvtHddr(){};
   StEvtHddr &operator=(const StEvtHddr &hddr);
-  virtual TObject *Clone(){StEvtHddr *to=new StEvtHddr();*to = *this; return to;};
+  virtual TObject *Clone() const{StEvtHddr *to=new StEvtHddr();*to = *this; return to;};
+  virtual TObject *Clone()      {return ((const StEvtHddr*)this)->Clone();};
 //		Get methods
 
   Int_t 	GetRunNumber()    const {return mRunNumber;};
