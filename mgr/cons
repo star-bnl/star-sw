@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.19 1999/10/22 19:37:52 fisyak Exp $
+# $Id: cons,v 1.20 1999/10/29 13:16:10 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.19 1999/10/22 19:37:52 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.20 1999/10/29 13:16:10 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -237,7 +237,6 @@ if ($main::_WIN32) {
 }
 
 # Handle command line arguments.
-# print "==========\tDebug: cons @ARGV = ",@ARGV,"\n";
 while (@ARGV) {
     $_ = shift(@ARGV);
     &option, next			if s/^-//;
@@ -247,7 +246,6 @@ while (@ARGV) {
 }
 
 sub option {
-# print "==========\tDebug:","-option- parameters = ", @_, "\n";
     if ($_ eq 'm') {
 	print($version, $cons_history), exit(0);
     } elsif ($_ eq 'v') {
@@ -310,7 +308,6 @@ sub option {
 
 # Process an equate argument (var=val).
 sub equate {
-# print "==========\tDebug:","-equate- parameters = ", @_, "\n";
     my($var, $val) = /([^=]*)=(.*)/;
     $script::ARG{$var} = $val;
 }
@@ -364,7 +361,6 @@ if ($param::overfile) {
 
 # Provide this to user to setup override patterns.
 sub Override {
-# print "==========\tDebug:","In override-Override- parameters = ", @_, "\n";
     my($re, @env) = @_;
     return if $overrides{$re}; # if identical, first will win.
     $param::overrides = 1;
@@ -419,7 +415,6 @@ exit 0 + ($errors != 0);
 
 # Build the supplied target directory or files. Return aggregated status.
 sub buildtarget {
-# print "==========\tDebug:","In main-buildtarget- parameters = ", ref(@_), "\n";
     my($tgt) = @_;
     if (ref($tgt) eq "dir") {
 	my($result) = "none";
@@ -463,7 +458,6 @@ sub buildtarget {
 		print qq(${\$tgt->path}\n) if !$param::aflag;
 	    }
 	    if ($param::aflag) {
-# print "==========\tDebug:","In main-buildtarget- action tgt = ", $tgt, "\n";
 		$tgt->{builder}->action($tgt);
 	    }
 	}
@@ -489,7 +483,6 @@ package script;
 # This is called from main to interpret/run the top-level Construct
 # file, passed in as the single argument.
 sub main::doscripts {
-# print "==========\tDebug:","In script-main::doscripts- parameters = ", @_, "\n";
     my($script) = @_;
     Build($script);
     # Now set up the includes/excludes (after the Construct file is read).
@@ -540,11 +533,9 @@ sub main::doscripts {
 # Link a directory to another. This simply means set up the *source*
 # for the directory to be the other directory.
 sub Link {
-# print "==========\tDebug:","In script-Link- parameters = ", $_[0]," => ",$_[1], "\n";
     my(@paths) = @_;
     my($srcdir) = $dir::cwd->lookupdir(pop @paths)->srcdir;
     map($dir::cwd->lookupdir($_)->{srcdir} = $srcdir, @paths);
-# print "==========\tDebug:","In script-Link- output = ", $srcdir, "\n";
 }
 
 # Add directories to the repository search path for files.
@@ -554,7 +545,6 @@ sub Link {
 # is cumbersome, but assures that the paths will be reported
 # the same regardless of symbolic links.
 sub Repository {
-# print "==========\tDebug:","In script-Repository- parameters = ", @_, "\n";
     my($my_dir) = $dir::cwd->path;
     if ($my_dir eq '.') {
 	chomp($my_dir = `pwd`);
@@ -571,35 +561,30 @@ sub Repository {
 
 # Return the list of Repository directories specified.
 sub Repository_List {
-# print "==========\tDebug:","In script-Repository_List- parameters = ", @_, "\n";
     map($_->path, @param::rpath);
 }
 
 # Specify whether the .consign signature times in repository files are,
 # in fact, consistent with the times on the files themselves.
 sub Repository_Sig_Times_OK {
-# print "==========\tDebug:","In script-Repository_Sig_Times_OK- parameters = ", @_, "\n";
     $param::rep_sig_times_ok = shift;
 }
 
 # Specify files/targets that must be present and built locally,
 # even if they exist already-built in a Repository.
 sub Local {
-# print "==========\tDebug:","In script-Local- parameters = ", @_, "\n";
     my(@files) = map($dir::cwd->lookup($_), @_);
     map($_->local(1), @files);
 }
 
 # Export variables to any scripts invoked from this one.
 sub Export {
-# print "==========\tDebug:","In script-Export- parameters = ", @_, "\n";
     @{$priv::self->{exports}} = @_;
 }
 
 # Import variables from the export list of the caller
 # of the current script.
 sub Import {
-# print "==========\tDebug:","In script-Import- parameters = ", @_, "\n";
     my($parent) = $priv::self->{parent};
     my($imports) = $priv::self->{imports};
     @{$priv::self->{exports}} = keys %$imports;
@@ -621,7 +606,6 @@ sub Import {
 # the specified script, passing to it any exported variables from
 # the current script.
 sub Build {
-# print "==========\tDebug:","In script-Build- parameters = ", @_, "\n";
     my(@files) = map($dir::cwd->lookup($_), @_);
     my(%imports);
     map($imports{$_} = ${"script::$_"}, @{$priv::self->{exports}});
@@ -637,21 +621,18 @@ sub Build {
 
 # Set up regexps dependencies to ignore. Should only be called once.
 sub Ignore {
-# print "==========\tDebug:","In script-Ignore- parameters = ", @_, "\n";
     die("Ignore called more than once\n") if $param::ignore;
     $param::ignore = join("|", map("($_)", @_)) if @_;
 }
 
 # Specification of default targets.  Should only be called once?
 sub Default {
-# print "==========\tDebug:","In script-Default- parameters = ", @_, "\n";
     die("Default called more than once\n") if $param::default_targets;
     @param::default_targets = @_ if @_;
 }
 
 # Local Help.  Should only be called once.
 sub Help {
-# print "==========\tDebug:","In script-Help- parameters = ", @_, "\n";
     if ($param::localhelp) {
 	print "@_\n";
 	exit 2;
@@ -660,7 +641,6 @@ sub Help {
 
 # Return the build name(s) of a file or file list.
 sub FilePath {
-# print "==========\tDebug:","In script-FilePath- parameters = ", @_, "\n";
     wantarray
 	? map($dir::cwd->lookup($_)->path, @_)
 	: $dir::cwd->lookup($_[0])->path;
@@ -668,7 +648,6 @@ sub FilePath {
 
 # Return the build name(s) of a directory or directory list.
 sub DirPath {
-# print "==========\tDebug:","In script-DirPath- parameters = ", @_, "\n";
     wantarray
 	? map($dir::cwd->lookupdir($_)->path, @_)
 	: $dir::cwd->lookupdir($_[0])->path;
@@ -678,7 +657,6 @@ sub DirPath {
 # relative to the current directory.
 # The usual path separator problems abound; for now we'll use :
 sub SplitPath {
-# print "==========\tDebug:","In script-SplitPath- parameters = ", @_, "\n";
     my($dirs) = @_;
     if (ref($dirs) ne ARRAY) {
 	$dirs = [ split(/$main::PATH_SEPARATOR/o, $dirs) ];
@@ -689,7 +667,6 @@ sub SplitPath {
 # Return true if the supplied path is available as a source file
 # or is buildable (by rules seen to-date in the build).
 sub ConsPath {
-# print "==========\tDebug:","In script-ConsPath- parameters = ", @_, "\n";
     my($path) = @_;
     my($file) = $dir::cwd->lookup($path);
     return $file->accessible;
@@ -697,7 +674,6 @@ sub ConsPath {
 
 # Return the source path of the supplied path.
 sub SourcePath {
-# print "==========\tDebug:","In script-SourcePath- parameters = ", @_, "\n";
     my($path) = @_;
     my($file) = $dir::cwd->lookup($path);
     return $file->rsrcpath;
@@ -710,7 +686,6 @@ sub SourcePath {
 # then targets may be mixed in the cache (two targets may share the same
 # cache file--not recommended).
 sub UseCache($@) {
-# print "==========\tDebug:","In script-UseCache- parameters = ", @_, "\n";
     my($dir, @args) = @_;
     # NOTE: it\'s important to process arguments here regardless of whether
     # the cache is disabled temporarily, since the mixtargets option affects
@@ -749,7 +724,6 @@ sub UseCache($@) {
 # into the signature of each derived file. Changing the salt will
 # force recompilation of all derived files.
 sub Salt($) {
-# print "==========\tDebug:","In script-Salt- parameters = ", @_, "\n";
     # We append the value, so that UseCache and Salt may be used
     # in either order without changing the signature calculation.
     $param::salt .= $_[0];
@@ -1001,7 +975,6 @@ package cons;
 # Overrides to the base environment may also be passed in
 # as key/value pairs.
 sub new {
-# print "==========\tDebug:","In cons-new- parameters = ", @_, "\n";
     my($package) = shift;
     my ($env) = {@param::defaults, @_};
     @{$env->{_envcopy}} = %$env; # Note: we never change PATH
@@ -1013,7 +986,6 @@ sub new {
 # Note that the working directory will be the initial directory
 # of the original environment.
 sub clone {
-# print "==========\tDebug:","In cons-clone- parameters = ", @_, "\n";
     my($env) = shift;
     my $clone = {@{$env->{_envcopy}}, @_};
     @{$clone->{_envcopy}} = %$clone; # Note: we never change PATH
@@ -1025,7 +997,6 @@ sub clone {
 # It also contains a copy of the PATH, so that the path
 # may be modified if it is converted back to a hash.
 sub copy {
-# print "==========\tDebug:","In cons-copy- parameters = ", @_, "\n";
     my($env) = shift;
     (@{$env->{_envcopy}}, 'ENV' => {%{$env->{ENV}}}, @_)
 }
@@ -1033,7 +1004,6 @@ sub copy {
 # Resolve which environment to actually use for a given
 # target. This is just used for simple overrides.
 sub _resolve {
-# print "==========\tDebug:","In cons-_resolve- parameters = ", @_, "\n";
     return $_[0] if !$param::overrides;
     my($env, $tgt) = @_;
     my($path) = $tgt->path;
@@ -1054,7 +1024,6 @@ sub _resolve {
 # Substitute construction environment variables into a string.
 # Internal function/method.
 sub _subst {
-# print "==========\tDebug:","In cons-_subst- parameters = ", @_, "\n";
     my($env, $str) = @_; # no% option for Sun
     while ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge) {}
 #    while ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/) {
@@ -1066,7 +1035,6 @@ sub _subst {
 }
 
 sub Install {
-# print "==========\tDebug:","In cons-Install- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgtdir) = $dir::cwd->lookupdir(shift);
     for $file (map($dir::cwd->lookup($_), @_)) {
@@ -1076,7 +1044,6 @@ sub Install {
 }
 
 sub InstallAs {
-# print "==========\tDebug:","In cons-InstallAs- parameters = ", @_, "\n";
     my $env = shift;
     my $tgt = shift;
     my $src = shift;
@@ -1116,7 +1083,6 @@ sub InstallAs {
 #	Install $env $dir, $file;
 #	Local "$dir/$file";
 sub Install_Local {
-# print "==========\tDebug:","Install_Local-- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgtdir) = $dir::cwd->lookupdir(shift);
     for $file (map($dir::cwd->lookup($_), @_)) {
@@ -1127,7 +1093,6 @@ sub Install_Local {
 }
 
 sub Objects {
-# print "==========\tDebug:","In cons-Objects- parameters = ", @_, "\n";
     my($env) = shift;
     map($_->{entry}, _Objects($env, map($dir::cwd->lookup($_), @_)))
 }
@@ -1135,7 +1100,6 @@ sub Objects {
 # Called with multiple source file references (or object files).
 # Returns corresponding object files references.
 sub _Objects {
-# print "==========\tDebug:","In cons-_Objects- parameters = ", @_, "\n";
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
     map(_Object($env, $_, $_->{dir}->lookup($_->base . $suffix)), @_);
@@ -1146,7 +1110,6 @@ sub _Objects {
 # source file\'s extension. Sets up the appropriate rules for creating
 # the object from the source.  Returns the object reference.
 sub _Object {
-# print "==========\tDebug:","In cons-_Object- parameters = ", @_, "\n";
     my($env, $src, $obj) = @_;
     return $obj if $src eq $obj; # don't need to build self from self.
     my($objenv) = $env->_resolve($obj);
@@ -1163,7 +1126,6 @@ sub _Object {
 }
 
 sub Program {
-# print "==========\tDebug:","In cons-Program- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgt) = $dir::cwd->lookup(shift);
     my($progenv) = $env->_resolve($tgt);
@@ -1172,7 +1134,6 @@ sub Program {
 }
 
 sub Module {
-# print "==========\tDebug:","In cons-Module- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgt) = $dir::cwd->lookup(shift);
     my($modenv) = $env->_resolve($tgt);
@@ -1182,7 +1143,6 @@ sub Module {
 }
 
 sub LinkedModule {
-# print "==========\tDebug:","In cons-LinkedModule- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgt) = $dir::cwd->lookup(shift);
     my($progenv) = $env->_resolve($tgt);
@@ -1192,7 +1152,6 @@ sub LinkedModule {
 }
 
 sub Library {
-# print "==========\tDebug:","In cons-Library- parameters = ", @_, "\n";
     my($env) = shift;
     my($lib) = $dir::cwd->lookup(file::addsuffix(shift, $env->{SUFLIB}));
     my($libenv) = $env->_resolve($lib);
@@ -1205,7 +1164,6 @@ sub Library {
 # Target may be a reference, in which case it is taken
 # to be a multiple target (all targets built at once).
 sub Command {
-# print "==========\tDebug:","In cons-Command- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgt) = shift;
     my($com) = pop(@_);
@@ -1229,7 +1187,6 @@ sub Command {
 }
 
 sub Depends {
-# print "==========\tDebug:","In cons-Depends- parameters = ", @_, "\n";
     my($env) = shift;
     my($tgt) = $dir::cwd->lookup(shift);
     push(@{$tgt->{dep}}, map($dir::cwd->lookup($_), @_));
@@ -1241,7 +1198,6 @@ sub Depends {
 # a time of the file, and is expected to return a list of
 # dependencies.
 sub QuickScan {
-# print "==========\tDebug:","In cons-QuickScan- parameters = ", @_, "\n";
     my($env, $code, $file, $path) = @_;
     $dir::cwd->lookup($file)->{srcscan,$env} =
 	find scan::quickscan($code, $env, $path);
@@ -1270,7 +1226,6 @@ BEGIN {
 }
 
 sub find {
-# print "==========\tDebug:","In build::install-find- parameters = ", @_, "\n";
     $installer
 }
 
@@ -1281,7 +1236,6 @@ sub cachout { }
 
 # Do the installation.
 sub action {
-# print "==========\tDebug:","In build::install-action- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     my($src) = $tgt->{sources}[0];
     main::showcom("Install ${\$src->rpath} as ${\$tgt->path}")
@@ -1297,7 +1251,6 @@ package build::command;
 BEGIN { @ISA = qw(build) }
 
 sub find {
-# print "==========\tDebug:","In build::command-find- parameters = ", @_, "\n";
     my($class, $env, $com, $includes) = @_;
     $com = $env->_subst($com);
     $com{$env,$com,$includes} || do {
@@ -1312,7 +1265,6 @@ sub find {
 
 # Default cache in function.
 sub cachin {
-# print "==========\tDebug:","In build::command-cachin- parameters = ", @_, "\n";
     my($self, $tgt, $sig) = @_;
     if (cache::in($tgt, $sig)) {
 	if ($param::cachecom) {
@@ -1327,7 +1279,6 @@ sub cachin {
 
 # Default cache out function.
 sub cachout {
-# print "==========\tDebug:","In build::command-cachout- parameters = ", @_, "\n";
     my($self, $tgt, $sig) = @_;
     cache::out($tgt, $sig);
 }
@@ -1342,7 +1293,6 @@ sub cachout {
 # Call this to get the command line script: an array of
 # fully substituted commands.
 sub getcoms {
-# print "==========\tDebug:","In build::command-getcoms- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     my(@coms);
     for $com (split(/\n/, $self->{com})) {
@@ -1402,7 +1352,6 @@ sub getcoms {
 
 # Build the target using the previously specified commands.
 sub action {
-# print "==========\tDebug:","In build::command-action- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     my($env) = $self->{env};
 
@@ -1431,7 +1380,6 @@ sub action {
 	    die("$0: unable to fork child process ($!)\n") if !defined $pid;
 	    if (!$pid) {
 	      # This is the child.
-# print "==========\tDebug:","In build::command-action- command = ", $com, "\n";
 	      exec($com);
 	      $com =~ s/\s.*//;
 	      die qq($0: failed to execute "$com" ($!). )
@@ -1476,7 +1424,6 @@ sub action {
 
 # Return script signature.
 sub script {
-# print "==========\tDebug:","In build::command-script- parameters = ", @_, "\n";
     $_[0]->{comsig}
 }
 
@@ -1487,7 +1434,6 @@ BEGIN { @ISA = qw(build::command) }
 
 # Find an appropriate linker.
 sub find {
-# print "==========\tDebug:","In build::command::link-find- parameters = ", @_, "\n";
     my($class, $env, $command) = @_;
     if (!exists $env->{_LDIRS}) {
 	my($ldirs);
@@ -1540,7 +1486,6 @@ sub find {
 # environment are built, and return the collected signatures
 # of the libraries in the path.
 sub includes {
-# print "==========\tDebug:","In build::command::link-includes- parameters = ", @_, "\n";
     return $_[0]->{sig} if exists $_[0]->{sig};
     my($self, $tgt) = @_;
     my($env) = $self->{env};
@@ -1604,7 +1549,6 @@ sub includes {
 # Always compatible with other such builders, so the user
 # can define a single program or module from multiple places.
 sub compatible {
-# print "==========\tDebug:","In build::command::link-compatible- parameters = ", @_, "\n";
     my($self, $other) = @_;
     ref($other) eq "build::command::link";
 }
@@ -1616,7 +1560,6 @@ BEGIN { @ISA = qw(build::command) }
 
 # Find an appropriate linker.
 sub find {
-# print "==========\tDebug:","In build::command::link-find- parameters = ", @_, "\n";
     my($class, $env, $command) = @_;
     if (!exists $env->{_LDIRS}) {
 	my($ldirs);
@@ -1669,7 +1612,6 @@ sub find {
 # environment are built, and return the collected signatures
 # of the libraries in the path.
 sub includes {
-# print "==========\tDebug:","In build::command::link-includes- parameters = ", @_, "\n";
     return $_[0]->{sig} if exists $_[0]->{sig};
     my($self, $tgt) = @_;
     my($env) = $self->{env};
@@ -1733,7 +1675,6 @@ sub includes {
 # Always compatible with other such builders, so the user
 # can define a single linked module from multiple places.
 sub compatible {
-# print "==========\tDebug:","In build::command::linkmodule-compatible- parameters = ", @_, "\n";
     my($self, $other) = @_;
     ref($other) eq "build::command::linkedmodule";
 }
@@ -1744,7 +1685,6 @@ package build::command::cc;
 BEGIN { @ISA = qw(build::command) }
 
 sub find {
-# print "==========\tDebug:","In build::command::cc-find- parameters = ", @_, "\n";
     $_[1]->{_cc} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1757,7 +1697,6 @@ sub find {
 
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::cc-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1769,7 +1708,6 @@ BEGIN { @ISA = qw(build::command) }
 
 #________________________________________
 sub find {
-# print "==========\tDebug:","In build::command::cxx-find- parameters = ", @_, "\n";
     $_[1]->{_cxx} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1782,7 +1720,6 @@ sub find {
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::cxx-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1794,7 +1731,6 @@ BEGIN { @ISA = qw(build::command) }
 
 #________________________________________
 sub find {
-# print "==========\tDebug:","In build::command::kuip-find- parameters = ", @_, "\n";
     $_[1]->{_kuip} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1807,7 +1743,6 @@ sub find {
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::kuip-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1819,7 +1754,6 @@ BEGIN { @ISA = qw(build::command) }
 
 #________________________________________
 sub find {
-# print "==========\tDebug:","In build::command::stic-find- parameters = ", @_, "\n";
     $_[1]->{_stic} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1832,7 +1766,6 @@ sub find {
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::stic-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1844,7 +1777,6 @@ BEGIN { @ISA = qw(build::command) }
 
 #________________________________________
 sub find {
-# print "==========\tDebug:","In build::command::fc-find- parameters = ", @_, "\n";
     $_[1]->{_fc} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1857,7 +1789,6 @@ sub find {
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::fc-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1869,7 +1800,6 @@ BEGIN { @ISA = qw(build::command) }
 
 #________________________________________
 sub find {
-# print "==========\tDebug:","In build::command::geant3-find- parameters = ", @_, "\n";
     $_[1]->{_geant3} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
@@ -1882,7 +1812,6 @@ sub find {
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
-# print "==========\tDebug:","In build::command::geant3-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -1897,7 +1826,6 @@ BEGIN { @ISA = qw(build::command) }
 
 # XXX Optimize this to not use ignored paths.
 sub comsig {
-# print "==========\tDebug:","In build::command::user-comsig- parameters = ", @_, "\n";
     return $_[0]->{_comsig} if exists $_[0]->{_comsig};
     my($self, $tgt) = @_;
     my($env) = $self->{env};
@@ -1929,7 +1857,6 @@ sub comsig {
 }
 
 sub includes {
-# print "==========\tDebug:","In build::command::user-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     my($sig);
 
@@ -1954,7 +1881,6 @@ package build::command::library;
 BEGIN { @ISA = qw(build::command) }
 
 sub find {
-# print "==========\tDebug:","In build::command::library-find- parameters = ", @_, "\n";
     my($class, $env) = @_;
     bless find build::command($env, $env->{ARCOM})
 }
@@ -1962,7 +1888,6 @@ sub find {
 # Always compatible with other library builders, so the user
 # can define a single library from multiple places.
 sub compatible {
-# print "==========\tDebug:","In build::command::library-compatible- parameters = ", @_, "\n";
     my($self, $other) = @_;
     ref($other) eq "build::command::library";
 }
@@ -1973,43 +1898,36 @@ sub compatible {
 package build::multiple;
 
 sub new {
-# print "==========\tDebug:","In build::multiple-new- parameters = ", @_, "\n";
     my($class, $builder, $tgts) = @_;
     bless { 'builder' => $builder, 'tgts' => $tgts };
 }
 
 sub script {
-# print "==========\tDebug:","In build::multiple-script- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{builder}->script($tgt);
 }
 
 sub includes {
-# print "==========\tDebug:","In build::multiple-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{builder}->includes($tgt);
 }
 
 sub compatible {
-# print "==========\tDebug:","In build::multiple-compatible- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{builder}->compatible($tgt);
 }
 
 sub cachin {
-# print "==========\tDebug:","In build::multiple-cachin- parameters = ", @_, "\n";
     my($self, $tgt, $sig) = @_;
     $self->{builder}->cachin($tgt, $sig);
 }
 
 sub cachout {
-# print "==========\tDebug:","In build::multiple-cachout- parameters = ", @_, "\n";
     my($self, $tgt, $sig) = @_;
     $self->{builder}->cachout($tgt, $sig);
 }
 
 sub action {
-# print "==========\tDebug:","In build::multiple-action- parameters = ", @_, "\n";
     my($self, $invoked_tgt) = @_;
     return $self->{built} if exists $self->{built};
 
@@ -2054,7 +1972,6 @@ package scan;
 # is being done. Signatures are cached for each unique file/scanner
 # pair.
 sub includes {
-# print "==========\tDebug:","In scan-includes- parameters = ", @_, "\n";
     my($self, $tgt, @files) = @_;
     my(%files, $file);
     my($inc) = $self->{includes} || ($self->{includes} = {});
@@ -2086,7 +2003,6 @@ package scan::quickscan;
 BEGIN { @ISA = qw(scan) }
 
 sub find {
-# print "==========\tDebug:","In scan::quickscan-find- parameters = ", @_, "\n";
     my($class, $code, $env, $path) = @_;
     $scanner{$code,$env,$path} || do {
 	my(@path) = map { $dir::cwd->lookupdir($_) } split(/:/, $path);
@@ -2097,7 +2013,6 @@ sub find {
 
 # Scan the specified file for included file names.
 sub scan {
-# print "==========\tDebug:","In scan::quickscan-scan- parameters = ", @_, "\n";
     my($self, $file) = @_;
     my($code) = $self->{code};
     my(@includes);
@@ -2137,7 +2052,6 @@ BEGIN { @ISA = qw(scan) }
 # some pains to make sure that we return the same scanner object
 # for the same path: otherwise we will unecessarily scan files.
 sub find {
-# print "==========\tDebug:","In scan::cpp-find- parameters = ", @_, "\n";
     my($class, $dir, $pdirs) = @_;
     if (ref($pdirs) ne 'ARRAY') {
 	$pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
@@ -2152,7 +2066,6 @@ sub find {
 
 # Scan the specified file for include lines.
 sub scan {
-# print "==========\tDebug:","In scan::cpp-scan- parameters = ", @_, "\n";
     my($self, $file) = @_;
     my($angles, $quotes);
 
@@ -2221,7 +2134,6 @@ sub scan {
 
 # Return the include flags that would be used for a C Compile.
 sub iflags {
-# print "==========\tDebug:","In scan::cpp-iflags- parameters = ", @_, "\n";
     my($self) = @_;
     my($iflags);
     my($rflags);
@@ -2280,7 +2192,6 @@ BEGIN {
 # The file may be specified as relative, absolute (starts
 # with /), or top-relative (starts with #).
 sub lookup {
-# print "==========\tDebug:","In dir-lookup- parameters = ", @_, "\n";
     my($dir, $entry) = @_;
 
     #--------------------------------------------------------------------
@@ -2327,7 +2238,6 @@ sub lookup {
 }
 
 sub lookupdir {
-# print "==========\tDebug:","In dir-lookupdir- parameters = ", $_[0],",",$_[1], "\n";
     $dir::cache{$_[0],$_[1]} || do {
 	my($dir) = $dir::cache{$_[0],$_[1]} = &dir::lookup;
 	$dir->{member}->{'..'} = $dir->{dir};
@@ -2339,22 +2249,18 @@ sub lookupdir {
 # Return the path of the directory (file paths implemented
 # separately, below).
 sub path {
-# print "==========\tDebug:","In dir-path- parameters = ", $_[0]->{path}  , "\n";
-# print "==========\tDebug:","In dir-path- parameters = ", $_[0]->{entry} , "\n";
     $_[0]->{path} ||
 	($_[0]->{path} = $_[0]->{dir}->prefix . $_[0]->{entry});
 }
 
 # Return the pathname as a prefix to be concatenated with an entry.
 sub prefix {
-# print "==========\tDebug:","In dir-prefix- parameters = ", $_[0]->{prefix}, "\n";
     return $_[0]->{prefix} if exists $_[0]->{prefix};
     $_[0]->{prefix} = $_[0]->path . $SEPARATOR;
 }
 
 # Return the related source path prefix.
 sub srcprefix {
-# print "==========\tDebug:","In dir-srcprefix- parameters = ", $_[0]->{srcprefix}, $_[0]->srcdir, "\n";
     return $_[0]->{srcprefix} if exists $_[0]->{srcprefix};
     my($srcdir) = $_[0]->srcdir;
     $srcdir->{srcprefix} = $srcdir eq $_[0] ? $srcdir->prefix : $srcdir->srcprefix;
@@ -2362,20 +2268,17 @@ sub srcprefix {
 
 # Return the related source directory.
 sub srcdir {
-# print "==========\tDebug:","In dir-srcdir- parameters = ", $_[0]->{srcdir}, "\n";
     $_[0]->{srcdir} ||
 	($_[0]->{srcdir} = $_[0]->{dir}->srcdir->lookupdir($_[0]->{entry}))
 }
 
 # Return if the directory is linked to a separate source directory.
 sub is_linked {
-# print "==========\tDebug:","In dir-is_linked- parameters = ", @_, "\n";
     $_[0]->{is_linked} ||
 	($_[0]->{is_linked} = $_[0]->path ne $_[0]->srcdir->path)
 }
 
 sub accessible {
-# print "==========\tDebug:","In dir-accessible- parameters = ", @_, "\n";
     my($path) = $_[0]->path;
     die(qq($0: you have attempted to use path "$path" both as a file and as a directory!\n));
 }
@@ -2389,19 +2292,16 @@ BEGIN { @ISA = qw(dir) }
 # Define this separately from dir::path because we don't want to
 # cache all file pathnames (just directory pathnames).
 sub path {
-# print "==========\tDebug:","In file-path- parameters = ", @_, "\n";
     $_[0]->{dir}->prefix . $_[0]->{entry}
 }
 
 # Return the related source file path.
 sub srcpath {
-# print "==========\tDebug:","In file-srcpath- parameters = ", @_, "\n";
     $_[0]->{dir}->srcprefix . $_[0]->{entry}
 }
 
 # Return if the file is (should be) linked to a separate source file.
 sub is_linked {
-# print "==========\tDebug:","In file-is_linked- parameters = ", @_, "\n";
     $_[0]->{dir}->is_linked
 }
 
@@ -2411,7 +2311,6 @@ sub is_linked {
 # under a Repository directory, return the local file name anyway
 # so that some higher layer can try to construct it.
 sub rfile {
-# print "==========\tDebug:","In file-rfile- parameters = ", @_, "\n";
     return $_[0]->{rfile} if exists $_[0]->{rfile};
     my($self) = @_;
     my($rfile) = $self;
@@ -2436,7 +2335,6 @@ sub rfile {
 # making this a completely local file object
 # by pointing it back to itself.
 sub no_rfile {
-# print "==========\tDebug:","In file-no_rfile- parameters = ", @_, "\n";
     $_[0]->{rfile} = $_[0];
 }
 
@@ -2444,7 +2342,6 @@ sub no_rfile {
 # implicitly returning the current file\'s path if there isn't a
 # same-named file under a Repository directory.
 sub rpath {
-# print "==========\tDebug:","In file-rpath- parameters = ", @_, "\n";
     $_[0]->{rpath} ||
 	($_[0]->{rpath} = $_[0]->rfile->path)
 }
@@ -2453,7 +2350,6 @@ sub rpath {
 # directory, implicitly returning the current file\'s srcpath if there
 # isn't a same-named file under a Repository directory.
 sub rsrcpath {
-# print "==========\tDebug:","In file-rsrcpath- parameters = ", @_, "\n";
     return $_[0]->{rsrcpath} if exists $_[0]->{rsrcpath};
     my($self) = @_;
     my($path) = $self->{rsrcpath} = $self->srcpath;
@@ -2476,7 +2372,6 @@ sub rsrcpath {
 # directory (preferably local, but maybe in a repository)
 # into a build directory from its proper Linked directory.
 sub source_exists {
-# print "==========\tDebug:","In file-source_exists- parameters = ", @_, "\n";
     return $_[0]->{source_exists} if defined $_[0]->{source_exists};
     my($self) = @_;
     my($path) = $self->path;
@@ -2527,19 +2422,16 @@ sub source_exists {
 
 # Return if a same-named derived file exists under a Repository directory.
 sub derived_exists {
-# print "==========\tDebug:","In file-derived_exists- parameters = ", @_, "\n";
     $_[0]->{derived_exists} ||
 	($_[0]->{derived_exists} = ($_[0] != $_[0]->rfile));
 }
 
 # Return if this file is somewhere under a Repository directory.
 sub is_on_rpath {
-# print "==========\tDebug:","In file-is_on_rpath- parameters = ", @_, "\n";
     $_[0]->{is_on_rpath};
 }
 
 sub local {
-# print "==========\tDebug:","In file-local- parameters = ", @_, "\n";
     my($self, $arg) = @_;
     if (defined $arg) {
 	$self->{local} = $arg;
@@ -2550,7 +2442,6 @@ sub local {
 # Return the entry name of the specified file
 # without the suffix
 sub base {
-# print "==========\tDebug:","In file-base- parameters = ", @_, "\n";
     my($entry) = $_[0]->{entry};
     $entry =~ s/\.[^\.]*$//;
     $entry;
@@ -2559,7 +2450,6 @@ sub base {
 # Return the suffix of the file, for up to a 3 character
 # suffix. Anything less returns nothing.
 sub suffix {
-# print "==========\tDebug:","In file-suffix- parameters = ", @_, "\n";
   if (! $main::_WIN32) {
     $_[0]->{entry} =~ /\.[^\.\/]{0,3}$/;
     $&
@@ -2572,7 +2462,6 @@ sub suffix {
 
 # Called as a simple function file::addsuffix(name, suffix)
 sub addsuffix {
-# print "==========\tDebug:","In file-addsuffix- parameters = ", @_, "\n";
     my($name, $suffix) = @_;
 
     if ($suffix && substr($name, -length($suffix)) ne $suffix) {
@@ -2584,7 +2473,6 @@ sub addsuffix {
 # Return true if the file is (or will be) accessible.
 # That is, if we can build it, or if it is already present.
 sub accessible {
-# print "==========\tDebug:","In file-accessible- parameters = ", @_, "\n";
     (exists $_[0]->{builder}) || ($_[0]->source_exists);
 }
 
@@ -2593,7 +2481,6 @@ sub accessible {
 # as a dependency and, further, should not be scanned for
 # dependencies).
 sub ignore {
-# print "==========\tDebug:","In file-ignore- parameters = ", @_, "\n";
     return 0 if !$param::ignore;
     return $_[0]->{ignore} if exists $_[0]->{ignore};
     $_[0]->{ignore} = $_[0]->path =~ /$param::ignore/o;
@@ -2601,12 +2488,10 @@ sub ignore {
 
 # Build the file, if necessary.
 sub build {
-# print "==========\tDebug:","In file-build- parameters = ", @_, "\n";
     $_[0]->{status} || &file::_build;
 }
 
 sub _build {
-# print "==========\tDebug:","In file-_build- parameters = ", @_, "\n";
     my($self) = @_;
     print main::DEPFILE $self->path, "\n" if param::depfile;
     print((' ' x $level), $self->path, "\n") if $param::depends;
@@ -2723,7 +2608,6 @@ sub _build {
 
 # Bind an action to a file, with the specified sources. No return value.
 sub bind {
-# print "==========\tDebug:","In file-bind- parameters = ", @_, "\n";
     my($self, $builder, @sources) = @_;
     if ($self->{builder} && !$self->{builder}->compatible($builder)) {
 	# Even if not "compatible", we can still check to see if the
@@ -2755,7 +2639,6 @@ package futil;
 # Links them if possible (hard link), otherwise copies.
 # Don't ask why, but the source is a path, the tgt is a file obj.
 sub install {
-# print "==========\tDebug:","In futil-install- parameters = ", @_, "\n";
     my($sp, $tgt) = @_;
     my($tp) = $tgt->path;
     return 1 if $tp eq $sp;
@@ -2770,7 +2653,6 @@ sub install {
 # Copy one file to another. Arguments are actual file names.
 # Returns undef on failure. Preserves mtime and mode.
 sub copy {
-# print "==========\tDebug:","In futil-copy- parameters = ", @_, "\n";
     my ($sp, $tp) = @_;
     my($mode, $length, $atime, $mtime) = (stat($sp))[2,7,8,9];
 
@@ -2787,7 +2669,6 @@ sub copy {
 # Ensure that the specified directory exists.
 # Aborts on failure.
 sub mkdir {
-# print "==========\tDebug:","In futil-mkdir- parameters = ", @_, "\n";
     return if $_[0]->{exists};
     futil::mkdir($_[0]->{dir}); # Recursively make parent.
     my($path) = $_[0]->path;
@@ -2802,7 +2683,6 @@ sub mkdir {
 package sig::hash;
 
 sub init {
- # print "==========\tDebug:","In sig::hash-init- parameters = ", @_, "\n";
     my($dir) = @_;
     my($consign) = $dir->prefix . ".consign";
     my($dhash) = $dir->{consign} = {};
@@ -2820,14 +2700,12 @@ sub init {
 
 # Read the hash entry for a particular file.
 sub in {
-# print "==========\tDebug:","In sig::hash-in- parameters = ", @_, "\n";
     my($dir) = $_[0]->{dir};
     ($dir->{consign} || init($dir))->{$_[0]->{entry}}
 }
 
 # Write the hash entry for a particular file.
 sub out {
-# print "==========\tDebug:","In sig::hash-out- parameters = ", @_, "\n";
     my($file, $sig) = @_;
     my($dir) = $file->{dir};
     ($dir->{consign} || init($dir))->{$file->{entry}} = $sig;
@@ -2836,7 +2714,6 @@ sub out {
 
 # Flush hash entries. Called at end or via ^C interrupt.
 sub END {
-# print "==========\tDebug:","In sig::hash-END- parameters = ", @_, "\n";
     return if $called++; # May be called twice.
     close(CONSIGN); # in case this came in via ^C.
     for $dir (values %sig::hash::dirty) {
@@ -2867,7 +2744,6 @@ package cache;
 
 # Find a file in the cache. Return non-null if the file is in the cache.
 sub in {
-# print "==========\tDebug:","In cache-in- parameters = ", @_, "\n";
     return undef unless $param::cache;
     my($file, $sig) = @_;
     # Add the path to the signature, to make it unique.
@@ -2881,7 +2757,6 @@ sub in {
 # If it doesn't make it out, due to an error, then that doesn't
 # really matter.
 sub out {
-# print "==========\tDebug:","In cache-out- parameters = ", @_, "\n";
     return unless $param::cache;
     my($file, $sig) = @_;
     # Add the path to the signature, to make it unique.
@@ -2911,7 +2786,6 @@ sub out {
 package sig;
 
 sub select {
-# print "==========\tDebug:","In sig-select- parameters = ", @_, "\n";
     my($package, $subclass) = @_;
     @ISA = ("sig::$subclass");
 };
@@ -2927,14 +2801,12 @@ BEGIN {
 
 # Invalidate a cache entry.
 sub invalidate {
-# print "==========\tDebug:","In sig::md5-invalidate- parameters = ", @_, "\n";
     delete $_[1]->{sig}
 }
 
 # Determine the current signature of an already-existing or
 # non-existant file.
 sub signature {
-# print "==========\tDebug:","In sig::md5-signature- parameters = ", @_, "\n";
     if (defined $_[1]->{sig}) {
 	return $_[1]->{sig};
     }
@@ -2988,7 +2860,6 @@ sub signature {
 # Is the provided signature equal to the signature of the current
 # instantiation of the target (and does the target exist)?
 sub current {
-# print "==========\tDebug:","In sig::md5-current- parameters = ", @_, "\n";
     my($self, $file, $sig) = @_;
     if ($param::debug) {
     # Uncomment this to debug checks for signature currency.
@@ -3002,7 +2873,6 @@ sub current {
 
 # Store the signature for a file.
 sub set {
-# print "==========\tDebug:","In sig::md5-set- parameters = ", @_, "\n";
     my($self, $file, $sig) = @_;
     my($time) = (stat($file->path))[9];
     sig::hash::out($file, "$time $sig");
@@ -3011,7 +2881,6 @@ sub set {
 
 # Return an aggregate signature
 sub collect {
-# print "==========\tDebug:","In sig::md5-collect- parameters = ", @_, "\n";
     my($self, @sigs) = @_;
     # The following sequence is faster than calling the hex interface.
     $md5->reset();
@@ -3031,7 +2900,6 @@ sub collect {
 # Directly compute a file signature as the MD5 checksum of the
 # bytes in the file.
 sub srcsig {
-# print "==========\tDebug:","In sig::md5-srcsig- parameters = ", @_, "\n";
     my($path) = @_;
     $md5->reset();
     open(FILE, $path) || die("$0: couldn't read $path ($!)\n");
