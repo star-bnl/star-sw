@@ -80,6 +80,6 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
 #define TableImpl(name)                                            \
   St_tableDescriptor *_NAME2_(St_,name)::fgColDescriptors = 0;     \
   TableImp(name)                                                   \
-  TableStreamerImp(particle_dst_param)
+  TableStreamerImp(name)
 
 #endif 
