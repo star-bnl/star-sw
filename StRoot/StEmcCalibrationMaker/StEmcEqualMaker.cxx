@@ -544,7 +544,7 @@ void StEmcEqualMaker::drawEtaBin(int eta0, int eta1,TH2F* SPEC)
 {   
 	TH2F *spec = NULL;
 	if(!SPEC) spec = getSpec(); else spec = SPEC;
-	if(!spec) return NULL;
+	if(!spec) return;
 	int mi = 1;
 	int mf = 60;
 	if(eta0<0 && eta1<0)
