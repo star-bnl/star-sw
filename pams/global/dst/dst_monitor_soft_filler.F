@@ -56,7 +56,7 @@ CC:>--------------------------------------------------------------------
 CC:  Local Variable Type Declarations:
 
       integer*4 i, secnum, padrow, clusterrow,zindex,ntpc_max
-      integer*4 tpc_track
+      integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf
       parameter (ntpc_max = 10000)
       integer*4 track_index(ntpc_max), tpc_trk_row
 
@@ -303,11 +303,15 @@ CC:  per TPC track, and average fitting chi-square per TPC track.
 
 CC:  Count number of good SVT tracks, average number of assigned space
 CC:  points per track, and average fitting chi-square per SVT track.
+CC:  Include chisq outlier rejection, i.e. do not include stk_track().chisq(1)
+CC:  or stk_track().chisq(2) .gt. 100 in the following averages.
 
       dst_monitor_soft(1).n_trk_svt = 0
       dst_monitor_soft(1).avg_trkL_svt = 0.0
       dst_monitor_soft(1).res_pad_svt  = 0.0
       dst_monitor_soft(1).res_drf_svt  = 0.0
+      n_svt_trk_pad = 0
+      n_svt_trk_drf = 0
 
       if(stk_track_h.nok .gt. 0) then
          do i = 1,stk_track_h.nok
@@ -317,24 +321,35 @@ CC:  points per track, and average fitting chi-square per SVT track.
                dst_monitor_soft(1).avg_trkL_svt =
      1            dst_monitor_soft(1).avg_trkL_svt +
      2            stk_track(i).nspt
-               dst_monitor_soft(1).res_pad_svt =
-     1            dst_monitor_soft(1).res_pad_svt +
-     2            stk_track(i).chisq(1)
-               dst_monitor_soft(1).res_drf_svt =
-     1            dst_monitor_soft(1).res_drf_svt +
-     2            stk_track(i).chisq(2)
+               if(stk_track(i).chisq(1) .le. 100.0) then
+                  n_svt_trk_pad = n_svt_trk_pad + 1
+                  dst_monitor_soft(1).res_pad_svt =
+     1               dst_monitor_soft(1).res_pad_svt +
+     2               stk_track(i).chisq(1)
+               end if
+               if(stk_track(i).chisq(2) .le. 100.0) then
+                  n_svt_trk_drf = n_svt_trk_drf + 1
+                  dst_monitor_soft(1).res_drf_svt =
+     1               dst_monitor_soft(1).res_drf_svt +
+     2               stk_track(i).chisq(2)
+               end if
             end if
          end do
+
          if(dst_monitor_soft(1).n_trk_svt .gt. 0) then
             dst_monitor_soft(1).avg_trkL_svt =
      1         dst_monitor_soft(1).avg_trkL_svt/
      2         dst_monitor_soft(1).n_trk_svt
-            dst_monitor_soft(1).res_pad_svt = 
-     1         dst_monitor_soft(1).res_pad_svt/
-     2         dst_monitor_soft(1).n_trk_svt
-            dst_monitor_soft(1).res_drf_svt =
-     1         dst_monitor_soft(1).res_drf_svt/
-     2         dst_monitor_soft(1).n_trk_svt
+            if(n_svt_trk_pad .gt. 0) then
+               dst_monitor_soft(1).res_pad_svt = 
+     1            dst_monitor_soft(1).res_pad_svt/
+     2            n_svt_trk_pad
+            end if
+            if(n_svt_trk_drf .gt. 0) then 
+               dst_monitor_soft(1).res_drf_svt =
+     1            dst_monitor_soft(1).res_drf_svt/
+     2            n_svt_trk_drf
+            end if 
          end if
       end if
 
