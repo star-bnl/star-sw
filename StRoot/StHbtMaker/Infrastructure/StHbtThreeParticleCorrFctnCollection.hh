@@ -14,7 +14,7 @@
 
 #include <list>
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::list;
 #endif
 class StHbtThreeParticleCorrFctn;
 
