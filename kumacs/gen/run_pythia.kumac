@@ -1,9 +1,39 @@
-macro pythia nevent=10 file=pythia_w_ej.xdr
-   
-make gen/pyth
+* RUN_PYTHIA.KUMAC
+* 
+* generates pythia events and writes out to xdf file
+* 
+* to run in staf:
+* stardev (or whichever version)
+* staf
+* exec $STAR/kumacs/gen/run_pythia
+* 
+* 6/22/98 Kathy Turner
+* 
+* ************************************************************************
+ 
+ macro run__
+   nevent=10 file=pythia_w_ej.xdf
+    
+  DEFAULT = _
+./kumacs/util,_
+./kumacs/gen,_
+./pams/gen/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/gen,_
+$STAR/pams/gen/kumac
+
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+ make gen/pyth
+ 
+ exec setup_dir
+ 
+* -------------------------------------------------------------------------
+* INITIALIZATION
+*-------------------------------------------------------------------------
 application data fort.4
 pyth  'cms' 'p  ' 'p  ' 200.
-*---
 *--- parameter setting for jetset
 *--- set strangness supression & fragmentation p_T
 *---
@@ -74,31 +104,35 @@ CKIN(3)=10.
 CKIN(4)=100.
 MSEL=14             ! Wj
 END
+ 
 fort.4
 f/call py_init(4)
 shell rm fort.4
-DIO/NEWFILESTREAM pythia [file] w
- cd /dui
- mkdir evgen
+* -------------------------------------------------------------------------
+* -------------------------------------------------------------------------
+ 
+ exec write_table_to_file#init pyfile [file]
+
+ 
+*** loop over events
+ 
  do i = 1, [nevent]
-   exec init_pyth
-   exec run_pyth
+   message ' processing event ' [i]
+   exec init_pyth#init
+   exec run_pyth#run
    if [i]=1 then
     call pylist(2)
     tdm/table/print /dui/evgen/particle
    endif
-   cd ..
-   message "Write event no." [i]
-   DIO/STREAM/PUTEVENT pythia evgen
+   exec write_table_to_file#write pyfile /dui/evgen
  enddo
-   DIO/STREAM/CLOSE pythia
-return
-**************************************************
-macro readev nevent=10 file=pythia_w_ej.xdr
-  DIO/NEWFILESTREAM pythia [file] r
-  do i = 1, [nevent] 
-    getevent pythia .
-    tdm/table/print /dui/evgen/particle
-  enddo
-  DIO/STREAM/CLOSE pythia
-return
+ 
+ 
+* end of processing
+ 
+ exec write_table_to_file#close pyfile
+ 
+ return
+ 
+*************************************************
+
