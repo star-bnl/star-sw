@@ -1,11 +1,45 @@
 #include <iostream>
-
-//Sti
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiTrackNode.h"
 
+
 double StiTrackNode::kField = 0.;
+
+
+//_____________________________________________________________________________
+void StiTrackNode::reset()
+{ 
+  fX    = 0.;
+  fAlpha= 0.;
+  fdEdx = 0.;
+  fChi2  = 0;
+  mDepth = 0;
+
+  fP0   = 0.;
+  fP1   = 0.;
+  fP2   = 0.;
+  fP3   = 0.;
+  fP4   = 0.;
+  // covariance error matrix
+  fC00  = 0.;
+  fC10  = 0.;
+  fC11  = 0.;
+  fC20  = 0.;
+  fC21  = 0.;
+  fC22  = 0.;
+  fC30  = 0.;
+  fC31  = 0.;
+  fC32  = 0.;
+  fC33  = 0.;
+  fC40  = 0.;
+  fC41  = 0.;
+  fC42  = 0.;
+  fC43  = 0.;
+  fC44  = 0.;
+}
+
+
 //_____________________________________________________________________________
 void StiTrackNode::set(const double xx[5],
 	 const double cc[15], 

@@ -38,7 +38,8 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   int    mDepth;
   
   StiHit * hit;
-
+  
+  void reset();
   void set(const double xx[5],
 	   const double cc[15], 
 	   double xref, 

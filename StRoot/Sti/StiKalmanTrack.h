@@ -4,6 +4,7 @@
 #include <math.h>
 #include "StiTrack.h"
 #include "StiTrackNode.h"
+#include "StiFactoryTypedefs.h"
 
 class StiKalmanTrack : StiTrack 
 {
@@ -22,8 +23,8 @@ class StiKalmanTrack : StiTrack
   // Action methods
   // Implementation of virtua methods inherited
   // from StiTrack
-  virtual void reset();
-  virtual double  getMomentum(double p[3], double e[6]) const ;
+  virtual void    reset();
+  virtual void    getMomentum(double p[3], double e[6]) const ;
   virtual double  getPt()             const                   ;   // transverse momentum
   virtual double  getRapidity()       const                   ;   // rapidity
   virtual double  getPseudoRapidity() const                   ;   // pseudo rapidity
@@ -44,7 +45,18 @@ class StiKalmanTrack : StiTrack
   double  getTpcDedx()         const { return tpcDedx;};
   void   setSvtDedx(double dedx) { svtDedx = dedx; };
   void   setTpcDedx(double dedx) { tpcDedx = dedx; };
-  
+
+  // convenience methods for adding/retrieving points
+  void addHit(StiHit *h);
+  void insertHit(StiHit *hInserted, StiHit * targetParent);
+  void removeHit(StiHit *h);
+  void removeAllHits();
+  int  getHitCount();
+  StiHit * getHit(int index);
+  StiTrackNode * findHit(StiHit * h);
+
+  static StiTrackNodeFactory * trackNodeFactory;
+
  protected:
   
   StiTrackNode * firstNode;
