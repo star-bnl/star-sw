@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.6 1999/02/16 18:15:49 fisyak Exp $
+// $Id: trs.C,v 1.7 1999/03/07 22:34:04 fisyak Exp $
 // $Log: trs.C,v $
+// Revision 1.7  1999/03/07 22:34:04  fisyak
+// replace StSclRoot by StarClassLibrary
+//
 // Revision 1.6  1999/02/16 18:15:49  fisyak
 // Check in the latest updates to fix them
 //
@@ -17,7 +20,7 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
-  gSystem->Load("StSclRoot");
+  gSystem->Load("StarClassLibrary");
   gSystem->Load("St_params_Maker");
   gSystem->Load("geometry");
   gSystem->Load("St_g2r");
