@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.5 1999/09/12 23:02:43 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.6 1999/09/12 23:08:12 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.6  1999/09/12 23:08:12  fisyak
+// Add return value in Finish()
+//
 // Revision 1.5  1999/09/12 23:02:43  fisyak
 // Add closing xdf and TFile
 //
@@ -740,5 +743,5 @@ Int_t StBFChain::Finish()
 {
   SafeDelete (xdf_out);
   SafeDelete (m_TFile);
-  StMaker::Finish();
+  return StMaker::Finish();
 }
