@@ -1,11 +1,11 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.6 2000/02/14 20:54:03 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.7 2000/04/05 16:03:04 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
- * Revision 1.6  2000/02/14 20:54:03  lasiuk
- * : in class definition
+ * Revision 1.7  2000/04/05 16:03:04  lasiuk
+ * remove size_type type definition.  Clash on SUN
  *
  * Revision 1.6  2000/02/14 20:54:03  lasiuk
  * : in class definition
@@ -33,8 +33,9 @@
 
 #ifdef __ROOT__
 #include "TObject.h"
-
 #endif
+
+#include <iostream.h>
 #include <list>
 #include <vector>
 
@@ -47,17 +48,32 @@ using std::list;
 //namespace StRichRawData {
 #endif
 #include "StRichRrsMacros.h"
+#include "StRichEnumeratedTypes.h"
+
 struct StRichID {
     StRichID()
-	:  mG_ID(0), mTrackp(0), mAmount(0.0) {/* nopt*/ }
+	:  mHitID(0), mG_ID(0), mTrackp(0), mAmount(0), mSignalType(eUnknown) {/* nopt*/ }
 	
-    StRichID(int i, int track, double d =-1.0)
-	:  mG_ID(i), mTrackp(track), mAmount(d) {/* nopt*/ }
-	
+    StRichID(int id, int gid, int track, int q =-1, StRichSignalType signalType=eUnknown)
+	:  mHitID(id), mG_ID(gid), mTrackp(track), mAmount(q), mSignalType(signalType) {/* nopt*/ }
+
+    int operator==(const StRichID& anID) const;
+
+    int mHitID;
     int mG_ID;
     int mTrackp;
-    double mAmount;
+    int mAmount;
+    StRichSignalType mSignalType;
 };
+
+inline int StRichID::operator==(const StRichID& anID) const
+{
+    return ((mG_ID == anID.mG_ID) &&
+	    (mTrackp == anID.mTrackp) &&
+	    (mSignalType == anID.mSignalType));
+}
+
+ostream& operator<<(ostream& os, const StRichID& id);
 
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -76,7 +92,7 @@ struct StRichPad {
 };    
 
 
-typedef unsigned int size_type;
+//typedef unsigned int size_type;
 typedef StRichPad pad_type;
 typedef StRichID id_type;
 
@@ -108,7 +124,7 @@ class StRichPadPlane
 {
 public:
     StRichPadPlane();
-    StRichPadPlane(size_type rows, size_type cols);  
+    StRichPadPlane(size_t rows, size_t cols);  
 	
     ~StRichPadPlane();
 	
@@ -119,12 +135,12 @@ public:
     const_row_iter end() const { return v.end(); }
     row_iter end() { return v.end(); }
 	
-    void resize(size_type rows, size_type cols);
+    void resize(size_t rows, size_t cols);
     
     void clear();
     
-    size_type row_size() { return v.size(); }
-    size_type col_size() { return v.begin()->size(); }
+    size_t row_size() { return v.size(); }
+    size_t col_size() { return v.begin()->size(); }
 
 public:
     aPadPlane v;

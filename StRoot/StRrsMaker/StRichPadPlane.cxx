@@ -1,29 +1,31 @@
 /******************************************************************
- *  $Id: StRichPadPlane.cxx,v 1.1 2000/01/18 21:32:03 lasiuk Exp $
+ *  $Id: StRichPadPlane.cxx,v 1.2 2000/04/05 16:03:00 lasiuk Exp $
  *
  * Description:
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  ********************************************************************
  *  $Log: StRichPadPlane.cxx,v $
- *  Revision 1.1  2000/01/18 21:32:03  lasiuk
- *  Initial Revision
+ *  Revision 1.2  2000/04/05 16:03:00  lasiuk
+ *  remove size_type type definition.  Clash on SUN
  *
  *  Revision 1.1  2000/01/18 21:32:03  lasiuk
  *  Initial Revision
  *
  ********************************************************************/
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
 #include "StRichPadPlane.h"
-    
+
+ostream& operator<<(ostream& os, const StRichID& id)
+{
+    return (os << "id.mHitID: " << id.mHitID << " GID: " << id.mG_ID << " track: " << id.mTrackp
+	       << " q: " << id.mAmount << " type: " << static_cast<int>(id.mSignalType));
+}
+
 StRichPadPlane::StRichPadPlane()
     : v() { /*nopt*/ }
     
-StRichPadPlane::StRichPadPlane(size_type rows, size_type cols)
+StRichPadPlane::StRichPadPlane(size_t rows, size_t cols)
 {
     v.resize(rows);
     for (unsigned int i=0; i<rows; i++ )
@@ -48,13 +50,13 @@ StRichPadPlane::~StRichPadPlane() { /* nopt */ }
 // row_iter StRichPadPlane::end()
 // { return v.end(); }
 
-// size_type StRichPadPlane::row_size()
+// size_t StRichPadPlane::row_size()
 // { return v.size(); }
 
-// size_type StRichPadPlane::col_size()
+// size_t StRichPadPlane::col_size()
 // { return v.begin()->size(); }
 
-void StRichPadPlane::resize(size_type rows, size_type cols)
+void StRichPadPlane::resize(size_t rows, size_t cols)
 { 
     if ( v.size() != rows )
 	v.resize( rows );
@@ -69,7 +71,3 @@ void StRichPadPlane::clear()
     v.clear();
     resize(rows,cols);
 }
-
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
