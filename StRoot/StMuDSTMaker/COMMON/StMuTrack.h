@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.4 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuTrack.h,v 1.5 2002/09/19 21:54:01 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -68,6 +68,7 @@ public:
   double phi() const;
   double eta() const;
   double length() const;
+  double lengthMeasured() const;
   StTrackTopologyMap topologyMap() const;
   Short_t charge() const;
   StThreeVectorF p() const;
@@ -172,6 +173,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.5  2002/09/19 21:54:01  laue
+ * fix bug in length() method
+ *
  * Revision 1.4  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.2 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.3 2002/09/19 21:54:01 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -108,7 +108,9 @@ StPhysicalHelixD StMuTrack::helix() const {return StPhysicalHelixD(mHelix.p(),mH
 StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
 
 double StMuTrack::length() const { 
-  return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mLastPoint)) ); }
+  return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) ); }
+double StMuTrack::lengthMeasured() const { 
+  return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mFirstPoint)) ); }
 
 
 ClassImp(StMuTrack)
@@ -117,6 +119,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.3  2002/09/19 21:54:01  laue
+ * fix bug in length() method
+ *
  * Revision 1.2  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *
