@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.22 2003/09/30 00:10:29 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.23 2003/10/02 00:10:37 perev Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.23  2003/10/02 00:10:37  perev
+// Zeroing of members added and bug in ResetMagField fixed
+//
 // Revision 1.22  2003/09/30 00:10:29  oldi
 // mMagField set to 0.
 //
@@ -263,6 +266,9 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
 					   St_ftpcPadrowZ *zrow) 
   : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1)
 {
+  // zero everythig what possible
+  memset(&mStart,0,&mEnd-&mStart+1);
+
   // default constructor
 
   mFtpcRotation[0] = new StMatrixD(3, 3, 1);
@@ -291,6 +297,9 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
 StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1) 
 {
+  // zero everythig what is possible
+  memset(&mStart,0,&mEnd-&mStart+1);
+
   // Initialization with hardcoded values.
 
   mFtpcRotation[0] = new StMatrixD(3, 3, 1);
@@ -1014,7 +1023,6 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog, StBFChain *chain) {
   // Resets magnetic field if field configuration has changed.
   
-  mMagField = 0;
 
   if (RunLog) {
     St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor");     
@@ -1026,6 +1034,7 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog, StBFChain *chain) {
       if (mMagFieldFactor == -9999.) { // field will be set the first time
 	mMagFieldFactor = newFactor;
 	gMessMgr->Message("", "I", "OST") << "Initializing StMagUtilities for FTPC!" << endm;
+        delete mMagField;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);  
 	// I hope this is ok. Should be the same as the table in the database.
       }

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.14 2003/09/26 06:08:58 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.15 2003/10/02 00:10:37 perev Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.15  2003/10/02 00:10:37  perev
+// Zeroing of members added and bug in ResetMagField fixed
+//
 // Revision 1.14  2003/09/26 06:08:58  oldi
 // Check if the magentic field was reversed 'by hand' with a chain option.
 // If yes, multiply the scaleFactor of the field with -1.
@@ -93,7 +96,8 @@ class StFtpcTrackingParams
 private:
   
   static StFtpcTrackingParams* mInstance;
-  
+
+  char mStart;  //  start of simple variables
   /// FTPC geometry
   Double_t  mInnerRadius;
   Double_t  mOuterRadius;
@@ -153,11 +157,6 @@ private:
   Double_t mFracTrunc;
   Double_t mAip;
   Double_t mALargeNumber;
-
-  // transformation due to rotated and displaced TPC
-       StMatrixD mTpcToGlobalRotation; // (3X3)
-       StMatrixD mGlobalToTpcRotation; // (3X3)
-  StThreeVectorD mTpcPositionInGlobal; 
   
   // internal FTPC rotation
   StMatrixD *mFtpcRotationY[2];
@@ -173,7 +172,15 @@ private:
    Double_t  mObservedVertexOffsetX[2];
 
   StMagUtilities *mMagField;       // pointer to magnetic field table
-        Double_t  mMagFieldFactor;
+
+   Double_t  mMagFieldFactor;
+
+   char mEnd; //End of simple variables
+
+  // transformation due to rotated and displaced TPC
+       StMatrixD mTpcToGlobalRotation; // (3X3)
+       StMatrixD mGlobalToTpcRotation; // (3X3)
+  StThreeVectorD mTpcPositionInGlobal; 
 
 protected:
   
