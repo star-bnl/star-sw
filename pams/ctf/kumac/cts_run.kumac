@@ -4,9 +4,7 @@
 macro cts_run 
 macro/global/import *
 *
-wait
 *---- call cts for CTB data...
-message CTS: calling cts for CTB data...
 ami/mod/call cts [geant_Event]/g2t_ctb_hit     _
                  [geant_Event]/g2t_track       _
                  [params]/ctf/ctg/ctb          _ 
@@ -18,7 +16,6 @@ ami/mod/call cts [geant_Event]/g2t_ctb_hit     _
                  [data]/ctf/ctb_mslat          _
                  [data]/ctf/ctb_raw
 *---- call cts for TOF data...
-message CTS: calling cts for TOF data...
 ami/mod/call cts [geant_Event]/g2t_tof_hit     _
                  [geant_Event]/g2t_track       _
                  [params]/ctf/ctg/tof          _ 
@@ -29,5 +26,5 @@ ami/mod/call cts [geant_Event]/g2t_tof_hit     _
                  [data]/ctf/tof_event          _
                  [data]/ctf/tof_mslat          _
                  [data]/ctf/tof_raw
-wait
+theend:
 return
