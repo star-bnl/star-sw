@@ -34,6 +34,11 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *               - Scintillation layer placed between paper  
 *                 Cellulose ro=0.35
 *               - two type of strips in the SMD in eta direction
+*
+*      Version 2.7
+*               - modified by A. OGAWA   98.9.23
+*	        - modification for path (year1, 2 or 3)
+*	        - modification for STAR NOTE 229 numbering scheme
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -48,7 +53,7 @@ external etsphit
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
                        NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2),
-                       Nmodule(2), Shift }
+                       Nmodule(2), Shift(2) }
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
       real      current_depth, current, layer_width, smd_width, tan_theta,
@@ -60,7 +65,7 @@ external etsphit
 * ----------------------------------------------------------------------------
 *
    fill CALG                 ! Barrel Calorimeter data
-      Version  = 2.5         ! geometry version
+      Version  = 2.7         ! geometry version
       Rmin     = 223.5       ! inner radius 
       EtaCut   = 1.0         ! calorimeter rapidity cut
       CrackWd  = 0.655       ! half width of the crack between modules
@@ -95,7 +100,7 @@ external etsphit
       Nsmd     = 5           ! SMD positioned after sandvich type layers EMC
       NsubLay  = {1,20}      ! number of layers in a superlayer
       Nmodule  = {60,60}     ! number of modules
-      Shift    = 75          ! starting azimuth of the first module   
+      Shift    = {75,105}    ! starting azimuth of the first module   
    Endfill
 *
       USE    CALG
@@ -119,7 +124,7 @@ external etsphit
       nn    = max(calg_Nmodule(1),calg_Nmodule(2))
       dphi  = 6*nn
 *
-      create and position CALB in CAVE  AlphaZ=calg_shift
+      create and position CALB in CAVE
       prin1  calg_Version;            (' CALB geo. version    =',F7.1)
       prin1  calg_RMin;               (' CALB inner radius    =',F7.1)
 *
@@ -130,20 +135,19 @@ block CALB is  EMC Barrel envelope
       Medium    Standard
       attribute CALB  seen=0  colo=7
 *
-      SHAPE     PCON  Phi1=0  Dphi=Dphi  Nz=4,
+      SHAPE     PCON  Phi1=0  Dphi=360  Nz=4,
                       zi  = {-Hleng,      -cut_length, cut_length, Hleng},
                       rmn = { cut_radius,  Calg_rmin,  Calg_Rmin,  cut_radius},
                       rmx = { Rmax,        Rmax,       Rmax,       Rmax };
 
-      if calg_Nmodule(1)>0 { ii=1; create and Position  CHLV;            }
-      
-      if calg_Nmodule(2)>0 { ii=2; create and Position  CHLV thetaZ=180; }
+      if calg_Nmodule(1)>0 { ii=1; create and Position CHLV;            }      
+      if calg_Nmodule(2)>0 { ii=2; create and Position CHLV thetaZ=180; }
 *
 EndBlock
 * -----------------------------------------------------------------------------
 Block CHLV corresponds to double modules...
 *
-      shape     PCON  Phi1=0  Dphi=6*calg_Nmodule(ii)  Nz=3,
+      shape     PCON  Phi1=calg_shift(ii) Dphi=6*calg_Nmodule(ii)  Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
