@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.1 1999/11/11 23:08:56 posk Exp $
+// $Id: StFlowEvent.hh,v 1.2 1999/11/24 18:17:14 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.2  1999/11/24 18:17:14  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
 // Revision 1.1  1999/11/11 23:08:56  posk
 // Rearrangement of files.
 //
@@ -22,22 +25,33 @@
 
 #ifndef StFlowEvent_hh
 #define StFlowEvent_hh
-//#include "StFlowMaker.hh"
+#include <iostream.h>
+#include <stdlib.h>
 #include "StFlowTrackCollection.hh"
+#include "Rtypes.h"
+class TVector2;
+
 
 class StFlowEvent{
 
 public:
 
-                  StFlowEvent();
-  virtual         ~StFlowEvent();
+           StFlowEvent();
+  virtual  ~StFlowEvent();
 
-  unsigned short  EventNumber() const;
-  unsigned short  NumberOfTracks() const;
   StFlowTrackCollection* TrackCollection() const;
 
-  void SetEventNumber(const unsigned short&);
-  void SetNumberOfTracks(const unsigned short&);
+  void     SetEventNumber(const UInt_t&);
+  void     SetOrigTrackN(const UInt_t&);
+  void     SetPhiWeight(const Double_t* pPhiWgt);
+  /// void SetPhiWeight(const PhiWgt_t &pPhiWgt);
+  Double_t PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
+  UInt_t   EventNumber() const;
+  UInt_t   Mult(Int_t harN=1, Int_t selN=0, Int_t subN=0);
+  TVector2 Q(Int_t harN=1, Int_t selN=0, Int_t subN=0);
+  Float_t  q(Int_t harN=1, Int_t selN=0, Int_t subN=0);
+  Float_t  MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=0);
+  Float_t  Psi(Int_t harN=1, Int_t selN=0, Int_t subN=0);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StFlowEvent& ev);
@@ -45,21 +59,27 @@ public:
 
 private:
 
-  unsigned short  mEventNumber;                    // number of the event
-  unsigned short  mNumberOfTracks;                 // number of tracks
-  StFlowTrackCollection* mTrackCollection;         //!
+  Int_t   checkInput(Int_t harN, Int_t selN, Int_t subN) const;
+  UInt_t  mEventNumber;                    // number of the event
+  UInt_t  nOrigTrack;                      // number of tracks
+  StFlowEvent* pFlowEvent;                 //!
+  StFlowTrackCollection* pTrackCollection; //!
+
+  // C++ way to define constants in the header
+  enum {nHars = 4, nSels=2, nSubs = 2};
+  enum {nPhiBins = 60};
+  /// typedef Double_t PhiWgt_t[nSel][nHars][nPhiBins];
+  Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event palne isotropic
 
 };
 
-inline void StFlowEvent::SetEventNumber(const unsigned short& event){
-  mEventNumber = event;}
-inline void StFlowEvent::SetNumberOfTracks(const unsigned short& tracks){
-  mNumberOfTracks = tracks;}
+inline void StFlowEvent::SetEventNumber(const UInt_t& event)
+  {mEventNumber = event;}
+inline void StFlowEvent::SetOrigTrackN(const UInt_t& tracks)
+  {nOrigTrack = tracks;}
 
-inline  unsigned short StFlowEvent::EventNumber() const {return mEventNumber;}
-inline  unsigned short StFlowEvent::NumberOfTracks() const {
-  return mNumberOfTracks;}
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
-  return mTrackCollection;}
+  return pTrackCollection;}
+inline  UInt_t StFlowEvent::EventNumber() const {return mEventNumber;}
 
 #endif

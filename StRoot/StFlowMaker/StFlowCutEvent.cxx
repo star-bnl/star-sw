@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.1 1999/11/11 23:08:47 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.2 1999/11/24 18:17:09 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.2  1999/11/24 18:17:09  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
 // Revision 1.1  1999/11/11 23:08:47  posk
 // Rearrangement of files.
 //
@@ -19,16 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
+#include <iomanip.h>
 #include <stdlib.h>
 #include "StFlowCutEvent.hh"
+#include "StFlowCutTrack.hh"
 #include "StEvent.h"
-//#include "StFlowMaker.hh"
-//#include "StEvent.h"
-//#include "StVertex.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorF.hh"
-#define PR(x) cout << (#x) << " = " << (x) << endl;
+#define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
 
 //ClassImp(StFlowCutEvent)
 
@@ -55,27 +57,30 @@ UInt_t   StFlowCutEvent::mMultCut        = 0;
 UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-
+Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-0.1, 0.1};
+UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
+Int_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if the event survives all the cuts
   mEventN++;
   
-  //Long_t mult = mEvent->summary->mNumberOfGoodPrimaryTracks();
-  long mult = mEvent->trackCollection()->size();
+  // Multiplicity
+  //Long_t mult = pEvent->summary->NumberOfGoodPrimaryTracks();
+  long mult = pEvent->trackCollection()->size();
   if (mMultCuts[1] > mMultCuts[0] && 
      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
     mMultCut++;
     return kFALSE;
   }
   
-  //StThreeVectorF vertex = mEvent->summary->mPrimaryVertexPos();
-  StVertex* pVertex = mEvent->primaryVertex();
+  //StThreeVectorF vertex = pEvent->summary->PrimaryVertexPosition();
+  StVertex* pVertex = pEvent->primaryVertex();
   if (!pVertex) return kFALSE;
   const StThreeVectorF& vertex = pVertex->position();
  
+  // Vertex x
   Float_t vertexX = vertex.x();
   if (mVertexXCuts[1] > mVertexXCuts[0] &&
      (vertexX < mVertexXCuts[0] || vertexX >= mVertexXCuts[1])) {
@@ -83,6 +88,7 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
     return kFALSE;
   }
 
+  // Vertex y
   Float_t vertexY = vertex.y();
   if (mVertexYCuts[1] > mVertexYCuts[0] &&
      (vertexY < mVertexYCuts[0] || vertexY >= mVertexYCuts[1])) {
@@ -90,6 +96,7 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
     return kFALSE;
   }
 
+  // Vertex z
   Float_t vertexZ = vertex.z();
   if (mVertexZCuts[1] > mVertexZCuts[0] &&
      (vertexZ < mVertexZCuts[0] || vertexZ >= mVertexZCuts[1])) {
@@ -103,20 +110,43 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
 
 //-----------------------------------------------------------------------
 
+Int_t StFlowCutEvent::CheckEtaSymmetry() {
+  // Returns kTRUE if the event survives this Eta symmetry cut
+  // Call at the end of the event after doing CheckTrack for each track
+  // If kFALSE you should delete the last event
+  Float_t mEtaSymPosN = (float)StFlowCutTrack::EtaSymPos();
+  Float_t mEtaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
+  Float_t EtaSym = (mEtaSymPosN - mEtaSymNegN) / 
+    (mEtaSymPosN + mEtaSymNegN);
+  StFlowCutTrack::EtaSymClear();
+  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
+      (EtaSym < mEtaSymCuts[0] || EtaSym >= mEtaSymCuts[1])) {
+    mEtaSymCutN++;
+    mGoodEventN--;
+    return kFALSE;
+  }
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
   cout << "#######################################################" << endl;
   cout << "# Total Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
   cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
-       << "\t Events Cut= " << mMultCut << endl;
+       << " :\t Events Cut= " << mMultCut << endl;
   cout << "#   VertexX cuts= " << mVertexXCuts[0] << ", " << mVertexXCuts[1]
-       << "\t Events Cut= " << mVertexXCut << endl;
+       << " :\t Events Cut= " << mVertexXCut << endl;
   cout << "#   VertexY cuts= " << mVertexYCuts[0] << ", " << mVertexYCuts[1]
-       << "\t Events Cut= " << mVertexYCut << endl;
+       << " :\t Events Cut= " << mVertexYCut << endl;
   cout << "#   VertexZ cuts= " << mVertexZCuts[0] << ", " << mVertexZCuts[1]
-       << "\t Events Cut= " << mVertexZCut << endl;
-  cout << "# Good Events = " << mGoodEventN << ", " << 
+       << " :\t Events Cut= " << mVertexZCut << endl;
+  cout << "#   Eta Symmetry cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
+       << " :\t " <<  setprecision(4) << (float)mEtaSymCutN/(float)mEventN/perCent
+       << "% cut" << endl;
+  cout << "# Good Events = " << mGoodEventN << ", " << setprecision(4) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
 }

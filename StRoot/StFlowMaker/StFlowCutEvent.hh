@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.hh,v 1.1 1999/11/11 23:08:49 posk Exp $
+// $Id: StFlowCutEvent.hh,v 1.2 1999/11/24 18:17:10 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.hh,v $
+// Revision 1.2  1999/11/24 18:17:10  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
 // Revision 1.1  1999/11/11 23:08:49  posk
 // Rearrangement of files.
 //
@@ -28,7 +31,6 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StEvent;
-//#include "StFlowMaker.hh"
 
 class StFlowCutEvent {
 
@@ -36,11 +38,13 @@ class StFlowCutEvent {
 
                StFlowCutEvent();
   virtual      ~StFlowCutEvent();
-  static void  SetMult(Int_t lo, Int_t hi);
-  static void  SetVertexX(Float_t lo, Float_t hi);
-  static void  SetVertexY(Float_t lo, Float_t hi);
-  static void  SetVertexZ(Float_t lo, Float_t hi);
-  static Int_t CheckEvent(StEvent* mEvent);
+  static void  SetMult(const Int_t lo, const Int_t hi);
+  static void  SetVertexX(const Float_t lo, const Float_t hi);
+  static void  SetVertexY(const Float_t lo, const Float_t hi);
+  static void  SetVertexZ(const Float_t lo, const Float_t hi);
+  static void  SetEtaSym(Float_t lo, Float_t hi);
+  static Int_t CheckEvent(StEvent* pEvent);
+  static Int_t CheckEtaSymmetry();
   static void  PrintCutList();
   
  private:
@@ -60,19 +64,25 @@ class StFlowCutEvent {
   static UInt_t  mVertexZCut;            // number of not accepted events
   static Float_t mVertexZCuts[2];        // range of Z vertex position
 
-  //ClassDef(StFlowCutEvent,1)             // macro for rootcint
+  static UInt_t  mEtaSymCutN;            // number not accepted
+  static Float_t mEtaSymCuts[2];         // range
+
+  //ClassDef(StFlowCutEvent,1)           // macro for rootcint
 }; 
 
-inline void StFlowCutEvent::SetMult(Int_t lo, Int_t hi) {
+inline void StFlowCutEvent::SetMult(const Int_t lo, const Int_t hi) {
   mMultCuts[0] = lo; mMultCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetVertexX(Float_t lo, Float_t hi) {
+inline void StFlowCutEvent::SetVertexX(const Float_t lo, const Float_t hi) {
   mVertexXCuts[0] = lo; mVertexXCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetVertexY(Float_t lo, Float_t hi) {
+inline void StFlowCutEvent::SetVertexY(const Float_t lo, const Float_t hi) {
   mVertexYCuts[0] = lo; mVertexYCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetVertexZ(Float_t lo, Float_t hi) {
+inline void StFlowCutEvent::SetVertexZ(const Float_t lo, const Float_t hi) {
   mVertexZCuts[0] = lo; mVertexZCuts[1] = hi; }
+
+inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) 
+  {mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi;}
 
 #endif
