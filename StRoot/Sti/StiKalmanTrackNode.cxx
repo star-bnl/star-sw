@@ -471,7 +471,13 @@ void  StiKalmanTrackNode::propagate(double xk,
       }
   double r2=sqrt(1.- c2sq );
   fP0 = fP0 + dx*(c1+c2)/(r1+r2);
-  fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
+	double dddd = c1*r2 + c2*r1;
+	if (fabs(dddd)<1e-20)
+		{
+			cout << "StiKalmanTrackNode::propagate() - dddd==0  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+			dddd = 1e-20;
+		}
+  fP1 = fP1 + dx*(c1+c2)/(dddd)*fP4; 
   
   //f = F - 1
   double rr=r1+r2, cc=c1+c2, xx=x1+x2;
@@ -558,16 +564,24 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
   // return : increment in chi2 implied by the node/hit assocition.
   //-----------------------------------------------------------------
 	// Update Measurement Error Matrix, calculate its determinant
+	if (isnan(fC00))
+		cout << "SKTN::evaluateChi2() fC00 NaN " << endl;
+	if (isnan(fC10))
+		cout << "SKTN::evaluateChi2() fC10 NaN " << endl;
+	if (isnan(fC11))
+		cout << "SKTN::evaluateChi2() fC11 NaN " << endl;
+
 	double r00=hit->syy()+fC00;
   double r01=hit->syz()+fC10;
   double r11=hit->szz()+fC11;
   double det=r00*r11 - r01*r01;
-  if (det< 1.e-10 && det>-1.e-10) {
-      cout <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
+  if (fabs(det)< 1.e-20)
+		{
+			cout <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
       cout <<"det test failed line 535.  return 0."<<endl;
       //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
       return 0.;
-  }
+		}
   // inverse matrix
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y() - fP0;

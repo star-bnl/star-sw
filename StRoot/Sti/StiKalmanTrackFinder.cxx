@@ -354,7 +354,7 @@ void StiKalmanTrackFinder::doInitLayer()
 	StiDetector * currentDet = **detectorContainer;
 	detectorContainer->moveIn();
 	tDet = **detectorContainer;
-	leadDet = tDet;
+	//leadDet = tDet;
 	trackMes << "TDET:" << *tDet<<endl;
 	if (tDet==0) 
 		throw logic_error("StiKalmanTrackFinder::doInitLayer() ERROR - tDet==0");
@@ -409,6 +409,8 @@ void StiKalmanTrackFinder::doNextDetector()
 				{
 					hasDet = true;
 					leadNode = tNode;
+					cout << "===============================leadNode   is at:" << leadNode << endl;
+					//leadNode->setHit(0); // insures no hit is here...
 					leadNode->setDetector(tDet);
 					if (position==kHit)
 						scanningDone = true;
@@ -436,6 +438,17 @@ void StiKalmanTrackFinder::doNextDetector()
 									bestChi2 = chi2;
 									bestNode = tNode;
 								}
+							if (hitContainer->hasMore()) // prepare new node
+								{
+									StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
+									if (newNode==0) 
+										throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
+									newNode->reset();			
+									newNode->setState(tNode); // get everything from tNode
+									//newNode->setHit(0);       // not done by setState 
+									newNode->setDetector(tDet); // set the local pointer to tDet
+									tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
+								}
 						} // searching best hit
 				}
 			else
@@ -452,7 +465,7 @@ void StiKalmanTrackFinder::doNextDetector()
 					trackMes << " but was a hit" << endl;
 					scanningDone = true;	
 					leadNode = tNode;
-					leadNode->setHit(0); // insures no hit is here...
+					//leadNode->setHit(0); // insures no hit is here...
 					leadNode->setDetector(tDet);
 				}
 			else
@@ -553,14 +566,15 @@ void StiKalmanTrackFinder::doFinishLayer()
 			else // no hit found
 				{
 					contiguousNullCount++; nullCount++;	
-					leadNode->setHit(0); // make sure there is no hit here...
-					sNode->add(leadNode);
-					sNode = leadNode;  
+					//leadNode->setHit(0); // make sure there is no hit here...
+					cout << "===============================leadNode   is at:" << leadNode << endl;
 					leadDet = leadNode->getDetector();
 					if (leadDet==0)
 						trackMes << "SKTF::doFinishLayer() - Fatal Error - leadDet==0" << endl;
 					else
 						trackMes << "SKTF::doFinishLayer() - Adding node WITHOUT hit in det:"  << *leadDet << endl;
+					sNode->add(leadNode);
+					sNode = leadNode;  
 					if (nullCount>maxNullCount ||contiguousNullCount>maxContiguousNullCount)
 						trackDone = true;				
 				}

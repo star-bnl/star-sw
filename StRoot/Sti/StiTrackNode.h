@@ -18,7 +18,8 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   void setAsCopyOf(const StiTrackNode * node);
   void     setHit(StiHit * h)  {  
     hit = h;  
-    if(hit!=NULL){ detector = NULL; }
+		//    if(hit!=NULL){ detector = NULL; }
+    if(hit!=0){ detector = 0; }
   }
   StiHit * getHit() const      {  return hit;}
   friend ostream& operator<<(ostream& os, const StiTrackNode& n);
@@ -31,7 +32,8 @@ class StiTrackNode : public StiDefaultMutableTreeNode
 		
  protected:   
 
-  StiTrackNode(): hit(NULL), detector(NULL){}
+  //StiTrackNode(): hit(NULL), detector(NULL){}
+  StiTrackNode(): hit(0), detector(0){}
 
 	double        dedx;
   StiHit      * hit;  
