@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.25 2000/09/23 03:07:13 fine Exp $
+// $Id: St_geant_Maker.h,v 1.26 2001/05/31 16:06:12 perev Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.26  2001/05/31 16:06:12  perev
+// hiding
+//
 // Revision 1.25  2000/09/23 03:07:13  fine
 // class TShape; statement introduced to fix a side aeffect of TDataSet clean up
 //
@@ -53,7 +56,7 @@ public:
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
-   virtual void   Draw();
+   virtual void   Draw(const char*);
    virtual void   G2root();
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
@@ -71,7 +74,7 @@ public:
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
 
-   virtual void  SetDebug(EDebugLevel dbl=kDebug); 
+   virtual void  SetDebug(Int_t dbl=kDebug); 
            Int_t SetInputFile(const char* file);
 
    TVolume* GetVolume() { return fVolume; }
@@ -109,7 +112,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.25 2000/09/23 03:07:13 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.26 2001/05/31 16:06:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
