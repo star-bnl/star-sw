@@ -25,17 +25,8 @@ ExitSepCorrFctn.o \
 ParityCorrFctn.o \
 MinvCorrFctnY_vs_Pt.o \
 QinvCorrFctn.o \
-MinvLikeSignCorrFctn.o \
 OpeningAngleCorrFctn.o \
-EtaCorrFctn.o \
-Eta_vs_QualityCorrFctn.o \
-Angle_vs_QualityCorrFctn.o \
-Eta_vs_PhiCorrFctn.o \
-Phi_vs_QualityCorrFctn.o \
-QinvCorrFctnCC.o \
 franksPairCut.o \
-v0CutMonitor_K0Short.o \
-v0CutMonitor_dcaV0Daughters.o \
 trackCutMonitor_P.o \
 franksV0PairCut.o \
 mikesEventCut.o \
@@ -48,13 +39,9 @@ trackCutMonitor_Pt.o \
 mikesTrackCut.o \
 v0CutMonitor_Minv.o \
 trackCutMonitor_DCA.o \
-v0CutMonitor_dcaV0ToPrimVertex.o \
 franksTrackCut.o \
 trackCutMonitor_Y_vs_Pt.o \
-franksV0Cut.o \
 helensV0Cut.o \
-trackCutMonitor_Eta.o \
-StHbtRadiusFit3.o \
 StHbtAnalysis.o \
 StHbtCheckPdgIdList.o \
 StHbtSectoredAnalysis.o \
@@ -63,7 +50,6 @@ StHbtThreeParticleAnalysis.o \
 StHbtCoulomb.o \
 StHbtMultiTrackCut.o \
 StHbtManager.o \
-StHbtLikeSignAnalysis.o \
 StHbtVertexAnalysis.o \
 StHbtAsciiReader.o \
 StHbtBinaryReader.o \
@@ -245,6 +231,10 @@ endif
    
 ##############################################################
 hbt:	hbt.o $(HBTOBJ) $(STARCLASSOBJ)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< $(HBTOBJ) $(STARCLASSOBJ) -o hbt
+	echo $(LDFLAGS)
+
+hbtQinv: hbtQinv.o $(HBTOBJ) $(STARCLASSOBJ)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< $(HBTOBJ) $(STARCLASSOBJ) -o hbt
 	echo $(LDFLAGS)
 
