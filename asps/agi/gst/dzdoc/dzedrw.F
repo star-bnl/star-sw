@@ -1,8 +1,11 @@
-$Id: dzedrw.F,v 1.1 2000/01/06 01:01:10 nevski Exp $
-$Log: dzedrw.F,v $
-Revision 1.1  2000/01/06 01:01:10  nevski
-dzdoc for agi
-
+* $Id: dzedrw.F,v 1.2 2000/01/06 20:35:10 nevski Exp $
+* $Log: dzedrw.F,v $
+* Revision 1.2  2000/01/06 20:35:10  nevski
+* correct cvs header
+*
+* Revision 1.1  2000/01/06 01:01:10  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZEDRW
 ********************************************************************
 * PN, 07.12.99 - modifications to substitute a standalone dzdoc
