@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.51 2004/04/03 00:34:42 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.52 2004/04/03 00:44:10 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.52  2004/04/03 00:44:10  jhthomas
+ * Blew it again.  I sure wish this wasn't an archive!
+ *
  * Revision 1.51  2004/04/03 00:34:42  jhthomas
  * Accidently deleted a line on the previous committ
  *
@@ -399,8 +402,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( fSpaceChargeR2 == 0 )
     {
       SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2
-settings. " << endl ; 
+      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using SpaceChargeR2 values from the DB." << endl ; 
 
