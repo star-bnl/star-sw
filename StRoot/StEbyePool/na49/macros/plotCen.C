@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.2 2001/03/06 17:33:00 posk Exp $
+// $Id: plotCen.C,v 1.3 2001/05/14 23:22:47 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.3  2001/05/14 23:22:47  posk
+// Minor changes.
+//
 // Revision 1.2  2001/03/06 17:33:00  posk
 // All macros now work.
 //
@@ -394,7 +397,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 	TF1* funcCos2 = new TF1("funcCos2",
            "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
 	funcCos2->SetParNames("k=1", "k=2", "har");
-	funcCos2->SetParameters(0, 0, j+1);               // initial values
+	funcCos2->SetParameters(0, 0, harN);              // initial values
 	funcCos2->SetParLimits(2, 1, 1);                  // har is fixed
 	hist->Fit("funcCos2");
 	delete funcCos2;
@@ -469,7 +472,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptStat(0);
       hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
-      hist->SetMaximum(10.);
+      hist->SetMaximum(5.);
       gStyle->SetOptStat(0);
       hist->Draw();
     } else {                                              // all other 1D
