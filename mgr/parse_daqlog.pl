@@ -300,7 +300,8 @@ sub parse_log($) {
    for ($i = 0; $i <= $last_tag_line; $i++){
    print $line_tag[$i], "\n";
  }
-
+  if ( !defined($segmentation_violation) and !defined ($break_buss))  {
+     
    print '=' x 80, "\n";
    print(">>> Average number of tracks, vertices and hits found <<<\n");
    print '=' x 80, "\n";
@@ -344,7 +345,7 @@ sub parse_log($) {
    printf("Package   %s            Memory size =  %10.3f  MB; \n", $maker_name[15], $msize_aver[15]);
 
   }
-
+}
  #--------------------------------------------------------------------------
   
  # parse end of file
@@ -364,7 +365,7 @@ sub parse_log($) {
     print ">>>>>>>>>>>>>>>  Average CPU TIME per EVENT for Makers <<<<<<<<<<<<<<<\n";
     print '=' x 80, "\n";    
 
- @cpu_output = `tail -90 $job_log`;
+ @cpu_output = `tail -150 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
