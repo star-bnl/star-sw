@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.h,v 1.2 1999/06/30 16:27:43 fine Exp $
+// $Id: St_geom_Maker.h,v 1.3 1999/07/02 20:01:22 fine Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.3  1999/07/02 20:01:22  fine
+// The name of the maker is the geom file name
+//
 // Revision 1.2  1999/06/30 16:27:43  fine
 // Comments make up
 //
@@ -58,15 +61,20 @@
 #endif
 class St_geom_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.2 1999/06/30 16:27:43 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.3 1999/07/02 20:01:22 fine Exp $";
  
  protected:
  public: 
-                  St_geom_Maker(const char *name="geom");
+                  St_geom_Maker(const char *name="star.root");
    virtual       ~St_geom_Maker();
+   virtual St_DataSet  *GetDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
    virtual Int_t Init();
-   virtual Int_t  Make();
-   virtual void   PrintInfo();
+   virtual Int_t Make();
+   virtual void  SetGeomFileName(const Char_t *fileName){SetName(fileName);} 
+   virtual const Char_t *GetGeomFileName(){ return GetName();}
+   virtual void  PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_geom_Maker, 1)   //StAF chain virtual base class for Makers
 };
