@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.18 2001/08/07 18:42:53 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.19 2001/08/07 20:22:00 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -212,7 +212,8 @@ ClassImp(StdEdxMaker)
 
 //_____________________________________________________________________________
 StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), 
-m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0), m_Simulation(kFALSE) {}
+m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0), 
+m_Simulation(kFALSE), m_InitDone (kFALSE) {}
 //_____________________________________________________________________________
 StdEdxMaker::~StdEdxMaker(){}
 //_____________________________________________________________________________
@@ -410,6 +411,7 @@ Int_t StdEdxMaker::InitRun(Int_t RunNumber){
       m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
     }
   }
+  m_InitDone = kTRUE;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -428,6 +430,7 @@ Int_t StdEdxMaker::FinishRun(Int_t OldRunNumber) {
   SafeDelete(m_tpcTime); 
   SafeDelete(m_drift); 
   SafeDelete(m_badpads); 
+  m_InitDone = kFALSE;
   return StMaker::FinishRun(OldRunNumber);
 }
 //_____________________________________________________________________________
@@ -438,6 +441,7 @@ Int_t StdEdxMaker::Finish() {
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
 // Get the magnetic field direction to build the helix properly:
+  if (!m_InitDone) InitRun(GetRunNumber());
   St_dst_event_summary *summary = (St_dst_event_summary *)GetDataSet("dst/event_summary");
   float bField = -1;
   if (summary) { 
