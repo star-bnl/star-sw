@@ -6,8 +6,8 @@
 /// allows children.
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode()
 {
-	//initialize(true);
-	initialize();
+	//reset(true);
+	reset();
 }
 /*
 /// Creates a tree node with no parent, no children
@@ -16,15 +16,14 @@ StiDefaultMutableTreeNode::StiDefaultMutableTreeNode()
 ///        nodes -- otherwise, it is always a leaf node
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(bool allowsChild) 
 {
-	//initialize(allowsChild);
-	initialize();
+	//reset(allowsChild);
+	reset();
 }
 */
 void StiDefaultMutableTreeNode::reset()
 {
-	//initialize(true);
-	initialize();
-	children.clear();
+  parent = 0;
+  children.clear();
 }
 
 
@@ -37,26 +36,9 @@ void StiDefaultMutableTreeNode::reset()
 
 void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * node)
 {
-  //mDepth = node->mDepth;
   parent = node->parent;
-  //allowsChildren = node->allowsChildren;
   children = node->children;
 }
-
-
-
-  ///  Initialize data members of the class
-//void StiDefaultMutableTreeNode::initialize(bool allowsChild)
-void StiDefaultMutableTreeNode::initialize()
-{
-  parent         = 0;
-  //allowsChildren = allowsChild;
-}
-
-
-//-------------------------------------------------------------------------------
-///  Primitives
-//-------------------------------------------------------------------------------
 
 void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
   //--------------------------------------------------------------
