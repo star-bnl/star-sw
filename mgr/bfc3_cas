@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc3_cas,v 1.4 2001/04/28 01:17:21 didenko Exp $
+# $Id: bfc3_cas,v 1.5 2001/04/28 03:56:01 didenko Exp $
 # $Log: bfc3_cas,v $
+# Revision 1.5  2001/04/28 03:56:01  didenko
+# fixed output files
+#
 # Revision 1.4  2001/04/28 01:17:21  didenko
 # fix syntax
 #
@@ -56,6 +59,7 @@ for (my $i = 0;$i<=$#ARGV;$i++){
   if ($ARGV[$i] && ! ($ARGV[$i] =~ /\./)) {$Chain .= " " .  $ARGV[$i];}
 }
 my  $input_file;
+my $outfile;
 if ($ACTUAL_INPUT0) {
   chomp ($ACTUAL_INPUT0);
   print "Input: ",$ACTUAL_INPUT0, "\n";
@@ -84,6 +88,7 @@ if ($ACTUAL_INPUT0) {
   my $output_file8 = basename($OUTPUT_FILE8);
   my $output_file9 = basename($OUTPUT_FILE9);
   my $out_dir      = dirname ($OUTPUT_FILE0);
+    $outfile = $output_file0;  
   print "Output:", $output_file0,",",$output_file1,",",$output_file2,",",$output_file3,",",$output_file4,",",$output_file5,",",$output_file6,",",$output_file7,",",$output_file8,",",$output_file9,"\n";
   print "Dirname:", $out_dir, "\n";
   if ($out_dir && !-d $out_dir) {mkdir $out_dir,0773;}
@@ -132,19 +137,18 @@ my $Nevts;
 my $nSeqi;
 my $Nev_first;
 my $Nev_last;
-my $NofEvents = 1200;
-my $outfile;
+my $NofEvents;
 my @prt;
 
-$outfile = $output_file0;
+my $outfl = $outfile;
 $outfile =~ s/dst.root/root/g;
-@prt = split("_", $outfile);
+@prt = split("_", $outfl);
 $nSeq = $prt[1];
 $evts = $prt[2];
 ($Nevts,$dummy) = split /e/, $evts;
 $NofEvents = $Nevts * $nSeq;
 
-my $N3 = $Nevts * ($nSeq - 1);
+my $N3 = $Nevts * abs($nSeq - 1) + 1;
 my $N1 = $N3 + 1;
 my $N2 = $NofEvents;
 
