@@ -131,3 +131,26 @@ ostream& operator<<(ostream& os, const StiHit& hit)
 }
 
 
+double StiHit::getValue(int key) const
+{
+  double value;
+  switch (key)
+    {
+    case kZ: value = _zg; break;
+    case kR: value = sqrt(_xg*_xg+_yg*_yg); break;
+    case kPseudoRapidity: value = getPseudoRapidity(); break;
+    case kPhi: value = atan2(_yg,_xg);break;
+    default: value = -999999.; break;
+    }
+  return value;  
+}
+  
+double StiHit::getPseudoRapidity() const
+{
+  double r=sqrt(_xg*_xg+_yg*_yg);
+  double tanTheta = tan(atan2(r,_zg)/2.);
+  if (tanTheta>0.)
+    return -log(tanTheta);
+  else
+    return 1.e10;
+}

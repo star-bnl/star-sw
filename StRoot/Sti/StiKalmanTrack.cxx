@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.21 2003/04/10 12:02:13 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.22 2003/04/22 21:20:05 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.22  2003/04/22 21:20:05  pruneau
+ * Added hit filter
+ * Tuning og finder pars
+ * Tuning of KalmanTrackNode
+ *
  * Revision 2.21  2003/04/10 12:02:13  pruneau
  * various changes
  *
@@ -925,8 +930,7 @@ bool StiKalmanTrack::find(int direction)
     }
   catch (runtime_error & error)
     {
-      cout << "SKT:find(int dir) -W- HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEELP"<<endl
-	   << " ERROR:" << error.what()<<endl;
+      cout << "SKT:find(int dir) -W- ERROR:" << error.what()<<endl;
     }
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();

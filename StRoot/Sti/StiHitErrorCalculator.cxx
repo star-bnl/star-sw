@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.4 2003/04/10 12:02:12 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.5 2003/04/22 21:20:05 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,11 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.5  2003/04/22 21:20:05  pruneau
+ * Added hit filter
+ * Tuning og finder pars
+ * Tuning of KalmanTrackNode
+ *
  * Revision 2.4  2003/04/10 12:02:12  pruneau
  * various changes
  *
@@ -68,12 +73,14 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (ecross>20.e-2) ecross = 20.e-2; // cp 04/02/2003
-  if (edip>20.e-2) edip = 20.e-2;     // in meters here
-  node->eyy = 10000.*ecross; // in centimeters here...
-  node->ezz = 10000.*edip;
-  //if (ecross<0 || edip<0 || node->eyy<=0. || node->eyy>10. || node->ezz<=0. || node->ezz>10.)
-  //  cout << " Hit Error - ecross:"<<ecross<<" edip:"<<edip
-  //<<" node->eyy:"<<node->eyy<<" node->ezz:"<<node->ezz<<endl;
+  if (ecross>100) ecross = 100.; 
+  if (edip>100) edip = 100.; 
+  double scaling;
+  if (node->_x>120)
+    scaling = StiKalmanTrackNode::pars->getOuterScaling();
+  else
+    scaling = StiKalmanTrackNode::pars->getInnerScaling();
+  node->eyy = ecross*scaling*scaling; // in cm^2
+  node->ezz = edip*scaling*scaling;
 }
 

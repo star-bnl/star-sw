@@ -52,7 +52,12 @@ class StMatrixF;
 
 class StiHit 
 {
-public:
+public: 
+
+  enum StiHitProperty { kR,
+			kZ,
+			kPseudoRapidity,
+			kPhi};
     ///Default constructor.
     StiHit();
     StiHit(const StiHit&);
@@ -142,8 +147,9 @@ public:
     ///Set the number of times used
     void setTimesUsed(unsigned int);
     void reset();
-		void rotate(double angle);
-    
+    void rotate(double angle);
+    double getValue(int key) const;
+    double getPseudoRapidity() const;
     friend ostream& operator<<(ostream& os, const StiHit& h);
 private:
     float mrefangle;
