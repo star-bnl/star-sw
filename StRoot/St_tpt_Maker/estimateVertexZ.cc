@@ -1,5 +1,8 @@
-//$Id: estimateVertexZ.cc,v 1.6 2000/08/23 22:06:50 wdeng Exp $
+//$Id: estimateVertexZ.cc,v 1.7 2000/08/24 00:56:18 wdeng Exp $
 //$Log: estimateVertexZ.cc,v $
+//Revision 1.7  2000/08/24 00:56:18  wdeng
+//Add protection.
+//
 //Revision 1.6  2000/08/23 22:06:50  wdeng
 //Rewrite. Improve the speed by a factor of 3. This introduces a dependence: tphit table must be pre-sorted.
 //
@@ -37,8 +40,9 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
       Short_t sectorPadrow = sector*100 + padrow;
       
       while(1) {
+	if( indexTableI==hitNumber ) break;
 	Short_t rowI = tphitT[indexTableI++].row;
-	
+
 	if( rowI>sectorPadrow ) break; 
 	if( sectorPadrow == rowI ) {
 	  Float_t innerX = tphitT[indexTableI].x;
@@ -51,6 +55,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
 	    Short_t sectorNextPadrow = sector*100 + nextPadrow;
 	    
 	    while(1) {
+	      if( indexTableO==hitNumber ) break;
 	      Short_t rowO = tphitT[indexTableO++].row;
 	      
 	      if( rowO>sectorNextPadrow ) break;
