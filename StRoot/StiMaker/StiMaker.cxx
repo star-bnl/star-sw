@@ -68,7 +68,7 @@ ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //flags
-					 mSimulation(false), mSeedFinderType(kUndefined),
+					 mSimulation(false), mUseGui(true), mSeedFinderType(kUndefined),
 					 //Containers
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
@@ -199,7 +199,7 @@ Int_t StiMaker::Init()
     mtrackstore = StiTrackContainer::instance();
 
     //The hit container
-    mhitstore = StiHitContainer::instance();
+    mhitstore = StiHitContainer::instance(mUseGui);
 
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
@@ -207,7 +207,12 @@ Int_t StiMaker::Init()
     mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
     //The Evalualbe Track Factory
-    mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
+    if (mUseGui==true) {
+	mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
+    }
+    else {
+	mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
+    }
     mtrackfactory->setIncrementalSize(1000);
     mtrackfactory->setMaxIncrementCount(10);
 
@@ -229,7 +234,12 @@ Int_t StiMaker::Init()
     mEvaluableSeedFinder->build();
 
     //The StiDetector factory
-    mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
+    if (mUseGui==true) {
+	mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
+    }
+    else {
+	mdetectorfactory = new StiDetectorFactory("DetectorFactory");
+    }
     mdetectorfactory->setIncrementalSize(1000);
     mdetectorfactory->setMaxIncrementCount(10);
     mdetectorfactory->reset();
@@ -333,12 +343,21 @@ Int_t StiMaker::Make()
 	    mEvaluableSeedFinder->setEvent(mc);
 	}
 
+	//Now we can loop, if we're not using the gui
+	if (mUseGui==false) {
+	    while (mtracker->hasMore()) {
+		mtracker->doNextAction();
+	    }
+	}
+
+    }
+
+    if (mUseGui==true) {
+	mdisplay->draw();
+	mdisplay->update();
     }
 
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
-    
-    mdisplay->draw();
-    mdisplay->update();
     return kStOK;
 }
 

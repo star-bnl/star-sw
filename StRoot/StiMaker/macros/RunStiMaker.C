@@ -7,6 +7,7 @@ StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
 		 bool simulated=true,
+		 bool draw=true,
 		 //const char* MainFile="/star/data13/reco/dev/2001/09/*2251008*.event.root")
 		 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
 		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
@@ -123,6 +124,8 @@ void RunStiMaker(Int_t nevents=1,
     //anaMk->setSeedFinderType(StiMaker::kComposite);
 
     anaMk->setSimulation(simulated);
+    anaMk->setGui(draw);
+    
     if (simulated) {
 	anaMk->setMcEventMaker(mcEventReader);
 	anaMk->setAssociationMaker(assocMaker);
@@ -132,8 +135,11 @@ void RunStiMaker(Int_t nevents=1,
     chain->PrintInfo();
     
     //Make Control-Bar
-    StiControlBar* sti = new StiControlBar();
-    sti->setStChain(chain);
+    StiControlBar* sti=0;
+    if (draw==true) {
+	sti = new StiControlBar();
+	sti->setStChain(chain);
+    }
     
     cout <<"Calling Init() Methods "<<endl;
     chain->Init();
