@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.22 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.23 2001/04/23 20:30:41 oldi Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.23  2001/04/23 20:30:41  oldi
+// Output sent to StMessMgr now.
+//
 // Revision 1.22  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -74,6 +77,7 @@
 #include "StFtpcGeantReader.hh"
 #include <iostream.h>
 #include <stdlib.h>
+#include "StMessMgr.h"
 #include "PhysicalConstants.h"
 #include "Random.h"
 #include "RanluxEngine.h"
@@ -155,7 +159,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
 
 StFtpcFastSimu::~StFtpcFastSimu()
 {
-  cout << "StFtpcFastSimu destructed" << endl;
+  //gMessMgr->Message("", "I", "OST") << "StFtpcFastSimu destructed" << endm;
 }
 
 int StFtpcFastSimu::ffs_gen_padres()
@@ -487,21 +491,21 @@ int StFtpcFastSimu::ffs_ini()
     err_azi[2] = 0;
     err_azi[3] = 0;
     
-    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-    cout << "Parametrization for vd, Td, sig_rad and sig_azi, err_rad and err_azi,:" << endl;
-    cout << "vd=" << Vhm[0]<<"+"<<Vhm[1]<<"x+"<<Vhm[2]<<"xx+"
-	 <<Vhm[3]<<"xxx" << endl;
-    cout << "Td="<<Tbm[0]<<"+"<<Tbm[1]<<"x+"<<Tbm[2]<<"xx+"<<Tbm[3]
-	 <<"xxx" << endl;
-    cout << "sig_rad="<<s_rad[0]<<"+"<<s_rad[1]<<"x+"<<s_rad[2]
-	 <<"xx+"<<s_rad[3]<<"xxx" << endl;
-    cout << "sig_azi="<<s_azi[0]<<"+"<<s_azi[1]<<"x+"<<s_azi[2]
-	 <<"xx+"<<s_azi[3]<<"xxx" << endl;
-    cout << "err_rad="<<err_rad[0]<<"+"<<err_rad[1]<<"x+"<<err_rad[2]
-	 <<"xx+"<<err_rad[3]<<"xxx" << endl;
-    cout << "err_azi="<<err_azi[0]<<"+"<<err_azi[1]<<"x+"<<err_azi[2]
-	 <<"xx+"<<err_azi[3]<<"xxx" << endl;
-    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+    gMessMgr->Message("", "I", "OST") << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
+    gMessMgr->Message("", "I", "OST") << "Parametrization for vd, Td, sig_rad and sig_azi, err_rad and err_azi:" << endm;
+    gMessMgr->Message("", "I", "OST") << "vd=" << Vhm[0]<<"+"<<Vhm[1]<<"x+"<<Vhm[2]<<"xx+"
+	 <<Vhm[3]<<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "Td="<<Tbm[0]<<"+"<<Tbm[1]<<"x+"<<Tbm[2]<<"xx+"<<Tbm[3]
+	 <<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "sig_rad="<<s_rad[0]<<"+"<<s_rad[1]<<"x+"<<s_rad[2]
+	 <<"xx+"<<s_rad[3]<<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "sig_azi="<<s_azi[0]<<"+"<<s_azi[1]<<"x+"<<s_azi[2]
+	 <<"xx+"<<s_azi[3]<<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "err_rad="<<err_rad[0]<<"+"<<err_rad[1]<<"x+"<<err_rad[2]
+	 <<"xx+"<<err_rad[3]<<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "err_azi="<<err_azi[0]<<"+"<<err_azi[1]<<"x+"<<err_azi[2]
+	 <<"xx+"<<err_azi[3]<<"xxx" << endm;
+    gMessMgr->Message("", "I", "OST") << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
     
     // Drift velocity at anode (Ranode = ra from/ftpc_params/ ) [cm/microsec]
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
@@ -640,7 +644,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
     rem_count2=0;
 
     // now remove merged clusters and those on sector border
-    cout << "remove merged and cut-off hits" << endl;
+    // gMessMgr->Message("", "I", "OST") << "remove merged and cut-off hits" << endm;
     id_1 = 0;
     id_2 = 0;
     n_gepoints = 0;
@@ -718,8 +722,8 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	
     nPoints = n_gepoints;
       
-    cout << "Deleted " << rem_count1 << " merged clusters." << endl;
-    cout << "Deleted " << rem_count2 << " clusters on sector limit." << endl;
+    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count1 << " merged clusters." << endm;
+    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count2 << " clusters on sector limit." << endm;
       
     return TRUE;
   }
@@ -742,10 +746,10 @@ int StFtpcFastSimu::ffs_tag()
 
       if (num_nok > MXMROW )
 	{
-	  cout << "FFS WARNING: number of Points (" << nPoints
-	       << ") greater than mxmrow ("<< MXMROW<<")"<< endl;
-	  cout << "              Setting num_nok =  mxmrow ("
-	       << MXMROW <<")" << endl;
+	  gMessMgr->Message("", "I", "OST") << "FFS WARNING: number of Points (" << nPoints
+	       << ") greater than mxmrow ("<< MXMROW<<")"<< endm;
+	  gMessMgr->Message("", "I", "OST") << "              Setting num_nok =  mxmrow ("
+	       << MXMROW <<")" << endm;
 	  num_nok=MXMROW;
 	}
  
