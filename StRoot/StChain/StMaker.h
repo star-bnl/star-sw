@@ -208,7 +208,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.71 2004/11/13 00:28:57 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.72 2005/01/26 23:02:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -256,7 +256,7 @@ public:
 virtual     ~StTestMaker(){};
 virtual void SetNext(StMaker *mk);
 virtual void Print(const char *opt="") const;
-private:
+protected:
 
    StMaker *fNext;
    StMaker *fLast;
@@ -266,8 +266,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.71 2004/11/13 00:28:57 fine Exp $
+// $Id: StMaker.h,v 1.72 2005/01/26 23:02:48 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.72  2005/01/26 23:02:48  perev
+// private ==> protected
+//
 // Revision 1.71  2004/11/13 00:28:57  fine
 // move the logger instantiation away of the ctor to be able to get the csubclass name
 //
