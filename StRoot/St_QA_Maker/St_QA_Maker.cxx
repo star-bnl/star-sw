@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.25 1999/05/06 12:48:44 fisyak Exp $
+// $Id: St_QA_Maker.cxx,v 1.26 1999/05/07 17:18:29 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.26  1999/05/07 17:18:29  kathy
+// new method AddToLogYList implemented and tested on solaris
+//
 // Revision 1.25  1999/05/06 12:48:44  fisyak
 // Add search geant in search path for particle tables
 //
@@ -98,6 +101,7 @@
 #include <string.h>
 #include "TStyle.h"
 #include "TCanvas.h"
+#include "TObjString.h"
 #include "TPostScript.h"
 #include "PhysicalConstants.h"
 #include <math.h>
@@ -115,7 +119,6 @@
 #include "St_dst_tof_evt_Table.h"
 #include "St_dst_tof_trk_Table.h"
 #include "St_ems_hits_Table.h"
-
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -186,6 +189,9 @@ ClassImp(St_QA_Maker)
 {
 
 // First, zero all pointers defined in the header file
+
+  m_ListOfLog = 0;
+  m_QACanvas = 0;
   
   // for method MakeEvSum - from table event_summary
   m_trk_tot_gd = 0;      //! number of good global tracks divided by total
@@ -318,7 +324,7 @@ ClassImp(St_QA_Maker)
 
 //  Now construct inline functions: 
   SetDraw(kFALSE);
-  SetHistsNames();
+  SetHistsNamesDraw();
   SetZones();
   SetPaperSize();
   SetPostScriptFile(); // no PostScript file "by default"
@@ -326,6 +332,10 @@ ClassImp(St_QA_Maker)
 //_____________________________________________________________________________
 St_QA_Maker::~St_QA_Maker(){
   SafeDelete(m_QACanvas);
+  if (m_ListOfLog) {
+    m_ListOfLog->Delete();
+    delete m_ListOfLog;
+  }
 }
 //_____________________________________________________________________________
 // Method DrawHists -->
@@ -437,6 +447,28 @@ Int_t St_QA_Maker::ListHists()
 
   cout << " ****  Total No. Histograms  = " << histReadCount <<endl;
   return histReadCount;
+}
+
+//_____________________________________________________________________________
+// Method AddToLogYList
+//   making list of all histograms that we want drawn with LogY scale
+
+Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){  
+  cout << " **** Now in St_QA_Maker::AddToLogYList  **** " << endl;
+
+// Since I'm creating a new list, must delete it in the destructor!!
+//make a new TList on heap(persistant); have already defined m_ListOfLog in header file
+   if (!m_ListOfLog) m_ListOfLog = new TList;
+
+// the add method for TList requires a TObject input  (also can use TObjString)
+// create TObjString on heap
+   TObjString *HistNameObj = new TObjString(HistName);
+
+// now can use method of TList
+    m_ListOfLog->Add(HistNameObj);
+ 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfLog->GetSize();
 }
 
 //_____________________________________________________________________________
@@ -1121,7 +1153,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.25 1999/05/06 12:48:44 fisyak Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.26 1999/05/07 17:18:29 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
