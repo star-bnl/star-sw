@@ -22,7 +22,7 @@ Tower id starts from 1 and goes to 4800 to match EMC Id
 
 #include <iostream>
 
-enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmde=7, esmdp=8};
+enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmdu=7, esmdv=8};
 
 class StMuEmcCollection: public TObject
 {
@@ -44,6 +44,20 @@ class StMuEmcCollection: public TObject
     StMuEmcPoint*     getPoint(int);
     int               getNEndcapPoints();
     StMuEmcPoint*     getEndcapPoint(int);
+
+    // EEMC utility methods
+    int   getNEndcapTowerADC(){ return 720;}
+    void  getEndcapTowerADC(int ihit, 
+			    int &adc, int &isec, int &isub, int & ieta);
+
+    int   getNEndcapPrsHits(){ return getNPrsHits(eprs);}
+    StMuEmcHit *getEndcapPrsHit(int ihit, 
+			  int &isec, int &isub, int & ieta, int &ipre);
+
+    int   getNEndcapSmdHits(char uv); // set 'U' or 'V'
+    StMuEmcHit * getEndcapSmdHit(char uv, int ihit,
+				 int &isec, int &istrip);
+
         
     void              setTowerADC(int,int, int detector = bemc);
     void              addSmdHit(int detector);

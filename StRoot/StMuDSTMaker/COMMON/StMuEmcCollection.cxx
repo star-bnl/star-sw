@@ -5,7 +5,13 @@
 //
 // See README for details
 //########################################################### 
+#include <assert.h>
+
 #include "StMuEmcCollection.h"
+
+#include "StMuEmcUtil.h"
+static StMuEmcUtil util; // to ease decoding of EEMC hits
+
 #include <iostream>
 ClassImp(StMuEmcCollection)
 
@@ -167,11 +173,13 @@ int StMuEmcCollection::getTowerADC(int id, int detector)
   }
   return 0;
 }
+
+
 int StMuEmcCollection::getNSmdHits(int detector)
 {
   TClonesArray *tca = NULL;
   if(detector==bsmde || detector==bsmdp) tca = mSmdHits[detector-bsmde];
-  if(detector==esmde || detector==esmdp) tca = mEndcapSmdHits[detector-esmde];
+  if(detector==esmdu || detector==esmdv) tca = mEndcapSmdHits[detector-esmdu];
   if(tca) return tca->GetEntries();
   return 0;
 }
@@ -179,7 +187,7 @@ StMuEmcHit* StMuEmcCollection::getSmdHit(int hitId,int detector)
 {
   TClonesArray *tca = NULL;
   if(detector==bsmde || detector==bsmdp) tca = mSmdHits[detector-bsmde];
-  if(detector==esmde || detector==esmdp) tca = mEndcapSmdHits[detector-esmde];
+  if(detector==esmdu || detector==esmdv) tca = mEndcapSmdHits[detector-esmdu];
   if(tca)
   {
     int counter = tca->GetEntries();
@@ -211,7 +219,7 @@ StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId, int detector)
 }
 int StMuEmcCollection::getNClusters(int detector)
 {
-  if(detector<bemc && detector>esmdp) return 0;
+  if(detector<bemc && detector>esmdv) return 0;
   TClonesArray *tca =NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
@@ -219,7 +227,7 @@ int StMuEmcCollection::getNClusters(int detector)
 }
 StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector)
 {
-  if(detector<bemc && detector>esmdp) return NULL;
+  if(detector<bemc && detector>esmdv) return NULL;
   TClonesArray *tca = NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
@@ -272,7 +280,7 @@ void StMuEmcCollection::addSmdHit(int detector)
 {
   TClonesArray *tca = NULL;
   if(detector==bsmde || detector==bsmdp) tca = mSmdHits[detector-bsmde];
-  if(detector==esmde || detector==esmdp) tca = mEndcapSmdHits[detector-esmde];
+  if(detector==esmdu || detector==esmdv) tca = mEndcapSmdHits[detector-esmdu];
   if(tca) 
   {
     int counter = tca->GetEntries();
@@ -294,7 +302,7 @@ void StMuEmcCollection::addPrsHit(int detector)
 }
 void StMuEmcCollection::addCluster(int detector)
 {
-  if(detector<bemc && detector>esmdp) return;
+  if(detector<bemc && detector>esmdv) return;
   TClonesArray *tca =NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
@@ -318,5 +326,45 @@ void StMuEmcCollection::addEndcapPoint()
 }
 
 
+void StMuEmcCollection
+::getEndcapTowerADC(int ihit, int &adc, int &isec, int &isub, int & ieta)
+{
+  adc=getTowerADC(ihit,eemc);
+  if(adc<=0) {
+    isec=isub=ieta=-1;
+    return;
+  }
+  util.getEndcapBin(eemc,ihit,isec,ieta,isub);
+  return ;
+}
 
+
+StMuEmcHit * StMuEmcCollection
+::getEndcapPrsHit(int ihit, int &isec, int &isub, int & ieta, int &ipre)
+{
+  StMuEmcHit * h =  getPrsHit(ihit,eprs);
+  util.getEndcapBin(eprs,h->getId(),isec,ieta,isub);
+  ipre=isub/5;
+  isub%=5;
+  return h;
+}
+
+
+int StMuEmcCollection::getNEndcapSmdHits(char uv)
+{
+  assert(uv=='U' || uv=='V');
+  return getNSmdHits(esmdu+uv-'U');
+}
+
+
+StMuEmcHit * StMuEmcCollection
+::getEndcapSmdHit(char uv, int ihit,int &isec, int &istrip)
+{
+  assert(uv=='U' || uv=='V');
+  int det=esmdu+uv-'U';
+  StMuEmcHit * h =getSmdHit(ihit,det);  
+  int idum;
+  util.getEndcapBin(det,h->getId(),isec,istrip,idum);
+  return h;
+}
 
