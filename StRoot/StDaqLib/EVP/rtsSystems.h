@@ -1,6 +1,9 @@
 #ifndef _RTS_SYSTEMS_H_
 #define _RTS_SYSTEMS_H_
 
+#include <sys/types.h>
+//#include <rtsLog.h>
+
 /*
 	HISTORY:
 	* 11/06/2000, Tonko, completelly revamped from daqSystems.h
@@ -17,13 +20,15 @@
         John,  8/7/01, replaced RICH with SSD and moved down ETOW, ESMD and PMD into
                        region 0-13 which is the region of valid LIVE
         John, 10/23/02 Updated TRG_xxx_INSTANCE and TRG_xxx_NODEID (Jeff consulted)
+	Tonko, 10/07/03 Untangled BTOW, BSMD, ETOW & ESMD and retired EMC names...
 */
+
+/* This is _obsolete_ */
 #define TRG_TPC_BIT     0
 
 #define TRG_SVT_BIT     1
 
 #define TRG_BSMD_BIT    2
-#define TRG_SMD_BIT     TRG_BSMD_BIT   // use "BSMD"
 
 #define TRG_FTPC_BIT    3
 
@@ -38,15 +43,47 @@
 #define TRG_FP2_BIT	TRG_FPD_BIT	// same bit as for older FPD
 
 #define TRG_ETOW_BIT    8
-#define TRG_ESMD_BIT    9
 #define TRG_EEC_BIT     TRG_ETOW_BIT    // use "ETOW"
 
+#define TRG_ESMD_BIT    9
+
 #define TRG_PMD_BIT    10
+
+//#define TRG_MWC_BIT	11
 
 #define TRG_CTB_BIT    14               // does not have a LIVE bit
  
 #define TRG_BBC_BIT    15               // does not have a LIVE bit
 
+
+
+/* TCD IDs - slot positions in the TCD crate */
+#define TCD_ESMD        6
+#define TCD_BBC         7
+#define TCD_ETOW        8
+#define TCD_SSD         9
+#define TCD_FPD         10
+#define TCD_TOF         11      //
+#define TCD_SVT         12      //
+#define TCD_SVT_CD      13      // SVT's cable driver slot
+#define TCD_MWC         14
+#define TCD_BSMD        15      //
+#define TCD_CTB         16
+#define TCD_BTOW        17      //
+#define TCD_FTPC        18      //
+#define TCD_PMD         19      //
+#define TCD_TPC         20      //
+#define TCD_TPC_CD      21      // TPC's cable driver slot
+
+// Trigger Detector groupings...
+#define TPC_GRP		0
+#define FPD_GRP		1
+#define TOF_GRP		2
+#define BTOW_GRP	3
+#define BSMD_GRP	4
+#define ETOW_GRP	5
+#define ESMD_GRP	6
+#define PMD_GRP		7
 
 /* RTS Node Id, Tonko, 11/06/2000
 
@@ -106,11 +143,10 @@ so we keep it here for source compatibility
 #define TOF_SYSTEM	2
 #define TOF_ID		TOF_SYSTEM
 
-/* this is just the barrel EMC! */
-#define EMC_SYSTEM	3
-#define EMC_ID		EMC_SYSTEM
-#define BEMC_SYSTEM	EMC_SYSTEM
-#define BEMC_ID		EMC_SYSTEM
+/* this is just the Barrel Tower EMC! */
+#define BTOW_SYSTEM	3
+#define BTOW_ID		BTOW_SYSTEM
+
 
 /* Frozen as of 8/2002, Tonko */
 #define FPD_SYSTEM	4
@@ -146,10 +182,9 @@ so we keep it here for source compatibility
 #define SSD_SYSTEM	13
 #define SSD_ID		SSD_SYSTEM
 
-/* Endcap */
-#define EEC_SYSTEM	14
-#define EEC_ID		EEC_SYSTEM
-
+/* Endcap Tower!*/
+#define ETOW_SYSTEM	14
+#define ETOW_ID		ETOW_SYSTEM
 
 #define DAQ_SYSTEM	15
 #define DAQ_ID          DAQ_SYSTEM
@@ -158,6 +193,22 @@ so we keep it here for source compatibility
 // the "new" (2002-03) FPD
 #define FP2_SYSTEM	16
 #define FP2_ID		FP2_SYSTEM
+
+#define PP_SYSTEM       17              /* pp2pp */
+#define PP_ID           PP_SYSTEM
+
+#define BSMD_SYSTEM	18
+#define BSMD_ID		BSMD_SYSTEM
+
+#define ESMD_SYSTEM	19
+#define ESMD_ID		ESMD_SYSTEM
+
+#define RTS_NUM_SYSTEMS	20	/* current maximum. Can not be greater than 32! */
+
+#define PP_SEQE_INSTANCE  1
+#define PP_SEQW_INSTANCE  2
+#define PP_TRG_INSTANCE 3
+#define PP_TEST_INSTANCE 4
 
 /*
   Subsystems (These are overloaded for each system)
@@ -169,20 +220,36 @@ so we keep it here for source compatibility
 #define GL3_SUBSYS 1
 #define SL3_SUBSYS 2
 
+#define EVB_SUBSYS	1
+#define GB_SUBSYS	2
 
 /*
   Instances (overloaded for each system)
 */
 
+#ifndef RTS_PROJECT_PP
 #define DAQMAN_INSTANCE 1
+#endif
+
 #define BB_INSTANCE     2
+
+#ifndef RTS_PROJECT_PP
 #define EVP_INSTANCE    3
-#define GB_INSTANCE     4
+#endif
+
+//#define GB_INSTANCE     4
+#define BDB_INSTANCE	4	// we'll keep the BDB controller's node_id the same...
+
 #define BB2_INSTANCE    5
-#define TM_INSTANCE     GB_INSTANCE
+//#define TM_INSTANCE     GB_INSTANCE
 #define EVB_INSTANCE    BB_INSTANCE
 #define EVB02_INSTANCE	BB2_INSTANCE
 #define CLIENT_INSTANCE 15
+
+#ifdef RTS_PROJECT_PP
+#define DAQMAN_INSTANCE BB_INSTANCE
+#define EVP_INSTANCE BB_INSTANCE
+#endif
 
 #define TRG_INSTANCE         1
 #define TRG_L1_INSTANCE      2
@@ -190,10 +257,10 @@ so we keep it here for source compatibility
 #define TRG_TCD_INSTANCE     4
 #define TRG_RCC_INSTANCE     5
 #define TRG_CTB_INSTANCE     6
-#define TRG_EEC_INSTANCE     7
+// #define TRG_EEC_INSTANCE     7    jml Aug 21,03
 #define TRG_MWC_INSTANCE     8
 #define TRG_BC1_INSTANCE     9
-#define TRG_BCE_INSTANCE    10
+#define TRG_BCE_INSTANCE    10  
 #define TRG_BCW_INSTANCE    11
 #define TRG_SCALER_INSTANCE 12
 #define TRG_BBC_INSTANCE    13
@@ -205,36 +272,66 @@ so we keep it here for source compatibility
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
 
-
 /******************** RC/DAQ nodes ****************/
-#define DAQMAN_NODE	((DAQ_SYSTEM<<12) | DAQMAN_INSTANCE) 
+/* Tonko, Jun 6, 2003 - EVB & GB extensions */
+/* 
+	Tonko Comments: 
+
+	EVB) the Linux based EVBs will be EVB_NODES(1)... and
+		we keep the old names...
+	GB) the new Linux GB will be GB_NODES(1) and the old MVME
+		in the main crate will continue to be called
+		BDB_NODE
+*/
+#define EVB_NODES(x)	((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
+#define GB_NODES(x)	((DAQ_SYSTEM<<12) | (GB_SUBSYS<<8 ) | (x))
+#define GB_NODE		GB_NODES(1)
+
+
 #define BB_NODE		((DAQ_SYSTEM<<12) | BB_INSTANCE) 
-#define BB2_NODE	((DAQ_SYSTEM<<12) | BB2_INSTANCE) 
+
+#ifdef RTS_PROJECT_PP
+
+#define DAQMAN_NODE BB_NODE
+#define EVP_NODE BB_NODE
+#define BB2_NODE BB_NODE
+
+#else
+
+#define DAQMAN_NODE	((DAQ_SYSTEM<<12) | DAQMAN_INSTANCE) 
 #define EVP_NODE	((DAQ_SYSTEM<<12) | EVP_INSTANCE) 
-#define GB_NODE		((DAQ_SYSTEM<<12) | GB_INSTANCE)
+#define BB2_NODE	((DAQ_SYSTEM<<12) | BB2_INSTANCE) 
+
+#endif
 
 /* aliases and shortcuts */
 #define RC_NODE		DAQMAN_NODE 		/* for the time being...*/
 #define LOG_NODE        DAQMAN_NODE
 #define MON_NODE        DAQMAN_NODE
 
-#define TM_NODE		GB_NODE
 
 #define CLIENT_NODE     ((DAQ_SYSTEM<<12) | CLIENT_INSTANCE)
-#define EVB01_NODE      BB_NODE
-#define EVB02_NODE      BB2_NODE
-#define EVB_NODE	EVB01_NODE
 
+// Tonko: changed this, Nov 4, 2003
+//#define EVB01_NODE      BB_NODE
+//#define EVB02_NODE      BB2_NODE
+//#define EVB_NODE	EVB01_NODE
+// this will also go away!
+#define EVB_NODE	EVB_NODES(1)
+
+
+#define BDB_NODE	((DAQ_SYSTEM<<12) | BDB_INSTANCE) // old GB...
 
 /* singular detectors */
 #define RIC01_NODE	((RIC_SYSTEM<<12) | 1)
 #define RIC02_NODE	((RIC_SYSTEM<<12) | 2)
 #define RIC_NODE	RIC01_NODE
 
-#define TOF01_NODE	((TOF_SYSTEM<<12) | 1)
-#define TOF02_NODE	((TOF_SYSTEM<<12) | 2)
+#define TOF01_NODE	((TOF_SYSTEM<<12) | 1)	// DAQ end
+#define TOF02_NODE	((TOF_SYSTEM<<12) | 2)	// Platform
+#define TOF03_NODE	((TOF_SYSTEM<<12) | 3)	// new, test node
 #define TOF_NODE	TOF01_NODE
-
+#define TOF_NODES	((TOF_SYSTEM<<12) | (x))	// shorthand
 
 #define FPD01_NODE	((FPD_SYSTEM<<12) | 1)
 #define FPD02_NODE	((FPD_SYSTEM<<12) | 2)
@@ -249,15 +346,10 @@ so we keep it here for source compatibility
 
 /* separated the Endcap (EEC) from the Barrel (EMC), Tonko, 4/4/2002 */
 /* Barrel */
-#define BTOW_INSTANCE	1
-#define BSMD_INSTANCE	2
-#define BPRE_INSTANCE	3	/* preshower - doesn't exist yet... */
 
-#define EMC_NODES(x)	((EMC_SYSTEM<<12) | (x))
-
-#define BTOW_NODE	EMC_NODES(BTOW_INSTANCE)
-#define BSMD_NODE	EMC_NODES(BSMD_INSTANCE)
-#define BPRE_NODE	EMC_NODES(BPRE_INSTANCE)	
+#define BTOW_NODE	((BTOW_SYSTEM<<12) | 1)
+#define BSMD_NODE	((EXT_SYSTEM<<12)|(BSMD_SYSTEM<<4)|1)
+#define BPRE_NODE	((BTOW_SYSTEM<<12) | 2)	/* NOT really known yet! */
 
 /* Extended (post April 2002) Detectors */
 #define PMD01_NODE	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | 1)
@@ -275,20 +367,14 @@ so we keep it here for source compatibility
 #define FP2_NODE	FP201_NODE
 
 /* Endcap */
-#define ETOW_INSTANCE	1
-#define ESMD_INSTANCE	2
 
-#define EEC_NODES(x)	((EXT_SYSTEM<<12)|(EEC_SYSTEM<<4) | (x))
-
-#define ETOW_NODE	EEC_NODES(ETOW_INSTANCE)	// for _all_ Endcap
-#define EEC_NODE	ETOW_NODE			// Endcap EMC shortcut if only one...
-
-#define ESMD_NODE	EEC_NODES(ESMD_INSTANCE)	
-
+#define ETOW_NODE	((EXT_SYSTEM<<12)|(ETOW_SYSTEM<<4)|1)
+#define ESMD_NODE	((EXT_SYSTEM<<12)|(ESMD_SYSTEM<<4)|1)
 
 
 /* Level III */
 #define L3_NODES(x)	((L3_SYSTEM<<12) | (SL3_SUBSYS<<8) | (x)) 
+#define SL3_NODES(x)	((L3_SYSTEM<<12) | (SL3_SUBSYS<<8) | (x)) 
 #define GL3_NODES(x)	((L3_SYSTEM<<12) | (GL3_SUBSYS<<8) | (x)) 
 #define L3EVP_NODE      ((L3_SYSTEM<<12) | 1)
 #define L3DISP_NODE     ((L3_SYSTEM<<12) | 2)
@@ -304,7 +390,6 @@ so we keep it here for source compatibility
 #define TRG_CTB_NODE        ((TRG_SYSTEM<<12) | TRG_CTB_INSTANCE)
 #define TRG_L1_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L1_SUBSYS<<8) | (x))
 #define TRG_L2_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L2_SUBSYS<<8) | (x))
-#define TRG_EEC_NODE        ((TRG_SYSTEM<<12) | TRG_EEC_INSTANCE)
 #define TRG_MWC_NODE	((TRG_SYSTEM<<12) | TRG_MWC_INSTANCE)
 #define TRG_BC1_NODE        ((TRG_SYSTEM<<12) | TRG_BC1_INSTANCE)
 #define TRG_BCE_NODE        ((TRG_SYSTEM<<12) | TRG_BCE_INSTANCE)
@@ -323,11 +408,204 @@ so we keep it here for source compatibility
 /* Slow Controls */
 #define SC_NODE         ((SC_SYSTEM<<12) | 1)
 
+/* PP2PP */
+#define PP_SEQE_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_SEQE_INSTANCE)
+
+/* this is known as Sector1 aka ppdaq2 aka Yellow */
+#define PP_SEQ1_NODE	PP_SEQE_NODE
+
+#define PP_SEQW_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_SEQW_INSTANCE)
+/* this is known as Sector2 aka ppdaq5 aka Blue */
+#define PP_SEQ2_NODE	PP_SEQW_NODE
+
+#define PP_TRG_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_TRG_INSTANCE)
+#define PP_TEST_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_TEST_INSTANCE)
+
+
+
+extern inline char *rts2name(int rts_id)
+{
+	switch(rts_id) {
+	case TPC_SYSTEM :
+		return "TPC" ;
+	case SVT_SYSTEM :
+		return "SVT" ;
+	case TOF_SYSTEM :
+		return "TOF" ;
+	case BTOW_SYSTEM :
+		return "BTOW" ;
+	case FPD_SYSTEM :
+		return "FPD" ;
+	case FTP_SYSTEM :
+		return "FTP" ;
+	case PMD_SYSTEM :
+		return "PMD" ;
+	case SSD_SYSTEM :
+		return "SSD" ;
+	case ETOW_SYSTEM :
+		return "ETOW" ;
+	case FP2_SYSTEM :	// watch it!
+		return "FP2" ;
+	case BSMD_SYSTEM :
+		return "BSMD" ;
+	case ESMD_SYSTEM :
+		return "ESMD" ;
+	case DAQ_SYSTEM :
+		return "DAQ" ;
+	case TRG_SYSTEM :
+		return "TRG" ;
+	case L3_SYSTEM :
+		return "L3" ;
+	case SC_SYSTEM :
+		return "SC" ;
+	default :
+		return NULL ;	// unknown!
+	}
+} ;
+
+extern inline int rts2tcd(int rts)
+{
+	static int map[32] = {
+		TCD_TPC,
+		TCD_SVT,
+		TCD_TOF,
+		TCD_BTOW,
+		TCD_FPD,
+		TCD_FTPC,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		TCD_PMD,
+		TCD_SSD,
+		TCD_ETOW,
+		-1,
+		TCD_FPD,
+		-1,
+		TCD_BSMD,
+		TCD_ESMD,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+	} ;
+
+	return map[rts] ;
+
+}
+
+extern inline int tcd2rts(int tcd)
+{
+	static int map[32] = {
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        ESMD_SYSTEM,
+        -1,
+        ETOW_SYSTEM,
+        SSD_SYSTEM,
+        FPD_SYSTEM,
+        TOF_SYSTEM,
+        SVT_SYSTEM,
+        -1,
+        -1,
+        BSMD_SYSTEM,
+        -1,
+        BTOW_SYSTEM,
+        FTP_SYSTEM,
+        PMD_SYSTEM,
+        TPC_SYSTEM,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+	};
+
+//	LOG(WARN,"tcd2rts: tcd %d, rts %d",tcd,map[tcd],0,0,0) ;
+	return map[tcd] ;
+} ;
+
+		
+extern inline u_int grp2rts_mask(int grp)
+{
+	u_int ret ;
+
+	ret = 0 ;
+
+	if(grp & (1<<TPC_GRP)) {
+		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1<<SSD_SYSTEM) ;
+	}
+	if(grp & (1<<TOF_GRP)) {
+		ret |= (1<<TOF_SYSTEM) ;
+	}
+	if(grp & (1<<PMD_GRP)) {
+		ret |= (1<<PMD_SYSTEM) ;
+	}
+	if(grp & (1<<ETOW_GRP)) {
+		ret |= (1<<ETOW_SYSTEM) ;
+	}
+	if(grp & (1<<ESMD_GRP)) {
+		ret |= (1<<ESMD_SYSTEM) ;
+	}
+	if(grp & (1<<BTOW_GRP)) {
+		ret |= (1<<BTOW_SYSTEM) ;
+	}
+	if(grp & (1<<BSMD_GRP)) {
+		ret |= (1<<BSMD_SYSTEM) ;
+	}
+	if(grp & (1<<FPD_GRP)) {
+		ret |= (1<<FPD_SYSTEM) ;
+	}
+
+	return ret ;
+}
+
+// goes from the RTS_SYSTEM id to the GRP id
+extern inline int rts2grp(int rts)
+{
+  switch(rts)
+    {
+      // Instance doesn't matter...
+    case TPC_ID: 
+    case SVT_ID: 
+    case FTP_ID:
+    case SSD_ID:
+	return TPC_GRP ;
+    case TOF_ID: return TOF_GRP;
+    case FPD_ID: return FPD_GRP;
+    case FP2_ID: return FPD_GRP;
+    case BTOW_ID: return BTOW_GRP;
+    case BSMD_ID: return BSMD_GRP;
+    case ETOW_ID: return ETOW_GRP;
+    case ESMD_ID: return ESMD_GRP;
+    case PMD_ID: return PMD_GRP;
+    default:
+	return 15 ;	// this is an ERROR!
+    }
+}
+
+
 /*
   Inverse's...
 
   MODIFIED FOR POST-APRIL02 EXT. DETECTORS! Tonko
 */
+
 extern inline int GET_NODE(int sys, int subsys, int inst)
 {
 	int node ;

@@ -58,6 +58,18 @@ int StEEMCReader::getTowerAdc(int crate,int channel) {
   return -1;
 }
 
+
+int StEEMCReader::getEEmcData(int crate,int channel, int mapping) {
+  static int warn=0;
+  if(fEEMCImpReader) return fEEMCImpReader->getEemc(crate,channel,mapping);
+  if(!warn) {
+    printf("StEEMCReader::getTowerAdc  WARNING:   no EEMC data in this event.\n");
+    warn=1;
+  }
+  return -1;
+}
+
+
 int StEEMCReader::Update() {
   delete fEEMCImpReader;
   fEEMCImpReader = ::getEEMCReader(fDAQReader->getEventReader());
