@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.54 2000/04/18 23:31:16 fine Exp $
+// $Id: makedoc.C,v 1.55 2000/05/30 00:00:37 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -6,7 +6,7 @@
   {
  //*-- Author :    Valery Fine   25/12/98
  gROOT.Reset();
-  Char_t *libs[] = { "libSTAR", "St_base","xdf2root","St_Tables"                    
+  Char_t *libs[] = { "libSTAR", "Star2Root","St_base","xdf2root","St_Tables"                    
                     , "StChain","StUtilities","StBFChain"};
 
  TString AFS; // STAR root directory
@@ -67,10 +67,15 @@
   THtml *html = new THtml();
 
   TString STAR = "$STAR/.$STAR_SYS/obj";  
+  TString ROOTSYS = "$ROOTSYS/.$STAR_SYS/obj";
+
   TString sourcedir;
   sourcedir =  "$STAR";
   if (!NT) { 
     sourcedir += ":";
+    sourcedir += "$STAR/include:";
+    sourcedir += "$STAR/include/tables:";
+    sourcedir += "$ROOTSYS/ROOT/root/STAR:";
     sourcedir = STAR;
     sourcedir += "/StRoot/St_base:";
     sourcedir += STAR;
@@ -160,21 +165,23 @@
 
   Char_t *classes[] = { "TTableSorter",  "TCL", "StMicky",  "TTableDescriptor"
                        ,"St_XDFFile",    "St_Module",       "TTable"
-                       ,"TDataSet",      "TDataSetIter",     "TFileSet"
-                       ,"StParticleView","St_ObjectSet",    "TVolume",     "TVolumePosition"
+                       ,"TDataSet",      "TDataSetIter",    "TFileSet"
+                       ,"StParticleView","TObjectSet",      "TVolume",      "TVolumePosition"
                        ,"StMaker",       "StChain",         "TVolumeView"
-                       ,"table_head_st", "TVolumeViewIter", "St_PolyLineShape"
-                       ,"TPoints3D",     "St_PolyLine3D",    "TPointsArray3D"
+                       ,"table_head_st", "TVolumeViewIter", "TPolyLineShape"
+                       ,"TPoints3D",     "St_PolyLine3D",   "TPointsArray3D"
                        ,"TTable3Points", "TTablePoints"
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
                        ,"StBFChain",     "StEventDisplayMaker",
-                       ,"StVirtualEventFilter", "St_TableIter"
+                       ,"StVirtualEventFilter", "TTableIter"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
   Int_t nclass = 39;
+  html.MakeIndex();
+
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -300,6 +307,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.55  2000/05/30 00:00:37  fine
+// Correction to create STAR/ROOT classes html docs
+//
 // Revision 1.54  2000/04/18 23:31:16  fine
 // adjusted to ROOT 2.24
 //
