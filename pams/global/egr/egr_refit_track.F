@@ -88,9 +88,12 @@ C     Local variables
       INTEGER n_bad
       INTEGER iplane,isvth
       INTEGER imsg
+
       LOGICAL enough, good_hit(mxpnt)
+      INTEGER pnt(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
-      REAL    wcir(mxpnt),wlin(mxpnt),pnt(mxpnt)
+      REAL    wcir(mxpnt),wlin(mxpnt)
+
       REAL    as,bs,cf,xold,yold,theta,covar(3,3)
       REAL*4  prim_vrtx_x, prim_vrtx_y, prim_vrtx_z
       DATA    imsg /0/
@@ -166,7 +169,7 @@ C     load the fitting arrays for the primary vertex
             zcir(ncir) = prim_vrtx_z
             wcir(ncir) = 1250.      ! Record as 0.2 in z and 0.02 in xy (cm)
             wlin(ncir) = 25.0
-            pnt(ncir) = gtrk(igtrk).nhit
+            pnt(ncir)  = gtrk(igtrk).nhit
          endif
 
 C     Load the fitting arrays with the SVT space points
