@@ -1,3 +1,9 @@
+* $Id: ffpdstep.g,v 1.2 2004/03/31 16:34:10 potekhin Exp $
+* $Log: ffpdstep.g,v $
+* Revision 1.2  2004/03/31 16:34:10  potekhin
+* Factored out two methods due to code
+* reorganization.
+*
 
       subroutine FFPDSTEP
 * discard cerenkov photon absorption hits everywhere except for
