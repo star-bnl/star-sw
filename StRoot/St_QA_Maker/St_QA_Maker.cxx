@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.65 1999/12/07 23:14:18 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.66 1999/12/08 22:58:18 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.66  1999/12/08 22:58:18  kathy
+// changed histogram limits and made names smaller
+//
 // Revision 1.65  1999/12/07 23:14:18  kathy
 // fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
 //
@@ -295,6 +298,7 @@ void St_QA_Maker::MakeHistEvSum(){
       m_glb_trk_tot->Fill(tt->glb_trk_tot);
       m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
       m_vert_total->Fill(tt->n_vert_total);
+      m_glb_trk_prim->Fill(tt->glb_trk_prim);
 
       m_mean_pt->Fill(tt->mean_pt);
       m_mean_eta->Fill(tt->mean_eta);
@@ -304,12 +308,6 @@ void St_QA_Maker::MakeHistEvSum(){
       if(!isnan((double)(tt->prim_vrtx[1])))  m_prim_vrtx1->Fill(tt->prim_vrtx[1]);
       if(!isnan((double)(tt->prim_vrtx[2])))  m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
       
-// not in 99i tables
-      m_glb_trk_prim->Fill(tt->glb_trk_prim);
-//      m_T_average->Fill(tt->T_average);    
-//      m_vert_V0->Fill(tt->n_vert_V0);
-//      m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
-
     }
   }
 } 
@@ -652,7 +650,10 @@ void St_QA_Maker::MakeHistGen(){
 	    Double_t pT    =  TMath::Sqrt(px*px+py*py);
 	    Double_t theta =  TMath::ATan2( pT, pz );
 	    Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-	    m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+
+            Float_t Glmevpt = TMath::Log10(pT*1000.0);
+
+	    m_H_pT_eta_gen->Fill(eta, Glmevpt);
 	    m_H_pT_gen->Fill((Float_t) pT);
 	    m_H_eta_gen->Fill(eta);
 	    m_H_vtxx->Fill(p->vhep[0]);

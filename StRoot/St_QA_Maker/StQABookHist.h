@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.7 1999/12/08 22:58:17 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.7  1999/12/08 22:58:17  kathy
+//! changed histogram limits and made names smaller
+//!
 //! Revision 1.6  1999/12/07 23:14:18  kathy
 //! fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
 //!
@@ -35,19 +38,19 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.7 1999/12/08 22:58:17 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
   static const Float_t xminpT;
   static const Float_t xmaxpT;
-  static const Float_t ymineta;
-  static const Float_t ymaxeta;
+  //  static const Float_t ymineta;
+  //  static const Float_t ymaxeta;
   
   static const Int_t nchisq;
-  static const Int_t nmass;
-  static const Int_t ntau; 
+  //  static const Int_t nmass;
+  //  static const Int_t ntau; 
   static const Int_t ndedx;  
   static const Int_t npnt;   
   static const Int_t nleng;  
@@ -390,7 +393,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.7 1999/12/08 22:58:17 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
