@@ -3,8 +3,8 @@
 
 #include <ctime>
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-//#include "StChain/StChain.h"
-#include "StChain/StMaker.h"
+//#include "StChain.h"
+#include "StMaker.h"
 
 class StHbtMcEventReader : public StHbtEventReader{
 

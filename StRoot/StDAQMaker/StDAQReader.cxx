@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.8 1999/09/10 16:35:38 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.9 1999/09/24 01:22:52 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.9  1999/09/24 01:22:52  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.8  1999/09/10 16:35:38  fine
  * The oreder of deleting object has been changed to avoid crash in StDaqLib
  *
@@ -28,7 +31,8 @@
  * Revision 1.3  1999/08/01 00:09:07  perev
  * leak removed author added
  *
- **************************************************************************/#include "StDAQMaker/StDAQReader.h"
+ **************************************************************************/
+#include "StDAQReader.h"
 #include "Stypes.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 

@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.39 1999/07/20 02:16:58 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.40 1999/09/24 01:23:29 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.40  1999/09/24 01:23:29  fisyak
+// Reduced Include Path
+//
 // Revision 1.39  1999/07/20 02:16:58  lasiuk
 // bring in line with new options (TSS algorithms)
 //
@@ -201,13 +204,13 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "StSequence.hh"
 
 // g2t tables
-#include "St_g2t_tpc_hit_Table.h"
-#include "St_g2t_track_Table.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
 
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.39 1999/07/20 02:16:58 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.40 1999/09/24 01:23:29 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)

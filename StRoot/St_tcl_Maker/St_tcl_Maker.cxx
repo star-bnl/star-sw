@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.43 1999/09/05 05:13:44 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.44 1999/09/24 01:23:43 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.44  1999/09/24 01:23:43  fisyak
+// Reduced Include Path
+//
 // Revision 1.43  1999/09/05 05:13:44  sakrejda
 // Calls to Limit Error Messages added to Init()
 //    gMessMgr->SetLimit("TPSEQ",10);
@@ -146,7 +149,7 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
-#include "StUtilities/StMessMgr.h"
+#include "StMessMgr.h"
 #include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"

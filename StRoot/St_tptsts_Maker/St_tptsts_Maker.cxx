@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.cxx,v 1.2 1999/07/15 13:58:30 perev Exp $
+// $Id: St_tptsts_Maker.cxx,v 1.3 1999/09/24 01:23:48 fisyak Exp $
 // $Log: St_tptsts_Maker.cxx,v $
+// Revision 1.3  1999/09/24 01:23:48  fisyak
+// Reduced Include Path
+//
 // Revision 1.2  1999/07/15 13:58:30  perev
 // cleanup
 //
@@ -21,10 +24,10 @@
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_sts_Module.h"
-#include "St_tpt_strack_Table.h"
-#include "St_tpt_res_Table.h"
+#include "tables/St_tpt_strack_Table.h"
+#include "tables/St_tpt_res_Table.h"
 #include "TNtuple.h"
-#include "St_type_index_Table.h"
+#include "tables/St_type_index_Table.h"
 
 ClassImp(St_tptsts_Maker)
   

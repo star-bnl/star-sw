@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $
+ * $Id: StSvtHit.cxx,v 1.6 1999/09/24 01:23:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 1.5  1999/06/27 22:45:28  fisyak
- * Merge StRootEvent and StEvent
+ * Revision 1.6  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.6  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
  *
  * Revision 1.5  1999/06/27 22:45:28  fisyak
  * Merge StRootEvent and StEvent
@@ -29,12 +32,12 @@
  * version with constructors for table-based loading
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
-#include "tables/dst_point.h"
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+#include "StGlobalTrack.h"
 #include "dst_point.h"
  * Inlined layer(), sector() and ladder().
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.6 1999/09/24 01:23:01 fisyak Exp $";
 #include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -59,7 +62,7 @@ StSvtHit::StSvtHit(dst_point_st* pt)
 
     //
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.6 1999/09/24 01:23:01 fisyak Exp $";
 
 ClassImp(StSvtHit)
     

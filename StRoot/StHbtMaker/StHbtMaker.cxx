@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.6 1999/09/08 04:15:51 lisa Exp $
+ * $Id: StHbtMaker.cxx,v 1.7 1999/09/24 01:23:08 fisyak Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.7  1999/09/24 01:23:08  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.6  1999/09/08 04:15:51  lisa
  * persistent microDST implementation tweaked to please fickle solaris details
  *
@@ -36,7 +39,7 @@
 #include <stdlib.h>
 //#include <string>
 #include <vector>
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "StHbtMaker.h"
 
 

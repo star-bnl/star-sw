@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.cc,v 1.2 1999/09/02 09:04:57 jones Exp $
+ * $Id: StXiMiniDst.cc,v 1.3 1999/09/24 01:23:32 fisyak Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.cc,v $
+ * Revision 1.3  1999/09/24 01:23:32  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.2  1999/09/02 09:04:57  jones
  * Added StEvMiniDst class, New file handling, Partially implemented TTrees
  *
@@ -19,7 +22,7 @@
  *
  *
  ***********************************************************************/
-#include "global/inc/phys_constants.h"
+#include "phys_constants.h"
 #include "StXiMiniDst.hh"
 #include "StXiVertex.h"
 #include "SystemOfUnits.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 1.3 1999/04/30 13:16:31 fisyak Exp $
+ * $Id: StXiVertex.h,v 1.4 1999/09/24 01:23:03 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
- * Revision 1.3  1999/04/30 13:16:31  fisyak
- * add StArray for StRootEvent
+ * Revision 1.4  1999/09/24 01:23:03  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.4  1999/09/24 01:23:03  fisyak
+ * Reduced Include Path
  *
  * Revision 1.3  1999/04/30 13:16:31  fisyak
  * add StArray for StRootEvent
@@ -50,8 +53,8 @@
  *
 #include "StObject.h"
  * Revision 2.0  1999/10/12 18:43:37  ullrich
-#include "tables/dst_vertex.h"
-#include "tables/dst_xi_vertex.h"
+#include "StV0Vertex.h"
+#include "StGlobalTrack.h"
  * Completely Revised for New Version
 #include "dst_vertex.h"
 #include "dst_xi_vertex.h"

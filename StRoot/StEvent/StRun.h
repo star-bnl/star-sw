@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.h,v 1.6 1999/05/04 20:59:26 fisyak Exp $
+ * $Id: StRun.h,v 1.7 1999/09/24 01:23:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.h,v $
- * Revision 1.6  1999/05/04 20:59:26  fisyak
- * move CVS Tag to StRun
+ * Revision 1.7  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
  *
  * Revision 1.6  1999/05/04 20:59:26  fisyak
  * move CVS Tag to StRun
@@ -47,8 +50,8 @@
 #ifndef StRun_hh
 #define StRun_hh
 
-#include "tables/dst_run_header.h"
-#include "tables/dst_run_summary.h"
+#include "St_DataSet.h"
+#include "StRunSummary.h"
 #include "StEnumerations.h"
 #include "dst_run_header.h"
 #include "dst_run_summary.h"

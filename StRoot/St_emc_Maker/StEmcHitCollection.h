@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.6 1999/09/17 21:28:40 fisyak Exp $
+// $Id: StEmcHitCollection.h,v 1.7 1999/09/24 01:23:38 fisyak Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.7  1999/09/24 01:23:38  fisyak
+// Reduced Include Path
+//
 // Revision 1.6  1999/09/17 21:28:40  fisyak
 // remove St_db_Maker.h
 //
@@ -39,8 +42,8 @@
 #include "tables/St_emc_calib_header_Table.h"
 //
 //#include <vector>
-//#include "StEvent/StEmcHit.hh"
-//#include "StEvent/StEmcTowerHitCollection.hh"
+//#include "StEmcHit.hh"
+//#include "StEmcTowerHitCollection.hh"
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StEmcHitCollection class for <FONT COLOR="RED">EMc Calibrated Hit</FONT>     //

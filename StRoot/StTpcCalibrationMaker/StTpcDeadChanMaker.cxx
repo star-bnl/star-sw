@@ -28,7 +28,7 @@
 #include "St_DataSetIter.h"
 //#include "StTpcDb/StTpcDb.h"
 #include "StDAQMaker/StDAQReader.h"
-#include "StRoot/StDaqLib/TPC/fee_pin.h"
+#include "StDaqLib/TPC/fee_pin.h"
 // Local
 #include "StTpcDeadChanMaker.h"
 #include "StTpcCalibSetup.h"
@@ -116,7 +116,7 @@ Int_t StTpcDeadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcDeadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.2 1999/09/23 16:13:26 fretiere Exp $\n");
+  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.3 1999/09/24 01:23:27 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

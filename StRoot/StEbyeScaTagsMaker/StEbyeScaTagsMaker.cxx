@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.7 1999/07/15 13:57:00 perev Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.8 1999/09/24 01:22:57 fisyak Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.8  1999/09/24 01:22:57  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.7  1999/07/15 13:57:00  perev
  * cleanup
  *
@@ -33,7 +36,7 @@
  *
  **************************************************************************/
 #include "StEbyeScaTagsMaker.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "StRun.h"
 #include "StEvent.h"
 #include "StGlobalTrack.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.11 1999/07/17 19:10:29 perev Exp $
+ * $Id: StEvent.h,v 1.12 1999/09/24 01:23:00 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.11  1999/07/17 19:10:29  perev
- * type() check for non print characters added
+ * Revision 1.12  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.12  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
  *
  * Revision 1.11  1999/07/17 19:10:29  perev
  * type() check for non print characters added
@@ -131,8 +134,8 @@ class StVecPtrZdcSegment;
 #include "StEmcPreShowerHit.h"
 #include "StSmdPhiHit.h"
 #include "StSmdEtaHit.h"
-#include "tables/dst_event_header.h"
-#include "tables/dst_event_summary.h"
+#include "StL0Trigger.h"
+#include "StTriggerDetectorCollection.h"
 #include "StEnumerations.h"
 #include "dst_event_header.h"
 #include "dst_event_summary.h"

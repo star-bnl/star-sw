@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.11 1999/07/15 13:57:59 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.12 1999/09/24 01:23:37 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.12  1999/09/24 01:23:37  fisyak
+// Reduced Include Path
+//
 // Revision 1.11  1999/07/15 13:57:59  perev
 // cleanup
 //
@@ -58,12 +61,12 @@
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 
-//#include "St_dst_run_header_Table.h"
-//#include "St_dst_event_header_Table.h"
-//#include "St_dst_track_Table.h"
+//#include "tables/St_dst_run_header_Table.h"
+//#include "tables/St_dst_event_header_Table.h"
+//#include "tables/St_dst_track_Table.h"
 
-//#include "St_sca_switch_Table.h"
-//#include "St_sca_filter_const_Table.h"
+//#include "tables/St_sca_switch_Table.h"
+//#include "tables/St_sca_filter_const_Table.h"
 
 #include "ebye/St_sca_filter_Module.h"
 #include "ebye/St_sca_runsca_Module.h"

@@ -1,7 +1,7 @@
 #include "StAngleCorrMaker.h"
 #include "StEvent.h"
 #include "StGlobalTrack.h"
-#include "StEvent/StTpcDedxPid.h"
+#include "StTpcDedxPid.h"
 #include "StAngleDiff.hh"
 #include "StTrackForPool.hh"
 #include "StThreeVectorD.hh"
@@ -11,7 +11,7 @@
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.4 1999/08/25 14:19:35 ogilvie Exp $";
+static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.5 1999/09/24 01:22:49 fisyak Exp $";
 
 void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 {

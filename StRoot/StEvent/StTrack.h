@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 1.6 1999/06/23 15:06:16 perev Exp $
+ * $Id: StTrack.h,v 1.7 1999/09/24 01:23:02 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 1.6  1999/06/23 15:06:16  perev
- * length of track is added
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
  *
  * Revision 1.6  1999/06/23 15:06:16  perev
  * length of track is added
@@ -49,7 +52,7 @@
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
 #define StTrack_hh 
-#include "tables/dst_track.h"
+ * Revision 2.5  1999/11/15 18:48:22  ullrich
 #include "StPhysicalHelixD.hh"
  *
 #include "dst_track.h"

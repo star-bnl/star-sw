@@ -12,7 +12,7 @@
 #define StHbtCoulomb_HH
 
 #include <stdio.h>
-#include "StChain/StMaker.h"
+#include "StMaker.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.14 1999/07/20 02:18:06 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.15 1999/09/24 01:23:30 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.15  1999/09/24 01:23:30  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.14  1999/07/20 02:18:06  lasiuk
  * remove CVS merge conflicts
  *
@@ -64,7 +67,7 @@
 
 #include <algorithm>
 #if  defined(__sun) && ! defined(__GNUG__)
-#include "ospace/stl/src/randgen.cpp"
+#include <ospace/stl/src/randgen.cpp>
 #endif
 
 #include "StPhysicalHelix.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 1.6  1999/08/25 12:50:07  ullrich
- * Buf fixed in unpacking the charge.
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
  *
  * Revision 1.6  1999/08/25 12:50:07  ullrich
  * Buf fixed in unpacking the charge.
@@ -32,12 +35,12 @@
  * version with constructors for table-based loading
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
-#include "tables/dst_point.h"
+ * Renamed xxxInCluster() methods to xxxInHit()
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
+#include "StGlobalTrack.h"
 #include "dst_point.h"
  * Inlined sector() and padrow().
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $";
 #include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -61,7 +64,7 @@ StTpcHit::StTpcHit(dst_point_st* pt)
 
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 

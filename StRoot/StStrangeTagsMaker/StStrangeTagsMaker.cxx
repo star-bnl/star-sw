@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.10 1999/07/15 13:57:28 perev Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.11 1999/09/24 01:23:26 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.11  1999/09/24 01:23:26  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.10  1999/07/15 13:57:28  perev
  * cleanup
  *
@@ -45,7 +48,7 @@
 #include "StEvent.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
 

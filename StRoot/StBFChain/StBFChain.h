@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.3 1999/09/12 23:02:43 fisyak Exp $
+// $Id: StBFChain.h,v 1.4 1999/09/24 01:22:51 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.4  1999/09/24 01:22:51  fisyak
+// Reduced Include Path
+//
 // Revision 1.3  1999/09/12 23:02:43  fisyak
 // Add closing xdf and TFile
 //
@@ -45,7 +48,7 @@ enum EChainOptions {
   kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,          // time stamps
   kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
   kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
-  kTDAQ    ,kFZIN    ,kGEANT   ,
+  kTDAQ    ,kFZIN    ,kGEANT   ,kUTIL    ,
   kFieldOn ,kFieldOff,kHalfField,kReverseField     ,          // Magnetic Field
   kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
   kSVT     ,kSRS     ,kSTK     ,                              // SVT  
@@ -80,7 +83,7 @@ class StBFChain : public StChain {
    virtual St_XDFFile *GetXdfOut() {return xdf_out;}
    Bool_t              GetOption(Int_t k);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.3 1999/09/12 23:02:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.4 1999/09/24 01:22:51 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif

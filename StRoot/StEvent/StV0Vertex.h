@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 1.6 1999/04/30 13:16:30 fisyak Exp $
+ * $Id: StV0Vertex.h,v 1.7 1999/09/24 01:23:02 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
- * Revision 1.6  1999/04/30 13:16:30  fisyak
- * add StArray for StRootEvent
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
  *
  * Revision 1.6  1999/04/30 13:16:30  fisyak
  * add StArray for StRootEvent
@@ -51,8 +54,8 @@
  * Completely Revised for New Version
  *
 #include "StObject.h"
-#include "tables/dst_vertex.h"
-#include "tables/dst_v0_vertex.h"
+ **************************************************************************/
+#include "StEnumerations.h"
 #include "StGlobalTrack.h"
 #include "dst_vertex.h"
 #include "dst_v0_vertex.h"

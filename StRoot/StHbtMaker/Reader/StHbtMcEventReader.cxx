@@ -3,7 +3,7 @@
 #define DIFF_CUT_OFF 1.
 
 #include "StHbtMaker/Reader/StHbtMcEventReader.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 
 // these StEvent files keep oscillating between ".hh" and ".h" files
 // fortunately, they are used only here
@@ -14,10 +14,10 @@
   #include "StTpcDedxPid.h"
   #include "StDedxPid.h"
 */
-#include "StEvent/StEvent.h"
-#include "StEvent/StGlobalTrack.h"
-#include "StEvent/StTpcDedxPid.h"
-#include "StEvent/StDedxPid.h"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StTpcDedxPid.h"
+#include "StDedxPid.h"
 
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
@@ -35,36 +35,29 @@
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
 
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
-#include "tables/g2t_event.h"
-#include "tables/g2t_ftp_hit.h"
-#include "tables/g2t_svt_hit.h"
-#include "tables/g2t_tpc_hit.h"
-#include "tables/g2t_track.h"
-#include "tables/g2t_vertex.h"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_ftp_hit_Table.h"
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 
-#include "St_g2t_event_Table.h"
-#include "St_g2t_ftp_hit_Table.h"
-#include "St_g2t_svt_hit_Table.h"
-#include "St_g2t_tpc_hit_Table.h"
-#include "St_g2t_track_Table.h"
-#include "St_g2t_vertex_Table.h"
+// #include "StMemoryInfo.hh"
 
-// #include "StMcEvent/StMemoryInfo.hh"
-
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcFtpcHit.hh"
-#include "StMcEvent/StMcSvtHit.hh"
-#include "StMcEvent/StMcVertex.hh"
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcVertex.hh"
 
 #include "StAssociationMaker/StTrackPairInfo.hh"
-#include "StarClassLibrary/StParticleDefinition.hh"
-#include "StarClassLibrary/StPhysicalHelix.hh"
+#include "StParticleDefinition.hh"
+#include "StPhysicalHelix.hh"
 
 
 

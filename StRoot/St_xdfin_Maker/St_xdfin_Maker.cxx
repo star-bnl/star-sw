@@ -7,7 +7,6 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_xdfin_Maker.h"
-#include "St_particle_Table.h"
 #include "St_XDFFile.h"
 
 ClassImp(St_xdfin_Maker)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 1.6 1999/06/27 22:45:28 fisyak Exp $
+ * $Id: StGlobalTrack.h,v 1.7 1999/09/24 01:23:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
- * Revision 1.6  1999/06/27 22:45:28  fisyak
- * Merge StRootEvent and StEvent
+ * Revision 1.7  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:01  fisyak
+ * Reduced Include Path
  *
  * Revision 1.6  1999/06/27 22:45:28  fisyak
  * Merge StRootEvent and StEvent
@@ -81,7 +84,7 @@ class StVecPtrTpcHit;
 #include "StTpcHit.h"
 #include "StSvtHit.h"
 #include "StDedx.h"
-#include "tables/dst_track.h"
+#ifndef StGlobalTrack_hh
 #include "StFtpcHit.h"
 #include "StTrackPidTraits.h"
 #include "dst_track.h"

@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.12 1999/09/17 16:25:54 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.13 1999/09/24 01:23:23 fisyak Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.13  1999/09/24 01:23:23  fisyak
+// Reduced Include Path
+//
 // Revision 1.12  1999/09/17 16:25:54  genevb
 // handle missing events in Xi section
 //
@@ -65,10 +68,10 @@
 #include "StEvent.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
-#include "global/inc/math_constants.h"
+#include "math_constants.h"
 #include "PhysicalConstants.h"
 #include "TMath.h"
-#include "StMagF/StMagF.h"
+#include "StMagF.h"
 #include "StMessMgr.h"
 
 ClassImp(StSmdstMaker)

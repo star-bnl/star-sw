@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedx.h,v 1.5 1999/04/30 13:16:26 fisyak Exp $
+ * $Id: StDedx.h,v 1.6 1999/09/24 01:23:00 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StDedx.h,v $
- * Revision 1.5  1999/04/30 13:16:26  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.6  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
  *
  * Revision 1.5  1999/04/30 13:16:26  fisyak
  * add StArray for StRootEvent
@@ -31,7 +34,7 @@
  *
  **************************************************************************/
 #ifndef StDedx_hh
-#include "tables/dst_dedx.h"
+#define StDedx_hh
 
 #include "StObject.h"
 #include "dst_dedx.h"

@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.37  1999/09/24 01:23:45  fisyak
+// Reduced Include Path
+//
 // Revision 1.36  1999/09/23 16:22:00  ward
 // Removed obsolete include file.
 //
@@ -114,17 +117,17 @@
 // #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 // #include "StTrsMaker/include/StDacRawDataEvent.hh"
 #ifdef TRS_SIMPLE
-#include "StTrsSimpleMaker/StTrsSimpleMaker.h"
+#include <StTrsSimpleMaker/StTrsSimpleMaker.h>
 #else
 #include "StTrsMaker/include/StTrsUnpacker.hh"
 #endif
 #include "StSequence.hh"
 
-#include "St_raw_sec_m_Table.h"
-#include "St_raw_row_Table.h"
-#include "St_raw_pad_Table.h"
-#include "St_raw_seq_Table.h"
-#include "St_type_shortdata_Table.h"
+#include "tables/St_raw_sec_m_Table.h"
+#include "tables/St_raw_row_Table.h"
+#include "tables/St_raw_pad_Table.h"
+#include "tables/St_raw_seq_Table.h"
+#include "tables/St_type_shortdata_Table.h"
 
 ClassImp(St_tpcdaq_Maker)
 

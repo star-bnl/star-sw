@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 1.3 1999/09/23 21:25:51 calderon Exp $
+ * $Id: StMcHit.hh,v 1.4 1999/09/24 01:23:16 fisyak Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 1.4  1999/09/24 01:23:16  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.3  1999/09/23 21:25:51  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -12,7 +15,7 @@
 #define StMcHit_hh
 
 #include <iostream.h>
-#include "tables/g2t_hits.h"
+#include "tables/St_g2t_hits_Table.h"
 
 class StMcTrack;
 class StThreeVectorF;

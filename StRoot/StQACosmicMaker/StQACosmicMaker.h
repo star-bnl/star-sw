@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.7 1999/09/23 18:25:19 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.8 1999/09/24 01:23:21 fisyak Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.8  1999/09/24 01:23:21  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.7  1999/09/23 18:25:19  snelling
  * Added QA hists for hitclus table and morphology table
  *
@@ -38,7 +41,7 @@
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_residuals_Module.h"
 #include "tpc/St_xyz_newtab_Module.h"
-#include "St_tcc_morphology_Table.h"
+#include "tables/St_tcc_morphology_Table.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
@@ -68,7 +71,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.7 1999/09/23 18:25:19 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.8 1999/09/24 01:23:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 

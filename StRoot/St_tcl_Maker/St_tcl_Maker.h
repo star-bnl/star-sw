@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.12 1999/07/15 13:58:24 perev Exp $
+// $Id: St_tcl_Maker.h,v 1.13 1999/09/24 01:23:43 fisyak Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.13  1999/09/24 01:23:43  fisyak
+// Reduced Include Path
+//
 // Revision 1.12  1999/07/15 13:58:24  perev
 // cleanup
 //
@@ -72,10 +75,10 @@ class St_tfs_fsctrl;
 
 class TH1F;
 
-#include "St_type_shortdata_Table.h"
-#include "St_tcl_tpcluster_Table.h"
-#include "St_tcl_tp_seq_Table.h"
-#include "St_tcc_morphology_Table.h"
+#include "tables/St_type_shortdata_Table.h"
+#include "tables/St_tcl_tpcluster_Table.h"
+#include "tables/St_tcl_tp_seq_Table.h"
+#include "tables/St_tcc_morphology_Table.h"
 
 class St_tcl_Maker : public StMaker {
 
@@ -184,7 +187,7 @@ protected:
    virtual Int_t  Make();
    virtual void   MakeHistograms();// Histograms for tpc clustering
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.12 1999/07/15 13:58:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.13 1999/09/24 01:23:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };

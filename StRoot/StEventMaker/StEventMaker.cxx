@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.20 1999/09/24 01:23:05 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.20  1999/09/24 01:23:05  fisyak
+// Reduced Include Path
+//
 // Revision 1.19  1999/08/30 18:04:28  genevb
 // More stringent prim vtx requirement
 //
@@ -135,8 +138,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.20 1999/09/24 01:23:05 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.20  1999/09/24 01:23:05  fisyak
+// Reduced Include Path
+//
 // Revision 1.19  1999/08/30 18:04:28  genevb
 // More stringent prim vtx requirement
 //
@@ -252,41 +258,25 @@
  * Instance of StEvent now also created if no DST dataset
  * is available.
 
-#ifndef TRANSIENT_STEVENT
-  #include "StThreeVectorD.hh"
-  #include "StThreeVectorF.hh"
-  #include "StRun.h"
-  #include "StEvent.h"
-  #include "StGlobalTrack.h"
-  #include "StDedx.h"
-  #include "StTpcHit.h"
-  #include "StFtpcHit.h"
-  #include "StSvtHit.h"
-  #include "StHit.h"
-  #include "StVertex.h"
-  #include "StV0Vertex.h"
-  #include "StXiVertex.h"
-#else
-  #include "StEvent/StRun.hh"
-  #include "StEvent/StEvent.hh"
-  #include "StEvent/StGlobalTrack.hh"
-  #include "StEvent/StDedx.hh"
-  #include "StEvent/StTpcHit.hh"
-  #include "StEvent/StFtpcHit.hh"
-  #include "StEvent/StSvtHit.hh"
-  #include "StEvent/StHit.hh"
-  #include "StEvent/StVertex.hh"
-  #include "StEvent/StV0Vertex.hh"
-  #include "StEvent/StXiVertex.hh"
-  typedef StThreeVector<float> StThreeVectorF;
-  typedef StThreeVector<double> StThreeVectorD;
-#endif
-#include "global/inc/StVertexId.h"
+#include "StThreeVectorD.hh"
+#include "StThreeVectorF.hh"
+#include "StRun.h"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StDedx.h"
+#include "StTpcHit.h"
+#include "StFtpcHit.h"
+#include "StSvtHit.h"
+#include "StHit.h"
+#include "StVertex.h"
+#include "StV0Vertex.h"
+#include "StXiVertex.h"
+#include "StVertexId.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include <new.h>
 static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.20 1999/09/24 01:23:05 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 #include <vector>

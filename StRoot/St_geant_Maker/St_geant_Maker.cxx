@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.44 1999/07/14 16:47:44 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.45 1999/09/24 01:23:42 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.45  1999/09/24 01:23:42  fisyak
+// Reduced Include Path
+//
 // Revision 1.44  1999/07/14 16:47:44  fisyak
 // Set protection against empty event
 //
@@ -182,11 +185,11 @@ extern "C" int isprint (int);
 #include "TGTRA.h"
 #include "TCTUB.h"
 #include "TGeant3.h"
-#include "St_g2t_run_Table.h"
-#include "St_g2t_event_Table.h"
-#include "St_g2t_gepart_Table.h"
-#include "St_g2t_vertex_Table.h"
-#include "St_g2t_track_Table.h"
+#include "tables/St_g2t_run_Table.h"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_gepart_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_g2t_track_Table.h"
 
 #include "St_DataSetIter.h"
 #include "g2r/St_g2t_get_kine_Module.h"
