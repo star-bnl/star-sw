@@ -1,12 +1,15 @@
 //StiResidualMaker.cxx
 /***************************************************************************
  *
- * $Id: StiResidualMaker.cxx,v 1.1 2002/10/16 18:42:04 andrewar Exp $
+ * $Id: StiResidualMaker.cxx,v 1.2 2002/11/15 17:07:01 andrewar Exp $
  *
  * /author Andrew Rose, Wayne State University 
  * October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.cxx,v $
+ * Revision 1.2  2002/11/15 17:07:01  andrewar
+ * Fixed bug with virtual base class destructor.
+ *
  * Revision 1.1  2002/10/16 18:42:04  andrewar
  * Initial commit. Methods for derived class StiResidualMaker.
  *
@@ -152,15 +155,8 @@ int StiResidualMaker::calcResiduals(StiTrackContainer *tracks)
   int check=0;
   while(trackIt!=tracks->end())
     {
-      const StiKalmanTrack* kTrack = 
-	static_cast<const StiKalmanTrack*>((*trackIt).second);  
-      if(kTrack==(const StiKalmanTrack*)NULL)
-	{
-	  cout <<"Error: Could not cast to Kalman Track!"<<endl;
-	  return -10;
-	}  
+      check= trackResidue((*trackIt).second);
 
-      check=trackResidue(kTrack);
       //abort if track not okay (1=all fine, -5 no hits)
       if (check!=1 || check!=-5 ) return check;
       trackIt++;
@@ -169,13 +165,28 @@ int StiResidualMaker::calcResiduals(StiTrackContainer *tracks)
   return 1;
 }
 
+int StiResidualMaker::trackResidue(const StiTrack *track)
+{
+  //cast to Kalman Track; if fail, end
+
+       const StiKalmanTrack* kTrack = 
+	 static_cast<const StiKalmanTrack*>(track);  
+      if(kTrack==(const StiKalmanTrack*)NULL)
+	{
+	  cout <<"Error: Could not cast to Kalman Track!"<<endl;
+	  return -10;
+	}  
+
+     int check = trackResidue(kTrack);
+     return check;
+}
+
 int StiResidualMaker::trackResidue(const StiKalmanTrack *track)
 {
 
   //Get nodes in the detector 
   //(only returns nodes with hits in requested detector)
-    vector<StiKalmanTrackNode*> nodes = 
-      const_cast<StiKalmanTrack*>(track)->getNodes(mDetector);
+    vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector);
 
   if(nodes.size()==0)
     {
