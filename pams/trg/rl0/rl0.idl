@@ -2,6 +2,7 @@
  *
  *        description: Trigger Level 0 simulator analysis module
  */
+
 #include "PAM.idl"
 #include "ctg_geo.idl"
 #include "mwc_geo.idl"
@@ -26,5 +27,5 @@ interface rl0: amiModule {
                 , inout rl0_mwccal   mwccal
                 );
 };
-/* Last mod. for mws.idl: $Date: 1998/02/05 21:30:26 $ */
+/* Last mod. for mws.idl: $Date: 1998/02/17 17:09:32 $ */
 

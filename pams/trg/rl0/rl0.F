@@ -133,7 +133,15 @@ C-----------------------------------------------------------------------
      + .and.     ieta .ge. 1 .and. ieta .le. 2*Max_mwc_eta 
      + .and.     iz   .ge. 1 .and. iz   .le. 2           ) then
 
-          Raw_mwc (iz,iphi,ieta) = mwc_raw(i).adc
+************************************************************
+**** There is a SERIOUS problem here. mwc_raw(i).adc DOES  *
+**** NOT EXIST, as far as I can tell. I commented the line *
+**** out and added mwc_raw(i).count just to get rl0 to     *
+**** compile. This will need to be checked thoroughly to   *
+**** make sure code is behaving correctly. -ZM 2-16-98     *
+************************************************************
+*          Raw_mwc (iz,iphi,ieta) = mwc_raw(i).adc
+          Raw_mwc (iz,iphi,ieta) = mwc_raw(i).count
           write (9,*) 'MWC ',iz, iphi, ieta, raw_mwc(iz,iphi,ieta)
            else
           write ( 6, * ) isector,index,
