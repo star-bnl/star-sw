@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.10 1999/01/30 04:24:20 fine Exp $
+// $Id: St_Node.cxx,v 1.11 1999/01/31 02:03:06 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.11  1999/01/31 02:03:06  fine
+// St_DataSetIter::Notify - new method + clean up
+//
 // Revision 1.10  1999/01/30 04:24:20  fine
 // St_Table: Print memory leak fixed
 //
@@ -284,7 +287,7 @@ St_NodePosition *St_Node::Add(St_Node *node, St_NodePosition *nodePosition)
 }
 //______________________________________________________________________________
 St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
-                              TRotMatrix *matrix, Option_t *option)
+                              TRotMatrix *matrix, Option_t *)
 {
 //*-*
 //*-*    node    the pointer to the node to be placed
@@ -299,7 +302,7 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
 }
 
 //______________________________________________________________________________
-St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option)
+St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *)
 {
 //*-*
 //*-*    node        the pointer to the node to be placed
@@ -339,7 +342,7 @@ void St_Node::Browse(TBrowser *b)
 } 
  
 //______________________________________________________________________________
-Int_t St_Node::DistancetoPrimitive(Int_t px, Int_t py)
+Int_t St_Node::DistancetoPrimitive(Int_t , Int_t )
 {
 //*-*-*-*-*-*-*-*-*-*-*Compute distance from point px,py to a Node*-*-*-*-*-*
 //*-*                  ===========================================
@@ -430,7 +433,6 @@ void St_Node::Draw(Option_t *option)
 //*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
 //*-*                   =============================================
  
-   Int_t i;
    TString opt = option;
    opt.ToLower();
 //*-*- Clear pad if option "same" not given
@@ -578,7 +580,7 @@ void St_Node::ls(Option_t *option)
 #endif
  
 //______________________________________________________________________________
-void St_Node::Paint(Option_t *option)
+void St_Node::Paint(Option_t *)
 {
   Error("Paint","Bug, this method  should not be called");
   return; 

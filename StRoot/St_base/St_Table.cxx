@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.38 1999/01/30 18:29:29 fine Exp $ 
+// $Id: St_Table.cxx,v 1.39 1999/01/31 02:03:08 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.39  1999/01/31 02:03:08  fine
+// St_DataSetIter::Notify - new method + clean up
+//
 // Revision 1.38  1999/01/30 18:29:29  fine
 // Clean up
 //
@@ -348,7 +351,7 @@ void St_Table::Browse(TBrowser *b){
   Print(0,6);
 }
 //______________________________________________________________________________
-void St_Table::Clear(Option_t *opt)
+void St_Table::Clear(Option_t *)
 {
   if (s_Table)
   {
@@ -571,8 +574,9 @@ const Char_t *St_Table::PrintHeader() const
 }
 
 //______________________________________________________________________________
-const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst, const Char_t *collast) const 
+const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const Char_t *) const 
 {
+///const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst, const Char_t *collast) const 
   //  
   //  Print the contents of STAF tables per COLUMN.
   //
@@ -1195,7 +1199,7 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
    // In case of VersionID<=0 write dummy streamer only calling
    // its base class Streamer(s). If no base class(es) let Streamer
    // print error message, i.e. this Streamer should never have been called.
-   char a[80];
+
 //   int i = pass;
 //   sprintf(a, "%s::Class_Version()", cl.Name());
 //   version = (int)G__int(G__calc(a));

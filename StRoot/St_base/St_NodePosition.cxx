@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.6 1999/01/30 04:24:21 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.7 1999/01/31 02:03:07 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.7  1999/01/31 02:03:07  fine
+// St_DataSetIter::Notify - new method + clean up
+//
 // Revision 1.6  1999/01/30 04:24:21  fine
 // St_Table: Print memory leak fixed
 //
@@ -126,7 +129,6 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
    if (!fMatrix) fMatrix = St_Node::GetIdentity();
 }
-  
 //______________________________________________________________________________
 void St_NodePosition::Browse(TBrowser *b)
 {
@@ -146,7 +148,7 @@ void St_NodePosition::Browse(TBrowser *b)
     }
 } 
 //______________________________________________________________________________
-Int_t St_NodePosition::DistancetoPrimitive(Int_t px, Int_t py)
+Int_t St_NodePosition::DistancetoPrimitive(Int_t, Int_t)
 {
 //*-*-*-*-*-*-*-*-*-*-*Compute distance from point px,py to a Node*-*-*-*-*-*
 //*-*                  ===========================================
@@ -233,7 +235,7 @@ Int_t St_NodePosition::DistancetoPrimitive(Int_t px, Int_t py)
 }
  
 //______________________________________________________________________________
-void St_NodePosition::Draw(Option_t *option)
+void St_NodePosition::Draw(Option_t *)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
 //*-*                   =============================================

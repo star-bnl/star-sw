@@ -35,7 +35,7 @@ enum EBitOpt {
                kReset = kFALSE
              };
 class St_DataSetIter : public TObject{
-private:
+protected:
    TIter           *fNext;            // "standard" ROOT iterator for containers
 //   TList          *fNextSet;        // the list of the TList iterators to bypass the whole dataset
    TIter           *fNextSet[100];    // the list of the TList iterators to bypass the whole dataset
@@ -62,7 +62,7 @@ public:
   virtual Int_t          GetDepth() const {return fDepth;}
   virtual St_DataSet    *Cwd() const {return fWorkingDataSet;}
   virtual St_DataSet    *Dir(Char_t *dirname);
-  virtual Int_t          Du() const;  // summarize dataset usage
+  virtual Int_t          Du() const;            // summarize dataset usage
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
 
   virtual St_DataSet    *Find(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
@@ -73,16 +73,16 @@ public:
 
   virtual St_DataSet    *Ls(const Char_t *dirname="",Option_t *opt="");
   virtual St_DataSet    *Ls(const Char_t *dirname,Int_t depth);
-  virtual St_DataSet    *ls(const Char_t *dirname="",Option_t *opt=""){return Ls(dirname,opt);}
+  virtual St_DataSet    *ls(const Char_t *dirname="",Option_t *opt="")   {return Ls(dirname,opt);}
   virtual St_DataSet    *ls(const Char_t *dirname,Int_t depth){return Ls(dirname,depth);}
   virtual St_DataSet    *Mkdir(const Char_t *dirname);
-  virtual St_DataSet    *Md(const Char_t *dirname){return Mkdir(dirname);}
-  virtual TString        Path(const Char_t *path) {St_DataSet *set = Find(path); return set ? TString (""):set->Path();}
+  virtual St_DataSet    *Md(const Char_t *dirname)                       {return Mkdir(dirname);}
+  virtual TString        Path(const Char_t *path)                        {St_DataSet *set = Find(path); return set ? TString (""):set->Path();}
   virtual TString        Path() {return fWorkingDataSet ? TString ("") : fWorkingDataSet->Path();}
-  virtual St_DataSet    *Pwd(Option_t *opt="") const {if (Cwd()) Cwd()->ls(opt); return Cwd();}
+  virtual St_DataSet    *Pwd(Option_t *opt="") const                     {if (Cwd()) Cwd()->ls(opt); return Cwd();}
   virtual Int_t          Rmdir(St_DataSet *dataset,Option_t *option="");
   virtual Int_t          Rmdir(const Char_t *dirname,Option_t *option=""){return Rmdir(Find(dirname),option);}
-  virtual Int_t          Rd(const Char_t *dirname,Option_t *option=""){return Rmdir(Find(dirname),option);}
+  virtual Int_t          Rd(const Char_t *dirname,Option_t *option="")   {return Rmdir(Find(dirname),option);}
  
   virtual St_DataSet    *Shunt(St_DataSet *set){return Shunt(set,(St_DataSet *)0);}
   virtual St_DataSet    *Shunt(St_DataSet *set, const Char_t *path);
@@ -90,7 +90,8 @@ public:
  
   virtual St_DataSet    *Next();
   virtual St_DataSet    *Next(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE){return Find(path,rootset,mkdir);}
-  const Option_t *GetOption() const { return fNext ? fNext->GetOption():0; }
+  virtual void           Notify(St_DataSet *dataset);
+  const Option_t *GetOption() const                                      { return fNext ? fNext->GetOption():0; }
   virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
   ClassDef(St_DataSetIter,0)
 };

@@ -320,7 +320,15 @@ St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname)
  if (!fNext)  Reset();  // Create a new iterator
  return set;
 }
- 
+//______________________________________________________________________________
+void St_DataSetIter::Notify(St_DataSet *dataset)
+{
+  //
+  //  Notify(St_DataSet *dataset)
+  //
+  //  This dummy method is called when St_DataSetIter::Find dive in "dataset"
+  //  to look for thew next level of the dataset's
+} 
 //______________________________________________________________________________
 Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option)
 {
@@ -511,7 +519,10 @@ else
       // Go to the next recursive level
       if (found) {
         if (seppos) seppos++;
+        Notify(dataset);
+        fDepth++;
         dataset = Find(seppos,dataset,mkdirflag);
+        fDepth--;
       }
  
       delete [] dirname;
