@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.3 1999/09/03 22:39:14 lisa Exp $
+ * $Id: StHbtEventReader.hh,v 1.4 1999/09/04 04:41:01 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.4  1999/09/04 04:41:01  lisa
+ * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
+ *
  * Revision 1.3  1999/09/03 22:39:14  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -51,6 +54,11 @@ public:
   // this next method does NOT need to be implemented, in which case the 
   // "default" method below is executed
   virtual void WriteHbtEvent(StHbtEvent*){cout << "No WriteHbtEvent implemented";}
+
+  // these next two are optional but would make sense for, e.g., opening and closing a file
+  virtual void Init(char ReadWrite, StHbtString Message=" "){/*no-op*/};
+  virtual void Finish(){/*no-op*/};
+
 
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.6 1999/09/03 22:39:15 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.7 1999/09/04 04:41:01 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.7  1999/09/04 04:41:01  lisa
+ * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
+ *
  * Revision 1.6  1999/09/03 22:39:15  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -43,6 +46,7 @@ ClassImp(StHbtManager)
 StHbtManager::StHbtManager(){
   mAnalysisCollection = new StHbtAnalysisCollection;
   mEventReader = 0;
+  mEventWriter = 0;
 }
 //____________________________
 StHbtManager::~StHbtManager(){
@@ -57,7 +61,13 @@ StHbtManager::~StHbtManager(){
 }
 //____________________________
 void StHbtManager::Init(){
-  /* noop */
+  if (mEventReader) {
+    mEventReader->Init('r');
+    if (mEventWriter) mEventWriter->Init('w',mEventReader->Report());
+  }
+  else{
+    if (mEventWriter) mEventWriter->Init('w');
+  }
 }
 //____________________________
 void StHbtManager::Finish(){
@@ -67,6 +77,8 @@ void StHbtManager::Finish(){
     currentAnalysis = *AnalysisIter;
     currentAnalysis->Finish();
   }
+  if (mEventReader) mEventReader->Finish();
+  if (mEventWriter) mEventWriter->Finish();
 }
 //____________________________
 StHbtString StHbtManager::Report(){
@@ -96,6 +108,9 @@ void StHbtManager::ProcessEvent(){
   StHbtEvent* currentHbtEvent = mEventReader->ReturnHbtEvent();
 
   cout << "Event reader has returned control to manager" << endl;
+
+  // shall we write a microDST? - added 3sep99
+  if (mEventWriter) mEventWriter->WriteHbtEvent(currentHbtEvent);
 
   StHbtAnalysisIterator AnalysisIter;
   StHbtAnalysis* currentAnalysis;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.2 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtManager.h,v 1.3 1999/09/04 04:41:02 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.3  1999/09/04 04:41:02  lisa
+ * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
+ *
  * Revision 1.2  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -37,6 +40,7 @@ class StHbtManager{
 private:
   StHbtAnalysisCollection* mAnalysisCollection;
   StHbtEventReader*        mEventReader;
+  StHbtEventReader*        mEventWriter;
 
 public:
   StHbtManager();
@@ -46,6 +50,7 @@ public:
   StHbtAnalysisCollection* AnalysisCollection();
   StHbtEventReader* EventReader();
   void SetEventReader(StHbtEventReader*);
+  void SetEventWriter(StHbtEventReader*);
 
   void AddAnalysis(StHbtAnalysis*);
 
@@ -62,6 +67,7 @@ public:
 inline StHbtAnalysisCollection* StHbtManager::AnalysisCollection(){return mAnalysisCollection;}
 inline StHbtEventReader* StHbtManager::EventReader(){return mEventReader;}
 inline void StHbtManager::SetEventReader(StHbtEventReader* reader){mEventReader = reader;}
+inline void StHbtManager::SetEventWriter(StHbtEventReader* writer){mEventWriter = writer;}
 
 inline void StHbtManager::AddAnalysis(StHbtAnalysis* anal){mAnalysisCollection->push_back(anal);}
 
