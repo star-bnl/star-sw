@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0 Win">
+  <TITLE>StSpectraMaker How to use</TITLE>
+</HEAD>
+<BODY>
+
+<P>The user needs to instantiate several analyses and put them
+into a container. This is done in StSpectraMaker. The user controls
+the choice of which analyses are created with a data-file StRoot/StSpectraMaker/analysis.dat.
+There is no need to edit code. For example to instantiate a StTpcDeviantSpectraAnalysis
+for pi+, the analysis.dat file is</P>
+
+<PRE>pi+
+piplus
+function
+StRoot/StSpectraMaker/effic.dat
+-2. 2 yrange
+20 ybins
+1.0 mtupper-m0
+10 mtbins</PRE>
+
+<P>Other analyses can be added by repeating these lines in the
+same file. The lines in this file will change in the next few
+weeks or so as the eventrality selection is added.</P>
+
+<UL>
+  <LI>pi+ is the official name used in StParticleDefinition. This
+  gives the code full access to mass, decay etc.
+  <LI>piplus is the title used for all histograms. Don't use any
+  non alphanumeric characters.
+  <LI>each analysis owns an StEfficiency object. The efficiency
+  bumbers are obtained by a separate embedding run, and the output
+  of this is not defined but is likely to be stored in a file,
+  e.g. StRoot/StSpectraMaker/effic.dat. There are two schools of
+  thought on what to save, either a histogram of efficiency numbers
+  for each (y,mt) bin or a functional form that analytically represents
+  the efficiency as a function of y,mt. The user of StSpectraMaker
+  controls the choice with keywords &quot;function&quot; or &quot;histogram&quot;
+  (not yet implemented).
+  <LI>effic.dat is currently a placeholder for the output of an
+  embedding job. It is used in the StEfficiency constructor. The
+  file effic.dat first lists the track cuts that were used in the
+  embedding job. The constructor of StEfficiency puts these into
+  a container, where each cut is derived from StSpectraCut. For
+  example effic.dat currently specifies that the cuts used in the
+  embedding job were nhits&gt;10 on a track or dca_primary_vertex
+  &lt; 2.0cm. 
+  <LI>The calculation of spectra uses the same track cuts as were
+  used in the embedding run. Each derived class of StSpectraCut
+  has a member function satisfiesCut(StTrack*, StEvent*)
+  <LI>Finally in analysis.dat the user specifies the range and
+  bins of the (y,mt) spectra histograms 
+</UL>
+
+<P>The user then does a root4star -b doEvents.C . This produces
+a deviant.root file with a 3-D histogram for each instantiated
+analysis. An example cint macro to project and fit these histograms
+is in projectHistogram.C. This macro needs to be developed and
+worked on for each specific project as the S/B, fitting techniques
+are likely to be very specific to a project.
+
+</BODY>
+</HTML>

@@ -23,8 +23,12 @@ class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
   TH1D* mPIDDeviant;  
   TH2D* mDedxvsP;
 
-  double mYBinSize;
-  double mMtBinSize;
+  float mlYbin;
+  float muYbin;
+  int   mnYbin;
+  float mlMtbin;
+  float muMtbin;
+  int   mnMtbin;
 
  protected:
 
@@ -36,10 +40,9 @@ class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
   void fillHistograms(StEvent& event);
   void projectHistograms();
 
-  void setYBinSize(double ybin);
-  double getYBinSize();
-  void setMtBinSize(double mtbin);
-  double getMtBinSize();
+  void setYAxis(float lYbin, float uYbin, int nYbin);
+  void setMtAxis(float lMtbin, float uMtbin, int nMtbin);
+
 
 };
 

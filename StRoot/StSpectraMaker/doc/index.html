@@ -1,64 +1,35 @@
-<html>
-<p>
-<h4>
-Package StSpectraMaker 
-Author Craig Ogilvie, MIT Oct 1999
-</h4>
-<p>
-The creation of spectra, i.e. invariant cross-sections as a function of mt
-is currently envisioned to proceed in two steps;
-1) loop through reconstructed tracks, use PID, efficiency information
-to fill histograms as a function of y,mt. Depending on the PID technique
-these histograms can be e.g. a de/dx spectrum for evary y,mt bin.
-2) by fitting these histograms to a peak + background, the counts in the
-peak can be used to fill an invariant cross-section.
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0 Win">
+  <TITLE>StSpectraMaker </TITLE>
+</HEAD>
+<BODY>
 
-This package performs the first task. The second task is best 
-done in a separate, interactive script where the user
-can explore different ways of extracting the signal from the background.
-   
-The StSpectraMaker package is based around the class StSpectraAnalysis. 
-Each "analysis" is an instantiation of this class or one of its derived classes. 
-The user has complete control of the parameters of each analysis, the size of
-the mt bin for the spectrum, the size of the ybin, quality cuts on the tracks,
-e.g. nhits, dca, chi-squared etc.. A place-holder efficiency correction
-is applied to the data. Not yet implemented, but forseen is the ability to 
-use pwg-wide code to select events based on multiplicity etc..
+<P>StSpectraMaker Package is a framework for calculating spectra
+for STAR. The framework allows a user to develop and perform various
+types of analyses, differing by event selection (not yet implemented),
+particle type and PID method. The framework is designed to be
+used in two ways.</P>
 
-There are several PID technques that can be used make mt-spectra. Each PID
-technique has its own class that is derived from StSpectraAnalysis. This allows
-individual users to develop their own derived class if their physics analysis
-requires it. Currently implemented is the PID technique that looks at the 
-number of sigma a track is away from a PID dE/dx band.,e.g
-deviant_proton = (de/dx - <de/dx>_proton)/sigma
-This class is StTpcDeviantSpectraAnalysis and inherits from  StSpectraAnalysis.
-An instantiation of this class is an "analysis" and in this case the output 
-of the analysis is a 1-D histogram of e.g. deviant_proton for every (y,mt) bin.
+<P>In the early stages of STAR, multiple spectra projects will
+be deveoped by a wide range of people, with different needs, requirements
+on how to cleanly identify particles etc.. Developing these projects
+within the StSpectra framework has two advantages. First the framweork
+provides the physicist with common access to efficiencies, centrality
+cuts etc.. Secondly, when ready, the physicist can easily compare
+the results of their analysis to other people's work that also
+have been developed in the framweork. The two analyses can be
+run side-by-side with exactly the same events, centrality selection,
+track-cuts etc.. </P>
 
-Forseen is another derived class StTpcDedxSpectraAnalysis where the output will
-be a 1-D histogram of dE/dx for every (y,mt) bin. Other derived classes might
-use PID from the RICH etc. The framework in StSpectraMaker will be able to handle
-each of these. Note this is currently not true because the STL container is not
-heterogenous but this will be done in the near future.
- 
-In StSpectraMaker.cxx, the StSpectraMaker::init() function instantiates several
-analyses and loads them into a container. Each analysis is configurable 
-to have a given yrange, bin size etc., as well as whether its a pion, kaon or 
-proton analysis. Not yet implemented is a centrality selection. Histograms are
-booked for each analysis.
- 
-Currently the user has to edit StSpectraMaker.cxx and recompile in order
-change the analyses, but this control eventually will be done by 
-StSpectraMaker.cxx reading a script.
+<P>As spectra projects mature, a second use of the framwork emerges.
+Code that groups of physicists have developed will be available
+for others to calculate their spectra. This code can be further
+refined if needed for a specific project, or run without modification.</P>
 
-In StSpectraMaker::make() the histograms are filled for every analysis, and
-in  StSpectraMaker::finish() these histograms are projected and written out 
-to a .root file. These histograms can now be fitted to extract the counts in
-a PID peak above background. These counts are loaded into the final (y,mt) 
-invariant corss-section. This fitting task should be done in a separate script,
-which for mature analyses could be included in the StSpectraMaker::finish().
-Sample fitting scripts are under development.
-</p>
- 
-</html>
+<P><A HREF="introduction.html">Introduction</A></P>
 
+<P><A HREF="howtouse.html">How to Use</A>
+
+</BODY>
+</HTML>
