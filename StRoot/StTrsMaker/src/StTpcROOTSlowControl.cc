@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcROOTSlowControl.cc,v 1.2 1999/04/07 00:45:43 lasiuk Exp $
+ * $Id: StTpcROOTSlowControl.cc,v 1.3 2000/03/15 17:39:49 calderon Exp $
  *
  * Author: brian, against his will 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcROOTSlowControl.cc,v $
+ * Revision 1.3  2000/03/15 17:39:49  calderon
+ * Remove beeps
+ *
  * Revision 1.2  1999/04/07 00:45:43  lasiuk
  * addition of gas gain
  *
@@ -54,7 +57,7 @@ StTpcROOTSlowControl::StTpcROOTSlowControl(slowcontrolDataSet* dS)
 StTpcSlowControl* StTpcROOTSlowControl::instance()
 {
     if (mInstance == 0) {
-	cerr << "StTpcROOTSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcROOTSlowControl::instance() " << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tNo arguments for instantiation of" << endl;
 	cerr << "\tsingleton class. All values default to zero." << endl;
@@ -70,7 +73,7 @@ StTpcSlowControl* StTpcROOTSlowControl::instance(slowcontrolDataSet* dS)
     if (mInstance == 0)
 	mInstance = new StTpcROOTSlowControl(dS);
     else {
-	cerr << "StTpcROOTSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcROOTSlowControl::instance() " << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tSingleton class is already instantiated." << endl;
 	cerr << "\tArgument (const char*) is ignored." << endl;

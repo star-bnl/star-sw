@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.5 2000/02/25 17:25:36 long Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.6 2000/03/15 17:39:48 calderon Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.6  2000/03/15 17:39:48  calderon
+ * Remove beeps
+ *
  * Revision 1.5  2000/02/25 17:25:36  long
  * move hardwired parameters into database
  *
@@ -243,7 +246,7 @@ StTpcDbGeometry::instance(StTpcDb* gDbPtr)
 	mInstance = new StTpcDbGeometry(gDbPtr);
     }
     else {
-	cerr << "StTpcDbGeometry::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcDbGeometry::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tDataSet Argument ignored!!" << endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.cc,v 1.3 2000/02/10 01:21:49 calderon Exp $
+ * $Id: StTpcDbSlowControl.cc,v 1.4 2000/03/15 17:39:48 calderon Exp $
  *
  * Authors: Manuel Calderon de la Barca Sanchez
  *          Brian Lasiuk
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.cc,v $
+ * Revision 1.4  2000/03/15 17:39:48  calderon
+ * Remove beeps
+ *
  * Revision 1.3  2000/02/10 01:21:49  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -96,7 +99,7 @@ StTpcSlowControl* StTpcDbSlowControl::instance()
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("StTpcDbSlowControl::getInstance(): Argument Missing!");
 #else	
-	cerr << "StTpcDbSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcDbSlowControl::instance() " << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tNo arguments for instantiation of" << endl;
 	cerr << "Exiting..." << endl;
@@ -112,7 +115,7 @@ StTpcSlowControl* StTpcDbSlowControl::instance(StTpcDb* globalDbPointer)
     if (!mInstance)
 	mInstance = new StTpcDbSlowControl(globalDbPointer);
     else {
-	cerr << "StTpcDbSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcDbSlowControl::instance() " << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tSingleton class is already instantiated." << endl;
 	cerr << "\tArgument (const char*) is ignored." << endl;

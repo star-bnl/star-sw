@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.7 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.8 2000/03/15 17:39:49 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.8  2000/03/15 17:39:49  calderon
+ * Remove beeps
+ *
  * Revision 1.7  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -253,7 +256,7 @@ StTpcSimpleGeometry::instance(const char* file)
 	mInstance = new StTpcSimpleGeometry(file);
     }
     else {
-	cerr << "StTpcSimpleGeometry::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcSimpleGeometry::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tArgument \"" << file << "\" ignored!!" << endl;

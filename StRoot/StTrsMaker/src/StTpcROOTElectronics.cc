@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTElectronics.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
+ * $Id: StTpcROOTElectronics.cc,v 1.4 2000/03/15 17:39:48 calderon Exp $
  *
  * Author: brian March 22, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTElectronics.cc,v $
+ * Revision 1.4  2000/03/15 17:39:48  calderon
+ * Remove beeps
+ *
  * Revision 1.3  2000/01/10 23:14:29  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -86,7 +89,7 @@ StTpcROOTElectronics::instance(electronicsDataSet* dS)
 	mInstance = new StTpcROOTElectronics(dS);
     }
     else {
-	cerr << "StTpcROOTElectronics::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcROOTElectronics::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tArgument  ignored!!" << endl;
