@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: EventControlPanel.C,v 1.4 2001/09/01 23:36:57 perev Exp $
+// $Id: EventControlPanel.C,v 1.5 2001/09/05 18:34:20 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -183,8 +183,7 @@ static void ToggleDisplayName(const char *name,TGTextButton *button)
   fgBar->Show();
   if (!fgDispMk) return;
   TList *lis = fgDispMk->GetNameList(); 
-  if (!lis) return;
-  if (!(lis->FindObject(name))) {
+  if (!lis || !(lis->FindObject(name))) {
        fgDispMk->AddName(name);
        button->SetState(kButtonDown);
     } else {
