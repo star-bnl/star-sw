@@ -139,6 +139,7 @@ Int_t StKinkMaker::Make(){//called for each event
          if(p22.x() != 0) mBfield *= p11.x()/p22.x();
          else mBfield *= p11.y()/p22.y();
 	}
+	mGlobalTrks++;
       //### cut: fiducial volume
 
       Float_t trkStartRadius2D = trk->geometry()->origin().perp();
@@ -150,7 +151,7 @@ Int_t StKinkMaker::Make(){//called for each event
 	    trkEndRadius2D > tkfpar->vertexRMin2D ){
 	tempTrack = new StKinkLocalTrack(trk);
 	trackArray.Add(tempTrack);//keep the track if ok
-	mGlobalTrks++;
+
       }
       }//for each track in the node
   }   //for each node
