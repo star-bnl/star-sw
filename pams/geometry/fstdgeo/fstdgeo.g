@@ -1,5 +1,9 @@
-* $Id: fstdgeo.g,v 1.4 2005/01/25 22:43:36 potekhin Exp $
+* $Id: fstdgeo.g,v 1.5 2005/01/26 01:12:46 potekhin Exp $
 * $Log: fstdgeo.g,v $
+* Revision 1.5  2005/01/26 01:12:46  potekhin
+* Removed active and passive layers, corrected nesting of
+* the water duct volume
+*
 * Revision 1.4  2005/01/25 22:43:36  potekhin
 * Added the water manifold (duct). Corrected a small
 * error in the size of AlN plate. Added HITS (to be further devloped)
@@ -61,7 +65,7 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       Zmax       = 38.0        ! Z-finish of the barrel comprising the three pancakes
 
 
-      WedgeThk   =  0.700      ! Includes sensor assembly and water pipes
+      WedgeThk   =  0.730      ! Includes sensor assembly and water pipes
       SensAThk   =  0.370      ! Sensor assembly thk: includes two layers of Si, AlN plates and chips
       SensorThk  =  0.030      ! Total   silicon thickness, includes passive and active
 
@@ -144,9 +148,9 @@ Block FSMO is the mother of one endcap of FSTD
 endblock
 
 * -----------------------------------------------------------------------------
-Block FDMO is the mother of an individual two-layer disk
+Block FDMO is the mother of an individual two-layer disk assembly (wafers and cooling)
       Material  Air
-      Attribute FDMO  Seen=0  colo=6
+      Attribute FDMO  Seen=1  colo=6
 
       Shape TUBE Rmin=FSTG_Rmin Rmax=FSTG_Rmax Dz=FSTG_WedgeThk/2.0
 
@@ -159,8 +163,18 @@ Block FDMS is a division within an individual disk
 
       Shape  Division   Iaxis=2   Ndiv=21 c0=start
 
+* -------------------------------------
+* sensor assembly mother
       Create   FDMW
       Position FDMW x=WedgeOffset y=0.0 z=-0.5*(FSTG_WedgeThk-FSTG_SensAThk) ORT=YZX
+
+* -------------------------------------
+* Water manifold (duct)
+      Create   FDWD
+
+      Position FDWD x=FDWG_Rmin+0.5*(FDWG_Rmax-FDWG_Rmin) _
+                    y=0 _
+                    z=-0.5*(FSTG_WedgeThk-FSTG_SensAThk-FDWG_Thk-FSAN_Thk) ORT=YZX
 
 endblock
 * -----------------------------------------------------------------------------
@@ -200,11 +214,6 @@ Block FDMW is the mother wedge, housing plate, sensor  and chips
       PlateOffset    = PlateOffset-Offhack ! Encapsulated hack
       Position FDTP y=+FSAN_Thk z=PlateOffset
       Position FDTP y=-FSAN_Thk z=PlateOffset
-
-* -------------------------------------
-* Water manifold (duct)
-      Create FDWD
-      Position FDWD x=0 y=0.5*(FSTG_WedgeThk-FSTG_SensAThk+FSAN_Thk)  z=0.5*(FDWG_Rmin-FSTG_RminS)
 
 endblock
 * -----------------------------------------------------------------------------
