@@ -1,12 +1,6 @@
 /***************************************************************************
- *
- *  St_SsdDb_Reader.hh,v 1.3 
- *
- * Author: cr
- ***************************************************************************
- *
+ * Author: christelle roy
  * Description: SSD DB access Maker
- *
  **************************************************************************/
 
 #ifndef ST_SSDDB_READER_H
@@ -19,12 +13,12 @@
 #endif
 #include "St_DataSet.h"
 
-class StSsdHybridCollection;
 class StSsdConfig;
 class StSsdGeometry;
 
-class St_svg_geom;
-class svg_geom_st;
+class St_ssdWafersPosition;
+class St_ssdConfiguration;
+class St_ssdDimensions;
 class TString;
 
 class St_SsdDb_Reader 
@@ -34,8 +28,10 @@ class St_SsdDb_Reader
 
   StSsdConfig* mSsdConfig;      //!
   StSsdGeometry* mSsdGeom;      //!
-  St_svg_geom* mSvgGeom ;
-
+  St_ssdWafersPosition* mWafersPosition ;
+  St_ssdConfiguration* mSsdConfiguration ;
+  St_ssdDimensions* mSsdDimensions ;
+  
  protected:
 
  public: 
@@ -43,13 +39,18 @@ class St_SsdDb_Reader
   virtual ~St_SsdDb_Reader();
 
   void setDataBase(St_DataSet* input, dbSsdType type);
-  void setSvgGeom(St_svg_geom* aSvgGeom);
-  St_svg_geom* getSvgGeom();
+  void setWafersPosition(St_ssdWafersPosition* mssdWafersPosition);
+  St_ssdWafersPosition* getWafersPosition();
+  void setSsdConfiguration(St_ssdConfiguration* mSsdConfiguration);
+  St_ssdConfiguration* getSsdConfiguration();
+  void setSsdDimensions(St_ssdDimensions* mSsdDimensions);
+  St_ssdDimensions* getSsdDimensions();
 
-  StSsdHybridCollection* getPedestals();
   StSsdConfig* getConfiguration();
-  StSsdGeometry* getGeometry(St_svg_geom* SsdGeom);
+  StSsdConfig* getConfiguration(St_ssdConfiguration* ssdConfiguration);
   StSsdGeometry* getGeometry();
+  StSsdGeometry* getGeometry(St_ssdWafersPosition* wafersPosition);
+  StSsdGeometry* getDimensions(St_ssdDimensions* ssdDimensions);
 
 #ifdef __ROOT__
   ClassDef(St_SsdDb_Reader, 1)   //StAF chain virtual base class for Makers
