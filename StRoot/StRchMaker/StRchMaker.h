@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 2.2 2001/02/07 16:06:39 lasiuk Exp $
+ * $Id: StRchMaker.h,v 2.3 2002/02/22 21:46:16 dunlop Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
+ * Revision 2.3  2002/02/22 21:46:16  dunlop
+ * Remove picket fence pixels once and for all
+ *
  * Revision 2.2  2001/02/07 16:06:39  lasiuk
  * adc decoder modified for 11bit check
  * this-> for internal calls
@@ -112,6 +115,8 @@ public:
     void setPedestalSubtract(int v,const char *file);
     void clearPadMonitor();
 
+    void setRemovePicketFencePixels(int);
+    
 protected:
     void fillStEvent();
     
@@ -140,9 +145,14 @@ private:
     float mPedestal[160][96];
     float mSigma[160][96];
     const char* mPedestalFile;
+    int mRemovePicketFencePixels;
     
 #ifndef __CINT__    
     vector<StRichSinglePixel*> mPixelStore;//!
+    typedef vector<StRichSinglePixel*>* pointerToPixelStoreType;
+    
+// Create a vector of picket fence pixels
+    vector<StRichSinglePixel*> mPicketFencePixelStore;//!
     StRichClusterAndHitFinder*  mClusterFinder;//!
     // this is used only to pass the hits via the DataSet
     // We will access them via the richcollection
@@ -175,7 +185,7 @@ private:
 #endif
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRchMaker.h,v 2.2 2001/02/07 16:06:39 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRchMaker.h,v 2.3 2002/02/22 21:46:16 dunlop Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -190,6 +200,7 @@ private:
 	};
 
 inline void StRchMaker::setUseMatrix(int v) {mUseMatrix = v;}
+inline void StRchMaker::setRemovePicketFencePixels(int v) {mRemovePicketFencePixels = v;}
 
 #endif 
 #endif /* __ROOT__ */
