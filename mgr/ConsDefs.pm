@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.67 2004/03/01 17:46:16 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.68 2004/03/04 23:57:52 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -292,16 +292,16 @@
             $LD  = $CXX;
             $SO  = $CXX;
         }
-	if ($STAR_HOST_SYS eq 'rh80_g77') {
+        if ($PGI) {
+	  $FC    = "pgf77";
+	  $FFLAGS = "";
+	  $FEXTEND = "-Mextend";
+	}
+	else {
 	  $FC = $G77;
 	  $FFLAGS = $G77FLAGS;
 	  $FEXTEND = $G77EXTEND;
 #	  $FCCOM  = $FCviaAGETOFCOM;
-	}
-        elsif ($PGI) {
-	  $FC    = "pgf77";
-	  $FFLAGS = "";
-	  $FEXTEND = "-Mextend";
 	}
         $F77LIBS = " -lg2c -lnsl";
         $FLIBS .= $F77LIBS;
