@@ -45,7 +45,7 @@ C     Local variables
 
       RECORD /track_pointers/ gtrk(1)
       
-      INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
+      INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt,n
       INTEGER imsg,ipriv,i,det
       REAL    covar(3,3),bfield,x0,y0
       real    atan2d
@@ -64,11 +64,12 @@ C Adjust for ssd later
       globtrk(iglob).n_point = gtrk(igtrk).ntpc+
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = gtrk(igtrk).nmax
-      globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
-      globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)/
-     +     real(globtrk(iglob).n_fit_point-3)
-      globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)/
-     +     real(globtrk(iglob).n_fit_point-2)
+      n = gtrk(igtrk).nfit
+      globtrk(iglob).n_fit_point = n
+      globtrk(iglob).chisq(1)= 1.e+6
+      if (n.gt.3) globtrk(iglob).chisq(1)= gtrk(igtrk).p(8)/(n-3)
+      globtrk(iglob).chisq(2)=1.e+6
+      if (n.gt.2) globtrk(iglob).chisq(2)= gtrk(igtrk).p(9)/(n-2)
       if( ipriv .gt. 0) then
          globtrk(iglob).n_fit_point =   globtrk(iglob).n_fit_point-1
          globtrk(iglob).n_point     =  globtrk(iglob).n_point - 1000
@@ -95,8 +96,8 @@ C Adjust for ssd later
          globtrk(iglob).psi = globtrk(iglob).psi + 360.0
       endif
       globtrk(iglob).tanl = gtrk(igtrk).p(7)
-      globtrk(iglob).invpt =1.0/abs(C_D_CURVATURE*bfield*
-     +     gtrk(igtrk).p(2))
+      globtrk(iglob).invpt =1.0/(abs(C_D_CURVATURE*bfield*
+     +     gtrk(igtrk).p(2))+1.e-5)
       globtrk(iglob).covar(1) = 0
       globtrk(iglob).covar(2) = 0
       globtrk(iglob).covar(3) = 0
@@ -274,7 +275,7 @@ C     Now find last point on track and calculate track length.
          globtrk(iglob).length=99999.9
       endif
       globtrk(iglob).impact = 0.
-      globtrk(iglob).curvature = abs(1/gtrk(igtrk).p(2))
+      globtrk(iglob).curvature = abs(1./(gtrk(igtrk).p(2)+1.e-5))
       globtrk(iglob).method = kHelix2StepId
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
@@ -302,7 +303,7 @@ C
       if(bf.lt.0.01) then
          glength = gseed
       else
-         rr=1./(C_D_CURVATURE*bf*ginvpt)
+         rr=1./(C_D_CURVATURE*bf*ginvpt+1.e-5)
          glength=abs((2.*rr*asin(gseed/(2.*rr)))/cos(atan(gtanl)))
       endif
 
