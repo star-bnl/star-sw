@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.392 2004/03/12 06:28:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.393 2004/03/15 23:57:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1851,7 +1851,7 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
 */
 void StBFChain::SetFlags(const Char_t *Chain)
 {
-  Int_t k;
+  Int_t k=0;
   if (!Chain || !Chain[0] || !strlen(Chain)) {
     printf ("\tPossible Chain Options are: \n");
     for (k=0;k<NoChainOptions;k++)
