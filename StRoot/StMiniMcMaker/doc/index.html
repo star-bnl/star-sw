@@ -12,6 +12,7 @@
 	</td>
     </table>
 
+    <h2> Purpose of StMiniMcMaker </h2>
     <p>
       StMiniMcMaker is meant to be a package that fills the classes in StMiniMcEvent.  These are classes to store
       basic information about the simulated and reconstructed tracks for both embedding and fully simulated events (e.g.
@@ -27,7 +28,7 @@
       Since several people have made the request for having a mini dst for the Embedding and Simulation data, it is hoped that
       this package will be useful to people.  This has already been used for the h- paper and for the high-pt paper.  The
       algorithms to calculate efficiencies, backgrounds, acceptance, etc. have been incorporated from the code that has
-      already been used for the pion, kaon and proton analyses.
+      already been used for the pion, kaon and proton analyses in the spectra group.
       
     <p>
       The macros that are used to run StMiniMcMaker are in the StMiniMcMaker directory: StMiniEmbed.C and StMiniHijing.C.  The
@@ -35,13 +36,38 @@
       can be found in PDSF, this script is designed to work in the PDSF LSF queue, with some options like the data vault
       resource usage specification.  Running the script without any arguments returns with a screen output detailing the
       usage and options.  Please look at the macros for more information, should be straightforward.
-      
-      
+    <p>
+    <h2> Contents of the Tree </h2>
+      As usual, the tree has eventwise information at the top level, and several branches for each event.  First of all,
+    we save all the thrown Monte Carlo tracks in their own trackwise branch.  This guarantees all the original MC information
+    is available.  The other branches are pairwise, each entry representing a pair of tracks: one MC and one Reconstructed.
+    For the reconstructed tracks, important information like the global track parameters, the primary track parameters (if
+    available) the nubmer of fit points, etc. is stored.  For the monte carlo tracks, the GEANT ID, four momentum,
+    number of MC tpc hits, etc. is stored.  In addition, some pairwise information, e.g. the number of common hits between the
+    tracks found by the association maker, is also stored.  There are several pairwise branches which are used for
+    different purposes:
+    <ul>
+      <li>Matched Pairs
+      <li>Merged Pairs
+      <li>Split pairs
+      <li>Contamination pairs (weak decay products, secondary tracks)
+      <li>Ghost tracks
+    </ul>
+    <p>
+      The information in the Matched Pairs branch is the one used to extract the reconstruction efficiency, when comparing
+      the matched tracks to the accepted tracks.  We normally define accepted tracks directly from the MC track branch
+      as the ratio of the tracks with 10 or more TPC hits to all tracks, and we define efficiency as the ratio of the
+      MC tracks that were matched (where we test the reconstructed matched track for the quality cuts we're interested in,
+      for example fit points&ge;23 and global DCA&lt;1 cm) to the accepted tracks.
+    <p>
+      With this information, all the corrections needed to produce corrected spectra should be readily obtained without
+      the need to rerun the association maker every time, and saving the disk space used by the hits in the geant.root and
+      event.root files.
     <hr>
     <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
 <!-- Created: Fri May 17 14:57:20 EDT 2002 -->
 <!-- hhmts start -->
-Last modified: Wed May 29 15:40:29 EDT 2002
+Last modified: Wed Jun  5 11:53:09 EDT 2002
 <!-- hhmts end -->
   </body>
 </html>
