@@ -84,7 +84,7 @@ for (l=0;l<track_h->nok; l++)
      loc_track[track[l].id]=l;
 
 /* Loop over all the hits, until you run into track>0 */
-for(l=0;l<=hit_h->nok;l++)
+for(l=0;l<hit_h->nok;l++)
 if(hit[loc_hit[l]].track>0) break;
 
 /* Set pointer to residuals to point to the first element */
@@ -93,7 +93,7 @@ jres = res;
 res_h->nok = 0;
 
 /* Start looping from the non-zero hit */
-while (l<=hit_h->nok && hit[loc_hit[l]].track>0)
+while (l<hit_h->nok && hit[loc_hit[l]].track>0)
   {
     /* get the track number */
     id_track=hit[loc_hit[l]].track/1000;
