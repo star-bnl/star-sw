@@ -1,7 +1,10 @@
 /*
- * $Id: traceqc.c,v 1.7 1998/09/27 19:29:48 nevski Exp $
+ * $Id: traceqc.c,v 1.8 1998/09/28 03:14:08 nevski Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.8  1998/09/28 03:14:08  nevski
+ * protection against break in break
+ *
  * Revision 1.7  1998/09/27 19:29:48  nevski
  * break treatment refined
  *
@@ -66,6 +69,8 @@ void dump_arg_list_ ( )
   extern KmCommand *cmd_current_;
   static KmCommand *cmd;
   cmd = cmd_current_;
+  if (cmd == 0 ) { printf (" *** Kuip tracing not available ***\n"); return; }
+
   if( cmd->argc > 0 )
   { int i;
     printf (" *** Last command: %s \n",cmd->name);
