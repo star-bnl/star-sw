@@ -1,0 +1,32 @@
+/**********************************************************************
+* StEmcCalibrationMaker
+* Author: Alexandre A. P. Suaide 
+* (C) 2000-2001
+*
+* This maker does calibration on the EMC detector
+* The method it is used now is based on equalize the detector
+* for each etabin and, after equalization, a MIP peak fit
+* is done over all towers in the same etabin to get the
+* final calibration constants. 
+*
+***********************************************************************
+*
+* There are five new tables:(see .idl file for definitions)
+*
+* emcCalSummary
+*      This table has the calibration summary 
+*
+* emcCalSettings
+*      This table has the global calibration parameters 
+*
+* emcMipCalib
+*      This table has the MIP information for mip fit for each eta bin
+*      If etabin is turned off it has MIP peak information for each tower.
+*
+* emcEqualization
+*      This table has all equalization info for each tower
+*
+* emcCalibration
+*      This table has all final calibration info for each tower
+*
+***********************************************************************

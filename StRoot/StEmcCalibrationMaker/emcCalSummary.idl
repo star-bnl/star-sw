@@ -1,0 +1,17 @@
+/*****************************************************************************
+*   Table: emcCalSummary
+*        description: Table which contains the calibration summary
+*        auther:      SUAIDE, Alexandre
+*        compile with stic -f <name.idl>
+******************************************************************************/
+   struct emcCalSummary 
+   { 
+       long   DetNumber;                 /* detector number */
+       long   FirstRun;                  /* first run used for calibration */
+       long   LastRun;                   /* last run used for calibration */
+       long   NEvents;                   /* number of events used for calibration */
+       long   CalibMode;                 /* calibration mode (1=Equalization, 10=MIP,100=Pi0,1000=Electron) */
+    
+       char   Operator[64];              /* Operator Name */
+       char   Comments[256];             /* comments */
+   };
