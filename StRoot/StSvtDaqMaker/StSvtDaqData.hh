@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.hh,v 1.1 2000/06/13 20:42:05 caines Exp $
+ * $Id: StSvtDaqData.hh,v 1.2 2000/11/30 20:44:33 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.hh,v $
+ * Revision 1.2  2000/11/30 20:44:33  caines
+ * Use database
+ *
  * Revision 1.1  2000/06/13 20:42:05  caines
  * StRoot/StSvtDaqMaker
  *
@@ -26,7 +29,9 @@ class StSVTReader;
 class StSvtDaqData: public StSvtData
 {
 public:
-  StSvtDaqData(char* config=0, StSVTReader* reader=0, char* option = "ZS", int run=0, int event=0, int trigger=0);
+  StSvtDaqData();
+  StSvtDaqData(const char* config, StSVTReader* reader=0, char* option = "ZS", int run=0, int event=0, int trigger=0);
+  StSvtDaqData(StSvtConfig* config, StSVTReader* reader=0, char* option = "ZS", int run=0, int event=0, int trigger=0);
 
   int setData(StSVTReader* reader, char* option = "ZS");
 

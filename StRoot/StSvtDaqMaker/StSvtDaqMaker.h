@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.2 2000/08/04 21:03:51 perev Exp $
+ * $Id: StSvtDaqMaker.h,v 1.3 2000/11/30 20:44:33 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.3  2000/11/30 20:44:33  caines
+ * Use database
+ *
  * Revision 1.2  2000/08/04 21:03:51  perev
  * Leaks + Clear() cleanup
  *
@@ -57,6 +60,7 @@ class StSvtDaqMaker : public StMaker {
   Int_t  SetHybridData();
   Int_t  GetSvtData();
   Int_t  GetHybridData(int barrel, int ladder, int wafer, int hybrid);
+  Int_t  GetUnixTime();
   void   PrintInfo();
   void   PrintEventInfo();
   Int_t  Reset();

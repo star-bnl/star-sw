@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.7 2000/10/31 16:20:57 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.8 2000/11/30 20:43:17 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.8  2000/11/30 20:43:17  caines
+ * Use database
+ *
  * Revision 1.7  2000/10/31 16:20:57  caines
  * Added more functions to make the code more readable
  *
@@ -103,7 +106,7 @@ Int_t StSvtClusterAnalysisMaker::Init()
   GetSvtEvent();
   SetSvtAnalysis();
 
-  mDataType = mSvtAdjEvent->getConfiguration();
+  mDataType = (char*)mSvtAdjEvent->getConfiguration();
   mEventNum = mSvtAdjEvent->getEventNumber();
  
   mTotalNumberOfHybrids = mSvtClusterColl->getTotalNumberOfHybrids();
@@ -127,7 +130,7 @@ Int_t StSvtClusterAnalysisMaker::GetSvtEvent()
   mSvtAdjEvent = (StSvtData*)(dataSet->GetObject());
   assert(mSvtAdjEvent);
 
-  dataSet = GetDataSet("StSvtHybRawData");
+  dataSet = GetDataSet("StSvtRawData");
   assert(dataSet);
   mSvtRawEventColl = (StSvtHybridCollection*)(dataSet->GetObject());
   //mSvtRawEventColl = (StSvtData*)(dataSet->GetObject());
@@ -383,7 +386,7 @@ Int_t StSvtClusterAnalysisMaker::GetRawData(int index)
 
   numOfAnodes = mHybridRawData->getAnodeList(anodeList);
  
-  cout<<"numOfAnodes for hybrid index"<<index<<" = "<<numOfAnodes<<endl;
+  //cout<<"numOfAnodes for hybrid index"<<index<<" = "<<numOfAnodes<<endl;
 
   int counter = 0;
 
@@ -398,7 +401,7 @@ Int_t StSvtClusterAnalysisMaker::GetRawData(int index)
            mHybridRawData->getListSequences(an,numOfSeq,svtSequence);
            seqStart =  svtSequence[seq].startTimeBin;
            adc = svtSequence[seq].firstAdc;
-           cout<<(int)adc[seqStart + mseq] - 100<<" ";
+           //cout<<(int)adc[seqStart + mseq] - 100<<" ";
            ++an;
 	 }
         else if(an == numOfAnodes)
@@ -477,7 +480,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 	 if( index != 11 && index!= 12){
 	   TotalClusters+=mNumOfClusters;
 	 }
-         cout<<"numOfClusters = "<<mNumOfClusters << " For index = " << index<<endl;
+	 gMessMgr->Message()<<"numOfClusters = "<<mNumOfClusters << " For index = " << index<< " " ;
 	 
          tempMemberInfo =  new StSvtClusterMemberInfo*[mNumOfClusters];
 	 
@@ -515,9 +518,9 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
    } //ladder loop
  } //barrel loop
 
- 
+ gMessMgr->Message()<< endm;
+
  m_nClust->Fill((float)mNoEvents,(float)TotalClusters);
-   //cout<<"******* making histograms finished *******"<<endl; 
 }
 
 //____________________________________________________________________________
