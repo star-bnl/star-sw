@@ -258,6 +258,7 @@
 	  MSG_Sample(    ID ) = ' ' !Make sure it's blanked out first.
 	  MSG_Sample(    ID ) = Prefix(1:MSG_Length(ID)) !Initialize sample with prefix.
 	  MSG_CPU_Mark(  ID ) = 0 !CPU usage "Mark", set at call to MSG_Mark.
+	  MSG_CPU_Delta( ID ) = 0 !Most recent CPU-usage between calls to MSG_Mark and MSG_Incr.
 	  MSG_CPU_Total( ID ) = 0 !Sum of all CPU-usages between calls to MSG_Mark and MSG_Incr.
 	  MSG_Counts(    ID ) = 0
 	  MSG_Lookups  ( ID ) = 0
@@ -656,6 +657,9 @@
 	  MSG_CPU_Mark(ID) = 0 !Remove the mark -- needs to be marked each time.
 	  IF ( Delta .GT. 0 ) THEN
 	    MSG_CPU_Total(ID) = MSG_CPU_Total(ID) + Delta
+	    MSG_CPU_Delta(ID) = Delta
+	  ELSE
+	    MSG_CPU_Delta(ID) = 0
 	  END IF
 	END IF
 
