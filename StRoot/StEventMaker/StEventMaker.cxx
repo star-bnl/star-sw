@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $
+// $Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.15  1999/07/24 00:25:49  fisyak
+// Gene corrections
+//
 // Revision 1.14  1999/07/18 22:49:45  perev
 // Used StVecPtrVertex instead of StVertexCollection
 //
@@ -120,8 +123,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $
+// $Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.15  1999/07/24 00:25:49  fisyak
+// Gene corrections
+//
 // Revision 1.14  1999/07/18 22:49:45  perev
 // Used StVecPtrVertex instead of StVertexCollection
 //
@@ -252,10 +258,20 @@
   typedef StThreeVector<double> StThreeVectorD;
 #endif
 #include "StEventMaker/StRootEventManager.hh"
+#include <new.h>
+static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
+#include <vector>
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+// Syntax currently required by Solaris compiler
+ * to StEvent. printEventInfo() and makeEvent() modified.
+ *
+ * Revision 2.22  2000/04/26 20:29:13  ullrich
+ * Create instance of StEvent not StBrowsableEvent.
+ * Added further checks for case were tables exist but have
 const long detid_tpc = 1;
 const long detid_svt = 2;
 const long detid_ftpcWest = 4;
@@ -315,12 +331,13 @@ Int_t StEventMaker::Make(){
   if (!dstRunHeader) dstRunHeader = defRunHeader;
 
   if (dstRunHeader!=defRunHeader) {
-    cout << "StEventMaker: Run header: ID " << dstRunHeader->run_id << endl;
+     gMessMgr->Info() << thisClass << "Run header: ID " <<
+       dstRunHeader->run_id << endm;
     /* run summary not used
        dstRunsummary_st* dstRunSummary = theEventManager->returnTable_dst_run_summary (nrows);
        delete currentRun;
        if (dstRunSummary) {
-       cout << "StEventMaker: Run summary found" << endl;
+       gMessMgr->Info() << thisClass << "Run summary found" << endm;
        // Create transient run header
        currentRun = new StRun(*dstRunHeader, *dstRunSummary);
        } else {
@@ -333,7 +350,7 @@ Int_t StEventMaker::Make(){
   }
  * Revised to build new StEvent version
   
-  cout << "StEventMaker: Reading Event" << endl;
+  gMessMgr->Info() << thisClass << "Reading Event" << endm;
   dstEventHeader = theEventManager->returnTable_dst_event_header(nrows);
   if(!dstEventHeader) dstEventHeader=defEventHeader;
 
@@ -352,13 +369,13 @@ Int_t StEventMaker::Make(){
   
     dstMonitorHard = theEventManager->returnTable_dst_monitor_hard(nrows);
     if (dstMonitorHard) 
-          cout << "StEventMaker: Found dstMonitorHard" << endl;
-    else  dstMonitorHard = defMonitorHard;
+         gMessMgr->Info() << thisClass << "Found dstMonitorHard" << endm;
+    else dstMonitorHard = defMonitorHard;
 
     dstMonitorSoft = theEventManager->returnTable_dst_monitor_soft(nrows);
     if (dstMonitorSoft) 
-         cout << "StEventMaker: Found dstMonitorSoft" << endl;
-    else dstMonitorSoft=defMonitorSoft;
+         gMessMgr->Info() << thisClass << "Found dstMonitorSoft" << endm;
+    else dstMonitorSoft = defMonitorSoft;
   
 // 		Read and load trigger detector data
         else
@@ -367,7 +384,7 @@ Int_t StEventMaker::Make(){
   if (status) {
     dstTriggerDetectors = theEventManager->returnTable_dst_TrgDet(nrows); 
     if (dstTriggerDetectors){
-      cout << "StEventMaker: Loading triggerDetectors" << endl;
+      gMessMgr->Info() << thisClass << "Loading triggerDetectors" << endm;
       StTriggerDetectorCollection *trgDets =
 	currentEvent->triggerDetectorCollection();
       // Load CTB data
@@ -450,88 +467,132 @@ Int_t StEventMaker::Make(){
     // during vertex->track pointer loading. Assumes (requires!) that
     // vertices are ordered
     
-    // First, find the total number of vertices
-    StVecPtrVertex vtxPtr;
-    int indexCount = 0;                    // count vertices added to collection
-    int vertexMatchIndex[20000];
+    // First, find the total number of vertices and DST tracks
     dst_vertex_st* dstVertex = theEventManager->returnTable_dst_vertex(nVertex);
-    for (i=0; i<nVertex; i++) vertexMatchIndex[i]=-1;
-    
-    // Second, deal with xi's
+    dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
     dst_xi_vertex_st* dstXiVertex = theEventManager->returnTable_dst_xi_vertex(nXiVertex);
+    dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
+
+
+    // Second, set up structures used in making relationships
+    StVecPtrVertex vtxPtr;
+    int indexCount = 0;                  // count vertices added to collection
+    typedef StVector(int) intVector;
+
+    intVector vertexMatchIndex;
+    if (nVertex) vertexMatchIndex.resize(nVertex,-1);
+
+    StVector(intVector) v0XiIndex;
+    if (nVertex) v0XiIndex.resize(nVertex);
+
+    StVector(intVector) trackVertexIndex;
+    if (nTrack) trackVertexIndex.resize(nTrack);
+
+
+    // Third, deal with xi's
     if (nXiVertex > nVertex)
-      cout << "StEventMaker: Warning - more Xi's than vertices" << endl;
+      gMessMgr->Warning() << thisClass << "more Xi's than vertices" << endm;
     if (dstXiVertex) {
-      cout << "StEventMaker: " << nXiVertex << " dst_xi_vertex" << endl;
+      gMessMgr->Info() << thisClass << nXiVertex << " dst_xi_vertex" << endm;
       // Add Xi vertices to vertex collection
       if (doLoad) {
-	StVertex* vtx = NULL;
-	long vertex_id;
-	for (i=0; i<nXiVertex; i++) {
-	  vertex_id = dstXiVertex[i].id_xi;
-	  vertexMatchIndex[vertex_id-1] = indexCount;
-	  vtx = (StVertex*) new StXiVertex(&(dstXiVertex[i]), &(dstVertex[vertex_id]) );
-	  // Add associated v0's during v0 loop
-	  vtx->setIndex(indexCount++);
-	  currentEvent->vertexCollection()->push_back(vtx);
-	  vtxPtr.push_back(vtx);
-	}
+        StVertex* vtx = NULL;
+        long vertex_id;
+        long v0vertex_id;
+        long track_id;
+        for (i=0; i<nXiVertex; i++) {
+          vertex_id = dstXiVertex[i].id_xi - 1;
+          v0vertex_id = dstXiVertex[i].id_v0 - 1;
+          track_id = dstXiVertex[i].id_b - 1;
+          if (vertex_id >= nVertex)
+            gMessMgr->Warning() << thisClass <<
+               "Xi associated vertex index too large: " << ++vertex_id << endm;
+          else vertexMatchIndex[vertex_id] = indexCount;
+          if (v0vertex_id >= nVertex)
+            gMessMgr->Warning() << thisClass <<
+              "Xi associated V0 index too large: " << ++v0vertex_id << endm;
+          else v0XiIndex[v0vertex_id].push_back(indexCount);
+          if (track_id >= nTrack)
+            gMessMgr->Warning() << thisClass <<
+              "Xi associated track index too large: " << ++track_id << endm;
+          else trackVertexIndex[track_id].push_back(indexCount);
+          vtx = (StVertex*) new StXiVertex(&(dstXiVertex[i]), &(dstVertex[vertex_id]) );
+          // Add associated v0's during v0 loop
+          vtx->setIndex(indexCount++);
+          currentEvent->vertexCollection()->push_back(vtx);
+          vtxPtr.push_back(vtx);
+    
       }
         StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
-    
-    // Third, deal with v0's
-    dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
+        id = dstXiVertices[i].id_v0 - 1;
+        if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
+    // Fourth, deal with v0's
     if (nV0Vertex > nVertex)
-      cout << "StEventMaker: Warning - more V0's than vertices" << endl;
+      gMessMgr->Warning() << thisClass << "more V0's than vertices" << endm;
     if (dstV0Vertex) {
-      cout << "StEventMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
+      gMessMgr->Info() << thisClass << nV0Vertex << " dst_v0_vertex" << endm;
       // Add V0 vertices to vertex collection
       if (doLoad) {
-	StVertex* vtx = NULL;
-	long vertex_id;
-	long xi_index = 0;
-	for (i=0; i<nV0Vertex; i++) {
-	  vertex_id = dstV0Vertex[i].id_vertex;
-	  vertexMatchIndex[vertex_id-1] = indexCount;
-	  vtx = (StVertex*) new StV0Vertex(&(dstV0Vertex[i]), &(dstVertex[vertex_id]) );
-	  vtx->setIndex(indexCount++);
-	  currentEvent->vertexCollection()->push_back(vtx);
-	  vtxPtr.push_back(vtx);
-	  // Add associated v0's to xi's
-	  //  - take advantage of ordered xi/v0 tables
-	  //  - take advantage of xi's being added to vtxPtr first
-	  if (dstXiVertex) {
-	    while ((xi_index<nXiVertex) &&
-		   (dstXiVertex[xi_index].id_v0 == dstV0Vertex[i].id) )
-	      ((StXiVertex*) (vtxPtr[xi_index++]))->setV0Vertex((StV0Vertex*) vtx);
-	  }
-	}
+        StVertex* vtx = NULL;
+        long vertex_id;
+        long track_id;
+        long xi_id;
+        for (i=0; i<nV0Vertex; i++) {
+          vertex_id = dstV0Vertex[i].id_vertex - 1;
+          track_id = dstV0Vertex[i].idneg - 1;
+          if (vertex_id >= nVertex)
+            gMessMgr->Warning() << thisClass <<
+              "V0 associated vertex index too large: " << ++vertex_id << endm;
+          else vertexMatchIndex[vertex_id] = indexCount;
+          if (track_id >= nTrack)
+            gMessMgr->Warning() << thisClass <<
+              "V0 associated track index too large: " << ++track_id << endm;
+          else trackVertexIndex[track_id].push_back(indexCount);
+          track_id = dstV0Vertex[i].idpos - 1;
+          if (track_id >= nTrack)
+            gMessMgr->Warning() << thisClass <<
+              "V0 associated track index too large: " << ++track_id << endm;
+          else trackVertexIndex[track_id].push_back(indexCount);
+          vtx = (StVertex*) new StV0Vertex(&(dstV0Vertex[i]), &(dstVertex[vertex_id]) );
+          vtx->setIndex(indexCount++);
+          currentEvent->vertexCollection()->push_back(vtx);
+          vtxPtr.push_back(vtx);
+          // Add associated v0's to xi's
+          while (!v0XiIndex[vertex_id].empty()) {
+            xi_id = v0XiIndex[vertex_id].back();
+            v0XiIndex[vertex_id].pop_back();
+            ((StXiVertex*) (vtxPtr[xi_id]))->setV0Vertex((StV0Vertex*) vtx);
+          }
+        if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
       }
-    }    
-    
+    }  
+        id = dstKinkVertices[i].idp;
+    if (nfailed)
     // Last for the vertices, add any un-accounted-for vertices (primary)
     if (dstVertex) {
-      cout << "StEventMaker: " << nVertex << " dst_vertex" << endl;
+      gMessMgr->Info() << thisClass << nVertex << " dst_vertex" << endm;
       // Build vertex collection
       if (doLoad) {
-	StVertex* vtx = NULL;
-	for (i=0; i<nVertex; i++) {
-	  if (vertexMatchIndex[i]<0) {
-	    vertexMatchIndex[i] = indexCount;
-	    vtx = new StVertex(&(dstVertex[i]) );
-	    vtx->setIndex((ULong_t)indexCount++);
-	    currentEvent->vertexCollection()->push_back(vtx);
-	    vtxPtr.push_back(vtx);
-	  }
-	}
-	if (vtx) currentEvent->setPrimaryVertex(vtx); // Last vertex is primary?
+        StVertex* vtx = NULL;
+        for (i=0; i<nVertex; i++) {
+          if (vertexMatchIndex[i]<0) {
+            vertexMatchIndex[i] = indexCount;
+            vtx = new StVertex(&(dstVertex[i]) );
+            vtx->setIndex(indexCount++);
+            currentEvent->vertexCollection()->push_back(vtx);
+            vtxPtr.push_back(vtx);
+          }
+                buf += sizeof(StTpcHit);
+        // Last remaining vertex is primary? Should be...
+        if (vtx) currentEvent->setPrimaryVertex(vtx);
       }
     }
     // *** END VERTEX BUILDING ***
-    
-    dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
+
+
+    // dstTrack table loaded before vertex portion above
     if (dstTrack) {
-      cout << "StEventMaker: " << nTrack << " dst_track" << endl;
+      gMessMgr->Info() << thisClass << nTrack << " dst_track" << endm;
       if (doLoad) {
 	StGlobalTrack* trk = NULL;
 	for (i=0; i<nTrack; i++, dstTrack++) {
@@ -563,48 +624,63 @@ Int_t StEventMaker::Make(){
           trk->setLength(dstTrack->length);
 	  currentEvent->trackCollection()->push_back(trk);
 	  // add the track to vertex
+          long track_id = dstTrack->id - 1;
 	  unsigned long idStartVertex = dstTrack->id_start_vertex;
 	  unsigned long idStopVertex = dstTrack->id_stop_vertex;
-	  // For now, if start or stop vertex id is zero, assume it is the primary
-	  //  vertex, even though the primary vertex should not be a stop vertex
-	  StVertex* startVertex = 0;
-	  StVertex* stopVertex = 0;
-	  if (idStartVertex == 0) {
-	    startVertex = currentEvent->primaryVertex();
-	  } else {
-	    if ( idStartVertex > 0 && idStartVertex <= vtxPtr.size() ) {
-	      startVertex = vtxPtr[vertexMatchIndex[--idStartVertex]];
-	    } else {
-	      cout << "StEventMaker: WARNING: idStartVertex " << idStartVertex <<
-		" either null or larger than vertex list " << vtxPtr.size() << endl;
-	    }
-	  }
-	  if (idStopVertex == 0) {
-	    stopVertex  = currentEvent->primaryVertex();
-	  } else {
-	    if ( idStopVertex > 0 && idStopVertex <= vtxPtr.size() ) {
-	      stopVertex  = vtxPtr[vertexMatchIndex[--idStopVertex]];
-	    } else {
-	      cout << "StEventMaker: WARNING: idStopVertex " << idStopVertex <<
-		" either null or larger than vertex list " << vtxPtr.size() << endl;
-	    }
-	  }
-	  // Load the appropriate vertex info using the vertex pointer vector
-	  if ( startVertex ) {
-	    trk->setStartVertex(startVertex);
-	    startVertex->daughters().push_back(trk); // Add track to start vtx daughters
-	  }
-	  if ( stopVertex ) {
-	    trk->setStopVertex(stopVertex);
-	    stopVertex->setParent(trk); // Set track as stop vtx
-	  }
+          StVertex* startVertex = 0;
+          StVertex* stopVertex = 0;
+
+          // Load the appropriate vertex info using the vertex pointer vector
+
+          // Set track Start Vertex
+          // For now, if start vertex id is zero, assume the primary vertex
+          if ( idStartVertex >= 0 && idStartVertex <= vtxPtr.size() ) {
+            if ( idStartVertex ) {
+              idStartVertex = vertexMatchIndex[--idStartVertex];
+              startVertex = vtxPtr[idStartVertex];
+            } else {
+              startVertex = currentEvent->primaryVertex();
+              idStartVertex = startVertex->index();
+                            << " Xi vertices, invalid foreign key to vertex table." << endm;
+            trk->setStartVertex(startVertex);
+            // Add track to start vertex daughters
+            startVertex->daughters().push_back(trk);
+            // Check for any other vertices of which this may be a daughter
+            long vertex_id;
+            while (!(trackVertexIndex[track_id].empty())) {
+              vertex_id = trackVertexIndex[track_id].back();
+              trackVertexIndex[track_id].pop_back();
+              if (vertex_id != idStartVertex) {
+                startVertex = vtxPtr[vertex_id];
+                startVertex->daughters().push_back(trk);
+              }
+			info->addHit(tpcHit);
+          } else {
+            gMessMgr->Warning() << thisClass << "idStartVertex " << idStartVertex <<
+              " either negative or larger than vertex list " << vtxPtr.size() << endm;
+          }
+
+          // Set track Stop Vertex
+          // For now, if stop vertex id is zero, do not set
+          if ( idStopVertex >= 0 && idStopVertex <= vtxPtr.size() ) {
+            if ( idStopVertex ) {
+              idStopVertex  = vertexMatchIndex[--idStopVertex];
+              stopVertex  = vtxPtr[idStopVertex];
+              trk->setStopVertex(stopVertex);
+              // Set track to stop vertex parent
+              stopVertex->setParent(trk);
+		else
+          } else {
+            gMessMgr->Warning() << thisClass << "idStopVertex " << idStopVertex <<
+              " either negative or larger than vertex list " << vtxPtr.size() << endm;
+          }
 	}
       }
     }  
     
     dst_track_aux_st* dstTrackAux = theEventManager->returnTable_dst_track_aux(nTrackAux);
     if (dstTrackAux) {
-      cout << "StEventMaker: " << nTrackAux << " dst_track_aux" << endl;
+      gMessMgr->Info() << thisClass << nTrackAux << " dst_track_aux" << endm;
       // Add auxiliary info to tracks
       if (doLoad) {
 	StGlobalTrack* theTrack;
@@ -627,7 +703,8 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	      theTrack->fitTraits().covariantMatrix()(jTab[0],jTab[1]) = qwe; 
 	      theTrack->fitTraits().covariantMatrix()(jTab[1],jTab[0]) = qwe;}
 	  } else {
-	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+            gMessMgr->Error() << thisClass <<
+              "Track find failed for ID " << itrk << endm;
 	  }
 	}
       }
@@ -635,7 +712,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     
     dst_dedx_st* dstDedx = theEventManager->returnTable_dst_dedx(nDedx);
     if (dstDedx) {
-      cout << "StEventMaker: " << nDedx << " dst_dedx" << endl;
+      gMessMgr->Info() << thisClass << nDedx << " dst_dedx" << endm;
       // Add dedx info to tracks
       if (doLoad) {
 	StDedx* dedx = NULL;
@@ -660,13 +737,14 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	    } else if (idet == detid_svt) {
 	      theTrack->setSvtDedx(dedx);
 	    } else {
-	      cout << "StEventMaker: ERROR: Dedx: Det ID " << idet << 
-		" not recognized" << endl;
+              gMessMgr->Error() << thisClass <<
+	        "ERROR: Dedx: Det ID " << idet << " not recognized" << endm;
 	      delete dedx;
 	      dedx=0;
 	    }
 	  } else {
-	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+            gMessMgr->Error() << thisClass <<
+              "Track find failed for ID " << itrk << endm;
 	  }
 	}
       }
@@ -680,7 +758,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     
     dst_tof_trk_st* dstTofTrk = theEventManager->returnTable_dst_tof_trk(nTofTrk);
     if (dstTofTrk) {
-      cout << "StEventMaker: " << nTofTrk << " dst_tof_trk" << endl;
+      gMessMgr->Info() << thisClass << nTofTrk << " dst_tof_trk" << endm;
       if (doLoad) {
       }
     }    
@@ -688,7 +766,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     dst_point_st* dstPoint = theEventManager->returnTable_dst_point(nPoint);
     dst_point_st* thePoint = NULL;  
     if (dstPoint) {
-      cout << "StEventMaker: " << nPoint << " dst_point" << endl;
+      gMessMgr->Info() << thisClass << nPoint << " dst_point" << endm;
       if (doLoad) {
 	StTpcHit* tpcHit = NULL;
 	StFtpcHit* ftpcHit = NULL;
@@ -721,7 +799,8 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	    if (theTrack) theTrack->addFtpcHit(ftpcHit);
 	  }
 	  else {
-	    cout << "StEventMaker: ERROR: Detector ID " << idet << " not known" << endl;
+            gMessMgr->Error() << thisClass <<
+              "Detector ID " << idet << " not known" << endm;
 	  }
 	}
       }

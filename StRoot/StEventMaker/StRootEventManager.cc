@@ -1,5 +1,8 @@
-// $Id: StRootEventManager.cc,v 1.4 1999/07/23 22:49:47 perev Exp $
+// $Id: StRootEventManager.cc,v 1.5 1999/07/24 00:25:50 fisyak Exp $
 // $Log: StRootEventManager.cc,v $
+// Revision 1.5  1999/07/24 00:25:50  fisyak
+// Gene corrections
+//
 // Revision 1.4  1999/07/23 22:49:47  perev
 // Remove redundant printout
 //
@@ -145,7 +148,6 @@ void StRootEventManager::shutdown() { /* noop */ }
 
     cout << "StRootEventManager: Table type  " << nt << \
 TABLE_TYPE ##_st* StRootEventManager::returnTable_ ## TABLE_TYPE(long& nentries) const\
-//VP    Dst->Pwd()->ls(2);\
 {\
   TABLE_TYPE ## _st* table = NULL;\
   St_ ## TABLE_TYPE  *tableWrap;\
