@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.30 2002/02/12 22:50:57 hardtke Exp $
+ * $Id: StMagUtilities.cxx,v 1.31 2002/02/22 17:44:18 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.31  2002/02/22 17:44:18  jhthomas
+ * Get CathodeV and GG from DB. Change Defaults.  Change Instantiation argument
+ * order. Update D'Oxygen documentation.  Remove 2000/2001 E field switch.
+ *
  * Revision 1.30  2002/02/12 22:50:57  hardtke
  * separate geometrical tpc rotation from field twist
  *
@@ -87,8 +91,8 @@
 
 \author Jim Thomas 10 October 2000
 
-A package of Bfield routines and distortion corrections for STAR.  
-Methods included to read the correct Bfield map and scale it 
+A package of Bfield routines and distortion corrections for the STAR 
+TPC.  Methods included to read the correct Bfield map and scale it 
 according to a scale factor provided during instantiation.
 All corrections automatically adjust themselves for different
 B field settings and E field settings.  Even reversed fields. 
@@ -96,9 +100,48 @@ B field settings and E field settings.  Even reversed fields.
 <p>
 
 An enumerated argument provided at the time of instantiation selects
-a constant field (map=1) or the interpolation grid (map=2).
+a constant field (map=1) or the interpolation grid (map=2).  Or
+the values may be taken from the DataBase by using a time stamp
+and the appropriate style of instantiation (usually done in the chain).
+
+<p>
+
 This code works in kGauss, cm - but note that the Bfield maps on disk 
 are in gauss, cm.
+
+<p>
+
+A mode switch can be used to select the distortions that will be 
+applied to the data.  A choice of mode = 0 will give the default
+set of distortions.  Other modes can be selected by turning on the 
+appropriate bit field, shown below.  
+
+<br>
+
+Bit counting starts at 1 for the mode switch (...,3,2,1) <br>
+
+<br>
+
+enum   DistortSelect                                                  <br>
+{                                                                     <br>
+  kBMap              = 0x08,     // Bit 4                             <br>
+  kPadrow13          = 0x10,     // Bit 5                             <br>
+  kTwist             = 0x20,     // Bit 6                             <br>
+  kClock             = 0x40,     // Bit 7                             <br>
+  kMembrane          = 0x80,     // Bit 8                             <br>
+  kEndcap            = 0x100,    // Bit 9                             <br>
+  kIFCShift          = 0x200,    // Bit 10                            <br>
+  kSpaceCharge       = 0x400     // Bit 11                            <br>
+} ;                                                                   <br>
+
+Note that the option flag used in the chain is 2x larger 
+than shown here in order to allow the first bit to be used 
+as an on/off flag and then it is shifted away before entering 
+StMagUtilities.  This can be summarized by saying:
+
+<br> 
+
+Bit counting starts at 0 for the chain option flag (...,3,2,1,0) <br>
 
 <p>
 
@@ -116,6 +159,7 @@ To do:  <br>
 #include "tables/St_MagFactor_Table.h"
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
+#include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -138,11 +182,12 @@ StMagUtilities::StMagUtilities ()
 
 /// StMagUtilities constructor using the DataBase
 
-StMagUtilities::StMagUtilities ( Int_t mode , StTpcDb* dbin , TDataSet* dbin2 )
+StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode = 0 )
 
 { 
   gMap = kMapped ;                    // Do once & Select the B field map (mapped field or constant)
   fSpaceCharge = StDetectorDbSpaceCharge::instance() ;  // Initialize the DB for SpaceCharge (EbyE)
+  fTpcVolts    = StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
   CommonStart( mode, dbin , dbin2 ) ; // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -155,6 +200,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   gFactor = factor ;
   gMap = map ;                        // Do once & select the requested map (mapped or constant)
   fSpaceCharge = 0 ;                  // Do not get SpaceCharge out of the DB - use default in CommonStart
+  fTpcVolts = 0 ;                     // Do not get TpcVoltages out of the DB - use default in CommonStart
   CommonStart( mode, 0 , 0 ) ;        // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -186,12 +232,12 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
   YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
   SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC - Coulombs/Epsilon-nought)
-  // These items are not available in the DB but should be ... some day.
   IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
-  CathodeV    =  31000.0 ;      // Cathode Voltage (volts)
+  CathodeV    = -31000.0 ;      // Cathode Voltage (volts)
   GG          =   -127.5 ;      // Gating Grid voltage (volts)
   EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
   WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
+  // These items are not taken from the DB but they should be ... some day.
   IFCRadius   =    47.45 ;      // Radius of the Inner Field Cage
   OFCRadius   =    200.0 ;      // Radius of the Outer Field Cage
   // End of list of items that might come from the DB
@@ -200,16 +246,12 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
 
   if ( dbin != 0 )  // Initialize parameters to database values, if requested and where available
     { 
-      // STAR Drift Velocity (cm/microSec) Magnitude
-      StarDriftV  = 1e-6*thedb->DriftVelocity() ;        
-      // Z location of STAR TPC Ground Plane (cm)
-      TPC_Z0      = thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
-	            ->outerSectorFrischGridPadPlaneSeparation() ;    
-      // X Displacement of West end of TPC wrt magnet (mRad)
-      XTWIST      = 1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
-      // Y Displacement of West end of TPC wrt magnet (mRad)
-      YTWIST      = -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
-      IFCShift = thedb->FieldCage()->InnerFieldCageShift();
+      StarDriftV  =  1e-6*thedb->DriftVelocity() ;        
+      TPC_Z0      =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
+	             ->outerSectorFrischGridPadPlaneSeparation() ;    
+      XTWIST      =  1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
+      YTWIST      =  -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
+      IFCShift    =  thedb->FieldCage()->InnerFieldCageShift();
       EASTCLOCKERROR = 1e3*thedb->FieldCage()->EastClockError();
       WESTCLOCKERROR = 1e3*thedb->FieldCage()->WestClockError();
       cout << "StMagUtilities::CommonSta  Using TPC parameters from DataBase. " << endl ; 
@@ -217,6 +259,25 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   else
     {
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
+    }
+
+  if ( fTpcVolts != 0 )     // Get TpcVoltages
+    {
+      CathodeV = fTpcVolts->getCathodeVoltage() * 1000 ; 
+      GG       = fTpcVolts->getGGVoltage() ; 
+    }
+  else
+    {
+      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVolages setting. " << endl ; 
+    }
+
+  if ( fSpaceCharge != 0 )  // Get SpaceCharge so it can be printed, below.
+    {
+      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
+    }
+  else
+    {
+      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge setting. " << endl ; 
     }
 
   if ( dbin2 != 0 )  // Initialize the DB for the Magnetic Field and set the scale factor
@@ -229,15 +290,6 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting. " << endl ; 
     }
 
-  if ( fSpaceCharge != 0 )  // Get SpaceCharge so it can be printed, below.
-    {
-      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
-    }
-  else
-    {
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge setting. " << endl ; 
-    }
-
   // Default behavior: no bits set gives you this default
   // To turn on and off individual distortions, set these higher bits
 
@@ -245,10 +297,11 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge ))) 
     {
-      mDistortionMode |= kBMap;
-      mDistortionMode |= kTwist;
-      mDistortionMode |= kPadrow13;
-      mDistortionMode |= kClock;
+      mDistortionMode |= kBMap ;
+      mDistortionMode |= kPadrow13 ;
+      mDistortionMode |= kTwist ;
+      mDistortionMode |= kClock ;
+      mDistortionMode |= kIFCShift ;
       printf("StMagUtilities::CommonSta  Default mode selection\n");
     } 
   else 
@@ -259,36 +312,30 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
-  // Mode = 0 is for Year 1 running, Mode = 1 is for year 2 running (different cathode potentials)
-  // We reserved 3 bits for the option so we can extend up to 111=7 => 8 options (0 to 7)
-
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from the Aleph collaboration
 
-  StarMagE     =  TMath::Abs(CathodeV/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
-
-  if ( !(mode & kElectricField2001) ){
-    OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
-  } else {
-    OmegaTau   =  -12.4 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
-  }
+  StarMagE   =  TMath::Abs(CathodeV/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
+  OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
 
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
 
+  cout << "StMagUtilities::DriftVel   =  " << StarDriftV << " cm/microsec" <<  endl ; 
+  cout << "StMagUtilities::TPC_Z0     =  " << TPC_Z0 << " cm" << endl ; 
   cout << "StMagUtilities::OmegaTau   =  " << OmegaTau << endl ; 
   cout << "StMagUtilities::XTWIST     =  " << XTWIST << " mrad" << endl ;
   cout << "StMagUtilities::YTWIST     =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharg =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
-  cout << "StMagUtilities::IFCShift =  " << IFCShift << " cm" << endl ;
-  cout << "StMagUtilities::EastClockError = " << EASTCLOCKERROR << " mrad" << endl;
-  cout << "StMagUtilities::WestClockError = " << WESTCLOCKERROR << " mrad" << endl;
+  cout << "StMagUtilities::IFCShift   =  " << IFCShift << " cm" << endl ;
+  cout << "StMagUtilities::CathodeV   =  " << CathodeV << " volts" << endl ;
+  cout << "StMagUtilities::GG         =  " << GG << " volts" << endl ;
+  cout << "StMagUtilities::EastClock  =  " << EASTCLOCKERROR << " mrad" << endl;
+  cout << "StMagUtilities::WestClock  =  " << WESTCLOCKERROR << " mrad" << endl;
 
 }
-
-
 
 //________________________________________
 
@@ -980,9 +1027,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   
   if ( fSpaceCharge !=0 ) {
       // need to reset it. 
-      fSpaceCharge = StDetectorDbSpaceCharge::instance();
-
-      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
+      fSpaceCharge =  StDetectorDbSpaceCharge::instance();
+      SpaceCharge  =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
   }
   
   // Subtract to Undo the distortions
@@ -1061,20 +1107,12 @@ void StMagUtilities::ReadField( )
   if ( mDistortionMode & kPadrow13 )     printf (" + Padrow 13") ;
   if ( mDistortionMode & kTwist )        printf (" + Twist") ;
   if ( mDistortionMode & kClock )        printf (" + Clock") ;
-  if ( mDistortionMode & kMembrane )     printf (" + Central Membrane") ;
-  if ( mDistortionMode & kEndcap )       printf (" + Endcap") ;
   if ( mDistortionMode & kIFCShift )     printf (" + IFCShift") ;
   if ( mDistortionMode & kSpaceCharge )  printf (" + SpaceCharge") ;
+  if ( mDistortionMode & kMembrane )     printf (" + Central Membrane") ;
+  if ( mDistortionMode & kEndcap )       printf (" + Endcap") ;
 
   printf("\n");
-  if (mDistortionMode & kElectricField2001){
-      printf("StMagUtilities::ReadField  2001 Electric Field\n");
-  }
-  
-  else {
-      printf("StMagUtilities::ReadField  2000 Electric Field\n");
-  }
-  
   
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;

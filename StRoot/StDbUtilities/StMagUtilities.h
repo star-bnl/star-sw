@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.18 2002/02/02 01:01:09 jeromel Exp $
+ * $Id: StMagUtilities.h,v 1.19 2002/02/22 17:44:19 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.19  2002/02/22 17:44:19  jhthomas
+ * Get CathodeV and GG from DB. Change Defaults.  Change Instantiation argument
+ * order. Update D'Oxygen documentation.  Remove 2000/2001 E field switch.
+ *
  * Revision 1.18  2002/02/02 01:01:09  jeromel
  * Jim's modif for FC & SpaceCharge corrections.
  *
@@ -68,25 +72,32 @@
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
-// DO NOT change the numbering of these constants. StBFChain depends
-// on these values to build an option mask. In StBFChain, the options
-// are set to these values x2 since the mask is right shifted first.
+
+// Bit counting starts at 1 for the mode switch (...,3,2,1)
+
 enum   DistortSelect 
 { 
-  kElectricField2001 = 1,        // Bits 0-2 used to specify year from 2000
-  kBMap              = 0x08,     // Bit 3
-  kPadrow13          = 0x10,     // Bit 4
-  kTwist             = 0x20,     // Bit 5
-  kClock             = 0x40,     // Bit 6
-  kMembrane          = 0x80,     // Bit 7
-  kEndcap            = 0x100,    // Bit 8
-  kIFCShift          = 0x200,    // Bit 9
-  kSpaceCharge       = 0x400     // Bit 10
+  kBMap              = 0x08,     // Bit 4
+  kPadrow13          = 0x10,     // Bit 5
+  kTwist             = 0x20,     // Bit 6
+  kClock             = 0x40,     // Bit 7
+  kMembrane          = 0x80,     // Bit 8
+  kEndcap            = 0x100,    // Bit 9
+  kIFCShift          = 0x200,    // Bit 10
+  kSpaceCharge       = 0x400     // Bit 11
 } ;
+
+// DO NOT change the numbering of these constants. StBFChain depends
+// on these values to build an option flag. The option flag used in 
+// the chain is 2x larger than shown here in order to allow the first 
+// bit to be used as an on/off flag.  It is shifted away before entering 
+// StMagUtilities.  So, this can be summarized by saying: 
+// Bit counting starts at 0 for the chain option flag (...,3,2,1,0) 
 
 class StTpcDb ;
 class TDataSet ;
 class StDetectorDbSpaceCharge ;
+class StDetectorDbTpcVoltages ;
 
 class StMagUtilities {
 
@@ -96,6 +107,7 @@ class StMagUtilities {
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge* fSpaceCharge ;
+  StDetectorDbTpcVoltages* fTpcVolts ;
 
   virtual void    CommonStart ( Int_t mode, StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    ReadField ( ) ;
@@ -116,8 +128,8 @@ class StMagUtilities {
   Float_t  TPC_Z0 ;                     // Z location of STAR TPC Ground Wire Plane (cm) Magnitude
   Float_t  XTWIST ;                     // X Displacement of West end of TPC wrt magnet (mRad)
   Float_t  YTWIST ;                     // Y Displacement of West end of TPC wrt magnet (mRad)
-  Float_t  CathodeV ;                   // Cathode Potential (volts)
-  Float_t  GG ;                         // Gating Grid voltage (volts)
+  Double_t CathodeV ;                   // Cathode Potential (volts)
+  Double_t GG ;                         // Gating Grid voltage (volts)
   Float_t  EASTCLOCKERROR ;             // Phi rotation of East end of TPC in milli-radians
   Float_t  WESTCLOCKERROR ;             // Phi rotation of West end of TPC in milli-radians
   Float_t  IFCRadius ;                  // Radius of the Inner Field Cage
@@ -140,7 +152,7 @@ class StMagUtilities {
  public:
 
   StMagUtilities () ;
-  StMagUtilities ( Int_t mode, StTpcDb* dbin,  TDataSet* dbin2 ) ;
+  StMagUtilities ( StTpcDb* dbin,  TDataSet* dbin2, Int_t mode = 0 ) ;
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
   virtual ~StMagUtilities () {}
 
