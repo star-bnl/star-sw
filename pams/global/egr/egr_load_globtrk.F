@@ -89,7 +89,7 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk(iglob).covar_diag(5) = 0
       globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)
       globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)
-      globtrk(iglob).length=99999.9
+      globtrk(iglob).length=9999.9
       if( isvtt .eq. 0) then
          firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc)
          if (firsthit .gt. 0) then
@@ -121,7 +121,7 @@ C----->>>>  new calculation of .length   S.Margetis
                
                gtanl = globtrk(iglob).tanl
                ginvpt= globtrk(iglob).invpt
-               call trk_length(gseed,gtanl,ginvpt,glength)
+               call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
                globtrk(iglob).length=glength
 C---  <<<<<<<
             endif
@@ -139,7 +139,7 @@ C----->>>>  new calculation of .length   S.Margetis
                
                gtanl = globtrk(iglob).tanl
                ginvpt= globtrk(iglob).invpt
-               call trk_length(gseed,gtanl,ginvpt,glength)
+               call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
                globtrk(iglob).length=glength
 C---  <<<<<<<
             endif
@@ -208,19 +208,22 @@ C-- A acurate estimation of track length which is using as a 'seed' the
 C   current calculation, i.e. the cord length in x-y plane
 C   Author: S. Margetis  7/1/99
 c----------------------------------------------------------------------
-      SUBROUTINE trk_length(seed,tanl,invpt,bf,length)
+      SUBROUTINE egr_trk_length(gseed,gtanl,ginvpt,bf,glength)
       IMPLICIT NONE
 C
 #include "phys_constants.inc"
 C#include "math_constants.inc"
 
 C
-      REAL    seed,tanl,invpt,bf,length
+      REAL    gseed,gtanl,ginvpt,bf,glength
       REAL    rr
 
-      rr=1./(C_D_CURVATURE*bf*invpt)
-
-      length=(2.*rr*asin(seed/(2.*rr)))/cos(atan(tanl))
+      if(bf.lt.0.01) then
+         glength = gseed
+      else
+         rr=1./(C_D_CURVATURE*bf*ginvpt)
+         glength=abs((2.*rr*asin(gseed/(2.*rr)))/cos(atan(gtanl)))
+      endif
 
       RETURN
       END

@@ -359,7 +359,7 @@ c     Fill tracks
                   globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
      +                 tptrack(itpct).nrec
                   globtrk(igtrk).n_max_point = 0
-                  globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
+              globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
      +                 tptrack(itpct).nfit
                   globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
                   if( abs(globtrk(igtrk).icharge) .ne. 1) then
@@ -393,7 +393,7 @@ C     Now find first point on track
                      if( svt_group(ishit).id1 .eq.
      +                    svt_track(svt(isvtt)).id) then
                         ient = svt_group(ishit).id2
-                        r =  (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
+                     r =  (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                       svt_spt(ient).x(3)**2)
                         if( r .lt. rfirst) then
                            rfirst = r
@@ -427,7 +427,7 @@ C----->>>>  new calculation of .length   S.Margetis
 
                   gtanl = globtrk(igtrk).tanl
                   ginvpt= globtrk(igtrk).invpt
-                  call trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
+              call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
                   globtrk(igtrk).length=glength
 C---<<<<<<<
                   globtrk(igtrk).impact = 0.                  
@@ -470,15 +470,15 @@ C---<<<<<<<
                   endif
                   
                else
-                  iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
+            iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
      +                 svt(isvtt),ipriv,gtrk,tphit_h,tphit,privert_h,
      +                 privert,svt_spt_h,svt_spt,svt_track_h,svt_track,
      +                 svt_group_h,svt_group,egrpar_h,egrpar,
      +                 evt_match_h,evt_match,covar)
                   
-                  iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+                iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +                 ,globtrk_aux,tptrack(itpct).id,gtrk,
-     +                 tphit_h,tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
+     +               tphit_h,tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
      +                 ipriv,bfield(3))
                endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
@@ -530,7 +530,7 @@ c     mark spts as used
 	       if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                globtrk_h.nok = globtrk_h.nok + 1
 	       ifull = 2
-	       if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
+	     if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
                globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                igtrk = globtrk_h.nok
                globtrk(igtrk).id=igtrk              
@@ -541,7 +541,7 @@ c     mark spts as used
                globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nrec
                 globtrk(igtrk).n_max_point = 0  
-                globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
+               globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nfit 
                globtrk(igtrk).icharge=tptrack(tpc(itpct)).q ! tpc q
                globtrk(igtrk).x0=svt_track(svt(isvtt)).r0*
@@ -555,8 +555,8 @@ c     mark spts as used
                globtrk(igtrk).covar_diag(1)=svt_track(svt(isvtt)).cov(1)
                globtrk(igtrk).covar_diag(2)=svt_track(svt(isvtt)).cov(3)
                globtrk(igtrk).covar_diag(3)=svt_track(svt(isvtt)).cov(6)
-               globtrk(igtrk).covar_diag(4)=svt_track(svt(isvtt)).cov(10)
-               globtrk(igtrk).covar_diag(5)=svt_track(svt(isvtt)).cov(15)
+              globtrk(igtrk).covar_diag(4)=svt_track(svt(isvtt)).cov(10)
+              globtrk(igtrk).covar_diag(5)=svt_track(svt(isvtt)).cov(15)
                globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
                globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
 C     Now find first point on track
@@ -600,7 +600,7 @@ C----->>>>  new calculation of .length   S.Margetis
 
                   gtanl = globtrk(igtrk).tanl
                   ginvpt= globtrk(igtrk).invpt
-                  call trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
+             call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
                   globtrk(igtrk).length=glength
 C---<<<<<<<
                if (globtrk(igtrk).length.gt.99999.9) then
@@ -766,7 +766,7 @@ C----->>>>  new calculation of .length   S.Margetis
 
                   gtanl = globtrk(iglob).tanl
                   ginvpt= globtrk(iglob).invpt
-                  call trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
+            call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
                   globtrk(iglob).length=glength
 C---<<<<<<<
                   if (globtrk(iglob).length.gt.99999.9) then
@@ -877,14 +877,14 @@ C----->>>>  new calculation of .length   S.Margetis
 
                   gtanl = globtrk(iglob).tanl
                   ginvpt= globtrk(iglob).invpt
-                  call trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
+            call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
                   globtrk(iglob).length=glength
 C---<<<<<<<
                   if (globtrk(iglob).length.gt.99999.9) then
                      globtrk(iglob).length=99999.9
                   endif
                     globtrk(iglob).impact = 0
-                    globtrk(iglob).ndegf = (2*globtrk(iglob).n_point) - 5 
+                    globtrk(iglob).ndegf = (2*globtrk(iglob).n_point)-5 
                     globtrk(iglob).id_global_pid = 0
                     globtrk(iglob).id_hypo_pid = 0
                     globtrk(iglob).id_start_vertex = 0
