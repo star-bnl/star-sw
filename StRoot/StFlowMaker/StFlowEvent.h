@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.27 2001/06/07 20:06:20 posk Exp $
+// $Id: StFlowEvent.h,v 1.28 2001/07/24 22:29:12 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -32,7 +32,11 @@ public:
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, StTrackTopologyMap map) const;
   Int_t          EventID() const;
   Int_t          RunID() const;
+  Double_t       CenterOfMassEnergy() const;
+  Short_t        BeamMassNumberEast() const;
+  Short_t        BeamMassNumberWest() const;
   UInt_t         OrigMult() const;
+  UInt_t         UncorrMult() const;
   UInt_t         MultEta() const;
   UInt_t         FlowEventMult() const;
   UInt_t         Centrality() const;
@@ -60,7 +64,11 @@ public:
   void MakeEtaSubEvents();
   void SetEventID(const Int_t&);
   void SetRunID(const Int_t&);
+  void SetCenterOfMassEnergy(const Double_t&);
+  void SetBeamMassNumberEast(const Short_t&);
+  void SetBeamMassNumberWest(const Short_t&);
   void SetOrigMult(const UInt_t&);
+  void SetUncorrMult(const UInt_t&);
   void SetMultEta(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
@@ -95,7 +103,11 @@ private:
 
   Int_t               mEventID;                                  // ID of the event
   Int_t               mRunID;                                    // ID of the run
+  Double_t            mCenterOfMassEnergy;                       // 
+  Short_t             mBeamMassNumberEast;                       //
+  Short_t             mBeamMassNumberWest;                       //
   UInt_t              mOrigMult;                                 // number of tracks
+  UInt_t              mUncorrMult;                               // number of h-
   UInt_t              mMultEta;                                  // number of tracks
   // with pos. flag in 1.5 unit of eta
   UInt_t              mCentrality;                               // centrality bin
@@ -112,7 +124,7 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
-  static Char_t       mPid[10];                       // pi-, pi+, pi, pbar, proton, e+, e-
+  static Char_t       mPid[10];                                  // pi-, pi+, pi, pbar, proton, e+, e-
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
   static Float_t      mPiMinusCuts[2];
@@ -141,7 +153,15 @@ inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
 inline Int_t StFlowEvent::RunID() const { return mRunID; }
 
+inline Double_t StFlowEvent::CenterOfMassEnergy() const { return mCenterOfMassEnergy; }
+
+inline Short_t StFlowEvent::BeamMassNumberEast() const { return mBeamMassNumberEast; }
+
+inline Short_t StFlowEvent::BeamMassNumberWest() const { return mBeamMassNumberWest; }
+
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
+
+inline UInt_t StFlowEvent::UncorrMult() const { return mUncorrMult; }
 
 inline UInt_t StFlowEvent::MultEta() const { return mMultEta; }
 
@@ -190,8 +210,17 @@ inline void StFlowEvent::SetEventID(const Int_t& id) { mEventID = id; }
 
 inline void StFlowEvent::SetRunID(const Int_t& id) { mRunID = id; }
 
+inline void StFlowEvent::SetCenterOfMassEnergy(const Double_t& cms) { mCenterOfMassEnergy = cms; }
+
+inline void StFlowEvent::SetBeamMassNumberEast(const Short_t& bme) { mBeamMassNumberEast = bme; }
+
+inline void StFlowEvent::SetBeamMassNumberWest(const Short_t& bmw) { mBeamMassNumberWest = bmw; }
+
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
+
+inline void StFlowEvent::SetUncorrMult(const UInt_t& tracks) {
+  mUncorrMult = tracks; }
 
 inline void StFlowEvent::SetMultEta(const UInt_t& goodtracks) {
   mMultEta = goodtracks; }
@@ -252,6 +281,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.28  2001/07/24 22:29:12  snelling
+// First attempt to get a standard root pico file again, added variables
+//
 // Revision 1.27  2001/06/07 20:06:20  posk
 // Global Dca cut for event plane particles.
 // Removed SetPtWgt().

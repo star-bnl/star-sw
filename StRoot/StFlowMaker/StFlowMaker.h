@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.23 2001/06/04 18:57:06 rcwells Exp $
+//  $Id: StFlowMaker.h,v 1.24 2001/07/24 22:29:26 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -21,6 +21,7 @@
 #include "TString.h"
 #include "TTree.h"
 #include "StFlowConstants.h"
+class StRun;
 class StEvent;
 class StPrimaryTrack;
 class StParticleDefinition;
@@ -33,6 +34,7 @@ class StFileI;
 class TChain;
 class StHbtEvent; // Randy added these 2
 class StHbtTrack;
+class StThreeVectorF;
 
 class StFlowMaker : public StMaker {
 
@@ -56,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.23 2001/06/04 18:57:06 rcwells Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.24 2001/07/24 22:29:26 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -85,8 +87,10 @@ private:
   Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
+  StRun*           pRun;                      //! pointer to run summary data
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                //! pointer flow event
   StFlowPicoEvent* pPicoEvent;                // pointer to pico-DST Event
@@ -94,6 +98,8 @@ private:
   TTree*           pFlowTree;                 // pointer to pico-DST Tree
   TFile*           pPicoDST;                  //! pointer to pico-DST File
   TChain*          pPicoChain;                //! pointer to chain of pico files
+  Float_t          calcDcaSigned(const StThreeVectorF pos, 
+				 const StPrimaryTrack* track);
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 };
@@ -122,6 +128,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.24  2001/07/24 22:29:26  snelling
+//  First attempt to get a standard root pico file again, added variables
+//
 //  Revision 1.23  2001/06/04 18:57:06  rcwells
 //  Adding filling from HbtEvents
 //

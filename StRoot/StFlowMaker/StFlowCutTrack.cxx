@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.23 2001/05/22 20:17:17 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.24 2001/07/24 22:29:06 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -13,6 +13,7 @@
 #include <iomanip.h>
 #include <stdlib.h>
 #include "StEvent.h"
+//#include "StTrackTopologyMap.h"
 #include "StFlowPicoEvent.h"
 #include "StEventTypes.h"
 #include "StFlowCutTrack.h"
@@ -390,22 +391,23 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   Int_t nFitPoints = pPicoTrack->FitPts();
   Int_t nMaxPoints = pPicoTrack->MaxPts();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
+  StTrackTopologyMap map(pPicoTrack->TopologyMap0(),pPicoTrack->TopologyMap1());
 
-  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
+  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
+      (map.data(0) == 0 && map.data(1) == 0)) {
       mTpcTrackN++;
-  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
+  } else if (map.numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+  } else if (map.numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
       
-  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
+  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
+      (map.data(0) == 0 && map.data(1) == 0)) {
       
     // dca
     if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
@@ -460,8 +462,8 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     }
       
     mGoodTpcTrackN++;
-  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId) || 
-	     pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
+  } else if (map.numberOfHits(kFtpcEastId) || 
+	     map.numberOfHits(kFtpcWestId)) { // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -582,6 +584,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.24  2001/07/24 22:29:06  snelling
+// First attempt to get a standard root pico file again, added variables
+//
 // Revision 1.23  2001/05/22 20:17:17  posk
 // Now can do pseudorapidity subevents.
 //
