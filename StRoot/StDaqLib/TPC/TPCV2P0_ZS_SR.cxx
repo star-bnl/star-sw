@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.21 2003/09/02 17:55:33 perev Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.22 2003/10/01 20:55:06 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.22  2003/10/01 20:55:06  ward
+ * Protection against empty TPCSEQD banks.
+ *
  * Revision 1.21  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -321,6 +324,7 @@ int TPCV2P0_ZS_SR::initialize()
 	      lastbin = start+len-1;
 	      oldstart = start;
 	      if (work & 0x20 ) {//last sequence ?
+		assert(padrow>=1&&pad>=1); // Herb_Oct_01_2003, added this assert.
 		int nseq = Pad_array[padrow-1][pad-1].nseq;
 		if (nseq) { // only if there are sequences on this pad
 		  //allocate memory for Sequence arrays
@@ -351,6 +355,7 @@ int TPCV2P0_ZS_SR::initialize()
 
 	      while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; // skip until "switch=1"
 	      //	      return FALSE;
+	      assert(padrow>=1&&pad>=1); // Herb_Oct_01_2003, added this assert.
 	      int nseq = Pad_array[padrow-1][pad-1].nseq;
 	      if (nseq) { // only if there are sequences on this pad
 		// allocate memory for Sequence arrays
@@ -367,7 +372,16 @@ int TPCV2P0_ZS_SR::initialize()
 	    }    //  else { ...starting new pad without bit 5 set
 	  }      //  else { ...start|lastseq|len
 	}        // while (i<numseq)
-	int nseq = Pad_array[padrow-1][pad-1].nseq;
+	int nseq;
+
+	if (padrow <1 || pad <1) { // Jerome and Herb, Oct 1 2003.
+	  nseq = 0;
+	  if (iOld==-1) (void) printf("Did not loop over bank TPCSEQD");
+	  else          (void) printf("Sequence=%d for SEQD bank\n",numseq);
+	} else {
+	  nseq = Pad_array[padrow-1][pad-1].nseq;
+	}
+
 	if (nseq) { // only if there are sequences on this pad
 	  // allocate memory for Sequence arrays
 	  // make sure we don't do it more than once
