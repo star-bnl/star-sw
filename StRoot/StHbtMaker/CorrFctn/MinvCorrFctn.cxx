@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.5 2000/03/16 01:56:36 laue Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.6 2000/03/17 17:22:40 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
- * Revision 1.5  2000/03/16 01:56:36  laue
- * Copy constructor added to some correlation functions
+ * Revision 1.6  2000/03/17 17:22:40  laue
+ * Roberts new three particle correlations implemented.
  *
  * Revision 1.4  2000/01/25 17:34:44  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
@@ -121,7 +121,6 @@ StHbtString MinvCorrFctn::Report(){
 //____________________________
 inline void MinvCorrFctn::AddRealPair(const StHbtPair* pair){
   mNumerator->Fill(pair->mInv());
-
   mTagWriter->SetTag("positiveKaonsMeans",2, (float)pair->mInv() );  // <-- this is how to fill the tag
 }
 //____________________________

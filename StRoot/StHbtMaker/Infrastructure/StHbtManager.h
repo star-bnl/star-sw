@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.9 2000/02/18 21:32:24 laue Exp $
+ * $Id: StHbtManager.h,v 1.10 2000/03/17 17:23:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.10  2000/03/17 17:23:05  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.9  2000/02/18 21:32:24  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
  * on charge. This is important for front-loaded cuts.
@@ -64,8 +67,8 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtAnalysisCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtEventWriterCollection.hh"
-#include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtBaseAnalysis.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StHbtMaker/Base/StHbtEventWriter.hh"
 
@@ -82,8 +85,8 @@ public:
 
   // Gets and Sets...
   StHbtAnalysisCollection* AnalysisCollection();
-  StHbtAnalysis* Analysis(int n);  // Access to Analysis within Collection
-  void AddAnalysis(StHbtAnalysis*);
+  StHbtBaseAnalysis* Analysis(int n);  // Access to Analysis within Collection
+  void AddAnalysis(StHbtBaseAnalysis*);
 
   StHbtEventWriterCollection* EventWriterCollection();
   StHbtEventWriter* EventWriter(int n);// Access to EventWriter within Collection
@@ -105,7 +108,7 @@ public:
 };
 
 inline StHbtAnalysisCollection* StHbtManager::AnalysisCollection(){return mAnalysisCollection;}
-inline void StHbtManager::AddAnalysis(StHbtAnalysis* anal){mAnalysisCollection->push_back(anal);}
+inline void StHbtManager::AddAnalysis(StHbtBaseAnalysis* anal){mAnalysisCollection->push_back(anal);}
 
 inline StHbtEventWriterCollection* StHbtManager::EventWriterCollection(){return mEventWriterCollection;}
 inline void StHbtManager::AddEventWriter(StHbtEventWriter* writer){mEventWriterCollection->push_back(writer);}

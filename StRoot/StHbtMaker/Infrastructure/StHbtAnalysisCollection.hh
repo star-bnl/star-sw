@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysisCollection.hh,v 1.2 2000/02/01 00:33:31 laue Exp $
+ * $Id: StHbtAnalysisCollection.hh,v 1.3 2000/03/17 17:23:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysisCollection.hh,v $
+ * Revision 1.3  2000/03/17 17:23:05  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.2  2000/02/01 00:33:31  laue
  * namespaces changed to run on the new Solaris Compiler CC5
  * since we can use member templates in franks1Histo.hh we are doing it
@@ -29,14 +32,14 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::list;
 #endif
-class StHbtAnalysis;
+class StHbtBaseAnalysis;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StHbtAnalysis*, allocator<StHbtAnalysis*> >            StHbtAnalysisCollection;
-typedef list<StHbtAnalysis*, allocator<StHbtAnalysis*> >::iterator  StHbtAnalysisIterator;
+typedef list<StHbtBaseAnalysis*, allocator<StHbtBaseAnalysis*> >            StHbtAnalysisCollection;
+typedef list<StHbtBaseAnalysis*, allocator<StHbtBaseAnalysis*> >::iterator  StHbtAnalysisIterator;
 #else
-typedef list<StHbtAnalysis*>            StHbtAnalysisCollection;
-typedef list<StHbtAnalysis*>::iterator  StHbtAnalysisIterator;
+typedef list<StHbtBaseAnalysis*>            StHbtAnalysisCollection;
+typedef list<StHbtBaseAnalysis*>::iterator  StHbtAnalysisIterator;
 #endif
 
 #endif

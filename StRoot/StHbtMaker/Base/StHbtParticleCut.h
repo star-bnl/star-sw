@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.5 2000/03/16 01:54:37 laue Exp $
+ * $Id: StHbtParticleCut.h,v 1.6 2000/03/17 17:18:25 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.6  2000/03/17 17:18:25  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.5  2000/03/16 01:54:37  laue
  * Copy constructor added to all the cut base classes and to the
  * corrfctn base class
@@ -83,14 +86,14 @@ public:
   virtual StHbtParticleType Type()=0;
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
-  friend class StHbtAnalysis;
-  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+  friend class StHbtBaseAnalysis;
+  StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
 
 
 protected:
   double mMass;
   //  StHbtParticleType mType;            // tells whether cut is on Tracks or V0's
-  StHbtAnalysis* myAnalysis;
+  StHbtBaseAnalysis* myAnalysis;
 
 #ifdef __ROOT__
   ClassDef(StHbtParticleCut, 0)

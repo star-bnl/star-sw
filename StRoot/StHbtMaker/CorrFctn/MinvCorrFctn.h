@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.h,v 1.4 2000/03/16 01:56:36 laue Exp $
+ * $Id: MinvCorrFctn.h,v 1.5 2000/03/17 17:22:40 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.h,v $
+ * Revision 1.5  2000/03/17 17:22:40  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.4  2000/03/16 01:56:36  laue
  * Copy constructor added to some correlation functions
  *
@@ -51,8 +54,8 @@ public:
   virtual StHbtString Report();
   virtual void AddRealPair(const StHbtPair*);
   virtual void AddMixedPair(const StHbtPair*);
-
   virtual void Finish();
+  MinvCorrFctn* Clone();
 
   StHbt1DHisto* Numerator();
   StHbt1DHisto* Denominator();
@@ -74,10 +77,12 @@ private:
 inline  StHbt1DHisto* MinvCorrFctn::Numerator(){return mNumerator;}
 inline  StHbt1DHisto* MinvCorrFctn::Denominator(){return mDenominator;}
 inline  StHbt1DHisto* MinvCorrFctn::Difference(){return mDifference;}
+inline MinvCorrFctn* MinvCorrFctn::Clone() { MinvCorrFctn* c = new MinvCorrFctn(*this); return c;}
 inline MinvCorrFctn::MinvCorrFctn(const MinvCorrFctn& fctn) :StHbtCorrFctn() {
-  mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
-  mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
-  mDifference = new StHbt1DHisto(*(fctn.mDifference));
+    mTagWriter = StHbtTagWriter::Instance();  
+    mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
+    mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
+    mDifference = new StHbt1DHisto(*(fctn.mDifference));
 }
 
 
