@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.13 2003/05/23 22:13:04 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.14 2004/01/19 20:19:44 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.14  2004/01/19 20:19:44  zolnie
+ * added getEtaMin and getEtaMax inline members
+ *
  * Revision 1.13  2003/05/23 22:13:04  zolnie
  * SUN does not like inlines (why??)
  *
@@ -56,10 +59,11 @@ public:
   TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
   TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
   
-  inline Float_t getZ1()   const { return mZ1;  };
-  inline Float_t getZ2()   const { return mZ2;  };
-  inline Float_t getZSMD() const { return mZSMD;};
-
+  inline Float_t getZ1()     const { return mZ1;  };
+  inline Float_t getZ2()     const { return mZ2;  };
+  inline Float_t getZSMD()   const { return mZSMD;};
+  inline Float_t getEtaMin() const { return mEtaBin[0];       };
+  inline Float_t getEtaMax() const { return mEtaBin[mNumEta]; };
   
   // return the "mean" value of an eta bin
   inline Float_t getEtaMean(UInt_t eta) const {
