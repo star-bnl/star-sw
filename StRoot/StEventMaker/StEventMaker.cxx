@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.61 2003/12/01 18:22:31 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -57,7 +57,9 @@ static int r0outLen = 0;
    }
    if (t->iflag < 0)       			return 1;
    if ( StMath::tooBig(&(t->r0   ),r0Len   )) 	return 2; 
-   if ( StMath::tooBig(&(t->r0out),r0outLen)) 	return 3; 
+// if ( StMath::tooBig(&(t->r0out),r0outLen)) 	return 3; 
+   if ( StMath::tooBig(&(t->r0out),r0outLen))   {//fill by senseless but not carzy
+     for (int i=0;i<r0outLen;i++) {(&(t->r0out))[i]=1.e+5;}}
    return 0;
 }
 
@@ -1586,8 +1588,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.61 2003/12/01 18:22:31 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.62  2003/12/04 03:54:13  perev
+ * Set empty, instead of crazy outer geometry
+ *
  * Revision 2.61  2003/12/01 18:22:31  perev
  * Fix bug in bad track filter. Thanks to Helen
  *
