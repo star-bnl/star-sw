@@ -264,13 +264,7 @@ void StiDetectorContainer::buildDetectors(const char* buildDirectory)
     
     // if regular file, process as detector
     if(S_ISREG(fileStat.st_mode)){
-      StiDetector* layer;
-      if (mdraw) {
-        layer = new StiRootDrawableDetector();
-      }else {
-        layer = new StiDetector();
-      }
-      
+      StiDetector* layer = makeDetectorObject();
       layer->build(buildfile);
       if (layer->isOn()) push_back(layer);
 
@@ -281,6 +275,17 @@ void StiDetectorContainer::buildDetectors(const char* buildDirectory)
   closedir(pDir);
  
   return;
+}
+
+StiDetector* StiDetectorContainer::makeDetectorObject() const
+{
+    StiDetector* layer = 0;
+    if (mdraw) {
+        layer = new StiRootDrawableDetector();
+    }else {
+        layer = new StiDetector();
+    }
+    return layer;
 }
 
 void StiDetectorContainer::print() const

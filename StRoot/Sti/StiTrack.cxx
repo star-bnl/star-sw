@@ -3,8 +3,11 @@
 
 //StEvent
 #include "StEventTypes.h"
-#include "StiTrack.h"
+
+//Sti
+#include "StiHit.h"
 #include "StiConstants.h"
+#include "StiTrack.h"
 
 StiTrack::StiTrack()
 {

@@ -81,6 +81,8 @@ private:
     static StiDetectorContainer* sinstance;
 
 protected:
+    virtual StiDetector* makeDetectorObject() const;
+    
     bool mdraw;
     materialmap mmaterialmap;
     

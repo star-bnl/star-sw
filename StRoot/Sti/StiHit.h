@@ -14,70 +14,145 @@ class ostream;
 
 class StiHit : public TObject
 {
- public:
-  StiHit() {};
+public:
+    StiHit();
+    StiHit(const StiHit&);   
+    ~StiHit();
+
+    //Gets
+    double x() const;
+    double y() const;
+    double z() const;
+    double sxx() const;
+    double syy() const;
+    double szz() const;
+    double sxy() const;
+    double sxz() const;
+    double syz() const;
+    double refangle() const;
+    double position() const;
+    StHit* stHit() const;
+    bool   isUsed() const;
+
+    //Sets
+    void set(double refAngle, double position,double x, double y, double z, 
+	     double sxx, double sxy, double sxz, double syy, double syz, double szz);
+    
+    void setX(double);
+    void setY(double);
+    void setZ(double);
+    void setRefangle(double);
+    void setPosition(double);
+    void setStHit(StHit*);
+    void setUsed(bool);
+
+    //Operators
+    bool operator==(const StiHit&);
+    StiHit& operator=(const StiHit&);
+
+    //Action
+    void reset();
+    
+private:
   
-  StiHit(const StiHit& rhs) {
-    if (*this==rhs) return;
-    copyToThis(rhs);
-    return;
-  }
-  
-    ~StiHit() {};
-  
-  inline double x() const {return mx;}
-  inline double y() const {return my;}
-  inline double z() const {return mz;}
-  inline double sxx() const {return msxx;}
-  inline double syy() const {return msyy;}
-  inline double szz() const {return mszz;}
-  inline double sxy() const {return msxy;}
-  inline double sxz() const {return msxz;}
-  inline double syz() const {return msyz;}
-  inline double refangle() const {return mrefangle;}
-  inline double position() const {return mposition;}
-  inline StHit* stHit() const {return msthit;}
-  inline bool   isUsed() const { return mused;}
-  
-  inline void set(double refAngle, double position,
-		  double x, double y, double z, 
-		  double sxx, double sxy, double sxz, 
-		  double syy, double syz, double szz)
-    {
-      mrefangle = refAngle;
-      mposition = position;
-      mx = x;
-      my = y;
-      mz = z;
-      msxx = sxx;
-      msyy = syy;
-      mszz = szz;
-      msxy = sxy;
-      msxz = sxz;
-      msyz = syz;  
-      mused = false;
-    }
-  inline void setX(double val) {mx=val;}
-  inline void setY(double val) {my=val;}
-  inline void setZ(double val) {mz=val;}
-  inline void setRefangle(double val) {mrefangle=val;}
-  inline void setPosition(double val) {mposition=val;}
-  inline void setStHit(StHit* val) {msthit=val;}
-  inline void setUsed(bool val) { mused = val;}
-  inline bool operator==(const StiHit& rhs) {
+    void copyToThis(const StiHit&);
+    
+    double mrefangle;
+    double mposition;
+    double mx;
+    double my;
+    double mz; 
+    double msxx;
+    double msyy;
+    double mszz;
+    double msxy;
+    double msxz;
+    double msyz;
+    bool   mused;
+    StHit* msthit;
+};
+
+//Inlines-----------------------------------------------------------
+
+inline void StiHit::reset()
+{
+    mrefangle = mposition = mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
+    mused = false;
+    msthit = 0;
+}
+
+inline double StiHit::x() const {return mx;}
+
+inline double StiHit::y() const {return my;}
+
+inline double StiHit::z() const {return mz;}
+
+inline double StiHit::sxx() const {return msxx;}
+
+inline double StiHit::syy() const {return msyy;}
+
+inline double StiHit::szz() const {return mszz;}
+
+inline double StiHit::sxy() const {return msxy;}
+
+inline double StiHit::sxz() const {return msxz;}
+
+inline double StiHit::syz() const {return msyz;}
+
+inline double StiHit::refangle() const {return mrefangle;}
+
+inline double StiHit::position() const {return mposition;}
+
+inline StHit* StiHit::stHit() const {return msthit;}
+
+inline bool   StiHit::isUsed() const { return mused;}
+
+inline void StiHit::set(double refAngle, double position, double x, double y, double z, 
+			double sxx, double sxy, double sxz, double syy, double syz, double szz) 
+{
+    mrefangle = refAngle;
+    mposition = position;
+    mx = x;
+    my = y;
+    mz = z;
+    msxx = sxx;
+    msyy = syy;
+    mszz = szz;
+    msxy = sxy;
+    msxz = sxz;
+    msyz = syz;  
+    mused = false;
+}
+
+inline void StiHit::setX(double val) {mx=val;}
+
+inline void StiHit::setY(double val) {my=val;}
+
+inline void StiHit::setZ(double val) {mz=val;}
+
+inline void StiHit::setRefangle(double val) {mrefangle=val;}
+
+inline void StiHit::setPosition(double val) {mposition=val;}
+
+inline void StiHit::setStHit(StHit* val) {msthit=val;}
+
+inline void StiHit::setUsed(bool val) { mused = val;}
+
+inline bool StiHit::operator==(const StiHit& rhs)
+{
     return ( mrefangle==rhs.mrefangle && mposition==rhs.mposition &&
 	     mx==rhs.mx && my==rhs.my && mz==rhs.mz );
-  }
+}
 
-  inline StiHit& operator=(const StiHit& rhs) {
+inline StiHit& StiHit::operator=(const StiHit& rhs)
+{
     if (*this==rhs) return *this;
     copyToThis(rhs);
     return *this;
-  }
-  
- private:
-  
-  void copyToThis(const StiHit& rhs) {
+}
+
+inline void StiHit::copyToThis(const StiHit& rhs)
+{
     mrefangle = rhs.mrefangle;
     mposition = rhs.mposition;
     mx = rhs.mx;
@@ -90,23 +165,7 @@ class StiHit : public TObject
     msxz = rhs.msxz;
     msyz = rhs.msyz;
     mused = rhs.mused;
-  }
-  
-  double mrefangle;
-  double mposition;
-  double mx;
-  double my;
-  double mz; 
-  double msxx;
-  double msyy;
-  double mszz;
-  double msxy;
-  double msxz;
-  double msyz;
-  bool   mused;
-  StHit* msthit;
-
-};
+}
 
 //Non-member functions
 

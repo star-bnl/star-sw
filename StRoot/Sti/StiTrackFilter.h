@@ -4,7 +4,8 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "TObject.h"
-#include "StiTrack.h"
+
+class StiTrack;
 
 class StiTrackFilter : public TObject
 {

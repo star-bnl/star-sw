@@ -1,3 +1,5 @@
+
+#include "StiTrack.h"
 #include "StiTrackFilter.h"
 
 ClassImp(StiTrackFilter)
