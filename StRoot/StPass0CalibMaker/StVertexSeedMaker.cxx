@@ -26,6 +26,7 @@
 #include "TNtuple.h"
 #include "StTree.h"
 
+const char* defDir = "./StarDb/Calibrations/rhic";
 
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
@@ -267,7 +268,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.4 2002/03/20 00:40:42 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.5 2002/03/20 19:22:59 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -275,7 +276,7 @@ void StVertexSeedMaker::PrintInfo() {
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteTableToFile(){
   char filename[80]; 
-  sprintf(filename,"./StarDb/Calibrations/rhic/vertexSeed.%08d.%06d.C",date,time);
+  sprintf(filename,"%s/vertexSeed.%08d.%06d.C",defDir,date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new table to:\n  "
     << filename << endm;
   TString dirname = gSystem->DirName(filename);
@@ -312,7 +313,7 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteHistFile(){
   char filename[80]; 
-  sprintf(filename,"vertexseedhist.%08d.%06d.root",date,time);
+  sprintf(filename,"%s/vertexSeed.%08d.%06d.C",defDir,date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
     << filename << endm;
   TFile out(filename,"RECREATE");
@@ -545,8 +546,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.4 2002/03/20 00:40:42 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.5 2002/03/20 19:22:59 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.5  2002/03/20 19:22:59  genevb
+// changed output directory of histogram files
+//
 // Revision 1.4  2002/03/20 00:40:42  genevb
 // Addition of Aggregate feature, minor updates
 //
