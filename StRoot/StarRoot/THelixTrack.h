@@ -11,6 +11,7 @@ public:
 	THelixTrack(const THelixTrack &from);
 
 	void Set   (const double *xyz,const double *dir,double rho,const double *hxyz=0);
+	void Set   (double rho);
 	void Backward();
 	double Fit(const double *pnts,int npnts, int size = 3);
 	double Move(double step);
