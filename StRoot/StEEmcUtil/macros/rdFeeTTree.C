@@ -9,6 +9,7 @@ void rdFeeTTree(int max=200000) {
   
   TString fname="run00006.root";
   fname="miniDaq/feb24/run00003.root";
+  fname="/star/u/eemcdb/ezdaqRead/fee.root";
 
   TFile   *f  = new TFile(fname);
   TTree   *t  = (TTree *)f->Get("fee");
@@ -22,7 +23,12 @@ void rdFeeTTree(int max=200000) {
   bd->SetAddress(&des);
 
   Int_t nentries = (Int_t)t->GetEntries();
-  cout << nentries << endl;
+  printf(" N entries=%d\n",nentries);
+  if(nentries<=0) {
+    printf(" file=%s is empty, STOP\n",fname.Data());
+    return;
+  }
+
   Int_t nbe=0;
   Int_t nbd=0;
   for(Int_t i=0; i<nentries; i++) {
