@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.28 2002/02/03 21:17:11 dunlop Exp $
+ * $Id: StMagUtilities.cxx,v 1.29 2002/02/06 18:39:45 hardtke Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.29  2002/02/06 18:39:45  hardtke
+ * Use Database for tpc Field cage parameters
+ *
  * Revision 1.28  2002/02/03 21:17:11  dunlop
  * Fix the spacecharge instance, so that it gets called to
  * reset ONLY if the instance is non-zero, e.g. wanted.
@@ -203,6 +206,9 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
       XTWIST      = 1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisY() ; 
       // Y Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      = -1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisX() ;            
+      IFCShift = thedb->FieldCage()->InnerFieldCageShift();
+      EASTCLOCKERROR = 1e3*thedb->FieldCage()->EastClockError();
+      WESTCLOCKERROR = 1e3*thedb->FieldCage()->WestClockError();
       cout << "StMagUtilities::CommonSta  Using TPC parameters from DataBase. " << endl ; 
     }
   else
@@ -274,7 +280,8 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   cout << "StMagUtilities::YTWIST     =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharg =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
   cout << "StMagUtilities::IFCShift =  " << IFCShift << " cm" << endl ;
-
+  cout << "StMagUtilities::EastClockError = " << EASTCLOCKERROR << " mrad" << endl;
+  cout << "StMagUtilities::WestClockError = " << WESTCLOCKERROR << " mrad" << endl;
 
 }
 
