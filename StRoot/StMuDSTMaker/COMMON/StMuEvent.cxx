@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuEvent.cxx,v 1.2 2002/08/27 19:05:57 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -68,17 +68,30 @@ void StMuEvent::fill(const StEvent* event){
   if ( !event->info() ) throw StMuExceptionNullPointer("no event info",PF);
   if ( !event->runInfo() ) throw StMuExceptionNullPointer("no run info",PF);
   if ( !event->summary() ) throw StMuExceptionNullPointer("no event summary",PF);
-  if ( !event->triggerDetectorCollection() ) throw StMuExceptionNullPointer("no trigger detector collection",PF);
-  //  if (event->numberOfPrimaryVertices() != 1 ) throw StMuExceptionBadValue("!= 1 primary vertex");
+//  if (event->numberOfPrimaryVertices() != 1 ) throw StMuExceptionBadValue("!= 1 primary vertex");
 
 
   /// classes that we just copy from StEvent
   mRunInfo = *event->runInfo();
   mEventInfo = *event->info();
   mEventSummary = *event->summary();
-  mCtbTriggerDetector = event->triggerDetectorCollection()->ctb();
-  mZdcTriggerDetector = event->triggerDetectorCollection()->zdc();
-  mBbcTriggerDetector = event->triggerDetectorCollection()->bbc();
+
+  if ( !event->triggerDetectorCollection() ) {
+    DEBUGVALUE2(event->type());
+    DEBUGVALUE2(event->info()->time());
+    DEBUGMESSAGE2("no trigger detector collection, creating dummy");
+    StTriggerDetectorCollection trg;
+    mCtbTriggerDetector = trg.ctb();
+    mZdcTriggerDetector = trg.zdc();
+    mBbcTriggerDetector = trg.bbc();
+    mEventInfo.setTime(0);
+  }
+  else {
+    mCtbTriggerDetector = event->triggerDetectorCollection()->ctb();
+    mZdcTriggerDetector = event->triggerDetectorCollection()->zdc();
+    mBbcTriggerDetector = event->triggerDetectorCollection()->bbc();
+  }
+
   if (event->fpdCollection())
     mFpdCollection = *event->fpdCollection();
   if (event->l0Trigger())
@@ -96,6 +109,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.2  2002/08/27 19:05:57  laue
+ * Minor updates to make the muDst from simulation work
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *

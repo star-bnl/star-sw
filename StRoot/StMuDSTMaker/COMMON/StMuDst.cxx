@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.8 2002/08/20 19:55:48 laue Exp $
+ * $Id: StMuDst.cxx,v 1.9 2002/08/27 19:05:56 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -138,7 +138,7 @@ StEvent* StMuDst::createStEvent() {
   //   ev->setRichCollection(StRichCollection*);
   //   ev->setTofCollection(StTofCollection*);
   ev->setFpdCollection( new StFpdCollection(mu->fpdCollection()) );
-  //   ev->setTriggerDetectorCollection(StTriggerDetectorCollection*);
+  //ev->setTriggerDetectorCollection(muStTriggerDetectorCollection*);
   ev->setL0Trigger ( new StL0Trigger(mu->l0Trigger()) );
   //   ev->setL1Trigger ( new StL0Trigger(mu->l0Trigger()) );
   ev->setL3Trigger ( new StL3Trigger() );
@@ -215,6 +215,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.9  2002/08/27 19:05:56  laue
+ * Minor updates to make the muDst from simulation work
+ *
  * Revision 1.8  2002/08/20 19:55:48  laue
  * Doxygen comments added
  *
