@@ -14,12 +14,17 @@
 //StEvent
 #include "StEventTypes.h"
 
+//StMcEvent
+#include "StMcEventTypes.hh"
+
 //Association
 #include "StAssociationMaker/StTrackPairInfo.hh"
 
 //Sti includes
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiEvaluableTrack.h"
+#include "Sti/StiTrack.h"
+#include "Sti/StiKalmanTrack.h"
 
 //StiEvaluator includes
 #include "StiEvaluator.h"
@@ -58,12 +63,12 @@ void StiEvaluator::build()
     cout <<"StiEvaluator::build().\tOpening Root file, building TTree(s)"<<endl;
     //Must open TFile first if you want ntuple to disk
     mFile = new TFile("TestEvaluation.root","RECREATE");
-    mNtuple = new TNtuple("ntuple","This is the ntuple","a:b:c");
+    mNtuple = new TNtuple("ntuple","This is the ntuple","McID:McPt");
 
     //cout <<"Make TTree, here goes nothin'"<<endl;
 
     //cout <<"\tMake Entry"<<endl;
-    mEntry = new TreeEntry();
+    mEntry = new TrackEntry();
 
     //cout <<"\tDeclare Tree"<<endl;
     mTree = new TTree("TestTree","The Test Tree");
@@ -72,7 +77,7 @@ void StiEvaluator::build()
     Int_t splitlevel = 1;
 
     //cout <<"\tMake Branch, maybe seg-fault?"<<endl;
-    mTree->Branch("TestBranch","TreeEntry",&mEntry, buffsize, splitlevel);
+    mTree->Branch("TestBranch","TrackEntry",&mEntry, buffsize, splitlevel);
 
     //cout <<"\tSo far so good"<<endl;
     cout <<"\tdone"<<endl;
@@ -91,8 +96,8 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
     //typedef vector<StiTrack*> stitrackvec; ...
 
     //Temporary test of filling
-    fillTuple();
-    mTree->Fill();
+    //fillTuple();
+    //mTree->Fill();
     
     for (StiTrackContainer::stitrackvec::const_iterator it=trackStore->begin(); it!=trackStore->end(); ++it) {
 	StiTrack* temp = (*it);
@@ -109,15 +114,19 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t.Associated Pair==0.  Abort"<<endl;
 	    return;
 	}
-	//Call some function to actuall fill TTree object(s)
+	//Call some function to actually fill TTree object(s)
+	mEntry->setMcTrack(associatedPair->partnerMcTrack());
+	mEntry->setTptTrack(associatedPair->partnerTrack());
+	//mEntry->setStiTrack(temp);
+	fillTree(temp, associatedPair);
+	mTree->Fill();
+
     }
 }
 
-void StiEvaluator::fillTuple()
+void StiEvaluator::fillTree(StiTrack *track, StTrackPairInfo *associatedPair)
 {
-    for (double x=1.; x<10.; ++x) {
-	mNtuple->Fill(x, 2.*x, 3.*x);
-    }
+
 
     //Try the tree!
     mEntry->clear();
@@ -125,57 +134,94 @@ void StiEvaluator::fillTuple()
     mEntry->setA(1.2);
     mEntry->setB(2.3);
 
-    for (double val=100.; val<1000.; ++val) {
-	ArrayEntry myArrayEntry;
-	myArrayEntry.setVal(val);
-	mEntry->addArrayEntry(myArrayEntry);
-    }
+    
+    //ArrayEntry myArrayEntry;
 
+    mEntry->setMcTrack(associatedPair->partnerMcTrack());
+    mEntry->setTptTrack(associatedPair->partnerTrack());
+
+    
+    //myArrayEntry.setStiTrack(track);
+
+
+    //mNtuple->Fill(getMcTrackID(),getMcTrackPt());
+
+    //mEntry->addArrayEntry(myArrayEntry);
+   
 }
 
 //Temp, to be moved to own file
 
-ClassImp(ArrayEntry)
 
-void ArrayEntry::setVal(double val)
-{
-    mval=val;
+
+double TrackEntry::getMcTrackID(){
+  return(McTrackID);
 }
 
-ClassImp(TreeEntry)
+double TrackEntry::getMcTrackPt(){
+  return(McTrackPt);
+}
+
+void TrackEntry::setTptTrack(StTrack *newtrack)
+{
+  const StThreeVectorF& mom = newtrack->geometry()->momentum();
+  TptTrackPt = mom.perp();
+  TptTrackQ  = newtrack->geometry()->charge();
+  TptTrackPsi = newtrack->geometry()->psi();
+}
+
+void TrackEntry::setStiTrack(StiTrack *newtrack)
+{
+  /*const StThreeVectorD& mom = newtrack->geometry()->momentum();
+  StiTrackPt = mom.perp();
+  StiTrackQ  = newtrack->geometry()->charge();
+  StiTrackPsi = newtrack->geometry()->psi();*/
+}
+
+void TrackEntry::setMcTrack(StMcTrack *newtrack)
+{
+  //cout << "Setting MC ID " << newtrack->geantId();
+  McTrackPt  = newtrack->pt();
+  McTrackID  = newtrack->geantId();
+}
+
+ClassImp(TrackEntry)
     
-    void TreeEntry::setA(double val)
+void TrackEntry::setA(double val)
 {
     ma=val;
 }
 
-TreeEntry::TreeEntry() : mArray(new TClonesArray("ArrayEntry",50)), mCounter(0)
+TrackEntry::TrackEntry() : mArray(new TClonesArray("ArrayEntry",50)), mCounter(0)
 {
 }
 
-void TreeEntry::clear()
+void TrackEntry::clear()
 {
     mArray->Clear();
     mCounter=0;
 }
 
-void TreeEntry::addArrayEntry(const ArrayEntry& val)
+/*void TrackEntry::addArrayEntry(const ArrayEntry& val)
 {
     TClonesArray& cArr = *mArray;
     new(cArr[mCounter++]) ArrayEntry(val);
-}
+    }*/
 
-void TreeEntry::setB(double val)
+void TrackEntry::setB(double val)
 {
     mb=val;
 }
 
-double TreeEntry::a() const
+double TrackEntry::a() const
 {
     return ma;
 }
 
-double TreeEntry::b() const
+double TrackEntry::b() const
 {
     return mb;
 }
+
+
+
