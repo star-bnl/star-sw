@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.51 1999/12/07 15:44:25 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.52 2000/01/04 21:51:11 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.52  2000/01/04 21:51:11  fisyak
+// Move TGeant3 to root4star
+//
 // Revision 1.51  1999/12/07 15:44:25  fisyak
 // Add geane, new TGeant3 from Alice
 //
@@ -233,12 +236,49 @@ extern "C" int isprint (int);
 #endif
 # define csaddr csaddr_
 # define csjcal csjcal_
+#define    agnzgete	 F77_NAME(agnzgete,AGNZGETE)
+
+#define    geometry	 F77_NAME(geometry,GEOMETRY)
+#define    agstroot	 F77_NAME(agstroot,AGSTROOT)
+#define    g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
+#define    agvolume      F77_NAME(agvolume,AGVOLUME)
+#define    rootmaptable  F77_NAME(rootmaptable,ROOTMAPTABLE)
 typedef long int (*addrfun)(); 
-extern "C" void type_of_call *csaddr_(char *name, int l77name=0);
-extern "C" long int type_of_call csjcal_(
-                            addrfun *fun, /* addres of external routine */
-                            int  *narg,   /* number   of arguments      */
-                            ...);         /* other narg arguments       */
+R__EXTERN "C" {
+  void type_of_call geometry();
+  Int_t type_of_call agstroot();
+  void type_of_call *csaddr_(char *name, int l77name=0);
+  long int type_of_call csjcal_(
+				addrfun *fun, /* addres of external routine */
+				int  *narg,   /* number   of arguments      */
+				...);         /* other narg arguments       */
+  
+  Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
+  void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
+  void type_of_call gfxzrm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,
+			      Float_t&,Float_t&,Float_t&,Float_t&);
+  void type_of_call agnzgete (Int_t &ILK,Int_t &IDE,
+			      Int_t &NPART,Int_t &IRUN,Int_t &IEVT,DEFCHARD CGNAM,
+			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH DEFCHARL);
+  void type_of_call dzddiv   (Int_t &,Int_t &,DEFCHARD,DEFCHARD,
+			      Int_t &,Int_t &,Int_t &,Int_t & DEFCHARL DEFCHARL);
+/*
+* Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
+*         IDE   - ID of event in gate ( ZEBRA IDN)                        *
+* Output: NPART - Number of particles in event record                     *
+*         IRUN  - run number as recorded by generator                     *
+*         IEVT  - event number as recorded by generator                   *
+*         CGNAM - generator name                                          *
+*         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
+*         IWTFL - weight flag                                             *
+*         WEIGH - event weight                                            *
+*/
+  void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
+				  DEFCHARL DEFCHARL DEFCHARL);
+  Int_t type_of_call agvolume(St_Node*&,Float_t*&,Float_t*&,Float_t*&,
+			      Int_t&,Int_t&,Float_t*&,Int_t&);
+}
+
 
 Quest_t  *cquest; 
 Gclink_t *clink; 
@@ -342,11 +382,10 @@ Int_t St_geant_Maker::Make()
 
     // check EoF
     if (cquest->iquest[0]) {return kStEOF;}
-
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
-    geant3->Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
+    Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
 
     fEvtHddr->SetRunNumber(irun);
     fEvtHddr->SetEventNumber(ievt);
@@ -517,9 +556,9 @@ Int_t St_geant_Maker::Make()
 void St_geant_Maker::LoadGeometry(Char_t *option){
   Init(); 
   if (strlen(option)) Do (option); 
-  geant3->Geometry();
+  Geometry();
   Do("gclose all");
-  geant3->Agstroot();
+  Agstroot();
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Draw()
@@ -529,7 +568,7 @@ void St_geant_Maker::Draw()
   Int_t one = 1;
   Char_t *path = " ";
   Char_t *opt = "IN";
-  geant3->Dzddiv (two,zero,path,opt,one,zero,one,one);
+  Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Do(const Char_t *job)
@@ -660,7 +699,7 @@ St_Node *St_geant_Maker::MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t 
 
 	Ierr = geant3->Glvolu(nlevv, Names, Numbers);
 
-	geant3->Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
+	Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
 		       theta1,phi1, theta2,phi2, theta3,phi3, type);
         St_Node *newnode = (St_Node *) topnode->FindObject(namem.Data());
 
@@ -810,7 +849,7 @@ St_Node *St_geant_Maker::Work()
  
   printf(" looping on agvolume \n");
   //   ===============================================================
-  while (geant3->Agvolume(node,volu,position,mother,who,copy,p,npar)) 
+  while (Agvolume(node,volu,position,mother,who,copy,p,npar)) 
   { // ===============================================================
   
     typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
@@ -904,7 +943,7 @@ St_Node *St_geant_Maker::Work()
     }
 
     if (node)
-    {  geant3->Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
+    {  Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
                        theta2,phi2, theta3,phi3, type);
        TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
        node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
@@ -955,7 +994,7 @@ Int_t St_geant_Maker::SetInputFile(const char *file)
   Do((const char*)kuip); 
   if (cquest->iquest[0]) {return kStEOF;}
   Do("gclose all");
-  geant3->Agstroot();
+  Agstroot();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -973,30 +1012,68 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 }
 //_____________________________________________________________________________
 void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const Char_t* spec, 
-                                                      Int_t *k, Char_t *iq, 
+                                                      Int_t &k, Char_t *iq, 
 				const int lCdest,const int lTable, const int lSpec)
 { 
   Char_t *Cdest = new char[(lCdest+1)]; strncpy(Cdest,cdest,lCdest); Cdest[lCdest] = 0;
   Char_t *Table = new char[(lTable+1)]; strncpy(Table,table,lTable); Table[lTable] = 0;
   Char_t *Spec  = new char[(lSpec+1)];  strncpy(Spec,spec,lSpec);    Spec[lSpec]   = 0;
-  St_geant_Maker::RootMapTable(Cdest,Table, Spec, k, iq); 
+  St_geant_Maker::RootMapTable(Cdest,Table,Spec, k, iq); 
   delete [] Cdest;
   delete [] Table;
   delete [] Spec;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
-                                                      Int_t *k, Char_t *iq)
+                                                      Int_t &k, Char_t *iq)
 {
   TString TableName(Table); 
   TString t = TableName.Strip();
   t.ToLower();
 
   // Use St_Table::New(...)  when it is available as follows:
-  St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,*k);
+  St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,k);
   if (table) {fgGeom->Add(table); table->SetBit(kIsNotOwn);}
   else       cout << "Dictionary for table :" << t.Data() 
                   << " has not been defined yet. Skip it" 
                   << endl;
+}
+//_____________________________________________________________________________
+Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
+  return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
+}
+//_____________________________________________________________________________
+Int_t St_geant_Maker::Agvolume(St_Node *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
+		       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
+  return agvolume(node,par,pos,mot,who,copy,par1,npar);
+}
+//_____________________________________________________________________________
+void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
+			Int_t &NPART,Int_t &IRUN,Int_t &IEVT,const Char_t *CGNAM,
+			Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH){
+  agnzgete (ILK,IDE,NPART,IRUN,IEVT,PASSCHARD(CGNAM),VERT,IWTFL,WEIGH
+	    PASSCHARL(CGNAM));
+}
+//______________________________________________________________________________
+void St_geant_Maker::Geometry() {geometry();}
+//______________________________________________________________________________
+Int_t St_geant_Maker::Agstroot() {return agstroot();}
+//_____________________________________________________________________________
+void St_geant_Maker::Gfxzrm(Int_t & Nlevel, 
+		     Float_t &x, Float_t &y, Float_t &z,
+		     Float_t &Theta1, Float_t & Phi1,
+		     Float_t &Theta2, Float_t & Phi2,
+		     Float_t &Theta3, Float_t & Phi3,
+		     Float_t &Type){
+	gfxzrm(Nlevel, x, y, z,
+	       Theta1, Phi1, 
+	       Theta2, Phi2, 
+	       Theta3, Phi3, Type);
+} 
+//_____________________________________________________________________________
+void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const Char_t* opt,
+		     Int_t& one,Int_t &two,Int_t &three,Int_t& iw){
+  dzddiv (idiv,Ldummy,PASSCHARD(path),PASSCHARD(opt),
+	  one,two,three,iw PASSCHARL(path) PASSCHARL(opt));
 }
 

@@ -6,11 +6,5 @@
 #pragma link C++ class St_geant_Maker;
 #pragma link C++ class StarMC;
 #pragma link C++ class TGeant3;
-#pragma link C++ class StGeant3GeometryGUI-;
-#pragma link C++ class StGuiGeomMain;
-#pragma link C++ class StGuiGeomDialog;
-#pragma link C++ class StGUISliders;
-#pragma link C++ class StDrawVolume-;
-#pragma link C++ class THIGZ;
 #pragma link C++ class TPaveTree;
 #endif

@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.19 1999/12/07 15:44:25 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.20 2000/01/04 21:51:11 fisyak Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -10,16 +10,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
 class St_Node;
-#ifndef __CINT__
-#include "StarCallf77.h" 
-#define rootmaptable_ F77_NAME(rootmaptable,ROOTMAPTABLE)
-#define agvolume_     F77_NAME(agvolume,AGVOLUME)
-extern "C" {
-R__EXTERN  void type_of_call rootmaptable_(const Char_t *,const Char_t *,const Char_t*, Int_t *, Char_t *,const int ,const int, const int);
-R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,Float_t**,
-                                       Int_t*,Int_t*,Float_t**,Int_t*);
-}
-#endif
 class TGeant3;
 class TRotMatrix;
 class St_geant_Maker : public StMaker {
@@ -61,13 +51,32 @@ public:
 
    St_Node* GetNode() { return fNode; }
    static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
-			    Int_t *k, Char_t *iq);
+			    Int_t &k, Char_t *iq);
+   virtual void     Geometry();
+   virtual Int_t    Agstroot();
+   virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
+   virtual Int_t    Agvolume(St_Node *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
+			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
+   virtual void     Agnzgete (Int_t &ILK, Int_t &IDE,
+			      Int_t &NPART, Int_t &IRUN,
+			      Int_t &IEVT, const Char_t *CGNAM,
+			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH);
+   
+   virtual void     Gfxzrm(Int_t & Nlevel, 
+		     Float_t &x, Float_t &y, Float_t &z,
+		     Float_t &Theta1, Float_t & Phi1,
+		     Float_t &Theta2, Float_t & Phi2,
+		     Float_t &Theta3, Float_t & Phi3,
+		     Float_t &Type);  
+   virtual void     Dzddiv(Int_t& idiv ,Int_t &Ldummy,
+			   const Char_t* path,const Char_t* opt,
+			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
    
  protected:
    static St_DataSet *fgGeom; //!
    static TGeant3    *geant3; //!
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.19 1999/12/07 15:44:25 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.20 2000/01/04 21:51:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
