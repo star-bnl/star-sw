@@ -1,8 +1,12 @@
-* $Id: g2t_get_kine.F,v 1.12 2000/01/13 02:57:04 nevski Exp $
+* $Id: g2t_get_kine.F,v 1.13 2000/01/23 19:04:43 nevski Exp $
+*
 * $Log: g2t_get_kine.F,v $
+* Revision 1.13  2000/01/23 19:04:43  nevski
+* unused variables deleted
+*
+*
 * Revision 1.12  2000/01/13 02:57:04  nevski
 * particle-track relation corrected
-*
 *
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 CC: FILE:        g2t_get_kine.F
@@ -29,7 +33,7 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv, Md
       REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
-     >          d,P(4),V(3),am,time,Vcut/0.0010/
+     >          P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
       Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
       INTEGER             NUMPRIM,NUMFINS

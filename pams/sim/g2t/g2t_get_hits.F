@@ -1,5 +1,8 @@
-* $Id: g2t_get_hits.F,v 1.23 2000/01/12 00:10:45 nevski Exp $
+* $Id: g2t_get_hits.F,v 1.24 2000/01/23 19:04:42 nevski Exp $
 * $Log: g2t_get_hits.F,v $
+* Revision 1.24  2000/01/23 19:04:42  nevski
+* unused variables deleted
+*
 * Revision 1.23  2000/01/12 00:10:45  nevski
 * add cvs headers
 *
@@ -62,16 +65,15 @@ C :>--------------------------------------------------------------------
 *KEND
 
 * External functions:
-      Integer         G2T_GET_HITS, AgHITSET, AgHITGET, G2T_VOLUME_ID, 
-     >                TDM_GET_COLUMN, TDM_GET_CCOUNT, ISLFLAG, IG2TPOS
+      Integer         G2T_GET_HITS, AgHITGET, G2T_VOLUME_ID, 
+     >                TDM_GET_COLUMN, TDM_GET_CCOUNT, ISLFLAG
 * Local variables
-      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),IPOS,Nbytpw,Iprin,Jtra,
+      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),Nbytpw,Iprin,Jtra,
      >                LenT,LenH,Npar,Ish,nh,i,j,k,l,e,f,m,n,ip,in,Ip0,Nu,n0
       Real            G2T_FIELD,Par(50),xxx(10),U(50),Pt,Vr,dphi,dtr,FieldZ
-      Character*4     Csys*4/' '/,cnam*4,col*80,typ*80,cp*20
+      Character*4     Csys*4/' '/,col*80,typ*80,cp*20
       Parameter       (Nbytpw=4)
       Equivalence     (NAPART,cp)
-      IPOS(cnam) =    IG2TPOS(cnam,Gname,Lnam0)
 * - -    
       G2T_GET_HITS = STAFCV_BAD
       Iprin  = ISLFLAG('G2TM','PRIN')
@@ -198,16 +200,5 @@ C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
 
  190  enddo
  200  G2T_GET_HITS = STAFCV_OK
-      end
-
-*****************************************************************************
-
-      Function IG2TPOS(name,table,L)
-      character*4  name,table(L)
-      do i=1,L
-         Ig2tpos=i
-         if (name.eq.table(i)) return
-      enddo
-         Ig2tpos=0
       end
 
