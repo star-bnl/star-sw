@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.49 1999/11/13 02:40:55 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.50 1999/11/13 17:30:05 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.50  1999/11/13 17:30:05  fine
+// scope for i within for loop fixed
+//
 // Revision 1.49  1999/11/13 02:40:55  fisyak
 // Add gclose
 //
@@ -361,7 +364,8 @@ Int_t St_geant_Maker::Make()
 
     fEvtHddr->SetRunNumber(irun);
     fEvtHddr->SetEventNumber(ievt);
-    for (int i=0; i<20 && isprint(cgnam[i]); i++);
+    int i;
+    for (i=0; i<20 && isprint(cgnam[i]); i++);
     cgnam[i] = 0;
     
     if (i) fEvtHddr->SetEventType(cgnam);
@@ -829,7 +833,7 @@ St_Node *St_geant_Maker::Work()
     //   Int_t    medium  = (Int_t)  volu[3]; 
     Int_t    np      = (Int_t)  volu[4];
     Float_t* p0      = volu+6;
-    Float_t* att     = volu+6+np;
+    Float_t* att     = p0+np;
     Char_t   name[]  = {0,0,0,0,0};
     Char_t   nick[]  = {0,0,0,0,0};
     float    xx[3]   = {0.,0.,0.};
