@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.6 1998/05/15 21:52:26 fisyak Exp $
+#  $Id: fast,v 1.7 1998/05/15 21:54:02 fisyak Exp $
 #  $Log: fast,v $
+#  Revision 1.7  1998/05/15 21:54:02  fisyak
+#  check commitlog once again
+#
 #  Revision 1.6  1998/05/15 21:52:26  fisyak
 #  check commitlog once again
 #
@@ -40,7 +43,7 @@
 #$ -m bes        # Mail at beginning/end/on suspension
 #$ -M fisyak@bnl.gov       # Send mail to these users
 #$ -s /usr/local/bin/tcsh # under what shell to execute
-#  
+#    
 # Go to the directory from where job was submitted.
 #
 echo Starting job execution at `date`
