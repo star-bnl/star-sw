@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.124 2000/01/25 16:06:34 fisyak Exp $
+// $Id: bfc.C,v 1.125 2000/01/28 21:06:57 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -37,7 +37,7 @@ void bfc(const Int_t First,
   // Chain = "minidaq" read miniDAQ xdf file and process 
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
-
+  
   chain->SetFlags(Chain);
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
@@ -67,17 +67,38 @@ void bfc(const Int_t First,
   if (chain->GetOption("TCL") && chain->GetOption("Eval")) {
     St_tcl_Maker *tclMk= (St_tcl_Maker *) chain->GetMaker("tpc_hits");
     if (tclMk) {
-	tclMk->tclPixTransOn(); //Turn on flat adcxyz table
-	tclMk->tclEvalOn();     //Turn on the hit finder evaluation
+      tclMk->tclPixTransOn(); //Turn on flat adcxyz table
+      tclMk->tclEvalOn();     //Turn on the hit finder evaluation
     }
   }
   if (chain->GetOption("TPT")) {
     St_tpt_Maker *tptMk= (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
     if (tptMk && chain->GetOption("MINIDAQ"))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
     if (tptMk && chain->GetOption("Eval")) {
-	tptMk->tteEvalOn();   //Turn on the tpc evaluation
-	tptMk->tptResOn();    // Turn on the residual table
+      tptMk->tteEvalOn();   //Turn on the tpc evaluation
+      tptMk->tptResOn();    // Turn on the residual table
     }
+  }
+  if (chain->GetOption("McAss")) {
+    // Define the cuts for the Associations
+
+    StMcParameterDB* parameterDB = StMcParameterDB::instance();  
+    // TPC
+    parameterDB->setXCutTpc(.5); // 5 mm
+    parameterDB->setYCutTpc(.5); // 5 mm
+    parameterDB->setZCutTpc(.2); // 2 mm
+    parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
+    // FTPC
+    parameterDB->setRCutFtpc(.3); // 3 mm
+    parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
+    parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
+    // SVT
+    parameterDB->setXCutSvt(.1); // 1 mm
+    parameterDB->setYCutSvt(.1); // 1 mm
+    parameterDB->setZCutSvt(.1); // 1 mm
+    parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
+    
+    
   }
   if (chain->GetOption("V0") && chain->GetOption("Eval")) {
     StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
@@ -89,49 +110,50 @@ void bfc(const Int_t First,
   }
   printf ("QAInfo:Run on %s in %s\n",
 	  gSystem->HostName(),
-	  gSystem->WorkingDirectory());
-  printf ("QAInfo: with %s\n", chain->GetCVS());
-   
-  // Init the chain and all its makers
-  if (Last >= 0) {
-    Int_t iInit = chain->Init();
-    // skip if any
-    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
-    St_XDFFile *xdf_out = chain->GetXdfOut();
-    if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-    if (geant && First > 1) geant->Skip(First-1);
-    else {
-      StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
-      if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
-    }
+	gSystem->WorkingDirectory());
+printf ("QAInfo: with %s\n", chain->GetCVS());
+
+// Init the chain and all its makers
+if (Last >= 0) {
+  Int_t iInit = chain->Init();
+  // skip if any
+  St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
+  St_XDFFile *xdf_out = chain->GetXdfOut();
+  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+  if (geant && First > 1) geant->Skip(First-1);
+  else {
+    StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
+    if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
   }
-  TBenchmark evnt;
-  Int_t iMake = 0, i = First;
- EventLoop: if (i <= Last && iMake < kStEOF) {
-   evnt->Reset();
-   evnt->Start("QAInfo:");
-   chain->Clear();
-   iMake = chain->Make(i);
-   if (iMake <kStEOF && xdf_out){
-     St_DataSet *dstSet = chain->GetInputDS("dst");
-     if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
-   }
-   //    gSystem->Exec("ps ux");
-   evnt->Stop("QAInfo:");
-   evnt->Show("QAInfo:");
-   printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	   i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
-	   iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
-   i++; goto EventLoop;
- }
-  fflush(stdout);
-  printf ("QAInfo:Run completed ");
-  gSystem->Exec("date");
-  if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
-  {
-    TDatime t;
-    printf ("\nQAInfo:Run is finished at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
+  
+}
+TBenchmark evnt;
+Int_t iMake = 0, i = First;
+EventLoop: if (i <= Last && iMake < kStEOF) {
+  evnt->Reset();
+  evnt->Start("QAInfo:");
+  chain->Clear();
+  iMake = chain->Make(i);
+  if (iMake <kStEOF && xdf_out){
+    St_DataSet *dstSet = chain->GetInputDS("dst");
+    if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
   }
+  //    gSystem->Exec("ps ux");
+  evnt->Stop("QAInfo:");
+  evnt->Show("QAInfo:");
+  printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	  i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
+	  iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
+  i++; goto EventLoop;
+}
+fflush(stdout);
+printf ("QAInfo:Run completed ");
+gSystem->Exec("date");
+if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
+{
+  TDatime t;
+  printf ("\nQAInfo:Run is finished at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
+}
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
