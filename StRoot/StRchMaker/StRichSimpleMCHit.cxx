@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleMCHit.cxx,v 1.1 2000/05/23 16:54:22 lasiuk Exp $
+ * $Id: StRichSimpleMCHit.cxx,v 1.2 2000/06/16 02:07:04 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -9,13 +9,16 @@
  *
  ***************************************************************************
  * $Log: StRichSimpleMCHit.cxx,v $
+ * Revision 1.2  2000/06/16 02:07:04  lasiuk
+ * explicit pathnames for different Maker files
+ *
  * Revision 1.1  2000/05/23 16:54:22  lasiuk
  * Initial Revision
  *
  ***************************************************************************/
 #include "StRichSimpleMCHit.h"
 #ifdef __ROOT__
-#include "StRichMCHit.h"
+#include "StEvent/StRichMCHit.h"
 #endif
 
 StRichSimpleMCHit::StRichSimpleMCHit() {/* nopt */}
