@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.83 2004/04/29 02:03:37 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.84 2004/07/22 20:47:40 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.84  2004/07/22 20:47:40  perev
+// Cleanup. 0 nrows for no table found
+//
 // Revision 1.83  2004/04/29 02:03:37  jeromel
 // y2004a addded
 //
@@ -108,29 +111,6 @@
 #include "TUnixTime.h"
 #include "StDbBroker/StDbBroker.h"
 
-static const char *aliases[]={
-   "sd97",     "sd98", "year_1a", "year_1b",  "year_1c",
-   "es99",     "er99",    "dc99", "year_1d",  "year_1e",
-"year_1h",  "year_2a", "year_2b","year2001", "year2003", 
- "y2003x",   "y2003a",  "y2003b",   "y2004",   "y2004x",
- "y2004a",          0
-};   
-
-static const int   dates[]=  {
- 19970101,   19980101,  19990101,  19990501,   19991001,
- 19990615,   19990616,  19991206,  19991101,   19991201,
- 20000614,   20010610,  20010501,  20010615,   20021115, 
- 20021115,   20021115,  20021115,  20031120,   20031120,
- 20031120,          0
-};
-
-static const int   times[]=  {
-        0,          0,         0,         0,          0,
-        0,     120000,     80000,         0,          0,
-   175430,          0,         0,         0,          0,        
-        0,          0,         0,         0,          0,
-        0,          0
-};
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
 
@@ -426,6 +406,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   }
 
   if (!dbstruct) {
+    dat->SetNRows(0);
     if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
     return 1;
   }
@@ -874,26 +855,6 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
   TUnixTime ut;
   ut.SetGTime(idate,itime);
   fMaxEntryTime = ut.GetUTime();
-}
-//_____________________________________________________________________________
-Int_t St_db_Maker::AliasDate(const char *alias)
-
-{
-
-  int n = strcspn(alias," ."); if (n<4) return 0;
-  int i;
-  for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
-  return dates[i];
-}
-//_____________________________________________________________________________
-Int_t St_db_Maker::AliasTime(const char *alias)
-
-{
-
-  int n = strcspn(alias," ."); if (n<4) return 0;
-  int i;
-  for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
-  return times[i];
 }
 
 
