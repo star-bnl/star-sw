@@ -100,7 +100,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
                  LabelTr,LabelVx,ge_pid,eg_pid,StartVx,StopVx,i,
                  eg_proc,parent
    Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,
-                 PP(3),vert(4),UBUF(10),a,b
+                 PP(3),vert(4),UBUF(10)
    integer       istat,eg_pid,moth,daut,num(5)
    data          num/1,1,0,0,0/
    character     Cform*8 /'/6I 9F'/
@@ -122,7 +122,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    }
    else If Line(1:5)=='EVENT'
    { 
-     read2 (line(7:),*,end=:a:)  Ieven,Ntrac,Nvert,a,b
+     read2 (line(7:),*,end=:a:)  Ieven,Ntrac,Nvert
                          (' gstar_ReadNew: EVENT :',3i8,2f8.3)
      :a: if (Ieven<=-999) goto :e: " end of data "
    }
