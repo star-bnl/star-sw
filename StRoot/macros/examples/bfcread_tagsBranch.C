@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.3 2000/03/21 15:45:08 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -11,9 +11,10 @@
 //                - for first event, prints out values of all tables & tags
 //                - for rest of events, counts # tags for each table
 //
+// branches -> tables
+// leaves   -> entries (tags) in tables
 //
 //=======================================================================
-
 
 void bfcread_tagsBranch(const char *MainFile=
  "/afs/rhic/star/data/samples/gstar.tags.root")
@@ -45,10 +46,13 @@ void bfcread_tagsBranch(const char *MainFile=
 
   TString file;
 
-//Loop over entries in histograms (events written to the tags.root file)
+//Loop over entries (events written to the tags.root file)
 //test that all events can be read in & print out values for first event
 
   Int_t countEvents=0;
+  Int_t countTables=0;
+  Int_t countTagsTot[4]={0,0,0,0};
+
   for (Int_t k=0;k<chain->GetEntries();k++) {
 
     chain->GetEntry(k);
@@ -61,39 +65,51 @@ void bfcread_tagsBranch(const char *MainFile=
 	file = (files->UncheckedAt(chain.GetTreeNumber()))->GetTitle();
         if (!k) cout <<"    now reading file: " << file.Data() << endl;
 
-        cout <<" ----- Event # " << k << endl;
+        cout <<" ----- Event # " << countEvents << endl;
     
 	//must renew leaves for each file
 	leaves = chain.GetListOfLeaves();
 
-// Now loop over leaves and print out branch,tag name and value - first event only	
-        Int_t countLeaf=0;
-        Int_t count[4]={0,0,0,0};
+// Now loop over leaves (values or tags in tables)
+
+        Int_t countTags[4]={0,0,0,0};
 
 	for (Int_t l=0;l<nleaves;l++) {
 	  leaf = (TLeaf*)leaves->UncheckedAt(l);
           branch = leaf->GetBranch();
-          countLeaf++;
-          count[branches->IndexOf(branch)]++;
 
+          countTags[branches->IndexOf(branch)]++;
+          countTagsTot[branches->IndexOf(branch)]++;
+         
+ 
+//print out branch,tag name and value - first event only
 	  if (!k) 
           { 
             cout << 
-	    "   ... table #, name: " << branches->IndexOf(branch) <<
-	    ", " << branch->GetName() << 
-            " -- has  tag: " << leaf->GetName() <<
-            " = " << leaf->GetValue() << endl; 
+	      " QAInfo: table#,name: " << branches->IndexOf(branch) <<
+	      ", " << branch->GetName() << 
+              " -- has  tag: " << leaf->GetName() <<
+              " = " << leaf->GetValue() << endl; 
 	  }
-
 	}
-        for (Int_t m=0; m<4; m++){
-          cout << "   table "<< m << " has " << count[m] << " tags" <<endl;
-        }
 
+// print out for all events
+        for (Int_t m=0; m<4; m++){
+          cout << "  table "<< m << " has " << countTags[m] << " tags" << endl;
+          countTables++;
+        }
 	
   }
-  cout << " ===> Read total # events = " << countEvents << endl;
-  
+
+  cout << " QAInfo:  Read total # events = " << countEvents << endl;
+  //  cout << " QAInfo:  Read total # tables = " << countTables << endl;
+  countTables /= countEvents;
+  cout << " QAInfo:  #tables/event = " << countTables << endl;
+
+  for (Int_t j=0; j<4; j++){
+    countTagsTot[j] /= countEvents;
+     cout << " QAInfo: table "<< j << " had " << countTagsTot[j] << " tags per event" <<endl;
+  }
 
   // stop timer and print results
   timer.Stop();

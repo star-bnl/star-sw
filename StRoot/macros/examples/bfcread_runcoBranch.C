@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.4 2000/03/20 17:50:41 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.5 2000/03/21 15:45:07 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.5  2000/03/21 15:45:07  kathy
+// updated the bfcread_*Branch.C macros so they printout info that can be used by autoQA system
+//
 // Revision 1.4  2000/03/20 17:50:41  kathy
 // fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
 //
@@ -59,10 +62,10 @@ void bfcread_runcoBranch(
   St_DataSet *obj=0;
 
 // Event loop
-  int istat=0,i=1;
+  int istat=0,i=0;
 
-EventLoop: if (i <= nevents && !istat) {
-    cout << "============================ Event " << i << " start" << endl;
+EventLoop: if (i < nevents && !istat) {
+
     chain->Clear();
     istat = chain->Make(i);
     cout << "     istat value returned from chain Make = " << istat << endl;
@@ -74,6 +77,10 @@ EventLoop: if (i <= nevents && !istat) {
     int countTable=0;
 
     if (!istat) {
+
+    i++;
+    cout << " start event # " << i << endl;
+
       ds=chain->GetDataSet("runco");
       St_DataSetIter tabiter(ds);
       if (ds) {
@@ -96,8 +103,8 @@ EventLoop: if (i <= nevents && !istat) {
             tabl = (St_Table *)objindiriter.Find(objindir->GetName());
             if (tabl) {
               countTable++;
-              cout << "      which is a table with # rows =  "
-                   << tabl->GetNRows() << endl;
+              cout << "  QAInfo: found table, #rows = " <<  objindir->GetName() 
+                 << ",  "     << tabl->GetNRows() << endl;
             }
           }
          
@@ -107,16 +114,15 @@ EventLoop: if (i <= nevents && !istat) {
       }
     }
 
-    cout << " End of Event " << i << endl;
-    cout << "  # objects found = " << countObj << endl;
-    cout << "  # sub-objects found = " << countObjInDir << endl;
-    cout << "  # tables found = " << countTable << endl;
+    cout << endl << endl <<" QAInfo: finished event " << i << endl;
+    cout << " QAInfo: # objects (directories) found = " << countObj << endl;
+    cout << " QAInfo: # sub-objects, tables found = "
+	 << countObjInDir << ", " << countTable << endl << endl;
 
     if (istat) {
       cout << "Last event processed. Status = " << istat << endl;
     }
-
-    i++;
+    
     goto EventLoop;
    }
 
