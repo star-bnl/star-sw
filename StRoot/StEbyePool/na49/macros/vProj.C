@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.4 2001/05/14 23:20:29 posk Exp $
+// $Id: vProj.C,v 1.5 2001/08/17 22:15:16 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.5  2001/08/17 22:15:16  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.4  2001/05/14 23:20:29  posk
 // Uses cross section weighting for all projections.
 //
@@ -24,6 +27,9 @@
 // plotGraphs.C makes the final graphs.
 //
 // $Log: vProj.C,v $
+// Revision 1.5  2001/08/17 22:15:16  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.4  2001/05/14 23:20:29  posk
 // Uses cross section weighting for all projections.
 //
@@ -35,7 +41,8 @@
 // NA49 version of STAR software.
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
+
+#include <iostream.h>
 
 TCanvas*  can;
 char      runName[6];
@@ -45,6 +52,8 @@ const int nCens = 6;
 
 void vProj(char* part = "pion") {
   
+  int       eBeam = 158; //select full beam energy
+  //int       eBeam = 40;  //select 40Gev beam energy
   bool      pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
   //bool   crossSection = kTRUE;
@@ -53,10 +62,10 @@ void vProj(char* part = "pion") {
   const int nPlots = 1 + nCens + nCens/2;
   const int nHars = 2;
   int       sel   = 2;
-  float     yLow  = 3.;              // for pt proj.
-  float     yLowY = 2.;              // for y proj.
-  float     yUp   = 5.;              // for both projs.
-  float     ptUp  = 2.;              // for both projs.
+  float     yLow  = 2.92;             // for pt proj.
+  float     yLowY = 2.;               // for y proj.
+  float     yUp   = 5.;               // for both projs.
+  float     ptUp  = 2.;               // for both projs.
   TFile*    anaFile[nCens];
   TH2*      v2D[nCens][nHars];
   TH2*      yieldPartHist[nCens];
@@ -89,6 +98,18 @@ void vProj(char* part = "pion") {
   float     vPtMax = 20.;
   float     vPtMin = -10.;
  
+  if (eBeam == 40) {
+    yLow  = 2.24;             // for pt proj.
+    yLowY = 1.;               // for y proj.
+    yUp   = 4.5;              // for both projs.
+    ptUp  = 2.;               // for both projs.
+    yCM = 2.24;
+    vYMax  = 5.;
+    vYMin  = -5.;
+    vPtMax = 5.;
+    vPtMin = -5.;
+  }
+   
   // set style
   gROOT->SetStyle("Bold");                              
   gROOT->ForceStyle();
@@ -166,7 +187,7 @@ void vProj(char* part = "pion") {
   float  yMin  = yAxis->GetXmin();
   float  yMax  = yAxis->GetXmax();
  
-  cout << "Please wait" << end << endl;
+  cout << "Please wait" << endl << endl;
 
   for (int n = 0; n < nPlots; n++) {
     sprintf(cenText, "%d", n);

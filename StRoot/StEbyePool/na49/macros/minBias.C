@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.5 2001/05/14 23:17:23 posk Exp $
+// $Id: minBias.C,v 1.6 2001/08/17 22:14:52 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 // Description:  Macro to add histograms together.
@@ -12,6 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.6  2001/08/17 22:14:52  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.5  2001/05/14 23:17:23  posk
 // Uses only yield weighting, not cross section weighting.
 //
@@ -24,7 +27,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-gROOT->Reset();
+#include <iostream.h>
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 

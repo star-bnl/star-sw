@@ -3,28 +3,33 @@
 // Reads from file produced by vProj.C.
 // Alexander Wetzler and Art Poskanzer, April 2001
 
-gROOT->Reset();
-
 void plotGraphs(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
 
   Bool_t crossSection = kTRUE;
+  // The directories must exist
   //Bool_t crossSection = kFALSE;  // yield weighting
+//   if (crossSection) {
+//     Char_t* fileExt = ".root";
+//     Char_t* plotExt = "Plots";
+//   } else {
+//     Char_t* fileExt = "Yield.root";
+//     Char_t* plotExt = "YieldPlots";
+//   }
   if (crossSection) {
-    Char_t* fileExt = ".root";
-    Char_t* plotExt = "Plots";
+    Char_t* fileExt = "Pcons.root";
+    Char_t* plotExt = "PconsPlots";
   } else {
-    Char_t* fileExt = "Yield.root";
-    Char_t* plotExt = "YieldPlots";
+    Char_t* fileExt = "PconsYield.root";
+    Char_t* plotExt = "PconsYieldPlots";
   }
 
-  Char_t pstype[255] = "ps";
+  //Char_t pstype[255] = "ps";
   //Char_t pstype[255] = "eps";
-  //Char_t pstype[255] = "gif";
+  Char_t pstype[255] = "gif";
 
   gROOT->SetStyle("Bold");
-  //gROOT->SetStyle("Video");
   gStyle->SetOptStat(kFALSE);
 
   const Int_t nHar = 2;
@@ -112,6 +117,9 @@ void plotGraphs(Char_t* part = "pion") {
 	histName->Append(*cenText);
 	Y[i][j] = (TH1F*)file->Get(histName->Data());
 	if (!pion && i!=0) {
+	  Y[i][j]->Rebin(4);  
+	  Y[i][j]->Scale(0.25);
+	} else if (!pion && j==1) {
 	  Y[i][j]->Rebin(4);  
 	  Y[i][j]->Scale(0.25);
 	} else {
@@ -204,6 +212,10 @@ void plotGraphs(Char_t* part = "pion") {
 	    flowY[i][j][1]->SetPointError(k, 0., Y[i][j]->GetBinError(k+1));
 	  }
 	}
+//       flowY[i][j][0]->Rebin(2);
+//       flowY[i][j][0]->Scale(0.5);
+//       flowY[i][j][1]->Rebin(2);
+//       flowY[i][j][1]->Scale(0.5);
       }
     }
   }
@@ -361,11 +373,11 @@ void plotGraphs(Char_t* part = "pion") {
 
   l.SetTextColor(kRed); 
   if (pion) {
-    l.DrawLatex(0.7,0.32,"v_{1}"); 
+    l.DrawLatex(0.7,0.25,"v_{1}"); 
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.7,0.82,"v_{2}"); 
   } else {
-    l.DrawLatex(0.75,0.57,"v_{1}"); 
+    l.DrawLatex(0.75,0.5,"v_{1}"); 
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.75,0.3,"v_{2}"); 
   }
@@ -730,7 +742,7 @@ void plotGraphs(Char_t* part = "pion") {
   hist = new TH1F(title, title, 6, 0.5, 6.5);
   if (pion) {
     max =  5.;
-    min = -3.;
+    min = -4.;
   } else {
     max =  7.;
     min = -5.;
