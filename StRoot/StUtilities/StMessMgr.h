@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.2 1999/07/15 05:15:02 genevb Exp $
+// $Id: StMessMgr.h,v 1.3 1999/07/17 00:23:22 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.3  1999/07/17 00:23:22  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
 // Revision 1.2  1999/07/15 05:15:02  genevb
 // Fixed an odd bug with seekp(0) on an empty stream buffer
 //
@@ -47,9 +50,9 @@ R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="", char* opt=
                                   size_t len1=0, size_t len2=0, size_t len3=1);
 R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O",
+R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StError_(char* mess="", char* opt="O",
+R__EXTERN  void type_of_call StError_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
@@ -112,7 +115,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // Warning Messages:
-   virtual StMessMgr& Warning(char* mess="", char* opt="O") =0;
+   virtual StMessMgr& Warning(char* mess="", char* opt="E") =0;
    virtual        int PrintWarnings() =0;
    virtual const messVec* GetWarnings() =0;
    virtual StMessage* FindWarning(const char* s1, char* s2="", char* s3="",
@@ -121,7 +124,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // Error Messages:
-   virtual StMessMgr& Error(char* mess="", char* opt="O") =0;
+   virtual StMessMgr& Error(char* mess="", char* opt="E") =0;
    virtual        int PrintErrors() =0;
    virtual const messVec* GetErrors() =0;
    virtual StMessage* FindError(const char* s1, char* s2="", char* s3="",

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.15 1999/07/08 22:58:18 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.16 1999/07/17 00:23:24 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.16  1999/07/17 00:23:24  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
 // Revision 1.15  1999/07/08 22:58:18  genevb
 // Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
 //
@@ -341,6 +344,10 @@ ostream& operator<<(ostream& os, StMessage*) {
 }
 static const char* defaultMessType = "I";
 static char* emptyString = "";
+static char* oOpt = "O";
+static char* eOpt = "E";
+static size_t oSize = 25;
+
 StMessMgr* StMessageManager::mInstance = 0;
 //
 // C and Fortran routines:
@@ -391,32 +398,38 @@ void type_of_call Msg_Disable_(char* mess, size_t len) {
 void type_of_call StMessage_(char* mess, char* type, char* opt,
                              size_t len1, size_t len2, size_t len3) {
   if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
-  if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
-  if (strlen(opt) > len3) strcpy(&(opt[len3]),emptyString);
+  if ((len2<=0) || (len2>oSize)) type=emptyString;
+  else if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
+  if ((len3<=0) || (len3>oSize)) opt=oOpt;
+  else if (strlen(opt) > len3) strcpy(&(opt[len3]),emptyString);
   gMessMgr->Message(mess,type,opt);
 }
 //________________________________________
 void type_of_call StInfo_(char* mess, char* opt, size_t len1, size_t len2) {
   if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
-  if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((len2<=0) || (len2>oSize)) opt=oOpt;
+  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"I",opt);
 }
 //________________________________________
 void type_of_call StWarning_(char* mess, char* opt, size_t len1, size_t len2) {
   if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
-  if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((len2<=0) || (len2>oSize)) opt=eOpt;
+  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"W",opt);
 }
 //________________________________________
 void type_of_call StError_(char* mess, char* opt, size_t len1, size_t len2) {
   if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
-  if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((len2<=0) || (len2>oSize)) opt=eOpt;
+  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
 void type_of_call StDebug_(char* mess, char* opt, size_t len1, size_t len2) {
   if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
-  if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((len2<=0) || (len2>oSize)) opt=oOpt;
+  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"D",opt);
 }
 //________________________________________
@@ -443,7 +456,7 @@ StMessageManager::StMessageManager() : StMessMgr() {
   gMessMgr = (StMessMgr*) this;
   messTypeList = StMessTypeList::Instance();
   messCounter = StMessageCounter::Instance();
-  messCounter->AddType();
+  messCounter->AddType(emptyString);
   // First messVec on collection is list of all messages
   messCollection.push_back(&messList);
   AddType("I","Info");
@@ -720,14 +733,14 @@ int StMessageManager::AddType(const char* type, const char* text) {
   if (typeN) {
     messVec* temp = new messVec();   // Add a new messVec for each message type
     messCollection.push_back(temp);
-    messCounter->AddType();
+    messCounter->AddType(type);
   }
   return typeN;
 }
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.15 1999/07/08 22:58:18 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.16 1999/07/17 00:23:24 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

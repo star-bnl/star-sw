@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.10 1999/07/08 22:58:18 genevb Exp $
+// $Id: StMessageManager.h,v 1.11 1999/07/17 00:23:24 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.11  1999/07/17 00:23:24  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
 // Revision 1.10  1999/07/08 22:58:18  genevb
 // Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
 //
@@ -117,7 +120,7 @@ class StMessageManager : public StMessMgr {
          char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[1]);}
 
 // Warning Messages:
-   virtual StMessMgr& Warning(char* mess="", char* opt="O")
+   virtual StMessMgr& Warning(char* mess="", char* opt="E")
          { return Message(mess, "W", opt);}
    virtual        int PrintWarnings() {return PrintList(messCollection[2]); }
    virtual const messVec* GetWarnings() {return (messCollection[2]);}
@@ -127,7 +130,7 @@ class StMessageManager : public StMessMgr {
          char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[2]);}
 
 // Error Messages:
-   virtual StMessMgr& Error(char* mess="", char* opt="O")
+   virtual StMessMgr& Error(char* mess="", char* opt="E")
          { return Message(mess, "E", opt);}
    virtual        int PrintErrors() {return PrintList(messCollection[3]); }
    virtual const messVec* GetErrors() {return (messCollection[3]);}
