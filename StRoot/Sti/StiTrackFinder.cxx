@@ -11,6 +11,7 @@
 //Sti
 #include "StiSeedFinder.h"
 #include "StiTrackFilter.h"
+#include "StiDynamicTrackFilter.h"
 #include "StiDetectorContainer.h"
 #include "StiHitContainer.h"
 #include "StiTrackContainer.h"
@@ -26,7 +27,7 @@ StiTrackFinder::StiTrackFinder()
     //Perform safe sets of tracking essentials
 
     //Track Filter
-    setTrackFilter( new StiTrackFilter() );
+    //setTrackFilter( new StiTrackFilter() );
 
     //Detector Container
     setDetectorContainer( StiDetectorContainer::instance() );
@@ -40,8 +41,8 @@ StiTrackFinder::~StiTrackFinder()
 {
     cout <<"StiTrackFinder::~StiTrackFinder()"<<endl;
 
-    delete trackFilter;
-    trackFilter=0;
+    //delete trackFilter;
+    //trackFilter=0;
 }
 
 bool StiTrackFinder::isValid(bool debug) const
@@ -66,7 +67,8 @@ bool StiTrackFinder::isValid(bool debug) const
 
 //Set Owned Objects-------
 
-void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
+//void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
+void StiTrackFinder::setTrackFilter(StiDynamicTrackFilter * filter)
 {
   //----------------------------------------------------------------- 
   // Set the seedFilter to be used by this track finder to the given
@@ -93,8 +95,8 @@ void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
     }
 
   // check whether a filter currently exist, if so destroy it.
-  if (trackFilter!=0)
-    delete trackFilter;
+  //if (trackFilter!=0)
+  //delete trackFilter;
  
   // set filter used by this track finder to given value
   trackFilter = filter;  

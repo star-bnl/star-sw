@@ -11,6 +11,7 @@ class StiDetectorContainer;
 class StiHitContainer;
 class StiTrackContainer;
 class StMagUtilities;
+class StiDynamicTrackFilter;
 
 class StiTrackFinder 
 {
@@ -27,7 +28,8 @@ public:
     
     //_accessor methods_____________________________________________
     void setTrackSeedFinder(StiSeedFinder * finder);
-    void setTrackFilter(StiTrackFilter * filter);
+    //void setTrackFilter(StiTrackFilter * filter);
+    void setTrackFilter(StiDynamicTrackFilter * filter);
     void setDetectorContainer(StiDetectorContainer* detcontainer);
     void setHitContainer(StiHitContainer * hitContainer);
     void setTrackContainer(StiTrackContainer * newTrackContainer);
@@ -39,7 +41,8 @@ public:
     virtual void setMCSCalculated(bool option);
     
     StiSeedFinder             * getTrackSeedFinder()    const;
-    StiTrackFilter            * getTrackFilter()        const;
+    //StiTrackFilter            * getTrackFilter()        const;
+    StiDynamicTrackFilter     * getTrackFilter()        const;
     StiDetectorContainer      * getDetectorContainer()  const;
     StiHitContainer           * getHitContainer()       const;
     StiTrackContainer         * getTrackContainer()     const;
@@ -54,9 +57,10 @@ public:
 protected:
 
     //Objects owned by this class
-    StiTrackFilter            * trackFilter;
+    //StiTrackFilter            * trackFilter;
     
     //Objects not owned by this class
+    StiDynamicTrackFilter            * trackFilter;
     StiSeedFinder             * trackSeedFinder;
     StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
     StMagUtilities            * magField;
@@ -135,7 +139,8 @@ inline StiSeedFinder * StiTrackFinder::getTrackSeedFinder() const
   return trackSeedFinder;
 }
 
-inline StiTrackFilter     * StiTrackFinder::getTrackFilter() const
+//inline StiTrackFilter     * StiTrackFinder::getTrackFilter() const
+inline StiDynamicTrackFilter     * StiTrackFinder::getTrackFilter() const
 {
   return trackFilter;
 }
