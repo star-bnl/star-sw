@@ -1,6 +1,19 @@
 	SUBROUTINE MHEADRD()
-	common/HDRNFO/ SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
-	integer        SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+*
+* $Id: mheadrd.g,v 1.5 2004/08/05 16:37:23 potekhin Exp $
+*
+* $Log: mheadrd.g,v $
+* Revision 1.5  2004/08/05 16:37:23  potekhin
+* New format for the common block due to Pythia work
+*
+*
+	common/HDRNFO/ EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+	integer        EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+
+	common/PYTNFO/ PYSTAT,PYT_ID,MANDS,MANDT,MANDU,HARDP,COSTH,BJOR1,BJOR2
+	integer        PYSTAT,PYT_ID
+	real           MANDS,MANDT,MANDU,HARDP,COSTH,BJOR1,BJOR2
+
 	integer ISTAT
 	data ISTAT/0/
 
@@ -9,29 +22,52 @@
 
 	STRUCTURE MPAR {int Version, int SUBPR, int NBIN, int NWE, int NWW, int NJETS, int NREJ }
 
+	STRUCTURE PYTH {int Version, int SUBPR,
+                        real MANDS,  real MANDT,  real MANDU,
+                        real HARDP,  real COSTH,
+                        real BJOR1,  real BJOR2}
+
+
+*------------------------------------------------------------------
 	USE /EVNT/PASS/MPAR stat=ISTAT
 
 	if(ISTAT.GE.0) then
-	   write(*,*) '*******************  + ZERO ISTAT ***********', ISTAT
+	   write(*,*) 'EVENT HEADER FOUND'
+
 	   SUB_ID    = MPAR_SUBPR
+
 	   NBIN_COLL = MPAR_NBIN
 	   NWE       = MPAR_NWE
 	   NWW       = MPAR_NWW
 	   NJETS     = MPAR_NJETS
 	   NREJ      = MPAR_NREJ
-	   write(*,*) '####################################################################'
-	   write(*,*) MPAR_SBPR
-	   write(*,*) '####################################################################'
+*	   write(*,*) '####################################################################'
+*	   write(*,*) MPAR_SUBPR
+*	   write(*,*) '####################################################################'
 
 	else
-	   write(*,*) '*******************  - ZERO ISTAT ***********'
-	   SUB_ID    = 0
-	   NBIN_COLL = 0
-	   NWE       = 0
-	   NWW       = 0
-	   NJETS     = 0
-	   NREJ      = 0
+	   write(*,*) 'EVENT HEADER NOT FOUND'
+	endif
+	EVSTAT=ISTAT
+*------------------------------------------------------------------
+	USE /EVNT/PASS/PYTH stat=ISTAT
+
+	if(ISTAT.GE.0) then
+	   write(*,*) 'PYTHIA HEADER FOUND'
+
+	   PYT_ID = PYTH_SUBPR
+
+	   MANDS  = PYTH_MANDS
+	   MANDT  = PYTH_MANDT
+	   MANDU  = PYTH_MANDU
+	   HARDP  = PYTH_HARDP
+	   COSTH  = PYTH_COSTH
+	   BJOR1  = PYTH_BJOR1
+	   BJOR2  = PYTH_BJOR2
+	else
+	   write(*,*) 'PYTHIA HEADER NOT FOUND'
 	endif
 
+	PYSTAT=ISTAT
 	return
 	end

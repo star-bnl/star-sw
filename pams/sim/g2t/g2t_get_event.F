@@ -1,6 +1,9 @@
-* $Id: g2t_get_event.F,v 1.8 2003/07/30 03:51:32 potekhin Exp $
+* $Id: g2t_get_event.F,v 1.9 2004/08/05 16:38:05 potekhin Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.9  2004/08/05 16:38:05  potekhin
+* New format for the common block due to Pythia work
+*
 * Revision 1.8  2003/07/30 03:51:32  potekhin
 * Update the format of the event header, including the new
 * field -- the rejected events scaler
@@ -38,13 +41,14 @@
       Integer             G2T_GET_EVENT,Len,NBytPW
       Integer             NwHEAD,IHEAD(100),Nu,IBUF(100),i,j,in,ip,jn,jp
       Integer             Ntra,IRUN,Ievt,IwtFL,Istat,IDPDG,MOTH(2),IDAU1
+
       Real                VERT(4),PP(4),TIME,AMASS,WEIGH
       Character           GeName*8
       Parameter           (NBytPW=4)
 
       INTEGER             NUMPRIM,NUMFINS
-      common /HDRNFO/     SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
-      INTEGER             SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+      common /HDRNFO/     EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+      INTEGER             EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
 
       common /g2tevtcnt/  NUMPRIM,NUMFINS 
 *
@@ -85,15 +89,23 @@
       g2t_event(1).prim_vertex_p      = 1
       g2t_event(1).time_offset        = 0
 
-* Adding the suboprocess ID and other additional info, to the event struct:
-      call MHEADRD() ! Fetch data from Zebra and into the common block
-      g2t_event(1).subprocess_id = SUB_ID
-      g2t_event(1).n_binary      = NBIN_COLL
-      g2t_event(1).n_wounded_east= NWE
-      g2t_event(1).n_wounded_west= NWW
-      g2t_event(1).njets         = NJETS
-      g2t_event(1).n_rejected    = NREJ
+* Adding the subprocess ID and other additional info, to the event struct:
+* Note that the following call fills out a few common blocks used as
+* a temporary container. Only one of those is used right here, others
+* can be accessed from a diferent location
 
+      call MHEADRD() ! Fetch data from Zebra and into the common blocks
+
+      if(evStat.ge.0) then
+         g2t_event(1).subprocess_id = SUB_ID
+         g2t_event(1).n_binary      = NBIN_COLL
+         g2t_event(1).n_wounded_east= NWE
+         g2t_event(1).n_wounded_west= NWW
+         g2t_event(1).njets         = NJETS
+         g2t_event(1).n_rejected    = NREJ
+* now, we reserve the second decimal bit to signal the success of Pythia read:
+         G2T_GET_EVENT=G2T_GET_EVENT+10
+      endif
 
       END
 
