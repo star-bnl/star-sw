@@ -20,5 +20,5 @@
 	long	first_bucket;	/* first bucket used in gain calculation */
 	long	last_bucket;	/* last bucket used  "   "     "         */
   };
-/*  Last mod. for tfc_tstpar: $Date: 1997/12/31 14:34:11 $ */
+/*  Last mod. for tfc_tstpar: $Date: 1998/05/08 15:18:35 $ */
 
