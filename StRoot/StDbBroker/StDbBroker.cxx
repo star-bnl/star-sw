@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.14 2000/02/28 15:24:19 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.15 2000/03/04 18:56:20 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.15  2000/03/04 18:56:20  porter
+ * fixed return of endtime, it was returning beginTime for both begin & end
+ *
  * Revision 1.14  2000/02/28 15:24:19  porter
  * add more StDbLib methods to broker: this time, StDbManager::closeAllConnections()
  *
@@ -318,7 +321,7 @@ void * StDbBroker::Use(int tabID, int parID)
     m_BeginTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
 
-    thisTime = node->getBeginDateTime();
+    thisTime = node->getEndDateTime();
     tmp1 = new char[strlen(thisTime)+1];
     tmp2 = new char[strlen(thisTime)+1];
     strcpy(tmp1,thisTime);
@@ -430,6 +433,7 @@ StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
 
 if(m_Tree) delete m_Tree;
 
+ if(m_isVerbose)mgr->setVerbose(true);
 if(!versionName){
   m_Tree=mgr->initConfig(configName,"reconV0");
 }else{
