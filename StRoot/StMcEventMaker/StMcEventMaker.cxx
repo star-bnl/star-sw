@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.4 1999/09/10 19:11:54 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.5 1999/09/15 18:39:28 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.5  1999/09/15 18:39:28  calderon
+ * -Do not require g2t_ftp_hit table for filling of StMcEvent
+ * -Update README for changes
+ *
  * Revision 1.4  1999/09/10 19:11:54  calderon
  * Write the Ntuple in StMcAnalysisMaker into a file.
  * This way it can be accessed after the macro finishes,
@@ -108,7 +112,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.4 1999/09/10 19:11:54 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.5 1999/09/15 18:39:28 calderon Exp $\n");
     printf("**************************************************************\n");
 
    
@@ -179,13 +183,14 @@ Int_t StMcEventMaker::Make()
   // Now we check if we have the pointer, if we do, then we can access the tables!
 
    if (g2t_vertexTablePointer && g2t_trackTablePointer
-       && g2t_tpc_hitTablePointer && g2t_ftp_hitTablePointer ){
+       && g2t_tpc_hitTablePointer ){
        
        //g2t_event_st   *eventTable  = g2t_eventTablePointer->GetTable();
        g2t_vertex_st  *vertexTable = g2t_vertexTablePointer->GetTable();
        g2t_track_st   *trackTable  = g2t_trackTablePointer->GetTable();
        g2t_tpc_hit_st *tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
-       g2t_ftp_hit_st *ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
+       g2t_ftp_hit_st *ftpHitTable;
+       if (g2t_ftp_hitTablePointer) ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
        g2t_svt_hit_st *svtHitTable;
        if (g2t_svt_hitTablePointer) svtHitTable = g2t_svt_hitTablePointer->GetTable();
        
@@ -448,6 +453,7 @@ Int_t StMcEventMaker::Make()
 	  }
 	  
 	  // FTPC Hits
+	  if (g2t_ftp_hitTablePointer) {
 	  NHits = g2t_ftp_hitTablePointer->GetNRows();
 	  iTrkId = 0;
 	  for(ihit=0; ihit<NHits; ihit++) {
@@ -463,6 +469,11 @@ Int_t StMcEventMaker::Make()
 	      
 	  };
 	  cout << "Filled FTPC Hits" << endl;
+	  }
+	  else {
+	      cout << "No FTPC Hits in this file" << endl;
+	      mCurrentMcEvent->ftpcHitCollection()->clear();
+	  }
 	  
 
 	  ttemp.clear();

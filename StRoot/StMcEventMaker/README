@@ -27,4 +27,4 @@ into account.
 
 Tests done
 ----------
-Compiles on hp_ux102, sun4x and i386_redhat51.
+Compiles on hp_ux102, sun4x_56 and i386_redhat51.
