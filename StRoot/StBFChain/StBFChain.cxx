@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.363 2003/10/30 19:36:32 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.364 2003/11/09 20:59:14 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -58,7 +58,10 @@ Bfc_st BFC1[] = {
   {"RY2000a","","","db,detDb"            ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2001","","","db,detDb"                ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"RY2003","","","db,detDb"                   ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
-  {"RY2003X","","","db,detDb"            ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
+  {"RY2003a","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
+  {"RY2003b","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
+  {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
+
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,detDb"      ,"","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -68,6 +71,10 @@ Bfc_st BFC1[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
@@ -559,7 +566,10 @@ Bfc_st BFC2[] = {
   {"RY2000a","","","db,detDb"            ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2001","","","db,detDb"                ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"RY2003","","","db,detDb"                   ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
-  {"RY2003X","","","db,detDb"            ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
+  {"RY2003a","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
+  {"RY2003b","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
+  {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
+
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,detDb"      ,"","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -569,6 +579,10 @@ Bfc_st BFC2[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
@@ -1371,8 +1385,10 @@ Int_t StBFChain::Instantiate()
 	    } else {
 	      // depend on RY option i.e. take default for that RealYear data
 	      // expectations.
-	      if( GetOption("RY2001") ||
-		  GetOption("RY2003") ||
+	      if( GetOption("RY2001")  ||
+		  GetOption("RY2003")  ||
+		  GetOption("RY2003a") ||
+		  GetOption("RY2003b") ||
 		  GetOption("RY2003X")) mask = mask | 2 ;  // Jim Thomas request
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
@@ -1977,6 +1993,10 @@ void StBFChain::SetGeantOptions(){
 	       GetOption("RY2001"))   geantMk->LoadGeometry("detp geometry year2001");
       else if (GetOption("Y2003")  ||
 	       GetOption("RY2003"))   geantMk->LoadGeometry("detp geometry year2003");
+      else if (GetOption("Y2003a") ||
+	       GetOption("RY2003a"))  geantMk->LoadGeometry("detp geometry y2003a");
+      else if (GetOption("Y2003b") ||
+	       GetOption("RY2003b"))  geantMk->LoadGeometry("detp geometry y2003b");
       else if (GetOption("Y2003X") ||
 	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry y2003x");
 
@@ -2083,6 +2103,8 @@ void StBFChain::SetDbOptions(){
 	// svt shift. Small hack to make it work.
 	else if (GetOption("Y2001n"))db->SetDateTime("year2001");
 	else if (GetOption("Y2003")) db->SetDateTime("year2003");
+	else if (GetOption("Y2003a"))db->SetDateTime("y2003a");
+	else if (GetOption("Y2003b"))db->SetDateTime("y2003b");
 	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
 	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
       }
