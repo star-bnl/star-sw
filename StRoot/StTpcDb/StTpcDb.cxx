@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.19 2000/03/30 17:02:36 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.20 2000/04/05 15:44:56 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.20  2000/04/05 15:44:56  hardtke
+ * fix solaris bug -- char* was too short for table name
+ *
  * Revision 1.19  2000/03/30 17:02:36  hardtke
  * limit warning message in StRTpcPadPlane
  *
@@ -248,7 +251,7 @@ StTpcT0I* StTpcDb::T0(int sector){
   }
   if(!t0[sector-1]){
    const int dbIndex = kCalibration;
-   char dbname[25],dbname2[25];
+   char dbname[40],dbname2[40];
    sprintf(dbname,"Sector_%.2d/tpcISTimeOffsets",sector);
    sprintf(dbname2,"Sector_%.2d/tpcOSTimeOffsets",sector);
    printf("Getting %s , %s \n",dbname,dbname2);
