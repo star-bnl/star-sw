@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.22 2003/10/01 20:55:06 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.23 2004/02/03 20:07:18 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.23  2004/02/03 20:07:18  jml
+ * added MERGE_SEQUENCES define
+ *
  * Revision 1.22  2003/10/01 20:55:06  ward
  * Protection against empty TPCSEQD banks.
  *
@@ -106,7 +109,10 @@
 #include <assert.h>
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"
+
 #define MAKE_THE_DAMNED_COMPILER_SILENT
+#define MERGE_SEQUENCES
+
 #include "fee_pin.h"
 // 
 
@@ -283,6 +289,7 @@ int TPCV2P0_ZS_SR::initialize()
       else { //TPCSEQD bank exists
 	if (detector->ercpy->verbose) 
 	  printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
+
 	int padrow=-1, pad=-1, lastbin=-2, oldstart=0;
 	int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
 	int numseq = (4*len)/sizeof(short); // find # sequences this bank
@@ -319,7 +326,13 @@ int TPCV2P0_ZS_SR::initialize()
 	    int start = work>>6;
 	    int len = work & 0x1f;
 	    if (start >= oldstart) { // still on same pad
+
+#ifdef MERGE_SEQUENCES
 	      if (start>lastbin+1)  Pad_array[padrow-1][pad-1].nseq++;
+#else
+	      Pad_array[padrow-1][pad-1].nseq++;   
+#endif
+
 	      // don't increment nseq if sequences are adjacent!
 	      lastbin = start+len-1;
 	      oldstart = start;
@@ -414,26 +427,46 @@ int TPCV2P0_ZS_SR::initialize()
 	    unsigned short work = seqd_p[rcb][mz]->sequence[i];
 	    int start = work>>6;
 	    int len = work & 0x1f;
+
 	    if (start >= oldstart) { // still on same pad
 	      //is this sequence adjacent to previous one?
-	      if (start>lastbin+1)  { //no
-		if (pad_seq>=Pad_array[padrow-1][pad-1].nseq)
+
+#ifdef MERGE_SEQUENCES
+	      if (start>lastbin+1)  {   // Not adjoining previous sequence, no merge!
+		if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
 		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
 			 __FILE__,__LINE__,padrow,pad,pad_seq);
+		}
+
 		Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
 		Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
 		Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
 		adc_locn +=len;
 		pad_seq++;
 	      }
-	      else { // yes: just update the length
+ 	      else { // Merge sequence!
 		assert ( pad_seq>=1 && pad_seq<=Pad_array[padrow-1][pad-1].nseq);
-		if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
-		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
-			 __FILE__,__LINE__,padrow,pad,pad_seq);
-		Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
-		adc_locn +=len;
+
+ 		if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
+ 		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
+ 			 __FILE__,__LINE__,padrow,pad,pad_seq);
+ 		Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
+ 		adc_locn +=len;
+ 	      }
+#else
+
+	      if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
+		printf("sequence overrun %s %d row %d pad %d seq %d\n",
+		       __FILE__,__LINE__,padrow,pad,pad_seq);
 	      }
+
+	      Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
+	      Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
+	      Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
+	      adc_locn +=len;
+	      pad_seq++;
+#endif
+ 
 	      lastbin = start+len-1;
 	      oldstart = start;
 	      if (work & 0x20) {//last sequence ?
