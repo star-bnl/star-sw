@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.9 2001/04/09 22:57:05 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.10 2001/05/04 19:49:51 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.10  2001/05/04 19:49:51  perev
+ * Streamer to account old ROOT2
+ *
  * Revision 2.9  2001/04/09 22:57:05  perev
  * forget STAR I/O
  *
@@ -41,6 +44,7 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include "TFile.h"
 #include <algorithm>
 #include "StTrackFitTraits.h"
 #include "StParticleTypes.hh"
@@ -53,7 +57,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.9 2001/04/09 22:57:05 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.10 2001/05/04 19:49:51 perev Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -166,6 +170,10 @@ void StTrackFitTraits::Streamer(TBuffer &R__b)
 
     R__b >> (unsigned short&)mPidHypothesis;
     R__b >> (unsigned short&)mNumberOfFitPoints;
+
+    if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
+       { Int_t dumy; R__b >> dumy;}
+
     R__b.ReadFastArray(mChi2,2);
     mCovariantMatrix.Streamer(R__b);
 
