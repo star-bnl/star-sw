@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.hh,v 1.2 1999/06/04 18:01:38 ullrich Exp $
+ * $Id: StLorentzVectorD.hh,v 1.3 2000/09/25 20:22:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,9 +13,8 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.hh,v $
- * Revision 1.2  1999/06/04 18:01:38  ullrich
- * New operators operator() and operator[] which can be used
- * as lvalues.
+ * Revision 1.3  2000/09/25 20:22:51  ullrich
+ * Removed inheritance from TObject.
  *
  * Revision 1.2  1999/06/04 18:01:38  ullrich
  * New operators operator() and operator[] which can be used
@@ -37,19 +36,16 @@
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #ifdef __ROOT__
-#include "TObject.h"
+#include "Rtypes.h"
 #endif
 
 class StLorentzVectorF;
 
 class StLorentzVectorD 
-#ifdef __ROOT__
- : public TObject 
-#endif
 {
 public:
     StLorentzVectorD(double = 0, double = 0, double = 0, double = 0);
-    ~StLorentzVectorD();
+    virtual ~StLorentzVectorD();
     
     StLorentzVectorD(const StThreeVectorD&, double);
     StLorentzVectorD(double, const StThreeVectorD&);   
@@ -128,7 +124,7 @@ protected:
     StThreeVectorD mThreeVector;
     double         mX4;
 #ifdef __ROOT__
-    ClassDef(StLorentzVectorD,1)
+    ClassDef(StLorentzVectorD,2)
 #endif
 };
 
