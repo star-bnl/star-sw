@@ -429,7 +429,7 @@ Block CSHI is a sensiteve Ar/CO2 box
                    Dx = calg_SmGasWdh,
                    Phi1 = 270 phi2 = 450
       endif
-      call CALBPAR(ag_imed','SENSITIVE')
+      call CALBPAR(ag_imed,'SENSITIVE')
       CAll GSTPAR (ag_imed,'STRA',1.0)
 *
       h_eta1=2.*(calg_Seta1Wdh+calg_Set12Wdh)
