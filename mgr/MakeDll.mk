@@ -205,7 +205,7 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) -I$(INP_DIR) $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF));
 
-$(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
+$(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h  $(wildcard  $(STAR)/StRoot/base/*.h) 
 	$(ORD_LINKDEF)
 	@cat $(LINKDEF)
 	cd $(GEN_DIR); cp $(1ST_DEPS) .; \
@@ -213,7 +213,7 @@ $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
          $(notdir $(LINKDEF));
 
 
-$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(STAR)/StRoot/base/St_Table.h $(STAR)/StRoot/base/Stypes.h
+$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(wildcard  $(STAR)/StRoot/base/*.h)
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
