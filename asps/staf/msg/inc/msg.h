@@ -66,6 +66,7 @@ typedef	void	(*funcPoint)(const char*, const char*, const int*);
 	void	MsgGetClass( const char *Prefix, char *Class );
 	void	MsgIncr( const int ID );
 	void	MsgIni( int LUN );
+	void    MsgFinish( const char *switches, int Nevents );
 	void	MsgInit( const char *switches, ... );
 	int	MsgJournalClose( void );
 	int	MsgJournalEnabled( void );
@@ -85,6 +86,7 @@ typedef	void	(*funcPoint)(const char*, const char*, const int*);
 	                    , int *AbortLimit, int *Active, int *Counting, int *Alarming, char State[9] );
 	void	MsgPrefixSet( const char *Prefix, int CountLimit, int Level
 	                    , int AbortLimit, int Active, int Counting, int Alarming );
+	int     MsgRemoveSharedMemory( const pid_t ProcessID );
 	void	MsgResetID( const int ID );
 	void	MsgSetAbortLimit( const char *Prefix, int Limit );
 	int	MsgSetByCommand( const char *Command );

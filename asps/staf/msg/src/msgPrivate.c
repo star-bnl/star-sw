@@ -45,7 +45,9 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
 
+#ifndef _AIX
 #include <sys/systeminfo.h>
+#endif
 
 #include <errno.h>
 #include <msg.h>
@@ -54,10 +56,11 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 msgData_t msg;
 msgData_t *Msg;
 FILE *JournalFILE;    /* Journal-file descriptor                          */
+int   JournalEnabled; /* Journal-file enabled-flag                        */
 
 control_t *control = &msg.control;
-prefix_t  *prefix = &msg.prefix[0];
-class_t   *class = &msg.class[0];
+prefix_t  *prefix  = &msg.prefix[0];
+class_t   *class   = &msg.class[0];
 
 extern int MsgInitialized; /* This starts out FALSE, and is set to TRUE when initialized.  */
 
@@ -1079,7 +1082,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
 {
 /* Description:  Set Msg up to share its memory.
-	         When this routine returns TRUE, the memory is being shared.
+	         When this routine returns >0, the memory is being shared.
 	         This should be the very first Msg call.
 	         If a journal file was open at the time of this call, it is closed.
 	         The journal will need to be reopened if it had been open.
@@ -1095,26 +1098,28 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 	int shmid;
 	key_t key;
+	pid_t pid;
 	int shmflg;
 	unsigned long L;
 
 	const int ID = 1;
 	FILE *shmidLogFILE; /* shmid log-file descriptor                         */
 
-	JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+/*	Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+	if ( !JournalFILE ) JournalFILE = fopen( "/dev/null", "w" );
 
 	size = sizeof( msg );
 	addr = &msg;
 	addr = 0;
 
-/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
-
 	if ( ProcessID <= 0 ) {
-	  control->ProcessID = getpid();
+	  pid = getpid();
 	} else {
-	  control->ProcessID = ProcessID;
+	  pid = ProcessID;
 	}
-	key = (key_t)( control->ProcessID );
+	key = (key_t)( pid );
+
+/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
 
 	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
 /*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
@@ -1146,8 +1151,15 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	  return( -1 );
 	}
 
+	control->ProcessID = pid;
+	control->shmid     = shmid;
+
 /*	Need to re-establish this:  */
+#ifndef _AIX
 	if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
+#else
+	if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
+#endif
 	MsgNodeNameSet( s1000 );
 
 	shmidLogFILE = fopen( "msg.shmid", "a" );  /* Append to this log file -- keep track of shmids!  */
@@ -1166,7 +1178,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
 {
 /* Description:  Set Msg up to share its memory.
-	         When this routine returns TRUE, the memory is being shared.
+	         When this routine returns >0, the memory is being shared.
 	         This should be the very first Msg call.
 	         If a journal file was open at the time of this call, it is closed.
 	         The journal will need to be reopened if it had been open.
@@ -1183,12 +1195,14 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 	int shmid;
 	key_t key;
+	pid_t pid;
 	int shmflg;
 	unsigned long L;
 
 	const int ID = 1;
 
-	JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+/*	Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+	if ( !JournalFILE ) JournalFILE = fopen( "/dev/null", "w" );
 
 	size = sizeof( msg );
 	addr = &msg;
@@ -1197,11 +1211,11 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 /*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
 
 	if ( ProcessID <= 0 ) {
-	  control->ProcessID = getpid();
+	  pid = getpid();
 	} else {
-	  control->ProcessID = ProcessID;
+	  pid = ProcessID;
 	}
-	key = (key_t)( control->ProcessID );
+	key = (key_t)( pid );
 
 	shmflg = 0660;  /*  Read/Write Owner/Group  */
 /*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
@@ -1232,6 +1246,9 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	  perror( "MsgShare-e2 system error:\n" );
 	  return( -1 );
 	}
+
+	control->ProcessID = pid;
+	control->shmid     = shmid;
 
 	return( shmid );
 }
@@ -1278,4 +1295,39 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	}
 	return;
 }
+
+	int	MsgRemoveSharedMemory(
+/*  Input:                                                                          */
+	const pid_t  ProcessID )   /* The ID of the process which created the msg shared memory segment. */
+{
+/* Description:  Remove the specified Shared Memory Segment.
+	         When this routine returns TRUE, the Shared Memory Segment has been removed.
+
+   Returns:
+	TRUE (-1) for success.
+	FALSE (0) for failure.                                                          */
+
+
+	FILE *shmidLogFILE; /* shmid log-file descriptor                         */
+
+	key_t key    = (key_t)( ProcessID );
+	int   shmflg = 0660;  /*  Read/Write Owner/Group  */
+	int   shmid  = shmget( key, 0, shmflg );  /*  unique key, size, read/write user/group.  */
+	if ( shmid < 0 ) {
+	  perror( "MsgRemoveSharedMemory-E1  Shared Memory Segment not found" );
+	  return( 0 );
+	}
+	shmidLogFILE = fopen( "msg.shmid", "a" );  /* Append to this log file -- keep track of shmids!  */
+	MsgTimeStampFileOut( shmidLogFILE );       /* Put a time stamp on it.                           */
+	fprintf( shmidLogFILE, "msg Shared Memory segment removed, shmid:%d  pid:%d\n", shmid, key );
+	fclose( shmidLogFILE );
+
+	shmctl( shmid, IPC_RMID, NULL );  /* It's actually removed here.  */
+
+	return( -1 );
+
+}
+
+
+
 

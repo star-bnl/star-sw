@@ -42,7 +42,9 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#ifndef _AIX
 #include <sys/systeminfo.h>
+#endif
 
 #include <errno.h>
 #include <msg.h>
@@ -58,6 +60,7 @@ extern prefix_t  *prefix;
 extern class_t   *class;
 
 extern FILE *JournalFILE;    /* Journal-file descriptor                          */
+extern int   JournalEnabled; /* Journal-file enabled-flag                        */
 extern int CPUtime0;
 extern int ELAtime0;
 
@@ -892,6 +895,36 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 
 
+	void 	MsgFinish( const char *switches  /*  One-letter switch string:                                       */
+	                                         /*  "s"  shared msg (remove shmid) -- default: not shared           */
+	                 , int   Nevents )       /*  User-suplied number-of-events, to normalize message frequencies */
+{
+/* Description:  MSG package finish -- output message summary, close journal and remove shmid if "s" is specified.   */
+
+	int ID;
+	int ret;
+	FILE *fid;
+	
+
+	MsgSummaryEventFile( NULL, Nevents ); /* List them all, to the terminal.  */
+	MsgSummaryCPUFile(   NULL );          /* CPU usage measurements.          */
+
+	fid = MsgJournalGet();
+	MsgSummaryEventFile( fid, Nevents ); /* List them all, in the journal.   */
+	MsgSummaryCPUFile(   fid );          /* CPU usage measurements.          */
+
+	if ( switches ) {
+	  if ( strchr( switches, 's' ) ) {
+	    ret = MsgRemoveSharedMemory( control->ProcessID );
+	  }
+	}
+	ret = MsgJournalClose();
+	return;
+}
+
+
+
+
 	void 	MsgInit( const char *switches /*  One-letter switch string:                    */
 	                                      /*  "s"  shared msg -- default: not shared       */
 	                                      /*  "h"  hard initialize -- default: hard        */
@@ -926,7 +959,11 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  }
  	} else {                  /* Cold-start initialization -- get everything:              */
 	  MsgInitialized = TRUE;
+#ifndef _AIX
 	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
+#else
+	  if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
+#endif
 	  MsgNodeNameSet( s1000 );
 	  if ( switches ) {
 	    if ( strchr( switches, 's' ) ) {
@@ -1008,7 +1045,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
     Returns:
 	TRUE  for journal file enabled.
 	FALSE for journal file disabled.                                    */
-	return(control->JournalEnabled);
+	return(JournalEnabled);
 }
 
 
@@ -1025,7 +1062,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	void	MsgJournalOff() {
 /* Description:  Disable journal logging of messages.
 	Call this subroutine to disable the message journal file.  */
-	control->JournalEnabled = FALSE;
+	JournalEnabled = FALSE;
 	return;
 }
 
@@ -1033,7 +1070,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	void	MsgJournalOn() {
 /* Description:  (Re)enable journal logging of messages.
 	Call this subroutine to (Re)enable the message journal file.  */
-	control->JournalEnabled = TRUE;
+	JournalEnabled = TRUE;
 	return;
 }
 
@@ -1054,7 +1091,6 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	if ( !MsgJournalClose() ) return( FALSE );  /*  Ensure no file is now open.  */
 
 	JournalFILE = MsgFileOpen( FileName, "w" );
-/*	JournalFILE = fopen( FileName, "w" );  */
 	if ( !JournalFILE ) return( FALSE );
 
 	MsgJournalOn();
@@ -1947,9 +1983,9 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	fgets( s1000, 999, fid );
 	MsgTruncate( s1000, 1000 );
-	sscanf( s1000, "%d", &control->JournalEnabled );     /*  Journal-enabled control-flag.     */
+	sscanf( s1000, "%d", &JournalEnabled );     /*  Journal-enabled control-flag.     */
 	if ( Trace ) {
-	  sprintf( m1000, "          JournalEnabled[%d] line:\n[%s]", control->JournalEnabled, s1000 );
+	  sprintf( m1000, "          JournalEnabled[%d] line:\n[%s]", JournalEnabled, s1000 );
 	  MessageOut( m1000 );
 	}
 
@@ -2173,7 +2209,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	fprintf( fid, "%f  VERSION\n", VERSION );
 
 	fprintf( fid, "%s\n"                , control->NodeName );          /*  Application-specified node-name.  */
-	fprintf( fid, "%d  JournalEnabled\n", control->JournalEnabled );    /*  Journal-enabled control-flag.     */
+	fprintf( fid, "%d  JournalEnabled\n", JournalEnabled );             /*  Journal-enabled flag.             */
 	fprintf( fid, "%d  TimeStampCPU\n"  , control->TimeStampCPU );      /*  Time-stamp mode-select.           */
 	fprintf( fid, "%d  Sorted\n"        , control->Sorted );            /*  Whether ID list is sorted.        */
 
@@ -2399,7 +2435,7 @@ Message-Prefix & Truncated Sample of last occurance              Total CPU Usage
 
 	}    /*  for ( ID = 1;  ID <= control->Nprefixes; ID++ )   */
 
-	if ( ( control->JournalEnabled ) && ( fid ) ) fflush( fid );
+	if ( ( JournalEnabled ) && ( fid ) ) fflush( fid );
 	return;
 }
 
@@ -2692,7 +2728,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	    fprintf(stderr, "%s\n", s1000 );
 	    fflush( stderr );
 	  } else if ( fid == JournalFILE ) {
-	    if ( control->JournalEnabled ) {
+	    if ( JournalEnabled ) {
 	      fprintf( fid, "%s\n", s1000 );
 	      fflush( fid );
 	    }
@@ -2910,8 +2946,8 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	if ( !fid ) { /*  Put it on standard error:  */
 	  fprintf(stderr, "%s\n", msg );
 	  fflush( stderr );
-	} else if ( fid == JournalFILE ) {
-	  if ( control->JournalEnabled ) {
+	} else if ( JournalFILE && (fid == JournalFILE) ) {
+	  if ( JournalEnabled ) {
 	    MsgTimeStampFile( fid );  /* Time.  */
 	    fprintf( fid, "%s\n", msg );
 	    fflush( fid );
