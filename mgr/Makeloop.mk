@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.64  1999/03/30 21:46:26  didenko
+#  unfilter some makers
+#
 #  Revision 1.63  1999/03/21 20:41:01  fisyak
 #  Cleanup for SL99d
 #
@@ -268,7 +271,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/03/21 20:41:01 $ 
+#           Last modification $Date: 1999/03/30 21:46:26 $ 
 #  default setings
 # Current Working Directory
 #
@@ -323,11 +326,11 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
 #ifneq ($(USER),wenaus) # List makers to be converted into new scheme
-  SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
-  SUBDIRS := $(filter-out StAnalysisMaker StEventReaderMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StSpectraTagsMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
+   SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StAnalysisMaker StEventReaderMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StSpectraTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker, $(SUBDIRS)) 
   SUBDIRS := $(filter-out objy, $(SUBDIRS))
 #  SUBDIRS := $(filter-out StTreeMaker, $(SUBDIRS))
