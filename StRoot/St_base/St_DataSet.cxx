@@ -52,6 +52,8 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
  //  returns  the pointer to set is success or ZERO poiner                    //
  //  =======                                                                  //
  //                                                                           //
+ //  Note: If this St_DataSetIter is empty (i.e. Pwd() returns 0), the "set"  //
+ //        becomes the "root" dataset of this iterator                        //                                                                         //
  ///////////////////////////////////////////////////////////////////////////////
  
   if (!set) return 0;
@@ -60,6 +62,18 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
   if (s) {
      s->Add(set);
      s = set;
+  }
+  else {
+  //  make the coming dataset the current one for the iterator
+     s = set;
+     fRootDataSet    = s;
+     fWorkingDataSet = s;
+     if (fNext) {
+       Error("Add","St_DataSetIter has been corrupted ;-!"); 
+       delete fNext; 
+       fNext = 0;
+     }
+     fNext = new TIter(s->fList);
   }
   return s;
 }
