@@ -801,7 +801,7 @@ foreach my $runDsc (@runDescr) {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID'"; 
+    $sql.=" WHERE runID = '$mrunID' AND fName like '%root' and path like '%P00hf%' "; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
