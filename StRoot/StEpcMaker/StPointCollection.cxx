@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.19  2003/10/12 02:56:51  perev
+// LeakOff TClonesArray::Delete added
+//
 // Revision 1.18  2003/09/17 00:55:59  suaide
 // Fixed bug. Chain was crashing because some data members were not initialized
 //
@@ -151,6 +154,9 @@ StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 //_____________________________________________________________________________
 StPointCollection::~StPointCollection()
 {
+    mPoints.Delete();
+    mPointsReal.Delete();
+    mNPoints =0; mNPointsReal=0;
 }
 
 void 
