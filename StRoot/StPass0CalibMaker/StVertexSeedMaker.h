@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.2 2002/01/27 01:56:14 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.3 2002/01/28 22:16:33 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -45,13 +45,15 @@ class StVertexSeedMaker : public StMaker {
    void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.2 2002/01/27 01:56:14 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.3 2002/01/28 22:16:33 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
  protected:
    Int_t FillAssumed();
    void FillDateTime();
+   Bool_t BetterErrors();
+   Bool_t ChangedValues();
 
  private:
   TH1F* xdist;
@@ -61,10 +63,6 @@ class StVertexSeedMaker : public StMaker {
   TNtuple* resNtuple;
   float xguess;
   float yguess;
-  float x0_assumed;
-  float dxdz_assumed;
-  float y0_assumed;
-  float dydz_assumed;
   float zvertex;
   float yvertex;
   float xvertex;
@@ -83,8 +81,10 @@ class StVertexSeedMaker : public StMaker {
   float    maxY0Err;
   Bool_t   mHistOut;
   Bool_t   useEventDateTime;
-  double p[4];
-  double ep[4];
+  double p[4];  // calculated params
+  double ep[4]; // calculated errs
+  double a[4];  // database params
+  double ea[4]; // database errs
   double chi;
   double weight;
 
