@@ -77,7 +77,7 @@ Int_t StTreeMaker::Open(const char*)
       AddData(fTree);
 //		Register for outer world
       SetOutput(fTree);
-      fTree->UpdateFile(fFile);
+//      fTree->SetFile(fFile,"r");
 //	1st branch must be mentioned in fFile
       TString firstBr(fFile);
       i = firstBr.Last('.'); assert(i>0);
@@ -102,6 +102,7 @@ Int_t StTreeMaker::Open(const char*)
 //
 
     UpdateTree(0);
+    fTree->SetFile(fFile,"r");
     fTree->SetUKey(0);
     
   } else            { //Write mode  
@@ -124,14 +125,12 @@ Int_t StTreeMaker::Open(const char*)
     } else {			// Create new tree
 
       fTree = new StTree(GetTreeName()); 
-      if (!fFile.IsNull()) fTree->SetBaseName(fFile);
-      Broadcast("OutputFile",fFile.Data());
-      
 
     }//end of new tree
     
 
     UpdateTree(0);
+    fTree->SetFile(fFile,"w");
     fTree->SetUKey(0);
     fTree->Close("keep");
   } 

@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StTreeMaker 			                            	//
+// StTreeMaker 			                            	        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -39,15 +39,17 @@ public:
    virtual void   FillHistBranch(StBranch *histBr);
   
 
-   StTree        *fTree;	//!
+ 
    StTree *GetTree(){return fTree;};
    StBranch *GetBranch(const Char_t *brName)
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.15 2001/05/04 19:55:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.16 2002/02/23 19:14:15 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
+private:
+   StTree        *fTree;	//!
+   ClassDef(StTreeMaker, 0)   	//general StAR IO maker
 };
 
 #endif
