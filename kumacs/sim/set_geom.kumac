@@ -3,6 +3,7 @@
 * ***********************
 * 7Jul98 - created, Pavel Nevski
 * 9Jul98 - editted, Kathy Turner
+* 31Jul98 - editted, Kathy Turner - use Bfield instead of field
 * ******************************************************************
 * COMMON SETTINGS YOU MAY WANT:
  
@@ -78,7 +79,7 @@
       mode g2tm geom 1
       
 * - turn magnetic field off (default is 5):
- detp mfld mflg.field=0    
+ detp mfld mflg.Bfield=0    
  
     message ' no B-field'
  
