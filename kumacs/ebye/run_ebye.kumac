@@ -9,7 +9,7 @@
 ************************************************************************
 
  macro run__
-          TOP=$STAR _
+          TOP=/scr22/kathy/ebye _
           domain='geometry tpc svt global ebye' _
           input_data_dir=/star/u2/dhammika/data/ _
           input_data_file=DST_prodrun2_evt1-99.xdf _
@@ -37,7 +37,8 @@
   message ' *** output Ntuple filename  -->            ' [nfile]
   message ' *** Ntuple ID # -->                        ' [nid]
   message ' *** Table to write to ntup -->             ' [table]
-
+  
+  
 ***********************************************************
 * General Setup
 ***********************************************************
