@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.9 2000/11/23 01:33:16 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.10 2000/11/28 14:10:11 jcs Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.10  2000/11/28 14:10:11  jcs
+// set a_large_number frp fdepar
+//
 // Revision 1.9  2000/11/23 01:33:16  oldi
 // Proper initialization of some variables to avoid Insure++ error messages.
 //
@@ -262,6 +265,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
   min_hit     = fdepar[0].min_hit;          // min. no. hit required 
   pad_length  = fdepar[0].pad_length/100.;  // from cm to um/keV
   ftrunc      = fdepar[0].frac_trun;        // fraction for trunc. mean 
+  a_large_number = fdepar[0].a_large_number; // 1e+10
   
   if (debug_level < 8 ) {      
     gMessMgr->Message("", "I", "OST") << " No track = " << (Int_t)GetNumberOfTracks() << endm;
