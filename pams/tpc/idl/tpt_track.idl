@@ -20,7 +20,6 @@
        float     chisq[2];   /* chi squared of the momentum fit */
        float     cov[15];    /* covariance matrix(psi,invp,tanl,phi,z) */
        float     dedx[2];    /* dE/dx information */
-       float     dedxEnsemble[2]; /* dE/dx from ensemble truncation */
        float     invp;       /* 1/pt (transverse momentum) at (r,phi,z) */
        float     curvature;  /* 1/radius */
        float     length;     /* track length */
