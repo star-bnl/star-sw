@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.8 2000/02/02 15:20:36 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.9 2000/02/02 15:40:05 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.9  2000/02/02 15:40:05  hummler
+// make hit smearing gaussian instead of box-shaped
+//
 // Revision 1.8  2000/02/02 15:20:36  hummler
 // correct acceptance at sector boundaries,
 // take values from fcl_det
@@ -27,6 +30,7 @@
 #include "Random.h"
 #include "JamesRandom.h"
 #include "RandFlat.h"
+#include "RandGauss.h"
 StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
 			       int *g2t_ftp_hit_nok,
 			       G2T_TRACK_ST* g2t_track,
@@ -119,7 +123,8 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 
 
     HepJamesRandom engine;
-    HepRandom quasiRandom(engine);
+    RandGauss quasiRandom(engine);
+
 
     //     loop over tracks
 
@@ -275,7 +280,7 @@ atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
 
 	ffs_hit_smear( phi, xi, yi, zi, &xo, &yo, &zo,
 		       sigma_l_hit, sigma_tr_hit,&sigma_z,&sigma_x,&sigma_y,
-		       quasiRandom);
+		       &quasiRandom);
 
 	fcl_fppoint[k].x = xo;
 	fcl_fppoint[k].y = yo;
@@ -397,7 +402,7 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
 				  float *st_dev_z,
 				  float *st_dev_x,
 				  float *st_dev_y,
-				  HepRandom quasiRandom)
+				  RandGauss *quasiRandom)
   {
     // Local Variables
 
@@ -417,12 +422,12 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     *st_dev_y = sqr(sin(phi)) * sqr(st_dev_l) + sqr(cos(phi)) * sqr(st_dev_t);
     *st_dev_y = sqrt (*st_dev_y)/10000.;   // microns -> cm
 
-    smear=(float) quasiRandom.flat()-0.5;
-    err_pad = st_dev_t*smear;
-
-    smear=(float) quasiRandom.flat()-0.5;
+    smear=(float) quasiRandom->shoot();
+    err_pad = st_dev_t*smear; // box->sigma
+    
+    smear=(float) quasiRandom->shoot();
     err_drft = st_dev_l*smear;
-
+    
     //        err_Z = st_dev_Z*SMEAR
 
     // Evaluate hit-shift in x- and y-direction as well as the new points xo and yo

@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.4 2000/02/02 15:20:37 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.5 2000/02/02 15:40:08 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.5  2000/02/02 15:40:08  hummler
+// make hit smearing gaussian instead of box-shaped
+//
 // Revision 1.4  2000/02/02 15:20:37  hummler
 // correct acceptance at sector boundaries,
 // take values from fcl_det
@@ -26,7 +29,7 @@
 #define SIZE 20
 // #define sqr(x) ((x)*(x))
 
-class HepRandom;
+class RandGauss;
 
 class StFtpcFastSimu
 {
@@ -102,7 +105,7 @@ class StFtpcFastSimu
 		    float *st_dev_z,
 		    float *st_dev_x,
 		    float *st_dev_y,  
-		    HepRandom quasiRandom);
+		    RandGauss *quasiRandom);
   int ffs_ini(FFS_FSPAR_ST *ffs_fspar,   
 	      FFS_GASPAR_ST *ffs_gaspar,
 	      FCL_DET_ST* fcl_det);
