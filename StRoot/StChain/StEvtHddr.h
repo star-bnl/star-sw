@@ -3,6 +3,8 @@
 
 #include "TDatime.h"
 #include "St_DataSet.h"
+struct EvtHddr_st;
+
 class StEvtHddr : public St_DataSet
 {
 public:
@@ -14,7 +16,7 @@ public:
   Int_t 	GetRunNumber()    const {return mRunNumber;};
   Int_t 	GetOldRunNumber() const {return mOldRunNumber;};
   const Char_t *GetEventType()    const {return (const Char_t*)mEventType;};
-  ULong_t 	GetTriggerMask()  const {return mTriggerMask;};
+  UInt_t 	GetTriggerMask()  const {return mTriggerMask;};
   Float_t       GetCenterOfMassEnergy() const {return mCenterOfMassEnergy;};
   Int_t       	GetAEast()        const {return mAEast;};
   Int_t       	GetZEast() 	  const {return mZEast;};
@@ -24,7 +26,7 @@ public:
   Float_t     	GetBImpact()      const {return mBImpact;};
   Float_t     	GetPhiImpact()    const {return mPhImpact;};
   Float_t     	GetPhImpact()     const {return GetPhiImpact();};
-  ULong_t     	GetUTime() 	  const {return mEventTime.Get();};
+  UInt_t     	GetUTime() 	  const {return mEventTime.Get();};
   Int_t     	GetDate()  	  const {return ((TDatime *)&mEventTime)->GetDate();};
   Int_t     	GetTime()  	  const {return ((TDatime *)&mEventTime)->GetTime();};
   TDatime       GetDateTime()     const {return mEventTime;};
@@ -32,13 +34,13 @@ public:
   Int_t     	GetEventNumber()  const {return mEventNumber;};
   Int_t     	GetGenerType()    const {return mGenerType;};
   Int_t     	IsNewRun()    const {return (mRunNumber==mOldRunNumber);};
-
+  void          FillTag(EvtHddr_st *tag);  
 //		Set methods
 
   void          SetRunNumber(int run)	{mOldRunNumber=mRunNumber;mRunNumber=run;};
   void		SetEventType(const Char_t *type){mEventType=type;};
-  void 		SetTriggerMask(ULong_t tm)	{mTriggerMask=tm;};
-  void 		SetInputTriggerMask(ULong_t tm)	{mInputTriggerMask=tm;};
+  void 		SetTriggerMask(UInt_t tm)	{mTriggerMask=tm;};
+  void 		SetInputTriggerMask(UInt_t tm)	{mInputTriggerMask=tm;};
   void       	SetCenterOfMassEnergy(float e)	{mCenterOfMassEnergy=e;};
   void     	SetBImpact  (float b)  	{mBImpact=b;};
   void     	SetPhiImpact(float p)  	{mPhImpact=p;};
@@ -50,7 +52,7 @@ public:
   void     	SetLuminosity(float lu)	{mLuminosity=lu;};
   void     	SetDateTime(int iDate,int iTime){mEventTime.Set(iDate,iTime);};
   void          SetDateTime(TDatime dt)	{mEventTime=dt;};
-  void          SetGMTime(ULong_t ut);
+  void          SetGMTime(UInt_t ut);
   void          SetProdDateTime()	{mProdTime.Set();};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
   void     	SetGenerType(int g)	{mGenerType=g;};
@@ -61,8 +63,8 @@ protected:
     Int_t	mRunNumber;
     Int_t	mOldRunNumber;
     Int_t       mId;
-    ULong_t 	mInputTriggerMask;
-    ULong_t 	mTriggerMask;
+    UInt_t 	mInputTriggerMask;
+    UInt_t 	mTriggerMask;
     Float_t     mCenterOfMassEnergy;
     Int_t       mAEast;
     Int_t       mZEast;
@@ -74,7 +76,7 @@ protected:
     Float_t	mBImpact;			//Impact parameter
     Float_t	mPhImpact;			//Phi angle of impact
     Int_t       mGenerType;			//Gener type see below
-    ULong_t	mBunchCrossingNumber;
+    UInt_t	mBunchCrossingNumber;
     Int_t       mEventNumber;    
 //
     TDatime     mEventTime;		//DAQ Time
@@ -83,7 +85,35 @@ protected:
 
 ClassDef(StEvtHddr,1)
 };
-
+struct EvtHddr_st 
+{
+    Int_t	mRunNumber;
+    Int_t	mOldRunNumber;
+    Int_t       mId;
+    UInt_t 	mInputTriggerMask;
+    UInt_t 	mTriggerMask;
+    Float_t     mCenterOfMassEnergy;
+    Int_t       mAEast;
+    Int_t       mZEast;
+    Int_t       mAWest;
+    Int_t       mZWest;
+    Float_t     mLuminosity;
+    Float_t     mBeamPolarizationEast[3];
+    Float_t     mBeamPolarizationWest[3];
+    Float_t	mBImpact;			//Impact parameter
+    Float_t	mPhImpact;			//Phi angle of impact
+    Int_t       mGenerType;			//Gener type see below
+    UInt_t	mBunchCrossingNumber;
+    Int_t       mEventNumber;    
+//
+//    TDatime     mEventTime;		//DAQ Time
+    Int_t       mEventTime;
+    Int_t       mEventDate;
+//    TDatime     mProdTime;		//Production time
+    Int_t       mProdTime;
+    Int_t       mProdDate;
+  //    TString     mEventType;
+};
 #endif
 
 #if 0
