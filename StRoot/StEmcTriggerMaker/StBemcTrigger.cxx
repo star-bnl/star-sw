@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.1 2001/05/24 14:42:10 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.2 2001/09/19 15:50:45 suaide Exp $
 //
 //    
 
@@ -104,7 +104,7 @@ void StBemcTrigger::MakeTrigger()
         {
           Int_t id;
           geo->getId(m,e,s,id);        
-          if(e8bits[id-1]>HT[patch-1]) 
+          if(e8bits[id-1]>=HT[patch-1]) 
           {
             HT[patch-1]=e8bits[id-1]; 
             HTId[patch-1]=id;
