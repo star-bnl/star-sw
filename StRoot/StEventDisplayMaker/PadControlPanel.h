@@ -1,8 +1,10 @@
+#ifndef STAR_PadControlPanel
+#define STAR_PadControlPanel
 //*-- Author :    Valery Fine   25/05/99  (E-mail: fine@bnl.gov)
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.h,v 1.2 2002/12/19 01:21:45 fine Exp $
+// $Id: PadControlPanel.h,v 1.3 2002/12/24 01:32:55 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -22,7 +24,7 @@
 #ifdef R__QT
 #include "Rtypes.h"
 #include "Gtypes.h"
-#if !defined(__CINT__) && defined(R__QT)
+#if !defined(__CINT__)
 # include <qobject.h>
 #endif
 
@@ -30,11 +32,11 @@ class QButtonGroup;
 class TVirtualPad;
 
 class StPadControlPanel
-#if !defined(__CINT__) && defined(R__QT)
+#if !defined(__CINT__)
   : public QObject 
 #endif
 {
-#if !defined(__CINT__) && defined(R__QT)
+#if !defined(__CINT__)
 Q_OBJECT
 #endif
   private:
@@ -44,6 +46,9 @@ Q_OBJECT
 protected:
   void AddButt(const Char_t *buttonName, const Char_t *command);
 
+public slots:
+     void Clicked(int id);
+
 public:
 
   StPadControlPanel();
@@ -51,7 +56,6 @@ public:
   virtual ~StPadControlPanel();
   QButtonGroup *Bar() const;
 
-  void Clicked(int id);
 
   static void SetBackround(Color_t color, TVirtualPad *pad=0);
   static void SetBackroundStyle(TVirtualPad *pad=0);
@@ -68,10 +72,13 @@ public:
   static void Inscrease3DScale();
   void MakeFourView(TVirtualPad *pad=0);
   void AddAxes(TVirtualPad *pad=0);
+  
+  
 #if 0
  ClassDef(StPadControlPanel,0);
 #endif
 };
 
 // StPadControlPanel __StPadControlPanel__;
+#endif
 #endif
