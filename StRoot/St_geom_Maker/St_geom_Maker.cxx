@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.9 1999/11/12 18:25:51 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.10 1999/11/21 01:40:48 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.10  1999/11/21 01:40:48  fine
+// Temporary mark TPC and SVT modes unless Pavel does it
+//
 // Revision 1.9  1999/11/12 18:25:51  fine
 // Take in account GEANT maker
 //
@@ -77,6 +80,7 @@
 #include "TFile.h"
 #include "TGeometry.h"
 #include "TSystem.h"
+#include "TTUBE.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -138,6 +142,29 @@ Int_t St_geom_Maker::Init() {
   // Remove hall from the list of ROOT nodes to make it free of ROOT control
   listOfNode->Remove(hall);
   listOfNode->Remove(hall);
+//  Artifact to be deleted just Pavel marks all volumes proeprly
+// ---  Create "standard" TPC and SVT views ----
+
+  // Create an iterator to navigate STAR geometry
+  St_DataSetIter volume(hall,0);
+  St_Node *sector = 0;
+  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
+  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
+  while ( (sector = ( St_Node *)volume()) ){
+    Bool_t found = kFALSE;
+    Int_t i;
+    for (i =0; i < lvolueNames; i++) 
+    if (strcmp(sector->GetName(),volueNames[i]) == 0 ) {found = kTRUE; break; }
+    if (found) {
+      sector->SetVisibility(St_Node::kSonUnvisible);
+      sector->Mark();
+      if (!i) {  // special case for TPSS sectors
+        TTUBE *tubs = (TTUBE *)sector->GetShape();
+        tubs->SetNumberOfDivisions(1);
+      }
+    }
+  }
+
 // Add "hall" into ".const" area of this maker
    AddConst(hall);
    if (Debug()) hall->ls(3);
