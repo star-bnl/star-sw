@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtBinaryReader.h,v 1.10 2000/08/25 15:12:58 laue Exp $ 
+ * $Id: StHbtBinaryReader.h,v 1.11 2001/05/10 21:01:30 laue Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.11  2001/05/10 21:01:30  laue
+ * reduced output via new member 'mDebug' in StHbtEventReader (base)
+ *
  * Revision 1.10  2000/08/25 15:12:58  laue
  * Bux-fix. Private copy of mReaderStatus deleted. Now mReaderStatus from base
  * is used. This will lead to termination of the event loop if no more
@@ -54,7 +57,7 @@ class StHbtBinaryReader : public StHbtEventReader{
 
 private:
   StHbtIOBinary* binaryIO;
-
+  
   unsigned short mStHbtEventVersion;
   unsigned short mStHbtTrackVersion;
   unsigned short mStHbtV0Version;
