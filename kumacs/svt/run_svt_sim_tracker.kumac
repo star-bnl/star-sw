@@ -16,6 +16,7 @@
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 8/10/98 - K. Turner - fixed up init calls
+* 8/27/98 - K. Turner - fixed up init calls
 * *************************************************
  
  MACRO run _
@@ -121,7 +122,7 @@
    exec create_tables_svt#stk
    exec init_sgr#init
    exec init_stk#init
-   exec init_stk#vtx
+   exec init_vertices#init
  endif
  
  
