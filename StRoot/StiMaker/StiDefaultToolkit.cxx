@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.18 2004/02/21 18:28:29 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.19 2004/02/21 19:17:38 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.19  2004/02/21 19:17:38  pruneau
+ * removing reference to evaluable tracks and finder
+ *
  * Revision 2.18  2004/02/21 18:28:29  pruneau
  * Updates to comply to changes in interfaces
  *
@@ -84,12 +87,10 @@
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiCompositeSeedFinder.h"
-#include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiDetectorGroups.h"
-#include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiResidualCalculator.h"
 #include "StiTpc/StiTpcHitLoader.h"
