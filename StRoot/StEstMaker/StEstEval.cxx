@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstEval.cxx,v 1.4 2001/03/02 16:05:05 lmartin Exp $
+ * $Id: StEstEval.cxx,v 1.5 2001/04/23 12:29:21 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstEval.cxx,v $
+ * Revision 1.5  2001/04/23 12:29:21  lmartin
+ * Information on the findable pattern added in the results vs the segment patterns
+ * to facilitate the parameter tuning.
+ *
  * Revision 1.4  2001/03/02 16:05:05  lmartin
  * Save the numbers of ideal, good and bad tracks.
  *
@@ -59,6 +63,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
 
   int matrix,matrix2,ok,mcid;
   long possmatr[64],badmatr[64],goodmatr[64],badimatr[64],goodimatr[64];
+  long possfmatr[64],badfmatr[64],goodfmatr[64];
   int nPerfectHit;
 
   double maxdist;
@@ -101,8 +106,11 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
     possmatr[i]  = 0;
     goodmatr[i]  = 0;
     badmatr[i]   = 0;
+    possfmatr[i]  = 0;
     goodimatr[i] = 0;
+    goodfmatr[i] = 0;
     badimatr[i]  = 0;
+    badfmatr[i]  = 0;
   }
 
   // first loop over all the tracks - to evaluate the ideal tracks
@@ -130,6 +138,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
 	&& nPerfectHit>=nminhit) {
 	  poss[j]++;
 	  possmatr[matrix]++;
+	  possfmatr[mTrack[i]->GetFindablePattern()]++;
 	  lmideal_id[lmideal_tot]=mTrack[i]->mTPCTrack->mId;
 	  lmideal_i[lmideal_tot]=i;
 	  lmideal_pat[lmideal_tot]=matrix;
@@ -196,6 +205,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
 	badmatr[matrix]++;
 	//	if (matrix2==0) cout<<"ideal pattern=0 : track_id= "<<mTrack[i]->mTPCTrack->GetId()<<endl;
 	badimatr[matrix2]++;
+	badfmatr[mTrack[i]->GetFindablePattern()]++;
 	lmbad_id[lmbad_tot]=mTrack[i]->mTPCTrack->mId;
 	lmbad_i[lmbad_tot]=i;
 	lmbad_pat[lmbad_tot]=matrix;
@@ -207,6 +217,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
 	good[mTrack[i]->GetBranch(_NBR)->GetNHits()]++;
 	goodmatr[matrix]++;
 	goodimatr[matrix2]++;
+	goodfmatr[mTrack[i]->GetFindablePattern()]++;
 	lmgood_id[lmgood_tot]=mTrack[i]->mTPCTrack->mId;
 	lmgood_i[lmgood_tot]=i;
 	lmgood_pat[lmgood_tot]=matrix;
@@ -236,8 +247,8 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
   cout <<"BAD:  slay[0]="<<slay_bad[0]<<" slay[1]="<<slay_bad[1]<<" slay[2]="<<slay_bad[2]<<" slay[3]="<<slay_bad[3]<<endl;
   cout <<endl;
   cout <<"*****  RESULTS VERSUS THE SEGMENT PATTERNS *****"<<endl;
-  cout << "\t\t| final\tpattern\t| ideal\tpattern"<<endl;
-  cout << "1234\t| POSS\t| GOOD\tBAD\t| GOOD\tBAD"<<endl;
+  cout << "layer|\t\t\t| final\tpattern\t| ideal\tpattern\t| finda\tpattern"<<endl;
+  cout << "0123 | POSS\t| FIND\t| GOOD\tBAD\t| GOOD\tBAD\t| GOOD\tBAD"<<endl;
   for (i=0;i<16;i++) {
     for (j=0;j<4;j++) {
       if (i & int(pow(2,j))) 
@@ -245,7 +256,9 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
       else
 	cout << "0";
     }
-    cout << "\t| "<<possmatr[i]<<"\t| "<<goodmatr[i]<<"\t"<<badmatr[i]<<"\t| "<<goodimatr[i]<<"\t"<<badimatr[i]<<endl;
+    cout << " | "<<possmatr[i]<<"\t| "<<possfmatr[i]<<"\t| "<<goodmatr[i]<<"\t"<<badmatr[i]
+	 <<"\t| "<<goodimatr[i]<<"\t"<<badimatr[i]
+	 <<"\t| "<<goodfmatr[i]<<"\t"<<badfmatr[i]<<endl;
   }
 
   cout<<endl;
