@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.9 2003/03/04 15:25:48 andrewar Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.10 2003/03/04 18:41:27 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.10  2003/03/04 18:41:27  pruneau
+ * Fixed StiHit to use global coordinates as well as locals.
+ * Fixed Logic Bug in StiKalmanTrackFinder
+ *
  * Revision 2.9  2003/03/04 15:25:48  andrewar
  * Added several functions for radlength calculation.
  *
@@ -248,11 +252,6 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
 double StiKalmanTrackNode::getField()  const
 {
   return pars->field;
-}
-
-double StiKalmanTrackNode::getHelicity()  const
-{
-  return (getCharge()*getField() <= 0) ? 1 : -1;
 }
 
 double StiKalmanTrackNode::getPhase() const
