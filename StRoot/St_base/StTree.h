@@ -40,13 +40,15 @@ class StBranch : public St_DataSet {
 //friend class StBranch;
 friend class StTree;
 public:
-  StBranch(const Char_t *name="", StTree* parent=0);
+  StBranch(const Char_t *name="", StTree* parent=0,Option_t *opt=0);
  ~StBranch();
 
   virtual void SetIOMode(Option_t *iomode="0");
   virtual Option_t *GetIOMode();
   virtual void SetOption(Option_t *opt);
-  virtual Option_t     *GetOption() const {return fOption;};
+  virtual Option_t *GetOption() const {return fOption;};
+  virtual Bool_t IsOption(Option_t *opt) const 
+          {return fOption.Contains(opt,TString::kIgnoreCase);};
   virtual Int_t UpdateFile(const Char_t *file);
   virtual const Char_t *GetFile();
   virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
