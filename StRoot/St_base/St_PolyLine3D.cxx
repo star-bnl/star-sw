@@ -291,7 +291,7 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 //  Axis() draws three axice  Ox,   Oy,    Oz   with three different colors: //
 //                           red   gree   blue                               //
 // as follows:                                                               //
-//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/Axice.gif.gif"> </P> End_Html  // 
+//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/Axice.gif"> </P> End_Html  // 
 //                                                                           //
 //   TVirualPad - the point to TPad objest these axice will be drawn into    //
 //              = 0 (= gPad, by default)                                     //
