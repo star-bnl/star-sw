@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.88  1999/10/28 17:03:37  fisyak
+#  remove no%castop for Sun
+#
 #  Revision 1.87  1999/09/09 23:02:16  fisyak
 #  Suppress library versioning for users
 #
@@ -239,7 +242,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/09/09 23:02:16 $ 
+#             Last modification $Date: 1999/10/28 17:03:37 $ 
 #. default setings
 
 MAKE  := gmake
@@ -644,7 +647,7 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   CC    := /opt/SUNWspro/bin/cc
   CXX   := /opt/SUNWspro/bin/CC
   FC    := /opt/SUNWspro/bin/f77
-  CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
+  CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%anachronisms -features=rtti +w
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
