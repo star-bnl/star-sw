@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.64 1999/02/14 23:10:08 fisyak Exp $
+# $Id: MakeDll.mk,v 1.65 1999/02/16 15:37:34 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.65  1999/02/16 15:37:34  fisyak
+# Clean up HP stuff
+#
 # Revision 1.64  1999/02/14 23:10:08  fisyak
 # split tables for HP, remove duplicates for root4star
 #
@@ -322,21 +325,6 @@ ifneq (,$(QWE))
   QWE  :=$(shell expr $(QWE) + 1)
   SL_NEW :=$(MY_SO).$(QWE)
 endif
-ifneq (,$(findstring $(PKG),tables))
-ifneq (,$(findstring $(STAR_SYS),hp_ux102)) 
-  SO_LIB_CINT :=$(strip $(basename $(SO_LIB))Cint.$(SOEXT))
-  MY_SO_CINT  :=$(SO_LIB_CINT)
-  EWQ         :=$(strip $(wildcard $(MY_SO_CINT).*))
-  SL_NEW_CINT :=$(MY_SO_CINT).1000
-ifneq (,$(EWQ))
-  NEWQ :=$(words $(EWQ))
-  EWQ  :=$(word $(NEWQ),$(EWQ))
-  EWQ  :=$(subst $(MY_SO_CINT).,,$(EWQ))
-  EWQ  :=$(shell expr $(EWQ) + 1)
-  SL_NEW_CINT :=$(MY_SO_CINT).$(EWQ)
-endif
-endif
-endif
 else #/* NT */
   SL_NEW := $(MY_SO)
 endif
@@ -437,31 +425,10 @@ Libraries : $(MY_SO) $(MY_SO_CINT)
 
 ifndef NT
 
-$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O)
-
-ifeq (,$(findstring $(STAR_SYS),hp_ux102)) 
+$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O) $(LIBRARY)
 	cd $(OBJ_DIR);  \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS)  $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
-else  # hp_ux102  CXXOPTS="($(notdir $(filter %Cint%, $(ALL_DEPS))))"; export CXXOPTS; 
-ifdef MY_SO_CINT
-	cd $(OBJ_DIR); \
-	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW_CINT) *Cint.o $(LIBRARY);\
-        $(RM) $(MY_SO); $(LN)  $(SL_NEW_CINT) $(MY_SO_CINT)
-	cd $(OBJ_DIR); \
-	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW) $(filter-out %Cint.o, $(notdir $(ALL_DEPS)))  $(LIBRARY);\
-        $(RM) $(MY_SO); $(LN)  $(SL_NEW) $(MY_SO)
-else
-	cd $(OBJ_DIR); \
-	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW) $(notdir $(ALL_DEPS))  $(LIBRARY);\
-        $(RM) $(MY_SO); $(LN)  $(SL_NEW) $(MY_SO)
-endif
-endif # hp_ux102
-#	cd $(OBJ_DIR); $(RM) link; echo "" > link; 
-#	cd $(OBJ_DIR); for p in $(filter-out %Cint.o, $(notdir $(ALL_DEPS))); do echo $$p >> link; done; 
-#	cd $(OBJ_DIR); for p in $(filter %Cint.o, $(notdir $(ALL_DEPS))); do echo $$p >> link; done; 
-#	cd $(OBJ_DIR); $(LD) -c link $(filter-out -g,$(SOFLAGS)) $(SoOUT)$(SL_NEW) $(LIBRARY); $(RM) $(MY_SO); 
-# $(LN)
 else # NT
 ifdef MY_SO
 MY_SOLIB := $(subst /bin/,/lib/,$(MY_SO))

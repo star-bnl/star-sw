@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.56  1999/02/16 15:37:38  fisyak
+#  Clean up HP stuff
+#
 #  Revision 1.55  1999/02/14 23:10:10  fisyak
 #  split tables for HP, remove duplicates for root4star
 #
@@ -244,7 +247,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/14 23:10:10 $ 
+#           Last modification $Date: 1999/02/16 15:37:38 $ 
 #  default setings
 # Current Working Directory
 #
@@ -255,7 +258,9 @@ endif
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
+
 include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeDirs.mk
 ifneq (,$(wildcard StRoot/St_base))
   BASE := St_base
 endif
@@ -292,15 +297,14 @@ ifndef SUBDIRS
   endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
-  ifndef OBJY_HOME
-#    SUBDIRS := $(filter-out objy, $(SUBDIRS))
-  endif
-    SUBDIRS := $(filter-out objy, $(SUBDIRS))
+  SUBDIRS := $(filter-out StREvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out StREvent, $(SUBDIRS))
   SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
+#  ifndef OBJY_HOME
+    SUBDIRS := $(filter-out objy, $(SUBDIRS))
+#  endif
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
     SUBDIRS := $(filter-out l3, $(SUBDIRS)) 
@@ -311,10 +315,9 @@ ifndef SUBDIRS
     SUBDIRS:=
   endif
 endif
-include $(STAR_MAKE_HOME)/MakeDirs.mk
 #          I have subdrs
-.PHONY               :  all $(BASE)  $(St_TABLES) test clean clean_lib clean_share clean_obj
-all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG)) $(St_TABLES)
+.PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
+all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG)) $(St_Tables)
 	@echo $(TARGETS)
 $(BASE):
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
