@@ -1,3 +1,16 @@
+/***************************************************************************
+ *
+ * $Id: StQACosmicMaker.cxx,v 1.2 1999/08/03 17:15:53 snelling Exp $
+ *
+ * Author: Raimond Snellings, LBNL, Jun 1999
+ * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
+ *
+ * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.2  1999/08/03 17:15:53  snelling
+ * added id tags
+ *
+ *  
+ **************************************************************************/
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
@@ -23,8 +36,6 @@ ClassImp(StQACosmicMaker)
 
 //-----------------------------------------------------------------------
 StQACosmicMaker::~StQACosmicMaker() {
-  //  delete phistresxvsdip;
-  //  delete nttpc;
 }
 
 //-----------------------------------------------------------------------
@@ -101,7 +112,7 @@ Int_t StQACosmicMaker::Make() {
 //-----------------------------------------------------------------------
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.1.1.1 1999/08/03 01:28:33 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.2 1999/08/03 17:15:53 snelling Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
