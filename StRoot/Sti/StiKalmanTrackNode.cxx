@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.39 2004/11/08 15:32:54 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.40 2004/11/10 21:46:02 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.40  2004/11/10 21:46:02  pruneau
+ * added extrapolation function; minor change to updateNode function
+ *
  * Revision 2.39  2004/11/08 15:32:54  pruneau
  * 3 sets of modifications
  * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
@@ -515,6 +518,32 @@ bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
 }
 
 
+///Propagate track from the given node to the beam line with x==0.
+///Set the hit and detector pointers to null to manifest this is an extrapolation
+bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode)
+{
+  setState(parentNode);
+  if (propagate(0., kPlanar) < 0) return false; // track does not reach vertex "plane"
+  propagateError();
+  _hit = 0;
+  _detector = 0;
+  return true;
+}
+
+///Extrapolate the track defined by the given node to the given radius.
+///Return a negative value if the operation is impossible.
+int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radius)
+{
+  int position = 0;
+  setState(pNode);
+  _refX = radius;
+  position = propagate(radius,kCylindrical);
+  if (position<0) return position;
+  propagateError();
+  return position;
+}
+
+
 /*! Work method used to perform the tranport of "this" node from 
   its current "_x" position to the given position "xk". 
   Returns -1 if the propagation cannot be carried out, i.e.
@@ -986,7 +1015,28 @@ int StiKalmanTrackNode::updateNode()
   double dp2  = k20*dy + k21*dz;
   double dp4  = k40*dy + k41*dz;
 
+  //if (_c00>0 && _c11>0 && hitCount>20) 
+  //  {
+  //    cout << " _x:"<<_x<< " hit:"<<hitCount<<" c22:"<<sqrt(_c22)<<" c44:"<<sqrt(_c44)<<" dp2:"<<dp2<<" dp4:"<<dp4<<endl;
+  //  }
+  //if (_x>50.)
+  //{
   if (fabs(dp4)>0.27 || fabs(dp2)>3) return 1;
+  //}
+  //else
+  //{
+  //if (fabs(dp4)>0.1 || fabs(dp2)>0.5) return 1;
+  //}
+  if (_x>2.)
+    {
+      if ( (dp4*dp4/16.>_c44) || (dp3*dp3/16. > _c33) || (dp2*dp2/16.>_c22) ) return 1;
+    }
+  /*  else
+    {
+      if ((dy*dy/16.>_c00) || (dz*dz/16.>_c11)) return 1;
+    }
+  */
+
   double cur  = _p3 + dp3;
   double eta  = _p2 + dp2;
   double tanl = _p4 + dp4;
@@ -1232,15 +1282,17 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
   zAbsOff = fabs(zOff);
   detHW = sh->getHalfWidth();
   detHD = sh->getHalfDepth();
-  if (_x<5.)
-    edge  = 0.5;  
+  if (_x<50.)
+    edge  = 0.3;  
   else
     edge  = 2.;
 
   innerY = detHW - edge;
-  outerY = innerY + 2*edge;
   innerZ = detHD - edge;
-  outerZ = innerZ + 2*edge;
+  //outerY = innerY + 2*edge;
+  //outerZ = innerZ + 2*edge;
+  outerY = innerY + edge;
+  outerZ = innerZ + edge;
 
   if (yAbsOff<innerY && zAbsOff<innerZ)
     position = kHit; 
