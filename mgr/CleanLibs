@@ -5,16 +5,21 @@ require "find.pl";
 
 # Added so it does not depend on soft-link but
 # rather on afs/cons created tree structure.
-chomp($fs=`fs sysname`);
-if($fs ne ""){
-    $fs =~ s/(.*)\'(.*)\'/$2/;
-    #print `pwd`."$fs";
-    if( -d ".$fs"){
+#chomp($fs=`fs sysname`);
+$SYSNM = $ENV{STAR_HOST_SYS};
+if ( ! defined($SYSNM) ){
+    chomp($SYSNM=`fs sysname`);
+}
+
+if($SYSNM ne ""){
+    $SYSNM =~ s/(.*)\'(.*)\'/$2/;
+    #print `pwd`."$SYSNM";
+    if( -d ".$SYSNM"){
 	# use @sys, we found it.
-	$fs = ".$fs/";
+	$SYSNM = ".$SYSNM/";
     } else {
 	# revert to default
-	$fs = "";
+	$SYSNM = "";
     }
 }
 
@@ -23,9 +28,9 @@ my @dirs = ();
 if ($#ARGV > -1) {
     push(@dirs, $ARGV[0]);
 } else {
-    push(@dirs,$fs."obj"); 
-    push(@dirs,$fs."OBJ");
-    push(@dirs,$fs."IOBJ");
+    push(@dirs,$SYSNM."obj"); 
+    push(@dirs,$SYSNM."OBJ");
+    push(@dirs,$SYSNM."IOBJ");
 }
 
 my $KEEP;
