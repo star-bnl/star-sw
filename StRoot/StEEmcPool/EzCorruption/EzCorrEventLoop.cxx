@@ -1,4 +1,4 @@
-// $Id: EzCorrEventLoop.cxx,v 1.2 2004/07/26 22:54:26 rfatemi Exp $
+// $Id: EzCorrEventLoop.cxx,v 1.3 2004/07/26 23:02:29 rfatemi Exp $
 // modified by rfatemi 6-22-04 added barrel loop
  
 #include <assert.h>
@@ -298,11 +298,9 @@ void EzCorrEventLoop::unpackEzTreeHisto(){
 //--------------------------------------------------
 void EzCorrEventLoop::printCorrupt(){
   int nb=eEve->block->GetEntries();
-  printf("#datablocks=%d %p\n",nb, eHead);
+  printf("#datablocks=%d\n",nb);
   long timeStamp=eHead->getTimeStamp();
- printf("run   timeStamp=%d=%s\n" ,(int)timeStamp,ctime((const time_t *)&timeStamp));
   eEve->maskWrongCrates(timeStamp,eHead->getToken()); 
-  printf("After maskWrongCrates\n");
   UChar_t test;
 
   if (nb==0)  printf("NO DATA BLOCKS -- ABORT!\n");
@@ -376,7 +374,7 @@ void EzCorrEventLoop::printCorrupt(){
     }  
   }
   else {
-    printf("Did you make it to the else?\n");
+
     for(int Bic=EDataBkMin;Bic<EDataBkMax;Bic++) {// ETOW data blocks 0 - 5
       EEfeeDataBlock *b=(EEfeeDataBlock *)eEve->block->At(Bic);
       //int crateID=b->getCrateID(); 
@@ -630,6 +628,9 @@ void EzCorrEventLoop::printCorrupt(){
 
 /*****************************************************************
  * $Log: EzCorrEventLoop.cxx,v $
+ * Revision 1.3  2004/07/26 23:02:29  rfatemi
+ * Corruption update without comments
+ *
  * Revision 1.2  2004/07/26 22:54:26  rfatemi
  * Corruption Update
  *
