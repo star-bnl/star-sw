@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: PhysicalConstants.h,v 1.1 1999/01/30 03:58:59 fisyak Exp $
+ * $Id: PhysicalConstants.h,v 1.2 1999/02/22 16:52:47 didenko Exp $
  *
  * Author: CLHEP (see below)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: PhysicalConstants.h,v $
+ * Revision 1.2  1999/02/22 16:52:47  didenko
+ * updates from Gene
+ *
  * Revision 1.1  1999/01/30 03:58:59  fisyak
  * Root Version of StarClassLibrary
  *
@@ -73,6 +76,14 @@ static const double   proton_mass_c2 = 938.27231 * MeV;
 static const double  neutron_mass_c2 = 939.56563 * MeV;
 static const double           amu_c2 = 931.49432 * MeV;
 static const double              amu = amu_c2/c_squared;
+
+static const double kaon_0_short_mass_c2 = 497.672  * MeV;
+static const double    pion_plus_mass_c2 = 139.5700 * MeV;
+static const double   pion_minus_mass_c2 = 139.5700 * MeV;
+static const double       lambda_mass_c2 = 1115.684 * MeV;
+static const double   antilambda_mass_c2 = 1115.684 * MeV;
+static const double     xi_minus_mass_c2 = 1321.32  * MeV;
+
 
 //
 // permeability of free space mu0    = 2.01334e-16 Mev*(ns*eplus)^2/mm
