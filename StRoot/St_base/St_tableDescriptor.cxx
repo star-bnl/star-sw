@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.12 2000/02/29 01:54:49 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.13 2000/02/29 22:13:56 fine Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -63,10 +63,12 @@ Int_t St_tableDescriptor::Compare(St_tableDescriptor *compTable)
 {
   Int_t diffCols = GetNumberOfColumns() - compTable->GetNumberOfColumns();
   if (diffCols) return diffCols;
-  for (Int_t i = 0; i < GetNumberOfColumns(); i++){
+  Int_t counter = 0;
+  for (UInt_t i = 0; i < GetNumberOfColumns(); i++){
       if (strcmp(GetColumnName(i),compTable->GetColumnName(i))) {
            printf(" mistmatch names of the %d-th cols. Should be: \"%s\", got:  \"%s\"\n", 
-                   GetColumnName(i),compTable->GetColumnName(i));
+                   i, GetColumnName(i),compTable->GetColumnName(i));
+           counter++; 
            continue;
       }
 #if 0
@@ -78,6 +80,7 @@ Int_t St_tableDescriptor::Compare(St_tableDescriptor *compTable)
       EColumnType GetColumnType(Int_t columnIndex)          const;
 #endif
   }
+  return counter;
 }
 
 //____________________________________________________________________________
@@ -265,6 +268,9 @@ St_Table::EColumnType St_tableDescriptor::GetColumnType(const Char_t *columnName
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.13  2000/02/29 22:13:56  fine
+// Compare method fixed
+//
 // Revision 1.12  2000/02/29 01:54:49  fine
 // St_Table -> turn automatic schema evolution for table version 2 and above
 //
