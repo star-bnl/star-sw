@@ -52,6 +52,8 @@ public:
  float PadPitchAtRow(int row)       const;
  float RowPitchAtRow(int row)       const;
 
+ int indexForRowPad(int row, int pad)   const;
+
  ClassDef(StRTpcPadPlane,0)
 
 };

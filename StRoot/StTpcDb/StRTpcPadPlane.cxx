@@ -1,4 +1,5 @@
 #include <StRTpcPadPlane.h>
+#include <iostream.h>
 
 ClassImp(StRTpcPadPlane)
 
@@ -147,17 +148,28 @@ float StRTpcPadPlane::RowPitchAtRow(int row) const {
  return Pitch;
 }
 
-
-
-//float StRTpcPadPlane::radialDistanceAtRow(int row) const = 0;  
-//float StRTpcPadPlane::PadWidthAtRow(int row)       const = 0;
-//float StRTpcPadPlane::PadLengthAtRow(int row)      const = 0;
-//float StRTpcPadPlane::PadPitchAtRow(int row)       const = 0;
-//float StRTpcPadPlane::RowPitchAtRow(int row)       const = 0;
-
-
-
-
-
+int StRTpcPadPlane::indexForRowPad(int row, int pad) const {
+  int index = 0;
+  if (row>0&&row<=numberOfInnerRows()){
+    for (int i=1;i<row;i++){
+     index += numberOfPadsAtRow(i);
+    }
+    index+=pad;
+    index--;   //start at index 0
+    return index;
+  }
+  else if (row>numberOfInnerRows()&&row<=numberOfRows()){
+    for (int i=numberOfInnerRows()+1;i<row;i++){
+     index += numberOfPadsAtRow(i);
+    }
+    index+=pad;
+    index--;   //start at index 0
+    return index;
+  }
+  else {
+    cout << "StRTpcPadPlane::Invalid Row Number" << endl;
+    return -1;
+  }
+}
 
 

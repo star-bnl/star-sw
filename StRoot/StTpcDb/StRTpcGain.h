@@ -4,38 +4,32 @@
 #include <StTpcGainI.h>
 #include <gainFactors.time.h>
 #include <StTpcPadPlaneI.h>
-#include <iostream.h>
+//#include <iostream.h>
 
 class StRTpcGain : public StTpcGainI {
 
 private:
 
-  gain_factors* mGains[24];
+  gain_factors mGain;
+  int mSector;
   StTpcPadPlaneI* padplane;
 
 public:
 
   StRTpcGain(){}
   ~StRTpcGain(){}
-  void AddDataForSector(int sector, gain_factors* GainIn) {
-    if (sector>=1&&sector<=24){ 
-      mGains[sector-1] = GainIn;
-    }
-    else {
-     cout << "StRTpcGain::AddDataForSector: Invalid Sector = " 
-	  << sector << endl;
-    }
+  void AddData(gain_factors GainIn) {
+      mGain = GainIn;
    }
-void SetPadPlanePointer(StTpcPadPlaneI* ppin){
-padplane = ppin;
-}
-// void AddData(tpc_padplanes PadIn);
+  void SetPadPlaneP57ointer(StTpcPadPlaneI* ppin){
+      padplane = ppin;
+  }
 
   //Implements Abstract Interface 
-  float getGain(int sector, int row, int pad)   const;
-  float getOnlineGain(int sector, int row, int pad) const;
-  float getNominalGain(int sector, int row, int pad) const;
-  float getRelativeGain(int sector, int row, int pad) const;
+  float getGain(int row, int pad)   const;
+  float getOnlineGain(int row, int pad) const;
+  float getNominalGain(int row, int pad) const;
+  float getRelativeGain(int row, int pad) const;
   float getAverageGainInner(int sector) const;
   float getAverageGainOuter(int sector) const;
  
