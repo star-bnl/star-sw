@@ -1,6 +1,9 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StVertexMaker class ( est + evr/lmv/pplmv )                          //
+// Modes: 0 = lmv/evr                                                   //
+//        1 = ppLMV                                                     //
+//        2 = lmv/evr with VtxOffSet                                    //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -59,13 +62,15 @@ Int_t StVertexMaker::Init(){
 
   switch(m_Mode) { // lmv/evr or ppLMV
 
-  case 0: { // initialize lmv/evr
+  case 0:   // initialize lmv/evr
+  case 2: { // initialize lmv/evr with VtxOffSet
     // Create evr table
     m_evr_evrpar = new St_evr_evrpar("evr_evrpar",1);
     evr_evrpar_st row;
     //
     memset(&row,0,sizeof(row));
     if (m_Mode & 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
+    else row.fitoption = 0;
     row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
     row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;
@@ -153,7 +158,8 @@ Int_t StVertexMaker::Make(){
 
   switch(m_Mode) { // lmv/evr or ppLMV
 
-  case 0: { // lmv/evr
+  case 0:   // lmv/evr
+  case 2: { // lmv/evr with VtxOffSet
 
     St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
     St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
@@ -374,8 +380,11 @@ void StVertexMaker::UnFixVertex(){
   }
 }
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.1 2002/02/18 21:52:59 genevb Exp $
+// $Id: StVertexMaker.cxx,v 1.2 2002/02/19 20:28:19 genevb Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.2  2002/02/19 20:28:19  genevb
+// Fix mode=2 option (VtxOffSet)
+//
 // Revision 1.1  2002/02/18 21:52:59  genevb
 // Introduction of StVertexMaker for finding primary vertices
 //
