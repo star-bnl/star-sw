@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.10 1999/10/11 16:53:10 sakrejda Exp $
+* $Id: tfs_g2t.F,v 1.11 1999/11/22 22:42:44 liq Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.11  1999/11/22 22:42:44  liq
+* modify for the new tphit table, and simulate the pad and time bucket information for tfs
+*
 * Revision 1.10  1999/10/11 16:53:10  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -233,3 +236,7 @@ C     Increment counter and check if done
       
  999  Return
       End
+
+
+
+

@@ -35,5 +35,11 @@ for (i=0; i < tphit_h[0].nok; i++)
     }
 
    tphit_h[0].nok = count;
+
    return STAFCV_OK;
 }
+
+
+
+
+
