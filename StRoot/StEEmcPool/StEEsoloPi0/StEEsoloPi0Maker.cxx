@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.8 2004/09/03 04:50:52 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.9 2004/09/29 18:04:44 balewski Exp $
 
 #include <TFile.h>
 
@@ -59,7 +59,13 @@ StEEsoloPi0Maker::~StEEsoloPi0Maker(){
 //________________________________________________
 //________________________________________________
 Int_t StEEsoloPi0Maker::InitRun(int runNo){
+  // call initRun() only once for M-C
+
+  if( !MCflag) initRun(runNo);
+  static int first=1;
+  if(first) return kStOK;
   initRun(runNo);
+  first=0;
   return kStOK;
 }
  
@@ -69,7 +75,7 @@ Int_t StEEsoloPi0Maker::Init(){
   eeDb=(EEDB*)GetMaker("eemcDb");
   EEsoloPi0::init();
   gMessMgr->Info() << GetName() << "has MCflag="<< MCflag<<endm;
-  return StMaker::Init();
+   return StMaker::Init();
 }
 
 //________________________________________________
@@ -90,7 +96,7 @@ Int_t StEEsoloPi0Maker::Make(){
   //  printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
   n0++;
   //............. trigger sort
-  if( !unpackMuTrig()) return kStOK;
+  if( !MCflag&& !unpackMuTrig()) return kStOK;
   n1++;
 
   //................. CTB sort
@@ -118,14 +124,17 @@ bool StEEsoloPi0Maker::unpackMuTrig(){
  
   // Access to muDst .......................
   StMuEvent* muEve = mMuDstMaker->muDst()->event();
-  //  int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries(); 
   
   StMuTriggerIdCollection& trgIdColl=muEve->triggerIdCollection();
 
   const StTriggerId& oflTrgId=trgIdColl.nominal();
   vector<unsigned int> trgId=oflTrgId.triggerIds();
 
-  // printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
+#if 1
+  StEventInfo &info=muEve->eventInfo();
+  int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries(); 
+  printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
+#endif
 
   bool isGood=false;
   uint i;
@@ -138,7 +147,6 @@ bool StEEsoloPi0Maker::unpackMuTrig(){
   }
   
 #if 0 // TPC vertex, not used (yet)
-  StEventInfo &info=muEve->eventInfo();
   StEventSummary &smry=muEve->eventSummary();
   StThreeVectorF ver=smry.primaryVertexPosition();
 
@@ -163,6 +171,7 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
   }
 
   int i, n1=0;
+  //printf("aaa %d %d \n",eeDb->mfirstSecID,eeDb->mlastSecID);
   //.........................  T O W E R S .....................
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
     int sec,eta,sub,val;
@@ -175,21 +184,24 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
  
     const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
     assert(x); // it should never happened for muDst
+
     if(x->fail ) continue; // drop broken channels
 
     int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
     int ieta=x->eta-1;
     assert(iphi>=0 && iphi<MaxPhiBins);
     assert(ieta>=0 && ieta<MaxEtaBins);
-    int ispir=iphi*MaxEtaBins+ieta; // unified spiral index
-    assert(ispir>=0 && ispir<EEsoloPi0::MxTw);
+    int irad=iphi*MaxEtaBins+ieta; // unified spiral index
+    assert(irad>=0 && irad<EEsoloPi0::MxTw);
 
     float adc=-100, rawAdc=-101, ene=-102;
     
     if(MCflag) {  // M-C & real data needs different handling
       adc=val; //  this is stored in muDst
-      rawAdc=adc+x->ped; // ped noise could be added
+      rawAdc=adc+x->ped; // ped noise could be added but is not yet
+      rawAdc-=3; // tmp, simulate threshold over pedestal, remove once ideal peds are loaded
       ene=adc/ mfixEmTgain[ieta];
+      ene/=0.8; //fug factor for sampling fraction in M-C being ~4% insted of assumed 5%
     } else {
       rawAdc=val;
       adc=rawAdc-x->ped;
@@ -197,7 +209,7 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
     }
 
     int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
-    assert(ii==ispir);
+    assert(ii==irad);
     //    if(adc>0)
     // printf("adc=%f ene/GeV=%f rawAdc=%f idG=%f,hSec=%d %s\n",adc,ene,rawAdc,mfixEmTgain[ieta],x->sec,x->name); 
     
@@ -206,11 +218,10 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
     //aa tileThr[iT][ieta][iphi]=rawAdc>x->thr;
     if(rawAdc<x->thr) continue;
     n1++;
-    if(x->gain<=0) continue;// drop channels w/o gains
     //aa tileEne[iT][ieta][iphi]=ene;
     float recoEner=ene/scaleFactor; // ideal
-    // printf("new ii=%d ene=%f del=%f mcf=%d\n",ispir,recoEner,recoEner-soloMip[ispir].e,MCflag);
-    soloMip[ispir].e= recoEner;
+    // printf("new ii=%d ene=%f del=%f mcf=%d\n",idar,recoEner,recoEner-soloMip[irad].e,MCflag);
+    soloMip[irad].e= recoEner;
     
   }// end of loop over towers
 
@@ -248,6 +259,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.9  2004/09/29 18:04:44  balewski
+// now it runs on M-C as well
+//
 // Revision 1.8  2004/09/03 04:50:52  balewski
 // big clenup
 //
