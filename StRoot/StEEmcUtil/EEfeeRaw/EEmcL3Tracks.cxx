@@ -1,5 +1,8 @@
-// $Id: EEmcL3Tracks.cxx,v 1.8 2003/09/02 17:57:55 perev Exp $ 
+// $Id: EEmcL3Tracks.cxx,v 1.9 2003/09/05 15:04:21 zolnie Exp $ 
 // $Log: EEmcL3Tracks.cxx,v $
+// Revision 1.9  2003/09/05 15:04:21  zolnie
+// remove Stiostream/iostream from the source code
+//
 // Revision 1.8  2003/09/02 17:57:55  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -23,7 +26,7 @@
 // new additions for ..... :)
 //
 
-#include <Stiostream.h>
+//#include <Stiostream.h>
 #include <math.h>
 #include "EEmcL3Tracks.h"
 
