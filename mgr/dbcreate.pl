@@ -1,11 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbcreate.pl,v 1.1 1999/06/25 15:16:59 wenaus Exp $
-#
-# $Log: dbcreate.pl,v $
-# Revision 1.1  1999/06/25 15:16:59  wenaus
-# Add scripts for managing prod DB and SW guide
-#
+# $Id: dbcreate.pl,v 1.2 1999/07/07 13:22:10 wenaus Exp $
 #
 ######################################################################
 #
@@ -18,7 +13,13 @@
 #
 # Usage:    create.pl <pwd>
 #
-
+# $Log: dbcreate.pl,v $
+# Revision 1.2  1999/07/07 13:22:10  wenaus
+# incorporate run log
+#
+# Revision 1.1  1999/06/25 15:16:59  wenaus
+# Add scripts for managing prod DB and SW guide
+#
 package StDbCreate;
 
 #use strict;
@@ -30,29 +31,12 @@ require "dbsetup.pl";
 
 my $debugOn=0;
 
-@ARGV or die "Error: Password must be provided.\n";
-
-# DAQ format info:
-#   http://daq.star.bnl.gov/~daq/DOC/mz_fmt_defaults.html
-# DAQ run type numbering: test=0, ped=1, gain=2, physics=3
-$runTypes="'unknown','test','ped','gain','physics'";
-# DAQ gain mode numbering: seesaw=0, linear=1, log=2, corrected=3
-$gainMode="'unknown','seesaw','linear','log','corrected'";
-# DAQ ped mode numbering: 0=off, 1=on
-$pedMode="'unknown','off','on'";
-my $evTypes="'unknown','BEGR','ENDR','DATA','SLOW'";
-my $procStages="'unknown','daq','reco','postDst'";
-# bankTypes: Bank types supported by DAQ
-my $bankTypes="'TPC','EMC','SMX','SVT','FTP','TOF','L3_','TRG','BEG','END','PED','CAL','SLO'";
-
-# Triggers:
-# 1. cosmic ray
-# 2. TPC pulser
-# 3. TPC laser
-# 4. Collision = M(CTB)>4
-# 5. ZDC = ZDCE.ZDCW
-# 6. central = M>8.ZDC
-my $trigTypes="'cosmic','pulser','laser','collision','zdc','central'";
+for ($ii=0; $ii<@ARGV; $ii++) {
+    if ( $ARGV[$ii] eq "droprun" ) {
+        print "Run tables will be dropped\n";
+        $dropRunTables = 1;
+    }
+}
 
 my @dataDisks=(
             "/disk00000/star",
@@ -582,20 +566,21 @@ sub addFile {
 ######################
 sub StDbDeleteTables {
     open ( DELTABLES, "| /usr/local/mysql/bin/mysql -u $dbuser --password=$dbpass") or die "Open failure: $!";
-    $dbCmd =<<END_BLOCK;
-# ---------
+    print DELTABLES <<END;
     use $dbname;
     drop table $DataFileT;
     drop table $FileLocationT;
     drop table $DataSetT;
     drop table $SubsetT;
     drop table $DataDirT;
+END
+    if ( $dropRunTables ) {
+    print DELTABLES <<END;
     drop table $RunT;
-    drop table $EventT;
     drop table $RunFileT;
-# ---------
-END_BLOCK
-    print DELTABLES $dbCmd;
+    drop table $EventT;
+END
+    }
     close DELTABLES;
 }
 
@@ -609,7 +594,7 @@ sub StDbCreateTables {
     create table $DataFileT
         (
          id mediumint not null auto_increment primary key,
-         cTime datetime not null,
+         ctime datetime not null,
          size bigint not null,
          name varchar(255) not null,
          ext varchar(10) not null,
@@ -642,8 +627,8 @@ sub StDbCreateTables {
          prodtag varchar(10) not null,
          subset varchar(40) not null,
          events smallint,
-         readTime datetime not null,
-         insertTime timestamp(10) not null,
+         readtime datetime not null,
+         inserttime timestamp(10) not null,
          location varchar(10) not null,
          site varchar(10) not null,
          volume varchar(30) not null,
@@ -652,7 +637,7 @@ sub StDbCreateTables {
 
          unique(name),
          index(location),
-         index(cTime),
+         index(ctime),
          index(format),
          index(hpss),
          index(beam),
@@ -672,19 +657,19 @@ sub StDbCreateTables {
     create table $FileLocationT
         (
          id mediumint not null auto_increment primary key,
-         fileId mediumint not null,
+         fileid mediumint not null,
          path varchar(255) not null,
          site varchar(32) not null,
 # is this the primary instance of the file
-         prime enum('Y','N') not null,
-         modTime datetime not null,
+         prime enum('U', 'Y','N') not null,
+         modtime datetime not null,
          owner varchar(20) not null,
          grp varchar(20) not null,
          access mediumint,
          size mediumint not null,
          comment blob,
 
-         index(fileId),
+         index(fileid),
          index(site)
          );
 
@@ -694,14 +679,14 @@ sub StDbCreateTables {
     create table $DataSetT
         (
          id mediumint not null auto_increment primary key,
-         cTime datetime not null,
+         ctime datetime not null,
          size bigint,
          name varchar(128) not null,
          site varchar(10) not null,
          owner varchar(20) not null,
          grp varchar(20) not null,
-         modTime datetime not null,
-         nFiles mediumint,
+         modtime datetime not null,
+         nfiles mediumint,
          beam enum( $beamEnum ) not null,
          mcgen enum( $genEnum ) not null,
          param enum( $paramEnum ) not null,
@@ -713,21 +698,21 @@ sub StDbCreateTables {
          unique(name),
          index(name),
          index(site),
-         index(cTime),
-         index(modTime)
+         index(ctime),
+         index(modtime)
          );
 
     create table $SubsetT
         (
          id mediumint not null auto_increment primary key,
-         cTime datetime not null,
+         ctime datetime not null,
          size bigint,
          name varchar(128) not null,
          site varchar(10) not null,
          owner varchar(20) not null,
          grp varchar(20) not null,
-         modTime datetime not null,
-         nFiles mediumint,
+         modtime datetime not null,
+         nfiles mediumint,
          beam enum( $beamEnum ) not null,
          mcgen enum( $genEnum ) not null,
          param enum( $paramEnum ) not null,
@@ -740,8 +725,8 @@ sub StDbCreateTables {
          unique(name),
          index(name),
          index(site),
-         index(cTime),
-         index(modTime)
+         index(ctime),
+         index(modtime)
          );
 
 #    show columns from $SubsetT;
@@ -751,7 +736,7 @@ sub StDbCreateTables {
         (
          id mediumint not null auto_increment primary key,
          dir varchar(128) not null,
-         modTime datetime not null,
+         modtime datetime not null,
          beam enum( $beamEnum ) not null,
          mcgen enum( $genEnum ) not null,
          param enum( $paramEnum ) not null,
@@ -776,18 +761,50 @@ sub StDbCreateTables {
     create table $RunT
         (
          id mediumint not null auto_increment primary key,
-         type enum ( $runTypes ) not null,
+         name varchar(80) not null,
+         # person responsible for this run or entry
+         user varchar(60),
+         # log info only, not a run spec entry?
+         logonly enum ( 'U','Y','N' ) not null,
+         type enum ( $runTypeList ) not null,
          format int unsigned,
          nrun int unsigned not null,
-         gainMode enum ( $gainMode ) not null,
-         pedMode enum ( $pedMode ) not null,
+         gainmode enum ( $gainModeList ) not null,
+         pedmode enum ( $pedModeList ) not null,
+         zerosup enum ( 'U','Y','N' ) not null,
+         rawformat enum ( 'U','Y','N' ),
+         trig set ( $trigTypeList ) not null,
+         trigwdin smallint unsigned,
          beam enum( $beamEnum ) not null,
-         startTime datetime not null,
-         endTime datetime not null,
+         # Percent of full field; -ve for reversed polarity
+         field smallint,
+         thrlo smallint,
+         thrhi smallint,
+         seqlo smallint,
+         seqhi smallint,
+         ctime datetime not null,
+         starttime datetime not null,
+         endtime datetime not null,
+         period varchar(20) not null,
+         status smallint,
+         banks set ( $bankTypeList ),
+         sectors set ( $sectorList ),
+         nevents mediumint unsigned,
+         ngood mediumint unsigned,
+         nfiles mediumint unsigned,
+         stage set ( $procStages ) not null,
+         title blob,
          comment blob,
-         nFiles mediumint unsigned,
 
-         index(nrun)
+         index(type),
+         index(logonly),
+         index(nrun),
+         index(gainmode),
+         index(pedmode),
+         index(zerosup),
+         index(beam),
+         index(starttime),
+         index(period)
          );
 
 #    show columns from $RunT;
@@ -796,21 +813,29 @@ sub StDbCreateTables {
     create table $EventT
         (
          id mediumint not null auto_increment primary key,
-         type enum ( $evTypes ) not null,
+         type enum ( $eventTypeList ) not null,
 #          the trigger mask
-         trig set ( $trigTypes ) not null,
+         trig set ( $trigTypeList ) not null,
+         trigwd smallint unsigned,
+         trigwdin smallint unsigned,
          format smallint unsigned,
          nrun mediumint unsigned not null,
-         nevent mediumint unsigned,
+         nevent mediumint unsigned not null,
          time datetime not null,
+         nwords int unsigned,
+         npads int unsigned,
 #          number of banks
-         nBanks smallint unsigned,
+         nbanks smallint unsigned,
 #          the set of banks in this event
-         banks set ( $bankTypes ),
+         banks set ( $bankTypeList ),
+         sectors set ( $sectorList ),
+         comment blob,
 
          index(type),
          index(trig),
-         index(nrun)
+         index(nrun),
+         index(nevent),
+         unique(nrun,nevent)
          );
 
 #    show columns from $EventT;
@@ -821,14 +846,15 @@ sub StDbCreateTables {
          id mediumint not null auto_increment primary key,
          fileId1 int unsigned not null,
          fileId2 int unsigned not null,
+         runname varchar(80) not null,
          name varchar(255) not null,
-         type enum ( $runTypes ) not null,
+         type enum ( $runTypeList ) not null,
          nrun int unsigned not null,
          stage enum ( $procStages ) not null,
          nseq int not null,
          format varchar(30) not null,
-         cTime datetime not null,
-         useTime datetime not null,
+         ctime datetime not null,
+         usetime datetime not null,
          hpss enum('U','Y','N') not null,
          size bigint not null,
          comment blob,

@@ -1,8 +1,27 @@
 #!/opt/star/bin/perl
+#
+# $Id: dbquery.pl,v 1.2 1999/07/07 13:22:11 wenaus Exp $
+#
+# $Log: dbquery.pl,v $
+# Revision 1.2  1999/07/07 13:22:11  wenaus
+# incorporate run log
+#
+#
+######################################################################
+#
+# dbquery.pl
+#
+# T. Wenaus 5/99
+#
+# Production database query form
+#
+# Usage: CGI script
+#
 
 require "dbheader.pl";
 require "dbsetup.pl";
 
+&cgiSetup();
 &printMainHeader("STAR Production Database Query Form");
 
 %keys = (
@@ -29,8 +48,16 @@ require "dbsetup.pl";
              );
 
 print <<END;
+<center><font size="-1">
+<a href="http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes">
+Real data run log</a> - 
+<a href="/STARAFS/comp/prod/">Production</a>
+</font></center>
+<p>
  This is an interface to the <a href="http://www.mysql.org/">MySQL</a>
 based production database and data catalog.
+The database is updated nightly at present.
+All comments (to wenaus\@bnl.gov) appreciated.
  <ul>
      <li> Files with paths starting with <code>/home</code> are in HPSS.
      If you need HPSS-resident files for which a copy doesn't exist on
@@ -46,13 +73,6 @@ based production database and data catalog.
        <li><a href="/data/afs_data_test/">/afs/rhic/star/data/test</a>
      </ul>
  </ul>
-Recent changes:
-<ul>
-<li> Results are now sorted. Files and subsets are sorted by date, most
-recent first. Datasets are sorted by name in descending order.
-</ul>
-The database is updated nightly at present.
-All comments (to wenaus\@bnl.gov) appreciated.
 
 <p>
 END
@@ -136,8 +156,6 @@ Find subset files: (eg.  psc0194_03_40evts)
 DB administration browser</a>
 </font></td></tr></table>
 END
-
-
 
 print <<END;
 </body>
