@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.1 1999/05/19 22:23:47 ullrich Exp $
+# $Id: GNUmakefile,v 1.2 1999/06/04 18:04:12 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.1  1999/05/19 22:23:47  ullrich
-# Initial Revision
+# Revision 1.2  1999/06/04 18:04:12  ullrich
+# Added dependencies for memInfoTest
 #
 # Revision 1.5  1999/12/21 16:30:17  ullrich
 # Added test program for StFastCircleFitter.
@@ -72,6 +72,11 @@ LDFLAGS       :=
 	endif
 endif
 
+#
+#   Rules and dependencies
+#
+
+.PRECIOUS: %.o
 
 %:	%.cc
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< -o $@ $(LDFLAGS)
@@ -173,7 +178,7 @@ particlesTest:	particlesTest.cc \
 	StOmegacZero.o StOpticalPhoton.o StParticleDefinition.o \
 	StParticleTable.o StPionMinus.o StPionPlus.o \
 	StPionZero.o StPositron.o StProton.o \
-		vecTest2 vecTest3 units JamesRand.conf Templates.DB
+	StRhoMinus.o StRhoPlus.o StRhoZero.o \
 	StSigmaMinus.o StSigmaPlus.o StSigmaZero.o \
 	StSigmacPlus.o StSigmacPlusPlus.o StSigmacZero.o \
 		vecTest2 vecTest3 units JamesRand.conf Templates.DB memInfoTest
