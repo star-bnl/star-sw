@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.25 2000/07/02 19:37:47 snelling Exp $
+* $Id: tph.F,v 1.26 2000/08/07 04:07:12 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.26  2000/08/07 04:07:12  snelling
+* Added StInfo line with the drift velocity on popular demand
+*
 * Revision 1.25  2000/07/02 19:37:47  snelling
 * Fixed min time, max time, min pad, max pad for single hit clusters
 *
@@ -188,6 +191,12 @@ c     sca and digitization noise
 c     noise that comes through shaper
       filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
+c     get drift velocity
+      istatus = tpc_drift_velocity(dvel)
+      write(m132,*) 'TPH - Drift Velocity used is: ', dvel
+      call StInfo(m132)
+
+
       if (tcl_sector_index(1).CurrentSector .lt. 0) then
          CurrentSector = -tcl_sector_index(1).CurrentSector
          istart = 1
@@ -347,7 +356,6 @@ c     Transform row to y coordinate invec(2)
 c     Correct z for weighted mean function used to determine it 
 c     (using the drift velocity and tau)
               invec(3) = z(ihit)
-              istatus = tpc_drift_velocity(dvel)
               if (tclpar(1).tfit .eq. 0) then 
                  invec(3) = z(ihit) - 
      &                3.0 * tsspar(1).tau * dvel * 1.0E-6
