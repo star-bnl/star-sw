@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.1 1999/11/19 19:01:08 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.2 1999/12/03 00:50:31 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.2  1999/12/03 00:50:31  calderon
+ * Using StTpcDb (there are still problems with SlowControl parameters).
+ *
  * Revision 1.1  1999/11/19 19:01:08  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -459,15 +462,17 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
     double frischGrid = 2098.998*millimeter;
 
     //PR(mTPCdb->frischGrid());
-    //PR(z);
+//     PR(frischGrid);
+//     PR(gTpcDbPtr->Electronics()->tZero());
+//     PR(gTpcDbPtr->SlowControlSim()->driftVelocity());
   // z is in tpc local sector coordinate system. z>=0;
    
    
     double tb = (//gTpcDbPtr->PadPlaneGeometry()->frischGrid()
 		 frischGrid
-		 +gTpcDbPtr->Electronics()->tZero() *gTpcDbPtr->SlowControlSim()->driftVelocity()
+		 + (gTpcDbPtr->Electronics()->tZero()) * (gTpcDbPtr->SlowControlSim()->driftVelocity())
 		 - z)
-	/gTpcDbPtr->SlowControlSim()->driftVelocity();
+	/ (gTpcDbPtr->SlowControlSim()->driftVelocity());
     
   return((int)(tb/(mTimeBinWidth)));//time bin starts at 0,HL,9/1/99
 }
