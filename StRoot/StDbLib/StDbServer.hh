@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbServer.hh,v 1.5 1999/09/30 02:06:09 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Server class for DB-access
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbServer.hh,v $
+ * Revision 1.5  1999/09/30 02:06:09  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBSERVER_HH
 #define STDBSERVER_HH
 
@@ -35,7 +53,7 @@ protected:
 
 public:
 
-  StDbServer(): mserverName(0), mhostName(0), munixSocket(0), mdbName(0), mconnectState(false), mdatabase(0), misDefault(false), mdomainName(0), mtypeName(0) {};
+  StDbServer(): mserverName(0), mhostName(0), munixSocket(0), mdbName(0),  mdomainName(0), mtypeName(0), mconnectState(false), misDefault(false), mdatabase(0) {};
   StDbServer(StDbType type, StDbDomain domain);
   StDbServer(StDbType type, StDbDomain domain, const char* typeName, const char* domainName);
   //  StDbServer(const char* server, const char* hostname, int port);
@@ -72,15 +90,19 @@ public:
   virtual void  init() { initServer(); };
   virtual bool  isconnected() const { return mconnectState;};
   virtual bool  isDefault() const { return misDefault; };
+
+  virtual unsigned int getUnixTime(const char* dateTime);
+  virtual char* getDateTime(unsigned int time);
   
 //Here's the real work of the server -> providing Query access to the DataBase
 
-  virtual void QueryDb(StDbTable* table);
+  virtual void QueryDb(StDbTable* table, unsigned int reqTime);
+  virtual void QueryDb(StDbTable* table, const char* reqTime);
   virtual void QueryDb(StDbConfigNode* node);
   virtual void QueryDescriptor(StDbTable* table);
-  virtual void WriteDb(StDbTable* table);
-
-
+  virtual void WriteDb(StDbTable* table, unsigned int storeTime);
+  virtual void WriteDb(StDbTable* table, const char* reqTime);
+ 
 };
 
 #endif

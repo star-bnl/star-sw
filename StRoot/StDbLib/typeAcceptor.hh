@@ -1,7 +1,24 @@
+/***************************************************************************
+ *
+ * $Id: typeAcceptor.hh,v 1.3 1999/09/30 02:06:16 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: buffer for file I/O for StDbTable (e.g. XmlReader/Writer)
+ *
+ ***************************************************************************
+ *
+ * $Log: typeAcceptor.hh,v $
+ * Revision 1.3  1999/09/30 02:06:16  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef TYPEACCEPTOR_HH
 #define TYPEACCEPTOR_HH
 
-#include "enumType.hh" // only for _ByteSwap_
 
 class typeAcceptor {
 

@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbFactoryI.cc,v 1.3 1999/09/30 02:06:05 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  StDbTable ctor & list holder for generic tables
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbFactoryI.cc,v $
+ * Revision 1.3  1999/09/30 02:06:05  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbFactoryI.hh"
 #include "StDbTable.h"
 
@@ -31,8 +49,7 @@ for(IDList::iterator itr = mIDList.begin();
   }
 }
 
-if(!retVal) cerr << "StDbFactoryI:: No TableID for Table= "<<tableName<< endl;
-
+if(!retVal)cerr << "StDbFactoryI:: No SchemaID for "<<tableName<<" : default to most recent in DB"<< endl;
 return retVal;
 }
 

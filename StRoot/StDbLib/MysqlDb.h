@@ -1,4 +1,21 @@
-
+/***************************************************************************
+ *
+ * $Id: MysqlDb.h,v 1.3 1999/09/30 02:06:00 porter Exp $
+ *
+ * Author: Laurent Conin
+ ***************************************************************************
+ *
+ * Description: Mysql - SQL Query handler
+ *
+ ***************************************************************************
+ *
+ * $Log: MysqlDb.h,v $
+ * Revision 1.3  1999/09/30 02:06:00  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef MYSQDB_HH
 #define MYSQDB_HH
 #ifndef __CINT__
@@ -11,7 +28,6 @@ typedef  int MYSQL_FIELD;
 #endif
 #include <iostream.h>
 #include <strstream.h>
-#include "enumType.hh"
 #include <string.h>
 #include "StDbBuffer.h"
 
@@ -54,12 +70,8 @@ private:
   
 public:
   MysqlBin() {mBinData=0;mLen=0;};
-  virtual void Input(const unsigned long int aLen,const char *aBin) 
+  virtual void Input(const unsigned long int aLen,char *aBin) 
     {mBinData=aBin;mLen=aLen;};
-  /*  virtual void Print() {
-      unsigned i;
-      for(i=0;i<mLen;i++) {cout << mBinData[i]<< "|" <<endl;};
-      };*/
   
   friend class MysqlDb;
 };
@@ -75,12 +87,13 @@ private:
   char* mQueryMess;
   char* mQueryLast;
   MysqlResult* mRes;
+  bool mqueryState;
   
 public:
   MysqlDb() ;
   virtual ~MysqlDb();
   virtual bool Connect(const char *aHost, const char *aUser, 
-	const char *aPasswd, const char *aDb, unsigned aPort);
+	const char *aPasswd, const char *aDb, const int aPort=0);
 
   virtual unsigned NbRows () {return mRes->NbRows();};
   virtual unsigned NbFields () {return mRes->NbFields();};
@@ -94,8 +107,8 @@ public:
   virtual bool Output(StDbBuffer *aBuff);  
   MysqlDb &operator<<(const char *c);
   MysqlDb &operator<<(const MysqlBin *aBin);
-  char **DecodeStrArray(const char* strinput , int &aLen) ; 
-  char* CodeStrArray(const char** strarr , int aLen);
+  char **DecodeStrArray(char* strinput , int &aLen) ; 
+  char* CodeStrArray(char** strarr , int aLen);
   virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
 
 protected:

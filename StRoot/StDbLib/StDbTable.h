@@ -1,3 +1,22 @@
+/***************************************************************************
+ *
+ * $Id: StDbTable.h,v 1.5 1999/09/30 02:06:10 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:   Class that holds data, descriptor, & db-address 
+ *                & performs streamer of db-data into data-memory
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbTable.h,v $
+ * Revision 1.5  1999/09/30 02:06:10  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef StDbTable_HH
 #define StDbTable_HH
  
@@ -16,12 +35,15 @@ protected:
 StDbAccessor maccessor;//!
 
   char* mtableName;//!
-  int mtableID;//!
+  int mstructID;//!  database equivalent to tableName
 
+  bool misBaseLine;
   bool mhasDescriptor;//!
-StTableDescriptorI* mdescriptor;//!
+  StTableDescriptorI* mdescriptor;//!
 
   char* mdata;//!
+  int mrows;
+  int mrowNumber;
 
   virtual void ReadElement(char*& ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
   virtual void WriteElement(char* ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
@@ -29,12 +51,15 @@ StTableDescriptorI* mdescriptor;//!
   virtual void getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type);
 
   bool createMemory();
+  bool createMemory(int nrows);
+  char* duplicateData();
   void checkDescriptor();
+
 
 public:
 
   StDbTable(const char* tableName);
-  StDbTable(const char* tableName, int tableID);
+  StDbTable(const char* tableName, int schemaID);
   StDbTable(StDbTable& table);
 
   virtual ~StDbTable(){if(mtableName)delete [] mtableName;
@@ -43,8 +68,6 @@ public:
 
   virtual StDbAccessor getAccessor() const ;
   virtual void setAccessor(StDbAccessor a) ;
-  virtual int getTableID() const;
-  virtual void setTableID(int tableID);
   virtual unsigned int getTableSize() const;
   virtual char* getTableName() const;
   virtual void setTableName(const char* name);
@@ -52,26 +75,51 @@ public:
   virtual void setDbType(StDbType type) ;
   virtual StDbDomain getDbDomain() const ;
   virtual void setDbDomain(StDbDomain domain); 
-  virtual int getRequestTime() const ;
-  virtual void setRequestTime(int time) ;
   virtual char* getVersion() const ;
   virtual void setVersion(char* version) ;
-  virtual int getEndTime() const ;
-  virtual void setEndTime(int time) ;
-  virtual int getBeginTime() const  ;
-  virtual void setBeginTime(int time) ;
-  virtual int getElementID() const ;
-  virtual void setElementID(int id) ; 
-  virtual int getSchemaID() const ; 
-  virtual void setSchemaID(int id) ; 
- 
 
+  //  virtual int  getRequestTime() const ;
+  //  virtual void setRequestTime(int time) ;
+
+  virtual unsigned int getEndTime() const ;
+  virtual char* getEndDateTime();
+  virtual void setEndTime(unsigned int time);
+  virtual void setEndTime(const char* time);
+
+  virtual char*  getBeginDateTime();
+  virtual unsigned int getBeginTime() const  ;
+  virtual void setBeginTime(unsigned int time) ;
+  virtual void setBeginTime(const char* time);
+
+  virtual int* getElementID() const ;
+  virtual int  getRowID(int rowNumber) const ;
+  virtual void setElementID(int* elements, int nrows=1) ; 
+
+  virtual int  getSchemaID() const ; 
+  virtual void setSchemaID(int id) ; 
+  virtual bool isBaseLine() const;
+  virtual void setIsBaseLine(bool baseline); 
+
+  // c-struct descriptort & schema 
+  // set by 1st call to db
+
+  virtual int getStructID() const;
+  virtual void setStructID(int structID);
   virtual StTableDescriptorI* getDescriptorCpy() const;
   virtual void setDescriptor(StTableDescriptorI* descriptor);
   virtual bool hasDescriptor() const {return mhasDescriptor;};
 
+  //
+  // access to date via this table or c-struct
+
   virtual StDbTableI* Clone();
   virtual char* GetTable(); 
+  virtual void SetTable(char* data, int nrows);
+  virtual void AddRows(char* data, int nrows);
+  virtual int  GetNRows() const;
+  virtual void setRowNumber(int row=0);
+
+  // methods for reading & writing to Db & to file
 
   virtual void StreamAccessor(typeAcceptor* accept);
   virtual void dbStreamer(typeAcceptor* accept);
@@ -80,15 +128,14 @@ public:
   virtual void dbStreamer(StDbBufferI* buff, bool isReading);
 
   //ClassDef(StDbTable,1)
-
-
 };
 
+
 inline 
-int StDbTable::getTableID() const {return mtableID;}
+int StDbTable::getStructID() const {return mstructID;}
 
 inline
-void StDbTable::setTableID(int tableID) {mtableID=tableID;}
+void StDbTable::setStructID(int structID) {mstructID=structID;}
 
 inline 
 unsigned int
@@ -116,40 +163,71 @@ StDbDomain StDbTable::getDbDomain() const { return maccessor.dbDomain; }
 inline 
 void StDbTable::setDbDomain(StDbDomain domain) {maccessor.dbDomain = domain; }
 
-inline 
-int StDbTable::getRequestTime() const { return maccessor.requestTime; }
+//inline 
+//int StDbTable::getRequestTime() const { return maccessor.requestTime; }
 
-inline 
-void StDbTable::setRequestTime(int time) { maccessor.requestTime = time; }
+//inline 
+//void StDbTable::setRequestTime(int time) { maccessor.requestTime = time; }
 
 inline 
 char* StDbTable::getVersion() const { 
+
 if(!maccessor.version)return maccessor.version;
 char* retString=new char[strlen(maccessor.version)+1];
 strcpy(retString,maccessor.version);
 return retString;
+
 }
 
 inline 
-void StDbTable::setVersion(char* version) {strcpy(maccessor.version,version); }
+void StDbTable::setVersion(char* version) {
+
+if(maccessor.version)delete [] maccessor.version;
+maccessor.version = new char[strlen(version)+1];
+strcpy(maccessor.version,version); 
+
+}
 
 inline 
-int StDbTable::getEndTime() const { return maccessor.endTime; }
+unsigned int StDbTable::getEndTime() const { 
+return maccessor.endTime.munixTime; }
 
 inline 
-void StDbTable::setEndTime(int time) {maccessor.endTime = time; }
+char* StDbTable::getEndDateTime() { 
+return maccessor.endTime.mdateTime; }
 
 inline 
-int StDbTable::getBeginTime() const  { return maccessor.beginTime; }
+void StDbTable::setEndTime(unsigned int time) {
+maccessor.endTime.munixTime = time; }
 
 inline 
-void StDbTable::setBeginTime(int time) {maccessor.beginTime = time; }
+void StDbTable::setEndTime(const char* time){ 
+maccessor.endTime.setDateTime(time); }
 
 inline 
-int StDbTable::getElementID() const { return maccessor.elementID; }
+unsigned int StDbTable::getBeginTime() const  { 
+return maccessor.beginTime.munixTime; }
 
 inline 
-void StDbTable::setElementID(int id) {maccessor.elementID = id; }
+char* StDbTable::getBeginDateTime() { 
+return maccessor.beginTime.mdateTime; }
+
+inline 
+void StDbTable::setBeginTime(unsigned int time) {
+maccessor.beginTime.munixTime = time; }
+
+inline 
+void StDbTable::setBeginTime(const char* time){ 
+maccessor.beginTime.setDateTime(time); }
+
+inline 
+int* StDbTable::getElementID() const { return maccessor.elementID; }
+
+inline
+int StDbTable::getRowID(int rowNumber) const { 
+  if(rowNumber<mrows)return maccessor.elementID[rowNumber];
+return 0;
+}
 
 inline 
 int StDbTable::getSchemaID() const { return maccessor.schemaID; }
@@ -158,15 +236,22 @@ inline
 void StDbTable::setSchemaID(int id) {maccessor.schemaID = id; }
 
 inline
-void StDbTable::setDescriptor(StTableDescriptorI* descriptor){ 
- if(mdescriptor) delete mdescriptor;
- mdescriptor=descriptor;
- mhasDescriptor=true;
- //checkDescriptor();
-};
+bool StDbTable::isBaseLine() const { return misBaseLine; }
 
-inline StDbTableI* 
-StDbTable::Clone(){return (new StDbTable(*this));};
+inline
+void StDbTable::setIsBaseLine(bool baseline) { misBaseLine = baseline; }
+
+
+inline 
+StDbTableI* StDbTable::Clone(){return (new StDbTable(*this));}
+
+inline 
+int StDbTable::GetNRows() const { return mrows; }
+
+inline 
+void StDbTable::setRowNumber(int row){
+if(row < mrows)mrowNumber = row;
+}
 
 
 #endif

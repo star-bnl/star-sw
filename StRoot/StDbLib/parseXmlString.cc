@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: parseXmlString.cc,v 1.2 1999/09/30 02:06:15 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  parses Xml file & returns contents between request TAGs
+ *
+ ***************************************************************************
+ *
+ * $Log: parseXmlString.cc,v $
+ * Revision 1.2  1999/09/30 02:06:15  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "parseXmlString.hh"
 #include <iostream.h>
 #include <strstream.h>

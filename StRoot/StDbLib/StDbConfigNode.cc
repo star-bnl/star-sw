@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbConfigNode.cc,v 1.8 1999/09/30 02:06:03 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  Node (directory) to hold list of dbtables
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbConfigNode.cc,v $
+ * Revision 1.8  1999/09/30 02:06:03  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include <iostream.h>
 #include <strings.h>
 
@@ -131,19 +149,20 @@ StDbConfigNode::printTree(){
 ////////////////////////////////////////////////////////////////////////
 
 StDbTable*
-StDbConfigNode::addDbTable(const char* tableName, char* version, int elementID){
+StDbConfigNode::addDbTable(const char* tableName, char* version, bool isBaseLine){
   // just like addTable but also loads the descriptor from the database
 
-  StDbTable* table = addTable(tableName,version,elementID);
+  StDbTable* table = addTable(tableName,version,isBaseLine);
   StDbServer* server = StDbManager::Instance()->findServer(mdbType, mdbDomain);
   if(server)server->QueryDescriptor(table);
+
   return table;
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 StDbTable*
-StDbConfigNode::addTable(const char* tableName, char* version, int elementID){
+StDbConfigNode::addTable(const char* tableName, char* version, bool isBaseLine){
 
   if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType);
 
@@ -153,9 +172,10 @@ StDbConfigNode::addTable(const char* tableName, char* version, int elementID){
 
   if(table){
     table->setVersion(version);
-    table->setElementID(elementID);
+    //    table->setElementID(elementID);
     table->setDbType(mdbType);
     table->setDbDomain(mdbDomain);
+    table->setIsBaseLine(isBaseLine);
     mTables.push_back(table);
     if(!mhasData)mhasData=true;
   } else {
@@ -172,41 +192,27 @@ StDbConfigNode::removeTable(StDbTable* table){
  
   if(!table)return;
 
-    char* tableName=table->getTableName();
-    char* version = table->getVersion();
-    int elementID = table->getElementID();
 
   TableList::iterator itr;
   StDbTable* myTable=0;
-  char* mtableName=0;
-  char* mversion=0;
-  int meID;
 
   do {
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
         myTable=*itr;
-        if(myTable){
-          mtableName=myTable->getTableName();
-          mversion=myTable->getVersion();
-          meID=myTable->getElementID();
-          if(strcmp(tableName,mtableName)==0 &&
-           strcmp(version,mversion)==0 && elementID==meID){
-            mTables.erase(itr);
-            break;
-          } else { delete [] mtableName; delete [] mversion;}
+        if(myTable && compareTables(myTable,table)){
+                 mTables.erase(itr);
+                 break;
         }
         myTable=0;
     }
   } while (mTables.begin() != mTables.end());
 
-if(mtableName)delete [] mtableName;
-if(mversion)delete [] mversion;
-delete [] tableName; delete [] version;
 
 }
 
 
 ////////////////////////////////////////////////////////////////
+/*
 StDbTable*
 StDbConfigNode::findTable(const char* tableName, const char* version, int elementID){
 
@@ -237,6 +243,45 @@ if(mversion)delete [] mversion;
 
 return table;
 }
+*/
+
+////////////////////////////////////////////////////////////////
+bool
+StDbConfigNode::compareTables(StDbTable* tab1, StDbTable* tab2){
+
+bool retVal=false;
+// compare name & version
+    char* name1=tab1->getTableName();
+    char* version1 = tab1->getVersion();
+    char* name2=tab2->getTableName();
+    char* version2 = tab2->getVersion();
+
+    if(!(strcmp(name1,name2)==0) || !(strcmp(version1,version2)==0)){
+      delete [] name1; delete [] name2; delete [] version1; delete [] version2;
+      return retVal;
+    }
+
+    // compare number of rows
+    int nRows1 = tab1->GetNRows();
+    int nRows2 = tab2->GetNRows();
+    if(nRows1 != nRows2) return retVal;
+
+    // compare each row identifier
+    int* elements1 = tab1->getElementID();
+    int* elements2 = tab2->getElementID();
+    bool check=true;
+    for(int i=0;i<nRows1;i++){
+      if(elements1[i] != elements2[i]){
+        check = false;
+        break;
+      }
+    }
+    if(check)retVal=true;
+
+return retVal;
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////

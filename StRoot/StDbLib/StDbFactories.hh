@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbFactories.hh,v 1.3 1999/09/30 02:06:04 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  locates a Table factory of given Db-Type & Db-Domain
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbFactories.hh,v $
+ * Revision 1.3  1999/09/30 02:06:04  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBFACTORIESI_HH
 #define STDBFACTORIESI_HH
 

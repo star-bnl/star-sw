@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbXmlReader.cc,v 1.4 1999/09/30 02:06:11 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  implement typeAcceptor for READING XML files of DB-tables
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbXmlReader.cc,v $
+ * Revision 1.4  1999/09/30 02:06:11  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbXmlReader.h"
 #include <iostream.h>
 #include <strings.h>
@@ -57,12 +75,14 @@ StDbXmlReader::readTable(ifstream &is){
      k = strlen(line);
      j = 0;
      line2[j]='\0';
+     char* ptr=&line2[0];
      for(icount=0;icount<k;icount++){
        if(!(line[icount]==' ')){
           *tmp=line[icount];
           tmp[1]='\0';
           j++;
-          strcat(line2,tmp);
+          strncpy(ptr,tmp,1);
+          ptr++;
        }
      }
      line2[j]='\0';

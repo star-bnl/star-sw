@@ -1,3 +1,22 @@
+/***************************************************************************
+ *
+ * $Id: StDbXmlWriter.cc,v 1.4 1999/09/30 02:06:12 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  implement typeAcceptor for WRITING XML files of DB-tables
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbXmlWriter.cc,v $
+ * Revision 1.4  1999/09/30 02:06:12  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
+
 #include "StDbXmlWriter.h"
 
 

@@ -6,18 +6,28 @@
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName): mdata(0), mtableName(0), mhasDescriptor(0), mtableID(0), mdescriptor(0)  { 
+StDbTable::StDbTable(const char* tableName): mtableName(0), mstructID(0), misBaseLine(false), mhasDescriptor(false), mdescriptor(0), mdata(0) { 
 setTableName(tableName);
 maccessor.endTime = -1;
-maccessor.version[0]='\0';
+maccessor.version=0;
+mrows=1;
+mrowNumber=0;
+maccessor.elementID = new int;
+*(maccessor.elementID) = 0;
+
 }
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName, int tableID): mdata(0), mtableName(0), mhasDescriptor(0), mdescriptor(0), mtableID(tableID) { 
+StDbTable::StDbTable(const char* tableName, int schemaID): mtableName(0), mstructID(0), misBaseLine(false), mhasDescriptor(false), mdescriptor(0), mdata(0) { 
 setTableName(tableName);
-maccessor.endTime = -1;
-maccessor.version[0]='\0';
+//maccessor.endTime = -1;
+maccessor.version=0;
+maccessor.schemaID=schemaID;
+mrows=1;
+mrowNumber=0;
+maccessor.elementID = new int;
+*(maccessor.elementID) = 0;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -27,8 +37,10 @@ StDbTable::StDbTable(StDbTable& table){
  mtableName=0;
  mdescriptor=0;
  mdata = 0;
+ mrowNumber = 0;
+ mrows = table.GetNRows();
  mtableName=table.getTableName();
- mtableID=table.getTableID();
+ mstructID=table.getStructID();
  mhasDescriptor=table.hasDescriptor();
  mdescriptor=table.getDescriptorCpy();
  setTableName(table.getTableName());
@@ -36,10 +48,11 @@ StDbTable::StDbTable(StDbTable& table){
 
  char* tmp = table.GetTable();
  if(tmp) {
-   unsigned int size = table.getTableSize();
+   unsigned int size = mrows*table.getTableSize();
    mdata = new char[size];
    memcpy(mdata,tmp,size);
  }
+
 
 }
 
@@ -51,8 +64,85 @@ return mdescriptor->getCpy();
 }
 
 /////////////////////////////////////////////////////////////////////
+
+void 
+StDbTable::setDescriptor(StTableDescriptorI* descriptor){ 
+
+ if(mdescriptor) delete mdescriptor;
+ mdescriptor=descriptor;
+ mhasDescriptor=true;
+ //checkDescriptor();
+
+};
+
+
+/////////////////////////////////////////////////////////////////////
+
 char* 
 StDbTable::GetTable() { if(!mdata)createMemory(); return mdata;};
+
+/////////////////////////////////////////////////////////////////////
+
+void 
+StDbTable::SetTable(char* c, int nrows) { 
+
+if(mdata)delete [] mdata; 
+
+createMemory(nrows);
+int len = nrows*getTableSize();
+memcpy(mdata,c,len);
+
+
+}
+
+/////////////////////////////////////////////////////////////////////
+
+void 
+StDbTable::AddRows(char* c, int nrows) { 
+
+char* tmpData = duplicateData();
+int len1 = mrows*getTableSize();
+int len2 = nrows*getTableSize();
+
+int newRows = nrows+mrows;
+if(mdata){
+   delete [] mdata;
+   mdata = 0;
+ }
+
+createMemory(newRows);
+
+char* ptr= &mdata[0];
+memcpy(mdata,tmpData,len1);
+ptr+=len1;
+memcpy(ptr,c,len2);
+
+delete [] tmpData;
+
+}
+/////////////////////////////////////////////////////////////////////
+
+char*
+StDbTable::duplicateData() { 
+
+
+int len1 = mrows*getTableSize();
+char* dup=new char[len1];
+memcpy(dup,mdata,len1);
+
+return dup;
+
+}
+
+
+/////////////////////////////////////////////////////////////////////
+
+bool
+StDbTable::createMemory(int nrows) { 
+ mrows = nrows;
+ return createMemory();
+}
+
 /////////////////////////////////////////////////////////////////////
 
 bool
@@ -62,13 +152,13 @@ bool retVal = true;
   if(mdata)return retVal;
 
   if(mdescriptor && mdescriptor->getNumElements()>0){
-     mdata=new char[mdescriptor->getTotalSizeInBytes()];
+     int len = mrows*mdescriptor->getTotalSizeInBytes();
+     mdata=new char[len];
   } else {
     if(!mtableName){mtableName=new char[8]; strcpy(mtableName,"Unknown");}
     cerr << "Table [ "<<mtableName<<" ] has no description to fill memory" << endl;
     retVal = false;
   }
-
 return retVal;
 }
     
@@ -96,6 +186,22 @@ return retString;
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void
+StDbTable::setElementID(int* elements, int nrows) { 
+
+ mrows = nrows;
+ if(mrows==1){
+   maccessor.elementID = new int;
+   *(maccessor.elementID) = 0;
+ } else {
+   maccessor.elementID = new int[nrows];
+   for(int i=0;i<nrows;i++)maccessor.elementID[i] = elements[i];
+ }
+
+}
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -106,13 +212,16 @@ StDbTable::StreamAccessor(typeAcceptor* accept){
   //  cout << "stream sID " << endl;
    accept->pass("schemaID",maccessor.schemaID,1);
    //  cout << "stream bt " << endl;
-   accept->pass("beginTime",maccessor.beginTime,1);
+   int len = 1;
+   if(maccessor.beginTime.mdateTime)len=strlen(maccessor.beginTime.mdateTime);
+   accept->pass("beginTime",maccessor.beginTime.mdateTime,1);
    //  cout << "stream et " << endl;
-   accept->pass("endTime",maccessor.endTime,1);
+   //   accept->pass("endTime",maccessor.endTime,1);
    //  cout << "stream v " << endl;
-   accept->pass("version",maccessor.version,strlen(maccessor.version));
+   if(maccessor.version)len=strlen(maccessor.version);
+   accept->pass("version",maccessor.version,len);
    //  cout << "stream eID " << endl;
-   accept->pass("elementID",maccessor.elementID,1);
+   accept->pass("elementID",maccessor.elementID, mrows);
 
 }
 
@@ -126,32 +235,36 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
   bool ClientMode;
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
 
+  int rowID;
 
   if(isReading){
-   //  cout << "stream sID " << endl;
-   buff->ReadScalar(maccessor.schemaID,"schemaID");
-   //  cout << "stream bt " << endl;
-   buff->ReadScalar(maccessor.beginTime,"beginTime");
-   //  cout << "stream et " << endl;
-   buff->ReadScalar(maccessor.endTime,"endTime");
-   //  cout << "stream v " << endl;
-   char* mversion = 0;
-   buff->ReadScalar(mversion,"version");
-   if(mversion)strcpy(maccessor.version,mversion);
-   delete [] mversion;
-   //  cout << "stream eID " << endl;
-   buff->ReadScalar(maccessor.elementID,"elementID");
+    buff->ReadScalar(rowID,"elementID");
+    maccessor.elementID[mrowNumber]=rowID;
+
+    if(mrowNumber==0){
+     buff->ReadScalar(maccessor.schemaID,"schemaID");
+     char* version = 0;
+     buff->ReadScalar(version,"version");
+     if(version)strcpy(maccessor.version,version);
+     delete [] version;
+    } else {
+      unsigned int bTime;// , eTime;
+      buff->ReadScalar(bTime,"beginTime"); 
+      if(bTime>maccessor.beginTime.munixTime)maccessor.beginTime.munixTime=bTime;
+      //      buff->ReadScalar(eTime,"endTime");
+      //      if(eTime<maccessor.endTime.munixTime) maccessor.endTime.munixTime = eTime;
+    }
+    //   buff->ReadScalar(maccessor.beginTime,"beginTime");
+    //   buff->ReadScalar(maccessor.endTime,"endTime");
   } else {
-   //  cout << "stream sID " << endl;
+
    buff->WriteScalar(maccessor.schemaID,"schemaID");
-   //  cout << "stream bt " << endl;
-   buff->WriteScalar(maccessor.beginTime,"beginTime");
-   //  cout << "stream et " << endl;
-   buff->WriteScalar(maccessor.endTime,"endTime");
-   //  cout << "stream v " << endl;
+   buff->WriteScalar(maccessor.beginTime.munixTime,"beginTime");
+   //   buff->WriteScalar(maccessor.endTime,"endTime");
    buff->WriteScalar(maccessor.version,"version");
-   //  cout << "stream eID " << endl;
-   buff->WriteScalar(maccessor.elementID,"elementID");
+   rowID = maccessor.elementID[mrowNumber];   
+   buff->WriteScalar(rowID,"elementID");
+
   }
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
@@ -163,13 +276,14 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 void
 StDbTable::getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type){
 
+    int rowIndex = mrowNumber*mdescriptor->getTotalSizeInBytes();
     int i = elementNum;
-    c = mdata;
-    int max = mdescriptor->getElementOffset(i);
-    for(int k=0;k<max;k++)c++;
-    name = mdescriptor->getElementName(i);
+    c = &mdata[rowIndex];
+    int current = mdescriptor->getElementOffset(i);
+    c += current; // for(int k=0;k<current;k++)c++;
+    name   = mdescriptor->getElementName(i);
     length = mdescriptor->getElementLength(i);;
-    type = mdescriptor->getElementType(i);
+    type   = mdescriptor->getElementType(i);
 
 return;
 }
@@ -188,7 +302,7 @@ char* ptr;
   bool ClientMode;
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
 
- if(createMemory()){
+ if(createMemory() && mrowNumber < mrows){
 
  for(int i=0; i<max; i++){
     getElementSpecs(i,ptr,name,length,type);
@@ -199,10 +313,13 @@ char* ptr;
      } else {
      WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
     }       
+   delete [] name;
  }
 
+ mrowNumber++;
+
  } else {
-   cerr << "Cannot Stream Data" << endl;
+   cerr << "dbStreamer:: more rows delivered than allocated " << endl;
  }
 
 
@@ -221,13 +338,16 @@ StTypeE type;
 unsigned int length;
 char* ptr;
 
- if(createMemory()){
+ if(createMemory() && mrowNumber < mrows){
 
  for(int i=0; i<max; i++){
     getElementSpecs(i,ptr,name,length,type);
     // cout << "Acceptor offset is " << ptr-mdata << endl;
     PassElement(ptr,name,length,type,accept);
+    delete [] name;
  }
+
+ mrowNumber++;
 
  } else {
    cerr << "Cannot Stream Data" << endl;
@@ -291,6 +411,7 @@ float* mfloat; double* mdouble;
   case Stlong:
     {
     buff->ReadArray(mlong,len,name);
+    //if(len==1)cout<<name<<" = "<<*mlong<<endl;
     memcpy(ptr,mlong,len*sizeof(long));
     delete [] mlong;
     break;
@@ -305,6 +426,7 @@ float* mfloat; double* mdouble;
   case Stfloat:
     {
     buff->ReadArray(mfloat,len,name);
+    //if(len==1)cout<<name<<" = "<<*mfloat<<endl;
     memcpy(ptr,mfloat,len*sizeof(float));
     delete [] mfloat;
     break;
@@ -329,7 +451,7 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   case Stchar:
     {
     char* mchar = ptr;
-    buff->WriteArray(mchar,len,name);
+    buff->WriteScalar(mchar,name);
     break;
     }
   case Stuchar:
@@ -365,6 +487,7 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   case Stlong:
     {
     long* mlong = (long*) ptr;
+    //if(len==1) cout << name << " = "<< *mlong << endl;
     buff->WriteArray(mlong,len,name);
     break;
     }
@@ -377,6 +500,7 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   case Stfloat:
     {
     float* mfloat = (float*) ptr;
+    //if(len==1) cout << name << " = "<< *mfloat << endl;
     buff->WriteArray(mfloat,len,name);
     break;
     }
