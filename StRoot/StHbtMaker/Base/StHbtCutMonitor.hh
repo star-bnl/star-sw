@@ -18,6 +18,8 @@ public:
     StHbtString returnThis = Stemp;
     return returnThis; 
   }
+  virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
+  virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
   virtual void Fill(const StHbtEvent*) { cout << " *** no user defined Fill(const StHbtEvent*), take from base class" << endl; }
   virtual void Fill(const StHbtTrack*) { cout << " *** no user defined Fill(const StHbtTrack*), take from base class" << endl; }
   virtual void Fill(const StHbtV0*) { cout << " *** no user defined Fill(const StHbtV0Track*), take from base class" << endl; }

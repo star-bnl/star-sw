@@ -1,6 +1,7 @@
+
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.3 2000/01/07 23:21:17 laue Exp $
+ * $Id: StHbtParticleCut.h,v 1.4 2000/02/13 17:13:15 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.4  2000/02/13 17:13:15  laue
+ * EventBegin() and EventEnd() functions implemented
+ *
  * Revision 1.3  2000/01/07 23:21:17  laue
  * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
  * 1.) unnecessary includes of 'StMaker.h' deleted
@@ -68,7 +72,11 @@ public:
   double Mass(){return mMass;};       // mass of the particle being selected
   virtual void SetMass(const double& mass) {mMass = mass;};
 
+  virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
+  virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
+
   virtual StHbtParticleType Type()=0;
+
 
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
