@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.8 1999/12/19 03:15:42 fine Exp $
+// $Id: PadBrowser.C,v 1.9 2000/01/27 20:54:09 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.9  2000/01/27 20:54:09  fine
+// StarClassLibrary has been added
+//
 // Revision 1.8  1999/12/19 03:15:42  fine
 // StEventDisplayMker loaded
 //
@@ -38,6 +41,7 @@ StPadDisplayMaker *padMonitor;
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+    gSystem->Load("StarClassLibrary");
     gSystem->Load("St_geom_Maker");
     gSystem->Load("StIOMaker");
     gSystem->Load("StPadDisplayMaker");
