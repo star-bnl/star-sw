@@ -1,0 +1,12 @@
+/*****************************************************************************
+*   Table: emc_adc_hist_control
+*	emc adc histgraming control table     -OGAWA, Akio
+*/
+   struct emc_adc_hist_control {
+     long  det;      /* Detector number. See emc_def.h*/
+     long  init;     /* =0 initarization =1 filling =2 write =3 read */
+     long  min;      /* histgram lower limit */
+     long  max;      /* histgram upper limit */
+     long  nbin;     /* histgram number of bin */
+     long  id_base;  /* histgram id base */
+   };

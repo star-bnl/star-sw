@@ -1,7 +1,7 @@
 /*****************************************************************************
 *   Table: ems_jetlist
 *        description: contains the jet information            
-*
+* 
 *	W.J. Llope
 */
    struct ems_jetlist {
