@@ -11,6 +11,7 @@ CC:<--------------------------------------------------------------------
      4           privert_h,           privert ) 
       IMPLICIT NONE
 #include "evr_am.inc"
+#include "math_constants.inc"
 CC:>----------------------------------------------------------------------
 CC: ROUTINE:    EVR
 CC: DESCRIPTION: Vertex fit, least square method with outlier removal
@@ -30,6 +31,10 @@ CC:   Added switches so the vertex finder can use TPC, SVT or global tracks.
 CC:         Also added cuts on pt, and whether or not the track has been
 CC:         matched, to improve track selection : E. G. Judd, April 1994
 CC: MODIFIED TO WORK IN STAF : S. Margetis, November 1996
+CC:
+CC:  Modified for greater accepted range in z for vertex position; array
+CC:  bounds checking; unused array cleanup; and bug fixes by L. Ray on
+CC:  Feb. 22, 1999
 CC:
 CC:  METHOD:
 CC:  Minimization of the perpendicular distances from the vectors to a point.
@@ -55,7 +60,7 @@ CC:
 CC:>----------------------------------------------------------------------
 
       INTEGER 	maxtr,i,j,k,ipnt
-      PARAMETER	(maxtr=10000)
+      PARAMETER	(maxtr=20000)
       REAL 	vtrv(6,maxtr)
       COMMON 	/FITVERT/ vtrv
       REAL 	XV,YV,ZV
@@ -69,11 +74,14 @@ CC:>----------------------------------------------------------------------
       REAL      psi,ppt,xx0,yy0,b,zz0,tanla
       INTEGER   icharge
       REAL	xp(2),x(4)
-      REAL	zsum(100),seed,zmax
+      REAL	zsum(800),seed,zmax
       REAL      xlocal(3),bfield(3)
 *
-        CALL VZERO(zsum,100)
+        CALL VZERO(zsum,800)
 	ntrk = 0
+        do i = 1,maxtr
+           gindex(i) = 0
+        end do
 
 c B-field obtained via gufld call
 
@@ -83,6 +91,7 @@ c B-field obtained via gufld call
 
       call gufld(xlocal,bfield)
       write(6,*) 'Using a field of',bfield(3),' KGauss'
+      b = bfield(3)
 
 
 C=== use only global tracks, i.e. dst_track instances ====
@@ -103,20 +112,24 @@ C=== use only global tracks, i.e. dst_track instances ====
            yy0 = globtrk(i).y0
            zz0 = globtrk(i).z0
            
-           if (ppt.ge.evrpar(1).ptmin) then
-              b = bfield(3)
+           if (ppt.ge.evrpar(1).ptmin .and.
+     1         globtrk(i).det_id .le.3) then
+C             b = bfield(3)
+              k = k + 1
+              if(k .le. maxtr) then
               xp(1) = 0.0
               xp(2) = 0.0
               call evr_project_track(psi,icharge,ppt,tanla,xx0,yy0,b,zz0,xp,x)
-              k = k + 1
+C             k = k + 1
               gindex(k) = i
 	      x0(k) = x(1)
 	      y0(k) = x(2)
 	      z0(k) = x(3)
               phi0(k)= x(4)
               tanl(k) = tanla
-              if(abs(z0(k)).lt.15.) then
-                 zsum(int(2*z0(k))+30)=zsum(int(2*z0(k))+30)+1.
+              if(abs(z0(k)).lt.200.) then
+                 zsum(int(2*z0(k))+400)=zsum(int(2*z0(k))+400)+1.
+              endif
               endif
            endif
 20      continue
@@ -130,10 +143,10 @@ C=== use only global tracks, i.e. dst_track instances ====
 
         seed=0.
         zmax=0.
-        do i=2,60
+        do i=1,800
          if(zsum(i).gt.zmax) then
            zmax=zsum(i)
-           seed=float(i-30)/2.
+           seed=float(i-400)/2.
          endif
         enddo   
 
@@ -152,6 +165,12 @@ C=== use only global tracks, i.e. dst_track instances ====
 	   endif
 10	continue
 
+        if (k.lt.2) then
+           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT,k=',k
+           evr_am = STAFCV_BAD
+           return
+        endif
+
 	CALL EVR_VERTEX_FIT(k)
 
 	k=0
@@ -167,6 +186,12 @@ C=== use only global tracks, i.e. dst_track instances ====
 	vtrv(6,k)=z0(i)
 	endif
 105	continue
+
+        if (k.lt.2) then
+           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT,k=',k
+           evr_am = STAFCV_BAD
+           return
+        endif
 
 	CALL EVR_VERTEX_FIT(k)
 
@@ -184,20 +209,35 @@ C=== use only global tracks, i.e. dst_track instances ====
 	endif
 205	continue
 
+        if (k.lt.2) then
+           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT,k=',k
+           evr_am = STAFCV_BAD
+           return
+        endif
+
 	CALL EVR_VERTEX_FIT(k)
 C
 C save results
 C
 
 C--mark default primary tracks
+CC:  NOTE: This can only mark tracks that have pT .ge. evrpar(1).ptmin
+CC:        AND det_id .le. 3
 
+        j = 0   ! Count tracks with pT.ge.evrpar(1).ptmin AND 
+C               ! globtrk.det_id .le. 3  AND
+C               ! DCA to primary vertex .lt.evrpar(1).vcut
 	do 235 i=1,ntrk
            dr=sqrt( (x0(i)-xv)*(x0(i)-xv)+(y0(i)-yv)*(y0(i)-yv)
      +          +(z0(i)-zv)*(z0(i)-zv) )
            if(dr.lt.evrpar(1).vcut) then
-            if(k.gt.0)then                   ! WJL
-             if(gindex(k).gt.0)then          ! WJL
-              globtrk(gindex(k)).id_start_vertex = 1
+C           if(k.gt.0)then                   ! WJL
+C            if(gindex(k).gt.0)then          ! WJL
+C             globtrk(gindex(k)).id_start_vertex = 1
+            if(i.le.maxtr) then              ! LR
+             if(gindex(i).gt.0)then          ! LR
+              j = j + 1                      ! LR
+              globtrk(gindex(i)).id_start_vertex = 1    ! LR
              end if                          ! WJL
             end if                           ! WJL
            endif
@@ -212,7 +252,8 @@ C--mark default primary tracks
         privert(index).iflag  = 1              ! found
         privert(index).det_id = 3              ! global reconstruction
         privert(index).vtx_id  = 1             ! primary
-        privert(index).n_daughters  = k
+C       privert(index).n_daughters  = k
+        privert(index).n_daughters  = j
         privert(index).x = xv
         privert(index).y = yv
         privert(index).z = zv
@@ -256,10 +297,11 @@ CC:
 CC:>--------------------------------------------------------------------
 
 	integer ngmx
-	PARAMETER (NGMX=10000)
-	integer ITACP(NGMX),NEX,NTRK
-	real Trk(15,ngmx)
-        COMMON /VTRAK/ ITACP,NEX,NTRK,TRK
+	PARAMETER (NGMX=20000)
+C	integer ITACP(NGMX),NEX,NTRK
+        integer NEX,NTRK
+C	real Trk(15,ngmx)
+C       COMMON /VTRAK/ ITACP,NEX,NTRK,TRK
 	REAL vtrv(6,ngmx)
 	common /fitvert/ vtrv
 	real Xv,Yv,Zv
@@ -276,8 +318,10 @@ c  Local variables:
 	real sinV,cosV,sinL,cosL,U,rho
 	real sigma(3,3),H(3),G(3,3),Txx,Txy,Txz,Tyy,Tyz,Tzz,G_inv(3,3),det
 	real Sxx,Sxy,Sxz,Syy,Syz,Szz,s2
-	real Dmcs,d0,d2,d3,Dtlt,Dtot,Dsig,Dmax,Dave,Dst,Dmat(ngmx)
-	real SigX,SigY,SigZ,Cx(ngmx),Cy(ngmx),Cz(ngmx)
+C	real Dmcs,d0,d2,d3,Dtlt,Dtot,Dsig,Dmax,Dave,Dst,Dmat(ngmx)
+C	real SigX,SigY,SigZ,Cx(ngmx),Cy(ngmx),Cz(ngmx)
+        real Dmcs,d0,d2,d3,Dtlt,Dtot,Dsig,Dmax,Dave,Dst
+        real SigX,SigY,SigZ
 	real Mass,Q,Ptot,multiple_Coulomb_scattering
 	real cut
 
@@ -396,7 +440,7 @@ CC: STATUS	     : Test
 CC:
 CC:>---------------------------------------------------------------------
 
-      REAL psi,pt,tanl,x0,y0,bfld,z0
+      REAL psi,pt,tanl,x0,y0,bfld,z0,adb
       INTEGER q,i
       REAL rh,phih,psin
       REAL xp(2),xc(2),x(4)
@@ -459,9 +503,17 @@ C     calculate the distance ds and the angle between the old and new position
 C
       axb = (x0-xc(1))*(x(2)-xc(2)) - (y0-xc(2))*(x(1)-xc(1))
       arg = axb/(rh*rh)
+      adb = ( x0-xc(1))*(x(1)-xc(1)) + (y0-xc(2))*(x(2)-xc(2))
+      adb = adb/(rh*rh)
       if( arg.ge.1.0) arg = 1.0
       if( arg.le.-1.0) arg = -1.0
-      dphih = asin(arg)
+      if( arg .gt. 0) then
+         dphih = acos(adb)
+      elseif( arg .lt. 0 .and. adb .gt. 0) then
+         dphih = asin(arg)
+      else
+         dphih = C_2PI - acos(adb)
+      endif
       ds = dphih*rh
       dz = ds*tanl
 C
