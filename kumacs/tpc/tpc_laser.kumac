@@ -598,12 +598,12 @@ dui/cd /dui
 soc/object/delete tntCWNtuple86 tntCWNtuple
 h/del 86
 wait
-tnt/newcwn 86 /ProducedData/Hits/tphit
+tnt/newcwn 86 ProducedData/Hits/tphit
 igset mtyp 20
 
-rowcount /ProducedData/Tracks/strack
+rowcount ProducedData/Tracks/strack
 ntracks=staf_result(1)
-rowcount /ProducedData/Tracks/res
+rowcount ProducedData/Tracks/res
 nhitused=staf_result(1)
 
 vec/crea xx(2) r
