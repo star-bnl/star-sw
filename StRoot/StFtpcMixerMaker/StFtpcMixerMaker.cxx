@@ -129,19 +129,7 @@ Int_t StFtpcMixerMaker::Make() {
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
-                                                m_padrow_z,
-						m_asicmap,
-                                                m_efield,
-                                                m_vdrift,
-                                                m_deflection,
-                                                m_dvdriftdp,
-                                                m_ddeflectiondp,
-                                                m_ampslope,
-                                                m_ampoffset,
-                                                m_timeoffset,
-                                                m_driftfield,
-                                                m_gas,
-                                                m_electronics);
+                                                m_padrow_z);
 
 
   // get the two datasets
@@ -423,9 +411,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.1 2003/02/14 18:11:25 fsimon Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.2 2003/06/13 12:12:44 jcs Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.2  2003/06/13 12:12:44  jcs
+ * use the same StFtpcDbReader constructor as used by Sti/StFtpcDetectorBuilder
+ *
  * Revision 1.1  2003/02/14 18:11:25  fsimon
  * Initial commit of FTPC embedding code
  *
