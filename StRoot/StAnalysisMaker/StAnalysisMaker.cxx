@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.6 2003/03/20 00:29:19 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.7 2004/02/01 18:01:53 jeromel Exp $
  *
  */
 
@@ -70,15 +70,25 @@ StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
     mTuple = 0;
 }
 
-//
-//  Usually ok to leave this as it is.
-//
+
+
+/*!
+ *
+ *  Usually ok to leave this as it is, the destructor should
+ *  however free/delete private data allocated in other part
+ *  of the code.
+ *
+ */
 StAnalysisMaker::~StAnalysisMaker() { /* noop */ }
 
-//
-//  Called once at the beginning.
-//  This is a good place to book histos and tuples.
-//
+
+
+/*!
+ *
+ * Called once at the beginning.
+ * This is a good place to book histos and tuples.
+ *
+ */
 Int_t
 StAnalysisMaker::Init()
 {
@@ -107,19 +117,23 @@ StAnalysisMaker::Init()
     return StMaker::Init();
 }
 
-//
-//  Called every event after Make(). Usually you do not
-//  need to do anything here. Leave it as it is.
-//
+/*!
+ *
+ *  Called every event after Make(). Usually you do not
+ *  need to do anything here. Leave it as it is.
+ *
+ */
 void
 StAnalysisMaker::Clear(Option_t *opt)
 {
     StMaker::Clear();
 }
 
-//
-//  Called once at the end.
-//
+/*!
+ *
+ * Called once at the end.
+ *
+ */
 Int_t
 StAnalysisMaker::Finish()
 {
@@ -142,10 +156,10 @@ StAnalysisMaker::Finish()
     return kStOK;
 }
 
-//
-//  This method is called every event. That's the
-//  right place to plug in your analysis. 
-//
+/*!
+ *  This method is called every event. That's the
+ *  right place to plug in your analysis. 
+ */
 Int_t
 StAnalysisMaker::Make()
 {
@@ -156,7 +170,10 @@ StAnalysisMaker::Make()
     //
     StEvent* event;
     event = (StEvent *) GetInputDS("StEvent");
-    if (!event) return kStOK;        // if no event, we're done
+    if (!event){
+      cout << "StAnalysisMaker::Make : No StEvent"  << endl;
+      return kStOK;        // if no event, we're done
+    }
 
     //
     //  The following is only needed since the
@@ -169,7 +186,10 @@ StAnalysisMaker::Make()
     //  See if this event survives the event filter.
     //  If not we stop here right away.
     //
-    if (!accept(event)) return kStOK;   
+    if (!accept(event)){
+      cout << "StAnalysisMaker::Make : Event was not accepted"  << endl;
+      return kStOK;
+    }
 
     //
     //  Ok we survived the filter. Now it is time
@@ -178,7 +198,7 @@ StAnalysisMaker::Make()
     //
     int k = 0;
     float tuple[10];
-    tuple[k++] = event->id();       // the event number
+    tuple[k++] = event->id();                               // the event number
     
     tuple[k++] = event->primaryVertex()->position().x();    // x-vertex
     tuple[k++] = event->primaryVertex()->position().y();    // y-vertex
@@ -188,7 +208,7 @@ StAnalysisMaker::Make()
     // Y3 trigger Id dump
     StTriggerIdCollection *trgcol = event->triggerIdCollection();
     if ( ! trgcol ){
-      cout << "No triggerIdCollection " << endl;
+      cout << "StAnalysisMaker::Make : No triggerIdCollection " << endl;
     } else {
       const StTriggerId *l1 = trgcol->l1();
       const StTriggerId *l2 = trgcol->l2();
@@ -239,7 +259,11 @@ StAnalysisMaker::Make()
     //  Get the ZDC and CTB data.
     //  
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
-    if (!theTriggers) return kStOK;      // good idea to check if the data is available at all
+    if (!theTriggers){
+      // good idea to check if the data is available at all
+      cout << "StAnalysisMaker::Make : no triggerDetectorCollection" << endl;
+      return kStOK;           
+    }
     StCtbTriggerDetector &theCtb = theTriggers->ctb();
     StZdcTriggerDetector &theZdc = theTriggers->zdc();
 
@@ -314,6 +338,9 @@ bool StAnalysisMaker::accept(StTrack* track)
 
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.7  2004/02/01 18:01:53  jeromel
+ * A few message addition
+ *
  * Revision 2.6  2003/03/20 00:29:19  jeromel
  * Calling Wite() on 0x0 pointer
  *
