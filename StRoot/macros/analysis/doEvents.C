@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.62 2001/02/21 23:16:19 perev Exp $
+// $Id: doEvents.C,v 1.63 2001/02/27 23:19:38 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -134,7 +134,7 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
     }
  
     TString mainBranch;
-    if (strstr(fileList[0],".root")) {
+    if (fileList && fileList[0] && strstr(fileList[0],".root")) {
       mainBranch = fileList[0];
       mainBranch.ReplaceAll(".root","");
       int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
@@ -302,6 +302,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.63  2001/02/27 23:19:38  perev
+// test for filelist[0]!=0 added
+//
 // Revision 1.62  2001/02/21 23:16:19  perev
 // clean up
 //
