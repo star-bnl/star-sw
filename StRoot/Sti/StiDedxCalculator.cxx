@@ -29,15 +29,15 @@ StiDedxCalculator::StiDedxCalculator()
   truncation fraction (see setFractionUsed(double)).  Dedx has units of
   KeV/cm.
  */
-float StiDedxCalculator::getDedx(const StiKalmanTrack* track)
+void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
+ 			         double &dEdx, double &dEdxE,
+			         double &nPointsUsed)
 {
-  cout <<"In Dedx Calculator"<<endl;
     mVector.clear();
     //hopefully this can be a reference to a vec
     //We assume that the vector contains only nodes with hits!!!!!
     vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector); //Claude t.b.d.
 
-    cout <<"Dedx: Got the node vector."<<endl;
     //Transform each node to a double=dedx of it's hit
     //I did it in one line because it should be a little faster than
     //a loop, since the call to NodeDedxCalculator() should be
@@ -50,10 +50,19 @@ float StiDedxCalculator::getDedx(const StiKalmanTrack* track)
     
     //sort in ascending order
     sort(mVector.begin(), mVector.end(), less<double>() );
-    double nPoints = mFraction*static_cast<double>( mVector.size() );
+    nPointsUsed = mFraction*static_cast<double>( mVector.size() );
     double sum = accumulate(mVector.begin(),
-			    mVector.begin()+static_cast<int>(nPoints), 0.);
-    return (nPoints>=0.) ? (sum/nPoints) : DBL_MAX;
+			    mVector.begin()+static_cast<int>(nPointsUsed), 0.);
+    if(nPointsUsed>=0.)
+      {
+        dEdx=sum/nPointsUsed;
+        dEdxE=DBL_MAX;
+      }
+    else
+      {
+        dEdx=DBL_MAX;
+        dEdxE=DBL_MAX;
+      }
 }
 
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
@@ -92,6 +101,5 @@ double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
     //pad itself.
     
     dedx = (mNode->getHit()->getEloss())/dx;
-    cout << "Dedx of hit: "<<dedx<<endl;
     return dedx;
 }

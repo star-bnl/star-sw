@@ -60,7 +60,12 @@ class StiDedxCalculator
     //Action
     
     ///Calculate Dedx for the track.
-    virtual float getDedx(const StiKalmanTrack* track);
+    virtual void getDedx(const StiKalmanTrack* track,
+			  double &dEdx, double &dEdxE,
+			  double &nPointsUsed);
+    //return some info
+    StDetectorId whichDetId();
+    double       whatUseFraction();
 
  private:
 
@@ -102,5 +107,10 @@ inline void StiDedxCalculator::setDetectorFilter(StDetectorId detector)
 {
     mDetector = detector;
 }
+
+
+inline StDetectorId StiDedxCalculator::whichDetId(){return mDetector;};
+inline double       StiDedxCalculator::whatUseFraction(){return mFraction;};
+
 
 #endif
