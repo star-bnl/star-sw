@@ -53,6 +53,11 @@ C     Local variables
       REAL    covar(3,3),bfield
       DATA    imsg /0/
 
+
+C--->>>>>>>>>> 
+      REAL gseed, gtanl, ginvpt, glength
+
+c---<<<<<<<<<<<<<<<<<<<<<<<<
  
       globtrk_h.nok = globtrk_h.nok + 1
       globtrk_aux_h.nok = globtrk_aux_h.nok +1
@@ -108,10 +113,17 @@ C     Now find last point on track and calculate track length.
                globtrk(iglob).x_last(1) = tphit(lasthit).x
                globtrk(iglob).x_last(2) = tphit(lasthit).y
                globtrk(iglob).x_last(3) = tphit(lasthit).z
-               globtrk(iglob).length = 
-     +              sqrt((globtrk(iglob).x_last(1)- 
-     +              globtrk(iglob).x_first(1))**2 +
-     +              (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)
+C----->>>>  new calculation of .length   S.Margetis
+               gseed = sqrt((globtrk(iglob).x_last(1) 
+     +              - globtrk(iglob).x_first(1))**2 +
+     +              (globtrk(iglob).x_last(2) 
+     +              - globtrk(iglob).x_first(2))**2)
+               
+               gtanl = globtrk(iglob).tanl
+               ginvpt= globtrk(iglob).invpt
+               call trk_length(gseed,gtanl,ginvpt,glength)
+               globtrk(iglob).length=glength
+C---  <<<<<<<
             endif
          else
             lasthit = gtrk(igtrk).ipnt(gtrk(igtrk).nhit)
@@ -119,10 +131,17 @@ C     Now find last point on track and calculate track length.
                globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
                globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
                globtrk(iglob).x_last(3) = svthit(lasthit).x(3)
-               globtrk(iglob).length = 
-     +              sqrt((globtrk(iglob).x_last(1)- 
-     +              globtrk(iglob).x_first(1))**2 +
-     +              (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)        
+C----->>>>  new calculation of .length   S.Margetis
+               gseed = sqrt((globtrk(iglob).x_last(1) 
+     +              - globtrk(iglob).x_first(1))**2 +
+     +              (globtrk(iglob).x_last(2) 
+     +              - globtrk(iglob).x_first(2))**2)
+               
+               gtanl = globtrk(iglob).tanl
+               ginvpt= globtrk(iglob).invpt
+               call trk_length(gseed,gtanl,ginvpt,glength)
+               globtrk(iglob).length=glength
+C---  <<<<<<<
             endif
          endif
       endif
@@ -183,3 +202,26 @@ C     Now find last point on track and calculate track length.
       EGR_LOAD_GLOBTRK = 0
       return
       end
+      
+C======================================================================
+C-- A acurate estimation of track length which is using as a 'seed' the
+C   current calculation, i.e. the cord length in x-y plane
+C   Author: S. Margetis  7/1/99
+c----------------------------------------------------------------------
+      SUBROUTINE trk_length(seed,tanl,invpt,bf,length)
+      IMPLICIT NONE
+C
+C#include "phys_constants.inc"
+#include "math_constants.inc"
+
+C
+      REAL    seed,tanl,invpt,bf,length
+      REAL    rr
+
+      rr=1./(C_D_CURVATURE*bf*invpt)
+
+      length=(rr*asin(seed/(2*rr)))/cos(atan(tanl))
+
+      RETURN
+      END
+
