@@ -5,6 +5,7 @@
 #include <string.h>
 #endif
 #include <stdlib.h>
+#include "stic.h"
 #define PP printf(
 #define FF fprintf(ff,
 extern char gCvsVersion[];

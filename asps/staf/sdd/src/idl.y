@@ -12,6 +12,7 @@
 #include <string.h>
 #endif
 #include <stdlib.h>
+#include "stic.h"
 #define FORTRANCOMMENTSIZE 277
 /* #define STUFF_FOR_64_BITS */
 #define P printf(
@@ -27,7 +28,7 @@
 #define ISIZE 83 /* size of identifiers (eg interface names, prototype names */
 #define PROTOTYPES 4 /* max prototypes in interface def */
 #define INCDIR 37	/* max -I on command line */
-#define INCDIRS 80	/* max size of path spec in a -I */
+#define INCDIRS 255	/* max size of path spec in a -I */
 #define ERROR_FORMAT "stic: error on line %d:\n%s\n%s\n"
 #define ERR_FORMAT2 "stic: error on line %d: unused character: %s\n"
 #define OUTFILE 43
@@ -87,7 +88,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.4 1998/05/19 01:26:19 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.5 1998/05/20 00:40:56 dave Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
