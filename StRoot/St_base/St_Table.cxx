@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.23 1998/10/14 22:40:48 fine Exp $ 
+// $Id: St_Table.cxx,v 1.24 1998/10/31 00:20:14 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.24  1998/10/31 00:20:14  fisyak
+// Add ds2ReallocTable
+//
 // Revision 1.23  1998/10/14 22:40:48  fine
 // St_Table::ReAllocate method and "plain" C interface to that has been introduced
 //
@@ -231,7 +234,7 @@ void St_Table::CopySet(St_Table &array)
 void *St_Table::ReAllocate(Int_t newsize)
 {
   if (s_Size && newsize > fN) {
-   void *arr =  realloc(s_Table,*s_Size*fN);
+   void *arr =  realloc(s_Table,*s_Size*newsize);
    SetfN(newsize);
    s_Table = (char *)arr;
  }  
