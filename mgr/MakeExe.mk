@@ -68,7 +68,8 @@ FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(basename $(notdir $(FILES_O)
 FILES_D := $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(basename $(notdir $(FILES_D)))))
 
 
-INCL  := $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple
+INCL  := $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(CERN_ROOT)/include 
+#                                                                    $(CERN_ROOT)/src/pawlib/paw/ntuple
 INCL  := $(addprefix -I,$(INCL))
 
 
@@ -133,7 +134,8 @@ $(OBJ_DIR)/%.o : $(SRG_DIR)/%.f
 $(OBJ_DIR)/%.o : %.f
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.c
-	$(CC)  -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
+	cd $(dir $(1ST_DEPS));\
+        $(CC)  -c -I. $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.cc
 	$(CPP) -c $(INCL) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 #
@@ -152,16 +154,17 @@ endif
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	cd $(dir $(1ST_DEPS));\
+        $(GCC)  -MM -MG -nostdinc -w -I. $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cc 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) > $(ALL_TAGS)
 
 
 $(DEP_DIR)/%.d:  %.F
 	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(ALL_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
+	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(1ST_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
 
 
 

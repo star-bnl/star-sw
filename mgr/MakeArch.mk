@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.60  1999/01/30 04:08:22  fisyak
+#  Add StRootEvent
+#
 #  Revision 1.59  1999/01/27 23:46:25  fisyak
 #  Add Templates
 #
@@ -155,7 +158,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/27 23:46:25 $ 
+#             Last modification $Date: 1999/01/30 04:08:22 $ 
 #. default setings
 
 MAKE  := gmake
@@ -382,7 +385,8 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -L /usr/local/egcs-1.1.1-l/g2clib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lI77 -lF77
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -L/usr/local/egcs-1.1.1 \
+              -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c -lI77 -lF77 -lcrypt 
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
