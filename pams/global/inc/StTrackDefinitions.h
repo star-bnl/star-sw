@@ -40,4 +40,5 @@
 #define kLine2StepIdentifier            4
 #define kLine3DIdentifier               5
 #define kL3FitIdentifier                6
+#define kITKalmanFitIdentifier          7
 #endif
