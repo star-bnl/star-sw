@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.2 2000/01/05 22:12:03 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.3 2000/01/10 21:57:16 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.3  2000/01/10 21:57:16  kathy
+// must now load St_global when running St_QA_Maker
+//
 // Revision 1.2  2000/01/05 22:12:03  kathy
 // changed input file to current one
 //
@@ -72,6 +75,7 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");
+  gSystem->Load("St_global");
 
 //  Setup top part of chain
   chain = new StChain("bfc");

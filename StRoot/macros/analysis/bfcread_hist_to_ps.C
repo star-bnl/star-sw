@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.14 2000/01/10 21:24:03 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.15 2000/01/10 21:59:17 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.15  2000/01/10 21:59:17  kathy
+// must now load St_global when running St_QA_Maker
+//
 // Revision 1.14  2000/01/10 21:24:03  kathy
 // St_QA_Maker now requires that St_global be loaded because it uses the prop_one_track function from pams/global/egr
 //
@@ -85,7 +88,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_to_ps(
   const Char_t *MainFile=
-     "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.hist.root",
+     "/star/rcf/test/dev/tfs_Linux/Thu/year_1b/hc_lowdensity/gstar.hist.root",
   const Char_t *MakerHistDir="QA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",
@@ -110,7 +113,7 @@ void bfcread_hist_to_ps(
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("St_QA_Maker");
-    gSystem->Load("St_global");
+
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
