@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.25 2004/01/23 01:30:18 akio Exp $
+// $Id: StppEvent.cxx,v 1.26 2004/01/24 01:28:09 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.26  2004/01/24 01:28:09  akio
+// Adding abort
+//
 // Revision 1.25  2004/01/23 01:30:18  akio
 // Adding 2004 ntuples
 //
@@ -825,6 +828,11 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  ntp2004_.zVertex     = zVertex;	  
 	  ntp2004_.ntrk        = 0;
 	  int n=0;
+	  if(nPrimTrack>MAXTRK2004){
+	    printf("ERROR!!!  # of primary track=%d is larger than MAXTRK2004=%d",nPrimTrack,MAXTRK2004);
+	    printf("Aborting this job!");
+	    abort();
+	  }
 	  if(nPrimTrack>0) {
 	    for(int i=0; i<=tracks->GetLast(); i++) {
 	      StMuTrack *t = (StMuTrack *)(* tracks)[i];
