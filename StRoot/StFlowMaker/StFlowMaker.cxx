@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.82 2003/04/01 00:27:08 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.83 2003/05/06 20:38:03 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.82 2003/04/01 00:27:08 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.83 2003/05/06 20:38:03 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -885,7 +885,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   if (Debug()) gMessMgr->Info() << "FlowMaker: Pico Version: " <<  
 		 pPicoEvent->Version() << endm;
 
-  if (!pPicoEvent || !pPicoChain->GetEntry(mPicoEventCounter++)) {
+  if (!pPicoEvent || !pPicoChain->GetEntry(mEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
     return kFALSE; 
   }
@@ -927,16 +927,16 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     break;
   case 5: FillFromPicoVersion5DST(pPicoEvent);
     break;
-  case 4: FillFromPicoVersion4DST(pPicoEvent);
-    break;
-  case 3: FillFromPicoVersion3DST(pPicoEvent);
-    break;
-  case 2: FillFromPicoVersion2DST(pPicoEvent);
-    break;
-  case 1: FillFromPicoVersion1DST(pPicoEvent);
-    break;
-  case 0: FillFromPicoVersion0DST(pPicoEvent);
-    break;
+//   case 4: FillFromPicoVersion4DST(pPicoEvent);
+//     break;
+//   case 3: FillFromPicoVersion3DST(pPicoEvent);
+//     break;
+//   case 2: FillFromPicoVersion2DST(pPicoEvent);
+//     break;
+//   case 1: FillFromPicoVersion1DST(pPicoEvent);
+//     break;
+//   case 0: FillFromPicoVersion0DST(pPicoEvent);
+//     break;
   default:
     cout << "##### FlowMaker: Illegal pico file version" << endl;
     return kStFatal;
@@ -966,341 +966,341 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
-  // Make StFlowEvent from StFlowPicoEvent
+// Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
+//   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion0DST()" << endm;
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion0DST()" << endm;
   
-  pFlowEvent->SetEventID(pPicoEvent->EventID());
-  UInt_t origMult = pPicoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
-					  pPicoEvent->VertexY(),
-					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetCTB(pPicoEvent->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+//   pFlowEvent->SetEventID(pPicoEvent->EventID());
+//   UInt_t origMult = pPicoEvent->OrigMult();
+//   pFlowEvent->SetOrigMult(origMult);
+//   PR(origMult);
+//   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+// 					  pPicoEvent->VertexY(),
+// 					  pPicoEvent->VertexZ()) );
+//   pFlowEvent->SetCTB(pPicoEvent->CTB());
+//   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+//   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
-  int    goodTracks    = 0;
-  UInt_t goodTracksEta = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
-      ->UncheckedAt(nt);
-    if (fabs(pPicoTrack->Eta()) < 0.75) goodTracksEta++;
-    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pPicoTrack->Pt());
-      pFlowTrack->SetPhi(pPicoTrack->Phi());
-      pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetDedx(pPicoTrack->Dedx());
-      pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetChi2(pPicoTrack->Chi2()/10000.);
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
-      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+//   int    goodTracks    = 0;
+//   UInt_t goodTracksEta = 0;
+//   // Fill FlowTracks
+//   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
+//     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+//       ->UncheckedAt(nt);
+//     if (fabs(pPicoTrack->Eta()) < 0.75) goodTracksEta++;
+//     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+//       // Instantiate new StFlowTrack
+//       StFlowTrack* pFlowTrack = new StFlowTrack;
+//       if (!pFlowTrack) return kFALSE;
+//       pFlowTrack->SetPt(pPicoTrack->Pt());
+//       pFlowTrack->SetPhi(pPicoTrack->Phi());
+//       pFlowTrack->SetEta(pPicoTrack->Eta());
+//       pFlowTrack->SetDedx(pPicoTrack->Dedx());
+//       pFlowTrack->SetCharge(pPicoTrack->Charge());
+//       pFlowTrack->SetChi2(pPicoTrack->Chi2()/10000.);
+//       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+//       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-    }
-  }
+//       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+//       goodTracks++;
+//     }
+//   }
   
-  // Recreate centrality
-  pFlowEvent->SetMultEta(goodTracksEta);
-  pFlowEvent->SetCentrality();
+//   // Recreate centrality
+//   pFlowEvent->SetMultEta(goodTracksEta);
+//   pFlowEvent->SetCentrality();
   
-  return kTRUE;
-}
+//   return kTRUE;
+// }
 
-//-----------------------------------------------------------------------
+// //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
-  // Make StFlowEvent from StFlowPicoEvent
+// Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
+//   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion1DST()" << endm;
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion1DST()" << endm;
 
-  pFlowEvent->SetEventID(pPicoEvent->EventID());
-  UInt_t origMult = pPicoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
-					  pPicoEvent->VertexY(),
-					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality();
-  pFlowEvent->SetRunID(pPicoEvent->RunID());
-  pFlowEvent->SetCTB(pPicoEvent->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+//   pFlowEvent->SetEventID(pPicoEvent->EventID());
+//   UInt_t origMult = pPicoEvent->OrigMult();
+//   pFlowEvent->SetOrigMult(origMult);
+//   PR(origMult);
+//   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+// 					  pPicoEvent->VertexY(),
+// 					  pPicoEvent->VertexZ()) );
+//   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+//   pFlowEvent->SetCentrality();
+//   pFlowEvent->SetRunID(pPicoEvent->RunID());
+//   pFlowEvent->SetCTB(pPicoEvent->CTB());
+//   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+//   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
-  int goodTracks = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
-      ->UncheckedAt(nt);
-    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pPicoTrack->Pt());
-      pFlowTrack->SetPhi(pPicoTrack->Phi());
-      pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetDedx(pPicoTrack->Dedx());
-      pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
-      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
-      pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
-      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
-      if (pPicoTrack->Charge() < 0) {
-	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
-      } else {
-	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
-      }
+//   int goodTracks = 0;
+//   // Fill FlowTracks
+//   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
+//     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+//       ->UncheckedAt(nt);
+//     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+//       // Instantiate new StFlowTrack
+//       StFlowTrack* pFlowTrack = new StFlowTrack;
+//       if (!pFlowTrack) return kFALSE;
+//       pFlowTrack->SetPt(pPicoTrack->Pt());
+//       pFlowTrack->SetPhi(pPicoTrack->Phi());
+//       pFlowTrack->SetEta(pPicoTrack->Eta());
+//       pFlowTrack->SetDedx(pPicoTrack->Dedx());
+//       pFlowTrack->SetCharge(pPicoTrack->Charge());
+//       pFlowTrack->SetDca(pPicoTrack->Dca());
+//       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+//       pFlowTrack->SetChi2(pPicoTrack->Chi2());
+//       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+//       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+//       if (pPicoTrack->Charge() < 0) {
+// 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+//       } else {
+// 	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+//       }
       
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-    }
-  }
+//       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+//       goodTracks++;
+//     }
+//   }
   
-  return kTRUE;
-}
+//   return kTRUE;
+// }
 
-//-----------------------------------------------------------------------
+// //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
-  // Make StFlowEvent from StFlowPicoEvent
+// Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
+//   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion2DST()" << endm;
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion2DST()" << endm;
 
-  pFlowEvent->SetEventID(pPicoEvent->EventID());
-  UInt_t origMult = pPicoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-  pFlowEvent->SetVertexPos( StThreeVectorF(pPicoEvent->VertexX(),
-					   pPicoEvent->VertexY(),
-					   pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality();
-  pFlowEvent->SetRunID(pPicoEvent->RunID());
-  pFlowEvent->SetCTB(pPicoEvent->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+//   pFlowEvent->SetEventID(pPicoEvent->EventID());
+//   UInt_t origMult = pPicoEvent->OrigMult();
+//   pFlowEvent->SetOrigMult(origMult);
+//   PR(origMult);
+//   pFlowEvent->SetVertexPos( StThreeVectorF(pPicoEvent->VertexX(),
+// 					   pPicoEvent->VertexY(),
+// 					   pPicoEvent->VertexZ()) );
+//   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+//   pFlowEvent->SetCentrality();
+//   pFlowEvent->SetRunID(pPicoEvent->RunID());
+//   pFlowEvent->SetCTB(pPicoEvent->CTB());
+//   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+//   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
-  int goodTracks = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
-      ->UncheckedAt(nt);
-    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pPicoTrack->Pt());
-      pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
-      pFlowTrack->SetPhi(pPicoTrack->Phi());
-      pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
-      pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
-      pFlowTrack->SetDedx(pPicoTrack->Dedx());
-      pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
-      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
-      pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
-      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
-      if (pPicoTrack->Charge() < 0) {
-	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
-      } else {
-	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
-      }
+//   int goodTracks = 0;
+//   // Fill FlowTracks
+//   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
+//     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+//       ->UncheckedAt(nt);
+//     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+//       // Instantiate new StFlowTrack
+//       StFlowTrack* pFlowTrack = new StFlowTrack;
+//       if (!pFlowTrack) return kFALSE;
+//       pFlowTrack->SetPt(pPicoTrack->Pt());
+//       pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
+//       pFlowTrack->SetPhi(pPicoTrack->Phi());
+//       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
+//       pFlowTrack->SetEta(pPicoTrack->Eta());
+//       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+//       pFlowTrack->SetDedx(pPicoTrack->Dedx());
+//       pFlowTrack->SetCharge(pPicoTrack->Charge());
+//       pFlowTrack->SetDca(pPicoTrack->Dca());
+//       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+//       pFlowTrack->SetChi2(pPicoTrack->Chi2());
+//       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+//       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+//       if (pPicoTrack->Charge() < 0) {
+// 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+//       } else {
+// 	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+//       }
       
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-    }
-  }
+//       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+//       goodTracks++;
+//     }
+//   }
   
-  return kTRUE;
-}
+//   return kTRUE;
+// }
 
-//-----------------------------------------------------------------------
+// //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
-  // Make StFlowEvent from StFlowPicoEvent
+// Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
+//   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion3DST()" << endm;
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion3DST()" << endm;
 
-  pFlowEvent->SetEventID(pPicoEvent->EventID());
-  UInt_t origMult = pPicoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
-					  pPicoEvent->VertexY(),
-					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality();
-  pFlowEvent->SetRunID(pPicoEvent->RunID());
-  pFlowEvent->SetCTB(pPicoEvent->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+//   pFlowEvent->SetEventID(pPicoEvent->EventID());
+//   UInt_t origMult = pPicoEvent->OrigMult();
+//   pFlowEvent->SetOrigMult(origMult);
+//   PR(origMult);
+//   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+// 					  pPicoEvent->VertexY(),
+// 					  pPicoEvent->VertexZ()) );
+//   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+//   pFlowEvent->SetCentrality();
+//   pFlowEvent->SetRunID(pPicoEvent->RunID());
+//   pFlowEvent->SetCTB(pPicoEvent->CTB());
+//   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+//   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
-  int goodTracks = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
-      ->UncheckedAt(nt);
-    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pPicoTrack->Pt());
-      pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
-      pFlowTrack->SetPhi(pPicoTrack->Phi());
-      pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
-      pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
-      pFlowTrack->SetDedx(pPicoTrack->Dedx());
-      pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
-      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
-      pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
-      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
-      pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
-      pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
-      pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
-      if (pPicoTrack->Charge() < 0) {
-	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
-      } else {
-	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
-      }
+//   int goodTracks = 0;
+//   // Fill FlowTracks
+//   for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
+//     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+//       ->UncheckedAt(nt);
+//     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+//       // Instantiate new StFlowTrack
+//       StFlowTrack* pFlowTrack = new StFlowTrack;
+//       if (!pFlowTrack) return kFALSE;
+//       pFlowTrack->SetPt(pPicoTrack->Pt());
+//       pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
+//       pFlowTrack->SetPhi(pPicoTrack->Phi());
+//       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
+//       pFlowTrack->SetEta(pPicoTrack->Eta());
+//       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+//       pFlowTrack->SetDedx(pPicoTrack->Dedx());
+//       pFlowTrack->SetCharge(pPicoTrack->Charge());
+//       pFlowTrack->SetDca(pPicoTrack->Dca());
+//       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+//       pFlowTrack->SetChi2(pPicoTrack->Chi2());
+//       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+//       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+//       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
+//       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
+//       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+//       if (pPicoTrack->Charge() < 0) {
+// 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+//       } else {
+// 	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+//       }
 
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-    }
-  }
+//       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+//       goodTracks++;
+//     }
+//   }
   
-  return kTRUE;
-}
+//   return kTRUE;
+// }
 
-//-----------------------------------------------------------------------
+// //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
-  // Make StFlowEvent from StFlowPicoEvent
+// Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
+//   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion4DST()" << endm;
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion4DST()" << endm;
 
-  pFlowEvent->SetEventID(pPicoEvent->EventID());
-  UInt_t origMult = pPicoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-  pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
-  pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
-  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
-					  pPicoEvent->VertexY(),
-					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality();
-  pFlowEvent->SetRunID(pPicoEvent->RunID());
-  pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
+//   pFlowEvent->SetEventID(pPicoEvent->EventID());
+//   UInt_t origMult = pPicoEvent->OrigMult();
+//   pFlowEvent->SetOrigMult(origMult);
+//   PR(origMult);
+//   pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
+//   pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
+//   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+// 					  pPicoEvent->VertexY(),
+// 					  pPicoEvent->VertexZ()) );
+//   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+//   pFlowEvent->SetCentrality();
+//   pFlowEvent->SetRunID(pPicoEvent->RunID());
+//   pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
 
-  pFlowEvent->SetCenterOfMassEnergy(pPicoEvent->CenterOfMassEnergy());
-  pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
-  pFlowEvent->SetBeamMassNumberWest(pPicoEvent->BeamMassNumberWest());
+//   pFlowEvent->SetCenterOfMassEnergy(pPicoEvent->CenterOfMassEnergy());
+//   pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
+//   pFlowEvent->SetBeamMassNumberWest(pPicoEvent->BeamMassNumberWest());
 
-  pFlowEvent->SetCTB(pPicoEvent->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+//   pFlowEvent->SetCTB(pPicoEvent->CTB());
+//   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+//   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
-  int goodTracks = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
-      ->UncheckedAt(nt);
-    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pPicoTrack->Pt());
-      pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
-      pFlowTrack->SetPhi(pPicoTrack->Phi());
-      pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
-      pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
-      pFlowTrack->SetDedx(pPicoTrack->Dedx());
-      pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
-      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
-      pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
-      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
-      pFlowTrack->SetNhits(pPicoTrack->Nhits());
-      pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
-      pFlowTrack->SetDcaGlobal3(StThreeVectorD(pPicoTrack->DcaGlobalX(),
-					       pPicoTrack->DcaGlobalY(),
-					       pPicoTrack->DcaGlobalZ()) );
-      pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
-      pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
-      pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
-      pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
-      pFlowTrack->SetElectronPositronProb(pPicoTrack->ElectronPositronProb()); 
-      pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
-      pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
-      pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
-      if (pPicoTrack->Charge() < 0) {
-	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
-      } else {
-	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
-	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
-	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
-	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
-	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
-      }
+//   int goodTracks = 0;
+//   // Fill FlowTracks
+//   for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
+//     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+//       ->UncheckedAt(nt);
+//     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+//       // Instantiate new StFlowTrack
+//       StFlowTrack* pFlowTrack = new StFlowTrack;
+//       if (!pFlowTrack) return kFALSE;
+//       pFlowTrack->SetPt(pPicoTrack->Pt());
+//       pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
+//       pFlowTrack->SetPhi(pPicoTrack->Phi());
+//       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
+//       pFlowTrack->SetEta(pPicoTrack->Eta());
+//       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+//       pFlowTrack->SetDedx(pPicoTrack->Dedx());
+//       pFlowTrack->SetCharge(pPicoTrack->Charge());
+//       pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
+//       pFlowTrack->SetDca(pPicoTrack->Dca());
+//       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+//       pFlowTrack->SetChi2(pPicoTrack->Chi2());
+//       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+//       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+//       pFlowTrack->SetNhits(pPicoTrack->Nhits());
+//       pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
+//       pFlowTrack->SetDcaGlobal3(StThreeVectorD(pPicoTrack->DcaGlobalX(),
+// 					       pPicoTrack->DcaGlobalY(),
+// 					       pPicoTrack->DcaGlobalZ()) );
+//       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
+//       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
+//       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
+//       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+//       pFlowTrack->SetElectronPositronProb(pPicoTrack->ElectronPositronProb()); 
+//       pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
+//       pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
+//       pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
+//       if (pPicoTrack->Charge() < 0) {
+// 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+//       } else {
+// 	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+// 	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+// 	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+// 	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+// 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+//       }
 
-      if (pPicoTrack->TopologyMap0() || pPicoTrack->TopologyMap1()) {
-	// topology map found
-	pFlowTrack->SetTopologyMap(StTrackTopologyMap(pPicoTrack->TopologyMap0(),
-						      pPicoTrack->TopologyMap1()) );
-      }
+//       if (pPicoTrack->TopologyMap0() || pPicoTrack->TopologyMap1()) {
+// 	// topology map found
+// 	pFlowTrack->SetTopologyMap(StTrackTopologyMap(pPicoTrack->TopologyMap0(),
+// 						      pPicoTrack->TopologyMap1()) );
+//       }
 
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-    }
-  }
+//       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+//       goodTracks++;
+//     }
+//   }
   
-  return kTRUE;
-}
+//   return kTRUE;
+// }
 
 //-----------------------------------------------------------------------
 
@@ -1506,7 +1506,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pMuTracks->Clear();
   pMuGlobalTracks->Clear();
       
-  if (!pMuChain->GetEntry(mPicoEventCounter++)) {
+  if (!pMuChain->GetEntry(mEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
     return kFALSE; 
   }
@@ -1797,7 +1797,7 @@ Int_t StFlowMaker::InitPicoEventRead() {
   if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = "
 		   << nEntries << endm;
   
-  mPicoEventCounter = 0;
+  mEventCounter = 0;
   
   return kStOK;
 }
@@ -1849,7 +1849,7 @@ Int_t StFlowMaker::InitMuEventRead() {
     
   }
   
-  mPicoEventCounter = 0;
+  mEventCounter = 0;
   
   return kStOK;
 }
@@ -1893,6 +1893,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.83  2003/05/06 20:38:03  posk
+// Removed all but last two versions of pico file read.
+//
 // Revision 1.82  2003/04/01 00:27:08  posk
 // Little q is now unweighted by pt or eta. Big Q is unaffected.
 //
