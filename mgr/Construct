@@ -185,11 +185,26 @@ foreach my $rep (@Repo) {
   push @Reps, $rep;
 } print "Repositories: @Reps\n";
 if ($STAR_SYS !~ /^intel_wnt/) {
+  $INCLUDE_PATH = "";
   $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
 }
 else {
   $LINKMODULECOM = 
 "BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+  foreach my $inc (split /:/, $CPPPATH) {
+    
+  }
+  $CPPPATH = "";
+  $FCPPPATH = "";
+  foreach my $dir ($DirPath, @Reps) {
+    $INCLUDE_PATH .= ";" . $dir . "/include";
+    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
+    $INCLUDE_PATH .= ";" . $dir . "/pams";
+    $INCLUDE_PATH .= ";" . $dir . "/include/tables";
+  }
+  $INCLUDE_PATH .= ";" . $ROOTSRC . "/src";
+  $INCLUDE_PATH .= ";" . $STAF . "/inc";
+  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
 $env = new cons(
 		'CPPPATH'      => $CPPPATH,
@@ -730,9 +745,9 @@ sub rmkdir {
 sub sortu {
   my $old = "";
   my @sorted_and_uniq = ();
-  foreach my $name (@_) {
-    next if $old eq $name;
-    push @sorted_and_uniq, $name;
+  foreach my $name (sort @_) {
+    next if "$old" eq "$name";
+    push @sorted_and_uniq, $name; $old = $name;
   }
   return @sorted_and_uniq;
 }

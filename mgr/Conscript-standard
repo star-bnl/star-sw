@@ -14,10 +14,10 @@ my $PKG = $pkg;
 my @idlM = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 printf ("Run Conscript-standard in %-20s   \tfor %s",$Dir, $PKG) ;
-my $obj  = $ObjDir . "/";  #print "obj = $obj\n";
+my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
-(my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; #print "new share $share\n";
+(my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
 my $CPPP = "$env->{CPPPATH}:$Dir";#:$share";# print "CPPP = $CPPP\n";
@@ -44,7 +44,7 @@ foreach my $cpp (@cpps) {
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
 my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
-my @CintFiles = ($share . $PKG . "_Cint.cxx", $share . $PKG . "_Cint.h", $share . "LinkDef.h"); 
+my @CintFiles = ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
 my @src  = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
 my @h_files = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
 my $DIR = cwd(); #print "DIR = $DIR\n";
@@ -72,21 +72,19 @@ if ($#idlM > -1) {
     }
     close (IN);
     my @incs = ();
-    push @incs, $share  . $stem . ".h";
-    push @incs, $share  . $stem . ".inc";
-    my $defs = $share  . "St_" . $stem . "_Module.h"; #print "defs = $defs\n";
+    push @incs, $share . "/"   . $stem . ".h";
+    push @incs, $share . "/"   . $stem . ".inc";
+    my $defs  = $share . "/"   . "St_" . $stem . "_Module.h"; #print "defs = $defs\n";
     push @incs, $defs;
     my @Deps = @incs;
     push @Defs, $defs;
-    my $mod = $share  . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
+    my $mod = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
     push @Deps, $mod;
     my @idlm = ($idM);
     Command $env2 [@Deps], @idlS,  qq(stic.pl %>:d $stem -r $STIC_CPPPATH -q %1);  
-    my $inlcude = $INLCUDE . "/" . $pkg;
+    my $include = $INCLUDE . "/" . $pkg;
     Install $env2 $include, @incs;#  print "Install incs = @incs in $INCLUDE\n";
     my @objmod = ($mod);
-    my $include = $INCLUDE . "/" . $pkg;
-    Install $env2 $include, @incs;
     Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n";
     $mod =~  s/$share/$obj/g;
     push @src, $mod; #print "src: @src\n";
@@ -106,30 +104,4 @@ if ($#src > -1) {
 #  Install $env2 $LIB, $LIBPKG;
   Install $env2 $LIB, $SO_PKG;
 }  
-#________________________________________
-sub script::find_Template {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_Template, @_);
-  for my $dir (@_) {
-    my $i = 0;
-    for ($i=0;$i<=$#search_files;$i++) {
-      #      print "i = ",$i, "src =", $search_files[$i],"\n";
-      my $file = $search_files[$i];
-      $file =~ s/$dir\///g;
-      $search_files[$i] = $file;
-    }
-  }
-  #  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub script::wanted_Template {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d $_ && ! /^Templates\.Db$/) {return;}
-  if (/\.o$/) {print "$name\n";
-    push @search_files, $name; 
-  }
-}
-#________________________________________
+
