@@ -31,10 +31,11 @@ typedef enum dio_mode_t {
 }DIO_MODE_T;
 
 typedef enum dio_state_t {
-    DIO_OPEN_STATE,
-    DIO_CLOSE_STATE,
-    DIO_READ_STATE,
-    DIO_WRITE_STATE,
+    DIO_OPEN_STATE,		/*- stream is open and ready -*/
+    DIO_CLOSE_STATE,		/*- stream is closed -*/
+    DIO_READ_STATE,		/*- stream is reading -*/
+    DIO_WRITE_STATE,		/*- stream is writing -*/
+    DIO_CONNECT_STATE,		/*- connection in place (sock only) -*/
     DIO_UNKNOWN_STATE
 }DIO_STATE_T;
 
@@ -44,7 +45,6 @@ typedef enum dio_state_t {
 extern CC_P int dio_init();
 extern CC_P int dio_start();
 extern CC_P int dio_stop();
-extern CC_P void dio_def_();
 extern CC_P int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
 extern CC_P int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
 extern CC_P int dio_clearDataset(DS_DATASET_T *pDS);
@@ -59,25 +59,47 @@ extern CC_P int dio_tcltk_browsefile(char** name, char** file
 #endif /*NOTCL*/
 
 #ifndef NOKUIP
+extern CC_P void dio_def_();
+
 extern CC_P void kam_dio_count_();
 extern CC_P void kam_dio_list_();
 extern CC_P void kam_dio_newfilestream_();
+extern CC_P void kam_dio_newsockstream_();
 extern CC_P void kam_diofilestream_open_();
 extern CC_P void kam_diofilestream_close_();
 extern CC_P void kam_diofilestream_getevent_();
 extern CC_P void kam_diofilestream_putevent_();
 extern CC_P void kam_diofilestream_mode_();
 extern CC_P void kam_diofilestream_state_();
-
+extern CC_P void kam_diofilestream_filename_();
+extern CC_P void kam_diosockstream_open_();
+extern CC_P void kam_diosockstream_close_();
+extern CC_P void kam_diosockstream_getevent_();
+extern CC_P void kam_diosockstream_putevent_();
+extern CC_P void kam_diosockstream_mode_();
+extern CC_P void kam_diosockstream_state_();
+extern CC_P void kam_diosockstream_host_();
+extern CC_P void kam_diosockstream_port_();
+/*-*/
 extern CC_P int kam_dio_count();
 extern CC_P int kam_dio_list();
 extern CC_P int kam_dio_newfilestream();
+extern CC_P int kam_dio_newsockstream();
 extern CC_P int kam_diofilestream_open();
 extern CC_P int kam_diofilestream_close();
 extern CC_P int kam_diofilestream_getevent();
 extern CC_P int kam_diofilestream_putevent();
 extern CC_P int kam_diofilestream_mode();
 extern CC_P int kam_diofilestream_state();
+extern CC_P int kam_diofilestream_filename();
+extern CC_P int kam_diosockstream_open();
+extern CC_P int kam_diosockstream_close();
+extern CC_P int kam_diosockstream_getevent();
+extern CC_P int kam_diosockstream_putevent();
+extern CC_P int kam_diosockstream_mode();
+extern CC_P int kam_diosockstream_state();
+extern CC_P int kam_diosockstream_host();
+extern CC_P int kam_diosockstream_port();
 #endif /*NOKUIP*/
 
 #endif /* DIO_TYPES_H */
