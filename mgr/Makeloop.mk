@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.73  1999/04/30 13:22:06  fisyak
+#  put StRootEvent into loop
+#
 #  Revision 1.72  1999/04/24 13:15:25  fisyak
 #  Add --sillent mode for set SILENT environmnet variable
 #
@@ -295,7 +298,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/24 13:15:25 $ 
+#           Last modification $Date: 1999/04/30 13:22:06 $ 
 #  default setings
 # Current Working Directory
 #
@@ -345,7 +348,7 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out StREvent StrEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
