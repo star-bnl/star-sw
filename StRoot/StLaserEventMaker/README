@@ -1,8 +1,8 @@
-St_LSEvent_Maker
+StLaserEventMaker
 ==================
 
- Create an LSEvent TTree object by analysing
- laser event data.
+ Create an StLaserEvent TTree object by analysing
+ event data from a laser run.
 
 
 Author: Bill Love 
@@ -14,6 +14,9 @@ Usage
 Mod history
 ===========
  Created 27 April 99 - love
+ 28Sep99 St_LSEvent_Maker name changed to StLaserEventMaker
+ 30Nov99 DOCA method added to provide xl,yl,zl track variables.
+ 15Feb00 Track variables added to Hits. 
  
 ToDo
 ====
