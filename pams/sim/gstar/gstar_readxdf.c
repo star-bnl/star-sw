@@ -7,31 +7,45 @@
 #include "dsxdr.h"
 #include "dscodes.h"
 #include "dstype.h"
+#if 0
    static FILE         *f=NULL; /* input file      */
    static XDR           x;      /* XDR stream      */
    static DS_DATASET_T *d=NULL; /* "root" dataset  */
+#endif
 #include "eg_gener.h"
+#if 0
    static DS_DATASET_T *g=NULL; /* generator table */
+#endif
    EG_GENER_ST         *gener;	/* data structure  */
    size_t              gok;	/* size of table (# of rows) */
 #include "eg_event.h"
+#if 0
    static DS_DATASET_T *e=NULL; /* event table     */
+#endif
    EG_EVENT_ST         *event;	/* data structure  */
    size_t              eok;	/* size of table (# of rows) */
 #include "eg_track.h"
+#if 0
    static DS_DATASET_T *t=NULL; /* track table     */
+#endif
    EG_TRACK_ST         *track;	/* data structure  */
    size_t              tok;	/* size of table (# of rows) */
 #include "eg_vertex.h"
+#if 0
    static DS_DATASET_T *v=NULL;	/* vertex table */
+#endif
    EG_VERTEX_ST        *vertex;	/* data structure */
    size_t              vok;	/* size of table (# of rows) */
 #include "particle.h"
+#if 0
    static DS_DATASET_T *p=NULL;	  /* HEPEVNT table */
+#endif
    PARTICLE_ST         *particle; /* data structure */
    size_t              pok;	  /* size of table (# of rows) */
 /*generic io*/
+#if 0
    static DS_DATASET_T *ptr;
+#endif
    unsigned int        *pp;
    size_t               nn;
 
