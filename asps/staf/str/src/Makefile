@@ -178,6 +178,9 @@ str_parse_inc : str_parse.inc
 str_time_inc : str_time.inc
 	ln -s str_time.inc str_time_inc
 
+strterm_vms_inc : strterm_vms.inc
+	ln -s strterm_vms.inc strterm_vms_inc
+
 
 strterm_sun.f : strterm_sgi.f
 	rm -f strterm_sun.f
