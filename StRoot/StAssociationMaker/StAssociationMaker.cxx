@@ -1,7 +1,14 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.42 2004/02/13 22:39:39 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.43 2004/03/26 23:26:34 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.43  2004/03/26 23:26:34  calderon
+ * -Adding switch to control Association based on IdTruth or on Distance.
+ * -Adding debug2 output to print out all hits in a padrow, both reco and MC,
+ * along with the IdTruth, quality (StHit) and the parentTrack()->key() (StMcHit)
+ * as well as the hit coordiantes.  This is useful for debugging, but produces
+ * lots of output, so it is only turned on in Debug()>=2.
+ *
  * Revision 1.42  2004/02/13 22:39:39  calderon
  * At Helen's request, during the opton for associating est tracks,
  * if there is not an est track in the node, use the original global track.
@@ -406,6 +413,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mL3TriggerOn = false;
     mInTrackerOn = false;
     mEstTracksOn = false;
+    mDistanceAssoc = true;
 }
 
 //_________________________________________________
@@ -658,7 +666,15 @@ Int_t StAssociationMaker::Make()
 	gMessMgr->Warning() << "AssociationMaker::Make(): EST and IT Tracks are both on!" << endm;
 	return kStWarn;
     }
-    
+    if (Debug()) {
+	if (mDistanceAssoc==true) {
+	    gMessMgr->Info() << "Using Distance Association" << endm;
+	}
+	else {
+	    gMessMgr->Info() << "Using Id Association" << endm;
+	}
+	
+    }
     //
     // Get StEvent
     //
@@ -764,7 +780,28 @@ Int_t StAssociationMaker::Make()
 		 iPadrow++) {
 		StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
 		//PR(iPadrow);
-		
+		int padrowMatchesId = 0;
+		int padrowMatchesDi = 0;
+		if (Debug()>=2 && iPadrow>=0) {
+		    cout << endl;
+		    cout << "Padrow " << iPadrow+1 << endl;
+		    cout << "Reco hit index \tX pos\tY pos\tZ pos\tmIdTruth" << endl;
+		    // In debug2 mode, print out all the reco hits and all the MC hits in this padrow
+		    for (unsigned int iHit=0;
+			 iHit<tpcPadRowHitColl->hits().size();
+			 iHit++) {
+			rcTpcHit = tpcPadRowHitColl->hits()[iHit];
+			cout << iHit << "\t" << rcTpcHit->position() << "\t" << rcTpcHit->idTruth() << "\t" << rcTpcHit->quality() << endl;
+		    } // reco hits in debug2
+		    cout << "MC Hit Key\tX pos\tY pos\tZ pos\tparent key" << endl;		    
+		    for (StMcTpcHitIterator jHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
+			     jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
+			     jHit++){
+			mcTpcHit = *jHit;
+			cout << mcTpcHit->key()  << "\t" << mcTpcHit->position() << "\t" << mcTpcHit->parentTrack()->key() << endl;
+			
+		    } // mc hits in debug2
+		}// end of debug2 mode
 		compFuncMcTpcHit tpcComp;
 		for (unsigned int iHit=0;
 		     iHit<tpcPadRowHitColl->hits().size();
@@ -773,9 +810,15 @@ Int_t StAssociationMaker::Make()
 		    
 		    rcTpcHit = tpcPadRowHitColl->hits()[iHit];
 
-		    // now we need to check if the MC truth information is there.
-		    // if it is not, then we use the usual distance cut.
-		    if (!rcTpcHit->idTruth()) {
+		    // switch the algorithm based on the option
+		    // in shorthand:
+		    // if (distance Association || !idTruth) {
+		    //  do distance association
+		    //  } else {
+		    //  do id association
+		    //  }
+
+		    if (mDistanceAssoc || !rcTpcHit->idTruth()) {
 			//gMessMgr->Info() << "Backward compatibility mode:: distance cut association" << endm;
 			// Set the reference z for the comparison function
 			// The comparison will be used to find the first Mc Hit
@@ -827,6 +870,7 @@ Int_t StAssociationMaker::Make()
 				rcTpcHit->SetBit(StMcHit::kMatched,1);
 				mcTpcHit->SetBit(StMcHit::kMatched,1);
 				++matchedR;
+				++padrowMatchesDi;
 			    }
 			    
 			} // End of Hits in Padrow loop for MC Hits
@@ -844,8 +888,9 @@ Int_t StAssociationMaker::Make()
 			
 			//now we're not using the distance cut, however, we can still speed up the
 			// algorithm by looking around a z window only for the match.
-			// A 2 cm window should be enough.
-			tpcComp.setReferenceZ(rcTpcHit->position().z() - 2.); // hardwired 2 cm 
+			// A 4 cm window should be enough.
+
+			tpcComp.setReferenceZ(rcTpcHit->position().z() - 4.); // hardwired 4 cm 
 			
 			
 			// Find the first Mc Tpc Hit that might have a meaningful association.
@@ -859,7 +904,7 @@ Int_t StAssociationMaker::Make()
 			    //PR(jHit); 
 			    mcTpcHit = *jHit;
 			    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();			    
-			    if ( zDiff > 2. ) break; //mc hits are sorted, save time! Again, hardwire the cut to 2 cm
+			    if ( zDiff > 4. ) break; //mc hits are sorted, save time! Again, hardwire the cut to 2 cm
 			    int idMc = 0; // to store the key of the parent track of this mc hit
 			    if (mcTpcHit->parentTrack()) {
 				idMc = mcTpcHit->parentTrack()->key(); 
@@ -871,6 +916,7 @@ Int_t StAssociationMaker::Make()
 				rcTpcHit->SetBit(StMcHit::kMatched,1);
 				mcTpcHit->SetBit(StMcHit::kMatched,1);
 				++matchedR;
+				++padrowMatchesId;
 				
 			    }
 			    else {
@@ -881,6 +927,11 @@ Int_t StAssociationMaker::Make()
 		    } // end of case 2, id truth 
 		    // check for non associated hits
 		} // End of Hits in Padrow loop for Rec. Hits
+		if (Debug()>=2 && iPadrow>=0) {
+		    cout << "Reco  Hits in Padrow   " << tpcPadRowHitColl->hits().size() << endl;
+		    cout << "Id Matches in Padrow   " << padrowMatchesId << endl;
+		    cout << "Distance Matches in pr " << padrowMatchesDi << endl;
+		}
 	    } // End of Padrow Loop for Rec. Hits
 	} // End of Sector Loop for Rec. Hits
 	// check non associated Mc hits 
