@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.24 2000/04/18 20:44:48 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.25 2000/05/02 21:15:52 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.25  2000/05/02 21:15:52  kathy
+// updated print statements in macro to be explicit
+//
 // Revision 1.24  2000/04/18 20:44:48  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -89,182 +92,157 @@
 class StChain;
 StChain *chain;
 
-
 void QA_bfcread_dst_tables(
- Int_t nevents=500, 
+ Int_t nevents=2, 
  const char *MainFile=
-   "/afs/rhic/star/data/samples/gstar.dst.root",
- const char *fname="qa_dst.out") 
+ "/afs/rhic/star/data/samples/gstar.dst.root",
+  const char *fname="qa_dst_tables.out")
 {
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
+//
+  cout << " events to process  = " << nevents << endl;
+  cout << " Input File Name = " << MainFile << endl;
+  cout << " Output file containing printouts = " << fname << endl;
 
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
+  ofstream fout(fname);
 
+  fout << " Running: QA_bfcread_dst_tables.C " << endl;
+  fout << " events to process  = " << nevents << endl;
+  fout << " Input File Name = " << MainFile << endl;
+  fout << " Output file containing printouts = " << fname << endl;
+  fout << endl << endl;
 
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
+    gSystem->Load("St_base");
+    gSystem->Load("StChain");
+    gSystem->Load("libglobal_Tables");
+    gSystem->Load("StIOMaker");
 
 //  Setup top part of chain
-  chain = new StChain("bfc");
-  chain->SetDebug();
-
-// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
+    chain = new StChain("bfc");
+    chain->SetDebug();
+   
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
-//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 
-  
 // --- now execute chain member functions
   chain->Init();
 
   TDataSet *ds=0;
-  TTable *tabl=0;
+  TTable   *tabl=0;
   TDataSet *obj=0;
 
-  Float_t tottabcntr=0.;
 
-  Int_t tabcntr=0;
-  Int_t tabmiss=0;
-
-  Int_t cnt_globtrk=0;
-  Int_t cnt_globtrk2=0;
-  Int_t cnt_primtrk=0;
-  Int_t cnt_vertex=0;
-  Int_t cnt_dst_v0_vertex=0;
-  Int_t cnt_ev0_eval=0;
-  Int_t cnt_dst_xi_vertex=0;
-  Int_t cnt_kinkVertex=0;
-  Int_t cnt_particle=0;
-  Int_t cnt_g2t_rch_hit=0;
-  Int_t cnt_TrgDet=0;
-  Int_t cnt_l3Track=0;
-  Int_t cnt_event_header=0;
-  Int_t cnt_event_summary=0;
-  Int_t cnt_point=0;
-  Int_t cnt_dst_dedx=0;
-  Int_t cnt_mon_soft_ftpc=0;
-  Int_t cnt_mon_soft_glob=0;
-  Int_t cnt_mon_soft_svt=0;
-  Int_t cnt_mon_soft_tpc=0;
-  Int_t cnt_mon_soft_ctb=0;
-  Int_t cnt_mon_soft_emc=0;
-  Int_t cnt_mon_soft_l3=0;
-  Int_t cnt_mon_soft_rich=0;
+  Float_t tottabcntr=0;
+  Float_t totobjcntr=0;
 
 
-  ofstream fout(fname);
-  fout << "QAInfo: " << MainFile << endl << endl;
-  fout << "QAInfo: table name";
-  fout.width(18);
-  fout << "# rows" << endl;
-  fout << "QA->     __________";
-  fout.width(18);
-  fout << "______"<< endl << endl;
+  int istat=0;
+  int i=0;
+  int countev=0;
+  int countevdds=0;
+  int countevobj=0;
+  int countevtab=0;
 
-
-// Loop over events
-  int iret=0,iev=0;
-  EventLoop: if (iev<nevents && !iret) {         // goto loop code
-
-   tabcntr=0;
-   tabmiss=0;
-
-   cnt_event_header=0;
-   cnt_event_summary=0;
-   cnt_globtrk=0;
-   cnt_vertex=0;
-   cnt_point=0;
-   cnt_globtrk2=0;
-   cnt_primtrk=0;
-   cnt_dst_v0_vertex=0;
-   cnt_dst_xi_vertex=0;
-   cnt_dst_dedx=0;
-   cnt_particle=0;
-   cnt_TrgDet=0;
-   cnt_mon_soft_ftpc=0;
-   cnt_mon_soft_glob=0;
-   cnt_mon_soft_svt=0;
-   cnt_mon_soft_tpc=0;
-   cnt_mon_soft_ctb=0;
-   cnt_mon_soft_emc=0;
-   cnt_mon_soft_l3=0;
-   cnt_mon_soft_rich=0;
-   cnt_g2t_rch_hit=0;
-   cnt_l3Track=0;
-   cnt_kinkVertex=0;
-   cnt_ev0_eval=0;
+// Event loop
+EventLoop: if (i < nevents && !istat) {
 
     chain->Clear();
-    iret = chain->Make();
+    istat = chain->Make(i);
+    
+//  count # times Make is called
+    i++;
 
-    // cout << "   ...iret = " << iret << endl;
-    if (!iret) {
+    cout << " Call Make # " << i << endl; 
+    cout << "     istat value returned from chain Make = " << istat << endl;
 
-    iev++;                                      // goto loop code
+// Now look at the data in the event:
+    int countObj=0;
+    int countTable=0;
 
-    cout  << "QAInfo: reading dst.root Ev# " << iev << endl;
-    fout  << "QAInfo: reading dst.root Ev# " << iev << endl;
+    if (!istat) {
+
+    countev++;
+
+    cout << " start event # " << countev << endl;
 
       ds=chain->GetDataSet("dst");
       TDataSetIter tabiter(ds);
-
-      tabcntr=0;
-      tabmiss=0;
-
       if (ds) {
-
-// ls() returns a virtual void, so don't have to set it = to anything
-	//   ds->ls(2);
-
+        countevdds++;
+//        ds->ls(2);  
         while (obj = tabiter.Next()) {
+
+	  cout << " QAInfo: found object: " << obj->GetName() << endl;
+	  fout << " QAInfo: found object: " << obj->GetName() << endl;
+
+          countObj++;
+          totobjcntr++;
+
 //.. count all tables that exist:
           if (obj->InheritsFrom("TTable")) {
-            tabcntr++;
-
-            //cout << "object  = " << obj->GetName() << endl;
-            //cout << "tabcntr = " << tabcntr << endl;
-
             tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
-              cout << "QAInfo: " << obj->GetName();
-              cout.width(28-strlen(obj->GetName()));
-              cout << tabl->GetNRows() << endl;
+              countTable++;
+              tottabcntr++;
+              cout << " QAInfo: it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+              fout << " QAInfo: it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
 
-              fout << "QAInfo: " << obj->GetName();
-              fout.width(28-strlen(obj->GetName()));
-              fout << tabl->GetNRows()<< endl;
 
+	    } // tabl
+          }  // obj
+//.. end of counting all tables that exist
+	}  // while
+           if (countObj) countevobj++;
+           if (countTable) countevtab++;
+      }   // ds
 
-            }
-          }
-        }
-      }
-// ------------------------------------------------------------
+    cout << " QAInfo: event # " << countev << ", # objects found = " 
+         << countObj << ", # tables found = " << countTable << endl << endl;
+    fout << " QAInfo: event # " << countev << ", # objects found = " 
+         << countObj << ", # tables found = " << countTable << endl << endl;
 
-      cout <<  "QAInfo:  # tables in event = " << tabcntr << endl << endl;
-      fout <<  "QAInfo:  # tables in event = " << tabcntr << endl << endl;
+    }  // istat
 
-     tottabcntr += tabcntr;
+    else   // if (istat)
+      {
+      cout << "Last event processed. Status = " << istat << endl;
     }
+
     goto EventLoop;
- }
 
-    cout << endl << endl << "QAInfo:  total # events read  = " << iev << endl;
-    fout << endl << endl << "QAInfo:  total # events read  = " << iev << endl;
+}  // EventLoop
+     
+  tottabcntr /= countev;
+  totobjcntr /= countev;
+ 
+  cout << endl;
+  cout << "QAInfo: End of Job " << endl; 
+  cout << "QAInfo: # times Make called = " << i << endl;
+  cout << "QAInfo:  # events read = " << countev << endl;
+  cout << "QAInfo:   # events with dst dataset = " << countevdds << endl;
+  cout << "QAInfo:     # with objects = " << countevobj << endl;
+  cout << "QAInfo:     # with tables  = " << countevtab << endl;
+  cout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
+  cout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
 
-      tottabcntr /= iev;
+  fout << endl;
+  fout << "QAInfo: # times Make called = " << i << endl;
+  fout << "QAInfo:  # events read = " << countev << endl;
+  fout << "QAInfo:   # events with dst dataset = " << countevdds << endl;
+  fout << "QAInfo:     # with objects = " << countevobj << endl;
+  fout << "QAInfo:     # with tables  = " << countevtab << endl;
+  fout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
+  fout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
 
-      cout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl;
-      fout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl;
+ chain->Finish();   
 
-
-        fout.close();
-        chain->Finish();   
 }
+ 
+
+ 
+
+
