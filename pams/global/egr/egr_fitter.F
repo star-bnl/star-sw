@@ -86,7 +86,7 @@ C ---------------------------------------------------------------------
       INTEGER nqwe,locf,ifull
       CHARACTER*132 errmsg,msg
       REAL rfirst,rlast,r
-      double precision param(5),covar(5,5)
+      double precision param(6),covar(5,5)
       real x(3),bfield(3),cov(3,3)
       DATA imsg,imsgw,imsg1,imsg2,imsg3 /5*0/
       DATA imsg4,imsg5,imsg6,imsg7,imsg8 /5*0/
@@ -285,6 +285,7 @@ c     mark spts as used if not using primary vertex
                param(3) = svt_track(svt(isvtt)).psi*C_RAD_PER_DEG 
                param(4) = svt_track(svt(isvtt)).tanl
                param(5) = svt_track(svt(isvtt)).invpt
+               param(6) = svt_track(svt(isvtt)).r0
                
                
                iret = egr_refit_track_kal(param, igtrk,itpct,svt(isvtt),
@@ -384,6 +385,7 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                     param(3) = tptrack(itrk).psi*C_RAD_PER_DEG 
                     param(4) = tptrack(itrk).tanl
                     param(5) = tptrack(itrk).invp*tptrack(itrk).q
+                    param(6) = tptrack(itrk).r0
 
                   iret = egr_refit_track_kal(param,tptrack(itrk).id,
      +                 tptrack(itrk).id,isvtt,ipriv,gtrk,tphit_h,
@@ -696,6 +698,7 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                     param(3) = svt_track(itrk).psi*C_RAD_PER_DEG
                     param(4) = svt_track(itrk).tanl
                     param(5) = svt_track(itrk).invpt
+                    param(6) = svt_track(itrk).r0
 
                     iret = egr_refit_track_kal(param,igtrk,itpct,itrk,ipriv,
      +                   gtrk,tphit_h,tphit,privert_h,privert,
