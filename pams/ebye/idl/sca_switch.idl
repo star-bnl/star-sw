@@ -1,0 +1,20 @@
+/*   Table type: sca_switch.idl
+*   written by L. D. Carr -- lcarr@u.washington.edu
+*/
+
+   /*******************  Row struct *******************/
+   struct sca_switch {
+	/* use* are on-off switches for methods in runSca        */
+	long	useDeltaD;
+	long	useDimension;
+	long	useEntropy;
+	/* these are on-off switches for various kumac options   */
+	long	makePrior;
+	long	doAnalysis;
+	long	useEventTable;
+	long	useTrackTable;
+	/* dirty way of carrying the total events for making the */
+	/* ensemble average                                      */
+	long	nEvents;
+   };
+/*  Last mod. for sca_switch.idl :  $DATE$ */
