@@ -131,6 +131,7 @@ C-----------------------------------------------------------------------
         integer ntim, nseq, jseq
 
         real pad_width, time_bucket, time_bin, tval
+        real shaper_bin
         real rstat
 
         double precision invec(3),outvec(3)
@@ -160,6 +161,7 @@ c
             time_bucket = detector(1).drift_length/tsspar(1).ntime
             time_bin = time_bucket/tsspar(1).v_drift
 
+            shaper_bin = tsspar(1).tau1/time_bin
         endif
 
         do jtpcl = 1, tpclusterh.nok
@@ -213,7 +215,11 @@ c
                     tphit(tphith.nok).z = rstat
                  endif
               endif
-
+c
+c             final adjustment to z coordinate--we must add the shaper response 
+c             in time bins!!!
+c  
+              tphit(tphith.nok).z = tphit(tphith.nok).z + shaper_bin
 c
 c             now use Gaussian prf assumption in order to refine 
 c             pad dimension prf/coordinate; could use alternative
