@@ -10,11 +10,13 @@
 
 class StTpcHit;
 class StSvtHit;
+class StSsdHit;
 class StiHit;
 class StTpcCoordinateTransform;
 class svg_geom_st;
 class svg_shape_st;
 class StPrimaryVertex;
+class StSvtConfig;
 
 class StiGeometryTransform{
     
@@ -23,7 +25,7 @@ public:
     typedef map<unsigned int, double> padrow_radius_map;
     typedef padrow_radius_map::value_type padrow_radius_map_ValType;
     
-    
+    StiGeometryTransform();    
     virtual ~StiGeometryTransform();
 
     //Global access
@@ -60,12 +62,15 @@ public:
     void operator() (const StiHit*, StTpcHit*); //From Sti -> Tpc
     
     void operator() (const StSvtHit*, StiHit*); //From Svt -> Sti
-    void operator() (const StiHit, StSvtHit*);  //From Sti -> Svt
+    void operator() (const StiHit*, StSvtHit*);  //From Sti -> Svt
+    
+    void operator() (const StSsdHit*, StiHit*); //From Ssd -> Sti
+    void operator() (const StiHit*, StSsdHit*);  //From Sti -> Ssd
     
     void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
     
 protected: 
-    StiGeometryTransform();
+
     static StiGeometryTransform* sinstance;
 
     // SVT & SSD database tables
