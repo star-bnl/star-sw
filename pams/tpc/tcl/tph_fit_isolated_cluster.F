@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.4 1998/08/20 21:29:48 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.5 1998/08/25 16:50:00 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.5  1998/08/25 16:50:00  sakrejda
+* z_vector protexted agains overflows
+*
 * Revision 1.4  1998/08/20 21:29:48  sakrejda
 * printing replaced by a message call
 *
@@ -236,8 +239,11 @@ C pad direction projection
      +                          + FLOAT(itdc_ipix)*adc_ipix
            numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
 C time direction no longer a projection - WAL 13 Feb 98
-           iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
-           if(iret.eq.1)z_vector(ipix) = zdummy
+           if(ipix.le.nbuck_max) then
+             iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
+             z_vector(ipix) = 0.0
+             if(iret.eq.1)z_vector(ipix) = zdummy
+           endif
         enddo
 	if (adc_sum.eq.0.) stop 'Hey -- ADCSUM=0!!!!'
 
@@ -313,7 +319,7 @@ c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
 c
         loop_over_z=nclspix
-        if(loop_over_z.gt.nbuck_max)
+        if(loop_over_z.gt. nbuck_max)
      +  loop_over_z=nbuck_max
         do indx=1,loop_over_z
            rvec(indx) = float(iadc(indx))
