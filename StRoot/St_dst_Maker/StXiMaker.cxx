@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.13 2000/03/30 16:33:39 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.14 2000/03/30 22:32:07 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.14  2000/03/30 22:32:07  genevb
+// Fixed a typo
+//
 // Revision 1.13  2000/03/30 16:33:39  genevb
 // Change messages to say where they are called from
 //
@@ -155,6 +158,7 @@ Int_t StXiMaker::Make(){
     if (iRes != kSTAFCV_OK) iMake = kStWarn;
     if (iRes != kSTAFCV_OK) {
       gMessMgr->Warning("StXiMaker::Make(): Problem on return from EXI");
+    }
   }
   return iMake;
 }

@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.20 2000/03/30 16:33:39 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.21 2000/03/30 22:32:06 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.21  2000/03/30 22:32:06  genevb
+// Fixed a typo
+//
 // Revision 1.20  2000/03/30 16:33:39  genevb
 // Change messages to say where they are called from
 //
@@ -235,6 +238,7 @@ Int_t StV0Maker::Make(){
 	
 	if (Res_ev0_eval != kSTAFCV_OK) {
 	  gMessMgr->Warning("StV0Maker::Make(): Problem on return from ev0eval2");
+        }
       }
     }     // If ev0 evaluation switched on 
   }  
