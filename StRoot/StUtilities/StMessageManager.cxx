@@ -301,6 +301,9 @@ StMessageManager::StMessageManager() : StMessMgr()
 #ifdef LINUX
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
 #endif
+  // Initialize buffer with 1024 bytes
+  *this << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64
+        << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64;
 }
 //_____________________________________________________________________________
 StMessageManager::~StMessageManager() {
@@ -414,10 +417,30 @@ void StMessageManager::Print() {
 // If not currenty building a message, print the last one created.
 //
   if (building) {
-    operator<<(ends);
+    *this << ends;
+
+    if (fail()) {                   // Check to see if input has failed
+      int pos0 = tellp();
+      int pos1 = pos0 - 160;
+      clear();
+      if (pos1 >= 0) {
+        seekp(pos1);
+        *this << "\n\n WARNING!!!  ATTEMPT TO INPUT PAST END OF BUFFER"
+          << " IN StMessageManager!\n Buffer Size = " << pos0
+          << ".  IGNORING REMAINDER OF MESSAGE...";
+      } else {
+        seekp(0);
+        myerr << "StMessage: ERROR!!! StMessageManager BUFFER TOO SMALL!"
+          << endl;
+      }
+      *this << ends;
+    }
+
     BuildMessage(str(), curType, curOpt);
     building = 0;
+
   } else {
+
     if (gMessage) {
       gMessage->Print(-1);
     } else {
@@ -631,7 +654,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.36 2003/09/25 21:19:22 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.37 2003/10/01 20:06:50 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -643,8 +666,11 @@ StMessMgr* temp=StMessageManager::Instance();
 StMessMgr& gMess = (*temp);
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.36 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.37 2003/10/01 20:06:50 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.37  2003/10/01 20:06:50  genevb
+// Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
+//
 // Revision 1.36  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //

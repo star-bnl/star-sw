@@ -34,14 +34,6 @@ StMessage::StMessage(const char *mess, const char *ty, const char* opt) {
   *type = *ty;
   type[1] = 0;
   SetOptions(opt);
-/*
-  if (!opt) opt="";
-  int len = strlen(opt);
-  option = new char[(len+1)];
-  option[len] = 0;
-  while (len--)
-    option[len] = toupper(opt[len]);  // capitalize while copying
-*/
 //  location = "Unknown";
 //  runNumber = 0;
   int len = strlen(mess);
@@ -174,14 +166,26 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.23 2003/09/25 21:18:14 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.24 2003/10/01 20:06:50 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
+//_____________________________________________________________________________
+int StMessage::InitBuffer() {
+  // Initialize buffer with 1088 bytes.
+  messBuffer << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64
+     << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64;
+  return messBuffer.tellp();
+}
+
+int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.23 2003/09/25 21:18:14 genevb Exp $
+// $Id: StMessage.cxx,v 1.24 2003/10/01 20:06:50 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.24  2003/10/01 20:06:50  genevb
+// Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
+//
 // Revision 1.23  2003/09/25 21:18:14  genevb
 // Changed option storage
 //
