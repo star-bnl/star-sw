@@ -18,11 +18,16 @@
 *
       G2T_FTP=STAFCV_OK
       call G2R_GET_SYS ('FTPC','FSEC')
+      if (g2t_ftp_hit_h.maxlen.le.0) return
 *
       i=0
       g2t_ftp_hit_h.nok = 0
       Do While (G2R_GET_HIT('ftp') .eq. 0)
          i=i+1
+         if (i.gt.g2t_ftp_hit_h.maxlen) then
+           print *,' getting i=',i,trac,' out of ',g2t_ftp_hit_h.maxlen
+           return
+         endif
          g2t_ftp_hit_h.nok            = i
          g2t_ftp_hit(i).id            = i
          If (local) then
@@ -51,7 +56,6 @@
          g2t_ftp_hit(i).next_tr_hit_p = g2t_track(trac).hit_ftp_p
          g2t_track(trac).hit_ftp_p    = i
          g2t_track(trac).n_ftp_hit    = g2t_track(trac).n_ftp_hit + 1
-
       enddo    
 
       RETURN
