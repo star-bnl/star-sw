@@ -42,7 +42,7 @@ gmake -f ${STAR_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 gmake -f ${STAR_MAKE_HOME}/MakeGe3.mk INP_DIR=${INP} OUT_DIR=${OUT} geant3
 rehash
 
-gmake -f ${STAR_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG Staf
+gmake -f ${STAR_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG staf
 
 
 
