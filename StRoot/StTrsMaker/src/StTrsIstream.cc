@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.12 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTrsIstream.cc,v 1.13 2001/02/16 16:56:21 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.13  2001/02/16 16:56:21  fisyak
+ * Make Solaris happy
+ *
  * Revision 1.12  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -199,7 +202,8 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 		digitalPadData.clear();
 		if (lengthData>0) { // We have data, read it in
 		    digitalPadData.resize(lengthData);
-		    ifs.read(static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
+//yf                ifs.read((char *)static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
+		    ifs.read((char *)(digitalPadData.begin()), lengthData);
     
 		    bool PrintToScreen = false;
 		    if (PrintToScreen) {
