@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.8 2002/01/16 18:21:49 posk Exp $
+// $Id: vProj.C,v 1.9 2002/03/23 21:46:20 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -13,45 +13,8 @@
 //               Centralites 7, 8, and 9 are the 
 //                 combined 1-2, 3-4, and 5-6 centralities.
 //               Makes momentum conserevation correction if pCons is TRUE.
+//               Calculates <px> if pTFlow is TRUE.
 //
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: vProj.C,v $
-// Revision 1.8  2002/01/16 18:21:49  posk
-// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
-//
-// Revision 1.7  2001/11/06 18:02:54  posk
-// 40 GeV compatability.
-//
-// Revision 1.6  2001/10/24 21:46:36  posk
-// Added conservation of momentum correction. Calculate triply integrated v values.
-//
-// Revision 1.4  2001/05/14 23:20:29  posk
-// Uses cross section weighting for all projections.
-//
-// Revision 1.3  2001/03/16 22:35:10  posk
-// plotGraphs.C makes the final graphs.
-//
-// $Log: vProj.C,v $
-// Revision 1.8  2002/01/16 18:21:49  posk
-// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
-//
-// Revision 1.7  2001/11/06 18:02:54  posk
-// 40 GeV compatability.
-//
-// Revision 1.6  2001/10/24 21:46:36  posk
-// Added conservation of momentum correction. Calculate triply integrated v values.
-//
-// Revision 1.4  2001/05/14 23:20:29  posk
-// Uses cross section weighting for all projections.
-//
-// Revision 1.2  2001/03/06 17:33:04  posk
-// All macros now work.
-//
-//
-// Revision 1.1  2001/02/23 00:58:19  posk
-// NA49 version of STAR software.
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
@@ -74,6 +37,8 @@ void vProj(char* part = "pion") {
   //bool  crossSection = kFALSE;       // use yield weighting
   bool  pCons = kTRUE;               // do momentum consevation corr.
   //bool  pCons = kFALSE;
+  //bool  pTFlow = kTRUE;      //calculate Flow weighted with pt
+  bool  pTFlow = kFALSE;
 
   const int nPlots = 1 + nCens + nCens/2;
   const int nHars = 2;
@@ -98,16 +63,18 @@ void vProj(char* part = "pion") {
     double yCM    =  2.24;
     float  yLow   =  yCM;              // for pt proj.
     float  yLowY  =  1.;               // for y proj.
-    float  yUp    =  4.5;              // for both projs.
+    float  yUp    =  4.;               // for both projs.
     float  ptUp   =  2.;               // for both projs.
     float  vYMax  =  5.;
     float  vYMin  = -5.;
     float  vPtMax =  5.;
     float  vPtMin = -5.;
     float  sumPt2All[nCens] = {579.,467.,344..,231.,155.,94.}; // from Glenn
-    float  meanMul[nCens] = {265.,230.,172.,112.,75.,45.}; // for har 1
-    //float  meanMul[nCens] = {66.,57.,43.,33.,19.,11.}; // for har 1 stripes
-    float  meanPt[nCens] = {0.326,0.322,0.316,0.309,0.302,0.297};//for har 1
+    //float  meanMul[nCens] = {281.,244.,172.,112.,75.,45.}; // for har 1 sel 1
+    float  meanMul[nCens] = {84.,74.,54.,37.,25.,15.}; // for har 1 sel 2
+    //float  meanMul[nCens] = {142.,60.,59.,39.,27.,17.}; // for har 1 sel 1 stripes 
+    //float  meanMul[nCens] = {45.,40.,21.,14.,11.,7.}; // for har 1 sel 2 stripes 
+    float  meanPt[nCens] = {0.326,0.322,0.316,0.309,0.302,0.297}; //for har 1
   } else {
     cout << " Not valid beam energy" << endl;
     return;
@@ -260,20 +227,41 @@ void vProj(char* part = "pion") {
 
 	// Get the resolution and calculate chi
 	double res = resHist[n]->GetBinContent(j+1);
-	double chiSV = chi(res) * fullSubFact / sqrt2;
-	double chiCorrSV = sqrt(chiSV*chiSV + frac2);
-	double resCorr = resEventPlane(chiCorrSV);
-	double chiFact = F(chiCorrSV/sqrt2);
-	cout << " ChiCorrSV= " << chiCorrSV << ", corr. = " << chiCorrSV/chiSV <<
-	  ", chiCorrJYO= " << chiCorrSV/sqrt2 << endl;
-	cout << " resCorr= " << resCorr << ", corr. = " << resCorr/res << endl;
-	cout << " F= " << chiFact << ", corr. = " << chiFact/sqrtPiOver2 << endl;
+	double chi = chi(res);
+	double chiSub = chi / 2.;
+
+	double resCorr;
+	double chiFactCorr;
+	if (chiSub < 0.1 && frac < 0.1) {
+	  // Approximate solution
+	  double chiApprox = sqrt(chi*chi + frac2);
+	  double resCorr = resEventPlane(chiApprox);
+	  double chiFactCorr = F(chiApprox);
+	  cout << " chiApprox= " << chiApprox << ", corr.= " <<
+	    chiApprox/chi << endl;
+	  cout << " resApprox= " << resCorr << ", corr.= " << resCorr/res << endl;
+	  cout << " F approx= " << chiFactCorr << ", corr.= " <<
+	    chiFactCorr/sqrtPiOver2 << endl;
+	} else {
+	  // Starting from resSub
+	  double resSub = resEventPlane(chiSub);
+	  double chiSubCorr = chi(resSub, frac);
+	  double chiCorr = chiSubCorr * fullSubFact;
+	  resCorr = resEventPlane(chiCorr);
+	  chiFactCorr = F(chiCorr);
+	  cout << " chiCorr= " << chiCorr << ", corr.= " << 
+	    chiCorr/chi << endl;
+	  cout << " resCorr= " << resCorr << ", corr.= " << resCorr/res << endl;
+	  cout << " F corr= " << chiFactCorr << ", corr.= " << chiFactCorr/sqrtPiOver2
+	       << endl;
+	}
+
 	for (int yBin=1; yBin<=yBins; yBin++) {
 	  pt = yAxis->GetBinCenter(yBin);
 	  for (int xBin=1; xBin<=xBins; xBin++) {
 	    v = vObs2D[n][j]->GetCellContent(xBin, yBin);
 	    vErr = vObs2D[n][j]->GetCellError(xBin, yBin);
-	    v += 100. * chiFact * pt * fracFact / sqrt(sumPt2All[n]);
+	    v += 100. * chiFactCorr * pt * fracFact / sqrt(sumPt2All[n]);
 	    v2D[n][j]->SetCellContent(xBin, yBin, v);
 	    v2D[n][j]->SetCellError(xBin, yBin, vErr);
 	  }
@@ -417,11 +405,17 @@ void vProj(char* part = "pion") {
 		yield = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	      }
 	      v = v2D[n-1][j]->GetCellContent(xBin, yBin);
-	      if(v != 0.0) {
+	      if (v != 0.0) {
 		yieldSum += yield;
-		vSum     += yield * v;
-		err2Sum  += pow(yield * v2D[n-1][j]->GetCellError(xBin, yBin), 
-				2.);
+		if (pTFlow) {
+		  vSum     += yield * v *pt;
+		  err2Sum  += pow(pt * yield * v2D[n-1][j]->GetCellError(xBin, yBin), 
+				  2.);
+		} else {
+		  vSum     += yield * v;
+		  err2Sum  += pow(yield * v2D[n-1][j]->GetCellError(xBin, yBin), 
+				  2.);
+                }
 	      }
 	    }
 	  }
@@ -429,7 +423,8 @@ void vProj(char* part = "pion") {
 	    content = vSum / yieldSum;
 	    error   = sqrt(err2Sum) / yieldSum;
 	  }
-	  yieldY[n]->SetBinContent(xBin, yieldSum);
+	  if(j != 1 || n != 1 || eBeam != 40)
+	    yieldY[n]->SetBinContent(xBin, yieldSum);
 	  vY[n][j]->SetBinContent(xBin, content);
 	  vY[n][j]->SetBinError(xBin, error);
 	}
@@ -458,18 +453,24 @@ void vProj(char* part = "pion") {
 	    } else {
 	      yield = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	    }
-	    if(v != 0.0) {
+	    if (v != 0.0) {
 	      yieldSum += yield;
-	      vSum     += yield * v;
-	      err2Sum  += pow(yield * v2D[n-1][j]->GetCellError(xBin, yBin), 2.);
+	      if (pTFlow) {
+		vSum += yield * v *pt;
+	      } else {
+		vSum += yield * v;
+	      }
+	      err2Sum += pow(yield * v2D[n-1][j]->GetCellError(xBin, yBin), 2.);
 	    }
 	  }
 	}
 	if (yieldSum) {
 	  content = vSum / yieldSum;
 	  error   = sqrt(err2Sum) / yieldSum;
+          if (pTFlow) error *= pt;
 	}
-	yieldPt[n]->SetBinContent(yBin, yieldSum);
+	if(j != 1 || n != 1 || eBeam != 40)
+	  yieldPt[n]->SetBinContent(yBin, yieldSum);
 	vPt[n][j]->SetBinContent(yBin, content);
 	vPt[n][j]->SetBinError(yBin, error);
       }
@@ -521,7 +522,8 @@ void vProj(char* part = "pion") {
 	content = vSum / yieldSum;
 	error   = sqrt(err2Sum) / yieldSum;
       }
-      if (j==0) yieldPt[0]->SetBinContent(xBin, yieldSum);
+      if(j != 1 || n != 1 || eBeam != 40) 
+	yieldPt[0]->SetBinContent(xBin, yieldSum);
       vPt[0][j]->SetBinContent(xBin, content);
       vPt[0][j]->SetBinError(xBin, error);
     }
@@ -848,9 +850,10 @@ bool Pause() {
 //-----------------------------------------------------------------------
 
 static Double_t resEventPlane(double chi) {
-  // Calculates the event plane resolution as a function of chi
+  // Calculates the event plane resolution as a function of chiJYO
 
   double con = sqrt(TMath::Pi() / 2.) / 2.;
+  chi *= sqrt(2.);
   double arg = chi * chi / 4.;
   
   Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) + 
@@ -862,13 +865,48 @@ static Double_t resEventPlane(double chi) {
 //-----------------------------------------------------------------------
 
 static Double_t chi(double res) {
-  // Calculates chi from the event plane resolution
+  // Calculates chiJYO from the event plane resolution
 
   double chi   = 2.0;
   double delta = 1.0;
 
   for (int i = 0; i < 15; i++) {
     chi = (resEventPlane(chi) < res) ? chi + delta : chi - delta;
+    delta = delta / 2.;
+  }
+
+  return chi;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t resEventPlane(double chi, double f) {
+  // Calculates the subevent plane resolution as a function of chi_subJYO
+  // and the fraction f
+
+  double con = sqrt(TMath::Pi()) / 2.;
+  double arg = chi * chi / 2.;
+  
+  Double_t I0 = TMath::BesselI0(arg);
+  Double_t I1 = TMath::BesselI1(arg);
+  Double_t term1 = chi * chi * (I0 + I1) * (I0 + I1);
+  Double_t term2 = (f * f / 2.) * ((I0 * I0)  + (I1 * I1));
+  Double_t res =  con * exp(-arg) * sqrt(term1 - term2);
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t chi(double res, double f) {
+  // Calculates chi_subJYO from the subevent plane resolution
+  // including momentum conservatiuon
+
+  double chi   = 2.0;
+  double delta = 1.0;
+
+  for (int i = 0; i < 15; i++) {
+    chi = (resEventPlane(chi, f) < res) ? chi + delta : chi - delta;
     delta = delta / 2.;
   }
 
@@ -889,3 +927,48 @@ static Double_t F(double chi) {
 }
 
 //-----------------------------------------------------------------------
+
+///////////////////////////////////////////////////////////////////////////
+//
+// $Log: vProj.C,v $
+// Revision 1.9  2002/03/23 21:46:20  posk
+// More 40 GeV compatability.
+//
+// Revision 1.8  2002/01/16 18:21:49  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
+// Revision 1.7  2001/11/06 18:02:54  posk
+// 40 GeV compatability.
+//
+// Revision 1.6  2001/10/24 21:46:36  posk
+// Added conservation of momentum correction. Calculate triply integrated v values.
+//
+// Revision 1.4  2001/05/14 23:20:29  posk
+// Uses cross section weighting for all projections.
+//
+// Revision 1.3  2001/03/16 22:35:10  posk
+// plotGraphs.C makes the final graphs.
+//
+// $Log: vProj.C,v $
+// Revision 1.9  2002/03/23 21:46:20  posk
+// More 40 GeV compatability.
+//
+// Revision 1.8  2002/01/16 18:21:49  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
+// Revision 1.7  2001/11/06 18:02:54  posk
+// 40 GeV compatability.
+//
+// Revision 1.6  2001/10/24 21:46:36  posk
+// Added conservation of momentum correction. Calculate triply integrated v values.
+//
+// Revision 1.4  2001/05/14 23:20:29  posk
+// Uses cross section weighting for all projections.
+//
+// Revision 1.2  2001/03/06 17:33:04  posk
+// All macros now work.
+//
+// Revision 1.1  2001/02/23 00:58:19  posk
+// NA49 version of STAR software.
+//
+///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.6 2001/11/06 18:02:49 posk Exp $
+// $Id: plotCen.C,v 1.7 2002/03/23 21:46:08 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -11,35 +11,6 @@
 //               First time type .x plotCen.C() to see the menu.
 //               After the first execution, just type plotCen(N) .
 //               A negative N plots all pages starting with page N.
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: plotCen.C,v $
-// Revision 1.6  2001/11/06 18:02:49  posk
-// 40 GeV compatability.
-//
-// Revision 1.5  2001/10/24 21:48:41  posk
-// Improved graphs.
-//
-// Revision 1.4  2001/08/17 22:15:03  posk
-// Updated to also do 40 GeV.
-//
-// Revision 1.3  2001/05/14 23:22:47  posk
-// Minor changes.
-//
-// Revision 1.2  2001/03/06 17:33:00  posk
-// All macros now work.
-//
-// Revision 1.1  2001/02/23 00:58:27  posk
-// NA49 version of STAR software.
-//
-// Revision 1.5  2000/09/29 22:53:19  posk
-// More histograms.
-//
-// Revision 1.1  2000/08/31 18:50:33  posk
-// Added plotCen.C to plot from a series of files with different centralities.
-//
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -548,3 +519,35 @@ static Double_t BetheBlochFunc(double* lnp, double* par) {
   
   return dedx;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: plotCen.C,v $
+// Revision 1.7  2002/03/23 21:46:08  posk
+// More 40 GeV compatability.
+//
+// Revision 1.6  2001/11/06 18:02:49  posk
+// 40 GeV compatability.
+//
+// Revision 1.5  2001/10/24 21:48:41  posk
+// Improved graphs.
+//
+// Revision 1.4  2001/08/17 22:15:03  posk
+// Updated to also do 40 GeV.
+//
+// Revision 1.3  2001/05/14 23:22:47  posk
+// Minor changes.
+//
+// Revision 1.2  2001/03/06 17:33:00  posk
+// All macros now work.
+//
+// Revision 1.1  2001/02/23 00:58:27  posk
+// NA49 version of STAR software.
+//
+// Revision 1.5  2000/09/29 22:53:19  posk
+// More histograms.
+//
+// Revision 1.1  2000/08/31 18:50:33  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
+///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.5 2002/01/16 18:21:35 posk Exp $
+// $Id: doFlowEvents.C,v 1.6 2002/03/23 21:45:52 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -30,27 +30,6 @@
 //              Art Poskanzer
 //  
 ///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: doFlowEvents.C,v $
-// Revision 1.5  2002/01/16 18:21:35  posk
-// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
-//
-// Revision 1.4  2001/11/06 18:02:43  posk
-// 40 GeV compatability.
-//
-// Revision 1.3  2001/08/17 22:14:42  posk
-// Updated to also do 40 GeV.
-//
-// Revision 1.2  2001/05/14 23:15:20  posk
-// Lower pt uppers for centralities 1 and 2.
-//
-// Revision 1.1  2001/02/23 00:57:53  posk
-// NA49 version of STAR software.
-//
-// Revision 1.27  2000/11/15 14:41:51  posk
-//
-///////////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
 class    StChain;
 StChain  *chain=0;
@@ -145,14 +124,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
     sprintf(makerName, "FlowAnalysis");
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
   }
-
-  // Make docs
-//  flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
-//  flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
-    
-  // Set Debug status
-//    flowMaker->SetDebug();
-//    flowAnalysisMaker->SetDebug();
 
   //
   // Chain Init()
@@ -305,8 +276,8 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*muDST.root";
 
   //LBL
-  Char_t* filePath="/auto/na49/160GeV/std+";
-  //Char_t* filePath="/auto/na49/160GeV/std-";
+  //Char_t* filePath="/auto/na49/160GeV/std+";
+  Char_t* filePath="/auto/na49/160GeV/std-";
   //Char_t* filePath="/auto/na49/160GeV/std+cen";
   //Char_t* filePath="/auto/na49/40GeV/std+";
   //Char_t* filePath="/auto/na49/40GeV/std-";
@@ -315,3 +286,28 @@ void doFlowEvents(const Int_t nevents)
 
   doFlowEvents(nevents, filePath, fileExt);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: doFlowEvents.C,v $
+// Revision 1.6  2002/03/23 21:45:52  posk
+// More 40 GeV compatability.
+//
+// Revision 1.5  2002/01/16 18:21:35  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
+// Revision 1.4  2001/11/06 18:02:43  posk
+// 40 GeV compatability.
+//
+// Revision 1.3  2001/08/17 22:14:42  posk
+// Updated to also do 40 GeV.
+//
+// Revision 1.2  2001/05/14 23:15:20  posk
+// Lower pt uppers for centralities 1 and 2.
+//
+// Revision 1.1  2001/02/23 00:57:53  posk
+// NA49 version of STAR software.
+//
+// Revision 1.27  2000/11/15 14:41:51  posk
+//
+///////////////////////////////////////////////////////////////////////////////

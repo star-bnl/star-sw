@@ -12,32 +12,37 @@ void plotGraphs(Char_t* part = "pion") {
   //Bool_t crossSection = kFALSE;  // yield weighting
   Bool_t pCons = kTRUE;            // with momentum conservation
   //Bool_t pCons = kFALSE;            // without momentum conservation
-
+  int   eBeam = 158; //select full beam energy
+  //int   eBeam = 40;  //select 40Gev beam energy
 
   if (pCons) {
     if (crossSection) {
       Char_t* fileExt = "Pcons.root";
-      Char_t* plotExt = "PconsPlots";
+      Char_t* outdir  = "PconsPlots/";
     } else {
       Char_t* fileExt = "PconsYield.root";
-      Char_t* plotExt = "PconsYieldPlots";
+      Char_t* outdir  = "PconsYieldPlots/";
     }
   } else {
     if (crossSection) {
       Char_t* fileExt = ".root";
-      Char_t* plotExt = "Plots";
+      Char_t* outdir  = "Plots/";
     } else {
       Char_t* fileExt = "Yield.root";
-      Char_t* plotExt = "YieldPlots";
+      Char_t* outdir  = "YieldPlots/";
     }
   }
 
-  Char_t pstype[255] = "ps";
-  //Char_t pstype[255] = "eps";
+  //Char_t pstype[255] = "ps";
+  Char_t pstype[255] = "eps";
   //Char_t pstype[255] = "gif";
 
   gROOT->SetStyle("Bold");
   gStyle->SetOptStat(kFALSE);
+  if (strcmp(pstype, "eps")==0) {
+    cout << "No title box" << endl;
+    gStyle->SetOptTitle(kFALSE);
+  }
 
   const Int_t nHar = 2;
   const Int_t nCen = 10;   // min. bias + six centralities + 3 averaged
@@ -47,17 +52,26 @@ void plotGraphs(Char_t* part = "pion") {
   Float_t max;
   Float_t min;
   Float_t flip;
-  Float_t yCM = 2.92;
-  Float_t markerSize = 1.5;
+  //Float_t markerSize = 1.5;
+  Float_t markerSize = 2.5;
+  Char_t* beam;
+  Float_t yCM;
+
+  if (eBeam == 158) {
+    beam = "160";
+    yCM = 2.92;
+  } else if (eBeam == 40) {
+    beam = "40";
+    yCM =  2.24;
+  } else {
+    cout << " Not valid beam energy" << endl;
+    return;
+  }
 
   Char_t temp[30];
   strcpy(temp, part);
   Char_t infile[255] = strcat(temp, fileExt);
   cout << "in file = " << infile << endl;
-
-  strcpy(temp, part);
-  strcat(temp, plotExt);
-  Char_t outdir[255] = strcat(temp, "/");
   cout << "out dir = " << outdir << endl;
   Char_t outfile[255];
 
@@ -308,6 +322,10 @@ void plotGraphs(Char_t* part = "pion") {
   flowY[0][0][1]->SetMarkerColor(kRed);
   flowY[0][1][0]->SetMarkerColor(kGreen);
   flowY[0][1][1]->SetMarkerColor(kGreen);
+  flowY[0][0][0]->SetLineColor(kRed);
+  flowY[0][0][1]->SetLineColor(kRed);
+  flowY[0][1][0]->SetLineColor(kGreen);
+  flowY[0][1][1]->SetLineColor(kGreen);
   flowY[0][0][0]->SetMarkerSize(markerSize);
   flowY[0][0][1]->SetMarkerSize(markerSize);
   flowY[0][1][0]->SetMarkerSize(markerSize);
@@ -369,7 +387,7 @@ void plotGraphs(Char_t* part = "pion") {
     l.DrawLatex(0.6,0.7,"v_{2}"); 
   }
 
-  sprintf(outfile, "%smb_y.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_mb_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
 
@@ -380,6 +398,8 @@ void plotGraphs(Char_t* part = "pion") {
   flowPt[0][1][0]->SetMarkerStyle(kFullSquare);
   flowPt[0][0][0]->SetMarkerColor(kRed);
   flowPt[0][1][0]->SetMarkerColor(kGreen);
+  flowPt[0][0][0]->SetLineColor(kRed);
+  flowPt[0][1][0]->SetLineColor(kGreen);
   flowPt[0][0][0]->SetMarkerSize(markerSize);
   flowPt[0][1][0]->SetMarkerSize(markerSize);
 
@@ -430,7 +450,7 @@ void plotGraphs(Char_t* part = "pion") {
     l.DrawLatex(0.7,0.65,"v_{2}");
   } 
   
-  sprintf(outfile, "%smb_pt.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_mb_pt.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
 
@@ -440,9 +460,11 @@ void plotGraphs(Char_t* part = "pion") {
     for (Int_t j = 0; j < 2; j++) {
       for (Int_t k = 0; k < 2; k++) {
 	flowY[i][j][k]->SetMarkerColor(m+2);
+	flowY[i][j][k]->SetLineColor(m+2);
 	flowY[i][j][k]->SetMarkerSize(markerSize);
 	flowY[i][j][k]->SetMarkerStyle(20+(m%3)+4*(k%2));
 	flowPt[i][j][k]->SetMarkerColor(m+2);
+	flowPt[i][j][k]->SetLineColor(m+2);
 	flowPt[i][j][k]->SetMarkerSize(markerSize);
 	flowPt[i][j][k]->SetMarkerStyle(20+(m%3)+4*(k%2));
       }
@@ -472,15 +494,16 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY1NDC(0.17);    
   legend->SetX2NDC(0.39);
   legend->SetY2NDC(0.37);
+  legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 0; i < 3; i++){
     sprintf(EntryName, "%d + %d", 2*i+1, 2*i+2);
-    legend->AddEntry(flowY[i][0][0], EntryName);
+    legend->AddEntry(flowY[i][0][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
 
-  sprintf(outfile, "%sv1_all_y.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v1_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
 
   // Harmonic 1 vs. y three Centralities redrawn ---------------------------
@@ -519,10 +542,11 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY1NDC(0.17);    
   legend->SetX2NDC(0.38);
   legend->SetY2NDC(0.37);
+  legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
     sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowY[i][0][0], EntryName);
+    legend->AddEntry(flowY[i][0][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
@@ -541,7 +565,7 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.3,0.8,"p_{t} < 2 GeV/c");
   l.SetTextSize(0.06); 
 
-  sprintf(outfile, "%sv1_all_y.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v1_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
 
@@ -587,10 +611,11 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY1NDC(0.17);    
   legend->SetX2NDC(0.38);
   legend->SetY2NDC(0.37);
+  legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
     sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowY[i][1][0], EntryName);
+    legend->AddEntry(flowY[i][1][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
@@ -608,7 +633,7 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.2,"p_{t} < 2 GeV/c");
   l.SetTextSize(0.06); 
 
-  sprintf(outfile, "%sv2_all_y.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v2_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
 
@@ -646,10 +671,11 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY1NDC(0.65);    
   legend->SetX2NDC(0.38);
   legend->SetY2NDC(0.85);
+  legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
     sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowPt[i][0][0], EntryName);
+    legend->AddEntry(flowPt[i][0][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
@@ -663,7 +689,7 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.2,"3 < y < 5");
   l.SetTextSize(0.06); 
 
-  sprintf(outfile, "%sv1_all_pt.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v1_all_pt.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
   
@@ -694,10 +720,11 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY1NDC(0.6);    
   legend->SetX2NDC(0.38);
   legend->SetY2NDC(0.8);
+  legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
     sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowPt[i][1][0], EntryName);
+    legend->AddEntry(flowPt[i][1][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
@@ -711,7 +738,7 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.22,0.85,"3 < y < 5");
   l.SetTextSize(0.06); 
 
-  sprintf(outfile, "%sv2_all_pt.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v2_all_pt.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
  
@@ -720,6 +747,8 @@ void plotGraphs(Char_t* part = "pion") {
   flowV[1]->SetMarkerStyle(kFullSquare);
   flowV[0]->SetMarkerColor(kRed);
   flowV[1]->SetMarkerColor(kGreen);
+  flowV[1]->SetLineColor(kGreen);
+  flowV[0]->SetLineColor(kRed);
   flowV[0]->SetMarkerSize(markerSize);
   flowV[1]->SetMarkerSize(markerSize);
 
@@ -767,7 +796,7 @@ void plotGraphs(Char_t* part = "pion") {
     l.DrawLatex(0.75,0.69,"v_{2}"); 
   }
 
-  sprintf(outfile, "%sv_cen.%s", outdir, pstype);
+  sprintf(outfile, "%s%s%s_v_cen.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
   //if (!Pause()) return;
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.8 2002/01/16 18:21:36 posk Exp $
+// $Id: plot.C,v 1.9 2002/03/23 21:46:04 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -14,36 +14,6 @@
 //               After plot(-N) type two returns.
 //
 ///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: plot.C,v $
-// Revision 1.8  2002/01/16 18:21:36  posk
-// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
-//
-// Revision 1.7  2001/11/06 18:02:46  posk
-// 40 GeV compatability.
-//
-// Revision 1.6  2001/10/24 21:48:36  posk
-// Improved graphs.
-//
-// Revision 1.5  2001/08/17 22:14:57  posk
-// Updated to also do 40 GeV.
-//
-// Revision 1.4  2001/05/14 23:22:42  posk
-// Minor changes.
-//
-// Revision 1.3  2001/03/06 17:32:59  posk
-// All macros now work.
-//
-// Revision 1.2  2001/02/26 23:07:14  posk
-// Rearranged macros.
-//
-// Revision 1.1  2001/02/23 00:58:19  posk
-// NA49 version of STAR software.
-//
-// Revision 1.29  2000/10/12 21:01:32  posk
-//
-///////////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
 #include <math.h> 
 //const Int_t nHars    = 6;
@@ -479,7 +449,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
       } else if (strstr(shortName[pageNumber],"CosPhiLab")!=0) {  // CosPhiLab
-	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+	TLine* lineZeroHar = new TLine(0.5, 0., nHars + 0.5, 0.);
 	gStyle->SetOptStat(0);
 	hist->Draw();
 	lineZeroHar->Draw();
@@ -563,7 +533,7 @@ TCanvas* plotResolution(){
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
-  TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+  TLine* lineZeroHar = new TLine(0.5, 0., nHars + 0.5, 0.);
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
   graphPad->Draw();
   graphPad->cd();
@@ -660,3 +630,37 @@ static Double_t qDist(double* q, double* par) {
 
   return dNdq;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: plot.C,v $
+// Revision 1.9  2002/03/23 21:46:04  posk
+// More 40 GeV compatability.
+//
+// Revision 1.8  2002/01/16 18:21:36  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
+// Revision 1.7  2001/11/06 18:02:46  posk
+// 40 GeV compatability.
+//
+// Revision 1.6  2001/10/24 21:48:36  posk
+// Improved graphs.
+//
+// Revision 1.5  2001/08/17 22:14:57  posk
+// Updated to also do 40 GeV.
+//
+// Revision 1.4  2001/05/14 23:22:42  posk
+// Minor changes.
+//
+// Revision 1.3  2001/03/06 17:32:59  posk
+// All macros now work.
+//
+// Revision 1.2  2001/02/26 23:07:14  posk
+// Rearranged macros.
+//
+// Revision 1.1  2001/02/23 00:58:19  posk
+// NA49 version of STAR software.
+//
+// Revision 1.29  2000/10/12 21:01:32  posk
+//
+///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEventsVar.C,v 1.4 2001/11/06 18:02:45 posk Exp $
+// $Id: doFlowEventsVar.C,v 1.5 2002/03/23 21:45:56 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -41,6 +41,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEventsVar.C,v $
+// Revision 1.5  2002/03/23 21:45:56  posk
+// More 40 GeV compatability.
+//
 // Revision 1.4  2001/11/06 18:02:45  posk
 // 40 GeV compatability.
 //
@@ -216,11 +219,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
 //   StFlowEvent::SetPtCut(0., 2., 0, 1);
 //   StFlowEvent::SetPtCut(0., 2., 1, 1);
 //   StFlowEvent::SetPtCut(0., 2., 2, 1);
-  if(centrality == 1)
-    StFlowEvent::SetPtCut(0., .3, 0, 1);
-  if(centrality == 2)
-    StFlowEvent::SetPtCut(0., .6, 0, 1);
 
+  if(Flow::eBeam != 40) {
+    if(centrality == 1)
+      StFlowEvent::SetPtCut(0., .3, 0, 1);
+    if(centrality == 2)
+      StFlowEvent::SetPtCut(0., .6, 0, 1);
+  }
+  
   if(Flow::eBeam == 40){
     StFlowCutEvent::SetVertexZ(-581.7, -580.5);
     //       StFlowEvent::SetYCut(2.5, 4., 0, 1); // harmonic 1, selection 2
@@ -237,7 +243,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   }
   
   //StFlowEvent::SetPid("");
-
   //StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
   
   // Use weights in the event plane calcualtion
@@ -321,7 +326,7 @@ void doFlowEvents(const Int_t nevents)
   if (RunType > 20 && RunType < 30 || RunType > 60 && RunType < 70)
     Char_t* filePath="/auto/na49/160GeV/std-";
   if (RunType > 30 && RunType < 40 || RunType > 70 && RunType < 80)
-//     Char_t* filePath="/auto/na49/160GeV/std+cen";
+    Char_t* filePath="/auto/na49/160GeV/std+cen";
 //   if (RunType > 10 && RunType < 20) 
 //     Char_t* filePath="/auto/na49/40GeV/std+";
 //   if (RunType > 50 && RunType < 60) 
