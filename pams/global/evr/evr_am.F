@@ -26,6 +26,8 @@ CC:       	globtrk  = Track information from egr package; uses the
 CC:                        first instance of the global track table
 CC:                        corresponding to the fit or refit of only the
 CC:                        space points from the tracking detectors.
+CC:	       	privert  = Information on fixed vertex, if any. For a fixed
+CC:                        primary vertex, the value of both chisq=-1.0.
 CC:         OUT:
 CC:	       	privert  = Primary Vertex Information
 CC:      UPDATE:
@@ -326,6 +328,28 @@ CC  (4)  between sigmin and sigmax, then 'error' is set to the computed value.
 CC  Vertex_pass(i,j) contains the vertex position from the initial
 CC  estimate and the first and second passes, where i = pass#, j=x,y,z.
 
+
+CC  B-field obtained via gufld call
+      xlocal(1) = 0.
+      xlocal(2) = 0.
+      xlocal(3) = 0.
+
+      call gufld(xlocal,bfield)
+      write(6,*) 'Using a field of',bfield(3),' KGauss'
+      b = bfield(3)
+
+CC  Check for fixed vertex
+      do i = 1,privert_h.nok
+	if ((privert(i).chisq(1).eq.-1.0).and.(privert(i).chisq(2).eq.-1.0)) then
+          index = i
+	  xxv(1) = privert(i).x
+	  xxv(2) = privert(i).y
+	  xxv(3) = privert(i).z
+	  goto 500
+	end if
+      end do
+
+
 CC  Initialize arrays:
 
         CALL VZERO(zsum,800)
@@ -367,15 +391,6 @@ CC  the array 'dettrkcounter,' for track/detector segment counting:
          evr_am = STAFCV_BAD
          Return
       end if
-
-c B-field obtained via gufld call
-      xlocal(1) = 0.
-      xlocal(2) = 0.
-      xlocal(3) = 0.
-
-      call gufld(xlocal,bfield)
-      write(6,*) 'Using a field of',bfield(3),' KGauss'
-      b = bfield(3)
 
 CC  Check value of the magnetic field, z-component.
 CC  If b .ge. bfield_min (equal to 0.001 kGauss), then proceed with calc.
@@ -1024,7 +1039,7 @@ CC:  Also load 3D DCA into globtrk().impact.
 CC:  NOTE: This only marks tracks that have pT .ne. 99999.
 CC:        AND detIdOK.eq.1 (see below)  AND iflag .gt. 0
 
-      if(privert(index).iflag .eq. 1 .and.
+500   if(privert(index).iflag .eq. 1 .and.
      1   privert(index).vtx_id .eq. kEventVtxId) then
         j = 0   ! Count tracks with pT.ne. 99999.  AND 
 C               ! detIdOK.eq.1  AND iflag .gt. 0 AND
