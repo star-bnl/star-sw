@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.12 2000/07/03 04:10:29 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.13 2000/07/14 23:18:25 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.13  2000/07/14 23:18:25  snelling
+ * Added the z-residual histograms
+ *
  * Revision 1.12  2000/07/03 04:10:29  snelling
  * Fixed bug in ntuple (changed :: to :)
  *
@@ -58,7 +61,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.12 2000/07/03 04:10:29 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.13 2000/07/14 23:18:25 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -85,6 +88,7 @@ class StQACosmicMaker : public StMaker {
 
   Int_t  initTNtuple();
   Int_t  fillHitTNtuple();
+  Int_t  fillTrackTNtuple();
   Int_t  fillMorphTNtuple();
   Int_t  fillHitTNtupleNoTrk();
   Int_t  fillMorphTNtupleNoTrk();
@@ -138,13 +142,14 @@ class StQACosmicMaker : public StMaker {
   enum {nResHist = 4, nChargeHist = 4, nClusterHist = 4,
 	nMorphHist = 4 };
 
-  enum {hrow,hx,hy,hz,hq,dedx,halpha,hlambda,hdalpha,hdlambda,resy,resz,trknfit,trkp,enumLast};
+  enum {hflag,hrow,hx,hy,hz,hq,dedx,halpha,hlambda,hdalpha,hdlambda,resy,resz,trknfit,trkp,enumLast};
   float ntEntries[enumLast];
  
   TNtuple *mTNtupleTPC; //!
   TNtuple *mTNtupleMorph; //!
   TNtuple *mTNtupleTPCNoTrk; //!
   TNtuple *mTNtupleMorphNoTrk; //!
+  TNtuple *mTNtupleTrk; //!
 
   struct ClusterHist {
     TH1F *mNPadsPerHit;
@@ -196,6 +201,66 @@ class StQACosmicMaker : public StMaker {
     TH1D *mXYResVersusAlphaZ4_sigma;
     TH1D *mXYResVersusAlphaZ4_mag;
     TH1D *mXYResVersusAlphaZ4_chi;
+    TH1D *mXYResVersusDip_mean;
+    TH1D *mXYResVersusDip_sigma;
+    TH1D *mXYResVersusDip_mag;
+    TH1D *mXYResVersusDip_chi;
+    TH1D *mXYResVersusDipZ1_mean;
+    TH1D *mXYResVersusDipZ1_sigma;
+    TH1D *mXYResVersusDipZ1_mag;
+    TH1D *mXYResVersusDipZ1_chi;
+    TH1D *mXYResVersusDipZ2_mean;
+    TH1D *mXYResVersusDipZ2_sigma;
+    TH1D *mXYResVersusDipZ2_mag;
+    TH1D *mXYResVersusDipZ2_chi;
+    TH1D *mXYResVersusDipZ3_mean;
+    TH1D *mXYResVersusDipZ3_sigma;
+    TH1D *mXYResVersusDipZ3_mag;
+    TH1D *mXYResVersusDipZ3_chi;
+    TH1D *mXYResVersusDipZ4_mean;
+    TH1D *mXYResVersusDipZ4_sigma;
+    TH1D *mXYResVersusDipZ4_mag;
+    TH1D *mXYResVersusDipZ4_chi;
+    TH1D *mZResVersusAlpha_mean;
+    TH1D *mZResVersusAlpha_sigma;
+    TH1D *mZResVersusAlpha_mag;
+    TH1D *mZResVersusAlpha_chi;
+    TH1D *mZResVersusAlphaZ1_mean;
+    TH1D *mZResVersusAlphaZ1_sigma;
+    TH1D *mZResVersusAlphaZ1_mag;
+    TH1D *mZResVersusAlphaZ1_chi;
+    TH1D *mZResVersusAlphaZ2_mean;
+    TH1D *mZResVersusAlphaZ2_sigma;
+    TH1D *mZResVersusAlphaZ2_mag;
+    TH1D *mZResVersusAlphaZ2_chi;
+    TH1D *mZResVersusAlphaZ3_mean;
+    TH1D *mZResVersusAlphaZ3_sigma;
+    TH1D *mZResVersusAlphaZ3_mag;
+    TH1D *mZResVersusAlphaZ3_chi;
+    TH1D *mZResVersusAlphaZ4_mean;
+    TH1D *mZResVersusAlphaZ4_sigma;
+    TH1D *mZResVersusAlphaZ4_mag;
+    TH1D *mZResVersusAlphaZ4_chi;
+    TH1D *mZResVersusDip_mean;
+    TH1D *mZResVersusDip_sigma;
+    TH1D *mZResVersusDip_mag;
+    TH1D *mZResVersusDip_chi;
+    TH1D *mZResVersusDipZ1_mean;
+    TH1D *mZResVersusDipZ1_sigma;
+    TH1D *mZResVersusDipZ1_mag;
+    TH1D *mZResVersusDipZ1_chi;
+    TH1D *mZResVersusDipZ2_mean;
+    TH1D *mZResVersusDipZ2_sigma;
+    TH1D *mZResVersusDipZ2_mag;
+    TH1D *mZResVersusDipZ2_chi;
+    TH1D *mZResVersusDipZ3_mean;
+    TH1D *mZResVersusDipZ3_sigma;
+    TH1D *mZResVersusDipZ3_mag;
+    TH1D *mZResVersusDipZ3_chi;
+    TH1D *mZResVersusDipZ4_mean;
+    TH1D *mZResVersusDipZ4_sigma;
+    TH1D *mZResVersusDipZ4_mag;
+    TH1D *mZResVersusDipZ4_chi;
   };
 
   struct ResidualHist;
@@ -207,6 +272,21 @@ class StQACosmicMaker : public StMaker {
     TH2F *mXYResVersusAlphaZ2;
     TH2F *mXYResVersusAlphaZ3;
     TH2F *mXYResVersusAlphaZ4;
+    TH2F *mXYResVersusDip;
+    TH2F *mXYResVersusDipZ1;
+    TH2F *mXYResVersusDipZ2;
+    TH2F *mXYResVersusDipZ3;
+    TH2F *mXYResVersusDipZ4;
+    TH2F *mZResVersusAlpha;
+    TH2F *mZResVersusAlphaZ1;
+    TH2F *mZResVersusAlphaZ2;
+    TH2F *mZResVersusAlphaZ3;
+    TH2F *mZResVersusAlphaZ4;
+    TH2F *mZResVersusDip;
+    TH2F *mZResVersusDipZ1;
+    TH2F *mZResVersusDipZ2;
+    TH2F *mZResVersusDipZ3;
+    TH2F *mZResVersusDipZ4;
     struct FitHist FitHists; 
   };
 
