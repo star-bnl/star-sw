@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.5 1999/02/24 21:15:02 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.6 1999/02/25 19:25:39 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.6  1999/02/25 19:25:39  kathy
+// fix up histograms
+//
 // Revision 1.5  1999/02/24 21:15:02  kathy
 // fixed histograms and added a few new ones
 //
@@ -50,13 +53,64 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
-
    const Int_t   St_QA_Maker::nxpT = 50;
    const Int_t   St_QA_Maker::nyeta = 50;
    const Float_t St_QA_Maker::xminpT = 0.0;
    const Float_t St_QA_Maker::xmaxpT = 5.0;
    const Float_t St_QA_Maker::ymineta = -2.0;
    const Float_t St_QA_Maker::ymaxeta =  2.0;
+
+    const Int_t St_QA_Maker::nchisq = 50;
+    const Int_t St_QA_Maker::nmass  = 40;
+    const Int_t St_QA_Maker::ntau   = 40;
+    const Int_t St_QA_Maker::ndedx  = 50;
+    const Int_t St_QA_Maker::npnt   = 50;
+    const Int_t St_QA_Maker::nleng  = 50;
+    const Int_t St_QA_Maker::npsi   = 36;
+    const Int_t St_QA_Maker::knpsi  = 42;
+    const Int_t St_QA_Maker::ntrk   = 100;
+    const Int_t St_QA_Maker::nvrt   = 100;
+    const Int_t St_QA_Maker::nmnpt  = 50;
+    const Int_t St_QA_Maker::nmneta = 40;
+    const Int_t St_QA_Maker::nxyz   = 50;
+    const Int_t St_QA_Maker::knyeta = 60;
+    const Int_t St_QA_Maker::knid   = 10;
+    const  Int_t St_QA_Maker::cnp = 100;
+    const  Int_t St_QA_Maker::cndedx = 100;    
+
+    const Float_t St_QA_Maker::kminnid  = 0.0;
+    const Float_t St_QA_Maker::kmaxnid  = 10.0;
+    const Float_t St_QA_Maker::minpsi   = 0.0;
+    const Float_t St_QA_Maker::kminpsi  = -60.0;
+    const Float_t St_QA_Maker::maxpsi   = 360.0;
+    const Float_t St_QA_Maker::minchisq = 0.;
+    const Float_t St_QA_Maker::maxchisq = 50.0;
+    const Float_t St_QA_Maker::minmass  = 0.0;
+    const Float_t St_QA_Maker::maxmass  = 2.0;
+    const Float_t St_QA_Maker::mindedx  = 0.0;
+    const Float_t St_QA_Maker::maxdedx  = 0.0005;
+    const Float_t St_QA_Maker::minpnt   = 0.0;
+    const Float_t St_QA_Maker::maxpnt   = 50.0;
+    const Float_t St_QA_Maker::minleng  = 0.0;
+    const Float_t St_QA_Maker::maxleng  = 200.0;
+    const Float_t St_QA_Maker::mintau   = 0.0;
+    const Float_t St_QA_Maker::maxtau   = 20.0;
+    const Float_t St_QA_Maker::mintrk   = 0.0;
+    const Float_t St_QA_Maker::maxtrk   = 10000.0;
+    const Float_t St_QA_Maker::minvrt   = 0.0;
+    const Float_t St_QA_Maker::maxvrt   = 100.0;
+    const Float_t St_QA_Maker::minmpt   = 0.0;
+    const Float_t St_QA_Maker::maxmpt   = 5.0;
+    const Float_t St_QA_Maker::minmeta  = -1.0;
+    const Float_t St_QA_Maker::maxmeta  = 1.0;
+    const Float_t St_QA_Maker::kmineta  = -3.0;
+    const Float_t St_QA_Maker::kmaxeta  = 3.0;
+    const Float_t St_QA_Maker::minxyz   = 0.0;
+    const Float_t St_QA_Maker::maxxyz   = 50.0;
+    const Float_t St_QA_Maker::cminp = 0.0;
+    const Float_t St_QA_Maker::cmaxp = 2.0;
+    const Float_t St_QA_Maker::cmindedx = 0.0;
+    const Float_t St_QA_Maker::cmaxdedx =  0.1e-04;
 
 ClassImp(St_QA_Maker)
 
@@ -70,64 +124,48 @@ St_QA_Maker::~St_QA_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Init(){
+
 // Create tables
 // Create Histograms 
 
-    const Int_t nchisq = 50;
-    const Int_t nmass  = 40;
-    const Int_t ntau   = 40;
-    const Int_t ndedx  = 50;
-    const Int_t npnt   = 50;
-    const Int_t nleng  = 50;
-    const Int_t npsi   = 36;
-    const Int_t knpsi  = 42;
-    const Int_t ntrk   = 100;
-    const Int_t nvrt   = 100;
-    const Int_t nmnpt  = 50;
-    const Int_t nmneta = 40;
-    const Int_t nxyz   = 50;
-    const Int_t knyeta = 60;
-    const Int_t knid   = 10;
-    
-
-    const Float_t kminnid  = 0.0;
-    const Float_t kmaxnid  = 10.0;
-    const Float_t minpsi   = 0.0;
-    const Float_t kminpsi  = -60.0;
-    const Float_t maxpsi   = 360.0;
-    const Float_t minchisq = 0.;
-    const Float_t maxchisq = 50.0;
-    const Float_t minmass  = 0.0;
-    const Float_t maxmass  = 2.0;
-    const Float_t mindedx  = 0.0;
-    const Float_t maxdedx  = 0.0005;
-    const Float_t minpnt   = 0.0;
-    const Float_t maxpnt   = 50.0;
-    const Float_t minleng  = 0.0;
-    const Float_t maxleng  = 200.0;
-    const Float_t mintau   = 0.0;
-    const Float_t maxtau   = 20.0;
-    const Float_t mintrk   = 0.0;
-    const Float_t maxtrk   = 10000.0;
-    const Float_t minvrt   = 0.0;
-    const Float_t maxvrt   = 100.0;
-    const Float_t minmpt   = 0.0;
-    const Float_t maxmpt   = 5.0;
-    const Float_t minmeta  = -1.0;
-    const Float_t maxmeta  = 1.0;
-    const Float_t kmineta  = -3.0;
-    const Float_t kmaxeta  = 3.0;
-    const Float_t minxyz   = 0.0;
-    const Float_t maxxyz   = 50.0;
-    
-    const  Int_t cnp = 100;
-    const  Int_t cndedx = 100;
-    const  Float_t cminp = 0.0;
-    const  Float_t cmaxp = 2.0;
-    const  Float_t cmindedx = 0.0;
-    const  Float_t cmaxdedx =  0.1e-04;
-
 //book histograms --------------
+
+ BookHistEvSum();
+ BookHistGlob();
+ BookHistDE();
+ BookHistPrim();
+ BookHistGen();
+ BookHistV0();
+ BookHistPID();
+
+   return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t St_QA_Maker::Make(){
+//  PrintInfo();
+
+// Call methods to fill histograms
+
+// histograms from table event_summary
+  MakeHistEvSum();
+// histograms from table globtrk
+  MakeHistGlob();
+// histograms from table dst_dedx
+  MakeHistDE();
+// histograms from table primtrk
+  MakeHistPrim();
+// histograms from table particle
+ MakeHistGen();
+// histograms from table dst_v0_vertex
+  MakeHistV0();
+// histograms from table primtrk & dst_dedx
+  MakeHistPID();
+    
+
+  return kStOK;
+}
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistEvSum(){
 
 // for method MakeEvSum - from table event_summary
    m_trk_tot_gd    = new TH2F("QaEvsumGlbTrkGoodVsTotal","number of good track versus total",
@@ -165,6 +203,10 @@ Int_t St_QA_Maker::Init(){
    m_vrtx_chisq = new TH1F("QaEvsumVrtxChisq", "chisq of primary vertex",
                                             nchisq, -maxchisq, maxchisq); 
      
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistGlob(){
 
 // for method MakeGlob - from table globtrk
    m_pT         = new TH1F("QaGlobtrkPt","pT distribution",nxpT,xminpT,xmaxpT);
@@ -176,11 +218,15 @@ Int_t St_QA_Maker::Init(){
    m_point      = new TH1F("QaGlobtrkNPoint","N points on track", npnt, minpnt, maxpnt);
    m_fit_point  = new TH1F("QaGlobtrkNPointFit","N fit points on track", npnt,minpnt, maxpnt);
    m_length     = new TH1F("QaGlobtrkLength","Length of track", nleng,minleng,maxleng);
-   m_chisq0     = new TH1F("QaGlobtrkChisq0P","chisq[0]", nchisq, -maxchisq, maxchisq);
-   m_chisq1     = new TH1F("QaGlobtrkChisq1P","chisq[1]", nchisq, -2*maxchisq, 2*maxchisq);
-   m_psi        = new TH1F("QaGlobtrkPsi","psi distribution", knpsi, kminpsi,maxpsi);
+   m_chisq0     = new TH1F("QaGlobtrkChisq0P","chisq[0]", nchisq, minchisq, maxchisq);
+   m_chisq1     = new TH1F("QaGlobtrkChisq1P","chisq[1]", nchisq, minchisq, maxchisq);
+   m_psi        = new TH1F("QaGlobtrkPsi","psi distribution", npsi, minpsi,maxpsi);
    m_det_id     = new TH1F("QaGlobtrkDetId","Detector ID for tracks",knid,kminnid,kmaxnid);
       
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistDE(){
    
 // for method MakeDE - from table dst_dedx
    m_ndedx   = new TH1F("QaDstDedxNdedx", "number of point to define dE/dx", npnt,
@@ -188,7 +234,10 @@ Int_t St_QA_Maker::Init(){
    m_dedx0   = new TH1F("QaDstDedxDedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
    m_dedx1   = new TH1F("QaDstDedxDedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
 
+}
 
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistPrim(){
 // for MakeHistPrim - from table primtrk
   m_prim_pT         = new TH1F("QaPrimtrkPt","primtrk: pT distribution",nxpT,xminpT,xmaxpT);
   m_prim_eta        = new TH1F("QaPrimtrkEta","primtrk: eta distribution",knyeta,kmineta,kmaxeta);
@@ -204,18 +253,29 @@ Int_t St_QA_Maker::Init(){
    m_prim_psi       = new TH1F("QaPrimtrkPsi","psi distribution", knpsi, kminpsi,maxpsi);
    m_prim_det_id    = new TH1F("QaPrimtrkDetId","Detector ID for tracks",knid,kminnid,kmaxnid);
 
+}
 
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistGen(){
 // for MakeHistGen - from table particle
   m_H_pT_eta_gen = new TH2F("QaParticlePtVsEta","pT versus eta (generated)",
 			  nyeta,kmineta,kmaxeta,nxpT,xminpT,xmaxpT);
     m_H_pT_eta_gen->SetXTitle("eta");
     m_H_pT_eta_gen->SetYTitle("pT (GeV)");
 
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistV0(){
 
 // for MakeHistV0 - from table dst_v0_vertex
   m_ev0_lama_hist  = new TH1F("QaDstV0VertexLambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.25);
   m_ev0_k0ma_hist  = new TH1F("QaDstV0VertexK0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
 
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistPID(){
 
 // for MakeHistPID - from tables primtrk & dst_dedx 
   // Spectra/pid histograms. C.Ogilvie
@@ -225,35 +285,10 @@ Int_t St_QA_Maker::Init(){
     m_p_dedx_rec->SetYTitle("dedx");
     m_p_dedx_rec->SetXTitle("p (GeV)");
 
-
-   return StMaker::Init();
 }
+
 //_____________________________________________________________________________
-Int_t St_QA_Maker::Make(){
-  //  PrintInfo();
-
-// Call methods to fill histograms
-
-// histograms from table event_summary
-  MakeEvSum();
-// histograms from table globtrk
-  MakeGlob();
-// histograms from table dst_dedx
-  MakeDE();
-// histograms from table primtrk
-  MakeHistPrim();
-// histograms from table particle
- MakeHistGen();
-// histograms from table dst_v0_vertex
-  MakeHistV0();
-// histograms from table primtrk & dst_dedx
-  MakeHistPID();
-    
-
-  return kStOK;
-}
-//_____________________________________________________________________________
-void St_QA_Maker::MakeEvSum(){
+void St_QA_Maker::MakeHistEvSum(){
  //  PrintInfo();
  // Fill histograms for event summary
   St_DataSet *dst = gStChain->DataSet("dst");
@@ -291,7 +326,7 @@ void St_QA_Maker::MakeEvSum(){
 
 //-----------------------------------------------------------------
 
-void St_QA_Maker::MakeGlob(){
+void St_QA_Maker::MakeHistGlob(){
 
    // Fill histograms for globtrk
   St_DataSet *dst = gStChain->DataSet("dst");
@@ -328,7 +363,7 @@ void St_QA_Maker::MakeGlob(){
 
 //_____________________________________________________________________________
 
- void St_QA_Maker::MakeDE() {
+ void St_QA_Maker::MakeHistDE() {
    // Fill histograms for dE/dx
 
   St_DataSet *dst = gStChain->DataSet("dst");
@@ -492,7 +527,7 @@ void St_QA_Maker::MakeHistPID(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.5 1999/02/24 21:15:02 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.6 1999/02/25 19:25:39 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
