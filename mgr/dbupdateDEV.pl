@@ -102,7 +102,7 @@ my $jj = 0;
 for ($i = 0; $i < scalar(@node_daq); $i++) {
       for ($ll = 0; $ll < scalar(@daq_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_daq[$i] . "/" . $testDay . "/". $dir_year[$jj] . "/" . $daq_dir[$ll];
-    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+   print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -285,7 +285,7 @@ struct JFileAttr => {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'logFile');  
-        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');
+       ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -345,12 +345,15 @@ my $pvcomp;
 my $pfullName;
 my $fflag;
 my $Fname;
+my @files;
 
  foreach  my $eachOutLDir (@OUT_DIR) {
           if (-d $eachOutLDir) {
      opendir(DIR, $eachOutLDir) or die "can't open $eachOutLDir\n";
-
-    while( defined($fname = readdir(DIR)) ) {
+      @files = readdir(DIR);
+#    while( defined($fname = readdir(DIR)) ) {
+     foreach $fname ( @files) {
+      next if !$fname;
       next if $fname =~ /^\.\.?$/;    
      
  $jrun = "Run not completed";
@@ -572,13 +575,18 @@ my $Fname;
      print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
 
+
+my @fileR;
 ######## read output files for DEV test at testDay
 
 foreach  $eachOutNDir (@OUT_DIR) {
          if (-d $eachOutNDir) {
     opendir(DIR, $eachOutNDir) or die "can't open $eachOutNDir\n";
 
-    while( defined($flname = readdir(DIR)) ) {
+#    while( defined($flname = readdir(DIR)) ) {
+           @fileR = readdir(DIR);  
+   foreach $flname ( @fileR) {
+       next if !$flname;
       next if $flname =~ /^\.\.?$/;    
       if ($flname =~ /.root/)   {
       $fullname = $eachOutNDir."/".$flname;
@@ -625,7 +633,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
          $EvReq = 100;
    }  
     elsif($EvTp eq "hc_highdensity") {          
-         $EvReq = 10;
+         $EvReq = 16;
    }  
     elsif($EvTp eq "hc_standard") {          
          $EvReq = 20;
