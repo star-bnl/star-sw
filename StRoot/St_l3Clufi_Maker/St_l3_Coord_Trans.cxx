@@ -37,14 +37,26 @@ inline void St_l3_Coord_Trans::raw_to_local()
   xyz_local[1] = radialDistanceAtRow[row-1];
   xyz_local[2] = driftLength - tb*lengthPerTb;*/
 
+    Int_t row    =  (Int_t) pa_ti_ro_se[2];
+    Double_t  pitch = (pa_ti_ro_se[2]<14) ?
 
-  Double_t  pitch = (pa_ti_ro_se[2]<14) ?
     innerSectorPadPitch : outerSectorPadPitch;
   
   Double_t pads2move = pa_ti_ro_se[0] - numberOfPadsAtRow[(Int_t)pa_ti_ro_se[2]-1]/2;
   xyz_local[0] = pitch * (pads2move-.5);
   xyz_local[1] = radialDistanceAtRow[Int_t(pa_ti_ro_se[2])-1];
-  xyz_local[2] = driftLength - pa_ti_ro_se[1] *lengthPerTb;
+  if (row <=13 )
+      {
+	  Double_t innerdriftLength = 200.668 ; 
+  	  Double_t lengthpertimebucket = 0.574731 ;
+	  xyz_local[2] = innerdriftLength - pa_ti_ro_se[1] *lengthpertimebucket;
+      }
+  else
+      {
+	  Double_t outerdriftLength = 201.138 ; 
+  	  Double_t lengthpertimebucket = 0.574731 ;
+	  xyz_local[2] = outerdriftLength - pa_ti_ro_se[1] *lengthpertimebucket;
+      }  
 }
 //______________________________
 inline void St_l3_Coord_Trans::local_to_global()
