@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.33 2004/04/04 23:19:28 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.34 2004/08/06 02:28:53 andrewar Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.34  2004/08/06 02:28:53  andrewar
+ * Added getMaxPointCount(int detectorId)< where detectorId corresponds to the
+ * StDetectorId value.
+ *
  * Revision 2.33  2004/04/04 23:19:28  jeromel
  * isfinite() -> finite()
  *
@@ -534,24 +538,52 @@ int StiKalmanTrack::getMaxPointCount() const
   int nPts = 0;
   if (firstNode)
     {
-			StiKTNBidirectionalIterator it;
-			int k=0;
+      StiKTNBidirectionalIterator it;
+      int k=0;
+
       for (it=begin();it!=end();it++,k++)
-				{
-					StiHit* h = (*it).getHit();
-					if (h)
-						{
-							const StiDetector * detector = h->detector();
-							if (detector)
-								{
-									if (detector->isActive((*it)._p0,(*it)._p1))
-										nPts++;
-								}
-							else
-								nPts++; // vertex have no detector...
-						}
-				}
-		}
+	{
+	  StiHit* h = (*it).getHit();
+	  if (h)
+	    {
+	       const StiDetector * detector = h->detector();
+	       if (detector)
+		  {
+		     if (detector->isActive((*it)._p0,(*it)._p1))
+			      	nPts++;
+		  }
+	       //else
+	       //  nPts++; // vertex have no detector...
+	     }
+	}
+    }
+  return nPts;
+}
+int StiKalmanTrack::getMaxPointCount(int detectorId) const
+{
+  int nPts = 0;
+  if (firstNode)
+    {
+      StiKTNBidirectionalIterator it;
+      int k=0;
+
+      for (it=begin();it!=end();it++,k++)
+	{
+	  StiHit* h = (*it).getHit();
+	  if (h)
+	    {
+	       const StiDetector * detector = h->detector();
+	       if (detector)
+		  {
+		     if (detector->isActive((*it)._p0,(*it)._p1) &&
+			 detector->getGroupId() == detectorId)
+			      	nPts++;
+		  }
+	       //else
+	       //  nPts++; // vertex have no detector...
+	     }
+	}
+    }
   return nPts;
 }
 
