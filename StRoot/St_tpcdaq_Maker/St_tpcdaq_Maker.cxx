@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.71  2002/10/18 20:08:18  didenko
+// fixed flag
+//
 // Revision 1.70  2002/10/15 19:24:31  ward
 // Stuff for pre-.daq file testing, and better handling of daq_flag.
 //
@@ -232,7 +235,7 @@ ClassImp(St_tpcdaq_Maker)
 StDAQReader *victorPrelim;
 StTPCReader *victor;
 int gSector;
-#define DEVELOPMENT
+// #define DEVELOPMENT
 //________________________________________________________________________________
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
