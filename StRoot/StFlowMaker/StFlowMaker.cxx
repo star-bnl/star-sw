@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.16 2000/02/29 01:26:11 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.17 2000/02/29 22:00:54 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.17  2000/02/29 22:00:54  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
 // Revision 1.16  2000/02/29 01:26:11  snelling
 // removed static const int& nxxx = Flow::nxxx;
 //
@@ -68,7 +71,6 @@
 #include "StFlowMaker.hh"
 #include "StFlowEvent.hh"
 #include "StEvent.h"
-#include "StRun.h"
 #include "StEventTypes.h"
 #include "StFlowCutEvent.hh"
 #include "StFlowCutTrack.hh"
@@ -88,7 +90,7 @@ ClassImp(StFlowMaker)
 
 StFlowMaker::StFlowMaker(const Char_t *name): 
   StMaker(name),
-  pEvent(0) {
+  pEvent(NULL) {
 }
 
 //-----------------------------------------------------------------------
@@ -106,7 +108,7 @@ Int_t StFlowMaker::Make() {
 
   // Check the event cuts and fill StFlowEvent
   pFlowEvent = NULL;
-  if (StFlowCutEvent::CheckEvent(pEvent)) fillFlowEvent();
+  if (StFlowCutEvent::CheckEvent(pEvent)) FillFlowEvent();
 
   return kStOK;
 }
@@ -114,7 +116,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.16 2000/02/29 01:26:11 snelling Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.17 2000/02/29 22:00:54 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -123,7 +125,7 @@ void StFlowMaker::PrintInfo() {
 
 Int_t StFlowMaker::Init() {
   // Open PhiWgt file
-  readPhiWgtFile();
+  ReadPhiWgtFile();
 
   // Set the event cuts
 //   StFlowCutEvent::SetMult(1999, 2000);
@@ -151,7 +153,7 @@ Int_t StFlowMaker::Finish() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::readPhiWgtFile() {
+Int_t StFlowMaker::ReadPhiWgtFile() {
   // Read the PhiWgt root file
 
   TDirectory* dirSave = gDirectory;
@@ -193,11 +195,12 @@ Int_t StFlowMaker::readPhiWgtFile() {
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::fillFlowEvent() {
+void StFlowMaker::FillFlowEvent() {
   // Make StFlowEvent from StEvent
 
   // Instantiate a new StFlowEvent
   pFlowEvent = new StFlowEvent;
+  if (!pFlowEvent) return;
 
   // Fill PhiWgt array
   pFlowEvent->SetPhiWeight(mPhiWgt);
@@ -222,6 +225,8 @@ void StFlowMaker::fillFlowEvent() {
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackIterator itr = 0;
   StParticleDefinition* particle;
+  StTpcDedxPidAlgorithm tpcDedxAlgo;
+  Float_t nSigma;
 
   for (itr = tracks.begin(); itr != tracks.end(); itr++) {
     StPrimaryTrack* pTrack = *itr;
@@ -233,17 +238,21 @@ void StFlowMaker::fillFlowEvent() {
       pFlowTrack->SetEta(p.pseudoRapidity());
       pFlowTrack->SetPt(p.perp());
       pFlowTrack->SetCharge(pTrack->geometry()->charge());
-      pFlowTrack->SetImpactPar(pTrack->impactParameter());
+      pFlowTrack->SetDca(pTrack->impactParameter());
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
       pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
+      const StParticleDefinition* guess = pTrack->pidTraits(tpcDedxAlgo);
 #if !defined(__CC5__)
       particle =  StParticleTable::instance()->findParticle("pi+");
-      pFlowTrack->SetPidPiPlus(PidSigmas(pTrack, particle));
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      pFlowTrack->SetPidPiPlus(nSigma);
       particle =  StParticleTable::instance()->findParticle("pi-");
-      pFlowTrack->SetPidPiMinus(PidSigmas(pTrack, particle));
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      pFlowTrack->SetPidPiMinus(nSigma);
       particle =  StParticleTable::instance()->findParticle("proton");
-      pFlowTrack->SetPidProton(PidSigmas(pTrack, particle));
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      pFlowTrack->SetPidProton(nSigma);
 #endif
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
@@ -264,20 +273,17 @@ void StFlowMaker::fillFlowEvent() {
   pFlowEvent->SetPids();
 
   // Print multiplicities
-//   static const int& nHars    = Flow::nHars;
-//   static const int& nSels    = Flow::nSels;
-//   static const int& nSubs    = Flow::nSubs;
 //   int j, k, n;
 
-//   for (j = 0; j < nHars; j++) {
-//     for (k = 0; k < nSels; k++) {
+//   for (j = 0; j < Flow::nHars; j++) {
+//     for (k = 0; k < Flow::nSels; k++) {
 //       cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(j, k) << endl;
 //     }
 //   }
 
-//   for (j = 0; j < nHars; j++) {
-//     for (k = 0; k < nSels; k++) {
-//       for (n = 0; n < nSubs+1; n++) {
+//   for (j = 0; j < Flow::nHars; j++) {
+//     for (k = 0; k <Flow:: nSels; k++) {
+//       for (n = 0; n < Flow::nSubs+1; n++) {
 // 	cout << "j,k,n= " << j << k << n << " : " << 
 // 	  pFlowEvent->Mult(j, k, n) << endl;
 //       }
@@ -288,30 +294,5 @@ void StFlowMaker::fillFlowEvent() {
 
 //-----------------------------------------------------------------------
 
-Float_t StFlowMaker::PidSigmas(const StPrimaryTrack* pTrack, 
-			 const StParticleDefinition* particle) {
-     
-  Float_t nSigma = 0.;
 
-  // get collection of pid traits of TPC track
-  StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
-  
-  StTpcDedxPidAlgorithm tpcDedx;
-  StDedxPidTraits* pid;
-  for (int i = 0; i < traits.size(); i++) {
-    StTrackPidTraits* thisTrait = traits[i];
-    // perform cast to make the pid trait a dedx trait
-    pid = dynamic_cast<StDedxPidTraits*>(thisTrait);
-    //pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
-
-    // container of traits contains several possible dE/dx methods
-    if (pid && pid->method() == kTruncatedMeanId) {
-      // next line is necessary to allow tpcDedx functions
-      const StParticleDefinition* guess = pTrack->pidTraits(tpcDedx);
-      nSigma = (float)tpcDedx.numberOfSigma(particle);
-      break;
-    }
-  }
-  return nSigma;
-}
 

@@ -27,7 +27,7 @@ isotropic in the lab.
 
 In Make, it stores in StFlowEvent the PhiWgt values, the original
 track multiplicity, and the primary vertex position. In each
-StFlowTrack it stores phi, eta, p_t, charge, impact parameter, chi2,
+StFlowTrack it stores phi, eta, p_t, charge, dca, pid, chi2,
 fit points, and max points.
 
 In Finish, it prints the lists of cuts and selections.
@@ -38,8 +38,8 @@ StFlowEvent contains member functions which return PhiWeight, Mult,
 MeanPt, Q (the event plane vector), Psi (the event plane angle), and q
 (=Q/sqrt(Mult)). It contains the function which sets the flags for
 each track saying whether it is used in the event plane determined for
-each harmonic and each selection. It also contains the function which
-makes the random sub-events.
+each harmonic and each selection. It also contains the functions which
+make the random sub-events and set the pid values.
 
 StFlowEvent is used in the flow analysis by StFlowTagMaker and
 StFlowAnalysisMaker.
