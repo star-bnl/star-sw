@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.10 2000/05/16 20:57:31 posk Exp $
+// $Id: doFlowEvents.C,v 1.11 2000/05/17 16:20:59 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -34,6 +34,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.11  2000/05/17 16:20:59  kathy
+// add some print stmts and also run some IOMaker methods in order to get default input files that are softlinks to other files working correctly
+//
 // Revision 1.10  2000/05/16 20:57:31  posk
 // Voloshin's flownanoevent.root added.
 //
@@ -86,8 +89,20 @@ void doFlowEvents(Int_t, const Char_t *, const Char_t *,
 		  const char *qaflag = "off");
 void doFlowEvents(Int_t nevents = 2);
 
+
+// ------------------ Here is the actual method -----------------------------------------
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
+
+  cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
+  Int_t ilist=0;
+  while(fileList[ilist]){ 
+      cout << " doFlowEvents -  input fileList = " << fileList[ilist] << endl;
+      ilist++; 
+    }
+  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl << endl << endl;
+ 
+
   //
   // First load some shared libraries we need
   // Do it in this order
@@ -112,26 +127,35 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // Make a chain with a file list
   chain  = new StChain("StChain");
   //chain->SetDebug();
+
   StFile *setFiles= new StFile();
   for (int ifil=0; fileList[ifil]; ifil++)
     { setFiles->AddFile(fileList[ifil]); }
   
   cout << "#### First File = " << fileList[0] << endl;
+
   if (strstr(fileList[0], "event.root")==0) {
     // Read raw events and make StEvent
     gSystem->Load("StEventMaker");
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
-    IOMk->SetBranch("runcoBranch", 0, "r");
-    //IOMk->SetDebug();
+     IOMk->SetIOMode("r");
+     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+     IOMk->SetBranch("dstBranch",0,"r");
+     IOMk->SetBranch("runcoBranch", 0, "r");
+     //IOMk->SetDebug();
     StEventMaker *readerMaker =  new StEventMaker("events", "title");
     StFlowMaker* flowMaker = new StFlowMaker();
+
   } else if (strstr(fileList[0], "nano")==0) {
     // Read StEvent (or StFlowEvent) files
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("eventBranch", 0, "r");
     IOMk->SetBranch("runcoBranch", 0, "r");
-    IOMk->SetBranch("event");
     //IOMk->SetDebug();
     StFlowMaker* flowMaker = new StFlowMaker();
+
   } else {
     //Read nano-DST
     StFlowMaker* flowMaker = new StFlowMaker();
