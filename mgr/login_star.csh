@@ -1,5 +1,8 @@
 #!/bin/csh
 #  $Log: login_star.csh,v $
+#  Revision 1.5  1998/02/21 00:59:13  fisyak
+#  use dropit only in interactive job
+#
 #  Revision 1.4  1998/02/17 18:06:48  fisyak
 #  Add dropit for PATH
 #
@@ -20,7 +23,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/17 18:06:48 $ 
+#             Last modification $Date: 1998/02/21 00:59:13 $ 
 # login_star.csh
 #------------------------------------------------------------------#
 # This script will set up the STAR enviroment.                     #
@@ -120,12 +123,8 @@ set STAR_PATH = "/usr/afsws/bin:/usr/afsws/etc:/opt/rhic/bin:/afs/rhic/local/bin
 if ( -e /usr/ccs/bin/ld ) set STAR_PATH = ( $STAR_PATH':'/usr/ccs/bin /usr/ccs/lib )
 if ( (`echo $PATH | awk '{print index($0,"/afs/rhic/star/packages")}' `) == 0 ) then
         setenv PATH "$STAR_PATH":"$PATH"
-        if ( -e $STAR/mgr/dropit ) then
-          if ( -x  /bin/nawk ) then
-            setenv PATH `$STAR/mgr/dropit` 
-          endif
-        endif
 endif
+if ( $?TERM > 0 && -e $STAR/mgr/dropit && -x /bin/nawk ) setenv PATH `$STAR/mgr/dropit` 
 unset STAR_PATH
 if ( -e $STAR/mgr/init_star.csh) source $STAR/mgr/init_star.csh
 if ($ECHO) echo   "STAR library version "$VERSION_STAR" has been initiated"
