@@ -162,8 +162,13 @@ Int_t strangeFormulas(TTree* tree) {
   } else {
     max_codes = 100;
   }
+
+  // These branches seem to require classes. No thanks.
   if (tree->GetBranch("EmcCollection")) {
     tree->SetBranchStatus("EmcCollection.*",0);
+  }
+  if (tree->GetBranch("PmdCollection")) {
+    tree->SetBranchStatus("PmdCollection.*",0);
   }
 
   strangeTree = tree;
@@ -858,8 +863,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.8 2004/01/06 05:21:22 genevb Exp $
+// $Id: strangeFormulas.C,v 3.9 2004/04/06 21:27:51 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.9  2004/04/06 21:27:51  genevb
+// Avoid PmdCollection branch
+//
 // Revision 3.8  2004/01/06 05:21:22  genevb
 // Restore decay length functionality (was broken)
 //
