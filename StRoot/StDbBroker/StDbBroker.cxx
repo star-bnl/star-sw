@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.43 2003/09/15 19:16:39 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.44 2004/01/14 23:13:08 fisyak Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.44  2004/01/14 23:13:08  fisyak
+ * Replace ostringstream => StString
+ *
  * Revision 1.43  2003/09/15 19:16:39  porter
  * added #include <sstream> to fix rh7.2 compile problem introduced with recent fix
  * for rh8 compilation.
@@ -149,7 +152,7 @@
  *
  *
  **************************************************************************/
-#include <sstream>
+#include <StString.h>
 #include <Stiostream.h>
 #include <stdlib.h> 
 
@@ -296,7 +299,7 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
    if(!mdescriptor->Dimensions(i)){
       buff.WriteScalar("1","length");
    } else {
-     ostringstream os;
+     StString os;
      const unsigned int* index = mdescriptor->IndexArray(i);
      for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
        os<<index[k]<<",";
@@ -385,8 +388,8 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
    m_DateTime[0] = date; 
    m_DateTime[1]= time;
 
-   ostringstream ds;
-   ostringstream ts;
+   StString ds;
+   StString ts;
 
    ts<<m_DateTime[1];
    int len = (ts.str()).length(); 
@@ -464,13 +467,13 @@ void * StDbBroker::Use(int tabID, int parID)
   }
 
   // success or failure yields an endtime ... so get it.
-  char* thisTime;
-  m_endTimeStamp = m_node->getEndTime();
-  thisTime = m_node->getEndDateTime();
-  makeDateTime(thisTime,m_EndDate,m_EndTime);
 
   if(fetchStatus){  
 
+    char* thisTime;
+    m_endTimeStamp = m_node->getEndTime();
+    thisTime = m_node->getEndDateTime();
+    makeDateTime(thisTime,m_EndDate,m_EndTime);
     m_nRows= m_node->GetNRows();
     pData  = m_node->GetTableCpy(); // gives the "malloc'd version"
 
@@ -503,7 +506,7 @@ void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
 bool StDbBroker::UseRunLog(StDbTable* table){
 
   unsigned int prodTime=table->getProdTime();    
-    ostringstream rq;
+    StString rq;
     rq<<" where runNumber="<<m_runNumber;
 
     if(prodTime==0){
@@ -523,7 +526,7 @@ return fetchStatus;
 Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 #define __METHOD__ "WriteToDb(pArray,tabID)"
 
-  ostringstream em;
+  StString em;
   if(!pArray || tabID==0) {
     em<<" Write Failed -> either data-array or tableID is incomplete";
     return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
@@ -553,7 +556,7 @@ Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 //_____________________________________________________________________________
 Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
 #define __METHOD__ "WriteToDb(pArray,fullPath,idList)"
-  ostringstream em;
+  StString em;
 
   if(!pArray || !fullPath) {
     em<<" Write Failed:: either data-array or path is incomplete";
