@@ -54,7 +54,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
   printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %u\n"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
          ,mBunchCrossingNumber);  
-  printf("\tInpTrig: %4x OutTrig: %4x  \n"
-         ,mInputTriggerMask,mTriggerMask);
+  printf("\t EvtSize: %d \tInpTrig: %4x OutTrig: %4x  \n"
+         ,mEventSize,mInputTriggerMask,mTriggerMask);
   printf("\n *********************************************\n\n");  
 }  
