@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.29 2000/08/07 14:39:40 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.30 2000/09/07 19:00:53 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.30  2000/09/07 19:00:53  lbarnby
+// Explicitly set Kalman mass hypothesis to pion (whad been commented out) rather than relying on default inside Kalman module
+//
 // Revision 1.29  2000/08/07 14:39:40  caines
 // Add to dst a copy of tpc and svt tracks called CpyTrk
 //
@@ -432,8 +435,8 @@ Int_t StMatchMaker::Init(){
   //  row.usevert   = m_usevert;
    m_egr_egrpar->AddAt(&row,0);
   //Use this as the GEANT pid to be used for the kalman filter for now 
-    //row.useglobal = 8;
-    //m_egr_egrpar->AddAt(&row,1);
+    row.useglobal = 8;
+    m_egr_egrpar->AddAt(&row,1);
   }
   
   AddRunCont(m_egr_egrpar);
