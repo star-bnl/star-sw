@@ -1,7 +1,8 @@
 //*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
 // ***********************************************************************
-// * C++ class library to paint axis "arround" TView object
+// * C++ class library to paint 3D axice "arround" TView object
+//                     and zoom 3D objects  as well
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
 // * Author                  Valerie Fine  (fine@bnl.gov)
 // * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
@@ -19,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.8 1999/12/10 02:30:25 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.9 1999/12/12 01:07:21 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -40,6 +41,11 @@
 //   The 3D axis painter class
 //   ==========================
 //
+//  This class provide up to 3 axice to any 3D ROOT plot and
+//  "ZOOM" service.
+//  ExecuteEvent() method does provide zooming and moving a projection
+//  3D object within TPad client area
+//
 //  To add the 3D rulers to any 3D view one has to create
 //  an instance of this class and Draw it.
 //
@@ -50,6 +56,14 @@
 //
 //   TAxis3D::ToggleRulers(); // Brings the 3D axice up
 //   TAxis3D::ToggleRulers(); // next calls remove the rulers from the TPad etc
+//
+//   To activate Zoomer one may call
+//
+//   TAxis3D::ToggleZoom(); 
+//
+//  each time one needs move or zoom the image. Then the user can zoom 
+//  / move its 3D view with <left-mouse button> press / move.
+//  The "Zoom" deactivates itself just the user release the <left-mouse button>
 //
 //  To change attributes of the rulers attached to the current Pad, one may 
 //  query its pointer first:
@@ -555,6 +569,8 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
 {
    AXISCHOICE { fAxis[ax].SetTitleOffset(offset); }
 }
+#undef AXISCHOICE
+
 //_______________________________________________________________________________________
 TAxis3D *TAxis3D::GetPadAxis(TVirtualPad *pad)
 {
@@ -626,6 +642,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.9  1999/12/12 01:07:21  fine
+// remove the compilation warnings
+//
 // Revision 1.8  1999/12/10 02:30:25  fine
 // Centered
 //
@@ -649,4 +668,5 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //
 // Revision 1.1  1999/11/29 19:49:56  fine
 // ROOT class: TAxis3D. To be moved to ROOT later
-//
+//_______________________________________________________________________________________
+
