@@ -3,12 +3,15 @@
 #ifndef EEmcGeom_EEmcDefs_h
 #define EEmcGeom_EEmcDefs_h
 /*********************************************************************
- * $Id: EEmcGeomDefs.h,v 1.4 2003/04/04 15:35:47 wzhang Exp $
+ * $Id: EEmcGeomDefs.h,v 1.5 2003/10/15 15:28:53 wzhang Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Definitions (temp file)
  *********************************************************************
  * $Log: EEmcGeomDefs.h,v $
+ * Revision 1.5  2003/10/15 15:28:53  wzhang
+ * updated for the new StEEmcSmdGeom
+ *
  * Revision 1.4  2003/04/04 15:35:47  wzhang
  * added SMD constants
  *
@@ -33,7 +36,7 @@ const int kEEmcNumEtas       = 12;
 const int kEEmcNumSmdPlanes  =  3;
 const int kEEmcNumStrips     =288;
 const int kEEmcNumEdgeStrips =283;
-const int kEEmcNumSmdLayers  =  2;  // 2 SMD layers: U and V
+const int kEEmcNumSmdUVs  =  2;  // 2 SMD layers: U and V
 
 
 const float kEEmcZPRE1=270.190; // [cm] z preshower1
@@ -48,11 +51,12 @@ const float kEEmcSmdZPlaneShift = 1.215;
 const float kEEmcSmdROffset[kEEmcNumSmdPlanes]={1.850,0.925,0.0};
 
 // The value of the map matrix(3x12) indicates if a EEMC SMD layer in a plane 
-// is a U layer(1), V layer(2), or void(0)  
+// is a U (1), V (2), or void(0)  
+
 const int   kEEmcSmdMapUV[kEEmcNumSmdPlanes][kEEmcNumSectors] = 
-                                     {{2,1,0,2,1,0,2,1,0,2,1,0},
-                                      {0,2,1,0,2,1,0,2,1,0,2,1},
-                                      {1,0,2,1,0,2,1,0,2,1,0,2}};
+                                     {{1,0,-1,1,0,-1,1,0,-1,1,0,-1},
+                                      {-1,1,0,-1,1,0,-1,1,0,-1,1,0},
+                                      {0,-1,1,0,-1,1,0,-1,1,0,-1,1}};
 
 // The value of the map matrix(3x12) indicates if a EEMC SMD module in a plane
 // is an edge module 
@@ -61,9 +65,9 @@ const int   kEEmcSmdMapEdge[kEEmcNumSmdPlanes][kEEmcNumSectors] =
                                       {0,0,1,0,0,0,0,0,1,0,0,0},
                                       {0,0,0,0,0,0,0,0,0,0,0,0}};
 
-const char kEEmcSmdLayerChar[kEEmcNumSmdLayers] = {'U','V'};
+const char kEEmcSmdUVChar[kEEmcNumSmdUVs] = {'U','V'};
 
-const int kEEmcSmdModuleIdPhiCrossPi = 9;
+const int kEEmcSmdSectorIdPhiCrossPi = 9;
 
 #endif
 /* ------------------------------------------
