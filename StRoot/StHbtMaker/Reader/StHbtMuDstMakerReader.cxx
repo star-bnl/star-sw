@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.cxx,v 1.2 2003/01/31 20:22:57 magestro Exp $
+ * $Id: StHbtMuDstMakerReader.cxx,v 1.3 2003/02/13 19:02:20 magestro Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -102,7 +102,6 @@ StHbtEvent* StHbtMuDstMakerReader::ReturnHbtEvent(){
   timer.start();
   clear();
   mMuDst=mMuDstMaker->muDst();
-  cout << mMuDstMaker->chain()->GetCurrentFile()->GetName() << endl;
   mHbtEvent=0;
   if (mMuDst && mMuDst->event() ) {
     DEBUGVALUE3(mMuDst);
@@ -141,6 +140,9 @@ void StHbtMuDstMakerReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.cxx,v $
+ * Revision 1.3  2003/02/13 19:02:20  magestro
+ * Removed offending cout statement
+ *
  * Revision 1.2  2003/01/31 20:22:57  magestro
  * Small changes to eliminate compiler warnings
  *
