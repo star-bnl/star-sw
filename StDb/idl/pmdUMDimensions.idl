@@ -14,6 +14,6 @@ struct pmdUMDimensions {
   long  FEEChainNumber;   /* Chain number of the unit module */ 
   long  StartBoardNumber; /* Initial Board Number*/
   long  EndBoardNumber; /* Final Board Number */
-  char  BoardStatus[9];  /* Overall status of the boards in the unit module */
+  char  BoardStatus[16];  /* Overall status of the boards in the unit module */
 };  
 
