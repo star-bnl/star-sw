@@ -56,6 +56,7 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x13) return 2001; // roughly to the file names for the various
   if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
   if(*data==0x21) return 2004; // trgStructures.h versions (eg, trgStructures2004.h).
+  if(*data==0x22) return 2005; // trgStructures.h versions (eg, trgStructures2005.h).
   
   printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
   assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
@@ -109,6 +110,12 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
       S_mode = 0;
       // SanityCheck2004(ptr,S_mode);
       if(pBankTRGD->HerbSwap2004(ptr)<0) { mErr = 2004; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      break;
+
+    case 2005:
+      S_mode = 0;
+      // SanityCheck2004(ptr,S_mode);
+      if(pBankTRGD->HerbSwap2005(ptr)<0) { mErr = 2005; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     default: assert(0);
