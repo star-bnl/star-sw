@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtData.cc,v 1.4 2001/10/24 16:48:50 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.cc,v $
+ * Revision 1.4  2001/10/24 16:48:50  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.3  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -44,9 +47,6 @@ StSvtData::StSvtData(const char* config, int run, int event, int trigger, int ti
   mRunNumber = run;
   mEventNumber = event;
   mTriggerWord = trigger;
-  mSCAZero = 0;
-  for (int i = 0; i < N_SECTORS; i++)
-    mTimeZero[i] = 0;
   mUnixTime = time;
 }
 
@@ -57,9 +57,6 @@ StSvtData::StSvtData(StSvtConfig* config, int run, int event, int trigger, int t
   mRunNumber = run;
   mEventNumber = event;
   mTriggerWord = trigger;
-  mSCAZero = 0;
-  for (int i = 0; i < N_SECTORS; i++)
-    mTimeZero[i] = 0;
   mUnixTime = time;
 }
 
@@ -72,9 +69,6 @@ StSvtData::StSvtData(const StSvtData& data):StSvtHybridCollection(data.mConfig)
   mRunNumber = data.mRunNumber;
   mEventNumber = data.mEventNumber;
   mTriggerWord = data.mTriggerWord;
-  mSCAZero = data.mSCAZero;
-  for (int i = 0; i < N_SECTORS; i++)
-    mTimeZero[i] = data.mTimeZero[i];
   mUnixTime =data.mUnixTime;
 }
 
@@ -83,9 +77,6 @@ StSvtData& StSvtData::operator = (const StSvtData& data)
   mRunNumber = data.mRunNumber;
   mEventNumber = data.mEventNumber;
   mTriggerWord = data.mTriggerWord;
-  mSCAZero = data.mSCAZero;
-  for (int i = 0; i < N_SECTORS; i++)
-    mTimeZero[i] = data.mTimeZero[i];
   mUnixTime =data.mUnixTime;
 
   return *this;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.4 2001/07/11 23:29:47 munhoz Exp $
+ * $Id: StSvtDaqData.cc,v 1.5 2001/10/24 16:49:42 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.5  2001/10/24 16:49:42  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.4  2001/07/11 23:29:47  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
@@ -99,6 +102,13 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	  mData = new StSvtHybridDaqData(barrel, ladder, wafer, hybrid);
 
 	  status = ((StSvtHybridDaqData*)mData)->setHybridData(reader, option);
+
+	  if ((barrel == 1) && (ladder == 1) && (wafer == 2)) {
+	    ((StSvtHybridDaqData*)at(getHybridIndex(1, 1, 1, 1)))->setSCAZero(((StSvtHybridDaqData*)mData)->getSCAZero());
+	    ((StSvtHybridDaqData*)at(getHybridIndex(1, 1, 1, 2)))->setSCAZero(((StSvtHybridDaqData*)mData)->getSCAZero());
+	    ((StSvtHybridDaqData*)at(getHybridIndex(1, 1, 1, 1)))->setTimeZero(((StSvtHybridDaqData*)mData)->getTimeZero());
+	    ((StSvtHybridDaqData*)at(getHybridIndex(1, 1, 1, 2)))->setTimeZero(((StSvtHybridDaqData*)mData)->getTimeZero());
+	  }
 
 	  if (status >= 0) {
 

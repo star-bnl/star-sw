@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.5 2001/08/22 14:22:17 caines Exp $
+ * $Id: StSvtDaqMaker.h,v 1.6 2001/10/24 16:49:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.6  2001/10/24 16:49:43  munhoz
+ * adding capability to retrieve t0 and first SCA
+ *
  * Revision 1.5  2001/08/22 14:22:17  caines
  * Default to config to FULL and ZS
  *
@@ -78,6 +81,9 @@ class StSvtDaqMaker : public StMaker {
   void   PrintEventInfo();
   Int_t  Reset();
   void   UpdateReader();
+  Int_t  InitEvp(const char* option){return kStErr;}
+  Int_t  GetSvtEvpData(){return kStErr;}
+
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   Clear(const char *opt);
