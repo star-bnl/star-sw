@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.2  2000/08/29 20:13:39  subhasis
+// Modified to accept StEvent input and writing out StEvent output for Emc
+//
 // Revision 1.1  2000/05/15 21:18:33  subhasis
 // initial version
 //
@@ -45,15 +48,14 @@ typedef vector<int> intVector;
 #include "St_DataSetIter.h"
 #include "St_TableSorter.h"
 #include "StPi0Candidate.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
-#include "StPreEclMaker/StEmcPreClusterCollection.h"
-#include "StPreEclMaker/StBemcPreClusterCollection.h"
-#include "StPreEclMaker/StBsmdePreClusterCollection.h"
-#include "StPreEclMaker/StBsmdpPreClusterCollection.h"
 #include "StEpcMaker.h"
 
-typedef StVector(StEmcPreCluster*) StMatchVec;
-typedef StVector(StEmcPreCluster*)::iterator StMatchVecIter;
+class StEmcClusterCollection;
+class StEmcCluster;
+
+typedef StVector(StEmcCluster*) StMatchVecClus;
+typedef StVector(StEmcCluster*)::iterator StMatchVecClusIter;
+
 
 #include "tables/St_dst_track_Table.h"
 class StPointCollection : public St_DataSet {
@@ -77,38 +79,33 @@ public:
   Int_t NPointsReal() const;
   const TObjArray* PointsReal() const;
 
-
 Int_t
-  findPoints(StBemcPreClusterCollection*,
-             StBsmdePreClusterCollection*,
-             StBsmdpPreClusterCollection*,
-             StEmcHitCollection*,
-             StEmcHitCollection*,
-             StEmcHitCollection*,
-             St_dst_track *); 
+  findEmcPoints(StEmcClusterCollection*,
+             StEmcClusterCollection*,
+             StEmcClusterCollection*,
+             StEmcClusterCollection*,
+             StTrackVec &);
+
+void
+  PointCalc(StEmcClusterCollection*,
+            StEmcClusterCollection*,
+            StEmcClusterCollection*,
+            StEmcClusterCollection*);
 
 virtual Int_t
   addPoints(Float_t*);
 
-void 
-  findCandidates(StBemcPreClusterCollection*,
-                 StBsmdePreClusterCollection*,
-                 StBsmdpPreClusterCollection*,
-                 StEmcHitCollection*,
-                 StEmcHitCollection*,
-                 StEmcHitCollection*); 
-
 virtual Int_t
-  GetEmcPoint(const StMatchVec,
-              const StMatchVec,
-              const StMatchVec,
+  GetEmcPointEvent(const StMatchVecClus,
+              const StMatchVecClus,
+              const StMatchVecClus,
               const FloatVector,
               const FloatVector,
               const FloatVector,
               Int_t *);
 
 virtual Int_t
-  GlobSort(const St_dst_track *) const;
+  TrackSort(const StTrackVec &) const;
  
   ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection 
 };
