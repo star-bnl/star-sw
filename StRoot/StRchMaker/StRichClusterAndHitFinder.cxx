@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.12 2003/09/24 02:39:31 hippolyt Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.13 2003/11/18 02:51:16 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.13  2003/11/18 02:51:16  perev
+ * Fix FPE
+ *
  * Revision 2.12  2003/09/24 02:39:31  hippolyt
  * init pointers and arrays
  *
@@ -1236,9 +1239,11 @@ bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVec
     //  this is temp:
     //                2       2        2
     //              dx  =  < x  > - < x >
-    hitInfo->setPositionError(::sqrt(tmpX2/amp-sqr(tmpX/amp)),
-			      ::sqrt(tmpY2/amp-sqr(tmpY/amp)),
-			      0.);
+    double tmpDX = tmpX2/amp-sqr(tmpX/amp);
+    double tmpDY = tmpY2/amp-sqr(tmpY/amp);
+    if (tmpDX<0.) tmpDX=1.e-20;
+    if (tmpDY<0.) tmpDY=1.e-20;
+    hitInfo->setPositionError(sqrt(tmpDX),sqrt(tmpDY), 0.);
 
     hitInfo->setCharge(amp);
     hitInfo->setMaxAdc(maxAdc);
