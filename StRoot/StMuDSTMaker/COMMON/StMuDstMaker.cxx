@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.33 2003/09/19 01:45:18 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.34 2003/09/28 21:10:59 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -85,6 +85,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0), 
+  mCurrentFile(0), 
+  mChain (0), mTTree(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4), 
   mProbabilityPidAlgorithm(0)  
 {
@@ -914,6 +916,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.34  2003/09/28 21:10:59  jeromel
+ * More data members zeroed (would cause a crash on exit)
+ *
  * Revision 1.33  2003/09/19 01:45:18  jeromel
  * A few problems hopefully fixed i.e. one constructor lacked zeroing
  * emcArrays were not  zeroed, mStMuDst not zeroed.
