@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 2.1 2000/09/29 19:01:26 lasiuk Exp $
+ * $Id: StRichSimpleHit.h,v 2.2 2000/11/01 16:52:43 lasiuk Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,10 +7,9 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
- * Revision 2.1  2000/09/29 19:01:26  lasiuk
- * enumerated types added for flags
- * c'tor includes cp from persistent hit
- * number of pads added as a member
+ * Revision 2.2  2000/11/01 16:52:43  lasiuk
+ * Use the enumerated types from StEvent.  correct the NAMESPACE macro
+ * and print more bits in the printBit member
  *
  * Revision 2.1  2000/09/29 19:01:26  lasiuk
  * enumerated types added for flags
@@ -41,18 +40,17 @@
 #include <iostream.h>
 #include <vector>
 
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
+#ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
 
 #include "StThreeVector.hh"
 
 // From StEvent
-#ifdef __ROOT__
-#include "StEvent/StRichHit.h"
-#endif
-
-enum StRichSimpleHitFlag {eDeconvoluted=1, eMip=2, eSaturatedPad=4};
+// if not running with STEVENT, set this and the enumerations
+// will be defined here...otherwise use the StEvent definitions.
+#include "StEnumerations.h"
+#include "StRichHit.h"
 
 class StRichSimpleHit  {
 public:
@@ -92,9 +90,9 @@ public:
 
     //
     // Flag Operation
-    bool isSet(StRichSimpleHitFlag f)      const;
-    void setBit(StRichSimpleHitFlag f);
-    void unSetBit(StRichSimpleHitFlag f);
+    bool isSet(StRichHitFlag f)      const;
+    void setBit(StRichHitFlag f);
+    void unSetBit(StRichHitFlag f);
     unsigned long flags()                  const;
     void printBits()                       const;
     
@@ -132,9 +130,9 @@ inline void StRichSimpleHit::setNumberOfPads(unsigned short n) {mNumberOfPads=n;
 
 inline StRichSimpleHit* StRichSimpleHit::clone() {return new StRichSimpleHit(*this);}
 // Flags
-inline void StRichSimpleHit::setBit(StRichSimpleHitFlag b) { mFlags |= b; }
-inline void StRichSimpleHit::unSetBit(StRichSimpleHitFlag b) { mFlags &= ~(b);}
-inline bool StRichSimpleHit::isSet(StRichSimpleHitFlag b) const { return (mFlags & b); }
+inline void StRichSimpleHit::setBit(StRichHitFlag b) { mFlags |= b; }
+inline void StRichSimpleHit::unSetBit(StRichHitFlag b) { mFlags &= ~(b);}
+inline bool StRichSimpleHit::isSet(StRichHitFlag b) const { return (mFlags & b); }
 inline unsigned long StRichSimpleHit::flags() const { return (mFlags); }
 
 // non-members

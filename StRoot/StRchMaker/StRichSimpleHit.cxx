@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 2.1 2000/09/29 19:01:24 lasiuk Exp $
+ * $Id: StRichSimpleHit.cxx,v 2.2 2000/11/01 16:52:41 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,10 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
- * Revision 2.1  2000/09/29 19:01:24  lasiuk
- * enumerated types added for flags
- * c'tor includes cp from persistent hit
- * number of pads added as a member
+ * Revision 2.2  2000/11/01 16:52:41  lasiuk
+ * Use the enumerated types from StEvent.  correct the NAMESPACE macro
+ * and print more bits in the printBit member
  *
  * Revision 2.1  2000/09/29 19:01:24  lasiuk
  * enumerated types added for flags
@@ -72,10 +71,10 @@ ostream& operator<<(ostream& os, const StRichSimpleHit& hit)
 
 void StRichSimpleHit::printBits() const
 {
-    const int numberOfBits = 10;  // a long is really 32 bits you know
+    const int numberOfBits = 15;  // a long is really 32 bits you know
     cout << "StRichSimpleHitFlags: ";
     for(int ii=0; ii<numberOfBits; ii++) {
-	unsigned long mask = pow(2.,ii);
+	unsigned long mask = static_cast<unsigned long>(pow(2.,ii));
 	cout << ((mFlags & mask) == 0 ? 0 : 1);
     }
     cout << endl;
