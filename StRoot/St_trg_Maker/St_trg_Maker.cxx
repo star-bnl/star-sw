@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.35 2001/12/04 18:24:13 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.36 2002/02/19 18:34:44 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.36  2002/02/19 18:34:44  ward
+// Changes from Jenn Klay: EMC unpacker rewritten, updated dsm-to-patch conversion to match offline software.
+//
 // Revision 1.35  2001/12/04 18:24:13  jeromel
 // Small modif of return value to make Insure happy.
 //
@@ -198,41 +201,6 @@ Int_t St_trg_Maker::Init(){
 #include "duplicated.code"
 
 ////////////////////////////////////////////////////////////////////////////////////////
-
-void St_trg_Maker::unpack6bits( byte* value, byte* newbits) {
-
-  int index;
-  int i1,i2;
-
-  //Unpack the bits into 20 signals
-  for (index=0; index<5; index++) {
-    i1=index*3;
-    i2=index*4;
-
-    newbits[i2] = (value[i1] & 0xFC);           //Get the first 6 bits only of this char
-    newbits[i2] >>= 2;                          //Move them 2 bits to the right, add 2 leading zeros
-    newbits[i2+1] = ((value[i1] & 0x03) << 6) | ((value[i1+1] & 0xF0) >> 2);
-    newbits[i2+1] >>= 2;
-    newbits[i2+2] = ((value[i1+1] & 0x0F) << 4) | ((value[i1+2] & 0xC0) >> 4);
-    newbits[i2+2] >>= 2;
-    newbits[i2+3] = (value[i1+2] & 0x3F);
-  }
-
-  return;
-}
-void St_trg_Maker::swapByteOrder( byte *dsmOutput, byte* emcOrder) {
-
-  int index;
-  int i,j,k;
-
-  for (index=0; index<8; index++) {
-    i=7-index;
-    emcOrder[index] = dsmOutput[i];
-    j = 8+index; k = 15-index;
-    emcOrder[j] = dsmOutput[k];
-  }
-  return;
-}
 void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
