@@ -24,8 +24,8 @@ StEmcHandleDB::StEmcHandleDB(TDataSet* calibdb)
 StEmcHandleDB::~StEmcHandleDB() {}
 
 Int_t 
-StEmcHandleDB::ProcessDB() {
-  cout << "HandleDB::ProcessDB()" << endl;
+StEmcHandleDB::processDB() {
+  cout << "HandleDB::processDB()" << endl;
 
   for(Int_t i=0; i<4; i++) {
     geo[i] = StEmcGeom::getEmcGeom(i+1);
@@ -56,23 +56,23 @@ StEmcHandleDB::ProcessDB() {
   }
 
     // get tower tables and fill arrays
-    Int_t towerstat=Process_TowerPedDB();
+    Int_t towerstat=processTowerPedDB();
     // get tower tables and fill arrays
-    Int_t smdestat=Process_SmdEDB();
+    Int_t smdestat=processSmdEDB();
     // get tower tables and fill arrays
-    Int_t smdpstat=Process_SmdPDB();
+    Int_t smdpstat=processSmdPDB();
      return kStOK;
 }
 
 
 Int_t 
-StEmcHandleDB::Process_TowerPedDB()
+StEmcHandleDB::processTowerPedDB()
 {
-  cout<<"EMCHandleDB:: In Process Tower Ped DB**"<<endl;
-  // Get pedestal tables from m_calibdb
+  cout<<"EMCHandleDB:: In process Tower Ped DB**"<<endl;
+  // get pedestal tables from m_calibdb
   TString TableNamePed=detname[0]+"Pedestal"; 
   St_emcCalibration* calped=0;
-  //Get Pedestal tables
+  //get Pedestal tables
   cout<<"GETTING PEDS FOR TOWER***"<<endl;
   calped = (St_emcCalibration*)m_calibdbptr->Find(TableNamePed.Data());
   if(!calped) {
@@ -101,9 +101,9 @@ StEmcHandleDB::Process_TowerPedDB()
 
 
 Int_t 
-StEmcHandleDB::Process_TowerCalibDB()
+StEmcHandleDB::processTowerCalibDB()
 {
-  cout<<"EMCHandleDB:: In Process Tower Calib DB**"<<endl;
+  cout<<"EMCHandleDB:: In process Tower Calib DB**"<<endl;
   TString TableName=detname[0]+"Calibration"; 
   St_emcCalibration* caltemp=0;
   //Get Calibration tables
@@ -135,7 +135,7 @@ StEmcHandleDB::Process_TowerCalibDB()
 
  ////////////////////////////////////////////////////////////
  // Get pdestal tables from m_calibdb
- cout<<"In Process Tower DB, get equal **"<<endl;
+ cout<<"In process Tower DB, get equal **"<<endl;
  TableName=detname[0]+"Equalization"; 
  St_emcCalibration* caleq=0;
  caleq = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
@@ -162,7 +162,7 @@ StEmcHandleDB::Process_TowerCalibDB()
  return kStOK;
 }
 
-Int_t StEmcHandleDB::Process_SmdEDB()
+Int_t StEmcHandleDB::processSmdEDB()
 {
 
   // Get pdestal tables from m_calibdb
@@ -194,7 +194,7 @@ Int_t StEmcHandleDB::Process_SmdEDB()
    return kStOK;
 }
 
-Int_t StEmcHandleDB::Process_SmdPDB()
+Int_t StEmcHandleDB::processSmdPDB()
 {
 
   // Get pdestal tables from m_calibdb
@@ -226,7 +226,7 @@ Int_t StEmcHandleDB::Process_SmdPDB()
    return kStOK;
 }
 
- Int_t StEmcHandleDB::GetTowerPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::getTowerPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
 // Call m,e,s starting from 0,0,0 not 1,1,1
 //
@@ -235,7 +235,7 @@ Int_t StEmcHandleDB::Process_SmdPDB()
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetTowerCalibs(Int_t m,Int_t e,Int_t s,Float_t* ped)
+ Int_t StEmcHandleDB::getTowerCalibs(Int_t m,Int_t e,Int_t s,Float_t* ped)
 {
   if(m_TowerCalibs[m][e][s].size()>0){
 //     for(UInt_t l=0;l<m_TowerCalibs[m][e][s].size();l++)cout<<m_TowerCalibs[m][e][s][l]<<endl;
@@ -244,49 +244,49 @@ Int_t StEmcHandleDB::Process_SmdPDB()
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetTowerEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::getTowerEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
   if(m_TowerEquals[m][e][s].size()>0)ped=m_TowerEquals[m][e][s][0];
   else{ped=1;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetSmdEPeds(Int_t m,Int_t e,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdEPeds(Int_t m,Int_t e,Float_t& ped)
 {
   if(m_SmdEPeds[m][e].size()>0)ped=m_SmdEPeds[m][e][0];
   else{ped=0;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetSmdECalibs(Int_t m,Int_t e,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdECalibs(Int_t m,Int_t e,Float_t& ped)
 {
   if(m_SmdECalibs[m][e].size()>0)ped=m_SmdECalibs[m][e][0];
   else{ped=1;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetSmdEEquals(Int_t m,Int_t e,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdEEquals(Int_t m,Int_t e,Float_t& ped)
 {
   if(m_SmdEEquals[m][e].size()>0)ped=m_SmdEEquals[m][e][0];
   else{ped=1;}
   return kStOK;
 }
 ///////////////////////////////////////////////////////////////
- Int_t StEmcHandleDB::GetSmdPPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdPPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
   if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPPeds[m][e][s][0];
   else{ped=0;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetSmdPCalibs(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdPCalibs(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
   if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPCalibs[m][e][s][0];
   else{ped=1;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetSmdPEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::getSmdPEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
   if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPEquals[m][e][s][0];
   else{ped=1;}

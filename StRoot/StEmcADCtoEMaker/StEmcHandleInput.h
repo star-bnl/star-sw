@@ -21,26 +21,22 @@ using std::vector;
 #endif
 
 class StEMCReader;
-class StEvent;
+class StEmcCollection;
 class TDataSet;
 
 class StEmcHandleInput {
     
-private:
-    
-protected:
-    
 public: 
-    StEmcHandleInput(StEvent*, StEMCReader*, TDataSet*);
+    StEmcHandleInput(StEmcCollection*, StEMCReader*, TDataSet*);
     virtual       ~StEmcHandleInput();
-    virtual Int_t  ProcessInput();
+    Int_t  processInput();
     void clear();
 protected:
     
 private:
-    StEvent     *mevent;
-    StEMCReader *mTheEmcReader;
-    TDataSet    *mCalibDb;
+    StEmcCollection *mEmcCollection; //!
+    StEMCReader *mTheEmcReader;      //!
+    TDataSet    *mCalibDb;           //!
     ClassDef(StEmcHandleInput, 1)   
 };
 

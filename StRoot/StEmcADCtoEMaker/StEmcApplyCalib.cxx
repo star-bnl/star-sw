@@ -26,28 +26,28 @@ ClassImp(StEmcApplyCalib) // macro
 
 Short_t calibBemc, calibSmd;
    
-StEmcApplyCalib::StEmcApplyCalib(StEvent*event,TDataSet* calibdb)
-: mevent(event), m_calibdb(calibdb)
+StEmcApplyCalib::StEmcApplyCalib
+(StEmcCollection *emccol, TDataSet* calibdb)
+:mEmcCollection(emccol),  mCalibDb(calibdb)
 {}
 
 StEmcApplyCalib::~StEmcApplyCalib() {}
 
 Int_t 
-StEmcApplyCalib::Calibrate() 
+StEmcApplyCalib::calibrate() 
 {
-  cout << "ApplyCalib::Calibrate()" << endl;
+  cout << "ApplyCalib::calibrate()" << endl;
   StEmcHandleDB * db=0;
   calibBemc = StEmcADCtoEMaker::getControlTable()[0].bemcCalibration;
   calibSmd  = StEmcADCtoEMaker::getControlTable()[0].bsmdCalibration;
   if(calibBemc && calibSmd) {
-    cout<<" StEmcApplyCalib::Calibrate() -> N O  C A L I B R A T I O N"
+    cout<<" StEmcApplyCalib::calibrate() -> N O  C A L I B R A T I O N"
 	<<" calibBemc "<<calibBemc<<" calibSmd "<< calibSmd<<endl;
     return kStWarn;
   }
 
-// Get EmcCollection, apply separately for each subdetectors
-  StEmcCollection * emccoll=mevent->emcCollection();  
-  if(!emccoll){
+// Check mEmcCollection, apply separately for each subdetectors
+  if(!mEmcCollection){
     cout<<"EmcCollection does not exist **, quit" << endl;
     return kStWarn;
   }
@@ -55,14 +55,14 @@ StEmcApplyCalib::Calibrate()
   if(calibBemc || calibSmd) {
 //Get DB
     cout<<"Getting CalibDB"<<endl;
-    db = new StEmcHandleDB(m_calibdb);
-    db->Process_TowerCalibDB(); 
+    db = new StEmcHandleDB(mCalibDb);
+    db->processTowerCalibDB(); 
     cout<<"DB handled"<<endl;
   }
 
   //First , Tower 
   if(calibBemc) {
-    Int_t stat_tower = Calibrate_Tower(db,emccoll);
+    Int_t stat_tower = calibrateTower(db,mEmcCollection);
     if(stat_tower!=kStOK) {
       cout<<"Tower Calibration not OK**"<<endl;
     } else {
@@ -71,7 +71,7 @@ StEmcApplyCalib::Calibrate()
   }
   if(calibSmd) {
   //Second  , SMD 
-    Int_t stat_smd = Calibrate_Smd(db,emccoll);
+    Int_t stat_smd = calibrateSmd(db,mEmcCollection);
     if(stat_smd!=kStOK) {
       cout<<"Smd Calibration not OK**"<<endl;
     } else {
@@ -84,7 +84,7 @@ StEmcApplyCalib::Calibrate()
 }
 
 Int_t 
-StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
+StEmcApplyCalib::calibrateTower(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
     StDetectorId id = static_cast<StDetectorId>(1+kBarrelEmcTowerId);
     StEmcDetector* detector1=(StEmcDetector*)emccoll->detector(id);
@@ -104,7 +104,7 @@ StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
           Float_t calib[5];
           for(Int_t i=0;i<5;i++){calib[i]=0.;}
           Float_t energy=0;
-            int calstat=db->GetTowerCalibs(m1,e1,s1,calib);
+            int calstat=db->getTowerCalibs(m1,e1,s1,calib);
              if(calstat==kStOK){
                 Float_t ADC=rawHit1[k1]->adc();
 //                energy=ADC*calib[0];
@@ -124,7 +124,7 @@ StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
 }
 
 Int_t 
-StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
+StEmcApplyCalib::calibrateSmd(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
   for(UInt_t idet=3;idet<=4;idet++){
     StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);
@@ -145,8 +145,8 @@ StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
           Float_t calib=0;
           Float_t energy=0;
           int calstat=0;
-            if(idet==3){calstat=db->GetSmdECalibs(m1,e1,calib);}
-            if(idet==4){calstat=db->GetSmdPCalibs(m1,e1,s1,calib);}
+            if(idet==3){calstat=db->getSmdECalibs(m1,e1,calib);}
+            if(idet==4){calstat=db->getSmdPCalibs(m1,e1,s1,calib);}
              if(calstat){
                 Float_t ADC=rawHit1[k1]->adc();
                 energy=ADC*calib;

@@ -38,7 +38,7 @@ controlADCtoE_st *StEmcADCtoEMaker::mControlTable=0;
 StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name, int daq)
 : StMaker(name), mDaq(daq)
 {
-  mevent         = 0;
+  mEvent         = 0;
   mEmcCollection = 0;
   // default Control table
   mControlMaker = new St_controlADCtoE("controlADCtoE",1);
@@ -61,76 +61,106 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name, int daq)
 
 StEmcADCtoEMaker::~StEmcADCtoEMaker() {}
 
-Int_t StEmcADCtoEMaker::Init() 
+Int_t 
+StEmcADCtoEMaker::Init() 
 {
   gMessMgr->Info()<<"StEmcADCtoEMaker::Init() ended";
   return StMaker::Init();
 }
-//-----------------------------------------------------------------
 
-Int_t StEmcADCtoEMaker::Make() {
-  gMessMgr->Info()<<"StEmcADCtoEMaker::Make() started for Event "
-                  << GetEventNumber() << endl;
+Int_t 
+StEmcADCtoEMaker::Make()
+{
+  gMessMgr->Info()<<"StEmcADCtoEMaker::Make() started "
+                  << GetEventNumber() << endm;
 
-  // This staf must be redesign
-  mevent = new StEvent();
-  mevent->SetName("StEventTmp"); // 2-oct-2001
   mEmcCollection = 0;
- 
-  mTheEmcData   = GetDataSet("StDAQReader");
+  mEvent = (StEvent*)GetInputDS("StEvent");
+  if(mEvent) mEmcCollection = mEvent->emcCollection();
 
-  if(!mTheEmcData) {
-    cout << "StEreaderMaker::Maker()\n";
-    cout << "\t DataSet: StDAQReader not there\n";
-    cout << "\tSkip this event\n" << endl;
-    mTheEmcReader = NULL;
-  } else{
-    cout<<" GOT DaqReader dataset **"<<endl;
-    mTheDataReader = (StDAQReader*)(mTheEmcData->GetObject());
-    if(!mTheDataReader) {
-      cout << "StEreaderMaker::Maker()\n";
-      cout << "\tStDAQReader*: not there\n";
-      cout << "\tSkip this event\n" << endl;
+  if(mEmcCollection == 0) {
+    //
+    // No StEvent or emc collection in StEvent
+    // Will try to create emc hits from reader
+    //
+    mTheEmcData  = GetDataSet("StDAQReader");
+
+    if(!mTheEmcData) {
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => DataSet: StDAQReader not there "
+                      << "=>Skip this event\n" << endm;
       mTheEmcReader = NULL;
-    } else{
-      cout<<" GOT DaqReader object, look for emc**"<<endl;
-      if(!(mTheDataReader->EMCPresent())) {
-	cout << "StEreaderMaker::Maker()\n";
-	cout << "\tEMC not in datastream\n";
-	cout << "\tSkip this event\n" << endl;
-	mTheEmcReader = NULL;
-      } else{
-        cout<<"EMC prsent seen from datareader"<<endl;
-	mTheEmcReader = mTheDataReader->getEMCReader();
+    } else {
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => got DaqReader dataset"
+                      << endm;
+      mTheDataReader = (StDAQReader*)(mTheEmcData->GetObject());
+      if(!mTheDataReader) {
+        gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => StDaqReader not there **"
+                        << " : Skip this event\n" << endm;
+        mTheEmcReader = NULL;
+      } else {
+        gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => got StDaqReader object"
+                        << endm;
+        if(!(mTheDataReader->EMCPresent())) {
+          gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => Emc reader not there **"
+                          << " : Skip this event\n" << endm;
+	  mTheEmcReader = NULL;
+        } else{
+          gMessMgr->Info()<<"StEmcADCtoEMaker::Make() =>  Emc reader is present"
+                          << endm;
+	  mTheEmcReader = mTheDataReader->getEMCReader();
+        }
       }
     }
-  }
-  if(!mTheEmcReader){
-    cout<<"No EMC READER***, QUIT"<<endl;
-    return kStWarn;
+
+    if(!mTheEmcReader){
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make() =>  No emc colection and "
+		      <<"No EMC reader , QUIT **" << endm;
+      return kStWarn;
+    } else {
+      mEmcCollection = new StEmcCollection;
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => create emc collection for StEvent"
+                    <<endm;
+    }
+
+  } else {
+    gMessMgr->Info()<<"StEmcADCtoEMaker::Make() => get emc collection from StEvent"
+                    <<endm;
   }
 
-  // Get DB if need 
+  // Get DB if need -> very slowly 
   mCalibDb = GetInputDB("Calibrations/emc");
   if(!mCalibDb) {
-    cout<<" Didn't get calib db** quiting"<<endl;
+    gMessMgr->Info()<<"StEmcADCtoEMaker::Make() =>  No calibration DB , quit **"
+		    << endm;
     return kStWarn;
   }
 
-// you have DB, StEvent and EmcReader pointers, so handle the input now
-
-  StEmcHandleInput * input = new StEmcHandleInput(mevent,mTheEmcReader,mCalibDb);
-
-  if(input->ProcessInput()!=kStOK){
-     cout<<" error in input handling, bail out**"<<endl;
-     return kStWarn;
-  } else {
-   // apply calib now
-    StEmcApplyCalib * calib = new StEmcApplyCalib(mevent,mCalibDb);
-    if(calib->Calibrate()!= kStOK){   
-      cout<<"error in calibrating **"<<endl;
+  // We have DB, emc hits collection pointer and EmcReader (may be)
+  StEmcHandleInput *input = 0;
+  if(mTheEmcReader) {
+    input = new StEmcHandleInput(mEmcCollection, mTheEmcReader, mCalibDb);
+    if(input->processInput()!=kStOK){
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make()=>error in input , bail out**"
+		      << endm;
       return kStWarn;
-    } else cout <<" Calibration done **"<<endl;
+    }
+  }
+
+  
+  if(mEmcCollection&&(mControlTable[0].bemcCalibration||mControlTable[0].bemcCalibration)){
+   // apply calib now
+    StEmcApplyCalib * calib = new StEmcApplyCalib(mEmcCollection, mCalibDb);
+    if(calib->calibrate()!= kStOK){   
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make()=> error in calibration **"
+		      << endm;
+      return kStWarn;
+    } else {
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make()=> calibration done" << endm;
+    }
+  } else {
+    if(mEmcCollection) 
+      gMessMgr->Info()<<"StEmcADCtoEMaker::Make()=> NO calibration "
+		      << endm;
   }
 
     // for what ?? after that program crash in StDAQReader::readEvent() 
@@ -144,13 +174,11 @@ Int_t StEmcADCtoEMaker::Make() {
 	mTheEmcReader = 0;
     }
      */
-  mEmcCollection = mevent->emcCollection();
-
   return kStOK;
 }
 
-Int_t StEmcADCtoEMaker::Finish() {
-
+Int_t 
+StEmcADCtoEMaker::Finish() {
     return StMaker::Finish();
 }
 
@@ -158,7 +186,7 @@ StEmcCollection*
 StEmcADCtoEMaker::getEmcCollection()
 {
   return mEmcCollection;
-  //  return mevent->emcCollection();
+  //  return mEvent->emcCollection();
 }
 
 void 
@@ -170,7 +198,7 @@ StEmcADCtoEMaker::clearStEventStaf()
 void
 StEmcADCtoEMaker::Browse(TBrowser* b)
 {
-  if(mevent) b->Add(mevent);
+  if(mEmcCollection) b->Add((TObject*)mEmcCollection);
   TDataSet::Browse(b);
   print();
 }
@@ -190,4 +218,14 @@ StEmcADCtoEMaker::print()
       printf("Det %s #hits %5i \n", detname[i].Data(), detector->numberOfHits());
     }
   }
+}
+
+void 
+StEmcADCtoEMaker::Clear(Option_t *option)
+{// 13-oct
+  if(option){};
+  //  if(mEmcCollection) {
+  //  delete mEmcCollection;
+  //  mEmcCollection = 0;
+  //}
 }

@@ -13,6 +13,7 @@
 #include "StEmcTowerInput.h"
 #include "StEmcSmdInput.h"
 #include "StEventTypes.h"
+#include <StMessMgr.h>
 
 //
 // Interfaces
@@ -24,43 +25,27 @@
 
 ClassImp(StEmcHandleInput) // macro
    
-StEmcHandleInput::StEmcHandleInput(StEvent*event, StEMCReader* emcreader, TDataSet* calibdb)
-: mevent(event), mTheEmcReader(emcreader),mCalibDb(calibdb)
+StEmcHandleInput::StEmcHandleInput
+(StEmcCollection *emccol, StEMCReader* emcreader,   TDataSet* calibdb)
+:mEmcCollection(emccol),  mTheEmcReader(emcreader), mCalibDb(calibdb)
 { }
 
 StEmcHandleInput::~StEmcHandleInput() {}
 
 Int_t 
-StEmcHandleInput::ProcessInput() 
+StEmcHandleInput::processInput() 
 {
-  cout << "HandleInput::ProcessInput()" << endl;
+  gMessMgr->Info()<<"HandleInput::processInput()" << endm;
+  static Int_t statTower, statSmd;
 
-  if(!mTheEmcReader){
-    // case 1 , StEvent exist but no daq
-    cout<<"ProcessInput::EmcRead does not exist"<<endl;
-    StEmcnoDaqInput *ndaq = new StEmcnoDaqInput(mevent,mTheEmcReader,mCalibDb);
-    int stat=ndaq->ProcessInput();
-    if(stat!=kStOK)return kStWarn;
-  }
+  StEmcTowerInput *tower = new StEmcTowerInput(mEmcCollection, mTheEmcReader,mCalibDb);
+  statTower = tower->processInput();
+  if(statTower == kStOK) gMessMgr->Info()<<"Tower input OK" << endm;
 
-  if(mTheEmcReader){
-    //case 2 StEvent, emcreader exist
-    cout<<"ProcessInput::EmcRead "<<endl;
-
-    StEmcTowerInput *tower = new StEmcTowerInput(mevent, mTheEmcReader,mCalibDb);
-    int stat=tower->ProcessInput();
-    if(stat==kStOK) cout<<"Towerinput OK"<<endl;
-
-    StEmcSmdInput *smd = new StEmcSmdInput(mevent, mTheEmcReader,mCalibDb);
-    int statsmd=smd->ProcessInput();
-    if(statsmd==kStOK) cout<<"SmdInput OK"<<endl;
-  }
-//
-//    if(ndaq){delete ndaq;ndaq=0;}
-//    if(tower){delete tower;tower=0;}
-//    if(smd){delete smd;smd=0;}
-//
-     return kStOK;
+  StEmcSmdInput *smd = new StEmcSmdInput(mEmcCollection, mTheEmcReader,mCalibDb);
+  statSmd = smd->processInput();
+  if(statSmd == kStOK) gMessMgr->Info()<<"SMD input OK" << endm;
+  return (statTower || statSmd);
 }
 
 void  StEmcHandleInput::clear()
