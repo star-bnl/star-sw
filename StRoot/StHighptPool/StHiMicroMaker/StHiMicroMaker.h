@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.h,v 1.2 2002/04/03 00:37:41 jklay Exp $
+ * $Id: StHiMicroMaker.h,v 1.3 2002/05/31 21:50:14 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.h,v $
+ * Revision 1.3  2002/05/31 21:50:14  jklay
+ * Fixed the way centrality is calculated, see README
+ *
  * Revision 1.2  2002/04/03 00:37:41  jklay
  * Fixed some bugs, added new version of dcaz
  *
@@ -65,6 +68,9 @@ class StHiMicroMaker : public StMaker {
     Int_t  Finish();
 
     void     setDebug(Int_t debug=1) { mDebug = debug; }
+    void     setSaveAllEvents(bool val=false)	{mSaveAllEvents = val;}
+
+    bool   SaveAllEvents() const {return mSaveAllEvents;}
     
     void     setHitLoop(Int_t doit=1) { mHitLoop=doit; }
     void     setVertexZCut(Float_t x) { mVertexZCut=x; }
@@ -72,7 +78,7 @@ class StHiMicroMaker : public StMaker {
     
 
  private:
-    void     fillEvent(StEvent*,Int_t);
+    void     fillEvent(StEvent*);
     Int_t    fillTracks(StEvent*);
     void     dump(StTrack* prTrack,StTrack* glTrack);
     Float_t  computeXY(const StThreeVectorF&, const StTrack*);
@@ -103,6 +109,7 @@ class StHiMicroMaker : public StMaker {
     Int_t      mNEvent;       //!
     Int_t      mNAcceptedEvent;//!
     Int_t      mNAcceptedTrack;//!
+    bool       mSaveAllEvents; //!If all events are saved, can look at vertex efficiency with ZDC info
     Int_t      mDebug;         //!
     Float_t    mVertexZCut;    //!
     Int_t      mHitLoop;       //!
