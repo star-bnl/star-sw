@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.10 2004/04/08 16:28:08 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.11 2004/04/08 21:33:25 perev Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -19,7 +19,13 @@
 
 
 ClassImp(StEEmcFastMaker)
+//--------------------------------------------
 
+void StEEmcFastMaker::Clear(Option_t *)
+{
+  meeve->Clear();
+  StMaker::Clear();
+}	
 //--------------------------------------------
 StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   mlocalStEvent=0;
@@ -318,6 +324,9 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
 
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.11  2004/04/08 21:33:25  perev
+// Leak off
+//
 // Revision 1.10  2004/04/08 16:28:08  balewski
 // *** empty log message ***
 //

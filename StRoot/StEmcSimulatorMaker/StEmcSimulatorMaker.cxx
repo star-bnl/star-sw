@@ -91,7 +91,11 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    m_nhit         = 0;
 
 }
-
+void StEmcSimulatorMaker::Clear(const char *)
+{
+  delete mEmcCollection;mEmcCollection=0;
+  StMaker::Clear();		
+}
 StEmcSimulatorMaker::~StEmcSimulatorMaker() 
 {
   if(mEmcCollection) delete mEmcCollection; // 25-jan-2001
@@ -975,8 +979,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.24 2003/10/01 00:43:16 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.25 2004/04/08 21:35:12 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.25  2004/04/08 21:35:12  perev
+// Leak off
+//
 // Revision 1.24  2003/10/01 00:43:16  pavlinov
 // Change searching order for Geant hits
 //

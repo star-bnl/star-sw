@@ -62,6 +62,7 @@ public:
   virtual ~StEmcSimulatorMaker();
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual void Clear(const char *);
   Int_t fillStEvent();
   void  saveRunco();
 
@@ -104,7 +105,7 @@ public:
   void   setPrint(Bool_t a) {mPrint = a;}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.11 2003/09/23 15:19:55 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.12 2004/04/08 21:35:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
 };
@@ -112,8 +113,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.11 2003/09/23 15:19:55 suaide Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.12 2004/04/08 21:35:45 perev Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.12  2004/04/08 21:35:45  perev
+// Leak off
+//
 // Revision 1.11  2003/09/23 15:19:55  suaide
 // fixed bugs and modifications for embedding
 //
