@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.19 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.20 2001/04/02 12:10:18 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.20  2001/04/02 12:10:18  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.19  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -98,8 +102,9 @@ ClassImp(StFtpcClusterMaker)
   //_____________________________________________________________________________
 StFtpcClusterMaker::StFtpcClusterMaker(const char *name):
 StMaker(name),
-    m_det(0),
-    m_gaspar(0),
+    m_clusterpars(0),
+    m_fastsimgas(0),
+    m_fastsimpars(0),
     m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
@@ -109,7 +114,8 @@ StMaker(name),
     m_ddeflectiondp(0),
     m_ampslope(0),
     m_ampoffset(0),
-    m_timeoffset(0)
+    m_timeoffset(0),
+    m_driftfield(0)
 {
   drawinit=kFALSE;
 }
@@ -123,8 +129,9 @@ Int_t StFtpcClusterMaker::Init(){
   assert(ftpc);
   St_DataSetIter       local(ftpc);
 
-  m_det        = (St_fcl_det      *)local("fclpars/det"     );
-  m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
+  m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
+  m_fastsimgas   = (St_ftpcFastSimGas  *)local("ftpcFastSimGas");
+  m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -151,6 +158,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
+  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
 
 // 		Create Histograms
 m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
@@ -183,8 +191,9 @@ Int_t StFtpcClusterMaker::Make()
     }
 
   // create parameter reader
-  StFtpcParamReader *paramReader = new StFtpcParamReader(m_det,
-							 m_gaspar);
+  StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
+							 m_fastsimgas,
+                                                         m_fastsimpars);
   
  
   // create FTPC data base reader
@@ -198,7 +207,8 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_ddeflectiondp,
                                                 m_ampslope,
                                                 m_ampoffset,
-                                                m_timeoffset);
+                                                m_timeoffset,
+                                                m_driftfield);
 
   TObjArray *hitarray = new TObjArray(10000);  
 

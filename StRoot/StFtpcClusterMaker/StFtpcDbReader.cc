@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.2 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.3 2001/04/02 12:10:22 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.3  2001/04/02 12:10:22  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.2  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -24,7 +28,8 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcdDeflectiondP *ddeflectiondp,
                                St_ftpcAmpSlope      *ampslope,
                                St_ftpcAmpOffset     *ampoffset,
-                               St_ftpcTimeOffset    *timeoffset )
+                               St_ftpcTimeOffset    *timeoffset,
+                               St_ftpcDriftField    *driftfield)
 {
   mParam = paramReader;
 
@@ -63,6 +68,7 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
   if(efieldTable){
+    mNumberOfMagboltzBins = efieldTable->numberOfEFieldBins;
    mMagboltzEField = (Float_t *)efieldTable->e;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcEField","E");
@@ -118,6 +124,16 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
     gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
   }
 
+  //  just copy driftfield table start to pointer
+  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
+  if(driftfieldTable){
+    mTZero              = driftfieldTable->tZero;
+    mMinimumDriftField  = driftfieldTable->minimumDriftField;
+    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
+    mRadiusTimesField   = driftfieldTable->radiusTimesField;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
+  }
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
@@ -129,7 +145,9 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcVDrift        *vdrift,
                                St_ftpcDeflection    *deflection,
                                St_ftpcdVDriftdP     *dvdriftdp,
-                               St_ftpcdDeflectiondP *ddeflectiondp)
+                               St_ftpcdDeflectiondP *ddeflectiondp,
+                               St_ftpcGas           *gas,
+                               St_ftpcDriftField    *driftfield)
 {
   mParam = paramReader;
 
@@ -169,6 +187,7 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
   if(efieldTable){
+    mNumberOfMagboltzBins = efieldTable->numberOfEFieldBins;
    mMagboltzEField = (Float_t *)efieldTable->e;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcEField","E");
@@ -206,6 +225,30 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
     gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
   }
 
+  //  just copy gas table start to pointer
+  ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
+  if(gasTable){
+   mPercentAr              = gasTable->percentAr;
+   mPercentCO2             = gasTable->percentCO2;
+   mPercentNe              = gasTable->percentNe;
+   mPercentHe              = gasTable->percentHe;
+   mGasGain                = gasTable->gasGain;
+   mGasAttenuation         = gasTable->gasAttenuation;
+   mGasIonizationPotential = gasTable->gasIonizationPotential;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcGas","E");
+  }
+
+  //  just copy driftfield table start to pointer
+  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
+  if(driftfieldTable){
+    mTZero              = driftfieldTable->tZero;
+    mMinimumDriftField  = driftfieldTable->minimumDriftField;
+    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
+    mRadiusTimesField   = driftfieldTable->radiusTimesField;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
+  }
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
@@ -234,7 +277,7 @@ Float_t StFtpcDbReader::padrowZPosition(Int_t i)
 
 Float_t StFtpcDbReader::magboltzEField(Int_t i)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins())
+  if(i>=0 && i<mNumberOfMagboltzBins)
     {
       return mMagboltzEField[i];
     }
@@ -247,7 +290,7 @@ Float_t StFtpcDbReader::magboltzEField(Int_t i)
 
 Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       return mMagboltzVDrift[padrow+numberOfPadrowsPerSide()*i];
     }
@@ -260,7 +303,7 @@ Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       return mMagboltzDeflection[padrow+numberOfPadrowsPerSide()*i];
     }
@@ -273,7 +316,7 @@ Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       return mMagboltzdVDriftdP[padrow+numberOfPadrowsPerSide()*i];
     }
@@ -286,7 +329,7 @@ Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       return mMagboltzdDeflectiondP[padrow+numberOfPadrowsPerSide()*i];
     }
@@ -339,7 +382,7 @@ Float_t StFtpcDbReader::timeOffset(Int_t i, Int_t padrow)
 
 Int_t StFtpcDbReader::setMagboltzEField(Int_t i, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins())
+  if(i>=0 && i<mNumberOfMagboltzBins)
     {
       mMagboltzEField[i]=newvalue;
       return 1;
@@ -353,7 +396,7 @@ Int_t StFtpcDbReader::setMagboltzEField(Int_t i, Float_t newvalue)
 
 Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       mMagboltzVDrift[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
@@ -367,7 +410,7 @@ Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
 
 Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       mMagboltzDeflection[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
@@ -381,7 +424,7 @@ Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newva
 
 Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       mMagboltzdVDriftdP[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
@@ -395,7 +438,7 @@ Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newval
 
 Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
+  if(i>=0 && i<mNumberOfMagboltzBins && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
       mMagboltzdDeflectiondP[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;

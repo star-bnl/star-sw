@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.hh,v 1.14 2001/03/19 15:52:48 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.15 2001/04/02 12:10:28 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.15  2001/04/02 12:10:28  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.14  2001/03/19 15:52:48  jcs
 // use ftpcDimensions from database
 //
@@ -48,10 +52,11 @@
 #include <sys/types.h>
 #include "TObject.h"
 
-#include "tables/St_fcl_det_Table.h"
-#include "tables/St_ffs_gaspar_Table.h"
-#include "tables/St_fss_gas_Table.h"
-#include "tables/St_fss_param_Table.h"
+#include "tables/St_ftpcClusterPars_Table.h"
+#include "tables/St_ftpcSlowSimGas_Table.h"
+#include "tables/St_ftpcSlowSimPars_Table.h"
+#include "tables/St_ftpcFastSimGas_Table.h"
+#include "tables/St_ftpcFastSimPars_Table.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -62,19 +67,15 @@ class StFtpcParamReader : public TObject
 protected:
   //STAF table pointers stored for writing back in destructor
   //set to NULL if not set in constructor
-  fcl_det_st *mDetTable;
+  ftpcClusterPars_st *mClusterParsTable;
 
   //ClusterFinder parameters (also used by other classes)
-  Int_t mNumberOfMagboltzBins;
   Int_t mGaussFittingFlags;
   Int_t mMinimumClusterMaxADC;
   Int_t mNumberOfDriftSteps;
   Int_t mDirectionOfMagnetField;
-  Float_t mRadiusTimesField;
-  Float_t mRadiansPerDegree;
   Float_t mStandardPressure;
   Float_t mNormalizedNowPressure;
-  Float_t mTZero;
   Float_t mLorentzAngleFactor;
   Int_t mOrderOfDiffusionErrors;
   Float_t *mPadDiffusionErrors;
@@ -94,14 +95,8 @@ protected:
   Float_t m3PadWeightedError;
   Float_t m3PadGaussError;
   Float_t mZDirectionError;
-  Float_t mMinimumDriftField;
-  Float_t mStepSizeDriftField;
   Float_t mDvdpCalcOffset;
   Float_t mBaseTemperature;
-  Float_t mPercentAr;
-  Float_t mPercentCO2;
-  Float_t mPercentNe;
-  Float_t mPercentHe;
   //FastSimulator parameters
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
@@ -136,23 +131,19 @@ protected:
   Int_t mGaussIntegrationSteps;
   Int_t mDiffusionCoarseness;
   Float_t mAdcConversion;
-  Float_t mSimulationPhiStart;
-  Float_t mSimulationPhiEnd;
   Float_t mChamberCathodeVoltage;
-  Float_t mGasAttenuation;
-  Float_t mGasGain;
-  Float_t mGasIonizationPotential;
   Float_t mSigmaPadResponseFuntion;
   Float_t mReadoutShaperTime;
   
 public:
   // constructor used by StFtpcClusterMaker:
-  StFtpcParamReader(St_fcl_det *det,
-		    St_ffs_gaspar *gaspar);
+  StFtpcParamReader(St_ftpcClusterPars *det,
+		    St_ftpcFastSimGas *gaspar,
+                    St_ftpcFastSimPars *param);
   // constructor used by StFtpcSlowSimMaker:
-  StFtpcParamReader(St_fss_gas *gas,
-		    St_fss_param *param,
-		    St_fcl_det *det);
+  StFtpcParamReader(St_ftpcClusterPars *det,
+                    St_ftpcSlowSimGas  *gas,
+                    St_ftpcSlowSimPars *param);
   ~StFtpcParamReader();
   Float_t padDiffusionErrors(Int_t i); 
   Float_t timeDiffusionErrors(Int_t i); 
@@ -172,16 +163,12 @@ public:
   Int_t setNormalizedNowPressure(Float_t f) {mNormalizedNowPressure=f; return 1;}
 
   // inline get functions
-  Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
   Int_t gaussFittingFlags() {return mGaussFittingFlags;}
   Int_t minimumClusterMaxADC() {return mMinimumClusterMaxADC;}
   Int_t numberOfDriftSteps() {return mNumberOfDriftSteps;}
   Int_t directionOfMagnetField() {return mDirectionOfMagnetField;}
-  Float_t radiusTimesField() {return mRadiusTimesField;}
-  Float_t radiansPerDegree() {return mRadiansPerDegree;}
   Float_t standardPressure() {return mStandardPressure;}
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
-  Float_t tZero() {return mTZero;}
   Float_t lorentzAngleFactor() {return mLorentzAngleFactor;}
   Float_t padBadFitError() {return mPadBadFitError;}
   Float_t timeBadFitError() {return mTimeBadFitError;}
@@ -198,14 +185,8 @@ public:
   Float_t threePadWeightedError() {return m3PadWeightedError;}
   Float_t threePadGaussError() {return m3PadGaussError;}
   Float_t zDirectionError() {return mZDirectionError;}
-  Float_t minimumDriftField() {return mMinimumDriftField;}
-  Float_t stepSizeDriftField() {return mStepSizeDriftField;}
   Float_t dvdpCalcOffset() {return mDvdpCalcOffset;}
   Float_t baseTemperature() {return mBaseTemperature;}
-  Float_t percentAr() {return mPercentAr;}
-  Float_t percentCO2() {return mPercentCO2;}
-  Float_t percentNe() {return mPercentNe;}
-  Float_t percentHe() {return mPercentHe;}
   Int_t ftpcWestGeantVolumeId() {return mFtpcWestGeantVolumeId;}
   Int_t ftpcEastGeantVolumeId() {return mFtpcEastGeantVolumeId;}
   Int_t unfoldedClusterFlag() {return mUnfoldedClusterFlag;}
@@ -225,12 +206,7 @@ public:
   Int_t gaussIntegrationSteps() {return mGaussIntegrationSteps;}
   Int_t diffusionCoarseness() {return mDiffusionCoarseness;}
   Float_t adcConversion() {return mAdcConversion;}
-  Float_t simulationPhiStart() {return mSimulationPhiStart;}
-  Float_t simulationPhiEnd() {return mSimulationPhiEnd;}
   Float_t chamberCathodeVoltage() {return mChamberCathodeVoltage;}
-  Float_t gasAttenuation() {return mGasAttenuation;}
-  Float_t gasGain() {return mGasGain;}
-  Float_t gasIonizationPotential() {return mGasIonizationPotential;}
   Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
   Float_t readoutShaperTime() {return mReadoutShaperTime;}
 

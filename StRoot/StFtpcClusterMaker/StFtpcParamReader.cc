@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.cc,v 1.14 2001/03/19 15:52:48 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.15 2001/04/02 12:10:26 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.15  2001/04/02 12:10:26  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.14  2001/03/19 15:52:48  jcs
 // use ftpcDimensions from database
 //
@@ -43,76 +47,83 @@
 
 #include "StFtpcParamReader.hh"
 #include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
 
 #include <math.h>
 #include "StMessMgr.h"
 
-StFtpcParamReader::StFtpcParamReader(St_fcl_det *det,
-				     St_ffs_gaspar *gaspar)
+StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
+				     St_ftpcFastSimGas *gaspar,
+                                     St_ftpcFastSimPars *param)
 {
 
-  mNumberOfMagboltzBins = 761;
+  mStandardPressure = atmosphere/(100*pascal);
 
-  // det table exists only once, just copy
-  fcl_det_st *detTable = det->GetTable();
-  mDetTable = detTable; // copy to data member to write parameters back
-  mGaussFittingFlags = detTable->usegauss;
-  mMinimumClusterMaxADC = detTable->min_max_adc;
-  mNumberOfDriftSteps = detTable->n_int_steps;
-  mDirectionOfMagnetField = detTable->magfld;
-  mRadiusTimesField = detTable->rad_times_field;
-  mRadiansPerDegree = degree;
-  mStandardPressure = detTable->p_standard;
-  mNormalizedNowPressure = detTable->p_normalized;
-  mTZero = detTable->t_zero;
-  mLorentzAngleFactor = detTable->angle_factor;
-  mOrderOfDiffusionErrors = 3;
-  mPadDiffusionErrors = (Float_t *) detTable->pad_err_diff;
-  mTimeDiffusionErrors = (Float_t *) detTable->time_err_diff;
-  mPadBadFitError = detTable->pad_err_bad;
-  mTimeBadFitError = detTable->time_err_bad;
-  mPadUnfoldError = detTable->pad_err_unfold;
-  mTimeUnfoldError = detTable->time_err_unfold;
-  mPadFailedFitError = detTable->pad_err_failed;
-  mTimeFailedFitError = detTable->time_err_failed;
-  mPadCutoffClusterError = detTable->pad_err_cutoff;
-  mTimeCutoffClusterError = detTable->time_err_cutoff;
-  mPadSaturatedClusterError = detTable->pad_err_sat;
-  mTimeSaturatedClusterError = detTable->time_err_sat;
-  m2PadWeightedError = detTable->pad_err_2mean;
-  m2PadGaussError = detTable->pad_err_2gauss;
-  m3PadWeightedError = detTable->pad_err_3mean;
-  m3PadGaussError = detTable->pad_err_3gauss;
-  mZDirectionError = detTable->z_err;
-  mMinimumDriftField = detTable->start_field;
-  mStepSizeDriftField = detTable->step_field;
-  mDvdpCalcOffset = detTable->dvdp_off;
-  mBaseTemperature = detTable->temperature;
-  mPercentAr = detTable->percent_ar;
-  mPercentCO2 = detTable->percent_co2;
-  mPercentNe = detTable->percent_ne;
-  mPercentHe = detTable->percent_he;
+  // ftpcClusterPars table exists only once, just copy
+  ftpcClusterPars_st *detTable = det->GetTable();
+  if(detTable){
+    mClusterParsTable = detTable; // copy to data member to write parameters back
+    mGaussFittingFlags = detTable->gaussFittingFlags;
+    mMinimumClusterMaxADC = detTable->minimumClusterMaxADC;
+    mNumberOfDriftSteps = detTable->numberOfDriftSteps;
+    mOrderOfDiffusionErrors = detTable->orderOfDiffusionErrors;
+    mPadDiffusionErrors = (Float_t *) detTable->padDiffusionErrors;
+    mTimeDiffusionErrors = (Float_t *) detTable->timeDiffusionErrors;
+    mLorentzAngleFactor = detTable->lorentzAngleFactor;
+    mDvdpCalcOffset = detTable->dvdpCalcOffset;
+    mPadBadFitError = detTable->padBadFitError;
+    mTimeBadFitError = detTable->timeBadFitError;
+    mPadUnfoldError = detTable->padUnfoldError;
+    mTimeUnfoldError = detTable->timeUnfoldError;
+    mPadFailedFitError = detTable->padFailedFitError;
+    mTimeFailedFitError = detTable->timeFailedFitError;
+    mPadCutoffClusterError = detTable->padCutoffClusterError;
+    mTimeCutoffClusterError = detTable->timeCutoffClusterError;
+    mPadSaturatedClusterError = detTable->padSaturatedClusterError;
+    mTimeSaturatedClusterError = detTable->timeSaturatedClusterError;
+    m2PadWeightedError = detTable->twoPadWeightedError;
+    m2PadGaussError = detTable->twoPadGaussError;
+    m3PadWeightedError = detTable->threePadWeightedError;
+    m3PadGaussError = detTable->threePadGaussError;
+    mZDirectionError = detTable->zDirectionError;
+    mDirectionOfMagnetField = detTable->directionOfMagnetField;
+    mBaseTemperature = detTable->baseTemperature;
+    mNormalizedNowPressure = detTable->normalizedNowPressure;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
+  }
 
-  //  temporarily set Ftpc fast simulator parameters until in data base
-  mFtpcWestGeantVolumeId = 100;
-  mFtpcEastGeantVolumeId = 200;
-  mUnfoldedClusterFlag = 1;
-  mBadShapeClusterFlag = 8;
-  mMergedClusterFlag = 1000;
-  mNumberOfPadsDedxSmearing = 4;
-  mNumberOfBinsDedxSmearing = 3;
-  mRadiusTolerance = 0.25;
-  mSigmaSpacingFactor = 2.5;
-  mAdcConversionFactor = 8000000.0;
-  mClusterChargeConversionFactor = 6;
+  // ftpcFastSimPars table exists only once, just copy
+  ftpcFastSimPars_st *paramTable = param->GetTable();
+  if(paramTable){
+     mFtpcWestGeantVolumeId         = paramTable->ftpcWestGeantVolumeId;
+     mFtpcEastGeantVolumeId         = paramTable->ftpcEastGeantVolumeId; 
+     mUnfoldedClusterFlag           = paramTable->unfoldedClusterFlag;
+     mBadShapeClusterFlag           = paramTable->badShapeClusterFlag;
+     mMergedClusterFlag             = paramTable->mergedClusterFlag;
+     mNumberOfPadsDedxSmearing      = paramTable->numberOfPadsDedxSmearing; 
+     mNumberOfBinsDedxSmearing      = paramTable->numberOfBinsDedxSmearing;
+     mRadiusTolerance               = paramTable->radiusTolerance; 
+     mSigmaSpacingFactor            = paramTable->sigmaSpacingFactor;
+     mAdcConversionFactor           = paramTable->adcConversionFactor;
+     mClusterChargeConversionFactor = paramTable->clusterChargeConversionFactor;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcFastSimPars","E");
+  }
+
   //  just copy gaspar array pointers  
-  mOrderOfFastEstimates = 4;
-  mVDriftEstimates = (Float_t *) &(gaspar->GetTable()->vdrift);
-  mTDriftEstimates = (Float_t *) &(gaspar->GetTable()->tdrift);
-  mSigmaRadialEstimates = (Float_t *) &(gaspar->GetTable()->sig_rad);
-  mSigmaAzimuthalEstimates = (Float_t *) &(gaspar->GetTable()->sig_azi);
-  mErrorRadialEstimates = (Float_t *) &(gaspar->GetTable()->err_rad);
-  mErrorAzimuthalEstimates = (Float_t *) &(gaspar->GetTable()->err_azi);
+  ftpcFastSimGas_st *gasTable = gaspar->GetTable();
+  if(gasTable){
+      mOrderOfFastEstimates =  gasTable->orderOfFastEstimates;
+      mVDriftEstimates = (Float_t *) &(gaspar->GetTable()->driftVelocityEstimates);
+      mTDriftEstimates = (Float_t *) &(gaspar->GetTable()->driftTimeEstimates);
+      mSigmaRadialEstimates = (Float_t *) &(gaspar->GetTable()->sigmaRadialEstimates);
+      mSigmaAzimuthalEstimates = (Float_t *) &(gaspar->GetTable()->sigmaAzimuthalEstimates);
+      mErrorRadialEstimates = (Float_t *) &(gaspar->GetTable()->errorRadialEstimates);
+      mErrorAzimuthalEstimates = (Float_t *) &(gaspar->GetTable()->errorAzimuthalEstimates);
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcFastSimGas","E");
+  }
 
   // create empty dummy of fss gas table, to keep destructor uniform
   mNumberOfFssGasValues = 0;
@@ -126,11 +137,11 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_det *det,
 //   cout << "StFtpcParamReader constructed from StFtpcClusterMaker tables" << endl;  
 }
 
-StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
-				     St_fss_param *param,
-				     St_fcl_det *det)
+StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
+                                     St_ftpcSlowSimGas  *gas, 
+                                     St_ftpcSlowSimPars *param)
 {
-  // fss gas table has to be copied to be accessible as separate arrays
+  // slow simulator gas table has to be copied to be accessible as separate arrays
   mNumberOfFssGasValues = gas->GetNRows();
   mFssGasEField = new Float_t[mNumberOfFssGasValues];
   mFssGasVDrift = new Float_t[mNumberOfFssGasValues];
@@ -139,76 +150,69 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mFssGasDiffusionZ = new Float_t[mNumberOfFssGasValues];
   mFssGasLorentzAngle = new Float_t[mNumberOfFssGasValues];
   Int_t i;
-  fss_gas_st *gasTable = gas->GetTable();
+  ftpcSlowSimGas_st *gasTable = gas->GetTable();
   for(i=0; i<mNumberOfFssGasValues; i++)
     {
-      mFssGasEField[i] = gasTable[i].efield;
-      mFssGasVDrift[i] = gasTable[i].velocity_z;
-      mFssGasDiffusionX[i] = gasTable[i].diffusion_x;
-      mFssGasDiffusionY[i] = gasTable[i].diffusion_y;
-      mFssGasDiffusionZ[i] = gasTable[i].diffusion_z;
-      mFssGasLorentzAngle[i] = gasTable[i].angle_lorentz;
+      mFssGasEField[i] = gasTable[i].electricField;
+      mFssGasVDrift[i] = gasTable[i].driftVelocity;
+      mFssGasDiffusionX[i] = gasTable[i].diffusionX;
+      mFssGasDiffusionY[i] = gasTable[i].diffusionY;
+      mFssGasDiffusionZ[i] = gasTable[i].diffusionZ;
+      mFssGasLorentzAngle[i] = gasTable[i].lorentzAngle;
     }
 
-  // param table exists only once, just copy
-  fss_param_st *paramTable = param->GetTable();
-  mRandomNumberGenerator = paramTable->random_number_gen;
-  mZeroSuppressThreshold = paramTable->adc_threshold;
-  mNumSlowSimGridPoints = paramTable->n_grid_points;
-  mMaxAdc = paramTable->max_adc;
-  mGaussIntegrationSteps = paramTable->n_int_steps;
-  mDiffusionCoarseness = paramTable->diff_coarse;
-  mAdcConversion = paramTable->adc_conversion;
-  mSimulationPhiStart = paramTable->chamber_phi_min;
-  mSimulationPhiEnd = paramTable->chamber_phi_max;
-  mChamberCathodeVoltage = paramTable->chamber_cath_voltage;
-  mGasGain = paramTable->gas_gas_gain;
-  mGasAttenuation = paramTable->gas_attenuation;
-  mGasIonizationPotential = paramTable->gas_avg_ion_pot;
-  mSigmaPadResponseFuntion = paramTable->readout_sigma_prf;
-  mReadoutShaperTime = paramTable->readout_shaper_time;
+  // ftpcSlowSimPars table exists only once, just copy
+  ftpcSlowSimPars_st *paramTable = param->GetTable();
+  if(paramTable){
+     mRandomNumberGenerator = paramTable->randomNumberGenerator;
+     mZeroSuppressThreshold = paramTable->zeroSuppressThreshold;
+     mNumSlowSimGridPoints = paramTable->numSlowSimGridPoints;
+     mMaxAdc = paramTable->maxAdc;
+     mGaussIntegrationSteps = paramTable->numGaussIntSteps;
+     mDiffusionCoarseness = paramTable->diffusionCoarseness;
+     mAdcConversion = paramTable->adcConversion;
+     mChamberCathodeVoltage = paramTable->chamberCathodeVoltage;
+     mSigmaPadResponseFuntion = paramTable->sigmaPadResponseFuntion;
+     mReadoutShaperTime = paramTable->shaperTime;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcSlowSimPars","E");
+  }
  
-  mNumberOfMagboltzBins = 761;
+  mStandardPressure = atmosphere/(100*pascal);
 
-  // det table exists only once, just copy
-  fcl_det_st *detTable = det->GetTable();
-  mDetTable = detTable; // copy to data member to write parameters back
-  mGaussFittingFlags = detTable->usegauss;
-  mMinimumClusterMaxADC = detTable->min_max_adc;
-  mNumberOfDriftSteps = detTable->n_int_steps;
-  mDirectionOfMagnetField = detTable->magfld;
-  mRadiusTimesField = detTable->rad_times_field;
-  mRadiansPerDegree = degree;
-  mStandardPressure = detTable->p_standard;
-  mNormalizedNowPressure = detTable->p_normalized;
-  mTZero = detTable->t_zero;
-  mLorentzAngleFactor = detTable->angle_factor;
-  mOrderOfDiffusionErrors = 3;
-  mPadDiffusionErrors = (Float_t *) detTable->pad_err_diff;
-  mTimeDiffusionErrors = (Float_t *) detTable->time_err_diff;
-  mPadBadFitError = detTable->pad_err_bad;
-  mTimeBadFitError = detTable->time_err_bad;
-  mPadUnfoldError = detTable->pad_err_unfold;
-  mTimeUnfoldError = detTable->time_err_unfold;
-  mPadFailedFitError = detTable->pad_err_failed;
-  mTimeFailedFitError = detTable->time_err_failed;
-  mPadCutoffClusterError = detTable->pad_err_cutoff;
-  mTimeCutoffClusterError = detTable->time_err_cutoff;
-  mPadSaturatedClusterError = detTable->pad_err_sat;
-  mTimeSaturatedClusterError = detTable->time_err_sat;
-  m2PadWeightedError = detTable->pad_err_2mean;
-  m2PadGaussError = detTable->pad_err_2gauss;
-  m3PadWeightedError = detTable->pad_err_3mean;
-  m3PadGaussError = detTable->pad_err_3gauss;
-  mZDirectionError = detTable->z_err;
-  mMinimumDriftField = detTable->start_field;
-  mStepSizeDriftField = detTable->step_field;
-  mDvdpCalcOffset = detTable->dvdp_off;
-  mBaseTemperature = detTable->temperature;
-  mPercentAr = detTable->percent_ar;
-  mPercentCO2 = detTable->percent_co2;
-  mPercentNe = detTable->percent_ne;
-  mPercentHe = detTable->percent_he;
+  // ftpcClusterPars table exists only once, just copy
+  ftpcClusterPars_st *detTable = det->GetTable();
+  if(detTable){
+    mClusterParsTable = detTable; // copy to data member to write parameters back
+    mGaussFittingFlags = detTable->gaussFittingFlags;
+    mMinimumClusterMaxADC = detTable->minimumClusterMaxADC;
+    mNumberOfDriftSteps = detTable->numberOfDriftSteps;
+    mOrderOfDiffusionErrors = detTable->orderOfDiffusionErrors;
+    mPadDiffusionErrors = (Float_t *) detTable->padDiffusionErrors;
+    mTimeDiffusionErrors = (Float_t *) detTable->timeDiffusionErrors;
+    mLorentzAngleFactor = detTable->lorentzAngleFactor;
+    mDvdpCalcOffset = detTable->dvdpCalcOffset;
+    mPadBadFitError = detTable->padBadFitError;
+    mTimeBadFitError = detTable->timeBadFitError;
+    mPadUnfoldError = detTable->padUnfoldError;
+    mTimeUnfoldError = detTable->timeUnfoldError;
+    mPadFailedFitError = detTable->padFailedFitError;
+    mTimeFailedFitError = detTable->timeFailedFitError;
+    mPadCutoffClusterError = detTable->padCutoffClusterError;
+    mTimeCutoffClusterError = detTable->timeCutoffClusterError;
+    mPadSaturatedClusterError = detTable->padSaturatedClusterError;
+    mTimeSaturatedClusterError = detTable->timeSaturatedClusterError;
+    m2PadWeightedError = detTable->twoPadWeightedError;
+    m2PadGaussError = detTable->twoPadGaussError;
+    m3PadWeightedError = detTable->threePadWeightedError;
+    m3PadGaussError = detTable->threePadGaussError;
+    mZDirectionError = detTable->zDirectionError;
+    mDirectionOfMagnetField = detTable->directionOfMagnetField;
+    mBaseTemperature = detTable->baseTemperature;
+    mNormalizedNowPressure = detTable->normalizedNowPressure;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
+  }
 
 //   cout << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endl;  
 }
@@ -218,8 +222,8 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
 StFtpcParamReader::~StFtpcParamReader()
 {
 
-  // write back det table entries that have set functions:
-  mDetTable->p_normalized = mNormalizedNowPressure;
+  // write back clusterpars table entries that have set functions:
+  mClusterParsTable->normalizedNowPressure = mNormalizedNowPressure;
 
   // delete allocated memory
   delete[] mFssGasEField;

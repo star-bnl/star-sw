@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.hh,v 1.8 2001/03/06 23:33:46 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.9 2001/04/02 12:10:16 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.9  2001/04/02 12:10:16  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.8  2001/03/06 23:33:46  jcs
 // use database instead of params
 //
@@ -33,7 +37,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "fcl_det.h"
 #include "TObjArray.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"

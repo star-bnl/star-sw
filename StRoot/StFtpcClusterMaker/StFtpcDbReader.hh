@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.2 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.3 2001/04/02 12:10:24 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.3  2001/04/02 12:10:24  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.2  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -24,6 +28,8 @@
 #include "tables/St_ftpcAmpSlope_Table.h"
 #include "tables/St_ftpcAmpOffset_Table.h"
 #include "tables/St_ftpcTimeOffset_Table.h"
+#include "tables/St_ftpcGas_Table.h"
+#include "tables/St_ftpcDriftField_Table.h"
 
 class StFtpcParamReader;
 
@@ -51,12 +57,26 @@ protected:
   Float_t mSensitiveVolumeOuterRadius;
 
   Float_t *mPadrowZPosition;
+
+  Int_t   mNumberOfMagboltzBins;
   Float_t *mMagboltzEField;
   Float_t *mMagboltzVDrift;
   Float_t *mMagboltzDeflection;
   Float_t *mMagboltzdVDriftdP;
   Float_t *mMagboltzdDeflectiondP;
 
+  Float_t mPercentAr;
+  Float_t mPercentCO2;
+  Float_t mPercentNe;
+  Float_t mPercentHe;
+  Float_t mGasGain;
+  Float_t mGasAttenuation;
+  Float_t mGasIonizationPotential;
+
+  Float_t mTZero;
+  Float_t mMinimumDriftField;
+  Float_t mStepSizeDriftField;
+  Float_t mRadiusTimesField;
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
@@ -80,7 +100,8 @@ public:
                  St_ftpcdDeflectiondP *ddeflectiondp,
                  St_ftpcAmpSlope      *ampslope,
                  St_ftpcAmpOffset     *ampoffset,
-                 St_ftpcTimeOffset    *timeoffset);
+                 St_ftpcTimeOffset    *timeoffset,
+                 St_ftpcDriftField    *driftfield);
   // constructor used by StFtpcSlowSimMaker and StFtpcDriftMapMaker:
   StFtpcDbReader(StFtpcParamReader    *paramReader,
                  St_ftpcDimensions    *dimensions,
@@ -89,7 +110,9 @@ public:
                  St_ftpcVDrift        *vdrift,
                  St_ftpcDeflection    *deflection,
                  St_ftpcdVDriftdP     *dvdriftdp,
-                 St_ftpcdDeflectiondP *ddeflectiondp);
+                 St_ftpcdDeflectiondP *ddeflectiondp,
+                 St_ftpcGas           *gas,
+                 St_ftpcDriftField    *driftfield);
   ~StFtpcDbReader();
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);
@@ -119,6 +142,8 @@ public:
   Int_t numberOfPads() {return mNumberOfPads;}
   Int_t numberOfTimebins() {return mNumberOfTimebins;}
 
+  Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
+
   Float_t phiOrigin()    {return mPhiOrigin;}
   Float_t phiPerSector() {return mPhiPerSector;}
   Float_t phiEnd()       {return mPhiOrigin+mPhiPerSector;}
@@ -130,6 +155,18 @@ public:
   Float_t sensitiveVolumeInnerRadius() {return mSensitiveVolumeInnerRadius;}
   Float_t sensitiveVolumeOuterRadius() {return mSensitiveVolumeOuterRadius;}
 
+  Float_t percentAr() {return mPercentAr;}
+  Float_t percentCO2() {return mPercentCO2;}
+  Float_t percentNe() {return mPercentNe;}
+  Float_t percentHe() {return mPercentHe;}
+  Float_t gasGain() {return mGasGain;}
+  Float_t gasAttenuation() {return mGasAttenuation;}
+  Float_t gasIonizationPotential() {return mGasIonizationPotential;}
+
+  Float_t tZero() {return mTZero;}
+  Float_t minimumDriftField() {return mMinimumDriftField;}
+  Float_t stepSizeDriftField() {return mStepSizeDriftField;}
+  Float_t radiusTimesField() {return mRadiusTimesField;}
 };
 
 #endif
