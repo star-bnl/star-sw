@@ -10,12 +10,15 @@ long type_of_call sca_runsca_(
        TABLE_HEAD_ST   *sca_prior_h,        SCA_PRIOR_ST   *sca_prior,  
        TABLE_HEAD_ST   *sca_out_h,          SCA_OUT_ST     *sca_out  )   
 {
+
 #ifndef  SCALE_OK
 #define    SCALE_OK     0
-#endif   SCALE_OK
+#endif
+
 #ifndef  SCALE_BAD
 #define    SCALE_BAD 1
-#endif   SCALE_BAD
+#endif
+
   char *raw_data_name = "sca_data";
   char *sca_data_name = "sca";
   long iret;
