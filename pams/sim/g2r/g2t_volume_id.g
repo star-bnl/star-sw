@@ -150,7 +150,7 @@
 	    endif
             phi   =numbv(1)
             superl=numbv(2)
-cccccccccccccccccc else  to be filled.
+*       else  to be filled.
 	  endif
         endif
         eta=idigi(1)+1
@@ -191,7 +191,7 @@ c	write(*,*)"###",rileft,eta,phi,phi_sub,superl,volume_id
             endif
             phi      =numbv(1)
             forw_back=numbv(2)
-cccccccccccccccccc else  to be filled.
+c* else  to be filled.
           endif
         endif          
 	eta=idigi(2)+1
