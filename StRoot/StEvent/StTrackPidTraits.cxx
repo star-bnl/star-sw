@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 2.2 1999/11/15 18:48:25 ullrich Exp $
+ * $Id: StTrackPidTraits.cxx,v 2.3 1999/11/29 16:53:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
- * Revision 2.2  1999/11/15 18:48:25  ullrich
- * Adapted new enums for dedx and track reco methods.
+ * Revision 2.3  1999/11/29 16:53:24  ullrich
+ * ADopted new encoding scheme for method().
  *
  * Revision 2.3  1999/11/29 16:53:24  ullrich
  * ADopted new encoding scheme for method().
@@ -31,7 +31,7 @@
 
 ClassImp(StTrackPidTraits)
 
-static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.2 1999/11/15 18:48:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.3 1999/11/29 16:53:24 ullrich Exp $";
 
 StTrackPidTraits::StTrackPidTraits() :
     mDetectorId(0), mMethod(0) { /* noop */ }
@@ -47,7 +47,7 @@ StTrackPidTraits::~StTrackPidTraits() { /* noop */ }
 Short_t
 StTrackPidTraits::encodedMethod() const { return mMethod; }
 
-    switch (mMethod%100) {
+StDedxMethod
 StTrackPidTraits::method() const
 {
     switch (mMethod) {
