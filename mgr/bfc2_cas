@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc2_cas,v 1.11 2001/05/03 00:32:05 didenko Exp $
+# $Id: bfc2_cas,v 1.12 2001/05/03 17:19:56 didenko Exp $
 # $Log: bfc2_cas,v $
+# Revision 1.12  2001/05/03 17:19:56  didenko
+# next file to mixed
+#
 # Revision 1.11  2001/05/03 00:32:05  didenko
 # *** empty log message ***
 #
@@ -57,8 +60,8 @@ use File::Basename;
 system 'echo "Starting job execution at" `date` " on " $HOSTNAME';
 print "STAR_LEVEL = $STAR_LEVEL\n";
 my $Chain = "";
-my $bfile = "pds0200_02_29102evts.fzd";
- symlink "/star/data04/simu/tests/pds0200/pds0200_02_29102evts.fzd", $bfile;
+my $bfile = "pds0200_03_29136evts.fzd";
+ symlink "/star/data04/simu/tests/pds0200/pds0200_03_29136evts.fzd", $bfile;
 
 die "No input Chain defined" if ! defined($ARGV[0]);
 for (my $i = 0;$i<=$#ARGV;$i++){
@@ -154,7 +157,7 @@ $evts = $prt[2];
 ($Nevts,$dummy) = split /e/, $evts;
 $NofEvents = 100;
 
-my $N3 = $Nevts * abs($nSeq - 129) + 1;
+my $N3 = $Nevts * abs($nSeq - 355) + 1;
 my $N1 = $N3 + 1;
 my $N2 = $Nevts * $nSeq + 1;
 
