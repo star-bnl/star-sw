@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.103 1999/08/06 14:58:40 fisyak Exp $
+// $Id: bfc.C,v 1.104 1999/08/07 19:44:55 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -72,7 +72,7 @@ void bfc(const Int_t First,
 " root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n"
 "                                    \t// skipping the 4 events for the rest 6 events\n");
     printf (
-" root4star 'bfc.C(1,\"off in tpc FieldOff sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n"
+" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n"
 " root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n"
 " root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
     printf (
@@ -108,25 +108,25 @@ void bfc(const Int_t First,
   evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
   if (geant && First > 1) geant->Skip(First-1);
   if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
-  Int_t iMake = 0;
   TBenchmark evnt;
-  for (Int_t i = First; i <= NoEvents; i++){
-    evnt->Reset();
-    evnt->Start("QAInfo:");
-    chain->Clear();
-    iMake = chain->Make(i);
-    if (iMake <kStEOF && xdf_out){
-      St_DataSet *dstSet = chain->GetInputDS("dst");
-      if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
-    }
-    //    gSystem->Exec("ps ux");
-    evnt->Stop("QAInfo:");
-    evnt->Show("QAInfo:");
-    printf ("QAInfo: Done with Event no. %d (%d) Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	    i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
-    if (iMake>=kStEOF) break;
-  }
-  if (NoEvents > 1) {
+  Int_t iMake = 0, i = First;
+ EventLoop: if (i <= NoEvents && iMake < kStEOF) {
+   evnt->Reset();
+   evnt->Start("QAInfo:");
+   chain->Clear();
+   iMake = chain->Make(i);
+   if (iMake <kStEOF && xdf_out){
+     St_DataSet *dstSet = chain->GetInputDS("dst");
+     if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
+   }
+   //    gSystem->Exec("ps ux");
+   evnt->Stop("QAInfo:");
+   evnt->Show("QAInfo:");
+   printf ("QAInfo: Done with Event no. %d (%d) Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	   i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
+   i++; goto EventLoop;
+ }
+  if (NoEvents > 1 || gROOT->IsBatch()) {
     chain->Finish();
     if (xdf_out) delete xdf_out;
     fflush(stdout);
