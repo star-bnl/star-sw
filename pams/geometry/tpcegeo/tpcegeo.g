@@ -27,7 +27,7 @@ Structure TECW { sec,GapRad,GapHeit,GapWidI,GapWidO,inwidth,ouwidth,
                  Rcenter,MWCinn,MWCout,MWChei,n,nex,
                  z(8),dz(8),xex(5),zex(5),dxex(5),dzex(5) } 
 *
-Structure TPRS { sec,N,pitch,width,super,Rpads(40),Npads(40) }
+Structure TPRS { sec,Nrow,pitch,width,super,Rpads(40),Npads(40) }
 *
 Real      tocsIR,tocsOR,tokaIR,tokaOR,tonxIR,tonxOR,toadIR,toadOR,toigIR,toigOR,
           toalIR,toalOR,tohaIR,tohaOR,tofsIR,tofsOR,tofcIR,tofcOR,
@@ -64,7 +64,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
-      n      = 13           ! number of padrows in the sector
+      nRow   = 13           ! number of padrows in the sector
       pitch  = 0.335        ! tpc padrow pitch width
       width  = 1.15         ! tpc padrow thickness
       super  = 3            ! number of padraws in a superpadrow
@@ -75,7 +75,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *
    Fill TPRS              ! sector of padrows
       sec    = 2            ! sector number: 1 for inner, 2 for outer
-      n      = 32           ! number of padrows in outer sector
+      nRow   = 32           ! number of padrows in outer sector
       pitch  = 0.67         ! outer tpc padrow pitch width
       width  = 1.95         ! outer tpc padrow thickness
       super  = 1            ! number of padrows in a superpadrow
@@ -267,9 +267,11 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
          Use    TPRS  sec=i_sec
 
 *        position within supersector (this assumes rectangular padrows)
-         do i_row = 1,nint(tprs_N)
-            create and position TPAD  x=tprs_Rpads(i_row) dx=tprs_width/2,
-                                      dy=tprs_npads(i_row)*tprs_pitch/2
+         do i_row = 1,nint(tprs_nRow)
+            If (nint(tprs_super)>0)  then
+               create and position TPAD  x=tprs_Rpads(i_row) dx=tprs_width/2,
+                                         dy=tprs_npads(i_row)*tprs_pitch/2
+            endif
             If (nint(tprs_super)==3)  then
                Create and Position TPAI  x=tprs_Rpads(i_row)-tprs_width  
                Create and Position TPAO  x=tprs_Rpads(i_row)+tprs_width  
