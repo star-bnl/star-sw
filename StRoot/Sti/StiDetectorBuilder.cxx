@@ -9,10 +9,11 @@
 #include "StThreeVector.hh"
 
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
-  : Named(name),
+  : Named(name+"Builder"),
     _groupId(-1),
     _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
+    _trackingParameters(new StiTrackingParameters(name,name)),
     _messenger(*Messenger::instance(MessageType::kDetectorMessage) )
 {
   _messenger << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
@@ -101,6 +102,7 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
+  detector->setTrackingParameters(_trackingParameters);
   return detector;
 }
 

@@ -6,6 +6,7 @@
 #include <string>
 #include <stdexcept>
 #include <math.h>
+#include "Sti/StiTrackingParameters.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/Base/Named.h"
 #include "StThreeVector.hh"
@@ -74,7 +75,9 @@ public:
 			  unsigned int nSectors) const;
   void setGroupId(int id);
   int  getGroupId() const;
-  
+  void setTrackingParameters(StiTrackingParameters * pars);
+  StiTrackingParameters * getTrackingParameters();
+
  protected:
   
   int                 _groupId;
@@ -87,6 +90,8 @@ public:
   vector< unsigned int> _nSectors;
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
+  StiTrackingParameters * _trackingParameters;
+
   Messenger&           _messenger;
 
 };
@@ -247,5 +252,14 @@ inline int  StiDetectorBuilder::getGroupId() const
   return _groupId;
 }
 
+inline void StiDetectorBuilder::setTrackingParameters(StiTrackingParameters * pars)
+{
+  _trackingParameters = pars;
+}
+
+inline StiTrackingParameters * StiDetectorBuilder::getTrackingParameters()
+{
+  return  _trackingParameters;
+}
 
 #endif // ifndef STI_DETECTOR_BUILDER_H
