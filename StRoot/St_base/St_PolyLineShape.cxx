@@ -575,6 +575,29 @@ Double_t *St_PolyLineShape::gyrot(Double_t *dirc, Double_t cosang, Double_t sina
 }
 
 //______________________________________________________________________________
+Color_t St_PolyLineShape::SetColorAttribute(Color_t color)
+{
+  Color_t currentColor = GetColorAttribute();
+  if (color != currentColor) 
+  {
+    SetLineColor(color);
+    SetMarkerColor(color);
+  }
+  return currentColor;
+}
+//______________________________________________________________________________
+Width_t St_PolyLineShape::SetSizeAttribute(Width_t size)
+{
+  Width_t currentSize = GetSizeAttribute();
+  if (size != currentSize) 
+  {
+    SetLineWidth(size);
+    SetMarkerSize(size);
+  }
+  return currentSize;
+}
+
+//______________________________________________________________________________
 void St_PolyLineShape::SetShape(TShape *shape)
 { 
    SafeDelete(m_Shape)
