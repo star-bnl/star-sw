@@ -39,6 +39,13 @@ public:
    l3List        histoList ;
    int*          tokenIndex ;
    unsigned long mask[32];
+   //
+   //  Options
+   //
+   short         hitProcessing ; // 0=does read hits
+                                 // 1=reassigns trackId in hits to
+				 // pass that info downstream
+				 // 2=full hit unpacking for module use
    // 
    //  Communications
    //
@@ -58,6 +65,7 @@ public:
    gl3Event* getEvent     ( int token ) ;
    int       releaseToken ( int token ) ;
 
+   void setHitProcessing  ( int hitPro ) ; 
    int  setCommunications (  ) ; 
    int  writeHistos ( int maxBytes, char *buffer ) ;
    int  setup  ( int maxEvents=1, int maxAnalysis=10 ) ;

@@ -83,13 +83,15 @@ int gl3GeneralHistos::process ( gl3Event* event ) {
    gl3Track* tTrack ;
    for ( i = 0 ; i < event->getNTracks() ; i++ ) { 
       tTrack = event->getTrack(i);
-      sector = tTrack->id / 10000 ;  
+      sector = tTrack->sector ;  
       if ( sector > NSECTORS || sector <= 0 ) {
-         fprintf ( stderr, " gl3Event:fillHistos:: wrong sector %d \n", sector ) ;
+         fprintf ( stderr, " gl3GeneralHistos:process:: wrong sector %d \n", sector ) ;
+	 printf ( "track id r0 flag %d %f %d \n", tTrack->id, tTrack->r0, tTrack->flag ) ;
+	 tTrack->Print(20);
          continue ;
       }
       hPt->Fill     ( fabs(tTrack->pt),   1. ) ;
-      hEta->Fill    ( tTrack->eta(),      1. ) ;
+      hEta->Fill    ( tTrack->getRealEta(),      1. ) ;
       hPsi->Fill    ( tTrack->psi*toDeg,  1. ) ;
       hR0->Fill     ( tTrack->r0,         1. ) ;
       hZ0->Fill     ( tTrack->z0,         1. ) ;

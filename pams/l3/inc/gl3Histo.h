@@ -35,14 +35,14 @@ public:
    gl3HistoHeader header ;
    double*   info ;
 public:
-   gl3Histo ( char iId[10]="id", char iTitle[100]="default", 
+   gl3Histo ( char iId[10]="id", char iTitle[100]="name", 
                    int iNBins=100,  double iXMin=0., double iXMax=100. ) ;
    ~gl3Histo ( ) ;
    int   Fill   ( double x, double weight ) ;
    double GetY   ( int iBin ) ;
    int   Print  ( short Level=1 ) ;
    int   Read   ( char* input  ) ; 
-   int   Write  ( char* output ) ; 
+   int   Write  ( int maxBytes, char* output ) ; 
 
    ClassDef(gl3Histo,1)
 

@@ -27,6 +27,7 @@ public:
   slink(void* a, slink* suc) { e = a; succ = suc; };
 //slink* operator++(){ return succ ; } ; 
 };
+
 class l3List {
 private:
    slink* head;         //head
@@ -35,6 +36,7 @@ private:
    int    count;        //length of List
 public:
    l3List():head(0),tail(0),count(0) {};
+//*********************************************************
    ~l3List() 
    {
      if (head!=0) {
@@ -49,11 +51,13 @@ public:
          count=0;
       }
    };
+//*********************************************************
    void* first() { 
       current = head ;
       if ( head ) return head->e;
       else return 0 ;
    };
+//*********************************************************
    void* next() { 
       current = current->succ ;
       if ( current == 0 ) return 0 ;
@@ -67,6 +71,7 @@ public:
       return tail;
    };
    //
+//*********************************************************
    void remove(slink* item)
    {
       slink* temp;
@@ -92,42 +97,6 @@ public:
    };
    int size() {return count;};
 
-/*
-   const void* inf(slink* item) const { return ( (item->e));};
-   void* inf(slink* item)  {return (item->e);};
-   slink* succ(slink* item) const {
-      return item->succ;
-   };
-   void* next(slink* item) const {
-      current = current->succ ;
-      return current->e;
-   };
-
-   const void* head() const {return head->e;};
-   const void* tail() const {return tail->e;};
-   const void* itsObject  ( slink* &s ) { if ( s == 0 ) return 0 ;
-                                     else return s->e;} ;
-   const void* nextObject ( slink* &s ) { if ( s == 0 ) return 0 ; 
-                                     else {
-                                     s = s->succ ;
-                                     if ( s != 0 )  return s->e;
-                                     else     return 0 ; } 
-                                     } ;
-
-   void clear() {
-      if (head!=0) {
-         register slink* p, *old;
-         for(p = head; p; ) {
-// get next element before deleting this one
-            old = p;
-            p = p->succ;
-            delete old;
-         }
-         head=tail=0;
-         count=0;
-      }
-   }
-*/
 };
 
 #endif

@@ -5,11 +5,11 @@
 //:<------------------------------------------------------------------
 #include <stdio.h>
 #include <math.h>
-#include "gl3Tracks.h"
+#include "gl3Track.h"
 #include "gl3Histo.h"
 #include "l3List.h"
 
-#define toDeg (180./M_PI) 
+#define toDeg 57.295779513
 
 #ifndef GL3SECTOR
 #define GL3SECTOR

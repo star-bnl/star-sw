@@ -114,8 +114,17 @@ int gl3Histo::Read ( char* input ) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-int gl3Histo::Write ( char* output ) {
+int gl3Histo::Write ( int maxBytes, char* output ) {
    char* contents  = output  ;
+
+   int minBytes = 64 + 128 + 2 * sizeof(int) + 6 * sizeof(double) +
+                  (header.nBins+2)*sizeof(double) ; 
+
+   if ( minBytes >= maxBytes ) {
+      printf ( "gl3Histo::Write %d bytes in buffer not enough \n", maxBytes ) ;
+      return 0 ;
+   }
+   
    memcpy ( contents, header.id, 64*sizeof(char) ) ;
    contents += 64 * sizeof(char) ;
    memcpy ( contents, header.title, 128*sizeof(char) ) ;

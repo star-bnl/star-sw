@@ -4,6 +4,8 @@
 //:           27jan2000  start writting changes 
 //:                      refHit replaced by xRefHit and yRefHit
 //:           27jan2000  VOLUME, ROW and AREA classes replaced by FtfContainer
+//:            9mar2000  trackLength moved to FtfBaseTrack
+//:            9mar2000  use void pointers
 //:>----------------------------------------------------------------------
 #ifndef FTFTRACK
 #define FTFTRACK
@@ -28,25 +30,25 @@ class FtfTrack : public FtfBaseTrack {
 public:
    friend class FtfFinder ;
 
-   void    add                   ( FtfHit   *thisHit, int way ) ;
-   void    add                   ( FtfTrack *thisTrack ) ;
-   int     buildTrack            ( FtfHit *firstHit, FtfContainer *volume ) ;
-   void    dEdx                  ( ) ;
-   void    deleteCandidate       ( ) ;
-   void    fill                  ( ) ;
-   void    fillPrimary           ( double &xc, double &yc, double &rc ) ;
-   void    fillSecondary         ( double &xc, double &yc ) ;
-   int     follow                ( FtfContainer *volume, int way, int rowToStop ) ;
-   int     followHitSelection    ( FtfHit *baseHit, FtfHit *candidateHit ) ;
-   int     mergePrimary          ( FtfContainer   *trackArea ) ;
-   void    reset                 ( ) ;
-   FtfHit  *seekNextHit          ( FtfContainer  *volume, 
-                                   FtfHit *baseHit,
-			           int     nradiusSteps,
-                                   int     whichFunction ) ;
+   void      add                   ( FtfHit   *thisHit, int way ) ;
+   void      add                   ( FtfTrack *thisTrack ) ;
+   int       buildTrack            ( FtfHit *firstHit, FtfContainer *volume ) ;
+   void      dEdx                  ( ) ;
+   void      deleteCandidate       ( ) ;
+   void      fill                  ( ) ;
+   void      fillPrimary           ( double &xc, double &yc, double &rc,
+                                     double xPar, double yPar ) ;
+   void      fillSecondary         ( double &xc, double &yc, double xPar, double yPar ) ;
+   int       follow                ( FtfContainer *volume, int way, int rowToStop ) ;
+   int       followHitSelection    ( FtfHit *baseHit, FtfHit *candidateHit ) ;
+   FtfTrack* getNextTrack ( )      { return (FtfTrack *)nxatrk ; } ; 
+   int       mergePrimary          ( FtfContainer   *trackArea ) ;
+   void      reset                 ( ) ;
+   FtfHit    *seekNextHit          ( FtfContainer  *volume, FtfHit *baseHit,
+	                             int nradiusSteps, int whichFunction ) ;
    int     segment               ( FtfContainer *volume, int way ) ;
    int     segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ) ;
-   FtfTrack *nxatrk  ;      
+   void    *nxatrk  ;      
         
 #ifdef DEBUG
    void debugAsk                 ( ) ;
@@ -81,9 +83,8 @@ public:
 
    vfit    ddXy, a1Xy, a2Xy ;    /*fit par in xy */
    vfit    ddSz, a1Sz, a2Sz ;    /*fit par in sz */
-   float   trackLength ;
 //private:
-   inline virtual   void nextHit (){ currentHit = currentHit->nextTrackHit ; } ;
+   inline virtual   void nextHit (){ currentHit = ((FtfBaseHit *)currentHit)->nextTrackHit ; } ;
 	   
    ClassDef(FtfTrack,1)
    } ;

@@ -29,7 +29,7 @@ public:
 
    long      nMcHits ;  // # space points in hit array
 
-   inline virtual void nextHit (){ currentHit = currentHit->nextMcTrackHit ; } ;
+   inline virtual void nextHit (){ currentHit = ((FtfBaseHit *)currentHit)->nextMcTrackHit ; } ;
 
 } ;
 #endif

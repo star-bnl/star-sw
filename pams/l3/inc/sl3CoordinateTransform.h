@@ -7,6 +7,9 @@
 //
 //  fast coordinate transformation: rawToLocal, localToGlobal
 //  and rawToGlobal
+//:
+//:       apr 19  2000  cs ppy: padLengthInner(Outer)Sector added
+
 //
 
 // Numbering convetion (see DAQ Data Format Document)
@@ -20,6 +23,8 @@
 
 #define innerSectorPadPitch     0.335    // cm
 #define outerSectorPadPitch     0.67     // cm
+#define padLengthInnerSector    1.15     // cm
+#define padLengthOuterSector    1.95     // cm
 #define driftLength             208.     // cm
 #define lengthPerTb             0.5977   // = 208/348
 

@@ -14,12 +14,18 @@
 **:                              clean extra includes    
 **:           12/06/99      ppy: method added to check whether track can be merged
 **:           01/26/00      ppy: delete rawToGlobal declaration
-**:           feb 10, 2000  ppy add xyError and zError
+**:           feb 10, 2000  ppy: add xyError and zError
+**:           mar 21  2000  ppy: add fill Hits
+**:           apr  8  2000  ppy: add variables to cut hit based on charge and time
+**:           apr 18  2000  ppy: modify readMezzannine to include rb and mz as arguments
+**:           apr 19  2000  ppy: dEdx from Christof
+**:           apr 19  2000  cs ppy: include FtfDedx added
 **:<------------------------------------------------------------------*/
 #ifndef FTFSL3
 #define FTFSL3
 
 #include "FtfFinder.h"
+#include "FtfDedx.h"
 //#include <SECTOR/daqFormats.h>
 #include "l3GeneralHeaders.h"
 #include "daqFormats.h"
@@ -51,6 +57,10 @@ public:
    short     debugLevel  ;
    double    xyError ;
    double    zError ;
+   int       minTimeBin ;
+   int       maxTimeBin ;
+   int       minClusterCharge ;
+   int       maxClusterCharge ;
    //
    //  Sector phase space
    //
@@ -58,17 +68,26 @@ public:
 
    FtfSl3 (  ) { 
       debugLevel = 0 ;
-      xyError    = 0.05 ;
-      zError     = 0.1 ;
+      xyError    = 0.3 ;
+      zError     = 1.0 ;
+      minTimeBin = 0 ;
+      maxTimeBin = 500 ;
+//    minTimeBin =  35 ;
+//    maxTimeBin = 300 ;
+      minClusterCharge = 80 ;
+      maxClusterCharge = 100000 ;
    };
    ~FtfSl3 ( ) {
         if ( track != 0 ) delete []track ;
         if ( hit   != 0 ) delete []hit   ;
    };
    int   fillTracks      ( int maxBytes, char* buff, unsigned int token ) ;
+   int   fillHits        ( unsigned int maxBytes, char* buff, unsigned int token ) ;
    int   canItBeMerged   ( FtfTrack* thisTrack ) ;
+   int   dEdx ( ) ;
    int   processSector   ( ) ;
-   int   readMezzanine   ( int sector, struct TPCMZCLD_local *mzcld );
+   int   readMezzanine   ( int sector, int readOutBoard,
+                           int MezzanninneNr, struct TPCMZCLD_local *mzcld );
    int   readSector      ( struct TPCSECLP *seclp ) ; 
    int   setParameters   ( ) ;
    int   setup           ( int maxHitsIn=20000, int maxTracksIn=2000 ) ;
