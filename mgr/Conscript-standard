@@ -218,8 +218,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 	foreach my $subdir ( glob("$Dir/*") ){
 	    if( -d $subdir && 
-		$subdir ne "$Dir/CVS"    &&
-		$subdir ne "$Dir/macros" &&
+		$subdir ne "$Dir/CVS"      &&
+		$subdir ne "$Dir/macros"   &&
+		$subdir ne "$Dir/examples" &&
 		$subdir ne "$Dir/doc" ){
 		#print "Inserting $subdir\n";
 		$CPPPATH  .= $main::PATH_SEPARATOR . "#"  . $subdir;
@@ -229,7 +230,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	#$SO_PKG = $PKG . "." . $env->{SUFSOLIB};
 
-	print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
+	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
 
 
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
