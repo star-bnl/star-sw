@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.13 1999/11/08 00:48:54 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.14 1999/11/08 00:51:39 fisyak Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.14  1999/11/08 00:51:39  fisyak
+* Add atand description for g77
+*
 * Revision 1.13  1999/11/08 00:48:54  sakrejda
 * A bug in track length calculation fixed - tanl was missing.
 *
@@ -79,6 +82,7 @@ C___________________________________________________________________
       REAL   dx0,dy0
       real   radtodeg
       real   xlocal(3),bfield(3)
+      real   atand
       data   xlocal /3*0./
 
 C*** This part if for n_pos (n_max) calculation
