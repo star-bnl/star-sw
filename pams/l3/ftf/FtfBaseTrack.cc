@@ -2,6 +2,8 @@
 //: FILE:       FtfBaseTrack.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+//:             11aug1999 ppy primary flag in FtfPara replace with vertexConstrainedFit
+//:             11aug1999 ppy primary flag in track filled now 
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfBaseTrack
@@ -74,7 +76,7 @@ int FtfBaseTrack::fitCircle (  )
 	xav       += currentHit->wxy * currentHit->x ;
 	yav       += currentHit->wxy * currentHit->y ;
   }
-  if ( para->primaries ) {
+  if ( para->vertexConstrainedFit ) {
 	 wsum += para->xyWeightVertex ;
 	 xav  += para->xVertex ;
 	 yav  += para->yVertex ;
@@ -96,7 +98,7 @@ int FtfBaseTrack::fitCircle (  )
 	xyav     += xi * yi * currentHit->wxy ;
 	yyav     += yi * yi * currentHit->wxy ;
   }
-  if ( para->primaries ) {
+  if ( para->vertexConstrainedFit ) {
 	xi        = para->xVertex - xav ;
 	yi        = para->yVertex - yav ;
 	xxav     += xi * xi * para->xyWeightVertex ;
@@ -191,7 +193,7 @@ int FtfBaseTrack::fitCircle (  )
 //
 //   Include vertex if required
 //
-  if ( para->primaries ) {
+  if ( para->vertexConstrainedFit ) {
 	xold = para->xVertex - xav ;
 	yold = para->yVertex - yav ;
 //
@@ -320,13 +322,15 @@ int FtfBaseTrack::fitCircle (  )
 //    Get other track parameters
 //
   float x0, y0 ;
-  if ( para->primaries ) {
+  if ( para->vertexConstrainedFit ) {
+     flag = 1 ; // primary track flag
      x0   = para->xVertex ;
      y0   = para->yVertex ;
      phi0 = para->phiVertex ;
      r0   = para->rVertex ;
   } 
   else {
+     flag =  0 ; // primary track flag
      x0   =  lastHit->x  ;
      y0   =  lastHit->y  ;
      phi0 =  lastHit->phi;
@@ -365,7 +369,7 @@ int FtfBaseTrack::fitLine ( )
 // 
    float dx, dy ;
    float radius = (float)(pt / ( 2.9979e-3 * para->bField ) ) ;
-   if ( para->primaries ) {
+   if ( para->vertexConstrainedFit ) {
       dx   = firstHit->x - para->xVertex ;
       dy   = firstHit->y - para->yVertex ;
    }
@@ -465,7 +469,7 @@ int FtfBaseTrack::getErrorsCircleFit ( float a, float b, float r ) {
 //    errors in the real space need to
 //    be calculated
 //
-   if ( pt < para->ptMinHelixFit == 1 ) {
+   if ( pt < para->ptMinHelixFit ) {
       for ( startLoop() ; done() ; nextHit() ) { 
          currentHit->wxy = 1.0F/ (float)(currentHit->dx*currentHit->dx +
                                          currentHit->dy*currentHit->dy) ;
@@ -500,7 +504,7 @@ int FtfBaseTrack::getErrorsCircleFit ( float a, float b, float r ) {
 //
 //     Get error in psi now
 //
-   if ( para->primaries ) {
+   if ( para->vertexConstrainedFit ) {
       dx = a ;
       dy = b ;
    }

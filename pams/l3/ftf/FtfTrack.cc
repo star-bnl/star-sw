@@ -2,6 +2,7 @@
 //: FILE:       FtfTrack.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+//:             11aug1999 ppy primary flag fill in filling routines
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfTrack
@@ -275,7 +276,7 @@ void FtfTrack::fill (  ) {
    double rc   = sqrt ( a2Xy * a2Xy + 1 ) / ( 2 * fabs(a1Xy) ) ;
    pt          = (double)(2.9979e-3 * para->bField * rc );
 
-   if ( pt > para->ptMinHelixFit == 1 ) fitHelix ( ) ;
+   if ( pt > para->ptMinHelixFit ) fitHelix ( ) ;
    else{
       if ( para->primaries ) fillPrimary ( xc, yc, rc ) ;
       else
@@ -343,6 +344,10 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
 //    Store some more track info
 //
    eta     = seta(1.,tanl )   ;
+//
+//   Set primary track
+//
+   flag = 1 ;
 
 }
 //****************************************************************************
@@ -394,6 +399,10 @@ void FtfTrack::fillSecondary ( double &xc, double &yc, double &rc )
 //-->    Store some more track info
 //
    eta     = seta(1., tanl )   ;
+//
+//    Set primary track flag
+//
+   flag = 0 ;
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //        Adds hits to a track chosing the closest to fit
@@ -594,6 +603,10 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
    FtfTrack *i_track ;
    int    ip, ie ;
    double  delta_psi ;
+//
+//   Check Track is primary
+//
+   if ( flag != 1 ) return 0 ;
 //-
 //   Get track area       
 //

@@ -2,8 +2,9 @@
 //: FILE:       FtfPara.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
-//:              7dec1998 variable names changed to C++ style
-//:              3jun1999 add fillTracks flag
+//:              7dec1998 ppy variable names changed to C++ style
+//:              3jun1999 ppy add fillTracks flag
+//:             11aug1999 ppy add vertexContrainedFit variable
 //:                       
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -48,13 +49,14 @@ void FtfPara::setDefaults (void)
    phiMaxTrack       = (float)(360.2/toDeg)  ;
    maxDistanceSegment = 100.F * modRow ;
    minHitsPerTrack   = 5      ;
-   nHitsForSegment   = 3      ;
+   nHitsForSegment   = 2      ;
    nEta              = 60     ;
    nEtaTrack         = 60     ;
    nPhi              = 20     ;
    nPhiTrack         = 60     ;
    nPrimaryPasses    = 1      ;
-   nSecondaryPasses  = 1      ;
+   nSecondaryPasses  = 0      ;
+   vertexConstrainedFit = 0 ;
    rowInnerMost      = 1      ;
    rowOuterMost      = 45     ;
    rowStart          = 45     ;
