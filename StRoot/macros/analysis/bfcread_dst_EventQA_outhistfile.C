@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.1 1999/12/01 21:30:10 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.2 2000/01/11 16:31:02 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.2  2000/01/11 16:31:02  kathy
+// change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
+//
 // Revision 1.1  1999/12/01 21:30:10  kathy
 // added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
 //
@@ -37,9 +40,9 @@ class StChain;
 StChain *chain;
 
 void bfcread_dst_EventQA_outhistfile(
-     Int_t nevents=2, 
+     Int_t nevents=10, 
      const Char_t *MainFile=
-     "/star/rcf/test/dev/tfs_Solaris/Mon/year_1b/set0352_01_35evts.dst.root",
+     "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
      const Char_t *outHistFile="StEQAMaker",
      const Char_t *TopDirTree="StEQAtree",
      const Char_t *MakerHistDir="StEQA")
@@ -62,7 +65,7 @@ void bfcread_dst_EventQA_outhistfile(
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("St_QA_Maker");  
+  gSystem->Load("St_QA_Maker"); 
   gSystem->Load("StTreeMaker");
 
   gSystem->Load("StEvent");
