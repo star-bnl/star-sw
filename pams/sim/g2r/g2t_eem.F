@@ -19,7 +19,7 @@
       G2T_EEM=STAFCV_OK
       if (g2t_emc_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('CALB','CSUP',Iprin,Idigi)
+      call G2R_GET_SYS ('ECAL','ESCI',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
