@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.94 2000/03/15 20:20:38 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.95 2000/04/20 17:26:30 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.95  2000/04/20 17:26:30  kathy
+// fix to remove compilation warnings due to unused variables - see Victor's email to starsofi recently
+//
 // Revision 1.94  2000/03/15 20:20:38  lansdell
 // added Craig's changes to pid histogram
 //
@@ -1114,8 +1117,9 @@ void St_QA_Maker::MakeHistPID(){
     dst_dedx_st  *dedx   = dst_dedx->GetTable();
     dst_track_st  *trk   = globtrk->GetTable();
     dst_track_st *start_trk = trk;
-    Int_t no_of_tracks  =  globtrk->GetNRows();
-    Int_t no_of_dedx    =  dst_dedx->GetNRows();
+
+    //    Int_t no_of_tracks  =  globtrk->GetNRows();
+    //    Int_t no_of_dedx    =  dst_dedx->GetNRows();
 
     // loop over dedx entries
     for (Int_t l = 0; l < dst_dedx->GetNRows(); l++,dedx++){
