@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //   Maker to run minuit based vertex finder                            //
-//   
+//
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,9 +21,9 @@
 #include "TNtuple.h"
 #include "StMessMgr.h"
 
-#include "StGenericVertexFinder.h"  
-#include "StMinuitVertexFinder.h"  
-#include "StppLMVVertexFinder.h"  
+#include "StGenericVertexFinder.h"
+#include "StMinuitVertexFinder.h"
+#include "StppLMVVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -58,7 +58,7 @@ StGenericVertexMaker::~StGenericVertexMaker()
 }
 
 /*!
-  The Init() method instantiates the VertexFinder() method. 
+  The Init() method instantiates the VertexFinder() method.
   Since this is  a Maker, the switch between the diverse methods
   will be made as part of the m_Mode mechanism. m_Mode will be
   a bit set to later allow multiple vertex finder running in the
@@ -68,7 +68,7 @@ StGenericVertexMaker::~StGenericVertexMaker()
 
   m_Mode = 0x1     Minuit
   m_Mode = 0x2     ppLMV4  This will not be able to run in parrallele of ppLMV5
-  m_Mode = 0x3     ppLMV5  This will not be able to run in parrallele of ppLMV4
+  m_Mode = 0x4     ppLMV5  This will not be able to run in parrallele of ppLMV4
 
   Default          Minuit  (to preserver backward compatibility)
 
@@ -76,7 +76,7 @@ StGenericVertexMaker::~StGenericVertexMaker()
   NCtbMatches() etc ...) described in the GenericVertexFinder() class).
   Currentely, methods are not part of the base class and need
   cleanup.
-  
+
 */
 Int_t StGenericVertexMaker::Init()
 {
@@ -89,7 +89,7 @@ Int_t StGenericVertexMaker::Init()
   } else if ( m_Mode & 0x2){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(0);                 // this mode is an internal to ppLMV option switch
-  } else if ( m_Mode & 0x3){
+  } else if ( m_Mode & 0x4){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
   } else {
@@ -119,10 +119,10 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
 
      // Get Current Beam Line Constraint from database
      TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
-    
+
      if (dbDataSet) {
        vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-     
+
      x0 = vSeed->x0;
      y0 = vSeed->y0;
      dxdz = vSeed->dxdz;
@@ -130,7 +130,7 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      }
      else {
        gMessMgr->Info() << "StGenericVertexMaker -- No Database for beamline" << endm;
-     }   
+     }
      gMessMgr->Info() << "BeamLine Constraint: " << endm;
      gMessMgr->Info() << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
      gMessMgr->Info() << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
@@ -146,7 +146,7 @@ Int_t StGenericVertexMaker::Finish()
   //LSB TODO change over to using message manager
   gMessMgr->Info() << "StGenericVertexMaker::Finish " <<GetName() <<endm;
   gMessMgr->Info() << " Total events: " << nEvTotal << endm;
-  gMessMgr->Info() << " Good events:  " << nEvGood  << endm; 
+  gMessMgr->Info() << " Good events:  " << nEvGood  << endm;
 
 
   //LSB TODO Leave this for now. Should really be using STAR/ROOT I/O scheme?
@@ -168,7 +168,7 @@ Int_t StGenericVertexMaker::Finish()
 Bool_t StGenericVertexMaker::DoFit(){
   StThreeVectorD myvertex;
 
-  StEvent *event = (StEvent *) GetInputDS("StEvent"); 
+  StEvent *event = (StEvent *) GetInputDS("StEvent");
   assert(event);
 
   if (theFinder->fit(event)) {
@@ -180,7 +180,7 @@ Bool_t StGenericVertexMaker::DoFit(){
   }
 
   return kTRUE;
-  
+
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -193,13 +193,13 @@ Int_t StGenericVertexMaker::Make()
   nEvTotal++;
   primV  = NULL;
   mEvent = NULL;
-  mEvent = (StEvent *)GetInputDS("StEvent"); 
+  mEvent = (StEvent *)GetInputDS("StEvent");
   gMessMgr->Debug() << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
   gMessMgr->Debug() << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;
 
   if(!externalFindUse){
     DoFit();
-  } 
+  }
 
 //   //For testing purposes
 //   theFinder->DoNotUseITTF();
@@ -219,7 +219,7 @@ Int_t StGenericVertexMaker::Make()
   if(!externalFindUse){
     ///Only fill StEvent when successful
     if (theFinder->status()!=-1){
-      theFinder->FillStEvent(mEvent); 
+      theFinder->FillStEvent(mEvent);
       nEvGood++;
     }
   }
@@ -233,14 +233,14 @@ void StGenericVertexMaker::MakeEvalNtuple(){
   // get geant vertex
   St_DataSet *gds=GetDataSet("geant");
   St_g2t_vertex  *g2t_ver=0;
-  g2t_vertex_st *gver=0;  
+  g2t_vertex_st *gver=0;
   if(gds)  g2t_ver=( St_g2t_vertex *)gds->Find("g2t_vertex");
   if(g2t_ver)gver=g2t_ver->GetTable();
-  
+
   double gx = -999.;
   double gy = -999.;
   double gz = -999.;
-    
+
   if(gver) {
     gx=gver->ge_x[0];
     gy=gver->ge_x[1];
@@ -248,14 +248,14 @@ void StGenericVertexMaker::MakeEvalNtuple(){
   }
 
 
-  //  G E T     P R I M     V E R T E X 
+  //  G E T     P R I M     V E R T E X
   primV=mEvent->primaryVertex();
   if(!primV) {
     printf("primaryVertex()=NULL\n");
     mEvalNtuple->Fill(theFinder->result().x(),theFinder->result().y(),theFinder->result().z(),theFinder->status(),mEvent->summary()->numberOfGoodTracks(),-999.,-999.,-999.,-999.,-999.,theFinder->NCtbMatches(),gx,gy,gz);
     }
   else {
-    printf("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters());  
+    printf("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters());
   mEvalNtuple->Fill(theFinder->result().x(),theFinder->result().y(),theFinder->result().z(),theFinder->status(),mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(),theFinder->NCtbMatches(),gx,gy,gz);
   }
 }
