@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.23 2001/02/09 23:06:25 porter Exp $
+ * $Id: StDbTable.cc,v 1.24 2001/04/23 19:24:32 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.24  2001/04/23 19:24:32  porter
+ * fixed row limit & initial buffer contents for query by where clause
+ *
  * Revision 1.23  2001/02/09 23:06:25  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -110,6 +113,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.24  2001/04/23 19:24:32  porter
+ * fixed row limit & initial buffer contents for query by where clause
+ *
  * Revision 1.23  2001/02/09 23:06:25  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -456,7 +462,8 @@ StDbTable::createMemory(int nrows) {
  mrows = nrows;
  bool retVal = true;
  if(mrows==0) {
-   delete mdata; mdata=0;
+   if(mdata)delete [] mdata; 
+   mdata=0;
    return retVal;
  }
 
@@ -491,8 +498,9 @@ StDbTable::createMemory() {
   if(mrows==0) mrows=1;
   return createMemory(mrows);
 }
-    
+
 //////////////////////////////////////////////////////////////////////
+
 char*
 StDbTable::getElementName() { return mstrDup(melementName); };
 
@@ -519,6 +527,7 @@ StDbTable::addNRows(int numRows){
   unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
   unsigned int len = newRows*rowsize;
   char* newData = new char[len]; 
+  memset(newData,0,len);
   if(mdata)memcpy(newData,mdata,mrows*rowsize);
   char* p1 = newData;
   p1+=mrows*rowsize;
