@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.84  1999/07/13 15:54:13  fisyak
+#  Add SKIP_DIRS
+#
 #  Revision 1.83  1999/07/13 14:41:42  fisyak
 #  Add SKIP_LIB env. varibale to skip unwanted directory
 #
@@ -328,7 +331,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/13 14:41:42 $ 
+#           Last modification $Date: 1999/07/13 15:54:13 $ 
 #  default setings
 # Current Working Directory
 #
@@ -395,6 +398,9 @@ endif
  endif
 ifdef SKIP_LIB
     SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
+endif
+ifdef SKIP_DIRS
+    SUBDIRS := $(filter-out $(SKIP_DIRS),  $(SUBDIRS))
 endif
   ifdef PKG
     SUBDIRS:=
