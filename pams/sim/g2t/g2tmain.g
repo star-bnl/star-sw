@@ -231,7 +231,7 @@ created   22 april 98
       Integer                NwHEAD,IHEAD(100),Nu,IBUF(100),i,j,in,ip,jn,jp
       Integer                Ntra,IRUN,Ievt,IwtFL,Istat,IDPDG,MOTH(2),IDAU1
       Real                   VERT(4),PP(4),TIME,AMASS,WEIGH
-      Character              o*1,edir*(*), GeName*8
+      Character              GeName*8
       INTEGER                NUMPRIM,NUMFINS
       common /g2tevtcnt/     NUMPRIM,NUMFINS 
       Record /G2T_EVENT_ST/  g2t_event
