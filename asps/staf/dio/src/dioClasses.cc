@@ -4,6 +4,7 @@
 //:DESCRIPTION: DIO Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     21aug96-v010a-cet- debug xdrrec_create for Sun4OS5
 //:HISTORY:     12dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
@@ -283,6 +284,7 @@ dioSockStream:: dioSockStream(const char * name, const char * hostName
    myHost = (char*)ASUALLOC(strlen(hostName) +1);
    strcpy(myHost,hostName);
    myPort = port;
+   myRequiresHandshake = TRUE; //-default 
 }
 
 //----------------------------------
@@ -312,7 +314,71 @@ long dioSockStream::  bufferSize () {
    return myBufferSize;
 }
 
+//----------------------------------
+unsigned char dioSockStream:: requiresHandshake () {
+   return myRequiresHandshake;
+}
+
+//----------------------------------
+void dioSockStream:: requiresHandshake (unsigned char truth) {
+   if( truth ){
+      myRequiresHandshake = TRUE;
+   } else {
+      myRequiresHandshake = FALSE;
+   }
+}
+
 //:----------------------------------------------- PUB FUNCTIONS      --
+STAFCV_T dioSockStream:: acknowledgeRequest() {
+
+    bool_t  ak=TRUE;
+    enum xdr_op save_op;
+
+    save_op = myXDR.x_op;
+//-- server: sending acknowledgement
+    myXDR.x_op = XDR_ENCODE;
+    if (!xdr_bool(&myXDR,&ak)) {
+	perror("server send acknowledgement");
+	return STAFCV_BAD;
+    }
+    if (!xdrrec_endofrecord(&myXDR, 1)) {
+	printf("xdr_endofrecord failed for encode\n");
+	return STAFCV_BAD;
+    }
+    myXDR.x_op = save_op;
+    return STAFCV_OK;
+}
+
+//----------------------------------
+STAFCV_T dioSockStream:: requestAcknowledge() {
+
+    bool_t  rq=TRUE, ak;
+    enum xdr_op save_op;
+
+    save_op = myXDR.x_op;
+//-- client: sending request
+    myXDR.x_op = XDR_ENCODE;
+    if (!xdr_bool(&myXDR,&rq)) {
+	perror("client send request");
+	return STAFCV_BAD;
+    }
+    if (!xdrrec_endofrecord(&myXDR, 1)) {
+	printf("xdr_endofrecord failed for encode\n");
+	return STAFCV_BAD;
+    }
+//-- client: waiting for acknowledgement
+    myXDR.x_op = XDR_DECODE;
+    printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR));
+    if (!xdr_bool(&myXDR,&ak)) {
+	perror("client get ack");
+	return STAFCV_BAD;
+    }
+    myXDR.x_op = save_op;
+    if(ak)return STAFCV_OK;
+    return STAFCV_BAD;
+}
+
+//----------------------------------
 STAFCV_T dioSockStream:: close () {
 
    DIO_STATE_T saveState=myState;
@@ -347,7 +413,8 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
 //- Create XDR pointer. -**
    memset((char*)&myXDR, 0, sizeof(myXDR));
-   xdrrec_create(&myXDR, 0, 0, &mySocket, tcpRead, tcpWrite);
+//-21aug96- xdrrec_create(&myXDR, 0, 0, &mySocket, tcpRead, tcpWrite);
+   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, tcpRead, tcpWrite);
 //-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
 
 //- Set XDR mode -**
@@ -372,6 +439,11 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
 //----------------------------------
 STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
+   if( requiresHandshake() ){
+       if( !requestAcknowledge() ){		//-HACK- everytime?
+	  EML_ERROR(NO_ACKNOWLEDGEMENT);
+       }
+   }
    printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR));
    return dioStream::getEvent(destination);
 }

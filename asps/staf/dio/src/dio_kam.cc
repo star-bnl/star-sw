@@ -495,3 +495,37 @@ int kam_diosockstream_port()
    EML_SUCCESS(STAFCV_OK);
 }
 
+/*-------------------------------------------------------------------*/
+void kam_diosockstream_handshake_(){kam_diosockstream_handshake();}
+int kam_diosockstream_handshake()
+{
+   long npars = ku_npar(); /* no. of KUIP param.s */
+   char* name = ku_gets();      /* stream name */
+   char* truth = ku_getc();      /* truth value */
+
+   dioSockStream* stream;
+
+   if( !dio->findSockStream(name, stream) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   switch (truth[0]) {
+   case '-': case '?':
+       if( stream->requiresHandshake() ){
+	  printf("DIO:\tDOES require handshake \n");
+       } else {
+	  printf("DIO:\tDOES NOT require handshake \n");
+       }
+       break;
+   case 'T':
+       stream->requiresHandshake(TRUE);
+       break;
+   case 'F':
+       stream->requiresHandshake(FALSE);
+       break;
+   default:
+       EML_ERROR(KAM_INVALID_BOOLEAN);
+       break;
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+

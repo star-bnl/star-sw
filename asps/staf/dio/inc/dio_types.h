@@ -80,6 +80,7 @@ extern CC_P void kam_diosockstream_mode_();
 extern CC_P void kam_diosockstream_state_();
 extern CC_P void kam_diosockstream_host_();
 extern CC_P void kam_diosockstream_port_();
+extern CC_P void kam_diosockstream_handshake_();
 /*-*/
 extern CC_P int kam_dio_count();
 extern CC_P int kam_dio_list();
@@ -100,6 +101,7 @@ extern CC_P int kam_diosockstream_mode();
 extern CC_P int kam_diosockstream_state();
 extern CC_P int kam_diosockstream_host();
 extern CC_P int kam_diosockstream_port();
+extern CC_P int kam_diosockstream_handshake();
 #endif /*NOKUIP*/
 
 #endif /* DIO_TYPES_H */
