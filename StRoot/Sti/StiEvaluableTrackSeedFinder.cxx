@@ -1,31 +1,20 @@
-//StiEvaluableTrackSeedFinder.cxx
-//M.L. Miller (Yale Software)
-//04/01
-
+///\File StiEvaluableTrackSeedFinder.cxx
+///\author M.L. Miller (Yale Software) 04/01
 //Std
 #include <iostream>
 #include <algorithm>
 using std::for_each;
 using std::equal_range;
-
 #include <math.h>
 #include <map>
 #include <utility>
 using std::pair;
-
 //SCL
 #include "StGetConfigValue.hh"
-
 //StMcEvent
 #include "StMcEventTypes.hh"
-
-//Association
-//#include "StAssociationMaker/StTrackPairInfo.hh"
-//#include "StAssociationMaker/StAssociationMaker.h"
-
 //Sti
 #include "Sti/Base/Messenger.h"
-#include "StiIOBroker.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
@@ -43,22 +32,18 @@ ostream& operator<<(ostream&, const StiHit&);
   object is owned by some other scope.
 */
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(const string& name,
-							 Factory<StiKalmanTrack>* trackFactory,
-							 StiHitContainer      * hitContainer,
-							 StiDetectorContainer * detectorContainer,
-							 StAssociationMaker   * assoc)
-    : Observer(StiIOBroker::instance()),
-      StiSeedFinder(name,trackFactory,hitContainer,detectorContainer),
-      mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
-      mIOBroker(StiIOBroker::instance()),
-      mLowerBound(0), mMaxHits(0)
+																												 Factory<StiKalmanTrack>* trackFactory,
+																												 StiHitContainer      * hitContainer,
+																												 StiDetectorContainer * detectorContainer,
+																												 StAssociationMaker   * assoc)
+	: StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer),
+		mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
+		mLowerBound(5), mMaxHits(6)
 {
   cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - INFO - Started"<<endl;
   if (!assoc) 
     throw runtime_error("StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - FATAL - assoc==0");
-  mSubject->attach(this);
   mTpcHitFilter = new StTpcPadrowHitFilter();
-  getNewState();
   cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - INFO - Done"<<endl;
 }
 
@@ -69,12 +54,10 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
     delete mTpcHitFilter;
     mTpcHitFilter=0;
   }
-  if (mSubject) 
-    mSubject->detach(this);
   cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder() - INFO - Done"<<endl;
 }
 
-/*! This call is inherited from StiSeedFinder but does not make much sense in the context
+/*! This call is inherited from StiTrackSeedFinder but does not make much sense in the context
   of evaluable seeds.  That is, the internal state cannot be reset without a call to
   setEvent().
 */
@@ -101,18 +84,6 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
   mCurrentMc = mBeginMc;
   
   return;
-}
-
-void StiEvaluableTrackSeedFinder::getNewState()
-{
-  //cout <<"StiEvaluableTrackSeedFinder::getNewState()"<<endl;
-  //cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*mIOBroker<<endl;
-  
-  mLowerBound = mIOBroker->etsfLowerBound();
-  mMaxHits = mIOBroker->etsfMaxHits();
-  mLowerBound = mIOBroker->etsfLowerBound();
-  //cout <<"maxHits: "<<mMaxHits<<"\tlowerBound: "<<mLowerBound<<endl;
-  mTpcHitFilter->getNewState();
 }
 
 /*! A call to hasMore() simply checks if there are more seeds to be generated.
@@ -209,3 +180,7 @@ void BestCommonHits::operator()(const McToStPair_t& rhs)
   }
 }
 
+void StiEvaluableTrackSeedFinder::initialize()
+{
+
+}

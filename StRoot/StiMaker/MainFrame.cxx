@@ -24,7 +24,6 @@ using std::find_if;
 #include "Sti/StiCompositeTreeNode.h"
 #include "Sti/StlUtilities.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiIOBroker.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
@@ -41,7 +40,6 @@ using std::find_if;
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDrawable.h"
 #include "StiGui/StiRootDisplayManager.h"
-#include "StiGui/StiGuiIOBroker.h"
 #include "StiMaker/MainFrame.h"
 #include "StiMaker/StiOptionFrame.h"
 #include "Sti/StiDefaultTrackFilter.h"
@@ -705,18 +703,7 @@ void MainFrame::printHits()
 
 void MainFrame::toggleFitFind()
 {
-  int dummy;
-  cout <<"Please enter a number\n\t1\tFit Tracks\n\t2\tFind Tracks"<<endl;
-  cin >> dummy;
-  if (dummy==1) {
-    StiIOBroker::instance()->setDoTrackFit(true);
-  }
-  else if (dummy==2) {
-    StiIOBroker::instance()->setDoTrackFit(false);
-  }
-  else {
-    cout <<"Error: entry "<<dummy<<" invalid.  No action taken"<<endl;
-  }
+	cout << " NO LONGER A VALID OPTION"<<endl;
 }
 
 void MainFrame::printVertices()

@@ -14,7 +14,7 @@ class StEvent;
 
 class StiTrackContainer;
 class StiEvaluableTrack;
-class StiSeedFinder;
+class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
 class StiKalmanTrackNode;
@@ -23,7 +23,6 @@ class StMcEventMaker;
 class StAssociationMaker;
 class StMcEvent;
 class StiTrackMerger;
-class StiIOBroker;
 class StiToolkit;
 
 class StiMaker : public StMaker 
@@ -39,13 +38,12 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.0 2002/12/04 16:50:56 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.1 2003/01/24 06:12:28 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     static StiMaker* instance();
     static void kill();
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
-    StiIOBroker* getIOBroker();
 
 protected:
     StiMaker(const char* name = "StiMaker");
@@ -55,8 +53,7 @@ private:
     static StiMaker* sinstance; //!
     bool eventIsFinished;
     bool initialized;
-    StiIOBroker * ioBroker;
-    StiToolkit  * toolkit;
+    StiToolkit  *    _toolkit;
     StiTrackFinder * tracker;
     StMcEventMaker* mMcEventMaker; //!
     StAssociationMaker* mAssociationMaker; //!

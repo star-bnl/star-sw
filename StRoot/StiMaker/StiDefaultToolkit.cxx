@@ -1,18 +1,17 @@
-/** 
- * @file  StiDefaultToolkit.cxx
- * @brief Default Implementation of the StiToolkit Abstract interface
- * @author Claude A Pruneau, Wayne State University, 
- * @date   March 2001
- * @copyright 2001, STAR  Experiment at BNL, All rights reserved.  
- *  
- * Permission to use, copy, modify and distribute this software and its
- * documentation strictly for non-commercial purposes is hereby granted 
- * without fee, provided that the above copyright notice appears in all
- * copies and that both the copyright notice and this permission notice
- * appear in the supporting documentation. The authors make no claims 
- * about the suitability of this software for any purpose. It is     
- * provided "as is" without express or implied warranty.             
- */
+///@file  StiDefaultToolkit.cxx
+///@brief Default Implementation of the StiToolkit Abstract interface
+///@author Claude A Pruneau, Wayne State University, 
+///@date   March 2001
+///@copyright 2001, STAR  Experiment at BNL, All rights reserved.  
+/// 
+///Permission to use, copy, modify and distribute this software and its
+///documentation strictly for non-commercial purposes is hereby granted 
+///without fee, provided that the above copyright notice appears in all
+///copies and that both the copyright notice and this permission notice
+///appear in the supporting documentation. The authors make no claims 
+///about the suitability of this software for any purpose. It is     
+///provided "as is" without express or implied warranty.             
+///
 #include "StiDefaultToolkit.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Filter.h"
@@ -40,10 +39,11 @@
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiCompositeSeedFinder.h"
+#include "StiGui/StiRDLocalTrackSeedFinder.h"
+#include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDisplayManager.h"
 #include "Sti/StiDefaultTrackFilter.h"
-#include "Sti/StiIOBroker.h"
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiHitErrorCalculator.h"
@@ -52,7 +52,6 @@
 #include "StiSvt/StiSvtHitLoader.h"
 
 #include "StiMaker/RootEditableParameter.h"
-#include "StiMaker/StiRootIOBroker.h"
 #include "StiGui/StiRootDisplayManager.h"
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiRootDrawableMcTrack.h"
@@ -67,6 +66,9 @@
 
 StiDefaultToolkit::StiDefaultToolkit()
   :
+	_guiEnabled(false),
+	_evaluatorEnabled(false),
+	_mcEnabled(false),
   _trackFilterFactory(0),
   _parameterFactory(0),
   _hitFactory(0),
@@ -85,7 +87,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackMerger(0),
 	_vertexFinder(0),
   _displayManager(0),
-  _ioBroker(0),
   _hitLoader(0),
   _associationMaker(0)
 {
@@ -114,7 +115,6 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _trackFinder;
   delete _trackFitter;
   delete _trackMerger;
-  delete _ioBroker;
 };
 
 Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
@@ -131,8 +131,7 @@ Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
 {
   if (_parameterFactory)
     return _parameterFactory;
-  StiIOBroker * ioBroker = getIOBroker();
-  if (ioBroker->useGui())
+  if (_guiEnabled)
     _parameterFactory = new VectorizedFactory<RootEditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
   else
     _parameterFactory = new VectorizedFactory<EditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
@@ -151,21 +150,20 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 {
   if (_trackFactory)
     return _trackFactory;
-  StiIOBroker * ioBroker = getIOBroker();
   cout << "StiDefaultToolkit::getTrackFactory() - INFO - "; 
-  if (ioBroker->useGui())
+  if (_guiEnabled)
     {
-      if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable)
-	  _trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
-      else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
-	  _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
+      if (_evaluatorEnabled)
+				_trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
+      else 
+				_trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
     }
   else // no gui needed
     {	
-      if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable)
-	  _trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
-      else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
-	  _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
+      if (_evaluatorEnabled)
+				_trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
+      else 
+				_trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
     }
   return _trackFactory;
 }
@@ -174,9 +172,8 @@ Factory<StiMcTrack>* StiDefaultToolkit::getMcTrackFactory()
 {
   if (_mcTrackFactory)
     return _mcTrackFactory;
-  StiIOBroker * ioBroker = getIOBroker();
   cout << "StiDefaultToolkit::getMcTrackFactory() - INFO - "; 
-  if (ioBroker->useGui())
+  if (_guiEnabled)
       _mcTrackFactory = new VectorizedFactory<StiRootDrawableMcTrack,StiMcTrack>("StiRootDrawableMcTrackFactory",10000,5000,10);
   else // no gui needed
       _mcTrackFactory = new VectorizedFactory<StiMcTrack,StiMcTrack>("StiMcTrackFactory",10000,5000,10);
@@ -188,7 +185,7 @@ Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
   if (_detectorFactory)
     return _detectorFactory;
   cout << "StiDefaultToolkit::getDetectorFactory() - INFO - Instantiating Detector Factory"; 
-  if (getIOBroker()->useGui())
+  if (_guiEnabled)
     _detectorFactory = new VectorizedFactory<StiRootDrawableDetector,StiDetector>("StiRDDetectorFactory",2000,500,10);
   else
     _detectorFactory = new VectorizedFactory<StiDetector,StiDetector>("StiDetectorFactory",2000,500,10);
@@ -264,7 +261,7 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
   if (_hitContainer)
     return _hitContainer;
   cout << "StiDefaultToolkit::getHitContainer() - INFO - "; 
-  if (getIOBroker()->useGui())
+  if (_guiEnabled)
     {
       _hitContainer = new StiRootDrawableHitContainer();
       cout << "instantiating StiRootDrawableHitContainer" << endl;
@@ -306,28 +303,39 @@ StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
   return _detectorFinder;
 }
 
-StiSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
+StiTrackSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
   if (_trackSeedFinder)
     return _trackSeedFinder;
   cout << "StiDefaultToolkit::getTrackSeedFinder() - INFO - "; 
-  StiIOBroker * ioBroker = getIOBroker();
-  if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable) 
+  if (_evaluatorEnabled)
     {
-      _trackSeedFinder = new StiEvaluableTrackSeedFinder("EvaluableTrackSeedFinder",
-							 getTrackFactory(),
-							 getHitContainer(),
-							 getDetectorContainer(),
-							 getAssociationMaker());
       cout << "instantiating StiEvaluableTrackSeedFinder" << endl;
+      _trackSeedFinder = new StiEvaluableTrackSeedFinder("EvaluableTrackSeedFinder",
+																												 getTrackFactory(),
+																												 getHitContainer(),
+																												 getDetectorContainer(),
+																												 getAssociationMaker());
     }
-  else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
+  else 
     {
-      _trackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
-						    getTrackFactory(),
-						    getHitContainer(),
-						    getDetectorContainer());
       cout << "instantiating StiCompositeTrackSeedFinder" << endl;
+			StiCompositeSeedFinder * compositeTrackSeedFinder;
+			compositeTrackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
+																														getTrackFactory(),
+																														getHitContainer(), 
+																														getDetectorContainer());  
+			StiTrackSeedFinder * trackSeedFinder;																																					
+			if (_guiEnabled)
+				trackSeedFinder = new StiRDLocalTrackSeedFinder("RDLocalTrackSeedFinder",
+																												_trackFactory, 
+																												_hitContainer, 
+																												_detectorContainer);
+			else 
+				trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",_trackFactory, _hitContainer, _detectorContainer);
+			compositeTrackSeedFinder->Vectorized<StiTrackSeedFinder>::add(trackSeedFinder);
+			compositeTrackSeedFinder->reset();
+			_trackSeedFinder = compositeTrackSeedFinder;
     }
   return _trackSeedFinder;
 }
@@ -385,13 +393,6 @@ StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
   return _hitLoader;
 }
 
-StiIOBroker * StiDefaultToolkit::getIOBroker()
-{
-  if (!_ioBroker)
-    _ioBroker = new StiRootIOBroker();
-  return _ioBroker;
-}
-
 StAssociationMaker * StiDefaultToolkit::getAssociationMaker()
 {
   if (!_associationMaker)
@@ -404,5 +405,36 @@ void StiDefaultToolkit::setAssociationMaker(StAssociationMaker * a)
   _associationMaker = a;
   if (!_associationMaker)
     throw runtime_error(" StiDefaultToolkit::getAssociationMaker() - FATAL - _associationMaker==0");
+}
+
+
+void StiDefaultToolkit::setGuiEnabled(bool guiEnabled)
+{
+	_guiEnabled = guiEnabled;
+}
+
+bool StiDefaultToolkit::isGuiEnabled() const
+{
+	return _guiEnabled;
+}
+
+void StiDefaultToolkit::setMcEnabled(bool mcEnabled)
+{
+	_mcEnabled = mcEnabled;
+}
+
+bool StiDefaultToolkit::isMcEnabled() const
+{
+	return _mcEnabled;
+}
+
+void StiDefaultToolkit::setEvaluatorEnabled(bool evaluatorEnabled)
+{
+	_evaluatorEnabled = evaluatorEnabled;
+}
+
+bool StiDefaultToolkit::isEvaluatorEnabled() const
+{
+	return _evaluatorEnabled;
 }
 

@@ -39,9 +39,6 @@ public:
     virtual void mergeTracks();
 
 protected:
-    virtual void getNewState();
-    
-private:
     StiLocalTrackMerger(); //This is not implemented
     bool sameTrack(StiKalmanTrack* lhs, StiKalmanTrack* rhs);
     bool configureMaxTrack(StiKalmanTrack* lowerTrack);

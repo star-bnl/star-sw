@@ -1,12 +1,11 @@
-//
 // $Id $
-//StiMaker.cxx
-// M.L. Miller
-// 5/00
-// Modified Pruneau 3/02
-//
-//
+/// \File StiMaker.cxx
+/// \author M.L. Miller 5/00
+/// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.110  2003/01/24 06:12:28  pruneau
+// removing centralized io
+//
 // Revision 1.109  2003/01/22 20:06:26  andrewar
 // Changed includes to point to new libraries (StiTpc, StiSvt, etc)
 //
@@ -52,11 +51,11 @@
 // Revision 1.95  2002/05/29 19:13:50  calderon
 // Added
 //
-//   mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
+//   mevent = mStEventFiller->fillEvent(mevent, _toolkit->getTrackContainer());
 //
 // for globals and
 //
-//   mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+//   mevent = mStEventFiller->fillEventPrimaries(mevent, _toolkit->getTrackContainer());
 //
 // for primaries.
 //
@@ -75,8 +74,6 @@
 #include "StEventTypes.h"
 //StMcEventMaker
 #include "StMcEventMaker/StMcEventMaker.h"
-
-#include "Sti/StiIOBroker.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
@@ -96,17 +93,13 @@ ClassImp(StiMaker)
   StiMaker::StiMaker(const Char_t *name) : 
     StMaker(name),
     initialized(false),
-    ioBroker(0),
-    toolkit(0),
+    _toolkit(StiToolkit::instance() ),
     tracker(0),
     mMcEventMaker(0),
     mAssociationMaker(0)
 {
-  cout <<"StiMaker::StiMaker() - INFO - Starting"<<endl;
+  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
   sinstance = this;
-  //StiToolkit::setToolkit(new StiDefaultToolkit());//now done in MiniChain
-  // local cache
-  toolkit = StiToolkit::instance();
 }
 
 StiMaker* StiMaker::instance()
@@ -131,17 +124,17 @@ StiMaker::~StiMaker()
 
 void StiMaker::Clear(const char*)
 {
-  cout <<"StiMaker::Clear( ) - INFO - Started"<<endl;
+  cout <<"StiMaker::Clear( ) -I- Started"<<endl;
   if (initialized) 
     {
-      cout <<"StiMaker::Clear( ) - INFO - Initialized - call tracker reset"<<endl;
+      cout <<"StiMaker::Clear( ) -I- Initialized - call tracker reset"<<endl;
       tracker->clear();
-      if (ioBroker->useGui()) 
-	toolkit->getDisplayManager()->reset();
+      if (_toolkit->isGuiEnabled() )
+				_toolkit->getDisplayManager()->reset();
     }
-  cout <<"StiMaker::Clear( ) - INFO - Call base class clear"<<endl;
+  cout <<"StiMaker::Clear( ) -I- Call base class clear"<<endl;
   StMaker::Clear();
-  cout <<"StiMaker::Clear( ) - INFO - Done"<<endl;
+  cout <<"StiMaker::Clear( ) -I- Done"<<endl;
 }
 
 Int_t StiMaker::Finish()
@@ -156,13 +149,13 @@ Int_t StiMaker::Init()
 
 Int_t StiMaker::InitDetectors()
 {
-  cout<<"StiMaker::InitDetectors() - INFO - Adding detector group:Star"<<endl;
-  toolkit->add(new StiStarDetectorGroup());
-  cout<<"StiMaker::InitDetectors() - INFO - Adding detector group:TPC"<<endl;
-  toolkit->add(new StiTpcDetectorGroup(true));
-  cout<<"StiMaker::Init() - INFO - Adding detector group:SVT"<<endl;
-  toolkit->add(new StiSvtDetectorGroup(true));
-  //cout<<"StiMaker::Init() - INFO - Adding detector group:EMC"<<endl;
+  cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
+  _toolkit->add(new StiStarDetectorGroup());
+  cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
+  _toolkit->add(new StiTpcDetectorGroup(true));
+  cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
+  _toolkit->add(new StiSvtDetectorGroup(true));
+  //cout<<"StiMaker::Init() -I- Adding detector group:EMC"<<endl;
   //toolkit->add(new StiEmcDetectorGroup(true));
   return kStOk;
 }
@@ -174,32 +167,29 @@ Int_t StiMaker::InitRun(int run)
 
 Int_t StiMaker::Make()
 {
-  cout <<"StiMaker::Make() - INFO - Starting"<<endl;
+  cout <<"StiMaker::Make() -I- Starting"<<endl;
 
   // a  kludge because some guys don't initialize their detectors
   // in Init but in Make - this is BAD!
   if (!initialized)
     {
-      cout <<"\n --- StiMaker::InitRun() - INFO - Building --- \n"<<endl;
+      cout <<"\n --- StiMaker::InitRun() -I- Building --- \n"<<endl;
       initialized=true;
       InitDetectors();
-      ioBroker = toolkit->getIOBroker();
-      cout <<"StiMaker::Make() - INFO - Parameters:"<<endl;
-      cout <<*ioBroker<<endl;
-      cout << "StiMaker::Make() - INFO - Instantiate Tracker" <<  endl;
-      tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
+      cout << "StiMaker::Make() -I- Instantiate Tracker" <<  endl;
+      tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
       if (!tracker)
 	throw runtime_error("StiMaker::Make() - FATAL - tracker is not a StiKalmanTrackFinder");
       tracker->initialize();
       tracker->clear();
-      if (ioBroker->useGui()) 
-	{
-	  cout << "StiMaker::Make() - INFO - Instantiate/Setup DisplayManager" <<  endl;
-	  toolkit->getDisplayManager()->cd();
-	  toolkit->getDisplayManager()->setView(0);
-	  toolkit->getDisplayManager()->draw();
-	  toolkit->getDisplayManager()->update();
-	}
+      if (_toolkit->isGuiEnabled())
+				{
+					cout << "StiMaker::Make() -I- Instantiate/Setup DisplayManager" <<  endl;
+					_toolkit->getDisplayManager()->cd();
+					_toolkit->getDisplayManager()->setView(0);
+					_toolkit->getDisplayManager()->draw();
+					_toolkit->getDisplayManager()->update();
+				}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
   eventIsFinished = false;
@@ -207,20 +197,20 @@ Int_t StiMaker::Make()
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (!event)
     throw runtime_error("StiMaker::Make() - ERROR - event == 0");
-  if (ioBroker->simulated()) 
+  if (_toolkit->isMcEnabled())
     {
       mcEvent= mMcEventMaker->currentMcEvent();
       if (!mcEvent)
-	throw runtime_error("StiMaker::Make() - ERROR - mcEvent == 0");
+				throw runtime_error("StiMaker::Make() - ERROR - mcEvent == 0");
     }
   else 
     mcEvent = 0;
-  if (ioBroker->useGui())
+  if (_toolkit->isGuiEnabled())
     {
-      cout << "StiMaker::Make() - INFO - Loading EVENT"<<endl;
+      cout << "StiMaker::Make() -I- Loading EVENT"<<endl;
       tracker->loadEvent(event,mcEvent);
-      toolkit->getDisplayManager()->draw();
-      toolkit->getDisplayManager()->update();
+      _toolkit->getDisplayManager()->draw();
+      _toolkit->getDisplayManager()->update();
     }
   else
     tracker->findTracks(event,mcEvent);
@@ -233,19 +223,19 @@ void StiMaker::finishEvent()
   StTimer clockGlobalFinder;
   StTimer clockAssociator;
   if (eventIsFinished)
-    {
-      cout << "StiMaker::finishEvent() - Event reconstruction is finished." <<endl;
+	{
+	cout << "StiMaker::finishEvent() - Event reconstruction is finished." <<endl;
       return;				
     }
-  cout <<"StiMaker::finishEvent() - Event reconstruction begins."<<endl;
+		cout <<"StiMaker::finishEvent() - Event reconstruction begins."<<endl;
   clockGlobalFinder.start();   
   tracker->findTracks();  
   clockGlobalFinder.stop();
-  if (ioBroker->useGui()==true) 
-    {
-      tracker->update();
-      StiDefaultTrackFilter * f = 0;
-      if (f)
+  if (_toolkit->isGuiEnabled())
+	{
+	tracker->update();
+	StiDefaultTrackFilter * f = 0;
+	if (f)
 	{
 	  f->getParameter("Chi2Used")->setValue(true);
 	  f->getParameter("Chi2Min")->setValue(0.);
@@ -278,13 +268,8 @@ void StiMaker::finishEvent()
        <<" Global  Finding :"<<clockGlobalFinder.elapsedTime()<<endl
        <<" Primary Finding :"<<clockPrimaryFinder.elapsedTime()<<endl
        <<"     Association :"<<clockAssociator.elapsedTime()<<endl
-  cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
+  cout <<"StiMaker::finishEvent() -I- Done"<<endl;
 }
 */
 
-
-StiIOBroker* StiMaker::getIOBroker()
-{
-  return toolkit->getIOBroker();
-}
 

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.2 2003/01/23 05:26:02 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.3 2003/01/24 06:12:28 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.3  2003/01/24 06:12:28  pruneau
+ * removing centralized io
+ *
  * Revision 2.2  2003/01/23 05:26:02  pruneau
  * primaries rec reasonable now
  *
@@ -265,7 +268,6 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
 	StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
 	int errorCount=0; 
-	int tc=0;
 	for (TrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
 		{
 			const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
@@ -469,7 +471,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 	StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
 	origin.rotateZ(node->getRefAngle());
 	StThreeVectorF p = node->getGlobalMomentumF();
-	short int h = node->getHelicity();
+	short int h = (short int) node->getHelicity();
 	phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
 	phase += h*halfpi;
 	double curv=fabs(node->getCurvature());

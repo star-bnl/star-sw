@@ -40,12 +40,11 @@ class 	StiHitContainer;
 class 	StiTrackContainer;
 // service and convenience class objects.
 class 	StiDetectorFinder;
-class 	StiSeedFinder;
+class 	StiTrackSeedFinder;
 class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
 class   StiVertexFinder;
-class   StiIOBroker;
 class   StiDisplayManager;
 class   StAssociationMaker;
 class   EditableParameter;
@@ -75,18 +74,23 @@ public:
   
   // service and convenience class objects.
   virtual StiDetectorFinder    * getDetectorFinder()=0;
-  virtual StiSeedFinder        * getTrackSeedFinder()=0;
+  virtual StiTrackSeedFinder   * getTrackSeedFinder()=0;
   virtual StiTrackFinder       * getTrackFinder()=0;
   virtual StiTrackFitter       * getTrackFitter()=0;
   virtual StiTrackMerger       * getTrackMerger()=0;
 	virtual StiVertexFinder      * getVertexFinder()=0;
   virtual StiDisplayManager    * getDisplayManager()=0;
-  virtual StiIOBroker * getIOBroker()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
-  
   virtual void add(StiDetectorGroup<StEvent>* detectorGroup)=0;
+
+	virtual void setGuiEnabled(bool )=0;
+	virtual bool isGuiEnabled() const=0;
+	virtual void setMcEnabled(bool)=0;
+	virtual bool isMcEnabled() const=0;
+	virtual void setEvaluatorEnabled(bool)=0;
+	virtual bool isEvaluatorEnabled() const=0;
 
   static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();

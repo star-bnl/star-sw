@@ -1,6 +1,5 @@
 #ifndef StiTrackMerger_HH
 #define StiTrackMerger_HH
-#include "Sti/Base/SubjectObserver.h"
 
 class StiTrackContainer;
 
@@ -16,7 +15,7 @@ class StiTrackContainer;
   via the pointer to StiTrackContainer.
 
  */
-class StiTrackMerger : public Observer
+class StiTrackMerger
 {
 public:
     ///One must provide a valid pointer to the track container.
@@ -26,9 +25,7 @@ public:
     virtual void mergeTracks() = 0;
 protected:
     StiTrackMerger(); //This is not implemented
-    virtual void getNewState() = 0;
     StiTrackContainer* mTrackStore;
 };
-
 
 #endif

@@ -16,6 +16,7 @@
 #ifndef StiDefaultToolkit_H
 #define StiDefaultToolkit_H 1
 #include "Sti/StiToolkit.h"
+#include "StiMaker/RootEditableParameter.h"
 
 /** 
  * @class StiDefaultToolkit
@@ -44,7 +45,7 @@ public:
   
   // service and convenience class objects.
   virtual StiDetectorFinder      * getDetectorFinder();
-  virtual StiSeedFinder          * getTrackSeedFinder();
+  virtual StiTrackSeedFinder          * getTrackSeedFinder();
   virtual StiTrackFinder         * getTrackFinder();
   virtual StiTrackFitter         * getTrackFitter();
   virtual StiTrackMerger         * getTrackMerger();
@@ -53,16 +54,27 @@ public:
   //virtual StiEvaluator         * getEvaluator(const string& file);
   //virtual StiEvaluator         * getEvaluator();
   //virtual StiEventAssociator   * getEventAssociator();
-  virtual StiIOBroker            * getIOBroker();
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader();
   virtual StAssociationMaker     * getAssociationMaker();
   virtual void setAssociationMaker(StAssociationMaker * a);
   virtual void add(StiDetectorGroup<StEvent>* detectorGroup);
-  
+
+  //RootEditableParameter & getParameters();
+	void setGuiEnabled(bool );
+	bool isGuiEnabled() const;
+	void setMcEnabled(bool);
+	bool isMcEnabled() const;
+	void setEvaluatorEnabled(bool);
+	bool isEvaluatorEnabled() const;
+
  protected:
   
+	bool _guiEnabled;
+	bool _evaluatorEnabled;
+	bool _mcEnabled;
+
   virtual ~StiDefaultToolkit();
-  
+
   // small object factories
   Factory< Filter<StiTrack>  > * _trackFilterFactory;
   Factory<EditableParameter>   * _parameterFactory;
@@ -82,7 +94,7 @@ public:
   
   // service and convenience class objects.
   StiDetectorFinder       * _detectorFinder;
-  StiSeedFinder           * _trackSeedFinder;
+  StiTrackSeedFinder           * _trackSeedFinder;
   StiTrackFinder          * _trackFinder;
   StiTrackFitter          * _trackFitter;
   StiTrackMerger          * _trackMerger;
@@ -90,7 +102,6 @@ public:
   StiDisplayManager       * _displayManager;
   //StiEvaluator          * _evaluator;
   //StiEventAssociator    * _eventAssociator;
-  StiIOBroker             * _ioBroker;
   StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
   StAssociationMaker                       * _associationMaker; 
 };
