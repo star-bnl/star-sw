@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.2 2000/11/27 14:08:00 hummler Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.3 2001/01/11 18:28:44 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.3  2001/01/11 18:28:44  jcs
+// use PhysicalConstants.h instead of math.h, remove print statement
+//
 // Revision 1.2  2000/11/27 14:08:00  hummler
 // inplement tzero and lorentz angle correction factor
 //
@@ -16,7 +19,7 @@
 //          02/27/98    Janet Seyboth   correct definition of new arrays
 ///////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
+#include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
@@ -122,7 +125,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader)
   EFieldMin=preciseEField[0];
   EFieldStep=preciseEField[1]-EFieldMin;
   EFieldStepInverted= 1/EFieldStep;
-  EFieldStepInvConverted= EFieldStepInverted * M_PI/180.0;
+  EFieldStepInvConverted= EFieldStepInverted * degree;
   finalVelocity = grid_point[mParam->numSlowSimGridPoints()-1].vel_z*10.;
 
 }
@@ -199,33 +202,10 @@ void StFtpcSlowSimField::Output() const
             << grid_point[i].vel_z << space
             << grid_point[i].diff_z<< space 
             << grid_point[i].diff_x<< space 
-            << grid_point[i].lorentz*180/M_PI << space 
+            << grid_point[i].lorentz/degree << space 
             << grid_point[i].dlnv_dr 
 		 *mParam->lorentzAngleFactor()
             << endl;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

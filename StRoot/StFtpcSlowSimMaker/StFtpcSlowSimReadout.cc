@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.2 2001/01/11 18:28:53 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.2  2001/01/11 18:28:53  jcs
+// use PhysicalConstants.h instead of math.h, remove print statement
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -15,8 +18,9 @@
 //         02/18/98    Janet Seyboth   Remove all references to point file
 ///////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
 #include <stdlib.h>
+
+#include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcSlowSimCluster.hh"
@@ -65,8 +69,8 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
   }
   
   // angle range in which each sector is calculated
-  phiMin = mParam->simulationPhiStart() * M_PI/180.0;
-  phiMax = mParam->simulationPhiEnd() * M_PI/180.0;    
+  phiMin = mParam->simulationPhiStart() * degree;
+  phiMax = mParam->simulationPhiEnd() * degree;    
   mGasGain = mParam->gasGain();
   mMaxAdc = mParam->maxAdc();
   mGaussIntSteps = mParam->gaussIntegrationSteps();
@@ -175,7 +179,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	  int isec_max;                                              //jcs
 	  int pad_max_save;                                          //jcs
 	  int npad;                                                  //jcs
-	  int pad_min = WhichPad(phi-width_phi+2*M_PI,isec_min);       //jcs
+	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);       //jcs
 	  int pad_max = WhichPad(phi+width_phi,isec_max);       //jcs
 	  if ( isec_min > isec_max )                                 //jcs
 	    nsecs = mParam->numberOfSectors() - isec_min + isec_max + 1;                 //jcs
@@ -194,7 +198,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    float* pad = new float[npad];  // signal dist. in pads
 	    int i;
 	    
-	    float dphi = fmod(phi-phiMin+2*M_PI,2*M_PI);   //jcs
+	    float dphi = fmod(phi-phiMin+twopi,twopi);   //jcs
 	    isec = (int)(dphi/(phiMax-phiMin));
 	    dphi = dphi - isec*(phiMax-phiMin);
 	    
@@ -303,7 +307,7 @@ float StFtpcSlowSimReadout::PhiOfPad(const int pad, const int deg_or_rad)
 int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)   //jcs
 {
     // phi and phi_min in rad
-    float dphi = fmod(phi-phiMin+2*M_PI,2*M_PI);   //jcs
+    float dphi = fmod(phi-phiMin+twopi,twopi);   //jcs
     isec = (int)(dphi/(phiMax-phiMin));
     dphi = dphi - isec*(phiMax-phiMin)- mParam->radiansPerBoundary()/2;
     int ipad = (int) (dphi/mParam->radiansPerPad() +0.5) ;
@@ -361,7 +365,7 @@ void StFtpcSlowSimReadout::polya(const int gnch, const float glow,
 // c.f.: Ronaldo Bellazzini and Mario Spezziga
 //       La Rivista del Nuovo Cimento V17N12(1994)1.
 //
-//       m=3/2, gamma(m)=sqrt(PI)/2=0.8862269
+//       m=3/2, gamma(m)=sqrt(pi)/2=0.8862269
 //       polya(k) = m*pow((m*k),(m-1))*exp(-m*k)/gamma(m)
 //
     float m_polya = 1.5;
@@ -425,7 +429,7 @@ float StFtpcSlowSimReadout::InteGauss(const float x_1, const float x_2,
            x += del_x;
      }
 
-     return del_x*0.39894228*sum; // 1/sqrt(2*M_PI)=0.39894228
+     return del_x*0.39894228*sum; // 1/sqrt(twopi)=0.39894228
 }
 
 float StFtpcSlowSimReadout::ranmar()
