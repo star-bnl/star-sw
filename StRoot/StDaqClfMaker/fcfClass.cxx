@@ -63,7 +63,7 @@ struct fcfResx {
 
 
 
-extern __inline volatile void mstore(struct fcfResx *rr, u_int av, u_int pad, u_int ch, u_int flags, int mean)
+void mstore(struct fcfResx *rr, u_int av, u_int pad, u_int ch, u_int flags, int mean)
 {
 
 	rr->t = av ;
@@ -753,7 +753,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres, short *t0_cor
 } 
 
 
-fcfClass::fcfClass(int det, u_short *table = NULL) 
+fcfClass::fcfClass(int det, u_short *table) 
 {
 	detector = det ;
 
