@@ -33,6 +33,7 @@ public:
   TDatime       GetDateTime()     const {return mEventTime;};
   TDatime       GetProdDateTime() const {return mProdTime;};
   Int_t     	GetIventNumber()  const {return mIventNumber;};
+  Int_t     	GetEventSize()    const {return mEventSize;};
   Int_t     	GetEventNumber()  const {return mEventNumber;};
   Int_t     	GetGenerType()    const {return mGenerType;};
   Int_t     	IsNewRun()    const {return (mRunNumber!=mOldRunNumber);};
@@ -57,6 +58,7 @@ public:
   void          SetGMTime(UInt_t ut);
   void          SetProdDateTime()	{mProdTime.Set();};
   void     	SetIventNumber(int iv)	{mIventNumber=iv;};
+  void     	SetEventSize(int is)	{mEventSize=is;};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
   void     	SetGenerType(int g)	{mGenerType=g;};
   void     	Print();
@@ -81,6 +83,7 @@ protected:
     Int_t       mGenerType;		//Gener type see below
     UInt_t	mBunchCrossingNumber;
     Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
+    Int_t       mEventSize;    		//size of event
     Int_t       mEventNumber;    
 //
     TDatime     mEventTime;		//DAQ Time

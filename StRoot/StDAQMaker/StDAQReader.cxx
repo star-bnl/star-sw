@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.14 2000/04/07 15:43:18 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.15 2000/05/25 20:01:58 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.15  2000/05/25 20:01:58  perev
+ * EventSize added
+ *
  * Revision 1.14  2000/04/07 15:43:18  perev
  * SetVerbose method added
  *
@@ -192,6 +195,8 @@ void StDAQReader::setFTPCVersion(const char* vers)
    int StDAQReader::TRGDetectorsPresent() const{return  fEventInfo->TRGDetectorsPresent;}
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
+//_____________________________________________________________________________
+   int StDAQReader::getEventSize()const {return  fEventInfo->EventLength;}
 //_____________________________________________________________________________
 StTPCReader *StDAQReader::getTPCReader() 
 {

@@ -78,6 +78,7 @@ Int_t StDAQMaker::Make(){
   fEvtHddr->SetInputTriggerMask	( fDAQReader->getTrigInputWord());
   fEvtHddr->SetTriggerMask	( fDAQReader->getTrigWord() 	);
   fEvtHddr->SetGMTime		( fDAQReader->getUnixTime()	);
+  fEvtHddr->SetEventSize	( fDAQReader->getEventSize()	);
   if (Debug()) fEvtHddr->Print();
   
 

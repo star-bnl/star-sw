@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.9 2000/04/07 15:43:19 perev Exp $
+ * $Id: StDAQReader.h,v 1.10 2000/05/25 20:01:58 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.10  2000/05/25 20:01:58  perev
+ * EventSize added
+ *
  * Revision 1.9  2000/04/07 15:43:19  perev
  * SetVerbose method added
  *
@@ -120,11 +123,12 @@ public:
 
   virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
-  StTPCReader *getTPCReader(); 
+  StTPCReader  *getTPCReader(); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
-  StTRGReader *getTRGReader();
+  StTRGReader  *getTRGReader();
   virtual void printEventInfo();
+  virtual int  getEventSize() const;
 
 protected:
 int fFd;	//File descriptor
