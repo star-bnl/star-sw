@@ -22,7 +22,7 @@ Provides template for creation any user maker.
    could be used from Cint macro or root prompt
    If possible, user method must be private. 
 
-TLA - Tripple Letter Achronim. 
+TLA - Triple Letter Acronym. 
 
 In previous notation user module name must have 3 letters
 surrounded by "_".
