@@ -1,12 +1,12 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.3 2000/01/27 17:09:59 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
- * Revision 1.2  2000/01/25 22:02:23  lasiuk
- * Second Revision
+ * Revision 1.3  2000/01/27 17:09:59  lasiuk
+ * modify to work stand-alone from ROOT
  *
  *
  * Revision 1.5  2000/02/08 19:53:43  lasiuk
@@ -20,9 +20,9 @@
  *
  * Revision 1.2  2000/01/25 22:02:23  lasiuk
  * Second Revision
+ *
  * Revision 1.1  2000/01/18 21:32:05  lasiuk
-#include "St_DataSet.h"
-
+ * Initial Revision
  *
  ******************************************************/
 

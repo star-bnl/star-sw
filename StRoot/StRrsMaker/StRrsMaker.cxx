@@ -1,8 +1,14 @@
-/*******************************************Maker.cxx**\
- *
+/******************************************************
+ * $Id: StRrsMaker.cxx,v 1.4 2000/01/27 17:10:03 lasiuk Exp $
+ * Description:
  *  Implementation of the Maker main module.
  *
-\******************************************************/
+ * $Log: StRrsMaker.cxx,v $
+ * Revision 1.4  2000/01/27 17:10:03  lasiuk
+ * modify to work stand-alone from ROOT
+ *
+ *
+ * Revision 1.7  2000/02/08 23:46:46  lasiuk
  * comment to prevent streamer for ionize and inducesignal. Remove filter
  *
  * Revision 1.6  2000/02/08 16:36:49  lasiuk
@@ -473,6 +479,7 @@ void StRrsMaker::drawNoise()           // electrical noise simulation
 #endif
 }
 
+//   St_DataSet * StRrsMaker::getPadPlaneTable() {
 //     Writer* output = Writer::getInstance();
 //     return output->getPadsTable(); 
 //   }
