@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.31  1998/11/27 20:01:38  fisyak
+#  put l3 after trg (bug in usage of idl)
+#
 #  Revision 1.30  1998/11/25 21:51:08  fisyak
 #  remove tcc trg and l3 from directories list for hp_ux102
 #
@@ -169,7 +172,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/25 21:51:08 $ 
+#           Last modification $Date: 1998/11/27 20:01:38 $ 
 #  default setings
 # Current Working Directory
 #
@@ -259,6 +262,7 @@ endif
 ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
 #        SUBDIRS := $(filter-out trg, $(SUBDIRS))
 endif
+SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
 ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
          SUBDIRS := $(filter-out tcc, $(SUBDIRS))
          SUBDIRS := $(filter-out trg, $(SUBDIRS))
