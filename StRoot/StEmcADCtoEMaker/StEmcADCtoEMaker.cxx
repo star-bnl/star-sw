@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.32 2002/09/19 21:32:23 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.33 2002/09/30 14:03:00 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.33  2002/09/30 14:03:00  suaide
+// small bugs fixed
+//
 // Revision 1.32  2002/09/19 21:32:23  suaide
 // Modifications to use a new internal data format
 //
@@ -339,6 +342,12 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 //_____________________________________________________________________________
 Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
 {
+	mData->NTowerHits = 0;
+	mData->NSmdHits = 0;
+	mData->ValidTowerEvent = kFALSE; 
+	mData->TowerPresent = kFALSE;
+	mData->ValidSMDEvent = kFALSE;
+	mData->SMDPresent = kFALSE;
   if(!emc) return kFALSE;
   for(Int_t det=0;det<MAXDET;det++)
   {
@@ -361,7 +370,13 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
        
             Int_t idh;
             mGeo[det]->getId(m,e,s,idh);
-            if(det==0) {mData->TowerADC[idh-1] = adc; mData->ValidTowerEvent=kTRUE;}
+            if(det==0) 
+						{
+							mData->TowerADC[idh-1] = adc; 
+							mData->ValidTowerEvent=kTRUE; 
+							mData->TowerPresent = kTRUE;
+							mData->NTowerHits++;
+						}
 						if(det==2) mData->SmdeADC[idh-1] = adc;
 						if(det==3) mData->SmdpADC[idh-1] = adc;
             if(det==2 || det==3) 
@@ -370,6 +385,8 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
               mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
               mData->TimeBin[RDO]=rawHit[k]->calibrationType();
 							mData->ValidSMDEvent=kTRUE;
+							mData->SMDPresent=kTRUE;
+							mData->NSmdHits++;
             }
           }
         }
@@ -549,6 +566,13 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 		if(totalE>0)   mEtot->Fill(log(totalE),(Float_t)det+1);
 		if(totalADC>0) mAdc1d[det]->Fill(log(totalADC));
   	if(det==2) for(Int_t RDO=0;RDO<8;RDO++) mSmdTimeBinHist->Fill(RDO,mData->TimeBin[RDO]);
+		if(nHits>0)
+		{
+			cout <<"Statistics for detector "<<detname[det].Data()<<endl;
+			cout <<"Total Energy = "<<totalE<<endl;
+			cout <<"Number of Hits = "<<nHits<<endl;
+			cout <<"total ADC = "<<totalADC<<endl;
+		}
 	}
   return kTRUE;
 }
