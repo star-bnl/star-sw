@@ -1,0 +1,33 @@
+<h1> Package tbr </h1>
+
+<h2> Introduction </h2>
+This is package tbr (tABLE brOWSER).  It is an X/Xt/Motif program,
+so you have to have an Xterminal, and set and export DISPLAY.
+
+<p>Author: 
+<a href=
+"http://rsgi01.rhic.bnl.gov/star/starlib/doc/www/spb/ward.html">
+Herb Ward</a>.
+
+<h2>Getting started: </h2>
+From the TAS prompt type ??? (not glued to TAS runtime yet).
+From the UNIX prompt type "<code>/u2/ward/tbr/bin/$ARCH/tbr myfile.xdf"
+</code>.  You can generate <code>.xdf</code> files from TAS by
+typing, for example, <code>data_io/write myfile.xdf xdf table1 table2</code>,
+where <code>table1</code> and <code>table2</code>
+are the names of the TAS tables you want to save.
+<p>
+ Pull down the help menu to "Getting Started".<p>
+There are six GUI boxes labeled STEP1 to STEP6, but you don't have
+to do all six steps each time (eg, STEP1 is "Choose Table", but
+you only use the mouse in this box when you want to change tables).
+However, when you are having trouble, you should check all six
+"step"s.
+<p>
+There is enough on-line help that I don't want to type anything further
+here.
+
+<h2>Bugs and things left to do: </h2>
+Things to do: Support table columns whose data types are arrays
+in 2D histograms. Glue to TAS.  Support for re-sizing window.
+
