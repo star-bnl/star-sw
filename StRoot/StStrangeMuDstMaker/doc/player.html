@@ -91,9 +91,9 @@ selectable options. The three modes of operation are provided by
 the following member functions.</p>
 
 <pre>
-  Make(Int_t NEvents, StFile *input, Char_t *output);
-  Filter(Int_t NEvents, StFile *input, Char_t *output);
-  Play(Int_t NEvents, StFile *input, Char_t *output);
+  Make(const Int_t NEvents, StFile *input, Char_t *output);
+  Filter(const Int_t NEvents, StFile *input, Char_t *output);
+  Play(const Int_t NEvents, StFile *input, Char_t *output);
 </pre>
 
 Make() creates a new MuDst, Filter() creates a new MuDst from an existing
@@ -191,6 +191,7 @@ switchable.
   StrangeMuDstPlayer player;
   player.DoT0Abort();                 // Filter out T0 jitter events
   player.DoFileSplit();               // Save branches to the separate files
+  player.DoReadDST();                 // Setup to read .dst.root files
   player.Play(Nevents,input,output);
 </pre>
 
