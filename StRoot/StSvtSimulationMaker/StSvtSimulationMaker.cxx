@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.21 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.22 2004/04/06 20:18:19 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.22  2004/04/06 20:18:19  caines
+ * Initialise variable counter in the constructor to NULL to avoid crash
+ *
  * Revision 1.21  2004/03/30 21:27:12  caines
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
@@ -143,6 +146,7 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   
   mCoordTransform = NULL;
 
+  counter = NULL;
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
  
 }
