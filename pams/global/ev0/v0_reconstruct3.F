@@ -127,7 +127,7 @@ CCC           IF(trak(i).ndef.lt.20) go to 10
 C--   calculate impact parameter at main vertex--- wkw
            
            call ev0_project_track(trak(i).xc,trak(i).rc,mainv,xn1)
-           trak(i).dca=sqrt(xn1(1)**2.+xn1(2)**2.)
+           trak(i).dca=sqrt((xn1(1)-mainv(1))**2.+(xn1(2)-mainv(2))**2.)
 
 C--   skip all tracks with impact parameter .lt. dcapnmin
            if( trak(i).det_id .eq. 1 )then
@@ -177,7 +177,7 @@ C--    and total mom for trak(j) first time I see it---
               
 
                  call ev0_project_track(trak(j).xc,trak(j).rc,mainv,xn2)
-                 trak(j).dca=sqrt(xn2(1)**2.+xn2(2)**2.)
+                 trak(j).dca=sqrt((xn2(1)-mainv(1))**2.+(xn2(2)-mainv(2))**2.)
 
 C--   skip all tracks with impact parameter .lt. dcapnmin
                 IF((trak(j).dca.gt.ev0par(det_id).dcapnmin)) then 
