@@ -63,12 +63,38 @@
     </p>
     <a name="Quick Glance"></a>
     <h2>Quick glance at Multimaps</h2>
+    <h3>STL Containers</h3>
     <p>
       A <a href="http://www.sgi.com/Technology/STL/Multimap.html"><i>multimap</i></a> is
       a type of C++
       <a href="http://www.sgi.com/Technology/STL/stl_introduction.html">Standard
 	Template Library</a>
-      associative container.  The crucial idea for
+      associative container.
+      The STL provides several containers with different features.  Examples
+      are lists, vectors, and associative arrays.  In general, one can
+      add and remove objects from a container.  The C++ standard library
+      containers were designed to meet 2 criteria: to provide as much freedom
+      as possible in the design of individual containers and at the same
+      time to provide a common interface to users.  This allows to make
+      each container as efficient as possible for its intended use but
+      still enable users to write code that is independent of the
+      particular container being used.
+      The standard library defines two kinds of containers: sequences and
+      associative containers.  A key idea for the standard containers is that
+      they should be logically interchangeable wherever reasonable.  Users can
+      then choose between them depending on efficiency concerns and the
+      need for specialized operations.  For example, if lookup based on
+      a key is common, a <b>map</b> can be used.  If general list operations
+      dominate, a <b>list</b> can be used.  If many additions and removals of
+      elements occur at the ends of the container, a <b>deque</b> (double-ended
+      queue), a <b>stack</b>, or a <b>queue</b> should be considered.
+      These are
+      illustrated in the figure below.
+      
+      <img src="./conthier.gif" align=left>
+      <br clear=center>
+      <h3>Multimap Introduction</h3>
+      The crucial idea for
       <a href="http://www.sgi.com/Technology/STL/Map.html"><i>maps</i></a> (and indeed,
       for all types of
       associative containers) is to gain information based on a "key".  To illustrate
@@ -141,7 +167,7 @@
     <p>
       To clarify the above, let me show an example of the invocations
       used in <b>StAssociationMaker</b>.  The first multimap used is the one that
-      takes a pointer to a reconstructed Tpc Hit as the key (<code> StTpcHit*</code>)
+      takes a pointer to a reconstructed Tpc Hit as the key (<code>StTpcHit*</code>)
       and the 'value' is a pointer to the associated 
       Monte Carlo Tpc Hit (<code>StMcTpcHit*</code>).
       For the comparison of the reconstructed Tpc Hits,
@@ -156,7 +182,7 @@
       other words, if the 'key' in the multimap was an <code>int</code>, then
       the default would be that
       an entry whose key is 1 would be placed before an entry whose key is 2, and so on.
-      For more exotic type, one has to supply one's
+      For more exotic types, one has to supply one's
       own "alphabetical order" so the container is ordered.
       For example, for the tpc hit multimaps, the "alphabetical order" is
       based on the x, y, and z positions.
@@ -196,7 +222,7 @@
 
     <h3>Common Usage of Multimaps</h3>
     <p>
-      Ok, so you have a the maps.  How do you use them once you have them?  (I won't
+      Ok, so you have the maps.  How do you use them once you have them?  (I won't
       go into detail of how one actually FILLS them, because this task is probably
       not as common as using them in downstream code once they are already filled
       in <b>StAssociationMaker</b>.)  One typically asks questions like
@@ -344,7 +370,7 @@
       STL containers.
     <p>
       To illustrate the ideas, think again of the phonebook.
-      For simplicity, assume a the names are just one letter
+      For simplicity, assume the names are just one letter
       long.  So the keys are just 'A', 'B', 'C', and so on.  Assume there are 5 phones under
       'A', 0 under 'B', and 3 under 'C'.
       A call to <code>phonebook.lower_bound("A");</code> would return an
@@ -460,9 +486,8 @@
       
       For the Track multimap, the criterion is based on the number of hits
       the tracks share in common.
-      This means that to build the Track Multimap, the TPC Hit Multimap is used.
-      When the relevant
-      Hit Multimaps are implemented for the other detectors, these will be used too.
+      This means that to build the Track Multimap, the Hit Multimaps are used.
+      
       The user specifies
       the minimum number of hits the tracks must share in order to be associated.
     </p>
@@ -736,7 +761,7 @@
     <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
 <!-- Created: Mon Sep 27 15:18:56 EDT 1999 -->
 <!-- hhmts start -->
-Last modified: Fri Jan 21 17:47:40 EST 2000
+Last modified: Tue Feb  1 11:31:22 EST 2000
 <!-- hhmts end -->
   </body>
 </html>
