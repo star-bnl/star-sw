@@ -15,14 +15,12 @@
 	int i;
 	static int  negOne=-1;
 	static int *NegOne=&negOne;
-	static int JL, TL;
 	static int ID1=0;
 	static int ID2=0;
 	static int ID3=0;
 	static int ID4=0;
 	static int ID5=0;
 	static int ID6=0;
-	static int ID7=0;
 	static int ID8=0;
 	static int ID9=0;
 	static int ID10=0;

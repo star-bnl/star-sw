@@ -1,23 +1,28 @@
 #!gnumake
+ifeq "$(STAR_ARCH)" "sun4os5"
+  FF = f77
+else
+  ifeq "$(STAR_ARCH)" "sun4os5pc"
+    FF = f77
+  else
+    FF = $(CC) -lftn
+  endif
+endif
 
 clean :
-	rm *.o
-	rm *.d
+	rm -f *.o
+	rm -f *.d
 
 all : run test ftest
 
 # Note:  "msg" is a Tcl/Tk gui.
 run : ../bin/$(STAR_ARCH)/msg ../lib/$(STAR_ARCH)/libmsg.a ../bin/$(STAR_ARCH)/msgControl ../bin/$(STAR_ARCH)/rmid
 
-../bin/$(STAR_ARCH)/msgControl : msgControl
-
-../bin/$(STAR_ARCH)/rmid : rmid
-
 ../bin/$(STAR_ARCH)/msg : msg
 	chmod u+x msg
 	cp msg ../bin/$(STAR_ARCH)/msg
 
-ftest : msgtest msgtest.ref
+ftest : ../bin/$(STAR_ARCH)/msgtest msgtest.ref
 	cd ../wrk/;msgtest 2> /dev/null
 	mv ../wrk/msg.jou .
 	@echo ""
@@ -28,15 +33,15 @@ ftest : msgtest msgtest.ref
 	@echo "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	@echo ""
 	diff -I"Elapsed:" -I"--- Message Accounting Summary" -I"--- CPU Usage Summary ---" -I"msgTest-O4  Once    #4" msg.jou msgtest.ref
-	rm msg.jou
+	rm -f msg.jou
 	@echo ""
 	@echo "   +++++++++++++++++++++++++++++"
 	@echo "   + Automatic test succeeded. +"
 	@echo "   +++++++++++++++++++++++++++++"
 	@echo ""
 
-# test : msgTest msgtest msgctest msgstest msgstest_so msgControl msgTest.ref msgtest.ref msgctest.ref
-test : msgTest msgctest msgstest msgControl msgTest.ref msgctest.ref
+# test : msgTest msgtest msgctest msgstest msgstest_so msgTest.ref msgtest.ref msgctest.ref
+test : ../bin/$(STAR_ARCH)/msgTest ../bin/$(STAR_ARCH)/msgctest ../bin/$(STAR_ARCH)/msgstest msgTest.ref msgctest.ref
 	@echo ""
 	@echo "   +++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	@echo "   + Automatic test of some msg calls, using GNU diff. +"
@@ -45,17 +50,17 @@ test : msgTest msgctest msgstest msgControl msgTest.ref msgctest.ref
 	cd ../wrk/;msgTest 2> /dev/null
 	mv ../wrk/msg.jou .
 	diff -I"Elapsed:" -I"--- Message Accounting Summary" -I"--- CPU Usage Summary ---" -I"msgTest-O4  Once    #4" msg.jou msgTest.ref
-	rm msg.jou
+	rm -f msg.jou
 
 	cd ../wrk/;msgctest 2> /dev/null
 	mv ../wrk/msg.jou .
 	diff -I"Elapsed:" -I"--- Message Accounting Summary" -I"--- CPU Usage Summary ---" -I"msgTest-O4  Once    #4" msg.jou msgctest.ref
-	rm msg.jou
+	rm -f msg.jou
 
 #	cd ../wrk/;msgtest 2> /dev/null
 #	mv ../wrk/msg.jou .
 #	diff -I"Elapsed:" -I"--- Message Accounting Summary" -I"--- CPU Usage Summary ---" -I"msgTest-O4  Once    #4" msg.jou msgtest.ref
-#	rm msg.jou
+#	rm -f msg.jou
 
 	@echo ""
 	@echo "   +++++++++++++++++++++++++++++"
@@ -63,47 +68,40 @@ test : msgTest msgctest msgstest msgControl msgTest.ref msgctest.ref
 	@echo "   +++++++++++++++++++++++++++++"
 	@echo ""
 
-rmid : rmid.o
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/rmid : rmid.o
+	$(CC) $^ -lc -o $@
+	rm -f ../wrk/rmid
+	ln -sf $@ ../wrk/rmid
 
-msgControl : msgControl.o ../lib/$(STAR_ARCH)/libmsg.a
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgControl : msgControl.o ../lib/$(STAR_ARCH)/libmsg.a
+	$(CC) $^ -lc -o $@
+	rm -f ../wrk/msgControl
+	ln -sf $@ ../wrk/msgControl
 
-msgTest : msgTest.o ../lib/$(STAR_ARCH)/libmsg.a
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -lm -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgTest : msgTest.o ../lib/$(STAR_ARCH)/libmsg.a
+	$(CC) $^ -lc -lm -o $@
+	rm -f ../wrk/msgTest
+	ln -sf $@ ../wrk/msgTest
 
-msgtest : msgtest.o ../lib/$(STAR_ARCH)/libmsg.a
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -R/opt/SUNWspro/SC4.2/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lsunmath -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgtest : msgtest.o ../lib/$(STAR_ARCH)/libmsg.a
+	$(FF) $^ -lc -o $@;
+	rm -f ../wrk/msgtest
+	ln -sf $@ ../wrk/msgtest
 
-msgctest : msgctest.o ../lib/$(STAR_ARCH)/libmsg.a
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -lm -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgctest : msgctest.o ../lib/$(STAR_ARCH)/libmsg.a
+	$(CC) $^ -lc -lm -o $@
+	rm -f ../wrk/msgctest
+	ln -sf $@ ../wrk/msgctest
 
-msgstest : msgstest.o ../lib/$(STAR_ARCH)/libmsg.a
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -lm -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgstest : msgstest.o ../lib/$(STAR_ARCH)/libmsg.a
+	$(CC) $^ -lc -lm -o $@
+	rm -f ../wrk/msgstest
+	ln -sf $@ ../wrk/msgstest
 
-msgstest_so : msgstest.o ../solib/$(STAR_ARCH)/libmsg.so
-#	$(CC) $^ -lc -lftn -o ../bin/$(STAR_ARCH)/$@
-	$(CC) $^ -lc -lm -o ../bin/$(STAR_ARCH)/$@
-	rm -f ../wrk/$@
-	ln -sf ../bin/$(STAR_ARCH)/$@ ../wrk/$@
+../bin/$(STAR_ARCH)/msgstest_so : msgstest.o ../solib/$(STAR_ARCH)/libmsg.so
+	$(CC) $^ -lc -lm -o $@
+	rm -f ../wrk/msgstest_so
+	ln -sf $@ ../wrk/msgstest_so
 
 %.o: %.c
 	gcc -M $< -I../inc -I/usr/include > $@.d
