@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.20 2001/07/20 20:03:57 rcwells Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.21 2001/12/05 14:42:18 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,11 +20,8 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
- * Revision 1.20  2001/07/20 20:03:57  rcwells
- * Added pT weighting and moved event angle cal. to event cut
- *
- * Revision 1.19  2001/06/23 21:55:45  laue
- * *** empty log message ***
+ * Revision 1.21  2001/12/05 14:42:18  laue
+ * updated for trigger(action)word and l3TriggerAlgorithm
  *
  * Revision 1.18  2001/06/04 19:09:54  rcwells
  * Adding B-field, run number, and improved reaction plane functionality
@@ -136,6 +133,10 @@ class StKaonPlus;
 class StProton;
 class StTpcDedxPidAlgorithm;
 class StParticleDefinition;
+class StFlowMaker;
+class StFlowEvent;
+class StFlowAnalysisMaker;
+class StFlowSelection;
 
 class StStandardHbtEventReader : public StMaker, public StHbtEventReader{
 
@@ -149,6 +150,11 @@ private:
   StTrackType mTrackType;
   bool mReadTracks;
   bool mReadV0s;
+  bool mReadXis;
+  bool mReadKinks;
+
+  StFlowMaker* mFlowMaker;             //!
+  StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
  protected:
 
@@ -169,9 +175,15 @@ private:
   StTrackType TrackType(); 
   bool ReadTracks();
   bool ReadV0s();
+  bool ReadXis();
+  bool ReadKinks();
   void SetTrackType(StTrackType);
   void SetReadTracks(bool);
   void SetReadV0s(bool);
+  void SetReadXis(bool);
+  void SetReadKinks(bool);
+  void SetFlowMaker(StFlowMaker* flowMaker);
+  void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
 
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
@@ -187,9 +199,17 @@ inline StHbtTagReader* StStandardHbtEventReader::TheTagReader(){return mTheTagRe
 inline StTrackType StStandardHbtEventReader::TrackType() { return mTrackType;}
 inline bool StStandardHbtEventReader::ReadTracks() { return mReadTracks;}
 inline bool StStandardHbtEventReader::ReadV0s() { return mReadV0s;}
+inline bool StStandardHbtEventReader::ReadXis() { return mReadXis;}
+inline bool StStandardHbtEventReader::ReadKinks() { return mReadKinks;}
 inline void StStandardHbtEventReader::SetTrackType(StTrackType t) { mTrackType=t;}
 inline void StStandardHbtEventReader::SetReadTracks(bool b) { mReadTracks=b;}
 inline void StStandardHbtEventReader::SetReadV0s(bool b) { mReadV0s=b;}
+inline void StStandardHbtEventReader::SetReadXis(bool b) { mReadXis=b;}
+inline void StStandardHbtEventReader::SetReadKinks(bool b) { mReadKinks=b;}
+inline void StStandardHbtEventReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
+inline void StStandardHbtEventReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
+  mFlowAnalysisMaker = flowAnal;
+}
 
 #endif
 

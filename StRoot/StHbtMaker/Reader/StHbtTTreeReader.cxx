@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.4 2001/09/25 16:52:01 rcwells Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.5 2001/12/05 14:42:17 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -71,7 +71,7 @@ StHbtTTreeReader::StHbtTTreeReader(StHbtIOMode mode, StIOMaker* io,
 }
 //__________________
 StHbtTTreeReader::~StHbtTTreeReader(){
-  if (mIOMode==hbtWrite && mCurrentFile) mTTree->Write();
+  if (mIOMode==hbtWrite && mCurrentFile && mTTree) { mTTree->AutoSave(); mTTree=0;} 
   if (mCurrentFile) { mCurrentFile->Close(); delete mCurrentFile; mCurrentFile = 0;}
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
@@ -257,6 +257,7 @@ int StHbtTTreeReader::initWrite(string ioMakerFileName, string extention){
   }
   
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
+  //mTTree->SetAutoSave(1000);  // autosave when 1 Mbyte written
   if (mDebug) cout << "StHbtTTreeReader::initWrite(...) - now create branch " << endl; 
   mTTree->Branch("mHbtTTreeEvent", "StHbtTTreeEvent", &mHbtTTreeEvent, bufsize, split);
   mCurrentFileName = ioMakerFileName;
@@ -264,10 +265,10 @@ int StHbtTTreeReader::initWrite(string ioMakerFileName, string extention){
 }
 
 int StHbtTTreeReader::uninitWrite(){
-  mTTree->Write();
+  mTTree->AutoSave();
   mCurrentFile->Close();
-  if (mTTree) delete mTTree;
   if (mCurrentFile) delete mCurrentFile;
+  if (mTTree) delete mTTree;
   mTTree = 0;
   mCurrentFile = 0;
   return 0;
@@ -344,7 +345,6 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* fileList, const int m
     temp = new char[200];
     inputStream->getline(temp,200);
     if (mDebug) cout << temp << endl;
-    cout << "StHbtTTreeReader::fillChain(string file.lis) - Adding " << temp << " to the chain" << endl;
     chain->Add(temp);
     delete temp;
     ++count;
@@ -382,11 +382,8 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
- * Revision 1.4  2001/09/25 16:52:01  rcwells
- * Added event cut and a print statement for file lists
- *
- * Revision 1.3  2001/09/19 16:14:58  laue
- * filelist option added
+ * Revision 1.5  2001/12/05 14:42:17  laue
+ * updated for trigger(action)word and l3TriggerAlgorithm
  *
  * Revision 1.1  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.h,v 1.2 2001/09/19 16:14:58 laue Exp $
+ * $Id: StHbtTTreeReader.h,v 1.3 2001/12/05 14:42:17 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -95,8 +95,8 @@ inline void StHbtTTreeReader::SetDebug(int debug) {mDebug=debug;}
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.h,v $
- * Revision 1.2  2001/09/19 16:14:58  laue
- * filelist option added
+ * Revision 1.3  2001/12/05 14:42:17  laue
+ * updated for trigger(action)word and l3TriggerAlgorithm
  *
  * Revision 1.1  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
