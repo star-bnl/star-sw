@@ -237,8 +237,34 @@ C     +                xn2,trak(j).r0,trk2)
               endif
 
               if( updated) then 
-                 rd=(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
-     +                +(trk1(3)-trk2(3))**2
+
+CC---------This part is added by Hui Long in order to include
+CC-------  the 3D calculation of the v0_dca
+                 call ev0_track_mom(trk1,trak(i).rc,0,
+     +                pst1,bfield(3))
+                 call ev0_track_mom(trk2,trak(j).rc,0,
+     +                pst2,bfield(3))
+                 pst1(1)=pst1(1)/trak(i).p
+                 pst1(2)=pst1(2)/trak(i).p
+                 pst1(3)=pst1(3)/trak(i).p
+                 pst2(1)=pst2(1)/trak(j).p
+                 pst2(2)=pst2(2)/trak(j).p
+                 pst2(3)=pst2(3)/trak(j).p
+                 rd=(trk1(3)-trk2(3))**2
+                 call ev0_3D_dca(rd,pst1,pst2,trk1,trk2,xn1,
+     +                xn2,trak(i).rc,trak(j).rc)
+                 call ev0_update_track_param(trak(i).xc,trak(i).rc,
+     +                xn1,trak(i).r0,trk1)
+                 
+                 call ev0_update_track_param(trak(j).xc,trak(j).rc,
+     +                xn2,trak(j).r0,trk2)  
+
+
+CC  ----------------------------------------------------------------------
+CC  -----------------------------------------------------------------------
+
+C                rd=(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
+C     +                +(trk1(3)-trk2(3))**2
               else
                  rd = ev0par(det_id).dca**2 + 1.0
               endif
