@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: vecTest.cc,v 1.1 1999/02/17 12:44:04 ullrich Exp $
+ * $Id: vecTest.cc,v 1.2 1999/06/04 18:04:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: vecTest.cc,v $
- * Revision 1.1  1999/02/17 12:44:04  ullrich
- * New Revision
+ * Revision 1.2  1999/06/04 18:04:57  ullrich
+ * Added testing of new features
  *
  * Revision 1.2  1999/06/04 18:04:57  ullrich
  * Added testing of new features
@@ -42,12 +42,26 @@ int main()
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 	StThreeVector<double> vec4 = vec3;
 	StThreeVector<double> vec5(vec4);
-#endif	
+#else	
+	StThreeVector<>       vec4 = vec3;
+	StThreeVector<>       vec5(vec4);
+#endif
+	double *a = new double[3];
+	a[0] = a[1] = a[2] = 42;
+	float *b = new float[3];
+	b[0] = b[1] = b[2] = 99;
 	StThreeVector<double> vec6(a);
 	StThreeVector<double> vec7(b);
 	    
 	PR(vec1);
-
+	PR(vec2);
+	PR(vec3);
+	PR(vec4);
+	PR(vec6);
+        vec6[2] = 17;
+	PR(vec6);
+	PR(vec7);
+        vec7[2] = 11;
 	PR(vec7);
 	
 	
@@ -117,12 +131,20 @@ int main()
         StLorentzVector<double> lvec6;
 #else
  	StLorentzVector<>       lvec4 = lvec3;
+        StLorentzVector<>       lvec5(vec3, 190.2);
+        StLorentzVector<>       lvec6;
 #endif
 	StLorentzVector<double> lvec7(lvec5);
 	StLorentzVector<double> lvec8(lvec5);
 	
  	PR(lvec1);
  	PR(lvec2);
+ 	PR(lvec3);
+ 	PR(lvec4);
+ 	PR(lvec5);
+	PR(lvec7);
+        lvec7[3] = 17;
+	PR(lvec7);
 	PR(lvec8);
         lvec8[3] = 11;
 	PR(lvec8);
