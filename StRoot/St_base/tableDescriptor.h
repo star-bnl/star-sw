@@ -1,7 +1,7 @@
 /* tableDescriptor.h */
 #ifndef TABLEDESCRIPTOR_H
 #define TABLEDESCRIPTOR_H
-// $Id: tableDescriptor.h,v 1.6 2000/01/12 18:07:25 fine Exp $"
+// $Id: tableDescriptor.h,v 1.7 2000/01/25 22:25:46 fine Exp $"
 #ifdef NORESTRICTIONS
 # define TABLEDESCRIPTOR_SPEC   \
  "struct tableDescriptor {      \
@@ -17,7 +17,7 @@
 # define TABLEDESCRIPTOR_SPEC      \
  "struct tableDescriptor {         \
     char         m_ColumnName[20]; \
-    unsigned int m_IndexArray[2];  \
+    unsigned int m_IndexArray[3];  \
     unsigned int m_Offset;         \
     unsigned int m_Size;           \
     unsigned int m_TypeSize;       \
@@ -45,7 +45,7 @@ typedef struct tableDescriptor_st {
     unsigned int *m_IndexArray; /* The array of the sizes for each dimensions m_IndexArray[m_Dimensions] */
 #else
     char         m_ColumnName[32];  /* The name of this data-member: see dstype.h for dsl compatible mode */
-    unsigned int m_IndexArray[2];   /* The array of the sizes for each dimensions m_IndexArray[m_Dimensions] */
+    unsigned int m_IndexArray[3];   /* The array of the sizes for each dimensions m_IndexArray[m_Dimensions] */
 #endif
     unsigned int m_Offset;      /* The first byte in the row of this column                              */
     unsigned int m_Size;        /* The full size of the selected column in bytes                         */
@@ -54,7 +54,10 @@ typedef struct tableDescriptor_st {
     Int_t        m_Type;        /* The data type of the selected column                                  */
 } TABLEDESCRIPTOR_ST;
 // $Log: tableDescriptor.h,v $
+// Revision 1.7  2000/01/25 22:25:46  fine
+// the number of dimensions for table arrays became 3 instead of 2
+//
 // Revision 1.6  2000/01/12 18:07:25  fine
-// cvs symbols have been added and copyright class introduced
+//  cvs symbols have been added and copyright class introduced
 //"
 #endif /* TABLEDESCRIPTOR_H */
