@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTPad.h,v 1.2 2000/03/17 14:54:24 lasiuk Exp $
+ * $Id: StRichDrawableTPad.h,v 1.3 2000/04/05 15:57:56 lasiuk Exp $
  *
  * Description:
  *   Pad which is drawn in the pad monitor
@@ -30,8 +30,8 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTPad.h,v $
- * Revision 1.2  2000/03/17 14:54:24  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.3  2000/04/05 15:57:56  lasiuk
+ * const pointer for compiler
  *
  * Revision 1.2  2000/03/17 14:54:24  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -52,7 +52,7 @@ class StRichSinglePixel;
 class StRichDrawableTPad : public TBox {
 public:
     StRichDrawableTPad();
-    StRichDrawableTPad(double xl, double yl, double xu, double yu, StRichSinglePixel* pix);
+    StRichDrawableTPad(double xl, double yl, double xu, double yu, const StRichSinglePixel* pix);
     StRichDrawableTPad(double xl, double yl, double xu, double yu, int pad, int row, int adc);
     
     virtual ~StRichDrawableTPad();
@@ -69,16 +69,16 @@ public:
     
     void draw();
     
-    void ExecuteEvent(Int_t event, Int_t px, Int_t py) ;
+    virtual void ExecuteEvent(Int_t event, Int_t px, Int_t py) ;
 
     static void setPadMonitorText(StRichPadMonitorText*);
 
-private:
+protected:
     int    mPad;
     int    mRow;
     int    mAdc;
 
-private:
+protected:
     static StRichPadMonitorText* mText;
 
     ClassDef(StRichDrawableTPad,1)

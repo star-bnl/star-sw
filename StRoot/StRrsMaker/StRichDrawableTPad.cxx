@@ -1,12 +1,12 @@
 /***************************************************************
- * $Id: StRichDrawableTPad.cxx,v 1.2 2000/03/17 14:54:21 lasiuk Exp $
+ * $Id: StRichDrawableTPad.cxx,v 1.3 2000/04/05 15:57:52 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTPad.cxx,v $
- * Revision 1.2  2000/03/17 14:54:21  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.3  2000/04/05 15:57:52  lasiuk
+ * const pointer for compiler
  *
  * Revision 1.2  2000/03/17 14:54:21  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -26,7 +26,7 @@ StRichPadMonitorText* StRichDrawableTPad::mText = 0;
 
 StRichDrawableTPad::StRichDrawableTPad() {/*nopt*/}
 
-StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, StRichSinglePixel* pix)
+StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, const StRichSinglePixel* pix)
     : TBox(xl,yl,xu,yu), mPad(pix->pad()), mRow(pix->row()), mAdc(pix->amplitude())
 {/* nopt */}
 
@@ -57,10 +57,12 @@ void StRichDrawableTPad::ExecuteEvent(int event, int px, int py)
 
     switch(event) {
 
-	//case kButton1Down:
     case kMouseEnter:
 	//this->Dump();
 	mText->drawText(this);
+	break;
+    case kButton2Down:
+	this->Dump();
 	break;
     case kMouseLeave:
 	// mText->removeText();
