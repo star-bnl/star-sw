@@ -1,0 +1,30 @@
+/*:Copyright 1996, Lawrence Berkeley National Laboratory
+**:>--------------------------------------------------------------------
+**:FILE:        lev_i.idl
+**:DESCRIPTION: Interface Definition Language for LEV.
+**:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+**:BUGS:        -- STILL IN DEVELOPMENT --
+**:HISTORY:     15jul96-v000a-cet,hw- creation
+**:<--------------------------------------------------------------------
+*/
+
+//:----------------------------------------------- INCLUDES           --
+// #include "soc_i.idl"
+#include "tdm_i.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface levFactory_i: socFactory_i {
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute tdmTable_i env; /* environment table */
+readonly attribute tdmTable_i versions; /* of asps, pams, kumacs, (etc?) */
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T registerVersion(in string name, in string type
+		, in string version);
+STAFCV_T timeStamp(in string stamp);
+
+};      /* levFactory_i */
+
