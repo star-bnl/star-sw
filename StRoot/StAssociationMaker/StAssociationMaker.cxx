@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.19 2000/02/22 16:18:45 ullrich Exp $
+ * $Id: StAssociationMaker.cxx,v 1.20 2000/03/06 18:08:56 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.20  2000/03/06 18:08:56  calderon
+ * Hit comparisons are used for both sorting the hits in the
+ * StMcEvent containers and for ordering the hits in the multimaps,
+ * so they are kept now in StMcEvent.
+ *
  * Revision 1.19  2000/02/22 16:18:45  ullrich
  * Applied temporary fix to cope with changed SVT hit
  * storage scheme in StEvent.
@@ -121,68 +126,68 @@ using std::vector;
 #include "StEventMaker/StEventMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 
-// Define the comparison to be used in the multimaps
+// // Define the comparison to be used in the multimaps
     
-bool compTpcHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// bool compTpcHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
-bool compMcTpcHit::operator()(const StMcTpcHit* h1, const StMcTpcHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// }
+// bool compMcTpcHit::operator()(const StMcTpcHit* h1, const StMcTpcHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
-bool compSvtHit::operator()(const StSvtHit* h1, const StSvtHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// }
+// bool compSvtHit::operator()(const StSvtHit* h1, const StSvtHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
-bool compMcSvtHit::operator()(const StMcSvtHit* h1, const StMcSvtHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// }
+// bool compMcSvtHit::operator()(const StMcSvtHit* h1, const StMcSvtHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
-bool compFtpcHit::operator()(const StFtpcHit* h1, const StFtpcHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// }
+// bool compFtpcHit::operator()(const StFtpcHit* h1, const StFtpcHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
-bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) const {
-    if        (h1->position().x() != h2->position().x()) {
-	return h1->position().x() <  h2->position().x();
-    }
-    else if   (h1->position().y() != h2->position().y()) {
-	return h1->position().y() <  h2->position().y();
-    }
-    else return h1->position().z() < h2->position().z();
+// }
+// bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) const {
+//     if        (h1->position().z() != h2->position().z()) {
+// 	return h1->position().z() <  h2->position().z();
+//     }
+//     else if   (h1->position().y() != h2->position().y()) {
+// 	return h1->position().y() <  h2->position().y();
+//     }
+//     else return h1->position().x() < h2->position().x();
     
-}
+// }
     
 
 bool compTrack::operator()(const StGlobalTrack* t1, const StGlobalTrack* t2) const {
@@ -595,6 +600,9 @@ Int_t StAssociationMaker::Make()
 		    float xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
 		    float yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
 		    float zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+		    
+		    if ( zDiff > parDB->zCutTpc() ) break; //mc hits are sorted, save time!
+		    
 		    if (jHit==0) {
 			tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
 			closestTpcHit = mcTpcHit;
@@ -603,7 +611,7 @@ Int_t StAssociationMaker::Make()
 			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
 			closestTpcHit = mcTpcHit;
 		    }
-
+		    
 		    if ( fabs(xDiff)< parDB->xCutTpc() &&
 			 fabs(yDiff)< parDB->yCutTpc() &&
 			 fabs(zDiff)< parDB->zCutTpc()) {
@@ -636,25 +644,6 @@ Int_t StAssociationMaker::Make()
     mRcSvtHitMap = new rcSvtHitMapType;
     mMcSvtHitMap = new mcSvtHitMapType;
 
-    //**************************************************************************
-    //          READ THIS - READ THIS - READ THIS - READ THIS - READ THIS
-    //**************************************************************************
-    //
-    //   Begin modifications here, Feb 22, 2000 by Thomas
-    //
-    //   Cause of problem: In the SVT block below the StSvtLayerHitCollection
-    //   is used but didn't exist anymore.
-    //   Was changed to StSvtBarrelHitCollection after announcing it one day
-    //   in advanced.
-    //   Best solution: change StMcEvent (not sure here?) and StAssociationMaker.
-    //   This solution: I change the StEvent part only. The association should
-    //                  still work it might only take a bit more time.
-    //
-    //   SHOULD BE PERMANENTLY FIXED BY AN EXPERT !!!
-    // 
-    //**************************************************************************
-
-    unsigned int iLayer;
     float svtHitDistance;
     unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
     for (unsigned int iBarrel=0;  nSvtHits &&
@@ -669,21 +658,7 @@ Int_t StAssociationMaker::Make()
 	    for (unsigned int iWafer=0;
 		 iWafer<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
 		 iWafer++) {
-	    //PR(iWafer);
-
-		//**************************************************************
-		//  Mods by Thomas: Up to here it was easy.
-		//  Now we have to get the layer number where the wafer
-		//  is in. This is straightforward since we do the association
-		//  on the wafer and all hits in the wafer know about the layer
-		//  they are in. Here we use the first one (as good as any other
-		//  one) if it exists. If not the next for-loop is not executed
-		//  anyhow.
-		//**************************************************************
-		if (rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size()) {
-		    iLayer = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[0]->layer();
-		    iLayer--;   // SVT guys start to count at 1. We start at 0 here.
-		}
+		//PR(iWafer);
 			
 		for (unsigned int iHit=0;
 		     iHit<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
@@ -692,20 +667,23 @@ Int_t StAssociationMaker::Make()
 		    rcSvtHit = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[iHit];
 				
 		    StMcSvtHit* closestSvtHit = 0;
+		    float newDist = 0;
 		    for (unsigned int jHit=0;
-			 jHit<mcSvtHitColl->layer(iLayer)->ladder(iLadder)->wafer(iWafer)->hits().size();
+			 jHit<mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
 			 jHit++){
 			//PR(jHit); 
-			mcSvtHit = mcSvtHitColl->layer(iLayer)->ladder(iLadder)->wafer(iWafer)->hits()[jHit];
+			mcSvtHit = mcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[jHit];
 			float xDiff = mcSvtHit->position().x() - rcSvtHit->position().x();
 			float yDiff = mcSvtHit->position().y() - rcSvtHit->position().y();
 			float zDiff = mcSvtHit->position().z() - rcSvtHit->position().z();
+			if ( zDiff > parDB->zCutSvt() ) break; //mc hits are sorted, save time!
+
 			if (jHit==0) {
-			    svtHitDistance=xDiff*xDiff+zDiff*zDiff;
+			    svtHitDistance=xDiff*xDiff+yDiff*yDiff+zDiff*zDiff;
 			    closestSvtHit = mcSvtHit;
 			}
-			if (xDiff*xDiff+zDiff*zDiff<svtHitDistance) {
-			    svtHitDistance = xDiff*xDiff+zDiff*zDiff;
+			if ( (newDist = xDiff*xDiff+yDiff*yDiff+zDiff*zDiff) < svtHitDistance) {
+			    svtHitDistance = newDist;
 			    closestSvtHit = mcSvtHit;
 			}
 			
@@ -728,14 +706,6 @@ Int_t StAssociationMaker::Make()
 	} // End of Ladder Loop for Rec. Hits
     } // End of Barrel Loop for Rec. Hits
 
-    //**************************************************************************
-    //
-    //   End modifications here, Feb 22, 2000 by Thomas
-    //
-    //**************************************************************************
-    //   No mods by me after this line
-    //**************************************************************************
-    
     cout << "Finished Making SVT Hit Associations *********" << endl;
 
     //
@@ -751,6 +721,7 @@ Int_t StAssociationMaker::Make()
     mMcFtpcHitMap = new mcFtpcHitMapType;
 
     float ftpcHitDistance;
+    float minHitDistance;
     
     for (unsigned int iPlane=0;
 	 iPlane<rcFtpcHitColl->numberOfPlanes(); iPlane++) {
@@ -781,14 +752,18 @@ Int_t StAssociationMaker::Make()
 		    mcFtpcHit = mcFtpcHitColl->plane(iPlane)->hits()[jHit];
 		    rDiff   = mcFtpcHit->position().perp() - rcFtpcHit->position().perp();
 		    phiDiff = (mcFtpcHit->position().phi()  - rcFtpcHit->position().phi())/degree;
+		    if ( phiDiff > parDB->phiCutFtpc() ) break; //mc hits are sorted, save time!
+		    
+		    ftpcHitDistance = (mcFtpcHit->position() - rcFtpcHit->position()).mag2();
+		    		    
 		    if (jHit==0) {
-			ftpcHitDistance=rDiff*rDiff+phiDiff*phiDiff;
+			minHitDistance=ftpcHitDistance;
 			closestFtpcHit = mcFtpcHit;
 			rDiffMin=rDiff;
 			phiDiffMin=phiDiff;
 		    }
-		    if (rDiff*rDiff+phiDiff*phiDiff<ftpcHitDistance) {
-			ftpcHitDistance = rDiff*rDiff+phiDiff*phiDiff;
+		    if (ftpcHitDistance<minHitDistance) {
+			minHitDistance = ftpcHitDistance;
 			closestFtpcHit = mcFtpcHit;
 			rDiffMin=rDiff;
 			phiDiffMin=phiDiff;
