@@ -18,7 +18,7 @@ cdl_init()
     strcpy(cdl_def.path, "/tmp/");
     strcpy(cdl_def.lang, "f77");
     cdl_def.ld[0] = '\0';
-#ifdef HPUX
+#if defined(__hpux)
     strcpy(cdl_def.f77, "f77 -c +z +ppu -K -O");
     strcpy(cdl_def.cc,  "cc -c +z -O");
     strcpy(cdl_def.CC,  "");
@@ -61,7 +61,7 @@ cdl_init()
 /*
 *    Try add libraries loaded implicitly at startup time to filelist.
 */
-#if defined(HPUX)
+#if defined(__hpux)
     {
     FilesPtr  f, fp;
     struct shl_descriptor *desc;
@@ -262,7 +262,7 @@ cdl_script(char *fexec, char *path, char *name, char *fext)
     fprintf(st,            "then\n");
     fprintf(st,            "   exit $errno\n");
     fprintf(st,            "fi\n");
-#if defined (HPUX)
+#if defined (__hpux)
 
     fprintf(st, "ld -b -o %s.sl %s.o %s\n",name,name,cdl_def.ld);
 
@@ -465,9 +465,9 @@ cdl_load(char *lib_name)
 {
    FilesPtr   f;
    FileHandle file_handle;
-#ifdef HPUX
-   int        flags=BIND_DEFERRED;
-   long       address=0L;
+#if defined(__hpux)
+   int flags = BIND_DEFERRED | DYNAMIC_PATH;
+   long address = 0L;
    extern int errno;
 
    file_handle = shl_load(lib_name, flags, address);
@@ -525,7 +525,7 @@ int cdl_unload(char *lib_name)
       fileList = f->next;
    }
 
-#ifdef HPUX
+#if defined(__hpux)
    if(shl_unload(f->file_handle) != 0) {
 #else
    if (dlclose(f->file_handle) != 0) {
@@ -552,7 +552,7 @@ int cdl_unload_(char *lib_name, int n)
 void *cdl_get_func_lib(char *func_name, FilesPtr *fp)
 {
    void  *addr;
-#ifdef HPUX
+#if defined(__hpux)
    shl_t handle;
 #endif
 #ifdef SUN
@@ -566,7 +566,7 @@ void *cdl_get_func_lib(char *func_name, FilesPtr *fp)
 /*   Search for all files  */
    *fp = fileList;
    while (*fp != NULL) {
-#ifdef HPUX
+#if defined(__hpux)
       handle = (*fp)->file_handle;
       if (shl_findsym(&handle, func_name, TYPE_PROCEDURE, &addr) == 0){
         return(addr);
