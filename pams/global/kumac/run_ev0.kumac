@@ -35,10 +35,10 @@ MACRO ev0_eval2 i=1
 i = [1]
 
 if ( [i] .eq. 1 ) then
- tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval 10000
- maxrow  /dui/data/global/vertices/ev0_eval 10000
+ tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval 100000
 endif
 
+maxrow  /dui/data/global/vertices/ev0_eval 100000
 message ' Calling ev0_eval2..'
 
 tdm/table/maxrowcount /dui/data/svt/tracks/stk_track
