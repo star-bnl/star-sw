@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.31 2001/12/28 09:19:12 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.32 2002/02/05 22:27:30 jeromel Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.32  2002/02/05 22:27:30  jeromel
+// Modifications from David H. Int() -> InitRun().
+//
 // Revision 2.31  2001/12/28 09:19:12  genevb
 // Adjustments for pp running
 //
@@ -150,17 +153,22 @@ Int_t StEventQAMaker::Finish() {
 
   return StMaker::Finish();
 }
-
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Init() {
+  return StQAMakerBase::Init();
+}
 
-// StEventQAMaker - Init; book histograms and set defaults for member functions
+
+//_____________________________________________________________________________
+Int_t StEventQAMaker::InitRun(int runnumber) {
+
+// StEventQAMaker - InitRun; book histograms and set defaults for member functions
 
   mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
   if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
     for(Int_t i=0; i<4; i++) {emcGeom[i] = StEmcGeom::getEmcGeom(i+1);} // 3-oct-2001 by PAI
   }
-  return StQAMakerBase::Init();
+  return kStOK;
 }
 
 //_____________________________________________________________________________
