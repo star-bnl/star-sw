@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.3 2000/01/20 16:36:33 kathy Exp $
+//$Id: MemoryUsage.C,v 1.4 2000/01/21 22:01:32 kathy Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.4  2000/01/21 22:01:32  kathy
+//updated to print box plot and to input lower and upper range of vertical axis
+//
 //Revision 1.3  2000/01/20 16:36:33  kathy
 //updating to add nevents as input to MemoryUsage.C
 //
@@ -21,23 +24,27 @@
 //               - 1 entry per line
 //        OutFile - output postscript file name
 //        nevents - # entrys in InFile - default is 500
+//        lowy    - low value of y axis - default is 250000
+//        highy   - upper value of y axis - default is 350000
 ////////////////////////////////////////////////////////////
-
-//#include "TH2.h"
 
 void MemoryUsage(    
        const Char_t *InFile=
- "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_fri_y2a_hc_lowdensity.txt",
-       const Char_t *OutFile="mem_usage_dev_tfs_lin_fri_y2a_hc_lowdensity.ps",
-       Int_t nevents=500)
+         "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.txt",
+       const Char_t *OutFile=
+         "mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.ps",
+       Int_t nevents=500,
+       Float_t lowy=250000,
+       Float_t highy=350000)
 {
  
    gROOT->Reset();
 
    cout << "MemoryUsage.C, input file name = " << InFile << endl;
    cout << "MemoryUsage.C, # entries in input file = " << nevents << endl;
+   cout << "MemoryUsage.C, lower y range of plot =" << lowy << endl;
+   cout << "MemoryUsage.C, upper y range of plot =" << highy << endl;
    cout << "MemoryUsage.C, output postscript file = " << OutFile << endl;
-
 
    FILE *fp = fopen(InFile,"r");
 
@@ -46,7 +53,7 @@ void MemoryUsage(
 
 
    TH2F *h1 = new TH2F("MemUsage","memory usage vs event number",
-      nevents,0.,Float_t(nevents),100,200000.,1600000.);
+      nevents,0.,Float_t(nevents),100,lowy,highy);
    h1->SetXTitle("event number");
    h1->SetYTitle("memory usage in bytes");
    h1->GetXaxis()->SetLabelSize(0.02);
@@ -103,7 +110,7 @@ void MemoryUsage(
    graphPad->Draw();
    graphPad->cd();
 
-   h1->Draw();
+   h1->Draw("box");
 
    if (psf) {
      psf->Close();
