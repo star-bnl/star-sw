@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.5 2000/11/01 17:43:13 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.6 2000/11/07 14:13:27 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
- *  Revision 2.5  2000/11/01 17:43:13  lasiuk
- *  default arguments initialization in c'tor.  Addition of init() member
- *  function to handle generic DB initialization and removal of virtual keyword
+ *  Revision 2.6  2000/11/07 14:13:27  lasiuk
+ *  add possibility of .4*px/pz correction to the track extrapolation
  *
  *  Revision 2.6  2000/11/07 14:13:27  lasiuk
  *  add possibility of .4*px/pz correction to the track extrapolation
@@ -104,7 +103,7 @@ public:
     //
     StRichPidTraits* getPidTrait();  
     void             addPidTrait(StRichPidTraits*); 
-    vector<StRichRingHit*> getRingHits(StParticleDefinition* );
+    
     void  clearHits();
     void  addHit(StRichHit*, double, double, double, double, double, StParticleDefinition* );
     vector<StRichRingHit*>& getRingHits(StParticleDefinition* );
