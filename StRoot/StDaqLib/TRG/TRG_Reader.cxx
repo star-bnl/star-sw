@@ -34,6 +34,7 @@ int Bank_TRGD::HerbSwap() {
   assert(header.ByteOrder==0x01020304||header.ByteOrder==0x04030201);
   if(header.ByteOrder==0x04030201) return 0;
 
+  swapHerb2bytes( &(GS->EvtDesc.TCU3.FIFO3.TriggerWd),   1);
   swapHerb2bytes( &(GS->EvtDesc.TCU1.FIFO1.TrgActionWd), 1);
   swapHerb2bytes( &(GS->EvtDesc.TCU1.FIFO1.TrgToken),    1);
   swapHerb2bytes( &(GS->EvtDesc.TCU2.FIFO2.DSMAddress),  1);
