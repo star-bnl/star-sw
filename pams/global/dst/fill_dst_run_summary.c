@@ -77,7 +77,7 @@ long  type_of_call fill_dst_run_summary_ (
 
   /*  ==================  Local Variables  ======================== */
   
-  int     irange, i;
+  int     irange, i, glb_trk_good;
   int     itrk, ibin, iptbin, imtbin, ietabin, iphibin;
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
@@ -181,8 +181,11 @@ long  type_of_call fill_dst_run_summary_ (
   }
 
   /* Fill pt, mt, eta & phi histograms  */
+  glb_trk_good = 0;
   for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
-    /*  Calculate kinematic varialbles */
+    /*  Calculate kinematic varialbles  for good tracks only */
+    if ( dst_track[itrk].iflag < 0 )
+      continue;
     theta = piov2 - atan(dst_track[itrk].tanl);
     eta   = -log(tan(theta/2.));
     pt    = 1./dst_track[itrk].invpt;
@@ -205,11 +208,12 @@ long  type_of_call fill_dst_run_summary_ (
     pt2_sum   += pt*pt;
     eta_sum   += eta;
     eta2_sum  += eta*eta;
+    glb_trk_good++;         /*  good track multipicity   */
   }/* end of global track loop  */
 
   /* charge track multiplicity and vertices */
-  nchgtrk_sum  += dst_track_h->nok;
-  nchgtrk2_sum += pow(dst_track_h->nok,2);
+  nchgtrk_sum  += glb_trk_good;
+  nchgtrk2_sum += pow(glb_trk_good,2);
   nvertx_sum   += dst_vertex_h->nok;
   nvertx2_sum  += pow(dst_vertex_h->nok,2);
 
