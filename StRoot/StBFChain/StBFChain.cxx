@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.16 1999/10/14 14:43:25 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.17 1999/10/16 20:20:19 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.17  1999/10/16 20:20:19  fisyak
+// Allow to have xdf file for gstar option
+//
 // Revision 1.16  1999/10/14 14:43:25  fisyak
 // Ad casts
 //
@@ -630,11 +633,11 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	   ,InFile->Data());
     printf ("QAInfo:Output root file name %s\n", FileOut->Data());
     printf ("==============================================\n");
-    if (GetOption(kXOUT)) {
-      XdfFile = new TString(FileOut->Data());
-      XdfFile->Append(".dst.xdf");
-      printf ("QAInfo:Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
-    }
+  }
+  if (GetOption(kXOUT) && FileOut) {
+    XdfFile = new TString(FileOut->Data());
+    XdfFile->Append(".dst.xdf");
+    printf ("QAInfo:Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
   }
   //    gSystem->Exit(1);
 }
