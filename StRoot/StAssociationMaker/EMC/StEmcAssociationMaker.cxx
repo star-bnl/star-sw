@@ -421,7 +421,7 @@ void StEmcAssociationMaker::printMaps()
         StEmcClusterAssociation* value = (StEmcClusterAssociation*)(*j).second;
         if(track && value)
         {
-          StEmcCluster *c = value->getCluster();
+          StEmcCluster *c = (StEmcCluster*) value->getCluster();
           
           if(c) 
           {
@@ -443,7 +443,7 @@ void StEmcAssociationMaker::printMaps()
         StEmcClusterAssociation* value = (StEmcClusterAssociation*)(*j).second;
         if(c && value)
         {               
-          StMcTrack* track = value->getTrack();
+          StMcTrack* track = (StMcTrack*)value->getTrack();
           if(track) 
           {
             cout <<" Cl = "<<c<<" E = "<<c->energy()<<" eta = "<<c->eta()<<" phi = "<<c->phi()
@@ -464,7 +464,7 @@ void StEmcAssociationMaker::printMaps()
       StEmcPointAssociation *value = (StEmcPointAssociation*)(*j).second;
       if(value)
       {
-        StEmcPoint *point = value->getPoint(); 
+        StEmcPoint *point = (StEmcPoint*)value->getPoint(); 
         if(track && point)
         {
           cout <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
@@ -486,7 +486,7 @@ void StEmcAssociationMaker::printMaps()
       StEmcPointAssociation *value = (StEmcPointAssociation*)(*j).second;
       if(value)
       {
-        StMcTrack *track = value->getTrack();
+        StMcTrack *track = (StMcTrack*)value->getTrack();
         if(track && point)
         {
           cout <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
