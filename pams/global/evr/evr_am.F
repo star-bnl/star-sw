@@ -1002,20 +1002,20 @@ CCC   Compute the rms of the z-DCA sequence:
            end if
 
 CCC   Set transverse and 3D DCA distance cuts for fits 1,2,3:
-           dca_cut1 = 3.0*dsqrt(2.0)*sigmaz
+           dca_cut1 = 3.0*dsqrt(2.D0)*sigmaz
            if(dca_cut1 .lt. evrpar(1).cutxy)
      1        dca_cut1 =    evrpar(1).cutxy
            if(dca_cut1 .gt. beampipecut1) dca_cut1 = beampipecut1
-           dca_cut2 = 2.0*dsqrt(3.0)*sigmaz
+           dca_cut2 = 2.0*dsqrt(3.D0)*sigmaz
            if(dca_cut2 .lt. evrpar(1).cut2)
      1        dca_cut2 =    evrpar(1).cut2
-           if(dca_cut2 .gt. 2.0*dsqrt(3.0)*sigdef)
-     1        dca_cut2 =    2.0*dsqrt(3.0)*sigdef
-           dca_cut3 = dsqrt(3.0)*sigmaz
+           if(dca_cut2 .gt. 2.0*dsqrt(3.D0)*sigdef)
+     1        dca_cut2 =    2.0*dsqrt(3.D0)*sigdef
+           dca_cut3 = dsqrt(3.D0)*sigmaz
            if(dca_cut3 .lt. evrpar(1).cut3)
      1        dca_cut3 =    evrpar(1).cut3
-           if(dca_cut3 .gt. dsqrt(3.0)*sigdef)
-     1        dca_cut3 =    dsqrt(3.0)*sigdef
+           if(dca_cut3 .gt. dsqrt(3.D0)*sigdef)
+     1        dca_cut3 =    dsqrt(3.D0)*sigdef
 
 CCC   Compute the acceptance volumes and ratio for min. track ratio cuts:
            volume_seq = C_PI*beampipecut1*beampipecut1*
