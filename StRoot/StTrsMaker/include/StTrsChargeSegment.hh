@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.5 1999/02/18 21:18:43 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.6 1999/07/19 21:37:59 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
- * Revision 1.5  1999/02/18 21:18:43  lasiuk
- * rotate() mods to StTpcCoordinateTranform
+ * Revision 1.6  1999/07/19 21:37:59  lasiuk
+ * - tssSplit() and associated parameterizations from
+ *   tss are included (requires linking with cernlib)
+ * - introduce static random number generators
+ * - whichGEANTParticle() introduced for g2t input
  *
  * Revision 1.5  1999/02/18 21:18:43  lasiuk
  * rotate() mods to StTpcCoordinateTranform
@@ -59,6 +62,7 @@
 #include "StGlobals.hh"
 #include "StThreeVector.hh"
 #include "StMatrix.hh"
+#include "Randomize.h"
 
 //#include "g2t_tpc_hit.hh"
 #include "StTpcSlowControl.hh"
@@ -77,7 +81,7 @@ public:
 		       double de,                  // energy deposited
 		       double ds,                  // pathlength
 		       int    pid = -1,            // pid #
-		       float  ne  = -1);           // numberOfElectrons
+		       double ne  = -1);           // numberOfElectrons
 
     ~StTrsChargeSegment();
     //StTrsChargeSegment(const StTrsChargeSegment&);
@@ -91,16 +95,29 @@ public:
     double                 dE()                const;
     double                 ds()                const;
     int                    pid()               const;
-    float                  numberOfElectrons() const;
+    double                 numberOfElectrons() const;
     
     void  rotate(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*);
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     void  split(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment>*);
+    void  tssSplit(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment>*);
 #else
-        void  split(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment, allocator<StTrsMiniChargeSegment> >*);
+    void  split(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment, allocator<StTrsMiniChargeSegment> >*);
+    void  tssSplit(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment, allocator<StTrsMiniChargeSegment> >*);
 #endif
 
+public:
+    // TSS segment splitting functions
+    double sigmaParameter(double&, double&, double&, int&) const;
+    double meanParameter(double&, double&, double&, int&)  const;
+    double xReflectedGauss(double&, double&)               const;
+    double xReflectedLandau(double&, double&)              const;
+    double binaryPartition(double, double&, double&)      const;
+
+private:
+    void whichGEANTParticle(double&, int&);
+    
 private:
     StThreeVector<double> mPosition;
     StThreeVector<double> mSector12Position;
@@ -109,19 +126,18 @@ private:
     double                mDs;
     int                   mPid;
     
-    float                 mNumberOfElectrons;
+    double                mNumberOfElectrons;
     int                   mSectorOfOrigin;
 
-    // NOTE: This should be a wrapped table so we don't have to copy...
-    //       For now copy the vectors...
-    //g2t_tpc_hit*  mG2tTpcHit ;
+    static HepJamesRandom  mEngine;
+    static RandFlat        mFlatDistribution;
 };
 inline const StThreeVector<double>& StTrsChargeSegment::position() const {return mPosition;}
 inline const StThreeVector<double>& StTrsChargeSegment::momentum() const {return mMomentum;}
 inline double StTrsChargeSegment::dE() const {return mDE;}
 inline double StTrsChargeSegment::ds() const {return mDs;}
 inline int StTrsChargeSegment::pid() const {return mPid;}
-inline float StTrsChargeSegment::numberOfElectrons() const {return mDs;}
+inline double StTrsChargeSegment::numberOfElectrons() const {return mNumberOfElectrons;}
 
 // Non-member Function
 ostream& operator<<(ostream&, const StTrsChargeSegment&);
