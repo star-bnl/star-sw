@@ -55,6 +55,7 @@ StiHitContainer::StiHitContainer()
     cout <<"StiHitContainer::StiHitContainer()"<<endl;
     mminpoint = new StiHit();
     mmaxpoint = new StiHit();
+    cout <<"\tLeaving StiHitContainer()"<<endl;
 }
 
 StiHitContainer::~StiHitContainer()

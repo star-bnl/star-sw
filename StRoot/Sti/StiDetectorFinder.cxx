@@ -20,7 +20,7 @@ void StiDetectorFinder::addDetector(StiDetector *pDetector){
                                            pDetector ) );
 } // addDetector()
 
-StiDetector *StiDetectorFinder::findDetector(const char *szName)
+StiDetector *StiDetectorFinder::findDetector(const string& szName)
 {
     detectorIterator where = mDetectorMap.find(NameMapKey(szName));
     return (where!= mDetectorMap.end()) ? (*where).second : NULL;

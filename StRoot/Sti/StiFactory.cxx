@@ -29,7 +29,7 @@
 #include <iostream.h>
 #include "StiFactory.h"
 
-StiFactory::StiFactory(const char * newName) : name(newName)
+StiFactory::StiFactory(const string& newName) : name(newName)
 {
 }
 
@@ -37,8 +37,3 @@ StiFactory::~StiFactory()
 {
 }
 
-const char * StiFactory::getName()
-{
-  return name;
-}
- 

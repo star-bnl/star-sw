@@ -4,6 +4,9 @@
 #ifndef TpcMapUtilities_h
 #define TpcMapUtilities_h
 
+#include <string>
+using std::string;
+
 class StHit;
 class StiHit;
 
@@ -33,11 +36,11 @@ struct DetectorMapKey {
 
 // Structure for material, shape, or detector name map key
 struct NameMapKey {
-    NameMapKey::NameMapKey(const char *str){ strncpy(name, str, 127); }
+    NameMapKey::NameMapKey(const string& str){ name = str; }
     NameMapKey::NameMapKey(){}
     bool operator==(const NameMapKey&) const;
     bool operator<(const NameMapKey&) const;
-    char name[128];
+    string name;
 };
 
 //Functors for ordering hits

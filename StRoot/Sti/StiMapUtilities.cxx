@@ -127,11 +127,13 @@ bool DetectorMapKey::operator<(const DetectorMapKey& key2) const
 }
 
 bool NameMapKey::operator==(const NameMapKey& key2) const{
-  return( strcmp(name, key2.name) == 0 );
+    //return( strcmp(name, key2.name) == 0 );
+  return( name ==key2.name );
 }
 
 bool NameMapKey::operator<(const NameMapKey& key2) const{
-  return( strcmp(name, key2.name) < 0 );
+    //return( strcmp(name, key2.name) < 0 );
+  return( name < key2.name );
 }
 
 //----------------------- Streamers -------------------------------------------------

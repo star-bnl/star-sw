@@ -1,19 +1,28 @@
 #ifndef StiFactory_H
 #define StiFactory_H
 
+#include <string>
+using std::string;
+
 class StiFactory
 {
  public:
 
     //StiFactory(); //Not implemented
-    StiFactory(const char * name);
+    StiFactory(const string& name);
     virtual ~StiFactory();
     
-    const char * getName();
+    const string& getName() const;
     
 protected:
     
-    const char * name;
+    const string& name;
 };
+
+inline const string& StiFactory::getName() const
+{
+  return name;
+}
+ 
 
 #endif

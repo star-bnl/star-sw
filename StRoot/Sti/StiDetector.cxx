@@ -38,15 +38,11 @@ void StiDetector::copy(StiDetector &detector){
   setName(detector.getName());
 }
 
-void StiDetector::build(const char* buildfile)
+void StiDetector::build()
 {
     return;
 }  // build()
  
-void StiDetector::write(const char *szFileName){
-
-} // write()
-
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
     os << d.getName()<<"\t"<<d.getPlacement()->getCenterRadius()<<"\t"<<d.getPlacement()->getCenterRefAngle();

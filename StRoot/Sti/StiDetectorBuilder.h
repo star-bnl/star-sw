@@ -38,9 +38,9 @@ public:
     // accessors
     detectorMap getDetectors(){ return mDetectorMap; }
 
-    virtual StiMaterial *findMaterial(const char *szName) const;
-    virtual StiShape    *findShape(const char *szName) const;
-    virtual StiDetector *findDetector(const char *szName) const;
+    virtual StiMaterial *findMaterial(const string& szName) const;
+    virtual StiShape    *findShape(const string& szName) const;
+    virtual StiDetector *findDetector(const string& szName) const;
 
     // mutators
 
