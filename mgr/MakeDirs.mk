@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.4 1999/02/13 01:52:07 didenko Exp $
+# $Id: MakeDirs.mk,v 1.5 1999/05/08 23:18:17 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.5  1999/05/08 23:18:17  fisyak
+# Clean up
+#
 # Revision 1.4  1999/02/13 01:52:07  didenko
 # Fix bug with list of tables
 #
@@ -16,7 +19,6 @@
 SRC_DIR := $(INP_DIR)
 SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
 ifeq (,$(findstring $(LEVEL),0 1))
-
   PKG     := $(notdir $(INP_DIR))
   D       := $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR)))
   DOMAIN  := $(word 2, $(D))
@@ -56,50 +58,13 @@ ifeq (,$(findstring $(LEVEL),0 1))
   GEN_DIR := $(DIR_GEN)/$(DOMAIN)
   DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(ROOT_DIR)/pams/*)))
 #.
-  ifndef NT
       check_out   := $(shell test -d $(ROOT_DIR) || mkdir -p $(ROOT_DIR)) 
-      check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
-      check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
-      check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
-      check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
-      check_gen   := $(shell test -d $(DIR_GEN) || mkdir -p $(DIR_GEN))
-      check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
-      check_tab   := $(shell test -d $(GEN_TAB) || mkdir -p $(GEN_TAB))
-      check_tmp   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
-  else # /* NT */
-      check_out   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(ROOT_DIR))))
-      check_sys   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(SYS_DIR))))
-      check_lib   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(LIB_DIR))))
-      check_obj   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(OBJ_DIR))))
-#     check_dep   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(DEP_DIR))))
-      check_gen   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(DIR_GEN))))
-      check_neg   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_DIR))))
-      check_tab   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_TAB))))
-      check_tmp   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_TMP))))
-  endif #/* NT */
-endif
-ifdef NEVER
-ifneq (,$(ROOT_DIR))
-ifneq ($(STAR),$(ROOT_DIR))
-  StTables    :=$(strip $(wildcard $(ROOT_DIR)/.share/tables))
-  ifeq (,$(StTables))
-    checkout := $(shell  mkdir -p $(ROOT_DIR)/.share/tables)
-    checkout := $(foreach p,$(wildcard $(STAR)/.share/tables/*.*),\
-                            $(shell $(LN) $(p)  $(ROOT_DIR)/.share/tables/.))
-  endif
-  StTables :=$(strip $(wildcard $(SYS_DIR)/obj/tables))
-  ifeq (,$(StTables)) 
-    checkout := $(shell  mkdir -p $(SYS_DIR)/obj/tables)
-    checkout := $(foreach p,$(wildcard  $(STAR)/.$(SYS_HOST_SYS)/obj/tables/*.*),\
-                           $(shell $(LN) $(p)  $(SYS_DIR)/obj/tables/.))
-  endif
-  StTables :=$(strip $(wildcard $(SYS_DIR)/dep/tables))
-  ifeq (,$(StTables)) 
-    checkout := $(shell  mkdir -p $(SYS_DIR)/dep/tables)
-    checkout := $(foreach p,$(wildcard  $(STAR)/.$(SYS_HOST_SYS)/dep/tables/*.*),\
-                           $(shell $(LN) $(p)  $(SYS_DIR)/dep/tables/.))
-
-  endif
-endif
-endif
+      check_sys   := $(shell test -d $(SYS_DIR)  || mkdir -p $(SYS_DIR)) 
+      check_lib   := $(shell test -d $(LIB_DIR)  || mkdir -p $(LIB_DIR))
+      check_obj   := $(shell test -d $(OBJ_DIR)  || mkdir -p $(OBJ_DIR))
+      check_dep   := $(shell test -d $(DEP_DIR)  || mkdir -p $(DEP_DIR))
+      check_gen   := $(shell test -d $(DIR_GEN)  || mkdir -p $(DIR_GEN))
+      check_neg   := $(shell test -d $(GEN_DIR)  || mkdir -p $(GEN_DIR))
+      check_tab   := $(shell test -d $(GEN_TAB)  || mkdir -p $(GEN_TAB))
+      check_tmp   := $(shell test -d $(GEN_TMP)  || mkdir -p $(GEN_TMP))
 endif
