@@ -6,7 +6,7 @@
  *
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
- *  
+ * $Log $  
  */
 #include "StMiniMcMaker.h"
 #include "TFile.h"
@@ -928,7 +928,10 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 
   tinyRcTrack->setChi2Pr(prTrack->fitTraits().chi2());
   tinyRcTrack->setFlag(prTrack->flag());
-  tinyRcTrack->setDedx(computeDedx(prTrack));
+
+  StDedxPidTraits* pid = findDedxPidTraits(prTrack);
+  float meanDedx = (pid) ? pid->mean() : -999;
+  tinyRcTrack->setDedx(meanDedx);
   
   //
   // reality check
@@ -1022,6 +1025,8 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   }
   
   tinyRcTrack->setFitPts(glTrack->fitTraits().numberOfFitPoints(kTpcId));
+  short nDedxPts = (pid) ? pid->numberOfPoints() : 0;
+  tinyRcTrack->setDedxPts(nDedxPts);
   tinyRcTrack->setAllPts(glTrack->detectorInfo()->numberOfPoints(kTpcId));
   tinyRcTrack->setCharge(glTrack->geometry()->charge());
 
@@ -1357,8 +1362,8 @@ StMiniMcMaker::computeZDca(const StThreeVectorF* point, const StTrack* track)
 /*
   
  */
-Float_t
-StMiniMcMaker::computeDedx(const StTrack* track)
+StDedxPidTraits*
+StMiniMcMaker::findDedxPidTraits(const StTrack* track)
 {
   StDedxPidTraits* pid=0;
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
@@ -1367,7 +1372,7 @@ StMiniMcMaker::computeDedx(const StTrack* track)
     pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
     if (pid && pid->method() == kTruncatedMeanId) break;
   }
-  return (pid) ? pid->mean() : 0;
+  return pid;
 }  
 
 /*
