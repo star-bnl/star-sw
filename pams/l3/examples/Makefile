@@ -35,7 +35,7 @@ GRAPHTRACK      = FtfGraphic.o FtfBaseHitDict.o FtfHitDict.o FtfBaseTrackDict.o 
 		  FtfTrackDict.o FtfFinderDict.o FtfParaDict.o FtfSl3Dict.o \
 		  FtfGraphicDict.o
 
-SL3TRACKER     	= $(TRACKER) FtfSl3.o sl3Swap.o  sl3CoordinateTransform.o
+SL3TRACKER     	= $(TRACKER) FtfSl3.o sl3Swap.o 
 
 
 #===================================
