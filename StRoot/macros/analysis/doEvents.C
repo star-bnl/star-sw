@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.71 2001/09/27 00:51:34 perev Exp $
+// $Id: doEvents.C,v 1.72 2001/12/22 03:47:27 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -116,7 +116,6 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StEventUtilities");
     gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
-    gSystem->Load("StTpcDb");
     
 //   		Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
@@ -159,6 +158,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     TString mainBranch;
     if (fileList && fileList[0] && strstr(fileList[0],".root")) {
       mainBranch = fileList[0];
+      printf("fileList[0] %s %s\n",fileList[0],mainBranch.Data());
       mainBranch.ReplaceAll(".root","");
       int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
       mainBranch.Replace(0,idot+1,"");
@@ -178,6 +178,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     // Maker to read events from file or database into StEvent
     //
     if (!mainBranch.Contains("eventBranch")) {
+      gSystem->Load("StTpcDb");
       gSystem->Load("StEventMaker");
       StEventMaker *readerMaker =  new StEventMaker("events","title");
     }
@@ -293,6 +294,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.72  2001/12/22 03:47:27  perev
+// StTpcDb.so is not loaded for event.root case
+//
 // Revision 1.71  2001/09/27 00:51:34  perev
 // call StEventMaker conditionally
 //
