@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.3 2001/03/16 20:57:45 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.4 2001/03/16 21:31:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.4  2001/03/16 21:31:42  ullrich
+ * Changed version number from 1 to 2.
+ *
  * Revision 2.3  2001/03/16 20:57:45  ullrich
  * Covariant matrix now stored in TArrayF.
  *
@@ -56,6 +59,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,1)
+    ClassDef(StTrackFitTraits,2)
 };
 #endif
