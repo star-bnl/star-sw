@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.22 2003/03/24 18:12:10 ward Exp $
+ * $Id: StDAQReader.h,v 1.23 2003/09/28 01:57:21 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.23  2003/09/28 01:57:21  jeromel
+ * No change (indent)
+ *
  * Revision 1.22  2003/03/24 18:12:10  ward
  * Full support for EEMC from Herbert Ward.
  *
@@ -176,7 +179,7 @@ protected:
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  
   StEMCReader  *fEMCReader;  
-  StEEMCReader  *fEEMCReader;  
+  StEEMCReader *fEEMCReader;  
   StPMDReader  *fPMDReader;  
   StFTPCReader *fFTPCReader;  
   StRICHReader *fRICHReader;
