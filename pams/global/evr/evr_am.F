@@ -49,15 +49,27 @@ CC:     ----------------------------------
 CC:     privert().id        = Primary key; value of privert_h.nok when
 CC:                           row is filled
 CC:               iflag     = +yx1 for normal, successfully found primary vertex
-CC:                             during the 3rd iteration
+CC:                                during the 3rd iteration
 CC:                         = -yx3 for initial seed value
 CC:                         = -yx2 for first iteration value
 CC:                         = -yx1 for second iteration value
 CC:                         = -yx4 for failed fit with Determinant of G = 0.0,
-CC:                              occuring during any iteration.
+CC:                                occuring during any iteration.
 CC:                         = -yx5 for failed error covariance matrix evaluation
-CC:                              during fit with Determinant of E = 0.0,
-CC:                              occuring during any iteration.
+CC:                                during fit with Determinant of E = 0.0,
+CC:                                occuring during any iteration.
+CC:                         = -yx6 for failed vertex finding due to too few
+CC:                                tracks occuring anytime after the initial
+CC:                                vertex seed has been found.
+CC:                         = -yx7 for failed vertex finding due to too low
+CC:                                a fraction of selected tracks relative
+CC:                                to the total number of global tracks
+CC:                                occuring anytime after the initial vertex
+CC:                                seed has been found.
+CC:                         = -yx8 for failed vertex finding due to both of
+CC:                                the previous two conditions occuring anytime
+CC:                                after the initial vertex seed has been
+CC:                                found.
 CC:                            x is the event vertex id (for pileups). Zero
 CC:                              means one vertex, x=1 is the next one etc.
 cc:                            y is the det_id for prevertex finding only. 
@@ -136,31 +148,20 @@ CC:                           vertex finding all the way to the final, third
 CC:                           fit iteration; indicates to the calling
 CC:                           program that event processing should continue.
 CC:                           
-CC:          STAFCV_BAD     - occurs if number of global tracks < 5, or if
-CC:                           number of global tracks < ntrkcut (=50) and
-CC:                           number of selected tracks at any step in the
-CC:                           processing is < 5.  This indicates to the
-CC:                           calling program that the event multiplicity
-CC:                           is too small for this module to work.  An
-CC:                           alternate, small event primary vertex finder
-CC:                           should be called instead of evr_am.  For example,
-CC:                           the peripheral collision group's primary vertex
-CC:                           module.  This return value may also indicate 
-CC:                           that the vertex table (privert) had an
-CC:                           insufficient number of rows such that the
-CC:                           primary vertex could not be written into it.
-CC:                           The calling program should increase the
-CC:                           number of assigned rows to table privert and
-CC:                           call evr_am again.
-CC:                           
-CC:          STAFCV_ERR     - occurs if the number of global tracks => ntrkcut
-CC:                           (equal to 50) and the number of selected tracks
-CC:                           at any step in the processing is < 5.  This
-CC:                           indicates to the calling program that a serious
-CC:                           failure in evr processing has occured, no
-CC:                           primary vertex could be found even though the
-CC:                           event multiplicity was large; event 
-CC:                           processing should be terminated.
+CC:          STAFCV_BAD     - The following error conditions will result
+CC:                           in evr_am returning this STAF condition value:
+CC:                           (1) The number of selected tracks for vertex 
+CC:                               finding is less than 5 during any iteration.
+CC:                           (2) The ratio of the number of selected global
+CC:                               tracks to total number of global tracks is
+CC:                               less than 'ntrkratiocut' (set to 0.1) during
+CC:                               any iteration.
+CC:                           (3) The primary vertex table, 'privert', is
+CC:                               already filled to its maximum length and
+CC:                               cannot have new vertex information added.
+CC:                           (4) The detector ID code numbers from 
+CC:                               $STAR/pams/global/inc/StDetectorDefinitions.h
+CC:                               are out of the assumed range from 1 to 30.
 CC:                           
 CC: ERROR CONDITIONS	: None-Yet
 CC: STATUS		: Tested
@@ -239,6 +240,23 @@ CC:       and load into globtrk().impact.
 CC:
 CC: (14)  Modified for new global track parameters r0,phi0 - 9/29/99 (L.Ray)
 CC:
+CC: (15)  Corrected handling of anomalously small values of extrapolated
+CC:       track position errors; hard coded pion mass (0.14) in multiple
+CC:       Coulomb scattering estimate - R. L. Ray, March, 2000.
+CC:
+CC: (16)  Revised the event abort criteria and diagnostic output - R. L. Ray,
+CC:       April, 2000.
+CC:
+CC: (17)  Use weighted means for initial seed values for vertex z-position
+CC:       and for x,y-positions for the case when the beam-beam axis is not
+CC:       coincident with the x = y = 0 axis - R. L. Ray, April, 2000.
+CC:
+CC: (18)  Replaced math library functions sind and cosd with locally
+CC:       defined functions - R. L. Ray, April, 2000.
+CC:
+CC: (19)  Added extra track selection criteria based on a minimum number of
+CC:       space points used in the global track fit - R. L. Ray, April, 2000.
+CC:
 CC:  METHOD:
 CC:  Minimization of the perpendicular distances from the vectors to a point.
 CC:
@@ -277,7 +295,8 @@ CC  Local Variable Type Declarations:
       REAL xp(2),x(4),xxv(3),xa0(3),pa0(3),x3d0(3)
       REAL zsum(800),seed,zmax,LIFC,LRAD,LSVT1
       REAL xlocal(3),bfield(3),ptdefault,bfield_min,pptdef
-      REAL ntrkratio, beampipecut
+      REAL ntrkratio, beampipecut, ntrkratiocut
+      REAL xsum(81), ysum(81), maxval, sumbin
 
       INTEGER   i,j,k,ipnt,ntrk,index,gindex(maxtr),icharge
       INTEGER   fitoption,covariance,ntrkcut
@@ -285,6 +304,7 @@ CC  Local Variable Type Declarations:
       PARAMETER (maxdettypes = 30)
       INTEGER   detIdOK,dettrkcounter(maxdettypes)
       INTEGER   DetectorId, DetectorIdSave
+      INTEGER   flagset1, flagset2, bin_max, bin_low, bin_high
 
 CC  Declare new variables used in track cov() matrix contribution to sigma:
       REAL h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
@@ -307,6 +327,8 @@ CC                          ! DCA position uncertainty with SVT and/or SSD hits.
       DATA beampipecut /4.0/  ! Beam pipe radius (cm), used for track DCA
 CC                            ! transverse position cut on initial pass.
       DATA ntrkcut  /50/    ! Min. track number for event abort decision
+      DATA ntrkratiocut /0.1/ ! Min. acceptable ratio of selected tracks for
+CC                            ! vertex fitting to total # global tracks.
       DATA ptdefault /0.4/  ! Default pT value in GeV/c for use in B_field = 0
 CC                          ! cases for estimating MCS error contribution to
 CC                          ! the uncertainty in the track's DCA to prim. vrtx.
@@ -343,30 +365,10 @@ CC  B-field obtained via gufld call
       write(6,*) 'EVR: Using a field of',bfield(3),' KGauss'
       b = bfield(3)
 
-C>>>  TEST PRINT OUT
-C      write(6,990) xlocal(1),b
-C990   Format(1x,'EVR: xlocal(1),b=',2F20.16)
-C      write(6,*) 'EVR: evrpar.ptmin      = ',evrpar(1).ptmin
-C      write(6,*) 'EVR: evrpar.fitoption  = ',evrpar(1).fitoption
-C      write(6,*) 'EVR: evrpar.covariance = ',evrpar(1).covariance
-C      write(6,*) 'EVR: evrpar.cutxy      = ',evrpar(1).cutxy
-C      write(6,*) 'EVR: evrpar.cutz       = ',evrpar(1).cutz
-C      write(6,*) 'EVR: evrpar.cut2       = ',evrpar(1).cut2
-C      write(6,*) 'EVR: evrpar.cut3       = ',evrpar(1).cut3
-C      write(6,*) 'EVR: evrpar.vcut       = ',evrpar(1).vcut
-C      zsum(1) = sind(30.0)
-C      zsum(2) = cosd(30.0)
-C      write(6,*) 'EVR: sind, cosd=',zsum(1),zsum(2)
-C      write(6,*) 'EVR: pi        =',C_PI
-C      write(6,*) 'EVR: curvature =',C_D_CURVATURE
-C      write(6,*) 'EVR: 2*pi      =',C_2PI
-C      write(6,*) 'EVR: sqrt(2)   =',C_SQRT2
-C      write(6,*) 'EVR: pion mass =',M_PION_PLUS
-C>>>  TEST PRINT OUT
-
 CC  Check for fixed vertex
       do i = 1,privert_h.nok
-	if ((privert(i).chisq(1).eq.-1.0).and.(privert(i).chisq(2).eq.-1.0)) then
+	if ((privert(i).chisq(1).eq.-1.0).and.
+     1      (privert(i).chisq(2).eq.-1.0)) then
           index = i
 	  xxv(1) = privert(i).x
 	  xxv(2) = privert(i).y
@@ -378,6 +380,8 @@ CC  Check for fixed vertex
 
 CC  Initialize arrays:
 
+        CALL VZERO(xsum,81)
+        CALL VZERO(ysum,81)
         CALL VZERO(zsum,800)
 	ntrk = 0
         ntrkratio = 0.0
@@ -448,6 +452,7 @@ C=== use only global tracks, i.e. dst_track instances ====
         ntrk = globtrk_h.nok  
         k = 0
 
+CCC   Check for adequate number of tracks:
         if (ntrk.lt.5) then
            write(6,*) 'EVR: Not enough initial global tracks to find '
            write(6,*) 'EVR: the vertex, ntrk=',ntrk
@@ -455,6 +460,7 @@ C=== use only global tracks, i.e. dst_track instances ====
            return
         endif
 
+CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
         do 20 i = 1,ntrk
            psi = globtrk(i).psi
            icharge = globtrk(i).icharge
@@ -486,7 +492,8 @@ C=== use only global tracks, i.e. dst_track instances ====
            
            if (ppt.ge.evrpar(1).ptmin .and. ppt.ne. 99999. .and.
      1     detIdOK.eq.1 .and. globtrk(i).iflag.gt.0 .and.
-     2     icharge.ne.0) then
+     2     icharge.ne.0 .and. (globtrk(i).n_fit_point.eq.0
+     3     .or. globtrk(i).n_fit_point.ge.10)) then
               k = k + 1
               if(k .le. maxtr) then
 
@@ -515,13 +522,6 @@ CC  uncertainty at the DCA to the primary vertex.
               phi0(k)= x(4)
               tanl(k) = tanla
               sigma(k) = sig
-
-C>>> TEST OUTPUT
-C      write(6,992) psi,ppt,tanla,xx0,yy0,zz0
-C      write(6,993) LRAD,x(1),x(2),x(3),x(4),sig
-C992   Format('EVR:SIG1',6E12.4)
-C993   Format('EVR:SIG2',6E12.4)
-C>>>  End test output
 
 CCC  Include track fit error covariance matrix contributions to the
 CCC  track position uncertainty at the DCA point:
@@ -666,6 +666,10 @@ CCC   Assign final error (sigma) to extrapolated track position:
 CCC              Modified to correct fat bin at 0.0
                  zsum(int(2.0*(z0(k)+200.0))+1) =      
      1           zsum(int(2.0*(z0(k)+200.0))+1) + 1.   
+                 xsum(int(10.0*(x0(k)+4.0))+1) =
+     1           xsum(int(10.0*(x0(k)+4.0))+1) + 1.
+                 ysum(int(10.0*(y0(k)+4.0))+1) =
+     1           ysum(int(10.0*(y0(k)+4.0))+1) + 1.
               endif
               else if (k.gt.maxtr) then
                  k = maxtr
@@ -678,46 +682,123 @@ CC                            ! the remainder of tracks are skipped.
 
         ntrk = k
 
+CCC   Check for adequate number of tracks:
+        if(globtrk_h.nok .ne. 0) then
+           ntrkratio = float(ntrk)/float(globtrk_h.nok)
+        end if
         if (ntrk.lt.5) then
-           if(globtrk_h.nok .ne. 0) then
-              ntrkratio = float(ntrk)/float(globtrk_h.nok)
-           end if
            write(6,*) 'EVR: Not enough global tracks after ptmin,z '
            write(6,*) 'EVR: and beampipe cuts to find the vertex:'
            write(6,*) 'EVR: ntrk,ntrkratio = ',ntrk,ntrkratio
-           if(globtrk_h.nok .lt. ntrkcut) then
-              evr_am = STAFCV_BAD
-           else
-              evr_am = STAFCV_ERR
-           end if
+           evr_am = STAFCV_BAD
+           return
+        endif
+        if (ntrkratio .lt. ntrkratiocut) then
+           write(6,*) 'EVR: Ratio of accepted to total global tracks'
+           write(6,*) 'EVR: too low after ptmin,z and beampipe cuts'
+           write(6,*) 'EVR: to find the vertex:'
+           write(6,*) 'EVR: ntrk,ntrkratio = ',ntrk,ntrkratio
+           evr_am = STAFCV_BAD
            return
         endif
 
-CCC  Determine initial, rough z-coordinate of vertex and put in 'seed'
-        seed=0.
-        zmax=0.
-        do i=1,800
-         if(zsum(i).gt.zmax) then
-           zmax=zsum(i)
-           seed=0.5*float(i) - 200.25      ! Put seed at center of bin.   
-         endif
-        enddo   
-
-CCC  Print z bins:
-C        do i = 300,500
-C           write(6,*) 'EVR: zsum for i = ',i,zsum(i)
-C        end do
-C        write(6,*) 'EVR: seed = ', seed
-
-CC  Load default vertex position:
-        xv = xp(1)
-        yv = xp(2)
+CCC   Determine the initial, rough x,y,z location of the primary vertex
+CCC   using weighted means for selected x,y,z bins of DCA positions which
+CCC   are near the peak bin.  Find bin with maximum number of DCA points
+CCC   for z-coordinate, then for x and y.
+CCC
+CCC      z-coordinate seed value:
+        bin_max = 0
+        maxval = 0.0
+        do i = 1,800
+           if (zsum(i) .gt. maxval) then
+              maxval = zsum(i)
+              bin_max = i
+           end if
+        end do
+        bin_low  = bin_max - 4
+        bin_high = bin_max + 4
+        if(bin_low .lt. 1) bin_low = 1
+        if(bin_high .gt. 800) bin_high = 800
+        seed = 0.0
+        sumbin = 0.0
+        do i = bin_low,bin_high
+           sumbin = sumbin + zsum(i)
+           seed = seed + (0.5*float(i) - 200.25)*zsum(i)
+        end do
+        if(sumbin .gt. 0.0) then
+           seed = seed/sumbin
+        else
+           seed = 0.5*float(bin_max) - 200.25
+        end if
         zv = seed
 
+CCC     x-coordinate seed value:
+        bin_max = 0
+        maxval = 0.0
+        do i = 1,80
+           if (xsum(i) .gt. maxval) then
+              maxval = xsum(i)
+              bin_max = i
+           end if
+        end do
+        bin_low  = bin_max - 15
+        bin_high = bin_max + 15
+        if(bin_low .lt. 1) bin_low = 1
+        if(bin_high .gt. 80) bin_high = 80
+        seed = 0.0
+        sumbin = 0.0
+        do i = bin_low,bin_high
+           sumbin = sumbin + xsum(i)
+           seed = seed + (0.1*float(i) - 4.05)*xsum(i)
+        end do
+        if(sumbin .gt. 0.0) then
+           seed = seed/sumbin
+        else
+           seed = 0.1*float(bin_max) - 4.05
+        end if
+        if(abs(seed) .le. 0.1) then
+           xv = 0.0
+        else
+           xv = 2.0*seed
+        end if
+        if(abs(xv) .gt. beampipecut) xv = seed
+
+CCC     y-coordinate seed value:
+        bin_max = 0
+        maxval = 0.0
+        do i = 1,80
+           if (ysum(i) .gt. maxval) then
+              maxval = ysum(i)
+              bin_max = i
+           end if
+        end do
+        bin_low  = bin_max - 15
+        bin_high = bin_max + 15
+        if(bin_low .lt. 1) bin_low = 1
+        if(bin_high .gt. 80) bin_high = 80
+        seed = 0.0
+        sumbin = 0.0
+        do i = bin_low,bin_high
+           sumbin = sumbin + ysum(i)
+           seed = seed + (0.1*float(i) - 4.05)*ysum(i)
+        end do
+        if(sumbin .gt. 0.0) then
+           seed = seed/sumbin
+        else
+           seed = 0.1*float(bin_max) - 4.05
+        end if
+        if(abs(seed) .le. 0.1) then
+           yv = 0.0
+        else
+           yv = 2.0*seed
+        end if
+        if(abs(yv) .gt. beampipecut) yv = seed
+
 CC  Save vertex seed value:
-        vertex_pass(1,1) = xp(1)
-        vertex_pass(1,2) = xp(2)
-        vertex_pass(1,3) = seed
+        vertex_pass(1,1) = xv
+        vertex_pass(1,2) = yv
+        vertex_pass(1,3) = zv
 
 CC  Determine most complete list of detectors which contribute space points
 CC  to all the tracks selected in the initial pass (DO 20 Loop):
@@ -750,13 +831,42 @@ CCC  Load initial seed value into table privert:
            Return
         end if
 
+CCC  Re-Calculate selected track extrapolation parameters for initial
+CCC  estimate of vertex position if it is off the x=y=0 axis:
+        if (xv.ne.0.0 .or. yv.ne.0.0) then
+           do i = 1,ntrk
+              k = gindex(i)
+              psi = globtrk(k).psi
+              if(b.ne.0.0) then
+                 icharge = globtrk(k).icharge
+                 ppt = 1.0/abs(globtrk(k).invpt)
+              else if (b.eq.0.0) then
+                 icharge = 1
+                 ppt = pptdef
+              end if
+              tanla = globtrk(k).tanl
+              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
+              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
+              zz0 = globtrk(k).z0
+              xp(1) = xv
+              xp(2) = yv
+              Call evr_project_track(psi,icharge,ppt,tanla,xx0,yy0,
+     1                               b,zz0,xp,x,sig,LIFC)
+              x0(i) = x(1)
+              y0(i) = x(2)
+              z0(i) = x(3)
+              phi0(i) = x(4)
+              tanl(i) = tanla
+           end do
+        end if
+
 CCC  Select tracks based on transverse x-y and z cuts and load
 CCC  track parameters into temporary arrays:
 	k=0
 	do 10 i=1,ntrk
-	   dr=sqrt( x0(i)*x0(i)+y0(i)*y0(i) )
+	   dr=sqrt((x0(i)-xv)**2 + (y0(i)-yv)**2 )
 	   if(dr.lt.evrpar(1).cutxy) then
-	      if( abs(z0(i)-seed).lt.evrpar(1).cutz) then
+	      if( abs(z0(i)-zv).lt.evrpar(1).cutz) then
 	         k=k+1
 	         vtrv(1,k)=phi0(i)
 	         vtrv(2,k)=tanl(i)
@@ -768,20 +878,62 @@ CCC  track parameters into temporary arrays:
 	   endif
 10	continue
 
+CCC   Check for adequate number of tracks:
+        if(globtrk_h.nok .ne. 0) then
+           ntrkratio = float(k)/float(globtrk_h.nok)
+        end if
         if (k.lt.5) then
-           if(globtrk_h.nok .ne. 0) then
-              ntrkratio = float(k)/float(globtrk_h.nok)
-           end if
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
            write(6,*) 'EVR: after cutxy,cutz; k,ratio=',k,ntrkratio
-           if(globtrk_h.nok .lt. ntrkcut) then
-              evr_am = STAFCV_BAD
+           flagset1 = -6
+        else
+           flagset1 = 0
+        end if
+        if(ntrkratio .lt. ntrkratiocut) then
+           write(6,*) 'EVR: Ratio of accepted to total global tracks'
+           write(6,*) 'EVR: too low after cutxy,cutz;'
+           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+           flagset2 = -7
+        else
+           flagset2 = 0
+        end if
+        if(flagset1.ne.0 .or. flagset2.ne.0) then
+           index = privert_h.nok + 1
+           if(index.le.privert_h.maxlen) then
+              privert_h.nok = index
+              privert(index).id = index
+              if(flagset1.ne.0 .and. flagset2.eq.0) then
+                 privert(index).iflag = flagset1
+              else if(flagset1.eq.0 .and. flagset2.ne.0) then
+                 privert(index).iflag = flagset2
+              else
+                 privert(index).iflag = -8
+              end if
+              if(covariance.eq.-1) privert(index).iflag =
+     1           privert(index).iflag - 100
+              privert(index).det_id = privert(index-1).det_id
+              privert(index).vtx_id = privert(index-1).vtx_id
+              privert(index).n_daughters = privert(index-1).n_daughters
+              privert(index).x      = privert(index-1).x
+              privert(index).y      = privert(index-1).y
+              privert(index).z      = privert(index-1).z
+              do i = 1,6
+                 privert(index).covar(i) = privert(index-1).covar(i)
+              end do
+              privert(index).chisq(1) = privert(index-1).chisq(1)
+              privert(index).chisq(2) = privert(index-1).chisq(2)
+              privert(index).id_aux_ent = privert(index-1).id_aux_ent
            else
-              evr_am = STAFCV_ERR
+              write(6,*) 'EVR: Privert is full - cannot load vertex:',
+     1                    index
+              evr_am = STAFCV_BAD
+              Return
            end if
-           return
-        endif
+           evr_am = STAFCV_BAD
+           Return
+        end if
 
+CCC   Do first iteration of vertex finding:
 	CALL EVR_VERTEX_FIT(k)
         xxv(1)=xv
         xxv(2)=yv
@@ -880,20 +1032,62 @@ C** straight line tracks, i.e. can put e.g. pt=1 then
 	endif
 105	continue
 
+CCC   Check for adequate number of tracks:
+        if(globtrk_h.nok .ne. 0) then
+           ntrkratio = float(k)/float(globtrk_h.nok)
+        end if
         if (k.lt.5) then
-           if(globtrk_h.nok .ne. 0) then
-              ntrkratio = float(k)/float(globtrk_h.nok)
-           end if
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
            write(6,*) 'EVR: after cut2; k,ratio=',k,ntrkratio
-           if(globtrk_h.nok .lt. ntrkcut) then
-              evr_am = STAFCV_BAD
+           flagset1 = -6
+        else
+           flagset1 = 0
+        end if
+        if(ntrkratio .lt. ntrkratiocut) then
+           write(6,*) 'EVR: Ratio of accepted to total global tracks'
+           write(6,*) 'EVR: too low after cut2;'
+           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+           flagset2 = -7
+        else
+           flagset2 = 0
+        end if
+        if(flagset1.ne.0 .or. flagset2.ne.0) then
+           index = privert_h.nok + 1
+           if(index.le.privert_h.maxlen) then
+              privert_h.nok = index
+              privert(index).id = index
+              if(flagset1.ne.0 .and. flagset2.eq.0) then
+                 privert(index).iflag = flagset1
+              else if(flagset1.eq.0 .and. flagset2.ne.0) then
+                 privert(index).iflag = flagset2
+              else
+                 privert(index).iflag = -8
+              end if
+              if(covariance.eq.-1) privert(index).iflag =
+     1           privert(index).iflag - 100
+              privert(index).det_id = privert(index-1).det_id
+              privert(index).vtx_id = privert(index-1).vtx_id
+              privert(index).n_daughters = privert(index-1).n_daughters
+              privert(index).x      = privert(index-1).x
+              privert(index).y      = privert(index-1).y
+              privert(index).z      = privert(index-1).z
+              do i = 1,6
+                 privert(index).covar(i) = privert(index-1).covar(i)
+              end do
+              privert(index).chisq(1) = privert(index-1).chisq(1)
+              privert(index).chisq(2) = privert(index-1).chisq(2)
+              privert(index).id_aux_ent = privert(index-1).id_aux_ent
            else
-              evr_am = STAFCV_ERR
+              write(6,*) 'EVR: Privert is full - cannot load vertex:',
+     1                    index
+              evr_am = STAFCV_BAD
+              Return
            end if
-           return
-        endif
+           evr_am = STAFCV_BAD
+           Return
+        end if
 
+CCC   Do second iteration of vertex finding:
 	CALL EVR_VERTEX_FIT(k)
         xxv(1)=xv
         xxv(2)=yv
@@ -994,20 +1188,62 @@ CC                                              ! in final vertex fit
 	endif
 205	continue
 
+CCC   Check for adequate number of tracks:
+        if(globtrk_h.nok .ne. 0) then
+           ntrkratio = float(k)/float(globtrk_h.nok)
+        end if
         if (k.lt.5) then
-           if(globtrk_h.nok .ne. 0) then
-              ntrkratio = float(k)/float(globtrk_h.nok)
-           end if
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
            write(6,*) 'EVR: after cut3; k,ratio=',k,ntrkratio
-           if(globtrk_h.nok .lt. ntrkcut) then
-              evr_am = STAFCV_BAD
+           flagset1 = -6
+        else
+           flagset1 = 0
+        end if
+        if(ntrkratio .lt. ntrkratiocut) then
+           write(6,*) 'EVR: Ratio of accepted to total global tracks'
+           write(6,*) 'EVR: too low after cut3;'
+           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+           flagset2 = -7
+        else
+           flagset2 = 0
+        end if
+        if(flagset1.ne.0 .or. flagset2.ne.0) then
+           index = privert_h.nok + 1
+           if(index.le.privert_h.maxlen) then
+              privert_h.nok = index
+              privert(index).id = index
+              if(flagset1.ne.0 .and. flagset2.eq.0) then
+                 privert(index).iflag = flagset1
+              else if(flagset1.eq.0 .and. flagset2.ne.0) then
+                 privert(index).iflag = flagset2
+              else
+                 privert(index).iflag = -8
+              end if
+              if(covariance.eq.-1) privert(index).iflag =
+     1           privert(index).iflag - 100
+              privert(index).det_id = privert(index-1).det_id
+              privert(index).vtx_id = privert(index-1).vtx_id
+              privert(index).n_daughters = privert(index-1).n_daughters
+              privert(index).x      = privert(index-1).x
+              privert(index).y      = privert(index-1).y
+              privert(index).z      = privert(index-1).z
+              do i = 1,6
+                 privert(index).covar(i) = privert(index-1).covar(i)
+              end do
+              privert(index).chisq(1) = privert(index-1).chisq(1)
+              privert(index).chisq(2) = privert(index-1).chisq(2)
+              privert(index).id_aux_ent = privert(index-1).id_aux_ent
            else
-              evr_am = STAFCV_ERR
+              write(6,*) 'EVR: Privert is full - cannot load vertex:',
+     1                    index
+              evr_am = STAFCV_BAD
+              Return
            end if
-           return
-        endif
+           evr_am = STAFCV_BAD
+           Return
+        end if
 
+CCC   Do third and final iteration of vertex finding:
 	CALL EVR_VERTEX_FIT(k)
         xxv(1)=xv
         xxv(2)=yv
@@ -1029,7 +1265,8 @@ CC  Load final iteration vertex value into table privert:
         else
            privert(index).iflag = 1       ! Final primary vertex marker
         end if
-        if(covariance.eq.-1) privert(index).iflag =privert(index).iflag +100
+        if(covariance.eq.-1)
+     1     privert(index).iflag = privert(index).iflag + 100
         privert(index).det_id = DetectorIdSave ! global reconstruction
         privert(index).vtx_id  = kEventVtxId   ! primary vertex indicator
         privert(index).n_daughters  = k 
@@ -1556,15 +1793,6 @@ C      DATA sqrt2  /1.4142135/
      1         theta_mcs(0.14,1.0,ptot,Leff,1.0,1)
       end if
 
-C>>>  TEST OUTPUT
-C      if(LIFC.gt.0.0) then
-C         write(6,990) pt,x0,y0,psi,tanl,trans_pathL
-C         write(6,991) phi0,cospr,M_PION_PLUS,ptot,sigma_estimate
-C990      Format('EVR:SIG3',6E12.4)
-C991      Format('EVR:SIG4',5E12.4)
-C      end if
-C>>>
-
       Return
       END
  
@@ -1633,14 +1861,6 @@ CCC   Begin Calculation, if L or LR = 0.0, set theta_mcs to zero and return:
             theta_mcs = theta_fac1*abs(charge)*sqrt(LFAC)
      1      *(1.0 + LOGFAC1*log(LFAC))/(1000.0*momentum*beta)
          end if
-
-C>>>  TEST OUTPUT
-C      write(6,990) L,LR,LFAC,momentum,mass,E
-C      write(6,991) formula_type,gamma,beta,charge,LOGFAC1,theta_fac1,
-C     1             theta_mcs
-C990   Format('EVR:SIG5',6E12.4)
-C991   Format('EVR:SIG6',I2,6E11.3)
-C>>>
 
       end if
 
@@ -1727,11 +1947,6 @@ CC  Initialize all output quantities:
       end if
 
 	do k=1,nt			! Master loop over tracks
-C>>>  TEST OUTPUT
-C>>>          write(6,991) k,vtrv(1,k),vtrv(2,k),vtrv(3,k),
-C>>>     1                   vtrv(4,k),vtrv(5,k),vtrv(6,k)
-C>>>991       Format(1x,'EVR:k,vt=',I4,6E11.3)
-C>>>  TEST OUTPUT
 	  sinV=sind(vtrv(1,k))
 	  cosV=cosd(vtrv(1,k))
 	  cosL=1.0/(sqrt(1.0 + vtrv(2,k)**2))
@@ -1741,9 +1956,9 @@ C>>>  TEST OUTPUT
 	  Y0= vtrv(5,k)
 	  Z0= vtrv(6,k)
           sigma2 = vtrv(3,k)*vtrv(3,k)
-C>>>          if(sigma2 .eq. 0.0) sigma2 = 1.0
-C>>>   Try a lower cut-off on sigma
-          if(sigma2.lt.0.0025) sigma2 = 0.0025
+CCC   Fix sigma**2 lower limit at (0.1 cm)**2, based on test runs & optimization
+CCC   study, April 3-11, 2000 at UT.
+          if(sigma2.lt.0.01) sigma2 = 0.01
 
 c  Calculate the matrix elements of Ti (individual transformation matrices)
 c  in the document Mi is the same as Ti
@@ -1814,30 +2029,6 @@ c  Calcualate the determinant
 	G_inv(3,1)=+(G(2,1)*G(3,2)-G(2,2)*G(3,1))/det
 	G_inv(3,2)=-(G(1,1)*G(3,2)-G(1,2)*G(3,1))/det
 	G_inv(3,3)=+(G(1,1)*G(2,2)-G(1,2)*G(2,1))/det
-C>>>  TEST PRINT OUT
-C      write(6,*) 'EVR: G=',G(1,1),G(1,2),G(1,3)
-C      write(6,*) 'EVR: G=',G(2,1),G(2,2),G(2,3)
-C      write(6,*) 'EVR: G=',G(3,1),G(3,2),G(3,3)
-C      write(6,*) 'EVR: G_inv=',G_inv(1,1),G_inv(1,2),G_inv(1,3)
-C      write(6,*) 'EVR: G_inv=',G_inv(2,1),G_inv(2,2),G_inv(2,3)
-C      write(6,*) 'EVR: G_inv=',G_inv(3,1),G_inv(3,2),G_inv(3,3)
-C      write(6,*) 'EVR: H=',H(1),H(2),H(3)
-CC  Compute G_inv*G to see if the inverse matrix is ok:
-C        do i = 1,3
-C           do j = 1,3
-C              unit(i,j) = 0.0
-C           end do
-C        end do
-C        do i = 1,3
-C           do j = 1,3
-C              do k = 1,3
-C                 unit(i,j) = unit(i,j) + G_inv(i,k)*G(k,j)
-C              end do
-C           end do
-C        end do
-C        write(6,*) 'EVR: G_inv*G=',unit(1,1),unit(1,2),unit(1,3)
-C        write(6,*) 'EVR: G_inv*G=',unit(2,1),unit(2,2),unit(2,3)
-C        write(6,*) 'EVR: G_inv*G=',unit(3,1),unit(3,2),unit(3,3)
 
 c  The vertex vector = The inverted G matrix times the H vector
 
@@ -1890,23 +2081,6 @@ CCC                       !  covariance matrix calculation.
         E_inv(3,2)=-(E(1,1)*E(3,2)-E(1,2)*E(3,1))/detE
         E_inv(3,3)=+(E(1,1)*E(2,2)-E(1,2)*E(2,1))/detE
 
-C  Compute E_inv*E to see if the inverse matrix is ok:
-C        do i = 1,3
-C           do j = 1,3
-C              unit(i,j) = 0.0
-C           end do
-C        end do
-C        do i = 1,3
-C           do j = 1,3
-C              do k = 1,3
-C                 unit(i,j) = unit(i,j) + E_inv(i,k)*E(k,j)
-C              end do
-C           end do
-C        end do
-C        write(6,*) 'EVR: E_inv*E=',unit(1,1),unit(1,2),unit(1,3)
-C        write(6,*) 'EVR: E_inv*E=',unit(2,1),unit(2,2),unit(2,3)
-C        write(6,*) 'EVR: E_inv*E=',unit(3,1),unit(3,2),unit(3,3)
-                                                                 
 CC  Load the covariance matrix elements:
 
         cov(1) = E_inv(1,1)
@@ -2066,3 +2240,22 @@ CC   TPC-SSD-SVT tracks:
       end if
 
       END
+
+      Real*4 Function cosd(x)
+      implicit none
+CCC   Cosine of angles (x) in degrees
+#include "math_constants.inc"
+      real*4 x
+      cosd = cos(x*C_RAD_PER_DEG)
+      Return
+      END
+
+      Real*4 Function sind(x)
+      implicit none
+CCC   Sine of angles (x) in degrees
+#include "math_constants.inc"
+      real*4 x
+      sind = sin(x*C_RAD_PER_DEG)
+      Return
+      END
+
