@@ -160,27 +160,31 @@ Int_t StVertexMaker::Make(){
   Int_t mdate = db->GetDateTime().GetDate();
  
   int iRes=0;
+  St_dst_vertex  *preVertex=0;
+
+  preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex");
+  if( !preVertex)  
+    preVertex = (St_dst_vertex *)GetDataSet("SvtVtx/.data/preVertex");
+  St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
+  if( preVertex ) {
+    Int_t numRowPreVertex = preVertex->GetNRows();
+    vertex->ReAllocate( numRowPreVertex+4 );
+    Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVertex;
+    memcpy(vertex->GetTable(), preVertex->GetTable(), sizeToCopy);
+    vertex->SetNRows( numRowPreVertex );
+  } else if ( clusterVertex ) {
+    Int_t numRowClusterVertex = clusterVertex->GetNRows();
+    vertex->ReAllocate( numRowClusterVertex+4 );
+    Int_t sizeToCopy = sizeof(dst_vertex_st) *numRowClusterVertex ;
+    memcpy(vertex->GetTable(), clusterVertex->GetTable(), sizeToCopy);
+    vertex->SetNRows( numRowClusterVertex );
+  }
 
   switch(m_Mode) { // lmv/evr or ppLMV
 
   case 0:   // lmv/evr
   case 2: { // lmv/evr with VtxOffSet
 
-    St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
-    St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
-    if( preVertex ) {
-      Int_t numRowPreVertex = preVertex->GetNRows();
-      vertex->ReAllocate( numRowPreVertex+4 );
-      Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVertex;
-      memcpy(vertex->GetTable(), preVertex->GetTable(), sizeToCopy);
-      vertex->SetNRows( numRowPreVertex );
-    } else if ( clusterVertex ) {
-      Int_t numRowClusterVertex = clusterVertex->GetNRows();
-      vertex->ReAllocate( numRowClusterVertex+4 );
-      Int_t sizeToCopy = sizeof(dst_vertex_st) *numRowClusterVertex ;
-      memcpy(vertex->GetTable(), clusterVertex->GetTable(), sizeToCopy);
-      vertex->SetNRows( numRowClusterVertex );
-    }
 
     long NGlbTrk = 0;
     if (globtrk) NGlbTrk = globtrk->GetNRows();
@@ -391,8 +395,11 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.4 2002/12/04 15:43:05 jeromel Exp $
+// $Id: StVertexMaker.cxx,v 1.5 2003/01/29 23:44:44 caines Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.5  2003/01/29 23:44:44  caines
+// Looks for SVT vertex finder output if prevertex doesnt exist
+//
 // Revision 1.4  2002/12/04 15:43:05  jeromel
 // Changes by J.Gans. Approved by Gene
 //
