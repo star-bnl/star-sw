@@ -3,6 +3,7 @@
 
 
 #define StEEmcNameLen 16  // to avoid dependency on "cstructs/eemcConstDB.hh"
+//class FILE;
 
 class EEmcDbItem {
 
@@ -33,6 +34,7 @@ class EEmcDbItem {
   void setDefaultTube(int cr_off);
   int isEmpty() const;
   int isSMD() const { return (plane=='U' || plane=='V');}
+  void exportAscii(FILE *fd) const;
 };
 
 #endif 
