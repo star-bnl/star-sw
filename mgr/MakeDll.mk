@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.109 1999/09/02 22:42:06 fisyak Exp $
+# $Id: MakeDll.mk,v 1.110 1999/09/09 23:02:16 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.110  1999/09/09 23:02:16  fisyak
+# Suppress library versioning for users
+#
 # Revision 1.109  1999/09/02 22:42:06  fisyak
 # typo in StEvent
 #
@@ -457,14 +460,18 @@ all:
 else
 
 MY_SO  := $(SO_LIB)
+ifeq ($(ROOT_DIR),$(STAR))
   QWE    :=$(strip $(sort $(wildcard $(MY_SO).*)))
   SL_NEW :=$(MY_SO).1000
-ifneq (,$(QWE))
-  NQWE :=$(words $(QWE))
-  QWE  :=$(word $(NQWE),$(QWE))
-  QWE  :=$(subst $(MY_SO).,,$(QWE))
-  QWE  :=$(shell expr $(QWE) + 1)
-  SL_NEW :=$(MY_SO).$(QWE)
+  ifneq (,$(QWE))
+    NQWE :=$(words $(QWE))
+    QWE  :=$(word $(NQWE),$(QWE))
+    QWE  :=$(subst $(MY_SO).,,$(QWE))
+    QWE  :=$(shell expr $(QWE) + 1)
+    SL_NEW :=$(MY_SO).$(QWE)
+  endif
+else
+  SL_NEW :=$(MY_SO).9999
 endif
 MY_SO_NOTDIR := $(notdir $(MY_SO))
 SL_NEW_NOTDIR := $(notdir $(SL_NEW))
@@ -695,3 +702,6 @@ test_mk:
 	@echo "NAME      = |"$(NAME)"|"
 	@echo "branch    = |"$(branch)"|"
 	@echo "PAMS      = |"$(PAMS)"|"
+	@echo "STAR      = |"$(STAR)"|"
+	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
+	@echo "INC_DIRS  = |"$(INC_DIRS)"|"
