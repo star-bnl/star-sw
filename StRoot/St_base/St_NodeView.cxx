@@ -368,7 +368,7 @@ TString St_NodeView::PathP() const
    if (p) {
       char buffer[10];
       positionId = p->GetId();
-      sprintf(buffer,"%d",p->GetId());
+      sprintf(buffer,";%d",p->GetId());
       str +=  buffer;
    }
    return str;

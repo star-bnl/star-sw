@@ -1,7 +1,7 @@
-// $Id: StArray.cxx,v 1.3 1999/04/15 19:44:44 fine Exp $
+// $Id: StArray.cxx,v 1.4 1999/04/30 13:15:55 fisyak Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.3  1999/04/15 19:44:44  fine
-// St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
+// Revision 1.4  1999/04/30 13:15:55  fisyak
+// Ad StObject, modification StArray for StRootEvent
 //
 // Revision 1.2  1999/01/21 21:14:43  fisyak
 // assert
@@ -13,16 +13,29 @@
 TObjArray *StRegistry::fReg = 0;
 
 //______________________________________________________________________________
-Int_t StRegistry::SetColl (TObjArray *coll) 		
+Int_t StRegistry::SetColl (StStrArray *coll) 		
 // Register new container
 {
   assert(coll);
   if (!fReg) fReg = new TObjArray(10,1);
   
-  const char *collname = coll->GetName();
-  assert( !fReg->FindObject(collname));
+  const char *collname = coll->GetIDName();
+  int i=0,n=fReg->GetLast();
+  
+  for (i=0;i<=n;i++) 
+  {
+    StStrArray *koll = (StStrArray*)fReg->At(i);
+    if (!koll) continue;
+    assert(strcmp(collname,koll->GetIDName()));
+  }
   fReg->AddLast(coll);
   return fReg->GetLast();
+}
+//______________________________________________________________________________
+void StRegistry::RemColl(StStrArray *coll)  
+{
+  assert(fReg); fReg->Remove(coll);
+  
 }
 //______________________________________________________________________________
 Int_t StRegistry::GetColl(const char *collname)  
@@ -30,20 +43,27 @@ Int_t StRegistry::GetColl(const char *collname)
 {
   assert(collname);
   if (fReg) return 0;
-  TObject *coll = fReg->FindObject(collname);
-  if (!coll) return 0;
-  return fReg->IndexOf(coll)+1;
+
+  int i=0,n=fReg->GetLast();  
+  for (i=0;i<=n;i++) 
+  {
+    StStrArray *koll = (StStrArray*)fReg->At(i);
+    if (!koll) continue;
+    if(strcmp(collname,koll->GetIDName())) continue;
+    return (i+1);
+  }
+  return 0;
 }
 //______________________________________________________________________________
-TObjArray *StRegistry::GetColl (Int_t idx )
+StStrArray *StRegistry::GetColl (Int_t idx )
 // get collection  by index
-{ assert(fReg); return (TObjArray*)fReg->At(idx-1);} 
+{ assert(fReg); return (StStrArray*)fReg->At(idx-1);} 
 
 //______________________________________________________________________________
 const char *StRegistry::GetCollName (Int_t idx ) 
 // get name of collection by index
 {
- TObjArray *coll = GetColl(idx-1); assert(coll); return coll->GetName();
+ StObjArray *coll = GetColl(idx-1); assert(coll); return coll->GetName();
 }
  
 //______________________________________________________________________________
@@ -54,7 +74,7 @@ void StRegistry::List()
   if (!fReg) return;
   int n = fReg->GetLast();
   for (int i=1;i<=n;i++) {
-    TObjArray *coll = GetColl(i);
+    StObjArray *coll = GetColl(i);
     if (!coll) continue;
     int size = coll->GetSize();
     printf("Collection.%02d = %s Size = %d Address=%p\n"
@@ -66,28 +86,31 @@ void StRegistry::List()
 
 ClassImp(StObjArray)
 //______________________________________________________________________________
-void StObjArray::Streamer(TBuffer &R__b)
-{TObjArray::Streamer(R__b);}
+void StObjArray::Streamer(TBuffer &)
+{;}
 
 //______________________________________________________________________________
-const StObjArrayIter StObjArray::begin() const
+const TIterator *StObjArray::Begin() const
 { 
-  const StObjArrayIter iter(this);
+//  TIterator *(StObjArray::*mkit)(Bool_t dir) const = (TIterator *(StObjArray::*)(Bool_t) const)&MakeIterator;
+  static  TIterator *iter=0;
+  if (iter) delete iter;
+  iter =  MakeIterator();
   return iter;
 }
 //______________________________________________________________________________
-const StObjArrayIter StObjArray::Begin() const {return begin();}
-//______________________________________________________________________________
-const StObjArrayIter StObjArray::end() const
+const TIterator *StObjArray::End() const
 { 
-  StObjArrayIter iter(this);
-  iter.SetCursor(GetLast()+1);
+  static  TIterator *iter=0;
+  if (iter) delete iter;
+  iter =  MakeIterator();
+  ((StObjArrayIter*)iter)->SetCursor(GetLast()+1);
   return iter;
 }
 //______________________________________________________________________________
 void StObjArray::SetLast(Int_t last)
 {
-  *((int*)((int*)((void*)(this))+8)) = last;
+  *((int*)((int*)((void*)(fObjArr))+8)) = last;
 }
 //______________________________________________________________________________
 void StObjArray::Resize(Int_t num)
@@ -96,9 +119,10 @@ void StObjArray::Resize(Int_t num)
   if (num <0 ) num = 0;
   SetLast(num-1);
 }
-//______________________________________________________________________________
-const StObjArrayIter StObjArray::End() const {return end();}
-
+TIterator* StObjArray::MakeIterator(Bool_t dir) const
+{
+  return (TIterator*)(new StObjArrayIter(this,dir));
+}
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
 //______________________________________________________________________________
@@ -129,14 +153,20 @@ void   StObjArrayIter::SetCollection(TObjArray *coll)
   *((TObjArray**)((int*)((void*)(this))+1)) = coll;
 }
 //______________________________________________________________________________
-TObject* StObjArrayIter::operator*()
+TObject* StObjArrayIter::GetObject() const
 {return ((TObjArray*)GetCollection())->At(GetCursor());}
 
 //______________________________________________________________________________
 StObjArrayIter &StObjArrayIter::operator++()
 { Int_t kursor=GetCursor(); SetCursor(++kursor); return *this;}
 //______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator++(int)
+{ Int_t kursor=GetCursor(); SetCursor(++kursor); return *this;}
+//______________________________________________________________________________
 StObjArrayIter &StObjArrayIter::operator--()
+{ Int_t kursor=GetCursor(); SetCursor(--kursor); return *this;}
+//______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator--(int)
 { Int_t kursor=GetCursor(); SetCursor(--kursor); return *this;}
 
 //______________________________________________________________________________
@@ -145,6 +175,13 @@ Bool_t StObjArrayIter::operator==(const StObjArrayIter &iter)
   if (GetCursor() != iter.GetCursor()) return 0;
   if (GetCollection() != iter.GetCollection()) return 0;
   return 1;
+}  
+//______________________________________________________________________________
+Bool_t StObjArrayIter::operator!=(const StObjArrayIter &iter)
+{
+  if (GetCursor() != iter.GetCursor()) return 1;
+  if (GetCollection() != iter.GetCollection()) return 1;
+  return 0;
 }  
 
 //______________________________________________________________________________
@@ -166,7 +203,7 @@ void StRefArray::Streamer(TBuffer &R__b)
    Int_t icolls[100]; 
    ULong_t ulong,objidx,colidx,kolidx,nkoll=0; 
    TObject *obj; TString colname;
-   TObjArray *coll;
+   StObjArray *coll;
 
    if (R__b.IsReading()) {
       R__b.ReadVersion();   // Version_t v = R__b.ReadVersion();
@@ -220,19 +257,38 @@ void StRefArray::Streamer(TBuffer &R__b)
 
 ClassImp(StStrArray)
 //______________________________________________________________________________
-StStrArray::StStrArray(const char *name)
-{ if (!name) return; SetName(name); }
- 
-void StStrArray::SetName(const char *name)
+StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 
- fName = name; 
- if (!strstr(name," At ")) {//add datetime
-   fName += " At ";
-   TDatime dt; fName += dt.AsString();
- }
- fIdx=StRegistry::SetColl(this);
+  if (!name) return;
+  SetName(name); SetIDName(0); 
 }
+//______________________________________________________________________________
+StStrArray::~StStrArray()
+{StRegistry::RemColl(this);}
 
+//______________________________________________________________________________
+const Char_t *StStrArray::GetIDName() const 
+{
+  assert(!fIDName.IsNull()); return fIDName;
+}
+ 
+//______________________________________________________________________________
+void StStrArray::SetIDName(const Char_t *idname)
+{
+  assert(fIDName.IsNull()) ;
+  if (idname) 
+  {
+    fIDName = idname; 
+  } else {
+
+    char buf[20]; sprintf(buf,"%p",this); fIDName = buf;
+
+    fIDName += " ";
+    TDatime dt; fIDName += dt.AsString();
+  }
+
+  fIdx=StRegistry::SetColl(this);
+}
 //______________________________________________________________________________
 void StStrArray::Streamer(TBuffer &R__b)
 {
@@ -240,19 +296,75 @@ void StStrArray::Streamer(TBuffer &R__b)
 
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
-      TObjArray::Streamer(R__b);
-      TString name; name.Streamer(R__b);
-      SetName(name);
+      TString name; name.Streamer(R__b);SetName(name);
+      name.Streamer(R__b);SetIDName(name);
+      R__b >> fObjArr;
    } else {
       R__b.WriteVersion(StStrArray::IsA());
-      TObjArray::Streamer(R__b);
       fName.Streamer(R__b);
+      fIDName.Streamer(R__b);
+      R__b << fObjArr;
    }
 
 }
+#if 0
+ClassImp(QWERTY)
+
+ClassImp(QWERTYIter)
+//______________________________________________________________________________
+void QWERTYIter::Streamer(TBuffer& ){}
+
+//______________________________________________________________________________
+ClassImp(QWERTYRef)
+void QWERTYRef::Streamer(TBuffer& b){StRefArray::Streamer(b);}
+
+TIterator* QWERTYRef::MakeIterator(Bool_t dir) const
+{return (TIterator*)new QWERTYIter(this,dir);}
+
+const QWERTYIter QWERTYRef::begin() const { return *((QWERTYIter*)Begin());};
+const QWERTYIter QWERTYRef::end()   const { return *((QWERTYIter*)End());};
+
+//______________________________________________________________________________
+ClassImp(QWERTYStr)
+void QWERTYStr::Streamer(TBuffer& b){StStrArray::Streamer(b);}
+
+TIterator* QWERTYStr::MakeIterator(Bool_t dir) const
+{return (TIterator*)new QWERTYIter(this,dir);}
+
+const QWERTYIter QWERTYStr::begin() const { return *((QWERTYIter*)Begin());};
+const QWERTYIter QWERTYStr::end()   const { return *((QWERTYIter*)End());};
+
+
+
 void testqwe()
 {
-StObjArray ar;
-StObjArrayIter it = ar.begin();
-}
 
+printf("TEST 1: QWERTYRef\n\n");
+
+  int i,n;
+  QWERTY *to;
+
+  QWERTYRef ar(100);
+  ar.resize(20);
+  for (i=0;i<20;i++)
+  { 
+    to = new QWERTY; to->SetUniqueID(i);
+    ar[i] = to;
+  }
+
+  n = ar.size(); printf("size = %d\n",n);
+  for (i=0;i<n;i++)
+  { 
+    to = ar[i]; 
+    printf(" %d == %d\n",i,to->GetUniqueID());
+  }
+
+  printf("TEST 2: QWERTYRef\n\n");
+
+  for (QWERTYIter it = ar.begin(); !(it==ar.end()); ++it)
+  {
+    to = *it; printf(" %d == %d\n",i,to->GetUniqueID());
+
+  }
+}
+#endif
