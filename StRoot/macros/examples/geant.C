@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.3 1999/01/23 18:38:51 fisyak Exp $
+// $Id: geant.C,v 1.4 1999/02/02 17:33:11 fine Exp $
 // $Log: geant.C,v $
+// Revision 1.4  1999/02/02 17:33:11  fine
+// makedoc.C creates html directory itself now
+//
 // Revision 1.3  1999/01/23 18:38:51  fisyak
 // Cleanup for SL98l
 //
@@ -19,15 +22,8 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("geometry");
-  //  gSystem->Load("libmsg");
-  //  gSystem->Load("libasu");
-  //  gSystem->Load("libsoc");
-  //  gSystem->Load("libtdm");
-  //  gSystem->Load("libdui");
-  //  gSystem->Load("gstar");
-  //  gSystem->Load("St_gstar");
-  //  gSystem->Load("g2t");
-  //  gSystem->Load("St_g2t");
+  gSystem->Load("g2r");
+  gSystem->Load("St_g2r");
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
 }
@@ -48,7 +44,7 @@ void geant()
   //  geant->Do("gfile pz /disk1/star/kathy/auau_ce_b0-2_4041_4060.fzd;");
   //  geant->Do("zone 1 2;");
   //  geant->Do("next;");
-  geant->Do("dcut cave x 0.1 10 10 0.03 0.03;");
+  //geant->Do("dcut cave x 0.1 10 10 0.03 0.03;");
   chain->PrintInfo();
 // Init the mai chain and all its makers
   int iInit = chain->Init();
