@@ -131,6 +131,7 @@
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
+ 
  macro bfc_start _ 
    domain='geometry tpc svt global' _
    chain=' ' _
@@ -144,13 +145,25 @@
    message '        !!! split_off is hardwired into this kumac !!! '
    detp geometry [gstar_settings] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
-   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
    exec load_libraries#run          [domain]
-   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
    exec bfc_util#bfc_g2t_after_load [chain]
-   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
-ABEND: 
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   
+  
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_START - JUMP OUT'
+   staf_status(1)=stafcv_bad
+ 
+END:
+ 
 return
+
+
  
 *********************************************************************
 *********************************************************************
@@ -352,7 +365,7 @@ macro bfc_init _
 	      exec write_table_to_file#init outfile [output_xdf_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open output file"
-                goto eof
+                goto EOF
               endif
               exec write_table_to_file#write outfile [run]         
             endif
@@ -363,7 +376,7 @@ macro bfc_init _
 	      exec write_table_to_file#init dstout [output_dst_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open dst output file"
-                goto eof
+                goto EOF
               endif
               exec write_table_to_file#write dstout [run_dst]         
             endif
@@ -374,21 +387,29 @@ macro bfc_init _
               dio/newfilestream outfile [output_xdf_file] w
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open output file"
-                goto eof
+                goto EOF
               endif
               cd [run]
               dio/stream/puteven outfile
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
-    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+    if (STAF_STATUS(1).ne. STAFCV_OK) goto EOF
     
   enddo
-EOF:
-ABEND:
+  
+
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ EOF:
+   message ' ERROR IN BFC_INIT - JUMP OUT'
+   staf_status(1)=stafcv_bad
  
- return
+END:
  
+return
+
 **********************************************************************
 **********************************************************************
 **********************************************************************
@@ -426,8 +447,8 @@ ABEND:
                 tdm/table/cell/getvalue 'run/dst/run_summary[0].n_events_tot' 
                 if (staf_result(1).ne.0) then 
 	            vec/create havedstrunsum
-*	            message ' *** BFC_PROCESS: final run_summary table!'
-	            goto FINISH
+	            message ' *** BFC_PROCESS: have final run_summary table!'
+	            goto EOF
 	        endif
               endif
             endif
@@ -447,21 +468,21 @@ ABEND:
 	      rm [run_dst]/run_summary
 	      mv [dst]/run_header [run_dst]
 	      mv [dst]/run_summary [run_dst]
-	      goto FINISH	
+	      goto EOF	
             endif
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
             endfor
-     (fzin) trig 1; if ($iquest(1) <>0) goto EOF	     
-            vec/input staf_status(1) STAFCV_OK
+     (fzin) trig 1 
+	    if ($iquest(1) <>0) goto EOF	     
     (calin) call cal2mem(946702800) 
-     (rgst) trig 1; if ($iquest(1) <>0) goto EOF	     
-            vec/input staf_status(1) STAFCV_OK
+     (rgst) trig 1
+            if ($iquest(1) <>0) goto EOF	                 
      (rg2t) cd [geantE]
           for/call g2t
 * try this - error check
-          if ($iquest(100) <1 .or. $iquest(100) > 100000) goto ABEND 
+          if ($iquest(100) <1 .or. $iquest(100) > 100000) goto EOF
             cd /dui
             tdm/table/rowcount event/geant/Event/g2t_vertex
             no_vert=$format(staf_result(1),i10)
@@ -471,6 +492,11 @@ ABEND:
             fmessage $quote([string])    [log_file]
             message $quote([string])
 * copy event generator table to dst directory
+* first must allocate a large table because copy doesn't take care of 
+*   extending row count if needed
+	    if ([nev_proc].eq.1) then
+	      tdm/newtable [dst]/hepe_gent hepe_gent 20000
+	    endif
           cp event/geant/Event/hepe_gent [dst]
       (svg)    nextl 1
       (tpg)    nextl 1
@@ -478,17 +504,20 @@ ABEND:
                exec run_ssf
       (srs)    exec run_srs
                if (staf_status(1) .ne. stafcv_ok) then 
-                  message ' problem with run_srs'
+		 message ' problem with run_srs'
+		 goto NEXT_EVENT
 		endif
       (tfs)    
                exec tfs_run#run
                if (staf_status(1) .ne. stafcv_ok) then 
-                  message ' problem with tfs_run'
+		 message ' problem with tfs_run'
+		 goto NEXT_EVENT
 	       endif
       (tss)    
                exec tss_run#run [tpc_sector_first] [tpc_sector_last]
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tss_run'
+		 goto NEXT_EVENT
                endif
       (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
       (tcl)    
@@ -496,30 +525,36 @@ ABEND:
                exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_clustering_process_event'
+		 goto NEXT_EVENT
                endif
     (tcl_e)    exec tte_run#run_tte_hit_match
        
       (stk)    exec run_stk#run
                if (staf_status(1) .ne. stafcv_ok) then
+	         goto NEXT_EVENT
                  nextl 1;
                endif
       (sgr)    exec run_sgr#run
 	       exec run_stk#run
                if (staf_status(1) .ne. stafcv_ok) then
                  nextl 1;
+		 goto NEXT_EVENT 
                endif
       (spr)    exec run_spr#run
       (tpt)    exec tpt_run#run
 	       if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_tracker_tpt'
+		 goto NEXT_EVENT
                endif 
     (tte_t)    exec tte_run#run_tte_track
                  if (staf_status(1) .ne. stafcv_ok) then 
                    message ' problem with tpc_tracker_tte'
+		   goto NEXT_EVENT
                  endif
       (tid)    exec tid_run#run_tde_new 
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_tracker_tpt'
+		 goto NEXT_EVENT
                endif
     (tte_e)    exec tte_run#run_tte
       (ffs)    exec ffs_run#run 
@@ -557,10 +592,12 @@ ABEND:
                exec run_sca#filter 
                if ( staf_status(1) .ne. STAFCV_OK) then
                  message <<< WARNING >>>  Problem with sca_filter in event [i]
+		 goto NEXT_EVENT
 	       endif
                exec run_sca#runsca
                if ( staf_status(1) .ne. STAFCV_OK) then
                  message <<< WARNING >>>  Problem with sca_runsca in event [i]
+		 goto NEXT_EVENT
                endif
     (ev0j)     exec run_ev0join
    (smdst)     exec run_smdst#run
@@ -584,12 +621,13 @@ ABEND:
                  endfor
 	       endif
       (*)      message " !!! bfc_util: No process stage for package " [mod]
-      if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
 
-
-   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
-
+   if (STAF_STATUS(1).ne. STAFCV_OK) then
+      message BFC_UTIL#proc - staf status BAD in [mod] go to next event
+      goto NEXT_EVENT
+   endif
+    
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
    string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
@@ -601,16 +639,16 @@ ABEND:
 
 
  asu/malloc/stats 
-
- ABEND:
- NEXT_EVENT:
- STAF_STATUS(1) = [STAFCV_OK]
- EOF:
-
- goto END
  
- FINISH:
- message ' BFC_UTIL,process: skip out because got to final run summary table'
+ 
+ NEXT_EVENT:
+ 
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ EOF:
+   message ' SKIP OUT OF BFC_PROCESS  - GO TO BFC_FINISH'
+   staf_status(1)=stafcv_bad
  
  END:
  
@@ -675,7 +713,7 @@ macro bfc_finish _
       message $quote([string]) 
     endif
 
-   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
 
   enddo
 
@@ -690,10 +728,19 @@ macro bfc_finish _
       fmessage $quote([string])    [log_file]
       message $quote([string]) 
   endif
+  
 
-ABEND:
-
-return
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_FINISH - JUMP OUT'
+   staf_status(1)=stafcv_bad
+ 
+ END:
+ 
+ return
+ 
  
 **********************************************************************
 **********************************************************************
@@ -711,8 +758,18 @@ return
     message $quote([string]) 
   enddo
   
- return
+
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_PRINT - JUMP OUT'
+   staf_status(1)=stafcv_bad
  
+ END:
+ 
+ return
+  
 *********************************************************************
 **********************************************************************
 ************************************************************
@@ -733,7 +790,16 @@ macro bfc_g2t_b4_load chain
          detp g2tmain gttc.rdir=0		  
    ENDCASE
  enddo
-       
+ 
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_G2T_B4_LOAD - JUMP OUT'
+   staf_status(1)=stafcv_bad
+ 
+END:
+ 
 return
 
 **********************************************************************
@@ -759,8 +825,18 @@ return
         tables ' ' [geant_Run]
    ENDCASE
  enddo
-  
+ 
+ staf_status(1)=stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_G2T_AFTER_LOAD - JUMP OUT'
+   staf_status(1)=stafcv_bad
+ 
+END:
+ 
 return
+
 
 
 **********************************************************************

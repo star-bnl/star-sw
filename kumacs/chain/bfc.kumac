@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.67 1998/09/24 20:18:14 kathy Exp $
+* * $Id: bfc.kumac,v 1.68 1998/09/25 15:38:55 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.68  1998/09/25 15:38:55  kathy
+* bfc & bfc_util --> corrected how parts are skipped out of if there are errors; for rg2t -> had to create newtable with large rowcount for hepe_gent in order to copy it since copy does not take care of extending rows
+*
 * Revision 1.67  1998/09/24 20:18:14  kathy
 * make default order: egr, evr, ev0 in all chains
 *
@@ -356,7 +359,7 @@ MACRO bfc _
 
  exec bfc_util#bfc_start _
    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
- if (STAF_STATUS(1).ne. 1) goto ABEND
+ if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
  
  macro/global/import *
    
@@ -370,7 +373,7 @@ MACRO bfc _
  if $iquest(1)<>0 goto ABEND
  
  exec bfc_util#bfc_init chain=[chain]
- if (STAF_STATUS(1).ne. 1) goto ABEND
+ if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
 
   
 ***********************************************************
@@ -387,9 +390,9 @@ MACRO bfc _
 	   do ievent = 1,[skip]
 	       nev_total = [nev_total] + 1
                exec bfc_util#bfc_process chain=[mod]
-               if (STAF_STATUS(1).ne. 1) goto ABEND
-   message ' =====> BFC #events total,processed,passed = ' _
-      [nev_total] [nev_proc] [nev_pass]
+               if (STAF_STATUS(1).ne. stafcv_ok) goto FINISH
+      message ' =====> BFC skip, #events total,processed,passed = ' _
+          [nev_total] [nev_proc] [nev_pass]
            enddo
        endif
      enddo
@@ -400,13 +403,15 @@ MACRO bfc _
 ***************************************** 
  
  message cpu time = $cptime
+   
  do ievent=[first],[last]	| loop over events
-   message ' =====> BFC is processing loop, ievent = ' [ievent]
+   message ' =====> BFC in processing loop, ievent = ' [ievent]
    nev_total = [nev_total] + 1
    nev_proc = [nev_proc] + 1
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
-   if (STAF_STATUS(1).ne. 1) goto ABEND
+   if (STAF_STATUS(1).ne. stafcv_ok) goto FINISH
+   
    if ($vexist(havedstrunsum).ne.0) then
      message ' BFC: skip to bfc_finish because got to run_summary'
      goto FINISH
@@ -414,10 +419,11 @@ MACRO bfc _
    if ($vexist(readprob).ne.0) then
      message ' BFC: skip to bfc_finish because problem reading input file'
      goto FINISH
-   endif   
-   nev_pass = [nev_pass] + 1
+   endif 
    
-   message ' =====> BFC #events total,processed,passed = ' _
+   nev_pass = [nev_pass] + 1
+
+   message ' =====> BFC proc: #events total,processed,passed = ' _
       [nev_total] [nev_proc] [nev_pass]
  enddo
 
@@ -427,9 +433,12 @@ MACRO bfc _
  
 FINISH:
   exec bfc_util#bfc_finish [chain]
-  if (STAF_STATUS(1).ne. 1) goto ABEND
+  if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
   
+  message ' =====> BFC FINAL: #events total,processed,passed = ' _
+      [nev_total] [nev_proc] [nev_pass]
  
+  
  goto END
   
 ABEND:
