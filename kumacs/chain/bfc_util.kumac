@@ -273,8 +273,8 @@ macro bfc_init _
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
     (drsum) exec create_tables_global#fill_dst_run_summary
-     (dehd) exec create_tables_global#fill_dst_event_head
-     (drhd) exec create_tables_global#fill_dst_run_head
+     (dehd) exec create_tables_global#fill_dst_event_header
+     (drhd) exec create_tables_global#fill_dst_run_header
 	    exec init_dst#init_rhead
     (fzout) user/output o [output_fzd_file]
     (evout)
