@@ -1,8 +1,11 @@
 #include <stdlib.h>
 /*
- * $Id: memget.c,v 1.3 1998/07/20 20:17:29 perev Exp $
+ * $Id: memget.c,v 1.4 1998/08/03 17:23:56 didenko Exp $
  *
  * $Log: memget.c,v $
+ * Revision 1.4  1998/08/03 17:23:56  didenko
+ * correction for NT version by Faine
+ *
  * Revision 1.3  1998/07/20 20:17:29  perev
  * Mods for exe SGI64 and HP rubber Zebra
  *
@@ -27,10 +30,14 @@
  *  subroutine fsub(n,array,...)
  */
 /*  char *malloc(); */
-unsigned long memget_(unsigned int *n)
+#include "PAM.h"
+#define memget_ F77_NAME(memget, MEMGET)
+#define iudivd_ F77_NAME(iudivd, IUDIVD)
+
+unsigned long type_of_call memget_(unsigned int *n)
 {
   /* malloc() requires unsigned arg. FORTRAN passes signed integers */
   /* malloc() returns a pointer;     memget() returns an integer.   */
   return ( (unsigned long) malloc(*n) );
 }
-unsigned long iudivd_ (unsigned long *u1, unsigned long *u2) { return (*u1 / *u2);}
+unsigned long type_of_call iudivd_ (unsigned long *u1, unsigned long *u2) { return (*u1 / *u2);}

@@ -12,6 +12,7 @@ extern "C" int  tdm_clear_all_ () {return 0;}
 extern "C" void ami_module_register_ ()    {}
  
 #else
+#include "PAM.h"
 #include <stdio.h>
 #include <stream.h>
 #include <stdlib.h>
@@ -28,6 +29,26 @@ extern "C" void ami_module_register_ ()    {}
 #include "topLib.h"
 #include "dstype.h"
  
+
+#define staf_start_          F77_NAME(staf_start,STAF_START)
+#define staf_stop_           F77_NAME(staf_stop,STAF_STOP)
+#define dui_cdir_            F77_NAME(dui_cdir,dui_cdir) 
+#define tdm_new_table_       F77_NAME(tdm_new_table,tdm_new_table)
+#define tdm_map_table_       F77_NAME(tdm_map_table,TDM_MAP_TABLE)
+#define tdm_find_spec_       F77_NAME(tdm_find_spec,TDM_FIND_SPEC)
+#define tdm_get_spec_        F77_NAME(tdm_get_spec,TDM_GET_SPEC)
+#define tdm_get_ccount_      F77_NAME(tdm_get_ccount,TDM_GET_CCOUNT)
+#define tdm_get_column_      F77_NAME(tdm_get_column,TDM_GET_COLUMN)
+#define tdm_clear_all_       F77_NAME(tdm_clear_all,TDM_CLEAR_ALL)
+#define ami_call_            F77_NAME(ami_call,AMI_CALL)
+#define ami_module_call_     F77_NAME(ami_module_call,AMI_MODULE_CALL)
+#define ami_module_register_ F77_NAME(ami_module_register,AMI_MODULE_REGISTER)
+#define xdf_open_            F77_NAME(xdf_open,XDF_OPEN)
+#define xdf_close_           F77_NAME(xdf_close,XDF_CLOSE)
+#define xdf_next_record_     F77_NAME(xdf_next_record,XDF_NEXT_RECORD)
+#define xdf_get_struct_      F77_NAME(xdf_get_struct,XDF_GET_STRUCT)
+#define xdf_getev_           F77_NAME(xdf_getev,XDF_GETEV)
+#define cs_get_func_         F77_NAME(cs_get_func,CS_GET_FUNC) 
 /*---------------------------------------------------------------------------*/
  
 typedef struct XdfLun_t
@@ -44,14 +65,14 @@ typedef struct XdfLun_t
  
 /* extern "C"  int  dsTypeSpecifier (char**, unsigned*, int); */
  
-extern "C" FNC_PTR_T cs_get_func_(char* name,int n);
+extern "C" FNC_PTR_T type_of_call cs_get_func_(char* name,int n);
 extern "C" void  staf_banner     (FILE* stream);
 extern CC_P int  ami_load        (amiBroker *broker);
 int              ami_load        (amiBroker *broker) {return 1;}
  
 /****************************************************************************/
  
-extern "C" void staf_start_ ()
+extern "C" void type_of_call staf_start_ ()
 {
    asu_init(); asu_start();
    eml_init(); eml_start();
@@ -66,7 +87,7 @@ extern "C" void staf_start_ ()
    staf_banner(stdout);
 }
  
-extern "C" void staf_stop_ ()
+extern "C" void type_of_call staf_stop_ ()
 {
    tnt_stop();
    ami_stop();
@@ -89,8 +110,16 @@ extern "C" int dui_cdir_ (char* path,int lp)
  
 /*---------------------------------------------------------------------------*/
  
-extern "C" int tdm_map_table_(char* path, char* name, char* spec, long* l,
+extern "C" int type_of_call tdm_map_table_
+#ifndef CERNLIB_MSSTDCALL
+                             (char* path, char* name, char* spec, long* l,
                               char* data, int lp, int ln, int ls)
+#else
+                             (char* path, int lp, 
+                              char* name, int ln, 
+                              char* spec, int ls, 
+                              long* l,char* data) 
+#endif                             
 {
   tdmDataset*       tDs = NULL; // pointer to tdm class member function
   tdmTable*         aDs = NULL; // pointer to table finder function
@@ -131,7 +160,14 @@ extern "C" int tdm_map_table_(char* path, char* name, char* spec, long* l,
   return 0;
 }
  
-extern "C" int tdm_new_table_ (char* name, char* spec, int* n, int ln, int ls)
+extern "C" int type_of_call tdm_new_table_ 
+#ifndef CERNLIB_MSSTDCALL
+                 (char* name, char* spec, int* n, int ln, int ls)
+#else
+                 (char* name, int ln,
+                  char* spec, int ls,
+                  int* n)
+#endif
 { int i;  char* s;
   /* skip spaces */  s=spec; while (*s==' ') { s++; }
   /*
@@ -145,7 +181,7 @@ extern "C" int tdm_new_table_ (char* name, char* spec, int* n, int ln, int ls)
  
 /*---------------------------------------------------------------------------*/
  
-extern "C" int tdm_find_spec_(char* c, int lc)
+extern "C" int type_of_call tdm_find_spec_(char* c, int lc)
 {
   char *pSpec;  int i;  unsigned lspec=0;
   for (i=1;;i++)
@@ -154,7 +190,7 @@ extern "C" int tdm_find_spec_(char* c, int lc)
   }
 }
  
-extern "C" int tdm_get_spec_(TABLE_HEAD_ST* pTab, char* c, int lc)
+extern "C" int type_of_call tdm_get_spec_(TABLE_HEAD_ST* pTab, char* c, int lc)
 {
   char *pSpec;
 /*
@@ -173,14 +209,14 @@ extern "C" int tdm_get_spec_(TABLE_HEAD_ST* pTab, char* c, int lc)
  
 /*---------------------------------------------------------------------------*/
  
-extern "C" int tdm_get_ccount_(TABLE_HEAD_ST* pTab)
+extern "C" int type_of_call tdm_get_ccount_(TABLE_HEAD_ST* pTab)
  
 { unsigned ccount;
   if (!dsTableColumnCount(&ccount, (ds_dataset_t*)pTab->dsl_pointer)) return 0;
   return (int) ccount;
 }
  
-extern "C" int tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,char* d,
+extern "C" int type_of_call tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,char* d,
                                 unsigned* l, unsigned* e, unsigned* m)
 { char *cc; char *dd;
   if (!dsColumnName     (&cc, (ds_dataset_t*) pTab->dsl_pointer,*k)
@@ -195,7 +231,7 @@ extern "C" int tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,char* d,
 }
 /*---------------------------------------------------------------------------*/
  
-extern "C" int  tdm_clear_all_  (char* path, int lp)
+extern "C" int type_of_call tdm_clear_all_  (char* path, int lp)
 {  tdmDataset*   tDs  = NULL;
    DS_DATASET_T  *ds, *dt, *du, *dd[20];
    int           i,j,l,mm[20];
@@ -226,7 +262,13 @@ extern "C" int  tdm_clear_all_  (char* path, int lp)
 }
 /***************************************************************************-*/
  
-extern "C" int ami_call_(char* name,int* n, char* tables, int ln, int lt)
+extern "C" int type_of_call ami_call_
+#ifndef CERNLIB_MSSTDCALL
+         (char* name,int* n, char* tables, int ln, int lt)
+#else
+         (char* name,int ln,
+          int* n, char* tables,  int lt)
+#endif
  
 { amiInvoker*    invoker;
   FNC_PTR_T      myPamFtn;
@@ -250,8 +292,13 @@ extern "C" int ami_call_(char* name,int* n, char* tables, int ln, int lt)
    return status;
 }
  
-extern "C" int ami_module_call_ (char* name, int* n, char* tables,
-                                                   int ln, int lt)
+extern "C" int type_of_call ami_module_call_ 
+#ifndef CERNLIB_MSSTDCALL
+  (char* name, int* n, char* tables,int ln, int lt)
+#else
+  (char* name, int ln, int* n, char* tables, int lt)
+#endif
+                                                 
 {
     int i; char* ctab[40];
     for (i=0;i<*n;i++)
@@ -269,7 +316,7 @@ int tabspeci_(int* i,char* c)
 #endif
  
  
-extern "C" void ami_module_register_ (char* name, int n)
+extern "C" void type_of_call ami_module_register_ (char* name, int n)
 {
    STRING_SEQ_T specs;
    char sname[80];
@@ -367,8 +414,13 @@ int xdf_close(XdfLun_t **Lun) {
  
 /***********************fortran interface to xdf************************/
  
-extern "C" void xdf_open_(unsigned long *Lun, char *File, char *Mode,
-                          int *ier, int lFile, int lMode)
+extern "C" void type_of_call xdf_open_
+#ifndef CERNLIB_MSSTDCALL
+(unsigned long *Lun, char *File, char *Mode,int *ier, int lFile, int lMode)
+#else
+(unsigned long *Lun, char *File, int lFile, char *Mode, int lMode,int *ier)
+#endif
+                          
 {
   char file[512], mode[8];
   int l;
@@ -387,15 +439,22 @@ extern "C" void xdf_close_(unsigned long *Lun,int *ier)
  
 /*-------------------------------------------------------------------------*/
  
-extern "C" void xdf_next_record_(unsigned long *Lun, int *ier)
+extern "C" void type_of_call xdf_next_record_(unsigned long *Lun, int *ier)
 {
   *ier = xdf_next_record((XdfLun_t*) *Lun);
 }
  
  
-extern "C" void xdf_get_struct_(unsigned long *Lun, char *Name,
+extern "C" void type_of_call xdf_get_struct_
+#ifndef CERNLIB_MSSTDCALL
+    (unsigned long *Lun, char *Name,
      unsigned long *Entry, unsigned long *Data, size_t *nrows, int *ier,
      int lName)
+#else
+    (unsigned long *Lun, char *Name,int lName,
+     unsigned long *Entry, unsigned long *Data, size_t *nrows, int *ier
+     )
+#endif
 {
   char name[512];
   int l;
@@ -408,7 +467,12 @@ extern "C" void xdf_get_struct_(unsigned long *Lun, char *Name,
  
 /*-------------------------------------------------------------------------*/
  
-extern "C" void xdf_getev_ (unsigned long* Lun, char* dir, int* ier, int ld)
+extern "C" void type_of_call xdf_getev_
+#ifndef CERNLIB_MSSTDCALL
+ (unsigned long* Lun, char* dir, int* ier, int ld)
+#else
+ (unsigned long* Lun, char* dir, int ld, int* ier)
+#endif
 {
    tdmDataset    *d;
    DSL_PTR_T     ddd;
