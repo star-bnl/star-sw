@@ -14,8 +14,7 @@ StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
   void StEvtHddr::SetGMTime(ULong_t ut)
 {  
    struct tm *tp;
-   time_t tloc   = time(0);
-   tp            = (tm*)gmtime(&tloc);
+   tp            = (tm*)gmtime((time_t*)&ut);
    UInt_t year   = tp->tm_year;
    UInt_t month  = tp->tm_mon + 1;
    UInt_t day    = tp->tm_mday;
