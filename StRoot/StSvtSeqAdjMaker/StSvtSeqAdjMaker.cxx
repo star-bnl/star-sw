@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.36 2001/12/13 03:08:11 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.37 2002/01/11 22:49:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.37  2002/01/11 22:49:15  caines
+ * Fix sequence merging bugs-hopefully
+ *
  * Revision 1.36  2001/12/13 03:08:11  caines
  * Can now subtract common mode noise via black anodes 239 and 2
  *
@@ -165,7 +168,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mPedOffSet = 10;
   m_thresh_lo = 3+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
-  m_n_seq_lo  = 1;
+  m_n_seq_lo  = 2;
   m_n_seq_hi  = 0;
   m_inv_prod_lo = 0;
  
@@ -598,6 +601,9 @@ Int_t StSvtSeqAdjMaker::Make()
 	  if (mHybridAdjData)
 	    delete mHybridAdjData;
 	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid); 
+	  mHybridAdjData->setTimeZero(mHybridRawData->getTimeZero());
+	  mHybridAdjData->setSCAZero(mHybridRawData->getSCAZero());
+
 	  mNAnodes = FindBlackAnodes();
 	  if( doCommon || !mNAnodes ){
 	    cout << "Doing Common mode average for index " << index << endl;
@@ -717,14 +723,13 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
   //status= mHybridRawData->getSequences(Anode,nSeqOrig,Sequence);
 
-  nSeqNow=0;
-
+  nSeqNow = 0;
   for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
-  
+    
     adc=Sequence[nSeq].firstAdc;
     length = Sequence[nSeq].length;
     startTimeBin=Sequence[nSeq].startTimeBin;
-
+    
     int j =0;
     while( j<length){
       count1=0;
@@ -744,48 +749,48 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
       if( count2 > m_n_seq_hi && count1 > m_n_seq_lo){
 
 	firstTimeBin = startTimeBin + j - count1 - ExtraBefore;
-	if (nSeqNow > 0)
-	  previousEndTimeBin = tempSeq1[nSeqNow-1].startTimeBin + tempSeq1[nSeqNow-1].length;
-	else
-	  previousEndTimeBin = -1;
 
-	if (firstTimeBin >= previousEndTimeBin) {
-	  tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - ExtraBefore];
-	  tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
-	  if((startTimeBin + j - count1 - ExtraBefore)  < 0){
-	    tempSeq1[nSeqNow].startTimeBin=0;
-	    tempSeq1[nSeqNow].firstAdc=&adc[0];
-	  }
-	  if((startTimeBin + j - count1 - ExtraBefore)  < startTimeBin){
-	    tempSeq1[nSeqNow].startTimeBin=startTimeBin;
-	    tempSeq1[nSeqNow].firstAdc=&adc[0];
-	  }
-	  tempSeq1[nSeqNow].length= count1+ ExtraAfter+ ExtraBefore;
-	  if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
-	    tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
-	  if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
-	       startTimeBin +length){
-	    tempSeq1[nSeqNow].length =  (startTimeBin +length) -
-	      tempSeq1[nSeqNow].startTimeBin ;
-	  }
-	  nSeqNow++;
+	tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - ExtraBefore];
+	tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
+	tempSeq1[nSeqNow].length = 0;
+	if((startTimeBin + j - count1 - ExtraBefore)  < 0){
+	  tempSeq1[nSeqNow].startTimeBin=0;
+	  tempSeq1[nSeqNow].firstAdc=&adc[0];
+	  // Make length temp. negative to account for the fact we went
+	  //past the start of the sequence get adjusted properly in a bit
+	  tempSeq1[nSeqNow].length = startTimeBin + j - count1 - ExtraBefore;
 	}
-	else {
-	  tempSeq1[nSeqNow-1].length += ((count1+ ExtraAfter+ ExtraBefore)-(previousEndTimeBin-firstTimeBin+1));
-	  if( tempSeq1[nSeqNow-1].length + tempSeq1[nSeqNow-1].startTimeBin  > 128) 
-	    tempSeq1[nSeqNow-1].length=128-tempSeq1[nSeqNow-1].startTimeBin;
-	  if ( tempSeq1[nSeqNow-1].startTimeBin+ tempSeq1[nSeqNow-1].length >
-	       startTimeBin +length){
-	    tempSeq1[nSeqNow-1].length = (startTimeBin +length) 
-	      - tempSeq1[nSeqNow-1].startTimeBin ;
-	  }
+
+	if((startTimeBin + j - count1 - ExtraBefore)  < startTimeBin){
+	  tempSeq1[nSeqNow].startTimeBin=startTimeBin;
+	  tempSeq1[nSeqNow].firstAdc=&adc[0];
+	  // Make length temp. negative to account for the fact we went
+	  //past the start of the sequence get adjusted properly in a bit
+	  tempSeq1[nSeqNow].length = startTimeBin + j - count1 - ExtraBefore
+	    -startTimeBin;
 	}
+
+	// Make length proper size even if it went negative
+	tempSeq1[nSeqNow].length += count1+ ExtraAfter+ ExtraBefore;
+
+	// Check dont go past end of sequence if do adjust length correctly
+	if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
+	  tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin +1;
+	if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
+	     startTimeBin +length){
+	  tempSeq1[nSeqNow].length =  (startTimeBin +length) -
+	    tempSeq1[nSeqNow].startTimeBin ;
+	}
+	
+	nSeqNow++;
       }
+      
+      
       j++;
     }
   }
    
-  mNumOfSeq = nSeqNow;
+  mNumOfSeq = MergeSequences(tempSeq1,nSeqNow);
 
   mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
   
@@ -804,14 +809,14 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   //Perform E896 like zero suppression. Find pixels that have consecutive ADC 
   // counts that do not have the shape of noise
 
-  int nSeqBefore, nSeqNow, count;
+  int nSeqBefore, nSeqNow, count1;
   int startTimeBin, length, status;
   StSequence* Sequence;
   unsigned char* adc;
   int ExtraBefore=1;
   int ExtraAfter=3;
 
-  int firstTimeBin, previousEndTimeBin;
+  int firstTimeBin;
   
   double tempBuffer = 0;
   
@@ -828,72 +833,100 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
       int j=0;
       while( j < length)
 	{ 
-	  count = 0;
+	  count1 = 0;
 	  tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
 	  
 	  while(tempBuffer > m_inv_prod_lo && j < length)
 	    {
-	      ++count;
+	      ++count1;
 	      ++j;
 	      tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
-	      if(count > 0  && (tempBuffer < m_inv_prod_lo || j == length))
-		{
-		  firstTimeBin = startTimeBin + j - count - ExtraBefore;
-		  if (nSeqNow > 0)
-		    previousEndTimeBin = tempSeq1[nSeqNow-1].startTimeBin + tempSeq1[nSeqNow-1].length;
-		  else
-		    previousEndTimeBin = -1;
-		  
-		  if (firstTimeBin >= previousEndTimeBin) {
-		    tempSeq1[nSeqNow].firstAdc=&adc[j- count - ExtraBefore];
-		    tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
-		    if((startTimeBin + j - count - ExtraBefore)  < 0){
-		      tempSeq1[nSeqNow].startTimeBin=0;
-		      tempSeq1[nSeqNow].firstAdc=&adc[0];
-		    }
-		    if((startTimeBin + j - count - ExtraBefore)  < startTimeBin){
-		      tempSeq1[nSeqNow].startTimeBin=startTimeBin;
-		      tempSeq1[nSeqNow].firstAdc=&adc[0];
-		    }
-		    tempSeq1[nSeqNow].length= count+ ExtraAfter+ ExtraBefore;
-		    if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
-		      tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
-		    if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
-			 startTimeBin +length){
-		      tempSeq1[nSeqNow].length =  (startTimeBin +length) -
-			tempSeq1[nSeqNow].startTimeBin ;
-		    }
-		    nSeqNow++;
-		  }
-		  else {
-		    tempSeq1[nSeqNow-1].length += ((count+ ExtraAfter+ ExtraBefore)-(previousEndTimeBin-firstTimeBin+1));
-		    if( tempSeq1[nSeqNow-1].length + tempSeq1[nSeqNow-1].startTimeBin  > 128) 
-		      tempSeq1[nSeqNow-1].length=128-tempSeq1[nSeqNow-1].startTimeBin;
-		    if ( tempSeq1[nSeqNow-1].startTimeBin+ tempSeq1[nSeqNow-1].length >
-			 startTimeBin +length){
-		      tempSeq1[nSeqNow-1].length = (startTimeBin +length) 
-			- tempSeq1[nSeqNow-1].startTimeBin ;
-		    }
-		  }
-		}
 	    }
-	  
+	  if(count1 > 0  && (tempBuffer < m_inv_prod_lo || j == length))
+	    {
+	      firstTimeBin = startTimeBin + j - count1 - ExtraBefore;
+	      
+	      tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - ExtraBefore];
+	      tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
+	      tempSeq1[nSeqNow].length = 0;
+	      if((startTimeBin + j - count1 - ExtraBefore)  < 0){
+		tempSeq1[nSeqNow].startTimeBin=0;
+		tempSeq1[nSeqNow].firstAdc=&adc[0];
+		// Make length temp. negative to account for the fact we went
+		//past the start of the sequence get adjusted properly in a bit
+		tempSeq1[nSeqNow].length = startTimeBin + j - count1 - ExtraBefore;
+	      }
+	      
+	      if((startTimeBin + j - count1 - ExtraBefore)  < startTimeBin){
+		tempSeq1[nSeqNow].startTimeBin=startTimeBin;
+		tempSeq1[nSeqNow].firstAdc=&adc[0];
+		// Make length temp. negative to account for the fact we went
+		//past the start of the sequence get adjusted properly in a bit
+		tempSeq1[nSeqNow].length = startTimeBin + j - 
+		  count1 - ExtraBefore -startTimeBin;
+	      }
+	      
+	      // Make length proper size even if it went negative
+	      tempSeq1[nSeqNow].length += count1+ ExtraAfter+ ExtraBefore;
+	      
+	      // Check dont go past end of sequence if do adjust length correctly
+	      if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
+		tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin +1;
+	      if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
+		   startTimeBin +length){
+		tempSeq1[nSeqNow].length =  (startTimeBin +length) -
+		  tempSeq1[nSeqNow].startTimeBin ;
+	      }
+	      
+	      nSeqNow++;
+	    
+	    }
 	  j++;
 	}
-      
+	  
     } // Sequence loop
   
-  mNumOfSeq = nSeqNow;
   
   if( nSeqBefore >0){
+    
+    mNumOfSeq = MergeSequences(tempSeq1, nSeqNow);
     mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
   }
   //cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
   
   return kStOK;
-  
-}
 
+}
+//_____________________________________________________________________________
+
+Int_t StSvtSeqAdjMaker::MergeSequences( StSequence* seq, int nSeq){
+
+  // Check and see if the end of one sequence overlaps the start of the next
+  // if it does merge sequences
+
+  int nSeqNow = 0;
+  int EndTime;
+
+  for( int i=1; i<nSeq; i++){
+    
+    if( (seq[nSeqNow].startTimeBin + seq[nSeqNow].length) 
+	>= seq[i].startTimeBin){
+      EndTime = seq[i].startTimeBin + seq[i].length;
+      seq[nSeqNow].length = EndTime - seq[nSeqNow].startTimeBin;
+                }
+    else{
+      nSeqNow++;
+      seq[nSeqNow].startTimeBin = seq[i].startTimeBin;
+      seq[nSeqNow].length = seq[i].length;
+      seq[nSeqNow].firstAdc = seq[i].firstAdc;
+      
+      
+    }
+
+  }
+
+  return nSeqNow+1;
+}
 //_____________________________________________________________________________
 
 void StSvtSeqAdjMaker::CommonModeNoiseCalc(int iAnode){
@@ -997,7 +1030,7 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
   }
   return;
 }
-//_______________________________________________________________________________
+//____________________________________________________________________________
 
 int StSvtSeqAdjMaker::FindBlackAnodes(){
   // Decide whether to do common mode noise from average timebucket 
@@ -1063,12 +1096,12 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
   
   // now find second black anode
   
-  status= mHybridRawData->getSequences(1,nSequence,Seq);
+  status= mHybridRawData->getSequences(2,nSequence,Seq);
   length = 0;
   
   for( i=0; i<nSequence; i++)  length += Seq[i].length;
   if( length < 126){
-    status= mHybridRawData->getSequences(2,nSequence,Seq);
+    status= mHybridRawData->getSequences(1,nSequence,Seq);
     length = 0;	  
     
     for( i=0; i<nSequence; i++)  length += Seq[i].length;
@@ -1106,6 +1139,7 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
 	  j=0;
 	  while( j<length){
 	    adcCommon[startTimeBin+j] -= (float)adc[j]-mPedOffSet;
+	    adcAv += (int)  adc[j];
 	    j++;
 	  }
 	}
