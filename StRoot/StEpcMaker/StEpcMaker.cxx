@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.23 2003/09/02 17:58:03 perev Exp $
+// $Id: StEpcMaker.cxx,v 1.24 2003/10/02 15:27:54 suaide Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.24  2003/10/02 15:27:54  suaide
+// changed some return values to avoid non-necessary printouts
+//
 // Revision 1.23  2003/09/02 17:58:03  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -236,7 +239,7 @@ Int_t StEpcMaker::Make()
 	      if(idet==0 && ncl==0)
 		{
 		  if(mPrint) cout << "EPC:: No BEMC tower clusters, cannot continue" << endl;
-		  return kStWarn;
+		  return kStOk;
 		}
 
 	      if(cluscoll)
@@ -274,7 +277,7 @@ Int_t StEpcMaker::Make()
       if(fabs(mBField) < 0.01) 
 	{
 	  if(mPrint) cout << "StEpcMaker::Make() finished => wrong mBField !!!" << endl; 
-	  return kStWarn;
+	  return kStOk;
 	}
   
       //////////////////////////////////////
@@ -316,7 +319,7 @@ Int_t StEpcMaker::Make()
 
       if(mPoint->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit) != kStOK)
 	{
-	  return kStWarn;
+	  return kStOk;
 	} 
       else if(mPrint) cout << "findEmcPoint == kStOK" << endl;
 
