@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.10 1999/12/14 07:05:32 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.11 2000/01/11 23:18:56 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.11  2000/01/11 23:18:56  calderon
+ * Check if there are hits before writing info to screen.
+ *
  * Revision 1.10  1999/12/14 07:05:32  calderon
  * Use numbering scheme
  *
@@ -76,7 +79,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.10 1999/12/14 07:05:32 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.11 2000/01/11 23:18:56 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -613,9 +616,11 @@ StMcEventMaker::printEventInfo()
     cout << "StMcTpcHitCollection at " << (void*) tpcColl               << endl;
     cout << "Dumping collection size and one hit only."                 << endl;
     cout << "---------------------------------------------------------" << endl;
-    if (tpcColl) {
-	nhits = tpcColl->numberOfHits();
-	cout << "# of hits in collection = " << nhits << endl;
+    nhits = tpcColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (tpcColl && nhits) {
+	
+	
 	gotOneHit = kFALSE;
 	for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
 	    for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
@@ -633,9 +638,11 @@ StMcEventMaker::printEventInfo()
     cout << "StMcFtpcHitCollection at " << (void*) ftpcColl             << endl;
     cout << "Dumping collection size and one hit only."                 << endl;
     cout << "---------------------------------------------------------" << endl;
-    if (ftpcColl) {
-	nhits = ftpcColl->numberOfHits();
-	cout << "# of hits in collection = " << nhits << endl;
+    nhits = ftpcColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (ftpcColl &&  nhits) {
+	
+	
 	gotOneHit = kFALSE;
 	for (k=0; !gotOneHit && k<ftpcColl->numberOfPlanes(); k++)
 	    if (ftpcColl->plane(k)->hits().size()) {
@@ -652,9 +659,11 @@ StMcEventMaker::printEventInfo()
     cout << "StMcSvtHitCollection at " << (void*) svtColl               << endl;
     cout << "Dumping collection size and one hit only."                 << endl;
     cout << "---------------------------------------------------------" << endl;
-    if (svtColl) {
-	nhits = svtColl->numberOfHits();
-	cout << "# of hits in collection = " << nhits << endl;
+    nhits = svtColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+
+    if (svtColl && nhits) {
+	
 	gotOneHit = kFALSE;
 	for (k=1; !gotOneHit && k<=svtColl->numberOfLayers(); k++)
 	    for (j=1; !gotOneHit && j<=svtColl->layer(k)->numberOfLadders(); j++)
