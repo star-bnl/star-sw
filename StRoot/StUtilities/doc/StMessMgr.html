@@ -118,9 +118,11 @@ in CINT as "endm" is not recognized properly there.
 No special statements are needed in fortran to include message
 functionality. Messages are declared with a call as follows:
 
-  call StMessage('message text')
+  call StMessage('message text','I','O')
 
-As with C++, a second string can denote a message type. New message types
+Where the second and third strings are message types and options respectively.
+In Fortran, there is no defaulting of parameters, so all parameters must be
+entered. The message types are as described above. New message types
 can be declared with StMessAddType():
 
   call StMessAddType('A','Abort')
@@ -132,6 +134,17 @@ The five predefined types also have associated declaration calls:
   call StWarning('better not')
   call StDebug('value above zero')
   call QAInfo('12 histograms filled')
+
+and
+
+  call StInfoOpt('info text','O')
+  call StErrorOpt('error message','E')
+  call StWarningOpt('better not','E')
+  call StDebugOpt('value above zero','O')
+  call QAInfoOpt('12 histograms filled','OTS')
+
+The first set do not take option strings and are equivalent to the second
+set with the option strings shown (which are the defaults for C++).
 
 Format statements can also be used with character strings:
 
