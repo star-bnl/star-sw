@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.33 2000/06/20 20:39:49 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.34 2000/06/23 16:44:42 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.34  2000/06/23 16:44:42  fisyak
+// remove params
+//
 // Revision 1.33  2000/06/20 20:39:49  fisyak
 // Add debug print out
 //
@@ -122,7 +125,7 @@ St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userd
    fHierarchy = 0;
    fIsDBTime = 0;
    fMainDir = maindir;
-   if (userdir) fUserDir=userdir;
+   if (userdir && strlen(userdir)) fUserDir=userdir;
    else if (maindir && strncmp(maindir,"MySQL:",6)==0) fUserDir = maindir+6; 
      
    fDataBase = 0;
@@ -136,6 +139,9 @@ Int_t St_db_Maker::Init()
 {
    TFileSet *fileset;
    TString fullpath,topdir;
+   TString STAR("$STAR");
+   gSystem->ExpandPathName(STAR);
+   TString PWD(gSystem->pwd());
 
    fDataBase=0;
    if (!fMainDir.IsNull() && strncmp("MySQL:",(const char*)fMainDir,6)==0){
@@ -143,37 +149,39 @@ Int_t St_db_Maker::Init()
      if (!fDataBase) return kStErr;
      fDataBase->Pass(PrepareDB,0);
    }
-
+   for (int k = 0; k<3; k++) {
 // 		recreate a memory resided data-structure
-   fCurrentDir = fMainDir;
-   if (!fDataBase && !fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
-     if (!fileset->First()) {delete fileset; fileset = 0;}
-     if(fileset) {
-       fileset->Purge(); 
-       fileset->Sort(); 
-       fileset->Pass(PrepareDB,&fCurrentDir);
-       fileset->Purge(); 
-       if (fDataBase) {
-	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-	 fDataBase->Update(fileset); delete fileset;
-       } else          {fDataBase = fileset; }
-   } }
-
-   fCurrentDir = fUserDir; fileset = 0;
-   if (!fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
-     if (!fileset->First()) {delete fileset; fileset = 0;}
-     if(fileset) {
-       fileset->Purge(); 
-       fileset->Sort(); 
-       fileset->Pass(PrepareDB,&fCurrentDir);
-       fileset->Purge(); 
-       if (fDataBase) {
-	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-	 fDataBase->Update(fileset); delete fileset;
-       } else          {fDataBase = fileset; }
-   } }
+     
+     if (k == 0)    {
+       if (fDataBase) continue;
+       fCurrentDir = fMainDir;
+     }
+     if (k == 1) {
+       if (STAR == PWD) continue;
+       fCurrentDir = STAR;
+       fCurrentDir+= "/";
+       fCurrentDir+= fUserDir;
+     }
+     if (k == 2) {
+       fCurrentDir = fUserDir;
+     }
+     if (fCurrentDir == "") continue;
+     fileset = 0;
+     if (!fCurrentDir.IsNull()) {
+       fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
+       if (!fileset->First()) {delete fileset; fileset = 0;}
+       if(fileset) {
+	 fileset->Purge(); 
+	 fileset->Sort(); 
+	 fileset->Pass(PrepareDB,&fCurrentDir);
+	 fileset->Purge(); 
+	 if (fDataBase) {
+	   assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+	   fDataBase->Update(fileset); delete fileset;
+	 } else          {fDataBase = fileset; }
+       } 
+     }
+   }
    fDataBase->Sort();
 
    AddData(fDataBase);
@@ -398,7 +406,7 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   par->Remove(val->fDat);
 
   int kase = 0;
-  if (mk->fDBBroker && val->fDat) {	// Try to load from MySQL
+  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
      
     int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
     if (!ierr) kase = 1;

@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.5 2000/06/10 23:15:12 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.6 2000/06/23 16:42:08 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.6  2000/06/23 16:42:08  fisyak
+// remove params
+//
 // Revision 1.5  2000/06/10 23:15:12  fisyak
 // Add new W.Loeve table with Laser tracks
 //
@@ -38,6 +41,7 @@
 #include "StarCallf77.h" 
 #include "Prediction.h"
 #include "StDAQMaker/StDAQReader.h"
+#include "StDAQMaker/StTPCReader.h"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
 #define g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
@@ -84,7 +88,6 @@ StLaserAnalysisMaker::~StLaserAnalysisMaker() {
 //_____________________________________________________________________________
 Int_t StLaserAnalysisMaker::Init(){
   // Create tables
-  //   St_DataSetIter       local(GetDataBase("params"));
   // Create Histograms    
   Int_t i,j;
   geant3 = TGeant3::Geant3();
@@ -102,7 +105,7 @@ Int_t StLaserAnalysisMaker::Init(){
     z_lq   = (Int_t    *) geant3->Lq();
     z_q    = (Float_t  *) geant3->Q();
   }
-  //  St_DataSet *tpg =  GetInputDB("params/tpc/tpgpar"); assert(tpg);
+  //  St_DataSet *tpg =  GetInputDB("tpc/tpgpar"); assert(tpg);
   ftpg_pad_plane = (St_tpg_pad_plane *) GetChain()->FindObject("tpg_pad_plane");  
   assert(ftpg_pad_plane);
   St_tpg_pad_plane &tpg_pad_plane = *ftpg_pad_plane;
