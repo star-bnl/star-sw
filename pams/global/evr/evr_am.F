@@ -539,6 +539,7 @@ CC
       REAL*8 Beamlinephi0, Beamlinetanl
       REAL*8 Beamline_xzslope, Beamline_yzslope
       REAL*8 Beamline_sigma
+      INTEGER izzz
       Parameter(BeamlineX1   = 0.561)
       Parameter(BeamlineY1   = 0.352)
       Parameter(BeamlineZ1   = 0.00)
@@ -898,8 +899,8 @@ CCC   Assign final error (sigma) to extrapolated track position:
      2           (dabs(z0(k)).lt.zlimit2 .and. dabs(z0(k)).gt.
      3           zlimit1 .and. dsqrt(x0(k)*x0(k) + y0(k)*y0(k))
      4           .le. beampipecut2)) then
-                 zsum(int((z0(k)+zlimit2)/dz)+1) =      
-     1           zsum(int((z0(k)+zlimit2)/dz)+1) + 1   
+                 izzz = int((z0(k)+zlimit2)/dz)+1;
+                 zsum(izzz) = zsum(izzz) + 1   
               endif
               else if (k.gt.maxtr) then
                  k = maxtr
