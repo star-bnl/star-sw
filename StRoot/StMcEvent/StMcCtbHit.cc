@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.cc,v 2.1 2003/02/19 03:29:41 calderon Exp $
+ * $Id: StMcCtbHit.cc,v 2.2 2003/04/11 19:58:29 calderon Exp $
  * $Log: StMcCtbHit.cc,v $
+ * Revision 2.2  2003/04/11 19:58:29  calderon
+ * Fixed bug in calculating slat and tray.  Start with an int, make sure
+ * i_eta and i_phi begin at zero (was missing before), and finally return the values as unsigned
+ * ints.
+ *
  * Revision 2.1  2003/02/19 03:29:41  calderon
  * Introduction of CTB classes to repository.
  *
@@ -12,7 +17,7 @@
 #include "StMcCtbHit.hh"
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.1 2003/02/19 03:29:41 calderon Exp $";
+static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.2 2003/04/11 19:58:29 calderon Exp $";
 
 StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
 
@@ -50,15 +55,15 @@ ostream&  operator<<(ostream& os, const StMcCtbHit& h)
     return os;
 }
 
-
-void StMcCtbHit::get_slat_tray(unsigned int &slat, unsigned int &tray ) const {
+void StMcCtbHit::get_slat_tray(unsigned int &slat_out, unsigned int &tray_out ) const {
     long i1 ;
     unsigned int volume = mVolumeId;
-    unsigned int i_phi;
-    unsigned int i_eta;
+    int i_phi = static_cast<int>(fmod(volume,100.)) ;
+    int i_eta = 999;
+    int slat = 999;
+    int tray = 999;
     
     i1     = int(volume/100) ;
-    i_phi  = static_cast<int>(fmod(static_cast<double>(volume),100.)) ;
     if ( i1 < 20 ) {
 	i_phi = 14 - i_phi ;
 	if ( i_phi < 1 ) i_phi = i_phi + 60 ;
@@ -73,7 +78,10 @@ void StMcCtbHit::get_slat_tray(unsigned int &slat, unsigned int &tray ) const {
 	else 
 	    if ( i1 == 22 ) i_eta = 1 ;
     }
-        
+
+    i_phi--;
+    i_eta--;
+    
     if(i_eta == 0){
         slat = 1;
         tray = i_phi + 102;
@@ -98,4 +106,6 @@ void StMcCtbHit::get_slat_tray(unsigned int &slat, unsigned int &tray ) const {
         if(tray < 0)
 	    tray += 60;
     }
+    slat_out = slat;
+    tray_out = tray;
 }
