@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.42 2004/11/22 19:43:06 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.43 2004/11/24 17:59:26 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.43  2004/11/24 17:59:26  fisyak
+ * Set ionization potential for Ar in eloss calculateion instead 5
+ *
  * Revision 2.42  2004/11/22 19:43:06  pruneau
  * commented out offending cout statement
  *
@@ -869,7 +872,8 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     sign = 1.;
   else
     sign = -1.;
-  double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
+  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
+  double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,I2Ar);
   double fudge = 2.;
   dE = fudge*sign*dxEloss*eloss;
   if(!finite(dxEloss) || !finite(beta2) || !finite(m) || m==0 || !finite(eloss) || !finite(_p3) || p2==0 )
