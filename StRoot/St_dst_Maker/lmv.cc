@@ -1,5 +1,14 @@
-// $Id: lmv.cc,v 1.13 2000/07/21 23:55:47 balewski Exp $
+// $Id: lmv.cc,v 1.14 2000/07/22 18:02:12 balewski Exp $
 // $Log: lmv.cc,v $
+// Revision 1.14  2000/07/22 18:02:12  balewski
+// more NaN fixes
+//
+// JB: Why people trust that input is correct?
+//     In a loop over input global tracks I added:
+//     -  if(iflag<=)0 continue; 
+//     - reorganized this loop
+//     - moved Rmin cut to the same loop, so no erase is needed 
+//  
 // Revision 1.13  2000/07/21 23:55:47  balewski
 // NaN bug#600 fix
 //
@@ -93,7 +102,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.13 2000/07/21 23:55:47 balewski Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.14 2000/07/22 18:02:12 balewski Exp $";
 
 static double  MinTrackLen= 1.;
 
@@ -159,83 +168,68 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     cout<<"No vertex can be reconstructed."<<endl;
     return kStWarn; 
   }
-  cout<<"lmv: Low Multiplicity Vertex Finder. Number of global tracks: "<<Ntrk<<endl;
-
+  cout<<"lmv: Low Multiplicity Vertex Finder. Global tracks: in Table="<<Ntrk;
   long i_non_tpc=0;
   dst_track_st *glb_track_pointer = track->GetTable();
   dst_track_st *sec_pointer = glb_track_pointer;
-  //  dst_track_st  *sec_pointer = new dst_track_st;
-  //  sec_pointer = glb_track_pointer;
-  for (long l=0; l<Ntrk; l++){
+  int n1=0,n2=0,n3=0;
+  for (long l=0; l<Ntrk; l++,glb_track_pointer++)
+    {
+      if(glb_track_pointer->iflag<=0) continue;
+      n1++;
 
-    // First point on Helix
-    x0 = glb_track_pointer->r0*cos(C_RAD_PER_DEG*glb_track_pointer->phi0);
-    y0 = glb_track_pointer->r0*sin(C_RAD_PER_DEG*glb_track_pointer->phi0);
-    z0 = glb_track_pointer->z0;
-    StThreeVectorD origin(x0*centimeter, y0*centimeter, z0*centimeter);
+      long NPoints = glb_track_pointer->n_point;
+      if(NPoints <= MinTrkPoints) continue;
+      n2++;
 
-    // Helicity / Sense of Curvatutre
-    h  = 1.0;  if( bfield*glb_track_pointer->icharge > 0.0 )h=-1.0;
-    double qtrk = 1.0; if( h*bfield > 0.0)qtrk=-1.0;
+      // First point on Helix
+      x0 = glb_track_pointer->r0*cos(C_RAD_PER_DEG*glb_track_pointer->phi0);
+      y0 = glb_track_pointer->r0*sin(C_RAD_PER_DEG*glb_track_pointer->phi0);
+      z0 = glb_track_pointer->z0;
+      StThreeVectorD origin(x0*centimeter, y0*centimeter, z0*centimeter);
+      
+      // Helicity / Sense of Curvatutre
+      h  = 1.0;  if( bfield*glb_track_pointer->icharge > 0.0 )h=-1.0;
+      double qtrk = 1.0; if( h*bfield > 0.0)qtrk=-1.0;
+      
+      // Track direction at first point
+      ptinv  = glb_track_pointer->invpt;
+      tanl   = glb_track_pointer->tanl;
+      psi    = (C_PI/180.0)*glb_track_pointer->psi; 
+      if(psi<0.0){psi=psi+2.*C_PI;}
+      
+      px   = (1./ptinv)*cos(psi);
+      py   = (1./ptinv)*sin(psi);
+      pz   = (1./ptinv)*tanl;
+      StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+      
+      StPhysicalHelixD TrkHlx(MomFstPt, origin, bfield*tesla, qtrk);
 
-    // Track direction at first point
-    ptinv  = glb_track_pointer->invpt;
-    tanl   = glb_track_pointer->tanl;
-    psi    = (C_PI/180.0)*glb_track_pointer->psi; if(psi<0.0){psi=psi+2.*C_PI;}
+      // check Rmin condition
 
-    px   = (1./ptinv)*cos(psi);
-    py   = (1./ptinv)*sin(psi);
-    pz   = (1./ptinv)*tanl;
-    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-    
-    StPhysicalHelixD TrkHlx(MomFstPt, origin, bfield*tesla, qtrk);
+      
+      double xorigin = 0.0; double yorigin = 0.0;
+      spath = TrkHlx.pathLength(xorigin, yorigin);
+      StThreeVectorD XMinVec = TrkHlx.at(spath);
+      //    cout<<"Min Position: "<<XMinVec<<endl;
+      double x_m = XMinVec.x(), y_m = XMinVec.y();
+      double dmin = sqrt(x_m*x_m + y_m*y_m);
+      if( dmin > Rmincut ) continue;
+      n3++;
 
-    long NPoints = glb_track_pointer->n_point;
-    if(NPoints > MinTrkPoints){
+      // Now it is a good track
+
       helices.push_back(TrkHlx);
       double ltk = glb_track_pointer->length;
       TrkLength.push_back(ltk);
       long trk_id = glb_track_pointer->id;
       index.push_back(trk_id);
       if( glb_track_pointer->det_id != kTpcIdentifier )i_non_tpc=1;
+  
     }
 
-    glb_track_pointer++;
 
-  }
-
-  //Currently, use only pure tpc tracks
-  //  if( i_non_tpc == 1 ){
-  //    cout<<"This event contains non-tpc tracks - lmv currently only works for pure tpc tracks"<<endl;
-  //    return kStWarn;
-  //  }
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-  vector<StPhysicalHelixD,allocator<StPhysicalHelixD> >::iterator ihlx=helices.begin();
-  vector<double,allocator<double> >::iterator ihelp=TrkLength.begin();
-  vector<long,allocator<long> >::iterator i_index=index.begin();
-#else
-  vector<StPhysicalHelixD >::iterator ihlx=helices.begin();
-  vector<double >::iterator ihelp=TrkLength.begin();
-  vector<long >::iterator i_index=index.begin();
-#endif  
-  while( ihlx != helices.end()){
-    StPhysicalHelixD trk = *ihlx;
-    double xorigin = 0.0; double yorigin = 0.0;
-    spath = trk.pathLength(xorigin, yorigin);
-    StThreeVectorD XMinVec = trk.at(spath);
-    //    cout<<"Min Position: "<<XMinVec<<endl;
-    double x_m = XMinVec.x(), y_m = XMinVec.y();
-    double dmin = sqrt(x_m*x_m + y_m*y_m);
-    if( dmin > Rmincut ){
-      helices.erase(ihlx);
-      TrkLength.erase(ihelp);
-      index.erase(i_index);
-    }
-    else{
-      ihlx++; ihelp++; i_index++;
-    }
-  }
+  printf(", used %d %d %d\n",n1,n2,n3);
 
   // Do the Multiple Scattering
   for(unsigned int jj=0; jj < helices.size(); jj++){
