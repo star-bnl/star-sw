@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.13 2000/09/06 22:34:17 ullrich Exp $
+ * $Id: StEvent.h,v 2.14 2000/09/25 14:21:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.13  2000/09/06 22:34:17  ullrich
- * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
+ * Revision 2.14  2000/09/25 14:21:30  ullrich
+ * Removed enums for content vector. Replaced by lookup function.
  *
  * Revision 2.13  2000/09/06 22:34:17  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
@@ -173,36 +173,15 @@ public:
     void setL3Trigger(StL3Trigger*);
     void addPrimaryVertex(StPrimaryVertex*);
     
-protected:
-    enum { mInfo,
-	   mSummary,
-	   mSoftwareMonitor,
-	   mTpcHits,
-	   mFtpcHits,
-	   mSvtHits,
-	   mSsdHits,
-	   mRichCollection,
-	   mEmcCollection,
-	   mTriggerDetectors,
-	   mL0Trigger,
-	   mL3Trigger,	
-	   mTrackDetectorInfo,
-	   mTrackNodes,	
-	   mPrimaryVertices,
-	   mV0Vertices,
-	   mXiVertices,
-	   mKinkVertices,
-           mContentLength };
-    
+protected:    
     mutable StSPtrVecObject  mContent;
-    static TString           mCvsTag;
+    static  TString          mCvsTag;
 
 private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
     void initToZero();
     void init(const event_header_st&);
-    
     ClassDef(StEvent,1)
 };
 #endif

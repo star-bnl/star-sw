@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.15  2000/09/06 22:34:12  ullrich
- * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
+ * Revision 2.16  2000/09/25 14:21:27  ullrich
+ * Removed enums for content vector. Replaced by lookup function.
  *
  * Revision 2.16  2000/09/25 14:21:27  ullrich
  * Removed enums for content vector. Replaced by lookup function.
@@ -67,6 +67,7 @@
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
+ * Completely Revised for New Version
  *
  **************************************************************************/
 #include <typeinfo>
@@ -94,19 +95,50 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $";
-void
-StEvent::initToZero()
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $";
 
-    mContent.resize(mContentLength);
-    for (int i=0; i<mContentLength;i++) mContent[i]=0;
+ClassImp(StEvent)
+
+template<class T> void
+_lookup(T* val, StSPtrVecObject &vec)
+{
+    val = 0;
+    for (unsigned int i=0; i<vec.size(); i++)
+	if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+	    val = static_cast<T*>(vec[i]);
+	    break;
+	}
+}
+
+template<class T> void
+_lookupOrCreate(T* val, StSPtrVecObject &vec)
+{
+    T* t = 0;
+    _lookup(t, vec);
+    if (!t) {
+	t = new T;
+	vec.push_back(t);
+    }
+    val = t;
+}
+
+template<class T> void
+_lookupAndSet(T* val, StSPtrVecObject &vec)
+{
+    for (unsigned int i=0; i<vec.size(); i++)
+	if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+	    delete vec[i];
+	    vec[i] = val;
 	    return;
 	}    
     if (val) vec.push_back(val);
+}
+
+void
 StEvent::initToZero() { /* noop */ }
 
-    mContent[mInfo] = new StEventInfo(evtHdr);
+void
 StEvent::init(const event_header_st& evtHdr)
 {
     mContent.push_back(new StEventInfo(evtHdr));
@@ -121,7 +153,7 @@ StEvent::StEvent(const event_header_st& evtHdr,
                  const dst_event_summary_st& evtSum,
                  const dst_summary_param_st& sumPar) :
     St_DataSet("StEvent")
-    mContent[mSummary] = new StEventSummary(evtSum, sumPar);
+{
     initToZero();
     init(evtHdr);
     mContent.push_back(new StEventSummary(evtSum, sumPar));
@@ -132,67 +164,86 @@ StEvent::StEvent(const event_header_st& evtHdr) :
 {
     initToZero();
     init(evtHdr);
-{
 }
 
 StEvent::~StEvent()
 { /* noop */ }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->type() : TString();
+TString
+StEvent::type() const
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->type() : TString();
 }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->id() : 0;
+Long_t
+StEvent::id() const
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->id() : 0;
 }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->runId() : 0;
+Long_t
+StEvent::runId() const
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->runId() : 0;
 }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->time() : 0;
+Long_t
+StEvent::time() const 
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->time() : 0;
 }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->triggerMask() : 0;
+ULong_t
+StEvent::triggerMask() const  
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->triggerMask() : 0;
 }
 
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->bunchCrossingNumber(i) : 0;
+ULong_t
+StEvent::bunchCrossingNumber(UInt_t i) const  
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->bunchCrossingNumber(i) : 0;
 }
 
-    return static_cast<StEventInfo*>(mContent[mInfo]);
+StEventInfo*
+StEvent::info()
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info;
 }
 
-    return static_cast<StEventInfo*>(mContent[mInfo]);
+const StEventInfo*
+StEvent::info() const
+{
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info;
 }
 
-    return static_cast<StEventSummary*>(mContent[mSummary]);
+StEventSummary*
+StEvent::summary()
+{
     StEventSummary* summary = 0;
     _lookup(summary, mContent);
     return summary;
 }
 
-    return static_cast<StEventSummary*>(mContent[mSummary]);
+const StEventSummary*
+StEvent::summary() const
+{
     StEventSummary* summary = 0;
     _lookup(summary, mContent);
     return summary;
@@ -201,166 +252,211 @@ StEvent::~StEvent()
 const TString&
 StEvent::cvsTag() { return mCvsTag; }
 
-    return static_cast<StSoftwareMonitor*>(mContent[mSoftwareMonitor]);
+StSoftwareMonitor*
+StEvent::softwareMonitor()
+{
     StSoftwareMonitor *monitor = 0;
     _lookup(monitor, mContent);
     return monitor;
 }
 
-    return static_cast<StSoftwareMonitor*>(mContent[mSoftwareMonitor]);
+const StSoftwareMonitor*
+StEvent::softwareMonitor() const
+{
     StSoftwareMonitor *monitor = 0;
     _lookup(monitor, mContent);
     return monitor;
 }
 
-    return static_cast<StTpcHitCollection*>(mContent[mTpcHits]);
+StTpcHitCollection*
+StEvent::tpcHitCollection()
+{
     StTpcHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StTpcHitCollection*>(mContent[mTpcHits]);
+const StTpcHitCollection*
+StEvent::tpcHitCollection() const
+{
     StTpcHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StFtpcHitCollection*>(mContent[mFtpcHits]);
+StFtpcHitCollection*
+StEvent::ftpcHitCollection()
+{
     StFtpcHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StFtpcHitCollection*>(mContent[mFtpcHits]);
+const StFtpcHitCollection*
+StEvent::ftpcHitCollection() const
+{
     StFtpcHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StSvtHitCollection*>(mContent[mSvtHits]);
+StSvtHitCollection*
+StEvent::svtHitCollection()
+{
     StSvtHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StSvtHitCollection*>(mContent[mSvtHits]);
+const StSvtHitCollection*
+StEvent::svtHitCollection() const
+{
     StSvtHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StSsdHitCollection*>(mContent[mSsdHits]);
+StSsdHitCollection*
+StEvent::ssdHitCollection()
+{
     StSsdHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StSsdHitCollection*>(mContent[mSsdHits]);
+const StSsdHitCollection*
+StEvent::ssdHitCollection() const
+{
     StSsdHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-    return static_cast<StEmcCollection*>(mContent[mEmcCollection]);
+StEmcCollection*
+StEvent::emcCollection()
+{
     StEmcCollection *emc = 0;
     _lookup(emc, mContent);
     return emc;
 }
 
-    return static_cast<StEmcCollection*>(mContent[mEmcCollection]);
+const StEmcCollection*
+StEvent::emcCollection() const
+{
     StEmcCollection *emc = 0;
     _lookup(emc, mContent);
     return emc;
 }
 
-    return static_cast<StRichCollection*>(mContent[mRichCollection]);
+StRichCollection*
+StEvent::richCollection()
+{
     StRichCollection *rich = 0;
     _lookup(rich, mContent);
     return rich;
 }
 
-    return static_cast<StRichCollection*>(mContent[mRichCollection]);
+const StRichCollection*
+StEvent::richCollection() const
+{
     StRichCollection *rich = 0;
     _lookup(rich, mContent);
     return rich;
 }
 
-    return static_cast<StTriggerDetectorCollection*>(mContent[mTriggerDetectors]);
+StTriggerDetectorCollection*
+StEvent::triggerDetectorCollection()
+{
     StTriggerDetectorCollection *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
 
-    return static_cast<StTriggerDetectorCollection*>(mContent[mTriggerDetectors]);
+const StTriggerDetectorCollection*
+StEvent::triggerDetectorCollection() const
+{
     StTriggerDetectorCollection *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
 
-    return static_cast<StL0Trigger*>(mContent[mL0Trigger]);
+StL0Trigger*
+StEvent::l0Trigger()
+{
     StL0Trigger *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
 
-    return static_cast<StL0Trigger*>(mContent[mL0Trigger]);
+const StL0Trigger*
+StEvent::l0Trigger() const
+{
     StL0Trigger *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
 
-    return static_cast<StL3Trigger*>(mContent[mL3Trigger]);
+StL3Trigger*
+StEvent::l3Trigger()
+{
     StL3Trigger *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
 
-    return static_cast<StL3Trigger*>(mContent[mL3Trigger]);
+const StL3Trigger*
+StEvent::l3Trigger() const
+{
     StL3Trigger *trg = 0;
     _lookup(trg, mContent);
+    return trg;
 }
 
 
-    if (!mContent[mTrackDetectorInfo])
-        mContent[mTrackDetectorInfo] = new StSPtrVecTrackDetectorInfo;
-    return *static_cast<StSPtrVecTrackDetectorInfo*>(mContent[mTrackDetectorInfo]);
+StSPtrVecTrackDetectorInfo&
+StEvent::trackDetectorInfo()
+{
     StSPtrVecTrackDetectorInfo *info = 0;
     _lookupOrCreate(info, mContent);
     return *info;
 }
 
-    if (!mContent[mTrackDetectorInfo])
-        mContent[mTrackDetectorInfo] = new StSPtrVecTrackDetectorInfo;
-    return *static_cast<StSPtrVecTrackDetectorInfo*>(mContent[mTrackDetectorInfo]);
+const StSPtrVecTrackDetectorInfo&
+StEvent::trackDetectorInfo() const
+{
     StSPtrVecTrackDetectorInfo *info = 0;
     _lookupOrCreate(info, mContent);
     return *info;
 }
 
-    if (!mContent[mTrackNodes])
-        mContent[mTrackNodes] = new StSPtrVecTrackNode;
-    return *static_cast<StSPtrVecTrackNode*>(mContent[mTrackNodes]);
+StSPtrVecTrackNode&
+StEvent::trackNodes()
+{
     StSPtrVecTrackNode *nodes = 0;
     _lookupOrCreate(nodes, mContent);
     return *nodes;
 }
 
-    if (!mContent[mTrackNodes])
-        mContent[mTrackNodes] = new StSPtrVecTrackNode;
-    return *static_cast<StSPtrVecTrackNode*>(mContent[mTrackNodes]);
+const StSPtrVecTrackNode&
+StEvent::trackNodes() const
+{
     StSPtrVecTrackNode *nodes = 0;
     _lookupOrCreate(nodes, mContent);
     return *nodes;
 }
 
-    return mContent[mPrimaryVertices] ? static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size() : 0;
+UInt_t
+StEvent::numberOfPrimaryVertices() const
+{
     StSPtrVecPrimaryVertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return vertices ? vertices->size() : 0;
 }
 
-    if (mContent[mPrimaryVertices] && i < static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size())
-        return (*static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]))[i];
+StPrimaryVertex*
+StEvent::primaryVertex(UInt_t i)
+{
+    StSPtrVecPrimaryVertex *vertices = 0;
     _lookup(vertices, mContent);
     if (vertices && i < vertices->size())
         return (*vertices)[i];
@@ -368,8 +464,10 @@ StEvent::cvsTag() { return mCvsTag; }
         return 0;
 }
 
-    if (mContent[mPrimaryVertices] && i < static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size())
-        return (*static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]))[i];
+const StPrimaryVertex*
+StEvent::primaryVertex(UInt_t i) const
+{
+    StSPtrVecPrimaryVertex *vertices = 0;
     _lookup(vertices, mContent);
     if (vertices && i < vertices->size())
         return (*vertices)[i];
@@ -377,49 +475,49 @@ StEvent::cvsTag() { return mCvsTag; }
         return 0;
 }
 
-    if (!mContent[mV0Vertices])
-        mContent[mV0Vertices] = new StSPtrVecV0Vertex;
-    return *static_cast<StSPtrVecV0Vertex*>(mContent[mV0Vertices]);
+StSPtrVecV0Vertex&
+StEvent::v0Vertices()
+{
     StSPtrVecV0Vertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
 }
 
-    if (!mContent[mV0Vertices])
-        mContent[mV0Vertices] = new StSPtrVecV0Vertex;
-    return *static_cast<StSPtrVecV0Vertex*>(mContent[mV0Vertices]);
+const StSPtrVecV0Vertex&
+StEvent::v0Vertices() const
+{
     StSPtrVecV0Vertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
 }
 
-    if (!mContent[mXiVertices])
-        mContent[mXiVertices] = new StSPtrVecXiVertex;
-    return *static_cast<StSPtrVecXiVertex*>(mContent[mXiVertices]);
+StSPtrVecXiVertex&
+StEvent::xiVertices()
+{
     StSPtrVecXiVertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
 }
 
-    if (!mContent[mXiVertices])
-        mContent[mXiVertices] = new StSPtrVecXiVertex;
-    return *static_cast<StSPtrVecXiVertex*>(mContent[mXiVertices]);
+const StSPtrVecXiVertex&
+StEvent::xiVertices() const
+{
     StSPtrVecXiVertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
 }
 
-    if (!mContent[mKinkVertices])
-        mContent[mKinkVertices] = new StSPtrVecKinkVertex;
-    return *static_cast<StSPtrVecKinkVertex*>(mContent[mKinkVertices]);
+StSPtrVecKinkVertex&
+StEvent::kinkVertices()
+{
     StSPtrVecKinkVertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
 }
 
-    if (!mContent[mKinkVertices])
-        mContent[mKinkVertices] = new StSPtrVecKinkVertex;
-    return *static_cast<StSPtrVecKinkVertex*>(mContent[mKinkVertices]);
+const StSPtrVecKinkVertex&
+StEvent::kinkVertices() const
+{
     StSPtrVecKinkVertex *vertices = 0;
     _lookupOrCreate(vertices, mContent);
     return *vertices;
@@ -428,139 +526,130 @@ StEvent::cvsTag() { return mCvsTag; }
 StSPtrVecObject&
 StEvent::content() { return mContent; }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setType(val);
+void
+StEvent::setType(const Char_t* val)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setType(val);
 }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setRunId(val);
+void
+StEvent::setRunId(Long_t val)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setRunId(val);
 }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setId(val);
+void
+StEvent::setId(Long_t val)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setId(val);
 }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setTime(val);
+void
+StEvent::setTime(Long_t val)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setTime(val);
 }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setTriggerMask(val);
+void
+StEvent::setTriggerMask(ULong_t val)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setTriggerMask(val);
 }
 
-    if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
-    static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val, i);
+void
+StEvent::setBunchCrossingNumber(ULong_t val, UInt_t i)
+{
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setBunchCrossingNumber(val, i);
 }
 
-    if (mContent[mInfo]) delete mContent[mInfo];
-    mContent[mInfo] = val;
+void
 StEvent::setInfo(StEventInfo* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mSummary]) delete mContent[mSummary];
-    mContent[mSummary] = val;
+void
 StEvent::setSummary(StEventSummary* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mSoftwareMonitor]) delete mContent[mSoftwareMonitor];
-    mContent[mSoftwareMonitor] = val;
+void
 StEvent::setSoftwareMonitor(StSoftwareMonitor* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mTpcHits]) delete mContent[mTpcHits];
-    mContent[mTpcHits] = val;
+void
 StEvent::setTpcHitCollection(StTpcHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mFtpcHits]) delete mContent[mFtpcHits];
-    mContent[mFtpcHits] = val;
+void
 StEvent::setFtpcHitCollection(StFtpcHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mSvtHits]) delete mContent[mSvtHits];
-    mContent[mSvtHits] = val;
+void
 StEvent::setSvtHitCollection(StSvtHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mSsdHits]) delete mContent[mSsdHits];
-    mContent[mSsdHits] = val;
+void
 StEvent::setSsdHitCollection(StSsdHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
 
-    if (mContent[mEmcCollection]) delete mContent[mEmcCollection];
-    mContent[mEmcCollection] = val;
+void
 StEvent::setEmcCollection(StEmcCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mRichCollection]) delete mContent[mRichCollection];
-    mContent[mRichCollection] = val;
+void
 StEvent::setRichCollection(StRichCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mTriggerDetectors]) delete mContent[mTriggerDetectors];
-    mContent[mTriggerDetectors] = val;
+void
 StEvent::setTriggerDetectorCollection(StTriggerDetectorCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mL0Trigger]) delete mContent[mL0Trigger];
-    mContent[mL0Trigger] = val;
+void
 StEvent::setL0Trigger(StL0Trigger* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-    if (mContent[mL3Trigger]) delete mContent[mL3Trigger];
-    mContent[mL3Trigger] = val;
+void
 StEvent::setL3Trigger(StL3Trigger* val)
 {
     _lookupAndSet(val, mContent);
 }
 
 void
-        if (!mContent[mPrimaryVertices])
-            mContent[mPrimaryVertices] = new StSPtrVecPrimaryVertex;
-
-	StSPtrVecPrimaryVertex* vertexVector =
-	    static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]);
+StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
+{
     if (vertex) {
 	StSPtrVecPrimaryVertex* vertexVector = 0;
 	_lookupOrCreate(vertexVector, mContent);
