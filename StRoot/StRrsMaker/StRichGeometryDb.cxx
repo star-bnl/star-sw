@@ -1,14 +1,17 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 1.3 2000/02/08 16:26:01 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.4 2000/02/12 21:55:44 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.3  2000/02/08 16:26:01  lasiuk
- * rmove vector and StGlobals from Interface.
- * allocate space for survey parameters
- * calculate sector origins and pad corner positions
+ * Revision 1.4  2000/02/12 21:55:44  lasiuk
+ * Wire position adjustment
+ *
+ * add normal vector value
+ *
+ * Revision 1.5  2000/02/29 18:25:46  lasiuk
+ * change radial placement of detector
  *
  * Revision 1.4  2000/02/12 21:55:44  lasiuk
  * Wire position adjustment
@@ -50,7 +53,6 @@ StRichGeometryDb::~StRichGeometryDb()
     quad_gap_z        =  30.0 * millimeter;          
     delete p2Db;
 }
-    wire_x0           = 41.61 * centimeter;          // verified
 void StRichGeometryDb::my_fill()
     
     pad_side_x        = 7.9   * millimeter;          // verified
@@ -125,6 +127,12 @@ void StRichGeometryDb::my_fill()
 	-quadrantGapInX()/2. - rowPitch()*(numberOfRowsInAQuadrantColumn()/2.);
     quadsOrigin[4].x0 = quadsOrigin[3].x0;   
     quadsOrigin[1].y0 =
+	quadrantGapInY()/2 + rowPitch()*(numberOfRowsInAQuadrantColumn()/2.);
+    quadsOrigin[2].y0 = quadsOrigin[1].y0;
+
+    wire_x0[0] = quad_gap_x/2. + (n_pad_x - 0.5)*row_pitch + wire_spacing/2.;
+    quadsOrigin[3].y0 =
+    wire_x0[1] = -quad_gap_x/2. - (0.5)*row_pitch + wire_spacing/2.;
     //-1.71 * centimeter;          // verified
     wire_y0[1] = -quad_gap_y/2. - (0.5)*row_pitch + wire_spacing/2.;
 
@@ -176,8 +184,10 @@ StRichGeometryDb* StRichGeometryDb::getDb()
     os << endl;
     os << "Pad Width=         " << (padWidth()/millimeter)        << " mm" << endl;
     os << "Pad Length=        " << (padLength()/millimeter)       << " mm" << endl;
-    os << "Wire OffSet (x)=   " << (firstWirePositionInX()/centimeter) << " cm" << endl;
+    os << "Wire OffSet (+x)=   " << (firstWirePositionInX(1)/centimeter) << " cm" << endl;
+    os << "Wire OffSet (-x)=   " << (firstWirePositionInX(-1)/centimeter) << " cm" << endl;
     os << "Pad Spacing=       " << (padSpacing()/millimeter)      << " mm" << endl;
+    os << "Row Spacing=       " << (rowSpacing()/millimeter)      << " mm" << endl;
 
     os << endl;
     os << "Number of Wires:   " << (numberOfWires())                       << endl;

@@ -1,9 +1,12 @@
 /*************************************************************************
- * $Id: StRichGeometryDbInterface.h,v 1.2 2000/02/08 16:26:04 lasiuk Exp $
+ * $Id: StRichGeometryDbInterface.h,v 1.3 2000/02/12 21:55:45 lasiuk Exp $
  *
  * Description:
  *
  * $Log: StRichGeometryDbInterface.h,v $
+ * Revision 1.3  2000/02/12 21:55:45  lasiuk
+ * Wire position adjustment
+ *
  * Revision 1.2  2000/02/08 16:26:04  lasiuk
  * rmove vector and StGlobals from Interface.
  * allocate space for survey parameters
@@ -50,7 +53,7 @@ public:
     virtual double padSpacing() const = 0;
     
     virtual double wirePitch() const = 0;
-    virtual double firstWirePositionInX() const = 0;
+    virtual double firstWirePositionInX(int) const = 0;
     virtual int    numberOfWires() const = 0;
 
     virtual double anodeToPadSpacing() const = 0;
