@@ -484,7 +484,7 @@ StHbtString ThNonId3DCF::Report(){
   return returnThis;
 }
 
-inline StHbtThCorrFctn* ThNonId3DCF::Clone() const {return new ThNonId3DCF(*this);}
+inline StHbtThCorrFctn* ThNonId3DCF::ThClone() const {return new ThNonId3DCF(*this);}
 inline void ThNonId3DCF::SetBtRange(double aBtMin, double aBtMax)
 {
   mBtMin = aBtMin;

@@ -31,7 +31,9 @@ class ThBPCorrFctn :  public virtual StHbtThCorrFctn {
   void AddNum(StHbtThPair*);
   void AddDen(StHbtThPair*);
   
-   StHbtThCorrFctn* Clone() const ;
+  virtual StHbtCorrFctn* Clone() {return 0;}   // Legacy code due to previous bug
+                                               // in StHbtCorrFctn, do not use
+  StHbtThCorrFctn* ThClone() const ;
 
   virtual StHbt3DHisto* Numerator() const ;
   virtual StHbt3DHisto* Denominator() const ;

@@ -54,4 +54,4 @@ inline StHbt1DHisto* ThQinvCorrFctn::Denominator() const {cout << "Return Denimn
 inline StHbt1DHisto* ThQinvCorrFctn::Ratio() const {cout << "Return Numerator" << endl; return mRatio;};
 inline void ThQinvCorrFctn::Write()  {mNumerator->Write();mDenominator->Write();mRatio->Write();};
 
-inline StHbtThCorrFctn* ThQinvCorrFctn::Clone() const {return new ThQinvCorrFctn(*this);}
+inline StHbtThCorrFctn* ThQinvCorrFctn::ThClone() const {return new ThQinvCorrFctn(*this);}
