@@ -36,7 +36,7 @@ tdm/newtable vertex dst_vertex 100000
 rowcount [data]/global/tracks/globtrk 
 if ( staf_result(1) .eq. 0 ) then
 cd [data]/global/tracks
-tdm/newtable globtrk egr_globtrk 100000
+tdm/newtable globtrk dst_track 100000
 endif
 
 cd [data]/global/tracks

@@ -1,5 +1,4 @@
 **********************************************************
-
 macro egr i=1 
 macro/global/import *
 
@@ -25,13 +24,15 @@ ami/mod/call egr_fitter_
         [data]/tpc/hits/tphit_
         [data]/global/vertices/evr_privert_
         [data]/tpc/tracks/tptrack_
-        [data]/tpc/tracks/tpt_eval_
+        [data]/tpc/tracks/evaltrk_
         [data]/svt/hits/scs_spt_
         [params]/global/egr_egrpar_
         [data]/svt/tracks/stk_track_
         [data]/svt/tracks/groups_
         [data]/global/tracks/evt_match_
-        [data]/global/tracks/globtrk
+        [data]/global/tracks/globtrk_
+        [data]/global/tracks/globtrk_aux
+
 
 if ( staf_status(1) .ne. STAFCV_OK) then
      message 'Problem on return from EGR_FITTER'
