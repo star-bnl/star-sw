@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.1 1999/09/20 20:12:15 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.2 1999/11/05 21:51:58 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.2  1999/11/05 21:51:58  kathy
+// write title at top of each page of histograms in DrawHists method
+//
 // Revision 1.1  1999/09/20 20:12:15  kathy
 // moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
 //
@@ -21,6 +24,7 @@
 #include "TPostScript.h"
 #include "TMath.h"
 #include "TString.h"
+#include "TPaveLabel.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -79,23 +83,46 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   SafeDelete(m_HistCanvas);
 
 // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
+//                                        (600 x 720                US      )
   TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
-//  HistCanvas->SetFillColor(19);
-  HistCanvas->SetBorderSize(2);  
-  HistCanvas->Divide(m_PadColumns,m_PadRows);
 
-  
+//  HistCanvas->SetFillColor(19);
+// but now we have paper size in cm
+  //  HistCanvas->Range(0,0,20,24);
+  //  Can set range to something which makes it equivalent to canvas but is 0,1 by default
+  //HistCanvas->SetBorderSize(2);  
+
+// Range for all float numbers used by ROOT methods is now 0,1 by default!
+
+// write title at top of canvas
+// order of PaveLabel is x1,y1,x2,y2 - fraction of pad (which is the canvas now)
+   TPaveLabel *title = new TPaveLabel(0.1,0.96,0.9,0.99," Global Title Goes Here ","br");
+   title->SetFillColor(18);
+   title->SetTextFont(32);
+   title->SetTextSize(0.6);
+   // title->SetTextColor(49);
+   title->Draw();
+
+// Make 1 big pad on the canvas - make it a little shorter than the canvas 
+//    - must cd to get to this pad! 
+  TPad *graphPad = new TPad("PadName","Pad Title",0.01,0.05,0.95,0.95);
+  graphPad->Draw();
+  graphPad->cd();
+
+// Now divide the canvas (should work on the last pad created) 
+  graphPad->Divide(m_PadColumns,m_PadRows);
+
   if (psf) psf->NewPage();
   const Char_t *firstHistName = m_FirstHistName.Data();
   const Char_t *lastHistName  = m_LastHistName.Data();
 
+  cout << " **** Now finding hist **** " << endl;
 
 // Now find the histograms
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   dirList = FindHists(dirName);
  
-
   Int_t padCount = 0;
   
 // Create an iterator called nextHist - use TIter constructor
@@ -110,8 +137,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   TObject *obj = 0;
   Int_t chkdim=0;
   while (obj = nextHist()) {
-//    cout << " **** Now in StHistUtil::DrawHists - in loop: " << endl;
-//    cout << "               name = " << obj->GetName() << endl;
+   cout << " **** Now in StHistUtil::DrawHists - in loop: " << endl;
+   cout << "               name = " << obj->GetName() << endl;
+
 
     if (obj->InheritsFrom("TH1")) { 
 //    cout << " **** Now in StHistUtil::DrawHists - obj->InheritsFrom(TH1)  **** " << endl;
@@ -126,7 +154,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	  if (psf) psf->NewPage();
 	  padCount=0;
 	}
-	HistCanvas->cd(++padCount);
+	graphPad->cd(++padCount);
           gPad->SetLogy(0);
 	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName())){
 	  gPad->SetLogy(1);
