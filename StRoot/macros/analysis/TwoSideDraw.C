@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.1.1.1 1999/08/10 18:48:22 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.2 1999/08/10 19:01:25 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.2  1999/08/10 19:01:25  snelling
+// changed for new bfc
+//
 // Revision 1.1.1.1  1999/08/10 18:48:22  snelling
 // macro to draw pixels and hits
 //
@@ -203,4 +206,3 @@ void TwoSideDraw() {
     DrawGeantHits("x2:x0","x2<0","same,scat");
   }
 }
-
