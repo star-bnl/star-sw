@@ -1,8 +1,5 @@
-// $Id: laser.C,v 1.5 1998/08/26 19:04:05 love Exp $
+// $Id: laser.C,v 1.4 1998/08/26 12:15:15 fisyak Exp $
 // $Log: laser.C,v $
-// Revision 1.5  1998/08/26 19:04:05  love
-// Event display working (SUN arch only)
-//
 // Revision 1.4  1998/08/26 12:15:15  fisyak
 // Remove asu & dsl libraries
 //
@@ -63,26 +60,24 @@
   // Set parameters
   //  tss_Maker.adcxyzon();
   chain.PrintInfo();
-// Init the main chain and all its makers
+// Init the mai chain and all its makers
    gBenchmark->Start("laser");
    chain.Init();
    TFile f("fntup.root","RECREATE");
 // Prepare TCanvas to show some histograms created by makers
   gBenchmark->Start("laser");
-  // Skip some events.
-  Int_t ievt;
-  Int_t nskip=1;
-  for (ievt=0;ievt<nskip;ievt++){
+  // Skip one bad event.
   St_DataSet *set = xdffile_in.NextEventGet();  
   delete set;
-  }
-  Int_t nevt=10;
-  for (Int_t i=ievt;i<ievt+nevt;i++){
+  for (Int_t i=0;i<10;i++){
     chain.Clear();
-    chain.Make(i+1);
+    chain.Make(i);
+  //  histCanvas->Modified();
+  //  histCanvas->Update();
+  //chain.Clear();
   }
   laser_Maker.Histograms()->Write();
   gBenchmark->Stop("laser");
   gBenchmark->Print("laser");
-  //  TBrowser b;
+  TBrowser b;
 }

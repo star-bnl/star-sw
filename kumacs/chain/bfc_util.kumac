@@ -60,12 +60,6 @@
 * editted 8/26/98 K. Turner - in (evin), rm run/params/svt tables that
 *                             are in wrong place and not needed
 * editted 8/26/98 K. Turner - fixed (fzin) so it would work 
-* editted 8/26/98 K. Turner - now use par2mem to read in svt & tpc run/params
-*                             tables so had to change init kumacs for svt,tpc
-*                           - remove rm and rmdir (see few days ago);  just 
-*                             leave old unused tables in
-*                           - write out information to log file from (rg2t)
-*                             
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -132,6 +126,14 @@ macro bfc_init _
      (evin)
           exec read_table_from_file#init inev [input_file]
           exec read_table_from_file#read inev
+* 8/26/98 - now read in run/params using db,par2mem and these tables
+*          were in the wrong place in an old version
+* rm run/params/svt/config
+* rm run/params/svt/shape
+* rm run/params/svt/geom
+* rm run/params/svt/srs_activea
+* rm run/params/svt/srs_srspar
+* rm run/params/svt/srs_direct
      (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -312,6 +314,8 @@ ABEND:
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
+* 8/25/98 K.Turner - because of mismatch between old and new structure:
+* rmdir event/dst
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
@@ -321,7 +325,7 @@ ABEND:
      (rg2t) cd [geantE]
           for/call g2t
           cd /dui
-          tdm/table/rowcount event/geant/Event/g2t_vertex
+          tdm/table/rowcount rvent/geant/Event/g2t_vertex
           no_vert=$format(staf_result(1),i10)
           tdm/table/rowcount event/geant/Event/g2t_track
           no_track=$format(staf_result(1),i10)
