@@ -378,15 +378,15 @@ foreach my $dir ("StRoot","pams") {
 	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	my @inc_local = readdir DIR; 
 	closedir DIR;# print "incs = @inc_local\n";
-	my @inclT     = ();
+	my @inclTT     = ();
 	foreach my $inc (@inc_local) {
 	  if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
-	    push @inclT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
+	    push @inclTT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
 	  }
 	}
-	if ($#inclT > -1) {
-	  my $include_dir = $INCLUDE . "/" . $sub_dir;# print "Install $include_dir, @inclT\n";
-	  Install $env $include_dir, @inclT;
+	if ($#inclTT > -1) {
+	  my $include_dir = $INCLUDE . "/" . $sub_dir;# print "Install $include_dir, @inclTT\n";
+	  Install $env $include_dir, @inclTT;
 	}
       }
     }
@@ -428,6 +428,9 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n";# Targets = @Targets\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
+if ($#incT > -1) {
+  Install $env $INCLUDE, @incT;
+}
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
