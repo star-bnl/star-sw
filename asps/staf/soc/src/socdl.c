@@ -1,70 +1,63 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "asuAlloc.h"
 #include "cdl.h"
 #include "emlLib.h"
 
-/*--------------------------------------------------------------------*/
-int soc_dl_init(char *pkgName) {
-  int returnValue;
+/* Dynamically load a shared library. */
+int 
+soc_dl_load (char *pkgName)
+{
   char *solibName;
-  char *funcName;
-  int (*theFunction)();
+  
+  solibName = (char *) MALLOC(strlen(pkgName) + 7);
+  sprintf(solibName, "lib%s.so", pkgName);
 
-  solibName = (char*)MALLOC(strlen(pkgName) +7);
-  sprintf(solibName,"lib%s.so",pkgName);
-
-  if(cdl_load(solibName)) {
-    fprintf(stderr,"Cannot load '%s'.\n",solibName);
-    fprintf(stderr,"Check that your LD_LIBRARY_PATH contains '.'.\n");
+  if (cdl_load(solibName)) {
     FREE(solibName); /*fix memory leak -akio*/
-    exit(2);
+    EML_ERROR(NO_FUNCTION_LOADED);
   }
   FREE(solibName); /*fix memory leak -akio*/
-  
-  funcName = (char*)MALLOC(strlen(pkgName) +6);
-  sprintf(funcName,"%s_init",pkgName);
-  theFunction = (int(*)())cdl_func_addr(funcName);
-  FREE(funcName);  /*fix memory leak -akio*/
-  if(!theFunction) EML_ERROR(NO_FUNCTION_LOADED);
 
-  returnValue=theFunction();   
-
-  return returnValue;
-  
+  return STAFCV_OK;
 }
 
-/*--------------------------------------------------------------------*/
-int soc_dl_start(char *pkgName) {
-  int returnValue;
+static int
+soc_dl_call (char *pkgName, char *suffix)
+{
   char *funcName;
   int (*theFunction)();
+  
+  funcName = (char *) MALLOC(strlen(pkgName) + strlen(suffix) + 1);
+  sprintf(funcName, "%s%s", pkgName, suffix);
 
-  funcName = (char*)MALLOC(strlen(pkgName) +7);
-  sprintf(funcName,"%3s_start",pkgName);
-  theFunction = (int(*)())cdl_func_addr(funcName);
-  FREE(funcName);  /*-akio*/
-  if(!theFunction) EML_ERROR(NO_FUNCTION_LOADED);
-
-  returnValue=theFunction();
-
-  return returnValue;
+  theFunction = (int(*)()) cdl_func_addr(funcName);
+  FREE(funcName);   
+  if (!theFunction) 
+    EML_ERROR(NO_FUNCTION_LOADED);
+  
+  return theFunction();   
 }
 
-/*--------------------------------------------------------------------*/
-int soc_dl_stop(char *pkgName) {
-  int returnValue;
-  char *funcName;
-  int (*theFunction)();
+/* Call the ???_init entrypoint of a package */
+int 
+soc_dl_init (char *pkgName) 
+{
+  return soc_dl_call(pkgName, "_init");
+}
 
-  funcName = (char*)MALLOC(strlen(pkgName) +6);
-  sprintf(funcName,"%3s_stop",pkgName);
-  theFunction = (int(*)())cdl_func_addr(funcName);
-  FREE(funcName);  /*-akio*/
-  if(!theFunction) EML_ERROR(NO_FUNCTION_LOADED);
+/* Call the ???_start entrypoint of a package */
+int 
+soc_dl_start (char *pkgName) 
+{
+  return soc_dl_call(pkgName, "_start");
+}
 
-  returnValue=theFunction(); 
-
-  return returnValue;
+/* Call the ???_stop entrypoint of a package */
+int 
+soc_dl_stop (char *pkgName) 
+{
+  return soc_dl_call(pkgName, "_stop");
 }
 
