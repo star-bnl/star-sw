@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.34 1999/09/03 23:11:48 perev Exp $
+// $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.35  1999/09/08 00:13:35  fisyak
+// Add static *GetChain()
+//
 // Revision 1.34  1999/09/03 23:11:48  perev
 // Add .runcont directory
 //
@@ -167,6 +170,7 @@ public:
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
    virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
+   static  StMaker     *GetChain() {return fgStChain;}
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
@@ -233,7 +237,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.34 1999/09/03 23:11:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };

@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.62 1999/09/03 23:11:48 perev Exp $
+// $Id: StMaker.cxx,v 1.63 1999/09/08 00:13:35 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.63  1999/09/08 00:13:35  fisyak
+// Add static *GetChain()
+//
 // Revision 1.62  1999/09/03 23:11:48  perev
 // Add .runcont directory
 //
@@ -167,7 +170,7 @@
 #include "StChain.h"
 #include "St_Table.h"
 
-#include "StarClassLibrary/StMemoryInfo.hh"
+#include "StMemoryInfo.hh"
 
 StMaker *StMaker::fgStChain = 0;
 Int_t MaxWarnings = 26;
