@@ -40,8 +40,9 @@ int lev_init()
 //:<--------------------------------------------------------------------
 int lev_start()
 {
-  printf("LEV: Starting.\n");
-  lev = new levFactory();
+  printf("LEV: Starting.\n"); fflush(0);
+  lev = new levFactory("lev");
+  printf("LEV: Updating.\n"); fflush(0);
   lev->levUpdate();
   // What's this for?   tdmTable *versions=lev->versions();
   // What's this for?   tdmTable *environment=lev->environment();

@@ -39,7 +39,7 @@ void kam_lev_update_()
 {
   //Later maybe. long npars = ku_npar();      /* number of KUIP parameters */
   lev->update();
-  printf("I have updated the versions table (config/levVersions).\n");
+  printf("I have updated the versions table (config/levVer).\n");
   set_staf_status(0);
 }
 void levVersRegistration(const char *name,const char *version) {

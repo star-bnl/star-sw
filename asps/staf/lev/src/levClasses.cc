@@ -27,7 +27,7 @@
 
 //:----------------------------------------------- MACROS             --
 #define LEV_ENV_TABLE "config/levEnv"
-#define LEV_VER_TABLE "config/levVersions"
+#define LEV_VER_TABLE "config/levVer"
 /* HACK These should be from idl/*.idl: */
 #define LEV_ENV_SPEC "struct levEnvTab { char name[32],value[128]; };"
 #define LEV_VER_SPEC "struct levVerTab { char name[128],\
@@ -84,7 +84,7 @@ STAFCV_T levRegisterEnvInfo(char *name,char *value) {
   TDM_COLUMN_T col; TDM_CELLDATA_T cellData; DS_TYPE_CODE_T tcode;
   int column; char *colName,*val,*v;
   tdmTable* tab; long ncol,nrow;
-  if(!tdm->findTable(LEV_ENV_TABLE,tab)) {
+  if(NULL == (tab = tdm->findTable(LEV_ENV_TABLE))) {
      EML_ERROR(ENV_TBL_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
@@ -102,14 +102,14 @@ STAFCV_T levRegisterEnvInfo(char *name,char *value) {
       EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
-    cellData.data.v = (void*)ASUALLOC(sizeof(double)); // BUG? FIXED?
-    v=(char*)ASUALLOC(strlen(val) +1);
+    cellData.data.v = (void*)MALLOC(sizeof(double)); // BUG? FIXED?
+    v=(char*)MALLOC(strlen(val) +1);
     strcpy(v,val); cellData.data.c = (char*)v;
     if(!tab->putCell(cellData,nrow,ncol)) {
       PP"putCell fail\n"); EML_ERROR(PUT_CELL_FAILED);
     }
   }
-  ASUFREE(cellData.data.v);
+  FREE(cellData.data.v);
   EML_SUCCESS(STAFCV_OK);
 } /* nrow val .v .c */
 void levExeName(char *out) {
@@ -129,7 +129,7 @@ void levExeName(char *out) {
 void levFactory::levUpdate() {
   socObject *obj;
   for( int i=0; i<soc->count();i++ ){
-     if(soc->getObject(i,obj)) {
+     if(NULL != (obj = soc->getObject(i))) {
         registerVersion(obj->name(),obj->type(),obj->version());
      }
   }
@@ -167,33 +167,40 @@ STAFCV_T levFactory::levRegisterEnvironment() {
   levExeName(nameOfExe);
   /******************  output to tables ****************************/
   if(!levRegisterEnvInfo("user",user)) EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("hostname",hostname)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("sysname",osys.sysname)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("node",osys.nodename)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("release",osys.release)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("version",osys.version)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("machine",osys.machine)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("nameOfExe",nameOfExe)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
-  if(!levRegisterEnvInfo("startTime",startTime)) 
-        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("hostname",hostname))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("sysname",osys.sysname))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("node",osys.nodename))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("release",osys.release))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("version",osys.version))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("machine",osys.machine))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("nameOfExe",nameOfExe))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("startTime",startTime))
+	EML_ERROR(TABLE_INSERTION_FAILED);
   EML_SUCCESS(STAFCV_OK);
 }
 //:=============================================== CLASS              ==
 // levFactory
 
 //:----------------------------------------------- CTORS & DTOR       --
-levFactory:: levFactory() : socObject("lev", "levFactory") {
+levFactory:: levFactory(const char *name)
+	: socFactory()
+	, socObject(name, "levFactory") {
   myPtr = (SOC_PTR_T)this;
+  lock(TRUE);
+printf("DEBUG HACK 1a \n"); fflush(0);
   tdm->newDataset("config",20);
+printf("DEBUG HACK 1b \n"); fflush(0);
   tdm->newTable(LEV_ENV_TABLE,LEV_ENV_SPEC,LEV_ENV_MAX_ROWS);
+printf("DEBUG HACK 1c \n"); fflush(0);
   tdm->newTable(LEV_VER_TABLE,LEV_VER_SPEC,LEV_VER_MAX_ROWS);
+printf("DEBUG HACK 1d \n"); fflush(0);
   this->levRegisterEnvironment();
   // Craig tdm->findTable(LEV_ENV_TABLE,myEnvironment);
   // Craig tdm->findTable(LEV_VER_TABLE,myVersions);
@@ -208,8 +215,8 @@ int levCellAlreadyIn(const char *table,const char *value,long col) {
   long i,nrow;
   tdmTable* tab;
   TDM_CELLDATA_T cellData;
-  if(!tdm->findTable(table,tab)) {
-     EML_ERROR(TABLE_NOT_FOUND);
+  if(NULL == (tab = tdm->findTable(table))) {
+     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=tab->rowCount();
   for(i=nrow-1;i>=0;i--) {
@@ -225,8 +232,8 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   const char *val;
   tdmTable* tab; long ncol,nrow;
   /*------------------------------------------- */
-  if(!tdm->findTable(LEV_VER_TABLE,tab)) {
-     EML_ERROR(TABLE_NOT_FOUND);
+  if(NULL == (tab = tdm->findTable(LEV_VER_TABLE))) {
+     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
   if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
@@ -251,20 +258,20 @@ STAFCV_T levFactory:: registerVersion(const char *name,
       EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
-    cellData.data.v = (void*)ASUALLOC(1000);  // BUG? does this mem get used?
-    v=(char*)ASUALLOC(strlen(val) +1);
+    cellData.data.v = (void*)MALLOC(1000);  // BUG? does this mem get used?
+    v=(char*)MALLOC(strlen(val) +1);
     strcpy(v,val); cellData.data.c = (char*)v;
     if(!tab->putCell(cellData,nrow,ncol)) {
       PP"putCell fail\n"); EML_ERROR(PUT_CELL_FAILED);
     }
-    ASUFREE(cellData.data.v);
+    FREE(cellData.data.v);
   }
   /* -------------------------------------------------------*/
   EML_SUCCESS(STAFCV_OK);
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.3 1997/03/28 20:50:11 ward Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.4 1997/05/12 20:40:42 tull Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;
@@ -277,4 +284,13 @@ tdmTable * levFactory:: environment()
 tdmTable * levFactory:: versions() 
 {
    return myVersions;
+}
+//:---------------------------------------------------------------------
+unsigned char levFactory:: implementsInterface (const char * iface) {
+   if( 0 == strcmp("levFactory",iface)
+   ||  socFactory::implementsInterface(iface)
+   ){
+      return TRUE;
+   }
+   return FALSE;
 }

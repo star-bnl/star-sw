@@ -13,7 +13,7 @@ endif
 #
 export VPATH := $(BINDIR) $(SRCMDIR) $(LIBDIRS) $(INCDIRS)
 #
-VERSION := "$Id: Makefile,v 1.4 1997/03/28 20:49:35 ward Exp $"
+VERSION := "$Id: Makefile,v 1.5 1997/05/12 20:40:20 tull Exp $"
 # 
 #-- Object files
 SUFS := *.cc *.c *.F

@@ -8,7 +8,7 @@ endif
 #
 .PHONY: all clean test install
 #
-VERSION := "$Id: Makefile,v 1.2 1997/03/28 20:50:09 ward Exp $"
+VERSION := "$Id: Makefile,v 1.3 1997/05/12 20:40:39 tull Exp $"
 # 
 PAMTYPE := PAM
 ASPTYPE := ASP
