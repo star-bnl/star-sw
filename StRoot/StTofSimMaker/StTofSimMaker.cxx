@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.3 2003/07/25 04:34:44 geurts Exp $
+ * $Id: StTofSimMaker.cxx,v 1.4 2003/08/08 00:22:11 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.4  2003/08/08 00:22:11  geurts
+ * changed location of header files for the local collections
+ *
  * Revision 1.3  2003/07/25 04:34:44  geurts
  * - upper adc and tdc limits
  * - geometry initialization moved to InitRun()
@@ -54,8 +57,8 @@
 #include "tables/St_g2t_vpd_hit_Table.h"
 //#include "tables/St_g2t_track_Table.h"
 //#include "tables/St_g2t_tpc_hit_Table.h"
-#include "StTofMaker/StTofDataCollection.h"
-#include "StTofMaker/StTofSlatCollection.h"
+#include "StTofUtil/StTofDataCollection.h"
+#include "StTofUtil/StTofSlatCollection.h"
 #include "StTofMCSlat.h"
 
 typedef vector<StTofMCSlat> tofMCSlatVector;
