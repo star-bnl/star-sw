@@ -1,3 +1,6 @@
+//*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
+//*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
+//
 //  
 //  
 //
@@ -8,10 +11,13 @@
 //
 TBrowser *b = 0;
 class StChain;
+class St_DataSet;
 StChain  *chain=0;
 TFile *root_file=0;
 TTree  *tree=0;
-void Load(){
+St_DataSet *set = 0;
+void Load()
+{
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("xdf2root");
@@ -29,13 +35,13 @@ void Load(){
 
 void GetEvent(Int_t numberOfEvent=1,
 	      Int_t firstEventNumber=2,
-	      const Char_t *RootFileName = "gtrack.rootx",
+	      const Char_t *RootFileName = "/disk1/star/test/psc0049_08_40evts.root",
 	      const Char_t *testedMakerName = "dst")
 {
   cout << "Usage:   \tGetEvent(Int_t numberOfEvent=\t"<<numberOfEvent<<"," << endl; 
   cout << "\t \t Int_t firstEventNumber=\t"<<firstEventNumber<<","<< endl;
   cout << "\t \t const Char_t *RootFileName = \t\""<<RootFileName<< "\","<< endl;
-  cout << "\t \t const Char_t *testedMakerName = \t\""<<testedMakerName<<"\"," << endl;
+  cout << "\t \t const Char_t *testedMakerName = \t\""<<testedMakerName<<"\"); " << endl;
 //=================  NAME to TEST ==================
 //  const Char_t *testedMakerName = "geant";
 //==================================================
@@ -77,10 +83,12 @@ void GetEvent(Int_t numberOfEvent=1,
       chain->DataSet(testedMakerName)->ls("*");
     }
     else {
-     St_DataSet *set = chain->DataSet(testedMakerName);
+     set = chain->DataSet(testedMakerName);
      if (set) set->ls("*");
      else
         cout << "------------- Wrong Event #" << i << endl;
     }
   }
+  if (b) delete b;
+  if (set) b = new TBrowser("DST", set);
 }
