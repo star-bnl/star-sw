@@ -1,3 +1,4 @@
+depend: $(FILES_DM) $(FILES_D)
 ifneq (,$(FILES_DCINT))
 $(FILES_DCINT): $(DEP_DIR)/%Cint.d: %.h 
 ifdef NT
