@@ -1,0 +1,14 @@
+AAREADME
+
+B. Moskowitz, BNL   April 29, 1996
+
+An important message concerning the dsl package
+-----------------------------------------------
+
+The dsl package must use its own Makefiles, and not the standard 
+slm Makefiles.  This is because dsl needs to work under VxWorks 
+as well as under Unix.
+
+To build the library, use the command "make", not "make lib".
+
+The top Makefile now uses STAR_SYS_LEVEL for "make install".
