@@ -3,10 +3,10 @@ SmdGains *task=0;
 TObjArray  *HList;
 TFile *fd;
 
-doSmdGains(  int sectID=6 ){
-int iU=1;
+doSmdGains( int sectID=5 , int iU=0){
+  
   TString iPath="/star/data05/scratch/balewski/outD0/";//BNL
-  // iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outD0/";//LBL
+  iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outE2/";//LBL
   
   char *libL[]={
    "../StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
@@ -23,8 +23,11 @@ int iU=1;
  
   HList=new TObjArray;
   task=new SmdGains;
+  
+  char tt[100];
+  sprintf(tt,"mipA%02d",sectID);
 
-   fd=task->open(iPath+"mip5-8Slow.hist.root"); 
+  fd=task->open(iPath+tt+".hist.root"); 
   //fd=task->open(iPath+"R5112018.hist.root"); 
   //  return;
 
@@ -33,27 +36,26 @@ int iU=1;
   int str1=1,str2=288;
 
   //  plotAllTiles(); return;
-
-
   //  task->fitSlopesSmd(250,280,1); return;
-
   //  fitSlopesSmdPlain(); // plot all strips w/ slopes for one plain
 
+#if 0
   task->fitSlopesSmd(str1,str2); 
   //task->fitSlopesSmd(261,290,1);
   task-> doSlopesOnly(760.); 
+#endif
 
-#if 0
-  task->doOneStripEne(str1,str2);
-  task->doGainCorr(str1,str2);
+#if 1
+  task->doGainCorr(str1,str2,15,0);
+  task->plTGraph("pol0",1,3); // avearge MIP energy  
   task->saveHisto();
 
   if(0) {
     task->plFGC();
     task->plTGraph("pol0",0); // individual gain corrections
-    task->plTGraph("pol0",1); // avearge MIP energy
-  }
 
+  }
+  return;
 #endif
   char tt[100];
   sprintf(tt,"smd%02d%c.dat",sectID,'U'+iU);
@@ -102,3 +104,8 @@ void  fitSlopesSmdPlain(){
     task->fitSlopesSmd(1+str1,30+str1,3);
   }
 }
+
+//------------------------------
+
+//  task->doOneStripEne(str1,str2); // fit individaul energy of strips
+//  task->doGainCorr(str1,str2);
