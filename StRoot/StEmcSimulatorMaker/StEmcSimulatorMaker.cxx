@@ -558,7 +558,7 @@ Int_t StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits()
         mGeom[BSMDE-1]->getId(module,eta,sub,rid);
         hasHit[0][rid-1] = 1;
       }
-      else if(detector == BPRS)
+      else if(detector == BSMDP)
       {
         mGeom[BSMDP-1]->getId(module,eta,sub,rid);
         hasHit[1][rid-1] = 1;
@@ -1029,8 +1029,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.28 2004/08/09 19:43:28 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.29 2005/01/07 11:31:20 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.29  2005/01/07 11:31:20  suaide
+// small bug fixed
+//
 // Revision 1.28  2004/08/09 19:43:28  suaide
 // moved global variables to private members and
 // made small modifications to run in embedding mode
