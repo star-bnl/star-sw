@@ -2,10 +2,16 @@
 *	AIX versions.
 
 	REAL FUNCTION RAN(ISEED)
+
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER ISEED !Ignored.
+
+*  Description:
 *	This is meant to provide VMS look-alike random number generator.
 *	ISEED isn't used at all - VMS ISEED and IBM SEED are different things.
-	IMPLICIT NONE
-	INTEGER ISEED
+
 	REAL SEED
 	SAVE SEED
 	REAL RAND
@@ -19,8 +25,17 @@
 	END
 
 	SUBROUTINE STRCPU(TCPU)
-	INTEGER TCPU
+
+	IMPLICIT NONE
+
+*  Output:
+	INTEGER TCPU !CPU time in "ticks" since last STRCPU0 call.
+
+*  Description:
+*	Platform-specific call to get the CPU time.
+
 	INTEGER MCLOCK
+
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
@@ -30,7 +45,18 @@
 	END
 
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
-	INTEGER TCPU(2)
+
+	IMPLICIT NONE
+
+*  Output:
+	INTEGER TCPU(2) !CPU time in "ticks" since last STRCPU0 call.
+
+*  Description:
+*	Platform-specific call to get the CPU time in quad-word form.
+*	This really only does the same as STRCPU at present, with
+*	TCPU being an array instead of single-element.  TCPU(2)
+*	always comes back zero.
+
 	INTEGER MCLOCK
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
@@ -42,8 +68,12 @@
 	END
 
 	SUBROUTINE STRCPU0
-*	"Initialize" CPU elapsed time counter.
+
 	IMPLICIT NONE
+
+*  Description:
+*	"Initialize" CPU elapsed time counter.
+
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 	INTEGER MCLOCK
@@ -55,81 +85,114 @@
 
 	IMPLICIT NONE
 
-*  Return value:
-*	Native cpu clock ticks-per-second.
+*  Description:
+*	Return native cpu clock ticks-per-second.
 
 	STRCPUTPS=100 !On AIX, it's 100 per second.
 
 	RETURN
 	END
 
-	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
+	SUBROUTINE STRDate( Year, Month, Day )
+
 	IMPLICIT NONE
-*  Output arguments:
-	INTEGER YEAR,MONTH,DAY !Year is 4-digit, eg, 1991.
 
-	INTEGER ITIME,DAYS,HOUR,SECS
-	INTEGER LEAP_CYCLE,MONTH_DAYS(12)
+*  Outputs:
+	INTEGER Year, Month, Day !Year is 4-digit, eg, 1991.
+
+*  Brief Description: Handles a call to the SGI time routine.
+
+*  Description:
+*	Return the integer date.
+
+	INTEGER Itime, Days, Hour, Secs
+	INTEGER Leap_Cycle
+
+	CHARACTER*4 Zone_Name
+	INTEGER     Zone
+
+	INTEGER Month_Days(12)
+
 *	Table of months' days:
-	DATA MONTH_DAYS/31,28,31,30,31,30,31,31,30,31,30,31/
+	DATA Month_Days / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
+*	                 Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+*	                 Note:  Feb's entry is overwritten as needed (not constant)!
 
-	CALL TIME(ITIME)
-	DAYS=ITIME/86400
-	SECS=ITIME-DAYS*86400
-	HOUR=SECS/3600
 
-	HOUR=HOUR-5 !Convert UT to EST.
-	IF (HOUR.LT.0) THEN
-	  HOUR=HOUR+24
-	  DAYS=DAYS-1
+	CALL STRTime_Get_Current_Zone( Zone, Zone_Name ) !Get it as set by application or from system.
+
+*	"TIME" gives seconds since 01-Jan-1970, midnight.
+	CALL TIME(Itime) !System routine.
+
+	Days  = Itime / 86400
+	Secs  = Itime - Days * 86400
+	Hour  = Secs  / 3600
+
+	Hour = Hour - Zone !Convert UT to the current time zone.
+	IF ( Hour .LT. 0 ) THEN
+	  Hour = Hour + 24
+	  Days = Days -  1
+	ELSE IF ( Hour .GE. 24 ) THEN
+	  Hour = Hour - 24
+	  Days = Days +  1
 	END IF
 
-*	Assume 1-JAN-1970 is day zero.
-	YEAR=1970
-	LEAP_CYCLE=2
-	DO WHILE (DAYS.GE.366)
-	  DAYS=DAYS-365
-	  YEAR=YEAR+1
-	  LEAP_CYCLE=LEAP_CYCLE+1
+*	Assume 1-JAN-1970 is Day Zero.
+	Year       = 1970
+	Leap_Cycle = 2
+	DO WHILE ( Days .GE. 366 )
+	  Days = Days - 365
+	  Year = Year + 1
+	  Leap_Cycle = Leap_Cycle+1
 *	  Subtract one from days on year after leap:
-	  IF (LEAP_CYCLE.EQ.1) THEN !Year after leap.
-	    DAYS=DAYS-1
+	  IF ( Leap_Cycle .EQ. 1 ) THEN !Year after leap.
+	    Days = Days - 1
 	  END IF
 *	  Recycle back to zero every 4 years:
-	  IF (LEAP_CYCLE.EQ.4) THEN !Leap.
-	    LEAP_CYCLE=0
+	  IF ( Leap_Cycle .EQ. 4 ) THEN !Leap.
+	    Leap_Cycle = 0
 	  END IF
 	END DO
 
-	IF (LEAP_CYCLE.EQ.0) THEN !Leap year:
-	  MONTH_DAYS(2)=29
+	IF ( Leap_Cycle .EQ. 0 ) THEN !Leap year:
+	  Month_Days(2) = 29
 	ELSE !Non-leap year:
-	  MONTH_DAYS(2)=28
-	  IF (DAYS.EQ.365) THEN !Last day plus one of non-leap year:
-	    DAYS=0 !Make it 1st day of next year.
-	    YEAR=YEAR+1 !Next year.
+	  Month_Days(2) = 28
+	  IF ( Days .EQ. 365 ) THEN !Last day plus one of non-leap year:
+	    Days = 0 !Make it 1st day of next year.
+	    Year = Year + 1 !Next year.
 	  END IF
 	END IF
 
-	MONTH=1
-	DO WHILE ((DAYS.GE.MONTH_DAYS(MONTH)).AND.(MONTH.LE.12))
-	  DAYS=DAYS-MONTH_DAYS(MONTH)
-	  MONTH=MONTH+1
+	Month = 1
+	DO WHILE ( ( Days .GE. Month_Days(Month) ) .AND. (Month.LE.12) )
+	  Days  = Days - Month_Days(Month)
+	  Month = Month + 1
 	END DO
-	DAY=DAYS+1
+	Day = Days + 1
 
 	RETURN
 	END
+
+
+
+
+
 
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
+	IMPLICIT NONE
+
+*  Input/output:
+	INTEGER I32 !32-bit integer to be 16-bit-word "swapped".
+
+*  Description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On AIX (here), the swapping is done.
 
-	IMPLICIT NONE
+*	Compatibility routine.  See STRDEC_ENDIAN_HALF.
 
-	INTEGER I32
 	INTEGER I4
 	INTEGER*2 I2(2),I2SAVE
 	EQUIVALENCE (I2,I4)
@@ -431,9 +494,15 @@
 	END
 
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
+
 	IMPLICIT NONE
+
 	INTEGER HOUR,MIN,SEC
 	INTEGER ITIME,SECS,DAYS
+
+	INTEGER     Zone
+	CHARACTER*4 Zone_Name
+
 	CALL TIME(ITIME) !Observed to return seconds since 1-jan-1970.
 	DAYS=ITIME/86400
 	SECS=ITIME-DAYS*86400
@@ -441,12 +510,103 @@
 	MIN=(SECS-HOUR*3600)/60
 	SEC=(SECS-HOUR*3600-MIN*60)
 
-	HOUR=HOUR-5 !Convert UT to EST.
-	IF (HOUR.LT.0) THEN
-	  HOUR=HOUR+24
+	CALL STRTime_Get_Current_Zone( Zone, Zone_Name )
+
+	HOUR = HOUR - Zone !Convert UT to the current time zone.
+
+	IF ( HOUR .LT. 0 ) THEN
+	  HOUR = HOUR + 24
+	ELSE IF ( HOUR .GE. 24 ) THEN
+	  HOUR = HOUR - 24
 	END IF
+
 	RETURN
 	END
+
+	SUBROUTINE STRTime_Get_Current_Zone( Zone, Zone_Name )
+
+	IMPLICIT NONE
+
+	INCLUDE 'str_time_inc'
+
+*  Outputs:
+	INTEGER       Zone      !Time zone offset, in {-12, 12}.
+	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
+
+*  Brief Description: Get the time zone.
+
+*  Description:
+*	Return the current time zone, as set in str.  If not set,
+*	set str's current zone to the host's local time zone.
+
+
+	LOGICAL Initialized
+	SAVE    Initialized
+
+	DATA    Initialized / .FALSE. /
+
+
+*	Initialization of time zone may occur externally, so a gauntlet of tests is needed:
+*	(Doing it with two independent values is safe & eliminates the need for BLOCKDATAs.)
+	IF ( Initialized )                             THEN !Initialized; Skip this.
+	ELSE IF ( Current_Zone .LT. -12 )                THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Current_Zone .GT.  12 )                THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Initialized_1 .NE. Initialized_1_P ) THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Initialized_2 .NE. Initialized_2_P ) THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE                                                !Initialized.
+	  Initialized = .TRUE.
+	END IF
+
+	IF ( .NOT. Initialized ) THEN !Set it to the local time zone:
+*	  Hardwire for the moment:
+	  Current_Zone      = 6
+	  Current_Zone_Name = 'EDT '
+*	  Current_Zone      = 5
+*	  Current_Zone_Name = 'EST '
+	  Initialized = .TRUE.
+	  Initialized_1 = Initialized_1_P
+	  Initialized_2 = Initialized_2_P
+	END IF
+
+	Zone      = Current_Zone
+	Zone_Name = Current_Zone_Name
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRTime_Set_Current_Zone( Zone, Zone_Name )
+
+	IMPLICIT NONE
+
+	INCLUDE 'str_time_inc'
+
+*  Inputs:
+	INTEGER       Zone      !Time zone offset, in {-12, 12}.
+	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
+
+*  Brief Description:  Set str's current time zone.
+
+	Current_Zone      = Zone
+	Current_Zone_Name = Zone_name
+
+*	Double zone-initialized values -- indicate it's initialized:
+	Initialized_1 = Initialized_1_P
+	Initialized_2 = Initialized_2_P
+
+	RETURN
+	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
 

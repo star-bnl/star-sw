@@ -2,12 +2,17 @@
 
 
 	SUBROUTINE STRCPU(TCPU)
+
 	IMPLICIT NONE
-*  Output argument:
+
+*  Output:
 	INTEGER TCPU
+
+*  Description:
+*	Obtain the total CPU time since counter-initialization:
+
 	INTEGER IERR,QCPU(2)
 	INTEGER LIB$STAT_TIMER
-*	Obtain the total CPU time since counter-initialization:
 	IERR=LIB$STAT_TIMER(2,QCPU) !Don't care about errors here.
 	TCPU=QCPU(1)
 	
@@ -19,12 +24,17 @@
 
 
 	SUBROUTINE STRCPUQ(TCPU) !Quad-version (64-bits).
+
 	IMPLICIT NONE
+
 *  Output argument:
 	INTEGER TCPU(2) !VMS uses 64 bits, others may or may not.
+
+*  Description:
+*	Obtain the total CPU time since counter-initialization:
+
 	INTEGER IERR
 	INTEGER LIB$STAT_TIMER
-*	Obtain the total CPU time since counter-initialization:
 	IERR=LIB$STAT_TIMER(2,TCPU) !Don't care about errors here.
 	
 	RETURN
@@ -36,6 +46,7 @@
 
 	SUBROUTINE STRCPU0
 
+*  Description:
 *	Initialize CPU elapsed time counter.
 
 	CALL LIB$INIT_TIMER
@@ -50,8 +61,8 @@
 
 	IMPLICIT NONE
 
-*  Return value:
-*	Native cpu clock ticks-per-second.
+*  Description:
+*	Return Native cpu clock ticks-per-second.
 
 	STRCPUTPS=100 !On VMS, it's 100 per second.
 
@@ -63,9 +74,15 @@
 
 
 	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
+
 	IMPLICIT NONE
+
 *  Output arguments:
 	INTEGER YEAR,MONTH,DAY !Year is 4-digit, eg, 1991.
+
+*  Description:
+*	Return the integer-date.
+
 	CALL IDATE(MONTH,DAY,YEAR) !Get the numerical date.
 	IF (YEAR.LT.1900) YEAR=YEAR+1900 !If it's missing, add the century.
 	RETURN
@@ -77,7 +94,8 @@
 
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
-*  Compatibility routine.  See STRDEC_ENDIAN_HALF.
+*  Description:
+*	Compatibility routine.  See STRDEC_ENDIAN_HALF.
 
 	IMPLICIT NONE
 
@@ -94,6 +112,7 @@
 
 	SUBROUTINE STRDEC_ENDIAN_BYTE(I32)
 
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On VMS (here), nothing is done.
@@ -111,6 +130,7 @@
 
 	SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)
 
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On VMS (here), nothing is done.
@@ -134,6 +154,7 @@
 
 	SUBROUTINE STRDEC_ENDIAN_HALF(I32)
 
+*  Description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On VMS (here), nothing is done.
@@ -151,6 +172,7 @@
 
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
+*  Description:
 *	Do an IBITS, but make it act like DEC.
 
 	IMPLICIT NONE
@@ -170,10 +192,10 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !FORTRAN Logical Unit of device (file) to be "flushed".
 
-*  Functional Description:
+*  Description:
 *	Do whatever platform-dependent operations are necessary to cause all
 *	pending output for the specified LUN to be sent to the actual device
 *	or file represented by the LUN, "flushing" out that device's buffer.
@@ -188,13 +210,18 @@
 
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
-*	VAX interface routine to LIB$MOVC3.  COUNT is a 32-bit word-count,
-*	not a byte-count.
-
 	IMPLICIT NONE
 
+*  Inputs:
 	INTEGER COUNT
-	INTEGER SOURCE(*),DEST(*)
+	INTEGER SOURCE(*)
+
+*  Output:
+	INTEGER DEST(*)
+
+*  Description:
+*	VAX interface routine to LIB$MOVC3.  COUNT is a 32-bit word-count,
+*	not a byte-count.
 
 	INTEGER BYTES_TO_TRANSFER,BYTES_THIS_TRANSFER,I
 
@@ -216,9 +243,15 @@
 
 
 	SUBROUTINE STRMSEC(MSECS)
-*	Standard interface routine to return milliseconds since midnight.
+
 	IMPLICIT NONE
-	INTEGER MSECS
+
+*  Input:
+	INTEGER MSECS !Millisecs.
+
+*  Description:
+*	Standard interface routine to return milliseconds since midnight.
+
 	REAL SECNDS
 	MSECS=INT(1000.*SECNDS(0.)) !Milliseconds since midnight
 	RETURN
@@ -230,13 +263,16 @@
 
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER MSECS !Delay in milliseconds.
+
+*  Description:
 *	Standard interface routine to delay the specified time in
 *	milliseconds.
 *	Returns .TRUE. for success, .FALSE. for failure, such as
 *	would occur for an illegally long, or negative time.
-
-	IMPLICIT NONE
-	INTEGER MSECS
 
 	CHARACTER*15 C15
 	INTEGER DAYS,HOURS,MINS,SECS,MILLS,BAL
@@ -404,40 +440,39 @@
 
 
 
-	LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
-     1	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
-     2	 ,RECL_FLAG,RECL_IARG
-     3	 ,CARRIAGECONTROL_FLAG,CARRIAGECONTROL_CARG
-     4	 ,RECORDTYPE_FLAG,RECORDTYPE_CARG
-     5	 ,INITIALSIZE_FLAG,INITIALSIZE_IARG
-     6	 ,BLOCKSIZE_FLAG,BLOCKSIZE_IARG
-     7	 ,MAXREC_FLAG,MAXREC_IARG
-     1	 ,READONLY_FLAG
-     8   )
+	LOGICAL FUNCTION STROPEN_NAT( LUN, FILENAME
+     1	               , STATUS_CARG, ACCESS_CARG, FORM_CARG
+     2	               , RECL_FLAG  , RECL_IARG
+     3	               , CARRIAGECONTROL_FLAG, CARRIAGECONTROL_CARG
+     4	               , RECORDTYPE_FLAG , RECORDTYPE_CARG
+     5	               , INITIALSIZE_FLAG, INITIALSIZE_IARG
+     6	               , BLOCKSIZE_FLAG  , BLOCKSIZE_IARG
+     7	               , MAXREC_FLAG     , MAXREC_IARG
+     1	               , READONLY_FLAG           )
 
 	IMPLICIT NONE
 
 *  Input arguments:
-	INTEGER LUN !Logical unit on which to open file.
-	CHARACTER*(*) FILENAME !Name of file.
+	INTEGER       LUN         !Logical unit on which to open file.
+	CHARACTER*(*) FILENAME    !Name of file.
 	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
 	CHARACTER*(*) ACCESS_CARG !"ACCESS=" character argument
-	CHARACTER*(*) FORM_CARG !"FORM=" character argument
-	LOGICAL RECL_FLAG !RECL specified/not flag.
-	INTEGER RECL_IARG !"RECL=" integer argument;  Record-length, bytes.
-	LOGICAL CARRIAGECONTROL_FLAG !CARRIAGECONTROL specified/not flag.
+	CHARACTER*(*) FORM_CARG   !"FORM=" character argument
+	LOGICAL       RECL_FLAG   !RECL specified/not flag.
+	INTEGER       RECL_IARG   !"RECL=" integer argument;  Record-length, bytes.
+	LOGICAL       CARRIAGECONTROL_FLAG !CARRIAGECONTROL specified/not flag.
 	CHARACTER*(*) CARRIAGECONTROL_CARG !"CARRIAGECONTROL=" char. argument
-	LOGICAL RECORDTYPE_FLAG !RECORDTYPE specified/not flag.
-	CHARACTER*(*) RECORDTYPE_CARG !"RECORDTYPE=" character argument.
-	LOGICAL INITIALSIZE_FLAG !INITIALSIZE specified/not flag.
-	INTEGER INITIALSIZE_IARG !"INITIALSIZE=" integer argument.
-	LOGICAL BLOCKSIZE_FLAG !BLOCKSIZE specified/not flag.
-	INTEGER BLOCKSIZE_IARG !"BLOCKSIZE=" integer argument.
-	LOGICAL MAXREC_FLAG !MAXREC specified/not flag.
-	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
-	LOGICAL READONLY_FLAG
+	LOGICAL       RECORDTYPE_FLAG      !RECORDTYPE specified/not flag.
+	CHARACTER*(*) RECORDTYPE_CARG      !"RECORDTYPE=" character argument.
+	LOGICAL       INITIALSIZE_FLAG     !INITIALSIZE specified/not flag.
+	INTEGER       INITIALSIZE_IARG     !"INITIALSIZE=" integer argument.
+	LOGICAL       BLOCKSIZE_FLAG       !BLOCKSIZE specified/not flag.
+	INTEGER       BLOCKSIZE_IARG       !"BLOCKSIZE=" integer argument.
+	LOGICAL       MAXREC_FLAG          !MAXREC specified/not flag.
+	INTEGER       MAXREC_IARG          !"MAXREC=" integer argument.
+	LOGICAL       READONLY_FLAG        !Whether OPEN is to be READONLY.
 
-*  Functional Description:
+*  Description:
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).  That such a thing as this
 *	is needed is sad indeed.
@@ -1796,6 +1831,91 @@
 	MINS=M
 	SECS=S
 1	CONTINUE
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRTime_Get_Current_Zone( Zone, Zone_Name )
+
+	IMPLICIT NONE
+
+	INCLUDE 'str_time_inc'
+
+*  Outputs:
+	INTEGER       Zone      !Time zone offset, in {-12, 12}.
+	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
+
+*  Brief Description: Get the time zone.
+
+*  Description:
+*	Return the current time zone, as set in str.  If not set,
+*	set str's current zone to the host's local time zone.
+
+
+	LOGICAL Initialized
+	SAVE    Initialized
+
+	DATA    Initialized / .FALSE. /
+
+
+*	Initialization of time zone may occur externally, so a gauntlet of tests is needed:
+*	(Doing it with two independent values is safe & eliminates the need for BLOCKDATAs.)
+	IF ( Initialized )                             THEN !Initialized; Skip this.
+	ELSE IF ( Current_Zone .LT. -12 )                THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Current_Zone .GT.  12 )                THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Initialized_1 .NE. Initialized_1_P ) THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE IF ( Initialized_2 .NE. Initialized_2_P ) THEN !Not initialized:
+	  Initialized = .FALSE.
+	ELSE                                                !Initialized.
+	  Initialized = .TRUE.
+	END IF
+
+	IF ( .NOT. Initialized ) THEN !Set it to the local time zone:
+*	  Hardwire for the moment:
+	  Current_Zone      = 6
+	  Current_Zone_Name = 'EDT '
+*	  Current_Zone      = 5
+*	  Current_Zone_Name = 'EST '
+	  Initialized = .TRUE.
+	  Initialized_1 = Initialized_1_P
+	  Initialized_2 = Initialized_2_P
+	END IF
+
+	Zone      = Current_Zone
+	Zone_Name = Current_Zone_Name
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRTime_Set_Current_Zone( Zone, Zone_Name )
+
+	IMPLICIT NONE
+
+	INCLUDE 'str_time_inc'
+
+*  Inputs:
+	INTEGER       Zone      !Time zone offset, in {-12, 12}.
+	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
+
+*  Brief Description:  Set str's current time zone.
+
+	Current_Zone      = Zone
+	Current_Zone_Name = Zone_name
+
+*	Double zone-initialized values -- indicate it's initialized:
+	Initialized_1 = Initialized_1_P
+	Initialized_2 = Initialized_2_P
+
 	RETURN
 	END
 
