@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.16 1999/01/20 23:44:48 fine Exp $
+// $Id: StMaker.cxx,v 1.17 1999/02/22 22:25:10 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.17  1999/02/22 22:25:10  fisyak
+// No Fruits(=0) by default
+//
 // Revision 1.16  1999/01/20 23:44:48  fine
 // The special Input/Output makers and the static variable StChain::g_Chain have been introduced
 //
@@ -77,6 +80,7 @@ StMaker::StMaker(const char *name, const char *title)
    m_BranchName = "";
    m_Save       = 0;
    m_Histograms = new TList();
+   m_Fruits     = 0;
    //   m_Clones     = 0;
    m_IsClonable = kTRUE;
    m_DataSet    = 0;
