@@ -117,14 +117,24 @@ Int_t StTreeMaker::Init()
 Int_t StTreeMaker::Make(){
    
   if (fIOMode[0]=='r')  { //Read mode
-    return MakeRead();
+    int iret=0,ntry=13;
+    while(1999) {
+      iret = MakeRead();
+      if (iret!=kStErr && ntry--) break;
+      Warning("Make","%d *** ReadError ***\n",ntry);
+    }
+    return iret;
+
   } else 		{ //Write mode
+
     return MakeWrite();
+
   }
 }
 //_____________________________________________________________________________
 Int_t StTreeMaker::MakeRead(){
   int iret = fTree->NextEvent();
+  if (iret) return iret;
   St_DataSetIter nextBr(fTree);
   StBranch *br ;
   while ((br = (StBranch*)nextBr())){
