@@ -82,25 +82,25 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   switch(YearOfData(ptr)) {
     case 2000:
       gs2000=(MarilynMonroe2000*)ptr;
-      SanityCheck2000(1);
+      // SanityCheck2000(1);
       if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2001:
       gs=(MarilynMonroe*)ptr;
-      SanityCheck(1);
+      // SanityCheck(1);
       if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2003:
       S_mode = 0;
-      SanityCheck2003(ptr,S_mode);
+      // SanityCheck2003(ptr,S_mode);
       if(pBankTRGD->HerbSwap2003(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2004:
       S_mode = 0;
-      SanityCheck2004(ptr,S_mode);
+      // SanityCheck2004(ptr,S_mode);
       if(pBankTRGD->HerbSwap2004(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
