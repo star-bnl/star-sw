@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.7 2001/04/04 17:08:52 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.8 2001/05/17 20:45:19 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.8  2001/05/17 20:45:19  jcs
+// change to use Jim Thomas StMagUtilities
+//
 // Revision 1.7  2001/04/04 17:08:52  jcs
 // remove references to StFtpcParamReader from StFtpcDbReader
 //
@@ -50,8 +53,10 @@ extern "C" void gufld(float *, float *);
 ClassImp(StFtpcDriftMapMaker)
 
 //_____________________________________________________________________________
-StFtpcDriftMapMaker::StFtpcDriftMapMaker(const char *name):
-StMaker(name),
+StFtpcDriftMapMaker::~StFtpcDriftMapMaker(){
+}
+//_____________________________________________________________________________
+StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor):
     m_clusterpars(0),
     m_slowsimgas(0),
     m_slowsimpars(0),
@@ -65,12 +70,6 @@ StMaker(name),
     m_gas(0),
     m_driftfield(0)
 {
-}
-//_____________________________________________________________________________
-StFtpcDriftMapMaker::~StFtpcDriftMapMaker(){
-}
-//_____________________________________________________________________________
-Int_t StFtpcDriftMapMaker::Init(){
 // Create tables
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
@@ -82,7 +81,8 @@ Int_t StFtpcDriftMapMaker::Init(){
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-     return kStErr;
+     *gMessMgr<<"Could not locate MySQLDb:Geometry/ftpc"<<endm;
+     exit(0);
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
 
@@ -91,7 +91,8 @@ Int_t StFtpcDriftMapMaker::Init(){
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-     return kStErr;
+     *gMessMgr<<"Could not locate MySQLDb:Calibrations/ftpc"<<endm;
+     exit(0);
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
 
@@ -103,12 +104,8 @@ Int_t StFtpcDriftMapMaker::Init(){
   m_gas           = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_driftfield    = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   
-  // Create Histograms    
 
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
-Int_t StFtpcDriftMapMaker::Make(){
+  StMagUtilities  *magField = new StMagUtilities(map,factor);
 
   // create parameter reader
   StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
@@ -157,8 +154,8 @@ Int_t StFtpcDriftMapMaker::Make(){
  	  posVector[2]=dbReader->padrowZPosition(j); 
  	  /* sets posVector to (0, radius, z) */ 
 	  
- 	  gufld(posVector, bVector); 
-//   	  printf("pos %f %f %f field %f %f %f\n", posVector[0], posVector[1], posVector[2], bVector[0], bVector[1], bVector[2]);
+ 	  magField->BField(posVector, bVector); 
+	  printf("pos %f %f %f field %f %f %f\n", posVector[0], posVector[1], posVector[2], bVector[0], bVector[1], bVector[2]);
  	  bMag=sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1] +  
  		    bVector[2]*bVector[2]); 
  	  bRadial=sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1]); 
@@ -254,23 +251,7 @@ Int_t StFtpcDriftMapMaker::Make(){
   delete dbReader;
   delete magboltz;
 
-  cout <<"finished fmg" << endl;
-  MakeHistograms();
-  return kStOK;
+  cout <<"finished StFtpcDriftMapMaker" << endl;
 }
 //_____________________________________________________________________________
-void StFtpcDriftMapMaker::MakeHistograms() {
-
-}
-//_____________________________________________________________________________
-
-
-
-
-
-
-
-
-
-
 
