@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.4 1998/10/31 00:26:22 fisyak Exp $
+// $Id: St_tcl_Maker.h,v 1.5 1998/12/16 22:19:20 fisyak Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.5  1998/12/16 22:19:20  fisyak
+// New tfs
+//
 // Revision 1.4  1998/10/31 00:26:22  fisyak
 // Makers take care about branches
 //
@@ -34,7 +37,6 @@ class St_tcl_tclpar;
 class St_tcl_tpc_index_type;
 
 class St_tfs_fspar;
-class St_tfs_bmpar;
 class St_tfs_fsctrl;
 
 class St_tcl_Maker : public StMaker {
@@ -52,7 +54,6 @@ class St_tcl_Maker : public StMaker {
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
                St_tfs_fspar     *m_tfs_fspar;   //! TFS parameter table 
-               St_tfs_bmpar     *m_tfs_bmpar;   //! TFS beam parameter table
                St_tfs_fsctrl    *m_tfs_fsctrl;  //! TFS control switches
  protected:
  public: 
