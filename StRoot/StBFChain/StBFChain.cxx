@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.315 2003/01/16 21:12:09 lbarnby Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.316 2003/01/17 18:09:12 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -24,6 +24,7 @@
 #include "St_tpcdaq_Maker/St_tpcdaq_Maker.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
+#include "St_QA_Maker/StEventQAMaker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -1286,7 +1287,16 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("Rrs")) mk->SetMode(1); // rrs
 	    else                  mk->SetMode(0); // daq
 	  }
-	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); // Turn on alternative V0 method
+
+	  // Turn on alternative V0 method
+	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); 
+
+	  if (maker == "StEventQAMaker") {
+	    if ( GetOption("alltrigger") ){
+	      StEventQAMaker *QAmk = (StEventQAMaker *) mk;
+	      QAmk->AllTriggers();
+	    }
+	  }
 	  if (maker == "St_trg_Maker") {
 	    Int_t mode = 0;
 	    if (! GetOption("alltrigger")){
