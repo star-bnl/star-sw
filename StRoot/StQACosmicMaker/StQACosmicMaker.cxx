@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.15 2000/02/05 01:26:10 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.16 2000/06/23 00:29:52 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
- * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
+ * Description:  Maker to QA the data from the tables (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.16  2000/06/23 00:29:52  snelling
+ * Added hit charge to the ntuple
+ *
  * Revision 1.15  2000/02/05 01:26:10  snelling
  * Fixed multiple declaration loop variable (SUN compiler does not like it)
  *
@@ -32,7 +35,7 @@ ClassImp(StQACosmicMaker)
 StQACosmicMaker::StQACosmicMaker(const char *name):
   StMaker(name),
   bSectorSelectionOn(kFALSE),
-  bWriteTNtupleOn(kFALSE),
+  bWriteTNtupleOn(kTRUE),
   bWritePostscriptOn(kFALSE),
   bWriteHistogramsOn(kTRUE),
   nXBins(50),
@@ -77,7 +80,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.15 2000/02/05 01:26:10 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.16 2000/06/23 00:29:52 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -240,8 +243,8 @@ Int_t StQACosmicMaker::initTNtuple() {
   
   mTNtupleTPC = new TNtuple("nttpc",
 			    "TPC TNtuple",
-			    "hrow:hx:hy:hz:hdx:hdy:hdz:halpha:hlamda:hdalpha:\
-hdlamda:cnseq:cnpix:cnpads:resy:resz:trknfit:trkcalcp");
+			    "hrow:hx:hy:hz:hq:halpha:hlamda::hdalpha:\
+hdlamda:resy:resz:trknfit:trkcalcp");
 
   mTNtupleMorph = new TNtuple("ntmorph",
 			    "Morph TNtuple",
@@ -261,10 +264,6 @@ Int_t StQACosmicMaker::fillTNtuple() {
     // cluster information
     Int_t irow_morph = morphsorter->operator[]((Int_t)(pttphit[i].cluster));
 
-    // row in tphit table 100*sector + row
-    Int_t isector = (Int_t)(pttphit[i].row/100.);
-    // row number in sector (to distinguish between inner and outer)
-    Int_t irowsector = pttphit[i].row - 100 * isector;   
     
     // global cuts and only particles belonging to track
     if (irow_trk >= 0 && irow_morph >= 0 && irow_res >= 0) {
@@ -272,18 +271,17 @@ Int_t StQACosmicMaker::fillTNtuple() {
       Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
 			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
       
+      // row in tphit table 100*sector + row
       mTNtupleTPC->Fill(
 			(Float_t)(pttphit[i].row/100.),
 			(Float_t)(pttphit[i].x),
 			(Float_t)(pttphit[i].y),
 			(Float_t)(pttphit[i].z),
-			(Float_t)(pttphit[i].dx),
-			(Float_t)(pttphit[i].dy),
-			(Float_t)(pttphit[i].dz),
+			(Float_t)(pttphit[i].q),
 			(Float_t)(pttphit[i].alpha),
 			(Float_t)(pttphit[i].lambda),
 			(Float_t)(pttphit[i].dalpha),
-			(Float_t)(pttphit[i].dlambda),
+                        (Float_t)(pttphit[i].dlambda),
 			(Float_t)(ptres[irow_res].resy),
 			(Float_t)(ptres[irow_res].resz),
 			(Float_t)(pttrk[irow_trk].nfit),
