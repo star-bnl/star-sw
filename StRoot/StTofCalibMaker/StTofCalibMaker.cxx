@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.3 2004/07/15 18:11:22 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.4 2004/07/16 15:06:08 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,8 +13,12 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.4  2004/07/16 15:06:08  dongx
+ * Z correction function separated for TOFp and TOFr.
+ * Use a new one for RunIV AuAu 200GeV runs
+ *
  * Revision 1.3  2004/07/15 18:11:22  dongx
- * -introduce two new tables in dbase: tofAdcRange & tofResolution
+ *  -introduce two new tables in dbase: tofAdcRange & tofResolution
  *  -continue update on writing StTofPidTraits
  *
  * Revision 1.2  2004/07/08 18:26:09  dongx
@@ -151,7 +155,10 @@ void StTofCalibMaker::initFormulas()
   /// define the calibration functions
   mTofrSlewing = new TF1("TofrSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
   mTofpSlewing = new TF1("TofpSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
-  mZCorr = new TF1("ZCorr", "pol7");
+  mTofrZCorr = new TF1("TofrZCorr", "pol7");
+  //  mTofpZCorr = new TF1("TofpZCorr", "pol7");
+  // Run 4, AuAu200GeV, Jiansong's calibration function
+  mTofpZCorr = new TF1("TofpZCorr", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
   mPVPDSlewing = new TF1("pVPDSlewing","[0]+[1]/sqrt(x)+[2]/x+[3]*x");
 }
 
@@ -391,7 +398,8 @@ void StTofCalibMaker::clearFormulars()
 {
   if (mTofrSlewing) delete mTofrSlewing;
   if (mTofpSlewing) delete mTofpSlewing;
-  if (mZCorr) delete mZCorr;
+  if (mTofrZCorr) delete mTofrZCorr;
+  if (mTofpZCorr) delete mTofpZCorr;
   if (mPVPDSlewing) delete mPVPDSlewing;
 }
 
@@ -636,8 +644,8 @@ Double_t StTofCalibMaker::tofrSlewingCorr(const Double_t tof, const Double_t adc
 //_____________________________________________________________________________
 Double_t StTofCalibMaker::tofrZCorr(const Double_t tof, const Double_t zhit)
 {
-  mZCorr->SetParameters(mTofrZPar);
-  return tof - mZCorr->Eval(zhit);
+  mTofrZCorr->SetParameters(mTofrZPar);
+  return tof - mTofrZCorr->Eval(zhit);
 }
 
 //_____________________________________________________________________________
@@ -680,8 +688,8 @@ Double_t StTofCalibMaker::tofpSlewingCorr(const Double_t tof, const Double_t adc
 //_____________________________________________________________________________
 Double_t StTofCalibMaker::tofpZCorr(const Double_t tof, const Double_t zhit)
 {
-  mZCorr->SetParameters(mTofpZPar);
-  return tof - mZCorr->Eval(zhit);
+  mTofpZCorr->SetParameters(mTofpZPar);
+  return tof - mTofpZCorr->Eval(zhit);
 }
 
 //_____________________________________________________________________________
