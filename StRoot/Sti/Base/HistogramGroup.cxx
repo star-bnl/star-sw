@@ -71,20 +71,3 @@ TH2D * HistogramGroup::book(const string &title,
   return dynamic_cast<TH2D*>(add(new TH2D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax,ny,yMin,yMax)) );
 }
 
-TH3D * HistogramGroup::book(const string &title, 
-			    const string & description, 
-			    int nx, 
-			    double xMin,
-			    double xMax,
-			    int ny, 
-			    double yMin,
-			    double yMax,
-			    int nz, 
-			    double zMin,
-			    double zMax)
-{
-  string histoName = getName() + "_" + title;
-  string histoDesc = getName() + " " + description;
-  return dynamic_cast<TH3D*>(add(new TH3D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax,ny,yMin,yMax,nz,zMin,zMax)) );
-}
-

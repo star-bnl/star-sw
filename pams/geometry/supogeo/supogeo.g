@@ -3,7 +3,6 @@ Module   SUPOGEO  is the geometry of the Forward TPC supports in STAR
 Author   Holm Huemmler
 Created  27-Okt-99
 * modification:
-* 
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -24,7 +23,7 @@ Created  27-Okt-99
 			StabWid, StabThk, Stab1Z, Stab2Z}
 *
 	Integer  Agexist
-	Real pos, angle, shptpos, shbkpos
+	Real pos, angle
 *
 * ----------------------------------------------------------------------------
 
@@ -91,22 +90,6 @@ Endfill
 	pos=(smai_ZMin+smai_ZMax)/2
 
 	create   SUPO
-
-* these bug fixes are temporarily reversed for now to keep the
-* consistency in teh year2003 geometry
-
-* N.B. this variable --pos-- is (erroneously) overwritten
-* in the constructors of the SUPH module. As a result,
-* the position of the support was totally incorrect.
-* We shall revisit this later, because the code dependencies
-* are too complex for a quick fix. For now it suffices to
-* restore the correct value of "pos". The resulting geometry
-* looks right. --max--
-
-*	pos=(smai_ZMin+smai_ZMax)/2
-* another bug fix: the signs of "pos" on the following line were incorrect: --max--
-*        position SUPO in CAVE z=-pos             konly='MANY'
-*        position SUPO in CAVE z= pos ThetaZ=180 konly='MANY' 
 
         position SUPO in CAVE z=pos             konly='MANY'
 	position SUPO in CAVE z=-pos ThetaZ=180 konly='MANY' 
@@ -274,18 +257,15 @@ Block SUPH is the upper FTPC support mother volume
                     y=sshi_YDist+sshi_RailHei+sshi_PlatHei+sshi_BarHei/2,
                     z=(smai_ZMin-smai_ZMax)/2+sshi_BarOffZ+sshi_BarLen/2
       Create   SHBK
-
       pos=sshi_YDist+sshi_RailHei+sshi_PlatHei+sshi_BarHei
       position SHBK x=sshi_XDist,
                     y=pos+sshi_BlocHei/2,
                     z=(smai_ZMin-smai_ZMax)/2+smai_FixThk+sshi_BlocLen/2
-
       Create   SHFX
       position SHFX Alphaz=45,
                     x=sshi_XDist-sshi_BoltOff*sin(degrad*45),
                     y=pos+sshi_BlocHei/2+sshi_BoltOff*cos(degrad*45),
                     z=(smai_ZMin-smai_ZMax)/2+smai_FixThk/2
-
       Create   SHST
       position SHST x=sshi_XDist-sshi_PlatThk/2-sshi_StabWid/2,
                     y=sshi_YDist+sshi_RailHei+sshi_PlatHei/2,
@@ -318,8 +298,8 @@ Endblock
 
 Block SHPT is the upper FTPC support main plate
 
-      shptpos=((smai_ZMax-smai_ZMin)/2-(sshi_BarOffZ+sshi_BarLen/2))
-      angle=atan(shptpos/sshi_PlatHei)
+      pos=((smai_ZMax-smai_ZMin)/2-(sshi_BarOffZ+sshi_BarLen/2))
+      angle=atan(pos/sshi_PlatHei)
 
       Material  aluminium
       Attribute SHPT    seen=1   colo=2

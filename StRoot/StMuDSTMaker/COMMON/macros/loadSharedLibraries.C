@@ -1,6 +1,6 @@
 void loadSharedLibraries() {
   // Dynamically link needed shared libs
-  gSystem->Load("libTable");
+  gSystem->Load("libStar");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -10,7 +10,6 @@ void loadSharedLibraries() {
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
-  gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");

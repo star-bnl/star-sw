@@ -1,19 +1,11 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.2 2003/04/29 18:48:33 pruneau Exp $
+ * $Id: StiResidualMaker.h,v 2.2 2003/03/16 21:57:45 andrewar Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
- * $Log: StiResidualCalculator.h,v $
- * Revision 2.2  2003/04/29 18:48:33  pruneau
- * *** empty log message ***
- *
- * Revision 2.1  2003/04/29 14:59:02  andrewar
- * Modified to conform to naming convention. Added
- * initDetectors(StiDetectorBuilder) to switch desired detectors 'off' during
- * tracking, so residual will be unbiased.
- *
+ * $Log: StiResidualMaker.h,v $
  * Revision 2.2  2003/03/16 21:57:45  andrewar
  * Fixed filling bug, removed couts and improved functionality
  *
@@ -32,31 +24,24 @@
  */
 
 
-#define TRACKMESSENGER *(Messenger::instance(MessageType::kResidualMessage))
-
 #ifndef StiResidualMaker_HH
 #define StiResidualMaker_HH
 
 //forward declarations
 class TH3D;
-class TH2D;
 class StiHit;
 class StiTrack;
 class StiKalmanTrack;
-class StiNeverActiveFunctor;
 
 #include "StDetectorId.h"
-#include "Sti/StiResiduals.h"
 
-class StiResidualCalculator: public StiResiduals
+class StiResidualMaker: StiResiduals
 {
    public:
-     StiResidualCalculator(StiHitContainer*, StiDetectorBuilder*);
-     ~StiResidualCalculator(){/*noop*/};
-
-     void initDetector(StiDetectorBuilder*);
-
-     void calcResiduals(StiTrackContainer*);
+     StiResidualMaker(StDetectorId det);
+     virtual ~StiResidualMaker(){};
+ 
+     int calcResiduals(StiTrackContainer*);
 
      void Write(char* outfile);
 
@@ -64,16 +49,10 @@ class StiResidualCalculator: public StiResiduals
      int  Init();
      int  trackResidue(const StiTrack *track);
      int  trackResidue(const StiKalmanTrack *track);
-     void FillHist(double z, double y,
-		   double cross, double dip,
-		   double dz, double dy);
-     void fillTrackHist(double cross, double dip, double pt, double drift);
-
+     void FillHist(StiKalmanTrackNode *node);
 
      StDetectorId mDetector;
-     vector<StiDetector*> candidates;
-     StiHitContainer * candidateHits;
-     StiNeverActiveFunctor * isNotActiveFunc;
+
 
      //Residual Hists  
      TH3D *mYResidualCrossDip;
@@ -82,14 +61,6 @@ class StiResidualCalculator: public StiResiduals
      TH3D *mZResidualZY;
      TH3D *mResidualCrossDip;
      TH3D *mResidualZY;
-
-     TH1D *mCross;
-     TH1D *mDip;
-     TH1D *mPt;
-     TH1D *mDrift;
-
-     TH2D *mDetectorHist;
-
 };
   
 

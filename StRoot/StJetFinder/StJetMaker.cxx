@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.3 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.2 2003/04/04 21:25:56 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -26,6 +26,9 @@
  * These modules all require the StJetFinder modules.
  *
  **************************************************************************/
+#include <string.h>
+#include <iostream.h>
+
 #include "TFile.h"
 #include "TTree.h"
 
@@ -59,9 +62,9 @@ StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker,
   StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
     outName(outputName), mGoodCounter(0), mBadCounter(0){
-    //numJetBranches = 0;
-    //jetBranches = new (StppJetAnalyzer*)[MAXANALYZERS];
-    //names = new (char*)[MAXANALYZERS];
+    numJetBranches = 0;
+    jetBranches = new (StppJetAnalyzer*)[MAXANALYZERS];
+    names = new (char*)[MAXANALYZERS];
     infoLevel = 0;
     mudst=0;
     saveEventWithNoJets = true;
@@ -70,7 +73,6 @@ StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker,
     fileCounter = 0;
     saveEMC = false;
     muEmcCol = new StMuEmcCollection();
-    neverSave = false;
 }
 
 void StJetMaker::SetSaveEventWithNoJets(bool saveIt)
@@ -80,14 +82,20 @@ void StJetMaker::SetSaveEventWithNoJets(bool saveIt)
 
 void StJetMaker::addAnalyzer(StppJetAnalyzer* a, const char * name)
 {
-    jetBranches[name] = a;
+    char* branchName = new char[strlen(name)+2];
+    strcpy(branchName, name);
+    //this worked for Thomas, but not for Mike
+    //strcat(branchName, ".");
+    
+    names[numJetBranches] = branchName;
+    jetBranches[numJetBranches] = a;
+    numJetBranches++;
 }
 
 void StJetMaker::InitFile(void) 
 {
     // creating Jet nanoDst file name
     TString jetFileName(outName);
-    if(jetFileName == "/dev/null") { neverSave = true; return; }
     jetFileName += fileCounter;
     jetFileName += ".root";
     cout << "StJetMaker: jet output file: " << jetFileName << endl;
@@ -106,10 +114,10 @@ Int_t StJetMaker::Init()
     jetTree  = new TTree("jet","jetTree",99);
     jetEvent = new StppEvent(); //jetEvent->setInfoLevel(infoLevel);
     jetTree->Branch ("Event","StppEvent",&jetEvent,64000,99);
-    for(jetBranchesMap::iterator i = jetBranches.begin(); i != jetBranches.end(); i++)
-    {
-      (*i).second->addBranch((*i).first.c_str(), jetTree);
-    }
+    for(int i = 0; i < numJetBranches; i++)
+	{
+	    jetBranches[i]->addBranch(names[i], jetTree);
+	}
 #ifdef _GEANT_
     ppGeant = new StppGeant(); ppGeant->setInfoLevel(infoLevel);
     jetTree->Branch ("Geant","StppGeant",&ppGeant,64000,99);
@@ -172,7 +180,7 @@ Int_t StJetMaker::Make() {
     cout << "Failed to set muDst in event.  Retrying!" << endl; 
     jetEvent->mudst = mudst;
   }
-
+  
   // fill jetEvent 
   int res;
   res = jetEvent->fill(event, mudst);
@@ -207,23 +215,17 @@ Int_t StJetMaker::Make() {
 
   //Find the Jets, using the fourPMaker information:
   bool hadJets = false;
-  for(jetBranchesMap::iterator jb = jetBranches.begin(); jb != jetBranches.end(); jb++)
+  for(Int_t jbNum = 0; jbNum < numJetBranches; jbNum++)
   {
-    StppJetAnalyzer* thisAna = (*jb).second;
+    StppJetAnalyzer* thisAna = jetBranches[jbNum];
     if(!thisAna)
     {
-      cout << "StJetMaker::Make() ERROR:\tjetBranches[" << (*jb).first << "]==0. abort()" << endl;
+      cout << "StJetMaker::Make() ERROR:\tjetBranches[" << jbNum << "]==0. abort()" << endl;
       abort();
     }
-
-    if(fourPMaker == NULL)
-    {
-      cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
-      abort();
-    }
-    FourList &tracks = fourPMaker->getTracks();
-    thisAna->setFourVec(tracks);
-    //cout << "AnaNum = " << (*jb).first << " Tracks = " << fourPMaker->numTracks() << endl;
+    StMuTrackFourVec* tracks = fourPMaker->getTracks();
+    thisAna->setFourVec(tracks, fourPMaker->numTracks());
+    //cout << "AnaNum = " << jbNum << " Tracks = " << fourPMaker->numTracks() << endl;
     thisAna->findJets();
 
     typedef StppJetAnalyzer::JetList JetList;
@@ -238,24 +240,24 @@ Int_t StJetMaker::Make() {
     {
       muDstJets->addProtoJet(*it);
     }
-    //cout << "Number Jets Found: " << muDstJets->nJets() << endl;
-    //for(int i = 0; i < muDstJets->nJets(); i++)
-    //{
-    //StJet* jet = (StJet*) muDstJets->jets()->At(i);
-    //cout << "Pt of Jet " << i << " = " << jet->Pt() << endl;
-    //cout << "Eta of Jet " << i << " = " << jet->Eta() << endl;
-    //cout << "Phi of Jet " << i << " = " << jet->Phi() << endl;
-    //}
+    cout << "Number Jets Found: " << muDstJets->nJets() << endl;
+    for(int i = 0; i < muDstJets->nJets(); i++)
+    {
+      StJet* jet = (StJet*) muDstJets->jets()->At(i);
+      cout << "Pt of Jet " << i << " = " << jet->Pt() << endl;
+      cout << "Eta of Jet " << i << " = " << jet->Eta() << endl;
+      cout << "Phi of Jet " << i << " = " << jet->Phi() << endl;
+    }
   }
 
   //write out to file
   if(saveEventWithNoJets)
   {
-    if(!neverSave) jetTree->Fill();
+    jetTree->Fill();
   }
   else if(hadJets)
   {
-    if(!neverSave) jetTree->Fill();
+    jetTree->Fill();
   } else
   {
     mBadCounter++;
@@ -269,7 +271,6 @@ Int_t StJetMaker::Make() {
 
 void StJetMaker::FinishFile(void) 
 {
-  if(neverSave) return;
     fileCounter++;
     
     //close file
@@ -289,13 +290,4 @@ Int_t StJetMaker::Finish()
   StMaker::Finish();
   return kStOK;
 }
-
-
-
-
-
-
-
-
-
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2003/04/25 22:52:28 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.1 2003/04/04 21:36:42 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -17,7 +17,6 @@
 #include <string.h>
 #include <iostream.h>
 #include <math.h>
-#include <sys/times.h>
 
 #include "StChain.h"
 #include "StEventTypes.h"
@@ -37,15 +36,52 @@
 
 ClassImp(StEmcTpcFourPMaker)
   
-StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker,
-  long pBins, long thBins, double pRad, double thRad, double rsqr) 
-  : StFourPMaker(name, uDstMaker), radiussqr(rsqr), binmap(pBins, thBins, pRad, thRad){
-  seconds = 0;
+StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
+  : StFourPMaker(name, uDstMaker){
+    tracks = new StMuTrackFourVec[MAXTRACKS];
+    nTracks = 0;
+    trackToPointIndices = new int[MAXTRACKS];
+    trackEmcPhi = new double[MAXTRACKS];
+    trackEmcPhiIsValid = new bool[MAXTRACKS];
+    reducedPointEnergies = new double[MAXTRACKS];
+    for(int i = 0; i < MAXTRACKS; i++)
+    {
+      trackToPointIndices[i] = -1;
+      trackEmcPhiIsValid[i] = false;
+    } 
+    pointPhiIndices = new (int*)[PHIMODULES];
+    pointPhiIndicesNum = new int[PHIMODULES];
+    for(int i = 0; i < PHIMODULES; i++)
+    {
+      pointPhiIndices[i] = new int[MAXPOINTS];
+      pointPhiIndicesNum[i] = 0;
+    }
+    pi = atan(1.0)*4.0;
+    twoPi = pi*2.0;
+    modAngle = pi/180.0*6.00001;
+    pointRadius = 2.0*modAngle;
+    probPion = new double[MAXPOINTS];
+    probKaon = new double[MAXPOINTS];
+    probProton = new double[MAXPOINTS];
+    probElectron = new double[MAXPOINTS];
+
+    PionAveDepRatio = 0.2;
+    KaonAveDepRatio = 0.2;
+    ProtonAveDepRatio = 0.2;
+    ElectronAveDepRatio = 1.0;
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
   cout <<" Start StEmcTpcFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
-  binmap.clearall();
+  for(int i = 0; i < nTracks; i++)
+  {
+    trackToPointIndices[i] = -1;
+    trackEmcPhiIsValid[i] = false;
+  }
+  for(int i = 0; i < PHIMODULES; i++)
+  {
+    pointPhiIndicesNum[i] = 0;
+  }
 
   // Construct tracks out of (primary) tracks and EMC points. 
   // Must calculate the eta shift of the EMC
@@ -54,35 +90,56 @@ Int_t StEmcTpcFourPMaker::Make() {
   double mField = uEvent->magneticField()/10.0;
   cout << "mField: " << mField << endl;
   StThreeVectorF vertex = uEvent->primaryVertexPosition();
-  binmap.setVertex(vertex);
   double SMDR = 2.2625;
   double etaShift = atan2(vertex.z()/100.0, SMDR);
   cout << "zVertex: " << vertex.z()/100.0 << endl;
   cout << "EtaShift: " << etaShift << endl;
   double HSMDR = SMDR/2.0;
-  long nTracks = uDst->numberOfPrimaryTracks();
+  nTracks = uDst->numberOfPrimaryTracks();
 
   // Calculate trackEmcPhi (Phi of the track at the radius of the EMC SMD)
   // pt=BeR, pt=0.3BR, pt GeV/c, B Tesla, R meters, R = pt/(Be) = pt/(0.3B)
   for(int i = 0; i < nTracks; i++)
   {
     StMuTrack* track = uDst->primaryTracks(i);
-    if(track->flag() < 0) continue;
     double pt = track->pt();
     double R = pt/(0.3*mField);
-    if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
+    if(R < HSMDR) 
+    {
+      trackEmcPhiIsValid[i] = false; 
       continue;
-    binmap.insertTrack(track);
+    }
+    // If a circle of Radius R is tangent to the origin, where
+    // a circle of Radius SMDR is centered, the circles cross
+    // where x^2 + y^2 = SMDR^2 and x^2 + (y-R)^2 = R^2, or:
+    // y^2 - (y-R)^2 = SMDR^2 - R^2,
+    // 2.0*y*R = SMDR^2,
+    // y = SMDR^2/(2.0*R)
+    // The angle of deviation is then: sin(dev) = y/SMDR, so:
+    double y = HSMDR/R;
+    double dev = asin(y);
+    if(track->charge() > 0.0) dev *= -1.0;
+    trackEmcPhi[i] = track->phi() + dev; 
+    while(trackEmcPhi[i] < 0) trackEmcPhi[i] += twoPi;
+    while(trackEmcPhi[i] > twoPi) trackEmcPhi[i] -= twoPi;
+    if((track->eta() > 0.0) && (track->eta() < 1.0))
+      if(track->p().mag() < 1.0)
+    {
+      cout << "trackEmcPhi[" << i << "]: " << trackEmcPhi[i];
+      cout << "  dev: " << dev;
+      cout << "  eta: " << track->eta();
+      cout << "  e: " << track->p().mag();
+      cout << "  eProb: " << track->pidProbElectron() << endl;
+    }
+    trackEmcPhiIsValid[i] = true;
   }
 
   // Retreive the points
   StMuEmcCollection* emc = uDst->emcCollection();
   int numPoints = emc->getNPoints();
 
-  // Add the points
+  // Sort EMC Points into Phi bins
   cout << "NumPoints: " << numPoints << endl;
-  // This just prints for debugging purposes:
-  double twoPi = M_PI*2.0;
   for(int i = 0; i < numPoints; i++)
   {
     StMuEmcPoint* point = emc->getPoint(i);
@@ -96,85 +153,143 @@ Int_t StEmcTpcFourPMaker::Make() {
   for(int i = 0; i < numPoints; i++)
   {
     StMuEmcPoint* point = emc->getPoint(i);
-    binmap.insertPoint(point);
-  }
-
-  // Connect the points with the tracks when they are within radiussqr 
-  binmap.correlate(radiussqr);
-
-  // Veto the guess of Tpc particle identification using the 
-  // Point correlations
-  for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
-      trackit != binmap.t2p.end(); ++trackit)
-  {
-    // If the energy of the point is close to the energy of the track,
-    // then it is most likely an electron:
-    StMuTrack* track= (*trackit).first;
-    StProjectedTrack &pTrack = binmap.moddTracks[track];
-    StMuEmcPoint* point = (*trackit).second;
-    double trackE = pTrack.E();
-    double pointE = binmap.moddPoints[point].E();
-    double ediff = fabs(trackE - pointE);
-    if(ediff < 0.2*pointE)
-      pTrack.probEIsOne();
-    if(trackE < 0.5*pointE)
-      pTrack.probEIsZero();
-    break;
-  }
-
-  // It can't be an electron if there is no point:
-  for(trackMap::iterator trackit = binmap.moddTracks.begin();
-      trackit != binmap.moddTracks.end(); ++trackit)
-  {
-    trackToPoints::iterator foundPoint = binmap.t2p.find((*trackit).first);
-    if(foundPoint == binmap.t2p.end())
+    double phi = point->getPhi();
+    if(phi < 0) phi += pi;
+    ////double radius = point->getRadius();
+    //double radius = 2.0*modAngle;
+    reducedPointEnergies[i] = point->getEnergy();
+    int range = (int) ceil(pointRadius/modAngle);
+    int phiBin = (int) floor(phi/modAngle);
+    for(int j = phiBin - range; j <= phiBin + range; j++)
     {
-      binmap.moddTracks[(*trackit).first].probEIsZero();
-      continue;
+      int k = j;
+      while(k < 0) k+= PHIMODULES;
+      while(k >= PHIMODULES) k -= PHIMODULES;
+      pointPhiIndices[k][pointPhiIndicesNum[k]] = i;
+      pointPhiIndicesNum[k]++;
     }
   }
 
-  // Add TPC tracks
-  long index = 0;
-  for(trackMap::iterator track = binmap.moddTracks.begin(); 
-      track != binmap.moddTracks.end(); ++track)
+  // Fill the trackToPointIndices array with indices of points which the 
+  // track strikes within the point's radius
+  for(int i = 0; i < nTracks; i++)
   {
-    trackMap::value_type &track_val = *track;
-    StMuTrackFourVec& newTrack = tPile[index];
-    StProjectedTrack &pTrack = track_val.second;
-    newTrack.Init(pTrack.getTrack(), pTrack.P(), index++);
-    tracks.push_back(&newTrack);  
-  }  
+    if(!trackEmcPhiIsValid[i]) continue;   
+    StMuTrack* track = uDst->primaryTracks(i);
+    double eta = track->eta();
+    int phiBin = (int) floor(trackEmcPhi[i]/modAngle);
+    for(int j = 0; j < pointPhiIndicesNum[phiBin]; j++)
+    {
+      cout << "PointPhiIndices[" << phiBin << "][" << j << "]: " << pointPhiIndices[phiBin][j] << endl;
+      StMuEmcPoint* point = emc->getPoint(pointPhiIndices[phiBin][j]);
+      double deta = eta - point->getEta()+etaShift;
+      cout << "Deta: " << deta << endl;
+      double pointPhi = point->getPhi(); 
+      while(pointPhi < 0) pointPhi += twoPi;
+      while(pointPhi > twoPi) pointPhi -= twoPi;
+      double dphi = trackEmcPhi[i] - point->getPhi();
+      while(dphi > pi) dphi -= twoPi; while(dphi < -pi) dphi += twoPi;
+      cout << "Dphi: " << dphi << endl;
+      double radius2 = deta*deta + dphi*dphi;
+      cout << "PointRadius == " << pointRadius << endl;
+      cout << "Radius == " << sqrt(radius2) << endl;
+      if(radius2 < pointRadius*pointRadius)
+      {
+        trackToPointIndices[i] = pointPhiIndices[phiBin][j];
+        break;
+      }
+    }
+  }
 
-  // Now subtract the energy deposited by the tracks:
-  for(pointToTracks::iterator pointit = binmap.p2t.begin(); 
-      pointit != binmap.p2t.end(); ++pointit)
+  // Guess the identities of the tracked particles using the TPC information
+  for(int i = 0; i < nTracks; i++)
   {
-    StCorrectedEmcPoint &point = binmap.moddPoints[(*pointit).first];
-    StProjectedTrack &track = binmap.moddTracks[(*pointit).second];
-    point.SubE(track.depE());
-  }  
+    StMuTrack* track = uDst->primaryTracks(i);
+    probPion[i] = track->pidProbPion();
+    probKaon[i] = track->pidProbKaon();
+    probProton[i] = track->pidProbProton();
+    probElectron[i] = track->pidProbElectron();
+  }
+
+  // Veto the above guess using the trackToPointIndices for vetoes.  
+  for(int i = 0; i < nTracks; i++)
+  {
+    // If there is no point associated with the track, 
+    if(trackToPointIndices[i] == -1)  // Then it can't be an electron!
+    {
+      probEClobber(i); continue;
+    }
+    // If the energy of the point is close to the energy of the track,
+    // then it is most likely an electron:
+    StMuTrack* track = uDst->primaryTracks(i);
+    double simpleEnergy = track->momentum().mag();
+    if(fabs(simpleEnergy - reducedPointEnergies[trackToPointIndices[i]]) 
+       < .3) 
+    {
+      probElectron[i] = 1.0;
+      probPion[i] = 0.0;
+      probKaon[i] = 0.0;
+      probProton[i] = 0.0;
+    }
+    // Also, if it doesn't leave enough energy in the EMC, it can't be an electron
+    if(simpleEnergy - reducedPointEnergies[trackToPointIndices[i]] > .3)
+      probEClobber(i); continue;    
+  }
+
+  // Add TPC tracks
+  for(int i = 0; i < nTracks; i++)
+  {
+    StMuTrack* track = uDst->primaryTracks(i);
+    StThreeVectorF mom = track->momentum();
+    float mass = probElectron[i]*me + probProton[i]*mp +
+      probPion[i]*mpi + probKaon[i]*mk;
+    StLorentzVectorF P(sqrt(mass*mass + mom.mag2()), mom);
+    if(trackToPointIndices[i] != -1)
+    {
+      int pointIndex = trackToPointIndices[i];
+      // Subtract wieghted average energies from the EMC:
+      reducedPointEnergies[pointIndex] -= (probPion[i]*PionAveDepRatio 
+        + probKaon[i]*KaonAveDepRatio + probProton[i]*ProtonAveDepRatio 
+        + probElectron[i]*ElectronAveDepRatio)*P.e();
+    }
+    tracks[i].Init(track, P, i);
+  } 
 
   // Add neutral pion and eta tracks using the remaining energy in the 
-  // reducedPointEnergies array - not coded
+  // reducedPointEnergies array
 
-  //start = clock();
   // Add photon tracks using the remainder of the energy in the
   // reducedPointEnergies array 
-  for(pointMap::iterator point = binmap.moddPoints.begin(); 
-      point != binmap.moddPoints.end(); ++point)
+  for(int i = 0; i < numPoints; i++)
   {
-    pointMap::value_type &point_val = *point;
-    StMuTrackFourVec& newTrack = tPile[index];
-    StCorrectedEmcPoint &cPoint = point_val.second;
-    newTrack.Init(NULL, cPoint.P(), index++);
-    tracks.push_back(&newTrack);  
-  }  
-  //stop = clock();
-  //timeLengths[timeindex] += static_cast<double>(stop-start)
-  ///static_cast<double>(CLOCKS_PER_SEC);
-  //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
+    if(reducedPointEnergies[i] > 0.0)
+    {
+      cout << "reducedPointEnergies[" << i << "]: " << reducedPointEnergies[i] << endl;
+      StMuEmcPoint* point = emc->getPoint(i);
+      double eta = point->getEta() - etaShift;
+      double phi = point->getPhi();
+      double pmag = reducedPointEnergies[i]; // Since mass = 0;
+      //pmag*pmag = pz*pz + pt*pt; pz = pt*sinh(eta);
+      //pmag*pmag = pt*pt*(1+sinh(eta)^2);
+      //pt = pmag/sqrt(1+sinh(eta)^2);
+      double pt = pmag/sqrt(1+sinh(eta)*sinh(eta));
+      StLorentzVectorF P(pmag, pt*cos(phi), pt*sin(phi), pt*sinh(eta));
+      tracks[nTracks].Init(NULL, P, i);
+      cout << "tracks[" << nTracks << "].p() :" << tracks[nTracks].p() << endl;
+      //tracks[i].Init(uDst->primaryTracks(i), P, i);
+      cout << "P.mag: " << pmag*pmag - pt*pt*(1+sinh(eta)*sinh(eta)) << endl;
+      nTracks++;
+    }
+  }
 
   return kStOk;
 }
 
+void StEmcTpcFourPMaker::probEClobber(int i)
+{
+  double renormalize = 1.0/(1.0 - probElectron[i]);
+  probPion[i] *= renormalize;
+  probKaon[i] *= renormalize;
+  probProton[i] *= renormalize;
+  probElectron[i] = 0;
+}

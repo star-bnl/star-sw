@@ -4,7 +4,7 @@ void load() {
   cout << " THIS macro is OBSOLETE and will be later removed  " << endl;
   cout << " Please, use 'loadSharedLibraries.C' instead       " << endl;
   cout << "***************************************************" << endl;
-  gSystem->Load("libTable");
+  gSystem->Load("libStar");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
   gSystem->Load("StChain");

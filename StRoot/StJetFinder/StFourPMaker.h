@@ -1,12 +1,7 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.2 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StFourPMaker.h,v 1.1 2003/04/04 21:35:32 thenry Exp $
  * $Log: StFourPMaker.h,v $
- * Revision 1.2  2003/04/24 14:15:16  thenry
- * These changes are really the first working version of the StFourPMakers
- * and teh StJetMakers.  This is all c++ stl implementation, and by virtue of
- * that fact, StEmcTpcFourPMaker bady needs to be speed optimized.
- *
  * Revision 1.1  2003/04/04 21:35:32  thenry
  * Base class for creating lists of four vectors for use with the
  * StJetMaker
@@ -22,21 +17,17 @@
  ***************************************************************************/
 #ifndef StFourPMaker_h
 #define StFourPMaker_h
-#include <map>
 #include "StMaker.h"
-#include "StProtoJet.h"
-#include "../StSpinMaker/StMuTrackFourVec.h"
+
+#define MAXTRACKS 10000
 
 class StEvent;
-class StEmcClusterCollection;    
-typedef map<long, StMuTrackFourVec, less<long> > TrackPile;
-
+class StEmcClusterCollection;
 class StEmcPoint;
 class StMuDst;
 class StMuEmcCollection;
 class StMuDstMaker;
-
-typedef StProtoJet::FourVecList FourList;
+class StMuTrackFourVec;
 
 class StFourPMaker : public StMaker {
 public:
@@ -46,25 +37,17 @@ public:
     virtual Int_t Finish();
 
     StMuEmcCollection* getStMuEmcCollection(void);
-    FourList &getTracks() { return tracks; };
-    Int_t numTracks(void) { return tracks.size(); };
+    StMuTrackFourVec* getTracks() { return tracks; };
+    Int_t numTracks(void) { return nTracks; };
 
-    TrackPile tPile; 
 protected:
-
     StMuEmcCollection* muEmcCol;    //!
-    FourList tracks;       //!
+    StMuTrackFourVec* tracks;       //!
+    Int_t nTracks;                  //!
     StMuDstMaker *muDst;           //!
 
-public:
-    const double me;	
-    const double mpr;
-    const double mpi;
-    const double mk;
+    float me, mp, mpi, mk;         //!
 
     ClassDef(StFourPMaker,1)
 };
 #endif
-
-
-

@@ -166,8 +166,7 @@ Double_t    dEdxParameterization::Interpolation(TH2 *hist, Double_t X, Double_t 
   Double_t XYZ[2];
   XYZ[0] = X;
   XYZ[1] = Y;
-  Double_t Value = Interpolation(2, hist, XYZ, kase);
-  return Value;
+  return Interpolation(2, hist, XYZ, kase);
 }
 //________________________________________________________________________________
 Double_t   dEdxParameterization:: Interpolation(TH1 *hist, Double_t X, Int_t kase) {

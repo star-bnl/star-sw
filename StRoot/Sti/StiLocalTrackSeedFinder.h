@@ -34,7 +34,7 @@ public:
   virtual bool hasMore();
   virtual StiKalmanTrack* next();
   virtual void reset();
-  virtual void initialize();
+  void initialize();
   virtual void addLayer(StiDetector*);
   virtual void print() const;
   

@@ -47,49 +47,6 @@ void RunMany(int first=0, int count=100)
       "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
       "rcf0183_02_300evts.geant.root");
 }
-
-void RunResiduals(int firstEvent = 0, 
-		  int nEvents    = 100,
-		  const char * filePrefix = "rcf",
-		  const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-		  const char * file="rcf0183_02_300evts.geant.root",
-		  bool useGui=false,
-		  bool useMcAsRec=false,
-		  bool doPlots=true,
-		  bool doSimulation=true,
-		  bool doAssociation=true,
-		  bool doMiniMcEvent=true,
-		  bool doDst=false,
-		  bool doStEventOutput=false,
-		  bool doStEventInput=true,
-		  bool useTpc=true,
-		  bool useSvt=false,
-		  bool useEmc=false,
-		  bool useFtpc=false,
-		  bool useResidualCalculator=true,
-		  bool doProfile=false	 )
-{
-  Run(firstEvent,
-      nEvents,
-      filePrefix,
-      path,
-      file,
-      useGui, 
-      useMcAsRec,
-      doPlots,
-      doSimulation,
-      doAssociation,
-      doMiniMcEvent,
-      doDst,
-      doStEventOutput,
-      doStEventInput,
-      useTpc,
-      useSvt,
-      useEmc,
-      useFtpc,
-      useResidualCalculator,
-      doProfile);
-}
  
 void RunGui()
 {
@@ -123,7 +80,6 @@ void Run(int firstEvent,
 	 bool useSvt=false,
 	 bool useEmc=false,
 	 bool useFtpc=false,
-	 bool useResidualCalculator=false,
 	 bool doProfile=false	 )
 {
   const char *fileList[]={0,0};
@@ -152,7 +108,6 @@ void Run(int firstEvent,
       useSvt,
       useEmc,
       useFtpc,
-      useResidualCalculator,
       doProfile);
 }
 
@@ -173,7 +128,6 @@ void Run(Int_t firstEvent,
 	 bool useSvt=false,
 	 bool useEmc=false,
 	 bool useFtpc=false,
-	 bool useResidualCalculator=false,
 	 bool doProfile=false)
 {
   loadLibrairies(doProfile);
@@ -192,7 +146,6 @@ void Run(Int_t firstEvent,
   pars->useTpc=useTpc;
   pars->useSvt=useSvt;
   pars->useEmc=useEmc;
-  pars->useFtpc=useFtpc;  
-  pars->useResidualCalculator=useResidualCalculator;
+  pars->useFtpc=useFtpc;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }

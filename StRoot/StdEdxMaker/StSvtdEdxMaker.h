@@ -24,8 +24,9 @@ class StSvtdEdxMaker : public StMaker
   ~StSvtdEdxMaker();
 
   virtual Int_t Init();
+  virtual Int_t InitRun(Int_t RunNumber);
   virtual Int_t Make();
-  
+ 
   void FillHistograms(double dEdx, double p);
   Int_t GetSvtGeometry();
 

@@ -1,17 +1,5 @@
-* $Id: geometry.g,v 1.55 2003/04/29 21:04:55 potekhin Exp $
+* $Id: geometry.g,v 1.54 2002/12/10 01:48:25 potekhin Exp $
 * $Log: geometry.g,v $
-* Revision 1.55  2003/04/29 21:04:55  potekhin
-* To keep the consistency of current simulation runs,
-* the geometry "year2003" is frozen. All the corrections
-* will go into "y2003a", and there will be a number of those.
-* Such geometry has been added to this present source file.
-* In the current cut of y2003a, to be tested, we corrected
-* the supogeo and the offset of the ECAL phi position.
-* We are also awaiting further corrections from the SVT group.
-*
-* Revision 1.55  2003/04/29 16:57:00  potekhin
-* New geometry y2003a -- corrected
-*
 * Revision 1.54  2002/12/10 01:48:25  potekhin
 * Important: the hadronic interactions are now indeed actuated in GCALOR
 *
@@ -97,11 +85,8 @@
    Integer    btofconfig
 
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),ecal_config,
-              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug,
-              CorrNum
-* Correction number within a year
-
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),kusok,
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug
    character  Commands*4000,Geom*8
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -126,8 +111,7 @@ replace[;ON#{#;] with [
 * before parsing the request, set some default values:
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
-* No correction by default
-   CorrNum = 0
+*
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
@@ -145,7 +129,7 @@ replace[;ON#{#;] with [
    Rv=2                  " add non-sensetive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
-   ecal_config=0         " define a patch of Ecal                         "
+   kusok=0               " define a patch of Ecal                         "
    mf=2                  " default field - simetrical, as fitted by Bill  "
    ArgonBug=0            " in the future tsettting bug to 1 should introiduce "
    Fieldbug=0            "  old bugs in these places "
@@ -175,9 +159,9 @@ If LL>1
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_1a,s,b,h,c;  year_2a    ');
-                  <W>;('               : year2000, year2001,year2002  ');
-                  <W>;('               : year2003, year2003a          ');
-                  <W>;('Gcalor         : Gcalor_on, Gcalor_off        ');
+                  <W>;('               : year2000, year2001           ');
+                  <W>;('               : year2002, year2003           ');
+                  <W>;('Gcalor     : Gcalor_on, Gcalor_off        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off            ');
                   <W>;('Geant Physics  : Phys_off, Decay_Only         ');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
@@ -215,8 +199,7 @@ If LL>1
                   nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
-
-  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_Config=3;   }
+  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; Kusok=3;   }
 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
 *                 corrected: MWC readout, RICH reconstructed position, no TOF 
@@ -237,23 +220,23 @@ If LL>1
                      mwc=on       " Wultiwire chambers are read-out ";
                      pse=on       " inner sector has pseudo padrows ";
                   "rich"
-                     rich=on      " have rich ";
+                     rich=on      " est rich ";
                      Rv=2;        " save additional (fake) hits "; 
                   "ctb: central trigger barrer ";
                      Itof=2       " vyzyvat' btofgeo2                 ";
                      btofconfig=4;
                   "calb: barrel calorimeter "
                      ems=on       " sector version "
-                     nmod={24,0}  " 24 sectors ";
+                     nmod={24,0}  " 24 sectora na east side  ";
                      shift={21,0} " starting from 21         "; 
-                  "ecal "
+                  "ecal"
                      ecal=off
                   "beam-beam counter "
                      bbcm=on
-                  "forward pion detector "
+                  "forward pion detector
                      fpdm=on
-                  "field version "
-                     Mf=4;      " tabulated field, with correction ";
+                  " versia polia "
+                     Mf=4;      " tabulirovannoe pole s korrektsiei "
                 }
   on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
@@ -267,50 +250,16 @@ If LL>1
                      Itof=2 " vyzyvat' btofgeo2            ";
                      btofconfig=5;
                   "calb" 
-                     ems=on   "endcap "
-                     nmod={60,0}; shift={0,0}; " 60 sectors "
+                     ems=on   " est endcap " 
+                     nmod={60,0}; shift={0,0}; " 24 sectora na east side .." 
                   "ecal" 
-                     ecal_config=1   "one ecal patch, west "
+                     kusok=1   " odin kusok na west "
                   "beam-beam counter "
                      bbcm=on
-                  "forward pion detector "
+                  "forward pion detector
                      fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 0;
-                }
-
-* Only have 8 characters max in the name, soo we have to go with y2003a, not "year".
-* Corrections in y2003a:
-*    extra material in SVT
-*    removed serious bugs from SUPOGEO
-*    corrected ECALGEO -- the shift variable
-
-  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
-                  "calb" 
-                     ems=on   "endcap " 
-                     nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal" 
-                     ecal_config=1   " one ecal patch, west "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 1;
+                  " versia polia "
+                     Mf=4;      " tabulirovannoe pole s korrektsiei "
                 }
 
   on HADR_ON    { all Geant Physics On;                                       }
@@ -380,7 +329,6 @@ If LL>1
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
 *   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
 * - for year_1 X in mwc hits was limited, keep this (mwx=1)
-
    If (LL>1 & tpce) then
      call AgDETP new ('TPCE')
      If (Geom(1:2)='_1') mwx=1
@@ -388,21 +336,9 @@ If LL>1
      If ( mwx <2 )  call AgDETP add ('tpcg(1).MWCread=',mwx,1)
      If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
    endif 
-
    if (tpce) Call tpcegeo
-
-   if (ftpc) then
-* FTPC proper
-	Call ftpcgeo
-* Take care of the support structure:
-	if(CorrNum==0) then
-* Default, buggy version
-		Call supogeo
-	else
-* New, corrected version
-		Call supogeo1
-	endif
-   endif
+   if (ftpc) Call ftpcgeo
+   if (ftpc) Call supogeo
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1 & btof) then
@@ -433,9 +369,9 @@ If LL>1
 *  - endcap calorimeter may be controled here
    If (LL>1 & ecal) then
       call AgDETP new ('ECAL')
-      if (ecal_config>0)  
+      if (kusok>0)  
       {  call AgDETP add ('emcg.OnOff='   ,1,1)
-         call AgDETP add ('emcg.FillMode=',ecal_config,1)
+         call AgDETP add ('emcg.FillMode=',kusok,1)
       }
    endif
    if (ecal) Call ecalgeo

@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.50 2003/04/26 04:19:15 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.49 2003/03/04 02:52:56 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -312,8 +312,8 @@
 
 	$FC            = "f77";
 	$FLIBS         = "";
-	$FFLAGS        = "-old_f77";
-	$FEXTEND       = "-extend_source";
+	$FFLAGS        = "-w";
+	$FEXTEND       = "-e";
 	
 
 	$R_CPPFLAGS    = "";

@@ -51,10 +51,8 @@ public:
   virtual StiTrackFitter         * getTrackFitter();
   virtual StiTrackMerger         * getTrackMerger();
   virtual StiVertexFinder        * getVertexFinder();
-  virtual StAssociationMaker     * getAssociationMaker();
-  virtual StiResidualCalculator  * getResidualCalculator();
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader();
-
+  virtual StAssociationMaker     * getAssociationMaker();
   virtual void setAssociationMaker(StAssociationMaker * a);
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup);
 
@@ -107,8 +105,7 @@ public:
   StiTrackMerger          * _trackMerger;
   StiVertexFinder         * _vertexFinder;
   StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
-  StAssociationMaker       * _associationMaker; 
-  StiResidualCalculator    * _residualCalculator;
+  StAssociationMaker                       * _associationMaker; 
 
   EditableFilter<StiHit>   * _loaderHitFilter;
   EditableFilter<StiTrack> * _loaderTrackFilter;

@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.4 2003/04/30 16:38:16 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.2 2003/04/29 18:48:33 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,12 +9,6 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
- * Revision 2.4  2003/04/30 16:38:16  pruneau
- * active detector hit filtering
- *
- * Revision 2.3  2003/04/30 15:38:56  pruneau
- * Integrating StiResidualCalculator into the main stream.
- *
  * Revision 2.2  2003/04/29 18:48:33  pruneau
  * *** empty log message ***
  *
@@ -62,19 +56,22 @@ class TH3D;
 class TFile;
 
 //Constructor
-StiResidualCalculator::StiResidualCalculator(StiHitContainer *hitC)
+StiResidualCalculator::StiResidualCalculator(StiHitContainer *hitC, StiDetectorBuilder *detBuilder)
   :candidateHits(hitC)
 {
   candidates.clear();
-  cout <<"StiResidualCalculator::StiResidualCalculator created "<<endl;
+  
+  cout <<"StiResidualCalculator::StiResidualCalculator created "
+       <<endl;
+
+  //Okay detector, init hists
   int check=Init();
   if(check<1) cout <<"StiResidualCalculator::StiResidualCalculator "
 		   <<"Error while initializing histograms."<<endl;
-}
 
-void StiResidualCalculator::initialize(StiDetectorBuilder*detBuilder)
-{
-  initDetector(detBuilder);
+  if(detBuilder) initDetector(detBuilder);
+  
+  return;
 }
 
 void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
@@ -289,7 +286,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
   	  candidateHits->setDeltaD(20.);
   	  candidateHits->setDeltaZ(20.);
  	  candidateHits->setRefPoint(iNode);
-	  //HitVectorType hits = candidateHits->hits(iNode.getDetector());
+	
 
 	  StiHit* hit;
 	  //cout <<"Hit container size: "<<candidateHits.size()<<endl;

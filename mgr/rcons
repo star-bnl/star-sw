@@ -4,15 +4,12 @@
 # Remove file depence for makers from
 # the STAR environment
 #
-source ${GROUP_DIR}/star_cshrc.csh
-
-echo "LEVEL = $STAR_LEVEL"
-echo "STAR  = $STAR"
 
 setenv NODEBUG 1
+starver $STAR_LEVEL 
 cons -r $*
 
 unsetenv NODEBUG
+starver $STAR_LEVEL 
 cons -r $*
 
-echo ""

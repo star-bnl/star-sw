@@ -36,15 +36,17 @@ class StiTrackSeedFinder : public EditableParameters
 {
 public:
   StiTrackSeedFinder(const string& name,
-		     Factory<StiKalmanTrack> * trackFactory,
-		     StiHitContainer         * hitContainer,
-		     StiDetectorContainer    * detectorContainer);
+								Factory<StiKalmanTrack> * trackFactory,
+								StiHitContainer         * hitContainer,
+								StiDetectorContainer    * detectorContainer);
   virtual ~StiTrackSeedFinder();
   virtual bool hasMore() = 0;
   virtual StiKalmanTrack* next() = 0;
   virtual void reset() =0;
-  virtual EditableParameters * getParameters();
+	virtual EditableParameters * getParameters();
+  ///Set factory
   void setFactory(Factory<StiKalmanTrack>* val);
+  ///Set hit container
   void setHitContainer(StiHitContainer*);
   StiHitContainer* getHitContainer();
   

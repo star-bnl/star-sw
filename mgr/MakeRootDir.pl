@@ -68,7 +68,6 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
        if( ! -l "icons")    { symlink("$ANFS/$root/icons","icons");}
        if( ! -l "include")  { symlink("$ANFS/$root/include","include");}
        if( ! -l "tutorials"){ symlink("$ANFS/$root/tutorials","tutorials");}
-       if( ! -l "fonts")    { symlink("$ANFS/$root/fonts","fonts");}
        if( ! -l "test")     { symlink("$ANFS/$root/test","test");}
    }
    # Backward support for old scripts
