@@ -3,7 +3,7 @@
       INTEGER kBarrelEmcPreShowerId,kBarrelSmdEtaStripId
       INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
-      INTEGER kEndcapSmdEtaStripId,kEndcapSmdPhiStripId,kMwpcWestId,kMwpcEastId
+      INTEGER kEndcapSmdUStripId,kEndcapSmdVStripId,kMwpcWestId,kMwpcEastId
       INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId 
 
 #include "StDetectorDefinitions.h"
@@ -22,8 +22,8 @@
       PARAMETER (kBarrelSmdPhiStripId = kBarrelSmdPhiStripIdentifier)
       PARAMETER (kEndcapEmcTowerId = kEndcapEmcTowerIdentifier)
       PARAMETER (kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier)
-      PARAMETER (kEndcapSmdEtaStripId = kEndcapSmdEtaStripIdentifier)
-      PARAMETER (kEndcapSmdPhiStripId = kEndcapSmdPhiStripIdentifier)
+      PARAMETER (kEndcapSmdUStripId = kEndcapSmdUStripIdentifier)
+      PARAMETER (kEndcapSmdVStripId = kEndcapSmdVStripIdentifier)
       PARAMETER (kZdcWestId = kZdcWestIdentifier)
       PARAMETER (kZdcEastId = kZdcEastIdentifier)
       PARAMETER (kMwpcWestId = kMwpcWestIdentifier)

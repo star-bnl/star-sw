@@ -43,8 +43,8 @@
 #define kBarrelSmdPhiStripIdentifier  12
 #define kEndcapEmcTowerIdentifier     13
 #define kEndcapEmcPreShowerIdentifier 14
-#define kEndcapSmdEtaStripIdentifier  15
-#define kEndcapSmdPhiStripIdentifier  16
+#define kEndcapSmdUStripIdentifier    15
+#define kEndcapSmdVStripIdentifier    16
 #define kZdcWestIdentifier            17
 #define kZdcEastIdentifier            18
 #define kMwpcWestIdentifier           19
