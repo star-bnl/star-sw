@@ -11,9 +11,9 @@ macro/global/import *
 *
 *---- otherwise define tables "by hand"...
 *---- and save the xdf dataset so it can be put in the library...
-*!  exec fill
-*!  exec ctg      | in this case will be called again from bfc_util
-*!  exec write
+*  exec fill
+*  exec ctg      | in this case will be called again from bfc_util
+*  exec write
 *
 return
  
@@ -196,9 +196,9 @@ tdm/table/cell/putvalue 'tof[0].counter_width'     2.     | was 10.795 for ctb
 do index   =  0,17
    variable='''tof_slat_eta['//[index]//'].cosang'''
    if [index]<9 then
-     tdm/table/cell/putvalue [variable] -0.990268
-   else
      tdm/table/cell/putvalue [variable]  0.990268
+   else
+     tdm/table/cell/putvalue [variable] -0.990268
    endif
    variable='''tof_slat_eta['//[index]//'].r'''
    tdm/table/cell/putvalue [variable]    214.2

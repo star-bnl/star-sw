@@ -23,7 +23,7 @@ c
       INTEGER   ietaphi2mslat(20,300)
       INTEGER   nopoint_ttetrk,nopoint_g2ttrk,nopoint_ctfhit
       INTEGER   itptrk,imctrk,igetrk,ittetrk,ig2ttrk,ictfhit,imslat
-      INTEGER   i,j,k,l,m,n,icall,itrk,itr,ieb,ll
+      INTEGER   i,j,k,l,m,n,icall,itrk,itr,ieb,ll,idet
       INTEGER   iout,iout1,iout2,iout3,iout4,iout5
       INTEGER   eta_bin,tray_bin,slat_bin,int_yn
       INTEGER   n_exttrk,n_toftrk,trk_npts_min,i_eta,kk,kk_eta
@@ -32,7 +32,7 @@ c
       REAL      trk_qual,trk_qual_cut,trkchar,rval,zmin,zmax,pid,c,r,s_trk
       REAL      xc,yc,crad,eta_hit,phi_tof,phi_trk
       REAL      ctg_zmin(18),ctg_zmax(18),len,trkz
-      REAL      prtrkmat,prhitmat,prtrkctsmat
+      REAL      prtramat,prtrkmat,prhitmat
       REAL      pt,pz,p_tot,x_strt,y_strt,cap_phi0,dedx,theta
       REAL      ang_int,td_ang,cosphi_int,z_int,dirvec(3)
       REAL      xprivert(2),p_privert(6),xp(2),xcc(2)
@@ -218,15 +218,16 @@ c---- extrapolate to z-dependent radius of tofp slats...
           trkz    = 213.*pz/pt
           kk_eta  = 0
           if(ABS(trkz).gt.zmin.AND.ABS(trkz).lt.zmax)then
-           if(trkz.gt.0)then   ! acceptable ONLY for TOFp design!!!!
+           if(trkz.gt.0)then                             ! acceptable ONLY for TOFp design (mdc2)!!!!
             kk_eta  = Z_TO_IETA(ctg_zmin,ctg_zmax,trkz)  !!!! ! estimate i_eta from momenta
            end if
           end if
           if(kk_eta.gt.0)then
            len     = ABS(trkz - ctg_zmin(kk_eta))
-           rval    = 214.35 - len*SIND(8.0)
+           rval    = 214.35   - len*SIND(8.0)
            call EUT_EXTRA_RAD(p_input,rval,trkchar,ang_int,td_ang,
      +                        cosphi_int,z_int,int_yn,dirvec)
+           if (ABS(z_int).lt.zmin) goto 201     ! skip track...
            if (ABS(z_int).gt.zmax) goto 201     ! skip track...
           else
            goto 201
@@ -253,10 +254,6 @@ c---- track extrapolated to the TOF radius within the Z-extrema...
            if(phi2.ge. pi)phi2 = phi2 - 2.*pi
            phi_tof   = phi1
            phi_trk   = phi2
-c--- already too late given the ictftrk check above....
-c           if((phi_trk.gt.2.67.and.phi_trk.lt.2.78)then
-c               iout4                 = iout4 + 1
-c           end if
 c---- assign eta,tray,slat bin numbers
            n_toftrk = n_toftrk + 1
 c            eta_hit  = -1.0*LOG(TAN(ATAN2(rval,z_int)/2.0))
@@ -297,7 +294,7 @@ c---- calculate path length...
              r       = crad
              theta   = ATAN2(rval,z_int)
              s_trk   = SQRT((2.*r*ASIN(c/2./r))**2 + (z_int-z_privert)**2)
-     1               - SIN(theta) + pi/2.
+     1               - SIN(theta) + pi/2. + 0.5
              if(s_trk.gt.200.and.             ! <----------<<<<<<<
      1          p_tot.le.5.0)then             ! <----------<<<<<<<
               KEEPIT    = .TRUE.              ! <----------<<<<<<<
@@ -306,27 +303,30 @@ c---- calculate path length...
             s_trk    = 0.
            end if                             ! end drinner check...
 
-           if(eta_bin .ge.1.and.eta_bin .le. 18.and.
-     1        slat_bin.ge.1.and.slat_bin.le.300)then
-              imslat = ietaphi2mslat(eta_bin,slat_bin)
-              iout2  = iout2 + 1
-              if(imslat.eq.0)then
-               iout3 = iout3 + 1 
+c           if(eta_bin .ge.1.and.eta_bin .le. 18.and.       ! sanity check...
+c     1        slat_bin.ge.1.and.slat_bin.le.300)then       ! sanity check...
+           iout2     = iout2 + 1
+           if(eta_bin .ge. 10.and.eta_bin .le. 18.and.      ! does it extrapolate to TOFp?
+     1        slat_bin.ge.251.and.slat_bin.le.255)then      ! does it extrapolate to TOFp?
+              imslat = ietaphi2mslat(eta_bin,slat_bin)      ! yes, but does it match a struck slat?
+              iout3  = iout3 + 1
+              if(imslat.le.0)then
+cTEST              write(*,*)'track hits tray but not slat ',eta_bin,slat_bin
+               idet  = 0
+              else
+               iout4 = iout4 + 1 
+               idet  = (eta_bin-10)*5 + (slat_bin-250)      ! appropriate mdc2 tofp only!!!
               end if
            else
-              write(*,*)'mslat error ',eta_bin,slat_bin
+cTEST              write(*,*)'track not in TOFp acceptance ',eta_bin,slat_bin
+              KEEPIT = .FALSE.
               imslat = 0
            end if
 
-c	if(ictfhit.gt.0.or.imslat.gt.0)then
-c	write(*,*)z_int,eta_bin,slat_bin,ictfhit,imslat
-c	if(ictfhit.gt.0)write(*,*)'............',g2t_ctf_hit(ictfhit).x(3)
-c	if(imslat .gt.0)write(*,*)'............',cts_mslat(imslat).i_eta,cts_mslat(imslat).z_hit
-c	end if
-
 c---- fill dst_tof_trk...
           if(KEEPIT)then
-           kk                   = kk + 1
+           kk                       = kk + 1
+           dst_tof_trk(kk).det_id   = idet
            dst_tof_trk(kk).itptrk   = itptrk
            dst_tof_trk(kk).ittetrk  = ittetrk
            dst_tof_trk(kk).ictfhit  = ictfhit
@@ -400,13 +400,18 @@ c      write(*,*)'                 tte_mctrk nok =',tte_mctrk_h.nok
       write(*,*)' FILL_DST_TOF:        n_exttrk =',n_exttrk
       write(*,*)' FILL_DST_TOF:        n_toftrk =',n_toftrk
       write(*,*)' FILL_DST_TOF: dst_tof_trk nok =',dst_tof_trk_h.nok
+c      write(*,*)iout,iout1,iout2,iout3,iout4
       if(iout.gt.0)then
        prhitmat = FLOAT(iout1)/FLOAT(iout)
-       write(*,*)' FILL_DST_TOF:  prob tpt/tte/g2t track has ctf hit       = ',prhitmat
+       write(*,*)' FILL_DST_TOF:  prob tpt/tte/g2t trk has ctf hit        = ',prhitmat
       end if
       if(iout2.gt.0)then
-       prtrkmat = FLOAT(iout3)/FLOAT(iout2)
-       write(*,*)' FILL_DST_TOF:  prob extrapolated track hits struck slat = ',prtrkmat
+       prtramat = FLOAT(iout3)/FLOAT(iout2)
+       write(*,*)' FILL_DST_TOF:  prob decent trk extrap.s to tray        = ',prtramat
+       prtrkmat = FLOAT(iout4)/FLOAT(iout2)
+       write(*,*)' FILL_DST_TOF:  prob decent trk extrap.s to struck slat = ',prtrkmat
+       prhitmat = FLOAT(iout4)/FLOAT(iout3)
+       write(*,*)' FILL_DST_TOF:  prob intray trk extrap.s to struck slat = ',prhitmat
       end if
       dst_tof_evt_h.nok           = 1
       dst_tof_evt(1).icall        = icall
@@ -418,10 +423,12 @@ c      write(*,*)'                 tte_mctrk nok =',tte_mctrk_h.nok
       dst_tof_evt(1).n_toftrk     = n_toftrk
       dst_tof_evt(1).ntrks        = iout
       dst_tof_evt(1).ntrks_hit    = iout1
-      dst_tof_evt(1).ntrks_ext    = iout2
-      dst_tof_evt(1).ntrks_mat    = iout3
-      dst_tof_evt(1).prhitmat     = prhitmat   
+      dst_tof_evt(1).ntrks_kee    = iout2
+      dst_tof_evt(1).ntrks_tra    = iout3
+      dst_tof_evt(1).ntrks_mat    = iout4
+      dst_tof_evt(1).prtramat     = prtramat
       dst_tof_evt(1).prtrkmat     = prtrkmat
+      dst_tof_evt(1).prhitmat     = prhitmat   
     
 999   FILL_DST_TOF=STAFCV_OK
       GOTO 1001

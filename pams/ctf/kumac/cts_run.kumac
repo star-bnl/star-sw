@@ -41,8 +41,8 @@ ami/mod/call fill_dst_tof  _
                  [params]/ctf/ctg/tof_slat_eta _
                  [params]/ctf/cts/cts_tof      _
                  [data]/ctf/tof_mslat          _
-                 [data]/ctf/dst_tof_trk        _
-                 [data]/ctf/dst_tof_evt
+                 [dst]/dst_tof_trk             _
+                 [dst]/dst_tof_evt
 *
 theend:
 return
