@@ -8,7 +8,7 @@
 
 struct emcSampFracMSU { 
 
-   float  const;   /*   None  : parameters  */
+   float  constant;   /*   None  : parameters  */
    float  a;   /*   None  : parameters  */
    float  b;   /*   None  : parameters  */
    float  last_tower;   /*   None  : parameters  */
