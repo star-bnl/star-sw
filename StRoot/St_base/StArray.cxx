@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.11 1999/07/17 19:00:12 perev Exp $
+// $Id: StArray.cxx,v 1.12 1999/07/30 01:12:05 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.12  1999/07/30 01:12:05  perev
+// StArray const(antisation)
+//
 // Revision 1.11  1999/07/17 19:00:12  perev
 // fix destructor of StStrArray
 //
@@ -268,14 +271,14 @@ StObjArrayIter &StObjArrayIter::operator--(int)
 { Int_t kursor=GetCursor(); SetCursor(--kursor); return *this;}
 
 //______________________________________________________________________________
-Bool_t StObjArrayIter::operator==(const StObjArrayIter &iter)
+Bool_t StObjArrayIter::operator==(const StObjArrayIter &iter) const
 {
   if (GetCursor() != iter.GetCursor()) return 0;
   if (GetCollection() != iter.GetCollection()) return 0;
   return 1;
 }  
 //______________________________________________________________________________
-Bool_t StObjArrayIter::operator!=(const StObjArrayIter &iter)
+Bool_t StObjArrayIter::operator!=(const StObjArrayIter &iter) const
 {
   if (GetCursor() != iter.GetCursor()) return 1;
   if (GetCollection() != iter.GetCollection()) return 1;
