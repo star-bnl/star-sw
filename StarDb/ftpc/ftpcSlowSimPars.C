@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ftpcSlowSimPars Allocated rows: 1  Used rows: 1  Row size: 40 bytes
+// Top/ftpcSlowSimPars Allocated rows: 1  Used rows: 1  Row size: 44 bytes
 //  Table: ftpcSlowSimPars_st[0]--> ftpcSlowSimPars_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -19,6 +19,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.chamberCathodeVoltage   =  -10000; // D=  drift cathode voltage [V]    ;
     row.sigmaPadResponseFuntion =    1500; // D=  pad-response-function sigma [um]    ;
     row.shaperTime	        =     150; // D=  shaper time FWHM [ns]    ;
+    row.slowSimPressure         = 1013.25; // D = atmospheric pressure used;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
