@@ -1,31 +1,23 @@
-***********************************************************************
-***********************************************************************
- 
 MACRO ev0_am i=1 
+i = [1]
 
- i = [1]
+if [i] = 1 then
+exec init_ev0
+endif
+message 'Calling ev0...'
 
-
-
- if [i] = 1 then
-  exec init_ev0
- endif
-
- message 'Calling ev0...'
-
- ami/mod/call ev0_am _
+ami/mod/call ev0_am _
       	/dui/constants/global/params/ev0par _
         /dui/data/global/tracks/globtrk _
         /dui/data/global/vertices/evr_privert _
-        /dui/data/global/vertices/ev0out _
-        /dui/data/global/tracks/ev0track
+	/dui/data/global/vertices/vertex _
+        /dui/data/global/vertices/ev0out _	
+        /dui/data/global/tracks/ev0track _ 
+	/dui/constants/global/magnetic_field/magf
 
-** Kathy removes this table from ev0_am call on 4/28/98
-*	/dui/constants/global/magnetic_field/magf
-
- if (staf_status(1).ne.stafcv_ok) then
-   message 'Problem on return from ev0_am'
- endif
+if (staf_status(1).ne.stafcv_ok) then
+ message 'Problem on return from ev0_am'
+endif
 
 RETURN
 
@@ -33,28 +25,33 @@ RETURN
 ***********************************************************************
 ***********************************************************************
 
+
 MACRO ev0_eval2 i=1 
 
- i = [1]
+i = [1]
 
- message ' Calling ev0_eval2..'
+message ' Calling ev0_eval2..'
 
- tdm/table/maxrowcount /dui/data/svt/tracks/stk_track
- if ( staf_result(1) .eq. 0) then
-   tdm/newtable /dui/data/svt/tracks/stk_track stk_track 1
- endif
+tdm/table/maxrowcount /dui/data/svt/tracks/stk_track
+if ( staf_result(1) .eq. 0) then
+  tdm/newtable /dui/data/svt/tracks/stk_track stk_track 1
+endif
 
- ami/mod/call ev0_eval2 _
+rowcount /dui/data/global/vertices/ev0out 
+tdm/newtable /dui/data/global/vertices/ev0_eval staf_result(1)
+
+ami/mod/call ev0_eval2 _
       	/dui/data/svt/tracks/stk_track _
 	/dui/data/tpc/tracks/tptrack  _
 	/dui/data/tpc/tracks/tpt_eval  _
         /dui/data/global/vertices/ev0out _
+	/dui/data/global/vertices/ev0_eval _
         /dui/geant/Event/g2t_track _
         /dui/geant/Event/g2t_vertex
 
- if (staf_status(1).ne.stafcv_ok) then
-  message 'Problem on return from ev0eval2'
- endif
+if (staf_status(1).ne.stafcv_ok) then
+ message 'Problem on return from ev0eval2'
+endif
 
 
 return
@@ -63,23 +60,23 @@ return
 ***********************************************************************
 ***********************************************************************
 
-MACRO ev0_direct i=1 
 
- i = [1]
+MACRO direct i=1
 
- message ' Calling ev0_direct..'
+i = [1]
 
- tdm/table/maxrowcount /dui/data/global/track/globtrk
+message ' Calling ev0_direct..'
 
- if ( staf_result(1) .eq. 0) then
-   tdm/newtable /dui/data/global/track/globtrk egr_globtrk 100000
- endif
+tdm/table/maxrowcount /dui/data/global/track/globtrk
+if ( staf_result(1) .eq. 0) then
+  tdm/newtable /dui/data/global/track/globtrk egr_globtrk 100000
+endif
 
- newtable /dui/data/svt/track/stk_mctrack stk_track 100000
- newtable /dui/data/tpc/track/tptrack tpt_track 10000
- newtable /dui/data/tpc/track/tpt_eval tte_eval 10000
+newtable /dui/data/svt/track/stk_mctrack stk_track 100000
+newtable /dui/data/tpc/track/tptrack tpt_track 10000
+newtable /dui/data/tpc/track/tpt_eval tte_eval 10000
 
- ami/mod/call ev0_direct _
+ami/mod/call ev0_direct _
       	/dui/geant/Event/g2t_svt_hit _
 	/dui/geant/Event/g2t_tpc_hit  _
 	/dui/geant/Event/g2t_track  _
@@ -89,12 +86,10 @@ MACRO ev0_direct i=1
 	/dui/data/tpc/track/tpt_eval  _
         /dui/data/global/track/globtrk 
 
- if (staf_status(1).ne.stafcv_ok) then
-  message 'Problem on return from ev0_direct'
- endif
+if (staf_status(1).ne.stafcv_ok) then
+ message 'Problem on return from ev0_direct'
+endif
+
 
 return
 
-***********************************************************************
-***********************************************************************
-***********************************************************************
