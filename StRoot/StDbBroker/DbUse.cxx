@@ -91,8 +91,8 @@ mysql_init(&mysql);
 
 char *dbName="params";
 //only db1 is visible from rcas0202 machine
-char *dbHost="db1.star.bnl.gov";
-//char *dbHost="duvall.star.bnl.gov";
+//char *dbHost="db1.star.bnl.gov";
+char *dbHost="duvall.star.bnl.gov";
 
 //if (!mysql_real_connect(&mysql,"localhost","","",dbName,0,"/tmp/mysql.sock",0))
 //mysql_real_connect(MYSQL *mysql, const char *host, const char *user, const char *passwd, const char *db, uint port, const char *unix_socket, uint client_flag) 

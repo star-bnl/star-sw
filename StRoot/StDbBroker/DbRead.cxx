@@ -6,8 +6,8 @@
 #include "StDbBroker.h"
 #include "StDbLib/StDbDefs.hh"
 #include "StDbLib/StDbConfigNode.hh"
-#include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbTable.h"
+#include "StDbLib/StDbTableDescriptor.h"
 
 // modified for general access
 
@@ -77,11 +77,21 @@ if(!tableVersion)version="default";
    domain = mgr->getDbDomain(dbDomain);
 
 StDbConfigNode* node=mgr->initConfig(type,domain);
+// now try without descriptor --> can't
 StDbTable* mtable=node->addDbTable(tableName,version,1);
+//StDbTable* mtable=node->addTable(tableName,version,1);
+
  if(!mtable){
    *nRows=0;
     return NULL;
  }
+
+
+ // --> can't do it 'cause St_base descriptor's limits 
+ //_Descriptor* _d = (_Descriptor*)d;
+ //StDbTableDescriptor* dbDescr = new StDbTableDescriptor(_d,nVar,sizeOfStruct);
+ //mtable->setDescriptor((StTableDescriptorI*)dbDescr);
+
 mgr->setRequestTime(currentDateTime);
 mgr->fetchDbTable(mtable);
 
@@ -166,6 +176,10 @@ int nextDirTime;
 
 return data;
 }
+
+
+
+
 
 
 
