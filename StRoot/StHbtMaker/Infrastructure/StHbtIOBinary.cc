@@ -255,8 +255,9 @@ int StHbtIOBinary::read( StHbtV0& x, unsigned short version){
   case 0: 
   case 1: iret = read_V1( x ); break;
   case 2: iret = read_V2( x);  break;
+  case 3: iret = read_V3( x);  break;
   default: 
-    cout << " can not write this V0 version " << endl;
+    cout << " can not read this V0 version " << endl;
     return ioERR;
   }
 
@@ -273,6 +274,7 @@ int StHbtIOBinary::write(const StHbtV0& x, unsigned short version){
   case 0: 
   case 1: iret = write_V1( x ); break;
   case 2: iret = write_V2( x ); break;
+  case 3: iret = write_V3( x ); break;
   default: 
     cout << " can not write this V0 version " << endl;
     return ioERR;
