@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.5 2000/02/23 17:36:02 ullrich Exp $
+ * $Id: StEvent.h,v 2.6 2000/03/29 16:54:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.5  2000/02/23 17:36:02  ullrich
- * Changes due to the addition of the EMC to StEvent
+ * Revision 2.6  2000/03/29 16:54:15  ullrich
+ * Added L3 trigger.
  *
  * Revision 2.10  2000/05/22 21:47:15  ullrich
  * Added RICH collection and related methods.
@@ -53,6 +53,7 @@
 #include "StTrackDetectorInfo.h"
 #ifndef StEvent_hh
 #define StEvent_hh
+
 #include "St_DataSet.h"
 #include "StContainers.h"
 
@@ -96,6 +97,8 @@ public:
     StEventSummary*                     summary();
     const StEventSummary*               summary() const;
     
+    StSoftwareMonitor*                  softwareMonitor();
+    const StSoftwareMonitor*            softwareMonitor() const;
     
     StTpcHitCollection*                 tpcHitCollection();
     StRichPixelCollection*              richPixelCollection();
@@ -115,8 +118,7 @@ public:
     StL3Trigger*                        l3Trigger();
     const StL3Trigger*                  l3Trigger() const;
     StTriggerDetectorCollection*        triggerDetectorCollection();
-
-    
+    const StTriggerDetectorCollection*  triggerDetectorCollection() const;
     
     StSPtrVecTrackDetectorInfo&         trackDetectorInfo();
     const StSPtrVecTrackDetectorInfo&   trackDetectorInfo() const;
@@ -132,6 +134,7 @@ public:
     const StSPtrVecXiVertex&            xiVertices() const;
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
+
     StSPtrVecObject&                    content();  // for IO purposes only
 
     void setBunchCrossingNumber(ULong_t);
@@ -142,18 +145,19 @@ public:
     Long_t                       mRunId;
     Long_t                       mId;
     Long_t                       mTime;
-    StEventSummary*              mSummary;           
-    StSoftwareMonitor*           mSoftwareMonitor;   
+    ULong_t                      mTriggerMask;
+    ULong_t                      mBunchCrossingNumber;
     
-    StTpcHitCollection*          mTpcHits;           
-    StFtpcHitCollection*         mFtpcHits;          
-    StSvtHitCollection*          mSvtHits;           
+    StEventSummary*              mSummary;
+    StSoftwareMonitor*           mSoftwareMonitor;
+
     StTpcHitCollection*          mTpcHits;
     StFtpcHitCollection*         mFtpcHits;
     StSvtHitCollection*          mSvtHits;
     StSsdHitCollection*          mSsdHits;
-    StTriggerDetectorCollection* mTriggerDetectors;  
-    StL0Trigger*                 mL0Trigger;         
+    StRichPixelCollection*       mRichPixels;
+    StEmcCollection*             mEmcCollection;
+    
     StTriggerDetectorCollection* mTriggerDetectors;
     StL0Trigger*                 mL0Trigger;
     StL3Trigger*                 mL3Trigger;

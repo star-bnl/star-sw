@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.6  2000/02/23 17:35:59  ullrich
- * Changes due to the addition of the EMC to StEvent
+ * Revision 2.7  2000/03/29 16:54:11  ullrich
+ * Added L3 trigger.
  *
  * Revision 2.12  2000/05/22 21:47:12  ullrich
  * Added RICH collection and related methods.
@@ -48,6 +48,7 @@
  *
  * Revision 2.2  1999/11/04 13:30:40  ullrich
  * Added constructor without summary table
+ *
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
@@ -56,11 +57,11 @@
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -68,8 +69,8 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich 
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -79,6 +80,7 @@ using std::swap;
     mRunId = 0;
     mId = 0;
     mTime = 0;
+    mTriggerMask = 0;
     mBunchCrossingNumber = 0;
     mSummary = 0;
     mSoftwareMonitor = 0;
@@ -91,7 +93,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -125,6 +127,7 @@ StEvent::StEvent(const event_header_st& evtHdr,
     delete mFtpcHits; mFtpcHits = 0;
     delete mSvtHits; mSvtHits = 0;
     delete mSsdHits; mSsdHits = 0;
+    delete mRichPixels; mRichPixels = 0;
     delete mTriggerDetectors; mTriggerDetectors = 0;
     delete mL0Trigger; mL0Trigger = 0;
     delete mL3Trigger; mL3Trigger = 0;
@@ -208,6 +211,12 @@ StEvent::richPixelCollection() const { return mRichPixels; }
     return emc;
 StEvent::richCollection() const { return mRichCollection; }
     _lookup(rich, mContent);
+    return rich;
+StEvent::triggerDetectorCollection() { return mTriggerDetectors; }
+    _lookup(rich, mContent);
+    return rich;
+StEvent::triggerDetectorCollection() const { return mTriggerDetectors; }
+    _lookup(trg, mContent);
     return trg;
 StEvent::l0Trigger() { return mL0Trigger; }
     _lookup(trg, mContent);
@@ -342,21 +351,28 @@ StEvent::setRichPixelCollection(StRichPixelCollection* val)
 }
 
     if (mContent[mRichCollection]) delete mContent[mRichCollection];
+    if (mTriggerDetectors) delete mTriggerDetectors;
+    mTriggerDetectors = val;
+{
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mTriggerDetectors]) delete mContent[mTriggerDetectors];
     if (mL0Trigger) delete mL0Trigger;
     mL0Trigger = val;
 {
-	mPrimaryVertices.push_back(vertex);
-	
-	//
-	//  Sort new entry.
-	//  Vertices are ordered according to number
-	//  of daughter tracks in descending order.
+    _lookupAndSet(val, mContent);
 }
-	for (int i=mPrimaryVertices.size()-1; i>0; i--) {
-            if (mPrimaryVertices[i]->numberOfDaughters() > mPrimaryVertices[i-1]->numberOfDaughters()) 
-		swap(mPrimaryVertices[i], mPrimaryVertices[i-1]);
-	    else
-		break;
+
+        mPrimaryVertices.push_back(vertex);
+{
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mL3Trigger]) delete mContent[mL3Trigger];
+    mContent[mL3Trigger] = val;
+        for (int i=mPrimaryVertices.size()-1; i>0; i--) {
+            if (mPrimaryVertices[i]->numberOfDaughters() > mPrimaryVertices[i-1]->numberOfDaughters())
                 swap(mPrimaryVertices[i], mPrimaryVertices[i-1]);
         if (!mContent[mPrimaryVertices])
             mContent[mPrimaryVertices] = new StSPtrVecPrimaryVertex;
