@@ -1,5 +1,9 @@
-* $Id: tde_new.F,v 1.12 1999/04/25 04:25:08 sakrejda Exp $
+* $Id: tde_new.F,v 1.13 1999/05/27 13:54:46 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.13  1999/05/27 13:54:46  ogilvie
+* added new parameter to control the method used to calculate averages
+* called "averaging_method"
+*
 * Revision 1.12  1999/04/25 04:25:08  sakrejda
 * protected against accidental runs with no field
 *
@@ -158,13 +162,14 @@ c if this works, find a more efficient way later
 c C. Ogilvie June 1998
 c
 c to run this option use
-c      tdpar(1).debug(2)=2
+c      =2
 c      tdpar(1).truncopt=4
-c      tdpar(1).truncfact=0.0
-c temp
-c      tdpar(1).debug(2)=3 
-             
+c      tdpar(1).truncfact=0.3 
 
+      write(6,*) "averaging method"
+      write(6,*)  tdpar(1).averaging_method            
+
+      pause
 C Sort the hit array according to the track number
       
       iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
@@ -221,19 +226,18 @@ C        and average charge
 *   Calculate dE/dx for each track & output to tptrack table  (TdEdx)  *
 ************************************************************************
 C
-C        tdpar.truncopt=1   truncate tdpar.debug(1) points 
-C                            with larger dE/dx
+C        tdpar.truncopt=1   not used
 C        tdpar.truncopt=2   use all dedx points
-C        tdpar.truncopt=4   truncate P% of points with larger dE/dx
+C        tdpar.truncopt=4   truncate truncfrac% of points with larger dE/dx
 C
-C        tdpar.debug(2)=0   calculate dE/dx=(sum of q)/(sum of s)
+C        tdpar.averaging_method=0   calculate dE/dx=(sum of q)/(sum of s)
 C
-C        tdpar.debug(2)=1   calculate dE/dx=(sum of q/s)/(# of pnts)
+C        tdpar.averaging_method=1   calculate dE/dx=(sum of q/s)/(# of pnts)
 c     
-c        tdpar.debug(2)=2   calculate dE/dx as maximum likelihood
+c        tdpar.averaging_method=2   calculate dE/dx as maximum likelihood
 C
-c        tdpar.debug(2)=3   calculate dE/dx=(sum of weight*q/s)/(# of weight)
-c                           weight = sqrt(q)
+c        tdpar.averaging_method=3  calculate dE/dx=(sum of weight*q/s)/(# of weight)
+c                           weight = sqrt(s)
 c
 C        tdpar.usemerge=1   skipp  point flagged as merged 
 c                           implemented as default, with no
@@ -349,10 +353,8 @@ c
 c truncating options
 c
          nde_orig=nde
-         if(tdpar(1).truncopt.eq.1) then
-            nde=nde-tdpar(1).debug(1)
-            if(nde.lt.0) nde=0
-         else if(tdpar(1).truncopt.eq.4) then
+
+         if(tdpar(1).truncopt.eq.4) then
             nde=nde-int(tdpar(1).truncfact*real(nde))
             if(nde.lt.0) nde=0
          elseif (tdpar(1).truncopt.eq.2) then
@@ -366,22 +368,22 @@ c
 c
 c options for dE/dx calc
 c
-         if(tdpar(1).debug(2).eq.0.and.nde.gt.0) then
+         if(tdpar(1).averaging_method.eq.0.and.nde.gt.0) then
             do k=1,nde
                track(j).dedx(1)=track(j).dedx(1)+ dedx(k).length
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
             track(j).dedx(1)=track(j).dedx(2)/track(j).dedx(1)
-         else if(tdpar(1).debug(2).eq.1.and.nde.gt.0) then
+         else if(tdpar(1).averaging_method.eq.1.and.nde.gt.0) then
             do k=1,nde
                track(j).dedx(1)= track(j).dedx(1)+ dedx(k).adedx
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
             track(j).dedx(1)=track(j).dedx(1)/real(nde)
-         elseif (tdpar(1).debug(2).eq.3.and.nde.gt.0) then
+         elseif (tdpar(1).averaging_method.eq.3.and.nde.gt.0) then
             sum_weight = 0.
             do k=1,nde
-               weight = sqrt(abs(dedx(k).charge))
+               weight = sqrt(abs(dedx(k).length))
                track(j).dedx(1)=track(j).dedx(1)+weight*dedx(k).adedx
                sum_weight=sum_weight+weight
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
@@ -389,7 +391,7 @@ c
             if (sum_weight.gt.0) then
                track(j).dedx(1)=track(j).dedx(1)/sum_weight
             endif
-         elseif (tdpar(1).debug(2).eq.2.and.nde.gt.10) then
+         elseif (tdpar(1).averaging_method.eq.2.and.nde.gt.10) then
 c
 c likelihood method
 c get standard (0.7) mean dE/dx (hxamp) 
@@ -442,7 +444,7 @@ c
 c
   
        end do 
-c      if (tdpar(1).debug(2).eq.2) then
+c      if (tdpar(1).averaging_method.eq.2) then
 c         call hdelet(hhid)
 c      endif
       tde_new=STAFCV_OK
