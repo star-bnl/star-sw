@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.94 2003/09/02 17:58:08 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.95 2003/10/10 17:41:51 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -282,7 +282,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
       sector->SetVisibility(TVolume::kThisUnvisible);
     }
   }
-  m_Hall->SetVisibility(TVolume::kBothVisible);
+  m_Hall->SetVisibility(TVolume::kThisUnvisible);
   m_ShortView = new TVolumeView(*m_Hall,2); 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
@@ -1106,6 +1106,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.95  2003/10/10 17:41:51  fine
+// change the default view for HALL to unvisible
+//
 // Revision 1.94  2003/09/02 17:58:08  perev
 // gcc 3.2 updates + WarnOff
 //
