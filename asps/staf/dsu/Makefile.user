@@ -1,6 +1,6 @@
 # Makefile.user - user customization of SLM
 #? - Use this file to override SLMakefile behavior.
-#####################################################  xdf2root  ########
+#####################################################  xdf2root  #######
 #
 ifeq ($(STAR_ARCH),sun4os5pc)
   xdf2rootMsg1 := "Making xdf2root..."
@@ -23,3 +23,10 @@ xdf2root:	$(STAR_ARCH)/xdf2root.o
 	-L$(STAR_LIB)/$(STAR_SYS_LEVEL)/sys/lib \
 	-ldsl $(xdf2rootExtraLib)
 	ls -l $(BASE_DIR)/bin/$(STAR_ARCH)/xdf2root*
+#
+#
+CLIBS := $(shell cernlib pawlib graflib grafX11 packlib mathlib kernlib)
+xdf2rzd: xdf2rzd.o -ldsu -ldsl
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ \
+	$(CLIBS)
+#
