@@ -112,13 +112,13 @@ void DrawDstHist(
       input->AddFile(exFileName);
       nFile++;
     }
-    cout << "Total: " << nFile << " files will be analysed" << endl ;
+    cout << " DrawDstHist.C, Total: " << nFile << " files will be analysed" << endl ;
 
 // set max # events to read from each file ()=default value of 10 million 
    
-    cout << " Default max event per file is " << input->GetMaxEvent() << endl;
+    cout << " DrawDstHist.C, Default max event per file is " << input->GetMaxEvent() << endl;
       input->SetMaxEvent(nevproc);
-    cout << " Have set max event per file to " << input->GetMaxEvent() << endl;
+    cout << " DrawDstHist.C, Have set max event per file to " << input->GetMaxEvent() << endl;
       input->SetDebug();
 
 // now setup the rest of the Makers in the chain 
@@ -135,7 +135,7 @@ void DrawDstHist(
 // method to print out list of histograms - can do this anytime after they're booked
    Int_t NoHist=0;
    NoHist = QA->ListHists();
-   cout << " No. of Hist we have == " << NoHist << endl;
+   cout << " DrawDstHist.C, No. of Hist we have == " << NoHist << endl;
 
 
 // now looping over all events in input file
@@ -144,14 +144,14 @@ void DrawDstHist(
   iloop = input->GetMaxEvent();
 // add 1 to iloop  or it doesn't work (due to "feature" in St_io_Maker??)
   iloop+=1;
-  cout << " DrawDstHist - will now loop over # events = " << input->GetMaxEvent() << endl;
+  cout << " DrawDstHist, will now loop over # events = " << input->GetMaxEvent() << endl;
   cout << "   -- but really have to add 1 to loop to make it work! iloop =  " << iloop << endl;
   for (i=1;i<=iloop; i++)  { 
-    cout <<  " !!! processing event !!! " << i << endl ;
+    cout <<  " DrawDstHist.C, processing event !!! " << i << endl ;
     if (!chain->Make(i))  chain->Clear();
     else break;
   }
-  cout <<  " !!! passed chain->Make !!!" << endl ;
+  cout <<  " DrawDstHist.C, passed chain->Make !!!" << endl ;
 
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
@@ -170,15 +170,22 @@ void DrawDstHist(
   Int_t ilg = 0;
   Int_t numLog = 0;
   for (ilg=0;ilg<lengOfList;ilg++) {
-    cout <<  " !!! adding histogram " << LList[ilg] << " to LogY list "  << endl ;
+    cout <<  " DrawDstHist.C, adding histogram " << LList[ilg] << " to LogY list "  << endl ;
     numLog = QA->AddToLogYList(LList[ilg]);
   }
-  cout <<" Number hist to plot with log scale = " << numLog << endl;
+  cout <<" DrawDstHist.C, Number hist to plot with log scale = " << numLog << endl;
 
+// Now remove a hist from the list:
+// numLog = QA->RemoveFromLogYList("QaGlobtrkPt");
+// cout <<" DrawDstHist.C, Number hist to plot with log scale = " << numLog << endl;
+   numLog = QA->RemoveFromLogYList("Abcd");
+   cout <<" DrawDstHist.C, Number hist to plot with log scale = " << numLog << endl;
+
+  numLog = QA->ExamineLogYList();
 
 // Finish method in St_QA_Maker is where the actual DrawHist is done
   chain->Finish();
-  cout <<  " !!! passed chain->Finish" << endl ;
+  cout <<  "DrawDstHist.C, passed chain->Finish" << endl ;
 
 
   if (QABrowser) delete QABrowser;
