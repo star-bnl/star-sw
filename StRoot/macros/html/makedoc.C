@@ -2,74 +2,108 @@
   gROOT.Reset();
   Char_t *libs[] = {"St_base","xdf2root","St_Tables", 
   "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
+  
+ TString AFS; // STAR root directory
 
  Char_t *suffix=0;
   Int_t nlist = 10;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
      NT=kTRUE;
-     gSystem.Load("Root_html.dll");
-     suffix = ".dll";
+     gSystem.Load("Root_html");
+     AFS = "//sol/afs_rhic";
   }
-  else 
-     suffix =".so";
+  else
+     AFS = "/afs/rhic";
 
    Char_t buffer[256];
    if (NT) {
     for(Int_t i=0;i<nlist;i++) {
        strcpy(buffer,libs[i]);
-       if (!strchr(libs[i],'.')) strcat(buffer,suffix);
        if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
     }
     
    }
    else {
-     gSystem->Load("St_base.so");
-     gSystem->Load("xdf2root.so");
-     gSystem->Load("St_Tables.so");
+     gSystem->Load("St_base");
+     gSystem->Load("xdf2root");
+     gSystem->Load("St_Tables");
   
      gSystem->Load("libmsg.so");
      gSystem->Load("libtls.so");
      gSystem->Load("tpc.sl");
-     gSystem->Load("St_tpc.so");
+     gSystem->Load("St_tpc");
      gSystem->Load("svt.sl");
-     gSystem->Load("St_svt.so");
+     gSystem->Load("St_svt");
      gSystem->Load("global.sl");
-     gSystem->Load("St_global.so");
+     gSystem->Load("St_global");
      gSystem->Load("ftpc.sl");
-     gSystem->Load("St_ftpc.so");
-     gSystem->Load("StChain.so");
+     gSystem->Load("St_ftpc");
+     gSystem->Load("StChain");
 
-   //  gSystem->Load("St_srs_Maker.so");
-   //  gSystem->Load("St_tpt_Maker.so");
-   //  gSystem->Load("St_xdfin_Maker.so");
-   //  gSystem->Load("St_evg_Maker.so");
-   //  gSystem->Load("St_tcl_Maker.so");
-   //  gSystem->Load("St_tss_Maker.so");
-  //   gSystem->Load("St_ebye_Maker.so");
-  //   gSystem->Load("St_laser_Maker.so");
-  //   gSystem->Load("St_run_Maker.so");
-  //   gSystem->Load("St_tpctest_Maker.so");
+     gSystem->Load("St_srs_Maker");
+     gSystem->Load("St_tpt_Maker");
+     gSystem->Load("St_xdfin_Maker");
+     gSystem->Load("St_evg_Maker");
+     gSystem->Load("St_tcl_Maker");
+     gSystem->Load("St_tss_Maker");
+     gSystem->Load("St_ebye_Maker");
+     gSystem->Load("St_laser_Maker");
+     gSystem->Load("St_run_Maker");
+     gSystem->Load("St_tpctest_Maker");
 
-     gSystem->Load("St_calib_Maker.so");
+     gSystem->Load("St_calib_Maker");
    }
    
    
   //Create the object of the THtml class
   THtml *html = new THtml();
 
-  char *sourcedir = 0;
-  if (NT) 
-    sourcedir = "//sol/afs_rhic/star/packages/dev/StRoot/base";
-  else
-    sourcedir = "/afs/rhic/star/packages/dev/StRoot/base:/afs/rhic/star/packages/dev/StRoot/xdf2root:/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/inc";
+  TString STAR = AFS;  
+  STAR += "/star/packages/dev";
+  TString sourcedir;
+  sourcedir = STAR;
+  sourcedir += "/StRoot/base";
+  if (!NT) { 
+    sourcedir += ":";
+    sourcedir += STAR;
+    sourcedir += "/.share/tables:";
+    sourcedir += STAR;
+    sourcedir += "/inc";
+  }
 
-  char *lookup = 0;
-  if (NT) 
-    lookup = "//sol/afs_rhic/star/packages/dev/.share/tables;../base;//sol/afs_rhic/star/packages/dev/.share/base";
-  else
-    lookup = "/afs/rhic/star/packages/dev/StRoot/StChain:/afs/rhic/star/packages/dev/StRoot/xdf2root:/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/StRoot/base";
+  TString lookup ;
+  if (NT) {
+    lookup = STAR;
+    lookup += "/.share/tables;../base;";
+    lookup += STAR;
+    lookup += ".share/base";
+  }
+  else {
+    lookup = STAR;
+    lookup += "/StRoot/StChain:";
+    lookup += STAR;
+    lookup += "/StRoot/xdf2root:";
+    lookup += STAR;
+    lookup += "/.share/tables:";
+    lookup += STAR;
+    lookup += "/StRoot/base";
+  }
 
+  
+  TString giffile = STAR;
+  giffile += "/StRoot/html/src/gif";
+  
+  if (gSystem->AccessPathName(giffile.Data()) && !NT) {
+    // Create "gif" subdirectory for the first time
+    gSystem->MakeDirectory(giffile);
+    // Create links 
+    gSystem->Symlink("../src/gif","/afs/rhic/star/packages/dev/StRoot/html/examples/gif");
+    gSystem->Symlink("src/gif","/afs/rhic/star/packages/dev/StRoot/html/gif");
+    // Copy the old images into a new directrory
+    gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
+  }
+  
   html->SetSourceDir(lookup);
 
   if (NT) 

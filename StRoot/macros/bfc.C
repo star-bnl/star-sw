@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.19 1998/10/18 21:20:49 fisyak Exp $
+// $Id: bfc.C,v 1.20 1998/10/21 20:30:56 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.20  1998/10/21 20:30:56  fine
+// makedoc macro creates "gif" directories and fill it up
+//
 // Revision 1.19  1998/10/18 21:20:49  fisyak
 // typo
 //
@@ -52,11 +55,11 @@
 // Add tcl and tpt
 //
 void bfc(const Char_t *fileinp = 
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc262_02_142evts.xdf", 
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc340_04_90evts.xdf", 
          const Char_t *fileout=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.xdf",
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.xdf",
          const Char_t *FileOut=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.root",
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.root",
          const Int_t  Nevents=1000)
 {
    gSystem->Load("St_base.so");
@@ -98,15 +101,16 @@ void bfc(const Char_t *fileinp =
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
 //  StChain chain("StChain");
-  StChainSpy chain("StChain");
+  StChainSpy chain("bfc");
 
 //  Create the makers to be called by the current chain
-  St_run_Maker run_Maker("run_Maker","run/params");
+  St_run_Maker run_Maker("params","run/params");
+  St_run_Maker run_Maker("params/geant","run/params/geant/Run");
   if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin_Maker","event/geant");
+    St_xdfin_Maker xdfin("xdfin","event/geant");
     chain.SetInputXDFile(xdf_in);
   }
-//St_calib_Maker calib("calib_Maker","run/calib"); 
+//St_calib_Maker calib("calib","run/calib"); 
 //  St_evg_Maker evg_Maker("evg_Maker","event");
   St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
   //  St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
