@@ -1,5 +1,8 @@
-// $Id: bfcz.C,v 1.15 1999/04/27 21:01:11 snelling Exp $
+// $Id: bfcz.C,v 1.16 1999/04/29 23:54:18 fisyak Exp $
 // $Log: bfcz.C,v $
+// Revision 1.16  1999/04/29 23:54:18  fisyak
+// Add StRootEvent and test on existing of input file
+//
 // Revision 1.15  1999/04/27 21:01:11  snelling
 // fixed a few switches
 //
@@ -21,8 +24,8 @@
 //////////////////////////////////////////////////////////////////////////
 //  default is g2t data 
 //#define MINIDAQ   /* TPC minidaq data */
-//#define FZIN    /* GEANT fz-file */
-#define GTRACK  /* GEANT simulation on flight */
+#define FZIN    /* GEANT fz-file */
+//#define GTRACK  /* GEANT simulation on flight */
 #ifndef MINIDAQ
 #endif /* GTRACK or FZIN */
 #ifdef FZIN 
@@ -52,7 +55,7 @@
 //#define EMC
 //#define CTF
 //#define L3
-//#define GLOBAL
+#define GLOBAL
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
 
@@ -75,18 +78,19 @@ void Load(){
 #else /* no StMagF, GEANT field */
     gSystem->Load("geometry");
 #endif /* StMagF */
+    gSystem->Load("StarClassLibrary");
 #ifdef TPC
     gSystem->Load("St_tpc");
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-#ifdef TRS
-    gSystem->Load("StarClassLibrary");
+  #ifdef TRS
     gSystem->Load("StTrsMaker"); 
     gSystem->Load("St_tpcdaq_Maker");
-#else /* no TRS */
-#ifdef  TSS
+  #else /* no TRS */
+    #ifdef  TSS
     gSystem->Load("St_tss_Maker");
-#endif /* TSS */
+    #endif /* TSS */
+  #endif /* TRS */
 #endif /* TPC */
 #ifdef MINIDAQ
     gSystem->Load("StMinidaqMaker");
@@ -132,6 +136,7 @@ void Load(){
 #endif /* SVT */
 #ifdef GLOBAL
     gSystem->Load("St_global");
+    gSystem->Load("StRootEvent");
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StTreeMaker");
@@ -178,9 +183,13 @@ void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
     if (NoEvents <=0) {NoEvents = Nevents;}  
     if (NoEvents > Nevents) {NoEvents = Nevents;}  
   }
-#else  /* not FZIN and not GTRACK */
-  TString InFile(infile);
 #endif /* FZIN */
+  TString InFile(infile);
+//      Check the input file
+  if (gSystem->AccessPathName(InFile.Data())) {// file does not exist
+    printf(" *** NO FILE: %s, exit!\n", InFile.Data());
+    gSystem->Exit(1); 
+  }
   if (outfile) FileOut = new TString(outfile);
   else {
     FileOut = new TString(gSystem->BaseName(InFile.Data()));
@@ -197,7 +206,6 @@ void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
 #endif /* GTRACK */
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
-#endif
 
 #ifdef XDFOUT
   if (!FileOut) {
@@ -208,7 +216,6 @@ void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
     printf ("Open xdf file  = %s \n +++++++++++++++++++++++++++++++++++++++++++++++\n",XdfFile->Data());
   }
 #endif
-
   // Create the main chain object
   chain = new StChain("bfc");
   chain->SetDebug();
@@ -258,7 +265,10 @@ void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
   geant->Do("swit 2 3;");
   // geant->LoadGeometry("detp geometry field_only field_off");
 #else /* no GTRACK */
-  geant->SetInputFile(InFile.Data());
+  if (geant->SetInputFile(InFile.Data()) =! kStOK) {
+    printf ("Problem with opening %s input file, exit !\n",InFile.Data());
+    gSystem->Exit(1); 
+  }
 #endif /* GTRACK */
   chain->SetInput("geom","geant:geom");
 #endif /* GEANT */
