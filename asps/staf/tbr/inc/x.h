@@ -63,7 +63,7 @@ Widget gVer2;
 #define MCOL 4  /* max columns allowed to be selected in table win */
 #define EXT 13 /* length of constant beginning part of header info */
                /* (WFW+1)*NWF+EXT < COL */
-size_t LastRow(int);
+size_t LastRow(myBool,int);
 size_t FirstRow(int);
  /* comment 6tx tlm="ThisLineMeans".
     For TableBrowser windows
@@ -76,6 +76,7 @@ size_t FirstRow(int);
     that the user sees in the clickable window. */
 char gCuts[COL+4];
 myBool gBreakRowsLoop;
+#define RW 12  /* num Rows in Write part init (table window type only) */
 typedef struct {
   int    win_type;	/* one of WIN_TYPE_XXX */
   int    rowSel;	/* one of ROW_SEL_XXX */
@@ -85,6 +86,7 @@ typedef struct {
   int    nLineClickPart; /* BBB compare to MAX_LINES_CLICK_PART */
   int    tlm[MAX_LINES_CLICK_PART]; /* See 6tx.  This is wh_gDs or colNum. */
   int    wh_gDs;  /* See 7tx. */
+  int    nRowsWritePart;
   Widget shell,txtWidClickH,txtWidWriteH,rowWidget,rad[NUM_RADIO];
   Widget txtWidTop,txtWidClick,txtWidWrite;
   myBool isHilited[MAX_LINES_CLICK_PART],useCuts;

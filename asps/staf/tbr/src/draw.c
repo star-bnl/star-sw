@@ -1,3 +1,6 @@
+/* This file is the result of modifications applied to a
+ * file written by the people mentioned immediately
+ * below. HW 5/23/95 */
 /* Written by Dan Heller and Paula Ferguson.  
  * Copyright 1994, O'Reilly & Associates, Inc.
  * Permission to use, copy, and modify this program without
