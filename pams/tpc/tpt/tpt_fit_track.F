@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
+* $Id: tpt_fit_track.F,v 1.6 1999/09/14 00:53:11 liq Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.6  1999/09/14 00:53:11  liq
+* add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.5  1999/07/19 19:15:54  genevb
 * Use StMessMgr
 *
@@ -41,6 +44,8 @@ C     Fits a helix to the TPC track ipt
 
 #include "tpt_pars.inc"
 #include "tcl_tphit.inc"
+#include "tpt_mxdim.inc"
+#include "tpt_track_pointers.inc"
 C______________________________________________________________________
 
       RECORD /table_head_st/    tpar_h
@@ -49,9 +54,9 @@ C______________________________________________________________________
       RECORD /tcl_tphit_st/     hit(*)
 C_____________________________________________________________________
 C     Local variables
-#include "tpt_pointers.inc"
+C#include "tpt_pointers.inc"
 
-      RECORD /track_pointers/ trk(*)
+      RECORD /tpt_track_pointers_st/ trk(*)
 
       INTEGER ipt, ncir,i,ntry,j,iret,ibad,ient ,ient1
       INTEGER tpt_helix_fit, tpt_find_outlier

@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.9 1999/07/19 19:15:55 genevb Exp $
+* $Id: tpt_merge_segments.F,v 1.10 1999/09/14 00:53:12 liq Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.10  1999/09/14 00:53:12  liq
+* add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.9  1999/07/19 19:15:55  genevb
 * Use StMessMgr
 *
@@ -43,7 +46,8 @@ C
 #include "PAM.inc"
 
 #include "tpt_track.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
+#include "tpt_mxdim.inc"
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 C______________________________________________________________________
@@ -59,7 +63,7 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/      tpar(*)
 
