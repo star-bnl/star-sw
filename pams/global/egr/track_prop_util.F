@@ -117,11 +117,10 @@ C
 
 C********************************************************************
 
-       SUBROUTINE   PROP_CIRCLE_PARAM(trk,xc,r,beta)
+      SUBROUTINE   PROP_CIRCLE_PARAM(trk,xc,r)
       IMPLICIT NONE
-C   Input arguments  :	trk(6)	!Helix parameters of track
+C   Input arguments  :	trk(7)	!custom helix parameters of track
 C			r	!radius of circle
-C                       beta    !MAg field in tesla
 C   Output arguments :	xc(2)	!coordinates of the centre of circle
 C   Functional Description : Returns the x-y coordinates and the radius
 C			     of the circle (projected-helix) on the
@@ -130,16 +129,13 @@ C   Created  DEC-1991 S.Margetis
 C   Error conditions	: None
 C   Status		: Tested
 C----------------------------------------------------------------------
-      INTEGER iflag
-      REAL    trk(6),xc(2),r,beta
+      REAL    trk(7),xc(2),r
       REAL    x,y,p(3),a,yt1,yt2,xt1,xt2,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
-      IF(trk(1).eq.0.) trk(1)=0.01
       x=trk(1)
       y=trk(2)
 C--------get the momentum components-----------------------------------
-      iflag=0
-      CALL prop_track_mom(trk,r,iflag,p,beta)
+      CALL prop_track_mom(trk,p)
 C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
@@ -149,7 +145,7 @@ C--------find the two possible solutions------------------------------
       xt2=-a*(yt2-y) + x
 C-------decide which one is the right one------------------------------
       rxp=(xt1-x)*p(2) - (yt1-y)*p(1)
-      test=rxp*trk(6)/r
+      test=rxp*trk(6)
       IF(test.gt.0.0) THEN
 	xc(1)=xt1
 	xc(2)=yt1
@@ -294,12 +290,10 @@ C----------------------------------------------------------------------
 
 C*********************************************************************
 
-      SUBROUTINE PROP_TRACK_MOM(trk,rc,iflag,p,beta)
+      SUBROUTINE PROP_TRACK_MOM(trk,p)
       IMPLICIT NONE
-C   Input arguments  :	trk(6)	!helix parameters of the track
-C			iflag	!if =5 it is a neutral particle and
-C				!trk(6)=1./momentum of particle
-C                        beta    !field in Tesla
+C   Input arguments  :	trk(7)	!custom helix parameters of the track
+C
 C   Output arguments : 	p(3)	!momentum vector of track
 C   Functional Description :  	returns the momentum components
 C				of a track
@@ -308,28 +302,16 @@ C   Error conditions	:	None
 C   Status 		:	Tested
 C----------------------------------------------------------------------
 
-      INTEGER iflag
-      REAL    trk(6),p(3),phi,rc
-      REAL    const,beta,lamda
-      REAL    sph,cph,pt,ptot
-      PARAMETER (const=0.299792458)
+      REAL    trk(7),p(3),psi
+      REAL    sph,cph,pt
 
 C-----Extract momentum components from helix --------------------------
 
-	phi  =trk(4)
-	cph  =cos(phi)
-	sph  =sin(phi)
+	psi  =trk(4)
+	cph  =cos(psi)
+	sph  =sin(psi)
 
-C-------check if it is a neutral particle------------------------------
-
-       IF(iflag.eq.5) THEN
-	lamda=atan(trk(5))
-	ptot =1./trk(6)
-	pt   =ptot*cos(lamda)
-       ELSE
-	pt   =(beta*const*rc)/100.
-	ptot =sqrt(pt*pt+p(3)*p(3))
-       ENDIF	!iflag.eq.5
+	pt   =trk(7)
 
         p(3) = pt*trk(5)
 	p(1) =pt*cph
