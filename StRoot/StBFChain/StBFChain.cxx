@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.308 2002/12/02 16:17:14 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.309 2002/12/04 15:26:04 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1099,13 +1099,19 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options
 	if (mk) {
-	  if (GetOption("pp") ) {                           // pp specific stuff
-	    if (maker == "StTrsMaker") mk->SetMode(1);      // Pile-up correction
+	  if (GetOption("pp") ) {                            // pp specific stuff
+	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
-	      mk->SetMode(1);                               // Switch vertex finder to ppLMV
+	      mk->SetMode(1);                                // Switch vertex finder to ppLMV
+	      StVertexMaker *pMk = (StVertexMaker*) mk;
 	      if( GetOption("beamLine")){
-		StVertexMaker *pMk = (StVertexMaker*) mk;
-		pMk->SetBeam4ppLMV();                       // Add beam-line constrain
+		  pMk->SetBeam4ppLMV();                      // Add beam-line constrain
+	      }
+
+	      if( GetOption("fzin")){                        // if fzin, get CTB's from MC
+		  pMk->SetCTBMode(1);
+	      } else{
+		  pMk->SetCTBMode(0);                        // Else get from DAQ
 	      }
 	    }
 	  }
