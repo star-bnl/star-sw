@@ -26,6 +26,7 @@ macro dir
  MESSAGE ********************************
 
  macro/global/create log_file ' ' 'default log message file'
+ macro/global/create nevents  0   'no. of events processed so far'
 *************** create global macros *********************************
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
