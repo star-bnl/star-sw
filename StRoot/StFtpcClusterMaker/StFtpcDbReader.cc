@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.22 2003/05/06 20:19:40 mora Exp $
+// $Id: StFtpcDbReader.cc,v 1.23 2003/06/10 13:13:51 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.23  2003/06/10 13:13:51  jcs
+// get mix,max gas temperature and pressure limits from database
+//
 // Revision 1.22  2003/05/06 20:19:40  mora
 // Add a new constructor only with FTPC dimensions and geometry for ITTF
 //
@@ -220,6 +223,10 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mTemperatureDifference  = gasTable->temperatureDifference;
    mDefaultTemperatureWest = gasTable->defaultTemperatureWest;
    mDefaultTemperatureEast = gasTable->defaultTemperatureEast;
+   mMinPressure            = gasTable->minPressure;
+   mMaxPressure            = gasTable->maxPressure; 
+   mMinGasTemperature      = gasTable->minGasTemperature;
+   mMaxGasTemperature      = gasTable->maxGasTemperature; 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
@@ -342,6 +349,10 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mTemperatureDifference  = gasTable->temperatureDifference;
    mDefaultTemperatureWest = gasTable->defaultTemperatureWest;
    mDefaultTemperatureEast = gasTable->defaultTemperatureEast;
+   mMinPressure            = gasTable->minPressure;
+   mMaxPressure            = gasTable->maxPressure; 
+   mMinGasTemperature      = gasTable->minGasTemperature;
+   mMaxGasTemperature      = gasTable->maxGasTemperature; 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }

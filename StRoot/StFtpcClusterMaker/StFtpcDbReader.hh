@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.14 2003/05/06 20:19:40 mora Exp $
+// $Id: StFtpcDbReader.hh,v 1.15 2003/06/10 13:13:51 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.15  2003/06/10 13:13:51  jcs
+// get mix,max gas temperature and pressure limits from database
+//
 // Revision 1.14  2003/05/06 20:19:40  mora
 // Add a new constructor only with FTPC dimensions and geometry for ITTF
 //
@@ -121,6 +124,10 @@ protected:
   Float_t mTemperatureDifference;
   Float_t mDefaultTemperatureWest;
   Float_t mDefaultTemperatureEast;
+  Float_t mMinPressure;
+  Float_t mMaxPressure;
+  Float_t mMinGasTemperature;
+  Float_t mMaxGasTemperature;
 
   Float_t mTZero;
   Float_t mDriftCathodeVoltage;
@@ -242,6 +249,10 @@ public:
   Float_t temperatureDifference(){return mTemperatureDifference;}
   Float_t defaultTemperatureWest(){return mDefaultTemperatureWest;}
   Float_t defaultTemperatureEast(){return mDefaultTemperatureEast;}
+  Float_t minPressure() {return mMinPressure;}
+  Float_t maxPressure() {return mMaxPressure;}
+  Float_t minGasTemperature() {return mMinGasTemperature;}
+  Float_t maxGasTemperature() {return mMaxGasTemperature;}
 
   Float_t tZero() {return mTZero;}
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
