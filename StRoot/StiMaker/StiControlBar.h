@@ -22,9 +22,12 @@ public:
     static void resetStiGuiForEvent(); //Reset for current event
     static void doNextStiGuiAction(); //do next action within this event
     static void stepToNextEvent(); //step to the next event
+    static void stepThroughNEvents(); //step through user-specified number of events
     static void finish(); //call StChain::Finish() and close control
     static void printDisplayManager(); //call StiDisplayManager::print()
     static void printDetector(); //call StiDetecotrLayerContainer::print()
+    static void printHits(); //print all hits in event
+    static void printHitContainerForDetector(); //print hits for the current detector layer
     
     static void setVisible(); //call StiDisplayManager::setVisible()
     static void setInvisible(); //call StiDisplayManager::setInvisible()
@@ -49,11 +52,14 @@ public:
     static void moveMinusPhi();
     
 
+    static void memoryInfo();
+    static void printFactorySize();
+    
     //General access
     void setStChain(StChain* val) {mchain=val;}
     
 private:
-    static int mevent;
+    static int mnevent;
     static TControlBar *makeControlBar();
     static StChain* mchain; //!
     

@@ -8,9 +8,13 @@
 #include "TControlBar.h"
 #include "StiMaker.h"
 
+//SCL
+#include "StMemoryInfo.hh"
+
 //Sti
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
+#include "Sti/StiHitContainer.h"
 
 //StiGui
 #include "StiGui/StiRootDrawableDetector.h"
@@ -19,7 +23,7 @@
 //StiMaker
 #include "StiControlBar.h"
 
-int StiControlBar::mevent = 0;
+int StiControlBar::mnevent = 0;
 StChain* StiControlBar::mchain = 0;
 
 ClassImp(StiControlBar)
@@ -54,8 +58,26 @@ void StiControlBar::doNextStiGuiAction()
 
 void StiControlBar::stepToNextEvent()
 {
+    mchain->Clear();
     mchain->Make();
-    ++mevent;
+    ++mnevent;
+}
+
+void StiControlBar::stepThroughNEvents()
+{
+    cout <<"\nEnter number of events to process (int) "<<endl;
+    int nevents;
+    cin >> nevents;
+    for (int i=0; i<nevents; ++i) {
+	mchain->Clear();
+	mchain->Make();
+	++mnevent;
+    }
+}
+
+void StiControlBar::printFactorySize()
+{
+    StiMaker::instance()->printStatistics();
 }
 
 void StiControlBar::finish()
@@ -202,6 +224,18 @@ void StiControlBar::moveMinusPhi()
     StiControlBar::showCurrentDetector();
 }
 
+void StiControlBar::printHitContainerForDetector()
+{
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    StiDetector* layer = *rdet;
+    
+    if (!layer) {
+	cout <<"Error! StiControlBar::printHitContainerForDetector(): Failed to get detector"<<endl;
+	return;
+    }
+    StiHitContainer::instance()->print( layer->getCenterRefAngle(), layer->getCenterRadius() );
+}
+
 void StiControlBar::showCurrentDetector()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
@@ -222,6 +256,12 @@ void StiControlBar::showCurrentDetector()
     return;
 }
 
+void StiControlBar::memoryInfo()
+{
+    StMemoryInfo::instance()->snapshot();
+    StMemoryInfo::instance()->print();
+}
+
 void StiControlBar::setCurrentDetectorToDefault()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
@@ -236,14 +276,26 @@ void StiControlBar::setCurrentDetectorToDefault()
     //cout <<"\t Leaving StiControlBar::setCurrentDetectorToDefault()"<<endl;
 }
 
+void StiControlBar::printHits()
+{
+    StiHitContainer::instance()->print();
+}
+
 TControlBar* StiControlBar::makeControlBar()
 {
     TControlBar* bar = new TControlBar("vertical","Sti Control Panel");
     
     //Add Buttons:
+    bar->AddButton("Memory Snapshot","StiControlBar::memoryInfo()",
+		   "Print a Current Membory Snapshot");
+
+    bar->AddButton("Show Factory Size","StiControlBar::printFactorySize()",
+		   "Print current factory size");
+
     bar->AddButton("Dump Display Manager","StiControlBar::printDisplayManager()",
 		   "Show contents of the Display Manager");
     bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
+    bar->AddButton("Dump Hits","StiControlBar::printHits()","Show all contents of Hit Container");
     bar->AddSeparator();
     
     bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");
@@ -255,12 +307,11 @@ TControlBar* StiControlBar::makeControlBar()
     bar->AddButton("Tpc Visible","StiControlBar::setTpcVisible()","Set Tpc Drawables to Visible State");    
     bar->AddButton("Tpc Invisible","StiControlBar::setTpcInvisible()","Set Tpc Drawables to Invisible State");
     
-    bar->AddButton("Reset", "StiControlBar::resetStiGuiForEvent()","Reset Sti For Next Event");
-    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
-    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
 
     //Detector navigation
     bar->AddButton("Show Current Detector","StiControlBar::showCurrentDetector()","Highlight Current Detector");
+    bar->AddButton("Show Hits for Current Detector","StiControlBar::printHitContainerForDetector()",
+		   "Show hits for Current Detector");
     
     bar->AddButton("Move Out","StiControlBar::moveOut()","Step Radially to Next Padrow Out");
     bar->AddButton("Move In","StiControlBar::moveIn()","Step Radially to Next Padrow In");
@@ -274,6 +325,10 @@ TControlBar* StiControlBar::makeControlBar()
 
     //Chain management
     bar->AddSeparator();
+    bar->AddButton("Reset", "StiControlBar::resetStiGuiForEvent()","Reset Sti For Next Event");
+    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
+    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
+    bar->AddButton("N-Event Step","StiControlBar::stepThroughNEvents()","Step Through N-Events");
     bar->AddButton("Finish","StiControlBar::finish()","Call StChain::Finish()");
 
     bar->Show();

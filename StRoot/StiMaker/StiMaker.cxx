@@ -83,7 +83,15 @@ StiMaker::~StiMaker()
 
 void StiMaker::Clear(const char*)
 {
+    //Clear HitContainer
     mhitstore->clear();
+    
+    //Reset DetectorContainer
+    StiDetectorContainer::instance()->reset();
+    
+    //Reset HitFactory
+    mhitfactory->reset();
+    
     StMaker::Clear();
 }
 
@@ -100,6 +108,8 @@ Int_t StiMaker::Init()
     mtrackstore = StiTrackContainer::instance();
     mhitstore = StiHitContainer::instance();
     mhitfactory = new StiHitFactory("HitFactory");
+    mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
+    mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.  Throw's error if over this!
 
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
     mdisplay->cd();
@@ -117,17 +127,18 @@ Int_t StiMaker::Init()
       
     mdisplay->draw();
     mdisplay->update();
-    
-    //mhitfiller = new StiHitFiller();
-    //mhitfiller->addDetector(kTpcId);
+
+    mhitfiller = new StiHitFiller();
+    mhitfiller->addDetector(kTpcId);
     //mhitfiller->addDetector(kSvtId);
-    //cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+    cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
     
     return StMaker::Init();
 }
 
 Int_t StiMaker::Make()
 {
+    Clear();
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
     if (rEvent) {
@@ -135,10 +146,16 @@ Int_t StiMaker::Make()
 	
 	cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
 	cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
-	//mhitfiller->setEvent(mevent);
-	//mhitfiller->fillHits(mhitstore, mhitfactory);
+	mhitfiller->setEvent(mevent);
+	mhitfiller->fillHits(mhitstore, mhitfactory);
     }
     return kStOK;
+}
+
+void StiMaker::printStatistics() const
+{
+    cout <<"HitFactory Size:\t"<<mhitfactory->getCurrentSize()<<endl;
+    cout <<"HitContainer size:\t"<<mhitstore->size()<<endl;
 }
 
 void StiMaker::setMaterialBuildPath(char* val)
@@ -161,7 +178,7 @@ void StiMaker::reset()
 {
     mdone=false;
     mcounter=0;
-    StiDetectorContainer::instance()->reset();
+    
 }
 
 void StiMaker::doNextAction()
