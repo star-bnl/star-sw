@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSectoredPicoEvent.cc,v 1.1 2000/04/12 01:47:00 willson Exp $
+ * $Id: StHbtSectoredPicoEvent.cc,v 1.2 2000/05/25 20:57:18 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtSectoredPicoEvent.cc,v $
+ * Revision 1.2  2000/05/25 20:57:18  laue
+ * bug fix in creating the arrays of collections. Now compiles on solaris
+ *
  * Revision 1.1  2000/04/12 01:47:00  willson
  * Initial Installation
  *
@@ -28,19 +31,19 @@ StHbtSectoredPicoEvent::StHbtSectoredPicoEvent(int numbins){
 
   mNumBins = numbins;
 
-  StHbtParticleCollection **sectoredCollection1 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection1 = new StHbtParticleCollection*[mNumBins+1];
   mFirstSectoredCollection = sectoredCollection1;
 
   for (i=0; i<=mNumBins; i++) 
 	mFirstSectoredCollection[i] = new StHbtParticleCollection;
 
-  StHbtParticleCollection **sectoredCollection2 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection2 = new StHbtParticleCollection*[mNumBins+1];
   mSecondSectoredCollection = sectoredCollection2;
 
   for (i=0; i<=mNumBins; i++) 
 	mSecondSectoredCollection[i] = new StHbtParticleCollection;
 
-  StHbtParticleCollection **sectoredCollection3 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection3 = new StHbtParticleCollection*[mNumBins+1];
   mThirdSectoredCollection = sectoredCollection3;
 
   for (i=0; i<=mNumBins; i++) 
@@ -54,19 +57,19 @@ StHbtSectoredPicoEvent::StHbtSectoredPicoEvent(int numbinsx, int numbinsy, int n
 
   mNumBins = numbinsx*numbinsy*numbinsz;
 
-  StHbtParticleCollection **sectoredCollection1 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection1 = new StHbtParticleCollection*[mNumBins+1];
   mFirstSectoredCollection = sectoredCollection1;
 
   for (i=0; i<=mNumBins; i++) 
 	mFirstSectoredCollection[i] = new StHbtParticleCollection;
 
-  StHbtParticleCollection **sectoredCollection2 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection2 = new StHbtParticleCollection*[mNumBins+1];
   mSecondSectoredCollection = sectoredCollection2;
 
   for (i=0; i<=mNumBins; i++) 
 	mSecondSectoredCollection[i] = new StHbtParticleCollection;
 
-  StHbtParticleCollection **sectoredCollection3 = new (StHbtParticleCollection*)[mNumBins+1];
+  StHbtParticleCollection **sectoredCollection3 = new StHbtParticleCollection*[mNumBins+1];
   mThirdSectoredCollection = sectoredCollection3;
 
   for (i=0; i<=mNumBins; i++) 
