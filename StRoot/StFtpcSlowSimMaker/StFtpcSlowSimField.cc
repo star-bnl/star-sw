@@ -1,5 +1,10 @@
-// $Id: StFtpcSlowSimField.cc,v 1.11 2002/09/13 13:44:55 fsimon Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.12 2003/02/14 16:58:03 fsimon Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.12  2003/02/14 16:58:03  fsimon
+// Add functionality that allows for different temperature corrections
+// in west and east, important for embedding. Drift tables are created
+// for east and west seperately.
+//
 // Revision 1.11  2002/09/13 13:44:55  fsimon
 // Commented out anglefactor
 //
@@ -64,16 +69,16 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   angleFactor = mParam->lorentzAngleFactor();
   
   grid_point = new grid_data[mParam->numSlowSimGridPoints()];
-  
+
   int i;
   float cathodeVoltage = mParam->chamberCathodeVoltage();
-  
+
   // grid size
   del_r = (outerRadius - innerRadius)
     / (float) (mParam->numSlowSimGridPoints()-1);
   inverseDeltaRadius = 1/del_r; // '*' faster than '/' in later calculations
   twoDeltaRadius = 2*del_r;
-  
+
   int num_data = mParam->numberOfFssGasValues();    // number of data point
   float * in_efield  = new float[num_data];
   float * in_velocity_z = new float[num_data];
@@ -89,20 +94,20 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
     in_diffusion_y[i]   = mParam->fssGasDiffusionY(i);
     in_angle_lorentz[i] = mParam->fssGasLorentzAngle(i);
   }
-  
+
   float eff;
   // big loop to define the field
   for ( i=0; i<mParam->numSlowSimGridPoints(); i++) {
-    
+
     grid_point[i].rhit = innerRadius + i * del_r;
 
-    eff = fabs(cathodeVoltage) / log(outerRadius / innerRadius) 
+    eff = fabs(cathodeVoltage) / log(outerRadius / innerRadius)
       / grid_point[i].rhit;
     grid_point[i].ef   = eff;
-    
+
     int index = Locate(num_data, in_efield, eff);
-    
-    grid_point[i].vel_z   
+
+    grid_point[i].vel_z
       = Interpolate(num_data,in_efield,in_velocity_z,index,eff);
     float diffusionX=Interpolate(num_data,in_efield,in_diffusion_x,
 				 index,eff);
@@ -110,46 +115,70 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
 				 index,eff);
     float diffusionZ=Interpolate(num_data,in_efield,in_diffusion_z,
 				 index,eff);
-    grid_point[i].diff_z  
+    grid_point[i].diff_z
       = diffusionZ*diffusionZ;
-    grid_point[i].diff_x  
+    grid_point[i].diff_x
       = diffusionX*diffusionY;
   }
-  
+
   // calculate drift velocity gradients
-  
+
   for (i=mParam->numSlowSimGridPoints()-1; i>0; i--) {
-    grid_point[i].dlnv_dr 
+    grid_point[i].dlnv_dr
       = ( 1. - grid_point[i-1].vel_z/grid_point[i].vel_z)
       *inverseDeltaRadius;
   }
-  grid_point[0].dlnv_dr = grid_point[1].dlnv_dr; 
+  grid_point[0].dlnv_dr = grid_point[1].dlnv_dr;
   delete [] in_efield;
   delete [] in_velocity_z;
   delete [] in_diffusion_z;
   delete [] in_diffusion_x;
   delete [] in_diffusion_y;
   delete [] in_angle_lorentz;
-  
+
   radTimesField = mDb->radiusTimesField();
   nPadrowPositions = mDb->numberOfPadrowsPerSide();
   nMagboltzBins = mDb->numberOfMagboltzBins();
   preciseEField = new float[nMagboltzBins];
-  inverseDriftVelocity = new float[nMagboltzBins*nPadrowPositions];
-  preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];
-  
-  float deltaP = mParam->slowSimPressure()-mParam->standardPressure();
-  
+  inverseDriftVelocityWest = new float[nMagboltzBins*nPadrowPositions];
+  preciseLorentzAngleWest = new float[nMagboltzBins*nPadrowPositions];
+  inverseDriftVelocityEast = new float[nMagboltzBins*nPadrowPositions];
+  preciseLorentzAngleEast = new float[nMagboltzBins*nPadrowPositions];
+
+  // use pressure and temperature corrections for each FTPC seperately
+
+  // calculate drift velocity and lorentz angle for west
+
+  // use temperature corrected pressure (set in StFtpcSlowSimMaker
+  //float deltaP = mParam->slowSimPressure()-mParam->standardPressure();
+  float deltaP = mParam->adjustedAirPressureWest() - mParam->standardPressure();
+
   {for(int i=0; i<nMagboltzBins; i++)
     {
       preciseEField[i] = mDb->magboltzEField(i);
       for(int j=0; j<nPadrowPositions; j++)
 	{
-	  inverseDriftVelocity[i+nMagboltzBins*j] = 
+	  inverseDriftVelocityWest[i+nMagboltzBins*j] =
 	    1/ (mDb->magboltzVDrift(i,j)
 		+ deltaP * mDb->magboltzdVDriftdP(i,j));
-	  preciseLorentzAngle[i+nMagboltzBins*j] = 
-	    mDb->magboltzDeflection(i,j) 
+	  preciseLorentzAngleWest[i+nMagboltzBins*j] =
+	    mDb->magboltzDeflection(i,j)
+	    + deltaP * mDb->magboltzdDeflectiondP(i,j);
+	}
+    }}
+
+   // calculate drift velocity and lorentz angle for east
+  deltaP = mParam->adjustedAirPressureEast() - mParam->standardPressure();
+
+  {for(int i=0; i<nMagboltzBins; i++)
+    {
+      for(int j=0; j<nPadrowPositions; j++)
+	{
+	  inverseDriftVelocityEast[i+nMagboltzBins*j] =
+	    1/ (mDb->magboltzVDrift(i,j)
+		+ deltaP * mDb->magboltzdVDriftdP(i,j));
+	  preciseLorentzAngleEast[i+nMagboltzBins*j] =
+	    mDb->magboltzDeflection(i,j)
 	    + deltaP * mDb->magboltzdDeflectiondP(i,j);
 	}
     }}
@@ -163,19 +192,21 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
 
 StFtpcSlowSimField::~StFtpcSlowSimField() {
   delete[] preciseEField;
-  delete[] inverseDriftVelocity;
-  delete[] preciseLorentzAngle;
+  delete[] inverseDriftVelocityWest;
+  delete[] preciseLorentzAngleWest;
+  delete[] inverseDriftVelocityEast;
+  delete[] preciseLorentzAngleEast;
   delete[] grid_point;
 }
 
-float StFtpcSlowSimField::Interpolate(const int npt, const float* x, 
-				      const float* y,const int ich, 
+float StFtpcSlowSimField::Interpolate(const int npt, const float* x,
+				      const float* y,const int ich,
 				      const float xx)
 {
-// 
+//
 // this subroutine will Interpolate the value (xx,yy) from
 // the arrays {x(1:npt), y(1:npt)} at a given channel ich.
-// 
+//
     float x1[5];
     float y1[5];
     register int i;
