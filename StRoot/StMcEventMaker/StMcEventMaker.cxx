@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.49 2004/10/29 20:08:26 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.50 2004/12/17 01:19:40 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.50  2004/12/17 01:19:40  calderon
+ * Protection against deleting twice (Found by Jeff Porter).
+ *
  * Revision 1.49  2004/10/29 20:08:26  calderon
  * Reduce cout statements in normal running, but keep them in Debug mode.
  *
@@ -227,7 +230,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.49 2004/10/29 20:08:26 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.50 2004/12/17 01:19:40 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -278,8 +281,10 @@ void StMcEventMaker::Clear(const char*)
 {
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();    
     // StMcEventMaker - Clear,
-    delete mCurrentMcEvent;
-    mCurrentMcEvent = 0;
+    if (mCurrentMcEvent) {
+	delete mCurrentMcEvent;
+	mCurrentMcEvent = 0;
+    }
     if (doPrintMemoryInfo) {
 	StMemoryInfo::instance()->snapshot();
 	StMemoryInfo::instance()->print();
