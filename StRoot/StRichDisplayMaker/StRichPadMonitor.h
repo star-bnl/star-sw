@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 2.0 2000/08/09 16:28:04 gans Exp $
+ * $Id: StRichPadMonitor.h,v 2.1 2000/08/11 20:20:44 gans Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,8 +7,11 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
- * Revision 2.0  2000/08/09 16:28:04  gans
- * Created New Maker for all drawable objects.
+ * Revision 2.1  2000/08/11 20:20:44  gans
+ * Added use of StRichDrawableTControl
+ *
+ * Revision 2.3  2000/09/29 17:36:58  gans
+ * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  * Revision 2.0  2000/08/09 16:28:04  gans
  * Created New Maker for all drawable objects.
@@ -58,6 +61,7 @@ using std::vector;
 
 #include "StRrsMaker/StRichG2TInfo.h"
 #include "StRichPIDMaker/StRichRings.h"
+class TCanvas;
 #include "StRichPIDMaker/StRichTrack.h"
 #include "StRichDrawableTTrack.h"
 
@@ -112,8 +116,8 @@ public:
     
     void drawLegend();
     void printCanvas(char*,int);
-
-   
+    TCanvas * getRichCanvas();
+    
     void printCanvas(char*,char*, int);
    
    
@@ -122,8 +126,8 @@ public:
 protected:
     StRichPadMonitor(StRichGeometryDb*);
 
+    Color_t GetColorAttribute(double amp);
 private:
-    TCanvas*    mRichCanvas;
     
 private:
     TCanvas*    mRichCanvas;
@@ -174,6 +178,7 @@ private:
     StKaonPlus* kaonplus;
     StProton* proton;
     
+
 private:
     static StRichPadMonitor* mInstance;
 };
