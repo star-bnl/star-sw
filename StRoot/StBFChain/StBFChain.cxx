@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.280 2002/02/28 23:33:28 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.281 2002/03/01 22:21:30 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -49,6 +49,8 @@ Bfc_st BFC[] = {
   {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
+  {"Y2001n","","","db,calib,detDb","","",
+                                     "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
   {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
   {"NoHits",""  ,"",""                                  ,"","","Don't write hits into Event.Branch",kFALSE},
@@ -390,6 +392,13 @@ Bfc_st BFC[] = {
   {"tags"        ,"","TagsChain",
                  "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
+
+
+  {"MuDSTChain","MuDSTChain","EMCmDST",""                                   ,"StMaker","StChain","",kFALSE},
+  {"EMCmDST","","MuDSTChain","StEvent,EmcUtil",                 "StEmcMicroDstMaker","StMuDSTMaker"
+                                                                                ,"Writes EMC MuDST",kFALSE},
+
+
 
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
