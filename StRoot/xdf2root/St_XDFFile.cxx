@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.19 1998/11/25 21:58:38 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.20 1998/12/19 02:54:04 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.20  1998/12/19 02:54:04  fine
+// ST_XDFFile::NextEventList() - fast scan of the XDF files method has been introduced
+//
 // Revision 1.19  1998/11/25 21:58:38  fisyak
 // Cleanup
 //
@@ -287,6 +290,7 @@ St_DataSet *St_XDFFile::NextEventGet()
  if (strchr(fType,'r')) {
    if (!::xdr_dataset(fStream,&fDataSet))
    {
+//    xdr_getpos(&fDataSet)
        printf("*** Warning: NextEvent() xdf_next_record: end of file %s\n",fName); 
        return 0;
    };
@@ -298,7 +302,47 @@ St_DataSet *St_XDFFile::NextEventGet()
  } else 
    return 0;
 }
+#if 1
+//______________________________________________________________________________
+St_DataSet *St_XDFFile::NextEventList()
+{
+ // 
+ //  NextEventList()
+ // 
+ //  The NextEventGet reads the next XDR events and creats St_DataSet object
+ //  and returns its pointer.
+ //
+ //  It returns ZERO if failed.
+ //
+ // Note: 
+ // ----
+ // It is the calling method responsibility to delete the object created with
+ // this method to avoid any memory leak
+ //
 
+ fMethodName = "NextEvent()";
+ // printf("%s \n",fMethodName);
+ if (!fFile) return 0;
+ if (strchr(fType,'r')) {
+   if (    !xdr_getpos(fStream) 
+        && !::xdr_dataset_type(fStream,&fDataSet)
+        && !xdr_getpos(fStream)
+        && !xdr_dataset_data(fStream,fDataSet)
+      ) 
+  {
+//   
+       printf("*** Warning: NextEvent() xdf_next_record: end of file %s\n",fName); 
+       return 0;
+   };
+   fRecordCount++;
+    printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
+   St_DataSet *set = MakeDataSet(fDataSet);
+   Delete(fDataSet);
+   return set;
+ } else 
+   return 0;
+}
+#endif
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
 {
