@@ -1,5 +1,9 @@
-// $Id: StSpectraMaker.cxx,v 1.1 1999/11/03 21:22:41 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.2 1999/11/05 18:58:49 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.2  1999/11/05 18:58:49  ogilvie
+// general tidy up following Mike Lisa's review. List of analyses conntrolled via
+// analysis.dat, rather than hardcoded into StSpectraMaker.cxx
+//
 // Revision 1.1  1999/11/03 21:22:41  ogilvie
 // initial version
 //
@@ -14,7 +18,7 @@
 #include "StMessMgr.h"
 #include <vector>
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.1 1999/11/03 21:22:41 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.2 1999/11/05 18:58:49 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -26,20 +30,23 @@ Int_t StSpectraMaker::Init() {
 
   mOutput = new TFile("deviant.root","RECREATE");
   //
-  // create two analyses, piplus and pminus via tpc dedx deviants
-  // do this via a file script?
+  // create the analyses that are stored in the file analysis.dat, 
   //
-
-  StTpcDeviantSpectraAnalysis* piplus = new StTpcDeviantSpectraAnalysis;
-  piplus->setParticle("pi+");
-  piplus->setTitle("piplus");
-  mSpectraAnalysisContainer.push_back(piplus);
  
-  StTpcDeviantSpectraAnalysis* piminus = new StTpcDeviantSpectraAnalysis;
-  piminus->setParticle("pi-");
-  piminus->setTitle("piminus");
-  mSpectraAnalysisContainer.push_back(piminus);
-
+  ifstream from("StRoot/StSpectraMaker/analysis.dat");
+  while (!from.eof()) {
+    string particleName;
+    from >> particleName;
+    cout << "particle name :" << particleName << endl;
+    string analysisTitle;
+    from >> analysisTitle; 
+    cout << "title for analysis :" << analysisTitle << endl;
+    StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
+    anal->setParticle(particleName);
+    anal->setTitle(analysisTitle);
+    mSpectraAnalysisContainer.push_back(anal);
+  }
+ 
   //
   // set common characteristics of spectra, e.g. size of bins, efficiencies
   // dca cuts etc., do this via a file?
@@ -59,10 +66,10 @@ Int_t StSpectraMaker::Init() {
     analysis->setYBinSize(ybin); 
     analysis->setMtBinSize(mtbin);
 
-    StEfficiency* effic = new StEfficiency;
-    effic->setNhitCut(10);
-    effic->setDcaCut(2.*centimeter);
-    effic->init(analysis->getParticle());
+    StEfficiency effic;
+    effic.setNhitCut(10);
+    effic.setDcaCut(2.*centimeter);
+    effic.init(analysis->getParticle());
     analysis->setEfficiencyParam(effic);
 
     analysis->bookHistograms();
@@ -111,6 +118,7 @@ Int_t StSpectraMaker::Finish() {
   cout << "writing out histograms" << endl;
 
   mOutput->Write("MyKey",kSingleKey);
+  cout << "written"<< endl;
   mOutput->Close();
   return kStOK;
 }

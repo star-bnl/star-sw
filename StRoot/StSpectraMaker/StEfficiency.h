@@ -27,7 +27,7 @@ class StEfficiency {
   void setDcaCut(double dca);
   double dcaCut();
   void init(StParticleDefinition* particle);
-  double efficiency(const StTrack* track);
+  double efficiency(StTrack* track);
 
 };
 

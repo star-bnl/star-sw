@@ -12,29 +12,22 @@ class StSpectraAnalysis {
 
  protected:
 
-  char* mTitle;
+  string mTitle;
   StParticleDefinition* mParticle;
-  double* mYBinSize;
-  double* mMtBinSize;
-  StEfficiency* mEffic;
-  int* mNumEvent;
+  StEfficiency mEffic;
+  int mNumEvent;
 
  public:
   StSpectraAnalysis();
   ~StSpectraAnalysis();
 
-  void setTitle(char title[20]);
-  char getTitle();
+  void setTitle(string title);
+  string getTitle();
 
-  void setParticle(char particle[20]);
+  void setParticle(string particle);
   StParticleDefinition* getParticle();
 
-  void setYBinSize(double ybin);
-  double getYBinSize();
-  void setMtBinSize(double mtbin);
-  double getMtBinSize();
-
-  void setEfficiencyParam(StEfficiency* effic);
+  void setEfficiencyParam(StEfficiency effic);
   StEfficiency* getEfficiencyParam();
 
   void bookHistograms();
