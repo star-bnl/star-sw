@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.32 2000/02/03 22:02:30 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.33 2000/02/04 19:53:56 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.33  2000/02/04 19:53:56  kathy
+// added 2 more histograms - for med and small range of # hits in detector
+//
 // Revision 1.32  2000/02/03 22:02:30  kathy
 // adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
 //
@@ -445,8 +448,15 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
     m_xi_ma_hist=0; //! Xi Mass
   
   // for method MakeHistPoint
-    m_pnt_tot=0;   //! number of tpc hits
-  
+    m_pnt_tot=0;     //! number of hits
+    m_pnt_tot_med=0; //! number of hits, med range
+    m_pnt_tot_sm=0;  //! number of hits, small range
+    m_pnt_tpc=0;   //! number of hits tpc
+    m_pnt_svt=0;   //! number of hits svt
+    m_pnt_ssd=0;   //! number of hits ssd
+    m_pnt_ftpcE=0;   //! number of hits ftpcE
+    m_pnt_ftpcW=0;   //! number of hits ftpcW
+
   // for method MakeHistKink
     m_kink_tot=0;   //! number of kinks
   
@@ -1122,7 +1132,10 @@ void StQABookHist::BookHistXi(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
 
-  m_pnt_tot     = QAH1F("QaPointTot",  "point: # hits total ",100, 0.,250000.);
+  m_pnt_tot     = QAH1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
+  m_pnt_tot_med = QAH1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
+  m_pnt_tot_sm  = QAH1F("QaPointTotsm", "point: # hits total ",100, 0.,250.);
+
   m_pnt_tpc     = QAH1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
   m_pnt_svt     = QAH1F("QaPointSvt",  "point: # hits svt ",100, 0.,250000.);
   m_pnt_ssd     = QAH1F("QaPointSsd",  "point: # hits ssd ",100, 0.,250000.);

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.17  2000/02/04 19:53:57  kathy
+//! added 2 more histograms - for med and small range of # hits in detector
+//!
 //! Revision 1.16  2000/02/03 22:02:31  kathy
 //! adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
 //!
@@ -65,7 +68,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -405,7 +408,10 @@ class StQABookHist : public StMaker {
 
   
   // for method MakeHistPoint
-   TH1F     *m_pnt_tot;   //! number of hits total
+   TH1F     *m_pnt_tot;     //! number of hits total
+   TH1F     *m_pnt_tot_med; //! number of hits total, med range
+   TH1F     *m_pnt_tot_sm;  //! number of hits total, small range
+
    TH1F     *m_pnt_tpc;   //! number of hits tpc
    TH1F     *m_pnt_svt;   //! number of hits svt
    TH1F     *m_pnt_ssd;   //! number of hits ssd
@@ -488,7 +494,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
