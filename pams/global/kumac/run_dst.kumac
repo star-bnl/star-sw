@@ -7,6 +7,7 @@ macro dst_dedx_filler
 
   ami/mod/call dst_dedx_filler_
         [data]/tpc/tracks/tptrack_
+        [data]/svt/tracks/stk_track_
         [dst]/dst_dedx
 
 
@@ -65,5 +66,62 @@ return
 
        message ' run_dst: Calling fill_dst_event_summary'
        
+ami/mod/call fill_dst_event_summary_
+        [run_dst]/run_header _
+        [dst]/event_header _
+        [dst]/tof _
+        [dst]/globtrk _
+        [dst]/globtrk_aux _
+        [dst]/vertex _
+        [dst]/event_summary
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from FILL_DST_EVENT_SUMMARY'
+endif
+
+
+message ' run_dst: finished calling fill_dst_event_summary'
+
  return
 * **************************************************
+
+ macro point_filler
+
+   macro/global/import *
+
+   message ' run_dst: Calling dst_point_filler'
+
+ami/mod/call dst_point_filler_
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [dst]/point
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from DST_POINT_FILLER'
+endif
+
+message ' run_dst: finished calling dst_point_filler'
+
+ return
+* **************************************************
+
+ macro point_unpack
+
+   macro/global/import *
+
+       message ' run_dst: Calling dst_point_unpack'
+
+ami/mod/call dst_point_unpack_    
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [dst]/point
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from DST_POINT_UNPACK'
+endif
+
+message ' run_dst: finished calling dst_point_unpack'
+ return
+* **************************************************
+
+
