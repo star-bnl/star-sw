@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.5 2004/04/11 11:19:33 putschke Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.6 2004/06/30 15:58:36 putschke Exp $
  ***************************************************************************
  *
  * Description:
@@ -22,9 +22,9 @@
  * With the multiplicity in FTPC east 3 "centrality bins" are defined :
  *
  * centrality bin    multiplicity FTPC east    percentOfEvents
- *        1                   <=11                 100-40
- *        2                   <=17                 40-20
- *        3                   >=18                 20-0
+ *        1                   <10                 100-40
+ *        2                   <17                 40-20
+ *        3                   >=17                 20-0
  *
  * This definition seems to be stable up to day 40 !!!
  * 
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.6  2004/06/30 15:58:36  putschke
+ * Fix comments !
+ *
  * Revision 1.5  2004/04/11 11:19:33  putschke
  * Remove dAu minbias trigger cut
  *
