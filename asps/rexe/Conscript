@@ -2,9 +2,10 @@
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;
-(my $obj_dir = DirPath '.') =~ s/\\/\//g;
-(my $Dir = $obj_dir) =~ s/$build\///g;
-my $ObjDir = "#" . $obj_dir; 
+(my $ObjDir = DirPath '.') =~ s/\\/\//g;
+(my $Dir = $ObjDir) =~ s/$build\///g;
+$ObjDir = "#" . $ObjDir; 
+(my $obj_dir = $ObjDir) =~ s/^\#//g;
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg;
 if ($env->{ENV}->{STAR}) {$pkg  = "root4star";}
@@ -49,7 +50,6 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'FEXTEND'      => $FEXTEND,
 		    'LIBPATH'      => $LIBPATH,
 		    'LIBS'         => $LIBS,
-		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries
 		   );
 my @src = ();

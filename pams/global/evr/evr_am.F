@@ -14,6 +14,7 @@ CC:<--------------------------------------------------------------------
 #include "phys_constants.inc"
 #include "StDetectorId.inc"
 #include "StVertexId.inc"
+#include "StTrackMethod.inc"
 
 CC:>----------------------------------------------------------------------
 CC: ROUTINE:    EVR
@@ -63,7 +64,7 @@ CC:                                tracks occuring anytime after the initial
 CC:                                vertex seed has been found.
 CC:                         = -yx7 for failed vertex finding due to too low
 CC:                                a fraction of selected tracks relative
-CC:                                to the total number of global tracks
+CC:                                to the total number of global tracks in seed
 CC:                                occuring anytime after the initial vertex
 CC:                                seed has been found.
 CC:                         = -yx8 for failed vertex finding due to both of
@@ -151,10 +152,18 @@ CC:
 CC:          STAFCV_BAD     - The following error conditions will result
 CC:                           in evr_am returning this STAF condition value:
 CC:                           (1) The number of selected tracks for vertex 
-CC:                               finding is less than 5 during any iteration.
+CC:                               finding is less than ntrkcut (=3) during
+CC:                               any iteration.
 CC:                           (2) The ratio of the number of selected global
-CC:                               tracks to total number of global tracks is
-CC:                               less than 'ntrkratiocut' (set to 0.1) during
+CC:                               tracks to total number of global tracks
+CC:                               with DCA points within the Z-DCA sequence
+CC:                               and beam pipe volume is less than the
+CC:                               volumetric ratio of a sphere of radius
+CC:                               sqrt(3)*sigma(Z_DCA seq.) [corresponding to
+CC:                               to the final track cut, dca_cut3] to the
+CC:                               sequence-beam pipe volume or, if these have
+CC:                               problematic values, less than the default
+CC:                               value 'ntrkratiocut' (set to 0.1) during
 CC:                               any iteration.
 CC:                           (3) The primary vertex table, 'privert', is
 CC:                               already filled to its maximum length and
@@ -162,6 +171,9 @@ CC:                               cannot have new vertex information added.
 CC:                           (4) The detector ID code numbers from 
 CC:                               $STAR/pams/global/inc/StDetectorDefinitions.h
 CC:                               are out of the assumed range from 1 to 30.
+CC:                           (5) The vertex seed z-position lies outside the
+CC:                               detector fiducial as specified by parameter
+CC:                               'zrange' (=200 cm).
 CC:                           
 CC: ERROR CONDITIONS	: None-Yet
 CC: STATUS		: Tested
@@ -257,6 +269,79 @@ CC:
 CC: (19)  Added extra track selection criteria based on a minimum number of
 CC:       space points used in the global track fit - R. L. Ray, April, 2000.
 CC:
+CC: (20)  Changed most Real variables to Real*8 and used explicit double
+CC:       precision functions, e.g. dsin(), etc. - Nov. 2000, G. van Buren.
+CC:
+CC:  Changes in Feb. 2001 - R. L. Ray
+CC:
+CC: (21)  Include Year 2000 run's beam line coordinates in vertex fit with
+CC:       small error in order to constrain the transverse vertex position
+CC:       for low multiplicity events.  Numbers are hardwired into code and
+CC:       should only be used for production of real Y2K data.
+CC:
+CC: (22)  Extend vertex search region to include full beam pipe volume out 
+CC:       to +/- 6m, but only proceed with vertex fitting if seed is within
+CC:       TPC, or if |z_seed| <= 2m.  Also, only tracks with DCA points
+CC:       within the sequence of z-bins near the seed are used to determine
+CC:       the <x>, <y> of the vertex seed.
+CC:
+CC: (23)  Use variable DCA binning as determined using parameter values
+CC:       in code; but use 2x larger z-DCA bins for low multiplicity events
+CC:       where globtrk_h.nok <= 50.
+CC:
+CC: (24)  Track DCA acceptance for each iteration of the vertex
+CC:       fit is based on distance cuts computed from the rms of the
+CC:       z distribution in the z-DCA sequence.  Preset DCA cuts are
+CC:       no longer used directly but are used to limit the computed cuts.
+CC:
+CC:       New track acceptance criteria:
+CC:        a) For the initial seed finding use all DCA points to the x=y=0
+CC:           z-axis that lie within the beampipe volume and |z| <= 6m.
+CC:        b) Select and proceed with fitting for seeds with <z> within
+CC:           TPC as specified from -zrange to +zrange (zrange = 200 cm).
+CC:        c) Fill x,y DCA histograms for sqrt(x*x+y*y) within beampipe and
+CC:           for z within z-DCA sequence range, the latter is nominally
+CC:           <z> of seed +/- 'def_seq_range_z' (=2cm).
+CC:        d) For First fit iteration:
+CC:              select tracks with z-DCA within seed sequence range along
+CC:              z-axis and transverse x,y DCAs within the larger of
+CC:                 evrpar(1).cutxy OR 3*sqrt(2)*sigmaz,
+CC:              but not larger than the beampipe radius, in transverse
+CC:              distance from the vertex seed.
+CC:        e) For Second fit iteration:
+CC:              select tracks with DCA point within 3D distance of the
+CC:              larger of 2*sqrt(3)*sigmaz or evrpar(1).cut2, but not
+CC:              larger than 2*sqrt(3)*sigdef, where sigdef = 1.0 cm.
+CC:        f) For Third (final) fit iteration:                 
+CC:              select tracks with DCA point within 3D distance of the   
+CC:              larger of sqrt(3)*sigmaz or evrpar(1).cut3, but not
+CC:              larger than sqrt(3)*sigdef, where sigdef = 1.0 cm.
+CC:
+CC:           where  sigmaz = rms of z-DCA sequence
+CC:                  sqrt(2)*sigmaz = two-dimensional Gaussian rms
+CC:                  sqrt(3)*sigmaz = three-dimensional Gaussian rms
+CC:
+CC:        g) For primary track candidate marker, use 3D DCA from final
+CC:           vertex with evrpar(1).vcut as before.
+CC:
+CC: (25)  Track fit covariance matrix automatically used if globtrk.method
+CC:       is 2**kKalmanFitId (i.e., if the Kalman track fitter was used).
+CC:
+CC: (26)  Changed minimum track number and track ratio requirements to:
+CC:        a) minimum number of tracks at each step must be .ge. ntrkcut (=3)
+CC:        b) initial number of selected tracks from DO 20 loop must be
+CC:           .ge. ntrkratiocut (0.1)*(globtrk_h.nok)
+CC:        c) for all subsequent iterations the ratio of the number of
+CC:           accepted tracks after each cut to the total number in the seed
+CC:           z-DCA sequence volume must be .ge. the ratio of the 3D dca_cut3
+CC:           volume to the z-DCA sequence volume, where these are given by:
+CC:                3D dca_cut3 Vol. = (4*pi/3)*(dca_cut3**3)
+CC:                z-DCA seq. Vol.  = pi*(beampipe radius**2)*(length of seq)
+CC:           For problematic cases the default 'ntrkratiocut' = 0.1 is used.
+CC:
+CC: (27)  Reduced the array sizes for local track arrays from 20000 to 5000
+CC:       to better match the actual size of RHIC AuAu events.
+CC:
 CC:  METHOD:
 CC:  Minimization of the perpendicular distances from the vectors to a point.
 CC:
@@ -282,36 +367,92 @@ CC:>----------------------------------------------------------------------
 
 CC:  Variables in common with Subroutines:
       INTEGER   maxtr
-      PARAMETER (maxtr=20000)
-      REAL      vtrv(6,maxtr)
+      PARAMETER (maxtr=5000)
+      REAL*8    vtrv(6,maxtr)
       COMMON    /FITVERT/ vtrv
-      REAL      XV,YV,ZV,cov(6),chisq
+      REAL*8    XV,YV,ZV,cov(6),chisq
       COMMON    /VERTEX/ XV,YV,ZV,cov,chisq
 
 CC  Local Variable Type Declarations:
-      REAL dr,x0(maxtr),y0(maxtr),z0(maxtr),phi0(maxtr),tanl(maxtr)
-      REAL sig,sigma(maxtr),vertex_pass(3,3)
-      REAL psi,ppt,xx0,yy0,b,zz0,tanla
-      REAL xp(2),x(4),xxv(3),xa0(3),pa0(3),x3d0(3)
-      REAL zsum(800),seed,zmax,LIFC,LRAD,LSVT1
-      REAL xlocal(3),bfield(3),ptdefault,bfield_min,pptdef
-      REAL ntrkratio, beampipecut, ntrkratiocut
-      REAL xsum(81), ysum(81), maxval, sumbin
+      REAL*8 dr,x0(maxtr),y0(maxtr),z0(maxtr),phi0(maxtr),tanl(maxtr)
+      REAL*8 sig,sigma(maxtr),vertex_pass(3,3)
+      REAL*8 psi,ppt,xx0,yy0,zz0,tanla
+      REAL*8 xp(2),x(4),xxv(3),xa0(3),pa0(3),x3d0(3)
+      REAL*8 seed,LIFC,LRAD,LSVT1
+      REAL   xlocal(3),bfield(3),b,bfield_min,chisq1
+      REAL*8 ptdefault,pptdef
+      REAL*8 ntrkratio, ntrkratiocut, sumbin
+      REAL*8 zlowercut, zuppercut, sigmaz, zlocal
+      REAL*8 dca_cut1, dca_cut2, dca_cut3
+      REAL*8 volume_seq, volume_fit3, volume_ratio
 
       INTEGER   i,j,k,ipnt,ntrk,index,gindex(maxtr),icharge
       INTEGER   fitoption,covariance,ntrkcut
-      INTEGER   maxdettypes
+      INTEGER   maxdettypes, k_fit_call, ntracks_seq
       PARAMETER (maxdettypes = 30)
       INTEGER   detIdOK,dettrkcounter(maxdettypes)
       INTEGER   DetectorId, DetectorIdSave
-      INTEGER   flagset1, flagset2, bin_max, bin_low, bin_high
+      INTEGER   flagset1, flagset2, bin_max, bin_low, bin_high, maxval
 
 CC  Declare new variables used in track cov() matrix contribution to sigma:
-      REAL h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
-      REAL deriv(3,5),derrorsq,derror,r0save,phi0save
-      REAL sigdef,sigmin,sigmax,sigbig
-      REAL COSD,SIND
+      REAL*8 h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
+      REAL*8 deriv(3,5),derrorsq,derror,r0save,phi0save
+      REAL*8 sigdef,sigmin,sigmax,sigbig
       INTEGER  ii,jj,ialpha,ibeta
+
+CC  Local Variable Type and Parameter Declarations for quantities used
+CC  to define the beampipe volume and binning for the DCA points.
+CC
+CC     The beampipe volume is assumed to be:
+CC        (1) cylinder of radius 6.5 cm from z = -600 to -385 cm
+CC        (2) cylinder of radius 4.0 cm from z = -385 to +385 cm
+CC        (3) cylinder of radius 6.5 cm from z = +385 to +600 cm
+CC     The domains along z are set by parameters:
+CC        zlimit1 = 385 (cm)
+CC        zlimit2 = 600 (cm)
+CC     The beampipe radii are set by parameters:
+CC        beampipecut1 = 4.0 (cm)
+CC        beampipecut2 = 6.5 (cm)
+CC
+CC     The distribution of DCA points is binned along the z-axis in 0.5 cm
+CC     bins (dz_default) for a total number of 2400 (nbins).  For low
+CC     multiplicity events where globtrk_h.nok .le. 50, larger 1.0 cm bins,
+CC     1200 total, are used.  The value of dz is set to either dz_default or
+CC     2*dz_default, depending on the value of globtrk_h.nok.
+CC
+CC     The DCA points are binned in x,y in 0.1 cm bins (dxy) for a total of
+CC     80 + 1 (for round-off error) bins (nxybins) and is only done within the
+CC     z-DCA sequence and then only for seeds within the detector zrange from
+CC     z = -200 to +200 cm.
+CC
+CC     The lower limit in z for the vertex seed search is
+CC        zmin = -zlimit2 = -600 cm
+CC
+CC     The vertex seed sequence is located along the z-axis in bins
+CC        centered about the maximum occupied bin +/- 'def_seq_range_z'
+CC        which is set to 2 cm.  Similarly, for x,y the range is
+CC        'def_seq_range_xy' = 1.5 cm.
+CC
+CC     The DCA x,y,z histograms are loaded into local integer arrays,
+CC        xsum, ysum, zsum
+
+      Integer  nbins, nxybins
+      REAL*8   zlimit1, zlimit2, beampipecut1, beampipecut2
+      REAL*8   dz, dxy, zmin, dz_default, zrange
+      REAL*8   def_seq_range_z, def_seq_range_xy
+      Parameter(nbins         = 2400)
+      Parameter(nxybins       = 81)
+      Parameter(zlimit1       = 385.0)
+      Parameter(zlimit2       = 600.0)
+      Parameter(beampipecut1  = 4.0)
+      Parameter(beampipecut2  = 6.5)
+      Parameter(dz_default    = 0.5)
+      Parameter(dxy           = 0.1)
+      Parameter(zmin          = -600.0)
+      Parameter(zrange        = 200.0)
+      Parameter(def_seq_range_z = 2.0)
+      Parameter(def_seq_range_xy = 1.5)
+      Integer  xsum(nxybins), ysum(nxybins), zsum(nbins)
 
 CC  Declare called CERNLIB Function:
       REAL PROB
@@ -324,23 +465,24 @@ CC                          ! fraction from GSTAR data (1999).
       DATA LSVT1 /0.017/    ! Effective SVT first layer radiation thickness
 CC                          ! to roughly approximate MCS effects on track
 CC                          ! DCA position uncertainty with SVT and/or SSD hits.
-      DATA beampipecut /4.0/  ! Beam pipe radius (cm), used for track DCA
-CC                            ! transverse position cut on initial pass.
-      DATA ntrkcut  /50/    ! Min. track number for event abort decision
-      DATA ntrkratiocut /0.1/ ! Min. acceptable ratio of selected tracks for
-CC                            ! vertex fitting to total # global tracks.
+      DATA ntrkcut  /3/     ! Min. trk # at each step in the finding/fitting
+      DATA ntrkratiocut /0.1/! Default min. acceptable track ratio (see above)
       DATA ptdefault /0.4/  ! Default pT value in GeV/c for use in B_field = 0
 CC                          ! cases for estimating MCS error contribution to
 CC                          ! the uncertainty in the track's DCA to prim. vrtx.
-      DATA bfield_min /0.001/ ! Lower cutoff on abs(B_field, z component) in
-CC                            ! kGauss, below which this case is taken to be
-CC                            ! a zero magnetic field run; b is set to 0.000 .
+      DATA bfield_min /0.1/ ! Lower cutoff on abs(B_field, z component) in
+CC                          ! kGauss, below which this case is taken to be
+CC                          ! a zero magnetic field run; b is set to 0.000 .
+CC                          ! Same value used in TPC tracking code, tpt.
 
 CC  The following parameters are used for the extrapolated track position
 CC  uncertainty (sigma) at the DCA point to the primary vertex due to the
 CC  errors in the track helix parameters.
       DATA sigdef  /1.0/    ! Default track position sigma (cm) at DCA point
-      DATA sigmin  /0.01/   ! Minimum track position sigma (cm) at DCA point
+      DATA sigmin  /0.1/    ! Minimum track position sigma (cm) at DCA point
+CC                          ! Changed from 0.01 to 0.1 on Feb. 12, 2001 by
+CC                          ! RLR to be compatible with the minimum error
+CC                          ! assigned in Subr: EVR_VERTEX_FIT
       DATA sigmax  /10.0/   ! Maximum track position sigma (cm) at DCA point
       DATA sigbig  /100.0/  ! Upper cutoff track position sigma (cm), DCA point
 CC  If the computed track position uncertainty ('error') using the helix
@@ -352,9 +494,55 @@ CC  (2)  less than sigmin, then 'error' is set to sigmin
 CC  (3)  between sigmax and sigbig, then 'error' is set to sigmax
 CC  (4)  between sigmin and sigmax, then 'error' is set to the computed value.  
 
+CC  Load beam line coordinates in STAR Global coordinate system as obtained
+CC  from the summer 2000 run.  These values will change every time STAR is
+CC  installed in the WAH.  Eventually these values should be determined by
+CC  analysis of central events, then loaded into the STAR run conditions DB,
+CC  and later retrieved and used in subsequent reconstruction runs.  For now,
+CC  these are hardwired into the code in order to improve the transverse
+CC  position determination of the primary vertex for low multiplicity events.
+CC  The slopes, azimuthal angle, and tanl are based on the full, measured
+CC  distributions from -120 to +120 cm provided by Akio Ogawa.
+CC
+CC  The parameters are:
+CC    - (x,y,z)1 (cm) where the actual beam line intersects the z=0 plane
+CC    - (x,y,z)2 (cm) where the actual beam line intersects the z= -100 cm plane
+CC    - slope of beam line as seen in projection onto x-z and y-z planes
+CC    - azimuthal angle (deg) of beam line as seen in projection onto x-y plane
+CC    - beam line's tanl parameter
+CC    - the assumed value of sigma (cm) to weight the beam line relative to the
+CC        extrapolated tracks in the vertex chi-sq fit; suggested values range
+CC        from 0.1 to 0.2 cm such that the beam line has negligible effects
+CC        on central events but dominant effect in the transverse fit for
+CC        low multiplicity events.
+CC
+
+      REAL*8 BeamlineX1, BeamlineY1, BeamlineZ1
+      REAL*8 BeamlineX2, BeamlineY2, BeamlineZ2
+      REAL*8 Beamlinephi0, Beamlinetanl
+      REAL*8 Beamline_xzslope, Beamline_yzslope
+      REAL*8 Beamline_sigma
+      Parameter(BeamlineX1   = 0.58)
+      Parameter(BeamlineY1   = 0.34)
+      Parameter(BeamlineZ1   = 0.00)
+      Parameter(BeamlineX2   = 0.626)
+      Parameter(BeamlineY2   = 0.400)
+      Parameter(BeamlineZ2   = -100.0)
+      Parameter(Beamlinephi0 = 52.8)    ! deg
+      Parameter(Beamlinetanl = -1319.)
+      Parameter(Beamline_xzslope = -0.00046)
+      Parameter(Beamline_yzslope = -0.00060)
+      Parameter(Beamline_sigma   = 0.10)
+
 CC  Vertex_pass(i,j) contains the vertex position from the initial
 CC  estimate and the first and second passes, where i = pass#, j=x,y,z.
 
+CC  Load control switches (Temporary):
+C      fitoption  = 0   !  Turn off when evrpar(1).fitoption available
+C      covariance = 0   !  Turn off when evrpar(1).covariance available
+CSM    covariance = -1  !  TPC-tracks are used to fit pre-vertex. Simplify!!!
+      fitoption  = evrpar(1).fitoption ! Activate when evrpar(1).fitoption ok
+      covariance = evrpar(1).covariance ! Activate when evrpar(1).covariance ok
 
 CC  B-field obtained via gufld call
       xlocal(1) = 0.
@@ -362,7 +550,12 @@ CC  B-field obtained via gufld call
       xlocal(3) = 0.
 
       call gufld(xlocal,bfield)
-      write(6,*) 'EVR: Using a field of',bfield(3),' KGauss'
+      if(covariance .eq. -1) then
+         write(6,*) 'EVR: (pre-vertex) Using a field of',
+     1              bfield(3),' KGauss'
+      else
+         write(6,*) 'EVR: Using a field of',bfield(3),' KGauss'
+      end if
       b = bfield(3)
 
 CC  Check for fixed vertex
@@ -380,9 +573,16 @@ CC  Check for fixed vertex
 
 CC  Initialize arrays:
 
-        CALL VZERO(xsum,81)
-        CALL VZERO(ysum,81)
-        CALL VZERO(zsum,800)
+      do i = 1,nxybins
+         xsum(i) = 0
+         ysum(i) = 0
+      end do
+      do i = 1,nbins
+         zsum(i) = 0
+      end do
+C        CALL VZERO(xsum,81)
+C        CALL VZERO(ysum,81)
+C        CALL VZERO(zsum,800)
 	ntrk = 0
         ntrkratio = 0.0
         do i = 1,maxtr
@@ -423,7 +623,7 @@ CC  the array 'dettrkcounter,' for track/detector segment counting:
       end if
 
 CC  Check value of the magnetic field, z-component.
-CC  If b .ge. bfield_min (equal to 0.001 kGauss), then proceed with calc.
+CC  If b .ge. bfield_min (equal to 0.1 kGauss), then proceed with calc.
 CC  But, if b .lt. bfield_min, then set b = 0.0 and set the default pT
 CC  value to the greater of ptdefault (equal to 0.4 GeV/c) or
 CC  evrpar(1).ptmin, the pT minimum cutoff for the initial track acceptance.
@@ -439,23 +639,24 @@ CC  pass the initial track selection cut in the do-20 loop below.
          end if
       end if
 
-CC  Load control switches (Temporary):
-C      fitoption  = 0   !  Turn off when evrpar(1).fitoption available
-C      covariance = 0   !  Turn off when evrpar(1).covariance available
-CSM    covariance = -1  !  TPC-tracks are used to fit pre-vertex. Simplify!!!
-      fitoption  = evrpar(1).fitoption ! Activate when evrpar(1).fitoption ok
-      covariance = evrpar(1).covariance ! Activate when evrpar(1).covariance ok
-
 CCC  Initial global track selection and setup loop:
 C=== use only global tracks, i.e. dst_track instances ====
 
         ntrk = globtrk_h.nok  
         k = 0
 
+CCC   Check size of global track table; set size of z-DCA bins for
+CCC   low multiplicity events:
+        if(ntrk .le. 50) then
+           dz = 2.0*dz_default
+        else
+           dz = dz_default
+        end if     
+
 CCC   Check for adequate number of tracks:
-        if (ntrk.lt.5) then
+        if (ntrk.lt.ntrkcut) then
            write(6,*) 'EVR: Not enough initial global tracks to find '
-           write(6,*) 'EVR: the vertex, ntrk=',ntrk
+           write(6,*) 'EVR:    the vertex, ntrk=',ntrk
            evr_am = STAFCV_BAD  
            return
         endif
@@ -474,8 +675,8 @@ CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
               ppt = pptdef
            end if
            tanla = globtrk(i).tanl
-           xx0 = globtrk(i).r0*cosd(globtrk(i).phi0)
-           yy0 = globtrk(i).r0*sind(globtrk(i).phi0)
+           xx0 = globtrk(i).r0*dcosd(dble(globtrk(i).phi0))
+           yy0 = globtrk(i).r0*dsind(dble(globtrk(i).phi0))
            zz0 = globtrk(i).z0
            globtrk(i).id_start_vertex = 0
            if(globtrk(i).det_id .eq. kTpcId       .or.
@@ -527,7 +728,8 @@ CCC  Include track fit error covariance matrix contributions to the
 CCC  track position uncertainty at the DCA point:
 
               derror = 0.0
-              if(covariance .eq. 1) then
+              if(covariance .eq. 1 .OR.
+     1           globtrk(i).method .eq. (2**kKalmanFitId)) then
                  xsave(1) = x(1)
                  xsave(2) = x(2)
                  xsave(3) = x(3)
@@ -563,11 +765,11 @@ CCC  Calculate derivatives using same track parameters as assumed for
 CCC  covariance matrix.  This uses the Kalman filter track covariance
 CCC  matrix definition.  See comments for table dst_track.
 CCC  Compute the 5 track parameters using the Kalman filter definition:
-                 r0save = sqrt(xx0*xx0 + yy0*yy0)
+                 r0save = dsqrt(xx0*xx0 + yy0*yy0)
                  if(r0save.eq.0.0) then
                     phi0save = 0.0
                  else
-                    phi0save = ATAN2(yy0,xx0)*180.0/C_PI
+                    phi0save = DATAN2(yy0,xx0)*180.0/C_PI
                  end if
                  p(1) = r0save*phi0save
                  p(2) = zz0
@@ -576,7 +778,7 @@ CCC  Compute the 5 track parameters using the Kalman filter definition:
                  if(icharge.eq.0) then
                     p(5) = 1.0/ppt
                  else
-                    p(5) = float(icharge)/ppt
+                    p(5) = dble(icharge)/ppt
                  end if
 CCC  Set the shifted values of each track parameter needed for calculating
 CCC  the partial derivatives numerically.  Use amounts 
@@ -606,19 +808,19 @@ CC  Compute partial derivatives:
                     if(icharge.eq.0) then          ! Get pcall(8) = pt
                        pcall(8) = 1.0/pcall(5)
                     else
-                       pcall(8) = float(icharge)/pcall(5)
+                       pcall(8) = dble(icharge)/pcall(5)
                     end if
                     if(r0save.eq.0.0) then         ! Get pcall(6,7)=x0,y0
                        if(ii.eq.1) then
-                          pcall(6) = cosd(pcall(1)) ! use shifted r*phi
-                          pcall(7) = sind(pcall(1))
+                          pcall(6) = dcosd(pcall(1)) ! use shifted r*phi
+                          pcall(7) = dsind(pcall(1))
                        else
                           pcall(6) = 0.0           ! use original x0,y0    
                           pcall(7) = 0.0
                        end if
                     else
-                       pcall(6) = r0save*cosd(pcall(1)/r0save)
-                       pcall(7) = r0save*sind(pcall(1)/r0save)
+                       pcall(6) = r0save*dcosd(pcall(1)/r0save)
+                       pcall(7) = r0save*dsind(pcall(1)/r0save)
                     end if
                     Call evr_project_track(pcall(4),icharge,pcall(8),
      1                   pcall(3),pcall(6),pcall(7),b,pcall(2),
@@ -636,12 +838,16 @@ CC  Compute partial derivatives:
                        end do
                     end do
                  end do
+
+CC  Do sanity check on error results from track fit covariance matrix and
+CC  limit values if necessary.
+
                  if(derrorsq .le. 0.0) then
                     write(6,*) 'EVR: Track position error-sq .le. 0.0 ',
      1                 'using covar()-USE Default:',derrorsq
                     derror = sigdef
                  else
-                    derror = sqrt(derrorsq)
+                    derror = dsqrt(derrorsq)
                     if(derror.eq.0.0.or.derror.gt.sigbig) then
                        derror = sigdef
                     else if(derror.gt.0.0 .and.
@@ -658,18 +864,16 @@ CCC   Assign final error (sigma) to extrapolated track position:
               if(sigma(k).eq.0.0 .and. derror.eq.0.0) then
                  sigma(k) = sigdef
               else
-                 sigma(k) = sqrt(sigma(k)*sigma(k) + derror*derror)
+                 sigma(k) = dsqrt(sigma(k)*sigma(k) + derror*derror)
               end if
 
-              if(abs(z0(k)).lt.200. .and. sqrt(x0(k)*x0(k) +
-     1           y0(k)*y0(k)) .le. beampipecut) then
-CCC              Modified to correct fat bin at 0.0
-                 zsum(int(2.0*(z0(k)+200.0))+1) =      
-     1           zsum(int(2.0*(z0(k)+200.0))+1) + 1.   
-                 xsum(int(10.0*(x0(k)+4.0))+1) =
-     1           xsum(int(10.0*(x0(k)+4.0))+1) + 1.
-                 ysum(int(10.0*(y0(k)+4.0))+1) =
-     1           ysum(int(10.0*(y0(k)+4.0))+1) + 1.
+              if((dabs(z0(k)).le.zlimit1 .and. dsqrt(x0(k)*x0(k)
+     1           + y0(k)*y0(k)) .le. beampipecut1) .OR.
+     2           (dabs(z0(k)).lt.zlimit2 .and. dabs(z0(k)).gt.
+     3           zlimit1 .and. dsqrt(x0(k)*x0(k) + y0(k)*y0(k))
+     4           .le. beampipecut2)) then
+                 zsum(int((z0(k)+zlimit2)/dz)+1) =      
+     1           zsum(int((z0(k)+zlimit2)/dz)+1) + 1   
               endif
               else if (k.gt.maxtr) then
                  k = maxtr
@@ -682,22 +886,28 @@ CC                            ! the remainder of tracks are skipped.
 
         ntrk = k
 
+CC  Determine most complete list of detectors which contribute space points
+CC  to all the tracks selected in the initial pass (DO 20 Loop):
+        DetectorIdSave = DetectorId(maxdettypes,dettrkcounter)
+
 CCC   Check for adequate number of tracks:
         if(globtrk_h.nok .ne. 0) then
-           ntrkratio = float(ntrk)/float(globtrk_h.nok)
+           ntrkratio = dble(ntrk)/dble(globtrk_h.nok)
+        else
+           ntrkratio = 0.0
         end if
-        if (ntrk.lt.5) then
+        if (ntrk.lt.ntrkcut) then
            write(6,*) 'EVR: Not enough global tracks after ptmin,z '
-           write(6,*) 'EVR: and beampipe cuts to find the vertex:'
-           write(6,*) 'EVR: ntrk,ntrkratio = ',ntrk,ntrkratio
+           write(6,*) 'EVR:    and beampipe cuts to find the vertex:'
+           write(6,*) 'EVR:    ntrk,ntrkratio = ',ntrk,ntrkratio
            evr_am = STAFCV_BAD
            return
         endif
         if (ntrkratio .lt. ntrkratiocut) then
            write(6,*) 'EVR: Ratio of accepted to total global tracks'
-           write(6,*) 'EVR: too low after ptmin,z and beampipe cuts'
-           write(6,*) 'EVR: to find the vertex:'
-           write(6,*) 'EVR: ntrk,ntrkratio = ',ntrk,ntrkratio
+           write(6,*) 'EVR:    too low after ptmin,z and beampipe cuts'
+           write(6,*) 'EVR:    to find the vertex:'
+           write(6,*) 'EVR:    ntrk,ntrkratio = ',ntrk,ntrkratio
            evr_am = STAFCV_BAD
            return
         endif
@@ -709,100 +919,191 @@ CCC   for z-coordinate, then for x and y.
 CCC
 CCC      z-coordinate seed value:
         bin_max = 0
-        maxval = 0.0
-        do i = 1,800
+        maxval = 0
+        do i = 1,nbins
            if (zsum(i) .gt. maxval) then
               maxval = zsum(i)
               bin_max = i
            end if
         end do
-        bin_low  = bin_max - 4
-        bin_high = bin_max + 4
+        bin_low  = bin_max - int(def_seq_range_z/dz + 0.0001)
+        bin_high = bin_max + int(def_seq_range_z/dz + 0.0001)
         if(bin_low .lt. 1) bin_low = 1
-        if(bin_high .gt. 800) bin_high = 800
+        if(bin_high .gt. nbins) bin_high = nbins
         seed = 0.0
         sumbin = 0.0
         do i = bin_low,bin_high
-           sumbin = sumbin + zsum(i)
-           seed = seed + (0.5*float(i) - 200.25)*zsum(i)
+           sumbin = sumbin + dble(zsum(i))
+           seed = seed + (dz*dble(i)-(zlimit2+0.5*dz))*dble(zsum(i))
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.5*float(bin_max) - 200.25
+           seed = dz*dble(bin_max) - (zlimit2+0.5*dz)
         end if
         zv = seed
 
+CCC   Determine if vertex seed is within detector fiducial volume (zrange)
+CCC   and if so continue, but if not, then output vertex seed and return
+CCC   with STAFCV_BAD:
+
+        if(dabs(zv) .gt. zrange) then
+
+CCC   Load the out-of-range seed value into table privert:
+           index = privert_h.nok + 1
+           if(index.le.privert_h.maxlen) then
+              privert_h.nok = index
+              privert(index).id = index
+              privert(index).iflag = -3
+              if(covariance.eq.-1) privert(index).iflag =
+     +           privert(index).iflag - 100
+              privert(index).det_id = DetectorIdSave
+              privert(index).vtx_id = kEventVtxId
+              privert(index).n_daughters = int(sumbin)
+              privert(index).x           = 0.0
+              privert(index).y           = 0.0
+              privert(index).z           = zv
+              do i = 1,6
+                 privert(index).covar(i) = 0.0
+              end do
+              privert(index).chisq(1) = 0.0
+              privert(index).chisq(2) = 0.0
+              privert(index).id_aux_ent  = 0
+           else
+           write(6,*) 'EVR:Privert table is full - cannot load vertex:',
+     1                 index
+              evr_am = STAFCV_BAD
+              Return
+           end if
+           write(6,*) 'EVR: Vertex seed is outside detector range'
+           evr_am = STAFCV_BAD
+           Return
+        else   ! Proceed with vertex finding and fitting  
+
+CCC   Set z-range for vertex seed, or sequence of bins:
+           zlowercut = dz*dble(bin_low) - zlimit2 - dz
+           zuppercut = dz*dble(bin_high) - zlimit2
+
+CCC   Save the total number of tracks with DCAs within the vertex seed
+CCC   sequence z-range; used for later track ratio cuts:
+           ntracks_seq = int(sumbin)
+           if(ntracks_seq .le. 0) ntracks_seq = globtrk_h.nok
+
+CCC   Compute the rms of the z-DCA sequence:
+           sigmaz = 0.0
+           do i = bin_low,bin_high
+              zlocal = dz*dble(i) - (zlimit2 + 0.5*dz)
+              sigmaz = sigmaz + (zlocal-zv)*(zlocal-zv)*dble(zsum(i))
+           end do
+           if(sumbin .gt. 0.0) then
+              sigmaz = dsqrt(sigmaz/sumbin)
+           else
+              sigmaz = sigdef
+           end if
+
+CCC   Set transverse and 3D DCA distance cuts for fits 1,2,3:
+           dca_cut1 = 3.0*dsqrt(2.0)*sigmaz
+           if(dca_cut1 .lt. evrpar(1).cutxy)
+     1        dca_cut1 =    evrpar(1).cutxy
+           if(dca_cut1 .gt. beampipecut1) dca_cut1 = beampipecut1
+           dca_cut2 = 2.0*dsqrt(3.0)*sigmaz
+           if(dca_cut2 .lt. evrpar(1).cut2)
+     1        dca_cut2 =    evrpar(1).cut2
+           if(dca_cut2 .gt. 2.0*dsqrt(3.0)*sigdef)
+     1        dca_cut2 =    2.0*dsqrt(3.0)*sigdef
+           dca_cut3 = dsqrt(3.0)*sigmaz
+           if(dca_cut3 .lt. evrpar(1).cut3)
+     1        dca_cut3 =    evrpar(1).cut3
+           if(dca_cut3 .gt. dsqrt(3.0)*sigdef)
+     1        dca_cut3 =    dsqrt(3.0)*sigdef
+
+CCC   Compute the acceptance volumes and ratio for min. track ratio cuts:
+           volume_seq = C_PI*beampipecut1*beampipecut1*
+     1        (zuppercut - zlowercut)
+           volume_fit3 = (4.0*C_PI/3.0)*(dca_cut3**3)
+           if(volume_seq .gt. 0.0) then
+              volume_ratio = volume_fit3/volume_seq
+              if(volume_ratio .ge. 1.0) then
+                 volume_ratio = ntrkratiocut
+              end if
+           else
+              volume_ratio = ntrkratiocut
+           end if
+
+CCC   Fill x,y DCA histograms for DCAs in z-DCA sequence and inside
+CCC   beam pipe:
+           do k = 1,ntrk
+              if(z0(k).ge.zlowercut .and. z0(k).le.zuppercut
+     1           .and. dsqrt(x0(k)*x0(k) + y0(k)*y0(k)) .le.
+     2           beampipecut1) then
+                 xsum(int((x0(k) + beampipecut1)/dxy)+1) =
+     1           xsum(int((x0(k) + beampipecut1)/dxy)+1) + 1
+                 ysum(int((y0(k) + beampipecut1)/dxy)+1) =
+     1           ysum(int((y0(k) + beampipecut1)/dxy)+1) + 1
+              end if
+           end do
+        end if
+
 CCC     x-coordinate seed value:
         bin_max = 0
-        maxval = 0.0
-        do i = 1,80
+        maxval = 0
+        do i = 1,nxybins-1
            if (xsum(i) .gt. maxval) then
               maxval = xsum(i)
               bin_max = i
            end if
         end do
-        bin_low  = bin_max - 15
-        bin_high = bin_max + 15
+        bin_low  = bin_max - int(def_seq_range_xy/dxy + 0.0001)
+        bin_high = bin_max + int(def_seq_range_xy/dxy + 0.0001)
         if(bin_low .lt. 1) bin_low = 1
-        if(bin_high .gt. 80) bin_high = 80
+        if(bin_high .gt. (nxybins-1)) bin_high = nxybins-1
         seed = 0.0
         sumbin = 0.0
         do i = bin_low,bin_high
-           sumbin = sumbin + xsum(i)
-           seed = seed + (0.1*float(i) - 4.05)*xsum(i)
+           sumbin = sumbin + dble(xsum(i))
+           seed = seed
+     1       +(dxy*dble(i)-(beampipecut1+0.5*dxy))*dble(xsum(i))
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.1*float(bin_max) - 4.05
+           seed = dxy*dble(bin_max) - (beampipecut1+0.5*dxy)
         end if
-        if(abs(seed) .le. 0.1) then
-           xv = 0.0
-        else
-           xv = 2.0*seed
-        end if
-        if(abs(xv) .gt. beampipecut) xv = seed
+        xv = 2.0*seed
+        if(dabs(xv) .gt. beampipecut1) xv = seed
 
 CCC     y-coordinate seed value:
         bin_max = 0
-        maxval = 0.0
-        do i = 1,80
+        maxval = 0
+        do i = 1,nxybins-1
            if (ysum(i) .gt. maxval) then
               maxval = ysum(i)
               bin_max = i
            end if
         end do
-        bin_low  = bin_max - 15
-        bin_high = bin_max + 15
+        bin_low  = bin_max - int(def_seq_range_xy/dxy + 0.0001)
+        bin_high = bin_max + int(def_seq_range_xy/dxy + 0.0001)
         if(bin_low .lt. 1) bin_low = 1
-        if(bin_high .gt. 80) bin_high = 80
+        if(bin_high .gt. (nxybins-1)) bin_high = nxybins-1
         seed = 0.0
         sumbin = 0.0
         do i = bin_low,bin_high
-           sumbin = sumbin + ysum(i)
-           seed = seed + (0.1*float(i) - 4.05)*ysum(i)
+           sumbin = sumbin + dble(ysum(i))
+           seed = seed
+     1       +(dxy*dble(i)-(beampipecut1+0.5*dxy))*dble(ysum(i))
         end do
         if(sumbin .gt. 0.0) then
            seed = seed/sumbin
         else
-           seed = 0.1*float(bin_max) - 4.05
+           seed = dxy*dble(bin_max) - (beampipecut1+0.5*dxy)
         end if
-        if(abs(seed) .le. 0.1) then
-           yv = 0.0
-        else
-           yv = 2.0*seed
-        end if
-        if(abs(yv) .gt. beampipecut) yv = seed
+        yv = 2.0*seed
+        if(dabs(yv) .gt. beampipecut1) yv = seed
 
 CC  Save vertex seed value:
         vertex_pass(1,1) = xv
         vertex_pass(1,2) = yv
         vertex_pass(1,3) = zv
-
-CC  Determine most complete list of detectors which contribute space points
-CC  to all the tracks selected in the initial pass (DO 20 Loop):
-        DetectorIdSave = DetectorId(maxdettypes,dettrkcounter)
 
 CCC  Load initial seed value into table privert:
         index = privert_h.nok + 1
@@ -814,7 +1115,7 @@ CCC  Load initial seed value into table privert:
      +          privert(index).iflag - 100
            privert(index).det_id = DetectorIdSave
            privert(index).vtx_id = kEventVtxId
-           privert(index).n_daughters = k
+           privert(index).n_daughters = ntracks_seq
            privert(index).x           = vertex_pass(1,1)
            privert(index).y           = vertex_pass(1,2)
            privert(index).z           = vertex_pass(1,3)
@@ -845,8 +1146,8 @@ CCC  estimate of vertex position if it is off the x=y=0 axis:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
-              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
+              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
+              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
               zz0 = globtrk(k).z0
               xp(1) = xv
               xp(2) = yv
@@ -864,9 +1165,9 @@ CCC  Select tracks based on transverse x-y and z cuts and load
 CCC  track parameters into temporary arrays:
 	k=0
 	do 10 i=1,ntrk
-	   dr=sqrt((x0(i)-xv)**2 + (y0(i)-yv)**2 )
-	   if(dr.lt.evrpar(1).cutxy) then
-	      if( abs(z0(i)-zv).lt.evrpar(1).cutz) then
+	   dr=dsqrt((x0(i)-xv)**2 + (y0(i)-yv)**2 )
+	   if(dr.lt.dca_cut1) then
+	      if(z0(i).ge.zlowercut.and.z0(i).le.zuppercut) then
 	         k=k+1
 	         vtrv(1,k)=phi0(i)
 	         vtrv(2,k)=tanl(i)
@@ -878,21 +1179,36 @@ CCC  track parameters into temporary arrays:
 	   endif
 10	continue
 
-CCC   Check for adequate number of tracks:
-        if(globtrk_h.nok .ne. 0) then
-           ntrkratio = float(k)/float(globtrk_h.nok)
+CCC   Include beam line in EVR_VERTEX_FIT:
+        k_fit_call = k
+        if(k.lt.maxtr) then
+           k_fit_call = k + 1
+           vtrv(1,k+1) = Beamlinephi0
+           vtrv(2,k+1) = Beamlinetanl
+           vtrv(4,k+1) = Beamline_xzslope*vertex_pass(1,3) + BeamlineX1
+           vtrv(5,k+1) = Beamline_yzslope*vertex_pass(1,3) + BeamlineY1
+           vtrv(6,k+1) = vertex_pass(1,3)
+           vtrv(3,k+1) = Beamline_sigma
         end if
-        if (k.lt.5) then
+
+CCC   Check for adequate number of tracks:
+        if(ntracks_seq .ne. 0) then
+           ntrkratio = dble(k)/dble(ntracks_seq)
+        else
+           ntrkratio = 0.0
+        end if
+        if (k.lt.ntrkcut) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'EVR: after cutxy,cutz; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR:    after dca_cut1,z-range; k,ratio='
+     1                 ,k,ntrkratio
            flagset1 = -6
         else
            flagset1 = 0
         end if
-        if(ntrkratio .lt. ntrkratiocut) then
-           write(6,*) 'EVR: Ratio of accepted to total global tracks'
-           write(6,*) 'EVR: too low after cutxy,cutz;'
-           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+        if(ntrkratio .lt. volume_ratio) then
+           write(6,*) 'EVR: Ratio of accepted to # glb trk in seed'
+           write(6,*) 'EVR:    too low after dca_cut1,z-range;'
+           write(6,*) 'EVR:    k,ratio=',k,ntrkratio
            flagset2 = -7
         else
            flagset2 = 0
@@ -934,7 +1250,7 @@ CCC   Check for adequate number of tracks:
         end if
 
 CCC   Do first iteration of vertex finding:
-	CALL EVR_VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k_fit_call)
         xxv(1)=xv
         xxv(2)=yv
         xxv(3)=zv
@@ -967,7 +1283,7 @@ CCC  Load first iteration vertex value into table privert:
            do i = 1,6
               privert(index).covar(i) = 0.0
            end do
-           privert(index).chisq(1) = chisq/float(k-1)
+           privert(index).chisq(1) = chisq/dble(k-1)
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
@@ -991,8 +1307,8 @@ CC  Optional Re-calculation of helix track projection to new vertex position:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
-              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
+              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
+              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
               zz0 = globtrk(k).z0
               xp(1) = xxv(1)
               xp(2) = xxv(2)
@@ -1007,7 +1323,7 @@ C              sigma(i) = sig    !  Do not update track position error
            end do
         end if
 
-CCC  Select tracks based on tighter 3D DCA cut (cut2) and load
+CCC  Select tracks based on tighter 3D DCA cut (dca_cut2) and load
 CCC  track parameters into temporary arrays:
 	k=0
 	do 105 i=1,ntrk
@@ -1015,13 +1331,12 @@ CCC  track parameters into temporary arrays:
         xa0(2)=y0(i)
         xa0(3)=z0(i)
 C** straight line tracks, i.e. can put e.g. pt=1 then
-        pa0(1)=cosd(phi0(i))
-        pa0(2)=sind(phi0(i))
+        pa0(1)=dcosd(phi0(i))
+        pa0(2)=dsind(phi0(i))
         pa0(3)=tanl(i)
         call ThreeD_dca(xxv,xa0,pa0,x3d0)
-	dr=sqrt( (x3d0(1)-xv)*(x3d0(1)-xv)+(x3d0(2)-yv)*(x3d0(2)-yv)
-     +          +(x3d0(3)-zv)*(x3d0(3)-zv) )
-	if(dr.lt.evrpar(1).cut2) then
+	dr=dsqrt( (x3d0(1)-xv)**2+(x3d0(2)-yv)**2+(x3d0(3)-zv)**2 )
+	if(dr.lt.dca_cut2) then
 	k=k+1
 	vtrv(1,k)=phi0(i)
 	vtrv(2,k)=tanl(i)
@@ -1032,21 +1347,36 @@ C** straight line tracks, i.e. can put e.g. pt=1 then
 	endif
 105	continue
 
-CCC   Check for adequate number of tracks:
-        if(globtrk_h.nok .ne. 0) then
-           ntrkratio = float(k)/float(globtrk_h.nok)
+CCC   Include beam line in EVR_VERTEX_FIT:
+        k_fit_call = k
+        if(k.lt.maxtr) then
+           k_fit_call = k + 1
+           vtrv(1,k+1) = Beamlinephi0
+           vtrv(2,k+1) = Beamlinetanl
+           vtrv(4,k+1) = Beamline_xzslope*vertex_pass(1,3) + BeamlineX1
+           vtrv(5,k+1) = Beamline_yzslope*vertex_pass(1,3) + BeamlineY1
+           vtrv(6,k+1) = vertex_pass(1,3)
+           vtrv(3,k+1) = Beamline_sigma
         end if
-        if (k.lt.5) then
+
+CCC   Check for adequate number of tracks:
+        if(ntracks_seq .ne. 0) then
+           ntrkratio = dble(k)/dble(ntracks_seq)
+        else
+           ntrkratio = 0.0
+        end if
+        if (k.lt.ntrkcut) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'EVR: after cut2; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR:    after dca_cut2; k,ratio=',
+     1                 k,ntrkratio
            flagset1 = -6
         else
            flagset1 = 0
         end if
-        if(ntrkratio .lt. ntrkratiocut) then
-           write(6,*) 'EVR: Ratio of accepted to total global tracks'
-           write(6,*) 'EVR: too low after cut2;'
-           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+        if(ntrkratio .lt. volume_ratio) then
+           write(6,*) 'EVR: Ratio of accepted to # glb trks in seed'
+           write(6,*) 'EVR:    too low after dca_cut2;'
+           write(6,*) 'EVR:    k,ratio=',k,ntrkratio
            flagset2 = -7
         else
            flagset2 = 0
@@ -1088,7 +1418,7 @@ CCC   Check for adequate number of tracks:
         end if
 
 CCC   Do second iteration of vertex finding:
-	CALL EVR_VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k_fit_call)
         xxv(1)=xv
         xxv(2)=yv
         xxv(3)=zv
@@ -1121,7 +1451,7 @@ CCC  Load second iteration vertex value into table privert:
            do i = 1,6
               privert(index).covar(i) = 0.0
            end do
-           privert(index).chisq(1) = chisq/float(k-1)
+           privert(index).chisq(1) = chisq/dble(k-1)
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
@@ -1145,8 +1475,8 @@ CC  Optional Re-calculation of helix track projection to new vertex position:
                  ppt = pptdef
               end if
               tanla = globtrk(k).tanl
-              xx0 = globtrk(k).r0*cosd(globtrk(k).phi0)
-              yy0 = globtrk(k).r0*sind(globtrk(k).phi0)
+              xx0 = globtrk(k).r0*dcosd(dble(globtrk(k).phi0))
+              yy0 = globtrk(k).r0*dsind(dble(globtrk(k).phi0))
               zz0 = globtrk(k).z0
               xp(1) = xxv(1)
               xp(2) = xxv(2)
@@ -1161,7 +1491,7 @@ C              sigma(i) = sig    !  Do not update track position error
            end do
         end if
 
-CCC  Final track selection based on 3D DCA cut (cut3) and loading
+CCC  Final track selection based on 3D DCA cut (dca_cut3) and loading
 CCC  track parameters into temporary arrays:
 	k=0
 	do 205 i=1,ntrk
@@ -1169,13 +1499,12 @@ CCC  track parameters into temporary arrays:
         xa0(2)=y0(i)
         xa0(3)=z0(i)
 C** straight line tracks, i.e. can put e.g. pt=1 then
-        pa0(1)=cosd(phi0(i))
-        pa0(2)=sind(phi0(i))
+        pa0(1)=dcosd(phi0(i))
+        pa0(2)=dsind(phi0(i))
         pa0(3)=tanl(i)
         call ThreeD_dca(xxv,xa0,pa0,x3d0)
-	dr=sqrt( (x3d0(1)-xv)*(x3d0(1)-xv)+(x3d0(2)-yv)*(x3d0(2)-yv)
-     +          +(x3d0(3)-zv)*(x3d0(3)-zv) )
-	if(dr.lt.evrpar(1).cut3) then
+	dr=dsqrt( (x3d0(1)-xv)**2+(x3d0(2)-yv)**2+(x3d0(3)-zv)**2 )
+	if(dr.lt.dca_cut3) then
 	k=k+1
         globtrk(gindex(i)).id_start_vertex = 1  ! mark global tracks used
 CC                                              ! in final vertex fit
@@ -1188,21 +1517,36 @@ CC                                              ! in final vertex fit
 	endif
 205	continue
 
-CCC   Check for adequate number of tracks:
-        if(globtrk_h.nok .ne. 0) then
-           ntrkratio = float(k)/float(globtrk_h.nok)
+CCC   Include beam line in EVR_VERTEX_FIT:
+        k_fit_call = k
+        if(k.lt.maxtr) then
+           k_fit_call = k + 1
+           vtrv(1,k+1) = Beamlinephi0
+           vtrv(2,k+1) = Beamlinetanl
+           vtrv(4,k+1) = Beamline_xzslope*vertex_pass(1,3) + BeamlineX1
+           vtrv(5,k+1) = Beamline_yzslope*vertex_pass(1,3) + BeamlineY1
+           vtrv(6,k+1) = vertex_pass(1,3)
+           vtrv(3,k+1) = Beamline_sigma
         end if
-        if (k.lt.5) then
+
+CCC   Check for adequate number of tracks:
+        if(ntracks_seq .ne. 0) then
+           ntrkratio = dble(k)/dble(ntracks_seq)
+        else
+           ntrkratio = 0.0
+        end if
+        if (k.lt.ntrkcut) then
            write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'EVR: after cut3; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR:    after dca_cut3; k,ratio=',
+     1                 k,ntrkratio
            flagset1 = -6
         else
            flagset1 = 0
         end if
-        if(ntrkratio .lt. ntrkratiocut) then
-           write(6,*) 'EVR: Ratio of accepted to total global tracks'
-           write(6,*) 'EVR: too low after cut3;'
-           write(6,*) 'EVR: k,ratio=',k,ntrkratio
+        if(ntrkratio .lt. volume_ratio) then
+           write(6,*) 'EVR: Ratio of accepted to # glb trks in seed'
+           write(6,*) 'EVR:    too low after dca_cut3;'
+           write(6,*) 'EVR:    k,ratio=',k,ntrkratio
            flagset2 = -7
         else
            flagset2 = 0
@@ -1244,7 +1588,7 @@ CCC   Check for adequate number of tracks:
         end if
 
 CCC   Do third and final iteration of vertex finding:
-	CALL EVR_VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k_fit_call)
         xxv(1)=xv
         xxv(2)=yv
         xxv(3)=zv
@@ -1305,11 +1649,12 @@ CC  Fill covariance error matrix in units of cm^2:
            end if
         end if
 
+        chisq1=chisq
         privert(index).covar(2) = cov(2)
         privert(index).covar(4) = cov(4)
         privert(index).covar(5) = cov(5)
-        privert(index).chisq(1) = chisq/float(k-1)
-        privert(index).chisq(2) = PROB(chisq,k-1)
+        privert(index).chisq(1) = chisq/dble(k-1)
+        privert(index).chisq(2) = PROB(chisq1,k-1)
         privert(index).id_aux_ent  = 0
       else
            write(6,*) 'EVR:Privert table is full - cannot load vertex:',
@@ -1341,8 +1686,8 @@ C               ! DCA to primary vertex .lt.evrpar(1).vcut
               ppt = pptdef
            end if
            tanla = globtrk(i).tanl
-           xx0 = globtrk(i).r0*cosd(globtrk(i).phi0)
-           yy0 = globtrk(i).r0*sind(globtrk(i).phi0)
+           xx0 = globtrk(i).r0*dcosd(dble(globtrk(i).phi0))
+           yy0 = globtrk(i).r0*dsind(dble(globtrk(i).phi0))
            zz0 = globtrk(i).z0
            if(globtrk(i).det_id .eq. kTpcId       .or.
      1        globtrk(i).det_id .eq. kSvtId       .or.
@@ -1365,11 +1710,11 @@ C               ! DCA to primary vertex .lt.evrpar(1).vcut
               xa0(1) = x(1)
               xa0(2) = x(2)
               xa0(3) = x(3)
-              pa0(1) = cosd(x(4))
-              pa0(2) = sind(x(4))
+              pa0(1) = dcosd(x(4))
+              pa0(2) = dsind(x(4))
               pa0(3) = tanla
               Call ThreeD_dca(xxv,xa0,pa0,x3d0)
-              dr = sqrt((x3d0(1)-xxv(1))**2 + (x3d0(2)-xxv(2))**2
+              dr = dsqrt((x3d0(1)-xxv(1))**2 + (x3d0(2)-xxv(2))**2
      1                 +(x3d0(3)-xxv(3))**2)
               globtrk(i).impact = dr
               if(dr .lt. evrpar(1).vcut) then
@@ -1446,34 +1791,34 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL  psi,pt,tanl,x0,y0,z0,bfld,ka,trans_pathL,LIFC
-      REAL  xp(2),x(4),epsq,R,RMAX,xc(2),xi
-      REAL  sigma, sigma_estimate 
-      REAL COSD,SIND 
+      REAL    bfld,ka
+      REAL*8  psi,pt,tanl,x0,y0,z0,trans_pathL,LIFC
+      REAL*8  xp(2),x(4),epsq,R,RMAX,xc(2),xi
+      REAL*8  sigma, sigma_estimate
       INTEGER  q
 
 C      DATA ka  /0.000299792458/
-      DATA RMAX /1.0E+05/
+      DATA RMAX /1.0D+05/
 
       ka = C_D_CURVATURE
 CC    Compute epsq = charge*B_z
 
-      epsq = float(q)*bfld
+      epsq = dble(q)*bfld
 
       if(epsq .eq. 0.0) then    ! If neutral and/or B_z = 0 
          Call PROJECT_ST_TRACK(psi,tanl,x0,y0,z0,xp,x)
-         trans_pathL = sqrt((x0-x(1))**2 + (y0-x(2))**2)
+         trans_pathL = dsqrt((x0-x(1))**2 + (y0-x(2))**2)
          sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
       else
-         R = pt/abs(ka*epsq)
+         R = pt/dabs(ka*epsq)
          if(R .le. RMAX) then
             Call PROJECT_HELIX(psi,q,pt,tanl,x0,y0,z0,bfld,xp,x
      1                         ,R,xc,xi)
-            trans_pathL = abs(R*xi)
+            trans_pathL = dabs(R*xi)
             sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
-         else
+        else
             Call PROJECT_ST_TRACK(psi,tanl,x0,y0,z0,xp,x)
-            trans_pathL = sqrt((x0-x(1))**2 + (y0-x(2))**2)
+            trans_pathL = dsqrt((x0-x(1))**2 + (y0-x(2))**2)
             sigma = sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
          end if
       end if
@@ -1540,20 +1885,20 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL  psi,pt,tanl,x0,y0,z0,bfld,ka
-      REAL  xp(2),x(4),xc(2)
-      REAL  R,a,b,c,invc,signa,signb,cut
-      REAL  phi0,phiDCA,xi,epsq
-      REAL COSD,SIND    
+      REAL    bfld,ka
+      REAL*8  psi,pt,tanl,x0,y0,z0
+      REAL*8  xp(2),x(4),xc(2)
+      REAL*8  R,a,b,c,invc,signa,signb,cut,a1,b1
+      REAL*8  phi0,phiDCA,xi,epsq
       INTEGER  q
 
-      DATA cut /1.0E-03/
+      DATA cut /1.0D-03/
 C      DATA ka  /0.000299792458/
 
       ka = C_D_CURVATURE
 CC    Compute epsq = sign of charge*B_z
 
-      epsq = float(q)*bfld
+      epsq = dble(q)*bfld
       if(epsq .eq. 0.0) then    ! If neutral or B_z = 0 then return defaults
          x(1) = 0.0
          x(2) = 0.0
@@ -1561,18 +1906,20 @@ CC    Compute epsq = sign of charge*B_z
          x(4) = 0.0
          RETURN
       else
-         epsq = epsq/abs(epsq)
+         epsq = epsq/dabs(epsq)
       end if
 
 CC    Find radius of helix, center of circle projection onto x-y plane,
 CC    and x,y coordinates of DCA point on helix.
 
-      R     = pt/abs(ka*float(q)*bfld)
-      xc(1) = x0 + R*cosd(psi - epsq*90.0)
-      xc(2) = y0 + R*sind(psi - epsq*90.0)
+      R     = pt/dabs(ka*dble(q)*bfld)
+      xc(1) = x0 + R*dcosd(psi - epsq*90.0)
+      xc(2) = y0 + R*dsind(psi - epsq*90.0)
       a = xp(1) - xc(1)
       b = xp(2) - xc(2)
-      if(abs(a) .eq. 0.0 .and. abs(b) .eq. 0.0) then  ! Line coincides
+      a1 = dabs(a)
+      b1 = dabs(b)
+      if(a1 .eq. 0.0 .and. b1 .eq. 0.0) then          ! Line coincides
 C                                                     ! with axis of helix
 C                                                     ! Return initial pt.
          x(1) = x0
@@ -1581,21 +1928,21 @@ C                                                     ! Return initial pt.
          x(4) = psi
          xi   = 0.0
          RETURN
-      else if(abs(b) .eq. 0.0 .and. abs(a) .gt. 0.0) then
-         signa = a/abs(a)
+      else if(b1 .eq. 0.0 .and. a1 .gt. 0.0) then
+         signa = a/a1
          x(1) = xc(1) + signa*R
          x(2) = xc(2)
-      else if(abs(a) .eq. 0.0 .and. abs(b) .gt. 0.0) then
-         signb = b/abs(b)
+      else if(a1 .eq. 0.0 .and. b1 .gt. 0.0) then
+         signb = b/b1
          x(1) = xc(1)
          x(2) = xc(2) + signb*R
       else
          c = a/b
          invc = b/a
-         signa = a/abs(a)
-         signb = b/abs(b)
-         x(2) = xc(2) + signb*R/sqrt(1.0 + c*c)
-         if(abs(invc) .le. cut) then
+         signa = a/a1
+         signb = b/b1
+         x(2) = xc(2) + signb*R/dsqrt(1.0 + c*c)
+         if(dabs(invc) .le. cut) then
             x(1) = xc(1) +signa*R*(1.0 - 0.5/(1.0 + c*c))
          else
             x(1) = xc(1) + c*(x(2) - xc(2))
@@ -1605,8 +1952,8 @@ C                                                     ! Return initial pt.
 CC    Find the phase angle to go from initial point back to the DCA point x;
 CC    then calculate the azimuthal direction angle of p_T at the DCA point x.
 
-      phi0 = ATAN2(y0-xc(2),x0-xc(1))
-      phiDCA = ATAN2(x(2)-xc(2),x(1)-xc(1)) 
+      phi0 = DATAN2(y0-xc(2),x0-xc(1))
+      phiDCA = DATAN2(x(2)-xc(2),x(1)-xc(1))
       xi   = epsq*(phi0 - phiDCA)
       if(xi .gt. 0.0) then
          xi = xi - C_2PI
@@ -1658,15 +2005,14 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL  psi,tanl,x0,y0,z0,xp(2),x(4)
-      REAL  px,py,cut,d,m1,m2,pdu
-      REAL COSD,SIND   
-      DATA cut /1.0E-7/
+      REAL*8  psi,tanl,x0,y0,z0,xp(2),x(4)
+      REAL*8  px,py,cut,d,m1,m2,pdu
+      DATA cut /1.0D-7/
 
 CC  Determine if special cases apply:
 
-      px = cosd(psi)
-      py = sind(psi)
+      px = dcosd(psi)
+      py = dsind(psi)
 
       if(abs(px) .le. cut) then
          x(1) = x0
@@ -1683,10 +2029,10 @@ CC  Determine if special cases apply:
          m1 = -1.0/m2         ! slope of line from xp->x @ dca (perp.)
          x(1) = (m1*xp(1)-m2*x0-xp(2)+y0)/(m1-m2)
          x(2) = (m1*m2*(xp(1)-x0) + m1*y0 - m2*xp(2))/(m1-m2)
-         d = sqrt((x(1)-x0)**2 + (x(2)-y0)**2)
+         d = dsqrt((x(1)-x0)**2 + (x(2)-y0)**2)
          if(d .gt. cut) then
             pdu = px*(x(1)-x0)/d + py*(x(2)-y0)/d
-            if(abs(abs(pdu)-1.0) .gt. 100.0*cut) then
+            if(dabs(dabs(pdu)-1.0) .gt. 100.0*cut) then
                if(pdu .ge. 0.0) then
                   pdu = 1.0
                else
@@ -1694,7 +2040,7 @@ CC  Determine if special cases apply:
                end if
             end if
 
-            if(abs(abs(pdu)-1.0) .gt. 0.0001) then
+            if(dabs(dabs(pdu)-1.0) .gt. 0.0001) then
                write(6,*) 'EVR: Direction cosines .ne. +/-1,=',pdu
             end if
 
@@ -1713,7 +2059,7 @@ CC    For straight tracks:
 
 
 C------------------------------------------------------------------------
-      Real*4 Function sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
+      Real*8 Function sigma_estimate(pt,x0,y0,psi,tanl,trans_pathL,LIFC)
 C------------------------------------------------------------------------
       Implicit none
 #include "math_constants.inc"
@@ -1772,23 +2118,24 @@ CC-----------------------------------------------------------------------
 
 CC  Local Variable Type Declarations:
 
-      REAL pt,x0,y0,psi,tanl,trans_pathL
-      REAL fac,ptot,phi0,cospr,Leff,LIFC
-      REAL theta_mcs,sqrt2
-      REAL COSD,SIND
+      REAL*8 pt,x0,y0,psi,tanl,trans_pathL
+      REAL*8 fac,ptot,phi0,cospr,Leff,LIFC
+      REAL*8 theta_mcs
+      REAL   sqrt2
 C      DATA sqrt2  /1.4142135/
 
       sqrt2 = C_SQRT2
-      fac = sqrt(1.0 + tanl*tanl)
+      fac = dsqrt(1.0 + tanl*tanl)
       ptot = pt*fac
-      phi0 = ATAN2(y0,x0)
-      cospr = (cosd(psi)*cos(phi0) + sind(psi)*sin(phi0))/fac
+      phi0 = DATAN2(y0,x0)
+      cospr = dcos(psi*C_PI/180.0 - phi0)/fac
+c     cospr = (dcosd(psi)*dcos(phi0) + dsind(psi)*dsin(phi0))/fac
 
       if(cospr .eq. 0.0) then
          sigma_estimate = trans_pathL*fac*sqrt2*
      1         theta_mcs(0.14,1.0,ptot,LIFC,1.0,1)
       else
-         Leff = LIFC/abs(cospr)
+         Leff = LIFC/dabs(cospr)
          sigma_estimate = trans_pathL*fac*sqrt2*
      1         theta_mcs(0.14,1.0,ptot,Leff,1.0,1)
       end if
@@ -1797,7 +2144,7 @@ C      DATA sqrt2  /1.4142135/
       END
  
 C---------------------------------------------------------------------- 
-      Real*4 Function theta_mcs(mass,charge,momentum,L,LR,
+      Real*8 Function theta_mcs(mass,charge,momentum,L,LR,
      1       formula_type)
       implicit none
 C----------------------------------------------------------------------
@@ -1834,9 +2181,10 @@ CCC
 
 CCC   Variable Declarations:
 
-      real*4 mass,charge,momentum,L,LR
-      real*4 theta_fac0, theta_fac1, LOGFAC0, LOGFAC1
-      real*4 E, gamma, beta, LFAC
+      real   mass,charge,LR
+      real*8 momentum,L
+      real*8 theta_fac0, theta_fac1, LOGFAC0, LOGFAC1
+      real*8 E, gamma, beta, LFAC
       integer*4 formula_type
 
       parameter(theta_fac0 = 14.1)
@@ -1850,16 +2198,16 @@ CCC   Begin Calculation, if L or LR = 0.0, set theta_mcs to zero and return:
          theta_mcs = 0.0
       else
          LFAC = L/LR
-         E = sqrt(momentum*momentum + mass*mass)
+         E = dsqrt(momentum**2 + mass**2)
          gamma = E/mass
-         beta = sqrt(1.0 - 1.0/(gamma*gamma))
+         beta = dsqrt(1.0 - 1.0/(gamma**2))
 
          if(formula_type .eq. 0) then
-            theta_mcs = theta_fac0*abs(charge)*sqrt(LFAC)
-     1      *(1.0 + LOGFAC0*log(LFAC))/(1000.0*momentum*beta)
+            theta_mcs = theta_fac0*abs(charge)*dsqrt(LFAC)
+     1      *(1.0 + LOGFAC0*dlog(LFAC))/(1000.0*momentum*beta)
          else
-            theta_mcs = theta_fac1*abs(charge)*sqrt(LFAC)
-     1      *(1.0 + LOGFAC1*log(LFAC))/(1000.0*momentum*beta)
+            theta_mcs = theta_fac1*abs(charge)*dsqrt(LFAC)
+     1      *(1.0 + LOGFAC1*dlog(LFAC))/(1000.0*momentum*beta)
          end if
 
       end if
@@ -1903,24 +2251,23 @@ CC:   Status:   Testing in May, 1999, Done.
 CC:>--------------------------------------------------------------------
 
 	integer ngmx
-	PARAMETER (NGMX=20000)
-	REAL vtrv(6,ngmx)
+	PARAMETER (NGMX=5000)
+	REAL*8 vtrv(6,ngmx)
 	common /fitvert/ vtrv
-	real Xv,Yv,Zv,cov(6),chisq
+	real*8 Xv,Yv,Zv,cov(6),chisq
 	COMMON /VERTEX/XV,YV,ZV,cov,chisq
 c  passed parameters:
 	integer NT
 
 c  Local variables:
 	integer i,j,k
-	real x0,y0,z0
-	real sinV,cosV,sinL,cosL
-	real sigma(3,3),H(3),G(3,3),Txx,Txy,Txz,Tyy,Tyz,Tzz,G_inv(3,3),det
-	real sigma2 
-        real E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
-        real Sigxv,Sigyv,Sigzv
-        real ex,ey,ez
-        REAL COSD,SIND
+	real*8 x0,y0,z0
+	real*8 sinV,cosV,sinL,cosL
+	real*8 sigma(3,3),H(3),G(3,3),Txx,Txy,Txz,Tyy,Tyz,Tzz,G_inv(3,3)
+	real*8 sigma2,det
+        real*8 E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
+        real*8 Sigxv,Sigyv,Sigzv
+        real*8 ex,ey,ez
 
 c  Convention: L=angle lambda, V=angle phi
 
@@ -1947,9 +2294,9 @@ CC  Initialize all output quantities:
       end if
 
 	do k=1,nt			! Master loop over tracks
-	  sinV=sind(vtrv(1,k))
-	  cosV=cosd(vtrv(1,k))
-	  cosL=1.0/(sqrt(1.0 + vtrv(2,k)**2))
+	  sinV=dsind(vtrv(1,k))
+	  cosV=dcosd(vtrv(1,k))
+	  cosL=1.0/(dsqrt(1.0 + vtrv(2,k)**2))
 	  sinL=cosL*vtrv(2,k)
 
 	  X0= vtrv(4,k)
@@ -2039,9 +2386,9 @@ c  The vertex vector = The inverted G matrix times the H vector
 
 CC  Compute Chi-Square of fit to vertex, return the total chi-square value:
         do k = 1,nt
-           sinV = sind(vtrv(1,k))
-           cosV = cosd(vtrv(1,k))
-           cosL = 1.0/sqrt(1.0 + vtrv(2,k)**2)
+           sinV = dsind(vtrv(1,k))
+           cosV = dcosd(vtrv(1,k))
+           cosL = 1.0/dsqrt(1.0 + vtrv(2,k)**2)
            ex = cosV*cosL
            ey = sinV*cosL
            ez = vtrv(2,k)*cosL
@@ -2055,7 +2402,7 @@ CC  Compute Chi-Square of fit to vertex, return the total chi-square value:
      2           +  ((XV - X0)*ey - (YV- Y0)*ex)**2
      3           +  ((ZV - Z0)*ex - (XV- X0)*ez)**2)/sigma2
         end do
-C        chisq = chisq/float(nt)   !  Return the Total Chi Square
+C        chisq = chisq/dble(nt)   !  Return the Total Chi Square
 
 c  Invert the E matrix and calculate the determinant
 c  Calcualate the determinant
@@ -2092,9 +2439,9 @@ CC  Load the covariance matrix elements:
         Sigxv = 0.0
         Sigyv = 0.0
         Sigzv = 0.0
-        if(cov(1) .ge. 0.0) Sigxv = sqrt(cov(1))
-        if(cov(3) .ge. 0.0) Sigyv = sqrt(cov(3))
-        if(cov(6) .ge. 0.0) Sigzv = sqrt(cov(6))
+        if(cov(1) .ge. 0.0) Sigxv = dsqrt(cov(1))
+        if(cov(3) .ge. 0.0) Sigyv = dsqrt(cov(3))
+        if(cov(6) .ge. 0.0) Sigzv = dsqrt(cov(6))
         write(6,*) 'EVR: Diagonal Errors:', Sigxv,Sigyv,Sigzv
         write(6,*) 'EVR: COV=',cov(1),cov(2),cov(3),cov(4),cov(5),cov(6)
 999	Return
@@ -2118,27 +2465,34 @@ C                               The input vectors must be calculated
 C                               at a point close to the vertex.
 C   Created  JUN-1992  S.Margetis
 C   Modified: 4/2/99 R.L.Ray
+C             Nov. 2000 G. van Buren - optimized algebra
 C   Error conditions            : Error for p(1)=0 fixed (4/2/99 RLR)
 C   Status                      : Tested
 C----------------------------------------------------------------------
-      REAL      xv(3),x(3),p(3),x0(3),nom,cut,det
-      DATA  cut /1.0E-06/
+      REAL*8    xv(3),x(3),p(3),x0(3),nom,cut,det
+      REAL*8    p1sq,p2sq,p3sq,temp
+      DATA  cut /1.0D-06/
 *----------------------------------------------------------------------
 
-        nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+        p1sq = p(1)**2
+        p2sq = p(2)**2
+        p3sq = p(3)**2
+        nom=(p2sq+p3sq)*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
         nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
-        x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
+        x0(1)=nom/( p1sq+p2sq+p3sq )
 
 C       IF(p(1).ne.0.) THEN
-        IF(abs(p(1)) .gt. cut) THEN              ! RLR (4/99)
-         x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
-         x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+        IF(dabs(p(1)) .gt. cut) THEN              ! RLR (4/99)
+         temp=(x0(1)-x(1))/p(1)
+         x0(2)=x(2)+p(2)*temp
+         x0(3)=x(3)+p(3)*temp
         ELSE
-         det = p(2)*p(2) + p(3)*p(3)             ! RLR (4/99)
-         x0(2)=(x(2)*p(3)*p(3)+xv(2)*p(2)*p(2)+  ! RLR (4/99)
-     1         (xv(3)-x(3))*p(2)*p(3))/det       ! RLR (4/99)
-         x0(3)=(x(3)*p(2)*p(2)+xv(3)*p(3)*p(3)+  ! RLR (4/99)
-     1         (xv(2)-x(2))*p(2)*p(3))/det       ! RLR (4/99)
+         temp = p(2)*p(3)
+         det = p2sq + p3sq                       ! RLR (4/99)
+         x0(2)=(x(2)*p3sq+xv(2)*p2sq+            ! RLR (4/99)
+     1         (xv(3)-x(3))*temp)/det            ! RLR (4/99)
+         x0(3)=(x(3)*p2sq+xv(3)*p3sq+            ! RLR (4/99)
+     1         (xv(2)-x(2))*temp)/det            ! RLR (4/99)
 
 C        x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
 C               IF(p(2).eq.0.) THEN
@@ -2239,23 +2593,5 @@ CC   TPC-SSD-SVT tracks:
          Return
       end if
 
-      END
-
-      Real*4 Function cosd(x)
-      implicit none
-CCC   Cosine of angles (x) in degrees
-#include "math_constants.inc"
-      real*4 x
-      cosd = cos(x*C_RAD_PER_DEG)
-      Return
-      END
-
-      Real*4 Function sind(x)
-      implicit none
-CCC   Sine of angles (x) in degrees
-#include "math_constants.inc"
-      real*4 x
-      sind = sin(x*C_RAD_PER_DEG)
-      Return
       END
 

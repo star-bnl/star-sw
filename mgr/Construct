@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.108 2001/02/10 20:31:09 fisyak Exp $
+# $Id: Construct,v 1.106 2001/02/03 01:58:26 fisyak Exp $
 use Env;
 use lib $STAR . "/mgr"; # Modify perl include path
 use ConsDefs;
@@ -126,14 +126,6 @@ foreach my $dir ("pams","StRoot","StPiD"){
     if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {
       print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
       next;
-    }
-    if ($#Repo == -1) {
-      if ($STAR_HOST_SYS =~ /^sun4x_56/ && 
-	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StMiniDstMaker/ || $sub_dir =~ /StppSpin/) 
-	  ) {
-	 print "skip dir: $sub_dir\n";
-	next;
-      }
     }
     my $sub_DIR = $dir . "/" . $sub_dir; 
     if (-d $sub_DIR) {

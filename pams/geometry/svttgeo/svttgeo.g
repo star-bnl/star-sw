@@ -1,9 +1,6 @@
-* $Id: svttgeo.g,v 1.14 2000/12/19 22:42:49 nevski Exp $
+* $Id: svttgeo.g,v 1.13 2000/11/18 22:15:28 nevski Exp $
 *
 * $Log: svttgeo.g,v $
-* Revision 1.14  2000/12/19 22:42:49  nevski
-* make water manifold optional
-*
 * Revision 1.13  2000/11/18 22:15:28  nevski
 * adjust wafer size as requested by Helen
 *
@@ -397,23 +394,19 @@ Block SVTT is the mother of all SVT volumes
 * 
 * Water manifold
 *
-      if (swam_Len > 0) then
       Create    SWMM  " water manifold mother"
       Position  SWMM  z= swam_Zmin+swam_Len/2
       Position  SWMM  z=-swam_Zmin-swam_Len/2 
-      endif
 *
 * Bracket connecting water minifold to support cone 
 * (guess, this is not designed yet)
 *
-      if (swam_Len > 0) then
       Create    SBWC " water manifold to support cone bracket mother"
       Position  SBWC z= (swam_Zmin+swam_Len+ _
                         (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2)
       Position  SBWC z=-(swam_Zmin+swam_Len+ _
                         (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2),
                      ThetaZ=180
-      endif
 * 
 * SVT support cones
 *

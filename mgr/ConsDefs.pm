@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.30 2001/02/10 20:31:09 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.28 2000/12/19 20:25:17 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -89,8 +89,7 @@
  $SYSLIBS  = "";
  $OSFID    = "";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
- $date     = `date +\%d\%b-%T`;
- $CXXCOM   = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
+ $date    = `date +\%d\%b-%T`;
 # $MAKELIB = "test -f %> && mv %> %>.$date;";
  $MAKELIB.= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
@@ -223,7 +222,7 @@
  elsif (/^sun4x_56_CC5$/) {
    $PLATFORM = "solaris"; 
    $ARCH     = "solarisCC5";
-   $OSFID     = "__SunOS_5_6";
+   $OSFID     = "__CC5__ __SunOS_5_6";
    $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
    if ($STAR) {
      $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
@@ -232,11 +231,8 @@
    $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
-   $CXXCOM   = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";      
    $FC        = "/opt/WS5.0/bin/f77";
-   $CXXFLAGS  = "-KPIC";# -library=iostream,no%%Cstd";
-   $EXTRA_CXXFLAGS = " -D__CC5__";
-   $EXTRA_CFLAGS = " -D__CC5__";
+   $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no%%Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
@@ -249,9 +245,9 @@
    $CFLAGS    = "-KPIC";
    $CINTCFLAGS= $CFLAGS . " " . $R_CPPFLAGS;
    $LD        = $CXX;
-   $LDFLAGS   = " -Bdynamic"; #-library=iostream
+   $LDFLAGS   = "-library=iostream -Bdynamic";
    $SO        = $CXX;
-   $SOFLAGS   = "-G -ptr%ObjDir";;#
+   $SOFLAGS   = "-G";#
    if (defined($ARG{INSURE})){
      print "***Use INSURE++***\n";
      $CC       = "insure -g -Zoi \"compiler_c cc\"";
@@ -433,7 +429,7 @@
 		'CXXFLAGS'     => $CXXFLAGS,
 		'CINTCXXFLAGS' => $CINTCXXFLAGS,
 		'EXTRA_CXXFLAGS'     => $EXTRA_CXXFLAGS,
-		'CXXCOM'       => $CXXCOM,
+		'CXXCOM'       => '%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
 		'CLIBS'        => $CLIBS,
 		'FLIBS'        => $FLIBS,
 		'XLIBS'        => $XLIBS,

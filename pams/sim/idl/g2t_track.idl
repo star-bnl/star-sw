@@ -13,7 +13,7 @@ struct g2t_track {          /* G2t_track */
        long      hit_ftp_p;  /* Id of first ftp hit on track linked list */
        long      hit_mwc_p;  /* Id of first mwc hit on track linked list */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
-       long      hit_pmd_p;  /* Id of first psc hit on track linked list */
+       long      hit_psc_p;  /* Id of first psc hit on track linked list */
        long      hit_smd_p;  /* pointer to first SHM linked list hit */
        long      hit_svt_p;  /* Id of first svt hit on track linked list */
        long      hit_tof_p;  /* Id of first tof hit on track linked list */
@@ -28,8 +28,8 @@ struct g2t_track {          /* G2t_track */
        long      n_esm_hit;  /* Nhits in esm (endcap shower max) */
        long      n_ftp_hit;  /* Nhits in forward tpc */
        long      n_mwc_hit;  /* Nhits in mwc */
-       long      n_pgc_hit;  /* Nhits in pgc  ???  */
-       long      n_pmd_hit;  /* Nhits in pmd (PMD) */
+       long      n_pgc_hit;  /* Nhits in pgc (PMD) */
+       long      n_psc_hit;  /* Nhits in psc (PMD) */
        long      n_smd_hit;  /* number of hits in shower max */
        long      n_svt_hit;  /* Nhits in svt */
        long      n_tof_hit;  /* Nhits in tof */

@@ -3,11 +3,12 @@ Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
-(my $obj_dir = $DirPath) =~ s/\\/\//g;# print "obj_dir = $obj_dir\n";
-(my $Dir = $obj_dir) =~ s/$build\///g;# print "Dir = $Dir\n";
-my $ObjDir = "#" . $obj_dir; #print "ObjDir = $ObjDir\n";
+(my $ObjDir = $DirPath) =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
+(my $Dir = $ObjDir) =~ s/$build\///g;# print "Dir = $Dir\n";
+$ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
+(my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-@Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";nv
+@Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my $pkg  = File::Basename::basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
 my $SO_PKG = "";
@@ -67,6 +68,11 @@ if ($pkg =~ /^pyth$/){
   $LIBPATH .= $CERN_ROOT . "/lib";
   $LIBS    .= " -lpythia ";  
 }
+#if ($pkg eq 'StEeFit' and $STAR_SYS =~ /^i386/) {
+#  $FC = "g77";
+#  $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
+#  $FEXTEND  = "-ffixed-line-length-132"; 
+#}
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
@@ -82,7 +88,7 @@ if ($pkg =~ /^StHbtMaker$/) {
 }
 
 if ($pkg =~ /^StDaqLib$/) {$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n"  if $param::debug;}
-
+#if ($Dir =~ /pams\// || $Dir =~ /StRoot\//) {
 if ($#idlM > -1) {
   $CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
@@ -99,18 +105,22 @@ my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
+#if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
+#  if (!$LIBPATH) {$LIBPATH  = "/opt/WS5.0/SC5.0/lib";}
+#  else           {$LIBPATH .= $main::PATH_SEPARATOR . "/opt/WS5.0/SC5.0/lib";}
+#  $LIBS    .= " -lCstd -liostream";
+#}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CXXFLAGS'     => $CXXFLAGS,
 		    'FCCOM'        => $FCCOM,
                     'LIBPATH'      => $LIBPATH,
                     'LIBS'         => $LIBS,
 		    'share'        => $share,
-		    'ObjDir'       => $obj_dir,
+		    'ObjDir'       => $ObjDir,
 		    'FC'           => $FC,
 		    'FFLAGS'       => $FFLAGS,
 		    'FEXTEND'      => $FEXTEND
 		   );
-bless $env2, cons;
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
 print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
@@ -131,7 +141,7 @@ foreach my $cpp ($Dir,@cpps) {
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
 my $ROOTCINT_CPPPATH = $cscanner->iflags($env2); 
-
+#$ROOTCINT_CPPPATH .= " -I" . $env->{ENV}->{ROOTSYS} . "/root/cint/stl";
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
 my $STIC_CPPPATH = $cscanner->iflags($env2);# print "STIC_CPPPATH  = $STIC_CPPPATH\n";
@@ -233,14 +243,27 @@ if ($#idlL > -1) {
     }
     Install $env $INCLUDE, @idlT;# print "Install $env $INCLUDE, @idlT\n";
     #___________________________________
-    my $ROOTCINT_CPP = $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
-    $ROOTCINT_CPP .= $main::PATH_SEPARATOR . $shareT . $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC};
-    my $tobj_dir = $obj_dir . "/Tables" ;
-    $CPPPATH = $env->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
-    $env3 = $env->clone('DEBUG'      => ' ',
-			'CPPPATH'      => $CPPPATH,
-			'ObjDir'       => $tobj_dir
-		       );
+    my $ROOTCINT_CPP = $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . $shareT . $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC};
+    my $CXXFLAGS = $env->{CXXFLAGS};
+    my $LINKMODULECOM = $env->{LINKMODULECOM};
+    if ($STAR_SYS =~ /^sun4x_5.$/) {
+      $CXXFLAGS .= " -ptr" . $obj_dir . "/Tables" ;
+      $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Tables/Templates.DB/*.o %_LDIRS %LIBS";
+    }
+    if ($SO_PKGT eq $SO_PKG) {
+      $CPPPATH = $env2->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+      $env3 = $env->clone(
+			  'CPPPATH'    => $CPPPATH
+			 );
+    }
+    else {
+      $env3 = $env->clone(
+			  'DEBUG'      => ' ',
+			  'CPPPATH'    =>$ROOTCINT_CPP,
+			  'CXXFLAGS'   => $CXXFLAGS,
+			  'LINKMODULECOM'=> $LINKMODULECOM
+			 );
+    }
     my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
     my $ROOTCINT_CPPPATH = $cscanner->iflags($env3);# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
     
@@ -266,6 +289,7 @@ if ($#idlL > -1) {
 	  push @Deps, $idlH;
 	  Command $env3 [$idlC],        @Deps, qq (ConstructTable.pl %1 %>);
 	  Command $env3 [$LinkDef],     @Deps, qq (ConstructTable.pl %1 %>);
+#	  Install $env $share, @Deps; print "Install $env3 $share, @Deps;\n";
 	}
 	@Deps = ();
 	push @Deps, $idlH;
