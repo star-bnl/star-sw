@@ -1,11 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.25 2003/02/07 23:47:53 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.26 2003/02/19 15:38:10 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
 #include <fstream>
-
+#include <strstream>
 #include "StChain.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
@@ -95,8 +95,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   
   createArrays();
 
-  setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
-  FORCEDDEBUGMESSAGE("ATTENTION: pid table hardwired to /afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+
+  setProbabilityPidFile();
   StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
   FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
@@ -862,13 +862,35 @@ string StMuDstMaker::dirname(string s){
   DEBUGVALUE3(name);
   return name;
 } 
+
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
+  ostrstream flnm;
+
+  if ( ! file ){
+    const char *PIDtable="PIDTableP01gl.root";
+
+    flnm << getenv("STAR") << "/StarDb/dEdxModel/" << PIDtable << ends;
+    FORCEDDEBUGMESSAGE("ATTENTION: pid table hardwired to " << flnm.str() );
+
+  } else {
+    flnm << file << ends;
+    FORCEDDEBUGMESSAGE("Using pid table to user value " << flnm.str() );
+  }
+
+
   if (mProbabilityPidAlgorithm)
-    mProbabilityPidAlgorithm->readParametersFromFile(file);
+    mProbabilityPidAlgorithm->readParametersFromFile(flnm.str());
 }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.26  2003/02/19 15:38:10  jeromel
+ * Modifications made to account for the new location of the PIDTable file.
+ * The setProbabilityPidFile() method has been modified to take care of a default
+ * file loading if unspecified. Messages will be displayed appropriatly.
+ * Macros mdoofied to not call the method (leave it handled through the default
+ * file).
+ *
  * Revision 1.25  2003/02/07 23:47:53  laue
  * New EMC code. TObject arrays replaced by TClonesArrays (thanks to Alex)
  *

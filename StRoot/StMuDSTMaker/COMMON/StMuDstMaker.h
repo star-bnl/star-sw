@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.18 2003/01/29 03:04:57 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.19 2003/02/19 15:38:10 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -91,10 +91,22 @@ class StMuDstMaker : public StMaker {
   void setL3TrackFilter(StMuCut* c);
   StMuL3Filter* l3TrackFilter();
   /// Set the file from where the PID probability tables should be read. 
-  /** Set the file from where the PID probability tables should be read. These tables might change from production version to production version.
-      It is the reposibility of who ever creates muDsts to make sure the right tables are used. So far, Aihong was providing these files. Thanks,Aihong. 
+  /** 
+      Set the file from where the PID probability tables should be read. 
+      These tables might change from production version to production version.
+      It is the reposibility of who ever creates muDsts to make sure the right tables 
+      are used. So far, Aihong was providing these files. 
+      Thanks, Aihong. 
+      Note that this method hard code the file name if the argument is not give. 
+      The default is currently
+
+          getenv("STAR") << "/StarDb/dEdxModel/" << PIDtable 
+
+      where PIDtable=PIDTableP01gl.root . This will later change with possibly 
+      a database approach.
+
   */
-  void setProbabilityPidFile(const char* file);
+  void setProbabilityPidFile(const char* file=NULL);
   /// Returns pointer to the StMuDst object, the transient class that holds all the TClonesArrays and has access functions to the tracks, v0s, etc. 
   /// Returns null pointer if no StMuDst available.
   StMuDst* muDst();
@@ -114,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.18 2003/01/29 03:04:57 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.19 2003/02/19 15:38:10 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -122,9 +134,12 @@ class StMuDstMaker : public StMaker {
 private:
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts. 
-      ioFix = use filename specified in when calling the constructor, right in the same output file for all input files. 
-      ioIOMaker = create one output file per input file, derive output filename from current input file of the StIOMaker.
-      ioTreeMaker = create one output file per input file, derive output filename from current input file of the StTreeMaker.
+      ioFix = use filename specified in when calling the constructor, right in the 
+      same output file for all input files. 
+      ioIOMaker = create one output file per input file, derive output filename 
+      from current input file of the StIOMaker.
+      ioTreeMaker = create one output file per input file, derive output filename 
+      from current input file of the StTreeMaker.
   */
   enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
@@ -276,6 +291,13 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.19  2003/02/19 15:38:10  jeromel
+ * Modifications made to account for the new location of the PIDTable file.
+ * The setProbabilityPidFile() method has been modified to take care of a default
+ * file loading if unspecified. Messages will be displayed appropriatly.
+ * Macros mdoofied to not call the method (leave it handled through the default
+ * file).
+ *
  * Revision 1.18  2003/01/29 03:04:57  laue
  * !!DIRTY FIX FOR StMuEmcCollection
  * !! Was memor leaking. Leak fixed, but slow and dirty.
