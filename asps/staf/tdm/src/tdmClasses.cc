@@ -789,6 +789,7 @@ STAFCV_T tdmFactory:: getTable (IDREF_T id, tdmTable*& table) {
 
 //----------------------------------
 char * tdmFactory:: list () {
+   char *n,*t,nn[30]={0},*nb;
    socObject* obj;
 
    printf("\n"
@@ -796,32 +797,51 @@ char * tdmFactory:: list () {
    "\n"
 "|*************** TDM - Table & Dataset Memory listing ****************"
    "\n"
-"+-------+-----------------+-----------------+-------------------------"
+"+-------+------------------------------+------------+-----------------"
    "\n"
-"| IDREF | NAME            | TYPE            |                         "
+"| IDREF | NAME                         | TYPE       | USED/ALLOCATED  "
     "\n"
-"+-------+-----------------+-----------------+-------------------------"
+"+-------+------------------------------+------------+-----------------"
     "\n");
    for( int i=0;i<myCount;i++ ){
       if( soc->getObject(entry(i),obj) ){
-         if( 0 == strcmp("tdmTable",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %d of %d rows filled \n"
-                        ,obj->idRef(),obj->name(),obj->type()
+         if( 0 == strcmp("tdmTable",t=obj->type()) ){
+	    n=obj->name();
+	    if(strlen(n) < 29){
+	       strcpy(nn,n);
+	    }
+	    else {
+	       nb = n + (strlen(n)-25);
+	       sprintf(nn,"...%25s%c",nb,0);
+	    }
+            printf("| %5d | %-28s | %-10s | %d/%d \n"
+                        ,obj->idRef(),nn,t
                         ,TDMTABLE(obj)->rowCount()
                         ,TDMTABLE(obj)->maxRowCount());
+	    free(n); free(t);
          } else if( 0 == strcmp("tdmDataset",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %d of %d entries used \n"
-                        ,obj->idRef(),obj->name(),obj->type()
+	    n=obj->name();
+	    if(strlen(n) < 29){
+	       strcpy(nn,n);
+	    }
+	    else {
+	       nb = n + (strlen(n)-25);
+	       sprintf(nn,"...%25s%c",nb,0);
+	    }
+            printf("| %5d | %-28s | %-10s | %d/%d \n"
+                        ,obj->idRef(),nn,t
                         ,TDMDATASET(obj)->entryCount()
                         ,TDMDATASET(obj)->maxEntryCount());
+	    free(n); free(t);
          }
       } else {
          printf("| %5d | %-15s | %-15s | \n"
                         ,entry(i),"**DELETED**","**DELETED**");
+	    free(t);
       }
    }
    printf(
-"+-------+-----------------+-----------------+-------------------------"
+"+-------+------------------------------+------------+-----------------"
    "\n\n");
 
    return ""; // TEMPORARY HACK
