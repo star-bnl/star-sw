@@ -27,30 +27,26 @@ using std::vector;
 //#include "tables/St_emcEqualization_Table.h"
 //#include "tables/St_emcMipCalib_Table.h"                                      
 class StEMCReader;
-class StEvent;
+class StEmcCollection;
 class TDataset;
 class StEmcHandleDB;
 class StEmcCollection;
 
 class StEmcApplyCalib {
     
-private:
-    
-protected:
-    
 public: 
-    StEmcApplyCalib(StEvent*, TDataSet*);
+    StEmcApplyCalib(StEmcCollection*, TDataSet*);
     virtual       ~StEmcApplyCalib();
-    virtual Int_t  Calibrate();
-    Int_t Calibrate_Tower(StEmcHandleDB*,StEmcCollection *);
-    Int_t Calibrate_Smd(StEmcHandleDB*,StEmcCollection *);
+    Int_t  calibrate();
+    Int_t  calibrateTower(StEmcHandleDB*,StEmcCollection *);
+    Int_t  calibrateSmd(StEmcHandleDB*,StEmcCollection *);
 protected:
     
 private:
-    StEvent* mevent;
-    TDataSet* m_calibdb;
+    StEmcCollection *mEmcCollection; //!
+    TDataSet        *mCalibDb;       //!
     ClassDef(StEmcApplyCalib, 1)   
-	};
+};
 
 #endif 
 #endif /* __ROOT__ */

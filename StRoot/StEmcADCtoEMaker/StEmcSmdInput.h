@@ -22,30 +22,26 @@ using std::vector;
 
 
 class StEMCReader;
-class StEvent;
+class StEmcCollection;
 class TDataSet;
 class StEmcHandleDB;
 
 class StEmcSmdInput {
-    
-private:
-    
-protected:
-    
+        
 public: 
-    StEmcSmdInput(StEvent*, StEMCReader*, TDataSet *);
+    StEmcSmdInput(StEmcCollection*, StEMCReader*, TDataSet *);
     virtual       ~StEmcSmdInput();
-    virtual Int_t  ProcessInput();
-    Int_t subtractPedestals(StEmcHandleDB*);
-    Int_t applyAmpEqualization(StEmcHandleDB*);
-    Int_t applyEtaCorrection(StEmcHandleDB*);
-    Int_t fillEvent();
+    Int_t  processInput();
+    Int_t  subtractPedestals(StEmcHandleDB*);
+    Int_t  applyAmpEqualization(StEmcHandleDB*);
+    Int_t  applyEtaCorrection(StEmcHandleDB*);
+    Int_t  fillEmcHitsCollection();
 protected:
     
 private:
-    StEvent     *mevent;
-    StEMCReader *mTheEmcReader;//!
-    TDataSet    *mCalibDb;
+    StEmcCollection *mEmcCollection; //!
+    StEMCReader *mTheEmcReader;      //!
+    TDataSet    *mCalibDb;           //!
     //    Float_t mTimeBin;
     Float_t mSMDEADC[120][50];
     Float_t mSMDPADC[120][10][15];

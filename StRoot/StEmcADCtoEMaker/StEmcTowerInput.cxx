@@ -30,15 +30,16 @@ ClassImp(StEmcTowerInput) // macro
 St_emcCalibration*   cal;
 //StEmcHandleDB* db;
    
-StEmcTowerInput::StEmcTowerInput(StEvent*event, StEMCReader* emcreader,TDataSet* calibdb)
-: mevent(event), mTheEmcReader(emcreader),mCalibDb(calibdb)
+StEmcTowerInput::StEmcTowerInput
+(StEmcCollection *emccol, StEMCReader* emcreader,   TDataSet* calibdb)
+:mEmcCollection(emccol),  mTheEmcReader(emcreader), mCalibDb(calibdb)
 { }
 
 StEmcTowerInput::~StEmcTowerInput() {}
 
 Int_t 
-StEmcTowerInput::ProcessInput() {
-  cout << "TowerInput::ProcessInput()" << endl;
+StEmcTowerInput::processInput() {
+  cout << "TowerInput::processInput()" << endl;
   static unsigned short ADC=0;
 // Initialize tower ADC array
   for(Int_t i=0;i<120;i++){
@@ -56,7 +57,7 @@ StEmcTowerInput::ProcessInput() {
     }
   }
   
-  Int_t stat_fill=0, stat_ped=0;
+  static Int_t stat_fill=0, stat_ped=0;
   controlADCtoE_st *tmpTab = StEmcADCtoEMaker::getControlTable();
   Short_t deductPed = tmpTab->bemcDeductPedestal;
 
@@ -66,7 +67,7 @@ StEmcTowerInput::ProcessInput() {
     //Get DB
     cout<<"Getting DB"<<endl;
     db = new StEmcHandleDB(mCalibDb);
-    db->ProcessDB();
+    db->processDB();
     cout<<"DB handled"<<endl;
     //
     //First , Pedestals
@@ -79,7 +80,7 @@ StEmcTowerInput::ProcessInput() {
     //Apply Equalization consts
 //    Int_t stat_eual = applyEqualization(db);
     //Write into StEvent
-  stat_fill = fillEvent();
+  stat_fill = fillEmcHitsCollection();
   if(stat_fill == kStOK) return kStOK;
   if(db) delete db;
   db=0;
@@ -95,7 +96,7 @@ StEmcTowerInput::subtractPedestals(StEmcHandleDB* db)
     for(Int_t j=0;j<20;j++){
       for(Int_t k=0;k<2;k++){
         Float_t ped=0;
-        int pedstat=db->GetTowerPeds(i,j,k,ped);
+        int pedstat=db->getTowerPeds(i,j,k,ped);
 //     if(pedstat==kStOK)cout<<"i "<<i<<" j "<<j<<"k "<<k<<"ADC "<<mTowerADC[i][j][k]<<"ped  "<<ped<<endl;
         if(pedstat==kStOK)mTowerADC[i][j][k]-=ped;
       }
@@ -113,7 +114,7 @@ StEmcTowerInput::applyEqualization(StEmcHandleDB* db)
     for(Int_t j=1;j<20;j++){
       for(Int_t k=1;k<2;k++){
         Float_t equal=1.;
-        //      int pedstat=db->GetTowerEquals(i,j,k,equal);
+        //      int pedstat=db->getTowerEquals(i,j,k,equal);
         mTowerADC[i][j][k]*=equal;
       }
     }
@@ -122,29 +123,18 @@ StEmcTowerInput::applyEqualization(StEmcHandleDB* db)
 }
 
 Int_t 
-StEmcTowerInput::fillEvent()
+StEmcTowerInput::fillEmcHitsCollection()
 {
-  // Fill StEvent - correct 1-oct-2001 by PAI
-  StEmcCollection *emctemp = mevent->emcCollection(); 
-  if(!emctemp){
-    cout<<" Emc Collection does not exist ";
-    emctemp=new StEmcCollection();
-    mevent->setEmcCollection(emctemp);
-    cout<<" so => emcCollection created and set to StEvent emccollection SET "<< endl;
-  }
+  // Fill  EmcHitsCollection - correct 1-oct-2001 by PAI
 
-  StDetectorId id = static_cast<StDetectorId>(kBarrelEmcTowerId); // 1-oct-2001
-  if(StEmcDetector* detector=(StEmcDetector*)emctemp->detector(id)){
-    delete detector; 
-    detector=0;
-  }
-  if(mTheEmcReader->NTowerHits() == 0) return kStOK; // Create empty detector entity only
+  if(mTheEmcReader->NTowerHits() == 0) return kStOK;
 
   StEmcGeom *geo = StEmcGeom::getEmcGeom(1);  // Bemc geometry - 1-oct-2001  
+  StDetectorId id = static_cast<StDetectorId>(kBarrelEmcTowerId);
   StEmcDetector* detector = new StEmcDetector(id, geo->NModule());
 
-  static UInt_t ADC=0;;
-  static StEmcRawHit *hit=0;
+  static UInt_t ADC;
+  static StEmcRawHit *hit;
   for(UInt_t m=1;m<=120;m++){
     for(UInt_t e=1;e<=20;e++){
       for(UInt_t s=1;s<=2;s++){
@@ -159,8 +149,8 @@ StEmcTowerInput::fillEvent()
     }
   }
 
-  emctemp->setDetector(detector);
-  printf("StEmcTowerInput::fillEvent() %s #hits %5i \n", 
+  mEmcCollection->setDetector(detector);
+  printf("StEmcTowerInput::fillEmcHitsCollection() %s #hits %5i \n", 
   detname[0].Data(), detector->numberOfHits());
 
   return kStOK;

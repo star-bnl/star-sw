@@ -50,28 +50,28 @@ public:
     virtual       ~StEmcHandleDB();
 
     //Towers DB
-    virtual Int_t  GetTowerPeds(Int_t,Int_t,Int_t,Float_t&);  //mod,eta,phi
-    //    virtual Int_t  GetTowerPeds(Int_t,Float_t&);        //Towerno
-    virtual Int_t  GetTowerCalibs(Int_t,Int_t,Int_t,Float_t*);
-    //   virtual Int_t  GetTowerCalibs(Int_t,Float_t&);
-    virtual Int_t  GetTowerEquals(Int_t,Int_t,Int_t,Float_t&);
-    //    virtual Int_t  GetTowerEquals(Int_t,Float_t&);
+    virtual Int_t  getTowerPeds(Int_t,Int_t,Int_t,Float_t&);  //mod,eta,phi
+    //    virtual Int_t  getTowerPeds(Int_t,Float_t&);        //Towerno
+    virtual Int_t  getTowerCalibs(Int_t,Int_t,Int_t,Float_t*);
+    //   virtual Int_t  getTowerCalibs(Int_t,Float_t&);
+    virtual Int_t  getTowerEquals(Int_t,Int_t,Int_t,Float_t&);
+    //    virtual Int_t  getTowerEquals(Int_t,Float_t&);
 
     //SMDE DB
-    virtual Int_t  GetSmdEPeds(Int_t,Int_t,Float_t&);    //mod,eta
-    virtual Int_t  GetSmdECalibs(Int_t,Int_t,Float_t&);
-    virtual Int_t  GetSmdEEquals(Int_t,Int_t,Float_t&);
+    virtual Int_t  getSmdEPeds(Int_t,Int_t,Float_t&);    //mod,eta
+    virtual Int_t  getSmdECalibs(Int_t,Int_t,Float_t&);
+    virtual Int_t  getSmdEEquals(Int_t,Int_t,Float_t&);
 
     //SMDP DB
-    virtual Int_t  GetSmdPPeds(Int_t,Int_t,Int_t,Float_t&); //mod,eta,phi
-    virtual Int_t  GetSmdPCalibs(Int_t,Int_t,Int_t,Float_t&);
-    virtual Int_t  GetSmdPEquals(Int_t,Int_t,Int_t,Float_t&);
+    virtual Int_t  getSmdPPeds(Int_t,Int_t,Int_t,Float_t&); //mod,eta,phi
+    virtual Int_t  getSmdPCalibs(Int_t,Int_t,Int_t,Float_t&);
+    virtual Int_t  getSmdPEquals(Int_t,Int_t,Int_t,Float_t&);
 
-    Int_t ProcessDB();
-    Int_t Process_TowerPedDB();
-    Int_t Process_TowerCalibDB();
-    Int_t Process_SmdEDB();
-    Int_t Process_SmdPDB();
+    Int_t processDB();
+    Int_t processTowerPedDB();
+    Int_t processTowerCalibDB();
+    Int_t processSmdEDB();
+    Int_t processSmdPDB();
 
 protected:
     

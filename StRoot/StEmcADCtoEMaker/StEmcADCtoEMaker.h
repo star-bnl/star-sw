@@ -36,8 +36,8 @@ public:
     virtual       ~StEmcADCtoEMaker();
     virtual Int_t  Init();
     virtual Int_t  Make();
-    //    virtual void   PrintInfo();
     virtual Int_t  Finish();
+    virtual void   Clear(Option_t *option="");
 
     static controlADCtoE_st *getControlTable() 
     {return mControlMaker->GetTable();}
@@ -56,10 +56,10 @@ private:
     StDAQReader     *mTheDataReader; //!
     StEMCReader     *mTheEmcReader;  //!
     TDataSet        *mTheEmcData;    //!
-    StEvent         *mevent;         //!
+    StEvent         *mEvent;         //!
     StEmcCollection *mEmcCollection; //!
     TDataSet        *mCalibDb;       //!
-    int mDaq;  // looking for DAQ data or not?
+    Int_t mDaq;                      //! looking for DAQ data or not?
 
     // the following is a ROOT macro  that is needed in all ROOT code
     ClassDef(StEmcADCtoEMaker, 1)   
