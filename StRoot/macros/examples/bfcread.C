@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.19 1999/09/13 14:33:49 kathy Exp $
+// $Id: bfcread.C,v 1.20 2000/01/05 22:11:57 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.20  2000/01/05 22:11:57  kathy
+// changed input file to current one
+//
 // Revision 1.19  1999/09/13 14:33:49  kathy
 // update bfcread.C so that it now uses IOMaker instead of TreeMaker - tested it for .dst.root,.dst.xdf, .*.root files - works for all
 //
@@ -67,7 +70,7 @@ TBrowser *brow=0;
 void bfcread(
  Int_t nevents=1, 
  const char *MainFile=
- "/disk00000/star/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root")
+ "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

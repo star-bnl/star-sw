@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.15 1999/11/19 20:13:21 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.16 2000/01/05 22:12:03 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.16  2000/01/05 22:12:03  kathy
+// changed input file to current one
+//
 // Revision 1.15  1999/11/19 20:13:21  kathy
 // cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
 //
@@ -66,8 +69,8 @@ StChain *chain;
 void QA_bfcread_dst_tables(
  Int_t nevents=1, 
  const char *MainFile=
-  "/star/rcf/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
- const char *fname="qa_tables_tfs_lin_wed_y2a.out") {
+  "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
+ const char *fname="qa_tables_tfs_lin_wed_y1b.out") {
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
