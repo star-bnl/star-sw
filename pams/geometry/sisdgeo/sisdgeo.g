@@ -1,5 +1,12 @@
-* $Id: sisdgeo.g,v 1.1 2003/11/20 03:02:23 potekhin Exp $
+* $Id: sisdgeo.g,v 1.2 2004/01/29 19:57:37 potekhin Exp $
 * $Log: sisdgeo.g,v $
+* Revision 1.2  2004/01/29 19:57:37  potekhin
+* Positioned the laddre mother volume with the 'many'
+* option to guard ourselves against the quite possible
+* overlap.
+* Also, deleted the operator that would create the full
+* version every time
+*
 * Revision 1.1  2003/11/20 03:02:23  potekhin
 * The first functional version of the rewritten
 * Silicon Strip Geometry, separated from the
@@ -131,8 +138,7 @@ Module  SISDGEO  is the Silicon Strip Detector
 *************************************************************************************************
 
       USE SSDP
-*     USE SFPA version=SSDP_Config
-      USE SFPA version=3
+      USE SFPA version=SSDP_Config
 
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
@@ -163,7 +169,7 @@ Block SFMO is the mother of all Silicon Strip Detector volumes
            endif
            Position SFLM x= (SFPA_ladderRadius(ilad)*cos(ang) + (dthk*cos(ang+radtilt))/2.0),
                          y= (SFPA_ladderRadius(ilad)*sin(ang) + (dthk*sin(ang+radtilt))/2.0),
-                         z=0, AlphaZ=SFPA_ladderAngle(ilad)-90.0+SFPA_ladderTilt(ilad) Ncopy=nc
+                         z=0, AlphaZ=SFPA_ladderAngle(ilad)-90.0+SFPA_ladderTilt(ilad) Ncopy=nc Konly='MANY'
         endif
       EndDo
 Endblock 
