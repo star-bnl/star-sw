@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.20 1999/09/27 23:45:43 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.21 1999/09/29 00:31:51 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.21  1999/09/29 00:31:51  fine
+// RMath class has been repleaced with StCL one
+//
 // Revision 1.20  1999/09/27 23:45:43  fine
 // Several methods to calculate errors were introduced
 //
@@ -69,7 +72,7 @@
 #include <iostream.h>
 #include <iomanip.h>
 
-#include "RMath.h"
+#include "StCL.h"
 #include "St_NodePosition.h" 
 #include "St_Node.h" 
 
@@ -228,7 +231,7 @@ Text_t *St_NodePosition::GetObjectInfo(Int_t, Int_t)
 Double_t *St_NodePosition::Errmx2Master(const Double_t *localError, Double_t *masterError)
 {
   Double_t error[6];
-  RMath::vzero(&error[1],4);
+  StCL::vzero(&error[1],4);
   error[0] = localError[0]; error[2] = localError[1]; error[5] = localError[2];
   return Cormx2Master(error, masterError);
 } 
@@ -237,7 +240,7 @@ Double_t *St_NodePosition::Errmx2Master(const Double_t *localError, Double_t *ma
 Float_t *St_NodePosition::Errmx2Master(const Float_t *localError, Float_t *masterError)
 {
   Float_t error[6];
-  RMath::vzero(&error[1],4);
+  StCL::vzero(&error[1],4);
   error[0] = localError[0]; error[2] = localError[1]; error[5] = localError[2];
   return Cormx2Master(error, masterError);
 } 
@@ -249,9 +252,9 @@ Double_t *St_NodePosition::Cormx2Master(const Double_t *localCorr, Double_t *mas
   TRotMatrix *rm = GetMatrix();
   double *m = 0;
   if (rm && ( m = rm->GetMatrix()) ) 
-    res = RMath::trasat(m,(Double_t *)localCorr,masterCorr,3,3);
+    res = StCL::trasat(m,(Double_t *)localCorr,masterCorr,3,3);
   else
-    res = RMath::ucopy(localCorr,masterCorr,6);
+    res = StCL::ucopy(localCorr,masterCorr,6);
   return res;
 } 
  
@@ -263,12 +266,12 @@ Float_t *St_NodePosition::Cormx2Master(const Float_t *localCorr, Float_t *master
  Double_t *m = 0;
  if (rm && (m = rm->GetMatrix()) ) {
     double corLocal[6], corGlobal[6]; 
-    RMath::ucopy(localCorr,corLocal,6);
-    RMath::trasat(m,corLocal,corGlobal,3,3);
-    res =  RMath::ucopy(corGlobal,masterCorr,6);
+    StCL::ucopy(localCorr,corLocal,6);
+    StCL::trasat(m,corLocal,corGlobal,3,3);
+    res =  StCL::ucopy(corGlobal,masterCorr,6);
  }
  else
-    res =  RMath::ucopy(localCorr,masterCorr,6);
+    res =  StCL::ucopy(localCorr,masterCorr,6);
  return res;
 } 
 

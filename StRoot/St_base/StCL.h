@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.1 1999/09/28 19:45:10 fine Exp $
+// $Id: StCL.h,v 1.2 1999/09/29 00:31:51 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.2  1999/09/29 00:31:51  fine
+// RMath class has been repleaced with StCL one
+//
 // Revision 1.1  1999/09/28 19:45:10  fine
 // RMath class has been renamed to StCL - STAR CERN Library
 //
@@ -81,7 +84,7 @@ class StCL  {
     static void mxmltr(float *a, float *b, float *c, int ni, int nj);
     static void mxtrp(float *a, float *b, int i, int j);
 
-    static void mxmad_0_(int n, double *a, double *b, double *c, int i, int j, int k);
+    static double *mxmad_0_(int n, double *a, double *b, double *c, int i, int j, int k);
 
     static void mxmad (double *a, double *b, double *c, int i, int j, int k);
     static void mxmad1(double *a, double *b, double *c, int i, int j, int k);
