@@ -28,10 +28,14 @@ class StBemcData: public TDataSet
 					// global event data
 					Int_t   RunNumber;
 					Int_t   TriggerWord;
+					Int_t   TriggerCmd;
+					Int_t   PhysWord;
 					Int_t   EventDate;
 					Int_t   EventTime;
 					Int_t   NGlobalTracks;
           Float_t Vertex[3];
+					Long_t  ZDCSum;
+					Long_t  CTBSum;
 	
 					// tower data -----------------------------------------------------
 					Bool_t  TowerPresent;                 ///< Check to see if there is tower information in the event
