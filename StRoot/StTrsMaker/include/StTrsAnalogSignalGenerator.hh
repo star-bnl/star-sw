@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.3 1999/01/18 21:00:52 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.4 1999/02/28 20:13:40 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
- * Revision 1.3  1999/01/18 21:00:52  lasiuk
- * add fractionSampled(); reorder initialization
+ * Revision 1.4  1999/02/28 20:13:40  lasiuk
+ * noise additions
  *
  * Revision 1.3  1999/01/18 21:00:52  lasiuk
  * add fractionSampled(); reorder initialization
@@ -46,6 +46,8 @@
 #include <utility>
 #include <vector>
 
+#include "Randomize.h"
+
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"
 #include "StTpcSlowControl.hh"
@@ -72,8 +74,14 @@ public:
     void           setSignalThreshold(double);
     void           setSuppressEmptyTimeBins(bool);
 
+    // noise generation
+    void           addNoise(bool);
+    void           setNoiseRMS(double);
+    void           generateNoiseUnderSignalOnly(bool);
+    
 protected:
     void           fractionSampled();
+    double         generateNoise()    const;
     
 protected:
     StTpcGeometry*       mGeomDb;
@@ -105,9 +113,21 @@ protected:
     double mSamplingFrequency;
     double mGain;
     double mFractionSampled;
+
+    // Noise Generation
+    bool   mAddNoise;
+    bool   mAddNoiseUnderSignalOnly;
+    double mNoiseRMS;
+    
+    static HepJamesRandom mEngine;
+    static RandGauss      mGaussDistribution;
 };
 void inline StTrsAnalogSignalGenerator::setDeltaRow(int dr) { mDeltaRow = (dr >=0) ? dr : 0;}
 void inline StTrsAnalogSignalGenerator::setDeltaPad(int dp) { mDeltaPad = (dp >=0) ? dp : 0;}
 void inline StTrsAnalogSignalGenerator::setSignalThreshold(double th) { mSignalThreshold = th;}
 void inline StTrsAnalogSignalGenerator::setSuppressEmptyTimeBins(bool su) {mSuppressEmptyTimeBins = su;}
+void inline StTrsAnalogSignalGenerator::addNoise(bool v) {mAddNoise = v;}
+void inline StTrsAnalogSignalGenerator::setNoiseRMS(double v) {mNoiseRMS = v*mGain;}
+void inline StTrsAnalogSignalGenerator::generateNoiseUnderSignalOnly(bool v) {mAddNoiseUnderSignalOnly = v;}
+double inline StTrsAnalogSignalGenerator::generateNoise() const {return fabs(mGaussDistribution.shoot(0.,mNoiseRMS));}
 #endif
