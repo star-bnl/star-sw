@@ -20,7 +20,7 @@
 # set list = `ls *evts`
 # if (-z "$list") exit 0
 #
- foreach tag (NoSpace ErrLoadLib CantRead CantOpen NoSpaceOnDev staging-failed staging-problem SegViolation BreakBusErr SimulBreak done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem)
+ foreach tag (NoSpace ErrLoadLib CantRead CantOpen NoSpaceOnDev staging-failed staging-problem HPSS-staging-problem SegViolation BreakBusErr SimulBreak done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem)
     switch ($tag)
     case "NoSpace":
 #=============================
@@ -77,6 +77,15 @@
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
     end
+    breaksw
+    case "HPSS-staging-problem":
+#===========================
+    set list = `grep -l 'HPSS\ Staging\ problem' *evts`
+    foreach file ($list)
+    set ltime = `mod_time $file`
+     if( $ltime > 3600)  mv $file ${file}_${tag}
+    end
+    breaksw
     case "SegViolation":
 #===========================
     set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *evts`
