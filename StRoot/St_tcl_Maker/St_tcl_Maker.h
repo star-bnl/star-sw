@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.9 1999/03/13 23:34:03 perev Exp $
+// $Id: St_tcl_Maker.h,v 1.10 1999/03/16 00:20:43 sakrejda Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.10  1999/03/16 00:20:43  sakrejda
+// switch for the cluster morphology stuff added
+//
 // Revision 1.9  1999/03/13 23:34:03  perev
 // New makers
 //
@@ -68,7 +71,8 @@ class TH1F;
 class St_tcl_Maker : public StMaker {
 
 private:
-  Bool_t                m_tclEvalOn;
+  Bool_t                m_tclEvalOn;            // switch for the cluster finder eveluation
+  Bool_t                m_tclMorphOn;           // switch for the cluster morphology study
   St_tpg_detector       *m_tpg_detector;  	//! TPC geometry parameters 
   St_tpg_pad            *m_tpg_pad;       	//! characteristics unique to a given pad
 	                                  	// (not used)
@@ -159,6 +163,9 @@ protected:
    virtual void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
    virtual void   tclEvalOn() {tclEval(kTRUE);}                       // *MENU*
    virtual void   tclEvalOff(){tclEval();} 
+   virtual void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
+   virtual void   tclMorphOn() {tclMorph(kTRUE);}                       // *MENU*
+   virtual void   tclMorphOff(){tclMorph();} 
 
    virtual Int_t  Init();
    virtual Int_t  Make();
