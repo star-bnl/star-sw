@@ -67,6 +67,7 @@ my $LIBS  = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/StRoot//g;
 my $CPPP =  $INCLUDE . "/" . $pkg 
+  .  ":" . $Dir  
   .  ":" . $Dir . "/CorrFctn" 
   .  ":" . $Dir . "/Cut" 
   .  ":" . $Dir . "/Infrastructure"
@@ -98,7 +99,7 @@ if ($#h_files > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
   Command $env2 [@CintFiles], @h_files,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-  my $linkdef = pop @CintFiles; print "ObjDir and Cints: $ObjDir => @CintFiles\n";
+  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
   push @src, $cint;# print "+==========add $cint\n"; 
