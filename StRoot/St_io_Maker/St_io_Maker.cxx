@@ -434,13 +434,6 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
    return m_Tree;
 }
 //_____________________________________________________________________________
-void St_io_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.19 1999/05/06 21:37:41 perev Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 //_____________________________________________________________________________
 Int_t St_io_Maker::SetActive()

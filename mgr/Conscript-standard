@@ -1,0 +1,59 @@
+#!/opt/star/bin/perl
+#use Env;
+Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
+(my $build = $OBJ) =~ s/\#//g; # print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
+my $ObjDir = DirPath '.';
+(my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
+my $CPPPATH = "$Dir:$ObjDir:$env->{CPPPATH}"; #print "CPPPATH = $CPPPATH\n";
+my $CPPFLAGS = cppflags($env); #print "CPPFLAGS = $CPPFLAGS\n";
+my $PKG  = basename($Dir); 
+if ($Dir =~ /^pams/) {$PKG = "St_" . $PKG;}
+print "Run Conscript-standard in $Dir for $PKG\n";
+my $SO_PKG = $PKG . ".so";
+my @CintFiles = ($PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h"); 
+my @src  = find_sources($Dir);  #my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+my @Defs = find_hfiles($Dir);   #$i = 0; for my $s (@Defs) {print "i=",$i++," Defs = ",$s,"\n";}
+my @idlM = find_idlM($Dir);     #$i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
+my $CPPPATH = cpppath($env);    # print "CPPPATH = $CPPPATH";
+my $DIR = $OBJ . "/" . $Dir . "/";
+(my $dir = $DIR) =~ s/\#//g;
+my $line;
+
+if ($#idlM > -1) {
+  for $idl (@idlM) {
+    my $stem = basename($idl,".idl");# print "stem = $stem\n";
+    my $idm  = $stem . ".idl";
+    my $idM = $Dir . "/" . $idl; 
+    my @idlS = ($idl);
+    open (IN, "<$idM") or die  "Can't open $idM";
+    while ($line = <IN>) {
+      if ($line !~ "include") {next;}
+      if ($line =~ "PAM")     {next;}
+      my @words = split '"', $line; my $idt = $EXPORT . "/tables/" . $words[1]; #print "idt = $idt\n";
+      push @idlS, $idt; 
+    }
+    close (IN);
+    my @Deps = ();
+    push @Deps,$DIR . $stem . ".h";
+    push @Deps,$DIR . $stem . ".inc";
+    push @Deps,$DIR . "St_" . $stem . "_Module.h";
+    push @Deps,$DIR . "St_" . $stem . "_Module.cxx";#    print "@Deps\n";
+    Command $env [@Deps], @idlS, 
+    qq(
+       cd $dir; stic -r $CPPPATH -q $idl;
+      );  
+    my @incs = ($Deps[0],$Deps[1]); 
+    Install $env $INCLUDE, @incs; # print "Install incs = @incs in $INCLUDE\n";
+    (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; ; #print "new share $share\n";
+    $share =~ s/\/(sim|gen)//g; 
+    Install $env $share, $Deps[2];
+    push @src, $Deps[3]; #print "src: @src\n";
+    push @Defs, $Deps[2];
+  }
+}
+if ($#Defs > -1) {
+  Command $env [@CintFiles], @Defs,  qq( RootCint.pl "%>" "%<" "$CPPFLAGS" );
+  push @src, $CintFiles[0]; #print "+==========add $CintFiles[0]\n"; 
+}
+LinkedModule $env $SO_PKG, @src;
+Install $env $LIB, $SO_PKG;
