@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.44 2000/06/13 00:32:38 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.45 2000/06/23 15:44:24 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.45  2000/06/23 15:44:24  lansdell
+// restore PID method to using global tracks & retitle PID histogram
+//
 // Revision 1.44  2000/06/13 00:32:38  lansdell
 // added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
 //
@@ -1422,10 +1425,10 @@ void StQABookHist::BookHistGen(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistPID(){
   
-  // for MakeHistPID - from tables primtrk & dst_dedx 
+  // for MakeHistPID - from tables globtrk & dst_dedx 
   // Spectra/pid histograms. C.Ogilvie
   
-  m_p_dedx_rec = QAH2F("QaPidPrimtrkDstdedxPVsDedx","PID: primtrk-dst_dedx,  p vs dedx (reconstructed)",
+  m_p_dedx_rec = QAH2F("QaPidGlobtrkDstdedxPVsDedx","PID: globtrk-dst_dedx,  p vs dedx (reconstructed)",
 			  cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
   m_p_dedx_rec->SetYTitle("dedx");
   m_p_dedx_rec->SetXTitle("p (GeV)");
