@@ -1,41 +1,35 @@
 ******************************************************************
 
-MACRO run_svm i=1 
-macro/global/import *
+MACRO run_svm 
+  
+  macro/global/import *
 
-i = [1]
+    
+   message 'Calling SVM...'
 
+  ami/mod/call svm_am _
+   [data]/svt/tracks/stk_track _
+   [data]/tpc/tracks/tptrack _
+   [params]/global/svm_ctrl _
+   [data]/global/tracks/evt_match
 
-
-* initializations
-message 'Calling SVM...'
-
-ami/mod/call svm_am _
- [data]/svt/tracks/stk_track _
- [data]/tpc/tracks/tptrack _
-	[params]/global/svm_ctrl _
- [data]/global/tracks/evt_match
-
-if (staf_status(1) .ne. stafcv_ok) then
+  
+  if (staf_status(1) .ne. stafcv_ok) then
 	message 'Problem on return from SVM'
-endif
-
+  endif
 
 return
+ 
 ****************************************************************
-MACRO eval 
-macro/global/import *
-
-i=[1]
-
-
-if ( [i]=1) then
-  exec init_svm_svt_eval.kumac
-endif
+ 
+ MACRO eval 
+   
+   macro/global/import *
 
 message 'Calling SVM_EVAL2..'
 
-ami/mod/call svm_eval2 [geant]/Run/g2t_gepart _
+ ami/mod/call svm_eval2 _
+                   [geant_Run]/g2t_gepart _
 		   [data]/svt/hits/scs_spt _
 		   [data]/svt/tracks/groups _
 		   [data]/svt/tracks/stk_track _
@@ -59,7 +53,7 @@ ami/mod/call svm_svt_eval _
  [data]/tpc/tracks/tptrack _
  [data]/tpc/tracks/tpt_eval _
  [data]/global/tracks/evt_match _
-	[params]/global/svm_eval_par _
+ [params]/global/svm_eval_par _
  [data]/global/tracks/svm_eval_strk
 
 if (staf_status(1) .ne. stafcv_ok) then
@@ -67,3 +61,5 @@ if (staf_status(1) .ne. stafcv_ok) then
 endif
 
 return 
+ 
+****************************************************************
