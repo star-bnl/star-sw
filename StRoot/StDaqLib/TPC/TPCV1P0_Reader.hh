@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_Reader.hh,v 1.3 1999/07/04 01:43:25 levine Exp $
+ * $Id: TPCV1P0_Reader.hh,v 1.4 1999/07/10 21:31:25 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common definitions for TPC
@@ -9,6 +9,11 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0_Reader.hh,v $
+ * Revision 1.4  1999/07/10 21:31:25  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.3  1999/07/04 01:43:25  levine
  * minor changes to make solaris CC compiler happy
  *
@@ -75,7 +80,7 @@ public:
   BadChannelReader *getBadChannelReader(int sector);
   ConfigReader *getConfigReader(int sector);
 
-  TPCV1P0_Reader(EventReader *er);
+  TPCV1P0_Reader(EventReader *er, classname(Bank_TPCP) *ptpc);
   ~TPCV1P0_Reader(); 
 
   int MemUsed();

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.6 1999/07/04 01:47:58 levine Exp $
+ * $Id: EventReader.cxx,v 1.7 1999/07/10 21:31:17 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -15,6 +15,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.7  1999/07/10 21:31:17  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.6  1999/07/04 01:47:58  levine
  * minor changes to make solaris CC compiler happy
  *
@@ -367,3 +372,40 @@ void EventReader::setVerbose(int v)
   verbose = v;
 }
 
+char * EventReader::findBank(char *bankid)
+{
+  // Fix up DATAP
+  Bank_DATAP *pBankDATAP = (Bank_DATAP *)this->getDATAP();
+
+  if (!pBankDATAP->test_CRC()) {
+    printf("CRC error in DATAP: %s %d\n",__FILE__,__LINE__) ;
+    return FALSE;
+  }
+  if (pBankDATAP->swap() < 0){
+    printf("swap error in DATAP: %s %d\n",__FILE__,__LINE__) ;
+    return FALSE;
+  }
+  pBankDATAP->header.CRC = 0;
+  
+    // position independent pointers to lower banks, variable DATAP length
+  int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
+  len -= ((INT32 *)&pBankDATAP->TPC -  (INT32 *)&pBankDATAP->EventLength)/4;
+  len /= sizeof(Pointer)/4;
+  Bank_Header *pBank;
+  Pointer *ptr = &pBankDATAP->TPC;
+  int i;
+  for (i=0; i<len; i++, ptr++) {
+    if (ptr->length==0) continue;//invalid entry
+    if (ptr->length== 0xfeedf00d) continue; // EVB fills DATAP with this
+    pBank = (Bank_Header *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
+    if(!strncmp(bankid,pBank->BankType,4)) break;
+  }
+  if (i==len)  return FALSE;
+  if(strncmp(pBank->BankType,bankid,4)) {
+    printf("detector %s not found in DATAP\n",bankid);
+    return FALSE;
+  }
+
+  return (char *)pBank;
+  
+}

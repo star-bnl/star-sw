@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.4 1999/07/03 04:25:48 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.5 1999/07/10 21:31:25 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -11,9 +11,16 @@
  * 23-Jun-99 MJL most output now supressed with EventReader.verbose
  * 23-Jun-99 MJL can now navigate DATAP even though offset/len to various
  *   lower banks are at arbitrary positions
+ * 09-Jul-99 MJL removed navigation code from TPC_Reader. Introduced
+ *               Bank_TPCP argument to TPCV2P0_Reader constructor
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.5  1999/07/10 21:31:25  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.4  1999/07/03 04:25:48  levine
  * changes to get past Linux cyyyYompiler
  *
@@ -216,45 +223,16 @@ TPCV2P0_PADK_SR *TPCV2P0_Reader::getPADKReader(int sector)
   return p;
 }
 
-TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er)
+TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er, classname(Bank_TPCP) *ptpc)
 {
+  pBankTPCP = ptpc; // copy pointer into class variable
   ercpy = er; // squirrel away pointer eventreader for our friends
-  //  cout << "TPCV2P0 constructor" << endl;
-
-  // Fix up DATAP
-  pBankDATAP = (Bank_DATAP *)er->getDATAP();
-  //  printf("pBankDATAP.head: %s\n",pBankDATAP->header.BankType);
-
-  if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
-  if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
-  pBankDATAP->header.CRC = 0;
-#define DYNAMIC
-#ifdef DYNAMIC // position independent pointers to lower banks, variable DATAP length
-  int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-  Pointer *ptr = &pBankDATAP->TPC;
-  int i;
- for (i=0; i<len; i++, ptr++) {
-   if (ptr->length==0) continue;//invalid entry
-   pBankTPCP = (classname(Bank_TPCP) *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
-   if(!strncmp(pBankTPCP->header.BankType,"TPCP",4)) break;
-  }
-  if(strncmp(pBankTPCP->header.BankType,"TPCP",4)) {
-    printf("detector TPC not found in DATAP\n");
-    exit(0);
-  }
-#else // fixed position pointers, fixed DATAP length
-  // Fix up TPCP
-  pBankTPCP = (classname(Bank_TPCP) *)
-              (((INT32 *)pBankDATAP) + pBankDATAP->TPC.offset);
-  //  printf("Offset = %d\n",pBankDATAP->TPC.offset);
-  //  printf("pBankTPCP.head: %s\n",pBankTPCP->header.BankType);
-#endif
 
   if (!pBankTPCP->test_CRC()) ERROR(ERR_CRC);
   if (pBankTPCP->swap() < 0) ERROR(ERR_SWAP);
   pBankTPCP->header.CRC = 0;
   // We can have a padk for each of 24 sectors
-  for(i=0;i<TPC_SECTORS;i++)
+  for(int i=0;i<TPC_SECTORS;i++)
   {
     padk[i] = NULL;
   }

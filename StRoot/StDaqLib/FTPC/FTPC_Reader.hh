@@ -20,7 +20,7 @@
 // Detector Reader Virtual Class
 
 
-struct  Bank_FTPCP: public Bank
+struct  Bank_FTPP: public Bank
 {
   Pointer dummy[6];   //**** PLACE HOLDER for real bank definition ******
   // look at TPC/TPCV2P0.cxx, TPCV2P0.hh for further details
@@ -39,32 +39,12 @@ public:
   GainReader *getGainReader(int sector){cout<<sector<<endl; return FALSE;};
   CPPReader *getCPPReader(int sector){cout<<sector<<endl; return FALSE;};
   BadChannelReader *getBadChannelReader(int sector){cout<<sector<<endl; return FALSE;};
-  FTPC_Reader(EventReader *er){
-    cout <<"DUMMY implementation"<<endl;
+  FTPC_Reader(EventReader *er, Bank_FTPP *pftp){
+    pBankFTPP = pftp ; // copy arg into class variable
     ercpy = er; // squirrel away pointer eventreader for our friends
-  // Fix up DATAP
-    pBankDATAP = (Bank_DATAP *)er->getDATAP();
-
-    if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
-    if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
-    pBankDATAP->header.CRC = 0;
-
-    // position independent pointers to lower banks, variable DATAP length
-    int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-    Pointer *ptr = &pBankDATAP->FTPC;
-    for (int i=0; i<len; i++, ptr++) {
-      if (ptr->length==0) continue;//invalid entry
-      pBankFTPCP = (Bank_FTPCP *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
-      if(!strncmp(pBankFTPCP->header.BankType,"FTPCP",4)) break;
-    }
-    if(strncmp(pBankFTPCP->header.BankType,"FTPCP",4)) {
-      printf("detector FTPC not found in DATAP\n");
-      exit(0);
-    }
-
-    if (!pBankFTPCP->test_CRC()) ERROR(ERR_CRC);
-    if (pBankFTPCP->swap() < 0) ERROR(ERR_SWAP);
-    pBankFTPCP->header.CRC = 0;
+    if (!pBankFTPP->test_CRC()) ERROR(ERR_CRC);
+    if (pBankFTPP->swap() < 0) ERROR(ERR_SWAP);
+    pBankFTPP->header.CRC = 0;
   };
 
   ~FTPC_Reader(){}; 
@@ -79,7 +59,7 @@ protected:
 
   // Bank Pointers
   Bank_DATAP *pBankDATAP;
-  Bank_FTPCP *pBankFTPCP;
+  Bank_FTPP *pBankFTPP;
 
 
   // Useful functions
