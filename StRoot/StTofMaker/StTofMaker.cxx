@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.1 2001/04/24 20:27:08 wzhang Exp $
+ * $Id: StTofMaker.cxx,v 1.2 2001/04/26 18:39:54 wzhang Exp $
  *
  * Author: Wei-Ming Zhang, April 2001
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.2  2001/04/26 18:39:54  wzhang
+ * Changed MCInfo() to mcInfo()
+ *
  * Revision 1.1  2001/04/24 20:27:08  wzhang
  * First release
  *
@@ -233,7 +236,7 @@ Int_t StTofMaker::Make(){
                unsigned short fastTdc;
                int nFired=0, accumNPhe=0;
                float accumDe=0.0, accumDs=0.0, fastTof=0.0;
-               fastTof = slatTempIter->MCInfo().mTof;
+               fastTof = slatTempIter->mcInfo().mTof;
                fastTdc = slatTempIter->tdc();
 
                slatTempIter=slatTempVec.begin();
@@ -242,10 +245,10 @@ Int_t StTofMaker::Make(){
                while(slatErasedIter!= slatErasedVec.end()) {
                   if(slatTempIter->slatIndex() == slatErasedIter->slatIndex()) {
                      nFired++;
-                     accumDe = accumDe + slatErasedIter->MCInfo().mDe;
-                     accumDs = accumDs + slatErasedIter->MCInfo().mDs;
-                     accumNPhe = accumNPhe + slatErasedIter->MCInfo().mNPhe;
-                     fastTof = min(fastTof, slatErasedIter->MCInfo().mTof);
+                     accumDe = accumDe + slatErasedIter->mcInfo().mDe;
+                     accumDs = accumDs + slatErasedIter->mcInfo().mDs;
+                     accumNPhe = accumNPhe + slatErasedIter->mcInfo().mNPhe;
+                     fastTof = min(fastTof, slatErasedIter->mcInfo().mTof);
                      fastTdc = min(fastTdc, slatErasedIter->tdc());
 
                      slatErasedVec.erase(slatErasedIter);
@@ -461,9 +464,9 @@ Int_t StTofMaker::Make(){
                StTofMCHit *MCHitPtr = new StTofMCHit(); 
 
                MCHitPtr->setSlatIndex(MCSlatPtr->slatIndex());
-               MCHitPtr->setTrkId(MCSlatPtr->MCInfo().mTrkId);
-               MCHitPtr->setGId(MCSlatPtr->MCInfo().mGId);
-               MCHitPtr->setFlightTime(MCSlatPtr->MCInfo().mTime);
+               MCHitPtr->setTrkId(MCSlatPtr->mcInfo().mTrkId);
+               MCHitPtr->setGId(MCSlatPtr->mcInfo().mGId);
+               MCHitPtr->setFlightTime(MCSlatPtr->mcInfo().mTime);
                MCHitPtr->setPosition(newSlatHitVec[ii].hitPosition);
                MCHitPtr->setHardwarePosition(kTofId);
 // setNumberOfMips is out temporarily for now (numberOfMips shows slatIndex!) 
