@@ -44,6 +44,9 @@ class StVertexMaker : public StMaker {
   int ppLMVparI[10];
    
   TH1F *hPiFi[32];
+
+  unsigned int mCTBMode; // 0 == DAQ, 1 == MC, 2 == Embedding
+
  protected:
   virtual Int_t FixVertexFileRead(char* fname, Bool_t idMatch);
   TH1F *hctb[16];
@@ -76,11 +79,15 @@ class StVertexMaker : public StMaker {
     beam4ppLMV.y0=y;    beam4ppLMV.ny=uy;
   } 
 
+    void SetCTBMode(unsigned int mode){ mCTBMode = mode;};
+    unsigned int GetCTBMode(){ return mCTBMode;};
+    
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.1 2002/02/18 21:52:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.2 2002/12/04 15:43:06 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StVertexMaker, 0)   //StAF chain virtual base class for Makers
-    };
+    
+};
     
 inline Int_t StVertexMaker::FixVertexFileEmbed(char* fname)
   { embedVerts=kTRUE; return FixVertexFileRead(fname, kTRUE); }
@@ -90,8 +97,11 @@ inline Int_t StVertexMaker::FixVertexFileMatch(char* fname)
   { embedVerts=kFALSE; return FixVertexFileRead(fname, kTRUE ); }
 #endif
 
-// $Id: StVertexMaker.h,v 1.1 2002/02/18 21:52:59 genevb Exp $
+// $Id: StVertexMaker.h,v 1.2 2002/12/04 15:43:06 jeromel Exp $
 // $Log: StVertexMaker.h,v $
+// Revision 1.2  2002/12/04 15:43:06  jeromel
+// Changes by J.Gans. Approved by Gene
+//
 // Revision 1.1  2002/02/18 21:52:59  genevb
 // Introduction of StVertexMaker for finding primary vertices
 //
