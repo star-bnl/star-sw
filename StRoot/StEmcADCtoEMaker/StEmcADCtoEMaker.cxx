@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.30 2002/05/15 15:05:28 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.31 2002/05/22 22:04:23 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.31  2002/05/22 22:04:23  suaide
+// small bug fixed to reconstruct micro DST's
+//
 // Revision 1.30  2002/05/15 15:05:28  suaide
 // bugs fixed to recalibrate EMC after production
 //
@@ -174,6 +177,7 @@ void StEmcADCtoEMaker::zeroAll()
     }
   }
   for(Int_t i=0;i<8;i++) mSmdTimeBin[i]=0;
+	clearStEventStaf();
 } 
 //_____________________________________________________________________________
 /*!

@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.18 2002/05/15 15:05:28 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.19 2002/05/22 22:04:24 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.19  2002/05/22 22:04:24  suaide
+// small bug fixed to reconstruct micro DST's
+//
 // Revision 1.18  2002/05/15 15:05:28  suaide
 // bugs fixed to recalibrate EMC after production
 //
@@ -138,7 +141,7 @@ class StEmcADCtoEMaker : public StMaker
    
            controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
            StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
-           void              clearStEventStaf() {mEmc = 0;} ///< Clear emcCollection (does not delete from memory)
+           void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
 
    ClassDef(StEmcADCtoEMaker, 1)  
 };
