@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.6 2000/04/10 19:59:33 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.7 2000/04/12 19:44:03 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
- * Revision 2.6  2000/04/10 19:59:33  genevb
- * StRoot/StEvent/doc/tex/
+ * Revision 2.7  2000/04/12 19:44:03  genevb
+ * Reimplement mMap data members as individual unsigned ints
+ *
+ * Revision 2.7  2000/04/12 19:44:03  genevb
+ * Reimplement mMap data members as individual unsigned ints
  *
  * Revision 2.6  2000/04/10 19:59:33  genevb
  * StRoot/StEvent/doc/tex/
@@ -31,25 +34,25 @@
  * Revision 2.1  1999/10/13 19:45:46  ullrich
  * Initial Revision
  *
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.6 2000/04/10 19:59:33 genevb Exp $";
+ **************************************************************************/
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.6 2000/04/10 19:59:33 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.7 2000/04/12 19:44:03 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
-    mMap[0] = mMap[1] = 0;
+
 StTrackTopologyMap::StTrackTopologyMap()
 {
     mMap0 = mMap1 = 0;
 }
-    mMap[0] = (Int_t) m1;
-    mMap[1] = (Int_t) m2;
+
+StTrackTopologyMap::StTrackTopologyMap(ULong_t m1, ULong_t m2)
 {
     mMap0 = (Int_t) m1;
     mMap1 = (Int_t) m2;
 }
-    mMap[0] = (Int_t) m[0];
-    mMap[1] = (Int_t) m[1];
+
+StTrackTopologyMap::StTrackTopologyMap(const ULong_t* m)
 {
     mMap0 = (Int_t) m[0];
     mMap1 = (Int_t) m[1];
@@ -57,7 +60,7 @@ StTrackTopologyMap::StTrackTopologyMap()
 
 StTrackTopologyMap::~StTrackTopologyMap() { /* noop */ }
 
-    return i>31 ? (mMap[1]>>(i-32) & 1U) : (mMap[0]>>i & 1U);
+Bool_t
 StTrackTopologyMap::bit(Int_t i) const
 {
     return i>31 ? (mMap1>>(i-32) & 1U) : (mMap0>>i & 1U);
@@ -70,7 +73,7 @@ StTrackTopologyMap::ftpcFormat() const
 }
 
 
-    return i<2 ? (ULong_t) mMap[i] : 0;
+ULong_t
 StTrackTopologyMap::data(UInt_t i) const
 {
     return (ULong_t) (i<2 ? (i<1 ? mMap0 : mMap1) : 0);

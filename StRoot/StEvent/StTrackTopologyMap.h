@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.3 2000/04/10 19:59:33 genevb Exp $
+ * $Id: StTrackTopologyMap.h,v 2.4 2000/04/12 19:44:03 genevb Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
- * Revision 2.3  2000/04/10 19:59:33  genevb
- * StRoot/StEvent/doc/tex/
+ * Revision 2.4  2000/04/12 19:44:03  genevb
+ * Reimplement mMap data members as individual unsigned ints
+ *
+ * Revision 2.4  2000/04/12 19:44:03  genevb
+ * Reimplement mMap data members as individual unsigned ints
  *
  * Revision 2.3  2000/04/10 19:59:33  genevb
  * StRoot/StEvent/doc/tex/
@@ -50,7 +53,8 @@ protected:
     Bool_t ftpcFormat() const;
     
 private:
-    UInt_t mMap[2];
+    // Used to store as unsigned longs, but this caused problems with
+    // storing StTrackTopologyMap in TTrees (not supported by TBranch).
     // ULong_t mMap[2];
     UInt_t mMap0;
     UInt_t mMap1;
