@@ -58,6 +58,7 @@
 #include "StiEvaluator/StiEventAssociator.h"
 
 // StiMaker
+#include "StiStEventFiller.h"
 #include "StiMaker.h"
 
 StiMaker* StiMaker::sinstance = 0;
@@ -86,6 +87,8 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mtracker(0),
 					 //Filter
 					 mFilter(0),
+					 //Filler
+					 mStEventFiller(0),
 					 //flags
 					 mBuilt(false),
 					 //Members
@@ -157,6 +160,9 @@ StiMaker::~StiMaker()
 
     delete mtracker;
     mtracker = 0;
+
+    delete mStEventFiller;
+    mStEventFiller = 0;
     
     StiGeometryTransform::kill();
 
@@ -312,20 +318,20 @@ Int_t StiMaker::InitRun(int run)
 	}
     
 	else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kComposite) {
-	//Make a kalman track factory
-	if (StiIOBroker::instance()->useGui()==true) {
-	    mtrackfactory = new StiRDKalmanTrackFactory("StiRDKalmanTrackFactory",50);
-	}
-	else {
-	    mtrackfactory = new StiKalmanTrackFactory("StiKalmanTrackFactory");
-	}
-	mtrackfactory->setIncrementalSize(1000);
-	mtrackfactory->setMaxIncrementCount(200);
+	    //Make a kalman track factory
+	    if (StiIOBroker::instance()->useGui()==true) {
+		mtrackfactory = new StiRDKalmanTrackFactory("StiRDKalmanTrackFactory",50);
+	    }
+	    else {
+		mtrackfactory = new StiKalmanTrackFactory("StiKalmanTrackFactory");
+	    }
+	    mtrackfactory->setIncrementalSize(1000);
+	    mtrackfactory->setMaxIncrementCount(200);
 	
-	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
-	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory, mhitstore);
-	mSeedFinder=temp;
-    }
+	    cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
+	    StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory, mhitstore);
+	    mSeedFinder=temp;
+	}
 	else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
 	    cout <<"StiMaker::init(). ERROR:\t SeedFinderType==StiIOBroker::kUndefined"<<endl;
 	}
@@ -337,6 +343,9 @@ Int_t StiMaker::InitRun(int run)
 	mFilter = new StiDynamicTrackFilter(StiIOBroker::instance());
 	cout <<"\n--- HitFilter ---\n"<<endl;
 	mFilter->print();
+
+	//StiStEventFiller
+	mStEventFiller = new StiStEventFiller();
 	
 	//The Tracker
 	mtracker = new StiKalmanTrackFinder();
@@ -366,11 +375,12 @@ Int_t StiMaker::InitRun(int run)
 Int_t StiMaker::Make()
 {
     cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
-    cout <<"\n--- HitFilter ---\n";
-    mFilter->print();
+    //cout <<"\n--- HitFilter ---\n";
+    //mFilter->print();
     
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
+    
     if (StiIOBroker::instance()->simulated() && !mMcEventMaker) {
 	cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
 	return 0;
@@ -457,6 +467,15 @@ void StiMaker::finishEvent()
 	//mTrackMerger->mergeTracks();
 	//clock.stop();
 	//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+
+	//Write into StEvent
+	cout <<"Fill StEvent:\t"<<endl;
+	clock.reset();
+	clock.start();
+	mevent = mStEventFiller->fillEvent(mevent, mtrackstore);
+	clock.stop();
+	cout <<"Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+	
 	if (StiIOBroker::instance()->simulated()==true) {
 	    cout <<"Associate for event\t";
 	    StiEventAssociator::instance()->associate(mMcEvent);
