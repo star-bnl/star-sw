@@ -114,8 +114,7 @@ If LL>1
 *
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
-   If (LL>1) call AgDETP new ('Trac')
-   call AgDETP add ('TracDCAY',dcay,4)
+   If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 *
    if (rich) ItCKOV = 1
    if (cave) Call cavegeo
