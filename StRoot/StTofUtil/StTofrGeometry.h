@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.4 2004/05/03 22:58:26 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.5 2004/05/03 23:07:49 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,8 +10,12 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
- * Revision 1.4  2004/05/03 22:58:26  dongx
- * using a switch to set the ouput message
+ * Revision 1.5  2004/05/03 23:07:49  dongx
+ * -Introduce data members to save the Tray and Sensor geometries in the initialization.
+ * -Optimize the HelixCrossCellIds() function to save CPU time
+ * -Introduce a new function projTrayVector()
+ * -Update the ClassDef number 1->2
+ *
  *
  * Revision 1.3  2004/03/09 16:45:16  dongx
  * Remove InitDaqMap() since a StTofrDaqMap is introduced
