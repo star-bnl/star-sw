@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.hh,v 1.1 2003/11/13 14:12:17 jcs Exp $
+//   $Id: StFtpcGasUtilities.hh,v 1.2 2004/07/18 14:12:45 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -9,6 +9,10 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.hh,v $
+//   Revision 1.2  2004/07/18 14:12:45  jcs
+//   use adjustAverageWest/East from database
+//   always output temperature calculation information since this is a critical value for the FTPC
+//
 //   Revision 1.1  2003/11/13 14:12:17  jcs
 //   move pressure and gas corrections from StFtpcClusterMaker.cxx to StFtpcGasUtilities
 //
@@ -35,8 +39,8 @@ class StFtpcGasUtilities
    ~StFtpcGasUtilities();
 
    Int_t barometricPressure();      //!
-   Int_t averageTemperatureWest(Int_t dbDate);  //!
-   Int_t averageTemperatureEast(Int_t dbDate);  //!
+   Int_t averageTemperatureWest(Int_t dbDate,Int_t runNumber);  //!
+   Int_t averageTemperatureEast(Int_t dbDate,Int_t runNumber);  //!
    Int_t defaultTemperatureWest(Int_t dbDate,Bool_t SVT_On); //!
    Int_t defaultTemperatureEast(Int_t dbDate,Bool_t SVT_On); //!
 
