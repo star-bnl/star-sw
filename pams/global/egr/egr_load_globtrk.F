@@ -47,6 +47,7 @@ C     Local variables
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
       INTEGER imsg,ipriv,i,det
       REAL    covar(3,3),bfield,x0,y0
+      real    atan2d
       DATA    imsg /0/
 
 
