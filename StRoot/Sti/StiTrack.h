@@ -91,8 +91,6 @@ public:
   virtual void reset()=0;
   virtual void getMomentum(double p[3], double e[6]) const =0;
   virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point
-  virtual StThreeVector<double> getMomentumNear(double x) =0; //3-momentum at arb. point
-  virtual StThreeVector<double> getHitPositionNear(double x) const =0; //3-position at arb. point
   virtual double  getCurvature()      const=0;   // transverse curvature
   virtual double  getP()              const=0;   // transverse momentum
   virtual double  getPt()             const=0;   // transverse momentum
