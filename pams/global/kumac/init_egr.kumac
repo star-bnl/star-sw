@@ -1,8 +1,15 @@
-MACRO init
+* *************************************************************
+ macro init
+  macro/global/import *
+    
+  return
+* *****************************************************************
+ 
+ macro fill
    
-macro/global/import *
-
-cd [params]/global/egrpars
+  macro/global/import *
+ 
+  cd [params]/global/egrpars
  
  
 * Kathy put new set in on 10/7/98 (dev) following *Official request*
