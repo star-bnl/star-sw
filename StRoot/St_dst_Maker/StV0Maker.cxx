@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.26 2000/08/31 21:47:08 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.27 2000/09/01 15:00:23 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.27  2000/09/01 15:00:23  genevb
+// Reset dcaV0 to 0.8cm
+//
 // Revision 1.26  2000/08/31 21:47:08  genevb
 // Allow V0s to be trimmed after finding Xis
 //
@@ -116,7 +119,7 @@ Int_t StV0Maker::Init(){
   // TPC only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        0.8; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
