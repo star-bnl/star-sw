@@ -1,7 +1,6 @@
 #ifndef StDetectorDbFTPCVoltage_h
 #define StDetectorDbFTPCVoltage_h
 
-#include <Stiostream.h>
 #include "StMaker.h"
 
 

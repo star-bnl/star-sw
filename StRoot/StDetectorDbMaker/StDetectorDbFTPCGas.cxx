@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbFTPCGas.h"
 #include "tables/St_ftpcGasOut_Table.h"
 #include "tables/St_ftpcGasSystem_Table.h"
@@ -11,7 +11,7 @@
 
   #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
   StDetectorFTPCGas * gas = StDetectorDbFTPCGas::instance();
-  cout << *gas << endl;
+  ~gMess << *gas << endm;
   gas->getWestO2ppm();
 
   or any other access methods.
@@ -69,7 +69,7 @@ void StDetectorDbFTPCGas::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbFTPCGas::StDetectorDbFTPCGas(){
-    cout << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endl;
+    ~gMess << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endm;
     mGasSystem = 0;
     mGasOut = 0;
 };

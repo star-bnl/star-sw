@@ -1,7 +1,6 @@
 #ifndef StDetectorDbRichScalers_h
 #define StDetectorDbRichScalers_h
 
-#include <Stiostream.h>
 #include "StMaker.h"
 
 struct trigDetSums_st;

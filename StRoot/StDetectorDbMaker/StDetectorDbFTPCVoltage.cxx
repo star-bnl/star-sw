@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbFTPCVoltage.h"
 #include "tables/St_ftpcVoltage_Table.h"
 
@@ -6,7 +6,7 @@
   The class holds the FTPC voltage database values needed in the chain. It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return 0. To use:
   #include "StDetectorDbMaker/StDetectorDbFTPCVoltage.h"
   StDetectorFTPCVoltage * gas = StDetectorDbFTPCVoltage::instance();
-  cout << *voltage << endl;
+  ~gMess << *voltage << endm;
 
   gas->getCathodeVEast();
   or any other access methods.
@@ -48,7 +48,7 @@ void StDetectorDbFTPCVoltage::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbFTPCVoltage::StDetectorDbFTPCVoltage(){
-    cout << "StDetectorDbFTPCVoltage::StDetectorDbFTPCVoltage" << endl;
+    ~gMess << "StDetectorDbFTPCVoltage::StDetectorDbFTPCVoltage" << endm;
     mVoltage = 0;
 };
 

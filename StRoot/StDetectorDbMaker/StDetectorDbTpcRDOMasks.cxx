@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbTpcRDOMasks.h"
 #include "tables/St_tpcRDOMasks_Table.h"
 
@@ -9,8 +9,8 @@ It is a singleton which requires manual updating, usually taken care of in StDet
 
   #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
   StDetectorDbTpcRDOMasks * masks = StDetectorDbTpcRDOMasks::intstance();
-  cout << *masks << endl;
-  cout << masks->isOn(sector,rdo) << endl;
+  ~gMess << *masks << endm;
+  ~gMess << masks->isOn(sector,rdo) << endm;
  
 */
 
@@ -63,16 +63,16 @@ void StDetectorDbTpcRDOMasks::update(StMaker* maker){
 	}
 	
 	if( dataSet == 0 || mTable == 0 || mNumEntries == 0)
-	    cout << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
+	    ~gMess << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     }
     else
-	cout << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
+	~gMess << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     
 };
 
 /// Default constructor
 StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks(){
-    cout << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endl;
+    ~gMess << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endm;
     mNumEntries = 0;
     mMaskVector = 0;
     mTable = 0;
@@ -106,8 +106,8 @@ unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
     //unsigned int mask = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
     
     if(sector < 1 || sector > 24 || mNumEntries == 0){
-      cout << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
-	   << "sector= " << sector << " mNumEntries=" << mNumEntries << endl;
+      ~gMess << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
+	   << "sector= " << sector << " mNumEntries=" << mNumEntries << endm;
       return mask;
     }
     

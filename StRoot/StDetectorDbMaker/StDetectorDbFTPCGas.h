@@ -2,7 +2,6 @@
 #define StDetectorDbFTPCGas_h
 
 #include "StMaker.h"
-#include <Stiostream.h>
 
 
 struct ftpcGasSystem_st;

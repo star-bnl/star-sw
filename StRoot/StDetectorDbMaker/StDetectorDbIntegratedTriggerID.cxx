@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbIntegratedTriggerID.h"
 #include "tables/St_triggerInfo_Table.h"
 #include "tables/St_defaultTrgLvl_Table.h"
@@ -65,7 +65,7 @@ void StDetectorDbIntegratedTriggerID::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbIntegratedTriggerID::StDetectorDbIntegratedTriggerID(){
-    cout << "StDetectorDbIntegratedTriggerID::StDetectorDbIntegratedTriggerID" << endl;
+    ~gMess << "StDetectorDbIntegratedTriggerID::StDetectorDbIntegratedTriggerID" << endm;
     mTriggerInfo = 0;
     mIDNumRows = 0;
     mIDTable = 0;

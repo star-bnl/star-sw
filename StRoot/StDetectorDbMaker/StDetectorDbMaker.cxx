@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbMaker.h"
 #include "StDetectorDbFTPCGas.h"
 #include "StDetectorDbFTPCVoltage.h"
@@ -51,17 +51,17 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     // Update triggerID 
     StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
     trigger->update(this);
-//    cout << *trigger;
+//    ~gMess << *trigger;
 
     // Update integratedTriggerID 
     StDetectorDbIntegratedTriggerID* inTrigger = StDetectorDbIntegratedTriggerID::instance();
     inTrigger->update(this);
-//    cout << *inTrigger;
+//    ~gMess << *inTrigger;
 
     // Update the ftpc voltage
     StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
     ftpcVolt->update(this);
-//    cout << *ftpcVolt;
+//    ~gMess << *ftpcVolt;
 
     return StMaker::InitRun(runNumber);
 }
@@ -76,7 +76,7 @@ Int_t StDetectorDbMaker::Make(){
     // Update the ftpc voltage
     StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
     ftpcVolt->update(this);
-//    cout << *ftpcVolt;
+//    ~gMess << *ftpcVolt;
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
@@ -103,8 +103,8 @@ Int_t StDetectorDbMaker::Make(){
     
     
     // Jamie Asked for SpaceCharge to be couted every event
-    cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
-	 << " Coulombs" << endl;
+    ~gMess << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
+	 << " Coulombs" << endm;
 
     return kStOK;
 }

@@ -1,7 +1,6 @@
 #ifndef StDetectorDbIntegratedTriggerID_h
 #define StDetectorDbIntegratedTriggerID_h
 
-#include <Stiostream.h>
 #include "StMaker.h"
 
 struct triggerInfo_st;

@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbClock.h"
 #include "tables/St_starClockOnl_Table.h"
 #include "TUnixTime.h"
@@ -49,7 +49,7 @@ void StDetectorDbClock::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbClock::StDetectorDbClock(){
-    cout << "StDetectorDbClock::StDetectorDbClock" << endl;
+    ~gMess << "StDetectorDbClock::StDetectorDbClock" << endm;
     mStarClockOnl = 0;
     mNumRows = 0;
     mTable = 0;
