@@ -188,7 +188,7 @@ all:   RootCint Libraries  DeleteDirs
 RootCint : $(FILES_CINT_SYT) $(FILES_CINT_SYM) $(FILES_CINT_TAB) $(FILES_CINT_MOD)
 
 
-$(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
+$(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h $(wildcard  $(STAR)/StRoot/base/*.h) 
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class table_head_st-!;"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
@@ -197,8 +197,8 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(LINKDEF); 
 
 
-$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(wildcard $(SRC_DIR)/St_*.h)
-$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
+#$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(wildcard $(SRC_DIR)/St_*.h)
+$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h $(wildcard  $(STAR)/StRoot/base/*.h) 
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
@@ -216,7 +216,8 @@ $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h  $(wildcard  $(STAR)/S
          $(notdir $(LINKDEF));
 
 
-$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(wildcard  $(STAR)/StRoot/base/*.h)
+#$(FILES_CINT_TAB) : 
+$(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(wildcard  $(STAR)/StRoot/base/*.h)
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
@@ -224,7 +225,8 @@ $(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(wi
 	cd $(GEN_DIR); cd $(GEN_DIR); cp $(1ST_DEPS) .;\
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF));
 
-$(FILES_CINT_MOD) : $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h $(STAR)/StRoot/base/St_Module.h
+#$(FILES_CINT_MOD) : 
+$(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h $(STAR)/StRoot/base/St_Module.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ global $(STEM);"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
