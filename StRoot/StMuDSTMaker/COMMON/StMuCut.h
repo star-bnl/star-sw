@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuCut.h,v 1.5 2004/05/02 04:10:13 perev Exp $
+ * $Id: StMuCut.h,v 1.6 2004/11/24 19:46:09 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -28,7 +28,7 @@ class StKinkMuDst;
 
 class StMuCut : public TObject {
  public:
-  StMuCut() {};
+  StMuCut();
   virtual ~StMuCut() {};
   
   bool pass( const StEvent*      );///< called by user code,  returns true if argument passes cuts, else false
@@ -81,6 +81,9 @@ inline bool StMuCut::pass( const StKinkMuDst* k) {    return leave( accept(k), m
 /***************************************************************************
  *
  * $Log: StMuCut.h,v $
+ * Revision 1.6  2004/11/24 19:46:09  jeromel
+ * Forgot .h file commit
+ *
  * Revision 1.5  2004/05/02 04:10:13  perev
  * private => protected
  *
