@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.2 2000/05/11 20:00:39 posk Exp $
+// $Id: StFlowTrack.h,v 1.3 2000/05/12 22:42:05 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.3  2000/05/12 22:42:05  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.2  2000/05/11 20:00:39  posk
 // Preparation for micro and nano DSTs.
 //
@@ -52,9 +55,10 @@
 #define StFlowTrack_h
 #include <string.h>
 #include "Rtypes.h"
+#include "StObject.h"
 #include "StFlowConstants.h"
 
-class StFlowTrack{
+class StFlowTrack : public StObject {
 
 public:
 
@@ -107,6 +111,7 @@ private:
   Int_t    mSelection;
   Int_t    mSubevent[Flow::nHars][Flow::nSels];
 
+  ClassDef(StFlowTrack,1)
 };
 
 inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus; }

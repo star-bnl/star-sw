@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.3 2000/05/11 20:00:33 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.4 2000/05/12 22:42:04 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.4  2000/05/12 22:42:04  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.3  2000/05/11 20:00:33  posk
 // Preparation for micro and nano DSTs.
 //
@@ -70,10 +73,10 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-#include <algorithm>
-#if !defined(ST_NO_NAMESPACES)
-using std::random_shuffle;
-#endif
+//#include <algorithm>
+//#if !defined(ST_NO_NAMESPACES)
+//using std::random_shuffle;
+//#endif
 #include "StFlowEvent.h"
 #include "StFlowTrackCollection.h"
 #include "StFlowSelection.h"
@@ -262,7 +265,7 @@ void StFlowEvent::MakeSubEvents() {
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
 
-  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+  //  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.2 2000/03/28 23:21:04 posk Exp $
+// $Id: StFlowSelection.h,v 1.3 2000/05/12 22:42:05 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.3  2000/05/12 22:42:05  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.2  2000/03/28 23:21:04  posk
 // Allow multiple instances of the AnalysisMaker.
 //
@@ -24,11 +27,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Rtypes.h"
+#include "StObject.h"
 #include "StFlowConstants.h"
 class StFlowTrack;
 class StFlowEvent;
 
-class StFlowSelection {
+class StFlowSelection : public StObject {
 
  public:
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.23 2000/05/11 20:00:35 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.24 2000/05/12 22:42:04 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.24  2000/05/12 22:42:04  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.23  2000/05/11 20:00:35  posk
 // Preparation for micro and nano DSTs.
 //
@@ -138,7 +141,7 @@ Int_t StFlowMaker::Make() {
       pFlowEvent = new StFlowEvent;
       if (!pFlowEvent) return kStOK;
       FillFlowEvent();
-      if (mFlowEventWrite) WriteFlowEvent();
+      if (mFlowEventWrite) pFlowMicroTree->Fill();  //fill the tree
       if (mNanoFlowEventOn) FillFlowNanoEvent();
     } else {
       Long_t eventID = pEvent->id();
@@ -152,7 +155,9 @@ Int_t StFlowMaker::Make() {
   }
 
   //PrintInfo();
-  UInt_t flowEventMult = pFlowEvent->TotalMult();
+  UInt_t flowEventMult;
+  if (!pFlowEvent) { flowEventMult = 0;}
+  else { flowEventMult = pFlowEvent->TotalMult(); }
   PR(flowEventMult);
 
   return kStOK;
@@ -162,7 +167,7 @@ Int_t StFlowMaker::Make() {
 
 void StFlowMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowMaker.cxx,v 1.23 2000/05/11 20:00:35 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.24 2000/05/12 22:42:04 snelling Exp $" << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 
@@ -303,31 +308,12 @@ void StFlowMaker::FillFlowEvent() {
   if (!StFlowCutEvent::CheckEtaSymmetry()) {  // if kFALSE delete this event
     delete pFlowEvent;
     pFlowEvent = NULL;
-
     return;
   }
 
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
   pFlowEvent->SetPids();
-
-  // Print multiplicities
-//   int j, k, n;
-
-//   for (j = 0; j < Flow::nHars; j++) {
-//     for (k = 0; k < Flow::nSels; k++) {
-//       cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(j, k) << endl;
-//     }
-//   }
-
-//   for (j = 0; j < Flow::nHars; j++) {
-//     for (k = 0; k <Flow:: nSels; k++) {
-//       for (n = 0; n < Flow::nSubs+1; n++) {
-// 	cout << "j,k,n= " << j << k << n << " : " << 
-// 	  pFlowEvent->Mult(j, k, n) << endl;
-//       }
-//     }
-//   }
 
 }
 
@@ -346,14 +332,14 @@ void StFlowMaker::InitFlowNanoEvent() {
   Int_t comp   = 1;       // by default file is compressed
   if (pFlowNanoDST) pFlowNanoDST->SetCompressionLevel(comp);
   // Create a ROOT Tree and one superbranch
-  pFlowTree = new TTree("FlowTree","Flow Tree");
-  if (pFlowTree) {
-    pFlowTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
+  pFlowNanoTree = new TTree("FlowNanoTree","Flow Nano Tree");
+  if (pFlowNanoTree) {
+    pFlowNanoTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
   }
   Int_t bufsize = 256000;
   if (split)  bufsize /= 4;
-  if (pFlowTree) {
-    pFlowTree->Branch("pFlowNanoEvent", "StFlowNanoEvent", &pFlowNanoEvent, bufsize,split);
+  if (pFlowNanoTree) {
+    pFlowNanoTree->Branch("pFlowNanoEvent", "StFlowNanoEvent", &pFlowNanoEvent, bufsize,split);
   }
 
 }
@@ -372,14 +358,14 @@ void StFlowMaker::InitFlowEventWrite() {
   Int_t comp   = 1;       // by default file is compressed
   if (pFlowDST) pFlowDST->SetCompressionLevel(comp);
   // Create a ROOT Tree and one superbranch
-  pFlowTree = new TTree("FlowTree","Flow Tree");
-  if (pFlowTree) {
-    pFlowTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
+  pFlowMicroTree = new TTree("FlowMicroTree","Flow Micro Tree");
+  if (pFlowMicroTree) {
+    pFlowMicroTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
   }
   Int_t bufsize = 256000;
   if (split)  bufsize /= 4;
-  if (pFlowTree) {
-    pFlowTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, bufsize, split);
+  if (pFlowMicroTree) {
+    pFlowMicroTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, bufsize, split);
   }
   PR("InitFlowEventWrite()");
 }
@@ -389,13 +375,6 @@ void StFlowMaker::InitFlowEventWrite() {
 void StFlowMaker::InitFlowEventRead() {
   pFlowDST = new TFile("flowEvent.root", "READ");
   PR("InitFlowEventRead()");
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::WriteFlowEvent() {
-  //pFlowEvent->Write();
-  PR("WriteFlowEvent()");
 }
 
 //-----------------------------------------------------------------------
@@ -425,7 +404,7 @@ void StFlowMaker::FillFlowNanoEvent() {
   }
 
 
-  pFlowTree->Fill();  //fill the tree
+  pFlowNanoTree->Fill();  //fill the tree
   pFlowNanoEvent->Clear();
 
 }
@@ -446,7 +425,7 @@ void StFlowMaker::CloseFlowNanoEvent() {
 void StFlowMaker::CloseFlowEventWrite() {
 
   if (pFlowDST->IsOpen()) {
-    //pFlowDST->Write();
+    pFlowDST->Write();
     pFlowDST->Close();
   }
   PR("CloseFlowEventWrite()");

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.5 2000/05/11 20:00:36 posk Exp $
+//  $Id: StFlowMaker.h,v 1.6 2000/05/12 22:42:04 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.6  2000/05/12 22:42:04  snelling
+//  Additions for persistency and minor fix
+//
 //  Revision 1.5  2000/05/11 20:00:36  posk
 //  Preparation for micro and nano DSTs.
 //
@@ -93,7 +96,7 @@ public:
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.5 2000/05/11 20:00:36 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.6 2000/05/12 22:42:04 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 protected:
@@ -101,11 +104,11 @@ protected:
   Flow::PhiWgt_t   mPhiWgt;                   // To make event plane isotropic
 
 private:
-  Bool_t           mNanoFlowEventOn;          // switch for nano DST
-  Bool_t           mFlowEventWrite;           // switch for StFlowEvent
-  Bool_t           mFlowEventRead;            // switch for StFlowEvent
+  Bool_t           mNanoFlowEventOn;          // switch for nano DST fill and write
+  Bool_t           mFlowEventWrite;           // switch for StFlowEvent write
+  Bool_t           mFlowEventRead;            // switch for StFlowEvent read
   void             NanoFlowEvent(Bool_t flag=kFALSE){ mNanoFlowEventOn=flag; }
-  StFlowSelection* pFlowSelect;               //! selection object
+  StFlowSelection* pFlowSelect;               // selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
   void             InitFlowNanoEvent();       // fill a persistent nano dst
   void             InitEventRead();           // open StEvent
@@ -113,18 +116,16 @@ private:
   void             InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
   void             FillFlowNanoEvent();       // fill a persistent nano dst
-  void             WriteFlowEvent();          // write StFlowEvent
-  void             CloseFlowNanoEvent();      // Close the output file
-  void             CloseEventRead();          // close StEvent
-  void             CloseFlowEventWrite();     // close StFlowEvent
-  void             CloseFlowEventRead();      // close StFlowEvent
+  void             CloseFlowNanoEvent();      // Close the NanoEvent output file
+  void             CloseFlowEventWrite();     // close StFlowEvent output file  
+  void             CloseFlowEventRead();      // close StFlowEvent input file
   StEvent*         pEvent;                    //! pointer to DST data
-  StFlowEvent*     pFlowEvent;                //! pointer to micro-DST data
+  StFlowEvent*     pFlowEvent;                // pointer to micro-DST data
   StFlowNanoEvent* pFlowNanoEvent;            // pointer to the nano DST Event
-  TTree*           pFlowTree;                 // pointer to the nano DST Tree
+  TTree*           pFlowNanoTree;             // pointer to the nano DST Tree
+  TTree*           pFlowMicroTree;            // pointer to the nano DST Tree
   TFile*           pFlowNanoDST;              //! pointer to the nano DST File
   TFile*           pFlowDST;                  //! pointer to the micro DST File
-  TFile*           pDST;                      //! pointer to the DST File
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 
 };
@@ -138,3 +139,5 @@ inline void StFlowMaker::FlowEventRead(Bool_t flag)
           { mFlowEventRead=flag; mFlowEventWrite=kFALSE;}
 
 #endif
+
+

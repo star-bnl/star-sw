@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.3 2000/05/11 20:00:40 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.4 2000/05/12 22:42:05 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.4  2000/05/12 22:42:05  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.3  2000/05/11 20:00:40  posk
 // Preparation for micro and nano DSTs.
 //
@@ -38,15 +41,19 @@
 
 #ifndef StFlowTrackCollection_h
 #define StFlowTrackCollection_h
+#include "StArray.h"
 #include "StFlowTrack.h"
-#include <vector>
+//#include <vector>
 
-#if !defined(ST_NO_NAMESPACES)
-using std::vector;
-#endif
+//#if !defined(ST_NO_NAMESPACES)
+//using std::vector;
+//#endif
 
-typedef vector<StFlowTrack*>            StFlowTrackCollection;
-typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
+//typedef vector<StFlowTrack*>            StFlowTrackCollection;
+//typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
+StCollectionDef(FlowTrack)
+typedef StSPtrVecFlowTrack StFlowTrackCollection;
+//typedef StFlowTrackIterator StFlowTrackIterator;
 
 #endif
 
