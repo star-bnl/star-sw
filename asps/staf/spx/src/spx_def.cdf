@@ -28,7 +28,7 @@ VERSION v1.00a (30apr96).
 >GUIDANCE
 Show count of known SPX objects.
 .
->ACTION KAM_SPX_COUNT
+>ACTION kam_spx_count_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/LIST
@@ -37,7 +37,7 @@ Show count of known SPX objects.
 >GUIDANCE
 List all known SPX objects.
 .
->ACTION KAM_SPX_LIST
+>ACTION kam_spx_list_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/NEWDUMMY NAME
@@ -47,7 +47,7 @@ NAME 'spxDummy name.' C
 >GUIDANCE
 Create a new spxDummy object.
 .
->ACTION KAM_SPX_NEWDUMMY
+>ACTION kam_spx_newdummy_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/NEWGRID NAME HEIGHT WIDTH
@@ -59,7 +59,7 @@ WIDTH 'Grid width.' I
 >GUIDANCE
 Create a new spxGrid object.
 .
->ACTION KAM_SPX_NEWGRID
+>ACTION kam_spx_newgrid_%C
 
 ************************************************************************
 ************************************************************************
@@ -77,7 +77,7 @@ DNAME 'spxDummy object name.' C
 >GUIDANCE
 Shows number of calls to spxDummy functions.
 .
->ACTION KAM_SPXDUMMY_NCALLS
+>ACTION kam_spxdummy_ncalls_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/DUMMY/NULL DNAME
@@ -87,7 +87,7 @@ DNAME 'spxDummy object name.' C
 >GUIDANCE
 Does nothing.
 .
->ACTION KAM_SPXDUMMY_NULL
+>ACTION kam_spxdummy_null_%C
 
 ************************************************************************
 ************************************************************************
@@ -105,7 +105,7 @@ DNAME 'spxGrid object name.' C
 >GUIDANCE
 Show height attribute of spxGrid object.
 .
->ACTION KAM_SPXGRID_HEIGHT
+>ACTION kam_spxgrid_height_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/GRID/WIDTH DNAME
@@ -115,7 +115,7 @@ DNAME 'spxGrid object name.' C
 >GUIDANCE
 Show width attribute of spxGrid object.
 .
->ACTION KAM_SPXGRID_WIDTH
+>ACTION kam_spxgrid_width_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/GRID/GET DNAME M N
@@ -127,7 +127,7 @@ N 'Second index of cell.' I
 >GUIDANCE
 Get cell value of spxGrid object.
 .
->ACTION KAM_SPXGRID_GET
+>ACTION kam_spxgrid_get_%C
 
 ** ---------------------------------------------------------------------
 ** SPX/GRID/SET DNAME M N VALUE
@@ -140,5 +140,5 @@ VALUE 'New value of cell.' I
 >GUIDANCE
 Set cell value of spxGrid object.
 .
->ACTION KAM_SPXGRID_SET
+>ACTION kam_spxgrid_set_%C
 

@@ -11,6 +11,11 @@
 #include "emlLib.h"
 #include "spxLib.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define spx_def_ F77_NAME(spx_def,SPX_DEF)
+extern "C" void type_of_call spx_def_();
+
 spxFactory *spx;
 
 //:>--------------------------------------------------------------------

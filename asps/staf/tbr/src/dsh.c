@@ -2,7 +2,11 @@
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+
+#ifndef WIN32
+# include <strings.h>
+#endif
+
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsxdr.h"
