@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.412 2004/04/29 02:03:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.413 2004/05/07 18:12:08 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -415,12 +415,6 @@ Bfc_st BFC1[] = {
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"           ,"StMaker","StChain","",kFALSE},
-  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
-                                    "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
-  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
-                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
-
 
   {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
@@ -465,6 +459,13 @@ Bfc_st BFC1[] = {
                                                                                "<StEvent creation>",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
+
+
+  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
+  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
+                                    "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
+  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
+                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
 
   {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
@@ -975,12 +976,6 @@ Bfc_st BFC2[] = {
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"           ,"StMaker","StChain","",kFALSE},
-  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
-                                    "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
-  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
-                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
-
   {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
@@ -1029,6 +1024,12 @@ Bfc_st BFC2[] = {
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
+
+  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
+  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
+                                    "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
+  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
+                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
 
   {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
