@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.11 2005/03/09 19:24:18 balewski Exp $
+ * $Id: StGenericVertexFinder.h,v 1.12 2005/03/11 22:23:53 balewski Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -48,9 +48,9 @@ class StGenericVertexFinder {
   // General (default)
   virtual void           SetMode(Int_t mode=0 ) {mMode = mode;}
   virtual void           Init(){ /* noop */;}
+  virtual void           Finish(){ /* noop */;}
   virtual void           InitRun  (int runumber){ /* noop */;}
   virtual void           Clear(const char* opt=""){ /* noop */;}
-
 
   virtual StThreeVectorD result() const {return mFitResult;}  // result of fit
   virtual StThreeVectorD error()  const {return  mFitError;}  // error on fit result
@@ -100,6 +100,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.12  2005/03/11 22:23:53  balewski
+// towards PPV
+//
 // Revision 1.11  2005/03/09 19:24:18  balewski
 // preparation for PPV vertex finder
 //

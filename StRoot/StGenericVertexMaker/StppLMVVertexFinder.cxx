@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.17 2005/03/09 19:24:18 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.18 2005/03/11 22:23:53 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -80,7 +80,8 @@ StppLMVVertexFinder::~StppLMVVertexFinder() {
 //==========================================================
 //==========================================================
 bool StppLMVVertexFinder::fit(StEvent* event) {
-  //
+  gMessMgr->Info() << "StppLMVVertexFinder::fit() START ..." << endm;
+ //
   //  Reset vertex
   //
   mFitError = mFitResult = StThreeVectorD(777,888,999);
@@ -135,6 +136,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
     StTriggerData *trgD=event->triggerData ();
     collectCTBhitsData(trgD); // use real data
   }
+  // printCtb(); //4ppv
 
   if(mCtbHits.size()<=0){
     gMessMgr->Warning() << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
@@ -158,7 +160,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
          
   } // end of track selection
 
-  //printf(", now n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6);
+  //  printf(", now n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6); //tmp
   gMessMgr->Debug() << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 << "n6=" << n6 << endm;
 
 
@@ -193,11 +195,12 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
 
   //printf("PrimCand  before ppLMV for eveID=%d tracks at first point\n",eveID);
   gMessMgr->Debug() << "PrimCand  before ppLMV for eveID=" << eveID << "tracks at first point" << endm;
+
+  //tmp - lits all matched tracks
   for( uint j=0;j<mPrimCand.size();j++) {
     StThreeVectorD p=mPrimCand[j].helix.momentum(mBfield*tesla);
-    // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180);
-    
-  }
+    printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180);    
+  } 
 
   //  ----------  D O   F I N D    V E R T E X
   int ret=ppLMV5();
@@ -598,6 +601,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.18  2005/03/11 22:23:53  balewski
+ * towards PPV
+ *
  * Revision 1.17  2005/03/09 19:24:18  balewski
  * preparation for PPV vertex finder
  *
