@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.23 2004/06/09 20:04:27 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.24 2004/07/12 21:04:10 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.24  2004/07/12 21:04:10  jml
+ * moved pixel anotation to FCFMaker from saveRes() because saveRes() called more than once leading to excess entries in pixel table (for yuri)
+ *
  * Revision 1.23  2004/06/09 20:04:27  tonko
  * New ANNOTATION scheme added
  *
@@ -175,7 +178,11 @@ class StMaker;
 class St_g2t_tpc_hit;
 class g2t_tpc_hit_st;
 #endif
-
+#ifdef FCF_ANNOTATE_CLUSTERS
+#include "tables/St_fcfPixel_Table.h"
+static TDataSet *fcfPixATop = 0;
+extern struct fcfPixAnnotate pixStruct[183][512] ;
+#endif
 #ifdef FCF_DEBUG_OUTPUT
 struct Hit_t {
   double x, y, z, charge ; 
@@ -253,8 +260,11 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   mDp = .1;             // hardcoded errors
   mDt = .2;
   mDperp = .1;
-
+#ifndef FCF_ANNOTATE_CLUSTERS
   splitRows = 1;        // split padrows as if real DAQ on i960s
+#else
+  splitRows = 0;        // to avoid multiple clster in fcfPixel table
+#endif
   doT0Corrections = 1;  // do the t0 corrections
   doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
   doZeroTruncation = 1; // do it, but leave 5 cm... 
@@ -1675,11 +1685,29 @@ int StRTSClientFCFMaker::build_croat_clusters()
 			   sim_resptr);
 
 
-// 	printf("(raw)------>        0x%x 0x%x 0x%x (0x%x)\n",
-// 	       (u_int)raw_resptr[0],
-// 	       (u_int)raw_resptr[1],
-// 	       (u_int)raw_resptr[2],
-// 	       (u_int)croat_out);
+	// 	printf("(raw)------>        0x%x 0x%x 0x%x (0x%x)\n",
+	// 	       (u_int)raw_resptr[0],
+	// 	       (u_int)raw_resptr[1],
+	// 	       (u_int)raw_resptr[2],
+	// 	       (u_int)croat_out);
+	// save pixels
+#if defined(FCF_ANNOTATE_CLUSTERS) && defined(__ROOT__)
+	St_fcfPixel *fcfPixA = new St_fcfPixel(Form("fcfPixA%i_%i",sectorIdx,r+1),1000);
+	fcfPixATop->Add(fcfPixA);
+	fcfPixel_st pix;
+	for(int i=1;i<=182;i++) {
+	  for(int j=0;j<512;j++) {
+	    if(pixStruct[i][j].adc) {
+	      pix.pad = i;
+	      pix.tbin = j;
+	      pix.adc  = pixStruct[i][j].adc;
+	      pix.cl_id = pixStruct[i][j].cl_id;
+	      pix.id_simtrk = pixStruct[i][j].id_simtrk;
+	      fcfPixA->AddAt(&pix);
+	    }
+	  }
+	}
+#endif
       }
     }
   }
