@@ -1,3 +1,5 @@
+#include <fstream.h>
+
 #include "Messenger.h"
 #include "StiDetector.h"
 #include "StiDetectorBuilder.h"
