@@ -1,11 +1,14 @@
-// $Id: Example_root_look_at_tables_after_bfcread.C,v 1.2 1999/05/21 15:33:49 kathy Exp $
-// $Log: Example_root_look_at_tables_after_bfcread.C,v $
+// $Id: Example_look_at_tables_after_bfcread.C,v 1.1 1999/06/07 17:31:22 kathy Exp $
+// $Log: Example_look_at_tables_after_bfcread.C,v $
+// Revision 1.1  1999/06/07 17:31:22  kathy
+// clean up some macros
+//
 // Revision 1.2  1999/05/21 15:33:49  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
 // owner: Kathy Turner
-// what it does: 
+// what it does: see below
 //=======================================================================
 //
 //  Example_root_look_at_tables_after_bfcread.C
@@ -20,6 +23,7 @@
 //
 //=======================================================================
 
+{
 //  get dataset for globtrk
 St_DataSet *ds=chain->GetDataSet("dst/globtrk");
 
@@ -41,18 +45,22 @@ glob->Print(0,5);
 
 // get the table header data
 table_head_st *tdt_h = glob->GetHeader();
-tdt_h->name
-tdt_h->type
-tdt_h->maxlen
-tdt_h->nok
+tdt_h->name;
+tdt_h->type;
+tdt_h->maxlen;
+tdt_h->nok;
 
 // get the table and print out info about it (it's printing row 0)
 dst_track_st *sth = glob->GetTable();
-sth->ndegf
-sth->x0
-sth->impact
-sth->invpt
-sth->y0
+sth->ndegf;
+sth->x0;
+sth->impact;
+sth->invpt;
+sth->y0;
 
 
-// Now histogram some stuff:
+}
+
+
+
+
