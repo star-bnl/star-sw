@@ -2,10 +2,8 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-#pragma link C++ class table_head_st-!;
+// #pragma link C++ class table_head_st-!;
 #pragma link C++ class point3_st-!;
-#pragma link C++ enum EModuleTypes;
-#pragma link C++ enum  EReturnCodes;
 #pragma link C++ class St_PolyLine3D-;
 
 #pragma link C++ typedef StCL;
