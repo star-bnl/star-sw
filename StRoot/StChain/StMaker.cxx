@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.15 1999/01/02 19:08:12 fisyak Exp $
+// $Id: StMaker.cxx,v 1.16 1999/01/20 23:44:48 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.16  1999/01/20 23:44:48  fine
+// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
+//
 // Revision 1.15  1999/01/02 19:08:12  fisyak
 // Add ctf
 //
@@ -49,6 +52,8 @@
 static StMaker *thisMakers[100];
 static Int_t     thisMakerIndx=0;
 
+StChain *StMaker::g_Chain = 0;
+
 ClassImp(StMaker)
 
 //_____________________________________________________________________________
@@ -68,14 +73,15 @@ StMaker::StMaker()
 StMaker::StMaker(const char *name, const char *title)
        :TNamed(name,title)
 {
-  //   cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
+  //   cout << "ctor for " << GetName() << " - " << GetTitle() << endl;   
    m_BranchName = "";
    m_Save       = 0;
    m_Histograms = new TList();
    //   m_Clones     = 0;
    m_IsClonable = kTRUE;
    m_DataSet    = 0;
-   TList *list =  gStChain->Makers();
+   if (!g_Chain) g_Chain = gStChain;
+   TList *list =  g_Chain->Makers();
    if (list) {
      StMaker *maker =  (StMaker *) list->FindObject(name);
      if (!maker) list->Add(this);
@@ -152,22 +158,24 @@ void StMaker::FillClone()
 {
    if (!m_Save) return;
 
-#if 1
-   TTree *tree = Tree();
-   if (!tree) {
-     TString name = GetName();
-     name += "_Tree";
-     tree = new TTree(name.Data(),GetTitle());
+
+   TTree *tree = GetTree();
+#if 0
+// Fill the maker's owned tree if any
+//   if (!tree) {
+//     TString name = GetName();
+//     name += "_Tree";
+//     tree = new TTree(name.Data(),GetTitle());
 //     thisMakers[thisMakerIndx]=this;     
 //     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
-     name.ReplaceAll("Tree","Branch");
+/     name.ReplaceAll("Tree","Branch");
 //     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
-     //     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
-     printf(" Maker number %d \n",thisMakerIndx++);
-     SetTree(tree);
-     SetBranch();
-   }
-
+//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
+//     printf(" Maker number %d \n",thisMakerIndx++);
+//     SetTree(tree);
+//     SetBranch();
+//   }
+#else
    if (tree) 
      tree->Fill();
 #endif
@@ -293,6 +301,28 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
   html.MakeClass((Char_t *)c);
 }
 
+
+//_____________________________________________________________________________
+TTree *StMaker::MakeTree(const char* name, const char*title)
+{
+   TTree *tree = Tree();
+  // Fill the maker's owned tree if any
+   if (!tree) {
+     TString name = GetName();
+     name += "_Tree";
+     tree = new TTree(name.Data(),GetTitle());
+//     thisMakers[thisMakerIndx]=this;     
+//     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
+//     name.ReplaceAll("Tree","Branch");
+//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
+     //     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
+//     printf(" Maker number %d \n",thisMakerIndx++);
+     SetTree(tree);
+//     SetBranch();
+   }
+  return tree;
+}
+
 //_____________________________________________________________________________
 void StMaker::PrintInfo()
 {
@@ -302,7 +332,7 @@ void StMaker::PrintInfo()
    printf("*                               *\n");
    printf("*********************************\n");
 
-   if (gStChain->Debug()) Dump();
+   if (g_Chain->Debug()) Dump();
 }
 //_____________________________________________________________________________
 void StMaker::PrintTimer(Option_t *option)
@@ -312,11 +342,11 @@ void StMaker::PrintTimer(Option_t *option)
 //_____________________________________________________________________________
 void StMaker::MakeBranch()
 {
-//   Adds the list of physics objects to the ATLFast tree as a new branch
+//   Adds the list of physics objects to the STAR tree as a new branch
 
    if (m_Save == 0) return;
 
-   TTree *tree = Tree();
+   TTree *tree = GetTree();
    if (!tree) return;
 
 //   if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
@@ -336,18 +366,22 @@ void StMaker::MakeBranch()
        tree->Branch(m_BranchName.Data(),m_Fruits->ClassName(), &m_Fruits, buffersize);
      }
    }
-   if (m_DataSet){
-     m_BranchName = m_DataSet->GetName();
-     tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0);
+///==   if (m_DataSet)
+   {
+//     m_BranchName = m_DataSet->GetName();
+     m_BranchName = GetName();
+     m_BranchName += "_Branch";
+     TBranch *b = tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0); 
    }
 }
 
 //_____________________________________________________________________________
 void  StMaker::SetBranch(){
-    TTree *tree = Tree();
+    TTree *tree = GetTree();
     if (!tree) return;
-    m_BranchName = GetName();
+//    m_BranchName = GetName();
     TBranch *dstBranch = tree->GetBranch(m_BranchName.Data());
+    printf(" ---- Branch name %s, address %x, %x \n", m_BranchName.Data(), dstBranch,&m_DataSet);
     if (dstBranch) dstBranch->SetAddress(&m_DataSet);
 }
 //_____________________________________________________________________________
@@ -384,7 +418,7 @@ void StMaker::Streamer(TBuffer &R__b)
       R__b >> m_Histograms;
           //this is an addition to the standard rootcint version of Streamer
           //branch address for this maker is set automatically
-      TTree *tree = gStChain->Tree();
+      TTree *tree = g_Chain->Tree();
       if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
       TBranch *branch = tree->GetBranch(m_BranchName.Data());
       if (branch)  branch->SetAddress(&m_Fruits);
@@ -401,8 +435,5 @@ void StMaker::Streamer(TBuffer &R__b)
 
 //_____________________________________________________________________________
 TTree *StMaker::GetTree(){
-  return m_Tree;
-#if 0
-  gStChain->Tree();
-#endif
+  return m_Tree ? m_Tree : g_Chain->Tree();
 }

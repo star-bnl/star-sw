@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.19 1999/01/02 19:08:12 fisyak Exp $
+// $Id: StChain.h,v 1.20 1999/01/20 23:44:47 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.20  1999/01/20 23:44:47  fine
+// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
+//
 // Revision 1.19  1999/01/02 19:08:12  fisyak
 // Add ctf
 //
@@ -87,10 +90,13 @@
 #include "StChain.h"
 #include "StMaker.h"
 #endif
-
 class TBrowser;
 class TChain;
+class StHeader;
+class StDisplay;
+class StMagF;
 class St_XDFFile; 
+
 class StChain : public StMaker {
 public:
 typedef  enum {kNormal, kDebug} EDebugLevel;
@@ -108,10 +114,16 @@ private:
    TDatime             mTimeStapm;          //time stamp for event
    TDatime             mProcessTime;        //time of event processing
    EDebugLevel         m_DebugLevel;        //Debug level
-   TTree              *m_Tree;              //Pointer to the Root tree
+   TTree              *m_Tree;              //!Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
    St_XDFFile         *m_FileOut;           //!Pointer to output file 
+   StHeader           *fHeader;             //!Header information
+   Int_t               fNtrack;             //Number of tracks
+   StDisplay          *fDisplay;            //!Pointer to event display
+   TGeometry          *fGeometry;           //!Pointer to geometry
+   TObjArray          *fDetectors;          //!List of Detectors
+   StMagF             *fField;              //!Magnetic Field Map
 public:
                       StChain();
                       StChain(const char *name, const char *title="STAR Big Full Chain");
@@ -121,9 +133,14 @@ public:
    St_DataSet        *DataSet()  const {return StMaker::DataSet();}
    St_DataSet        *DataSet(const Char_t *makername, const Char_t *path="") const ; // find the maker by name and return its dataset
    EDebugLevel        Debug(){return m_DebugLevel;}
+   TGeometry         *GetGeometry();
+   StHeader          *GetHeader() {return fHeader;} 
+   Int_t              GetNtrack() {return fNtrack;}
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
    virtual void       Clear(Option_t *option="");
+   virtual void       CleanDetectors();
+   TObjArray         *Detectors() const {return fDetectors;}
    virtual void       FillClone();
    virtual void       FillXDF(St_XDFFile &file);
    virtual Int_t      Finish();
@@ -136,13 +153,18 @@ public:
    virtual void       StartMaker(StMaker *mk);
    virtual Int_t      Make(Int_t i);
    virtual void       MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev",const TString &outdir="$(star)/StRoot/html");
+   virtual StMagF    *MagF() {return fField;}
    virtual void       EndMaker  (StMaker *mk,Int_t iret);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();
-   void               SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
+   virtual void       ResetPoints();
+   virtual void       ResetHits();
+   virtual void       SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
    virtual void       SetDefaultParameters();
+   virtual void       SetDisplay(StDisplay *display) {fDisplay = display;}
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
    virtual void       SetOutputXDFile(St_XDFFile *file) {m_FileOut = file;}
+   virtual void       SetMagF (StMagF *f){fField = f;}
    virtual St_XDFFile *XDFFile() {return m_File;}
    virtual void	      Fatal(int Ierr, const char *Com);  
 
@@ -163,10 +185,10 @@ public:
    virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;}
    virtual void   SetTree(TTree *tree)   {m_Tree=tree;}
 
-   void           FillTree();
+   Int_t          FillTree();
    void           InitChain(TChain *chain);
    virtual void   MakeBranch();   
-           TTree *MakeTree(const char* name="T", const char*title="StChain tree");
+   virtual TTree *MakeTree(const char* name="T", const char*title="StChain tree");
    void           SortDown(Int_t n, Float_t *a, Int_t *index, Bool_t down=kTRUE);
 
    ClassDef(StChain, 1)   //StChain control class

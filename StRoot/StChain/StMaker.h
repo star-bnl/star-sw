@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.11 1999/01/02 19:08:13 fisyak Exp $
+// $Id: StMaker.h,v 1.12 1999/01/20 23:44:48 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.12  1999/01/20 23:44:48  fine
+// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
+//
 // Revision 1.11  1999/01/02 19:08:13  fisyak
 // Add ctf
 //
@@ -42,6 +45,7 @@ class TList;
 class TBrowser;
 class TChain;
 class TTree;
+class StChain;
 
 class StMaker : public TNamed {
 
@@ -52,13 +56,17 @@ protected:
    TObject       *m_Fruits;      //Pointer to maker fruits (result)
    //   TClonesArray  *m_Clones;      //Pointer to clones of fruits
    TString        m_BranchName;  //Name of branch (if any)
-   St_DataSet    *m_DataSet;     //Pointer to the Maker's dataset
+   St_DataSet    *m_DataSet;     //!Pointer to the Maker's dataset
    TString        m_BranchFile;  //
    TTree         *m_Tree;        //! TTree to write this branch out
    TList         *m_Histograms;  // Pointer to list supporting Maker histograms
    TStopwatch     m_Timer;       // Timer object
-   
+   TString        m_BranchWriteFile;  // The where this maker is written in
+
+      
 public:
+
+   static StChain   *g_Chain;       // Refs pointer to the parent;
 
    enum {kSTAFCV_BAD, kSTAFCV_OK} EModule_return_Status;
 
@@ -68,6 +76,8 @@ public:
    virtual void   Browse(TBrowser *b);
    virtual void Clear(Option_t *option="");
    virtual St_DataSet *DataSet() const {return m_DataSet;}
+   virtual St_DataSet *DataSet(const Char_t *set) { return 0; }
+   virtual St_DataSet *DataSet(TString &set) {return DataSet(set.Data());}
    void           SetDataSet (St_DataSet *set);
    virtual void   Draw(Option_t *option="");
    virtual Int_t  Finish();
@@ -82,6 +92,7 @@ public:
    virtual Int_t  IsToSave(){return m_Save;}
    virtual Int_t  Make() = 0;
    virtual void   MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev",const TString &outdir="$(star)/StRoot/html");
+   virtual TTree *MakeTree(const char* name="", const char*title="");
    virtual void   PrintInfo();
    virtual void   MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}
@@ -92,7 +103,7 @@ public:
    virtual void   PrintTimer(Option_t *option="");
    virtual void   SetChainAddress(TChain *chain);
    virtual void   SetBranchFile (TString &name){m_BranchFile = name;}  // *MENU*
-           TTree *Tree(){return GetTree(); }
+           TTree *Tree(){return m_Tree; }
 
    virtual TString  GetBranchFile (){return m_BranchFile;}
    ClassDef(StMaker, 1)   //StChain virtual base class for Makers
