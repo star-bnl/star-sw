@@ -21,6 +21,7 @@ return
 macro read
 macro/global/import *
   cd [params]/ctf
+****  exec read_table_from_file#init infile ./params/ctf/cts_pars.xdf
   exec read_table_from_file#init infile $STAR/params/ctf/cts_pars.xdf
   exec read_table_from_file#read infile [params]/ctf
   exec read_table_from_file#close infile
@@ -58,12 +59,12 @@ tdm/table/cell/putvalue 'cts_ctb[0].adc_overflow'      256.0
 tdm/table/cell/putvalue 'cts_ctb[0].attlen'            380.0 
 tdm/table/cell/putvalue 'cts_ctb[0].cath_eff'            0.2  
 tdm/table/cell/putvalue 'cts_ctb[0].cath_surf'           0.25 
-tdm/table/cell/putvalue 'cts_ctb[0].delay'              74.7e-12  |fixed wjl...
+tdm/table/cell/putvalue 'cts_ctb[0].delay'              74.7e-12  
 tdm/table/cell/putvalue 'cts_ctb[0].elec_noise'          0      
 tdm/table/cell/putvalue 'cts_ctb[0].gain'                1.
 tdm/table/cell/putvalue 'cts_ctb[0].gate_t0'             3.e-9
 tdm/table/cell/putvalue 'cts_ctb[0].gate_width'         66.e-9
-tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      1
+tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      0        
 tdm/table/cell/putvalue 'cts_ctb[0].GeV_2_n_photons'     1.e+7
 tdm/table/cell/putvalue 'cts_ctb[0].nphe_yield'         16. 
 tdm/table/cell/putvalue 'cts_ctb[0].nphe_to_adc'         0.027
@@ -72,7 +73,8 @@ tdm/table/cell/putvalue 'cts_ctb[0].phys_noise'          0
 tdm/table/cell/putvalue 'cts_ctb[0].surf_loss'           0.27   
 tdm/table/cell/putvalue 'cts_ctb[0].tdc_overflow'      256.0 
 tdm/table/cell/putvalue 'cts_ctb[0].start_res'          50.e-12
-tdm/table/cell/putvalue 'cts_ctb[0].time_res'          200.e-12 |roughly 2ns at far end... 
+tdm/table/cell/putvalue 'cts_ctb[0].time_res'          200.e-12 
+*|roughly 2ns at far end... 
 tdm/table/cell/putvalue 'cts_ctb[0].zero_suppression'    0      
 *
 tdm/table/cell/putvalue 'cts_ctb[0].n_z'                  11
@@ -104,28 +106,35 @@ macro fill_cts_tof
 rm cts_tof
 newtab cts_tof cts_mpara 1
 rowcount cts_tof 1
-tdm/table/cell/putvalue 'cts_tof[0].slat_para'         0     | 0 for exp atten, 1 for map
-tdm/table/cell/putvalue 'cts_tof[0].GeV_2_n_photons' 1.e+7   |
-tdm/table/cell/putvalue 'cts_tof[0].cath_eff'          0.2   | quantum efficiency
-tdm/table/cell/putvalue 'cts_tof[0].cath_surf'         0.61  | area ratio: 0.126 for ctb
-tdm/table/cell/putvalue 'cts_tof[0].surf_loss'         0.42  | surf ratio: 0.27  for ctb
-tdm/table/cell/putvalue 'cts_tof[0].attlen'          110.0   | atten len:  280   for ctb
-tdm/table/cell/putvalue 'cts_tof[0].nphe_to_adc'  0.1        | 4e5/1.6e7/0.25 (0.027 for ctb)
-tdm/table/cell/putvalue 'cts_tof[0].delay'       80.2e-12    | 74.7 for ctb
-tdm/table/cell/putvalue 'cts_tof[0].elec_noise'        0     |
-tdm/table/cell/putvalue 'cts_tof[0].gate_t0'           3.e-9 |
-tdm/table/cell/putvalue 'cts_tof[0].gate_width'      200.e-9 |
-tdm/table/cell/putvalue 'cts_tof[0].adc_overflow'    2048.0  | 11 bits
-tdm/table/cell/putvalue 'cts_tof[0].tdc_overflow'    2048.0  | 11 bits
-tdm/table/cell/putvalue 'cts_tof[0].geo_from_geant'     1    |
-tdm/table/cell/putvalue 'cts_tof[0].position_tolerance' 0.3  |
-tdm/table/cell/putvalue 'cts_tof[0].phys_noise'         0    |
-tdm/table/cell/putvalue 'cts_tof[0].start_res'  50.e-12 |
-tdm/table/cell/putvalue 'cts_tof[0].time_res'   16.e-12 |=75ps/sqrt(22)=16ps@farend (min=50ps at near end in cts)
+tdm/table/cell/putvalue 'cts_tof[0].slat_para'         0     
+tdm/table/cell/putvalue 'cts_tof[0].GeV_2_n_photons' 1.e+7   
+tdm/table/cell/putvalue 'cts_tof[0].cath_eff'          0.2   
+*| quantum efficiency
+tdm/table/cell/putvalue 'cts_tof[0].cath_surf'         0.61  
+*| area ratio: 0.126 for ctb
+tdm/table/cell/putvalue 'cts_tof[0].surf_loss'         0.42  
+*| surf ratio: 0.27  for ctb
+tdm/table/cell/putvalue 'cts_tof[0].attlen'          110.0   
+*| atten len:  280   for ctb
+tdm/table/cell/putvalue 'cts_tof[0].nphe_to_adc'  0.1        
+*| 4e5/1.6e7/0.25 (0.027 for ctb)
+tdm/table/cell/putvalue 'cts_tof[0].delay'       80.2e-12    
+*| 74.7 for ctb
+tdm/table/cell/putvalue 'cts_tof[0].elec_noise'        0     
+tdm/table/cell/putvalue 'cts_tof[0].gate_t0'           3.e-9 
+tdm/table/cell/putvalue 'cts_tof[0].gate_width'      200.e-9 
+tdm/table/cell/putvalue 'cts_tof[0].adc_overflow'    2048.0  
+tdm/table/cell/putvalue 'cts_tof[0].tdc_overflow'    2048.0  
+tdm/table/cell/putvalue 'cts_ctb[0].geo_from_geant'      0   
+tdm/table/cell/putvalue 'cts_tof[0].position_tolerance' 0.3  
+tdm/table/cell/putvalue 'cts_tof[0].phys_noise'         0    
+tdm/table/cell/putvalue 'cts_tof[0].start_res'  50.e-12 
+tdm/table/cell/putvalue 'cts_tof[0].time_res'   16.e-12 
+*|=75ps/sqrt(22)=16ps@farend (min=50ps at near end in cts)
 tdm/table/cell/putvalue 'cts_tof[0].zero_suppression'   1
 ****NOT_USED****
-*tdm/table/cell/putvalue 'cts_tof[0].nphe_yield'         16.   | not used...
-*tdm/table/cell/putvalue 'cts_tof[0].gain'                1.   | not used...
+*tdm/table/cell/putvalue 'cts_tof[0].nphe_yield'         16.   
+*tdm/table/cell/putvalue 'cts_tof[0].gain'                1.   
 ****************
 tdm/table/cell/putvalue 'cts_tof[0].n_z'  0
 tdm/table/cell/putvalue 'cts_tof[0].n_d'  0

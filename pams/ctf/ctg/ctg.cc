@@ -181,17 +181,24 @@ long type_of_call ctg_(
 //    Get phi angles 
 //
          slat_phi[i_phi].iphi    = i_phi + 1 ;
-         slat_phi[i_phi].phi     = Todeg * ( phi_tray + atan2(y0, slat_eta[0].r ) ) ;
-         if ( slat_phi[i_phi].phi < 0     ) slat_phi[i_phi].phi+=Twopi ; 
-         if ( slat_phi[i_phi].phi > 360 ) slat_phi[i_phi].phi-=Twopi ; 
-         slat_phi[i_phi].phi_min = Todeg * ( phi_tray + atan2(y0-geo->counter_width, slat_eta[0].r ) ) ;
-         if ( slat_phi[i_phi].phi_min < 0     ) slat_phi[i_phi].phi_min+=360.F;
-         if ( slat_phi[i_phi].phi_min > 360 ) slat_phi[i_phi].phi_min-=360.F ;
-         slat_phi[i_phi].phi_max = Todeg * ( phi_tray + atan2(y0+geo->counter_width, slat_eta[0].r ) ) ;
-         if ( slat_phi[i_phi].phi_max < 0     ) slat_phi[i_phi].phi_max+=360.F ;
-         if ( slat_phi[i_phi].phi_max > 360 ) slat_phi[i_phi].phi_max-=360.F ;
+         slat_phi[i_phi].phi     = Todeg*(phi_tray+atan2(y0,                   slat_eta[0].r));
+//wjl         if ( slat_phi[i_phi].phi < 0       ) slat_phi[i_phi].phi+=Twopi;  //BUG WAS HERE (SEE IT?)
+//wjl         if ( slat_phi[i_phi].phi > 360     ) slat_phi[i_phi].phi-=Twopi;  //BUG WAS HERE (SEE IT?)
+         if ( slat_phi[i_phi].phi < 0       ) slat_phi[i_phi].phi+=360.F;       //wjl  fixed now... 
+         if ( slat_phi[i_phi].phi > 360     ) slat_phi[i_phi].phi-=360.F;       //wjl  fixed now...
+         slat_phi[i_phi].phi_min = Todeg*(phi_tray+atan2(y0-geo->counter_width,slat_eta[0].r));
+         if ( slat_phi[i_phi].phi_min < 0   ) slat_phi[i_phi].phi_min+=360.F;
+         if ( slat_phi[i_phi].phi_min > 360 ) slat_phi[i_phi].phi_min-=360.F;
+         slat_phi[i_phi].phi_max = Todeg*(phi_tray+atan2(y0+geo->counter_width,slat_eta[0].r));
+         if ( slat_phi[i_phi].phi_max < 0   ) slat_phi[i_phi].phi_max+=360.F;
+         if ( slat_phi[i_phi].phi_max > 360 ) slat_phi[i_phi].phi_max-=360.F;
+//wjl
+//	if (i_tray < 4) {
+//		printf(" %d %f %d ..  %f %f ..  %f %f \n", i_tray, phi_tray, i_phi+1, y0,
+//		slat_phi[i_phi].phi, slat_phi[i_phi].phi_max, slat_phi[i_phi].phi_min);
+//	}
+//wjl
  
-//
       } // End loop over counters
    } // End loop over trays
 //
@@ -228,15 +235,18 @@ long ctg_i_eta ( float z,
 //
    for ( int i_eta = 0 ; i_eta < slat_eta_h->nok ; i_eta++ ) {
       if ( z > 0 ) {
-         if ( z > slat_eta[i_eta].z_min  &&  
-              z < slat_eta[i_eta].z_max ) { 
+         if ( (z>slat_eta[i_eta].z_min &&  
+               z<slat_eta[i_eta].z_max  ) ||
+              (z>slat_eta[i_eta].z_max &&  
+               z<slat_eta[i_eta].z_min  ) ) { 
            i_sel = slat_eta[i_eta].ieta ;
            break ; 
          }
-      }
-      else {
-         if ( z < slat_eta[i_eta].z_min  &&
-              z > slat_eta[i_eta].z_max ) {
+      } else {
+         if ( (z<slat_eta[i_eta].z_min &&
+               z>slat_eta[i_eta].z_max  ) ||
+              (z<slat_eta[i_eta].z_max &&
+               z>slat_eta[i_eta].z_min  ) ) {
             i_sel = slat_eta[i_eta].ieta ;
             break ;
          }
@@ -245,7 +255,7 @@ long ctg_i_eta ( float z,
 //
 //   If value was found return
 //
-   if ( i_sel > 1 ) return i_sel ;
+   if ( i_sel > 0 ) return i_sel ;    //BUG WAS HERE  (was i_sel>1)   fixed wjl...
 //
 //  If value not found take closest slat
 //

@@ -10,6 +10,9 @@ macro/global/import *
 *---- when current ctg XDF files are available in the library, just do this...
   exec read
 *
+* tab/pri [params]/ctf/ctg/tof_slat_eta  18
+* tab/pri [params]/ctf/ctg/tof_slat_phi 300
+*
 *---- otherwise define tables "by hand"...
 *---- and save the xdf dataset so it can be put in the library...
 *  exec fill
@@ -57,7 +60,7 @@ RETURN
 macro read 
 macro/global/import *
   cd [params]/ctf
-*TEST  exec read_table_from_file#init infile ./params/ctf/ctg_pars.xdf
+****  exec read_table_from_file#init infile ./params/ctf/ctg_pars.xdf
   exec read_table_from_file#init infile $STAR/params/ctf/ctg_pars.xdf
   exec read_table_from_file#read infile [params]/ctf 
   exec read_table_from_file#close infile
@@ -104,15 +107,15 @@ tdm/table/cell/putvalue 'ctb[0].counter_thickness' 1.
 tdm/table/cell/putvalue 'ctb[0].counter_width'    10.795 
 *
 rowcount ctb_slat_eta [n_tot_eta]
-tdm/table/cell/putvalue 'ctb_slat_eta[0].cosang'   1. 
-tdm/table/cell/putvalue 'ctb_slat_eta[1].cosang'  -1. 
-tdm/table/cell/putvalue 'ctb_slat_eta[2].cosang'   1. 
-tdm/table/cell/putvalue 'ctb_slat_eta[3].cosang'  -1. 
+tdm/table/cell/putvalue 'ctb_slat_eta[0].cosang'   1.
+tdm/table/cell/putvalue 'ctb_slat_eta[1].cosang'  -1.
+tdm/table/cell/putvalue 'ctb_slat_eta[2].cosang'   1.
+tdm/table/cell/putvalue 'ctb_slat_eta[3].cosang'  -1.
 *
-tdm/table/cell/putvalue 'ctb_slat_eta[0].z_min'    -241.49 
-tdm/table/cell/putvalue 'ctb_slat_eta[1].z_min'    -0.13 
-tdm/table/cell/putvalue 'ctb_slat_eta[2].z_min'     0.13 
-tdm/table/cell/putvalue 'ctb_slat_eta[3].z_min'     241.49 
+tdm/table/cell/putvalue 'ctb_slat_eta[0].z_min'    -241.49
+tdm/table/cell/putvalue 'ctb_slat_eta[1].z_min'    -0.13
+tdm/table/cell/putvalue 'ctb_slat_eta[2].z_min'     0.13
+tdm/table/cell/putvalue 'ctb_slat_eta[3].z_min'     241.49
 *
 tdm/table/cell/putvalue 'ctb_slat_eta[0].z_max'  -111.49
 tdm/table/cell/putvalue 'ctb_slat_eta[1].z_max'  -112.63
@@ -178,22 +181,22 @@ newtab   tof_slat     ctg_slat     [n_tot]
 rowcount tof_slat                  [n_tot]
 *
 tdm/table/cell/putvalue 'tof[0].init'             0
-tdm/table/cell/putvalue 'tof[0].detector'         2    | was 1 for ctb
+tdm/table/cell/putvalue 'tof[0].detector'         2
 tdm/table/cell/putvalue 'tof[0].n_tray_eta'       2
 tdm/table/cell/putvalue 'tof[0].n_tray_phi'      60
 tdm/table/cell/putvalue 'tof[0].tray_height'      4.700
 tdm/table/cell/putvalue 'tof[0].tray_width'      10.795
 tdm/table/cell/putvalue 'tof[0].tray_length'    120.81
-tdm/table/cell/putvalue 'tof[0].n_counter_eta'    9    | was 2 for ctb
-tdm/table/cell/putvalue 'tof[0].n_counter_phi'    5    | was 1 for ctb
+tdm/table/cell/putvalue 'tof[0].n_counter_eta'    9
+tdm/table/cell/putvalue 'tof[0].n_counter_phi'    5
 tdm/table/cell/putvalue 'tof[0].i_eta_min'        1
-tdm/table/cell/putvalue 'tof[0].i_eta_max'        18   | was 4 for ctb
+tdm/table/cell/putvalue 'tof[0].i_eta_max'        18
 tdm/table/cell/putvalue 'tof[0].i_phi_min'        1
-tdm/table/cell/putvalue 'tof[0].i_phi_max'        300  | was 60 for ctb
+tdm/table/cell/putvalue 'tof[0].i_phi_max'        300
 tdm/table/cell/putvalue 'tof[0].tray_phi_zero'    0.
 tdm/table/cell/putvalue 'tof[0].r'              213.95
-tdm/table/cell/putvalue 'tof[0].counter_thickness' 1.     |
-tdm/table/cell/putvalue 'tof[0].counter_width'     2.     | was 10.795 for ctb
+tdm/table/cell/putvalue 'tof[0].counter_thickness' 1.
+tdm/table/cell/putvalue 'tof[0].counter_width'     2.159
 *
 do index   =  0,17
    variable='''tof_slat_eta['//[index]//'].cosang'''
@@ -249,7 +252,7 @@ do i_eta = 1, [n_tot_eta]
       tdm/table/cell/putvalue [variable]        0.0
 *---- ADC Calibration Constant
       variable='''tof_slat['//[index]//'].cc_adc'''
-      tdm/table/cell/putvalue [variable]        2.4e-2   | 2.4e-2 for ctb
+      tdm/table/cell/putvalue [variable]        2.4e-2
 *---- TDC Calibration Constant
       variable='''tof_slat['//[index]//'].cc_tdc'''
       tdm/table/cell/putvalue [variable]       25.0e-12
