@@ -359,8 +359,8 @@ Int_t StEmcSimulatorMaker::Make()
 {
 //VPunused    TDataSet *simEmcPar = GetInputDB("emc/simulator");
   // Changed the order of searching - xdf first.
-  static Char_t* typeOfFile[3]={"xdf", "fz", "geant.root"};
-  static Char_t* nameIn[3]={"event/geant/Event", "geant", "geantBranch"};
+  static Char_t* typeOfFile[3]={"xdf", "geant.root", "fz"};
+  static Char_t* nameIn[3]={"event/geant/Event", "geantBranch", "geant"};
   //  Find  Geant  directory with hits
   for(Int_t i=0; i<3; i++){
      geaIn = GetDataSet(nameIn[i]);
@@ -975,8 +975,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.23 2003/09/30 01:28:49 jeromel Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.24 2003/10/01 00:43:16 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.24  2003/10/01 00:43:16  pavlinov
+// Change searching order for Geant hits
+//
 // Revision 1.23  2003/09/30 01:28:49  jeromel
 // Undo correction until logic reshape
 //
