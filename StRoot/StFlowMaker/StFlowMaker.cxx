@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StFlowMaker.cxx,v 1.5 1999/12/04 00:10:34 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.6 1999/12/07 23:30:53 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill StFlowEvent from StEvent and
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.6  1999/12/07 23:30:53  snelling
+// Fixed Linux warnings
+//
 // Revision 1.5  1999/12/04 00:10:34  posk
 // Works with the new StEvent
 //
@@ -71,7 +74,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.5 1999/12/04 00:10:34 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.6 1999/12/07 23:30:53 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -115,7 +118,6 @@ Int_t StFlowMaker::readPhiWgtFile() {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
     for (int j = 0; j < nHars; j++) {
-      float order  = (float)(j+1);
       char countHars[2];
       sprintf(countHars,"%d",j+1);
       TString* histTitle = new TString("Flow_Phi_Weight_Sel");

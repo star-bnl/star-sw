@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.4 1999/12/04 00:10:32 posk Exp $
+// $Id: StFlowEvent.cc,v 1.5 1999/12/07 23:30:52 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.5  1999/12/07 23:30:52  snelling
+// Fixed Linux warnings
+//
 // Revision 1.4  1999/12/04 00:10:32  posk
 // Works with the new StEvent
 //
@@ -97,7 +100,7 @@ Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
   if (!checkInput(harN, selN, 0)) return 0.;
 
   if (mPhi < 0.) mPhi += twopi;
-  Int_t n = (mPhi/twopi)*nPhiBins;
+  Int_t n = (Int_t) (mPhi/twopi)*nPhiBins;
   //float phiWgt = mPhiWgt[selN][harN][n];  
 
   return mPhiWgt[selN][harN][n];
@@ -221,7 +224,7 @@ void StFlowEvent::MakeSubEvents() {
       for (iHar = 0; iHar < nHars; iHar++) {
 	if (pFlowTrack->Select(iHar, iSelect)) {
 	  count[iHar + nHars * iSelect]++;
-	  iSub = ceil(count[iHar + nHars * iSelect] / 
+	  iSub = (Int_t) ceil(count[iHar + nHars * iSelect] / 
 			 floor(fullEventMult[iHar + nHars * iSelect] / nSubs));
 	  if (iSub > nSubs) {
 	    iSub = 0;
