@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobals.hh,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StGlobals.hh,v 1.2 1999/11/09 16:20:08 ullrich Exp $
  *
  * Author:  Thomas Ullrich, 1998
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StGlobals.hh,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/11/09 16:20:08  ullrich
+ * Include stdcomp.h only for SUN.
  *
  * Revision 1.2  1999/11/09 16:20:08  ullrich
  * Include stdcomp.h only for SUN.
@@ -24,7 +24,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#ifndef GNU_GCC
+#ifndef ST_GLOBALS_HH
 #define ST_GLOBALS_HH
 
 #if defined(__SUNPRO_CC)
