@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.44 2004/01/22 16:20:43 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.45 2004/02/11 22:26:55 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.45  2004/02/11 22:26:55  perev
+ * More prints for NO TPC DB
+ *
  * Revision 1.44  2004/01/22 16:20:43  jhthomas
  * Add Hardwired code for Shorted Ring with External Resistor.
  * Change Omega Tau factors.  May need update, later.
@@ -333,6 +336,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   if ( thedb == 0 )
     {
+      cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
+      cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
+      cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
+      cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
       StarDriftV  =     5.45 ;      // Drift Velocity (cm/microSec) Magnitude
       TPC_Z0      =    208.7 ;      // Z location of STAR TPC Gated Grid (cm)
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
