@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.4 2003/12/04 18:27:46 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.5 2003/12/10 04:43:10 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -33,9 +33,22 @@ void EEmcDbItem::print() const{
   }
 
   if(strchr(name,'U') || strchr(name,'V') )
-    printf(" %s crate=%d chan=%3d sec=%d plane=%c strip=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
+    printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
   else
-    printf(" %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
+    printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
+}
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+void EEmcDbItem::exportAscii(FILE *fd) const{
+  
+  if(name[0]==0) return; // item not defined
+
+  if(strchr(name,'U') || strchr(name,'V') )
+    fprintf(fd,"itemSMD %s %3d %3d %2d %c %4d %.3f %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
+  else
+    fprintf(fd,"itemTWR %s %d %3d %2d %c %2d %.3f  %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
 }
 
 //--------------------------------------------------
@@ -66,7 +79,7 @@ void EEmcDbItem::setDefaultTube(int cr_off) {
   int iCrate=crate-cr_off;
   int iTube=chan/16;
   int tubeID=(iTube<=5) ? 2*iTube+1 :14-  2*(iTube-5); // tube ID counting from 1
-  int cwID=tubeID+ 12*(iCrate%8); // offset for every pair of subsectors, not used
+  // int cwID=tubeID+ 12*(iCrate%8); // offset for every pair of subsectors, not used
 
   int secID=1 + ((iCrate/4)+11)%12;
   assert(secID==sec);
@@ -122,6 +135,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.5  2003/12/10 04:43:10  balewski
+// fisrt QA
+//
 // Revision 1.4  2003/12/04 18:27:46  balewski
 // added MAPMT pixel names
 //
