@@ -28,6 +28,11 @@
 // For L3 filter
 #include "StarClassLibrary/BetheBloch.h"
 #include "StEvent/StDedxPidTraits.h"
+// For coloring filter
+#include "StEventTypes.h"
+#include "StProbPidTraits.h"
+#include "StTpcDedxPidAlgorithm.h"
+
 
 #include "StEventHelper.h"
 
@@ -837,3 +842,109 @@ Int_t StMuDstFilterHelper::Accept(StPoints3DABC *pnt)
    trk = (StTrack*)to;
    return Accept(trk);
 }
+
+//______________________________________________________________________________
+ClassImp(StColorFilterHelper)
+StColorFilterHelper::StColorFilterHelper(const char *name,bool active):StFilterABC(name,active)
+{
+   fPidAlgorithm = new StTpcDedxPidAlgorithm();;
+   fElectron     = StElectron::instance();
+   fPion         = StPionPlus::instance();
+   fKaon         = StKaonPlus::instance();
+   fProton       = StProton::instance();
+
+   SetDefs();
+  
+}
+//______________________________________________________________________________
+StColorFilterHelper::~StColorFilterHelper()
+{ delete fPidAlgorithm;}
+//______________________________________________________________________________
+const char  **StColorFilterHelper::GetNams() const
+{
+  static const char *nams[] = {
+    " Electron sigma ",  
+    " Electron color ",
+    " Pion sigma     ",  
+    " Pion color     ",
+    " Kaon sigma     ",  
+    " Kaon color     ",
+    " Proton sigma   ",  
+    " Proton color   ",
+    " others sigma   ",  
+    " others color   ",
+    0
+  };
+  return nams;
+}
+//______________________________________________________________________________
+const float  *StColorFilterHelper::GetDefs() const
+{
+  static const float defs[] = {
+    /* fNSigmaElectron*/ 1 ,   // nSigma cut for electron 
+    /* fNColorElectron*/ 2 ,   // the color index for electron
+    /* fNSigmaPion    */ 1 ,   // nSigma cut for electron
+    /* fNColorPion    */ 3 ,   // the color index for pion
+    /* fNSigmaKaon    */ 1 ,   // nSigma cut for pion
+    /* fNColorKaon    */ 4 ,   // the color index for kaon 
+    /* fNSigmaProton  */ 1 ,   // nSigma cut for kaon
+    /* fNColorProton  */ 6 ,   // the color index kaon
+    
+    /* fNSigmaOther*/   -1,     // nSigma cut for other types
+    /* fNColorOther*/    0,     // the color index for other types
+    0
+  };
+  return defs;
+}
+//______________________________________________________________________________
+Int_t StColorFilterHelper::Accept(const StTrack* track, Color_t &color, Size_t&size, Style_t&) {
+  
+float   sigmaElectron =  fNSigmaElectron ;         // nSigna cut for electron 
+Color_t colorElectron = (Color_t)fNColorElectron ; // the color index for electron
+
+float   sigmaPion     = fNSigmaPion ;              // nSigna cut for electron
+Color_t colorPion     = (Color_t)fNColorPion ;     // the color index for pion
+
+float   sigmaKaon     = fNSigmaKaon ;              // nSigna cut for pion
+Color_t colorKaon     = (Color_t)fNColorKaon ;     // the color index for kaon 
+
+float   sigmaProton   = fNSigmaProton ;            // nSigna cut for kaon
+Color_t colorProton   = (Color_t)fNColorProton ;   // the color index kaon
+    
+// float   sigmaOther    = fNSigmaOther ;             // nSigna cut for other types
+Color_t colorOther    = (Color_t)fNColorOther ;    // the color index for other types
+
+// Fisyak's color schema
+
+/* const StParticleDefinition* pd = */ track->pidTraits(*fPidAlgorithm);
+
+  color = colorOther;
+  size  = 1;
+
+ if (TMath::Abs(fPidAlgorithm->numberOfSigma(fElectron)) < sigmaElectron) 
+    { color = colorElectron; size = 2; }
+
+ if (TMath::Abs(fPidAlgorithm->numberOfSigma(fKaon))     < sigmaKaon)
+    { color = colorKaon; size = 4; }
+ 
+ if (TMath::Abs(fPidAlgorithm->numberOfSigma(fPion))     < sigmaPion)
+    { color = colorPion; size = 5; }
+ 
+ if (TMath::Abs(fPidAlgorithm->numberOfSigma(fProton))   < sigmaProton)
+    { color = colorProton; size = 3; }
+
+  return 1;
+}
+
+//______________________________________________________________________________
+Int_t StColorFilterHelper::Accept(StPoints3DABC *pnt, Color_t&color, Size_t&size, Style_t&style) 
+{
+   TObject *to;
+   StTrack *trk;
+   to = pnt->GetObject();
+   if (!to) 						return 1;
+   if (!to->InheritsFrom(StTrack::Class()))		return 1;
+   trk = (StTrack*)to;
+   return Accept(trk,color,size,style);
+}
+  

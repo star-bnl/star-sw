@@ -266,7 +266,58 @@ private:
   ClassDef(StMuDstFilterHelper,0)
 };
 
+   class StTpcDedxPidAlgorithm;
+   class StElectron;
+   class StPionPlus;
+   class StKaonPlus;
+   class StProton;
+  
+//______________________________________________________________________________
 
+class StColorFilterHelper : public StFilterABC { // An example of default coloring filter
+public:
+   		StColorFilterHelper(const char *name,bool active=true);
+               ~StColorFilterHelper();
+virtual float        *GetPars() const {return (float*)(&fFirst+1);}
+virtual const float  *GetDefs() const;
+virtual const char  **GetNams() const;
+
+protected:
+  virtual Int_t  Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
+          Int_t  Accept(const StTrack *track, Color_t&, Size_t&, Style_t&);
+          Int_t  Accept(StPoints3DABC *pnt){return 1;}
+          
+protected:
+   StTpcDedxPidAlgorithm *fPidAlgorithm;
+   StElectron            *fElectron;
+   StPionPlus            *fPion;
+   StKaonPlus            *fKaon;
+   StProton              *fProton;
+
+private:
+  float fFirst;          // do not touch this data member
+
+  // --
+  // This filter custom data members go here:
+  // --
+    float fNSigmaElectron ;   // nSigna cut for electron 
+    float fNColorElectron ;   // the color index for electron
+    float fNSigmaPion ;       // nSigna cut for electron
+    float fNColorPion ;       // the color index for pion
+    float fNSigmaKaon ;       // nSigna cut for pion
+    float fNColorKaon ;       // the color index for kaon 
+    float fNSigmaProton ;     // nSigna cut for kaon
+    float fNColorProton ;     // the color index kaon
+    
+    float fNSigmaOther ;     // nSigna cut for other types
+    float fNColorOther ;     // the color index for other types
+
+  // --  the last custom data-member  --
+
+  float fLast;                // do not touch this data member
+
+  ClassDef(StColorFilterHelper,0)
+};
 
 
 
