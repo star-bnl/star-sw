@@ -1,3 +1,5 @@
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*        1         2         3         4         5         6         7
 C----------------------------------------------------------------------
 C
 C                               *
@@ -111,6 +113,21 @@ C    21 Apr 1995
 C     -	uncertainty in position along pad row for hits fit w/ 3-point gaussian
 C	now caculated in a non-ad-hoc fashion, depends on signal:noise
 C
+C    June 1995
+C     - npix_pad is now called npix_seq, since it just
+C       indicates where in the ipad,iadc,itdc arrays the pad number (ipad)
+C       changes.  This just makes things faster later on.
+C     - itrk is now an *array* passed back from tph_get_cls_data, telling
+C       which MC track contributed most to a pixel-- that way, the track
+C       associated with a given *hit* can be assessed after deconvolution
+C     - also, no reason to keep iadc,itdc,ipad arrays as reals... put them
+C       integer -- that should also speed things up
+C     - tph_fit_cluster now first figures out how many hits are in
+C       the cluster, then parses the fitting job out to fit_isolated_cluster
+C       (now existing) if isolated or deconvolute_cluster (will exist)
+C     - the field tphit.lambda is now filled, using a vertex ansatz
+C       (lambda=atan(z/radius_of_row)
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -178,8 +195,6 @@ c        functions
          double precision tpg_row_to_y
      +,                   tpg_pad_to_x
 
-         real tph_calc_prf_sigma
-     +,       tph_calc_prf_pos
 c
 C-----------------------------------------------------------------------
 
@@ -187,10 +202,11 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
         integer nclpix_max
         parameter (nclpix_max = 10000)
-        real ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
-	integer npix_pad(100)
+        integer ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
+        integer itrk(nclpix_max)
+	integer npix_seq(300)
 
-        integer isec,irow,itrk,krow
+        integer isec,irow,krow,nhits
 
         integer jtpcl, nclspix
 
@@ -263,7 +279,7 @@ c           endif
      +,                             tpmcpix_h, tpmcpix
      +,                             nclspix, ipad, itdc, iadc, itrk
      +,				    nclpix_max
-     +,				    npix_pad)
+     +,				    npix_seq)
  
 
               tphith.nok = tphith.nok + 1
@@ -273,11 +289,11 @@ c           endif
 c              tphit(tphith.nok).row = krow
 c              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
               tphit(tphith.nok).row = 100*isec+krow     	! mal 30mar95
-              tphit(tphith.nok).track = itrk   ! for now this is MC info
+c              tphit(tphith.nok).track = itrk   ! for now this is MC info
 
-	      call tph_fit_cluster(nseq, nclspix, npix_pad,
-     +				   ipad, itdc, iadc, tphith, tphit,
-     +				   rms_noise)
+	      call tph_fit_cluster(nseq, nclspix, npix_seq,
+     +				   ipad, itdc, iadc, itrk, tphith, tphit,
+     +				   rms_noise,nhits)
 
            else
 c
@@ -285,6 +301,11 @@ c             do not store clusters with < min_hit_seq  sequences in them
 c
               goto 999
            endif
+
+c store (nothing else for now) the estimated number of hits contributing 
+c  to cluster in TPCLUSTER table.... (however, we still treat one cluster
+c  as one hit in TPHIT table for now)
+           tpcluster(jtpcl).nhits  = nhits
 c
 c          finally, transform everything to global coordinates !
 c
@@ -303,7 +324,14 @@ c mal 30mar95
            endif
 
            invec(3)=dble(tphit(tphith.nok).z*time_bucket)
+
+c correct (in average way) for time-offset -- (this is not beautiful)
+c  22jun95 mal
+           invec(3) = invec(3) - 0.88
+
            invec(2)=tpg_row_to_y(iirow,iisec)
+
+
 c
 c mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
 c  		up, so I just do tpg's job explicitly...
@@ -317,6 +345,12 @@ c           invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)
            tphit(tphith.nok).x = real(outvec(1))
            tphit(tphith.nok).y = real(outvec(2))
            tphit(tphith.nok).z = real(outvec(3))
+
+
+c while we have these numbers, fill the lambda field of tphit,
+c  with the ansatz that the track comes from (0,0,0)
+           tphit(tphith.nok).lambda = sngl(datand(outvec(3)/invec(2)))
+
 c
 c          zrf in units of time bins --> cm
 c
@@ -339,15 +373,14 @@ c
 
 c	also, calculate "orientation" of hit in terms of spatial quantities
 
-	if (tphit(tphith.nok).phi.gt.-990.0)
-     +	   tphit(tphith.nok).phi = atand(
-     +				  	tphit(tphith.nok).phi *
-     +					time_bucket / pad_width )
+           tphit(tphith.nok).phi = atand(
+     +          tphit(tphith.nok).phi *
+     +          time_bucket / pad_width )
 
 c must also rotate dx,dy into global coordinates...
 	tphit(tphith.nok).dz = time_bucket*tphit(tphith.nok).dz
 	dx_prime = pad_width*tphit(tphith.nok).dx
-c for explanation of what follows, see bottom of notebook p59
+c for explanation of what follows, see bottom of notebook p95
 	rad = sqrt((tphit(tphith.nok).x)**2+
      +		(tphit(tphith.nok).y)**2)
 	tphit(tphith.nok).dx = dx_prime *
@@ -355,6 +388,20 @@ c for explanation of what follows, see bottom of notebook p59
 	tphit(tphith.nok).dy = dx_prime *
      +		abs(tphit(tphith.nok).x)/rad
 
+
+c here, at the very end, I make up for the sins of Bob Hackenburg, who
+c  spurns convention, and makes the fast and slow simulator routes have
+c  different conventions for sector numbering... best if this becomes
+c  unneccesary!!!!!!!!!! 26may95 mal
+	isec=tphit(tphith.nok).row
+	isec=(isec-irow)/100
+	if (isec.le.12) then
+           isec=isec+12
+        else
+           isec=isec-12
+        endif
+        tphit(tphith.nok).row=isec*100+irow
+ccccccccc
 
  999       continue
         enddo
@@ -371,7 +418,7 @@ C-----------------------------------------------------------------------
      +,                            tpmcpix_h, tpmcpix
      +,                            nclspix, ipad, itdc, iadc, itrk
      +,				   nclpix_max
-     +,				   npix_pad)
+     +,				   npix_seq)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -397,7 +444,7 @@ C     ipad:
 C     itdc:
 C     iadc:
 C     itrk:
-C     npix_pad:	(added 23 Nov 94) number of pixels in segment on each pad
+C     npix_seq:	(added 23 Nov 94) number of pixels in segment on each pad
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -411,7 +458,7 @@ C   Copyright 1994    Lawrence Berkeley Laboratory
 c   
 c   modificattions:
 c   ==============
-C   23nov94 - m lisa - added output argument of npix_pad=number of pixels
+C   23nov94 - m lisa - added output argument of npix_seq=number of pixels
 C			in each sequence
 C
 C   30mar95 now sector=1..24,row=1..45
@@ -443,10 +490,10 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
         integer lvmax,iucomp
 
-        real iadc(*),itdc(*),ipad(*)
-        integer id_pad(*), itrk
+        integer iadc(*),itdc(*),ipad(*)
+        integer id_pad(*), itrk(*)
         integer jseq,nseq,nclspix,irow
-	integer npix_pad(*)
+	integer npix_seq(*)
 C-----------------------------------------------------------------------
         integer ldatum
 c 24mar95 -now data is packed in a new way in tppixel
@@ -456,10 +503,11 @@ c        integer*2 seqmask,botmask
 	integer tdc_factor/'400'X/
 	integer numseq_factor/'100000'X/
 
-        integer maxtrk, ntrk, ktrk, imax
-        parameter (maxtrk=2000)
-        integer ltrk(maxtrk)		! array of all MC tracks contrib to cluster
-        real nocc(maxtrk)		! array of occurrances of those tracks
+c        integer maxtrk, ntrk, ktrk, imax
+        integer ktrk
+c        parameter (maxtrk=2000)
+c        integer ltrk(maxtrk)		! array of all MC tracks contrib to cluster
+c        real nocc(maxtrk)		! array of occurrances of those tracks
 
         integer kseq,kpix,kseqpix
         integer jpix,iclspix,indx
@@ -474,16 +522,16 @@ c        data seqmask/'3F00'X/,botmask/'FF'X/
 C-----------------------------------------------------------------------
 
         iclspix = 0
-        ntrk = 0
-        call vzero(ltrk,maxtrk)
-        call vzero(nocc,maxtrk)
+c        ntrk = 0
+c        call vzero(ltrk,maxtrk)
+c        call vzero(nocc,maxtrk)
 
 	iseq_num = 0
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
            iclspix = iclspix + 1
 
-	   if (nclspix.gt.nclpix_max) then
+	   if (iclspix.gt.nclpix_max) then
 	     id = 0
 	     call message('TPHAM-!-TMP too many pixels!',1,id)
 	     return
@@ -494,29 +542,31 @@ c
 c          for MC data!
 c
            ktrk = tpmcpix(jpix).mcid
-           if(ntrk.gt.0 .and. ntrk.lt.maxtrk)then
-              mtrk = iucomp(ktrk,ltrk,ntrk)
-              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
-                 ntrk = ntrk + 1
-                 ltrk(ntrk) = ktrk
-                 nocc(ntrk) = 1.
-              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
-                 nocc(mtrk) = nocc(mtrk) + 1.
-              else
-                 id = 0
-                 call message('TPHAM-I-GCD--A, ntrk.gt.maxtrk',1,id)
-                 return
-              endif
-           elseif(ntrk.eq.0)then
-              ntrk = ntrk + 1
-              ltrk(ntrk) = ktrk
-              nocc(ntrk) = 1.
-           else
-              id = 0
-              call message('TPHAM-I-GCD--B, ntrk.gt.maxtrk',1,id)
-	      write(6,*)ntrk,maxtrk,ktrk
-              return
-           endif
+           itrk(iclspix) = ktrk
+c this below is a good way to do it but save it for after deconvolution
+c           if(ntrk.gt.0 .and. ntrk.lt.maxtrk)then
+c              mtrk = iucomp(ktrk,ltrk,ntrk)
+c              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+c                 ntrk = ntrk + 1
+c                 ltrk(ntrk) = ktrk
+c                 nocc(ntrk) = 1.
+c              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+c                 nocc(mtrk) = nocc(mtrk) + 1.
+c              else
+c                 id = 0
+c                 call message('TPHAM-I-GCD--A, ntrk.gt.maxtrk',1,id)
+c                 return
+c              endif
+c           elseif(ntrk.eq.0)then
+c              ntrk = ntrk + 1
+c              ltrk(ntrk) = ktrk
+c              nocc(ntrk) = 1.
+c           else
+c              id = 0
+c              call message('TPHAM-I-GCD--B, ntrk.gt.maxtrk',1,id)
+c	      write(6,*)ntrk,maxtrk,ktrk
+c              return
+c           endif
 
 c           iadc(iclspix) = real(idatum(1))
 c
@@ -526,52 +576,54 @@ c           itdc(iclspix) = real(tdc_lo + tdc_hi)
 c           kseqpix = iand(idatum(2),seqmask)/'100'X
 c new way to unpack data
            kseqpix = ldatum/numseq_factor
-           itdc(iclspix) = real((ldatum - numseq_factor*kseqpix)/
-     +		tdc_factor)
-           iadc(iclspix) = real(ldatum - numseq_factor*kseqpix 
-     +		- tdc_factor*int(itdc(iclspix)))
+           itdc(iclspix) = (ldatum - numseq_factor*kseqpix)/
+     +		tdc_factor
+           iadc(iclspix) = ldatum - numseq_factor*kseqpix 
+     +		- tdc_factor*itdc(iclspix)
 
-           ipad(iclspix) = real(tpseq(kseq).secpad-id_pad(irow))
+           ipad(iclspix) = tpseq(kseq).secpad-id_pad(irow)
 
 	   iseq_num = iseq_num+1
-	   npix_pad(iseq_num) = kseqpix
+	   npix_seq(iseq_num) = kseqpix
 
            do indx = 2, kseqpix
               iclspix = iclspix + 1
-	      if (nclspix.gt.nclpix_max) then
+	      if (iclspix.gt.nclpix_max) then
 	        id = 0
 	        call message('TPHAM-!-TMP too many pixels!',1,id)
 	        return
 	      endif
               ldatum = tppixel(jpix+indx-1).datum
 c              iadc(iclspix) = real(idatum(1))
-              itdc(iclspix) = real(itdc(iclspix-1)+1.)
-              iadc(iclspix) = real(ldatum - numseq_factor*kseqpix 
-     +		- tdc_factor*int(itdc(iclspix)))
-              ipad(iclspix) = real(ipad(iclspix-1))
+              itdc(iclspix) = itdc(iclspix-1)+1
+              iadc(iclspix) = ldatum - numseq_factor*kseqpix 
+     +		- tdc_factor*itdc(iclspix)
+              ipad(iclspix) = ipad(iclspix-1)
 c
 c             for MC data!
 c
               ktrk = tpmcpix(jpix).mcid
-              mtrk = iucomp(ktrk,ltrk,ntrk)
-              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
-                 ntrk = ntrk + 1
-                 ltrk(ntrk) = ktrk
-                 nocc(ntrk) = 1.
-              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
-                 nocc(mtrk) = nocc(mtrk) + 1.
-              else
-                 id = 0
-                 call message('TPHAM-I-GCD--C, ntrk.gt.maxtrk',1,id)
-                 return
-              endif
+              itrk(iclspix) = ktrk
+c this below is a good way to do it... save it for after deconvolution
+c              mtrk = iucomp(ktrk,ltrk,ntrk)
+c              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+c                 ntrk = ntrk + 1
+c                 ltrk(ntrk) = ktrk
+c                 nocc(ntrk) = 1.
+c              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+c                 nocc(mtrk) = nocc(mtrk) + 1.
+c              else
+c                 id = 0
+c                 call message('TPHAM-I-GCD--C, ntrk.gt.maxtrk',1,id)
+c                 return
+c              endif
 
            enddo
         enddo
 
         nclspix = iclspix
-        imax = lvmax(nocc,ntrk)
-        itrk = ltrk(imax)
+c        imax = lvmax(nocc,ntrk)
+c        itrk = ltrk(imax)
 
 c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 
@@ -580,9 +632,9 @@ c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_fit_cluster(nseq, nclspix, npix_pad,
-     +				ipad, itdc, iadc, 
-     +				tphith, tphit,rms_noise)
+	Subroutine tph_fit_cluster(nseq, nclspix, npix_seq,
+     +				ipad, itdc, iadc, itrk,
+     +				tphith, tphit,rms_noise,nhits)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -591,10 +643,11 @@ C   Input arguments  (One to a line with definition after ! )
 C
 C     nseq:	number of sequences in cluster
 C     nclspix:	number of pixels in cluster
-C     npix_pad: number of pixels in each sequence in cluster
+C     npix_seq: number of pixels in each sequence in cluster
 C     ipad:	for each pixel, what is pad #
 C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
+C     itrk:     for each pixel, what MC track contributed most
 C     rms_noise: rms noise on adc values
 C
 C   Output arguments : 
@@ -609,6 +662,8 @@ C			dq    - ??? not filled - how to do it???
 C			prf   - width of gaussian in pad direction
 C			zrf   - width in time direction
 C			phi   - orientation of the hit w.r.t. padplane
+C                       track - dominant MC track contributing to hit's pixels
+C     nhits - estimated number of hits in this cluster
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -641,125 +696,541 @@ C-----------------------------------------------------------------------
 
 C-----------------------------------------------------------------------
 	integer nseq,nclspix
-	real ipad(*),itdc(*),iadc(*)
-	integer npix_pad(*)
+	integer ipad(*),itdc(*),iadc(*),itrk(*)
+	integer npix_seq(*),nhits
+
+        real rms_noise
+
+	integer nhits_nnet      ! neural net estimator function
+                                ! of #hits in cluster
+
+
+        integer max_hits_in_cluster
+        parameter(max_hits_in_cluster=10)
+        real q(max_hits_in_cluster)
+        real x(max_hits_in_cluster)
+        real dx(max_hits_in_cluster)
+        real prf(max_hits_in_cluster)
+        real z(max_hits_in_cluster)
+        real dz(max_hits_in_cluster)
+        real zrf(max_hits_in_cluster)
+        real phi(max_hits_in_cluster)
+        real track(max_hits_in_cluster)
+c----------------------------------------------------------------
+
+c*** skip the neural net for now..... mal 21jun95
+***        nhits = nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc) ! this is experimental
+        nhits=1
+
+        if (nhits.eq.1) then
+           call tph_fit_isolated_cluster(nseq, nclspix, npix_seq,
+     +				ipad, itdc, iadc, itrk,
+     +				rms_noise,
+     +                          q,x,dx,prf,z,dz,zrf,phi,track)
+           tphit(tphith.nok).q     = q(1)
+           tphit(tphith.nok).x     = x(1)
+           tphit(tphith.nok).dx    = dx(1)
+           tphit(tphith.nok).prf   = prf(1)
+           tphit(tphith.nok).z     = z(1)
+           tphit(tphith.nok).dz    = dz(1)
+           tphit(tphith.nok).zrf   = zrf(1)
+           tphit(tphith.nok).phi   = phi(1)
+           tphit(tphith.nok).track = track(1)
+        endif
+
+        return
+        end
+
+
+
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_fit_isolated_cluster(nseq, nclspix, npix_seq,
+     +				ipad, itdc, iadc, itrk,
+     +				rms_noise,
+     +                          q,x,dx,prf,z,dz,zrf,phi,track)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:	number of sequences in cluster
+C     nclspix:	number of pixels in cluster
+C     npix_seq: number of pixels in each sequence in cluster
+C     ipad:	for each pixel, what is pad #
+C     itdc:	for each pixel, what is bucket #
+C     iadc:	for each pixel, what is adc value
+C     itrk:     for each pixel, what MC track contributed most
+C     rms_noise: rms noise on adc values
+C
+C   Output arguments : 
+C
+C     q         - "integrated charge" (sum of adc counts)
+C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
+C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
+C     phi       - "orientation" of cluster
+C     track     - MC track contributing the most pixels
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C	This subroutine replaces what had been a messy set of routine
+C	calls in the main code.  It should help in fitting in a more
+C	truly 2-dimentional way.
+C	The pad direction is fit with a Gaussian parametrization.
+C	The time direction is fit with a form reflecting real signals
+C	measured in the lab.
+C
+C   Originally written 23 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+
+
+c passed inputs
+	integer nseq,nclspix
+	integer ipad(*),itdc(*),iadc(*),itrk(*)
+	integer npix_seq(*),nhits
+
+c passed outputs
+        real q(*)
+        real x(*)
+        real dx(*)
+        real prf(*)
+        real z(*)
+        real dz(*)
+        real zrf(*)
+        real phi(*)
+        real track(*)
+
+        integer tph_3point_gauss
 
 	real centroid,sigma,uncertainty,sum,rms_noise,dt0
 C-----------------------------------------------------------------------
-	integer lvmax
-	integer iseq,iptr_lo,iptr_hi
-	integer itim,ipix
-	real padsum(50),padnum(50),padtime(50),padwidth(50),d_padsum(50)
-	real tseq(100),aseq(100)	! for passing to pulse-fitting routine
-	real t0,tau
-	real hitsum
-	real mom1,mom2
-	integer ngood_times
-	real adc_sum
-	integer id,imax
-	real dylin(50),slope,intercept
-	real dslope,dintercept
-	real padtime_arr(50),padwidth_arr(50)
-	real padsum_arr(50),padnum_arr(50),d_padsum_arr(50)
+
+        integer ipix,adc_sum
+        integer npads_max,nbuck_max
+        parameter(npads_max=184,nbuck_max=1024)
+        integer pad_proj(npads_max),time_proj(nbuck_max)
+        integer tdc_x_adc(npads_max)
+        integer nmc_tracks_max,nmc_tracks
+        parameter(nmc_tracks_max=2000)
+        integer imc_track(nmc_tracks_max),nocc_track(nmc_tracks_max)
+
+        real identity_vector(nbuck_max) ! useful for x-axis of projections
+        real rvec(nbuck_max),d_rvec(nbuck_max) ! temp arrays
+        logical first/.true./
+        integer mtrk,iucomp,ktrk
+
+        real slope,b,badness    ! for linear fit
+
+        integer imax,lvsimx
+        integer id,indx
 C-----------------------------------------------------------------------
 
-c loop over sequences to (1) make projection in pad direction 	(padnum,padsum)
-c			 (2) sum all adc counts in hit 		 (hitsum)
-c			 (3) determine and store t0 for each pad (padtime)
-c
-c (here it is assumed that each sequence is on a different pad)
+c set up the identity vector
+        if (first) then
+           first = .false.
+           do indx=1,nbuck_max
+              identity_vector(indx) = float(indx)
+           enddo
+        endif
 
-	hitsum = 0.0
-	ngood_times = 0
-	iptr_lo = 1
-	do iseq = 1,nseq
-	  padsum(iseq) = 0.0
-	  padnum(iseq) = ipad(iptr_lo)
-	  iptr_hi = iptr_lo + npix_pad(iseq) - 1
-	  itim = 0
-	  do ipix=iptr_lo,iptr_hi
-	    itim = itim+1
-	    padsum(iseq) = padsum(iseq) + iadc(ipix)
-	    tseq(itim) = itdc(ipix)
-	    aseq(itim) = iadc(ipix)
-	  enddo
-	  d_padsum(iseq) = sqrt(padsum(iseq))*rms_noise
-	  iptr_lo = iptr_hi + 1
-	  hitsum = hitsum + padsum(iseq)
-	  if (npix_pad(iseq).ge.3) then		! little time info if <3 bkts
-	    call tph_fit_pulse(tseq, aseq, itim, t0, tau)
-	    padtime(iseq) = t0
-	    padwidth(iseq) = tau
-	    if (tau.gt.0.0) then
-	      ngood_times = ngood_times + 1
-	      padtime_arr(ngood_times)  = padtime(iseq)
-	      padwidth_arr(ngood_times) = padwidth(iseq)
-	      padsum_arr(ngood_times)   = padsum(iseq)
-	      d_padsum_arr(ngood_times) = d_padsum(iseq)
-	      padnum_arr(ngood_times)   = padnum(iseq)
-	      dylin(ngood_times)	= 1.0/sqrt(padsum(iseq)) ! ad hoc
-	    endif
-	  else
-	    padwidth(iseq) = -1.0
-	  endif
-	enddo
 
-	tphit(tphith.nok).q = hitsum
+c loop over all pixels, in the process:
+c 1) sum all adc counts == q
+c 2) project onto padrow (will fit projection to find x,dx,prf)
+c 3) project onto time axis (will fit projection to find z,dz,zrf)
+c 4) get time average for each pad (fit each and obtain orientation)
+c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
+
+        call vzero(imc_track,nmc_tracks_max)
+        call vzero(nocc_track,nmc_tracks_max)
+        call vzero(pad_proj,npads_max)
+        call vzero(time_proj,nbuck_max)
+        call vzero(tdc_x_adc,npads_max)
+        adc_sum = 0
+        nmc_tracks = 0
+        do ipix=1,nclspix
+           adc_sum = adc_sum+iadc(ipix)
+           pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
+           time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
+           tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
+     +          itdc(ipix)*iadc(ipix)
+c this following is only useful for MC data-- could turn it off with 
+c  a switch if interested in real data (or real data performance)
+           ktrk=itrk(ipix)
+           mtrk=iucomp(ktrk,imc_track,nmc_tracks)
+           if (mtrk.eq.0) then
+              if (nmc_tracks.lt.nmc_tracks_max) then
+                 nmc_tracks=nmc_tracks+1
+                 imc_track(nmc_tracks) = ktrk
+                 nocc_track(nmc_tracks) = 1
+              else              ! too many contributing tracks... forget it
+                 id=0
+                 call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
+              endif
+           else
+              nocc_track(mtrk) = nocc_track(mtrk)+1
+           endif
+        enddo
+
+c q:
+        q(1) = adc_sum
+
+c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
+        call vfloat(pad_proj,rvec,npads_max)
+        do indx=1,npads_max
+           if (pad_proj(indx).ne.0)
+     +          d_rvec(indx) = sqrt(rvec(indx))*rms_noise
+        enddo
+        if (tph_3point_gauss(identity_vector,rvec,d_rvec,
+     +       npads_max,centroid,sigma,uncertainty).ne.1) 
+     +       call tph_weighted_mean(identity_vector,rvec,d_rvec,
+     +       npads_max,centroid,sigma,uncertainty)
+        x(1) = centroid
+        dx(1) = uncertainty
+        prf(1) = sigma
+
+c z,dz,zrf: - do weighted mean
+        call vfloat(time_proj,rvec,nbuck_max)
+        do indx=1,nbuck_max
+           if (time_proj(indx).ne.0) then
+              d_rvec(indx) = sqrt(rvec(indx))*rms_noise
+           else
+              d_rvec(indx) = 0.0
+           endif
+        enddo
+        call tph_weighted_mean(identity_vector,rvec,d_rvec,
+     +       nbuck_max,centroid,sigma,uncertainty)
+        z(1) = centroid
+        dz(1) = uncertainty
+        zrf(1) = sigma
+
+c orientation phi:
+	call vfloat(tdc_x_adc,rvec,npads_max)
+	call vfloat(pad_proj,d_rvec,npads_max)
+        do indx=1,npads_max
+           if (pad_proj(indx).ne.0) rvec(indx) = rvec(indx)/d_rvec(indx)
+        enddo
+	call lfitw(identity_vector,rvec,d_rvec,npads_max,0,
+     +       slope,b,badness)
+        phi(1) = slope
+
+
+c track: - who contributed the most pixels (MC data)
+        imax = lvsimx(nocc_track,nmc_tracks,1)
+        track(1) = imc_track(imax)
+
+        return
+        end
+
+
+
+*	integer lvsimx
+*	integer iseq,iptr_lo,iptr_hi
+*	integer itim,ipix
+*	integer nsequences_max,npixels_in_sequence_max
+*	parameter (nsequences_max=300,npixels_in_sequence_max=300)
+*	real padsum(nsequences_max)
+*	real padnum(nsequences_max)
+*	real padtime(nsequences_max)
+*	real padwidth(nsequences_max)
+*	real d_padsum(nsequences_max)
+*	real tseq(npixels_in_sequence_max)	! for passing to pulse-
+*	real aseq(npixels_in_sequence_max)	!   fitting routine
+*	real t0,tau
+**	real hitsum
+*(	real mom1,mom2
+*	integer ngood_times
+*	real adc_sum
+*	integer id,imax
+*	real dylin(nsequences_max),slope,intercept
+*	real dslope,dintercept
+*	real padtime_arr(nsequences_max),padwidth_arr(nsequences_max)
+*	real padsum_arr(nsequences_max)
+*	real padnum_arr(nsequences_max),d_padsum_arr(nsequences_max)
+C-----------------------------------------------------------------------
+
+*	hitsum = 0.0
+*	ngood_times = 0
+*	iptr_lo = 1
+*	do iseq = 1,nseq
+*	  padsum(iseq) = 0.0
+*	  padnum(iseq) = ipad(iptr_lo)
+*	  iptr_hi = iptr_lo + npix_seq(iseq) - 1
+*	  itim = 0
+*	  do ipix=iptr_lo,iptr_hi
+*	    itim = itim+1
+*	    padsum(iseq) = padsum(iseq) + iadc(ipix)
+*	    tseq(itim) = itdc(ipix)
+*	    aseq(itim) = iadc(ipix)
+*	  enddo
+*	  d_padsum(iseq)=sqrt(padsum(iseq))*rms_noise
+*	  iptr_lo = iptr_hi + 1
+*	  hitsum = hitsum + padsum(iseq)
+*	  if (npix_seq(iseq).ge.3) then		! little time info if <3 bkts
+*	    call tph_fit_pulse(tseq, aseq, itim, t0, tau)
+*	    padtime(iseq) = t0
+*	    padwidth(iseq) = tau
+*	    if (tau.gt.0.0) then
+*	      ngood_times = ngood_times + 1
+*	      padtime_arr(ngood_times)  = padtime(iseq)
+*	      padwidth_arr(ngood_times) = padwidth(iseq)
+*	      padsum_arr(ngood_times)   = padsum(iseq)
+*	      d_padsum_arr(ngood_times) = d_padsum(iseq)
+*	      padnum_arr(ngood_times)   = padnum(iseq)
+*	      dylin(ngood_times)	= 1.0/sqrt(padsum(iseq)) ! ad hoc
+*	    endif
+*	  else
+*	    padwidth(iseq) = -1.0
+*	  endif
+*	enddo
+
+*	tphit(tphith.nok).q = hitsum
 
 c calculate hit position along pad row: fit to gaussian.  If that does not
 c   work, do a weighted mean
 c
-	sigma = -1.0
-	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum,
-     +					d_padsum, nseq,
-     +					centroid, sigma, uncertainty)
-	if (sigma.le.0.0) then
-	  call tph_weighted_mean(padnum, padsum, d_padsum, nseq,
-     +				 centroid, sigma, uncertainty)
-	  sigma = -sigma		! use sign to flag different algorithm
-	endif
+*        if (tph_3point_gauss(padnum, padsum,
+*     +       d_padsum, nseq, centroid, sigma, uncertainty).ne.1) then
+*           call tph_weighted_mean(padnum, padsum, d_padsum, nseq,
+*     +          centroid, sigma, uncertainty)
+*           sigma = -sigma       ! use sign to flag different algorithm
+*        endif
 
-	tphit(tphith.nok).x = centroid
-	tphit(tphith.nok).prf = sigma
-	tphit(tphith.nok).dx = uncertainty
+*	tphit(tphith.nok).x = centroid
+*	tphit(tphith.nok).prf = sigma
+*	tphit(tphith.nok).dx = uncertainty
 
 c Calculate hit position along time direction from sequences with well-defined
 c  t0's
 
-	if (ngood_times.ge.1) then
-	  call tph_weighted_mean(padtime_arr, padsum_arr,
-     +				 d_padsum_arr, ngood_times,
-     +				 t0, mom2,dt0)
-	  call tph_weighted_mean(padwidth_arr, padsum_arr,
-     +				 d_padsum_arr, ngood_times,
-     +				 tau, mom2,uncertainty)
-	else
-	  id = 5
-	  call message('TPH_FIT_CLUSTER no good time peaks-taking max',
-     +			1, id)
-	  imax = lvmax(iadc,nclspix)
-	  t0 = itdc(imax)
-	  tau = 0.0
-	  dt0 = 0.0
-	endif
+*	if (ngood_times.ge.1) then
+*	  call tph_weighted_mean(padtime_arr, padsum_arr,
+*     +				 d_padsum_arr, ngood_times,
+*     +				 t0, mom2,dt0)
+*	  call tph_weighted_mean(padwidth_arr, padsum_arr,
+*     +				 d_padsum_arr, ngood_times,
+*     +				 tau, mom2,uncertainty)
+*	else
+*	  id = 0
+*	  call message('TPH_FIT_CLUSTER no good time peaks-taking max',
+*     +			1, id)
+*c	  imax = lvmax(iadc,nclspix)
+*	  imax = lvsimx(iadc,nclspix,1) ! because iadc is now integer
+*	  t0 = itdc(imax)
+*	  tau = 0.0
+*	  dt0 = 1.0
+*	endif
 
-	tphit(tphith.nok).z   = t0
-	tphit(tphith.nok).dz  = dt0
-	tphit(tphith.nok).zrf = tau
+*
+*	tphit(tphith.nok).z   = t0
+*	tphit(tphith.nok).dz  = dt0
+*	tphit(tphith.nok).zrf = tau
 
 
 c now linear fit to padtime vs padnum:
-	if (ngood_times.gt.1) then	
- 	  call tph_lin_fit(padnum_arr, padtime_arr, dylin, ngood_times,
-     +			   slope, dslope, intercept, dintercept)
-	else
-	  slope = -1000.0
-	endif
+*	if (ngood_times.gt.1) then	
+* 	  call tph_lin_fit(padnum_arr, padtime_arr, dylin, ngood_times,
+*     +			   slope, dslope, intercept, dintercept)
+*	else
+*	  slope = -1000.0
+*	endif
 
-	tphit(tphith.nok).phi = slope
+*	tphit(tphith.nok).phi = slope
 
-	return
-	end
+*	return
+*	end
+
+
+
+      integer function nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
+c
+c this is an experimental neural net function that should return the number of hits
+c  that have contributed to a given cluster *****
+c
+c
+C     nseq:	number of sequences in cluster
+C     nclspix:	number of pixels in cluster
+C     npix_seq: number of pixels in each sequence in cluster
+C     ipad:	for each pixel, what is pad #
+C     itdc:	for each pixel, what is bucket #
+C     iadc:	for each pixel, what is adc value
+c
+      implicit none
+c this include file contains neural net architecture
+#include "tcl_nnet.inc"
+      
+      integer nseq,nclspix
+      integer ipad(*),itdc(*),iadc(*)
+      integer npix_seq(*)
+
+      integer minpad,maxpad,mintdc,maxtdc
+      integer ix,iy,ig,ng,nsamp
+      parameter(ng=12,nsamp=12)
+      real g(1:ng)
+      real a(1:nsamp,1:nsamp)   ! for passing to correlated moments routine
+      real f_nnet
+      integer ipic
+
+      nhits_nnet = 1            ! this is the default value
+      
+c (1) pack cluster in array a...
+c find minimum and maximum pad, time bucket #
+      do ix=1,nsamp
+         do iy=1,nsamp
+            a(ix,iy) = 0.0
+         enddo
+      enddo
+      minpad=9999
+      maxpad=-9999
+      mintdc=9999
+      maxtdc=-9999
+      do ipic=1,nclspix
+         if (ipad(ipic).lt.minpad) minpad=ipad(ipic)
+         if (ipad(ipic).gt.maxpad) maxpad=ipad(ipic)
+         if (itdc(ipic).lt.mintdc) mintdc=itdc(ipic)
+         if (itdc(ipic).gt.maxtdc) maxtdc=itdc(ipic)
+      enddo
+      if ((maxpad-minpad+1).gt.nsamp) then
+         write(6,*)'ERROR - nsamp too small (pad)'
+         return
+      endif
+      if ((maxtdc-mintdc+1).gt.nsamp) then
+         write(6,*)'ERROR - nsamp too small (tdc)'
+         return
+      endif
+      do ipic=1,nclspix
+         ix = ipad(ipic) - minpad + 1
+         iy = itdc(ipic) - mintdc + 1
+         a(ix,iy) = iadc(ipic)
+      enddo
+
+c (2) calculate reduced correlated moments (net preprocessor)      
+      call calculate_correlated_moments(a,nsamp,g,ng)
+      do ig=1,ng                ! correlated moments are net input
+         s(0,ig) = g(ig)
+      enddo
+
+c (3) process through net
+      do il=1,n_layer
+         do in=1,nneur(il)
+            sum = 0.0
+            do jn=1,nneur(il-1)
+               sum = sum + w(il,in,jn)*s(il-1,jn)
+            enddo
+            s(il,in) = f_nnet(sum - t(il,in),il)
+         enddo
+      enddo
+
+      nhits_nnet = nint(s(n_layer,1))
+      
+      end
+
+c----------------------------------------------
+      real function f_nnet(x,l)
+      implicit none
+      real x
+      integer l
+c     transfer function, which depends on layer
+      goto (1,2,3) l
+ 1    f_nnet = tanh(x)
+      return
+ 2    f_nnet = tanh(x)
+      return
+ 3    f_nnet = x
+      return
+      end
+c----------------------------------------------
+
+
+
+      subroutine calculate_correlated_moments(a,nsamp,g,ng)
+      implicit none
+      integer nsamp,ng
+      integer nsamp_i,nsamp_j
+      integer iprime,jprime,ipq_combo
+      real a(1:nsamp,1:nsamp),g(1:ng)
+      integer ip,im,m,i,j,index1,index2,iq
+      integer ik,k
+      real gmom,asum,ave_j,ave_i
+c     
+c     based on p116 in STAR notebook
+c     
+      
+      nsamp_i = nsamp
+      nsamp_j = nsamp
+      
+      do ipq_combo=1,3
+         if (ipq_combo.eq.1) then
+            ip = 2
+            iq = 0
+            index1 = 0
+         elseif (ipq_combo.eq.2) then
+            ip = 0
+            iq = 2
+            index1=4
+         elseif (ipq_combo.eq.3) then
+            ip = 2
+            iq = 2
+            index1=8
+         endif
+         index2 = 0
+         do im=0,2,2
+            m = nsamp_i/2**im
+            do ik=0,2,2
+               k = nsamp_i/2**ik
+               index2=index2+1
+c     ok, now we have decided what is p,q and m,k... now calculate G_(p,q)(m,k)
+               gmom = 0.0
+               do i=1,nsamp_i-m+1
+                  do j=1,nsamp_j-k+1
+                     asum = 0.0
+                     ave_i = 0.0
+                     ave_j = 0.0
+                     do iprime=i,i+m-1
+                        do jprime=j,j+k-1
+                           asum = asum + a(iprime,jprime)
+                           ave_i = ave_i+iprime*a(iprime,jprime)
+                           ave_j = ave_j+jprime*a(iprime,jprime)
+                        enddo
+                     enddo
+                     if (asum.gt.0.0) then
+                        ave_i = ave_i/asum
+                        ave_j = ave_j/asum
+                        do iprime=i,i+m-1
+                           do jprime=j,j+k-1
+                              gmom = gmom + 
+     +                             (float(iprime)-ave_i)**ip *
+     +                             (float(jprime)-ave_j)**iq *
+     +                             a(iprime,jprime)/asum
+                           enddo
+                        enddo
+                     endif
+                  enddo
+               enddo
+c     scale it pretty now...
+               gmom = ((float(m)/float(nsamp_i))*
+     +              (float(k)/float(nsamp_j))*
+     +              gmom)**(1.0/float((ip+1)*(iq+1)))
+               g(index1+index2) = gmom
+            enddo
+         enddo
+      enddo
+      return
+      end
+
+
+
 
 C-----------------------------------------------------------------------
 	Subroutine tph_fit_pulse(tseq, aseq, itim,
@@ -930,7 +1401,7 @@ c calculate "width" tau
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_3point_gauss(x, y, dy, npts,
+	integer function tph_3point_gauss(x, y, dy, npts,
      +				centroid, sigma, uncertainty)
 C-----------------------------------------------------------------------
 
@@ -950,7 +1421,8 @@ C     sigma	- Gaussian width from 3-point fit to y(x)
 C     uncertainty - uncertainty in centroid
 C
 C  Returns:
-C       Contained in the output arguments...
+C
+C     +1 if successful, -1 if unable to fit Gaussian
 C     
 C   Functional Description : 
 C
@@ -965,9 +1437,9 @@ C
 C   Error conditions : 
 C   ================
 C
-C	If the distribution is not well described by a gaussian, (i.e.
-C	it has a peak on one edge), a negative sigma is returned and no
-C	centroid is calculated
+C     If the distribution is not well described by a gaussian, (i.e.
+C	it has a peak on one edge and is not monotonic) the function
+C       returns a value of -1
 C
 C-----------------------------------------------------------------------
 	real y(*),x(*),dy(*)
@@ -978,39 +1450,63 @@ C-----------------------------------------------------------------------
 	integer ipt,imax,istart,id
 	real y1,y2,y3,delta,r213
 
-	imax = lvmax(y,npts)
+        tph_3point_gauss = 1
+        
+        if (npts.lt.3) then
+           tph_3point_gauss = -1
+           return
+        endif
 
-	if ((imax.ge.2).and.(imax.lt.npts)) then
-	  istart=imax-1
-	elseif (imax.eq.1) then
-	  id = 0
-	  call message('TPH_3POINT_GAUSS peak at first point',
-     +			1,id)
-c	  istart=1
-	  sigma = -1.0
-	  return
-	else
-	  id = 0
-	  call message('TPH_3POINT_GAUSS peak at last point',
-     +			1,id)
-c	  istart=npts-2
-	  sigma = -1.0
-	  return
+	imax = lvmax(y,npts)
+        
+	if ((imax.ge.2).and.(imax.lt.npts)) then ! normal - max not at edge
+           istart=imax-1
+        elseif (imax.eq.1) then ! maximum occupancy at first point
+           if (y(2).le.y(3)) then
+              id = 0
+              tph_3point_gauss = -1
+              call message('TPH_3POINT_GAUSS bad shape',
+     +             1,id)
+              return
+           endif
+           istart=1
+	else                    ! maximum occupancy at last point
+           if (y(npts-1).le.y(npts-2)) then
+              id = 0
+              tph_3point_gauss = -1
+              call message('TPH_3POINT_GAUSS bad shape',
+     +             1,id)
+              return
+           endif
+           istart=npts-2
 	endif
 
 	y1 = y(istart)
 	y2 = y(istart+1)
 	y3 = y(istart+2)
 
+        if (y1*y3.lt.1.0e-10) then ! zero occupancy - no can do
+           tph_3point_gauss=-1
+           return
+        endif
+
 	delta = x(istart+1) - x(istart)
 	if (delta.ne.1.0) then
 	  id = 0
 	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
      +			1,id)
+          tph_3point_gauss = -1
 	  return
 	endif
 
 	r213 = log(y2*y2/(y1*y3))
+        if (r213.le.0.0) then
+           id = 0
+           tph_3point_gauss = -1
+           call message('TPH_3POINT_GAUSS bad shape - r213',
+     +          1,id)
+           return
+        endif
 	x0 = (delta/2.0) * log(y3/y1)/r213
 	centroid = x(istart+1) + x0
 	sigma = delta/sqrt(r213)
@@ -1134,6 +1630,7 @@ C-----------------------------------------------------------------------
 	real x(*),y(*),dy(*)
 	integer npts
 	real mom1,mom2,uncertainty
+        integer n_nonzero
 C-----------------------------------------------------------------------
 	real ysum
 	integer ipt
@@ -1142,20 +1639,26 @@ C-----------------------------------------------------------------------
 	mom1 = 0.0
 	mom2 = 0.0
 	ysum = 0.0
+	n_nonzero = 0
 	do ipt=1,npts
 	  ysum = ysum + y(ipt)
+          if (y(ipt).gt.1.0e-10) n_nonzero=n_nonzero+1
 	  mom1 = mom1 + x(ipt)*y(ipt)
 	  mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
 	enddo
 	mom1 = mom1 / ysum
 	mom2 = mom2 / ysum
 	mom2 = sqrt(mom2 - mom1*mom1)
+c what follows is what I think is right... however, it does not give
+c  good z-errors, so I calculate uncertainty differently for now...
+c	uncertainty = 0.0
+c	do ipt=1,npts
+c	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
+c	enddo
+c	uncertainty = sqrt(uncertainty)
 
-	uncertainty = 0.0
-	do ipt=1,npts
-	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
-	enddo
-	uncertainty = sqrt(uncertainty)
+	uncertainty = mom2/sqrt(float(n_nonzero))
+
 	return
 	end
 
