@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.7 1999/09/08 23:28:57 fine Exp $
+// $Id: PadBrowser.C,v 1.8 1999/12/19 03:15:42 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.8  1999/12/19 03:15:42  fine
+// StEventDisplayMker loaded
+//
 // Revision 1.7  1999/09/08 23:28:57  fine
 // Histogram browser fixed
 //
@@ -38,6 +41,7 @@ void Load(){
     gSystem->Load("St_geom_Maker");
     gSystem->Load("StIOMaker");
     gSystem->Load("StPadDisplayMaker");
+    gSystem->Load("StEventDisplayMaker");
     gROOT->LoadMacro("PadControlPanel.C");
 }
 //_______________________________________________________________________________________
