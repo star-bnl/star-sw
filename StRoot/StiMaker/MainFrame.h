@@ -57,6 +57,7 @@ enum ETestCommandIdentifiers {
     M_DetNavigate_SetLayerAndAngle,
 
     M_DetView_SkeletonView,
+    M_DetView_ZoomSkeletonView,
     M_DetView_AllVisible,
     M_DetView_AllInvisible,
     M_DetView_TpcVisible,
@@ -140,7 +141,8 @@ private:
     void printVertices();
     
     //call StiDisplayManager::makeSkeletonView
-    void setSkeletonView(); 
+    void setSkeletonView();
+    void setZoomSkeletonView();
 
     //Navigate through detector (should be sub-menued/cascaded)
     void setCurrentDetectorToDefault();
