@@ -156,7 +156,7 @@ static char   s1001[1000];  /*  Some "scratch" string space.  */
 
 
 
-
+
 	char*	MsgCtime( void )
 {
 /*  Description: Return standard 23 character ASCII date and time.
@@ -173,7 +173,7 @@ static char   s1001[1000];  /*  Some "scratch" string space.  */
 /*	size_t strftime (char *s, size_t maxsize, const char *format,             */
 /*	                 const struct tm *timeptr);                               */
 
-	static char str[50];
+	static char str[51];
 	time_t t;
 	size_t length;
 
@@ -1236,7 +1236,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 	if ( control->Sorted ) return;   /*  Already sorted.  */
 
-	for ( ID = 1;  ID <= control->Nprefixes; prefix[ID].SID = ID++ );
+	for ( ID = 1;  ID <= control->Nprefixes; prefix[ID].SID = ID,ID++ );
 
 	while ( !control->Sorted ) {
 	  control->Sorted = TRUE;

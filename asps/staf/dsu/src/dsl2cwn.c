@@ -56,7 +56,7 @@ long xdf2rzd(int lunn, char* inFile)
 /*- Open the INPUT file. -*/
    if ((inputFile = fopen(inFile, type)) == NULL) {
       dsPerror("xdf2rzd.E0- file open failed ");
-      return;
+      return 0;
    }
 
 /*- Create a dataSet pointer associated with the file. -*/
@@ -157,6 +157,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
    ||   !dsTableColumnCount(&ncols, pTable)
    ||   !dsTableDataAddress(&pData, pTable) ) {
       dsPerror("dsl2cwn.E3- bad table ");
+    return 0;
    } else {
 /*    HCDIR(cdir," "); */
       HBNT(hid,((char*)name)," ");
@@ -235,7 +236,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	    HFNT(hid);
 	 }
       }
-      HPRINT(hid);
+      HPRINT(hid); return hid;
    }
 }
 
