@@ -2,10 +2,13 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.20 1999/11/18 22:18:38 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.21 1999/11/27 18:21:42 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.21  1999/11/27 18:21:42  fisyak
+// Add test that primary vertex exists
+//
 // Revision 1.20  1999/11/18 22:18:38  fisyak
-// Spiros decided to open this cut from 1cm (~1sigma for year1) to 3cm (~3sigma).
+//  Spiros decided to open this cut from 1cm (~1sigma for year1) to 3cm (~3sigma).
 //
 // Revision 1.19  1999/11/16 20:58:42  wdeng
 // Spiros's temporary solution to id_start_vertex puzzle
@@ -313,15 +316,15 @@ Int_t StPrimaryMaker::Make(){
         gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
     }
   }
+  else {
+    gMessMgr->Debug() <<" No Primary vertex " << endm;
+    return kStWarn;
+  }
 
   // copy id_start_vertex from globtrk to primtrk for all rows
-  const dst_track_st* globtrkStart = globtrk->GetTable();
-  const dst_track_st* primtrkStart = primtrk->GetTable();  
-  dst_track_st* globtrkPtr;
-  dst_track_st* primtrkPtr;
-  for( Int_t i=0; i<primtrk->GetNRows(); i++) {
-    globtrkPtr = globtrkStart + i;
-    primtrkPtr = primtrkStart + i;
+  dst_track_st* globtrkPtr = globtrk->GetTable();
+  dst_track_st* primtrkPtr = primtrk->GetTable();  
+  for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) {
     primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
   } 
  

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.36 1999/11/19 14:03:44 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.37 1999/11/27 18:21:42 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.37  1999/11/27 18:21:42  fisyak
+// Add test that primary vertex exists
+//
 // Revision 1.36  1999/11/19 14:03:44  fisyak
 // Missed dst lavel
 //
@@ -114,7 +117,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.36 1999/11/19 14:03:44 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.37 1999/11/27 18:21:42 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -354,7 +357,7 @@ Int_t  St_dst_Maker::Filler(){
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (point && fcl_fppoint &&  fpt_fptrack) {
+  if (point && fcl_fppoint &&  fpt_fptrack && vertex) {
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = 0;
     if (globtrk) No_of_Tracks += globtrk->GetNRows();

@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.4 1999/11/17 01:18:28 nystrand Exp $
+// $Id: lmv.cc,v 1.5 1999/11/27 18:21:42 fisyak Exp $
 // $Log: lmv.cc,v $
+// Revision 1.5  1999/11/27 18:21:42  fisyak
+// Add test that primary vertex exists
+//
 // Revision 1.4  1999/11/17 01:18:28  nystrand
 // Modified the filling of the dst vertex table
 //
@@ -52,10 +55,10 @@
 #include "fortranc.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
-//#include "StMagF.h"
+//#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.4 1999/11/17 01:18:28 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.5 1999/11/27 18:21:42 fisyak Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
