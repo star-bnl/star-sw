@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.11 1999/04/07 00:49:05 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.12 1999/04/20 20:06:04 ward Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.11  1999/04/07 00:49:05  lasiuk
- * use the z offset for driftLength
+ * Revision 1.12  1999/04/20 20:06:04  ward
+ * Protection against pointer error in StTrsWireHistogram::clear
  *
+ *
+ * Revision 1.12  1999/04/20 20:06:04  ward
+ * Protection against pointer error in StTrsWireHistogram::clear
  *
  * Revision 1.11  1999/04/07 00:49:05  lasiuk
  * use the z offset for driftLength
@@ -217,6 +220,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    cout << "wire " << wireIndex << " Out Of Wire Grid..."<< endl;
 	}
 }
+
 void StTrsWireHistogram::clear()
 {
     for(int ii=mMin; ii<= mMax; ii++) {
