@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.68 2003/01/10 16:40:16 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.69 2003/01/16 16:02:27 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -137,7 +137,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =   1.2; 
   const float origMultMin     =    0.;
-  const float origMultMax     = 2500.; 
+  const float origMultMax     = 3000.; 
   const float MultEtaMin      =    0.;
   const float MultEtaMax      = 1000.; 
   const float totalMultMin    =    0.;
@@ -152,8 +152,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const float vertexXYMax     =    1.; 
   const float etaSymZMin      =  -1.1; 
   const float etaSymZMax      =   1.1; 
-  const float etaSymMin       =   -5.; 
-  const float etaSymMax       =    5.; 
+  const float etaSymMin       =   -6.; 
+  const float etaSymMax       =    6.; 
   const float phiMin          =    0.;
   const float phiMax          = twopi; 
   const float psiMin          =    0.;
@@ -179,14 +179,14 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMaxPtsBinsTpc    = 61,
 	 nMaxPtsBinsFtpc   = 14,
 	 nFitOverMaxBins   = 40,
-	 nOrigMultBins     = 50,
+	 nOrigMultBins     = 60,
 	 nMultEtaBins      = 50,
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nMultPartBins     = 40,
 	 nVertexZBins      = 60,
 	 nVertexXYBins     = 50,
-	 nEtaSymBins       = 50,
+	 nEtaSymBins       = 48,
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 40,
@@ -1052,12 +1052,12 @@ Int_t StFlowAnalysisMaker::Init() {
 	}
 	
 	histFull[k].histFullHar[j].mHistPsi_Diff = new TH1F(histTitle->Data(),
-						    histTitle->Data(), nPsiBins, -psiMax/my_order/2., psiMax/my_order/2.);
+	     histTitle->Data(), nPsiBins, -psiMax/my_order/2., psiMax/my_order/2.);
       }
 
       else {
 	histFull[k].histFullHar[j].mHistPsi_Diff = new TH1F(histTitle->Data(),	
-						    histTitle->Data(), nPsiBins, -psiMax/2., psiMax/2.);
+		          histTitle->Data(), nPsiBins, -psiMax/2., psiMax/2.);
       }
       
       if (k == 0) {
@@ -1203,7 +1203,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.68 2003/01/10 16:40:16 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.69 2003/01/16 16:02:27 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1334,7 +1334,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	    diff -= twopi/(j+1);
 	  }
 	  
-	  histFull[0].histFullHar[j].mHistPsi_Diff->Fill(diff);
+	  histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
 	}
 	
 	else if (k == 1) {
@@ -2095,6 +2095,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.69  2003/01/16 16:02:27  posk
+// Some plotting changes.
+//
 // Revision 1.68  2003/01/10 16:40:16  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

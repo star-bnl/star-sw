@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.43 2003/01/10 16:40:53 oldi Exp $
+// $Id: plot.C,v 1.44 2003/01/16 16:02:30 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -18,7 +18,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h> 
-//const Int_t nHars    = 6;
+#include <iostream.h>
+//const Int_t nHars     = 6;
 const    Int_t nHars    = 3;
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
@@ -40,7 +41,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   if (cOld) cOld->Delete();
     
   gROOT->SetStyle("Bold");                              // set style
-  //gROOT->SetStyle("Video");                              // set style
   gROOT->ForceStyle();
 
   // names of histograms made by StFlowAnalysisMaker
@@ -151,7 +151,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vPt_ScalarProd_Sel"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 46 + 1;
+  const int nSingles = 49 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -676,6 +676,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.44  2003/01/16 16:02:30  posk
+// Some plotting changes.
+//
 // Revision 1.43  2003/01/10 16:40:53  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
