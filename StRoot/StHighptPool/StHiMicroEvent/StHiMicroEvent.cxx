@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroEvent.cxx,v 1.1 2002/04/02 19:36:15 jklay Exp $
+ * $Id: StHiMicroEvent.cxx,v 1.2 2002/06/05 02:31:51 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroEvent.cxx,v $
+ * Revision 1.2  2002/06/05 02:31:51  jklay
+ * New Nch centrality limits from Zhangbu added
+ *
  * Revision 1.1  2002/04/02 19:36:15  jklay
  * Bums highpt uDST format
  *
@@ -106,8 +109,8 @@ StHiMicroEvent::SetCentrality(Int_t N)
       cout << "StHiMicroEvent->SetCentralityYear2AuAuFull: " << N << endl;
       
       // Centrality for year=2, Au+Au and Full Field 
-
-      int cent[] = {14,33,59,98,150,221,311,428,500};
+      // Zhangbu's corrected numbers as of 4-Jun-2002:
+      int cent[] = {14,30,56,94,146,217,312,431,510};
       if (N < cent[0])       { mCentrality = 0; }
       else if (N < cent[1])  { mCentrality = 1; }
       else if (N < cent[2])  { mCentrality = 2; }
