@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.9 2000/01/25 02:17:04 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.10 2000/01/25 22:25:46 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.10  2000/01/25 22:25:46  fine
+// the number of dimensions for table arrays became 3 instead of 2
+//
 // Revision 1.9  2000/01/25 02:17:04  fine
 // CreateLeafList and dtor have been fixed
 //
@@ -204,7 +207,7 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
 #else
        if (UInt_t(dim) > sizeof(elementDescriptor.m_IndexArray)/sizeof(UInt_t *)) {
                 Error("LearnTable","Too many dimenstions - %d", dim);
-                dim =  2;
+                dim =  3;
        }
 #endif
         for( Int_t indx=0; indx < dim; indx++ ){
