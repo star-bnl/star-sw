@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.7 2002/11/25 19:49:04 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.8 2002/11/26 21:22:03 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.8  2002/11/26 21:22:03  jml
+ * pad width --> 11 for inner sector
+ *
  * Revision 1.7  2002/11/25 19:49:04  jml
  * Changed mintmbk, maxtmbk, ntmbk = 10 to fix problem with loss of high pt tracks
  *
@@ -691,15 +694,11 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
     
 
   hit.nseq = 5;
-  hit.npads = 5;
 
-  hit.minpad = cl_xb - 2;
-  if(hit.minpad < 1) 
-  {
-    hit.npads = cl_xb + 2;
-    hit.minpad = 1;
-  }
-  hit.maxpad = cl_xb + 2;
+  hit.npads = (r>=13) ? 5 : 11;
+
+  hit.minpad = cl_xb - hit.npads/2;
+  hit.maxpad = cl_xb + hit.npads/2;
 
   if(cl_tb >= 5) {
     hit.mintmbk = cl_tb - 5;
@@ -709,7 +708,7 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
     hit.mintmbk = 0;
     hit.maxtmbk = 10;
   }
-  hit.ntmbk = hit.maxtmbk - hit.mintmbk;
+  hit.ntmbk = hit.maxtmbk - hit.mintmbk + 1;
 
   hit.prf = (r>=13) ? mPrfout : mPrfin ;
   hit.zrf = (r>=13) ? mTrfout : mTrfin ;
