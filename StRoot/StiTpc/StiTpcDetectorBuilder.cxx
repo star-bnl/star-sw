@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdexcept>
 #include "StDbUtilities/StTpcLocalCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
@@ -14,9 +15,7 @@
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/Base/Messenger.h"
-#include <stdio.h>
 #include "Sti/StiHitErrorCalculator.h"
-
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
 
@@ -24,12 +23,16 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder()
   : StiDetectorBuilder("TpcBuilder")
 {
   _innerCalc = new StiDefaultHitErrorCalculator();
-  _innerCalc->set(3.12735e-03,1.51055e-04,2.43806e-02,
-		  3.28243e-03,5.23272e-05,5.75341e-02);
+  _innerCalc->set(3.12735e-03, 0., 2.43806e-02,
+		  3.28243e-03, 0., 5.75341e-02);
+  //_innerCalc->set(3.12735e-03,1.51055e-04,2.43806e-02,
+  //3.28243e-03,5.23272e-05,5.75341e-02);
   //		  3.68243e-03,5.23272e-05,5.75341e-02); //original C.P.5/1/03
   _outerCalc = new StiDefaultHitErrorCalculator();
-  _outerCalc->set(8.158e-03,5.69582e-05,4.48440e-02,
-		  8.02775e-03,3.55219e-05,6.45610e-02);
+  _outerCalc->set(8.158e-03, 0., 4.48440e-02,
+		  8.02775e-03, 0., 6.45610e-02);
+  //_outerCalc->set(8.158e-03,5.69582e-05,4.48440e-02,
+  //8.02775e-03,3.55219e-05,6.45610e-02);
   //2.02775e-04,3.55219e-05,6.45610e-02);  //original C.P. 5/1/03
 }
 
