@@ -7,28 +7,44 @@ foreach ASP ( $ASPS )
 echo $ASP $ARCH
 set LIB = .$ARCH/lib
 if ( -d $LIB) then
-  echo rm -f $LIB/lib$ASP.a
-  rm -f $LIB/lib$ASP.a
-  echo rm -f $LIB/lib$ASP.s?.????
-  rm -f $LIB/lib$ASP.s?.????
+  set QWE = $LIB/lib$ASP.a
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
+  
+  set QWE = $LIB/lib$ASP.s?.????
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
 endif
 
 set OBJ = .$ARCH/obj/$ASP
 if ( -e $OBJ ) then
-  echo rm -rf $OBJ/*.o
-  rm -rf $OBJ/*.o
+  set QWE = $OBJ/*.o
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
 endif
 
 set DEP = .$ARCH/dep/$ASP
 if ( -e $DEP ) then
-  echo rm -rf $DEP/*.d
-  rm -rf $DEP/*.d
+  set QWE = $DEP/*.d
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
 endif
 
 set SRG = srg/$ASP
 if ( -e $SRG ) then
-  echo rm -rf $SRG/*.*
-  rm -rf $SRG/*.*
+  set QWE = $SRG/*.*
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
 endif
 
 end

@@ -1,3 +1,3 @@
 #
-cleanupStaf exe
+cleanupStaf.csh exe
 #
