@@ -108,18 +108,18 @@
   exec  init_svg#svg_am
   
  if [svt_simul] = sss then
-    exec init_sss
-    exec init_ssf
+    exec init_sss#init
+    exec init_ssf#init
  elseif [svt_simul] = srs then
    exec create_tables_svt#srs
-   exec init_srs
+   exec init_srs#init
  endif
  
  
  if [svt_tracker].eq.stk .or. [svt_tracker].eq.sgr then
    exec create_tables_svt#sgr
    exec create_tables_svt#stk
-   exec init_sgr
+   exec init_sgr#init
    exec init_stk#init
    exec init_stk#vtx
  endif
