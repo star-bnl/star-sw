@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.3 1998/11/16 14:48:19 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.4 1999/01/18 10:21:10 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,10 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.3  1998/11/16 14:48:19  lasiuk
- * use wire index instead of wireNumber
- * comment signal threshold
- * add deltaResponse()
+ * Revision 1.4  1999/01/18 10:21:10  lasiuk
+ * use integral to deposit total charge in time bin
  *
  * merge operations for speed up (after profiler0
  *
@@ -42,6 +40,7 @@
  * use wire index instead of wireNumber
  * comment signal threshold
  * add deltaResponse()
+ *
  * Revision 1.2  1998/11/13 21:32:16  lasiuk
  * adjust charge generated
  * Put Brian trs versin into StRoot
@@ -191,11 +190,13 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 //     return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
 //     return imageChargeIntegral(xo,yo,xl,xu,yl,yu);
 	    break;
+	default:
 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    exit(0);
-
-    for(int jj=wireHistogram->min(); jj<wireHistogram->max(); jj++) {
- 	cout << "Wire Index: " << jj << endl;
+    cout << "StTrsSlowAnalogSignalGenerator::inducedChargeOnPad()" << endl;
+	}
+}
+// // 	    return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
 // 	    cout << "Gatti Distribution Not Implemented Yet!" << endl;
 // 	    exit(0);
  	cout << "Wire Index: " << jj << '\n' << endl;
@@ -212,15 +213,19 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
 // 	PR(currentWire.size());
 // 	    PR(currentWire.size());
-// 	    ivb PR(ycoord);  // ycoord of Wire
-// 	    ivb PR(currentWire[jj].position());
+    PR(wireHistogram->max());
     if(wireHistogram->min()<0) {
 	cerr << "Wire Plane is empty" << endl;
  	    PR(ycoord);  // ycoord of Wire
+    }
+    for(int jj=wireHistogram->min(); jj<=wireHistogram->max(); jj++) {
+//   	cout << "Wire Index: " << jj << endl;
+
+	// StTrsWireHistogram defines typedefs:
+//  	    PR(ycoord);  // ycoord of Wire
+	aTpcWire currentWire = wireHistogram->getWire(jj);
 	aTpcWire::iterator iter;
-	    // 
-	    // CAREFUL, coordinate is (x,y,driftLength)
-	    //
+
 	    PR(iter->position());
 	    PR(xyCoord);
 	    // center of Pad that is being processed?
@@ -299,11 +304,13 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 			padWidth  = mGeomDb->innerSectorPadWidth();
 		    //cout << "  xl " << xl << " xu " << xu << endl;
 		    //cout << "  yl " << yl << " yu " << yu << endl;
+// 		    PR(padWidth);
 // 		    PR(padLength);
 		    PR(chargeOfSignal);
-		    
+		    PR(iter->numberOfElectrons());
 		    transformer(tpcRaw,xyCoord);
 		    PR(chargeOfSignal);
+// 		    PR(iter->numberOfElectrons());
 		    // Integral limits for nearest pad
 // 		    PR(chargeOfSignal);
 		    double xu = xyCoord.pos().x() + padWidth/2;
@@ -311,35 +318,43 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 		    PR(timeOfSignal);
 		    
 		    //PR(chargeOfSignal);
-		    mSector->addEntry(irow,ipad,padSignal);		    
+		    //PR(timeOfSignal);
+		    PR(padSignal);
+
+//  		    PR(chargeOfSignal);
 		    PR(ipad);
 		    PR(irow);
 		    PR(mSector->timeBinsOfRowAndPad(irow,ipad).size());
 //   		    PR(padSignal);
-		
+// 		    PR(iter->position());
 		    // Make an analog signal
-	
-    } // (jj)Loop over the wires of the Histogram 
+// 		    PR(ipad);
+// 		    PR(irow);
+
 		    //timeOfSignal = iter->position().z()/mSCDb->driftVelocity();
 // 		    PR(ipad);
 //  		    PR(irow);
 //    		    PR(padSignal);
 		    // make and store an analog signal
 //  		    PR(ipad);
+//Signal Sampling
 
 		    mSector->addEntry(irow,ipad,padSignal);
     // tbin = 0,1,2,3...
     // t    = 20,150,250,350...
 // 		    PR(mSector->timeBinsOfRowAndPad(irow,ipad).size());
-    double t = 1./mSamplingFrequency*(tbin+.5);
+		    
+    // Remember calculate at bin Centroid
+    // From DB
     //double t = 1./mSamplingFrequency*(tbin+.5);
-    value =  mGain*s.amplitude();
+
+	    } // row limits
 
 	} // (iterator) Loop over all wires
 
     } // (jj)Loop over the wires of the Histogram
 
-double StTrsSlowAnalogSignalGenerator::symmetricGaussianResponse(double tbin, StTrsAnalogSignal& s)
+/*******************************************************************/
 // Signal Sampling
 // For all functions below: 
 // tbin = 0,1,2,3...
@@ -347,10 +362,12 @@ double StTrsSlowAnalogSignalGenerator::symmetricGaussianResponse(double tbin, St
 
 double StTrsSlowAnalogSignalGenerator::deltaResponse(double tbin, StTrsAnalogSignal& s)
 {
+    double value=0;
 
     // Calculate pulse Height at bin Centroid
     double to = tbin*(1./mSamplingFrequency);
-    double factor = 1/(sqrt(2*pi)*mSigma1);
+    double deltaT = (1./mSamplingFrequency)/2;
+    value =  ((s.time() < to+deltaT) && (s.time() > to-deltaT)) ?
 	mGain*s.amplitude() : 0;
 
     double factor = 1/(M_SQRT1_2*M_2_SQRTPI/4.*mSigma1);
@@ -358,31 +375,107 @@ double StTrsSlowAnalogSignalGenerator::deltaResponse(double tbin, StTrsAnalogSig
     // Remember calculate at bin Centroid
     // From DB
 }
-    //cout << "v " << (value/(.001*volt)) << " mV" << endl;
+    double factor = (M_SQRT1_2*M_2_SQRTPI/(2.*mSigma1));
     value =  mGain*s.amplitude()*factor*exp(-sqr(t-s.time())/(2*sqr(mSigma1)));
     // Clculate at bin Centroid
     double t = 1./mSamplingFrequency*(tbin+.5);
     //    PR(t/nanosecond);
     //    cout << "gain/volt " << (s.amplitude()*mGain/(.001*volt)) << " mV" << endl;
+    // time bin, and multiply it by the width of the bin!
+    value *= mFractionSampled;
+    double value=0;
+    value *= 1./mSamplingFrequency;
+    //double factor = 1/(sqrt(2*pi)*mSigma1);
+    //double factor = (M_SQRT1_2*M_2_SQRTPI/(2.*mSigma1));
+
+    // Calculate at bin Centroid (from static const double)
+    //double t = 1./mSamplingFrequency*(tbin+.5);
+    double t = mTimeBinWidth*(tbin+.5);
+    //PR(t/nanosecond);
+    
+    value =  mGain*s.amplitude()*mSymGausApproxFactor*exp(-sqr(t-s.time())/(2*sqr(mSigma1)));
+    //    double factor = 1/(sqrt(2*M_PI)*mSigma1);
+
+    // Remember calculate at bin Centroid
+    // From DB
+    value *= mFractionSampled*mTimeBinWidth;
+
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    PR(lowerBound);
+    PR(upperBound);
+    //cout << "value/volt " << (value/(.001*volt)) << " mV" << endl;
+    double t = 1./mSamplingFrequency*(tbin+.5);
+    double lowerBound = tbin*100.*nanosecond;
+    double upperBound = lowerBound + 100.*nanosecond;
 double StTrsSlowAnalogSignalGenerator::symmetricGaussianExactResponse(double tbin, StTrsAnalogSignal& s)
-double StTrsSlowAnalogSignalGenerator::asymmetricGaussianResponse(double t, StTrsAnalogSignal& sig)
+    //                1                       (t - to)
     //    F :=   ------------------   exp(-  ---------- )
+    //                  1/2                           2
+    //           (2  Pi)    sigma             2  sigma
 
     double value=0;
-    // These are taken from DB at Constructor
-    //mSigma1 = 1;
-    //mSigma2 = sqrt(8.);
+
+    double t = mTimeBinWidth*(tbin+.5);
+    double lowerBound = tbin*mTimeBinWidth; // used to be --> 100.*nanosecond;
+    double upperBound = lowerBound + mTimeBinWidth; // 100.*nanosecond;
 //     PR(lowerBound);
-    double factor = sqrt(2/pi)/(mSigma1+mSigma2);
+    
     value =  (mGain*s.amplitude()/2.)*
-    if(t<sig.time())
-	value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma1)));
+	(erf((upperBound-s.time())/(M_SQRT2*mSigma1)) -
+    double tau1 = mSigma1;
     double tau2 = 2.*mSigma1;
-	value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma2)));
-	
-    return mGain*value;
+    
+    // use Std Library defined constants
+    double factor = (M_2_SQRTPI/M_SQRT2)/(tau1+tau2);
+
+    double t = 1./mSamplingFrequency*(tbin+.5);
+    
+ 	value =  mGain*s.amplitude()*factor*exp(-sqr(t-s.time())/(2*sqr(tau1)));
+
+    // charge = F(t) dt
+ 	value =  mGain*s.amplitude()*factor*exp(-sqr(t-s.time())/(2*sqr(tau2)));
+
+    value *= mFractionSampled;
+    //double tau1 = mSigma1;
+
+    value *= 1./mSamplingFrequency;
+double StTrsSlowAnalogSignalGenerator::shaperResponse(double t, StTrsAnalogSignal& sig)
+
+    double t = mTimeBinWidth*(tbin+.5);
+
+    
+ 	value =  mGain*s.amplitude()*mAsymGausApproxFactor*exp(-sqr(t-s.time())/(2*sqr(mTau1)));
+    else
+    double tau = mElectronicsDb->tau();
+    
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    double driftVelocity = mSCDb->driftVelocity();
+    // Amount of Charge in the bin
+    //double tau = mElectronicsDb->tau();
+    double value=0;
+    double K = sigmaL*sqrt(sig.time())/(tau*sqrt(driftVelocity));
+    double lambda =  (sig.time() - t)/(K*tau) + K;
+    value = sqr(K)*exp(K*(lambda-K/2.))*
+    // we convolute the response of the electronics with the diffusion
+    // DON'T DO THAT!!!!
+    double lambda =  (tzero - t)/(K*tau) + K;
+    // The integral of the function is actually 10! Take it
+    // into account here!
+    value /= 10.;
+    
+    PR(t);
+    PR(sig.time());
+    PR(driftVelocity);
+    PR(lambda);
+    PR(value);
+    
+    value = 1./(2.*tau)*sqr(K)*exp(K*(lambda-K/2.))*
+
+	( (1+sqr(lambda))/2*(1-erf(lambda/sqrt(2.))) -
+
     // that will do this, but I won't incorporate it yet.
     // For now use the approximation:
+    double tzero = sig.time() - 2.*mTau+10.*nanosecond;
     
     value *= 1./mSamplingFrequency;
 
@@ -397,30 +490,30 @@ double StTrsSlowAnalogSignalGenerator::asymmetricGaussianResponse(double t, StTr
 
     // Amount of Charge in the bin
     value *= mTimeBinWidth;
-double StTrsSlowAnalogSignalGenerator::asymmetricGaussianResponseWithUnrestoredBaseline(double t, StTrsAnalogSignal& sig)
-{
-    double value=0;
-{
-    // These are taken from DB at Constructor
-//     double mSigma1 = 1;
-//     double mSigma2 = sqrt(8.);
+    
+    //    cout << "gain/volt " << (s.amplitude()*mGain/(.001*volt)) << " mV" << endl;
+    return value;
 
-    double factor = sqrt(2/pi)/(mSigma1+mSigma2);
+}
+
+double StTrsSlowAnalogSignalGenerator::oneOverT(double t, double to)
+{
+    // CAUTION:  The following routine can be used to add an
     // undershoot or unrestored baseline to the signal profile.
-    if(t<sig.time())
-	value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma1)));
-    else {
-	if ((t-sig.time())<mSigma2) {  // if inside 1*sigma
-	    value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma2)));
-	}
-	else {  // generate a fraction of undershoot/unrestored
-	    value =
-		sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma2))) + oneOverT(t,sig.time());
-	}	    
+    // Make sure you think you know what you are doing...
+    double value;
+
+    if(t == to) {
+	value = 0;
     }
+    else {
+	//value = -1./(t-to);  // Undershoot
+    
+    }
+// 	value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma1)));
 }
-    return mGain*value;
-}
+
+// 	    value =  sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma2)));
 
 
 // 		sig.amplitude()*factor*exp(-sqr(t-sig.time())/(2*sqr(mSigma2))) + oneOverT(t,sig.time());
@@ -433,9 +526,11 @@ double StTrsSlowAnalogSignalGenerator::asymmetricGaussianResponseWithUnrestoredB
 void StTrsSlowAnalogSignalGenerator::setElectronicSampler(StSignal t)
 double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal& sig)
 {
-    return symmetricGaussianResponse(t, sig);
     //
-    //return asymmetricGaussianResponse(t, sig);
+    // This is where the function for the Signal Sampling is selected
+    // Add a function that returns the amplitude of a signal at
+    return deltaResponse(t, sig);
+    //return symmetricGaussianApproximateResponse(t, sig);
     //return symmetricGaussianExactResponse(t, sig);
     //return asymmetricGaussianApproximateResponse(t, sig);
     //return realShaperResponse(t,sig);
@@ -445,6 +540,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    exit(0);
     cout << "got to SlowAnalogsampler " << endl;
+    //Initialize mSigma1 & 2
     mSigma1 = mElectronicsDb->shapingTime();
     mSigma2 = 2.*mSigma1;
     mTau    = mElectronicsDb->tau();
@@ -455,21 +551,23 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
     PR(mSigma2);
     PR(mSamplingFrequency);
     PR(mGain);
-    // ??sort??
+//     PR(mSigma2);
 //     PR(mSamplingFrequency);
 //     PR(mGain);
     // ??sort?? ---> not necessary
 // 	    break;
 // 	case realShaper:
 // 	    return realShaperResponse(t,sig);
-    for(int irow=0; irow<mSector->numberOfRows(); irow++) {
-	for(int ipad=0; ipad<mSector->numberOfPadsInRow(irow); ipad++) {
+// 	    break;
+// 	    //case StSignal::asymmetricGaussianResponseWithUnRestoredBaseline:
 // 	    //return asymmetricGaussianResponseWithUnRestoredBaseline(t, sig);
 // 	    //break;
 // 	default:
 // 	    cerr << "Default Function Selected. ERROR!" << endl;
 // 	    exit(0);
 // 	    break;
+// 	}
+void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 {
 //     cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
 	    cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;
@@ -486,10 +584,9 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 
 //  		PR(mTimeSequenceIterator->time()/nanosecond);
 // 		cout << itbin << ", ";
-		    //cout << "pulse Height: " << pulseHeight << endl;
 
 //
-		//cout << " pulse Height: " << pulseHeight << endl;
+//  	    cout << "How many signals? " << endl;
 //  	    PR(continuousAnalogTimeSequence.size());
 //  	    for(int bbb=0; bbb<continuousAnalogTimeSequence.size(); bbb++)
 		//cout << itbin << " pulse Height: " << pulseHeight << endl;
@@ -504,18 +601,20 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 //  		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
 		    //if(itbin/freq
 		    //discreteAnalogTimeSequence[itbin].second +=
-		PR(mElectronicSignal);
+		    if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)
+			continue;
+//   		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
+		if(mElectronicSignal.amplitude() !=0 ) {
 		    PR(mElectronicSignal);
 		    PR(mElectronicSignal.amplitude()/(.001*volt));
 		}
-
+		// 
 		//pulseHeight += abs(gauss.shoot(0.,.1));
-
+		if(!mAddNoiseUnderSignalOnly && mAddNoise) {
 	    cout << " Finished Time Bins: irow: " << irow << " ipad " << ipad << endl;
 		}
 
 // 	    cout << " Finished Time Bins: irow: " << irow << " ipad " << ipad << endl;
-	    
 		// minimal threshold (should read value from database)
 		    pulseHeight += generateNoise(); //noise;
 		}
