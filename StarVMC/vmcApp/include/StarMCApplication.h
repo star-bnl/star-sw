@@ -1,4 +1,9 @@
-// $Id: StarMCApplication.h,v 1.1 2004/07/12 20:35:59 potekhin Exp $
+// $Id: StarMCApplication.h,v 1.2 2004/07/13 19:14:52 potekhin Exp $
+// $Log: StarMCApplication.h,v $
+// Revision 1.2  2004/07/13 19:14:52  potekhin
+// Added a finish event callback, event display
+// as a reference
+//
 
 #ifndef STARMCAPPLICATION_H
 #define STARMCAPPLICATION_H
@@ -8,11 +13,15 @@
 #include "StarDetectorConstruction.h"
 #include "StarModule.h"
 #include "StarHit.h"
+#include "StarMCDisplay.h"
 #include "StarRootManager.h"
 
 class TGeoVolume;
 class StarStack;
 class StarGenerator;
+class StarMCDisplay;
+
+typedef void (*pfv) ();
 
 class StarMCApplication : public TVirtualMCApplication
 {
@@ -31,6 +40,8 @@ class StarMCApplication : public TVirtualMCApplication
     void FinishRun();
     void ReadEvent(Int_t i);
  
+
+    virtual void InitDisplay(void);
     virtual void ConstructGeometry();
     virtual void InitGeometry();
     virtual void InspectGeometry(TGeoVolume* v);
@@ -59,6 +70,8 @@ class StarMCApplication : public TVirtualMCApplication
 
     virtual void PrintHits(void);
 
+    virtual void SetFinishEventCB(pfv cb_) {_finishEventCB=cb_;};
+
   private:
     // methods
     void RegisterStack();
@@ -73,7 +86,11 @@ class StarMCApplication : public TVirtualMCApplication
     StarDetectorConstruction _DetectorConstruction;
     Double_t*                fFieldB;
     StarRootManager          fRootManager;
-    int                      fileBased;
+    int                      _fileBased;
+
+    StarMCDisplay*           _display;
+
+    pfv                      _finishEventCB;
 
     ClassDef(StarMCApplication,1)  //Interface to MonteCarlo application
 };
