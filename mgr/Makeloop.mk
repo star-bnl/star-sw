@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.19  1998/10/06 19:52:30  fisyak
+#  Add g2t script
+#
 #  Revision 1.18  1998/09/22 02:21:32  fisyak
 #  Fix NOROOT version
 #
@@ -136,7 +139,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/09/22 02:21:32 $ 
+#           Last modification $Date: 1998/10/06 19:52:30 $ 
 #  default setings
 # Current Working Directory
 #
@@ -272,6 +275,9 @@ Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
 Makers  :=  $(filter-out St_calib_Maker, $(Makers))
 #Makers  :=  $(filter-out St_dst_Maker, $(Makers))
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
+Makers  :=  $(filter-out St_TLA_Maker, $(Makers))
+Makers  :=  $(filter-out St_fss_Maker, $(Makers))
+Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 endif
 #          I have subdrs
 .PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj

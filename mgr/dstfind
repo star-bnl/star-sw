@@ -29,7 +29,8 @@ while (<FILES>) {
   $thepath =~ s/$fname//;
   chomp($fname);
   $dbname = "/star/sol/db/stardb/dst/$fname.STAR.DB";
-  if ( -e $dbname ) {
+  $dbnamef = "/star/sol/db/stardb/dst/$fname"."f".".STAR.DB";
+  if ( -e $dbname || -e $dbnamef ) {
 #    print "File $dbname exists\n";
   } else {
 #    print "$fname not in database\n";
