@@ -1,1 +1,3 @@
-mws     pams/mws/mws       # yepes        09/25/93 11:54:41 Simulates the mwc response
+mws     pams/mws/mws       # vlmrz    Feb 01, 01 - slow simulator for MWC, includes electronic noise
+mwf     pams/mws/mwf       # vlmrz    Feb 01, 01 - fast simulator, same as old mws.F by P. Yepes
+
