@@ -221,16 +221,27 @@ C     Now find last point on track and calculate track length.
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
          
          if((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
-     +        .gt. 400) then
+     +        .gt. 900) then
+            
+            globtrk(iglob).det_id = kTpcId
+
+         elseif((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
+     +        .gt. 300) then
             
             globtrk(iglob).det_id = kTpcSsdId
+
          else
-            if( (gtrk(igtrk).nhit .eq. gtrk(igtrk).ntpc+1 .and.
-     +           ipriv .eq. 0) .or. (gtrk(igtrk).nhit.eq.gtrk(igtrk).ntpc+2))then
-               globtrk(iglob).det_id = kTpcSvtId
-            else
-               globtrk(iglob).det_id = kTpcSsdSvtId
-            endif
+            globtrk(iglob).det_id = kTpcSvtId
+            i = gtrk(igtrk).nhit
+            det = gtrk(igtrk).det(i)
+            do while( det .eq. 2)
+               
+               if( svthit(gtrk(igtrk).ipnt(i)).id_wafer .gt. 7000) then
+                  globtrk(iglob).det_id = kTpcSsdSvtId
+               endif
+               i = i-1
+               det = gtrk(igtrk).det(i)
+            enddo          
          endif
          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
