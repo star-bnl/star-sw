@@ -242,13 +242,16 @@ Int_t St_DataSet::Purge(Option_t *opt)
    TIter next(fList);   
    St_DataSet *son = 0;
 // Purge the sons of this St_DataSet only
+   TList garbage;
    while (son = (St_DataSet *)next()) {
      if (this == son->GetParent()) {
      // mark the object is deleted from the St_DataSet dtor
         son->Purge();
-        if (son->HasData() == 0 && son->GetListSize() == 0) delete son;
+        if (son->HasData() == 0 && son->GetListSize() == 0) 
+                           garbage.Add(son);
      }
    }
+   garbage.Delete();
  }
  return 0;
 }
