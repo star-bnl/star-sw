@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.31 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcTrack.cc,v 1.32 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.32  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.31  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -197,71 +200,6 @@ StFtpcTrack::StFtpcTrack(Int_t tracknumber)
 }
 
 
-StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits, Int_t tracknumber)
-{
-  // Constructor if STAF table track is given.
-  // Creates a ObjArray of the hits belonging to the track.
-
-  mPoints = new TObjArray(0);
-  mPointNumbers = new MIntArray();
-
-  SetTrackNumber(tracknumber);
-
-  Int_t id;
-
-  for(Int_t row=9; row>=0; row--) {
-    id = track_st->hitid[row];
-
-    if (id != -1) {
-      mPointNumbers->AddLast(id - 1);
-      
-      if (hits) {
-	mPoints->AddLast(hits->At(id - 1));
-      }
-    }
-  }
-  
-  mP.SetX(track_st->p[0]);
-  mP.SetY(track_st->p[1]);
-  mP.SetZ(track_st->p[2]);
-
-  mV.SetX(track_st->v[0]);
-  mV.SetY(track_st->v[1]);
-  mV.SetZ(track_st->v[2]);
-  
-  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
-  /*
-  // position of last point is not written to fpt table
-  // therefore it cannot be read
-  mL.SetX(0.);
-  mL.SetY(0.);
-  mL.SetZ(0.);
-  // change fpt table to make these lines possible
-  //mL.SetX(track_st->l[0]);
-  //mL.SetY(track_st->l[1]);
-  //mL.SetZ(track_st->l[2]);
-  */
-
-  mQ = track_st->q;
-  mChiSq[0] = track_st->chisq[0];
-  mChiSq[1] = track_st->chisq[1];
-  mTheta = track_st->theta;
-
-  ComesFromMainVertex(track_st->flag);
-
-  SetRadius(1./track_st->curvature);
-  SetCenterX(0.);
-  SetCenterY(0.);
-  SetAlpha0(0.);
-
-  SetNMax(track_st->nmax);
-  SetDca(track_st->impact);
-
-  SetdEdx(track_st->dedx);
-  SetNumdEdxHits(track_st->ndedx);
-}
-
-
 StFtpcTrack::~StFtpcTrack()
 {
   // Destructor.
@@ -279,6 +217,7 @@ void StFtpcTrack::SetDefaults()
   mPointNumbers = new MIntArray();
 
   mTrackNumber = -1;
+  mGlobTrackId = -1;
 
   SetRadius(0.);
   SetCenterX(0.);
@@ -297,16 +236,17 @@ void StFtpcTrack::SetDefaults()
   mV.SetY(0.);
   mV.SetZ(0.);
 
-  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
-  // mL.SetX(0.);
-  // mL.SetY(0.);
-  // mL.SetZ(0.);
+  mL.SetX(0.);
+  mL.SetY(0.);
+  mL.SetZ(0.);
 
   mQ = 0;
   mChiSq[0] = 0.;
   mChiSq[1] = 0.;
   mTheta = 0.;
   mDca = 0.;
+
+  mTrackLength = 0.;
 
   mdEdx = 0.;
   mNumdEdxHits = 0;
@@ -447,18 +387,20 @@ void StFtpcTrack::SetPointDependencies()
   mRowsWithPoints = 0;
   
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
-    StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
+    StFtpcPoint *p = (StFtpcPoint *)mPoints->At(i);
 
     mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
     
     if (i != 0) {
-      p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
+      p->SetNextHitNumber(((StFtpcPoint *)mPoints->At(i-1))->GetHitNumber());
     }
     
     else {
       p->SetNextHitNumber(-1);
     }
   }    
+
+
 
   return;
 }
@@ -645,10 +587,9 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
   mV.SetX(x(pl));
   mV.SetY(y(pl));
   mV.SetZ(z(pl));
-  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
-  // mL.SetX(x(mTrackLength));
-  // mL.SetY(y(mTrackLength));
-  // mL.SetZ(z(mTrackLength));
+  mL.SetX(x(mTrackLength));
+  mL.SetY(y(mTrackLength));
+  mL.SetZ(z(mTrackLength));
 
   mChiSq[0] = chi2Rad();
   mChiSq[1] = chi2Lin();
@@ -660,91 +601,6 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
   }
 
   return;
-}
-
-
-Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, StFtpcVertex *vertex, Bool_t primary_fit)
-{
-  // Writes track to StAF table
-  
-  trackTableEntry->q = mQ;
-  trackTableEntry->chisq[0] = mChiSq[0];
-  trackTableEntry->chisq[1] = mChiSq[1];
-  trackTableEntry->p[0] = mP.X();
-  trackTableEntry->p[1] = mP.Y();
-  trackTableEntry->p[2] = mP.Z();
-  trackTableEntry->v[0] = mV.X();
-  trackTableEntry->v[1] = mV.Y();
-  trackTableEntry->v[2] = mV.Z();
-  // trackTableEntry->l does not exist yet
-  //trackTableEntry->l[0] = mL.X();
-  //trackTableEntry->l[1] = mL.Y();
-  //trackTableEntry->l[2] = mL.Z();
-  trackTableEntry->length = mTrackLength;
-  trackTableEntry->theta = mTheta;
-  trackTableEntry->curvature = 1/mFitRadius;
-  trackTableEntry->impact = mDca;
-  trackTableEntry->dedx = mdEdx;
-  trackTableEntry->ndedx = mNumdEdxHits;
-  trackTableEntry->nrec = mPoints->GetEntriesFast();
-  trackTableEntry->nfit = trackTableEntry->nrec;
-  trackTableEntry->nmax = mNMax;
-  trackTableEntry->id_start_vertex = vertex->GetId();
-
-  for (Int_t k=0; k<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); k++) {
-    trackTableEntry->hitid[k] = -1;
-  }
-  
-  for (Int_t i=0; i<trackTableEntry->nrec; i++) {
-    Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
-    
-    if (rowindex > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-      rowindex -= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
-    }  
-    
-    trackTableEntry->hitid[rowindex-1] = mPointNumbers->At(i)+1;
-  }
-
-  if (primary_fit) {
-
-    if (vertex->GetId() == 0) { // no vertex found
-      gMessMgr->Message("", "W", "OS") << "StFtpcTrack::WriteTrack(): Primary fit and vertex ID == 0. This should never happen!" << endm;
-      // Primary fit shouldn't be performed without a found vertex!
-    }
-
-    else { // vertex found
-      
-      if (mFromMainVertex) { // this was a global track with dca < max_dca (= a real primary)
-	trackTableEntry->flag = 1;
-	trackTableEntry->nfit++; // add the vertex to the number of fit points
-      }
-      
-      else { // primary fit flag set but global DCA too large -> track holds global parameters, still (no refit done) 
-	trackTableEntry->flag = 0;
-      }
-    }
-  }
-
-  else { // global fit
-
-    if (vertex->GetId() == 0) { // no vertex found
-      trackTableEntry->flag = 0;
-      trackTableEntry->impact = 0.; // set dca to zero because it was calculated with a 'wrong' vertex
-    }
-
-    else { // vertex found
-
-      if (mFromMainVertex) { // primary candidate
-	trackTableEntry->flag = 1;
-      }
-      
-      else { // global track not associated to the primary vertex (possible secondary track)
-	trackTableEntry->flag = 0;
-      }
-    }
-  }
-
-  return 0;
 }
 
 

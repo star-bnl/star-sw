@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapPoint.hh,v 1.3 2000/11/10 18:34:31 oldi Exp $
+// $Id: StFtpcConfMapPoint.hh,v 1.4 2004/02/12 19:37:09 oldi Exp $
 // $Log: StFtpcConfMapPoint.hh,v $
+// Revision 1.4  2004/02/12 19:37:09  oldi
+// *** empty log message ***
+//
 // Revision 1.3  2000/11/10 18:34:31  oldi
 // New constructor added.
 //
@@ -73,7 +76,7 @@ private:
 public:
   
             StFtpcConfMapPoint();                                                 // default constructor
-            StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex);   // constructor
+            StFtpcConfMapPoint(StFtpcPoint *point, StFtpcVertex *vertex);         // "copy" constructor
             StFtpcConfMapPoint(Long_t    row, 
 			       Long_t    sector, 
 			       Long_t    n_pads, 

@@ -13,8 +13,6 @@
 #include "TBenchmark.h"
 #include "StFtpcVertex.hh"
 #include "TObjArray.h"
-#include "tables/St_fpt_fptrack_Table.h"
-#include "tables/St_fcl_fppoint_Table.h"
 
 class StFtpcTracker : public TObject {
 
@@ -36,10 +34,6 @@ protected:
 public:
 
             StFtpcTracker();                                  // default constructor
-            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, 
-			  StFtpcVertex *vertex = 0, 
-			  Bool_t bench = (Bool_t)kFALSE, 
-			  Double_t max_Dca = 100.);           // real constructor
             StFtpcTracker(StFtpcVertex *vertex, 
 			  TObjArray *hit, 
 			  TObjArray *track, 
@@ -49,11 +43,6 @@ public:
 			  StFtpcVertex *vertex, 
 			  Bool_t bench = (Bool_t)kFALSE, 
 			  Double_t max_Dca = 100.);           // constructor to handle arbitrary hits 
-            StFtpcTracker(StFtpcVertex *vertex, 
-			  St_fcl_fppoint *fcl_fppoint, 
-			  St_fpt_fptrack *fpt_fptrack, 
-			  Bool_t bench = (Bool_t)kFALSE, 
-			  Double_t max_Dca = 100.);           // constructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
 
@@ -67,19 +56,12 @@ public:
 			      UChar_t iterations = 1);  // vertex estimation with fit tracks
   void    CalcEnergyLoss();                                                 // calculates dE/dx
   void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
-  Int_t   GlobalFitAnddEdxAndWrite(St_fpt_fptrack *trackTable)
-          { return FitAnddEdxAndWrite(trackTable, kFALSE); }                // global momentum fit, dEdx calculation, and writing of tracks to STAF table
-  Int_t   PrimaryFitAnddEdxAndWrite(St_fpt_fptrack *trackTable) 
-          { return FitAnddEdxAndWrite(trackTable, kTRUE); }                 // primary momentum fit, dEdx calculation, and writing of tracks to STAF table
-  Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
-			     Bool_t primary_fit);                           // does momentum fit, the dEdx calculation, and writes tracks to STAF table
-  Int_t   GlobalFitAndWrite(St_fpt_fptrack *trackTable)
-          { return FitAndWrite(trackTable, kFALSE); }                       // global momentum fit and writing of tracks to STAF table
-  Int_t   PrimaryFitAndWrite(St_fpt_fptrack *trackTable) 
-          { return FitAndWrite(trackTable, kTRUE); }                        // primary momentum fit and writing of tracks to STAF table
-  Int_t   FitAndWrite(St_fpt_fptrack *trackTable, 
-		      Bool_t primary_fit);                                  // does momentum fit and writes tracks to STAF table
-  Int_t   WriteTracksAndClusters();                                         // writes tracks and clusters in ROOT file
+  Int_t   GlobalFitAnddEdx() { return FitAnddEdx(kFALSE); }                 // global momentum fit and dE/dx calculation (no writing!)
+  Int_t   PrimaryFitAnddEdx() { return FitAnddEdx(kTRUE); }                 // primary momentum fit and dE/dx calculation (no writing!)
+  Int_t   FitAnddEdx(Bool_t primary_fit);                                   // does momentum fit and dE/dx calculation (no writing!)
+  Int_t   GlobalFit()  { return Fit(kFALSE); }                              // global momentum fit
+  Int_t   PrimaryFit() { return Fit(kTRUE);  }                              // primary momentum fit 
+  Int_t   Fit(Bool_t primary_fit);                                          // does momentum fit 
 
   // getter
        Float_t   GetTime()              { return mTime;                    }  // returns time consumption
@@ -104,8 +86,11 @@ public:
 
 #endif
 
-// $Id: StFtpcTracker.hh,v 1.19 2003/09/16 16:52:51 jeromel Exp $
+// $Id: StFtpcTracker.hh,v 1.20 2004/02/12 19:37:11 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.20  2004/02/12 19:37:11  oldi
+// *** empty log message ***
+//
 // Revision 1.19  2003/09/16 16:52:51  jeromel
 // Multiple constructor entry, zeroing mBench everywhere + doxygenized
 //

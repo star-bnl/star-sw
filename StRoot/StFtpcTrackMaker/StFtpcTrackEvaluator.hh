@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.11 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.12 2004/02/12 19:37:11 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.12  2004/02/12 19:37:11  oldi
+// *** empty log message ***
+//
 // Revision 1.11  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -89,8 +92,6 @@
 #include "tables/St_g2t_ftp_hit_Table.h"
 
 #include "St_DataSet.h"
-
-#include "tables/St_fpt_fptrack_Table.h"
 
 class StFtpcTrackEvaluator : public TObject {
 
@@ -297,11 +298,8 @@ public:
    TFile   *mFile;                           // Pointer to the data file.
 
             StFtpcTrackEvaluator();                                                                    // default constructor
-            StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex,  
-				 St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, 
-				 Char_t *filename = 0, Char_t *write_permission = 0);                  // real constructor
             StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcTracker *tracker, 
-				 Char_t *filename = 0, Char_t *write_permission = 0);                  // another real constructor
+				 Char_t *filename = 0, Char_t *write_permission = 0);                  // real constructor
   virtual  ~StFtpcTrackEvaluator();                                                                    // destructor
 
   TObjArray *GetGeantHits()   { return mGeantHits;   }

@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.hh,v 1.12 2003/09/02 17:58:17 perev Exp $
+// $Id: StFtpcVertex.hh,v 1.13 2004/02/12 19:37:11 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.13  2004/02/12 19:37:11  oldi
+// *** empty log message ***
+//
 // Revision 1.12  2003/09/02 17:58:17  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -83,8 +86,6 @@
 #include "St_DataSet.h"
 #include "tables/St_dst_vertex_Table.h"
 
-class fcl_fppoint_st;
-
 class StFtpcVertex : public TObject {
 
 private:
@@ -97,7 +98,6 @@ private:
 public:
 
   StFtpcVertex();                                                                    // default constructor
-  StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F *vtx_pos = 0);   // constructor from points        
   StFtpcVertex(TObjArray *hits, TH1F *vtx_pos = 0);                                  // constructor from point array   
   StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
   StFtpcVertex(dst_vertex_st *vertex);                                               // constructor from dst vertex

@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.30 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcConfMapper.cc,v 1.31 2004/02/12 19:37:09 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.31  2004/02/12 19:37:09  oldi
+// *** empty log message ***
+//
 // Revision 1.30  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -202,75 +205,9 @@ StFtpcConfMapper::StFtpcConfMapper()
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(TObjArray *inputHits, MIntArray *good_hits, StFtpcVertex *vertex, Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(fcl_fppoint, vertex, bench)
-{
-  // Constructor.
-
-  if (bench) {
-    mBench->Start("init");
-  }
-
-  mLaser = (Bool_t)kFALSE;
-
-  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
-  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments(); 
-  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments(); 
-  mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
-  mMaxFtpcRow = StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
-
-  CalcEtaMinMax();
-
-  mMainVertexTracks = 0;
-  mMergedTracks = 0;
-  mMergedTracklets = 0;
-  mMergedSplits = 0;
-  mExtendedTracks = 0;
-  mDiffHits = 0;
-  mDiffHitsStill = 0;
-  mLengthFitNaN  = 0;
-
-  Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
-  mClustersUnused = n_clusters;
-  mBadClusters = 0;
-
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
-
-  mHit = new TObjArray(n_clusters);    // create TObjArray
-  mHitsCreated = (Bool_t)kTRUE;
-  {for (Int_t i = 0; i < n_clusters; i++) {
-    mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
-    StFtpcConfMapPoint *hit = (StFtpcConfMapPoint *)mHit->At(i);
-    hit->SetHitNumber(i);
-    if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
-  }}
-
-  mVolume = new TObjArray(mBounds+1);  // create ObjArray for volume cells (of size mBounds + one cell for garbage)
-
-  {for (Int_t i = 0; i <= mBounds; i++) {
-    mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
-  }}
-
-  StFtpcConfMapPoint *h;
-
-  {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
-    h = (StFtpcConfMapPoint *)mHit->At(i);   
-    h->Setup(mVertex);
-    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
-  }}
-
-  if (mBench) {
-    mBench->Stop("init");
-    gMessMgr->Message("", "I", "OS") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
-    mTime += mBench->GetCpuTime("init");
-  }
-}
-
-
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, StFtpcVertex *vertex, Bool_t bench, 
-				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(fcl_fppoint, vertex, bench)
+  : StFtpcTracker(inputHits, vertex, bench)
 {
   // Constructor to fill in evaluated hits.
 
@@ -297,29 +234,24 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
   mDiffHitsStill = 0;
   mLengthFitNaN  = 0;
 
-  Int_t n_clusters = fcl_fppoint->GetNRows();           // number of clusters
+  Int_t n_clusters = inputHits->GetEntriesFast();           // number of clusters
   Int_t n_goodclusters = good_hits->CountAppearance(1); // number of good clusters
   mClustersUnused = n_goodclusters;
   mBadClusters = 0;
-
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TObjArray(n_goodclusters);    // create TObjArray
   mHitsCreated = (Bool_t)kTRUE;
   Int_t good_hits_counted = 0;
 
   {for (Int_t i = 0; i < n_clusters; i++) {
-    
+    StFtpcConfMapPoint *point = (StFtpcConfMapPoint*)inputHits->At(i);
+
     if (good_hits->At(i) == 1) {
-      mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), good_hits_counted);
+      mHit->AddAt(new StFtpcConfMapPoint(point, mVertex), good_hits_counted);
       StFtpcConfMapPoint* hit = (StFtpcConfMapPoint *)mHit->At(good_hits_counted);
       hit->SetHitNumber(i);
       if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
       good_hits_counted++;
-    }
-
-    else {
-      point_st++;
     }
   }}
 
@@ -329,12 +261,12 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }}
 
-  StFtpcConfMapPoint *h;
+  StFtpcConfMapPoint *hit;
 
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
-    h = (StFtpcConfMapPoint *)mHit->At(i);   
-    h->Setup(mVertex);
-    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
+    hit = (StFtpcConfMapPoint *)mHit->At(i);   
+    hit->Setup(mVertex);
+    ((TObjArray *)mVolume->At(GetSegm(hit)))->AddLast(hit);
   }}
 
   if (mBench) {
@@ -350,10 +282,8 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   : StFtpcTracker(hits, vertex, bench)
 {
   // Constructor which needs a ClonesArray of hits as an input.
-  // So it is possible to fill in arbitrary hits.
 
   if (bench) { 
-//VP    mBench = new TBenchmark(); //leak, already made in base class
     mBench->Start("init");
   }
 
@@ -385,12 +315,14 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }}
 
-  StFtpcConfMapPoint *h;
+  StFtpcConfMapPoint *hit;
 
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
-    h = (StFtpcConfMapPoint *)mHit->At(i);
-    if (h->GetUnusableForTrackingFlag()) mBadClusters++;
-    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
+    hit = (StFtpcConfMapPoint *)mHit->At(i);
+    hit->SetHitNumber(i);
+    if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
+    hit->Setup(mVertex);
+    ((TObjArray *)mVolume->At(GetSegm(hit)))->AddLast(hit);
   }}
 
   if (mBench) {
@@ -2113,11 +2045,11 @@ Double_t StFtpcConfMapper::GetEta(Int_t segm)
 }
 
 
-Int_t StFtpcConfMapper::GetSegm(StFtpcConfMapPoint *h)
+Int_t StFtpcConfMapper::GetSegm(StFtpcConfMapPoint *hit)
 {
   // Calculates segment of a given hit.
 
-  return GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h));
+  return GetSegm(GetRowSegm(hit), GetPhiSegm(hit), GetEtaSegm(hit));
 }
 
 
