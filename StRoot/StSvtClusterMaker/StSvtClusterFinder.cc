@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.7 2001/04/25 18:38:28 perev Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.8 2003/01/28 20:28:18 munhoz Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.8  2003/01/28 20:28:18  munhoz
+ * new filters for clusters
+ *
  * Revision 1.7  2001/04/25 18:38:28  perev
  * HPcorrs
  *
@@ -24,6 +27,9 @@
  *  now runs faster.
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.8  2003/01/28 20:28:18  munhoz
+ * new filters for clusters
+ *
  * Revision 1.7  2001/04/25 18:38:28  perev
  * HPcorrs
  *
@@ -100,6 +106,10 @@ void StSvtClusterFinder::setHybridPointer(StSvtHybridData* hdata)
 void StSvtClusterFinder::ClusterFinder()
  { 
   cluIndex = 0;
+  //if (m_hybIndex==69){
+  //cout << " In clumaker, the number of anodes is " << mNumOfAnodes << endl;
+  //}
+
   for(int mAnode = 0; mAnode<mNumOfAnodes; mAnode++)
    {
      hybdata->getListSequences(mAnode,mSequence,sequence); //need to decide where to get sequences
@@ -367,6 +377,10 @@ int StSvtClusterFinder::getSeqOnLeft(int mAnode, int& breakAn,int mSeqStart, int
 
 //____________________________________________________________________________
 
+void StSvtClusterFinder::SetHybIndex(int index)
+{
+  m_hybIndex = index;
+}
 
 int StSvtClusterFinder::ClusterIndex()
   {

@@ -32,7 +32,7 @@ double           x_scale, z_scale;
 long     	 x_size, z_size, iptr;
 double           x_min, x_max, z_min, z_max;
 int              icall = 1;
-TH1F             *mtemp;
+//TH1F             *mtemp;
 
 void sft_init(void);
 float sft_process_event ( long NSpt, scs_spt_st *scs_spt, dst_vertex_st *sft_vertex, long Nvtx);
@@ -53,7 +53,7 @@ float sft_main(  St_scs_spt  *scs_spt, St_dst_vertex *svt_vertex, float x0,float
    
    gMessMgr->Info() << "TPC X at = " << x0tpc << endm;
    gMessMgr->Info() << "TPC Y at = " << y0tpc << endm;
-   mtemp=hist;
+   //mtemp=hist;
    scs_spt_st *s_spt = scs_spt->GetTable();  
    long NSpt = scs_spt->GetNRows();
    dst_vertex_st *sft_vertex = svt_vertex->GetTable();
@@ -162,12 +162,15 @@ float sft_vf_ntrack(double z0)
 	   xc  = x * rx;
 	   Changed by Helen */
 	 xc  = atan2(y,x); 
+
          zc0 = z * rz;                               /* the constant part */
          zc  = (zc0 + z0 - z0 * rz);                 /* the variable part */
          iz  = (int)((zc - z_min)*z_scale);          /* Split into mm bins Z-scale=140, zmin=-70*/
          ix  = (int)((xc - x_min)*x_scale);          /* Split into 3.6 degree bins x-scale=6.6*/
          spt[ispt].off = ix*z_size; 
          ii = spt[ispt].off + iz;
+
+
 
          if (ix < 0 || ix > x_size - 1 || iz < 0 || iz > z_size - 1)
          {
@@ -253,8 +256,7 @@ float sft_vf_ntrack(double z0)
    /* group = tracks             */ 
    /*                            */
    ntrack = 0;
-   for (iptr = 0; iptr < iNumOccupiedPixels; iptr++)
-   {
+   for (iptr = 0; iptr < iNumOccupiedPixels; iptr++){
      /* definition of track */
      if (*(OccupiedPixels[iptr]) > 1){
        ntrack++;
@@ -394,8 +396,8 @@ int bracket2 ( float (*func)(double),
       fVal = (*func)(fX);
       // printf("%f %f \n",fX,-fVal);
       //if (fStep==.1){
-      if (mtemp)
-	mtemp->Fill(fX,-fVal);
+      //if (mtemp)
+      //	mtemp->Fill(fX,-fVal);
 	//}
 
       pPoints[iNumPoints].x = fX;

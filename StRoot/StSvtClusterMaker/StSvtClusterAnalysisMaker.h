@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.9 2002/05/09 16:55:40 munhoz Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.10 2003/01/28 20:28:09 munhoz Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.10  2003/01/28 20:28:09  munhoz
+// new filters for clusters
+//
 // Revision 1.9  2002/05/09 16:55:40  munhoz
 // add reading bad anodes from DB
 //
@@ -84,7 +87,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.9 2002/05/09 16:55:40 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.10 2003/01/28 20:28:09 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
@@ -124,6 +127,7 @@ class StSvtClusterAnalysisMaker : public StMaker
 
   TH1F *m_n_seq;                              //! No. of seq on a cluster
   TH1F **m_sumADC;                            //! Sum of ADC on hits
+  TH1F *m_sumADC_all;                            //! Sum of ADC on hits
   TH2F *m_nClust;                             //! No. of  clusters per event
   TH2F **m_time_anode_clu;                    //! Timebucket vs anode for clusters
   TH2F **m_time_anode_raw;                    //! Timebucket vs anode for raw sequences

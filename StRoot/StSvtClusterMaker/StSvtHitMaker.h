@@ -1,7 +1,7 @@
-// $Id: StSvtHitMaker.h,v 1.11 2002/06/10 21:13:17 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.12 2003/01/28 20:29:02 munhoz Exp $
 // $Log: StSvtHitMaker.h,v $
-// Revision 1.11  2002/06/10 21:13:17  caines
-// Add SvtHits and a hit collection if StEvent already exists - prepartation for ittf
+// Revision 1.12  2003/01/28 20:29:02  munhoz
+// new filters for clusters
 //
 // Revision 1.10  2002/02/22 18:43:43  caines
 // Add SetFileNames function
@@ -59,8 +59,6 @@ class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
 class StSvtData;
 class StSvtGeantHits;
-class StEvent;
-class StSvtHitCollection;
  
 class StSvtHitMaker : public StMaker
 {
@@ -70,6 +68,7 @@ class StSvtHitMaker : public StMaker
   ~StSvtHitMaker();
 
   virtual Int_t Init();
+  virtual Int_t  InitRun(int runumber);
   virtual Int_t Make();
   virtual Int_t Finish();
   Int_t FillHistograms();
@@ -84,7 +83,7 @@ class StSvtHitMaker : public StMaker
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.11 2002/06/10 21:13:17 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.12 2003/01/28 20:29:02 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -100,9 +99,6 @@ class StSvtHitMaker : public StMaker
   
   StSvtData *mSvtData; //!
   StSvtGeantHits *mSvtGeantHit;  //!
-
-  StEvent* mCurrentEvent; //!
-  StSvtHitCollection* msvtHitColl; //!
   
   TH2F     *m_x_vs_y;  //! x vs y of Si points
   TH2F     **m_waf_no;  //! ladder no vs z of Si hit

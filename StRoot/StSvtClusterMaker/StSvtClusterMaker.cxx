@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.8 2002/03/20 00:33:32 munhoz Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.9 2003/01/28 20:28:34 munhoz Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.9  2003/01/28 20:28:34  munhoz
+// new filters for clusters
+//
 // Revision 1.8  2002/03/20 00:33:32  munhoz
 // temporary fix for memory leaks and new vertex finder params for pp
 //
@@ -144,15 +147,16 @@ Int_t StSvtClusterMaker::SetHybridClusters()
            
           index = mSvtEvent->getHybridIndex(barrel,ladder,wafer,hybrid);
           if(index < 0) continue;
-
+	  //	  if (index != 69) continue;
+	  
           mHybridData = (StSvtHybridData *)mSvtEvent->at(index);
 	  if( !mHybridData) continue;
-
+	  
           mClusterFinder->setHybridPointer(mHybridData);
-
+	  mClusterFinder->SetHybIndex(index);
           mClusterFinder->ClusterFinder();
           
-
+	  
 	  mHybridCluster = (StSvtHybridCluster* )mClusterColl->at(index);
 	  if( mHybridCluster){
 	    delete mHybridCluster;
@@ -164,7 +168,7 @@ Int_t StSvtClusterMaker::SetHybridClusters()
 	  mClusterColl->at(index) = mHybridCluster;
           mClusterFinder->ResetContainers();
 	  
-          }
+	}
       }
     }
   }

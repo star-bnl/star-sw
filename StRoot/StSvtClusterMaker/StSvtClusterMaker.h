@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.5 2001/09/22 01:07:09 caines Exp $
+// $Id: StSvtClusterMaker.h,v 1.6 2003/01/28 20:28:44 munhoz Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.6  2003/01/28 20:28:44  munhoz
+// new filters for clusters
+//
 // Revision 1.5  2001/09/22 01:07:09  caines
 // Fixes now that AddData() is cleared everyevent
 //
@@ -55,7 +58,7 @@ class StSvtClusterMaker : public StMaker
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.5 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.6 2003/01/28 20:28:44 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:

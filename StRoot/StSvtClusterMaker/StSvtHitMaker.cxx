@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.23 2002/06/10 21:13:17 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.24 2003/01/28 20:28:51 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
- * Revision 1.23  2002/06/10 21:13:17  caines
- * Add SvtHits and a hit collection if StEvent already exists - prepartation for ittf
+ * Revision 1.24  2003/01/28 20:28:51  munhoz
+ * new filters for clusters
  *
  * Revision 1.22  2002/02/22 18:43:39  caines
  * Add SetFileNames function
@@ -104,9 +104,6 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StSvtSimulationMaker/StSvtGeantHits.hh"
-
-#include "StEvent.h"
-#include "StSvtHitCollection.h"
 
 fstream cluInfo;
 
@@ -225,6 +222,22 @@ Int_t StSvtHitMaker::Init()
     
 }
 
+//_____________________________________________________________________________
+Int_t StSvtHitMaker::InitRun(int runumber)
+{
+
+  if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::InitRun() ..."  << endm;
+
+  if( GetSvtGeometry() != kStOK) return kStWarn;
+
+  // drift velocity
+  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
+
+  return kStOK;
+ 
+}
+
+
 //___________________________________________________________________________
 
 Int_t StSvtHitMaker::GetSvtRawData()
@@ -310,11 +323,6 @@ Int_t StSvtHitMaker::Make()
      gMessMgr->Warning() <<" Things are wrong with the SVT database!!!!!!!!!" << endm;
   }
 
-
-  mCurrentEvent = (StEvent*) GetInputDS("StEvent");
-  if( mCurrentEvent){
-    msvtHitColl = new StSvtHitCollection;
-  }
   TransformIntoSpacePoint();
   FillHistograms();
 
@@ -330,8 +338,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
   int index, TotHits=0, GoodHit=0;
   
-  StSvtHit* EventSvtHit;
-
+  
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
   //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc);
@@ -390,11 +397,10 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
 	 
+	    //	    cout << "local x = " << localCoord.position().x() <<  ", local y = " << localCoord.position().y() <<  ", local z = " << localCoord.position().z() << endl; 
+	    //cout << "global x = " << globalCoord.position().x() <<  ", global y = " << globalCoord.position().y() <<  ", global z = " << globalCoord.position().z() << endl; 
+
 	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
-	    if( mCurrentEvent){
-	      EventSvtHit = new StSvtHit(mSvtBigHit->svtHit()[clu]);
-	      msvtHitColl->addHit(EventSvtHit);
-	    }
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
