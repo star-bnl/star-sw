@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.3 2000/03/15 17:23:14 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.4 2000/03/15 20:50:41 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.4  2000/03/15 20:50:41  pfachini
+ * The command line to write out the mixed events into a file is now commented
+ *
  * Revision 1.3  2000/03/15 17:23:14  pfachini
  * Using now the Trs classes instead of having a 'local' copy
  *
@@ -593,7 +596,9 @@ Int_t StMixerMaker::Make() {
     mSector2->clear();
     
   }// sector loop
-  mOutputStreamMixer->writeTrsEvent((mAllTheDataMixer));
+
+  // Uncomment this line if you want to write the mixed events in a file.
+  //mOutputStreamMixer->writeTrsEvent((mAllTheDataMixer));
   return kStOK;
 } // Make() 
 
