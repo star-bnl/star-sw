@@ -7,7 +7,7 @@
 #ifndef ST_FTPC_V0
 #define ST_FTPC_V0
 
-#include <iostream>
+#include <iostream.h>
  
 #include "StPhysicalHelix.hh"
 #include "StThreeVector.hh"
