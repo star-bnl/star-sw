@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.71 2002/04/14 21:57:09 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.72 2002/06/17 16:12:43 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.72  2002/06/17 16:12:43  perev
+// fix wrong geant time
+//
 // Revision 1.71  2002/04/14 21:57:09  perev
 // Obsolete StBroadcast
 //
@@ -484,10 +487,15 @@ Int_t St_geant_Maker::Make()
 	if (fEvtHddr->GetRunNumber() != p->vhep[0])
 	  fEvtHddr->SetRunNumber(p->vhep[0]);
 	fEvtHddr->SetEventNumber(p->vhep[1]);
-	ULong_t  t = p->jdahep[1];
-	if (t > 99999) t = 0;
-	fEvtHddr->SetDateTime(p->jdahep[0],t);
 	fEvtHddr->SetProdDateTime();
+        Int_t id = p->jdahep[0];
+        Int_t it = p->jdahep[1];
+        if (id <=        0) id = 19991231;
+	if (id <= 19000000) id +=19000000;
+        if (id >= 20500000) id = 19991231;
+	if (it <         0) it = 235959;
+	if (it >    246060) it = 235959;
+	fEvtHddr->SetDateTime(id,it);
       }
     }
     if (!cnum->nvertx || !cnum->ntrack) return kStErr;
@@ -978,14 +986,14 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 	   << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endl;
       Int_t JDU = z_lq[JD-3];
       if (JDU > 0) {
-	Int_t i1 = z_q[JDU+3], i2 = z_q[JDU+5];
+	Int_t i1 = (int)z_q[JDU+3], i2 = (int)z_q[JDU+5];
 	cout << " Volume/Bits :" << i1 << "/" << i2 <<  endl;
 	for (Int_t i=i1;i<i2;i += 3) {
 	  Int_t j   = JDU+i;
-	  Int_t iv  = z_q[j+1];
-	  Int_t Nmx = z_q[j+2];
-	  Int_t Nam = z_iq[clink->jvolum+iv];
-	  Int_t Nb  = z_q[j+3];
+	  Int_t iv  = (int)z_q[j+1];
+	  Int_t Nmx = (int)z_q[j+2];
+	  Int_t Nam = (int)z_iq[clink->jvolum+iv];
+	  Int_t Nb  = (int)z_q[j+3];
 	  memcpy (Uvol, &Nam, 4);
 	  cout << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endl;
 	}
