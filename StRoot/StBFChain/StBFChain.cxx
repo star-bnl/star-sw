@@ -128,10 +128,10 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Valid Db Versions","------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"DbVNone"     ,""  ,"","db,calib,y1h"                    ,"","","19940614/0 Db Version for none",kFALSE},
-  {"DbV0614"     ,""  ,"","db,calib,y1h"                   ,"","","20000614/0 Db Version for p00hd",kFALSE},
-  {"DbV0624"     ,""  ,"","db,calib,y1h"                 ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
-  {"DbV0713"     ,""  ,"","db,calib,y1h"                   ,"","","20000713/0 Db Version for p00he",kFALSE},
+  {"DbVNone"     ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
+  {"DbV0614"     ,""  ,"","db,calib,ry1h"                  ,"","","20000614/0 Db Version for p00hd",kFALSE},
+  {"DbV0624"     ,""  ,"","db,calib,ry1h"                ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
+  {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -801,5 +801,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.122 2000/07/26 14:09:02 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.123 2000/07/27 15:39:58 fisyak Exp $
 //_____________________________________________________________________
