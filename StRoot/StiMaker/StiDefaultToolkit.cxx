@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.9 2003/03/31 17:19:26 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.10 2003/04/09 21:16:19 andrewar Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.10  2003/04/09 21:16:19  andrewar
+ * Changed limits for StiHitFactory: maxIncrements (from 10 to 20)
+ *
  * Revision 2.9  2003/03/31 17:19:26  pruneau
  * various
  *
@@ -159,7 +162,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
   if (_hitFactory)
     return _hitFactory;
-  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,10);
+  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,15);
   return _hitFactory;
 }
 
