@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.6 2001/05/04 20:15:14 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.7 2002/04/30 16:02:48 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.7  2002/04/30 16:02:48  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.6  2001/05/04 20:15:14  genevb
 // Common interfaces and reorganization of components, add MC event info
 //
@@ -118,47 +121,60 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
   StV0Vertex* rcV0Partner = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcV0Map->count(mcVert);
+  StV0MuDst* vvv = 0;
   
   if (count>0) {
     pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
     rcV0Partner = (*mcV0Bounds.first).second;
-    float x, y, z, delta;
+    float x, y, z, delta, xd, yd, zd;
     x = mcVert->position().x();
     y = mcVert->position().y();
     z = mcVert->position().z();
-    delta = (x - rcV0Partner->position().x())*(x - rcV0Partner->position().x())+
-        (y - rcV0Partner->position().y())*(y - rcV0Partner->position().y())+
-        (z - rcV0Partner->position().z())*(z - rcV0Partner->position().z());
+    xd = x - rcV0Partner->position().x();
+    yd = y - rcV0Partner->position().y();
+    zd = z - rcV0Partner->position().z();
+    delta = xd*xd + yd*yd + zd*zd;
 
     //Now loop over the bounds      
     for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
                     mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt) {
       StV0Vertex *temp = (*mcV0MapIt).second;
-      if ((x - temp->position().x())*(x - temp->position().x())+
-          (y - temp->position().y())*(y - temp->position().y())+
-          (z - temp->position().z())*(z - temp->position().z()) < delta)
-		      rcV0Partner = (*mcV0MapIt).second;
+      if (temp != rcV0Partner) {
+        xd = x - temp->position().x();
+        yd = y - temp->position().y();
+        zd = z - temp->position().z();
+        float delta2 = xd*xd + yd*yd + zd*zd;
+        if (delta2 < delta) { rcV0Partner = temp; delta = delta2; }
+      }
     }
+    x = rcV0Partner->position().x();
+    y = rcV0Partner->position().y();
+    z = rcV0Partner->position().z();
     // stupid way
     for(Int_t i = 0; i < GetN(); i++) {
       StV0MuDst* tmpV0 = (StV0MuDst*) dataArray->At(i);
-      if( fabs(rcV0Partner->position().x()-tmpV0->decayVertexV0X()) < 0.00001 &&
-          fabs(rcV0Partner->position().y()-tmpV0->decayVertexV0Y()) < 0.00001 &&
-          fabs(rcV0Partner->position().z()-tmpV0->decayVertexV0Z()) < 0.00001 )
-      { indexRecoArray = i; break; }
+      if( fabs(x - tmpV0->decayVertexV0X()) < 0.00001 &&
+          fabs(y - tmpV0->decayVertexV0Y()) < 0.00001 &&
+          fabs(z - tmpV0->decayVertexV0Z()) < 0.00001 )
+      //{ indexRecoArray = i; break; }
+      { indexRecoArray = i; vvv = tmpV0; break; }
     }
   }
 
   StSPtrVecMcTrack& Daughters = mcVert->daughters();
   for (StMcTrackIterator DTrackIt = Daughters.begin();
                          DTrackIt != Daughters.end(); DTrackIt++) {
-    if (((*DTrackIt)->geantId()==8)||((*DTrackIt)->geantId()==14)) 
-      Pos = (*DTrackIt);
-    else if (((*DTrackIt)->geantId()==9)||((*DTrackIt)->geantId()==15))
-      Neg = (*DTrackIt);
+    switch ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
+      case ( 1) : // Positive
+        Pos = (*DTrackIt); break;
+      case (-1) : // Negative
+        Neg = (*DTrackIt); break;
+    }
   }
   if ((Pos)&&(Neg)) {
     StV0Mc* v0Mc = new((*mcArray)[mcEntries++]) StV0Mc(mcVert,Pos,Neg,ev);
+    if ((v0Mc->decayMode() > 26) && (v0Mc->decayMode() < 33) &&
+        (indexRecoArray != -1))
     if((assocMaker)&&(count>0)) {
       new((*assocArray)[assocEntries++]) 
             StStrangeAssoc(indexRecoArray,mcEntries-1);

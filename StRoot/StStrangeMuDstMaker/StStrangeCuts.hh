@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.hh,v 3.1 2001/01/30 04:06:54 genevb Exp $
+ * $Id: StStrangeCuts.hh,v 3.2 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.hh,v $
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/01/30 04:06:54  genevb
  * Better handling of file switches
  *
@@ -29,42 +32,53 @@
 #include "TObject.h"
 
 class TDataSet;
+class TClonesArray;
 
-class StStrangeCuts {
+class StStrangeCuts : public TOrdCollection {
 public:
   StStrangeCuts();
   virtual ~StStrangeCuts();
-  TOrdCollection* GetCollection();
+  TCut* CutAt(Int_t idx) const;
   TCut* GetCut(const char* name) const;
   const char* GetValue(const char* name) const;
   void Add(const char* name, const char* val);
-  void Add(TCut&);
+  void Add(const TCut&);
+  void Add(const TCut*);
   void List();
   void Store();
   void Fill(const char*, TDataSet*);
-  void Append(TOrdCollection*);
-  void Assure();
+  void Append(const TOrdCollection*);
+  void Reset(const TSeqCollection&);
+  void Reset(const TSeqCollection*);
+  void UpdateArray(TClonesArray*);
+  void ForceUpdateArray();
+  void UnknownCuts();
  protected:
-  Bool_t NewCut(TObject*);
-  TOrdCollection* cuts;
+  void AddIfNew(TCut*, Bool_t reverse=kFALSE);
+  Bool_t NewCut(const TObject*);
+  Bool_t update;
   ClassDef(StStrangeCuts,0)
 };
 
-inline TOrdCollection* StStrangeCuts::GetCollection()
-            { return cuts; }
+inline TCut* StStrangeCuts::CutAt(Int_t idx) const
+            { return (TCut*) At(idx); }
 inline TCut* StStrangeCuts::GetCut(const char* name) const
-            { return (cuts ? (TCut*) cuts->FindObject(name) : 0); }
+            { return (TCut*) FindObject(name); }
 inline const char* StStrangeCuts::GetValue(const char* name) const
-            { return (cuts ? GetCut(name)->GetTitle() : 0); }
+            { return GetCut(name)->GetTitle(); }
 inline void StStrangeCuts::Add(const char* name, const char* val)
-            { Assure(); cuts->AddLast(new TCut(name,val)); }
-inline void StStrangeCuts::Add(TCut& newCut)
-            { Assure(); cuts->AddLast(new TCut(newCut)); }
-inline void StStrangeCuts::Assure()
-            { if (!cuts) cuts = new TOrdCollection(); }
+            { AddIfNew(new TCut(name,val)); }
+inline void StStrangeCuts::Add(const TCut& newCut)
+            { AddIfNew(new TCut(newCut)); }
+inline void StStrangeCuts::Add(const TCut* newCut)
+            { Add(*newCut); }
 inline void StStrangeCuts::List()
-            { if (cuts) cuts->Print(); }
+            { Print(); }
 inline void StStrangeCuts::Store()
-            { if (cuts) cuts->Write("StrangeCuts",TObject::kSingleKey); }
+            { Write("StrangeCuts",TObject::kSingleKey); }
+inline void StStrangeCuts::Reset(const TSeqCollection& oldCuts)
+	    { Reset(&oldCuts); }
+inline void StStrangeCuts::ForceUpdateArray()
+	    { update = kTRUE; }
 
 #endif

@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StKinkMc.cc,v 3.1 2001/05/04 20:15:13 genevb Exp $
+ * $Id: StKinkMc.cc,v 3.2 2002/04/30 16:02:47 genevb Exp $
  * $Log: StKinkMc.cc,v $
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/05/04 20:15:13  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -34,9 +37,17 @@ StKinkMc::StKinkMc(StMcVertex* mcVertex, StMcTrack* mcDaughterTrack) :
 
   mParentGeantId = mcVertex->parent()->geantId(); 
   mDaughterGeantId = mcDaughterTrack->geantId();
-  mParentMomentumX = mcVertex->parent()->momentum().x();
-  mParentMomentumY = mcVertex->parent()->momentum().y();
-  mParentMomentumZ = mcVertex->parent()->momentum().z();
+  mParentMomentumX = 0.;
+  mParentMomentumY = 0.;
+  mParentMomentumZ = 0.;
+  for (unsigned int i=0; i < mcVertex->numberOfDaughters(); i++) {
+    mParentMomentumX += mcVertex->daughter(i)->momentum().x();
+    mParentMomentumY += mcVertex->daughter(i)->momentum().y();
+    mParentMomentumZ += mcVertex->daughter(i)->momentum().z();
+  }
+  mParentPrimMomentumX = mcVertex->parent()->momentum().x();
+  mParentPrimMomentumY = mcVertex->parent()->momentum().y();
+  mParentPrimMomentumZ = mcVertex->parent()->momentum().z();
   mDaughterMomentumX = mcDaughterTrack->momentum().x();
   mDaughterMomentumY = mcDaughterTrack->momentum().y();
   mDaughterMomentumZ = mcDaughterTrack->momentum().z();

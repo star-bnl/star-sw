@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 3.4 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 3.5 2002/04/30 16:02:47 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 3.5  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.4  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -64,6 +67,9 @@ void StStrangeEvMuDst::Fill(StEvent& event) {
   StEventSummary* evSum = event.summary();
   if (evSum) mMagneticField = evSum->magneticField();
   else mMagneticField = 0.;
+  StTrigger* L0trig = event.l0Trigger();
+  if (L0trig) mL0TriggerWord = L0trig->triggerWord();
+  else mL0TriggerWord = 0;
   
   mGlobalTracks = 0;
   StSPtrVecTrackNode& theNodes = event.trackNodes();

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.7 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.8 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.8  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.7  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -74,30 +77,36 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   StTrack* parentPrimaryTrack = 
     kinkVertex->parent()->node()->track(primary);
   if (parentPrimaryTrack) {
-    mParentMomentumX = parentPrimaryTrack->geometry()->momentum().x();
-    mParentMomentumY = parentPrimaryTrack->geometry()->momentum().y();
-    mParentMomentumZ = parentPrimaryTrack->geometry()->momentum().z();
+    mParentPrimMomentumX = parentPrimaryTrack->geometry()->momentum().x();
+    mParentPrimMomentumY = parentPrimaryTrack->geometry()->momentum().y();
+    mParentPrimMomentumZ = parentPrimaryTrack->geometry()->momentum().z();
   } else {
-    mParentMomentumX = 999.;
-    mParentMomentumY = 999.;
-    mParentMomentumZ = 999.;
+    mParentPrimMomentumX = 999.;
+    mParentPrimMomentumY = 999.;
+    mParentPrimMomentumZ = 999.;
   }
-  mParentMomentum = sqrt( mParentMomentumX*mParentMomentumX +
-			  mParentMomentumY*mParentMomentumY +
-			  mParentMomentumZ*mParentMomentumZ );
+  mParentPrimMomentum = sqrt( mParentPrimMomentumX*mParentPrimMomentumX +
+                          mParentPrimMomentumY*mParentPrimMomentumY +
+                          mParentPrimMomentumZ*mParentPrimMomentumZ );
+
+  const StThreeVectorF parentMom = kinkVertex->parentMomentum();
+  mParentMomentumX = parentMom.x();
+  mParentMomentumY = parentMom.y();
+  mParentMomentumZ = parentMom.z();
+  mParentMomentum  = parentMom.mag();
   mParentCharge = kinkVertex->parent()->geometry()->charge();
 
-  mDaughterMomentumX = kinkVertex->daughter()->geometry()->momentum().x();
-  mDaughterMomentumY = kinkVertex->daughter()->geometry()->momentum().y();
-  mDaughterMomentumZ = kinkVertex->daughter()->geometry()->momentum().z(); 
-  mDaughterMomentum = sqrt( mDaughterMomentumX*mDaughterMomentumX +
-			    mDaughterMomentumY*mDaughterMomentumY +
-			    mDaughterMomentumZ*mDaughterMomentumZ );
+  const StThreeVectorF daughterMom = kinkVertex->daughterMomentum();
+  mDaughterMomentumX = daughterMom.x();
+  mDaughterMomentumY = daughterMom.y();
+  mDaughterMomentumZ = daughterMom.z();
+  mDaughterMomentum  = daughterMom.mag();
   mDaughterCharge = kinkVertex->daughter()->geometry()->charge();
 
-  mPositionX = kinkVertex->position().x();
-  mPositionY = kinkVertex->position().y();
-  mPositionZ = kinkVertex->position().z();
+  const StThreeVectorF pos = kinkVertex->position();
+  mPositionX = pos.x();
+  mPositionY = pos.y();
+  mPositionZ = pos.z();
   mChi2Kink = kinkVertex->chiSquared();
   mClKink = kinkVertex->probChiSquared();
   
