@@ -156,11 +156,7 @@ If LL>1
    if (ecal) Call ecalgeo
    if (magp) Call magpgeo
 
-   if (rich) then
-     Call AGSFLAG('SIMU',2)
-     Call richgeo
-     Call AGSFLAG('SIMU',1)
-   endif
+   if (rich) Call richgeo
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) call AgDETP new ('MFLD')
