@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.30 1999/10/28 16:24:30 fine Exp $
+// $Id: St_Node.cxx,v 1.31 1999/11/15 23:22:16 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.31  1999/11/15 23:22:16  fine
+// refs to GEANT Wen site has been added
+//
 // Revision 1.30  1999/10/28 16:24:30  fine
 // St_DataSet major correction: it may be built with TList (default) or with TObjArray
 //
@@ -253,6 +256,7 @@ Int_t St_Node::MapStNode2GEANTVis(ENodeSEEN  vis)
 //                            10 - this unvisible, but sons are visible
 //                            01 - this visible but sons
 //                            11 - neither this nor its sons are visible
+// Maps the value of the visibility flag to begin_html <a href="http://wwwinfo.cern.ch/asdoc/geant_html3/node128.html#SECTION056000000000000000000000">GEANT 3.21 "volume attributes"</a>end_html
   const Int_t mapVis[4] = {1, -2, 0, -1 };
   return mapVis[vis];
 }
@@ -260,6 +264,7 @@ Int_t St_Node::MapStNode2GEANTVis(ENodeSEEN  vis)
 //ENodeSEEN St_Node::MapGEANT2StNodeVis(Int_t vis)
 Int_t St_Node::MapGEANT2StNodeVis(Int_t vis)
 {
+// Maps the value of begin_html <a href="http://wwwinfo.cern.ch/asdoc/geant_html3/node128.html#SECTION056000000000000000000000">GEANT 3.21 "volume attributes"</a>end_html to the visibility flag  
   const Int_t mapVis[4] = {1, -2, 0, -1 };
   Int_t i;
 //  for (i =0; i<3;i++) if (mapVis[i] == vis) return (ENodeSEEN)i;
