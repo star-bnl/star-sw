@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.39 2000/04/11 17:44:37 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.40 2000/04/11 23:54:00 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.40  2000/04/11 23:54:00  caines
+// Shouldnt try to access row -1 any more
+//
 // Revision 1.39  2000/04/11 17:44:37  wdeng
 // Calculate lengths for globtrk and primtrk using StHelix model. Flip sign if length is negative! Length can't be less than zero according to Spiros.
 //
@@ -465,7 +468,7 @@ Int_t StPrimaryMaker::Make(){
       bool isset;
       
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
-	if( tgroup->id1 > 0){
+	if( tgroup->ident > 0){
 	  spt_id = tgroup->id2-1;
 	  row = spc[spt_id].row/100;
 	  row = spc[spt_id].row - row*100;
