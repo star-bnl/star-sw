@@ -9,11 +9,12 @@
 #include "TRotMatrix.h"
 #include "TShape.h"
 #include "TNode.h"
+#include "TVolume.h"
 
 //Sti
 #include "StiRootDrawable.h"
 
-StiRootDrawable::StiRootDrawable() : mrotation(0), mshape(0), mnode(0)
+StiRootDrawable::StiRootDrawable() : mrotation(0), mshape(0), mnode(0), mselfnode(0)
 {
 }
 
@@ -30,7 +31,7 @@ StiRootDrawable::~StiRootDrawable()
 
 void StiRootDrawable::setVisibility(bool val)
 {
-    (val) ? mshape->SetVisibility(1) : mshape->SetVisibility(0);
+    (val) ? mnode->SetVisibility(TVolume::kBothVisible) : mnode->SetVisibility(TVolume::kNoneVisible);
     return;
 }
 
@@ -38,6 +39,7 @@ void StiRootDrawable::setColor(int val)
 {
     mshape->SetLineColor(val);
     mnode->SetLineColor(val);
+    mselfnode->SetLineColor(val);
     return;
 }
 

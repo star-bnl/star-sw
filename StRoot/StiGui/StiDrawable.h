@@ -7,9 +7,7 @@
 #ifndef StiDrawable_HH
 #define StiDrawable_HH
 
-class TRotMatrix;
-class TShape;
-class TNode;
+#include "StThreeVector.hh"
 
 class StiDrawable
 {
@@ -23,8 +21,11 @@ public:
     virtual void setVisibility(bool val) = 0;
     
     virtual const char* name() const = 0;
+
+    const StThreeVector<double>& position() {return mposition;}
     
 protected:
+    StThreeVector<double> mposition; //Global position of center of volume
 };
 
 #endif

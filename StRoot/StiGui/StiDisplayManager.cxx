@@ -7,11 +7,16 @@
 //Root
 #include "TCanvas.h"
 #include "TShape.h"
-#include "TNode.h"
+#include "TVolume.h"
 #include "TBRIK.h"
+#include "TPolyMarker3D.h"
+
+//SCL
+#include "StThreeVector.hh"
 
 //StiGui
 #include "StiDrawable.h"
+#include "StiRootDrawable.h"
 #include "StiDisplayManager.h"
 
 StiDisplayManager* StiDisplayManager::sinstance = 0;
@@ -21,11 +26,28 @@ StiDisplayManager::StiDisplayManager()
     cout <<"StiDisplayManager::StiDisplayManager(int, int, int)"<<endl;
     mcanvas = new TCanvas("c1","Star Integrated Tracker", kXmin, kYmin, kXmax, kYmax);
     //mcanvas->Draw();
-    mzone = new TBRIK("zone","BRIK","void", kdx, kdy, kdz);
-    mzone->SetLineColor(0);
-    mnode = new TNode("mainnode","mainnode", mzone);
-    mnode->SetVisibility(0);
+    //mzone = new TBRIK("zone","BRIK","void", kdx, kdy, kdz);
+    //mzone->SetLineColor(0);
+    
+    mnode = new TVolume("mainnode","mainnode", mzone);
+    //mnode->SetVisibility(TVolume::kThisUnvisible);
     cd();
+
+    //Temp test of TPolyMarker3D
+    /*
+      cout <<"Starting Loop To Fill Array"<<endl;
+      int n=90;
+      double* px = new double[n];
+      double val=10.;
+      for (int i=0; i<n; ++i) {
+      px[i]=val++;
+      }
+      cout <<"Instantiate Poly"<<endl;
+      poly = new TPolyMarker3D(n, px, 8);
+      cout <<"Reset Bit"<<endl;
+      poly->ResetBit(kCanDelete);
+    */
+    cout <<"Leaving StiDisplayManager::StiDisplayManager()"<<endl;
     sinstance = this;
 }
 
@@ -56,13 +78,17 @@ void StiDisplayManager::kill()
 
 void StiDisplayManager::cd()
 {
-    mnode->cd();
+    //mnode->cd();
     return;
 }
 
 void StiDisplayManager::draw()
 {
     mnode->Draw();
+    //Temp patch
+    //cout <<"Drawing Poly"<<endl;
+    //poly->Draw();
+    //cout <<"Done Drawing Poly"<<endl;
     return;
 }
 
@@ -117,11 +143,22 @@ void StiDisplayManager::setInvisible(const StiDrawable* val)
     return;
 }
 
-void StiDisplayManager::addDrawable(StiDrawable* val)
+void StiDisplayManager::addDrawable(StiDrawable* tempval)
 {
+    StiRootDrawable* val = dynamic_cast<StiRootDrawable*>(tempval);
+    if (!val) {
+	cout <<"StiDisplayManagar::addDrawable().  Error:\tCast Failed"<<endl;
+	return;
+    }
+    
     string name = val->name();
     //cout <<"Adding detector: "<<name<<endl;
     mmap.insert( stiDrawableMapValType( name, val ) );
+
+    //Add to main volume
+    const StThreeVector<double>& pos = val->position();
+    //mnode->Add( val->volume(), 0., 0., 0., val->rotation());
+    mnode->Add( val->volume(), pos.x(), pos.y(), pos.z(), val->rotation());
     return;
 }
 
