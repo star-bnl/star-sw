@@ -22,10 +22,6 @@
 #include "dst_mon_soft_glob.idl"
 #include "dst_mon_soft_svt.idl"
 #include "dst_mon_soft_tpc.idl"
-#include "dst_mon_soft_ctb.idl"
-#include "dst_mon_soft_emc.idl"
-#include "dst_mon_soft_l3.idl"
-#include "dst_mon_soft_rich.idl"
 
 interface dst_monitor_soft_filler : amiModule {
              STAFCV_T call
@@ -47,4 +43,4 @@ interface dst_monitor_soft_filler : amiModule {
                       out     dst_mon_soft_tpc  dms_tpc
              );
      };
-     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/11/15 21:54:25 $ */
+     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/11/17 15:22:09 $ */
