@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.16 1999/03/19 20:30:50 perev Exp $
+// $Id: StMaker.h,v 1.17 1999/03/20 20:57:35 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.17  1999/03/20 20:57:35  perev
+// add StEvtHddr.h and fix Get/SetNumber in maker
+//
 // Revision 1.16  1999/03/19 20:30:50  perev
 // GetCVSTag introduced
 //
@@ -99,8 +102,8 @@ public:
    virtual void   	Clear(Option_t *option="");
 
 //		STAR methods
-   virtual Int_t  	GetNumber() const {return m_Number;}
-   virtual void   	SetNumber(int number) {m_Number = number;}
+   virtual Int_t  	GetNumber() const ;
+   virtual void   	SetNumber(Int_t number) ;
    virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
@@ -153,7 +156,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.16 1999/03/19 20:30:50 perev Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.17 1999/03/20 20:57:35 perev Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
