@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.17 1999/05/10 17:16:18 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.18 1999/05/10 20:03:56 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.18  1999/05/10 20:03:56  kathy
+//! add new member function ExamineLogYList and RemoveFromLogYList
+//!
 //! Revision 1.17  1999/05/10 17:16:18  kathy
 //! added new member function SetDefaultLogYList and implemented and tested
 //!
@@ -107,7 +110,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.17 1999/05/10 17:16:18 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.18 1999/05/10 20:03:56 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -363,7 +366,10 @@ class St_QA_Maker : public StMaker {
   virtual void   SetPostScriptFile(const Char_t *psFileName="");
   virtual void   SetDefaultLogYList();
   virtual Int_t  AddToLogYList(const Char_t *HistName="");
+  virtual Int_t  RemoveFromLogYList(const Char_t *HistName="");
+  virtual Int_t  ExamineLogYList();
   
+
 // the following is a ROOT macro  that is needed in all ROOT code
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
