@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.cxx,v 1.22 1999/12/05 06:34:16 fine Exp $
+// $Id: St_TableSorter.cxx,v 1.23 1999/12/06 03:44:15 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -535,8 +535,10 @@ Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch,
          // Forward pass
        }
     }
-    while ( indx < nRows &&!m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++; count++;}
-    if (firstRow && count) *firstRow = indx-count;
+    if (indx >= 0) {
+       while ( indx < nRows &&!m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++; count++;}
+       if (firstRow && count) *firstRow = indx-count;
+    }
   }
   return count;
 }
@@ -792,6 +794,9 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 //______________________________________________________________________________
 //______________________________________________________________________________
 // $Log: St_TableSorter.cxx,v $
+// Revision 1.23  1999/12/06 03:44:15  fine
+// Bug in Compare method fixed
+//
 // Revision 1.22  1999/12/05 06:34:16  fine
 // Several const methods for St_TableSorter introduced
 //
