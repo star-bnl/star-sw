@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.57 1999/01/31 20:54:56 fisyak Exp $
+# $Id: MakeDll.mk,v 1.58 1999/01/31 23:12:08 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.58  1999/01/31 23:12:08  fisyak
+# Cleanup St Wrapper libraries
+#
 # Revision 1.57  1999/01/31 20:54:56  fisyak
 # Fix bugs
 #
@@ -217,11 +220,12 @@ endif
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
-FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
+FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
+FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
 ifneq ($(GEN_DIR),$(SRC_DIR))
-FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
+FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
 endif
+FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
 FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.f, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.c, $(FILES_SRC))
@@ -263,15 +267,13 @@ FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
-FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx $(SRC_DIR)/*.cc))
-FILES_HH   := $(wildcard $(addprefix $(SRC_DIR)/, $(addsuffix  .h, $(basename $(notdir $(FILES_ALL)))) \
-                                                  $(addsuffix .hh, $(basename $(notdir $(FILES_ALL))))))
+FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 ifneq (,$(FILES_HH))
 FILES_H    := $(shell grep -l ClassDef $(FILES_HH))
 endif
 FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) 
 NAMES_ST   := $(basename $(notdir $(FILES_ST)))
-FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
+FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_SRC)))
 FILES_ORD  := $(FILES_ALL)
 
 ifdef FILES_SYM

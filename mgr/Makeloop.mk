@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.48  1999/01/31 23:12:08  fisyak
+#  Cleanup St Wrapper libraries
+#
 #  Revision 1.47  1999/01/31 20:54:57  fisyak
 #  Fix bugs
 #
@@ -220,7 +223,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/31 20:54:57 $ 
+#           Last modification $Date: 1999/01/31 23:12:08 $ 
 #  default setings
 # Current Working Directory
 #
@@ -320,6 +323,7 @@ endif
 SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
 SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
 SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
+SUBDIRS := $(filter-out objy, $(SUBDIRS))
 ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
          SUBDIRS := $(filter-out tcc, $(SUBDIRS))
          SUBDIRS := $(filter-out trg, $(SUBDIRS))
@@ -394,6 +398,7 @@ Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_hbt_Maker, $(Makers))
+Makers  :=  $(filter-out StEventReaderMaker, $(Makers))
 ifneq ($(EMPTY),$(Makers))
 StRoot += St_Makers
 endif
