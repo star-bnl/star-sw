@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.24 2001/11/02 20:50:03 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.25 2001/11/13 21:17:56 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.25  2001/11/13 21:17:56  lansdell
+// changed limits on dedx error on mean, tpc
+//
 // Revision 2.24  2001/11/02 20:50:03  genevb
 // Changed histogram ranges for momenta
 //
@@ -1508,7 +1511,7 @@ void StQABookHist::BookHistDE(){
 
   m_ndedxT   = QAH::H1F("QaDedxNdedxT", "dedx: number of point to define dE/dx, tpc",50,0., 50.);  
   m_dedx0T   = QAH::H1F("QaDedxDedx0T", "dedx: dE/dx mean (GeV/cm), tpc", ndedx, 0., 0.0005);
-  m_dedx1T   = QAH::H1F("QaDedxDedx1T", "dedx: dE/dx error on mean, tpc", ndedx, 0., 0.0001);
+  m_dedx1T   = QAH::H1F("QaDedxDedx1T", "dedx: dE/dx error on mean, tpc", ndedx, 0., 1);
   m_dedxTTS  = QAH::H1F("QaDedxBBTTS",  "dedx: ratio <dE/dx> mean to Bethe Bloch <dE/dx>, tpc,tpc+svt",
 			50,0.,10.);
   // east and west on same plot
