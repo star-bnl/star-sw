@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.9 1999/03/14 00:23:38 perev Exp $
+// $Id: St_tpt_Maker.h,v 1.10 1999/05/05 18:45:42 liq Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.10  1999/05/05 18:45:42  liq
+// include valuation plots of reconstraction
+//
 // Revision 1.9  1999/03/14 00:23:38  perev
 // New makers
 //
@@ -46,6 +49,8 @@ class St_tte_control;
 class St_tdeparm;
 class St_tpipar;
 class TH1F;
+class TH2F;
+class TH3F;
 class TNtuple;
 
 enum { maxNofTracks = 20000}; 
@@ -56,7 +61,7 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.9 1999/03/14 00:23:38 perev Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.10 1999/05/05 18:45:42 liq Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -66,6 +71,9 @@ private:
   St_tdeparm            *m_tdeparm;   		//! Parameters for the tde dedx module
   St_tpipar             *m_tpipar;    		//! parameter file for tpi package
   void         MakeHistograms();// Histograms for tracking
+  void         VertexEffResolutionInit();// Initial function  for VertexEffResolution
+  void         VertexEffResolutionMakeHistograms();// Histograms for VertexEffResolution
+  void         VertexEffResolutionFinish();// Calculate efficiency for this run
 
 protected:
  TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
@@ -75,6 +83,71 @@ protected:
  TH1F *m_r0;            //!radius for the first point
  TH1F *m_invp;          //!inverse momentum
  TNtuple                *m_final; //! Final track-hit Ntuple
+
+   TH1F *m_ptr;           //! pointer to 1d hist. of rec. pt
+   TH1F *m_vertex_x; //! pointer to 1d hist. of vertex x
+   TH1F *m_vertex_y; //! pointer to 1d hist. of vertex y
+   TH1F *m_vertex_z; //! pointer to 1d hist. of vertex z
+   TH1F *m_vertex_xy; //! pointer to 1d hist. of vertex xy
+   TH1F *m_rapidity;  //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) all tracks
+
+   TH1F *m_average_ptr; //! pointer to 1dhist of average ptr 
+   TH1F *m_average_ptg; //! pointer to 1dhist of average ptg 
+
+   TH1F *m_average_rapidity; //! pointer to 1dhist of average pseudo_rapidity 
+   TH1F *m_average_chisqxy; //! pointer to 1dhist of average chisqxy
+   TH1F *m_average_chisqz; //! pointer to 1dhist of average chisqz
+
+   TH1F *m_chisqxy; //! pointer to 1dhist of chisqxy
+   TH1F *m_chisqz; //! pointer to 1dhist of  chisqz
+
+   //   TH1F *m_rapidity1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) per event
+   //TH1F *m_rapidity2; //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) per event
+   //TH1F *m_eff1; //! pointer to efficiency  vs. rapidity of 1 event
+
+   TH1F *m_rapidity_total1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) total events
+   TH1F *m_rapidity_total2; //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) total events
+   TH1F *m_eff_total; //! pointer to efficiency  vs. rapidity total events
+   TH1F *m_averge_eff;//! pointer to efficiency  for every event
+
+   TH2F  *m_vertexX_vertexY; //! vertex positionY vs.  vertex X
+   TH2F  *m_vertexX_vertexZ; //! vertex positionZ vs.  vertex X
+
+   TH2F  *m_vertexXY_eff; //! vertex position vs.  efficiency
+   TH2F  *m_vertexZ_eff; //! vertex position vs.  efficiency
+
+   TH2F *m_vertexXY_average_ptr; //! vertex xy vs. average ptr 
+   TH2F *m_vertexZ_average_ptr; //! vertex z vs. average ptr 
+   TH2F *m_vertexXY_average_ptg; //! vertex xy vs. average ptg 
+   TH2F *m_vertexZ_average_ptg; //! vertex z vs. average ptg 
+
+   TH2F *m_vertexXY_average_rapidity; //! vertex xy vs. average rapidity 
+   TH2F *m_vertexZ_average_rapidity; //! vertex z vs. average rapidity 
+
+   TH2F *m_vertexXY_average_chisqxy; //! vertex xy vs. average chisqxy 
+   TH2F *m_vertexZ_average_chisqxy; //! vertex z vs. average chisqxy 
+
+   TH2F *m_vertexXY_average_chisqz; //! vertex xy vs. average chisqz 
+   TH2F *m_vertexZ_average_chisqz; //! vertex z vs. average chisqz
+
+   TH2F *m_ptg_rapidity; // ! Ptg vs. pseudo_rapidity 
+   TH2F *m_ptg_rapidity_1; // ! Ptg vs. pseudo_rapidity, nrec1>=0 
+   TH2F *m_ptg_rapidity_2; // ! Ptg vs. pseudo_rapidity, nrec1>0
+   TH3F *m_ptg_rapidity_dpt; //!Ptg vs. pseudo_rapidity vs. abs(ptr-ptg)/ptg
+
+   TH1F  *m_dpt; //! abs(ptr-ptg)/ptg
+   TH2F  *m_dpt_ptg;//! abs(ptr-ptg)/ptg vs. ptg
+
+   TH1F  *m_dp; //! abs(pr-pg)/pg
+   TH2F  *m_dp_pg;//! abs(pr-pg)/pg vs. pg
+
+   TH2F  *m_dp_pg_pion; //! abs(pr-pg)/pg vs. pg for pion
+   TH2F  *m_dp_pg_proton; //! abs(pr-pg)/pg vs. pg for pion
+   TH2F  *m_dp_pg_kaon; //! abs(pr-pg)/pg vs. pg for pion
+
+//init ntuple
+   TNtuple *m_vertex_final; //! ntuple for efficiency, average pt, rapidity,.....
+    Int_t  mevent;
 
 public: 
   St_tpt_Maker(const char *name="tpc_tracks");
@@ -88,10 +161,11 @@ public:
 
   virtual Int_t  Init();
   virtual Int_t  Make();
+  virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual void   Set_tte(Bool_t m=kFALSE){m_iftteTrack = m;}
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
-ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
+ ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
