@@ -160,7 +160,7 @@ public:
   int    getHelicity()  const;
   double getPhase()   const;
   double getWindowY();
-  double getWindowZ() const;
+  double getWindowZ();
   double pitchAngle() const;
   double crossAngle() const;
   double sinCrossAngle() const;

@@ -345,6 +345,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       // tDet=currentDet implies there are no more new volumes to go to - exit loop
       if (tDet==0) throw logic_error("SKTF::find() - ERROR -  **_detectorContainer ==0");
       if (tDet==currentDet) break;
+      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
       lastMove     = 0;
       scanningDone = false;
       // loop over possible volumes
@@ -370,7 +371,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		    {  
 		      stiHit = _hitContainer->getHit();if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
 		      chi2 = testNode.evaluateChi2(stiHit);
-		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
+		      //if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
+		      if (chi2<maxChi2 && chi2<testNode.getChi2())
 			{
 			  testNode.setHit(stiHit); testNode.setChi2(chi2);
 			}
