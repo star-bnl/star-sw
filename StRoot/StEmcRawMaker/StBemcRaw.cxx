@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.11 2005/01/07 20:33:18 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.12 2005/01/14 12:20:31 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.12  2005/01/14 12:20:31  suaide
+// small bug fixed for the PSD
+//
 // Revision 1.11  2005/01/07 20:33:18  suaide
 // created a new method to correct for the PSD map problem
 //
@@ -556,8 +559,10 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
     Int_t RDO,index,PMT,wire,A_value;
     mDecoder->GetPsdRDO(id,RDO,index);
     mDecoder->GetPsdId(RDO,index,id,PMT,wire,A_value);
+    //int oldId = id;
     id-=PsdOffset_bug[wire-1];
-    id-=PsdOffset_ok[wire-1];
+    id+=PsdOffset_ok[wire-1];
+    //cout <<"PSD old id = "<<oldId<<"  new id = "<<id<<"  wire = "<<wire<<endl;
   }
   Int_t m,e,s;
   geo->getBin(id,m,e,s);
