@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.7 2000/11/14 13:08:26 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.8 2000/11/27 14:09:20 hummler Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.8  2000/11/27 14:09:20  hummler
+// implement tzero and lorentz angle correction factor
+//
 // Revision 1.7  2000/11/14 13:08:26  hummler
 // add charge step calculation, minor cleanup
 //
@@ -99,6 +102,8 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mRadiansPerBoundary = detTable->rad_per_gap;
   mStandardPressure = detTable->p_standard;
   mNormalizedNowPressure = detTable->p_normalized;
+  mTZero = detTable->t_zero;
+  mLorentzAngleFactor = detTable->angle_factor;
   mOrderOfDiffusionErrors = 3;
   mPadDiffusionErrors = (Float_t *) detTable->pad_err_diff;
   mTimeDiffusionErrors = (Float_t *) detTable->time_err_diff;
@@ -251,6 +256,8 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mRadiansPerBoundary = detTable->rad_per_gap;
   mStandardPressure = detTable->p_standard;
   mNormalizedNowPressure = detTable->p_normalized;
+  mTZero = detTable->t_zero;
+  mLorentzAngleFactor = detTable->angle_factor;
   mOrderOfDiffusionErrors = 3;
   mPadDiffusionErrors = (Float_t *) detTable->pad_err_diff;
   mTimeDiffusionErrors = (Float_t *) detTable->time_err_diff;

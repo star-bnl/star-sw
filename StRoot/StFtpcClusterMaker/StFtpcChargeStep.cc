@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.2 2000/11/14 14:01:39 hummler Exp $
+// $Id: StFtpcChargeStep.cc,v 1.3 2000/11/27 14:08:54 hummler Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.3  2000/11/27 14:08:54  hummler
+// implement tzero and lorentz angle correction factor
+//
 // Revision 1.2  2000/11/14 14:01:39  hummler
 // cleanup: comment out alternative charge step calculations, can be uncommented
 // again if they turn out to be better
@@ -182,6 +185,8 @@ int StFtpcChargeStep::histogram(int setPressure)
     chargestep2 = maxdrop-sigmaSqrChange*log(dCharge[maxdrop-1]/dCharge[maxdrop+1])-0.5;  
 
   float TimeCoordinate=chargestep2+0.5;// 0 is at beginning of 1st timebin
+  // include tZero = time from collision to beginning of bin 0
+  TimeCoordinate += mParam->tZero()/mParam->microsecondsPerTimebin();
   int PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
     / mParam->numberOfTimebins();
   

@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.9 2000/11/14 13:08:04 hummler Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.10 2000/11/27 14:09:07 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.10  2000/11/27 14:09:07  hummler
+// implement tzero and lorentz angle correction factor
+//
 // Revision 1.9  2000/11/14 13:08:04  hummler
 // add charge step calculation, minor cleanup
 //
@@ -1680,6 +1683,8 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 
   /* preparatory calculations */
   TimeCoordinate = Peak->TimePosition + 0.5; /*time start at beginning of bin 0*/
+  // include tZero = time from collision to beginning of bin 0
+  TimeCoordinate += mParam->tZero()/mParam->microsecondsPerTimebin();
   PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
     / mParam->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
@@ -1788,9 +1793,11 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
       psi_now=((mParam->padtransDeflection(v_buf,padrow)
 		+deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
+	       *mParam->lorentzAngleFactor()
 	       *(mParam->padtransEField(j)-e_now)
 	       +(mParam->padtransDeflection(j,padrow)
 		 +deltap*mParam->padtransdDeflectiondP(j,padrow))
+	       *mParam->lorentzAngleFactor()
 	       *(e_now-mParam->padtransEField(v_buf)))
 	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
       for (i=0; i<mParam->numberOfDriftSteps() 
@@ -1822,9 +1829,11 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
 	  psi_now=((mParam->padtransDeflection(v_buf,padrow)
 		    +deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
+		   *mParam->lorentzAngleFactor()
 		   *(mParam->padtransEField(j)-e_now)
 		   +(mParam->padtransDeflection(j,padrow)
 		     +deltap*mParam->padtransdDeflectiondP(j,padrow))
+		   *mParam->lorentzAngleFactor()
 		   *(e_now-mParam->padtransEField(v_buf)))
 	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
 	  

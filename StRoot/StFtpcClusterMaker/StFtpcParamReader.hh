@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.7 2000/11/14 13:08:30 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.8 2000/11/27 14:09:26 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.8  2000/11/27 14:09:26  hummler
+// implement tzero and lorentz angle correction factor
+//
 // Revision 1.7  2000/11/14 13:08:30  hummler
 // add charge step calculation, minor cleanup
 //
@@ -81,6 +84,8 @@ protected:
   Float_t mRadiansPerBoundary;
   Float_t mStandardPressure;
   Float_t mNormalizedNowPressure;
+  Float_t mTZero;
+  Float_t mLorentzAngleFactor;
   Int_t mOrderOfDiffusionErrors;
   Float_t *mPadDiffusionErrors;
   Float_t *mTimeDiffusionErrors;
@@ -213,6 +218,8 @@ public:
   Float_t radiansPerBoundary() {return mRadiansPerBoundary;}
   Float_t standardPressure() {return mStandardPressure;}
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
+  Float_t tZero() {return mTZero;}
+  Float_t lorentzAngleFactor() {return mLorentzAngleFactor;}
   Float_t padBadFitError() {return mPadBadFitError;}
   Float_t timeBadFitError() {return mTimeBadFitError;}
   Float_t padUnfoldError() {return mPadUnfoldError;}
