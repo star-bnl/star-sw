@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.8 2000/02/29 01:54:49 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.9 2000/03/05 04:11:48 fine Exp $
 #ifndef STAR_St_tableDescriptor
 #define STAR_St_tableDescriptor
 
@@ -11,48 +11,46 @@ class St_tableDescriptor : public St_Table {
      static St_tableDescriptor *fgColDescriptors;
      virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;} 
      virtual void  SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}  
-     St_tableDescriptor(){;}
   public:                                    
- 
-    St_tableDescriptor(const St_Table *parentTable);
+    St_tableDescriptor(const St_Table *parentTable=0);
     St_tableDescriptor(TClass *classPtr);
    ~St_tableDescriptor();
     TString CreateLeafList() const;
-    virtual  Int_t Compare(St_tableDescriptor *compTable);
     tableDescriptor_st *GetTable(){ return (tableDescriptor_st *)s_Table;}                                            
              void        LearnTable(const St_Table *parentTable);
              void        LearnTable(TClass *classPtr);
-             const Char_t *GetColumnName(Int_t columnIndex)        const;
-             const Int_t GetColumnByName(const Char_t *columnName=0) const;
-             UInt_t      GetNumberOfColumns()                      const;
-             UInt_t     *GetIndexArray(Int_t columnIndex)          const;
-             UInt_t      GetOffset(Int_t columnIndex)              const;
-             Int_t       GetOffset(const Char_t *columnName=0)     const;
-             UInt_t      GetColumnSize(Int_t columnIndex)          const;
-             Int_t       GetColumnSize(const Char_t *columnName=0) const;
-             UInt_t      GetTypeSize(Int_t columnIndex)            const;
-             Int_t       GetTypeSize(const Char_t *columnName=0)   const;
-             UInt_t      GetDimensions(Int_t columnIndex)          const;
-             Int_t       GetDimensions(const Char_t *columnName=0) const;
-             EColumnType GetColumnType(Int_t columnIndex)          const;
-             EColumnType GetColumnType(const Char_t *columnName=0) const;
+             const Char_t *ColumnName(Int_t columnIndex)        const;
+             const Int_t ColumnByName(const Char_t *columnName=0) const;
+             UInt_t      NumberOfColumns()                      const;
+             UInt_t     *IndexArray(Int_t columnIndex)          const;
+             UInt_t      Offset(Int_t columnIndex)              const;
+             Int_t       Offset(const Char_t *columnName=0)     const;
+             UInt_t      ColumnSize(Int_t columnIndex)          const;
+             Int_t       ColumnSize(const Char_t *columnName=0) const;
+             UInt_t      TypeSize(Int_t columnIndex)            const;
+             Int_t       TypeSize(const Char_t *columnName=0)   const;
+             UInt_t      Dimensions(Int_t columnIndex)          const;
+             Int_t       Dimensions(const Char_t *columnName=0) const;
+             EColumnType ColumnType(Int_t columnIndex)          const;
+             EColumnType ColumnType(const Char_t *columnName=0) const;
              void        SetOffset(UInt_t offset,Int_t column);
              void        SetSize(UInt_t size,Int_t column);
              void        SetTypeSize(UInt_t size,Int_t column);
              void        SetDimensions(UInt_t dim,Int_t column);
              void        SetColumnType(EColumnType type,Int_t column);
+    virtual  Int_t       UpdateOffsets(const St_tableDescriptor *newDesciptor);
     ClassDef(St_tableDescriptor,0)
 };
 
 //______________________________________________________________________________
-inline  const Char_t *St_tableDescriptor::GetColumnName(Int_t column)const{return ((tableDescriptor_st *)At(column))->m_ColumnName;}
-inline  UInt_t St_tableDescriptor::GetOffset(Int_t column)          const {return ((tableDescriptor_st *)At(column))->m_Offset;    }
-inline  UInt_t *St_tableDescriptor::GetIndexArray(Int_t column)     const {return ((tableDescriptor_st *)At(column))->m_IndexArray;}
-inline  UInt_t St_tableDescriptor::GetNumberOfColumns()             const {return GetNRows();                                      }
-inline  UInt_t St_tableDescriptor::GetColumnSize(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Size;      }
-inline  UInt_t St_tableDescriptor::GetTypeSize(Int_t column)        const {return ((tableDescriptor_st *)At(column))->m_TypeSize;  }
-inline  UInt_t St_tableDescriptor::GetDimensions(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Dimensions;}
-inline  St_Table::EColumnType St_tableDescriptor::GetColumnType(Int_t column) const {return EColumnType(((tableDescriptor_st *)At(column))->m_Type);}
+inline  const Char_t *St_tableDescriptor::ColumnName(Int_t column)const{return ((tableDescriptor_st *)At(column))->m_ColumnName;}
+inline  UInt_t St_tableDescriptor::Offset(Int_t column)          const {return ((tableDescriptor_st *)At(column))->m_Offset;    }
+inline  UInt_t *St_tableDescriptor::IndexArray(Int_t column)     const {return ((tableDescriptor_st *)At(column))->m_IndexArray;}
+inline  UInt_t St_tableDescriptor::NumberOfColumns()             const {return GetNRows();                                      }
+inline  UInt_t St_tableDescriptor::ColumnSize(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Size;      }
+inline  UInt_t St_tableDescriptor::TypeSize(Int_t column)        const {return ((tableDescriptor_st *)At(column))->m_TypeSize;  }
+inline  UInt_t St_tableDescriptor::Dimensions(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Dimensions;}
+inline  St_Table::EColumnType St_tableDescriptor::ColumnType(Int_t column) const {return EColumnType(((tableDescriptor_st *)At(column))->m_Type);}
 inline  void   St_tableDescriptor::SetOffset(UInt_t offset,Int_t column)  {((tableDescriptor_st *)At(column))->m_Offset     = offset;}
 inline  void   St_tableDescriptor::SetSize(UInt_t size,Int_t column)      {((tableDescriptor_st *)At(column))->m_Size       = size;  }
 inline  void   St_tableDescriptor::SetTypeSize(UInt_t size,Int_t column)  {((tableDescriptor_st *)At(column))->m_TypeSize   = size;  }
@@ -61,6 +59,9 @@ inline  void   St_tableDescriptor::SetColumnType(EColumnType type,Int_t column) 
 
 //______________________________________________________________________________
 // $Log: St_tableDescriptor.h,v $
+// Revision 1.9  2000/03/05 04:11:48  fine
+// Automatic schema evolution for St_Table has been activated
+//
 // Revision 1.8  2000/02/29 01:54:49  fine
 // St_Table -> turn automatic schema evolution for table version 2 and above
 //
