@@ -1,6 +1,34 @@
-//
-// StHeavyTagMaker class for Spectra Reconstruction Tags                  //
-//
+/* $Id: StHeavyTagMaker.cxx,v 1.2 2004/07/29 23:06:11 calderon Exp $
+ *
+ * Author: Manuel Calderon de la Barca Sanchez, July 2004
+ ***************************************************************************
+ *
+ * Description:   Maker to fill the Heavy Flavor Tags
+ * 
+ * StHeavyTagMaker class for Heavy Flavor Reconstruction Tags
+ * The tags that are currently filled are:
+ * 1) The number of tracks above 3 different mass thresholds
+ * -m_charm  = 1.25 GeV/c^2
+ * -m_beauty = 4.2  GeV/c^2
+ *             7    GeV/c^2
+ * 2) The number of tracks above p>2 GeV/c that point to a tower
+ *    with ADC-30>360, which should roughly correspond to towers above
+ *    Et=3 GeV.  The mean pedestal is 30 adc counts, and 360 roughly
+ *    corresponds to the 3 GeV, based on a sample of 10 events in
+ *    the AuAu62 run, which gives 0.0083 GeV/adc
+ *
+ * 3) The largest pair invariant mass in the event, assuming the electron mass.
+ *
+ ***************************************************************************
+ *
+ * $Log: StHeavyTagMaker.cxx,v $
+ * Revision 1.2  2004/07/29 23:06:11  calderon
+ * Changed adc cut to match towers to 360 ADC counts,
+ * and documented the origin.
+ * Added Description to cxx file.
+ * Removed unnecessary static_cast for StDetectorId
+ *
+ **************************************************************************/
 
 #include "StHeavyTagMaker.h"
 #include "tables/St_HeavyTag_Table.h"
@@ -110,6 +138,15 @@ void StHeavyTagMaker::fillTag() {
     mTagTable->mNumberOfTrackToTowerMatches = countTrackTowerMatches(mEvent);
     mTagTable->mLargestPairMass = largestPairMass(mEvent);
 
+    if (Debug()>0) {
+	cout << "Heavy Flavor Tags for Run " << mEvent->runId() << " Event: " << mEvent->id() << endl;
+	cout << "Tracks above m_c  : " << mTagTable->mNumberOfTracksAboveThres[0] << endl;
+	cout << "Tracks above m_b  : " << mTagTable->mNumberOfTracksAboveThres[1] << endl;
+	cout << "Tracks above 7GeV : " << mTagTable->mNumberOfTracksAboveThres[2] << endl;
+	cout << "Track-Tower Matches " << mTagTable->mNumberOfTrackToTowerMatches << endl;
+	cout << "Largest Inv. Mass : " << mTagTable->mLargestPairMass  << endl;
+
+    }
     return;
 }
 
