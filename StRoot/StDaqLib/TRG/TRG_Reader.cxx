@@ -96,7 +96,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   assert(pBankTRGD);
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
   if(pBankTRGD->HerbSwap(pBankTRGD)<0) { printf("Swap error %s %d.\n"__FILE__,__LINE__); }
-  SanityCheck();
+  //  SanityCheck();
   printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
 }
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
