@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.22  1999/04/09 23:29:08  ward
+// Does not waste huge amounts of table space.
+//
 // Revision 1.21  1999/04/08 17:21:46  ward
 // Re-init nPixelPreviousPadRow at row 13, again.
 //
@@ -78,6 +81,7 @@
 
 ClassImp(St_tpcdaq_Maker)
 
+#define ALLOC 1.2  // Must be > 1.0.  Larger runs faster, but wastes memory.
 #define NSECT 24
 #define NROW  45
 #define DEBUG_ACTIVE_ROW 33
@@ -145,60 +149,69 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
 
   *raw_pad_in=(St_raw_pad*) sect("raw_pad_in");
   if (!(*raw_pad_in)) {
-    *raw_pad_in=new St_raw_pad("raw_pad_in",1750); sect.Add(*raw_pad_in);
+    *raw_pad_in=new St_raw_pad("raw_pad_in",3); sect.Add(*raw_pad_in);
   }
 
   *raw_pad_out=(St_raw_pad*) sect("raw_pad_out");
   if (!(*raw_pad_out)) {
-    *raw_pad_out=new St_raw_pad("raw_pad_out",3940); sect.Add(*raw_pad_out);
+    *raw_pad_out=new St_raw_pad("raw_pad_out",3); sect.Add(*raw_pad_out);
   }
 
   *raw_seq_in=(St_raw_seq*) sect("raw_seq_in");
   if (!(*raw_seq_in)) {
-    *raw_seq_in=new St_raw_seq("raw_seq_in",50000); sect.Add(*raw_seq_in);
+    *raw_seq_in=new St_raw_seq("raw_seq_in",3); sect.Add(*raw_seq_in);
   }
 
   *raw_seq_out=(St_raw_seq*) sect("raw_seq_out");
   if (!(*raw_seq_out)) {
-    *raw_seq_out=new St_raw_seq("raw_seq_out",100000); sect.Add(*raw_seq_out);
+    *raw_seq_out=new St_raw_seq("raw_seq_out",3); sect.Add(*raw_seq_out);
   }
 
   *pixel_data_in=(St_type_shortdata*) sect("pixel_data_in");
   if (!(*pixel_data_in)) {
-    *pixel_data_in=new St_type_shortdata("pixel_data_in",400000); // BBB Iwona
+    *pixel_data_in=new St_type_shortdata("pixel_data_in",100);
     sect.Add(*pixel_data_in);
   }
 
   *pixel_data_out=(St_type_shortdata*) sect("pixel_data_out");
   if (!(*pixel_data_out)) {
-    *pixel_data_out=new St_type_shortdata("pixel_data_out",400000);
+    *pixel_data_out=new St_type_shortdata("pixel_data_out",100);
     sect.Add(*pixel_data_out);
   }
 }
 void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
       int seqOffset,int nseq,int timeWhere,int pad) {
+  int nAlloc,nUsed;
   raw_pad_st singlerow;
   singlerow.PadOffset=padOffset;
   singlerow.SeqOffset=seqOffset;
   singlerow.nseq=nseq;
   singlerow.SeqModBreak=timeWhere;
   singlerow.PadId=pad;
+  nAlloc=raw_pad_gen->GetTableSize(); nUsed=raw_pad_gen->GetNRows();
+  if(nUsed>nAlloc-10) { raw_pad_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   raw_pad_gen->AddAt(&singlerow,padR);
 }
 inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
       int rownum,unsigned char datum) {
+  int nAlloc,nUsed;
   type_shortdata_st singlerow;
   singlerow.data=datum;
+  nAlloc=pixel_data_gen->GetTableSize(); nUsed=pixel_data_gen->GetNRows();
+  if(nUsed>nAlloc-10) { pixel_data_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   pixel_data_gen->AddAt(&singlerow,rownum);
 }
 void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
     int startTimeBin,int numberOfBinsInSequence) {
+  int nAlloc,nUsed;
   raw_seq_st singlerow;
   if(startTimeBin>=0x100) { 
     mErr=__LINE__; return; 
   }
   singlerow.m=startTimeBin;
   singlerow.i=numberOfBinsInSequence-1;
+  nAlloc=raw_seq_gen->GetTableSize(); nUsed=raw_seq_gen->GetNRows();
+  if(nUsed>nAlloc-10) { raw_seq_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   raw_seq_gen->AddAt(&singlerow,rownumber);
 }
 void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
@@ -313,12 +326,12 @@ int St_tpcdaq_Maker::Output() {
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
           if(startTimeBin<=255) timeWhere=iseq+1; else timeOff=0x100;
-// printf("BBB startTimeBin=%3d, timeOff=%3d, diff = %x\n",startTimeBin,timeOff,
-                        // startTimeBin-timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
           pointerToAdc=listOfSequences[iseq].firstAdc;
           for(ibin=0;ibin<seqLen;ibin++) {
+            // fprintf(BBB,"%2d %2d %2d %2d %3d %3d\n",
+            // isect,ipadrow+1,pad,iseq,ibin+startTimeBin+1,*pointerToAdc);
             PixelWrite(pixel_data_gen,pixR++,*(pointerToAdc++));
             nPixelThisPadRow++; nPixelThisPad++;
           }
@@ -391,7 +404,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.21 1999/04/08 17:21:46 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.22 1999/04/09 23:29:08 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
