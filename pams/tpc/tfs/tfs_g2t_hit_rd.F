@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.3 1998/04/07 20:56:32 hardtke Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.4 1998/04/23 19:12:03 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.4  1998/04/23 19:12:03  sakrejda
+* modified to print out an estimate of needed tphit size if the structure is not big enough
+*
 * Revision 1.3  1998/04/07 20:56:32  hardtke
 * AZZZZ
 * A
@@ -97,6 +100,7 @@ C-----------------------------------------------------------------------
       INTEGER MXSECTOR
       PARAMETER (MXSECTOR=24)
       INTEGER IROW(2,MXROW,MXSECTOR)
+      INTEGER ICOUNT
       COMMON /TPHPNT/ IROW
 C     IROW  - 1 pointer to a row in a sector
 C     IROW  - 2 number of hits
@@ -117,6 +121,7 @@ C=========================== Begin Executable Code =======================
 C     set row counter for tphit
       nok = tphit_h.nok
       ierr = 0
+      icount = 0
 
 C     loop over MC hits and extract sector-row information
       do 100 ih = 1, g2t_hit_h.nok
@@ -132,7 +137,7 @@ C     For physical pad-rows, max volume_id = 100*24 + 45 = 2445. For the TPC
 C     Fast Simulator, reject GEANT hits with voulme_id > 2445.    
 C     ---  Dhammika W.  April 18, 1996 ---
 
-         if(g2t_hit(ih).volume_id.gt.2445)goto 100 
+         if(g2t_hit(ih).volume_id.gt.2445)goto 100
 
          if( nok .lt. tphit_h.maxlen ) then
 
@@ -272,17 +277,16 @@ C     rotate sectors into one quadrant
                endif
             endif
          
-         else                        ! not enough space in tphit
-          ierr = 1
-          goto 998   
+         else  
+          icount=icount+1            ! not enough space in tphit
+
          endif                       ! nok < tphit.maxlen
          
  100  enddo
 
 C     set the row counter
- 998  continue
+      if(icount.ne.0) ierr = nok+icount
       tphit_h.nok = nok
 
- 999  CONTINUE
       RETURN
       END

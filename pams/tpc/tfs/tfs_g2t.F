@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.5 1998/04/09 22:59:40 hardtke Exp $
+* $Id: tfs_g2t.F,v 1.6 1998/04/23 19:12:00 sakrejda Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.6  1998/04/23 19:12:00  sakrejda
+* modified to print out an estimate of needed tphit size if the structure is not big enough
+*
 * Revision 1.5  1998/04/09 22:59:40  hardtke
 * change write statement to message call
 *
@@ -237,8 +240,9 @@ C     read-in the Monte-Carlo hit data
      >        ix, nxtrig,
      >        tpc_index_h, tpc_index, tpc_index_type_h,
      >        tpc_index_type,ierr)
-         If (ierr.eq.1) then
-          write(m132,*) 'TFS-G2T-I1 tphit table too small'
+         If (ierr.gt.0) then
+          write(m132,*) 'TFS-G2T-I1 tphit table too small, needs',
+     >    ierr
           call Message (m132, 1, idI1 )
 C          write(6,*) 'TFS-G2T-I1 tphit table too small'
 *          tfs_g2t = STAFCV_BAD
