@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.8 1999/03/23 23:10:05 ullrich Exp $
+% $Id: StEvent.tex,v 1.9 1999/03/24 19:03:43 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.8  1999/03/23 23:10:05  ullrich
-% Added latest changes to StEvent.
+% Revision 1.9  1999/03/24 19:03:43  ullrich
+% Fixed bug in UML figure numbers.
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -140,8 +140,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/23 23:10:05 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -149,14 +149,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/23 23:10:05 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/23 23:10:05 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -182,9 +182,9 @@ tree and navigate freely through the structure is a pointer to
 \name{StEventReaderMaker} which is explained below in detail.
 
 \section{Introduction}
-    \label{fig:umlForEvents}
 sec.~\ref{sec:StEventReaderMaker}.
 \StEvent\footnote{The name ``StEvent'' is somewhat misleading since it
+    is \textit{(i)} the name of the package and \textit{(ii)} the name
     of a class.  We therefore write \StEvent\ when we refer to the
     package and \name{StEvent} for the class.} is an object oriented
 framework to access, manipulate and analyze STAR DSTs. It consist of a
@@ -210,8 +210,8 @@ between classes through pointer and references.
     \label{fig:umlForEvents}
 \end{center}
 \end{figure}
+\usepackage{graphicx}
 Overall the design of \StEvent\ is fairly simple which reflects the
-    \caption{Dependencies for the TPC, FTPC and SVT hit classes.}
 fact that the package is strongly focused on simple data access and
 navigation.  In order to give an overview without going to much in
 detail Fig.~\ref{fig:umlForEvents}-\ref{fig:umlForVertices} show some
@@ -225,8 +225,8 @@ vertices. Each event has a run associated with it which is described
 by the \name{StRun} class. \\
 A more simple structure of concrete classes is depicted in
 Fig.~\ref{fig:umlForHits}. Shown is the relations between the various
+describes a global track (\name{StGlobalTrack} and its dependencies.
 Global Tracks are the essential backbone of the data model. They
-    \caption{Data model for \name{StGlobalTrack} and related classes.}
 three vector class \name{StThreeVector} indicates a 'has a'
 relationship, since the actual position in xyz is stored in a data
 member of type \name{StThreeVector}.
@@ -240,8 +240,8 @@ member of type \name{StThreeVector}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Fig.~\ref{fig:umlForTracks} shows a more complex diagram which
+describes a global track (\name{StGlobalTrack}) and its dependencies.
 Global tracks are the essential backbone of the data model. They
-    \caption{Data model for the vertices and related classes in \StEvent .}
 contain references to their hits in the various detectors and keep
 track of their start and stop vertices.  (see
 fig.~\ref{fig:umlForVertices}).
@@ -298,7 +298,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/23 23:10:05 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
