@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.19  1999/02/24 16:59:24  lasiuk
+// turn off histos
+//
 // Revision 1.18  1999/02/24 16:57:02  lasiuk
 // x --> -x for sectors>12
 //
@@ -43,7 +46,7 @@
 //                                                                      //
 // StTrsMaker class for Makers                                          //
 //                                                                      //
-#define HISTOGRAMS 1
+#define hISTOGRAMS 1
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -107,7 +110,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -655,7 +658,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
