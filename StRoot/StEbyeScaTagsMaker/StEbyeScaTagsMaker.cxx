@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.23 2002/05/04 21:59:26 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.24 2002/05/07 23:12:38 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.24  2002/05/07 23:12:38  jgreid
+ * blunderbug fix
+ *
  * Revision 1.23  2002/05/04 21:59:26  jgreid
  * abs->fabs
  *
@@ -265,7 +268,7 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
               dcaX = dca.x()/centimeter;
               dcaY = dca.y()/centimeter;
               dcaZ = dca.z()/centimeter;
-              dcaM = (fabs(dca))/centimeter;
+              dcaM = (fabs(dca.mag()))/centimeter;
 
               // calculate mt (needed for temperature calculation)
               mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
