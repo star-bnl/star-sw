@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.111 2001/04/14 01:55:39 perev Exp $
+// $Id: StMaker.cxx,v 1.112 2001/05/04 19:15:40 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -531,11 +531,11 @@ Int_t StMaker::Make()
    return kStOK;
 }
 //_____________________________________________________________________________
-void StMaker::Fatal(int Ierr, const char *com)
+void StMaker::FatalErr(int Ierr, const char *com)
 {
    printf("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
    StMaker *parent = (StMaker *)GetParent();
-   if (parent) ((StMaker*)parent)->Fatal(Ierr,com);
+   if (parent) ((StMaker*)parent)->FatalErr(Ierr,com);
    fflush(stdout);
 }
 //_____________________________________________________________________________
@@ -1049,6 +1049,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.112  2001/05/04 19:15:40  perev
+// Fatal() -> FatalErr()
+//
 // Revision 1.111  2001/04/14 01:55:39  perev
 // Reverse iter for Clear() and Finish()
 //
