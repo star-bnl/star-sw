@@ -2,7 +2,7 @@
 #define STAR_RMath
 
 #include "Rtypes.h"
-#include "string.h"
+#include <string.h>
 
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 
