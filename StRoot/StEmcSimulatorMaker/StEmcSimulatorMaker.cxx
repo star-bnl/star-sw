@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <math.h>
 #include <TRandom.h>
+#include <TBrowser.h>
 #include <StMessMgr.h>
 
 #include "StEmcSimulatorMaker.h"
@@ -40,7 +41,7 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
   //
   // Default value of parameters for this maker
   //
-   mBEMC        = 2;  // >0 BEMC yon
+   mBEMC        = 2;  // >0 BEMC 
    mEEMC        = 0;  // EEMC  of
    mHistControl = 1;  // Hist  on
    SetDebug(0);       // Debug of
@@ -48,7 +49,10 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
 
 }
 
-StEmcSimulatorMaker::~StEmcSimulatorMaker() { /* nothing */}
+StEmcSimulatorMaker::~StEmcSimulatorMaker() 
+{
+  if(mEmcCollection) delete mEmcCollection; // 25-jan-2001
+}
 
 Int_t StEmcSimulatorMaker::Init()
 {
@@ -149,6 +153,8 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
     m_nhit = new TH2F("EmcNHitsVsDet(ems)" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
     m_etot = new TH2F("EmcEtotVsDet(ems)" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
   }
+
+  gMessMgr->Info()<<" Book hist for detector " << detname[i].Data() <<endm;
 
   TString name_h   = detname[i] + "Hits";
   TString name_e   = detname[i] + "Energy";
@@ -403,8 +409,6 @@ Int_t StEmcSimulatorMaker::fillStEvent(){
 
   mEmcCollection = new StEmcCollection();
 
-  AddData(new St_ObjectSet("EmcCollection" , mEmcCollection)); // ??
-
   for(Int_t i=0; i<MAXDET; i++){ //Loop over detectors
     //    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StDetectorId id = (StDetectorId)(i+kBarrelEmcTowerId);
@@ -427,14 +431,25 @@ Int_t StEmcSimulatorMaker::fillStEvent(){
   return kStOK;
 }
 
-void StEmcSimulatorMaker::printmBEMC(){
+void StEmcSimulatorMaker::Browse(TBrowser* b)
+{
+//  Will be see StEmcCollection in browser as separate entity (if unzero)
+  if(mEmcCollection) b->Add((TObject*)mEmcCollection);
+  TDataSet::Browse(b);
+}
+
+void StEmcSimulatorMaker::printmBEMC()
+{
   if(!mBEMC) gMessMgr->Info()<<" BEMC out of CHAIN  mBEMC="<<mBEMC<<endm;
   else       gMessMgr->Info()<<" BEMC     in CHAIN  mBEMC="<<mBEMC<<endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.1 2000/10/23 22:53:14 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.2 2001/02/02 23:59:59 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.2  2001/02/02 23:59:59  pavlinov
+// New function Browse() and cleanup for new version of BFC
+//
 // Revision 1.1  2000/10/23 22:53:14  pavlinov
 // First working C++ version
 //

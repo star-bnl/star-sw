@@ -15,5 +15,8 @@ The main differences between two makers are:
 Modification history (reverse chronological)
 ====================
 
+2-Feb-2001  A.Pavlinov.
+- New function Browse() and cleanup for new version of BFC.
+
 Oct-2000  A.Pavlinov.
 - Created, tested and committed.
