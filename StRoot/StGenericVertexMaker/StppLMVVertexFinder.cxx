@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.7 2004/08/06 04:49:14 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.8 2004/08/06 21:00:01 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -83,7 +83,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   mBfield=  0.1*b[2]; //This is now Tesla.
   
   //printf("mBfield=%f tesla=%e b2=%f\n",mBfield,tesla,b[2]);
-  gMessMgr->Debug() << "mBfield=" << mBfield << "tesla=" << tesla << "b2=" << b[2] << endm;
+  gMessMgr->Info() << "ppLMV5:: mBfield/Tesla=" << mBfield << " b2=" << b[2] << endm;
  
   setFlagBase(); // what is that ? JB
   changeCuts();
@@ -313,13 +313,13 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   // float strag=0.0136/beta/pmom.mag()*fabs(spath); 
 
   // ppLMV face-lift : attenuated weights 
-  float pmomX=pmom.mag();
-  if (pmomX >4 )pmomX=4; //inhibit domination of high pT tracks
-  float spathX=spath; // reduce advantage of SVT matched tracks
-  if(spathX<30) spathX=30;
-  float strag=0.0136/beta/pmomX*fabs(spathX); 
- 
-  if(fabs(mBfield)<0.01) strag=0.0136*fabs(spath);
+  float pmomM=pmom.mag();
+  if (pmomM >4 )pmomM=4; //inhibit domination of high pT tracks
+  float spathL=fabs(spath); // reduce advantage of SVT matched tracks
+  if(spathL<40) spathL=40;
+  float strag=0.0136/beta/pmomM*spathL; 
+  if(fabs(mBfield)<0.01) strag=0.0136*spathL; // no field case, pT makes no sense
+
   //  printf("stragling=%f %f p=%f %f nFp=%d nPp=%d\n",strag,beta,pmom.mag(),spath, track->fitTraits().numberOfFitPoints(),nPoss );
   
   pairD  d2;
@@ -502,6 +502,8 @@ bool  StppLMVVertexFinder::ppLMV5() {
   mFitError.setX(sqrt(C11));   mFitError.setY(sqrt(C22));   mFitError.setZ(sqrt(C33));
 
   gMessMgr->Debug() <<"ppLMV5: Primary Vertex found!\nVert position: "<<XVertex<<", accepted tracks "<<mPrimCand.size()<<" of "<<totTr<<" eveID="<<eveID<<endm;
+  printf("##V %6d %d %f %f %f    %d %d %d\n",eveID,mTotEve,XVertex.x(),XVertex.y(),XVertex.z(),NCtbSlats(),n1,NCtbMatches());
+      
 
   // get geant vertex
   St_DataSet *gds=mDumMaker->GetDataSet("geant");
@@ -515,7 +517,7 @@ bool  StppLMVVertexFinder::ppLMV5() {
       // hPiFi[11]->Fill(GVER->ge_x[0]-rXver);
       // hPiFi[12]->Fill(GVER->ge_x[1]-rYver);
       printf("Z Geant-found=%.2f, dx=%.2f, dy=%.2f nCtbSl=%d n1=%d eveID=%d\n",GVER->ge_x[2]-XVertex.z(),GVER->ge_x[0]-XVertex.x(),GVER->ge_x[1]-XVertex.y(),NCtbSlats(),n1,eveID);
-      printf("##V %6d %d %f %f    %d %d %d\n",eveID,mTotEve,GVER->ge_x[2],XVertex.z(),NCtbSlats(),n1,NCtbMatches());
+      printf("##G %6d %d %f %f    %d %d %d\n",eveID,mTotEve,GVER->ge_x[2],XVertex.z(),NCtbSlats(),n1,NCtbMatches());
       
     }
   }
@@ -568,6 +570,11 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.8  2004/08/06 21:00:01  balewski
+ * now should be fine for 2004 pp200 data,
+ * high pT & small path cat-off included
+ *  still no nFit/nPoss cut
+ *
  * Revision 1.7  2004/08/06 04:49:14  balewski
  * that would be it
  *
