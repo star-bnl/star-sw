@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.81  2004/01/02 18:11:29  ward
+// Change encoding of rb_mz.
+//
 // Revision 1.80  2004/01/02 17:53:18  ward
 // Add receiver board and mezzanine to daq100cl output table.
 //
@@ -943,7 +946,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int m
       singlerow.timebucket=Swap2(swap,*time);
       singlerow.charge=Swap2(swap,*charge);
       singlerow.flag=Swap2(swap,*flag);
-      singlerow.rb_mz=receiverBoard*mezzanine; // range = (1,36) = (1,12)*(1,3)
+      singlerow.rb_mz=receiverBoard+100*mezzanine; // 0 < = rb_mz <= 211
       nAlloc=daq100cl->GetTableSize(); nUsed=daq100cl->GetNRows();
       if(nUsed>nAlloc-10) { daq100cl->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
       daq100cl->AddAt(&singlerow,totalRowCount++);
@@ -1014,7 +1017,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
         if(length==0) continue;
         pTPCMZCLD=pTPCRBCLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
         swapTPCMZCLD=WhetherToSwap(*(pTPCMZCLD+5));
-        DAQ100clTableOut(irb+1,imz+1,
+        DAQ100clTableOut(irb,imz,
             sector+map,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
       }
     }
