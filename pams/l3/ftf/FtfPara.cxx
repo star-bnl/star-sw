@@ -1,5 +1,5 @@
 //:>------------------------------------------------------------------
-//: FILE:       FtfPara.cpp
+//: FILE:       FtfPara.cxx
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:              7dec1998 ppy variable names changed to C++ style

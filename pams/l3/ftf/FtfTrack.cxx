@@ -1,12 +1,14 @@
 //:>------------------------------------------------------------------
-//: FILE:       FtfTrack.cpp
+//: FILE:       FtfTrack.cxx
 //: HISTORY:
-//:             28oct1996 version 1.00
-//:             11aug1999 ppy primary flag fill in filling routines
-//:             22aug1999 ppy fixing Debug routines (TRDEBUG flag on)  
-//:             23aug1999 ppy change loop order in seekNextHit
-//:             29aug1999 ppy move fill tracks from follow to build
-//:             19nov1999 ppy add maxChi2Primary to decide whether track is primary
+//:           28oct1996 version 1.00
+//:           11aug1999 ppy primary flag fill in filling routines
+//:           22aug1999 ppy fixing Debug routines (TRDEBUG flag on)  
+//:           23aug1999 ppy change loop order in seekNextHit
+//:           29aug1999 ppy move fill tracks from follow to build
+//:           19nov1999 ppy add maxChi2Primary to decide whether track is primary
+//:           27jan2000 ppy refHit replaced by xRefHit and yRefHit
+//:           27jan2000  VOLUME, ROW and AREA classes replaced by FtfContainer
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -17,9 +19,8 @@
 #include <memory.h>
 #include <stdio.h>
 #include <math.h>
-#include "FtfHit.h"
 #include "FtfTrack.h"
-#include "FtfVolume.h"
+#include "FtfHit.h"
 
 //extern FtfFinder     tracker ;
 
@@ -45,10 +46,14 @@ void FtfTrack::add ( FtfHit *thisHit, int way )
   if ( way < 0 || nHits == 1 ) {
      if ( nHits > 1 ) lastHit->nextTrackHit = thisHit ;
      lastHit = thisHit ;
+     innerMostRow = lastHit->row ;
+     xLastHit = lastHit->x ;
+     yLastHit = lastHit->y ;
   }
   else {
      thisHit->nextTrackHit = firstHit ; 
      firstHit = thisHit ;
+     outerMostRow = firstHit->row ;
   }
 //
 //        Declare hit as used and fill chi2
@@ -114,7 +119,7 @@ void FtfTrack::add ( FtfHit *thisHit, int way )
 void FtfTrack::add ( FtfTrack *piece ) 
 {
 //
-//   Get cercle parameters
+//   Get circle parameters
 //
   s11Xy += piece->s11Xy  ;
   s12Xy += piece->s12Xy  ;
@@ -129,44 +134,58 @@ void FtfTrack::add ( FtfTrack *piece )
 //     Now in the sz plane
 //
   if ( para->szFitFlag ) {
-     s11Sz += piece->s11Sz  ;
-     s12Sz += piece->s12Sz  ;
-     s22Sz += piece->s22Sz  ;
-     g1Sz  += piece->g1Sz   ;
-     g2Sz  += piece->g2Sz   ;
+     double det1 = s11Sz * s22Sz - s12Sz * s12Sz ;
+     dtanl = (double) ( s11Sz / det1 );
+     dz0   = (double) ( s22Sz / det1 );
 
-     ddSz  = s11Sz * s22Sz - square ( s12Sz ) ;
-     a1Sz  = ( g1Sz * s22Sz - g2Sz * s12Sz ) / ddSz ;
-     a2Sz  = ( g2Sz * s11Sz - g1Sz * s12Sz ) / ddSz ;
+     double det2 = piece->s11Sz * piece->s22Sz - piece->s12Sz * piece->s12Sz ;
+     piece->dtanl = (double) ( piece->s11Sz / det2 );
+     piece->dz0   = (double) ( piece->s22Sz / det2 );
+      
+     double weight1 = 1./(dtanl*dtanl);
+     double weight2 = 1./(piece->dtanl*piece->dtanl);
+     double weight  = (weight1+weight2);
+     tanl = ( weight1 * tanl + weight2 * piece->tanl ) / weight ; 
+
+     weight1 = 1./(dz0*dz0);
+     weight2 = 1./(piece->dz0*piece->dz0);
+     weight  = (weight1+weight2);
+     z0   = ( weight1 * z0 + weight2 * piece->z0 ) / weight ; 
    }
 //
 //  Add space points to first track
 //
     int counter ;
-    if ( piece->firstHit->row < firstHit->row ){
-      counter = 0 ;
-      lastHit->nextTrackHit = piece->firstHit ;
-      lastHit         = piece->lastHit ;
-      for ( currentHit   = (FtfHit *)piece->firstHit ; 
-            currentHit != 0 && counter < piece->nHits ;
-            currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
-        currentHit->track = this   ;
-	counter++ ;
-       }
+    if ( piece->outerMostRow < outerMostRow ){
+      if ( lastHit != NULL ) {
+         counter = 0 ;
+	 lastHit->nextTrackHit = piece->firstHit ;
+	 lastHit         = piece->lastHit ;
+	 for ( currentHit   = (FtfHit *)piece->firstHit ; 
+	       currentHit != 0 && counter < piece->nHits ;
+	       currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
+	    currentHit->track = this   ;
+	    counter++ ;
+	 }
+      }
+      innerMostRow = piece->innerMostRow ;
+      xLastHit     = piece->xLastHit ;
+      yLastHit     = piece->yLastHit ;
     }
     else {
-      counter = 0 ;
-      for ( currentHit   = (FtfHit *)piece->firstHit ; 
-            currentHit != 0 && counter < piece->nHits ;
-            currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
-        currentHit->track = this   ;
-	counter++;
-      }
-
-      piece->lastHit->nextTrackHit = firstHit ;
-      firstHit               = piece->firstHit ;
-      
-   }
+       if ( piece->lastHit != NULL ) {
+	  counter = 0 ;
+	  for ( currentHit   = (FtfHit *)piece->firstHit ; 
+		currentHit != 0 && counter < piece->nHits ;
+		currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
+	     currentHit->track = this   ;
+	     counter++;
+	  }
+	  piece->lastHit->nextTrackHit = firstHit ;
+	  firstHit               = piece->firstHit ;
+       }
+       outerMostRow = piece->outerMostRow ;
+    }
 //
 //
 //
@@ -176,7 +195,9 @@ void FtfTrack::add ( FtfTrack *piece )
 //
 //   Update track parameters
 //
+   para->szFitFlag = 0 ;
    if ( para->fillTracks ) fill ( ) ;
+   para->szFitFlag = 1 ;
 //
 //   Declare track 2 not to be used
 //
@@ -186,11 +207,11 @@ void FtfTrack::add ( FtfTrack *piece )
 //****************************************************************************
 //   Control how the track gets built
 //****************************************************************************
-int FtfTrack::buildTrack ( FtfHit *firstHit, VOLUME *volume ) {
+int FtfTrack::buildTrack ( FtfHit *frstHit, FtfContainer *volume ) {
 //
 //   Add first hit to track
 //
-   add ( firstHit, GO_DOWN ) ;
+   add ( frstHit, GO_DOWN ) ;
 //
 //    Try to build a segment first
 //
@@ -264,21 +285,21 @@ void FtfTrack::dEdx (  ){
 //***********************************************************************
 void FtfTrack::deleteCandidate(void)
 {
-  FtfHit *currentHit = (FtfHit *)firstHit ;
+  FtfHit *curentHit = (FtfHit *)firstHit ;
   FtfHit *nextHit ;
 #ifdef TRDEBUG
   debugDeleteCandidate ( ) ;
 #endif
-  while ( currentHit != 0 )
+  while ( curentHit != 0 )
   {
-    nextHit            = (FtfHit *)currentHit->nextTrackHit;
-    currentHit->nextTrackHit     =  0 ;
-    currentHit->xyChi2   =
-    currentHit->szChi2   =  
-    currentHit->s        =  0.F ;
+    nextHit            = (FtfHit *)curentHit->nextTrackHit;
+    curentHit->nextTrackHit     =  0 ;
+    curentHit->xyChi2   =
+    curentHit->szChi2   =  
+    curentHit->s        =  0.F ;
 
-    currentHit->setStatus ( 0 ) ;
-    currentHit = nextHit;
+    curentHit->setStatus ( 0 ) ;
+    curentHit = nextHit;
   }
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -291,7 +312,7 @@ void FtfTrack::fill (  ) {
    double xc, yc ;
    double rc   = sqrt ( a2Xy * a2Xy + 1 ) / ( 2 * fabs(a1Xy) ) ;
    pt          = (double)(2.9979e-3 * para->bField * rc );
-
+//
    if ( pt > para->ptMinHelixFit ) {
       double combinedChi2 = 0.5*(chi2[0]+chi2[1])/nHits ;
       if ( para->primaries && combinedChi2 < para->maxChi2Primary ) para->vertexConstrainedFit = 1 ;
@@ -316,9 +337,9 @@ void FtfTrack::fill (  ) {
 //****************************************************************************     
 //     Fill track information variables
 //****************************************************************************
-void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
+void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc ) {
 //
-//   Get cercle parameters
+//   Get circle parameters
 //
    double xcp = - a2Xy / ( 2. * a1Xy ) ;
    double ycp = - 1.   /  ( 2. * a1Xy ) ;
@@ -331,8 +352,8 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
    double angle_vertex  = atan2 ( -ycp, -xcp ) ;
    if ( angle_vertex < 0. ) angle_vertex = angle_vertex + twoPi ;
 
-   double dx_last    = lastHit->x - xc ;
-   double dy_last    = lastHit->y - yc ;
+   double dx_last    = xLastHit - xc ;
+   double dy_last    = yLastHit - yc ;
    double angle_last = atan2 ( dy_last, dx_last ) ;
    if ( angle_last < 0. ) angle_last = angle_last + twoPi ;
 //
@@ -353,11 +374,11 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
 //
 //      Get z parameters if needed       
 //
-   if ( para->szFitFlag ){
+   if ( para->szFitFlag == 1 ){
       tanl = -(double)a2Sz ;
       z0   =  (double)(a1Sz + a2Sz * ( trackLength - rc * d_angle * q ) );
    }
-   else{
+   else if ( para->szFitFlag == 2 ) {
       tanl = firstHit->z /
           (double)sqrt ( firstHit->x*firstHit->x + firstHit->y*firstHit->y ) ;
       z0      = 0.F ;
@@ -379,8 +400,8 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
 //****************************************************************************
 void FtfTrack::fillSecondary ( double &xc, double &yc )
 {
-   xc = - a2Xy / ( 2. * a1Xy ) + refHit->x ;
-   yc = - 1.   /  ( 2. * a1Xy ) + refHit->y ;
+   xc = - a2Xy / ( 2. * a1Xy ) + xRefHit ;
+   yc = - 1.   /  ( 2. * a1Xy ) + yRefHit ;
 /*--------------------------------------------------------------------------
      Get angles for initial and final points
 ------------------------------------------------------------------------------*/
@@ -433,7 +454,7 @@ void FtfTrack::fillSecondary ( double &xc, double &yc )
 //              way   :       which way to procede in r (negative or positive)
 //              row_to_stop:  row index where to stop
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
+int FtfTrack::follow ( FtfContainer *volume, int way, int ir_stop ) {
 
    FtfHit *nextHit ;
    
@@ -546,8 +567,8 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //      If looking for secondaries calculate conformal coordinates
 //
    if ( para->primaries == 0 ){
-      double xx = candidateHit->x - refHit->x ;
-      double yy = candidateHit->y - refHit->y ;
+      double xx = candidateHit->x - xRefHit ;
+      double yy = candidateHit->y - yRefHit ;
       double rr = xx * xx + yy * yy ;
       candidateHit->xp =   xx / rr ;
       candidateHit->yp = - yy / rr ;
@@ -612,7 +633,7 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Merges tracks
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfTrack::mergePrimary ( AREA *trackArea ){
+int FtfTrack::mergePrimary ( FtfContainer *trackArea ){
    short  track_merged ;
    register int  areaIndex ;
    int    i_phi, i_eta ;
@@ -657,7 +678,7 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 //
 //    Loop over tracks
 //
-         for ( i_track = trackArea[areaIndex].firstTrack ; 
+         for ( i_track = (FtfTrack *)trackArea[areaIndex].first ; 
                i_track != 0 ;
                i_track = i_track->nxatrk  ) {
 //
@@ -668,8 +689,10 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 // Compare both tracks
 //
 //   No overlapping tracks
-			short delta1 = i_track->firstHit->row - firstHit->row ;
-			short delta2 = i_track->lastHit->row - lastHit->row ;
+//			short delta1 = i_track->firstHit->row - firstHit->row ;
+			short delta1 = i_track->outerMostRow - outerMostRow ;
+//			short delta2 = i_track->lastHit->row - lastHit->row ;
+			short delta2 = i_track->innerMostRow - innerMostRow ;
 			if ( delta1 * delta2 <= 0 ) continue ;
 //
 //    Tracks close enough
@@ -693,12 +716,21 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 //
    if ( track_merged == 0 ) {
       areaIndex = i_phi * para->nEtaTrackPlusOne + i_eta ;
+      /*
       if ( trackArea[areaIndex].firstTrack == 0 )
          trackArea[areaIndex].firstTrack = 
          trackArea[areaIndex].lastTrack = this  ;
       else {
          trackArea[areaIndex].lastTrack->nxatrk = this ; 
          trackArea[areaIndex].lastTrack = this ;
+      }
+      */
+      if ( trackArea[areaIndex].first == 0 )
+         trackArea[areaIndex].first = 
+         trackArea[areaIndex].last = (void *)this  ;
+      else {
+         ((FtfTrack *)trackArea[areaIndex].last)->nxatrk = this ; 
+	 trackArea[areaIndex].last = (void *)this ;
       }
    }
    return track_merged ;
@@ -740,7 +772,7 @@ void FtfTrack::reset (void)
 //		    which_function: Function to be used to decide whether the hit is good
 // Returns:	Selected hit
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-FtfHit *FtfTrack::seekNextHit ( VOLUME  *volume, 
+FtfHit *FtfTrack::seekNextHit ( FtfContainer  *volume, 
 			        FtfHit *baseHit,
 				int     n_r_steps,
 				int which_function ) {
@@ -807,7 +839,7 @@ FtfHit *FtfTrack::seekNextHit ( VOLUME  *volume,
 //       Now loop over hits in each volume 
 //
          areaIndex = irp   * para->nPhiEtaPlusOne + ipp * para->nEtaPlusOne + itp ;
-         for ( FtfHit *candidateHit = volume[areaIndex].firstHit ; 
+         for ( FtfHit *candidateHit = (FtfHit *)volume[areaIndex].first ; 
              candidateHit != 0 ;
              candidateHit = candidateHit->nextVolumeHit ){
 #ifdef TRDEBUG
@@ -854,7 +886,7 @@ found: ;
 //             way        :    whether to go to negative or positive ir
 //             row_to_stop:    row index where to stop
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfTrack::segment( VOLUME *volume, int way ){
+int FtfTrack::segment( FtfContainer *volume, int way ){
 //
 //   Define some variables
 //
@@ -908,11 +940,12 @@ int FtfTrack::segment( VOLUME *volume, int way ){
 //   Calculate conformal coordinates
 //
          if ( para->primaries == 0 ){
-            rr = square ( refHit->x - nextHit->x ) +
-                 square ( refHit->y - nextHit->y ) ;
+            rr = square ( xRefHit - nextHit->x ) +
+                 square ( yRefHit - nextHit->y ) ;
 
-            nextHit->xp    =   ( nextHit->x - refHit->x ) / rr ;
-            nextHit->yp    = - ( nextHit->y - refHit->y ) / rr ;
+
+            nextHit->xp    =   ( nextHit->x - xRefHit ) / rr ;
+            nextHit->yp    = - ( nextHit->y - yRefHit ) / rr ;
             nextHit->wxy   = rr * rr / ( square(para->xyErrorScale)  *
                                          square(nextHit->dx) + square(nextHit->dy) ) ;
          }

@@ -1,12 +1,12 @@
 //:>-----------------------------------------------------------------/
-//: FILE:       FtfBaseTrack.cpp
+//: FILE:       FtfBaseTrack.cxx
 //: HISTORY:
-//:             28oct1996 version 1.00
-//:             11aug1999 ppy primary flag in FtfPara replace with vertexConstrainedFit
-//:             11aug1999 ppy primary flag in track filled now 
-//:              3sep1999 ppy fitLine, dpsi cannot be greater than 1. Check introduced
-//:              5oct1999 ppy fitLine, bug corrected
-//:              6oct1999 ppy Root switch added
+//:          28oct1996 version 1.00
+//:          11aug1999 ppy primary flag in FtfPara replace with vertexConstrainedFit
+//:          11aug1999 ppy primary flag in track filled now 
+//:           3sep1999 ppy fitLine, dpsi cannot be greater than 1. Check introduced
+//:           5oct1999 ppy fitLine, bug corrected
+//:           6oct1999 ppy Root switch added
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfBaseTrack
@@ -540,7 +540,7 @@ void FtfBaseTrack::Print ( int level )
       printf ( " \n p,  pt, q         %7.2f  %7.2f  %2d ", pmom, pt, q ) ;
    }   
    if ( level > 19 ) {
-      printf ( " \n r0, z0            %7.2f  %7.2f ", r0, z0 ) ;
+      printf ( " \n r0,   z0,  nHits  %7.2f  %7.2f %d    ", r0, z0, nHits ) ;
       printf ( " \n phi0, psi, tanl   %7.2f  %7.2f %7.2f ", phi0, psi, tanl ) ;
    }  
    else printf ( "\n " ) ; 

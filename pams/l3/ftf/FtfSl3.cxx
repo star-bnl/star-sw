@@ -1,5 +1,5 @@
 /*:>-------------------------------------------------------------------
-**: FILE:  
+**: FILE:     FtfSl3.cxx 
 **: HISTORY:
 **:           aug 23, 1999  add setup with number of hits and tracks
 **:           oct  6, 1999  ppy new version from Christof
@@ -26,6 +26,7 @@
 **:           dec 21, 1999  ppy bug corrected phiShift = 0 zero for non-border sectors
 **:           dec 21, 1999  ppy ptHelixFit set to zero in setParameters
 **:           dec 21, 1999  ppy maxChi2Primary =10 in setParameters
+**:           jan 27, 2000  ppy canItMerged beefed up
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 #include <iostream.h>
@@ -40,9 +41,69 @@ ClassImp(FtfSl3)
 //******************************************************************
 //   fill tracks
 //******************************************************************
-int FtfSl3::canItBeMerged ( FtfTrack* thisTrack ) {
+int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 // if ( thisTrack->nHits < 45 - para.minHitsPerTrack ) return 1 ; // no type 1 for now
 // float pt = thisTrack->pt ;
+   double rTpcMin =  50. ;
+   double rTpcMax = 210. ;
+//
+//   Get circle parameters
+//
+   double rc = tTrack->pt / ( 2.9979e-3 * para.bField );
+   double xc = para.xVertex - tTrack->a2Xy / ( 2. * tTrack->a1Xy ) ;
+   double yc = para.yVertex - 1.   /  ( 2. * tTrack->a1Xy ) ;
+//   
+//   Calculate intersection with tracking area (sector or supersector) boundaries
+//
+   double localPhi[2] ;
+   localPhi[0] = para.phiMin ;
+   localPhi[1] = para.phiMax ;
+
+// printf ( " mergable track pt %f \n", tTrack->pt ) ;
+   double sinPhi, cosPhi, tanPhi ;  
+   double a, b, c, b2minus4ac ;
+   double x1, y1, x2, y2, r1, r2 ;
+   c = xc * xc + yc * yc - rc * rc ;
+   for ( int i = 0 ; i < 2 ; i++ ) {
+      sinPhi = sin(localPhi[i]); 
+      cosPhi = cos(localPhi[i]); 
+      tanPhi = tan(localPhi[i]); 
+      a = 1. + tanPhi * tanPhi ;
+      b = -2. * xc - 2. * yc * tanPhi ;
+
+      b2minus4ac = b * b - 4. * a * c ;
+      if ( b2minus4ac > 0 ) {
+	 double rootB2Minus4ac = sqrt(b2minus4ac);
+
+	 x1 = 0.5 * (-b + rootB2Minus4ac) / a ;
+	 y1 = x1 * tanPhi ;
+	 r1 = sqrt(x1*x1+y1*y1);
+
+//	 printf ( " x1 y1 %e %e cos sin %e %e\n", x1, y1, cosPhi, sinPhi ) ; 
+//	 double ratiox = x1/cosPhi ;
+//	 double ratioy = y1/sinPhi ;
+//	 printf ( " ratiox ratioy %e %e \n", ratiox, ratioy ) ;
+	 if ( (x1/cosPhi)> 0 && (y1/sinPhi)> 0 && 
+	      r1 > rTpcMin   &&  r1 < rTpcMax ) {
+//	    printf ( "phi %f boundary crossed !!!!\n", localPhi[i] ) ;
+	    return 1 ;
+	 }
+
+	 x2 = 0.5 * (-b - rootB2Minus4ac) / a ;
+	 y2 = x2 * tanPhi ;
+	 r2 = sqrt(x2*x2+y2*y2);
+//	 ratiox = x2/cosPhi ;
+//	 ratioy = y2/sinPhi ;
+//	 printf ( " ratiox ratioy %e %e \n", ratiox, ratioy ) ;
+//	 printf ( " x2 y2 %e %e cos sin %e %e\n", x2, y2, cosPhi, sinPhi ) ; 
+	 if ( (x2/cosPhi) > 0 && (y2/sinPhi) > 0 &&  
+	      r2 > rTpcMin   &&  r2 < rTpcMax ) {
+//	    printf ( "phi %f boundary crossed !!!!\n", localPhi[i] ) ;
+	    return 1 ;
+	 }
+      }
+
+   }
    return 0 ;
 }
 //******************************************************************
@@ -208,6 +269,8 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 	     mPTrack->trackLength  = track[i].trackLength  ;
 	     mPTrack->xLastHit = track[i].lastHit->x  ;
 	     mPTrack->yLastHit = track[i].lastHit->y  ;
+	     mPTrack->innerMostRow = track[i].innerMostRow ;
+	     mPTrack->outerMostRow = track[i].outerMostRow ;
 	     mPTrack++ ;
 	  }
 	  else {

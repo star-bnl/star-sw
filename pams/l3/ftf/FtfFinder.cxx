@@ -1,5 +1,5 @@
 //:>------------------------------------------------------------------
-//: FILE:       FtfFinder.cpp
+//: FILE:       FtfFinder.cxx
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:             03jun1999 ppy para.fillTracks included. Merging only when tracks filled
@@ -10,6 +10,8 @@
 //:             23aug1999 ppy ClassImp added with ROOT flag
 //:             21dec1999 ppy printf replaced by fprintf(stderr,...
 //:             26jan2000 ppy malloc replaced with new, destructor function added
+//:             27jan2000 ppy refHit replaced by xRefHit and yRefHit
+//:             28jan2000 ppy track id from 1 to N
 //:              1feb2000 ppy track id starting at 1
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -34,9 +36,9 @@ FtfFinder::FtfFinder ( )
     hit        = 0 ;  
     track      = 0 ;
     mcTrack    = 0 ;
-    volume     = 0 ;
-    rowk       = 0 ;
-    trackArea  = 0 ;
+    trackC     = 0 ;
+    volumeC    = 0 ;
+    rowC       = 0 ;
     nHitsOutOfRange = 0 ;
 }
 //*********************************************************************
@@ -46,9 +48,9 @@ FtfFinder::~FtfFinder ( )
 {
 //
     if ( mcTrack ) delete[] mcTrack ;
-    if ( volume  ) delete[] volume  ;
-    if ( rowk    ) delete[] rowk ;
-    if ( trackArea ) delete[] trackArea ;
+    if ( volumeC ) delete[] volumeC  ;
+    if ( rowC    ) delete[] rowC ;
+    if ( trackC    ) delete[] trackC ;
 }
 //*********************************************************************
 //      Steers the tracking 
@@ -133,7 +135,7 @@ int FtfFinder::getTracks ( ) {
 //
 //           Loop over hits in this particular row
 //
-      for ( FtfHit *firstHit = rowk[ir].firstHit ;
+      for ( FtfHit *firstHit = (FtfHit *)rowC[ir].first ;
             firstHit != 0 ;
             firstHit = firstHit->nextRowHit ) {
 //
@@ -157,7 +159,12 @@ int FtfFinder::getTracks ( ) {
          FtfTrack *thisTrack = &track[nTracks-1];
 	 thisTrack->para     = &para ;
 	 thisTrack->id       = nTracks ;
-         thisTrack->firstHit = thisTrack->lastHit = thisTrack->refHit = firstHit ;
+         thisTrack->firstHit = thisTrack->lastHit = firstHit ;
+	 thisTrack->innerMostRow = thisTrack->outerMostRow = firstHit->row ;
+	 thisTrack->xRefHit  = firstHit->x ;
+	 thisTrack->yRefHit  = firstHit->y ;
+	 thisTrack->xLastHit = firstHit->x ;
+	 thisTrack->yLastHit = firstHit->y ;
 #ifdef TRDEBUG
          thisTrack->debugNew ( ) ;
 #endif
@@ -168,14 +175,14 @@ int FtfFinder::getTracks ( ) {
 //
 //      Go into hit looking loop
 //
-        if ( thisTrack->buildTrack ( firstHit, volume ) ) {
+        if ( thisTrack->buildTrack ( firstHit, volumeC ) ) {
 //
 //    Merge Tracks if requested
 //
            if ( para.primaries &&
                 para.mergePrimaries == 1 &&
                 para.fillTracks &&
-                thisTrack->mergePrimary( trackArea )  ) nTracks-- ;
+                thisTrack->mergePrimary( trackC )  ) nTracks-- ;
            }
        else{
 //
@@ -202,7 +209,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //
 //   Reset area keeping track pointers
 // 
-   memset ( trackArea, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(AREA) ) ;  
+   memset ( trackC, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(FtfContainer) ) ;  
 //
 //    Loop over tracks
 //
@@ -219,7 +226,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //    if track is not merged is added
 //    to the track volume (area)
 //
-      if ( currentTrack->mergePrimary ( trackArea ) ) {
+      if ( currentTrack->mergePrimary ( trackC ) ) {
          currentTrack->flag = -1 ;
       }
    }
@@ -254,8 +261,7 @@ int FtfFinder::reset (void)
 //
 //-->    Allocate volume memory
 //
-// if (volume != NULL) free ( (void *) volume ) ; 
-   if (volume != NULL) delete []volume; 
+   if (volumeC != NULL) delete []volumeC; 
 #ifdef TRDEBUG
    fprintf(stderr,"Allocating %d bytes of memory for volume\n",
                para.nRowsPlusOne*
@@ -264,21 +270,21 @@ int FtfFinder::reset (void)
 #endif
    int nVolumes = para.nRowsPlusOne*para.nPhiPlusOne *
                   para.nEtaPlusOne ;
-   volume = new VOLUME[nVolumes];
-   if(volume == NULL) {
+   volumeC = new FtfContainer[nVolumes];
+   if(volumeC == NULL) {
      fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
      return 1 ;
    }
 // 
 //      Allocate row memory
 //
-   if ( rowk != NULL ) delete[] rowk ;
+   if ( rowC != NULL ) delete[] rowC ;
 #ifdef TRDEBUG
-   fprintf( stderr, "Allocating %d bytes of memory for rowk\n",
+   fprintf( stderr, "Allocating %d bytes of memory for rowC\n",
                               para.nRowsPlusOne*sizeof(ROW));
 #endif
-   rowk = new ROW[para.nRowsPlusOne];
-   if ( rowk == NULL) {
+   rowC = new FtfContainer[para.nRowsPlusOne];
+   if ( rowC == NULL) {
      fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
      exit(0);
    }
@@ -286,7 +292,7 @@ int FtfFinder::reset (void)
 //       Allocate track area memory
 //
    if ( para.mergePrimaries ) {
-      if (trackArea != NULL) delete []trackArea  ;
+      if (trackC    != NULL) delete []trackC     ;
 #ifdef TRDEBUG
          fprintf(stderr, "Allocating %d bytes of memory for track_area\n",
                        para.nPhiTrackPlusOne*
@@ -294,8 +300,8 @@ int FtfFinder::reset (void)
 #endif
          int nTrackVolumes = para.nPhiTrackPlusOne*
                              para.nEtaTrackPlusOne ;
-         trackArea = new AREA[nTrackVolumes];
-         if(trackArea == NULL) {
+         trackC    = new FtfContainer[nTrackVolumes];
+         if(trackC == NULL) {
 	    fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
 	    return 1 ;
 	 }
@@ -303,7 +309,7 @@ int FtfFinder::reset (void)
 //
 //   Check there is some memory allocated
 //
-         if ( trackArea == 0 ){
+         if ( trackC == 0 ){
             fprintf ( stderr, "FtfFinder::reset: Merging option not available \n " ) ; 
             printf ( " when option was not used the first time         \n " ) ; 
             return 1 ;
@@ -405,11 +411,12 @@ int FtfFinder::setPointers ( )
 //
 //   Set volumes to zero
 //
-   memset ( rowk,   0, para.nRowsPlusOne*sizeof(ROW) ) ;
+   memset ( rowC,   0, para.nRowsPlusOne*sizeof(FtfContainer) ) ;
    int n = para.nRowsPlusOne*para.nEtaPlusOne*para.nPhiPlusOne ;
-   memset ( volume, 0, n*sizeof(VOLUME) ) ;
-   if ( para.mergePrimaries ) 
-      memset ( trackArea, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(AREA) ) ;  
+   memset ( volumeC, 0, n*sizeof(FtfContainer) ) ;
+   if ( para.mergePrimaries ){ 
+      memset ( trackC, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(FtfContainer) ) ;  
+   }
 /*-------------------------------------------------------------------------
         Loop over hits 
 -------------------------------------------------------------------------*/
@@ -496,20 +503,21 @@ int FtfFinder::setPointers ( )
       volumeIndex = localRow  * para.nPhiEtaPlusOne + 
                     thisHit->phiIndex * para.nEtaPlusOne + thisHit->etaIndex ;
 
-      if (volume[volumeIndex].firstHit == 0 ) 
-	      volume[volumeIndex].firstHit = thisHit ;
+
+      if (volumeC[volumeIndex].first == 0 ) 
+	      volumeC[volumeIndex].first = (void *)thisHit ;
       else
-         (volume[volumeIndex].lastHit)->nextVolumeHit = thisHit ;
-      volume[volumeIndex].lastHit = thisHit ;
+         ((FtfHit *)(volumeC[volumeIndex].last))->nextVolumeHit = thisHit ;
+      volumeC[volumeIndex].last = (void *)thisHit ;
 
 /*-------------------------------------------------------------------------
      Set row pointers
 -------------------------------------------------------------------------*/
-      if ( rowk[localRow].firstHit == NULL )
-         rowk [localRow].firstHit = thisHit ;
+      if ( rowC[localRow].first == NULL )
+         rowC [localRow].first = (void *)thisHit ;
       else
-         (rowk[localRow].lastHit)->nextRowHit = thisHit ;
-      rowk[localRow].lastHit = thisHit ;
+         ((FtfHit *)(rowC[localRow].last))->nextRowHit = thisHit ;
+      rowC[localRow].last = (void *)thisHit ;
    }
    return 0 ;
 } 
