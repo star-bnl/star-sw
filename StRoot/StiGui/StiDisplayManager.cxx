@@ -120,7 +120,7 @@ void StiDisplayManager::setInvisible(const StiDrawable* val)
 void StiDisplayManager::addDrawable(StiDrawable* val)
 {
     string name = val->name();
-    cout <<"Adding detector: "<<name<<endl;
+    //cout <<"Adding detector: "<<name<<endl;
     mmap.insert( stiDrawableMapValType( name, val ) );
     return;
 }
