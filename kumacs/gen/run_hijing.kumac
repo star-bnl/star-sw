@@ -29,7 +29,8 @@ $STAR/pams/gen/kumac
  make gen/hij
  
  exec setup_dir
- 
+ macro/global/import *
+   
  message ' !!! HIJING expects input file hijev.inp in top directory !!! '
  
 * initialize

@@ -29,7 +29,7 @@ $STAR/pams/gen/kumac
  make gen/ven
  
  exec setup_dir
- 
+ macro/global/import * 
 
 * initialize
    
