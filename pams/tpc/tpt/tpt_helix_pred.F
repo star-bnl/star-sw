@@ -1,5 +1,8 @@
-* $Id: tpt_helix_pred.F,v 1.3 1998/03/23 18:25:59 sakrejda Exp $
+* $Id: tpt_helix_pred.F,v 1.4 1998/12/11 01:54:28 sakrejda Exp $
 * $Log: tpt_helix_pred.F,v $
+* Revision 1.4  1998/12/11 01:54:28  sakrejda
+* a call to tgc_global_to_local replaced by tgc_global_to_sector - only the sector information was used
+*
 * Revision 1.3  1998/03/23 18:25:59  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -53,8 +56,8 @@ C______________________________________________________________________
 
       INTEGER tgc_row_par,tpt_circle_pred
       INTEGER isect,irow,np,iret,itrk,isec1,ipass
-      integer tgc_global_to_local
-      REAL    xp(2),yp(2),as,bs,xav,yav,dr,xlocal(3),xglobal(3)
+      integer tgc_global_to_sector
+      REAL    xp(2),yp(2),as,bs,xav,yav,dr,xglobal(3)
       REAL    dummy
 
       np=0
@@ -75,7 +78,7 @@ C______________________________________________________________________
            xglobal(1)=xp(1)
            xglobal(2)=yp(1)
            xglobal(3)=10.0
-           iret =  tgc_global_to_local(isec1,xglobal,xlocal)
+           iret =  tgc_global_to_sector(isec1,xglobal)
            if(isec1.gt.12) isec1=24-isec1
            if(isec1.eq.0) isec1=12
            if(isec1.eq.isect) then
@@ -84,7 +87,7 @@ C______________________________________________________________________
            xglobal(1)=xp(2)
            xglobal(2)=yp(2)
            xglobal(3)=10.0
-           iret =  tgc_global_to_local(isec1,xglobal,xlocal)
+           iret =  tgc_global_to_sector(isec1,xglobal)
            if(isec1.gt.12) isec1=24-isec1
            if(isec1.eq.0) isec1=12
            if(isec1.eq.isect) then
