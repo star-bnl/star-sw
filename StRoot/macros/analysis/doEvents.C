@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.55 2000/06/19 23:33:29 perev Exp $
+// $Id: doEvents.C,v 1.56 2000/06/20 14:11:46 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -166,24 +166,85 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
     if (iInit) chain->Fatal(iInit,"on init");
     chain->PrintInfo();
 
+
+//----- added 6/20/00 by Kathy
+  TTable   *tabl=0;
+  TDataSet *obj=0;
+  TDataSet *ddb=0;
+  TDataSet *ddstBranch=0;
+//------
+
     //
     // Event loop
     //
     int istat=0,i=1;
  EventLoop: if (i <= nevents && istat!=2) {
-     cout << "============================ Event " << i
+
+     cout << endl << "============================ Event " << i
 	  << " start ============================" << endl;
+
      chain->Clear();
      istat = chain->Make(i);
-     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
-     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
+
+     if (istat==2) 
+         {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat==3) 
+         {cout << "Error event processed. Status = " << istat << endl;}
+
+//------------------ added 6/20/00 by Kathy to unpack BfcStatus table
+     if (!istat) {
+         
+       ddstBranch=chain->GetDataSet("dstBranch");
+
+       TDataSetIter dstbranchIter(ddstBranch);
+
+       if (ddstBranch) {
+
+       cout << endl << " QAInfo: in dstBranch " << endl;
+
+         while (ddb=dstbranchIter.Next()) {
+
+         cout << endl << 
+             " QAInfo:   found object: " << ddb->GetName() << endl;      
+           
+         TString dsName =  ddb->GetName();
+
+           if (ddb->InheritsFrom("TTable")) { 
+
+             tabl = (TTable *)ddb;
+             cout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+
+             if (dsName == "BfcStatus") {	
+// Now print out contents of BfcStatus for QA purposes
+               TDataSetIter bfcstatiter(ddb);
+               St_dst_bfc_status *bfcstat = 
+                 (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
+               dst_bfc_status_st *bth = bfcstat->GetTable();
+//  loop over all rows in table BfcStatus:
+               Int_t ij = 0;
+               for (ij=0; ij< bfcstat->GetNRows(); ij++)
+               {
+	         cout << " QAInfo:       BfcStatus table -- row " << ij <<
+		   ", Maker: "     <<  bth[ij]->maker_name <<
+                   " has istat = "  <<  bth[ij]->status << endl;	
+	       }   // for bfcstat
+             }  // if dsName
+           } // if ddb
+	 }  // while obj Next
+       } // if dstBranch
+     } //  if !istat
+
+//------------------
+
      i++;
      goto EventLoop;
  }
 
     i--;
-    cout << "============================ Event " << i
+    cout << endl << "============================ Event " << i
 	 << " finish ============================" << endl;
+
     if (nevents > 1) {
 	chain->Clear();
 	chain->Finish();
@@ -215,8 +276,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.55  2000/06/19 23:33:29  perev
-// GC for real data
+// Revision 1.56  2000/06/20 14:11:46  kathy
+// now unpack BfcStatus table in doEvents so people can see if maker errors exist
+//
+// Revision 1.56  2000/06/20 14:11:46  kathy
+// now unpack BfcStatus table in doEvents so people can see if maker errors exist
 //
 // Revision 1.55  2000/06/19 23:33:29  perev
 // GC for real data
