@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.52 2004/04/03 00:44:10 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.53 2004/07/01 17:48:12 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.53  2004/07/01 17:48:12  jhthomas
+ * Add Event by Event SpaceCharge capabilities from GVB.  Start adding incomplete/unfinished work on Endcaps from JT.
+ *
  * Revision 1.52  2004/04/03 00:44:10  jhthomas
  * Blew it again.  I sure wish this wasn't an archive!
  *
@@ -240,6 +243,7 @@ To do:  <br>
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TMatrix.h"
+#include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TF1.h"
 #include "StTpcDb/StTpcDb.h"
@@ -289,8 +293,8 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   thedb2  = 0         ;      // Do not get MagFactor from the DB       - use manual selection above
   thedb   = 0         ;      // Do not get TPC parameters from the DB  - use defaults in CommonStart
   fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
-  fSpaceCharge   =  0 ;      // Do not get SpaceCharge out of the DB   - use defaults in CommonStart
-  fSpaceChargeR2 =  0 ;      // Do not get SpaceChargeR2 out of the DB - use defaults in CommonStart
+  ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults in CommonStart
+  ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults in CommonStart
   CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -388,24 +392,18 @@ void StMagUtilities::CommonStart ( Int_t mode )
       GG          =   -115.0 ;      // Gating Grid voltage (volts)
       Ring        =      0   ;      // Temporary until an Instance() is created for Ring and Resistor
       Resistor    =      0   ;
+      Ring        =      0   ;         
+      Resistor    =      0   ;      
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
 
-  if ( fSpaceCharge == 0 )          
-    {
-      SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge settings. " << endl ; 
-    }
-  else  cout << "StMagUtilities::CommonSta  Using SpaceCharge values from the DB." << endl ; 
-
-  if ( fSpaceChargeR2 == 0 )
-    {
-      SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
-    }
-  else  cout << "StMagUtilities::CommonSta  Using SpaceChargeR2 values from the DB." << endl ; 
-
+  if (fSpaceCharge) cout << "StMagUtilities::CommonSta  Using SpaceCharge values from the DB." << endl ; 
+  else              cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge settings. " << endl ; 
+  
+  if (fSpaceChargeR2) cout << "StMagUtilities::CommonSta  Using SpaceChargeR2 values from the DB." << endl ;
+  else                cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
+  
   // Parse the mode switch which was received from the Tpt maker
   // To turn on and off individual distortions, set these higher bits
   // Default behavior: no bits set gives you the following defaults
@@ -1347,11 +1345,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 
   // Get Space Charge **** Every Event (JCD This is actually per hit)***
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.  
-  if ( fSpaceCharge !=0 )  // need to reset it. 
-    {
-      fSpaceCharge =  StDetectorDbSpaceCharge::instance();
-      SpaceCharge  =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
-    }
+  if (fSpaceCharge) GetSpaceCharge(); // need to reset it. 
 
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
@@ -1480,11 +1474,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
   // Get Space Charge **** Every Event (JCD This is actually per hit)***
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
-  if ( fSpaceChargeR2 !=0 )   // need to reset it. 
-    {
-      fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance();
-      SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
-    }
+  if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
 
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
@@ -2742,9 +2732,364 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 //________________________________________
 
 
+/// Apply the (1/R**2) space charge correction to data already on the microDSTs. 
+/*! 
+  Given the charge and momentum of a particle and a point on the circular path described by the particle , 
+  this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  
+  The momentum p[] must be the momentum at the point x[].
+  
+  Input x[], p[] and return x_new[], p_new[].        x[] in cm and p[] in GeV.
+  
+  The program works by calculating the hits on the TPC rows for the input track, removes the distortion 
+  from the hits according to the 1/R**2 spacecharge presciption, and then refits the new hits to find
+  the new track parameters.  If the track is a primary track (PrimaryOrGlobal == 0) then x[] is assumed to
+  be the vertex and it is included in the refit.  If the track is a global track (PrimaryOrGlobal == 1) then
+  x[] is assumed to lie somewhere (anywhere) on the track but it is not included in the fit.  For a global
+  track, x[] must lie on the track because it is used to determine where the track flies (ie. angle phi).
+  
+  PrimaryOrGlobal = 0   for a primary track.
+  PrimaryOrGlobal = 1   for a global track.  You can also use the "Prime" enumeration in the .h file.
+  
+  The code attempts to be as realistic as possible when it does the refit.  Therefore, it asks you for
+  the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
+  For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
+  word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
+  
+  VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
+  is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
+  So you can calculate this, external to the function, and then work with a realistic vertex error bar if
+  you wish to do it.  200 microns error is a good average value for central Au-Au events.
+*/
+void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t Charge, const Float_t x[3], const Float_t p[3],
+                                            const Prime PrimaryOrGlobal, Int_t &new_Charge, Float_t x_new[3], Float_t p_new[3],
+				   const unsigned int RowMask1, const unsigned int RowMask2, const Float_t VertexError )
+{
+
+   x_new[0] = x[0] ; x_new[1] = x[1] ; x_new[2] = x[2] ;         //  Default is to do nothing
+   p_new[0] = p[0] ; p_new[1] = p[1] ; p_new[2] = p[2] ;
+
+   // Return default values if passed a whacko input value (i.e. infinite or NaN)
+   if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
+
+   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
+   const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
+   const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
+   const Int_t   MinHits  = 15  ;        // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   DEBUG    =  0  ;        // Turn on debugging statements and plots
+
+   Int_t    ChargeB ;
+   Float_t  B[3], Direction, xx[3], xxprime[3] ;
+   Double_t Xreference, Yreference ;
+   Double_t Xtrack[ROWS], Ytrack[ROWS], Ztrack[ROWS] ;
+   Double_t R[ROWS], C0, X0, Y0, R0, Pt, R2, DeltaTheta, DCA ;
+   Double_t Xprime[ROWS+1], Yprime[ROWS+1], Zprime[ROWS+1], dX[ROWS+1], dY[ROWS+1] ;  
+   Double_t U[ROWS+1], V[ROWS+1], eU[ROWS+1], eV[ROWS+1] ;  
+   // Extra index is to accomodate the vertex in the fit for primaries
+
+   // Temporarily overide settings for space charge data (only)
+   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
+   ManualSpaceChargeR2(sc); // Set a custom value of the spacecharge parameter
+   
+   BField(x,B) ;
+   ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
+   Pt = TMath::Sqrt( p[0]*p[0] + p[1]*p[1] ) ;
+   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
+   X0 = x[0] + ChargeB * p[1] * R0 / Pt ;
+   Y0 = x[1] - ChargeB * p[0] * R0 / Pt ;
+   DCA = TMath::Sqrt( X0*X0 + Y0*Y0 ) - R0 ;  // Negative means (0,0) is inside the circle
+
+   for ( Int_t i = 0 ; i < ROWS ; i++ )
+     {
+       if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
+       else              R[i] = 127.195 + (i-INNER)*2.0 ;
+     }
+
+   // Test which of the two directions the particle goes on the circle
+   if (TMath::Abs(Y0) < 0.001 )  Direction = TMath::Sign( (float)1.0, p[1] ) ;  
+   else
+     {
+       Direction = 1.0 ;
+       R2 = R[RefIndex]*R[RefIndex] ;
+       C0 = ( R2 - R0*R0 + X0*X0 + Y0*Y0 ) ;                                // Intermediate constant
+       Double_t X1 = 0.5 * ( C0*X0 - TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - (C0*C0 - 4*Y0*Y0*R2) * (X0*X0+Y0*Y0) ) ) ) 
+	                   / (X0*X0 + Y0*Y0) ;
+       Double_t Y1 = ( R2 - R0*R0 - 2*X0*X1 + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+       Double_t X2 = 0.5 * ( C0*X0 + TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - (C0*C0 - 4*Y0*Y0*R2) * (X0*X0+Y0*Y0) ) ) ) 
+	                   / (X0*X0 + Y0*Y0) ;
+       Double_t Y2 = ( R2 - R0*R0 - 2*X0*X2 + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+       if ( X2*p[0] +  Y2*p[1]  <  X1*p[0] + Y1*p[1] ) Direction = -1.0 ;   
+     }
+
+   Xreference = Yreference = 0.0 ;
+   for ( Int_t i = 0 ; i < ROWS ; i++ )
+     {
+       C0 = ( R[i]*R[i] - R0*R0 + X0*X0 + Y0*Y0 ) ;     // Intermediate constant
+       if ( TMath::Abs(Y0) < 0.001 ) Xtrack[i]  =  0.5 * C0 / X0 ;     // Create circular tracks and record hits on pad rows
+       else           Xtrack[i]  =  0.5*( C0*X0 + Direction*TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - 
+					    (C0*C0-4*Y0*Y0*R[i]*R[i])*(X0*X0+Y0*Y0) )) ) / (X0*X0+Y0*Y0) ;
+       if ( TMath::Abs(Y0) < 0.001 ) Ytrack[i]  =  Direction * TMath::Sqrt( TMath::Abs( R[i]*R[i] - Xtrack[i]*Xtrack[i] ) ) ;
+       else           Ytrack[i]  =  ( R[i]*R[i] - R0*R0 - 2*X0*Xtrack[i] + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+       DeltaTheta  =  TMath::ATan2(x[1]-Y0,x[0]-X0) - TMath::ATan2(Ytrack[i]-Y0,Xtrack[i]-X0) ;
+       while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
+       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
+       Ztrack[i]  =   x[2] + ChargeB*DeltaTheta*R0*p[2] / Pt ;
+       xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
+       //UndoShortedRingDistortion(xx,xxprime) ;        // JT test of shorted ring distortion
+       UndoSpaceChargeR2Distortion(xx,xxprime) ;        // Undo the distortion for the hits
+       Xtrack[i] = xxprime[0] ; Ytrack[i] = xxprime[1] ;  Ztrack[i] = xxprime[2] ;  // This line to undo the distortion
+       //Xtrack[i] = 2*xx[0] - xxprime[0] ; Ytrack[i] = 2*xx[1] - xxprime[1] ;  Ztrack[i] = 2*xx[2] - xxprime[2] ; // JT test
+       if ( i == RefIndex )
+	 {
+	   Xreference = Xtrack[i] ;  // This point on the circle is the reference for the rest of the fit
+	   Yreference = Ytrack[i] ;  // Note: we must run through all TPC Rows to find this point.  Can't skip a row.
+	 }
+     }
+   
+   Int_t Index = 0 ;
+   unsigned int OneBit =  1 ;
+   for ( Int_t i = 0 ; i < ROWS ; i++ )  // Delete rows not in the bit masks
+     {
+       if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) == 0 )) continue ;  // Skip this row if not in bit mask
+       if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) == 0 )) continue ;  // Skip this row if not in bit mask
+       Index++ ;    // Start counting at 1 to leave room for the vertex point.
+       Xprime[Index] = Xtrack[i] ; Yprime[Index] = Ytrack[i] ; Zprime[Index] = Ztrack[i] ;
+       dX[Index] = 0.2 ; dY[Index] = 1.0 ;
+       // Inner pads are smaller, but noisier, in the real world. Toy model requires adjustment to match STAR tracker.
+       if ( i < INNER ) { dX[Index] *= InnerOuterRatio ; dY[Index] *= InnerOuterRatio ; } ;  
+     }
+   
+   // Fill in the vertex location.  These will only be used if we have a primary track.
+   Xprime[0] = x[0] ;  Yprime[0] = x[1] ; Zprime[0] = x[2] ; dX[0] = VertexError ; dY[0] = VertexError ; 
+
+   // Transform into U,V space so circles in x,y space lie on a straight line in U,V space
+   Int_t count = -1 ;                                       // Count number of active rows
+   for ( Int_t i = PrimaryOrGlobal ; i < Index+1 ; i++ )  
+     {
+       Double_t zero = 0.001 ;         // Check divide by zero ... not a very tight constraint in this case.
+       Double_t displacement2 ;
+
+       displacement2 =
+	 (Xprime[i]-Xreference)*(Xprime[i]-Xreference) + (Yprime[i]-Yreference)*(Yprime[i]-Yreference) ;
+       
+       if ( displacement2 > zero )  
+	 {
+	   count ++ ;            // reference point not included in the arrays for fitting (below)
+	   U[count]  = ( Xprime[i] - Xreference ) / displacement2 ;
+	   V[count]  = ( Yprime[i] - Yreference ) / displacement2 ;
+	   eU[count] = dX[i] / displacement2 ;
+	   eV[count] = dY[i] / displacement2 ; 
+	 }
+     }
+
+   if ( count < MinHits ) return ;                      // No action if too few hits
+   
+   TGraphErrors gre( count+1, U, V, eU, eV ) ;     
+   gre.Fit("pol1","Q") ;
+   TF1 *fit = gre.GetFunction("pol1" ) ;
+   
+   if ( DEBUG ) 
+     { // Begin debugging plots
+       TCanvas* c1  = new TCanvas("A Simple Fit","The Fit", 250, 10, 700, 500) ;
+       c1  -> cd() ;
+       gre.Draw("A*") ;
+       c1  -> Update() ;
+       TCanvas* c2  = new TCanvas("The circles are OK","The circles ", 250, 800, 700, 500) ;
+       TGraph* gra  = new TGraph( Index-PrimaryOrGlobal+1, &Xprime[PrimaryOrGlobal], &Yprime[PrimaryOrGlobal] ) ;
+       c2  -> cd() ;
+       gra -> SetMaximum(200)  ;
+       gra -> SetMinimum(-200) ;
+       gra -> Draw("A*") ;  // Have to draw twice in order to get the Axis (?)
+       gra -> GetXaxis() -> SetLimits(-200.,200.) ;
+       gra -> Draw("A*") ;
+       c2  -> Update() ;
+     } // End debugging plots 
+       
+   Double_t X0_new  =  Xreference - ( fit->GetParameter(1) / ( 2.0 * fit->GetParameter(0) ) )  ;
+   Double_t Y0_new  =  Yreference + ( 1.0 / ( 2.0 * fit->GetParameter(0) ) ) ;
+   Double_t R0_new  =  TMath::Sqrt( (Xreference-X0_new)*(Xreference-X0_new) + (Yreference-Y0_new)*(Yreference-Y0_new) ) ;
+   Double_t Pt_new  =  TMath::Abs ( R0_new * 0.299792 * B[2] / 1000. ) ;   
+   //Double_t DCA_new =  TMath::Sqrt( X0_new*X0_new + Y0_new*Y0_new ) - R0_new ;  // Negative means (0,0) is inside the circle
+
+   //cout << "DCA (from inside) = " << DCA_new << endl ; // JT test
+
+   // P in GeV, R in cm, B in kGauss
+   if ( TMath::Sqrt( x[0]*x[0]+x[1]*x[1] ) <= IFCRadius )
+     {  x_new[0] = x[0] ;  x_new[1] = x[1] ;  x_new[2] = x[2] ; }
+   else
+     {
+       UndoSpaceChargeR2Distortion(x,x_new) ;
+     }
+
+   Int_t icount = 0 ;  p_new[2] = 0.0 ;
+   for ( Int_t i = 0 ; i < Index+1 ; i++ )
+     {
+       DeltaTheta  = (TMath::ATan2(Yprime[i]-Y0_new,Xprime[i]-X0_new)-TMath::ATan2(x_new[1]-Y0_new,x_new[0]-X0_new)) ;
+       while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
+       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
+       if ( DeltaTheta != 0 )  {  p_new[2] += (Zprime[i]-x_new[2]) / DeltaTheta ;   icount += 1 ;  }
+     }
+
+   p_new[0]   = Pt_new * ( x_new[1] - Y0_new ) / ( ChargeB * R0_new ) ;
+   p_new[1]   = Pt_new * ( X0_new - x_new[0] ) / ( ChargeB * R0_new ) ;
+   p_new[2]  *= Pt_new / ( -1 * ChargeB * R0_new * icount ) ;
+
+   // Check if the charge of the track changed due to the distortions
+   Float_t change = TMath::Abs( TMath::ATan2(Y0,X0) - TMath::ATan2(Y0_new,X0_new) ) ;
+   if ( change > 0.9*TMath::Pi() && change < 1.1*TMath::Pi() ) new_Charge = -1 * Charge ;
+   else  new_Charge = Charge ;
+
+   // Restore settings for spacechargeR2
+   fSpaceChargeR2 = tempfSpaceChargeR2 ;
+   SpaceChargeR2 = tempSpaceChargeR2 ;
+   
+}
 
 
 
+// Input Physical-Signed DCA and get back spacecharge parameter plus a success or failure flag.
+Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
+	       Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace )
+{
+
+   pSpace  = 0 ;
+
+   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(0) ; // Fail
+   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(0) ; // Fail
+   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(0) ; // Fail
+   if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
+   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
+
+   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
+   const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sector
+   const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
+   const Int_t   MinHits  = 15  ;        // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   DEBUG    =  0  ;        // Turn on debugging statements and plots
+
+   Int_t    ChargeB ;
+   Float_t  B[3], Direction, xx[3], xxprime[3] ;
+   Double_t Xreference, Yreference ;
+   Double_t Xtrack[ROWS], Ytrack[ROWS], Ztrack[ROWS] ;
+   Double_t R[ROWS], C0, X0, Y0, R0, Pz, DeltaTheta ;
+   Double_t Xprime[ROWS+1], Yprime[ROWS+1], Zprime[ROWS+1], dX[ROWS+1], dY[ROWS+1] ;  
+   Double_t U[ROWS+1], V[ROWS+1], eU[ROWS+1], eV[ROWS+1] ;  
+
+   // Temporarily overide settings for space charge data (only)
+   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
+   ManualSpaceChargeR2(0.01);// Set "medium to large" value of the spacecharge parameter for tests, not critical.
+     
+   Float_t x[3] = { 0, 0, 0 } ;
+   BField(x,B) ;
+   ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
+   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
+   X0 = ChargeB *  0.707107 * R0  ;   // Assume a test particle that shoots out at 45 degrees
+   Y0 = ChargeB * -0.707107 * R0  ;
+   Pz = Pt * TMath::SinH(PseudoRapidity) ;
+ 
+   for ( Int_t i = 0 ; i < ROWS ; i++ )
+     {
+       if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
+       else              R[i] = 127.195 + (i-INNER)*2.0 ;
+     }
+
+   Xreference = Yreference = 0.0 ;
+   Direction = 1.0 ; // Choose sqrt solution so ray shoots out at 45 degrees
+   for ( Int_t i = 0 ; i < ROWS ; i++ )
+     {
+       C0 = ( R[i]*R[i] - R0*R0 + X0*X0 + Y0*Y0 ) ;     // Intermediate constant
+       if ( TMath::Abs(Y0) < 0.001 ) Xtrack[i]  =  0.5 * C0 / X0 ;     // Create circular tracks and record hits on pad rows
+       else           Xtrack[i]  =  0.5*( C0*X0 + Direction*TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - 
+					    (C0*C0-4*Y0*Y0*R[i]*R[i])*(X0*X0+Y0*Y0) )) ) / (X0*X0+Y0*Y0) ;
+       if ( TMath::Abs(Y0) < 0.001 ) Ytrack[i]  =  Direction * TMath::Sqrt( TMath::Abs( R[i]*R[i] - Xtrack[i]*Xtrack[i] ) ) ;
+       else           Ytrack[i]  =  ( R[i]*R[i] - R0*R0 - 2*X0*Xtrack[i] + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+       DeltaTheta  =  TMath::ATan2(-1*Y0,-1*X0) - TMath::ATan2(Ytrack[i]-Y0,Xtrack[i]-X0) ;
+       while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
+       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
+       Ztrack[i]  =   VertexZ + ChargeB*DeltaTheta*R0*Pz / Pt ;
+       xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
+       UndoSpaceChargeR2Distortion(xx,xxprime) ;     
+       Xtrack[i] = 2*xx[0] - xxprime[0] ; Ytrack[i] = 2*xx[1] - xxprime[1] ;  Ztrack[i] = 2*xx[2] - xxprime[2] ; 
+       if ( i == RefIndex )
+	 {
+	   Xreference = Xtrack[i] ;  // This point on the circle is the reference for the rest of the fit
+	   Yreference = Ytrack[i] ;  // Note: we must run through all TPC Rows to find this point.  Can't skip a row.
+	 }
+     }
+   
+   Int_t Index = -1 ;
+   unsigned int OneBit =  1 ;
+   for ( Int_t i = 0 ; i < ROWS ; i++ )  // Delete rows not in the bit masks
+     {
+       if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) == 0 )) continue ;  // Skip this row if not in bit mask
+       if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) == 0 )) continue ;  // Skip this row if not in bit mask
+       Index++ ;   
+       Xprime[Index] = Xtrack[i] ; Yprime[Index] = Ytrack[i] ; Zprime[Index] = Ztrack[i] ;
+       dX[Index] = 0.2 ; dY[Index] = 1.0 ;
+       // Inner pads are smaller, but noisier, in the real world. Toy model requires adjustment to match STAR tracker.
+       if ( i < INNER ) { dX[Index] *= InnerOuterRatio ; dY[Index] *= InnerOuterRatio ; } ;  
+     }
+   
+   // Transform into U,V space so circles in x,y space lie on a straight line in U,V space
+   Int_t count = -1 ;                                       // Count number of active rows
+   for ( Int_t i = 0 ; i < Index+1 ; i++ )  
+     {
+       Double_t zero = 0.001 ;         // Check divide by zero ... not a very tight constraint in this case.
+       Double_t displacement2 ;
+
+       displacement2 =
+	 (Xprime[i]-Xreference)*(Xprime[i]-Xreference) + (Yprime[i]-Yreference)*(Yprime[i]-Yreference) ;
+       
+       if ( displacement2 > zero )  
+	 {
+	   count ++ ;            // reference point not included in the arrays for fitting (below)
+	   U[count]  = ( Xprime[i] - Xreference ) / displacement2 ;
+	   V[count]  = ( Yprime[i] - Yreference ) / displacement2 ;
+	   eU[count] = dX[i] / displacement2 ;
+	   eV[count] = dY[i] / displacement2 ; 
+	 }
+     }
+
+   if ( count < MinHits ) return(0) ;                      // No action if too few hits
+   
+   TGraphErrors gre( count+1, U, V, eU, eV ) ;     
+   gre.Fit("pol1","Q") ;
+   TF1 *fit = gre.GetFunction("pol1" ) ;
+   
+   if ( DEBUG ) 
+     { // Begin debugging plots
+       TCanvas* c1  = new TCanvas("A Simple Fit","The Fit", 250, 10, 700, 500) ;
+       c1  -> cd() ;
+       gre.Draw("A*") ;
+       c1  -> Update() ;
+       TCanvas* c2  = new TCanvas("The circles are OK","The circles ", 250, 800, 700, 500) ;
+       TGraph* gra  = new TGraph( Index+1, Xprime, Yprime ) ;
+       c2  -> cd() ;
+       gra -> SetMaximum(200)  ;
+       gra -> SetMinimum(-200) ;
+       gra -> Draw("A*") ;  // Have to draw twice in order to get the Axis (?)
+       gra -> GetXaxis() -> SetLimits(-200.,200.) ;
+       gra -> Draw("A*") ;
+       c2  -> Update() ;
+     } // End debugging plots 
+       
+   Double_t X0_new  =  Xreference - ( fit->GetParameter(1) / ( 2.0 * fit->GetParameter(0) ) )  ;
+   Double_t Y0_new  =  Yreference + ( 1.0 / ( 2.0 * fit->GetParameter(0) ) ) ;
+   Double_t R0_new  =  TMath::Sqrt( (Xreference-X0_new)*(Xreference-X0_new) + (Yreference-Y0_new)*(Yreference-Y0_new) ) ;
+   Double_t DCA_new =  TMath::Sqrt( X0_new*X0_new + Y0_new*Y0_new ) - R0_new ;  // Negative means (0,0) is inside the circle
+   
+   pSpace  =  (DCA * ChargeB) * SpaceChargeR2 / DCA_new ;    // Work with Physical-Signed DCA from Chain or MuDST 
+
+   // Restore settings for spacechargeR2
+   fSpaceChargeR2 = tempfSpaceChargeR2 ;
+   SpaceChargeR2 = tempSpaceChargeR2 ;
+   
+   return(1) ; // Success 
+
+}
 
 
 
