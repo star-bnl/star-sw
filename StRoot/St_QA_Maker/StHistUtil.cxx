@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.18 1999/12/17 22:11:32 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.19 1999/12/20 17:31:25 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.19  1999/12/20 17:31:25  kathy
+// updates to write page numbers on output histogram ps file
+//
 // Revision 1.18  1999/12/17 22:11:32  kathy
 // add psi vs phi hist, change limits
 //
@@ -171,8 +174,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
     Char_t Ctmp[10];
     ostrstream Cpagenum(Ctmp,10);
     Cpagenum << Ipagenum << ends;
-    cout << " Ipage " << Ipagenum << " Cpage " << Cpagenum << endl;
-  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.2,0.03,"PageNum","br");
+    cout << " Ipage " << Ipagenum << " Cpage " << Ctmp << endl;
+  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.2,0.03,Ctmp,"br");
   Lpage->SetTextSize(0.6);
   Lpage->Draw();
 
@@ -226,9 +229,12 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
 	if (padCount == numPads) {
 	  if (psf) psf->NewPage();
+ 
           Ipagenum++;
-          Cpagenum << Ipagenum << ends;
-          cout << " Ipage " << Ipagenum << " Cpage " << Cpagenum << endl;
+          ostrstream Cpagenumt(Ctmp,10);
+          Cpagenumt << Ipagenum << ends;
+          cout << " Ipage " << Ipagenum << " Cpage " << Ctmp << endl;
+
 // must redraw the histcanvas for each new page of postscript file!
 	  //    HistCanvas->cd();
         HistCanvas->Modified();
