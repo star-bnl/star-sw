@@ -3,6 +3,9 @@
 * 
 *****************************************************************
       implicit none
+#include "/cern/pro/include/geant321/gcbank.inc"
+#include "/cern/pro/include/geant321/gcnum.inc"
+#include "/cern/pro/include/geant321/gclink.inc"
       integer  g2t_volume_id
 * 
       Character*3      Csys
@@ -22,8 +25,8 @@
       Structure  BTOG  {version, choice, posit1, posit2 }
       Structure  CALG  {version, Nmodule(2) }
       logical          first/.true./
+      integer          Irich
 *c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-*
       if (First) then
           first=.false.
           call RBPUSHD
@@ -123,19 +126,33 @@
 
       else If (Csys=='emc') then
 *6*                                barrel calorimeter - K.Shester
-        if (numbv(3)>0) then
-          rileft=numbv(1)
-	  phi   =numbv(2)
-	  superl=numbv(3)
-	else
-	  if(CALG_Nmodule(1)==0) then
-            rileft=2
-          else
-            rileft=1
+        CALL GLOOK('RICH',IQ(JVOLUM+1),NVOLUM,Irich)
+	if (Irich==0) then
+          if (numbv(3)>0) then
+            rileft=numbv(1)
+	    phi   =numbv(2)
+	    superl=numbv(3)
+   	  else  
+	    if(CALG_Nmodule(1)==0) then
+              rileft=2
+            else
+              rileft=1
+	    endif
+            phi   =numbv(1)
+            superl=numbv(2)
 	  endif
-          phi   =numbv(1)
-          superl=numbv(2)
-	endif
+	else
+          if(CALG_Nmodule(1)*CALG_Nmodule(2)==0) then
+	    if(CALG_Nmodule(1)==0) then
+              rileft=2
+            else
+              rileft=1
+	    endif
+            phi   =numbv(1)
+            superl=numbv(2)
+cccccccccccccccccc else  to be filled.
+	  endif
+        endif
         eta=idigi(1)+1
         phi_sub=idigi(2)
         If (rileft==1) then
@@ -147,22 +164,36 @@
         endif
         volume_id=10000000*rileft+100000*eta+100*phi+
      +                            10*phi_sub+superl
-
+c	write(*,*)"###",rileft,eta,phi,phi_sub,superl,volume_id
       else If (Csys=='smd') then
 *7*
-	 if (numbv(3)>0) then
-           rileft   =numbv(1)
-	   phi      =numbv(2)
-	   forw_back=numbv(3)
-	 else
-           if(CALG_Nmodule(1)==0) then
-             rileft=2
-           else
-             rileft=1
-           endif
-           phi      =numbv(1)
-           forw_back=numbv(2)
-        endif
+        CALL GLOOK('RICH',IQ(JVOLUM+1),NVOLUM,Irich)
+	if (Irich==0) then
+	  if (numbv(3)>0) then
+            rileft   =numbv(1)
+	    phi      =numbv(2)
+	    forw_back=numbv(3)
+	  else
+            if(CALG_Nmodule(1)==0) then
+              rileft=2
+            else
+              rileft=1
+            endif
+            phi      =numbv(1)
+            forw_back=numbv(2)
+          endif
+        else
+          if(CALG_Nmodule(1)*CALG_Nmodule(2)==0) then
+            if(CALG_Nmodule(1)==0) then
+              rileft=2
+            else
+              rileft=1
+            endif
+            phi      =numbv(1)
+            forw_back=numbv(2)
+cccccccccccccccccc else  to be filled.
+          endif
+        endif          
 	eta=idigi(2)+1
         strip=idigi(3)+1
         If (forw_back==4) forw_back=3
