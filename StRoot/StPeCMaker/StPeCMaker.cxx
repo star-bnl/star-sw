@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.8 2000/03/24 22:36:24 nystrand Exp $
+// $Id: StPeCMaker.cxx,v 1.9 2000/04/21 19:09:49 nystrand Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.9  2000/04/21 19:09:49  nystrand
+// Update StPeCPair class, new histograms
+//
 // Revision 1.8  2000/03/24 22:36:24  nystrand
 // First version with StPeCEvent
 //
@@ -51,9 +54,12 @@
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "TH1.h"
+#include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.8 2000/03/24 22:36:24 nystrand Exp $";
-
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.9 2000/04/21 19:09:49 nystrand Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -79,6 +85,11 @@ Int_t StPeCMaker::Init() {
   m_hminvk    = new TH1F("hminvk","2-Track Evts. Minv kaons",50,0.8,2.0);
   m_hrappi    = new TH1F("hrappi","Evt. Rapidity (pions)",50,-5.0,5.0);
   m_hrapka    = new TH1F("hrapka","Evt. Rapidity (kaons)",50,-5.0,5.0);
+  m_hopnangle = new TH1F("hopnangle","Opening angle of the pairs (rad)",100,0.0,3.15);
+  m_hcostheta = new TH1F("hcostheta","Cos(Theta*) (for pairs of pions) ",120,-0.1,1.1); 
+  m_hdedx     = new TH2F("hdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,200,0.0,100.0);
+  m_hdedxpos  = new TH2F("hdedxpos","P (GeV) vs dE/dx (*10**6) +",200,0.0,2.0,200,0.0,100.0);
+  m_hdedxneg  = new TH2F("hdedxneg","P (GeV) vs dE/dx (*10**6) -",200,0.0,2.0,200,0.0,100.0);
   cout<<"StPeCMaker: Initialization done!"<<endl;
 
   return StMaker::Init();
@@ -137,7 +148,7 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
   // Set Run and Event Number
   Long_t evno = event->id();
   pevent->setEventNumber(evno);
-  Long_t runo = event->id();
+  Long_t runo = event->runId();
   pevent->setEventNumber(runo);
 
   Int_t   NGlobal=0; 
@@ -146,6 +157,9 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
   Float_t SumPt=0.0;
   Float_t SumPx=0.0; 
   Float_t SumPy=0.0;  
+#ifndef __CINT__
+  vector<StTrack*> ThePrimaries;
+#endif /* __CIN__ */
 
   // Get the track nodes
   StSPtrVecTrackNode& exnode = event->trackNodes();
@@ -164,6 +178,10 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
       SumPx = SumPx + px; SumPy = SumPy + py;
       SumQ  = SumQ  + tp->geometry()->charge();
       pevent->addPeCPrimaryTrack(tp);
+      // Store the Primaries in a vector for formation of pairs
+#ifndef __CINT__
+      ThePrimaries.push_back(tp);
+#endif /* __CINT__ */
     }
     if( nprim==0 && nglob==1 ){
       NGlobal++; 
@@ -188,13 +206,28 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
 
   Float_t Zv = vtx->position().z();
   pevent->setZVertex(Zv);
-  
+
+  // Fill the pairs into StPeCPair
+#ifndef __CINT__
+  Int_t NVect = ThePrimaries.size();
+  if ( NPrimaries != NVect ){
+    cout<<"StPeCMaker: Warning pair vector might be incorrect!"<<endl;}
+  for ( Int_t i1 = 0; i1<NPrimaries; i1++ ) {
+    for( Int_t i2 = i1+1; i2<NPrimaries; i2++ ) {
+      StTrack *trk1 = ThePrimaries[i1];
+      StTrack *trk2 = ThePrimaries[i2];
+      StPeCPair *thepair = new StPeCPair(trk1,trk2);
+      pevent->addPeCPair(thepair);
+    }
+  }  
+#endif /* __CINT__ */
+
   return kStOK;
 }
 
 Int_t StPeCMaker::FillHistograms(StPeCEvent *pevent) {
 
-  cout<<"StPeCMaker::FillHistograms"<<endl;
+  cout<<"StPeCMaker:FillHistograms"<<endl;
   Int_t GlobMult = pevent->globMultiplicity();
   m_hntrk->Fill(1.0*GlobMult);
   Int_t PrimMult = pevent->primMultiplicity();
@@ -218,6 +251,42 @@ Int_t StPeCMaker::FillHistograms(StPeCEvent *pevent) {
   Float_t yka = pevent->yRap(kaon);
   m_hrapka->Fill(yka);
 
+  StPeCPairCollection *pair = pevent->getPeCPairCollection();
+  StPeCPairIterator itp = pair->begin();
+  while( itp != pair->end() ){
+    StPeCPair *pp = *itp;
+    Float_t theta_open = pp->openingAngle();
+    Float_t costheta   = pp->cosThetaStar(pion);
+    m_hopnangle->Fill(theta_open);
+    m_hcostheta->Fill(costheta);
+    itp++;
+  }
+
+  // Loop over Tracks to extract TPC dE/dx (TruncatedMean)
+  StPeCPrimaryTrackCollection *pprimv = pevent->getPeCPrimaryTrackCollection();
+  StPeCPrimaryTrackIterator pprimit = pprimv->begin();
+  while( pprimit != pprimv->end() ){
+    StTrack *pprimt = *pprimit;
+    StTrackGeometry *geo = pprimt->geometry();
+    Float_t ptot = geo->momentum().mag();
+    StSPtrVecTrackPidTraits& traits = pprimt->pidTraits();
+    StDedxPidTraits *dedx;
+    Int_t NTraits = traits.size();
+    for( Int_t i=0; i<NTraits; i++) {
+      if ( traits[i]->detector() == kTpcId ){
+	dedx = dynamic_cast<StDedxPidTraits*>(traits[i]);
+        if ( dedx && dedx->method() == kTruncatedMeanIdentifier )break;
+      }
+    }
+    // dedx now contains the dedx according to the TruncatedMean
+    Float_t TrunkMean = 1000000.0*dedx->mean();
+    m_hdedx->Fill(ptot,TrunkMean);
+    Int_t QCharge = geo->charge();
+    if( QCharge > 0 )m_hdedxpos->Fill(ptot,TrunkMean);
+    if( QCharge < 0 )m_hdedxneg->Fill(ptot,TrunkMean);
+    pprimit++;
+  }
+
   return kStOK;
 }
 
@@ -226,7 +295,7 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
   // Below are some examples how to obtain and use the event information
   // through StPeCEvent
 
-  cout<<"StPeCMaker::ExampleAnalysis"<<endl;
+  cout<<"StPeCMaker:ExampleAnalysis"<<endl;
 
   // Some basic event quantities are calculated and stored as data members
   // in StPeCEvent. For example: summed QCharge for primary tracks, pT of
@@ -238,8 +307,8 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
 
   // Other event quantities depend on the particle id, like invariant
   // mass and event rapidity. The member functions for these take 
-  // and argument of type StPeCParticle (an enumeration), which currently
-  // can be pion, kaon, or proton
+  // an argument of type StPeCParticle (an enumeration), which currently
+  // can be pion, kaon, proton, electron or muon
   Float_t MInvPionHypo = pevent->mInv(pion);
   //  cout<<"Event invariant mass, assuming pion tracks: "<<MInvPionHypo<<endl;
 
@@ -275,6 +344,9 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
     Float_t pz = geo->momentum().z();
     it++;
   }
+
+  // For an example of how to use the StPeCPair class, check the FillHistograms
+  // member function.
 
   return kStOK;
 }

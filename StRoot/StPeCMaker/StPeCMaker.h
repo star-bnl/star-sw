@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.6 2000/03/24 22:36:16 nystrand Exp $
+// $Id: StPeCMaker.h,v 1.7 2000/04/21 19:09:42 nystrand Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.7  2000/04/21 19:09:42  nystrand
+// Update StPeCPair class, new histograms
+//
 // Revision 1.6  2000/03/24 22:36:16  nystrand
 // First version with StPeCEvent
 //
@@ -40,12 +43,14 @@
 #include "StMaker.h"
 #include "StPeCEvent.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TFile.h"
 
 class StEvent;
 class StPeCEvent;
 class StRun;
 class TH1F;
+class TH2F;
 
 class StPeCMaker : public StMaker {
 
@@ -63,6 +68,11 @@ protected:
   TH1F *m_hminvk;
   TH1F *m_hrappi;
   TH1F *m_hrapka;
+  TH1F *m_hopnangle;
+  TH1F *m_hcostheta;
+  TH2F *m_hdedx;
+  TH2F *m_hdedxpos;
+  TH2F *m_hdedxneg;
 
 public:
 
@@ -80,7 +90,7 @@ private:
   Int_t ExampleAnalysis(StPeCEvent *pevent);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.6 2000/03/24 22:36:16 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.7 2000/04/21 19:09:42 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };
