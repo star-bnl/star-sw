@@ -71,7 +71,7 @@ Int_t eemcTimingScanPlot::scan(TString directory) {
 	/// Determine if we're looking at an MAPMT or TOWER run
         flavor = dirEntry(4,5);
 
-	std::cout << "FLAVOR=" << flavor << std::endl;
+	//std::cout << "FLAVOR=" << flavor << std::endl;
 	
 	/// Access TTree to obtain channel integral and 
 	/// timing information
@@ -79,7 +79,7 @@ Int_t eemcTimingScanPlot::scan(TString directory) {
         ttree->SetBranchAddress("chanint",channelIntegrals);
         ttree->SetBranchAddress("delay",&tmpfloat);
         ttree->GetEvent(0); // only the one event here
-	printf("%s %f %f --------\n",flavor.Data(),channelIntegrals,&tmpfloat);
+	//printf("%s %f %f --------\n",flavor.Data(),channelIntegrals,&tmpfloat);
 
 	/// Loop over all MAPMT crates
         for(int i=0; i<MaxMapmtCrates; i++) {

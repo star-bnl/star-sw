@@ -1,8 +1,14 @@
-// $Id: StMuEEmcCrateTimingMaker.h,v 1.1 2005/01/28 20:15:24 jwebb Exp $
+// $Id: StMuEEmcCrateTimingMaker.h,v 1.2 2005/01/28 20:27:04 jwebb Exp $
 
 /*
  * \class StMuEEmcCrateTimingMaker
  * \author Dave Relyea
+ *
+ * Class for generating EEMC timing scans.  The maker is configured to use
+ * the ezTree branches in the muDst, without access to the database.  ADC
+ * spectra are accumulated/integrated from a fixed cut above pedestal to
+ * the maximum.  macros/makeTimingFiles.C runs the code.  macros/plotTiming.C
+ * produces plots from the output.  
  *
  */
 
@@ -29,7 +35,7 @@ class StMuEEmcCrateTimingMaker : public StMaker {
  public: 
   
   StMuEEmcCrateTimingMaker(StMuDstMaker* mudstmaker);
-  virtual ~StMuEEmcCrateTimingMaker(){}
+  virtual ~StMuEEmcCrateTimingMaker(){ /* nada */ }
   virtual Int_t Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
