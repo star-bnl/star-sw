@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.35 1999/11/18 23:42:30 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.36 1999/11/19 14:03:44 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.36  1999/11/19 14:03:44  fisyak
+// Missed dst lavel
+//
 // Revision 1.35  1999/11/18 23:42:30  lbarnby
 // Allow l3Hit table to be written out when l3Clufi is run
 //
@@ -111,7 +114,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.35 1999/11/18 23:42:30 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.36 1999/11/19 14:03:44 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -357,7 +360,7 @@ Int_t  St_dst_Maker::Filler(){
     if (globtrk) No_of_Tracks += globtrk->GetNRows();
     if (fpt_fptrack) No_of_Tracks += fpt_fptrack->GetNRows();
     if (globtrk) globtrk->ReAllocate(No_of_Tracks);
-    else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); AddData(globtrk);}
+    else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); dstI.Add(globtrk);}
     dst_dedx->ReAllocate(No_of_Tracks);
     iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
                          point,vertex,dst_dedx);
