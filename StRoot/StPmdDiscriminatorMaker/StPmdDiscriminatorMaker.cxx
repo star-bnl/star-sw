@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.4 2003/09/02 17:58:48 perev Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.5 2004/07/13 12:59:11 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.5  2004/07/13 12:59:11  subhasis
+ * Ncluster() is put with check in PrepareInput()
+ *
  * Revision 1.4  2003/09/02 17:58:48  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -169,10 +172,12 @@ void StPmdDiscriminatorMaker::Browse(TBrowser *b)
 void StPmdDiscriminatorMaker::fillHistograms(StPmdDetector* pmd_det, StPmdDetector* cpv_det)
 {
   StPmdClusterCollection* clusters = (StPmdClusterCollection*)pmd_det->cluster();
-  
-  Int_t nclust = clusters->Nclusters();
+  Int_t nclust=0;
+  if(clusters){nclust = clusters->Nclusters();}
+
+  if(nclust>0){
   TIter next(clusters->Clusters());
-  StPmdCluster *spmcl1;
+	  StPmdCluster *spmcl1;
   for(Int_t i=0; i<nclust ; i++)
     {
       spmcl1 = (StPmdCluster*)next();
@@ -186,6 +191,7 @@ void StPmdDiscriminatorMaker::fillHistograms(StPmdDetector* pmd_det, StPmdDetect
 	 mClusterPID->Fill(Float_t(PID));
 	 mClusterEdepPID->Fill(Float_t(EdepPID));
     }
+  }
 }
 
 
@@ -207,10 +213,7 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
   StPmdClusterCollection* clusters = (StPmdClusterCollection*)pmd_det->cluster();
   StPmdClusterCollection* clusters1 = (StPmdClusterCollection*)cpv_det->cluster();
   //  Int_t nclust = clusters->Nclusters(); 
-  Int_t nclust1 = clusters1->Nclusters(); 
-  TIter next(clusters->Clusters());
-  StPmdCluster *spmcl1;
-  
+
   if(cluscoll){
     Int_t Ncluster0=cluscoll->numberOfclusters();
     if(Ncluster0>0)
@@ -221,6 +224,9 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
 	cout<<"PMD cluster size "<<pmdclusters.size()<<endl;
 	cout<<"CPV cluster size "<<cpvclusters.size()<<endl;
 	
+if(clusters1){
+	  Int_t nclust1=0;
+	  nclust1 = clusters1->Nclusters(); 
 	TIter nextCPV(clusters1->Clusters());
 	StPmdCluster *spmcl2;
 	for(Int_t icpv=0; icpv<nclust1 ; icpv++)
@@ -232,14 +238,17 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
 	    edepcpv=spmcl2->CluEdep();
 	    
 	    if(fabs(etacpv)>2. && fabs(etacpv)<4.){etabin=Int_t((fabs(etacpv)-2)/mDeltaEta);}
-	    //if(fabs(etacpv)>2. && fabs(etacpv)<4.){etabin=Int_t((fabs(etacpv)-2)/0.2);}
 	    if(fabs(phicpv)<3.14){phibin=Int_t((phicpv+3.14)/mDeltaPhi);}
-	    // if(fabs(phicpv)<3.14){phibin=Int_t((phicpv+3.14)/0.2);}
 	    EtaPhiArr_CPV[etabin][phibin]=icpv;
 	  }
-	
+  }	
+
+
 	Int_t cpvmatched=0;
 	Int_t hadmatched=0;
+  StPmdCluster *spmcl1;
+  if(clusters){
+	  TIter next(clusters->Clusters());
 	for(UInt_t i=0;i<pmdclusters.size();i++)
 	  {
 	    Int_t etabin,phibin;
@@ -257,10 +266,7 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
 	    mMCPID->Fill(Float_t(spmcl1->McCluPID()));
 	    
 	    if(fabs(etapmd)>2. && fabs(etapmd)<4.)etabin=Int_t((fabs(etapmd)-2)/mDeltaEta);
-	    //	 if(fabs(etapmd)>2. && fabs(etapmd)<4.)etabin=Int_t((fabs(etapmd)-2)/0.2);
 	    if(fabs(phipmd)<3.14)phibin=Int_t((phipmd+3.14)/mDeltaPhi);
-	    //	 if(fabs(phipmd)<3.14)phibin=Int_t((phipmd+3.14)/0.2);
-	    
 	    
 	    for(Int_t ibineta=0;ibineta<400;ibineta++){
 	      for(Int_t ibinphi=0;ibinphi<1400;ibinphi++){
@@ -290,6 +296,7 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
 	    
 	    
 	    NNContainer.push_back(nncls); 
+	  }
 	  }
 	if(cpvmatched>0)mcpvmatched->Fill(cpvmatched);
 	
