@@ -1847,13 +1847,20 @@ void StEventQAMaker::MakeHistPoint() {
 	for (UInt_t k=0; k<ftpcHits->plane(i)->sector(j)->hits().size(); k++) {
           Float_t x  = ftpcHits->plane(i)->sector(j)->hits()[k]->position().x();
           Float_t y  = ftpcHits->plane(i)->sector(j)->hits()[k]->position().y();
+	  Int_t npads = ftpcHits->plane(i)->sector(j)->hits()[k]->padsInHit();
+	  Int_t ntimebins = ftpcHits->plane(i)->sector(j)->hits()[k]->timebinsInHit();
+	  UInt_t trackReferenceCount = ftpcHits->plane(i)->sector(j)->hits()[k]->trackReferenceCount();
 	  if (i<10) {
 	    hists->m_pnt_planeF->Fill(i+1,1.); // physical numbering starts at 1
             hists->m_pnt_xyFW->Fill(x,y);
+	    hists->m_pnt_padtimeFW->Fill(ntimebins,npads);
+	    if (trackReferenceCount !=0 )hists->m_globtrk_padtimeFW->Fill(ntimebins,npads);
           }
 	  else {
 	    hists->m_pnt_planeF->Fill(i+1,0.); // physical numbering starts at 1
             hists->m_pnt_xyFE->Fill(x,y);
+	    hists->m_pnt_padtimeFE->Fill(ntimebins,npads);
+	    if (trackReferenceCount !=0 )hists->m_globtrk_padtimeFE->Fill(ntimebins,npads);
           }
 	}
       if (i<10)
@@ -2132,8 +2139,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.61 2004/05/29 12:41:42 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.62 2004/10/04 16:40:42 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.62  2004/10/04 16:40:42  genevb
+// FTPC radial histos
+//
 // Revision 2.61  2004/05/29 12:41:42  genevb
 // handle absence of tpc & ftpc software monitors
 //

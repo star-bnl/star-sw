@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.18 2004/04/23 23:15:30 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.19 2004/10/04 16:40:42 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.19  2004/10/04 16:40:42  genevb
+// FTPC radial histos
+//
 // Revision 2.18  2004/04/23 23:15:30  genevb
 // Added signedDCA (Impact) plots for globals
 //
@@ -87,7 +90,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.18 2004/04/23 23:15:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.19 2004/10/04 16:40:42 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -310,6 +313,8 @@ class StQABookHist : public TObject {
   TH2F     *m_globtrk_xf_yfTS; //! Y vs X of first hit on trk, tpc+svt
   TH2F     *m_globtrk_xf_yfFE; //! Y vs X of first hit on trk, ftpc east
   TH2F     *m_globtrk_xf_yfFW; //! Y vs X of first hit on trk, ftpc west
+  TH2F     *m_globtrk_padtimeFE;    //! padlength vs timelength of hits on track, ftpcE
+  TH2F     *m_globtrk_padtimeFW;    //! padlength vs timelength of hits on track, ftpcW
   TH2F     *m_tanl_zfT;        //! tanl(dip angle) vs zfirst-zvtx, tpc
   TH2F     *m_tanl_zfTS;       //! tanl(dip angle) vs zfirst-zvtx, tpc+svt 
   TH2F     *m_mom_trklengthT;  //! mom vs. trk length, tpc
@@ -603,6 +608,8 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_barrelS; //! barrel dist. of hits, svt
   TH2F     *m_pnt_xyFE;    //! xy dist. of hits, ftpcE
   TH2F     *m_pnt_xyFW;    //! xy dist. of hits, ftpcW
+  TH2F     *m_pnt_padtimeFE;    //! padlength vs timelength of hits, ftpcE
+  TH2F     *m_pnt_padtimeFW;    //! padlength vs timelength of hits, ftpcW
   TH2F     *m_pnt_planeF;  //! plane dist. of hits, ftpc
   TH1F     *m_pnt_tot;     //! number of hits total
   TH1F     *m_pnt_tot_med; //! number of hits total, med range
