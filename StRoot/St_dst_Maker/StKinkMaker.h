@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.9 1999/08/02 18:42:44 wdeng Exp $
+// $Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.10  1999/08/23 22:37:29  wdeng
+// New definiton with function dcaTwoLines
+//
 // Revision 1.9  1999/08/02 18:42:44  wdeng
 // Cleanup.
 //
@@ -58,14 +61,15 @@ using namespace std;
 class StKinkMaker : public StMaker {
  private:
   Bool_t m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.9 1999/08/02 18:42:44 wdeng Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
  protected:
   Int_t    meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
 			    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
 			    Float_t yCoordinates[2]);
-  Float_t  dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, Float_t syz1, 
-		       Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3]);
+  Float_t  dcaTwoLines(const StThreeVectorD& p1Project, const StThreeVectorD& p2Project, 
+		       const StThreeVectorD& parentMoment, const StThreeVectorD& daughterMoment, 
+		       Float_t point1AtDca[3], Float_t point2AtDca[3]);
   
  public: 
   StKinkMaker(const char *name="kink");
@@ -76,7 +80,7 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.9 1999/08/02 18:42:44 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     
