@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.20 2004/08/25 04:05:56 mvl Exp $
+ * $Id: StMuDst.h,v 1.21 2004/10/19 01:45:26 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -66,10 +66,8 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0);
-  // subhasis: commented to include tof again
-  // void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0);
-
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, StMuEmcCollection *emc=0, StMuPmdCollection *pmd=0);
+  
   /// resets the pointers to the TClonesArrays to 0
   void unset();
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
@@ -94,6 +92,10 @@ public:
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
   static TClonesArray** tofArrays;
+  /// pointer to EmcCollection (manages the EmcArrays)
+  static StMuEmcCollection *mEmcCollection;
+  /// pointer to PmdCollection (manages the PmdArrays)
+  static StMuPmdCollection *mPmdCollection;
 
 public:
   /// returns pointer to the n-th TClonesArray 
@@ -145,6 +147,8 @@ public:
 
   /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
   static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
+  /// returns pointer to MC version of current StStrangeEvMuDst
+  static StStrangeEvMuDst* strangeEventMc() { return (StStrangeEvMuDst*)strangeArrays[smuEvMc]->UncheckedAt(0); }
   /// returns pointer to the v0 list
   static TClonesArray* v0s() { return strangeArrays[smuV0]; }
   /// returns pointer to the mc v0 list
@@ -181,9 +185,9 @@ public:
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
   /// returns pointer to current StMuEmcCollection
-  static StMuEmcCollection* emcCollection() { return (StMuEmcCollection*)emcArrays[muEmc]->UncheckedAt(0); }
+  static StMuEmcCollection* emcCollection() { return mEmcCollection; }
   /// returns pointer to current StMuPmdCollection
-  static StMuPmdCollection* pmdCollection() { return (StMuPmdCollection*)pmdArrays[muPmd]->UncheckedAt(0); }
+  static StMuPmdCollection* pmdCollection() { return mPmdCollection; }
 
   /// returns pointer to the i-th muTofHit
   static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
@@ -243,6 +247,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.21  2004/10/19 01:45:26  mvl
+ * Changes to split Emc and Pmd collections. Minor change to track copying logic
+ *
  * Revision 1.20  2004/08/25 04:05:56  mvl
  * Added getters for StStrangeAssocs
  *
