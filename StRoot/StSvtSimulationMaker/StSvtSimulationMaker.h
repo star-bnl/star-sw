@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.5 2001/03/19 22:25:53 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.6 2001/08/13 15:34:19 bekele Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.6  2001/08/13 15:34:19  bekele
+// Debugging tools added
+//
 // Revision 1.5  2001/03/19 22:25:53  caines
 // Catch wrong wafer ids more elegantly
 //
@@ -42,11 +45,11 @@ class srs_srspar_st;
 class svg_geom_st;
 
 class StSvtHybridCollection;
+class StSvtHybridData;
 class StSvtConfig;
 class StSvtGeantHits;
 class StSvtHybridPixels;
 class StSvtHybridSimData;
-class StSvtEnergySim;
 class StSvtSimulation;
 class StSvtSignal;
 class StSvtElectronCloud;
@@ -64,7 +67,7 @@ class StSvtSimulationMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
 
-  Int_t setOneHit(int oneHit = 0, double anode = 0, double time = 0,double energy = 0,double theta = 0,double phi = 0);
+  Int_t setEmbedding(char* embedding);
   Int_t setOptions(char* option1, int option2, int option3, int option4);
   Int_t setConst(char* backgr,double backgSigma, double timBinSize, double anodeSize );
   Int_t setConfig(const char* config);
@@ -75,16 +78,23 @@ class StSvtSimulationMaker : public StMaker
   Int_t setTables();
   Int_t setHybrid();
   Int_t createBackGrData(double backgsigma);
-  void  calcAngles(svg_geom_st *geom_st,int hardWarePosition);
-  void  fillBuffer(double mAnHit, double mTimeHit, int hybIndex);
-  Int_t doOneHit(StSvtHybridPixels* mSvtSimDataPixels);
-  Int_t fillEval(int barrel, int ladder, int wafer, int yybrid, StSvtWaferCoordinate& waferCoord, StThreeVector<double>& xVec);
+  void mixData();
+  Int_t getRealData();
+  Int_t checkCoordTrans();
+  Int_t setDriftTimeShift(int driftTimeShift);
+  Int_t setHybridToCheck(int oneHybrid, int allHybrids, int numOfHitsperHyb,int pasaSigAttributes);
+  Int_t setHitAttributes(double anode, double time,double energy, double theta, double phi);
+  Int_t checkOneHybrid(StSvtHybridPixels* mSvtSimDataPixels);
+  Int_t checkAllHybrids();
+  Int_t doDriftTimeShift(StSvtHybridPixels* SvtSimDataPixels);
+  Int_t fillEval(int* svtAttrib, float* anodeTim);
+  Int_t fillEval(int barrel, int ladder, int wafer, int hybrid, StSvtWaferCoordinate& waferCoord, StThreeVector<double>& VecG,StThreeVector<double>& VecL);
 
   Int_t CreateHistograms();
-  void  MakeHistograms1();
-  void  MakeHistograms2();
-  void  histTimeDist();
-  void  histChargeDist();
+  Int_t MakeHistograms1();
+  Int_t MakeHistograms2();
+  void  histTimeDist(int hit);
+  void  histChargeDist(int hit);
 
  private:
   TString                      mConfigString;  
@@ -94,18 +104,19 @@ class StSvtSimulationMaker : public StMaker
   StSvtElectronCloud           *mElectronCloud;      //!
   StSvtSimulation              *mSvtSimulation;      //!
   StSvtSignal                  *mSvtSignal;          //!
-  StSvtEnergySim               *mEnergySim;          //!
   StSvtCoordinateTransform     *mCoordTransform;     //!
 
   StSvtHybridCollection        *mSvtSimPixelColl;    //!
   StSvtHybridCollection        *mSvtSimDataColl;     //!
   StSvtHybridCollection        *mSvtGeantHitColl;    //!
+  StSvtHybridCollection        *mRealDataColl;       //!
 
 
   StSvtGeantHits               *mSvtGeantHit;        //!
   StSvtHybridPixels            *mBackGrDataPixels;   //!
   StSvtHybridPixels            *mSvtSimDataPixels;   //!
   StSvtHybridSimData           *mSimHybridData;      //!
+  StSvtHybridData              *mSvtRealData;      //!
 
   St_ObjectSet                 *mGeantHitSet;        //!
   St_ObjectSet                 *mSimDataSet;         //!
@@ -119,13 +130,18 @@ class StSvtSimulationMaker : public StMaker
   TFile                        *mNtFile;          //! 
   TNtuple                      *mNTuple;          //!
 
+  char* mDoEmbedding;       //!
   Int_t mNumOfHybrids;
   char* mBackGrOption ;    //! 
   char* mExpOption;    //!  
   Int_t mWrite;        // for signal width outputs
   Int_t mFineDiv;      // mFineDiv = 0 to use finer scales for signal width outputs 
   Int_t mSigOption;
-  Int_t mOneHit;
+  Int_t mCheckOneHybrid;
+  Int_t mCheckAllHybrids;
+  Int_t mNumOfHitsPerHyb;
+  Int_t mPasaSigAttributes;
+  Int_t mDoDriftTimeShift;
   Float_t mAdcArray[128*240];
 
   double mAnode;
@@ -144,9 +160,10 @@ class StSvtSimulationMaker : public StMaker
   TH1D* mChargeDist;           //!
   TH2D** hit_plus_backgr;      //!
   TH2D** geant_hit;            //!
+  TH2D** mDataBeforeSeqAdj;            //! 
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.5 2001/03/19 22:25:53 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.6 2001/08/13 15:34:19 bekele Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,1)
 
