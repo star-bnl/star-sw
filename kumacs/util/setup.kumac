@@ -15,7 +15,7 @@ macro setup
  if $vexist(setup_done)=0 then
    exec setup#set_dir
    exec setup#set_aliases
-   exec setup#set_values
+   exec setup#set_globals
    vec/cre setup_done
  endif
  
@@ -33,26 +33,21 @@ macro set_aliases
 return
 **************************************************
  
-macro set_values
+macro set_globals
 
  macro/global/import *
 
  macro/global/create log_file ' ' 'default log message file'
  macro/global/create nevents  0   'no. of events processed so far'
-
-return
-
-**************************************************
-macro set_dir
-  
-  macro/global/import *
    
- MESSAGE ********************************
- MESSAGE *** Setting up directory tree **
- MESSAGE ********************************
-
-
-*************** create global macros *********************************
+ macro/global/create nev_proc 0
+ macro/global/create nev_pass 0
+ macro/global/create nev_total 0    
+   
+ macro/global/create ievent           1          'Event counter'
+   
+   
+*************** create global macros for directories ********************
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
  macro/global/create calib     /dui/calib
@@ -70,6 +65,18 @@ macro set_dir
  macro/global/create raw_data    [event]/raw_data 
  macro/global/create data        [event]/data
  macro/global/create dst         [event]/data/global/dst   
+   
+return
+
+**************************************************
+macro set_dir
+  
+  macro/global/import *
+   
+ MESSAGE ********************************
+ MESSAGE *** Setting up directory tree **
+ MESSAGE ********************************
+
 ***************** make directories *************************************
    
 * top level directories--------------------------
