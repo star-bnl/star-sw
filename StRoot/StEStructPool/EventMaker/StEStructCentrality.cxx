@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructCentrality.cxx,v 1.2 2004/02/27 02:28:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,27 +32,36 @@ if(mcentralities) delete [] mcentralities;
 }
 
 //--------------------------------------------------------------------
-int StEStructCentrality::centrality(const int ncharge){
+// Feb 26, 2004 djp Change from UInt_t to Double_t and check that
+//                  input is within range covered by definition.
+int StEStructCentrality::centrality(const double impact){
 
   if(!mcentralities) {
-    cout<<" Error:: centralitiy requested without initialization "<<endl;
+    cout<<" Error:: centrality requested without initialization "<<endl;
     return -1;
   }
 
-  int retVal=0;
-  for(retVal=0;retVal<mnumCentralities-1;retVal++)
-   if(ncharge>=mcentralities[retVal] && ncharge<mcentralities[retVal+1]) break;
-
+  int found  = 0;
+  int retVal = 0;
+  for(retVal=0;retVal<mnumCentralities-1;retVal++) {
+    if(impact>=mcentralities[retVal] && impact<mcentralities[retVal+1]) {
+      found = 1;
+      break;
+    }
+  }
+  if (!found) {
+    return -1;
+  }
   return retVal;
 
 }
 
 //--------------------------------------------------------------------
-void StEStructCentrality::setCentralities(const int* centralities, const int num){
+void StEStructCentrality::setCentralities(const double* centralities, const int num){
 
   if(!centralities || num==0) return;
   if(mcentralities) delete [] mcentralities;
-  mcentralities = new int[num];
+  mcentralities = new double[num];
   for(int i=0;i<num;i++)mcentralities[i]=centralities[i];
   mnumCentralities=num;
 }
@@ -60,6 +69,11 @@ void StEStructCentrality::setCentralities(const int* centralities, const int num
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.2  2004/02/27 02:28:02  prindle
+ * Small modification to StEStructCentrality in EventMaker branch.
+ * Many modifications to Fluctuations branch, although that branch is not
+ * stable yet.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *

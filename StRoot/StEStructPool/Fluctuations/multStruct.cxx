@@ -17,12 +17,12 @@ int multStruct::NewEvent(float xv, float yv, float zv) {
             for (int iEta=0;iEta<NETABINS;iEta++) {
                 mTrackBinPlus[iPt][iPhi][iEta][0]  = 0;
                 mTrackBinPlus[iPt][iPhi][iEta][1]  = 0;
+                mTrackBinPlus[iPt][iPhi][iEta][2]  = 0;
                 mTrackBinMinus[iPt][iPhi][iEta][0] = 0;
                 mTrackBinMinus[iPt][iPhi][iEta][1] = 0;
+                mTrackBinMinus[iPt][iPhi][iEta][2] = 0;
             }
         }
-        mPtSqPlus[iPt]  = 0;
-        mPtSqMinus[iPt] = 0;
     }
     return 1;
 }
@@ -33,22 +33,22 @@ void multStruct::SetRefMult(int refMult) {
     mCalcRefMult = false;
     mRefMult = refMult;
 }
-int multStruct::AddTrack(int phiBin, int etaBin, int iPt, int sign, float pt) {
+int multStruct::AddTrack(int phiBin, int etaBin, int iPt, int sign, double pt) {
     if (mCalcRefMult) {
         mRefMult++;
     }
     if (sign > 0) {
-        ++mTrackBinPlus[iPt][phiBin][etaBin][0];
+        mTrackBinPlus[iPt][phiBin][etaBin][0] += 1;
         mTrackBinPlus[iPt][phiBin][etaBin][1] += pt;
-        mPtSqPlus[iPt] += pt*pt;
+        mTrackBinPlus[iPt][phiBin][etaBin][2] += pt*pt;
     } else if (sign < 0) {
-        ++mTrackBinMinus[iPt][phiBin][etaBin][0];
+        mTrackBinMinus[iPt][phiBin][etaBin][0] += 1;
         mTrackBinMinus[iPt][phiBin][etaBin][1] += pt;
-        mPtSqMinus[iPt] += pt*pt;
+        mTrackBinMinus[iPt][phiBin][etaBin][2] += pt*pt;
     }
     return 1;
 }
-float multStruct::GetNSum( int iPhi, int iEta, int iPt ) {
+double multStruct::GetNSum( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -65,7 +65,7 @@ float multStruct::GetNSum( int iPhi, int iEta, int iPt ) {
         return mTrackBinPlus[iPt][iPhi][iEta][0] + mTrackBinMinus[iPt][iPhi][iEta][0];
     }
 }
-float multStruct::GetNPlus( int iPhi, int iEta, int iPt ) {
+double multStruct::GetNPlus( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -82,7 +82,7 @@ float multStruct::GetNPlus( int iPhi, int iEta, int iPt ) {
         return mTrackBinPlus[iPt][iPhi][iEta][0];
     }
 }
-float multStruct::GetNMinus( int iPhi, int iEta, int iPt ) {
+double multStruct::GetNMinus( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -99,7 +99,7 @@ float multStruct::GetNMinus( int iPhi, int iEta, int iPt ) {
         return mTrackBinMinus[iPt][iPhi][iEta][0];
     }
 }
-float multStruct::GetNDiff( int iPhi, int iEta, int iPt ) {
+double multStruct::GetNDiff( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -116,7 +116,7 @@ float multStruct::GetNDiff( int iPhi, int iEta, int iPt ) {
         return mTrackBinPlus[iPt][iPhi][iEta][0] - mTrackBinMinus[iPt][iPhi][iEta][0];
     }
 }
-float multStruct::GetPSum( int iPhi, int iEta, int iPt ) {
+double multStruct::GetPtSum( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -133,7 +133,7 @@ float multStruct::GetPSum( int iPhi, int iEta, int iPt ) {
         return mTrackBinPlus[iPt][iPhi][iEta][1] + mTrackBinMinus[iPt][iPhi][iEta][1];
     }
 }
-float multStruct::GetPPlus( int iPhi, int iEta, int iPt ) {
+double multStruct::GetPtPlus( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -150,7 +150,7 @@ float multStruct::GetPPlus( int iPhi, int iEta, int iPt ) {
         return mTrackBinPlus[iPt][iPhi][iEta][1];
     }
 }
-float multStruct::GetPMinus( int iPhi, int iEta, int iPt ) {
+double multStruct::GetPtMinus( int iPhi, int iEta, int iPt ) {
     if (iPhi < 0) {
         return -1;
     } else if (iPhi >= NPHIBINS) {
@@ -167,30 +167,54 @@ float multStruct::GetPMinus( int iPhi, int iEta, int iPt ) {
         return mTrackBinMinus[iPt][iPhi][iEta][1];
     }
 }
-float multStruct::GetPtSqSum( int iPt ) {
-    if (iPt < 0) {
+double multStruct::GetPtSqSum( int iPhi, int iEta, int iPt ) {
+    if (iPhi < 0) {
         return -1;
-    } else if (iPt >= NPTBINS) {
+    } else if (iPhi >= NPHIBINS) {
         return -2;
+    } else if (iEta < 0) {
+        return -3;
+    } else if (iEta >= NETABINS) {
+        return -4;
+    } else if (iPt < 0) {
+        return -5;
+    } else if (iPt >= NPTBINS) {
+        return -6;
     } else {
-        return mPtSqPlus[iPt] + mPtSqMinus[iPt];
+        return mTrackBinPlus[iPt][iPhi][iEta][2] + mTrackBinMinus[iPt][iPhi][iEta][2];
     }
 }
-float multStruct::GetPtSqPlus( int iPt ) {
-    if (iPt < 0) {
+double multStruct::GetPtSqPlus( int iPhi, int iEta, int iPt ) {
+    if (iPhi < 0) {
         return -1;
-    } else if (iPt >= NPTBINS) {
+    } else if (iPhi >= NPHIBINS) {
         return -2;
+    } else if (iEta < 0) {
+        return -3;
+    } else if (iEta >= NETABINS) {
+        return -4;
+    } else if (iPt < 0) {
+        return -5;
+    } else if (iPt >= NPTBINS) {
+        return -6;
     } else {
-        return mPtSqPlus[iPt];
+        return mTrackBinPlus[iPt][iPhi][iEta][2];
     }
 }
-float multStruct::GetPtSqMinus( int iPt ) {
-    if (iPt < 0) {
+double multStruct::GetPtSqMinus( int iPhi, int iEta, int iPt ) {
+    if (iPhi < 0) {
         return -1;
-    } else if (iPt >= NPTBINS) {
+    } else if (iPhi >= NPHIBINS) {
         return -2;
+    } else if (iEta < 0) {
+        return -3;
+    } else if (iEta >= NETABINS) {
+        return -4;
+    } else if (iPt < 0) {
+        return -5;
+    } else if (iPt >= NPTBINS) {
+        return -6;
     } else {
-        return mPtSqMinus[iPt];
+        return mTrackBinMinus[iPt][iPhi][iEta][2];
     }
 }

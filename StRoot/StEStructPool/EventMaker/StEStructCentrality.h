@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructCentrality.h,v 1.2 2004/02/27 02:28:03 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -17,7 +17,7 @@
 
 class StEStructCentrality {
 
-  int* mcentralities;
+  double* mcentralities;
   int  mnumCentralities;
 
   static StEStructCentrality* mInstance;
@@ -29,8 +29,8 @@ class StEStructCentrality {
 
   virtual ~StEStructCentrality();
 
-  int centrality(int ncharge);
-  void setCentralities(const int* centralities, const int num);
+  int centrality(double impact);
+  void setCentralities(const double* centralities, const int num);
 
 
   ClassDef(StEStructCentrality,1)
@@ -41,6 +41,11 @@ class StEStructCentrality {
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.2  2004/02/27 02:28:03  prindle
+ * Small modification to StEStructCentrality in EventMaker branch.
+ * Many modifications to Fluctuations branch, although that branch is not
+ * stable yet.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *

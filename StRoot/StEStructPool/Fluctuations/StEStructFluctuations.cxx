@@ -286,10 +286,8 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
     //    outside these loops.
     int iPhi, jPhi, kPhi, lPhi, dPhi, iEta, jEta, kEta, lEta, dEta;
     int iBin, jPt;
-    double binNPlus = 0, binNMinus = 0;
-    double binPPlus = 0, binPMinus = 0;
-    double ptBinNPlus = 0, ptBinNMinus = 0;
-    double ptBinPPlus = 0, ptBinPMinus = 0;
+    double NPlus, NMinus, PtPlus, PtMinus, Pt2Plus, Pt2Minus;
+    double ptNPlus, ptNMinus, ptPtPlus, ptPtMinus, ptPt2Plus, ptPt2Minus;
     for (jPhi=0;jPhi<NPHIBINS;jPhi++) {
         dPhi = jPhi + 1;
         for (jEta=0;jEta<NETABINS;jEta++) {
@@ -307,60 +305,53 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
                     // Next loop is over Pt binning.
                     // We keep bins that are summed over all pt in
                     // addition to bins for particular pt ranges.
-                    binNPlus  = 0;
-                    binNMinus = 0;
-                    binPPlus  = 0;
-                    binPMinus = 0;
+                    NPlus    = 0, NMinus   = 0;
+                    PtPlus   = 0, PtMinus  = 0;
+                    Pt2Plus  = 0, Pt2Minus = 0;
                     for (jPt=0;jPt<NPTBINS;jPt++) {
                         // Final two loops sum the small bins.
-                        ptBinNPlus  = 0;
-                        ptBinNMinus = 0;
-                        ptBinPPlus  = 0;
-                        ptBinPMinus = 0;
+                        ptNPlus    = 0, ptNMinus   = 0;
+                        ptPtPlus   = 0, ptPtMinus  = 0;
+                        ptPt2Plus  = 0, ptPt2Minus = 0;
                         for (lPhi=kPhi;lPhi<kPhi+dPhi;lPhi++) {
                             for (lEta=kEta;lEta<kEta+dEta;lEta++) {
-                                ptBinNPlus  += ms->mTrackBinPlus[jPt][lPhi][lEta][0];
-                                ptBinNMinus += ms->mTrackBinMinus[jPt][lPhi][lEta][0];
-                                ptBinPPlus  += ms->mTrackBinPlus[jPt][lPhi][lEta][1];
-                                ptBinPMinus += ms->mTrackBinMinus[jPt][lPhi][lEta][1];
+                                ptNPlus    += ms->mTrackBinPlus[jPt][lPhi][lEta][0];
+                                ptNMinus   += ms->mTrackBinMinus[jPt][lPhi][lEta][0];
+                                ptPtPlus   += ms->mTrackBinPlus[jPt][lPhi][lEta][1];
+                                ptPtMinus  += ms->mTrackBinMinus[jPt][lPhi][lEta][1];
+                                ptPt2Plus  += ms->mTrackBinPlus[jPt][lPhi][lEta][2];
+                                ptPt2Minus += ms->mTrackBinMinus[jPt][lPhi][lEta][2];
                             }
                         }
                         AddToPtBin( jPtCent, jPt, iBin,
-                                    ptBinNPlus, ptBinNMinus,
-                                    ptBinPPlus, ptBinPMinus );
-                        binNPlus  += ptBinNPlus;
-                        binNMinus += ptBinNMinus;
-                        binPPlus  += ptBinPPlus;
-                        binPMinus += ptBinPMinus;
+                                    ptNPlus,   ptNMinus,
+                                    ptPtPlus,  ptPtMinus,
+                                    ptPt2Plus, ptPt2Minus );
+                        NPlus    += ptNPlus;
+                        NMinus   += ptNMinus;
+                        PtPlus   += ptPtPlus;
+                        PtMinus  += ptPtMinus;
+                        Pt2Plus  += ptPt2Plus;
+                        Pt2Minus += ptPt2Minus;
                     }
 
-                    AddToBin( jPhi, jEta, jCent, iBin,
-                              binNPlus, binNMinus,
-                              binPPlus, binPMinus );
+                    AddToBin( jCent,      iBin,
+                              NPlus,   NMinus,
+                              PtPlus,  PtMinus,
+                              Pt2Plus, Pt2Minus );
+#ifdef TERMINUSSTUDY
+                    sum[jPhi][jEta]->Fill(NPlus+NMinus);
+                    plus[jPhi][jEta]->Fill(NPlus);
+                    minus[jPhi][jEta]->Fill(NMinus);
+                    diff[jPhi][jEta][jCent]->Fill(NPlus-NMinus);
+#endif
+
                     iEta++;
                 }
                 iPhi++;
             }
         }
     }
-    // Fill histograms of pt^2 for all tracks.
-    int iCent = 1 + jCent;
-    int iPtCent = 1 + jPtCent;
-    double PtSqPlus = 0, PtSqMinus = 0;
-    for (int jPt=0;jPt<NPTBINS;jPt++) {
-        double ptPtSqPlus  = ms->GetPtSqPlus(jPt);
-        double ptPtSqMinus = ms->GetPtSqMinus(jPt);
-        if (iPtCent > 0) {
-            hptPtSumSq[jPt][0]->Fill(iPtCent,ptPtSqPlus+ptPtSqMinus);
-            hptPtSumSq[jPt][1]->Fill(iPtCent,ptPtSqPlus);
-            hptPtSumSq[jPt][2]->Fill(iPtCent,ptPtSqMinus);
-        }
-        PtSqPlus  += ptPtSqPlus;
-        PtSqMinus += ptPtSqMinus;
-    }
-    hPtSumSq[0]->Fill(iCent,PtSqPlus+PtSqMinus);
-    hPtSumSq[1]->Fill(iCent,PtSqPlus);
-    hPtSumSq[2]->Fill(iCent,PtSqMinus);
 
     // Increment occupancy histograms.
     delEta = (ETAMAX-ETAMIN) / NETABINS;
@@ -375,13 +366,13 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
                 double np, nm, pp, pm;
                 np = ms->GetNPlus(jPhi,jEta,jPt);
                 nm = ms->GetNMinus(jPhi,jEta,jPt);
-                pp = ms->GetPPlus(jPhi,jEta,jPt);
-                pm = ms->GetPMinus(jPhi,jEta,jPt);
+                pp = ms->GetPtPlus(jPhi,jEta,jPt);
+                pm = ms->GetPtMinus(jPhi,jEta,jPt);
                 nsum   = np + nm;
                 ndiff  = np - nm;
                 psum   = pp + pm;
                 pdiff  = pp - pm;
-                if ((jPtCent = getPtCentBin(jCent)) >= 0) {
+                if (jPtCent >= 0) {
                     occptNSum[jPtCent][jPt]->Fill(dp,de,nsum);
                     occptNPlus[jPtCent][jPt]->Fill(dp,de,np);
                     occptNMinus[jPtCent][jPt]->Fill(dp,de,nm);
@@ -420,242 +411,243 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
     }
 }
 void StEStructFluctuations::AddToPtBin( int jPtCent, int jPt, int iBin,
-                                        double Nplus,   double Nminus,
-                                        double Pplus,   double Pminus ) {
+                                        double Nplus,    double Nminus,
+                                        double Ptplus,   double Ptminus,
+                                        double PtSqplus, double PtSqminus ) {
 
-    if (jPtCent < 0) {
+    if ((jPtCent < 0) || (NPTCENTBINS <= jPtCent)) {
+        return;
+    }
+    if ((jPt < 0) || (NPTBINS <= jPt)) {
         return;
     }
 
-    double Nsum  = Nplus + Nminus;
-    double Ndiff = Nplus - Nminus;
-    double Psum  = Pplus + Pminus;
-
     hptTotEvents[jPtCent][jPt][0]->Fill(iBin);
-    if (Nsum > 0) {
-        hptTotEvents[jPtCent][jPt][1]->Fill(iBin);
-    }
-    if (Nplus > 0) {
-        hptTotEvents[jPtCent][jPt][2]->Fill(iBin);
-    }
-    if (Nminus > 0) {
-        hptTotEvents[jPtCent][jPt][3]->Fill(iBin);
-    }
-    if ((Nplus > 0) && (Nminus > 0)) {
-        hptTotEvents[jPtCent][jPt][4]->Fill(iBin);
-    }
-
-    hptNSum[jPtCent][jPt][0]->Fill(iBin,Nsum);
-    hptNSum[jPtCent][jPt][1]->Fill(iBin,Nsum*Nsum);
-
-    hptNDel[jPtCent][jPt][0]->Fill(iBin,Ndiff);
-    hptNDel[jPtCent][jPt][1]->Fill(iBin,Ndiff*Ndiff);
-
-    hptNPlus[jPtCent][jPt][0]->Fill(iBin,Nplus);
-    hptNPlus[jPtCent][jPt][1]->Fill(iBin,Nplus*Nplus);
-
-    hptNMinus[jPtCent][jPt][0]->Fill(iBin,Nminus);
-    hptNMinus[jPtCent][jPt][1]->Fill(iBin,Nminus*Nminus);
-
-    hptNPlusMinus[jPtCent][jPt]->Fill(iBin,Nplus*Nminus);
 
     // This routine is called in an inner loop.
     // Although the compiler should do the optimizations I try
     // minimizing number of sqrt() and eliminating pow().
+    double Nsum = Nplus + Nminus;
     if (Nsum < 0) {
         return;
     }
+
+    double Ndiff   = Nplus - Nminus;
+    double Ptsum   = Ptplus + Ptminus;
+    double PtSqsum = PtSqplus + PtSqminus;
     double sqs = sqrt(Nsum);
     double sqp = sqrt(Nplus);
     double sqm = sqrt(Nminus);
     double rs, rs2, rp, rp2, rm, rm2;
+
     if (Nsum > 0) {
-        hptPSum[jPtCent][jPt][0]->Fill(iBin,Psum);
-        rs = Psum/Nsum;
+        hptTotEvents[jPtCent][jPt][1]->Fill(iBin);
+
+        hptNSum[jPtCent][jPt][0]->Fill(iBin,Nsum);
+        hptNSum[jPtCent][jPt][1]->Fill(iBin,Nsum*Nsum);
+
+        rs = Ptsum/Nsum;
         rs2 = rs*rs;
-        hptPSum[jPtCent][jPt][1]->Fill(iBin,Psum*rs);
+        hptPSum[jPtCent][jPt][0]->Fill(iBin,Ptsum);
+        hptPSum[jPtCent][jPt][1]->Fill(iBin,Ptsum*rs);
         hptPSum[jPtCent][jPt][2]->Fill(iBin,rs2);
         hptPSum[jPtCent][jPt][3]->Fill(iBin,rs2*rs2);
-    }
+        hptPSum[jPtCent][jPt][4]->Fill(iBin,PtSqsum);
 
-    if (Nplus > 0) {
-        hptPPlus[jPtCent][jPt][0]->Fill(iBin,Pplus);
-        rp = Pplus/Nplus;
-        rp2 = rp*rp;
-        hptPPlus[jPtCent][jPt][1]->Fill(iBin,Pplus*rp);
-        hptPPlus[jPtCent][jPt][2]->Fill(iBin,rp2);
-        hptPPlus[jPtCent][jPt][3]->Fill(iBin,rp2*rp2);
-    }
-
-    if (Nminus > 0) {
-        hptPMinus[jPtCent][jPt][0]->Fill(iBin,Pminus);
-        rm = Pminus/Nminus;
-        rm2 = rm*rm;
-        hptPMinus[jPtCent][jPt][1]->Fill(iBin,Pminus*rm);
-        hptPMinus[jPtCent][jPt][2]->Fill(iBin,rm2);
-        hptPMinus[jPtCent][jPt][3]->Fill(iBin,rm2*rm2);
-    }
-
-    if ((Nplus > 0) && (Nminus > 0)) {
-        hptPPlusMinus[jPtCent][jPt][0]->Fill(iBin,sqp*sqm);
-        hptPPlusMinus[jPtCent][jPt][1]->Fill(iBin,Pplus*sqm/sqp);
-        hptPPlusMinus[jPtCent][jPt][2]->Fill(iBin,Pminus*sqp/sqm);
-        hptPPlusMinus[jPtCent][jPt][3]->Fill(iBin,Pplus*Pminus/(sqp*sqm));
-    }
-
-    if (Nsum > 0) {
         hptPNSum[jPtCent][jPt][0]->Fill(iBin,sqs);
         hptPNSum[jPtCent][jPt][1]->Fill(iBin,Nsum*sqs);
-        hptPNSum[jPtCent][jPt][2]->Fill(iBin,Psum/sqs);
-        hptPNSum[jPtCent][jPt][3]->Fill(iBin,Psum*sqs);
+        hptPNSum[jPtCent][jPt][2]->Fill(iBin,Ptsum/sqs);
+        hptPNSum[jPtCent][jPt][3]->Fill(iBin,Ptsum*sqs);
     }
 
+    hptNDel[jPtCent][jPt][0]->Fill(iBin,Ndiff);
+    hptNDel[jPtCent][jPt][1]->Fill(iBin,Ndiff*Ndiff);
+
     if (Nplus > 0) {
+        hptTotEvents[jPtCent][jPt][2]->Fill(iBin);
+
+        hptNPlus[jPtCent][jPt][0]->Fill(iBin,Nplus);
+        hptNPlus[jPtCent][jPt][1]->Fill(iBin,Nplus*Nplus);
+
+        rp = Ptplus/Nplus;
+        rp2 = rp*rp;
+        hptPPlus[jPtCent][jPt][0]->Fill(iBin,Ptplus);
+        hptPPlus[jPtCent][jPt][1]->Fill(iBin,Ptplus*rp);
+        hptPPlus[jPtCent][jPt][2]->Fill(iBin,rp2);
+        hptPPlus[jPtCent][jPt][3]->Fill(iBin,rp2*rp2);
+        hptPPlus[jPtCent][jPt][4]->Fill(iBin,PtSqplus);
+
         hptPNPlus[jPtCent][jPt][0]->Fill(iBin,sqp);
         hptPNPlus[jPtCent][jPt][1]->Fill(iBin,Nplus*sqp);
-        hptPNPlus[jPtCent][jPt][2]->Fill(iBin,Pplus/sqp);
-        hptPNPlus[jPtCent][jPt][3]->Fill(iBin,Pplus*sqp);
+        hptPNPlus[jPtCent][jPt][2]->Fill(iBin,Ptplus/sqp);
+        hptPNPlus[jPtCent][jPt][3]->Fill(iBin,Ptplus*sqp);
     }
 
     if (Nminus > 0) {
+        hptTotEvents[jPtCent][jPt][3]->Fill(iBin);
+
+        hptNMinus[jPtCent][jPt][0]->Fill(iBin,Nminus);
+        hptNMinus[jPtCent][jPt][1]->Fill(iBin,Nminus*Nminus);
+
+        rm = Ptminus/Nminus;
+        rm2 = rm*rm;
+        hptPMinus[jPtCent][jPt][0]->Fill(iBin,Ptminus);
+        hptPMinus[jPtCent][jPt][1]->Fill(iBin,Ptminus*rm);
+        hptPMinus[jPtCent][jPt][2]->Fill(iBin,rm2);
+        hptPMinus[jPtCent][jPt][3]->Fill(iBin,rm2*rm2);
+        hptPMinus[jPtCent][jPt][4]->Fill(iBin,PtSqminus);
+
         hptPNMinus[jPtCent][jPt][0]->Fill(iBin,sqm);
         hptPNMinus[jPtCent][jPt][1]->Fill(iBin,Nminus*sqm);
-        hptPNMinus[jPtCent][jPt][2]->Fill(iBin,Pminus/sqm);
-        hptPNMinus[jPtCent][jPt][3]->Fill(iBin,Pminus*sqm);
+        hptPNMinus[jPtCent][jPt][2]->Fill(iBin,Ptminus/sqm);
+        hptPNMinus[jPtCent][jPt][3]->Fill(iBin,Ptminus*sqm);
     }
 
     if ((Nplus > 0) && (Nminus > 0)) {
-        hptPNPlusMinus[jPtCent][jPt][0]->Fill(iBin,Pplus*Nminus/sqp);
+        hptTotEvents[jPtCent][jPt][4]->Fill(iBin);
+
+        hptNPlusMinus[jPtCent][jPt]->Fill(iBin,Nplus*Nminus);
+
+        hptPPlusMinus[jPtCent][jPt][0]->Fill(iBin,sqp*sqm);
+        hptPPlusMinus[jPtCent][jPt][1]->Fill(iBin,Ptplus*sqm/sqp);
+        hptPPlusMinus[jPtCent][jPt][2]->Fill(iBin,Ptminus*sqp/sqm);
+        hptPPlusMinus[jPtCent][jPt][3]->Fill(iBin,Ptplus*Ptminus/(sqp*sqm));
+        hptPPlusMinus[jPtCent][jPt][4]->Fill(iBin,Nplus);
+        hptPPlusMinus[jPtCent][jPt][5]->Fill(iBin,Ptplus);
+        hptPPlusMinus[jPtCent][jPt][6]->Fill(iBin,Nminus);
+        hptPPlusMinus[jPtCent][jPt][7]->Fill(iBin,Ptminus);
+
+        hptPNPlusMinus[jPtCent][jPt][0]->Fill(iBin,Ptplus*Nminus/sqp);
         hptPNPlusMinus[jPtCent][jPt][1]->Fill(iBin,Nminus*sqp);
-        hptPNPlusMinus[jPtCent][jPt][2]->Fill(iBin,Pminus*Nplus/sqm);
+        hptPNPlusMinus[jPtCent][jPt][2]->Fill(iBin,Ptminus*Nplus/sqm);
         hptPNPlusMinus[jPtCent][jPt][3]->Fill(iBin,Nplus*sqm);
+        hptPNPlusMinus[jPtCent][jPt][4]->Fill(iBin,Nplus);
+        hptPNPlusMinus[jPtCent][jPt][5]->Fill(iBin,Ptplus);
+        hptPNPlusMinus[jPtCent][jPt][6]->Fill(iBin,sqp);
+        hptPNPlusMinus[jPtCent][jPt][7]->Fill(iBin,Ptplus/sqp);
+        hptPNPlusMinus[jPtCent][jPt][8]->Fill(iBin,Nminus);
+        hptPNPlusMinus[jPtCent][jPt][9]->Fill(iBin,Ptminus);
+        hptPNPlusMinus[jPtCent][jPt][10]->Fill(iBin,sqm);
+        hptPNPlusMinus[jPtCent][jPt][11]->Fill(iBin,Ptminus/sqm);
     }
 }
-void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
-                                      int jCent,      int iBin,
-                                      double Nplus,   double Nminus,
-                                      double Pplus,   double Pminus ) {
-    double Nsum  = Nplus + Nminus;
-    double Ndiff = Nplus - Nminus;
-    double Psum  = Pplus + Pminus;
+void StEStructFluctuations::AddToBin( int jCent,       int iBin,
+                                      double Nplus,    double Nminus,
+                                      double Ptplus,   double Ptminus,
+                                      double PtSqplus, double PtSqminus ) {
 
-#ifdef TERMINUSSTUDY
-    sum[jPhi][jEta]->Fill(Nsum);
-    plus[jPhi][jEta]->Fill(Nplus);
-    minus[jPhi][jEta]->Fill(Nminus);
-    diff[jPhi][jEta][jCent]->Fill(Ndiff);
-#endif
+    if ((jCent < 0) || (NCENTBINS <= jCent)) {
+        return;
+    }
 
     hTotEvents[jCent][0]->Fill(iBin);
-    if (Nsum > 0) {
-        hTotEvents[jCent][1]->Fill(iBin);
-    }
-    if (Nplus > 0) {
-        hTotEvents[jCent][2]->Fill(iBin);
-    }
-    if (Nminus > 0) {
-        hTotEvents[jCent][3]->Fill(iBin);
-    }
-    if ((Nplus > 0) && (Nminus > 0)) {
-        hTotEvents[jCent][4]->Fill(iBin);
-    }
-
-    hNSum[jCent][0]->Fill(iBin,Nsum);
-    hNSum[jCent][1]->Fill(iBin,Nsum*Nsum);
-
-    hNDel[jCent][0]->Fill(iBin,Ndiff);
-    hNDel[jCent][1]->Fill(iBin,Ndiff*Ndiff);
-
-    hNPlus[jCent][0]->Fill(iBin,Nplus);
-    hNPlus[jCent][1]->Fill(iBin,Nplus*Nplus);
-
-    hNMinus[jCent][0]->Fill(iBin,Nminus);
-    hNMinus[jCent][1]->Fill(iBin,Nminus*Nminus);
-
-    hNPlusMinus[jCent]->Fill(iBin,Nplus*Nminus);
 
     // This routine is called in an inner loop.
     // Although the compiler should do the optimizations I try
     // minimizing number of sqrt() and eliminating pow()
+    double Nsum = Nplus + Nminus;
     if (Nsum < 0) {
         return;
     }
+
+    double Ndiff    = Nplus - Nminus;
+    double Ptsum    = Ptplus   + Ptminus;
+    double PtSqsum  = PtSqplus + PtSqminus;
     double sqs = sqrt(Nsum);
     double sqp = sqrt(Nplus);
     double sqm = sqrt(Nminus);
     double r, r2;
+
     if (Nsum > 0) {
-        hPSum[jCent][0]->Fill(iBin,Psum);
-        r  = Psum/Nsum;
+        hTotEvents[jCent][1]->Fill(iBin);
+
+        hNSum[jCent][0]->Fill(iBin,Nsum);
+        hNSum[jCent][1]->Fill(iBin,Nsum*Nsum);
+
+        r  = Ptsum/Nsum;
         r2 = r*r;
-        hPSum[jCent][1]->Fill(iBin,Psum*r);
+        hPSum[jCent][0]->Fill(iBin,Ptsum);
+        hPSum[jCent][1]->Fill(iBin,Ptsum*r);
         hPSum[jCent][2]->Fill(iBin,r2);
         hPSum[jCent][3]->Fill(iBin,r2*r2);
-    }
+        hPSum[jCent][4]->Fill(iBin,PtSqsum);
 
-    if (Nplus > 0) {
-        hPPlus[jCent][0]->Fill(iBin,Pplus);
-        r  = Pplus/Nplus;
-        r2 = r*r;
-        hPPlus[jCent][1]->Fill(iBin,Pplus*r);
-        hPPlus[jCent][2]->Fill(iBin,r2);
-        hPPlus[jCent][3]->Fill(iBin,r2*r2);
-    }
-
-    if (Nminus > 0) {
-        hPMinus[jCent][0]->Fill(iBin,Pminus);
-        r  = Pminus/Nminus;
-        r2 = r*r;
-        hPMinus[jCent][1]->Fill(iBin,Pminus*r);
-        hPMinus[jCent][2]->Fill(iBin,r2);
-        hPMinus[jCent][3]->Fill(iBin,r2*r2);
-    }
-
-    if ((Nplus > 0) && (Nminus > 0)) {
-        hPPlusMinus[jCent][0]->Fill(iBin,sqp*sqm);
-        hPPlusMinus[jCent][1]->Fill(iBin,Pplus*sqm/sqp);
-        hPPlusMinus[jCent][2]->Fill(iBin,Pminus*sqp/sqm);
-        hPPlusMinus[jCent][3]->Fill(iBin,Pplus*Pminus/(sqp*sqm));
-        hPPlusMinus[jCent][4]->Fill(iBin,Nplus);
-        hPPlusMinus[jCent][5]->Fill(iBin,Pplus);
-        hPPlusMinus[jCent][6]->Fill(iBin,Nminus);
-        hPPlusMinus[jCent][7]->Fill(iBin,Pminus);
-    }
-
-    if (Nsum > 0) {
         hPNSum[jCent][0]->Fill(iBin,sqrt(Nsum));
         hPNSum[jCent][1]->Fill(iBin,Nsum*sqs);
-        hPNSum[jCent][2]->Fill(iBin,Psum/sqs);
-        hPNSum[jCent][3]->Fill(iBin,Psum*sqs);
+        hPNSum[jCent][2]->Fill(iBin,Ptsum/sqs);
+        hPNSum[jCent][3]->Fill(iBin,Ptsum*sqs);
     }
 
+
+    hNDel[jCent][0]->Fill(iBin,Ndiff);
+    hNDel[jCent][1]->Fill(iBin,Ndiff*Ndiff);
+
     if (Nplus > 0) {
+        hTotEvents[jCent][2]->Fill(iBin);
+
+        hNPlus[jCent][0]->Fill(iBin,Nplus);
+        hNPlus[jCent][1]->Fill(iBin,Nplus*Nplus);
+
+        r  = Ptplus/Nplus;
+        r2 = r*r;
+        hPPlus[jCent][0]->Fill(iBin,Ptplus);
+        hPPlus[jCent][1]->Fill(iBin,Ptplus*r);
+        hPPlus[jCent][2]->Fill(iBin,r2);
+        hPPlus[jCent][3]->Fill(iBin,r2*r2);
+        hPPlus[jCent][4]->Fill(iBin,PtSqplus);
+
         hPNPlus[jCent][0]->Fill(iBin,sqp);
         hPNPlus[jCent][1]->Fill(iBin,Nplus*sqp);
-        hPNPlus[jCent][2]->Fill(iBin,Pplus/sqp);
-        hPNPlus[jCent][3]->Fill(iBin,Pplus*sqp);
+        hPNPlus[jCent][2]->Fill(iBin,Ptplus/sqp);
+        hPNPlus[jCent][3]->Fill(iBin,Ptplus*sqp);
     }
 
     if (Nminus > 0) {
+        hTotEvents[jCent][3]->Fill(iBin);
+
+        hNMinus[jCent][0]->Fill(iBin,Nminus);
+        hNMinus[jCent][1]->Fill(iBin,Nminus*Nminus);
+
+        r  = Ptminus/Nminus;
+        r2 = r*r;
+        hPMinus[jCent][0]->Fill(iBin,Ptminus);
+        hPMinus[jCent][1]->Fill(iBin,Ptminus*r);
+        hPMinus[jCent][2]->Fill(iBin,r2);
+        hPMinus[jCent][3]->Fill(iBin,r2*r2);
+        hPMinus[jCent][4]->Fill(iBin,PtSqminus);
+
         hPNMinus[jCent][0]->Fill(iBin,sqm);
         hPNMinus[jCent][1]->Fill(iBin,Nminus*sqm);
-        hPNMinus[jCent][2]->Fill(iBin,Pminus/sqm);
-        hPNMinus[jCent][3]->Fill(iBin,Pminus*sqm);
+        hPNMinus[jCent][2]->Fill(iBin,Ptminus/sqm);
+        hPNMinus[jCent][3]->Fill(iBin,Ptminus*sqm);
     }
 
     if ((Nplus > 0) && (Nminus > 0)) {
-        hPNPlusMinus[jCent][0]->Fill(iBin,Pplus*Nminus/sqp);
+        hTotEvents[jCent][4]->Fill(iBin);
+
+        hNPlusMinus[jCent]->Fill(iBin,Nplus*Nminus);
+
+        hPPlusMinus[jCent][0]->Fill(iBin,sqp*sqm);
+        hPPlusMinus[jCent][1]->Fill(iBin,Ptplus*sqm/sqp);
+        hPPlusMinus[jCent][2]->Fill(iBin,Ptminus*sqp/sqm);
+        hPPlusMinus[jCent][3]->Fill(iBin,Ptplus*Ptminus/(sqp*sqm));
+        hPPlusMinus[jCent][4]->Fill(iBin,Nplus);
+        hPPlusMinus[jCent][5]->Fill(iBin,Ptplus);
+        hPPlusMinus[jCent][6]->Fill(iBin,Nminus);
+        hPPlusMinus[jCent][7]->Fill(iBin,Ptminus);
+
+        hPNPlusMinus[jCent][0]->Fill(iBin,Ptplus*Nminus/sqp);
         hPNPlusMinus[jCent][1]->Fill(iBin,Nminus*sqp);
-        hPNPlusMinus[jCent][2]->Fill(iBin,Pminus*Nplus/sqm);
+        hPNPlusMinus[jCent][2]->Fill(iBin,Ptminus*Nplus/sqm);
         hPNPlusMinus[jCent][3]->Fill(iBin,Nplus*sqm);
         hPNPlusMinus[jCent][4]->Fill(iBin,Nplus);
-        hPNPlusMinus[jCent][5]->Fill(iBin,Pplus);
+        hPNPlusMinus[jCent][5]->Fill(iBin,Ptplus);
         hPNPlusMinus[jCent][6]->Fill(iBin,sqp);
-        hPNPlusMinus[jCent][7]->Fill(iBin,Pplus/sqp);
+        hPNPlusMinus[jCent][7]->Fill(iBin,Ptplus/sqp);
         hPNPlusMinus[jCent][8]->Fill(iBin,Nminus);
-        hPNPlusMinus[jCent][9]->Fill(iBin,Pminus);
+        hPNPlusMinus[jCent][9]->Fill(iBin,Ptminus);
         hPNPlusMinus[jCent][10]->Fill(iBin,sqm);
-        hPNPlusMinus[jCent][11]->Fill(iBin,Pminus/sqm);
+        hPNPlusMinus[jCent][11]->Fill(iBin,Ptminus/sqm);
     }
 }
 // iEta runs from 1 up to the number of etaBins that fit in,
@@ -837,7 +829,7 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
             hNMinus[jC][jStat]->Write();
         }
         hNPlusMinus[jC]->Write();
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<5;jStat++) {
             hPSum[jC][jStat]->Write();
             hPPlus[jC][jStat]->Write();
             hPMinus[jC][jStat]->Write();
@@ -854,9 +846,6 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
             hPNPlusMinus[jC][jStat]->Write();
         }
     }
-    hPtSumSq[0]->Write();
-    hPtSumSq[1]->Write();
-    hPtSumSq[2]->Write();
 
     for (int jC=0;jC<NPTCENTBINS;jC++) {
         for (int jPt=0;jPt<NPTBINS;jPt++) {
@@ -870,12 +859,12 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
                 hptNMinus[jC][jPt][jStat]->Write();
             }
             hptNPlusMinus[jC][jPt]->Write();
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<5;jStat++) {
                 hptPSum[jC][jPt][jStat]->Write();
                 hptPPlus[jC][jPt][jStat]->Write();
                 hptPMinus[jC][jPt][jStat]->Write();
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<8;jStat++) {
                 hptPPlusMinus[jC][jPt][jStat]->Write();
             }
             for (int jStat=0;jStat<4;jStat++) {
@@ -883,15 +872,10 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
                 hptPNPlus[jC][jPt][jStat]->Write();
                 hptPNMinus[jC][jPt][jStat]->Write();
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<12;jStat++) {
                 hptPNPlusMinus[jC][jPt][jStat]->Write();
             }
         }
-    }
-    for (int jPt=0;jPt<NPTBINS;jPt++) {
-        hptPtSumSq[jPt][0]->Write();
-        hptPtSumSq[jPt][1]->Write();
-        hptPtSumSq[jPt][2]->Write();
     }
 
     cout << "For this analysis we used doingPairCuts = " << doingPairCuts << endl;
@@ -1109,7 +1093,7 @@ cout << "Allocating histograms to store info." << endl;
         }
         sprintf( line, "NPlusMinus%i_0", jC );
         hNPlusMinus[jC] = new TH1D(line,line,totBins,0.5,totBins+0.5);
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<5;jStat++) {
             sprintf( line, "PSum%i_%i", jC, jStat );
             hPSum[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             sprintf( line, "PPlus%i_%i", jC, jStat );
@@ -1134,9 +1118,6 @@ cout << "Allocating histograms to store info." << endl;
             hPNPlusMinus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
         }
     }
-    hPtSumSq[0] = new TH1D("PtSumSq","PtSumSq",NCENTBINS,0.5,NCENTBINS+0.5);
-    hPtSumSq[1] = new TH1D("PtPlusSq","PtMinusSq",NCENTBINS,0.5,NCENTBINS+0.5);
-    hPtSumSq[2] = new TH1D("PtMinusSq","PtPlusSq",NCENTBINS,0.5,NCENTBINS+0.5);
 
 cout << "Allocating histograms to store Pt info. " << endl;
     for (int jC=0;jC<NPTCENTBINS;jC++) {
@@ -1164,7 +1145,7 @@ cout << "Allocating histograms to store Pt info. " << endl;
             }
             sprintf( line, "ptNPlusMinus%i_%i_0", jC, jPt );
             hptNPlusMinus[jC][jPt] = new TH1D(line,line,totBins,0.5,totBins+0.5);
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<5;jStat++) {
                 sprintf( line, "ptPSum%i_%i_%i", jC, jPt, jStat );
                 hptPSum[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
                 sprintf( line, "ptPPlus%i_%i_%i", jC, jPt, jStat );
@@ -1172,7 +1153,7 @@ cout << "Allocating histograms to store Pt info. " << endl;
                 sprintf( line, "ptPMinus%i_%i_%i", jC, jPt, jStat );
                 hptPMinus[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<8;jStat++) {
                 sprintf( line, "ptPPlusMinus%i_%i_%i", jC, jPt, jStat );
                 hptPPlusMinus[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             }
@@ -1184,19 +1165,11 @@ cout << "Allocating histograms to store Pt info. " << endl;
                 sprintf( line, "ptPNMinus%i_%i_%i", jC, jPt, jStat );
                 hptPNMinus[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<12;jStat++) {
                 sprintf( line, "ptPNPlusMinus%i_%i_%i", jC, jPt, jStat );
                 hptPNPlusMinus[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             }
         }
-    }
-    for (int jPt=0;jPt<NPTBINS;jPt++) {
-        sprintf( line, "ptPtSumSq_%i", jPt );
-        hptPtSumSq[jPt][0] = new TH1D(line,line,NPTCENTBINS,0.5,NPTCENTBINS+0.5);
-        sprintf( line, "ptPtPlusSq_%i", jPt );
-        hptPtSumSq[jPt][1] = new TH1D(line,line,NPTCENTBINS,0.5,NPTCENTBINS+0.5);
-        sprintf( line, "ptPtMinusSq_%i", jPt );
-        hptPtSumSq[jPt][2] = new TH1D(line,line,NPTCENTBINS,0.5,NPTCENTBINS+0.5);
     }
 }
 
@@ -1266,7 +1239,7 @@ cout << "freeing h Array histograms." << endl;
             delete hNMinus[jC][jStat];
         }
         delete hNPlusMinus[jC];
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<5;jStat++) {
             delete hPSum[jC][jStat];
             delete hPPlus[jC][jStat];
             delete hPMinus[jC][jStat];
@@ -1283,9 +1256,6 @@ cout << "freeing h Array histograms." << endl;
             delete hPNPlusMinus[jC][jStat];
         }
     }
-    for (int jType=0;jType<3;jType++) {
-        delete hPtSumSq[jType];
-    }
 
 cout << "freeing hpt Array histograms." << endl;
     for (int jC=0;jC<NPTCENTBINS;jC++) {
@@ -1301,12 +1271,12 @@ cout << "freeing hpt Array histograms." << endl;
                 delete hptNMinus[jC][jPt][jStat];
             }
             delete hptNPlusMinus[jC][jPt];
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<5;jStat++) {
                 delete hptPSum[jC][jPt][jStat];
                 delete hptPPlus[jC][jPt][jStat];
                 delete hptPMinus[jC][jPt][jStat];
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<8;jStat++) {
                 delete hptPPlusMinus[jC][jPt][jStat];
             }
             for (int jStat=0;jStat<4;jStat++) {
@@ -1314,14 +1284,9 @@ cout << "freeing hpt Array histograms." << endl;
                 delete hptPNPlus[jC][jPt][jStat];
                 delete hptPNMinus[jC][jPt][jStat];
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<12;jStat++) {
                 delete hptPNPlusMinus[jC][jPt][jStat];
             }
-        }
-    }
-    for (int jPt=0;jPt<NPTBINS;jPt++) {
-        for (int jType=0;jType<3;jType++) {
-            delete hptPtSumSq[jPt][jType];
         }
     }
 }
@@ -1340,12 +1305,21 @@ int StEStructFluctuations::getCentBin( int mult ) {
 #ifdef AUAUDATA
     int multCut[] = { 4, 14, 30, 60, 120, 195, 285, 420, 570, 780, 900, 2000};
 #endif
+#ifdef HIJING
+    int multCut[] = {};
+    int iCent = (int) mCurrentEvent->Centrality();
+    if ((iCent < 0) || (NCENTBINS <= iCent)) {
+        cout << "Centrality " << iCent << " is out of range!!!!" << endl;
+        iCent = -1;
+    }
+    return iCent;
+#endif
 #ifdef PPDATA
 // The next line is for common mult for 200GeV pp data using refMult.
 // I use the same cuts for tracks in |eta| < 1.
 //    int multCut[] = { 2, 5, 8, 11, 14, 25};
-    int multCut[] = { 3, 7, 13, 21, 26, 50};
-//    int multCut[] = { 3, 8, 25};
+//    int multCut[] = { 3, 7, 13, 21, 26, 50};
+    int multCut[] = { 1, 25};
 #endif
 #endif
 #ifdef USEREFMULT
@@ -1371,6 +1345,13 @@ int StEStructFluctuations::getPtCentBin( int jCent ) {
         return (jCent-2)/3;
     } else {
         return -1;
+    }
+#endif
+#ifdef HIJING
+    if (jCent <= 2) {
+        return 0;
+    } else {
+        return 1;
     }
 #endif
 #ifdef PPDATA

@@ -210,13 +210,14 @@ void StEStructSigmas::PHistograms() {
         PPlusErrors[jCent]->Reset();
         PMinusErrors[jCent]->Reset();
         PPlusMinusErrors[jCent]->Reset();
+
+        SPtHat[jCent]->Reset();
+        PPtHat[jCent]->Reset();
+        MPtHat[jCent]->Reset();
+        sigSPtHat[jCent]->Reset();
+        sigPPtHat[jCent]->Reset();
+        sigMPtHat[jCent]->Reset();
     }
-    PtSHat->Reset();
-    PtPHat->Reset();
-    PtMHat->Reset();
-    sigPtSHat->Reset();
-    sigPtPHat->Reset();
-    sigPtMHat->Reset();
 
     // If we have summed histogram files the number of bins, offsets and
     // fraction of unique tracks ended up getting multiplied by the number
@@ -238,11 +239,10 @@ void StEStructSigmas::PHistograms() {
     TH1D *hNSum[2];
     TH1D *hNPlus[2];
     TH1D *hNMinus[2];
-    TH1D *hPSum[4];
-    TH1D *hPPlus[4];
-    TH1D *hPMinus[4];
+    TH1D *hPSum[5];
+    TH1D *hPPlus[5];
+    TH1D *hPMinus[5];
     TH1D *hPPlusMinus[8];
-    TH1D *hPtSumSq[3];
 
     for (int jCent=0;jCent<NSCENTBINS;jCent++) {
         // Note that NTot, NTotPlus and NTotMinus are summed over events.
@@ -271,7 +271,7 @@ void StEStructSigmas::PHistograms() {
             hNMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
         }
 
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<5;jStat++) {
             sprintf(buffer,"PSum%i_%i",jCent,jStat);
             hPSum[jStat] = (TH1D *) gDirectory->Get(buffer);
 
@@ -285,54 +285,35 @@ void StEStructSigmas::PHistograms() {
             sprintf(buffer,"PPlusMinus%i_%i",jCent,jStat);
             hPPlusMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
         }
-        hPtSumSq[0] = (TH1D *) gDirectory->Get("PtSumSq");
-        hPtSumSq[1] = (TH1D *) gDirectory->Get("PtPlusSq");
-        hPtSumSq[2] = (TH1D *) gDirectory->Get("PtMinusSq");
 
         int mBin, oBin;
-        int iBin = 1 + (int) hoffset->GetBinContent(NPhiBins,NEtaBins);
-        double NTot      = hNSum[0]->GetBinContent(iBin);
-        double NTotPlus  = hNPlus[0]->GetBinContent(iBin);
-        double NTotMinus = hNMinus[0]->GetBinContent(iBin);
-
-        double StHat, PtHat, MtHat;
-        StHat = hPSum[0]->GetBinContent(iBin) / NTot;
-        PtHat = hPPlus[0]->GetBinContent(iBin) / NTotPlus;
-        MtHat = hPMinus[0]->GetBinContent(iBin) / NTotMinus;
-        int iCent = 1 + jCent;
-        PtSHat->Fill(iCent,StHat);
-        PtPHat->Fill(iCent,PtHat);
-        PtMHat->Fill(iCent,MtHat);
-        double sigSHat, sigPHat, sigMHat;
-        sigSHat = hPtSumSq[0]->GetBinContent(iCent)/NTot - StHat*StHat;
-        sigPHat = hPtSumSq[1]->GetBinContent(iCent)/NTotPlus - PtHat*PtHat;
-        sigMHat = hPtSumSq[2]->GetBinContent(iCent)/NTotMinus - MtHat*MtHat;
-        sigPtSHat->Fill(iCent,sigSHat);
-        sigPtPHat->Fill(iCent,sigPHat);
-        sigPtMHat->Fill(iCent,sigMHat);
 
         for (int iPhi=1;iPhi<=NPhiBins;iPhi++) {
             for (int iEta=1;iEta<=NEtaBins;iEta++) {
-                double NS1, PS1, PS2, Ssig = 0, NSsig = 0;
-                double NP1, PP1, PP2, Psig = 0, NPsig = 0;
-                double NM1, PM1, PM2, Msig = 0, NMsig = 0;
+                double NS1, PS1, PS2, Ssig = 0, NSsig = 0, ptSHat = 0, sigptSHat = 0;
+                double NP1, PP1, PP2, Psig = 0, NPsig = 0, ptPHat = 0, sigptPHat = 0;
+                double NM1, PM1, PM2, Msig = 0, NMsig = 0, ptMHat = 0, sigptMHat = 0;
                 double PPM1, PPM2, PPM3,  PPM4, PMsig = 0, NPMsig = 0;
-                double PHat, MHat;
-                double totEvents, sumEvents, plusEvents, minusEvents, plusMinusEvents;
+                double sigPtHat, SHat, PHat, MHat;
+                double sumEvents, plusEvents, minusEvents, plusMinusEvents;
 
                 mBin = (int) hnBins->GetBinContent(iPhi,iEta);
                 oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
+
                 for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
-                    totEvents = hTotEvents[0]->GetBinContent(iBin);
                     sumEvents = hTotEvents[1]->GetBinContent(iBin);
                     if (sumEvents > 0) {
                         NS1 = hNSum[0]->GetBinContent(iBin) / sumEvents;
                         PS1 = hPSum[0]->GetBinContent(iBin) / sumEvents;
                         PS2 = hPSum[1]->GetBinContent(iBin) / sumEvents;
                         if (NS1 > 0) {
-                            Ssig  += (PS2 - PS1*PS1/NS1) - sigSHat;
-                            NSsig += 1;
+                            SHat = PS1 / NS1;
+                            Ssig      += PS2 - PS1*PS1/NS1;
+                            ptSHat    += PS1/NS1;
+                            sigPtHat = hPSum[4]->GetBinContent(iBin)/hNSum[0]->GetBinContent(iBin) - SHat*SHat;
+                            sigptSHat += sigPtHat;
+                            NSsig     += 1;
                         }
                     }
 
@@ -342,10 +323,14 @@ void StEStructSigmas::PHistograms() {
                         NP1 = hNPlus[0]->GetBinContent(iBin) / plusEvents;
                         PP1 = hPPlus[0]->GetBinContent(iBin) / plusEvents;
                         PP2 = hPPlus[1]->GetBinContent(iBin) / plusEvents;
+                        sigPtHat = hPPlus[4]->GetBinContent(iBin)/plusEvents - PP1*PP1;
                         if (NP1 > 0) {
                             PHat = PP1 / NP1;
-                            Psig  += (PP2 - PP1*PP1/NP1) - sigPHat;
-                            NPsig += 1;
+                            Psig      += PP2 - PP1*PP1/NP1;
+                            ptPHat    += PP1/NP1;
+                            sigPtHat = hPPlus[4]->GetBinContent(iBin)/hNPlus[0]->GetBinContent(iBin) - PHat*PHat;
+                            sigptPHat += sigPtHat;
+                            NPsig     += 1;
                         }
                     }
 
@@ -357,8 +342,11 @@ void StEStructSigmas::PHistograms() {
                         PM2 = hPMinus[1]->GetBinContent(iBin) / minusEvents;
                         if (NM1 > 0) {
                             MHat = PM1 / NM1;
-                            Msig  += (PM2 - PM1*PM1/NM1) - sigMHat;
-                            NMsig += 1;
+                            Msig      += PM2 - PM1*PM1/NM1;
+                            ptMHat    += PM1/NM1;
+                            sigPtHat = hPMinus[4]->GetBinContent(iBin)/hNMinus[0]->GetBinContent(iBin) - MHat*MHat;
+                            sigptMHat += sigPtHat;
+                            NMsig     += 1;
                         }
                     }
 
@@ -379,22 +367,31 @@ void StEStructSigmas::PHistograms() {
                     }
                 }
 
-                if (StHat == 0) {
-                    return;
-                }
                 if (NSsig > 0) {
-                    Ssig = Ssig / NSsig;
-                    PSig[jCent]->SetBinContent(iPhi,iEta,Ssig);
+                    Ssig      = Ssig / NSsig;
+                    ptSHat    = ptSHat / NSsig;
+                    sigptSHat = sigptSHat / NSsig;
+                    PSig[jCent]->SetBinContent(iPhi,iEta,Ssig-sigptSHat);
+                    SPtHat[jCent]->SetBinContent(iPhi,iEta,ptSHat);
+                    sigSPtHat[jCent]->SetBinContent(iPhi,iEta,sigptSHat);
                 }
 
                 if (NPsig > 0) {
-                    Psig = Psig / NPsig;
-                    PPlus[jCent]->SetBinContent(iPhi,iEta,Psig);
+                    Psig      = Psig / NPsig;
+                    ptPHat    = ptPHat / NSsig;
+                    sigptPHat = sigptPHat / NSsig;
+                    PPlus[jCent]->SetBinContent(iPhi,iEta,Psig-sigptPHat);
+                    PPtHat[jCent]->SetBinContent(iPhi,iEta,ptPHat);
+                    sigPPtHat[jCent]->SetBinContent(iPhi,iEta,sigptPHat);
                 }
 
                 if (NMsig > 0) {
-                    Msig = Msig / NMsig;
-                    PMinus[jCent]->SetBinContent(iPhi,iEta,Msig);
+                    Msig      = Msig / NMsig;
+                    ptMHat    = ptMHat / NMsig;
+                    sigptMHat = sigptMHat / NMsig;
+                    PMinus[jCent]->SetBinContent(iPhi,iEta,Msig-sigptMHat);
+                    MPtHat[jCent]->SetBinContent(iPhi,iEta,ptMHat);
+                    sigMPtHat[jCent]->SetBinContent(iPhi,iEta,sigptMHat);
                 }
 
                 if (NPMsig > 0) {
@@ -444,13 +441,13 @@ void StEStructSigmas::PNHistograms() {
 
     TH1D *hTotEvents[5];
     TH1D *hNSum[2];
-    TH1D *hNPlus[2];
-    TH1D *hNMinus[2];
     TH1D *hPSum[4];
-    TH1D *hPPlus[4];
-    TH1D *hPMinus[4];
     TH1D *hPNSum[4];
+    TH1D *hNPlus[2];
+    TH1D *hPPlus[4];
     TH1D *hPNPlus[4];
+    TH1D *hNMinus[2];
+    TH1D *hPMinus[4];
     TH1D *hPNMinus[4];
     TH1D *hPNPlusMinus[12];
 
@@ -507,14 +504,6 @@ void StEStructSigmas::PNHistograms() {
         }
 
         int mBin, oBin;
-        int iBin = 1 + (int) hoffset->GetBinContent(NPhiBins,NEtaBins);
-        double NTot      = hNSum[0]->GetBinContent(iBin);
-        double NTotPlus  = hNPlus[0]->GetBinContent(iBin);
-        double NTotMinus = hNMinus[0]->GetBinContent(iBin);
-        double StHat, PtHat, MtHat;
-        StHat = hPSum[0]->GetBinContent(iBin) / NTot;
-        PtHat = hPPlus[0]->GetBinContent(iBin) / NTotPlus;
-        MtHat = hPMinus[0]->GetBinContent(iBin) / NTotMinus;
 
         for (int iPhi=1;iPhi<=NPhiBins;iPhi++) {
             for (int iEta=1;iEta<=NEtaBins;iEta++) {
@@ -528,56 +517,45 @@ void StEStructSigmas::PNHistograms() {
 
                 mBin = (int) hnBins->GetBinContent(iPhi,iEta);
                 oBin = (int) hoffset->GetBinContent(iPhi,iEta);
-//>>>>>I need to check that I am calculating correct means and dividing
-//>>>>>by the correct number of events!!!!!
+
                 for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
                     sumEvents = hTotEvents[1]->GetBinContent(iBin);
                     if (sumEvents > 0) {
                         NS1 = hNSum[0]->GetBinContent(iBin) / sumEvents;
                         PS1 = hPSum[0]->GetBinContent(iBin) / sumEvents;
-                        if (NS1 > 0) {
-                            SHat = PS1 / NS1;
-                            PNS1 = SHat*NS1*hPNSum[0]->GetBinContent(iBin);
-                            PNS2 = SHat*hPNSum[1]->GetBinContent(iBin);
-                            PNS3 = NS1*hPNSum[2]->GetBinContent(iBin);
-                            PNS4 = hPNSum[3]->GetBinContent(iBin);
-                            Ssig  += (PNS1 - PNS2 - PNS3 + PNS4) / (sumEvents*sqrt(NS1));
-                            NSsig +=1;
-                        }
+                        SHat = PS1 / NS1;
+                        PNS1 = SHat*NS1*hPNSum[0]->GetBinContent(iBin) / sumEvents;
+                        PNS2 = SHat*hPNSum[1]->GetBinContent(iBin) / sumEvents;
+                        PNS3 = NS1*hPNSum[2]->GetBinContent(iBin) / sumEvents;
+                        PNS4 = hPNSum[3]->GetBinContent(iBin) / sumEvents;
+                        Ssig  += (PNS1 - PNS2 - PNS3 + PNS4) / sqrt(NS1);
+                        NSsig +=1;
                     }
 
                     plusEvents = hTotEvents[2]->GetBinContent(iBin);
-                    NP1  = 0;
-                    PHat = 0;
                     if (plusEvents > 0) {
                         NP1 = hNPlus[0]->GetBinContent(iBin) / plusEvents;
                         PP1 = hPPlus[0]->GetBinContent(iBin) / plusEvents;
-                        if (NP1 > 0) {
-                            PHat = PP1 / NP1;
-                            PNP1 = PHat* NP1*hPNPlus[0]->GetBinContent(iBin);
-                            PNP2 = PHat*hPNPlus[1]->GetBinContent(iBin);
-                            PNP3 = NP1*hPNPlus[2]->GetBinContent(iBin);
-                            PNP4 = hPNPlus[3]->GetBinContent(iBin);
-                            Psig  += (PNP1 - PNP2 - PNP3 + PNP4) / (plusEvents*sqrt(NP1));
-                            NPsig += 1;
-                        }
+                        PHat = PP1 / NP1;
+                        PNP1 = PHat* NP1*hPNPlus[0]->GetBinContent(iBin) / plusEvents;
+                        PNP2 = PHat*hPNPlus[1]->GetBinContent(iBin) / plusEvents;
+                        PNP3 = NP1*hPNPlus[2]->GetBinContent(iBin) / plusEvents;
+                        PNP4 = hPNPlus[3]->GetBinContent(iBin) / plusEvents;
+                        Psig  += (PNP1 - PNP2 - PNP3 + PNP4) / sqrt(NP1);
+                        NPsig += 1;
                     }
 
                     minusEvents = hTotEvents[3]->GetBinContent(iBin);
-                    NM1 = 0;
-                    MHat = 0;
                     if (minusEvents > 0) {
                         NM1 = hNMinus[0]->GetBinContent(iBin) / minusEvents;
                         PM1 = hPMinus[0]->GetBinContent(iBin) / minusEvents;
-                        if (NM1 > 0) {
-                            MHat = PM1 / NM1;
-                            PNM1 = MHat*NM1*hPNMinus[0]->GetBinContent(iBin);
-                            PNM2 = MHat*hPNMinus[1]->GetBinContent(iBin);
-                            PNM3 = NM1*hPNMinus[2]->GetBinContent(iBin);
-                            PNM4 = hPNMinus[3]->GetBinContent(iBin);
-                            Msig  += (PNM1 - PNM2 - PNM3 + PNM4) / (minusEvents*sqrt(NM1));
-                            NMsig += 1;
-                        }
+                        MHat = PM1 / NM1;
+                        PNM1 = MHat*NM1*hPNMinus[0]->GetBinContent(iBin);
+                        PNM2 = MHat*hPNMinus[1]->GetBinContent(iBin);
+                        PNM3 = NM1*hPNMinus[2]->GetBinContent(iBin);
+                        PNM4 = hPNMinus[3]->GetBinContent(iBin);
+                        Msig  += (PNM1 - PNM2 - PNM3 + PNM4) / (minusEvents*sqrt(NM1));
+                        NMsig += 1;
                     }
 
                     plusMinusEvents = hTotEvents[4]->GetBinContent(iBin);
@@ -588,29 +566,22 @@ void StEStructSigmas::PNHistograms() {
                         NM1   = hPNPlusMinus[8]->GetBinContent(iBin) / plusMinusEvents;
                         PM1   = hPNPlusMinus[9]->GetBinContent(iBin) / plusMinusEvents;
                         MHat  = PM1 / NM1;
-                        PNPM1 = hPNPlusMinus[0]->GetBinContent(iBin);
-                        PNPM2 = PHat*hPNPlusMinus[1]->GetBinContent(iBin);
-                        PNPM3 = NM1*hPNPlusMinus[7]->GetBinContent(iBin);
-                        PNPM4 = PHat*NM1*hPNPlusMinus[6]->GetBinContent(iBin);
-                        if (NM1 > 0) {
-                            PMsig  += (PNPM1 - PNPM2 - PNPM3 + PNPM4) / (plusMinusEvents*sqrt(NM1));
-                            NPMsig += 1;
-                        }
+                        PNPM1 = hPNPlusMinus[0]->GetBinContent(iBin) / plusMinusEvents;
+                        PNPM2 = PHat*hPNPlusMinus[1]->GetBinContent(iBin) / plusMinusEvents;
+                        PNPM3 = NM1*hPNPlusMinus[7]->GetBinContent(iBin) / plusMinusEvents;
+                        PNPM4 = PHat*NM1*hPNPlusMinus[6]->GetBinContent(iBin) / plusMinusEvents;
+                        PMsig  += (PNPM1 - PNPM2 - PNPM3 + PNPM4) / sqrt(NM1);
+                        NPMsig += 1;
 
-                        PNMP1 = hPNPlusMinus[2]->GetBinContent(iBin);
-                        PNMP2 = MHat*hPNPlusMinus[3]->GetBinContent(iBin);
-                        PNMP3 = NP1*hPNPlusMinus[11]->GetBinContent(iBin);
-                        PNMP4 = MHat*NP1*hPNPlusMinus[10]->GetBinContent(iBin);
-                        if (NP1 > 0) {
-                            MPsig  += (PNMP1 - PNMP2 - PNMP3 + PNMP4) / (plusMinusEvents*sqrt(NP1));
-                            NMPsig += 1;
-                        }
+                        PNMP1 = hPNPlusMinus[2]->GetBinContent(iBin) / plusMinusEvents;
+                        PNMP2 = MHat*hPNPlusMinus[3]->GetBinContent(iBin) / plusMinusEvents;
+                        PNMP3 = NP1*hPNPlusMinus[11]->GetBinContent(iBin) / plusMinusEvents;
+                        PNMP4 = MHat*NP1*hPNPlusMinus[10]->GetBinContent(iBin) / plusMinusEvents;
+                        MPsig  += (PNMP1 - PNMP2 - PNMP3 + PNMP4) / sqrt(NP1);
+                        NMPsig += 1;
                     }
                 }
 
-                if (StHat <= 0) {
-                    return;
-                }
                 if (NSsig > 0) {
                     Ssig = Ssig / NSsig;
                     PNSig[jCent]->SetBinContent(iPhi,iEta,Ssig);
@@ -875,15 +846,14 @@ void StEStructSigmas::ptPHistograms() {
             ptPPlusErrors[jPtCent][jPt]->Reset();
             ptPMinusErrors[jPtCent][jPt]->Reset();
             ptPPlusMinusErrors[jPtCent][jPt]->Reset();
+
+            ptSPtHat[jPtCent][jPt]->Reset();
+            ptPPtHat[jPtCent][jPt]->Reset();
+            ptMPtHat[jPtCent][jPt]->Reset();
+            ptsigSPtHat[jPtCent][jPt]->Reset();
+            ptsigPPtHat[jPtCent][jPt]->Reset();
+            ptsigMPtHat[jPtCent][jPt]->Reset();
         }
-    }
-    for (int jPt=0;jPt<NPTBINS;jPt++) {
-        ptPtSHat[jPt]->Reset();
-        ptPtPHat[jPt]->Reset();
-        ptPtMHat[jPt]->Reset();
-        ptsigPtSHat[jPt]->Reset();
-        ptsigPtPHat[jPt]->Reset();
-        ptsigPtMHat[jPt]->Reset();
     }
     // If we have summed histogram files the number of bins, offsets and
     // fraction of unique tracks ended up getting multiplied by the number
@@ -904,11 +874,10 @@ void StEStructSigmas::ptPHistograms() {
     TH1D *hptNSum[2];
     TH1D *hptNPlus[2];
     TH1D *hptNMinus[2];
-    TH1D *hptPSum[4];
-    TH1D *hptPPlus[4];
-    TH1D *hptPMinus[4];
-    TH1D *hptPPlusMinus[4];
-    TH1D *hptPtSumSq[4][3];
+    TH1D *hptPSum[5];
+    TH1D *hptPPlus[5];
+    TH1D *hptPMinus[5];
+    TH1D *hptPPlusMinus[8];
 
     for (int jPtCent=0;jPtCent<NPTSCENTBINS;jPtCent++) {
         for (int jPt=0;jPt<NPTBINS;jPt++) {
@@ -935,7 +904,7 @@ void StEStructSigmas::ptPHistograms() {
                 hptNMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
             }
 
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<5;jStat++) {
                 sprintf(buffer,"ptPSum%i_%i_%i",jPtCent,jPt,jStat);
                 hptPSum[jStat] = (TH1D *) gDirectory->Get(buffer);
 
@@ -945,39 +914,16 @@ void StEStructSigmas::ptPHistograms() {
                 sprintf(buffer,"ptPMinus%i_%i_%i",jPtCent,jPt,jStat);
                 hptPMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<8;jStat++) {
                 sprintf(buffer,"ptPPlusMinus%i_%i_%i",jPtCent,jPt,jStat);
                 hptPPlusMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
             }
-            sprintf( buffer, "ptPtSumSq_%i", jPt );
-            hptPtSumSq[jPt][0] = (TH1D *) gDirectory->Get(buffer);
-            sprintf( buffer, "ptPtPlusSq_%i", jPt );
-            hptPtSumSq[jPt][1] = (TH1D *) gDirectory->Get(buffer);
-            sprintf( buffer, "ptPtMinusSq_%i", jPt );
-            hptPtSumSq[jPt][2] = (TH1D *) gDirectory->Get(buffer);
-
 
             int mBin, oBin;
             int iBin = 1 + (int) hoffset->GetBinContent(NPhiBins,NEtaBins);
             double NTot      = hptNSum[0]->GetBinContent(iBin);
             double NTotPlus  = hptNPlus[0]->GetBinContent(iBin);
             double NTotMinus = hptNMinus[0]->GetBinContent(iBin);
-
-            double SHat, PHat = 0, MHat = 0, StHat, PtHat, MtHat;
-            StHat = hptPSum[0]->GetBinContent(iBin) / NTot;
-            PtHat = hptPPlus[0]->GetBinContent(iBin) / NTotPlus;
-            MtHat = hptPMinus[0]->GetBinContent(iBin) / NTotMinus;
-            int iCent = 1 + jPtCent;
-            ptPtSHat[jPt]->Fill(iCent,StHat);
-            ptPtPHat[jPt]->Fill(iCent,PtHat);
-            ptPtMHat[jPt]->Fill(iCent,MtHat);
-            double sigSHat, sigPHat, sigMHat;
-            sigSHat = hptPtSumSq[jPt][0]->GetBinContent(iCent)/NTot - StHat*StHat;
-            sigPHat = hptPtSumSq[jPt][1]->GetBinContent(iCent)/NTotPlus - PtHat*PtHat;
-            sigMHat = hptPtSumSq[jPt][2]->GetBinContent(iCent)/NTotMinus - MtHat*MtHat;
-            ptsigPtSHat[jPt]->Fill(iCent,sigSHat);
-            ptsigPtPHat[jPt]->Fill(iCent,sigPHat);
-            ptsigPtMHat[jPt]->Fill(iCent,sigMHat);
 
             for (int iPhi=1;iPhi<=NPhiBins;iPhi++) {
                 for (int iEta=1;iEta<=NEtaBins;iEta++) {
@@ -990,13 +936,17 @@ void StEStructSigmas::ptPHistograms() {
                     double PPMe1, PPMe2, PPMe3, PPMe4;
                     double totBins = 0, sumBins = 0, plusBins = 0;
                     double minusBins = 0, plusMinusBins = 0;
+                    double ptSHat = 0, sigptSHat = 0;
+                    double ptPHat = 0, sigptPHat = 0;
+                    double ptMHat = 0, sigptMHat = 0;
+                    double sigPtHat, PHat, MHat;
                     double sumEvents, plusEvents, minusEvents, plusMinusEvents;
+                    int NSum = 0, NPlus = 0, NMinus = 0, NPlusMinus = 0;
 
                     mBin = (int) hnBins->GetBinContent(iPhi,iEta);
                     oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
                     double SumSig = 0, PlusSig = 0, MinusSig = 0, PMSig = 0;
-
                     for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
                         totBins       += hptTotEvents[0]->GetBinContent(iBin);
                         sumBins       += hptTotEvents[1]->GetBinContent(iBin);
@@ -1012,10 +962,14 @@ void StEStructSigmas::ptPHistograms() {
                             PSe2  = hptPSum[1]->GetBinContent(iBin);
                             PSe3  = hptPSum[2]->GetBinContent(iBin);
                             PSe4  = hptPSum[3]->GetBinContent(iBin);
-                            SHat = 0;
+                            double SHat = 0;
                             if (NSe1 > 0) {
-                                SumSig += (PSe2 - PSe1*PSe1 / NSe1) / sumEvents;
-                                SHat  = PSe1 / NSe1;
+                                SHat       = PSe1 / NSe1;
+                                SumSig    += (PSe2 - PSe1*PSe1/NSe1) / sumEvents;
+                                ptSHat    += PSe1/NSe1;
+                                sigPtHat   = hptPSum[4]->GetBinContent(iBin)/NSe1 - SHat*SHat;
+                                sigptSHat += sigPtHat;
+                                NSum++;
                             }
                             PSNbSig += PSe4 - 2*PSe3*pow(SHat,2) + pow(SHat,4);
                             PSPbSig += PSe3 - 2*PSe1*SHat + pow(SHat,2);
@@ -1029,10 +983,14 @@ void StEStructSigmas::ptPHistograms() {
                             PPe2  = hptPPlus[1]->GetBinContent(iBin);
                             PPe3  = hptPPlus[2]->GetBinContent(iBin);
                             PPe4  = hptPPlus[3]->GetBinContent(iBin);
-                            PHat = 0;
+                            double PHat = 0;
                             if (NPe1 > 0) {
-                                PlusSig += (PPe2 - PPe1*PPe1 / NPe1) / plusEvents;
-                                PHat  = PPe1 / NPe1;
+                                PHat       = PPe1 / NPe1;
+                                PlusSig   += (PPe2 - PPe1*PPe1/NPe1) / plusEvents;
+                                ptPHat    += PPe1/NPe1;
+                                sigPtHat   = hptPPlus[4]->GetBinContent(iBin)/NPe1 - PHat*PHat;
+                                sigptPHat += sigPtHat;
+                                NPlus++;
                             }
                             PPNbSig += PPe4 - 2*PPe3*pow(PHat,2) + pow(PHat,4);
                             PPPbSig += PPe3 - 2*PPe1*PHat + pow(PHat,2);
@@ -1046,10 +1004,14 @@ void StEStructSigmas::ptPHistograms() {
                             PMe2  = hptPMinus[1]->GetBinContent(iBin);
                             PMe3  = hptPMinus[2]->GetBinContent(iBin);
                             PMe4  = hptPMinus[3]->GetBinContent(iBin);
-                            MHat = 0;
+                            double MHat = 0;
                             if (NMe1 > 0) {
-                                MinusSig += (PMe2 - PMe1*PMe1 / NMe1) / minusEvents;
-                                MHat  = PMe1 / NMe1;
+                                MHat       = PMe1 / NMe1;
+                                MinusSig  += (PMe2 - PMe1*PMe1/NMe1) / minusEvents;
+                                ptMHat    += PMe1/NMe1;
+                                sigPtHat   = hptPMinus[4]->GetBinContent(iBin)/NMe1 - MHat*MHat;
+                                sigptMHat += sigPtHat;
+                                NMinus++;
                             }
                             PMNbSig += PMe4 - 2*PMe3*pow(MHat,2) + pow(MHat,4);
                             PMPbSig += PMe3 - 2*PMe1*MHat + pow(MHat,2);
@@ -1057,69 +1019,92 @@ void StEStructSigmas::ptPHistograms() {
 
                         plusMinusEvents = hptTotEvents[4]->GetBinContent(iBin);
                         if (plusMinusEvents > 0) {
+                            NPe1  = hptPPlusMinus[4]->GetBinContent(iBin);
+                            PPe1  = hptPPlusMinus[5]->GetBinContent(iBin);
+                            PHat = PPe1 / NPe1;
+                            NMe1  = hptPPlusMinus[6]->GetBinContent(iBin);
+                            PMe1  = hptPPlusMinus[7]->GetBinContent(iBin);
+                            MHat = PMe1 / NMe1;
                             PPMe1 = PHat*MHat*hptPPlusMinus[0]->GetBinContent(iBin);
                             PPMe2 = MHat*hptPPlusMinus[1]->GetBinContent(iBin);
                             PPMe3 = PHat*hptPPlusMinus[2]->GetBinContent(iBin);
                             PPMe4 = hptPPlusMinus[3]->GetBinContent(iBin);
                             PMSig += (PPMe1 - PPMe2 - PPMe3 + PPMe4) / plusMinusEvents;
+                            NPlusMinus++;
                         }
                     }
 
-                    if (0 == totBins) {
-                        return;
-                    }
-                    SumSig = SumSig / mBin;
-                    if (StHat > 0) {
-                        double sSig = (SumSig - sigSHat) / (StHat*StHat);
-                        ptPSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,sSig);
+                    if (NSum > 0) {
+                        SumSig    = SumSig / NSum;
+                        ptSHat    = ptSHat / NSum;
+                        sigptSHat = sigptSHat / NSum;
+                        ptPSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,SumSig-sigptSHat);
+                        ptSPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,ptSHat);
+                        ptsigSPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,sigptSHat);
                     } else {
                         ptPSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptSPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptsigSPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
                     }
 
-                    PlusSig = PlusSig / mBin;
-                    if (PtHat > 0) {
-                        double pSig = (PlusSig - sigPHat) / (PtHat*PtHat);
-                        ptPPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,pSig);
+                    if (NPlus > 0) {
+                        PlusSig   = PlusSig / NPlus;
+                        ptPHat    = ptPHat / NPlus;
+                        sigptPHat = sigptPHat / NPlus;
+                        ptPPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PlusSig-sigptPHat);
+                        ptPPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,ptPHat);
+                        ptsigPPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,sigptPHat);
                     } else {
                         ptPPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptPPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptsigPPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
                     }
 
-                    MinusSig = MinusSig / mBin;
-                    if (MtHat > 0) {
-                        double mSig = (MinusSig = sigMHat) / (MtHat*MtHat);
-                        ptPMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,mSig);
+                    if (NMinus > 0) {
+                        MinusSig  = MinusSig / NMinus;
+                        ptMHat    = ptMHat / NMinus;
+                        sigptMHat = sigptMHat / NMinus;
+                        ptPMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,MinusSig-sigptMHat);
+                        ptMPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,ptMHat);
+                        ptsigMPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,sigptMHat);
                     } else {
                         ptPMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptMPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                        ptsigMPtHat[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
                     }
 
-                    PMSig = PMSig / mBin;
-                    if ((PtHat > 0) && (MtHat > 0)) {
-                        double pmSig = PMSig / sqrt(PtHat*MtHat);
-                        ptPPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,pmSig);
+                    if (NPlusMinus > 0) {
+                        PMSig = PMSig / NPlusMinus;
+                        ptPPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PMSig);
                     } else {
                         ptPPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
                     }
 
-                    double nSbar = NSb1 / mBin;
-                    double SErr = nSbar*(1-nSbar/NTot)*PSNbSig + 4*SumSig*PSPbSig;
-                    if (StHat > 0) {
-                        SErr = sqrt(SErr) / (sumBins*StHat);
+                    if (NSum > 0) {
+                        double nSbar = NSb1 / NSum;
+                        double SErr = nSbar*(1-nSbar/NTot)*PSNbSig +
+                                      4*SumSig*PSPbSig / sumBins;
+                        SErr = sqrt(SErr) / sumBins;
                         ptPSigErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,SErr);
                     } else {
                         ptPSigErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,0.001);
                     }
-                    double nPbar = NPb1 / mBin;
-                    double PErr = nPbar*(1-nPbar/NTotPlus)*PPNbSig + 4*PlusSig*PPPbSig;
-                    if (PtHat > 0) {
-                        PErr = sqrt(PErr) / (plusBins*PtHat);
+
+                    if (NPlus > 0) {
+                        double nPbar = NPb1 / NPlus;
+                        double PErr = nPbar*(1-nPbar/NTotPlus)*PPNbSig +
+                                      4*PlusSig*PPPbSig / plusBins;
+                        PErr = sqrt(PErr) / plusBins;
                         ptPPlusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,PErr);
                     } else {
                         ptPPlusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,0.001);
                     }
-                    double nMbar = NMb1 / mBin;
-                    double MErr = nMbar*(1-nMbar/NTotMinus)*PMNbSig + 4*MinusSig*PMPbSig;
-                    if (MtHat > 0) {
-                        MErr = sqrt(MErr) / (minusBins*MtHat);
+
+                    if (NMinus > 0) {
+                        double nMbar = NMb1 / NMinus;
+                        double MErr = nMbar*(1-nMbar/NTotMinus)*PMNbSig +
+                                      4*MinusSig*PMPbSig / minusBins;
+                        MErr = sqrt(MErr) / minusBins;
                         ptPMinusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,MErr);
                     } else {
                         ptPMinusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,0.001);
@@ -1127,8 +1112,8 @@ void StEStructSigmas::ptPHistograms() {
                     
                     // Haven't worked out error on plus-minus covariance.
                     double PMErr = PMSig / mBin;
-                    if ((plusMinusBins > 0) && (PtHat > 0) && (MtHat > 0)) {
-                        PMErr = sqrt(PMErr / (PtHat*MtHat)) / plusMinusBins;
+                    if (NPlusMinus > 0) {
+                        PMErr = sqrt(PMErr) / NPlusMinus;
                         ptNPlusMinusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,1/sqrt(plusMinusBins));
                     } else {
                         ptNPlusMinusErrors[jPtCent][jPt]->SetBinContent(iPhi,iEta,0.001);
@@ -1180,7 +1165,7 @@ void StEStructSigmas::ptPNHistograms() {
     TH1D *hptPNSum[4];
     TH1D *hptPNPlus[4];
     TH1D *hptPNMinus[4];
-    TH1D *hptPNPlusMinus[4];
+    TH1D *hptPNPlusMinus[12];
 
     for (int jPtCent=0;jPtCent<NPTSCENTBINS;jPtCent++) {
         for (int jPt=0;jPt<NPTBINS;jPt++) {
@@ -1226,31 +1211,21 @@ void StEStructSigmas::ptPNHistograms() {
                 sprintf(buffer,"ptPNMinus%i_%i_%i",jPtCent,jPt,jStat);
                 hptPNMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
             }
-            for (int jStat=0;jStat<4;jStat++) {
+            for (int jStat=0;jStat<12;jStat++) {
                 sprintf(buffer,"ptPNPlusMinus%i_%i_%i",jPtCent,jPt,jStat);
                 hptPNPlusMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
             }
 
             int mBin, oBin;
-            int iBin = 1 + (int) hoffset->GetBinContent(NPhiBins,NEtaBins);
-            double NTot      = hptNSum[0]->GetBinContent(iBin);
-            double NTotPlus  = hptNPlus[0]->GetBinContent(iBin);
-            double NTotMinus = hptNMinus[0]->GetBinContent(iBin);
-            double StHat, PtHat, MtHat;
-            StHat = hptPSum[0]->GetBinContent(iBin) / NTot;
-            PtHat = hptPPlus[0]->GetBinContent(iBin) / NTotPlus;
-            MtHat = hptPMinus[0]->GetBinContent(iBin) / NTotMinus;
 
             for (int iPhi=1;iPhi<=NPhiBins;iPhi++) {
                 for (int iEta=1;iEta<=NEtaBins;iEta++) {
-                    double nSBar, SHat;
-                    double nPBar = 0, PHat = 0;
-                    double nMBar = 0, MHat = 0;
+                    double SHat, PHat, MHat;
                     double NSe1, PSe1, PNSe1, PNSe2, PNSe3, PNSe4;
                     double NPe1, PPe1, PNPe1, PNPe2, PNPe3, PNPe4;
                     double NMe1, PMe1, PNMe1, PNMe2, PNMe3, PNMe4;
                     double PNPMe1, PNPMe2, PNPMe3, PNPMe4;
-                    double PNPMe5, PNPMe6, PNPMe7, PNPMe8;
+                    double PNMPe1, PNMPe2, PNMPe3, PNMPe4;
                     double totBins = 0, totEvents;
                     double totSumBins = 0, totPlusBins = 0;
                     double totMinusBins = 0, totPlusMinusBins = 0;
@@ -1259,8 +1234,8 @@ void StEStructSigmas::ptPNHistograms() {
                     mBin = (int) hnBins->GetBinContent(iPhi,iEta);
                     oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
-                    double SumSig = 0, PlusSig = 0, MinusSig = 0;
-                    double PMSig = 0, MPSig = 0;
+                    double SSig = 0, PSig = 0, MSig = 0, PMSig = 0, MPSig = 0;
+                    double NSSig = 0, NPSig = 0, NMSig = 0, NPMSig = 0, NMPSig = 0;
 
                     for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
                         totEvents = hptTotEvents[0]->GetBinContent(iBin);
@@ -1271,105 +1246,92 @@ void StEStructSigmas::ptPNHistograms() {
                         totPlusMinusBins += hptTotEvents[4]->GetBinContent(iBin);
 
                         sumEvents = hptTotEvents[1]->GetBinContent(iBin);
-                        SHat = 0;
                         if (sumEvents > 0) {
-                            NSe1  = hptNSum[0]->GetBinContent(iBin);
-                            nSBar = NSe1 / totEvents;
-                            PSe1  = hptPSum[0]->GetBinContent(iBin);
-                            if (NSe1 > 0) {
-                                SHat = PSe1 / NSe1;
-                                PNSe1 = SHat*sqrt(nSBar)*hptPNSum[0]->GetBinContent(iBin);
-                                PNSe2 = SHat*hptPNSum[1]->GetBinContent(iBin)/sqrt(nSBar);
-                                PNSe3 = sqrt(nSBar)*hptPNSum[2]->GetBinContent(iBin);
-                                PNSe4 = hptPNSum[3]->GetBinContent(iBin)/sqrt(nSBar);
-                                SumSig += (PNSe1 - PNSe2 - PNSe3 + PNSe4) / sqrt(sumEvents*totEvents);
-                            }
+                            NSe1  = hptNSum[0]->GetBinContent(iBin) / sumEvents;
+                            PSe1  = hptPSum[0]->GetBinContent(iBin) / sumEvents;
+                            SHat  = PSe1 / NSe1;
+                            PNSe1 = SHat*NSe1*hptPNSum[0]->GetBinContent(iBin) / sumEvents;
+                            PNSe2 = SHat*hptPNSum[1]->GetBinContent(iBin) / sumEvents;
+                            PNSe3 = NSe1*hptPNSum[2]->GetBinContent(iBin) / sumEvents;
+                            PNSe4 = hptPNSum[3]->GetBinContent(iBin) / sumEvents;
+                            SSig += (PNSe1 - PNSe2 - PNSe3 + PNSe4) / sqrt(NSe1);
+                            NSSig  += 1;
                         }
 
                         plusEvents = hptTotEvents[2]->GetBinContent(iBin);
-                        PHat = 0;
                         if (plusEvents > 0) {
-                            NPe1  = hptNPlus[0]->GetBinContent(iBin);
-                            nPBar = NPe1 / totEvents;
-                            PPe1  = hptPPlus[0]->GetBinContent(iBin);
-                            if (NPe1 > 0) {
-                                PHat = PPe1 / NPe1;
-                                PNPe1 = PHat*sqrt(nPBar)*hptPNPlus[0]->GetBinContent(iBin);
-                                PNPe2 = PHat*hptPNPlus[1]->GetBinContent(iBin)/sqrt(nPBar);
-                                PNPe3 = sqrt(nPBar)*hptPNPlus[2]->GetBinContent(iBin);
-                                PNPe4 = hptPNPlus[3]->GetBinContent(iBin)/sqrt(nPBar);
-                                PlusSig += (PNPe1 - PNPe2 - PNPe3 + PNPe4) / sqrt(plusEvents*totEvents);
-                            }
+                            NPe1  = hptNPlus[0]->GetBinContent(iBin) / plusEvents;
+                            PPe1  = hptPPlus[0]->GetBinContent(iBin) / plusEvents;
+                            PHat = PPe1 / NPe1;
+                            PNPe1 = PHat*NPe1*hptPNPlus[0]->GetBinContent(iBin) / plusEvents;
+                            PNPe2 = PHat*hptPNPlus[1]->GetBinContent(iBin) / plusEvents;
+                            PNPe3 = NPe1*hptPNPlus[2]->GetBinContent(iBin) / plusEvents;
+                            PNPe4 = hptPNPlus[3]->GetBinContent(iBin) / plusEvents;
+                            PSig += (PNPe1 - PNPe2 - PNPe3 + PNPe4) / sqrt(NPe1);
+                            NPSig   += 1;
                         }
 
                         minusEvents = hptTotEvents[3]->GetBinContent(iBin);
                         MHat = 0;
                         if (minusEvents > 0) {
-                            NMe1  = hptNMinus[0]->GetBinContent(iBin);
-                            nMBar = NMe1 / totEvents;
-                            PMe1  = hptPMinus[0]->GetBinContent(iBin);
-                            if (NMe1 > 0) {
-                                MHat = PMe1 / NMe1;
-                                PNMe1 = MHat*sqrt(nMBar)*hptPNMinus[0]->GetBinContent(iBin);
-                                PNMe2 = MHat*hptPNMinus[1]->GetBinContent(iBin)/sqrt(nMBar);
-                                PNMe3 = sqrt(nMBar)*hptPNMinus[2]->GetBinContent(iBin);
-                                PNMe4 = hptPNMinus[3]->GetBinContent(iBin)/sqrt(nMBar);
-                                MinusSig += (PNMe1 - PNMe2 - PNMe3 + PNMe4) / sqrt(minusEvents*totEvents);
-                            }
+                            NMe1  = hptNMinus[0]->GetBinContent(iBin) / minusEvents;
+                            PMe1  = hptPMinus[0]->GetBinContent(iBin) / minusEvents;
+                            MHat = PMe1 / NMe1;
+                            PNMe1 = MHat*NMe1*hptPNMinus[0]->GetBinContent(iBin) / minusEvents;
+                            PNMe2 = MHat*hptPNMinus[1]->GetBinContent(iBin) / minusEvents;
+                            PNMe3 = NMe1*hptPNMinus[2]->GetBinContent(iBin) / minusEvents;
+                            PNMe4 = hptPNMinus[3]->GetBinContent(iBin) / minusEvents;
+                            MSig += (PNMe1 - PNMe2 - PNMe3 + PNMe4) / sqrt(NMe1);
+                            NMSig    += 1;
                         }
 
                         plusMinusEvents = hptTotEvents[4]->GetBinContent(iBin);
                         if (plusMinusEvents > 0) {
-                            if (nMBar > 0) {
-                                PNPMe1 = hptPNPlusMinus[0]->GetBinContent(iBin)/sqrt(nMBar);
-                                PNPMe2 = hptPNPlusMinus[1]->GetBinContent(iBin)*PHat/sqrt(nMBar);
-                                PNPMe3 = hptPNPlus[2]->GetBinContent(iBin)*sqrt(nMBar);
-                                PNPMe4 = hptPNPlus[0]->GetBinContent(iBin)*PHat*sqrt(nMBar);
-                                PMSig += (PNPMe1 - PNPMe2 - PNPMe3 + PNPMe4) / sqrt(plusMinusEvents*totEvents);
-                            }
+                            NPe1   = hptPNPlusMinus[4]->GetBinContent(iBin) / plusMinusEvents;
+                            PPe1   = hptPNPlusMinus[5]->GetBinContent(iBin) / plusMinusEvents;
+                            PHat  = PPe1 / NPe1;
+                            NMe1   = hptPNPlusMinus[8]->GetBinContent(iBin) / plusMinusEvents;
+                            PMe1   = hptPNPlusMinus[9]->GetBinContent(iBin) / plusMinusEvents;
+                            MHat  = PMe1 / NMe1;
+                            PNPMe1 = hptPNPlusMinus[0]->GetBinContent(iBin) / plusMinusEvents;
+                            PNPMe2 = PHat*hptPNPlusMinus[1]->GetBinContent(iBin) / plusMinusEvents;
+                            PNPMe3 = NMe1*hptPNPlusMinus[7]->GetBinContent(iBin) / plusMinusEvents;
+                            PNPMe4 = PHat*NMe1*hptPNPlusMinus[6]->GetBinContent(iBin) / plusMinusEvents;
+                            PMSig  += (PNPMe1 - PNPMe2 - PNPMe3 + PNPMe4) / sqrt(NMe1);
+                            NPMSig += 1;
 
-                            if (nPBar > 0) {
-                                PNPMe5 = hptPNPlusMinus[2]->GetBinContent(iBin)/sqrt(nPBar);
-                                PNPMe6 = hptPNPlusMinus[3]->GetBinContent(iBin)*MHat/sqrt(nPBar);
-                                PNPMe7 = hptPNMinus[2]->GetBinContent(iBin)*sqrt(nPBar);
-                                PNPMe8 = hptPNMinus[0]->GetBinContent(iBin)*MHat*sqrt(nPBar);
-                                MPSig += (PNPMe5 - PNPMe6 - PNPMe7 + PNPMe8) / sqrt(plusMinusEvents*totEvents);
-                            }
+                            PNMPe1 = hptPNPlusMinus[2]->GetBinContent(iBin) / plusMinusEvents;
+                            PNMPe2 = MHat*hptPNPlusMinus[3]->GetBinContent(iBin) / plusMinusEvents;
+                            PNMPe3 = NPe1*hptPNPlusMinus[11]->GetBinContent(iBin) / plusMinusEvents;
+                            PNMPe4 = MHat*NPe1*hptPNPlusMinus[10]->GetBinContent(iBin) / plusMinusEvents;
+                            MPSig  += (PNMPe1 - PNMPe2 - PNMPe3 + PNMPe4) / sqrt(NPe1);
+                            NMPSig += 1;
                         }
                     }
 
-                    if (0 == totBins) {
-                        return;
-                    }
-                    SumSig = SumSig / mBin;
-                    if (StHat > 0) {
-                        ptPNSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,SumSig/StHat);
-                    } else {
-                        ptPNSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                    if (NSSig > 0) {
+                        SSig = SSig / NSSig;
+                        ptPNSig[jPtCent][jPt]->SetBinContent(iPhi,iEta,SSig);
                     }
 
-                    PlusSig  = PlusSig / mBin;
-                    if (PtHat > 0) {
-                        ptPNPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PlusSig/PtHat);
-                    } else {
-                        ptPNPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                    if (NPSig > 0) {
+                        PSig  = PSig / NPSig;
+                        ptPNPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PSig);
                     }
 
-                    MinusSig = MinusSig / mBin;
-                    if (MtHat > 0) {
-                        ptPNMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,MinusSig/MtHat);
-                    } else {
-                        ptPNMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                    if (NMSig > 0) {
+                        MSig = MSig / NMSig;
+                        ptPNMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,MSig);
                     }
 
-                    PMSig = PMSig / mBin;
-                    MPSig = MPSig / mBin;
-                    if ((PtHat > 0) && (MtHat > 0)) {
-                        ptPNPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PMSig/sqrt(PtHat*MtHat));
-                        ptPNMinusPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,MPSig/sqrt(PtHat*MtHat));
-                    } else {
-                        ptPNPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
-                        ptPNMinusPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,0);
+                    if (NPMSig > 0) {
+                        PMSig = PMSig / NPMSig;
+                        MPSig = MPSig / NMPSig;
+                        ptPNPlusMinus[jPtCent][jPt]->SetBinContent(iPhi,iEta,PMSig);
+                    }
+                    if (NMPSig > 0) {
+                        MPSig = MPSig / NMPSig;
+                        ptPNMinusPlus[jPtCent][jPt]->SetBinContent(iPhi,iEta,MPSig);
                     }
 
 
@@ -1430,6 +1392,13 @@ void StEStructSigmas::writeQAHists(TFile* qatf) {
         PNPlusMinus[i]->Write();
         PNMinusPlus[i]->Write();
 
+        SPtHat[i]->Write();
+        PPtHat[i]->Write();
+        MPtHat[i]->Write();
+        sigSPtHat[i]->Write();
+        sigPPtHat[i]->Write();
+        sigMPtHat[i]->Write();
+
         NSigErrors[i]->Write();
         NDelErrors[i]->Write();
         NPlusErrors[i]->Write();
@@ -1445,12 +1414,6 @@ void StEStructSigmas::writeQAHists(TFile* qatf) {
         PNPlusMinusErrors[i]->Write();
         PNMinusPlusErrors[i]->Write();
     }
-    PtSHat->Write();
-    PtPHat->Write();
-    PtMHat->Write();
-    sigPtSHat->Write();
-    sigPtPHat->Write();
-    sigPtMHat->Write();
 
     for (int i=0;i<NPTSCENTBINS;i++) {
         for (int j=0;j<NPTBINS;j++) {
@@ -1469,6 +1432,13 @@ void StEStructSigmas::writeQAHists(TFile* qatf) {
             ptPNPlusMinus[i][j]->Write();
             ptPNMinusPlus[i][j]->Write();
 
+            ptSPtHat[i][j]->Write();
+            ptPPtHat[i][j]->Write();
+            ptMPtHat[i][j]->Write();
+            ptsigSPtHat[i][j]->Write();
+            ptsigPPtHat[i][j]->Write();
+            ptsigMPtHat[i][j]->Write();
+
             ptNSigErrors[i][j]->Write();
             ptNDel[i][j]->Write();
             ptNPlusErrors[i][j]->Write();
@@ -1484,14 +1454,6 @@ void StEStructSigmas::writeQAHists(TFile* qatf) {
             ptPNPlusMinusErrors[i][j]->Write();
             ptPNMinusPlusErrors[i][j]->Write();
         }
-    }
-    for (int j=0;j<NPTBINS;j++) {
-        ptPtSHat[j]->Write();
-        ptPtPHat[j]->Write();
-        ptPtMHat[j]->Write();
-        ptsigPtSHat[j]->Write();
-        ptsigPtPHat[j]->Write();
-        ptsigPtMHat[j]->Write();
     }
 }
 
@@ -1537,6 +1499,19 @@ void StEStructSigmas::initArraysAndHistograms() {
         sprintf( line, "PNMinusPlus_%i", i );
         PNMinusPlus[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
 
+        sprintf( line, "SptHat_%i", i );
+        SPtHat[i]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+        sprintf( line, "PptHat_%i", i );
+        PPtHat[i]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+        sprintf( line, "MptHat_%i", i );
+        MPtHat[i]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+        sprintf( line, "SsigPtHat_%i", i );
+        sigSPtHat[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+        sprintf( line, "PsigPtHat_%i", i );
+        sigPPtHat[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+        sprintf( line, "MsigPtHat_%i", i );
+        sigMPtHat[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+
         sprintf( line, "NSigErrors_%i", i );
         NSigErrors[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
         sprintf( line, "NDelErrors_%i", i );
@@ -1566,12 +1541,6 @@ void StEStructSigmas::initArraysAndHistograms() {
         sprintf( line, "PNMinusPlusErrors_%i", i );
         PNMinusPlusErrors[i] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
     }
-    PtSHat    = new TH1D("PtSHat",   "PtSHat",   NSCENTBINS,0.5,NSCENTBINS+0.5);
-    PtPHat    = new TH1D("PtPHat",   "PtPHat",   NSCENTBINS,0.5,NSCENTBINS+0.5);
-    PtMHat    = new TH1D("PtMHat",   "PtMHat",   NSCENTBINS,0.5,NSCENTBINS+0.5);
-    sigPtSHat = new TH1D("sigPtSHat","sigPtSHat",NSCENTBINS,0.5,NSCENTBINS+0.5);
-    sigPtPHat = new TH1D("sigPtPHat","sigPtPHat",NSCENTBINS,0.5,NSCENTBINS+0.5);
-    sigPtMHat = new TH1D("sigPtMHat","sigPtMHat",NSCENTBINS,0.5,NSCENTBINS+0.5);
 
     // pt dependent variances and errors.
     for (int i=0;i<NPTSCENTBINS;i++) {
@@ -1605,6 +1574,19 @@ void StEStructSigmas::initArraysAndHistograms() {
             sprintf( line, "ptPNMinusPlus_%i_%i", i, j );
             ptPNMinusPlus[i][j] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
 
+            sprintf( line, "ptPtSHat_%i_%i", i, j );
+            ptSPtHat[i][j]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+            sprintf( line, "ptPtPHat_%i_%i", i, j );
+            ptPPtHat[i][j]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+            sprintf( line, "ptPtMHat_%i_%i", i, j );
+            ptMPtHat[i][j]    = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+            sprintf( line, "ptsigPtSHat_%i_%i", i, j );
+            ptsigSPtHat[i][j] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+            sprintf( line, "ptsigPtPHat_%i_%i", i, j );
+            ptsigPPtHat[i][j] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+            sprintf( line, "ptsigPtMHat_%i_%i", i, j );
+            ptsigMPtHat[i][j] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
+
             sprintf( line, "ptNSigErrors_%i_%i", i, j );
             ptNSigErrors[i][j] = new TH2D(line,line,NPhiBins,0.0,6.2831852,NEtaBins,0.0,SETAMAX-SETAMIN);
             sprintf( line, "ptNDelErrors_%i_%i", i, j );
@@ -1636,18 +1618,6 @@ void StEStructSigmas::initArraysAndHistograms() {
         }
     }
     for (int j=0;j<NPTBINS;j++) {
-        sprintf( line, "ptPtSHat_%i", j );
-        ptPtSHat[j]    = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
-        sprintf( line, "ptPtPHat_%i", j );
-        ptPtPHat[j]    = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
-        sprintf( line, "ptPtMHat_%i", j );
-        ptPtMHat[j]    = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
-        sprintf( line, "ptsigPtSHat_%i", j );
-        ptsigPtSHat[j] = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
-        sprintf( line, "ptsigPtPHat_%i", j );
-        ptsigPtPHat[j] = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
-        sprintf( line, "ptsigPtMHat_%i", j );
-        ptsigPtMHat[j] = new TH1D(line,line,NPTSCENTBINS,0.5,NPTSCENTBINS+0.5);
     }
 }
 
@@ -1671,6 +1641,13 @@ cout << "Deleting bin***Var2, bin***Errors histograms." << endl;
         delete PNPlusMinus[i];
         delete PNMinusPlus[i];
 
+        delete SPtHat[i];
+        delete PPtHat[i];
+        delete MPtHat[i];
+        delete sigSPtHat[i];
+        delete sigPPtHat[i];
+        delete sigMPtHat[i];
+
         delete NSigErrors[i];
         delete NDelErrors[i];
         delete NPlusErrors[i];
@@ -1686,12 +1663,6 @@ cout << "Deleting bin***Var2, bin***Errors histograms." << endl;
         delete PNPlusMinusErrors[i];
         delete PNMinusPlusErrors[i];
     }
-    delete PtSHat;
-    delete PtPHat;
-    delete PtMHat;
-    delete sigPtSHat;
-    delete sigPtPHat;
-    delete sigPtMHat;
 
 cout << "Deleting pt***Var2, bin***Errors histograms." << endl;
     for (int i=0;i<NPTSCENTBINS;i++) {
@@ -1711,6 +1682,13 @@ cout << "Deleting pt***Var2, bin***Errors histograms." << endl;
             delete ptPNPlusMinus[i][j];
             delete ptPNMinusPlus[i][j];
 
+            delete ptSPtHat[i][j];
+            delete ptPPtHat[i][j];
+            delete ptMPtHat[i][j];
+            delete ptsigSPtHat[i][j];
+            delete ptsigPPtHat[i][j];
+            delete ptsigMPtHat[i][j];
+
             delete ptNSigErrors[i][j];
             delete ptNDelErrors[i][j];
             delete ptNPlusErrors[i][j];
@@ -1726,13 +1704,5 @@ cout << "Deleting pt***Var2, bin***Errors histograms." << endl;
             delete ptPNPlusMinusErrors[i][j];
             delete ptPNMinusPlusErrors[i][j];
         }
-    }
-    for (int j=0;j<NPTBINS;j++) {
-        delete ptPtSHat[j];
-        delete ptPtPHat[j];
-        delete ptPtMHat[j];
-        delete ptsigPtSHat[j];
-        delete ptsigPtPHat[j];
-        delete ptsigPtMHat[j];
     }
 }
