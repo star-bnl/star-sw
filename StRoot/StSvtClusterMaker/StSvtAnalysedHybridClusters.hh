@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.1 2000/08/21 13:04:29 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.2 2000/08/24 04:27:56 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.2  2000/08/24 04:27:56  caines
+ * Fixed casting warnings so compiles without errors on linux
+ *
  * Revision 1.1  2000/08/21 13:04:29  caines
  * First version of hit fitting routines
  *
@@ -20,11 +23,9 @@
 #define STSVTANALYSEDHYBRIDCLUSTERS_HH
 
 #include "StSvtClassLibrary/StSvtHybridObject.hh" 
-#include "StarClassLibrary/StThreeVectorF.hh"
+#include "StarClassLibrary/StThreeVector.hh"
 #include "StSvtHit.h"
 
-//class StSvtHit;
-//class StThreeVectorF;
 class StSvtAnalysis;
 
 
@@ -60,7 +61,7 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
   StSvtHitData* svtHitData();
   StSvtHit* svtHit();
   int numOfHits();
-  StThreeVectorD* WaferPosition();
+  StThreeVector<double>* WaferPosition();
   
 
  private:
@@ -68,16 +69,15 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
     int mNumOfHits;
     ulong mHardWarePosition;
     StSvtHitData* mSvtHitData;     //!
-    StSvtHit* mSvtHit;          //!
-    StThreeVectorD mGlobalPos;   
-    StThreeVectorD* mPos;        //!      
+    StSvtHit* mSvtHit;          //!   
+    StThreeVector<double>* mPos;        //!      
 
 };
 
 inline StSvtHitData* StSvtAnalysedHybridClusters::svtHitData(){ return  mSvtHitData;}
 inline StSvtHit* StSvtAnalysedHybridClusters::svtHit(){ return mSvtHit;}
 inline int StSvtAnalysedHybridClusters::numOfHits(){ return mNumOfHits;}
-inline StThreeVectorD* StSvtAnalysedHybridClusters::WaferPosition(){ return mPos;}
+inline StThreeVector<double>* StSvtAnalysedHybridClusters::WaferPosition(){ return mPos;}
 #endif
 
 

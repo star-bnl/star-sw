@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.1 2000/08/21 13:04:29 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.2 2000/08/24 04:27:56 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.2  2000/08/24 04:27:56  caines
+ * Fixed casting warnings so compiles without errors on linux
+ *
  * Revision 1.1  2000/08/21 13:04:29  caines
  * First version of hit fitting routines
  *
@@ -23,12 +26,11 @@
 #include "StSvtAnalysedHybridClusters.hh"
 
 
-StSvtAnalysedHybridClusters::StSvtAnalysedHybridClusters(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid), mGlobalPos() 
+StSvtAnalysedHybridClusters::StSvtAnalysedHybridClusters(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid)
 { 
  mNumOfHits = 0;
  mSvtHitData = NULL;
  mSvtHit = NULL;
- mPos = NULL;
 
 }
 
@@ -46,12 +48,14 @@ void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int wafer, int ladder
  mHardWarePosition = getLayerID()*1000 + 100*wafer + ladder;
  mSvtHitData = new StSvtHitData[mNumOfHits];
  mSvtHit = new StSvtHit[mNumOfHits];
- mPos = new StThreeVectorD[mNumOfHits];
+ mPos = new StThreeVector<double>[mNumOfHits];
 }
 
 
 int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis)
 {
+
+ StThreeVectorF mGlobalPos;
 
  for(int hit = 0; hit < mNumOfHits; hit++)
   {

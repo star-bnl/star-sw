@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.3 2000/08/21 13:06:58 caines Exp $
+ * $Id: StSvtAnalysis.hh,v 1.4 2000/08/24 04:27:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
+ * Revision 1.4  2000/08/24 04:27:56  caines
+ * Fixed casting warnings so compiles without errors on linux
+ *
  * Revision 1.3  2000/08/21 13:06:58  caines
  * Much improved hit finding and fitting
  *
@@ -43,7 +46,6 @@ public:
   int    GetLastAnode(int clu);
   int    GetFirstTimeBin(int clu);
   int    GetLastTimeBin(int clu);
-  int    GetCluCharge(int clu);
   int    GetCluFlag(int clu);
   int    GetCluPeakAdc(int clu);
   int    GetCluNumAnodes(int clu);
@@ -51,6 +53,7 @@ public:
   int    GetnSvtClu();
   int    GetCluID(int clu);
   int    GetCluDeconvID(int clu);
+  double    GetCluCharge(int clu);
   double GetMeanClusterAnode(int clu);
   double GetMeanClusterTimeBin(int clu);
   double GetSecondMomClusterAnode(int clu);
@@ -100,7 +103,6 @@ private:
   int* mCluLastAnode;                      //!
   int* mCluFirstTimeBin;                   //!
   int* mCluLastTimeBin;                    //!
-  int* mCluCharge;                         //!
   int* mCluFlag;                           //!
   int* mCluPeakAdc;                        //!
   int* mCluNumPixels;                      //!
@@ -108,6 +110,7 @@ private:
   int* mHybridNum;                         //!
   int* mCluID;                             //!
   int* mCluDeconvID;                       //!
+  double* mCluCharge;                      //!
   double* mMeanClusterTimeBin;             //!
   double* mMeanClusterAnode;               //!
   double* mSecondMomClusterTimeBin;        //!
