@@ -1,5 +1,9 @@
-// $Id: StMcEventReadMacro.C,v 1.7 1999/11/03 22:47:33 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.8 1999/12/03 01:01:33 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.8  1999/12/03 01:01:33  calderon
+// Updated for new StMcEvent 2.0 and StMcEventMaker.
+// Uses StTpcDb to get the geometry info (calib has some problems still).
+//
 // Revision 1.7  1999/11/03 22:47:33  calderon
 // Changed default file.  Previous one no longer existed.
 //
@@ -41,62 +45,66 @@ TBrowser *brow=0;
 
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
-
-
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root")
-// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root
-// /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
+const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_05_35evts.geant.root")
 {
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
-    //gSystem->Load("StTreeMaker");
-    gSystem->Load("StIOMaker");
+    gSystem->Load("StUtilities");
+    gSystem->Load("StDbLib");
+    gSystem->Load("StDbBroker");
+    gSystem->Load("St_db_Maker");
+    gSystem->Load("StTpcDb");
 
+    gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("StDbUtilities");
+   
     gSystem->Load("StMcEvent");
-    gSystem->Load("StMcEventMaker"); // This is where I load my own maker
+    gSystem->Load("StMcEventMaker");
     
-//	TOP maker
+    //	TOP maker
     chain = new StChain("StMcEventMainChain"); 
     chain->SetDebug();
-   
-//		Input Tree
-//   StTreeMaker *treeMk = new StTreeMaker("StMcEventTree",MainFile); //The MainFile above is passed to the tree maker
-//   treeMk->SetIOMode("r");
-//   treeMk->SetDebug();
-//   treeMk->SetBranch("*",0,"0");                 //deactivate all branches
-//   treeMk->SetBranch("geantBranch",0,"r"); //activate EventBranch
-  //treeMk->SetBranch("PetersBranch",0,"r");
 
+    // IO Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
     IOMk->SetDebug();
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("geantBranch",0,"r");
-  
-  // add makers to chain here:
-  
-  StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
 
-  // now execute the chain member functions
+    // Db
+    St_db_Maker *dbMk = new St_db_Maker("Geometry","MySQL:Geometry");
+    dbMk->SetDebug();
+
+    //St_db_Maker *calibMk = new St_db_Maker("calib","MySQL:calib");
+    //calibMk->SetDebug();
+
+    StTpcDbMaker* tpcDbMk = new StTpcDbMaker("tpcDb");
+    tpcDbMk->SetDebug();
   
-  chain->Init(); // This should call the Init() method in ALL makers
-  chain->PrintInfo();
+    StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
+
+    // now execute the chain member functions
+    
+    chain->Init(); // This should call the Init() method in ALL makers
+    chain->PrintInfo();
 
     int istat=0,iev=1;
-    EventLoop: if (iev<=nevents && !istat) {
-	chain->Clear();
-	istat = chain->Make(iev); // This should call the Make() method in ALL makers
-	if (istat) {
-	    cout << "Last Event Processed. Status = " << istat << endl;
-	}
-	iev++; goto EventLoop;
-    
-    // this next part is just for doing the browser:
-    //create browser with name=BName,title=Btitle
+ EventLoop: if (iev<=nevents && !istat) {
+     chain->Clear();
+     cout << "---------------------- Processing Event : " << iev << endl;
+     istat = chain->Make(iev); // This should call the Make() method in ALL makers
+     if (istat) {
+	 cout << "Last Event Processed. Status = " << istat << endl;
+     }
+     iev++; goto EventLoop;
+     
+     // this next part is just for doing the browser:
+     //create browser with name=BName,title=Btitle
     
 //     Event = chain->GetDataSet("geant");
 //     Event->ls(9);
