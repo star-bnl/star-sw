@@ -11,13 +11,11 @@
 #include <memory.h>
 #include <stdio.h>
 #include <math.h>
-#include "TrackerFrame.h"
 #include "FTF_Hit.h"
 #include "FTF_Track.h"
 #include "FTF_Volume.h"
 
 extern FTFinder     tracker ;
-extern TrackerFrame frame ;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Add hits to track
