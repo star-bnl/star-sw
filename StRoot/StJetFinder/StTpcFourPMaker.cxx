@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.6 2003/09/02 17:58:39 perev Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.7 2003/09/11 18:14:04 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -13,8 +13,8 @@
  * Revision 1.0  2003/02/20 thenry
  *
  **************************************************************************/
-#include <string.h>
-#include <Stiostream.h>
+#include <string>
+#include <iostream>
 
 #include "StChain.h"
 #include "StEventTypes.h"
@@ -51,6 +51,8 @@ Int_t StTpcFourPMaker::Make() {
   {
     StMuTrack *t = uDst->primaryTracks(i);
     if(t->flag()<=0) continue;
+    if(t->eta() < GetEtaLow()) continue;
+    if(t->eta() > GetEtaHigh()) continue;
     StThreeVectorF mom = t->momentum();
     float mommag2 = mom.mag2();
     float ee = ::sqrt(me*me + mommag2);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.14 2003/09/11 05:49:20 perev Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.15 2003/09/11 18:14:04 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -14,16 +14,13 @@
  * Revision 1.0  2003/02/20 thenry
  *
  **************************************************************************/
-#include <string.h>
-#include <Stiostream.h>
+using namespace std;
+#include <string>
+#include <iostream>
 #include <math.h>
 #include <sys/times.h>
 
 #include "StChain.h"
-#include "StEventTypes.h"
-#include "StMessMgr.h"
-#include "StIOMaker/StIOMaker.h"
-#include "StEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -41,17 +38,6 @@
 #include "StEmcADCtoEMaker/StBemcData.h"
 
 ClassImp(StEmcTpcFourPMaker)
-const double StCorrectedEmcPoint::SMDR = 2.2625;
-const double StCorrectedEmcPoint::HSMDR = 1.13125;
-const double StCorrectedEmcPoint::twoPi = M_PI*2.0;
-
-const double StProjectedTrack::SMDR = 231.23;
-const double StProjectedTrack::HSMDR = 115.615;
-const double StProjectedTrack::twoPi = M_PI*2.0;
-const double StProjectedTrack::me = .000511;	
-const double StProjectedTrack::mpr = .9383;
-const double StProjectedTrack::mpi = .1396;
-const double StProjectedTrack::mk = .4937;
   
 double PionAveDepRatio;
 double KaonAveDepRatio;
