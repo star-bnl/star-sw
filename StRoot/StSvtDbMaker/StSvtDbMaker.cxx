@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.5 2002/02/20 17:10:06 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.6 2002/02/28 20:41:37 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.6  2002/02/28 20:41:37  caines
+ * Fix filling of global coord from fortran
+ *
  * Revision 1.5  2002/02/20 17:10:06  caines
  * Added fortran2c code from StDbUtilities so library depedancies removed
  *
@@ -52,13 +55,12 @@ StSvtDbMaker* gStSvtDbMaker=NULL;
 //_______________________________________________________________________
 int type_of_call SvtGtoL_(float *x,float *xp, int* index){
 
-  StThreeVector<double> a(x[0],x[1],x[2]);
+  StThreeVector<double> a((double)x[0], (double)x[1], (double)x[2]);
   StSvtCoordinateTransform transform;
   St_DataSet* dataSet;
   dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
   StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
   if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL);
-
   StSvtLocalCoordinate b;
 
   transform.GlobaltoLocal(a, b,*index, -1);
