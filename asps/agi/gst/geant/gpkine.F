@@ -1,7 +1,10 @@
 *
-* $Id: gpkine.f,v 1.1 1998/08/28 14:46:49 nevski Exp $
+* $Id: gpkine.F,v 1.1 1998/08/28 14:48:38 nevski Exp $
 *
-* $Log: gpkine.f,v $
+* $Log: gpkine.F,v $
+* Revision 1.1  1998/08/28 14:48:38  nevski
+* interface KINE bank via LgKINE to eliminate 64k limitation
+*
 * Revision 1.1  1998/08/28 14:46:49  nevski
 * interface KINE bank via LgKINE to eliminate 64k limitation
 *
