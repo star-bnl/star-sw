@@ -158,15 +158,15 @@ To apply this cut use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
 
 ** ---------------------------------------------------------------------
 ** TOP/NEWSORT AGENT [ SORTFUNC ]
->COMMAND NEWSORT
->PARAMETERS
-AGENT 'Sort Agent Name' C 
-+
-SORTFUNC 'Original sort function.' C D='-'
->GUIDANCE
-Create and register a new topSort agent.
-.
->ACTION KAM_TOP_NEWSORT
+**>COMMAND NEWSORT
+**>PARAMETERS
+**AGENT 'Sort Agent Name' C 
+**+
+**SORTFUNC 'Original sort function.' C D='-'
+**>GUIDANCE
+**Create and register a new topSort agent.
+**.
+**>ACTION KAM_TOP_NEWSORT
 
 ************************************************************************
 ************************************************************************

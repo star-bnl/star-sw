@@ -14,7 +14,8 @@
 #include "tdmClasses.hh"
 #include "top_utils.h"
 extern "C" void CutsInit(void);
-extern "C" int dsuDoCuts(size_t bytes,char *ba,char *cut,DS_DATASET_T *pTab);
+extern "C" int dsuDoCuts(size_t bytes, char *ba, char *cut
+		,DS_DATASET_T *pTab);
 extern "C" int dsuRowPassedCuts(char *ba,long row);
 extern "C" int IsValidCutFunc(char*);
 //:----------------------------------------------- MACROS             --
@@ -37,7 +38,7 @@ topProject:: topProject(const char * name, const char * spec)
 		: socObject(name, "topProject") {
    myPtr = (SOC_PTR_T)this;
    if( isValidSelectSpec((char*)spec) ){
-      mySelectSpec = (char*)ASUALLOC(strlen(spec) +1);
+      mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec, spec);
    }
    else {
@@ -47,13 +48,13 @@ topProject:: topProject(const char * name, const char * spec)
 
 //:---------------------------------
 topProject:: ~topProject(){
-   ASUFREE(mySelectSpec);
+   FREE(mySelectSpec);
 };
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topProject:: selectionSpecification() {
    char* c=NULL;
-   c = (char*)ASUALLOC(strlen(mySelectSpec) +1);
+   c = (char*)MALLOC(strlen(mySelectSpec) +1);
    strcpy(c,mySelectSpec);
    return c;
 }
@@ -61,15 +62,31 @@ char* topProject:: selectionSpecification() {
 //----------------------------------
 void topProject:: selectionSpecification(const char* spec) {
    if( isValidSelectSpec((char*)spec) ){
-      ASUFREE(mySelectSpec);
-      mySelectSpec = (char*)ASUALLOC(strlen(spec) +1);
+      FREE(mySelectSpec);
+      mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec,spec);
    }
 }
 
+//----------------------------------
+// OVERRIDE socObject::listing()
+char * topProject::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   char* s = selectionSpecification();
+   char* ss="                           ";
+   strncpy(ss,s,strlen(ss)-1);
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s %s",c,ss);
+   FREE(c);
+   FREE(s);
+   return cc;
+}
+
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T topProject:: project(tdmTable * table1, tdmTable *& table2) {
-   DS_DATASET_T *pTbl1=table1->dslPointer();
+   DS_DATASET_T *pTbl1=table1->dslPointer(); //HACK -collocated only!!!
    DS_DATASET_T *pTbl2=NULL;
    if( NULL == table2 ){
       table2 = pTarget(table1, NULL);
@@ -96,10 +113,10 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    }
    if( !dsTargetTable(&pTbl2, n, n, pTbl1, NULL, NULL, 
 	     mySelectSpec) ){
-      free(n);
+      FREE(n);
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   free(n);
+   FREE(n);
 // table2 = new tdmTable(pTbl2);		// HACK !!!
    char *n2=NULL;
    char *s2=NULL;
@@ -108,16 +125,15 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    ){
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   tdm->newTable(n2,s2,0);
-   if( !tdm->findTable(n2, table2) ){
-      EML_ERROR(CANT_FIND_OBJECT);
+   if( NULL == (table2 = tdm->newTable(n2,s2,0)) ){
+      EML_ERROR(CANT_CREATE_TABLE);
    }
    return table2;
 }
 
 //----------------------------------
 STAFCV_T topProject:: reset() {
-   ASUFREE(mySelectSpec);
+   FREE(mySelectSpec);
    mySelectSpec = NULL;
    EML_SUCCESS(STAFCV_OK);
 }
@@ -145,7 +161,7 @@ topCut:: topCut(const char * name, const char * func)
    int bad=0;
    if(strlen(func)<3) bad=1;
    if( !bad ){
-      myCutFunction = (char*)ASUALLOC(strlen(func) +1);
+      myCutFunction = (char*)MALLOC(strlen(func) +1);
       strcpy(myCutFunction, func);
    }
    else {
@@ -156,15 +172,33 @@ topCut:: topCut(const char * name, const char * func)
 
 //:---------------------------------
 topCut:: ~topCut(){
-   ASUFREE(myCutFunction);
+   FREE(myCutFunction);
 };
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topCut:: cutFunction() {
    char* c=NULL;
-   c = (char*)ASUALLOC(strlen(myCutFunction) +1);
+   c = (char*)MALLOC(strlen(myCutFunction) +1);
    strcpy(c,myCutFunction);
    return c;
+}
+
+//----------------------------------
+// OVERRIDE socObject::listing()
+char * topCut::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   char* m = dio_mode2text(mode());
+   char* s = dio_state2text(state());
+   char* l = location();
+   char* ll="                           ";
+   strncpy(ll,l,strlen(ll)-1);
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s (%c,%c) %s",c,m[0],s[0],ll);
+   FREE(c);
+   FREE(l);
+   return cc;
 }
 
 //:----------------------------------------------- INTERFACE METHODS  --
@@ -183,7 +217,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   if(!dsTableDataAddress(&beginningOfTable,dsPtr)) EML_ERROR(CANT_FIND_DATA);
   bottomNewTbl=beginningOfTable;
 
-  nbytes=(size_t)(((*orig)/8)+1); mask=malloc(nbytes);
+  nbytes=(size_t)(((*orig)/8)+1); mask=MALLOC(nbytes);
   if(!mask) { printf("Could not allocate %d bytes.\n",nbytes); return 0; }
 
   CutsInit();
@@ -227,7 +261,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   tgtPtr=tgt->dslPointer(); // ONLY in a collocated process (CORBA)
   if(!dsTableRowSize(&bytesPerRow,tgtPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
 
-  nbytes=(size_t)(((*orig)/8)+1); mask=malloc(nbytes);
+  nbytes=(size_t)(((*orig)/8)+1); mask=MALLOC(nbytes);
   if(!mask) { printf("Could not allocate %d bytes.\n",nbytes); return 0; }
 
   CutsInit();
@@ -320,14 +354,14 @@ topJoin:: topJoin(const char * name, const char * spec
 		, socObject(name, "topJoin") {
    myPtr = (SOC_PTR_T)this;
    if( isValidSelectSpec((char*)spec) ){
-      mySelectSpec = (char*)ASUALLOC(strlen(spec) +1);
+      mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec, spec);
    }
    else {
       mySelectSpec = NULL;
    }
    if( isValidWhereClause((char*)clause) ){
-      myWhereClause = (char*)ASUALLOC(strlen(clause) +1);
+      myWhereClause = (char*)MALLOC(strlen(clause) +1);
       strcpy(myWhereClause, clause);
    }
    else {
@@ -337,13 +371,13 @@ topJoin:: topJoin(const char * name, const char * spec
 
 //:---------------------------------
 topJoin:: ~topJoin(){
-   ASUFREE(myWhereClause);
+   FREE(myWhereClause);
 };
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topJoin:: whereClause() {
    char* c=NULL;
-   c = (char*)ASUALLOC(strlen(myWhereClause) +1);
+   c = (char*)MALLOC(strlen(myWhereClause) +1);
    strcpy(c,myWhereClause);
    return c;
 }
@@ -351,12 +385,27 @@ char* topJoin:: whereClause() {
 //:---------------------------------
 void topJoin:: whereClause(const char* clause) {
    if( isValidWhereClause((char*)clause) ){
-      ASUFREE(myWhereClause);
-      myWhereClause = (char*)ASUALLOC(strlen(clause) +1);
+      FREE(myWhereClause);
+      myWhereClause = (char*)MALLOC(strlen(clause) +1);
       strcpy(myWhereClause,clause);
    }
 }
 
+//----------------------------------
+// OVERRIDE socObject::listing()
+char * topJoin::  listing () {
+   char* c = topProject::listing();
+   char* cc = NULL;
+   char* w = whereClause();
+   char* ww="                           ";
+   strncpy(ww,w,strlen(ww)-1);
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s (%s)",c,ww);
+   FREE(c);
+   FREE(w);
+   return cc;
+}
 
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T topJoin:: join(tdmTable * table1, tdmTable * table2
@@ -392,10 +441,10 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    }
    if( !dsTargetTable(&pTbl3, n, n, pTbl1, pTbl2, NULL, 
              mySelectSpec) ){
-      free(n);
+      FREE(n);
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   free(n);
+   FREE(n);
 // table3 = new tdmTable(pTbl3);                // HACK !!!
    char *n3=NULL;
    char *s3=NULL;
@@ -404,16 +453,15 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    ){
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   tdm->newTable(n3,s3,0);
-   if( !tdm->findTable(n3, table3) ){
-      EML_ERROR(CANT_FIND_OBJECT);
+   if( NULL == (table3 = tdm->newTable(n3,s3,0)) ){
+      EML_ERROR(CANT_CREATE_TABLE);
    }
    return table3;
 }
 
 //:---------------------------------
 STAFCV_T topJoin:: reset() {
-   ASUFREE(myWhereClause);
+   FREE(myWhereClause);
    myWhereClause = NULL;
    topProject::reset();
    EML_SUCCESS(STAFCV_OK);
@@ -453,7 +501,20 @@ topFactory:: ~topFactory() {
 
 //:----------------------------------------------- INTERFACE METHODS  --
 char * topFactory:: list () {
-   return NULL; //HACK
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
+
+   sprintf(cc, 
+                "\n"
+                "+-------------------------------------------"
+                "-----------------------------------\n"
+                "|*********************** "
+                "TOP - Table Operators listing"
+                " ************************\n"
+                "%s\n",c);
+   FREE(c);
+   return cc;
 }
 
 //:- Project -----------------------
@@ -468,7 +529,7 @@ STAFCV_T topFactory:: deleteProject (const char * name) {
 STAFCV_T topFactory:: findProject (const char * name
 		, topProject*& project) {
    socObject* obj=NULL;
-   if( !soc->findObject(name,"topProject",obj) ){
+   if( NULL == (obj = soc->findObject(name,"topProject")) ){
       project = NULL;   //- ???-leave as is?
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -479,7 +540,7 @@ STAFCV_T topFactory:: findProject (const char * name
 //:---------------------------------
 STAFCV_T topFactory:: getProject (IDREF_T id, topProject*& project) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       project = NULL;
       EML_ERROR(INVALID_IDREF);
    }
@@ -519,7 +580,7 @@ STAFCV_T topFactory:: deleteJoin (const char * name) {
 STAFCV_T topFactory:: findJoin (const char * name
 		, topJoin*& join) {
    socObject* obj=NULL;
-   if( !soc->findObject(name,"topJoin",obj) ){
+   if( NULL == (obj = soc->findObject(name,"topJoin")) ){
       join = NULL;   //- ???-leave as is?
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -530,7 +591,7 @@ STAFCV_T topFactory:: findJoin (const char * name
 //:---------------------------------
 STAFCV_T topFactory:: getJoin (IDREF_T id, topJoin*& join) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       join = NULL;
       EML_ERROR(INVALID_IDREF);
    }
@@ -570,7 +631,7 @@ STAFCV_T topFactory:: deleteCut (const char * name) {
 STAFCV_T topFactory:: findCut (const char * name
 		, topCut*& cut) {
    socObject* obj=NULL;
-   if( !soc->findObject(name,"topCut",obj) ){
+   if( NULL == (obj = soc->findObject(name,"topCut")) ){
       cut = NULL;   //- ???-leave as is?
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -581,7 +642,7 @@ STAFCV_T topFactory:: findCut (const char * name
 //:---------------------------------
 STAFCV_T topFactory:: getCut (IDREF_T id, topCut*& cut) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       cut = NULL;
       EML_ERROR(INVALID_IDREF);
    }

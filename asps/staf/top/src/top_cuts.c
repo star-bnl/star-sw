@@ -11,14 +11,15 @@ char gStr[100];
 void CutsInit(void) {
   printf("Initializing cuts.\n"); gDone=0;
 }
+/*- cet(30jan97) old prototype : void Progress(long jj);
 void Progress(int jj,int junk,char *junk2,char *junk3) {
   if(jj<0) return;
   if(jj<1000||jj%3300==0) 
-      printf("       I:         %d \n",jj); /* modulus=150n */
+      printf("       I:         %d \n",jj); // modulus=150n //
 }
 void Say(char *x) {
   printf("%s\n",x);
-}
+}*/
 void ErrTop(int x) {
   PP"Error number %d in function TableValue() of file %s.\n",__FILE__);
 }

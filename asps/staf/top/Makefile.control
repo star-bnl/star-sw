@@ -5,7 +5,7 @@
 ######################################################################
 #
 # Specify ASPs and PAMs upon which this package depends.
-ASPS := tbr top ami dio dui tdm spx soc
+ASPS := top ami dio dui tdm spx soc
 PAMS := pam
 #
 # Specify special user libraries against which to link.
