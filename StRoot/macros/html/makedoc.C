@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.52 1999/12/15 23:55:14 fine Exp $
+// $Id: makedoc.C,v 1.53 2000/02/24 02:23:47 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -77,6 +77,8 @@
     sourcedir += "/.share/tables:";
     sourcedir += "$STAR";
     sourcedir += "/include:";
+    sourcedir += "$STAR";
+    sourcedir += "/include/tables:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StEvent:";
     sourcedir += STAR;
@@ -89,6 +91,8 @@
     sourcedir += "/StRoot/StPadDisplay:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StarClassLibrary:";
+    sourcedir += "$ROOTSYS";
+    sourcedir += "/src:";
     sourcedir += STAR;
     sourcedir += "/StRoot/St_geom_Maker:";
     sourcedir += STAR;
@@ -134,6 +138,8 @@
     lookup += "/StRoot/StEventDisplayMaker:";
     lookup += STAR;
     lookup += "/StRoot/StEvent:";
+    lookup += "$ROOTSYS";
+    lookup += "/src:";
     lookup += STAR;
     lookup += "/StRoot/StarClassLibrary";
   }
@@ -160,11 +166,11 @@
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
-                       ,"StBFChain",     "StEventDisplayMaker", "TAxis3D"
+                       ,"StBFChain",     "StEventDisplayMaker",
                        ,"StVirtualEventFilter", "St_TableIter"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 42;
+  Int_t nclass = 41;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -183,6 +189,22 @@
   Int_t i=0;
   for (i=0;i<nclass;i++)  html.MakeClass(classes[i],kTRUE);
 
+  // Make tables descriptions
+  St_FileSet tableDir("$STAR/include/tables");
+  St_DataSetIter nextTable(&tableDir);
+  St_DataSet *table = 0;
+  while (table = nextTable()) {
+    TString tabName = table.GetName();
+    tabName.ReplaceAll("St_","");
+    tabName.ReplaceAll("_Table.h","");
+    tabName += "_st";
+    html.MakeClass(tabName.Data());
+
+    tabName = table.GetName();    
+    tabName.ReplaceAll("_Table.h","");
+    html.MakeClass(tabName.Data());
+  } 
+   
   TString giffile = STAR;
   giffile += "/StRoot/html/src/gif";
   if (!NT) {
@@ -274,6 +296,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.53  2000/02/24 02:23:47  fine
+// St_Table html docs generationn added
+//
 // Revision 1.52  1999/12/15 23:55:14  fine
 // St_TableIter doc included
 //
