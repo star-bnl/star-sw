@@ -3,8 +3,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "TObject.h"
-#include "TObjArray.h"
+#include <vector>
 #include "StiTreeNode.h"
 
 //-----------------------------------------------------------------------------
@@ -36,12 +35,10 @@ class StiDefaultMutableTreeNode : public StiTreeNode
 {
  public:
 
+  virtual ~StiDefaultMutableTreeNode(){};
   StiDefaultMutableTreeNode();
-  StiDefaultMutableTreeNode(TObject *  userObject) ;
-  StiDefaultMutableTreeNode(TObject *  userObject, bool allowsChildren);
-  StiDefaultMutableTreeNode(TObject *  userObject, int childrenArraySize);
-  StiDefaultMutableTreeNode(TObject *  userObject, bool allowsChildren, int childrenArraySize);
-  void initialize(TObject *  userObject, bool allowsChildren, int childrenArraySize);
+  StiDefaultMutableTreeNode(bool allowsChildren);
+  void initialize(bool allowsChildren);
   void insert(StiTreeNode * newChild, int childIndex);
   void remove(int childIndex) ;
   void setParent(StiTreeNode *  newParent) ;
@@ -51,9 +48,7 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   int getIndex(StiTreeNode *  aChild) ;
   void setAllowsChildren(bool allows);
   bool getAllowsChildren() ;
-  void setUserObject(TObject *  userObject);
-  TObject *  getUserObject() ;
-  void   removeFromParent() ;
+  void removeFromParent() ;
   void remove(StiTreeNode *  aChild) ;
   void removeAllChildren();
   void removeAllChildrenBut(StiTreeNode *  aChild);
@@ -85,13 +80,12 @@ class StiDefaultMutableTreeNode : public StiTreeNode
 
  protected:
 
-  bool        allowsChildren;
-  TObject   * userObject;
-  TObjArray * children;
-  //StiDefaultMutableTreeNode * parent;
-  StiTreeNode * parent;
+  typedef vector<StiDefaultMutableTreeNode *> StiDefaultMutableTreeNodeVector;
+  typedef StiDefaultMutableTreeNodeVector::iterator StiDefaultMutableTreeNodeIterator;
 
-  ClassDef(StiDefaultMutableTreeNode,1)
+  bool          allowsChildren;
+  StiTreeNode * parent;
+  StiDefaultMutableTreeNodeVector children;
 
 };
 

@@ -1,6 +1,4 @@
 #include "StiConstants.h"
-ClassImp(StiConstants)
-
 
 int StiConstants::Ok = 0 ;
 int StiConstants::Warning = 1;

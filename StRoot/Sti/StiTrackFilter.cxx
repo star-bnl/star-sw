@@ -1,8 +1,5 @@
-
 #include "StiTrack.h"
 #include "StiTrackFilter.h"
-
-ClassImp(StiTrackFilter)
 
 StiTrackFilter::StiTrackFilter()
 {

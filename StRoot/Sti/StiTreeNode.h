@@ -2,9 +2,8 @@
 #define StiTreeNode_H 1
 #include <iostream.h>
 #include <stdlib.h>
-#include "TObject.h"
 
-class StiTreeNode : public TObject
+class StiTreeNode 
 {
  public:
   //
@@ -44,8 +43,6 @@ class StiTreeNode : public TObject
 
   virtual void setParent(StiTreeNode * newParent)=0;
 
-  ClassDef(StiTreeNode,1)
-  
 };
 
 #endif

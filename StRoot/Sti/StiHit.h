@@ -7,12 +7,10 @@
 #ifndef StiHit_HH
 #define StiHit_HH
 
-#include "TObject.h"
-
 class StHit;
 class ostream;
 
-class StiHit : public TObject
+class StiHit 
 {
 public:
     StiHit();

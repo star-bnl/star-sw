@@ -54,8 +54,6 @@ class StiUnidentifiedTrackFilter : public StiTrackFilter
   float  minFitToTotalPtsRatio, maxFitToTotalPtsRatio;
   float  minChi2,               maxChi2;
 
-ClassDef(StiUnidentifiedTrackFilter, 1)
-
 };
 
 #endif

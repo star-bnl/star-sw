@@ -3,11 +3,10 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "TObject.h"
 
 class StiTrack;
 
-class StiTrackFilter : public TObject
+class StiTrackFilter 
 {
  public:
 
@@ -24,8 +23,6 @@ class StiTrackFilter : public TObject
 
   int analyzedTrackCount;
   int acceptedTrackCount;
-
-  ClassDef(StiTrackFilter, 1)
 
 };
 
