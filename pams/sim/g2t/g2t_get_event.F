@@ -1,3 +1,10 @@
+* $Id: g2t_get_event.F,v 1.4 2000/01/22 22:50:18 nevsky Exp $
+*
+* $Log: g2t_get_event.F,v $
+* Revision 1.4  2000/01/22 22:50:18  nevsky
+* proton/neutron sharing corrected
+*
+*
 **:>-----------------------------------------------------------------------
 *  module    G2T_get event fills event header struct
 *  author    Pavel Nevski
@@ -33,24 +40,14 @@
       if (Istat .eq. 10) then
         g2t_event(1).eg_label         = VERT(2)    ! run number
         g2t_event(1).event_type       = VERT(1)    ! event number
-        i =  AMASS                                 ! Awest.Aeast
-        j = (AMASS-i)*1000                         !
-        if (i.le.100) then                         ! west
-           in = 0
-           ip = i 
-        else   
-           in = 100*i/197
-           ip = i-in
-        endif 
+        i  =  AMASS                                ! Awest.Aeast
+        j  = (AMASS-i)*10**INT(ALOG10(AMASS+.1)+1)
+        in = (100*i)/197                           ! west
+        ip = i-in
         g2t_event(1).n_part_neut_west = in
         g2t_event(1).n_part_prot_west = ip
-        if (j.le.100) then                         ! east
-           jn = 0
-           jp = j
-        else
-           jn = 100*j/197
-           jp = j-jn
-        endif
+        jn = 100*j/197                             ! east
+        jp = j-jn
         g2t_event(1).n_part_neut_east = jn  
         g2t_event(1).n_part_prot_east = jp
         g2t_event(1).n_run            = MOTH(1)
