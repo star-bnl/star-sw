@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.12 2000/04/18 20:44:53 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.13 2000/06/12 19:58:54 lansdell Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.13  2000/06/12 19:58:54  lansdell
+// loaded global shared library
+//
 // Revision 1.12  2000/04/18 20:44:53  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -71,7 +74,8 @@ void bfcread_hist_list_all(
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
-   
+    gSystem->Load("libglobal_Tables");
+
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
