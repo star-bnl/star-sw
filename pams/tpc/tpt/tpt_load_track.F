@@ -1,5 +1,9 @@
-* $Id: tpt_load_track.F,v 1.11 1999/09/30 00:22:06 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.12 1999/11/07 05:54:48 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.12  1999/11/07 05:54:48  sakrejda
+* Calculation of dip and crossing angle added (moved here from two other places)
+* Track length calculation added
+*
 * Revision 1.11  1999/09/30 00:22:06  sakrejda
 * twopi and radtodeg were replaced by C_2PI and C_DEG_PER_RAD
 * (Thanks Spiros for pointing it out....)
@@ -33,7 +37,7 @@
 * Revision 1.2  1998/01/27 00:35:49  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT_LOAD_TRACK(ipt,track_h,track,trk)
+      INTEGER FUNCTION TPT_LOAD_TRACK(ipt,track_h,track,trk,hit_h,hit)
 C>--------------------------------------------------------------------
 C
 C TPT_LOAD_TRACK - calculate track parameters required in tptrack table
@@ -54,6 +58,7 @@ C<--------------------------------------------------------------------
 #include "PAM.inc"
 
 #include "tpt_track.inc"
+#include "tcl_tphit.inc"
 #include "tpt_track_pointers.inc"
 #include "phys_constants.inc"
 #include "math_constants.inc"
@@ -61,6 +66,8 @@ C<--------------------------------------------------------------------
 C___________________________________________________________________
       RECORD /table_head_st/    track_h
       RECORD /tpt_track_st/     track(*)
+      RECORD /table_head_st/    hit_h
+      RECORD /tcl_tphit_st/     hit(*)
       RECORD /tpt_track_pointers_st/   trk(*)
 
 C___________________________________________________________________
@@ -73,8 +80,9 @@ C___________________________________________________________________
 
 C*** This part if for n_pos (n_max) calculation
 C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
-      REAL     trakl(6), rr, xc(2)
-      INTEGER  nmax
+      REAL     trakl(6), rr, xc(2), xold, yold, cf, ds
+      INTEGER  nmax, ld, ient, iret
+      INTEGER  tpt_cross_fact
       data nmax /0/
 
       LOGICAL nposOn
@@ -142,7 +150,29 @@ C     z coordinate of the point where track parameters are given
       track(ipt).cov(15) = trk(ipt).dpar(9)
 C
       track(ipt).nrec = trk(ipt).nhit
+      ld = trk(ipt).ipnt(trk(ipt).nhit)
+      track(ipt).hitid = hit(ld).id
+c
+      xold = hit(ld).x
+      yold = hit(ld).y
+      ds=0.0
+      do ld=trk(ipt).nhit-1,1,-1
+         ient = trk(ipt).ipnt(ld)
+         iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
+     >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
+         ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
+     >      (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
+         xold = hit(ient).x
+         yold = hit(ient).y
+         hit(ient).lambda=atand(trk(ipt).p(7))
+      end do
+
+      hit( trk(ipt).ipnt(trk(ipt).nhit)).alpha =
+     >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).alpha
+      hit( trk(ipt).ipnt(trk(ipt).nhit)).lambda =
+     >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).lambda
 C
+      track(ipt).length =ds*sqrt(1.0+track(ipt)**2)
 C     azimuthal angle for the momentum at the first point
       sgn = sign(1.0,trk(ipt).p(2))
       track(ipt).psi = trk(ipt).p(5)-sgn*0.25*C_2PI
