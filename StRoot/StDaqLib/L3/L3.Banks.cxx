@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3.Banks.cxx,v 1.3 2000/07/26 02:12:27 struck Exp $
+ * $Id: L3.Banks.cxx,v 1.4 2000/07/26 02:37:41 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: L3.Banks.cxx,v $
+ * Revision 1.4  2000/07/26 02:37:41  struck
+ * minor changes
+ *
  * Revision 1.3  2000/07/26 02:12:27  struck
  * added i960 cluster reader
  *
@@ -44,7 +47,7 @@ int Bank_L3_GTD::swap()
   assert(iret > 0);
 
   // now swap globalTrack structure
-  for (int i=0; i<nTracks; i++) {
+  for ( unsigned int i=0; i<nTracks; i++) {
         iret = swap_raw(header.ByteOrder, (int *)&track[i].id, 1);
 	iret = l3Swap_short((short *)&track[i].flag, (short) 1);
 	iret = swap_raw(header.ByteOrder, (int *)&track[i].chi2, 13);
@@ -101,7 +104,7 @@ int Bank_L3_SECCD::swap()
   assert(iret > 0);
 
   // now swap l3_cluster structure
-  for (int i=0; i<nrClusters_in_sector; i++) {
+  for (unsigned int i=0; i<nrClusters_in_sector; i++) {
 	iret = l3Swap_short((short *)&cluster[i].pad, (short) 5);
   }
 
