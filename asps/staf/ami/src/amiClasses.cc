@@ -9,6 +9,7 @@
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
+#include "asuAlloc.h"
 #include "tdmLib.h"
 #include "ami_macros.h"
 #include "amiClasses.hh"
@@ -177,18 +178,37 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    tables._maximum = tnames._maximum;
    tables._buffer = new tdmTable* [tnames._maximum];
 
+   char *c,*cc;
+   char *table_name=NULL;
+   long table_size=1;
+   long b;
    for( int i=0;i<tnames._length;i++ ){
-      if( !tdm->findTable(tnames._buffer[i] ,tables._buffer[i]) ){
+//- Break up "name(size)" into "name" and size.
+      c = tnames._buffer[i];
+      cc = strchr(tnames._buffer[i],'(');
+      b = strlen(tnames._buffer[i]);
+      if( cc )b = (int)(cc - c);
+      table_name = (char*)ASUALLOC(b +1); memset(table_name,0,b+1);
+      strncpy(table_name,tnames._buffer[i],b);
+      if( b < strlen(tnames._buffer[i]) ){
+	 table_size = atoi(tnames._buffer[i] + b + 1);
+      }
+      else {
+	 table_size = 1;
+      }
+//- Find or create table.
+      if( !tdm->findTable(table_name, tables._buffer[i]) ){
 	 if( AMI_INPUT_MODE == invoker->tableMode(i) ){
 	    EML_ERROR(OBJECT_NOT_FOUND);
 	 }
 	 else {
-	    if( !tdm->newTable(tnames._buffer[i], invoker->tableSpec(i)
-			, 1) // TEMPORARY HACK !!!
-	    ||  !tdm->findTable(tnames._buffer[i], tables._buffer[i])
+	    if( !tdm->newTable(table_name, invoker->tableSpec(i)
+			, table_size) // TEMPORARY HACK !!!
+	    ||  !tdm->findTable(table_name, tables._buffer[i])
 	    ){
-	    if( !tdm->findTable(tnames._buffer[i], tables._buffer[i])
+	    if( !tdm->findTable(table_name, tables._buffer[i])
 	    ){ // HACK - should not be called twice... but it works
+	       if( table_name ){ASUFREE(table_name); table_name = NULL;}
 	       EML_ERROR(CANT_CREATE_OBJECT);
 	    }
 	    else {
@@ -197,6 +217,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 	    }
 	 }
       }
+      if( table_name ){ASUFREE(table_name); table_name = NULL;}
    }
 //- Call the actual invoker object.
    invoker->call(tables);
