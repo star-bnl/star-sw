@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.6 2000/08/31 18:58:26 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.7 2000/09/13 00:32:27 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.7  2000/09/13 00:32:27  snelling
+// Added selections for particles correlated with reaction plane
+//
 // Revision 1.6  2000/08/31 18:58:26  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -52,6 +55,15 @@ StFlowSelection::StFlowSelection() : mCentrality(0), mSubevent(-1) {
   mPtPart[1] = 0.;
   mEtaPart[0] = 0.;
   mEtaPart[1] = 0.;
+
+  mFitPtsPart[0] = 0.;
+  mFitPtsPart[1] = 0.;
+  mFitOverMaxPtsPart[0] = 0.;
+  mFitOverMaxPtsPart[1] = 0.;
+  mChiSqPart[0] = 0.;
+  mChiSqPart[1] = 0.;
+  mDcaPart[0] = 0.;
+  mDcaPart[1] = 0.;
 }
 
 //-----------------------------------------------------------------------
@@ -113,6 +125,29 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
   if (mEtaPart[1] > mEtaPart[0] && 
       (eta < mEtaPart[0] || eta >= mEtaPart[1])) return kFALSE;
 
+  // Fit Points
+  int fitPts = pFlowTrack->FitPts();
+  if (mFitPtsPart[1] > mFitPtsPart[0] && 
+      (fitPts < mFitPtsPart[0] || fitPts >= mFitPtsPart[1])) return kFALSE;
+
+  // Fit Points over Max Points
+  int maxPts = pFlowTrack->MaxPts();
+  float fitOverMaxPts = (float) fitPts / (float) maxPts;
+  if (mFitOverMaxPtsPart[1] > mFitOverMaxPtsPart[0] && 
+      (fitOverMaxPts < mFitOverMaxPtsPart[0] || 
+       fitOverMaxPts >= mFitOverMaxPtsPart[1])) return kFALSE;
+
+  // Chi Squared
+  float chiSq = pFlowTrack->Chi2();
+  if (mChiSqPart[1] > mChiSqPart[0] && 
+      (chiSq < mChiSqPart[0] || 
+       chiSq >= mChiSqPart[1])) return kFALSE;
+
+  // DCA
+  float dca = pFlowTrack->Dca();
+  if (mDcaPart[1] > mDcaPart[0] && 
+      (dca < mDcaPart[0] || dca >= mDcaPart[1])) return kFALSE;
+
   return kTRUE;
 }
 
@@ -131,6 +166,14 @@ void StFlowSelection::PrintList() const {
     mPtPart[0] << " to " << mPtPart[1] << " GeV/c" <<endl;
   cout << "# Eta for particles correlated with the event plane: " << 
     mEtaPart[0] << " to " << mEtaPart[1] <<endl;
+  cout << "# Fit Points for particles correlated with the event plane: " << 
+    mFitPtsPart[0] << " to " << mFitPtsPart[1] <<endl;
+  cout << "# Fit/Max Points for particles correlated with the event plane: " << 
+    mFitOverMaxPtsPart[0] << " to " << mFitOverMaxPtsPart[1] <<endl;
+  cout << "# Chi2 for particles correlated with the event plane: " << 
+    mChiSqPart[0] << " to " << mChiSqPart[1] <<endl;
+  cout << "# Dca for particles correlated with the event plane: " << 
+    mDcaPart[0] << " to " << mDcaPart[1] <<endl;
   cout << "#################################################################"
        << endl;
 
