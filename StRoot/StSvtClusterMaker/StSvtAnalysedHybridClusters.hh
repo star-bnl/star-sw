@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.5 2001/08/07 20:52:15 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.6 2001/11/12 22:58:01 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.6  2001/11/12 22:58:01  caines
+ * Add functions for filling hits from srs data
+ *
  * Revision 1.5  2001/08/07 20:52:15  caines
  * Implement better packing of svt hardware and charge values
  *
@@ -36,7 +39,7 @@
 #include "StEvent/StSvtHit.h"
 
 class StSvtAnalysis;
-
+class scs_spt_st;
 
 typedef struct StSvtHitData
 {
@@ -66,11 +69,14 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
   
   void setMembers(int numOfClu, int index);
   int setSvtHit(StSvtAnalysis* mSvtAnalysis);
+  int setSvtHit(scs_spt_st* mSrsHit);
 
   StSvtHitData* svtHitData();
   StSvtHit* svtHit();
+  void ReSize();
   int numOfHits();
   StThreeVector<double>* WaferPosition();
+
   
 
  private:
