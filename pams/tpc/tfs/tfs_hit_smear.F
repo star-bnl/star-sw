@@ -1,5 +1,8 @@
-* $Id: tfs_hit_smear.F,v 1.2 1998/03/03 23:03:14 hardtke Exp $
+* $Id: tfs_hit_smear.F,v 1.3 1999/11/10 15:43:00 nevski Exp $
 * $Log: tfs_hit_smear.F,v $
+* Revision 1.3  1999/11/10 15:43:00  nevski
+* more efficient use of rannor
+*
 * Revision 1.2  1998/03/03 23:03:14  hardtke
 * use constants files
 *
@@ -61,19 +64,19 @@ C-----------------------------------------------------------------------
       REAL      ST_DEV_X
       REAL      ST_DEV_Y
       REAL	ST_DEV_Z	!SIGMA FOR Z ERROR   (cm)
-      REAL      SMEAR           !Random no. gaussian distrib. unit sigma
       REAL      RDUMMY
       REAL      PHI
       real      xlocal(3),xglobal(3)
       integer   iret
       integer   tgc_local_to_global, tgc_global_to_local
+      REAL      SMEARA,SMEARB           !Random no. gaussian distrib. unit sigma
 
 C=========================== Begin Executable Code =======================
 
-        CALL RANNOR(SMEAR,RDUMMY)
-        ERR_PAD = ST_DEV_XY*SMEAR
-        CALL RANNOR(SMEAR,RDUMMY)
-        ERR_DRFT = ST_DEV_Z*SMEAR
+c PN: Rannor produces TWO independent random numbers at a single call:
+        CALL RANNOR(SMEARA,SMEARB)
+        ERR_PAD  = ST_DEV_XY*SMEARA
+        ERR_DRFT = ST_DEV_Z *SMEARB
         xglobal(1)=xi
         xglobal(2)=yi
         xglobal(3)=zi
@@ -83,6 +86,7 @@ C=========================== Begin Executable Code =======================
         xo=xglobal(1)
         yo=xglobal(2)
         zo=zi+err_drft
+        
 C     Make sure that z coordinate remains in the same hemisphere after the 
 C     smearing to maintain the correct sector number corresponding this hit.
 C     --- DSW Jun 18, 1997  --- 
