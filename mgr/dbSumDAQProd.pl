@@ -24,12 +24,12 @@ my $debugOn=0;
 #&cgiSetup();
 
 my @SetD = (
-             "P00hf/2000/06",
-             "P00hf/2000/07",
-             "P00hf/2000/08",
+             "P00hg/2000/06",
+             "P00hg/2000/07",
+             "P00hg/2000/08",
 );
-my $prod_html_back = "/star/u2e/starreco/P00hf/summary/P00hf.summary\.html_back";
-my $prod_html = "/star/u2e/starreco/P00hf/summary/P00hf.summary\.html";
+my $prod_html_back = "/star/u2e/starreco/P00hg/summary/P00hg.summary\.html_back";
+my $prod_html = "/star/u2e/starreco/P00hg/summary/P00hg.summary\.html";
 
 struct JFileAttr => {
     daqRun      => '$',
@@ -48,7 +48,7 @@ struct FilAttr => {
        numRun   => '$',
 }; 
  
-my @prodSer = ("P00hf","P00he") ;
+my @prodSer = ("P00hg","P00he") ;
 
 &beginHtml();
 
@@ -88,7 +88,7 @@ my  $nmfile;
 my  @hpssInFiles;
 
 
- $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE jobID like '%P00hf%' AND fName LIKE '%dst.root' ";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE jobID like '%P00hg%' AND fName LIKE '%dst.root' ";
 
  $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -294,7 +294,7 @@ my $TdaqHEvt  = 0;
 
     foreach my $runD (@DRun) {
       
-        $daqHpEvts{$runD} -= 1;
+#        $daqHpEvts{$runD} -= 1;
         if (! defined $dstHpEvts{$runD}) {$dstHpEvts{$runD} = 0 };
         if (! defined $dstDEvts{$runD}) {$dstDEvts{$runD} = 0 };
         if (! defined $daqHpEvts{$runD}) {$daqHpEvts{$runD} = 0 };
