@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.cc,v 2.2 2000/03/06 18:05:22 calderon Exp $
+ * $Id: StMcSvtHitCollection.cc,v 2.3 2000/04/19 18:32:23 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcSvtHitCollection.cc,v $
+ * Revision 2.3  2000/04/19 18:32:23  calderon
+ * Added check for SSD in barrel collection
+ * put default numbers for l, d, w in SvtHitCollection
+ *
  * Revision 2.2  2000/03/06 18:05:22  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -27,7 +31,7 @@
 #include "StMcSvtHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.2 2000/03/06 18:05:22 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.3 2000/04/19 18:32:23 calderon Exp $";
 
 StMcSvtHitCollection::StMcSvtHitCollection()
 {
@@ -52,6 +56,7 @@ bool
 StMcSvtHitCollection::addHit(StMcSvtHit* hit)
 {
     unsigned int l, d, w;
+    l = d = w = 99999; // set to some default invalid number
     if (hit &&
         (l = hit->barrel()-1) < mNumberOfBarrels &&
         (d = hit->ladder()-1) < mBarrels[l].numberOfLadders() &&
@@ -59,8 +64,10 @@ StMcSvtHitCollection::addHit(StMcSvtHit* hit)
         mBarrels[l].ladder(d)->wafer(w)->hits().push_back(hit);
         return true;
     }
-    else
+    else {
+	//cout << "\nBAD Hit:\n" << *hit << endl; 
         return false;
+    }
 }
 
 unsigned long

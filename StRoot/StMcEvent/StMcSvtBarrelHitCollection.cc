@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtBarrelHitCollection.cc,v 2.1 2000/03/06 18:05:22 calderon Exp $
+ * $Id: StMcSvtBarrelHitCollection.cc,v 2.2 2000/04/19 18:32:23 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcSvtBarrelHitCollection.cc,v $
+ * Revision 2.2  2000/04/19 18:32:23  calderon
+ * Added check for SSD in barrel collection
+ * put default numbers for l, d, w in SvtHitCollection
+ *
  * Revision 2.1  2000/03/06 18:05:22  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -20,7 +24,7 @@
  **************************************************************************/
 #include "StMcSvtBarrelHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtBarrelHitCollection.cc,v 2.1 2000/03/06 18:05:22 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtBarrelHitCollection.cc,v 2.2 2000/04/19 18:32:23 calderon Exp $";
 
 StMcSvtBarrelHitCollection::StMcSvtBarrelHitCollection()
 {
@@ -48,6 +52,9 @@ StMcSvtBarrelHitCollection::numberOfLadders() const
     case 2:
         return 16;
         break;
+    case 3:
+	return 20;
+	break;
     default:
         return 0;
     }
