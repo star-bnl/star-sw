@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.1 1998/11/10 17:12:04 fisyak Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.2 1998/11/16 19:40:21 lasiuk Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,8 +11,8 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
- * Revision 1.1  1998/11/10 17:12:04  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/16 19:40:21  lasiuk
+ * constructors do not use reference for doubles
  *
  * Revision 1.1  1998/11/10 17:12:04  fisyak
  * Put Brian trs versin into StRoot
@@ -34,11 +34,10 @@
 #include "StGlobals.hh"
 #include "StThreeVector.hh"
 
-
 class StGlobalCoordinate {         
 public:
     StGlobalCoordinate();
-    StGlobalCoordinate(const double&, const double&, const double&);
+    StGlobalCoordinate(const double, const double, const double);
     StGlobalCoordinate(const StThreeVector<double>&);
 
     virtual ~StGlobalCoordinate();

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalCoordinate.hh,v 1.2 1998/11/13 21:29:29 lasiuk Exp $
+ * $Id: StTpcLocalCoordinate.hh,v 1.3 1998/11/16 19:40:19 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcLocalCoordinate.hh,v $
- * Revision 1.2  1998/11/13 21:29:29  lasiuk
- * allow setting coordinates individually
+ * Revision 1.3  1998/11/16 19:40:19  lasiuk
+ * constructors do not use reference for doubles
  *
  * Revision 1.2  1998/11/13 21:29:29  lasiuk
  * allow setting coordinates individually
@@ -40,7 +40,7 @@
 class StTpcLocalCoordinate {
 public:
     StTpcLocalCoordinate();
-    StTpcLocalCoordinate(const double&, const double&, const double&);
+    StTpcLocalCoordinate(const double, const double, const double);
     StTpcLocalCoordinate(const StThreeVector<double>&);
 
     virtual ~StTpcLocalCoordinate();
