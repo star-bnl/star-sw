@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.10 1999/08/12 16:28:36 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.11 1999/11/03 17:12:58 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.11  1999/11/03 17:12:58  kathy
+// fixed macros so they use StIOMaker instead of StTreeMaker
+//
 // Revision 1.10  1999/08/12 16:28:36  kathy
 // changed QA_bfcred_dst_tables so that it can loop over many events - before was hardwired to only 1 event
 //
@@ -59,19 +62,22 @@ void QA_bfcread_dst_tables(
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
-  gSystem->Load("StTreeMaker");
+  gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
 
 //  Setup top part of chain
   chain = new StChain("bfc");
   chain->SetDebug();
-   
-//  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("dstBranch",0,"r");	//activate EventBranch
+
+// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
+//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
+
   
 // --- now execute chain member functions
   chain->Init();
