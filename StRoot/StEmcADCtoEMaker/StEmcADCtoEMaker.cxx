@@ -1,12 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.18 2001/10/31 22:08:56 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.19 2001/10/31 22:24:17 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.18  2001/10/31 22:08:56  suaide
-// fixed Finish() method
-//
-// Revision 1.17  2001/10/31 15:01:07  suaide
-// modified to discard bad EMC events
+// Revision 1.19  2001/10/31 22:24:17  suaide
+// modified Finish() method
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
 // log messages included for easier debug
