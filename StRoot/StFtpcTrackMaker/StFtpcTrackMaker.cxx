@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.46 2003/07/04 14:09:31 fsimon Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.47 2003/07/07 20:29:30 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.47  2003/07/07 20:29:30  oldi
+// Pointer to geant taken out (no actual code change).
+//
 // Revision 1.46  2003/07/04 14:09:31  fsimon
 // SlowSimulator now rotates hits: Check for simulated hits before rotation
 // commented out.
@@ -472,18 +475,11 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->NoFieldTracking();
   //tracker->LaserTracking();
   
-  // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
-  
-  
-  // now (07042003) the simulator also rotates the hits, so this check is no longer needed. Commented out! fsimon
-
-  // get geant information to evaluate if this event is simulated
-  //St_DataSet *geant = GetInputDS("geant");  
-  //St_DataSetIter geantI(geant);
-  
-  //if (!geantI("g2t_ftp_hit")) {
-  // not a simulated event
-    
+  // coordinate transformation due to rotation and shift of TPC with respect to the magnet 
+  // (= global coordinate system). 
+  // Since the simulator incorporates these transformations, the distinction between simulated
+  // and real events isn't necessary any more. 
+      
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
     
   TObjArray *clusters = tracker->GetClusters();
@@ -495,7 +491,6 @@ Int_t StFtpcTrackMaker::Make()
     point->TransformFtpc2Global();
     point->ToTable(&(point_st[i]));   
   }
-  //} 
   
   // momentum fit, dE/dx calculation, write tracks to tables
   St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
@@ -669,7 +664,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.46 2003/07/04 14:09:31 fsimon Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.47 2003/07/07 20:29:30 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
