@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.16 2001/04/27 10:20:24 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.17 2001/07/12 08:42:28 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.17  2001/07/12 08:42:28  oldi
+// Minor update.
+//
 // Revision 1.16  2001/04/27 10:20:24  oldi
 // Moved function calls of StFtpcTrackEvalulator to constructor of StFtpcTrackEvalulator.
 //
@@ -295,6 +298,7 @@ Int_t StFtpcTrackMaker::Make()
   // for the line above you have these possibilities
   //tracker->MainVertexTracking();
   //tracker->FreeTracking();
+  //tracker->NoFieldTracking();
   //tracker->LaserTracking();
 
   St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
@@ -386,7 +390,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.16 2001/04/27 10:20:24 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.17 2001/07/12 08:42:28 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
