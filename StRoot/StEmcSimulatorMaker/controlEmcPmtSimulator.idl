@@ -5,6 +5,17 @@
 *              from deposit energy to ADC
 * Author     : Aleksei Pavlinov, WSU 
 *********************************************************
+*
+*  mode = 0; no transition, keep deposit energy for energy;
+*  mode = 1; simple transition with using adc and energy scales 
+*            and sample fraction function;
+*  mode >=2  is valid for PMT simulation (BEMC or BPRS)
+*  mode = 2; simulation taking into account primary photo electron
+*            statistic
+*  mode = 3; simulation taking into account primary and secondary 
+*            photo electron statistics
+*  mode = 4; as 3 but fast approuching. 
+*            
 */
   struct  controlEmcPmtSimulator{
     short mode;      /* Mode of work (from 0 to 4 */
