@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.2 2000/01/05 16:07:47 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.3 2000/05/24 15:48:20 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
- * Revision 2.2  2000/01/05 16:07:47  ullrich
- * Added loading of SSD hits and handling of runco branch.
+ * Revision 2.3  2000/05/24 15:48:20  ullrich
+ * Instance of StEvent now also created if no DST dataset
+ * is available.
  *
  * Revision 2.3  2000/05/24 15:48:20  ullrich
  * Instance of StEvent now also created if no DST dataset
@@ -54,7 +55,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.2 2000/01/05 16:07:47 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.3 2000/05/24 15:48:20 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -63,7 +64,7 @@ public:
     Bool_t  doLoadFtpcHits;        //!
     Bool_t  doLoadSvtHits;         //!
     Bool_t  doLoadSsdHits;         //!
-    Bool_t  doPrintCpuInfo;        //! 
+    
     Bool_t  doPrintRunInfo;        //! lots of screen output
     Bool_t  doPrintEventInfo;      //! lots of screen output
     Bool_t  doPrintMemoryInfo;     //! 
@@ -80,6 +81,7 @@ protected:
     void   printTrackInfo(StTrack*);
     
 private:
+    StEventManager*       mEventManager;		//!
     StEvent*              mCurrentEvent;                //!
     StRun*                mCurrentRun; 			//!
     dst_summary_param_st* mDstSummaryParam;             //!
