@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.h,v 1.2 2001/07/27 17:40:18 ward Exp $
+ * $Id: StTrgMaker.h,v 1.3 2001/12/22 20:10:04 ward Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.h,v $
+ * Revision 1.3  2001/12/22 20:10:04  ward
+ * New code for MWC.
+ *
  * Revision 1.2  2001/07/27 17:40:18  ward
  * Handles reversed B field, also has code for chking triggerWord.
  *
@@ -98,10 +101,13 @@ private:
     double mMagneticField;
     bool accept(StEvent*);            // this method serves as an event filter
     bool accept(StTrack*);            // and this is used to select tracks
-    void DoOneTrack(FILE *oo,long q,double curvature,double phi0,
+    void DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
+         double psi,double r0,double tanl,double z0);
+    void DoOneTrackMwc(FILE *oo,long q,double curvature,double phi0,
          double psi,double r0,double tanl,double z0);
     void CalcCenterOfCircleDefinedByTrack(int q,double radius,double psi,double r0,
       double phi0,double *xcenter,double *ycenter);
+    void Location2Sector(double tanl,double xAtMwc,double yAtMwc,int *sector,int *subsector);
     void FindIntersectionOfTwoCircles(
       double center1x,double center1y,double radius1,  /* input (circle 1) */
       double center2x,double center2y,double radius2,  /* input (circle 2) */
