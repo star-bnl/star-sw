@@ -49,6 +49,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   StiDetector * detector;
   StiHit* stiHit;
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
+  if (!tpcHits) return;
   unsigned int stiSector;
   for (unsigned int sector=0; sector<24; sector++)
     {
