@@ -1,5 +1,6 @@
 //Std
 #include <iostream.h>
+#include <float.h>
 using std::cout;
 using std::endl;
 #include <string>
@@ -48,11 +49,11 @@ void StiCodedDetectorBuilder::init(){
 // build material objects and add them to map by name
 void StiCodedDetectorBuilder::buildMaterials(){
   
-  int nMaterials = 7;
+  int nMaterials = 8;
   char* aNames[] = {"Air", "Al", "Hybrid", "IfcAdhesive", 
-                    "Nomex", "P10", "Si"};
-  float aRadLengths[] = {30420., 8.9, 8.3, 33.3, 625., 12850., 9.36};
-  float aDensities[] = {.00119, 2.7, 2.5, 1.2, .064, .00156, 2.33};
+                    "Nomex", "P10", "Si", "Vacuum"};
+  float aRadLengths[] = {30420., 8.9, 8.3, 33.3, 625., 12850., 9.36, DBL_MAX};
+  float aDensities[] = {.00119, 2.7, 2.5, 1.2, .064, .00156, 2.33, 0.};
 
   for(int iMaterial = 0; iMaterial<nMaterials; iMaterial++){
     StiMaterial *pMaterial = new StiMaterial();
@@ -359,7 +360,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
 
   float fIfcRadius = gStTpcDb->Dimensions()->ifcRadius();   
   
-  pGas = findMaterial("Air");
+  pGas = findMaterial("P10");
   StiMaterial *pMaterial = findMaterial("Nomex");
   StiShape *pShape = findShape("Ifc/Nomex");
 

@@ -4,6 +4,14 @@
 #include "StiTrackNode.h"
 
 
+StiDetector * StiTrackNode::getDetector() const{
+  return( hit==NULL ? detector : hit->detector() );
+}
+void StiTrackNode::setDetector(StiDetector *pDetector){
+  if(hit==NULL){ detector = pDetector; }
+}
+
+
 //_____________________________________________________________________________
 void StiTrackNode::reset()
 { 

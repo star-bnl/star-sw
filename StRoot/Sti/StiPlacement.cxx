@@ -22,12 +22,12 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   while(normalRefAngle < 0.){ normalRefAngle += 2.*M_PI; }
   while(normalRefAngle >= 2.*M_PI){ normalRefAngle -= 2.*M_PI; }
   normalRadius = centerRadius*cos(centerOrientation);
-  normalXoffset = centerRadius*sin(centerOrientation);
+  normalYoffset = centerRadius*sin(centerOrientation);
 
 }// setCenterRep()
 
 void StiPlacement::setNormalRep(float refAngle_, float radius_, 
-                                float xOffset_){
+                                float yOffset_){
 
   while(refAngle_ < 0.){ refAngle_ += 2.*M_PI; }
   while(refAngle_ >= 2.*M_PI){ refAngle_ -= 2.*M_PI; }
@@ -35,11 +35,11 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
 
   if(radius_ >= 0.){ normalRadius = radius_; }
   
-  normalXoffset = xOffset_;
+  normalYoffset = yOffset_;
 
   // the checking above makes these values within bounds, also
-  centerRadius = sqrt(normalRadius*normalRadius + normalXoffset*normalXoffset);
-  centerOrientation = atan(normalXoffset/normalRadius);
+  centerRadius = sqrt(normalRadius*normalRadius + normalYoffset*normalYoffset);
+  centerOrientation = atan(normalYoffset/normalRadius);
   centerRefAngle = normalRefAngle - centerOrientation;
   while(centerRefAngle < 0.){ centerRefAngle += 2.*M_PI; }
   while(centerRefAngle >= 2.*M_PI){ centerRefAngle -= 2.*M_PI; }
