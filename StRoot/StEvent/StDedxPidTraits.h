@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.9 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StDedxPidTraits.h,v 2.10 2002/11/15 20:38:36 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.10  2002/11/15 20:38:36  fisyak
+ * Set class version 2 for new calibration scheme
+ *
  * Revision 2.9  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -71,6 +74,6 @@ protected:
     Short_t  mMethod;
     
     StObject* clone() const;
-    ClassDef(StDedxPidTraits,1)
+    ClassDef(StDedxPidTraits,2)
 };
 #endif
