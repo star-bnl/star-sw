@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.20 2004/09/03 00:36:50 jeromel Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.21 2004/09/06 21:46:52 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -24,11 +24,7 @@ ClassImp(StEEmcDataMaker)
 //_____________________________________________________________________
 StEEmcDataMaker::StEEmcDataMaker(const char *name):StMaker(name){
   mDb=0;
-  hs[0] = NULL;
-  hs[1] = NULL;
-  hs[2] = NULL;
-  hs[3] = NULL;
-  hs[4] = NULL;
+  memset(hs,0,sizeof(hs));
 }
 
 //___________________________________________________________
@@ -49,15 +45,17 @@ Int_t StEEmcDataMaker::Init(){
     printf("\n\nWARN %s::Init() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
   } 
 
+  
+  hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
+  
+  hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
+  hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
+  
+  hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
+  
+  hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
   if (IAttr(".histos")) {
-    hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
-
-    hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
-    hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
-
-    hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
-
-    hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
+    // add here what is not needed :)
   }
 
   return StMaker::Init();
@@ -479,6 +477,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.21  2004/09/06 21:46:52  balewski
+// I want all histos, it is just 4KB total
+//
 // Revision 1.20  2004/09/03 00:36:50  jeromel
 // Create histos only if attribute is ON. Added TH1F pointer protection everywhere
 //
