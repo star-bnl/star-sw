@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.17 2002/01/24 01:59:49 genevb Exp $
+// $Id: StPrimaryMaker.h,v 1.18 2002/01/24 06:10:24 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.18  2002/01/24 06:10:24  balewski
+// beamLine4ppLMV+DB correction and double call of ppLMV
+//
 // Revision 1.17  2002/01/24 01:59:49  genevb
 // Add use of vertexSeed from database for ppLMV
 //
@@ -96,7 +99,7 @@ class StPrimaryMaker : public StMaker {
   Bool_t embedVerts;
   Bool_t seed;
 
-  struct {int equivNtr; float x0,y0,nx,ny;} beam4ppLMV;
+  struct {int isOn,equivNtr; float x0,y0,nx,ny;} beam4ppLMV;
   float zCutppLMV;
   float ppLMVparF[10];
   int ppLMVparI[10];
@@ -123,20 +126,19 @@ class StPrimaryMaker : public StMaker {
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
   void ppLMVuse(int *parI, float *parF);
   long ppLMV4(MatchedTrk &, St_dst_track *trackAll,St_dst_vertex *vertex, Int_t mdate);
-  void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy)
-                    { SetBeam4ppLMV_db(ntr,x,y,ux,uy); NoDbSeed(); }
-  void SetBeam4ppLMV_db(int ntr, double x, double y, double ux, double uy){
+  void UnSetBeam4ppLMV(){beam4ppLMV.isOn=0;};
+  void SetBeam4ppLMV(){
+    beam4ppLMV.isOn=1; 
+    printf("SetBeam4ppLMV() from DB is activated\n");
+  };
+  void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy){
     beam4ppLMV.equivNtr=ntr;
     beam4ppLMV.x0=x;    beam4ppLMV.nx=ux;
     beam4ppLMV.y0=y;    beam4ppLMV.ny=uy;
-    printf(" Executed  SetBeam4ppLMV AAAAAAAAAA\n");
   } 
-  void UnSetBeam4ppLMV(){beam4ppLMV.equivNtr=0;}
-  void NoDbSeed() { seed = kFALSE; } // Turn off use of db vertex seed
-  void UseDbSeed() { seed = kTRUE; } // Turn on use of db vertex seed (default)
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.17 2002/01/24 01:59:49 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.18 2002/01/24 06:10:24 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };

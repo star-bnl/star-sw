@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.69 2002/01/24 01:59:49 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.70 2002/01/24 06:10:25 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.70  2002/01/24 06:10:25  balewski
+// beamLine4ppLMV+DB correction and double call of ppLMV
+//
 // Revision 1.69  2002/01/24 01:59:49  genevb
 // Add use of vertexSeed from database for ppLMV
 //
@@ -268,7 +271,6 @@ ClassImp(StPrimaryMaker)
   zCutppLMV=0; // turn off ppLMV  as default
   UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (1)
   embedVerts = kFALSE;
-  seed = kTRUE; // use vertex seed from database by default
 
 }
 //_____________________________________________________________________________
@@ -486,7 +488,16 @@ Int_t StPrimaryMaker::Init(){
      hPiFi[15] = new TH1F("Fin15","Primary No. of points/track",51,-0.5,50.5);
      hPiFi[16] =(TH1F *) new TH2F("vXZ","Vertex X/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
      hPiFi[17] =(TH1F *) new TH2F("vYZ","Vertex Y/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
+
+     //temp schizophrenia JB
+     hPiFi[18] = new TH1F("Fin18","Vertex X/cm found, no BeamLine",100,-5,5);
+     hPiFi[19] = new TH1F("Fin19","Vertex Y/cm found, no BeamLine",100,-5,5);
+     hPiFi[20] = new TH1F("Fin20","Vertex Z/cm found, no BeamLine",100,-250,250);
+     
+     hPiFi[21] = new TH1F("Fin21","Vertex Z/cm found-noBeamLine /cm ",200,-5,5);
+//temp schizophrenia JB
   }
+
    {// matching to many bXing
      
      hctb[0] = new TH1F("Gctb0","Geant TOF of CTB hit (ns)",200,-8000.,8000.);
@@ -632,14 +643,6 @@ Int_t StPrimaryMaker::Make(){
       St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
       Int_t mdate = db->GetDateTime().GetDate();
 
-      if (seed) {
-        TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
-        vertexSeed_st* vSeed =
-          ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-        SetBeam4ppLMV_db((int) (vSeed->weight), vSeed->x0, vSeed->y0,
-	              vSeed->dxdz, vSeed->dydz);
-      }
-
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
  
       //SetBeam4ppLMV(0.0,0.3,0.0001, 0.0001);
@@ -648,9 +651,47 @@ Int_t StPrimaryMaker::Make(){
         CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF);
 	
         MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse,globtrk) ;
+
+	//temp schizophrenia JB1
+	MatchedTrk maTrk2= maTrk;
+	St_dst_vertex vertex2("vertexSchizo", 1);
+	int oldK=beam4ppLMV.isOn;
+	beam4ppLMV.isOn=0;
+        int iRes2 =kStWarn;
+	if (beam4ppLMV.isOn) iRes2= ppLMV4(maTrk2,globtrk,&vertex2,-1);
+	if(iRes2==kStOK) {
+	  dst_vertex_st *aa=(dst_vertex_st *)vertex2.GetTable();
+	  assert(aa);
+	  printf("1-st ppLMV x,y,z= %f %f %f\n",aa->x,aa->y,aa->z);
+	  hPiFi[18]->Fill( aa->x);
+	  hPiFi[19]->Fill( aa->y);
+	  hPiFi[20]->Fill( aa->z);
+	}
+	beam4ppLMV.isOn=oldK;
+	//temp schizophrenia JB1 end
+	
+	if (beam4ppLMV.isOn) {// take beam line params from DB
+	  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+	  vertexSeed_st* vSeed =
+	    ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+	  SetBeam4ppLMV((int) (vSeed->weight), vSeed->x0, vSeed->y0,
+			   vSeed->dxdz, vSeed->dydz);
+	}
 	  
         iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
-
+	
+	//temp schizophrenia JB2 
+	if(iRes==kStOK && iRes2==kStOK ) {
+	  dst_vertex_st *aa=(dst_vertex_st *)vertex2.GetTable();
+	  assert(aa);
+	  dst_vertex_st *bb=(dst_vertex_st *)vertex->GetTable();
+	  assert(bb);
+	  printf("current # of vert=%d\n",vertex->GetNRows());
+	  bb+=vertex->GetNRows();
+	  hPiFi[21]->Fill( bb->z-aa->z);
+	}
+	//temp schizophrenia JB2 end
+	
       }  else {
 	iRes = lmv(globtrk,vertex,mdate);
       }

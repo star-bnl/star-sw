@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.5 2002/01/21 01:35:07 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.6 2002/01/24 06:10:24 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.6  2002/01/24 06:10:24  balewski
+// beamLine4ppLMV+DB correction and double call of ppLMV
+//
 // Revision 1.5  2002/01/21 01:35:07  balewski
 // Optional beam line constrain was added to ppLMV
 //
@@ -59,7 +62,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.5 2002/01/21 01:35:07 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.6 2002/01/24 06:10:24 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -78,7 +81,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   vector <Jtrk> *tracks=&(maTrk.tracks[bXing]);
 
-  printf("passed tracks match to CTB  nTracks=%d, Beam_equivNtr=%d\n",(*tracks).size(), beam4ppLMV.equivNtr);
+  printf("passed tracks match to CTB  nTracks=%d, BeamLine=%d\n",(*tracks).size(), beam4ppLMV.isOn);
 
   // Get BField from gufld(,) 
   //  cout<<"Trying to Get the BField the old way..."<<endl;
@@ -88,11 +91,14 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
   double bfield = 0.1*b[2]; //This is now Tesla.
   
 
-  if( beam4ppLMV.equivNtr>0) { // add beam line to ppLMV to constrain vertex
+  if( beam4ppLMV.isOn) { // add beam line to ppLMV to constrain vertex
     
+    assert(beam4ppLMV.equivNtr>0);
     double pt  = 88889999;   
     double nxy=sqrt(beam4ppLMV.nx*beam4ppLMV.nx +beam4ppLMV.ny*beam4ppLMV.ny);
-    assert(nxy>1.e-5); // beam line _MUST_ be tilted
+    if(nxy<1.e-5){ // beam line _MUST_ be tilted
+      nxy=beam4ppLMV.nx=1.e-5; 
+    }
     double p0=pt/nxy;  
     double px   = p0*beam4ppLMV.nx;
     double py   = p0*beam4ppLMV.ny;
@@ -112,7 +118,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
     trk1.sigma=sigMin/sqrt(beam4ppLMV.equivNtr); //<== assigne weight
     (*tracks).push_back(trk1);
-    printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d \n", trk1.sigma,(*tracks).size());
+    printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d beamLineX=%f, Y=%f Weight=%d\n", trk1.sigma,(*tracks).size(),beam4ppLMV.x0,beam4ppLMV.y0,beam4ppLMV.equivNtr);
     
   }//
 
@@ -215,7 +221,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
     double dmax=0.0;
     while(itehlx != (*tracks).end()){
-      if( (*itehlx).glb_track_pointer==0) {itehlx++; continue;}
+      if( (*itehlx).glb_track_pointer==0) {itehlx++; continue;}// beamLine track
       StPhysicalHelixD hlx = (*itehlx).helix;
       double sig = (*itehlx).sigma;
       double spath = hlx.pathLength(XVertex); 
@@ -250,6 +256,65 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   cout<<"ppLMV4: Primary Vertex found! Position: "<<XVertex<<", used tracks="<<(*tracks).size()<<endl;
 
+
+  Int_t nrows = vertex->GetNRows();
+  long IVertex = nrows+1; //By definition
+  dst_track_st *sec_pointer = trackAll->GetTable();
+
+
+  // printf(" Fill the dst_vertex table\n");
+  dst_vertex_st primvtx;
+  primvtx.vtx_id      = kEventVtxId;
+  primvtx.n_daughters = (*tracks).size();
+  primvtx.id          = IVertex;
+  primvtx.iflag       = 1;
+  if( (Is_SVT == 1) ){
+    primvtx.det_id    = kTpcSsdSvtIdentifier; 
+  }
+  else{
+    primvtx.det_id    = kTpcIdentifier; //TPC track by definition
+  }
+  primvtx.id_aux_ent  = 0;
+  primvtx.x           = XVertex.x();
+  primvtx.y           = XVertex.y();
+  primvtx.z           = XVertex.z();
+  primvtx.covar[0]    = C11;
+  primvtx.covar[1]    = C12;
+  primvtx.covar[2]    = C22;
+  primvtx.covar[3]    = C13;
+  primvtx.covar[4]    = C23;
+  primvtx.covar[5]    = C33;
+  primvtx.chisq[0]    = chi2pdof;
+  primvtx.chisq[1]    = 1.0; // Need to find the prob func in Root
+  vertex->AddAt(&primvtx,nrows);
+
+  //temp schizophrenia JB
+  if(mdate<0) {
+    printf(" WARN: ppLMV in schizophrenic mode, no beamLine added, done\n");
+    return kStOk;
+  }
+  //temp schizophrenia JB end
+
+
+  // printf(" Mark the vertex tracks in the global_trk table\n");
+  for (long ll=0; ll<trackAll->GetNRows(); ll++){
+    long idt = sec_pointer->id;
+    long icheck;
+    icheck = 0;
+    for(unsigned int ine=0; ine < (*tracks).size(); ine++){
+      if((*tracks)[ine].glb_track_pointer==0) continue;
+      if( idt == (*tracks)[ine].glb_track_pointer->id )icheck=1;
+    }  
+    Int_t istart_old;
+    if( icheck == 1 ){
+      // This track was included in the Vertex
+      istart_old = sec_pointer->id_start_vertex;
+      sec_pointer->id_start_vertex = 10*IVertex + istart_old;
+    }
+    sec_pointer++;
+  }
+
+
   {// fill some histos
     hPiFi[13]->Fill((*tracks).size());
     for(uint j=0;j<(*tracks).size();j++) {
@@ -283,56 +348,6 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   }  // end of histos
 
-
-  Int_t nrows = vertex->GetNRows();
-  long IVertex = nrows+1; //By definition
-  dst_track_st *sec_pointer = trackAll->GetTable();
-
-
-  // printf(" Mark the vertex tracks in the global_trk table\n");
-  for (long ll=0; ll<trackAll->GetNRows(); ll++){
-    long idt = sec_pointer->id;
-    long icheck;
-    icheck = 0;
-    for(unsigned int ine=0; ine < (*tracks).size(); ine++){
-      if((*tracks)[ine].glb_track_pointer==0) continue;
-      if( idt == (*tracks)[ine].glb_track_pointer->id )icheck=1;
-    }  
-    Int_t istart_old;
-    if( icheck == 1 ){
-      // This track was included in the Vertex
-      istart_old = sec_pointer->id_start_vertex;
-      sec_pointer->id_start_vertex = 10*IVertex + istart_old;
-    }
-    sec_pointer++;
-  }
-
-
-  // printf(" Fill the dst_vertex table\n");
-  dst_vertex_st primvtx;
-  primvtx.vtx_id      = kEventVtxId;
-  primvtx.n_daughters = (*tracks).size();
-  primvtx.id          = IVertex;
-  primvtx.iflag       = 1;
-  if( (Is_SVT == 1) ){
-    primvtx.det_id    = kTpcSsdSvtIdentifier; 
-  }
-  else{
-    primvtx.det_id    = kTpcIdentifier; //TPC track by definition
-  }
-  primvtx.id_aux_ent  = 0;
-  primvtx.x           = XVertex.x();
-  primvtx.y           = XVertex.y();
-  primvtx.z           = XVertex.z();
-  primvtx.covar[0]    = C11;
-  primvtx.covar[1]    = C12;
-  primvtx.covar[2]    = C22;
-  primvtx.covar[3]    = C13;
-  primvtx.covar[4]    = C23;
-  primvtx.covar[5]    = C33;
-  primvtx.chisq[0]    = chi2pdof;
-  primvtx.chisq[1]    = 1.0; // Need to find the prob func in Root
-  vertex->AddAt(&primvtx,nrows);
 
   // printf("end of ppLMV4\n");
   return kStOk;
