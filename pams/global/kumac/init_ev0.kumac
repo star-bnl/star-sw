@@ -42,7 +42,7 @@ maxrowcount globtrk
 tdm/newtable ev0track ev0_track  staf_result(1)
 
 cd /dui/constants/global/magnetic_field
-
+tdm/typespecifier/load $STAR/pams/magnet/idl/mft_control.idl
 tdm/newtable magf mft_control 1
 rowcount magf 1
 tdm/table/cell/putvalue 'magf[0].field_type' 1
