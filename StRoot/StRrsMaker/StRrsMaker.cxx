@@ -1,11 +1,14 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.15 2000/03/21 17:04:21 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.16 2000/04/03 22:52:28 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.15  2000/03/21 17:04:21  lasiuk
- * remove forced delete of singleton classes
+ * Revision 1.16  2000/04/03 22:52:28  lasiuk
+ * check pointer for non-specified GEANT particles
+ *
+ * Revision 1.16  2000/04/03 22:52:28  lasiuk
+ * check pointer for non-specified GEANT particles
  *
  * Revision 1.15  2000/03/21 17:04:21  lasiuk
  * remove forced delete of singleton classes
@@ -464,7 +467,11 @@ Int_t StRrsMaker::Make()
 		    local.position().setZ(rch_hit->x[2]*centimeter);
 
 		    momentum.setX(-1.*rch_hit->p[0]*GeV);
-		
+		    momentum.setY(-1.*rch_hit->p[1]*GeV);
+		    // z-component okay
+		}
+
+		double particleMass =
 		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
 		    0. : mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass();
 		    
@@ -473,7 +480,7 @@ Int_t StRrsMaker::Make()
 			 rch_hit->track_p,
 			 (momentum.x()/abs(momentum)),
 			 (momentum.y()/abs(momentum)),
-			 mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass(),
+			 (momentum.z()/abs(momentum)),
 			 rch_hit->ds*centimeter,
 			 rch_hit->de*GeV,
 			 particleMass,
