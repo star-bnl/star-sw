@@ -1,5 +1,8 @@
-e// $Id: St_tpt_Maker.cxx,v 1.19 1999/02/26 19:24:15 didenko Exp $
+// $Id: St_tpt_Maker.cxx,v 1.20 1999/02/26 20:03:59 didenko Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.20  1999/02/26 20:03:59  didenko
+// fixed stupid mistake
+//
 // Revision 1.19  1999/02/26 19:24:15  didenko
 // fixed histogram maker
 //
@@ -220,10 +223,11 @@ Int_t St_tpt_Maker::Make(){
    MakeHistograms(); // tracking histograms
   return kStOK;
 }
-void St_tpt_Maker::MakeHistograms() {
+  void St_tpt_Maker::MakeHistograms() {
    // go get event number from the event data
-  Int_t evno = 0;
+   Int_t evno = 0;
    if (m_mkfinal) {
+
   St_DataSet *raw = gStChain->DataSet("tpc_raw");
   if (raw) {
     St_DataSetIter nex(raw);
@@ -232,6 +236,7 @@ void St_tpt_Maker::MakeHistograms() {
     evno = ii->data_row;
      }
   }
+
   // Create an iterator
   St_DataSetIter tpc_tracks(m_DataSet);
   //Get the track table:
@@ -306,7 +311,7 @@ void St_tpt_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.19 1999/02/26 19:24:15 didenko Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.20 1999/02/26 20:03:59 didenko Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
