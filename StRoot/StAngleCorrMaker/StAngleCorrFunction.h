@@ -19,7 +19,6 @@
 
 #include "StTrackForPool.h"
 #include "TString.h"
-#include "StEvent.h"
 #include <TH1.h>
 
 

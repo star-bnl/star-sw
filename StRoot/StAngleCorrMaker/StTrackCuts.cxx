@@ -1,4 +1,5 @@
 #include "StTrackCuts.h"
+#include <iostream.h>
 
 StTrackCuts::StTrackCuts() 
 {
@@ -6,15 +7,13 @@ StTrackCuts::StTrackCuts()
   charge = 0;
   rap_lowCut = -10.0;
   rap_upCut = 10.0;
-  p_lowCut = 0.0;
+  p_lowCut = 1.0;
   p_upCut  = 100.0;
   pt_lowCut = 0.0;
   pt_upCut  = 100.0;
-  rchiXY_lowCut= 0.0;
-  rchiXY_upCut= 0.0;
-  rchiZ_lowCut= 0.0;
-  rchiZ_upCut= 0.0;
-  nPoints_lowCut = 0.0;
+  chi2_lowCut= 0.0;
+  chi2_upCut= 10.0;
+  nPoints_lowCut = 30.0;
   nPoints_upCut = 100.0;
 }
 
@@ -23,22 +22,21 @@ StTrackCuts::~StTrackCuts() {}
 Int_t 
 StTrackCuts::TrackSatisfiesCuts(StTrackForPool* t)
 {
-  Double_t trap,tpt,tp,trchixy,trchiz,tch,tnpoints;
+  Double_t trap,tpt,tp,tchi2,tch,tnpoints;
   t->GetPseudoRapidity(trap);
   t->GetMomentum(tp);
   t->GetPt(tpt);
   tch = t->GetCharge();
-  trchixy = t->GetRChiSquaredXY();
-  trchiz = t->GetRChiSquaredZ();
+  tchi2 = t->GetChiSquared();
   tnpoints = t->GetNTPCPoints();
-
+  
   if (chargeCut == "specific" && charge != tch) return 0;
   if (trap < rap_lowCut || trap > rap_upCut  ) return 0;
   if (tp < p_lowCut || tp > p_upCut  ) return 0;
   if (tpt < pt_lowCut || tp > pt_upCut  ) return 0;
-  if (trchixy < rchiXY_lowCut || trchixy > rchiXY_upCut  ) return 0;
-  if (trchiz < rchiZ_lowCut || trchiz > rchiZ_upCut  ) return 0;
+  if (tchi2 < chi2_lowCut || tchi2 > chi2_upCut  ) return 0;
   if (tnpoints < nPoints_lowCut || tnpoints > nPoints_upCut  ) return 0;
+  
   return 1; 
 }
 
@@ -71,17 +69,10 @@ StTrackCuts:: SetPseudoRapidityCuts(Double_t lowerCut, Double_t upperCut)
 }
 
 void 
-StTrackCuts:: SetRChiXYCuts(Double_t lowerCut, Double_t upperCut)
+StTrackCuts:: SetChi2Cuts(Double_t lowerCut, Double_t upperCut)
 {
-  rchiXY_lowCut = lowerCut;
-  rchiXY_upCut = upperCut;
-}
-
-void 
-StTrackCuts:: SetRChiZCuts(Double_t lowerCut, Double_t upperCut)
-{
-  rchiZ_lowCut = lowerCut;
-  rchiZ_upCut = upperCut;
+  chi2_lowCut = lowerCut;
+  chi2_upCut = upperCut;
 }
 
 

@@ -1,5 +1,6 @@
 #include "StMassFunction.h"
 #include <TH1.h>
+#include <iostream.h>
 
 StMassFunction::~StMassFunction() {}
 

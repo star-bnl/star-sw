@@ -1,67 +1,44 @@
-// $Id: StAngleCorrMaker.h,v 1.9 2000/01/09 20:40:51 horsley Exp $
-//
-//
-
 #ifndef StAngleCorrMaker_HH
 #define StAngleCorrMaker_HH
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// StAngleCorrMaker
-//
-// Description: 
-// 
-//
-// Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
-//
-// Author List:
-//  Craig Olgivie, MIT 
-//  Matt Horsley, Yale University
-//
-// History:
-//
-///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include "StAngleCorrAnalysisManager.h"
 #include "TString.h"
-#include <vector>
-#include "StAngleCorrFunction.h"
+#include "TFile.h"
+#include "StAngleCorrAnalysisManager.h" 
 
-class StEvent;
-class StRun;
+#include "StAngleCorrFunction.h"
+#include "StTrackCuts.h"
+#include "StTrackForPool.h"
+#include "StAngleCorrAnalysis.h"
+
 
 class StAngleCorrMaker : public StMaker {
 
 private:
   Bool_t drawinit;
   Char_t collectionName[256];
-  StAngleCorrAnalysisManager corrAnalysis; 
-  TString track1,track2;
+  
+  StAngleCorrAnalysisManager corrAnalysis; //!  
   TFile* mOutput;
-
-protected:
+  TString track1,track2; 
   
 public:
-  // ROOT
-  StAngleCorrMaker(const Char_t *name="angle corr maker");
+ 
+  StAngleCorrMaker(const Char_t *name="angleCorrMaker");
   virtual ~StAngleCorrMaker();
   virtual void  Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t Make();
   virtual Int_t Finish();
-
-  // analysis
-  void  AddAnalysis(TString analysisName);
-  void  SetCorrelationFunction(TString analysisName, TString functionName);
+  
+  void  AddAnalysis(TString analysisName);    
+  void  SetCorrelationFunction(TString analysisName, TString functionName); 
   void  SetFastestTrackAnalysis(TString analysisName, int fastAnalysis);
   void  SetSignalHist(TString analysisName, TH1D* sHist);
   void  SetBackgroundHist(TString analysisName, TH1D* bHist);
-  void SetNBackgroundPairs(TString analysisName, int number, Double_t fraction);
-  void SetNBackgroundEvents(TString analysisName, int number);
+  void  SetNBackgroundPairs(TString analysisName, int number);
+  void  SetNBackgroundEvents(TString analysisName, int number);
 
-  // cuts
-  // tracks
   void  SetMomentumCutsTrack1(TString analysisName, double lowerCut, double upperCut);
   void  SetMomentumCutsTrack2(TString analysisName, double lowerCut, double upperCut);
   void  SetPtCutsTrack1(TString analysisName, double lowerCut, double upperCut);
@@ -70,13 +47,18 @@ public:
   void  SetChargeTrack2(TString analysisName, Int_t charge);
   void  SetRapidityCutsTrack1(TString analysisName, double lowerCut, double upperCut);
   void  SetRapidityCutsTrack2(TString analysisName, double lowerCut, double upperCut);	 
-  // event
-  void  SetMultiplicityCuts(TString analysisName, double lowerCut, double upperCut);
   
-  // diagnostics
+  void  SetMultiplicityCuts(TString analysisName, double lowerCut, double upperCut);
+ 
   void SetDiagnosticsON(TString analysisName);
+ 
+  
+      virtual const char *GetCVS() const	{
+	static const char cvs[]="Tag $Name:  $ $Id: StAngleCorrMaker.h,v 1.10 2000/02/13 20:50:00 horsley Exp $ built "__DATE__" "__TIME__ ;
+	return cvs;
+      }
 
-  ClassDef(StAngleCorrMaker, 1)
+ ClassDef(StAngleCorrMaker,1)
 };
 
 #endif

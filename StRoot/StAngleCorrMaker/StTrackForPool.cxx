@@ -7,8 +7,7 @@ StTrackForPool::StTrackForPool()
   mPy=0.0;
   mPz=0.0;
   mPsuedoRap=0.0;
-  mRChiXY = 0.0;
-  mRChiZ = 0.0;
+  mChi2 = 0.0;
   mNTPCPoints=0;
   mCharge = 0;
 }
@@ -74,16 +73,11 @@ StTrackForPool::SetTrackIDNumber(Int_t id)
 
 
 void
-StTrackForPool::SetRChiSquaredXY(Double_t chiXY) 
+StTrackForPool::SetChiSquared(Double_t chi2) 
 {
-   mRChiXY = chiXY;
+   mChi2 = chi2;
 }
 
-void
-StTrackForPool::SetRChiSquaredZ(Double_t chiZ) 
-{
-   mRChiZ = chiZ;
-}
 
 void
 StTrackForPool::SetNTPCPoints(Int_t npoints) 
@@ -92,16 +86,11 @@ StTrackForPool::SetNTPCPoints(Int_t npoints)
 }
 
 Double_t
-StTrackForPool::GetRChiSquaredXY() 
+StTrackForPool::GetChiSquared() 
 {
-   return mRChiXY;
+   return mChi2;
 }
 
-Double_t
-StTrackForPool::GetRChiSquaredZ() 
-{
-   return mRChiZ;
-}
 
 Int_t
 StTrackForPool::GetNTPCPoints() 
