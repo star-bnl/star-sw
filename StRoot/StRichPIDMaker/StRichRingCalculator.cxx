@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.6 2000/11/22 16:58:42 lasiuk Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.7 2001/02/07 16:03:34 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
+ *  Revision 2.7  2001/02/07 16:03:34  lasiuk
+ *  systemOfUnits added
+ *  getRing() modified for return value
+ *  inline where possible
+ *
  *  Revision 2.6  2000/11/22 16:58:42  lasiuk
  *  add this to argument
  *
@@ -42,11 +47,12 @@
  **********************************************************/
 
 #include "StRichRingCalculator.h"
+
 #include "StRichRingDefinition.h" 
 #include "StRichArea.h"
 #include "StRichMaterialsDb.h"
 
-
+#include "SystemOfUnits.h"
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -57,33 +63,31 @@ StRichRingCalculator::StRichRingCalculator(StRichTrack* track) {
     this->init(track);
 }
 
-
-
 StRichRingCalculator::StRichRingCalculator(StRichTrack* track,
 					   StParticleDefinition* particle)  {
     this->init(track);
     this->setParticleType(particle);
 }
 
-
 void StRichRingCalculator::init(StRichTrack* track) {
-  mInnerRing = new StRichRingPoint(track,eInnerRing);
-  mOuterRing = new StRichRingPoint(track,eOuterRing);
-  mMeanRing  = new StRichRingPoint(track,eMeanRing);
-  
-  mInnerMinimization = new StRichMinimization(mInnerRing);
-  mMeanMinimization  = new StRichMinimization(mMeanRing);
-  mOuterMinimization = new StRichMinimization(mOuterRing);
-  
-  mConstantAreaAngle=M_PI;
-  
-  mMonteCarloSwitch = false;
-  mDrawRingPoints=false;
 
-  mRichMaterialsDb = StRichMaterialsDb::getDb();
-  mRichGeometryDb  = StRichGeometryDb::getDb();
+    mInnerRing = new StRichRingPoint(track,eInnerRing);
+    mOuterRing = new StRichRingPoint(track,eOuterRing);
+    mMeanRing  = new StRichRingPoint(track,eMeanRing);
+    
+    mInnerMinimization = new StRichMinimization(mInnerRing);
+    mMeanMinimization  = new StRichMinimization(mMeanRing);
+    mOuterMinimization = new StRichMinimization(mOuterRing);
+    
+    mConstantAreaAngle=M_PI;
+  
+    mMonteCarloSwitch = false;
+    mDrawRingPoints=false;
 
-  mMonteCarloArea.Set(18);
+    mRichMaterialsDb = StRichMaterialsDb::getDb();
+    mRichGeometryDb  = StRichGeometryDb::getDb();
+
+    mMonteCarloArea.Set(18);
 }
 
 
@@ -146,34 +150,19 @@ double StRichRingCalculator::calculateArea(bool gapCorrection, double angleCut, 
   vectorOfPtsToDraw.clear();
   vectorOfPtsToDraw.resize(0);
   vectorOfPtsToDraw  = areaCalc.getPtsToDraw();
-
  
   return mTotalArea;
 }
 
-void StRichRingCalculator::drawRingPoints(bool flag) {
-  mDrawRingPoints = flag;
-}
-
-TArrayD StRichRingCalculator::getMonteCarloArea() {
-  return mMonteCarloArea;
-}
-
-
-vector<StThreeVectorF>&  StRichRingCalculator::getMonteCarloPoints() {
-  return mMonteCarloPoints;
-}
-
-void StRichRingCalculator::setMonteCarloSwitch(bool set) {
-  mMonteCarloSwitch = set;
-}
-
 StRichRingPoint* StRichRingCalculator::getRing(StRichRingDefinition ringType) {
 
-    if (ringType==eInnerRing)  return  mInnerRing;
-    if (ringType==eOuterRing)  return  mOuterRing;
-    if (ringType==eMeanRing)   return  mMeanRing;
-    return 0;
+    StRichRingPoint* theRing = 0;
+
+    if(ringType==eInnerRing)  theRing = mInnerRing;
+    else if(ringType==eOuterRing)  theRing = mOuterRing;
+    else if(ringType==eMeanRing)   theRing = mMeanRing;
+    
+    return theRing;
 }
 
 double StRichRingCalculator::getRingWidth() const {
@@ -224,14 +213,9 @@ void StRichRingCalculator::clear() {
   mMeanPathInQuartz   = 0.0;  
 }
 
-vector<StRichAreaSegment >& StRichRingCalculator::getPtsToDraw() { return vectorOfPtsToDraw;}
-
-
-
 double StRichRingCalculator::getNormalArea() {
 
   double normalArea=0;
-
 
   if (mInnerRing && mInnerRing->getParticleType() &&
       mInnerRing->getTrack() &&  mInnerRing->getTrack()->fastEnough( mInnerRing->getParticleType())) {
@@ -271,20 +255,3 @@ double StRichRingCalculator::getNormalArea() {
 
   return normalArea;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
