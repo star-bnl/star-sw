@@ -1,29 +1,19 @@
-// $Id: bfcread_dstBranch.C,v 1.3 2000/03/13 17:50:17 kathy Exp $
-// $Log: bfcread_dstBranch.C,v $
-// Revision 1.3  2000/03/13 17:50:17  kathy
-// putting in example macro to show how to read and navigate through each type of bfc DST production output files - still working on tags.root
-//
-// Revision 1.2  2000/01/19 15:46:05  kathy
-// change default input files to point to ones in /afs/rhic/star/data/samples
-//
-// Revision 1.1  2000/01/07 19:22:52  kathy
-// add bfcread_dstBranch,bfcread_runcoBranch macros to show how to read dst produced from bfc.C and navigate through different branches of the file and find and list table information
-//
+// $Id: bfcread_geantBranch.C,v 1.1 2000/03/13 17:50:17 kathy Exp $
+// $Log $
 
 //======================================================================
 // owner:  Kathy Turner
-// what it does:  reads .dst.root file produced from bfc & shows how
-//                to find the dst tables
-//                 - sets branch to dstBranch
-//                 - gets Data Set "dst"
-//                 - prints out list of tables & # rows it finds
-//
+// what it does:  reads .dst.root file produced from bfc & then goes to
+//                the geant.root branch
+//                - finds data set "geant"
+//                - loops over and prints out list of objects 
+//                   and tables
 //=======================================================================
 
 class StChain;
 StChain *chain;
 
-void bfcread_dstBranch(
+void bfcread_geantBranch(
  Int_t nevents=2, 
  const char *MainFile=
 "/star/rcf/test/new/tfs_redhat61/year_1h/hc_standard/hc_standard.40_evts.dst.root")
@@ -42,7 +32,7 @@ void bfcread_dstBranch(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
+  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
 
 // --- now execute chain member functions
   chain->Init();
@@ -60,12 +50,13 @@ EventLoop: if (i <= nevents && !istat) {
     istat = chain->Make(i);
     cout << "     istat value returned from chain Make = " << istat << endl;
 
+
 // Now look at the data in the event:
     int countObj=0;
     int countTable=0;
 
     if (!istat) {
-      ds=chain->GetDataSet("dst");
+      ds=chain->GetDataSet("geant");
       St_DataSetIter tabiter(ds);
       if (ds) {
 //        ds->ls(2);  
@@ -73,18 +64,18 @@ EventLoop: if (i <= nevents && !istat) {
 //	  cout << " I have found an object! " <<endl;
           countObj++;
 
-
 //.. count all tables that exist:
           if (obj->InheritsFrom("St_Table")) {
             tabl = (St_Table *)tabiter.Find(obj->GetName());
             if (tabl) {
               countTable++;
-              cout << " Found Object (Table) "<< endl;
+              cout << " Found Object (Table) " << endl;
               cout << "   Name = " <<  obj->GetName() << 
                       "    # rows =  " << tabl->GetNRows() << endl;
              }
           }
 //.. end of counting all tables that exist
+
 
 	}      
       }
@@ -102,13 +93,10 @@ EventLoop: if (i <= nevents && !istat) {
     goto EventLoop;
    }
 
-  cout << " bfcread DST Branch: passed event loop " << endl;
+  cout << " bfcread GEANT Branch: passed event loop " << endl;
 
  chain->Finish();   
 }
- 
-
-
  
 
 
