@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.18  2003/09/17 00:55:59  suaide
+// Fixed bug. Chain was crashing because some data members were not initialized
+//
 // Revision 1.17  2003/09/02 17:58:03  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -133,6 +136,8 @@ StPointCollection::StPointCollection():TDataSet("Default")
   SetTitle("EmcPoints");
   mPrint = kTRUE;
   mBField = 0.5;
+  mNPoints =0;
+  mNPointsReal=0;
 }
 //_____________________________________________________________________________
 StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
@@ -140,6 +145,8 @@ StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
   SetTitle("EmcPoints");
   mPrint = kTRUE;
   mBField = 0.5;
+  mNPoints =0;
+  mNPointsReal=0;
 }
 //_____________________________________________________________________________
 StPointCollection::~StPointCollection()
