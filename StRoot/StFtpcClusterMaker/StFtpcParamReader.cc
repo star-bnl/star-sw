@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.17 2001/07/11 21:19:31 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.18 2002/01/21 22:14:56 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.18  2002/01/21 22:14:56  jcs
+// added values for temperature/pressure calculations to ftpcClusterPars
+//
 // Revision 1.17  2001/07/11 21:19:31  jcs
 // remove obsolete entries in tables
 //
@@ -93,6 +96,14 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     m3PadGaussError = detTable->threePadGaussError;
     mZDirectionError = detTable->zDirectionError;
     mNormalizedNowPressure = detTable->normalizedNowPressure;
+    mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
+    mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
+    mMinPressure = detTable->minPressure;
+    mMaxPressure = detTable->maxPressure;
+    mGasTemperatureWest = detTable->gasTemperatureWest;
+    mGasTemperatureEast = detTable->gasTemperatureEast;
+    mMinGasTemperature = detTable->minGasTemperature;
+    mMaxGasTemperature = detTable->maxGasTemperature;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
   }
@@ -145,6 +156,9 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
                                      St_ftpcSlowSimGas  *gas, 
                                      St_ftpcSlowSimPars *param)
 {
+
+  mStandardPressure = atmosphere/(100*pascal);
+
   // slow simulator gas table has to be copied to be accessible as separate arrays
   mNumberOfFssGasValues = gas->GetNRows();
   mFssGasEField = new Float_t[mNumberOfFssGasValues];
@@ -212,6 +226,8 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     m3PadGaussError = detTable->threePadGaussError;
     mZDirectionError = detTable->zDirectionError;
     mNormalizedNowPressure = detTable->normalizedNowPressure;
+    mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
+    mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
   }
@@ -226,6 +242,10 @@ StFtpcParamReader::~StFtpcParamReader()
 
   // write back clusterpars table entries that have set functions:
   mClusterParsTable->normalizedNowPressure = mNormalizedNowPressure;
+  mClusterParsTable->adjustedAirPressureWest = mAdjustedAirPressureWest;
+  mClusterParsTable->adjustedAirPressureEast = mAdjustedAirPressureEast;
+  mClusterParsTable->gasTemperatureWest = mGasTemperatureWest;
+  mClusterParsTable->gasTemperatureEast = mGasTemperatureEast;
 
   // delete allocated memory
   delete[] mFssGasEField;
