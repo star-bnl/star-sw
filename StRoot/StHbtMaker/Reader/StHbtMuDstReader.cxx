@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.6 2004/02/20 21:08:13 magestro Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.7 2004/02/24 19:45:34 magestro Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -121,7 +121,7 @@ TClonesArray* StHbtMuDstReader::clonesArray(TClonesArray* p, const char* type, i
     p = new TClonesArray(type, size);
     counter=0;
   }
-  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",__PRETTY_FUNCTION__);
+  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",__PRETTYF__);
   return p;
 }
 //-----------------------------------------------------------------------
@@ -287,7 +287,7 @@ void StHbtMuDstReader::openRead() {
 //-----------------------------------------------------------------------
 void StHbtMuDstReader::read(){
   DEBUGMESSAGE1("");
-    if ( !(mEventCounter<mChain->GetEntries()) ) throw StMuExceptionEOF("end of input",__PRETTY_FUNCTION__);
+    if ( !(mEventCounter<mChain->GetEntries()) ) throw StMuExceptionEOF("end of input",__PRETTYF__);
   mChain->GetEntry(mEventCounter);
   DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
   mEventCounter++;
@@ -308,7 +308,7 @@ void StHbtMuDstReader::openWrite(string fileName) {
   DEBUGMESSAGE2("now create file");
   mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
   
-  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTY_FUNCTION__);
+  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
 
   mCurrentFile->SetCompressionLevel(mCompress);
   
@@ -321,7 +321,7 @@ void StHbtMuDstReader::openWrite(string fileName) {
 
   //  muDst stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
-  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTY_FUNCTION__);
+  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
     DEBUGMESSAGE("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -392,7 +392,7 @@ void StHbtMuDstReader::fillTrees(StEvent* ev, StMuCut* cut){
 void StHbtMuDstReader::fillEvent(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE1("");
   StMuEvent typeOfEvent;
-  if (!ev) throw StMuExceptionNullPointer("no StEvent",__PRETTY_FUNCTION__);
+  if (!ev) throw StMuExceptionNullPointer("no StEvent",__PRETTYF__);
   StTimer timer;
   timer.start();
   if (!cut || cut->pass(ev)) {
@@ -513,7 +513,7 @@ int StHbtMuDstReader::addTrack(TClonesArray* tca, const StEvent*event, const StT
   /// if (!tca || !track) return index; /// I made sure that the array anf the track is there
   int counter = tca->GetEntries();
   try{
-    if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",__PRETTY_FUNCTION__);
+    if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",__PRETTYF__);
     // add StRichSpectra if StRichPidTraits are found 
     // we have to do this more elegant
     StRichSpectra* rich = richSpectra(track);
@@ -546,7 +546,7 @@ StRichSpectra* StHbtMuDstReader::richSpectra(const StTrack* track) {
 void StHbtMuDstReader::fillStrange(StStrangeMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   /// now fill the strangeness stuff
-  if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",__PRETTY_FUNCTION__);
+  if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",__PRETTYF__);
  
   StStrangeEvMuDst ev;
   StV0MuDst v0;     
@@ -683,8 +683,8 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
- * Revision 1.6  2004/02/20 21:08:13  magestro
- * Changed all __PRETTYF__ to __PRETTY_UNCTION__ to match StMuDebug.h
+ * Revision 1.7  2004/02/24 19:45:34  magestro
+ * reverted to 1.5 code
  *
  * Revision 1.5  2004/02/17 16:46:38  jeromel
  * PF to PRETTYF
