@@ -42,6 +42,11 @@ class StiDetector;
 
 #define DEG2RAD 57.2958
 
+StiHitErrorCalculator::StiHitErrorCalculator(){
+}
+StiHitErrorCalculator::~StiHitErrorCalculator(){
+}
+
 StiHitErrorDefault::StiHitErrorDefault()
      :mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance()),
       fTpcSource(0), fSvtSource(0), fFtpcSource(0), 

@@ -30,7 +30,7 @@ class StiHitErrorCalculator
   virtual ~StiHitErrorCalculator();
 
   //Get errors
-  virtual pair<double,double> getHitError(StiHit*, double, double);   //input z and dip angle
+  virtual pair<double,double> getHitError(StiHit*, double, double) = 0;   //input z and dip angle
 };
 
 class StiHitErrorDefault: public Observer, public StiHitErrorCalculator
