@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.24 2000/08/08 19:15:22 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.25 2000/08/09 13:00:03 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.25  2000/08/09 13:00:03  hardtke
+ * Add protections to make sure trigger table is filled before using
+ *
  * Revision 1.24  2000/08/08 19:15:22  hardtke
  * use correct trigger time offset in case of laser
  *
@@ -264,7 +267,7 @@ StTpcGainI* StTpcDb::Gain(int sector){
    char dbname[25],dbname2[25];
    sprintf(dbname,"Sector_%.2d/tpcISGains",sector);
    sprintf(dbname2,"Sector_%.2d/tpcOSGains",sector);
-   printf("Getting %s , %s\n",dbname,dbname2);
+   //   printf("Getting %s , %s\n",dbname,dbname2);
    if (tpc[dbIndex]){
     St_DataSet* tpd = tpc[dbIndex]->Find(dbname);
     St_DataSet* tpd2 = tpc[dbIndex]->Find(dbname2);
@@ -291,7 +294,7 @@ StTpcT0I* StTpcDb::T0(int sector){
    char dbname[40],dbname2[40];
    sprintf(dbname,"Sector_%.2d/tpcISTimeOffsets",sector);
    sprintf(dbname2,"Sector_%.2d/tpcOSTimeOffsets",sector);
-   printf("Getting %s , %s \n",dbname,dbname2);
+   //   printf("Getting %s , %s \n",dbname,dbname2);
    if (tpc[dbIndex]){
     St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
     St_DataSet* tpd2 = (St_DataSet*)tpc[dbIndex]->Find(dbname2);
@@ -346,7 +349,7 @@ float StTpcDb::triggerTimeOffset(){
   }
   //  assert(trig);
   float theoffset = 1e-6*(*toff)[0].offset;
-  if(trigtype&&(*trigtype)[0].TriggerActionWd==36865) theoffset = 1e-6*(*toff)[0].laserOffset;
+  if(trigtype&&trigtype->HasData()){if((*trigtype)[0].TriggerActionWd==36865) theoffset = 1e-6*(*toff)[0].laserOffset;}
   return theoffset;
 }
 
