@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.20 2000/02/10 23:02:45 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.20  2000/02/10 23:02:45  kathy
+//! changed limits on linear impact param hist; added new hist of detector id values for dst_point table
+//!
 //! Revision 1.19  2000/02/10 21:31:29  kathy
 //! add another set of impact param hist so we can see them in linear scale too
 //!
@@ -74,7 +77,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.20 2000/02/10 23:02:45 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -420,6 +423,7 @@ class StQABookHist : public StMaker {
    TH1F     *m_pnt_tot;     //! number of hits total
    TH1F     *m_pnt_tot_med; //! number of hits total, med range
    TH1F     *m_pnt_tot_sm;  //! number of hits total, small range
+   TH1F     *m_pnt_id;      //! detector ID of the hit
 
    TH1F     *m_pnt_tpc;   //! number of hits tpc
    TH1F     *m_pnt_svt;   //! number of hits svt
@@ -509,7 +513,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.20 2000/02/10 23:02:45 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
