@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.12 2000/01/05 22:12:03 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.13 2000/01/13 17:18:04 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.13  2000/01/13 17:18:04  kathy
+// updated bfcread_hist* macros so that they can now use the new *PrintList methods from StHistUtil to only print a subset (given a list of names) of histograms from the given Maker Directory; also updated documentation
+//
 // Revision 1.12  2000/01/05 22:12:03  kathy
 // changed input file to current one
 //
@@ -53,12 +56,10 @@
 //                 you probably used to write the *.hist.root file)
 //            NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
 //
-// standard Maker names in bfc ==>
+// standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
-// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
-//
-//
+//  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //======================================================================
 
 
