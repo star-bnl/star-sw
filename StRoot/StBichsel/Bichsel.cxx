@@ -3,6 +3,7 @@
 ClassImp(Bichsel);
 TString   Bichsel::m_Tags[kTotal] = {"P10","Bi","PAI"};
 dEdxParameterization *Bichsel::m_dEdxParameterizations[kTotal] = {0,0,0};
+Bichsel* Bichsel::fgBichsel = 0;
 //________________________________________________________________________________
 Bichsel::Bichsel(const Char_t *tag, Int_t keep3D) : m_Type(-1), m_Tag(tag), m_dEdxParameterization(0) {
   
@@ -11,6 +12,12 @@ Bichsel::Bichsel(const Char_t *tag, Int_t keep3D) : m_Type(-1), m_Tag(tag), m_dE
   if (! m_dEdxParameterizations[m_Type]) 
     m_dEdxParameterizations[m_Type] = new dEdxParameterization(m_Tag.Data(), keep3D);
   m_dEdxParameterization = m_dEdxParameterizations[m_Type];
+  fgBichsel = this;
+}
+//________________________________________________________________________________
+Bichsel *Bichsel::Instance(const Char_t *tag, Int_t keep3D) {
+  if (!fgBichsel) new Bichsel(tag, keep3D);
+  return fgBichsel;
 }
 //________________________________________________________________________________
 void Bichsel::Clean() {

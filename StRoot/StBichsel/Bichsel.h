@@ -21,9 +21,11 @@ class Bichsel {
   TString               m_Tag;
   static dEdxParameterization *m_dEdxParameterizations[kTotal]; //!
   dEdxParameterization *m_dEdxParameterization; //!
+  static Bichsel       *fgBichsel; //! last instance          
  public:
   Bichsel(const Char_t *tag="P10", Int_t keep3D=0);
   virtual ~Bichsel() {};
+  static Bichsel* Instance(const Char_t *tag="P10", Int_t keep3D=0);
   static Double_t GetdEdxResolution(Int_t k=1, Double_t TrackLengthInTPC=60);
   static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
   static Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
