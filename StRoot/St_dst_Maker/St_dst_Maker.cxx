@@ -1,5 +1,9 @@
-// $Id: St_dst_Maker.cxx,v 1.76 2003/09/02 17:59:26 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.77 2004/03/02 16:12:46 jcs Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.77  2004/03/02 16:12:46  jcs
+// Get dst_mon_soft_ftpc table from fglobal
+// Create the table with all entries set to zero is it doesn't exist
+//
 // Revision 1.76  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -225,6 +229,7 @@
 #include "global/St_fill_dst_event_summary_Module.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
+#include "tables/St_dst_mon_soft_ftpc_Table.h"
 #include "tables/St_dst_mon_soft_ctb_Table.h"
 #include "tables/St_dst_mon_soft_emc_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
@@ -235,7 +240,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.76 2003/09/02 17:59:26 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.77 2004/03/02 16:12:46 jcs Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -401,6 +406,26 @@ Int_t  St_dst_Maker::Filler(){
      } 
      if(!globtrk) {globtrk = new St_dst_track("globtrk",1);AddGarb(globtrk);}
   }
+
+  //  Get FTPC monitor soft table if it exists
+  // otherwise create an empty ftpc monitor soft table
+     St_dst_mon_soft_ftpc *mon_soft_ftpc =  NULL;
+     St_DataSet *ds=0, *mk=0;
+     mk = GetInputDS("fglobal");
+     if (mk) { 
+        ds = mk->Find("mon_soft_ftpc");
+        if (ds) {
+           ds->Shunt(dst);
+           mon_soft_ftpc =  (St_dst_mon_soft_ftpc *) dstI("mon_soft_ftpc");
+        }
+      } 
+      if (!mon_soft_ftpc) {
+           //Make (empty) ftpc monitor soft table
+           // fcl_fppoint and fpt_fptrack no longer exist
+           St_dst_mon_soft_ftpc *mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
+           dstI.Add(mon_soft_ftpc);
+           mon_soft_ftpc->SetNRows(1);
+       }	   
 
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   //Make empty vertex table if none exists
@@ -715,14 +740,6 @@ Int_t  St_dst_Maker::Filler(){
 #endif
   
  // dst_mon_soft
-  St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
-  St_fpt_fptrack *fpt_fptrack = 0;
-  if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (!fpt_fptrack) {fpt_fptrack = new St_fpt_fptrack("fpt_fptrack",1); AddGarb(fpt_fptrack);}
-  St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
-  St_fcl_fppoint *fcl_fppoint = 0;
-  if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
-  if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
   if (!evt_match)   {evt_match   = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
@@ -735,7 +752,6 @@ Int_t  St_dst_Maker::Filler(){
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_monitor_soft_filler" << endm;
     
-  St_dst_mon_soft_ftpc *mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
   St_dst_mon_soft_glob *mon_soft_glob = new St_dst_mon_soft_glob("mon_soft_glob",1);
   St_dst_mon_soft_svt  *mon_soft_svt  = new St_dst_mon_soft_svt("mon_soft_svt",1);
   St_dst_mon_soft_tpc  *mon_soft_tpc  = new St_dst_mon_soft_tpc("mon_soft_tpc",1);
@@ -743,7 +759,6 @@ Int_t  St_dst_Maker::Filler(){
   St_dst_mon_soft_emc  *mon_soft_emc  = new St_dst_mon_soft_emc("mon_soft_emc",1);
   St_dst_mon_soft_l3  *mon_soft_l3  = new St_dst_mon_soft_l3("mon_soft_l3",1);
   St_dst_mon_soft_rich  *mon_soft_rich  = new St_dst_mon_soft_rich("mon_soft_rich",1);
-  dstI.Add(mon_soft_ftpc);
   dstI.Add(mon_soft_glob);
   dstI.Add(mon_soft_svt);
   dstI.Add(mon_soft_tpc);
@@ -767,10 +782,10 @@ Int_t  St_dst_Maker::Filler(){
   //dst_mon_soft_rich_st *mon_rich = mon_soft_rich->GetTable();
 
   iRes = dst_monitor_soft_filler(tpcluster, 
-				 tphit, scs_spt, fcl_fppoint,
-				 tptrack,stk_track,fpt_fptrack,
+				 tphit, scs_spt,
+				 tptrack,stk_track,
 				 evt_match, ctb_cor, vertex, event_summary, 
-                                 mon_soft_ftpc, mon_soft_glob,
+                                  mon_soft_glob,
                                  mon_soft_svt, mon_soft_tpc);
   //===========================================================================
   if (iRes !=kSTAFCV_OK) {
