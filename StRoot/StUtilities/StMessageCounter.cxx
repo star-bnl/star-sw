@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.13 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.14 2000/03/24 14:48:39 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.14  2000/03/24 14:48:39  genevb
+// Insurance on end-of-strings
+//
 // Revision 1.13  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -89,8 +92,9 @@ void StMessageCounter::SetLimit(const char* str, int n) {
           index++;
         }
       }
-      temp = new char[len];
-      limitWList.push_back(strcpy(temp,str));
+      temp = new char[len+1];
+      temp[len] = 0;
+      limitWList.push_back(strncpy(temp,str,len));
       limitWCountList.push_back(n);
     }
   } else {                              // Limits by string
@@ -109,8 +113,9 @@ void StMessageCounter::SetLimit(const char* str, int n) {
       index++;
     }
     if (n < 0) return;
-    temp = new char[len];
-    limitList.push_back(strcpy(temp,str));
+    temp = new char[len+1];
+    temp[len] = 0;
+    limitList.push_back(strncpy(temp,str,len));
     limitNList.push_back(n);
     limitNCountList.push_back(0);
   }
