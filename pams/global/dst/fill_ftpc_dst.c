@@ -80,10 +80,9 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
   /* Locate primary vertex  */
   ivtx_prim = -1;
   for (i=0; i<dst_vertex_h->nok; i++) {
-    if (dst_vertex[i].vtx_id == kEventVtxId  && dst_vertex[i].iflag == 1){
+    if (dst_vertex[i].vtx_id == kEventVtxId  && dst_vertex[i].iflag == 1)
        ivtx_prim = i;
        break;
-    } 
   }
 
   /* Loop over all tracks in FTPC track table */
@@ -109,7 +108,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
 /*  Loop over all hits on track       */
      for (ihit=0; ihit<MAXHITS; ihit++) {
-printf(" fptrack[itrk].hitid[%d] = %d\n",ihit,fptrack[itrk].hitid[ihit]);
         if (fptrack[itrk].hitid[ihit] > -1){
            /* hitid array filled by FORTRAN routine, must -1 for C routine */
            iPoint =  fptrack[itrk].hitid[ihit] - 1;
@@ -130,7 +128,6 @@ printf(" fptrack[itrk].hitid[%d] = %d\n",ihit,fptrack[itrk].hitid[ihit]);
                  dst_track[dst_track_h->nok].det_id  = kFtpcEastId;   /* East */
               }
            }
-printf("fppoint[%d].row = %d\n",iPoint,fppoint[iPoint].row);
             dst_track[dst_track_h->nok].map[0] = 
                     dst_track[dst_track_h->nok].map[0] 
                   + pow(2,fppoint[iPoint].row);
@@ -228,7 +225,6 @@ printf("fppoint[%d].row = %d\n",iPoint,fppoint[iPoint].row);
                            fppoint[iPoint].y;
            dst_track[dst_track_h->nok].x_last[2]     = 
                            fppoint[iPoint].z;
-          break;
         }
      }
 
@@ -241,33 +237,6 @@ printf("fppoint[%d].row = %d\n",iPoint,fppoint[iPoint].row);
     dst_track[dst_track_h->nok].impact  = 0;
 
 
-/*    DEBUG     JCS    */
-printf("dst_track[dst_track_h->nok].id = %d\n",dst_track[dst_track_h->nok].id);
-printf(".iflag = %x\n",dst_track[dst_track_h->nok].iflag);
-printf(".det_id = %d\n",dst_track[dst_track_h->nok].det_id);
-printf(".method = %d\n",dst_track[dst_track_h->nok].method);
-printf(".pid = %d\n",dst_track[dst_track_h->nok].pid);
-printf(".n_point = %d\n",dst_track[dst_track_h->nok].n_point);
-printf(".n_max_point = %d\n",dst_track[dst_track_h->nok].n_max_point);
-printf(".icharge = %d\n",dst_track[dst_track_h->nok].icharge);
-printf(".id_start_vertex = %ld\n",dst_track[dst_track_h->nok].id_start_vertex);
-printf(".map[0] = %lx\n",dst_track[dst_track_h->nok].map[0]);
-printf(".map[1] = %lx\n",dst_track[dst_track_h->nok].map[1]);
-printf(".r0 = %f\n",dst_track[dst_track_h->nok].r0);
-printf("phi0 = %f\n",dst_track[dst_track_h->nok].phi0);
-printf("z0 = %f\n",dst_track[dst_track_h->nok].z0);
-printf("psi = %f\n",dst_track[dst_track_h->nok].psi);
-printf("tanl = %f\n",dst_track[dst_track_h->nok].tanl);
-printf("invpt = %f\n",dst_track[dst_track_h->nok].invpt);
-printf("curvature = %f\n",dst_track[dst_track_h->nok].curvature);
-printf("x_first[0] =  %f\n",dst_track[dst_track_h->nok].x_first[0]);
-printf("x_first[1] =  %f\n",dst_track[dst_track_h->nok].x_first[1]);
-printf("x_first[2] =  %f\n",dst_track[dst_track_h->nok].x_first[2]);
-printf("x_last[0] =  %f\n",dst_track[dst_track_h->nok].x_last[0]);
-printf("x_last[1] =  %f\n",dst_track[dst_track_h->nok].x_last[1]);
-printf("x_last[2] =  %f\n",dst_track[dst_track_h->nok].x_last[2]);
-printf("length =  %f\n",dst_track[dst_track_h->nok].length);
-printf("impact  =  %f\n",dst_track[dst_track_h->nok].impact);
 
 /*  Fill dst point table for current track */
 
