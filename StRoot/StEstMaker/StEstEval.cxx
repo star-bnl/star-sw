@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstEval.cxx,v 1.2 2001/01/25 17:43:07 lmartin Exp $
+ * $Id: StEstEval.cxx,v 1.3 2001/01/31 16:43:08 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstEval.cxx,v $
+ * Revision 1.3  2001/01/31 16:43:08  lmartin
+ * mParams[]->debug replaced by mDebug
+ *
  * Revision 1.2  2001/01/25 17:43:07  lmartin
  * Histogram filling removed
  * Evaluation result dumping into an external file removed
@@ -58,7 +61,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
   double maxdist;
 
 
-  if(mParams[0]->debug>2) cout << "Eval :: Start"<<endl;
+  if(mDebugLevel>2) cout << "Eval :: Start"<<endl;
 
   cout<<"+------------------------------------------------+"<<endl;
   cout <<"| EVAL for onoffmatrix= "<<onoffmatrix
