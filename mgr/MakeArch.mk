@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.62  1999/02/25 22:24:39  fisyak
+#  Add ROOTCINTD flag
+#
 #  Revision 1.61  1999/02/14 23:10:07  fisyak
 #  split tables for HP, remove duplicates for root4star
 #
@@ -161,7 +164,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/02/14 23:10:07 $ 
+#             Last modification $Date: 1999/02/25 22:24:39 $ 
 #. default setings
 
 MAKE  := gmake
@@ -456,7 +459,7 @@ endif
   OSFID += NEW_ARRAY_ON
     CXX     := aCC
     CC      := cc
-    LD      := ld
+    LD      := $(CXX)
     SO      := $(CXX)
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
@@ -465,7 +468,7 @@ endif
 	else
 		CXXFLAGS += +d
 	endif              # from Brian
-    LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E,+vnocompatwarnings
+    LDFLAGS   := $(DEBUG) -z -Wl,+s -Wl,-E,+vnocompatwarnings
     EXEFLAGS  := $(LDFLAGS) -Wl,-N 
     SOFLAGS   := $(DEBUG)  -b -z  
 #    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld /usr/local/lib/libMagick.a
@@ -556,7 +559,7 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
   STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace
-
+  ROOTCINTD = -DSOLARIS
   OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
