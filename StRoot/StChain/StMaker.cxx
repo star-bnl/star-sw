@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.93 2000/05/20 01:17:54 perev Exp $
+// $Id: StMaker.cxx,v 1.94 2000/05/30 21:04:41 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -534,8 +534,8 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
      table->ReAllocate();
      memset((void *)table->At(table->GetNRows()),127,table->GetRowSize());
      if (setSize && (setSize - table->GetTableSize() > 100))
-        table->Warning("ReAllocate"," Table %s has purged from %d to zero "
-               ,table->GetName(),setSize);
+        table->Warning("ReAllocate"," Table %s has purged from %d to %d "
+               ,table->GetName(),setSize,table->GetTableSize());
      table->NaN();
   }
   return kContinue; 
@@ -987,6 +987,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.94  2000/05/30 21:04:41  fine
+// Fix typo in the ReAllocate message
+//
 // Revision 1.93  2000/05/20 01:17:54  perev
 // NaN added
 //
