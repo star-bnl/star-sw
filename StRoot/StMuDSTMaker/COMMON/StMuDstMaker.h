@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.5 2002/03/27 00:50:11 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.6 2002/03/27 03:47:27 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -121,9 +121,11 @@ private:
   void openWrite(string fileName);
   void write();
   void closeWrite();
-
+ 
   void streamerOff();
-  void makeChain(const char* dir, const char* filter, int maxFiles=10);
+
+  string** subFilter(string filter);
+  void makeChain(string dir, string filter, int maxFiles=10);
 
   void openRead();
   void read();
@@ -209,6 +211,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.6  2002/03/27 03:47:27  laue
+ * better filter options
+ *
  * Revision 1.5  2002/03/27 00:50:11  laue
  * bux fix from earlier check in
  *

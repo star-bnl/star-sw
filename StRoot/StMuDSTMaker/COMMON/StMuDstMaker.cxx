@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.5 2002/03/27 00:50:11 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.6 2002/03/27 03:47:27 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -294,7 +294,7 @@ void StMuDstMaker::openRead() {
   DEBUGVALUE1(mFileName.c_str());
   DEBUGVALUE1(mFilter.c_str());
  
-  makeChain(mDirName.c_str(), mFilter.c_str(),mMaxFiles);
+  makeChain(mDirName, mFilter,mMaxFiles);
 
   // muDst stuff
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -306,7 +306,6 @@ void StMuDstMaker::openRead() {
     mChain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
   } 
   
-  (void*)mChain->GetBranch("");  /// this dummy call returns 0, but magically after calling it, I get a the tree in the next call
   mTTree = mChain->GetTree();
 
   mStMuDst->set(this);  
@@ -670,30 +669,56 @@ string StMuDstMaker::dirname(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) {
+string**  StMuDstMaker::subFilter(string filter) {
+  string** subFilter = new string*[100];
+  string tmp(filter);
+  int n=0;
+  size_t pos=0;
+  while (tmp.find_first_of(":")!=string::npos ) {
+    pos = tmp.find_first_of(":");
+    subFilter[n] = new string( tmp.substr(0,pos) );
+    tmp.erase(0,pos+1);
+    n++;
+  }				
+  subFilter[n++] = new string( tmp );
+  return subFilter;
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::makeChain(string dir, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
   mChain = new TChain("MuDst");
 
+  string** subFilters = subFilter(filter);
   //  TChain* mChain2 = new TChain("StrangeMuDst");
-  // read directory
-  void *pDir = gSystem->OpenDirectory(dir);
+  // read directory 
+  void *pDir = gSystem->OpenDirectory(dir.c_str());
   // now find the files that end in the specified extention
   const char* fileName(0);
   int fileCount(0);
   while((fileName = gSystem->GetDirEntry(pDir))){
-    if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
-    if(strcmp(fileName,".root")==0 || strcmp(fileName,"..")==0) continue;
-    if ( strstr(fileName,filter) && strstr(fileName,"MuDst.root") ){ // found a match
-      char* fullFile = gSystem->ConcatFileName(dir,fileName);
+    bool good = true;
+    string name(fileName);
+    if( strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) good=false;
+    if( strcmp(fileName,".root")==0 || strcmp(fileName,"..")==0) good=false;
+    if ( name.find(".MuDst.root")==string::npos ) good=false;
+    int n =0;
+    while (subFilters[n]) {
+      if ( name.find(*subFilters[n])==string::npos ) good=false;
+      //      cout << subFilters[n]->c_str() << endl;
+      n++;
+    }
+    if (good) {
+      char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the chain
       cout << fileCount << " " << fullFile << endl;
       mChain->Add(fullFile);
-      //  mChain2->Add(mChain2);
+      fileCount++;
       delete fullFile;
-      if(++fileCount >= maxFiles) break;
-    }   
-  }
-  //  mChain->AddFriend("StrangeMuDst");
+    }
+    if(fileCount >= maxFiles) break;
+  }   
   DEBUGVALUE2(fileCount);
 }
 
@@ -704,6 +729,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.6  2002/03/27 03:47:27  laue
+ * better filter options
+ *
  * Revision 1.5  2002/03/27 00:50:11  laue
  * bux fix from earlier check in
  *
