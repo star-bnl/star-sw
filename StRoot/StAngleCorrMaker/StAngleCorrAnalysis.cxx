@@ -6,6 +6,7 @@
 #include "StPhysicalHelixD.hh"
 #include "SystemOfUnits.h"
 #include <TH1.h>
+#include <TFile.h>
 #include <vector>
 #include "TString.h"
 #include "StTrackCuts.h"
@@ -17,6 +18,14 @@
 
 // diagnostic functions
 #include "StDiagnosticTool.h"
+#include "StDiagnosticEventStream.h"
+#include "StDiagnosticEventCuts.h"
+#include "StDiagnosticTracks.h"
+#include "StDiagnosticTrack1.h"
+#include "StDiagnosticTrack2.h"
+#include "StDiagnosticFastestTrack.h"
+#include "StDiagnosticSignal.h"
+#include "StDiagnosticBackground.h"
 
 #include <time.h>
 #include "TRandom.h"
@@ -39,9 +48,9 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   mNumberOfBackgroundEvents=0;
   mNumberOfBackgroundTracks1=0;
   mNumberOfBackgroundTracks2=0;
-  fractionToConsider=0.1;
-  minimumNumberOfBackgroundEvents=10;
-  minimumNumberOfBackgroundPairs=1000;
+  fractionToConsider=1.0;
+  minimumNumberOfBackgroundEvents=100;
+  minimumNumberOfBackgroundPairs=10000;
 
   // initialize TStrings
   name                                    = "default";
@@ -51,7 +60,8 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   DiagnoseTrack1                = "DiagnoseTrack1";
   DiagnoseTrack2                = "DiagnoseTrack2";
   DiagnoseFastestTrack    = "DiagnoseFastestTrack";
-
+  DiagnoseSignal                  = "DiagnoseSignal";
+  DiagnoseBackground       = "DiagnoseBackground";
   // default function is base function class
   correlationFunction = new StAngleCorrFunction();
 
@@ -61,7 +71,17 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   functionLibrary.push_back(new StMassFunction());
   
   // add functions to diagnostics library here
-  diagnosticsLibrary.push_back(new StDiagnosticTool());
+  TString outputfile = name;
+  outputfile.Append(".root");
+  mOutput = new TFile(outputfile,"RECREATE");
+  diagnosticsLibrary.push_back(new StDiagnosticEventStream());
+  diagnosticsLibrary.push_back(new StDiagnosticEventCuts());
+  diagnosticsLibrary.push_back(new StDiagnosticTracks());
+  diagnosticsLibrary.push_back(new StDiagnosticTrack1());
+  diagnosticsLibrary.push_back(new StDiagnosticTrack2());
+  diagnosticsLibrary.push_back(new StDiagnosticFastestTrack());
+  diagnosticsLibrary.push_back(new StDiagnosticSignal());
+  diagnosticsLibrary.push_back(new StDiagnosticBackground());
 }
 
 StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName) 
@@ -87,13 +107,14 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   minimumNumberOfBackgroundPairs=1000;
 
    // initialize TStrings used in Diagnostic checks
-  name                                    = "default";
   DiagnoseEventStream   = "DiagnoseEventStream";
   DiagnoseEventCuts        = "DiagnoseEventCuts";
   DiagnoseTracks                = "DiagnoseTracks";
   DiagnoseTrack1                = "DiagnoseTrack1";
   DiagnoseTrack2                = "DiagnoseTrack2";
   DiagnoseFastestTrack    = "DiagnoseFastestTrack";
+  DiagnoseSignal                  = "DiagnoseSignal";
+  DiagnoseBackground       = "DiagnoseBackground";
 
   name=analysisName;
   correlationFunction = new StAngleCorrFunction();
@@ -104,7 +125,17 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   functionLibrary.push_back(new StMassFunction());
   
   // add functions to diagnostics library here
-  diagnosticsLibrary.push_back(new StDiagnosticTool());
+  TString outputfile = name;
+  outputfile.Append(".root");
+  mOutput = new TFile(outputfile,"RECREATE");
+  diagnosticsLibrary.push_back(new StDiagnosticEventStream());
+  diagnosticsLibrary.push_back(new StDiagnosticEventCuts());
+  diagnosticsLibrary.push_back(new StDiagnosticTracks());
+  diagnosticsLibrary.push_back(new StDiagnosticTrack1());
+  diagnosticsLibrary.push_back(new StDiagnosticTrack2());
+  diagnosticsLibrary.push_back(new StDiagnosticFastestTrack());
+  diagnosticsLibrary.push_back(new StDiagnosticSignal());
+  diagnosticsLibrary.push_back(new StDiagnosticBackground());
 
   // initialize vectors 
   if (mCollectionOfTracks1.size()!=0) mCollectionOfTracks1.clear();
@@ -148,6 +179,12 @@ StAngleCorrAnalysis::SetCorrelationFunction(TString functionName)
     }
 }
 
+void
+StAngleCorrAnalysis::WriteDiagnostic()
+{
+  mOutput->Write();
+  mOutput->Close();
+}
 
 StAngleCorrAnalysis::~StAngleCorrAnalysis()
 {
@@ -284,11 +321,11 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
 	
                       SetTrackForPool(track,trackForPool);
 	  SetTrackForPool(track,trackForBackground);
-	  //if (diagnostics) {if (Diagnose(DiagnoseTracks) != NULL) Diagnose(DiagnoseTracks)->Fill(trackForPool);}
+	  if (diagnostics) {if (Diagnose(DiagnoseTracks) != NULL) Diagnose(DiagnoseTracks)->Fill(trackForPool);}
 	  
  	  if (Track1WithinCuts(trackForPool)) 
  	    {
-	      //if (diagnostics) {if (Diagnose(DiagnoseTrack1) != NULL) Diagnose(DiagnoseTrack1)->Fill(trackForPool);}
+	      if (diagnostics) {if (Diagnose(DiagnoseTrack1) != NULL) Diagnose(DiagnoseTrack1)->Fill(trackForPool);}
  	      mCollectionOfTracks1.push_back(trackForPool);
 	      mCollectionOfBackgroundTracks1.push_back(trackForBackground);
  	      mNumberOfTracks1InPool++;
@@ -303,7 +340,7 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
 
 	  if (Track2WithinCuts(trackForPool)) 
  	    {
-	      //if (diagnostics) {if (Diagnose(DiagnoseTrack2) != NULL) Diagnose(DiagnoseTrack2)->Fill(trackForPool);}
+	      if (diagnostics) {if (Diagnose(DiagnoseTrack2) != NULL) Diagnose(DiagnoseTrack2)->Fill(trackForPool);}
  	      mCollectionOfTracks2.push_back(trackForPool);
 	      mCollectionOfBackgroundTracks2.push_back(trackForBackground);
  	      mNumberOfTracks2InPool++;
@@ -315,21 +352,13 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
 	{
 	  mCollectionOfTracks1.clear();
 	  mCollectionOfTracks1.push_back(fastestTrack);
-	  // if (diagnostics) {if (Diagnose(DiagnoseFastestTrack) != NULL) Diagnose(DiagnoseFastestTrack)->Fill(fastestTrack);}
+	  if (diagnostics) {if (Diagnose(DiagnoseFastestTrack) != NULL) Diagnose(DiagnoseFastestTrack)->Fill(fastestTrack);}
 	}
 
       mBackgroundTracks1.push_back(mCollectionOfBackgroundTracks1);
       mBackgroundTracks2.push_back(mCollectionOfBackgroundTracks2);
     }
   
-  cout << "StAngleCorrAnalysis:  Event Summary: " << 
-    " Type " << ev.type()    << " Run " << ev.runNumber()     << endl;
-  cout << " N vertex "       << ev.vertexCollection()->size()  << endl;
-  cout << " N track "         << ev.trackCollection()->size()    << endl;
-  cout << " N TPC hit "    << ev.tpcHitCollection()->size()  << endl;
-  cout << " N FTPC hit " << ev.ftpcHitCollection()->size() << endl;
-  cout << " N SVT hit "    << ev.svtHitCollection()->size()  << endl;
-
   return;
  }
 
@@ -353,7 +382,7 @@ StAngleCorrAnalysis::AnalyseRealPairs()
 	{
 	  tr2=mCollectionOfTracks2[counter2];
 	  RelativeAngle(tr1,tr2,signal);
-	  // if (diagnostics) {if (Diagnose(DiagnoseSignal) != NULL) Diagnose(DiagnoseSignal)->Fill(tr1,tr2);}
+	  if (diagnostics) {if (Diagnose(DiagnoseSignal) != NULL) Diagnose(DiagnoseSignal)->Fill(tr1,tr2);}
 	  counter2++;
 	}
       counter1++;
@@ -372,7 +401,7 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
   ran->SetSeed(t1);  
 
  // reduce total number of pairs by 100 to avoid any superstatistical correlations
-  int mNumberOfBackgroundPairs=mNumberOfBackgroundTracks1*
+  UInt_t mNumberOfBackgroundPairs=mNumberOfBackgroundTracks1*
                                                                     mNumberOfBackgroundTracks2/100;
  
   if (mNumberOfBackgroundEvents>minimumNumberOfBackgroundEvents &&
@@ -386,7 +415,6 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
       Double_t evCounter1,evCounter2,trCounter1,trCounter2;
       Double_t totalNumberOfEvents=mBackgroundTracks1.size();
       Double_t totalTrackPairs=(fractionToConsider)*mNumberOfBackgroundPairs;
-      cout << "total num of back tracks under consideration = " << totalTrackPairs << endl;
 
       Int_t TooManyIterations = 10000;
       while(trackPairs<totalTrackPairs) 
@@ -408,13 +436,16 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
 	      return;
 	    } 
 
-	  trCounter1 = ran->Rndm()*mBackgroundTracks1[evCounter1].size();
-	  trCounter2 = ran->Rndm()*mBackgroundTracks2[evCounter2].size();
-	  tr1 = mBackgroundTracks1[evCounter1][trCounter1];
-	  tr2 = mBackgroundTracks2[evCounter2][trCounter2];
-                      // if (diagnostics) {if (Diagnose(DiagnoseBackground) != NULL) Diagnose(DiagnoseBackground)->Fill(tr1,tr2);}
-	  RelativeAngle(tr1,tr2,background);
 	  trackPairs++;
+	  if (!mBackgroundTracks1[evCounter1].empty() &&  !mBackgroundTracks2[evCounter2].empty()) 
+	    {
+	      trCounter1 = ran->Rndm()*mBackgroundTracks1[evCounter1].size();
+	      trCounter2 = ran->Rndm()*mBackgroundTracks2[evCounter2].size();
+	      tr1 = mBackgroundTracks1[evCounter1][trCounter1];
+	      tr2 = mBackgroundTracks2[evCounter2][trCounter2];
+	      if (diagnostics) {if (Diagnose(DiagnoseBackground) != NULL) Diagnose(DiagnoseBackground)->Fill(tr1,tr2);}
+	      RelativeAngle(tr1,tr2,background);	     
+	    }
 	}
       
       mNumberOfBackgroundTracks1=0;
@@ -437,7 +468,7 @@ StDiagnosticTool*
 StAngleCorrAnalysis::Diagnose(TString diagName) 
 { 
   uint index=0;
-  for (index=0;index<functionLibrary.size();index++) 
+  for (index=0;index<diagnosticsLibrary.size();index++) 
     {
       if (diagName == diagnosticsLibrary[index]->GetName() ) return diagnosticsLibrary[index];
     }

@@ -1,4 +1,4 @@
-// $Id: StAngleCorrMaker.h,v 1.7 1999/12/28 19:10:02 horsley Exp $
+// $Id: StAngleCorrMaker.h,v 1.8 2000/01/04 03:56:20 horsley Exp $
 //
 //
 
@@ -38,6 +38,7 @@ private:
   Char_t collectionName[256];
   StAngleCorrAnalysisManager corrAnalysis; 
   TString track1,track2;
+  TFile* mOutput;
 
 protected:
   
@@ -60,6 +61,10 @@ public:
                 void  SetFastestTrackAnalysis(TString analysisName, int fastAnalysis);
                 void  SetSignalHist(TString analysisName, TH1D* sHist);
                 void  SetBackgroundHist(TString analysisName, TH1D* bHist);
+                void SetNBackgroundPairs(TString analysisName, int number, Double_t fraction);
+                void SetNBackgroundEvents(TString analysisName, int number);
+                void SetDiagnosticsON(TString analysisName);
+                
   virtual Int_t Make();
   virtual Int_t Finish();
 

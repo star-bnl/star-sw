@@ -39,7 +39,7 @@ public:
     void                 DoEvents(StEvent& ev);
     void                 DoSignals(); 
     void                 DoBackgrounds();
-     
+    void                 WriteDiagnostic();
 };
 
 #endif

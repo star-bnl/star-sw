@@ -1,5 +1,8 @@
-// $Id: StAngleCorrMaker.cxx,v 1.10 1999/12/29 01:55:45 horsley Exp $
+// $Id: StAngleCorrMaker.cxx,v 1.11 2000/01/04 03:56:20 horsley Exp $
 // $Log: StAngleCorrMaker.cxx,v $
+// Revision 1.11  2000/01/04 03:56:20  horsley
+// *** empty log message ***
+//
 // Revision 1.10  1999/12/29 01:55:45  horsley
 // *** empty log message ***
 //
@@ -46,7 +49,7 @@
 #include "StAngleCorrAnalysis.h"
 #include "StAngleCorrAnalysisManager.h"
 
-static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.10 1999/12/29 01:55:45 horsley Exp $";
+static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.11 2000/01/04 03:56:20 horsley Exp $";
 
 Int_t
 StAngleCorrMaker::Make() 
@@ -72,6 +75,7 @@ StAngleCorrMaker::~StAngleCorrMaker() {}
 Int_t
 StAngleCorrMaker::Init()
 {
+  //mOutput = new TFile("DiagnosticHist.root","RECREATE");
   return StMaker::Init();
 }
 
@@ -138,6 +142,17 @@ StAngleCorrMaker::SetRapidityCutsTrack2(TString analysisName, double lowerCut, d
   corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track2)->SetPseudoRapidityCuts(lowerCut,upperCut);
 }
 
+void
+StAngleCorrMaker::SetNBackgroundPairs(TString analysisName, int number, Double_t fraction)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetNBackgroundPairs(number, fraction);
+}
+
+void
+StAngleCorrMaker::SetNBackgroundEvents(TString analysisName, int number)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetNBackgroundEvents(number);
+}
 
 void 
 StAngleCorrMaker::SetFastestTrackAnalysis(TString analysisName, int fastAnalysis)
@@ -157,6 +172,11 @@ StAngleCorrMaker::SetBackgroundHist(TString analysisName, TH1D* bHist)
   corrAnalysis.GetAnalysis(analysisName)->SetBackgroundHist(bHist);
 }
 
+void
+StAngleCorrMaker::SetDiagnosticsON(TString analysisName)
+{
+    corrAnalysis.GetAnalysis(analysisName)->SetDiagnosticsON();
+}
 
 void
 StAngleCorrMaker::Clear(Option_t *opt)
@@ -166,7 +186,8 @@ StAngleCorrMaker::Clear(Option_t *opt)
 
 Int_t
 StAngleCorrMaker::Finish() 
-{
+{   
+  corrAnalysis.WriteDiagnostic();
   return kStOK;
 }
 

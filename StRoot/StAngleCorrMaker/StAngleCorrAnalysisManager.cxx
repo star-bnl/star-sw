@@ -71,3 +71,10 @@ StAngleCorrAnalysisManager::DoBackgrounds()
 }
 
 
+void
+StAngleCorrAnalysisManager::WriteDiagnostic() 
+{
+  uint j;
+  for (j=0;j<vec.size();j++) {vec[j]->WriteDiagnostic();}
+  return;
+}

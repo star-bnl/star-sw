@@ -67,6 +67,7 @@ private:
   TString DiagnoseTracks,DiagnoseTrack1,DiagnoseTrack2;
   TString DiagnoseFastestTrack,DiagnoseSignal,DiagnoseBackground;
   int  diagnostics;
+  TFile* mOutput;
 
   // private member functions,variables
   int    fastestTrackAnalysis,ON,OFF;
@@ -99,6 +100,7 @@ public:
     void       SetNBackgroundEvents(int number);
     void       SetNBackgroundPairs(int number, Double_t fraction);
     StTrackCuts*     GetTrackCuts(TString whichTrack);
+    void       WriteDiagnostic();
 
 };
 
