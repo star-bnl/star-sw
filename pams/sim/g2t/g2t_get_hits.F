@@ -228,6 +228,7 @@ C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
                If (Ish.ne.1)    print *,' Awful error in TPC, shape=',Ish,Npar
                if (trac.ne.it0) call gfkine(trac,vert,pvert,iprt,ivert,Ub,nu)
                if (iprt.ne.ip0) call gfpart(iprt,cp,tp,mass,charge,tlf,Ub,nu)
+               if (charge.ne.0.and.step.lt.0.01) go to 190
                Vr  = 1.e9 
                Pt  = p(4)*sqrt(c(1)**2+c(2)**2)
                if (Pt.gt.0) Vr = 0.0003*FieldZ/Pt
@@ -240,7 +241,6 @@ C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
                ip0 = iprt
             endif
             if (abs(Step*c(1))<2*par(1)-0.1) User=-abs(User)
-            if (step.lt.0.01) go to 190
          endif
 C                 - - - - - - - - - - - - - - - - - - - - - - - - - -
          if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
