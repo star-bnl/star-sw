@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.18 1999/01/20 23:58:03 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.19 1999/01/28 17:09:59 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.19  1999/01/28 17:09:59  fisyak
+// Add ftpc to software monitor
+//
 // Revision 1.18  1999/01/20 23:58:03  fisyak
 // Tree 2 GetTree
 //
@@ -474,7 +477,19 @@ Int_t St_glb_Maker::Make(){
     
       cout << " run_dst: finished calling dst_point_filler" << endl;
     }
-    if (tphit && scs_spt && tptrack && stk_track && evt_match && ctf) {
+    St_DataSet *ftpc_hits   = gStChain->DataSet("ftpc_hits");
+    St_fcl_fppoint *fcl_fppoint = 0;
+    if (ftpc_hits) {
+      St_DataSetIter hits(ftpc_hits);
+      fcl_fppoint = (St_fcl_fppoint *) hits["fcl_fppoint"];
+    }
+    St_DataSet *ftpc_tracks = gStChain->DataSet("ftpc_tracks");
+    St_fpt_fptrack *fpt_fptrack = 0;
+    if (ftpc_tracks) {
+      St_DataSetIter tracks(ftpc_tracks);
+      fpt_fptrack = (St_fpt_fptrack *) tracks["fpt_fptrack"];
+    }
+    if (tphit && scs_spt && tptrack && stk_track && evt_match && ctf && fcl_fppoint && fpt_fptrack) {
       if (! monitor_soft) {
 	monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
 	dst.Add(monitor_soft);
@@ -483,7 +498,9 @@ Int_t St_glb_Maker::Make(){
       
       Int_t Res_dst_monitor =  dst_monitor_soft_filler(tpcluster,
 						       scs_cluster,
-						       tphit,scs_spt,tptrack,stk_track,evt_match,
+						       tphit,scs_spt,fcl_fppoint,
+						       tptrack,stk_track,fpt_fptrack,
+						       evt_match,
 						       ctb_cor,vertex,event_summary,monitor_soft);
       if (Res_dst_monitor  != kSTAFCV_OK){
 	cout << "Problem on return from DST_MONITOR_SOFT_FILLER" << endl;
@@ -536,9 +553,8 @@ Int_t St_glb_Maker::Make(){
   St_hepe_gent *hepev = (St_hepe_gent *) dst("hepe_gent");
   St_particle  *particle=0;
   if (hepev) {
-    hepe_gent_st *particle = hepev->GetTable();
-    for (Int_t l=0; l < hepev->GetNRows(); l++){
-      hepe_gent_st *p = particle+l;
+    hepe_gent_st *p = hepev->GetTable();
+    for (Int_t l=0; l < hepev->GetNRows(); l++, p++){
       if (p->isthep == 1) {
 	Double_t px = p->phep[0];
 	Double_t py = p->phep[1];
@@ -556,9 +572,8 @@ Int_t St_glb_Maker::Make(){
       St_DataSetIter local(evgen);
       St_particle *pa = (St_particle *) local("particle");
       if (pa){
-        particle_st *particle = pa->GetTable();
-        for (Int_t l=0; l < pa->GetNRows(); l++){
-          particle_st *p = particle+l;
+        particle_st *p = pa->GetTable();
+        for (Int_t l=0; l < pa->GetNRows(); l++, p++){
           if (p->isthep == 1) {
             Double_t px = p->phep[0];
             Double_t py = p->phep[1];
@@ -585,7 +600,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.18 1999/01/20 23:58:03 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.19 1999/01/28 17:09:59 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
