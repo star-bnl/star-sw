@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.6 2000/08/16 12:46:07 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.7 2000/08/23 01:18:14 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.7  2000/08/23 01:18:14  aihong
+ * remove a bug
+ *
  * Revision 1.6  2000/08/16 12:46:07  aihong
  * bug killed
  *
@@ -133,7 +136,7 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
       void   fill(double prob, StPidAmpNetOut* netOut);
       void   fillAsUnknown();
-      void   lowRigPID(double rig,double dedx);
+      void   lowRigPID(double rig,double dedx,int theCharge);
 
 
       StParticleTable* table;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.12 2000/08/22 23:50:04 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.13 2000/08/23 01:18:13 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.13  2000/08/23 01:18:13  aihong
+ * remove a bug
+ *
  * Revision 1.12  2000/08/22 23:50:04  aihong
  * fix lowRigPID
  *
@@ -245,7 +248,7 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
       fillPIDByCalculation(charge, dca, nhits, pt, dedx, rig);
    else fillPIDByLookUpTable(charge, dca, nhits, pt, dedx, rig);
 
-   } else { lowRigPID(rig,dedx);}
+   } else { lowRigPID(rig,dedx,charge);}
 
  
        } else if (dedx==0.0){ fillAsUnknown();}
@@ -359,7 +362,7 @@ double StuProbabilityPidAlgorithm::tossTail(double rig){
 
 
 //-------------------------------
-void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx){
+void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge){
 
               
 
@@ -377,7 +380,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx){
        a = 2.3952e-7;
        upper = a*pow(rigidity,m);
        if (mdedx>lower && mdedx<upper){
-	 PID[0]=(rigidity>0.0)? 8 : 9;  //pi+/-
+	 PID[0]=(theCharge>0.0)? 8 : 9;  //pi+/-
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
@@ -388,7 +391,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx){
        a = 6.6238e-7;
        upper = a*pow(rigidity,m);
        if (mdedx>lower && mdedx<upper){
-         PID[0]=(rigidity>0.0)? 11:12;  //k+/-
+         PID[0]=(theCharge>0.0)? 11:12;  //k+/-
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
@@ -399,7 +402,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx){
        a = 3.1824e-6;
        upper = a*pow(rigidity,m);
        if (mdedx>lower && mdedx<upper){
-         PID[0]=(rigidity>0.0)? 14:15;  //proton/antiproton
+         PID[0]=(theCharge>0.0)? 14:15;  //proton/antiproton
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
