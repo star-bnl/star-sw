@@ -24,7 +24,7 @@ my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data09/reco";
 my $DISK3 = "/star/rcf";
 
-my $prodSr = "P00he";
+my $prodSr = "P00hf";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
@@ -315,7 +315,7 @@ my $nDiskFiles = 0;
 
     print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
 
-   &updateDAQTable();
+  &updateDAQTable();
 
       last;
      }else{
@@ -327,6 +327,7 @@ my $nDiskFiles = 0;
 ##### select from JobStatus table files which should be updated
 
  $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
+
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -577,8 +578,7 @@ my $daqType = 0;
         
     if ( $mfName =~ /$dfile/) {
 
- print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";  
-   
+ print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
@@ -845,6 +845,7 @@ sub fillDbTable {
          next if ( $name =~ /^delete_me/);
          next if ( $name =~ /^file/);
          next if ( $name =~ /^Star.Test/);
+
       
 #         @dirF = split(/\//, $dirs->[$ii]); 
 
