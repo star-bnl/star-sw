@@ -3,12 +3,12 @@
   gSystem->Load("libSTAR");
 
   const char *cls[] = {
-                           "TCL","TChair","TDataSet","TDataSetIter",
+                           "TCL",     "TChair",    "TDataSet", "TDataSetIter",
                            "TFileSet","TObjectSet","TPoints3D","TPointsArray3D",
-                           "TPolyLineShape","TTable","TTable3Points",
-                           "TTableDescriptor","TTableIter","TTablePoints",
-                           "TTableSorter","TVolume","TVolumePosition",
-                           "TVolumeView","TVolumeViewIter"
+                           "TPolyLineShape",  "TTable",        "TTable3Points",
+                           "TTableDescriptor","TTableIter",    "TTablePoints",
+                           "TTableSorter",    "TVolume",       "TVolumePosition",
+                           "TVolumeView",     "TVolumeViewIter"
                           };
 
   const char *former[] = {
@@ -40,6 +40,9 @@
 //_____________________________________________
 // $id: $
 // $Log: STARDoc.C,v $
+// Revision 1.4  2000/05/20 01:24:52  perev
+// CleanUp
+//
 // Revision 1.3  2000/05/12 23:13:29  fine
 // Macro to create HTML for ROOT-based STAR classes
 //
