@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.163 2001/01/31 17:12:04 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.164 2001/01/31 18:22:23 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -40,6 +40,7 @@ Bfc_st BFC[] = {
   {"Y2a"         ,""  ,"","db,calib"                      ,"","","Turn on Year 2B :asymptotic STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"NoDb"        ,""  ,"","HalfField"                               ,"","","Take out Db from Chain",kFALSE},
+  {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -52,7 +53,7 @@ Bfc_st BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb"                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree"    ,"","","Default chain",kFALSE}, 
+  {"Cdefault"   ,"","","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,NoHits","","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
@@ -190,10 +191,10 @@ Bfc_st BFC[] = {
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Est"      ,"","svtChain",""                                ,"StEstMaker","St_svt,StEstMaker","",kFALSE},
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
-  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker","St_ftpc,StFtpcSlowSimMaker","",kFALSE},
+  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",        "StFtpcSlowSimMaker","StFtpcSlowSimMaker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpcChain","SCL"
-                          ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
-  {"fpt"         ,"ftpc_tracks","ftpcChain","SCL" ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
+                                  ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
+  {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
   {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
@@ -472,7 +473,7 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("LaserTest")) mode += 2;
 	    if (mode) mk->SetMode(mode);
 	  }
-	  if (GetOption("dst") && maker == "StEventMaker") {
+	  if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
 	    StEventMaker *EvMk = (StEventMaker *) mk;
 	    EvMk->doLoadTpcHits  = kFALSE;
 	    EvMk->doLoadFtpcHits = kFALSE;
