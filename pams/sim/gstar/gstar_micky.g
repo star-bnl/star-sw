@@ -3,7 +3,7 @@ module  agukine is the pseudo physics event generator
 author  Pavel Nevski
 Created August,14 1997
 **********************************************************************
-+CDE,GCONST,GCUNIT.
++CDE,GCONST,GCUNIT,GCFLAG.
 *
     structure MIKY { version, np, code(10), mult(10), slope(10), dy(10) }
     Integer   LENOCC,Ip,Ivert,I,Ipart,Mult,Ier,Nu,ItrTyp,Itr,Iprin
@@ -28,6 +28,7 @@ Created August,14 1997
 *
     Use   MIKY
 *
+    prin1; (' *** generating an event with micky-mouse generator ***')
     Call AgSVERT(Zero,0,0,Ub,0,Ivert)
     do Ip=1,nint(miky_NP) 
        Ipart=miky_code(Ip)
@@ -39,7 +40,7 @@ Created August,14 1997
 *                                 generate
        do I=1,Mult
           call RANNOR(a,b)
-          pt      = miky_SLOPE(Ip)*Gamma2(0)
+          pt      = Gamma2(0)/miky_SLOPE(Ip)
           y       = miky_DY(Ip)*a
           phi     = TwoPi*Rndm(1)
           pLab(1) = pt*cos(phi)
