@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.7 2000/01/19 20:20:07 porter Exp $
+ * $Id: StDbServer.hh,v 1.8 2000/01/27 05:54:34 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.8  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.7  2000/01/19 20:20:07  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -109,7 +114,8 @@ public:
 
   // connection & check connections
   virtual void  init() { initServer(); };
-  virtual bool  isconnected() const { return mconnectState;};
+  virtual bool  isConnected();
+  virtual bool  hasConnected() const { return mconnectState; }
   virtual bool  isDefault() const { return misDefault; };
   virtual bool  reConnect();
 
@@ -133,6 +139,17 @@ public:
   virtual tableQuery* getQueryObject();
  
 };
+
+
+inline
+bool
+StDbServer::isConnected() {
+
+if(!mconnectState)return false; // never connected
+return mdatabase->IsConnected();
+
+}
+ 
 
 inline
 tableQuery* 

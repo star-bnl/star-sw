@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.12 2000/01/19 20:20:07 porter Exp $
+ * $Id: StDbTable.cc,v 1.13 2000/01/27 05:54:34 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.13  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.12  2000/01/19 20:20:07  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -40,6 +45,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.13  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.12  2000/01/19 20:20:07  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -83,7 +93,7 @@
 
 StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0) { 
 
- mendTime = -1;
+ mendTime.munixTime=0;
  mrows=0;
  mrowNumber=0;
  melementID = 0;
@@ -144,6 +154,7 @@ void
 StDbTable::setNodeInfo(StDbNodeInfo* node){
 
   StDbNode::setNodeInfo(node);
+  if(melementID) delete [] melementID;
   melementID = mnode.getElementID((const char*)mnode.elementID,mrows);
     
 }
@@ -369,7 +380,7 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
      char* version = 0;
      buff->ReadScalar(version,"version");
      if(version)mnode.mstrCpy(mnode.versionKey,version);
-     delete [] version;
+     if(version)delete [] version;
     } else {
       unsigned int bTime;// , eTime;
       buff->ReadScalar(bTime,"beginTime"); 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTime.h,v 1.2 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbTime.h,v 1.3 2000/01/27 05:54:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbTime.h,v $
+ * Revision 1.3  2000/01/27 05:54:35  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.2  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -50,6 +55,7 @@ char* mdateTime;
 
   void setUnixTime(unsigned int utime) { munixTime = utime;}
   virtual void setDateTime(const char* dtime) { 
+                                  if(mdateTime) delete [] mdateTime;
                                   mdateTime=new char[strlen(dtime)+1]; 
                                   strcpy(mdateTime,dtime); };
 

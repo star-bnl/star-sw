@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.4 1999/12/07 21:39:27 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.5 2000/01/27 05:54:32 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.5  2000/01/27 05:54:32  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.4  1999/12/07 21:39:27  porter
  * *** empty log message ***
  *
@@ -50,6 +55,15 @@ void StDbBuffer::Print(){
   };  
 };
 
+void
+StDbBuffer::zeroColumn(int istart, int iend) {
+  for(int i=istart;i<iend+1;i++){
+     mCol[i].name = 0;
+     mCol[i].val  = 0;
+  }
+}
+
+
 void StDbBuffer::Raz(){
   int i;
   for (i=0;i<=mLast;i++) {
@@ -60,7 +74,7 @@ void StDbBuffer::Raz(){
 	for(j=0;j<(int)mCol[i].length;j++) {
 	  if (tTextVal[j]) delete [] tTextVal[j];
 	};
-	delete [] tTextVal ;
+	delete [] tTextVal ; mCol[i].val=0;
       } else {
       delete [] mCol[i].val ;mCol[i].val=0; 
       };
@@ -113,10 +127,12 @@ void StDbBuffer::AddField(const char *aName, const myctype aTpe,const void* aVal
     memcpy(tCol,mCol,(mMax+1)*sizeof(column));
     if (mCol) delete [] mCol;
     mCol=tCol;
+    zeroColumn(mMax+1,2*mMax);
     mMax=mMax*2;
   }
   mLast++;
   mCur=mLast;
+  if(mCol[mCur].name) delete [] mCol[mCur].name;
   mCol[mCur].name=new char[strlen(aName)+1];
   strcpy(mCol[mCur].name,aName);
   mCol[mCur].val=0; 
@@ -124,8 +140,17 @@ void StDbBuffer::AddField(const char *aName, const myctype aTpe,const void* aVal
 };
 
 void StDbBuffer::ChangeField(const myctype aTpe,const void* aVal,const int aLen) {
+  if (mCol[mCur].val){
+   if(mCol[mCur].type>=_ascii){
+	 char ** tTextVal= (char**)mCol[mCur].val;
+	 int j;
+	 for(j=0;j<(int)mCol[mCur].length;j++) {
+	   if (tTextVal[j]) delete [] tTextVal[j];
+	 };
+	 delete [] tTextVal ; mCol[mCur].val=0;
+    }
+  }
   mCol[mCur].type=aTpe;
-  if (mCol[mCur].val) delete [] mCol[mCur].val; 
   mCol[mCur].length=aLen;
   if (aTpe<_ascii) {
     mCol[mCur].val=new char[aLen*mycsize[aTpe]];
@@ -183,12 +208,7 @@ void StDbBuffer::StrConv(char* aVal,long &s){s=atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=atol(aVal);};
 void StDbBuffer::StrConv(char* aVal,float &s){s=(float) atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,double &s){s=atof(aVal);};
-void StDbBuffer::StrConv(char* aVal,char* &s){s=new char[strlen(aVal+1)];strcpy(s,aVal);};
-
-
-
-
-
+void StDbBuffer::StrConv(char* aVal,char* &s){s=new char[strlen(aVal)+1];strcpy(s,aVal);};
 
 
 #define castcase(typelist,casttype,tpe) case typelist: {casttype *tVal=(casttype*)aVal;casttype tValSwap;MemSwapCpy((char*)&tValSwap,(char*)tVal,mycsize[typelist],mycswapl[typelist],Client);*s=(tpe)tValSwap;};break;
@@ -223,7 +243,7 @@ genwritemem(unsigned long);
 genwritemem(float);
 genwritemem(double);
 
-#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr;};break
+#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; delete [] sStream.str(); };break
 
 bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   bool tRetVal=true;
@@ -308,9 +328,9 @@ bool StDbBuffer::WriteScalar(const char* s,const char *aName)
   strcpy(tVal[0],s);
  if (Find_Col(aName))
    //  { ChangeField(_string,(void*)&tVal,1);}
-  { ChangeField(_string,(void*)tVal,1);}
+  { ChangeField(_string,(void*)tVal,1); delete [] tVal[0]; delete [] tVal;}
  else
-   { AddField(aName,_string,(void*)tVal,1);};
+   { AddField(aName,_string,(void*)tVal,1); delete [] tVal[0]; delete [] tVal;};
 return true;
 }
 
@@ -348,6 +368,7 @@ Rarray(float,_float );
 Rarray(double,_double);
 Rarray(char*,_string);
 
+
 bool  StDbBuffer::ReadArray(char* &s, int &len,const char *aName)
 { bool tRetVal=false; 
  if (Find_Col(aName)) {
@@ -381,6 +402,7 @@ Warray(unsigned long,_ulong );
 Warray(float,_float );
 Warray(double,_double);
 Warray(char*,_string);
+
 
 
 

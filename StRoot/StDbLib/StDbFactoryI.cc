@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFactoryI.cc,v 1.4 1999/10/19 14:30:38 porter Exp $
+ * $Id: StDbFactoryI.cc,v 1.5 2000/01/27 05:54:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbFactoryI.cc,v $
+ * Revision 1.5  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.4  1999/10/19 14:30:38  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -80,7 +85,7 @@ isloaded=false;
 /////////////////////////////////////////////////////////
 
 void
-StDbFactoryI::initIDList(ifstream& is){
+StDbFactoryI::readIDList(ifstream& is){
 
 
 char line[256];

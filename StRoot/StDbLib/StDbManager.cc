@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.14 2000/01/19 20:20:05 porter Exp $
+ * $Id: StDbManager.cc,v 1.15 2000/01/27 05:54:34 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.15  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.14  2000/01/19 20:20:05  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -137,6 +142,7 @@ StDbManager::deleteServers() {
          break;
         }
      } while( mservers.begin() != mservers.end() );
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -310,6 +316,7 @@ StDbManager::findServersXml(ifstream& is){
       if(aname)delete [] aname;
     }
     
+   if(server) delete server;
    if(dbNames)delete [] dbNames;
   }
   if(stardatabase)delete [] stardatabase;
@@ -453,7 +460,7 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
 
  // connect to database if needed
 
- if(server && !server->isconnected()){
+ if(server && !server->hasConnected()){
    server->init();
  }
 
@@ -688,6 +695,8 @@ char* name;
 
  configNode = new StDbConfigNode(type,domain,name);
  configNode->buildTree();
+
+ delete [] name;
  return configNode;
 }
 
@@ -717,7 +726,10 @@ StDbManager::setRequestTime(unsigned int time){
 
 mcheckTime.munixTime = time;
 StDbServer* server = findServer(dbStDb,dbStar);
-if(server)mcheckTime.mdateTime = server->getDateTime(time);
+if(server){
+  if(mcheckTime.mdateTime) delete [] mcheckTime.mdateTime;
+  mcheckTime.mdateTime = server->getDateTime(time);
+}
 
 }
 
@@ -740,6 +752,7 @@ StDbManager::setStoreTime(unsigned int time){
 mstoreTime.munixTime = time;
 StDbServer* server = findServer(dbStDb,dbStar);
 if(server){
+ if(mstoreTime.mdateTime) delete [] mstoreTime.mdateTime;
  mstoreTime.mdateTime = server->getDateTime(time);
  if(misVerbose) cout <<" StoreDateTime = " << mstoreTime.mdateTime << endl;
 }
@@ -812,8 +825,10 @@ bool retVal = false;
     StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
     if(!server)return retVal;
     if(!server->QueryDb(table,mcheckTime.munixTime)){
-     if(!server->reConnect())return retVal;
-     if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
+     if(!server->isConnected()){
+       if(!server->reConnect())return retVal;
+       if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
+     }
     }
      
      // table is filled 
@@ -835,8 +850,10 @@ bool retVal = false;
     StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
     if(!server)return retVal;
     if(!server->QueryDb(table,whereClause)){
-     if(!server->reConnect())return retVal;
-     if(!server->QueryDb(table,whereClause))return retVal;
+     if(!server->isConnected()){
+      if(!server->reConnect())return retVal;
+      if(!server->QueryDb(table,whereClause))return retVal;
+     }
     }
      
      // table is filled 
@@ -853,6 +870,10 @@ bool
 StDbManager::fetchAllTables(StDbConfigNode* node){
 
 bool retVal=false;
+
+ if(misVerbose){
+   cout << "Retrieving Data from node = " << node->getName()<<endl;
+ }
 
   if(!mcheckTime.munixTime && !mcheckTime.mdateTime){
     cerr<< "No storage time set";
@@ -900,8 +921,10 @@ bool retVal = false;
     if(!server)return retVal;
 
     if(!server->WriteDb(table,mstoreTime.munixTime)){
-     if(!server->reConnect())return retVal;  // table is filled 
-     if(!server->WriteDb(table,mstoreTime.munixTime))return retVal; 
+     if(!server->isConnected()){
+       if(!server->reConnect())return retVal;  // table is filled 
+       if(!server->WriteDb(table,mstoreTime.munixTime))return retVal; 
+     }
    }    
 
   }
@@ -1017,12 +1040,12 @@ return (retVal && children && siblings);
 bool
 StDbManager::rollBackAllNodes(StDbConfigNode* node){
 
-bool retVal=false;
+  //bool retVal=false;
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
     StDbNode* tnode = 0;
-    retVal = true;
+    //    retVal = true;
     while(!itr->done()){
       tnode = (StDbNode*)itr->next();
       rollBack(tnode);
@@ -1030,12 +1053,12 @@ bool retVal=false;
   delete itr;
   }
 
-bool children = true;
-bool siblings = true;
+  //bool children = true;
+  //bool siblings = true;
 
-if(node->hasChildren())children = rollBackAllNodes(node->getFirstChildNode());
+if(node->hasChildren()) rollBackAllNodes(node->getFirstChildNode());
 StDbConfigNode* nextNode = 0;
-if((nextNode=node->getNextNode()))siblings = rollBackAllNodes(nextNode);
+if((nextNode=node->getNextNode())) rollBackAllNodes(nextNode);
 
 
 return rollBack(node);
@@ -1060,7 +1083,7 @@ return server->rollBack(node);
 bool
 StDbManager::rollBack(StDbTable* table){
 
-  int* dataRows=0;
+  int* dataRows;
   int numRows;
   bool retVal = false;
   if((dataRows=table->getWrittenRows(&numRows))){
@@ -1105,12 +1128,12 @@ return (retVal && children && siblings);
 bool
 StDbManager::commitAllNodes(StDbConfigNode* node){
 
-bool retVal=true;
+  //bool retVal=true;
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
     StDbNode* tnode = 0;
-    retVal = true;
+    //    retVal = true;
     while(!itr->done()){
       tnode = (StDbNode*)itr->next();
       if(tnode) tnode->commit();
@@ -1118,12 +1141,12 @@ bool retVal=true;
   delete itr;
   }
 
-bool children = true;
-bool siblings = true;
+  //bool children = true;
+  //bool siblings = true;
 
-if(node->hasChildren())children = commitAllNodes(node->getFirstChildNode());
+if(node->hasChildren())commitAllNodes(node->getFirstChildNode());
 StDbConfigNode* nextNode = 0;
-if((nextNode=node->getNextNode()))siblings = commitAllNodes(nextNode);
+if((nextNode=node->getNextNode()))commitAllNodes(nextNode);
 
 node->commit();
 
@@ -1168,4 +1191,11 @@ delete [] tmpName;
  }
 return retVal;
 }
+
+
+
+
+
+
+
 

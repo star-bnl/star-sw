@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.5 2000/01/10 20:37:53 porter Exp $
+ * $Id: MysqlDb.h,v 1.6 2000/01/27 05:54:32 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.6  2000/01/27 05:54:32  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.5  2000/01/10 20:37:53  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -101,6 +106,7 @@ private:
   char* mQueryLast;
   MysqlResult* mRes;
   bool mqueryState;
+  bool mhasConnected;
   
 public:
   MysqlDb() ;

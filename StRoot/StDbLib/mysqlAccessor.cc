@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.15 2000/01/24 15:10:17 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.16 2000/01/27 05:54:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.16  2000/01/27 05:54:35  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.15  2000/01/24 15:10:17  porter
  * bug fix to dbType+dbDomain info in deep tree
  *
@@ -139,6 +144,7 @@ int NodeID;
 //
 // Loop over rows in Configuration
 //
+   StDbTable* table; // for setting configured state
 
   while(Db.Output(&buff)){
 
@@ -168,8 +174,8 @@ int NodeID;
          cout << " Parent = " << node->getName();
          cout << " of version = " << node->getVersion()<< endl;;
        }
-      node->addTable(&currentNode);
-    
+      table = node->addTable(&currentNode);
+      if(table)table->setConfigured(true);
 
      }  // isNode check
 
@@ -177,6 +183,7 @@ int NodeID;
 
   } // table/config loop
 
+  buff.Raz();
   Db.Release();
   return 1;
 }
@@ -200,6 +207,8 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   
    } else {   
     table->getNodeInfo(&currentNode);
+    currentNode.name = table->getName();
+    currentNode.versionKey = table->getVersion();
    }
 
    if(!table->hasDescriptor()){
@@ -242,8 +251,12 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
 
   unsigned int z = 0;
   table->setBeginTime(z);
-  table->setBeginTime(getDateTime(z));
-  char* bTime=0;  
+  char* bTime=getDateTime(z);  
+  table->setBeginTime(bTime);
+  if(bTime){
+    delete [] bTime;
+    bTime=0;  
+  }
   char* eTime=0;
   int numberOfRows=0;
 
@@ -299,7 +312,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
      memcpy(elementID,storeIt,(unsigned int)numRows*sizeof(int));              
      delete [] storeIt;
      table->setElementID(elementID,numRows);
-
+     
     }
 
 
@@ -365,6 +378,10 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
       } else {
       if(t1>t2)t2=t1;
       }
+      if(bTime){
+        delete [] bTime;
+        bTime = 0;
+      }
 
      }// end loop over rows
 
@@ -424,6 +441,8 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
 
   if(bTime)delete [] bTime;
   if(eTime)delete [] eTime;
+  if(rTime)delete [] rTime;
+  if(elementID) delete [] elementID;
   Db.Release();
 
   return 1; 
@@ -503,6 +522,9 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   if(!elements){
     elements = new int[nrows];
     for(int k=0;k<nrows;k++)elements[k]=k;
+    table->setElementID(elements,nrows);
+    delete [] elements;
+    elements = table->getElementID(nrows);
   }
   int dataID;
 
@@ -554,9 +576,13 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
      if(currentNode.IsIndexed){
       eID=elements[i];
 
+      char* version = table->getVersion();
       buff.WriteScalar(table->getSchemaID(),"schemaID");
       buff.WriteScalar(sTime,"beginTime");
-      buff.WriteScalar(table->getVersion(),"version");
+      if(version){
+      buff.WriteScalar(version,"version");
+      delete [] version;
+      }
       buff.WriteScalar(eID,"elementID");
       buff.WriteScalar(dataID,"dataID");  
       buff.WriteScalar(currentNode.nodeID,"nodeID");
@@ -568,6 +594,8 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
         deleteRows("dataIndex",storedIndex,i);
         table->setRowNumber(); // reset row number to 0 for future dbStreaming
         table->commit(); //zero written rows
+        delete [] storedData; 
+        delete [] storedIndex;
         return 0;
       } else {
         storedIndex[i] = Db.GetLastInsertID();
@@ -580,6 +608,10 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
 
     table->addWrittenRow(dataID);
     } // element loop
+
+     delete [] storedData; 
+     delete [] storedIndex;
+
   }
 
   table->setRowNumber(); // reset row number to 0 for future dbStreaming
@@ -642,7 +674,7 @@ mysqlAccessor::queryNodeInfo(StDbNodeInfo* node){
 node->IsBinary   = false;
 node->IsBaseLine = false;
 node->IsIndexed  = true;
-bool retVal;
+bool retVal=true;
 
     Db.Release(); buff.Raz();
 
@@ -651,10 +683,14 @@ bool retVal;
 
     if(!Db.Output(&buff)) { // no such node... but maybe named reference is ok
        retVal = false;
-       Db.Release();
+       Db.Release(); buff.Raz();
        Db<< "Select * from Nodes where Nodes.name='";
        Db<< node->name<<"' limit 1"<<endsql;
-       if(!Db.Output(&buff))return retVal;
+       if(!Db.Output(&buff)){
+         Db.Release();
+         buff.Raz();
+         return retVal;
+       }
     }   
     buff.SetClientMode();
 
@@ -746,13 +782,13 @@ mysqlAccessor::hasInstance(StDbNodeInfo *node){
   Db<<" AND version='"<<node->versionKey<<"'"<<endsql;
 
   if(Db.NbRows() != 0) return true;
+  Db.Release();
 
 return false;
 }
 
 
-
-
+////////////////////////////////////////////////////////////////////
 
 int
 mysqlAccessor::QueryDescriptor(StDbTable* table){
@@ -782,6 +818,7 @@ mysqlAccessor::QueryDescriptor(StDbTable* table){
     if(!buff.ReadScalar(cstructName,"name")){
       cerr<<"QueryDb::Table no cstruct for requested Name "<<tableName<< endl;
       delete [] tableName;
+      buff.Raz();
       return 0;
     }
  
@@ -934,6 +971,7 @@ int* dataIDs;
       Db<<dataString<<")"<<endsql;
    }
 
+   delete [] dataString;
    Db.Release();
    table->commitData();
 
@@ -966,6 +1004,7 @@ return retVal;
 }
 
 /////////////////////////////////////////////////////////////////
+
 unsigned int
 mysqlAccessor::getUnixTime(const char* time){
 
@@ -982,7 +1021,20 @@ unsigned int retVal;
 return retVal;
 }
 
+/////////////////////////////////////////////////////////////////
 
+bool
+mysqlAccessor::IsConnected() {
+  // simple test of the connect state
+
+  Db.Release();
+  Db<<"show tables"<<endsql;
+  if(Db.NbRows() == 0)return false;
+  Db.Release();
+
+return true;
+
+}
 
 
 
