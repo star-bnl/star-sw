@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.9 1999/07/15 13:58:01 perev Exp $
+// $Id: St_emc_Maker.cxx,v 1.10 1999/07/16 18:24:27 pavlinov Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.10  1999/07/16 18:24:27  pavlinov
+// Little correction for StEclMake
+//
 // Revision 1.9  1999/07/15 13:58:01  perev
 // cleanup
 //
@@ -31,7 +34,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <math.h>
-//#include "global/inc/math_constants.h"
 #include "St_emc_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -133,9 +135,9 @@ void St_emc_Maker::MakeHistograms(){
 	  m_nhit->Fill(log10((Float_t)hit->NHit()),(Float_t)det);
 	  m_etot->Fill(log10(hit->EnergySum()),(Float_t)det);
 	  for(i = 0; i < n; i++){
-	    ene = hit->getHitEnergy(i);
+	    ene = hit->HitEnergy(i);
 	    if(ene > 0.0){
-              id = hit->getHitId(i);
+              id = hit->HitId(i);
 	      if(hit->getEtaPhi(id, eta, phi) == 0){
 	        m_hits[det-1]->Fill(eta,phi);
 	        m_energy[det-1]->Fill(eta,phi,ene);
