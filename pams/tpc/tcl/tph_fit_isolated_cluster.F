@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.22 2000/02/18 20:07:57 snelling Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.23 2001/04/19 19:54:07 hardtke Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.23  2001/04/19 19:54:07  hardtke
+* add pad-by-pad t0 correction to cluster fitting routine
+*
 * Revision 1.22  2000/02/18 20:07:57  snelling
 * Changed tph function into tpc functions y(using database)
 *
@@ -155,6 +158,9 @@ c
       real tdc_x_adc(npads_max) ! Sum of tdc*adc of cluster
       real bucket_length_in     ! length (cm) of inner sector time bucket
       real bucket_length_out    ! length (cm) of outer sector time bucket
+      real pad_t0               ! t0 (in time bucket units) for pad
+      real pad_t0_cm(npads_max) ! t0 (in cm) for row
+      real bucket_length        ! bucket length (cm) for this row
 c     
       logical first             ! .T. iff first call
       logical lookat_mc         ! Look at Monte Carlo info.
@@ -168,6 +174,7 @@ c      integer tgc_time_to_z
       integer tpc_time_to_z
       integer loop_over_z
       integer tph_3point_gauss  ! not in use?
+      integer tpc_pad_time_offset   ! pad-by-pad t0 from database
 c-----------------------------------------------------------------------
       data first/.true./
       data imc_track /nmc_tracks_max*0/
@@ -202,6 +209,14 @@ c     get difference in z-positions for two randomly selected pixels:
          iret=tpc_time_to_z(51,50,35,5,zdummy) 
          if(iret.eq.1)bucket_length_out = zdummy - bucket_length_out
       endif
+      if (irow.le.13) bucket_length = bucket_length_in
+      if (irow.gt.13) bucket_length = bucket_length_out
+      do indx=1,npads      ! fill t0 array
+         iret = tpc_pad_time_offset(isec,irow,indx,pad_t0)
+         pad_t0_cm(indx) = pad_t0*bucket_length
+      enddo
+
+     
         
 c     loop over all pixels, in the process:
 c     1) sum all adc counts == q
@@ -220,6 +235,7 @@ c
       enddo
 c
       adc_sum = 0.
+      ipad_last =0
       do ipix = 1,nclspix
          adc_ipix = FLOAT(iadc(ipix))
          adc_sum = adc_sum + adc_ipix
@@ -234,7 +250,7 @@ c     pad direction projection
          if(ipix .le. nbuck) then
             iret=tpc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
             z_vector(ipix) = 0.0
-            if(iret .eq. 1) z_vector(ipix) = zdummy
+            if(iret .eq. 1) z_vector(ipix) = zdummy + pad_t0_cm(ipad_ipix)
          endif
       enddo
       if (adc_sum .eq. 0.) then
