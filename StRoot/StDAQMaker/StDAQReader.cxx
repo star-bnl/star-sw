@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.33 2003/04/22 20:12:42 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.34 2003/05/14 18:25:08 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.34  2003/05/14 18:25:08  perev
+ * Remove error for No TPC
+ *
  * Revision 1.33  2003/04/22 20:12:42  ward
  * So the chain can run when there is no TPC data.
  *
@@ -220,9 +223,6 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
-  if (fTPCReader) {
-    if(fTPCReader ->Update()) return kStErr;
-  }
   if (fFTPCReader)	fFTPCReader->Update();  
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
