@@ -1,12 +1,12 @@
 *
-* $Id: gflrad.F,v 1.1 1998/04/10 15:31:20 fisyak Exp $
+* $Id: gflrad.F,v 1.2 1998/04/16 16:59:31 fisyak Exp $
 *
 * $Log: gflrad.F,v $
-* Revision 1.1  1998/04/10 15:31:20  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:31  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.00/00 25/05/95  03.58.23  by  A. James Cook
 *-- Author :
       SUBROUTINE GFLRAD(IAXIS,ISH,IROT,DX,PARS,CL,CH,IERR)
@@ -26,9 +26,9 @@ C.    *         Author  A.McPherson  *********                         *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcshno.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcshno.inc"
       DIMENSION DX(3),PARS(11),X(3),XT(3)
 C.
 C.           --------------------------------------------------

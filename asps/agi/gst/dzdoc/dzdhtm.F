@@ -1,15 +1,12 @@
 *
-* $Id: dzdhtm.F,v 1.2 1998/04/16 16:11:38 fisyak Exp $
+* $Id: dzdhtm.F,v 1.3 1998/04/16 17:00:27 fisyak Exp $
 *
 * $Log: dzdhtm.F,v $
-* Revision 1.2  1998/04/16 16:11:38  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:05  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 17:00:27  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "dzdoc/pilot.h"
 *CMZ :  1.30/00 28/05/96  23.54.26  by  Unknown
 *-- Author :    Otto Schaile   14/02/96
 *******************************************************************
@@ -24,9 +21,9 @@
 *                                                                 *
 *******************************************************************
 C+SEQ,ZUNIT.
-#include "packlib/zebra/zebra/zebq.inc"
-#include "packlib/zebra/zebra/mzca.inc"
-#include "packlib/zebra/zebra/mzcb.inc"
+#include "zebra/zebq.inc"
+#include "zebra/mzca.inc"
+#include "zebra/mzcb.inc"
 C++CDE,ZBCDK.         From DZEBRA
 C++SEQ,DZDPRM
 C++SEQ,DZDOCC.

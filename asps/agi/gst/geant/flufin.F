@@ -1,30 +1,30 @@
 *
-* $Id: flufin.F,v 1.1 1998/04/10 15:31:17 fisyak Exp $
+* $Id: flufin.F,v 1.2 1998/04/16 16:59:29 fisyak Exp $
 *
 * $Log: flufin.F,v $
-* Revision 1.1  1998/04/10 15:31:17  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:29  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if defined(CERNLIB_HADRON)
 *CMZ :          29/01/98  13.12.38  by  Pavel Nevski
 *CMZ :  3.21/02 19/05/94  13.35.12  by  S.Ravndal
 *-- Author :
       SUBROUTINE FLUFIN
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gsecti.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gfkdis.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gsecti.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gfkdis.inc"
 *CDE,DIMPAR,FINUCT,PART2T,COMCONT,FHEAVYT,PAPROPT
 *CDE,       FINUC, PART2, COMCON, FHEAVY, PAPROP
 *KEEP,DIMPAR.

@@ -1,20 +1,20 @@
 *
-* $Id: cshlopt.F,v 1.1 1998/04/10 15:30:53 fisyak Exp $
+* $Id: cshlopt.F,v 1.2 1998/04/16 17:02:19 fisyak Exp $
 *
 * $Log: cshlopt.F,v $
-* Revision 1.1  1998/04/10 15:30:53  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:19  fisyak
+* 2nd pass with gstar
 *
 *
 * ----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          23/05/97  18.43.27  by  Pavel Nevski
 *CMZ :  1.18/01 30/03/94  11.58.04  by  Vladimir Berezhnoi
 *-- Author : V.Berezhnoi
       SUBROUTINE CSHLOPT(TEXT,CHVAR)
       CHARACTER*(*)TEXT,CHVAR
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
       COMMON /CSDEBUG/ ICSDEBUG
  
       if (ICSDEBUG.gt.0) print *,' ===> in CSHLOPT <=== '

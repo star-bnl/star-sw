@@ -1,12 +1,12 @@
 *
-* $Id: gsngtr.F,v 1.1 1998/04/10 15:31:30 fisyak Exp $
+* $Id: gsngtr.F,v 1.2 1998/04/16 16:59:42 fisyak Exp $
 *
 * $Log: gsngtr.F,v $
-* Revision 1.1  1998/04/10 15:31:30  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:42  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 05/03/96  15.55.16  by  Unknown
 *CMZ :  1.00/01 02/02/96  10.45.45  by  G. Poulard
 *CMZ :  3.21/02 29/03/94  15.41.30  by  S.Giani
@@ -32,8 +32,8 @@ C.    *   Shekhtman: SL,SL1,SM,SM1 declared as DOUBLE PRECISION        *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcunit.inc"
 C
 #if !defined(CERNLIB_SINGLE)
       DOUBLE PRECISION X0,Y0,DXDZ,DYDZ,A,B,C,DISC,X1,X2,X3,SN,CP,SMALL

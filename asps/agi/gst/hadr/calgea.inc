@@ -1,9 +1,9 @@
 *
-* $Id: calgea.inc,v 1.1 1998/04/10 15:31:51 fisyak Exp $
+* $Id: calgea.inc,v 1.2 1998/04/16 16:58:40 fisyak Exp $
 *
 * $Log: calgea.inc,v $
-* Revision 1.1  1998/04/10 15:31:51  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:40  fisyak
+* 2nd pass with gstar
 *
 *
 *

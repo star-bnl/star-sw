@@ -1,38 +1,38 @@
 *
-* $Id: csinit.F,v 1.1 1998/04/10 15:30:53 fisyak Exp $
+* $Id: csinit.F,v 1.2 1998/04/16 17:02:19 fisyak Exp $
 *
 * $Log: csinit.F,v $
-* Revision 1.1  1998/04/10 15:30:53  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:19  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          10/11/97  12.13.09  by  Pavel Nevski
 *CMZ :  1.30/00 22/04/97  15.56.15  by  Pavel Nevski
 *-- Author : V.Berezhnoi
          SUBROUTINE CSINIT(NW)
 ***---------------------------
-#include "pawlib/comis/comis/cslun.inc"
+#include "comis/cslun.inc"
          COMMON/CSCONT/LCONT
-#include "pawlib/comis/comis/cspar.inc"
-#include "pawlib/comis/comis/mdpool.inc"
-#include "pawlib/comis/comis/comis.inc"
-#include "pawlib/comis/comis/csbuf.inc"
-#include "pawlib/comis/comis/csrec.inc"
-#include "pawlib/comis/comis/cstab.inc"
-#include "pawlib/comis/comis/cspnts.inc"
-#include "pawlib/comis/comis/cssysd.inc"
-#include "pawlib/comis/comis/csdpvs.inc"
-#include "pawlib/comis/comis/cskeys.inc"
-#include "pawlib/comis/comis/cscbwl.inc"
-#include "pawlib/comis/comis/csichv.inc"
-#include "pawlib/comis/comis/cskucs.inc"
+#include "comis/cspar.inc"
+#include "comis/mdpool.inc"
+#include "comis/comis.inc"
+#include "comis/csbuf.inc"
+#include "comis/csrec.inc"
+#include "comis/cstab.inc"
+#include "comis/cspnts.inc"
+#include "comis/cssysd.inc"
+#include "comis/csdpvs.inc"
+#include "comis/cskeys.inc"
+#include "comis/cscbwl.inc"
+#include "comis/csichv.inc"
+#include "comis/cskucs.inc"
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
 #endif
 #if defined(CERNLIB_PAW)
-#include "pawlib/comis/comis/cshfill.inc"
+#include "comis/cshfill.inc"
 #endif
       COMMON /MPLIST/ INDP
          EXTERNAL MDEXP, CSMBIT

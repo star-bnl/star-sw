@@ -1,12 +1,12 @@
 *
-* $Id: gpart.F,v 1.1 1998/04/10 15:31:26 fisyak Exp $
+* $Id: gpart.F,v 1.2 1998/04/16 16:59:38 fisyak Exp $
 *
 * $Log: gpart.F,v $
-* Revision 1.1  1998/04/10 15:31:26  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:38  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          25/03/98  12.07.16  by  Pavel Nevski
 *CMZ :  3.21/03 14/09/94  14.33.42  by  S.Ravndal
 *-- Author :
@@ -45,9 +45,9 @@ C.    *       Author    G.Patrick  *********                            *
 C.    *                                                                 *
 C.    *******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gconsp.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gconsp.inc"
 C                       do not activate additional decays
       DATA     NPAR/24/
       INTEGER  IPAR(36),UBUF(1)

@@ -1,12 +1,12 @@
 *
-* $Id: gsmixt.F,v 1.1 1998/04/10 15:31:29 fisyak Exp $
+* $Id: gsmixt.F,v 1.2 1998/04/16 16:59:41 fisyak Exp $
 *
 * $Log: gsmixt.F,v $
-* Revision 1.1  1998/04/10 15:31:29  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:41  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          02/09/97  18.34.00  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.19  by  S.Giani
 *-- Author :
@@ -36,10 +36,10 @@ C.    *    Modifications:                                              *
 C.    *    PN, 2.09.97  - Calculate Abs.Length for protons, not pions  *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcmzfo.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcmzfo.inc"
       DIMENSION WMAT(1),A(1),Z(1)
       CHARACTER*(*) NAMATE
       CHARACTER*20 NAME

@@ -1,12 +1,12 @@
 *
-* $Id: ssmt5t.F,v 1.1 1998/04/10 15:31:41 fisyak Exp $
+* $Id: ssmt5t.F,v 1.2 1998/04/16 16:59:51 fisyak Exp $
 *
 * $Log: ssmt5t.F,v $
-* Revision 1.1  1998/04/10 15:31:41  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:51  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.00/00 19/03/92  12.19.31  by  Federico Carminati
 *-- Author :
       SUBROUTINE SSMT5T(A,S,R)

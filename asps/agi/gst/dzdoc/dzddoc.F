@@ -1,16 +1,13 @@
 *
-* $Id: dzddoc.F,v 1.2 1998/04/16 16:11:36 fisyak Exp $
+* $Id: dzddoc.F,v 1.3 1998/04/16 17:00:26 fisyak Exp $
 *
 * $Log: dzddoc.F,v $
-* Revision 1.2  1998/04/16 16:11:36  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:03  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 17:00:26  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "packlib/zebra/zebra/pilot.h
+#include "dzdoc/pilot.h"
 *CMZ :  1.30/00 14/06/96  12.56.57  by  Pavel Nevski
 *CMZU:  1.00/01 21/01/96  23.17.55  by  Sasha Vanyashin
 *-- Author :
@@ -85,31 +82,33 @@
       CHARACTER*13 SPACES
       EXTERNAL SPACES
 #if defined(CERNLIB_NONEWL)
-#include "graflib/dzdoc/dzdoc/nonewl2.inc"
+#include "dzdoc/nonewl2.inc"
 #endif
 #if !defined(CERNLIB_NONEWL)
-#include "graflib/dzdoc/dzdoc/nonewl1.inc"
+#include "dzdoc/nonewl1.inc"
 #endif
 *
-#include "graflib/dzdoc/dzdoc/bkwrp.inc"
-#include "graflib/dzdoc/dzdoc/tapes.inc"
+#include "dzdoc/bkwrp.inc"
+#include "dzdoc/tapes.inc"
 *         From DZEBRA
-#include "packlib/zebra/zebra/zbcdk.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "graflib/dzdoc/dzdraw/dzdprm.inc"
-#include "graflib/dzdoc/dzdoc/linout.inc"
-#include "graflib/dzdoc/dzdoc/docparq.inc"
+#include "zebra/zbcdk.inc"
+#include "zebra/zunit.inc"
+#if defined(INCLUDE_DZDPRM)
+#include "dzdprm.inc"
+#endif
+#include "dzdoc/linout.inc"
+#include "dzdoc/docparq.inc"
       CHARACTER CQSTAK*13,CQINFO*40
       PARAMETER (NLICHQ=130,NSTCHQ=8,NDVCHQ=8,NBKCHQ=4 )
       CHARACTER CQLINE*(NLICHQ),CQMAP(10)*(NLICHQ)
       CHARACTER CQSTOR*(NSTCHQ),CQDIV*(NDVCHQ),CQID*(NBKCHQ)
       COMMON /DZC1CH/ CQSTOR,CQDIV,CQID,CQMAP,CQSTAK,CQINFO
       EQUIVALENCE (CQLINE,CQMAP)
-#include "graflib/dzdoc/dzdoc/bknuparq.inc"
-#include "packlib/zebra/zebra/bkfoparq.inc"
-#include "graflib/dzdoc/dzdoc/bkstparq.inc"
-#include "graflib/dzdoc/dzdoc/bktgparq.inc"
-#include "graflib/dzdoc/dzdoc/bktgdatq.inc"
+#include "dzdoc/bknuparq.inc"
+#include "zebra/bkfoparq.inc"
+#include "dzdoc/bkstparq.inc"
+#include "dzdoc/bktgparq.inc"
+#include "dzdoc/bktgdatq.inc"
 *
       DATA CHARIA/'BIFDHUR'/
       DATA LUNINT/0/
@@ -121,7 +120,7 @@
       IF(INDEX(CHOPT,'K').NE.0 .OR. INDEX(CHOPT,'I').NE.0)THEN
          KEEPSQ=.TRUE.
       ELSE
-#include "packlib/zebra/zebra/qstore.inc"
+#include "zebra/qstore.inc"
          IF(IL11.GT.IQ(KQS+L-1))IL11=IQ(KQS+L-1)
          KEEPSQ=.FALSE.
       ENDIF
@@ -150,7 +149,7 @@
       IENTRY = 2
       ITY    = 0
       IF(L.EQ.0)GOTO 990
-#include "packlib/zebra/zebra/qstore.inc"
+#include "zebra/qstore.inc"
       LUC = 6
       IF11=1
       IL11=IQ(KQS+L-1)

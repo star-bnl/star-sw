@@ -1,15 +1,13 @@
 *
-* $Id: mzgar1.F,v 1.2 1998/04/16 16:11:42 fisyak Exp $
+* $Id: mzgar1.F,v 1.3 1998/04/16 16:58:05 fisyak Exp $
 *
 * $Log: mzgar1.F,v $
-* Revision 1.2  1998/04/16 16:11:42  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:07  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:05  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 #if defined(CERNLIB_TEST)
 *CMZ :  1.30/00 16/03/97  22.41.45  by  Pavel Nevski
 *-- Author :
@@ -18,11 +16,11 @@
 C-    Garbage collect division JQDIVI for not enough space
 C-    System called
  
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
-#include "packlib/zebra/zebra/mzcn.inc"
-#include "packlib/zebra/zebra/mzct.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
+#include "zebra/mzcn.inc"
+#include "zebra/mzct.inc"
 C--------------    End CDE                             --------------
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
@@ -36,11 +34,11 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZGAR1  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_sbit.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_sbit.inc"
  
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
 #if defined(CERNLIB_QDEBUG)
       IQVREM(1,1) = IQVID(1)
       IQVREM(2,1) = IQVID(2)
@@ -154,7 +152,7 @@ C----              Relocate + memory move
       CALL MZRELX
    67 CALL MZMOVE
    68 IF (NQRESV.LT.0)             GO TO 71
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
  
 C--------          Not enough space
@@ -174,8 +172,8 @@ C------            Error conditions
  
       NQCASE = 1
       NQFATA = 1
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"
 #endif

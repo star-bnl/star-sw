@@ -1,35 +1,35 @@
 *
-* $Id: flufin.F,v 1.1 1998/04/10 15:31:55 fisyak Exp $
+* $Id: flufin.F,v 1.2 1998/04/16 16:58:45 fisyak Exp $
 *
 * $Log: flufin.F,v $
-* Revision 1.1  1998/04/10 15:31:55  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:45  fisyak
+* 2nd pass with gstar
 *
 *
 #if defined(CERNLIB_HADR)
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          16/12/97  14.29.01  by  Pavel Nevski
 *CMZ :  3.21/02 19/05/94  13.35.12  by  S.Ravndal
 *-- Author :
       SUBROUTINE FLUFIN
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gsecti.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/dimpar.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gsecti.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/dimpar.inc"
  
 #if !defined(CERNLIB_SINGLE)
-#include "geant321/geant321/finuct.inc"
+#include "geant321/finuct.inc"
 #endif
-#include "geant321/geant321/finuc.inc"
+#include "geant321/finuc.inc"
       REAL RNDM(1)
 #if !defined(CERNLIB_SINGLE)
       DOUBLE PRECISION AOCMBM, AMSS , ZTAR, RHO , ZLIN, ZLEL, ZLRAD,
@@ -41,22 +41,22 @@
      +                  MULFLG (MXXMDF),IFCOMP(MXXMDF), MSSNUM (MXXMDF),
      +                  NREGS, NMATF, MTBSNM
 #if !defined(CERNLIB_SINGLE)
-#include "geant321/geant321/part2t.inc"
+#include "geant321/part2t.inc"
 #endif
-#include "geant321/geant321/part2.inc"
+#include "geant321/part2.inc"
 #if !defined(CERNLIB_SINGLE)
-#include "geant321/geant321/comcont.inc"
+#include "geant321/comcont.inc"
 #endif
-#include "geant321/geant321/comcon.inc"
+#include "geant321/comcon.inc"
 #if !defined(CERNLIB_SINGLE)
-#include "geant321/geant321/fheavyt.inc"
+#include "geant321/fheavyt.inc"
 #endif
-#include "geant321/geant321/fheavy.inc"
-#include "geant321/geant321/paprop.inc"
+#include "geant321/fheavy.inc"
+#include "geant321/paprop.inc"
 #if !defined(CERNLIB_SINGLE)
-#include "geant321/geant321/papropt.inc"
+#include "geant321/papropt.inc"
 #endif
-#include "geant321/geant321/gfkdis.inc"
+#include "geant321/gfkdis.inc"
 #if !defined(CERNLIB_SINGLE)
       DOUBLE PRECISION POO,EKE,TXI,TYI,TZI,AMM,WE,ONE,PGEANT,DMOD
 #endif

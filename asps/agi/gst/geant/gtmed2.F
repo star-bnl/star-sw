@@ -1,13 +1,13 @@
 *
-* $Id: gtmed2.F,v 1.1 1998/04/10 15:31:33 fisyak Exp $
+* $Id: gtmed2.F,v 1.2 1998/04/16 16:59:45 fisyak Exp $
 *
 * $Log: gtmed2.F,v $
-* Revision 1.1  1998/04/10 15:31:33  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:45  fisyak
+* 2nd pass with gstar
 *
 *
 *  IF=OLD.
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          26/03/98  12.40.25  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.24  by  S.Giani
 *-- Author :
@@ -38,11 +38,11 @@ C.    *   Authors   : S.Banerjee, R.Brun, F.Bruyant, A.McPherson       *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gctrak.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
       COMMON/GCCHAN/LSAMVL
       LOGICAL LSAMVL

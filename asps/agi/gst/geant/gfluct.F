@@ -1,12 +1,12 @@
 *
-* $Id: gfluct.F,v 1.1 1998/04/10 15:31:20 fisyak Exp $
+* $Id: gfluct.F,v 1.2 1998/04/16 16:59:32 fisyak Exp $
 *
 * $Log: gfluct.F,v $
-* Revision 1.1  1998/04/10 15:31:20  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:32  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          14/10/97  20.16.21  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 *-- Author :
@@ -41,15 +41,15 @@ C.    *PN,27/07/97: For Gamma<1.1 PAI fluctuations are scaled as 1/v**2*
 C.    *             Brems losses are added to ionization for all models*
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gconst.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcmulo.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gconst.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcmulo.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gctrak.inc"
 *
       PARAMETER (DGEV=0.153536 E-3, DNLIM=50)
       PARAMETER (ASHMIN=1,ASHMAX=30)

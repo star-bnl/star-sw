@@ -1,12 +1,12 @@
 *
-* $Id: ggclos.F,v 1.1 1998/04/10 15:31:21 fisyak Exp $
+* $Id: ggclos.F,v 1.2 1998/04/16 16:59:33 fisyak Exp $
 *
 * $Log: ggclos.F,v $
-* Revision 1.1  1998/04/10 15:31:21  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:33  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if !defined(CERNLIB_OLD)
 *CMZ :          06/04/98  12.37.16  by  Pavel Nevski
 *CMZ :  3.21/04 13/12/94  15.29.27  by  S.Giani
@@ -41,13 +41,13 @@ C.    *    tracking based on virtual divisions (1993).                 *
 C.    *    PN: reset tmpmax (for CRAY)                                 *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gclist.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcopti.inc"
-#include "geant321/geant321/gchvir.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gclist.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcopti.inc"
+#include "geant321/gchvir.inc"
       CHARACTER*4 NAME
       LOGICAL BTEST
 C.

@@ -1,9 +1,9 @@
 *
-* $Id: dlfcn.inc,v 1.1 1998/04/10 15:30:58 fisyak Exp $
+* $Id: dlfcn.h,v 1.1 1998/04/16 17:01:59 fisyak Exp $
 *
-* $Log: dlfcn.inc,v $
-* Revision 1.1  1998/04/10 15:30:58  fisyak
-* Move gstar into CVS
+* $Log: dlfcn.h,v $
+* Revision 1.1  1998/04/16 17:01:59  fisyak
+* 2nd pass with gstar
 *
 *
 * ---------------------------------------------

@@ -1,25 +1,23 @@
 *
-* $Id: mzlink.F,v 1.2 1998/04/16 16:11:43 fisyak Exp $
+* $Id: mzlink.F,v 1.3 1998/04/16 16:58:06 fisyak Exp $
 *
 * $Log: mzlink.F,v $
-* Revision 1.2  1998/04/16 16:11:43  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:08  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:06  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          20/11/97  23.58.03  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZLINK (IXSTOR,CHNAME,LAREA,LREF,LREFL)
  
 C-    Set permanent link area, user called
  
-#include "packlib/zebra/zebra/zbcd.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
+#include "zebra/zbcd.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
 C--------------    End CDE                             --------------
       DIMENSION    LAREA(9),LREF(9),LREFL(9),NAME(2)
       CHARACTER    *(*) CHNAME
@@ -35,12 +33,12 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZLINK  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_locf.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_locf.inc"
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
  
-#include "packlib/zebra/zebra/qstore.inc"
+#include "zebra/qstore.inc"
 #if defined(CERNLIB_QDEBUG)
       IF (IQVSTA.NE.0)       CALL ZVAUTX
 #endif
@@ -174,7 +172,7 @@ C--                Check overlap with existing link areas
  
    61 IQ(KQS+LSYS+1) = NWTAB + 5
       CALL VZERO (LAREA,NL)
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
  
 C------            Error conditions
@@ -201,7 +199,7 @@ C------            Error conditions
       IQUEST(15) = LOCRL + LQSTOR
       IQUEST(16) = NS
       IQUEST(17) = NL
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

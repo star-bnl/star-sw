@@ -1,15 +1,13 @@
 *
-* $Id: mzpaw.F,v 1.2 1998/04/16 16:11:44 fisyak Exp $
+* $Id: mzpaw.F,v 1.3 1998/04/16 16:58:07 fisyak Exp $
 *
 * $Log: mzpaw.F,v $
-* Revision 1.2  1998/04/16 16:11:44  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:08  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:07  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          06/12/97  11.36.55  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZPAW (NWORDS,CHOPT)

@@ -1,12 +1,12 @@
 *
-* $Id: xmm55.F,v 1.1 1998/04/10 15:31:44 fisyak Exp $
+* $Id: xmm55.F,v 1.2 1998/04/16 16:59:54 fisyak Exp $
 *
 * $Log: xmm55.F,v $
-* Revision 1.1  1998/04/10 15:31:44  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:54  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.00/00 19/03/92  12.19.31  by  Federico Carminati
 *-- Author :
       SUBROUTINE XMM55(A,B,C)

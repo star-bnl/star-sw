@@ -1,12 +1,12 @@
 *
-* $Id: gxdraw.F,v 1.1 1998/04/10 15:31:38 fisyak Exp $
+* $Id: gxdraw.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
 *
 * $Log: gxdraw.F,v $
-* Revision 1.1  1998/04/10 15:31:38  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:49  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if defined(CERNLIB_TEST)
 *CMZ :  1.30/00 17/04/97  17.46.54  by  Pavel Nevski
 *CMZ :  3.21/02 28/03/94  01.30.59  by  S.Giani
@@ -23,21 +23,21 @@ C.    *                  S.Giani     **********                        *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/pawc.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcdraw.inc"
-#include "geant321/geant321/gcgobj.inc"
-#include "geant321/geant321/gcmutr.inc"
-#include "geant321/geant321/gcspee.inc"
-#include "geant321/geant321/gccurs.inc"
-#include "geant321/geant321/gchil2.inc"
-#include "geant321/geant321/gcursb.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/pawc.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcdraw.inc"
+#include "geant321/gcgobj.inc"
+#include "geant321/gcmutr.inc"
+#include "geant321/gcspee.inc"
+#include "geant321/gccurs.inc"
+#include "geant321/gchil2.inc"
+#include "geant321/gcursb.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
-#include "geant321/geant321/gcvdma.inc"
-#include "geant321/geant321/gcfdim.inc"
+#include "geant321/gcvdma.inc"
+#include "geant321/gcfdim.inc"
 *
       COMMON/QUEST/IQUEST(100)
 *

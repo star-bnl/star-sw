@@ -1,12 +1,12 @@
 *
-* $Id: gtmed1.F,v 1.1 1998/04/10 15:31:32 fisyak Exp $
+* $Id: gtmed1.F,v 1.2 1998/04/16 16:59:45 fisyak Exp $
 *
 * $Log: gtmed1.F,v $
-* Revision 1.1  1998/04/10 15:31:32  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:45  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if !defined(CERNLIB_OLD)
 *CMZ :          26/03/98  12.57.30  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.22.08  by  S.Giani
@@ -45,16 +45,16 @@ C.    *    Divisions along arbitrary axis are now possible.            *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gctrak.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
-#include "geant321/geant321/gchvir.inc"
-#include "geant321/geant321/gcvdma.inc"
+#include "geant321/gchvir.inc"
+#include "geant321/gcvdma.inc"
       COMMON/GCCHAN/LSAMVL
       LOGICAL LSAMVL
 C.

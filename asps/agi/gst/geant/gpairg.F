@@ -1,12 +1,12 @@
 *
-* $Id: gpairg.F,v 1.1 1998/04/10 15:31:25 fisyak Exp $
+* $Id: gpairg.F,v 1.2 1998/04/16 16:59:38 fisyak Exp $
 *
 * $Log: gpairg.F,v $
-* Revision 1.1  1998/04/10 15:31:25  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:38  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 19/09/96  18.01.50  by  Pavel Nevski
 *CMZ :  3.21/04 21/02/95  11.53.59  by  S.Giani
 *-- Author :
@@ -34,13 +34,13 @@ C.    *                                                                *
 C.    *  Correction: S.Randval:  PEL1 = SQRT((EEL1+EMASS)*TEL1)        *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gccuts.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gccuts.inc"
       DIMENSION NTYPEL(2)
       DIMENSION RNDM(2)
       LOGICAL ROTATE

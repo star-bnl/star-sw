@@ -1,13 +1,11 @@
 /*
- * $Id: memget.c,v 1.1 1998/04/10 15:30:59 fisyak Exp $
+ * $Id: memget.c,v 1.1 1998/04/16 17:03:33 fisyak Exp $
  *
  * $Log: memget.c,v $
- * Revision 1.1  1998/04/10 15:30:59  fisyak
- * Move gstar into CVS
+ * Revision 1.1  1998/04/16 17:03:33  fisyak
+ * 2nd pass with gstar
  *
  */
-#include "pawlib/comis/comis/pilot.h"
-/*CMZ :          08/07/97  16.16.29  by  Pavel Nevski*/
 /*-- Author :    Mark Hsu 2/1/91 HPCSD, Kingston, NY.*/
 /* memget.c: allow dynamic memory allocation from FORTRAN
  * Mark Hsu 2/1/91 HPCSD, Kingston, NY.

@@ -1,13 +1,13 @@
 *
-* $Id: cslink.F,v 1.1 1998/04/10 15:30:53 fisyak Exp $
+* $Id: cslink.F,v 1.2 1998/04/16 17:02:20 fisyak Exp $
 *
 * $Log: cslink.F,v $
-* Revision 1.1  1998/04/10 15:30:53  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:20  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          23/05/97  18.43.27  by  Pavel Nevski
 *CMZ :  1.30/00 22/04/97  15.56.16  by  Pavel Nevski
 *CMZ :  1.18/14 16/01/95  11.45.29  by  Vladimir Berezhnoi
@@ -16,12 +16,12 @@
 ***------------------------
 *     this is comis linker
 ***------------------------
-#include "pawlib/comis/comis/cspar.inc"
-#include "pawlib/comis/comis/mdpool.inc"
-#include "pawlib/comis/comis/cstabps.inc"
-#include "pawlib/comis/comis/cstab.inc"
-#include "pawlib/comis/comis/cspnts.inc"
-#include "pawlib/comis/comis/cslun.inc"
+#include "comis/cspar.inc"
+#include "comis/mdpool.inc"
+#include "comis/cstabps.inc"
+#include "comis/cstab.inc"
+#include "comis/cspnts.inc"
+#include "comis/cslun.inc"
 #if defined(CERNLIB_SHL)
       CHARACTER*(KLENID) FNNAME
       INTEGER CS_GET_FUNC

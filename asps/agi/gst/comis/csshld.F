@@ -1,19 +1,19 @@
 *
-* $Id: csshld.F,v 1.1 1998/04/10 15:30:55 fisyak Exp $
+* $Id: csshld.F,v 1.2 1998/04/16 17:02:22 fisyak Exp $
 *
 * $Log: csshld.F,v $
-* Revision 1.1  1998/04/10 15:30:55  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:22  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          10/11/97  12.13.09  by  Pavel Nevski
 *CMZ :  1.18/01 30/03/94  11.56.54  by  Vladimir Berezhnoi
 *-- Author :    Vladimir Berezhnoi   07/01/94
       SUBROUTINE CSSHLD
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
       COMMON /CSTBCS/ ITBC,ITBS
       CHARACTER *8 CPID
       CHARACTER *80 CHLINE,LIBNAME

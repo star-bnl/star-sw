@@ -1,13 +1,13 @@
 /*
- * $Id: cs_dlfcn.c,v 1.1 1998/04/10 15:30:56 fisyak Exp $
+ * $Id: cs_dlfcn.c,v 1.2 1998/04/16 17:01:56 fisyak Exp $
  *
  * $Log: cs_dlfcn.c,v $
- * Revision 1.1  1998/04/10 15:30:56  fisyak
- * Move gstar into CVS
+ * Revision 1.2  1998/04/16 17:01:56  fisyak
+ * 2nd pass with gstar
  *
  */
-#include "pawlib/comis/comis/pilot.h"
-#if (defined(CERNLIB_AIX))&&(defined(CERNLIB_SHL))
+#include "comis/pilot.h"
+#if defined(CERNLIB_AIX)
 /*CMZ :          06/07/97  15.44.20  by  Pavel Nevski*/
 /*-- Author :*/
 /*
@@ -36,7 +36,7 @@
 #include <sys/ldr.h>
 #include <a.out.h>
 #include <ldfcn.h>
-#include "gst/atcdes/dlfcn.h"
+#include "dlfcn.h"
  
 typedef struct {
 	char		*name;		/* the symbols's name */

@@ -1,20 +1,20 @@
 *
-* $Id: csrmsl.F,v 1.1 1998/04/10 15:30:54 fisyak Exp $
+* $Id: csrmsl.F,v 1.2 1998/04/16 17:02:21 fisyak Exp $
 *
 * $Log: csrmsl.F,v $
-* Revision 1.1  1998/04/10 15:30:54  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:21  fisyak
+* 2nd pass with gstar
 *
 *
 * ----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          23/05/97  19.31.06  by  Pavel Nevski
 *CMZ :  1.19/01 14/11/94  18.10.10  by  Fons Rademakers
 *-- Author :    Vladimir Berezhnoi   07/02/94
       SUBROUTINE CSRMSL(NAME1)
       CHARACTER *(*)NAME1
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
       COMMON /CSTBCS/ ITBC,ITBS
       CHARACTER *80 LIBNAME,NAME,SYMBOL*32
       INTEGER CSLTGP

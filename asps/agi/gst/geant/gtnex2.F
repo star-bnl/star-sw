@@ -1,12 +1,12 @@
 *
-* $Id: gtnex2.F,v 1.1 1998/04/10 15:31:36 fisyak Exp $
+* $Id: gtnex2.F,v 1.2 1998/04/16 16:59:47 fisyak Exp $
 *
 * $Log: gtnex2.F,v $
-* Revision 1.1  1998/04/10 15:31:36  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:47  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 18/09/96  20.43.59  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.24  by  S.Giani
 *-- Author :
@@ -25,16 +25,16 @@ C.    *   Authors   : S.Banerjee, R.Brun, F.Bruyant                    *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcstak.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gcshno.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcstak.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gcshno.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
 C.
       PARAMETER (BIG1=0.9*BIG)

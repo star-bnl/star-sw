@@ -1,26 +1,24 @@
 *
-* $Id: mzrelb.F,v 1.2 1998/04/16 16:11:46 fisyak Exp $
+* $Id: mzrelb.F,v 1.3 1998/04/16 16:58:08 fisyak Exp $
 *
 * $Log: mzrelb.F,v $
-* Revision 1.2  1998/04/16 16:11:46  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:09  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:08  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          25/03/98  17.50.48  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZRELB
  
 C-    Relocator for links in banks
  
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
-#include "packlib/zebra/zebra/mzcn.inc"
-#include "packlib/zebra/zebra/mzct.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
+#include "zebra/mzcn.inc"
+#include "zebra/mzct.inc"
 C--------------    End CDE                             --------------
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
@@ -34,10 +32,10 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZRELB  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
+#include "zebra/q_jbit.inc"
  
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
  
       LFIXLO = LQ(LQTA-1)
       LFIXRE = LQ(LQTA)
@@ -283,7 +281,7 @@ C------            Error conditions
       NQFATA = NQFATA + 1
       IQUEST(11) = LN
       IF (IQFLIO.NE.0)             GO TO 98
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
  
    98 IQUEST(9) = NQCASE
       IQUEST(10)= NQFATA
@@ -291,7 +289,7 @@ C------            Error conditions
       NQFATA = 0
       IQFLIO = -7
 #endif
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
 * prevent warning "not used"
 #if defined(CERNLIB_HPUX)
       I=IBITS(1,1,1)
@@ -299,4 +297,4 @@ C------            Error conditions
       RETURN
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

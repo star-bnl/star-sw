@@ -1,12 +1,12 @@
 *
-* $Id: gzebra.F,v 1.1 1998/04/10 15:31:40 fisyak Exp $
+* $Id: gzebra.F,v 1.2 1998/04/16 16:59:50 fisyak Exp $
 *
 * $Log: gzebra.F,v $
-* Revision 1.1  1998/04/10 15:31:40  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:50  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          07/12/97  17.29.02  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.19  by  S.Giani
 *-- Author :
@@ -24,8 +24,8 @@ C.    *   PN: Ellastic zebra inspired by V.Perevozchikov               *
 C.    ******************************************************************
 C.
 #include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcflag.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcflag.inc"
        INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB
 C.
 C.    ------------------------------------------------------------------

@@ -1,12 +1,12 @@
 *
-* $Id: gbrsge.F,v 1.1 1998/04/10 15:31:18 fisyak Exp $
+* $Id: gbrsge.F,v 1.2 1998/04/16 16:59:30 fisyak Exp $
 *
 * $Log: gbrsge.F,v $
-* Revision 1.1  1998/04/10 15:31:18  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:30  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 30/10/96  18.46.07  by  Pavel Nevski
 *-- Author :    L.Urban
       FUNCTION GBRSGE(ZZ,T,BCUT)
@@ -23,8 +23,8 @@ C.    *                                                                *
 C.    *  correction for T> 100 GeV !  (by L.Urban on 23/09/96)         *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcmate.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcmate.inc"
       DIMENSION C(100),C1(60),C2(40)
       EQUIVALENCE (C(1),C1(1)),(C(61),C2(1))
       SAVE C

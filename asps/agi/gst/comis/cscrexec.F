@@ -1,13 +1,13 @@
 *
-* $Id: cscrexec.F,v 1.1 1998/04/10 15:30:51 fisyak Exp $
+* $Id: cscrexec.F,v 1.2 1998/04/16 17:02:17 fisyak Exp $
 *
 * $Log: cscrexec.F,v $
-* Revision 1.1  1998/04/10 15:30:51  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:17  fisyak
+* 2nd pass with gstar
 *
 *
 * -------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 #if defined(CERNLIB_SHL)
 *CMZ :          10/11/97  11.27.40  by  Pavel Nevski
 *CMZ :  1.17/07 10/01/94  16.41.15  by  Vladimir Berezhnoi
@@ -21,7 +21,7 @@
 *              - system branches cleaned up, USERLIB is a common option *
 *************************************************************************
       CHARACTER *(*)      NAME,CPID,FEXT,FEXEC
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
       CHARACTER *256  CHLINE
       CHARACTER *4096 USERLIBS
       COMMON /CSDEBUG/ ICSDEBUG
