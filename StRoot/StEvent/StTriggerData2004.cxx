@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.6 2004/04/02 01:21:44 jeromel Exp $
+ * $Id: StTriggerData2004.cxx,v 2.7 2004/06/30 00:12:11 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.7  2004/06/30 00:12:11  ullrich
+ * Added ZDC info to dump().
+ *
  * Revision 2.6  2004/04/02 01:21:44  jeromel
  * Proper mapping added (Akio/Aihong)
  *
@@ -527,6 +530,10 @@ void StTriggerData2004::dump() const
     printf(" FPD West South PS: ");for(int i=1; i<= 7;i++){ printf("%d ",fpd(west,5,i,0));  }; printf("\n");
     printf(" FPD Sums East    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(east,j));        printf("\n");
     printf(" FPD Sums West    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(west,j));        printf("\n");
+    printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
+    printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
+    printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
+    printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
     printf("\n");
     printf("***** StTriggerData Dump *****\n");
 }
