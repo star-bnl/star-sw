@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.281 2002/03/01 22:21:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.282 2002/03/07 23:33:12 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -243,7 +243,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
-  {"dbutil"      ,""     ,"","SCL,svtDb"                   ,"","StDbUtilities","Load StDbUtilities",kFALSE},
+  {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
