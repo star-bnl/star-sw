@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.37  1999/07/09 03:45:50  lasiuk
+// set switch for the wireHistogram to determine the use
+// of a Gaussian or exponential gas gain based on a collection
+// or single electrons
+//
 // Revision 1.36  1999/06/17 19:04:40  lasiuk
 // Rotate the momentum the same way that the position is rotated
 //
@@ -197,7 +202,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -324,6 +329,7 @@ Int_t StTrsMaker::Init()
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
    mWireHistogram->setDoGasGain(true);
    mWireHistogram->setDoGasGainFluctuations(false); // used to be true
+   mWireHistogram->setDoSingleElectronMultiplication(false);
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
@@ -816,7 +822,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
