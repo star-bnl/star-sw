@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.9 2002/02/03 20:09:00 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.10 2002/02/22 21:46:46 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -83,6 +83,7 @@ ClassImp(StRchMaker) // macro
     mRchNTupleFile = 0;
     mPadPlane = 0;
 #endif
+    mRemovePicketFencePixels = 1;
     
     drawinit=kFALSE;
 }
@@ -158,7 +159,7 @@ Int_t StRchMaker::Init() {
 		}
 	    }
 	    pedfile.close();
-	    cout << "StRchMaker::Make() ";
+	    cout << "StRchMaker::Init() ";
 	    cout << " Read pedestals" << endl;
 	    
   	    for (unsigned int pad=0; pad < 160; ++pad) {
@@ -217,7 +218,9 @@ Int_t StRchMaker::Make() {
     // input into the CF
     //
     mPixelStore.clear();
-
+    
+    mPicketFencePixelStore.clear();
+    
     //
     // Pause for Event Display Inspection
     //
@@ -363,12 +366,15 @@ Int_t StRchMaker::Make() {
 	// The decoding is done such that it is a
 	// saturated pad if the 11th bit is set
 	//
-
+	if (mRemovePicketFencePixels) {
+	    cout << "StRchMaker::Make(): removing picket fence pixels" << endl;
+	}
+	
 	bool saturatedPad = false;
-
+	
 	for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
 	    for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
-
+		
 		saturatedPad = false;
 		
 		unsigned long theADCValue =
@@ -393,9 +399,25 @@ Int_t StRchMaker::Make() {
 		// the first 8 bits for the Pad (0-159)  --> 0-255
 		// the next  8 bits for the Row (0-96)   --> 0-255
 		// the next 11 bits for the ADC (0-1023) --> 0-2047
+		
 		if(theADCValue) {
 		    unsigned long codedValue = 0;
 		    codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
+
+		    pointerToPixelStoreType thePixelPointer = 0;
+// Deal with removing picket fence pixels
+		    if (mRemovePicketFencePixels) {
+			
+			if (iPad == 0 && iRow%6==5 &&theADCValue) {
+			    thePixelPointer = &(mPicketFencePixelStore);
+			}
+			else {
+			    thePixelPointer = &(mPixelStore);
+			}
+		    }
+		    else {
+			thePixelPointer = &(mPixelStore);
+		    }
 		    
 		    //
 		    // fill the pixel store
@@ -404,14 +426,14 @@ Int_t StRchMaker::Make() {
 			// ...from simulation
 			anIDList mcInfo =
 			    dynamic_cast<StRrsReader*>(mTheRichReader)->GetMCDetectorInfo(iPad, iRow);
-			mPixelStore.push_back(new StRichSingleMCPixel(iPad,
+			thePixelPointer->push_back(new StRichSingleMCPixel(iPad,
 								      iRow,
 								      theADCValue,
 								      mcInfo));
 		    }
 		    else {
 			// ...from data
-			mPixelStore.push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
+			thePixelPointer->push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
 		    }
 
 #ifdef RCH_DEBUG
@@ -466,6 +488,19 @@ Int_t StRchMaker::Make() {
 	    if (theADCValue) {
 		
 		StRichMCPixel* p = dynamic_cast<StRichMCPixel*>(*iter);
+		pointerToPixelStoreType thePixelPointer=0;
+		if (mRemovePicketFencePixels) {
+		    
+		    if (iPad == 0 && iRow%6==5 &&theADCValue) {
+			thePixelPointer = &(mPicketFencePixelStore);
+		    }
+		    else {
+			thePixelPointer = &(mPixelStore);
+		    }
+		}
+		else {
+		    thePixelPointer = &(mPixelStore);
+		}
 		
 		if (p) {
 		    anIDList mcInfo;
@@ -487,14 +522,14 @@ Int_t StRchMaker::Make() {
 						  charge,
 						  process));
 		    }
-		    mPixelStore.push_back(new StRichSingleMCPixel(iPad,iRow,theADCValue, mcInfo));
+		    thePixelPointer->push_back(new StRichSingleMCPixel(iPad,iRow,theADCValue, mcInfo));
 		}
 		else {
-		    mPixelStore.push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
+		    thePixelPointer->push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
 		}
 
 		if(saturatedPad) {
-		    mPixelStore.back()->setBit(eSaturatedPixel);
+		    thePixelPointer->back()->setBit(eSaturatedPixel);
 		    //cout << "p/r/q " << iPad << "/" << iRow << "/" << theADCValue << endl;
 		}
 	    }
@@ -700,7 +735,15 @@ Int_t StRchMaker::Make() {
 	}
 	mTheRichReader = 0;
     }
-
+    
+    // clear this out here.  Don't want to clean out the pixelstore.
+    for (size_t ipicket=0; ipicket<mPicketFencePixelStore.size(); ++ipicket) {
+	delete(mPicketFencePixelStore[ipicket]);
+	mPicketFencePixelStore[ipicket] = 0;
+    }
+    
+    mPicketFencePixelStore.clear();
+    
     return kStOK;
 }
 
@@ -726,10 +769,23 @@ void StRchMaker::fillStEvent()
     // Add all the pixels...ordered from the ClusterFinder
     //
     int totalCharge = 0;
+// Not a reference.  A copy, which will go away at the end of this function. 
     StRichSinglePixelCollection thePixels;
 //     if(!(richCollection->pixelsPresent())) {
+	
     if (1) {
 	thePixels = mClusterFinder->getPixels();
+// Add back in the picket fences for later analysis. 
+	for (unsigned int ipicket=0; ipicket<mPicketFencePixelStore.size(); ++ipicket) {
+	    unsigned int ipad = mPicketFencePixelStore[ipicket]->pad();
+	    unsigned int irow = mPicketFencePixelStore[ipicket]->row();
+	    // Need to make a new one because the SinglePixelCollection owns things
+	    if (!thePixels(ipad,irow)) {
+		thePixels.push_back(new StRichSinglePixel(*(mPicketFencePixelStore[ipicket])));
+	    }
+	    
+	}
+	
 	cout << " StRchMaker::fillStEvent() pixels " << thePixels.size() << endl;
 	for(size_t ii=0; ii<thePixels.size(); ii++) {
  	    unsigned long codedValue = 0;
@@ -760,6 +816,7 @@ void StRchMaker::fillStEvent()
  		richCollection->addPixel(new StRichPixel(codedValue));
  	    }
   	}
+
     }
     
     //
@@ -893,7 +950,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.9 2002/02/03 20:09:00 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.10 2002/02/22 21:46:46 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -938,6 +995,10 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.10  2002/02/22 21:46:46  dunlop
+ * Remove picket fence pixels from cluster finding once and for all.
+ * Switchable.
+ *
  * Revision 2.9  2002/02/03 20:09:00  lasiuk
  * Embedded Data will be searched for in the richmixer/.data/richMixedEvent
  * data set
