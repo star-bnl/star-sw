@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.5 2001/03/19 15:53:05 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.6 2001/04/02 12:06:34 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.6  2001/04/02 12:06:34  jcs
+// get FTPC calibrations,geometry from MySQL database
+//
 // Revision 1.5  2001/03/19 15:53:05  jcs
 // use ftpcDimensions from database
 //
@@ -46,16 +49,18 @@ ClassImp(StFtpcDriftMapMaker)
 //_____________________________________________________________________________
 StFtpcDriftMapMaker::StFtpcDriftMapMaker(const char *name):
 StMaker(name),
-m_fss_gas(0),
-m_fss_param(0),
-m_det(0),
+    m_clusterpars(0),
+    m_slowsimgas(0),
+    m_slowsimpars(0),
     m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
     m_vdrift(0),
     m_deflection(0),
     m_dvdriftdp(0),
-    m_ddeflectiondp(0)
+    m_ddeflectiondp(0),
+    m_gas(0),
+    m_driftfield(0)
 {
 }
 //_____________________________________________________________________________
@@ -68,9 +73,9 @@ Int_t StFtpcDriftMapMaker::Init(){
   assert(ftpc);
   St_DataSetIter       local(ftpc);
 
-  m_fss_gas  = (St_fss_gas      *) local("fsspars/fss_gas");
-  m_fss_param= (St_fss_param    *) local("fsspars/fss_param");
-  m_det      = (St_fcl_det      *) local("fclpars/det");
+  m_clusterpars = (St_ftpcClusterPars *) local("ftpcClusterPars");
+  m_slowsimgas  = (St_ftpcSlowSimGas  *)local("ftpcSlowSimGas");
+  m_slowsimpars = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -92,6 +97,8 @@ Int_t StFtpcDriftMapMaker::Init(){
   m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
   m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
   m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+  m_gas           = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
+  m_driftfield    = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   
   // Create Histograms    
 
@@ -101,9 +108,9 @@ Int_t StFtpcDriftMapMaker::Init(){
 Int_t StFtpcDriftMapMaker::Make(){
 
   // create parameter reader
-  StFtpcParamReader *paramReader = new StFtpcParamReader(m_fss_gas,
-							 m_fss_param,
-							 m_det);
+  StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
+                                                         m_slowsimgas,
+                                                         m_slowsimpars);
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
@@ -113,7 +120,9 @@ Int_t StFtpcDriftMapMaker::Make(){
                                                 m_vdrift,
                                                 m_deflection,
                                                 m_dvdriftdp,
-                                                m_ddeflectiondp);
+                                                m_ddeflectiondp,
+                                                m_gas,
+                                                m_driftfield);
   
   // create magboltz
   StFtpcMagboltz1 *magboltz = new StFtpcMagboltz1();
@@ -133,12 +142,12 @@ Int_t StFtpcDriftMapMaker::Make(){
 
   posVector[0]=0;
 
-  for(i=0; i < paramReader->numberOfMagboltzBins(); i++) 
+  for(i=0; i < dbReader->numberOfMagboltzBins(); i++) 
     { 
       
-      thisField = paramReader->minimumDriftField() 
-	+ i*paramReader->stepSizeDriftField(); 
-      thisRadius = paramReader->radiusTimesField() / thisField; 
+      thisField = dbReader->minimumDriftField() 
+	+ i*dbReader->stepSizeDriftField(); 
+      thisRadius = dbReader->radiusTimesField() / thisField; 
       
       posVector[1]=thisRadius; 
       for(j=0; j < dbReader->numberOfPadrowsPerSide(); j++) 
@@ -160,12 +169,12 @@ Int_t StFtpcDriftMapMaker::Make(){
 	  psiAngle=0;
 	  upDrift=0;
 	  upAngle=0;
- 	  printf("loop %d of %d\n", i, paramReader->numberOfMagboltzBins()); 
+ 	  printf("loop %d of %d\n", i, dbReader->numberOfMagboltzBins()); 
 //     	  printf("calling magboltz with field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);
-	  float gas1=paramReader->percentAr();
-	  float gas2=paramReader->percentCO2();
-	  float gas3=paramReader->percentNe();
-	  float gas4=paramReader->percentHe();
+	  float gas1=dbReader->percentAr();
+	  float gas2=dbReader->percentCO2();
+	  float gas3=dbReader->percentNe();
+	  float gas4=dbReader->percentHe();
 	  float temperature=paramReader->baseTemperature();
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &pressure, &gas1, &gas2, &gas3, &gas4, &temperature, &vDrift, &psiAngle, &eFinal); 
 //   	  printf("called magboltz got field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);  

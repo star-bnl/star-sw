@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.5  2001/04/02 12:06:36  jcs
+// get FTPC calibrations,geometry from MySQL database
+//
 // Revision 1.4  2001/03/19 15:53:05  jcs
 // use ftpcDimensions from database
 //
@@ -25,9 +28,9 @@
 #include "StMaker.h"
 #endif
 
-class St_fss_gas;
-class St_fss_param;
-class St_fcl_det;
+class St_ftpcClusterPars;
+class St_ftpcSlowSimGas;
+class St_ftpcSlowSimPars;
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
@@ -35,6 +38,8 @@ class St_ftpcVDrift;
 class St_ftpcDeflection;
 class St_ftpcdVDriftdP;
 class St_ftpcdDeflectiondP;
+class St_ftpcGas;
+class St_ftpcDriftField;
 
 class TH1F;
 class TH2F;
@@ -43,11 +48,11 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
-  St_fss_gas      *m_fss_gas;  //!
-  St_fss_param    *m_fss_param;//!
-  St_fcl_det      *m_det;      //!
+   St_ftpcClusterPars   *m_clusterpars;   //!
+   St_ftpcSlowSimGas    *m_slowsimgas;    //!
+   St_ftpcSlowSimPars   *m_slowsimpars;   //!
    St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
    St_ftpcEField        *m_efield;        //!
@@ -55,6 +60,8 @@ class StFtpcDriftMapMaker : public StMaker {
    St_ftpcDeflection    *m_deflection;    //!
    St_ftpcdVDriftdP     *m_dvdriftdp;     //!
    St_ftpcdDeflectiondP *m_ddeflectiondp; //!
+   St_ftpcGas           *m_gas;           //!
+   St_ftpcDriftField    *m_driftfield;    //!
   void                  MakeHistograms();// Histograms for FTPC drift map
   
  protected:
@@ -65,7 +72,7 @@ class StFtpcDriftMapMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };
