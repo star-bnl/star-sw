@@ -11,17 +11,17 @@ const StiDetector * StiTrackNode::getDetector() const
     if (hit==0)
 	{
 	    if (detector==0)
-		*(Messenger::instance(kNodeMessage)) << "StiTrackNode::getDetector() - Fatal Error - Detector improperly set to '0'" << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::getDetector() - Fatal Error - Detector improperly set to '0'" << endl;
 	    else
-		*(Messenger::instance(kNodeMessage)) << "StiTrackNode::getDetector() - Detector  :" << *detector << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::getDetector() - Detector  :" << *detector << endl;
 	}
     else
 	{
 	    StiDetector * d =  hit->detector();
 	    if (d==0)
-		*(Messenger::instance(kNodeMessage)) << "StiTrackNode::getDetector() - Fatal Error - Node has hit that has no associated detector" << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::getDetector() - Fatal Error - Node has hit that has no associated detector" << endl;
 	    else
-		*(Messenger::instance(kNodeMessage)) << "StiTrackNode::getDetector() - Detector associated with hit :" << *d << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::getDetector() - Detector associated with hit :" << *d << endl;
 	}
     return( hit==0 ? detector : hit->detector() );
 }
@@ -30,9 +30,9 @@ void StiTrackNode::setDetector(const StiDetector *pDetector){
     //if(hit==0){ 
     detector = pDetector; 
     if (detector!=0)
-	*(Messenger::instance(kNodeMessage)) << "StiTrackNode::setDetector() - Detector set to :" << *detector << endl;
+	*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::setDetector() - Detector set to :" << *detector << endl;
     else
-	*(Messenger::instance(kNodeMessage)) << "StiTrackNode::setDetector() - Fatal Error - Detector improperly set to '0'" << endl;
+	*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::setDetector() - Fatal Error - Detector improperly set to '0'" << endl;
 }
 
 

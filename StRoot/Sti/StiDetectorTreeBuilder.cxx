@@ -35,7 +35,7 @@ data_node* StiDetectorTreeBuilder::build(StiObjectFactoryInterface<StiDetectorNo
 					 StiObjectFactoryInterface<StiDetector>* detfactory)
 {
     if (mroot) {
-	*(Messenger::instance(kDetectorMessage)) << "StiDetectorTreeBuilder::build()\tError!\t"
+	*(Messenger::instance(MessageType::kDetectorMessage)) << "StiDetectorTreeBuilder::build()\tError!\t"
 						 << "root tree already built"<<endl;
 	return 0;
     }

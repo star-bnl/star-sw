@@ -188,7 +188,7 @@ Int_t StiMaker::Init()
 {
     Messenger::init();
     Messenger::instance()->setRoutingMask(0); //turn off all streams
-    Messenger::instance()->setRoutingBits(kHitMessage);
+    Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
 
     //The Display
     if (mUseGui) {

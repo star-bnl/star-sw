@@ -49,11 +49,11 @@
 ostream& operator<<(ostream&, const StiTrack&);
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
-    : StiTrackFinder(),trackMes(*Messenger::instance(kTrackMessage))
+    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage))
     
 {
     //Turn off by default
-    Messenger::instance()->clearRoutingBits(kTrackMessage);
+    Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
     
     trackMes << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
     StiTrack::setTrackFitter(new StiKalmanTrackFitter());

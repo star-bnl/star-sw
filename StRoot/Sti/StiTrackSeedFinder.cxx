@@ -65,15 +65,15 @@ void StiTrackSeedFinder::reset()
 void StiRectangular2HitComboFilter::build(const string buildPath)
 {
     if (buildPath=="empty") {
-	*(Messenger::instance(kSeedFinderMessage)) <<"StiRectangular2HitComboFilter::build(). ERROR:\t";
-	*(Messenger::instance(kSeedFinderMessage)) <<"buildPath==empty. Abort"<<endl;
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StiRectangular2HitComboFilter::build(). ERROR:\t";
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"buildPath==empty. Abort"<<endl;
 	return;
     }
     StGetConfigValue(buildPath.c_str(), "deltaD", deltaD);
     StGetConfigValue(buildPath.c_str(), "deltaZ", deltaZ);
     if (deltaD==-1 || deltaZ==-1) {
-	*(Messenger::instance(kSeedFinderMessage)) <<"StiRectangular2HitComboFilter::build(). ERROR:\t";
-	*(Messenger::instance(kSeedFinderMessage))  <<"deltaD or deltaZ not set.. Abort"<<endl;
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StiRectangular2HitComboFilter::build(). ERROR:\t";
+	*(Messenger::instance(MessageType::kSeedFinderMessage))  <<"deltaD or deltaZ not set.. Abort"<<endl;
 	return;
     }
 }
@@ -81,15 +81,15 @@ void StiRectangular2HitComboFilter::build(const string buildPath)
 void StiCollinear2HitComboFilter::build(const string buildPath)
 {
     if (buildPath=="empty") {
-	*(Messenger::instance(kSeedFinderMessage)) <<"StiCollinear2HitComboFilter::build(). ERROR:\t";
-	*(Messenger::instance(kSeedFinderMessage)) <<"buildPath==empty. Abort"<<endl;
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StiCollinear2HitComboFilter::build(). ERROR:\t";
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"buildPath==empty. Abort"<<endl;
 	return;
     }
     StGetConfigValue(buildPath.c_str(), "deltaPhi", deltaPhi);
     StGetConfigValue(buildPath.c_str(), "deltaTheta", deltaTheta);
     if (deltaPhi==-1 || deltaTheta==-1) {
-	*(Messenger::instance(kSeedFinderMessage)) <<"StiCollinear2HitComboFilter::build(). ERROR:\t";
-	*(Messenger::instance(kSeedFinderMessage)) <<"deltaPhi or deltaTheta not set.. Abort"<<endl;
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StiCollinear2HitComboFilter::build(). ERROR:\t";
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<"deltaPhi or deltaTheta not set.. Abort"<<endl;
 	return;
     }
 }

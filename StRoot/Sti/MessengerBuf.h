@@ -6,13 +6,11 @@
 #ifndef MESSENGER_BUF_H
 #define MESSENGER_BUF_H
 
-#include <iostream.h>
+#include <strstream.h>
 
-//! #ifdef __CINT__
-//! class streamsize;
-//! #endif
-
-class Messenger;
+// #ifdef __CINT__
+// class streamsize;
+// #endif
 
 class MessengerBuf: public streambuf{
 public:
@@ -27,28 +25,19 @@ public:
     virtual int overflow (int ch);
     // Defining xsputn is an optional optimization.
     // (streamsize was recently added to ANSI C++, not portable yet.)
-    //virutal streamsize xsputn (char* text, streamsize n);
+    virtual streamsize xsputn (const char* text, streamsize n);
     
-    /// Set the global routing mask, returns old mask
-    static unsigned int setRoutingMask(unsigned int routing){
-      unsigned int oldRouting = s_routing;
-      s_routing = routing; 
-      return oldRouting;
-    }
-    /// Returns the global routing mask
-    static unsigned int getRoutingMask(){ return s_routing; }
-    
+    /// return the instance routing code
+    inline unsigned int getRoutingCode(){ return m_routing; }
+
 protected:
     
     /// sends the current message to all appropriate output streams.
     /// returns 0 (ok) or EOF.
-    int dispatchMessage(char *szMessage, streamsize iLen);
+    int dispatchMessage(const char *szMessage, streamsize iLen);
     
     /// routing code for this MessengerBuf tells which streams should be output
     unsigned int m_routing;
-    
-    /// static routing mask, ANDed with the instance routing code.
-    static unsigned int s_routing;
     
 };
 

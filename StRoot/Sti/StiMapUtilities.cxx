@@ -85,8 +85,8 @@ bool StiDetectorNodePositionLessThan::operator() (const StiDetectorNode* lhs,
 					  const StiDetectorNode* rhs) const
 {
     if (lhs->getData()==0 || rhs->getData()==0) {
-	*(Messenger::instance(kHitMessage)) <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
-	*(Messenger::instance(kHitMessage)) <<"null data.  Return false"<<endl;
+	*(Messenger::instance(MessageType::kHitMessage)) <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
+	*(Messenger::instance(MessageType::kHitMessage)) <<"null data.  Return false"<<endl;
     }
     StiPlacement* lhsp = lhs->getData()->getPlacement();
     StiPlacement* rhsp = rhs->getData()->getPlacement();
@@ -118,14 +118,14 @@ bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 
 void StTpcPadrowHitFilter::build(const string& buildPath)
 {
-    *(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build()"<<endl;
+    *(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build()"<<endl;
     if (mBuilt==true) {
-	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
+	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
 	return;
     }
     
     if (buildPath=="empty") {
-	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
+	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
 					    << "buildPath==empty.  Abort."<<endl;
 	return;
     }
@@ -133,11 +133,11 @@ void StTpcPadrowHitFilter::build(const string& buildPath)
     StGetConfigValue(buildPath.c_str(), "mMaxPadrow", mMaxPadrow);
     
     if (mMinPadrow==999 || mMaxPadrow==999) {
-	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
+	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
 					    <<"members not initialized.  ABORT"<<endl;
 	return;
     }
-    *(Messenger::instance(kHitMessage)) <<"\tMinPadrow:\t"<<mMinPadrow
+    *(Messenger::instance(MessageType::kHitMessage)) <<"\tMinPadrow:\t"<<mMinPadrow
 					<<"\tMaxPadrow:\t"<<mMaxPadrow<<endl;
     mBuilt=true;
 }
