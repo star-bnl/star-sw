@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.32 2001/06/18 23:03:00 perev Exp $
+// $Id: rootlogon.C,v 1.33 2001/09/01 20:04:45 perev Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -21,33 +21,17 @@
     //  printf("\nType \".x STAR_Demos.C\" to get a toolbar from which to execute the STAR demos\n");
     printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
     printf("\nType \".x demoshelp.C\" to see the help window\n\n");
-   {
-     TDatime start;
-     
-     int idate=start.GetDate();
-     int itime=start.GetTime();
-     
-     int year=idate/10000;
-     int month=(idate%10000)/100;
-     int day=idate%100;
-     int hh=itime/10000;
-     int mm=(itime%10000)/100;
-     int ss=itime%100;
-     
-     char* c[12]={"Jan","Feb","Mar","Apr","May","Jun",
-		  "Jul","Aug","Sep","Oct","Nov","Dec"};
-     
-     // cout << " *** Start at Date : " << day << "-" << c[month-1] << "-" << year
-     //      << " Time : " << hh << ":" << mm << ":" << ss << " ***" << endl;
-     // cout << endl;
-     printf(" *** Start at Date : %i-%s-%i Time : %i:%i:%i ***\n",day, c[month-1], year, hh, mm, ss);
-   }
+
+    printf(" *** Start at Date : %s\n",TDatime().AsString());
+
+
+   if (gROOT->IsBatch()==0 && gSystem->Getenv("OPENGL")) gROOT->Macro("GL.C");
    
    
    gROOT->SetStyle("Plain");// Default white background for all plots
    
-   // The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
-   // from Alice.
+// 	The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
+// 	from Alice.
    
    gStyle->SetCanvasColor(10);
    gStyle->SetStatColor(10);
@@ -66,82 +50,18 @@
    
    // 	Assign bif size of hashtable for STAR I/O
    TBuffer::SetGlobalWriteParam(2003);
+
+
+
    //      Print version
+namespace _rootlogon_ {
    TString STAR_LEVEL("$STAR_LEVEL");
    TString ROOT_LEVEL("$ROOT_LEVEL");
-   gSystem->ExpandPathName(STAR_LEVEL);
-   gSystem->ExpandPathName(ROOT_LEVEL);
-   printf("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s \n",  
-	  STAR_LEVEL.Data(),
-	  ROOT_LEVEL.Data(),
-	  gSystem->HostName());
-   //   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
+   int dumy = gSystem->ExpandPathName(STAR_LEVEL);
+   int dumy = gSystem->ExpandPathName(ROOT_LEVEL);
+   int dumy = printf("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s \n",  
+	      STAR_LEVEL.Data(), ROOT_LEVEL.Data(),gSystem->HostName());
+}
    gSystem->SetIncludePath("-I. -I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/include");
-#ifdef RFIO    
-   {
-     // Load rfio map
-     
-     TNamed *tn=0;
-     TList *rfiomap = new TList();
-     rfiomap->SetName(".rfiomap");
-     gROOT->GetListOfSpecials()->Add(rfiomap);
-     char *map[] = {
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/data01",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/data02",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/data07",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/data08",
-       
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/GC",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/1999   ",  
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/l3",
-       
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/2000/06",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/disk0",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/disk1",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/dst",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/pwg",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/qa",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/scratch",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/simu",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/star",
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/test",
-      
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data03",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data04",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data05",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data06",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data09",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/data10",
-      
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/01",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/02",
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/03",
-      
-       ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/reco",
-       
-       ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/2000",
-       0
-     };
-     
-     for (int i=0;map[i];i+=2) {
-       tn = new TNamed();
-       tn->SetName (map[i+1]);
-       tn->SetTitle(map[i+0]);
-       rfiomap->Add(tn);
-     }
-   }
-#endif
   
-   int nargStar  = gApplication->Argc();
-   Bool_t starGraph = kTRUE;
-   if (nargStar > 1 ) {
-     int iii_jjj;
-     for (iii_jjj = 1; iii_jjj < nargStar;iii_jjj++) {
-       if (strcmp(gApplication->Argv(iii_jjj),"-b") == 0) {
-          starGraph = kFALSE; 
-       }
-     }
-   }
-   if (starGraph && gSystem->Getenv("OPENGL")) gROOT->Macro("GL.C");
 }

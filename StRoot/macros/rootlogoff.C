@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.4 2000/08/31 13:15:45 fisyak Exp $
+// $Id: rootlogoff.C,v 1.5 2001/09/01 20:04:45 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.5  2001/09/01 20:04:45  perev
+// namespace introduced to avoi clashes
+//
 // Revision 1.4  2000/08/31 13:15:45  fisyak
 // Force call to Finish before quit (Victor)
 //
@@ -14,9 +17,17 @@
 // description:
 ///////////////////////////////////////////////////////////////
 {
-if (gClassTable->GetID("StChain") >=0) {
-  StMaker *mk = StMaker::GetChain();
-  if (mk) {mk->Finish(); delete mk;}
+class StMaker;
+namespace rootlogoff {
+TClass *tclassMk=0;
+StMaker *mk=0;
+}
+
+rootlogoff::tclassMk = gROOT->GetClass("StMaker",0);
+if (rootlogoff::tclassMk && rootlogoff::tclassMk->GetClassInfo()) 
+{
+  rootlogoff::mk = StMaker::GetChain();
+  if (rootlogoff::mk) {rootlogoff::mk->Finish(); delete rootlogoff::mk;}
 }
 printf("\nThis is the end of ROOT -- Goodbye\n\n");
 }
