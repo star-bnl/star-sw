@@ -24,13 +24,12 @@ my $debugOn=0;
 #&cgiSetup();
 
 my @SetD = (
-             "P00he/2000/06",
-             "P00he/2000/07",
-             "P00he/2000/08",
+             "P00hf/2000/06",
+             "P00hf/2000/07",
+             "P00hf/2000/08",
 );
-my $SetD2 = "P00hd/2000/06";
-my $prod_html_back = "/star/u2e/starreco/P00he/summary/P00he.summary\.html_back";
-my $prod_html = "/star/u2e/starreco/P00he/summary/P00he.summary\.html";
+my $prod_html_back = "/star/u2e/starreco/P00hf/summary/P00hf.summary\.html_back";
+my $prod_html = "/star/u2e/starreco/P00hf/summary/P00hf.summary\.html";
 
 struct JFileAttr => {
     daqRun      => '$',
@@ -49,7 +48,7 @@ struct FilAttr => {
        numRun   => '$',
 }; 
  
-my @prodSer = ("P00he","P00hd") ;
+my @prodSer = ("P00hf","P00he") ;
 
 &beginHtml();
 
@@ -80,7 +79,7 @@ my @prodSer = ("P00he","P00hd") ;
                     "2000/09" => "SEPTEMBER-2000"                    
  ); 
 
-#my %daqHash = ();
+my %daqHash = ();
 
 
 &StDbProdConnect();
@@ -89,7 +88,8 @@ my  $nmfile;
 my  @hpssInFiles;
 
 
- $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE jobID like '%$prodSer[0]%' AND fName LIKE '%dst.root' AND hpss = 'Y'";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE jobID like '%P00hf%' AND fName LIKE '%dst.root' ";
+
  $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
  $cursor->execute;
@@ -101,8 +101,8 @@ my  @hpssInFiles;
      my $fvalue=$fields[$i];
      my $fname=$cursor->{NAME}->[$i];
      print "$fname = $fvalue\n" if $debugOn;
-  
       $myRun = $fvalue  if($fname eq 'runID');
+#   print "runID : ", $myRun ,"\n";
    }
   
    $DRun[$nRun] = $myRun;
@@ -152,7 +152,7 @@ my  @hpssInFiles;
 
   for ($ll=0; $ll<scalar(@DRun); $ll++) {
 
-  $sql="SELECT runID, dataset, fName, path, Nevents  FROM $FileCatalogT WHERE runID = '$DRun[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%$prodSer[0]%' AND hpss ='Y'";
+  $sql="SELECT runID, dataset, fName, path, Nevents  FROM $FileCatalogT WHERE runID = '$DRun[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%$prodSer[0]%' AND hpss = 'Y'";
   $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
   $cursor->execute;
@@ -165,7 +165,7 @@ my  @hpssInFiles;
        my $fvalue=$fields[$i];
         my $fname=$cursor->{NAME}->[$i];
       print "$fname = $fvalue\n" if $debugOn;
-
+ 
       ($$fObjAdr)->DtSt($fvalue)     if( $fname eq 'dataset'); 
       ($$fObjAdr)->flName($fvalue)   if( $fname eq 'fName');
       ($$fObjAdr)->fpath($fvalue)    if( $fname eq 'path'); 
@@ -182,12 +182,11 @@ my  @hpssInFiles;
  foreach my $dsfile (@hpssDstFiles) {
 
     $dhfile = ($$dsfile)->flName;
-    $dhSet  = ($$dsfile)->DtSt; 
     $dhpath = ($$dsfile)->fpath;
     $dhRun = ($$dsfile)->numRun;
     @dirP = split ("/", $dhpath);
     $dirR = $dirP[5] . "/" . $dirP[6];
-  $dtSet{$dhRun} = $dhSet;
+
   $periodRun{$dhRun} = $RunHash{$dirR};
   $dstHpEvts{$dhRun}  += ($$dsfile)->Nevts; 
 
@@ -212,12 +211,12 @@ my  @hpssInFiles;
       my $fvalue=$fields[$i];
       my $fname=$cursor->{NAME}->[$i];
       print "$fname = $fvalue\n" if $debugOn;
+
       ($$fObjAdr)->flName($fvalue)   if( $fname eq 'fName');
       ($$fObjAdr)->fpath($fvalue)   if( $fname eq 'path');     
       ($$fObjAdr)->Nevts($fvalue)    if( $fname eq 'Nevents');
       ($$fObjAdr)->numRun($fvalue)   if( $fname eq 'runID');
     }
-  
     $OnlFiles[$nOnlFile] = $fObjAdr;  
     $nOnlFile++;
    
@@ -248,7 +247,7 @@ my  @hpssInFiles;
 
  for ($kk=0; $kk<scalar(@DRun); $kk++) {
 
-  $sql="SELECT runID, fName, path, Nevents FROM $FileCatalogT WHERE runID = '$DRun[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%$prodSer[0]%' AND site = 'disk_rcf'";
+  $sql="SELECT runID, fName, dataset, path, Nevents FROM $FileCatalogT WHERE runID = '$DRun[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%$prodSer[0]%' AND site = 'disk_rcf'";
   $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
   $cursor->execute;
@@ -262,6 +261,7 @@ my  @hpssInFiles;
        my $fname=$cursor->{NAME}->[$i];
        print "$fname = $fvalue\n" if $debugOn;
 
+      ($$fObjAdr)->DtSt($fvalue)     if( $fname eq 'dataset');
       ($$fObjAdr)->flName($fvalue)    if( $fname eq 'fName');
       ($$fObjAdr)->fpath($fvalue)    if( $fname eq 'path');  
       ($$fObjAdr)->Nevts($fvalue)     if( $fname eq 'Nevents');
@@ -275,9 +275,11 @@ my  @hpssInFiles;
  
 foreach my $ddfile (@diskDstFiles) {
 
+   $dhSet  = ($$ddfile)->DtSt; 
    $dhfile = ($$ddfile)->flName;
    $dhpath = ($$ddfile)->fpath;
    $ddSet = ($$ddfile)->numRun;
+    $dtSet{$ddSet} = $dhSet;
    $dstDEvts{$ddSet}  += ($$ddfile)->Nevts;   
 
   }
@@ -300,17 +302,17 @@ my $TdaqHEvt  = 0;
         $TdstHEvt    +=  $dstHpEvts{$runD}; 
         $TdstDEvt    +=  $dstDEvts{$runD}; 
         $TdaqHEvt    +=  $daqHpEvts{$runD}; 
-
+#  print "Run ID", $runD, $periodRun{$runD}, "\n";
 
    print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
-   print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbFileDAQRetrv.pl?run=$runD\">$runD</TD>\n"; 
+   print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbP00hfDAQRetrv.pl?run=$runD\">$runD</TD>\n"; 
    print HTML "<td>$periodRun{$runD}</td><td>$prodRun{$runD}</td><td> $dtSet{$runD} </td><td>$daqHpEvts{$runD}</td><td>$dstHpEvts{$runD}</td><td>$dstDEvts{$runD}</td></tr>\n"; 
 
 }
 
 #  print total amount
    print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n"; 
-   print HTML "<td>Total</td><td>June-July</td><td>All</td><td> All</td><td> $TdaqHEvt</td><td>$TdstHEvt</td><td>$TdstDEvt </td></tr>\n"; 
+   print HTML "<td>Total</td><td>June-August</td><td>All</td><td> All</td><td> $TdaqHEvt</td><td>$TdstHEvt</td><td>$TdstDEvt </td></tr>\n"; 
 
 #####
 
