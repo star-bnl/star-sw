@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibration.cxx,v 1.1 2001/09/28 19:09:39 llope Exp $
+ * $Id: StTofCalibration.cxx,v 1.2 2002/01/22 07:11:32 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,18 +10,38 @@
  *****************************************************************
  *
  * $Log: StTofCalibration.cxx,v $
+ * Revision 1.2  2002/01/22 07:11:32  geurts
+ * doxygenized
+ *
  * Revision 1.1  2001/09/28 19:09:39  llope
  * first version
  *
  *******************************************************************/
+//! Time-of-Flight Calibration Utilities
+/*! \class StTofCalibration
+    \author Frank Geurts
+
+    <p>A package of calibration routines for the STAR Time-of-Flight
+    detector. Currently the only method prints the default initialized
+    values.<p>
+
+    To do:
+    <ul>
+    <li> create STAR dBase entries and add members to access those<li>
+    <li> move calibration methods from the StTofAnalysisMaker into
+         StTofCalibration</li>
+    </ul>
+*/
 #include <iostream.h>
 #include "StTofCalibration.h"
 //#include "St_XDFFile.h"
 //#include "St_DataSetIter.h"
 //#include "ctf/St_ctg_Module.h"
 
+/// default empty destructor
 StTofCalibration::~StTofCalibration(){ /* nope */}
 
+/// default constructor, initializes default calibration values
 StTofCalibration::StTofCalibration(){
   mSlatCalibVec.clear();
   for(int iRow=0; iRow<TOFP_MAX_SLATS; iRow++){
@@ -38,6 +58,7 @@ StTofCalibration::StTofCalibration(){
 }
 
 
+/// initializes calibration from XDF or dBase (not functioning yet)
 void StTofCalibration::init(){
   //Char_t *InputXdfFile= "ctg_pars.xdf";
   //St_XDFFile xdf(InputXdfFile);
@@ -63,17 +84,18 @@ void StTofCalibration::init(){
   //}
 }
 
-void StTofCalibration::print(){
-  cout << "------StTofCalibration:print()----" << endl;
-  cout << " CalibrationVector Size = " << mSlatCalibVec.size() << endl;
+/// dump contents of calibration vector to stdout
+void StTofCalibration::print(ostream& os = cout){
+  os << "------StTofCalibration:print()----" << endl;
+  os << " CalibrationVector Size = " << mSlatCalibVec.size() << endl;
   for (unsigned int i=0;i<mSlatCalibVec.size();i++){
-    cout << " slat: " << i
-         << "  tdc: " << mSlatCalibVec[i].offset_tdc  << " " << mSlatCalibVec[i].cc_tdc
-         << " " << mSlatCalibVec[i].ods_tdc
-         << "  adc: " << mSlatCalibVec[i].offset_adc 
-         << " " << mSlatCalibVec[i].ods_adc     << " " << mSlatCalibVec[i].cc_adc
-         << endl;
+    os  << " slat: " << i
+        << "  tdc: " << mSlatCalibVec[i].offset_tdc  << " " << mSlatCalibVec[i].cc_tdc
+        << " " << mSlatCalibVec[i].ods_tdc
+        << "  adc: " << mSlatCalibVec[i].offset_adc 
+        << " " << mSlatCalibVec[i].ods_adc     << " " << mSlatCalibVec[i].cc_adc
+        << endl;
   }
-  cout << "----------------------------------" << endl;
+  os << "----------------------------------" << endl;
 
 }
