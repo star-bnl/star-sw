@@ -1,5 +1,9 @@
-* $Id: tpt_make_segment.F,v 1.9 1999/10/15 00:54:08 nevski Exp $
+* $Id: tpt_make_segment.F,v 1.10 1999/12/17 16:30:53 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.10  1999/12/17 16:30:53  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.9  1999/10/15 00:54:08  nevski
 * pgf->g77 cleanup
 *
@@ -87,6 +91,7 @@ C     Local variables
 
       INTEGER tgc_global_to_sector
       INTEGER tgc_sec24_to_sec12
+      INTEGER longrow
 
       REAL    ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs,xp1,yp1
       REAL    zp1,rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2,denom
@@ -94,7 +99,8 @@ C     Local variables
 
 C     Find what was the innermost row number and continue the search 
 C     towards the inside of the chamber
-      irow_start = mod(hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row,100)-1
+      longrow = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row
+      irow_start = mod(longrow,100)-1
       isect_first= hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
       iret       = tgc_sec24_to_sec12(isect_first,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
@@ -113,7 +119,8 @@ C           if there was a gap parametrisation for a row won't change
             ip4 = trk(ntrk).ipnt(npnt-2)
             ip3 = trk(ntrk).ipnt(npnt-1)
             ip2 = trk(ntrk).ipnt(npnt)
-            ir2 = mod(hit(ip2).row,100)
+            longrow = hit(ip2).row
+            ir2 = mod(longrow,100)
             r2 = sqrt(hit(ip2).x**2+hit(ip2).y**2)
             ax = hit(ip3).x-hit(ip2).x
             ay = hit(ip3).y-hit(ip2).y

@@ -1,5 +1,9 @@
-* $Id: tpt_merge_segments.F,v 1.11 1999/11/03 03:25:28 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.12 1999/12/17 16:30:53 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.12  1999/12/17 16:30:53  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.11  1999/11/03 03:25:28  sakrejda
 * When two tracks were merged, hits were ordered on track one by one.
 * Those that were already placed, were marked as such, but were not removed
@@ -76,6 +80,7 @@ C______________________________________________________________________
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
       INTEGER i,j,k,l,lxj,lxi,next,c,m,n,ipass
+      INTEGER longrow
       REAL    radd,long
       INTEGER tracks,hits,id
       REAL    dis,min(5),cuta,cutb
@@ -193,19 +198,23 @@ c                 assign rows and coords.
                   xfi = hit(firsti).x
                   yfi = hit(firsti).y
                   zfi = hit(firsti).z
-                  rfi = mod(hit(firsti).row,100)
+                  longrow = hit(firsti).row
+                  rfi = mod(longrow,100)
                   xli = hit(lasti).x
                   yli = hit(lasti).y
                   zli = hit(lasti).z
-                  rli = mod(hit(lasti).row,100)
+                  longrow =hit(lasti).row 
+                  rli = mod(longrow,100)
                   xfj = hit(firstj).x
                   yfj = hit(firstj).y
                   zfj = hit(firstj).z
-                  rfj = mod(hit(firstj).row,100)
+                  longrow = hit(firstj).row
+                  rfj = mod(longrow,100)
                   xlj = hit(lastj).x
                   ylj = hit(lastj).y
                   zlj = hit(lastj).z
-                  rlj = mod(hit(lastj).row,100)
+                  longrow =hit(lastj).row 
+                  rlj = mod(longrow,100)
 
 c                 Compute the distances and row differences
 c                 between endpoints.

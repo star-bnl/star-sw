@@ -1,5 +1,9 @@
-* $Id: tpt_make_segment_uv.F,v 1.10 1999/09/14 00:55:50 liq Exp $
+* $Id: tpt_make_segment_uv.F,v 1.11 1999/12/17 16:30:53 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.11  1999/12/17 16:30:53  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.10  1999/09/14 00:55:50  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -82,6 +86,7 @@ C     Local variables
       INTEGER ntrk,ir1,irlast,nfound,iret,ip
       INTEGER irow_last,irow_start,irow_step,ngap
       INTEGER isec1, isect, isect_trunc
+      INTEGER longrow
 
       INTEGER ns,nf,drow,i,nh1,ilc,lsec
 
@@ -108,7 +113,8 @@ C     Local variables
 
 C     Find what was the innermost row number and continue the search 
 C     towards the inside of the chamber
-      irow_start = mod(hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row,100)-1
+      longrow = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row
+      irow_start = mod(longrow,100)-1
       isect      = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
       iret       = tgc_sec24_to_sec12(isect,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
