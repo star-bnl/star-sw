@@ -251,7 +251,7 @@
    int n_waf;
 	Point P = {0,0,0,0,0,0};
 
-	n_waf = ( P1.X + (P2.X - P1.X)*(R - P1.Z)/(P2.Z - P1.Z) +
+	n_waf = (int)( P1.X + (P2.X - P1.X)*(R - P1.Z)/(P2.Z - P1.Z) +
 				 0.5*num_waf*STEP)/STEP;
 
    if(n_waf >= num_waf) n_waf = num_waf - 1;
@@ -1126,7 +1126,7 @@ void work::InstallParam()
                         } 		
 //B. b.!!         nt += Events[i].num;
 		}
-	printf("chi : %.1f (%d)", chi/nt, nt/NEV);
+	 //	printf("chi : %.1f (%d)", chi/nt, nt/NEV);
 	return (nt > 0) ? chi/nt : 0;
 }
 
@@ -1303,8 +1303,7 @@ float work::TakeDerivatives(float st)
 
  int level = 20, n_track = 2000, nsh;
  int nl3, nw3, i, num3;
- float  x3, y3, angle = 0.001, dx, dy;
- float d, fi, rs;
+ float  x3, y3;
  Point P1, P2, P3, PP1, PP2;
 
  nsh = (int)n_track*level/100;

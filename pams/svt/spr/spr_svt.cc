@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: spr_svt.cc,v 1.7 1999/02/15 03:32:34 caines Exp $
+ * $Id: spr_svt.cc,v 1.8 1999/12/08 04:22:43 caines Exp $
  *
  * Author: blasiuk and nyfeiman 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: spr_svt.cc,v $
+ * Revision 1.8  1999/12/08 04:22:43  caines
+ * Still getting rid of warnings
+ *
  * Revision 1.7  1999/02/15 03:32:34  caines
  * Fixed bug so now looks at correct hits
  *
@@ -110,8 +113,7 @@
     idb << "numberOfTracks " << numberOfTracks << endl;
     idb << "MAXROWS " << MAXROWS << endl;
     idb << "MAXPOINTS " << MAXPOINTS << endl;
-    
-    int   globalTrackRow[MAXROWS];    
+        
     int   spacePoints[MAXPOINTS];
     float spacePointsCharge[MAXPOINTS];
     float pathLength[MAXPOINTS];
