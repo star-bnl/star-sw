@@ -1,8 +1,9 @@
+//*-- Author :    Valery Fine   21/01/99
 class St_XDFFile;
 TBrowser *xdfbrow;
 St_XDFFile *xdf=0;
 //
-// This is a macro to browse the XDF files with ROOT Browser
+// This is a macro to browse the XDF files with ROOT TBrowser
 // (It uses St_XDFFile::Browse method)
 // To get this picture:
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/XDFBrowser.gif"> </P> End_Html 

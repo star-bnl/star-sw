@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.6 1999/01/13 20:29:14 fine Exp $
+// $Id: St_Node.cxx,v 1.7 1999/01/23 18:40:53 fisyak Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.7  1999/01/23 18:40:53  fisyak
+// Cleanup for SL98l
+//
 // Revision 1.6  1999/01/13 20:29:14  fine
 // St_DataSet::Pass() method - the option kUp has been introduced
 //
@@ -67,8 +70,8 @@ R__EXTERN  Size3D gSize3D;
 ClassImp(St_Node)
  
 //______________________________________________________________________________
-//*-*-*-*-*-*-*-*-*-*-*-* T N O D E  description *-*-*-*-*-*-*-*-*-*-*-*-*
-//*-*                    =======================
+//*-*-*-*-*-*-*-*-*-*-*-* S T N O D E  description *-*-*-*-*-*-*-*-*-*-*-*-*
+//*-*                     ========================
 //*-*
 //*-*    A St_Node object is used to build the geometry hierarchy (see TGeometry).
 //*-*    A node may contain other nodes.
@@ -219,13 +222,14 @@ TNode *St_Node::CreateTNode(const St_NodePosition *position)
 
   TList *positions = GetListOfPositions();
   if (positions) {
-    newNode->cd();
     TIter next(positions);
     St_NodePosition *pos = 0;
     while (pos = (St_NodePosition *) next()){
       St_Node *node = pos->GetNode();
-      if (node) 
+      if (node) {
           TNode *nextNode = node->CreateTNode(pos);
+          newNode->cd();
+      }
     }
   }
   newNode->ImportShapeAttributes();
@@ -282,10 +286,8 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
  TRotMatrix *rotation = matrix;
  if(rotation) {
      rotation =gGeometry->GetRotMatrix("Identity");
-     if (rotation) {
-        new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-        rotation  = gGeometry->GetRotMatrix("Identity");
-     }
+     if (!rotation) 
+        rotation  = new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
    }
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
@@ -304,10 +306,8 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
  if (strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
  else {
    rotation = gGeometry->GetRotMatrix("Identity");
-   if (!rotation) {
-      new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-      rotation  = gGeometry->GetRotMatrix("Identity");
-   }
+   if (!rotation) 
+      rotation  = new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
  } 
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
