@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.36 2002/02/19 18:34:44 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.37 2002/04/09 00:01:37 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.37  2002/04/09 00:01:37  ward
+// Bug fix in Vladimir2Herbert().
+//
 // Revision 1.36  2002/02/19 18:34:44  ward
 // Changes from Jenn Klay: EMC unpacker rewritten, updated dsm-to-patch conversion to match offline software.
 //
@@ -333,16 +336,19 @@ int St_trg_Maker::getTrayCtb ( float phi, float z ) {
    }
 
 }
-
-
 void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
   int offset, flip;
   assert(input>=1&&input<=96);
-  if(input>48) { input-=48; offset=0; flip = -1;} else { offset=24; flip = 1; }
+  if(input>48) {
+    input-=48; offset=0; flip = -1;
+  } else if(45<=input&&input<=48) {
+    *sector=24; *subsector=input-44; return;
+  } else {
+    offset=24; flip = 1;
+  }
   *sector = (input-1)/4 + 1 ;
   *subsector = 4 + input - 4 * (*sector) ;
   *sector = flip*(offset - *sector);
-  if (45<=input&&input<=48) { *sector=24; *subsector=input-44; }
 }
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   int prePost,sector,subsector,index,irow;
