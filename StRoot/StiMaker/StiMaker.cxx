@@ -388,6 +388,12 @@ void StiMaker::doNextTrackStep()
     mtracker->doNextTrackStep();
 }
 
+void StiMaker::defineNextTrackStep(unsigned int val)
+{
+    cout <<"StiMaker::defineNextTrackStep(). Set to: "<<val<<endl;
+    //mtracker->defineNextTrackStep(val);
+}
+
 void StiMaker::setSeedFinderType(SeedFinderType val)
 {
     if (val==kComposite) {
