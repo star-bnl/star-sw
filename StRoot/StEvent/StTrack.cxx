@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.9 1999/12/01 15:58:08 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.10 2000/01/20 14:42:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.9  1999/12/01 15:58:08  ullrich
- * New decoding for dst_track::method. New enum added.
+ * Revision 2.10  2000/01/20 14:42:40  ullrich
+ * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
  *
  * Revision 2.10  2000/01/20 14:42:40  ullrich
  * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
@@ -58,7 +58,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.9 1999/12/01 15:58:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.10 2000/01/20 14:42:40 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -185,10 +185,9 @@ StTrack::impactParameter() const { return mImpactParameter; }
 Float_t
 StTrack::length() const { return mLength; }
 
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    return (mNumberOfPossiblePoints%1000) +
-	((mNumberOfPossiblePoints%10000)/1000) +
-	(mNumberOfPossiblePoints/10000);
+UShort_t
+StTrack::numberOfPossiblePoints() const
+{
     return (numberOfPossiblePoints(kTpcId) +
 	    numberOfPossiblePoints(kSvtId) +
 	    numberOfPossiblePoints(kSsdId));
@@ -196,6 +195,8 @@ StTrack::length() const { return mLength; }
 
 UShort_t
 StTrack::numberOfPossiblePoints(StDetectorId det) const
+{
+    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
     switch (det) {
     case kFtpcWestId:
     case kFtpcEastId:
@@ -204,10 +205,6 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
 	break;
     case kSvtId:
 	return (mNumberOfPossiblePoints%10000)/1000;
-	break;
-    case kFtpcWestId:
-    case kFtpcEastId:
-	return mNumberOfPossiblePoints;
 	break;
     case kSsdId:
 	return mNumberOfPossiblePoints/10000;
