@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.69 2004/04/09 22:11:53 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.70 2004/04/13 15:22:08 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.70  2004/04/13 15:22:08  suaide
+// svaeHistograms method added and small bug fixed
+//
 // Revision 1.69  2004/04/09 22:11:53  suaide
 // small bug fixed
 //
@@ -174,6 +177,7 @@
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "TStopwatch.h"
+#include "TFile.h"
 // DAQ Libraries
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
@@ -1220,8 +1224,12 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   bool save = false;
   for(Int_t det=0;det<MAXDETBARREL;det++) if(mSave[det]) save = true;
   if(!save) return kFALSE; 
-  if(!mEmc) mEmc =new StEmcCollection();
-  
+  if(!mEmc) 
+  {
+    mEmc =new StEmcCollection();
+    if(event) event->setEmcCollection(mEmc);
+  }
+
   if(mRawData)
   {
     if(mEmc->bemcRawData())
@@ -1476,6 +1484,29 @@ void StEmcADCtoEMaker::setRemoveGhostEvent(Bool_t value)
 {
   if(!mData) return;
   mData->TowerRemoveGhost = value;
+  return;
+}
+void StEmcADCtoEMaker::saveHistograms(char* file)
+{
+  TFile f(file,"RECREATE");
+  if(mNhit) mNhit->Write();           //!
+  if(mEtot) mEtot->Write();           //!
+  for(int i=0;i<MAXDETBARREL;i++)
+  {
+    if(mHits[i]) mHits[i]->Write();   //!
+    if(mAdc[i]) mAdc[i]->Write();    //!
+    if(mEnergyHist[i]) mEnergyHist[i]->Write(); //!
+    if(mEnergySpec[i][0]) mEnergySpec[i][0]->Write(); //!
+    if(mEnergySpec[i][1]) mEnergySpec[i][1]->Write(); //!
+    if(mEnergySpec[i][2]) mEnergySpec[i][2]->Write(); //!
+    if(mAdc1d[i]) mAdc1d[i]->Write();  //!
+    if(mEn1d[i]) mEn1d[i]->Write();  //!
+    if(mADCSpec[i]) mADCSpec[i]->Write();          //!
+  }
+  if(mSmdTimeBinHist) mSmdTimeBinHist->Write(); //!
+  if(mValidEvents) mValidEvents->Write();    //!
+  if(mAverageTDC) mAverageTDC->Write();    //!
+  f.Close();
   return;
 }
 
