@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.55 2004/08/29 21:48:33 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.56 2004/10/20 17:52:36 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.56  2004/10/20 17:52:36  jhthomas
+ * Add GetSpaceChargeMode() function
+ *
  * Revision 1.55  2004/08/29 21:48:33  jhthomas
  * Put Manual space charge back to 0.0 in order to enable DB.  Previous CVS was a mistake.
  *
@@ -359,6 +362,34 @@ void StMagUtilities::GetShortedRing ()
   Resistor = shortTable->resistor ;   // M-Ohm value of added external resistor to resistor chain 
 }
 
+/// Space Charge Correction Mode
+/*!
+     The spacecharge correction is performed using one of a variety
+     of modes.  See the UndoSpaceChargeDistortion*() functions for
+     more information on the different shapes used to correct the
+     distortion.  Additionally, the magnitude of the correction may
+     be set either manually, or from the database.  This routine
+     provides a method to determine which mode is in use at any
+     given time.  Return values are as follows:
+
+      0 : no correction
+     10 : uniform, from DB
+     11 : uniform, manually set
+     20 : R2, from DB
+     21 : R2, manually set
+*/
+Int_t StMagUtilities::GetSpaceChargeMode()
+{
+   if (mDistortionMode & kSpaceCharge) {
+     if (fSpaceCharge) return 10;
+     else return 11;
+   }
+   if (mDistortionMode & kSpaceChargeR2) {
+     if (fSpaceChargeR2) return 20;
+     else return 21;
+   }
+   return 0;
+}
 
 //________________________________________
 
