@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.4 1999/10/19 21:17:57 calderon Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.5 1999/11/05 22:17:04 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,13 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.5  1999/11/05 22:17:04  calderon
+ * Made private copy constructor and operator= in StTrsDigitalSector.
+ * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
+ * and use new "Fast" as default.
+ * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * data access.
+ *
  * Revision 1.4  1999/10/19 21:17:57  calderon
  * New format of data for the Digital Sector without mZeros.
  * Member functions modified accordingly.  Not tested yet, but
@@ -63,7 +70,7 @@ typedef vector<unsigned char>      digitalTimeBins;
 typedef vector<digitalTimeBins>    digitalPadRow;
 typedef vector<digitalPadRow>      digitalSector;
 
-typedef vector<unsigned char>::iterator digitialTimeBinIterator;
+typedef vector<unsigned char>::iterator digitalTimeBinIterator;
 #else
 typedef vector<unsigned char, allocator<unsigned char> >     digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
@@ -80,8 +87,6 @@ public:
     StTrsDigitalSector(StTpcGeometry*);
     ~StTrsDigitalSector();
     
-    //StTrsDigitalSector(const StTrsDigitalSector&);
-    //StTrsDigitalSector& operator=(const StTrsDigitalSector&);
 
     // access functions
     digitalTimeBins*   timeBinsOfRowAndPad(int, int);
@@ -102,6 +107,10 @@ public:
 public:
     digitalSector mData;
 //     digitalSector mZeros;
+private:
+    StTrsDigitalSector(const StTrsDigitalSector&);
+    StTrsDigitalSector& operator=(const StTrsDigitalSector&);
+
 };
 inline digitalTimeBins* StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN)
 {

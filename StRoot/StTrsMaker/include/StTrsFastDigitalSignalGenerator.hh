@@ -1,40 +1,24 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.3 1999/02/04 18:35:17 lasiuk Exp $
+ *  StTrsFastDigitalSignalGenerator.hh,v 1.1 1999/10/01 
+ *      17:15:00 HUi Long Exp $
  *
- * Author: 
+ * Author: Hui Long
  ***************************************************************************
  *
- * Description: parameterization of the digital signal response
+ * Description: Head file for the StTrsFastDigitalSignalGenerator.cc.
+ *              
  *
  ***************************************************************************
  *
- * $Log: StTrsFastDigitalSignalGenerator.hh,v $
- * Revision 1.3  1999/02/04 18:35:17  lasiuk
- * digital sector removed from constructor;
- * fillSector() added in base class
- *
- * Revision 1.2  1999/01/18 10:25:12  lasiuk
- * add conversion code for StTrsDigitalSector
- *
- * Revision 1.1  1998/11/10 17:12:11  fisyak
- * Put Brian trs versin into StRoot
- *
- * Revision 1.2  1998/11/04 18:51:17  lasiuk
- * initialization in base class
- * incorporate electronics db
- * sector by reference
- *
- * Revision 1.1  1998/06/30 22:54:09  lasiuk
- * Initial Revision
+ * $Log : v1.1 Hui Long$
  *
  **************************************************************************/
-#ifndef ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
-#define ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
-
+#ifndef ST_TRS_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
+#define ST_TRS_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #include <iostream.h>
 #include "StTrsDigitalSignalGenerator.hh"
-
+#include "StDaqLib/TPC/trans_table.hh"
 class StTrsFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {
 public:
     ~StTrsFastDigitalSignalGenerator();
@@ -47,7 +31,8 @@ public:
     void digitizeSignal()    ;
     void addWhiteNoise()     ;
     void addCorrelatedNoise();
-    
+private :  
+    unsigned char do10to8Translation(int ) const;  
 protected:
     StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 
