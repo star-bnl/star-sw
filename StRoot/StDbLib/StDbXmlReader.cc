@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.5 1999/12/03 17:03:22 porter Exp $
+ * $Id: StDbXmlReader.cc,v 1.6 1999/12/07 21:25:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.6  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.5  1999/12/03 17:03:22  porter
  * added multi-row support for the Xml reader & writer
  *
@@ -299,7 +302,7 @@ char* fullLine;
      // get Type
 
    p1=strstr(loca[e->istart],e->startKey);
-   for(j=0;j<strlen(e->startKey);j++)p1++;
+   for(j=0;j<(int)strlen(e->startKey);j++)p1++;
    p2=strstr(loca[e->istart],">");
    len = strlen(p1) - strlen(p2);
    e->type = new char[len];
@@ -320,7 +323,7 @@ char* fullLine;
    p1=strstr(loca[e->istart],e->size.startKey);
 
 if(p1){
-   for(j=0;j<strlen(e->size.startKey);j++)p1++;
+   for(j=0;j<(int)strlen(e->size.startKey);j++)p1++;
    p2=strstr(loca[e->istart],e->size.endKey);
    len = strlen(p1) - strlen(p2)+1;
    hlen = new char[len];
@@ -337,7 +340,7 @@ if(p1){
    if(p1){
      // <element Type> ...     <value> data </value>
      // </element Type>
-      for(j=0;j<strlen((e->val).startKey);j++)p1++;
+      for(j=0;j<(int)strlen((e->val).startKey);j++)p1++;
       while(p1[0]==' ')p1++;
       p2=strstr(loca[e->istart],(e->val).endKey);
       len = strlen(p1) - strlen(p2);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.10 1999/12/03 22:24:01 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.11 1999/12/07 21:25:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.11  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.10  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -88,19 +91,19 @@ mysqlAccessor::QueryDb(StDbConfigNode* node){
      buff.SetClientMode();
 
    char* nodeType = 0;
-   cout<<"will attempt to get nodeName"<< endl;
+   // cout<<"will attempt to get nodeName"<< endl;
 
    if(!buff.ReadScalar(nodeName,"Name")){ 
      buff.Raz();
      continue;
    }
 
-   cout<<"will attempt to get nodeType"<< endl;
+   // cout<<"will attempt to get nodeType"<< endl;
    if(!buff.ReadScalar(nodeType,"NodeType")){ 
      buff.Raz();
      continue;
    }
-   cout<<"got nodeName & nodeType = "<<nodeName<<" & "<<nodeType<< endl;
+   // cout<<"got nodeName & nodeType = "<<nodeName<<" & "<<nodeType<< endl;
 
 
    //   cout << ConfigName << endl;
@@ -168,7 +171,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   if(!table->hasDescriptor())QueryDescriptor(table);
 
   // --> find ID for this table Name & check if storage is binary
-    Db<<"SELECT structure.IsBinary, namedRef.ID, structure.name"; 
+    Db<<"SELECT structure.*, namedRef.ID as nameID"; 
     Db<<" from structure";
     Db<<" left join namedRef on structure.ID=namedRef.structID";
     Db<<" WHERE namedRef.name='";
@@ -186,10 +189,20 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
       cerr<<"QueryDb::Table no cstruct for requested Name "<<tableName<< endl;
       return 0;
     }
-    buff.ReadScalar(nameID,"ID");
+    buff.ReadScalar(nameID,"nameID");
     bool IsBinary=false;
     if(isbin && strstr(isbin,"Y"))IsBinary=true;
+    char* isindexed=0;
+    bool IsIndexed=true;
+    if(buff.ReadScalar(isindexed,"IsIndexed")){
+     if(isindexed && strstr(isindexed,"N"))IsIndexed=false;
+    } // else field is not there so assume it is indexed
     Db.Release(); buff.Raz();
+
+    if(!IsIndexed){
+      cerr << "QueryDb:: Cannot request Table via this API - no Index"<< endl;
+      return 0;
+    }
 
 // --> get the "version" & requestTime information
 
@@ -224,6 +237,9 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     es<<" "<<ends;
   }
 
+  unsigned int z = 0;
+  table->setBeginTime(z);
+  table->setBeginTime(getDateTime(z));
   char* bTime=0;  
   char* eTime=0;
   int numberOfRows=0;
@@ -394,7 +410,6 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   return 1; 
 }  
 
-
 ////////////////////////////////////////////////////////////////
 
 int
@@ -415,7 +430,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
   char* tableName = table->getTableName();
   char* cstructName=0;
 
-    Db<<"SELECT structure.IsBinary, namedRef.ID, structure.name"; 
+    Db<<"SELECT structure.*, namedRef.ID as namedID"; 
     Db<<" from structure";
     Db<<" left join namedRef on structure.ID=namedRef.structID";
     Db<<" WHERE namedRef.name='";
@@ -425,6 +440,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
     //    Db<< tableName <<"'"<<endsql;
    
     char* isbin=0;
+    char* isindexed = 0;
     int nameID=0; // c-struct ID
     Db.Output(&buff);
     buff.SetClientMode();
@@ -439,6 +455,11 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
     buff.ReadScalar(nameID,"ID");
     bool IsBinary=false;
     if(isbin && strstr(isbin,"Y"))IsBinary=true;
+    bool IsIndexed=true;
+    if(buff.ReadScalar(isindexed,"IsIndexed")){
+     if(isindexed && strstr(isindexed,"N"))IsIndexed=false;
+    }
+    
     Db.Release(); buff.Raz();
 
 
@@ -457,6 +478,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
     dataID = Db.GetLastInsertID();
     Db.Release(); buff.Raz();
 
+    if(IsIndexed){
     // now write to index
     buff.WriteScalar(table->getSchemaID(),"schemaID");
     buff.WriteScalar(storeTime,"beginTime");
@@ -470,6 +492,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
       Db<<"delete from bytes";
       Db<<" where dataID="<<dID<<" limit 1"<<endsql;
     }
+   }
       
   } else {
 
@@ -482,6 +505,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
      dataID = Db.GetLastInsertID(); // get auto-generated row-id
      Db.Release(); buff.Raz();
 
+     if(IsIndexed){
      eID=elements[i];
 
      buff.WriteScalar(table->getSchemaID(),"schemaID");
@@ -497,7 +521,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
        Db<<"delete from "<<cstructName;
        Db<<" where dataID="<<dID<<" limit 1"<<endsql;
      }
-
+     }
      Db.Release();
      buff.Raz();
 
@@ -511,6 +535,7 @@ mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
 return 1;
 
 }
+
 
 ////////////////////////////////////////////////////////////////
 int

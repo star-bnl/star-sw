@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.2 1999/09/30 02:05:59 porter Exp $
+ * $Id: MysqlDb.cc,v 1.3 1999/12/07 21:25:25 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.3  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.2  1999/09/30 02:05:59  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -304,7 +307,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
   if (tRow) {
-    for (i=0;i<tNbFields;i++){
+    for (i=0;i<(int)tNbFields;i++){
       if (IS_BLOB(mRes->mRes->fields[i].flags)) {
 	    if (mRes->mRes->fields[i].flags&BINARY_FLAG) {
 	       aBuff->WriteArray((char*)tRow[i],lengths[i],mRes->mRes->fields[i].name);
@@ -415,7 +418,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
     if (strarr[i]){
       int j;
       tRead=strarr[i];
-      for (j=0;j<strlen(strarr[i]);j++) {
+      for (j=0;j<(int)strlen(strarr[i]);j++) {
 	if (*tRead=='\\'||*tRead==',') {
 	  *tWrite='\\';
 	  tWrite++;

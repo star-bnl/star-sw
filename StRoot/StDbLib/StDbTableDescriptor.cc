@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.6 1999/12/03 19:02:01 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.7 1999/12/07 21:25:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.7  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.6  1999/12/03 19:02:01  porter
  * modified descriptor to accept tableDescriptor once this St_base object
  * has been updated to have longer name lengths.
@@ -54,7 +57,7 @@ mnumElements = numElements;
 mCur = mnumElements-1;
 mtableSize = sizeOfStruct;
 mcols = new tableDescriptor[mnumElements];
- for(int i=0;i<mnumElements;i++){
+ for(int i=0;i<(int)mnumElements;i++){
   strcpy(mcols[i].name,d[i].name);
   mcols[i].size = (unsigned int)d[i].typeSize;
   mcols[i].offset = (unsigned int)d[i].offset;
