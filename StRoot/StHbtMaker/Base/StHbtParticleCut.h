@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.7 2000/03/23 22:43:27 laue Exp $
+ * $Id: StHbtParticleCut.h,v 1.8 2000/06/15 18:51:33 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,6 +15,11 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.8  2000/06/15 18:51:33  willson
+ * Cuts and Correlation function information moved from StBaseAnalysis
+ * to the derived analysis classes.  Global functions installed in
+ * Cut and CorrFctn base classes to access analysis pointer.
+ *
  * Revision 1.7  2000/03/23 22:43:27  laue
  * Clone() function implemented in cuts.
  *
@@ -92,7 +97,7 @@ public:
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtBaseAnalysis;
   StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
-
+  void SetAnalysis(StHbtBaseAnalysis*);
 
 protected:
   double mMass;
@@ -110,5 +115,5 @@ inline StHbtParticleCut::StHbtParticleCut(const StHbtParticleCut& c) : StHbtCutM
   cout << " StHbtParticleCut::StHbtParticleCut(const StHbtParticleCut& c) - mMass: " << mMass << endl;
 #endif
 }
-
+inline void StHbtParticleCut::SetAnalysis(StHbtBaseAnalysis* analysis) { myAnalysis = analysis; }
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTripletCut.h,v 1.3 2000/05/11 21:16:40 willson Exp $
+ * $Id: StHbtTripletCut.h,v 1.4 2000/06/15 18:51:33 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StHbtTripletCut.h,v $
+ * Revision 1.4  2000/06/15 18:51:33  willson
+ * Cuts and Correlation function information moved from StBaseAnalysis
+ * to the derived analysis classes.  Global functions installed in
+ * Cut and CorrFctn base classes to access analysis pointer.
+ *
  * Revision 1.3  2000/05/11 21:16:40  willson
  * myAnalysis pointer changed to type StHbtBaseAnalysis - moved
  * some methods into StHbtBaseAnalysis class
@@ -49,11 +54,14 @@ public:
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtBaseAnalysis;
   StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
+  void SetAnalysis(StHbtBaseAnalysis*);
 
 protected:
   StHbtBaseAnalysis* myAnalysis;
 
 
 };
+
+inline void StHbtTripletCut::SetAnalysis(StHbtBaseAnalysis* analysis) { myAnalysis = analysis; }
 
 #endif

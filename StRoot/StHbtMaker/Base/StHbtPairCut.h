@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.7 2000/05/11 21:16:40 willson Exp $
+ * $Id: StHbtPairCut.h,v 1.8 2000/06/15 18:51:32 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.8  2000/06/15 18:51:32  willson
+ * Cuts and Correlation function information moved from StBaseAnalysis
+ * to the derived analysis classes.  Global functions installed in
+ * Cut and CorrFctn base classes to access analysis pointer.
+ *
  * Revision 1.7  2000/05/11 21:16:40  willson
  * myAnalysis pointer changed to type StHbtBaseAnalysis - moved
  * some methods into StHbtBaseAnalysis class
@@ -88,6 +93,7 @@ public:
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtBaseAnalysis;
   StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
+  void SetAnalysis(StHbtBaseAnalysis*);    // Set Back pointer to Analysis
 
 protected:
   StHbtBaseAnalysis* myAnalysis;
@@ -96,5 +102,5 @@ protected:
 
 
 inline StHbtPairCut::StHbtPairCut(const StHbtPairCut& c) : StHbtCutMonitorHandler() { myAnalysis = 0; }
-
+inline void StHbtPairCut::SetAnalysis(StHbtBaseAnalysis* analysis) { myAnalysis = analysis; }
 #endif

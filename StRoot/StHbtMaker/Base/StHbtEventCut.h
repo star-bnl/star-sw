@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.7 2000/04/03 16:21:19 laue Exp $
+ * $Id: StHbtEventCut.h,v 1.8 2000/06/15 18:51:32 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.8  2000/06/15 18:51:32  willson
+ * Cuts and Correlation function information moved from StBaseAnalysis
+ * to the derived analysis classes.  Global functions installed in
+ * Cut and CorrFctn base classes to access analysis pointer.
+ *
  * Revision 1.7  2000/04/03 16:21:19  laue
  * some include files changed
  *
@@ -82,6 +87,7 @@ public:
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtBaseAnalysis;
   StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
+  void SetAnalysis(StHbtBaseAnalysis*);
 
 protected:
   StHbtBaseAnalysis* myAnalysis;
@@ -89,5 +95,5 @@ protected:
 };
 
 inline StHbtEventCut::StHbtEventCut(const StHbtEventCut& c) : StHbtCutMonitorHandler() { myAnalysis=0;}
-
+inline void StHbtEventCut::SetAnalysis(StHbtBaseAnalysis* analysis) { myAnalysis = analysis; }
 #endif
