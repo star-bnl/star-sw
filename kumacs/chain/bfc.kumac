@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.24 1998/07/29 20:53:36 kathy Exp $
+* $Id: bfc.kumac,v 1.25 1998/07/31 21:22:38 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.25  1998/07/31 21:22:38  kathy
+* now can skip events in bfc.kumac
+*
 * Revision 1.24  1998/07/29 20:53:36  kathy
 * corrected for unecessary inputs to macros
 *
@@ -67,6 +70,7 @@
 *                                     rg2t -> rung2t
 *                                      g2t -> rdg2t 
 * editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
+* editted 7/31/98 K. Turner - now can skip events at beginning (g2tin)
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -187,14 +191,14 @@ MACRO bfc _
    tpc_sector_last=1 _
    geomtype=all _
    phystype=on _
-   domain=' geometry tpc svt global' _
-   chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+   domain=' geometry tpc svt global ' _
+   chain='  g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
    input_data_file=auau_central_hijing.xdf _
    output_file=bfc_output.xdf   
-  
+    
 ***********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
 ***********************************************************
@@ -243,6 +247,25 @@ MACRO bfc _
  if $iquest(1)<>0 goto ABEND
  exec bfc_util#bfc_init chain=[chain]
  
+***********************************************************
+* SKIP EVENTS 
+* **********************************************************
+
+   if [first].gt.1 then
+     test=[chain]
+     nw=$words([test])
+     do i=1,[nw]
+       mod=$word([test],[i],1)
+       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin  then 
+           message ' going to skip events for ' [mod]
+	   do ievent = 1,[first]-1
+	       message 'skip event # ',[ievent]
+               exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=[mod]
+           enddo
+       endif
+     enddo
+   endif
+
 *****************************************
 *  MAIN EVENT LOOP 
 ***************************************** 
