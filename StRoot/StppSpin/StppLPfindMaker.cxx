@@ -2,10 +2,13 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.1 2001/04/21 00:56:55 fisyak Exp $
+// $Id: StppLPfindMaker.cxx,v 1.2 2001/04/23 15:02:10 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
-// Revision 1.1  2001/04/21 00:56:55  fisyak
-// Restore StppLPfindMaker.cxx
+// Revision 1.2  2001/04/23 15:02:10  balewski
+// *** empty log message ***
+//
+// Revision 1.6  2001/04/19 21:30:36  balewski
+// add I/O to ppDst
 //
 // Revision 1.5  2001/04/13 20:15:13  balewski
 // *** empty log message ***
@@ -39,7 +42,10 @@
 #include "StEventTypes.h"
 #include "TH2.h"
 
-#include "StppMiniDst.h"  
+#include "StppDst.h"  
+
+#include "StTreeMaker/StTreeMaker.h"
+
 
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tpt_track_Table.h" 
@@ -75,6 +81,10 @@ Int_t StppLPfindMaker::Init()
   nEVtot=nEVfound=0;
   // setup params
   EtaCut=1.4; // tracks with larger eta are not considered
+
+  StTreeMaker *treeMk = (StTreeMaker *) GetMaker("outputStream"); 
+  treeMk->IntoBranch("ppDstBranch","dst");//<< ppDst.root file will be produced
+  printf("JB:  %s-maker ppDstBranch created\n",GetName());
 
   return StMaker::Init();
 }
@@ -187,24 +197,32 @@ Int_t StppLPfindMaker::Make()
   printf(" ppMiniDst   U p d a t e     . . .\n");
   // =========================================================
 
-  StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my); 
-  printf("ppMiniDst back: pT=%f \n",my->rLP.pt);
+ ppDst_t row;
+ printf("new ppMiniDst row\n");
 
-  my->rLP.vert.x=primV->position().x();
-  my->rLP.vert.y=primV->position().y();
-  my->rLP.vert.z=primV->position().z();
-  my->rLP.nPrim=primV->numberOfDaughters();
+  row.vertX=primV->position().x();
+  row.vertY=primV->position().y();
+  row.vertZ=primV->position().z();
+  row.nPrim=primV->numberOfDaughters();
 
-  my->rLP.pt=rPt;
-  my->rLP.eta=asinh(rLP->tanl);
-  my->rLP.psi=rLP->psi;
-  my->rLP.nTclHit=rTPT->nrec;
-  my->rLP.chi2f=TPTR->chisq[0]/(TPTR->nrec-2);
-  my->rLP.PrimId=rLP->id; // for evaluation only
+  row.pt=rPt;
+  row.eta=asinh(rLP->tanl);
+  row.psi=rLP->psi;
+  row.nTclHit=rTPT->nrec;
+  row.chi2f=TPTR->chisq[0]/(TPTR->nrec-2);
+  row.PrimId=rLP->id; // for evaluation only
 
-  my->rLP.Dz=delZ; // LP - vert
-  my->rLP.DRxy=delRxy;// LP - vert
-  my->rLP.Rxy=lpRxy;// LP - vert
+  row.Dz=delZ; // LP - vert
+  row.DRxy=delRxy;// LP - vert
+  row.Rxy=lpRxy;// LP - vert
+
+  ppDst *my=new ppDst("rec_lp",1); // name of the table in ppDst
+  my->AddAt(&row);
+
+  St_DataSet *dst1 = GetDataSet("dst");
+  assert(dst1);
+  dst1->Add(my);
+
   // =========================================================
   printf(" ppTag   U p d a t e     . . . NOT implemented\n");
   // =========================================================
@@ -212,11 +230,11 @@ Int_t StppLPfindMaker::Make()
   //-----------------------------
   //    H I S T O
   //-----------------------------
-  hv[0]->Fill(my->rLP.vert.z);
-  hv[1]->Fill(my->rLP.Dz);
-  hv[2]->Fill(my->rLP.DRxy);
-  hv[3]->Fill(my->rLP.nPrim);
-  hv[4]->Fill(my->rLP.pt);
+  hv[0]->Fill(row.vertZ);
+  hv[1]->Fill(row.Dz);
+  hv[2]->Fill(row.DRxy);
+  hv[3]->Fill(row.nPrim);
+  hv[4]->Fill(row.pt);
   hv[5]->Fill(nTPTtr);
   
 
