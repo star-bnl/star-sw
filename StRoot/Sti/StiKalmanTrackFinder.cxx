@@ -361,8 +361,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	    if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
 	  }
 	  double diff = projAngle-angle;
-	  if (diff >  2*M_PI) diff -= 2*M_PI;
-	  if (diff < -2*M_PI) diff += 2*M_PI;
+	  if (diff >  M_PI) diff -= 2*M_PI;
+	  if (diff < -M_PI) diff += 2*M_PI;
 	  diff = fabs(diff);
 	  if (diff <= OpenAngle) { detectors.push_back(detector);}
 	  ++sector;
@@ -414,6 +414,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		      for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 			{
 			  stiHit = *hitIter;
+                          if (stiHit->detector() && stiHit->detector()!=tDet) continue;
 			  chi2 = testNode.evaluateChi2(stiHit);
 			  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
 			  if (chi2>0 && chi2<maxChi2 && chi2<testNode.getChi2())
