@@ -83,9 +83,9 @@ class StEmcMixerMaker : public StMaker
     void          setClear(Bool_t a)        { mClear = a; } ///< Set kTRUE to clear EMC clusters and points
     void          setAddFlag(Bool_t a)      { mAddHits = a; } ///< Set kTRUE to embed hits
     void          setFakeTrack(Bool_t a)    { mFakeTrackEmbed = a; } ///< Set kTRUE to merge tracks
-    void          setDoPrint(Bool_t a)      { mDoPrint = a; } ///< Set kTRUE to print debug information
+    void          setPrint(Bool_t a)        { mDoPrint = a; } ///< Set kTRUE to print debug information
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.2 2003/09/10 19:47:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.3 2003/10/08 17:15:30 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcMixerMaker,0) 
 };
