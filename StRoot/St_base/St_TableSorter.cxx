@@ -62,17 +62,18 @@
 
 ClassImp(St_TableSorter)
 //_____________________________________________________________________________
-  St_TableSorter::St_TableSorter(const St_Table &table) : m_ParentTable(table)
+  St_TableSorter::St_TableSorter(const St_Table &table) : m_simpleArray(0),m_ParentTable(table)
 {
   // default ctor for RootCint dictionary
   m_SortIndex  = 0;
   m_searchMethod = 0;
   m_numberOfRows = 0;
   m_colType = kNAN;
+  m_simpleArray=0;
 }
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t firstRow
-                               ,Int_t numberRows):m_ParentTable(table)
+                               ,Int_t numberRows):m_simpleArray(0),m_ParentTable(table)
 {
   //
   // St_TableSorter ctor sort the input table along its column defined with colName
@@ -144,6 +145,125 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   FillIndexArray();
   SortArray();
   SetSearchMethod();
+}
+//_____________________________________________________________________________
+St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow
+                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(*((const St_Table *)0))
+{
+  //
+  // St_TableSorter ctor sort the input "simpleArray" 
+  //
+  //    - arraySize  - the sie of the full array
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+
+  SetSimpleArray(arraySize,firstRow,numberRows);
+  if (!m_simpleArray) return;
+
+ //  LearnTable();
+
+      m_colName = "Float";
+      m_colType   = kFloat;
+      m_colSize   = sizeof(Float_t);
+
+  // FillIndexArray();
+
+    Float_t *p = ((Float_t *)m_simpleArray) + m_firstRow;
+    for (Int_t i=0; i < m_numberOfRows;i++,p++) m_SortIndex[i-m_firstRow] = p;
+  
+  SortArray();
+
+  SetSearchMethod();
+}
+//_____________________________________________________________________________
+St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow
+                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(*((const St_Table *)0))
+{
+  //
+  // St_TableSorter ctor sort the input "simpleArray" 
+  //
+  //    - arraySize  - the sie of the full array
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+
+  SetSimpleArray(arraySize,firstRow,numberRows);
+  if (!m_simpleArray) return;
+
+ //  LearnTable();
+
+      m_colName = "Double";
+      m_colType = kDouble;
+      m_colSize = sizeof(Double_t);
+
+  // FillIndexArray();
+
+    Double_t *p = ((Double_t *)simpleArray) + m_firstRow;
+    for (Int_t i=0; i < m_numberOfRows;i++,p++) m_SortIndex[i-m_firstRow] = p;
+  
+  SortArray();
+
+  SetSearchMethod();
+}
+//_____________________________________________________________________________
+St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow
+                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(*((const St_Table *)0))
+{
+  //
+  // St_TableSorter ctor sort the input "simpleArray" 
+  //
+  //    - arraySize  - the sie of the full array
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+
+  SetSimpleArray(arraySize,firstRow,numberRows);
+  if (!simpleArray) return;
+
+ //  LearnTable();
+
+      m_colName = "Long";
+      m_colType = kLong;
+      m_colSize = sizeof(Long_t);
+
+  // FillIndexArray();
+
+    Long_t *p = ((Long_t *)simpleArray) + m_firstRow;
+    for (Int_t i=0; i < m_numberOfRows;i++,p++) m_SortIndex[i-m_firstRow] = p;
+  
+  SortArray();
+
+  SetSearchMethod();
+}
+
+//_____________________________________________________________________________
+void St_TableSorter::SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t numberRows)
+{
+  // Set some common parameteres for the "simple" arrays
+  SetName("Array");
+
+  m_SortIndex     = 0;
+  m_searchMethod  = 0;
+  m_colDimensions = 0;
+  m_IndexArray    = 0;
+  m_colOffset     = 0;
+
+  // check bounds:
+  if (firstRow > arraySize) return; 
+  m_firstRow = firstRow;
+
+  m_numberOfRows = arraySize - m_firstRow;
+  if (numberRows > 0)  m_numberOfRows = TMath::Min(numberRows,m_numberOfRows);
+
+  // Allocate index array
+  if (m_numberOfRows) m_SortIndex = new void*[m_numberOfRows];
 }
 //_____________________________________________________________________________
 St_TableSorter::~St_TableSorter() 
@@ -297,7 +417,10 @@ Int_t St_TableSorter::BSearch(const void *value){
     if (p) {
        const Char_t *res = (const Char_t *)(*p);
        // calculate index:
-       index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
+      if (!m_simpleArray) 
+         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
+      else
+        index = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
     }
   }
   return index;  
@@ -312,7 +435,10 @@ Int_t St_TableSorter::GetIndex(UInt_t index) const
      if (p) {
          const Char_t *res = (const Char_t *)p;
          // calculate index:
+       if (!m_simpleArray) 
          indx = m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
+       else
+         indx = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
      }
   }
   return indx;

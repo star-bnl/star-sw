@@ -9,7 +9,6 @@
 #define STAR_St_TableSorter
 
 #include "TNamed.h"
-// #include "TString.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -55,12 +54,13 @@ class St_TableSorter : public TNamed {
     Int_t     m_numberOfRows; // number of rows of ttable to be sorted
     TString   m_colName;      //
     Int_t     m_colOffset;    //
-    Int_t     m_colSize;      // The size of the selected columen in bytes
+    Int_t     m_colSize;      // The size of the selected column in bytes
     Int_t    *m_IndexArray;   // "parsed" indecis
-    Int_t     m_colDimensions;// The number of the dimensions for array
+    Int_t     m_colDimensions;// The number of the dimensions for array (=-1 means it is a "simple" array)
     const St_Table &m_ParentTable;  // the back pointer to the sorted table
-    SEARCHMETHOD m_searchMethod;    // Function selected to serach values
-    EColumnType  m_colType;         // data type of the selected column
+    const Char_t *m_simpleArray;     // Pointer to the "simple" array;
+    SEARCHMETHOD  m_searchMethod;    // Function selected to serach values
+    EColumnType   m_colType;         // data type of the selected column
 
     static int CompareFloat_t     (const void **, const void **);
     static int CompareInt_t       (const void **, const void **);
@@ -108,10 +108,14 @@ class St_TableSorter : public TNamed {
     Int_t SelectSearch(Char_t   value );
 
     void  SetSearchMethod();
+    void  SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t numberRows);
 
  public:
     St_TableSorter(const St_Table &table=*((const St_Table *)0));
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
+    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     virtual ~St_TableSorter();
     
     Int_t BinarySearch(Float_t  value );
