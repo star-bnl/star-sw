@@ -30,9 +30,7 @@ class St_srs_Maker : public StMaker {
                   St_srs_Maker();
                   St_srs_Maker(const char *name, const char *title);
    virtual       ~St_srs_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual void   Finish();
-   virtual void   Init();
+   virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    ClassDef(St_srs_Maker, 1)   //StAF chain virtual base class for Makers

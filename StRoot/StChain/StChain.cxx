@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.15 1998/09/23 20:22:51 fisyak Exp $
+// $Id: StChain.cxx,v 1.16 1998/10/06 18:00:26 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.16  1998/10/06 18:00:26  perev
+// cleanup
+//
 // Revision 1.15  1998/09/23 20:22:51  fisyak
 // Prerelease SL98h
 //
@@ -364,12 +367,13 @@ void StChain::Browse(TBrowser *b)
 void StChain::Clear(Option_t *option)
 {
 //    Reset lists of event objects
-   TIter next(m_Makers,kIterBackward);
+   TIter next(m_Makers);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       maker->Clear(option);
    }
 //   if (m_Display) m_Display->Clear();
+   return;
 }
 //_____________________________________________________________________________
 St_DataSet *StChain::DataSet(Char_t *makername)
@@ -405,15 +409,16 @@ void StChain::Draw(Option_t *option)
 }
 
 //_____________________________________________________________________________
-void StChain::GetEvent(Int_t event)
+Int_t StChain::GetEvent(Int_t event)
 {
 //    Read event from Tree
    if (m_Tree) m_Tree->GetEvent(event);
    m_Event = event;
+   return kStOK;
 } 
 
 //_____________________________________________________________________________
-void StChain::Init()
+Int_t StChain::Init()
 {// Initialize Chain
    if (! m_DataSet) m_DataSet = new St_DataSet(GetName()); 
    if (! m_RunSet) {//
@@ -432,7 +437,7 @@ void StChain::Init()
 
      // Initialise maker
       gBenchmark->Start((const char *) maker->GetName());
-      maker->Init();
+      if ( maker->Init()) return kStErr;
       gBenchmark->Stop((const char *) maker->GetName());
      // Add the Maker histograms in the Maker histograms list
       if (objlast) objfirst = gDirectory->GetList()->After(objlast);
@@ -450,6 +455,7 @@ void StChain::Init()
      if (set) set = next("Run");
      if (set) m_FileOut->NextEventPut(set);
    }
+   return kStOK;
 }
 
 //_____________________________________________________________________________
@@ -468,7 +474,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.15 1998/09/23 20:22:51 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.16 1998/10/06 18:00:26 perev Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -577,14 +583,15 @@ Int_t StChain::Make(Int_t i)
          makerset = m_EventSet;
   // Call Maker
      maker->SetDataSet(makerset);
-     gBenchmark->Start((const char *) maker->GetName());
+     StartMaker(maker);
      ret = maker->Make();
-     gBenchmark->Stop((const char *) maker->GetName());
+     EndMaker(maker,ret);
+     
      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
-     if (ret < 0) return ret;
+     if (ret) return ret;
      if (gStChain->Debug()) m_DataSet->ls(2);
    }
-   return 0;
+   return kStOK;
 }
 
 //_____________________________________________________________________________
@@ -600,17 +607,28 @@ void StChain::FillClone()
 }
 
 //_____________________________________________________________________________
-void StChain::Finish()
+Int_t StChain::Finish()
 {
 //    Terminate a run
 //   place to make operations on histograms, normalization,etc.
+   int nerr = 0;
 
    TIter next(m_Makers);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
-      maker->Finish();
+      if ( maker->Finish() ) nerr++;
       gBenchmark->Print((char *) maker->GetName());
    }
+   return nerr;
+}
+void StChain::StartMaker(StMaker *mk)
+{
+  gBenchmark->Start(mk->GetName());
+}
+void StChain::EndMaker(StMaker *mk,Int_t iret)
+{
+  gBenchmark->Stop (mk->GetName());
+
 }
 
 //_____________________________________________________________________________

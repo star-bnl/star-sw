@@ -20,7 +20,8 @@
 //////////////////////////////////////////////////////////////////////////
  
 #include "Rtypes.h"
-  
+
+enum EReturnCodes { kStOK=0, kStOk=0, kStWarn, kStErr };  
 #ifdef ANSICPP
 #   define _QUOTE2_(name1,name2) _QUOTE_(name1##name2)
 #else

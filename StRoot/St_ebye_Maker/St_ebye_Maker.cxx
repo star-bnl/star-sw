@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.4 1998/09/23 20:22:57 fisyak Exp $
+// $Id: St_ebye_Maker.cxx,v 1.5 1998/10/06 18:00:35 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.5  1998/10/06 18:00:35  perev
+// cleanup
+//
 // Revision 1.4  1998/09/23 20:22:57  fisyak
 // Prerelease SL98h
 //
@@ -73,21 +76,11 @@ m_sca_ensemble_ave(0)
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_ebye_Maker::~St_ebye_Maker(){
- if (m_DataSet) delete m_DataSet;
- m_DataSet = 0;
+St_ebye_Maker::~St_ebye_Maker()
+{
 }
 //_____________________________________________________________________________
-void St_ebye_Maker::Clear(Option_t *option){
-  if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
-}
-
-//_____________________________________________________________________________
-void St_ebye_Maker::Finish(){ 
- Clear();
-}
-//_____________________________________________________________________________
-void St_ebye_Maker::Init(){
+Int_t St_ebye_Maker::Init(){
 // Create tables
    St_DataSet *params = gStChain->GetParams();
    St_DataSetIter    local(gStChain->GetParams());
@@ -104,7 +97,7 @@ void St_ebye_Maker::Init(){
    ebye = local("ebye");
    if (!ebye) { 
       printf(" Error ** the file \"%s\" has no \"ebye\" dataset\n",ebye_pars);
-      return;
+      return kStErr;
    }
 
    St_DataSetIter scatable(ebye);
@@ -121,11 +114,11 @@ void St_ebye_Maker::Init(){
    sca_switch->doAnalysis   = 0;
 
 // Create Histograms    
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::Make(){
-  Int_t iret = kSTAFCV_BAD;
+  Int_t iret = kStErr;
 //  PrintInfo();
 
 
@@ -144,7 +137,7 @@ Int_t St_ebye_Maker::Make(){
    m_dst_event_summary = (St_foo_dst_event_summary *) local("output/sumout");
    m_dsttrack = (St_foo_dst_track *) local("output/trkout");
    if (!m_dsttrack || !m_dsttrack->HasData()) {
-      return kSTAFCV_BAD;
+      return kStErr;
    }
 
   iret = sca_filter(m_dst_event_summary 
@@ -155,7 +148,7 @@ Int_t St_ebye_Maker::Make(){
                    ,m_sca_in
                    );
 
-  if (iret = kSTAFCV_OK) 
+  if (iret == kSTAFCV_OK) 
           iret = sca_runsca(m_sca_switch
                            ,m_sca_const
                            ,m_sca_in
@@ -166,12 +159,12 @@ Int_t St_ebye_Maker::Make(){
 
 
 //Histograms     
- return iret;
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.4 1998/09/23 20:22:57 fisyak Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.5 1998/10/06 18:00:35 perev Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.5 1998/10/02 13:46:08 fine Exp $
+// $Id: St_TLA_Maker.cxx,v 1.6 1998/10/06 18:00:29 perev Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.6  1998/10/06 18:00:29  perev
+// cleanup
+//
 // Revision 1.5  1998/10/02 13:46:08  fine
 // DataSet->DataSetIter
 //
@@ -33,35 +36,25 @@ St_TLA_Maker::St_TLA_Maker(const char *name, const char *title):StMaker(name,tit
 }
 //_____________________________________________________________________________
 St_TLA_Maker::~St_TLA_Maker(){
-  SafeDelete(m_DataSet); 
 }
 //_____________________________________________________________________________
-void St_TLA_Maker::Clear(Option_t *option){
-  SafeDelete(m_DataSet); 
-}
-
-//_____________________________________________________________________________
-void St_TLA_Maker::Finish(){ 
- Clear();
-}
-//_____________________________________________________________________________
-void St_TLA_Maker::Init(){
+Int_t St_TLA_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->GetParams());
 // Create Histograms    
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_TLA_Maker::Make(){
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
 }
- return kSTAFCV_OK;
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.5 1998/10/02 13:46:08 fine Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.6 1998/10/06 18:00:29 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

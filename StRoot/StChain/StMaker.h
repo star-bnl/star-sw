@@ -1,7 +1,7 @@
-// $Id: StMaker.h,v 1.6 1998/09/22 01:32:36 fine Exp $
+// $Id: StMaker.h,v 1.7 1998/10/06 18:00:27 perev Exp $
 // $Log: StMaker.h,v $
-// Revision 1.6  1998/09/22 01:32:36  fine
-// StMaker::MakeDoc() method has been introduced to generate HTML docs for all base classes and Makers
+// Revision 1.7  1998/10/06 18:00:27  perev
+// cleanup
 //
 // Revision 1.5  1998/08/18 14:05:02  fisyak
 // Add to bfc dst
@@ -18,6 +18,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include "Stypes.h"
 #include "St_DataSet.h"
 #include <TString.h>
 #ifndef ROOT_TClonesArray
@@ -49,22 +50,21 @@ public:
                   StMaker(const char *name, const char *title="");
    virtual       ~StMaker();
    virtual void   Browse(TBrowser *b);
-   virtual void   Clear(Option_t *option="");
+   virtual void Clear(Option_t *option="");
    virtual St_DataSet *DataSet() {return m_DataSet;}
    void           SetDataSet (St_DataSet *set);
    virtual void   Draw(Option_t *option="");
-   virtual void   Finish();
+   virtual Int_t  Finish();
    TList         *Histograms() {return m_Histograms;}
-   virtual void   Init();
+   virtual Int_t  Init();
    Bool_t         IsFolder() {return kTRUE;}
    TObject       *Fruit()  {return m_Fruits;}
    St_DataSet    *Fruits() {return (St_DataSet*)m_Fruits;}
    TObject       *Clones() {return m_Clones;}
    virtual void   FillClone();
    virtual Int_t  Make() = 0;
-   virtual void   MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev/",const TString &outdir="$(star)/StRoot/html");
    virtual void   PrintInfo();
-   virtual void   MakeBranch();
+   virtual void MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}
    virtual void   SetChainAddress(TChain *chain);
    virtual void   SetBranchFile (TString &name){m_BranchFile = name;}  // *MENU*

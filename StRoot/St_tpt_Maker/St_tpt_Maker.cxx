@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.8 1998/09/23 20:23:16 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.9 1998/10/06 18:00:50 perev Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.9  1998/10/06 18:00:50  perev
+// cleanup
+//
 // Revision 1.8  1998/09/23 20:23:16  fisyak
 // Prerelease SL98h
 //
@@ -65,20 +68,9 @@ m_tpipar(0)
 }
 //_____________________________________________________________________________
 St_tpt_Maker::~St_tpt_Maker(){
- if (m_DataSet) delete m_DataSet;
- m_DataSet = 0;
 }
 //_____________________________________________________________________________
-void St_tpt_Maker::Clear(Option_t *option){
-  if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
-}
-
-//_____________________________________________________________________________
-void St_tpt_Maker::Finish(){ 
- Clear();
-}
-//_____________________________________________________________________________
-void St_tpt_Maker::Init(){
+Int_t St_tpt_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->GetParams());
    St_DataSet *tpc = local("tpc");
@@ -130,7 +122,7 @@ void St_tpt_Maker::Init(){
      }
    }
 // Create Histograms    
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Make(){
@@ -169,12 +161,12 @@ Int_t St_tpt_Maker::Make(){
        }
      }
    }
- return kSTAFCV_OK;
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.8 1998/09/23 20:23:16 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.9 1998/10/06 18:00:50 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

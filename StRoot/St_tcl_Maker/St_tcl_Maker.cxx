@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.9 1998/09/18 14:35:31 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.10 1998/10/06 18:00:48 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.10  1998/10/06 18:00:48  perev
+// cleanup
+//
 // Revision 1.9  1998/09/18 14:35:31  fisyak
 // Fix makers
 //
@@ -58,20 +61,9 @@ St_tcl_Maker::St_tcl_Maker(const char *name, const char *title):StMaker(name,tit
 }
 //_____________________________________________________________________________
 St_tcl_Maker::~St_tcl_Maker(){
- if (m_DataSet) delete m_DataSet;
- m_DataSet = 0;
 }
 //_____________________________________________________________________________
-void St_tcl_Maker::Clear(Option_t *option){
-  if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
-}
-
-//_____________________________________________________________________________
-void St_tcl_Maker::Finish(){ 
- Clear();
-}
-//_____________________________________________________________________________
-void St_tcl_Maker::Init(){
+Int_t St_tcl_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->GetParams());
 // geometry parameters
@@ -125,7 +117,7 @@ void St_tcl_Maker::Init(){
      m_tfs_fsctrl= (St_tfs_fsctrl*) local("tpc/tfspars/tfs_fsctrl");
    }
 // Create Histograms    
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_tcl_Maker::Make(){
@@ -221,12 +213,12 @@ Int_t St_tcl_Maker::Make(){
      }
    }
 //Histograms     
- return kSTAFCV_OK;
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.9 1998/09/18 14:35:31 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.10 1998/10/06 18:00:48 perev Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
