@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.4 2000/04/03 16:22:07 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.5 2000/04/13 16:54:25 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -177,7 +177,9 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 
   StHbtEvent* hbtEvent = new StHbtEvent;
   
-  int mult = t1_h->nok;
+  //int mult = t1_h->nok;  
+  int mult = part->GetNRows();
+
   hbtEvent->SetNumberOfTracks(mult);
   hbtEvent->SetNumberOfGoodTracks(mult);
 
