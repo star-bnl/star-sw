@@ -2,12 +2,11 @@
 #include <values.h>
 #include <math.h>
 #include "Sti/StiMath.h"
-double StiMath::_logGammaCof[6];
-/*={76.18009172947146,-86.50532032941677,
+double StiMath::_logGammaCof[6]={76.18009172947146,-86.50532032941677,
 				 24.01409824083091,-1.231739572450155,
-				 0.1208650973866179e-2,-0.5395239384953e-5};*/
+				 0.1208650973866179e-2,-0.5395239384953e-5};
 int StiMath::_nTop=4;
-double StiMath::_fac[33];/*={1.0,1.,2.0,6.0,24.0};*/
+double StiMath::_fac[33]={1.0,1.,2.0,6.0,24.0};
 double StiMath::_logFac[101];
 
 double StiMath::chi2(double x, int n)

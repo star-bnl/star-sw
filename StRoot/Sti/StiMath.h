@@ -12,6 +12,10 @@ class StiMath
   static double binomial(int n, int k);
  protected:
   StiMath(){};
+  static double _logGammaCof[6];
+  static int _nTop;
+  static double _fac[33];
+  static double _logFac[101];
 };
 
 #endif
