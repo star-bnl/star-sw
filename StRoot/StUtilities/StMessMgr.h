@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.9 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessMgr.h,v 1.10 2000/03/30 16:12:55 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.10  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
 // Revision 1.9  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -88,6 +91,7 @@ class StMessMgr : public ostrstream {
    virtual       void RemoveLimit(const char* str) =0;
    virtual       void SwitchOff(const char* str) =0;
    virtual       void SwitchOn(const char* str) =0;
+   virtual       void NoLimits() =0;
    virtual       void Summary(size_t nTerms=1) =0;
    virtual        int AddType(const char* type, const char* text) =0;
    virtual        int ListTypes() =0;

@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.9 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessageCounter.h,v 1.10 2000/03/30 16:12:55 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.10  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
 // Revision 1.9  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -56,6 +59,7 @@ class StMessageCounter : public ostrstream {
    StMessTypeList* messTypeList;
    const char* limitMessage;
    int yesLimits;
+   int noLimits;
    messCharVecIter curString;
    size_t index;
 
@@ -78,6 +82,7 @@ class StMessageCounter : public ostrstream {
       void ListLimits();
       void AddType(const char* type);
        int CheckLimit(char* mess, const char* type);
+      void NoLimits() {noLimits = 1;}
 };
 
 #endif
