@@ -52,7 +52,7 @@
 
 //StiEvaluator
 #include "StiEvaluator/StiEvaluator.h"
-#include "StiEvaluator/StiTrackAssociator.h"
+#include "StiEvaluator/StiEventAssociator.h"
 
 // StiMaker
 #include "StiMaker.h"
@@ -82,7 +82,7 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //Tracker
 					 mtracker(0),
 					 //Members
-					 mevent(0), mMcEventMaker(0),
+					 mevent(0), mMcEvent(0), mMcEventMaker(0),
 					 mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
@@ -203,7 +203,7 @@ Int_t StiMaker::Init()
     }
 
     if (stiIO->simulated()==true) {
-	StiTrackAssociator::instance(mAssociationMaker);
+	StiEventAssociator::instance(mAssociationMaker);
     }
     
     //The track store
@@ -332,6 +332,7 @@ Int_t StiMaker::Make()
     StMcEvent* mc = 0;
     if (StiIOBroker::instance()->simulated()) {
 	mc = mMcEventMaker->currentMcEvent();
+	mMcEvent = mc;
     }
     
     if (StiIOBroker::instance()->simulated()==true && mc==0) {
@@ -397,17 +398,38 @@ void StiMaker::finishEvent()
     StTimer clock;
     clock.start();
     double n=0.;
-    while (mtracker->hasMore()) {
-	++n;
-	finishTrack();
-	if (fmod(n, 100.)==0.) {
-	    cout <<"Chugging on track: "<<n<<endl;
+    if (mtracker->hasMore()) {
+	cout <<"Initial pass to track event:"<<endl;
+	while (mtracker->hasMore()) {
+	    ++n;
+	    finishTrack();
+	    if (fmod(n, 100.)==0.) {
+		cout <<"Chugging on track: "<<n<<endl;
+	    }
 	}
+	clock.stop();
+	StiEventAssociator::instance()->associate(mMcEvent);
+	StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     }
-    clock.stop();
+    else {
+	cout <<"Test cleanup algorithm:"<<endl;
+	cout <<"Parition Hits:\t";
+	mhitstore->partitionUsedHits();
+	cout <<"done"<<endl;
+	if (StiIOBroker::instance()->useGui()==true) {
+	    cout <<"Update gui hits:\t";
+	    mdisplay->reset();
+	    mhitstore->update();
+	    cout <<"done"<<endl;
+	    cout <<"Update display:\t";
+	    mdisplay->draw();
+	    mdisplay->update();
+	    cout <<"done"<<endl;
+	}
+	clock.stop();
+    }
     cout <<"Time to find/fit "<<n<<" tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
-    StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     cout <<"\tStiMaker::finishEvent(). done"<<endl;
 }
 
