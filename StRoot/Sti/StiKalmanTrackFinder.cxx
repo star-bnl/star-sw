@@ -13,8 +13,7 @@
 #include <stdexcept>
 #include <math.h>
 using namespace std;
-using std::_messenger;
-using std::endl;
+#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableFilter.h"
 #include "StiHitLoader.h"

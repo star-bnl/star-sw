@@ -64,6 +64,7 @@ const StiHit& StiHit::operator=(const StiHit & h)
 	mdetector = h.mdetector;
 	msthit = h.msthit;
 	_energy = h._energy;
+	return *this;
 }
 
 
@@ -87,7 +88,7 @@ void StiHit::rotate(double alpha)
 	double axx = rxx*msxx + rxy*msxy;
 	double axy = rxx*msxy + rxy*msyy;
 	double ayx = ryx*msxx + ryy*msxy;
-	double ayy = ryx*msxy + ryy*msyy;
+	//double ayy = ryx*msxy + ryy*msyy;
 	// S=A*Rt
 	msxx = axx*rxx + axy*ryx;
 	msxy = axx*ryx + axy*ryy;

@@ -385,6 +385,10 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	    gapT  = 0.;
 	    s=1.;
 	  }
+	case kConical:
+		{
+			cout << " StiKalmanTrackNode::propagate(  ) -F- kConical option not yet supported"<<endl;
+		}
 	}
       density = (gasDensity*gapT + 2*matDensity*detHT)/s;
       radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
@@ -398,8 +402,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       else
 	sign = 1.;
 	  
-      double zOverA = 0.5;
-      double ionization = 5;
+      //double zOverA = 0.5;
+      //double ionization = 5;
       //propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
     }
   return position;

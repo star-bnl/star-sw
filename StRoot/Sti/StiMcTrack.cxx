@@ -165,7 +165,7 @@ int     StiMcTrack::getCharge() const
 {
   const StParticleDefinition * pd = mcTrack->particleDefinition();
   if (pd)
-    return pd->charge();
+    return (int) pd->charge();
   else
     return -99;
 }
