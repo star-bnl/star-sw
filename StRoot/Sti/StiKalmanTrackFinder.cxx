@@ -203,26 +203,24 @@ void StiKalmanTrackFinder::findTracks()
 							_messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
 						}
 				}
-			/*
 				cout << "StiKalmanTrackFinder::findTracks() -I- filling "<<endl;							
-				if (_eventFiller)
-				_eventFiller->fillEvent(_event, _trackContainer);
+				//if (_eventFiller)
+				//_eventFiller->fillEvent(_event, _trackContainer);
 				cout << "StiKalmanTrackFinder::findTracks() -I- Done with global tracks" <<endl;
 				if (_vertexFinder)
-				{
-				StiHit *vertex=0;
-				cout << "StiKalmanTrackFinder::findTracks() -I- calling vertex finder."<<endl;
-				vertex = _vertexFinder->findVertex(_event);
-				cout << "StiKalmanTrackFinder::findTracks() -I- Done finding vertex" <<endl;
-				if (vertex)
-				{
-				extendTracksToVertex(vertex);
-				cout << "StiKalmanTrackFinder::findTracks() -I- Done extending tracks to vertex" <<endl;
-				if (_eventFiller)
-				_eventFiller->fillEventPrimaries(_event, _trackContainer);
-				}						
+					{
+						StiHit *vertex=0;
+						cout << "StiKalmanTrackFinder::findTracks() -I- calling vertex finder."<<endl;
+						vertex = _vertexFinder->findVertex(_event);
+						cout << "StiKalmanTrackFinder::findTracks() -I- Done finding vertex" <<endl;
+						if (vertex)
+							{
+								extendTracksToVertex(vertex);
+								cout << "StiKalmanTrackFinder::findTracks() -I- Done extending tracks to vertex" <<endl;
+								//if (_eventFiller)
+								//_eventFiller->fillEventPrimaries(_event, _trackContainer);
+							}						
 				}
-			*/
 		}
 	catch (runtime_error & rte)
 		{

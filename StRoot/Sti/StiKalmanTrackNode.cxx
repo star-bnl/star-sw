@@ -616,26 +616,21 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   MESSENGER <<"evaluateChi2()-INFO-Started"<<endl;
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
-  if (useCalculatedHitError && !(fabs(hit->x())<2.0 && fabs(hit->y())<2.0) )
+	if (!hit)
+		throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+	const StiDetector * detector = hit->detector();
+  if (useCalculatedHitError && detector)
     {
-      if (!hit)
-	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
       MESSENGER <<"evaluateChi2()-INFO- Hit OK"<<endl;
-      const StiDetector * det = hit->detector();
-      if (!det)
-	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - det==0");
-      MESSENGER <<"evaluateChi2()-INFO- det OK"<<endl;
-      const StiHitErrorCalculator * calc = det->getHitErrorCalculator();
+      const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
       if (!calc)
-	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
+				throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
       calc->calculateError(this);
       r00=_c00+eyy;
       r01=_c10; r11=_c11+ezz;
     }
   else
     { 
-      if (!hit)
-	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
       r00=hit->syy()+_c00;
       r01=hit->syz()+_c10;  
       r11=hit->szz()+_c11;
