@@ -120,6 +120,9 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
+
+    cout <<"Loading StItTestMaker"<<endl;
+    gSystem->Load("StItTestMaker");
     //
     // Handling depends on whether file is a ROOT file or XDF file
     //
@@ -331,6 +334,12 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
 	IOMk->SetNotify("CloseFile",outMk);
 	IOMk->SetNotify("OpenFile" ,outMk);
     }
+
+
+    //
+    // test the Ittf tracks in StEvent
+    //
+    StItTestMaker* itTest = new StItTestMaker("StItTestMaker");
     
     /*
       dbaseMk->Init();
