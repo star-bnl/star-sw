@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.34 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.35 2000/08/10 23:00:22 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.35  2000/08/10 23:00:22  posk
+// New centralities. pt and eta cuts.
+//
 // Revision 1.34  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -237,7 +240,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.34 2000/08/09 21:38:23 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.35 2000/08/10 23:00:22 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -384,7 +387,7 @@ void StFlowMaker::FillFlowEvent() {
       // calculate the number of tracks with positive flag 
       if (fabs(p.pseudoRapidity()) < 1.) {
 	goodTracksEta2++;
-	if (fabs(p.pseudoRapidity()) < 0.5) {
+	if (fabs(p.pseudoRapidity()) < 0.75) {
 	  goodTracksEta1++;
 	}
       }

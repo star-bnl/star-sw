@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.2 2000/07/12 17:54:36 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.3 2000/08/10 23:00:21 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.3  2000/08/10 23:00:21  posk
+// New centralities. pt and eta cuts.
+//
 // Revision 1.2  2000/07/12 17:54:36  posk
 // Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 // Apply cuts when reading picoevent file.
@@ -66,6 +69,8 @@ class StFlowCutTrack {
   static void   SetFitOverMaxPts(Float_t lo, Float_t hi);
   static void   SetChiSq(Float_t lo, Float_t hi);
   static void   SetDca(Float_t lo, Float_t hi);
+  static void   SetPt(Float_t lo, Float_t hi);
+  static void   SetEta(Float_t lo, Float_t hi);
   
  private:
 
@@ -85,6 +90,12 @@ class StFlowCutTrack {
 
   static UInt_t  mDcaCutN;                   // number not accepted
   static Float_t mDcaCuts[2];                // range
+
+  static UInt_t  mPtCutN;                   // number not accepted
+  static Float_t mPtCuts[2];                // range
+
+  static UInt_t  mEtaCutN;                   // number not accepted
+  static Float_t mEtaCuts[2];                // range
 
   ClassDef(StFlowCutTrack,1)                 // macro for rootcint
 }; 
@@ -106,5 +117,11 @@ inline void StFlowCutTrack::SetChiSq(Float_t lo, Float_t hi) {
 
 inline void StFlowCutTrack::SetDca(Float_t lo, Float_t hi) {
   mDcaCuts[0] = lo; mDcaCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetPt(Float_t lo, Float_t hi) {
+  mPtCuts[0] = lo; mPtCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetEta(Float_t lo, Float_t hi) {
+  mEtaCuts[0] = lo; mEtaCuts[1] = hi; }
 
 #endif

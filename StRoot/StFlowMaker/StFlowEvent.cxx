@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.8 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowEvent.cxx,v 1.9 2000/08/10 23:00:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.9  2000/08/10 23:00:21  posk
+// New centralities. pt and eta cuts.
+//
 // Revision 1.8  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -102,18 +105,18 @@ Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 								{0.,0.},
 								{0.,0.5},
 								{0.,0.}},
-							       {{2.,2.},
-								{2.,1.},
-								{2.,2.},
-								{2.,1.},
-								{2.,2.},
-								{2.,1.}}};
-Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.05,0.05},
-								{0.05,0.05},
-								{0.05,0.05},
-								{0.05,0.05},
-								{0.05,0.05},
-								{0.05,0.05}},
+							       {{1.5,2.},
+								{1.5,1.},
+								{1.5,2.},
+								{1.5,1.},
+								{1.5,2.},
+								{1.5,1.}}};
+Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
+								{0.1,0.1},
+								{0.1,0.1},
+								{0.1,0.1},
+								{0.1,0.1},
+								{0.1,0.1}},
 							       {{2.,2.},
 								{2.,2.},
 								{2.,2.},
@@ -355,36 +358,43 @@ void StFlowEvent::SetPids() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetCentrality(const UInt_t& tracks) {
-  //  int maxTracks = 4000; 
-  //  mCentrality = (6*tracks)/maxTracks + 1; 
-  UInt_t cent[9] = {40,80,125,180,240,310,380,450,700};
 
+  UInt_t cent[] = {20,100,180,270,360,460,560,660,870};
+//   if (!tracks) {
+//     float origMult = pFlowEvent->OrigMult();
+//     int maxTracks = 1500;
+//     mCentrality = (6*origMult)/maxTracks + 1;
+//   }
   if (tracks < cent[0]) {
-    mCentrality = 1;
+    //else if (tracks < cent[0]) {
+    mCentrality = 0;
   }
   else if (tracks >= cent[0] && tracks < cent[1]) {
-    mCentrality = 2;
+    mCentrality = 1;
   }
   else if (tracks >= cent[1] && tracks < cent[2]) {
-    mCentrality = 3;
+    mCentrality = 2;
   }
   else if (tracks >= cent[2] && tracks < cent[3]) {
-    mCentrality = 4;
+    mCentrality = 3;
   }
   else if (tracks >= cent[3] && tracks < cent[4]) {
-    mCentrality = 5;
+    mCentrality = 4;
   }
   else if (tracks >= cent[4] && tracks < cent[5]) {
-    mCentrality = 6;
+    mCentrality = 5;
   }
   else if (tracks >= cent[5] && tracks < cent[6]) {
-    mCentrality = 7;
+    mCentrality = 6;
   }
   else if (tracks >= cent[6] && tracks < cent[7]) {
-    mCentrality = 8;
+    mCentrality = 7;
   }
   else if (tracks >= cent[7] && tracks < cent[8]) {
-    mCentrality = 9;
+    mCentrality = 8;
+  }
+  else if (tracks >= cent[8]) {
+    mCentrality = 0;
   }
 }
 
