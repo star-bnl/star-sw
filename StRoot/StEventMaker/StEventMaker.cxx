@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.20 2000/02/23 12:11:49 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.19  2000/02/17 18:19:05  ullrich
- * Adapted new SVT hit storage layout. Barrels instead of layers.
+ * Revision 2.20  2000/02/23 12:11:49  ullrich
+ * Added printout of covariant matrix to printTrackInfo().
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +132,10 @@
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.20 2000/02/23 12:11:49 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.20 2000/02/23 12:11:49 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -1164,6 +1164,7 @@ StEventMaker::printRunInfo()
     cout << "*********************************************************" << endl;
     cout << "*                   Table Information                   *" << endl;
 	 << ") at " << (void*) track                                    << endl;
+    long nrows;
     cout << "globtrk:    ";
 	track->Dump();
     cout << "tpt:        ";
