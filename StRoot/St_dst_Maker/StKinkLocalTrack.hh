@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.5 1999/09/24 01:23:35 fisyak Exp $
+// $Id: StKinkLocalTrack.hh,v 1.6 2000/02/02 21:37:36 lbarnby Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.6  2000/02/02 21:37:36  lbarnby
+// CC5
+//
 // Revision 1.5  1999/09/24 01:23:35  fisyak
 // Reduced Include Path
 //
@@ -19,9 +22,6 @@
 #include "StThreeVectorD.hh"
 #include "dst_track.h"
 
-#if !defined(ST_NO_NAMESPACES) 
-using namespace std;
-#endif
 
 class StKinkLocalTrack:public TObject {
 public:
