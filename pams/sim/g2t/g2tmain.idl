@@ -55,5 +55,9 @@
 #include "tpce_tprs.idl"
 #include "vpdd_vpdg.idl"
 
+#include "hepe_gene.idl"
+#include "hepe_gent.idl"
+#include "hepe_pass.idl"
+
 
 interface g2tmain : amiModule{ STAFCV_T call ( ); };
