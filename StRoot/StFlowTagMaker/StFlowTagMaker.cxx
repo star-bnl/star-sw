@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFlowTagMaker.cxx,v 1.2 1999/07/26 23:39:34 snelling Exp $
+ * $Id: StFlowTagMaker.cxx,v 1.3 1999/08/09 21:43:05 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to fill the Flow EbyE Tag
@@ -8,24 +8,29 @@
  ***************************************************************************
  *
  * $Log: StFlowTagMaker.cxx,v $
+ * Revision 1.3  1999/08/09 21:43:05  snelling
+ * removed parameters from cxx file
+ *
  * Revision 1.2  1999/07/26 23:39:34  snelling
  * added histograms for FlowTag QA
  *
- * Revision 1.1.1.1  1999/07/22 18:34:39  snelling
  * FlowTagMaker: fills FlowTags defined by EbE workgroup
  *
  *  
  **************************************************************************/
+#define onlyforStFlowTagMaker
 #include "StFlowTagMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
 #include "StLorentzVector.hh"
 
+
 ClassImp(StFlowTagMaker)
 
-StFlowTagMaker::StFlowTagMaker(const Char_t *name, const Char_t *title) 
-  : StMaker(name, title)
+
+StFlowTagMaker::StFlowTagMaker(const Char_t *name) 
+  : StMaker(name)
 {
   mFlowTag = 0;
   mEvent = 0;
@@ -52,12 +57,18 @@ Int_t StFlowTagMaker::Make()
   // fill histograms from Flow Tag
   makeHistograms();
 
+  // print pointer to flowtag 
+  cout << "pointer to flow tag: " << tag() << endl;
+
+  // print debug info
+  printTag();
+
   return kStOK;
 }
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.2 1999/07/26 23:39:34 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.3 1999/08/09 21:43:05 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -82,13 +93,12 @@ FlowTag_st* StFlowTagMaker::tag()
 Int_t StFlowTagMaker::Init()
 {
 
-  // will go to header file soon 
   const float PhiMin = -pi;
   const float PhiMax = pi; 
   const float EtaMin = -6.;
   const float EtaMax = 6.;
   const float PtMin = 0.;
-  const float PtMax = 10.;
+  const float PtMax = 4.;
 
   const float PsiMin = 0.;
   const float PsiMax = twopi; 
@@ -252,11 +262,8 @@ Int_t StFlowTagMaker::makeHistograms()
 
 void StFlowTagMaker::fillFlowTag() 
 {
-  // will go te header file
-  const double    trackquality[3][2] = {{10, 0}, 
-					{ 0, 0},
-					{ 0, 0}}; 
-  const double    bField             = 0.5*tesla;
+
+  const double bField             = 0.5*tesla;
   
   // Initialize Iterator, loop variables
   StTrackCollection* tracks          = mEvent->trackCollection();
