@@ -1,4 +1,4 @@
-* $Id: tpt_fit_track_line.F,v 1.2 2000/03/09 20:45:30 sakrejda Exp $
+* $Id: tpt_fit_track_line.F,v 1.3 2000/04/11 18:21:45 sakrejda Exp $
 *
       INTEGER FUNCTION TPT_FIT_TRACK_LINE(ipt,trk,hit_h,hit,
      >                               tpar_h,tpar,ipass)
@@ -44,7 +44,7 @@ C#include "tpt_pointers.inc"
 
       RECORD /tpt_track_pointers_st/ trk(*)
 
-      INTEGER i, ipt, ipass, ntry, nfit, ient, ient1, nfit, ier, lswlf
+      INTEGER i, ipt, ipass, ntry, ient, ient1, nfit, ier, lswlf
       INTEGER iret, tpt_cross_fact
       REAL xfit(mxpnt), yfit(mxpnt), zfit(mxpnt), wxy(mxpnt), wz(mxpnt)
       REAL sfit(mxpnt), pnt(mxpnt)
@@ -144,6 +144,7 @@ c           now fit s-z
       trk(ipt).p(7)=cp
       trk(ipt).p(8)=chi1
       trk(ipt).p(9)=chi2
+      trk(ipt).nfit = nfit
       TPT_FIT_TRACK_LINE = STAFCV_OK
       return
       end
