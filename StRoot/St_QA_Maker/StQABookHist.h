@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.3 2001/04/25 21:35:26 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.3  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
 // Revision 2.2  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -37,7 +40,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.3 2001/04/25 21:35:26 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -460,6 +463,8 @@ class StQABookHist : public TObject {
 
   TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
                         //! to main vertex finder
+  TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s
+
   // from table dst_v0_vertex
   TH1F     *m_v0;            //! # v0 vertices
   TH1F     *m_ev0_lama_hist; //! Lambda mass

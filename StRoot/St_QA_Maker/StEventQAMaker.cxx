@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.5 2001/04/24 22:53:51 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.6 2001/04/25 21:35:25 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.6  2001/04/25 21:35:25  genevb
+// Added V0 phi distributions
+//
 // Revision 2.5  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -33,6 +36,7 @@
 #include "StQABookHist.h"
 #include "TH1.h"
 #include "TH2.h"
+//#include "TSpectrum.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
 #include "StTpcDedxPidAlgorithm.h"
@@ -970,6 +974,12 @@ void StEventQAMaker::MakeHistVertex() {
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
   hists->m_v0->Fill(v0Vtx.size());
 
+//  static TH1F v0PhiHist("voph","v0 Phi Hist",36,0.,360.);
+//  static TH1F v0PhiHist2("voph2","v0 Phi Hist2",36,180.,540.);
+//  static TSpectrum v0PhiSpec;
+//  v0PhiHist.Reset();
+//  v0PhiHist2.Reset();
+
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
     if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
@@ -998,8 +1008,46 @@ void StEventQAMaker::MakeHistVertex() {
       hists->m_v_pchi2->Fill(v0->chiSquared());
       hists->m_v_r->Fill(v0->position().x()*v0->position().x() +
 		  v0->position().y()*v0->position().y());
+
+      if (!(isnan(double(v0->position().x())) ||
+            isnan(double(v0->position().y())))) {
+        Float_t phi = atan2(v0->position().y() - primVtx->position().y(),
+	                    v0->position().x() - primVtx->position().x())
+                       * 180./M_PI;
+        if (phi<0.) phi += 360.;
+        hists->m_vtx_phi_dist->Fill(phi);
+//        v0PhiHist.Fill(phi);
+//        if (phi<180.) phi += 360.;
+//        v0PhiHist2.Fill(phi);
+      }
     }
   }
+
+  /*
+  if (v0PhiHist.GetEntries()>=144) {
+    for (Float_t ssig=2.; ssig<100.; ssig+=2.) {
+      Int_t npeaks = v0PhiSpec.Search(&v0PhiHist,
+                   (Double_t) (ssig/v0PhiHist.GetBinWidth(0)));
+      Float_t* pks = v0PhiSpec.GetPositionX();
+      for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
+        if ((pks[ipeak]>=90.)&&(pks[ipeak]<270.)) {
+          hists->m_vtx_phi_dist->Fill(pks[ipeak], ssig);
+        }
+      }
+
+      npeaks = v0PhiSpec.Search(&v0PhiHist2,
+                   (Double_t) (ssig/v0PhiHist2.GetBinWidth(0)));
+      pks = v0PhiSpec.GetPositionX();
+      for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
+        if ((pks[ipeak]>=270.)&&(pks[ipeak]<450.)) {
+          Float_t phi2 = pks[ipeak];
+          if (phi2>360.) phi2 -= 360.;
+          hists->m_vtx_phi_dist->Fill(phi2, ssig);
+	}
+      }
+    }
+  }
+  */
 
   // Xi vertices
   if (Debug()) 

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.3 2001/04/24 22:53:51 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 2.4 2001/04/25 21:35:26 genevb Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 2.4  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
 // Revision 2.3  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -444,6 +447,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pv_r=0;     //! radius to primary vertex
 
   m_vtx_z=0;    //! SVT vertex finder resolution relative to main finder
+  m_vtx_phi_dist=0;  //! azimuthal distribution of V0s
 
   m_v0           =0; //! # v0 vertices
   m_ev0_lama_hist=0; //! Lambda mass
@@ -1130,8 +1134,8 @@ void StQABookHist::BookHistPID(){
   
   m_p_dedx_rec = QAH::H2F("QaPidGlobtrkDstdedxPVsDedx","PID: globtrk-dst_dedx,  p vs dedx (reconstructed)",
 			  cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
-  m_p_dedx_rec->SetYTitle("dedx");
   m_p_dedx_rec->SetXTitle("p (GeV)");
+  m_p_dedx_rec->SetYTitle("dedx");
   
 }
 //_____________________________________________________________________________
@@ -1158,6 +1162,13 @@ void StQABookHist::BookHistVertex(){
 
   m_vtx_z    = QAH::H1F("QaVtxZres"," vertex: z(tpc)-z(svt), resolution check",100,-.1,.1);
   
+//  m_vtx_phi_dist  = QAH::H2F("QaV0VtxPhiDist",
+//            "V0 azimuthal distribution",36,0.,360.,25,1.,101.);
+//  m_vtx_phi_dist->SetXTitle("Mean of phi(V0)");
+//  m_vtx_phi_dist->SetYTitle("RMS of phi(V0)");
+  m_vtx_phi_dist  = QAH::H1F("QaV0VtxPhiDist",
+            "V0 azimuthal distribution",36,0.,360.);
+
   m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,2000.);
   m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
   m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
