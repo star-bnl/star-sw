@@ -5,7 +5,9 @@
   
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
-{}
+{
+  _pars.setName("KalmanTrackFitterParameters");
+}
 
 StiKalmanTrackFitter::~StiKalmanTrackFitter()
 {}
@@ -101,4 +103,25 @@ void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & 
 EditableParameters & StiKalmanTrackFitter::getParameters()
 {
   return _pars;
+}
+
+void StiKalmanTrackFitter::loadDS(TDataSet&ds)
+{
+  cout << "StiKalmanTrackFitter::load(TDataSet*ds) -I- Starting" << endl;
+  _pars.loadDS(ds); 
+  cout << "StiKalmanTrackFitter::load(TDataSet*ds) -I- Done" << endl;
+}
+
+void StiKalmanTrackFitter::loadFS(ifstream& inFile)
+{
+  cout << "StiKalmanTrackFitter::load(ifstream& inFile) -I- Starting" << endl;
+  _pars.loadFS(inFile); 
+  cout << "StiKalmanTrackFitter::load(ifstream& inFile) -I- Done" << endl;
+}
+
+void  StiKalmanTrackFitter::setDefaults()
+{
+  cout << "StiKalmanTrackFitter::setDefaults() -I- Starting" << endl;
+  _pars.setDefaults();
+  cout << "StiKalmanTrackFitter::setDefaults() -I- Done" << endl;
 }
