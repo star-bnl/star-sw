@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.12 1999/05/21 15:33:57 kathy Exp $
+// $Id: bfcread.C,v 1.13 1999/06/07 17:31:23 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.13  1999/06/07 17:31:23  kathy
+// clean up some macros
+//
 // Revision 1.12  1999/05/21 15:33:57  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -76,14 +79,24 @@ void bfcread(Int_t nevents=1, const char
     int iret = chain->Make();
     if (iret) break;
 
-// this next part is just for doing the browser:
-//create browser with name=BName,title=Btitle
+  }
+
+//  You are out of event loop now.  
+// Now print out contents of dataset and pop browser
+// for the last event.
+// Create browser with name=BName,title=Btitle
     Event = chain->GetDataSet("dst");
     if (Event) {
           Event->ls(9);
           brow = new TBrowser("BName","BTitle");    
-
     }
-  }
+
+// Comment out for now because it clears data so you can't
+// look at data in browser!  
+//  Call finish routines:
+// chain->Finish();    
+  
 }
  
+
+
