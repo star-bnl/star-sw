@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.9 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuTrack.h,v 1.10 2004/08/07 02:44:06 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -46,7 +46,7 @@ class StuProbabilityPidAlgorithm;
 
 class StMuTrack : public TObject {
  public:
-    StMuTrack(){/* no-op*/}; ///< default constructor
+    StMuTrack(): mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255) {/* no-op*/}; ///< default constructor
     StMuTrack(const StEvent*, const StTrack*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
@@ -57,10 +57,12 @@ class StMuTrack : public TObject {
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
     StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
     StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
-    unsigned short nHits() const;      ///< Return number of hits on track.
-    unsigned short  nHitsPoss() const; ///< Return number of possible hits on track.
-    unsigned short  nHitsDedx() const; ///< Return number of hits used for dEdx. 
-    unsigned short  nHitsFit() const;  ///< Return number of hits used in fit. 
+    unsigned short nHits() const;     ///< Return total number of hits on track.
+    unsigned short nHitsPoss() const; ///< Return number of possible hits on track.
+    unsigned short nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
+    unsigned short nHitsDedx() const; ///< Return number of hits used for dEdx. 
+    unsigned short nHitsFit() const;  ///< Return total number of hits used in fit. 
+    unsigned short nHitsFit(StDetectorId) const;  ///< Return number of hits used in fit. 
     double pidProbElectron() const; ///< Returns Aihong's probability of being an electron.
     double pidProbPion() const;     ///< Returns Aihong's probability of being a pion.
     double pidProbKaon() const;     ///< Returns Aihong's probability of being a kaon.
@@ -98,10 +100,14 @@ protected:
   Short_t mFlag;
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
-  UChar_t mNHits;
-  UChar_t mNHitsPoss; 
-  UChar_t mNHitsDedx;
-  UChar_t mNHitsFit;
+  UChar_t mNHits;           // Total number of points (was (F)tpc only)
+  UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
+  UChar_t mNHitsDedx;       
+  UChar_t mNHitsFit;        // Total fitted points (was (F)tpc only)
+  UChar_t mNHitsPossInner;  // Svt (3 bit) and Ssd (2 bit) possible hits
+  UChar_t mNHitsFitInner;   // Svt (3 bit) and Ssd (2 bit) fitted hits
+  UChar_t mNHitsPossTpc;    // Possible (F)tpc hits (Ftpc flagged with first 2 bits)
+  UChar_t mNHitsFitTpc;     // Fitted (F)tpc hits (Ftpc flagged with first 2 bits)
   UShort_t mPidProbElectron;
   UShort_t mPidProbPion;
   UShort_t mPidProbKaon;
@@ -135,7 +141,7 @@ protected:
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
   friend class StMuDst;
-  ClassDef(StMuTrack,4)
+  ClassDef(StMuTrack,5)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -186,6 +192,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.10  2004/08/07 02:44:06  mvl
+ * Added support for fitted and possible points in different detectors, for ITTF
+ *
  * Revision 1.9  2004/05/02 04:10:14  perev
  * private => protected
  *

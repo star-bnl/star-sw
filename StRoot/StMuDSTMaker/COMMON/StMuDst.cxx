@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.27 2004/04/20 18:41:20 perev Exp $
+ * $Id: StMuDst.cxx,v 1.28 2004/08/07 02:44:06 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -155,6 +155,14 @@ StEvent* StMuDst::createStEvent() {
   //   ev->setRichCollection(StRichCollection*);
   //   ev->setTofCollection(StTofCollection*);
   //ev->setTofCollection( new StTofCollection() );
+  StTriggerDetectorCollection *trg_coll=new StTriggerDetectorCollection();
+  trg_coll->bbc()=mu->bbcTriggerDetector();
+  trg_coll->ctb()=mu->ctbTriggerDetector();
+  trg_coll->emc()=mu->emcTriggerDetector();
+  trg_coll->fpd()=mu->fpdTriggerDetector();
+  trg_coll->zdc()=mu->zdcTriggerDetector();
+  ev->setTriggerDetectorCollection(trg_coll);
+
   ev->setFpdCollection( new StFpdCollection(mu->fpdCollection()) );
   // ev->setTriggerDetectorCollection(muStTriggerDetectorCollection*); <<< WE DON'T WANT THAT
   ev->setL0Trigger ( new StL0Trigger(mu->l0Trigger()) );
@@ -300,10 +308,34 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));
   Float_t a[2],b[15];
   a[0]=track->chi2();
-  StTrackFitTraits *traits=new StTrackFitTraits(0,track->nHitsFit(),a,b);
+  // This is cheating: fill in the old way to circumvent distinction
+  // between Tpc and Ftpc East, West
+  StTrackFitTraits *traits;
+  if (track->mNHitsPossTpc==255) {
+    // backward compatibility mode for old files 
+    // (also gives different result omn StEvent: no distinction between Tpcs)
+    traits=new StTrackFitTraits(0,track->nHitsFit(),a,b);
+  }
+  else {
+    traits->setNumberOfFitPoints(track->nHitsFit(kTpcId),kTpcId);
+    traits->setNumberOfFitPoints(track->nHitsFit(kFtpcEastId),kFtpcEastId);
+    traits->setNumberOfFitPoints(track->nHitsFit(kFtpcWestId),kFtpcWestId);
+    traits->setNumberOfFitPoints(track->nHitsFit(kSvtId),kSvtId);
+    traits->setNumberOfFitPoints(track->nHitsFit(kSsdId),kSsdId);
+  }
   t->setFitTraits(*traits);
   delete traits;  
-  t->setNumberOfPossiblePoints(track->nHitsPoss());
+  if (track->mNHitsPossTpc==255) {
+    // backward compatibility mode, doesn't work for Ftpc tracks
+    t->setNumberOfPossiblePoints(track->nHitsPoss(),kTpcId);
+  }
+  else {
+    t->setNumberOfPossiblePoints(track->nHitsPoss(kTpcId),kTpcId);
+    t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcEastId),kFtpcEastId);
+    t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcWestId),kFtpcWestId);
+    t->setNumberOfPossiblePoints(track->nHitsPoss(kSvtId),kSvtId);
+    t->setNumberOfPossiblePoints(track->nHitsPoss(kSsdId),kSsdId);
+  }
 
   // set the topology map
   t->setTopologyMap( track->topologyMap() );
@@ -317,6 +349,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.28  2004/08/07 02:44:06  mvl
+ * Added support for fitted and possible points in different detectors, for ITTF
+ *
  * Revision 1.27  2004/04/20 18:41:20  perev
  * Change arrays to pointer to StMuDstMaker::arrays StMuDst.h
  *
