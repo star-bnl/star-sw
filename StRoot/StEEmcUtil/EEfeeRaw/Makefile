@@ -1,5 +1,5 @@
 LIBNAME  = EEfeeRaw
-HDRS     = $(wildcard EE*.h) BsmdRawData.h TrigRawData.h
-SRCS     = $(wildcard EE*.cxx) RootWrapper.cxx BsmdRawData.cxx TrigRawData.cxx
+HDRS     = $(wildcard EE*.h) BsmdRawData.h 
+SRCS     = $(wildcard EE*.cxx) RootWrapper.cxx BsmdRawData.cxx 
 
 include ../Makefile.common
