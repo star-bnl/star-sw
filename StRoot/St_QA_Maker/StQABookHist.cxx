@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.19 2001/08/03 23:31:59 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.20 2001/08/07 07:51:27 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.20  2001/08/07 07:51:27  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
 // Revision 2.19  2001/08/03 23:31:59  lansdell
 // added missing axis labels to 2d histos
 //
@@ -592,7 +595,7 @@ void StQABookHist::BookHist(Int_t histsSet){
 
   QAH::preString = QAHistType;
 //book histograms --------------
-  if (histsSet==1) {
+  if (histsSet == 1) {
     mNullPrimVtxMult = QAH::H1F("QaNullPrimVtxMult","event primary vertex check",40,-2,2);
     mNullPrimVtxMult->SetXTitle("has primary vertex? (yes = 1, no = -1)");
     mNullPrimVtxMult->SetYTitle("# of events");

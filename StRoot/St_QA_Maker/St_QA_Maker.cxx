@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.8 2001/08/03 21:32:28 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.9 2001/08/07 07:51:28 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.9  2001/08/07 07:51:28  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
 // Revision 2.8  2001/08/03 21:32:28  lansdell
 // fixed primvtx check for dst table qa
 //
@@ -129,7 +132,8 @@ Int_t St_QA_Maker::Make(){
 	  int makeStat = StQAMakerBase::Make();
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
-	  hists->mNullPrimVtxMult->Fill(1);
+	  if (histsSet == 1)
+	    hists->mNullPrimVtxMult->Fill(1);
 	  return makeStat;
 	}
       }
@@ -138,7 +142,8 @@ Int_t St_QA_Maker::Make(){
   if (foundPrimVtx == kFALSE) {
     cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
     mNullPrimVtx->Fill(-1);
-    hists->mNullPrimVtxMult->Fill(-1);
+    if (histsSet == 1)
+      hists->mNullPrimVtxMult->Fill(-1);
     return kStOk;
   }
   else {
