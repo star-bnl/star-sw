@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2pt.C,v 1.4 2004/06/25 03:14:55 porter Exp $
+ * $Id: doEStruct2pt.C,v 1.5 2004/06/26 16:28:42 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,12 +39,12 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* c
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const double temp[4]={2,4,8,99}; //=3 centralies
+  const double temp[4]={2,5,9,99}; //=3 centralies
   cent->setCentralities(temp,4);
 
   // choose the mode for the binning
   StEStructCutBin* cb=StEStructCutBin::Instance();
-  cb->setMode(0);
+  cb->setMode(3);
 
   // create the low-level reader (here for MuDst)
   StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",5000);   
@@ -132,6 +132,9 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* c
 /**********************************************************************
  *
  * $Log: doEStruct2pt.C,v $
+ * Revision 1.5  2004/06/26 16:28:42  porter
+ * fixed typo in getDirNames.C
+ *
  * Revision 1.4  2004/06/25 03:14:55  porter
  * modified basic macro to take only 1 cutfile and moved some common
  * features into a new macro=support.C.....   this cleaned up the
