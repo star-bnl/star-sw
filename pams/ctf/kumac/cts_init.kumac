@@ -1,5 +1,11 @@
-macro cts_init
-macro/global/import *
+ 
+ macro init
+   macro/global/import *
+ return
+* ***************************************************************
+ 
+ macro fill
+  macro/global/import *
 *
 *    Define tables
 *
@@ -73,7 +79,8 @@ tdm/table/cell/putvalue 'cts[0].time_response' _
 *
 cd /dui
 
-
+ return
+* *******************************************************************
 
 
 

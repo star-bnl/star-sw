@@ -1,4 +1,10 @@
-macro init
+ macro init
+   macro/global/import *
+ return
+ 
+********************************************************************
+ 
+ macro fill
   macro/global/import *
    
 *
@@ -132,7 +138,12 @@ enddo
  
  cd /dui
  
+ return
+* **************************************************************
 * 
+ macro ctg
+   macro/global/import *
+     
 *   Call module
 *
 ami/module/call ctg [params]/ctf/ctg/ctb _
