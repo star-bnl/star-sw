@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.7 1999/04/13 14:26:41 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.8 1999/04/23 00:09:20 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.8  1999/04/23 00:09:20  fine
+// Working verion of PolyLineShape. Some correction for St_Node family as well
+//
 // Revision 1.7  1999/04/13 14:26:41  fine
 // Geometry-based dataset implementation, next step
 //
@@ -76,8 +79,10 @@ St_NodePosition *St_NodeViewIter::operator[](Int_t level) const
 //______________________________________________________________________________
 void St_NodeViewIter::Notify(St_DataSet *set)
 {
+  if (!set) return;
   St_NodeView     *view         = (St_NodeView *) set;
-  St_NodePosition *position     = view->GetPosition();
+  St_NodePosition *position     = 0;
+  position = view->GetPosition();
   St_NodePosition *newPosition=UpdateTempMatrix(position);
 }
 

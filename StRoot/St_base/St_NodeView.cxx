@@ -167,6 +167,19 @@ St_NodeView::~St_NodeView()
 }
 
 //_____________________________________________________________________________
+St_Node *St_NodeView::AddNode(St_Node *node)
+{
+  // Add the St_Node in the St_node data-structure refered
+  // by this St_NodeView object
+  // Return St_Node * the input St_Node * was attached to
+
+  St_Node *closedNode = 0;
+  St_NodePosition *pos ;
+  if ( node && (pos = GetPosition() )  && (closedNode = pos->GetNode()) ) 
+         closedNode->Add(node);        
+  return closedNode; 
+}
+//_____________________________________________________________________________
 void St_NodeView::Browse(TBrowser *b){
   St_ObjectSet::Browse(b);
 //  St_NodePosition *pos = GetPosition();
@@ -361,7 +374,7 @@ TString St_NodeView::PathP() const
    return str;
 }
 //_______________________________________________________________________
-void St_NodeView::SavePrimitive(ofstream &out, Option_t *option)
+void St_NodeView::SavePrimitive(ofstream &out, Option_t *)
 {
 const Char_t *sceleton[] = {
    "St_NodeView *CreateNodeView(St_Node *topNode) {"
