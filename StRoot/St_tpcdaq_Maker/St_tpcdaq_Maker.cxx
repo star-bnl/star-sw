@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.72  2003/04/22 20:12:44  ward
+// So the chain can run when there is no TPC data.
+//
 // Revision 1.71  2002/10/18 20:08:18  didenko
 // fixed flag
 //
@@ -980,7 +983,10 @@ Int_t St_tpcdaq_Maker::Make() {
 #endif
   mErr=0;
   errorCode=GetEventAndDecoder();
-  if(m_Mode != 1) { victor=victorPrelim->getTPCReader(); assert(victor); }
+  if(m_Mode != 1) {
+    victor=victorPrelim->getTPCReader();
+    if(!victor) return kStOk; // No TPC data,  Jerome says chain should continue.  Herb Ward Apr 22 2003
+  }
   // printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
     PP("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.4 2003/03/24 18:12:10 ward Exp $
+ * $Id: StTPCReader.cxx,v 1.5 2003/04/22 20:12:43 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.5  2003/04/22 20:12:43  ward
+ * So the chain can run when there is no TPC data.
+ *
  * Revision 1.4  2003/03/24 18:12:10  ward
  * Full support for EEMC from Herbert Ward.
  *
@@ -98,7 +101,7 @@ int StTPCReader::setSector(int sector)
    delete fTPCImpReader;
    ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
    fTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getTPCVersion());
-   assert(fTPCImpReader);
+   // assert(fTPCImpReader); We will depend on the "return 1" below.  Herb Ward, Apr 22 2003.
    fSector = -1999;
    if(!fTPCImpReader) return 1;
    ptrTPCP=fTPCImpReader->motherPointerBank; // Herb Oct 2002 for DAQ100.
@@ -107,6 +110,7 @@ int StTPCReader::setSector(int sector)
 
   fSector = sector;
 
+  assert(fTPCImpReader); // Better than a crash.
   fZeroSuppressedReader = fTPCImpReader->getZeroSuppressedReader(fSector);
   fADCRawReader 	= fTPCImpReader->getADCRawReader(fSector);
   fPedestalReader 	= fTPCImpReader->getPedestalReader(fSector);
