@@ -8,6 +8,8 @@ StEmcMicroEvent format.
 #define StEmcMicroUtil_h
 #include "TObject.h"
 
+#define MAXV0TRACKS 1000
+
 class StEvent;
 class StTrack;
 class StEmcMicroEvent;
@@ -23,12 +25,16 @@ class StEmcMicroUtil : public TObject
     StEmcGeom        *mGeo[4];
     StEmcFilter      *mPFilter;
     StEmcFilter      *mGFilter;
+    StTrack          *mV0Tracks[MAXV0TRACKS];
+		Int_t            mNV0Tracks;
 
     Bool_t           mDoSavePrimaries;
     Bool_t           mDoSaveGlobals;
     Bool_t           mDoSaveEmc;
     Bool_t           mDoSaveFpd;
     Bool_t           mDoSaveV0;
+		
+		void             clearGarbage();
     
     
   public:
