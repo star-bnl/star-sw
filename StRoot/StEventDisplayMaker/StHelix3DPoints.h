@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.1 1999/11/02 01:49:52 fine Exp $
+// $Id: StHelix3DPoints.h,v 1.2 1999/11/16 14:41:03 fine Exp $
 // $Log: StHelix3DPoints.h,v $
+// Revision 1.2  1999/11/16 14:41:03  fine
+// TObject::Distancetoprimitive implementation, GetXYZ has been removed
+//
 // Revision 1.1  1999/11/02 01:49:52  fine
 // The primitives moved from StEvent
 //
@@ -34,15 +37,15 @@ public:
         StHelix3DPoints(StHelixD *trackHelix=0,Float_t step=4,Int_t lastPosition=50,Bool_t own = kTRUE);
         StHelix3DPoints(StTrack *track,        Float_t length,Int_t lastPosition=50);
         virtual ~StHelix3DPoints();
+        virtual Int_t     DistancetoPrimitive(Int_t px, Int_t py);
         virtual Float_t  *GetP() const { return 0;}
         virtual Int_t     GetN() const { return 0;}
         virtual Int_t     GetLastPosition()const;
-        virtual Float_t   GetAnyPoint(Int_t idx,Int_t iAxis)  const;
+                Float_t   GetAnyPoint(Int_t idx,Int_t iAxis)  const;
         virtual Float_t   GetX(Int_t idx)  const { return GetAnyPoint(idx,0);}
         virtual Float_t   GetY(Int_t idx)  const { return GetAnyPoint(idx,1);}
         virtual Float_t   GetZ(Int_t idx)  const { return GetAnyPoint(idx,2);}
         virtual const Float_t  *GetXYZ(Int_t) {return 0;}
-        virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx=0,Int_t num=1)  const;
         virtual Float_t   GetStep() const { return m_Step; }
         virtual Option_t *GetOption()      const ;
         virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option="");
