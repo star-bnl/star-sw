@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.2 2000/01/26 19:29:26 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.3 2000/01/27 16:18:50 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.3  2000/01/27 16:18:50  kathy
+// adding more hist names in setdefaultlogx list to make tom trainor happier
+//
 // Revision 1.2  2000/01/26 19:29:26  kathy
 // add methods SetDefaultLogXList,AddToLogXList,ExamineLogXList,RemoveFromLogXList - requested by T.Trainor - impact param hists are now draw with LogX scale
 //
@@ -1055,6 +1058,8 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
    Char_t* sdefList1[] = {
     "TabQaGtrkImpactT",
     "TabQaGtrkImpactTS",
+    "TabQaGtrkCurvT",
+    "TabQaGtrkCurvTS",
     "TabQaPtrkImpact"
    };
   sdefList = sdefList1;
@@ -1065,6 +1070,8 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
    Char_t* sdefList2[] = {
     "StEQaGtrkImpactT",
     "StEQaGtrkImpactTS",
+    "TabQaGtrkCurvT",
+    "TabQaGtrkCurvTS",
     "StEQaPtrkImpact"
    };
   sdefList = sdefList2;
