@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.33 2004/06/05 23:38:22 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.34 2004/10/27 21:45:13 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.34  2004/10/27 21:45:13  fisyak
+ * Add debug print for tables Validities, add access to ExB correction
+ *
  * Revision 1.33  2004/06/05 23:38:22  fisyak
  * Add more chairs for TPC Db parameters
  *
@@ -105,7 +108,6 @@
 #include "TCL.h"
 #include "StTpcDbMaker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
 #include "StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "tables/St_tpg_pad_plane_Table.h"
@@ -395,10 +397,7 @@ int type_of_call tpc_hit_error_table_(int *i, int*j, int *k,float *val){
 }
 
 //_____________________________________________________________________________
-StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
- m_TpcDb = 0;
- m_dvtype = 0;
-}
+StTpcDbMaker::StTpcDbMaker(const char *name): StMaker(name), m_TpcDb(0), m_tpg_pad_plane(0), m_tpg_detector(0), m_dvtype(0) {}
 //_____________________________________________________________________________
 StTpcDbMaker::~StTpcDbMaker(){
   //delete m_TpcDb;
@@ -412,10 +411,12 @@ Int_t StTpcDbMaker::Init(){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
     if (m_TpcDb) return 0;
+    // Create Needed Tables:    
+    m_TpcDb = new StTpcDb(this);
     TDataSet *RunLog = GetDataBase("RunLog");                              assert(RunLog);
     St_MagFactor *fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
     Float_t gFactor = (*fMagFactor)[0].ScaleFactor;
-    cout << "Magnetic Field gFactor = " << gFactor << endl;
+    gMessMgr->Info() << "StTpcDbMaker::Magnetic Field gFactor = " << gFactor << endm;
     if (fabs(gFactor)>0.8){
       gMessMgr->Info() << "StTpcDbMaker::Using full field TPC hit errors" << endm;
       SetFlavor("FullMagF","tpcHitErrors");
@@ -430,6 +431,12 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
      SetFlavor("sim","tpcGlobalPosition");
      SetFlavor("sim","tpcSectorPosition");
+   }
+   else {
+     if (m_Mode & 2) {
+       Int_t option = (m_Mode & 0xfffc) >> 2;
+       m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
+     }
    }
    if (m_dvtype==0) {
    SetFlavor("ofl+laserDV","tpcDriftVelocity");
@@ -472,8 +479,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
    }
   }
 
-// Create Needed Tables:    
-   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
   m_tpg_pad_plane->SetNRows(1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
