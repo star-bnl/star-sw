@@ -34,7 +34,8 @@ macro/global/import *
  cd /dui
 
  dio/stream/close [alias]
-
+  oid = staf_result(1); 
+  soc/deleteoid [oid] 
  cd /dui
 
 return
