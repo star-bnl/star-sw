@@ -15,7 +15,7 @@
 #include "fortranc.h"
 #define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW)
 extern "C" {
-R__EXTERN  int type_of_call numberOfPadsAtRow_(int *row);
+int type_of_call numberOfPadsAtRow_(int *row);
 }
 #endif
 #include "StMessMgr.h"
