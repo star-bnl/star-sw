@@ -340,7 +340,7 @@ int dsTypeListEnter(size_t *list, char *str, char **ptr)
 		return FALSE;
 	}
 	name = dsTidInfo[tid].type->name;
-	if (!dsTypeListFindName(&h, list, name, NULL)) {
+	if (!dsTypeListFind(&h, list, name, NULL)) {
 		return FALSE;
 	}
 	if (list[h] == 0) {
@@ -356,7 +356,7 @@ int dsTypeListEnter(size_t *list, char *str, char **ptr)
 * dsTypeListFindName - find entry with type name in str
 *
 */
-int dsTypeListFindName(size_t *pH, size_t *list, char *str, char **ptr)
+int dsTypeListFind(size_t *pH, size_t *list, char *str, char **ptr)
 {
 	int c;
 	size_t h, len, tid, n = list[0];
@@ -384,19 +384,6 @@ int dsTypeListFindName(size_t *pH, size_t *list, char *str, char **ptr)
 	}
 	*pH = h;
 	return TRUE;
-}
-/******************************************************************************
-*
-* dsTypeListFindTid - find entry in type list with given tid
-*
-*/
-int dsTypeListFindTid(size_t *pH, size_t *list, size_t tid)
-{
-	if (tid < 1 || tid >= dsTidCount) {
-		DS_ERROR(DS_E_INVALID_TYPE_ID);
-	}
-	/* fastest way is to find type name */
-	return dsTypeListFindName(pH, list, dsTidInfo[tid].type->name, NULL);
 }
 /******************************************************************************
 *

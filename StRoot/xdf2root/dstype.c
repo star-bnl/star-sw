@@ -219,7 +219,6 @@ static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem
 	type->code = DS_TYPE_STRUCT;
 	type->flags = DS_STD_REP;
 	type->nField = nField;
-	type->field = field;
 	for(i = type->nField, fieldType = NULL; i-- > 0 ; field++) {
 		if (fieldType == NULL) {
 			if (!dsCreateTypeR(&fieldType, str, &str, mem)) {
@@ -270,8 +269,8 @@ static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem
 			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
 	}
-	if (!dsCheckDuplicate(type->field->name,
-		type->nField, sizeof(DS_FIELD_T))) {
+	field = DS_FIELD_PTR(type);
+	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
 		return FALSE;
 	}
 	if (!dsNextChar(str, &str, '}')) {
@@ -315,7 +314,7 @@ int dsDumpTypes(void)
 			basicType[i].flags, basicType[i].modulus,
 			basicType[i].size, basicType[i].stdmodulus,
 			basicType[i].stdsize, basicType[i].nField,
-			(size_t)basicType[i].field);
+			(size_t)DS_FIELD_PTR(&basicType[i]));
 	}
 	return TRUE;
 }
@@ -333,7 +332,7 @@ static DS_TYPE_T *dsFindTag(char *tag, DS_MEM_T *mem)
 		if (strcmp(tag, type->name) == 0) {
 			return type;
 		}
-		type = (DS_TYPE_T *)&(type->field[type->nField]);
+		type = (DS_TYPE_T *)&(DS_FIELD_PTR(type)[type->nField]);
 	}
 	return NULL;
 }
@@ -343,14 +342,16 @@ static DS_TYPE_T *dsFindTag(char *tag, DS_MEM_T *mem)
 int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
 {
 	size_t i;
+	DS_FIELD_T *field;
 
 	if (pType->code != DS_TYPE_STRUCT) {
 		DS_ERROR(DS_E_STRUCT_REQUIRED);
 	}
+	field = DS_FIELD_PTR(pType);
 	for (i = 0; i < pType->nField; i++) {
-		if (strcmp(pType->field[i].name, name) == 0) {
+		if (strcmp(field[i].name, name) == 0) {
 			if (ppField != NULL) {
-				*ppField = &pType->field[i];
+				*ppField = &field[i];
 			}
 			return TRUE;
 		}
@@ -370,7 +371,7 @@ int dsFmtTypeDef(char *str, size_t maxSize, DS_TYPE_T *type)
 
 	bp.first = bp.next = str;
 	bp.limit = str + maxSize;
-	if (	!dsStrToMem(&bp, "type ") ||
+	if (!dsStrToMem(&bp, "type ") ||
 		!dsFmtTypeDefR(&bp, type, 0, &nTag, tags) ||
 		!dsStrToMem(&bp, "\n")) {
 		return FALSE;
@@ -413,7 +414,7 @@ static int dsFmtTypeDefR(DS_MEM_T *bp,
 	if (!dsStrToMem(bp, " {\n")) {
 		return FALSE;
 	}
-	field = type->field;
+	field = DS_FIELD_PTR(type);
 	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
 		return FALSE;
 	}
@@ -434,13 +435,13 @@ static int dsFmtTypeDefR(DS_MEM_T *bp,
 			}
 		}
 		if (!dsStrToMem(bp, " ") ||
-			!dsNameToMem(bp, type->field[i].name)) {
+			!dsNameToMem(bp, field[i].name)) {
 			return FALSE;
 		}
 
-		for (j = 0; j < DS_MAX_DIMS && type->field[i].dim[j]; j++) {
+		for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
 			if (!dsStrToMem(bp, "[") ||
-				!dsNumToMem(bp, type->field[i].dim[j]) ||
+				!dsNumToMem(bp, field[i].dim[j]) ||
 				!dsStrToMem(bp, "]")) {
 				return FALSE;
 			}
@@ -480,9 +481,9 @@ int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 	}
 	if (t1->nField - t2->nField) return (t1->nField - t2->nField);
 
-	f1 = t1->field;
+	f1 = DS_FIELD_PTR(t1);
 	limit = f1 + t1->nField;
-	f2 = t2->field;
+	f2 = DS_FIELD_PTR(t2);
 	for (;f1 < limit; f1++, f2++) {
 		if ((c = strcmp(f1->name, f2->name)) != 0) return c;
 		if (f1->count - f2->count) return (f1->count - f2->count);
@@ -501,3 +502,28 @@ int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 	}
 	return 0;
 }
+/******************************************************************************
+*
+* dsTypeLimit - find limit for memory allocated to type
+*
+*/
+char *dsTypeLimit(DS_TYPE_T *type)
+{
+	char *l, *limit;
+	unsigned i;
+	DS_FIELD_T *field;
+
+	if (type->code != DS_TYPE_STRUCT) {
+		return NULL;
+	}
+	field = DS_FIELD_PTR(type);
+	limit = (char *)&field[type->nField];
+	for (i = 0; i < type->nField; i++) {
+		l = dsTypeLimit(field[i].type);
+		if (l > limit) {
+			limit = l;
+		}
+	}
+	return limit;
+}
+		 

@@ -4,8 +4,8 @@
 BASE_PATH=..
 CPATH= . $(BASE_PATH)/src
 HPATH= . $(BASE_PATH)/inc
-LPATH= . $(BASE_PATH)/lib/$(ARCH)
-OPATH= . $(BASE_PATH)/lib/$(ARCH) $(BASE_PATH)/bin/$(ARCH)
+LPATH= . $(BASE_PATH)/lib/$(STAR_ARCH)
+OPATH= . $(BASE_PATH)/lib/$(STAR_ARCH) $(BASE_PATH)/bin/$(STAR_ARCH)
 #
 vpath %.c $(CPATH)
 vpath %.h $(HPATH)
@@ -15,7 +15,7 @@ vpath %.o $(OPATH)
 LIB=libds.a
 LIBFILES=dserror.c dslib.c dstid.c dstree.c dslock.c\
 	dstype.c dsutil.c dsxdrlib.c
-TESTOBJ=checklib.o testlib.o
+TESTOBJ=checklib.o testlib.o testtas.o
 LIBOBJ=$(patsubst %.c,%.o, $(LIBFILES)) $(TESTOBJ)
 PROGOBJ=sample.o testds.o
 PROGS=$(basename $(PROGOBJ))
@@ -34,9 +34,10 @@ CC68FLAGS=  -DCPU=MC68040 -DVXWORKS -I$(VX_VW_BASE)/h $(CPPFLAGS) -Wall
 # all:		progs vwlib
 
 progs:		$(PROGS)
-	foreach f ($(PROGS))
-	   mv $$f ./irix/.
-	 end
+	mv $(PROGS) ./$(STAR_ARCH)/.
+#	foreach f ($(PROGS))
+#	   mv $$f ./irix/.
+#	 end
 
 vwlib:		$(VWLIB)
 
@@ -77,7 +78,7 @@ $(VWLIB):	$(VWOBJ)
 
 $(LIB):		$(LIBOBJ)
 		ar r $@ $?
-		ranlib $@
+		-ranlib $@
 
 install:	$(LIB)
 		cp -p $(LIB) ../lib

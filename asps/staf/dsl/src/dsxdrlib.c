@@ -110,10 +110,10 @@ static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
 	if (type->code != DS_TYPE_STRUCT) {
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
-	limit = type->field + type->nField;
+	limit = DS_FIELD_PTR(type) + type->nField;
 	for (i = 0; i < count; i++) {
 		nbytes = 0;
-		for (field = type->field; field != limit; field++) {
+		for (field = DS_FIELD_PTR(type); field != limit; field++) {
 			ftype = field->type;
 			ptr = base + field->offset;
 			if (!XDR_PAD(xdrs, field->stdoffset - nbytes)) {
@@ -211,6 +211,7 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 		goto success;
 	}
 	if (xdrs->x_op != XDR_DECODE) {
+		DS_LOG_ERROR(DS_E_INVALID_XDR_OP);
 		goto fail;
 	}
 	for(;;) {
@@ -347,7 +348,10 @@ static bool_t xdr_table(XDR *xdrs, void *ptr, size_t tid, size_t nrow)
 {
 	size_t npad, size;
 	DS_TYPE_T *type;
-
+    
+    if (nrow == 0) {
+    	return TRUE;
+    }
 	if (ptr == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
@@ -373,13 +377,20 @@ static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *tList)
 {
 	char *str;
 	size_t h, i, tid = pDataset->tid;
+	DS_TYPE_T *pType;
 
 	if (tid != 0) {
-		if (!dsTypeListFindTid(&h, tList, tid)) {
+		if (!dsTypePtr(&pType, tid)) {
 			return FALSE;
 		}
-		if (tList[h] != 0) {
+		if (!dsTypeListFind(&h, tList, pType->name, NULL)) {
+			return FALSE;
+		}
+		if (tList[h] == tid) {
 			return TRUE;
+		}
+		if (tList[h]) {
+			DS_ERROR(DS_E_DUPLICATE_TYPE_NAME);
 		}
 		if (!dsTypeDef(&str, &i, tid)) {
 			return FALSE;

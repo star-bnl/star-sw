@@ -1,7 +1,7 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
 
 /* dslock.c - lock and unlock routines for static type structures  */
-
+ 
 /*
 modification history
 --------------------
