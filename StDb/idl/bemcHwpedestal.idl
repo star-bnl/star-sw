@@ -1,0 +1,12 @@
+#ifndef BEMC_HWPEDESTAL_H
+#define BEMC_HWPEDESTAL_H
+
+/* table definition for L2 BEMC hardware pedestals on L0 */
+
+struct bemcHwpedestal {
+  unsigned int daqId;
+  unsigned int towerId;
+  float hwpedestal;
+};
+
+#endif
