@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.102 1999/07/20 00:24:55 fisyak Exp $
+# $Id: MakePam.mk,v 1.103 1999/07/28 14:16:24 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.103  1999/07/28 14:16:24  fisyak
+# Simplify for St_base, take out geant3.def
+#
 # Revision 1.102  1999/07/20 00:24:55  fisyak
 # Remove Objy
 #
@@ -533,14 +536,10 @@ $(GEN_TAB)/St_%_Table.h:
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
-$(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
-	@test -h $(OBJ_DIR)/geant3.def || $(RM)  $(OBJ_DIR)/geant3.def
-	@test -h $(OBJ_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(OBJ_DIR)/geant3.def 
-#$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(OBJ_DIR)/geant3.def
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g
 	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o):%.g $(OBJ_DIR)/geant3.def
+$(LIB_PKG)(%.o):%.g
 	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 #	$(RM) $(OBJ_DIR)/$(STEM).F 
