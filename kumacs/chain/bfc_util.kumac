@@ -163,7 +163,7 @@ EOF:
      (gethij)    
                cd [event]; getev hij_in
                user/input u evgen/particle.staf
-      (gst)    trig 1; cd [geant]; for/call g2t; cd /dui; 
+      (gst)    trig 1; cd [geant_Event]; for/call g2t; cd /dui; 
     (evgin) nextl 1
      (rgst) trig 1
      (rg2t) cd [geantE]
