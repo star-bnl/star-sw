@@ -23,7 +23,9 @@ topFactory *top;
 //:<--------------------------------------------------------------------
 int top_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TOP:Initializing. ");
+#endif
 
 /*- Define the TOP KUIP commands. -*/
    top_def_();
@@ -39,7 +41,9 @@ int top_init()
 //:<--------------------------------------------------------------------
 int top_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TOP:Starting. ");
+#endif
 
 /*- Create the TOP Factory. -*/
    top = new topFactory("top");
@@ -55,7 +59,9 @@ int top_start()
 //:<--------------------------------------------------------------------
 int top_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TOP:Stopping. ");
+#endif
 
 /*- Delete the TOP Factory.
    delete top;
