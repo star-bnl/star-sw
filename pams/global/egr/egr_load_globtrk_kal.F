@@ -23,7 +23,6 @@ C<--------------------------------------------------------------------
       IMPLICIT NONE
 #include "PAM.inc"
 #include "dst_track.inc"
-#include "dst_track_aux.inc"
 #include "tcl_tphit.inc"
 #include "scs_spt.inc"
 #include "egr_track_pointers.inc"
