@@ -1,3 +1,6 @@
+/*!
+ * \author Christelle Roy
+*/
 #ifndef StiSsdHitLoader_H
 #define StiSsdHitLoader_H
 
@@ -34,7 +37,9 @@ public:
     virtual void loadMcHits(StMcEvent* source,
 			    bool useMcAsRec,
 			    Filter<StiTrack> * trackFilter, 
-			    Filter<StiHit> * hitFilter);
+			    Filter<StiHit> * hitFilter,
+			    StMcTrack & stMcTrack,
+			    StiMcTrack & stiMcTrack);
 };
 
 #endif
