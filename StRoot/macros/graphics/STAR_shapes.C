@@ -9,7 +9,7 @@
    //
    gROOT->Reset();
    gSystem->Load("St_base");
-//   c1 = new TCanvas("c1","Geometry Shapes",200,10,700,500);
+   c1 = new TCanvas("c1","Geometry Shapes",200,10,700,500);
  
    //  Define some volumes
    brik = new TBRIK("BRIK","BRIK","void",200,150,150);
@@ -74,8 +74,14 @@
    node1->Add(new St_Node("NODE14","NODE14","SPHE1"),10, 250,300);
    node1->Add(new St_Node("NODE15","NODE15","SPHE2"),10,-100,-200);
 
-   TBrowser bb("BB",node1);
-   
+   // Create "view" object of the "node1" to browse 
+   St_NodeView view(*node1);   
+   TBrowser bb("BB",&view);
+
+   // Create ROOT node to draw
+   TNode *rootNode = node1->CreateTNode();
+   rootNode->cd();
+   rootNode->Draw();  
    // Draw this geometry in the current canvas
 //   node1->cd();
 //   node1->Draw();
