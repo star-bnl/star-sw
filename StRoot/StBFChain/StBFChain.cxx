@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.204 2001/05/29 22:04:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.205 2001/06/22 20:23:03 balewski Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -127,7 +127,7 @@ Bfc_st BFC[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"          ,""  ,"","ppLPfind1,SpinSortA,ppLPprojectA"    ,"","","Use pp specific parameters",kFALSE},
+  {"pp"          ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA"    ,"","","Use pp specific parameters",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -301,7 +301,8 @@ Bfc_st BFC[] = {
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
-  {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
+  {"SpinTag"   ,"SpinTag"  ,"",""  ,"StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
+ {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
   {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
   {"ppLPprojectA","ppLPprojectA","",""
                       ,"StppLPprojectMaker","StppSpin","project LP to the spin dependent phi-histo",kFALSE},
