@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.98 2000/07/01 23:06:21 fisyak Exp $
+# $Id: Construct,v 1.99 2000/07/31 21:59:47 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -30,7 +30,7 @@ print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
 if (defined($ARG{ROOTLIBS}))    {$ROOTLIBS = $ARG{ROOTLIBS}        ; print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);}
 $RINTLIBS    = "-lRint ";
 $CPPPATH  = $INCLUDE . ":#StRoot:" .  $ROOTSRC;
-$CPPPATH .= ":" . $CERN_ROOT . "/include:/opt/star/include" . $EXTRA_CPPPATH;
+$CPPPATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include" . $EXTRA_CPPPATH;
 $FCPPPATH ="";
 (my $DirPath  = cwd()) =~ s/\/$//g;
 print "Build directory: $DirPath;" unless ($param::quiet);
@@ -69,14 +69,14 @@ else {
   $CPPPATH  = "";
   $FCPPPATH = "";
   foreach my $dir ($DirPath, @Repo) {
-    $INCLUDE_PATH .= ";" . $dir . "/include";
-    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
-    $INCLUDE_PATH .= ";" . $dir . "/pams";
-    $INCLUDE_PATH .= ";" . $dir . "/include/tables";
+    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/include";
+    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/StRoot";
+    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/pams";
+    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/include/tables";
   }
   my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
-  $INCLUDE_PATH .= ";" . $ROOTSRC;
-  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
+  $INCLUDE_PATH .= $main::PATH_SEPARATOR . $ROOTSRC;
+  $INCLUDE_PATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
 }
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 print "CPPPATH = $CPPPATH\n";
@@ -118,7 +118,7 @@ if (! $param::quiet) {
 }
 my @subdirs = ();
 # make Targets and install includes
-foreach my $dir ("pams","StRoot"){#,"asps/rexe"){#,"StDb") {
+foreach my $dir ("pams","StRoot","StPiD"){#,"asps/rexe"){#,"StDb") {
   next if ! -d $dir;
   opendir (DIR, $dir) or die "Can't open $dir\n";
   my @subdirS = readdir DIR;
