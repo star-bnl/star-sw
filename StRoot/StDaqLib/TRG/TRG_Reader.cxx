@@ -58,8 +58,8 @@ int Bank_TRGD::HerbSwap() {
   swapHerb4bytes( &(GS->TrgSum.L2Result[0]),            32);
   swapHerb4bytes( &(GS->TrgSum.L2Sum[0]),                2);
   // fifo1 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU1.fifo1),1);
-  swapHerb4bytes( &(GS->EvtDesc.TCU2.fifo2),             1);
-  swapHerb4bytes( &(GS->EvtDesc.TCU3.fifo3),             1);
+  // fifo2 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU2.fifo2),1);
+  // fifo3 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU3.fifo3),1);
   numToSwap=1+GS->EvtDesc.npost+GS->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
   for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
     swapHerb2bytes( &(GS->RAW[i].CTBdataBytes),          1);
