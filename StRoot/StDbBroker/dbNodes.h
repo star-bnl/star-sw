@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.h,v 1.2 2000/01/14 14:49:10 porter Exp $
+ * $Id: dbNodes.h,v 1.3 2000/01/27 05:56:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbNodes.h,v $
+ * Revision 1.3  2000/01/27 05:56:03  porter
+ * update for compiling on CC5+HPUX-aCC+KCC
+ *
  * Revision 1.2  2000/01/14 14:49:10  porter
  * set verbose level for checking, added $Id & $Logs, & made node container
  * more robust for interactions with StDbLib
@@ -31,7 +34,9 @@
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StDbNode*, allocator<StDbNode*> > nodeVec;
 #else
+#if !defined(ST_NO_NAMESPACES)
 using std::vector;
+#endif
 typedef vector<StDbNode*> nodeVec;
 #endif
 
