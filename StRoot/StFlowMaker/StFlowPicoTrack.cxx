@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.1 2000/09/05 16:11:36 snelling Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.2 2000/09/05 17:57:12 snelling Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -9,12 +9,16 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.2  2000/09/05 17:57:12  snelling
+// Solaris needs math.h for fabs
+//
 // Revision 1.1  2000/09/05 16:11:36  snelling
 // Added global DCA, electron and positron
 //
 // 
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
+#include <math.h>
 #include "StFlowPicoTrack.h"
 
 ClassImp(StFlowPicoTrack)
