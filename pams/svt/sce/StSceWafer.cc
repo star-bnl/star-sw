@@ -7,7 +7,6 @@ StSceWafer::StSceWafer(int nid)
   mN        = new float[3];
   mX        = new float[3];
   mPoint    = new StSceListPoint();
-  mSimPoint = new StSceListPoint();
   mRecPoint = new StSceListPoint();
   mClusterP = new StSceListCluster();
   mClusterN = new StSceListCluster();
@@ -29,7 +28,6 @@ StSceWafer::~StSceWafer()
   delete [] mN;
   delete [] mX;
   delete    mPoint;
-  delete    mSimPoint;
   delete    mRecPoint;
   delete    mClusterP;
   delete    mClusterN;
@@ -104,21 +102,6 @@ int StSceWafer::convertLocalToUFrame(float ActiveLargeEdge, float ActiveSmallEdg
   return 1;
 } 
 
-StSceListPoint* StSceWafer::getDeadHits(float ActiveLargeEdge, float ActiveSmallEdge,float Test)
-{
-  StSceListPoint *listDeadBorder   = this->getNonActivePointBorder(ActiveLargeEdge,ActiveSmallEdge);
-  StSceListPoint *listDeadTriangle = this->getNonActivePointTriangle(Test);
-  StSceListPoint *listDeadTotal    = new StSceListPoint();
-  listDeadTotal = listDeadTotal->addListPoint(listDeadBorder);
-  listDeadTotal = listDeadTotal->addListPoint(listDeadTriangle);
-  listDeadTotal = listDeadTotal->removeMultipleCount();
-
-  (this->mPoint)->substractListPoint(listDeadTotal);
-  delete listDeadBorder;
-  delete listDeadTriangle;
-  return listDeadTotal;
-}
-
 void StSceWafer::addCluster(StSceCluster *ptr, int iSide)
 {
   if (iSide)
@@ -126,9 +109,6 @@ void StSceWafer::addCluster(StSceCluster *ptr, int iSide)
   else
     { mClusterP->addNewCluster(ptr); }
 }
-
-void StSceWafer::addSimPoint(StScePoint *ptr)
-{  mSimPoint->addNewPoint(ptr); }
 
 void StSceWafer::addRecPoint(StScePoint *ptr)
 {  mRecPoint->addNewPoint(ptr); }
@@ -138,9 +118,6 @@ void StSceWafer::addComPoint(StSceComp *ptr)
 
 StSceListPoint*  StSceWafer::getPoint()
 {  return mPoint; }
-
-StSceListPoint*  StSceWafer::getSimPoint()
-{  return mSimPoint; }
 
 StSceListPoint*  StSceWafer::getRecPoint()
 {  return mRecPoint; }
@@ -157,50 +134,6 @@ StSceListComp*  StSceWafer::getComPoint()
 int StSceWafer::getId()
 {  return mId; }
    
-StSceListPoint*  StSceWafer::getNonActivePointBorder(float ActiveLargeEdge, float ActiveSmallEdge)
-{
-  int localSize = (this->mPoint)->getSize();
-
-  StSceListPoint *deadPoints = new StSceListPoint();
-  if (!localSize) return deadPoints;
-  
-  StScePoint *temp = (this->mPoint)->first();
-  for (int i = 0; i < localSize; i++)
-    {
-      if((temp->getXl(0) >(ActiveLargeEdge/2.)) || (temp->getXl(0) < (-ActiveLargeEdge/2.)) || 
-	 (temp->getXl(1) >(ActiveSmallEdge/2.)) || (temp->getXl(1) < (-ActiveSmallEdge/2.)))
-	{
-	  // tempo : I can remove the hit now, just to keep information.
-	  StScePoint *badPoint = temp->giveCopy();
-	  deadPoints->addNewPoint(badPoint);
-	}
-      temp = (this->mPoint)->next(temp);
-    }
-  return deadPoints;
-} 
-
-StSceListPoint* StSceWafer::getNonActivePointTriangle(float Test)
-  //typically, test=pitch
-{
-  int localSize = (this->mPoint)->getSize();
-  StSceListPoint *deadPoints = new StSceListPoint();  
-
-  if (!localSize) return deadPoints;
-
-  StScePoint *temp = (this->mPoint)->first();
-  for (int i = 0; i < localSize; i++)
-    {
-      if (temp->getUpos(0) < -1.*Test && temp->getUpos(1) < -1.*Test) 
-	{
-	  // tempo : I can remove the hit now, just to keep information.
-	  StScePoint *badPoint = temp->giveCopy();
-	  deadPoints->addNewPoint(badPoint);
-	}
-      temp = (this->mPoint)->next(temp);
-    }
-  return deadPoints;
-} 
-
 int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
    int nEvaluatedCluster  = 0;
    StSceCluster *currentClusterP = 0;
@@ -216,7 +149,7 @@ int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
    int n_checked = 0;
    currentClusterP = mClusterP->first();
    currentClusterN = mClusterN->first();
-   currentSimPoint = mSimPoint->first();
+   currentSimPoint = mPoint->first();
 
    while(currentClusterP)
      {
@@ -267,7 +200,7 @@ int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
        else
 	 {n_lost++;}
 
-       currentSimPoint = mSimPoint->next(currentSimPoint);
+       currentSimPoint = mPoint->next(currentSimPoint);
      }
 
    ctrl[0].TrueClusterP  += p_true;
@@ -281,7 +214,6 @@ int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
  }
 
 int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
-//   printf("In doEvaluateSpt  in %d \n",mId);
   int nCompared     = 0;  
   int nEvaluatedSpt = 0;
   StScePoint   *scanRecPoint    = 0;
@@ -325,7 +257,6 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
    currentRecPoint = mRecPoint->first();
    while(currentRecPoint){
 
-//!  printf("Point in current treatment %d \n",currentRecPoint->getIdMatch());
      numPackage   = currentRecPoint->getIdCluster();
      switch(currentRecPoint->getIdMatch()){
       
@@ -339,7 +270,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	 }
        else if ((currentRecPoint->getIdMcHit(0))&&(!currentRecPoint->getIdMcHit(1)))
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -357,12 +288,12 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true11++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	 }
        else
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -380,7 +311,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true11++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	   for(e=1;e<5;e++)
 	     {
@@ -416,7 +347,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	 }
        else if ((currentRecPoint->getIdMcHit(0))&&(!currentRecPoint->getIdMcHit(1)))
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -434,12 +365,12 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		  true12++;
 		}
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	 }
        else
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -457,7 +388,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true12++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	   for(e=1;e<5;e++)
 	     {
@@ -485,7 +416,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	 }
        else if (((mRecPoint->next(currentRecPoint))->getIdMcHit(0))&&(!(mRecPoint->next(currentRecPoint))->getIdMcHit(1)))
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if ((mRecPoint->next(currentRecPoint))->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -503,12 +434,12 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true12++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	 }
        else
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if ((mRecPoint->next(currentRecPoint))->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -526,7 +457,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true12++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	   for(e=1;e<5;e++)
 	     {
@@ -566,7 +497,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	 }
        else if ((currentRecPoint->getIdMcHit(0))&&(!currentRecPoint->getIdMcHit(1)))
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -584,12 +515,12 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true22++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	 }
        else
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -607,7 +538,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true22++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	   for(e=1;e<5;e++)
 	     {
@@ -638,7 +569,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	 }
        else if (((mRecPoint->next(currentRecPoint))->getIdMcHit(0))&&(!(mRecPoint->next(currentRecPoint))->getIdMcHit(1)))
 	 {
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if ((mRecPoint->next(currentRecPoint))->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -656,11 +587,11 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true22++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	 }
        else{
-	   currentSimPoint = mSimPoint->first();
+	   currentSimPoint = mPoint->first();
 	   while(currentSimPoint)
 	     {
 	       if ((mRecPoint->next(currentRecPoint))->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -678,7 +609,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		   compOk = 1;
 		   true22++;
 		 }
-	       currentSimPoint = mSimPoint->next(currentSimPoint);
+	       currentSimPoint = mPoint->next(currentSimPoint);
 	     }
 	   for(e=1;e<5;e++)
 	     {
@@ -783,19 +714,19 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 
 		StScePoint   *simPoint1 = 0;
 		StScePoint   *simPoint2 = 0;
-		scanSimPoint = mSimPoint->first();
+		scanSimPoint = mPoint->first();
 		while(scanSimPoint)
 		  {
 		    if((scanSimPoint->getIdMatch()==tabHit[0])&&(!simPoint1))
 		      simPoint1=scanSimPoint;
-		    scanSimPoint = mSimPoint->next(scanSimPoint);
+		    scanSimPoint = mPoint->next(scanSimPoint);
 		  }
-		scanSimPoint = mSimPoint->first();
+		scanSimPoint = mPoint->first();
 		while(scanSimPoint)
 		  {
 		    if((scanSimPoint->getIdMatch()==tabHit[1])&&(simPoint1))
 		      simPoint2=scanSimPoint;
-		    scanSimPoint = mSimPoint->next(scanSimPoint);
+		    scanSimPoint = mPoint->next(scanSimPoint);
 		  }
 		if((!keepPoint1)||(!keepPoint2)||(!downPoint1)||(!downPoint2)||(!simPoint1)||(!simPoint2))
 		  {
@@ -1055,7 +986,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	   }
 	 if(okHit)
 	   {
-	     currentSimPoint = mSimPoint->first();
+	     currentSimPoint = mPoint->first();
 	     while(currentSimPoint)
 	       {
 		 if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -1074,7 +1005,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		     mComPoint->addNewComp(newComp);
 		     nCompared++;
 		   }
-		 currentSimPoint = mSimPoint->next(currentSimPoint);
+		 currentSimPoint = mPoint->next(currentSimPoint);
 	       }
 	     true23++;
 	     if(currentRecPoint->getIdMcHit(1)) lost23++;
@@ -1122,7 +1053,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 	   }
 	 if(okHit)
 	   {
-	     currentSimPoint = mSimPoint->first();
+	     currentSimPoint = mPoint->first();
 	     while(currentSimPoint)
 	       {
 		 if (currentRecPoint->getIdMcHit(0) == currentSimPoint->getIdMatch())
@@ -1141,7 +1072,7 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 		     mComPoint->addNewComp(newComp);
 		     nCompared++;
 		   }
-		 currentSimPoint = mSimPoint->next(currentSimPoint);
+		 currentSimPoint = mPoint->next(currentSimPoint);
 	       }
 	     true33++;
 	     if(currentRecPoint->getIdMcHit(1))
@@ -1184,7 +1115,6 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
 
 float* StSceWafer::findAngle(float *p, float *alpha)
 {
-
   int i = 0;
 
   float pT[3],pN[3],pD[3];
