@@ -406,7 +406,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   if (fabs(dAlpha)>1e-4)   // perform rotation if needed
 		{
 			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-			rotate(-dAlpha);
+			rotate(dAlpha);
 		}
   double x, x0, rho, pathLength;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho,
