@@ -144,6 +144,7 @@ public:
    virtual STAFCV_T close ();
    virtual STAFCV_T open (DIO_MODE_T mode);
    virtual STAFCV_T getEvent (tdmDataset* destination);
+   virtual STAFCV_T putEvent (tdmDataset* destination);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -154,8 +155,8 @@ protected:
    long myMaxHandshakes;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
-   virtual int openServer();
-   virtual int openClient();
+   // hjw 02oct97, not used.  virtual int openServer();
+   // hjw 02oct97, not used.  virtual int openClient();
 };
 
 //:=============================================== CLASS              ==

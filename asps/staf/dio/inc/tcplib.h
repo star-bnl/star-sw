@@ -37,6 +37,7 @@ char *tcpCodeStr(int code);
 
 int tcpConnect(char *hostName, int serverPort, int *pSocket);
 int tcpServer(int serverPort, int (*serverFcn)(), int spawn);
+int tcpStartServer(int serverPort, int *pSocket); /* blocks until connect */
 #ifdef __sgi
 int tcpRead(void *pFd, void *buf, u_int nbytes);
 int tcpWrite(void *pFd, void *buf, u_int nbytes);

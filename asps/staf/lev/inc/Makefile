@@ -9,7 +9,7 @@ endif
 #
 .PHONY: all clean test install help
 #
-VERSION := "$Id: Makefile,v 1.4 1997/08/18 22:46:51 tull Exp $"
+VERSION := "$Id: Makefile,v 1.5 1997/12/12 20:00:33 tull Exp $"
 # 
 all:
 clean:
@@ -25,14 +25,14 @@ test:
 	@echo "########################################################"
 	@-egrep -l struct *.idl
 #
-#?make install     - Install local files in $STAR_LIB/dev/inc area.
+#?make install     - Install local files in $STAR_LIB/.../inc area.
 install:
 ifneq ($(EMPTY),$(strip $(wildcard *.h *.hh *.inc *.idl)))
 	@echo "########################################################"
 	@echo "###          Installing include & IDL files.         ###"
 	@echo "########################################################"
 	-$(INSTALL) $(strip $(wildcard *.h *.hh *.inc *.idl)) \
-		$(STAR_LIB)/$(STAR_SYS_LEVEL)/$(BRANCH_NAME)/inc
+		$(STAR_LIB)/$(BRANCH_LEVEL)/$(BRANCH_NAME)/inc
 else
 	@echo "########################################################"
 	@echo "###           No include files to install.           ###"

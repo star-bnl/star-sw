@@ -102,12 +102,13 @@ STAFCV_T ami_call(char* name,long ntabs,char **tnames)
    tbls._buffer = tnames;
 
 //- Tell the AMI Broker to invoke the PAM.
-//- WARNING!!! - PAM status already recorded!!!
-   return ami->callInvoker(name, tbls);
-// if( !ami->callInvoker(name, tbls) ){
+   if( !ami->callInvoker(name, tbls) ){
+      //- WARNING!!! - PAM status already recorded!!!
+      EML_POPSTACK();
+      return FALSE;
 //    EML_FAILURE(KAM_METHOD_FAILURE);
-// }
-// EML_SUCCESS(STAFCV_OK);
+   }
+   EML_SUCCESS(STAFCV_OK);
 
 }
 

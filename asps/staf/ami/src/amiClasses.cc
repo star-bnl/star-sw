@@ -1,3 +1,4 @@
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.13 1997/12/12 19:48:15 tull Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -247,8 +248,8 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       if( table_name ){FREE(table_name); table_name = NULL;}
    }
 //- Call the actual invoker object.
-   invoker->call(tables);
-   EML_SUCCESS(STAFCV_OK);
+   return invoker->call(tables);
+//   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------

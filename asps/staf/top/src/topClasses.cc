@@ -21,9 +21,10 @@ extern "C" int dsuDoCuts(size_t bytes, char *ba, char *cut
 		,DS_DATASET_T *pTab);
 extern "C" int dsuRowPassedCuts(char *ba,long row);
 extern "C" int IsValidCutFunc(char*);
-extern "C" int topFastjoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
-        DS_DATASET_T *pTableTwo, char *aliases,
-        char *joinList, char *projectList);
+extern "C" int topFastjoin(DS_DATASET_T *pJoinTable
+	, DS_DATASET_T *pTableOne
+        , DS_DATASET_T *pTableTwo, char *aliases
+        , char *joinList, char *projectList);
 //:----------------------------------------------- MACROS             --
 #define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
@@ -519,10 +520,15 @@ STAFCV_T topJoin:: fastjoin(tdmTable * table1, tdmTable * table2
    DS_DATASET_T *pTbl3=NULL;
    if( NULL == table3 ){
       table3 = jTarget(table1, table2, NULL);
+      if( NULL == table3 ){
+	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_ERROR(FASTJOIN_FAILURE);
+      }
    }
    pTbl3=table3->dslPointer();
    if( !topFastjoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
-      EML_ERROR(JOIN_FAILURE);
+      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_ERROR(FASTJOIN_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 
@@ -535,9 +541,14 @@ STAFCV_T topJoin:: join(tdmTable * table1, tdmTable * table2
    DS_DATASET_T *pTbl3=NULL;
    if( NULL == table3 ){
       table3 = jTarget(table1, table2, NULL);
+      if( NULL == table3 ){
+	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_ERROR(JOIN_FAILURE);
+      }
    }
    pTbl3=table3->dslPointer();
    if( !dsEquijoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
+      EML_PUSHERROR(dsError("DSL_ERROR"));
       EML_ERROR(JOIN_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
