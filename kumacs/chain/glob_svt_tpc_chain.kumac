@@ -1,6 +1,17 @@
+*** TO DO:
 ** put in tss
 ** fix directory pointers for tpc parameters - don't use setup global macros
- **************************************************
+****************************************************
+* TO RUN:
+*
+*  1. stardev (or whichever version you want)
+*  2. staf++
+*  3. exec /afs/rhic/star/packages/dev/kumacs/chain/glob_svt_tpc_chain
+* 
+* if you want to change anything, copy kumac to your area and change:
+*  4. input values on macro command line
+*  5. default directory list where you pick up kumacs from 
+**************************************************
  * MACRO RUN_ALL
  *
  * SYNOPSIS: STAF analysis driver for the SVT + TPC analysis
@@ -23,7 +34,7 @@
  *
  * History:
  *          Feb 24, 97 - created
- *          April 29, 1998 - editted by Kathy
+ *          May 1, 1998 - editted by Kathy Turner
  *
 **************************************************
  
@@ -63,6 +74,7 @@ message ' *** EV0 Finder            -->  ' [ev0_finder]
  DEFAULT = _
 ./kumacs/util,_
 ./kumacs/chain,_
+./pams/emc/kumac,_
 ./pams/global/kumac,_
 ./pams/svt/kumac,_
 ./pams/tpc/kumac,_
@@ -81,67 +93,27 @@ $STAR/pams/trg/kumac
 
  def [DEFAULT]
  message 'Define default kumac search path as' def
-wait
+
 *******************************
 * SETUP GLOBAL MACROS
 *****************************
 
-* need these because the tpc init kumacs use them
+* need this because the tpc init kumacs use them
  exec setup_global_macros
 
  macro/global/import  PARAMS_TPC
 
-* macro/global/import  KUMACS_TPC,PARAMS_TPC,PAMS_TPC_KUMAC
-* macro/global/import  KUMACS_SVT,PARAMS_SVT,PAMS_SVT_KUMAC
-* macro/global/import  KUMACS_EMC,PARAMS_EMC,PAMS_EMC_KUMAC
-* macro/global/import  KUMACS_CTF,PARAMS_CTF,PAMS_CTF_KUMAC
-* macro/global/import  KUMACS_MWC,PARAMS_MWC,PAMS_MWC_KUMAC
-* macro/global/import  KUMACS_TRG,PARAMS_TRG,PAMS_TRG_KUMAC
-* macro/global/import  KUMACS_FTPC,PARAMS_FTPC,PAMS_FTPC_KUMAC
-* macro/global/import   KUMACS_GLOBAL,PARAMS_GLOBAL,PAMS_GLOBAL_KUMAC
-
-
-*   message ' get KUMACS_UTIL  = '      [KUMACS_UTIL]
-*   message ' get PAMS_SVT_KUMAC= '     [PAMS_SVT_KUMAC]
-*   message ' get PAMS_GLOBAL_KUMAC = ' [PAMS_GLOBAL_KUMAC]
-
 ****************************************
 *  LOAD LIBRARIES
 **************************************** 
+
  if $vexist(make_done)=0 then
-   make svt tpc global  
+   make svt 
+   make tpc 
+   make global  
    vec/cre make_done
  endif
  
-*************************
-* SETUP LOCAL DIRECTORIES
-*************************
-
-*   UTIL_HOME=[KUMACS_UTIL]
-*   message ' util home = ',[UTIL_HOME]
-
-*** TAKE OUT
-*   KATHY_KUMAC=./kumacs/util/
-*   message ' kathy kumac area = ' [KATHY_KUMAC]
-
-*   SVG_HOME=[PAMS_SVT_KUMAC]
-*   SSS_HOME=[PAMS_SVT_KUMAC]
-*   SSF_HOME=[PAMS_SVT_KUMAC]
-*   SRS_HOME=[PAMS_SVT_KUMAC]
-*   SGR_HOME=[PAMS_SVT_KUMAC]
-*   STK_HOME=[PAMS_SVT_KUMAC]
-*   SVM_HOME=[PAMS_GLOBAL_KUMAC]
-
-*   TPC_HOME=[KUMACS_TPC]
-*   TPC_PAMS_HOME=[PAMS_TPC_KUMAC]   
-*   TPG_HOME = [TPC_PAMS_HOME]
-*   TFS_HOME = [TPC_PAMS_HOME] 
-*   TPT_HOME = [TPC_PAMS_HOME]
-*   TTE_HOME = [TPC_PAMS_HOME]
-
-*   EGR_HOME = [PAMS_GLOBAL_KUMAC]
-*   EV0_HOME = [PAMS_GLOBAL_KUMAC]
-
 ************************** 
 * SETUP TABLE DIRECTORIES
 **************************
@@ -184,23 +156,24 @@ wait
      goto EOF 
  endif
 
- *****************************************
- * SVT initialization - geometry
- *****************************************
-
-* cd /dui/data/svt
- exec init_svg
- message ' called init_svg'
- if [svt_simul] = sss then
-  message 'run_all-I1 : will use svt simulator sss/ssf'
-  exec init_sss
-  exec init_ssf
- endif
-
  **************************************
  * open new output file
  **************************************
  exec write_table_to_file#init evout ev0out_tte.dsl
+
+
+ *****************************************
+ * SVT initialization - geometry
+ *****************************************
+
+
+ exec init_svg
+ message ' called init_svg'
+ if [svt_simul] = sss then
+   message 'run_all-I1 : will use svt simulator sss/ssf'
+   exec init_sss
+   exec init_ssf
+ endif
 
  ****************************************
  * TPC geometry &  pam initialization 
@@ -224,7 +197,7 @@ wait
 $cptime
    
  *  SVT detector response simulation -----------------------------
-   cd /dui/data/svt
+
     if [svt_simul]= sss then
       exec run_sss [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -242,7 +215,7 @@ $cptime
 
 
  *  svt track finding and momentum reconstruction -----------------------
-    cd ../svt
+
     if [svt_tracker]= stk then
       exec run_stk  [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto TPC
@@ -297,8 +270,6 @@ TPC:
 
 * TPC to SVT Matching ----------------------------------------------------
 
-    cd /dui/data/global
-
    if [tpc_svt_match]=svm then
       exec run_svm#run_svm [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -310,7 +281,6 @@ TPC:
 
 * Event Global Refit -----------------------------------------------
 
-   cd /dui/data/global
    if [event_refit]=egr then
       exec run_egr#egr [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -321,7 +291,7 @@ TPC:
 
 
 *  V0 Finder -----------------------------------------------------------
-   cd /dui/data/global
+
    if [ev0_finder]=ev0 then
       exec run_ev0#ev0_am  [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -335,6 +305,9 @@ TPC:
 
   exec run_ev0#ev0_eval2  [ievent] 
 
+
+* Timing values -------------------------------------------------------
+
   v/print vsrs
   v/print vsgr
   v/print vstk
@@ -344,9 +317,9 @@ TPC:
   v/print vegr
   v/print vev0
 
-* Write output file
-  exec write_table_to_file#write evout /dui/data/global
+* Write output file --------------------------------------------------
 
+  exec write_table_to_file#write evout /dui/data/global
 
 
  NEXT_EVENT:
