@@ -153,6 +153,9 @@ inline ostream& operator<<(ostream& os, const StMuTrackFourVec& f)
     else if (mDetId==kBarrelEmcTowerId) {
 	idstring = "kBarrelEmcTowerId";
     }
+    else if (mDetId==kEndcapEmcTowerId) {
+	idstring = "kEndcapEmcTowerId";
+    }
     else {
 	idstring = "kUnknown";
     }
