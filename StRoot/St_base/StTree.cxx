@@ -945,7 +945,7 @@ void StFile::SetInfo(TDataSet *ds)
 //              ... branch name still unknown
 
     tf = TFile::Open(fname,"READ");
-    assert(tf);
+    assert(tf && !tf->IsZombie());
     TList *kl = gFile->GetListOfKeys();
     TIter nextKey(kl);
     TKey *ky;
