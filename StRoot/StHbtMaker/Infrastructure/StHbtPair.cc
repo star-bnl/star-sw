@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.16 2001/02/15 19:23:00 rcwells Exp $
+ * $Id: StHbtPair.cc,v 1.17 2001/03/28 22:35:20 flierl Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.17  2001/03/28 22:35:20  flierl
+ * changes and bugfixes in qYKP*
+ * add pairrapidity
+ *
  * Revision 1.16  2001/02/15 19:23:00  rcwells
  * Fixed sign in qSideCMS
  *
@@ -105,6 +109,16 @@ double StHbtPair::kT() const
   return (tmp);
 }
 //_________________
+double StHbtPair::rap() const
+{
+  // longitudinal pair rapidity : Y = 0.5 log( E1 + E2 + pz1 + pz2 / E1 + E2 - pz1 - pz2 )
+  double  tmp = 0.5 * log (
+			   (mTrack1->FourMomentum().e() + mTrack2->FourMomentum().e() + mTrack1->FourMomentum().z() + mTrack2->FourMomentum().z()) / 
+			   (mTrack1->FourMomentum().e() + mTrack2->FourMomentum().e() - mTrack1->FourMomentum().z() - mTrack2->FourMomentum().z()) 
+			   ) ;
+  return (tmp);
+}
+//_________________
 // get rid of ambiguously-named method fourMomentum() and replace it with
 // fourMomentumSum() and fourMomentumDiff() - mal 13feb2000
 StHbtLorentzVector StHbtPair::fourMomentumSum() const
@@ -117,33 +131,87 @@ StHbtLorentzVector StHbtPair::fourMomentumDiff() const
   StHbtLorentzVector temp = mTrack1->FourMomentum()-mTrack2->FourMomentum();
   return temp;
 }
-
+//__________________________________
 // Yano-Koonin-Podgoretskii Parametrisation in CMS
-void StHbtPair::qYKPCMS(double& qP, double& qT, double& q0) {
-  StHbtLorentzVector l1 = mTrack1->FourMomentum();
-  StHbtLorentzVector l2 = mTrack2->FourMomentum();
-  StHbtLorentzVector  l = (l1+l2)/2.;
-  l1.boost(l);
-  l2.boost(l);
-  l = l1-l2;
-  qP = l.z();
-  qT = l.vect().perp();
-  q0 = l.e();
+void StHbtPair::qYKPCMS(double& qP, double& qT, double& q0) const
+{
+  ////
+  // calculate momentum difference in source rest frame (= lab frame)
+  ////
+  StHbtLorentzVector l1 = mTrack1->FourMomentum() ;
+  StHbtLorentzVector l2 = mTrack2->FourMomentum() ;
+  StHbtLorentzVector  l ;
+  // random ordering of the particles
+  if ( rand()/(double)RAND_MAX > 0.50 )  
+    { l = l1-l2 ; } 
+  else 
+    { l = l2-l1 ; } ;
+  // fill momentum differences into return variables
+  qP = l.z() ;
+  qT = l.vect().perp() ;
+  q0 = l.e() ;
 }
-
+//___________________________________
 // Yano-Koonin-Podgoretskii Parametrisation in LCMS
-void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) {
-  StHbtLorentzVector l1 = mTrack1->FourMomentum();
-  StHbtLorentzVector l2 = mTrack2->FourMomentum();
-  StHbtLorentzVector  l = (l1+l2)/2.; l.setX(0.); l.setY(0.), l.setE(l.vect().massHypothesis(l1.m()+l2.m()) );
-  l1.boost(l);
-  l2.boost(l);
-  l = l1-l2;
+void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) const
+{
+  ////
+  //  calculate momentum difference in LCMS : frame where pz1 + pz2 = 0
+  ////
+  StHbtLorentzVector l1 = mTrack1->FourMomentum() ;
+  StHbtLorentzVector l2 = mTrack2->FourMomentum() ;
+  // determine beta to LCMS
+  double beta = (l1.z()+l2.z()) / (l1.e()+l2.e()) ;
+  double beta2 =  beta*beta ;
+  // unfortunately STAR Class lib knows only boost(particle) not boost(beta) :(
+  // -> create particle with velocity beta and mass 1.0
+  // actually this is : dummyPz = sqrt( (dummyMass*dummyMass*beta2) / (1-beta2) ) ; 
+  double dummyPz = sqrt( (beta2) / (1-beta2) ) ;
+  // boost in the correct direction
+  if (beta>0.0) { dummyPz = -dummyPz; } ;
+  // create dummy particle
+  StHbtLorentzVector  l(0.0, 0.0, dummyPz) ; 
+  double dummyMass = 1.0 ;
+  l.setE(l.vect().massHypothesis(dummyMass) );
+  // boost particles along the beam into a frame with velocity beta 
+  StHbtLorentzVector l1boosted = l1.boost(l) ;
+  StHbtLorentzVector l2boosted = l2.boost(l) ;
+  // caculate the momentum difference with random ordering of the particle
+  if ( rand()/(double)RAND_MAX >0.50)  
+    { l = l1boosted-l2boosted ; } 
+  else 
+    { l = l2boosted-l1boosted ;} ;
+  // fill momentum differences into return variables
+  qP = l.z() ;
+  qT = l.vect().perp() ;
+  q0 = l.e() ;
+}
+//___________________________________
+// Yano-Koonin-Podgoretskii Parametrisation in pair rest frame
+void StHbtPair::qYKPPF(double& qP, double& qT, double& q0) const
+{
+  ////
+  //  calculate momentum difference in pair rest frame : frame where (pz1 + pz2, py1 + py2, px1 + px2) = (0,0,0)
+  ////
+  StHbtLorentzVector l1 = mTrack1->FourMomentum() ;
+  StHbtLorentzVector l2 = mTrack2->FourMomentum() ;
+  // the center of gravity of the pair travels with l
+  StHbtLorentzVector  l = l1 + l2 ; 
+  l = -l ;
+  l.setE(-l.e()) ;
+  // boost particles  
+  StHbtLorentzVector l1boosted = l1.boost(l) ;
+  StHbtLorentzVector l2boosted = l2.boost(l) ;
+  // caculate the momentum difference with random ordering of the particle
+  if ( rand()/(double)RAND_MAX > 0.50)  
+    { l = l1boosted-l2boosted ; } 
+  else 
+    { l = l2boosted-l1boosted ;} ;
+  // fill momentum differences into return variables
   qP = l.z();
   qT = l.vect().perp();
   q0 = l.e();
 }
-
 //_________________
 double StHbtPair::qOutCMS() const
 {
@@ -161,7 +229,6 @@ double StHbtPair::qOutCMS() const
     double tmp = k2/k1;
     return (tmp);
 }
-
 //_________________
 double StHbtPair::qSideCMS() const
 {
