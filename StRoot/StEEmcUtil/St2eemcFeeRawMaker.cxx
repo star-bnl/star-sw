@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.7 2003/03/22 19:37:24 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.8 2003/03/25 18:30:21 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.8  2003/03/25 18:30:21  balewski
+// towards EEMC daq reader
+//
 // Revision 1.7  2003/03/22 19:37:24  balewski
 // *** empty log message ***
 //
@@ -169,14 +172,15 @@ Int_t St2eemcFeeRawMaker::Make(){
     StEmcModule* stmod =   twE->module(i);
     if(stmod==0)	continue;
     StSPtrVecEmcRawHit& emcTowerHits = stmod->hits();
-    printf("bbb %d\n",emcTowerHits.size());
-
+    printf("bbb i=%d %d\n",i,emcTowerHits.size());
+ 
     uint j;
     for ( j = 0; j < emcTowerHits.size(); j++) { 
       int adc= emcTowerHits[j]->adc();
       int sec= emcTowerHits[j]->module()+1;
       int sub= emcTowerHits[j]->sub()+'A';
       int eta= emcTowerHits[j]->eta()+1;
+      float energy=emcTowerHits[j]->energy();
       //     float energy= emcTowerHits[j]->energy(); // not used
       // printf("%d sec=%d sub=%c eta=%d adc=%d energy =%g\n", j,sec,sub,eta,adc,energy);
       const StEEmcDbIndexItem1 *dbItem=meeDb->getT(sec,sub,eta);
