@@ -1,5 +1,8 @@
-/*    $Id: gstar_readtab.idl,v 1.1 1998/05/12 01:13:06 nevski Exp $
+/*    $Id: gstar_readtab.idl,v 1.2 2003/12/19 17:57:39 potekhin Exp $
       $Log: gstar_readtab.idl,v $
+      Revision 1.2  2003/12/19 17:57:39  potekhin
+      Remove the tabel interface which we declare obsolete.
+
       Revision 1.1  1998/05/12 01:13:06  nevski
       new user inputs - mm and staf
 
@@ -12,4 +15,3 @@
 #include "eg_track.idl"
 #include "eg_vertex.idl"
 
-interface gstar_readtab : amiModule  { STAFCV_T call (in particle p); };
