@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.7 2000/02/14 20:30:40 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.8 2000/03/17 23:10:05 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.8  2000/03/17 23:10:05  kathy
+// make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
+//
 // Revision 1.7  2000/02/14 20:30:40  kathy
 // removing unneeded macros; updating documentation in bfcread macros
 //
@@ -102,6 +105,7 @@ void bfcread_dst_EventQA_outhistfile(
 // Input File Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
 //     also open the runco branch in addition to dst branch (input file)
+    IOMk->SetBranch("dstBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
 
 // constructor for other maker (not used in chain)

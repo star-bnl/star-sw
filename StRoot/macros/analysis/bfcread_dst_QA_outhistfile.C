@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.10 2000/02/14 20:30:40 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.11 2000/03/17 23:10:06 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.11  2000/03/17 23:10:06  kathy
+// make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
+//
 // Revision 1.10  2000/02/14 20:30:40  kathy
 // removing unneeded macros; updating documentation in bfcread macros
 //
@@ -117,6 +120,7 @@ void bfcread_dst_QA_outhistfile(
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
 //  - turn geant Branch on - dstBranch already on from input file
      IOMk->SetDebug();
+     IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
      IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
 
 // constructor for other class  (not a Maker so not used in chain)
