@@ -11,7 +11,7 @@ class Vectorized
 { 
  public:
   virtual ~Vectorized();
-  void add(OBJECT * object);
+  OBJECT* add(OBJECT * object);
   void remove(OBJECT *object);
   void clear();
   vector<OBJECT*>::iterator begin();
@@ -36,7 +36,7 @@ Vectorized<OBJECT>::~Vectorized()
 }
 
 template<class OBJECT>
-void Vectorized<OBJECT>::add(OBJECT * object)
+OBJECT * Vectorized<OBJECT>::add(OBJECT * object)
 {
   _objects.push_back(object);
 }

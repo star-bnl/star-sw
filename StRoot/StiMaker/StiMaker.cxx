@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.115  2003/03/13 18:59:42  pruneau
+// various updates
+//
 // Revision 1.114  2003/03/13 16:30:59  andrewar
 // Added plotting package
 //
@@ -102,8 +105,6 @@
 #include "StiMaker.h"
 #include "TFile.h"
 
-#include "TH1.h"
-
 StiMaker* StiMaker::sinstance = 0;
 
 ClassImp(StiMaker)
@@ -157,24 +158,17 @@ void StiMaker::Clear(const char*)
 
 Int_t StiMaker::Finish()
 {
-  TFile * file = new TFile("StiMakerPrivate.root","RECREATE");
-  dyHist->Write();
-  dzHist->Write();
-  pseudoRapHist->Write(); 
-  phiHist->Write(); 
-  file->Close();
-  delete file;
+  if (plotter)
+    {
+      plotter->setOutFileName("StiMakerHistograms.root");
+      plotter->writeHists();
+    }
+
   return StMaker::Finish();
 }
 
 Int_t StiMaker::Init()
 {  
-  phiHist  = new TH1D("phiHist","phiHist",180,-3.1415927,3.1415927);
-  pseudoRapHist = new TH1D("pseudoRapHist","pseudoRapHist",40,-2.,2.);
-  dyHist = new TH1D("dyHist","dyHist",160, -20., 20.);
-  dzHist = new TH1D("dzHist","dzHist",160, -20., 20.);
-  StiKalmanTrackNode::maker = this;
-  StiKalmanTrack::maker = this;
   return kStOk;
 }
 
@@ -247,6 +241,7 @@ Int_t StiMaker::Make()
     }
   else
     tracker->findTracks(event,mcEvent);
+  plotter->fillStandardPlots(_toolkit->getTrackContainer());
   return kStOK;
 }
 

@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.1 2003/03/12 16:36:03 andrewar Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.2 2003/03/13 18:59:15 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.2  2003/03/13 18:59:15  pruneau
+ * various updates
+ *
  * Revision 2.1  2003/03/12 16:36:03  andrewar
  * Trackng plots package added. Sti tracks are histogrammed at the Sti level
  * alowing comparison to MuDst and StEvent tracks.
@@ -27,82 +30,38 @@
 
 StiTrackingPlots::StiTrackingPlots()
 {
+  cout <<"StiTrackingPlots::StiTrackingPlots() -I- Started"<<endl;
   //Standard plots def.
-  numTracks= new TH1D("numTracks","Number of tracks in Container",
-		      128,0.,10000.);
-
-  //Rad length map
-  radLengthZ = new TH2D("radLengthZ","Absorption Length (%) vs. Z",
-		       401,-200,200, 256,0,100);
-  radLengthPhi = new TH2D("radLengthPhi","Absorption Length (%) vs. Phi",
-		       128,0,360, 256,0,1);
-  radLengthEta = new TH2D("radLengthEta","Absorption Length (%) vs. Eta",
-		       128,-2,2, 256,0,1);
-
-  //track kinematics
-  mEta   = new TH1D("mEta","Track Eta",1024,-2,2);
-
-  mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt",
-		    256,-100,100,128,-2,2,128,0,30);
-  mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt",
-		    3,-1,1,128,-2,2,128,0,30);
-  mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",
-		    256,0,30,128,-2,2,128,0,360);
-  mMomY  = new TH3D("mMomY","Momentum (Y) v. Eta and Phi",
-		    256,0,30,128,-2,2,128,0,360);
-  mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",
-		    256,0,30,128,-2,2,128,0,360);
-  mPhase = new TH3D("mPhase","Phase v. Eta and Pt",
-		    256,0,30,128,-2,2,128,0,360);
-
-  globalDca = new TH1D("globalDca","Global DCA", 128,-20,20);
-	 
-  cout <<"Track Plots Set up."<<endl;
-
+  add( numTracks=new TH1D("numTracks","Number of tracks in Container", 128,0.,10000.) );
+  add( radLengthZ   =new TH2D("radLengthZ","Absorption Length (%) vs. Z",400,-200,200,  100,0,100)  );
+  add( radLengthPhi =new TH2D("radLengthPhi","Absorption Length (%) vs. Phi",128,0,360, 256,0,1) );
+  add( radLengthEta =new TH2D("radLengthEta","Absorption Length (%) vs. Eta",128,-2,2, 256,0,1)  );
+  add( _eta    = new TH1D("eta","Track Eta",200,-2,2) );
+  add( _phi    = new TH1D("phi","Track Phi",100,-3.1415927,3.1415927) );
+  add( _pt     = new TH1D("pt", "pt",       100,0., 5.) );
+  add( mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt", 256,-100,100,128,-2,2,128,0,30));
+  add( mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt", 3,-1,1,128,-2,2,128,0,30));
+  add( mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  add( mMomY  = new TH3D("mMomY","Momentum (Y) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  add( mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  add( mPhase = new TH3D("mPhase","Phase v. Eta and Pt",  256,0,30,128,-2,2,128,0,360));
+  add( globalDca = new TH1D("globalDca","Global DCA", 160, -20,20) );	 
+  cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
-
+  
 StiTrackingPlots::~StiTrackingPlots()
 {
-  //Standard plots def.
-  //  delete numTracks;
-
-//    delete radLengthZ;
-//    delete radLengthPhi;
-//    delete radLengthEta;
-
-
-  cout <<"Track Plots cleaned up."<<endl;
-
+  cout << "StiTrackingPlots::~StiTrackingPlots() -I- Done"<<endl;
 }
 
+///this method opens an output file, then writes hists to it,
+///then closes the file - use writeHists(file) if you want to
+///add the hists to an already open file
 void StiTrackingPlots::writeHists()
 {
-  //this method opens an output file, then writes hists to it,
-  //then closes the file - use writeHists(file) if you want to
-  //add the hists to an already open file
   const char* tName = mOutFile.c_str();
   TFile *newFile = new TFile(tName,"RECREATE");
-  //writeHists(newFile);
-  numTracks->Write();
-
-  mEta->Write();
-  //tRap->Write();
-
-  //rad length maps
-  radLengthZ->Write();
-  radLengthPhi->Write();
-  radLengthEta->Write();
-
-  mCurv->Write();
-  mHeli->Write();
-  mMomX->Write();
-  mMomY->Write();
-  mMomZ->Write();
-  mPhase->Write();
-
-  globalDca->Write();
-
-
+  write();
   newFile->Close();
   delete newFile;
 }
@@ -111,13 +70,7 @@ void StiTrackingPlots::writeHists(TFile *outFile)
 {//this method writes hists in file <outFile>
 
   outFile->cd();
-  numTracks->Write();
-
-  //rad length maps
-  radLengthZ->Write();
-  radLengthPhi->Write();
-  radLengthEta->Write();
-  
+  write();
 }
 
 void StiTrackingPlots::fillStandardPlots(StiTrackContainer *mTrackStore)
@@ -133,13 +86,13 @@ void StiTrackingPlots::fillStandardPlots(StiTrackContainer *mTrackStore)
        ++trackIt)
     {
       const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
-
       if(!kTrack) continue; //not for anything other than KalmanTracks
-
       if(kTrack->getFitPointCount()<15) continue;
-      mEta->Fill(kTrack->getPseudoRapidity());
-      globalDca->Fill(kTrack->getInnerMostNode()->_x);
-      //tRap->Fill(kTrack->getRapidity());
+
+      _eta->Fill(kTrack->getPseudoRapidity());
+      _phi->Fill(kTrack->getPhi());
+      _pt->Fill(kTrack->getPt());
+      globalDca->Fill(kTrack->getDca());
 
       double phi = kTrack->getPhi();
       double eta = kTrack->getPseudoRapidity();

@@ -35,15 +35,10 @@ void StiKalmanTrackFinderParameters::initialize()
       cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl; 
       throw logic_error("StiKalmanTrackFinderParameters::initialize() -F- Parameter factory is null"); 
     } 
-  add(f->getInstance()->set("elossCalculated",     
-                            "elossCalculated",       
-                            &elossCalculated,  
-                            false,  
-                            0)); 
   add(f->getInstance()->set("mcsCalculated",       
                             "mcsCalculated",    
                             &mcsCalculated, 
-                            false,  
+                            true,  
                             0)); 
   add(f->getInstance()->set("field",     
                             "field",  
