@@ -1,0 +1,46 @@
+#!/bin/csh
+
+# This file will be kept up to date
+# per library so we can create the links
+# appropriate for the supported platform and
+# the backward compatible ones. 
+# Added comments a MUST (thanks)
+
+
+#
+# RedHat 7.2
+#
+if ( -e .i386_linux24) then
+    if ( ! -e .rh73_gcc296) then
+	echo "Creating RedHat 7.3 is support via RedHat 7.2 using the same compiler"
+	ln -s .i386_linux24 .rh73_gcc296
+    endif
+
+    if ( ! -e .i386_redhat72) then
+	echo "Creating Alternate RedHat 7.2 support (naming scheme changed at RH7.2)"
+	ln -s .i386_linux24 .i386_redhat72
+    endif
+endif
+
+# ----------
+# RedHat 8.0
+# ----------
+if ( -e .rh80_gcc32) then
+    # Generic Redhat support / alternate STAR_HOST_SYS
+    if ( ! -e .i386_redhat80) then
+	echo "Creating Generic Redhat support / alternate STAR_HOST_SYS for RH8.0"
+	ln -s .rh80_gcc32 .i386_redhat80
+    endif
+endif
+
+# 
+# Redhat 9.0
+#
+if ( -e .rh80_gcc32) then
+    # RedHat 9 is supported via RedHat 8 using the same compiler
+    if ( ! -e .rh9_gcc322) then
+	echo "Creating RedHat 9 is supported via RedHat 8 using an assumed equivalence gcc 3.2 -> 3.2.2"
+	ln -s .rh80_gcc32 .rh9_gcc322
+    endif
+endif
+
