@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.8  2002/05/21 22:07:13  lasiuk
+ * revision of index of refraction
+ * and ray tracing
+ *
  * Revision 1.7  2002/02/19 04:26:50  lasiuk
  * addition of filling StEvent for inclusion in chain
  *
@@ -50,25 +54,25 @@ StRichRayTracer::StRichRayTracer()
 {
     cout << "StRichRayTracer::StRichRayTracer()\n";
     cout << "\tERROR\n";
-    cout << "\tCANNOT call. Must specify a mean wavelength." << endl;
+    cout << "\tCANNOT call. Must specify a mean wavelength and freon index." << endl;
     abort();
     
 }
 
 // ----------------------------------------------------
-StRichRayTracer::StRichRayTracer(double wavelength)
+StRichRayTracer::StRichRayTracer(double wavelength, double freonIndex)
 {
-    this->init(wavelength);    
+    this->init(wavelength, freonIndex);
 }
 
 // ----------------------------------------------------
 StRichRayTracer::StRichRayTracer(double wavelength,
 				 StThreeVectorF& pLocal,
 				 StThreeVectorF& radiationPoint,
-				 StThreeVectorF& quartzRadiationPoint)
+				 StThreeVectorF& quartzRadiationPoint, double freonIndex)
 {
-    this->init(wavelength);
-    this->setTrack(pLocal, radiationPoint, quartzRadiationPoint);
+    this->init(wavelength, freonIndex);
+    this->setTrack(pLocal, radiationPoint, quartzRadiationPoint, freonIndex);
 }
 
 // ----------------------------------------------------
@@ -77,11 +81,15 @@ StRichRayTracer::~StRichRayTracer() {/*nopt*/}
 // ----------------------------------------------------
 void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 			       StThreeVectorF& radiationPoint,
-			       StThreeVectorF& quartzRadiationPoint) {
+			       StThreeVectorF& quartzRadiationPoint,
+			       double index) {
 
     mLocalTrackMomentum           = pLocal;
     mExpectedRadiationPoint       = radiationPoint;
     mExpectedQuartzRadiationPoint = quartzRadiationPoint;
+
+    mIndexFreon = index;
+    cout << "Resetting index " << mIndexFreon << endl;
 //     PR(mRadiationPlanePoint);
 //     PR(mQuartzRadiationPlanePoint);
 
@@ -99,7 +107,7 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 }
 
 // ----------------------------------------------------
-void StRichRayTracer::init(double wavelength)
+void StRichRayTracer::init(double wavelength, double freonIndex)
 {
 //     cout << "StRichRayTracer::init()" << endl;
 
@@ -116,14 +124,16 @@ void StRichRayTracer::init(double wavelength)
 //    mIndexFreon  = 1.28;
 //    mIndexCH4    = 1.00044;
 
-    mIndexFreon  = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
+//     mIndexFreon  = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
     mIndexQuartz = materialsDb->indexOfRefractionOfQuartzAt(mMeanWavelength);
     mIndexCH4    = materialsDb->indexOfRefractionOfMethaneAt(mMeanWavelength);
 
+    mIndexFreon = freonIndex;
      PR(mIndexFreon);
      PR(mIndexQuartz);
      PR(mIndexCH4);
-
+     cerr << "Freon Index in Tracer " << mIndexFreon << endl;
+     
      double mLower = 165.*nanometer;
      mnF1 = materialsDb->indexOfRefractionOfC6F14At(mLower);
      mnQ1 = materialsDb->indexOfRefractionOfQuartzAt(mLower);
