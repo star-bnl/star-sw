@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.154 2004/09/03 20:33:31 perev Exp $
+// $Id: StMaker.cxx,v 1.155 2004/09/07 18:42:19 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -1304,7 +1304,8 @@ int StMaker::Cleanup(TDataSet *&ds)
      os->DoOwner(0); os->SetObject(0); 		return kount+1;}
    if (!os->IsOwner()) {os->SetObject(0);	return kount;}
    if (!to->InheritsFrom(TDataSet::Class()))	return kount;	
-   return kount + Cleanup((TDataSet*)to);   
+   TDataSet *t = (TDataSet*)to;
+   return kount + Cleanup(t);   
 }
 //_____________________________________________________________________________
 StEvtHddr *StMaker::GetEvtHddr() const
@@ -1442,6 +1443,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.155  2004/09/07 18:42:19  fisyak
+// Make icc happy
+//
 // Revision 1.154  2004/09/03 20:33:31  perev
 // Attributes, cleanup
 //
