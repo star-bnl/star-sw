@@ -1258,71 +1258,23 @@ AND APPLY ONLY WHEN CREATING WRAPPERS WHICH ENABLE FORTRAN TO CALL C ROUTINES.
 iii) Using C to manipulate FORTRAN COMMON BLOCKS:
      -------------------------------------------------------
 
-FORTRAN common blocks are set up with the following three constructs:
+FORTRAN common blocks are set up with the following two constructs:
 
-1.
 #define Common_block_name COMMON_BLOCK(COMMON_BLOCK_NAME,common_block_name)
 
 Common_block_name is in UPPER CASE. 
 COMMON_BLOCK_NAME is in UPPER CASE.
 common_block_name is in lower case. 
 [Common_block_name actually follows the same 'rules' as Routine_name in Note 2.
- of II i).] This construct exists to ensure that C code accessing the common
+of II i).] This construct exists to ensure that C code accessing the common
 block is machine independent.
 
-2.
 COMMON_BLOCK_DEF(TYPEDEF_OF_STRUCT, Common_block_name);
 
 where 
 typedef { ... } TYPEDEF_OF_STRUCT;
 declares the structure which maps on to the common block. The #define of
 Common_block_name must come before the use of COMMON_BLOCK_DEF.
-
-3.
-In exactly one of the C source files, storage should be set aside for the
-common block with the definition: 
-
-TYPEDEF_OF_STRUCT  Common_block_name;
-
-The above definition may have to be omitted on some machines for a common block
-which is initialized by Fortran BLOCK DATA or is declared with a smaller size
-in the C routines than in the Fortran routines.
-
-The rules for common blocks are not well defined when linking/loading a mixture
-of C and Fortran, but the following information may help resolve problems.
-
->From the 2nd or ANSI ed. of K&R C, p.31, last paragraph:
-i)
- An external variable must be defined, exactly once, outside of any function;
- this sets aside storage for it.
-ii)
- The variable must also be declared in each function that wants to access it;
- ...
- The declaration ... may be implicit from context.
-
-In Fortran, every routine says 'common /bar/ foo',
-i.e. part ii) of the above, but there's no part i) requirement.
-cc/ld on some machines don't require i) either.
-Therefore, when handling Fortran, and sometimes C,
-the loader/linker must automagically set aside storage for common blocks.
-
-Some loaders, including at least one for the CRAY, turn off the
-'automagically set aside storage' capability for Fortran common blocks,
-if any C object declares that common block.
-Therefore, C code should define, i.e. set aside storage,
-for the the common block as shown above.
-
-e.g.
-C Fortran
-      common /fcb/  v,w,x
-      character *(13) v, w(4), x(3,2)
-
-/* C */
-typedef struct { char v[13],w[4][13],x[2][3][13]; } FCB_DEF;
-#define Fcb COMMON_BLOCK(FCB,fcb)
-COMMON_BLOCK_DEF(FCB_DEF,Fcb);
-FCB_DEF Fcb;      /* Definition, which sets aside storage for Fcb, */
-                  /* may appear in at most one C source file.      */
 
 
 C programs can place a string (or a multidimensional array of strings) into a
@@ -1561,7 +1513,6 @@ VI History and Acknowledgements
       PNSTRING introduced with old PSTRING's behavior.
       PPSTRING introduced to always pass original address of string.
     - Support Alpha/OSF.
-    - Document that common blocks used in C should be declared AND defined.
 
 ['Support' implies these and more recent releases of the respective
  OS/compilers/linkers can be used with cfortran.h. 
