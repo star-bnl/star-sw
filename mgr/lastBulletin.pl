@@ -1,8 +1,11 @@
 #!/usr/local/bin/perl
 #
-# $Id: lastBulletin.pl,v 1.1 1999/08/14 15:00:18 wenaus Exp $
+# $Id: lastBulletin.pl,v 1.2 1999/08/14 15:25:28 wenaus Exp $
 #
 # $Log: lastBulletin.pl,v $
+# Revision 1.2  1999/08/14 15:25:28  wenaus
+# suppress cmd output
+#
 # Revision 1.1  1999/08/14 15:00:18  wenaus
 # Reports time since last software bulletin
 #
@@ -72,6 +75,6 @@ close BFILE;
 $cmd =
     "rm -f $floc/lastBulletin.pbm $floc/lastBulletin.ppm $floc/lastBulletin.gif;"
     ."pbmtext '$oline' > $floc/lastBulletin.pbm;"
-    ."pnmcrop $floc/lastBulletin.pbm > $floc/lastBulletin.ppm;"
-    ."ppmtogif -transparent rgb:ffff/ffff/ffff $floc/lastBulletin.ppm > $floc/lastBulletin.gif";
+    ."pnmcrop $floc/lastBulletin.pbm > $floc/lastBulletin.ppm 2>/dev/null;"
+    ."ppmtogif -transparent rgb:ffff/ffff/ffff $floc/lastBulletin.ppm > $floc/lastBulletin.gif 2>/dev/null";
 $result = system($cmd);
