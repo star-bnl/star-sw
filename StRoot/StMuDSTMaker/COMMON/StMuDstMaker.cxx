@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.46 2003/11/10 04:07:47 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.47 2003/11/17 22:16:55 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -57,7 +57,7 @@
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
 
-
+#include "THack.h"
 ClassImp(StMuDstMaker)
 
 #if !(ST_NO_NAMESPACES)
@@ -216,7 +216,7 @@ void StMuDstMaker::createArrays() {
 void StMuDstMaker::clear(int del){
   DEBUGMESSAGE2("");
   /// from muDst
-  int dell = 0; if (del) dell = 999;
+  int dell = 1; if (del) dell = 999;
 
   for ( int i=0; i<__NARRAYS__; i++) {
     clear(mArrays[i],StMuArrays::arrayCounters[i]		,dell);
@@ -248,8 +248,6 @@ void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
   if (mIoMode==ioWrite) kase |= kWrt;
   if (del    ==1      ) kase |= kDel;
   if (del     >1      ) kase |= kDtr;
-  int num,i;
-  TObject *to;
 
   switch (kase) {
 
@@ -264,20 +262,12 @@ void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
        delete t; t=0; break;
 
   case kRea|kDel:
-       num = t->GetLast()+1;
-       t->Delete();   // call dtr for objects (leak out)
-       for (i=0;i<num; i++) {
-         to = (*t)[i];
-         if (to->TestBit(kNotDeleted)) 	continue;//alive
-         t->New(i);   // call ctr for objects (alive for reading)
-       }
-       t->Clear();
+       THack::ClearClonesArray(t);
        break;
   
   case kRea|kDtr:
-       num = t->Capacity();
-       for (i=0;i<num; i++) {to = (*t)[i];}  //expose all objects to world
-       delete t; t = 0;
+       THack::DeleteClonesArray(t);
+       t = 0;
        break;
   default: assert(0);
   }
@@ -956,6 +946,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.47  2003/11/17 22:16:55  perev
+ * THack::DeleteClonesArray used for deleting, to avoid ROOT bad features
+ *
  * Revision 1.46  2003/11/10 04:07:47  perev
  * again clear improved to avoid leaks
  *
