@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.66 1999/09/12 16:54:50 fine Exp $
+// $Id: StMaker.cxx,v 1.67 1999/09/13 13:30:46 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.67  1999/09/13 13:30:46  fine
+// non-active new method MakeAssociatedClassList to be introduced new release
+//
 // Revision 1.66  1999/09/12 16:54:50  fine
 // StMaker::MakeDoc() adjusted to multi-level makers. Some bug fix also
 //
@@ -717,16 +720,103 @@ void StMaker::PrintTimer(Option_t *option)
    Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
                                          ,m_Timer.RealTime(),m_Timer.CpuTime());
 }
+#if DRAFT
+//_____________________________________________________________________________
+MakeAssociatedClassList(const Char_t classDir=0)
+{
+ //
+ // classDir - the name of the directory to search in
+ //
+ // Search C++ class declaraion looping over all *.h 
+ // with the classDir directory of provided otherwise
+ // within  this class source directory
 
+  const Char_t *thisDir = classDir;
+  if (thisDir == 0 || thisDir[0] == 0) 
+       thisDir = gSystem->DirName(IsA()->GetImplFileName());
+  // Loop over all *.h files within <thisDir> to find
+  // C++ class declarations
+  void *dirhandle = 0;
+  if (dirhandle = gSystem->OpenDirectory(sourcedir)) 
+  {
+    Char_t *n = 0;
+    while (n = gSystem->GetDirEntry(dirhandle)) {
+      // look for *.h* files
+      if (!strstr(name,".h")) continue; 
+      ifstream headerFile(n);
+      headerFile >> nextSymbol;
+
+      |<====================================+
+      |                                     |
+ $-->(1)<===+                               |
+      | ' ' |                               |
+      |---->|                               |
+      |"class"                              |
+      |------>(2)<===+                      |
+               | ' ' |                      |
+               |---->|                      | 
+               | name                       |
+               |------>(3)<===+             |
+                        | ' ' |             | 
+                        |---->|             | 
+                        | eol               | 
+                        |------>(4)-------->|
+                        |        | add2list    
+                        |  ":"   |
+                        |------->|
+      switch (status) {
+        case 1:
+           if (*nextSym == ' ') break;            
+           const Char_t *class = strstr(nextSym,"class");
+           if ( class && class == nextSym) {
+                status = 2;
+                nextSym += strlen("class");
+           }
+           else status = 999;
+           break;
+        case 2:
+           if (*nextSym == ' ') break;            
+           status = 999;
+           while (isalpha(*nextSym)) {
+             name += *nextSym;
+             nextSym++;
+             status = 3;
+           }                   
+           break;
+        case 3:
+           if (*nextSym == ' ') break;            
+           status = 999;
+           if (*nextSym ==  0   ||
+               *nextSym == ':'  || 
+               *nextSym == ';'  ||
+               ( *nextSym == '/' && 
+                 (*(nextSym+1) == '/' || *(nextSym+1) == '*') 
+               )
+              ) 
+              status = 4;
+           break;
+        case 4:
+           list->Add(name);
+           break;
+        default:
+           break;
+       };
+    } 
+  }
+  
+}
+#endif
 //_____________________________________________________________________________
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
 {
  //
- // MakeDoc - creates the HTML doc for this class and for the base classes:
- //           (if baseClasses == kTRUE)
- //         *  St_XDFFile  St_Module      St_Table       *
- //         *  St_DataSet  St_DataSetIter St_FileSet     *
- //         *  StMaker     StChain                       *
+ // MakeDoc - creates the HTML doc for this class and for the base classes
+ //           (if baseClasses == kTRUE):
+ //
+ //         *  St_XDFFile   St_Module      St_Table       *
+ //         *  St_DataSet   St_DataSetIter St_FileSet     *
+ //         *  StMaker      StChain        StEvent        *
+ //         *  St_TLA_Maker                               *
  //
  // stardir - the "root" directory to lookup the subdirectories as follows.
  //           = "$(STAR)"             by default
