@@ -1,4 +1,4 @@
-// $Id: EEtower.cxx,v 1.1 2004/06/06 04:54:08 balewski Exp $
+// $Id: EEtower.cxx,v 1.2 2004/06/08 17:10:41 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@ void EEtower::init( ){
 
   // add histos to the list (if provided)
   if(HList) {
-    for(i=0;i<=32;i++) {
+    for(i=0;i<32;i++) {
       if(hA[i]==0) continue;
       HList->Add(hA[i]);
     }  
