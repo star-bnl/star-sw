@@ -114,7 +114,7 @@ public:
  ~StIOEvent(){};
 TObject *fObj;	// Pointer to full tree
  virtual void  Browse(TBrowser *b);
-  virtual Bool_t IsFolder(){ return fObj ? kTRUE: kFALSE; }
+ virtual Bool_t IsFolder(){ return kTRUE; }
 
 ClassDef(StIOEvent,1)
 };
@@ -122,16 +122,16 @@ ClassDef(StIOEvent,1)
 class StFile : public St_DataSet
 {
 public:
-  StFile(Int_t nbranches=1);
+  StFile(const char** fileList=0);
  ~StFile(){};
  
   Int_t AddFile(const Char_t *file,const Char_t *branch=0);
+  Int_t AddFile(const Char_t **fileList);
   Int_t AddWild(const Char_t *file);
   Int_t GetNBranches();
   const Char_t *NextFileName();
   const Char_t *GetBraName(){return GetAttr("branch=");}; 
   const Char_t *GetFormat() {return GetAttr("format=");};
-  //  Int_t Check(){return 0;};
 protected:
   void SetInfo();
   const Char_t *GetAttr(const char *att); 

@@ -564,16 +564,22 @@ static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
 
 //_____________________________________________________________________________
 ClassImp(StFile)
- StFile::StFile(Int_t nbranches):St_DataSet("StFile")
+ StFile::StFile(const char** fileList):St_DataSet("StFile")
 {
-  char buf[20];
-  sprintf(buf," nbranches=%d ",nbranches);
-  SetTitle(buf);
+  SetTitle(" nbranches=1 ");
+  AddFile(fileList);
+}
+//_____________________________________________________________________________
+Int_t StFile::AddFile(const Char_t **fileList)
+{ 
+  if (!fileList) return 0;
+  for(int i=0;const Char_t *file = fileList[i];i++) SetFile(file);
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 { 
-  TString tfile,tit,base;
+  TString tfile,tit,base,famy;
   if (strstr(file,"*")) return AddWild(file);
   
   
@@ -591,7 +597,28 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
     return kStWarn;}
 
   base = gSystem->BaseName(tfile);
-  tit = tfile; tit.Replace(0,0," status=NONE file=");
+  if (Find(base)) 
+    Warning("AddFile","File %s added twice \n",(const Char_t *)tfile);
+
+  famy = base; 
+  int dot = famy.Last('.');
+  if (dot>0) famy.Replace(dot,999,""); 
+  dot = famy.Last('.');
+  if (dot>0) famy.Replace(dot+1,999,""); 
+  St_DataSetIter next(this);
+  St_DataSet *dss;
+  while((dss = next())) {
+    if (strncmp(famy,dss->GetName(),dot+1)) 	continue;
+    Warning("AddFile","Files %s and %s are frome the same family \n",
+    (const Char_t *)tfile,dss->GetName());
+  }
+  
+    
+
+
+
+  tit = tfile; tit.Replace(0,0," file=");
+
   if (branch) {tit.Replace(0,0,branch); tit.Replace(0,0," br=");}
 
   St_DataSet *ds = new St_DataSet(base,this);
@@ -645,18 +672,12 @@ Int_t StFile::AddWild(const Char_t *file)
 //_____________________________________________________________________________
 const Char_t * StFile::NextFileName()
 {
-  St_DataSet *ds = First();
+  St_DataSet *ds;
+  while ((ds = First())){
+    TString ts(ds->GetTitle());
+    if (ts.Index("status=USED")>=0) {delete ds; continue;}
+    ts.Replace(0,0," status=USED "); ds->SetTitle(ts); break;}
   if (!ds) return 0;
-  TString tit(ds->GetTitle());  
-  if (strstr(tit,"status=DONE")) return 0;
-  if (strstr(tit,"status=CURR")) {//move it to the end
-    tit.ReplaceAll("status=CURR","status=DONE");
-    ds->SetTitle(tit);
-    Remove(ds); Add(ds);
-    return NextFileName();
-  }
-  tit.ReplaceAll("status=NONE","status=CURR");
-  ds->SetTitle(tit);
   SetInfo();
   return strstr(ds->GetTitle(),"file=")+5;
 }
