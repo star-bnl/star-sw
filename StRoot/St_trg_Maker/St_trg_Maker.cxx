@@ -230,7 +230,7 @@ int St_trg_Maker::getTrayCtb ( float phi, float z ) {
       phiShift = 84  ;
       phiShifted = (phi - phiShift) ;
       if ( phiShifted < 0 ) phiShifted += 360 ;
-      iphi = phiShifted / 6 ;
+      iphi = int(phiShifted / 6) ;
       iPhi = 59 - iphi ;
       if ( iPhi == 0 ) iPhi = 60 ;
       return iPhi ;
@@ -239,7 +239,7 @@ int St_trg_Maker::getTrayCtb ( float phi, float z ) {
       phiShift = 112  ;
       phiShifted = (phi - phiShift) ;
       if ( phiShifted < 0 ) phiShifted += 360 ;
-      iphi = phiShifted / 6 ;
+      iphi = int(phiShifted / 6) ;
       iPhi = 62 + iphi ;
       if ( iPhi == 121 ) iPhi = 61 ;
       return iPhi ;
@@ -979,8 +979,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.41 2003/01/21 01:31:57 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.42 2003/01/21 04:41:29 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.42  2003/01/21 04:41:29  jeromel
+// float to int fix
+//
 // Revision 1.41  2003/01/21 01:31:57  jeromel
 // Minor changes in messaging (small request from Janet) to bring some consistency.
 // doxygenized the .h
