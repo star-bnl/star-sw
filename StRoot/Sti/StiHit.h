@@ -37,6 +37,7 @@ class StiHit : public TObject
   inline double refangle() const {return mrefangle;}
   inline double position() const {return mposition;}
   inline StHit* stHit() const {return msthit;}
+  inline bool   isUsed() const { return mused;}
   
   inline void set(double refAngle, double position,
 		  double x, double y, double z, 
@@ -54,6 +55,7 @@ class StiHit : public TObject
       msxy = sxy;
       msxz = sxz;
       msyz = syz;  
+      mused = false;
     }
   inline void setX(double val) {mx=val;}
   inline void setY(double val) {my=val;}
@@ -61,7 +63,7 @@ class StiHit : public TObject
   inline void setRefangle(double val) {mrefangle=val;}
   inline void setPosition(double val) {mposition=val;}
   inline void setStHit(StHit* val) {msthit=val;}
-  
+  inline void setUsed(bool val) { mused = val;}
   inline bool operator==(const StiHit& rhs) {
     return ( mrefangle==rhs.mrefangle && mposition==rhs.mposition &&
 	     mx==rhs.mx && my==rhs.my && mz==rhs.mz );
@@ -87,6 +89,7 @@ class StiHit : public TObject
     msxy = rhs.msxy;
     msxz = rhs.msxz;
     msyz = rhs.msyz;
+    mused = rhs.mused;
   }
   
   double mrefangle;
@@ -100,6 +103,7 @@ class StiHit : public TObject
   double msxy;
   double msxz;
   double msyz;
+  bool   mused;
   StHit* msthit;
 
 };

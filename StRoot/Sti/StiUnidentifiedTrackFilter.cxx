@@ -44,12 +44,12 @@ bool StiUnidentifiedTrackFilter::accept(StiTrack * t)
       float eta = t->getPseudoRapidity();
       float pt  = t->getPt();
       float dca = t->getDca();
-      float tpcDedx = 1.e6*t->getTpcDedx();
-      float svtDedx = 1.e6*t->getSvtDedx();
+      float tpcDedx = 0.;//1.e6*t->getTpcDedx();
+      float svtDedx = 0.;//1.e6*t->getSvtDedx();
       float chi2 = t->getChi2();
       int   pts    = t->getPointCount();
-      int   tpcPts = t->getTpcPointCount();
-      int   svtPts = t->getSvtPointCount();
+      int   tpcPts = 0;//t->getTpcPointCount();
+      int   svtPts = 0;//t->getSvtPointCount();
       int   fitPts = t->getFitPointCount();
       float ptsRatio = float(fitPts)/float(pts);
       if ( 
@@ -57,11 +57,11 @@ bool StiUnidentifiedTrackFilter::accept(StiTrack * t)
 	  ((!useEta)           || (eta>=minEta          && eta<maxEta) ) &&
 	  ((!usePt)            || (pt>=minPt            && pt<maxPt  ) ) && 
 	  ((!useDca)           || (dca>=minDca          && dca<maxDca) ) &&
-	  ((!useTpcDedx)       || (tpcDedx>=minTpcDedx     && tpcDedx<maxTpcDedx      ) ) &&
-	  ((!useSvtDedx)       || (svtDedx>=minSvtDedx     && svtDedx<maxSvtDedx      ) ) &&
+	  // ((!useTpcDedx)       || (tpcDedx>=minTpcDedx     && tpcDedx<maxTpcDedx      ) ) &&
+	  // ((!useSvtDedx)       || (svtDedx>=minSvtDedx     && svtDedx<maxSvtDedx      ) ) &&
 	  ((!usePtsCount)      || (pts>=minPtsCount         &&  pts<maxPtsCount) )        &&
-	  ((!useTpcPtsCount)   || (tpcPts>=minTpcPtsCount   &&  tpcPts<maxTpcPtsCount)   ) &&
-	  ((!useSvtPtsCount)   || (svtPts>=minSvtPtsCount   &&  svtPts<maxSvtPtsCount)   ) &&
+	  //((!useTpcPtsCount)   || (tpcPts>=minTpcPtsCount   &&  tpcPts<maxTpcPtsCount)   ) &&
+	  //((!useSvtPtsCount)   || (svtPts>=minSvtPtsCount   &&  svtPts<maxSvtPtsCount)   ) &&
 	  ((!useFitPtsCount)   || (fitPts>=minFitPtsCount   &&  fitPts<maxFitPtsCount)   ) &&
 	  ((!useFitToTotalPtsRatio)|| (ptsRatio>=minFitToTotalPtsRatio &&  ptsRatio<maxFitToTotalPtsRatio)) &&
 	  ((!useChi2)                || (chi2>=minChi2              &&  chi2<maxChi2)              ) &&
