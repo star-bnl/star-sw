@@ -138,7 +138,10 @@ public:
   
   /// Propagates a track encapsulated by the given node "p" to the given vertex
   bool propagate(const StiKalmanTrackNode *p, StiHit * vertex);
-  
+
+  bool propagateToBeam(const StiKalmanTrackNode *p);
+  int  propagateToRadius(StiKalmanTrackNode *pNode, double radius);
+
   /// Evaluates, stores and returns the dedx associated with this node.
   /// Possible returned values are:
   /// > 0 : value of dedx
