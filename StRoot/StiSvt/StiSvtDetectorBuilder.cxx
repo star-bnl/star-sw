@@ -82,10 +82,10 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
     }
   else
     {
-      trackingPars->setMaxChi2ForSelection(500000.);
-      trackingPars->setMinSearchWindow(1.6);
+      trackingPars->setMaxChi2ForSelection(5.);
+      trackingPars->setMinSearchWindow(1.);
       trackingPars->setMaxSearchWindow(4.);
-      trackingPars->setSearchWindowScaling(60000.);
+      trackingPars->setSearchWindowScaling(10.);
       cout <<"Tracking Parameters set from default. "<<endl;
     }
   cout <<*trackingPars<<endl;
@@ -107,7 +107,7 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
   else
     {
       cout <<"Setting Hit Error Calculator parameters from defaults:"<<endl;
-      _calc->set(.01,0.,0.,.01,0.,0.); 
+      _calc->set(.0009,0.004,0.04,.0009,0.0032,0.09); 
     }
 
 
@@ -307,43 +307,32 @@ void StiSvtDetectorBuilder::loadDb()
     }
 
 	/////
-		double x,y,z;
-		StSvtWaferGeometry* waferGeom;
-		for (unsigned int barrel=1; barrel<=_config->getNumberOfBarrels();barrel++) 
-			{ // loop over barrels
-				for (unsigned int ladder=1;
-						 ladder<=_config->getNumberOfLadders(barrel); ladder++) 
-					{ //	loop over ladders
-						for (unsigned int wafer=1;
-								 wafer<=_geometry->getNumberOfWafers(barrel);
-								 wafer++) { // loop over wafers
+    double x,y,z;
+    StSvtWaferGeometry* waferGeom;
+    for (int barrel=1;
+	 barrel<=_config->getNumberOfBarrels();
+	 barrel++) 
+       { // loop over barrels
+	      for (int ladder=1;
+		   ladder<=_config->getNumberOfLadders(barrel);
+		   ladder++) 
+		 { //	loop over ladders
+		     for (int wafer=1;
+			  wafer<=_geometry->getNumberOfWafers(barrel);
+			  wafer++)
+		       { // loop over wafers
+			    waferGeom =
+				  (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
 							
-							waferGeom =
-								(StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
-							
-							x = waferGeom->x(0);
-							y = waferGeom->x(1);
-							z = waferGeom->x(2);
-						cout << "x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
-						}
-				}
-			}
+		             x = waferGeom->x(0);
+			     y = waferGeom->x(1);
+			     z = waferGeom->x(2);
+					
+		       }//end loop over wafers
+		 }//end loop over ladders
+       }//end loop over barrels
 
-	/*
-		double x,y,z;
-		for (int barrel=0;barrel<3;++barrel)
-			{
-				for (unsigned int wafer=1;
-						 wafer<=_geometry->barrel(barrel)->ladder(barrel)->numberOfWafers();
-						 wafer++) 
-					{ // loop over wafers						
-						waferGeom =
-							(StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
-						x = waferGeom->x(0);
-						y = waferGeom->x(1);
-						z = waferGeom->x(2);
-					}
-					}*/
+
 }
 
 
