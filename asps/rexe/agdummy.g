@@ -17,7 +17,7 @@ Replace[LIST #;] with [ #1 _
              EBESI0,EBESI1,EBESK0,EBESK1,DCAUCH,
              lvmin,lvmina,lvmax,lvmaxa,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,assndx,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rnorml,dircos,rnpssn,
  "random "   binomi,gauss,proxim,rnhpre,rnhran,
