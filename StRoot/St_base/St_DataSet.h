@@ -26,26 +26,42 @@ class St_DataSet : public TNamed
     St_Table    *s_StafTable;       // The pointer to the STAF STAR tables for this data set
     TList       *s_ListOfDataSet;   // List of the STAF DataSet objects
  protected:
-   virtual void SetParent(St_DataSet *parent){if (s_ListOfDataSet) /* s_ListOfDataSet->SetParent(parent)*/;}
+   virtual void SetParent(St_DataSet *parent){if (s_ListOfDataSet) s_ListOfDataSet->SetParent(parent);}
  public:
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
     virtual ~St_DataSet();
             void        Add(St_DataSet *dataset);
-    virtual void        Add(St_Table *table){s_StafTable = table;}
+    virtual void        Add(St_Table *table);
     virtual void        Browse(TBrowser *b);
-    virtual St_DataSet *GetParent(){ return s_ListOfDataSet ? (St_DataSet *)(s_ListOfDataSet->GetParent()):0;}
-            St_Table   *GetStafTable(){ return GetTableObj(); }
-            St_Table   *GetTableObj(){ return s_StafTable; }
-            TList      *GetListOfDataset(){ return s_ListOfDataSet; }
-            Int_t       GetListSize(){ return s_ListOfDataSet ? s_ListOfDataSet->GetSize():0; }
+    virtual St_DataSet *GetParent();
+            St_Table   *GetStafTable();
+            St_Table   *GetTableObj();
+            TList      *GetListOfDataset();
+            Int_t       GetListSize();
     virtual void        Remove(St_DataSet *set);
     virtual St_DataSet *InsertTable(St_Table *table);
-    virtual Bool_t      IsFolder(){ return (!s_StafTable && s_ListOfDataSet->Last());}
+    virtual Bool_t      IsFolder();
     virtual Bool_t      IsThisDir(const Char_t *dirname);
     virtual void        ls(Option_t *option="");  // Option "*" means print all levels
     virtual void        ls(Int_t deep);           // Print the "deep" levels of this datatset
+    virtual void        Update();                 // Update dataset
             ClassDef(St_DataSet,1) 
 };
+
+inline void St_DataSet::Add(St_Table *table){s_StafTable = table;}
+
+inline St_Table   *St_DataSet::GetStafTable(){ return GetTableObj(); }
+inline St_Table   *St_DataSet::GetTableObj() { return s_StafTable; }
+inline TList      *St_DataSet::GetListOfDataset(){ return s_ListOfDataSet; }
+inline Int_t       St_DataSet::GetListSize(){ return s_ListOfDataSet ? s_ListOfDataSet->GetSize():0; }
+inline St_DataSet *St_DataSet::GetParent(){
+#ifdef WIN32
+  return s_ListOfDataSet ? (St_DataSet *)(s_ListOfDataSet->GetParent()):0;
+#else
+  return 0;
+#endif
+}
+inline Bool_t      St_DataSet::IsFolder(){ return (!s_StafTable && s_ListOfDataSet->Last());}
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -69,9 +85,19 @@ private:
 public:
   St_DataSetIter(St_DataSet *l=0, Bool_t dir = kIterForward);
   virtual         ~St_DataSetIter() {if (s_Next) delete s_Next; s_Next = 0;}
+
+  virtual St_DataSet      *Add(St_Table *table);
+  virtual St_DataSet      *Add(St_Table *table, const Char_t *path);
+  virtual St_DataSet      *Add(St_Table *table, St_DataSet *dataset);
+
+  virtual St_DataSet      *Add(St_DataSet *set);
+  virtual St_DataSet      *Add(St_DataSet *set, const Char_t *path);
+  virtual St_DataSet      *Add(St_DataSet *set, St_DataSet *dataset);
+
   virtual St_DataSet      *AddTable(St_Table *table){ return AddTable(table,(St_DataSet *)0);}
   virtual St_DataSet      *AddTable(St_Table *table, St_DataSet *dataset);
   virtual St_DataSet      *AddTable(St_Table *table, const Char_t *path);
+
   virtual St_DataSet      *Cd(Char_t *dirname);
   virtual St_DataSet      *operator()() { return  (St_DataSet *)(s_Next?s_Next->Next():0);}
   virtual St_DataSet      *operator()(const Char_t *path) { return Next(path); }
@@ -90,6 +116,13 @@ public:
   virtual void            Reset(St_DataSet *l=0);
   ClassDef(St_DataSetIter,0)
 };
+
+
+inline St_DataSet *St_DataSetIter::Add(St_Table *table)                     { return AddTable(table);}
+inline St_DataSet *St_DataSetIter::Add(St_Table *table, const Char_t *path) { return AddTable(table,path);}
+inline St_DataSet *St_DataSetIter::Add(St_Table *table, St_DataSet *dataset){ return AddTable(table,dataset);}
+
+inline St_DataSet *St_DataSetIter::Add(St_DataSet *set){return Add(set,(St_DataSet *)0);}
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //

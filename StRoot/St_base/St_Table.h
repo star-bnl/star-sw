@@ -48,8 +48,8 @@ protected:
    Int_t      SetfN(Long_t len);
    void       SetName(const Text_t *const name);
    void       SetTablePointer(void *table);
-   void       SetUsedRows(Int_t n){if (s_TableHeader) *s_MaxIndex = n;}
-   void       SetTitle(const Text_t *const title){SetType(title);}
+   void       SetUsedRows(Int_t n);
+   void       SetTitle(const Text_t *const title);
    void       SetType(const Text_t *const type);
    void       StreamerHeader(TBuffer &b);
    int        PointerToPointer(G__DataMemberInfo &m);
@@ -72,31 +72,40 @@ public:
    virtual     void      *At(Int_t i);
    virtual     void       Browse(TBrowser *b);
    virtual     void       Copy(St_Table &array);
-   virtual     Long_t     GetNRows(){ return *s_MaxIndex;}
-   virtual     Long_t     GetRowSize(){ return *s_Size;}
-   virtual     Long_t     GetTableSize(){ return fN;}
-   virtual     void      *GetArray() const { return s_Table; }
-   virtual     const Char_t *GetType() const { return GetTitle();}
+   virtual     Long_t     GetNRows();
+   virtual     Long_t     GetRowSize();
+   virtual     Long_t     GetTableSize();
+   virtual     void      *GetArray() const ;
+   virtual     const Char_t *GetType() const;
    virtual     void       ls(Option_t *option="");
    virtual     Char_t    *Print(Char_t *buf="",Int_t n=0);
-   virtual     table_head_st *GetHeader(){ return s_TableHeader; }
+   virtual     table_head_st *GetHeader();
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
    static Int_t MakeWrapClass(Text_t *name);
    virtual     Int_t      ReadGenericArray(TBuffer &b, void *&ii, EBufSizes membersize);
-   virtual     void       SetHeader(table_head_st *table){s_TableHeader = table;} 
+   virtual     void       SetHeader(table_head_st *table);
 //   ULong_t   &operator(){ return GetTable();}
-   virtual     void       SetTableName(Char_t *name){ if (s_TableHeader) strncpy(s_TableHeader->name,name,20); }
-   virtual     void       SetTableType(Char_t *type){ if (s_TableHeader) strncpy(s_TableHeader->type,type,20); }
+   virtual     void       SetTableName(Char_t *name);
+   virtual     void       SetTableType(Char_t *type);
 
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
    virtual     void       Reset(Int_t c=0);
+   virtual     void       Update(){;}
 //   void       &operator[](Int_t i);
  
    ClassDef(St_Table,0)  // Array of the STAF structure
 };
  
+inline  table_head_st *St_Table::GetHeader(){ return s_TableHeader; }
+inline  void St_Table::SetUsedRows(Int_t n){if (s_TableHeader) *s_MaxIndex = n;}
+inline  void St_Table::SetTitle(const Text_t *const title){SetType(title);}
+inline  void St_Table::SetHeader(table_head_st *table){s_TableHeader = table;} 
+//   ULong_t   &operator(){ return GetTable();}
+inline  void  St_Table::SetTableName(Char_t *name){ if (s_TableHeader) strncpy(s_TableHeader->name,name,20); }
+inline  void  St_Table::SetTableType(Char_t *type){ if (s_TableHeader) strncpy(s_TableHeader->type,type,20); }
+
 inline void *St_Table::At(Int_t i)
 {
    if (!BoundsOk("St_Table::At", i))
