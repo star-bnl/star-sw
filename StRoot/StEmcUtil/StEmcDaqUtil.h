@@ -7,31 +7,31 @@
 // usage:
 //
 //    #include "StEmcUtil/StEmcDaqUtil.h"
-//    St_DataSet* daq = GetDataSet("StDAQReader");
-//    StEmcCollection * emc=GetEmcCollectionFromDaq(daq);
+//    TDataSet* daq = GetDataSet("StDAQReader");
+//    StEmcCollection* emc=GetEmcCollectionFromDaq(daq);
 //
 //
 
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "St_DataSet.h"
+#include "TDataSet.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 //--------------------------------------------------------------------
-StEmcCollection* GetEmcCollectionFromDaq(St_DataSet* daq)
+StEmcCollection* GetEmcCollectionFromDaq(TDataSet* daq)
 {
   UInt_t eta[]={20,20,150,10};
   UInt_t sub[]={2,2,1,15};
   
-  StEmcCollection* m_emcDaqUtil=new StEmcCollection();
+  StEmcCollection* emcDaqUtil=new StEmcCollection();
   
-  StDAQReader* mTheDataReader=(StDAQReader*)(daq->GetObject());
-  if(!mTheDataReader) return 0;
-  if(!mTheDataReader->EMCPresent()) return 0;
+  StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
+  if(!TheDataReader) return 0;
+  if(!TheDataReader->EMCPresent()) return 0;
   
-  StEMCReader* mTheEmcReader=mTheDataReader->getEMCReader();
-  if(!mTheEmcReader) return 0;
+  StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
+  if(!TheEmcReader) return 0;
    
   for(Int_t det=0;det<4;det++)
   {
@@ -44,7 +44,7 @@ StEmcCollection* GetEmcCollectionFromDaq(St_DataSet* daq)
         {
           unsigned short ADC=0;
           if(det==0)
-            if(mTheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC));
+            if(TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC));
             {
               //cout <<"ADC = "<<ADC<<endl;
               if(ADC>0)
@@ -55,8 +55,8 @@ StEmcCollection* GetEmcCollectionFromDaq(St_DataSet* daq)
             }
         }
     
-    m_emcDaqUtil->setDetector(detector);
+    emcDaqUtil->setDetector(detector);
   }
   
-  return m_emcDaqUtil;
+  return emcDaqUtil;
 }
