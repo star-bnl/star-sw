@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 1.3 2000/03/31 03:20:24 jones Exp $
+ * $Id: StV0MuDst.cc,v 2.0 2000/06/02 22:11:54 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 2.0  2000/06/02 22:11:54  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.3  2000/03/31 03:20:24  jones
  * Added topology map to V0/Xi; access funcs for each data member
  *
@@ -37,7 +40,6 @@ StV0MuDst::StV0MuDst() {
 void StV0MuDst::Fill(StV0Vertex* v0Vertex,
                        StStrangeEvMuDst* event) {
   mEvent = event;
-  
   mDecayVertexV0X = v0Vertex->position().x();
   mDecayVertexV0Y = v0Vertex->position().y();
   mDecayVertexV0Z = v0Vertex->position().z();
@@ -51,12 +53,20 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mMomPosX = v0Vertex->momentumOfDaughter(positive).x();
   mMomPosY = v0Vertex->momentumOfDaughter(positive).y();
   mMomPosZ = v0Vertex->momentumOfDaughter(positive).z();
+  mChi2V0 = v0Vertex->chiSquared();
+  mClV0 = v0Vertex->probChiSquared();
 
-  mKeyPos = v0Vertex->daughter(positive)->key();
-  mKeyNeg = v0Vertex->daughter(negative)->key();
+  StTrack* trk = v0Vertex->daughter(positive);
+  mKeyPos = trk->key();
+  mTopologyMapPos = trk->topologyMap();
+  mChi2Pos = trk->fitTraits().chi2(0);
+  mClPos = trk->fitTraits().chi2(1);
 
-  mTopologyMapPos = v0Vertex->daughter(positive)->topologyMap();
-  mTopologyMapNeg = v0Vertex->daughter(negative)->topologyMap();
+  trk = v0Vertex->daughter(negative);
+  mKeyNeg = trk->key();
+  mTopologyMapNeg = trk->topologyMap();
+  mChi2Neg = trk->fitTraits().chi2(0);
+  mClNeg = trk->fitTraits().chi2(1);
 }
 
 void StV0MuDst::Clear() {
@@ -206,3 +216,33 @@ Float_t StV0MuDst::ptV0() {
 Float_t StV0MuDst::ptotV0() {
   return sqrt(Ptot2V0());
 }
+
+Long_t StV0MuDst::detectorIdTrack(StTrackTopologyMap& map) {
+  UInt_t tpcHits = map.numberOfHits(kTpcId);
+  UInt_t svtHits = map.numberOfHits(kSvtId);
+  UInt_t ssdHits = map.numberOfHits(kSvtId);
+  if (( tpcHits)&&(!svtHits)&&(!ssdHits)) return kTpcId;
+  if ((!tpcHits)&&( svtHits)&&(!ssdHits)) return kSvtId;
+  if ((!tpcHits)&&(!svtHits)&&( ssdHits)) return kSsdId;
+  if (( tpcHits)&&( svtHits)&&(!ssdHits)) return kTpcSvtId;
+  if (( tpcHits)&&(!svtHits)&&( ssdHits)) return kTpcSsdId;
+  if ((!tpcHits)&&( svtHits)&&( ssdHits)) return kSsdSvtId;
+  if (( tpcHits)&&( svtHits)&&( ssdHits)) return kTpcSsdSvtId;
+  return kUnknownId;
+}
+
+Long_t StV0MuDst::detectorIdV0() {
+  return ((100*detectorIdTrack(mTopologyMapPos))+
+               detectorIdTrack(mTopologyMapNeg));
+}
+
+Long_t StV0MuDst::detectorIdPars() {
+  Long_t det_id_pos = detectorIdTrack(mTopologyMapPos);
+  Long_t det_id_neg = detectorIdTrack(mTopologyMapNeg);
+  if ((det_id_pos == kTpcId)   ||(det_id_neg == kTpcId)) return 1;
+  if ((det_id_pos == kSvtId)   ||(det_id_neg == kSvtId)||
+      (det_id_pos == kSsdId)   ||(det_id_neg == kSsdId)||
+      (det_id_pos == kSsdSvtId)||(det_id_neg == kSsdSvtId)) return 2;
+  return 3;
+}
+

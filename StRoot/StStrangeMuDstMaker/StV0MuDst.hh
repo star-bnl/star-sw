@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 1.4 2000/03/31 03:20:24 jones Exp $
+ * $Id: StV0MuDst.hh,v 2.0 2000/06/02 22:11:54 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 2.0  2000/06/02 22:11:54  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.4  2000/03/31 03:20:24  jones
  * Added topology map to V0/Xi; access funcs for each data member
  *
@@ -28,18 +31,17 @@
  ***********************************************************************/
 #ifndef StV0MuDst_hh
 #define StV0MuDst_hh
-#include "TObject.h"
+#include "StStrangeMuDst.hh"
 
 #ifndef StTrackTopologyMap_hh
 #include "StEvent/StTrackTopologyMap.h"
-//#include "StEvent/StTrackTopologyMap.cxx"
 #endif
 
 class StVertex;
 class StV0Vertex;
 class StStrangeEvMuDst;
 
-class StV0MuDst : public TObject {
+class StV0MuDst : public StStrangeMuDst {
 public:
   StV0MuDst();
   ~StV0MuDst();
@@ -50,12 +52,12 @@ public:
 
   StStrangeEvMuDst *event();           // Pointer to event information
 
-  Float_t decayLengthV0() const;       // 3-d decay distance
+  virtual Float_t decayLengthV0() const;  // 3-d decay distance
   Float_t decayVertexV0X() const;      // Coordinates of decay vertex
   Float_t decayVertexV0Y() const;
   Float_t decayVertexV0Z() const;
   Float_t dcaV0Daughters() const;      // DCA of v0 daughters at decay vertex
-  Float_t dcaV0ToPrimVertex() const;   // DCA of v0 to primary vertex
+  Float_t dcaV0ToPrimVertex()  const;  // DCA of v0 to primary vertex
   Float_t dcaPosToPrimVertex() const;  // DCA of pos v0 daughter to pri vertex
   Float_t dcaNegToPrimVertex() const;  // DCA of neg v0 daughter to pri vertex
   Float_t momPosX() const;             // Momentum components of pos. daughter
@@ -93,13 +95,21 @@ public:
   Float_t ptotPos();              // Total momentum of pos. daughter
   Float_t ptNeg();                // Transverse momentum of neg. daughter
   Float_t ptotNeg();              // Total momentum of neg. daughter  
+  Float_t chi2V0()  const;        // Chi square of V0
+  Float_t clV0()    const;        // Confidence level of V0
+  Float_t chi2Pos() const;        // Chi square of pos. daughter
+  Float_t clPos()   const;        // Confidence level of pos. daughter
+  Float_t chi2Neg() const;        // Chi square of neg. daughter
+  Float_t clNeg()   const;        // Confidence level of neg. daughter
+  Long_t  detectorIdV0();         // Detector ID for V0 Vertex
+  virtual Long_t detectorIdPars();// Detector ID for pars used in V0 finder
 
 protected:
-  StStrangeEvMuDst *mEvent;           //!
+  StStrangeEvMuDst *mEvent;       //!
 
-  Float_t mDecayVertexV0X;            // These are written out
-  Float_t mDecayVertexV0Y;            // These are written out
-  Float_t mDecayVertexV0Z;            // These are written out
+  Float_t mDecayVertexV0X;        // These are written out
+  Float_t mDecayVertexV0Y;
+  Float_t mDecayVertexV0Z;
   Float_t mDcaV0Daughters;
   Float_t mDcaV0ToPrimVertex;
   Float_t mDcaPosToPrimVertex;
@@ -117,8 +127,12 @@ protected:
   StTrackTopologyMap mTopologyMapPos;
   StTrackTopologyMap mTopologyMapNeg;
 
-  //  Int_t   mTpcHitsPos;
-  //  Int_t   mTpcHitsNeg;
+  Float_t mChi2V0;
+  Float_t mClV0;
+  Float_t mChi2Pos;
+  Float_t mClPos;
+  Float_t mChi2Neg;
+  Float_t mClNeg;
 
   Float_t Ptot2Pos();          
   Float_t Ptot2Neg();             
@@ -127,7 +141,9 @@ protected:
   Float_t MomPosAlongV0();
   Float_t MomNegAlongV0();
 
-  ClassDef(StV0MuDst, 1)
+  Long_t detectorIdTrack(StTrackTopologyMap&);
+
+  ClassDef(StV0MuDst, 2)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1)
@@ -159,7 +175,13 @@ inline StTrackTopologyMap& StV0MuDst::topologyMapNeg()
              { return mTopologyMapNeg; }
 inline UShort_t StV0MuDst::keyPos() const { return mKeyPos; } 
 inline UShort_t StV0MuDst::keyNeg() const { return mKeyNeg; } 
-inline Float_t StV0MuDst::momV0X() const { return mMomPosX + mMomNegX; }
-inline Float_t StV0MuDst::momV0Y() const { return mMomPosY + mMomNegY; }
-inline Float_t StV0MuDst::momV0Z() const { return mMomPosZ + mMomNegZ; }
+inline Float_t StV0MuDst::momV0X()  const { return mMomPosX + mMomNegX; }
+inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
+inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
+inline Float_t StV0MuDst::chi2V0()  const { return mChi2V0; }
+inline Float_t StV0MuDst::clV0()    const { return mClV0; }
+inline Float_t StV0MuDst::chi2Pos() const { return mChi2Pos; }
+inline Float_t StV0MuDst::clPos()   const { return mClPos; }
+inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
+inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
 #endif

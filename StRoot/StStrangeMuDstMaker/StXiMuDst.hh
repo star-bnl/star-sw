@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 1.3 2000/03/31 03:20:25 jones Exp $
+ * $Id: StXiMuDst.hh,v 2.0 2000/06/02 22:11:55 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 2.0  2000/06/02 22:11:55  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.3  2000/03/31 03:20:25  jones
  * Added topology map to V0/Xi; access funcs for each data member
  *
@@ -40,7 +43,8 @@ public:
   void    Fill(StXiVertex*,StV0Vertex*,StStrangeEvMuDst*);
 
   Int_t   charge() const;              // Particle charge
-  Float_t decayLengthXi() const;       // 3-d decay distance
+  virtual Float_t decayLengthV0() const;  // 3-d decay distance
+  virtual Float_t decayLengthXi() const;  // 3-d decay distance
   Float_t decayVertexXiX() const;      // Coordinate of decay vertex
   Float_t decayVertexXiY() const;
   Float_t decayVertexXiZ() const;
@@ -72,6 +76,12 @@ public:
   Float_t ptotBachelor();              // Total momentum of bachelor
   Float_t ptXi();                      // Transverse momentum of Xi/Omega
   Float_t ptotXi();                    // Total momentum of Xi/Omega
+  Float_t chi2Xi() const;              // Chi square of Xi
+  Float_t clXi()   const;              // Confidence level of Xi
+  Float_t chi2Bachelor() const;        // Chi square of bachelor
+  Float_t clBachelor()   const;        // Confidence level of bachelor
+  Long_t  detectorIdXi();              // Detector ID for Xi vertex
+  virtual Long_t detectorIdPars();     // Detector ID for pars used in Xi finder
 
 protected:
   Int_t   mCharge;                     // Written out
@@ -90,6 +100,11 @@ protected:
 
   StTrackTopologyMap mTopologyMapBachelor;
 
+  Float_t mChi2Xi;
+  Float_t mClXi;
+  Float_t mChi2Bachelor;
+  Float_t mClBachelor;
+
   void    FillXi(StXiVertex*);
   Float_t Ptot2Bachelor();
   Float_t Ptot2Xi();
@@ -97,7 +112,7 @@ protected:
   Float_t MomBachelorAlongXi();
   Float_t MomV0AlongXi();
 
-  ClassDef(StXiMuDst, 1)
+  ClassDef(StXiMuDst, 2)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -124,4 +139,8 @@ inline Float_t StXiMuDst::momXiZ() const { return mMomBachelorZ + momV0Z(); }
 inline UShort_t StXiMuDst::keyBachelor() const { return mKeyBachelor; }
 inline StTrackTopologyMap& StXiMuDst::topologyMapBachelor()
              { return mTopologyMapBachelor; }
+inline Float_t StXiMuDst::chi2Xi() const { return mChi2Xi; }
+inline Float_t StXiMuDst::clXi()   const { return mClXi; }
+inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
+inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
 #endif
