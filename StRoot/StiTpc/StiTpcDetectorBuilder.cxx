@@ -244,12 +244,12 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	  // create unique detector properties (placement & name)
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
-	  pPlacement->setCenterRep(phic, rn, phi2); 
 
 	  pPlacement->setLayerRadius(fRadius);
 	  pPlacement->setLayerAngle(phiForTpcSector(sector));
-
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
+	  pPlacement->setCenterRep(phic, rn, phi2); 
+
 	  sprintf(name, "Tpc/Padrow_%d/Sector_%d", row, sector);
 	  // fill in the detector object and save it in our vector
 	  StiDetector *pDetector = _detectorFactory->getInstance();

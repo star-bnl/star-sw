@@ -360,13 +360,11 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  else {
 	    if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
 	  }
-	  Double_t Diff = projAngle-angle;
-	  if (Diff >  2*TMath::Pi()) Diff -= 2*TMath::Pi();
-	  if (Diff < -2*TMath::Pi()) Diff += 2*TMath::Pi();
-	  double diff = TMath::Abs(Diff);
-	  if (diff <= OpenAngle) {
-	    detectors.push_back(detector);
-	  }
+	  double diff = projAngle-angle;
+	  if (diff >  2*M_PI) diff -= 2*M_PI;
+	  if (diff < -2*M_PI) diff += 2*M_PI;
+	  diff = fabs(diff);
+	  if (diff <= OpenAngle) { detectors.push_back(detector);}
 	  ++sector;
 	}
       int nDets = detectors.size(); 

@@ -25,7 +25,7 @@ public:
   void setName(const string & newName);
   
   /// Get the name of the object
-  const string getName() const;
+  const string& getName() const;
   
   /// Determine whether name is set, i.e object has a name
   bool isNamed() const;

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.52 2005/02/07 18:34:16 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.53 2005/02/17 23:19:03 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.53  2005/02/17 23:19:03  perev
+ * NormalRefangle + Error reseting
+ *
  * Revision 2.52  2005/02/07 18:34:16  fisyak
  * Add VMC dead material
  *
@@ -347,6 +350,7 @@ using namespace std;
 #include "StHelix.hh"
 
 
+#include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StuFixTopoMap.cxx"
 //Sti
 #include "Sti/StiTrackContainer.h"
@@ -358,8 +362,13 @@ using namespace std;
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
 
+FILE *bgFile=0;
+
+
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
+   bgFile = fopen("dbFile.txt","w");
+
   //temp, make sure we're not constructing extra copies...
   //cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
   dEdxTpcCalculator.setFractionUsed(.6);
@@ -488,7 +497,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   int fillTrackCount1=0;
   int fillTrackCount2=0;
   int fillTrackCountG=0;
-
+  StErrorHelper errh;
   for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
       StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(*trackIt);
@@ -519,6 +528,12 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;
+          int ibad = gTrack->bad();
+	  errh.Add(ibad);
+          if (ibad) {
+//VP	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
+//VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
+          }
 	  fillTrackCount2++;
           if (gTrack->numberOfPossiblePoints()<10) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
@@ -546,7 +561,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(1):"<< fillTrackCount1<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
-
+  errh.Print();
 
   return mEvent;
 }
@@ -588,7 +603,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   int fillTrackCount2=0;
   int fillTrackCountG=0;
   bool testing= false;
-
+  StErrorHelper errh;
   for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
       kTrack = static_cast<StiKalmanTrack*>(*trackIt);
@@ -695,6 +710,12 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      vertex->addDaughter(pTrack);
 	      StuFixTopoMap(pTrack);
 	      fillTrackCount2++;
+              int ibad = pTrack->bad();
+	      errh.Add(ibad);
+              if (ibad) {
+//VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
+//VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
+              }
               if (pTrack->numberOfPossiblePoints()<10) 		continue;
               if (pTrack->geometry()->momentum().mag()<0.1) 	continue;
 	      fillTrackCountG++;
@@ -718,6 +739,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   mTrkNodeMap.clear();  // need to reset for the next event
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
   cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
+  errh.Print();
   return mEvent;
 }
 
@@ -761,15 +783,25 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 
   StiKalmanTrackNode* node = track->getInnOutMostNode(outer,2);
   StiHit *ihit = node->getHit();
-  StThreeVectorF origin(node->getX(),node->getY(),node->getZ());
-  StThreeVectorF hitpos(ihit->x()   ,ihit->y()   ,ihit->z()   );
+  StThreeVectorF origin(node->x_g(),node->y_g(),node->z_g());
+  StThreeVectorF hitpos(ihit->x_g(),ihit->y_g(),ihit->z_g());
+
   double dif = (hitpos-origin).mag();
-  if (dif>5.) {
-    printf("*** DIFF TOO BIG %g chi2 = %g\n",dif,node->getChi2());
-    printf("H=%g %g %g N =%g %g %g\n",hitpos.x(),hitpos.y(),hitpos.z(),origin.x(),origin.y(),origin.z());
-//    assert(dif<5.);
+  if (gTrack->type()!=primary)
+    fprintf(bgFile,"@DZNodHit%d DZ=%g ZH=%g\n",outer,node->z_g()-ihit->z_g(),ihit->z_g());
+
+  if (dif>3.) {
+    dif = node->z_g()-ihit->z_g();
+    double nowChi2 = node->evaluateChi2(ihit);
+    printf("****** DIFF TOO BIG %g chi2 = %g %g\n",dif,node->getChi2(),nowChi2);
+    printf("H=%g %g %g N =%g %g %g\n",ihit->x()   ,ihit->y()   ,ihit->z()
+		                     ,node->getX(),node->getY(),node->getZ());
+    const StMeasuredPoint *mp = ihit->stHit();
+    printf("H=%g %g %g N =%g %g %g\n",mp->position().x(),mp->position().y(),mp->position().z()
+		                     ,origin.x(),origin.y(),origin.z());
+     
+    assert(fabs(dif)<50.);
   }
-  origin.rotateZ(node->getRefAngle());
 
     // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
@@ -780,7 +812,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
       cout << "Ref Position  " << node->getRefPosition() << endl;
       cout << "node->getY()  " << node->getY() << endl;
       cout << "node->getZ()  " << node->getZ() << endl;
-      cout << "Ref Angle     " << node->getRefAngle() << endl;
+      cout << "Ref Angle     " << node->getAlpha() << endl;
       cout << "origin        " << origin << endl;
       cout << "curvature     " << node->getCurvature() << endl;
       abort();
@@ -807,6 +839,14 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     gTrack->setOuterGeometry(geometry);
   else
     gTrack->setGeometry(geometry);
+
+  if (!outer && gTrack->type()!=primary) {
+  StPhysicalHelixD helix = gTrack->geometry()->helix();
+  double s = helix.pathLength(0.,0.);
+  fprintf(bgFile,"@ZPrim X=%g Y=%g Z=%g L=%g\n"
+         ,helix.x(s),helix.y(s),helix.z(s),s);
+  }
+
   return;
 }
 
@@ -997,8 +1037,9 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
 
   gTrack->setEncodedMethod(mStiEncoded);
-
-  gTrack->setLength(track->getTrackLength());// someone removed this, grrrr!!!!
+  double tlen = track->getTrackLength();
+  assert(tlen >0.0 && tlen<1000.);
+  gTrack->setLength(tlen);// someone removed this, grrrr!!!!
  
   if (gTrack->type()==primary) {
       float impactParam = impactParameter(track);
@@ -1061,12 +1102,11 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
 
-  originD->setX(node->getX());
-  originD->setY(node->getY());
-  originD->setZ(node->getZ());
+  originD->setX(node->x_g());
+  originD->setY(node->y_g());
+  originD->setZ(node->z_g());
 
   StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
-  originD->rotateZ(node->getRefAngle());
 
   physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.61 2005/02/17 19:58:06 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.62 2005/02/17 23:19:02 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.62  2005/02/17 23:19:02  perev
+ * NormalRefangle + Error reseting
+ *
  * Revision 2.61  2005/02/17 19:58:06  fisyak
  * Add debug print out flags
  *
@@ -294,6 +297,12 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
   hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
   _detector = 0;
 }
+//______________________________________________________________________________
+void StiKalmanTrackNode::resetError()
+{ 
+static const double INCREASE=100.;
+  for (int i=0;i<15;i++) { (&_c00)[i]*=INCREASE; }
+}
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
 /// to that of the given node.
@@ -308,7 +317,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _cosCA = n->_cosCA;
   _sinCA = n->_sinCA;
   _refX  = n->_refX;
-  _refAngle  = n->_refAngle;
+  _layerAngle  = n->_layerAngle;
   _x     = n->_x;
   memcpy(&_p0,&n->_p0,sizeof(_p0)*5);
   memcpy(&_c00,&n->_c00,sizeof(_c00)*15);
@@ -331,7 +340,7 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * n)
   StiTrackNode::setAsCopyOf(n);
   _x        = n->_x;
   _refX     = n->_refX;
-  _refAngle = n->_refAngle;
+  _layerAngle = n->_layerAngle;
   _alpha    = n->_alpha;
   _cosAlpha = n->_cosAlpha;
   _sinAlpha = n->_sinAlpha;
@@ -370,8 +379,8 @@ void StiKalmanTrackNode::get(double& alpha,
 {
   alpha = _alpha;
   xRef  = _refX;
-  memcpy(x,&_p0,sizeof(x));
-  memcpy(e,&_c00,sizeof(e));
+  memcpy(x,&_p0,sizeof(x[0])*5);
+  memcpy(e,&_c00,sizeof(e[0])*15);
   chi2 = _chi2;
 }
 
@@ -430,7 +439,7 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   F[2][1]= -pt/rho*tip;
   F[2][2]= pt;
   
-  memset(e,0,sizeof(e));
+  memset(e,0,sizeof(*e)*6);
   for (int j1=2;j1<5;j1++) {
   for (int j2=2;j1<5;j1++) {
     double cc = (&_c00)[idx55[j1][j2]];    
@@ -553,7 +562,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiShape * sh = tDet->getShape();
   int shapeCode = sh->getShapeCode();
   _refX = place->getLayerRadius();
-  _refAngle = place->getLayerAngle();
+  _layerAngle = place->getLayerAngle();
   double endVal;
   switch (shapeCode) {
 
@@ -785,6 +794,8 @@ int StiKalmanTrackNode::nudge()
   _cosCA    = cosCA2;
   dl0      += deltaL;
   dl       += deltaL;
+
+
   assert(fabs(_sinCA) < 1.);
   assert(fabs(_cosCA) < 1.);
 	return 0;
@@ -1229,7 +1240,8 @@ static int nCall=0; nCall++;
 #endif
   double det=r00*r11 - r01*r01;
   assert(finite(det));
-  if (fabs(det)==0) throw runtime_error("SKTN::updateNode() -W- Singular matrix; fabs(det)==0");
+//VP  if (fabs(det)<1.e-20) throw runtime_error("SKTN::updateNode() -W- Singular matrix; fabs(det)==0");
+  assert(det>1.e-20);
   // inverse matrix
   double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
   // update error matrix
@@ -1280,6 +1292,7 @@ static int nCall=0; nCall++;
   if (debug() & 4) dP1.Verify(dP);//,1e-7,2);
 #endif
   double eta  = _p2 + dp2;
+  if (fabs(eta)>0.9)   return -16;
   double cur  = _p3 + dp3;
   if (fabs(cur) > 0.2) return -16;
   assert(finite(cur));
@@ -1533,7 +1546,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
   else     os << "Det:UNknown";
   os << " a:" << 180*n._alpha/M_PI<<" degs"
      << " refX:" << n._refX
-     << " refAngle:" << n._refAngle <<endl
+     << " refAngle:" << n._layerAngle <<endl
      << "\tx:" << n._x
      << " p0:" << n._p0 
      << " p1:" << n._p1 
@@ -1682,9 +1695,8 @@ void StiKalmanTrackNode::setChi2(double chi2)
 {
       _chi2 = chi2;
       if(chi2 < 0.) Break(1);
-static const double MyChi2 = -9999.;
-      if (chi2 <  0.9999*MyChi2) return;
-      if (chi2 >  1.0001*MyChi2) return;
+static const double MyChi2 = -4.3898059300925496;
+      if (fabs(chi2-MyChi2)>1.e-8) return;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
 }
 #endif 

@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.52 2005/02/17 19:58:06 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.52 2005/02/17 19:58:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.53 2005/02/17 23:19:02 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.53 2005/02/17 23:19:02 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.53  2005/02/17 23:19:02  perev
+ * NormalRefangle + Error reseting
+ *
  * Revision 2.52  2005/02/17 19:58:06  fisyak
  * Add debug print out flags
  *
@@ -512,7 +515,9 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
   double px,py,pz;
   px=py=pz=0;
+//VP  StiKalmanTrackNode * inner = getInnOutMostNode(0,2);
   StiKalmanTrackNode * inner = getInnerMostNode();
+  assert(inner->getChi2()<1000.);
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
   inner->propagate(0.,0,trackingDirection);
   double p[3];
@@ -931,8 +936,8 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-  StiKalmanTrackNode * node = getInnerMostHitNode();
-  return (fabs(node->getX())<2.) ? true : false;
+  StiKalmanTrackNode * node = getInnerMostHitNode(2);
+  return (fabs(node->getX())<2.);
 }
 
 /*! Swap the track node sequence inside-out
@@ -1102,11 +1107,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
 
-       StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
-       if (!innerMostHitNode) return false;
-       // track with hits in the outer portion of the TPC only are not considered
-       if (innerMostHitNode->getX()>100.) return false;
-
+  StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode(2);
+  if (!innerMostHitNode) return false;
+  // track with hits in the outer portion of the TPC only are not considered
+  if (innerMostHitNode->getX()>100.) return false;
+		
   StiHit localVertex = *vertex;
   sNode = lastNode;
 
@@ -1282,15 +1287,15 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   StiKalmanTrackNode*	node;
 
   lastNode = getInnerMostHitNode(); 
+  assert(lastNode->getChi2()<1000.);
   if (lastNode->getX()<2.)
     node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
   else
     node = lastNode;
-  StThreeVectorD originD(node->getX(),node->getY(),node->getZ());
+  assert(node->getChi2()<1000.);
+  StThreeVectorD originD(node->x_g(),node->y_g(),node->z_g());
   StThreeVectorD vxDD(vertex->x_g(), vertex->y_g(),vertex->z_g());
   StPhysicalHelixD physicalHelix(0.,0.,0.,originD,-1);
-  //originD.rotateZ(node->getRefAngle());
-  originD.rotateZ(node->getAlpha());
   physicalHelix.setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase(),

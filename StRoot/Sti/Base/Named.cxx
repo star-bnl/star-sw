@@ -17,9 +17,9 @@ void Named::setName(const string & newName)
     _name = newName;
 }
 
-const string Named::getName() const
+const string& Named::getName() const
 {
-    return string(_name);
+    return _name;
 }
 
 bool Named::isNamed() const

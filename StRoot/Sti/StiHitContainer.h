@@ -207,7 +207,7 @@ inline vector<StiHit*> & StiHitContainer::getHits(double position, double refAng
 /// Get hits satisfying the given position and search radius specified with a Kalman track node
 inline vector<StiHit*> & StiHitContainer::getHits(StiKalmanTrackNode & node, bool fetchAll)
 {
-  _utilityHit.set(node.getRefPosition(),node.getRefAngle(),node.getY(),node.getZ());
+  _utilityHit.set(node.getRefPosition(),node.getLayerAngle(),node.getY(),node.getZ());
   return getHits(_utilityHit,node.getWindowY(),node.getWindowZ(), fetchAll);
 }
 
@@ -232,7 +232,7 @@ inline vector<StiHit*>& StiHitContainer::getHits(double refangle, double positio
 /// Get all hits from the specified detector component
 inline vector<StiHit*>& StiHitContainer::getHits(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getNormalRefAngle();
+    _key.refangle = layer->getPlacement()->getLayerAngle();
     _key.position = layer->getPlacement()->getLayerRadius();
     return _map[_key].theHitVec;
 }
