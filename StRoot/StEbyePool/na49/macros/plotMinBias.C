@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.1 2001/02/23 00:58:12 posk Exp $
+// $Id: plotMinBias.C,v 1.1 2001/02/26 23:07:21 posk Exp $
 //
 // Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
@@ -17,20 +17,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Log: minBias.C,v $
+// $Log: plotMinBias.C,v $
+// Revision 1.1  2001/02/26 23:07:21  posk
+// Rearranged macros.
+//
 // Revision 1.1  2001/02/23 00:58:12  posk
 // NA49 version of STAR software.
 //
 // Revision 1.3  2000/09/29 22:53:17  posk
 // More histograms.
 //
-// Revision 1.2  2000/09/26 20:54:11  posk
-// Updated documentation.
-//
 // Revision 1.1  2000/09/26 00:19:43  posk
 // New macro to add centrality-selected histograms with proper weights, to make
 // minimum bias histogram.
-//
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +38,7 @@ Int_t runNumber      = 0;
 const Int_t nCens    = 8;
 TFile* histFile[nCens];
 
-TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
+TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
@@ -52,13 +51,15 @@ TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   int   canvasWidth = 780, canvasHeight = 600; 
   
   // names of histograms made by StFlowAnalysisMaker
-  const char* baseName[] = { "Flow_Phi_Flat",
-			     "Flow_Psi",
-			     "Flow_q",
-			     "Flow_Psi_Sub_Corr",
-			     "Flow_Psi_Sub_Corr_Diff",
-			     "Flow_vEta",
-			     "Flow_vPt"};
+  const char* baseName[] = {
+    "Flow_Phi_Flat",
+    "Flow_Psi",
+    "Flow_q",
+    "Flow_Psi_Sub_Corr",
+    "Flow_Psi_Sub_Corr_Diff",
+    "Flow_vEta",
+    "Flow_vPt"
+  };
   const int nNames = sizeof(baseName) / sizeof(char*);
   
   // input the first run number

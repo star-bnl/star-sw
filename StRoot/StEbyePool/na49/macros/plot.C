@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.1 2001/02/23 00:58:19 posk Exp $
+// $Id: plot.C,v 1.2 2001/02/26 23:07:14 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -11,10 +11,14 @@
 //               Default hist file is flow.hist.root .
 //               After the first execution, just type plot(N) .
 //               A negative N plots all pages starting with page N.
+//               After plot(-N) type two returns.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.2  2001/02/26 23:07:14  posk
+// Rearranged macros.
+//
 // Revision 1.1  2001/02/23 00:58:19  posk
 // NA49 version of STAR software.
 //
@@ -27,8 +31,6 @@
 const Int_t nHars    = 3;
 const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
-const Float_t twopi  = 2. * 3.1416;
-const Float_t etaMax = 1.5;
 Int_t runNumber      = 0;
 char  runName[6];
 char  fileNumber[4]  = "x";
@@ -37,7 +39,7 @@ TFile* histFile;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
-  bool multiGraph  = kFALSE;
+  bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
   if (selN == 0) multiGraph = kTRUE;
 
@@ -73,6 +75,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MeanDedxPiPlus2D",
     "Flow_MeanDedxProton2D",
     "Flow_PidMult",
+    //"Flow_YPtPhi3D",
     "Flow_YPtPhi2D.PhiY",
     "Flow_YPtPhi2D.PhiPt",
     "Flow_YieldAll2D",
@@ -111,11 +114,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles = 31 + 1;
 
-  if (pageNumber > 0 && pageNumber <= nSingles) {      // plot singles
-    singleGraph = kTRUE;
-    multiGraph  = kFALSE;
-  }
-
   // construct array of short names
   char* shortName[] = new char*[nNames];
   for (int n = 0; n < nNames; n++) {
@@ -147,31 +145,35 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   }
   
   // input the page number
-  //while (pageNumber <= nSingles || pageNumber > nNames) {
-  while (pageNumber <= 0 || pageNumber > nNames) {
-    if (pageNumber < 0) {                                // plot all
+  while (pageNumber <= 1 || pageNumber > nNames) {
+    if (pageNumber < 0) {                                 // plot all
+      char temp[3];
+      fgets(temp, sizeof(temp), stdin);
+      //fflush(stdin);
       plotAll(nNames, selN, harN, -pageNumber);
       return;
     }
-    if (pageNumber == 1) {                               // plot resolution
+    if (pageNumber == 1) {                                // plot resolution
       TCanvas* c = plotResolution();
       return c;
     }
-    if (pageNumber > 0 && pageNumber <= nSingles) {      // plot singles
-      singleGraph = kTRUE;
-      multiGraph  = kFALSE;
-    }
-    cout << "-1: \t All" << endl;                        // print menu
+    cout << "-1: \t All" << endl;                         // print menu
     for (int i = 0; i < nNames; i++) {
       cout << i+1 << ":\t " << shortName[i] << endl;
     }
     cout << "     page number? ";
     cin >> pageNumber;
   }
+  if (pageNumber > 0 && pageNumber <= nSingles) {         // plot singles
+    singleGraph = kTRUE;
+    multiGraph  = kFALSE;
+  }
   pageNumber--;
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
+  float twopi   = 2. * 3.1416;
+  float etaMax  =   1.5;
   float qMax    =   3.5;
   float phiMax  = twopi; 
   int   n_qBins =    50;
@@ -225,7 +227,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k + 1;                    // pad number
-      char* temp = new char[30];                       // construct histName
+
+      // construct histName and histProjName
+      char* temp = new char[30];
       strcpy(temp,shortName[pageNumber]);
       char* cproj = strstr(temp,".");
       if (cproj) {                                     // a projection
@@ -248,7 +252,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  histProjName->Append("_Har");
 	  histProjName->Append(*countRows);
 	}
-      } else {
+      } else {                                         // not projection
 	TString* histName = new TString(baseName[pageNumber]);
       }
       if (!singleGraph) {
@@ -258,17 +262,19 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       }
       cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
+
+      // get the histogram
       bool twoD;
       bool threeD;
       if (histProjName) {
-	if (strstr(temp,"3D")) {                   // 2D projection
+	if (strstr(temp,"3D")) {                      // 2D projection
 	  TH3* hist3D = dynamic_cast<TH3*>(histFile.Get(histName->Data()));
 	  if (!hist3D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
 	  twoD = kTRUE;
-	} else {                                   // 1D projection
+	} else {                                      // 1D projection
 	  TH2* hist2D = dynamic_cast<TH2*>(histFile.Get(histName->Data()));
 	  if (!hist2D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
@@ -276,7 +282,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  }
 	}
       } else {
-	if (strstr(shortName[pageNumber],"3D")!=0) { // 3D
+	if (strstr(shortName[pageNumber],"3D")!=0) {  // 3D
 	  threeD = kTRUE;
 	  TH3* hist3D = dynamic_cast<TH3*>(histFile.Get(histName->Data()));
 	  if (!hist3D) {
@@ -290,43 +296,44 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
-	} else {                                     // 1D
+	} else {                                            // 1D
 	  TH1* hist = dynamic_cast<TH1*>(histFile.Get(histName->Data()));
 	  if (!hist) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
+	  float ptMax = hist->GetXaxis()->GetXmax();
 	}
       }
       
       // make the plots
       if (multiGraph) graphPad->cd(padN);
-      if (threeD) {                                   // 3D
+      if (threeD) {                                            // 3D
 	gStyle->SetOptStat(10);
 	hist3D->Draw("BOX");
-      } else if (strstr(shortName[pageNumber],".PhiY")!=0) { // 3D Phi Y proj.
-	TH2D* projZX = hist3D->Project3D("zx");
-	projZX->SetName(histProjName->Data());
-	projZX->SetYTitle("azimuthal angle (rad)");
-	projZX->SetXTitle("rapidity");
-	gStyle->SetOptStat(0);
-	if (projZX) projZX->Draw("COLZ");
-      } else if (strstr(shortName[pageNumber],".PhiPt")!=0) { // 3D Phi Pt proj.
-	TH2D* projZY = hist3D->Project3D("zy");
-	projZY->SetName(histProjName->Data());
-	projZY->SetYTitle("azimuthal angle (rad");
-	projZY->SetXTitle("Pt (GeV)");
-	gStyle->SetOptStat(0);
-	if (projZY) projZY->Draw("COLZ");
-      } else if (twoD) {                                // 2D
-	if (strstr(shortName[pageNumber],"XY")!=0) {    // Vertex XY
+      } else if (twoD) {                                       // 2D
+	if (strstr(shortName[pageNumber],".PhiY")!=0) {        // 3D Phi Y proj.
+	  TH2D* projZX = hist3D->Project3D("zx");
+	  projZX->SetName(histProjName->Data());
+	  projZX->SetYTitle("azimuthal angle (rad)");
+	  projZX->SetXTitle("rapidity");
+	  gStyle->SetOptStat(0);
+	  if (projZX) projZX->Draw("COLZ");
+	} else if (strstr(shortName[pageNumber],".PhiPt")!=0) { // 3D Phi Pt proj.
+	  TH2D* projZY = hist3D->Project3D("zy");
+	  projZY->SetName(histProjName->Data());
+	  projZY->SetYTitle("azimuthal angle (rad");
+	  projZY->SetXTitle("Pt (GeV)");
+	  gStyle->SetOptStat(0);
+	  if (projZY) projZY->Draw("COLZ");
+	} else	if (strstr(shortName[pageNumber],"XY")!=0) {    // Vertex XY
 	  TLine* lineZeroX = new TLine(-1., 0., 1., 0.);
 	  TLine* lineZeroY = new TLine(0., -1., 0., 1.);
 	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	  lineZeroX->Draw();
 	  lineZeroY->Draw();
-	} else if (strstr(shortName[pageNumber],"Dedx")!=0) { // dE/dx
+	} else if (strstr(shortName[pageNumber],"Dedx")!=0) {   // dE/dx
 	  TF1* pionLine = new TF1("pionLine", BetheBlochFunc, -2., 5., 1);
 	  TF1* protLine = new TF1("protLine", BetheBlochFunc, -2., 5., 1);
 	  TF1* elecLine = new TF1("elecLine", BetheBlochFunc, -2., 5., 1);
@@ -341,12 +348,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  pionLine->Draw("SAME");
 	  protLine->Draw("SAME");
 	  elecLine->Draw("SAME");
-	} else if (strstr(shortName[pageNumber],"_v")!=0) { // v
+	} else if (strstr(shortName[pageNumber],"_v")!=0) {    // v
 	  hist2D->SetMaximum(20.);
 	  hist2D->SetMinimum(-20.);
 	  gStyle->SetOptStat(0);
 	  hist2D->Draw("COLZ");
-	} else {                                          // other 2D
+	} else {                                               // other 2D
 	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	}
@@ -373,7 +380,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	projY->SetXTitle("Pt (GeV)");
 	projY->SetYTitle("Counts");
 	gPad->SetLogy();
-	gStyle->SetOptStat(110);
+	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
@@ -405,7 +412,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(10);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
-      } else if (strstr(shortName[pageNumber],"_q")!=0) {     // q distibution
+      } else if (strstr(shortName[pageNumber],"_q")!=0) {   // q distibution
 	double area = hist->Integral() * qMax / (float)n_qBins; 
 	cout << "  Area = " << area << endl;
 	TF1* func_q = new TF1("func_q", "[0]*2.*x*exp(-x*x)", 0., qMax);
@@ -415,7 +422,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Draw("E1");
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
-      } else if (strstr(shortName[pageNumber],"Phi")!=0) {    // Phi distibutions
+      } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
        	hist->SetMinimum(0.9*(hist->GetMinimum()));
 	if (strstr(shortName[pageNumber],"Weight")!=0) {
 	  gStyle->SetOptStat(0);
@@ -445,7 +452,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(100110);
 	hist->Draw();
 	if (strstr(shortName[pageNumber],"v")!=0) {
-	  ptMax = hist->GetXaxis()->GetXmax();
 	  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
 	  lineZeroPt->Draw();
 	}
@@ -460,23 +466,23 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->SetMarkerColor(2);
 	hist->Draw();
 	lineDiagonal->Draw();
-      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) { // CosPhiLab
+      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
 	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
 	gStyle->SetOptStat(0);
 	hist->Draw();
 	lineZeroHar->Draw();
-      } else if (strstr(shortName[pageNumber],"PidMult")!=0) { // PID Mult
+      } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
 	gPad->SetLogy();
 	gStyle->SetOptStat(0);
 	hist->Draw();
-      } else {                                          // all other 1D
+      } else {                                              // all other 1D
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 
       }
       delete [] temp;
       delete histName;
       if (histProjName) delete histProjName;
-      gPad->Update();
+      //gPad->Update();
     }
   }
   for (int m = 0; m < nNames; m++) {  
@@ -489,9 +495,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
 // macro for the resolution plot
 TCanvas* plotResolution(){
-  char* resName[] = {"Flow_Cos_Sel","Flow_Res_Sel"};
+  char* resName[] = {"Flow_Cos_Sel","Flow_Res_Sel","Flow_v_Sel"};
   int columns = nSels;
-  int rows = 2;
+  int rows = 3;
   int pads = rows*columns;
 
   // make the graph page
@@ -520,14 +526,18 @@ TCanvas* plotResolution(){
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
-      TH1* hist = (TH1*)histFile.Get(histName->Data());
+      TH1* hist = dynamic_cast<TH1*>(histFile.Get(histName->Data()));
       if (!hist) {
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
       }
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
-      hist->SetMaximum(1.1);
+      if (strstr(resName[resNumber],"_v")!=0) {
+	hist->SetMaximum(10.);
+      } else {
+	hist->SetMaximum(1.1);
+      }
       hist->Draw();
       if (j == 0) lineZeroHar->Draw();
       hist->Print("all");
