@@ -17,7 +17,11 @@ str : libstr.a
 
 dbg : libstr_dbg.a
 
-doc : strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG).f str_file.f str_parse.f str_time.f
+doc : strbyte$(ARCH_TAG).c strlibc$(ARCH_TAG).c strtermc$(ARCH_TAG).c \
+strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG).f str_file.f str_parse.f str_time.f
+	docc   strbyte$(ARCH_TAG).c;   mv buttons.html strbyte.html
+	docc   strlibc$(ARCH_TAG).c;   mv buttons.html strlibc.html
+	docc   strtermc$(ARCH_TAG).c;  mv buttons.html strtermc.html
 	docfor strlib.f;    mv buttons.html strlib.html
 	docfor strmth.f;    mv buttons.html strmth.html
 	docfor strplot.f;   mv buttons.html strplot.html
