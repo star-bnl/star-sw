@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.hh,v 1.9 2002/06/04 13:34:59 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.10 2002/11/06 13:45:42 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.10  2002/11/06 13:45:42  oldi
+// Flag for clusters not to be used for tracking introduced.
+// Code clean ups.
+//
 // Revision 1.9  2002/06/04 13:34:59  oldi
 // Transformation of local FTPC coordinates in global coordinates introduced.
 // An additional flag keeps track in which coordinate system the point position
@@ -104,7 +108,10 @@ private:
   Long_t    mNumberBins;    // number of consecutive timebins in cluster
   Long_t    mMaxADC;        // cluster peak height (adc channels)
   Long_t    mCharge;        // cluster charge (adc channels)
-  Long_t    mFlags;         // bit4: cut off, bit5: tracked
+  Long_t    mFlags;         // bit0:unfolded, bit1:unfold failed,
+                            // bit2:saturated, bit3:bad shape, 
+                            // bit4:cut off, bit5:tracked, 
+                            // bit6:global coords, bit7:don't use for tracking
   Double_t  mSigmaPhi;      // cluster sigma in pad direction
   Double_t  mSigmaR;        // cluster sigma in drift direction
 
@@ -156,24 +163,28 @@ public:
        Bool_t  GetTrackedFlag();
          void  SetGlobalFlag(Bool_t global);
        Bool_t  GetGlobalFlag();
+         void  SetUnusableForTrackingFlag(Bool_t global);
+       Bool_t  GetUnusableForTrackingFlag();
 
-  Bool_t   IsInGlobalCoord()  const { return mGlobalCoord;   }
-  Bool_t   GetUsage()         const { return mUsed;          }
-  Int_t    GetHitNumber()     const { return mHitNumber;     }
-  Int_t    GetNextHitNumber() const { return mNextHitNumber; }
-  Int_t    GetTrackNumber()   const { return mTrackNumber;   }
-  Long_t   GetPadRow()        const { return mPadRow;        }
-  Long_t   GetSector()        const { return mSector;        }
-  Long_t   GetNumberPads()    const { return mNumberPads;    }
-  Long_t   GetNumberBins()    const { return mNumberBins;    }
-  Long_t   GetMaxADC()        const { return mMaxADC;        }
-  Long_t   GetCharge()        const { return mCharge;        }
-  Long_t   GetFlags()         const { return mFlags;         }
+  Bool_t   IsUsable();
+  Bool_t   IsUnusable();
+  Bool_t   IsInGlobalCoord()  { return GetGlobalFlag();  }
+  Bool_t   GetUsage()         { return GetTrackedFlag(); }
+  Int_t    GetHitNumber()     const { return mHitNumber;       }
+  Int_t    GetNextHitNumber() const { return mNextHitNumber;   }
+  Int_t    GetTrackNumber()   const { return mTrackNumber;     }
+  Long_t   GetPadRow()        const { return mPadRow;          }
+  Long_t   GetSector()        const { return mSector;          }
+  Long_t   GetNumberPads()    const { return mNumberPads;      }
+  Long_t   GetNumberBins()    const { return mNumberBins;      }
+  Long_t   GetMaxADC()        const { return mMaxADC;          }
+  Long_t   GetCharge()        const { return mCharge;          }
+  Long_t   GetFlags()         const { return mFlags;           }
   
-  Double_t GetXResidual()     const { return mXResidual;     }
-  Double_t GetYResidual()     const { return mYResidual;     }
-  Double_t GetRResidual()     const { return mRResidual;     }
-  Double_t GetPhiResidual()   const { return mPhiResidual;   }
+  Double_t GetXResidual()     const { return mXResidual;       }
+  Double_t GetYResidual()     const { return mYResidual;       }
+  Double_t GetRResidual()     const { return mRResidual;       }
+  Double_t GetPhiResidual()   const { return mPhiResidual;     }
 
   // setter  
   void    SetX(Double_t f)        {     mCoord.SetX(f); }
@@ -183,8 +194,8 @@ public:
   void    SetYerr(Double_t f)     {     mError.SetY(f); }
   void    SetZerr(Double_t f)     {     mError.SetZ(f); }
   
-  void    SetGlobalCoord(Bool_t f)  {   mGlobalCoord =  f; SetGlobalFlag(f);  }
-  void    SetUsage(Bool_t f)        {          mUsed =  f; SetTrackedFlag(f); }
+  void    SetGlobalCoord(Bool_t f)  {    SetGlobalFlag(f);  }
+  void    SetUsage(Bool_t f)        {   SetTrackedFlag(f);  }
   void    SetHitNumber(Int_t f)     {     mHitNumber =  f;  }
   void    SetNextHitNumber(Int_t f) { mNextHitNumber =  f;  }
   void    SetTrackNumber(Int_t f)   {   mTrackNumber =  f;  }
@@ -227,7 +238,7 @@ inline void StFtpcPoint::SetTrackedFlag(Bool_t tracked)
 
 inline Bool_t StFtpcPoint::GetTrackedFlag()
 {
-  // Returns true, if 'tracked flag' ist set, otherwise returns false.
+  // Returns true, if 'tracked flag' is set, otherwise returns false.
 
   return (Bool_t)(GetFlags() & (Long_t)32);
 }
@@ -244,10 +255,42 @@ inline void StFtpcPoint::SetGlobalFlag(Bool_t global)
 
 inline Bool_t StFtpcPoint::GetGlobalFlag()
 {
-  // Returns true, if 'global flag' ist set, otherwise returns false.
+  // Returns true, if 'global flag' is set, otherwise returns false.
 
   return (Bool_t)(GetFlags() & (Long_t)64);
 }
 
+
+inline void StFtpcPoint::SetUnusableForTrackingFlag(Bool_t global) 
+{
+  // Sets flag, if the cluster DOES NOT pass all quality criteria to be used for tracking.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFAF) | ((Long_t)global*128));
+}
+
+
+inline Bool_t StFtpcPoint::GetUnusableForTrackingFlag()
+{
+  // Returns true, if 'UnusableForTracking flag' is set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)128);
+}
+
+
+inline Bool_t StFtpcPoint::IsUsable()
+{
+  // Returns true, if 'UsableForTracking flag' and 'tracked flag' is set, otherwise returns false.
+    
+  return (Bool_t)((!GetTrackedFlag()) && !(GetUnusableForTrackingFlag()));
+}
+
+
+inline Bool_t StFtpcPoint::IsUnusable()
+{
+  // Returns true, if 'UsableForTracking flag' and 'tracked flag' is set, otherwise returns false.
+    
+  return (Bool_t)(GetTrackedFlag() || GetUnusableForTrackingFlag());
+}
 
 #endif
