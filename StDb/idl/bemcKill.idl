@@ -1,0 +1,12 @@
+#ifndef BEMC_KILL_H
+#define BEMC_KILL_H
+
+/* table definition for L2 BEMC tower kill status */
+
+struct bemcKill {
+  unsigned int daqId;
+  unsigned int towerId;
+  unsigned int killTower;
+};
+
+#endif
