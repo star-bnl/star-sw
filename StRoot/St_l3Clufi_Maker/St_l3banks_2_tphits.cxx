@@ -141,9 +141,10 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 		      //XYZ.Setxyz(1,1,1) ;
 		      PTRS.Setptrs((Double_t) pad, (Double_t) time,(Double_t) row, (Double_t) sector) ;
 		      transformer.raw_to_global(PTRS,XYZ) ;
-							    
-		      if ( flag == 0 ) // no one pad clusters !
-			{
+			
+		      // no one pad clusters ! sure : FAIR PLAY  :))	    
+		      //if ( flag == 0 ) 
+		      //	{
 			  // fill tphits
 			  mytclhits_st[tphit_index].x = (Float_t) XYZ.Getx() ;
 			  mytclhits_st[tphit_index].y = (Float_t) XYZ.Gety() ;
@@ -189,7 +190,7 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 
 			  // increase hit counter
 			  tphit_index++;
-			}
+			  //} one pad cluster
 		    } // loop over cluster
 		  // set offset for next row 
 		  rowoffset += ((2 * clusternumb) + 2); 

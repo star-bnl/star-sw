@@ -502,6 +502,13 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 		    c = (struct fmt21_c *) outres++ ;
 		    f = (struct fmt21_f *) outres++ ;
 
+		    // reject one_pad clusters
+		    if(resx[j].flags & FLAG_ONEPAD)
+		    {
+		      //printf("one pad rejected\n") ;
+		      continue ;
+		    }
+
 		    // if cluster is not empty
 		    if(resx[j].charge) 
 			{   
