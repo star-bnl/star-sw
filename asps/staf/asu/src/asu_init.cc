@@ -70,9 +70,9 @@ int asu_stop()
 {
 #ifndef QUIET_ASP
    EML_MESSAGE("ASU:Stopping. ");
-#endif
 
    asuMallocStats();			/* show allocation stats */
+#endif
    return TRUE;
 }
 
