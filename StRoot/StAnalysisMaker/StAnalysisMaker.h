@@ -7,32 +7,36 @@
 //  are not needed when you do not intend to put the file under
 //  cvs control. Remove them.
 //  
-/***************************************************************************
+/*!
+ * \class  StAnalysisMaker
+ * \brief  A typical Analysis Class
+ * \author Torre Wenaus, BNL, Thomas Ullrich
+ * \date   Nov 1999
  *
- * $Id: StAnalysisMaker.h,v 2.2 2002/01/24 22:29:31 jeromel Exp $
  *
- * Author: Torre Wenaus, BNL,
- *         Thomas Ullrich, Nov 1999
- ***************************************************************************
+ * This is an example of a maker to perform analysis using StEvent.
+ * Use this as a template and customize it for your studies.
  *
- * Description:  This is an example of a maker to perform analysis
- *               using StEvent.
- *               Use this as a template and customize it for your
- *               studies.
+ * $Id: StAnalysisMaker.h,v 2.3 2002/04/28 00:10:28 jeromel Exp $
  *
- ***************************************************************************
- *
+ */
+/* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
- * Revision 2.2  2002/01/24 22:29:31  jeromel
- * virtual const GetCVS()
+ * Revision 2.3  2002/04/28 00:10:28  jeromel
+ * doxygen basic dox added. GetCVS() had wrong signature : corrected to avoid
+ * propagation of this typo in new makers.
  *
- * Revision 2.1  2000/07/12 05:23:34  ullrich
+ * Revision 2.2  2000/07/12 05:23:28  ullrich
  * Updated for better use as template for actual analysis.
  *
- * Revision 2.0  1999/11/04 16:10:05  ullrich
+ * Revision 2.1  1999/12/30 01:54:57  ogilvie
+ * added countPrimaryPions as example how to use PID
+ *
+ * Revision 2.0  1999/11/04 16:10:03  ullrich
  * Revision for new StEvent
  *
- **************************************************************************/
+ * -------------------------------------------------------------------------
+ */
 
 //
 // Every header file should have these macros to protect
@@ -54,7 +58,7 @@
 #include <string>
 
 //
-//  Forward declerations.
+//  Forward declarations.
 //  It is always a good idea to reduce the dependencies
 //  to other header files. This can be achieved by
 //  forward declaring classes which are only referenced
@@ -95,8 +99,8 @@ public:
     Int_t  Init();                      // called once at the beginning of your job
     Int_t  Make();                      // invoked for every event
     Int_t  Finish();                    // called once at the end
-    virtual const char *GetCVS() {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.2 2002/01/24 22:29:31 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    virtual const char *GetCVS() const {
+      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.3 2002/04/28 00:10:28 jeromel Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
 

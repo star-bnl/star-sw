@@ -7,22 +7,26 @@
 //  are not needed when you do not intend to put the file under
 //  cvs control. Remove them.
 //  
-/***************************************************************************
+/*!
+ * \class  StAnalysisMaker
+ * \brief  A typical Analysis Class
+ * \author Torre Wenaus, BNL, Thomas Ullrich
+ * \date   Nov 1999
  *
- * $Id: StAnalysisMaker.cxx,v 2.2 2000/07/12 05:23:28 ullrich Exp $
  *
- * Author: Torre Wenaus, BNL,
- *         Thomas Ullrich, Nov 1999
- ***************************************************************************
+ * This is an example of a maker to perform analysis using StEvent.
+ * Use this as a template and customize it for your studies.
  *
- * Description:  This is an example of a maker to perform analysis
- *               using StEvent.
- *               Use this as a template and customize it for your
- *               studies.
+ * $Id: StAnalysisMaker.cxx,v 2.3 2002/04/28 00:10:27 jeromel Exp $
  *
- ***************************************************************************
- *
+ */
+
+/* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.3  2002/04/28 00:10:27  jeromel
+ * doxygen basic dox added. GetCVS() had wrong signature : corrected to avoid
+ * propagation of this typo in new makers.
+ *
  * Revision 2.2  2000/07/12 05:23:28  ullrich
  * Updated for better use as template for actual analysis.
  *
@@ -32,7 +36,9 @@
  * Revision 2.0  1999/11/04 16:10:03  ullrich
  * Revision for new StEvent
  *
- **************************************************************************/
+ * -------------------------------------------------------------------------
+ */
+
 
 //
 //  Include header files. What has to be included strongly depends
