@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.1 2000/09/25 18:03:13 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.2 2000/09/27 02:53:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.2  2000/09/27 02:53:23  ullrich
+ * No delete, create only zombies.
+ *
  * Revision 2.1  2000/09/25 18:03:13  ullrich
  * Initial Revision.
  *
@@ -20,128 +23,140 @@
 
 bool StEventScavenger::removeEventSummary(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setSummary(0);
-    return true;
+    if (evt && evt->summary()) {
+	evt->summary()->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeSoftwareMonitor(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setSoftwareMonitor(0);
-    return true;
+    if (evt && evt->softwareMonitor()) {
+	evt->softwareMonitor()->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeL3Trigger(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setL3Trigger(0);
-    return true;
+    if (evt && evt->l3Trigger()) {
+	evt->l3Trigger()->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeV0Vertices(StEvent* evt)
 {
     if (!evt) return false;
-    evt->v0Vertices().clear();
+    StSPtrVecV0Vertex &vec = evt->v0Vertices();
+    for (unsigned int i=0; i<vec.size(); i++)
+	vec[i]->makeZombie();
     return true;
 }
 
 bool StEventScavenger::removeXiVertices(StEvent* evt)
 {
     if (!evt) return false;
-    evt->xiVertices().clear();
+    StSPtrVecXiVertex &vec = evt->xiVertices();
+    for (unsigned int i=0; i<vec.size(); i++)
+	vec[i]->makeZombie();
     return true;
 }
 
 bool StEventScavenger::removeKinkVertices(StEvent* evt)
 {
     if (!evt) return false;
-    evt->kinkVertices().clear();
+    StSPtrVecKinkVertex &vec = evt->kinkVertices();
+    for (unsigned int i=0; i<vec.size(); i++)
+	vec[i]->makeZombie();
     return true;
 }
 
 bool StEventScavenger::removeTpcHitCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setTpcHitCollection(0);
-    removeAllTrackReferences(evt, kTpcId);
-    return true;
+    if (evt && evt->tpcHitCollection()) {
+	StTpcHitCollection *theHits = evt->tpcHitCollection();
+	for (unsigned int n=0; n<theHits->numberOfSectors(); n++)
+	    for (unsigned int m=0; m<theHits->sector(n)->numberOfPadrows(); m++) 
+		for (unsigned int h=0; h<theHits->sector(n)->padrow(m)->hits().size(); h++)
+		    theHits->sector(n)->padrow(m)->hits()[h]->makeZombie();
+	theHits->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeFtpcHitCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setFtpcHitCollection(0);
-    removeAllTrackReferences(evt, kFtpcWestId);
-    removeAllTrackReferences(evt, kFtpcEastId);
-    return true;
+    if (evt && evt->ftpcHitCollection()) {
+	StFtpcHitCollection *theHits = evt->ftpcHitCollection();
+	for (unsigned int n=0; n<theHits->numberOfPlanes(); n++)
+	    for (unsigned int m=0; m<theHits->plane(n)->numberOfSectors(); m++) 
+		for (unsigned int h=0; h<theHits->plane(n)->sector(m)->hits().size(); h++)
+		    theHits->plane(n)->sector(m)->hits()[h]->makeZombie();
+	theHits->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeSvtHitCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setSvtHitCollection(0);
-    removeAllTrackReferences(evt, kSvtId);
-    return true;
+    if (evt && evt->svtHitCollection()) {
+	StSvtHitCollection *theHits = evt->svtHitCollection();
+	for (unsigned int n=0; n<theHits->numberOfBarrels(); n++)
+	    for (unsigned int m=0; m<theHits->barrel(n)->numberOfLadders(); m++) 
+		for (unsigned int k=0; k<theHits->barrel(n)->ladder(k)->numberOfWafers(); k++) 
+		    for (unsigned int h=0; h<theHits->barrel(n)->ladder(m)->wafer(k)->hits().size(); h++)
+		    theHits->barrel(n)->ladder(m)->wafer(k)->hits()[h]->makeZombie();
+	theHits->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeSsdHitCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setSsdHitCollection(0);
-    removeAllTrackReferences(evt, kSsdId);
-    return true;
+    if (evt && evt->ssdHitCollection()) {
+	StSsdHitCollection *theHits = evt->ssdHitCollection();
+	    for (unsigned int m=0; m<theHits->numberOfLadders(); m++) 
+		for (unsigned int k=0; k<theHits->ladder(k)->numberOfWafers(); k++) 
+		    for (unsigned int h=0; h<theHits->ladder(m)->wafer(k)->hits().size(); h++)
+		    theHits->ladder(m)->wafer(k)->hits()[h]->makeZombie();
+	theHits->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeEmcCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setEmcCollection(0);
-    return true;
+    if (evt && evt->emcCollection()) {
+	evt->emcCollection()->makeZombie();
+	return true;
+    }
+    else
+	return false;
 }
 
 bool StEventScavenger::removeRichCollection(StEvent* evt)
 {
-    if (!evt) return false;
-    evt->setRichCollection(0);
-    return true;
-}
-
-bool StEventScavenger::removeAllTrackReferences(StEvent* evt, StDetectorId id)
-{
-    if (!evt) return false;
-
-    StSPtrVecTrackDetectorInfo&  infos = evt->trackDetectorInfo();
-    for (unsigned int i=0; i<infos.size(); i++) {
-	StPtrVecHit&  hits = infos[i]->hits();
-	StPtrVecHitIterator iter;
-	for (iter = hits.begin(); iter < hits.end();) 
-	    if ((*iter)->detector() == id)
-		iter = hits.erase(iter);
-	    else
-		iter++;
+    if (evt && evt->richCollection()) {
+	evt->richCollection()->makeZombie();
+	return true;
     }
-    return true;
-}
-
-bool StEventScavenger::removeAllTpcHitsNotOnTracks(StEvent* evt)
-{
-    if (!evt) return false;
-
-    //
-    //  Remove also all references to these hits
-    //
-    StSPtrVecTrackDetectorInfo&  infos = evt->trackDetectorInfo();
-    for (unsigned int i=0; i<infos.size(); i++) {
-	if (infos[i]->isZombie()) {
-	    StPtrVecHit&  hits = infos[i]->hits();	
-	    StPtrVecHitIterator iter;
-	    for (iter = hits.begin(); iter < hits.end(); iter++)
-		if ((*iter)->detector() == kTpcId)
-		    (*iter)->makeZombie();
-	}
-    }
-    return true;
+    else
+	return false;
 }
 
 bool StEventScavenger::remove(StTrack* track)

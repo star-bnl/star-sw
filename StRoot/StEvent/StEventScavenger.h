@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.1 2000/09/25 18:03:34 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.2 2000/09/27 02:53:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.2  2000/09/27 02:53:23  ullrich
+ * No delete, create only zombies.
+ *
  * Revision 2.1  2000/09/25 18:03:34  ullrich
  * Initial Revision.
  *
@@ -37,10 +40,6 @@ public:
     static bool removeXiVertices(StEvent*);
     static bool removeKinkVertices(StEvent*);
 
-    static bool removeAllTpcHitsNotOnTracks(StEvent*);
     static bool remove(StTrack*);
-    
-private:
-    static bool removeAllTrackReferences(StEvent*, StDetectorId);
 };
 #endif
