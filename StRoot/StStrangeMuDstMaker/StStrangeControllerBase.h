@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 3.2 2000/12/18 21:35:18 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.3 2001/05/31 02:47:18 perev Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.3  2001/05/31 02:47:18  perev
+// const(ing)
+//
 // Revision 3.2  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
 //
@@ -55,7 +58,7 @@ class StStrangeControllerBase : public TNamed {
   StStrangeMuDst* GetMc(Int_t i = 0);
   StStrangeAssoc* GetAssoc(Int_t i = 0);
 
-  virtual void  Clear();
+  virtual void  Clear(const char* opt="");
   virtual void  Finish();
   
   // Functions for sub-dsts:
