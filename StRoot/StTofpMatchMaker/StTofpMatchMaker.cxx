@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.7 2004/03/11 22:29:32 dongx Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.8 2004/04/10 04:32:39 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.8  2004/04/10 04:32:39  dongx
+ * fix a potential crashing of filling histo w/o mHisto
+ *
  * Revision 1.7  2004/03/11 22:29:32  dongx
  * -remove assert()
  * -add member mYear4
@@ -723,7 +726,7 @@ Int_t StTofpMatchMaker::Make(){
 	  
       //--- store number of hits per track
       int nHitsPerTrack = theTrack->topologyMap().numberOfHits(kTpcId);
-      hTofpNumberOfTrackHits->Fill(nHitsPerTrack);
+      if(mHisto) hTofpNumberOfTrackHits->Fill(nHitsPerTrack);
 	  
       // select the apropriate track geometry
       StTrackGeometry *theTrackGeometry = trackGeometry(theTrack);
