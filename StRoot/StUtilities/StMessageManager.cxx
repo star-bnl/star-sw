@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.25 1999/09/16 15:50:25 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.26 1999/10/28 16:06:58 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.26  1999/10/28 16:06:58  genevb
+// Fixed bug in C msg_enable routine - same as earlier fix for StMessage routines
+//
 // Revision 1.25  1999/09/16 15:50:25  genevb
 // Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
 //
@@ -170,13 +173,25 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
 }
 //________________________________________
 void type_of_call Msg_Enable_(char* mess, size_t len) {
-  if (strlen(mess) > len) mess[len]=0;
-  gMessMgr->SwitchOn(mess);
+  char* mess2 = mess;
+  size_t messlen = strlen(mess);
+  if (messlen > len) {
+    mess2 = new char[(messlen+1)];
+    strncpy(mess2,mess,messlen);
+    mess2[messlen] = 0;
+  }
+  gMessMgr->SwitchOn(mess2);
 }
 //________________________________________
 int type_of_call Msg_Enabled_(char* mess, int*, size_t len) {
-  if (strlen(mess) > len) mess[len]=0;
-  if ((gMessMgr->GetLimit(mess))==0) return 0;
+  char* mess2 = mess;
+  size_t messlen = strlen(mess);
+  if (messlen > len) {
+    mess2 = new char[(messlen+1)];
+    strncpy(mess2,mess,messlen);
+    mess2[messlen] = 0;
+  }
+  if ((gMessMgr->GetLimit(mess2))==0) return 0;
   return 1;
 }
 //________________________________________
@@ -200,7 +215,7 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
 
   size_t messlen = strlen(mess);
   char* mess2 = new char[(messlen+1)];
-  strcpy(mess2,mess);
+  strncpy(mess2,mess,messlen);
   mess2[messlen] = 0;
   
   if ((len1>1) && (messlen > len1) && (type1 > maxMessLength)) mess2[len1] = 0;
@@ -253,7 +268,7 @@ char* typString, char* optString) {
   size_t opt1 = (size_t) opt;
 
   char* mess2 = new char[(messlen+1)];
-  strcpy(mess2,mess);
+  strncpy(mess2,mess,messlen);
   mess2[messlen] = 0;
   
   if ((len1>1) && (messlen > len1) && (opt1>maxMessLength)) mess2[len1] = 0;
@@ -403,10 +418,10 @@ void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
 // Instantiate an StMessage and place on the lists of known messages
 //
   if (!(strlen(type))) {
-    static char dash = '-';            // if no type supplied,
-    char* cptr = strchr(mess,dash);    // search for type within message
+    static char dash = '-';                   // if no type supplied,
+    char* cptr = strchr(mess,dash);           // search for type within message
     curType = new char[2];
-    type = strcpy(curType,defaultMessType);
+    type = strncpy(curType,defaultMessType,1);
     if (cptr) curType[0] = cptr[1];
   } else {
     curType = 0;
@@ -419,8 +434,8 @@ void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
   }
   int typeN = messTypeList->FindTypeNum(type);
   if (!typeN) {
-    strcpy(type,defaultMessType);      // default type is Info
-    typeN = 1;                         // type number for Info is 1
+    strncpy(type,defaultMessType,1);          // default type is Info
+    typeN = 1;                                // type number for Info is 1
   }
   gMessage = new StMessage(mess, type, opt);
   if (strchr(opt,'-')) {
@@ -501,17 +516,19 @@ messVec* StMessageManager::FindMessageList(const char* s1, char* s2,
 // Obtain a list (messVec) of StMessage pointers for all messages
 // which contain matches to the strings s1,s2,s3,s4.
 //
-  char* s1a = new char[strlen(s1)];
+  size_t s1_len = strlen(s1);
+  char* s1a = new char[(s1_len+1)];
   strcpy(s1a,s1);
-  if ((strlen(s1)==1) && (!list)) {
+  if ((s1_len==1) && (!list)) {
     int typeN = messTypeList->FindTypeNum(s1);
     if (typeN) {
       list = messCollection[typeN];
       *s1a = 0;
+      s1_len = 0;
     }
   }
   if (!list) list = &messList;
-  if (!(strlen(s1a) || strlen(s2) || strlen(s3) || strlen(s4)))
+  if (!((s1_len) || (strlen(s2)) || (strlen(s3)) || (strlen(s4))))
     return list;
   messVec* newList = new messVec();
   messVecIter current;
@@ -644,7 +661,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.25 1999/09/16 15:50:25 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.26 1999/10/28 16:06:58 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
