@@ -23,7 +23,7 @@ echo "<hr>"                                                 >> index.html
 echo "<h3>Domains</h3>"                                     >> index.html
   set all_dom = `ls ${STAR}/pams | sed -e 's/CVS//g' -e 's/doc//g' -e 's/params//g'`
   foreach dom ($all_dom)
-     echo '<a href="#'$dom'">'$dom'</a> &nbsp;'             >> index.html
+     echo '<a href="#'$dom'">'$dom'</a> &nbsp;| &nbsp;'             >> index.html
   end
 echo '<hr>'                                                 >> index.html
 # list of all modules
@@ -31,7 +31,7 @@ echo '<hr>'                                                 >> index.html
    set dom_idl = `find $STAR/pams/$domain -name "*.idl"`
    set dom_idm = `egrep -l 'interface' $dom_idl`
    set dom_idt = `egrep -l 'struct '   $dom_idl`
-   echo '<H3>Domain '$domain                                >> index.html
+   echo '<H3><a name="'$domain'">Domain '$domain'</a>'                      >> index.html
    set count = 0
    set DOC = $STAR/pams/$domain/doc
    if (-r $DOC) then
@@ -49,7 +49,7 @@ echo '<hr>'                                                 >> index.html
    echo "<h4>Domain's tables</h4>"                          >> index.html
    foreach idl ($dom_idt)
       set idd = `basename ${idl} .idl`
-      echo '<a href="table.html#'$idd'_tab"><strong>'$idd'</strong></a>'>> index.html
+      echo '<a href="table.html#'$idd'_tab"><strong>'$idd'</strong></a>&nbsp;| &nbsp;'>> index.html
    end
    set package = ""
    foreach idlm ($dom_idm) 
@@ -62,7 +62,7 @@ echo '<hr>'                                                 >> index.html
          echo '</pre>'                                      >> index.html
        endif
        if (-r $dir/doc) then
-        set hid = `echo $dir/doc | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`                        >> index.html
+        set hid = `echo $dir/doc | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`'&nbsp;| &nbsp;'                        >> index.html
         echo '<a href="'$hid'">Documentation</a> for '      >> index.html
        endif
 #      echo '<br>'                                          >> index.html
@@ -72,7 +72,7 @@ echo '<hr>'                                                 >> index.html
      endif
      set package = $dir
      set idd = `basename ${idlm} .idl`
-     echo '<a href="module.html#'$idd'_mod"><strong>'$idd'</strong></a>&nbsp;'>> index.html
+     echo '<a href="module.html#'$idd'_mod"><strong>'$idd'</strong></a>&nbsp;&nbsp;| &nbsp;'>> index.html
    end
  end
  echo "<hr>"       >> index.html
@@ -134,7 +134,7 @@ echo "<ol>"       >> table.html
    set idlm_idl = `egrep -l ${id}.idl $all_idm`
    foreach idlm (${idlm_idl})
      set did = `basename ${idlm} .idl`
-     echo '<a href="module.html#'$did'_mod">'$did'</a> &nbsp;&nbsp;&nbsp;&nbsp;'       >> table.html
+     echo '<a href="module.html#'$did'_mod">'$did'</a> &nbsp;| &nbsp;'       >> table.html
    end
  end
 echo "</ol>"       >> table.html
