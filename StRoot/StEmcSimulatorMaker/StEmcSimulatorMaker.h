@@ -56,7 +56,7 @@ protected:
   TH1F *mhDiffDe[4];         //!
 public: 
   StEmcSimulatorMaker(const char *name="EmcSimulator"); 
-  ~StEmcSimulatorMaker();
+  virtual ~StEmcSimulatorMaker();
   virtual Int_t Init();
   virtual Int_t Make();
   Int_t fillStEvent();
@@ -98,7 +98,7 @@ public:
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.7 2002/06/04 16:09:37 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.8 2002/09/10 16:51:32 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -106,8 +106,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.7 2002/06/04 16:09:37 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.8 2002/09/10 16:51:32 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.8  2002/09/10 16:51:32  pavlinov
+// Discard line with mDbMaker->SetDateTime
+//
 // Revision 1.7  2002/06/04 16:09:37  pavlinov
 // added option with DB(pedestal ans calibration  coefficients
 //

@@ -205,12 +205,11 @@ Double_t StEmcSimpleSimulator::getPedestal(const Int_t type, const Double_t pedM
 Double_t StEmcSimpleSimulator::deductPedestal(const Int_t type, const Int_t adc, const Double_t pedMean)
 {
     switch(type){
-    case 0: 
-      return (Double_t)adc;             // >= 0.0
-      break;
     case 1:
       return ((Double_t)adc - pedMean); // could be negative
       break;
+    default: 
+      return (Double_t)adc;             // >= 0.0
     }
 }
 
@@ -266,8 +265,11 @@ Double_t StEmcSimpleSimulator::getSinTheta(Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.4 2002/06/04 16:09:35 pavlinov Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.5 2002/09/10 16:51:30 pavlinov Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.5  2002/09/10 16:51:30  pavlinov
+//  Discard line with mDbMaker->SetDateTime
+//
 //  Revision 1.4  2002/06/04 16:09:35  pavlinov
 //  added option with DB(pedestal ans calibration  coefficients
 //

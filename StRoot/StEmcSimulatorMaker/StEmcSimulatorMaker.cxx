@@ -107,9 +107,11 @@ Int_t StEmcSimulatorMaker::Init()
         gMessMgr->Info()<<"Calibration db in action for " << detInDb << " detector(s)"<<endm; 
         mDbMaker = (St_db_Maker*)GetMaker("db");
         if(mDbMaker) {
-           printf("Time stamp from control table : date %i time %i \n",
-           controlTable->dateDB,controlTable->timeDB);  
-	   mDbMaker->SetDateTime(controlTable->dateDB, controlTable->timeDB);
+	  // 10-sep-2002 - I can not do that because it changes the global time stamp 
+	  //           printf("Time stamp from control table : date %i time %i \n",
+	  //           controlTable->dateDB,controlTable->timeDB);  
+	  //	   mDbMaker->SetDateTime(controlTable->dateDB, controlTable->timeDB); 
+          printf("Time stamp from DB %s\n", mDbMaker->GetDateTime().AsString());
         } else {
            gMessMgr->Error()<<"No DB !! bye " << endm;
            assert(0); 
@@ -885,8 +887,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.10 2002/06/04 16:09:36 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.11 2002/09/10 16:51:32 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.11  2002/09/10 16:51:32  pavlinov
+// Discard line with mDbMaker->SetDateTime
+//
 // Revision 1.10  2002/06/04 16:09:36  pavlinov
 // added option with DB(pedestal ans calibration  coefficients
 //
