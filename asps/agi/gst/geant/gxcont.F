@@ -1,7 +1,10 @@
 *
-* $Id: gxcont.F,v 1.5 2000/01/07 00:48:49 nevski Exp $
+* $Id: gxcont.F,v 1.6 2000/09/28 00:38:28 fisyak Exp $
 *
 * $Log: gxcont.F,v $
+* Revision 1.6  2000/09/28 00:38:28  fisyak
+* Clean up for g77
+*
 * Revision 1.5  2000/01/07 00:48:49  nevski
 * strong typing in quest required
 *
@@ -65,8 +68,8 @@
       CHARACTER*32 CHPATL,CHPAR,Cmate,Cpart,Cvec
       External     IGIWTY
 * the following is a part of the GCDRAW keeps, forgotten in the official code
-      Integer      MyISel
-      real         zzfu,zzfv
+*yf      Integer      MyISel
+*yf      real         zzfu,zzfv
       Logical      First_QNEXT/.true./
 **
 **    ------------------------------------------------------------------
