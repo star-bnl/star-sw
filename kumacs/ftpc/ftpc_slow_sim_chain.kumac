@@ -13,7 +13,7 @@
 
 macro ftpc_slow_sim_chain_
        input_g2t_file=/afs/rhic/star/users/jcs/public/g2t_pipealu_1.dsl_
-       output_file=/afs/rhic/star/users/jcs/public/ftpc_slow_sim_pipealu_1.tab_
+       output_file=ftpc_slow_sim_pipealu_1.tab_
        gas_file=/afs/rhic/star/users/jcs/public/gas.dat_
        nskip=0_
        nevents=1
@@ -26,7 +26,7 @@ DEFAULT = _
 ./pams/global/kumac,_
 ./pams/svt/kumac,_
 ./pams/tpc/kumac,_
-./pams/ftpc/kumac,-
+./pams/ftpc/kumac,_
 $STAR/kumacs/util,_
 $STAR/kumacs/chain,_
 $STAR/kumacs/tpc,_
