@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.11 2004/07/30 14:15:10 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.12 2004/07/30 20:15:10 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.12  2004/07/30 20:15:10  fisyak
+// Synchronize Pcoll and Global Tags, remove TpcTags fro chain
+//
 // Revision 1.11  2004/07/30 14:15:10  fisyak
 // Back to idl tag definition
 //
@@ -75,10 +78,10 @@ Int_t StTagsMaker::Make(){
   if (event) {
     StPrimaryVertex *primVertex = event->primaryVertex();
     if (primVertex) {//    Primary vertex (x,y,z), with some flag if not found
-      row.xPrimVertex =  primVertex->position().x();    // x-vertex
-      row.yPrimVertex =  primVertex->position().y();    // y-vertex
-      row.zPrimVertex =  primVertex->position().z();    // z-vertex
-    } else row.vertexFlag = 99;
+      row.primaryVertexX =  primVertex->position().x();    // x-vertex
+      row.primaryVertexY =  primVertex->position().y();    // y-vertex
+      row.primaryVertexZ =  primVertex->position().z();    // z-vertex
+    } else row.primaryVertexFlag = 99;
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
     if ( theTriggers){
       StCtbTriggerDetector &theCtb = theTriggers->ctb();

@@ -42,16 +42,11 @@ Int_t StPCollTagMaker::Make(){
   PCollTag_st row;
   //fill default values for the PColl Tags
   row.chargedMultiplicity = 0;
-  row.numberOfPhotonClusters = 0;
   row.numberOfElectronsInEmc = 0;
-  row.numberOfMwpcHits = 0;
   row.numberOfPrimaryTracks= 0;
   row.vectorSumOfPt = -9999.;
   row.totalCharge = -9999.;
   row.pseudorapidityOfEvent = -9999.0;
-  row.primaryVertexX = -9999.;
-  row.primaryVertexY = -9999.;
-  row.primaryVertexZ = -9999.;
   row.zdc1Energy = -9999.0;
   row.zdc2Energy = -9999.0;
 
@@ -75,12 +70,6 @@ Int_t StPCollTagMaker::Make(){
     return kStErr;
   }
 
-  StPrimaryVertex* vtx = event->primaryVertex();
-  if(vtx) {
-    row.primaryVertexX = vtx->position().x();
-    row.primaryVertexY = vtx->position().y();
-    row.primaryVertexZ = vtx->position().z();
-  }
 
   if(tt) { 
   row.zdc1Energy = tt->adcZDCEast;
