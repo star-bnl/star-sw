@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.28 2001/07/16 21:38:44 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.29 2002/01/17 21:14:38 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.29  2002/01/17 21:14:38  perev
+ * Akio FPD reader
+ *
  * Revision 1.28  2001/07/16 21:38:44  perev
  * EMC added
  *
@@ -128,6 +131,7 @@ StDAQReader::StDAQReader(const char *file)
   fSVTReader 	= 0;
   fFTPCReader   = 0;
   fTOFReader    = 0;
+  fFPDReader    = 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -184,6 +188,7 @@ int StDAQReader::readEvent()
   delete fRICHReader; 	fRICHReader = 0;
   delete fL3Reader; 	fL3Reader   = 0;
   delete fTOFReader;    fTOFReader  = 0;
+  delete fFPDReader;    fFPDReader  = 0;
   if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
   fEventReader->setVerbose(fVerbose);
@@ -249,6 +254,8 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::TOFPresent()  const {return  fEventInfo->TOFPresent;}
 //_____________________________________________________________________________
+   int StDAQReader::FPDPresent()  const {return  fEventInfo->FPDPresent;}
+//_____________________________________________________________________________
    int StDAQReader::EMCPresent()  const {return  fEventInfo->EMCPresent;}
 //_____________________________________________________________________________
    int StDAQReader::SMDPresent()  const {return  fEventInfo->SMDPresent;}
@@ -312,6 +319,14 @@ StTOFReader *StDAQReader::getTOFReader()
     fTOFReader = ::getTOFReader(fEventReader);
   }
   return fTOFReader;
+}
+//_____________________________________________________________________________
+StFPDReader *StDAQReader::getFPDReader()
+{
+  if (!fFPDReader) {
+    fFPDReader = ::getFPDReader(fEventReader);
+  }
+  return fFPDReader;
 }
 //_____________________________________________________________________________
 StTRGReader *StDAQReader::getTRGReader()
