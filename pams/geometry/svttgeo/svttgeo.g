@@ -1,6 +1,9 @@
-* $Id: svttgeo.g,v 1.17 2001/09/10 16:24:54 nevski Exp $
+* $Id: svttgeo.g,v 1.18 2001/09/10 17:35:51 nevski Exp $
 *
 * $Log: svttgeo.g,v $
+* Revision 1.18  2001/09/10 17:35:51  nevski
+* bug fix - outer radius for a single ladder corrected
+*
 * Revision 1.17  2001/09/10 16:24:54  nevski
 * bug fix - outer radius for a single ladder corrected
 *
@@ -465,6 +468,8 @@ Block SVTT is the mother of all SVT volumes
          if (ilayer<6) then
             USE SVTL layer=ilayer+1
             radmax=svtl_radius
+         else
+            radmax=svtg_rSizeMax
          endif
          USE SVTL layer=ilayer
          Create   SLYD  " layer mother " 
