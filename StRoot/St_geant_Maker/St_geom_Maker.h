@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.h,v 1.2 1998/12/04 19:36:48 fisyak Exp $
+// $Id: St_geom_Maker.h,v 1.3 1998/12/16 20:56:24 fisyak Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.3  1998/12/16 20:56:24  fisyak
+// Add gstar to ROOT
+//
 // Revision 1.2  1998/12/04 19:36:48  fisyak
 // Add Pavel/Ruben gstar interface
 //
@@ -35,12 +38,10 @@ class TNode;
 
 #endif
 //class St_stk_stkpar;
-extern "C"    void    geant_();
-extern "C"    void    agmain_();
 class St_geom_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.2 1998/12/04 19:36:48 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.3 1998/12/16 20:56:24 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  TNode*   fNode;
