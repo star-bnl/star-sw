@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.62 2001/09/06 15:46:55 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.63 2001/09/21 21:06:39 jcs Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.63  2001/09/21 21:06:39  jcs
+// Set HitIndex correctly
+//
 // Revision 1.62  2001/09/06 15:46:55  caines
 // Indexing out by 1 for SVT
 //
@@ -193,7 +196,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.62 2001/09/06 15:46:55 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.63 2001/09/21 21:06:39 jcs Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -437,7 +440,7 @@ Int_t  St_dst_Maker::Filler(){
           // Fill 'used in the fit' info
 
     dst_point_st *mypoint  = point->GetTable();
-    int HitIndex = tphit->GetNRows();
+    int HitIndex = point->GetNRows();
 
 
     const float maxRange   = 22;
