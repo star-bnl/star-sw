@@ -122,6 +122,7 @@ void kam_tdm_newdataset_()
 }
 STAFCV_T tdm_newdataset(char* name)
 {
+   long dim = 0; //HACK - REMOVE THIS JUNK!!!
    if( !tdm->newDataset(name,dim) ){
       EML_FAILURE(KAM_METHOD_FAILURE);
    }
@@ -337,6 +338,7 @@ void kam_tdmdataset_adddataset_()
 STAFCV_T tdmdataset_adddataset(char* dsname,char* name)
 {
    tdmDataset *dataset;
+   long dim = 0; //HACK - REMOVE THIS JUNK!!!
    if( NULL == (dataset = tdm->findDataset(dsname))
    ||  !dataset->addDataset(name,dim)
    ){
@@ -1032,7 +1034,7 @@ void kam_tdmtable_show_()
 
         STAFCV_T status = tdmtable_show(name);
 }
-STAFCV_T tdmtable_show(char* name);
+STAFCV_T tdmtable_show(char* name)
 {
    tdmTable* table;		/* tdmTable object */
 
