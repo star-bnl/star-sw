@@ -20,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.10 1999/12/12 17:25:51 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.11 1999/12/13 22:51:52 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -107,7 +107,7 @@ TAxis3D::TAxis3D() : TNamed(TAxis3D::rulerName,"ruler"){
   InitSet();
 }
 //______________________________________________________________________________
-TAxis3D::TAxis3D(Option_t *option): TNamed(TAxis3D::rulerName,"ruler")
+TAxis3D::TAxis3D(Option_t *): TNamed(TAxis3D::rulerName,"ruler")
 {
   fSelected = 0;
   InitSet();
@@ -205,6 +205,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
       break;
 
    case kButton1Up: {
+        Int_t i;
         gPad->GetCanvas()->FeedbackMode(kFALSE);
         TView *view = gPad->GetView();
         if (!view) break;                       // no 3D view yet 
@@ -212,7 +213,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
         Float_t min[3],max[3],viewCenter[3],viewCenterNDC[3];
 
         view->GetRange(min,max);
-        for (int i =0; i<3;i++) viewCenter[i] = (max[i]+min[i])/2;
+        for (i =0; i<3;i++) viewCenter[i] = (max[i]+min[i])/2;
         view->WCtoNDC(viewCenter,viewCenterNDC);
         // Define the center
         Axis_t center[3],pointNDC[3],size[3],oldSize[3];
@@ -221,17 +222,17 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
         pointNDC[2] = viewCenterNDC[2];
         view->NDCtoWC(pointNDC, center); 
 
-        for (int i =0; i<3;i++) oldSize[i] = size[i]= (max[i]-min[i])/2;
+        for (i =0; i<3;i++) oldSize[i] = size[i]= (max[i]-min[i])/2;
 
         // If there was a small motion move the center only, do not change a scale
         if (TMath::Abs(px-px0)+TMath::Abs(py - py0) > 4 ) {
            Float_t newEdge[3];
-           for (int i =0; i<3;i++) size[i] = -1;
+           for (i =0; i<3;i++) size[i] = -1;
 
            pointNDC[0] = x0; pointNDC[1] = y0;
 
            view->NDCtoWC(pointNDC, newEdge); 
-           for (int i =0; i<3;i++) {
+           for (i =0; i<3;i++) {
              Float_t newSize = TMath::Abs(newEdge[i]-center[i]);
              if ( newSize/oldSize[i] > 0.002)
                size[i] = TMath::Max(size[i], newSize);
@@ -242,7 +243,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
            pointNDC[0] = x1; pointNDC[1] = y1;
 
            view->NDCtoWC(pointNDC, newEdge); 
-           for (int i =0; i<3;i++) {
+           for (i =0; i<3;i++) {
              Float_t newSize = TMath::Abs(newEdge[i]-center[i]);
              if ( newSize/oldSize[i] > 0.002)
                size[i] = TMath::Max(size[i], newSize);
@@ -262,7 +263,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
           }
 #endif
         }
-        for (int i =0; i<3;i++) {
+        for (i =0; i<3;i++) {
           max[i] = center[i] + size[i];
           min[i] = center[i] - size[i];
         }
@@ -279,7 +280,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
  
  
 //______________________________________________________________________________
-Text_t *TAxis3D::GetObjectInfo(Int_t px, Int_t py)
+Text_t *TAxis3D::GetObjectInfo(Int_t , Int_t )
 {
 //   Redefines TObject::GetObjectInfo.
 //   Displays the histogram info (bin number, contents, integral up to bin
@@ -289,7 +290,7 @@ Text_t *TAxis3D::GetObjectInfo(Int_t px, Int_t py)
 }
  
 //______________________________________________________________________________
-void TAxis3D::Paint(Option_t *option)
+void TAxis3D::Paint(Option_t *)
 {
  
   //  if (!MakeChopt(option)) return; //check options and fill Hoption structure
@@ -444,19 +445,20 @@ Axis_t *TAxis3D::PixeltoXYZ(Axis_t px, Axis_t py, Axis_t *point3D, TView *view)
     Axis_t x[3] = {px,py,0.5}; // ((TPad *)thisPad)->AbsPixeltoXY(px,py,x[0],x[1]);
     Float_t min[3], max[3];
     view->GetRange(min,max);
-    for (int i =0; i<3;i++) min[i] = (max[i]+min[i])/2;
+    Int_t i;
+    for (i =0; i<3;i++) min[i] = (max[i]+min[i])/2;
     view->WCtoNDC(min,max);
     min[0] = x[0]; min[1] = x[1];
     min[2] = max[2];
     view->NDCtoWC(min, x);  
-    for (int i=0;i<3;i++) point3D[i] = x[i];
+    for (i=0;i<3;i++) point3D[i] = x[i];
     thisPoint = point3D;
   }
   return thisPoint;
 }
 
 //______________________________________________________________________________
-void TAxis3D::SavePrimitive(ofstream &out, Option_t *option)
+void TAxis3D::SavePrimitive(ofstream &out, Option_t *)
 {
     // Save primitive as a C++ statement(s) on output stream out
  
@@ -631,7 +633,7 @@ TAxis3D *TAxis3D::GetPadAxis(TVirtualPad *pad)
   if (thisPad) {
     // Find axis in the current thisPad 
     TList *l = thisPad->GetListOfPrimitives();
-    TObject *o = l->FindObject(TAxis3D::rulerName);
+    o = l->FindObject(TAxis3D::rulerName);
     if (!(o && o->InheritsFrom(Class()->GetName()))) o = 0;
   }
   return (TAxis3D *)o;
@@ -692,6 +694,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.11  1999/12/13 22:51:52  fine
+// Fixes to make Sun C++ compiler happy
+//
 // Revision 1.10  1999/12/12 17:25:51  fine
 // smart zooming
 //
