@@ -14,13 +14,15 @@ class StMagUtilities;
 
 class StTpcHitMover : public StMaker {
  public:
-  StTpcHitMover(const Char_t *name);
+  StTpcHitMover(const char *name="tpc_hits");
   virtual ~StTpcHitMover();
 
   virtual Int_t Init();
   virtual Int_t InitRun(Int_t runnumber);
   virtual Int_t Make();
-  virtual Int_t Finish();
+  virtual Int_t Finish();  
+  virtual void  AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
+
 
   void setInputDataSetName(const Char_t *inputDataSetName);
   inline TString getInputDataSetName() const {return mInputDataSetName;}
@@ -31,8 +33,8 @@ class StTpcHitMover : public StMaker {
   void setOutputMode(Int_t mode);
   inline Int_t getOutputMode() const {return mOutputMode;}
 
-  virtual const Char_t *getCVS() const { 
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.1 2004/01/26 23:03:56 jeromel Exp $ built "__DATE__" "__TIME__; 
+  virtual const Char_t *GetCVS() const { 
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.2 2004/01/27 01:55:29 jeromel Exp $ built "__DATE__" "__TIME__; 
     return cvs; 
   }
  protected:
