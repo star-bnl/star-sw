@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.45 2000/04/13 02:53:35 perev Exp $
+// $Id: StMaker.h,v 1.46 2000/05/20 01:11:07 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.46  2000/05/20 01:11:07  perev
+// IventNumber and BfcStatus added
+//
 // Revision 1.45  2000/04/13 02:53:35  perev
 // StMaker::GetValidity added
 //
@@ -156,8 +159,9 @@ protected:
    Int_t	   m_Mode;		// Integer mode of maker
    Int_t           m_Number;        	//Serial event number
    Int_t           m_DebugLevel;    	//Debug level
+   Int_t           m_MakeReturn;    	//Make() return flag
    TStopwatch      m_Timer;             //Timer object
-
+  
    StMaker        *gStChain;  		//???? Temporary ?????
    Bool_t          fActive;             // true if active
 public:
@@ -204,6 +208,8 @@ public:
    static  StMaker     *GetChain(){return fgStChain;}
    static  StMaker     *GetFailedMaker(){return fgFailedMaker;}
    virtual StMaker     *GetParentChain() const;
+   virtual Int_t        GetIventNumber() const ;
+   virtual void         SetIventNumber(Int_t iv);
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
@@ -231,6 +237,7 @@ public:
 
    virtual Int_t 	GetDebug() const {return m_DebugLevel;}
    virtual Int_t 	   Debug() const {return GetDebug();};
+   virtual Int_t 	GetMakeReturn() const {return m_MakeReturn;}
    virtual TList       *Histograms()  const {return GetHistList();}
    virtual TString      GetAlias (const char* log, const char* dir=".aliases") const ;
    virtual TString      GetInput (const char* log) const {return GetAlias(log);};
@@ -247,6 +254,7 @@ public:
    virtual void        	SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
    virtual void        	SetDEBUG(Int_t l=1);                     // *MENU*
    virtual void         SetActive(Bool_t k=kTRUE){fActive = k;}  // *MENU*
+   virtual void         SetMakeReturn(Int_t ret){m_MakeReturn=ret;}  
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	SetInput(const char* log,const char* act){SetAlias(log,act);};
@@ -273,7 +281,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.45 2000/04/13 02:53:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.46 2000/05/20 01:11:07 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
