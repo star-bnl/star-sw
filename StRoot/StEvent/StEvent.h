@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.12 2000/06/19 01:32:15 perev Exp $
+ * $Id: StEvent.h,v 2.13 2000/09/06 22:34:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.12  2000/06/19 01:32:15  perev
- * Thomas StEvent branches added
+ * Revision 2.13  2000/09/06 22:34:17  ullrich
+ * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
  *
  * Revision 2.13  2000/09/06 22:34:17  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
@@ -100,7 +100,7 @@ public:
     
     TString                             type() const;
     Long_t                              id() const;
-    ULong_t                             bunchCrossingNumber() const;
+    Long_t                              runId() const;
     Long_t                              time() const;
     ULong_t                             triggerMask() const;
     ULong_t                             bunchCrossingNumber(UInt_t) const;
@@ -155,7 +155,7 @@ public:
 
     void setType(const Char_t*);
     void setRunId(Long_t);
-    void setBunchCrossingNumber(ULong_t);
+    void setId(Long_t);
     void setTime(Long_t);
     void setTriggerMask(ULong_t);
     void setBunchCrossingNumber(ULong_t, UInt_t);
