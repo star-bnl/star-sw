@@ -191,7 +191,7 @@ ClassImp(StEventHelper)
 //______________________________________________________________________________
 StEventHelper::StEventHelper(const TObject *evt,const char *opt)
 {
-   fMap = new TExMap();
+   fMap = new TExMap(10000);
    fObject = 0;
    Reset(evt,opt);
 }
@@ -208,7 +208,6 @@ void StEventHelper::Clear(Option_t *opt)
 //______________________________________________________________________________
 void StEventHelper::Reset(const TObject *evt,const char *opt)
 {
-   if (fObject == evt) return;
    fObject = (TObject *)evt;
    Clear();
    fMap->Delete();
@@ -293,7 +292,7 @@ void StEventHelper::ls(Option_t* option) const
    Long_t key,val;
    while( it.Next(key,val) ) {
      if (val != 2) continue;
-     StStrArray *a = (StStrArray *)key;
+     StStrArray *a = (StStrArray *)(key);
      Long_t &cnt = map((Long_t)a->IsA());
 //     printf("%s %p\n",a->ClassName(),(void*)a);
      if (!cnt) {
@@ -331,7 +330,7 @@ TObjArray *StEventHelper::SelConts(const char *sel)
   Long_t key,val;
   while( it.Next(key,val) ) {
      if (val == 1) 	continue;
-     StStrArray *a = (StStrArray *)key;
+     StStrArray *a = (StStrArray *)(key);
      if(a->size()==0)				continue;
      int n =0;
      if (reg.Index(a->ClassName(),&n)<0)	continue;   
