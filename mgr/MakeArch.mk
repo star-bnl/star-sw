@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.45  1998/11/29 21:19:16  fisyak
+#  new merge with NT
+#
 #  Revision 1.44  1998/11/16 01:26:44  fisyak
 #  New merging with NT
 #
@@ -113,8 +116,14 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/16 01:26:44 $ 
+#             Last modification $Date: 1998/11/29 21:19:16 $ 
 #. default setings
+
+PWD   := pwd
+GETCWD:= getcwd
+UNAME := uname
+SYS   := sys
+SO_SUBDIR := lib
 
 MOTIF := Yess
 RM := rm -f
@@ -197,11 +206,16 @@ LEXLIB   := -ll
 ifneq (,$(findstring $(STAR_SYS),intel_wnt))
 #  case WIN32
 #  ====================
-
+  SUNRPC:= E:/staf/sunrpc
+  MAKE  := make.exe
+  PWD   := pwd.exe
+  GETCWD:= getcwd.exe
+  UNAME := uname.bat
+  SYS   := sys.bat
+  SO_SUBDIR := bin
   MOTIF :=
   DEBUG :=  
-#  SHELL := cmd /C
-#  export SHELL
+#  SHELL := echo ==== cmd /C
   NT     := intel_wnt
   CAT    := type
   COUT   := -Fo
@@ -218,7 +232,7 @@ ifneq (,$(findstring $(STAR_SYS),intel_wnt))
   Cxx   :=cc
   So    :=dll
 
-  MAKECERNLIB = $(subst \,\\,$(subst /,\,$(STAF_MAKE_HOME)/cernlib.bat)) 
+  MAKECERNLIB := $(subst \,\\,$(subst /,\,$(STAF_MAKE_HOME)/cernlib.bat)) 
 # MAKECERNLIB = call Y:\wrk\mgr\cernlib.bat
 
   MAKEDEPEND =echo Please RUN this makefile from UNIX, first
@@ -239,18 +253,21 @@ ifneq (,$(findstring $(STAR_SYS),intel_wnt))
   LD      := $(CXX)
   SO      := link
 #  SOFLAGS := -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL -PDB:$(PDB)_all
-  SOFLAGS := -DEBUG  -INCREMENTAL:NO -NOLOGO -DLL 
-  CXXFLAGS:= $(cvarsdll) -MD -G5 -Zi 
+  SOFLAGS := -DEBUG  -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL 
+  CXXFLAGS:= $(cvarsdll) -MD -G5 -Zi -nologo -DASU_MALLOC_OFF
 #  CXXFLAGS:= $(cvarsdll) -MD -G5 -Zi -Fd$(PDB)
   CFLAGS  := $(CXXFLAGS)
   LDFLAGS := $(conlflags)
-  CLIBS   := $(guilibsdll)
+  CLIBS   := ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB
+# CLIBS   := $(guilibsdll) 
 
   FC         = fl32
   FLIBS   := dfordll.lib
 #  FFLAGS  := -MD -G5 -Zi -Fd$(PDB) -fpp -Oxp
-  FFLAGS  := -MD -G5 -Zi -fpp -Oxp -nokeep
+  FFLAGS  := -MD -G5 -Zi -fpp -Oxp -nokeep -nologo
   FEXTEND := -extend_source
+  KUIPC   :=kuipc.exe
+  FLIBS   := DFORDLL.LIB
 endif 
 
 ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
@@ -562,4 +579,8 @@ endif
   
 
 CERN_ROOT_LIBS := $(shell $(MAKECERNLIB) geant321 pawlib graflib mathlib)
+
+# Current Working Directory
+#
+CWD := $(shell $(PWD))
 
