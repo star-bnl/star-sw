@@ -14,11 +14,12 @@
 
 #include "St_Points3D.h"
 #include "TAttLine.h"
+#include "TAttMarker.h"
 #include "X3DBuffer.h"
 #include "St_AttributesABC.h"
 
 
-class St_PolyLine3D : public St_Points3D, public St_AttributesABC {
+class St_PolyLine3D : public St_Points3D, public TAttLine, public TAttMarker { //  public St_AttributesABC {
 protected:        
         St_AttributesABC   *fAttributes; //!
 

@@ -25,7 +25,7 @@ protected:
 
         St_Points3DABC *fPoints;
 
-        Bool_t IsOwner() {return TestBit(kIsOwner);}
+        Bool_t IsOwner() const {return TestBit(kIsOwner);}
         Bool_t DoOwner(Bool_t done=kTRUE);
 
 public:
@@ -76,7 +76,7 @@ inline Option_t *St_Points3D::GetOption() const          {return fPoints?fPoints
 inline Bool_t    St_Points3D::Is3D()                     {return fPoints?fPoints->Is3D():kFALSE;}
 inline Int_t     St_Points3D::SetLastPosition(Int_t idx) {return fPoints?fPoints->SetLastPosition(idx):0;}
 inline void      St_Points3D::SetOption(Option_t *option){if (fPoints) fPoints->SetOption(option);}
-inline Int_t     St_Points3D::SetPoint(Int_t point, Float_t x, Float_t y, Float_t z){return fPoints?fPoints->SetPoint(point,z,y,z):0;}
+inline Int_t     St_Points3D::SetPoint(Int_t point, Float_t x, Float_t y, Float_t z){return fPoints?fPoints->SetPoint(point,x,y,z):0;}
 inline Int_t     St_Points3D::SetPoints(Int_t n, Float_t *p, Option_t *option){return fPoints?fPoints->SetPoints(n,p,option):0;}
 
 inline Int_t     St_Points3D::Size() const               {return fPoints?fPoints->Size():0;}

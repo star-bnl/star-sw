@@ -1,3 +1,4 @@
+#include "St_PolyLine3D.h"
 #include <TPolyLine3D.h>
 #include <TPolyMarker3D.h>
 #include "St_Node.h"
@@ -9,6 +10,8 @@
 #include <TPad.h>
 
 #include "St_PolyLineShape.h"
+
+#define MyInputPoints St_PolyLine3D
 
 ClassImp(St_PolyLineShape)
 
@@ -26,9 +29,9 @@ St_PolyLineShape::St_PolyLineShape()
 
 //______________________________________________________________________________
 #ifdef LINES
-St_PolyLineShape::St_PolyLineShape(TPolyLine3D  *points,Option_t* option)
+St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
 #else
-St_PolyLineShape::St_PolyLineShape(TPolyMarker3D  *points,Option_t* option)
+St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
 #endif
 {
    m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
@@ -69,19 +72,19 @@ void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
       Float_t min[3];
       Float_t max[3];
       view->GetRange(min,max);
-      TPolyLine3D *lx = new TPolyLine3D(2);
+      MyInputPoints *lx = new MyInputPoints(2);
       lx->SetLineColor(6);
       lx->SetLineWidth(5);
       lx->SetPoint(0,0,0,0);
       lx->SetPoint(1,max[0],0,0);
 
-      TPolyLine3D *ly = new TPolyLine3D(2);
+      MyInputPoints *ly = new MyInputPoints(2);
       ly->SetLineColor(4);
       ly->SetLineWidth(5);
       ly->SetPoint(0,0,0,0);
       ly->SetPoint(1,0,max[1],0);
 
-      TPolyLine3D *lz = new TPolyLine3D(2);
+      MyInputPoints *lz = new MyInputPoints(2);
       lz->SetLineColor(2);
       lz->SetLineWidth(5);
       lz->SetPoint(0,0,0,0);
@@ -191,7 +194,8 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 #ifdef LINES  
     Float_t width = GetWidthFactor()*(m_Points->GetLineWidth());
 #else
-    Float_t width = GetWidthFactor()*(m_Points->GetMarkerSize());
+//    Float_t width = GetWidthFactor()*(m_Points->GetMarkerSize());
+    Float_t width = GetWidthFactor()*(m_Points->GetSizeAttribute());
 #endif
 
     mrot[0][0] *= width;
@@ -209,7 +213,8 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 #ifdef LINES  
     Color_t color = m_Points->GetLineColor();
 #else
-    Color_t color = m_Points->GetMarkerColor();
+    Color_t color = m_Points->GetColorAttribute();
+//    Color_t color = m_Points->GetMarkerColor();
 #endif
 
     St_Node node("SegmentNode","SegmentNode", shape);

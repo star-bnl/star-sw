@@ -71,7 +71,7 @@ St_PointsArray3D::St_PointsArray3D(Int_t n, Option_t *option)
    else fN = n;
  
    fP = new Float_t[3*fN];
-   for (Int_t i=0; i<3*fN; i++) fP[i] = 0;
+   memset(fP,0,3*fN*sizeof(Float_t));
    fOption = option;
 }
  
@@ -88,16 +88,12 @@ St_PointsArray3D::St_PointsArray3D(Int_t n, Float_t *p, Option_t *option)
  
    fP = new Float_t[3*fN];
    if (n > 0) {
-     for (Int_t i=0; i<3*n; i++) {
-        fP[i] = p[i];
-     }
-    fLastPoint = fN-1;
+     memcpy(fP,p,3*fN*sizeof(Float_t));
+     fLastPoint = fN-1;
    }
    else {
-     for (Int_t i=0; i<3*fN; i++) {
-        fP[i] = 0;
-     }
-    fLastPoint = -1;
+     memset(fP,0,3*fN*sizeof(Float_t));
+     fLastPoint = -1;
    }
    fOption = option;
 }
@@ -119,17 +115,14 @@ St_PointsArray3D::St_PointsArray3D(Int_t n, Float_t *x, Float_t *y, Float_t *z, 
    Int_t j = 0;
    if (n > 0) {
        for (Int_t i=0; i<n;i++) {
-           fP[j]   = x[i];
-           fP[j+1] = y[i];
-           fP[j+2] = z[i];
-           j += 3;
+           fP[j++] = x[i];
+           fP[j++] = y[i];
+           fP[j++] = z[i];
        }
        fLastPoint = fN-1;
    }
    else {
-     for (Int_t i=0; i<3*fN; i++) {
-        fP[i] = 0;
-     }
+      memset(fP,0,3*fN*sizeof(Float_t));
    }
    fOption = option;
 }
@@ -243,8 +236,8 @@ void St_PointsArray3D::Print(Option_t *option)
 //______________________________________________________________________________
 Int_t St_PointsArray3D::SetLastPosition(Int_t idx)
 {
-  Int_t lastPoint = fLastPoint;
-  fLastPoint = TMath::Min(idx,fN-1);
+  Int_t lastPoint = GetLastPosition();
+  fLastPoint = TMath::Min(idx,GetN()-1);
   return idx;
 }
  
@@ -262,7 +255,7 @@ Int_t St_PointsArray3D::SetPoint(Int_t n, Float_t x, Float_t y, Float_t z)
    if (n < 0) return n;
    if (!fP || n >= fN) {
    // re-allocate the object
-      Int_t step = TMath::Min(10, fN/4);
+      Int_t step = TMath::Max(10, fN/4);
       Float_t *savepoint = new Float_t [3*(fN+step)];
       if (fP && fN){
          memcpy(savepoint,fP,3*fN*sizeof(Float_t));
