@@ -48,27 +48,10 @@ class StObjArray;
 class StStrArray;
 class StRefArray;
 
-//______________________________________________________________________________
-class StRegistry 
-{
-public:
-
-         StRegistry();
-virtual ~StRegistry(){};
-static void CheckIn(const StObjArray *Arr);
-static void CheckIn(const TObject *Obj, const StObjArray *Arr);
-static Int_t  Where(const TObject *Obj, StObjArray *arr, Int_t &idx);
-static void  Remove(const TObject *Obj);  
-static void  ls(int nmax=1000000);
-
-static  StObjArray fgColl[2];
-ClassDef(StRegistry,0)
-};
 
 class StObjArray : public StObject {
-friend class StRegistry;
 public:
-             StObjArray(Int_t sz=0){if(sz) resize(sz); SetBit(kStARR);}
+             StObjArray(Int_t sz=0){if(sz) resize(sz);}
    virtual  ~StObjArray(){}
 virtual void Browse(TBrowser *b);
         void random_shuffle(int start=0,int end=0x7fffffff);
@@ -82,7 +65,6 @@ virtual void Browse(TBrowser *b);
         void resize(size_t sz,TObject *v=0) {fV.resize(sz,v);}
 virtual Bool_t IsFolder();
         TObject *&at(int i){return fV[i];}
-        TObject * const &at(int i) const {return fV[i];}
         void     put_at(TObject *obj,int i){fV[i]=obj;}
 
         TObject * const &front() const { return fV.front();}
@@ -90,17 +72,17 @@ virtual Bool_t IsFolder();
 
         TObject * const &back()  const { return fV.back();}
         TObject *       &back()        { return fV.back();}
-        void            ls(int nmax=1000000) const ;
+
 const_VecTObjIter begin() const {return fV.begin();}
         VecTObjIter begin()       {return fV.begin();}
 const_VecTObjIter end()   const {return fV.end();}
         VecTObjIter end()         {return fV.end();}
         VecTObjIter erase(VecTObjIter it                 ) {return fV.erase(it);}
         VecTObjIter erase(VecTObjIter fst,VecTObjIter lst) {return fV.erase(fst,lst);}
+        TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
 void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
 protected:
-        TObject *&       operator[](Int_t i)       {return fV[i];}
 #ifndef __CINT__
 VecTObj fV;
 #endif //_CINT__
@@ -125,11 +107,9 @@ public:
  virtual void        SetName(const char *name);
  virtual const char *GetName() const;
 
+ void push_back(const TObject *to){fV.push_back((TObject*)to);}
  VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
  void clear();
- void put_at(TObject *obj,int i){fV[i]=obj;StRegistry::CheckIn(obj,this);}
- void push_back(const TObject * const to)
-               {fV.push_back((TObject*)to);StRegistry::CheckIn(to,this);}
 private:
 TString fIDName;
 TString fName;
@@ -143,10 +123,7 @@ class StRefArray : public StObjArray
 public:
   StRefArray(Int_t sz=0);
   StRefArray(const StRefArray &from);
- virtual ~StRefArray(){};
- void put_at(TObject *obj,int i){fV[i]=obj;StRegistry::CheckIn(obj,this);}
- void push_back(const TObject *const to)
-               {fV.push_back((TObject*)to);StRegistry::CheckIn(to,this);}
+   ~StRefArray(){};
 ClassDef(StRefArray,2)
 };
 
@@ -184,7 +161,7 @@ const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iter
       {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)it);}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst)\
       {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)fst,(VecTObjIter)lst);}\
-/*VP  St ## QWERTY *       &operator[](Int_t i)       {return at(i);}*/\
+      St ## QWERTY *       &operator[](Int_t i)       {return at(i);}\
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
 void  push_back(const St ## QWERTY * const to){fV.push_back((TObject*const)to);}\
 \
@@ -216,7 +193,7 @@ const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iter
       {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)it);}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst)\
       {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)fst,(VecTObjIter)lst);}\
-/*VP  St ## QWERTY *       &operator[](Int_t i)       {return at(i);}*/\
+      St ## QWERTY *       &operator[](Int_t i)       {return at(i);}\
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
 void  push_back(const St ## QWERTY *to){StStrArray::push_back((TObject*)to);}\
 \
@@ -238,11 +215,5 @@ ClassImp(StSPtrVec ## QWERTY) \
 void 		StSPtrVec ## QWERTY::Streamer(TBuffer& b){StStrArray::Streamer(b);} \
 
 #endif /*End not __CINT__*/
-
-
-
-
-
-
 #endif
 
