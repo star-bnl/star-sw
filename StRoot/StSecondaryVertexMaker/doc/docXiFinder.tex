@@ -3,6 +3,7 @@
 \usepackage{footnpag,array}
 \usepackage{fancyhdr,fancybox}
 \usepackage{amsmath}
+\usepackage{epsfig}
 %\usepackage{french}
 % Ca fait chier de pas pouvoir utiliser ca : les captions ne sont plus en italique et ca marque "Figure 1:" [sans espace devant le chiffre] au lieu de "{\sc Fig.} 1 :". 'faut que je me redefinisse une commande "caption".
 
@@ -51,19 +52,89 @@
 %\discretionary{}{-}{}
 %
 
-\parindent40pt
 
-\begin{center}
+%\newenvironment{maliste}
+%{ \begin{list}
+%        {$\bullet$}
+%        {\setlength{\labelwidth}{30pt}
+%         \setlength{\leftmargin}{35pt}
+%         \setlength{\itemsep}{\parsep}}}
+%{ \end{list} }
+% Si on remplace itemsep par un nombre avec ou sans unite : ca chie.
+% Si on remplace a la fois parsep  et itemsep : ca compile, mais aucun resultat (ca printe les valeurs sur le document, en fait).
 
-~
+\newenvironment{maliste}
+{\vspace{-7pt}
+ \begin{list}
+ {$\bullet$}
+ {\setlength{\labelwidth}{30pt}
+ \setlength{\leftmargin}{35pt}
+ \setlength{\itemsep}{-4pt}}}
+{\end{list}
+ \vspace{-6pt}}
+
+
+
+
+
+
+
+%\parindent40pt
+%
+%\begin{center}
+%
+%~
+%
+%\thispagestyle{empty}
+%
+%\vspace{8cm}
+%
+%{\Huge\bf XiFinder and V0Finder documentation}
+%
+%\end{center}
+
+%\begin{picture}(21cm,29.7cm)(0cm,0cm)
+%\put(5cm,5cm){\circle(3cm)}
+%\end{picture}
 
 \thispagestyle{empty}
+\unitlength 1mm
+\begin{picture}(200,220)(20,10)
+%\put(5,0){\vector(1,0){190}}
+%\put(5,0){\vector(0,1){230}}
+\linethickness{1mm}
+%\put(5,0){\framebox(190,250)
+%{\vspace{2cm}\\
+%{\Huge\bf XiFinder and V0Finder documentation}\\
+%\vspace{1cm}\\
+%{\tt StRoot/StSecondaryVertexMaker/}\\
+%\vspace{1cm}\\
+%\hfill {\small --- Julien Faivre}}
+%}
+%Ca marche pas, ca met rien a la ligne ; laisser une ligne vide non plus.
+%\put(5,0){\framebox(190,250){~\vspace{-3cm}\Huge\bf XiFinder and V0Finder documentation}}
+%Marche pas du tout...
+\put(5,0){\framebox(190,250){}}
+\linethickness{1pt}
+\put(6,1){\framebox(188,248){}}
+\put(5,140){\makebox(190,50){\Huge\bf XiFinder and V0Finder documentation}}
+\put(40,120){\makebox(100,50)[l]{\Large\tt StRoot/StSecondaryVertexMaker/ :}}
+\put(70,115){\makebox(100,50)[l]{\large\tt StV0FinderMaker.cxx}}
+\put(70,110){\makebox(100,50)[l]{\large\tt StV0FinderMaker.h}}
+\put(70,105){\makebox(100,50)[l]{\large\tt StXiFinderMaker.cxx}}
+\put(70,100){\makebox(100,50)[l]{\large\tt StXiFinderMaker.h}}
+\put(40,90){\makebox(100,50)[l]{\Large\tt StRoot/StSecondaryVertexMaker/doc/ :}}
+\put(70,85){\makebox(100,50)[l]{\large\tt docXiFinder.tex}}
 
-\vspace{8cm}
+\put(5,50){\makebox(190,50){\hfill --- Julien Faivre\hspace{40pt}}}
+\put(5,45){\makebox(190,50){\hfill Strangeness group\hspace{40pt}}}
+\put(5,40){\makebox(190,50){\tt\small\hfill julien.faivre@ires.in2p3.fr\hspace{40pt}}}
+\end{picture}
 
-{\Huge\bf XiFinder and V0Finder documentation}
 
-\end{center}
+
+
+
 
 
 \newpage
@@ -724,7 +795,7 @@ m^2_\Lambda & (E_++E_-)^2 - (\overrightarrow{p}_++\overrightarrow{p}_-)^2 \\
 $$
 
 
-To modify the structure of {\em casc\_geom} and of the loop coloured in green in {\sc Fig}. \ref{XiFC}, I've written the Fortran code as a set of for-loops, if-loops, goto's and blocks of instructions. The figures below show those reashapings : {\sc Fig}. \ref{cascgeom} shows the reshaping of {\em casc\_geom}, and {\sc Fig}. \ref{blocs} shows the reshaping of the inside of the loop over the intersection points (between the bachelor's helix and the V0's straight line). In {\sc Fig}. \ref{blocs}, what is called {\em Block 5} is actually a huge part of the program, in it hasn't been reshaped.
+To modify the structure of {\em casc\_geom} and of the loop coloured in green in {\sc Fig}. \ref{XiFC}, I've written the Fortran code as a set of for-loops, if-loops, goto's and blocks of instructions. The figures below show those reashapings : {\sc Fig}. \ref{cascgeom} shows the reshaping of {\em casc\_geom}, and {\sc Fig}. \ref{blocs} shows the reshaping of the inside of the loop over the intersection points (between the bachelor's helix and the V0's straight line). In {\sc Fig}. \ref{blocs}, what is called {\em Block 5} is actually a huge part of the program, and it hasn't been reshaped.
 
 \begin{center}
 $
@@ -948,9 +1019,9 @@ $
 \end{center}
 
 
-\subsubsection{Calculation of the intersection points and dca}
+\subsubsection{Calculation of the intersection points}
 
-Now, here is how the coordinates of the intersection points {\em in the bending plane (xOy)} between the V0's straight line and the bachelor's helix (actually, of their projection in the bending plane).
+Now, here is how are calculated the coordinates of the intersection points {\em in the bending plane (xOy)} between the V0's straight line and the bachelor's helix (actually, of their projection in the bending plane). This is done in the code in the former subroutine {\tt casc\_geom}.
 
 Let's call $\Delta$ the projection of the V0's trajectory, and $\mathcal C$ the circle that is the projection of the bachelor's trajectory. Their equations are :
 $$\Delta : y=ax+b \qquad\qquad\qquad {\mathcal C} : (x-x_c)^2+(y-y_c)^2 = R^2$$
@@ -990,6 +1061,292 @@ X = \frac{\alpha\beta\pm\sqrt{R^2(\alpha^2+1)-\beta^2}}{\alpha^2+1} \\
 \right.
 $$
 
+The 2-D coordinates of these 2 points are stored in the code in variables called {\tt xOut} and {\tt yOut}.
+
+
+
+
+
+
+
+
+\subsubsection{Calculation of the dca between the V0 and the bachelor}
+\label{paragrDca}
+
+The algorithm that calculates the dca between the V0 (a line) and the bachelor (a helix) is rather intuitive (see also {\sc Fig.} \ref{XiAlgoMieux}). This dca can't be calculated analytically, so the trick is to linearise the helix locally. This means that we will assume, for the dca calculation, that the helix is equal to its tangent at the intersection point between the helix and the V0 line.
+\label{linearisation}
+
+Then, the position of the point of the tangent where the distance to the V0 line is the smallest is calculated. To check that the linearisation is not a too strong approximation, the disctance between that point and the actual helix is calculated, and is required to be smaller than a certain fraction of the helix' radius. If this is true but if the distance is yet bigger than another fraction of the helix' radius (obviously smaller than the previous one), then the helix is linearised at the calculated point (instead of the intersection point in 2-D), and the calculation is re-done.
+
+This is done 3 times, or less if the distance between the calculated point and the actual helix matches the second criterium after less than 3 loops. So all the candidates that match the first criterium are kept, and those not matching the second criterium are simply improved by trying 3 times to linearise the helix at a point that is closer to the actual point where the distance to the V0 line is the smallest.
+
+The first part of the algorithm is illustrated by the figure \ref{calcFig1}, which shows the projection in the plane $(xOy)$ of the cascade geometry : that gives the circle $\mathcal C$ (projection of the helix) and the line $\Delta$ (projection of the 3-D line). $M$ is one of the 2 intersection points (always in 2-D ; in 3-D, the helix and the line almost never intersect), $C$ is the center of the circle, $R$ its radius, and $A$ is the projection of what is called the origin of the helix (it's most often the first hit point, or more exactly the point of the helix that is closest to the first hit, since the helix is a fit). $\Psi$ is the angle between the $x$ axis and the tangent to the circle in $A$. For lack of imagination, I'll keep the same names for the non-projected objects later ;-) ~~ (i.e. $\mathcal C$ for the helix, $\Delta$ for the V0 line and $A$ for the origin (not its projection) of the helix).
+
+\begin{center}
+
+\epsfig{file=calcFig1.eps,width=11cm}
+
+\mycaption{Projection of the cascade geometry in the 2-D plane (xOy)}
+\label{calcFig1}
+\end{center}
+
+%{\small{\normalsize 
+%The first part of the code that is run is the former subroutine {\tt update\_track\_param}. Its role is simply to move the orgin of the helix from its former position $A$ to its new position $M$ (actually, the point of the helix that overlaps with $M$ when projected to the $(xOy)$ plane).
+%}\par}
+
+%{\advance\baselineskip -5pt 
+%The first part of the code that is run is the former subroutine {\tt update\_track\_param}. Its role is simply to move the orgin of the helix from its former position $A$ to its new position $M$ (actually, the point of the helix that overlaps with $M$ when projected to the $(xOy)$ plane).
+%\par}
+
+%{\setlength{\baselineskip}{0.2\baselineskip}
+%The first part of the code that is run is the former subroutine {\tt update\_track\_param}. Its role is simply to move the orgin of the helix from its former position $A$ to its new position $M$ (actually, the point of the helix that overlaps with $M$ when projected to the $(xOy)$ plane).
+%\par}
+
+% Les 3 marchent, mais impossible de descendre en-dessous d'une certaine valeur !
+% Au fait : ce que ca fait est que ca reduit (ou augmente) l'interligne.
+
+The first part of the code that is run is the former subroutine {\tt update\_track\_param}. Its role is simply to move the orgin of the helix from its former position $A$ to its new position $M$ (actually, the point of the helix that overlaps with $M$ when projected to the $(xOy)$ plane).
+
+%{\small{\normalsize 
+% Pareil : ca descend pas en-dessous d'une certaine valeur, ici bien trop grande.
+% Donc je me definis mon propre style de liste :-)
+Here is a list of the various variables in this area of the code :
+\begin{maliste}
+\item {\tt xi} : $x$ coordinate of the origin
+\item {\tt yi} : $y$ coordinate of the origin
+\item {\tt axb} : $\overrightarrow{CA} \cdot \overrightarrow{w}$, where $\overrightarrow{w}$ is the vector such as $\|\overrightarrow{w}\| = \|\overrightarrow{CM}\|$ and $(\widehat{\overrightarrow{CM},\overrightarrow{w}}) = -\frac{\pi}{2}$
+\item {\tt arg} : $\sin(\overrightarrow{CA},\overrightarrow{CM})$
+\item {\tt ds} : curvilinear length on the {\em circle} between $A$ and $M$
+\item {\tt dz} : $z_M - z_A$
+\end{maliste}
+And what follows is how to do the link between the code and the mathematical formulas :\\
+In the code : {\tt axb = (xi-xc)(yOut-yc) - (yi-yc)(xOut-xc)}
+$$
+\overrightarrow{CA} =
+\left|\begin{array}{l}
+x_{_A} - x_{_C} \\
+y_{_A} - y_{_C} \\
+\end{array}\right.
+\qquad\qquad
+\overrightarrow{CM} =
+\left|\begin{array}{l}
+x_{_M} - x_{_C} \\
+y_{_M} - y_{_C} \\
+\end{array}\right.
+\qquad\qquad
+\overrightarrow{w} =
+\left|\begin{array}{l}
+y_{_M} - y_{_C} \\
+-(x_{_M} - x_{_C}) \\
+\end{array}\right.
+$$
+So $\overrightarrow{CA} \cdot \overrightarrow{w} = (x_{_A}-x_{_C})(y_{_M}-y_{_C}) - (y_{_A}-y_{_C})(x_{_M}-x_{_C}) = \text{\tt axb}$.\\
+%$\overrightarrow{w} \perp \overrightarrow{CM}$, so $\overrightarrow{w}$ drives the tangent to the circle in $M$.
+Now, let's try to find what is $\text{\tt axb} = \overrightarrow{CA} \cdot \overrightarrow{w}$ :\\
+we know that $\|\overrightarrow{w}\| = \|\overrightarrow{CM}\|$, so :
+$$
+\begin{array}{r@{\;=\;}l}
+\overrightarrow{CA} \cdot \overrightarrow{w} & \|\overrightarrow{CA}\| \cdot \|\overrightarrow{w}\| \cos(\overrightarrow{CA},\overrightarrow{w}) \\
+ & \|\overrightarrow{CA}\| \cdot \|\overrightarrow{CM}\| \cos((\overrightarrow{CA},\overrightarrow{CM}) + (\overrightarrow{CM},\overrightarrow{w})) \\
+	& R^2 \cos((\overrightarrow{CA},\overrightarrow{CM}) - \frac{\pi}{2}) \\
+	& R^2 \sin(\overrightarrow{CA},\overrightarrow{CM}) \\
+\end{array}
+$$
+Therefore, since $\text{\tt rsq} = R^2$, we obtain $\text{\tt arg} = \text{\tt axb/rsq} = \sin(\overrightarrow{CA},\overrightarrow{CM})$.\\
+{\tt ds} is then defined as the angle ($\arcsin(\text{\tt arg})$) multiplied by $R$, i.e. it is the curvilinear length on the circle from $A$ to $M$.\\
+And then, from the definition of the dip angle\footnote{For a detailed note about the helices' parameters, see the appendix A of the Star Class Library documentation.}, we obtain that {\tt dz = ds.tan(dipAngle)} is $z_M - z_A$ (considering this time $A$ and $M$ as the points on the helix instead of on the circle).
+%}\par}
+
+At the end of the former subroutine {\tt update\_track\_param}, a helix called {\tt bachGeom2} is booked with the same parameters than the original bachelor helix taken from the track container, {\tt bachGeom}, except for the origin that has been moved from $A$ to $M$, and the angle $\Psi$ that obviously changes when the origin moves (see {\sc Fig.} \ref{calcFig1}).
+
+The next piece of code is the former subroutine {\tt track\_mom}, which just books the momentum of the bachelor taken in $M$ in the variable {\tt xOrig} (which contained the 3-D position of $M$ a couple of code-lines before : since both usages don't overlap, the same StThreeVector can be used for both of them).
+
+The next part of the code is the most difficult one to understand. It wasn't a subroutine in the Fortran code : that was part of the {\tt exiam} function.
+Here is a list of the various variables in this area of the code :
+\begin{maliste}
+\item {\tt pBach} : normalised momentum of the bachelor in $M$ (so it's rather the (normalised) direction of the tangent to the helix in $M$)
+\item {\tt dv0dotdb} : $\cos (\overrightarrow{\text{\tt dpV0}},\overrightarrow{\text{\tt pBach}})$
+\item {\tt diffc} : $\overrightarrow{MV}$, calling $V$ the point where the V0 decays
+\item {\tt denom} : $\cos^2 (\overrightarrow{\text{\tt dpV0}},\overrightarrow{\text{\tt pBach}}) - 1$
+\item {\tt s2} : ehm... well... see the explanations below !
+\item {\tt valid} : relative error due to the linearisation
+\end{maliste}
+So let's call $V$ the position of the V0 vertex, i.e. the point where the V0 decays. As described p. \pageref{linearisation}, we now linearise the helix, i.e. we now assume that the helix can be merged with its tangent in $M$. So an approximation of the point where the distance between the helix and the V0 line is the smallest is the point where the distance between the tangent to the helix and the V0 line is the smallest.
+
+Let $\mathcal D$ be the tangent to the helix in $M$, $\Delta$ being the V0 line, and let $H_1$ (resp. $H_2$) be the point on $\Delta$ (resp. on $\mathcal D$) where the distance to $\mathcal D$ (resp. to $\Delta$) is the smallest.
+
+Calling $\overrightarrow{u}$ the vector that drives $\Delta$ (i.e. $\overrightarrow{u} = \overrightarrow{\text{\tt dpV0}}$) and $\overrightarrow{v}$ the vector that drives $\mathcal D$ (i.e. $\overrightarrow{v} = \overrightarrow{\text{\tt pBach}}$), we can write $H_1$ and $H_2$ as :
+$$
+H_1 = V + k_1 \overrightarrow{u}
+\qquad\qquad
+H_2 = M + k_2 \overrightarrow{v}
+$$
+With the definition of $H_1$ and $H_2$ above, we can write that we search :
+\begin{equation}\label{k1k2}(H_1 \in \Delta , H_2 \in {\mathcal D}) \quad / \quad \overrightarrow{H_1 H_2} \perp \Delta \quad \text{and} \quad \overrightarrow{H_1 H_2} \perp {\mathcal D}
+\end{equation}
+\begin{equation}\label{Systeme}
+\Leftrightarrow \quad (H_1 \in \Delta , H_2 \in {\mathcal D}) \quad / \quad \overrightarrow{H_1 H_2} \cdot \overrightarrow{u} = \overrightarrow{H_1 H_2} \cdot \overrightarrow{v} = 0
+\end{equation}
+Given that
+$$\begin{array}{r@{\;=\;}l}
+\overrightarrow{H_1 H_2} & M + k_2 \overrightarrow{v} - V - k_1 \overrightarrow{u} \\
+& \overrightarrow{VM} + k_2 \overrightarrow{v} - k_1 \overrightarrow{u} \\
+& -\overrightarrow{\text{\tt diffc}} + k_2 \overrightarrow{v} - k_1 \overrightarrow{u} \\
+\end{array}$$
+we can re-write the system \eqref{Systeme} as
+$$\left\{\begin{array}{r@{\;=\;}l@{\;=\;}l}
+\overrightarrow{H_1 H_2} \cdot \overrightarrow{u} & -\overrightarrow{\text{\tt diffc}} \cdot \overrightarrow{u} + k_2 \overrightarrow{v} \cdot \overrightarrow{u} - k_1 \overrightarrow{u} \cdot \overrightarrow{u} & 0 \\
+\overrightarrow{H_1 H_2} \cdot \overrightarrow{v} & -\overrightarrow{\text{\tt diffc}} \cdot \overrightarrow{v} + k_2 \overrightarrow{v} \cdot \overrightarrow{v} - k_1 \overrightarrow{u} \cdot \overrightarrow{v} & 0 \\
+\end{array}\right.$$
+which can also be written as
+$$\left\{\begin{array}{r@{\;=\;}l}
+-\overrightarrow{\text{\tt diffc}} \cdot \overrightarrow{u} + k_2 \cos(\overrightarrow{v},\overrightarrow{u}) - k_1 & 0 \\
+-\overrightarrow{\text{\tt diffc}} \cdot \overrightarrow{v} + k_2 - k_1 \cos(\overrightarrow{u},\overrightarrow{v}) & 0 \\
+\end{array}\right.$$
+because $\|\overrightarrow{u}\| = \|\overrightarrow{v}\| = 1$.\\
+Solving this system, we obtain :
+$$\left\{\begin{array}{r@{\;=\;}l}
+ k_1 & \frac{\strut -\overrightarrow{\text{\tt diffc}} \cdot (\overrightarrow{v}\cos(\overrightarrow{u},\overrightarrow{v}) - \overrightarrow{u})}{\strut \cos^2 (\overrightarrow{u},\overrightarrow{v}) - 1} \\
+k_2	& \frac{\strut \overrightarrow{\text{\tt diffc}} \cdot (\overrightarrow{u}\cos(\overrightarrow{u},\overrightarrow{v}) - \overrightarrow{v})}{\strut \cos^2 (\overrightarrow{u},\overrightarrow{v}) - 1} \\
+\end{array}\right.$$
+In the code, {\tt s2} is calculated as :\\
+{\tt s2 = (dpV0.X dv0dotdb - pBach.X) diffc.X + (dpV0.Y dv0dotdb - pBach.Y) diffc.Y + (dpV0.Z dv0dotdb - pBach.Z) diffc.Z;}\\
+{\tt s2 = s2/denom;}\\
+which can be written as\footnote{Given that $\text{\tt dv0dotdb} = \overrightarrow{\text{\tt dpV0}} \cdot \overrightarrow{\text{\tt pBach}} = \cos (\overrightarrow{\text{\tt dpV0}},\overrightarrow{\text{\tt pBach}})$. Thus $\text{\tt denom} = \cos^2 (\overrightarrow{\text{\tt dpV0}},\overrightarrow{\text{\tt pBach}}) -1 = \cos^2 (\overrightarrow{u},\overrightarrow{v}) - 1$.} :
+$$\begin{array}{r@{\;=\;}l}
+\text{\tt s2} & \frac{\strut (\overrightarrow{\text{\tt dpV0}} \cos(\overrightarrow{u},\overrightarrow{v}) - \overrightarrow{\text{\tt pBach}}) \cdot \overrightarrow{\text{\tt diffc}}}{\strut \cos^2 (\overrightarrow{u},\overrightarrow{v}) - 1} \\
+ & \frac{\strut \overrightarrow{\text{\tt diffc}} \cdot (\overrightarrow{u} \cos(\overrightarrow{u},\overrightarrow{v}) - \overrightarrow{v})}{\strut \cos^2 (\overrightarrow{u},\overrightarrow{v}) - 1} \\
+	& k_2 \\
+\end{array}$$
+So {\tt s2} is the 3-D algebraic distance $\overline{MH_2}$ between $M$ and $H_2$, the point of $\mathcal D$ that is closest to $\Delta$.
+
+Then, {\tt valid} is calculated as $\left|\text{\tt s2} \sqrt{\text{\tt pBach.X}^2 + \text{\tt pBach.Y}^2}\right|$, i.e. it's the distance in the $(xOy)$ plane between $M$ and $H_2$, as illustrated by figure \ref{calcFig2}. The value {\tt valid} itself is not very helpful to determine if the linearisation is a good approximation or not. The value that has to be looked at is actually the distance between $H_2$ and the circle in the 2-D plane, which is called $d$ in figure \ref{calcFig2}.
+
+But $d$ actually depends explicitely on {\tt valid}, which means that an initial requirement on $d$ can be transformed into a requirement on {\tt valid}. This allows not to calculate $d$ and saves some calculation time -- at least it's the only reason I've found that would explain why the authors of the code have chosen to test {\tt valid} rather than $d$ ! The relation between $d$ and {\tt valid} is :
+$$d = \sqrt{R^2 + \text{\tt valid}^2} - R$$
+\begin{equation}\label{dVsValid}
+\Leftrightarrow \quad \frac{d}{R} = \sqrt{1+\left(\frac{\text{\tt valid}}{R}\right)^2\:} - 1
+\end{equation}
+
+There are 2 conditions on $\frac{\text{\tt valid}}{R}$. Let's call these two values $valid_1$ and $valid_2$, with $valid_1 < valid_2$. The original algorithm (I may change that, and will try to update this documentation if so) throws away any Xi candidate for which $\text{\tt valid} > valid_2$, and keeps all the other ones. But if $\text{\tt valid} \in [valid_1 ; valid_2]$, then another part of the algorithm, which I describe in the next paragraph, is run. It consists in improving the quality of the linearisation by linearising the helix at another point. This improvement is tried at most 3 times. Basically, this means that a linearisation that gives $\text{\tt valid} > valid_2$ means that it's hopelessly bad ; when $\text{\tt valid} < valid_1$ it means that the linearisation is good enough and doesn't need to be improved ; and when $\text{\tt valid} \in [valid_1 ; valid_2]$, the linearisation is improved but it actually doesn't matter if the criterium $\text{\tt valid} < valid_1$ is not reached : the candidate is kept anyway. As far as I've seen during the tests, only a very few proportion of the candidates need 3 passes in the loop\footnote{Result obtained over 1 {\tt Au}-{\tt Au} $200~GeV$ central event : over 73 269 bachelor, neglecting those which have only 1 intersection point, 45 500 have 2 intersection points, i.e. 62 \% of them (and therefore 38 \% have no intersection points). Among the 118 194 dca calculations of those 62 \%, 77.0 \% of them don't need a better linearisation, 21.7 \% need to go once in the loop, 0.8 \% need to go twice in the loop, and 0.5 \% go 3 times in the loop (this latter percentage, unike the former ones, is the number of candidates that need only 3 passes added to the number of candidates that would need more).}, so requiring more than 3 passes is indeed not necessary.
+
+\begin{center}
+\begin{tabular}{lc}
+% Il sait pas wrapper !! Pour le faire, il faut charger le package multirow, mais je peux pas utiliser de package pour cette doc...
+% Et en plus je suis oblige de mettre dans un tableau, ligne par ligne, sinon il met le tableau de la 2e partie aligne avec la 3e ligne de texte... Je pourrais me demerder avec une box, mais c'est chiant et pas propre non plus...
+\begin{tabular}{l}
+This table shows the numerical values of $valid_1$ and $valid_2$ \\
+used in the code (first line) and their equivalent for the more \\
+interesting variable $\frac{d}{R}$, calculated with \eqref{dVsValid}.\\
+\end{tabular}
+&
+\begin{tabular}{r@{~$<$~}c@{~$<$~}l}
+$0.001~R$ & {\tt valid} & $0.02~R$ \\
+$5.10^{-7}~R$ & $d$ & $2.10^{-4}~R$ \\
+0.0005 \% & $\frac{d}{R}$ & 0.02 \% \\
+\end{tabular}
+\\
+\end{tabular}
+\end{center}
+
+\begin{center}
+
+\epsfig{file=calcFig2.eps,width=11cm}
+
+\mycaption{2-D plane evaluation of the quality of the approximation made by linearising the helix}
+\label{calcFig2}
+\end{center}
+
+So when $\text{\tt valid} \in [valid_1 ; valid_2]$, here is the piece of code that is run :
+\begin{maliste}
+\item Former subroutine {\tt ev0\_project\_track} : calculates the coordinates (in the $(xOy)$ plane) of the point $M'$ defined as the intersection of the circle $\mathcal C$ and the line $(CH_2)$ (see {\sc Fig.} \ref{calcFig2})
+\item Former subroutine {\tt update\_track\_param} : moves the origin of the helix from $M$ to $M'$ (as previously done from $A$ to $M$)
+\item Former subroutine {\tt track\_mom} : calculates the momentum of the bachelor in $M'$ (as previously done in $M$)
+\item Block that calculates {\tt s2} and {\tt valid} : calculates a new {\tt s2} and {\tt valid}, whose value will be checked to see if one more pass in this loop is necessary
+\end{maliste}
+The 3 last blocks are exactly the same as those already described above, so I'll only describe the former subroutine {\tt ev0\_project\_track} : the list below is made of the variables that are used in this area of the code :
+\begin{maliste}
+\item {\tt batv} : 3-D coordinates of $H_2$
+\item {\tt dtmp} : $x_{_C} - x_{_{H_2}}$
+\item {\tt atmp} : $y_{_C} - y_{_{H_2}}$
+\item {\tt ctmp} : slope of the line $(CH_2)$
+\item {\tt yy} : $y_{_{M'}} - y_{_C}$
+\item {\tt zz} : $x_{_{M'}} - x_{_C}$
+\item {\tt xAns} : temporary variable that I'll remove soon...
+\item {\tt yAns} : temporary variable that I'll remove soon...
+\item {\tt xOut} : $x_{_{M'}}$ (contained $x_{_M}$ before)
+\item {\tt yOut} : $y_{_{M'}}$ (contained $y_{_M}$ before)
+\end{maliste}
+The calculation of $(x_{_{M'}},y_{_{M'}})$ is simple : since $\text{\tt ctmp} = \frac{x_{_C} - x_{_{H_2}}}{y_{_C} - y_{_{H_2}}}$ is the inverse of the slope of $(CH_2)$ the equation of $(CH_2)$ is :
+$$(CH_2) : y = \frac{1}{\text{\tt ctmp}}(x - x_{_C}) + y_{_C}$$
+and therefore, setting $x' = x_{_{M'}} - x_{_C}$ and $y' = y_{_{M'}} - y_{_C}$, $M'$ is such as :
+$$\left\{\begin{array}{l}
+y' = \left(\frac{1}{\text{\tt ctmp}}\right)x' \\
+{x'\strut }^2 + {y'\strut }^2 = R^2 \\
+% strut pour separer un peu mieux les 2 lignes du systeme, et accolades obligatoires pour x'^2 car il accepte pas un ^ juste apres un ^ (il considere que c'est 2 superscripts).
+\end{array}\right.$$
+Solving this system gives :
+$$\left\{\begin{array}{r@{\;=\;}l}
+y' & \pm \frac{R}{\sqrt{1+\text{\tt ctmp}^2}} \\
+x' & \text{\tt ctmp}\cdot y' \\
+\end{array}\right.$$
+$x'$ and $y'$ are respectively {\tt zz} and {\tt yy} in the code, and the ``signus dilemma" is solved by the if-loop on the sign of {\tt atmp}.
+
+At the end of the while-loop, the candidates for which $\text{\tt valid} > valid_2$ are simply thrown away, and all the other ones are kept, even if $\text{\tt valid} > valid_1$. The value of {\tt s2} calculated during the last loop is kept, and {\tt s1} (which is the $k_1$ of equation \eqref{k1k2} (p. \pageref{k1k2}) and of the following ones) is calculated as
+$$\text{\tt s1} = \frac{-\overrightarrow{\text{\tt diffc}} \cdot (\overrightarrow{\text{\tt pBach}} \times \text{\tt dv0dotdb} - \overrightarrow{\text{\tt dpV0}})}{\text{\tt dv0dotdb}^2 - 1} = \frac{-\overrightarrow{\text{\tt diffc}} \cdot (\overrightarrow{v}\cos(\overrightarrow{u},\overrightarrow{v}) - \overrightarrow{u})}{\cos^2(\overrightarrow{u},\overrightarrow{v}) - 1} = k_1$$
+Then, the 3-D coordinates of $H_1$ are calculated and stored in {\tt v0atv}, just like the coordinates of $H_2$ are stored in {\tt batv}. Once this is done, we check that $\overrightarrow{H_1 V}$ goes roughly in the same direction as $\overrightarrow{p_{_{V0}}}$, i.e. that the V0 points away from the Xi vertex newly found. This is done via the variable {\tt check}, that is exactly $\overrightarrow{H_1 V} \cdot \overrightarrow{p_{_{V0}}}$.
+
+If {\tt check} is positive, it means that the V0 points to the opposite direction than where the Xi vertex is, and the rest of the algorithm -- run only in that case -- can be roughly summed up as something that looks like that :
+
+$$
+\begin{array}{|ll|}
+\hline
+\hspace{4pt}~ &
+
+\hspace{-10pt}
+\begin{tabular}{l}
+{\tt dca} = $\left\|\overrightarrow{\text{\tt v0atv} - \text{\tt batv}}\right\|$ \hspace{55pt} {\tt // }{\tt dca} = $H_1 H_2$ \\
+{\tt xpp} = $\frac{\text{\tt v0atv} - \text{\tt batv}}{2}$ \hspace{85pt} {\tt // }{\tt xpp} = 3-D coordinates of the middle of $[H_1 H_2]$ \\
+{\tt rv} = $\left\|\overrightarrow{\text{\tt xpp} - \text{\tt xPvx}}\right\|$ \hspace{72pt} {\tt // }{\tt rv} = Xi decay length \\
+if (cuts are OK) \\
+\end{tabular} \\
+
+\hspace{4pt}~ &
+\left \lfloor
+\begin{array}{l}
+
+\hspace{-10pt}
+\begin{tabular}{l}
+{\tt pXi} = {\tt pV0} + {\tt xOrig} \hspace{58pt} {\tt // }$\overrightarrow{p_{_{Xi}}} = \overrightarrow{p_{_{V0}}} + \overrightarrow{p_{_{Bach,H_2}}}$\\
+{\tt check} = ({\tt xpp} - {\tt xPvx}) . $\overrightarrow{\text{\tt pXi}}$ \hspace{20pt} {\tt // }Check that $\overrightarrow{PvxXivtx} \cdot \overrightarrow{p_{_{Xi}}} \geq 0$, i.e. that the \\
+if ({\tt check} $\geq$ 0) \hspace{84pt} {\tt // } \hspace{20pt} reconstructed Xi points away from the Pvx \\
+\end{tabular} \\
+
+\left \lfloor
+\begin{tabular}{l}
+{\tt iflag}=0 if the dcaXiPvx (cut) is OK \\
+\end{tabular}
+\right. \\
+
+\hspace{-10pt}
+\begin{tabular}{l}
+if ({\tt iflag}=0) \\
+\end{tabular} \\
+
+\left \lfloor
+\begin{tabular}{l}
+Calculates the kinematic variables \\
+Store the candidate \\
+\end{tabular}
+\right. \\
+
+\vspace{-12pt}
+\end{array}
+\right. \\
+\hline
+\end{array}
+$$
+
 
 
 
@@ -1000,7 +1357,9 @@ $$
 
 \subsubsection{Detailed algorithm and cuts}
 
-{\sc Fig}. \ref{XiAlgoMieux} shows...
+The detailed algorithm is actually explained in the paragraph \ref{paragrDca} concerning the calculation of the dca, p. \pageref{paragrDca}. Yet, in the latter paragraph, no overview of the algorithm is given and the cuts are not listed. This is the purpose of this short paragraph, and is summed up in {\sc Fig}. \ref{XiAlgoMieux}.
+
+Blablabla.
 
 
 \begin{center}
