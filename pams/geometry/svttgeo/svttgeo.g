@@ -422,9 +422,10 @@ EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SVTD is an active wafer volume
       Material  Silicon  
-      medium    Sensitive  Isvol=1       
+      Material  Sensitive  Isvol=1       
       Attribute SVTD       seen=1  Colo=4
       Shape     BOX        dy=swca_WaferLen/2.0 
+      call      GSTPAR (%Imed,'STRA',1.)
 *      The following is the corrected hits definition: 2-12-97 (wkw)
        HITS      SVTD   xx:16:SH(-20,20)   yy:16:(-20,20)     zz:16:(-30,30),
 	                px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
