@@ -22,8 +22,9 @@ R__EXTERN  int type_of_call numberOfPadsAtRow_(int *row);
 #include "StMaker.h"
 #include "StDbLib/StDbTableI.h"
 #include "StDbLib/StDbDataSet.h"
-//#include "Geometry/StDbTpcGeomTables.hh"
 #include "StRTpcPadPlane.h"
+#include "StRTpcWirePlane.h"
+#include "StRTpcDimensions.h"
 class StMaker;
 
 
@@ -31,6 +32,8 @@ class StTpcDb {
  private:
  StMaker* mk;
  StTpcPadPlaneI* PadPlane;
+ StTpcWirePlaneI* WirePlane;
+ StTpcDimensionsI* dimensions;
  St_DataSet* tpc_geometry;
  St_DataSet* tpc_calibrations;
  St_DataSet* tpc_conditions;
@@ -41,6 +44,8 @@ class StTpcDb {
    StTpcDb(StMaker* mk);
    ~StTpcDb();
    StTpcPadPlaneI* PadPlaneGeometry();
+   StTpcWirePlaneI* WirePlaneGeometry();
+   StTpcDimensionsI* Dimensions();
 
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
