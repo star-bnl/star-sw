@@ -31,8 +31,8 @@ c:----------------------------------------------------------------------
 C: KUIP Vectors        
 c:----------------------------------------------------------------------
 
-#define STAF_STATUS_VECTOR(A) IQ(STAF_STATUS_LLOW+ A-1 )
-#define STAF_RESULT_VECTOR(A)  Q(STAF_RESULT_LLOW+ A-1 )
+/* #define STAF_STATUS_VECTOR(A) IQ(STAF_STATUS_LLOW+ A-1 ) */
+/* #define STAF_RESULT_VECTOR(A)  Q(STAF_RESULT_LLOW+ A-1 ) */
 
 /*HACK ---- CHECK THIS HACK ---- endif //EMLLIB_INC*/
 
@@ -55,6 +55,11 @@ c: Variables for STAF_STATUS and STAF_RESULT vectors.
 
       INTEGER*4 STAF_KUVEC_HISTORY
       PARAMETER (STAF_KUVEC_HISTORY = 256)
+
+      CHARACTER*11 STAF_STATUS_NAME
+      PARAMETER (STAF_STATUS_NAME = 'STAF_STATUS')
+      CHARACTER*11 STAF_RESULT_NAME
+      PARAMETER (STAF_RESULT_NAME = 'STAF_RESULT')
 
       INTEGER*4 STAF_STATUS_COUNT
       INTEGER*4 STAF_STATUS_LLOW,STAF_STATUS_LHIGH

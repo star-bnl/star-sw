@@ -3,7 +3,10 @@ c:>---------------------------------------------------------------------
 C:FILE:         eml_kuvec.F
 C:DESCRIPTION:  Functions for handling KUIP vectors
 c:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+c:AUTHOR:       mc - MCronqvist@lbl.gov- bug fix
+C:BUGS:         18nov96-v001d-mc - must get vector pointer every time
 C:BUGS:         04dec95-v000a-cet- needs to be a count down stack
+C:HISTORY:      18nov96-v001d-mc - fixed bug in vector pointer handling
 C:HISTORY:	18mar96-v001c-cet- change vector funcs. to 1 arg. APIs
 C:HISTORY:	18mar96-v001b-cet- change RESULT to 1-dim vector
 C:HISTORY:	18mar96-v001a-cet- change vectors to FIFO
@@ -21,24 +24,20 @@ c:<---------------------------------------------------------------------
 
 #include "emlLib.inc"
 
-      INTEGER*4 LENGTH(3)
+      INTEGER*4 LENGTH(3), ILO, IHI
 
 C- Vector of status values.
       LENGTH(1) = STAF_KUVEC_HISTORY
       LENGTH(2) = 0
       LENGTH(3) = 0
-      CALL KUVCRE('STAF_STATUS','I',LENGTH,
-     +		STAF_STATUS_LLOW,STAF_STATUS_LHIGH)
+      CALL KUVCRE(STAF_STATUS_NAME,'I',LENGTH,ILO,IHI)
       STAF_STATUS_COUNT = 0
-
 C- Vector of result values.
       LENGTH(1) = STAF_KUVEC_HISTORY
       LENGTH(2) = 0
       LENGTH(3) = 0
-      CALL KUVCRE('STAF_RESULT','R',LENGTH,
-     +		STAF_RESULT_LLOW,STAF_RESULT_LHIGH)
+      CALL KUVCRE(STAF_RESULT_NAME,'R',LENGTH,ILO,IHI)
       STAF_RESULT_COUNT = 0
-
 
       RETURN
       END
@@ -55,29 +54,17 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       INTEGER*4 STATUS
-/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
-      INTEGER*4 I
-
-c     write(*,*)'DEBUG:: SET_STAF_STATUS STATUS = ',STATUS
-
-C- Circular buffer approach. --
-c     STAF_STATUS_COUNT = STAF_STATUS_COUNT + 1
-c     IF(STAF_STATUS_COUNT.GT.STAF_KUVEC_HISTORY)THEN
-c        STAF_STATUS_COUNT = 1
-c     ENDIF
-c     STAF_STATUS_VECTOR(STAF_STATUS_COUNT) = STATUS
+      INTEGER*4 I,ILO,IHI
 
 C- FIFO buffer approach. --
-      STAF_STATUS_COUNT = MIN(STAF_STATUS_COUNT + 1,STAF_KUVEC_HISTORY)
+      CALL KUVECT(STAF_STATUS_NAME,ILO,IHI)
+      STAF_STATUS_COUNT = MIN(STAF_STATUS_COUNT+1,STAF_KUVEC_HISTORY)
       DO I=STAF_STATUS_COUNT-1,1,-1
-	 STAF_STATUS_VECTOR(I+1) = STAF_STATUS_VECTOR(I)
+         IQ(ILO+I) = IQ(ILO+I-1)
       ENDDO
-      STAF_STATUS_VECTOR(1) = STATUS
--- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
+      IQ(ILO) = STATUS
 
-      RETURN
       END
-
 c:<---------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 FUNCTION GET_STAF_STATUS
 C:DESCRIPTION:  Get Nth value of the STAF_STATUS vector.
@@ -89,14 +76,16 @@ c:<---------------------------------------------------------------------
 
 #include "emlLib.inc"
 
-      INTEGER*4 N
-/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
+      INTEGER*4 N,ILO,IHI
 
-      GET_STAF_STATUS = 
-     + STAF_STATUS_VECTOR(MAX(1,MIN(N,STAF_STATUS_COUNT)))
--- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
+      IF(N+1.GT.STAF_STATUS_COUNT .OR. N.LT.1) THEN
+        GET_STAF_STATUS = 0
+!error message here
+        RETURN
+      ENDIF
+      CALL KUVECT(STAF_STATUS_NAME,ILO,IHI)
+      GET_STAF_STATUS = IQ(ILO+N-1)
 
-      RETURN
       END
 
 c:<---------------------------------------------------------------------
@@ -111,20 +100,16 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       REAL*4 RESULT
-/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
-
-      INTEGER*4 I
+      INTEGER*4 I,ILO,IHI
 
 C- FIFO buffer approach. --
-      STAF_RESULT_COUNT = MIN(STAF_RESULT_COUNT + 1,STAF_KUVEC_HISTORY)
+      CALL KUVECT(STAF_RESULT_NAME,ILO,IHI)
+      STAF_STATUS_COUNT = MIN(STAF_STATUS_COUNT+1,STAF_KUVEC_HISTORY)
       DO I=STAF_RESULT_COUNT-1,1,-1
-         STAF_RESULT_VECTOR(I+1) = STAF_RESULT_VECTOR(I)
+         Q(ILO+I) = Q(ILO+I-1)
       ENDDO
+      Q(ILO) = RESULT
 
-      STAF_RESULT_VECTOR(1) = RESULT
--- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
-
-      RETURN
       END
 
 c:<---------------------------------------------------------------------
@@ -138,13 +123,15 @@ c:<---------------------------------------------------------------------
 
 #include "emlLib.inc"
 
-      INTEGER*4 N
-/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
+      INTEGER*4 N,ILO,IHI
 
-      GET_STAF_RESULT
-     += STAF_RESULT_VECTOR(MAX(1,MIN(N,STAF_RESULT_COUNT)))
--- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
+      IF(N.GT.STAF_KUVEC_HISTORY-1 .OR. N.LT.1) THEN
+        GET_STAF_RESULT = 0
+!error message here
+        RETURN
+      ENDIF
+      CALL KUVECT(STAF_RESULT_NAME,ILO,IHI)
+      GET_STAF_RESULT = Q(ILO+N-1)
 
-      RETURN
       END
 
