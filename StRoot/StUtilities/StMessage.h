@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.6 1999/08/18 18:28:33 fine Exp $
+// $Id: StMessage.h,v 1.7 2000/01/05 19:53:46 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.7  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
 // Revision 1.6  1999/08/18 18:28:33  fine
 // Various bugs have been fixed. share lib was not loaded under HP
 //
@@ -41,25 +44,25 @@ class StMessage {
  private:
 
  protected:
-   const char* type;
-//   char* location;
+   char type[2];
+//   char* location;                    //!
 //   unsigned long runNumber;
 //   pair<long, long> eventId;
-   char* option;
+   char* option;                      //!
    TDatime messTime;
-   char* message;
+   char* message;                     //!
 
  public:
-   StMessage(char* mess="", char* ty="I", char* opt="O");
+   StMessage(const char* mess="", const char* ty="I", const char* opt="O");
    StMessage(const StMessage&){;}
    virtual ~StMessage();
    virtual           void PrintInfo();
    virtual          int Print(int nChars=-1);
    virtual     TDatime& GetTime() {return messTime;}
-   virtual const  char* GetType() const {return type;}
+   virtual  const char* GetType() const {return type;}
    virtual        char* GetMessage() {return message;}
    virtual        char* GetOptions() {return option;}
-   virtual           void SetOption(char* opt) {option = opt;}
+   virtual         void SetOption(char* opt) {option = opt;}
 #ifdef __ROOT__
    ClassDef(StMessage,1)
 #endif

@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.8 1999/07/17 00:23:24 genevb Exp $
+// $Id: StMessageCounter.h,v 1.9 2000/01/05 19:53:46 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.9  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
 // Revision 1.8  1999/07/17 00:23:24  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
 //
@@ -70,8 +73,8 @@ class StMessageCounter : public ostrstream {
  public:
    ~StMessageCounter();
     static StMessageCounter* Instance();
-      void SetLimit(char* str, int n=0);
-       int GetLimit(char* str);
+      void SetLimit(const char* str, int n=0);
+       int GetLimit(const char* str);
       void ListLimits();
       void AddType(const char* type);
        int CheckLimit(char* mess, const char* type);

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.27 1999/12/07 19:47:02 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.28 2000/01/05 19:53:46 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.28  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
 // Revision 1.27  1999/12/07 19:47:02  genevb
 // Increased length of mess ptr list for Linux
 //
@@ -111,7 +114,7 @@ ostream& operator<<(ostream& os, StMessage*) {
   gMessMgr->Print();
   return os;
 }
-static const char defaultMessType[] = "I";
+static const char defaultMessType = 'I';
 static char emptyString[] = "";
 static char oOpt[] = "O";
 static char otsOpt[] = "OTS";
@@ -122,6 +125,7 @@ static size_t maxMessLength = 1024;
 static int sMessLength;
 static const int maxLOMP = 65536;
 static const int maxLOMP1 = (maxLOMP-1);
+static int lastLOMP = 0;
 static char* listOfMessPtrs[maxLOMP];
 static size_t listOfMessLens[maxLOMP];
 #endif
@@ -130,11 +134,11 @@ StMessMgr* StMessageManager::mInstance = 0;
 //
 // C and Fortran routines:
 //________________________________________
-void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
+void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
   static char space = ' ';
   static const char* messReturnChar = "\n";
   size_t messSize = strlen(mess);
-  char* mess2=mess;
+  char* mess2=const_cast<char*> (mess);
   int del_mess = 0;
   if (*lines>1) {
 #ifdef LINUX
@@ -146,7 +150,7 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
 #else
     int lineSize = messSize/(*lines);
 #endif
-    char* mess1 = mess;
+    char* mess1 = const_cast<char*> (mess);
     mess2 = new char[messSize];    // Build a new version of the
     *mess2 = 0;                          // message with trailing spaces
     for (int i=(*lines); i>0; i--) {     // removed, and \n's inserted.
@@ -175,8 +179,8 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
   if (del_mess) delete [] mess2;
 }
 //________________________________________
-void type_of_call Msg_Enable_(char* mess, size_t len) {
-  char* mess2 = mess;
+void type_of_call Msg_Enable_(const char* mess, size_t len) {
+  char* mess2 = const_cast<char*> (mess);
   size_t messlen = strlen(mess);
   if (messlen > len) {
     mess2 = new char[(messlen+1)];
@@ -186,8 +190,8 @@ void type_of_call Msg_Enable_(char* mess, size_t len) {
   gMessMgr->SwitchOn(mess2);
 }
 //________________________________________
-int type_of_call Msg_Enabled_(char* mess, int*, size_t len) {
-  char* mess2 = mess;
+int type_of_call Msg_Enabled_(const char* mess, int*, size_t len) {
+  char* mess2 = const_cast<char*> (mess);
   size_t messlen = strlen(mess);
   if (messlen > len) {
     mess2 = new char[(messlen+1)];
@@ -198,13 +202,20 @@ int type_of_call Msg_Enabled_(char* mess, int*, size_t len) {
   return 1;
 }
 //________________________________________
-void type_of_call Msg_Disable_(char* mess, size_t len) {
-  if (strlen(mess) > len) mess[len]=0;
-  gMessMgr->SwitchOff(mess);
+void type_of_call Msg_Disable_(const char* mess, size_t len) {
+  char* mess2 = const_cast<char*> (mess);
+  size_t messlen = strlen(mess);
+  if (messlen > len) {
+    mess2 = new char[(messlen+1)];
+    strncpy(mess2,mess,messlen);
+    mess2[messlen] = 0;
+  }
+  gMessMgr->SwitchOff(mess2);
 }
 //________________________________________
-void type_of_call StMessage_(char* mess, char* type, char* opt,
-                             size_t len1, size_t len2, size_t len3) {
+void type_of_call StMessage_(const char* mess, const char* type,
+                             const char* opt, size_t len1,
+			     size_t len2, size_t len3) {
 #ifdef LINUX
   sMessLength = len1;
 #endif
@@ -224,7 +235,7 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
   if ((len1>1) && (messlen > len1) && (type1 > maxMessLength)) mess2[len1] = 0;
 
   size_t typelen = strlen(type);
-  char* type2=type;
+  char* type2=const_cast<char*> (type);
   int del_type=0;
 
   if ((messlen>=type1) || (len2<=0)) {
@@ -237,13 +248,13 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
     del_type = 1;
   }
   
-  char* opt2=opt;
+  char* opt2=const_cast<char*> (opt);
   int del_opt=0;
 
   if ((messlen>=opt1) || ((messlen+1)==opt1) ||
       (opt1==1) || (len3<=0)) {
     opt2=oOpt;
-    if (messlen > opt1) mess[opt1]=0;
+    if (messlen > opt1) mess2[opt1]=0;
   } else if ((opt) && (strlen(opt) > len3)) {
     opt2 = new char[(len3+1)];
     strncpy(opt2,opt,len3);
@@ -257,8 +268,8 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
   if (del_opt) delete [] opt2;
 }
 //________________________________________
-void type_of_call StCaller_(char* mess, char* opt, size_t len1, size_t len2,
-char* typString, char* optString) {
+void type_of_call StCaller_(const char* mess, const char* opt, size_t len1, size_t len2,
+const char* typString, char* optString) {
 #ifdef LINUX
   sMessLength = len1;
 #endif
@@ -276,7 +287,7 @@ char* typString, char* optString) {
   
   if ((len1>1) && (messlen > len1) && (opt1>maxMessLength)) mess2[len1] = 0;
 
-  char* opt2=opt;
+  char* opt2=const_cast<char*> (opt);
   int del_opt=0;
 
   if ((messlen>=opt1) || (len2<=0)) {
@@ -294,23 +305,28 @@ char* typString, char* optString) {
   if (del_opt) delete [] opt2;
 }
 //________________________________________
-void type_of_call StInfo_(char* mess, char* opt, size_t len1, size_t len2) {
+void type_of_call StInfo_(const char* mess, const char* opt,
+                          size_t len1, size_t len2) {
   StCaller_(mess,opt,len1,len2,"I",oOpt);
 }
 //________________________________________
-void type_of_call StWarning_(char* mess, char* opt, size_t len1, size_t len2) {
+void type_of_call StWarning_(const char* mess, const char* opt,
+                             size_t len1, size_t len2) {
   StCaller_(mess,opt,len1,len2,"W",eOpt);
 }
 //________________________________________
-void type_of_call StError_(char* mess, char* opt, size_t len1, size_t len2) {
+void type_of_call StError_(const char* mess, const char* opt,
+                           size_t len1, size_t len2) {
   StCaller_(mess,opt,len1,len2,"E",eOpt);
 }
 //________________________________________
-void type_of_call StDebug_(char* mess, char* opt, size_t len1, size_t len2) {
+void type_of_call StDebug_(const char* mess, const char* opt,
+                           size_t len1, size_t len2) {
   StCaller_(mess,opt,len1,len2,"D",oOpt);
 }
 //________________________________________
-void type_of_call QAInfo_(char* mess, char* opt, size_t len1, size_t len2) {
+void type_of_call QAInfo_(const char* mess, const char* opt,
+                          size_t len1, size_t len2) {
   StCaller_(mess,opt,len1,len2,"Q",otsOpt);
 }
 //________________________________________
@@ -332,12 +348,15 @@ void type_of_call MessageOut( const char *msg ) {
 ClassImp(StMessageManager)
 #endif
 //_____________________________________________________________________________
-StMessageManager::StMessageManager() : StMessMgr() {
+StMessageManager::StMessageManager() : StMessMgr(),
+curType(new char[2]),
+building(0) {
 //
 // Constructor - only called once when the library is loaded to
 // instantiate the global message manager.
 //
-  curType = 0;
+  curType[0] = 0;
+  curType[1] = 0;
   gMessMgr = (StMessMgr*) this;
   messTypeList = StMessTypeList::Instance();
   messCounter = StMessageCounter::Instance();
@@ -379,7 +398,8 @@ StMessMgr* StMessageManager::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-StMessMgr& StMessageManager::Message(char* mess, char* type, char* opt) {
+StMessMgr& StMessageManager::Message(const char* mess, const char* type,
+  const char* opt) {
 //
 // Message declarator - creates a new message if mess is not empty,
 // otherwise, prepares for << input.
@@ -388,60 +408,64 @@ StMessMgr& StMessageManager::Message(char* mess, char* type, char* opt) {
   if (messSize) {
 #ifdef LINUX
     if (sMessLength == 1) {                // Check for re-used mess ptr
-      for (int i=0; i<maxLOMP; i++) {
-        if (!(listOfMessPtrs[i])) {        // mess ptr not found
-          listOfMessPtrs[i] = mess;
-          listOfMessLens[i] = messSize;
-          break;
-        }
+      for (int i=lastLOMP; i>=0; i--) {
         if (mess == listOfMessPtrs[i]) {   // mess ptr found
-          mess[(listOfMessLens[i]-1)]=0;
-          while ((listOfMessPtrs[++i]) && (i<maxLOMP)) 
-            listOfMessPtrs[i] = 0;
+          (listOfMessPtrs[i])[(listOfMessLens[i]-1)]=0;
+          lastLOMP = i;
           break;
         }
-        if (i==maxLOMP1) {
-          BuildMessage("StMessageManager - maximum depth reached on ptr list",
-             "W","E");
+        if (i==0) {                        // mess ptr not found
+          if (lastLOMP==maxLOMP1) {
+            BuildMessage("StMessageManager - maximum depth reached on ptr list",
+               "W","E");
+          } else {
+            lastLOMP++;
+            listOfMessPtrs[lastLOMP] = const_cast<char*> (mess);
+            listOfMessLens[lastLOMP] = messSize;
+          }
         }
       }
     }
 #endif
     BuildMessage(mess, type, opt);     // comes back with curType=0
   } else {
-    curType = type;
-    curOpt = opt;
+    building = 1;
+    *curType = *type;
+    curOpt = const_cast<char*> (opt);
     seekp(0);
   }
   return *((StMessMgr*) this);
 }
 //_____________________________________________________________________________
-void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
+void StMessageManager::BuildMessage(const char* mess, const char* type,
+  const char* opt) {
 //
 // Instantiate an StMessage and place on the lists of known messages
 //
-  if (!(strlen(type))) {
+  if (!(*type)) {
     static char dash = '-';                   // if no type supplied,
-    char* cptr = strchr(mess,dash);           // search for type within message
-    curType = new char[2];
-    type = strncpy(curType,defaultMessType,1);
-    if (cptr) curType[0] = cptr[1];
+    const char* cptr = strchr(mess,dash);     // search for type within message
+    if (cptr)
+      *curType = *(++cptr);
+    else
+      *curType = defaultMessType;
   } else {
-    curType = 0;
+    if (!building) *curType = *type;
   }
   if (!opt) {
     if ((*type == 'E') || (*type == 'W'))     // Error and Warning messages
-      opt = eOpt;                             // default to stderr,
+      curOpt = eOpt;                          // default to stderr,
     else                                      // otherwise
-      opt = oOpt;                             // default to stdout
-  }
-  int typeN = messTypeList->FindTypeNum(type);
+      curOpt = oOpt;                          // default to stdout
+  } else
+    if (!building) curOpt = const_cast<char*> (opt);
+  int typeN = messTypeList->FindTypeNum(curType);
   if (!typeN) {
-    strncpy(type,defaultMessType,1);          // default type is Info
+    *curType = defaultMessType;               // default type is Info
     typeN = 1;                                // type number for Info is 1
   }
-  gMessage = new StMessage(mess, type, opt);
-  if (strchr(opt,'-')) {
+  gMessage = new StMessage(mess, curType, curOpt);
+  if (strchr(curOpt,'-')) {
     if (gMessage) delete gMessage;
     gMessage = endm;
   } else {
@@ -451,10 +475,6 @@ void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
 #endif
     endm = gMessage;
   }
-  if (curType) {
-    delete [] curType;
-    curType = 0;
-  }
 }
 //_____________________________________________________________________________
 void StMessageManager::Print() {
@@ -462,10 +482,10 @@ void StMessageManager::Print() {
 // Empty the buffer into the current message and print it.
 // If not currenty building a message, print the last one created.
 //
-  if (curType) {  // curType is the type of the current message (0=no message)
+  if (building) {
     operator<<(ends);
     BuildMessage(str(), curType, curOpt);
-    curType = 0;
+    building = 0;
   } else {
     if (gMessage) {
       gMessage->Print(-1);
@@ -486,8 +506,8 @@ int StMessageManager::PrintList(messVec* list) {
   return i;
 }
 //_____________________________________________________________________________
-messVecIter StMessageManager::FindMessageIter(const char* s1, char* s2,
-               char* s3, char* s4, messVec* list) {
+messVecIter StMessageManager::FindMessageIter(const char* s1, const char* s2,
+               const char* s3, const char* s4, messVec* list) {
 //
 // Obtain an iterator for a particular StMessage on a list of messages.
 // First message which contains matches to the strings s1,s2,s3,s4 is returned.
@@ -503,8 +523,8 @@ messVecIter StMessageManager::FindMessageIter(const char* s1, char* s2,
   return 0;
 }
 //_____________________________________________________________________________
-StMessage* StMessageManager::FindMessage(const char* s1, char* s2,
-               char* s3, char* s4, messVec* list) {
+StMessage* StMessageManager::FindMessage(const char* s1, const char* s2,
+               const char* s3, const char* s4, messVec* list) {
 //
 // Obtain a pointer to a particular StMessage on a list of messages.
 // First message which contains matches to the strings s1,s2,s3,s4 is returned.
@@ -513,8 +533,8 @@ StMessage* StMessageManager::FindMessage(const char* s1, char* s2,
   return ( (current) ? (*current) : 0 );
 }
 //_____________________________________________________________________________
-messVec* StMessageManager::FindMessageList(const char* s1, char* s2,
-               char* s3, char* s4, messVec* list) {
+messVec* StMessageManager::FindMessageList(const char* s1, const char* s2,
+               const char* s3, const char* s4, messVec* list) {
 //
 // Obtain a list (messVec) of StMessage pointers for all messages
 // which contain matches to the strings s1,s2,s3,s4.
@@ -664,7 +684,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.27 1999/12/07 19:47:02 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.28 2000/01/05 19:53:46 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
