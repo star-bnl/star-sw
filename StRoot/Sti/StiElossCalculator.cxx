@@ -61,10 +61,5 @@ double StiElossCalculator::calculate(double z2, double zOverA, double m, double 
 ///\return energy loss in GeV*cm^2/g.
 double StiElossCalculator::calculate(double z2, double m, double beta2) const
 {
-  if (beta2>=1. || beta2<0)  throw runtime_error("StiElossCalculator::calculate() -E- beta2==1");
-  double gamma2 = 1./(1-beta2);
-  double gamma  = ::sqrt(gamma2);
-  double massRatio = _mec/m;
-  double tMax = 2.*_mec*beta2*gamma2/(1.+2*gamma*massRatio+massRatio*massRatio);
-  return _k*z2*_zOverA*(0.5*::log(_mec*beta2*gamma2*tMax/_ionization2)-beta2)/beta2;
+  return calculate(z2,_zOverA,m,beta2,_ionization2);
 }

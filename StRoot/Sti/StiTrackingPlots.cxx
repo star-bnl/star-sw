@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.23 2005/01/21 03:15:05 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.24 2005/02/07 18:33:43 fisyak Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.24  2005/02/07 18:33:43  fisyak
+ * Add VMC dead material
+ *
  * Revision 2.23  2005/01/21 03:15:05  pruneau
  * commented out offending cout
  *
@@ -309,8 +312,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       if(nPts<5) continue;
 
       int nFitPts    = kTrack->getFitPointCount();
+#if 0
       int nFitPtsSvt = kTrack->getFitPointCount(2);
       int tpcPoints  = (kTrack->getNodes(1)).size();
+#endif
       int svtPoints  = (kTrack->getNodes(2)).size();
       //int mPts=100*svtPoints+tpcPoints;
       
@@ -320,7 +325,9 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       double pt     = track->getPt();
       double gdca   = track->getGlobalDca();
       double dca    = track->getDca();
+#if 0
       double charge = track->getCharge();
+#endif
       double chi2   = kTrack->getChi2();
 
       bool globalAccepted = false;
@@ -472,8 +479,8 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 	  _svtNfitVsNode[i]->Fill(svtNnodes,svtNfits);
 	} // end of loop plot types
     }//end loop over tracks
-  trackCount[0] = trackCount[0]/10.;
-  trackCount[1] = trackCount[1]/10.;
+  trackCount[0] = trackCount[0]/10;
+  trackCount[1] = trackCount[1]/10;
   // some global histograms
   for (int j1=0;j1<NPLOTS-1;++j1)
     {
@@ -495,16 +502,20 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       const StiTrack* track = *trackIt;
       kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if( !track || !kTrack ) continue;
+#if 0
       bool good    = (1==kTrack->getFlag());
+#endif
       bool primary = kTrack->isPrimary();
 
       int nPts = kTrack->getPointCount();
       if(nPts<5) continue;
 
       int nFitPts    = kTrack->getFitPointCount();
+#if 0
       int nFitPtsSvt = kTrack->getFitPointCount(2);
       int tpcPoints  = (kTrack->getNodes(1)).size();
       int svtPoints  = (kTrack->getNodes(2)).size();
+#endif
       //int mPts=100*svtPoints+tpcPoints;
       
       double phi    = track->getPhi();
@@ -512,7 +523,9 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       double pt     = track->getPt();
       double gdca   = track->getGlobalDca();
       double dca    = track->getDca();
+#if 0
       double charge = track->getCharge();
+#endif
       double chi2   = kTrack->getChi2();
 
       bool globalAccepted = false;

@@ -17,11 +17,13 @@ ostream& operator<<(ostream& os, const StiTrack& track)
 {
   try 
     {
-      os <<" Chi2: "<<track.getChi2()
+      os << "Id: " << track.getId()  
+	 <<" Chi2: "<<track.getChi2()
 	 <<" q: "<<track.getCharge()
 	 <<" pt: "<<track.getPt()
 	 <<" eta: "<<track.getPseudoRapidity()
 	 <<" tanLambda: "<<track.getTanL()
+	 <<" phi: "<<track.getPhi()
 	 <<" points/fit/max: "<<track.getPointCount()
 	 <<"/"<<track.getFitPointCount()
 	 <<"/"<<track.getMaxPointCount()<<endl;

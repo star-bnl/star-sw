@@ -53,10 +53,14 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   unsigned int stiSector;
   for (unsigned int sector=0; sector<24; sector++)
     {
+#if 0
+      stiSector = sector;
+#else
     if (sector<12)
       stiSector = sector;
     else
       stiSector = 11 - (sector-11)%12;
+#endif
     const StTpcSectorHitCollection* secHits = tpcHits->sector(sector);
     if (!secHits)
       {
@@ -111,8 +115,12 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,
     unsigned int row = hit->padrow()-1;
     unsigned int sector = hit->sector()-1;
     unsigned int stiSector;
+#if 0
+    stiSector = sector;
+#else
     if (sector<12)stiSector = sector;
     else stiSector = 11 - (sector-11)%12;
+#endif
     //cout << "sector = " << sector <<" stiSector = "<<stiSector<<endl;
     StiDetector * detector = _detector->getDetector(row,stiSector);
     if (!detector)  throw runtime_error("StiTpcHitLoader::loadMcHits(StMcEvent*) -E- Detector element not found");

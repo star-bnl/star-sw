@@ -8,7 +8,7 @@ class StiTrackFinderParameters
   
   ~StiTrackFinderParameters()
     {}
-}
+};
 
 
 #endif

@@ -29,7 +29,7 @@ using namespace std;
 #include "StiKTNIterator.h"
 #include "StiTrack.h"
 
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 class StiHit;
 class StiKalmanTrackNode;
 class StiKalmanTrackFinderParameters;
@@ -235,8 +235,8 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getLastNode()   const { return lastNode; };
 
    void  setLastNode(StiKalmanTrackNode *n) { lastNode = n; };
-   void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };
-   
+   void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
+
    /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
    StiDirection getTrackingDirection() const { return  trackingDirection;};
    
@@ -331,6 +331,8 @@ protected:
 
   double  _dca;
   double  _gdca;
+  
+  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 
  public:
   double _vDca; // tempo dca 

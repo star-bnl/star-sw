@@ -24,11 +24,15 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
 	virtual ~StiSsdDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void setDefaults();
-  
+	virtual void useVMCGeometry();		
+	void    setSiMat(StiMaterial     *m) {_siMat = m;}
+	void    setHybridMat(StiMaterial *m) {_hybridMat = m;}
+	StiMaterial *getSiMat()    {return _siMat;}
+	StiMaterial *getHybridMat(){return _hybridMat;}
+ 
  protected:
         float phiForSsdLadder(unsigned int iLadder) const;
         float radiusForSsdLadder(unsigned int iLadder) const;
-	StiMaterial *_gasMat;        
 	StiMaterial *_siMat;
 	StiMaterial *_hybridMat;
 	StiPlanarShape * _waferShape[1];

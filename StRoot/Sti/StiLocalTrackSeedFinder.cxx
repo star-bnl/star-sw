@@ -128,6 +128,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
     }
   for_each( _seedHits.begin(), _seedHits.end(), ScaleHitError(10.) );
   track = initializeTrack(_trackFactory->getInstance());
+  track->setId(((VectorizedFactory<StiKalmanTrack,StiKalmanTrack> *)_trackFactory)->getCurrentEntry());
   //cout <<"StiLocalTrackSeedFinder::makeTrack() -I- Done"<<endl;
   return track;
 }

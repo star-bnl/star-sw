@@ -189,6 +189,8 @@ public:
   double getDensity() const;
   double getGasDensity() const;
 
+  Int_t  debug() const {return _debug;}
+  void   setDebug(Int_t m) {_debug = m;}
   /// rotation angle of local coordinates wrt global coordinates
 
 
@@ -258,6 +260,7 @@ public:
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[5][5];   
+  static int   _debug;
 };
 
 

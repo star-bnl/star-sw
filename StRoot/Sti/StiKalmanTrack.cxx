@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.50 2005/01/17 01:31:25 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.50 2005/01/17 01:31:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.51 2005/02/07 18:33:42 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.51 2005/02/07 18:33:42 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.51  2005/02/07 18:33:42  fisyak
+ * Add VMC dead material
+ *
  * Revision 2.50  2005/01/17 01:31:25  perev
  * New parameter model
  *
@@ -393,22 +396,22 @@ void StiKalmanTrack::initialize(double curvature,
     {
       detector = (*it)->detector();
       if (!detector) 
-				{
-					cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
-					throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
-				}
+	{
+	  cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
+	  throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
+	}
       // if alpha is same, avoid recalculating eta
       alpha = detector->getPlacement()->getNormalRefAngle();
       if (alphaP!=alpha)
-				{
-					temp = origin;
-					temp.rotateZ(-alpha);
-					eta = curvature*temp.x();
-					alphaP=alpha;
-				}
+	{
+	  temp = origin;
+	  temp.rotateZ(-alpha);
+	  eta = curvature*temp.x();
+	  alphaP=alpha;
+	}
       add((*it),alpha,eta,curvature,tanl);
     }
-  //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
+   //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -816,6 +819,7 @@ double StiKalmanTrack::getTrackRadLength() const
   x3=0.;
 
 
+  //  while ((++tNode)!=end() && (*tNode).getDetector())
   while ((tNode++)!=end() && (*tNode).getDetector())
     {
 
@@ -1095,11 +1099,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
 
-	StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
-	if (!innerMostHitNode) return false;
-	// track with hits in the outer portion of the TPC only are not considered
-	if (innerMostHitNode->getX()>100.) return false;
-		
+       StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
+       if (!innerMostHitNode) return false;
+       // track with hits in the outer portion of the TPC only are not considered
+       if (innerMostHitNode->getX()>100.) return false;
+
   StiHit localVertex = *vertex;
   sNode = lastNode;
 
@@ -1127,11 +1131,28 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
       dy=tNode->getY()- localVertex.y();
       dz=tNode->getZ()- localVertex.z();
       d= ::sqrt(dx*dx+dy*dy+dz*dz);
-      //cout << "chi2 @ vtx " << chi2 << endl;
-      /*	cout << " dx:"<< dx
-		<< " dy:"<< dy
-		<< " dz:"<< dz
-		<< " d: "<< d<<endl;*/
+	_dca = ::sqrt(dy*dy+dz*dz);
+#ifdef Sti_DEBUG      
+	int npoints[2] = {0,0};
+	vector<StMeasuredPoint*> hitVec = stHits();
+	for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
+	  StHit * hit = dynamic_cast<StHit *>(*point);
+	  if (hit) {
+	    StDetectorId detId = hit->detector();
+	    if (detId == kTpcId) ++npoints[0];
+	    if (detId == kSvtId) ++npoints[1];
+	  }
+	}
+	cout << "StiKalmanTrack::extendToVertex: localVertex: " << localVertex << endl;
+	cout << "StiKalmanTrack::extendToVertex: chi2 @ vtx: " << chi2 
+	     << " dx:"<< dx
+	     << " dy:"<< dy
+	     << " dz:"<< dz
+	     << " d: "<< d
+	     << " dca: " << _dca << " npoints tpc/svt: " << npoints[0] << "/" << npoints[1] << endl;
+	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
+#endif
+
       _vDca = d;
       _vChi2= chi2;
       //if (chi2<pars->maxChi2Vertex)
@@ -1145,6 +1166,9 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setDetector(0);
 	  add(tNode);
 	  trackExtended = true;
+#ifdef Sti_DEBUG      
+	cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
+#endif
 	}
     }
   //else
@@ -1164,9 +1188,9 @@ bool StiKalmanTrack::find(int direction)
       if (trackFinder->find(this,kOutsideIn))
 	{
 	  //cout<<"/////////////////fit(InOut)";
-	 fit(kInsideOut);  
-	  //------ 
-	 fit(kOutsideIn);
+	  fit(kInsideOut);  
+	  //------
+	  fit(kOutsideIn);
 	  trackExtended = true;
 	  //cout<<"/////////////////fit(InOut) Done";
 	}	
@@ -1264,6 +1288,35 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
 			       node->getHelicity());
   double dca = physicalHelix.distance(vxDD);
   return dca;
+}
+ostream& operator<<(ostream& os, const StiKalmanTrack& track)
+{
+  try 
+    {
+      os << *((StiTrack *) &track);
+      os <<"List of nodes" << endl;
+
+      //      bool trackIn = (kOutsideIn==track.getTrackingDirection());
+
+      StiKTNBidirectionalIterator tNode = track.begin();
+      StiKTNBidirectionalIterator eNode = track.end();
+      //set initial conditions for tNode, the 'current' node;
+      //will also need 'nextNode', ie node which is next 
+      while (tNode != eNode) {
+	StiKalmanTrackNode *thisNode = &(*tNode);
+	if (thisNode) os << *thisNode;
+	tNode++;
+      }
+    }
+  catch (runtime_error & rte)
+    {
+      os << " Run-time Error while accessing track parameters: " << rte.what() << endl;
+    }
+  catch (logic_error & le)
+    {
+      os << " Logic Error while accessing track parameters: " << le.what() << endl;
+    }
+  return os;
 }
 
 ///Extrapolate this track to the beam axis (x==0) to provide an estimate of the
