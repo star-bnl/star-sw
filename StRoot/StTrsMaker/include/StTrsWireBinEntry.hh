@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.3 1999/06/16 14:26:51 fisyak Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.4 2000/02/24 16:39:52 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.4  2000/02/24 16:39:52  long
+ * add sigmaL(),sigmaT()
+ *
  * Revision 1.3  1999/06/16 14:26:51  fisyak
  * Add flags for egcs on Solaris
  *
@@ -41,7 +44,7 @@
 
 class StTrsWireBinEntry {
 public:
-    StTrsWireBinEntry(StThreeVector<double>&, float);
+    StTrsWireBinEntry(StThreeVector<double>&, float,double,double);
     ~StTrsWireBinEntry();
     //StTrsWireBinEntry(const StTrsWireBinEntry&);
     //StTrsWireBinEntry& operator=(cont StTrsWireBinEntry&);
@@ -49,7 +52,9 @@ public:
     // access functions
     const StThreeVector<double>& position()       const;
     float                 numberOfElectrons()     const;
-
+    double                sigmaL();
+    double                sigmaT();
+    
     StThreeVector<double>& position()                  ;
     void                  setNumberOfElectrons(float)  ;
     void                  scaleNumberOfElectrons(float);
@@ -61,6 +66,8 @@ public:
 private:
     StThreeVector<double> mPosition;
     float                 mNumberOfElectrons;
+    double                mSigmaL;
+    double                mSigmaT;
 };
 inline const StThreeVector<double>&
 StTrsWireBinEntry::position() const {return mPosition;}
