@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.13 1999/07/15 13:58:03 perev Exp $
+// $Id: St_ems_Maker.cxx,v 1.14 1999/07/19 13:23:03 fisyak Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.14  1999/07/19 13:23:03  fisyak
+// New Maker scheme
+//
 // Revision 1.13  1999/07/15 13:58:03  perev
 // cleanup
 //
@@ -175,7 +178,7 @@ void St_ems_Maker::makeHistograms(const Int_t det, St_emc_hits *emc_hit){
 Int_t St_ems_Maker::Make(){
 
   //  Find  Geant  Tables
-  St_DataSet *gea = GetDataSet("event/geant/Event");
+  St_DataSet *gea = GetDataSet("geant");
   if (!gea) return kStWarn;
   St_DataSetIter geant(gea);
   St_g2t_event  *g2t_event  = (St_g2t_event  *) geant("g2t_event");
