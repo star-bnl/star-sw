@@ -1,7 +1,10 @@
 *
-* $Id: gsvert.F,v 1.3 2000/01/06 22:09:17 nevski Exp $
+* $Id: gsvert.F,v 1.4 2000/01/07 00:48:48 nevski Exp $
 *
 * $Log: gsvert.F,v $
+* Revision 1.4  2000/01/07 00:48:48  nevski
+* strong typing in quest required
+*
 * Revision 1.3  2000/01/06 22:09:17  nevski
 * unlimited track/vertex version
 *
@@ -36,7 +39,7 @@ C.
 #include "geant321/gctrak.inc"
 #include "geant321/gckine.inc"
 #include "geant321/gcunit.inc"
-#include "zebra/quest.inc"
+#include "atcdes/quest.inc"
 
       REAL     V(3),UBUF(1)
       INTEGER  LGKINE,LGVERT,NTBEAM,NTTARG,NWBUF,NVTX,NT(2),IER,
