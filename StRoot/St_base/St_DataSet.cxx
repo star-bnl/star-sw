@@ -232,6 +232,12 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t dept
 //______________________________________________________________________________
 Int_t St_DataSet::Purge(Option_t *opt)
 {
+ //
+ // Purge  - deletes all "dummy" datasets those are not ended up with some
+ //          dataset with data inside (those return HasData() = 0)
+ //
+ // Purge does affect only the structural links and doesn't touch refs.
+ //
  if (fList) {
    TIter next(fList);   
    St_DataSet *son = 0;

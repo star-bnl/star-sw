@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.8 1998/09/15 20:55:27 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.9 1998/09/18 14:35:31 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.9  1998/09/18 14:35:31  fisyak
+// Fix makers
+//
 // Revision 1.8  1998/09/15 20:55:27  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -141,10 +144,10 @@ Int_t St_tcl_Maker::Make(){
 //   St_DataSet *raw_data_tpc =  gStChain->Maker("tss_Maker")->DataSet();
      St_DataSetIter raw_data(gStChain->GetRawData());
      St_DataSet *raw_data_tpc = raw_data("tpc"); 
+     Int_t sector_tot = 0;
      if (raw_data_tpc){// Row data exits -> make clustering
        St_DataSetIter next(raw_data_tpc);
        St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
-       Int_t sector_tot = 0;
        while (sector=next()){// loop over sectors
          Char_t *name= 0;
          if (name = strstr(sector->GetName(),"Sector")) {
@@ -179,18 +182,21 @@ Int_t St_tcl_Maker::Make(){
                                 tpseq,tpcluster,tphit,tphitau);
 	 }
        }
-       cout << "start run_tte_hit_match" << endl;
-       St_tcl_tpc_index  *index = (St_tcl_tpc_index *) tpc_data("index");
-       if (!index) {index = new St_tcl_tpc_index("index",200000); tpc_data.Add(index);}
-       St_DataSetIter geant(gStChain->GetGeant());
-       St_DataSetIter g2t(geant("Event"));
-       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
+       if (sector_tot) {//slow simulation exist
+         cout << "start run_tte_hit_match" << endl;
+         St_tcl_tpc_index  *index = (St_tcl_tpc_index *) tpc_data("index");
+         if (!index) {index = new St_tcl_tpc_index("index",200000); tpc_data.Add(index);}
+         St_DataSetIter geant(gStChain->GetGeant());
+         St_DataSetIter g2t(geant("Event"));
+         St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
 
-       Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
-       if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
-       cout << "finish run_tte_hit_match" << endl;
+         Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
+         if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
+         cout << "finish run_tte_hit_match" << endl;
+       }
      }
-     else {// Row data does not exit, check GEANT. if it does then use fast cluster simulation
+// Row data does not exit, check GEANT. if it does then use fast cluster simulation
+     if (!raw_data_tpc || !sector_tot){
        St_DataSetIter geant(gStChain->GetGeant());
        St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
        St_g2t_track   *g2t_track   = (St_g2t_track *) geant("Event/g2t_track");
@@ -220,7 +226,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.8 1998/09/15 20:55:27 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.9 1998/09/18 14:35:31 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

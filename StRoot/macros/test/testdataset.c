@@ -1,7 +1,12 @@
 {
  gROOT->Reset();
 #include "iostream.h"
-  gSystem.Load("St_base.so");
+  // Determinate the brand of the OS
+  if (strcmp(gSystem.GetName(),"WinNT") == 0 ) 
+     gSystem.Load("St_base.dll");
+  else 
+     gSystem.Load("St_base.so");
+
   St_DataSetIter d;
   d.Mkdir("v1/v1_1/v1_1_1");
   d.Ls();
@@ -14,8 +19,11 @@
   cout  << endl << "------------ 1 ------------ " << endl;
   d.Mkdir("v1/v21/v3212/v4");
   cout << "the current path: " << d("v1/v21/v3212/v4")->Path() << endl;
-  d.Pwd()->ls("*");
-
+  d.Pwd()->ls("/");
+  cout << "list \"v3212\" the relative path " << endl;
+  d.Pwd()->ls("v1/v21/v3212");
+  cout << "We'll try some \"wrong\" path now" << endl;
+  d.Pwd()->ls("unknown");
   cout  << endl << "------------ 2 ------------ " << endl;
 
   cout << "recreating directories" << endl;
