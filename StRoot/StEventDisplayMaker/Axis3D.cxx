@@ -20,15 +20,14 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.15 2000/01/24 22:56:46 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.16 2000/01/31 23:51:20 fisyak Exp $ 
 //
 
 #include <iostream.h>
 #include <ctype.h>
 #include <assert.h>
-
 #include "TClass.h"
-#include "TAxis3D.h"
+#include <TAxis3D.h>   
 #include "Hoption.h"
 #include "TCanvas.h"
 #include "TPad.h"
@@ -689,6 +688,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.16  2000/01/31 23:51:20  fisyak
+// replace \"\" - > < > for TAxis3D.h for Solaris ?
+//
 // Revision 1.15  2000/01/24 22:56:46  fine
 // new packing schema for ssd introduced
 //
