@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.25 2001/04/09 18:39:42 jeromel Exp $
+// $Id: StAssociator.C,v 1.26 2001/04/25 21:16:57 jeromel Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.26  2001/04/25 21:16:57  jeromel
+// Added libgeometry_Tables missing for some StEmcUtil calls.
+//
 // Revision 1.25  2001/04/09 18:39:42  jeromel
 // Just checking (could not commit before). No changes.
 //
@@ -108,6 +111,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     gSystem->Load("StChain");
 //     gSystem->Load("St_Tables");
     gSystem->Load("libglobal_Tables");
+    gSystem->Load("libgeometry_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("StUtilities");
