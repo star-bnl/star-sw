@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.7 1999/12/07 23:14:17 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.8 1999/12/08 03:07:20 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.8  1999/12/08 03:07:20  lansdell
+// made corresponding tpc/ftpc split in dedx histograms for StEventQAMaker
+//
 // Revision 1.7  1999/12/07 23:14:17  kathy
 // fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
 //
@@ -314,9 +317,21 @@ void StEventQAMaker::MakeHistDE() {
       //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
       if (dedxPidTr) {
-	m_ndedxT->Fill(dedxPidTr->numberOfPoints());
-	m_dedx0T->Fill(dedxPidTr->mean());
-	m_dedx1T->Fill(dedxPidTr->sigma());
+	if (trkPidTr[0]->detector()==1) {
+	  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
+	  m_dedx0T->Fill(dedxPidTr->mean()*1e6);
+	  m_dedx1T->Fill(dedxPidTr->sigma()*1e6);
+	}
+	if (trkPidTr[0]->detector()==4) {
+	  m_ndedxFW->Fill(dedxPidTr->numberOfPoints());
+	  m_dedx0FW->Fill(dedxPidTr->mean());
+	  m_dedx1FW->Fill(dedxPidTr->sigma());
+	}
+	if (trkPidTr[0]->detector()==5) {
+	  m_ndedxFE->Fill(dedxPidTr->numberOfPoints());
+	  m_dedx0FE->Fill(dedxPidTr->mean());
+	  m_dedx1FE->Fill(dedxPidTr->sigma());
+	}
       }
     }
   }
