@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.2 2003/04/02 16:45:19 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.3 2003/04/04 14:43:44 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.3  2003/04/04 14:43:44  pruneau
+ * Fix to the hit error calculator and the getCharge methods.
+ *
  * Revision 2.2  2003/04/02 16:45:19  pruneau
  * Fixed error calculation and impose hard coded upper cut on the size of the error.
  *
@@ -66,8 +69,8 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   if (edip>20.e-2) edip = 20.e-2;     // in meters here
   node->eyy = 10000.*ecross; // in centimeters here...
   node->ezz = 10000.*edip;
-  if (ecross<0 || edip<0 || node->eyy<=0. || node->eyy>10. || node->ezz<=0. || node->ezz>10.)
-    cout << " Hit Error - ecross:"<<ecross<<" edip:"<<edip
-	 <<" node->eyy:"<<node->eyy<<" node->ezz:"<<node->ezz<<endl;
+  //if (ecross<0 || edip<0 || node->eyy<=0. || node->eyy>10. || node->ezz<=0. || node->ezz>10.)
+  //  cout << " Hit Error - ecross:"<<ecross<<" edip:"<<edip
+  //<<" node->eyy:"<<node->eyy<<" node->ezz:"<<node->ezz<<endl;
 }
 

@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.4 2003/03/31 17:19:02 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.5 2003/04/04 14:44:25 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.5  2003/04/04 14:44:25  pruneau
+ * Fix to the hit error calculator and the getCharge methods.
+ *
  * Revision 2.4  2003/03/31 17:19:02  pruneau
  * various
  *
@@ -75,6 +78,11 @@ class StiTrackingPlots : public HistogramGroup
   TH2D * radLengthPhi;
   TH2D * radLengthEta;
 
+  TH2D *_xLastHitVsXLastNode;
+  TH2D *_xLastHitVsXLastNode1;
+  TH2D *_xLastHitVsXLastNode2;
+
+
   //track kinematics & helix parameters
   //make all plots 3D - value,Phi,Eta - then cut 
   TH1D * mPx;
@@ -85,7 +93,6 @@ class StiTrackingPlots : public HistogramGroup
   TH3D * mMomY;
   TH3D * mMomZ;
   TH3D * mPhase;
-
 
 };
 

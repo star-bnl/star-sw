@@ -58,7 +58,7 @@ public:
   // Extract state information from this node.
   void get(double& alpha, double& xRef, double x[5], double cc[15], double& chi2);
   /// Get the charge (sign) of the track at this node
-  double getCharge() const;
+  int getCharge() const;
   /// Convenience Method that returns the track momentum at this node
   StThreeVectorF getMomentumF() const;
   /// Convenience Method that returns the track momentum at this node
@@ -296,9 +296,9 @@ inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
   return StThreeVectorF(p);
 }
 
-inline double StiKalmanTrackNode::getCharge() const
+inline int StiKalmanTrackNode::getCharge() const
 {
-  return (pars->field*_p3 > 0) ? -1. : 1.;
+  return (pars->field*_p3 > 0) ? -1 : 1;
 }
 
 inline double StiKalmanTrackNode::getTanL() const
