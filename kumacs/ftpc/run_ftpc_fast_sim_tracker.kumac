@@ -2,28 +2,30 @@
 * run_ftpc_fast_sim_tracker.kumac
 * 
 * 
-* created July 17, 1998 K. Turner
-* 
+* created July 28,1998 - Janet Seyboth
+*                        (with lots of help from Kathy Turner)
+*                      - this is now the kumac that drives the ftpc fast 
+*                        chain: simulation,tracking, track evaluation
 ************************************************************************
 ************************************************************************
 
  macro run__
-          TOP=/scr22/kathy/janet _
-          domain=' ftpc' _
-          INPUT_DATA_DIR=/scr22/kathy/janet/ _
-          input_g2t_file=janet_auau_central_venus.xdf _
+          TOP=$STAR _
+          domain='ftpc' _
+          INPUT_DATA_DIR=$AFS_RHIC/star/users/jcs/public/ _
+          input_g2t_file=auau_gstar_g2t.tab _
           num_events=1 _
           funit=21 _
           nfile=ftpc_tracks.ntup _
           nid=111 _
-          table=ftpc/tracks
+          table=ftpc/tracks/fpt_fptrack
 * 
 *  this is an example!! you must change to fill your needs
 *  
 * --> to run
 *    - change the inputs above as desired
 *    - run staf
-*    -   exec run_ftpc_fast_sim_tracker
+*    -   exec run_ftpc_fast_sim_chain
 * 
 	  
   message ' *** TOP directory to search for kumacs --> ' [TOP]
@@ -35,26 +37,21 @@
   message ' *** output Ntuple filename  -->            ' [nfile]
   message ' *** Ntuple ID # -->                        ' [nid]
   message ' *** Table to write to ntup -->             ' [table]
-
-***********************************************************
-* General Setup
-***********************************************************
-  
- macro/global/create TOP              [TOP]
-
+ 
+ 
+* ----------- General setup stuff ------------------------*
+  macro/global/create TOP              [TOP]
+    
 * setup default directories to search for kumacs in
 * setup default table directory structure in STAF
 * load libraries [domain]
     
-   exec $STAR/kumacs/chain/bfc_util#bfc_defaults 
-   
-   exec setup#setup
-   macro/global/import *
+ exec $STAR/kumacs/chain/bfc_util#bfc_start [domain]
      
-   exec bfc_util#bfc_load [domain]
-
+ macro/global/import *
+   
 * **************************************************************
-* --------- Setup and run tpc fast simulator & tracker pams -------------*
+* --------- Setup and run ftpc fast simulator & tracker pams -------------*
    
 * open input g2t data file
   exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
@@ -65,37 +62,38 @@
   exec write_table_to_ntuple#init_disk [funit] [nfile]  
    
 * --------------------- initialization ----------------------------*
-  
-* create tables
-  exec create_tables_ftpc#ffs_tables
-  exec create_tables_ftpc#fpt_tables
-  exec create_tables_ftpc#fte_tables
-  
-* Create and initialize input tables
 
-  exec ffs_init
-  exec fpt_init
-  exec fte_init
-  
-* set for ffs data
-   cd [params]/ftpc
-   tdm/table/cell/putvalue 'ftepar[0].void2' 2
-   cd /dui
-   
+* create tables
+    
+    exec create_tables_ftpc#ffs_tables
+    exec create_tables_ftpc#fpt_tables
+    exec create_tables_ftpc#fte_tables
+
+* initialize tables
+
+    exec ffs_init#init
+    exec fpt_init#init
+    exec fte_init#init
+
   
 * ------------------- process events ------------------------------*
 
 * read event and then process thru tpc fast sim & then tracker
   do i=1,[num_events]
-    message ' run_tpc_fast_sim_tracker: processing event ' [i]
+    message ' run_ftpc_fast_sim_chain: processing event ' [i]
 * clear all event tables
     tabclear [event]
 * read input file
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 * ftpc fast simulator 
-    exec ffs_run
+    exec ffs_run#run
+      if STAF_STATUS(1).eq.0 then
+        message ' problem with ffs '
+      endif
+* ftpc tracking
     exec fpt_run#run_fast_sim
+* ftpc track evaluation
     exec fte_run#run_fast_sim
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
@@ -105,6 +103,9 @@
 * -------------------- end stuff -----------------------------*
   
   ENDOFDATA:
+    if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
 
 * close ntuple
   message ' close ntuple'
@@ -117,16 +118,3 @@
 return
  
 ************************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-
