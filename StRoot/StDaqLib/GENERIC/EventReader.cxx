@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.39 2002/12/09 18:54:23 ward Exp $
+ * $Id: EventReader.cxx,v 1.40 2003/01/22 18:13:29 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.40  2003/01/22 18:13:29  ward
+ * Bug in TOF online code, disable corruption check for this bank.
+ *
  * Revision 1.39  2002/12/09 18:54:23  ward
  * EMC stuff from Subhassis.
  *
@@ -833,7 +836,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,    "FTPP")) { *beg=1; *end=4; } // Changed from 48 to 4, Dec 30 2001 by H Ward.
   if(!strcmp(xx, "FTPSECP")) { *beg=1; *end= 24; }
   if(!strcmp(xx,  "FTPRBP")) { *beg=1; *end=6; }
-  if(!strcmp(xx,    "TOFP")) { *beg=1; *end=8; }
+  // There is a bug in TOF online code. if(!strcmp(xx,    "TOFP")) { *beg=1; *end=8; }
   if(!strcmp(xx,    "FPDP")) { *beg=0; *end=0; } // This is for chekcing data corruptions. Skip for now
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
