@@ -82,6 +82,8 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
   }
   delete cutsArray; cutsArray = 0;
   delete cuts; cuts = 0;
+  for (int i=0;i<strDstT;i++) {delete cont[i]; cont[i]=0;}
+
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
@@ -653,8 +655,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.26 2003/07/09 21:58:30 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.27 2003/11/10 04:06:47 perev Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.27  2003/11/10 04:06:47  perev
+// delete controllers added in dtr
+//
 // Revision 3.26  2003/07/09 21:58:30  genevb
 // Use Get/SetMode() from StMaker
 //
