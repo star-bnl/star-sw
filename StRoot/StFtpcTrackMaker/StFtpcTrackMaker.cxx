@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.31 2002/04/08 15:38:04 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.32 2002/04/09 16:10:13 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.32  2002/04/09 16:10:13  oldi
+// Method to get the magentic field factor moved to StFormulary. It works for
+// simulation as well, now.
+//
 // Revision 1.31  2002/04/08 15:38:04  oldi
 // Switch for magnetic field factor installed.
 // Minor corrections/improvements.
@@ -141,6 +145,7 @@
 #include "StFtpcConfMapper.hh"
 #include "StFtpcDisplay.hh"
 #include "StFtpcTrackEvaluator.hh"
+#include "StFormulary.hh"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -148,8 +153,6 @@
 #include "StChain.h"
 #include "StVertexId.h"
 #include "StMessMgr.h"
-#include "StDetectorDbMaker/StDetectorDbMagnet.h"
-
 
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
@@ -376,9 +379,7 @@ Int_t StFtpcTrackMaker::Make()
   }
   
   // get magnetic field
-  StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
-  Double_t mag_fld_factor = magnet->getScaleFactor();
-
+  Double_t mag_fld_factor = StFormulary::GetMagneticFieldFactor();
   Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
 			   primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
@@ -557,7 +558,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.31 2002/04/08 15:38:04 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.32 2002/04/09 16:10:13 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
