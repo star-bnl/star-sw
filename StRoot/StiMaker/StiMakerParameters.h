@@ -39,7 +39,15 @@ class StiMakerParameters : public TObject
   bool doStEventInput;  
   bool doPlots;
 
-  char* baseName;
+  char* trackerInputFile;
+  char* fitterInputFile;
+  char* emcInputFile;
+  char* eemcInputFile;
+  char* svtInputFile;
+  char* ssdInputFile;
+  char* tpcInputFile;
+  char* ftpcInputFile;
+  char* pixelInputFile;
 
   friend ostream& operator<<(ostream& os, const StiMakerParameters&pars);
   

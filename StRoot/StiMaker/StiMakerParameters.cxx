@@ -27,7 +27,17 @@ StiMakerParameters::StiMakerParameters()
     doStEventOutput(false),
     doStEventInput(false),
     doPlots(false)
-{}
+{
+	trackerInputFile  = "trackerInputFile.dat";
+	fitterInputFile   = "fitterInputFile.dat";
+	emcInputFile      = "emcInputFile.dat";
+	eemcInputFile     = "eemcInputFile.dat";
+	svtInputFile      = "svtInputFile.dat";
+	ssdInputFile      = "ssdInputFile.dat";
+	tpcInputFile      = "tpcInputFile.dat";
+	ftpcInputFile     = "ftpcInputFile .dat";
+	pixelInputFile    = "pixelInputFile.dat";
+}
 
 StiMakerParameters::~StiMakerParameters()
 {}
@@ -60,8 +70,7 @@ ostream& operator<<(ostream& os, const StiMakerParameters&pars)
        << "                            doDst :" << pars.doDst <<endl
        << "                  doStEventOutput :" << pars.doStEventOutput <<endl
        << "                   doStEventInput :" << pars.doStEventInput   <<endl
-       << "                          doPlots :" << pars.doPlots << endl
-       << "                         baseName :" << pars.baseName << endl;
+       << "                          doPlots :" << pars.doPlots << endl;
   return os;
 }
 
