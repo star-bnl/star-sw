@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -48,7 +48,7 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -76,8 +76,11 @@ class StEEmcDbMaker : public StMaker {
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
+  TString flavor[2]; // holds flavor & tableMask
 
-  template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
+  //  template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
+
+  template <class St_T, class T_st> void  getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st **outTab);
   
 
  protected:
@@ -92,7 +95,8 @@ class StEEmcDbMaker : public StMaker {
   const  StEEmcDbIndexItem1* get(int crate, int channel); ///< returns full DB info for any ADC channel
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
-  
+  void setPreferedFlavor(const char *flavor, const char *tableNameMask);
+
   void setDBname(TString name){ dbName=name;}
 
   int valid(){ return nFound;} // return # of valid BD records
@@ -106,7 +110,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -117,6 +121,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.10  2003/08/27 03:26:46  balewski
+// flavor option added:  myMk1->setPreferedFlavor("set-b","eemcPMTcal");
+//
 // Revision 1.9  2003/08/26 03:02:30  balewski
 // fix of pix-stat and other
 //

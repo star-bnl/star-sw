@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.15 2003/08/26 03:02:30 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.16 2003/08/27 03:26:45 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -47,8 +47,12 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
     mLookup[i]=NULL;
     if(i==0 || (i>6 && i<64) ) continue; // to save memory for nonexisting crates
     mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
+    memset(mLookup[i],0,sizeof(StEEmcDbIndexItem1 *)*mxAdcChan);// clear all pointers
   }
   setDBname("Calibrations/eemc");
+  flavor[0]="";
+  flavor[1]="";
+ 
 }
 
 
@@ -110,11 +114,23 @@ void  StEEmcDbMaker::setTimeStampDay( int tD) {
 
 
 }
+
+//------------------
 //------------------
 void StEEmcDbMaker::setThreshold(float x){
  KsigOverPed=x;
  printf("%s::setThres KsigOverPed=%f, threshold=ped+sig*KsigOverPed\n",GetName(),KsigOverPed);
 }
+
+
+//------------------
+//------------------
+void StEEmcDbMaker::setPreferedFlavor(const char *flav, const char *mask){
+  flavor[0]=flav;
+  flavor[1]=mask;
+  printf("SET %s::preferFlavor(flav='%s', mask='%s')\n",GetName(),flavor[0].Data(),flavor[1].Data());
+}
+
 
 
 //________________________________________________________
@@ -144,7 +160,17 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
   mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
   mDbsectorID=  new int [mNSector];
-  
+
+  int i;
+  for(i=0; i<mNSector; i++) {// clear pointers
+    mDbADCconf[i]=0;
+    mDbPMTconf[i]=0;
+    mDbPMTcal [i]=0;
+    mDbPMTped [i]=0;
+    mDbPMTstat[i]=0;
+    mDbsectorID[i]=-1;
+  } 
+
   printf("\n\n%s::Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
 
 }
@@ -194,8 +220,15 @@ StEEmcDbMaker::get(int crate, int channel){
 
 Int_t  StEEmcDbMaker::InitRun  (int runumber){
   printf("\n\nInitRun :::::: %s\n\n\n",GetName());
+
+  printf("%s::use(flav='%s', mask='%s')\n",GetName(),flavor[0].Data(),flavor[1].Data());
+
+
   mReloadDb();
   mOptimizeDb();
+
+  printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
+
   return kStOK;
 }  
 
@@ -204,18 +237,19 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 //__________________________________________________
 
 void  StEEmcDbMaker::mReloadDb  (){
+
   int i;
   printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
   
   // clear old DB tables  ...................
   nFound=0;
-  
+  mDbADCconf[0]=0;
   for(i=0; i<mNSector; i++) {// clear old data
-    mDbADCconf[i]=0;
-    mDbPMTconf[i]=0;
-    mDbPMTcal [i]=0;
-    mDbPMTped [i]=0;
-    mDbPMTstat[i]=0;
+    delete mDbADCconf [i]; mDbADCconf [i]=0;
+    delete mDbPMTconf [i]; mDbPMTconf [i]=0;
+    delete mDbPMTcal  [i]; mDbPMTcal  [i]=0;
+    delete mDbPMTped  [i]; mDbPMTped  [i]=0;
+    delete mDbPMTstat [i]; mDbPMTstat [i]=0;
     mDbsectorID[i]=-1;
   }
   
@@ -257,45 +291,52 @@ void  StEEmcDbMaker::mReloadDb  (){
 
 
   printf("JB: access DB=\"%s\"  first time, use timeStamp=\n  ",dbName.Data());
-  TDatime aa;
-  aa=mydb->GetDateTime();
+  TDatime aa=mydb->GetDateTime();
   aa.Print();
-  
-  TDataSet *eedb=GetDataBase(dbName );
-  if(eedb==0) {
-    printf(" \n\n%s::InitRun()  Could not find %s\n\n",GetName(),dbName.Data());
-    return ;
-    // down-stream makers should check for presence of dataset
-  }
-  eedb->ls(2);  
 
-
-  int is;
-  for(is=0; is< mNSector; is++) {
-    int secID=is+mfirstSecID;
-
-    mDbsectorID[is]=secID;
+  int ifl;
+  TString mask="";
+  for(ifl=0;ifl<2;ifl++) { // loop over flavors
+    if(ifl==1) {
+      if( flavor[0].IsNull()) continue; // drop flavor change
+      printf("\n %s-->ifl=%d try flavor='%s' for mask='%s'\n",GetName(),ifl,flavor[0].Data(),flavor[1].Data());
+      SetFlavor(flavor[0].Data(),flavor[1].Data());
+      mask=flavor[1];
+    }
     
-    mDbADCconf[is]=
-      getTable<St_eemcDbADCconf,eemcDbADCconf_st>(eedb,secID,"eemcADCconf");
+    TDataSet *eedb=GetDataBase(dbName );
+    if(eedb==0) {
+      printf(" \n\n%s::InitRun()  Could not find %s\n\n",GetName(),dbName.Data());
+      return ;
+      // down-stream makers should check for presence of dataset
+    }
+    //eedb->ls(2);  
     
-    mDbPMTconf[is]=
-      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf");
-
-    mDbPMTcal[is]=
-      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal");
-
-    mDbPMTped[is]=
-      getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped");
-
-    mDbPMTstat[is]=
-      getTable<St_eemcDbPMTstat,eemcDbPMTstat_st>(eedb,secID,"eemcPMTstat");
     
-  } // end of loop over sectors
+    int is;
+    for(is=0; is< mNSector; is++) {
+      int secID=is+mfirstSecID;
+      
+      mDbsectorID[is]=secID;
+      getTable<St_eemcDbADCconf,eemcDbADCconf_st>
+	(eedb,secID,"eemcADCconf",mask, mDbADCconf+is);
 
+      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf",mask,mDbPMTconf+is);
+      
+   
+      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,   mDbPMTcal+is);
+   
+      
+      getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped",mask, mDbPMTped+is);
+      
+      
+      getTable<St_eemcDbPMTstat,eemcDbPMTstat_st>(eedb,secID,"eemcPMTstat",mask,mDbPMTstat+is);
+
+
+    } // end of loop over sectors
+    
+  }// end of loop over flavors
  
-  printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
-
 }
  
 //__________________________________________________
@@ -350,7 +391,13 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
       assert(t->crate[j]>=0 && t->crate[j]<mxAdcCrate);
       assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
-      assert(mLookup[t->crate[j]]);
+      assert(mLookup[t->crate[j]]);// wrong crate ID from DB
+      if(mLookup[t->crate[j]][t->channel[j]]) {
+	printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",t->crate[j],t->channel[j]);
+	mLookup[t->crate[j]][t->channel[j]]->print(); // first time
+	mDbItem1[index].print(); // second time
+	assert(1==2);
+      }
       mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[index];
       
       //      if(j>300) break;
@@ -361,7 +408,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
 
   //---------------------------------------------------
-  printf("\nAcquire secondary info for active elements\n");
+  printf("\nAcquire secondary info for active elements ...\n");
 
   int index;
   for(index=0; index<EEindexMax; index++){//main loop over all pixels
@@ -388,7 +435,8 @@ void  StEEmcDbMaker::mOptimizeDb(){
       if(p==0) continue;
       mDbItem1[index].gain=cal->gain[j];
       mDbItem1[index].hv=cal->hv[j];
-      //  if(strchr(name1,'T')==0) printf(" xx=%s, index=%d j=%d  gain=%f hv=%f\n",name1,j,index,cal->gain[j],cal->hv[j]) ;
+      //if(strchr(name1,'T')==0)
+      //printf(" xx=%s, index=%d j=%d  gain=%f hv=%f\n",name1,j,index,cal->gain[j],cal->hv[j]) ;
       break;
     }
     
@@ -501,39 +549,53 @@ void StEEmcDbMaker::mCleanDbNames(char * buf, int len){
 //_________________________________________________________
 //_________________________________________________________
 
-template<class St_T, class T_st> T_st *  StEEmcDbMaker::getTable(TDataSet *eedb, int secID, TString tabName){
+template <class St_T, class T_st>  void StEEmcDbMaker 
+::getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st **outTab){
 
   //  printf("\n\n%s ::TTT --> %s, size=%d\n\n\n",GetName(),tabName.Data(),sizeof(T_st));
 
+  //   printf("\n\n%s ::TTT --> mask='%s' p=%p ss=%d\n",tabName.Data(),mask.Data(),*outTab,tabName.Contains(mask));
+
+  if(!mask.IsNull() && !tabName.Contains(mask)) return;
   char name[1000];
   sprintf(name,"sector%2.2d/%s",secID,tabName.Data());
-  printf("request=%s==>",name);
+
+  printf("request=%s==>", name);
   St_T *ds= (St_T *)eedb->Find(name);
   if(ds==0) {
     printf(" not Found in DB, continue \n");
-    return NULL;
+    return ;
   }
 
   if(ds->GetNRows()!=1) {
     printf(" no records\n");
-    return NULL;
+    return ;
   }
   
   T_st *tab=(T_st *) ds->GetArray();
 
   if(tab==0) {
     printf(" GetArray() failed\n");
-    return NULL;
+    return ;
   }
+
+  mCleanDbNames(tab->name, EEMCDbMaxAdcName);
+  *outTab= new T_st (*tab); // copy the whole s-struct to allow flavor change
   
   printf("'%s'\n",tab->comment);
-  mCleanDbNames(tab->name, EEMCDbMaxAdcName);
+
+  // copy the whole table to allow multiple flavors to be mixed
+
+
   nFound++;
-  return tab;
+  return ;
 }
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.16  2003/08/27 03:26:45  balewski
+// flavor option added:  myMk1->setPreferedFlavor("set-b","eemcPMTcal");
+//
 // Revision 1.15  2003/08/26 03:02:30  balewski
 // fix of pix-stat and other
 //
@@ -594,3 +656,43 @@ template<class St_T, class T_st> T_st *  StEEmcDbMaker::getTable(TDataSet *eedb,
 // Revision 1.1  2002/11/30 20:01:26  balewski
 // start DB interface for EEMC RELATED ROUTINES
 //
+
+
+#if 0  
+  // test of flavor
+  {
+    St_db_Maker* mydb = (St_db_Maker*)GetMaker("StarDb");
+    mydb->SetDateTime(20030814,0); // set ~day & ~hour by hand
+    printf("\nJB:test of flavor, use time stamp=");
+    (mydb->GetDateTime()).Print();
+
+    TDataSet *eedb1=GetDataBase("TestScheme/emc");
+    assert(eedb1);
+
+    St_eemcDbPMTcal *ds= (St_eemcDbPMTcal *)eedb1->Find("sector04/eemcPMTcal");
+    assert(ds);
+    eemcDbPMTcal_st *tab1=(eemcDbPMTcal_st *) ds->GetArray();
+    assert(tab1);
+    
+    printf("1) p=%p tab1->comment=%s\n",tab1,tab1->comment);    
+
+    printf("\n change flavor\n");
+    SetFlavor("setb","eemcPMTcal");
+    TDataSet *eedb2=GetDataBase("TestScheme/emc");
+    assert(eedb2);
+
+    ds= (St_eemcDbPMTcal *)eedb2->Find("sector04/eemcPMTcal");
+    assert(ds);
+    
+    eemcDbPMTcal_st *tab=(eemcDbPMTcal_st *) ds->GetArray();
+    assert(tab);
+
+    printf("2) p=%p tab->comment=%s\n",tab,tab->comment);
+    printf("1)\' p=%p tab1->comment=%s\n",tab1,tab1->comment);    
+ 
+
+  }
+  // end of flavor test
+  assert(1==5);
+
+#endif
