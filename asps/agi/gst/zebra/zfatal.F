@@ -1,7 +1,10 @@
 *
-* $Id: zfatal.F,v 1.5 2000/01/06 02:42:37 nevski Exp $
+* $Id: zfatal.F,v 1.6 2000/01/06 19:53:09 nevski Exp $
 *
 * $Log: zfatal.F,v $
+* Revision 1.6  2000/01/06 19:53:09  nevski
+* zvfaut added
+*
 * Revision 1.5  2000/01/06 02:42:37  nevski
 * elastic zebra updated
 *
@@ -22,6 +25,7 @@ C-    FATAL PROGRAM TERMINATION
 #include "zebra/zmach.inc"
 #include "zebra/zstate.inc"
 #include "zebra/zunit.inc"
+#include "zebra/zvfaut.inc"
 #include "zebra/mqsys.inc"
 #include "zebra/fzci.inc"
 C--------------    END CDE                             --------------
