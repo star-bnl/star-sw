@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTPCTrack.hh,v 1.4 2001/02/23 14:48:33 lmartin Exp $
+ * $Id: StEstTPCTrack.hh,v 1.5 2003/09/18 22:47:50 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTPCTrack.hh,v $
+ * Revision 1.5  2003/09/18 22:47:50  caines
+ * Fix initialization ofr new RH system
+ *
  * Revision 1.4  2001/02/23 14:48:33  lmartin
  * cout replaced by gMessMgr.
  *
@@ -112,6 +115,14 @@ public:
     mParentPid =0;
     mParentMcId =0;
     mVid        =0;
+    for(int i=0; i<mMaxHits; i++){
+      mR[i] = NULL;
+      mdR[i] = NULL;
+      row[i] = 0;
+      mHitId[i] = 0;
+      mHitIndex[i] = 0;
+      mHitFlag[i] = 0;
+    }
   };  
   
   ~StEstTPCTrack() {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.cc,v 1.5 2001/07/15 20:31:33 caines Exp $
+ * $Id: StEstTrack.cc,v 1.6 2003/09/18 22:47:50 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.cc,v $
+ * Revision 1.6  2003/09/18 22:47:50  caines
+ * Fix initialization ofr new RH system
+ *
  * Revision 1.5  2001/07/15 20:31:33  caines
  * Fixes from Insure++ debugging
  *
@@ -39,6 +42,8 @@ StEstTrack::StEstTrack(long maxbranch, StEstTPCTrack *tr=NULL) {
   mBranch    = new StEstBranch*[mMaxBranch];
   mIdealPattern=0;
   mIdealNHits=0;
+  mIdealBranch=NULL;
+  mFindableBranch=NULL;
   mFindablePattern=0;
   mFindableNHits=0;
   mFlag      = 0;
