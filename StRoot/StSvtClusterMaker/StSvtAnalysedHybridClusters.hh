@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.4 2001/05/04 14:20:05 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.5 2001/08/07 20:52:15 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.5  2001/08/07 20:52:15  caines
+ * Implement better packing of svt hardware and charge values
+ *
  * Revision 1.4  2001/05/04 14:20:05  caines
  * Improved historgramming
  *
@@ -61,7 +64,7 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
   StSvtAnalysedHybridClusters(int barrel, int ladder, int wafer, int hybrid);
   virtual ~StSvtAnalysedHybridClusters();
   
-  void setMembers(int numOfClu, int wafer, int ladder);
+  void setMembers(int numOfClu, int index);
   int setSvtHit(StSvtAnalysis* mSvtAnalysis);
 
   StSvtHitData* svtHitData();

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.4 2001/04/29 20:11:58 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.5 2001/08/07 20:52:15 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.5  2001/08/07 20:52:15  caines
+// Implement better packing of svt hardware and charge values
+//
 // Revision 1.4  2001/04/29 20:11:58  caines
 // Added reset command for Online monitor
 //
@@ -138,8 +141,6 @@ Int_t StSvtClusterMaker::SetHybridClusters()
 	  mClusterColl->at(index) = mHybridCluster;
           mClusterFinder->ResetContainers();
 	  
-            
-         
           }
       }
     }

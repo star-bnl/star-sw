@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.58 2000/11/29 14:15:14 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.59 2001/08/07 20:51:23 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.59  2001/08/07 20:51:23  caines
+// Implement better packing of svt hardware and charge values
+//
 // Revision 1.58  2000/11/29 14:15:14  fisyak
 // Remove St_dst_dedx_filler_Module, Thanks Janet
 //
@@ -178,7 +181,10 @@
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.58 2000/11/29 14:15:14 fisyak Exp $";
+#include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
+
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.59 2001/08/07 20:51:23 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -388,11 +394,11 @@ Int_t  St_dst_Maker::Filler(){
   if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); AddGarb(tpcluster);}
 
   St_scs_spt     *scs_spt     = 0;
-  
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
   }
+  
   if (!scs_spt)      {scs_spt     = new St_scs_spt("scs_spt",1);         AddGarb(scs_spt);}
    
   St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
@@ -421,8 +427,127 @@ Int_t  St_dst_Maker::Filler(){
     }
           // Fill 'used in the fit' info
 
-      sgr_groups_st *tgroup = tpc_groups->GetTable();
-      dst_point_st *mypoint  = point->GetTable();
+    dst_point_st *mypoint  = point->GetTable();
+    int HitIndex = tphit->GetNRows();
+
+
+    const float maxRange   = 22;
+    const float mapFactor  = 23800;
+    unsigned int svty11,svtz,svtx,svty10,svty;
+    double cov;
+    int index;
+
+    // Get pointer to svt cluster analysis and pack SVT info into dst_point
+
+    StSvtAnalysedHybridClusters *mSvtBigHit;
+    StSvtHybridCollection *mSvtCluColl=0;
+    St_DataSet *dataSetSvt =0;
+    dataSetSvt = GetDataSet("StSvtAnalResults");
+    if( dataSetSvt)
+       mSvtCluColl = (StSvtHybridCollection*)(dataSetSvt->GetObject());
+    if(mSvtCluColl){
+      for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
+	
+	for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
+	  
+	  for (int wafer = 1;wafer <= mSvtCluColl->getNumberOfWafers(barrel);wafer++) {
+	    
+	    for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
+	      
+	      
+	      index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	      if(index < 0) continue;
+	      
+	      mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
+	      if( !mSvtBigHit) continue;
+	      
+	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
+
+		mypoint[HitIndex].hw_position = 2;
+ 		mypoint[HitIndex].hw_position += (1L<<4)*(index);
+		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
+		
+		mypoint[HitIndex].hw_position += (1L<<13)*(svtx);
+
+		svty = int(mSvtBigHit->WaferPosition()[clu].y()*4);
+	      	mypoint[HitIndex].hw_position += (1L<<22)*svty;
+
+		if( mSvtBigHit->svtHit()[clu].charge() < (1L<<10)){
+		  mypoint[HitIndex].charge = (int)mSvtBigHit->svtHit()[clu].charge();
+		}
+		else 
+		  mypoint[HitIndex].charge = (1L<<10)-1;
+
+		if( mSvtBigHit->svtHitData()[clu].peakAdc < (1L<<7)){
+		  mypoint[HitIndex].charge +=  
+		    mSvtBigHit->svtHitData()[clu].peakAdc*(1L<<10);
+		}		  
+		else  
+		  mypoint[HitIndex].charge += (1L<<10)-1;
+		
+		mypoint[HitIndex].charge += (1L<<17)*mSvtBigHit->svtHit()[clu].flag();
+		
+		if( mSvtBigHit->svtHit()[clu].position().x() > (-1*maxRange) &&
+		    mSvtBigHit->svtHit()[clu].position().x() < maxRange)
+		  svtx = int(mapFactor*(mSvtBigHit->svtHit()[clu]
+			     .position().x() + maxRange));
+		else svtx = 0;
+		
+		if( mSvtBigHit->svtHit()[clu].position().y() > (-1*maxRange) &&
+		    mSvtBigHit->svtHit()[clu].position().y() < maxRange)
+		  svty = int(mapFactor*(mSvtBigHit->svtHit()[clu]
+			     .position().y() + maxRange));
+		else svty = 0;
+		
+		if( mSvtBigHit->svtHit()[clu].position().z() > (-1*maxRange) &&
+		    mSvtBigHit->svtHit()[clu].position().z() < maxRange)
+                     svtz = int(mapFactor*(mSvtBigHit->svtHit()[clu]
+				.position().z() + maxRange));
+		else svtz = 0;
+		svty10 = int(svty/(1L<<10));
+		svty11 = svty - (1L<<10)*svty10;
+		
+		mypoint[HitIndex].position[0] = svtx + (1L<<20)*svty11;
+		mypoint[HitIndex].position[1] = svty10 + (1L<<10)*svtz; 
+		
+		
+		cov =  mSvtBigHit->svtHit()[clu].positionError().x()
+		  *mSvtBigHit->svtHit()[clu].positionError().x();
+		
+		if( cov > 0.0 && cov < 1.0/float((1L<<6)))
+		    svtx = int((1L<<26)*cov);
+		else  svtx = 0;
+		
+		cov =  mSvtBigHit->svtHit()[clu].positionError().y()
+		  *mSvtBigHit->svtHit()[clu].positionError().y();
+		if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
+		  svty = int((1L<<26)*cov);
+		else  svty = 0;
+		
+		cov =  mSvtBigHit->svtHit()[clu].positionError().z()
+		  *mSvtBigHit->svtHit()[clu].positionError().z();
+		if( cov > 0.0 && cov <  (1.0/float(1L<<6)))
+		  svtz = int((1L<<26)*cov);
+		else  svtz = 0;
+		
+		svty10 = int(svty/(1L<<10));
+		svty11 = svty - (1L<<10)*svty10;
+		
+		mypoint[HitIndex].pos_err[0] = svtx + (1L<<20)*svty11;
+		mypoint[HitIndex].pos_err[1] = svty10 + (1L<<10)*svtz;
+		mypoint[HitIndex].id_track = 0;
+
+		HitIndex++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  
+    point->SetNRows(HitIndex);
+    sgr_groups_st *tgroup = tpc_groups->GetTable();
+    mypoint  = point->GetTable();
       
       int spt_id = 0;
       int i;

@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.5 2001/03/22 20:46:54 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.6 2001/08/07 20:52:16 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.6  2001/08/07 20:52:16  caines
+// Implement better packing of svt hardware and charge values
+//
 // Revision 1.5  2001/03/22 20:46:54  caines
 // Comment out some of the QA histograms
 //
@@ -61,8 +64,11 @@ class StSvtHitMaker : public StMaker
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
-  void SetWriteNtuple(int iwrite=0){iWrite = iwrite;};
+  void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   Int_t Eval();
+  virtual const char *GetCVS()
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.6 2001/08/07 20:52:16 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 
  protected:
 

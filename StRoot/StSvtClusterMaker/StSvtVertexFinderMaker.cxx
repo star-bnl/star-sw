@@ -31,8 +31,9 @@ Int_t StSvtVertexFinderMaker::Init()
 
   if (Debug()) gMessMgr->Debug() << "In StSvtVertexFinderMaker::Init() ..."  << endm;
 
-  mVtxZ     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.1,0.1);
-  mVtxZGe     = new TH1F("StkSvtVertGe"        ,"Z SVT - Z Geant Primary vertex resolution"        ,100,-0.1,0.1);
+  mVtxZ     = new TH1F("StkSvtVert","Z SVT - Z TPC Primary vertex resolution"        ,100,-0.1,0.1);
+  mVtxZGe     = new TH1F("StkSvtVertGe","Z SVT - Z Geant Primary vertex resolution"        ,100,-0.1,0.1);
+
   
   return  StMaker::Init();
   

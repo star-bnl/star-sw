@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.3 2001/04/29 20:11:57 caines Exp $
+// $Id: StSvtClusterMaker.h,v 1.4 2001/08/07 20:52:15 caines Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.4  2001/08/07 20:52:15  caines
+// Implement better packing of svt hardware and charge values
+//
 // Revision 1.3  2001/04/29 20:11:57  caines
 // Added reset command for Online monitor
 //
@@ -47,6 +50,9 @@ class StSvtClusterMaker : public StMaker
   Int_t Reset();
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
+  virtual const char *GetCVS()
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.4 2001/08/07 20:52:15 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 
  protected:
 
