@@ -1,5 +1,8 @@
-// $Id: StEventMaker.h,v 1.2 1999/05/22 17:59:01 perev Exp $
+// $Id: StEventMaker.h,v 1.3 1999/07/11 23:27:50 fisyak Exp $
 // $Log: StEventMaker.h,v $
+// Revision 1.3  1999/07/11 23:27:50  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.2  1999/05/22 17:59:01  perev
 // Can read also mdc2 and last format
 //
@@ -60,7 +63,7 @@ class dst_monitor_hard_st;
 class dst_monitor_soft_st;
 class gen_header_st;
 class particle_st;
-class dst_TriggerDetectors_st;
+class dst_TrgDet_st;
  *
  * Revision 2.0  1999/11/04 19:03:00  ullrich
  private:
@@ -95,8 +98,8 @@ class dst_TriggerDetectors_st;
   dst_monitor_soft_st 		*defMonitorSoft;	//!
   gen_header_st 		*genHeader;		//!
   particle_st 			*particle;		//!
-  dst_TriggerDetectors_st 	*dstTriggerDetectors;	//!
-  dst_TriggerDetectors_st 	*defTriggerDetectors;	//!
+  dst_TrgDet_st 	        *dstTriggerDetectors;	//!
+  dst_TrgDet_st 	        *defTriggerDetectors;	//!
   Bool_t doLoad;					//!
    
    ClassDef(StEventMaker, 1)   //StAF chain virtual base class for Makers

@@ -1,6 +1,9 @@
-// $Id: StEventManager.hh,v 1.1 1999/05/22 18:23:42 perev Exp $
+// $Id: StEventManager.hh,v 1.2 1999/07/11 23:27:50 fisyak Exp $
 //
 // $Log: StEventManager.hh,v $
+// Revision 1.2  1999/07/11 23:27:50  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.1  1999/05/22 18:23:42  perev
 // Add classes from StEventReaderMaker
 //
@@ -59,7 +62,7 @@
  *
 #include "tables/dst_run_header.h"
 #include "tables/dst_run_summary.h"
-#include "tables/dst_TriggerDetectors.h"
+#include "tables/dst_TrgDet.h"
 #include "tables/dst_dedx.h"
 #include "tables/dst_event_header.h"
 #include "tables/dst_event_summary.h"
@@ -78,7 +81,7 @@
 
 #include "tables/St_dst_run_header_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
-#include "tables/St_dst_TriggerDetectors_Table.h"
+#include "tables/St_dst_TrgDet_Table.h"
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_dst_event_header_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
@@ -116,7 +119,7 @@ class StEventManager{
   virtual ooStatus readRunSummary(dst_run_summary_st& runInfo) const =0;
   virtual ooStatus readHeader(dst_event_header_st&    eventInfo) const =0;
 
-  virtual ooStatus readTable(dst_TriggerDetectors_st& table) const =0;
+  virtual ooStatus readTable(dst_TrgDet_st& table) const =0;
   virtual ooStatus readTable(dst_event_summary_st&    table) const =0;
   virtual ooStatus readTable(dst_monitor_hard_st&     table) const =0;
   virtual ooStatus readTable(dst_monitor_soft_st&     table) const =0;
@@ -126,7 +129,7 @@ class StEventManager{
   virtual dst_monitor_soft_st* 	   returnTable_dst_monitor_soft    (long& nentries) const =0;
   virtual dst_monitor_hard_st* 	   returnTable_dst_monitor_hard    (long& nentries) const =0;
   virtual dst_event_summary_st*    returnTable_dst_event_summary   (long& nentries) const =0;
-  virtual dst_TriggerDetectors_st* returnTable_dst_TriggerDetectors(long& nentries) const =0;
+  virtual dst_TrgDet_st*           returnTable_dst_TrgDet          (long& nentries) const =0;
   virtual dst_event_header_st* 	   returnTable_dst_event_header    (long& nentries) const =0;
   virtual dst_run_summary_st* 	   returnTable_dst_run_summary     (long& nentries) const =0;
   virtual dst_run_header_st* 	   returnTable_dst_run_header      (long& nentries) const =0;
