@@ -1,5 +1,8 @@
-//  $Id: StTpcEvalMaker.h,v 1.3 2001/04/06 22:27:21 flierl Exp $
+//  $Id: StTpcEvalMaker.h,v 1.4 2001/06/19 12:49:37 flierl Exp $
 //  $Log: StTpcEvalMaker.h,v $
+//  Revision 1.4  2001/06/19 12:49:37  flierl
+//  add l3 option
+//
 //  Revision 1.3  2001/04/06 22:27:21  flierl
 //  add zillion of comments
 //
@@ -25,6 +28,7 @@ class TFile;
 
 class StTpcDb;
 class StEvent;
+class StL3Trigger;
 class StGlobalTrack;
 class StMcEvent;
 class StMcTrack;
@@ -77,6 +81,9 @@ public:
     // getters
     StTpcEvalHistograms* GetHistos() ;
     TTree*  GetTrackTree() ;
+
+    // l3 switch
+    void useL3Trigger() {mL3TriggerOn = true;}
  
 
     // Filling of persistent event
@@ -85,14 +92,16 @@ public:
     
     // return cvs version
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.3 2001/04/06 22:27:21 flierl Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.4 2001/06/19 12:49:37 flierl Exp $ built "__DATE__" "__TIME__; return cvs;}	
         
  private:
 
-    Bool_t           mHitIteration;    // switch for hit iteration
-    Bool_t           mHitSeparation;   // switch for hit separation
+    Bool_t           mHitIteration;    //! switch for hit iteration
+    Bool_t           mHitSeparation;   //! switch for hit separation
+    Bool_t           mL3TriggerOn;     //!
     StTpcDb*         mStTpcDb;         //! database
     StEvent*         mStEvent;         //! stevent object
+    StL3Trigger*     ml3TriggerEvent;  //! stl3trigger
     StMcEvent*       mStMcEvent;       //! stmcevent object
     mcTpcHitMapType* mmcTpcHitMap;     //! matched hits from associationmaker using mc as key
     mcTrackMapType*  mmcTrackMap;      //! matched tracks from associationmaker using mc as key
