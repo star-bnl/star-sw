@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.h,v 1.10 2000/07/16 21:38:22 laue Exp $
+ * $Id: StHbtCoulomb.h,v 1.11 2000/08/02 01:25:12 lisa Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.h,v $
+ * Revision 1.11  2000/08/02 01:25:12  lisa
+ * Add Coulomb correction capability to 3D Bertsch-Pratt CorrFctn
+ *
  * Revision 1.10  2000/07/16 21:38:22  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -69,7 +72,7 @@ private:
   int mNLines;                                   // Number of Eta's in lookup-table
 
 #ifdef __ROOT__
-  ClassDef(StHbtCoulomb, 1)
+  ClassDef(StHbtCoulomb, 0)
 #endif
 };
 

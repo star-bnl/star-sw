@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLabFrame3DCorrFctn.h,v 1.1 2000/07/31 01:19:23 lisa Exp $
+ * $Id: BPLabFrame3DCorrFctn.h,v 1.2 2000/08/02 01:25:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLabFrame3DCorrFctn.h,v $
+ * Revision 1.2  2000/08/02 01:25:10  lisa
+ * Add Coulomb correction capability to 3D Bertsch-Pratt CorrFctn
+ *
  * Revision 1.1  2000/07/31 01:19:23  lisa
  * add PairCut which contains collection of PairCuts - also 3D bertsch-pratt CorrFctn
  *
@@ -21,7 +24,7 @@
 #define BPLabFrame3DCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
-//#include "StHbtMaker/Infrastructure/StHbtCoulomb.h"
+#include "StHbtMaker/Infrastructure/StHbtCoulomb.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class BPLabFrame3DCorrFctn : public StHbtCorrFctn {
@@ -48,7 +51,7 @@ public:
   float GetNormRangeLo();
   float GetNormRangeHi();
 
-  //  void SetCoulombCorrection(StHbtCoulomb* Correction);
+  void SetCoulombCorrection(StHbtCoulomb* Correction);
 
 
 private:
@@ -64,7 +67,7 @@ private:
   unsigned long int mNumRealsNorm;
   unsigned long int mNumMixedNorm;
 
-  //  StHbtCoulomb* mCorrection;
+  StHbtCoulomb* mCorrection; //!
 
 
 #ifdef __ROOT__
@@ -79,7 +82,7 @@ inline  void BPLabFrame3DCorrFctn::SetNormRangeLo(float qLo){mQinvNormLo = qLo;}
 inline  void BPLabFrame3DCorrFctn::SetNormRangeHi(float qHi){mQinvNormHi = qHi;}
 inline  float BPLabFrame3DCorrFctn::GetNormRangeLo(){return mQinvNormLo;}
 inline  float BPLabFrame3DCorrFctn::GetNormRangeHi(){return mQinvNormHi;}
-//inline  void BPLabFrame3DCorrFctn::SetCoulombCorrection(StHbtCoulomb* Correction){mCorrection = Correction;}
+inline  void BPLabFrame3DCorrFctn::SetCoulombCorrection(StHbtCoulomb* Correction){mCorrection = Correction;}
 
 #endif
 
