@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.68 2003/10/28 00:01:59 potekhin Exp $
+* $Id: geometry.g,v 1.69 2003/10/29 22:07:30 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.69  2003/10/29 22:07:30  potekhin
+* Two changes:
+* 1) As agreed, I swap the tags y2003(b,c) to arrange
+* them chronologically for better mneumonics
+* 2) Introduced variable for steering of the Silicon Strip
+* Detector code (which needs to be written)
+*
 * Revision 1.68  2003/10/28 00:01:59  potekhin
 * As agreed with Jerome, we shall prevent
 * proliferation of custom geometries to reduce
@@ -209,24 +216,32 @@
 
    Structure  GDAT {real mfscale, char gtag(2)}
 
-* system list 
-   Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
+* list of system on/off switches:
+   Logical    cave,pipe,svtt,sisd,tpce,ftpc,
+              btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,bbcm,fpdm,phmd,pixl
+
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,alpipe,svtw,
               on/.true./,off/.false./
 
+
 * btof tray configuration: btofconfig variable
+
    Integer    btofconfig
+
 *  Codes:
 *  1 - full ctb,         2 - full TOFp based tof,   3 - partial TOFp based tof,
 *  4 - single TOFp tray, 5 - one TOFp and one TOFr, 6 - full TOFr based tof.
 
    real       Par(1000),field,dcay(5),shift(2),wdm
+
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
-              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug,
-              CorrNum, PhmdVersion
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
+              fieldbug,argonbug,
+              CorrNum, PhmdVersion, SisdVersion
+
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
 
@@ -260,8 +275,9 @@ replace[;ON#{#;] with [
 * No correction by default
    CorrNum = 0
 
-* No PHMD by default, hence init the version:
+* No Photon multiplicity detector or Silicin strip by default, hence init the version:
    PhmdVersion = 0
+   SisdVersion = 0
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -271,8 +287,8 @@ replace[;ON#{#;] with [
 
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
-* whereas some stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl} = off;
+* whereas some newer stuff is considered optional:
+   {bbcm,fpdm,phmd,pixl,sisd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
    {ems,rich,alpipe}=off " TimeOfFlight, EM calorimeter Sector"
@@ -370,8 +386,11 @@ If LL>1
 * Retiring this version of "complete", and replacing it with a more modern one:
 *  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
 
-*****    NEW COMPLETE
-* as complete as Y2003X but with all corrections AND pixel detector
+*****               >>>NEW COMPLETE<<<
+*
+* as complete as Y2003X below but with all corrections AND pixel detector
+*
+*************************************************************************************************************
   on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -400,7 +419,10 @@ If LL>1
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
-* careful!
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdVersion = 1;
+* careful! Achtung!
                    pipe=off;   " provisional"
                    pixl=on;    " put the pixel detector in"
                 }
@@ -421,10 +443,11 @@ If LL>1
                   ecal_config=1   " one ecal patch, west "
 
 * this was put here in recent versions (as of 1.50) and I believe this is wrong as
-* it destroys compatibility with earlier code:
+* it destroys compatibility with earlier code: --max--
 *    ecal=off;  
                   nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
                 
+****************************************************************************************
   on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   "svt: 3 layers ";
                      nsi=6        " 3 bi-plane layers, nsi<=7 ";
@@ -452,6 +475,7 @@ If LL>1
                   "field version "
                      Mf=4;      " tabulated field, with correction ";
                 }
+****************************************************************************************
   on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -480,10 +504,11 @@ If LL>1
 
 ***********************************************************************
 * In y2003a:
-*    removed serious bugs from SUPOGEO
-*    corrected CALB -- the shift variable
-*    corrected SVT  -- the layer radii correction
-
+*    removed serious bugs from SUPOGEO (incorrect positioning inside the SVT,
+*    where is doesn't belong)
+*    corrected CALB -- the shift variable (was 0,0 so the barrel wasn't tilted right)
+*    corrected SVT  -- the layer radii (from 250 to 150 microns, see the svt code)
+****************************************************************************************
   on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -510,51 +535,14 @@ If LL>1
                   "geometry correction "
                      CorrNum = 1;
                 }
-
 ***********************************************************************
-* Corrections and enhancements in y2003b:
-*    extra material in SVT (see web page)
-*    added the Photon Multiplicity Detector (PHMD)
-*    added newly installed parts of ECAL
-*    THIS IS THE MASTER GEOMETRY FOR THE FALL'03
-
-  on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
-                  "calb" 
-                     ems=on
-                     nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
-                     ecal_fill=3     " all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 2;
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdVersion = 1;
-                }
-
-***********************************************************************
-* y2003c is y2003a, but with the extra material in the SVT
+* y2003b is y2003a, but with the extra material in the SVT
 * This is actually an important case (i.e. the "most precise" geometry
 * approximation for the early 2003 run) which we were lacking so far.
 * This is achieved by setting CorrNum to 2.
-
-  on Y2003C    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+* The endcap EMC has one third of one wheel, as before
+****************************************************************************************
+  on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -581,6 +569,50 @@ If LL>1
                      CorrNum = 2;
                 }
 
+*
+**********************************************************************
+* Corrections and enhancements in y2003c:
+*    extra material in SVT (see web page)
+*    added the Photon Multiplicity Detector (PHMD)
+*    The endcap EMC has one complete wheel in the west
+*    To be done: 3/4 of the second half of the barrel!
+*
+*                >>>THIS IS THE MASTER GEOMETRY FOR THE FALL'03<<<
+*
+****************************************************************************************
+  on Y2003C    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD; 
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,0}; shift={75,0}; " 60 sectors plus 3/4 to be done" 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 2;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdVersion = 1;
+                }
+****************************************************************************************
   on Y2003X    { same as year2003 (with all its deficiencies) but with full calorimeters
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -593,7 +625,7 @@ If LL>1
                      Itof=2 " call btofgeo2 ";
                      btofconfig=5;
                   "calb" 
-                     ems=on   "endcap " 
+                     ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
                   "ecal" 
                      ecal_config=3   "both wheels"
