@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.16 1998/12/16 18:49:48 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.17 1999/06/19 19:21:00 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1023,7 +1023,7 @@ if (gNArgName[0]){
   FF" const Char_t *names[]={");
   ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
   FF"\"%s\"",Nq(gDataType[ii][jj]));
-  if(jj<gNIncFile-1) FF",\n");
+  if(jj<gNArgName[ii]-1) FF",\n");
 };
   FF"};\n");
   FF"  CheckParameters(names);\n");
