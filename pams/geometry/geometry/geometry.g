@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.36 2000/11/22 17:51:41 nevski Exp $
+* $Id: geometry.g,v 1.37 2001/02/07 02:09:09 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.37  2001/02/07 02:09:09  nevski
+* 6 silicon layers in y_2b geometry
+*
 * Revision 1.36  2000/11/22 17:51:41  nevski
 * tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
 *
@@ -100,7 +103,7 @@ If LL>1
   on YEAR_2A    { asymptotic STAR;                                            }
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                         {vpdd,ecal}=off;  {rich,ems,t1}=on;  
-                        Itof=2;  Rv=2;  Wfr=7;  Wdm=6.305;                    }
+                        Itof=2;  Rv=2;  Wfr=7;  Wdm=6.305; Nsi=6;             }
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
