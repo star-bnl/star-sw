@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.55 1999/06/25 17:29:14 fine Exp $ 
+// $Id: St_Table.cxx,v 1.56 1999/06/26 01:40:56 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.56  1999/06/26 01:40:56  fisyak
+// Add Valery's abstract buffer
+//
 // Revision 1.55  1999/06/25 17:29:14  fine
 // Some bugs with a new Streamer fixed
 //
@@ -156,6 +159,7 @@
 #include "TDataType.h"
 #include "St_Table.h"
 #include "St_TableElementDescriptor.h"
+#include "StBufferAbc.h"
 
 //______________________________________________________________________________
 void *ReAllocate(table_head_st *header, Int_t newsize) 
@@ -1518,6 +1522,11 @@ void St_Table::Set(Int_t n, Char_t *array)
 }
  
 //_______________________________________________________________________
+Int_t St_Table::StreamerTable(StBufferAbc &b)
+{
+ return 0;
+}
+//_______________________________________________________________________
 void St_Table::StreamerTable(TBuffer &b)
 {
    // Stream a St_Table object.
@@ -1608,8 +1617,86 @@ Int_t St_Table::SetfN(Long_t len)
     R__b << *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());     \
  break
 
+#define StreamNMElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):           \
+ if (nextCol->GetDimensions())                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName()); \
+ else                                                            \
+   R__b.ReadScalar(*(_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName());      \
+ break
+
+#define StreamNMElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):          \
+ if (nextCol->GetDimensions())                                   \
+    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()), nextCol->GetSize()/sizeof(_NAME2_(type,_t)),nextCol->GetName()); \
+ else                                                            \
+    R__b.WriteScalar(*(_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName());     \
+ break
+//______________________________________________________________________________
+Int_t St_Table::StreamerHeader(StBufferAbc &b){ return 0;}
+
 //______________________________________________________________________________
 TList *St_Table::GetRowDescritors() { return 0;}
+//______________________________________________________________________________
+Int_t St_Table::Streamer(StBufferAbc &R__b)
+{
+   // Stream an array of the "plain" C-structures
+
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      St_Table::StreamerTable(R__b);
+      if (*s_MaxIndex <= 0) return -1; 
+      char *row= s_Table;
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+        TIter nextColDescriptor(GetRowDescritors());
+        St_TableElementDescriptor *nextCol = 0;
+        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        {
+          // Stream one table row supplied
+          switch(nextCol->GetType()) {
+           StreamNMElementIn(Float);
+           StreamNMElementIn(Int);
+           StreamNMElementIn(Long);
+           StreamNMElementIn(Short);
+           StreamNMElementIn(Double);
+           StreamNMElementIn(UInt);
+           StreamNMElementIn(ULong);
+           StreamNMElementIn(UChar);
+           StreamNMElementIn(Char);
+          default:
+            break;
+        };
+      }
+      row += GetRowSize();
+     }
+   } else {
+//      R__b.WriteVersion(St_ev0_track2::IsA());
+      St_Table::StreamerTable(R__b);
+      if (*s_MaxIndex <= 0) return -1; 
+      char *row= s_Table;
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+        TIter nextColDescriptor(GetRowDescritors());
+        St_TableElementDescriptor *nextCol = 0;
+        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        {
+          // Stream one table row supplied
+          switch(nextCol->GetType()) {
+           StreamNMElementOut(Float);
+           StreamNMElementOut(Int);
+           StreamNMElementOut(Long);
+           StreamNMElementOut(Short);
+           StreamNMElementOut(Double);
+           StreamNMElementOut(UInt);
+           StreamNMElementOut(ULong);
+           StreamNMElementOut(UChar);
+           StreamNMElementOut(Char);
+          default:
+            break;
+        };
+      }
+      row += GetRowSize();
+     }
+   }   
+   return 0;
+}
 //______________________________________________________________________________
 void St_Table::Streamer(TBuffer &R__b)
 {

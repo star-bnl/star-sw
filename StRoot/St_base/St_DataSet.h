@@ -1,7 +1,10 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.32 1999/06/09 22:08:53 fine Exp $
+// $Id: St_DataSet.h,v 1.33 1999/06/26 01:40:55 fisyak Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.33  1999/06/26 01:40:55  fisyak
+// Add Valery's abstract buffer
+//
 // Revision 1.32  1999/06/09 22:08:53  fine
 // Comment clean up
 //
@@ -27,6 +30,7 @@
  
 class St_DataSetIter;
 class TBrowser;
+class StBufferAbc;
 
 //----- dataset flags
 enum ESetBits {
@@ -110,6 +114,7 @@ class St_DataSet : public TNamed
     virtual void         ls(Int_t depth)  const;              // Print the "depth" levels of this datatset
     virtual void         Mark();                              // *MENU*
     virtual void         Mark(UInt_t flag,EBitOpt reset=kSet);
+    virtual Int_t        Streamer(StBufferAbc &R__b);
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
     ClassDef(St_DataSet,1)
