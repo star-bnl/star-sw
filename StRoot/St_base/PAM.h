@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+class amiBroker;
 #else
 #define CC_P
 #endif
