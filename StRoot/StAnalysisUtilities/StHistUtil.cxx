@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.18 2000/06/23 14:36:08 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.19 2000/06/23 15:26:22 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.19  2000/06/23 15:26:22  kathy
+// added method to return the copied array & it's size
+//
 // Revision 1.18  2000/06/23 14:36:08  kathy
 // comment out print statements and add some documentation
 //
@@ -190,6 +193,9 @@ StHistUtil::~StHistUtil(){
   if (m_ListOfPrint) {
     m_ListOfPrint->Delete();
     SafeDelete(m_ListOfPrint);
+  }
+  if (newHist){
+    delete [] newHist;
   }
 }
 //_____________________________________________________________________________
@@ -617,7 +623,6 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 
   if (dirList){
    TIter nextObj(dirList);
-   Int_t histReadCount = 0;
    TObject *obj = 0;
 
     while ((obj = nextObj())) {    
