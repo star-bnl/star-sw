@@ -604,8 +604,9 @@ end
 +CDE,Typing,GCBANK,GCVOLU,GCKINE,GCTRAK,AgCSTEP.
 */AGCSTEP/: r*7 vect0,vloc0,vloc,xloc, r: Astep,Adestep
 *
-      Integer   J,MyPad,JMyPad,Ishape,JMyPar,i_flag/0/,Jcenter/-1/
-      Real      Hit,Dr,Vect_middle(6)/6*0./
+      Integer   J,MyPad,JMyPad,Ishape,JMyPar,i_flag,Jcenter
+      Real      Hit,Dr,Vect_middle(6)
+      data      i_flag/0/,Jcenter/-1/,Vect_middle/6*0./
       Logical   Valid_hit
       Character Cname*4
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
