@@ -43,9 +43,9 @@ private:
 
   Double_t  trackMom,fastestMom;
 
-  int   mNumberOfEventsInPool,mNumberOfTracks1InPool,mNumberOfTracks2InPool;
-  int   mNumberOfBackgroundTracks1,mNumberOfBackgroundTracks2,mNumberOfBackgroundEvents;
-  int   minimumNumberOfBackgroundEvents,minimumNumberOfBackgroundTracks;
+  UInt_t   mNumberOfEventsInPool,mNumberOfTracks1InPool,mNumberOfTracks2InPool;
+  UInt_t   mNumberOfBackgroundTracks1,mNumberOfBackgroundTracks2,mNumberOfBackgroundEvents;
+  UInt_t   minimumNumberOfBackgroundEvents,minimumNumberOfBackgroundPairs;
   
   // for storing tracks
   StGlobalTrack* track1;
@@ -70,6 +70,8 @@ private:
 
   // private member functions,variables
   int    fastestTrackAnalysis,ON,OFF;
+  Double_t fractionToConsider;
+
   int    EventWithinCuts(StEvent& ev);
   int    TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2);
   int    Track1WithinCuts(StTrackForPool* t1);
@@ -95,7 +97,7 @@ public:
     void       SetFastestTrackAnalysis(int fastAnalysis);
     void       SetDiagnosticsON();
     void       SetNBackgroundEvents(int number);
-    void       SetNBackgroundTracks(int number);
+    void       SetNBackgroundPairs(int number, Double_t fraction);
     StTrackCuts*     GetTrackCuts(TString whichTrack);
 
 };

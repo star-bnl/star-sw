@@ -39,7 +39,10 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   mNumberOfBackgroundEvents=0;
   mNumberOfBackgroundTracks1=0;
   mNumberOfBackgroundTracks2=0;
-  
+  fractionToConsider=0.1;
+  minimumNumberOfBackgroundEvents=10;
+  minimumNumberOfBackgroundPairs=1000;
+
   // initialize TStrings
   name                                    = "default";
   DiagnoseEventStream   = "DiagnoseEventStream";
@@ -79,6 +82,9 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   mNumberOfBackgroundEvents=0;
   mNumberOfBackgroundTracks1=0;
   mNumberOfBackgroundTracks2=0;
+  fractionToConsider=0.1;
+  minimumNumberOfBackgroundEvents=10;
+  minimumNumberOfBackgroundPairs=1000;
 
    // initialize TStrings used in Diagnostic checks
   name                                    = "default";
@@ -100,11 +106,6 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   // add functions to diagnostics library here
   diagnosticsLibrary.push_back(new StDiagnosticTool());
 
-
-  // HARDWIRE 
-  minimumNumberOfBackgroundEvents=20;
-  minimumNumberOfBackgroundTracks=100;
-
   // initialize vectors 
   if (mCollectionOfTracks1.size()!=0) mCollectionOfTracks1.clear();
   if (mCollectionOfTracks2.size()!=0) mCollectionOfTracks2.clear();
@@ -119,9 +120,10 @@ StAngleCorrAnalysis::SetNBackgroundEvents(int number)
 }
 
 void
-StAngleCorrAnalysis::SetNBackgroundTracks(int number) 
+StAngleCorrAnalysis::SetNBackgroundPairs(int number, Double_t fraction) 
 {
-  minimumNumberOfBackgroundTracks=number;
+  minimumNumberOfBackgroundPairs=number;
+  fractionToConsider=fraction;
 }
 
 void 
@@ -182,11 +184,9 @@ int
 StAngleCorrAnalysis::TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2)
 {
   // here i just want to check if the two tracks are not the same track!
-
   Double_t px1,py1,pz1,px2,py2,pz2;
   t1->GetMomentum(px1,py1,pz1);
   t2->GetMomentum(px2,py2,pz2);
-
   if (px1 == px2 && py1 == py2 && pz1 == pz2) {return 0;}
   return 1;
 }
@@ -267,10 +267,10 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
   if (mCollectionOfTracks1.size()!=0) mCollectionOfTracks1.clear();
   if (mCollectionOfTracks2.size()!=0) mCollectionOfTracks2.clear();
     
-  // if (diagnostics) {if (Diagnose(DiagnoseEventStream) != NULL) Diagnose(DiagnoseEventStream)->Fill(ev);}
+  if (diagnostics) {if (Diagnose(DiagnoseEventStream) != NULL) Diagnose(DiagnoseEventStream)->Fill(ev);}
   if (EventWithinCuts(ev)) 
     {
-      // if (diagnostics) {if (Diagnose(DiagnoseEventCuts) != NULL) Diagnose(DiagnoseEventCuts)->Fill(ev);}
+      if (diagnostics) {if (Diagnose(DiagnoseEventCuts) != NULL) Diagnose(DiagnoseEventCuts)->Fill(ev);}
       mNumberOfEventsInPool++;
       mNumberOfBackgroundEvents++;
       tracks=ev.trackCollection();
@@ -284,11 +284,11 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
 	
                       SetTrackForPool(track,trackForPool);
 	  SetTrackForPool(track,trackForBackground);
-	  // if (diagnostics) {if (Diagnose(DiagnoseTracks) != NULL) Diagnose(DiagnoseTracks)->Fill(trackForPool);}
+	  //if (diagnostics) {if (Diagnose(DiagnoseTracks) != NULL) Diagnose(DiagnoseTracks)->Fill(trackForPool);}
 	  
  	  if (Track1WithinCuts(trackForPool)) 
  	    {
-	      // if (diagnostics) {if (Diagnose(DiagnoseTrack1) != NULL) Diagnose(DiagnoseTrack1)->Fill(trackForPool);}
+	      //if (diagnostics) {if (Diagnose(DiagnoseTrack1) != NULL) Diagnose(DiagnoseTrack1)->Fill(trackForPool);}
  	      mCollectionOfTracks1.push_back(trackForPool);
 	      mCollectionOfBackgroundTracks1.push_back(trackForBackground);
  	      mNumberOfTracks1InPool++;
@@ -303,7 +303,7 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
 
 	  if (Track2WithinCuts(trackForPool)) 
  	    {
-	      // if (diagnostics) {if (Diagnose(DiagnoseTrack2) != NULL) Diagnose(DiagnoseTrack2)->Fill(trackForPool);}
+	      //if (diagnostics) {if (Diagnose(DiagnoseTrack2) != NULL) Diagnose(DiagnoseTrack2)->Fill(trackForPool);}
  	      mCollectionOfTracks2.push_back(trackForPool);
 	      mCollectionOfBackgroundTracks2.push_back(trackForBackground);
  	      mNumberOfTracks2InPool++;
@@ -322,7 +322,7 @@ StAngleCorrAnalysis::ProcessEvent(StEvent& ev)
       mBackgroundTracks2.push_back(mCollectionOfBackgroundTracks2);
     }
   
-  cout << "StAnalysisMaker:  Reading Event " << 
+  cout << "StAngleCorrAnalysis:  Event Summary: " << 
     " Type " << ev.type()    << " Run " << ev.runNumber()     << endl;
   cout << " N vertex "       << ev.vertexCollection()->size()  << endl;
   cout << " N track "         << ev.trackCollection()->size()    << endl;
@@ -352,7 +352,6 @@ StAngleCorrAnalysis::AnalyseRealPairs()
       while (counter2<numberOfTracks2) 
 	{
 	  tr2=mCollectionOfTracks2[counter2];
-                      //if (TracksWithinCuts(tr1,tr2)) {RelativeAngle(tr1,tr2,signal);}
 	  RelativeAngle(tr1,tr2,signal);
 	  // if (diagnostics) {if (Diagnose(DiagnoseSignal) != NULL) Diagnose(DiagnoseSignal)->Fill(tr1,tr2);}
 	  counter2++;
@@ -372,31 +371,47 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
   TRandom *ran = new TRandom();
   ran->SetSeed(t1);  
 
-  int mNumberOfBackgroundTracks=mNumberOfBackgroundTracks1
-                               +mNumberOfBackgroundTracks2;
+ // reduce total number of pairs by 100 to avoid any superstatistical correlations
+  int mNumberOfBackgroundPairs=mNumberOfBackgroundTracks1*
+                                                                    mNumberOfBackgroundTracks2/100;
  
   if (mNumberOfBackgroundEvents>minimumNumberOfBackgroundEvents &&
-      mNumberOfBackgroundTracks>minimumNumberOfBackgroundTracks)
+       mNumberOfBackgroundPairs>minimumNumberOfBackgroundPairs)
     {
-      int totalNumberOfEvents=mBackgroundTracks1.size();
-      int eventLoopSize=totalNumberOfEvents-1;
       StTrackForPool* tr1;
       StTrackForPool* tr2;
 
       // loop over the events randomly and make random track pairs
       int trackPairs=0;
-      int totalTrackPairs=5000;
+      Double_t evCounter1,evCounter2,trCounter1,trCounter2;
+      Double_t totalNumberOfEvents=mBackgroundTracks1.size();
+      Double_t totalTrackPairs=(fractionToConsider)*mNumberOfBackgroundPairs;
+      cout << "total num of back tracks under consideration = " << totalTrackPairs << endl;
+
+      Int_t TooManyIterations = 10000;
       while(trackPairs<totalTrackPairs) 
-	{
-	  int evCounter1 = (int) ran->Rndm()*eventLoopSize;
-	  int evCounter2 = (int) evCounter1;
-	  while (evCounter2!=evCounter1) {evCounter2 = (int) ran->Rndm()*eventLoopSize;}
-	  
-	  int trCounter1 = (int) ran->Rndm()*mBackgroundTracks1[evCounter1].size();
-	  int trCounter2 = (int) ran->Rndm()*mBackgroundTracks2[evCounter2].size();
+	{ 
+	  Int_t eventLoopCounter=0;
+	  evCounter1 =  ran->Rndm()*totalNumberOfEvents;
+	  evCounter2 =  evCounter1;
+	  while (evCounter2==evCounter1) 
+	    {
+	      evCounter2 =  ran->Rndm()*totalNumberOfEvents;
+	      eventLoopCounter++;
+	      if (eventLoopCounter>TooManyIterations) break;
+	    }
+
+	  if (eventLoopCounter >= TooManyIterations) 
+	    {
+	      cout << "not enough events in event pool " << 
+                                         "  to form track pairs... will try next event loop" << endl;
+	      return;
+	    } 
+
+	  trCounter1 = ran->Rndm()*mBackgroundTracks1[evCounter1].size();
+	  trCounter2 = ran->Rndm()*mBackgroundTracks2[evCounter2].size();
 	  tr1 = mBackgroundTracks1[evCounter1][trCounter1];
 	  tr2 = mBackgroundTracks2[evCounter2][trCounter2];
-	  //if (TracksWithinCuts(tr1,tr2)) {RelativeAngle(tr1,tr2,background);}
                       // if (diagnostics) {if (Diagnose(DiagnoseBackground) != NULL) Diagnose(DiagnoseBackground)->Fill(tr1,tr2);}
 	  RelativeAngle(tr1,tr2,background);
 	  trackPairs++;

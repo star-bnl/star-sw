@@ -5,7 +5,7 @@ TString  thePath;
 TString  theFileName;
 TString  originalPath;
 
-Int_t        nBins = 200;
+Int_t        nBins = 1000;
 Double_t lBin    = 0.0;
 Double_t uBin   = 2.0;
 
@@ -16,10 +16,10 @@ TH1D* ratio1              = new TH1D("ratio1","Distribution1",nBins,lBin,uBin);
 class StChain;
 StChain *chain=0;
 TBrowser *b=0;
- 
+// /disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs_4/
 void doCorr(Int_t,const Char_t **,const char *qaflag = "");
 void doCorr(Int_t nevents=999,
-              const Char_t *path="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs_4/",
+              const Char_t *path="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4",
               const Char_t *file="*.root",
               const char *qaflag = "off");
 
@@ -55,8 +55,8 @@ void doCorr(Int_t nevents,const Char_t **fileList,const char *qaflag)
      corr->SetCorrelationFunction(analysis1,func1);
      corr->SetPtCutsTrack1(analysis1,0.0,10.0); 
      corr->SetPtCutsTrack2(analysis1,0.0,10.0); 
-     corr->SetRapidityCutsTrack1(analysis1,-1.,1.);
-     corr->SetRapidityCutsTrack2(analysis1,-1.,1.);
+     corr->SetRapidityCutsTrack1(analysis1,-.5,.5);
+     corr->SetRapidityCutsTrack2(analysis1,-.5,.5);
      corr->SetChargeTrack1(analysis1,+1);
      corr->SetChargeTrack2(analysis1,-1);
      corr->SetSignalHist(analysis1,signal1);
@@ -117,7 +117,7 @@ void doCorr(const Int_t nevents, const Char_t *path, const Char_t *file,const ch
   Stat_t bnf1 = background1->GetEntries();
   ratio1->Divide(signal1,background1, bnf1/snf1, 1.);
   
-  // draw canvus, histo's
+  // draw histo's
      
 }
 
