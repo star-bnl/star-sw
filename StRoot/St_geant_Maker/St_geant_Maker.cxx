@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.21 1999/02/22 19:27:20 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.22 1999/02/22 20:51:25 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.22  1999/02/22 20:51:25  fisyak
+// Mismatch between ctb/tof
+//
 // Revision 1.21  1999/02/22 19:27:20  fisyak
 // add gtrigi and gtigc
 //
@@ -290,13 +293,13 @@ Int_t St_geant_Maker::Make(){
       m_DataSet->Add(g2t_ftp_hit);
       Int_t Res_ftp = g2t_ftp(g2t_track,g2t_ftp_hit);
       }
-    gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
+    gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
     if (nhits>0) 
       { St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
       m_DataSet->Add(g2t_ctb_hit);
       Int_t Res_ctb = g2t_ctb(g2t_track,g2t_ctb_hit);
       }
-    gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
+    gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
     if (nhits>0) 
       { St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
       m_DataSet->Add(g2t_tof_hit);
@@ -369,7 +372,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.21 1999/02/22 19:27:20 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.22 1999/02/22 20:51:25 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
