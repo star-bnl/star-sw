@@ -1,8 +1,11 @@
 /*****************************************
  *
- * $Id: StTrackPairInfo.hh,v 1.4 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StTrackPairInfo.hh,v 1.5 2001/03/02 22:41:55 calderon Exp $
  *
  * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.5  2001/03/02 22:41:55  calderon
+ * Envelop header file in #ifndef's.
+ *
  * Revision 1.4  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
@@ -23,6 +26,8 @@
  * Modified includes according to Yuri
  *
  *****************************************/
+#ifndef StTrackPairInfo_hh
+#define StTrackPairInfo_hh
 
 class StMcTrack;
 class StGlobalTrack;
@@ -76,3 +81,4 @@ inline float StTrackPairInfo::percentOfPairedTpcHits() const { return mRatioComm
 inline float StTrackPairInfo::percentOfPairedSvtHits() const { return mRatioCommonToTotalHitsSvt; }
 
 inline float StTrackPairInfo::percentOfPairedFtpcHits() const { return mRatioCommonToTotalHitsFtpc; }
+#endif
