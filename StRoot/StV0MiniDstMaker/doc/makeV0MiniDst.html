@@ -28,15 +28,13 @@ run()
 
 <h3> Making a V0 mini-DST - an example macro </h3>
 <pre>
-// Using StV0MiniDstMaker to make a v0 mini-DST
+// Using StV0MiniDstMaker to make v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-
-void load() {
   gSystem->Load("St_base");
+  gSystem->Load("StUtilities");
   gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
-  gSystem->Load("StUtilities");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StMagF");
   gSystem->Load("StEvent");
@@ -47,7 +45,7 @@ void load() {
 void run() {
   // Open input file
   //  const Char_t *file = "/afs/rhic/star/strange/jones/xi_new.xdf";
-  const Char_t *file = "/afs/rhic/star/data3/test/dev/tfs_Solaris/Fri/year_1b/psc0050_01_40evts_dst.xdf";
+  const Char_t *file = "/afs/rhic/star/data3/test/dev/tfs_Solaris/Wed/year_1b/psc0050_01_40evts.dst.xdf";
 
   StFile *files = new StFile();
   files->AddFile(file);
@@ -63,7 +61,7 @@ void run() {
   StEventMaker eventMaker("events","title");
   StV0MiniDstMaker v0dst("v0dst","V0MicroDst.root"); // Sets output filename
 
-  v0dst.SetV0VertexType(); // Select only V0 vertices for micro-DST
+  v0dst.SetV0VertexType(); // Selects V0 vertices for micro-DST
 
   // Do init
   Int_t ierr = chain.Init();
