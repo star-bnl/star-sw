@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.22 2000/02/29 21:55:12 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.23 2000/03/02 22:55:32 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.23  2000/03/02 22:55:32  posk
+// Changed header file extensions from .hh to .h .
+//
 // Revision 1.22  2000/02/29 21:55:12  posk
 // Removed static const int& statements.
 //
@@ -86,11 +89,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include "StMaker.h"
-#include "StFlowAnalysisMaker.hh"
-#include "StFlowMaker/StFlowMaker.hh"
-#include "StFlowMaker/StFlowEvent.hh"
-#include "StFlowTagMaker/StFlowTagMaker.hh"
-#include "StFlowMaker/StFlowConstants.hh"
+#include "StFlowAnalysisMaker.h"
+#include "StFlowMaker/StFlowMaker.h"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowTagMaker/StFlowTagMaker.h"
+#include "StFlowMaker/StFlowConstants.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
@@ -176,7 +179,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.22 2000/02/29 21:55:12 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.23 2000/03/02 22:55:32 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();

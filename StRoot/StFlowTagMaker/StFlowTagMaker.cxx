@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.17 2000/02/29 21:53:29 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.18 2000/03/02 23:00:08 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.18  2000/03/02 23:00:08  posk
+// Changed header file extensions from .hh to .h .
+//
 // Revision 1.17  2000/02/29 21:53:29  posk
 // Removed static const int& statements.
 //
@@ -65,10 +68,10 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-#include "StFlowMaker/StFlowMaker.hh"
-#include "StFlowMaker/StFlowEvent.hh"
-#include "StFlowMaker/StFlowConstants.hh"
-#include "StFlowTagMaker.hh"
+#include "StFlowMaker/StFlowMaker.h"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowMaker/StFlowConstants.h"
+#include "StFlowTagMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TString.h"
@@ -132,7 +135,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.17 2000/02/29 21:53:29 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.18 2000/03/02 23:00:08 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
