@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.8 1999/11/07 02:26:22 fisyak Exp $
+// $Id: StBFChain.h,v 1.9 1999/11/29 21:38:29 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.9  1999/11/29 21:38:29  fisyak
+// Add Dave Hardtke corrections, clean up print outs
+//
 // Revision 1.8  1999/11/07 02:26:22  fisyak
 // Clean ups
 //
@@ -77,6 +80,7 @@ class StBFChain : public StChain {
    virtual Int_t       kOpt(const Char_t  *Tag) const; 
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {xdf_out = xdf;}
    virtual void        SetDbOptions();
+   virtual void        SetDataBases(const Char_t *TimeStamp);
    virtual void        SetGeantOptions();
    virtual void        SetTreeOptions();
    virtual void        SetOption(const Int_t k);
@@ -92,7 +96,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.8 1999/11/07 02:26:22 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.9 1999/11/29 21:38:29 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
