@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.3 2001/02/23 13:46:12 lmartin Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.4 2001/07/15 20:31:31 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.4  2001/07/15 20:31:31  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.3  2001/02/23 13:46:12  lmartin
  * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
  *
@@ -186,9 +189,12 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
 	ycir[ncir]=br->GetHit(isvt)->GetGlobX()->y();
 	zcir[ncir]=br->GetHit(isvt)->GetGlobX()->z();
 	if (br->GetHit(isvt)->GetWafer()->GetLayer()<3) {
-	  dx = 0.001;
-	  dy = 0.001;
-	  dz = 0.001;
+	  dx = br->GetHit(isvt)->GetGlobE()->x();
+	  dy = br->GetHit(isvt)->GetGlobE()->y();
+	  dz = br->GetHit(isvt)->GetGlobE()->z();
+// 	  dx = 0.001;
+// 	  dy = 0.001;
+// 	  dz = 0.001;
 	  //      dx = 0.002;
 	  //      dy = 0.002;
 	  //      dz = 0.002;

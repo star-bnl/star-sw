@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.cc,v 1.4 2001/02/23 13:27:12 lmartin Exp $
+ * $Id: StEstHit.cc,v 1.5 2001/07/15 20:31:33 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstHit.cc,v $
+ * Revision 1.5  2001/07/15 20:31:33  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.4  2001/02/23 13:27:12  lmartin
  * cout replaced by gMessMgr.
  *
@@ -29,11 +32,14 @@
 #include "StEstWafer.hh"
 #include "StEstBranch.hh"
 
-StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbranches, long maxsh, StEstWafer *det) {
+
+StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, StThreeVectorD *eg, StThreeVectorD *el, long maxbranches, long maxsh, StEstWafer *det) {
   int i;
   mId = id;
   mXL = xl;
   mXG = xg;
+  mEL = el;
+  mEG = eg;
   mMaxShare   = maxsh;
   mMaxBranches = maxbranches;
   mDetector   = det;
@@ -52,6 +58,8 @@ StEstHit::~StEstHit() {
   delete [] mBranch;
   delete mXL;
   delete mXG;
+  delete mEL;
+  delete mEG;
 };
 
 void StEstHit::DetachFromWafer() {
@@ -148,6 +156,7 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
   // once found in the list, we check that an other branch from the same track is also 
   // in the list in order to prevent mNShare to be decrease by unity.
   
+//   StEstBranch *brToKill;
   long int i,j, ok=0;
   int SharingSame;
   if(mDebugLevel>0) {
@@ -167,14 +176,19 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
       if (mBranch[i] == br) { 
 	ok = 1;
 	SharingSame=0;
-	for (j=0;j<mNBranch;j++) if (mBranch[j]->GetTrack()==mBranch[i]->GetTrack()&&j!=i) SharingSame=1;
+	for (j=0;j<mNBranch;j++)
+	  if (mBranch[j]->GetTrack()==mBranch[i]->GetTrack()&&j!=i) SharingSame=1;
+	
 	if (mDebugLevel>0) gMessMgr->Info()<<"SharingSame= "<<SharingSame<<endm;
-	if(mDebugLevel>0) gMessMgr->Info()<<"  mBranch["<<i<<"]==br<--- this branch is being removed"<<endm;
-	for (j=i;j<mNBranch-1;j++) mBranch[j] = mBranch[j+1];
+	if (mDebugLevel>0) gMessMgr->Info()<<"  mBranch["<<i<<"]==br<--- this branch is being removed"<<endm;
+// 	brToKill = mBranch[i]; // We point to the branch we want to leave and we will delete it after
+	for (j=i;j<mNBranch-1;j++) { mBranch[j] = mBranch[j+1]; cout << " j " << j << endl;}
 	break;
       }
     }
     if(ok) {
+      //cout << " to delete mBranch["<<mNBranch-1<<"] and mNBranch = "<< mNBranch <<endl;
+
       mNBranch--;
       if (SharingSame==0) mNShare--;
       if (mDebugLevel>0) gMessMgr->Info()<<" the branch is not in the hit list anymore : mNBranch : "<<mNBranch<<" mNShare : "<<mNShare<<endm;
@@ -192,8 +206,10 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
       br->RemoveHit(i);
       break;
     }
-  } 
-  
+  }
+
+//   if(ok) delete brToKill;
+
   if(mDebugLevel>0) gMessMgr->Info()<< "****StEstHit::LeaveBranch**** STOP"<<endm; 
 }
 

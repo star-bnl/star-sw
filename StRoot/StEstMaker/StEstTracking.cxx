@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.6 2001/04/25 17:34:09 perev Exp $
+ * $Id: StEstTracking.cxx,v 1.7 2001/07/15 20:31:31 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.7  2001/07/15 20:31:31  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.6  2001/04/25 17:34:09  perev
  * HPcorrs
  *
@@ -91,7 +94,8 @@ int StEstTracker::Tracking(int slay) {
       branch = mTrack[i]->GetBranch(j);
 
       // get the wafer list.
-      Preprojection(*branch,slay);
+//       Preprojection(*branch,slay);
+      Preprojection(branch,slay);
 
       // get the hit list (of size maxl).
       Projection(branch,slay);
@@ -212,7 +216,7 @@ int StEstTracker::Tracking(int slay) {
 		else {
 		  branch_new->SetIsGoodOld(branch->GetIsGood());
 		  branch_new->SetIsGood(0);
-		}		
+		}
 	      }
 	    }
 	    else {
@@ -224,7 +228,7 @@ int StEstTracker::Tracking(int slay) {
 				<<" MaxBranches="<<hitbra[distind[k]]->GetMaxBranches()
 				<<" NShare="<<hitbra[distind[k]]->GetNShare()
 				<<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endm;	
-      }
+	      }
 	      continue;
 	    }
 	  }

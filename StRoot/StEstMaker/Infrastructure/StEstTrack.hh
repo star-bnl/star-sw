@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.hh,v 1.4 2001/02/23 14:48:32 lmartin Exp $
+ * $Id: StEstTrack.hh,v 1.5 2001/07/15 20:31:33 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.hh,v $
+ * Revision 1.5  2001/07/15 20:31:33  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.4  2001/02/23 14:48:32  lmartin
  * cout replaced by gMessMgr.
  *
@@ -59,6 +62,7 @@ public :
     
   StEstTrack(long int maxbranch, StEstTPCTrack *tr);
   ~StEstTrack(); 
+  void StEstTrackDestructor();
   int AddBranch(StEstBranch *branch);
   int AddFindableBranch(StEstBranch *branch);
   int AddIdealBranch(StEstBranch *branch);
