@@ -1,5 +1,8 @@
-* $Id: control.g,v 1.14 2000/03/09 00:35:09 nevski Exp $
+* $Id: control.g,v 1.15 2000/03/10 23:03:52 nevski Exp $
 * $Log: control.g,v $
+* Revision 1.15  2000/03/10 23:03:52  nevski
+* accept both old and new EVNT headers
+*
 * Revision 1.14  2000/03/09 00:35:09  nevski
 * bad ReadNt events rejected
 *
@@ -48,12 +51,13 @@
       endif
 * 
       call AgNZGETP(1,1,1,ISTAT,IDPDG,P,AMASS,MOTH,TIME,IDAU,V)
-      if (ISTAT!=11|IDPDG!=999997) then
-         Prin1; ('CONTROL: bad EVNT bank, event rejected');    go to :e:
-      endif
-      if (AGDIGC(0) != 0)    then
-         Prin1; ('CONTROL: bad HITS bank, event rejected');    go to :e:
-      endif
+      unless (ISTAT==10&IdPDG==9999999) | (ISTAT==11&IdPDG==999997)
+      {  Prin1 istat,IdPDG;('CONTROL: bad EVNT bank ',2i8,', event rejected') 
+                                                               go to :e: }
+     
+      if  AGDIGC(0) != 0
+      {  Prin1; ('CONTROL: bad HITS bank, event rejected');    go to :e: }
+
       if (ISLFLAG('CONT','HIST')<=0) goto :r:
 
       call xntup ('Ieotri',Ieotri)
