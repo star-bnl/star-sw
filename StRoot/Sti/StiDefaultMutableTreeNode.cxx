@@ -250,9 +250,9 @@ bool StiDefaultMutableTreeNode::getAllowsChildren()
 //--------------------------------------------------------------
 void   StiDefaultMutableTreeNode::removeFromParent() 
 {
-  StiDefaultMutableTreeNode *  parent = (StiDefaultMutableTreeNode * )getParent();
-  if (parent != 0) {
-    parent->remove(this);
+  StiDefaultMutableTreeNode *  theparent = (StiDefaultMutableTreeNode * )getParent();
+  if (theparent != 0) {
+    theparent->remove(this);
   }
 }
 

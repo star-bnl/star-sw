@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //04/01
 
-#include <iostream>
+#include <iostream.h>
 #include "StiHit.h"
 
 StiHit::StiHit()

@@ -6,6 +6,8 @@
 #include <vector>
 #include "StiTreeNode.h"
 
+using std::vector;
+
 //-----------------------------------------------------------------------------
 // A <code>DefaultMutableTreeNode</code> is a general-purpose node in a tree data
 // structure. A tree node may have at most one parent and 0 or more children.

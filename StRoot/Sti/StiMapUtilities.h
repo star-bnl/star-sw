@@ -39,11 +39,6 @@ struct MaterialMapKey {
     const char *name;
 };
 
-//Non member functions
-ostream& operator<<(ostream&, const HitMapKey&);
-ostream& operator<<(ostream&, const DetectorMapKey&);
-ostream& operator<<(ostream&, const MaterialMapKey&);
-
 //Functors for ordering hits
 struct StiHitLessThan
 {

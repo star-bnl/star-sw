@@ -12,6 +12,8 @@
 #include <map>
 #include "StiMapUtilities.h"
 
+using std::map;
+
 class StiDetector;
 class StiMaterial;
 class StiDetPolygon;

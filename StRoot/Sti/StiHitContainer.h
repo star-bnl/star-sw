@@ -13,11 +13,15 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include <iostream.h>
+#include <fstream.h>
 
 #include "StiMapUtilities.h"
 
+using std::map;
+using std::vector;
+
 class StiHit;
-class ofstream;
 
 typedef vector<StiHit*> hitvector;
 typedef map<HitMapKey, hitvector, MapKeyLessThan> hitmap;

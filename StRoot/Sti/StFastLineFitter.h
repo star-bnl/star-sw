@@ -12,6 +12,8 @@
 
 #include <vector>
 
+using std::vector;
+
 class StFastLineFitter
 {
  public:

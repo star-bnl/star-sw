@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //03/01
 
-#include <iostream>
+#include <iostream.h>
 #include "StiSeedFinder.h"
 
 StiSeedFinder::StiSeedFinder()

@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //05/05
 
-#include <iostream>
+#include <iostream.h>
 #include <algorithm>
 #include "StiTrack.h"
 #include "StiTrackContainer.h"

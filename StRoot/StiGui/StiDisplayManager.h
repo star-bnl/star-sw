@@ -10,6 +10,9 @@
 #include <string>
 #include <map>
 
+using std::map;
+using std::string;
+
 class TCanvas;
 class TShape;
 class TNode;
