@@ -1,5 +1,8 @@
-* $Id: tcl.F,v 1.4 1999/03/03 17:35:07 sakrejda Exp $
+* $Id: tcl.F,v 1.5 1999/10/05 00:47:02 snelling Exp $
 * $Log: tcl.F,v $
+* Revision 1.5  1999/10/05 00:47:02  snelling
+* the tdc range saga continues
+*
 * Revision 1.4  1999/03/03 17:35:07  sakrejda
 * eror message was over 132 chars - fixed
 *
@@ -174,7 +177,6 @@ c but, meanwhile, use parameters:
 C----------------------------------------------------------------------
 c local variables:
 c
-	INTEGER IDE1, IDE2
 	integer index(n_index)
         integer itpp
         integer i_tppad
@@ -182,12 +184,11 @@ c
 	INTEGER Sector
 	INTEGER TAS_Code
         INTEGER row_table
+
+C----------------------------------------------------------------------
         CHARACTER*132 m132
-
-C----------------------------------------------------------------------
+	INTEGER IDE1, IDE2
 	SAVE    IDE1, IDE2
-
-C----------------------------------------------------------------------
 	DATA    IDE1,IDE2 /0,0/
            
 C----------------------------------------------------------------------
@@ -215,27 +216,27 @@ c
              row_table = Nrows - row + 1     
              if (raw_row_out(row_table).RowID.ne.row) then
                    write(m132,*) 
-     1 'TCL-E2 raw_row_out table has incorrect format.' 
+     & 'TCL-E2 raw_row_out table has incorrect format.' 
                     CALL Message( m132,
-     1                   1, IDE2 )
+     &                   1, IDE2 )
               tcl = STAFCV_BAD
               return
              endif
              If (raw_row_out(row_table).padref.ne.'N') then
 c Find pixel clusters in each row:
                  TAS_Code = tcl_clusters_in_row( Sector, Row 
-     1                , pad_plane_h, pad_plane
-     1                , raw_sec_m_h, raw_sec_m 
-     1                , raw_row_out_h, raw_row_out 
-     1                , raw_pad_out_h, raw_pad_out 
-     1                , raw_seq_out_h, raw_seq_out 
-     1                , pixel_data_out_h, pixel_data_out 
-     1                , tpcluster_h, tpcluster, tpseq_h, tpseq)
+     &                , pad_plane_h, pad_plane
+     &                , raw_sec_m_h, raw_sec_m 
+     &                , raw_row_out_h, raw_row_out 
+     &                , raw_pad_out_h, raw_pad_out 
+     &                , raw_seq_out_h, raw_seq_out 
+     &                , pixel_data_out_h, pixel_data_out 
+     &                , tpcluster_h, tpcluster, tpseq_h, tpseq)
     
                  IF ( TAS_Code .NE. STAFCV_OK ) THEN
                    write(m132,*) 'TCL-E1 Failed.' 
                     CALL Message( m132,
-     1                   1, IDE1 )
+     &                   1, IDE1 )
                     Tcl = TAS_Code
                     RETURN
                  END IF
@@ -254,27 +255,27 @@ c
              row_table = Nrows_in - row + 1     
              if (raw_row_in(row_table).RowID.ne.row) then
                    write(m132,*) 'TCL-E2 raw_row_in table has'// 
-     +                            'incorrect format.' 
+     &                            'incorrect format.' 
                     CALL Message( m132,
-     1                   1, IDE2 )
+     &                   1, IDE2 )
               tcl = STAFCV_BAD
               return
              endif
              If (raw_row_in(row_table).padref.ne.'N') then
 c Find pixel clusters in each row:
                  TAS_Code = tcl_clusters_in_row( Sector, Row 
-     1                , pad_plane_h, pad_plane
-     1                , raw_sec_m_h, raw_sec_m 
-     1                , raw_row_in_h, raw_row_in 
-     1                , raw_pad_in_h, raw_pad_in 
-     1                , raw_seq_in_h, raw_seq_in 
-     1                , pixel_data_in_h, pixel_data_in 
-     1                , tpcluster_h, tpcluster, tpseq_h, tpseq)
+     &                , pad_plane_h, pad_plane
+     &                , raw_sec_m_h, raw_sec_m 
+     &                , raw_row_in_h, raw_row_in 
+     &                , raw_pad_in_h, raw_pad_in 
+     &                , raw_seq_in_h, raw_seq_in 
+     &                , pixel_data_in_h, pixel_data_in 
+     &                , tpcluster_h, tpcluster, tpseq_h, tpseq)
     
                  IF ( TAS_Code .NE. STAFCV_OK ) THEN
                    write(m132,*) 'TCL-E1 Failed.' 
                     CALL Message( m132,
-     1                   1, IDE1 )
+     &                   1, IDE1 )
                     Tcl = TAS_Code
                     RETURN
                  END IF

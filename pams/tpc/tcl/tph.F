@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.17 1999/10/01 03:16:55 snelling Exp $
+* $Id: tph.F,v 1.18 1999/10/05 00:47:06 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.18  1999/10/05 00:47:06  snelling
+* the tdc range saga continues
+*
 * Revision 1.17  1999/10/01 03:16:55  snelling
 * changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
 *
@@ -361,7 +364,7 @@ c noise that comes through shaper
         filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
 c Loop over the sequences in this cluster:
-        If (tcl_sector_index(1).CurrentSector.lt.0) then
+        if (tcl_sector_index(1).CurrentSector .lt. 0) then
          CurrentSector = -tcl_sector_index(1).CurrentSector
          istart = 1
         else 
@@ -373,11 +376,11 @@ c Loop over the sequences in this cluster:
            nseq = tpcluster(jtpcl).nseq
            jseq = tpcluster(jtpcl).jseq
            isec = tpcluster(jtpcl).tpc_row/100
-         if(isec.eq.CurrentSector) then      
+         if(isec .eq. CurrentSector) then      
            irow = mod(tpcluster(jtpcl).tpc_row,100)
 c ??? Check index?
            npads = pads_per_row(irow)
-           if(nseq.ge.tclpar(1).min_nseq)then
+           if(nseq .ge. tclpar(1).min_nseq) then
 
             if (irow.gt.Nrows_in) then
               call tph_get_cluster_data(jseq, nseq, irow, isec, npads
@@ -395,20 +398,20 @@ c ??? Check index?
      +,				    nclpix_max, npix_seq, ipad_lo
      +,				    ipad_hi, itdc_lo, itdc_hi)
             endif
-              if(itdc_hi.gt.511) then
+              if(itdc_hi .gt. 511) then
                  write(m132,*) itdc_hi,'itdc_hi'
                  call StMessage(m132)
-                 itdc_hi=511
+                 itdc_hi = 511
               endif
-              if(itdc_lo.lt.0) then
+              if(itdc_lo .lt. 0) then
                  write(m132,*) itdc_lo,'itdc_lo'
                  call StMessage(m132)
-                 itdc_lo=0
+                 itdc_lo = 0
               endif
 
 C Rai: patch from Bill Love, we might have to think of a better way
 C             skip clusters on the end pads.
-              if(ipad_lo.eq.1)then
+              if(ipad_lo .eq. 1)then
                  if(debug) then
                     write(m132,1)irow
                     call StMessage(m132)
@@ -444,7 +447,7 @@ c
 c perhaps consistency with simulation demands use of pad_sep_in/out ???
 c yes, I think so - mal
 c
-           if(irow.gt.pad_plane(1).nrow_in)then
+           if(irow .gt. pad_plane(1).nrow_in) then
               pad_width = pad_plane(1).pad_sep_out
               de_scale = tsspar(1).ave_ion_pot*tsspar(1).scale
      +             /(tsspar(1).gain_out*tsspar(1).wire_coupling_out)
@@ -463,11 +466,12 @@ c  to cluster in TPCLUSTER table....
            else
               fflagg = 0
            end if
-           DO ihit=1,nhits
-              if (tphit_h.nok.ge.tphit_h.maxlen) then
+
+           do ihit=1,nhits
+              if (tphit_h.nok .ge. tphit_h.maxlen) then
 c ??? Direct write is forbidden
                  write(m132,*)'TPHIT table full - quitting at cluster',
-     +                jtpcl
+     &                jtpcl
                  call StWarning(m132)
                  return
               endif
@@ -490,8 +494,6 @@ c ??? Direct write is forbidden
               tphit(tphit_h.nok).dalpha=0
               tphit(tphit_h.nok).dlambda=0
               tphit(tphit_h.nok).dq=0
-
-              
 c     
 c     finally, transform everything to global coordinates !
 c     
@@ -554,7 +556,7 @@ c
 c     while we have these numbers, fill the lambda field of tphit,
 c     with the ansatz that the track comes from (0,0,0)
               tphit(tphit_h.nok).lambda = 
-     +             abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda > 0 always
+     &             abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda > 0 always
               
 c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
 c     explanation...
@@ -590,9 +592,6 @@ c             tphit(tphit_h.nok).dy+ tclpar(1).dxy_fact
 c
               tphit(tphit_h.nok).dz = 0.55
 c             tphit(tphit_h.nok).dz+0.07
-
-              
-              
 c     also put q (magnitude of hit) into units of energy loss
               tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale 
 
@@ -602,19 +601,20 @@ c     begin to fill the tcl_hitclus table (tphitclus)
 	         if (tphitclus_h.nok.ge.tphitclus_h.maxlen) then
 c ??? Direct write is forbidden
                	   write(m132,*)
-     + 'TPHITCLUS table full - quitting at cluster', jtpcl
+     &                   'TPHITCLUS table full - quitting at cluster', 
+     &                   jtpcl
                    call StWarning(m132)
 	           return		
         	 endif	
 		
                 if(nhits.eq.1)then
-                 ipad_hi	t_lo(ihit)=ipad_lo
-                 ipad_hit_hi(ihi	t)=ipad_hi
-                 itdc_hit_lo(ihit)=itdc_lo
-                 itdc_hit_hi(ihit)=itdc_hi
+                   ipad_hit_lo(ihit)=ipad_lo
+                   ipad_hit_hi(ihit)=ipad_hi
+                   itdc_hit_lo(ihit)=itdc_lo
+                   itdc_hit_hi(ihit)=itdc_hi
                 endif
 c fill the tphitclus table
-                tphitclus_h.nok = tphitclus_h.nok+1
+                tphitclus_h.nok = tphitclus_h.nok + 1
 	        tphitclus(tphitclus_h.nok).id = tphitclus_h.nok 
                 tphitclus(tphitclus_h.nok).sector=isec
                 tphitclus(tphitclus_h.nok).row=irow
@@ -622,35 +622,35 @@ c fill the tphitclus table
                 tphitclus(tphitclus_h.nok).nhits = nhits
                 tphitclus(tphitclus_h.nok).nth_hit = ihit
                 tphitclus(tphitclus_h.nok).npads_clus=
-     *             ipad_hi-ipad_lo+1    
+     &             ipad_hi-ipad_lo+1    
                 tphitclus(tphitclus_h.nok).minpad_clus=ipad_lo     
                 tphitclus(tphitclus_h.nok).maxpad_clus=ipad_hi     
                 tphitclus(tphitclus_h.nok).ntmbk_clus=
-     *             itdc_hi-itdc_lo+1    
+     &             itdc_hi-itdc_lo+1    
                 tphitclus(tphitclus_h.nok).mintmbk_clus=itdc_lo   
                 tphitclus(tphitclus_h.nok).maxtmbk_clus=itdc_hi   
                 tphitclus(tphitclus_h.nok).npads_hit=
-     *             ipad_hit_hi(ihit)-ipad_hit_lo(ihit)+1     
+     &             ipad_hit_hi(ihit)-ipad_hit_lo(ihit) + 1     
                 tphitclus(tphitclus_h.nok).minpad_hit=
-     *             ipad_hit_lo(ihit)     
+     &             ipad_hit_lo(ihit)     
                 tphitclus(tphitclus_h.nok).maxpad_hit=
-     *             ipad_hit_hi(ihit)     
+     &             ipad_hit_hi(ihit)     
                 tphitclus(tphitclus_h.nok).ntmbk_hit=
-     *             itdc_hit_hi(ihit)-itdc_hit_lo(ihit)+1         
+     &             itdc_hit_hi(ihit)-itdc_hit_lo(ihit) + 1         
                 tphitclus(tphitclus_h.nok).mintmbk_hit=
-     *             itdc_hit_lo(ihit)   
+     &             itdc_hit_lo(ihit)   
                 tphitclus(tphitclus_h.nok).maxtmbk_hit=
-     *             itdc_hit_hi(ihit)                      
+     &             itdc_hit_hi(ihit)                      
 
-             endif !tclpar(1).mc.gt.1
+             endif              !tclpar(1).mc.gt.1
 c-liq
-           ENDDO
+          enddo
 
-          Else if (isec.gt.CurrentSector) then
+          else if (isec.gt.CurrentSector) then
            goto 555           
-          Else         ! isec < Current Sector
+          else         ! isec < Current Sector
            continue
-          ENDIF        ! isec  = Current Sector
+          endif        ! isec  = Current Sector
 
  999       continue
         enddo

@@ -1,5 +1,8 @@
-* $Id: tph_3point_gauss.F,v 1.2 1999/07/17 00:32:06 genevb Exp $
+* $Id: tph_3point_gauss.F,v 1.3 1999/10/05 00:47:07 snelling Exp $
 * $Log: tph_3point_gauss.F,v $
+* Revision 1.3  1999/10/05 00:47:07  snelling
+* the tdc range saga continues
+*
 * Revision 1.2  1999/07/17 00:32:06  genevb
 * Use StMessMgr
 *
@@ -85,6 +88,10 @@ c
 	real delta
 	real r213
 	real y1, y2, y3
+
+c message call related variables
+        character*132 m132
+
 C-----------------------------------------------------------------------
 c functions:
 c
@@ -104,14 +111,16 @@ c Find pad with largest signal:
         if (imax.eq.1) then             ! maximum at first point
            if (y(2).le.y(3)) then
               tph_3point_gauss = -1
-              call StError('TPH_3POINT_GAUSS bad shape')
+	      write(132,*) 'TPH_3POINT_GAUSS bad shape'
+              call StError(132)
               return
            endif
            istart = 1
 	else if (imax.eq.npads) then ! maximum at last point
            if (y(npads-1).le.y(npads-2)) then
               tph_3point_gauss = -1
-              call StError('TPH_3POINT_GAUSS bad shape')
+	      write(132,*) 'TPH_3POINT_GAUSS bad shape'
+              call StError(132)
               return
            endif
            istart = npads - 2
@@ -131,15 +140,17 @@ c Find pad with largest signal:
 C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
 	delta = x(istart+1) - x(istart)
 	if (ABS(delta-1.).gt.1.E-7) then
-	  call StError('TPH_3POINT_GAUSS unexpected delta .ne. 1')
-          tph_3point_gauss = -1
-	  return
+	   write(132,*) 'TPH_3POINT_GAUSS unexpected delta .ne. 1'
+	   call StError(132)
+	   tph_3point_gauss = -1
+	   return
 	endif
 
 	r213 = log(y2*y2/(y1*y3))
         if (r213.le.0.0) then
            tph_3point_gauss = -1
-           call StError('TPH_3POINT_GAUSS bad shape - r213')
+	   write(132,*) 'TPH_3POINT_GAUSS bad shape - r213'
+	   call StError(132)
            return
 
 ********************** let's try to take it out....**********************

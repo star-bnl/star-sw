@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.7 1999/08/25 21:27:10 liq Exp $
+* $Id: mountain_finder.F,v 1.8 1999/10/05 00:46:59 snelling Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.8  1999/10/05 00:46:59  snelling
+* the tdc range saga continues
+*
 * Revision 1.7  1999/08/25 21:27:10  liq
 * add new table tphitclus
 *
@@ -163,23 +166,25 @@ C-----------------------------------------------------------------------
 c local variables:
 c
         integer h_tol                 ! Tolerance on monotonic ADC decrease
-        integer nbuck_max             ! Total number of time buckets
+        integer nbuck_max             ! Max range of time buckets
+        integer nbuck                 ! Total number of time buckets
         integer nclpix_max            ! Max. pixels in cluster
 cliq        integer nmax_max              ! maximum number of local maxima
         integer npads_max             ! Largest number of pads in any row
         integer n_allow               ! Most possible pixels in a cluster
 c
         parameter (h_tol=3)
-        parameter (nbuck_max=512)
+        parameter (nbuck_max = 511)
+        parameter (nbuck = 512)
         parameter (nclpix_max=10000)
 cliq        parameter (nmax_max=100)
         parameter (npads_max=182)
-        parameter (n_allow=npads_max*nbuck_max)
+        parameter (n_allow = npads_max * nbuck)
 c
-        integer assign(npads_max,nbuck_max) ! Assigned peak for pixel
+        integer assign(npads_max,0:nbuck_max) ! Assigned peak for pixel
         integer dpad                  ! ADC difference between maxima
         integer dtdc                  ! TDC difference between maxima
-        integer height(npads_max,nbuck_max)    ! ADC(pad,TDC) in cluster
+        integer height(npads_max,0:nbuck_max)    ! ADC(pad,TDC) in cluster
         integer i                     ! General-purpose index
         integer i_minimum_height      ! Min. height of local maxima
         integer i_sprd                ! Index for peak spreading
@@ -231,7 +236,7 @@ c
         integer nclspix_temp          ! Number of pixels in hit
         integer nmax                  ! Number of local maxima found
         integer peak_list(nmax_max)   ! Maxima index list sorted by peak height
-        integer track_pix(npads_max,nbuck_max) ! Track ID for MC data
+        integer track_pix(npads_max,0:nbuck_max) ! Track ID for MC data
         integer valley                ! Minima along ridge connecting maxima
         integer ierr
 
@@ -240,11 +245,15 @@ c
         real peak_to_valley           ! ADC separation of peak and valley
         real slope                    ! Slope of ridge between maxima
 
-        logical allowed(npads_max,nbuck_max) ! Candidate pixels for maxima
+        logical allowed(npads_max,0:nbuck_max) ! Candidate pixels for maxima
         logical ktdc_lo_sprd          ! Peak spreading about - TDC axis
         logical ktdc_hi_sprd          ! Peak spreading about + TDC axis
         logical kpad_lo_sprd          ! Peak spreading about - pad # axis
         logical kpad_hi_sprd          ! Peak spreading about + pad # axis
+
+c message call related variables
+        character*132 m132
+
 c
 C-----------------------------------------------------------------------
         data allowed /n_allow*.true./
@@ -261,7 +270,8 @@ c
 c Check that temporary arrays for hit are large enough to prevent
 c overflows; otherwise, print msg. and protect ourselves as best we can:
 	if ((2*iclosest_pad-1)*(2*iclosest_tdc-1).gt.nclpix_max) then
-           call StMessage('TPHAM-I-2MANY pix in temp hit')
+           write(m132,*) 'TPHAM-I-2MANY pix in temp hit'
+           call StMessage(m132)
            iclosest_pad = INT(SQRT(FLOAT(nclpix_max))+1.)/2
            iclosest_tdc = iclosest_pad
         end if
@@ -668,7 +678,8 @@ c Load the assigned pixels:
 c
 c Guarantee that arrays won't overrun:
                   if (nclspix_temp.ge.nclpix_max) then
-                     call StWarning('TPHAM - Too many pixels in hit ?')
+                     write(m132,*) 'TPHAM - Too many pixels in hit ?'
+                     call StWarning(m132)
                      goto 99
                   end if
 c
@@ -726,7 +737,8 @@ c-liq
 c
 c Should *not* be possible...
             nhits = nhits - 1
-            call StWarning('TPHAM - No pixels in hit ?')
+            write(m132,*) 'TPHAM - No pixels in hit ?'
+            call StWarning(m132)
          end if
       end do   ! i=1,nmax
 c
