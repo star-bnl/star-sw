@@ -10,7 +10,7 @@ macro tpc_slow_sim__
           nfile=tphit.ntup _
           nid=111_
           table=/dui/data/tpc/hits/tphit_
-          adcxyzon=1
+          adcxyzon=0
 
 *  
 * --> to run
