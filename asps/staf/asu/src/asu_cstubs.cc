@@ -15,10 +15,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#if defined(irix) || defined(irix64) || defined (linux) || defined (__alpha)
+#if defined(irix) || defined(irix64)  || defined (__alpha)
 # include <sys/time.h>
 #else
 # include <time.h>
+# include <sys/time.h>
 #endif
 #ifndef WIN32
 # include <unistd.h>

@@ -55,7 +55,7 @@ int tcpStartServer(int serverPort, int *pSocket); /* blocks until connect */
 #define TCPREAD  int (*)(...)             
 #define TCPWRITE int (*)(...)             
 #endif
-#if defined(i386_redhat51) || defined(i386_redhat60)
+#if defined(i386_redhat51) || defined(i386_redhat60) || defined(i386_linux24)
 #define TCPREAD  int (*)(char *, char *, int)             /*JCS*/
 #define TCPWRITE int (*)(char *, char *, int)             /*JCS*/
 #endif
@@ -79,7 +79,7 @@ int tcpWrite(int  *fd, char *buf, int len);
   int listen(int s, int backlog);
 #else
   int read(int fd, void *buf, unsigned int nbytes);
-  int socket(int domain, int type, int protocol);
+//VP  int socket(int domain, int type, int protocol);
   int write(int fd, const void *buf, unsigned int nbytes);
 #endif
 #endif

@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.33 1998/11/05 19:49:05 markp Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.34 2002/04/17 21:47:29 perev Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -17,7 +17,7 @@
 #elif !defined(__linux)
 # include <sys/stream.h>
 #else
-# include <g++/stream.h>
+# include <stream.h>
 #endif
 
 #include <math.h>

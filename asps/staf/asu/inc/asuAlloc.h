@@ -1,6 +1,7 @@
 #ifndef ASU_ALLOC_H
 #define ASU_ALLOC_H 1
 #include <stdlib.h>
+#define ASU_MALLOC_OFF 1
 #if defined(ASU_MALLOC_ON) && (defined(__ROOT__) || defined(ASU_MALLOC_OFF))
 #undef ASU_MALLOC_ON 
 #endif /**__ROOT__**/
