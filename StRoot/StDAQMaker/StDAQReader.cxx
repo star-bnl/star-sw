@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.30 2002/12/19 22:28:19 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.31 2003/02/16 16:02:49 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.31  2003/02/16 16:02:49  perev
+ * new method added
+ *
  * Revision 1.30  2002/12/19 22:28:19  perev
  * PMD added
  *
@@ -144,6 +147,7 @@ StDAQReader::StDAQReader(const char *file)
   assert(sizeof(DAQEventInfo)==sizeof(EventInfo));
   setTPCVersion();
   setFTPCVersion();
+  fTrigSummary = new StTrigSummary();
 
   if(file && file[0]) open(file);
 }
@@ -213,6 +217,16 @@ int StDAQReader::readEvent()
   if (fSVTReader) 	fSVTReader ->Update();
   if (fEMCReader) 	fEMCReader ->Update();
   if (fPMDReader) 	fPMDReader ->Update();
+
+//	Trigger Summary, code provided by Herb
+  Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
+   assert(datap->header.BankType[0]=='D'); // first letter of DATAP
+   { int i;
+     for(i=0;i<2;i++) fTrigSummary->L1summary[i]=datap->reserved[i+0];
+     for(i=0;i<2;i++) fTrigSummary->L2summary[i]=datap->reserved[i+2];
+     for(i=0;i<4;i++) fTrigSummary->L3summary[i]=datap->reserved[i+4];
+   }
+
   return 0;
 }
 //_____________________________________________________________________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.20 2002/12/19 22:28:27 perev Exp $
+ * $Id: StDAQReader.h,v 1.21 2003/02/16 16:02:49 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.21  2003/02/16 16:02:49  perev
+ * new method added
+ *
  * Revision 1.20  2002/12/19 22:28:27  perev
  * PMD added
  *
@@ -104,8 +107,12 @@ class StTOFReader;
 class StFPDReader;
 
 #endif /*__CINT__*/
-
-
+class StTrigSummary {
+public:
+  int L1summary[2];
+  int L2summary[2];
+  int L3summary[4];
+};
 //
 
  
@@ -153,6 +160,7 @@ public:
   StL3Reader   *getL3Reader  ();
   StTOFReader  *getTOFReader ();
   StFPDReader  *getFPDReader ();
+  StTrigSummary *getTrigSummary () const {return fTrigSummary;}
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
@@ -176,7 +184,7 @@ protected:
   char *fFile;
   char fTPCVersion[12];
   char fFTPCVersion[12];
-
+  StTrigSummary *fTrigSummary; //!
 };
 #ifndef __CINT__
 #include "StTPCReader.h"
