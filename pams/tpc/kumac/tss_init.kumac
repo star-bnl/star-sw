@@ -1,14 +1,14 @@
 macro init tpc_sector_first tpc_sector_last
 macro/global/import *
 
-  cd [params]/tpc
+* cd [params]/tpc
 
-  dio/newfilestream    tss_par $STAR/params/tpc/tss_pars.xdf r
-  dio/stream/getevent  tss_par
-  dio/stream/close     tss_par
-  soc/object/oid tss_par; oid = staf_result(1); soc/deleteoid [oid]
+* dio/newfilestream    tss_par $STAR/params/tpc/tss_pars.xdf r
+* dio/stream/getevent  tss_par
+* dio/stream/close     tss_par
+* soc/object/oid tss_par; oid = staf_result(1); soc/deleteoid [oid]
 
-  cd /dui
+* cd /dui
   
         * now overwrite which sector you want to run 	      
            cd [params]/tpc/tsspars
