@@ -52,10 +52,12 @@ public:
   virtual StiTrackMerger         * getTrackMerger();
   virtual StiVertexFinder        * getVertexFinder();
   virtual StAssociationMaker     * getAssociationMaker();
+  virtual StiMaker               * getStiMaker();          
   virtual StiResidualCalculator  * getResidualCalculator();
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader();
 
   virtual void setAssociationMaker(StAssociationMaker * a);
+  virtual void setStiMaker(StiMaker* a);
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup);
 
   //RootEditableParameter & getParameters();
@@ -107,7 +109,8 @@ public:
   StiTrackMerger          * _trackMerger;
   StiVertexFinder         * _vertexFinder;
   StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
-  StAssociationMaker       * _associationMaker; 
+  StAssociationMaker       * _associationMaker;
+    StiMaker                 * _stiMaker;
   StiResidualCalculator    * _residualCalculator;
 
   EditableFilter<StiHit>   * _loaderHitFilter;

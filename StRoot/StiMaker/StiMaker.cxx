@@ -3,6 +3,11 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.125  2003/05/06 15:36:36  mmiller
+// Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
+// Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
+// Not so elegant...
+//
 // Revision 1.124  2003/04/30 15:39:33  pruneau
 // Integrating StiResidual in main stream Sti
 //
@@ -149,7 +154,8 @@ ClassImp(StiMaker)
     _loaderHitFilter(0)
 
 {
-  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+    cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+    _toolkit->setStiMaker(this);
 }
 
 StiMaker::~StiMaker() 

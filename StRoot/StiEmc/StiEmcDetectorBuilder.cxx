@@ -54,6 +54,8 @@ void StiEmcDetectorBuilder::buildDetectors()
       place->setZcenter(zCenter);
       place->setNormalRep(phi,radius, 0.); 
       place->setLayerRadius(radius);
+      place->setRegion(StiPlacement::kMidRapidity);
+
 
       name = "Emc/Sector_";
       name+=iSector;
@@ -76,6 +78,7 @@ void StiEmcDetectorBuilder::buildDetectors()
       place->setZcenter(zCenter);
       place->setNormalRep(phi,radius, 0.); 
       place->setLayerRadius(radius);
+      place->setRegion(StiPlacement::kMidRapidity);
       name = "Emc/Sector_";
       name+=iSector;
       name+="/ShowerMax";
@@ -97,6 +100,7 @@ void StiEmcDetectorBuilder::buildDetectors()
       place->setZcenter(zCenter);
       place->setNormalRep(phi,radius, 0.); 
       place->setLayerRadius(radius);
+      place->setRegion(StiPlacement::kMidRapidity);
       name = "Emc/Sector_";
       name+=iSector;
       name+="/Tower";
