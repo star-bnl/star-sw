@@ -27,7 +27,7 @@ C :>--------------------------------------------------------------------
       Character  chit*4(15)
 
 #include       "g2t_get_hits.inc"
-#include       "geant_gcnum.inc"
+#include       "geant321/gcnum.inc"
 
       G2T_GET_HITS = STAFCV_BAD
       nh = 0

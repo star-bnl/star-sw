@@ -29,7 +29,7 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       CHARACTER NAPART*24,Cvol*4,Cshap*4
 
 #include       "g2t_get_kine.inc"
-#include       "geant_gcnum.inc"
+#include       "geant321/gcnum.inc"
 
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 
@@ -187,7 +187,7 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 
       SUBROUTINE  aGFVOLU (Cvol,Cshap,numed,par,npar,Ivol)
       implicit  none
-#include       "geant_gcbank.inc"
+#include       "geant321/gcbank.inc"
       integer   Ivol,numed,npar,Ishap
       character Cvol*4,Cshap*4
       real      par(*)
