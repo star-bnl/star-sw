@@ -3,13 +3,29 @@ use Env;
 #if (defined($AFS)) {$File::Find::dont_use_nlink;}
 require "find.pl";
 
+# Added so it does not depend on soft-link but
+# rather on afs/cons created tree structure.
+chomp($fs=`fs sysname`);
+if($fs ne ""){
+    $fs =~ s/(.*)\'(.*)\'/$2/;
+    #print `pwd`."$fs";
+    if( -d ".$fs"){
+	# use @sys, we found it.
+	$fs = ".$fs/";
+    } else {
+	# revert to default
+	$fs = "";
+    }
+}
+
+
 my @dirs = ();
 if ($#ARGV > -1) {
     push(@dirs, $ARGV[0]);
 } else {
-    push(@dirs,"obj"); 
-    push(@dirs,"OBJ");
-    push(@dirs,"IOBJ");
+    push(@dirs,$fs."obj"); 
+    push(@dirs,$fs."OBJ");
+    push(@dirs,$fs."IOBJ");
 }
 
 my $KEEP = 1;
