@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.8 2001/04/09 21:19:33 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.9 2001/04/11 23:03:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.9  2001/04/11 23:03:39  ullrich
+ * Removed unused variables in streamer.
+ *
  * Revision 1.8  2001/04/09 21:19:33  perev
  * Streamer for ROOT3
  *
@@ -124,14 +127,12 @@ istream&  operator>>(istream& is, StThreeVectorD& v)
 void StThreeVectorD::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorD.
-   int offset = 0;
-
    if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(); 
       R__b >> mX1;
       R__b >> mX2;
       R__b >> mX3;
-   } else {
+   }
+   else {
       R__b.WriteVersion(Class());
       R__b << mX1;
       R__b << mX2;
