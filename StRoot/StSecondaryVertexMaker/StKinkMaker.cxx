@@ -533,9 +533,12 @@ void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry
   Track acceptance filter
   fittingMethod() as defined in pams/global/inc/StTrackMethod.h 
   (values themselves are defined in pams/global/inc/StTrackDefinitions.h)
-  while mUseTracker is defined as SetTrackerUsage(). Note, TPT
-  tracks set as kHelix3DIdentifier but for safety purposes, 
-  kTrackerUseTPT will consider any tracks not being kITKalmanFitId.
+  while mUseTracker is defined as SetTrackerUsage(). Note that TPT
+  tracks are set as kHelix3DIdentifier BUT, we also found that there are
+  some cases (untraced) where the mEncodedMethod is reset to 0 (the only tracks
+  having kHelix3DIdentifier being tracks with SVT points). So, we had to revert
+  to a non-equality for safety purposes i.e. kTrackerUseTPT will consider any 
+  tracks not being kITKalmanFitId (sad).
 */
 /*!
   Julien : I change this on Jerome's request : now TPT tracks will only be kHelix3DIdentifier... for safety purposes too ;-))
@@ -549,19 +552,15 @@ bool StKinkMaker::acceptTrack(StTrack *trk)
   if (trk->flag() <= 0) return false;
 
   // on fittingMethod() 
-  if  (  ( trk->fittingMethod() == kHelix3DIdentifier  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
+  if  (  
+       //( trk->fittingMethod() == kHelix3DIdentifier  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
+  	 ( trk->fittingMethod() != kITKalmanFitId  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
   	 ( trk->fittingMethod() == kITKalmanFitId  && (mUseTracker == kTrackerUseITTF || mUseTracker == kTrackerUseBOTH) ) ){
     return true;
   } else {
     return false;
   }
 
-
-  //if ((trk->fittingMethod() != kITKalmanFitId && (mUseTracker == kTrackerUseITTF))||
-  //    (trk->fittingMethod() == kITKalmanFitId && (mUseTracker == kTrackerUseTPT)) ||
-  //    trk->flag()<=0){
-  //  return false;}
-  //else return true;
 }
 
 
