@@ -16,7 +16,6 @@ relation database join and project operations for tables
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "dscodes.h"
 #include "dstype.h"
 
 static int dsEquijoinFields(DS_FIELD_T **srcField, size_t *srcIndex,
@@ -36,8 +35,7 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 {
 	char aliasName[2][DS_NAME_DIM];
 	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase;
-	size_t i, r1, r2, size;
-	size_t srcIndex[DS_MAX_JOIN];
+	size_t i, r1, r2, size, srcIndex[DS_MAX_JOIN];
 	DS_BUF_T bp;	
 	DS_FIELD_T *pJoinField, *srcField[DS_MAX_JOIN];
 	DS_KEY_T key;
@@ -59,13 +57,13 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 		names[1] = pTableTwo->name;
 	}
 	else {
-    	DS_GET_INIT(&bp, aliases);
-    	names[0] = aliasName[0];
-    	names[1] = aliasName[1];
-    	if (dsGetName(names[0], &bp) <= 0 ||
-    		dsGetName(names[1], &bp) <= 0) {
-    		DS_ERROR(DS_E_INVALID_ALIAS);
-    	}       
+	 	DS_GET_INIT(&bp, aliases);
+		names[0] = aliasName[0];
+		names[1] = aliasName[1];
+		if (dsGetName(names[0], &bp) <= 0 ||
+			dsGetName(names[1], &bp) <= 0) {
+			DS_ERROR(DS_E_INVALID_ALIAS);
+		}       
    	}
 	if (!dsEquijoinKey(&key, &types[1], names, joinList)) {
 		return FALSE;
@@ -116,6 +114,10 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 	return TRUE;
 }
 /*****************************************************************************
+*
+* dsEquijoinField - find the source fields to be returned in the join
+*
+* RETURNS: TRUE if success else FALSE
 */
 static int dsEquijoinFields(DS_FIELD_T **srcField, size_t *srcIndex,
 	DS_TYPE_T **types, DS_KEY_T *key, char **names, char *projectList)
@@ -161,7 +163,9 @@ static int dsEquijoinFields(DS_FIELD_T **srcField, size_t *srcIndex,
 }
 /*****************************************************************************
 *
+* dsEquiJoinKey - determine the join fields
 *
+* RETURNS: TRUE if success else FALSE
 */
 static int dsEquijoinKey(DS_KEY_T *key,
 	DS_TYPE_T **types, char **names, char *joinList)
@@ -221,10 +225,10 @@ static int dsEquijoinKey(DS_KEY_T *key,
 				DS_ERROR(DS_E_INVALID_JOIN_SPECIFIER);
 			}
 			key->count++;
-	     	if (c == '}') {
+			if (c == '}') {
 				break;
-	     	}
-	     	if (c != ',') {
+			}
+			if (c != ',') {
 				DS_ERROR(DS_E_INVALID_JOIN_SPECIFIER);
 	 		}
 	 	}
@@ -240,6 +244,10 @@ static int dsEquijoinKey(DS_KEY_T *key,
 	return TRUE;	 
 }
 /*****************************************************************************
+*
+* dsProjectFields - form list of source fields for project
+*
+* RETURNS: TRUE if success else FALSE
 */
 static int dsProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 	DS_TYPE_T *dstType, DS_TYPE_T **srcType, char **names, char *projectList)
@@ -405,6 +413,10 @@ int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList)
 	}
 }
 /*****************************************************************************
+*
+* dsTargetField - find type of target field
+*
+* RETURNS: TRUE if success else FALSE
 */
 int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 	size_t *pSrcIndex, DS_TYPE_T **types, char **names, DS_BUF_T *bp)
@@ -447,6 +459,9 @@ int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 }
 /*****************************************************************************
 *
+* dsTargetTable - construct target table for join or project
+*
+* RETURNS: TRUE if success else FALSE
 */
 int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
 	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
@@ -460,7 +475,7 @@ int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName,
 
 	tables[0] = parentOne;
 	tables[1] = parentTwo;
-    DS_GET_INIT(&bp, aliases);
+	DS_GET_INIT(&bp, aliases);
 	for (i = 0; i < 2 && tables[i] != NULL; i++) {
 		if (!DS_IS_TABLE(tables[i])) {
 			DS_ERROR(DS_E_INVALID_TABLE);
@@ -480,7 +495,7 @@ int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName,
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
 	tidList[i] = 0;
-   if (!dsTargetTypeSpecifier(typeSpecifier, sizeof(typeSpecifier), 
+	if (!dsTargetTypeSpecifier(typeSpecifier, sizeof(typeSpecifier), 
 		typeName, tidList, names, projectList)) {
 		return FALSE;
 	}
@@ -488,6 +503,9 @@ int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName,
 }
 /*****************************************************************************
 *
+* dsTargetTypeSpecifier - construct target type specifier
+*
+* RETURNS: TRUE if success else FALSE
 */
 int dsTargetTypeSpecifier(char *str, size_t maxSize, char *typeName, 
 	size_t *tidList, char **names, char *projectList)
@@ -507,7 +525,7 @@ int dsTargetTypeSpecifier(char *str, size_t maxSize, char *typeName,
 	types[i] = NULL;
 
 	size = sizeof(DS_TYPE_T) + DS_MAX_JOIN*sizeof(DS_FIELD_T);
-	if ((newType = (DS_TYPE_T *)dsTypeCalloc(size)) == NULL) {
+	if ((newType = dsTypeCalloc(size)) == NULL) {
 		return FALSE;
 	}
 	field = DS_FIELD_PTR(newType);

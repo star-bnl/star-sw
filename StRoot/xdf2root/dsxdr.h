@@ -15,7 +15,6 @@ TBS ...
 
 #ifndef DSXDR_H
 #define DSXDR_H
-#include <rpc/rpc.h>
 #include "dstype.h"
 int dsReadAll(XDR *xdrs);
 int dsReadTest(XDR *xdrs, size_t count);

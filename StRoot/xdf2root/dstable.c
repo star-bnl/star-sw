@@ -16,7 +16,6 @@ relation database operations for tables
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "dscodes.h"
 #include "dstype.h"
 
 /*****************************************************************************
@@ -162,8 +161,11 @@ int dsTasProject(DS_DATASET_T *pDataset, char *name,
 	memset (&table, 0, sizeof(DS_DATASET_T));
 	table.maxcount = *pCount;
 	*pCount = 0;
-	if (!dsFindTable(&pSrcTable, pDataset, name, NULL)) {
+	if (!dsFindEntry(&pSrcTable, pDataset, name)) {
 		return FALSE;
+	}
+	if (!DS_IS_TABLE(pSrcTable)) {
+		DS_ERROR(DS_E_INVALID_TABLE);
 	}
 	if (pSrcTable->elcount == 0) {
 		return TRUE;

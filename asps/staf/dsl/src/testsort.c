@@ -12,6 +12,7 @@ DESCRIPTION
 */
 #include <stdlib.h>
 #include <string.h>
+#define DS_PRIVATE
 #include "dstype.h"
 /****************************************************************************
 *

@@ -53,7 +53,7 @@ int dsBinSearch(char **pFound, char *value, char *base, unsigned count,
 		
 		if (left == right) {
 			break;
-        }
+		}
 		if (test == 1) {
 			left = mid + 1;
 		}
@@ -89,9 +89,9 @@ void memSwap(void *p1, void *p2, unsigned n)
 			((long *)p1)[i] = ((long *)p2)[i];
 			((long *)p2)[i] = l;
 		}
-    }
-    else {
-    	for (i = 0; i < n; i++) {
+	}
+	else {
+		for (i = 0; i < n; i++) {
 			c = ((char *)p1)[i];
 			((char *)p1)[i] = ((char *)p2)[i];
 			((char *)p2)[i] = c;
@@ -170,7 +170,7 @@ static int dsQuickSortR(char *pLeft, char *pRight, unsigned size,
 		} while ((c = cmp(ptr, pI, key)) == 1);
 		if (c != -1 && c != 0) {
 			return FALSE;
-        }
+		}
 		do {
 			pJ -= size;
 			if (pJ < pLeft) {
@@ -179,10 +179,10 @@ static int dsQuickSortR(char *pLeft, char *pRight, unsigned size,
 		} while ((c = cmp(pJ, ptr, key)) == 1);
 		if (c != -1 && c != 0) {
 			return FALSE;
-      	}
+		}
 		if (pI >= pJ) {
 			break;
-        }
+		}
 		memSwap(pI, pJ, size);
 	}
 	memSwap(pI, ptr, size);

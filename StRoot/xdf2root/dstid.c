@@ -17,7 +17,6 @@ routines to manage type ID structures and hash tables
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dstype.h"
 
 static int dsTidInit(void);
@@ -58,26 +57,26 @@ static int dsTidInit()
 	size_t infoSize = (DS_MAX_TID + 1)*sizeof(TID_INFO_T);
 
 	/********* start critical section *********/
-	if (!dsTypeLock()) {
+	if (!dsTypeSemTake()) {
 		return FALSE;
 	}
 	if (dsTidCount != 0) {
 		/* exit if initialized */
-		return dsTypeUnlock();
+		return dsTypeSemGive();
 	}
-	if ((dsTidHash = (TID_HASH_T **)dsTypeCalloc(hashSize)) != NULL) {
-		if ((dsTidInfo =(TID_INFO_T *)dsTypeCalloc(infoSize)) == NULL) {
+	if ((dsTidHash = dsTypeCalloc(hashSize)) != NULL) {
+		if ((dsTidInfo = dsTypeCalloc(infoSize)) == NULL) {
 			dsTypeFree(dsTidHash, hashSize);
 			dsTidHash = NULL;
 		}
 	}
 	if (dsTidHash == NULL) {
-		dsTypeUnlock();
+		dsTypeSemGive();
 		return FALSE;
 	}
 	/* set dsTidCount to indicate initilized */
 	dsTidCount = 1;
-	return dsTypeUnlock();
+	return dsTypeSemGive();
 	/********** end critical section **********/
 }
 /******************************************************************************
@@ -106,7 +105,7 @@ int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid)
 		strcpy(str, buf);
 
 		/******** start critical section *********/
-		if (!dsTypeLock()) {
+		if (!dsTypeSemTake()) {
 			goto fail;
 		}
 		/* check for string formatted by another thread */
@@ -115,7 +114,7 @@ int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid)
 			dsTidInfo[tid].len = len;
 			str = NULL;
 		}
-		if (!dsTypeUnlock()) {
+		if (!dsTypeSemGive()) {
 			goto fail;
 		}
 		/********* end critical section **********/
@@ -222,7 +221,7 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 
 	/* create entry for open hash */
 	newSize = sizeof(TID_HASH_T) + n;
-	if ((new = (TID_HASH_T *)dsTypeCalloc(newSize)) == NULL) {
+	if ((new = dsTypeCalloc(newSize)) == NULL) {
 		dsTypeFree(type, typeSize);
 		return FALSE;
 	}
@@ -241,7 +240,7 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 			}
 		}
 		/********* start critical section *********/
-		if( !dsTypeLock()) {
+		if( !dsTypeSemTake()) {
 			goto fail;
 		}
 		/* check if entries were created by other threads */
@@ -250,7 +249,7 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 			if (new->tid == 0) {
 				if (dsTidCount >= DS_MAX_TID) {
 					/* exit with error - dsTidInfo full */
-					if (!dsTypeUnlock()) {
+					if (!dsTypeSemGive()) {
 						goto fail;
 					}
 					DS_LOG_ERROR(DS_E_TOO_MANY_TYPES);
@@ -263,13 +262,13 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 			}
 			/* add entry to open hash */
 			sptr->next = new;
-			if (!dsTypeUnlock())  {
+			if (!dsTypeSemGive())  {
 				goto fail;
 			}
 			entry = new;
 			break;
 		}
-		if (!dsTypeUnlock()) {
+		if (!dsTypeSemGive()) {
 			goto fail;
 		} 
 		/********** end critical section **********/
@@ -322,7 +321,7 @@ int dsTypeListCreate(size_t **pList, size_t listDim)
 			listDim = n;
 		}
 		size = listDim*sizeof(list[0]);
-		if ((list = (size_t *)dsDsetAlloc(size)) == NULL) {
+		if ((list = dsDsetAlloc(size)) == NULL) {
 			return FALSE;
 		}
 		*pList = list;

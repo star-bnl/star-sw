@@ -17,6 +17,7 @@ main program to run test code for dsl
 #include "dstype.h"
 #include "sample.h"
 
+int dsTestApi(void);
 int dsTestType(void);
 int dsTestCorba(void);
 int dsTestErr(void);
@@ -57,7 +58,7 @@ void main(int argc, char **argv)
 		errflag = 0;
 		switch(*ptr) {
 			case 'a':
-				printf("no a/n");
+				status = dsTestApi();
 				break;
 
 			case 'b':
@@ -136,7 +137,7 @@ void main(int argc, char **argv)
 void usage(char *name)
 {
 	printf("usage: %s [a | b | c | d | f | j | m | p | q | r | s| t | w]\n", name);
-	printf("\ta - reserved\n");
+	printf("\ta - dsTestApi\n");
 	printf("\tb - dumpBasic\n\tc - testCorba\n\td - dsTestDset\n");
 	printf("\te - dsTestErr\n\tf - fast xdrReadTest\n\tj - joinTest\n");
 	printf("\tm - dsMemTest\n\tp - projectTest\n\tq - testQuickSort\n");

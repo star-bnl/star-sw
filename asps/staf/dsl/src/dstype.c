@@ -17,7 +17,6 @@ These routines parse struct defs defined by the CORBA IDL version 1.2
 #include <string.h>
 #define DS_PRIVATE
 #define DS_GLOBAL_ONE
-#include "dscodes.h"
 #include "dstype.h"
 
 /*****************************************************************************
@@ -69,11 +68,11 @@ static int dsBasicInit()
 	DS_TYPE_T *t;
 
 	/********** start critical section *******************************/
-	if (!dsTypeLock()) {
+	if (!dsTypeSemTake()) {
 		return FALSE;
 	}
 	if (nBasic != 0) {
-		return dsTypeUnlock();
+		return dsTypeSemGive();
 	}
 	for (i = 0, t = basicType; i < n; i++, t++) {
 		if (i != (size_t)t->code || t->flags != 0 || t->modulus == 0 ||
@@ -87,10 +86,10 @@ static int dsBasicInit()
 		}
 	}
 	nBasic = n;
-	return dsTypeUnlock();
+	return dsTypeSemGive();
 	
 fail:
-	if (!dsTypeUnlock()) {
+	if (!dsTypeSemGive()) {
 		return FALSE;
 	}
 	/********** end critical section *******************************/
@@ -453,7 +452,7 @@ static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 		type->size += field->count*fieldType->size;
 		type->stdsize += field->count*fieldType->stdsize;
 
-		if (c ==';') {
+		if (c == ';') {
 			fieldType = NULL;
 		}
 		else if (c != ',') {

@@ -13,28 +13,8 @@ TBS ...
 */
 #include <string.h> 
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dsxdr.h"
 
-/****************************************************************************
-*/
-void testPrint()
-{
-	char *spec = 
-	"struct test {char x[10]; octet o; short s; unsigned short us;"
-		"long l; unsigned long ul; float f; double d;}";
-	struct test {char x[10]; octet o; short s; unsigned short us;
-		long l; unsigned long ul; float f; double d;}
-	data = {"hi", 129, 2, 6000, 123, 300000000, 1.23f, 4.46};
-	
-	DS_DATASET_T table, *pTable = &table;
-	if (!dsNewTable(&pTable, "table", spec, 1, &data)) {
-		dsPerror("dsNewTable failed for testPrint ");
-		return;
-	}
-	dsPrintTableData(stdout, pTable);
-	
-}	
 /*****************************************************************************
 *
 * dsPrintData - print data field

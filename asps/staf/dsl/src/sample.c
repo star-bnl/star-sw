@@ -13,7 +13,7 @@ DESCRIPTION
 TBS ...
 */
 #include <stdlib.h>
-#include "dstype.h"
+#define DS_PRIVATE
 #include "dsxdr.h"
 #include "sample.h"
 
@@ -55,7 +55,7 @@ int sample(void)
 int checkTable5(DS_DATASET_T *pDataset)
 {
 	char *typeStr;
-	void *table5 = NULL;
+	char *table5 = NULL;
 	size_t nRow5;
 
 	if (dsMapTable(pDataset, "table5", TYPE_A_S, &nRow5, &table5)) {
@@ -103,10 +103,10 @@ int readDynamic(void)
 	/* read dataset and set table row counts and pointers */
 	if (
 		!xdr_dataset(&xdr, &pDataset) ||
-		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &table1) ||
-		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &table2) ||
-		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &table3) ||
-		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &table4)
+		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, (char **)&table1) ||
+		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, (char **)&table2) ||
+		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, (char **)&table3) ||
+		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, (char **)&table4)
 	) {
 		dsPerror("readDynamic failed");
 		goto fail;
@@ -164,10 +164,10 @@ int readVars(void)
 	/* read dataset into program vars */
 	if (
 		!xdr_dataset_type(&xdr, &pDataset, DSET_DIM) ||
-		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &pTable1) ||
-		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &pTable2) ||
-		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &pTable3) ||
-		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &pTable4) ||
+		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, (char **)&pTable1) ||
+		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, (char **)&pTable2) ||
+		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, (char **)&pTable3) ||
+		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, (char **)&pTable4) ||
 		!dsAllocTables(pDataset) ||
 		!xdr_dataset_data(&xdr, pDataset)
 	) {
@@ -242,7 +242,7 @@ int readProject(void)
 		!dsCheckTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
 		!checkTable5(pDataset)
 	) {	
-	printf("readProject - dsCheckTable failed\n");
+		printf("readProject - dsCheckTable failed\n");
 		goto fail;
 	}
 	nRow1 = NROW_TABLE1;
@@ -321,11 +321,14 @@ done:
 */
 int writeVars(void)
 {
-	TYPE_A_T table1[NROW_TABLE1], *pTable1 = table1;
-	TYPE_B_T table2[NROW_TABLE2], *pTable2 = table2;
-	TYPE_C_T table3[NROW_TABLE3], *pTable3 = table3;
-	TYPE_D_T table4[NROW_TABLE4], *pTable4 = table4;
-	TYPE_A_T table5[NROW_TABLE5], *pTable5 = table5;
+	TYPE_A_T table1[NROW_TABLE1];
+	TYPE_B_T table2[NROW_TABLE2];
+	TYPE_C_T table3[NROW_TABLE3];
+	TYPE_D_T table4[NROW_TABLE4];
+	TYPE_A_T table5[NROW_TABLE5];
+	char *pTable1 = (char *)table1, *pTable2 = (char *)table2;
+	char *pTable3 = (char *)table3, *pTable4 = (char *)table4;
+	char *pTable5 = (char *)table5;
 	size_t nRow1 = NROW_TABLE1, nRow2 = NROW_TABLE2;
 	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
 	size_t nRow5 = NROW_TABLE5;
