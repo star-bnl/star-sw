@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.22 2001/05/22 20:17:26 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.23 2001/06/07 20:06:16 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -86,6 +86,7 @@ Float_t StFlowEvent::mDeuteronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mAntiDeuteronCuts[2]  = {-3., 3.};
 Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
+Float_t StFlowEvent::mDcaGlobalCuts[2]     = { 0., 0.};
 Bool_t  StFlowEvent::mPtWgt                = kFALSE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
@@ -242,6 +243,11 @@ void StFlowEvent::SetSelections() {
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
     if (mPid[0] != '\0' && strstr(pid, mPid)==0) continue;
+
+    // Global DCA
+    Float_t gDca = pFlowTrack->DcaGlobal();
+    if (mDcaGlobalCuts[1] > mDcaGlobalCuts[0] &&
+	(gDca < mDcaGlobalCuts[0] || gDca >= mDcaGlobalCuts[1])) continue;
     
     for (int selN = 0; selN < Flow::nSels; selN++) {
       for (int harN = 0; harN < Flow::nHars; harN++) {
@@ -569,7 +575,7 @@ void StFlowEvent::PrintSelectionList() {
     cout << "#    EtaSubs= FALSE" << endl;
   }
   cout << "#######################################################" << endl;
-  cout << "# Pid Cuts:" << endl; 
+  cout << "# Pid Deviant Cuts:" << endl; 
   cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 
        << mPiPlusCuts[1] << endl;
   cout << "#    PiMinus cuts= " << mPiMinusCuts[0] << ", " 
@@ -591,7 +597,10 @@ void StFlowEvent::PrintSelectionList() {
   cout << "#    Positron cuts=  " << mPositronCuts[0] << ", " 
        << mPositronCuts[1] << endl;
   cout << "#######################################################" << endl;
-  cout << "# Track Selections List:" << endl; 
+  cout << "# Tracks used for the event plane:" << endl; 
+  cout << "# Particle ID= " << mPid << endl; 
+  cout << "# Global Dca cuts= " << mDcaGlobalCuts[0] << ", " 
+       << mDcaGlobalCuts[1] << endl;
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       cout << "#  selection= " << k+1 << " harmonic= " 
@@ -613,6 +622,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.23  2001/06/07 20:06:16  posk
+// Global Dca cut for event plane particles.
+// Removed SetPtWgt().
+//
 // Revision 1.22  2001/05/22 20:17:26  posk
 // Now can do pseudorapidity subevents.
 //
