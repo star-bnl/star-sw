@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.43 2004/12/17 22:33:13 aihong Exp $
+//  $Id: StFlowMaker.h,v 1.44 2004/12/22 15:15:18 aihong Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.43 2004/12/17 22:33:13 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.44 2004/12/22 15:15:18 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -101,6 +101,7 @@ private:
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
+  Int_t            ReadZDCSMDFile();	      // get the ZDCSMD constants
   Int_t            InitPicoEventWrite();      // open pico-DST
   Int_t            InitPicoEventRead();       // open pico-DST
   Int_t            InitMuEventRead();         // open Mu-DST
@@ -173,8 +174,8 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
-//  Revision 1.43  2004/12/17 22:33:13  aihong
-//  add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//  Revision 1.44  2004/12/22 15:15:18  aihong
+//  Read run-by-run beam shifts and SMD pedestal. Done by Gang
 //
 //  Revision 1.42  2004/12/09 23:43:37  posk
 //  Minor changes in code formatting.
