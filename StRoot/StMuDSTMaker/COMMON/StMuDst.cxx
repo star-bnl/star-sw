@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.32 2004/10/22 23:44:07 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.33 2004/10/28 00:11:33 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,10 +34,10 @@ StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
 TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
 StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
 StEmcCollection *StMuDst::mEmcCollection = 0;
+TClonesArray** StMuDst::eztArrays    = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
-  mEmcCollection=0;
   /* no-op */
 }
 
@@ -50,7 +50,12 @@ void StMuDst::unset() {
     emcArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
+    mMuEmcCollectionArray = 0;
+    mMuEmcCollection = 0;
+    mMuPmdCollectionArray = 0;
+    mMuPmdCollection = 0;
     mEmcCollection = 0;
+    eztArrays      = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -67,6 +72,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   mMuEmcCollection      = maker->mEmcCollection;
   mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
+  eztArrays     = maker->mEztArrays;
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -85,7 +91,8 @@ void StMuDst::set(TClonesArray** theArrays,
                   TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
                   TClonesArray* pmd_arr,
-		  StMuPmdCollection *pmd) 
+		  StMuPmdCollection *pmd,
+		  TClonesArray** theEztArrays) 
 {
   // I don't understand why this method is still needed,
   // but cannot comile dictionary  when it is removed
@@ -99,6 +106,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mMuEmcCollection = emc;  
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
+  eztArrays     = theEztArrays;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -379,6 +387,10 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.33  2004/10/28 00:11:33  mvl
+ * Added stuff to support ezTree mode of MuDstMaker.
+ * This is a special mode for fast-online processing of fast-detector data.
+ *
  * Revision 1.32  2004/10/22 23:44:07  mvl
  * Fixed StMuDst::fixTrackIndices()
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.63 2004/10/21 02:58:17 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.64 2004/10/28 00:11:33 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -54,6 +54,11 @@
 #include "StMuTofHit.h"
 #include "StMuTofHitCollection.h"
 #include "StMuTofUtil.h"
+
+#include "StMuEzTree.h"
+#include "EztEventHeader.h"
+#include "EztEmcRawData.h"
+#include "EztTrigBlob.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -112,7 +117,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil )
+  mEzTree  = new StMuEzTree();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil || ! mEzTree )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -142,12 +148,20 @@ void StMuDstMaker::assignArrays()
   mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
   mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
   mTofArrays      = mPmdArrays     + __NPMDARRAYS__;    
+  mEztArrays      = mTofArrays     + __NTOFARRAYS__;    
 }
 
 void StMuDstMaker::clearArrays()
 {
-  for ( int i=0; i<__NALLARRAYS__; i++) {
+  const int ezIndex=__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
+    __NPMDARRAYS__+__NTOFARRAYS__;
+  for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
+    StMuArrays::arrayCounters[i]=0;
+  }
+  // ezTree classes need Delete, because of TArrayS
+  for ( int i=ezIndex; i<__NALLARRAYS__; i++) {
+    mAArrays[i]->Delete();
     StMuArrays::arrayCounters[i]=0;
   }
 }
@@ -156,6 +170,9 @@ void StMuDstMaker::zeroArrays()
 {
   memset(mAArrays,0,sizeof(void*)*__NALLARRAYS__);
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
+  // ezt arrays switched off
+  memset(&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
+			__NPMDARRAYS__+__NTOFARRAYS__],(char)0,__NEZTARRAYS__);
   
 }
 //-----------------------------------------------------------------------
@@ -185,7 +202,7 @@ void StMuDstMaker::zeroArrays()
 */
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll", 0};
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll","EztAll",0};
   static const int   specIndex[]={
     0, 
     __NARRAYS__,
@@ -193,6 +210,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__,
     -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
@@ -202,6 +220,8 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     int   num=specIndex[i+1]-specIndex[i];
     memset(sta,status,num);
     printf("StMuDstMaker::SetStatus %d to %s\n",status,specNames[i]);
+    if (mIoMode==ioRead)
+      setBranchAddresses(mChain);
     return;
   }
   
@@ -212,6 +232,8 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     printf("StMuDstMaker::SetStatus %d to %s\n",status,StMuArrays::arrayNames[i]);
     mStatusArrays[i]=status;
   }
+  if (mIoMode==ioRead)
+    setBranchAddresses(mChain);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -242,7 +264,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
-
+  mEzTree  = new StMuEzTree();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -287,6 +309,9 @@ void  StMuDstMaker::streamerOff() {
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
   StMuPmdHit::Class()->IgnoreTObjectStreamer();
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
+  EztEventHeader::Class()->IgnoreTObjectStreamer();
+  EztTrigBlob::Class()->IgnoreTObjectStreamer();
+  EztEmcRawData::Class()->IgnoreTObjectStreamer();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -470,6 +495,10 @@ int StMuDstMaker::Finish() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDstMaker::setBranchAddresses() {
+  setBranchAddresses(mChain);
+}
+
 void StMuDstMaker::setBranchAddresses(TChain* chain) {
   // all stuff
   if (!chain) return;
@@ -650,6 +679,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillEmc(ev);
     fillPmd(ev);
     fillTof(ev);
+    fillEzt(ev);
   }
   catch(StMuException e) {
     e.print();
@@ -770,7 +800,42 @@ void StMuDstMaker::fillTof(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillEzt(StEvent* ev) {
+  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+
+				      __NEMCARRAYS__+__NPMDARRAYS__+
+				      __NTOFARRAYS__];
+  if(eztArrayStatus[muEztHead]){
+    EztEventHeader* header = mEzTree->getHeader(ev);
+    addType(mEztArrays[muEztHead], *header);
+  }
 
+  if(eztArrayStatus[muEztTrig]) {
+    EztTrigBlob* trig = mEzTree->getTrig(ev);
+    addType(mEztArrays[muEztTrig], *trig);
+  }
+
+  if(eztArrayStatus[muEztETow] || eztArrayStatus[muEztESmd]) {
+    StEmcCollection* emcCol=(StEmcCollection*)ev->emcCollection();
+    if(emcCol==0){
+      gMessMgr->Message("","W") <<  GetName()<<"::fillEzt(), missing StEmcCollection, EEMC raw data NOT saved in muDst" <<endm;
+    } else { //........... EMC-Collection in StEvent exist
+      StEmcRawData *eeRaw=emcCol->eemcRawData();
+      
+      if(eztArrayStatus[muEztETow]) {
+	EztEmcRawData* ETow = mEzTree->copyETow(eeRaw);
+	addType(mEztArrays[muEztETow], *ETow);
+      }
+      
+      if(eztArrayStatus[muEztESmd]) {
+	EztEmcRawData* ESmd = mEzTree->copyESmd(eeRaw);
+	addType(mEztArrays[muEztESmd], *ESmd);
+      }
+    }
+  }
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1130,6 +1195,10 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.64  2004/10/28 00:11:33  mvl
+ * Added stuff to support ezTree mode of MuDstMaker.
+ * This is a special mode for fast-online processing of fast-detector data.
+ *
  * Revision 1.63  2004/10/21 02:58:17  mvl
  * Removed some code from Make() (backward compatible EMc mode), to fix StMuIOMaker
  *
