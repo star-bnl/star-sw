@@ -2,7 +2,7 @@
 #define STSCELISTCOMP_HH
 #include <stdlib.h>
 #include <math.h>
-#include <stdiostream.h>
+#include <iostream.h>
 #include "StSceComp.hh"
 
 class StSceListComp

@@ -1,6 +1,6 @@
 #ifndef STSCEBARREL_HH
 #define STSCEBARREL_HH
-#include <stdiostream.h>
+#include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "sce_am.h"
