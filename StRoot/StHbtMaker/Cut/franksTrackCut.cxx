@@ -55,7 +55,7 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
                   (track->NSigmaKaon()   <= mNSigmaKaon[1]) &&
                   (track->NSigmaProton() >= mNSigmaProton[0]) &&
                   (track->NSigmaProton() <= mNSigmaProton[1]) &&
-                  (track->Charge() == mCharge));
+                  (track->Charge() == mCharge || mCharge==0 ));
 
   if (goodPID){
     bool goodTrack=
@@ -88,27 +88,27 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
 StHbtString franksTrackCut::Report(){
   string Stemp;
   char Ctemp[100];
-  sprintf(Ctemp,"Particle mass:\t%E\n",this->Mass());
-  Stemp=Ctemp;
-  sprintf(Ctemp,"Particle charge:\t%d\n",mCharge);
-  Stemp=Ctemp;
-  sprintf(Ctemp,"Particle Nsigma from pion:\t%E - %E\n",mNSigmaPion[0],mNSigmaPion[1]);
+  sprintf(Ctemp,"\nParticle mass:\t%E",this->Mass());
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle Nsigma from kaon:\t%E - %E\n",mNSigmaKaon[0],mNSigmaKaon[1]);
+  sprintf(Ctemp,"\nParticle charge:\t%d",mCharge);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle Nsigma from proton:\t%E - %E\n",mNSigmaProton[0],mNSigmaProton[1]);
+  sprintf(Ctemp,"\nParticle Nsigma from pion:\t%E - %E",mNSigmaPion[0],mNSigmaPion[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle #hits:\t%d - %d\n",mNHits[0],mNHits[1]);
+  sprintf(Ctemp,"\nParticle Nsigma from kaon:\t%E - %E",mNSigmaKaon[0],mNSigmaKaon[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle p:\t%E - %E\n",mP[0],mP[1]);
+  sprintf(Ctemp,"\nParticle Nsigma from proton:\t%E - %E",mNSigmaProton[0],mNSigmaProton[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle pT:\t%E - %E\n",mPt[0],mPt[1]);
+  sprintf(Ctemp,"\nParticle #hits:\t%d - %d",mNHits[0],mNHits[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle rapidity:\t%E - %E\n",mRapidity[0],mRapidity[1]);
+  sprintf(Ctemp,"\nParticle p:\t%E - %E",mP[0],mP[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Particle DCA:\t%E - %E\n",mDCA[0],mDCA[1]);
+  sprintf(Ctemp,"\nParticle pT:\t%E - %E",mPt[0],mPt[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"Number of tracks which passed:\t%ld  Number which failed:\t%ld\n",mNTracksPassed,mNTracksFailed);
+  sprintf(Ctemp,"\nParticle rapidity:\t%E - %E",mRapidity[0],mRapidity[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle DCA:\t%E - %E",mDCA[0],mDCA[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nNumber of tracks which passed:\t%ld  Number which failed:\t%ld",mNTracksPassed,mNTracksFailed);
   Stemp += Ctemp;
   StHbtString returnThis = Stemp;
   return returnThis;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesEventCut.cxx,v 1.6 2000/01/25 17:35:02 laue Exp $
+ * $Id: mikesEventCut.cxx,v 1.7 2000/02/18 21:27:10 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: mikesEventCut.cxx,v $
+ * Revision 1.7  2000/02/18 21:27:10  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
  * Revision 1.6  2000/01/25 17:35:02  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -88,11 +92,11 @@ bool mikesEventCut::Pass(const StHbtEvent* event){
 StHbtString mikesEventCut::Report(){
   string Stemp;
   char Ctemp[100];
-  sprintf(Ctemp,"Multiplicity:\t %d-%d\n",mEventMult[0],mEventMult[1]);
+  sprintf(Ctemp,"\nMultiplicity:\t %d-%d",mEventMult[0],mEventMult[1]);
   Stemp = Ctemp;
-  sprintf(Ctemp,"Vertex Z-position:\t %E-%E\n",mVertZPos[0],mVertZPos[1]);
+  sprintf(Ctemp,"\nVertex Z-position:\t %E-%E",mVertZPos[0],mVertZPos[1]);
   Stemp += Ctemp;
-  sprintf(Ctemp,"Number of events which passed:\t%ld  Number which failed:\t%ld\n",mNEventsPassed,mNEventsFailed);
+  sprintf(Ctemp,"\nNumber of events which passed:\t%ld  Number which failed:\t%ld",mNEventsPassed,mNEventsFailed);
   Stemp += Ctemp;
   StHbtString returnThis = Stemp;
   return returnThis;
