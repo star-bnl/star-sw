@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: franksParticleCut.h,v 1.2 1999/09/17 22:38:01 lisa Exp $
+ *  
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,23 +10,12 @@
  *
  ***************************************************************************
  *
- * $Log: franksParticleCut.h,v $
- * Revision 1.2  1999/09/17 22:38:01  lisa
- * first full integration of V0s into StHbt framework
- *
- * Revision 1.1  1999/09/05 02:58:11  lisa
- * add ASCII microDST reader/writer AND franksParticle cuts
- *
- * Revision 1.2  1999/07/06 22:33:21  lisa
- * Adjusted all to work in pro and new - dev itself is broken
- *
- * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
- * Installation of StHbtMaker
+ * 
  *
  **************************************************************************/
 
-#ifndef franksParticleCut_hh
-#define franksParticleCut_hh
+#ifndef franksTrackCut_hh
+#define franksTrackCut_hh
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -36,14 +25,14 @@
 //#include "StHbtMaker/Base/StHbtHistoStyle.hh"
 //#include "StHbtMaker/Infrastructure/StHbtParticleCutMoniHandler.h" 
 
-class franksParticleCut : public StHbtTrackCut
+class franksTrackCut : public StHbtTrackCut
 //, public StHbtParticleCutMoniHandler 
 {
 
  public:
 
-  franksParticleCut();
-  ~franksParticleCut();
+  franksTrackCut();
+  ~franksTrackCut();
   
   virtual bool Pass(const StHbtTrack*);
 
@@ -78,21 +67,21 @@ private:   // here are the quantities I want to cut on...
   long              mNTracksPassed;
   long              mNTracksFailed;
 
-  ClassDef(franksParticleCut, 1)
+  ClassDef(franksTrackCut, 1)
 
 };
 
-inline void franksParticleCut::SetMass(const double& mass) {mMass = mass;}
+inline void franksTrackCut::SetMass(const double& mass) {mMass = mass;}
 
-inline void franksParticleCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
-inline void franksParticleCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}
-inline void franksParticleCut::SetNSigmaProton(const float& lo, const float& hi){mNSigmaProton[0]=lo; mNSigmaProton[1]=hi;}
+inline void franksTrackCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
+inline void franksTrackCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}
+inline void franksTrackCut::SetNSigmaProton(const float& lo, const float& hi){mNSigmaProton[0]=lo; mNSigmaProton[1]=hi;}
 
-inline void franksParticleCut::SetNHits(const int& lo, const int& hi){mNHits[0]=lo;mNHits[1]=hi;}
-inline void franksParticleCut::SetP(const float& lo, const float& hi){mP[0]=lo; mP[1]=hi;}
-inline void franksParticleCut::SetPt(const float& lo, const float& hi){mPt[0]=lo; mPt[1]=hi;}
-inline void franksParticleCut::SetRapidity(const float& lo,const float& hi){mRapidity[0]=lo; mRapidity[1]=hi;}
-inline void franksParticleCut::SetDCA(const float& lo,const float& hi){mDCA[0]=lo; mDCA[1]=hi;}
-inline void franksParticleCut::SetCharge(const int& ch){mCharge = ch;}
+inline void franksTrackCut::SetNHits(const int& lo, const int& hi){mNHits[0]=lo;mNHits[1]=hi;}
+inline void franksTrackCut::SetP(const float& lo, const float& hi){mP[0]=lo; mP[1]=hi;}
+inline void franksTrackCut::SetPt(const float& lo, const float& hi){mPt[0]=lo; mPt[1]=hi;}
+inline void franksTrackCut::SetRapidity(const float& lo,const float& hi){mRapidity[0]=lo; mRapidity[1]=hi;}
+inline void franksTrackCut::SetDCA(const float& lo,const float& hi){mDCA[0]=lo; mDCA[1]=hi;}
+inline void franksTrackCut::SetCharge(const int& ch){mCharge = ch;}
 
 #endif

@@ -1,6 +1,6 @@
 
 class StChain;
-StChain *chain=0;    // NOTE - chain needs to be declared global so for StHbtEventReader
+StChain *chain=0;    
 
 // keep pointers to Correlation Functions global, so you can have access to them...
 class QinvCorrFctn;
@@ -11,7 +11,7 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Tue/year_2a/psc0208_01_40evts.dst.root")
+		  const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0353_01_35evts.dst.root")
 {
 
     // Dynamically link needed shared libs
@@ -19,12 +19,14 @@ void StHbtExample(Int_t nevents=1,
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");  // new addition 22jul99
+    gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
     gSystem->Load("StMagF");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
+    gSystem->Load("StV0MiniDstMaker");
 
     cout << "Dynamic loading done" << endl;
 
@@ -44,8 +46,14 @@ void StHbtExample(Int_t nevents=1,
 
 
     StEventMaker* eventMaker = new StEventMaker("events","title");
-
     cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
+
+    // UNCOMMENT THIS NEXT PART OUT IF YOU WANT V0's
+    //StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst"); 
+    //cout << "Just instantiated StV0MiniDstMaker... lets go StHbt!" << endl;
+    //v0dst.SetV0VertexType(); //Set v0MiniDstMaker to find v0s not Xis
+    //v0dst.SetOutputFile("muv0dst.root"); // Set V0MiniDStMaker output file
+
 
 
     StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
@@ -62,6 +70,11 @@ void StHbtExample(Int_t nevents=1,
     // for STAR analyses in root4star, we instantiate StStandardHbtEventReader
     StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
     Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
+
+    // UNCOMMENT THIS NEXT LINE OUT IF YOU WANT V0's
+    //    Reader->SetTheV0Maker(v0dst); //Gotta tell the reader where to read the v0 stuff from
+
+    // here would be the palce to plug in any "front-loaded" Event or Particle Cuts...
     TheManager->SetEventReader(Reader);
 
     cout << "READER SET UP.... " << endl;
@@ -69,12 +82,11 @@ void StHbtExample(Int_t nevents=1,
     // Hey kids! Let's make a microDST!
     // in StHbt we do this by instantiating and plugging in a StHbtEventReader as a writer!
     // the particular StHbtEventReader that we will use will write (and read) ASCII files
-
+    //
     //    StHbtAsciiReader* Writer = new StHbtAsciiReader;
     //    Writer->SetFileName("FirstMicroDst.asc");
     //    TheManager->SetEventWriter(Writer);
-
-    cout << "WRITER SET UP.... " << endl;
+    //    cout << "WRITER SET UP.... " << endl;
 
     // 0) now define an analysis...
     StHbtAnalysis* anal = new StHbtAnalysis;
@@ -84,7 +96,7 @@ void StHbtExample(Int_t nevents=1,
     evcut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
     anal->SetEventCut(evcut);          // this is the event cut object for this analsys
     // 2) set the Track (particle) cuts for the analysis
-    mikesParticleCut* trkcut = new mikesParticleCut;  // use "mike's" particle cut object
+    mikesTrackCut* trkcut = new mikesTrackCut;  // use "mike's" particle cut object
     trkcut->SetNSigmaPion(-1.5,1.5);   // number of Sigma in TPC dEdx away from nominal pion dEdx
     trkcut->SetNSigmaKaon(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
     trkcut->SetNSigmaProton(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal proton dEdx
@@ -128,7 +140,7 @@ void StHbtExample(Int_t nevents=1,
     phiEvcut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
     phiAnal->SetEventCut(phiEvcut);          // this is the event cut object for this analsys
     // 2) set the Track (particle) cuts for the analysis
-    mikesParticleCut* kaonTrkcut = new mikesParticleCut;  // use "mike's" particle cut object
+    mikesTrackCut* kaonTrkcut = new mikesTrackCut;  // use "mike's" particle cut object
     kaonTrkcut->SetNSigmaPion(3,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
     kaonTrkcut->SetNSigmaKaon(-3.0,3.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
     kaonTrkcut->SetNSigmaProton(-1000.,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
@@ -139,7 +151,7 @@ void StHbtExample(Int_t nevents=1,
     kaonTrkcut->SetCharge(+1);              // want positive kaons
     kaonTrkcut->SetMass(0.494);             // kaon mass
     phiAnal->SetFirstParticleCut(kaonTrkcut);  // this is the track cut for the "first" particle
-    mikesParticleCut* antikaonTrkcut = new mikesParticleCut;  // use "mike's" particle cut object
+    mikesTrackCut* antikaonTrkcut = new mikesTrackCut;  // use "mike's" particle cut object
     antikaonTrkcut->SetNSigmaPion(3.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
     antikaonTrkcut->SetNSigmaKaon(-3.0,3.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
     antikaonTrkcut->SetNSigmaProton(-1000.0,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
@@ -161,9 +173,6 @@ void StHbtExample(Int_t nevents=1,
     // now add as many more correlation functions to the Analysis as you like..
     // 6) add the Analysis to the AnalysisCollection
     TheManager->AddAnalysis(phiAnal);
-
-
-
 
 
 
