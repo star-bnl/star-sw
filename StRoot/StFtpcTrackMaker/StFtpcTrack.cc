@@ -1,5 +1,11 @@
-// $Id: StFtpcTrack.cc,v 1.21 2002/10/24 16:37:41 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.22 2002/10/31 13:40:01 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.22  2002/10/31 13:40:01  oldi
+// Method GetSector() added.
+// Method GetMeanR() and GetMeanAlpha() added.
+// dca set to zero if no vertex was found (tracking done with arbitrary vertex at (0., 0., 0.))
+// Code cleanup.
+//
 // Revision 1.21  2002/10/24 16:37:41  oldi
 // dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
 // Therefore it is the smallest three dimensional distance of the helix to the
@@ -306,10 +312,17 @@ void StFtpcTrack::AddForwardPoint(StFtpcPoint* point)
 }
 
 
-Int_t StFtpcTrack::GetHemisphere() const
+inline Int_t StFtpcTrack::GetHemisphere() const
 {
   // Returns +1 if z of track is positiv, -1 otherwise.
   return (Int_t)TMath::Sign(1., ((StFtpcPoint *)(GetHits()->First()))->GetZ());  
+}
+
+
+inline Int_t StFtpcTrack::GetSector() const
+{
+  // Returns sector of track. Assumes that the track doesn't cross more than one sector.
+  return ((StFtpcPoint *)GetHits()->First())->GetSector();  
 }
 
 
@@ -576,6 +589,10 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   mFitRadius = 1./curvature();
   mTheta = mP.Theta();
 
+  if (id_start_vertex == 0) { // no vertex found, tracking done with arbitray vertex at 0., 0., 0.
+    mDca = 0.; // set dca to zero
+  }
+
   CalcResiduals();
 
   return;
@@ -645,10 +662,17 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   trackTableEntry->length = mTrackLength;
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mFitRadius;
-  trackTableEntry->impact = mDca;
   trackTableEntry->nmax = mNMax;
   trackTableEntry->dedx = mdEdx;
   trackTableEntry->ndedx = mNumdEdxHits;
+
+  if (id_start_vertex != 0.) {
+    trackTableEntry->impact = mDca;
+  }
+
+  else {
+    trackTableEntry->impact = 0.;
+  }
 
   return 0;
 }
@@ -950,17 +974,17 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   
   xav = xav/xwav;
   yav = yav/ywav;
-  
-  cout.precision(16);
-  
-  if (debug) {
-    cout << "from circle fitting program" << endl;
-  }
 
+  //gMessMgr->precision(16);
+    
+  if (debug) {
+    gMessMgr->Message("", "I", "OST") << "from circle fitting program" << endm;
+  }
+  
   for(i=0;i<num;i++) {
       
     if (debug) { 
-      cout << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] <<endl;
+      gMessMgr->Message("", "I", "OST") << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] << endm;
     }
 
     x[i] = x[i] - xav;
@@ -1011,7 +1035,6 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Q = Q/wQ;
   T = T/wT;
   
-
   Double_t  A = -F -G;
   Double_t  B =  F * G - T - H * H;
   Double_t  C =  T * (F + G) - 2 * (P *P + Q * Q);
@@ -1032,7 +1055,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Double_t xc = 0., yc = 0.;
   
   if (debug) { 
-    cout << "Solving by Newton method" << endl;
+    gMessMgr->Message("", "I", "OST") << "Solving by Newton method" << endm;
   }
   
   for(i = 0; i < MaxIter; i++) {
@@ -1041,7 +1064,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     wNew = w - f / fp;
     
     if (debug) { 
-      cout << "Iteration Number" << i << endl;
+      gMessMgr->Message("", "I", "OST") << "Iteration Number" << i << endm;
     }
     
     if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {
@@ -1101,7 +1124,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   mYCenter = yc;
   mFitRadius = R;
   mChi2Rad = chi2;
-  
+
   return 1;
 }
 
