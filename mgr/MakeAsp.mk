@@ -326,6 +326,7 @@ $(MY_LIB) : $(FILES_O)
 
 $(MY_SO) : $(FILES_O)
 	$(SO) $(SOFLAGS) -o $(NEW_MY_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
+	$(RM) $(MY_SO)
 	$(LN) $(NEW_MY_SO) $(MY_SO)
 	
 $(SRC_GEN_DIR)/%.c : %.cdf
