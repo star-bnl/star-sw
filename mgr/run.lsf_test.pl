@@ -1,4 +1,4 @@
-#!/usr/star/bin/perl -w
+#!/opt/star/bin/perl -w
 #
 #use strict;
 #use English;

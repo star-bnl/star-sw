@@ -1,4 +1,4 @@
-#!/usr/star/bin/perl
+#!/opt/star/bin/perl
 use Env;
 use File::Basename;
 system 'echo "Starting job execution at" `date` " on " $HOSTNAME';

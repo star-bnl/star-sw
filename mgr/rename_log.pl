@@ -1,4 +1,4 @@
-#! /usr/star/bin/perl -w
+#!/opt/star/bin/perl -w
 
 # script to rename log and err files
 #================================================================
