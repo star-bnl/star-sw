@@ -1,7 +1,7 @@
-// $Id: St_l3t_Maker.cxx,v 1.22 2000/03/28 20:22:15 fine Exp $
-// $Log: St_l3t_Maker.cxx,v $
+// $Id: St_l3t_Maker.cxx,v 1.23 2000/03/28 22:29:29 yepes Exp $
+//
 // Revision 1.22  2000/03/28 20:22:15  fine
-// Adjuested to ROOT 2.24
+// Adjusted to ROOT 2.24
 //
 // Revision 1.21  2000/03/14 17:58:41  yepes
 // change tracker setup for online case
@@ -92,6 +92,9 @@ ClassImp(St_l3t_Maker)
 St_l3t_Maker::St_l3t_Maker(const char *name):
     StMaker(name)
 {
+  m_InputHitDataSetName="tpc_hits";
+  m_InputHitName="tphit";
+
 }
 //_____________________________________________________________________________
 St_l3t_Maker::~St_l3t_Maker(){
@@ -115,6 +118,18 @@ Int_t St_l3t_Maker::Init(){
   m_l3_realTimeSector = new TH1F("L3tL3RealTimeSector","Real Time per sector(ms)",100,0.,200.);
 //
   return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+void St_l3t_Maker::SetInputHits(  const Char_t* DataSet, const Char_t * Table)
+{
+  m_InputHitDataSetName=DataSet;
+  m_InputHitName=Table;
+  m_Mode=2;
+  fprintf(stderr,"  \"%s\".SetInputHits to: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputHitDataSetName.Data(), m_InputHitName.Data());
+
 }
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Make(){
@@ -153,7 +168,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
       fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
       return kStWarn;
    }
-   fprintf ( stderr, "St_l3t_Maker:MakeOnLine: Online space points as input for L3T \n" ) ;
+   fprintf ( stderr, "St_l3t_Maker:MakeOnLine: Online buffer space points as input for L3T \n" ) ;
 //
 //    Create tracker and gl3 objects
 //
@@ -173,17 +188,20 @@ Int_t St_l3t_Maker::MakeOnLine(){
 
    gl3.init();
 
-   int const maxBytes = 500000 ;
+   int const maxBytes = 5000000 ;
    char   buffer[maxBytes] ;
    L3_P* gl3Header  = (L3_P *)buffer ;
    memset ( buffer, 0, sizeof(L3_P) ) ;
    int   nBytesUsed  = sizeof(L3_P);
    char* trackDataPointer = buffer + nBytesUsed  ;
+   char* endTrackDataPointer = buffer + maxBytes ;
 //
 //    Set parameters
 //
    tracker.setup ( 30000, 3000 ) ;
-// tracker.para.infoLevel = 10 ;
+   tracker.xyError = 0.2 ;
+   tracker.zError  = 0.2 ;
+   tracker.para.infoLevel = 10 ;
    for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
    tracker.reset();
 //
@@ -227,6 +245,19 @@ Int_t St_l3t_Maker::MakeOnLine(){
                    secIndex ) ;
          continue ; 
       }
+      //
+      L3_SECP* sectorHeader = (L3_SECP *)trackDataPointer ;
+      trackDataPointer += sizeof(L3_SECP);
+      if ( trackDataPointer > endTrackDataPointer ) {
+         printf ( "St_l3tMaker::MakeOnline: maxBytes %d too short a buffer", maxBytes ) ;
+         return kStWarn;
+      }
+
+      sectorHeader->bh.bank_id = (secIndex-1) * 2 + 1 ;
+      sectorHeader->clusterp.off = 0 ;
+      sectorHeader->clusterp.len = 0 ;
+      sectorHeader->trackp.off = 0 ;
+      sectorHeader->trackp.len = 0 ;
 //
 // Read clusters in DAQ format
 //
@@ -240,16 +271,22 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //      Write online track buffer
 //
       token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
-      int nBytes = tracker.fillTracks ( maxBytes-nBytesUsed, trackDataPointer,
+      int nBytes = tracker.fillTracks ( endTrackDataPointer-trackDataPointer,
+                                        trackDataPointer,
 	                                token ) ;
-      if ( nBytes < 0 ) continue ;
+      if ( nBytes <= 0 ) continue ;
+
+      sectorHeader->trackp.off = (trackDataPointer-(char *)sectorHeader)/4;
+      sectorHeader->trackp.len = nBytes/4;
+
+      trackDataPointer += nBytes ;
       //
       //   Update gl3 header
       //
       nBytesUsed += nBytes ;
       gl3Header->bh.token = token ;
-      gl3Header->sector[secIndex].len = nBytes ;
-      gl3Header->sector[secIndex].off = trackDataPointer - buffer ;
+      gl3Header->sector[secIndex].len = (trackDataPointer-(char *)sectorHeader)/4 ;
+      gl3Header->sector[secIndex].off = ((char *)sectorHeader - buffer)/4  ; ;
       trackDataPointer += nBytes ;
       //
       //   Fill histos
@@ -258,7 +295,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
       m_l3_nTracksSector->Fill  ( tracker.nTracks ) ;
       m_l3_cpuTimeSector->Fill  ( 1000.*tracker.cpuTime ) ;
       m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
-      printf ( "St_sl3Maker: %d tracks \n", tracker.nTracks ) ;
+      fprintf (stderr, "St_sl3Maker: %d tracks, %d hits out of range \n", 
+                     tracker.nTracks, tracker.nHitsOutOfRange ) ;
       //
       //     Fill offline hit table
       //
@@ -299,6 +337,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
    if ( eventP ) nTracks = max(1,eventP->getNTracks());   
    St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
+   fprintf(stderr," %s on-line found Ntracks=%d\n",GetName(),nTracks);
+
    //
    tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
    //
@@ -337,15 +377,14 @@ Int_t St_l3t_Maker::MakeOnLine(){
 Int_t St_l3t_Maker::MakeOffLine(){
 
    FtfFinder tracker ; 
-   printf ( "St_l3t_Maker: start offline processing \n" ) ;
-
-   St_DataSet *tpc_data =  GetDataSet("tpc_hits");
-   St_tcl_tphit   *tphit = (St_tcl_tphit     *) tpc_data->Find("tphit");
+   fprintf ( stderr, "St_l3t_Maker OffLine space points from Table as input for %s : Ds=%s, Hits=%s\n", m_InputHitDataSetName.Data(),m_InputHitName.Data(), GetName()) ;
+   St_DataSet *tpc_data =  GetDataSet(m_InputHitDataSetName);
+   St_tcl_tphit   *tphit = (St_tcl_tphit     *) tpc_data->Find(m_InputHitName);
    if (!tphit) {
       fprintf ( stderr, " St_l3t_Maker::MakeOffLine: No TPC space points \n" ) ;
       return kStWarn;
    }
-   fprintf ( stderr, "St_l3t_Maker:MakeOffLine: Offline space points as input for L3T \n" ) ;
+   fprintf (stderr, "St_l3t_Maker=%s: start offline processing \n" , GetName()) ;
 
    Int_t nHits = tphit->GetNRows();
    St_tcl_tphit   *l3Hit = new St_tcl_tphit("l3Hit",nHits);
@@ -394,6 +433,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
    int nTracks = max(1,tracker.nTracks);   
    St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
+   fprintf(stderr," %s found Ntracks=%d\n",GetName(),nTracks);
 //
    tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
 //
