@@ -1,3 +1,4 @@
+//Depracated - do not use.
 //StiDynamicTrackFilter.cxx
 //M.L. Miller (Yale Software)
 //3/02
@@ -11,7 +12,7 @@ using namespace std;
 #include "StiTrack.h"
 #include "SubjectObserver.h"
 #include "StiIOBroker.h"
-#include "StiTrackFilters.h"
+//#include "StiTrackFilters.h"
 #include "StiDynamicTrackFilter.h"
 
 StiDynamicTrackFilter::StiDynamicTrackFilter(StiIOBroker* b) : Observer(b), mBroker(b)
@@ -53,6 +54,7 @@ bool StiDynamicTrackFilter::accept(const StiTrack* t) const
 
 void StiDynamicTrackFilter::addFilter(FilterType t)
 {
+  /*
     if (t==kPtFilter) {
 	mMap[t] = new StiPtFilter(mSubject, mBroker);
     }
@@ -80,7 +82,7 @@ void StiDynamicTrackFilter::addFilter(FilterType t)
     else {
 	cout <<"StiDynamicTrackFilter::addFilter().  ERROR:\t"
 	     <<"Unknown filter type:\t"<<static_cast<int>(t)<<endl;
-    }
+	     }*/
 }
 
 void StiDynamicTrackFilter::getNewState()
