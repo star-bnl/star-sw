@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.91 2000/01/12 01:24:50 fine Exp $ 
+// $Id: St_Table.cxx,v 1.92 2000/01/21 02:09:52 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -843,7 +843,7 @@ Int_t St_Table::MakeWrapClass(Text_t *name)
   return 0;
 }
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t size) : St_DataSet()
+St_Table::St_Table(const Text_t *name, Int_t size) : St_DataSet()
 {
    // Default St_Table ctor.
    s_TableHeader = new table_head_st;
@@ -857,7 +857,7 @@ St_Table::St_Table(Text_t *name, Int_t size) : St_DataSet()
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t n,Int_t size) : St_DataSet()
+St_Table::St_Table(const Text_t *name, Int_t n,Int_t size) : St_DataSet()
 {
    // Create St_Table object and set array size to n longs.
  
@@ -871,7 +871,7 @@ St_Table::St_Table(Text_t *name, Int_t n,Int_t size) : St_DataSet()
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t n, Char_t *table,Int_t size) : St_DataSet(name)
+St_Table::St_Table(const Text_t *name, Int_t n, Char_t *table,Int_t size) : St_DataSet(name)
 {
    // Create St_Table object and initialize it with values of array.
  
@@ -884,7 +884,7 @@ St_Table::St_Table(Text_t *name, Int_t n, Char_t *table,Int_t size) : St_DataSet
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Text_t *type, Int_t n, Char_t *array, Int_t size) 
+St_Table::St_Table(const Text_t *name, const Text_t *type, Int_t n, Char_t *array, Int_t size) 
          : St_DataSet(name)
 {
    // Create St_Table object and initialize it with values of array.
@@ -1832,7 +1832,7 @@ void St_Table::Set(Int_t n)
    Reset();
 }
 //______________________________________________________________________________
-void St_Table::SetHeadFields(Text_t *name)
+void St_Table::SetHeadFields(const Text_t *name)
 {
    if (name) SetName(name);      // Define "name" if supplied
    else SetName("unknown");      // Define the default name 
@@ -2651,6 +2651,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.92  2000/01/21 02:09:52  fine
+// several parameters were converted to be const
+//
 // Revision 1.91  2000/01/12 01:24:50  fine
 // several methods to use St_Table class from the <converted> C program to C++
 //

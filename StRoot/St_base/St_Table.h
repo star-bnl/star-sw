@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.42 2000/01/12 01:24:52 fine Exp $
+// $Id: St_Table.h,v 1.43 2000/01/21 02:09:53 fine Exp $
 #ifndef STAF_St_Table
 #define STAF_St_Table
   
@@ -63,7 +63,7 @@ protected:
    virtual     void       Delete(Option_t *opt="");
    virtual Bool_t  EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *obj, Int_t nentries=1000000000, Int_t firstentry=0, Option_t *option="");
    void       LinkHeader();
-   void       SetHeadFields(Text_t *name);
+   void       SetHeadFields(const Text_t *name);
    Int_t      SetfN(Long_t len);
    void       SetName(const Char_t *name);
    void       SetTablePointer(void *table);
@@ -91,10 +91,10 @@ public:
 
    Char_t    *s_Table;       // Array of (fN*s_Size) longs
  
-   St_Table(Text_t *name=0, Int_t size=0);
-   St_Table(Text_t *name, Int_t n,Int_t size);
-   St_Table(Text_t *name, Int_t n, Char_t *array,Int_t size);
-   St_Table(Text_t *name, Text_t *type, Int_t n, Char_t *array, Int_t size);
+   St_Table(const Text_t *name=0, Int_t size=0);
+   St_Table(const Text_t *name, Int_t n,Int_t size);
+   St_Table(const Text_t *name, Int_t n, Char_t *array,Int_t size);
+   St_Table(const Text_t *name, const Text_t *type, Int_t n, Char_t *array, Int_t size);
    St_Table(const St_Table &table);
    St_Table    &operator=(const St_Table &rhs);
    virtual    ~St_Table();
@@ -211,6 +211,9 @@ inline void St_Table::Draw(Option_t *opt)
 { Draw(opt, "", "", 1000000000, 0); }
 
 // $Log: St_Table.h,v $
+// Revision 1.43  2000/01/21 02:09:53  fine
+// several parameters were converted to be const
+//
 // Revision 1.42  2000/01/12 01:24:52  fine
 // several methods to use St_Table class from the <converted> C program to C++
 //
