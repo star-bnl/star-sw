@@ -21,7 +21,7 @@ void loadLibrairies(bool doProfile)
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
 		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
 		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator","StiMaker",
-		 "StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
+		 "StiTpc","StiSvt","StiEmc","StiFtpc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
@@ -61,6 +61,10 @@ void Run(int firstEvent=0,
 	 bool doDst=false,
 	 bool doStEventOutput=true,
 	 bool doStEventInput=true,
+	 bool useTpc=true,
+	 bool useSvt=false,
+	 bool useEmc=false,
+	 bool useFtpc=false,
 	 bool doProfile=false	 )
 {
   const char *fileList[]={0,0};
@@ -85,6 +89,10 @@ void Run(int firstEvent=0,
       doDst,
       doStEventOutput,
       doStEventInput,
+      useTpc,
+      useSvt,
+      useEmc,
+      useFtpc,
       doProfile);
 }
 
@@ -101,7 +109,11 @@ void Run(Int_t firstEvent,
 	 bool doDst,
 	 bool doStEventOutput,
 	 bool doStEventInput,
-	 bool doProfile=false )
+	 bool useTpc=true,
+	 bool useSvt=false,
+	 bool useEmc=false,
+	 bool useFtpc=false,
+	 bool doProfile=false)
 {
   loadLibrairies(doProfile);
   MiniChain * miniChain = new MiniChain();
@@ -115,6 +127,10 @@ void Run(Int_t firstEvent,
   pars->doDst=doDst;
   pars->doStEventOutput=doStEventOutput;
   pars->doStEventInput=doStEventInput;  
-  pars->doPlots = doPlots;
+  pars->doPlots = doPlots; 
+  pars->useTpc=useTpc;
+  pars->useSvt=useSvt;
+  pars->useEmc=useEmc;
+  pars->useFtpc=useFtpc;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }
