@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.4 2001/11/28 05:14:59 genevb Exp $
+ * $Id: StXiI.hh,v 3.5 2002/02/10 15:29:09 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.5  2002/02/10 15:29:09  genevb
+ * Additional functions for momenta of decay daughters in CM frame
+ *
  * Revision 3.4  2001/11/28 05:14:59  genevb
  * Additional decay angle functions
  *
@@ -53,9 +56,11 @@ public:
   virtual Float_t decayVertexXiY() const=0;
   virtual Float_t decayVertexXiZ() const=0;
 
+  virtual TVector3 momBachelor();           // Momentum of bachelor
   virtual Float_t momBachelorX() const=0;   // Momentum components of bachelor
   virtual Float_t momBachelorY() const=0;
   virtual Float_t momBachelorZ() const=0;
+  virtual TVector3 momXi();                 // Momentum of Xi/Omega
   virtual Float_t momXiX() const=0;         // Momentum components of Xi/Omega
   virtual Float_t momXiY() const=0;
   virtual Float_t momXiZ() const=0;
@@ -95,6 +100,16 @@ public:
   // This helper function can be used for decayCosTheta of any hypothesis:
   // m1 = parent mass, m2 = daughter mass, type = bachelor/v0 daughter
   virtual Float_t dCTXi(Float_t m1, Float_t m2, StXiDaughter type);
+
+  // Momenta of daughters in Xi rest frame for different particle hypotheses
+  virtual TVector3 momBachelorXi();             // xi    - bachelor
+  virtual TVector3 momV0Xi();                   // xi    - V0
+  virtual TVector3 momBachelorOmega();          // omega - bachelor
+  virtual TVector3 momV0Omega();                // omega - V0
+  // This helper function can be used for momentum of daughter in
+  // Xi rest frame of any hypothesis:
+  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
+  virtual TVector3 momXiFrame(Float_t m1, Float_t m2, StXiDaughter type);
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -159,6 +174,14 @@ inline Float_t StXiI::decayLengthXi() const {
   return sqrt(pow(decayVertexXiX() - mEvent->primaryVertexX(),2) +
               pow(decayVertexXiY() - mEvent->primaryVertexY(),2) +
               pow(decayVertexXiZ() - mEvent->primaryVertexZ(),2));
+}
+
+inline TVector3 StXiI::momBachelor() {
+     return TVector3(momBachelorX(), momBachelorY(), momBachelorZ());
+}
+
+inline TVector3 StXiI::momXi() {
+     return TVector3(momXiX(), momXiY(), momXiZ());
 }
 
 inline Float_t StXiI::alphaXi() {
@@ -317,6 +340,30 @@ inline Float_t StXiI::dCTXi(Float_t m1, Float_t m2, StXiDaughter type) {
               momBachelorX(),momBachelorY(),momBachelorZ(),m2) :
     StDecayAngle::decayCosTheta(momXiX(),momXiY(),momXiZ(),m1,
                                 momV0X(),momV0Y(),momV0Z(),m2) );
+}
+
+inline TVector3 StXiI::momBachelorXi() {
+  return momXiFrame(M_XI_MINUS,M_PION_MINUS,bachelor);
+}
+
+inline TVector3 StXiI::momV0Xi() {
+  return momXiFrame(M_XI_MINUS,M_LAMBDA,v0);
+}
+
+inline TVector3 StXiI::momBachelorOmega() {
+  return momXiFrame(M_OMEGA_MINUS,M_KAON_MINUS,bachelor);
+}
+
+inline TVector3 StXiI::momV0Omega() {
+  return momXiFrame(M_OMEGA_MINUS,M_LAMBDA,v0);
+}
+
+inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
+  return ( (type == bachelor) ?
+    StDecayAngle::getShiftedDaughter(momXiX(),momXiY(),momXiZ(),m1,
+                   momBachelorX(),momBachelorY(),momBachelorZ(),m2) :
+    StDecayAngle::getShiftedDaughter(momXiX(),momXiY(),momXiZ(),m1,
+                                     momV0X(),momV0Y(),momV0Z(),m2) );
 }
 
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StDecayAngle.hh,v 3.3 2001/11/28 17:54:29 genevb Exp $
+ * $Id: StDecayAngle.hh,v 3.4 2002/02/10 15:29:09 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 26-Nov-2001
  *
@@ -14,6 +14,9 @@
  ***********************************************************************
  *
  * $Log: StDecayAngle.hh,v $
+ * Revision 3.4  2002/02/10 15:29:09  genevb
+ * Additional functions for momenta of decay daughters in CM frame
+ *
  * Revision 3.3  2001/11/28 17:54:29  genevb
  * Some errors/omissions in last check-in
  *
@@ -29,10 +32,16 @@
 #define StDecayAngle_hh
 #include "TLorentzVector.h"
 
+#define SHIFTED kTRUE
+#define UNSHIFTED kFALSE
+
 // Default beam axis is z-axis (for polarization calcs)
 static TVector3 StDecayAngleBeam(0.,0.,1.);
 static TLorentzVector StDecayAngleParent;
 static TLorentzVector StDecayAngleDaughter;
+static TLorentzVector StDecayAngleParentCopy;    // Use T (not M) to store
+static TLorentzVector StDecayAngleDaughterCopy;  //   value of m in Copy
+static Bool_t StDecayAngleShifted(UNSHIFTED); // Is daughter shifted?
 
 class StDecayAngle {
  public:
@@ -63,11 +72,18 @@ class StDecayAngle {
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2);
 
+  static TVector3 getShiftedDaughter(
+    Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2);
+
   static void setBeam(Float_t x, Float_t y, Float_t z);
   static void setParentDaughter(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
-    Float_t px2, Float_t py2, Float_t pz2, Float_t m2);
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2,
+    Bool_t shift=UNSHIFTED);
   static void shiftToRest();
+  static Bool_t different(TLorentzVector& v,
+    Float_t px , Float_t py , Float_t pz , Float_t m );
 
 };
 
@@ -79,16 +95,14 @@ inline void StDecayAngle::setBeam(Float_t x, Float_t y, Float_t z) {
 inline Float_t StDecayAngle::decayTheta(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
-  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
-  shiftToRest();
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2,SHIFTED);
   return decayTheta();
 }
 
 inline Float_t StDecayAngle::decayCosTheta(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
-  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
-  shiftToRest();
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2,SHIFTED);
   return decayCosTheta();
 }
 
@@ -109,28 +123,48 @@ inline Float_t StDecayAngle::decayCosThetaLab(
 inline Float_t StDecayAngle::polarityTheta(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
-  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
-  shiftToRest();
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2,SHIFTED);
   return polarityTheta();
 }
 
 inline Float_t StDecayAngle::polarityCosTheta(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
-  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
-  shiftToRest();
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2,SHIFTED);
   return polarityCosTheta();
 }
 
 inline void StDecayAngle::setParentDaughter(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
-    Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
-  StDecayAngleParent.SetXYZM(px1,py1,pz1,m1);
-  StDecayAngleDaughter.SetXYZM(px2,py2,pz2,m2);
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2,
+    Bool_t shift) {
+  if (different(StDecayAngleParentCopy,px1,py1,pz1,m1)) {
+    StDecayAngleParentCopy.SetXYZT(px1,py1,pz1,m1);
+    StDecayAngleParent.SetXYZM(px1,py1,pz1,m1);
+  }
+  if (different(StDecayAngleDaughterCopy,px2,py2,pz2,m2)) {
+    StDecayAngleDaughterCopy.SetXYZT(px2,py2,pz2,m2);
+    StDecayAngleDaughter.SetXYZM(px2,py2,pz2,m2);
+    StDecayAngleShifted = UNSHIFTED;
+  } else if (StDecayAngleShifted && !shift) {
+    StDecayAngleDaughter.SetXYZM(px2,py2,pz2,m2);
+    StDecayAngleShifted = UNSHIFTED;
+  }
+  if (shift) shiftToRest();
 }
 
 inline void StDecayAngle::shiftToRest() {
-  StDecayAngleDaughter.Boost(-StDecayAngleParent.BoostVector());
+  if (!StDecayAngleShifted) {
+    StDecayAngleDaughter.Boost(-StDecayAngleParent.BoostVector());
+    StDecayAngleShifted = SHIFTED;
+  }
+}
+
+inline TVector3 StDecayAngle::getShiftedDaughter(
+    Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2,SHIFTED);
+  return TVector3(StDecayAngleDaughter.Vect());
 }
 
 inline Float_t StDecayAngle::decayTheta() {
@@ -148,6 +182,11 @@ inline Float_t StDecayAngle::polarityTheta() {
 
 inline Float_t StDecayAngle::polarityCosTheta() {
   return TMath::Cos(polarityTheta());
+}
+
+inline Bool_t StDecayAngle::different(TLorentzVector& v,
+    Float_t px , Float_t py , Float_t pz , Float_t m ) {
+  return ((px != v.X()) || (py != v.Y()) || (pz != v.Z()) || (m != v.T()));
 }
 
 #endif
