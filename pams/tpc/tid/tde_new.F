@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.9 1999/01/11 22:35:37 sakrejda Exp $
+* $Id: tde_new.F,v 1.10 1999/02/19 21:14:37 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.10  1999/02/19 21:14:37  ogilvie
+* added new method 3 = use weights to calc de/dx
+*
 * Revision 1.9  1999/01/11 22:35:37  sakrejda
 * increased local arrays to accomodate a Vini event
 *
@@ -72,6 +75,7 @@ C-----------------------------------------------------------------------
       REAL    x1,y1,xc,yc,radius,psic,cosl
       REAL    xa,xb,ya,yb,a,b,bi,bo,ai,ao,ds,half_pad
       REAL    rowtmp
+      real weight,sum_weight
 C
 c     variables for maximumum likeihood
 c
@@ -133,6 +137,7 @@ C Abort if there are too many TPC tracks to work with
       endif
 
       call gufld(xlocal,bfield) 
+
       
 c
 c  this only once on initialisation-
@@ -148,7 +153,9 @@ c to run this option use
 c      tdpar(1).debug(2)=2
 c      tdpar(1).truncopt=4
 c      tdpar(1).truncfact=0.0
-      
+c temp
+c      tdpar(1).debug(2)=3 
+             
 
 C Sort the hit array according to the track number
       
@@ -217,6 +224,9 @@ C        tdpar.debug(2)=1   calculate dE/dx=(sum of q/s)/(# of pnts)
 c     
 c        tdpar.debug(2)=2   calculate dE/dx as maximum likelihood
 C
+c        tdpar.debug(2)=3   calculate dE/dx=(sum of weight*q/s)/(# of weight)
+c                           weight = sqrt(q)
+c
 C        tdpar.usemerge=1   skipp  point flagged as merged 
 c                           implemented as default, with no
 c                           option yet to include merged
@@ -355,6 +365,17 @@ c
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
             track(j).dedx(1)=track(j).dedx(1)/real(nde)
+         elseif (tdpar(1).debug(2).eq.3.and.nde.gt.0) then
+            sum_weight = 0.
+            do k=1,nde
+               weight = sqrt(abs(dedx(k).charge))
+               track(j).dedx(1)= track(j).dedx(1)+ weight*dedx(k).adedx
+               sum_weight=sum_weight+weight
+               track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
+            end do
+            if (sum_weight.gt.0) then
+               track(j).dedx(1)=track(j).dedx(1)/sum_weight
+            endif
          elseif (tdpar(1).debug(2).eq.2.and.nde.gt.10) then
 c
 c likelihood method
@@ -400,7 +421,8 @@ c            hstep(2)=hxmax/100.
 
            call hfith(hhid,landau2,'QL',3,hparam,hstep,hpmin,hpmax,hsig,hchi2)
             track(j).dedx(1)=hparam(2)
-            track(j).dedx(2)=hxamp
+            track(j).dedx(2)=hsig(2)
+            write(6,*) 'resoultion' , hsig(2)/hparam(2)
             call hdelet(hhid)
          endif
 c
