@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.7 2001/07/15 20:31:31 caines Exp $
+ * $Id: StEstTracking.cxx,v 1.8 2002/11/21 23:02:48 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.8  2002/11/21 23:02:48  caines
+ * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
+ *
  * Revision 1.7  2001/07/15 20:31:31  caines
  * Fixes from Insure++ debugging
  *
@@ -242,6 +245,7 @@ int StEstTracker::Tracking(int slay) {
 
 	if (hitbra[distind[k]]->JoinBranch(branch,mTrack[i])==1) {
 	  branch->AddHit(hitbra[distind[k]],distbra[distind[k]]);
+	
 	  RefitBranch(branch,0,&fitstatus);
 	  branch->SetStep(10*mSuperPass+mPass);
 	  if (mIdealTracking==1) {

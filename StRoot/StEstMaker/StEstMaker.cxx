@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.17 2002/10/11 21:25:08 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.18 2002/11/21 23:02:48 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.18  2002/11/21 23:02:48  caines
+ * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
+ *
  * Revision 1.17  2002/10/11 21:25:08  caines
  * Fix min radius cut to larger value
  *
@@ -216,7 +219,7 @@ Int_t StEstMaker::Init(){
 
  // ideal tracking: mIdealTracking = 1
   mIdealTracking = 0;
-  mDebugLevel = 0;
+  mDebugLevel = 1;
 
   mParams = new StEstParams*[mNPass];
   for (i=0;i<mNPass;i++) mParams[i] = new StEstParams;

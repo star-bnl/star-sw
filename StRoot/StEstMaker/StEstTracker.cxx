@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.13 2002/04/30 22:49:19 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.14 2002/11/21 23:02:48 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.14  2002/11/21 23:02:48  caines
+ * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
+ *
  * Revision 1.13  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -517,8 +520,6 @@ void StEstTracker::BuildFindableBranches() {
 	  // copy of the tpc helix.
 	  StHelix *helix_for_findablebranch = new StHelix(*mTrack[i]->mTPCTrack->GetHelix());
 	  branch->SetHelix(helix_for_findablebranch);
-
-
       	  if (dca<3.) {
    	    iret=RefitBranch(branch,1,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
