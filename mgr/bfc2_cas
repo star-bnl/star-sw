@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
-# $Id: bfc2_cas,v 1.1 2001/04/20 15:25:40 didenko Exp $
+# $Id: bfc2_cas,v 1.2 2001/04/20 15:59:51 didenko Exp $
 # $Log: bfc2_cas,v $
-# Revision 1.1  2001/04/20 15:25:40  didenko
-# add for ppSpin run
+# Revision 1.2  2001/04/20 15:59:51  didenko
+# put skip events
 #
 # Revision 1.1  2000/06/01 15:27:20  didenko
 # script to run mixing events
@@ -124,13 +124,15 @@ my $Nev_first;
 my $outputfl;
 my $Nev_last;
 
-my $NofEvents = 100;
+my $NofEvents = 1000;
 my $outfile;
 #   $outfile = $input_file;
 #   $outfile =~ s/fzd/root/g; 
     $outfile = pds0200_02_100evts.root; 
+my $N1 = 110;
+my $N2 = 1201;
 
-my $inputcs = " gfile B " . $bfile .";" . "mode SVTT back  22022; mode FTPC back  000;  mode TPCE back 1881188; gback 188 188 0.0213 213. 1.5";
+my $inputcs = " gfile B " . $bfile .";" . "mode SVTT back  22022; mode FTPC back  000;  mode TPCE back 1881188; gback 188 188 0.0213 213. 2.5; rndm $N1 $N2; skip $N1";
 my $cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . ";" . $inputcs . "\",\"" . $outfile . "\")\'";
 print $cmd,"\n";
 system $cmd;
