@@ -19,8 +19,11 @@
 #include <string>
 using std::string;
 #include "StiFactoryTypes.h"
+/////#include "StiMcTrack.h"
 
 // common object containers
+
+class   StiMcTrack;
 class 	StiDetectorContainer;
 class 	StiHitContainer;
 class 	StiHitFiller;
@@ -51,16 +54,17 @@ class StiToolkit
 public:
   
   virtual StiObjectFactoryInterface<StiHit> * getHitFactory()=0;
-  //virtual StiTrackFactory * getTrackFactory()=0;
   virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory()=0;
+  virtual StiObjectFactoryInterface<StiMcTrack> * getMcTrackFactory()=0;
+  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory()=0;
   virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory()=0;
   virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory()=0;
-  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory()=0;
   
   // common object containers
   virtual StiDetectorContainer  * getDetectorContainer()=0;
   virtual StiHitContainer       * getHitContainer()=0;
   virtual StiTrackContainer     * getTrackContainer()=0;
+  virtual StiTrackContainer     * getMcTrackContainer()=0;
   
   // service and convenience class objects.
   virtual StiGeometryTransform * getGeometryTransform()=0;

@@ -49,18 +49,19 @@ void StiLocalTrackMerger::mergeTracks()
     
     cout <<"\t N-tracks before merge: "<<mTrackStore->size()<<endl;
 
-    for (KalmanTrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
-	if (configureMaxTrack( (*lower).second )) {
+    for (TrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
+	if (configureMaxTrack( static_cast<StiKalmanTrack*>((*lower).second) )) {
 
 	    //Now find the bounds of search:
-	    KalmanTrackMap::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
+	    TrackMap::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
 	    if (lower!=upper) {
-		KalmanTrackMap::iterator start = lower;
+		TrackMap::iterator start = lower;
 		++start;
 		int i=0;
-		for (KalmanTrackMap::iterator it = start; it!=upper; ++it) {
+		for (TrackMap::iterator it = start; it!=upper; ++it) {
 		    ++i;
-		    if (sameTrack( (*start).second, (*it).second ) ) {
+		    if (sameTrack( static_cast<StiKalmanTrack*>((*start).second), 
+				   static_cast<StiKalmanTrack*>((*it).second) ) ) {
 			cout <<"sameTrack==true"<<endl;
 		    }
 		}

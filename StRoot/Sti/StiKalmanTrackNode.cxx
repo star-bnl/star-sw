@@ -1118,39 +1118,6 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   return (StThreeVector<double>(gx0,gy0,gz0));
 }
 
-/*! Calculate/return the track transverse momentum
-  <p>
-  Calculate the track transverse momentum in GeV/c based on this node's track parameters.
-  <p>
-  The momentum is calculated based on the track curvature held by this node. A minimum
-  curvature of 1e-12 is allowed. 
-*/
-double StiKalmanTrackNode::getPt() const
-{
-  double c;
-  c = fabs(fP3);
-  if (c<1e-12) 
-    return 0.003e12*pars->field;
-  else
-    return 0.003*pars->field/c;
-}
-
-/*! Calculate/return the track momentum
-  <p>
-  Calculate the track  momentum in GeV/c based on this node's track parameters.
-  <p>
-  The momentum is calculated based on the track curvature held by this node. A minimum
-  curvature of 1e-12 is allowed. 
-*/
-double StiKalmanTrackNode::getP() const
-{
-  double c;
-  c = fabs(fP3);
-  if (c<1e-12) 
-    return 0.003e12*pars->field;
-  else
-    return 0.003*pars->field*(1.+fP4*fP4)/c;
-}
 
 void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
 {

@@ -89,9 +89,11 @@ protected:
     StiSeedFinder             * trackSeedFinder;
     StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
     StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
+    StiObjectFactoryInterface<StiKalmanTrack> * mcTrackFactory;
     StiDetectorContainer      * detectorContainer;
     StiHitContainer           * hitContainer;
     StiTrackContainer         * trackContainer;
+    StiTrackContainer         * mcTrackContainer;
     StiKalmanTrackFinderParameters * pars;
 
 private:
