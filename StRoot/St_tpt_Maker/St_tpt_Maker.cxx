@@ -1,5 +1,11 @@
-// $Id: St_tpt_Maker.cxx,v 1.42 1999/11/09 20:38:56 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.43 1999/11/19 02:01:40 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.43  1999/11/19 02:01:40  sakrejda
+// if (! tphit) return kStWarn;
+// added after:
+// St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
+// to protect against empty events
+//
 // Revision 1.42  1999/11/09 20:38:56  fisyak
 // Fix for ROOT 2.23
 //
@@ -239,6 +245,7 @@ Int_t St_tpt_Maker::Make(){
 // 		Clusters exist -> do tracking
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
+ if (! tphit) return kStWarn;
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
       
