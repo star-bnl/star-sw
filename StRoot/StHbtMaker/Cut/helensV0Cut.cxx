@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.7 2000/03/17 17:22:53 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.8 2000/09/26 15:05:06 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.8  2000/09/26 15:05:06  laue
+ * Some cosmetic changes by Helen: histogram names, setting of mass cut
+ *
  * Revision 1.7  2000/03/17 17:22:53  laue
  * Roberts new three particle correlations implemented.
  *
@@ -80,16 +83,16 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
   // Find out what particle is desired
 
   if( strstr(V0Type,"k") || strstr(V0Type,"K")){
-     if( V0->massK0Short() < (mMass+mV0MassRange[1]) && 
-	 V0->massK0Short() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massK0Short() < (mV0MassRange[1]) && 
+	 V0->massK0Short() > (mV0MassRange[0]) ) inMassRange=1;
   }
   else if( (strstr(V0Type,"anti") || strstr(V0Type,"ANTI"))){
-     if( V0->massAntiLambda() < (mMass+mV0MassRange[1]) && 
-	 V0->massAntiLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massAntiLambda() < (mV0MassRange[1]) && 
+	 V0->massAntiLambda() > (mV0MassRange[0]) ) inMassRange=1;
   }
   else if( (strstr(V0Type,"ambda") || strstr(V0Type,"AMBDA"))){
-     if( V0->massLambda() < (mMass+mV0MassRange[1]) && 
-	 V0->massLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+     if( V0->massLambda() < (mV0MassRange[1]) && 
+	 V0->massLambda() > (mV0MassRange[0]) ) inMassRange=1;
   }
 
 
@@ -156,6 +159,9 @@ StHbtString helensV0Cut::Report(){
   char Ctemp[100];
   sprintf(Ctemp,"--helensV0Cut--\n Particle mass:\t%E\n",this->Mass());
   Stemp=Ctemp;
+  sprintf(Ctemp,"V0 mass range:\t%E - %E\n",mV0MassRange[0],
+	  mV0MassRange[1]);
+  Stemp+=Ctemp;
   sprintf(Ctemp,"dcaV0daughters:\t%E - %E\n",mdcaV0daughters[0],
 mdcaV0daughters[1]);
   Stemp+=Ctemp;
