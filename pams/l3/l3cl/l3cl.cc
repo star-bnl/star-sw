@@ -5,6 +5,7 @@
 **:                                          without StAF
 **:                            06/02/98  cs: StAF version
 **:                            06/15/98  ppy
+**:                            09/17/98  cs: new l3 pixel format
 **:   
 **:  
 **:<------------------------------------------------------------------*/
@@ -16,11 +17,11 @@
 
 
 
-extern "C" long type_of_call l3cl_(
-  TABLE_HEAD_ST     *para_h,       L3CL_PARA_ST    *para,
-  TABLE_HEAD_ST     *pad_h,        TSS_TPPAD_ST    *pad,
-  TABLE_HEAD_ST     *pixel_h,      TSS_TPPIXEL_ST  *pixel,        
-  TABLE_HEAD_ST     *hit_h,        TCL_TPHIT_ST    *hit   )
+extern "C" long l3cl_(
+  TABLE_HEAD_ST     *para_h,       L3CLPARA_ST        *para,
+  TABLE_HEAD_ST     *pad_h,        L3CLPAD_ST         *pad,
+  TABLE_HEAD_ST     *pixel_h,      TYPE_SHORTDATA_ST  *pixel,        
+  TABLE_HEAD_ST     *hit_h,        SL3HIT_ST          *hit   )
 
 
 {
@@ -36,49 +37,24 @@ extern "C" long type_of_call l3cl_(
 **:       IN:
 **:        l3cl_para      - Level 3 clusterfinder parameters
 **:       IN:
-**:        tss_tppad      \
-**:        tss_tppixel    - TPC Pixels
-**:      OUT:
-**:        tcl_tphit      - TPC Space Points
+**:        l3cl_pad       - 
+**:        l3cl_pixel     - TPC Pixels, l3 format
+**:       INOUT:
+**:        l3cl_hit       - TPC Space Points, l3 format
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-
-  TSS_TPPAD_ST *pad_pointer = pad;
-  int sector ;
-
-  hit_h->nok = 0;
-
-  init_phys_map();
-  init_pointers();
-  init_table();
-  init_other();
 //
-//    Set hit memory to 0
+  if ( l3clInitPhysMap()    ) return STAFCV_BAD ;
+  if ( l3clAllocateMemory() ) return STAFCV_BAD ;
 //
-  memset(hit, 0, hit_h->maxlen * sizeof(TCL_TPHIT_ST));
-
-
-  while( pad_pointer <= &(pad[(pad_h->nok)-1]) )  {
-      reset_other() ;
-      sector = pad_pointer->tpc_row /100 ;
+  l3clInitPointers();
+  l3clInitTable();
+  l3clInitOther() ;
+  l3clInitClusters     ( pad_h, pad, pixel );
+  l3clFindClusters     ( para->StartRow, para->EndRow );
+  l3clWriteDataToTable ( hit_h, hit );  
 //
-//    If sector wanted get clusters
-//
-      if ( ( sector >= para->FirstSector && sector <= para->LastSector ) ||
-           para->LastSector == 0 ){ 
-         pad_pointer = init_clusters( sector, pad_pointer, pad_h, pad, pixel );
-         FindClusters();
-         WriteDataToTable( sector, hit_h, hit );  
-      }
-//
-//    If sectors is not wanted look for next sector
-//
-      else {
-        while( sector == pad_pointer->tpc_row /100 && pad_pointer <= &(pad[(pad_h->nok)-1]) )
-        pad_pointer++;
-      }
-  }
- 
-
+  l3clFreeMemory() ;
+// 
   return STAFCV_OK;
 }

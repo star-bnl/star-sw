@@ -60,7 +60,7 @@ struct DATA_RAM *phys_data_ram;
 /*
 // find cluster
 */
-void FindClusters()
+void l3clFindClusters( int StartRow, int EndRow )
 {
 /* variables */
    int            iPadRow, iPad;
@@ -72,9 +72,9 @@ void FindClusters()
 
 /* reset the 'found clusters' counter */
    clusters = 0;
- 
+
 /* loop over all padrows */
-   for (iPadRow = 0; iPadRow < NPADROWS; iPadRow++)
+   for (iPadRow = StartRow; iPadRow < EndRow+1; iPadRow++)
    {
  //printf("clusters: %d\n", clusters);
 /* initialize the end of cluster-under-construction list
@@ -130,33 +130,32 @@ void FindClusters()
 /* yes ! */
 /* start a new cluster. that is: append the sequence-begin-end for both sequences (sequence1, sequence2)
 	at the tail of the cluster-under-construction-list (start/stop is for the last sequence(2)) */
-			pClusterUCNew->Sequence.Complete = pSequence2->Complete;
-						/* store padrow and startpad */
-						pClusterUCNew->PadRow = iPadRow;
-						pClusterUCNew->StartPad = iPad;
+                       pClusterUCNew->Sequence.Complete = pSequence2->Complete;
+/* store padrow and startpad */
+                       pClusterUCNew->PadRow = iPadRow;
+                       pClusterUCNew->StartPad = iPad;
 
-						/* make sure the sequence node is really empty */
-						pClusterUCNew->pList->Filling = 0;
-						pClusterUCNew->pList->next = NULL;
-						/* store the information in this node and increment filling */
-						pClusterUCNew->pList->Sequence[pClusterUCNew->pList->Filling++].Complete = pSequence1->Complete;
-						/* the same must be done for sequence2 */
-						pClusterUCNew->pList->Sequence[pClusterUCNew->pList->Filling++].Complete = pSequence2->Complete;
+/* make sure the sequence node is really empty */
+                       pClusterUCNew->pList->Filling = 0;
+                       pClusterUCNew->pList->next = NULL;
+/* store the information in this node and increment filling */
+                       pClusterUCNew->pList->Sequence[pClusterUCNew->pList->Filling++].Complete = pSequence1->Complete;
+/* the same must be done for sequence2 */
+                       pClusterUCNew->pList->Sequence[pClusterUCNew->pList->Filling++].Complete = pSequence2->Complete;
 
-						/* increment cluster-under-construction pointer to next free location */
-					pClusterUCNew++;
-                                        if ( pClusterUCNew >= pClusterUCMax ) {
-                                           printf ( " \n Maximum number of clusters under construction reached " ) ;
-                                           pClusterUCNew-- ;
-                                         }
-
-					}
-					/* increment sequence2; we have just used it! */
-					pSequence2++;
-					/* next sequence1 sequence */
-					pSequence1++;
-				} /* end: sequence1 to cluster-under-construction matching loop */
-				/* at this point we MUST have matched a sequence(1) to a cluster-under-construction! */
+/* increment cluster-under-construction pointer to next free location */
+                       pClusterUCNew++;
+                       if ( pClusterUCNew >= pClusterUCMax ) {
+                           printf ( " \n Maximum number of clusters under construction reached " ) ;
+                           pClusterUCNew-- ;
+                       }
+                    }
+/* increment sequence2; we have just used it! */
+                    pSequence2++;
+/* next sequence1 sequence */
+                    pSequence1++;
+                 } /* end: sequence1 to cluster-under-construction matching loop */
+/* at this point we MUST have matched a sequence(1) to a cluster-under-construction! */
 				/* now check, if it continues in the next pad (sequence2) */
 				/* NOTE:
 					here need NOT be any matches. so, we must test pSequence2 position */
