@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.24 1999/01/21 00:21:41 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.25 1999/01/21 02:46:36 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.25  1999/01/21 02:46:36  fine
+// New method dir and Browse to navigate XDF files
+//
 // Revision 1.24  1999/01/21 00:21:41  fine
 // Some print statement have been introduced
 //
@@ -74,6 +77,7 @@
 #include "TSystem.h"
 #include "TClass.h"
 #include "TSocket.h"
+#include "TBrowser.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
@@ -90,6 +94,7 @@ St_XDFFile::St_XDFFile(){
   fSocket = 0;
   fErrorCode=0;
   fRecordCount =0;
+  fBrowsable = 0;
 }
 
 //______________________________________________________________________________
@@ -111,6 +116,7 @@ St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
   fSocket = 0;
   fErrorCode=0;
   fRecordCount =0;
+  fBrowsable = 0;
   if (filename && strlen(filename)) {
      fStream = (XDR*) malloc(sizeof(XDR));
      OpenXDF(filename,mode);
@@ -126,9 +132,27 @@ St_XDFFile::~St_XDFFile(){
       fStream = 0;
     } 
     SafeDelete(fSocket);
+    SafeDelete(fBrowsable);
     if (fName) delete [] fName;
     fName = 0;
 }
+//______________________________________________________________________________
+void St_XDFFile::Browse(TBrowser *b)
+{
+  //
+  // Browse the next record in XDF file
+  // For this case NextEventGet will return
+  // the pointer to fBrowsable and will not
+  // read the next record
+  //
+  // It is GetSelected() method that return the fBrowsable only
+  //
+  if (!fFile) TObject::Browse(b);
+  if (fBrowsable) {delete fBrowsable; fBrowsable = 0;}
+  fBrowsable = NextEventGet();
+  b->Add(fBrowsable);
+}
+
 //______________________________________________________________________________
 void St_XDFFile::Delete(DS_DATASET_T *ds)
 {
@@ -278,7 +302,6 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
  } else 
    return kFALSE;
 }
-
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::NextEventGet()
 {
@@ -296,6 +319,7 @@ St_DataSet *St_XDFFile::NextEventGet()
  // this method to avoid any memory leak
  //
 
+ if (fBrowsable) return GetSelected(); // returh the slected with the ROOT Browser dataset
  fMethodName = "NextEvent()";
  // printf("%s \n",fMethodName);
  if (!fFile) return 0;
@@ -527,6 +551,44 @@ void St_XDFFile::GetXdFile(const Char_t *filename, St_DataSet *dataset)
     St_DataSet *set = xdf.NextEventGet();
     if (set) dataset->Add(set);
   }
+}
+
+//______________________________________________________________________________
+Int_t St_XDFFile::dir(const Char_t *filename, UInt_t firstRecord, UInt_t numberOfRecords)
+{
+ //
+ //  Usage:
+ //  -----
+ //    gSystem->Load("St_base");
+ //    gSystem->Load("xdf2root");
+ //    gSystem->Load("St_Tables");
+ //    St_XDFFile::dir(const Char_t *filename, UInt_t firstRecord=1 UInt_t numberOfRecords=1);
+ //       where:
+ //           firstRecord    =0 - means ALL record from the very first one by the "end_of_file"
+ //           numberOfRecords=0 - means ALL records fron the firstRecord by the "end_of_file"
+ //
+  if (!(filename && strlen(filename))) return 0;
+  printf("\n  Directory of  %s \n",filename);
+  St_XDFFile xdf;
+  Int_t counter=1;
+  if (xdf.OpenXDF(filename) == 0)
+  {
+    St_DataSet *set = 0;
+    while ( (set = xdf.NextEventGet()) && (!numberOfRecords || counter < firstRecord+numberOfRecords) ) 
+    {
+      if (!firstRecord || (counter >= firstRecord-1)) // Skip first "firstRecords" records
+      {
+        St_DataSetIter dir(set);
+        dir.Du();
+      }
+       counter++;
+    }
+    printf(" %d records have been read\n",counter);
+    return counter; 
+  }
+  else
+    printf(" Can't open file %s \n",filename);
+  return 0;
 }
 
 //______________________________________________________________________________
