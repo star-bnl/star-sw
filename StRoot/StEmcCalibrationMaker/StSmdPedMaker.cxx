@@ -318,7 +318,8 @@ void StSmdPedMaker::SavePedestals(Int_t date, Int_t time)
       for(Int_t k = 0;k<3;k++)
       {
         short int ped = (short int)(100*mSmdPed[i][k][j]);
-        short int rms = (short int)(100*mSmdRMS[i][k][j]);
+        short int rms = (short int
+				)(100*mSmdRMS[i][k][j]);
         if(k==0 && (ped==0 || rms==0)) status =0;
         tnew.AdcPedestal[j][k] = ped;
         tnew.AdcPedestalRMS[j][k] = rms;

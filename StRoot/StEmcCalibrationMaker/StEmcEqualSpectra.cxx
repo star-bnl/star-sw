@@ -12,6 +12,7 @@
 #include "TGraph.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEvent/StEvent.h"
+#include "TF1.h"
 
 ClassImp(StEmcEqualSpectra);
 //_____________________________________________________________________________
@@ -96,6 +97,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
   // 1 -  mean with linear average
   // 2 -  mean and rms with log average
   // 3 -  mean with log average 
+	// 4 -  exponential fit
 
   if(GetStatus(position1)==0) return kFALSE;
   if(GetStatus(position2)==0) return kFALSE;
@@ -132,6 +134,25 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
          <<"  a = "<<a<<"  b = "<<b<<endl;
   }
   
+	if(mode==4)
+	{
+		TF1 *f=new TF1("f","[0]*exp(-[1]*x)");
+		f->SetRange(mEqualMin,mEqualMax);
+		TH1D *h=GetSpectra(position1);
+		h->Fit(f,"RQN");
+		Float_t m1,m2;
+		m1 = f->GetParameter(1);
+		h=GetSpectra(position2);
+		h->Fit(f,"RQN");
+		m2 = f->GetParameter(1);
+		a=m2/m1;
+		b=0;
+		EqDone=kTRUE;
+    cout <<"  id = "<<position2<<"  ref = "<<position1<<"  slopes = "<<m1<<" , "<<m2
+         <<"  a = "<<a<<endl;
+		delete f;
+		
+	}
   if (EqDone)
   {
 		TH2F* equal=GetEqual();
