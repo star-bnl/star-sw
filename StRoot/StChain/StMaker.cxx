@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.14 1998/12/21 19:42:51 fisyak Exp $
+// $Id: StMaker.cxx,v 1.15 1999/01/02 19:08:12 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.15  1999/01/02 19:08:12  fisyak
+// Add ctf
+//
 // Revision 1.14  1998/12/21 19:42:51  fisyak
 // Move ROOT includes to non system
 //
@@ -28,7 +31,7 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include <iostream.h>
 #include "TSystem.h"
 #include "TClass.h"
 #include "TROOT.h"
@@ -51,11 +54,12 @@ ClassImp(StMaker)
 //_____________________________________________________________________________
 StMaker::StMaker()
 {
+  //  cout << "Default ctor for " << GetName() << " - " << GetTitle() << endl;
    m_BranchName = "";
    m_Save       = 0;
    m_Histograms = 0;
    m_Fruits     = 0;
-   m_Clones     = 0;
+   //   m_Clones     = 0;
    m_IsClonable = kTRUE;
    m_DataSet    = 0;
 }
@@ -64,10 +68,11 @@ StMaker::StMaker()
 StMaker::StMaker(const char *name, const char *title)
        :TNamed(name,title)
 {
+  //   cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
    m_BranchName = "";
    m_Save       = 0;
    m_Histograms = new TList();
-   m_Clones     = 0;
+   //   m_Clones     = 0;
    m_IsClonable = kTRUE;
    m_DataSet    = 0;
    TList *list =  gStChain->Makers();
@@ -81,6 +86,7 @@ StMaker::StMaker(const char *name, const char *title)
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
+  //  cout << "Default destructor for " << GetName() << " - " << GetTitle() << endl;
   Finish();
 }
 
@@ -146,17 +152,26 @@ void StMaker::FillClone()
 {
    if (!m_Save) return;
 
-   if (!m_Tree) {
-     m_Tree = new TTree(GetName(),GetTitle());
-     thisMakers[thisMakerIndx]=this;     
-//     m_Tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
-     printf(" Branch %s \n", m_Tree->Branch(GetName(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
+#if 1
+   TTree *tree = Tree();
+   if (!tree) {
+     TString name = GetName();
+     name += "_Tree";
+     tree = new TTree(name.Data(),GetTitle());
+//     thisMakers[thisMakerIndx]=this;     
+//     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
+     name.ReplaceAll("Tree","Branch");
+//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
+     //     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
      printf(" Maker number %d \n",thisMakerIndx++);
+     SetTree(tree);
+     SetBranch();
    }
 
-   if (m_Tree) {
-     m_Tree->Fill();
-   }
+   if (tree) 
+     tree->Fill();
+#endif
+
 }
 
 //_____________________________________________________________________________
@@ -289,7 +304,11 @@ void StMaker::PrintInfo()
 
    if (gStChain->Debug()) Dump();
 }
-
+//_____________________________________________________________________________
+void StMaker::PrintTimer(Option_t *option)
+{
+   Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName(),m_Timer.RealTime(),m_Timer.CpuTime());
+}
 //_____________________________________________________________________________
 void StMaker::MakeBranch()
 {
@@ -297,11 +316,19 @@ void StMaker::MakeBranch()
 
    if (m_Save == 0) return;
 
-   TTree *tree = gStChain->Tree();
+   TTree *tree = Tree();
+   if (!tree) return;
+
 //   if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
 
 //  Make a branch tree if a branch name has been set
    Int_t buffersize = 4000;
+
+//   thisMakers[thisMakerIndx]=this;     
+//   printf(" Branch %s \n", tree->Branch(GetName(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
+
+//   return;
+
    if (m_Fruits){
      if (m_Fruits->InheritsFrom("TClonesArray")) {
        tree->Branch(m_BranchName.Data(), &m_Fruits, buffersize);
@@ -311,10 +338,18 @@ void StMaker::MakeBranch()
    }
    if (m_DataSet){
      m_BranchName = m_DataSet->GetName();
-     tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize);
+     tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0);
    }
 }
 
+//_____________________________________________________________________________
+void  StMaker::SetBranch(){
+    TTree *tree = Tree();
+    if (!tree) return;
+    m_BranchName = GetName();
+    TBranch *dstBranch = tree->GetBranch(m_BranchName.Data());
+    if (dstBranch) dstBranch->SetAddress(&m_DataSet);
+}
 //_____________________________________________________________________________
 void StMaker::SetChainAddress(TChain *chain)
 {
@@ -363,3 +398,11 @@ void StMaker::Streamer(TBuffer &R__b)
    }
 }
 #endif
+
+//_____________________________________________________________________________
+TTree *StMaker::GetTree(){
+  return m_Tree;
+#if 0
+  gStChain->Tree();
+#endif
+}

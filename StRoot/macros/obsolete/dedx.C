@@ -1,5 +1,8 @@
-// $Id: dedx.C,v 1.1 1998/11/19 23:40:04 fine Exp $
+// $Id: dedx.C,v 1.2 1999/01/02 19:08:25 fisyak Exp $
 // $Log: dedx.C,v $
+// Revision 1.2  1999/01/02 19:08:25  fisyak
+// Add ctf
+//
 // Revision 1.1  1998/11/19 23:40:04  fine
 // A new macro "dedx.C" by Craig Ogilvie has been introduced
 //
@@ -71,8 +74,8 @@ void dedx(const Char_t *Path="/disk1/star/auau200/hijing135/default/",const Char
 	   
 	   //	   event->ls("*");
      
-           St_dst_dedx *dedx     = (St_dst_dedx *)  dst->Next("dst/dst_dedx");
-           St_dst_track *globtrk = (St_dst_track *) dst->Next("dst/globtrk");
+           St_dst_dedx *dedx     = (St_dst_dedx *)  dst->Find("dst/dst_dedx");
+           St_dst_track *globtrk = (St_dst_track *) dst->Find("dst/globtrk");
 
 	   if (dedx && globtrk) { 
 

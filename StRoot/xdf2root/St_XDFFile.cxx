@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.21 1998/12/30 22:28:59 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.22 1999/01/02 19:08:27 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.22  1999/01/02 19:08:27  fisyak
+// Add ctf
+//
 // Revision 1.21  1998/12/30 22:28:59  fine
 // St_XDFFile Some protection against of the wrong tables has been introduced
 //
@@ -399,7 +402,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
         table = (St_Table *)cl->New();
         // check the real table size against of the "dictionary" size
         cl = table->GetRowClass();
-        UInt_t cCount;
+        UInt_t cCount=0;;
         dsTableColumnCount(&cCount, ds);
         if (cl->GetNdata() == cCount) {
           table->SetTablePointer(data);
@@ -409,7 +412,20 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
         }
         else {
          table->PrintHeader();
-         Printf(" ** Error ** The number <%d> of the current columns in the <%s> table definition mismatched the number <%d> of the columns read from the <%s> file\n",cl->GetNdata(),cCount,type);
+         fprintf(stderr," ** Error ** There were <%d> columns found in the <%s> table definition\n\t mismatched  <%d> columns been read \n"
+                ,cl->GetNdata(),table->GetType(),cCount);
+         const Char_t *tableSpec=0;
+         if (dsTableTypeSpecifier(&tableSpec, ds)) {
+           fprintf(stderr," ------------------------------\n");
+           fprintf(stderr," The original table definition (as seen in xdf file) contains %d row%sof :\n%s\n",nrows,nrows>1?"s ":" ",tableSpec);
+           fprintf(stderr," -----------------------------\n");
+           fprintf(stderr," The current table (as defined by IDL) definition is :\n");
+           fprintf(stderr," ===============================\n");
+           table->Print();
+           fprintf(stderr," -------------------------------\n\n");
+         }
+         printf(" ** Error ** This table has been discarded !\n");
+         SafeDelete(table);
         }
       }
       else 

@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.18 1998/12/21 19:42:50 fisyak Exp $
+// $Id: StChain.h,v 1.19 1999/01/02 19:08:12 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.19  1999/01/02 19:08:12  fisyak
+// Add ctf
+//
 // Revision 1.18  1998/12/21 19:42:50  fisyak
 // Move ROOT includes to non system
 //
@@ -74,6 +77,7 @@
 #include "TROOT.h"
 #include "TChain.h"
 #include "TTree.h"
+#include "TDatime.h"
 #include "TBrowser.h"
 #include "TClonesArray.h"
 #include "TBenchmark.h"
@@ -91,15 +95,19 @@ class StChain : public StMaker {
 public:
 typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
-   const Char_t        *m_VersionCVS;       //StChain header CVS version
-   const Char_t        *m_VersionTag;       //StChain tag
+   const Char_t       *m_VersionCVS;        //StChain header CVS version
+   const Char_t       *m_VersionTag;        //StChain tag
    Int_t               m_Version;           //StChain version number
    Int_t               m_VersionDate;       //StChain version date
    Int_t               m_Run;               //Run number 
    Int_t               m_Event;             //Event event number
    Int_t               m_Mode;              //Run mode
+   Char_t              m_EvenType;          //Event type: Au+Au, p+p, laser..
+   ULong_t             mBunchCrossingNumber;//
+   ULong_t             mTriggerMask;        //
+   TDatime             mTimeStapm;          //time stamp for event
+   TDatime             mProcessTime;        //time of event processing
    EDebugLevel         m_DebugLevel;        //Debug level
-   St_DataSet         *m_RunSet;            //Run
    TTree              *m_Tree;              //Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
@@ -110,8 +118,8 @@ public:
    virtual           ~StChain();
    virtual void       Browse(TBrowser *b);
    virtual void       Draw(Option_t *option="");  // *MENU*
-   St_DataSet        *DataSet(){return StMaker::DataSet();}
-   St_DataSet        *DataSet(Char_t *makername); // find the maker by name and return its dataset
+   St_DataSet        *DataSet()  const {return StMaker::DataSet();}
+   St_DataSet        *DataSet(const Char_t *makername, const Char_t *path="") const ; // find the maker by name and return its dataset
    EDebugLevel        Debug(){return m_DebugLevel;}
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
@@ -148,15 +156,17 @@ public:
 
 //    Setters for flags and switches
 
+   virtual void   SetBranches();
    virtual void   SetRun(Int_t run=1)     {m_Run=run;}
    virtual void   SetEvent(Int_t event=1) {m_Event=event;}
    
    virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;}
+   virtual void   SetTree(TTree *tree)   {m_Tree=tree;}
 
    void           FillTree();
    void           InitChain(TChain *chain);
    virtual void   MakeBranch();   
-   void           MakeTree(const char* name="T", const char*title="StChain tree");
+           TTree *MakeTree(const char* name="T", const char*title="StChain tree");
    void           SortDown(Int_t n, Float_t *a, Int_t *index, Bool_t down=kTRUE);
 
    ClassDef(StChain, 1)   //StChain control class

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.30 1998/12/29 19:38:22 fine Exp $
+// $Id: bfc.C,v 1.31 1999/01/02 19:08:25 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.31  1999/01/02 19:08:25  fisyak
+// Add ctf
+//
 // Revision 1.30  1998/12/29 19:38:22  fine
 // STAR_shapes: test of the brand new St_NodeView class has been added
 //
@@ -87,16 +90,7 @@
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
-bfc(const Int_t   Nevents=1,
-    //    const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
-    const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
-    //    const Char_t *fileinp = "/disk1/star/kathy/year2a_psc079_01_46evts.xdf",
-    const Char_t *fileout =0,
-    //    const Char_t *fileout = "hijet-bfc.xdf",
-    const Char_t *FileOut = "hijet-bfc.root")
-{
-  // Dynamically link some shared libs
-  if (gClassTable->GetID("StChain") < 0){
+void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("xdf2root");
@@ -104,8 +98,9 @@ bfc(const Int_t   Nevents=1,
     gSystem->Load("libmsg");
     gSystem->Load("libtls");
     gSystem->Load("St_params_Maker");
+    //    gSystem->Load("St_db_Maker");
     gSystem->Load("St_xdfin_Maker");
-    //  gSystem->Load("St_calib_Maker");
+    gSystem->Load("St_calib_Maker");
     gSystem->Load("St_evg_Maker");
     gSystem->Load("geometry");
     gSystem->Load("St_geant_Maker");
@@ -115,20 +110,39 @@ bfc(const Int_t   Nevents=1,
     gSystem->Load("St_tss_Maker");
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-    gSystem->Load("global");
-    gSystem->Load("St_global");
-    gSystem->Load("St_dst_Maker");
-    gSystem->Load("St_run_summary_Maker");
+    gSystem->Load("ftpc");
+    gSystem->Load("St_ftpc");
+    gSystem->Load("St_fss_Maker");
+    gSystem->Load("St_fcl_Maker");
+    gSystem->Load("St_fpt_Maker");
+    gSystem->Load("emc");
+    gSystem->Load("St_emc");
+    gSystem->Load("St_ems_Maker");
+    gSystem->Load("St_emc_Maker");
+    gSystem->Load("ctf");
+    gSystem->Load("St_ctf");
+    gSystem->Load("St_ctf_Maker");
     gSystem->Load("svt");
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
-    //  gSystem->Load("ftpc");
-    //  gSystem->Load("St_ftpc");
-    //  gSystem->Load("St_fss_Maker");
-    //  gSystem->Load("St_fcl_Maker");
-    //  gSystem->Load("St_fpt_Maker");
-  }
+    gSystem->Load("strange");
+    gSystem->Load("St_strange");
+    gSystem->Load("global");
+    gSystem->Load("St_global");
+    gSystem->Load("St_dst_Maker");
+    gSystem->Load("St_run_summary_Maker");
+}
+bfc(const Int_t   Nevents=1,
+    //    const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
+    const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
+    //    const Char_t *fileinp = "/disk1/star/kathy/year2a_psc079_01_46evts.xdf",
+    const Char_t *fileout =0,
+    //    const Char_t *fileout = "hijet-bfc.xdf",
+    const Char_t *FileOut = "hijet-bfc.root")
+{
+  // Dynamically link some shared libs
+  if (gClassTable->GetID("StChain") < 0) Load();
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   St_XDFFile  *xdf_out   = 0;
@@ -142,7 +156,7 @@ bfc(const Int_t   Nevents=1,
   //  StChainSpy chain("bfc");
   
   //  Create the makers to be called by the current chain
-  St_params_Maker *params = new St_params_Maker("params","run/params");
+  St_params_Maker *params = new St_params_Maker("params","params");
   St_geom_Maker     *geom = new St_geom_Maker("geom","run/geant/Run");
   if (xdf_in) {
     St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
@@ -155,17 +169,23 @@ bfc(const Int_t   Nevents=1,
   //  St_tss_Maker    *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
   //  tpc_raw->adcxyzon();
+  St_ems_Maker          *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
+
+  St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
-  //  St_TLA_Maker         *ctf_hits = new St_TLA_Maker("ctf_hits","event/data/ctf/hits");
-  //St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
+  St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
+  //  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
   St_tpt_Maker       *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_stk_Maker       *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   //St_TLA_Maker      *ftpc_tracks = new St_TLA_Maker("ftpc_tracks","event/data/ftpc/tracks");
-  //  St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
-  // St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
+  St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
+  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
   //  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","event/data/global/dst");
   //  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
+  
+  // Create HTML docs of all Maker's involved
+  //  chain->MakeDoc();
   chain->PrintInfo();
   // Init the chain and all its makers
   int iInit = chain->Init();

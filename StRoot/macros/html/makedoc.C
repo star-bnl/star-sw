@@ -108,7 +108,7 @@
   Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
-                       ,"StMaker",     "StChain"
+                       ,"StMaker",     "StChain",       "St_NodeView"
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
@@ -116,7 +116,7 @@
                        ,"St_calib_Maker"
                        ,"St_tpctest_Maker","St_calib_Maker"
                         };
-  Int_t nclass = 23;
+  Int_t nclass = 24;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");

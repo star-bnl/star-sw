@@ -1,6 +1,5 @@
 {
  gROOT->Reset();
-#include "iostream.h"
   // Determinate the brand of the OS
   gSystem.Load("St_base");
 
@@ -82,4 +81,5 @@
   else cout << "Ok! The last dataset has NO active directory anymore" << endl;
 
   cout  << endl << "------------ 8 ------------ " << endl;
+  
 }
