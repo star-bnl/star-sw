@@ -1,11 +1,16 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.cxx,v 1.5 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StMcParameterDB.cxx,v 1.6 2003/06/27 03:01:19 calderon Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
  * $Log: StMcParameterDB.cxx,v $
+ * Revision 1.6  2003/06/27 03:01:19  calderon
+ * The z cut now depends on z_mc.
+ * The parameterization is done in the parameter DB
+ * with a linearly increasing rms, symmetric in +/- z.
+ *
  * Revision 1.5  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
@@ -68,6 +73,12 @@ void StMcParameterDB::setReqCommonHitsSvt(unsigned int val) { mReqCommonHitsSvt 
 void StMcParameterDB::setRCutFtpc(float val)   { mRCutFtpc   = val ;}
 void StMcParameterDB::setPhiCutFtpc(float val) { mPhiCutFtpc = val ;}
 void StMcParameterDB::setReqCommonHitsFtpc(unsigned int val) { mReqCommonHitsFtpc = val;}
+
+
+float StMcParameterDB::zCutTpc(float z) const {
+    return (mZCutTpc/0.166657) * (0.166657+2.07482e-4*fabs(z));
+}
+
 
 ostream& operator<<(ostream &os, const StMcParameterDB& mcDb)
 {

@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.35 2003/05/28 17:57:50 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.36 2003/06/27 03:01:18 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.36  2003/06/27 03:01:18  calderon
+ * The z cut now depends on z_mc.
+ * The parameterization is done in the parameter DB
+ * with a linearly increasing rms, symmetric in +/- z.
+ *
  * Revision 1.35  2003/05/28 17:57:50  calderon
  * No longer use find_if for FTPC to solve a bug for y<0 found by Frank Simon.
  * Initialize tpcHitDistance and svtHitDistance to avoid a warning.
@@ -739,7 +744,7 @@ Int_t StAssociationMaker::Make()
 		    // with a z greater than this reference, so that we don't loop
 		    // over the hits that we don't need to.
 		    
-		    tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc());
+		    tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc(200.));
 		    StMcTpcHit* closestTpcHit = 0;
 		    
 		    // Find the first Mc Tpc Hit that might have a meaningful association.
@@ -758,8 +763,8 @@ Int_t StAssociationMaker::Make()
 			xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
 			yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
 			zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-			
-			if ( zDiff > parDB->zCutTpc() ) break; //mc hits are sorted, save time!
+			float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
+			if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
 			
 			if (isFirst) {
 			    tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
@@ -773,7 +778,7 @@ Int_t StAssociationMaker::Make()
 			
 			if ( fabs(xDiff)< parDB->xCutTpc() &&
 			     fabs(yDiff)< parDB->yCutTpc() &&
-			     fabs(zDiff)< parDB->zCutTpc()) {
+			     fabs(zDiff)< parDB->zCutTpc(mcZ)) {
 			    // Make Associations  Use maps,
 			    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 			    mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
