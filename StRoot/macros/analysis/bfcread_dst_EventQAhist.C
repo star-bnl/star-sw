@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.5 1999/11/29 21:49:22 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.6 1999/11/30 19:23:05 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.6  1999/11/30 19:23:05  kathy
+// changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
+//
 // Revision 1.5  1999/11/29 21:49:22  kathy
 // more print statements
 //
@@ -24,7 +27,6 @@
 //
 // inputs: nevents   - # events to process
 //         MainFile  - *.dst.root file from bfc output
-//         MakerHist - name of Maker that you want histograms from
 //         psFile    - output postscript filename
 //         PageTitle - title you want on each output page, default is
 //                       MainFile name
@@ -35,19 +37,16 @@
 class StChain;
 StChain *chain;
 
-TBrowser *brow=0;
+//TBrowser *brow=0;
 
 void bfcread_dst_EventQAhist(Int_t nevents=10, 
              const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
-             const Char_t *MakerHist="EventQA",
              const Char_t *psFile="Event_QA_hist.ps",
              const Char_t *PageTitle="")
 {
 //
   cout << "bfcread_dst_EventQAhist.C, input file name       " << 
      MainFile << endl;
-  cout << "bfcread_dst_EventQAhist.C, input Maker name      " << 
-     MakerHist<< endl;
   cout << "bfcread_dst_EventQAhist.C, output psfile name    " << 
      psFile   << endl;
   cout << "bfcread_dst_EventQAhist.C, num events to process " << 
@@ -64,6 +63,11 @@ void bfcread_dst_EventQAhist(Int_t nevents=10,
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
 
+// force the directory name for histograms since this macro is 
+// specifically for running StEventQAMaker
+             const Char_t *MakerHist="EventQA";
+  cout << "bfcread_dst_EventQAhist.C, directory of Maker name      " << 
+     MakerHist<< endl;
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
