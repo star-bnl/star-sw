@@ -378,7 +378,7 @@ c  by dE.  To do this, remove the *'s
      +              +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(3)
 *     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
                    mchit_q(nmchit)=mchit_q(nmchit)
-     +              +1.e06*mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+     +        +1.0e06*mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
                    wire_hits = wire_hits + 1
 		   desum = desum + 
      +              mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
