@@ -59,7 +59,7 @@ return
        message ' run_dst: Calling fill_dst_run_summary'
        
 ami/mod/call fill_dst_run_summary_
-        [params]/global/dst_summary_param _
+        [params]/global/dstpars/dst_summary_param _
         [run_dst]/run_header _
         [dst]/event_header _
         [dst]/event_summary _
@@ -104,7 +104,7 @@ RETURN
        message ' run_dst: Calling fill_dst_event_summary'
        
 ami/mod/call fill_dst_event_summary_
-        [params]/global/dst_summary_param _
+        [params]/global/dstpars/dst_summary_param _
         [run_dst]/run_header _
         [dst]/event_header _
         [dst]/globtrk _
