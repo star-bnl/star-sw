@@ -6,7 +6,7 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1,TString fName="bb5" ) {
+void plPi0Solo( int page=1,TString fName="aa8c" ) {
   int pr=0;
 
   // fName="ctbSum70-801sec1-12thr0.8";
@@ -55,7 +55,7 @@ void plPi0Solo( int page=1,TString fName="bb5" ) {
 
 
  //fd->ls();
-  gStyle->SetOptStat(11     );
+  gStyle->SetOptStat(11111     );
 
   switch(page) {
   //..........................................

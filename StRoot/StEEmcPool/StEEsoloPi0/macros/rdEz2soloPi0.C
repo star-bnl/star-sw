@@ -1,9 +1,10 @@
-rdEz2soloPi0(  char *runL=" R5107005",
-	    char *outname="bb5"
+rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
 	    ) {
+  //    runL=" R5107005 R5107005_1  R5107008  R5109025  R5109026 R5109027   R5109028a  R5109028b  R5109028c  R5109029a  R5109030   R5109031  R5109034  R5109035";
+  char *outname="bb9a";
 
   TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
-  int mxEve=10000;
+  int mxEve=1000000;
   int firstSec=1;
   int lastSec=12;
   char *libL[]={
@@ -64,7 +65,8 @@ rdEz2soloPi0(  char *runL=" R5107005",
 
  //............  DB-reader .................
   EEmcDb *db=new EEmcDb() ;
-  db->setThreshold(3.0); 
+  db->setThreshold(5.0); 
+
   //  db->setPreferredFlavor("expoSlope1","eemcPIXcal");
 
   // set all DB flags before DB request
@@ -87,19 +89,20 @@ rdEz2soloPi0(  char *runL=" R5107005",
   int t1=time(0);  
   for(nEve=0; nEve<nEntries && nEve<mxEve; nEve++) {
     chain->GetEntry(nEve);
-    if(nEve%1000==0)printf("in %d, acc %d  ok=%d\n",nEve,nAcc,nOK);
+    // printf("\n================= %d ===\n",nEve);
+    if(nEve%3000==0)printf("in %d, acc %d  ok=%d\n",nEve,nAcc,nOK);
    //   printf("%d %d %d\n",  eTrig->isTrigID(10), eTrig->isTrigID(45010), eTrig->isTrigID(45020));
 
-#if 1    
    if(! eTrig->isTrigID(10) &&
       ! eTrig->isTrigID(45010) &&
       ! eTrig->isTrigID(45020) ) continue;
-#endif
    // this is for sure minB events
     nAcc++;
     // verify data block consistency
     int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
-    if(nCr!=22) continue;
+    eFee-> maskBEMC();
+    // printf("%d\n",nCr);
+    if(nCr!=22 && nCr!=36) continue;
     // use only 100% healthy events
     nOK++;
     task->make();
