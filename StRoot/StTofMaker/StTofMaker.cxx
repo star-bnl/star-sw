@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.8 2002/01/22 06:50:34 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.9 2003/02/06 05:02:05 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.9  2003/02/06 05:02:05  geurts
+ * Added TOFr and extra pVPD-ADC channels to the datastream:
+ * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
+ *
  * Revision 1.8  2002/01/22 06:50:34  geurts
  * modifications for STAR dBase access and doxygenized
  *
@@ -87,8 +91,8 @@ StTofMaker::~StTofMaker(){/* nope */}
 /// Init method, book histograms
 Int_t StTofMaker::Init(){
   //  create histograms
-  nAdcHitHisto = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",51,-1.,50.);
-  nTdcHitHisto = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",51,-1.,50.);
+  nAdcHitHisto = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",121,-0.5,120);
+  nTdcHitHisto = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",121,-0.5,120);
   return StMaker::Init();
 }
 
@@ -117,7 +121,8 @@ Int_t StTofMaker::FinishRun(int runnumber){
 //_________________________________________________________________________
 /// Make method, check for collections; create and fill them according to m_Mode
 Int_t StTofMaker::Make(){
-  cout << "StTofMaker::Make() starting..................................."  << endl;
+  // 
+  cout << "StTofMaker::Make() -- All Your Base Are Belong To Us --"  << endl;
 
   mDataCollection = new StTofDataCollection; 
   mTofCollectionPresent  = 0;
@@ -185,13 +190,25 @@ Int_t StTofMaker::Make(){
 #ifdef TOFP_DEBUG
       TOF_Reader* MyTest = dynamic_cast<TOF_Reader*>(mTheDataReader->getTOFReader());
       if (MyTest) MyTest->printRawData();
+      if (MyTest->year2Data()) cout << "StTofMaker: year2 data - TOFp+pVPD" << endl;
+      if (MyTest->year3Data()) cout << "StTofMaker: year3 data - TOFp+pVPD+TOFr" << endl;
 #endif
+
 //
 //--- copy daq data to collection. (TOFp and pVPD)
 //
       int nadchit=0;
       int ntdchit=0;
       int iStrobe = 0;
+
+      // set limits on basic event statistics
+      int tdcHitMax=1600;
+      int pvpdStrobeMin=1500;
+      if (mTheTofReader->year3Data()){
+	tdcHitMax=880;
+	pvpdStrobeMin=950;
+      }
+
       for (int i=0;i<48;i++){
 	unsigned short slatid = mTofGeom->daqToSlatId(i);
 	unsigned short rawAdc = mTheTofReader->GetAdcFromSlat(i);
@@ -204,12 +221,26 @@ Int_t StTofMaker::Make(){
 	mDataCollection->push_back(rawTofData);      // local collection
 	if(i<41) {
 	  if (rawAdc>  50) nadchit++; 
-	  if (rawTdc<1600) ntdchit++; 
+	  if (rawTdc<tdcHitMax) ntdchit++; 
 	}
 	if(i>41) {
-	  if (rawTdc>1500) iStrobe++; 
+	  if (rawTdc>pvpdStrobeMin) iStrobe++; 
 	}
       }    
+      if (mTheTofReader->year3Data()){
+	for (int i=48;i<132;i++){
+	  //arbitrary id, start from at 100.
+	  unsigned short id = (100-48)+i;
+	  unsigned short rawAdc = mTheTofReader->GetAdc(i);
+	  unsigned short rawTdc = 0;
+	  if (i<120) rawTdc = mTheTofReader->GetTdc(i);  
+	  StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0);
+	  mDataCollection->push_back(rawTofData);
+	  if ((i>59) && (rawAdc>50))    nadchit++;
+	  if ((i<120) && (rawTdc<tdcHitMax)) ntdchit++; 
+	}
+      }
+
 //--- end loop over data words...
 //
 //--- 
@@ -247,7 +278,7 @@ Int_t StTofMaker::Make(){
 //
   if (mEvent) this->fillStEvent();
   delete mDataCollection;
-  cout << "StTofMaker::Make() finished..................................." << endl;
+  cout << "StTofMaker::Make() -- see you next event --" << endl;
 
   return kStOK;
 }
@@ -326,10 +357,6 @@ void StTofMaker::storeTag(){
 //_____________________________________________________________________________
 /// default Finish method (empty)
 Int_t StTofMaker::Finish(){
-  //fg: no need for private file: histograms are collected.
-  // TFile theFile("tof.root","RECREATE","tofstudy");
-  // theFile.cd();
-  // nAdcHitHisto->Write();
-  // nTdcHitHisto->Write();
+  // nope 
   return kStOK;
 }

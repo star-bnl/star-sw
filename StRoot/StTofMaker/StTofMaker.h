@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.6 2002/01/22 16:47:08 geurts Exp $ 
+ * $Id: StTofMaker.h,v 1.7 2003/02/06 05:02:05 geurts Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.7  2003/02/06 05:02:05  geurts
+ * Added TOFr and extra pVPD-ADC channels to the datastream:
+ * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
+ *
  * Revision 1.6  2002/01/22 16:47:08  geurts
  * minor change in ClassDef
  *
@@ -44,12 +48,13 @@ class StTofPidTraits;
 class StTofGeometry;
 class StDAQReader;
 class StTofReaderInterface;
-
+class TOF_Reader;
 
 class StTofMaker : public StMaker {
  private:
   StDAQReader*           mTheDataReader;    //!
-  StTofReaderInterface*  mTheTofReader;     //!
+  //  StTofReaderInterface*  mTheTofReader;     //!
+  TOF_Reader*  mTheTofReader;     //!
   St_DataSet*            mTheTofData;       //!
   Bool_t                 drawinit;          //!
   StEvent*               mEvent;            //!
@@ -84,7 +89,7 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.6 2002/01/22 16:47:08 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.7 2003/02/06 05:02:05 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofMaker, 1)
 
