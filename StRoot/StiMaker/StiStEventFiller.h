@@ -1,12 +1,18 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.6 2002/08/19 19:33:01 pruneau Exp $
+ * $Id: StiStEventFiller.h,v 1.7 2002/08/22 21:46:00 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 1.7  2002/08/22 21:46:00  pruneau
+ * Made a fix to StiStEventFiller to remove calls to StHelix and StPhysicalHelix.
+ * Currently there is one instance of StHelix used a calculation broker to
+ * get helix parameters such as the distance of closest approach to the main
+ * vertex.
+ *
  * Revision 1.6  2002/08/19 19:33:01  pruneau
  * eliminated cout when unnecessary, made helix member of the EventFiller
  *
@@ -57,7 +63,8 @@ using std::map;
     \note 
  */
 #include "Sti/StiDedxCalculator.h"
-#include "StPhysicalHelix.hh"
+///////#include "StPhysicalHelix.hh"
+#include "StHelix.hh"
 
 class StEvent;
 class StTrackNode;
@@ -94,7 +101,7 @@ private:
     StiDedxCalculator dEdxTpcCalculator;
     StiDedxCalculator dEdxSvtCalculator;
 
-    StPhysicalHelix helix;
+    StHelix * helix;
 
 };
 

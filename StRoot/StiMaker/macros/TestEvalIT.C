@@ -1,8 +1,14 @@
 //
-// $Id: TestEvalIT.C,v 1.9 2002/08/19 19:33:19 pruneau Exp $
+// $Id: TestEvalIT.C,v 1.10 2002/08/22 21:46:14 pruneau Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.10  2002/08/22 21:46:14  pruneau
+// Made a fix to StiStEventFiller to remove calls to StHelix and StPhysicalHelix.
+// Currently there is one instance of StHelix used a calculation broker to
+// get helix parameters such as the distance of closest approach to the main
+// vertex.
+//
 // Revision 1.9  2002/08/19 19:33:19  pruneau
 // eliminated cout when unnecessary, made helix member of the EventFiller
 //
@@ -277,8 +283,10 @@ void TestEvalIT(Int_t firstEvtIndex,
 	stiIO->setETSFMaxHits(6);
 	stiIO->setDoTrackFit(doFit);
 	//Set Kalman Track Finder (KTF) run-time values:
-	stiIO->setKTFMcsCalculated(false);
-	stiIO->setKTFElossCalculated(false);
+	stiIO->setKTFMcsCalculated(true);
+	stiIO->setKTFElossCalculated(true);
+	//stiIO->setKTFMcsCalculated(false);
+	//stiIO->setKTFElossCalculated(false);
 	stiIO->setKTFMaxChi2ForSelection(50);
 	stiIO->setKTFBField(.5); //Tesla
 	stiIO->setKTFMassHypothesis(.1395); //GeV

@@ -1,11 +1,17 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.16 2002/08/19 19:33:00 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.17 2002/08/22 21:46:00 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.17  2002/08/22 21:46:00  pruneau
+ * Made a fix to StiStEventFiller to remove calls to StHelix and StPhysicalHelix.
+ * Currently there is one instance of StHelix used a calculation broker to
+ * get helix parameters such as the distance of closest approach to the main
+ * vertex.
+ *
  * Revision 1.16  2002/08/19 19:33:00  pruneau
  * eliminated cout when unnecessary, made helix member of the EventFiller
  *
@@ -115,7 +121,7 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   dEdxTpcCalculator.setDetectorFilter(kTpcId);
   dEdxSvtCalculator.setDetectorFilter(kSvtId);
 
-
+  helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
 }
@@ -124,6 +130,7 @@ StiStEventFiller::~StiStEventFiller()
 {
   cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
   //mResMaker.writeResiduals();
+  delete helix;
 }
 
 //Helper functor, gotta live some place else, just a temp. test of StiTrack::stHits() method
@@ -338,7 +345,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 		cout << "skipping Node: this node should have a global track but doesn't" << endl;
 		continue;
 	    }
-		  cout <<"Entries >1."<<endl;
+	    //cout <<"Entries >1."<<endl;
 	    // detector info
 	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	    fillDetectorInfo(detInfo,kTrack);
@@ -426,70 +433,22 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 	node = kTrack->getOuterMostHitNode();
     else
 	node = kTrack->getInnerMostHitNode();
-    
-    // good ol' Ben's transformation routine,
-    // this fills StPhysicalHelix appropriately
-    StiGeometryTransform* transformer = StiGeometryTransform::instance();
-    // note, we have to create an instance of StPhysicalHelix
-    // but the default constructor is protected, so we have to
-    // call the constructor with dummy information.
-    // the transformer will call the constructor with the right
-    // values and then use the assignment operator to put them into
-    // the instance that we pass to it.
-    StThreeVector<double> dummyVec(-999,-999,-999);
-
-    // transform node into "helix" (which is a Physical Helix)
-    // and then create a HelixModel out of it.
-    transformer->operator()(node, &helix);
-    const StThreeVector<double> orig = helix.origin();
-    StThreeVectorF origin(orig.x(),orig.y(),orig.z());
-    
-    double mom[3];
-    node->getGlobalMomentum(mom);
-    StThreeVectorF momF(mom[0],mom[1],mom[2]); 
-    //cout <<"Global Momentum: "<<momF<<endl;
-
-    double bField = -99999;
-    // test
-    // change: the magnetic field should NEVER be hardwired, this is merely a test to
-    // make sure the chain works, must use something else ASAP!!!!
-    if (mEvent->runInfo()!=0) 
-      {
-	bField = mEvent->runInfo()->magneticField();
-	bField = bField*tesla*.1;
-      }
-    else bField =  0.5; 
-    /*
-      cout <<"Helix BField: "<<bField<<endl;
-      cout <<"Helix Momentum: "<<helix.momentum(bField).x()
-      <<helix.momentum(bField).y()
-      <<helix.momentum(bField).z()
-      <<endl;
-    cout <<"Old phase: "<<helix.phase();
-    */
-    double newPhase = helix.phase() + helix.h()*halfpi;
-    //cout <<"New phase: "<<newPhase<<endl;
-    StTrackGeometry* geometry = new StHelixModel(helix.charge(bField),
-				         	 newPhase,
-						 helix.curvature(),
-						 helix.dipAngle(),
-						 origin, momF,
-						 helix.h());
-    //cout <<"Helix: "<<helix<<endl;
-    
+    double phase;
+    StThreeVectorF origin(node->fX,node->fP0,node->fP1);
+    origin.rotateZ(node->fAlpha);
+    StThreeVectorF p = node->getGlobalMomentumF();
+    short int h = (node->getCharge()*StiKalmanTrackNode::getFieldConstant() <= 0) ? 1 : -1;
+    phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
+    phase += h*halfpi;
+    StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
+						phase,
+						node->getCurvature(),
+						node->getDipAngle(),
+						origin, p, h);
     if (outer)
-      {
 	gTrack->setOuterGeometry(geometry);
-
-	//cout <<"Helix From Track: "<<gTrack->outerGeometry()->helix()<<endl;
-      }
     else
-      {
 	gTrack->setGeometry(geometry);
-	//cout <<"Helix From Track: "<<gTrack->geometry()->helix()<<endl;
-      }
-
-    
     return;
 }
 
@@ -666,9 +625,9 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
     // construct a Helix using Ben's Routines
     StiGeometryTransform* transformer = StiGeometryTransform::instance();
-    StThreeVector<double> dummyVec(-999,-999,-999);
+    //StThreeVector<double> dummyVec(-999,-999,-999);
     //StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-    transformer->operator()(node, &helix);
+    transformer->operator()(node, helix);
     // these next lines are just to keep prototypes right, Ben uses StPhysicalHelix<double>
     // but StEvent uses StThreeVectorF for persistency...
     const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
@@ -676,7 +635,7 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     //cout << "primary vertex " << vxD << endl;
     // return distance of closest approach to primary vertex
     //cout << "helix " << helix << endl;
-    float dca = static_cast<float>(helix.distance(vxD));
+    float dca = static_cast<float>(helix->distance(vxD));
     //cout << "dca " << dca << endl;
     return dca;
 }
