@@ -312,8 +312,10 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     int nDaughters = vertex->numberOfDaughters();
     long geantProcess = vertex->geantProcess();
     if ( nDaughters!=2) {
+#ifdef HBTDEBUG
       cout << " geant Process : " << geantProcess  << endl;
       cout << " daughters : " << nDaughters  << endl;
+#endif
       continue; // not a v0
     }
 
@@ -335,14 +337,14 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
       continue;  // not a v0
     }
     
-    /*
+#ifdef HBTDEBUG
       cout << " got a v0 "  << endl;
       cout << " charge ";
       cout << daughter1->particleDefinition()->charge() << " ";
       cout << daughter2->particleDefinition()->charge() << " ";
       cout << endl;
       cout << " geantProcessId " << geantProcess << endl;
-    */
+#endif    
 
     // fill the V0MiniDst structure
     StHbtV0* hbtv0 = new StHbtV0();
