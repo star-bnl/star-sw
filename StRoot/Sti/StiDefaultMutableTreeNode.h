@@ -33,6 +33,12 @@ using std::vector;
 //
 //-----------------------------------------------------------------------------
 
+
+class StiDefaultMutableTreeNode;
+typedef vector<StiDefaultMutableTreeNode *> StiDefaultMutableTreeNodeVector;
+typedef StiDefaultMutableTreeNodeVector::iterator StiDefaultMutableTreeNodeIterator;
+
+
 class StiDefaultMutableTreeNode : public StiTreeNode
 {
  public:
@@ -80,16 +86,17 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   StiDefaultMutableTreeNode *  getNextLeaf();
   StiDefaultMutableTreeNode *  getPreviousLeaf() ;
 
+  StiDefaultMutableTreeNodeVector * breadthFirstEnumeration();
+  void appendChildrenToVector(StiDefaultMutableTreeNode *node, 
+			      StiDefaultMutableTreeNodeVector *v);
  protected:
-
-  typedef vector<StiDefaultMutableTreeNode *> StiDefaultMutableTreeNodeVector;
-  typedef StiDefaultMutableTreeNodeVector::iterator StiDefaultMutableTreeNodeIterator;
 
   bool          allowsChildren;
   StiTreeNode * parent;
   StiDefaultMutableTreeNodeVector children;
 
 };
+
 
 #endif
 

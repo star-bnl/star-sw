@@ -1,7 +1,8 @@
 
 //Sti
+#include "StiHit.h"
+#include "StiDefaultMutableTreeNode.h"
 #include "StiTrackNode.h"
-
 #include "StiKalmanTrack.h"
 
 StiKalmanTrack::StiTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
@@ -96,7 +97,7 @@ double  StiKalmanTrack::getDca3(StiTrack *t)   const
 }
 
 
-void StiKalmanTrack::addHit(StiHit *h)
+StiTrackNode * StiKalmanTrack::addHit(StiHit *h)
 {
   // Add a hit to this track
   // If the current lastNode is non null
@@ -113,16 +114,19 @@ void StiKalmanTrack::addHit(StiHit *h)
       n->setHit(h);
       lastNode->add(n);
       lastNode = n;
+      return n;
     }
   else 
     {
       firstNode  = trackNodeFactory->getObject();
       firstNode->setHit(h);
       lastNode = firstNode;  // that's the only node on this track
+      return firstNode;
     }
+
 }
 
-void StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
+StiTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
 {
   // Add a hit to this track right after the given hit
   // Note that this method is slow because it needs to 
@@ -172,6 +176,7 @@ void StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
 	    }
 	}
     }
+  return n;
 }
 
 void StiKalmanTrack::removeHit(StiHit *h)
@@ -270,4 +275,57 @@ StiHit * StiKalmanTrack::getHit(int index)
 {
   // not implemented...
   return 0;
+}
+
+void StiKalmanTrack::initialize(double alpha, double x[5], double e[15], const hitvector & v)
+{
+  hitvector::const_iterator it;
+  StiTrackNode * newNode;
+  StiHit * hit;
+  for (it=v.begin(); it!=v.end();it++)
+    {
+      hit = *it;
+      newNode = addHit(hit);
+      newNode->set(x,e,hit->x(),alpha);
+    }
+}
+
+void StiKalmanTrack::getStateNear(double x, double &xx, double state[5], double error[15])
+{
+  if (firstNode==0)  // no node in this track, return a null state and error
+    {
+      for (int i=0;i<5;i++)
+	state[i] = 0.;
+      for (int i=0;i<15;i++)
+	error[i] = 0.;
+      return;
+    }
+  StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
+  double minDist  = 1.E10;
+  double diff;
+  StiTrackNode * bestNode = firstNode;
+  StiDefaultMutableTreeNodeIterator it;
+  for (it=nodes->begin(); it!=nodes->end(); it++)
+    {
+      StiTrackNode * node = dynamic_cast<StiTrackNode *>(*it);
+      diff = node->fX - x; if (diff<0) diff = -diff;
+      if (diff<minDist) 
+	{
+	  minDist = diff;
+	  bestNode = firstNode;
+	}
+    }
+  xx = bestNode->fX;
+  bestNode->getState(state, error);  
+  delete nodes;
+}
+
+void StiKalmanTrack::getPointNear(double x, double point[3])
+{
+  double xx;
+  double state[5];
+  getStateNear(x,xx,state,0);
+  point[0] = xx;
+  point[1] = state[0];
+  point[2] = state[1];
 }
