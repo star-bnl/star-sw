@@ -68,7 +68,7 @@ public:
 		{ /* nops */  }
   virtual ~StiTrack()  { /* nops */  }
   virtual void fit(int direction=kOutsideIn); 
-  virtual void find(int direction=kOutsideIn);
+  virtual bool find(int direction=kOutsideIn);
   virtual void reset()=0;
   virtual void getMomentum(double p[3], double e[6]) const =0;
   virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point

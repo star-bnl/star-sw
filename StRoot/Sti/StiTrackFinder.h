@@ -24,7 +24,7 @@ public:
   virtual void reset()=0;
   virtual bool isValid(bool debug=false) const = 0;
 
-  virtual void find(StiTrack *track, int direction) = 0;
+  virtual bool find(StiTrack *track, int direction) = 0;
 protected:
 
 };
