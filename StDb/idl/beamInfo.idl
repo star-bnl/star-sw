@@ -11,11 +11,13 @@ struct beamInfo {
    unsigned long  runNumber;   /*   */
    long  entryTag;   /*     0=startrun, 1=endrun, 2=runave, 3=std  */
    char  blueSpecies[32];   /*     species  */
+   unsigned long  blueMassNumber;   /*   */
    float  blueEnergy;   /*     energy  */
    float  blueIntensity;   /*     Ions  */
    float  blueLifeTime;   /*     Ions per minute  */
    float  blueBunchIntensity;   /*     bunch intensity  */
    char  yellowSpecies[32];   /*     species  */
+   unsigned long  yellowMassNumber;   /*   */
    float  yellowEnergy;   /*     energy  */
    float  yellowIntensity;   /*     Ions  */
    float  yellowLifeTime;   /*     Ions per minute  */
