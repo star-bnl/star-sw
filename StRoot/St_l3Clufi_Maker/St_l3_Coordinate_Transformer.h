@@ -36,7 +36,7 @@ public:
     // global -> raw
     void global_to_raw(const St_l3_xyz_Coordinate &global , St_l3_ptrs_Coordinate &raw ) ;
     void global_to_local(const St_l3_xyz_Coordinate &global, St_l3_xyz_Coordinate &local ,St_l3_ptrs_Coordinate &raw) ;
-    void local_to_raw(const St_l3_xyz_Coordinate &local , St_l3_ptrs_Coordinate &raw ) ; 
+    void local_to_raw(const St_l3_xyz_Coordinate &global , const St_l3_xyz_Coordinate &local , St_l3_ptrs_Coordinate &raw ) ; 
     
     // Set paramaters needed for the transformation in different ways
     // This is only for the transformation z <-> timebucket the others are fixed
