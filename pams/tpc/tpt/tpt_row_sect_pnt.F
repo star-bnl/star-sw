@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.20 2000/03/17 09:05:51 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.21 2000/03/17 22:20:44 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.21  2000/03/17 22:20:44  sakrejda
+* Accidental cont removed from line:214
+*
 * Revision 1.20  2000/03/17 09:05:51  sakrejda
 * Protection against indeces out of range (unphysical z) added.
 *
@@ -210,7 +213,7 @@ c        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.lt.14) then
             else
                tpcount(irow,isect) = 1
                tpstart(irow,isect) = i
-cont               inew = rhit(ipnt)
+               inew = rhit(ipnt)
             endif
           endif
         endif
