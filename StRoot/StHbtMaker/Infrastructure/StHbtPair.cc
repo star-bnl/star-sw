@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.12 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.13 2000/10/26 16:09:16 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.13  2000/10/26 16:09:16  lisa
+ * Added OpeningAngle PairCut class and method to StHbtPair
+ *
  * Revision 1.12  2000/10/05 23:09:05  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -291,5 +294,12 @@ double StHbtPair::NominalTpcAverageSeparation() const {
   }
   AveSep = AveSep/11.0;
   return (AveSep);
+}
+
+double StHbtPair::OpeningAngle() const {
+  StHbtThreeVector p1 = mTrack1->FourMomentum().vect();
+  StHbtThreeVector p2 = mTrack2->FourMomentum().vect();
+  double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
+  return (dAngInv);
 }
 
