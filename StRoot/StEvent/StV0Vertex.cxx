@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.5 2002/03/08 20:28:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.5  2002/03/08 20:28:36  ullrich
+ * Custom Streamer written.
+ *
  * Revision 2.4  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -39,7 +42,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.5 2002/03/08 20:28:36 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -60,12 +63,12 @@ StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) 
     mDaughters[positive] = 0;
     mDcaDaughtersToPrimaryVertex[negative] = v0vtx.dcan;
     mDcaDaughtersToPrimaryVertex[positive] = v0vtx.dcap;
-    mMomentumOfDaughters[negative].setX(v0vtx.neg_px);
-    mMomentumOfDaughters[negative].setY(v0vtx.neg_py);
-    mMomentumOfDaughters[negative].setZ(v0vtx.neg_pz);
-    mMomentumOfDaughters[positive].setX(v0vtx.pos_px);
-    mMomentumOfDaughters[positive].setY(v0vtx.pos_py);
-    mMomentumOfDaughters[positive].setZ(v0vtx.pos_pz);
+    mMomentumOfDaughters_0.setX(v0vtx.neg_px);
+    mMomentumOfDaughters_0.setY(v0vtx.neg_py);
+    mMomentumOfDaughters_0.setZ(v0vtx.neg_pz);
+    mMomentumOfDaughters_1.setX(v0vtx.pos_px);
+    mMomentumOfDaughters_1.setY(v0vtx.pos_py);
+    mMomentumOfDaughters_1.setZ(v0vtx.pos_pz);
     mDcaDaughters = v0vtx.dcapn;
     mDcaParentToPrimaryVertex = v0vtx.dcav0;
 }
@@ -141,14 +144,14 @@ StV0Vertex::dcaDaughterToPrimaryVertex(StChargeSign sign) const
 const StThreeVectorF&
 StV0Vertex::momentumOfDaughter(StChargeSign sign) const
 {
-    return mMomentumOfDaughters[sign];
+    return (sign == negative ? mMomentumOfDaughters_0 : mMomentumOfDaughters_1);
 }
 
 StThreeVectorF
 StV0Vertex::momentum() const
 {
-    return (mMomentumOfDaughters[negative] +
-            mMomentumOfDaughters[positive]);
+    return (mMomentumOfDaughters_0 +
+            mMomentumOfDaughters_1);
 }
 
 float
@@ -166,7 +169,10 @@ StV0Vertex::setDcaDaughterToPrimaryVertex(StChargeSign sign, float val)
 void
 StV0Vertex::setMomentumOfDaughter(StChargeSign sign, const StThreeVectorF& v)
 {
-    mMomentumOfDaughters[sign] = v;
+    if (sign == negative)
+	mMomentumOfDaughters_0 = v;
+    else
+	mMomentumOfDaughters_1 = v;
 }
 
 void
@@ -174,3 +180,37 @@ StV0Vertex::setDcaDaughters(float val) { mDcaDaughters = val; }
 
 void
 StV0Vertex::setDcaParentToPrimaryVertex(float val) { mDcaParentToPrimaryVertex = val; }
+
+void StV0Vertex::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+	UInt_t R__s, R__c;
+	Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+	if (R__v > 1) {
+	    Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+	    return;
+	}
+	//====process old versions before automatic schema evolution
+	StVertex::Streamer(R__b);
+	mDaughters.Streamer(R__b);
+	R__b >> mDcaDaughtersToPrimaryVertex[0];
+	R__b >> mDcaDaughtersToPrimaryVertex[1];
+	mMomentumOfDaughters_0.Streamer(R__b);
+	mMomentumOfDaughters_1.Streamer(R__b);
+	R__b >> mDcaDaughters;
+	R__b >> mDcaParentToPrimaryVertex;
+	R__b.CheckByteCount(R__s, R__c, Class());
+	//====end of old versions
+    }
+    else {
+	Class()->WriteBuffer(R__b,this);
+    }
+} 
+
+
+
+    
+
+    

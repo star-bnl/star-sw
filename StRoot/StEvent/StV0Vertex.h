@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.4 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StV0Vertex.h,v 2.5 2002/03/08 20:28:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 2.5  2002/03/08 20:28:37  ullrich
+ * Custom Streamer written.
+ *
  * Revision 2.4  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -70,11 +73,13 @@ public:
 private:
     StPtrVecTrack    mDaughters;
     Float_t          mDcaDaughtersToPrimaryVertex[2];
-    StThreeVectorF   mMomentumOfDaughters[2];
+    //    StThreeVectorF   mMomentumOfDaughters[2];
+    StThreeVectorF   mMomentumOfDaughters_0; // negative
+    StThreeVectorF   mMomentumOfDaughters_1; // positive
     Float_t          mDcaDaughters;
     Float_t          mDcaParentToPrimaryVertex;
 
     StObject* clone() const;
-    ClassDef(StV0Vertex,1)
+    ClassDef(StV0Vertex,2)
 };
 #endif
