@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.49  2000/06/09 18:02:38  ward
+// Removed the gets() for mErr.
+//
 // Revision 1.48  2000/03/07 21:52:14  ward
 // Converted from assert() to kStFatal.
 //
@@ -698,7 +701,6 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  return 0;
 }
 Int_t St_tpcdaq_Maker::Make() {
-  char junk[12];
   int ii,errorCode;
   printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
   mErr=0;
@@ -712,11 +714,7 @@ Int_t St_tpcdaq_Maker::Make() {
   assert(!m_DataSet->GetList());
   Output();
   if(mErr) {
-    PP"------------------------------------------------------\n");
-    PP"Hello.  This \007is Herb (ward@physics.utexas.edu).  We have a very\n");
-    PP"severe error.  Please record this error code: %d\n",mErr);
-    PP"and send it to me along with (1) the .daq file, (2) the event number,\n");
-    PP"(3) the bfc() arguments, and (4) $STAR.  Press return to continue.  "); gets(junk);
+    PP"St_tpcdaq_Maker failed with error code %d.\n",mErr);
     return kStFatal;
   } else {
     printf("Got through St_tpcdaq_Maker OK.\n");
