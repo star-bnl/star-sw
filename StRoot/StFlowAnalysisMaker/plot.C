@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.59 2004/11/19 16:54:40 posk Exp $
+// $Id: plot.C,v 1.60 2004/12/02 16:10:55 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,6 +33,7 @@ char     tmp[10];
 TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
+  gInterpreter->ProcessLine(".O0");
 
   //Bool_t includeFtpc = kTRUE;
   Bool_t includeFtpc = kFALSE;
@@ -739,7 +740,7 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) can->Print(".ps");
-    else if (strstr(tmp,"q")!=0) return can;
+    else if (strstr(tmp,"q")!=0) return;
   }
   cout << "  plotAll Done" << endl;
 }
@@ -777,6 +778,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.60  2004/12/02 16:10:55  posk
+// Added  gInterpreter->ProcessLine(".O0");
+//
 // Revision 1.59  2004/11/19 16:54:40  posk
 // Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
 //
