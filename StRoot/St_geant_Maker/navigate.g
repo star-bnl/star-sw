@@ -93,6 +93,7 @@
    }
 
    par1=LOCB(para); 
+   call UCOPY(Lnam(k),para(npar+1),1);
   
 *  call UHTOC(Lnam(k),4,cn,4)
 *  call GFPARA (cn,copy,0,npr,natt,parb,attr)
