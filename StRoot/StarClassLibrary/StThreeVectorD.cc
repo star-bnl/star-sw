@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.9 2001/04/11 23:03:39 ullrich Exp $
+ * $Id: StThreeVectorD.cc,v 1.10 2001/05/04 20:01:33 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.10  2001/05/04 20:01:33  perev
+ * Bug, Redaversion added
+ *
  * Revision 1.9  2001/04/11 23:03:39  ullrich
  * Removed unused variables in streamer.
  *
@@ -128,6 +131,7 @@ void StThreeVectorD::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorD.
    if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion();if (R__v){/*touch*/}; 
       R__b >> mX1;
       R__b >> mX2;
       R__b >> mX3;
