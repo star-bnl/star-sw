@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*********************************************************************
- * $Id: EEsmdCal.h,v 1.1 2004/06/12 04:09:20 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.2 2004/06/15 20:03:26 balewski Exp $
  *********************************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -42,8 +42,11 @@ class EEsmdCal {
   int iSect; /// the same info, counted from 0
   
   float thrMipSmdE; // threshold on MIP signal in SMD strip
-  // cuts: 0=inclusive, 1=VxV, 2=vetoUxV, 3&4=1&2 but with fiducial tower cut
-  enum {kCut=5}; 
+  int emptyStripCount; // minimal # of SMD strops below threshold
+  int iTagLayer; // used to tag all spectra : 0-3 means T,P,Q,R
+
+  // cuts: 0=inclusive, 1=tagged with PostShower,  2=Tagged & UxVinTower
+  enum {kCut=3}; 
 
   TH1F *hA[32]; // some global (test) histograms
   // all histograms are created for only one sector
@@ -56,9 +59,8 @@ class EEsmdCal {
   void initSmdHist(char cut, char * title); 
   void initAuxHisto();
   
-  void fillTailHisto_a();
   void fillSmdHisto_a();
-  void fillTailHisto1(char cut, int iEta, int iPhi);
+  void fillOneTailHisto(char cut, int iEta, int iPhi);
 
   int getUxVmip();
 
@@ -73,7 +75,7 @@ class EEsmdCal {
   /// local event storage for all instrumented sectors
   /// remeber to clear all variables bewlow for every event
   float tileAdc[kTile][MaxEtaBins][MaxPhiBins]; // adc-ped for : T,P,Q,R
-  int tileThr[kTile][MaxEtaBins][MaxPhiBins]; // adc-ped>thr for : T,P,Q,R
+  int tileTag[kTile][MaxEtaBins][MaxPhiBins]; // tagg  for : T,P,Q,R
   float smdE[MaxSectors][MaxSmdPlains][MaxSmdStrips]; // energy in arb.uni.
 
   void clear();
@@ -89,6 +91,9 @@ class EEsmdCal {
   void finish();
 
   void init(); 
+  void setMipCuts(float x, int y, int z) 
+    { thrMipSmdE=x; emptyStripCount=y; iTagLayer=z;}
+
   void saveHisto(TString fname="fixMe3");
  
   ClassDef(EEsmdCal,1) 
@@ -99,6 +104,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.2  2004/06/15 20:03:26  balewski
+ * to match web-descriptio
+ *
  * Revision 1.1  2004/06/12 04:09:20  balewski
  * start
  *

@@ -89,7 +89,7 @@ void EEsmdPlain::findMipPattern(){
     p+=xOffset;// move pointer a bit
   }
 
-
+  //  print(1);
 }
 
 //-------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.1 2004/06/12 04:09:21 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.2 2004/06/15 20:03:26 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -20,8 +20,7 @@ void EEsmdCal::initTileHist(char cut, char *title) {
 
   char *cTile[kTile]={"Tower","Pres1","Pres2","Post"};
   char cT[kTile]={'T','P','Q','R'};
-
-  int colA[kCut]={kBlack,kMagenta,kGreen,kRed,kBlue};
+  int colA[kCut]={kBlack,kRed,kBlue};
 
   int iT=0;
   for(iT=0;iT<kTile;iT++) {
@@ -52,9 +51,7 @@ void EEsmdCal::initSmdHist(char cut, char *title) {
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
 
-  int colA[kCut]={kBlack,kMagenta,kBlue,kRed,kGreen};
-
-
+  int colA[kCut]={kBlack,kBlue,kRed};
   int iuv,istrip;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
     for(istrip=0;istrip<MaxSmdStrips;istrip++) {
@@ -118,24 +115,24 @@ void EEsmdCal::initAuxHisto(){
 
   //..................
   sprintf(tt1,"ep%02dUorV",sectID);
-  sprintf(tt2,"MIP #DeltaEof 2-strips , SMD %02dUorV; strip ID; MIP #DeltaE ",sectID);
+  sprintf(tt2,"MIP #DeltaEof 2-strips in tagged tower , SMD %02dUorV; strip ID; MIP #DeltaE ",sectID);
   h2=new TH2F(tt1,tt2,30,0,300,20,-.5,3.5);
   hA[20]=(TH1F*)h2;
   
   //..................
-  sprintf(tt1,"xy%02d",sectID);
-  sprintf(tt2,"Accepted MIP position , SMD plane %02dUorV; X(cm); Y(cm) ",sectID);
+  sprintf(tt1,"xy%02dc",sectID);
+  sprintf(tt2," accepted MIP position , SMD plane %02dUorV; X(cm); Y(cm) ",sectID);
   h2=new TH2F(tt1,tt2,100,-40,160,100,-250,-50);
   hA[21]=(TH1F*)h2;
   
-  sprintf(tt1,"xy%02dc",sectID);
-  sprintf(tt2,"X/cm vs. Y/cm for acntral MIP's , SMD plane %02dU+V",sectID);
+  sprintf(tt1,"xy%02dct",sectID);
+  sprintf(tt2," accepted MIP position in tagged tower , SMD plane %02dUorV; X(cm); Y(cm) ",sectID);
   h2=new TH2F(tt1,tt2,200,-40,160,200,-250,-50);
   hA[22]=(TH1F*)h2;
   
   //..................
   sprintf(tt1,"eq%02dUV",sectID);
-  sprintf(tt2,"MIP #DeltaE from 4-strips, SMD %02dU+V; eta bin;  #DeltaE a.u.",sectID);
+  sprintf(tt2,"MIP #DeltaE from 4-strips in tagged tower, SMD %02dU+V; eta bin;  #DeltaE a.u.",sectID);
   h2=new TH2F(tt1,tt2,12,.5,12.5,20,-.5,7.5);
   hA[23]=(TH1F*)h2;
   
@@ -150,32 +147,13 @@ void EEsmdCal::initAuxHisto(){
 
 }
 
-//--------------------------------------------------
-//--------------------------------------------------
-void EEsmdCal::fillTailHisto_a(){
-  // Fill inclusive spectra for one sector 
-  int iCut=0;
-  
-  int iT=0;
-  for(iT=0;iT<kTile;iT++) {
-    for(char iSub=0; iSub<MaxSubSec; iSub++){
-      for(int iEta=0; iEta<MaxEtaBins; iEta++){
-	int iPhi=iSect*MaxSubSec+iSub;
-	TH1F *h=hT[iCut][iT][iEta][iPhi];
-	h->Fill(tileAdc[iT][iEta][iPhi]);
-      }
-    }
-  }
-}
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::fillTailHisto1(char cut, int iEta, int iPhi){
+void EEsmdCal::fillOneTailHisto(char cut, int iEta, int iPhi){
   // Fill inclusive spectra for one sector 
   int iCut=cut-'a';
   assert(iCut>=0 && iCut<kCut);
-
-  if(!tileThr[1][iEta][iPhi]) return;// no data in ?
 
   int iT=0;
   for(iT=0;iT<kTile;iT++) {
