@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.31 2003/09/18 17:16:20 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.32 2003/09/19 14:34:39 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.32  2003/09/19 14:34:39  suaide
+// Removed muDST option from StEmcADCtoEMaker. Will find another solution for that
+//
 // Revision 1.31  2003/09/18 17:16:20  suaide
 // Modifications in the way StEmcADCtoEMaker handles the database requests,
 // fixed a bug related to GetDate() that was making the maker extremely slow,
@@ -117,9 +120,9 @@ This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 #include "StEmcUtil/others/emcInternalDef.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TString.h"
 
 class StEmcCollection;
-class StMuEmcCollection;
 class StEmcDecoder;
 class StEmcGeom;
 class StBemcData;
@@ -161,6 +164,8 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mPrint;
   Bool_t            mSave[MAXDETBARREL]; 
   Bool_t            mFillHisto;
+  
+  TString           mMuName;
 					 
 					 
   void              zeroAll(); ///< Zero all temporary vectors
@@ -173,29 +178,25 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
   Bool_t            clearOldEmc(); ///< Clear old emc collection
   Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
-  Bool_t            getEmcFromMuDst(StMuEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
   Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
  protected:    
     
  public: 
                  
-  StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
+                            StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
   virtual                   ~StEmcADCtoEMaker(); ///< StEmcADCtoEMaker destructor
   virtual Int_t             Init(); ///< Init function. This method initializes the histograms
   virtual Int_t             Make(); ///< Process each event
   virtual Int_t             Finish(); ///< This method creates mean ADC and RMS histograms.
    
-  controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
-  StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
-  StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
-  void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
-  void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
-  void              setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
-  void              setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.31 2003/09/18 17:16:20 suaide Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
+  controlADCtoE_st*         getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
+  StEmcCollection*          getEmcCollection() {return mEmc;} ///< Return emcCollection
+  StBemcData*               getBemcData()      {return mData;} ///< Return BemcData pointer
+  void                      clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
+  void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
+  void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
+  void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.32 2003/09/19 14:34:39 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 1)  
 };

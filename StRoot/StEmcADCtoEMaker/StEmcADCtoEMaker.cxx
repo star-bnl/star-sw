@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.53 2003/09/18 17:15:53 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.54 2003/09/19 14:34:39 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.54  2003/09/19 14:34:39  suaide
+// Removed muDST option from StEmcADCtoEMaker. Will find another solution for that
+//
 // Revision 1.53  2003/09/18 17:15:53  suaide
 // Modifications in the way StEmcADCtoEMaker handles the database requests,
 // fixed a bug related to GetDate() that was making the maker extremely slow,
@@ -131,14 +134,8 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
 #include "StBemcData.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuDebug.h"
-#include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
 
 #define STATUS_OK 1
-//VP #define MAXDETBARREL 4  //already defined
 #define CAP1 124
 #define CAP2 125
 
@@ -647,55 +644,6 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
   return kTRUE;
 }
 //_____________________________________________________________________________
-Bool_t StEmcADCtoEMaker::getEmcFromMuDst(StMuEmcCollection *muEmc)
-{
-	mData->NTowerHits = 0;
-	mData->NSmdHits = 0;
-	mData->ValidTowerEvent = kFALSE; 
-	mData->TowerPresent = kFALSE;
-	mData->ValidSMDEvent = kFALSE;
-	mData->SMDPresent = kFALSE;
-  if(!muEmc) return kFALSE;
-  for(Int_t det=0;det<MAXDETBARREL;det++)
-  {
-    int nh;
-    if (det==0) nh = 4800; 
-    if (det==1) nh=muEmc->getNPrsHits(det+1);
-    if (det==2 || det==3) nh=muEmc->getNSmdHits(det+1);
-    for(Int_t j=0;j<nh;j++)
-    {
-      Int_t m,e,s,a,cal,rid;
-      if(det==0) // towers have only ADC
-      {
-        a = muEmc->getTowerADC(j+1,det+1);
-				mData->TowerADC[j] = a; 
-				mData->ValidTowerEvent=kTRUE; 
-				mData->TowerPresent = kTRUE;
-				mData->NTowerHits++;
-      }      
-      if(det==2 || det==3) //smd
-      {
-        StMuEmcHit* hit=muEmc->getSmdHit(j,det+1);
-        rid=hit->getId();
-        mGeo[det]->getBin(rid,m,e,s);
-        a=hit->getAdc();
-        cal=hit->getCalType();
-			  if(det==2) {mData->SmdeADC[rid-1] = a;mData->NSmdHits++;}
-				if(det==3) {mData->SmdpADC[rid-1] = a;mData->NSmdHits++;}
-        if(det==2) 
-        {
-          Int_t RDO,index;
-          mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-          mData->TimeBin[RDO]=cal;
-					mData->ValidSMDEvent=kTRUE;
-					mData->SMDPresent=kTRUE;
-        }
-      }
-    }
-  }
-  return kTRUE;
-}
-//_____________________________________________________________________________
 /*!
 This method gets EMC hits from different sources. First it looks for DAQ datasets.
 if Not present, looks for StEvent hits to recalibrate.
@@ -742,22 +690,10 @@ Bool_t StEmcADCtoEMaker::getEmc()
 		
 		StEmcCollection* emctemp=event->emcCollection();
   	if(!emctemp)  return kFALSE;
-  	if(getEmcFromStEvent(emctemp)) return kTRUE;
+  	return getEmcFromStEvent(emctemp);
 	}  
   
-  // No StEvent, will check muDst
-  StMuDstMaker *m = (StMuDstMaker*)GetMaker("muDstMaker");
-  if(m)
-  {
-    StMuDst* muDst = m->muDst();
-    StMuEvent* mu = muDst->event();
-    StMuEmcCollection *muEmc = muDst->emcCollection();
-  	mData->RunNumber = mu->runInfo().runId();
-		mRunNumber = mData->RunNumber;
-    if(muEmc) return getEmcFromMuDst(muEmc);
-  }
-	
-  return kFALSE;  
+  return kFALSE;
 }
 //_____________________________________________________________________________
 /*!
