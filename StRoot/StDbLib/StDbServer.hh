@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.10 2000/03/01 20:56:16 porter Exp $
+ * $Id: StDbServer.hh,v 1.11 2000/08/15 22:51:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.11  2000/08/15 22:51:52  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.10  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -151,7 +155,7 @@ public:
   virtual bool rollBack(StDbNode* node);
   virtual bool rollBack(StDbTable* table);
   virtual bool QueryDescriptor(StDbTable* table);
-  virtual void selectDb();
+  virtual bool selectDb();
 
   // provide direct SQL access
   virtual tableQuery* getQueryObject();
@@ -184,9 +188,9 @@ StDbServer::closeConnection(){
 ////////////////////////////////////////////////////////////////
 
 inline
-void StDbServer::selectDb(){
+bool StDbServer::selectDb(){
   if(!mdatabase->IsConnected()) initServer();
-  mdatabase->selectDb(mdbName,mdbType,mdbDomain);
+  return mdatabase->selectDb(mdbName,mdbType,mdbDomain);
 }
 
 ////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.19 2000/06/30 01:57:02 porter Exp $
+ * $Id: StDbTable.cc,v 1.20 2000/08/15 22:51:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.20  2000/08/15 22:51:52  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.19  2000/06/30 01:57:02  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -82,6 +86,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.20  2000/08/15 22:51:52  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.19  2000/06/30 01:57:02  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -378,7 +386,6 @@ char* dup=0;
 
 return dup;
 }
-
 
 /////////////////////////////////////////////////////////////////////
 

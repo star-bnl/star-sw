@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.10 2000/07/27 01:59:18 porter Exp $
+ * $Id: MysqlDb.cc,v 1.11 2000/08/15 22:51:51 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.11  2000/08/15 22:51:51  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.10  2000/07/27 01:59:18  porter
  * fixed bug in delete vs delete []
  * fixed up LDFLAGS for linux/g++
@@ -528,11 +532,13 @@ unsigned int mysqlError;
        reConnect();  
        if(mysql_select_db(&mData,dbName)){
          cerr<< "Error selecting database=" << dbName << endl;
+         tOk=false;
        } else {
          tOk=true;
        }
     } else {
        cerr<< "Error selecting database=" << dbName << endl;
+       tOk=false;
     }
  } else {
    tOk=true;

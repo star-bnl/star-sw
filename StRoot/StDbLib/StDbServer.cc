@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.12 2000/03/01 20:56:16 porter Exp $
+ * $Id: StDbServer.cc,v 1.13 2000/08/15 22:51:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.13  2000/08/15 22:51:52  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.12  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -136,23 +140,25 @@ if(!mconnectState){
 
   if(!mdatabase->IsConnected()){
     //cout << " Will init server = " << mserverName<<endl;;
-     mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber);
+    if(mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber)){
      // cout << " Did init server = " << mserverName<<endl;;
      mconnectState = true;
+    }
   } else {
-       selectDb();
-       mconnectState=true;
+       if(selectDb()){
+         mconnectState=true;
+       } else {
+         mconnectState=false;
+       }
   }
 
        if(!StDbManager::Instance()->IsQuiet()){
          cout << "Server connecting to DB =" << mdbName ;
          cout << " On Host = " << mhostName <<":"<<mportNumber<<endl; 
        }
-
-
 }
 
-return true;
+return mconnectState;
 }
 
 
