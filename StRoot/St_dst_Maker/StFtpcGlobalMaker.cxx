@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.6 2002/08/02 11:22:31 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.7 2002/10/11 15:47:33 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.7  2002/10/11 15:47:33  oldi
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+//
 // Revision 1.6  2002/08/02 11:22:31  oldi
 // MaxDCA is taken from StFtpcTrackingParams, now (it was hardcoded before).
 //
@@ -153,11 +156,11 @@ Int_t StFtpcGlobalMaker::Make(){
     gMessMgr->Info() << "Global fit for FTPC tracks not redone, because used vertex for tracking was the primary vertex." << endm;
     /*
 // Redo unconstrained fit with primary vertex instead of preVertex
-    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
     StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
     gMessMgr->Info() << "Using primary vertex: "<< refit_vertex->GetX() << "+-" << refit_vertex->GetXerr() << ", " << refit_vertex->GetY() << "+-" << refit_vertex->GetYerr()  << ", " << refit_vertex->GetZ()  << "+-" << refit_vertex->GetZerr() << endm;
     Bool_t bench = (Bool_t)false;
-    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, fcl_fppoint, fpt_fptrack, bench, params->MaxDca(0));
+    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, fcl_fppoint, fpt_fptrack, bench, 
+                                                StFtpcTrackingParams::Instance()->MaxDca(0));
     refitter->FitAnddEdxAndWrite(fpt_fptrack,fdepar,-primvtx->id);
     delete refitter;
     delete refit_vertex;

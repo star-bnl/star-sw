@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.11 2002/10/03 10:34:24 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.12 2002/10/11 15:47:35 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.12  2002/10/11 15:47:35  oldi
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+//
 // Revision 1.11  2002/10/03 10:34:24  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -144,15 +147,15 @@ Int_t StFtpcPrimaryMaker::Make(){
   }
   
   // Refit FTPC tracks with primary vertex
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();  
   StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
   Bool_t bench = (Bool_t)false;
-  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, params->MaxDca(0));
+  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 
+					      StFtpcTrackingParams::Instance()->MaxDca(0));
   refitter->FitAndWrite(tracks, primvtx->id);
   delete refitter;
   delete refit_vertex;
-  
-  // Increase size or create  primtrk to hold all FTPC primary tracks
+
+  // Increase size or create primtrk to hold all FTPC primary tracks
   
   Int_t No_of_Tracks = 0;
   No_of_Tracks += tracks->GetNRows();
@@ -214,8 +217,8 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->map[0]    = gtrk[iglobtrk].map[0] + 1 ;
       ptrk->map[1]    = gtrk[iglobtrk].map[1];
       
-      ptrk->id        =  trk->id_globtrk;
-      ptrk->iflag     =  800 + trk->flag;
+      ptrk->id        = trk->id_globtrk;
+      ptrk->iflag     = 800 + trk->flag;
       ptrk->det_id    = gtrk[iglobtrk].det_id;
       ptrk->method    = gtrk[iglobtrk].method;
       ptrk->pid       = gtrk[iglobtrk].pid;
