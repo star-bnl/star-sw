@@ -12,7 +12,7 @@ use Tie::IxHash;
 #$star = $ENV{STAR};
 $star_level = $ENV{STAR_LEVEL};
 $star_lib = $ENV{STAR_LIB};
-$star_sys = $ENV{STAR_HOST_SYS};
+$star_sys = $ENV{STAR_SYS};
 
 #-----------------------------------------------------------------
 $now = localtime;
@@ -44,7 +44,7 @@ $outfile = "/afs/rhic/star/doc/www/comp/prod/$output_string\.html";
 
 #print "STAR_SYS = ",$star_sys, "\n";
  
-if($star_sys =~ /i386_redhat51/) {
+if($star_sys =~ /i386_redhat61/) {
 
 &beginLiHtml();
  }
@@ -114,7 +114,7 @@ print HTML "  <head>\n";
 print HTML "          <title>CVS revision content of dev library</title>\n";
 print HTML "  </head>\n";
 print HTML "  <body BGCOLOR=\"#ccffff\">\n"; 
-print HTML " <center> <h1>CVS Revision Content for Shared Libraries in DEV on Linux</h1></center>\n";
+print HTML " <center> <h1>CVS Revision Content for Shared Libraries in DEV on RedHat61</h1></center>\n";
 print HTML "<a href=\"http://duvall.star.bnl.gov/cgi-bin/didenko/cvsShLinux.pl?show=yes\"><h3>Back</h3></a>\n";
 print HTML "<p>";
 }
