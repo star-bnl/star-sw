@@ -1,5 +1,11 @@
-// $Id: StFtpcPoint.hh,v 1.8 2002/04/05 16:50:40 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.9 2002/06/04 13:34:59 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.9  2002/06/04 13:34:59  oldi
+// Transformation of local FTPC coordinates in global coordinates introduced.
+// An additional flag keeps track in which coordinate system the point position
+// is measured.
+// 'Tracked' flag is set correctly, now.
+//
 // Revision 1.8  2002/04/05 16:50:40  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -79,6 +85,7 @@ private:
   TVector3  mCoord;         // vector of cluster coordinates
   TVector3  mError;         // vector of errors on cluster coordinates
   
+  Bool_t    mGlobalCoord;   // flag that indicates if the hit is stored in global or local (FTPC) coordinates
   Bool_t    mUsed;          // flag that indicates if the hit is assigned to a track 
   Int_t     mHitNumber;     // number of this cluster in this event
   Int_t     mNextHitNumber; // number of next hit on same track
@@ -122,8 +129,13 @@ public:
                  StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
                  StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
+
+  // coordinate transformations
+  void TransformFtpc2Global();
+  void TransformGlobal2Ftpc();
+
   virtual Int_t  WriteCluster();                                // writes cluster to disc
-  virtual Int_t  ToTable(fcl_fppoint_st *point_st);                                       // writes cluster to STAF table
+  virtual Int_t  ToTable(fcl_fppoint_st *point_st);             // writes cluster to STAF table
   
   // getter
   TVector3 GetCoord()  { return mCoord;    }
@@ -142,7 +154,10 @@ public:
   StFtpcTrack *GetTrack(TObjArray *tracks) const;
          void  SetTrackedFlag(Bool_t tracked);
        Bool_t  GetTrackedFlag();
+         void  SetGlobalFlag(Bool_t global);
+       Bool_t  GetGlobalFlag();
 
+  Bool_t   IsInGlobalCoord()  const { return mGlobalCoord;   }
   Bool_t   GetUsage()         const { return mUsed;          }
   Int_t    GetHitNumber()     const { return mHitNumber;     }
   Int_t    GetNextHitNumber() const { return mNextHitNumber; }
@@ -168,6 +183,7 @@ public:
   void    SetYerr(Double_t f)     {     mError.SetY(f); }
   void    SetZerr(Double_t f)     {     mError.SetZ(f); }
   
+  void    SetGlobalCoord(Bool_t f)  {   mGlobalCoord =  f; SetGlobalFlag(f);  }
   void    SetUsage(Bool_t f)        {          mUsed =  f; SetTrackedFlag(f); }
   void    SetHitNumber(Int_t f)     {     mHitNumber =  f;  }
   void    SetNextHitNumber(Int_t f) { mNextHitNumber =  f;  }
@@ -202,10 +218,10 @@ inline StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const
 inline void StFtpcPoint::SetTrackedFlag(Bool_t tracked) 
 {
   // Sets flag, if the cluster was used for tracking.
-  // This has to be done due to consitency with the point bank.
+  // This has to be done due to consistency with the point bank.
 
   Long_t old_flag = GetFlags();
-  SetFlags((old_flag & 0xFFFFFFEF) | ((Long_t)tracked*16));
+  SetFlags((old_flag & 0xFFFFFFDF) | ((Long_t)tracked*32));
 }
 
 
@@ -213,7 +229,24 @@ inline Bool_t StFtpcPoint::GetTrackedFlag()
 {
   // Returns true, if 'tracked flag' ist set, otherwise returns false.
 
-  return (Bool_t)(GetFlags() & (Long_t)16);
+  return (Bool_t)(GetFlags() & (Long_t)32);
+}
+
+
+inline void StFtpcPoint::SetGlobalFlag(Bool_t global) 
+{
+  // Sets flag, if the cluster is measured in global coordinates.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFAF) | ((Long_t)global*64));
+}
+
+
+inline Bool_t StFtpcPoint::GetGlobalFlag()
+{
+  // Returns true, if 'global flag' ist set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)64);
 }
 
 

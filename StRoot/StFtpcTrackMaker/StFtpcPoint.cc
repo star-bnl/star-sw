@@ -1,5 +1,11 @@
-// $Id: StFtpcPoint.cc,v 1.8 2002/03/05 16:53:10 jcs Exp $
+// $Id: StFtpcPoint.cc,v 1.9 2002/06/04 13:34:57 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.9  2002/06/04 13:34:57  oldi
+// Transformation of local FTPC coordinates in global coordinates introduced.
+// An additional flag keeps track in which coordinate system the point position
+// is measured.
+// 'Tracked' flag is set correctly, now.
+//
 // Revision 1.8  2002/03/05 16:53:10  jcs
 // force data type definitions to avoid compiler warnings (this is a correct
 // but inelegant fix which must be changed)
@@ -43,6 +49,7 @@
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcPoint.hh"
+#include "StMessMgr.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
@@ -60,8 +67,10 @@ StFtpcPoint::StFtpcPoint()
 {
   // Default constructor.
   // Sets all pointers to zero.
+  
+  SetGlobalCoord(kFALSE);
 
-  SetUsage(false);
+  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -98,7 +107,7 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   // to the fcl_fppoint_st(ructure) (cluster data found by the cluster finder) the 
   // constructor copies the cluster information into its data members.
 
-  SetUsage(false);
+  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -124,6 +133,8 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   SetSigmaR((Double_t) point_st->s_r);
   SetFlags((Long_t) point_st->flags);
 
+  SetGlobalCoord(GetGlobalFlag());
+
   return;
 }
 
@@ -146,7 +157,7 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 {
   // Constructor which fills all values found by the cluster finder directly.
 
-  SetUsage(false);
+  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -172,6 +183,8 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
   SetSigmaR(s_r);
   SetFlags(flags);
 
+  SetGlobalCoord(GetGlobalFlag());
+
   return;
 }  
 
@@ -180,7 +193,10 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
 {
   // Constructor which takes the x, y, and z coodrinate and the pad row.
 
-  SetUsage(false);
+  // Hit position is set in local coordinates per default! Change flag (SetGlobalCoord(kTRUE)) if necessary.
+  SetGlobalCoord(kFALSE); // Set to local per default.
+
+  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -214,6 +230,97 @@ StFtpcPoint::~StFtpcPoint()
 {
   // Destructor.
   // Does nothing except destruct.
+}
+
+
+void StFtpcPoint::TransformFtpc2Global()
+{
+  // Coordinate Transformation.
+  // Shift and Rotation of Ftpc coordinates due to the rotation of the TPC with respect to the magnet.
+  // (The FTPC was aligned with respect to the TPC!)
+  // Turns FTPC due to observed shift of reconstructed vertex position in y direction.
+  // Errors are left as they were.
+
+  if (!IsInGlobalCoord()) {
+   
+    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+    
+    StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
+
+    // internal FTPC rotation (FTPC east only)
+    if (org.z() < 0) {
+      // check if hit is in FTPC east
+      
+      // first tranformation to new origin (FTPC installation point)
+      org.setZ(org.z() - params->InstallationPointZ());
+      
+      // actual rotation
+      org = params->FtpcRotation() * org;
+      
+      // set z-position back to original value
+      org.setZ(org.z() + params->InstallationPointZ());
+    }
+    
+    StThreeVectorD transform = params->TpcToGlobalRotation() * org + params->TpcPositionInGlobal();
+    
+    mCoord.SetX(transform.x());
+    mCoord.SetY(transform.y());
+    mCoord.SetZ(transform.z());
+    
+    SetGlobalCoord(kTRUE);
+  }
+  
+  else {
+    // hit is in global coordinates already
+    gMessMgr->Message("", "W", "OST") << "Hit is in global coordinates already! Not transformed." << endm;
+  }
+  
+  return;
+}
+
+
+void StFtpcPoint::TransformGlobal2Ftpc()
+{
+  // Coordinate Transformation.
+  // Shift and Rotation of Ftpc coordinates due to the rotation of the TPC with respect to the magnet.
+  // (The FTPC was aligned with respect to the TPC!)
+  // Turns FTPC due to observed shift of reconstructed vertex position in y direction.
+  // Errors are left as they were.
+  
+  if (IsInGlobalCoord()) {
+    
+    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+    
+    StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
+    StThreeVectorD transform = params->GlobalToTpcRotation() * (org - params->TpcPositionInGlobal());
+
+    // internal FTPC rotation (FTPC east only)
+    if (transform.z() < 0) {
+      // check if hit is in FTPC east
+      
+      // first tranformation to new origin (FTPC installation point)
+      transform.setZ(transform.z() - params->InstallationPointZ());
+      
+      // actual rotation
+      transform = params->FtpcRotationInverse() * transform;
+      
+      // set z-position back to original value
+      transform.setZ(transform.z() + params->InstallationPointZ());
+    }
+    
+    mCoord.SetX(transform.x());
+    mCoord.SetY(transform.y());
+    mCoord.SetZ(transform.z());
+    
+    SetGlobalCoord(kFALSE);
+  }
+
+  else {
+    // hit is in local (FTPC) coordinates already
+    gMessMgr->Message("", "W", "OST") << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
+  }
+
+  return;
 }
 
 
