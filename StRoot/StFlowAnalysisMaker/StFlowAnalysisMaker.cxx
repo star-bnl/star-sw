@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.30 2000/05/26 21:25:20 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.31 2000/06/01 18:29:56 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.31  2000/06/01 18:29:56  posk
+// When resolution=0 reset histograms.
+//
 // Revision 1.30  2000/05/26 21:25:20  posk
 // Use TProfile2D class and profile projection methods.
 // Correction needed for >2 subevents.
@@ -178,11 +181,11 @@ Int_t StFlowAnalysisMaker::Make() {
       FillFromTags();                        // get event quantities
       FillEventHistograms();                 // fill from Flow Tags
     } else if (pFlowEvent) {
-      cout << "$$$$$ null FlowTag pointer" << endl;
+      cout << "##### null FlowTag pointer" << endl;
       FillFromFlowEvent();                   // get event quantities
       FillEventHistograms();                 // fill from FlowEvent
     } else {
-      cout << "$$$$$ null FlowEvent and FlowTag pointers" << endl;
+      cout << "##### null FlowEvent and FlowTag pointers" << endl;
       return kStOK;
     }
     // Particle quantities
@@ -199,7 +202,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "******************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.30 2000/05/26 21:25:20 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.31 2000/06/01 18:29:56 posk Exp $"
        << endl;
   cout << "******************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -996,7 +999,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
       histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
 
-      // Creat the v 2D histogram
+	// Creat the v 2D histogram
       histTitle = new TString("Flow_v2D_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -1044,6 +1047,9 @@ Int_t StFlowAnalysisMaker::Finish() {
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
+	histFull[k].histFullHar[j].mHist_v2D-> Reset();
+	histFull[k].histFullHar[j].mHist_vEta->Reset();
+	histFull[k].histFullHar[j].mHist_vPt ->Reset();
       }
 
       // Fit q distribution
