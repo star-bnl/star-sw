@@ -1,15 +1,23 @@
 -*- mode:outline -*-
-Time-stamp: <99/11/04 16:00:49 ullrich>
+Time-stamp: <00/03/02 12:53:13 ullrich>
 
 * Package: StAnalysisMaker
 
 * Purpose:
-Sample analysis maker using StEvent
+Sample analysis maker using StEvent.
+Note, that this is NOT a grown-up analysis package.
+It should only be used as a template or example
+on how to make one.
 
 * Author:
 Torre Wenaus, BNL
 
 * History:
+00/03/02  T. Ullrich
+Clean up, make code compile without
+warnings on Linux. Note: countPrimaryPions
+was added a while ago.
+
 11/04/1999 T. Ullrich
 Updated to deal with new version of StEvent.
 Code cleaned up a bit.
@@ -24,7 +32,6 @@ Code cleaned up a bit.
 - separate out event analysis into separate functions
 
 * Status:
-compiles on all platforms but functionality not fully
-tested. 
+Running smoothly, compile on all platforms.
 
 
