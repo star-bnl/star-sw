@@ -30,11 +30,11 @@ RadLengthPlots::~RadLengthPlots()
 void RadLengthPlots::fill(StiTrackContainer *mTrackStore)
 {
   //loop over tracks
-  for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
+  for (vector<StiTrack*>::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
-      const StiTrack* track = (*trackIt).second;
+      const StiTrack* track = *trackIt;
       const StiKalmanTrack * kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if(!track) continue; 
       double nPts = track->getPointCount();
