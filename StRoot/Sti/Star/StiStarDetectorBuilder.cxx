@@ -17,19 +17,17 @@ StiStarDetectorBuilder::StiStarDetectorBuilder(bool active)
 StiStarDetectorBuilder::~StiStarDetectorBuilder()
 {}
 
-void StiStarDetectorBuilder::buildMaterials()
+void StiStarDetectorBuilder::buildDetectors(StMaker&s)
 {
-  _messenger << "StiStarDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
-  _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
-  _messenger << "StiStarDetectorBuilder::buildMaterials() - INFO - Done" << endl;
-}
+  string name;
+  cout << "StiStarDetectorBuilder::buildDetectors() -I- Started" << endl;
+  //One row
+  setNRows(1);
+  //12 Sectors
+  setNSectors(0,12);
 
-void StiStarDetectorBuilder::buildShapes()
-{
-  _messenger << "StiStarDetectorBuilder::buildShapes() - INFO - Started" << endl;
-  // beam pipe
-  
+ _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
+  _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
   _beamPipeShape = new StiCylindricalShape;
   _beamPipeShape->setName("Star/pipe");
   _beamPipeShape->setThickness(0.1); // to be checked
@@ -37,13 +35,7 @@ void StiStarDetectorBuilder::buildShapes()
   _beamPipeShape->setOpeningAngle( M_PI/6. );
   _beamPipeShape->setOuterRadius(4.00);// to be checked
   add(_beamPipeShape);
-  _messenger << "StiStarDetectorBuilder::buildShapes() - INFO - Done" << endl;
-}
 
-void StiStarDetectorBuilder::buildDetectors()
-{
-  string name;
-  _messenger << "StiStarDetectorBuilder::buildDetectors() - INFO - Started" << endl;
   // vacuum+pipe
   float dPhi=M_PI/6.;
   for(unsigned int sector = 0; sector<12; sector++)
@@ -68,15 +60,8 @@ void StiStarDetectorBuilder::buildDetectors()
       pipeVolume->setMaterial(_pipeMaterial);
       add(0,sector,pipeVolume);
     }
- _messenger << "StiStarDetectorBuilder::buildDetectors() - INFO - Done" << endl;
+ cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
-void StiStarDetectorBuilder::loadDb()
-{
-  //One row
-  setNRows(1);
-  //12 Sectors
-  setNSectors(0,12);
-}
 
 
