@@ -42,6 +42,7 @@ using namespace std;
 int StiKalmanTrackFinder::_debug = 0;
 ostream& operator<<(ostream&, const StiTrack&);
 
+//______________________________________________________________________________
 void StiKalmanTrackFinder::initialize()
 {
   cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
@@ -102,9 +103,11 @@ StiKalmanTrackNode::setParameters(&_pars);
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
+//______________________________________________________________________________
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 { }
 
+//______________________________________________________________________________
 /*!
 Reset the state of the finder  to "event not tracked"
  <p>
@@ -112,6 +115,7 @@ Reset the state of the finder  to "event not tracked"
  method is distinct from the "clear" method which reset
  the state to "event not loaded".
  */
+//______________________________________________________________________________
 void StiKalmanTrackFinder::reset()
 {
   //cout << "StiKalmanTrackFinder::reset() -I- Starting" <<endl;
@@ -124,6 +128,7 @@ void StiKalmanTrackFinder::reset()
   //cout << "StiKalmanTrackFinder::reset() -I- Done" <<endl;
 }
 
+//______________________________________________________________________________
 /*!
 Reset the state of the finder  to "no event loaded"
  <p>
@@ -132,6 +137,7 @@ Reset the state of the finder  to "no event loaded"
  the hit, track, track node, mc track factories, the track containers,
  and the seed finder.
  */
+//______________________________________________________________________________
 void StiKalmanTrackFinder::clear()
 {
   //cout << "StiKalmanTrackFinder::clear() -I- Starting" <<endl;
@@ -143,6 +149,7 @@ void StiKalmanTrackFinder::clear()
   //cout << "StiKalmanTrackFinder::clear() -I- Done" <<endl;
 }
 
+//______________________________________________________________________________
 /*! Find all tracks associated with the current event.
 <p>
 Algorithm: In a <b>while loop</b>, obtain track seeds from
@@ -151,6 +158,7 @@ detector.
 <p>Found tracks are added to the track container if no track
 filter is set or if they satisfy the track filter requirements.
 */
+//______________________________________________________________________________
 void StiKalmanTrackFinder::findTracks()
 {
   if (!_trackContainer)   throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackContainer==0");
@@ -235,6 +243,7 @@ void StiKalmanTrackFinder::fitTracks()
 }
 */
 
+//______________________________________________________________________________
 /*
  Extend all known tracks to primary vertex
  <p>
@@ -253,6 +262,7 @@ void StiKalmanTrackFinder::fitTracks()
  Any exception thrown by "getInnerMostNode()" or "extendTrackToVertex()" are
  caught here and reported with "cout".
  */
+//______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 {
   //cout << "SKTF::extendTracksToVertex() - vertex position " << vertex->x_g() << ", " << vertex->y_g() << ", " << vertex->z_g() << endl;
@@ -298,18 +308,29 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 
 /// Find extension (track) to the given track seed in the given direction
 /// Return Ok      if operation was successful
+//______________________________________________________________________________
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
 
-#ifdef Sti_DEBUG
-  if (t) cout << *t << endl;
-#endif  
-  //cout << "SKTF::find(StiTrack * t) -I- Started" << endl;
+  double chi2sum=0;
+  track = dynamic_cast<StiKalmanTrack *> (t);
+  int dirIn = (direction==kOutsideIn);
+  StiKalmanTrackNode *leadNode = track->getInnOutMostNode(!dirIn,2);
+  if (!leadNode) throw runtime_error("SKTF::find() -E- track leadNode ==0");
+  assert(leadNode->isValid());
+  int nAdded = find(track,direction,leadNode,chi2sum);
+  return nAdded>0;
+}
+
+//______________________________________________________________________________
+int StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
+                              ,StiKalmanTrackNode *leadNode,double &chi2sum) 
+{
+static int nCall=0; nCall++;
+StiKalmanTrackNode::Break(nCall);
+
   const double degToRad = 3.1415927/180.;
   const double radToDeg = 180./3.1415927;
   const double ref1  = 50.*degToRad;
@@ -317,24 +338,25 @@ StiKalmanTrackNode::Break(nCall);
   const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
 
-  StiKalmanTrackNode * leadNode;
+  int dirIn = (direction==kOutsideIn);
   StiKalmanTrackNode testNode;
   int nAdded       = 0;
   int position;
   StiHit * stiHit;
   double  leadAngle,leadRadius;
-  int dirIn = (direction==kOutsideIn);
 
-  track = dynamic_cast<StiKalmanTrack *> (t);
-  if (!track) throw runtime_error("SKTF::find()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
-//  leadNode   = track->getLastNode();
-  leadNode = track->getInnOutMostNode(!dirIn,2);
-  if (!leadNode) throw runtime_error("SKTF::find() -E- track leadNode ==0");
   assert(leadNode->isValid());
-  leadDet    = leadNode->getDetector();
+  const StiDetector *leadDet    = leadNode->getDetector();
   if (!leadDet)  throw runtime_error("SKTF::find() -E- leadDet==0");
   leadRadius = leadDet->getPlacement()->getNormalRadius();
   leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
+
+
+////  if (dirIn && !nRefit && leadRadius <100 && track->getNNodes(3)>10) {
+////     nRefit++; track->refit(); if (!leadNode->isValid()) return 0;
+////  }
+  
+  
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
   double projAngle = atan2(yg,xg);
@@ -352,13 +374,9 @@ StiKalmanTrackNode::Break(nCall);
   }
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
-  Int_t reachThePipe = 0;
 
-  while ((!reachThePipe) && ((dirIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
+  while (((dirIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
     vector<StiDetectorNode*>::const_iterator sector;
     vector<StiDetector*> detectors;
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
@@ -368,14 +386,10 @@ StiKalmanTrackNode::Break(nCall);
     sector = (dirIn)? _detectorContainer->beginPhi(rlayer):_detectorContainer->beginPhi(layer);
     while ( (dirIn)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
     {
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
        StiDetector * detector = (*sector)->getData();
        double angle  = detector->getPlacement()->getNormalRefAngle();
        double radius = detector->getPlacement()->getNormalRadius();
        double diff = radius-leadRadius;if (dirIn) diff = -diff;
-//VP       assert(diff>1.e-6);
        if (diff<-1e-6 && debug()>3) {
           printf("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)\n"
 	  ,leadDet->getName().c_str(),leadRadius 
@@ -402,9 +416,6 @@ StiKalmanTrackNode::Break(nCall);
     if (!nDets) continue;
     if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
     for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d){
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
       tDet = *d;
       if (debug() > 2) {
 	cout << endl<< "target det:"<< *tDet;
@@ -425,10 +436,6 @@ StiKalmanTrackNode::Break(nCall);
 	if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
 	continue; // will try the next available volume on this layer
       }
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Stop();
-  StiTimer::fgFindTally++;
-#endif  
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
@@ -486,29 +493,21 @@ StiKalmanTrackNode::Break(nCall);
 	  node->getNullCount()++; node->getContigNullCount()++; node->getContigHitCount()  = 0;
       }//node->getHit()
 
-      leadNode = sNode;
-      assert(leadNode->isValid());
-      leadDet  = leadNode->getDetector();
-      leadRadius = leadDet->getPlacement()->getNormalRadius();
-      xg = leadNode->x_g();
-      yg = leadNode->y_g();
-      projAngle = atan2(yg,xg); 
-      if (dirIn && TMath::Sqrt(xg*xg + yg*yg) < 4.2) reachThePipe = 1;
-      //we added a node on the track, break scan of current layer, and move to next layer
-      break;
+      assert(sNode->isValid());
+      if (dirIn) {
+      xg = sNode->x_g();
+      yg = sNode->y_g();
+      if (TMath::Sqrt(xg*xg + yg*yg) < 4.2) return nAdded;
+      }
+
+      return nAdded+find(track,direction,sNode,chi2sum);
     }//End Detectors
   }while(0);if(dirIn){++rlayer;}else{++layer;}}
-
 //end layers
-  if (debug() > 2) cout << "       nAdded:"<< nAdded << endl;
-  lastMove++;
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Stop();
-#endif  
-  return nAdded>0;
+  return 0;
 }
 
-
+//______________________________________________________________________________
 StiTrack * StiKalmanTrackFinder::findTrack()
 {
   StiTrack * track = 0;
@@ -549,22 +548,26 @@ StiTrack * StiKalmanTrackFinder::findTrack()
  }
  */
 
+//______________________________________________________________________________
 void StiKalmanTrackFinder::setParameters(const StiKalmanTrackFinderParameters & par)
 {
   _pars = par;
 }
 
+//______________________________________________________________________________
 EditableParameters & StiKalmanTrackFinder::getParameters()
 {
   return _pars;
 }
 
+//______________________________________________________________________________
 /// Get the vertex finder used by this track finder
 StiVertexFinder * StiKalmanTrackFinder::getVertexFinder()
 {
   return _vertexFinder;
 }
 
+//______________________________________________________________________________
 /// Set the vertex finder used by this tracker
 void StiKalmanTrackFinder::setVertexFinder(StiVertexFinder *vertexFinder)
 {
@@ -572,6 +575,7 @@ void StiKalmanTrackFinder::setVertexFinder(StiVertexFinder *vertexFinder)
 }
 
 
+//______________________________________________________________________________
 void StiKalmanTrackFinder::loadDS(TDataSet&ds)
 {
   cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Starting" << endl;
@@ -579,6 +583,7 @@ void StiKalmanTrackFinder::loadDS(TDataSet&ds)
   cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Done" << endl;
 }
 
+//______________________________________________________________________________
 void StiKalmanTrackFinder::loadFS(ifstream & iFile)
 {
   cout << "StiKalmanTrackFinder::loadFS(ifstream&) -I- Starting" << endl;
@@ -587,6 +592,7 @@ void StiKalmanTrackFinder::loadFS(ifstream & iFile)
 }
 
 
+//______________________________________________________________________________
 void StiKalmanTrackFinder::setDefaults()
 {
   cout << "StiKalmanTrackFinder::setDefaults() -I- Starting" << endl;
@@ -594,10 +600,12 @@ void StiKalmanTrackFinder::setDefaults()
   cout << "StiKalmanTrackFinder::setDefaults() -I- Done" << endl;
 }
 
+//______________________________________________________________________________
 CloserAngle::CloserAngle(double refAngle)
   : _refAngle(refAngle)
 { }
 
+//______________________________________________________________________________
 bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
 {
   double lhsa = lhs->getPlacement()->getNormalRefAngle();
