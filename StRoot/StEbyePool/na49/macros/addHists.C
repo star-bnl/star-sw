@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.6 2002/03/23 21:45:51 posk Exp $
+// $Id: addHists.C,v 1.7 2002/11/15 22:38:14 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -13,7 +13,7 @@
 #include <iostream.h>
 
 // // pions
-// .x addHists.C(11,21,31,41)
+// .x addHists.C(11,21,31,41)  // at 40 GeV only 31
 // .x addHists.C(12,22,32,42)
 // .x addHists.C(13,23,33,43)
 // .x addHists.C(14,24,44)
@@ -39,14 +39,11 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t thirdRunNo,
 
 Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 
-  //bool   stripes = kFALSE;
-  bool   stripes = kTRUE;
+  bool   stripes = kFALSE;
+  //bool   stripes = kTRUE;
   TFile* histFile[3];
-  //char   firstRunName[6];
   char   firstRunName[30];
-  //char   secondRunName[6];
   char   secondRunName[30];
-  //char   outputRunName[6];
   char   outputRunName[30];
   int    nSels = 2;
   int    nHars = 3;
@@ -197,6 +194,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 	} else {
 	  // with yield weighting
 	  float v;
+	  float verr;
 	  float vSum;
 	  float content;
 	  float error;
@@ -205,6 +203,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 	  float yieldSum;
 	  for (int bin = 0; bin < nBins; bin++) {
 	    v         = 0.;
+	    verr      = 0.;
 	    vSum      = 0.;
 	    content   = 0.;
 	    error     = 0.;
@@ -222,10 +221,11 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 		yield = yieldPartHist[n]->Integral();
 	      }
 	      v = hist[n]->GetBinContent(bin);
-	      if (v != 0) {
+	      verr = hist[n]->GetBinError(bin);
+	      if (v != 0. && yield > 1.) { // error is wrong for one count
 		yieldSum  += yield;
 		vSum      += yield * v;
-		error2sum += pow(yield *  hist[n]->GetBinError(bin), 2.);
+		error2sum += pow(yield * verr, 2.);
 	      }
 	    }
 	    if (yieldSum) {
@@ -251,6 +251,9 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: addHists.C,v $
+// Revision 1.7  2002/11/15 22:38:14  posk
+// updates.
+//
 // Revision 1.6  2002/03/23 21:45:51  posk
 // More 40 GeV compatability.
 //
