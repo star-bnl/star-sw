@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.16 2003/11/13 02:57:08 perev Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.17 2004/08/19 19:55:52 perev Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.17  2004/08/19 19:55:52  perev
+// Replace Delete to THack:ClearClone
+//
 // Revision 3.16  2003/11/13 02:57:08  perev
 // LeakOff TClonesArray::Clear() ==> Delete()
 //
@@ -65,6 +68,7 @@
 #include "TROOT.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "THack.h"
 
 StStrangeMuDstMaker* StStrangeControllerBase::currentMaker = 0;
 static int bfirst=1;
@@ -234,7 +238,7 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
 Int_t StStrangeControllerBase::MakeCreateSubDst() {
   // If no entries to copy, skip data and association copying
   if (!entries) {
-    if (doMc) assocArray->Delete();
+    if (doMc) THack::ClearClonesArray(assocArray);
     return kStOK;
   }
 
@@ -286,12 +290,12 @@ void StStrangeControllerBase::Clear(Option_t* opt) {
     }
   }
   if (dataArray) {
-    dataArray->Delete();
+    THack::ClearClonesArray(dataArray);
     entries = 0;
     if (doMc) {
-      mcArray->Delete();
+      THack::ClearClonesArray(mcArray);
       mcEntries = 0;
-      assocArray->Delete();
+      THack::ClearClonesArray(assocArray);
       assocEntries = 0;
     }
   }
