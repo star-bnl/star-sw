@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.cxx,v 2.2 2003/02/18 21:34:46 jeromel Exp $
+ * $Id: StTriggerId.cxx,v 2.3 2004/10/11 23:00:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.cxx,v $
+ * Revision 2.3  2004/10/11 23:00:20  ullrich
+ * Add copy constructor and assign. op., implement ostream op., define to enum.
+ *
  * Revision 2.2  2003/02/18 21:34:46  jeromel
  * Changed vector to arrays
  *
@@ -24,30 +27,50 @@
 ClassImp(StTriggerId)
 
 StTriggerId::StTriggerId() : mMask(0) {
-  int i;
-
-  mIdx = 0;
-  for(i=0 ; i < TRIGGER_ID_DIM ; ++i){
-    mId[i]                = 0;
-    mVersion[i]           = 0;
-    mNameVersion[i]       = 0;
-    mThresholdVersion[i]  = 0;
-    mPrescaleVersion[i]   = 0;
-  }
-
-  /* noop */
+    mIdx = 0;
+    for(int i=0 ; i < mMaxTriggerIds ; ++i) {
+        mId[i]                = 0;
+        mVersion[i]           = 0;
+        mNameVersion[i]       = 0;
+        mThresholdVersion[i]  = 0;
+        mPrescaleVersion[i]   = 0;
+    }
 }
 
-StTriggerId::~StTriggerId()  {
-  /* noop */
+StTriggerId::~StTriggerId()  {/* noop */}
+
+StTriggerId::StTriggerId(const StTriggerId &id) {
+    mIdx = id.mIdx;
+    for(int i=0 ; i < mMaxTriggerIds ; ++i){
+        mId[i]                = id.mId[i];
+        mVersion[i]           = id.mVersion[i];
+        mNameVersion[i]       = id.mNameVersion[i];
+        mThresholdVersion[i]  = id.mThresholdVersion[i];
+        mPrescaleVersion[i]   = id.mPrescaleVersion[i];
+    }  
+}
+
+const StTriggerId &StTriggerId::operator=(const StTriggerId &id) {
+    if (&id==this) return id;
+  
+    mIdx=id.mIdx;
+    
+    for(int i=0 ; i < mMaxTriggerIds ; ++i) {
+        mId[i]                = id.mId[i];
+        mVersion[i]           = id.mVersion[i];
+        mNameVersion[i]       = id.mNameVersion[i];
+        mThresholdVersion[i]  = id.mThresholdVersion[i];
+        mPrescaleVersion[i]   = id.mPrescaleVersion[i];
+    }  
+    return *this;
 }
 
 unsigned int
 StTriggerId::index(unsigned int id) const
 {
-    for (unsigned int i=0; i<TRIGGER_ID_DIM; i++)
-	if (id == mId[i]) return i;
-    return TRIGGER_ID_DIM; // no index found (no such trigger id)
+    for (unsigned int i=0; i<mMaxTriggerIds; i++)
+        if (id == mId[i]) return i;
+    return mMaxTriggerIds; // no index found (no such trigger id)
 }
 
 unsigned int
@@ -56,14 +79,14 @@ StTriggerId::mask() const {return mMask;}
 bool
 StTriggerId::isTrigger(unsigned int id) const
 {
-    return index(id) < TRIGGER_ID_DIM;
+    return index(id) < mMaxTriggerIds;
 }
 
 unsigned int
 StTriggerId::version(unsigned int id) const
 {
     unsigned int i = index(id);
-    if (i < TRIGGER_ID_DIM)
+    if (i < mMaxTriggerIds)
 	return mVersion[i];
     else
 	return 0;
@@ -73,7 +96,7 @@ unsigned int
 StTriggerId::nameVersion(unsigned int id) const
 {
     unsigned int i = index(id);
-    if (i < TRIGGER_ID_DIM)
+    if (i < mMaxTriggerIds)
 	return mNameVersion[i];
     else
 	return 0;
@@ -83,7 +106,7 @@ unsigned int
 StTriggerId::thresholdVersion(unsigned int id) const
 {
     unsigned int i = index(id);
-    if (i < TRIGGER_ID_DIM)
+    if (i < mMaxTriggerIds)
 	return mThresholdVersion[i];
     else
 	return 0;
@@ -93,7 +116,7 @@ unsigned int
 StTriggerId::prescaleVersion(unsigned int id) const    
 {
     unsigned int i = index(id);
-    if (i < TRIGGER_ID_DIM)
+    if (i < mMaxTriggerIds)
 	return mPrescaleVersion[i];
     else
 	return 0;
@@ -101,12 +124,12 @@ StTriggerId::prescaleVersion(unsigned int id) const
 
 vector<unsigned int>
 StTriggerId::triggerIds() const {
-  vector<unsigned int> retVec;
-  for (unsigned int i=0; i< TRIGGER_ID_DIM; ++i) {
-    if (mId[i]) retVec.push_back(mId[i]);
-  }
-
-  return retVec;
+    vector<unsigned int> retVec;
+    for (unsigned int i=0; i< mMaxTriggerIds; ++i) {
+        if (mId[i]) retVec.push_back(mId[i]);
+    }
+    
+    return retVec;
 }
 
 void
@@ -114,23 +137,31 @@ StTriggerId::setMask(unsigned int val) {mMask = val;}
 
 void
 StTriggerId::addTrigger(unsigned int id, unsigned int v,
-			unsigned int nv, unsigned int tv,
-			unsigned int pv)
+		    unsigned int nv, unsigned int tv,
+		    unsigned int pv)
 {
-  if( mIdx >= TRIGGER_ID_DIM){
-    gMessMgr->Warning() << "StTriggerId::addTrigger : MAX Dimension reached. Cannot add !!" << endm;
-  } else {
-    mId[mIdx]               = id;
-    mVersion[mIdx]          = v;
-    mNameVersion[mIdx]      = nv;
-    mThresholdVersion[mIdx] = tv;
-    mPrescaleVersion[mIdx]  = pv;
-    ++mIdx;
-  }
-
+    if( mIdx >= mMaxTriggerIds){
+        gMessMgr->Warning() << "StTriggerId::addTrigger : MAX Dimension reached. Cannot add !!" << endm;
+    }
+    else {
+        mId[mIdx]               = id;
+        mVersion[mIdx]          = v;
+        mNameVersion[mIdx]      = nv;
+        mThresholdVersion[mIdx] = tv;
+        mPrescaleVersion[mIdx]  = pv;
+        ++mIdx;
+    }
 }
 
-ostream& operator<<(ostream&, const StTriggerId&);
-    
-
-    
+ostream& operator<<(ostream& os, const StTriggerId& id)
+{
+    for (unsigned int i=0; i<id.maxTriggerIds(); i++) {
+        os << i << '\t'
+           << id.mId[i] << '\t'
+           << id.mVersion[i] << '\t'
+           << id.mNameVersion[i] << '\t'
+           << id.mThresholdVersion[i] << '\t'
+           << id.mPrescaleVersion[i] << endl;
+    }
+    return os;
+}
