@@ -17,7 +17,7 @@
 
 #include "kuip.h"
 #define KUIP
-
+#include "asuAlloc.h"
 #include "asuLib.h"
 #include "asuAlloc.h"
 #include "emlLib.h"

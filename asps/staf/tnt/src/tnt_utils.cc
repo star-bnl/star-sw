@@ -3,7 +3,7 @@
 #include "asuAlloc.h"
 #include "tdmLib.h"
 #include "tntLib.h" 
-
+#include "asuAlloc.h"
 #ifndef MIN
 #define MIN(A,B) (A<B?A:B)
 #endif
