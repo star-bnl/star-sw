@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "St_l3_Coordinate_Transformer.h"
 #include "daqFormats.h"
 #include "l3GeneralHeaders.h"
 #include "FtfGeneral.h"
@@ -66,6 +67,13 @@ public:
       }
       return &(track[n]) ;
    }
+   gl3Hit* getHit ( int n ) {
+      if ( n < 0 || n > nHits ) {
+         fprintf ( stderr, " %d hit index out of range \n", n ) ; 
+         return NULL ;
+      }
+      return &(hit[n]) ;
+   }
    gl3Sector* getSector ( int n ) {
       if ( n < 0 || n > NSECTORS ) {
          fprintf ( stderr, " %d sector index out of range \n", n ) ; 
@@ -77,6 +85,7 @@ public:
    void addTracks ( short sector, int nTracks, local_track* track ) ;
 
    int getNTracks ( ) { return nTracks ; } ;
+   int getNHits   ( ) { return nHits   ; } ;
 
    int  readEvent  ( int maxLength, char* buffer ) ;
    int  readSectorHits   ( char* buffer, int nSectorTracks ) ;

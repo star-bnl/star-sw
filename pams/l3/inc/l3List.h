@@ -14,7 +14,7 @@
 #ifndef L3LIST
 #define L3LIST
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 class slink;
 typedef slink* slist_item;

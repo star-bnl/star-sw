@@ -24,12 +24,11 @@
 #ifndef FTFSL3
 #define FTFSL3
 
+#include "St_l3_Coordinate_Transformer.h"
 #include "FtfFinder.h"
 #include "FtfDedx.h"
-//#include <SECTOR/daqFormats.h>
 #include "l3GeneralHeaders.h"
 #include "daqFormats.h"
-#include "sl3CoordinateTransform.h"
 
 #define checkByteOrder(byte_order)    ( (byte_order) == (DAQ_RAW_FORMAT_ORDER) ? (1) : (0) )
 

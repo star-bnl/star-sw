@@ -31,9 +31,15 @@ int gl3Residuals::process ( gl3Event* event ) {
   
   // printf("In residuals\n");
 
+  St_l3_Coordinate_Transformer transformer ;
+  St_l3_xyz_Coordinate globalClusterXYZ(0,0,0) ;
+  St_l3_xyz_Coordinate localClusterXYZ(0,0,0) ;
+  St_l3_xyz_Coordinate globalTrackXYZ(0,0,0) ;
+  St_l3_xyz_Coordinate localTrackXYZ(0,0,0) ;
+  St_l3_ptrs_Coordinate rawHit(0,0,0,0) ;
+
   Ftf3DHit cross;
-  float todeg = 180./ M_PI;
-  float MaxDipAngle=10;
+//float MaxDipAngle=10;
   
   for(int i=0; i<event->getNTracks(); i++)
     {
@@ -43,7 +49,7 @@ int gl3Residuals::process ( gl3Event* event ) {
       if(ctrack->nHits<30) continue; //reading cosmics
       
       //calculate dipangle of this track
-      float dipangle=atan(ctrack->tanl);
+      //float dipangle=atan(ctrack->tanl);
       
       //calculate circle center and radius
       double x0=ctrack->r0*cos(ctrack->phi0);
@@ -59,18 +65,19 @@ int gl3Residuals::process ( gl3Event* event ) {
 	  gl3Hit *chit=(gl3Hit*)(ctrack->currentHit);
 	  
 	  int sector = chit->getRowSector()/100;
-	  int row=fmod(chit->getRowSector(),100);
+	  int row=(int)fmod(chit->getRowSector(),100);
 	  
 	  double xc=chit->getX();
 	  double yc=chit->getY();
 	  double zc=chit->getZ();
 	  
-	  if(SectorCos[sector-1]!=0)//avoid dividing by zero
+	  if(transformer.GetSectorCos(sector-1)!=0)//avoid dividing by zero
 	    {
 	      //finding line parameters of padrow plane:
-	      double a=-1.*SectorSin[sector-1]/SectorCos[sector-1];
+	      double a=-1.*transformer.GetSectorSin(sector-1)/
+                           transformer.GetSectorCos(sector-1);
 	      if(sector>12) a=-a;
-	      double b=radialDistanceAtRow[row-1]/SectorCos[sector-1];
+	      double b=transformer.GetRadialDistanceAtRow(row-1)/transformer.GetSectorCos(sector-1);
 	      
 	      //find crossing point between track and this line
 	      if(ctrack->intersectorZLine(a,b,cross)!=0)
@@ -84,8 +91,8 @@ int gl3Residuals::process ( gl3Event* event ) {
 	    {//sectors 3,9,15,21
 	    
 	      double xHit;
-	      if(sector==9 || sector==15) xHit=-radialDistanceAtRow[row-1];
-	      else xHit=radialDistanceAtRow[row-1];
+	      if(sector==9 || sector==15) xHit=-transformer.GetRadialDistanceAtRow(row-1);
+	      else xHit=transformer.GetRadialDistanceAtRow(row-1);
 	      
 	      double f1=(xHit-xcoc)*(xHit-xcoc);
 	      double r2=rcoc*rcoc;
@@ -119,23 +126,28 @@ int gl3Residuals::process ( gl3Event* event ) {
 	  float zt=cross.z;
 
 	  //Rotate coordinates to local sector coordinates
-	  double xcl,ycl,zcl,xtl,ytl,ztl;
-	  globalToLocal(sector,row,xc,yc,zc,xcl,ycl,zcl);
-	  globalToLocal(sector,row,xt,yt,zt,xtl,ytl,ztl);
+          
+          globalClusterXYZ.Setxyz(xc,yc,zc);
+          transformer.global_to_local(globalClusterXYZ,localClusterXYZ,rawHit);
+// globalToLocal(sector,row,xc,yc,zc,xcl,ycl,zcl);
+          
+          globalTrackXYZ.Setxyz(xt,yt,zt);
+          transformer.global_to_local(globalTrackXYZ,localTrackXYZ,rawHit);
+// globalToLocal(sector,row,xt,yt,zt,xtl,ytl,ztl);
 	  
 	  //calculate beta (crossing angle with padrow)
 	  double xcocg=xcoc;
 	  if (sector>12) 
 	    xcocg = -xcoc;
 	  
-	  double ycocl = SectorSin[sector-1] * xcocg + SectorCos[sector-1] * ycoc;
-	  double beta=asin(ytl/rcoc-ycocl/rcoc);
+	  double ycocl = transformer.GetSectorSin(sector-1) * xcocg + transformer.GetSectorCos(sector-1) * ycoc;
+	  //double beta=asin(localTrackXYZ.Gety()/rcoc-ycocl/rcoc);
 
 	  //if(fabs(beta*todeg)>5) continue; //only consider tracks normal to padrow
 
 	  //fill residuals in histogram
-	  double resx=xtl-xcl;
-	  double resz=ztl-zcl;
+	  double resx=localTrackXYZ.Getx()-localClusterXYZ.Getx();
+	  double resz=localTrackXYZ.Getz()-localClusterXYZ.Getz();
 	  
 	  Resx->Fill(resx,1.);
 	  Resz->Fill(resz,1.);

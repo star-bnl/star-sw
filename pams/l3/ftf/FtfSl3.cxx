@@ -42,9 +42,10 @@
 **:                             arguments
 **:           apr 19, 2000  cs  add dEdx from Christof
 **:           apr 19, 2000  cs  discard one-apd cluster (flag == 1) in readMezzanine(...)
+**:           jun 28, 2000  ppy replace sl3CoordinateTransform with class
+**:                             St_l3_Coordinate_Transformer
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
-//#include <iostream.h>
 
 UINT32 swap32(unsigned int   in);
 UINT32 swap16(unsigned short in);
@@ -453,6 +454,12 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 
    FtfHit *hitP = &hit[nHits];
 
+   // Prepare transformation
+   St_l3_Coordinate_Transformer transformer;
+   St_l3_xyz_Coordinate XYZ(0,0,0) ;
+   St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
+
+
    counter = 0;
    short swapByte = 0 ;
    if     ( !checkByteOrder(mzcld->bh.byte_order) ) swapByte = 1 ;
@@ -475,9 +482,6 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 
       for ( j=0; j<len; j++) {
 	 double fp, ft ;
-	 double x;
-	 double y;
-	 double z;
          unsigned short pad ;
          unsigned short time ;
 
@@ -522,7 +526,9 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 //
 //	 printf("row pad td ipad itd %02d %9.5f %9.5f %6d %3d\n", row,
 //	          fp, ft, c->c , c->f) ;
-	 rawToGlobal(sector, row, fp, ft, &x, &y, &z);
+//rawToGlobal(sector, row, fp, ft, &x, &y, &z);
+	 PTRS.Setptrs((double)fp, (double)ft,(double)row, (double)sector) ;
+	 transformer.raw_to_global(PTRS,XYZ) ;
 
 	 //	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
 	 //	   	                     sector, row, x, y, z);
@@ -530,9 +536,14 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 	 hitP->id  = nHits+counter ;
 	 hitP->row = row ;
 	 hitP->sector = sector ;
-	 hitP->x   = (float) x;
-	 hitP->y   = (float) y;
-	 hitP->z   = (float) z;
+//hitP->x   = (float) x;
+//hitP->y   = (float) y;
+//hitP->z   = (float) z;
+
+	 hitP->x   = (float) XYZ.Getx();
+	 hitP->y   = (float) XYZ.Gety();
+	 hitP->z   = (float) XYZ.Getz();
+
 	 hitP->dx  = xyError ;
 	 hitP->dy  = xyError ;
 	 hitP->dz  = zError ;

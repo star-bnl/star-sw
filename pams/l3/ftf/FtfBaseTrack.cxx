@@ -400,6 +400,10 @@ int FtfBaseTrack::fitLine ( )
          dx   = cHit->x - previousHit->x ;
 	 dy   = cHit->y - previousHit->y ;
 	 dpsi = 0.5F * (double)sqrt ( dx*dx + dy*dy ) / radius ;
+         if ( dpsi > 1.) {
+            fprintf (stderr, "FtfBaseHit::fitLine(): dpsi=%f\n", dpsi);
+            dpsi = 1.;
+         }
 	 cHit->s = previousHit->s - 2.0F * radius * (double)asin ( dpsi ) ;
       }
       else
@@ -753,7 +757,7 @@ int FtfBaseTrack::extraRCyl ( double &r,  double &phi, double &z,
 //  If they don't intersect return
 //  
    if ( fabs(sfac-rc) > r || fabs(sfac+rc) < r ) {
-      printf ( "particle does not intersect \n" ) ;
+//    printf ( "particle does not intersect \n" ) ;
       return  1 ;
     }
 //  
@@ -856,6 +860,7 @@ int FtfBaseTrack::intersectorZLine ( double a, double b, Ftf3DHit& cross ) {
 //
    return 0 ;
 }
+//
 /*:>--------------------------------------------------------------------
 **: METHOD:   Calculates trajectory length between two points on a track
 **:

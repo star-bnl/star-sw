@@ -2,15 +2,16 @@
 //: FILE:       gl3Hit.h
 //: HISTORY:
 //:              4apr2000 first version
+//:             28jun2000 add Coordinate Transformer class
 //:<------------------------------------------------------------------
-#include <stdio.h>
-#include <math.h>
-#include "daqFormats.h"
-#include "L3Formats.h"
-#include "sl3CoordinateTransform.h"
-
 #ifndef GL3HIT
 #define GL3HIT
+#include <stdio.h>
+#include <math.h>
+#include "St_l3_Coordinate_Transformer.h"
+#include "daqFormats.h"
+#include "L3Formats.h"
+
 
 
 class gl3Hit {
@@ -30,9 +31,12 @@ public:
    float getY ( ) { return y ; } ;
    float getZ ( ) { return z ; } ;
    short getRowSector ( ) { return rowSector ; } ;
+   unsigned short getCharge ( ) { return charge ; } ;
+   unsigned short getFlags  ( ) { return flags  ; } ;
    int   getTrackId ( ) { return trackId ; } ;
    void* getNextHit ( ) { return nextHit ; } ;
-   int   set ( int sector, l3_cluster* cluster ) ;
+   int   set ( St_l3_Coordinate_Transformer* transformer,
+               int sector, l3_cluster* cluster ) ;
    void  print ( ) ;
 };
 #endif
