@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.hh,v 1.1 1999/07/13 12:42:24 jones Exp $
+ * $Id: StV0MiniDst.hh,v 1.2 1999/07/26 19:17:25 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.hh,v $
+ * Revision 1.2  1999/07/26 19:17:25  jones
+ * Added primary vertex position and v0 daughter DCA to the primary vertex
+ *
  * Revision 1.1  1999/07/13 12:42:24  jones
  * *** empty log message ***
  *
@@ -30,10 +33,16 @@ public:
   StV0MiniDst(StV0Vertex*,StVertex*);
   void Update();
 
+  int run() const;              // Run number
+  int event() const;            // Event number
+  float *primVertex();          // Primary Vertex Position
+
   float decayDistance() const;          // 3-d decay distance
   float *position();                    // Coordinates of decay vertex
   float dcaDaughters() const;           // DCA of daughters at decay vertex
   float dcaParentToPrimVertex() const;  // DCA of v0 to primary vertex
+  float dcaPosToPrimVertex() const;     // DCA of pos v0 daughter to pri vertex
+  float dcaNegToPrimVertex() const;     // DCA of neg v0 daughter to pri vertex
   float *momPosDaughter();              // Momentum components of pos. daughter
   float *momNegDaughter();              // Momentum components of neg. daughter
 
@@ -60,14 +69,19 @@ public:
   float ptotNegDaughter();      // Total momentum of neg. daughter  
 
 protected:
-  float mDecayDistance;         // 12 words per candidate are written out
-  float mPosition[3];
+  int   mRun;                   // These are written out
+  int   mEvent;
+  float mPrimVertex[3];
 
+  float mPosition[3];
   float mDcaDaughters;
   float mDcaParentToPrimVertex;
+  float mDcaPosToPrimVertex;
+  float mDcaNegToPrimVertex;
   float mMomPosDaughter[3];
   float mMomNegDaughter[3];
 
+  float mDecayDistance;         //! Not to be written out
   float mMomV0[3];              //! Not to be written out
   float mPtot2PosDaughter;      //! Not to be written out
   float mPtot2NegDaughter;      //! Not to be written out
@@ -82,8 +96,15 @@ protected:
   ClassDef(StV0MiniDst, 1)
 };
 
+inline int   StV0MiniDst::run() const
+             { return mRun; }
+inline int   StV0MiniDst::event() const
+             { return mEvent; }
+inline float *StV0MiniDst::primVertex()
+             { return mPrimVertex; }
+
 inline float StV0MiniDst::decayDistance() const 
-             { return mDecayDistance; } 
+             { return mDecayDistance; }
 inline float *StV0MiniDst::position()
              { return mPosition; } 
 
@@ -91,10 +112,13 @@ inline float StV0MiniDst::dcaDaughters() const
              { return mDcaDaughters; }
 inline float StV0MiniDst::dcaParentToPrimVertex() const 
              { return mDcaParentToPrimVertex; }
+inline float StV0MiniDst::dcaPosToPrimVertex() const 
+             { return mDcaPosToPrimVertex; }
+inline float StV0MiniDst::dcaNegToPrimVertex() const 
+             { return mDcaNegToPrimVertex; }
 inline float *StV0MiniDst::momPosDaughter()
              { return mMomPosDaughter; }
 inline float *StV0MiniDst::momNegDaughter()
              { return mMomNegDaughter; }
 
 #endif
-
