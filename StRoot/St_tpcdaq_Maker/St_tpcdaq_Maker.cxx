@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.58  2000/11/25 23:15:03  fisyak
+// Add cut for 0.125 < Gain < 8
+//
 // Revision 1.57  2000/11/07 16:30:29  ward
 // New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
 //
@@ -251,7 +254,7 @@ Int_t St_tpcdaq_Maker::Init() {
      PP"-----------------------------------------------------------------\n");
      PP"The second argument of St_tpcdaq_Maker::St_tpcdaq_Maker() must be\n");
      PP"either \"daq\" or \"trs\".  Fatal error.  Please fix bfc.C.\n");
-     exit(2); // Ctor called incorrectly. 
+     assert(0); // Ctor called incorrectly. 
   }
   PP"end of St_tpcdaq_Maker::Init\n");
   return StMaker::Init();
@@ -393,7 +396,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
   static int numberAllocated=0,call=0;
   unsigned char *pointerToAdc,*beg[MSSPS],*end[MSSPS],*tmp;
   int npp=0,iss,nss; /* nss = Number of SubSequences */
-  int numberAboveThresh,npix,ipix,iseq,nseqNew=0,length;
+  int numberAboveThresh,npix,ipix,iseq,length;
   unsigned short conversion;
   char inSeq; /* boolean (true/false) value */
   if(mNseqLo<0) return; /* There is no asic.tpcdaq file. */
@@ -401,7 +404,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
   for(iseq=0;iseq<*nseqOld;iseq++) {
     npix=(*lst)[iseq].length; pointerToAdc=(*lst)[iseq].firstAdc; nss=0; inSeq=0;
     for(ipix=0;ipix<npix;ipix++) {
-      conversion=gain*(*pointerToAdc);
+      conversion=(unsigned short) (gain*(*pointerToAdc));
       if(conversion> mThreshLo&&!inSeq) { inSeq=7; assert(nss<MSSPS); beg[nss  ]=pointerToAdc;   }
       if(conversion<=mThreshLo&& inSeq) { inSeq=0; assert(nss<MSSPS); end[nss++]=pointerToAdc-1; }
       pointerToAdc++;
@@ -413,7 +416,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
       for(tmp=beg[iss];tmp<=end[iss];tmp++) { if(gain*(*tmp)>mThreshHi) numberAboveThresh++; }
       if(numberAboveThresh<=mNseqHi) continue;
       if(npp>=numberAllocated) { /* allocate extra memory if necessary */
-        numberAllocated=numberAllocated*1.3+5;
+        numberAllocated=(int)(numberAllocated*1.3+5);
         pp=(StSequence*)realloc(pp,(size_t)(numberAllocated*sizeof(StSequence))); assert(pp);
       }
       pp[npp].length=length;
@@ -528,7 +531,7 @@ void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
       PP"Cut pad %3d of row %2d\n",noiseElim[ii].pad[jj],noiseElim[ii].row[jj]);
     }
   }
-  exit(2); // This is in WriteStructToScreenAndExit().
+  assert(0); // This is in WriteStructToScreenAndExit().
 }
 #endif /* NOISE_ELIM */
 ///////////////////////////////////////
@@ -650,15 +653,18 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padNumber->Fill((Float_t)pad);
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
+#ifdef GAIN_CORRECTION
+          assert(pad>0&&pad<=182);
+          if(fGain[ipadrow][pad-1]<=0.125 || fGain[ipadrow][pad-1]>8.0) continue;
+#endif
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
 #ifdef GAIN_CORRECTION
-            assert(pad>0&&pad<=182);
             if(fGain[ipadrow][pad-1]>22.0) {
               printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
               printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
-              exit(2);
+              assert(0);
             }
             conversion=(short unsigned int)(0.5+fGain[ipadrow][pad-1]*conversion);
 #endif
@@ -709,7 +715,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  return 0;
 }
 Int_t St_tpcdaq_Maker::Make() {
-  int ii,errorCode;
+  int errorCode;
   printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
   mErr=0;
   errorCode=GetEventAndDecoder();
