@@ -11,8 +11,8 @@ endif
 
 cd /dui/data/tpc/hits
 
-  tdm/table/rowcount tpcluster 0
-  tdm/table/rowcount tpseq 0
+*  tdm/table/rowcount tpcluster 0
+*  tdm/table/rowcount tpseq 0
   tdm/table/rowcount tphit 0
   tdm/table/maxrowcount tphit 300000
 
