@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.10 1999/11/03 22:39:35 calderon Exp $
+// $Id: StAssociator.C,v 1.11 1999/12/14 18:18:01 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.11  1999/12/14 18:18:01  calderon
+// using new StMcEvent, StEvent & StAssociationMaker
+//
 // Revision 1.10  1999/11/03 22:39:35  calderon
 // Changed default file.  Previous one was removed.
 //
@@ -59,11 +62,7 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root")
-
-// ~/TestFiles/merged.geant.root
-// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root
-// /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
+const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_02_35evts.geant.root")
 {
 
     // Dynamically link needed shared libs
@@ -71,12 +70,12 @@ const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadr
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
-    gSystem->Load("StMagF");
+
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+    
     gSystem->Load("StEvent");
-    //gSystem->Load("StEventReaderMaker"); // For use in SL99e
-    gSystem->Load("StEventMaker"); // For use in SL99f (along with at least 5 other changes)
+    gSystem->Load("StEventMaker"); 
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -104,15 +103,26 @@ const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadr
     // Define the cuts for the Associations
 
     StMcParameterDB* parameterDB = StMcParameterDB::instance();  
-    parameterDB->setXCut(.5); // 5 mm
-    parameterDB->setZCut(.2); // 2 mm
-    parameterDB->setReqCommonHits(3); // Require 3 hits in common for tracks to be associated
+    // TPC
+    parameterDB->setXCutTpc(.5); // 5 mm
+    parameterDB->setYCutTpc(.5); // 5 mm
+    parameterDB->setZCutTpc(.2); // 2 mm
+    parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
+    // FTPC
+    parameterDB->setRCutFtpc(.3); // 3 mm
+    parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
+    parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
+    // SVT
+    parameterDB->setXCutSvt(.1); // 1 mm
+    parameterDB->setYCutSvt(.1); // 1 mm
+    parameterDB->setZCutSvt(.1); // 1 mm
+    parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
     
     
     // now execute the chain member functions
-  
-    chain->Init(); // This should call the Init() method in ALL makers
+
     chain->PrintInfo();
+    chain->Init(); // This should call the Init() method in ALL makers
 
     int istat=0,iev=1;
     EventLoop: if (iev<=nevents && !istat) {
@@ -130,24 +140,30 @@ const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadr
 
     myCanvas->cd(1);
     gPad->SetLogy(0);
-    examples->mTrackNtuple->Draw("(p-prec)/prec:commHits");
+    examples->mTrackNtuple->Draw("(p-prec)/prec:commTpcHits");
 
+    TList* dList = chain->GetMaker("McAnalysis")->Histograms();
+    TH2F* hitRes = dList->At(0);
+    TH2F* momRes = dList->At(1);
+    TH2F* coordRc = dList->At(2);
+    TH2F* coordMc = dList->At(3);
+    
     myCanvas->cd(2);
     gPad->SetLogy(0);
-    associator->mLocalHitResolution->Draw();
+    hitRes->Draw();
 
     myCanvas->cd(3);
     gPad->SetLogy(0);
-    examples->mMomResolution->Draw();
+    momRes->Draw();
 
     myCanvas->cd(4);
     gPad->SetLogy(0);
-    examples->coordRec->Draw();
+    coordRc->Draw();
 
     myCanvas->cd(4);
     gPad->SetLogy(0);
-    examples->coordMcPartner->SetMarkerColor(2);
-    examples->coordMcPartner->Draw("same");
+    coordMc->SetMarkerColor(2);
+    coordMc->Draw("same");
     
     //chain->Finish(); // This should call the Finish() method in ALL makers,
                      // comment it out if you want to keep the objects
