@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.20 2000/09/01 12:16:19 posk Exp $
+// $Id: doFlowEvents.C,v 1.21 2000/09/05 16:29:43 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.21  2000/09/05 16:29:43  snelling
+// Added cuts for new particles
+//
 // Revision 1.20  2000/09/01 12:16:19  posk
 // Consistency with Maker changes.
 //
@@ -189,8 +192,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowSelection flowSelect1;
   //flowSelect->SetNumber(1);
   //flowSelect->SetCentrality(1);
-  //flowSelect->SetPid("pi"); // pi+, pi-, pi, or proton
-  //flowSelect->SetPidPart("pi"); // pi+, pi-, pi, or proton
+  //particles  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
+  //flowSelect->SetPid("pi"); 
+  //flowSelect->SetPidPart("pi"); 
   //flowSelect->SetPtPart(1., 3.); // pt selection for parts. wrt plane
   //flowSelect->SetEtaPart(0., 0.); // eta selection for parts. wrt plane
 
@@ -256,7 +260,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //
   //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
-    if (makerName[0]=='\0') {
+  if (makerName[0]=='\0') {
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   } else {
     sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
@@ -292,19 +296,19 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   // Set the event cuts
   //StFlowCutEvent::SetCent(1, 1);
-  //StFlowCutEvent::SetMult(0, 0);
-  //StFlowCutEvent::SetVertexX(0., 0.);
-  //StFlowCutEvent::SetVertexY(0., 0.);
-  //StFlowCutEvent::SetVertexZ(0., 0.);
-  //StFlowCutEvent::SetEtaSym(0., 0.);
+//   StFlowCutEvent::SetMult(0, 0);
+//   StFlowCutEvent::SetVertexX(0., 0.);
+//   StFlowCutEvent::SetVertexY(0., 0.);
+//   StFlowCutEvent::SetVertexZ(0., 0.);
+//   StFlowCutEvent::SetEtaSym(0., 0.);
   
   // Set the track cuts
-  //StFlowCutTrack::SetFitPts(0, 0);
-  //StFlowCutTrack::SetFitOverMaxPts(0., 0.);
-  //StFlowCutTrack::SetChiSq(0., 3.);
-  //StFlowCutTrack::SetDca(0., 0.);
-  //StFlowCutTrack::SetPt(0., 0.);
-  //StFlowCutTrack::SetEta(0., 0.);
+//   StFlowCutTrack::SetFitPts(0, 0);
+//   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
+//   StFlowCutTrack::SetChiSq(0., 0.);
+//   StFlowCutTrack::SetDca(0., 0.);
+//   StFlowCutTrack::SetPt(0., 0.);
+//   StFlowCutTrack::SetEta(0., 0.);
   
   // Set the event plane selections
   //StFlowEvent::SetEtaCut(0.05, 1., 0, 0); // harmonic 1, selection 1
@@ -318,6 +322,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowEvent::SetAntiProtonCut(-3., 3.);
 //   StFlowEvent::SetKPlusCut(-3., 3.);
 //   StFlowEvent::SetKMinusCut(-3., 3.);
+//   StFlowEvent::SetDeuteronCut(-3., 3.);
+//   StFlowEvent::SetAntiDeuteronCut(-3., 3.);
+//   StFlowEvent::SetElectronCut(-3., 3.);
+//   StFlowEvent::SetPositronCut(-3., 3.);
 
   TTable   *tabl=0;
   TDataSet *obj=0;
