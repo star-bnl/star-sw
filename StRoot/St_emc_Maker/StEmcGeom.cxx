@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.6 2000/04/21 17:43:02 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.7 2000/04/25 17:02:06 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.7  2000/04/25 17:02:06  pavlinov
+ * Added methods for gettinng x,y,z from volume ID
+ *
  * Revision 1.6  2000/04/21 17:43:02  pavlinov
  * Added methods for for decoding Geant volume Id
  *
@@ -406,17 +409,17 @@ Int_t &sub, Int_t &dep)
     else{
     printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i; rl=%i\n",
     ivid, rl);
-    return 0;
+    return 1;
     }
   }
   else {
     printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i=>%i\n",
     ivid, ividw);
-    return 0;
+    return 1;
   }
-  printf(" vid %i m %3i eta %3i sub %3i dep %3i \n",
-  ivid,module,eta,sub,dep);  
-  return 1;
+  //  printf(" vid %i m %3i eta %3i sub %3i dep %3i \n",
+  // ivid,module,eta,sub,dep);  
+  return 0;
 }
 // _____________________________________________________________________
 Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,
@@ -453,7 +456,7 @@ Int_t &sub, Int_t &type)
     else{
       printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i; rl=%i\n",
       ivid, rl);
-      return 0;
+      return 1;
     }
     if     (t==1){
       type = BSMDE;
@@ -472,17 +475,28 @@ Int_t &sub, Int_t &type)
     }
     else {
       printf("<E> getVolIdBsmd: Type mismatch %i \n",t);
-      return 0;
+      return 1;
     }
   }
   else {
     printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i=>%i\n",
     ivid, ividw);
+    return 1;
+  }
+  //  printf(" vid %i m %3i eta %3i sub %3i type %3i \n",
+  //ivid,module,eta,sub,type);  
+  return 0;
+}
+// _____________________________________________________________________
+Int_t StEmcGeom::getVolId(const Int_t ivid, Int_t &module,Int_t &eta,
+Int_t &sub, Int_t &det)
+{
+  if     (mDetector==1||mDetector==2) return getVolIdBemc(ivid,module,eta,sub,det);
+  else if(mDetector==3||mDetector==4) return getVolIdBsmd(ivid,module,eta,sub,det);
+  else {
+    printf("<E> getVolId -- wrong detectot number %i \n",mDetector);
     return 0;
   }
-  printf(" vid %i m %3i eta %3i sub %3i type %3i \n",
-  ivid,module,eta,sub,type);  
-  return 1;
 }
 // _____________________________________________________________________
 void StEmcGeom::initEEMCorEPRS()  //wrong need to update

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.7 2000/04/21 17:43:01 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.8 2000/04/25 17:02:06 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.8  2000/04/25 17:02:06  pavlinov
+ * Added methods for gettinng x,y,z from volume ID
+ *
  * Revision 1.7  2000/04/21 17:43:01  pavlinov
  * Added methods for for decoding Geant volume Id
  *
@@ -126,8 +129,14 @@ public:
 
   Int_t    getVolIdBemc(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
   Int_t    getVolIdBsmd(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
+  Int_t    getVolId(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
   
   Int_t    getZlYl(const Int_t,Float_t &,Float_t &);
+  void     getXYZ(const Int_t,const Int_t,const Int_t,
+                  Float_t &,Float_t &,Float_t &);
+  Int_t    getXYZ(const Int_t, Float_t &,Float_t &,Float_t &);
+  Int_t    getXYZfromGeant(const Int_t, Float_t &,Float_t &,Float_t &);
+
   Int_t    getEta(const Int_t, const Int_t, Float_t &);
   Int_t    getTheta(const Int_t, const Int_t, Float_t &);
   Int_t    getPhi(const Int_t, const Int_t, Float_t &);
@@ -268,6 +277,36 @@ inline Int_t StEmcGeom::getZlYl(const Int_t rid, Float_t &zl, Float_t &yl)
   }
   else return 1;
 } 
+// _____________________________________________________________________
+inline void StEmcGeom::getXYZ(const Int_t m, const Int_t e, const Int_t s,
+                               Float_t &x,Float_t &y,Float_t &z)
+{
+  Float_t phi;
+  if(m<=60) z = mZlocal[e-1];
+  else      z =-mZlocal[e-1];
+  getPhi(m,s,phi);
+  x = mRadius*sin(phi); 
+  y = mRadius*cos(phi);
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getXYZ(const Int_t rid, Float_t &x,Float_t &y,Float_t &z)
+{
+  Int_t m, e, s;
+  if(!getBin(rid,  m,  e, s)){
+    getXYZ(m,e,s, x,y,z);
+    return 0;
+  }
+  else return 1;
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getXYZfromGeant(const Int_t ivid,Float_t &x,Float_t &y,Float_t &z)
+{
+  Int_t m, e, s, det;
+  if(getVolId(ivid, m,e,s,det) == 0){
+    return getXYZ(m,e,s, x,y,z);
+  }
+  else return 1;
+}
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getEta(const Int_t m, const Int_t  e, Float_t &eta)
 {
