@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.2  2000/01/07 00:16:43  fisyak
+add filling fgGeant
+
 Revision 1.1  2000/01/04 16:04:04  fisyak
 move TGeant3 to root4star executable
 
@@ -432,7 +435,7 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype)
   //
   // Standard constructor for TGeant3 with ZEBRA initialisation
   // 
-   
+  fgGeant = this;   
   printf (" calling agmain \n");
 #ifdef __HIGZ__
   if (!higz) higz = new THIGZ(defSize);
