@@ -115,9 +115,6 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     while (go) {
 	if (node->getHit()) {
 
-	    //Warning:! This is only temporary!  Should be done in tracker
-	    node->getHit()->setUsed(true);
-	    
 	    //Add this point to the drawable hits
 	    const StThreeVectorF& pos = node->getHit()->globalPosition();
 	    mLineHitPair.second->push_back( pos.x() );
