@@ -73,6 +73,9 @@ public:
     void setHitErrorCalculator(const StiHitErrorCalculator * calculator);
     const StiHitErrorCalculator * getHitErrorCalculator() const;
 
+    void setGroupId(int id);
+    int  getGroupId() const;
+
     friend ostream& operator<<(ostream&os, const StiDetector & det);
  protected:
     
@@ -111,6 +114,9 @@ public:
     double _cos;
     /// Convenience storage of sin(refAngle)
     double _sin;
+    /// Detector group identifier.
+    int _groupId;
+
 };
 
 inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)
@@ -121,6 +127,17 @@ inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * cal
 inline const StiHitErrorCalculator * StiDetector::getHitErrorCalculator() const
 {
   return _hitErrorCalculator;
+}
+
+
+inline void StiDetector::setGroupId(int id)
+{
+  _groupId = id;
+}
+
+inline int  StiDetector::getGroupId() const
+{
+  return _groupId;
 }
 
 #endif

@@ -4,9 +4,8 @@
 #include <stdexcept>
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Factory.h"
-#include "StiToolkit.h"
-
-class StiDetectorBuilder;
+#include "Sti/StiToolkit.h"
+#include "Sti/StiDetectorBuilder.h"
 template<class Event,class Detector> class StiHitLoader;
 class StiDedxCalculator;
 class StiElossCalculator;
@@ -31,6 +30,8 @@ class StiDetectorGroup : public Named
   /// An eloss calculator is used in the kalman propagation to determine
   /// the track energy loss.
   StiElossCalculator * getElossCalculator();
+  void setGroupId(int id);
+  int  getGroupId() const;
 
  protected:
 
@@ -44,7 +45,9 @@ class StiDetectorGroup : public Named
   StiHitLoader<Event,StiDetectorBuilder> * _hitLoader;
   StiDetectorBuilder * _detectorBuilder;
   StiDedxCalculator *  _dedxCalculator;
-  StiElossCalculator * _elossCalculator;
+  StiElossCalculator * _elossCalculator; 
+  /// Detector group identifier.
+  int _groupId;
 };
 
 
@@ -54,11 +57,12 @@ StiDetectorGroup<Event>::StiDetectorGroup(const string & name,
 					  StiDetectorBuilder * detectorBuilder,
 					  StiDedxCalculator *  dedxCalculator,
 					  StiElossCalculator * elossCalculator)
-  : Named(name),
-    _hitLoader(hitLoader),
-    _detectorBuilder(detectorBuilder),
-    _dedxCalculator(dedxCalculator),
-    _elossCalculator(elossCalculator)
+  :  Named(name),
+     _hitLoader(hitLoader),
+     _detectorBuilder(detectorBuilder),
+     _dedxCalculator(dedxCalculator),
+     _elossCalculator(elossCalculator),
+     _groupId(-1)
 {
   // If a loader was specified, make sure it uses the selected detector builder.
   if (_hitLoader)
@@ -145,6 +149,19 @@ StiElossCalculator * StiDetectorGroup<Event>::getElossCalculator()
       throw logic_error(message.c_str());
     }
   return _elossCalculator; 
+}
+
+template<class Event>
+inline void StiDetectorGroup<Event>::setGroupId(int id)
+{
+  if (_detectorBuilder) _detectorBuilder->setGroupId(id);
+  _groupId = id;
+}
+
+template<class Event>
+inline int  StiDetectorGroup<Event>::getGroupId() const
+{
+  return _groupId;
 }
 
 #endif

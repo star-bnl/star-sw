@@ -99,6 +99,7 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   //detector->build();
+  detector->setGroupId(_groupId);
   return detector;
 }
 
