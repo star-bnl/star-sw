@@ -528,6 +528,12 @@ C			in each sequence
 C
 C   30mar95 now sector=1..24,row=1..45
 C
+c   9apr96 -- malisa 
+c	account for the fact that data is stored such that tdc=0..511
+c	NOT 1..512.  The rest of the hitfinder assumes minimum tdc
+c	is 1.  This is the only routine where tdc information is unpacked,
+c	so I just add one to it here...
+c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -615,6 +621,8 @@ c new way to unpack data
            iadc(iclspix) = ldatum - numseq_factor*kseqpix 
      +		- tdc_factor*itdc(iclspix)
 
+           itdc(iclspix) = itdc(iclspix)+1 ! added 9apr96 malisa
+
            ipad(iclspix) = tpseq(kseq).secpad
 
 	   iseq_num = iseq_num+1
@@ -633,6 +641,7 @@ c              iadc(iclspix) = real(idatum(1))
               iadc(iclspix) = ldatum - numseq_factor*kseqpix 
      +		- tdc_factor*itdc(iclspix)
               ipad(iclspix) = ipad(iclspix-1)
+              itdc(iclspix) = itdc(iclspix)+1 ! added 9apr96 malisa
 c
 c             for MC data!
 c

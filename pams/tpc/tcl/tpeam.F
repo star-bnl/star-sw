@@ -1016,6 +1016,7 @@ c  mal 12jul95
                   ktdc = (kdatum - numpix_factor*numpix_seq)/tdc_factor
                   kadc = kdatum - numpix_factor*numpix_seq - 
      +                 tdc_factor*ktdc
+                  ktdc = ktdc+1 ! first bucket is coded as tdc=0
                   kmcid = tpmcpix(kpix).mcid
                   vec(3)=kadc
                   vec(2) = ktdc*time_bucket
