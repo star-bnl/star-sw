@@ -1,3 +1,10 @@
+// $Id: StSsdBarrel.cc,v 1.6 2005/03/18 14:04:06 lmartin Exp $
+//
+// $Log: StSsdBarrel.cc,v $
+// Revision 1.6  2005/03/18 14:04:06  lmartin
+// missing CVS header added
+//
+
 #include "StSsdBarrel.hh"
 
 #include "TFile.h"
