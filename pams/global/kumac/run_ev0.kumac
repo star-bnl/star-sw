@@ -10,7 +10,7 @@ macro ev0_am
         [dst]/globtrk _
         [dst]/vertex _
         [dst]/ev0out _	
-        [dst]/ev0track _ 
+        [data]/global/tracks/ev0track _ 
 	[params]/global/magnetic_field/magf
 
  if (staf_status(1).ne.stafcv_ok) then
