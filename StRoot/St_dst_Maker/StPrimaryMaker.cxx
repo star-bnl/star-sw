@@ -248,9 +248,9 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
      // Fill bit map in prim trk
       
 
-      tcl_tphit_st  *spc   = tphit->GetTable();
+      tcl_tphit_st  *spc    = tphit->GetTable();
       sgr_groups_st *tgroup = tpc_groups->GetTable();
-      dst_track_st * track  = primtrk->GetTable();
+      dst_track_st  *track  = primtrk->GetTable();
       
       int spt_id = 0;
       int row = 0,i;
@@ -289,10 +289,11 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
 	}
       }
       
+
       
-      // If EstGlobal exists create EstPrimary
+      // If EstGlobal exists create EstPrimary. It exists
+      // if EST runs.
       if( EstGlobal){
-	
 	dst_track_st *glob  = EstGlobal->GetTable();
 	for( Int_t no_rows=0; no_rows<EstGlobal->GetNRows(); no_rows++, glob++)
 	  {
@@ -396,13 +397,15 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
 	  }
 	  
 	}
-	
       } // End of if EstGlobal
+
     }
   } else {
     gMessMgr->Debug(" No Primary vertex ");
     return kStWarn;
   }
+
+
   
   // copy id_start_vertex from globtrk to primtrk for all rows
   // copy n_max_point from globtrk to primtrk for all rows
@@ -426,6 +429,7 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
       for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) 
         {
 	  
+	  // globtrkPtr->id_start_vertex is set to 0 in StMatchMaker::Make()
 	  globtrkPtr->id_start_vertex = 0;
 	  primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
 	  if( globtrkPtr->impact < 3.){
@@ -521,8 +525,11 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.78 2003/08/07 00:19:52 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.79 2003/08/19 16:02:24 jeromel Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.79  2003/08/19 16:02:24  jeromel
+// No changes (cosmetics)
+//
 // Revision 1.78  2003/08/07 00:19:52  caines
 // Write out the TPC only vertex as a calibration vertex if est vertex found
 //
