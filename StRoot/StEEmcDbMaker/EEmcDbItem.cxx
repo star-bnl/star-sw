@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.10 2004/04/04 06:10:37 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.11 2004/04/28 20:38:10 jwebb Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -62,26 +62,29 @@ int EEmcDbItem::importAscii(FILE *fd){
      1 : line ignored
      2 : valid input
   */
-
+ 
   clear();
   const int mx=1000;
   char buf[mx];
   
   char * ret=fgets(buf,mx,fd);
  
-  if(ret==0) return 0;
+  if(ret==0) return 0;  
 
-  if(buf[0]=='#') return 1;
+  if(buf[0]=='#') return 1; 
+
   char name0[mx];
   int ret1=sscanf(buf,"%s",name0);
+
+
   if(ret1==0) return -1;
 
   int n=0; 
   // printf("aaa name='%s' n=%d\n",name,name[0]);
-  if(name0[2]=='U' || name0[2]=='V') { 
+  if(name0[2]=='U' || name0[2]=='V') {     
     n=sscanf(buf,"%s %d %d %d %c %d %f %f %f %x %x %s %d",name,&crate,&chan,&sec,&plane,&strip,&gain,&ped,&thr,&stat,&fail,tube,&key);
   }
-  else if (name0[2]=='T' || name0[2]=='P' || name0[2]=='Q' || name0[2]=='R' ) {
+  else if (name0[2]=='T' || name0[2]=='P' || name0[2]=='Q' || name0[2]=='R' ) {    
     n=sscanf(buf,"%s %d %d %d %c %d %f  %f %f %x %x %s %d",name,&crate,&chan,&sec,&sub,&eta,&gain,&ped,&thr,&stat,&fail,tube,&key);
   }
   else 
@@ -180,6 +183,10 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.11  2004/04/28 20:38:10  jwebb
+// Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
+// tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.
+//
 // Revision 1.10  2004/04/04 06:10:37  balewski
 // *** empty log message ***
 //
