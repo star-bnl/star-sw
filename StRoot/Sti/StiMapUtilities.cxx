@@ -3,6 +3,8 @@
 //3/01
 
 #include <iostream>
+#include <math.h>
+
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 
@@ -11,20 +13,39 @@
 //Equality defined by same refangle and position
 bool HitMapKey::operator==(const HitMapKey& key2) const
 {
-  return (this->refangle==key2.refangle && this->position==key2.position);
+    cout <<"HitMapKey::operator==(const HitMapKey&)"<<endl;
+    return (this->refangle==key2.refangle && this->position==key2.position);
 }
 
 //Return true if key2 < key1.  Order first by refangle, then by position.
 bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) const
 {
+    //cout <<"HitMapKey::operator<()"<<endl;
     bool val = false;
-    if (key1.refangle > key2.refangle) {val =  false;}
-    if (key1.refangle < key2.refangle) {val = true;}
-    if (key1.refangle == key2.refangle) {
-	if (key1.position > key2.position) {val = false;}
-	if (key1.position < key2.position) {val = true;}
-	if (key1.position == key2.position) {val = false;}
+    if ( fabs(key1.refangle-key2.refangle) < reftolerance) { //Call these equal, check position
+
+	if ( fabs(key1.position-key2.position) < postolerance) {//Call these equal
+	    val = false;
+	}
+	
+	else if (key1.position < key2.position) {val = true;}
+	else {val = false;}
     }
+    
+    else if (key1.refangle < key2.refangle) {val = true;}
+    else {val = false;}
+
+    //Old
+    /*
+      if (key1.refangle > key2.refangle) {val =  false;}
+      else if (key1.refangle < key2.refangle) {val = true;}
+      else if (key1.refangle == key2.refangle) {
+      if (key1.position > key2.position) {val = false;}
+      else if (key1.position < key2.position) {val = true;}
+      else if (key1.position == key2.position) {val = false;}
+      }
+    */
+
     return val;
 }
 

@@ -21,7 +21,7 @@ class ofstream;
 
 typedef vector<StiHit*> hitvector;
 typedef map<HitMapKey, hitvector, MapKeyLessThan> hitmap;
-typedef map<HitMapKey, hitvector, MapKeyLessThan>::value_type hitMapValType;
+typedef hitmap::value_type hitMapValType;
 
 class StiHitContainer
 {

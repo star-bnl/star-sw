@@ -161,9 +161,16 @@ void StiHitContainer::sortHits()
 	
 void StiHitContainer::print(double refangle, double position)
 {
+    //cout <<"\nStiHitContainer::print(double, double)"<<endl;
     mkey.refangle = refangle;
     mkey.position = position;
-    const hitvector& tempvec = mmap[mkey];
+    hitmap::const_iterator where = mmap.find(mkey);
+    if (where==mmap.end()) {
+	//cout <<"StiHitContainer::print(double, double) !! Error. key:\t"<<mkey<<" not found"<<endl;
+	cout <<"No Hits For DetectorMapKey:\t"<<mkey<<endl;
+	return;
+    }
+    const hitvector& tempvec = (*where).second;
     for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
 	cout <<*(*it)<<endl;
     }
@@ -183,6 +190,7 @@ void StiHitContainer::print(double refangle, double position, ofstream& myout)
  
 void StiHitContainer::print() const
 {
+    cout <<"\nStiHitContainer::print()"<<endl;
     hitmap::const_iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	cout <<(*it).first<<endl;

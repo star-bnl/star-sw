@@ -12,7 +12,7 @@
 #include "StMcEventTypes.hh"
 
 //Sti
-#include "StiTrack.h"
+#include "StiKalmanTrack.h"
 #include "StiEvaluableTrack.h"
 
 StiEvaluableTrack::StiEvaluableTrack() : msttrack(0), mstmctrack(0)

@@ -64,7 +64,7 @@ bool StiEvaluableTrackSeedFinder::hasMore()
     return (mcurrent!=mend);
 }
 
-StiTrack* StiEvaluableTrackSeedFinder::next()
+StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 {
     bool go=true;
     while (go && mcurrent!=mend) {

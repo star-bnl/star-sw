@@ -13,7 +13,7 @@
 #include "StiHitContainer.h" //Include temp., so that we can use typedefs
 #include "CombinationIterator.h"
 
-class StiTrack;
+class StiKalmanTrack;
 class StTrack;
 
 class StiTrackSeedFinder : public StiSeedFinder
@@ -29,7 +29,7 @@ public:
     
     //Enforced User interface
     virtual bool hasMore();
-    virtual StiTrack* next();
+    virtual StiKalmanTrack* next();
     
     void addLayer(double refangle, double position);
     virtual void clear();
@@ -39,7 +39,7 @@ public:
     int numberOfLayers() const;
     
 protected:
-    virtual StiTrack* makeTrack(const tvector&) const;
+    virtual StiKalmanTrack* makeTrack(const tvector&) const;
     const StiHitContainer* mhitstore;
     combo_iterator* miterator;
     int mnlayers;

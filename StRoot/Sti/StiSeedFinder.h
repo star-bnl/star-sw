@@ -9,7 +9,7 @@
 
 #include <utility>
 
-class StiTrack;
+class StiKalmanTrack;
 class StTrack;
 
 class StiSeedFinder
@@ -21,7 +21,7 @@ public:
 
     //User interface
     virtual bool hasMore() = 0;
-    virtual StiTrack* next() = 0;
+    virtual StiKalmanTrack* next() = 0;
     
 protected:
 private:
