@@ -1,48 +1,36 @@
 #
 set ARCH = `sys`
+set ASPS = ( ami asu c4t dio dsl dsu dui lev msg pam sdd soc spx str tbr tdm tls tnt top )
+if ( $#argv ) set ASPS = $1
+
+foreach ASP ( $ASPS )
+echo $ASP $ARCH
 set LIB = .$ARCH/lib
 if ( -d $LIB) then
-  echo rm -f $LIB/*
-  rm -f $LIB/*
+  echo rm -f $LIB/lib$ASP.a
+  rm -f $LIB/*$ASP.a
+  echo rm -f $LIB/lib$ASP.s?
+  rm -f $LIB/*$ASP.s?
 endif
 
-set OBJ = .$ARCH/obj
+set OBJ = .$ARCH/obj/$ASP
 if ( -e $OBJ ) then
-  cd $OBJ
-  foreach dir (???)
-  if ( $dir != "exe") then
-    echo rm -rf $cwd/$dir
-    rm -rf $dir
-  endif
-  end
-  cd ../../
+  echo rm -rf $OBJ/*.o
+  rm -rf $OBJ/*.o
 endif
 
-set DEP = .$ARCH/dep
+set DEP = .$ARCH/dep/$ASP
 if ( -e $DEP ) then
-  cd $DEP
-  foreach dir (???)
-  if ( $dir != "exe") then
-    echo rm -rf $cwd/$dir
-    rm -rf $dir
-  endif
-  end
-  cd ../../
- endif
+  echo rm -rf $DEP/*.d
+  rm -rf $OBJ/*.d
+endif
 
-set SRG = srg
+set SRG = srg/$ASP
 if ( -e $SRG ) then
-  cd $SRG
-  cd $DEP
-  foreach dir (???)
-  if ( $dir != "exe") then
-    echo rm -rf $cwd/$dir
-    rm -rf $dir
-  endif
-  end
- cd ../../
- endif
+  echo rm -rf $SRG/*.*
+  rm -rf $SRG/*.*
+endif
 
-
+end
 
 
