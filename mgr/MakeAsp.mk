@@ -325,6 +325,7 @@ $(MY_LIB) : $(FILES_O)
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
+	$(CD) $(LIB_DIR);\
 	$(SO) $(SOFLAGS) -o $(NEW_MY_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
 	$(RM) $(MY_SO)
 	$(LN) $(NEW_MY_SO) $(MY_SO)
@@ -342,6 +343,7 @@ $(SRC_GEN_DIR)/%.c : %.y
 
 %.o : %.c 
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+
 %.o : $(SRC_GEN_DIR)/%.c 
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
