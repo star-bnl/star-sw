@@ -1,5 +1,8 @@
-// $Id: StHFillObject.cxx,v 1.4 2000/03/27 19:08:01 fine Exp $
+// $Id: StHFillObject.cxx,v 1.5 2000/06/30 17:52:53 genevb Exp $
 // $Log: StHFillObject.cxx,v $
+// Revision 1.5  2000/06/30 17:52:53  genevb
+// Fixed array size
+//
 // Revision 1.4  2000/03/27 19:08:01  fine
 // Adjuested to ROOT 2.24
 //
@@ -342,7 +345,7 @@ Double_t StHFillFormula::Eval()
   char *string_calc[kMAXSTRINGFOUND];
   Int_t precalculated = 0;
   Int_t precalculated_str = 0;
-  Double_t x[1];
+  Double_t x[2];
 
   x[0] = 1.0;
   pos  = 0;
