@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.28 2000/09/29 22:53:18 posk Exp $
+// $Id: plot.C,v 1.29 2000/10/12 21:01:32 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.29  2000/10/12 21:01:32  posk
+// Minor update.
+//
 // Revision 1.28  2000/09/29 22:53:18  posk
 // More histograms.
 //
@@ -99,6 +102,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   if (cOld) cOld->Delete();
     
   gROOT->SetStyle("Bold");                              // set style
+  //gROOT->LoadMacro("styles.C");
+  //Bold();
+  //Pub();
+  //gROOT->SetStyle("Video");                              // set style
   gROOT->ForceStyle();
 
   // names of histograms made by StFlowAnalysisMaker
@@ -186,14 +193,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     cout << " run name = " << runName << endl;
   }
 
-  // input the file number (default opens flow.hist.root)
+  // input the file number (0 opens flow.hist.root)
   if (strstr(fileNumber, "x")!=0) {
-    cout << "     anaXX.root file number? [flow.hist.root] " << flush;
-    fgets(fileNumber, sizeof(fileNumber), stdin);
-    if (strlen(fileNumber) == 1) {
+    cout << "     anaXX.root file number? [0= flow.hist.root] ";
+    cin >> fileNumber;
+    if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
       sprintf(fileName, "flow.hist.root");
     } else {
-      fileNumber[strlen(fileNumber)-1] = '\0';           // remove CR
       sprintf(fileName, "ana%s.root", fileNumber);       // insert
     }
     cout << " file name = " << fileName << endl;
