@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.14 2000/02/24 16:26:58 long Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.15 2000/07/30 02:39:51 long Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.15  2000/07/30 02:39:51  long
+ * comment out diffusion calculations,they will be done in other place.
+ *
  * Revision 1.14  2000/02/24 16:26:58  long
  * changes for field on cases ( calculation of diffusion as a function of field)
  *
@@ -154,17 +157,17 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg,dou
     //
     double ne = sqrt(seg.charge());
     if (mTransverseDiffusion) {
-      	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
-      					     SigmaT/ne));
-	seg.position().setY(mGaussDistribution.shoot(seg.position().y(),
-      					     SigmaT/ne));
+      //	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
+      // 					     SigmaT/ne));
+      //	seg.position().setY(mGaussDistribution.shoot(seg.position().y(),
+      // 					     SigmaT/ne));
 	
     } // else do not alter the position!
    
    if (mLongitudinalDiffusion) {
        
-	seg.position().setZ(mGaussDistribution.shoot(seg.position().z(),
-						     SigmaL/ne));
+     //	seg.position().setZ(mGaussDistribution.shoot(seg.position().z(),
+     //						     SigmaL/ne));
        
     }
     else {
