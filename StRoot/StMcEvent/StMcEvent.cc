@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.14  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.13  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -89,8 +94,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -102,7 +107,9 @@ void StMcEvent::initToZero()
     mRichHits = 0;            
     mCtbHits = 0;
     mTofHits = 0;
+    mEemcHits = 0;
     mPixelHits = 0;
+
     // Create the collections
     
     mTpcHits  = new StMcTpcHitCollection();
@@ -116,7 +123,9 @@ void StMcEvent::initToZero()
     mBsmdeHits = new StMcEmcHitCollection();
     mBsmdpHits = new StMcEmcHitCollection();
     mTofHits = new StMcTofHitCollection();
+    mEemcHits = new StMcEmcHitCollection();
     mPixelHits = new StMcPixelHitCollection();
+
 
 }
 
@@ -198,6 +207,9 @@ StMcEvent::~StMcEvent()
 
     if (mTofHits) delete mTofHits;
     mTofHits=0;
+
+    if (mEemcHits) delete mEemcHits;
+    mEemcHits=0;
 
     if (mPixelHits) delete mPixelHits;
     mPixelHits=0;
@@ -339,6 +351,12 @@ void StMcEvent::setTofHitCollection(StMcTofHitCollection* val)
 {
     if (mTofHits && mTofHits!= val) delete mTofHits;
     mTofHits = val;
+}
+
+void StMcEvent::setEemcHitCollection(StMcEmcHitCollection* val)
+{
+    if (mEemcHits && mEemcHits!= val) delete mEemcHits;
+    mEemcHits = val;
 }
 
 void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)

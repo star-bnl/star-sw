@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.12 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.13  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.12  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -157,8 +162,10 @@ public:
 
     StMcTofHitCollection*          tofHitCollection();
     const StMcTofHitCollection*    tofHitCollection() const;
-    StMcPixelHitCollection*         pixelHitCollection();
-    const StMcPixelHitCollection*   pixelHitCollection() const;
+    StMcEmcHitCollection*          eemcHitCollection();
+    const StMcEmcHitCollection*    eemcHitCollection() const;
+    StMcPixelHitCollection*        pixelHitCollection();
+    const StMcPixelHitCollection*  pixelHitCollection() const;
     
     // "Set" Methods
     
@@ -190,6 +197,7 @@ public:
     void setBsmdeHitCollection(StMcEmcHitCollection*);              
     void setBsmdpHitCollection(StMcEmcHitCollection*);              
     void setTofHitCollection(StMcTofHitCollection*);
+    void setEemcHitCollection(StMcEmcHitCollection*);              
     void setPixelHitCollection(StMcPixelHitCollection*);       
 
 protected:
@@ -224,6 +232,7 @@ protected:
     StMcEmcHitCollection*          mBsmdeHits;
     StMcEmcHitCollection*          mBsmdpHits;
     StMcTofHitCollection*          mTofHits;
+    StMcEmcHitCollection*          mEemcHits;
     StMcPixelHitCollection*        mPixelHits;
     static TString                 mCvsTag;
 private:
@@ -323,6 +332,10 @@ inline const StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() const {return
 inline StMcTofHitCollection* StMcEvent::tofHitCollection() { return mTofHits;}
 
 inline const StMcTofHitCollection* StMcEvent::tofHitCollection() const { return mTofHits;}
+
+inline StMcEmcHitCollection* StMcEvent::eemcHitCollection() { return mEemcHits;}
+
+inline const StMcEmcHitCollection* StMcEvent::eemcHitCollection() const {return mEemcHits;}
 
 inline StMcPixelHitCollection* StMcEvent::pixelHitCollection() { return mPixelHits;}
 

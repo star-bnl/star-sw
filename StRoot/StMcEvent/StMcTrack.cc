@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.16 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.16  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.15  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -15,8 +20,13 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.16 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.16  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.15  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -98,7 +108,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.16 2003/12/04 05:56:47 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -119,7 +129,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
     mEventGenLabel = trk->eg_label;
-    
+
     // The information to fill the collections 
     // is not available directly from the tables.  
     // We need to decode from trk->hit_tpc_p, 
@@ -154,6 +164,7 @@ StMcTrack::~StMcTrack() {
     mBsmdeHits.clear();
     mBsmdpHits.clear();
     mTofHits.clear();
+    mEemcHits.clear();
     mPixelHits.clear();
     
 }
@@ -203,6 +214,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
+    os << "No. Eemc  Hits: " << t.eemcHits().size()  << endl;
     os << "No. Pixel Hits: " << t.pixelHits().size()  << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
@@ -240,6 +252,8 @@ void StMcTrack::setBsmdeHits(StPtrVecMcCalorimeterHit& val) { mBsmdeHits = val; 
 void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; }
 
 void StMcTrack::setTofHits(StPtrVecMcTofHit& val) { mTofHits = val; }
+
+void StMcTrack::setEemcHits(StPtrVecMcCalorimeterHit& val) { mEemcHits = val; }
 
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
@@ -303,6 +317,11 @@ void StMcTrack::addBsmdpHit(StMcCalorimeterHit* hit)
 void StMcTrack::addTofHit(StMcTofHit* hit)
 {
   mTofHits.push_back(hit);
+}
+
+void StMcTrack::addEemcHit(StMcCalorimeterHit* hit)
+{
+  mEemcHits.push_back(hit);
 }
 
 void StMcTrack::addPixelHit(StMcPixelHit* hit)
@@ -386,6 +405,10 @@ void StMcTrack::removeTofHit(StMcTofHit* hit)
     }
 }
 
+void StMcTrack::removeEemcHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mEemcHits, hit);
+}
 void StMcTrack::removePixelHit(StMcPixelHit* hit)
 {
     StMcPixelHitIterator iter = find (mPixelHits.begin(), mPixelHits.end(),hit);

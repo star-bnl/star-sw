@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.8 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.9 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.9  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.8  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -77,7 +82,7 @@ public:
     StPtrVecMcTrack&            daughters();
     unsigned int                numberOfDaughters();
     StMcTrack*                  daughter(unsigned int);
-    const StMcTrack*            parent();
+    const StMcTrack*            parent() const;
     string const               &geantVolume() const;
     float                       tof() const;
     long                        geantProcess() const;
@@ -121,7 +126,7 @@ inline StMcTrack* StMcVertex::daughter(unsigned int i)
     return (i < mDaughters.size() ? mDaughters[i] : 0);
 }
 
-inline const StMcTrack* StMcVertex::parent(){ return mParent; }          
+inline const StMcTrack* StMcVertex::parent() const { return mParent; }          
 
 inline string const &StMcVertex::geantVolume() const { return mGeantVolume; }   
 
