@@ -44,7 +44,9 @@ ConstrainedParameter::ConstrainedParameter(const string & name, const string & d
     _minimum(min),
     _maximum(max),
     _default(defaultValue)
-{}
+{
+  *value = defaultValue;
+}
 
 ConstrainedParameter::ConstrainedParameter(const string & name, const string & description,
 					   float* value, float  defaultValue,float min, float max, int key)
@@ -52,7 +54,9 @@ ConstrainedParameter::ConstrainedParameter(const string & name, const string & d
     _minimum(min),
     _maximum(max),
     _default(defaultValue)
-{}
+{
+  *value = defaultValue;
+}
 
 ConstrainedParameter::ConstrainedParameter(const string & name, const string & description,
 					   double *  value, double defaultValue, double min, double max, int key)
@@ -60,7 +64,9 @@ ConstrainedParameter::ConstrainedParameter(const string & name, const string & d
     _minimum(min),
     _maximum(max),
     _default(defaultValue)
-{}
+{
+  *value = defaultValue;
+}
 
 
 ConstrainedParameter::~ConstrainedParameter()

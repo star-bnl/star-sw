@@ -26,7 +26,9 @@ EditableParameter::EditableParameter(const string & name,
 				     int   key)
   : ConstrainedParameter(name,description,value,defaultValue,key),
     _increment(1)
-{}
+{
+  
+}
 
 EditableParameter::EditableParameter(const string & name, 
 				     const string & description,
@@ -38,7 +40,8 @@ EditableParameter::EditableParameter(const string & name,
 				     int   key)
   : ConstrainedParameter(name,description,value,defaultValue,min,max,key),
     _increment(increment)
-{}
+{
+}
 
 EditableParameter::EditableParameter(const string & name, 
 				     const string & description,

@@ -57,12 +57,12 @@ class EditableParameter : public ConstrainedParameter
   
   double  getIncrement() const;
   void    setIncrement(double increment);
-  void    set(const string & name, const string & description,
-	      double value, double defaultValue, double min, double max, double increment, int type,int    key);
-  void    set(const string & name,const string & description,bool*value, bool defaultValue, int key=0);
-  void    set(const string & name,const string & description,int *value, int  defaultValue, int min,  int max, int increment,int key=0);
-  void    set(const string & name,const string & description,float*value, float defaultValue, float min, float max, float increment,int key=0);
-  void    set(const string & name,const string & description,double*value, double defaultValue, double min, double max, double increment,int key=0);
+  EditableParameter* set(const string & name, const string & description,
+			 double value, double defaultValue, double min, double max, double increment, int type,int    key);
+  EditableParameter* set(const string & name,const string & description,bool*value, bool defaultValue, int key=0);
+  EditableParameter* set(const string & name,const string & description,int *value, int  defaultValue, int min,  int max, int increment,int key=0);
+  EditableParameter* set(const string & name,const string & description,float*value, float defaultValue, float min, float max, float increment,int key=0);
+  EditableParameter* set(const string & name,const string & description,double*value, double defaultValue, double min, double max, double increment,int key=0);
   void    reset();
 
  protected:
@@ -100,40 +100,48 @@ inline void    EditableParameter::reset()
   _value = _default;
 }
 
-inline void EditableParameter::set(const string & name,const string & description, double value, 
+inline EditableParameter* EditableParameter::set(const string & name,const string & description, double value, 
 			    double defaultValue, double min, double max,double increment,int type,int    key)
 {
   ConstrainedParameter::set(name,description,value,defaultValue,min,max,type,key);
   _increment   = increment;
+  return this;
 }
 
-inline void EditableParameter::set(const string & name,const string & description,
+inline EditableParameter* EditableParameter::set(const string & name,const string & description,
 		bool*value, bool defaultValue, int key)
 {  
   ConstrainedParameter::set(name,description,value,defaultValue,key);
   _increment   = 1;
+  *value = defaultValue;
+  return this;
 }
 
-inline void EditableParameter::set(const string & name,const string & description,
+inline EditableParameter* EditableParameter::set(const string & name,const string & description,
 		int *value, int  defaultValue, int min,  int max, int increment,int key)
 {
   ConstrainedParameter::set(name,description,value,defaultValue,min,max,key);
   _increment   = increment;
+  *value = defaultValue;
+  return this;
 }
 
-inline void EditableParameter::set(const string & name,const string & description,
+inline EditableParameter* EditableParameter::set(const string & name,const string & description,
 				   float*value, float defaultValue, float min, float max, float increment,int key)
 {
   ConstrainedParameter::set(name,description,value,defaultValue,min,max,key);
   _increment   = increment;
+  *value = defaultValue;
+  return this;
 }
 
-inline void EditableParameter::set(const string & name,const string & description,
+inline EditableParameter * EditableParameter::set(const string & name,const string & description,
 				   double*value, double defaultValue, double min, double max, double increment,int key)
 {
   ConstrainedParameter::set(name,description,value,defaultValue,min,max,key);
   _increment   = increment;
+  *value = defaultValue;
+  return this;
 }
-
 
 #endif // !defined(EDITABLEPARAMETER_H_INCLUDED_)
