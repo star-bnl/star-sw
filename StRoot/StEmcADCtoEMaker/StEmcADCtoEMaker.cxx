@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.13 2001/10/26 15:58:37 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.14 2001/10/26 16:14:41 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.13  2001/10/26 15:58:37  suaide
-// bypass status DB for a while
+// Revision 1.14  2001/10/26 16:14:41  suaide
+// small fix
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
 // log messages included for easier debug
@@ -191,13 +191,13 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
         Int_t d = GetDate();
         Int_t t = GetTime();
         cout <<"Using bemc default status table for "
-             <<"date = "<<d<<"  time = "<<time<<endl;
+             <<"date = "<<d<<"  time = "<<t<<endl;
         for(Int_t i=1;i<=4800;i++)
         {
           status[i-1]=0;
           if (i>=1861 && i<=2340) status[i-1]=1; // initial 2001 configuration
           if (i>=2021 && i<=2100) status[i-1]=0; // initial 2001 configuration
-          if(i>=2021 && i<=2100)  // remove PTM 4
+          if (i>=1861 && i<=2020)  // remove PTM 4
           {
             if(d>=20011015 && d<=20011020) status[i-1]=0;
           }
