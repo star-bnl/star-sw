@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.41 1999/07/09 23:04:03 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.42 1999/07/11 23:32:00 fisyak Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.42  1999/07/11 23:32:00  fisyak
+// St_dst_TriggerDetectors => St_dst_TrgDet
+//
 // Revision 1.41  1999/07/09 23:04:03  kathy
 // hopefully getting to final round of fixes to globtrk and primtrk histograms
 //
@@ -158,7 +161,7 @@
 #include "St_dst_xi_vertex_Table.h"
 #include "St_dst_dedx_Table.h"
 #include "St_particle_Table.h"
-#include "St_dst_TriggerDetectors_Table.h"
+#include "St_dst_TrgDet_Table.h"
 #include "St_g2t_rch_hit_Table.h"
 #include "St_dst_monitor_soft_Table.h"
 
@@ -1559,7 +1562,7 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.41 1999/07/09 23:04:03 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.42 1999/07/11 23:32:00 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
