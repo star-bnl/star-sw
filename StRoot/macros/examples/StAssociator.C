@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.28 2001/05/30 22:48:13 calderon Exp $
+// $Id: StAssociator.C,v 1.29 2001/06/15 19:33:13 jeromel Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.29  2001/06/15 19:33:13  jeromel
+// StarRoot
+//
 // Revision 1.28  2001/05/30 22:48:13  calderon
 // don't load St_emc_Maker, not needed and caused problems
 // with optimized libraries.
@@ -113,153 +116,130 @@ void StAssociator(Int_t nevents=1,
 const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 {
 
-    // Dynamically link needed shared libs
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-//     gSystem->Load("St_Tables");
-    gSystem->Load("libglobal_Tables");
-    gSystem->Load("libgeometry_Tables");
-    gSystem->Load("libsim_Tables");
-    gSystem->Load("libgen_Tables");
-    gSystem->Load("StUtilities");
-//     gSystem->Load("StDbLib");
-//     gSystem->Load("StDbBroker");
-//     gSystem->Load("St_db_Maker");
-//     gSystem->Load("StTpcDb");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-//     gSystem->Load("StDbUtilities");
+  // Dynamically link needed shared libs
+  gSystem->Load("StarRoot");
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libgeometry_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
     
-    gSystem->Load("StEvent");
-    gSystem->Load("StEventMaker"); 
-    gSystem->Load("StEmcUtil"); 
-//     gSystem->Load("St_emc_Maker");
-    gSystem->Load("StMcEvent");
-    gSystem->Load("StMcEventMaker");
-    gSystem->Load("StAssociationMaker");
-    gSystem->Load("StMcAnalysisMaker");
+  gSystem->Load("StEvent");
+  gSystem->Load("StEventMaker"); 
+  gSystem->Load("StEmcUtil"); 
+
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
+  gSystem->Load("StAssociationMaker");
+  gSystem->Load("StMcAnalysisMaker");
     
-    chain = new StChain("StChain"); 
-    chain->SetDebug();
+  chain = new StChain("StChain"); 
+  chain->SetDebug();
    
-    // Now we add Makers to the chain...
+  // Now we add Makers to the chain...
 
-    StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-    ioMaker->SetDebug();
-    ioMaker->SetIOMode("r");
-    ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-    ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-    ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
-    ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
+  StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
+  ioMaker->SetDebug();
+  ioMaker->SetIOMode("r");
+  ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
+  ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
+  ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
-//     const char *mainDB = "MySQL:Geometry_tpc";
-//     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
-//     dbMk->SetDebug();
-    
-//     const char *calibDB = "MySQL:Calibrations_tpc";
-//     St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
-//     calibMk->SetDebug();
-    
-//     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-    
-    // Note, the title "events" is used in the Association Maker, so don't change it.
-    StEventMaker*       eventReader   = new StEventMaker("events","title");
-    eventReader->doPrintMemoryInfo = kFALSE;
-    StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
-//     mcEventReader->doPrintMemoryInfo = kFALSE;
-//     mcEventReader->doUseTpc = kTRUE;
-//     mcEventReader->doUseSvt = kTRUE;
-//     mcEventReader->doUseFtpc = kTRUE;
-//     mcEventReader->doUseRich = kTRUE;
-    StAssociationMaker* associator    = new StAssociationMaker;
+  // Note, the title "events" is used in the Association Maker, so don't change it.
+  StEventMaker*       eventReader   = new StEventMaker("events","title");
+  eventReader->doPrintMemoryInfo = kFALSE;
+  StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
+  StAssociationMaker* associator    = new StAssociationMaker;
 
-    // If you need to use L3 TRIGGER uncomment the line:
-    // associator->useL3Trigger();
-    //associator->SetDebug();
-    //associator->doPrintMemoryInfo = kTRUE;
-    StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
+  // If you need to use L3 TRIGGER uncomment the line:
+  // associator->useL3Trigger();
+  //associator->SetDebug();
+  //associator->doPrintMemoryInfo = kTRUE;
+  StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
 
-    // Define the cuts for the Associations
+  // Define the cuts for the Associations
 
-    StMcParameterDB* parameterDB = StMcParameterDB::instance();  
-    // TPC
-    parameterDB->setXCutTpc(.5); // 5 mm
-    parameterDB->setYCutTpc(.5); // 5 mm
-    parameterDB->setZCutTpc(.5); // 5 mm
-    parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
-    // FTPC
-    parameterDB->setRCutFtpc(.3); // 3 mm
-    parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
-    parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
-    // SVT
-    parameterDB->setXCutSvt(.08); // 800 um
-    parameterDB->setYCutSvt(.08); // 800 um
-    parameterDB->setZCutSvt(.08); // 800 um
-    parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
+  StMcParameterDB* parameterDB = StMcParameterDB::instance();  
+  // TPC
+  parameterDB->setXCutTpc(.5); // 5 mm
+  parameterDB->setYCutTpc(.5); // 5 mm
+  parameterDB->setZCutTpc(.5); // 5 mm
+  parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
+  // FTPC
+  parameterDB->setRCutFtpc(.3); // 3 mm
+  parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
+  parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
+  // SVT
+  parameterDB->setXCutSvt(.08); // 800 um
+  parameterDB->setYCutSvt(.08); // 800 um
+  parameterDB->setZCutSvt(.08); // 800 um
+  parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
     
     
-    // now execute the chain member functions
+  // now execute the chain member functions
 
-    chain->PrintInfo();
-    Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
-    if (initStat) chain->Fatal(initStat, "during Init()");
+  chain->PrintInfo();
+  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+  if (initStat) chain->Fatal(initStat, "during Init()");
     
-    int istat=0,iev=1;
+  int istat=0,iev=1;
  EventLoop: if (iev<=nevents && istat!=2) {
-     chain->Clear();
-     cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
-     istat = chain->Make(iev); // This should call the Make() method in ALL makers
-     if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
-     if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
-     iev++; goto EventLoop;
-    } // Event Loop
-    examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
-    TCanvas* myCanvas = examples->mAssociationCanvas;
-    myCanvas->Divide(2,2);
+   chain->Clear();
+   cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
+   istat = chain->Make(iev); // This should call the Make() method in ALL makers
+   if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
+   if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
+   iev++; goto EventLoop;
+ } // Event Loop
+  examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
+  TCanvas* myCanvas = examples->mAssociationCanvas;
+  myCanvas->Divide(2,2);
+  
+  myCanvas->cd(1);
+  gPad->SetLogy(0);
+  examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
 
-    myCanvas->cd(1);
-    gPad->SetLogy(0);
-    examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
+  TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
+  TH2F* hitRes = dList->At(0);
+  TH1F* momRes = dList->At(1);
+  TH2F* coordRc = dList->At(2);
+  TH2F* coordMc = dList->At(3);
+    
+  myCanvas->cd(2);
+  gPad->SetLogy(0);
+  hitRes->Draw("box");
+  
+  myCanvas->cd(3);
+  gPad->SetLogy(0);
+  momRes->Draw();
+  
+  myCanvas->cd(4);
+  gPad->SetLogy(0);
+  coordRc->SetMarkerStyle(20);
+  coordRc->Draw();
+    
+  myCanvas->cd(4);
+  gPad->SetLogy(0);
+  coordMc->SetMarkerColor(2);
+  coordMc->SetMarkerStyle(20);
+  coordMc->Draw("same");
+  
+  if(iev>200) chain->Finish(); // This should call the Finish() method in ALL makers,
+  // comment it out if you want to keep the objects
+  // available at the command line after running
+  // the macro.
 
-    TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
-    TH2F* hitRes = dList->At(0);
-    TH1F* momRes = dList->At(1);
-    TH2F* coordRc = dList->At(2);
-    TH2F* coordMc = dList->At(3);
-//     TH2F* hitRes  = examples->mHitResolution;
-//     TH1F* momRes  = examples->mMomResolution;
-//     TH2F* coordRc = examples->coordRec;
-//     TH2F* coordMc = examples->coordMcPartner;
-    
-    myCanvas->cd(2);
-    gPad->SetLogy(0);
-    hitRes->Draw("box");
-
-    myCanvas->cd(3);
-    gPad->SetLogy(0);
-    momRes->Draw();
-    
-    myCanvas->cd(4);
-    gPad->SetLogy(0);
-    coordRc->SetMarkerStyle(20);
-    coordRc->Draw();
-    
-    myCanvas->cd(4);
-    gPad->SetLogy(0);
-    coordMc->SetMarkerColor(2);
-    coordMc->SetMarkerStyle(20);
-    coordMc->Draw("same");
-    
-    if(iev>200) chain->Finish(); // This should call the Finish() method in ALL makers,
-                     // comment it out if you want to keep the objects
-                     // available at the command line after running
-                     // the macro.
-
-    // To look at the ntuple after the macro has executed:
-    // f1 = new TFile("TrackMapNtuple.root");  //This opens the file, and loads the Ntuple
-    // TrackNtuple->Draw("px:pxrec")  //Once loaded, the Ntuple is available by name.
-    // To look at the Histograms once the Macro has executed:
-    // TList* dList = chain->GetMaker("McAnalysis")->Histograms();
-    // TH2F* hitRes = dList->At(0);  //or whatever index from 0 to 3
+  // To look at the ntuple after the macro has executed:
+  // f1 = new TFile("TrackMapNtuple.root");  //This opens the file, and loads the Ntuple
+  // TrackNtuple->Draw("px:pxrec")  //Once loaded, the Ntuple is available by name.
+  // To look at the Histograms once the Macro has executed:
+  // TList* dList = chain->GetMaker("McAnalysis")->Histograms();
+  // TH2F* hitRes = dList->At(0);  //or whatever index from 0 to 3
 }
 
