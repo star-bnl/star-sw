@@ -454,12 +454,11 @@ tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	    lv = 0;
 	    for( iv=0;iv<nv;iv++ ){ lv += strlen(values[iv]); }
 	    value = (char*)MALLOC(lv +1);
-	    strncpy(value,values[0],lv + 1); //4aug97 - BUGFIX 
-	    value[lv + 1]=0; /* hjw 19Feb98 */
+	    strncpy(value,values[0],lv);
+	    value[lv]=0;
 	    for( iv=1;iv<nv;iv++ ){ strcat(value,values[iv]); }
-	    value[strlen(value)] = 0;
 	    strncpy(cellData.data.c,value,col.size); 
-	    cellData.data.c[col.size]=0; /* hjw 19Feb98 */
+	    cellData.data.c[col.size-1]=0; /* hjw 19Feb98 */
 	    FREE(value);
 	    break;
 	 case DS_TYPE_OCTET:
