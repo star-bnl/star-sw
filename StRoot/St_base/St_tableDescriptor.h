@@ -1,31 +1,10 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.6 1999/10/28 00:32:55 fine Exp $
-// $Log: St_tableDescriptor.h,v $
-// Revision 1.6  1999/10/28 00:32:55  fine
-// method At() has been removed
-//
-// Revision 1.5  1999/09/07 19:30:29  fine
-// table descriptor access has been changed. All tables are affected and must be re-compiled
-//
-// Revision 1.4  1999/08/12 18:53:49  fine
-// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
-//
-// Revision 1.3  1999/08/12 02:23:30  fine
-//  GetRowDescriptor must be const
-//
-// Revision 1.2  1999/08/11 14:44:39  fine
-// name clash with ROOT over enum resolved
-//
-// Revision 1.1  1999/08/11 00:40:12  fine
-// new class St_tableDescriptor
-//
-
+// $Id: St_tableDescriptor.h,v 1.7 2000/01/24 03:55:48 fine Exp $
 #ifndef STAR_St_tableDescriptor
 #define STAR_St_tableDescriptor
 
 #include "St_Table.h"
 #include "tableDescriptor.h"                 
-
 
 class St_tableDescriptor : public St_Table {
   protected:
@@ -36,9 +15,12 @@ class St_tableDescriptor : public St_Table {
   public:                                    
  
     St_tableDescriptor(const St_Table *parentTable);
+    St_tableDescriptor(TClass *classPtr);
    ~St_tableDescriptor();
+    TString CreateLeafList() const;
     tableDescriptor_st *GetTable(){ return (tableDescriptor_st *)s_Table;}                                            
              void        LearnTable(const St_Table *parentTable);
+             void        LearnTable(TClass *classPtr);
              const Char_t *GetColumnName(Int_t columnIndex)        const;
              const Int_t GetColumnByName(const Char_t *columnName=0) const;
              UInt_t      GetNumberOfColumns()                      const;
@@ -75,5 +57,30 @@ inline  void   St_tableDescriptor::SetSize(UInt_t size,Int_t column)      {((tab
 inline  void   St_tableDescriptor::SetTypeSize(UInt_t size,Int_t column)  {((tableDescriptor_st *)At(column))->m_TypeSize   = size;  }
 inline  void   St_tableDescriptor::SetDimensions(UInt_t dim,Int_t column) {((tableDescriptor_st *)At(column))->m_Dimensions = dim;   }
 inline  void   St_tableDescriptor::SetColumnType(EColumnType type,Int_t column) {((tableDescriptor_st *)At(column))->m_Type = type;  }
+
+//______________________________________________________________________________
+// $Log: St_tableDescriptor.h,v $
+// Revision 1.7  2000/01/24 03:55:48  fine
+// new nethod CreateLeafList() to create text descriptor compatible with TBranch ctor
+//
+// Revision 1.6  1999/10/28 00:32:55  fine
+// method At() has been removed
+//
+// Revision 1.5  1999/09/07 19:30:29  fine
+// table descriptor access has been changed. All tables are affected and must be re-compiled
+//
+// Revision 1.4  1999/08/12 18:53:49  fine
+// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
+//
+// Revision 1.3  1999/08/12 02:23:30  fine
+//  GetRowDescriptor must be const
+//
+// Revision 1.2  1999/08/11 14:44:39  fine
+// name clash with ROOT over enum resolved
+//
+// Revision 1.1  1999/08/11 00:40:12  fine
+// new class St_tableDescriptor
+//______________________________________________________________________________
+
 
 #endif
