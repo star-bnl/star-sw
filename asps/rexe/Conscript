@@ -99,11 +99,13 @@ if ($#Defs > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
 #  print "CintFiles = @CintFiles\n";
-  Install $env2 $share, @Defs; #print "Install $env2 $share, @Defs\n";
   my @defs = ();
+  my @d    = ();
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def); 
+    push @d   , "#include/" .  basename($def); 
   }
+  Install $env2 $share, @d;# print "Install $env2 $share, @d\n";
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$ObjDir/g;
