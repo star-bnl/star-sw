@@ -172,13 +172,18 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
    char *name;
    bool_t isDataset;
 
+//printf("path = %s \n",path);			.. ***** DEBUG *****
    while( (s = strntok(path,"/",i++)) != NULL ){
+//printf("elem = %s \t",s);			.. ***** DEBUG *****
+//printf("base = %s \n",pDSr->name);		.. ***** DEBUG *****
    if( 0 != strcmp(s,pDSr->name)){ 	// ***** HACK *****
       if( !dsIsDataset(&isDataset,pDSr)
       ||  !isDataset
       ||  !dsFindEntry(&pDSc, pDSr, s)
       ){
 	 dsPerror("can't find DSL node");
+//printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
+//printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
 	 ASUFREE(s);
 	 return FALSE;
       }

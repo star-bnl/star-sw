@@ -11,6 +11,7 @@
 #define DUI_TYPES_H
 
 /*-------------------------------------------- INCLUDES             --*/
+#include "asuLib.h"
 #include "dui_macros.h"
 #include "dstype.h"
 
@@ -40,9 +41,10 @@ extern CC_P int dui_ls_l_Header(char*& listing);
 extern CC_P int dui_init();
 extern CC_P int dui_start();
 extern CC_P int dui_stop();
-extern CC_P void dui_def_();
 
 #ifndef NOKUIP
+extern CC_P void dui_def_();
+
 extern CC_P void kam_dui_count_();
 extern CC_P void kam_dui_list_();
 extern CC_P void kam_dui_cd_();
@@ -54,19 +56,20 @@ extern CC_P void kam_dui_mv_();
 extern CC_P void kam_dui_pwd_();
 extern CC_P void kam_dui_rm_();
 extern CC_P void kam_dui_rmdir_();
-
-extern CC_P int kam_dui_count();
-extern CC_P int kam_dui_list();
-extern CC_P int kam_dui_cd();
-extern CC_P int kam_dui_cp();
-extern CC_P int kam_dui_ls();
-extern CC_P int kam_dui_mkdir();
-extern CC_P int kam_dui_mktable();
-extern CC_P int kam_dui_mv();
-extern CC_P int kam_dui_pwd();
-extern CC_P int kam_dui_rm();
-extern CC_P int kam_dui_rmdir();
 #endif /*NOKUIP*/
+
+extern CC_P STAFCV_T dui_count_();
+extern CC_P STAFCV_T dui_list_();
+extern CC_P STAFCV_T dui_cd(char* path);
+extern CC_P STAFCV_T dui_cp(char* fromPath, char* toPath);
+extern CC_P STAFCV_T dui_ls(char* path);
+extern CC_P STAFCV_T dui_mkdir(char* path);
+extern CC_P STAFCV_T dui_mktable(char* name,char* spec,long rowcount);
+extern CC_P STAFCV_T dui_mv(char* fromPath, char* toPath);
+extern CC_P STAFCV_T dui_pwd();
+extern CC_P STAFCV_T dui_rm(char* path);
+extern CC_P STAFCV_T dui_rmdir(char* path);
+
 
 #endif /* DUI_TYPES_H */
 

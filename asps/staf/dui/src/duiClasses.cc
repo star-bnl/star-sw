@@ -4,6 +4,7 @@
 //:DESCRIPTION: Dataset Unix-like Interface Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     23dec96-v010a-cet- OLD_DSL -> NEW_DSL default
 //:HISTORY:     01feb96-v001a-cet- make more like tdmFactory
 //:HISTORY:     08dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
@@ -36,7 +37,12 @@ duiDispatcher:: duiDispatcher(const char * name)
    strcpy(myCwd,"/");
    strcat(myCwd,name);
    pDSroot = NULL;
+
+#ifndef OLD_DSL
+   if( !dsNewDataset(&pDSroot, (char*)name) ){
+#else   /*OLD_DSL*/
    if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
+#endif  /*OLD_DSL*/
       dsPerror("duiDispatcher -- Error creating root dataset");
    }
    IDREF_T id;
@@ -163,8 +169,13 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
    ASUFREE(c);
 
    if( !findNode_ds(bName, pDSbase)
+#ifndef OLD_DSL
+   ||  !dsNewDataset(&pDSnew, nName)
+   ||  !dsLink(pDSbase, pDSnew)
+#else   /*OLD_DSL*/
    ||  !dsAddDataset(pDSbase,nName,DSET_DIM,NULL)
    ||  !dsFindEntry(&pDSnew, pDSbase, nName)
+#endif  /*OLD_DSL*/
    ||  !dsIsDataset(&isDataset,pDSnew)
    ||  !isDataset
    ){
