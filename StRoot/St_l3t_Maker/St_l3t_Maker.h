@@ -1,7 +1,7 @@
-// $Id: St_l3t_Maker.h,v 1.1 1999/02/12 13:52:50 fisyak Exp $
+// $Id: St_l3t_Maker.h,v 1.2 1999/02/19 14:39:32 fisyak Exp $
 // $Log: St_l3t_Maker.h,v $
-// Revision 1.1  1999/02/12 13:52:50  fisyak
-// l3t maker from Pablo
+// Revision 1.2  1999/02/19 14:39:32  fisyak
+// New version from Pablo, tpc safe
 //
 // Revision 1.6  1999/01/12 19:50:20  sakrejda
 // QA histograms added to the tpt maker
