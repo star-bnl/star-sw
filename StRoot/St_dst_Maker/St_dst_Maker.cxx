@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.59 2001/08/07 20:51:23 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.60 2001/08/08 22:37:44 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.60  2001/08/08 22:37:44  caines
+// IMprove packing of peakvalue for svt
+//
 // Revision 1.59  2001/08/07 20:51:23  caines
 // Implement better packing of svt hardware and charge values
 //
@@ -184,7 +187,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.59 2001/08/07 20:51:23 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.60 2001/08/08 22:37:44 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -483,7 +486,7 @@ Int_t  St_dst_Maker::Filler(){
 		    mSvtBigHit->svtHitData()[clu].peakAdc*(1L<<10);
 		}		  
 		else  
-		  mypoint[HitIndex].charge += (1L<<10)-1;
+		  mypoint[HitIndex].charge += (1L<<10)*((1L<<7)-1);
 		
 		mypoint[HitIndex].charge += (1L<<17)*mSvtBigHit->svtHit()[clu].flag();
 		
