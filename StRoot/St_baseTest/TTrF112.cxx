@@ -4,8 +4,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: TTrF112.cxx,v 1.2 1999/09/28 19:54:57 fine Exp $
+// $Id: TTrF112.cxx,v 1.3 1999/12/07 22:33:11 fine Exp $
 // $Log: TTrF112.cxx,v $
+// Revision 1.3  1999/12/07 22:33:11  fine
+// Clean up to remove compilation warnings
+//
 // Revision 1.2  1999/09/28 19:54:57  fine
 // RMath has been renamed to StCL
 //
@@ -386,10 +389,12 @@ int StMicky::ttrcho()
 
 #define tinfm4 (*(int *)&equiv_15)
 
+#if 0
   struct {
 	char e_1[4];
 	float e_2;
 	} equiv_16 = { {'S', 'M', 'L', 'U'}, 0. };
+#endif
 
 #define tinfl2 (*(float *)&equiv_16)
 
