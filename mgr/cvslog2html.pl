@@ -30,7 +30,10 @@ if( ! -e $LockFile){
     close(FO);
 } else {
     # do not continue. There is another
-    # process running on the same machine.
+    # process running on the same machine or a too
+    # old version of a lock file.
+    $date = time()-(stat("$cvsHtml/$host.lock"))[9];
+    if( $date > 7200){ unlink("$cvsHtml/$host.lock");}
     exit;
 }
 
