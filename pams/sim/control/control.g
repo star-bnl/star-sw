@@ -19,6 +19,10 @@
    
 * do not allow run without geometry
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
+      if (JVERTX<=0 | JKINE<=0) then
+         print *,'CONTROL: empty event rejected'
+         go to :e:
+      endif
 * 
       call xntup ('Ieotri',Ieotri)
       call xntup ('Ntrack',Ntrack)
