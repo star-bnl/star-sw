@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.7 2002/02/22 22:56:50 jeromel Exp $
+ * $Id: StSsdHit.h,v 2.8 2003/01/08 19:43:11 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.8  2003/01/08 19:43:11  perev
+ * CleanUp
+ *
  * Revision 2.7  2002/02/22 22:56:50  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -56,6 +59,7 @@ public:
     // StSsdHit& operator=(const StSsdHit&); use default
     ~StSsdHit();
 
+    void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }    
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEnumeration.hh,v 1.2 2001/09/05 20:41:42 laue Exp $
+ * $Id: StHbtEnumeration.hh,v 1.3 2003/01/08 19:43:12 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEnumeration.hh,v $
+ * Revision 1.3  2003/01/08 19:43:12  perev
+ * CleanUp
+ *
  * Revision 1.2  2001/09/05 20:41:42  laue
  * Updates of the hbtMuDstTree microDSTs
  *
@@ -30,10 +33,6 @@
 #ifndef StHbtEnumeration_hh
 #define StHbtEnumeration_hh
 
-#ifdef __CINT__
-#pragma link C++ enum StHbtParticleType;
-#pragma link C++ enum StHbtIOMode;
-#endif
 enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0, hbtKink, hbtXi};
 enum StHbtIOMode {hbtRead, hbtWrite};
 

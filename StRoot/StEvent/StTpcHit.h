@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.8 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTpcHit.h,v 2.9 2003/01/08 19:43:11 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.9  2003/01/08 19:43:11  perev
+ * CleanUp
+ *
  * Revision 2.8  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -61,6 +64,7 @@ public:
     // StTpcHit& operator=(const StTpcHit&); use default
     ~StTpcHit();
 
+    void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 

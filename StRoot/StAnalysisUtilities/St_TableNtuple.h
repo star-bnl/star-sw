@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.2 2000/03/27 19:08:01 fine Exp $
+// $Id: St_TableNtuple.h,v 1.3 2003/01/08 19:43:09 perev Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.3  2003/01/08 19:43:09  perev
+// CleanUp
+//
 // Revision 1.2  2000/03/27 19:08:01  fine
 // Adjuested to ROOT 2.24
 //
@@ -42,15 +45,6 @@
 
 #ifndef STAR_St_TableNtuple
 #define STAR_St_TableNtuple
-
-#ifdef __CINT__
-
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
-
-#pragma link C++ class St_TableNtuple;
-#endif
 
 #include "TTree.h"
 #include "St_Table.h"

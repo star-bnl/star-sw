@@ -11,21 +11,4 @@
 #pragma link C++ global gMessMgr;
 #pragma link C++ global gMessage;
 #pragma link C++ global endm;
-#pragma link C++ function Message_;
-#pragma link C++ function Msg_Enable_;
-#pragma link C++ function Msg_Enabled_;
-#pragma link C++ function Msg_Disable_;
-#pragma link C++ function StMessage_;
-#pragma link C++ function StInfo_;
-#pragma link C++ function StWarning_;
-#pragma link C++ function StError_;
-#pragma link C++ function StDebug_;
-#pragma link C++ function QAInfo_;
-#pragma link C++ function StInfoOpt_;
-#pragma link C++ function StWarningOpt_;
-#pragma link C++ function StErrorOpt_;
-#pragma link C++ function StDebugOpt_;
-#pragma link C++ function QAInfoOpt_;
-#pragma link C++ function StMessAddType_;
-#pragma link C++ function MessageOut;
 #endif
