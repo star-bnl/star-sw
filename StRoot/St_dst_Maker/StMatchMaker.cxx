@@ -2,8 +2,12 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.8 1999/09/12 23:03:03 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.9 1999/09/13 15:06:23 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.9  1999/09/13 15:06:23  caines
+// Added creation of garb(tphit) and garb(tptrack) so it is possible
+// to run with TPC turned off
+//
 // Revision 1.8  1999/09/12 23:03:03  fisyak
 // Move parameters into makers
 //
@@ -341,11 +345,11 @@ Int_t StMatchMaker::Init(){
   // Helix
     row.usetpc	 =          1; // set if TPC used in refit ;
   //Kalman
-  // row.usetpc =     4;
+  // row.usetpc =           4;
     row.usevert	 =          0; // Set if primary vertex used in refit ;
     row.prob[0]	 =         10; // probability cut in fit ;
     row.prob[1]	 =         10;
-    row.svtchicut	 =          0; // SVT chi2 cut for adding SVT-only tracks ;
+    row.svtchicut	 =  0; // SVT chi2 cut for adding SVT-only tracks ;
   //Kalman
   //row.useglobal =     4;
   //  row.scenario  = m_scenario;
@@ -400,6 +404,7 @@ Int_t StMatchMaker::Make(){
   }
   if (! evaltrk)    {evaltrk = new St_tte_eval("evaltrk",1); AddGarb(evaltrk);}
   if (! mctrk)    {mctrk = new St_tte_mctrk("mctrk",1); AddGarb(mctrk);}
+  if (! tptrack)    {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
   St_DataSet    *tpchits = GetInputDS("tpc_hits");
   St_tcl_tphit     *tphit     = 0;
   St_tcl_tpcluster *tpcluster = 0;
@@ -408,6 +413,7 @@ Int_t StMatchMaker::Make(){
     tpcluster = (St_tcl_tpcluster *) tpchits->Find("tpcluster");
   }
   if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); AddGarb(tpcluster);}
+ if (! tphit)    {tphit = new St_tcl_tphit("tphit",1); AddGarb(tphit);}
   
   St_DataSet     *svtracks = GetInputDS("svt_tracks");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
