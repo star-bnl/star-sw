@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.35 2001/07/20 20:03:57 rcwells Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.36 2001/12/05 14:42:18 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,11 +20,8 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
- * Revision 1.35  2001/07/20 20:03:57  rcwells
- * Added pT weighting and moved event angle cal. to event cut
- *
- * Revision 1.34  2001/06/23 21:55:45  laue
- * *** empty log message ***
+ * Revision 1.36  2001/12/05 14:42:18  laue
+ * updated for trigger(action)word and l3TriggerAlgorithm
  *
  * Revision 1.33  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
@@ -168,27 +165,34 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StHit.h"
 #include "StEventInfo.h"
-#include "StuProbabilityPidAlgorithm.h" // new
+//#include "StuProbabilityPidAlgorithm.h" // new
 #include <math.h>
 
 
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtXiCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtXiCut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
+#include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 
 #include "StEventMaker/StEventMaker.h"
 
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "tables/St_FlowTag_Table.h"
+#include "StFlowMaker/StFlowMaker.h"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
+#include "StFlowMaker/StFlowSelection.h"
 
 //#define STHBTDEBUG
 
@@ -202,17 +206,20 @@ ClassImp(StStandardHbtEventReader)
 
 
 //__________________
-StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary), mReadTracks(1), mReadV0s(1) {
+StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary), mReadTracks(1), mReadV0s(1), mReadXis(1), mReadKinks(1) {
   mTheEventMaker=0;
   mTheV0Maker=0;
   mTheTagReader = 0;
   mReaderStatus = 0;  // "good"
+  mFlowMaker = 0;
+  mFlowAnalysisMaker = 0;
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
+  if (mXiCut) delete mXiCut;
   if (mKinkCut) delete mKinkCut;
 }
 //__________________
@@ -224,6 +231,8 @@ StHbtString StStandardHbtEventReader::Report(){
   sprintf(ccc," mReadTracks is %d\n",mReadTracks);
   temp += ccc;
   sprintf(ccc," mReadV0s is %d\n",mReadV0s);
+  temp += ccc;
+  sprintf(ccc," mReadXis is %d\n",mReadXis);
   temp += ccc;
   temp += "---> EventCuts in Reader: ";
   if (mEventCut) {
@@ -242,6 +251,13 @@ StHbtString StStandardHbtEventReader::Report(){
   temp += "\n---> V0Cuts in Reader: ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> XiCuts in Reader: ";
+  if (mXiCut) {
+    temp += mXiCut->Report();
   }
   else {
     temp += "NONE";
@@ -317,13 +333,57 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   hbtEvent->SetRunNumber( rEvent->runId() );
 
   if ( rEvent->summary() ) {
-    double magneticField = rEvent->summary()->magneticField();
-    hbtEvent->SetMagneticField(magneticField);
+    hbtEvent->SetMagneticField(rEvent->summary()->magneticField());
     cout <<" StStandardHbtEventReader - magnetic field " << hbtEvent->MagneticField() << endl;
+    
   }
   else {
     cout << "StStandardHbtEventReader - no StEvent summary -> no magnetic field written to HbtEvent" << endl;
   }
+
+  if ( rEvent->l0Trigger() ) {
+    hbtEvent->SetTriggerWord(rEvent->l0Trigger()->triggerWord());
+    hbtEvent->SetTriggerActionWord(rEvent->l0Trigger()->triggerActionWord());
+  }
+  else {
+    cout << "StStandardHbtEventReader - no StEvent l0Trigger" << endl;
+  }
+
+  int nL3Processed,nL3Accept,nL3Build;
+  unsigned int firedL3TriggerAlgorithm=0;
+  if ( rEvent->l3Trigger() && rEvent->l3Trigger()->l3EventSummary()) {
+    const StL3EventSummary* mL3EventSummary = rEvent->l3Trigger()->l3EventSummary();
+      unsigned int nAlgorithms = mL3EventSummary->numberOfAlgorithms();
+      cout << "Number of L3 algorithms for this run: " << nAlgorithms << endl;
+      const StSPtrVecL3AlgorithmInfo& mL3AlgInfo = mL3EventSummary->algorithms();
+      for (int i=0; i<nAlgorithms; i++) {
+	int algId = mL3AlgInfo[i]->id();
+	nL3Processed = mL3AlgInfo[i]->numberOfProcessedEvents();
+	nL3Accept = mL3AlgInfo[i]->numberOfAcceptedEvents();
+	nL3Build = mL3AlgInfo[i]->numberOfBuildEvents();
+	if (mL3AlgInfo[i]->build()) cout << "**";
+	cout << " alg id " << algId << ":\t #proc " << nL3Processed << "\t #accept " << nL3Accept << "\t #build " << nL3Build << endl;
+      }
+      
+      // print triggered algorithms
+      const StPtrVecL3AlgorithmInfo& mL3TriggerAlgInfo = mL3EventSummary->algorithmsAcceptingEvent();
+      cout << "Number of L3 algorithms which triggered this event: " << mL3TriggerAlgInfo.size() << endl;
+      cout << "triggered algorithms: ";
+      for (int i=0; i<mL3TriggerAlgInfo.size(); i++) cout << mL3TriggerAlgInfo[i]->id() << "  ";
+      cout << endl;
+
+      firedL3TriggerAlgorithm=0;
+      for (StPtrVecL3AlgorithmInfoConstIterator theIter = mL3TriggerAlgInfo.begin(); theIter != mL3TriggerAlgInfo.end(); ++theIter) {
+	firedL3TriggerAlgorithm |= ( 1<<((*theIter)->id()) );
+	cout << ((*theIter)->id()) << " " << firedL3TriggerAlgorithm << endl;
+      }
+      hbtEvent->SetL3TriggerAlgorithm(0,firedL3TriggerAlgorithm);
+  }
+  else {
+    cout << "StStandardHbtEventReader - no StEvent l3Trigger" << endl;
+  }
+  cout <<  "StStandardHbtEventReader - done" << endl;
+
 
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
@@ -412,11 +472,12 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
   // For Aihong's pid
-  StuProbabilityPidAlgorithm aihongsPid(*rEvent);
+  //  StuProbabilityPidAlgorithm aihongsPid(*rEvent);
   if (mReadTracks) {
     for (unsigned int icount=0; icount<(unsigned int)mult; icount++){
 #ifdef STHBTDEBUG
-      cout << " track# " << icount << endl;
+      cout << " track# " << icount;
+      cout << "  -1- ";
 #endif
       gTrack = rEvent->trackNodes()[icount]->track(global);
       pTrack = rEvent->trackNodes()[icount]->track(primary);
@@ -451,6 +512,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       StParticleDefinition* BestGuess = (StParticleDefinition*)cTrack->pidTraits(*PidAlgorithm);
       //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
       if (!BestGuess){
+#ifdef STHBTDEBUG
+	cout << " noGuess ";
+#endif
 	iNoBestGuess++;
 	continue;
       }
@@ -460,81 +524,13 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 #endif    
       
       // o.k., we got the track with all we need, let's create the StHbtTrack
-      StHbtTrack* hbtTrack = new StHbtTrack;
-      //cout << "StHbtTrack instantiated " << endl;
-      
-      hbtTrack->SetTrackId(cTrack->key());
-      
-      hbtTrack->SetNHits(nhits);
-      hbtTrack->SetNHitsPossible( cTrack->numberOfPossiblePoints(kTpcId) );
-      
-      hbtTrack->SetNSigmaElectron(PidAlgorithm->numberOfSigma(Electron));
-      hbtTrack->SetNSigmaPion(PidAlgorithm->numberOfSigma(Pion));
-      hbtTrack->SetNSigmaKaon(PidAlgorithm->numberOfSigma(Kaon));
-      hbtTrack->SetNSigmaProton(PidAlgorithm->numberOfSigma(Proton));
-      
-      
-      //cout << "dEdx\t" << PidAlgorithm->traits()->mean() << endl; 
-      hbtTrack->SetdEdx(PidAlgorithm->traits()->mean());
-      
-      double pathlength = cTrack->geometry()->helix().pathLength(vp);
-      //cout << "pathlength\t" << pathlength << endl;
-      
-      hbtTrack->SetP(cTrack->geometry()->momentum());
-      hbtTrack->SetPt(cTrack->geometry()->momentum().perp());
-      
-      StHbtThreeVector  DCAxyz = cTrack->geometry()->helix().at(pathlength)-vp;
-      //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
-      hbtTrack->SetDCAxy( DCAxyz.perp() );
-      hbtTrack->SetDCAz(  DCAxyz.z()  );
-      
-      hbtTrack->SetChiSquaredXY( cTrack->fitTraits().chi2(0) );
-      hbtTrack->SetChiSquaredZ( cTrack->fitTraits().chi2(1) ); 
-      
-      hbtTrack->SetHelix( cTrack->geometry()->helix() );
-      
-      
-      //cout << "charge\t\t\t\t" << cTrack->geometry()->charge() << endl;
-      hbtTrack->SetCharge(cTrack->geometry()->charge());
-      
-      hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
-      hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
-      
-      hbtTrack->SetNHitsDedx(PidAlgorithm->traits()->numberOfPoints());
-      
-      pTrack->pidTraits(aihongsPid); //invoke functor.
-      int tPid;
-      hbtTrack->SetPidProbElectron(0.);
-      hbtTrack->SetPidProbPion(0.);
-      hbtTrack->SetPidProbKaon(0.);
-      hbtTrack->SetPidProbProton(0.);
-      for(int ti=0;ti<3;ti++){
-	tPid = aihongsPid.getParticleGeantID(ti);
-	if(tPid==8 || tPid==9){
-	  hbtTrack->SetPidProbPion(aihongsPid.getProbability(ti));
-	}
-	else{
-	  if(tPid==2 || tPid==3){
-	    hbtTrack->SetPidProbElectron(aihongsPid.getProbability(ti));
-	  }
-	  else{	  
-	    if(tPid==11 || tPid==12){
-	      hbtTrack->SetPidProbKaon(aihongsPid.getProbability(ti));
-	    }
-	    else{
-	      if(tPid==13 || tPid==15){
-		hbtTrack->SetPidProbProton(aihongsPid.getProbability(ti));
-	      }	      
-	    }
-	  }
-	}
-      }
-      // cout << "pushing..." <<endl;
-      
-      
-      // By now, all track-wise information has been extracted and stored in hbtTrack
-      // see if it passes any front-loaded event cut
+      StHbtTrack* hbtTrack = new StHbtTrack(rEvent,cTrack);
+
       if (mTrackCut){
+#ifdef STHBTDEBUG
+      cout << " -cut- ";
+      cout << endl;
+#endif
 	if (!(mTrackCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
 	  iFailedCut++;
 	  delete hbtTrack;
@@ -542,6 +538,10 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 	}
       }
       
+#ifdef STHBTDEBUG
+      cout << " -p- ";
+      cout << endl;
+#endif
       hbtEvent->TrackCollection()->push_back(hbtTrack);
     }
   }
@@ -557,154 +557,99 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   delete PidAlgorithm;
   //Now do v0 stuff
   
-  
   //Pick up pointer v0 minidst maker
   //StV0MiniDstMaker* v0Maker = (StV0MiniDstMaker *) mTheV0Maker;
-  StStrangeMuDstMaker* v0Maker = (StStrangeMuDstMaker *) mTheV0Maker;
-  if( ! v0Maker && mReadV0s ) {
-    cout << " StStandardHbtEventReader::ReturnHbtEvent() - Not doing v0 stuff" << endl;
-    return hbtEvent; 
-  }
-  //Get collection
-  
-  for( int i= 0; i < v0Maker->GetNV0(); i++){
-    StV0MuDst* v0FromMuDst = v0Maker->GetV0(i);
-    //v0FromMuDst->UpdateV0();
-    StHbtV0* hbtV0 = new StHbtV0;
-    hbtV0->SetdecayLengthV0(v0FromMuDst->decayLengthV0());
-    hbtV0->SetdecayVertexV0X(v0FromMuDst->decayVertexV0X());
-    hbtV0->SetdecayVertexV0Y(v0FromMuDst->decayVertexV0Y());
-    hbtV0->SetdecayVertexV0Z(v0FromMuDst->decayVertexV0Z());
-    hbtV0->SetdcaV0Daughters(v0FromMuDst->dcaV0Daughters());
-    hbtV0->SetdcaV0ToPrimVertex(v0FromMuDst->dcaV0ToPrimVertex());
-    hbtV0->SetdcaPosToPrimVertex(v0FromMuDst->dcaPosToPrimVertex());
-    hbtV0->SetdcaNegToPrimVertex(v0FromMuDst->dcaNegToPrimVertex());
-    hbtV0->SetmomPosX(v0FromMuDst->momPosX());
-    hbtV0->SetmomPosY(v0FromMuDst->momPosY());
-    hbtV0->SetmomPosZ(v0FromMuDst->momPosZ());
-    hbtV0->SetmomNegX(v0FromMuDst->momNegX());
-    hbtV0->SetmomNegY(v0FromMuDst->momNegY());
-    hbtV0->SetmomNegZ(v0FromMuDst->momNegZ());
-#ifdef STHBTDEBUG
-    cout << " hist pos ";
-    cout << v0FromMuDst->topologyMapPos().numberOfHits(kTpcId); 
-    cout << " hist neg ";
-    cout << v0FromMuDst->topologyMapNeg().numberOfHits(kTpcId) << endl;
-#endif
-    hbtV0->SettpcHitsPos(v0FromMuDst->topologyMapPos().numberOfHits(kTpcId));
-    hbtV0->SettpcHitsNeg(v0FromMuDst->topologyMapNeg().numberOfHits(kTpcId));
-    hbtV0->SetTrackTopologyMapPos(0,v0FromMuDst->topologyMapPos().data(0));
-    hbtV0->SetTrackTopologyMapPos(1,v0FromMuDst->topologyMapPos().data(1));
-    hbtV0->SetTrackTopologyMapNeg(0,v0FromMuDst->topologyMapNeg().data(0));
-    hbtV0->SetTrackTopologyMapNeg(1,v0FromMuDst->topologyMapNeg().data(1));
-    hbtV0->SetkeyPos(v0FromMuDst->keyPos());
-    hbtV0->SetkeyNeg(v0FromMuDst->keyNeg());
-#ifdef STHBTDEBUG
-    cout << " keyPos " << v0FromMuDst->keyPos() << endl;
-    cout << " keyNeg " << v0FromMuDst->keyNeg() << endl;
-#endif
-    hbtV0->SetmomV0X(v0FromMuDst->momV0X());
-    hbtV0->SetmomV0Y(v0FromMuDst->momV0Y());
-    hbtV0->SetmomV0Z(v0FromMuDst->momV0Z());
-#ifdef STHBTDEBUG
-    cout << " alpha  ";
-    cout << v0FromMuDst->alphaV0();
-    cout << " ptArm  ";
-    cout << v0FromMuDst->ptArmV0() << endl;
-#endif
-    hbtV0->SetalphaV0(v0FromMuDst->alphaV0());
-    hbtV0->SetptArmV0(v0FromMuDst->ptArmV0());
-    hbtV0->SeteLambda(v0FromMuDst->eLambda());
-    hbtV0->SeteK0Short(v0FromMuDst->eK0Short());
-    hbtV0->SetePosProton(v0FromMuDst->ePosProton());
-    hbtV0->SetePosPion(v0FromMuDst->ePosPion());
-    hbtV0->SeteNegPion(v0FromMuDst->eNegPion());
-    hbtV0->SeteNegProton(v0FromMuDst->eNegProton());
-    hbtV0->SetmassLambda(v0FromMuDst->massLambda());
-    hbtV0->SetmassAntiLambda(v0FromMuDst->massAntiLambda());
-    hbtV0->SetmassK0Short(v0FromMuDst->massK0Short());
-    hbtV0->SetrapLambda(v0FromMuDst->rapLambda());
-    hbtV0->SetrapK0Short(v0FromMuDst->rapK0Short());
-    hbtV0->SetcTauLambda(v0FromMuDst->cTauLambda());
-    hbtV0->SetcTauK0Short(v0FromMuDst->cTauK0Short());
-    hbtV0->SetptV0(v0FromMuDst->ptV0());
-    hbtV0->SetptotV0(v0FromMuDst->ptotV0());
-    hbtV0->SetptPos(v0FromMuDst->ptPos());
-    hbtV0->SetptotPos(v0FromMuDst->ptotPos());
-    hbtV0->SetptNeg(v0FromMuDst->ptNeg());
-    hbtV0->SetptotNeg(v0FromMuDst->ptotNeg());
-    hbtV0->SetdedxPos(v0FromMuDst->dedxPos());
-    hbtV0->SetdedxNeg(v0FromMuDst->dedxNeg());
+  StStrangeMuDstMaker* muDstMaker = (StStrangeMuDstMaker *) mTheV0Maker;
 
-    
-    // By now, all track-wise information has been extracted and stored in hbtTrack
-    // see if it passes any front-loaded event cut
-    if (mV0Cut){
-      if (!(mV0Cut->Pass(hbtV0))){                  // track failed - delete it and skip the push_back
-	delete hbtV0;
-	continue;
-      }
-    }
-    
-    
-    hbtEvent->V0Collection()->push_back(hbtV0);
-  } // end of loop over strangeness groups v0's
-  //Store total number of v0s in v0Mudst so can start from there next time
-  cout << " StStandardHbtEventReader::ReturnHbtEvent() - " << hbtEvent->V0Collection()->size();
-  cout << " V0s pushed in collection " << endl;
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) V0s pushed into collection \n",
-	 hbtEvent->V0Collection()->size(),
-	 v0Maker->GetNV0());
-
-  // Now do the Kink Stuff - mal 25May2001
-  StKinkVertex* starKink;
-  StHbtKink* hbtKink;
-  for (unsigned int icount=0; icount<(unsigned int)rEvent->kinkVertices().size(); icount++)
-    {
-      StKinkVertex* starKink = rEvent->kinkVertices()[icount];
-      hbtKink = new StHbtKink(*starKink, vp);
-      // before pushing onto the StHbtKinkCollection, make sure this kink passes any front-loaded cuts...
-      if (mKinkCut){
-	if (!(mKinkCut->Pass(hbtKink))){                  // kink failed - the "continue" will skip the push_back
-	  delete hbtKink;
+  /* **********************************************/
+  /* now read the v0 from the StStrangeMuDstMaker */
+  /* **********************************************/
+  if( muDstMaker && mReadV0s ) {
+    for( int i= 0; i < muDstMaker->GetNV0(); i++){
+      StV0MuDst* v0FromMuDst = muDstMaker->GetV0(i);
+      //v0FromMuDst->UpdateV0();
+      StHbtV0* hbtV0 = new StHbtV0(*v0FromMuDst);
+      // By now, all track-wise information has been extracted and stored in hbtTrack
+      // see if it passes any front-loaded event cut
+      if (mV0Cut){
+	if (!(mV0Cut->Pass(hbtV0))){                  // track failed - delete it and skip the push_back
+	  delete hbtV0;
 	  continue;
 	}
       }
-      hbtEvent->KinkCollection()->push_back(hbtKink);
-    }
-  cout << "Number of StHbtKinks in HbtEvent: " << hbtEvent->KinkCollection()->size() << endl;
+      hbtEvent->V0Collection()->push_back(hbtV0);
+    } // end of loop over strangeness groups v0's
+    printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) V0s pushed into collection \n",
+	   hbtEvent->V0Collection()->size(),
+	   muDstMaker->GetNV0());
+  }
 
-  /*  Randy moved this to event cut "calculateEventPlaneEventCut"
-  if (hbtEvent) {
-    mFlowMaker->FillFlowEvent(hbtEvent);
-    if (mFlowMaker->FlowEventPointer()) {
-      mFlowMaker->FlowEventPointer()->SetPtWgt(false);
-      // First get RP for whole event
-      mFlowMaker->FlowSelection()->SetSubevent(-1);
-      double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      hbtEvent->SetReactionPlane(reactionPlane,0);
-      // Sub event RPs
-      mFlowMaker->FlowSelection()->SetSubevent(0);
-      double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      mFlowMaker->FlowSelection()->SetSubevent(1);
-      double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2,0);
-      // Now with Pt Weighting
-      mFlowMaker->FlowEventPointer()->SetPtWgt(true);
-      // First get RP for whole event
-      mFlowMaker->FlowSelection()->SetSubevent(-1);
-      reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      hbtEvent->SetReactionPlane(reactionPlane,1);
-      // Sub event RPs
-      mFlowMaker->FlowSelection()->SetSubevent(0);
-      RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      mFlowMaker->FlowSelection()->SetSubevent(1);
-      RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2,1);
-      // if Flow Analysis is switched on ... make correction histogram
-      if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
-    }
-  */
+  /* **********************************************/
+  /* now read the xi from the StStrangeMuDstMaker */
+  /* **********************************************/
+  if( muDstMaker && mReadXis ) {
+    for( int i= 0; i < muDstMaker->GetNXi(); i++){
+      StXiMuDst* xiFromMuDst = muDstMaker->GetXi(i);
+      //xiFromMuDst->UpdateXi();
+      StHbtXi* hbtXi = new StHbtXi(*xiFromMuDst);
+      // By now, all track-wise information has been extracted and stored in hbtTrack
+      // see if it passes any front-loaded event cut
+      if (mXiCut){
+	if (!(mXiCut->Pass(hbtXi))){                  // track failed - delete it and skip the push_back
+	  delete hbtXi;
+	  continue;
+	}
+      }
+      hbtEvent->XiCollection()->push_back(hbtXi);
+    } // end of loop over strangeness groups xi's
+    printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) Xis pushed into collection \n",
+	   hbtEvent->XiCollection()->size(),
+	   muDstMaker->GetNXi());
+  }
+
+
+  /* *************************************/
+  /* now read the kinks from the StEvent */
+  /* *************************************/
+  // Now do the Kink Stuff - mal 25May2001
+  StKinkVertex* starKink;
+  StHbtKink* hbtKink;
+  if( mReadKinks ) {
+    for (unsigned int icount=0; icount<(unsigned int)rEvent->kinkVertices().size(); icount++)
+      {
+	StKinkVertex* starKink = rEvent->kinkVertices()[icount];
+	hbtKink = new StHbtKink(*starKink, vp);
+	// before pushing onto the StHbtKinkCollection, make sure this kink passes any front-loaded cuts...
+	if (mKinkCut){
+	  if (!(mKinkCut->Pass(hbtKink))){                  // kink failed - the "continue" will skip the push_back
+	    delete hbtKink;
+	    continue;
+	  }
+	}
+	hbtEvent->KinkCollection()->push_back(hbtKink);
+      }
+    printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) Kinks pushed into collection \n",
+	   hbtEvent->KinkCollection()->size(),
+	   rEvent->kinkVertices().size());
+  }
+
+  // Can't get Reaction Plane until whole HbtEvent is filled
+  if ( mFlowMaker && hbtEvent ) {
+//     mFlowMaker->FillFlowEvent(hbtEvent);
+//     // First get RP for whole event
+//     mFlowMaker->FlowSelection()->SetSubevent(-1);
+//     double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+//     cout << "Reaction Plane " << reactionPlane << endl;
+//     hbtEvent->SetReactionPlane(reactionPlane);
+//     // Sub event RPs
+//     mFlowMaker->FlowSelection()->SetSubevent(0);
+//     double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+//     mFlowMaker->FlowSelection()->SetSubevent(1);
+//     double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+//     hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2);
+//     // if Flow Analysis is switched on ... make correction histogram
+//     if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+  }
 
   // There might be event cuts that modify the collections of Tracks or V0 in the event.
   // These cuts have to be done after the event is built. That's why we have the event cut
