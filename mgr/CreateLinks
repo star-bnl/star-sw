@@ -55,3 +55,14 @@ else
     echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
 
+#
+# Scientific Linux
+#
+if ( -e .sl302_gcc323) then
+    # Support for earlier version seems strange but
+    # in this case, kernel and gcc libs are the same
+    if ( ! -e .sl301_gcc323) then
+	echo "Forward compatibility assumed between SL301 -> SL302"
+	ln -s .sl302_gcc323 .sl301_gcc323
+    endif
+endif
