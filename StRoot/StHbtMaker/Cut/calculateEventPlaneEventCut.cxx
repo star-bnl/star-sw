@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.cxx,v 1.5 2003/08/04 20:21:27 perev Exp $
+ * $Id: calculateEventPlaneEventCut.cxx,v 1.6 2003/08/05 00:29:55 perev Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.cxx,v $
+ * Revision 1.6  2003/08/05 00:29:55  perev
+ * warnOff
+ *
  * Revision 1.5  2003/08/04 20:21:27  perev
  * warnOff
  *
@@ -63,8 +66,7 @@ bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
   if (event) {
     if (mFromHBT) mFlowMaker->FillFlowEvent(event);
     if (mFlowMaker->FlowEventPointer()) {
-      mFlowMaker->FlowEventPointer()->SetPtWgt(false);
-      if (mFlowMaker->FlowEventPointer()->PtWgt()){/*warnOff*/}
+      StFlowEvent::SetPtWgt(false);
       // First get RP for whole event
       mFlowMaker->FlowSelection()->SetSubevent(-1);
       double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
@@ -77,8 +79,7 @@ bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
       double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
       event->SetReactionPlaneSubEventDifference(RP1-RP2,0);
       // Now with Pt Weighting
-      mFlowMaker->FlowEventPointer()->SetPtWgt(true);
-      if (mFlowMaker->FlowEventPointer()->PtWgt()){/*warnOff*/}
+      StFlowEvent::SetPtWgt(true);
       // First get RP for whole event
       mFlowMaker->FlowSelection()->SetSubevent(-1);
       reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
