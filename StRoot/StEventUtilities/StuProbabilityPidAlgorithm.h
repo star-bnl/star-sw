@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.3 2000/05/05 19:25:39 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.4 2000/07/22 22:45:27 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.4  2000/07/22 22:45:27  aihong
+ * change include path
+ *
  * Revision 1.3  2000/05/05 19:25:39  aihong
  * modified ctor
  *
@@ -29,7 +32,7 @@
 #include "StEventTypes.h"
 #include "StParticleTable.hh"
 #include "StParticleTypes.hh"
-#include "StPidAmpMaker/StPidAmpNetOut.h"
+#include "StEventUtilities/StPidAmpNetOut.h"
 
 class StEvent;
 
