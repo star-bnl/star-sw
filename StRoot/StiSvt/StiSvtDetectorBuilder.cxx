@@ -21,11 +21,55 @@
 #include <stdio.h>
 #include "Sti/StiHitErrorCalculator.h"
 
+/*
+  SVT Layer and Ladder Naming Convention
+  Hardware       StiSvtBuilder
+  ----------------------------------
+  Layer Ladder   Layer Ladder
+    1     2        0     0
+    1     4        0     1
+    1     6        0     2
+    1     8        0     3
+    2     1        1     0
+    2     3        1     1
+    2     5        1     2
+    2     7        1     3
+
+    3     2        2     0
+    3     4        2     1
+    3     6        2     2
+    3     8        2     3
+    3     10       2     4
+    3     12       2     5
+    4     1        3     0
+    4     3        3     1
+    4     5        3     2
+    4     7        3     3
+    4     9        3     4
+    4     11       3     5
+
+    5     2        4     0
+    5     4        4     1
+    5     6        4     2
+    5     8        4     3
+    5     10       4     4
+    5     12       4     5
+    5     14       4     6
+    5     16       4     7
+    6     1        5     0
+    6     3        5     1
+    6     5        5     2
+    6     7        5     3
+    6     9        5     4
+    6     11       5     5
+    6     13       5     6
+    6     15       5     7
+ */
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
   : StiDetectorBuilder("SvtBuilder",active)
 {
   _calc = new StiDefaultHitErrorCalculator();
-  _calc->set(0.1,0.,0.,0.1,0.,0.);
+  _calc->set(1.,0.,0.,1.,0.,0.);
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
@@ -82,10 +126,8 @@ void StiSvtDetectorBuilder::buildDetectors()
 
   for(unsigned int layer = 0; layer<getNRows(); layer++)
     {
-      //-----------------------------------------
       // calculate generic params for this layer
       // number of ladders per layer (not barrel) & phi increment between ladders
-      //float fDeltaPhi = 2.*M_PI/getNSectors(layer);
       float fDeltaPhi = M_PI/getNSectors(layer);
       // width of gap between the edges of 2 adjacent ladders:
       //   first, the angle subtended by 1/2 of the ladder
@@ -106,25 +148,12 @@ void StiSvtDetectorBuilder::buildDetectors()
       float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
       for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)
 	{
-	  // formal ladder number within barrel (odd or even, depending on layer)
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
-	  switch (layer)
-	    {
-	    case 0: break;
-	    case 1: fLadderPhi +=M_PI/getNSectors(layer);break;
-	    case 2: fLadderPhi +=M_PI/getNSectors(layer);break;
-	    case 3: break;
-	    case 4: break;
-	    case 5: fLadderPhi +=M_PI/getNSectors(layer);break;
-	    }
-	  //if ((layer%2)==1)
-	  //  fLadderPhi +=M_PI/getNSectors(layer);
 	  pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
-
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
 	  StiDetector *pLadder = _detectorFactory->getInstance();
 	  pLadder->setName(name);
@@ -211,3 +240,86 @@ void StiSvtDetectorBuilder::loadDb()
 }
 
 
+double StiSvtDetectorBuilder::phiForSvtBarrelLadder(unsigned int layer, 
+						    unsigned int ladder) const
+{
+  double angle;
+  switch (layer)
+    {
+    case 0:
+      switch (ladder)
+	{
+	case 0: angle =    0.; break;
+	case 1: angle =  270.; break;
+	case 2: angle =  180.; break;
+	case 3: angle =   90.; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    case 1:
+      switch (ladder)
+	{
+	case 0: angle =   45.; break;
+	case 1: angle =  315.; break;
+	case 2: angle =  225.; break;
+	case 3: angle =  135.; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    case 2:
+      switch (ladder)
+	{
+	case 0: angle =   30.; break;
+	case 1: angle =  330.; break;
+	case 2: angle =  270.; break;
+	case 3: angle =  210.; break;
+	case 4: angle =  150.; break;
+	case 5: angle =   90.; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    case 3:
+      switch (ladder)
+	{
+	case 0: angle =   60.; break;
+	case 1: angle =    0.; break;
+	case 2: angle =  300.; break;
+	case 3: angle =  240.; break;
+	case 4: angle =  180.; break;
+	case 5: angle =  120.; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    case 4:
+      switch (ladder)
+	{
+	case 0: angle =   45.; break;
+	case 1: angle =    0.; break;
+	case 2: angle =  315.; break;
+	case 3: angle =  270.; break;
+	case 4: angle =  225.; break;
+	case 5: angle =  180.; break;
+	case 6: angle =  135.; break;
+	case 7: angle =   90.; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    case 5:
+      switch (ladder)
+	{
+	case 0: angle =   67.5; break;
+	case 1: angle =   22.5; break;
+	case 2: angle =  337.5; break;
+	case 3: angle =  292.5; break;
+	case 4: angle =  247.5; break;
+	case 5: angle =  202.5; break;
+	case 6: angle =  157.5; break;
+	case 7: angle =  112.5; break;
+	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+	};
+      break;
+    default:   throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
+    }
+  cout << "  Layer:"<<layer<<" LADDER:"<<ladder<<" ANGLE PHI:"<< angle*M_PI/180.;
+  return  angle*M_PI/180.;
+} // phiForSvtLayerLadder
