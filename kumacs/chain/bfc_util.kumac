@@ -365,7 +365,6 @@ macro bfc_init _
 	    exec mwg_init#init
 	    exec mwg_init#mwg
 	    exec mws_init#init
-	    exec mws_init#fill
       (trg) exec l3cl_init
 	    exec l3t_init
 	    exec create_tables_l3
