@@ -6,13 +6,16 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.1 1999/09/26 19:35:12 fine Exp $
+// $Id: StMicky.cxx,v 1.2 1999/09/28 19:54:56 fine Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.2  1999/09/28 19:54:56  fine
+// RMath has been renamed to StCL
+//
 // Revision 1.1  1999/09/26 19:35:12  fine
 // Micky test has been rearranged
 //
 // Revision 1.1  1999/09/23 18:33:10  fine
-// test system for RMath class has been introduced
+// test system for StCL class has been introduced
 //
 //
 
