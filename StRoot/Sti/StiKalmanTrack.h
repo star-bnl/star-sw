@@ -3,13 +3,15 @@
 
 #include <math.h>
 #include "StiTrack.h"
+//#include "StiFactoryTypedefs.h"
+#include "StiObjectFactory.h"
 #include "StiTrackNode.h"
-#include "StiFactoryTypedefs.h"
 
-class StiKalmanTrack : StiTrack 
+class StiKalmanTrack : public StiTrack 
 {
  public:
-  
+    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
+
   // constructor/destructor/copy/etc
   
   StiKalmanTrack() 

@@ -1,4 +1,10 @@
+
+//Sti
+#include "StiTrackNode.h"
+
 #include "StiKalmanTrack.h"
+
+StiKalmanTrack::StiTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
 
 void StiKalmanTrack::reset()
 {
