@@ -1,6 +1,6 @@
 #include "StSsdStrip.hh"
 
-StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)
+StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int *rIdMcHit)
 {
   mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
@@ -12,7 +12,7 @@ StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)
   mNextStrip = 0;
 }
 
-StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, int rSigma)
+StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma)
 {
   mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
@@ -35,7 +35,7 @@ void StSsdStrip::setPrevStrip(StSsdStrip *rPrevStrip)
 void StSsdStrip::setNextStrip(StSsdStrip *rNextStrip)
 {  this->mNextStrip = rNextStrip; }
 
-void StSsdStrip::setSigma(int rSigma)
+void StSsdStrip::setSigma(float rSigma)
 {  this->mSigma = rSigma; }
 
 void StSsdStrip::setNStrip(int rNStrip)
@@ -59,7 +59,7 @@ StSsdStrip* StSsdStrip::getPrevStrip()
 StSsdStrip* StSsdStrip::getNextStrip()
 {  return this->mNextStrip; }
 
-int StSsdStrip::getSigma()
+float StSsdStrip::getSigma()
 {  return this->mSigma; }
 
 int StSsdStrip::getIdMcHit(int iR)
