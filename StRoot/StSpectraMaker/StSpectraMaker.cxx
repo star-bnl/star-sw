@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.8 2000/03/08 02:30:20 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.9 2000/03/10 19:54:07 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.9  2000/03/10 19:54:07  ogilvie
+// bug fix in name of histograms
+//
 // Revision 1.8  2000/03/08 02:30:20  ogilvie
 // individual output .root files per analysis, prep. for user choice of axes, (y,eta) (pperp,mperp)
 //
@@ -53,7 +56,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.8 2000/03/08 02:30:20 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.9 2000/03/10 19:54:07 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -63,7 +66,6 @@ StSpectraMaker::~StSpectraMaker() {
 
 Int_t StSpectraMaker::Init() {
 
-  mOutput = new TFile("deviant.root","RECREATE");
   //
   // create the analyses that are stored in the file analysis.dat, 
   // 
@@ -164,14 +166,6 @@ Int_t StSpectraMaker::Finish() {
 	 analysisIter++) {
     (*analysisIter)->writeHistograms();
   }
-
-  // write out histograms
-  
-  // cout << "writing out histograms" << endl;
-
-  // mOutput->Write(,kSingleKey);
-  // cout << "written"<< endl;
-  mOutput->Close();
 
   // delete analyses in container
 

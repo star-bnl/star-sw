@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.7 2000/03/08 02:30:20 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.8 2000/03/10 19:54:07 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.8  2000/03/10 19:54:07  ogilvie
+// bug fix in name of histograms
+//
 // Revision 1.7  2000/03/08 02:30:20  ogilvie
 // individual output .root files per analysis, prep. for user choice of axes, (y,eta) (pperp,mperp)
 //
@@ -45,7 +48,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include <TFile.h>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -64,8 +66,6 @@ private:
  vector<StSpectraAnalysis*> mSpectraAnalysisContainer;//!
 #endif
 
-TFile* mOutput;
-
 protected:
 
 public:
@@ -79,7 +79,7 @@ public:
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.7 2000/03/08 02:30:20 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.8 2000/03/10 19:54:07 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
   ClassDef(StSpectraMaker,1)
 
