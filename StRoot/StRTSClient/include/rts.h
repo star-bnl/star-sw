@@ -60,6 +60,10 @@
 
 #define RTS_BIG_ENDIAN
 
+#elif  defined(__alpha) && !defined(linux)     /* assume alpha OSF */
+
+#define RTS_BIG_ENDIAN
+
 #elif defined(__alpha)	/* assume alpha 21264, GCC 2.95 */
 
 #define RTS_LITTLE_ENDIAN
@@ -77,6 +81,8 @@
 #define TARGET_SYSTEM "LINUX"
 #elif defined(sun)
 #define TARGET_SYSTEM "SUN"
+#elif defined(__osf__)
+#define TARGET_SYSTEM "OSF1"
 #elif defined(vxworks)
 
 #if defined(i960)
