@@ -773,7 +773,9 @@ Int_t StFile::AddWild(const Char_t *file)
 //_____________________________________________________________________________
 void StFile::SetInfo(St_DataSet *ds)
 {
+  int i;
   TFile *tf=0;
+
   if (!ds) return;
   TString tit(ds->GetTitle());  
   Int_t known = 0;
@@ -785,68 +787,56 @@ void StFile::SetInfo(St_DataSet *ds)
   const char *ext =   strrchr(fname,'.');
   assert(ext);
 
+  tit.Replace(0,0," branch=NONE ");
+
 //		.XDF
   if (strcmp(".xdf",ext)==0) {
     tit.Replace(0,0," format=xdf ");
-    tit.Replace(0,0," branch=NONE");
     known = 3;
+    goto RETN;
   } 
 //		DAQ
   if (strcmp(".daq",ext)==0) {
     tit.Replace(0,0," format=daq ");
-    tit.Replace(0,0," branch=NONE");
     known = 3;
+    goto RETN;
   } 
   
-  if (known!=3) {
-    assert (!strcmp(".root",ext));
-    if (!(known&1)) {tit.Replace(0,0," format=root ");known|=1;}
+//		ROOT
+  if (strcmp(".root",ext)==0) {
+    tit.Replace(0,0," format=root ");
+    known |= 1;
+//		... now try to know branch name
     TString bran = fname;
     bran.ReplaceAll(".root","");
-    int i = bran.Last('.');
-    if (i>0) bran.Replace(0,i+1,"");
-    else     bran = "unknown";
-    bran.Replace(0,0,"branch=");
-    bran+=" ";
-    if (!(known&2)) {tit.Replace(0,0,bran);known|=2;}
-#if 0
+    i = bran.Last('.');
+    if (i>0) {
+      bran.Replace(0,i+1,"");
+      known = 3;
+      i = tit.Index("branch=NONE"); assert(i>=0);
+      tit.Replace(i+7,4,bran);
+      goto RETN;
+    }
+    
 
-    tf = new TFile(fname,"READ");
+// 		... branch name still unknown
+
+    tf = TFile::Open(fname,"READ");
     assert(!tf->IsZombie());
     TList *kl = gFile->GetListOfKeys();
     TIter nextKey(kl);
     TKey *ky;
     while ((ky = (TKey*)nextKey())) {
-      if (strcmp("StIOEvent",ky->GetClassName())==0) {	//it is post mdc2
-	if (!(known&1)) {tit.Replace(0,0," format=root ");known|=1;}
-	if (!(known&2)) {
-          const char *bra=ky->GetName();
-          if (strstr(bra,"tree")) 	continue;
-          if (strstr(bra,"Tree")) 	continue;
-	  tit.Replace(0,0,bra,strcspn(bra,"."));tit.Replace(0,0,"branch=");
-        }
-	known =3; break;
-      }
-      if (!strcmp("TTree" ,ky->GetClassName())
-       && !strcmp("Output",ky->GetName()) ) {//it is mdc2
-	if (!(known&1)) tit.Replace(0,0," format=mdc2");
-	if (!(known&2)) tit.Replace(0,0," branch=tree");
-	known =3; break;
-      }
+      if (strcmp("StIOEvent",ky->GetClassName()))	continue;
+      const char *bra=ky->GetName();
+      if (strstr(bra,"tree")) 				continue;
+      if (strstr(bra,"Tree")) 				continue;
+      i = tit.Index("branch=NONE"); assert(i>=0);
+      tit.Replace(i+7,4,bra,strcspn(bra,"."));
+  } }
 
-      if (known==3) break;
-      if (strcmp("TBranchObject",ky->GetClassName())==0) {//it is mdc2
-	if (!(known&1)) {tit.Replace(0,0," format=mdc2");}
-	if (!(known&2)) {tit.Replace(0,0,ky->GetName());tit.Replace(0,0," branch=");;}
-	known =3; 
-      }
-      if (known==3) break;
-    }
-#endif /*0*/
-  }
+RETN:;
   delete tf;
-  if (!known&1) tit.Replace(0,0,"format=unknown ");   
-  if (!known&2) tit.Replace(0,0,"branch=unknown ");   
   ds->SetTitle(tit);
 }
 //_____________________________________________________________________________

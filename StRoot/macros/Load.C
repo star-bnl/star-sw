@@ -1,5 +1,8 @@
-// $Id: Load.C,v 1.10 2000/04/13 23:10:08 fisyak Exp $
+// $Id: Load.C,v 1.11 2000/05/15 20:06:21 perev Exp $
 // $Log: Load.C,v $
+// Revision 1.11  2000/05/15 20:06:21  perev
+// Two libs added
+//
 // Revision 1.10  2000/04/13 23:10:08  fisyak
 // Take out Load of libSTAR and Star2Root
 //
@@ -27,4 +30,7 @@ void Load(){
     gSystem->Load("StBFChain");
     gSystem->Load("xdf2root");
     gSystem->Load("St_Tables");
+    gSystem->Load("StarClassLibrary");
+    gSystem->Load("StEvent");
+
 }
