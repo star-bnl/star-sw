@@ -28,13 +28,17 @@ error has occured.
 #define ntohl(x)    (x)
 #define htonl(x)    (x)
 #endif
-#include "asuAlloc.h"
 #include "xdrtape.h"
 /*****************************************************************************
 *
 * macros
 *
 */
+#ifdef _CRAY
+typedef inline_t INLINE;
+#else
+typedef long INLINE;
+#endif
 #define XDRTAPE_ERROR(code) {xdrs->x_handy = code; return FALSE;}
 
 #define BUFLEN(pT) ((pT)->limit - (pT)->first)
@@ -49,7 +53,7 @@ static void xdrtape_destroy(XDR *xdrs);
 static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, unsigned len);
 static bool_t xdrtape_getlong(XDR *xdrs, long *lp);
 static unsigned xdrtape_getpos(XDR *xdrs);
-static long *xdrtape_inline(XDR *xdrs, int len);
+static INLINE *xdrtape_inline(XDR *xdrs, int len);
 static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, unsigned len);
 static bool_t xdrtape_putlong(XDR *xdrs, long *lp);
 static bool_t xdrtape_setpos(XDR *xdrs, unsigned pos);
@@ -97,7 +101,7 @@ int xdrtape_create(XDR *xdrs, enum xdr_op op, int fd, unsigned size,
 	if (size <= 0) {
 		size = XDRTAPE_DEFAULT_BLOCK_SIZE;
 	}
-	if (!(pTape = (TAPEBUF_T *)CALLOC(1, sizeof(TAPEBUF_T) + size))) {
+	if (!(pTape = (TAPEBUF_T *)calloc(1, sizeof(TAPEBUF_T) + size))) {
 		XDRTAPE_ERROR(XDRTAPE_INSUFFICIENT_MEMORY);
 	}
 	xdrs->x_private = (caddr_t)pTape; 	
@@ -117,7 +121,7 @@ int xdrtape_create(XDR *xdrs, enum xdr_op op, int fd, unsigned size,
 */
 static void xdrtape_destroy(XDR *xdrs)
 {
-	FREE(xdrs->x_private);
+	free((char *)xdrs->x_private);
 }
 /*****************************************************************************
 *
@@ -243,7 +247,7 @@ static unsigned xdrtape_getpos(XDR *xdrs)
 * xdrtape_inline - not implemented
 *
 */
-static long *xdrtape_inline(XDR *xdrs, int len)
+static INLINE *xdrtape_inline(XDR *xdrs, int len)
 {
 	len = 0; /* to avoid warning from some compilers */
 	XDRTAPE_ERROR(XDRTAPE_UNIMPLEMENTED_FCN);

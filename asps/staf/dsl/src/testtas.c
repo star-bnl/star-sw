@@ -17,22 +17,22 @@ TBS ...
 #define DS_PRIVATE
 #include "dsxdr.h"
 
-typedef struct base_type {float x, y, z;}BASE_TYPE;
+typedef struct base_type {DS_FLOAT x, y, z;}BASE_TYPE;
 #define BASE_DECL "struct base_type {float x, y, z;}"
 
-typedef struct differ_type {float x, y; long z;}DIFFER_TYPE;
+typedef struct differ_type {DS_FLOAT x, y; DS_LONG z;}DIFFER_TYPE;
 #define DIFFER_DECL "struct differ_type {float x, y; long z;}"
 
-typedef struct fewer_type {float x, y;}FEWER_TYPE;
+typedef struct fewer_type {DS_FLOAT x, y;}FEWER_TYPE;
 #define FEWER_DECL "struct fewer_type {float x, y;}"
 
-typedef struct more_type {float x, y, z; long t;}MORE_TYPE;
+typedef struct more_type {DS_FLOAT x, y, z; DS_LONG t;}MORE_TYPE;
 #define MORE_DECL "struct more_type {float x, y, z; long t;}"
 
-typedef struct none_type {long x, y, z;}NONE_TYPE;
+typedef struct none_type {DS_LONG x, y, z;}NONE_TYPE;
 #define NONE_DECL "struct none_type {long x, y, z;}"
 
-typedef struct order_type {float z, y, x;}ORDER_TYPE;
+typedef struct order_type {DS_FLOAT z, y, x;}ORDER_TYPE;
 #define ORDER_DECL "struct order_type {float z, y, x;}"
 
 #define DSET_DIM 10

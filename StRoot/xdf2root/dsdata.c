@@ -30,8 +30,8 @@ static int dsIsAcyclicR(DS_DATASET_T *dataset, DS_LIST_T *list,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsAddTable(DS_DATASET_T *pDataset, const char *name,
-	const char *typeSpecifier, size_t nRow, char **ppData)
+int dsAddTable(DS_DATASET_T *pDataset, char *name,
+	char *typeSpecifier, size_t nRow, char **ppData)
 {
 	char *pData;
 	DS_DATASET_T *pTable;
@@ -124,7 +124,7 @@ static int dsCheckDupEntry(DS_DATASET_T *pDataset)
 * RETURNS: TRUE if success else FALSE
 */
 int dsCreateDataset(DS_DATASET_T **ppDataset,
-					 size_t *tList, const char *str, const char **ptr)
+					 size_t *tList, char *str, char **ptr)
 {
 	DS_BUF_T bp;
 	DS_LIST_T list;
@@ -240,13 +240,13 @@ int dsDatasetSpecifier(DS_BUF_T *bp, DS_DATASET_T *pDataset)
 		return FALSE;
 	}
 	if (dsPuts("data ", bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (!dsDatasetSpecifierR(bp, pDataset, &list, 0)) {
 		goto fail;
 	}
 	if (dsPutc('\0', bp) < 0) {
-		DS_LOG_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_LOG_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		goto fail;
 	}
 	return dsListFree(&list);
@@ -267,11 +267,11 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 	DS_TYPE_T *type;
 
 	if (dsPutTabs(level, bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (dsVisited(list, pDataset)) {
 		if (dsPutc('&', bp) < 0 || dsPutNumber(pDataset->visit, bp) < 0) {
-			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 		return TRUE;
 	}
@@ -279,7 +279,7 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 		return FALSE;
 	}
 	if (dsPuts(pDataset->name, bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (DS_IS_TABLE(pDataset)) {
 		if (!dsTypePtr(&type, pDataset->tid)) {
@@ -290,7 +290,7 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 			dsPuts(", ", bp) < 0 ||
 			dsPutNumber(pDataset->elcount, bp) < 0 ||
 			dsPutc(')', bp) < 0) {
-			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 		return TRUE;
 	}
@@ -298,14 +298,14 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
 	if (dsPuts("{\n", bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (!dsCheckDupEntry(pDataset)) {
 		return FALSE;
 	}
 	for (i = 0; i < pDataset->elcount; i++) {
 		if (i != 0 && dsPuts(",\n", bp) < 0) {
-			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 		if (!dsDatasetSpecifierR(bp,
 			pDataset->p.link[i], list, level + 1)) {
@@ -315,7 +315,7 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 	if (dsPutc('\n', bp) < 0 ||
 		dsPutTabs(level, bp) < 0 ||
 		dsPutc('}', bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	return TRUE;
 }
@@ -325,8 +325,8 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsInitTable(DS_DATASET_T *pTable, const char *tableName,
-	const char *typeSpecifier, unsigned rowCount, void *pData)
+int dsInitTable(DS_DATASET_T *pTable, char *tableName,
+	char *typeSpecifier, unsigned rowCount, void *pData)
 {
 	if (pTable == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);

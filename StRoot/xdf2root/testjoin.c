@@ -20,10 +20,10 @@ static void dumpTable(DS_DATASET_T *pTable, char *msg);
 * definitions for self-join tests
 */
 typedef struct staff_t {
-	char name[15];
-	short empNum;
-	long salary;
-	short supNum;
+	DS_CHAR name[15];
+	DS_SHORT empNum;
+	DS_LONG salary;
+	DS_SHORT supNum;
 }STAFF_T;
 
 #define STAFF_S "struct staff_t {"\
@@ -111,9 +111,9 @@ int testEquijoin()
 /***************************************************************************/
 		
 	/* typedefs for variables */
-typedef struct one_t {float x, t; long key;} TYPE_ONE_T;
-typedef struct two_t {long key; float z, y;} TYPE_TWO_T;
-typedef struct join_t {float x, y, z, t;} JOIN_TYPE_T;
+typedef struct one_t {DS_FLOAT x, t; DS_LONG key;} TYPE_ONE_T;
+typedef struct two_t {DS_LONG key; DS_FLOAT z, y;} TYPE_TWO_T;
+typedef struct join_t {DS_FLOAT x, y, z, t;} JOIN_TYPE_T;
 
 	/* type specifiers for tables */
 #define TYPE_ONE_S "struct one_t {float x, t; long key;}"
@@ -191,7 +191,7 @@ int testNatural()
  		goto fail;
  	}
  	/* get pointer to data and row count of join */
- 	if (!dsCellAddress((char**)&joinVar, pJoinTable, 0, 0) ||
+ 	if (!dsCellAddress((char **)&joinVar, pJoinTable, 0, 0) ||
  		!dsTableRowCount(&joinRowCount, pJoinTable)) {
  		dsPerror("get data pointer or row count failed");
  		goto fail;

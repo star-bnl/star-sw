@@ -16,26 +16,20 @@ TBS ...
 #ifndef DSXDR_H
 #define DSXDR_H
 #include "dstype.h"
+#include <rpc/rpc.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+int dsCheckTruncation();
+int dsEncodeBigEndian(XDR *xdrs, DS_DATASET_T *pDataset);
+int dsEncodeLittleEndian(XDR *xdrs, DS_DATASET_T *pDataset);
+int dsIgnoreTruncation();
 int dsReadAll(XDR *xdrs);
 int dsReadTest(XDR *xdrs, size_t count);
-int dsWriteTest(XDR *xdrs, size_t count);
+int dsWriteTest(XDR *xdrs, size_t count, int bigEndian);
 bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset);
 bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
-
-  /* Linux has a broken version of xdr.h - x_destroy doesn't take any
-     arguments, but the macro XDR_DESTROY passes it one.  */
-#if defined(linux)
-#ifdef XDR_DESTROY
-#undef XDR_DESTROY
-#endif
-#define	XDR_DESTROY(xdrs)				\
-	if ((xdrs)->x_ops->x_destroy) 			\
-		(*(xdrs)->x_ops->x_destroy)()
-#endif
 
 #ifdef DS_PRIVATE
 /******************************************************************************

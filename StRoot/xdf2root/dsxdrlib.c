@@ -7,6 +7,7 @@ modification history
 --------------------
 24apr93,whg  written.
 11jun96,whg  added indirection to dataset structure
+07apr98,whg  allow little endian representation of data
 */
 
 /*
@@ -15,91 +16,422 @@ xdr interface for tables and datasets
 */
 #include <string.h>
 #define DS_PRIVATE
-#include "asuAlloc.h"
 #include "dsxdr.h"
-
 /******************************************************************************
 *
 * macros and variables for padding and raw transfers
 *
 */
-#define XDR_PAD(xdrs, n) ((n) == 0 ? TRUE : ((size_t)(n) > MAX_PAD ? FALSE :\
-	((xdrs)->x_op == XDR_DECODE ? XDR_GETBYTES(xdrs, padBuf, n) :\
-	((xdrs)->x_op == XDR_ENCODE ? XDR_PUTBYTES(xdrs, padZero, n) : FALSE))))
+#define OFFSET(name)\
+	(DS_IS_BIG_ENDIAN ? sizeof(DS_ ## name) - (DS_LEN_ ## name) : 0)
 
-#define XDR_RAW(xdrs, ptr, n)\
-	((xdrs)->x_op == XDR_DECODE ? XDR_GETBYTES(xdrs, ptr, n) :\
-	((xdrs)->x_op == XDR_ENCODE ? XDR_PUTBYTES(xdrs, ptr, n) : FALSE))
+#define XDR_PAD(xdrs, n) ((n) == 0 ? TRUE : ((size_t)(n) > MAX_PAD ? FALSE :\
+	(xdrs)->x_op == XDR_DECODE ? XDR_GETBYTES(xdrs, padBuf, n) :\
+	XDR_PUTBYTES(xdrs, padZero, n)))
+
+#define XDR_RAW(xdrs, ptr, n) ((xdrs)->x_op == XDR_DECODE ?\
+	XDR_GETBYTES(xdrs, ptr, n) : XDR_PUTBYTES(xdrs, ptr, n))
 
 #define MAX_PAD 7
+static int checkTruncation = TRUE;
 static char padBuf[MAX_PAD], padZero[MAX_PAD] = {0, 0, 0, 0, 0, 0, 0};
 /******************************************************************************
 *
 * prototypes for static functions
 *
 */
-static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type);
+static int xdr_ctype(XDR *xdrs, char *base, size_t count,
+					 DS_TYPE_T *type, int swap);
 static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount);
-static bool_t xdr_table(XDR *xdrs, void *ptr, size_t typeID, size_t nrow);
-static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *typeList);
+static bool_t dsDecodeType(XDR *xdrs, DS_DATASET_T **ppDataset);
+static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset);
+/*****************************************************************************
+*
+* dsCheckTruncation - enable truncation check of integer types during write
+*
+* RETURNS: TRUE
+*/
+int dsCheckTruncation()
+{
+	checkTruncation = TRUE;
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsConvertLong - convert a long with size > DS_LEN_LONG
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsConvertLong(XDR *xdrs, char *base, int swap)
+{
+	DS_LONG l;
+
+	if (xdrs->x_op == XDR_DECODE) {
+		l = 0;
+		if (swap) {
+			if (!xdr_swap(xdrs, (char *)&l + OFFSET(LONG), DS_LEN_LONG, 1)) {
+				return FALSE;
+			}
+		}
+		else if (!XDR_GETBYTES(xdrs, (char *)&l + OFFSET(LONG), DS_LEN_LONG)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+		if ((l & DS_LONG_SIGN) != 0) {
+			l |= ~DS_LONG_MASK;
+		}
+
+		*((DS_LONG *)base) = l;
+	}
+	else {
+		l = *((DS_LONG *)base);
+		if ((l  < DS_MIN_LONG || l > DS_MAX_LONG) && checkTruncation) {
+			DS_ERROR(DS_E_TRUNCATION_ERROR);
+		}
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(LONG), DS_LEN_LONG, 1);
+		}
+		else if (!XDR_PUTBYTES(xdrs, base + OFFSET(LONG), DS_LEN_LONG)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsConvertShort - convert a short with size > DS_LEN_SHORT
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsConvertShort(XDR *xdrs, char *base, int swap)
+{
+	DS_SHORT s;
+
+	if (xdrs->x_op == XDR_DECODE) {
+		s = 0;
+		if (swap) {
+			if (!xdr_swap(xdrs, (char *)&s + OFFSET(SHORT), DS_LEN_SHORT, 1)) {
+				return FALSE;
+			}
+		}
+		else if (!XDR_GETBYTES(xdrs, (char *)&s + OFFSET(SHORT), DS_LEN_SHORT)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+		if ((s & DS_SHORT_SIGN) != 0) {
+			s |= ~DS_SHORT_MASK;
+		}
+		*((DS_SHORT *)base) = s;
+	}
+	else {
+		s = *((DS_SHORT *)base);
+		if ((s  < DS_MIN_SHORT || s > DS_MAX_SHORT) && checkTruncation) {
+			DS_ERROR(DS_E_TRUNCATION_ERROR);
+		}
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(SHORT), DS_LEN_SHORT, 1);
+		}
+		else if (!XDR_PUTBYTES(xdrs, base + OFFSET(SHORT), DS_LEN_SHORT)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsConvertUnsignedLong - convert a unsigned long with size > DS_LEN_U_LONG
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsConvertUnsignedLong(XDR *xdrs, char *base, int swap)
+{
+	if (xdrs->x_op == XDR_DECODE) {
+		*((DS_U_LONG *)base) = 0;
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(U_LONG), DS_LEN_U_LONG, 1);
+		}
+		else if (!XDR_GETBYTES(xdrs, base + OFFSET(U_LONG), DS_LEN_U_LONG)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	else {
+		if (*((DS_LONG *)base) > DS_MAX_U_LONG && checkTruncation) {
+			DS_ERROR(DS_E_TRUNCATION_ERROR);
+		}
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(U_LONG), DS_LEN_U_LONG, 1);
+		}
+		else if (!XDR_PUTBYTES(xdrs, base + OFFSET(U_LONG), DS_LEN_U_LONG)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsConvertUnsignedShort - convert a unsigned short with size > DS_LEN_U_SHORT
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsConvertUnsignedShort(XDR *xdrs, char *base, int swap)
+{
+	if (xdrs->x_op == XDR_DECODE) {
+		*((DS_U_SHORT *)base) = 0;
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(U_SHORT), DS_LEN_U_SHORT, 1);
+		}
+		else if (!XDR_GETBYTES(xdrs, base + OFFSET(U_SHORT), DS_LEN_U_SHORT)) {
+				DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	else {
+		if (*((DS_SHORT *)base) > DS_MAX_U_SHORT && checkTruncation) {
+			DS_ERROR(DS_E_TRUNCATION_ERROR);
+		}
+		if (swap) {
+			return xdr_swap(xdrs, base + OFFSET(U_SHORT), DS_LEN_U_SHORT, 1);
+		}
+		else if (!XDR_PUTBYTES(xdrs, base + OFFSET(U_SHORT), DS_LEN_U_SHORT)) {
+			DS_ERROR(DS_E_XDR_IO_ERROR);
+		}
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsDecodeType - decode abstract types for dataset
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static bool_t dsDecodeType(XDR *xdrs, DS_DATASET_T **ppDataset)
+{
+	char buf[DS_MAX_SPEC_LEN+1], *str;
+	int firstLine = TRUE, optsLittleEndian = FALSE;
+	size_t *tList = NULL;
+	DS_DATASET_T *pDataset = *ppDataset;
+
+	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
+		return FALSE;
+	}
+	for(;;) {
+		str = buf;
+		if (!xdr_string(xdrs, &str, sizeof(buf) - 1)) {
+			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
+			goto fail;
+		}
+		if (strncmp(buf, "type", 4) == 0) {
+			if (!dsTypeListEnter(tList, buf + 4, &str)) {
+				goto fail;
+			}
+		}
+		else if (strncmp(buf, "data", 4) == 0) {
+			if (!dsCreateDataset(&pDataset,
+				tList, buf+4, &str)) {
+				goto fail;
+			}
+			pDataset->flags = optsLittleEndian ? 
+				pDataset->flags | DS_F_XDR_L_END : 
+				pDataset->flags & ~DS_F_XDR_L_END;
+			*ppDataset = pDataset;
+			return dsTypeListFree(tList);
+		}
+		else if (strncmp(buf, "opts", 4) == 0) {
+			if (strstr(buf + 4, "lend") != NULL && firstLine) {
+				optsLittleEndian = TRUE;
+			}
+			else {
+				DS_LOG_ERROR(DS_E_DATASET_OPTS_ERROR);
+				goto fail;
+			}
+		}
+		else {
+			DS_LOG_ERROR(DS_E_INVALID_DATASET);
+			goto fail;
+		}
+	}
+	fail:
+		dsTypeListFree(tList);
+		return FALSE;
+}
+/*****************************************************************************
+*
+* dsEncodeBigEndian - write a dataset with big endian byte order
+*
+* RETURNS: TRUE if success else FALSE
+*/
+bool_t dsEncodeBigEndian(XDR *xdrs, DS_DATASET_T *pDataset)
+{
+	if (xdrs->x_op != XDR_ENCODE) {
+		DS_ERROR(DS_E_INVALID_XDR_OP);
+	}
+	pDataset->flags &= ~DS_F_XDR_L_END;
+	return dsEncodeType(xdrs, pDataset) && xdr_dataset_data(xdrs, pDataset);
+}
+/*****************************************************************************
+*
+* dsEncodeLittleEndian - write a dataset with little endian byte order
+*
+* RETURNS: TRUE if success else FALSE
+*/
+bool_t dsEncodeLittleEndian(XDR *xdrs, DS_DATASET_T *pDataset)
+{
+	if (xdrs->x_op != XDR_ENCODE) {
+		DS_ERROR(DS_E_INVALID_XDR_OP);
+	}
+	pDataset->flags |= DS_F_XDR_L_END;
+	return dsEncodeType(xdrs, pDataset) && xdr_dataset_data(xdrs, pDataset);
+}
+/******************************************************************************
+*
+* dsEncodeType - encode type declarations for dataset tables
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset)
+{
+	char buf[DS_MAX_SPEC_LEN+1];
+	size_t *tList = NULL;
+	DS_BUF_T bp;
+	char *str, *typeStr = "type ";
+	size_t h, i, len;
+	unsigned size;
+	DS_DATASET_T *item;
+	DS_LIST_T list;
+	DS_TYPE_T *pType;
+
+	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
+		return FALSE;
+	}
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
+	if (!dsVisitList(&list, pDataset)) {
+		goto fail;
+	}
+	if (DS_LITTLE_ENDIAN_XDR(pDataset)) {
+		str = "opts lend";
+		if (!xdr_string(xdrs, &str, strlen(str))) {
+			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
+			goto fail;
+		}
+	}
+	for (i = 0; i < list.count; i++) {
+		item = list.pItem[i];
+		if (!DS_IS_TABLE(item)) {
+			continue;
+		}
+		if (!dsTypePtr(&pType, item->tid) ||
+			!dsTypeListFind(&h, tList, pType->name)) {
+			goto fail;
+		}
+		if (tList[h] == item->tid) {
+			continue;
+		}
+		if (tList[h] != 0) {
+			DS_LOG_ERROR(DS_E_DUPLICATE_TYPE_NAME);
+			goto fail;
+		}
+		tList[h] = item->tid;
+		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+			goto fail;
+		}
+		size = len + strlen(typeStr);
+		if (size >= sizeof(buf)) {
+			DS_LOG_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+			goto fail;
+		}
+		strcat(strcpy(buf, typeStr), str);
+		str = buf;
+		if (!xdr_string(xdrs, &str, size)) {
+			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
+			goto fail;
+		}
+	}
+	str = buf;
+	DS_PUT_INIT(&bp, buf, sizeof(buf));
+	if (!dsDatasetSpecifier(&bp, pDataset)) {
+		goto fail;
+	}
+	if (!xdr_string(xdrs, &str, sizeof(buf) -1)) {
+		DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
+		goto fail;
+	}
+	dsTypeListFree(tList);
+	return dsListFree(&list);
+fail:
+	dsTypeListFree(tList);
+	dsListFree(&list);
+	return FALSE;
+}
+/*****************************************************************************
+*
+* dsIgnoreTruncation - disable truncation check of integer types during write
+*
+* RETURNS: TRUE
+*/
+int dsIgnoreTruncation()
+{
+	checkTruncation = FALSE;
+	return TRUE;
+}
 /******************************************************************************
 *
 * xdr_ctype - translate an array of c structs
 *
 * RETURNS: TRUE if success else FALSE
 */
-static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
+static int xdr_ctype(XDR *xdrs, char *base,
+					 size_t count, DS_TYPE_T *type, int swap)
 {
 	char *ptr;
-	int (*xdr_fcn)(XDR *xdrs, void *ptr);
-	size_t i, nbytes, size;
+	typedef int (*XDR_FCN)(XDR *, char *, int);
+	XDR_FCN xdr_fcn;
+	size_t i, nbytes;
 	DS_FIELD_T *field, *limit;
 	DS_TYPE_T *ftype;
 
-#ifndef FORCE_FULL_XDR
-	if (DS_REP_IS_STD(type)) {
+	if (DS_REP_IS_STD(type) && (!swap || !DS_IS_MULTI_BYTE(type))) {
 		 if (!XDR_RAW(xdrs, base, count*type->stdsize)) {
 			DS_ERROR(DS_E_XDR_IO_ERROR);
 		}
 		return TRUE;
 	}
-#endif
 	if (DS_BASIC_TYPE(type)) {
-		if ((size = type->size) == type->stdsize &&
-			(DS_IS_IEEE_FLOAT || !DS_IS_REAL(type))) {
-			if (DS_IS_BIG_ENDIAN || size == 1) {
-				if (!XDR_RAW(xdrs, base, count*size)) {
+		if (DS_REP_IS_STD(type)) {
+			if (!swap) {
+				if (!XDR_RAW(xdrs, base, type->size*count)) {
 					DS_ERROR(DS_E_XDR_IO_ERROR);
 				}
 			}
-			else if (!xdr_swap(xdrs, base, size, count)) {
+			else if (!xdr_swap(xdrs, base, type->size, count)) {
 				return FALSE;
 			}
 			return TRUE;
 		}
 		switch (type->code) {
-
-		 case DS_TYPE_LONG:
-			xdr_fcn = (int (*)(XDR *, void *))xdr_long;
+		case DS_TYPE_SHORT:
+			xdr_fcn = dsConvertShort; 
 			break;
 
-		 case DS_TYPE_U_LONG:
-			xdr_fcn = (int (*)(XDR *, void *))xdr_u_long;
+		case DS_TYPE_U_SHORT:
+			xdr_fcn = dsConvertUnsignedShort;
+			break;
+
+		case DS_TYPE_LONG:
+			xdr_fcn = dsConvertLong;
+			break;
+
+		case DS_TYPE_U_LONG:
+			xdr_fcn = dsConvertUnsignedLong;
 			break;
 
 		case DS_TYPE_FLOAT:
-			xdr_fcn = (int (*)(XDR *, void *))xdr_float;
-			break;
-
 		case DS_TYPE_DOUBLE:
-			xdr_fcn = (int (*)(XDR *, void *))xdr_double;
-			break;
+			DS_ERROR(DS_E_NON_IEEE_FLOATING_POINT);
 
 		default:
 			DS_ERROR(DS_E_SYSTEM_ERROR);
 		}
 		while (count-- >0) {
-			if (!xdr_fcn(xdrs, base)) {
+			if (!xdr_fcn(xdrs, base, swap)) {
 				DS_ERROR(DS_E_XDR_IO_ERROR);
 			}
 			base += type->size;
@@ -118,7 +450,7 @@ static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
 			if (!XDR_PAD(xdrs, field->stdoffset - nbytes)) {
 				DS_ERROR(DS_E_XDR_PAD_ERROR);
 			}
-			if (!xdr_ctype(xdrs, ptr, field->count, ftype)) {
+			if (!xdr_ctype(xdrs, ptr, field->count, ftype, swap)) {
 				return FALSE;
 			}
 			nbytes = field->stdoffset + field->count*ftype->stdsize;
@@ -171,9 +503,11 @@ fail:
 */
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 {
-	size_t i;
+	int swap;
+	size_t i, npad;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
+	DS_TYPE_T *type;
 
 	if (xdrs->x_op != XDR_DECODE && xdrs->x_op != XDR_ENCODE) {
 		DS_ERROR(DS_E_INVALID_XDR_OP);
@@ -184,13 +518,28 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}
+	swap = (DS_LITTLE_ENDIAN_XDR(pDataset) ?
+				DS_IS_BIG_ENDIAN : DS_IS_LITTLE_ENDIAN);
 	for (i = 0; i < list.count; i++) {
 		item = list.pItem[i];
 		if (DS_IS_TABLE(item)) {
 			if (xdrs->x_op == XDR_DECODE) {
 				item->elcount = item->maxcount;
 			}
-			if (!xdr_table(xdrs, item->p.data, item->tid, item->elcount)) {
+			if (item->elcount == 0) {
+				continue;
+			}
+			if (item->p.data == NULL) {
+				DS_LOG_ERROR(DS_E_NULL_POINTER_ERROR);
+				goto fail;
+			}
+			if (!dsTypePtr(&type, item->tid) ||
+				!xdr_ctype(xdrs, item->p.data, item->elcount, type, swap)) {
+				goto fail;
+			}
+			npad = DS_PAD(item->elcount*type->stdsize, BYTES_PER_XDR_UNIT);
+			if (!XDR_PAD(xdrs, npad)) {
+				DS_LOG_ERROR(DS_E_XDR_PAD_ERROR);
 				goto fail;
 			}
 		}
@@ -208,67 +557,21 @@ fail:
 */
 bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset)
 {
-	char buf[DS_MAX_SPEC_LEN+1], *str;
-	size_t *tList = NULL;
-	DS_BUF_T bp;
-	DS_DATASET_T *pDataset = *ppDataset;
+	DS_DATASET_T *pDataset;
 
-	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
-		return FALSE;
-	}
 	if (xdrs->x_op == XDR_ENCODE) {
-		if (!xdr_types(xdrs, pDataset, tList)) {
-			goto fail;
-		}
-		str = buf;
-		DS_PUT_INIT(&bp, buf, sizeof(buf));
-		if (!dsDatasetSpecifier(&bp, pDataset)) {
-			goto fail;
-		}
-		if (!xdr_string(xdrs, &str, sizeof(buf))) {
-			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
-			goto fail;
-		}
-		goto success;
+		pDataset = *ppDataset;
+		pDataset->flags &= ~DS_F_XDR_L_END;
+		return dsEncodeType(xdrs, pDataset);
 	}
-	if (xdrs->x_op != XDR_DECODE) {
-		DS_LOG_ERROR(DS_E_INVALID_XDR_OP);
-		goto fail;
+	if (xdrs->x_op == XDR_DECODE) {
+		return dsDecodeType(xdrs, ppDataset);
 	}
-	for(;;) {
-		str = buf;
-		if (!xdr_string(xdrs, &str, sizeof(buf) - 1)) {
-			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
-			goto fail;
-		}
-		if (strncmp(buf, "type", 4) == 0) {
-			if (!dsTypeListEnter(tList, buf + 4, (const char**)&str)) {
-				goto fail;
-			}
-		}
-		else if (strncmp(buf, "data", 4) == 0) {
-			if (!dsCreateDataset(&pDataset,
-				tList, buf+4, (const char**)&str)) {
-				goto fail;
-			}
-			*ppDataset = pDataset;
-			goto success;
-		}
-		else {
-			DS_LOG_ERROR(DS_E_INVALID_DATASET);
-			goto fail;
-		}
-	}
-	fail:
-		dsTypeListFree(tList);
-		return FALSE;
-	success:
-		dsTypeListFree(tList);
-		return TRUE;
+	DS_ERROR(DS_E_INVALID_XDR_OP);
 }
 /******************************************************************************
 *
-* xdr_swap - translate little endian integer and ieee floating point types
+* xdr_swap - xdr with swaped byte order for integer and ieee floating point
 *
 * RETURNS: TRUE if success else FALSE
 */
@@ -360,93 +663,7 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 		}
 	}
 	else {
-		DS_ERROR(DS_E_XDR_IO_ERROR);
+		DS_ERROR(DS_E_INVALID_XDR_OP);
 	}
 	return TRUE;
-}
-/******************************************************************************
-*
-* xdr_table - decode or encode table data
-*
-* RETURNS: TRUE if success else FALSE
-*/
-static bool_t xdr_table(XDR *xdrs, void *ptr, size_t tid, size_t nrow)
-{
-	size_t npad, size;
-	DS_TYPE_T *type;
-
-	if (nrow == 0) {
-		return TRUE;
-	}
-	if (ptr == NULL) {
-		DS_ERROR(DS_E_NULL_POINTER_ERROR);
-	}
-	if (!dsTypePtr(&type, tid)) {
-		return FALSE;
-	}
-	size = nrow*type->stdsize;
-	npad = DS_PAD(size, BYTES_PER_XDR_UNIT);
-	if (!xdr_ctype(xdrs, ptr, nrow, type)) {
-		return FALSE;
-	}
-	if (!XDR_PAD(xdrs, npad)) {
-		DS_ERROR(DS_E_XDR_PAD_ERROR);
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* xdr_types - encode type declarations for dataset tables
-*
-* RETURNS: TRUE if success else FALSE
-*/
-static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *tList)
-{
-	char *str, *typeStr = "type ";
-	size_t h, i, len, npad;
-	long size;
-	DS_DATASET_T *item;
-	DS_LIST_T list;
-	DS_TYPE_T *pType;
-
-	if (!dsListInit(&list)) {
-		return FALSE;
-	}
-	if (!dsVisitList(&list, pDataset)) {
-		goto fail;
-	}
-	for (i = 0; i < list.count; i++) {
-		item = list.pItem[i];
-		if (!DS_IS_TABLE(item)) {
-			continue;
-		}
-		if (!dsTypePtr(&pType, item->tid) ||
-			!dsTypeListFind(&h, tList, pType->name)) {
-			goto fail;
-		}
-		if (tList[h] == item->tid) {
-			continue;
-		}
-		if (tList[h]) {
-			DS_LOG_ERROR(DS_E_DUPLICATE_TYPE_NAME);
-			goto fail;
-		}
-		if (!dsTypeSpecifier((const char**)&str, &len, item->tid)) {
-			goto fail;
-		}
-		size = len + strlen(typeStr);
-		npad = DS_PAD((size_t)size, BYTES_PER_XDR_UNIT);
-		if (!xdr_long(xdrs, &size) ||
-			!XDR_PUTBYTES(xdrs, typeStr, strlen(typeStr)) ||
-			!XDR_PUTBYTES(xdrs, str, len) ||
-			!XDR_PAD(xdrs, npad)) {
-			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
-			goto fail;
-		}
-		tList[h] = item->tid;
-	}
-	return dsListFree(&list);
-fail:
-	dsListFree(&list);
-	return FALSE;
 }
