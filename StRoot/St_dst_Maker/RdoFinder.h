@@ -1,3 +1,9 @@
+// $Id: RdoFinder.h,v 1.2 2002/02/19 16:07:56 wdeng Exp $
+// $Log: RdoFinder.h,v $
+// Revision 1.2  2002/02/19 16:07:56  wdeng
+// cvs control strings.
+//
+
 #ifndef  RdoFinder_HH
 #define  RdoFinder_HH
 
