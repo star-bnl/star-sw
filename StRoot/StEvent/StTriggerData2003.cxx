@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.10 2004/10/20 18:56:22 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.11 2004/11/16 15:58:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.11  2004/11/16 15:58:23  ullrich
+ * Checks for valid pre/post samples added (Akio).
+ *
  * Revision 2.10  2004/10/20 18:56:22  ullrich
  * Add method getRawSize().
  *
@@ -286,7 +289,9 @@ unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int prepost) c
 	  242, 241, 240, 255, 254, 253, 252, 251, 250, 249,
 	  151, 150, 149, 148, 147, 146, 145, 144, 159, 158}
     };
-    return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[slat][tray]];
+    int add=prepostAddress(prepost);
+    if(add>=0) return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[slat][tray]];
+    else return 0;
 }
 
 unsigned short StTriggerData2003::ctbSum(int prepost) const{
