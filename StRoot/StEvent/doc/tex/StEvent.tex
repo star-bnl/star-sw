@@ -2,15 +2,15 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StEvent.tex,v 1.1 1999/03/09 17:28:28 ullrich Exp $
+% $Id: StEvent.tex,v 1.2 1999/03/09 21:49:25 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.1  1999/03/09 17:28:28  ullrich
-% Initial Revision
+% Revision 1.2  1999/03/09 21:49:25  ullrich
+% Added class reference for EMC hits. New examples.
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -117,8 +117,8 @@
 % Added description of changes to StTrackDetectorInfo.
 %
 % Revision 2.27  2000/04/10 19:59:34  genevb
-  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/03/09 17:28:28 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.2 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/03/09 21:49:25 $ $}  % replaced by cvs with current revision  
 % Revision 2.26  2000/03/30 16:55:38  ullrich
 % Modified reference section for StTrack::key().
 %
@@ -132,8 +132,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/09 17:28:28 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.2 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/09 21:49:25 $ $}  % replaced by cvs with current revision
 This needs work ...
 % Added the hypperref package to add bookmarks and hyperlinks
 In the following the term \textit{method} and \textit{member function}
@@ -142,13 +142,29 @@ is used synonymously.
 Examples are used throughout this guide but are often not complete
 and will therefore not compile. Their only purpose is to illustrate
 a specific feature and not to provide a fully functional programming unit.
-  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.2 $ $}  \\[5mm] % replaced by cvs with current revision
 The name StEvent is somewhat misleading since it is (i) the name of the
 package and (ii) the name of a class. 
 \section{About this document}
 best way to get started. Note, however,
 ... this section needs some work
 and are not guaranteed to compile. Their only purpose is to illustrate
+a specific feature and not to provide a fully functional programming unit.
+
+
+We therefore write \StEvent\ when we refer to the package
+and \name{StEvent} for the class.
+
+In this document the terms \textit{method} and \textit{member function}
+are used synonymously.
+
+\end{figure}
+
+%
+% Define multiline labels for class reference
+%
+with those classes which they will encounter most: \name{StEvent}
+  \item Obtain an \name{afs} token: \comp{klog -cell rhic}.
     (i.e.~\comp{CVSROOT = /afs/rhic/star/packages/repository})
 
 \index{SCL} \index{StarClassLibrary}
@@ -276,6 +292,7 @@ typedef short          Short_t;     //Signed Short integer 2 bytes
     \index{StTrackSign|textbf}
     The header file does not only define the enumerations and their values
     but also the \textit{type} of the enumeration set. This allows the
+    different enumerations to be used as argument types where the strong C++ type
     checking rules ensures the proper use of the enumeration constants already
     during compilation.
 
@@ -632,6 +649,7 @@ void printOneDedx(StDedx *dedx, const char* name)
 \subsection{StDstEventSummary}
 \index{event summary}
 \index{StDstEventSummary|textbf}
+    
 \begin{Entry}
 \subsection{StEmcHit \index{StEmcHit|textbf}} \index{EMC hit} \index{SMD hit}
     
@@ -726,6 +744,226 @@ void printOneDedx(StDedx *dedx, const char* name)
     Id of the corresponding detector element.
 
     \verb+float phi() const;+ \\
+    $\phi$ coordinate at the center of the detector element.
+
+    \verb+float eta() const;+ \\
+}%footnotesize    
+
+    \verb+void setEnergy(float);+ \\
+\subsection{StEmcPreShowerHit \index{StEmcPreShowerHit|textbf}} \index{EMC pre-shower hit}
+    Set $\phi$ coordinate.
+
+    \verb+void setEta(float);+ \\
+    Set $\eta$ coordinate.
+
+    \verb+#include "StEmcPreShowerHit.hh"+
+
+\item[Global Operators]
+    \verb+ostream& operator<< (ostream& os, const StEmcHit& h);+ \\
+    Prints the hit quantities of \name{h} to ostream \name{os}.
+    StEmcPreShowerHit represents a hit in the EMC pre-shower detector.
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+    
+\item[Synopsis] 
+//
+    StEmcPreShowerHit inherits all functionality from StEmcHit.
+    
+    see StEmcHit (sec.~\ref{sec:StEmcHit}).
+   cout << "EMC hit = " << hit << endl;
+}
+\end{verbatim}
+    
+{\bf Programs Output:}
+    StEmcPreShowerHit is derived directly from StEmcHit.
+    The hits are kept in an instance of StEmcPreShowerHitCollection
+EMC hit = (0.1, 2.094; 10)
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}
+
+    Create an instance of StEmcPreShowerHit with identifier \args{i},
+    energy deposition \args{E} and position \args{phi}, \args{eta}.
+%    Reference: StEmcPreShowerHit
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+\index{EMC pre-shower hit}  \index{StEmcPreShowerHit|textbf}
+\label{sec:StEmcPreShowerHit}
+\begin{Entry}
+\item[Summary]
+    \name{StEmcPreShowerHit} represents a hit in the EMC pre-shower detector.
+
+\item[Synopsis]
+    \verb+#include "StEmcPreShowerHit.hh"+\\
+    \verb+class StEmcPreShowerHit;+\\
+
+\item[Description]
+    \name{StEmcPreShowerHit} inherits all functionality from \name{StEmcHit}.
+   StEmcPreShowerHitCollection* hits = event->emcPreShowerHitCollection();
+
+\item[Persistence]
+    None
+
+\item[Related Classes]
+\subsection{StEmcTowerHit \index{StEmcTowerHit|textbf}} \index{EMC tower hit}
+}%footnotesize    
+    \index{StEmcPreShowerHitCollection}
+
+\item[Public\\ Constructors]
+    \verb+StEmcPreShowerHit(int i, float E, float phi, float eta);+ \\
+    \verb+#include "StEmcTowerHit.hh"+
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+    StEmcTowerHit represents a hit in the EMC tower.
+//  Calculate the total-energy ratio of pre shower detectors
+//  between the two hemispheres (eta < 0 and eta > 0).
+//
+    
+\item[Synopsis] 
+   StEmcPreShowerHitCollection* hits =
+    StEmcTowerHit inherits all functionality from StEmcHit.
+    
+    see StEmcHit (sec.~\ref{sec:StEmcHit}).
+   double sumRight = 0;
+   for (iter = hits->begin(); iter != hits->end(); iter++)
+       if (iter->eta() < 0)
+    
+       else
+    StEmcTowerHit is derived directly from StEmcHit.
+    The hits are kept in an instance of StEmcTowerHitCollection
+\item[Examples]
+\end{verbatim}
+}%footnotesize
+\item[Examples] \index{accumulate} 
+    double operator()(double s, MyHit h) {return s += h.e();}
+
+    Create an instance of StEmcTowerHit with identifier \args{i},
+    energy deposition \args{E} and position \args{phi}, \args{eta}.
+%    Reference: StEmcTowerHit
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+\item[Examples] \index{accumulate (example)} 
+\label{sec:StEmcTowerHit}
+\begin{Entry}
+   return accumulate(hits->begin(), hits->end(), 0., addEnergy()) << endl;
+    \name{StEmcTowerHit} represents a hit in the EMC tower.
+
+\item[Synopsis]
+    \verb+#include "StEmcTowerHit.hh"+\\
+    \verb+class StEmcTowerHit;+\\
+
+\item[Description]
+    \verb+ostream&  operator<<(ostream& os, const StHit&);+\\
+    Prints hit data to output stream \name{os}.
+
+\subsection{StSmdEtaHit \index{StSmdEtaHit|textbf}} \index{SMD hit}
+{\footnotesize
+\begin{verbatim}
+//
+    \verb+void setStopTime(time_t);+ \\
+    Sets stop time of production.
+    \verb+#include "StSmdEtaHit.hh"+
+    Sets total CPU seconds used for production run.
+
+\item[Examples]
+{\footnotesize
+    StSmdEtaHit represents a hit in the $\eta$ shower-maximum-detector (SMD).
+//
+//  Evaluate and print DST run efficiencies.
+    \name{StSmdEtaHit} represents a hit in the $\eta$ shower-maximum-detector (SMD).
+    
+\item[Synopsis] 
+
+    StSmdEtaHit inherits all functionality from StEmcHit.
+    
+    see StEmcHit (sec.~\ref{sec:StEmcHit}).
+                 summary->numberOfEvents();
+   double effT = (double)summary->cpuSeconds()/
+                 (summary->stopTime() - summary->start(Time));
+    
+   os << "Percentage of processed events: " << effN << endl;
+    StSmdEtaHit is derived directly from StEmcHit.
+    The hits are kept in an instance of StSmdEtaHitCollection
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Create an instance of StSmdEtaHit with identifier \args{i},
+    energy deposition \args{E} and position \args{phi}, \args{eta}.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StSmdEtaHit}
+    
+\label{sec:StSmdEtaHit}
+\begin{Entry}
+\item[Summary]
+    \name{StSmdEtaHit} represents a hit in the $\eta$
+    shower-maximum-detector (SMD).
+
+\item[Synopsis]
+    \verb+#include "StSmdEtaHit.hh"+\\
+    \verb+class StSmdEtaHit;+\\
+
+\item[Description]
+    \name{StSmdEtaHit} inherits all functionality from \name{StEmcHit}.
+    For a complete description of the inherited member functions
+\subsection{StSmdPhiHit \index{StSmdPhiHit|textbf}} \index{SMD hit}
+}%footnotesize    
+
+\item[Related Classes]
+    \name{StSmdEtaHit} is derived directly from \name{StEmcHit}.
+    The hits are kept in an instance of \name{StSmdEtaHitCollection}
+    \verb+#include "StSmdPhiHit.hh"+
+    \index{StSmdEtaHitCollection}
+
+\item[Public\\ Constructors]
+    \verb+StSmdEtaHit(int i, float E, float phi, float eta);+ \\
+    StSmdPhiHit represents a hit in the $\phi$ shower-maximum-detector (SMD).
+    energy deposition \name{E} and position \name{phi}, \name{eta}.
+
+    \name{StSmdPhiHit} represents a hit in the $\phi$ shower-maximum-detector (SMD).
+    
+\item[Synopsis] 
+//  Count the hits above given threshold minEnergy
+    StSmdPhiHit inherits all functionality from StEmcHit.
+    
+    see StEmcHit (sec.~\ref{sec:StEmcHit}).
+   StSmdEtaHitCollection* hits = event->emcTowerHitCollection();
+   double counter = 0;
+   StSmdEtaHitIterator iter;
+    
+       if (iter->energy() > minEnergy) counter++;
+    StSmdPhiHit is derived directly from StEmcHit.
+    The hits are kept in an instance of StSmdPhiHitCollection
+\end{verbatim}
+}%footnotesize
+
+\item[Examples]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Create an instance of StSmdPhiHit with identifier \args{i},
+    energy deposition \args{E} and position \args{phi}, \args{eta}.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StSmdPhiHit}
+    
+\label{sec:StSmdPhiHit}
+\begin{Entry}
+\item[Summary]
+    \name{StSmdPhiHit} represents a hit in the $\phi$
+    shower-maximum-detector (SMD).
+
+\item[Synopsis]
+    \verb+#include "StSmdPhiHit.hh"+\\
+    \verb+class StSmdPhiHit;+\\
 
 }%footnotesize
     StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
@@ -733,6 +971,29 @@ void printOneDedx(StDedx *dedx, const char* name)
 \item[Public Member\\ Functions]
     \verb+short id() const;+ \\
     Unique segment ID.
+
+    \verb+float adc() const;+ \\
+    ADC value.
+}%footnotesize    
+    
+StEvent.hh
+\item[Persistence]
+StSvtHit.hh
+StHit.hh
+StTpcHit.hh
+
+\item[Related Classes]
+    None
+StSvtHit.hh
+StTpcHit.hh
+
+StRun.hh
+StGlobalTrack.hh
+StV0Vertex.hh
+StMwcSector.hh
+StVertex.hh
+%%%%%%%%%%%%%%%%%%%
+StL0Trigger.hh
 StRunSummary.hh
 StVpdCounter.hh
 
