@@ -128,10 +128,11 @@ public:
                          Float_t *upar, Int_t np); 
    virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
 
-
+   static TGeant3 *Geant3(){ return fgGeant;}
    static TGeant3 *fgGeant; 
 
    virtual  Float_t* Gufld(Float_t *x, Float_t *bf);  
+   virtual  Bool_t   Agsens(const Char_t *name);
    ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
     TGeant3 *geant; 
 }; 
@@ -492,6 +493,7 @@ EXTERN Float_t *z_q;
 # define dzddiv  dzddiv_
 # define gfrotm  gfrotm_
 # define gfxzrm  gfxzrm_
+# define agsens  agsens_ 
 
 #ifndef Geant3Dummy
 # define type_of_call 
@@ -569,7 +571,7 @@ EXTERN Float_t *z_q;
 # define dzddiv  DZDDIV
 # define gfrotm  GFROTM
 # define gfxzrm  GFXZRM
-
+# define agsens  AGSENS
 
 #ifndef Geant3Dummy
  
@@ -649,6 +651,7 @@ extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
 extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
 extern "C" void type_of_call gfrotm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
 extern "C" void type_of_call gfxzrm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+extern "C" Int_t type_of_call agsens   (DEFCHARD DEFCHARL);
  
 #else  /* Geant3Dummy */
 #endif

@@ -703,4 +703,10 @@ Float_t* TGeant3::Gufld(Float_t *x, Float_t *bf)
 } 
 #endif /* Geant3Dummy */
  
- 
+//___________________________________________ 
+Bool_t  TGeant3::Agsens(const Char_t *name)
+{ 
+  // defines whether the node "name" is "sensible"
+   return Bool_t(agsens(PASSCHARD(name) PASSCHARL(name)));
+} 
+  
