@@ -67,27 +67,31 @@ public:
   int swapHerb2bytes(short unsigned int *data,int number);
   int swapHerb4bytes(unsigned int  *data,int number);
   int swapHerb4bytes(unsigned long *data,int number);
-  int HerbSwap(); //!
-  int HerbSwap2000(); //!
-  int HerbSwap2003(char*); //!
+  int HerbSwap();           //!
+  int HerbSwap2000();       //!
+  int HerbSwap2003(char*);  //!
   // void PrintAllTheData(FILE *ff);
   // void PrintDataCompact(FILE *ff);
   char *PrintHelp(char*,int);
 };
+
 class TRG_Reader {
   friend class EventReader;
 public:
   TRG_Reader(EventReader *er, Bank_TRGP *pTRGP);
   ~TRG_Reader(){}; 
-  Bank_TRGD *pBankTRGD; // Making this public saves 2 large layers of accessor functions.
-  int YearOfData(char *); //!
+  Bank_TRGD *pBankTRGD;     // Making this public saves 2 large layers of accessor functions.
+  int YearOfData(char *);   //!
+  int S_mode;               //!
+
 protected:
-  EventReader *ercpy;    // copy of EventReader pointer
-  Bank_TRGP *pBankTRGP;  // Bank Pointers
+  EventReader *ercpy;       // copy of EventReader pointer
+  Bank_TRGP *pBankTRGP;     // Bank Pointers
+
 private:
   void dumpWordsToScreenInHexAndExit(int); //!
-  void SanityCheck(); //!
-  void SanityCheck2000(); //!
-  void SanityCheck2003(char*); //!
+  void SanityCheck(int);                   //!
+  void SanityCheck2000(int);               //!
+  void SanityCheck2003(char*, int);        //!
 };
 TRG_Reader *getTRGReader(EventReader *er);
