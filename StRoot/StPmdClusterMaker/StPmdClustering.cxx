@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.18 2004/08/01 06:41:31 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.19 2004/09/03 14:31:22 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.19  2004/09/03 14:31:22  subhasis
+ * memset, memcpy used (Gene's suggesstion and order() changed
+ *
  * Revision 1.18  2004/08/01 06:41:31  subhasis
  * nclust limit put to <200
  *
@@ -140,13 +143,7 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 	{   //! loop for supermodule
 	  
 	  //!  id has to be 1 to 12, not 0 to 11
-	  for(Int_t j=0;j<96;j++)
-	    {  //for Column
-	      for(Int_t k=0;k<72;k++)
-		{ //for Row
-		  d1[j][k]=0;  //! Initialize edep 
-		}
-	    }
+	memset(d1[0],0,96*72*sizeof(Double_t));
 	  
 	  StPmdModule * pmd_mod=mdet->module(id);  //! getting module(id)
 	  
@@ -251,35 +248,36 @@ void StPmdClustering::printclust(Int_t i,Int_t m, StPmdCluster* pclust)
 //! order the data according to edep ( largest to smallest )
 void StPmdClustering::order(Int_t idet)
 {
-  // arranging in descending order. Simple sort used. The array itself 
-  // is not sorted but an index array is sorted. 
-  Double_t d[nmx], dd[nmx], adum;
-  Int_t i, j, i1, i2, iord1[nmx], itst, idum;
-  for(i1=0; i1 < 96; i1++){
-    for(i2=0; i2 < 72; i2++){
-      i=i1+i2*96;
-      
-      d[i]=d1[i1][i2];iord1[i]=i; dd[i]=d[i];
-    }
-  }
-  
-  for(j=1; j < nmx; j++){
-    
-    itst=0; adum=d[j]; idum=iord1[j];
-    for(i1=0; i1 < j ; i1++){
-      if(adum > d[i1] && itst == 0){
-        itst=1;
-        for(i2=j-1; i2 >= i1 ; i2--){   
-          d[i2+1]=d[i2]; iord1[i2+1]=iord1[i2];
-        }
-        d[i1]=adum; iord1[i1]=idum;
-      }
-    }
-  }
-  for(i=0; i < nmx; i++){
-    j=iord1[i]; i2=j/96; i1=j-i2*96; iord[0][i]=i1; iord[1][i]=i2;
-  }
-}
+  Double_t d[nmx];
+  Int_t curl=0;
+  Int_t curh=nmx-1;
+      for (int i1=0; i1<96; i1++) {
+        for(int i2=0; i2 < 72; i2++){
+                          if (d1[i1][i2] > 0.) {
+        // Insert where it belongs in descending order
+                        int j = 0;
+           while ((j<curl) && (d[j]>=d1[i1][i2])) j++; // Find insertion point
+              for (int k=curl; k>j; k--) { // Shift other points forward
+                   int l = k-1;
+                   d[k] = d[l];
+                  iord[0][k] = iord[0][l];
+                  iord[1][k] = iord[1][l];
+                }
+         // Insert data
+                 d[j] = d1[i1][i2];
+                iord[0][j] = i1;
+                iord[1][j] = i2;
+                curl++;
+		      } else {
+               // Insert at back end
+                iord[0][curh] = i1;
+	         iord[1][curh] = i2;
+		curh--;
+               }
+                }
+                }
+	}
+
 //---------------------------------------------
 
 //! arrange cells in each supercluster
@@ -502,13 +500,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 		}
 	    }
 	  // End of finding l,ocal maxima	
-	   for(Int_t icell=0; icell<200; icell++)
-	        {
-	          for(Int_t jcell=0; jcell<2000; jcell++)
-	                {
-	               cell_frac[icell][jcell]=0.;
-	                }
-	        }
+	memset(cell_frac[0],0,200*2000*sizeof(Float_t));
 	   //
 	  
 	  Int_t censtat=CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
@@ -526,12 +518,9 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
               take_cell[jk]=-999;
                  }
 
-           for(Int_t jk=0; jk<2000; jk++)
-            {
-                  temp[jk]=0.;
-             }
+	memset(temp,0,2000*sizeof(Float_t));
 
-          for(Int_t pb=0;pb<=ig;pb++)
+	for(Int_t pb=0;pb<=ig;pb++)
                {
 										            for(Int_t jk=0; jk<=ncl[i]; jk++)
 											        {
@@ -634,20 +623,11 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
       yy[i] = *(&y+i);
       zz[i] = *(&z+i);
     }
-  for(i=0;i<200;i++)
-    {
-    for(j=0;j<2000;j++)
-      {
-	clust_cell[i][j] = 0.;
-	cell_frac[i][j]  = 0.;	
-      }
-    }
-  for(i=0;i<2000;i++){
-    for(j=0;j<10;j++){
-      cluster[i][j]=0;
-    }
-  }
-  
+
+memset(clust_cell[0],0,200*2000*sizeof(Double_t));
+memset(cell_frac[0],0,200*2000*sizeof(Float_t));
+memset(cluster[0],0,2000*10*sizeof(Int_t));
+
   
   //If there is more than one local maxima
   if(nclust>0)
@@ -717,13 +697,10 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
       
 
       //Compute the cluster strength.
+memset(str,0,2000*sizeof(Double_t));
+memset(str1,0,2000*sizeof(Double_t));
       
-      for(i=0;i<=nclust;i++){
-	str[i] = 0.;
-	str1[i] = 0.;
-      }
-      
-      for(i=0;i<=ncell;i++){
+      for(Int_t i=0;i<=ncell;i++){
 	if(cluster[i][0]!=0){
 	  i1 = cluster[i][0];
 	  for(j=1;j<=i1;j++){
@@ -873,11 +850,7 @@ Int_t StPmdClustering::crclust(Double_t ave, Double_t cutoff, Int_t nmx1, Int_t 
    static Int_t neibx[6]={1,0,-1,-1,0,1}, neiby[6]={0,1,1,0,-1,-1};
 
 
-   for (j=0; j < 96; j++){
-     for(k=0; k < 72; k++){
-       d[j][k]=d1[j][k];
-     }
-   }
+   memcpy(d,d1,96*72*sizeof(Double_t));
    
    for (j=0; j < 96; j++){
      for(k=0; k < 72; k++){
