@@ -6,6 +6,7 @@
  *      
  *
  *   change log
+ * 02-Jul-99 MJL add navigation code to get to RICHP bank
  *
  ***************************************************************************
  *  
@@ -14,17 +15,23 @@
 #ifndef RICH_READER_HH
 #define RICH_READER_HH
 #include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 
 // Detector Reader Virtual Class
 
-struct  Bank_RICHP;
+
+struct  Bank_RICHP: public Bank
+{
+  Pointer dummy[6];   //**** PLACE HOLDER for real bank definition ******
+  // look at TPC/TPCV2P0.cxx, TPCV2P0.hh for further details
+};
 
 class RICH_Reader : public DetectorReader
 {
   friend class EventReader;
 
 public:
-  RICH_Reader *getRICHReader(int sector){};
+  RICH_Reader *getRICHReader(int sector){cout <<"DUMMY implementation"<<endl;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){};
   ADCRawReader *getADCRawReader(int sector){};
   PedestalReader *getPedestalReader(int sector){};
@@ -32,7 +39,34 @@ public:
   GainReader *getGainReader(int sector){};
   CPPReader *getCPPReader(int sector){};
   BadChannelReader *getBadChannelReader(int sector){};
-  RICH_Reader(EventReader *er){};
+  RICH_Reader(EventReader *er){
+    cout <<"DUMMY implementation"<<endl;
+    ercpy = er; // squirrel away pointer eventreader for our friends
+  // Fix up DATAP
+    pBankDATAP = (Bank_DATAP *)er->getDATAP();
+
+    if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
+    if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
+    pBankDATAP->header.CRC = 0;
+
+    // position independent pointers to lower banks, variable DATAP length
+    int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
+    Pointer *ptr = &pBankDATAP->RICH;
+    for (int i=0; i<len; i++, ptr++) {
+      if (ptr->length==0) continue;//invalid entry
+      pBankRICHP = (Bank_RICHP *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
+      if(!strncmp(pBankRICHP->header.BankType,"RICHP",4)) break;
+    }
+    if(strncmp(pBankRICHP->header.BankType,"RICHP",4)) {
+      printf("detector RICH not found in DATAP\n");
+      exit(0);
+    }
+
+    if (!pBankRICHP->test_CRC()) ERROR(ERR_CRC);
+    if (pBankRICHP->swap() < 0) ERROR(ERR_SWAP);
+    pBankRICHP->header.CRC = 0;
+  };
+
   ~RICH_Reader(){}; 
 
   int MemUsed(){};
