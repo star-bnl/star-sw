@@ -10,7 +10,7 @@
    /*******************  Row struct *******************/
    struct fpt_fptrack {    
        long      flag;        /* status flag */
-                              /* 0=from fppoints, 1=from gepoints */
+                              /* 1=primary track, 2=secondary track */
        long      hitid[10];   /* id's of all points on track */
        long      nrec;        /* number of points on track */
        long      nfit;        /* number of points in momentum fit */
@@ -24,4 +24,4 @@
        float     curvature;   /* Track curvature (1/cm) */
     };
 
-/*  Last mod. for fpt_fptrack: $Date: 1999/10/19 15:15:31 $ */
+/*  Last mod. for fpt_fptrack: $Date: 1999/11/12 10:34:39 $ */
