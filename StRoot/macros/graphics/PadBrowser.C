@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.3 1999/06/24 02:13:59 fine Exp $
+// $Id: PadBrowser.C,v 1.4 1999/06/25 18:34:00 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.4  1999/06/25 18:34:00  fine
+// MakeDoc was commented out
+//
 // Revision 1.3  1999/06/24 02:13:59  fine
 // New buttons and bug fixes
 //
@@ -91,7 +94,7 @@ void PadBrowser(const Int_t Nevents=1,Char_t *infile=0)
   chain = new StPadDisplayMaker("PadMonitor");
   chain->SetFileName(iNfile);
   chain->SetDebug();
-  chain->MakeDoc();
+//  chain->MakeDoc();
   chain->PrintInfo();
 
   // Init the chain and all its makers
