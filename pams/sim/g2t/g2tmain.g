@@ -131,14 +131,15 @@ created   22 april 98
 *     map detm family banks:
       o    = CHAR(0)
       Cdir = gttc_rdir(1)//gttc_rdir(2)//gttc_rdir(3)
-      Call AGSTRUT(' ',Cdir)
-
-      check NVERTX>0
+      Call AGSTRUT (' ',Cdir)
 *
       Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
+      ld   = Lenocc(cdir);  edir = Cdir(1:ld)//o
+      Call TDM_CLEAR_ALL(edir)
+
+      check NVERTX>0
 *     map hepe_gent particle table:
       call agstrut('/evnt/gene/gent@HEPE',Cdir)
-      ld   = Lenocc(cdir);  edir = Cdir(1:ld)//o
  
       i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
