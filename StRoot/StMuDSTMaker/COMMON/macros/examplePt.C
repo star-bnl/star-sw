@@ -29,30 +29,33 @@ char* outFile="test.root") {
    db->addDb("/star/u/laue/afsWork/P02gc.db");
    db->addDb("/star/u/laue/afsWork/P02gd.db");
 
-   int counter=0;
-   int iret=0;
+  int counter=0;
+  int iret=0;
   StMuTimer timer;
   timer.start();
-   StMuDebug::setLevel(1);  
-  maker = new StMuDstMaker(0,0,dir,file,filter,5);   // set up maker in read mode
+  StMuDebug::setLevel(0);  
+  maker = new StMuDstMaker(0,0,dir,file,filter,10);   // set up maker in read mode
   cout << "time to load chain: " << timer.elapsedTime() <<endl;
-   StMuDebug::setLevel(0);  
+  StMuDebug::setLevel(0);  
   timer.reset();
   timer.start();
   cout << maker->chain()->GetEntries() << " events in chain" << endl;
+  TMemStat memStat("examplePt");
   while ( !(iret=maker->Make()) ) {
     //    iret = maker->Make();  // read an event 
     StMuDst* mu = maker->muDst();
-    cout << mu->event()->l0Trigger()->triggerWord() << "   ";
     int n;
     n= mu->globalTracks()->GetEntries();
-    //cout << n << " global tracks " << endl; 
     for (int l=0; l<n; l++) globalPt.Fill( mu->globalTracks(l)->pt() );   
     n= mu->primaryTracks()->GetEntries();
     for (int l=0; l<n; l++) primaryPt.Fill( mu->primaryTracks(l)->pt() );   
     n= mu->l3Tracks()->GetEntries();
     for (int l=0; l<n; l++) l3Pt.Fill( mu->l3Tracks(l)->pt() );   
-    if (maker->chain()->GetEntries()) cout << counter++/maker->chain()->GetEntries() << " % done" << endl;
+    if (maker->chain()->GetEntries()) cout << "event# " << counter << " " << counter++/maker->chain()->GetEntries() << "%";
+    cout << " used= "<< memStat.Used();
+    cout << " size= "<< memStat.ProgSize();
+    cout << endl;
+    
   }
   cout << endl;
   if (counter) cout << "time/event " << timer.elapsedTime()/counter <<endl;
