@@ -1,14 +1,20 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.3 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 2.2  2000/09/29 17:55:51  horsley
- *  fixed bug in Minimization routine, included StMagF stuff (commented out)
- *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *  Revision 2.3  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
  *
+ *  typo corrected.
+ *
+ *  Revision 2.4  2000/11/01 17:40:49  lasiuk
+ *  add const to access member functions
  *
  *  Revision 2.3  2000/10/19 01:13:23  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
@@ -121,7 +127,7 @@ void StRichRingCalculator::setMonteCarloSwitch(bool set) {
 
 StRichRingPoint* StRichRingCalculator::getRing(StRichRingDefinition ringType) {
   if (ringType==eInnerRing)  return  mInnerRing;
-  return  (closestInnerRingPoint - closestOuterRingPoint).mag();
+  if (ringType==eOuterRing)  return  mOuterRing;
   if (ringType==eMeanRing)   return  mMeanRing;
   return 0;
 

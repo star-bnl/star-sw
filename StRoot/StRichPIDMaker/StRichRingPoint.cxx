@@ -1,13 +1,19 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.3 2000/10/01 00:57:18 gans Exp $
+ * $Id: StRichRingPoint.cxx,v 2.4 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 2.3  2000/10/01 00:57:18  gans
- *  Added #include <values.h> neeaded for MAXFLOAT
+ *  Revision 2.4  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
  *
+ *  Revision 2.4  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
  *  for individual photons, modified minimization routine to correct boundary
  *  problems
  *
@@ -157,6 +163,9 @@ StRichTrack* StRichRingPoint::getTrack() {
 void StRichRingPoint::setPoint(StThreeVectorF& sPoint) {
   minPoint = sPoint;
 }
+
+bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
+
   // initailize point
   point = mRefractedAway;
 
@@ -234,6 +243,7 @@ void StRichRingPoint::setPoint(StThreeVectorF& sPoint) {
 			   + (mDepthRad-mDepthRad*mMeanDepthRad)*mTanRAngle*cosPsiPrime);
 
     mPropagatedLightRay.setY((mDepthRad*mMeanDepthRad)*mTrackTanTheta*mTrackSinPhi 
+			   + (mDepthRad-mMeanDepthRad)*mTanRAngle*sinPsiPrime);
 
     mPropagatedLightRay.setZ(0.0);
 
@@ -292,7 +302,7 @@ double StRichRingPoint::rotatedFunction(double psi) {
   tempPoint = tempPoint - mImpactPoint;
   StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
 			      mTrackSinPhi*tempPoint.y(),
-  return (rotatedPoint - minPoint).mag(); 
+			      
 			     -mTrackSinPhi*tempPoint.x() + 
 			      mTrackCosPhi*tempPoint.y(),
 			      

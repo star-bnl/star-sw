@@ -1,10 +1,16 @@
 /**********************************************************
- * $Id: StRichRingHit.cxx,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichRingHit.cxx,v 2.2 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingHit.cxx,v $
+ *  Revision 2.2  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
+ *
  *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
@@ -27,10 +33,12 @@
 #include "StRichHit.h"
 
 
-StRichRingHit::StRichRingHit(StRichHit* hit, double angle, double dist, double radPath, double quaPath) {
+StRichRingHit::StRichRingHit(StRichHit* hit, double angle, double dist, double sigma, 
+			     double radPath, double quaPath) {
   mHit = hit;
   mAngle = angle;
   mDist = dist;
+  mNSigma = sigma;
   mPathInRadiator = radPath;
   mPathInQuartz = quaPath;
 }
@@ -49,6 +57,12 @@ double StRichRingHit::getAngle() {
 double StRichRingHit::getDist() {
   return mDist;
 }
+
+
+double StRichRingHit::getNSigma() {
+  return mNSigma;
+}
+
 
 
 double StRichRingHit::getMeanPathInQuartz() {

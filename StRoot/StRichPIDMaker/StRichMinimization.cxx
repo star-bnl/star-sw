@@ -1,14 +1,20 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.3 2000/10/19 01:13:22 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 2.2  2000/09/29 17:55:51  horsley
- *  fixed bug in Minimization routine, included StMagF stuff (commented out)
- *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *  Revision 2.3  2000/10/19 01:13:22  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
  *
+ *  Revision 2.4  2000/10/19 18:11:09  lasiuk
+ *  definition of degree
+ *
+ *  Revision 2.3  2000/10/19 01:13:22  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
  *  added normal distance sigma cut on hits, quartz and radiator pathlengths
  *  for individual photons, modified minimization routine to correct boundary
@@ -75,35 +81,92 @@ StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
   StThreeVectorF tempPoint = point - t->getImpactPoint();
 
   StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-  double returnPsia,returnPsib,returnPsic;
+			      mTrackSinPhi*tempPoint.y(),
+			      
+			     -mTrackSinPhi*tempPoint.x() + 
+			      mTrackCosPhi*tempPoint.y(),
+			      
 			      0.0);  
-  double minDistanceb = brent(0.0,-M_PI/2.0,-M_PI,&returnPsib);
-  double minDistancec = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsic);
-  }
-  if (minDistancea<minDistanceb) {
-    returnPsi=returnPsia;
-    minDistance=minDistancea;
-  }
-  else  {
-    minDistance=minDistanceb;
-    returnPsi=returnPsib;
-  }
+  
+  ringPoint->setPoint(rotatedPoint);
 
-  if (minDistancec<minDistance) {
-    returnPsi=returnPsic;
-    minDistance=minDistancec;
+
+  //
+  // call to Numerical Recipes minimization routine here
+  //
+  double returnPsia,returnPsib;
+  double minDistancea = brent(0.0,M_PI/2.0,M_PI,&returnPsia);
+  double minDistanceb = brent(-M_PI,-M_PI/2.0,0.0,&returnPsib);
+  if (minDistancea<minDistanceb) {returnPsi = returnPsia;}
+  else  { returnPsi = returnPsib;}
+
+  //
+  // check if minimization routine hits one of the boundary values
+  //
+  if ((returnPsi/degree>-0.05 && returnPsi/degree<0.05) ) {
+    double returnPsia,returnPsib;
+    double minDistancea = brent(M_PI/2.,0.,-M_PI/2.,&returnPsia);
+    double minDistanceb = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsib);
+    if (minDistancea<minDistanceb) {returnPsi = returnPsia; }
+    else  {returnPsi = returnPsib;} 
+  } 
+
+  if (returnPsi/degree>-90.05 && returnPsi/degree<-89.95) {
+    double returnPsia,returnPsib;
+    double minDistancea = brent(M_PI/2.,0.,-M_PI/2.,&returnPsia);
+    double minDistanceb = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsib);
+    if (minDistancea<minDistanceb) {returnPsi = returnPsia;}
+    else  {returnPsi = returnPsib;} 
   }
-    
-  status              = ringPoint->getPoint(returnPsi,returnThisPoint);
-  mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
-  mMeanPathInQuartz   = ringPoint->getMeanPathInQuartz();
-  return returnThisPoint;
+ 
+ if (returnPsi/degree>-180.05 && returnPsi/degree<-179.95) {
+    double returnPsia,returnPsib;
+    double minDistancea = brent(M_PI/2.,0.,-M_PI/2.,&returnPsia);
+    double minDistanceb = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsib);
+    if (minDistancea<minDistanceb) {returnPsi = returnPsia;}
+    else  {returnPsi = returnPsib;} 
+ }
+  
+ if (returnPsi/degree>89.95 && returnPsi/degree<90.05) {
+    double returnPsia,returnPsib,returnPsic;
+    double minDistancea = brent(M_PI/2.,0.,-M_PI/2.,&returnPsia);
+    double minDistanceb = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsib);
+    double minDistancec = brent(-2.0*M_PI,-M_PI,0,&returnPsic);
+    double minDistance=100;
+ 
+    if (minDistancea<minDistanceb) {
+      returnPsi = returnPsia;
+      minDistance=minDistancea;
+    }
+    else  {
+      returnPsi = returnPsib;
+      minDistance=minDistanceb;
+    } 
+    if (minDistancec<minDistance) {
+      returnPsi = returnPsic;
+      minDistance=minDistancec;
+    }
+ }
+ 
+ if (returnPsi/degree>179.95 && returnPsi/degree<180.05) {
+   double returnPsia,returnPsib;
+   double minDistancea = brent(M_PI/2.,0.,-M_PI/2.,&returnPsia);
+   double minDistanceb = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsib);
+   if (minDistancea<minDistanceb) {returnPsi = returnPsia;}
+   else  {returnPsi = returnPsib;}  
+ }
+ 
+ //
+ // angle should be between -M_PI and +M_PI
  //
  if (returnPsi>M_PI)  {returnPsi = returnPsi - 2.0*M_PI;}
  if (returnPsi<-M_PI) {returnPsi = returnPsi + 2.0*M_PI;}
 
  status              = ringPoint->getPoint(returnPsi,returnThisPoint);
  mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
+ mMeanPathInQuartz   = ringPoint->getMeanPathInQuartz();
+ 
+ return returnThisPoint;
 }
 
 

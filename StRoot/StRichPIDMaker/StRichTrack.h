@@ -1,12 +1,18 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.3 2000/10/03 19:26:02 horsley Exp $
+ * $Id: StRichTrack.h,v 2.4 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
- *  Revision 2.3  2000/10/03 19:26:02  horsley
- *  fixed error in StRichTrack correct member function, now returns bool.
+ *  Revision 2.4  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
+ *
+ *  Revision 2.6  2000/11/07 14:13:27  lasiuk
+ *  add possibility of .4*px/pz correction to the track extrapolation
  *
  *  Revision 2.5  2000/11/01 17:43:13  lasiuk
  *  default arguments initialization in c'tor.  Addition of init() member
@@ -89,7 +95,7 @@ class StRichTrack {
   virtual ~StRichTrack();
   virtual StTrack*         getStTrack();
   virtual StRichHit*       getAssociatedMIP();
-  virtual void  addHit(StRichHit*, double, double, double, double, StParticleDefinition* );
+  virtual void             assignMIP(const StSPtrVecRichHit*);  
   virtual StRichPidTraits* getPidTrait();  
   virtual void             addPidTrait(StRichPidTraits* ); 
 #ifdef RICH_WITH_L3_TRACKS
