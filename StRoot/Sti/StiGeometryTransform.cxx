@@ -221,13 +221,12 @@ double StiGeometryTransform::phiForEastSector(int iSector, int nSectors) const
 
 int StiGeometryTransform::westSectorForPhi(double phi, int nSectors) const
 {
-    
     int offset = nSectors/4;
     double deltaPhi = 2.*M_PI/nSectors;  
     
     int iSector = 0;
-    while(phi > deltaPhi/2.){ phi -= deltaPhi; iSector++; }
-    while(phi < deltaPhi/2.){ phi += deltaPhi; iSector--; }
+    while(phi >  deltaPhi/2.){ phi -= deltaPhi; iSector++; }
+    while(phi < -deltaPhi/2.){ phi += deltaPhi; iSector--; }
     
     iSector = offset - iSector;
     if(iSector<1){ iSector += nSectors; }
@@ -243,8 +242,8 @@ int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors) const
     double deltaPhi = 2.*M_PI/nSectors;  
     
     int iSector = 0;
-    while(phi > deltaPhi/2.){ phi -= deltaPhi; iSector++; }
-    while(phi < deltaPhi/2.){ phi += deltaPhi; iSector--; }
+    while(phi >  deltaPhi/2.){ phi -= deltaPhi; iSector++; }
+    while(phi < -deltaPhi/2.){ phi += deltaPhi; iSector--; }
     
     iSector = iSector + (2*nSectors + offset);
     if(iSector>2*nSectors){ iSector -= nSectors; }
@@ -284,25 +283,31 @@ int StiGeometryTransform::padrowForTpcCoords(const StThreeVector<double> &vec) c
     return tpcTransform->rowFromLocal( tpcTransform->rotateToLocal(vec, sector));
 }
 
-// finds nearest real ladder (as above, could be bogus [electronics instead  of wafers]) and layer.
-int StiGeometryTransform::layerForSvgCoords(const StThreeVector<double> &vec) const
+int StiGeometryTransform::barrelForSvgCoords(const StThreeVector<double> &vec) const
 {
-    double minDeltaR = 200.;
-    int minLayer = 0;
-    for(int layer = 0; layer < 7; layer++){
-	if( fabs(svgConfig.layer_radius[layer] - vec.perp()) < minDeltaR){
-	    minDeltaR = fabs(svgConfig.layer_radius[layer] - vec.perp());
-	    minLayer = layer;
-	}
+  double minDeltaR = 200.;
+  int minBarrel = 0;
+  for(int barrel = 1; barrel <= 4; barrel++){
+    double dBarrelRadius = svgConfig.layer_radius[2*(barrel - 1)];
+    if(barrel<4){
+      dBarrelRadius += svgConfig.layer_radius[2*barrel - 1];
+      dBarrelRadius /= 2;
     }
-    return minLayer + 1;
+    if( fabs(dBarrelRadius - vec.perp()) < minDeltaR){
+      minDeltaR = fabs(dBarrelRadius - vec.perp());
+      minBarrel = barrel;
+    }
+  }
+  return minBarrel;
 }
 
 int StiGeometryTransform::ladderForSvgCoords(const StThreeVector<double> &vec) const
 {
-    int layer = layerForSvgCoords(vec);
-    int nLadders = svgConfig.n_ladder[layer - 1];    
-    return westSectorForPhi(vec.phi(), nLadders);
+    int barrel = barrelForSvgCoords(vec);
+    int nLadders = svgConfig.n_ladder[2*(barrel - 1)];
+    if(barrel<4){ nLadders *= 2; }
+    int iSector = westSectorForPhi(vec.phi(), nLadders);
+    return iSector;
 }
     
 double StiGeometryTransform::phiForSector(int iSector, int nSectors) const
@@ -415,11 +420,20 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   //We'll temporarily keep
   stihit->setStHit(const_cast<StSvtHit*>(svthit));
 
+  // There is some problem with StSvtHit::ladder() and StSvtHit::layer(),
+  // so we'll calculate those here.
+  StThreeVector<double> position(svthit->position().x(),
+                                 svthit->position().y(),
+                                 svthit->position().z());
+  int iLadder = ladderForSvgCoords(position);
+  int iBarrel = barrelForSvgCoords(position);
+  int iLayer = 2*iBarrel - 1;
+  if(iLadder%2==1){ iLayer++; }
+
   // first the position & ref angle
-  int iLadder = svthit->ladder();
-  int nLadders = svgConfig.n_ladder[svthit->layer() - 1]*2; // 0-indexed
+  int nLadders = svgConfig.n_ladder[iLayer - 1]*2; // 0-indexed
   double dRefAngle = phiForSector( iLadder, nLadders );
-  double dPosition = mpadrowradiusmap[svthit->layer()]; // this is 1-indexed
+  double dPosition = mpadrowradiusmap[iLayer]; // this is 1-indexed
   stihit->setRefangle( dRefAngle );
   stihit->setPosition( dPosition );
 
@@ -440,12 +454,12 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   
   // find detector for this hit
   char szBuf[100];
-  sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
-	  (int) (svthit->ladder() + 1)/2);
+
+  sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", iLayer, iLadder);
   StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
   if (!layer) {
-      *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no detector for layer "<<svthit->layer()<<"\tladder: "<<svthit->ladder()<<"\tABORT"<<endl;
-      return;
+    *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no detector for layer "<<iLayer<<"\tladder: "<<iLadder<<"\tABORT"<<endl;
+    return;
   }
   
   stihit->setDetector( layer );
@@ -461,8 +475,12 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
   stihit->setStHit(const_cast<StSsdHit*>(ssdhit));
 
   // first the position & ref angle
+  StThreeVector<double> position(ssdhit->position().x(),
+                                 ssdhit->position().y(),
+                                 ssdhit->position().z());
   int nLadders = svgConfig.n_ladder[6];  // ssd is svg layer 7 (0-indexed)
-  double dRefAngle = phiForSector( ssdhit->ladder(), nLadders );
+  int iLadder = ladderForSvgCoords(position);
+  double dRefAngle = phiForSector( iLadder, nLadders );
   double dPosition = mpadrowradiusmap[7]; // this is 1-indexed
   stihit->setRefangle( dRefAngle );
   stihit->setPosition( dPosition );
