@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.128 2000/08/06 19:10:15 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.129 2000/08/15 23:57:12 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -37,6 +37,11 @@ Bfc_st BFC[] = {
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Physics"     ,"","","trg"                                        ,"","","Select Physics events",kFALSE},
+  {"LaserTest"   ,"","","trg"                                          ,"","","Select Laser events",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
@@ -50,7 +55,7 @@ Bfc_st BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
-  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,trg,Cdst,Kalman,tags,Tree,evout","",""
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -144,7 +149,7 @@ Bfc_st BFC[] = {
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE}, 
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
-  {"trg"         ,"trg","l0Chain","trg_T,db"               ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"tpc"       ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"     ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"         ,"tpc_raw","","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
@@ -153,7 +158,7 @@ Bfc_st BFC[] = {
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
-  {"laser"       ,"tpc_tracks","tpcChain","tdaq,tpc,-tpt,-PreVtx"
+  {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -402,6 +407,7 @@ Int_t StBFChain::Instantiate()
 	    if (mk) strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 	  }
 	}
+	// special maker options 
 	if (mk) {
 	  if (maker == "StTpcDbMaker") tpcDBMk = mk;
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
@@ -415,6 +421,12 @@ Int_t StBFChain::Instantiate()
 	    else                  mk->SetMode(0); // daq
 	  }
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); // Turn on alternative V0 method
+	  if (maker == "St_trg_Maker") {
+	    Int_t mode = 0;
+	    if (GetOption("Phyiscs"))   mode += 1;
+	    if (GetOption("LaserTest")) mode += 2;
+	    if (mode) mk->SetMode(mode);
+	  }
 	}
         else status = kStErr;
 	if (saveMk) saveMk->cd();
@@ -617,7 +629,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       }
     }
     if (!fInFile && GetOption("Laser")) {
-	  fInFile = new TString("/star/data08/daq/2000/06/st_physics_1169006_raw_0001.daq");
+	  fInFile = new TString("/star/rcf/data08/daq/2000/08/st_physics_1225045_raw_0001.daq");
 	  printf ("Use default input file %s for Laser\n",fInFile->Data());
     }    
     if (!fInFile && GetOption("p00h")) {
