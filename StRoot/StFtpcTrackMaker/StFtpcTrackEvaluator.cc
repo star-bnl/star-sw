@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.5 2000/07/18 21:22:16 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.6 2000/11/10 18:38:24 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.6  2000/11/10 18:38:24  oldi
+// Short tracks are treated now.
+//
 // Revision 1.5  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -27,7 +30,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 18.07.2000
+//----------Last Modified: 17.10.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcTrackEvaluator.hh"
@@ -100,6 +103,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mNumLongTracks = NULL;
   mNumLongTrackClusters = NULL;
   mNumShortTracks = NULL;
+  mNumTooShortTracks = NULL;
   mNumShortTrackClusters = NULL;
 
   mVertex = NULL;
@@ -354,6 +358,7 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mNumLongTracks;
   delete mNumLongTrackClusters;
   delete mNumShortTracks;
+  delete mNumTooShortTracks;
   delete mNumShortTrackClusters;
 
   delete mNumGoodGeantPoints;
@@ -518,6 +523,7 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
   mLongTrackClusters = 0;
   mShortTracks = 0;
   mShortTrackClusters = 0;
+  mTooShortTracks = 0;
   mMaxClusters = 0;
 
   mGoodGeantPoints = 0;
@@ -573,11 +579,12 @@ void StFtpcTrackEvaluator::SetupHistos()
     mNumLongTracks = (TH1F *)mFile->Get("num_long");
     mNumLongTrackClusters  = (TH1F *)mFile->Get("num_longclus");
     mNumShortTracks = (TH1F *)mFile->Get("num_short");
+    mNumTooShortTracks = (TH1F *)mFile->Get("num_tooshort");
     mNumShortTrackClusters  = (TH1F *)mFile->Get("num_shortclus");
     
     mNumGoodGeantPoints = (TH1F *)mFile->Get("good_pointsg");
     mNumGoodFoundPoints = (TH1F *)mFile->Get("good_pointsf");
-    mGoodPointRatio = (TH1F *)mFile->Get("good_points_ratio");
+    mGoodPointRatio = (TH1F *)mFile->Get("good_point_ratio");
 
     mGHitsOnTrack = (TH1F *)mFile->Get("geant_hits");
     mFHitsOnTrack = (TH1F *)mFile->Get("found_hits");
@@ -686,7 +693,7 @@ void StFtpcTrackEvaluator::CreateHistos()
   mNumNonVertexTracks = new TH1F("num_nvtx", "Non main vertex tracks", 100, 0., 1000.);
   mNumGoodGTracks = new TH1F("num_goodg", "Good geant tracks", 100, 0., 1000.);
   mNumGoodFTracks = new TH1F("num_goodf", "Good found tracks", 100, 0., 1000.);
-  mGoodRatio = new TH1F("good_ratio", "Ratio of good found tracks to goof geant tracks", 100, 0., 2.);
+  mGoodRatio = new TH1F("good_ratio", "Ratio of good found tracks to good geant tracks", 100, 0., 2.);
   mContamination = new TH1F("contamination", "Ratio of loli good tracks to good main vertex tracks", 100, 0., 2.);
   mContaWoSplit = new TH1F("conta_wo_split", "Ratio of loli good minus split tracks to good main vertex tracks", 100, 0., 2.);
   mNumSplitTracks = new TH1F("num_split", "Split tracks", 100, 0., 300.);
@@ -694,6 +701,7 @@ void StFtpcTrackEvaluator::CreateHistos()
   mNumUncleanTracks = new TH1F("num_unclean", "Unclean tracks", 100, 0., 300.);
   mNumLongTracks = new TH1F("num_long", "Simulated tracks with more than 10 clusters", 100, 0., 300.);
   mNumShortTracks = new TH1F("num_short", "Simulated tracks with less than 5 clusters", 100, 0., 5000.);
+  mNumTooShortTracks = new TH1F("num_tooshort", "Tracks which should be longer", 100, 0., 1000.);
 
   mNumShortTrackClusters = new TH1F("num_shortclus", "Clusters on tracks with less than 5 clusters", 100, 0., 12000.);
   mNumLongTrackClusters = new TH1F("num_longclus", "Clusters on tracks with more than 10 clusters", 100, 0., 1600.);
@@ -827,6 +835,8 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mNumLongTrackClusters->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumShortTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumShortTracks->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mNumTooShortTracks->GetXaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mNumTooShortTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumShortTrackClusters->GetXaxis())->SetTitle("'F# of clusters");
   ((TAxis *)mNumShortTrackClusters->GetYaxis())->SetTitle("'F# of events");
 
@@ -1431,6 +1441,11 @@ void StFtpcTrackEvaluator::FillFCutHistos()
   for (Int_t t_counter = 0; t_counter < mFoundTracks->GetEntriesFast(); t_counter++) {
     StFtpcTrack *track = (StFtpcTrack*) mFoundTracks->At(t_counter);
     TObjArray   *hits  = (TObjArray*) track->GetHits();
+
+    // evaluate if the track could be longer
+    if (track->GetNumberOfPoints() < track->GetNMax()) {
+      mTooShortTracks++;
+    }
     
     if (hits->GetEntriesFast() >= 3) {
       
@@ -1518,6 +1533,7 @@ void StFtpcTrackEvaluator::WriteHistos()
   mNumLongTrackClusters->Write();
   mNumShortTracks->Write();
   mNumShortTrackClusters->Write();
+  mNumTooShortTracks->Write();
 
   mGHitsOnTrack->Write();
   mFHitsOnTrack->Write();
@@ -1817,11 +1833,12 @@ void StFtpcTrackEvaluator::FillEventHistos()
 {
   // Fill the histograms which are filled only once per event.
 
+
   mNumGeantHits->Fill(GetNumGeantHits());
   mNumGeantTracks->Fill(GetNumGeantTracks());
   mNumFoundHits->Fill(GetNumFoundHits());
   mNumFoundTracks->Fill(GetNumFoundTracks());
-  
+
   mNumFoundVertexTracks->Fill(GetNumFoundVertexTracks());
   mNumFoundNonVertexTracks->Fill(GetNumFoundNonVertexTracks());
 
@@ -1840,6 +1857,7 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumLongTrackClusters->Fill(GetNumLongTrackClusters());
   mNumShortTracks->Fill(GetNumShortTracks());
   mNumShortTrackClusters->Fill(GetNumShortTrackClusters());
+  mNumTooShortTracks->Fill(GetNumTooShortTracks());
   mNumGoodGeantPoints->Fill(GetNumGoodGeantPoints());
   mNumGoodFoundPoints->Fill(GetNumGoodFoundPoints());
   mGoodPointRatio->Fill((Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints());
@@ -1899,6 +1917,7 @@ void StFtpcTrackEvaluator::TrackerInfo()
   gMessMgr->Message("", "I", "OST") << "Bad found tracks looking good : " << GetNumLookLikeGoodTracks() << endm;
   gMessMgr->Message("", "I", "OST") << "Found electron tracks         : " << GetNumElectronTracks() << endm;
   gMessMgr->Message("", "I", "OST") << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Found too short tracks        : " << GetNumTooShortTracks() << endm;
   
   gMessMgr->Message("", "I", "OST") << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endm;
   gMessMgr->Message("", "I", "OST") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm; 
