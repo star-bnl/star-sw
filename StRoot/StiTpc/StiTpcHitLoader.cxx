@@ -13,7 +13,7 @@
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
-#include "StiTpc/StiTpcHitLoader.h"
+#include "StiTpcHitLoader.h"
 
 StiTpcHitLoader::StiTpcHitLoader()
   : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader")
