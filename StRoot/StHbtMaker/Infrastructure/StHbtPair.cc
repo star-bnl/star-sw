@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.3 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.4 1999/07/12 18:57:05 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.4  1999/07/12 18:57:05  lisa
+ * fixed small bug in fourMomentum method of StHbtPair
+ *
  * Revision 1.3  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -92,7 +95,7 @@ double StHbtPair::qOut() const
 //_________________
 StHbtLorentzVector StHbtPair::fourMomentum() const
 {
-  StHbtLorentzVector temp = mTrack1->FourMomentum()-mTrack2->FourMomentum();
+  StHbtLorentzVector temp = mTrack1->FourMomentum()+mTrack2->FourMomentum();
   return temp;
 }
 
