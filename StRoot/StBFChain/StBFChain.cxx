@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.374 2004/01/16 15:05:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.375 2004/01/23 16:05:41 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -354,8 +354,8 @@ Bfc_st BFC1[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tpcChain","",
-            "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
+  {"fcf"         ,"","tpcChain","",   "StRTSClientFCFMaker","StDAQMaker,StRTSClientFCF,StRTSClientFCFMaker",
+                                                                       "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
@@ -890,8 +890,8 @@ Bfc_st BFC2[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tpcChain","",
-            "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
+  {"fcf"         ,"","tpcChain","",   "StRTSClientFCFMaker","StDAQMaker,StRTSClientFCF,StRTSClientFCFMaker",
+                                                                       "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
