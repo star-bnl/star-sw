@@ -29,8 +29,21 @@ int dsReadTest(XDR *xdrs, size_t count);
 int dsWriteTest(XDR *xdrs, size_t count, int bigEndian);
 bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset);
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
-bool_t xdr_dataset_skip(XDR *xdrs);
-bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);
+
+  /* Linux has a broken version of xdr.h - x_destroy doesn't take any
+     arguments, but the macro XDR_DESTROY passes it one.  */
+#if defined(linux)
+ /* But in RedHat5.1 2.0.35 x_destroy needs an argument */  /*JCS*/
+#ifndef i386_redhat51                              /*JCS*/
+#ifdef XDR_DESTROY
+#undef XDR_DESTROY
+#endif
+#define	XDR_DESTROY(xdrs)				\
+	if ((xdrs)->x_ops->x_destroy) 			\
+		(*(xdrs)->x_ops->x_destroy)()
+#endif
+#endif     /*i386_redhat51*/                            /*JCS*/
+
 #ifdef DS_PRIVATE
 /******************************************************************************
 *
