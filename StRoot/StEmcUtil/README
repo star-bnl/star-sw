@@ -1,4 +1,7 @@
-* Package: StEmcUtil
+Package: StEmcUtil
+
+Authors:
+A. Pavlinov, WSU (pavlinov@physics.wayne.edu).
 
 * Purpose:
 StEmcUtil is an area for packages that use the EMC software.
@@ -6,6 +9,8 @@ At the moment we have here coordinate routines for BEMC geometry
 (class StEmcGeom) and service "math" routines.
 
 * History:
+
+Corrected getBin and getId for Jose's scheme (15-march)
 
 Created "functor" class StEmcMath (march 2001)
 
