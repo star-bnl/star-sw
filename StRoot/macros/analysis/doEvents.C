@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.99 2004/08/27 01:50:12 fine Exp $
+// $Id: doEvents.C,v 1.100 2004/08/27 02:23:48 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -269,7 +269,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   istat=0,iEvt=1;
   istat = chain->EventLoop(1,nEvents);    
   //VP  
-  delete setFiles; setFiles=0;
+  // delete setFiles; setFiles=0;
   //  gSystem->Exit(0);
 }
 //____________________________________________________________________________
@@ -464,6 +464,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.100  2004/08/27 02:23:48  fine
+// comment out delete setFile to preserve setFile for interactive user
+//
 // Revision 1.99  2004/08/27 01:50:12  fine
 // restore g2t shared library. Geant complained
 //
