@@ -1,4 +1,22 @@
 #!/opt/star/bin/perl
+#
+# $Id: swguide.pl,v 1.3 1999/07/07 13:21:07 wenaus Exp $
+#
+# $Log: swguide.pl,v $
+# Revision 1.3  1999/07/07 13:21:07  wenaus
+# faster and more info presented
+#
+#
+######################################################################
+#
+# swguide.pl
+#
+# T. Wenaus 6/99
+#
+# Software guide; tool for browsing software info and doc
+#
+# Usage: CGI script
+#
 
 use lib "/star/u2d/wenaus/datadb";
 use File::Basename;
@@ -32,6 +50,7 @@ if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
                  ".cc" => "C++",
                  ".cxx" => "C++",
                  ".C" => "C++",
+                 ".C++" => "C++",
                  ".c" => "C",
                  ".inc" => "FORTRAN",
                  ".F" => "FORTRAN",
@@ -72,10 +91,9 @@ Pointers and comments...
     days since most recent mod, associated PAM.
     <li> The full listing adds all files (the same level of detail
     as the individual package listings)
-    <li> The file listings report the username of the most recent
-    modifier, if it can be determined from the file, ie. if a 
-    comment line containing \$Id\$ has been included in the file (such
-    a line should be in every file).
+    <li> The file listings report the file version in that release
+    (linked to the CVS source), username and date of the most
+    recent CVS commit, and the most recent tag for that file version
     <li> Ball color indicates time since most recent mod:
     <img src="/images/redball.gif">=2days, <img src="/images/greenball.gif">=2weeks, <img src="/images/blueball.gif">=2months, <img src="/images/whiteball.gif">=older
 </ul>
@@ -456,8 +474,10 @@ sub showPackage {
             $disp1="<b>$ballUrl";
             $disp2="</b>";
         }
-        $pkgLine = sprintf("$disp1%s%-27s%s %s %s %s %s%9s%4d Files%5d Lines %02d/%02d/%02d %3d Days %s$disp2\n",
-                           $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src,$pkgOwner,$filecount,$linecount,$mo+1,$dy,$yr,$sinceMod,$thePamUrl);
+        $pkgLine = sprintf("$disp1%s%-27s%s %s %s %s %s%s%9s%s%4d Files%5d Lines %02d/%02d/%02d %3d Days %s$disp2\n",
+                           $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src,
+                           "<a href=\"http://www.star.bnl.gov/cvs/user/$pkgOwner/index.html#bottom\">",$pkgOwner,"</a>",
+                           $filecount,$linecount,$mo+1,$dy,$yr,$sinceMod,$thePamUrl);
     } else {
         $pkgLine = sprintf("%s%-27s%s %s %s %s %s\n",
                            $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src);
@@ -481,7 +501,7 @@ sub showPackage {
         $i=0;
         foreach $e ( sort keys %eListH ) {
             $i++;
-            printf("%-25s",$e);
+            printf("%-33s",$e);
             if ($i%3 == 0) { print "\n"; }
         }
         print "</blockquote>\n";
@@ -510,16 +530,44 @@ sub showFiles {
             next if ( $fname =~ m/\~$/ );
             $filecount++;
             $cver = $tokens[2];
+##            This date is flaky. Does not correspond to most recent
+##            commit date. Can be more recent. Have to pick up the
+##            date from the repository file itself.
             $cdate = $tokens[3];
-
+            $date = substr($cdate,4,12)." ".substr($cdate,22,2);
+            open(REPFILE,"</afs/rhic/star/packages/repository/$theDir/$thePkg/$fname,v");
+            $owner = "";
+            $repTime = 0;
+            $repver = "";
+            $reptag = "";
+            while (<REPFILE>) {
+                chomp;
+                $repline = $_;
+                if ( $reptag eq "" && $repline =~ m/\s*(.*):$cver/ ) {
+                    $reptag = $1;
+                }
+                if ( $repver eq $cver ) {
+                    $cdate = $repline;
+                    if ( $cdate =~ m/date\s*([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*author\s+([a-z0-9]+)/ ) {
+                        $date = "$2/$3/$1 $4:$5 ";
+                        $repTime = timelocal($6,$5,$4,$3,$2-1,$1);
+                        $owner = $7;
+                        last;
+                    }
+                }
+                $repver = $_; # the version number is on the preceding line
+            }
+            close(REPFILE);
+            if ( $repTime > 0 ) {
+                if ( $repTime > $lastMod ) { $lastMod = $repTime; }
+            } else {
+                if ( $writeTime > $lastMod ) { $lastMod = $writeTime; }
+            }
             # stat
             $fullname = "$theRoot/$theDir/$thePkg/$fname";
             ($fmode, $uid, $gid, $filesize, 
              $readTime, $writeTime, $cTime) =
                  (stat($fullname))[2,4,5,7,8,9,10];
-            $grnam = (getgrgid($gid))[0];
-            $owner = (getpwuid($uid))[0];
-            if ( $writeTime > $lastMod ) { $lastMod = $writeTime; }
 
             $count = 0;
             $showLines = 0;
@@ -536,7 +584,6 @@ sub showFiles {
                          $isScript = 1;
                      }
                 }
-                $owner = "";
                 if ( exists($okExtensions{$ee}) || ($ff =~ m/akefile/)
                      || $isScript ) {
                     $showLines = 1;
@@ -554,7 +601,7 @@ sub showFiles {
                     for ($ii=0; $ii<@lines; $ii++) {
                         ## Don't count comments. Imperfect but should get
                         ## most.
-                        if ($ii<10) {
+                        if ($owner eq "" && $ii<10) {
                             # Give a try at finding the owner
                             if ( $lines[$ii] =~ m/(Id:).*(,v).*(\d\d:\d\d:\d\d)\s([a-z]+)/ ) {
                                 $owner = $4;
@@ -584,23 +631,16 @@ sub showFiles {
                     $typeCounts{$ftype} = $typeCounts{$ftype} +$count;
                 }
                 if ($showLines) {
-                    $theLines = sprintf("%5dLines",$count);
+                    $theLines = sprintf("%5d Lines",$count);
                 } else {
-                    $theLines = "";
-                }
-                $date = substr($cdate,4,12)." ".substr($cdate,22,2);
-                ## Get most recent modifier from ownership of 
-                ## repository file. (Doesn't work; almost always Lidia)
-                if ( 0 ) {
-                    $repfile = "/afs/rhic/star/packages/repository/$theDir/$thePkg/$fname,v";
-                    ($fmode, $uid, $gid, $filesize, 
-                     $readTime, $writeTime, $cTime) =
-                         (stat($repfile))[2,4,5,7,8,9,10];
-                    $grnam = (getgrgid($gid))[0];
-                    $owner = (getpwuid($uid))[0];
+                    $theLines = "           ";
                 }
 
-                $sinceMod = $curTime - $writeTime;
+                if ( $repTime > 0 ) {
+                    $sinceMod = $curTime - $repTime;
+                } else {
+                    $sinceMod = $curTime - $writeTime;
+                }
                 $sinceMod = $sinceMod/3600/24; # days
                 if ( $sinceMod < 3 ) {
                     $ball="red";
@@ -613,13 +653,14 @@ sub showFiles {
                 }
                 $ballUrl="<img src=\"/images/".$ball."ball.gif\">";
 
-                $output .= sprintf("%s%-35s %s%-7s%s %s %s %s%9s %s\n",
+                $output .= sprintf("%s%-35s %s%-7s%s %s %s %s%s%9s%s %s %s\n",
                                    $ballUrl,$fname,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname?rev=$cver&content-type=text/x-cvsweb-markup\">",$cver,"</a>",
                                    $date,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname\">CVS</a>",
                                    "<a href=\"http://duvall.star.bnl.gov/lxr/source/$theDir/$thePkg/$fname?v=$rel\">src</a>",
-                                   $owner,$theLines);
+                                   "<a href=\"http://www.star.bnl.gov/cvs/user/$owner/index.html#bottom\">",$owner,"</a>",
+                                   $theLines,$reptag);
                 print "$output" if $debugOn;
                 $linecount += $count;
             }
