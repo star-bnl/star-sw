@@ -300,7 +300,9 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
 			if(stop > 349) stop = 349 ;
 			
 			/* sequenz is not longer than 3 consequtive timebuckets ... */
+/*
 			if((stop-start)>3) stop = start + 3 ;
+*/
 			if(stop > 349) stop = 349 ;
 			
 

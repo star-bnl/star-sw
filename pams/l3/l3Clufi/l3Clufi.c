@@ -138,7 +138,7 @@ long type_of_call l3Clufi_(
 	    seclp->bh.length     = 34; 
 	    /*seclp->bh.bank_id    = 77; must be set in the maker !! must be 1,3..,23 */
 	    seclp->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
-	    seclp->bh.byte_order = 0x01020304;
+	    seclp->bh.byte_order = DAQ_RAW_FORMAT_ORDER ; 
 	    seclp->bh.token      = 1;
 	    seclp->bh.w9         = DAQ_RAW_FORMAT_WORD9;
 	    seclp->bh.crc        = 0;

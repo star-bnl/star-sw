@@ -1,10 +1,10 @@
-/*//
+/* //
 //      croat.h
 //
 //      first version, 07/23/99, struck
 //  
 //      header file adapted for _OFFLINE_ !!
-//*/
+// */
 
 
 #ifndef _CROAT_H_
@@ -19,10 +19,10 @@
 #define PARAM1		2
 
 /* perform deconv. in the time direction */
-#define DECONVOLUTE_TIME
+/*#define DECONVOLUTE_TIME */
 
 /* perform deconv. in the pad direction */
-#define DECONVOLUTE_PAD
+/*#define DECONVOLUTE_PAD */
 
 
 /* output flags */
