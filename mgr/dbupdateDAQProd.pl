@@ -720,11 +720,17 @@ foreach my $runDsc (@runDescr) {
        $engr = int($cWMnt + $cEMnt);
        if( !defined $magF) {$magF = 0};  
 
-#       if ($magF == 0) {
-#       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
-#     }else{
+       if ($magF < 2000) {
+       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
+     }
+       elsif ( $magF > 2240 && $magF < 2252 ) {
        $daqHash{$Numrun} = $ccn . $engr ."_" ."HalfField" . "_";
-#     }
+    }
+       elsif ( $magF > 3000 ) {
+       $daqHash{$Numrun} = $ccn . $engr ."_" ."FullField" . "_";
+   } else{
+       $daqHash{$Numrun} = $ccn . $engr ."_" ."Unknown" . "_";
+   }
        for ($ll = 0; $ll < scalar(@runDetector); $ll++) {
 
        if($DetecOn[$ll] != 0) { 
