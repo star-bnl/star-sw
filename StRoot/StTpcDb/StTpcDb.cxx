@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.35 2004/02/23 00:35:00 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.36 2004/03/16 22:17:46 jecc Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.36  2004/03/16 22:17:46  jecc
+ * Update triggerTimeOffset() due to a change in L0 TriggerActionWd
+ *
  * Revision 1.35  2004/02/23 00:35:00  fisyak
  * Add access to tpcPadResponse
  *
@@ -471,7 +474,8 @@ float StTpcDb::triggerTimeOffset(){
   }
   //  assert(trig);
   float theoffset = 1e-6*(*toff)[0].offset;
-  if(trigtype&&trigtype->HasData()){if((*trigtype)[0].TriggerActionWd==36865) theoffset = 1e-6*(*toff)[0].laserOffset;}
+  if(trigtype&&trigtype->HasData()){if((0xff00 & (*trigtype)[0].TriggerActionWd)==(0xff00 & 36865)) 
+    theoffset = 1e-6*(*toff)[0].laserOffset;}
   return theoffset;
 }
 //________________________________________________________________________________
