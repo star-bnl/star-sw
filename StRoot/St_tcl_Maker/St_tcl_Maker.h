@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.13 1999/09/24 01:23:43 fisyak Exp $
+// $Id: St_tcl_Maker.h,v 1.14 1999/10/01 22:22:25 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.14  1999/10/01 22:22:25  snelling
+// updated histograms
+//
 // Revision 1.13  1999/09/24 01:23:43  fisyak
 // Reduced Include Path
 //
@@ -57,9 +60,7 @@ const float LINEARIZATION 		= 1.2;
 // St_tcl_Maker virtual base class for Maker                            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
 class St_tpg_pad_plane;
 class St_tpg_detector;
 class St_tpg_pad;
@@ -82,7 +83,8 @@ class TH1F;
 
 class St_tcl_Maker : public StMaker {
 
-private:
+ private:
+
   Bool_t                m_tclPixTransOn;        // switch for pixel translation evaluation
   Bool_t                m_tclEvalOn;            // switch for the cluster finder evaluation
   Bool_t                m_tclMorphOn;           // switch for the cluster morphology study
@@ -100,65 +102,63 @@ private:
   St_tfs_fspar          *m_tfs_fspar;   	//! TFS parameter table 
   St_tfs_fsctrl         *m_tfs_fsctrl;  	//! TFS control switches
 
-Int_t cluster_morphology( 
-     	Int_t 		   sectorNumber,
-        St_type_shortdata *pixel_data_in, 
-        St_type_shortdata *pixel_data_out,
-        St_tcl_tpcluster  *tpcluster, 
-        St_tcl_tp_seq     *tpseq,
-        St_tcc_morphology *morph);
+  Int_t cluster_morphology( 
+			   Int_t 		   sectorNumber,
+			   St_type_shortdata *pixel_data_in, 
+			   St_type_shortdata *pixel_data_out,
+			   St_tcl_tpcluster  *tpcluster, 
+			   St_tcl_tp_seq     *tpseq,
+			   St_tcc_morphology *morph);
+  
+  Int_t FillOneRowOfMorphTable(
+			       int iClusterTbl,
+			       St_tcc_morphology *morph,
+			       int padrow,
+			       int sector,
+			       int nseq,
+			       int npix,
+			       int npad,
+			       unsigned int totalChargeEq1,
+			       int maxCharge,
+			       float averageCharge,
+			       float meanPadPos,
+			       float meanTimePos,
+			       float padSigma1Eq5,
+			       float bucSigma1Eq6,
+			       float padTimeSigma1Eq7,
+			       float padSigma2Eq12,
+			       float bucSigma2Eq13,
+			       float padTimeSigma2Eq14,
+			       float ecc1Eq15,
+			       float ecc2Eq16,
+			       float linEcc1Eq8,
+			       float linEcc2Eq9);
+  
+  
+  Int_t CalculateQuadrupoleMoms(
+				int padrow,
+				int npad,
+				int pads[TCC_PAD],
+				unsigned short charge[TCC_PAD][TCC_BIN],
+				unsigned int  &totChargeEq1,
+				float &meanPadEq3,
+				float &meanTimeEq4,
+				float &padSigma1Eq5,
+				float &timeSigma1Eq6,
+				float &padTimeSigma1Eq7,
+				float &padSigma2Eq12,
+				float &timeSigma2Eq13,
+				float &padTimeSigma2Eq14,
+				float &ecc1Eq15,
+				float &ecc2Eq16,
+				float &linEcc1Eq8,
+				float &linEcc2Eq9);
 
-Int_t FillOneRowOfMorphTable(
-	int iClusterTbl,
-        St_tcc_morphology 	*morph,
-        int padrow,
-        int sector,
-        int nseq,
-        int npix,
-        int npad,
-        unsigned int 	totalChargeEq1,
-        int 	maxCharge,
-        float 	averageCharge,
-        float 	meanPadPos,
-        float 	meanTimePos,
-        float 	padSigma1Eq5,
-        float 	bucSigma1Eq6,
-        float 	padTimeSigma1Eq7,
-        float 	padSigma2Eq12,
-        float 	bucSigma2Eq13,
-        float 	padTimeSigma2Eq14,
-        float 	ecc1Eq15,
-        float 	ecc2Eq16,
-        float 	linEcc1Eq8,
-        float 	linEcc2Eq9);
-
-
-Int_t CalculateQuadrupoleMoms(
-        int padrow,
-        int npad,
-        int pads[TCC_PAD],
-        unsigned short charge[TCC_PAD][TCC_BIN],
-        unsigned int  &totChargeEq1,
-        float &meanPadEq3,
-        float &meanTimeEq4,
-        float &padSigma1Eq5,
-        float &timeSigma1Eq6,
-        float &padTimeSigma1Eq7,
-        float &padSigma2Eq12,
-        float &timeSigma2Eq13,
-        float &padTimeSigma2Eq14,
-        float &ecc1Eq15,
-        float &ecc2Eq16,
-        float &linEcc1Eq8,
-        float &linEcc2Eq9);
-
-protected:
-
-// for tcl
+  // for tcl
   TH1F *m_nseq_cluster; //! number sequences in cluster
   TH1F *m_nhits;        //! estimated # of overlapping hits in cluster
-
-// for tph
+  
+  // for tph
   TH1F *m_nseq_hit;     //! number sequences contributing to hit
   TH1F *m_tpc_row;      //! tpc row number
   TH1F *m_x_of_hit;     //! x distribution of hits
@@ -169,27 +169,31 @@ protected:
   TH1F *m_phi;          //! orientation of the hit w.r.t padplane 
   TH1F *m_lambda;       //! dip angle (radians)
 
+ protected:
 
  public: 
-                  St_tcl_Maker(const char *name="tpc_hits");
-   virtual       ~St_tcl_Maker(); 
-   virtual void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
-   virtual void   tclEvalOn() {tclEval(kTRUE);}                       // *MENU*
-   virtual void   tclEvalOff(){tclEval();} 
-   virtual void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
-   virtual void   tclMorphOn() {tclMorph(kTRUE);}                       // *MENU*
-   virtual void   tclMorphOff(){tclMorph();} 
-   virtual void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
-   virtual void   tclPixTransOn() {tclPixTrans(kTRUE);}                       // *MENU*
-   virtual void   tclPixTransOff(){tclPixTrans();} 
 
-   virtual Int_t  Init();
-   virtual Int_t  Make();
-   virtual void   MakeHistograms();// Histograms for tpc clustering
+  St_tcl_Maker(const char *name="tpc_hits");
+  virtual       ~St_tcl_Maker(); 
+  virtual void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
+  virtual void   tclEvalOn() {tclEval(kTRUE);}                       // *MENU*
+  virtual void   tclEvalOff(){tclEval();} 
+  virtual void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
+  virtual void   tclMorphOn() {tclMorph(kTRUE);}                       // *MENU*
+  virtual void   tclMorphOff(){tclMorph();} 
+  virtual void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
+  virtual void   tclPixTransOn() {tclPixTrans(kTRUE);}                       // *MENU*
+  virtual void   tclPixTransOff(){tclPixTrans();} 
+
+  void MakeHistograms(); 
+  void InitHistograms(); 
+  
+  virtual Int_t  Init();
+  virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.13 1999/09/24 01:23:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.14 1999/10/01 22:22:25 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
+  ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };
 
 #endif
