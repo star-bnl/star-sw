@@ -1,0 +1,17 @@
+/*   mwc_mpar.idl
+ *    (onetasth.ace)
+ *  Table: mwc_mwpar
+ *        description: Parameter table for mws 
+ */
+
+   /*******************  Row struct *******************/
+   struct mwc_mpar {
+       float     gain;       /* Variation in Scale Factor */
+       float     de_thresh;  /* Threshold for de hit  */
+       float     tof_thresh; /* Threshold for tof of hit */
+       float     num_counts_out; /*Number of adcs to DSM tree */
+       float     num_wires_count; /* Number of wires per adc */
+       long      wires; /* Whether to use hits or de */  };
+
+/*  Last mod. for mwc_mpar:   $Date: 1998/02/17 17:21:56 $ */
+
