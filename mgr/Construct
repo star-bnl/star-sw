@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.99 2000/07/31 21:59:47 fisyak Exp $
+# $Id: Construct,v 1.100 2000/09/14 21:22:42 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -43,6 +43,8 @@ if ($#Repo > -1) {
   if (defined($ARG{Salt}))       {$Salt = $ARG{Salt};}
   elsif (!defined($ARG{NoSalt}))  {$Salt = "user";}
   if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);}
+#  $EXTRA_CXXFLAGS  .= " -I-";
+#  $EXTRA_CFLAGS  .= " -I-";
 }
 else {$param::keep = 1;}
 
@@ -80,8 +82,11 @@ else {
 }
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 print "CPPPATH = $CPPPATH\n";
+
 $env = new cons(	
 		'CPPPATH'      => $CPPPATH,
+		'EXTRA_CXXFLAGS'     => $EXTRA_CXXFLAGS,
+		'EXTRA_CFLAGS'     => $EXTRA_CFLAGS,
 		'Libraries'    => $Libraries,
 		'LIBPATH'      => $LIBPATH,
 		'ROOTLIBS'     => $ROOTLIBS,
@@ -198,15 +203,18 @@ foreach my $dir ("pams","StRoot","StPiD"){#,"asps/rexe"){#,"StDb") {
       }
       #      next if ($sub_dir =~ /tables/);
 #      next if $Dir =~ /^asps\/rexe$/;
-      if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  
-	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StFlow/)) {next;}
-      if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
-	  ($sub_dir =~ /StHbtMaker/ || 
-	   $sub_dir =~ /StSpectraMaker/ || 
-	   $sub_dir =~ /StRrsMaker/ || 
-	   $sub_dir =~ /StAngleCorrMaker/ ||
-	   $sub_dir =~ /StSpectraTagsMaker/ 
-	  )) {next;}
+      if ($#Repo == -1) {
+	if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  
+	    ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StFlow/)) {next;}
+	if ($STAR_HOST_SYS =~ /^sun4x_56_CC5$/ && $sub_dir =~ /StHbtMaker/) {next;}
+	if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
+	    ($sub_dir =~ /StHbtMaker/ || 
+	     $sub_dir =~ /StSpectraMaker/ || 
+	     $sub_dir =~ /StRrsMaker/ || 
+	     $sub_dir =~ /StAngleCorrMaker/ ||
+	     $sub_dir =~ /StSpectraTagsMaker/ 
+	    )) {next;}
+      }
       push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
     }
   }

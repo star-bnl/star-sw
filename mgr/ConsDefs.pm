@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.23 2000/08/08 17:02:28 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.24 2000/09/14 21:22:38 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -96,8 +96,8 @@
 # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
  $LINKCOM  = "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
- $GEANT3COM= "test -f %>.F && rm %>.F;";
- $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
+ $GEANT3COM= "test -f %>:b.F && rm %>:b.F;";
+ $GEANT3COM.="%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
  $INCLUDE_PATH  = $INCLUDE;
  $Salt = undef;
  if (!$OPTSTAR) {$OPTSTAR = "/opt/star";}
@@ -118,10 +118,10 @@
      $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
    }
    $R_CPPFLAGS  .= " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-   $CXXFLAGS = "-fPIC -Wall";# -march=pentiumpro";
+   $CXXFLAGS = "-pipe -fPIC -Wall";# -march=pentiumpro";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    #                                             -fpipe
-   $CFLAGS   = "-fPIC -Wall";# -march=pentiumpro";
+   $CFLAGS   = "-pipe -fPIC -Wall";# -march=pentiumpro";
    $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
    $LDFLAGS  = "";#$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $F77FLAGS      = "";
@@ -137,8 +137,8 @@
      $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
      $FCCOM    = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
      $FCCOM   .= "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
-     $FCCOM   .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>.f;"; 
-     $FCCOM   .= "if [ -f %>.f ]; then %FC %FFLAGS -c %>.f %Fout%> ;";
+     $FCCOM   .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;"; 
+     $FCCOM   .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
      $FCCOM   .= "else %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
      my $GEANT3COM= $FCCOM;
      $FEXTEND  = "-ffixed-line-length-132"; 
@@ -194,7 +194,7 @@
    if ($STAR) {
      $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
    }
-   $OSFID   .= " NEW_ARRAY_ON";
+   $OSFID   .= " NEW_ARRAY_ON";# _INCLUDE_HPUX_SOURCE";
    $CXX      = "aCC";
    $CC       = "cc";
    $LD       = $CXX;
@@ -238,18 +238,16 @@
    $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no%%Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
-#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
-   $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
+   $XLIBS     = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
+#   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
    $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
    $CINTCFLAGS= $CFLAGS . " " . $R_CPPFLAGS;
    $LD        = $CXX;
-#   $EXEFLAGS  = "-library=iostream";
    $LDFLAGS   = "-library=iostream -Bdynamic";
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
@@ -391,7 +389,7 @@
  if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH}    ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
  if (defined($ARG{SO}))       {$SO = $ARG{SO}              ; print "set SO = $SO\n" unless ($param::quiet);}
  if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS}    ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
- $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/include";
+ $ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
  my @params = (	'PLATFORM'     => $PLATFORM,
 		'ARCH'         => $ARCH,
 		'AFSDIR'       => $AFSDIR,
