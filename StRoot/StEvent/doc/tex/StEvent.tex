@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.19 1999/04/19 17:37:21 genevb Exp $
+% $Id: StEvent.tex,v 1.20 1999/04/19 20:46:41 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.19  1999/04/19 17:37:21  genevb
-% Updated vertex documentation
+% Revision 1.20  1999/04/19 20:46:41  ullrich
+% Mods to StHit (virtual)
+%
+% Revision 1.21  1999/06/07 14:57:21  ullrich
+% Added changes in StGlobalTrack
 %
 % Revision 1.20  1999/04/19 20:46:41  ullrich
 % Mods to StHit (virtual)
@@ -161,14 +164,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
+% Revision 2.19  2000/02/17 18:16:18  ullrich
+% Add documentation of new SVT hit storage layout.
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/19 20:46:41 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -312,7 +315,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/19 20:46:41 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -2003,7 +2006,7 @@ double meanPtOfGoodTracks(StEvent *event)
     \verb+class StHit;+\\
 
 \item[Description]
-    \name{StHit} is not a virtual class.
+    \name{StHit} provides the basic functionality for all derived classes
     which represent TPC, FTPC and SVT hits. It provides information on
     position, position error, charge, and on the number of tracks which
     are reconstructed using this hit.  All information is taken from
@@ -2028,28 +2031,28 @@ double meanPtOfGoodTracks(StEvent *event)
     to 0 (zero).
 
     \verb+StHit(const StThreeVector<float>& pos,+\\
-    \verb+const StThreeVector<float>& position() const;+\\
+    \verb+      const StThreeVector<float>& err,+\\
     \verb+      float q, unsigned char cnt = 0);+\\
     Create an instance of \name{StHit} with position \name{pos},
-    \verb+const StThreeVector<float>& positionError() const;+\\
+    position error \name{err}, charge \name{q}, and reference count \name{cnt}.
 
 \item[Public Member\\ Functions]
-    \verb+float charge() const;+\\
+    \verb+virtual const StThreeVector<float>& position() const;+\\
     Hit position in global coordinates.
 
-    \verb+unsigned char trackReferenceCount() const;+\\
+    \verb+virtual const StThreeVector<float>& positionError() const;+\\
     Hit position error.
 
-    \verb+void setPosition(const StThreeVector<float>&);+\\
+    \verb+virtual float charge() const;+\\
     Total hit charge.
 
-    \verb+void setPositionError(const StThreeVector<float>&);+\\
+    \verb+virtual unsigned char trackReferenceCount() const;+\\
     Number of tracks referencing this hit (see \name{StGlobalTrack}).
 
-    \verb+void setCharge(float);+\\
+    \verb+virtual void setPosition(const StThreeVector<float>&);+\\
     Set the hit position.
 
-    \verb+void setTrackReferenceCount(unsigned char);+\\
+    \verb+virtual void setPositionError(const StThreeVector<float>&);+\\
     Set the error on the hit position.
 
     \verb+virtual void setCharge(float);+\\
