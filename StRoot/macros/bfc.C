@@ -3,8 +3,27 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.135 2000/06/13 23:17:20 fisyak Exp $
+// $Id: bfc.C,v 1.136 2000/06/16 21:49:00 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
+#ifndef __CINT__
+#include "TSystem.h"
+#include "TBrowser.h"
+#include "TBenchmark.h"
+#include "TClassTable.h"
+#include "StBFChain.h"
+#include "St_tcl_Maker/St_tcl_Maker.h"
+#include "St_tpt_Maker/St_tpt_Maker.h"
+#include "StEvent.h"
+#include "St_geant_Maker/St_geant_Maker.h"
+#include "StIOMaker/StIOMaker.h"
+#include "StEventDisplayMaker/StEventDisplayMaker.h"
+#include "StEventMaker/StEventMaker.h"
+#include "StAssociationMaker/StMcParameterDB.h"
+#include "St_dst_Maker/StV0Maker.h"
+#include "xdf2root/St_XDFFile.h"
+void Usage();
+void Load();
+#endif
 TBrowser *b = 0;
 class StMaker;        
 class StBFChain;        
@@ -88,7 +107,7 @@ void bfc(const Int_t First,
   }
   if (chain->GetOption("McAss")) {
     // Define the cuts for the Associations
-
+    
     StMcParameterDB* parameterDB = StMcParameterDB::instance();  
     // TPC
     parameterDB->setXCutTpc(.5); // 5 mm
@@ -115,59 +134,58 @@ void bfc(const Int_t First,
   }
   printf ("QAInfo:Run on %s in %s\n",
 	  gSystem->HostName(),
-	gSystem->WorkingDirectory());
-printf ("QAInfo: with %s\n", chain->GetCVS());
-
-// Init the chain and all its makers
-if (Last >= 0) {
-  Int_t iInit = chain->Init();
-  StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
-  hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
-  // skip if any
-  St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
-  St_XDFFile *xdf_out = chain->GetXdfOut();
-  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-  if (geant && First > 1 && geant->IsActive()) geant->Skip(First-1);
-  else {
-    StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
-    if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
-  }
+	  gSystem->WorkingDirectory());
+  printf ("QAInfo: with %s\n", chain->GetCVS());
   
-}
-treeMk = chain->GetMaker("tree");
-TBenchmark evnt;
-Int_t iMake = 0, i = First;
-Int_t iTotal = 0, iBad = 0;
-EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
-  evnt->Reset();
-  evnt->Start("QAInfo:");
-  chain->Clear();
-  iMake = chain->Make(i);
-  if (iMake <kStEOF && xdf_out){
-    St_DataSet *dstSet = chain->GetInputDS("dst");
-    if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
+  // Init the chain and all its makers
+  if (Last >= 0) {
+    Int_t iInit = chain->Init();
+    StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
+    hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
+    // skip if any
+    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
+    if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+    if (geant && First > 1 && geant->IsActive()) geant->Skip(First-1);
+    else {
+      StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
+      if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
+    }
   }
-  iTotal++;
-  if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
-
-
-  //    gSystem->Exec("ps ux");
-  evnt->Stop("QAInfo:");
-  //  evnt->Show("QAInfo:");
-  printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	  i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
-	  iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
-  i++; goto EventLoop;
-}
-fflush(stdout);
-printf ("QAInfo:Run completed ");
-gSystem->Exec("date");
-if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
-{
-  TDatime t;
-  printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
-	  t.GetDate(),t.GetTime(),iTotal,iBad);
-}
+  St_XDFFile *xdf_out = chain->GetXdfOut();
+  treeMk = chain->GetMaker("tree");
+  TBenchmark evnt;
+  Int_t iMake = 0, i = First;
+  Int_t iTotal = 0, iBad = 0;
+ EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
+   evnt.Reset();
+   evnt.Start("QAInfo:");
+   chain->Clear();
+   iMake = chain->Make(i);
+   if (iMake <kStEOF) {
+     if (xdf_out){
+       St_DataSet *dstSet = chain->GetInputDS("dst");
+       if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
+     }
+     iTotal++;
+     if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
+     //    gSystem->Exec("ps ux");
+     evnt.Stop("QAInfo:");
+     //  evnt.Show("QAInfo:");
+     printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	     i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
+	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:"));
+   }
+   i++; goto EventLoop;
+ }
+  fflush(stdout);
+  printf ("QAInfo:Run completed ");
+  gSystem->Exec("date");
+  if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
+  {
+    TDatime t;
+    printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
+	    t.GetDate(),t.GetTime(),iTotal,iBad);
+  }
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
