@@ -10,7 +10,7 @@
 #include "ctc_histos.idl"
 #include "ctg_slat.idl"
 
-interface ctc_driver : amiModule{
+interface ctc : amiModule{
 	STAFCV_T call
 		( in    ctc_ctrl   ctrl  
 		, in    cte_extra  extra
