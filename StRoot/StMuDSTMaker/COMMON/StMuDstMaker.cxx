@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.3 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.4 2002/03/26 19:33:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -57,6 +57,19 @@ ClassImp(StMuDstMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+StMuDstMaker::StMuDstMaker(const char* name,) {
+  mStEvent = 0; 
+  mStStrangeMuDstMaker = 0; 
+  mIOMaker = 0;
+  mIoMode = 1;(mode);
+  mIoNameMode = 1;
+  mSplit = 99;
+  mCompression = 9;
+  mBufferSize(65536*4);
+{
+  streamerOff();
+}
+
 StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
@@ -65,12 +78,7 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
-  StObject::Class()->IgnoreTObjectStreamer();
-  StStrangeMuDst::Class()->IgnoreTObjectStreamer();
-  StV0MuDst::Class()->IgnoreTObjectStreamer();
-  StObject::Class()->GetStreamerInfo()->Build();	
-  StPhysicalHelixD::Class()->IgnoreTObjectStreamer();
-  StMuTrack::Class()->IgnoreTObjectStreamer();
+  streamerOff();
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -91,6 +99,18 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
 
 }
+
+ void  StMuDstMaker::streamerOff() {
+  StStrangeMuDst::Class()->IgnoreTObjectStreamer();
+  StV0MuDst::Class()->IgnoreTObjectStreamer();
+  StXiMuDst::Class()->IgnoreTObjectStreamer();
+  StKinkMuDst::Class()->IgnoreTObjectStreamer();
+  StV0Mc::Class()->IgnoreTObjectStreamer();
+  StXiMc::Class()->IgnoreTObjectStreamer();
+  StKinkMc::Class()->IgnoreTObjectStreamer();
+  StMuTrack::Class()->IgnoreTObjectStreamer();
+  StMuHelix::Class()->IgnoreTObjectStreamer();
+ }
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -692,7 +712,7 @@ void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) 
   while((fileName = gSystem->GetDirEntry(pDir))){
     if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
     if(strcmp(fileName,".root")==0 || strcmp(fileName,"..")==0) continue;
-    if(strstr(fileName,filter)){ // found a match
+    if ( strstr(fileName,filter) && strstr(fileName,"MuDst.root") ){ // found a match
       char* fullFile = gSystem->ConcatFileName(dir,fileName);
       // add it to the chain
       cout << fileCount << " " << fullFile << endl;
@@ -713,6 +733,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.4  2002/03/26 19:33:15  laue
+ * minor updates
+ *
  * Revision 1.3  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *

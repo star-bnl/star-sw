@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.3 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuDst.cxx,v 1.4 2002/03/26 19:33:14 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -78,7 +78,7 @@ void StMuDst:: fixTrackIndices() {
   timer.start();
 
   /// fill an array with the indices to the global tracks as function of trackId
-  int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
+  static int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) globalIndex[i]=-1;   // there must be an better way
   int nGlobals = arrays[muGlobal]->GetEntries();
   for (int i=0; i<nGlobals; i++) {
@@ -91,7 +91,6 @@ void StMuDst:: fixTrackIndices() {
   for (int i=0; i<nPrimaries; i++) {
      primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
   }
-  delete globalIndex;
   DEBUGVALUE2(timer.elapsedTime());
 }
 
@@ -206,6 +205,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.4  2002/03/26 19:33:14  laue
+ * minor updates
+ *
  * Revision 1.3  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *
