@@ -17,6 +17,8 @@ private :
   const StTpcCalibSetup* mSetup; //!
   const int* mNumberOfPadAtRow; //! To be replaced by db
 
+  int mNEvt;
+
   TH1F* mHCorrupted;//!
   TH2F* mHCorruptedMap;//!
   TH1F* mHMeanRMS;//!
