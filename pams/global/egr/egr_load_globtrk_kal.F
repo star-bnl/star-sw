@@ -168,53 +168,44 @@ C     Now find last point on track and calculate track length.
          if (itpct.ne.0) then
             i = 1
             do while (gtrk(igtrk).pos(i) .lt. 0 .or.
-     +        gtrk(igtrk).ipnt(i) .eq. 0)
+     +        gtrk(igtrk).ipnt(i) .eq. 0 .and. i .le. gtrk(igtrk).ntpc)
                i=i+1
-            enddo           
-            lasthit = gtrk(igtrk).ipnt(i)          
-            globtrk(iglob).x_last(1) = tphit(lasthit).x
-            globtrk(iglob).x_last(2) = tphit(lasthit).y
-            globtrk(iglob).x_last(3) = tphit(lasthit).z
-C----->>>>  new calculation of .length   S.Margetis
-            gseed = sqrt((globtrk(iglob).x_last(1) 
-     +           - globtrk(iglob).x_first(1))**2 +
-     +           (globtrk(iglob).x_last(2) 
-     +           - globtrk(iglob).x_first(2))**2)
-            
-            gtanl = globtrk(iglob).tanl
-            ginvpt= globtrk(iglob).invpt
-            call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
-            globtrk(iglob).length=glength
-C---  <<<<<<<
-            
+            enddo  
+            if( i .le. gtrk(igtrk).ntpc) then       
+               lasthit = gtrk(igtrk).ipnt(i)          
+               globtrk(iglob).x_last(1) = tphit(lasthit).x
+               globtrk(iglob).x_last(2) = tphit(lasthit).y
+               globtrk(iglob).x_last(3) = tphit(lasthit).z
+               
+            else
+               globtrk(iglob).x_last(1) = -9999
+               globtrk(iglob).x_last(2) = -9999
+               globtrk(iglob).x_last(3) = -9999
+            endif
          else
             i = gtrk(igtrk).nhit
             det = gtrk(igtrk).det(i)
             do while (gtrk(igtrk).pos(i) .lt. 0 .or.
      +           gtrk(igtrk).ipnt(i) .eq. 0)
                i = i-1
-             enddo
-            lasthit = gtrk(igtrk).ipnt(i)
-            if (lasthit .gt. 0) then
-               globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
-               globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
-               globtrk(iglob).x_last(3) = svthit(lasthit).x(3)
-C----->>>>  new calculation of .length   S.Margetis
-               gseed = sqrt((globtrk(iglob).x_last(1) 
-     +              - globtrk(iglob).x_first(1))**2 +
-     +              (globtrk(iglob).x_last(2) 
-     +              - globtrk(iglob).x_first(2))**2)
-               
-               gtanl = globtrk(iglob).tanl
-               ginvpt= globtrk(iglob).invpt
-               call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
-               globtrk(iglob).length=glength
-C---  <<<<<<<         
-            endif
+               det = gtrk(igtrk).det(i)
+            enddo
+            if( det .gt. 0) then
+               lasthit = gtrk(igtrk).ipnt(i)
+               if (lasthit .gt. 0) then
+                  globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
+                  globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
+                  globtrk(iglob).x_last(3) = svthit(lasthit).x(3)
+               endif
+            else
+               globtrk(iglob).x_last(1) = -9999
+               globtrk(iglob).x_last(2) = -9999
+               globtrk(iglob).x_last(3) = -9999
+            endif    
          endif
       endif
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
-
+         
          if((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
      +        .gt. 400) then
             
