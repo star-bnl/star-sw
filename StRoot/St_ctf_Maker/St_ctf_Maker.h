@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.1 1999/01/01 02:39:38 fisyak Exp $
+// $Id: St_ctf_Maker.h,v 1.2 1999/01/02 19:08:14 fisyak Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.2  1999/01/02 19:08:14  fisyak
+// Add ctf
+//
 // Revision 1.1  1999/01/01 02:39:38  fisyak
 // Add ctf Maker
 //
@@ -47,12 +50,11 @@ class St_ctf_Maker : public StMaker {
    St_cts_mpara     *m_cts;          //!
  protected:
  public: 
-                  St_ctf_Maker(const char *name="ctf", const char *title="event/data/ctf/hits");
+                  St_ctf_Maker(const char *name="ctf", const char *title="event/data/ctf");
    virtual       ~St_ctf_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_ctf_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

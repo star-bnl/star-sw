@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.5 1998/10/31 00:26:21 fisyak Exp $
+// $Id: St_stk_Maker.h,v 1.6 1999/01/02 19:08:22 fisyak Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.6  1999/01/02 19:08:22  fisyak
+// Add ctf
+//
 // Revision 1.5  1998/10/31 00:26:21  fisyak
 // Makers take care about branches
 //
@@ -39,11 +42,12 @@ class St_stk_vtx_direct;
 class St_stk_filler;
 class St_svg_config;
 class St_svg_geom;
+class St_spr_sprpar;
 
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.5 1998/10/31 00:26:21 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.6 1999/01/02 19:08:22 fisyak Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -87,7 +91,7 @@ class St_stk_Maker : public StMaker {
                St_stk_filler     *m_stk_filler; //!
                St_svg_config     *m_config; //!
                St_svg_geom       *m_geom;//!
-               
+               St_spr_sprpar     *m_sprpar; //!
  protected:
  public: 
                   St_stk_Maker(const char *name="svt_tracks", const char *title="event/data/svt/tracks");

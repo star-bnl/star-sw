@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.9 1998/12/21 19:41:51 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.10 1999/01/02 19:08:17 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.10  1999/01/02 19:08:17  fisyak
+// Add ctf
+//
 // Revision 1.9  1998/12/21 19:41:51  fisyak
 // Move dst 2 glb
 //
@@ -60,10 +63,13 @@ class St_ev0_ev0par;
 class St_ev0_ev0par2;
 class St_mft_control; 
 class St_particle_dst_param;
+class St_smdst_v0cut;
+
 class St_glb_Maker : public StMaker {
+
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.9 1998/12/21 19:41:51 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.10 1999/01/02 19:08:17 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -120,6 +126,7 @@ class St_glb_Maker : public StMaker {
   St_egr_egrpar  *m_egr_egrpar;  //!
   St_egr_egrpar  *m_egr2_egrpar; //!
   St_particle_dst_param *m_particle_dst_param; //!
+  St_smdst_v0cut *m_smdst_v0cut; //!
   // Histograms
   static const Int_t nxpT;
   static const Int_t nyeta;

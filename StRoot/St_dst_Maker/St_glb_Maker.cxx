@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.16 1998/12/21 19:41:50 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.17 1999/01/02 19:08:17 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.17  1999/01/02 19:08:17  fisyak
+// Add ctf
+//
 // Revision 1.16  1998/12/21 19:41:50  fisyak
 // Move dst 2 glb
 //
@@ -81,9 +84,12 @@
 #include "global/St_track_propagator_Module.h"
 //#include "global/St_ev0_am_Module.h"
 #include "global/St_ev0_am2_Module.h"
+#include "global/St_ev0_dst_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 #include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
+
+#include "strange/St_smdst2_am_Module.h"
 
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
@@ -105,7 +111,8 @@ m_evr_evrpar(0),
 m_ev0par(0),
 m_magf(0),
 m_egr_egrpar(0),
-m_particle_dst_param(0)
+m_particle_dst_param(0),
+m_smdst_v0cut(0)
 {
   drawinit=kFALSE;
   m_scenario  = 8;
@@ -202,6 +209,15 @@ Int_t St_glb_Maker::Init(){
   }
   ev0par2 = m_ev0par2->GetTable();
   ev0par2->dlen =  2;
+  // 
+  m_smdst_v0cut = (St_smdst_v0cut *) params("strange/smdst/smdst_v0cut");
+  if (! m_smdst_v0cut) {
+    m_smdst_v0cut = new St_smdst_v0cut("m_smdst_v0cut",1);
+    smdst_v0cut_st smdst_v0cut = {100., // max_dca
+				  100., // max_bv0
+				  0.0}; // min_dv0
+    m_smdst_v0cut->AddAt(&smdst_v0cut,0);
+  }
   // Create Histograms    
   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
@@ -227,37 +243,95 @@ Int_t St_glb_Maker::Make(){
   St_DataSet  *dst_loc = global("dst");
   if (! dst_loc) dst_loc = global.Mkdir("dst");
   St_DataSetIter dst(dst_loc);
-  St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
-  if (!globtrk){ //create dst
-    St_DataSetIter tpc_tracks(gStChain->DataSet("tpc_tracks")); 
-    St_DataSetIter tpc_hits(gStChain->DataSet("tpc_hits")); 
-    
-    St_DataSetIter svt_tracks(gStChain->DataSet("svt_tracks"));
-    St_DataSetIter svt_hits(gStChain->DataSet("svt_hits"));
-    
-    St_tpt_track  *tptrack   = (St_tpt_track *) tpc_tracks("tptrack");
-    St_tcl_tphit  *tphit = (St_tcl_tphit *) tpc_hits("tphit");
-    St_stk_track  *stk_track = (St_stk_track *) svt_tracks("stk_track");
-    if (! stk_track) {
-      stk_track = new St_stk_track("stk_track",1);
-      svt_tracks.Add(stk_track);
-    }
-    St_tte_eval     *evaltrk      = (St_tte_eval   *) tpc_tracks("evaltrk");
-    St_scs_spt      *scs_spt      = (St_scs_spt    *) svt_hits("scs_spt");
-    St_sgr_groups   *groups       = (St_sgr_groups *) svt_tracks("groups");
-    //svm
-    St_DataSet  *global_track = global.Mkdir("tracks");
-    St_DataSetIter track(global_track);
-    St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000);
-    track.Add(evt_match);
-    
+
+  St_dst_track      *globtrk     = (St_dst_track     *) dst("globtrk");
+  St_dst_track_aux  *globtrk_aux = (St_dst_track_aux *) dst("globtrk_aux");
+  St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
+  St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
+  St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
+  St_ev0_aux        *ev0out      = (St_ev0_aux       *) dst("ev0out");
+  St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
+  St_dst_point      *point       = (St_dst_point     *) dst("point");
+  St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
+  St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
+  St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
+  if (! event_header) {
+    event_header  = new St_dst_event_header("event_header",1);
+    dst.Add(event_header);
+  }
+  dst_event_header_st  event =   {"Collision", //event_type
+				  0,0,         // n_event[2]
+				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
+  event_header->AddAt(&event,0);
+  if (! event_summary) {
+    event_summary = new St_dst_event_summary("event_summary",1);
+    dst.Add(event_summary);
+  }
+  
+  St_DataSet    *tpctracks = gStChain->DataSet("tpc_tracks");
+  St_tpt_track  *tptrack   = 0;
+  St_tte_eval   *evaltrk   = 0;
+  if (tpctracks) {
+    St_DataSetIter tpc_tracks(tpctracks); 
+    tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
+    evaltrk   = (St_tte_eval   *) tpc_tracks("evaltrk");
+  }
+  St_DataSet         *tpchits = gStChain->DataSet("tpc_hits");
+  St_tcl_tphit     *tphit     = 0;
+  St_tcl_tpcluster *tpcluster = 0;
+  if (tpchits) {
+    St_DataSetIter    tpc_hits(gStChain->DataSet("tpc_hits")); 
+    tphit     = (St_tcl_tphit     *) tpc_hits("tphit");
+    tpcluster = (St_tcl_tpcluster *) tpc_hits("tpcluster");
+  }
+  if (! tpcluster)    tpcluster = new St_tcl_tpcluster("tpcluster",1); 
+  St_DataSet     *svtracks = gStChain->DataSet("svt_tracks"); 
+  St_stk_track  *stk_track = 0;
+  St_sgr_groups *groups    = 0;
+  
+  if (svtracks) {
+    St_DataSetIter svt_tracks(svtracks);
+    stk_track = (St_stk_track  *) svt_tracks("stk_track");
+    groups    = (St_sgr_groups *) svt_tracks("groups");
+  }
+  else {
+    stk_track = new St_stk_track("stk_track",1);
+  }
+
+  St_DataSet         *svthits = gStChain->DataSet("svt_hits");
+  St_scs_spt     *scs_spt     = 0;
+  St_scs_cluster *scs_cluster = 0;
+  if (svthits) {
+    St_DataSetIter   svt_hits(gStChain->DataSet("svt_hits"));
+    scs_spt      = (St_scs_spt     *) svt_hits("scs_spt");
+    scs_cluster = (St_scs_cluster *) svt_hits("scs_cluster");
+  }
+  // What is [data]/svt/hits/scs_cluster ?
+  if (! scs_cluster) scs_cluster = new St_scs_cluster("scs_cluster",1); 
+  St_DataSet  *global_track = global("tracks");
+  if (!global_track) global_track = global.Mkdir("tracks");
+  St_DataSetIter track(global_track);
+  St_svm_evt_match *evt_match = (St_svm_evt_match *) track("evt_match");
+  St_DataSet *ctf = gStChain->DataSet("ctf");
+  St_ctu_cor *ctb_cor = 0;
+  if (!ctf) {cout << "St_ctf_Maker has not been called " << endl;}
+  else {
+    St_DataSetIter ctf_hits(ctf);
+    ctb_cor = (St_ctu_cor *) ctf_hits("ctb_cor"); 
+    if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); ctf_hits.Add(ctb_cor,"ctf");}
+  }
+  if (!primtrk){ //create dst
     if (tptrack && stk_track) {
-      
+       //svm
+      if (!evt_match) {
+	evt_match  = new St_svm_evt_match("evt_match",3000);
+	track.Add(evt_match);
+      }
       Int_t res_svm =  svm_am (stk_track, tptrack,
 			       m_svm_ctrl, evt_match);
+#if 0
       cout << "Calling SVM_EVAL2.." << endl;
       
-      //
       St_DataSetIter run(gStChain->DataSet("geom"));
       St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
       if (!g2t_gepart){
@@ -278,170 +352,166 @@ Int_t St_glb_Maker::Make(){
       track.Add(svm_eval_strk);
       Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
 					     evt_match, svm_eval_par,svm_eval_strk);
+#endif
+      if (! globtrk)    {globtrk = new St_dst_track("globtrk",100000);             dst.Add(globtrk);}
+      if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",100000); dst.Add(globtrk_aux);}
+      if (! vertex) {vertex = new St_dst_vertex("vertex",100000); dst.Add(vertex);}
+      // egr
+      Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
+				   scs_spt,m_egr_egrpar,stk_track,groups,
+				   evt_match,globtrk,globtrk_aux);
+    
+      if (Res_egr != kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
+      cout << " finished calling egr_fitter" << endl;
     }
-    St_dst_track     *globtrk     = new St_dst_track("globtrk",100000); 
-    dst.Add(globtrk);
-    St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",100000);
-    dst.Add(globtrk_aux);
-    St_DataSet *vertices    = global("vertices");
-    if (!vertices) vertices = global.Mkdir("vertices");
-    St_dst_vertex *vertex = new St_dst_vertex("vertex",100000); 
-    dst.Add(vertex);
-
-    // evr
-    cout << "run_evr: calling evr_am" << endl;
-    
-    Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
-    
-    // egr
-    
-    Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
-				 scs_spt,m_egr_egrpar,stk_track,groups,
-				 evt_match,globtrk,globtrk_aux);
-    
-    if (Res_egr != kSTAFCV_OK) {
-      cout << "Problem on return from EGR_FITTER" << endl;
-    }
-    cout << " finished calling egr_fitter" << endl;
+#if 1
     // track_propogator
     St_dst_track *globtrk2     = new St_dst_track("globtrk2",100000);
     dst.Add(globtrk2);
     *globtrk2  = *globtrk;
     cout << " Calling track_propagator " << endl;
 
-    Int_t Res_tp = track_propagator(globtrk,m_tp_param,globtrk2);
+    Int_t Res_tp = track_propagator(globtrk2,m_tp_param,globtrk);
 
     if (Res_tp !=  kSTAFCV_OK) {
       cout << "Problem on return from Track_Propagator" << endl;
     }
     cout << " finished calling track-propagator" << endl;
-
-
     // egr2
-    cout << "Calling EGR_fitter - Second time" << endl;
-    St_dst_track *primtrk = new St_dst_track("primtrk",30000);
-    dst.Add(primtrk);
-    St_dst_track_aux *primtrk_aux = new St_dst_track_aux("primtrk_aux",30000);
-    dst.Add(primtrk_aux);
-    Int_t Res_egr2 = egr_fitter (tphit,vertex,tptrack,evaltrk,
-				 scs_spt,m_egr2_egrpar,stk_track,groups,
-				 evt_match,primtrk,primtrk_aux);
-    if (Res_egr2 != kSTAFCV_OK){
-      cout << "Problem on return from EGR_FITTER" << endl;
+    if (tphit && stk_track) {
+      if (!primtrk) {
+	primtrk = new St_dst_track("primtrk",30000);
+	dst.Add(primtrk);
+      }
+      if (!primtrk_aux) {
+	primtrk_aux = new St_dst_track_aux("primtrk_aux",30000);
+	dst.Add(primtrk_aux);
+      }
+      cout << "Calling EGR_fitter - Second time" << endl;
+      Int_t Res_egr2 = egr_fitter (tphit,vertex,tptrack,evaltrk,
+				   scs_spt,m_egr2_egrpar,stk_track,groups,
+				   evt_match,primtrk,primtrk_aux);
+      if (Res_egr2 != kSTAFCV_OK){
+	cout << "Problem on return from EGR_FITTER" << endl;
+      }
+      cout <<" finished calling egr_fitter - second time" << endl;
     }
-    cout <<" finished calling egr_fitter - second time" << endl;
+#endif
+    // evr
+    cout << "run_evr: calling evr_am" << endl;
+    Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,primtrk,vertex);
     // ev0
     cout << "Calling ev0..." << endl;
-    St_ev0_aux *ev0out    = new St_ev0_aux("ev0out",100000); 
-    vertices->Add(ev0out);
-    //    St_ev0_track     *ev0track    = new St_ev0_track("ev0track",100000);
-    //    dst.Add(ev0track);
-#if 0    
-    Int_t Res_ev0 = ev0_am(m_ev0par,globtrk,vertex,
-			   ev0out,ev0track,m_magf);
-#endif 
+    if (! ev0out) {ev0out = new St_ev0_aux("ev0out",100000); dst.Add(ev0out);}
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
     dst.Add(ev0track2);
-    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,ev0out,ev0track2);
-   
-    if (Res_ev0 != kSTAFCV_OK){
-      cout << "Problem on return from ev0_am" << endl;
-    }
+    if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
+    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk2,vertex,ev0out,ev0track2);
+    //ev0d
+    St_dst_v0_vertex *dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",100000);
+    dst.Add(dst_v0_vertex);
+    Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
+    if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
     //  ev0_eval2
-    St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000);
-    vertices->Add(ev0_eval); 
-    St_DataSetIter geant(gStChain->DataSet("geant"));
-    St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
-    St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *)geant("Event/g2t_vertex");
+    if (stk_track && tptrack && evaltrk) {
+      St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000);
+      dst.Add(ev0_eval); 
+      St_DataSetIter geant(gStChain->DataSet("geant"));
+      St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
+      St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
+      if (g2t_track && g2t_vertex){
+	cout << " Calling ev0_eval2.." << endl;
     
-    cout << " Calling ev0_eval2.." << endl;
+	Int_t Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
+				       vertex,ev0out,ev0_eval,
+				       g2t_track,g2t_vertex);
     
-    Int_t Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
-				   vertex,ev0out,ev0_eval,
-				   g2t_track,g2t_vertex);
-    
-    if (Res_ev0_eval != kSTAFCV_OK) {
-      cout << "Problem on return from ev0eval2" << endl;
+	if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
+      }
     }
-    //  dst 
-    St_dst_dedx *dst_dedx = new St_dst_dedx("dst_dedx",100000); dst.Add(dst_dedx);
+    // sdst2
+    St_smdst_index *tindex   = new St_smdst_index("tindex",50000); dst.Add(tindex);
+    St_smdst_index *vindex   = new St_smdst_index("vindex",10000); dst.Add(vindex);
+    St_smdst_v0    *smdst_v0 = new St_smdst_v0("smdst_v0",10000);  dst.Add(smdst_v0);
+    cout << " Calling smdst2..." << endl;
+    Int_t Res_smdst =  smdst2_am(event_header,globtrk,
+				 vertex,dst_v0_vertex,
+				 m_smdst_v0cut, 
+				 smdst_v0,tindex,vindex);
+    if (Res_smdst != kSTAFCV_OK) {cout << " Problem on return from smdst2_am" << endl;}
+    // dst 
     // dst_dedx_filler
+    if (tptrack && stk_track) {
+      cout << " run_dst: Calling dst_dedx_filler" << endl;
+      if (!dst_dedx) {
+	dst_dedx = new St_dst_dedx("dst_dedx",100000); dst.Add(dst_dedx);
+      }
+      Int_t Res_dedx_filler =  dst_dedx_filler(tptrack,stk_track,dst_dedx);
     
-    cout << " run_dst: Calling dst_dedx_filler" << endl;
-    
-    Int_t Res_dedx_filler =  dst_dedx_filler(tptrack,stk_track,dst_dedx);
-    
-    if (Res_dedx_filler != kSTAFCV_OK) {
-      cout << "Problem on return from DST_DEDX_FILLER" << endl; 
+      if (Res_dedx_filler != kSTAFCV_OK) {
+	cout << "Problem on return from DST_DEDX_FILLER" << endl; 
+      }
+      cout << " run_dst: finished calling dst_dedx_filler" << endl;
     }
-    cout << " run_dst: finished calling dst_dedx_filler" << endl;
     // dst_mon_soft
-    cout << " run_dst: Calling dst_point_filler" << endl;
-    // dst_point_filler
-    St_dst_point *point = new St_dst_point("point",200000); dst.Add(point);
+    if (tphit &&  scs_spt) {
+      cout << " run_dst: Calling dst_point_filler" << endl;
+      // dst_point_filler
+      if (! point) {point = new St_dst_point("point",200000); dst.Add(point);}
 #if 0
-    St_dst_tof *tof = new St_dst_tof("tof",2000); dst.Add(tof);
+      St_dst_tof *tof = new St_dst_tof("tof",2000); dst.Add(tof);
 #endif
-    Int_t Res_dst_point_filler = dst_point_filler(tphit, scs_spt, point);
+      Int_t Res_dst_point_filler = dst_point_filler(tphit, scs_spt, point);
     
-    if ( Res_dst_point_filler != kSTAFCV_OK) {
-      cout << "Problem on return from DST_POINT_FILLER" << endl;
+      if ( Res_dst_point_filler != kSTAFCV_OK) {
+	cout << "Problem on return from DST_POINT_FILLER" << endl;
+      }
+    
+      cout << " run_dst: finished calling dst_point_filler" << endl;
     }
+    if (tphit && scs_spt && tptrack && stk_track && evt_match && ctf) {
+      if (! monitor_soft) {
+	monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
+	dst.Add(monitor_soft);
+      }
+      cout << " run_dst: Calling dst_monitor_soft_filler" << endl;
+      
+      Int_t Res_dst_monitor =  dst_monitor_soft_filler(tpcluster,
+						       scs_cluster,
+						       tphit,scs_spt,tptrack,stk_track,evt_match,
+						       ctb_cor,vertex,event_summary,monitor_soft);
+      if (Res_dst_monitor  != kSTAFCV_OK){
+	cout << "Problem on return from DST_MONITOR_SOFT_FILLER" << endl;
+      }
+      cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
+    }      
+    St_DataSet *run_summary = gStChain->DataSet("run_summary");
+    if (run_summary) {
+      cout << " run_dst: Calling fill_dst_event_summary" << endl;
+      St_DataSetIter summary(run_summary);
+      St_dst_run_header *run_header = (St_dst_run_header *) summary("run_header");
+      St_dst_summary_param *summary_param = (St_dst_summary_param *) summary("summary_param");
+      
+      Int_t Res_fill_dst_event_summary = fill_dst_event_summary(summary_param,run_header,event_header,
+								globtrk,vertex,event_summary);
     
-    cout << " run_dst: finished calling dst_point_filler" << endl;
-    St_dst_event_header  *event_header  = new St_dst_event_header("event_header",1);
-    dst.Add(event_header);
-    dst_event_header_st  *event = event_header->GetTable();
-    event->n_event[0]=      0;
-    event->n_event[1]=      0;
-    event->n_run=        0;
-    strcpy(event->event_type,"Collision");
-    event->time=         0;
-    event->trig_mask=    0;
-    event->bunch_cross=  0;
-    
-    St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
-    dst.Add(event_summary);
-    St_dst_monitor_soft *monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
-    dst.Add(monitor_soft);
-    cout << " run_dst: Calling dst_monitor_soft_filler" << endl;
-    St_tcl_tpcluster  *tpcluster = (St_tcl_tpcluster *) tpc_hits("tpcluster");
-    if (! tpcluster) {tpcluster = new St_tcl_tpcluster("tpcluster",1); tpc_hits.Add(tpcluster);}
-    // What is [data]/svt/hits/scs_cluster ?
-    St_scs_cluster *scs_cluster = new St_scs_cluster("scs_cluster",1); svt_hits.Add(scs_cluster);
-    St_DataSet *ctf = gStChain->DataSet("ctf_hits");
-    if (!ctf) {cout << "St_ctf_Maker has not been called " << endl;}
-    St_DataSetIter ctf_hits(ctf);
-    St_ctu_cor *ctb_cor = (St_ctu_cor *) ctf_hits("ctb_cor"); 
-    if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); ctf_hits.Add(ctb_cor,"ctf");}
-    Int_t Res_dst_monitor =  dst_monitor_soft_filler(tpcluster,
-						     scs_cluster,
-						     tphit,scs_spt,tptrack,stk_track,evt_match,
-						     ctb_cor,vertex,event_summary,monitor_soft);
-    
-    if (Res_dst_monitor  != kSTAFCV_OK){
-      cout << "Problem on return from DST_MONITOR_SOFT_FILLER" << endl;
+      if (Res_fill_dst_event_summary != kSTAFCV_OK) {
+	cout << "Problem on return from FILL_DST_EVENT_SUMMARY" << endl;
+      }
+      cout << " run_dst: finished calling fill_dst_event_summary" << endl;
     }
-    cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
-    
-    cout << " run_dst: Calling fill_dst_event_summary" << endl;
-    St_DataSetIter summary(gStChain->DataSet("run_summary"));
-    St_dst_run_header *run_header = (St_dst_run_header *) summary("run_header");
-    St_dst_summary_param *summary_param = (St_dst_summary_param *) summary("summary_param");
-    
-    Int_t Res_fill_dst_event_summary = fill_dst_event_summary(summary_param,run_header,event_header,
-							      globtrk,vertex,event_summary);
-    
-    if (Res_fill_dst_event_summary != kSTAFCV_OK) {
-      cout << "Problem on return from FILL_DST_EVENT_SUMMARY" << endl;
-    }
-    cout << " run_dst: finished calling fill_dst_event_summary" << endl;
+    if (! svtracks) SafeDelete (stk_track);
+    SafeDelete (tpcluster);
+    SafeDelete (scs_cluster);
+#if 0
+    SafeDelete (ctb_cor);
+#endif
   }
   // Fill histograms
-  if (globtrk) {
-    table_head_st *trk_h = globtrk->GetHeader();
-    dst_track_st  *trk   = globtrk->GetTable();
-    for (Int_t i = 0; i < globtrk->GetNRows(); i++){
+  if (primtrk) {
+    table_head_st *trk_h = primtrk->GetHeader();
+    dst_track_st  *trk   = primtrk->GetTable();
+    for (Int_t i = 0; i < primtrk->GetNRows(); i++){
       dst_track_st *t = trk + i;
       Float_t pT = 9999.;
       if (t->invpt) pT = 1./TMath::Abs(t->invpt);
@@ -454,7 +524,7 @@ Int_t St_glb_Maker::Make(){
       m_tlength->Fill(t->length);
       if (t->ndegf>0) {
         m_chi2xd->Fill(t->chisq[0]/((t->ndegf+5.)/2.-3.));  
-        m_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-3.));  
+        m_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-2.));  
       }
     }
   }
@@ -499,7 +569,6 @@ Int_t St_glb_Maker::Make(){
     }
   }
   // V0
-  St_ev0_aux *ev0out = (St_ev0_aux *) global("vertices/ev0out");
   if (ev0out) {
     ev0_aux_st *ev0 = ev0out->GetTable();
     for (Int_t k=0; k<ev0out->GetNRows(); k++){
@@ -511,7 +580,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.16 1998/12/21 19:41:50 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.17 1999/01/02 19:08:17 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

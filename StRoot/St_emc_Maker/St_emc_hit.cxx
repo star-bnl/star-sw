@@ -1,5 +1,8 @@
-// $Id: St_emc_hit.cxx,v 1.1 1998/12/15 22:39:53 akio Exp $
+// $Id: St_emc_hit.cxx,v 1.2 1999/01/02 19:08:18 fisyak Exp $
 // $Log: St_emc_hit.cxx,v $
+// Revision 1.2  1999/01/02 19:08:18  fisyak
+// Add ctf
+//
 // Revision 1.1  1998/12/15 22:39:53  akio
 // Add emc_hit object and  adc_to_energy in here.
 //
@@ -10,8 +13,8 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <math.h>
-#include "/afs/rhic/star/packages/SL98j/pams/global/inc/math_constants.h"
-#include "/afs/rhic/star/packages/SL98j/pams/emc/inc/emc_def.h"
+#include "global/inc/math_constants.h"
+#include "emc/inc/emc_def.h"
 #include "St_emc_hit.h"
 ClassImp(St_emc_hit)
 

@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $
+// $Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.24  1999/01/02 19:08:12  fisyak
+// Add ctf
+//
 // Revision 1.23  1998/12/21 19:42:50  fisyak
 // Move ROOT includes to non system
 //
@@ -106,7 +109,7 @@
 //void umain(Int_t nevents=100)
 //{
 //   gROOT->Reset();
-//   gSystem->Load("libStChain.so");  // dynamically link the compiled shared library
+//   gSystem->Load("StChain");  // dynamically link the compiled shared library
 //
 //   // Open the root output file
 //   TFile file("StChain.root","recreate","StChain root file",2);
@@ -235,7 +238,6 @@
 #include "TTree.h"
 #include "TBrowser.h"
 #include "TClonesArray.h"
-#include "TBenchmark.h"
 #include "TSystem.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
@@ -264,7 +266,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $"),
 m_VersionTag("$Name:  $")
 {
    SetName(name);
@@ -319,7 +321,7 @@ void StChain::Browse(TBrowser *b)
   while ((maker = (StMaker*)next())) {
      b->Add(maker,maker->GetName());
   }
-  b->Add(m_DataSet,m_DataSet->GetName()); 
+  if (m_DataSet) b->Add(m_DataSet,m_DataSet->GetName()); 
 }
 
 //_____________________________________________________________________________
@@ -335,9 +337,9 @@ void StChain::Clear(Option_t *option)
    return;
 }
 //_____________________________________________________________________________
-St_DataSet *StChain::DataSet(Char_t *makername)
+St_DataSet *StChain::DataSet(const Char_t *makername, const Char_t *path) const
 {
-// find the maker by name and return its dataset
+// find the maker by name and return its dataset or subdataset if "path" supplied
  St_DataSet *set = 0;
  if (makername) {
   set = 0;
@@ -346,6 +348,14 @@ St_DataSet *StChain::DataSet(Char_t *makername)
      StMaker *maker;
      while (maker = (StMaker*) next()){if (!strcmp(maker->GetName(),makername)) break;}
      if (maker) set = maker->DataSet(); 
+     if (set && path && strlen(path)) set=0;
+#if 0
+     {
+       set = set->Find(path);
+       if (!set) {
+       }
+     }
+#endif
    }
  }
  return set;
@@ -389,7 +399,7 @@ Int_t StChain::Init()
       objlast = gDirectory->GetList()->Last();
 
      // Initialise maker
-      gBenchmark->Start((const char *) maker->GetName());
+      maker->StartTimer();
       St_DataSet *makerset = maker->DataSet();
       if (!makerset){
         const Char_t *makertype = maker->GetTitle();
@@ -398,7 +408,7 @@ Int_t StChain::Init()
         maker->SetDataSet(makerset);
       }
       if ( maker->Init()) return kStErr;
-      gBenchmark->Stop((const char *) maker->GetName());
+      maker->StopTimer();
      // Add the Maker histograms in the Maker histograms list
       if (objlast) objfirst = gDirectory->GetList()->After(objlast);
       else         objfirst = gDirectory->GetList()->First();
@@ -446,7 +456,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -492,12 +502,12 @@ void StChain::InitChain(TChain *chain)
 }
 
 //_____________________________________________________________________________
-void StChain::MakeTree(const char* name, const char*title)
+TTree *StChain::MakeTree(const char* name, const char*title)
 {
 //  Create a ROOT tree
 //  Loop on all makers to create the Root branch (if any)
 
-   if (m_Tree) return;
+   if (m_Tree) return m_Tree;
 
    m_Tree = new TTree(name,title);
 
@@ -506,9 +516,11 @@ void StChain::MakeTree(const char* name, const char*title)
    //   Save();
    //   MakeBranch();
    while ((maker = (StMaker*)next())) {
-      maker->Save();
-      maker->MakeBranch();
+   //   maker->Save();
+      if (maker->IsToSave())
+              maker->MakeBranch();
    }
+   return m_Tree;
 }
 //_____________________________________________________________________________
 void StChain::MakeBranch()
@@ -520,6 +532,22 @@ void StChain::MakeBranch()
    Int_t buffersize = 4000;
    m_BranchName = GetName();
    m_Tree->Branch(m_BranchName.Data(),ClassName(), &gStChain, buffersize);
+}
+
+//_____________________________________________________________________________
+void StChain::SetBranches()
+{
+   if (!m_Tree) return;
+
+   TIter next(m_Makers);
+   StMaker *maker;
+   //   Save();
+   //   MakeBranch();
+   while ((maker = (StMaker*)next())) {
+   //   maker->Save();
+   //   if (maker->IsToSave())
+              maker->SetBranch();
+   }
 }
 
 
@@ -586,19 +614,22 @@ Int_t StChain::Finish()
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       if ( maker->Finish() ) nerr++;
-      gBenchmark->Print((char *) maker->GetName());
+      maker->PrintTimer();
    }
    return nerr;
 }
+//_____________________________________________________________________________
 void StChain::StartMaker(StMaker *mk)
 {
-  gBenchmark->Start(mk->GetName());
+  if (mk) mk->StartTimer();
 }
+//_____________________________________________________________________________
 void StChain::EndMaker(StMaker *mk,Int_t iret)
 {
-  gBenchmark->Stop (mk->GetName());
+  if (mk) mk->StopTimer();
 
 }
+//_____________________________________________________________________________
 void StChain::Fatal(int Ierr, const char *com)
 {
    printf("StChain::Fatal: Error %d %s\n",Ierr,com);

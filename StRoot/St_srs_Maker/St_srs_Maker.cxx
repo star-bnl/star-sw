@@ -33,6 +33,15 @@ Int_t St_srs_Maker::Init(){
    m_shape       = (St_svg_shape   *) local("svt/svgpars/shape");
    m_config      = (St_svg_config  *) local("svt/svgpars/config");
    m_geom        = (St_svg_geom    *) local("svt/svgpars/geom");
+   if (!m_geom) {
+     if (!(m_shape && m_config)){
+       cout << " St_params_Maker:tpg_pad_plane or tpg_detector do not exist" << endl;
+     }
+     else {
+       m_geom = new St_svg_geom("geom",216);
+       Int_t res = svg_am(m_config,m_shape,m_geom);
+     }
+   }
    m_srs_activea = (St_srs_activea *) local("svt/srspars/srs_activea");
    m_srs_srspar  = (St_srs_srspar  *) local("svt/srspars/srs_srspar");
    m_srs_direct  = (St_srs_direct  *) local("svt/srspars/srs_direct");
@@ -60,7 +69,7 @@ Int_t St_srs_Maker::Make(){
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.12 1998/10/31 00:26:20 fisyak Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.13 1999/01/02 19:08:20 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
