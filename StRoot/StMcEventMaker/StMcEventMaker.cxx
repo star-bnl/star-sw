@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.25 2000/04/24 22:08:23 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.26 2000/05/04 22:46:39 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.26  2000/05/04 22:46:39  calderon
+ * pdg Id is now read in the track constructor for all tracks
+ *
  * Revision 1.25  2000/04/24 22:08:23  calderon
  * change for indexing of mother particles
  *
@@ -137,7 +140,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.25 2000/04/24 22:08:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.26 2000/05/04 22:46:39 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -550,7 +553,6 @@ Int_t StMcEventMaker::Make()
 		    // need to keep the information of its parentage.
 		    nParticlesInBothTables++;
 		    t->setParent(ttempParticle[iEventGeneratorLabel]->parent());
-		    t->setPdgId(ttempParticle[iEventGeneratorLabel]->pdgId());
 		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 							 mCurrentMcEvent->tracks().end(),
 							 ttempParticle[iEventGeneratorLabel]);
