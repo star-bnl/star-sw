@@ -6,6 +6,7 @@ using std::cout;
 using std::endl;
 
 #include "StiTrackFinder.h"
+#include "StiKalmanTrackNode.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "Messenger.h"
 #include "SubjectObserver.h"
@@ -154,7 +155,14 @@ inline void StiKalmanTrackFinder::forgetSubject(Subject* obsolete)
     }
 }
 
+inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
+{
+	pars = par;
+	StiKalmanTrackNode::pars = par;
+}
+
 
 #endif
+
 
 

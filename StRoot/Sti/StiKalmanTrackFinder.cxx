@@ -69,7 +69,11 @@ StiKalmanTrackFinder::StiKalmanTrackFinder()
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
   StiTrack::setTrackFitter(new StiKalmanTrackFitter());
   reset();
-    
+
+	// set parameters used by this finder.
+	setParameters(new StiKalmanTrackFinderParameters());
+	
+	
   mSubject->attach(this);
   getNewState();
     
@@ -92,7 +96,7 @@ void StiKalmanTrackFinder::getNewState()
   pars->setElossCalculated(broker->ktfElossCalculated());
   pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
   pars->setField(broker->ktfBField());
-  //pars->setMassHypothesis(broker->ktfMassHypothesis());
+  pars->setMassHypothesis(broker->ktfMassHypothesis());
   pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
   pars->setMaxNullCount(broker->ktfMaxNullCount());
   pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
