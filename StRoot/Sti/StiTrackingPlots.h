@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.11 2004/11/10 21:45:11 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.12 2004/11/22 19:21:49 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.12  2004/11/22 19:21:49  pruneau
+ * revamped the plotting package
+ *
  * Revision 2.11  2004/11/10 21:45:11  pruneau
  * added diagnostic plots
  *
@@ -60,60 +63,49 @@ class StiTrackingPlots : public HistogramGroup
   vector<StiDefaultTrackFilter *> mFilter;
   string mOutFile;
 
-  TH1D *numTracks;
-  TH1D * _eta;
-  TH1D * _etaPlus;
-  TH1D * _etaMinus;
-  TH1D * _phi;
-  TH1D * _phiPlus;
-  TH1D * _phiMinus;
-  TH1D * _pt;
-  TH1D * _ptPlus;
-  TH1D * _ptMinus;
-  TH1D * _dca40;
-  TH1D * _dca40Plus;
-  TH1D * _dca40Minus;
-  TH1D * _globalDca;
-  TH1D * _globalDcaPlus;
-  TH1D * _globalDcaMinus;
+  TH1D * _track[5];
+  TH2D * _track2D[5][5];
 
-  TH2D *_nptsVsPt;
-  TH2D *_nptsVsPtPlus;
-  TH2D *_nptsVsPtMinus;
-  TH2D *_nptsVsEtaPtGt200;
-  TH2D *_nptsVsEtaPtLt200;
+  TH1D * _eta[5];
+  TH1D * _phi[5];
+  TH1D * _pt[5];
+  TH1D * _dca[5];
+  TH1D * _gdca[5];
+  TH2D * _nptsVsPt[5];
+  TH2D * _nptsVsEta[5];
+  TH2D * _nptsVsPhi[5];
+  TH2D * _nFitVsPt[5];
+  TH2D * _nFitVsEta[5];
+  TH2D * _nFitVsPhi[5];
+  TH2D * _nFitVsN[5];
+  TH2D * _nFitVsNSvt[5];
+  TH1D * _chi2[5];
+  TH2D * _chi2VsNpts[5];
+  TH2D * _chi2VsDca[5];
+  TH2D * _xLastHitVsXLastNode[5];
+  TH2D * radLengthZ[5];
+  TH2D * radLengthPhi[5];
+  TH2D * radLengthEta[5];
+  TH1D * _chi2Inc[5][51];
+  TH2D * _chi2IncVsDca[5][51];
+  TH1D * _yPull[5][51];
+  TH1D * _zPull[5][51];
+  TH1D * _dx[5][51];
+  TH1D * _dy[5][51];
+  TH1D * _dz[5][51];
+  TH2D * _dyVsTanCA[5][51][12];
+  TH2D * _dzVsTanL[5][51][12];
 
-  TH2D *_nptsVsEta;
-  TH2D *_nptsVsEtaPlus;
-  TH2D *_nptsVsEtaMinus;
-
-  TH2D *_nptsVsPhi;
-  TH2D *_nptsVsPhiPlus;
-  TH2D *_nptsVsPhiMinus;
-
-  //rad length maps
-  TH2D * radLengthZ;
-  TH2D * radLengthPhi;
-  TH2D * radLengthEta;
-
-  TH2D *_xLastHitVsXLastNode;
-  TH2D *_xLastHitVsXLastNode1;
-  TH2D *_xLastHitVsXLastNode2;
-
-  TH1D * _chi2;
-  TH2D * _chi2VsNpts;
 
   //track kinematics & helix parameters
   //make all plots 3D - value,Phi,Eta - then cut 
   TH1D * mPx;
-
   TH3D * mCurv;
   TH3D * mHeli;
   TH3D * mMomX;
   TH3D * mMomY;
   TH3D * mMomZ;
   TH3D * mPhase;
-
   TH3D * mGDcavNptsvEtaA;
   //TH3D * mPDcavNptsvEtaA;
   TH3D * mGDcavNptsvPtA;
@@ -136,20 +128,6 @@ class StiTrackingPlots : public HistogramGroup
   TH3D * mGDcavEtavPtM;
   //TH3D * mPDcavEtavPtM;
 
-  TH1D* _etaSvt[3]        ;
-  TH1D* _phiSvt[3]        ;
-  TH1D* _ptSvt[3]         ;
-  TH1D* _globalDcaSvt[3]  ;
-  TH2D* _nptsVsPtSvt[3]   ;
-  TH2D* _nptsVsEtaSvt[3]  ;
-  TH2D* _nptsVsPhiSvt[3]  ;
-  TH1D* _chi2Svt[3]       ;
-  TH2D* _chi2VsNptsSvt[3] ;
-
-  TH2D* _chi2VsDca;
-  TH2D* _chi2VsDcaSvt[3];
-
-  
 };
 
 
