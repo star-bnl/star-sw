@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.46 2000/07/28 19:25:20 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.47 2000/07/28 19:46:04 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.47  2000/07/28 19:46:04  lansdell
+// changed Encap names
+//
 // Revision 1.46  2000/07/28 19:25:20  lansdell
 // added histogram of number of events without a primary vertex
 //
@@ -322,8 +325,8 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) m_det_id->Fill(kBarrelSmdPhiStripId);
       if (globtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) m_det_id->Fill(kEndcapEmcTowerId);
       if (globtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) m_det_id->Fill(kEndcapEmcPreShowerId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapSmdEtaStripId)>0) m_det_id->Fill(kEndcapSmdEtaStripId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapSmdPhiStripId)>0) m_det_id->Fill(kEndcapSmdPhiStripId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapSmdUStripId)>0) m_det_id->Fill(kEndcapSmdUStripId);
+      if (globtrk->topologyMap().numberOfHits(kEndcapSmdVStripId)>0) m_det_id->Fill(kEndcapSmdVStripId);
       if (globtrk->topologyMap().numberOfHits(kZdcWestId)>0) m_det_id->Fill(kZdcWestId);
       if (globtrk->topologyMap().numberOfHits(kZdcEastId)>0) m_det_id->Fill(kZdcEastId);
       if (globtrk->topologyMap().numberOfHits(kMwpcWestId)>0) m_det_id->Fill(kMwpcWestId);
@@ -714,8 +717,8 @@ void StEventQAMaker::MakeHistPrim() {
 	if (primtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) m_pdet_id->Fill(kBarrelSmdPhiStripId);
 	if (primtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) m_pdet_id->Fill(kEndcapEmcTowerId);
 	if (primtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) m_pdet_id->Fill(kEndcapEmcPreShowerId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapSmdEtaStripId)>0) m_pdet_id->Fill(kEndcapSmdEtaStripId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapSmdPhiStripId)>0) m_pdet_id->Fill(kEndcapSmdPhiStripId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapSmdUStripId)>0) m_pdet_id->Fill(kEndcapSmdUStripId);
+	if (primtrk->topologyMap().numberOfHits(kEndcapSmdVStripId)>0) m_pdet_id->Fill(kEndcapSmdVStripId);
 	if (primtrk->topologyMap().numberOfHits(kZdcWestId)>0) m_pdet_id->Fill(kZdcWestId);
 	if (primtrk->topologyMap().numberOfHits(kZdcEastId)>0) m_pdet_id->Fill(kZdcEastId);
 	if (primtrk->topologyMap().numberOfHits(kMwpcWestId)>0) m_pdet_id->Fill(kMwpcWestId);
