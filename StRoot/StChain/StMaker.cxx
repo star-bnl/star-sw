@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.41 1999/05/22 17:50:18 perev Exp $
+// $Id: StMaker.cxx,v 1.42 1999/05/23 03:25:07 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.42  1999/05/23 03:25:07  perev
+// Start & Stop Timer instead of benchmark
+//
 // Revision 1.41  1999/05/22 17:50:18  perev
 // StMaker::EndMaker ps added
 //
@@ -112,7 +115,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.41 1999/05/22 17:50:18 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.42 1999/05/23 03:25:07 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -417,10 +420,12 @@ Int_t StMaker::Init()
       objLast = gDirectory->GetList()->Last();
 
 // 		Initialise maker
-      gBenchmark->Start((const char *)maker->GetName());
+//VP      gBenchmark->Start((const char *)maker->GetName());
+      maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
       if ( maker->Init()) return kStErr;
-      gBenchmark->Stop((const char *) maker->GetName());
+      maker->StartTimer();
+//VP      gBenchmark->Stop((const char *) maker->GetName());
 
 // 		Add the Maker histograms in the Maker histograms list
 // 		and remove it from the ROOT system directory
@@ -447,8 +452,8 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new St_ObjectSet(".data"); Add(m_DataSet);}
   }
   if (GetDebug()) printf("\n*** Call %s::Make() ***\n\n", ClassName());
-  gBenchmark->Start(GetName());
-}
+//VP  gBenchmark->Start(GetName());
+  StartTimer();}
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
@@ -476,7 +481,8 @@ void StMaker::EndMaker(int ierr)
   if (ps[0]) gSystem->Exec(ps);
   
 
-  gBenchmark->Stop(GetName());
+//VP  gBenchmark->Stop(GetName());
+  StopTimer();
 }
 
 //_____________________________________________________________________________
@@ -490,7 +496,8 @@ Int_t StMaker::Finish()
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       if ( maker->Finish() ) nerr++;
-      gBenchmark->Print((char *) maker->GetName());
+      maker->PrintTimer();
+//VP      gBenchmark->Print((char *) maker->GetName());
    }
   Clear();
  return nerr;
