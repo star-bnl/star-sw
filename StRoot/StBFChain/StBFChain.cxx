@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.358 2003/10/01 21:50:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.359 2003/10/05 20:27:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -488,7 +488,7 @@ Bfc_st BFC1[] = {
   {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
@@ -987,7 +987,7 @@ Bfc_st BFC2[] = {
   {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
