@@ -95,8 +95,14 @@
   d.Mkdir("v1/v1_1/v1_1_1");
   d.ls("/v1",3);
   cout  << endl << "------------ 6 ------------ " << endl;
-  d.Rmdir("v1/v21");
+  cout << "Let's check the operator []" << endl;
+  if  (d["v1/v1_1/v1_1_1"])
+     cout << " ** Error **: the path to d[\"" << d("v1/v1_1/v1_1_1")->Path() << "\"]=" << d["v1/v1_1/v1_1_1"] << endl; 
+   else
+     cout << " Ok! the path to d[\"" <<  d("v1/v1_1/v1_1_1")->Path() << "\"]=" << d["v1/v1_1/v1_1_1"] << ";" << endl; 
   cout  << endl << "------------ 7 ------------ " << endl;
+  d.Rmdir("v1/v21");
+  cout  << endl << "------------ 8 ------------ " << endl;
   d.ls("","*");
   d.Rmdir("v1");
   d.Rmdir("v1");
@@ -106,6 +112,6 @@
   }
   else cout << "Ok! The last dataset has NO active directory anymore" << endl;
 
-  cout  << endl << "------------ 8 ------------ " << endl;
+  cout  << endl << "------------ 9 ------------ " << endl;
   
 }
