@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.4 2000/01/13 21:06:22 lasiuk Exp $
+ * $Id: StEvent.h,v 2.5 2000/02/23 17:36:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.4  2000/01/13 21:06:22  lasiuk
- * add rich pixel info/containers
+ * Revision 2.5  2000/02/23 17:36:02  ullrich
+ * Changes due to the addition of the EMC to StEvent
  *
  * Revision 2.10  2000/05/22 21:47:15  ullrich
  * Added RICH collection and related methods.
@@ -46,6 +46,7 @@
  * Revision 2.1  1999/10/28 22:25:10  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
+ * Revision 2.0  1999/10/12 18:41:58  ullrich
  * Completely Revised for New Version
  *
  **************************************************************************/
@@ -85,6 +86,8 @@ public:
     void                                Browse(TBrowser*);
     static const TString&               cvsTag();
     
+    TString                             type() const;
+    ULong_t                             triggerMask() const;
     ULong_t                             bunchCrossingNumber(UInt_t) const;
     
     StEventInfo*                        info();
@@ -122,6 +125,7 @@ public:
     const StSPtrVecTrackNode&           trackNodes() const;
 
     UInt_t                              numberOfPrimaryVertices() const;
+    StPrimaryVertex*                    primaryVertex(UInt_t = 0);
     const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
 
  
@@ -143,6 +147,7 @@ public:
     
     StTpcHitCollection*          mTpcHits;           
     StFtpcHitCollection*         mFtpcHits;          
+    StSvtHitCollection*          mSvtHits;           
     StTpcHitCollection*          mTpcHits;
     StFtpcHitCollection*         mFtpcHits;
     StSvtHitCollection*          mSvtHits;
@@ -166,6 +171,13 @@ public:
     mutable StSPtrVecTrackNode*          mTrackNodes;
 
     mutable StSPtrVecPrimaryVertex*      mPrimaryVertices;
+    mutable StSPtrVecV0Vertex*           mV0Vertices;
+    mutable StSPtrVecXiVertex*           mXiVertices;
+    mutable StSPtrVecKinkVertex*         mKinkVertices;
+	   mTrackNodes,	
+    static TString                       mCvsTag;
+	   mXiVertices,
+	   mKinkVertices,
            mContentLength };
     
     mutable StSPtrVecObject  mContent;

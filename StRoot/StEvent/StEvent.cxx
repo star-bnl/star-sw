@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.5  2000/02/11 16:14:00  ullrich
- * Primary vertices automatically sorted in addPrimaryVertex().
+ * Revision 2.6  2000/02/23 17:35:59  ullrich
+ * Changes due to the addition of the EMC to StEvent
  *
  * Revision 2.12  2000/05/22 21:47:12  ullrich
  * Added RICH collection and related methods.
@@ -40,6 +40,7 @@
  * Revision 2.5  2000/02/11 16:14:00  ullrich
  * Primary vertices automatically sorted in addPrimaryVertex().
  *
+ * Revision 2.4  2000/01/13 21:06:22  lasiuk
  * add rich pixel info/containers
  *
  * Revision 2.3  2000/01/05 16:02:25  ullrich
@@ -55,11 +56,11 @@
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -67,10 +68,11 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich 
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
+#include "StAutoBrowse.h"
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
@@ -89,7 +91,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.6 2000/02/23 17:35:59 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -178,6 +180,12 @@ StEvent::tpcHitCollection() const { return mTpcHits; }
     _lookup(hits, mContent);
     return hits;
 StEvent::ftpcHitCollection() { return mFtpcHits; }
+    _lookup(hits, mContent);
+    return hits;
+StEvent::ftpcHitCollection() const { return mFtpcHits; }
+    _lookup(hits, mContent);
+    return hits;
+StEvent::svtHitCollection() { return mSvtHits; }
     _lookup(hits, mContent);
     return hits;
 StEvent::svtHitCollection() const { return mSvtHits; }
@@ -299,6 +307,14 @@ StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }
 
     if (mContent[mTpcHits]) delete mContent[mTpcHits];
     if (mFtpcHits) delete mFtpcHits;
+    mFtpcHits = val;
+{
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mFtpcHits]) delete mContent[mFtpcHits];
+    if (mSvtHits) delete mSvtHits;
+    mSvtHits = val;
 {
     _lookupAndSet(val, mContent);
 }
