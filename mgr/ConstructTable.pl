@@ -40,7 +40,8 @@ sub TableH {
   print OUT "  St_",$stem,"(Text_t *name) : St_Table(name,sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
   print OUT "  St_",$stem,"(Int_t n): St_Table(\"",$stem,"\",n,sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
   print OUT "  St_",$stem,"(Text_t *name,Int_t n): St_Table(name,n,sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
-  print OUT "  ",$stem,"_st *GetTable(){ return (",$stem,"_st *)s_Table;}\n";
+  print OUT "  ",$stem,"_st *GetTable(Int_t i=0){ return ((",$stem,"_st *)s_Table)+i;}\n";
+  print OUT "  ",$stem,"_st &operator[](Int_t i){ assert(i<0 || i >= GetNRows()); return *GetTable(i); }\n";
   print OUT "\n";
   print OUT "  ClassDef(St_",$stem,",0) // class particle STAF tables\n";
   print OUT "};\n";
