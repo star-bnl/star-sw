@@ -1,14 +1,21 @@
 /***************************************************************************
- * $Id: CRC.cxx,v 1.2 1999/07/02 04:37:41 levine Exp $
+ * $Id: CRC.cxx,v 1.3 1999/07/02 21:07:45 levine Exp $
  * Author: M.W. Schulz
  ***************************************************************************
  * Description: calculate and check the CRC
  *      
  *
  *   change log
+ *  02-Jul-99 MJL removed default value in args (already done in function
+ *                prototypes in CRC.hh
  *
  ***************************************************************************
  * $Log: CRC.cxx,v $
+ * Revision 1.3  1999/07/02 21:07:45  levine
+ * removed redundant default value for function parameter, which caused error in
+ * Linux gcc compiler. Default value already declared in function prototype
+ * in CRC.hh
+ *
  * Revision 1.2  1999/07/02 04:37:41  levine
  * Many changes - see change logs in individual programs
  *
@@ -27,7 +34,7 @@
 /* in memory everything has to be done like this !!!!!*/
 /* if you read the data from file, we have to use the variable routine
    for some of the banks */
-unsigned int compute_crc_bank(Bank* d,unsigned int lcrc = 0 )
+unsigned int compute_crc_bank(Bank* d,unsigned int lcrc )
 {
   /* first do the header, but not the crc  */
   int i ;
@@ -73,7 +80,7 @@ unsigned int compute_crc_bank(Bank* d,unsigned int lcrc = 0 )
     }
 };
 //**************************************************************************
-unsigned int compute_crc_block(int* p,unsigned int ByteOrder,int Length,unsigned int lcrc = 0) 
+unsigned int compute_crc_block(int* p,unsigned int ByteOrder,int Length,unsigned int lcrc ) 
 {
   int i ;
   int iret ;
