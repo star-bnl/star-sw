@@ -14,3 +14,8 @@
    print *,' **********************************************************'
    end
 
+   subroutine gstar_start
+   external   gstar
+   call this_is_amodule('gstar'//char(0),gstar)
+   call gstar
+   end

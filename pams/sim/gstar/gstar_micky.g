@@ -1,7 +1,7 @@
     subroutine gstar_micky
-      print *,' ****  GSTAR mickey-mouse event generator loaded.  ****'
-      print *,' ***   Use   "USER/INPUT U mickey.mouse"  command   ***'
-      print *,' ****  to generate a pseudo-physics event with it  ****'
+      print *,' *  ***  GSTAR mickey-mouse event generator loaded.  ***  *'
+      print *,' *  **   Use   "USER/INPUT U mickey.mouse"  command   **  *'
+      print *,' *  ***  to generate a pseudo-physics event with it  ***  *'
       call micky
     end
 *
