@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.16 2000/03/26 16:47:13 fine Exp $
+ * $Id: StDbBroker.cxx,v 1.17 2000/04/04 14:04:07 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.17  2000/04/04 14:04:07  perev
+ * table descriptor modif
+ *
  * Revision 1.16  2000/03/26 16:47:13  fine
  * Adjusted to ROOT 2.24
  *
@@ -76,6 +79,7 @@
 #include "TDataType.h"
 
 #include "Api.h"
+#include "tableredef.h"
 #include "StDbBroker.h"
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
