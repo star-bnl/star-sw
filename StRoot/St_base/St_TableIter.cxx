@@ -2,12 +2,28 @@
 // Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
 // Author                  Valerie Fine  (fine@bnl.gov)
 // Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
-// $Id: St_TableIter.cxx,v 1.4 1999/12/29 18:43:03 fine Exp $
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_TableIter - class iterator to loop over sorted St_Table's         //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+// $Id: St_TableIter.cxx,v 1.5 2000/02/29 01:54:49 fine Exp $
+///////////////////////////////////////////////////////////////////////////
+//                                                                       //
+// St_TableIter - class iterator to loop over sorted St_Table's          //
+//                                                                       //
+// I allows to loop over the sub-set of the St_Table rows defined by     //
+// the foreing key                                                       //
+//                                                                       //
+// St_TableIter nextVertex(sortedVertex,track[indxRow].stop_vertex_p);   //
+//                                                                       //
+// if (nextVertex.GetNRows() > 0) {                                      // 
+//   St_g2t_vertex &vertex = *((St_g2t_vertex*)sortedVertex->GetTable());//
+//   while ( (indxRow = nextVertex() ) >=0 ) {                           //
+//     Float_t *x   = &(vertex[indxRow].ge_x[0]);                        //
+//     Float_t dist = x[0]*x[0]+x[1]*x[1];                               //
+//     Bool_t condition = dist > 133*133 && dist < 179*179;              //
+//     if ((vertex[indxRow].ge_proc == 5) && condition )                 //
+//                      return color%8+1;                                //
+//   }                                                                   //
+// }                                                                     //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
 
 #include "St_TableIter.h"
 #include "St_TableSorter.h"

@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.96 2000/02/26 01:38:12 fine Exp $ 
+// $Id: St_Table.cxx,v 1.97 2000/02/29 01:54:47 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -2582,14 +2582,27 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
 void St_Table::Streamer(TBuffer &R__b)
 {
    // Stream an array of the "plain" C-structures
-
+   St_tableDescriptor *ioDescriptor = GetRowDescriptors();
+   St_tableDescriptor *currentDescriptor = ioDescriptor;
    if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      Version_t R__v = R__b.ReadVersion(); 
+      if (R__v==2) {
+         if (IsA() != St_tableDescriptor::Class()) {
+            R__b >> ioDescriptor;
+            // compare two descriptors
+            if (!currentDescriptor->Compare(ioDescriptor)) {
+              currentDescriptor->Print(0,1);
+              ioDescriptor->Print(0,1);
+              // Add the real descriptor
+              Add(ioDescriptor);
+            }
+         }
+      }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
-        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        tableDescriptor_st *nextCol = ioDescriptor->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
         for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
@@ -2611,11 +2624,15 @@ void St_Table::Streamer(TBuffer &R__b)
      }
    } else {
 //      R__b.WriteVersion(St_ev0_track2::IsA());
+      if (Class_Version()==2) {
+         if (IsA() != St_tableDescriptor::Class()) 
+             R__b << (TObject *) ioDescriptor;
+      }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
-        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        tableDescriptor_st *nextCol = ioDescriptor->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
         for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
@@ -2691,6 +2708,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.97  2000/02/29 01:54:47  fine
+// St_Table -> turn automatic schema evolution for table version 2 and above
+//
 // Revision 1.96  2000/02/26 01:38:12  fine
 // public s_Table is replaced with inline GetArray()
 //

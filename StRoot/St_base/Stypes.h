@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-// $Id: Stypes.h,v 1.11 2000/01/23 20:58:53 fine Exp $                                                               
+// $Id: Stypes.h,v 1.12 2000/02/29 01:54:49 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -82,6 +82,9 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
   TableStreamerImp(name)
 
 // $Log: Stypes.h,v $
+// Revision 1.12  2000/02/29 01:54:49  fine
+// St_Table -> turn automatic schema evolution for table version 2 and above
+//
 // Revision 1.11  2000/01/23 20:58:53  fine
 // new macro ClassDefTable has been introduced
 //
@@ -98,7 +101,7 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
      static St_tableDescriptor *fgColDescriptors; \
      virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}                \
      virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}       \
-  public:                                         \
+   public:                                        \
     _NAME2_(St_,stem)() : St_Table(_QUOTE_(stem),sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));}    \
     _NAME2_(St_,stem)(Text_t *name) : St_Table(name,sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));} \
     _NAME2_(St_,stem)(Int_t n) : St_Table(_QUOTE_(stem),n,sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));}     \
