@@ -1,5 +1,10 @@
-// $Id: StFtpcPoint.hh,v 1.13 2004/02/12 19:37:10 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.14 2004/04/06 18:36:13 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.14  2004/04/06 18:36:13  oldi
+// New data mebers for pad and time position and pad and time sigma added.
+// Reference to StFtpcHit added.
+// Possibility to update StFtpcHit coordinates directly included.
+//
 // Revision 1.13  2004/02/12 19:37:10  oldi
 // *** empty log message ***
 //
@@ -109,6 +114,10 @@ private:
 
   // additional input variables from cluster finder
   
+  Float_t    mPadPos;        // pad position of hit
+  Float_t    mTimePos;       // time position of hit
+  Float_t    mPadPosSigma;   // sigma pad position of hit
+  Float_t    mTimePosSigma;  // sigma time position of hit
   Long_t     mPadRow;        // FTPC row number
   Long_t     mSector;        // FTPC readout sector number
   Long_t     mNumberPads;    // number of pads in cluster
@@ -122,7 +131,8 @@ private:
   Double_t   mSigmaPhi;      // cluster sigma in pad direction
   Double_t   mSigmaR;        // cluster sigma in drift direction
 
-    // Residuals
+
+  // Residuals
   Double_t   mXPrimResidual;     // x distance of measured point to primary momentum fit
   Double_t   mYPrimResidual;     // y distance of measured point to primary momentum fit
   Double_t   mRPrimResidual;     // r of measured point to r of primary momentum fit
@@ -141,6 +151,10 @@ public:
 			     Long_t   n_bins, 
 			     Long_t   max_adc, 
 			     Long_t   charge, 
+			     Float_t  padpos,
+			     Float_t  timepos,
+			     Float_t  padpossigma,
+			     Float_t  timepossigma,
 			     Double_t x, 
 			     Double_t y, 
 			     Double_t z, 
@@ -157,6 +171,7 @@ public:
   // coordinate transformations
   void TransformFtpc2Global();
   void TransformGlobal2Ftpc();
+  void SetStFtpcHitCoord();
 
   virtual Int_t  ToStEvent(StFtpcHitCollection *ftpcHitColl);   // writes cluster to StFtpcHit class within StEvent
   
@@ -191,6 +206,10 @@ public:
   Int_t    GetHitNumber()     const { return mHitNumber;       }
   Int_t    GetNextHitNumber() const { return mNextHitNumber;   }
   Int_t    GetTrackNumber()   const { return mTrackNumber;     }
+  Float_t  GetPadPos()        const { return mPadPos;          }
+  Float_t  GetTimePos()       const { return mTimePos;         }
+  Float_t  GetPadPosSigma()   const { return mPadPosSigma;     }
+  Float_t  GetTimePosSigma()  const { return mTimePosSigma;    }
   Long_t   GetPadRow()        const { return mPadRow;          }
   Long_t   GetSector()        const { return mSector;          }
   Long_t   GetNumberPads()    const { return mNumberPads;      }
@@ -225,6 +244,10 @@ public:
   void    SetHitNumber(Int_t f)     {     mHitNumber =  f;  }
   void    SetNextHitNumber(Int_t f) { mNextHitNumber =  f;  }
   void    SetTrackNumber(Int_t f)   {   mTrackNumber =  f;  }
+  void    SetPadPos(Float_t f)      {        mPadPos =  f;  }
+  void    SetTimePos(Float_t f)     {       mTimePos =  f;  }
+  void    SetPadPosSigma(Float_t f) {   mPadPosSigma =  f;  }
+  void    SetTimePosSigma(Float_t f){  mTimePosSigma =  f;  }
   void    SetPadRow(Long_t f)       {        mPadRow =  f;  }
   void    SetSector(Long_t f)       {        mSector =  f;  }
   void    SetNumberPads(Long_t f)   {    mNumberPads =  f;  }
