@@ -1,0 +1,4 @@
+This package creates a mini-DST used in the rare particle analysis.  The mini-DST is in the form of a root tree.  To set the cuts, the user must 
+inherit from StRareEventCut and StRareTrackCut
+
+David Hardtke -- DHHardtke@lbl.gov 
