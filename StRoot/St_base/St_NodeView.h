@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.18 1999/07/09 01:56:39 fine Exp $
+// $Id: St_NodeView.h,v 1.19 1999/07/09 17:52:56 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.19  1999/07/09 17:52:56  fine
+// New ctors to create sub-view between two nodes
+//
 // Revision 1.18  1999/07/09 01:56:39  fine
 // New method to contrsuct sub views and manage visibilities
 //
@@ -67,6 +70,7 @@ public:
   St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition=0);
   St_NodeView(St_NodeView *viewNode,const Char_t *NodeName1,const Char_t *NodeName2=0);
   St_NodeView(St_NodeView *viewNode,St_NodeView *topNode);
+  St_NodeView(St_NodeView *viewNode,const St_NodeView *node1,const St_NodeView *node2);
   St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition=0,EDataSetPass iopt=kAll,Int_t level=0);
   St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionId, St_Node *thisNode,
               const Char_t *thisNodePath, const Char_t *matrixName=0, const Int_t matrixType=0);
