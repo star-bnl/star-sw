@@ -29,7 +29,7 @@ char* outFile="test.root") {
 //    db->addDb("/star/u/laue/afsWork/P02gc.db");
 //    db->addDb("/star/u/laue/afsWork/P02gd.db");
 
-   int counter=0;
+  int counter=0;
   int iret=0;
   StMuTimer timer;
   timer.start();

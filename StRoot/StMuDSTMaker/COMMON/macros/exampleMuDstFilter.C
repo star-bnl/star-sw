@@ -21,8 +21,13 @@ void exampleMuDstFilter(const char* in="/star/u/laue/afsWork/dAu200.lis", const 
     int iret=0;
     StMuTimer timer;
     timer.start();
-    StMuDebug::setLevel(0);  
-    maker = new StMuDstMaker(0,0,"",in,"st_physics:MuDst.root",10);   // set up maker in read mode
+    // switch of debug messages 
+    StMuDebug::setLevel(0);
+    // for faster chain building
+    StMuDbReader* dbReader = StMuDbReader::instance();
+    dbReader->addDb("dAu200.db");
+    // create maker
+    maker = new StMuDstMaker(0,0,"",in,"st_physics:MuDst.root",10000);   // set up maker in read mode
     cout << "time to load chain: " << timer.elapsedTime() <<endl;
     
     filter = new StMuDstFilterMaker("filter");
