@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.57 2000/04/22 20:01:17 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.58 2000/04/22 22:53:25 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -154,79 +154,29 @@ Int_t StEventDisplayMaker::BuildGeometry()
   TDataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
-//  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
-   const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
-   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
+  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
+  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
     Int_t i;
     for (i =0; i < lvolueNames; i++) 
     if (strcmp(sector->GetName(),volueNames[i]) == 0 ) {found = kTRUE; break; }
     if (found) {
-      sector->SetVisibility(TVolume::kSonUnvisible);
+      sector->SetVisibility(TVolume::kBothVisible);
       sector->Mark();
       if (!i) {  // special case for TPSS sectors
         TTUBE *tubs = (TTUBE *)sector->GetShape();
         tubs->SetNumberOfDivisions(1);
       }
+    } else { 
+      sector->UnMark();
+      sector->SetVisibility(TVolume::kThisUnvisible);
     }
   }
-
-  // Select sensors
-  m_FullView = new TVolumeView(*m_Hall); 
-  // Create the "open" sub-structure from the full one
-  m_Sensible = new TVolumeView(m_FullView);
-  delete m_FullView; m_FullView = 0;
-  printf(" drawing the STAR geometry sensible volumes and hits \n");
-
+  m_Hall->SetVisibility(TVolume::kBothVisible);
+  m_ShortView = new TVolumeView(*m_Hall,0,kMarked); 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
-
-  //_______________________________________
-  //
-  //   Make simple view
-  //   Select node to be left
-  //_______________________________________
-  printf(" Marking the current structure to create another simplified one\n");
-  m_Sensible->Mark();                                                       // Select HALL
-  
-  // Select all sectors
-  TDataSetIter nextSector(m_Sensible,0);
-  TDataSet *tpssNode = 0;
-  while (( tpssNode = nextSector() ) ) {
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
-    Int_t i;
-    for (i =0; i < lvolueNames; i++) 
-      if (strcmp(tpssNode->GetName(),volueNames[i]) == 0 ) {tpssNode->Mark(); break;}    
-  }
-
-  //_______________________________________
-  //
-  //    Select all hits
-  //_______________________________________
-  TVolumeView *trackNode = (TVolumeView *)m_Sensible->FindByName(".track");    // Select ".track"
-  if (trackNode) trackNode->Mark();     
-  trackNode = (TVolumeView *)m_Sensible->FindByName("CAVE");                   // Select CAVE
-  if (trackNode) {
-     trackNode->Mark();     
-     TDataSetIter nextHits(trackNode);
-     while ( ( m_ShortView = (TVolumeView *) nextHits()) ) {
-       if (strcmp(m_ShortView->GetName(),"ZCAL")==0) continue;       // skip ZCAL detector element
-       m_ShortView->Mark();
-    }
-  }
-   
-  //_______________________________________
-  //
-  //   Create new short view                                        // New "short" dataset
-  //_______________________________________
-  printf(" Creating a new structure simplified structure\n");
-  m_ShortView = new TVolumeView(m_Sensible);
-  delete m_Sensible; m_Sensible = 0;
-
-  //_______________________________________
-  //
-  //   Replace the "HALL" node with an articial ".event"  node
-  //_______________________________________
   return 0;
 }
 
@@ -776,8 +726,8 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
         if (trackColor > 0) {
            StHelixD *helix  = points->MakeHelix(i);
            Float_t      len = points->Length(i);
-	   Int_t nSteps = Int_t(28*len*points->Curvature(i) + 1); 
-	   Float_t step = len / nSteps;
+    	   Int_t nSteps = Int_t(28*len*points->Curvature(i) + 1); 
+	       Float_t step = len / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
            TPolyLineShape *tracksShape   = new TPolyLineShape(tracksPoints,"L");
@@ -968,6 +918,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.58  2000/04/22 22:53:25  fine
+// new schema to build  the detector geometry based on new ROOT 2.24
+//
 // Revision 1.57  2000/04/22 20:01:17  fine
 // replace St_Table with TTable
 //
