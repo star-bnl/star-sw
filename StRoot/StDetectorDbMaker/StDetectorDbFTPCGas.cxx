@@ -34,7 +34,6 @@ StDetectorDbFTPCGas* StDetectorDbFTPCGas::instance()
 
 /// Updates data from database. Only use if know what you are doing
 void StDetectorDbFTPCGas::update(StMaker* maker){
-    cout << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endl;
 
     if(maker){
 		
@@ -65,6 +64,7 @@ void StDetectorDbFTPCGas::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbFTPCGas::StDetectorDbFTPCGas(){
+    cout << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endl;
     mGasSystem = 0;
     mGasOut = 0;
 };
