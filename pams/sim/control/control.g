@@ -3,6 +3,7 @@
       call hbook1(11,'all particle PID',           60, 0.5, 60.5, 0) 
       call hbook1(12,'primary particle PID',       60, 0.5, 60.5, 0) 
       call hbook1(13,'all particles with Nhit>10', 60, 0.5, 60.5, 0) 
+      call hbook1(14,'secondary processes       ', 50, 0.5, 50.5, 0) 
       end
 
       subroutine agudigi
@@ -30,8 +31,9 @@
          call GFVERT(Ivert,vert,Nttarg,Ntbeam,Tofg,Ubuf,Nu)
 * all particles:
          call hfill (11,float(Ipart),1.,1.)
-* Only primary:
-         if (Nttarg<=0) call hfill (12,float(Ipart),1.,1.)
+* separate histogram for primary and secondary
+         if (Nttarg<=0) call hfill(12,float(Ipart),1.,1.)
+         if (Nttarg>0)  call hfill(14,float(mod(Ntbeam,50)),1.,1.)
       enddo
 
 
