@@ -20,7 +20,7 @@ TH2D etaLength("etaLength","etaLength",20,-1,+1,200,0.,200.);
 
 
 void exampleStMuIOMaker(const char* file="/star/data14/reco/productionCentral/ReversedFullField/P02ge/2001/324/st_physics_2324001_raw_0006.MuDst.root") {
-  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
   StMuDebug::setLevel(0);  

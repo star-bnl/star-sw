@@ -8,7 +8,7 @@ StEvent* ev;
 
 
 void exampleStEvent() {
-  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
   cout << " loading done " << endl;
