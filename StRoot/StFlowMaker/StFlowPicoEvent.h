@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.14 2002/03/15 16:43:22 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.15 2004/05/31 20:09:40 oldi Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -49,7 +49,7 @@ class StFlowPicoEvent : public TObject {
   Float_t       CTB()        const { return mCTB; }
   Float_t       ZDCe()       const { return mZDCe; }
   Float_t       ZDCw()       const { return mZDCw; }
-
+  Float_t       ZDCSMD(int eastwest,int verthori,int strip) const;
   
   void SetVersion(const Int_t ver)      { mVersion = ver; }
   void SetEventID(const Int_t id)       { mEventID = id; }
@@ -70,6 +70,7 @@ class StFlowPicoEvent : public TObject {
   void SetCTB(const Float_t ctb)   {mCTB  = ctb; }
   void SetZDCe(const Float_t zdce) {mZDCe = zdce; }
   void SetZDCw(const Float_t zdcw) {mZDCw = zdcw; }
+  void SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd);
 
  private:
 
@@ -94,18 +95,30 @@ class StFlowPicoEvent : public TObject {
   Float_t        mCTB;                  // CTB value sum
   Float_t        mZDCe;                 // ZDC east
   Float_t        mZDCw;                 // ZDC west
+  Float_t	 mZDCSMD[2][2][8];      // ZDCSMD calibrated, diff. from MuDst. 
   
   TClonesArray*        fTracks;
   static TClonesArray* fgTracks;
   
-  ClassDef(StFlowPicoEvent,4)
+  ClassDef(StFlowPicoEvent,5)
 };
+
+inline void StFlowPicoEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {mZDCSMD[eastwest][verthori][strip-1] = zdcsmd;}
+
+inline Float_t  StFlowPicoEvent::ZDCSMD(int eastwest,int verthori,int strip) const {return mZDCSMD[eastwest][verthori][strip-1];}
+
 
 #endif
 
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.15  2004/05/31 20:09:40  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.14  2002/03/15 16:43:22  snelling
 // Added a method to recalculate the centrality in StFlowPicoEvent
 //

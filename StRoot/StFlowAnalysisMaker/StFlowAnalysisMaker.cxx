@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.83 2004/05/05 21:13:47 aihong Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.84 2004/05/31 20:09:22 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1161,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.83 2004/05/05 21:13:47 aihong Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.84 2004/05/31 20:09:22 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1179,7 +1179,7 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
 	int i = Flow::nSels*k + n;
 	// sub-event quantities
 	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
-	if (mPsiSub[k][j]==0.) return kFALSE; // to eliminate psi=0
+	if (mPsiSub[i][j]==0.) return kFALSE; // to eliminate psi=0
       }
       
       pFlowSelect->SetSubevent(-1);
@@ -1204,12 +1204,25 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 
   unsigned int triggerWord = pFlowEvent->L0TriggerWord();
   float trigger;
-  switch (triggerWord) {
-  case 4096:  trigger = 1.;  break; // minbias
-  case 4352:  trigger = 2.;  break; // central
-  case 61952: trigger = 3.;  break; // laser
-  default:    trigger = 10.; break; // no clue
+
+  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
+    if (!( (triggerWord == 35004 || triggerWord == 35007) ||
+	  ((triggerWord == 35001 || triggerWord == 35009) && pFlowEvent->CTB() > 15) )) {
+      trigger = 10.; // no clue
+    } else {
+      trigger = 1.; // minbias
+    }
+  } 
+
+  else {
+    switch (triggerWord) {
+    case 4096:  trigger = 1.;  break; // minbias
+    case 4352:  trigger = 2.;  break; // central
+    case 61952: trigger = 3.;  break; // laser
+    default:    trigger = 10.; break; // no clue
+    }
   }
+
   mHistTrigger->Fill(trigger);
 
   // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
@@ -2293,6 +2306,12 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.84  2004/05/31 20:09:22  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.83  2004/05/05 21:13:47  aihong
 // Gang's code for ZDC-SMD added
 //

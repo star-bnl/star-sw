@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.89 2004/05/05 21:13:44 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.90 2004/05/31 20:09:37 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.89 2004/05/05 21:13:44 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.90 2004/05/31 20:09:37 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -392,18 +392,32 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtFtpcFarWest[k][j][n] = (phiWgtHistFtpcFarWest) ? 
 	    phiWgtHistFtpcFarWest->GetBinContent(n+1) : 1.;
 	}
+
 	//ZDCSMD psi Wgt
 	TH1F* mZDCSMDPsiWest = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtWest");
 	TH1F* mZDCSMDPsiEast = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
-	Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
-	Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
-	for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
-	  mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
-	    mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
-	  mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ? 
-	    mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
-	}//zdcsmd_nPsiBins
-        } else {
+	
+	if (mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
+	  Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
+	  Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
+	  
+	  for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+	    mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
+	      mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
+	    mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ? 
+	      mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
+	  } //zdcsmd_nPsiBins
+	  
+	} else { //Weight histograms don't exist
+	  
+	  for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+	    mZDCSMD_PsiWgtWest[n] = 1.;
+	    mZDCSMD_PsiWgtEast[n] = 1.;
+	  }//zdcsmd_nPsiBins
+	  
+	}//else
+	
+      } else {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n]        = 1.;
 	  mPhiWgtFarEast[k][j][n] = 1.;
@@ -411,18 +425,20 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtWest[k][j][n]    = 1.;
 	  mPhiWgtFarWest[k][j][n] = 1.;
 	}
+	
 	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcFarEast[k][j][n] = 1.;
 	  mPhiWgtFtpcWest[k][j][n] = 1.;
 	  mPhiWgtFtpcEast[k][j][n] = 1.;
 	  mPhiWgtFtpcFarWest[k][j][n] = 1.;
 	}
-	for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
-          mZDCSMD_PsiWgtWest[n] = 1.;
-          mZDCSMD_PsiWgtEast[n] = 1.;
-        }//zdcsmd_nPsiBins
 
+	for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+	  mZDCSMD_PsiWgtWest[n] = 1.;
+	  mZDCSMD_PsiWgtEast[n] = 1.;
+	}//zdcsmd_nPsiBins	
       }
+
       delete histTitle;
       delete histTitleFarEast;
       delete histTitleEast;
@@ -434,10 +450,10 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       delete histTitleFtpcFarWest;
     }
   }
-
+  
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
-
+  
   return kStOK;
 }
 
@@ -467,12 +483,6 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
 
-  // Get Trigger information
-  StL0Trigger* pTrigger = pEvent->l0Trigger();
-  if (pTrigger) {
-    pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord());
-  }
-
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
   pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
@@ -489,6 +499,21 @@ void StFlowMaker::FillFlowEvent() {
     pFlowEvent->SetMagneticField(4.98);
     pFlowEvent->SetBeamMassNumberEast(197);
     pFlowEvent->SetBeamMassNumberWest(197);
+  }
+
+  // Get Trigger information
+  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65.) { // 62 GeV
+    UInt_t triggerId = 0;
+    if (pEvent->triggerIdCollection()->nominal()->isTrigger(35004)) triggerId = 35004;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35007)) triggerId = 35007;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35001)) triggerId = 35001;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35009)) triggerId = 35009;
+    pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
+  } else {
+    StL0Trigger* pTrigger = pEvent->l0Trigger();
+    if (pTrigger) {
+      pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord());
+    }
   }
 
   // Get primary vertex position
@@ -829,7 +854,7 @@ void StFlowMaker::FillPicoEvent() {
   }
   StFlowPicoTrack* pFlowPicoTrack = new StFlowPicoTrack();
   
-  pPicoEvent->SetVersion(6);         // version 6 
+  pPicoEvent->SetVersion(7);         // version 7 
   pPicoEvent->SetEventID(pFlowEvent->EventID());
   pPicoEvent->SetRunID(pFlowEvent->RunID());
   pPicoEvent->SetL0TriggerWord(pFlowEvent->L0TriggerWord());
@@ -851,6 +876,12 @@ void StFlowMaker::FillPicoEvent() {
   pPicoEvent->SetZDCe(pFlowEvent->ZDCe());
   pPicoEvent->SetZDCw(pFlowEvent->ZDCw());
   
+  for (int i=0; i<2; i++)
+    for (int j=0; j<2; j++)
+      for (int k=1; k<9; k++)
+	pPicoEvent->SetZDCSMD(i,j,k,pFlowEvent->ZDCSMD(i,j,k));
+
+
   StFlowTrackIterator itr;
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   
@@ -956,6 +987,8 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
 
   switch (pPicoEvent->Version()) {
+  case 7: FillFromPicoVersion7DST(pPicoEvent);
+    break;
   case 6: FillFromPicoVersion6DST(pPicoEvent);
     break;
   case 5: FillFromPicoVersion5DST(pPicoEvent);
@@ -1393,6 +1426,148 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
   return kTRUE;
 }
 
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
+  // Make StFlowEvent from StFlowPicoEvent
+
+  StuProbabilityPidAlgorithm uPid;
+  
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion7DST()" << endm;
+
+  pFlowEvent->SetFirstLastPoints();  
+  pFlowEvent->SetEventID(pPicoEvent->EventID());
+  UInt_t origMult = pPicoEvent->OrigMult();
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
+  pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
+  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+					  pPicoEvent->VertexY(),
+					  pPicoEvent->VertexZ()) );
+
+  pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
+
+  pFlowEvent->SetCenterOfMassEnergy(pPicoEvent->CenterOfMassEnergy());
+  pFlowEvent->SetMagneticField(pPicoEvent->MagneticField());
+  pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
+  pFlowEvent->SetBeamMassNumberWest(pPicoEvent->BeamMassNumberWest());
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
+
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+
+  for (int i=0; i<2; i++)
+    for (int j=0; j<2; j++)
+      for (int k=1; k<9; k++)
+	pFlowEvent->SetZDCSMD(i,j,k,pPicoEvent->ZDCSMD(i,j,k));
+  
+  int goodTracks = 0;
+  // Fill FlowTracks
+  for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
+    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+      ->UncheckedAt(nt);
+    if (pPicoTrack &&  (pPicoTrack->Dca())!=(pPicoTrack->DcaGlobal())
+	&& StFlowCutTrack::CheckTrack(pPicoTrack)) {
+      // Instantiate new StFlowTrack
+      StFlowTrack* pFlowTrack = new StFlowTrack;
+      if (!pFlowTrack) return kFALSE;
+      pFlowTrack->SetPt(pPicoTrack->Pt());
+      pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
+      pFlowTrack->SetPhi(pPicoTrack->Phi());
+      pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
+      pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+      pFlowTrack->SetZFirstPoint(pPicoTrack->ZFirstPoint());
+      pFlowTrack->SetZLastPoint(pPicoTrack->ZLastPoint());
+      pFlowTrack->SetDedx(pPicoTrack->Dedx());
+      pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
+      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+      pFlowTrack->SetChi2(pPicoTrack->Chi2());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+      pFlowTrack->SetNhits(pPicoTrack->Nhits());
+      pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
+      pFlowTrack->SetDcaGlobal3(StThreeVectorD(pPicoTrack->DcaGlobalX(),
+					       pPicoTrack->DcaGlobalY(),
+					       pPicoTrack->DcaGlobalZ()) );
+      pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
+
+      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+
+  uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
+                    pPicoTrack->DcaGlobal(),
+                    pPicoTrack->Charge(),
+  fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())*tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
+                    pPicoTrack->Eta(),
+                    pPicoTrack->NdedxPts(),
+                    pPicoTrack->Dedx() );
+
+      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
+      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
+      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
+
+      pFlowTrack->SetElectronPositronProb( (pPicoTrack->Charge()>0) ?   
+                                           float(uPid.beingPositronProb()) :
+                                           float(uPid.beingElectronProb()) );
+
+      pFlowTrack->SetPionPlusMinusProb( (pPicoTrack->Charge()>0) ?  
+                                        float(uPid.beingPionPlusProb()) :
+                                        float(uPid.beingPionMinusProb()) );
+
+      pFlowTrack->SetKaonPlusMinusProb( (pPicoTrack->Charge()>0) ? 
+                                        float(uPid.beingKaonPlusProb()) :
+                                        float(uPid.beingKaonMinusProb()) );
+
+      pFlowTrack->SetProtonPbarProb( (pPicoTrack->Charge()>0) ? 
+                                     float(uPid.beingProtonProb()) :
+                                     float(uPid.beingAntiProtonProb()) );
+
+      } else {
+      pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
+      pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
+      pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+      pFlowTrack->SetElectronPositronProb(pPicoTrack->ElectronPositronProb()); 
+      pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
+      pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
+      pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
+      }
+
+      if (pPicoTrack->Charge() < 0) {
+	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+      } else {
+	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+      }
+
+      if (pPicoTrack->TopologyMap0() || pPicoTrack->TopologyMap1()) {
+	// topology map found
+	pFlowTrack->SetTopologyMap(StTrackTopologyMap(pPicoTrack->TopologyMap0(),
+						      pPicoTrack->TopologyMap1()) );
+      }
+
+      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+      goodTracks++;
+    }
+  }
+  
+  return kTRUE;
+}
+
+
 //-----------------------------------------------------------------------
 
 Bool_t StFlowMaker::FillFromMuDST() {
@@ -1475,8 +1650,19 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   pFlowEvent->SetEventID(pMuEvent->eventId());
   pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
   pFlowEvent->SetRunID(pMuEvent->runId());
-  pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
   pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
+
+  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
+    UInt_t triggerId = 0;
+    if (pMuEvent->triggerIdCollection().nominal().isTrigger(35004)) triggerId = 35004;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35007)) triggerId = 35007;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35001)) triggerId = 35001;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35009)) triggerId = 35009;
+    pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
+  } else {
+    pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
+  }
+
   pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
   pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
   pFlowEvent->SetBeamMassNumberWest(pMuEvent->runInfo().beamMassNumber(west));
@@ -1849,6 +2035,12 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.90  2004/05/31 20:09:37  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.89  2004/05/05 21:13:44  aihong
 // Gang's code for ZDC-SMD added
 //

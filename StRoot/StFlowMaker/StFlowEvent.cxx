@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.46 2004/05/05 21:13:45 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.47 2004/05/31 20:09:35 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -946,9 +946,10 @@ void StFlowEvent::SetCentrality() {
     }
   } else if (mCenterOfMassEnergy <= 25.){ // year=2, 22 GeV
     cent = Flow::cent22;
-  } else if(mCenterOfMassEnergy >60. && mCenterOfMassEnergy <65) {//62 GeV
+  } else if(mCenterOfMassEnergy >60. && mCenterOfMassEnergy < 65. ) { // 62 GeV
     cent = Flow::cent62;
   }
+
   if      (tracks < cent[0])  { mCentrality = 0; }
   else if (tracks < cent[1])  { mCentrality = 1; }
   else if (tracks < cent[2])  { mCentrality = 2; }
@@ -1041,6 +1042,12 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.47  2004/05/31 20:09:35  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.46  2004/05/05 21:13:45  aihong
 // Gang's code for ZDC-SMD added
 //

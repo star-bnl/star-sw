@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.h,v 1.3 2003/09/10 19:47:15 perev Exp $
+// $Id: StFlowPhiWgtMaker.h,v 1.4 2004/05/31 20:09:26 oldi Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.3 2003/09/10 19:47:15 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.4 2004/05/31 20:09:26 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -51,6 +51,9 @@ private:
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   StFlowSelection* pFlowSelect; //! selection object
 
+  // for single histograms
+  TH1F*     mHistZDCSMDPsiWgtEast;         //!
+  TH1F*     mHistZDCSMDPsiWgtWest;         //!
   // for each harmonic, each selection, and each centrality
   struct histHars {
     TH1D*       mHistPhiFarEast;
@@ -94,6 +97,12 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.h,v $
+// Revision 1.4  2004/05/31 20:09:26  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.3  2003/09/10 19:47:15  perev
 // ansi corrs
 //

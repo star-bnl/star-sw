@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.39 2004/05/05 21:13:44 aihong Exp $
+//  $Id: StFlowMaker.h,v 1.40 2004/05/31 20:09:38 oldi Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.39 2004/05/05 21:13:44 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.40 2004/05/31 20:09:38 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -112,6 +112,7 @@ private:
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
   Bool_t           FillFromMuVersion0DST();
   void             CloseEventRead();          // close StEvent
@@ -173,6 +174,12 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.40  2004/05/31 20:09:38  oldi
+//  PicoDst format changed (Version 7) to hold ZDC SMD information.
+//  Trigger cut modified to comply with TriggerCollections.
+//  Centrality definition for 62 GeV data introduced.
+//  Minor bug fixes.
+//
 //  Revision 1.39  2004/05/05 21:13:44  aihong
 //  Gang's code for ZDC-SMD added
 //
