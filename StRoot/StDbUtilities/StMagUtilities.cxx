@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.16 2001/08/01 18:34:39 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.17 2001/08/08 20:11:42 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.17  2001/08/08 20:11:42  jeromel
+ * Added debugging lines for ExB correction option. WAS NEVER ON ==> Corrected & -> | (i.e. mea culpa)
+ *
  * Revision 1.16  2001/08/01 18:34:39  jhthomas
  * Add temporary mode flag for year 2 running (different cathode potentials)
  *
@@ -125,6 +128,8 @@ StMagUtilities::StMagUtilities( Int_t mode )
       gFactor = B[2] / 4.980 ;              // Select factor based on Chain values (kGauss) 
       gMap = kMapped ;                      // Do once & Select the B field map (mapped field or constant)
       Init(mode) ;                          // Read the Magnetic and Electric Field Data Files, set constants
+      (void) printf("StMagUtilities: ExB init(%d)\n",mode);
+
     }
 
 }
@@ -170,6 +175,7 @@ void StMagUtilities::Init ( Int_t mode )
     OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
   else
     OmegaTau   =  -12.4 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
+
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;

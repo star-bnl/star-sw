@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.62 2001/08/03 16:22:41 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.63 2001/08/08 20:11:43 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.63  2001/08/08 20:11:43  jeromel
+// Added debugging lines for ExB correction option. WAS NEVER ON ==> Corrected & -> | (i.e. mea culpa)
+//
 // Revision 1.62  2001/08/03 16:22:41  jeromel
 // Enabled option for StMagUtilities()
 //
@@ -393,6 +396,7 @@ Int_t St_tpt_Maker::Make(){
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
+	(void) printf("St_tpt_Maker: ExB StMagUtilities(%d)\n",option);
 	if ( m_ExB == 0 ) m_ExB = new StMagUtilities( option ) ;
 	//if ( m_ExB == 0 ) m_ExB = new StMagUtilities() ;
 	tcl_tphit_st *spc = tphit -> GetTable() ;
