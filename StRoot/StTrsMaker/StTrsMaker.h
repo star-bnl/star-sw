@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.h,v 1.1 1999/01/22 21:31:46 lasiuk Exp $
+// $Id: StTrsMaker.h,v 1.2 1999/02/04 18:39:25 lasiuk Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.2  1999/02/04 18:39:25  lasiuk
+// Add private member whichSector() to decode volumeId;
+// add multiple sector capabilities
+// add unpacker
+// runs in LINUX
+//
 // Revision 1.1  1999/01/22 21:31:46  lasiuk
 // Name change
 //
@@ -38,12 +44,13 @@ class StTrsSector;
 class StTrsDigitalSector;
 
 // Output Data
-//class StTpcRawDataEvent;
+class StTrsRawDataEvent;
+
 
 class StTrsMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.1 1999/01/22 21:31:46 lasiuk Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.2 1999/02/04 18:39:25 lasiuk Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -66,22 +73,26 @@ class StTrsMaker : public StMaker {
     StTrsDigitalSignalGenerator *mDigitalSignalGenerator;//!
     
     // Container
-    StTrsWireHistogram           *mWireHistogram;//!
-    StTrsSector                  *mSector;//!
-    StTrsDigitalSector           *mDigitalSector;//!
+    StTrsWireHistogram          *mWireHistogram;//!
+    StTrsSector                 *mSector;//!
+    StTrsDigitalSector          *mDigitalSector;//!
 
-    //StTpcRawDataEvent          *mAllTheData;
+    // Output
+    StTrsRawDataEvent           *mAllTheData;//!
 
 protected:
 
 public: 
     StTrsMaker(const char *name="tpc_raw", const char *title="event/raw_data/tpc");
-   virtual       ~StTrsMaker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
-   virtual void   PrintInfo();
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-   ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
+    virtual       ~StTrsMaker();
+    virtual Int_t Init();
+    virtual Int_t  Make();
+    virtual void   PrintInfo();
+    // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+    ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
+
+private:
+    void whichSector(int, int*, int*, int*);
 };
 
 #endif
