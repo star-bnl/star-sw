@@ -1,12 +1,15 @@
-// $Id: StKinkController.cxx,v 2.0 2000/06/05 05:19:39 genevb Exp $
+// $Id: StKinkController.cxx,v 2.1 2000/06/09 22:17:09 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 2.1  2000/06/09 22:17:09  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/05 05:19:39  genevb
 // New version of Strangeness micro DST package
 //
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StKinkController strangeness micro DST controller for Kinks              //
+// StKinkController strangeness micro DST controller for Kinks          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "TTree.h"
@@ -23,8 +26,6 @@
 #include "StParticleDefinition.hh"
 
 #include "StStrangeControllerInclude.h"  // Location of header for this class
-
-class StStrangeEvMuDst;
 
 //_____________________________________________________________________________
 StKinkController::StKinkController() : StStrangeControllerBase("Kink") {
@@ -102,7 +103,7 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
                 rcKinkPartner = (*mcKinkMapIt).second;
       }
       // stupid way
-      for(Int_t i = 0; i <= dataArray->GetLast(); i++) {
+      for(Int_t i = 0; i < GetN(); i++) {
         StKinkMuDst* tmpKink = (StKinkMuDst*) dataArray->At(i);
         if( fabs(rcKinkPartner->position().x()-tmpKink->positionX()) < 0.00001 &&
             fabs(rcKinkPartner->position().y()-tmpKink->positionY()) < 0.00001 &&
@@ -134,28 +135,6 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
     }
     break;
   }
-  
-  return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StKinkController::MakeCreateSubDst() {
-
-  // If no entries to copy, skip event
-  if (!entries) return kStOK;
-
-  // Event info copied directly from dstMaker.
-  if ((*selections)[0] < 0) {  // Copy all from the event
-    tree->SetBranchAddress(GetName(),&tempArray);
-  } else if (entries) {        // Copy selected from the event
-    Int_t asize = dataArray->GetSize();
-    if (entries > asize) dataArray->Expand(entries+increment);
-    for (Int_t k=0; k<entries; k++) {
-      new((*dataArray)[k]) StKinkMuDst(*((StKinkMuDst*)
-            (GetDstController()->Get((*selections)[k]))));
-    }
-  }
-  PrintNumCand("copying",entries);
-  nEntries += entries;
   
   return kStOK;
 }

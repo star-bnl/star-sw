@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerInclude.h,v 2.0 2000/06/05 05:19:42 genevb Exp $
+// $Id: StStrangeControllerInclude.h,v 2.1 2000/06/09 22:17:10 genevb Exp $
 // $Log: StStrangeControllerInclude.h,v $
+// Revision 2.1  2000/06/09 22:17:10  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/05 05:19:42  genevb
 // New version of Strangeness micro DST package
 //
@@ -37,7 +40,6 @@ class StV0Controller : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  virtual Int_t MakeCreateSubDst();
   ClassDef(StV0Controller,1)
 };
 
@@ -48,7 +50,6 @@ class StXiController : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  virtual Int_t MakeCreateSubDst();
   ClassDef(StXiController,1)
 };
 
@@ -59,7 +60,6 @@ class StKinkController : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  virtual Int_t MakeCreateSubDst();
   ClassDef(StKinkController,1)
 };
 

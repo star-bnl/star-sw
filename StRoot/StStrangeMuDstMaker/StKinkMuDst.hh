@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 2.0 2000/06/02 22:11:54 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 2.1 2000/06/09 22:17:10 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
+ * Revision 2.1  2000/06/09 22:17:10  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
  * Revision 2.0  2000/06/02 22:11:54  genevb
  * New version of Strangeness micro DST package
  *
@@ -21,11 +24,11 @@
  ***********************************************************************/
 #ifndef  STAR_StKinkMuDst
 #define  STAR_StKinkMuDst
-#include "TObject.h"
+#include "StStrangeMuDst.hh"
 
 class StKinkVertex;
 
-class StKinkMuDst : public TObject {
+class StKinkMuDst : public StStrangeMuDst {
 public:
   StKinkMuDst();
   StKinkMuDst(StKinkVertex*);

@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 2.0 2000/06/02 22:11:54 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 2.1 2000/06/09 22:17:11 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 2.1  2000/06/09 22:17:11  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/02 22:11:54  genevb
 // New version of Strangeness micro DST package
 //
@@ -60,6 +63,7 @@ class StStrangeMuDstMaker : public StMaker {
   void DoXi(Bool_t doIt=kTRUE);
   void DoKink(Bool_t doIt=kTRUE);
   void DoMc(Bool_t doIt=kTRUE);
+  void Do(const char* name, Bool_t doIt=kTRUE);
   Bool_t GetDoMc();
   
   StStrangeControllerBase* Get(const char* name) const;
@@ -106,17 +110,17 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t Finish();
   
   // Functions for sub-dsts:
-  virtual void SubDst(StStrangeMuDstMaker* maker);
-  virtual void SubDst(StStrangeMuDstMaker& maker);
-  virtual void SubDst(const char* maker_name);
-  virtual StStrangeMuDstMaker* GetSubDst();
+  void SubDst(StStrangeMuDstMaker* maker);
+  void SubDst(StStrangeMuDstMaker& maker);
+  void SubDst(const char* maker_name);
+  StStrangeMuDstMaker* GetSubDst();
   
   // Selects entire event for sub DST...
-  virtual void SelectEvent();          // selects whole event for sub DST
+  void SelectEvent();                  // selects whole event for sub DST
   // ...or select portions (use i<0 to select all of the V0s, etc...
-  virtual void SelectV0(Int_t i=-1)   { v0->Select(i); }
-  virtual void SelectXi(Int_t i=-1)   { xi->Select(i); }
-  virtual void SelectKink(Int_t i=-1) { kink->Select(i); }
+  void SelectV0(Int_t i=-1)   { v0->Select(i); }
+  void SelectXi(Int_t i=-1)   { xi->Select(i); }
+  void SelectKink(Int_t i=-1) { kink->Select(i); }
   
  protected:
   virtual void InitReadDst();
@@ -176,6 +180,11 @@ inline void StStrangeMuDstMaker::DoKink(Bool_t doIt)
             { doKink = doIt; }
 inline void StStrangeMuDstMaker::DoMc(Bool_t doIt)
             { doMc = doIt; }
+inline void StStrangeMuDstMaker::Do(const char* name, Bool_t doIt)
+            { if (!(strcmp(name,"V0"))) DoV0(doIt);
+	      if (!(strcmp(name,"Xi"))) DoXi(doIt);
+	      if (!(strcmp(name,"Kink"))) DoKink(doIt);
+	      if (!(strcmp(name,"Mc"))) DoMc(doIt); }
 inline Bool_t StStrangeMuDstMaker::GetDoMc()
             { return doMc; }
 inline TClonesArray* StStrangeMuDstMaker::GetEvClonesArray()
