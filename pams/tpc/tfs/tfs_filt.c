@@ -25,51 +25,15 @@ long type_of_call tfs_filt_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 
-long i, j, count, keep, shift, last;
+long i, count=0;
 
-count = 0;
-keep  = -1;
-shift = -1;
-for (i=0; i <= tphit_h[0].nok; i++)
-    {  if (tphit[i].flag < 0 || tphit[i].flag > 1 || i == tphit_h[0].nok)
-         { if (count >0 && shift>-1 )
-           {
-           keep = keep - shift;
-           last = keep+count-1;
-           for (j=keep; j<= last; j++)
-             {
-             tphit[j].id = tphit[j+1+shift].id;
-             tphit[j].flag = tphit[j+1+shift].flag;
-             tphit[j].cluster = tphit[j+1+shift].cluster;
-             tphit[j].id_globtrk = tphit[j+1+shift].id_globtrk;
-             tphit[j].nseq = tphit[j+1+shift].nseq;
-             tphit[j].row = tphit[j+1+shift].row;
-             tphit[j].track = tphit[j+1+shift].track;
-             tphit[j].alpha = tphit[j+1+shift].alpha; 
-             tphit[j].dalpha = tphit[j+1+shift].dalpha;  
-             tphit[j].dlambda =  tphit[j+1+shift].dlambda;
-             tphit[j].dq = tphit[j+1+shift].dq;
-             tphit[j].dx = tphit[j+1+shift].dx;
-             tphit[j].dy = tphit[j+1+shift].dy;
-             tphit[j].dz =  tphit[j+1+shift].dz;
-             tphit[j].lambda = tphit[j+1+shift].lambda; 
-             tphit[j].phi =  tphit[j+1+shift].phi;
-             tphit[j].prf =  tphit[j+1+shift].prf;
-             tphit[j].q =  tphit[j+1+shift].q;
-             tphit[j].x =  tphit[j+1+shift].x;
-             tphit[j].y =  tphit[j+1+shift].y;
-             tphit[j].z = tphit[j+1+shift].z; 
-             tphit[j].zrf =  tphit[j+1+shift].zrf;
-
-             }
-           }
-           keep = i;
-           count= 0;
-           if (i < tphit_h[0].nok) shift++;          
-         }
-       else
-         count++ ;
+for (i=0; i < tphit_h[0].nok; i++)
+    {  
+       if (tphit[i].flag<0||tphit[i].flag>1 )  continue;
+       if (count !=i)  tphit[count] = tphit[i];
+       count++;
     }
-   tphit_h[0].nok=tphit_h[0].nok-shift-1;
+
+   tphit_h[0].nok = count;
    return STAFCV_OK;
 }
