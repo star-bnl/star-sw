@@ -49,7 +49,7 @@ C<----------------------------------------------------------------------
       REAL    bfield(3)
       REAL    mainv(3)
       REAL    pveci(5),pvecis(5),rver1,bchis
-      REAL    Prob_cern
+      REAL    prob
       REAL    fcov(6,6) ! covariance matrix of fit
       REAL    alen ! arc length
 
@@ -119,7 +119,7 @@ C --      calculate the impact parameter chisq for charged track at primary vert
 
             if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,fcov,alen).ne.0)then
               ndegf = ndef+2 ! two extra df for fit
-              globtrk(i).chisq(2) = Prob_cern(globtrk(i).chisq(1)*ndef+bchis,ndegf)
+              globtrk(i).chisq(2) = prob(globtrk(i).chisq(1)*ndef+bchis,ndegf)
               EGR_IMPACTCL =STAFCV_OK
             endif ! if(impfit
          endif ! if(iret
