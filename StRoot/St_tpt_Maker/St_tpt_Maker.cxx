@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.59 2001/04/23 17:31:52 wdeng Exp $
+// $Id: St_tpt_Maker.cxx,v 1.60 2001/05/01 21:47:28 wdeng Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.60  2001/05/01 21:47:28  wdeng
+// St_tpt_Maker.cxx
+//
 // Revision 1.59  2001/04/23 17:31:52  wdeng
 // Create a temporary sorted tcl_tphit table for function estimateVertexZ. Delete it after calling the function.
 //
@@ -307,6 +310,7 @@ Int_t St_tpt_Maker::Make(){
   if (! tphit) return kStWarn;
   printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
 
+#if 0 // disable it. pp chain crashs somewhere sometime.
   // cluster vertex 
   // 1). First create a temporary St_tcl_tphit table, which is a copy of 'tphit' table
   //     but sorted by the entry 'row'.
@@ -349,6 +353,21 @@ Int_t St_tpt_Maker::Make(){
   m_DataSet->Add(clusterVertex);
   clusterVertex->AddAt(&dstVertexRow, 0);
   // end of cluster vertex finding
+#endif
+  ///!!!!!!!!!!
+  dst_vertex_st dstVertexRow;
+  ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
+  dstVertexRow.z = 0;
+  dstVertexRow.id = 1;
+  dstVertexRow.iflag = 105;
+  dstVertexRow.det_id = 1;
+  dstVertexRow.vtx_id = 1;
+
+  St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
+  m_DataSet->Add(clusterVertex);
+  clusterVertex->AddAt(&dstVertexRow, 0);
+  ///!!!!!!!!!! Dummy cluster vertex since module tpt interface needs it.
+
 
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
