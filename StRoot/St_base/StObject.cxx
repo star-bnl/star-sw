@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.7 2000/04/18 02:57:25 perev Exp $
+// $Id: StObject.cxx,v 1.8 2000/04/20 14:24:09 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.8  2000/04/20 14:24:09  perev
+// StArray fixes
+//
 // Revision 1.7  2000/04/18 02:57:25  perev
 // StEvent browse
 //
@@ -50,4 +53,9 @@ StObject::~StObject()
 void StObject::Browse(TBrowser *tb)
 {
   StAutoBrowse::Browse(this,tb);
+}
+//_____________________________________________________________________________
+Bool_t StObject::IsFolder()
+{
+  return StAutoBrowse::Browse(this,0);
 }

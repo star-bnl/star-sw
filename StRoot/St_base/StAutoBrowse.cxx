@@ -16,17 +16,23 @@
 
 class StAutoInspector : public TMemberInspector {
 public:
-StAutoInspector(TBrowser *b){fBrowser=b;};
+StAutoInspector(TBrowser *b){fBrowser=b;fCount=0;};
 virtual ~StAutoInspector(){};
 virtual void Inspect(TClass* cl, const char* parent, const char* name, void* addr);
-private:
-TBrowser *fBrowser;
 
+Int_t fCount;
+TBrowser *fBrowser;
 };      
 //______________________________________________________________________________
 void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, void* addr)
 {
-  if (tit && strchr(tit,'.') && strcmp("*fOrBrowser",name)) return;
+  int idot = (tit && strchr(tit,'.'));
+  int ifor = strcmp("*fOrBrowser",name)==0;
+  if (idot != ifor) return;
+  if (fCount && !fBrowser) return;
+
+  TString ts;
+
   if (!kl) return;
   if (*(kl->GetName()) == 'T') return;
   if (*name == '*') name++;
@@ -57,7 +63,8 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, vo
   if (prop & G__BIT_ISSTATIC) 	return;
   if (prop & G__BIT_ISFUNDAMENTAL) 	return;
   if (prop & G__BIT_ISENUM) 		return;
-  if (!m.Type()->IsBase("TObject"))	return;
+  if (strcmp(m.Type()->Fullname(),"TObject") && !m.Type()->IsBase("TObject"))
+  					return;
   if (mname == "G__virtualinfo")	return;
 
   int  size = sizeof(void*);
@@ -71,18 +78,38 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, vo
   for(int i=0; i<nmax; i++) {
     char *ptr = (char*)addr + i*size;
     TObject *obj = (prop&G__BIT_ISPOINTER) ? *((TObject**)ptr) : (TObject*)ptr;
-    if (!obj) continue;
-    fBrowser->Add(obj);
+    if (!obj) 		continue;
+    fCount++;
+    if (!fBrowser) 	return;
+    const char *bwname = obj->GetName();
+    if (!bwname[0] || strcmp(bwname,obj->ClassName())==0) {
+      bwname = name;
+      if (strcmp(bwname,"fOrBrowser")==0) {
+        ts.Replace(0,999,tit,strlen(tit)-1);
+        bwname = (const char*)ts;
+      } else {
+	int l = strcspn(bwname,"[ ");
+	if (bwname[l]=='[') {
+          char cbuf[12]; sprintf(cbuf,"[%02d]",i);
+          ts.Replace(0,999,bwname,l);
+          ts += cbuf;
+          bwname = (const char*)ts;
+	}
+      }  
+    }  
+   
+    fBrowser->Add(obj,bwname);
   }
 
 }    
 
 //______________________________________________________________________________
-void StAutoBrowse::Browse(TObject *obj,TBrowser *browser)
+Int_t StAutoBrowse::Browse(TObject *obj,TBrowser *browser)
 {
-  if(!obj)	return;
+  if(!obj)	return 0;
   char cbuf[1000]; *cbuf=0;
 
   StAutoInspector insp(browser);
   ((TObject*)obj)->ShowMembers(insp,cbuf);
+  return insp.fCount;
 }
