@@ -38,7 +38,14 @@ SetMaxRMS(float RMS)      -- To protect agaist bad measurements, the
                              if the RMS deviation of the t0 measurement
                              is below this value.  Default is .05us.
 
-          
+
+This maker produces two histograms.  To write them to a file named t0hist.root,
+call the WriteHistFile() member function or use the HistFileByDefault() 
+member funtion to automatically write out the result at Finish.  The
+histograms are:
+
+t0result                --  Event-by-event t0 
+t0 measured - t0 guess  --  measured t0 - guess taken from database        
 
 
 

@@ -1,5 +1,8 @@
-// $Id: StTpcT0Maker.h,v 1.1 2000/08/24 23:51:27 hardtke Exp $
+// $Id: StTpcT0Maker.h,v 1.2 2000/08/28 17:42:29 hardtke Exp $
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.2  2000/08/28 17:42:29  hardtke
+// Add new histogram
+//
 // Revision 1.1  2000/08/24 23:51:27  hardtke
 // New package for drift velocity calibrations
 //
@@ -41,12 +44,13 @@ class StTpcT0Maker : public StMaker {
    void HistFileByDefault();   // Write out file on Finish
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.1 2000/08/24 23:51:27 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.2 2000/08/28 17:42:29 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
  private:
   TH1F* t0result;
+  TH1F* t0guessError;
   float t0guess;
   float t0current;
   float zVertexWest;
