@@ -1,7 +1,10 @@
 *
-* $Id: csinit.F,v 1.2 1998/04/16 17:02:19 fisyak Exp $
+* $Id: csinit.F,v 1.3 1999/01/26 00:12:01 fisyak Exp $
 *
 * $Log: csinit.F,v $
+* Revision 1.3  1999/01/26 00:12:01  fisyak
+* Pavel correct for Linux
+*
 * Revision 1.2  1998/04/16 17:02:19  fisyak
 * 2nd pass with gstar
 *
@@ -162,8 +165,8 @@
 #endif
 #if (defined(CERNLIB_LINUX))&&(defined(CERNLIB_SHL))
 * pn, 29.10.97: not clear yet, may be '-pic' not needed
-      CHF77 ='f77 -c -PIC'
-      CHCC  ='cc -c -PIC'
+      CHF77 ='g77 -c'
+      CHCC  ='cc -c'
 #endif
       RETURN
       END
