@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.25 1999/11/10 00:10:52 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.26 1999/11/10 16:15:20 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.26  1999/11/10 16:15:20  fisyak
+// One more bug fix due to infile
+//
 // Revision 1.25  1999/11/10 00:10:52  fisyak
 // Valery's fix for fzin
 //
@@ -532,44 +535,46 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       }
     }
   }
-  if (Infile && !GetOption("FZIN")) {
-    setFiles= new StFile();
+  if (Infile) {
     InFile = new TString(Infile);
-    TString *Files[80];
-    Int_t NParsed = ParseString((const TString )*InFile,Files);
-    Int_t i;
-    for (i=0;i<=NParsed;i++) {
-      if (!strstr(Files[i]->Data(),"*") &&
-	  gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
-	printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
-	gSystem->Exit(1); 
-      }
-      else setFiles->AddFile(Files[i]->Data());
-    }
-  }
-  if (GetOption("GSTAR")) {
-    if (!Outfile) FileOut = new TString("gtrack");
-    else          FileOut = new TString(Outfile);
-    gMessMgr->QAInfo() << "Output root file name " << FileOut->Data() << endm;
-    printf ("==============================================\n");
-  }
-  else {
-    if (Outfile) FileOut = new TString(Outfile);
-    else {
+    if (Infile && !GetOption("FZIN")) {
+      setFiles= new StFile();
       InFile = new TString(Infile);
-      FileOut = new TString(gSystem->BaseName(InFile->Data()));
-      FileOut->ReplaceAll("*","");
-      FileOut->ReplaceAll("..",".");
-      FileOut->ReplaceAll(".daq","");
-      FileOut->ReplaceAll(".fzd","");
-      FileOut->ReplaceAll(".fz","");
-      FileOut->ReplaceAll(".xdf","");
-      FileOut->Strip();
+      TString *Files[80];
+      Int_t NParsed = ParseString((const TString )*InFile,Files);
+      Int_t i;
+      for (i=0;i<=NParsed;i++) {
+	if (!strstr(Files[i]->Data(),"*") &&
+	    gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
+	  printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
+	  gSystem->Exit(1); 
+	}
+	else setFiles->AddFile(Files[i]->Data());
+      }
     }
-    printf ("==============================================\n");
-    gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
-    gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
-    printf ("==============================================\n");
+    if (GetOption("GSTAR")) {
+      if (!Outfile) FileOut = new TString("gtrack");
+      else          FileOut = new TString(Outfile);
+      gMessMgr->QAInfo() << "Output root file name " << FileOut->Data() << endm;
+      printf ("==============================================\n");
+    }
+    else {
+      if (Outfile) FileOut = new TString(Outfile);
+      else {
+	FileOut = new TString(gSystem->BaseName(InFile->Data()));
+	FileOut->ReplaceAll("*","");
+	FileOut->ReplaceAll("..",".");
+	FileOut->ReplaceAll(".daq","");
+	FileOut->ReplaceAll(".fzd","");
+	FileOut->ReplaceAll(".fz","");
+	FileOut->ReplaceAll(".xdf","");
+	FileOut->Strip();
+      }
+      printf ("==============================================\n");
+      gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
+      gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
+      printf ("==============================================\n");
+    }
   }
   if (GetOption("XOUT") && FileOut) {
     XdfFile = new TString(FileOut->Data());
