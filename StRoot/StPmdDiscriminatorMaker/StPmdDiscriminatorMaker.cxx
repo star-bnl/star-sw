@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.6 2004/07/16 14:29:32 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.7 2004/10/30 00:08:00 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.7  2004/10/30 00:08:00  subhasis
+ * TranFlag added and set to 0 in ctor
+ *
  * Revision 1.6  2004/07/16 14:29:32  subhasis
  * more checks on edep Discriminate
  *
@@ -59,6 +62,7 @@ StPmdCollection *cluster_hit;
 bool discbyNN=false;
 StPmdDiscriminatorMaker::StPmdDiscriminatorMaker(const char *name):StMaker(name){
   mApplyFlagNN=0;
+  mTrainFlag=0;
 }
 
 StPmdDiscriminatorMaker::~StPmdDiscriminatorMaker()
@@ -310,7 +314,7 @@ if(clusters1){
 
 Int_t StPmdDiscriminatorMaker::Finish()
 {
-  if(mApplyFlagNN!=1){
+  if(mApplyFlagNN!=1 && mTrainFlag==1){
     StPmdDiscriminatorNN *discNN = new StPmdDiscriminatorNN(NNContainer);
     discNN->setApplyFlag(0);
     discNN->setDisMaker(this);
