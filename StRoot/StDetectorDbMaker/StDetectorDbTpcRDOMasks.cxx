@@ -102,11 +102,14 @@ bool StDetectorDbTpcRDOMasks::isOn(unsigned int sector,unsigned int rdo){
 /// higher order bit is higher mask
 unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
 
-    unsigned int mask = 0x0000; //
+    unsigned int mask = 0x0000; // default is to mask it out
+    unsigned int mask = 0xFFFF; // change to  ON by default
     
-    if(sector < 1 || sector > 24 || mNumEntries == 0)
-	return mask;
-
+    if(sector < 1 || sector > 24 || mNumEntries == 0){
+      cout << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
+	   << "sector= " << sector << " mNumEntries=" << mNumEntries << endl;
+      return mask;
+    }
     
     mask = mMaskVector[ ((sector + 1) / 2) - 1].mask; // does the mapping from sector 1-24 to packed sectors
 
