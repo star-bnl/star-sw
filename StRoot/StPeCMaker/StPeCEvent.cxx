@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.1 2000/03/24 22:37:06 nystrand Exp $
+// $Id: StPeCEvent.cxx,v 1.2 2000/04/21 19:10:30 nystrand Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.2  2000/04/21 19:10:30  nystrand
+// Include StPeCPair class
+//
 // Revision 1.1  2000/03/24 22:37:06  nystrand
 // First version of StPeCEvent
 //
@@ -18,6 +21,7 @@ StPeCEvent::StPeCEvent() {
 #ifndef __CINT__
   pPrim = new StPeCPrimaryTrackCollection;
   pNonPrim = new StPeCNonPrimaryTrackCollection;
+  pPair = new StPeCPairCollection;
 #endif /*__CINT__*/
 }
 
@@ -25,6 +29,7 @@ StPeCEvent::~StPeCEvent() {
 #ifndef __CINT__
  delete pPrim;
  delete pNonPrim;
+ delete pPair;
 #endif /*__CINT__*/
 }
 
@@ -44,6 +49,10 @@ void StPeCEvent::addPeCNonPrimaryTrack(StTrack* trk) const{
   pNonPrim->push_back(trk);
 }
 StPeCNonPrimaryTrackCollection* StPeCEvent::getPeCNonPrimaryTrackCollection() const{ return pNonPrim; }
+void StPeCEvent::addPeCPair(StPeCPair* pair) const{
+  pPair->push_back(pair);
+}
+StPeCPairCollection* StPeCEvent::getPeCPairCollection() const{ return pPair; }
 
 StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCParticle pid) const{
   Float_t mptcle=0.0;
@@ -55,6 +64,12 @@ StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCParticle pid) const{
   }
   if(pid==proton){
     mptcle = proton_mass_c2;
+  }
+  if(pid==electron){
+    mptcle = electron_mass_c2;
+  }
+  if(pid==muon){
+    mptcle = 105.6584*MeV; 
   }
   StLorentzVectorF p4event(0.0,0.0,0.0,0.0);
   StPeCPrimaryTrackIterator miter = pPrim->begin();
