@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.13 2000/03/21 20:33:09 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.14 2000/03/24 19:45:16 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.14  2000/03/24 19:45:16  flierl
+// correct looping over pixels during filling of stpixel
+//
 // Revision 1.13  2000/03/21 20:33:09  flierl
 // change output
 //
@@ -151,12 +154,21 @@ Int_t St_l3Clufi_Maker::Make(){
   // here we start
   cout << "Now we start l3Clufi Maker." << endl;
      
-
+  // check time consumption of different parts of the maker
+  TStopwatch timer1 ; 
+  TStopwatch timer2 ; 
+  TStopwatch timer3 ; 
+  if (Debug()) { timer1.Reset() ; timer2.Reset() ; timer3.Reset() ; }
+  
+  // some counters
+  Int_t totalpixelcount = 0 ;
+  
   /////////
   // Get raw data 
   /////////
   raw_data_tpc = (St_DataSet*) GetInputDS("tpc_raw");
-    
+  if (Debug()) { timer1.Start() ; } 
+
   // do we have something ? 
   if (!raw_data_tpc)
     { 
@@ -224,7 +236,9 @@ Int_t St_l3Clufi_Maker::Make(){
 		      output_name[13] = sec_char;
 		    }
 		  // allocate the table where the out bank will go for this supersector
-		  St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,80000);
+		  // 100000 longs (=4byte=online "word") we need 2 words per cluster
+		  // -> we have enough space for max. 50000 clusters per sector
+		  St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,100000);
 		  St_hit_bank_this = St_hit_bank[supersectorindex-1];
 		  hit_bank_this_st = (hitarray_st*) St_hit_bank_this->GetTable();
 		  // fill TPCSECLP bankheader with 1,3,5 ... or 23
@@ -249,12 +263,11 @@ Int_t St_l3Clufi_Maker::Make(){
 	      // fill pixel array for this sector
 	      //////	  
 	      // set pixel array 0 clumsey and slow but working 
+	      if (Debug()) { timer3.Start(0) ; }
 	      for(Int_t pixindex=0;pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;pixindex++)
 		{
 		  pixelst[pixindex].data=0;
 		}
-	      //bzero(pixelst,Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets*2);			   
-
 	      // fill pixel array inner rows
 	      if ( Fill_pixel_of_inner_rows() != 1 ) 
 		{
@@ -269,7 +282,9 @@ Int_t St_l3Clufi_Maker::Make(){
 		  cerr << " in sector " << sectorindex <<endl;
 		  return kStWarn;
 		}
-			
+	      if (Debug()) { timer3.Stop() ; }	
+	
+
 	      // just checking
 	      if (Debug())
 		{
@@ -278,7 +293,9 @@ Int_t St_l3Clufi_Maker::Make(){
 		    {
 		      if (pixelst[Pixindex].data!=0) { pixelcount++;} 
 		    }
-		  cout << pixelcount << " Pixel found in sector " << sectorindex << endl;
+		  cout << pixelcount << " Pixel found in sector " << sectorindex ;
+		  totalpixelcount += pixelcount ;
+		  cout << "       total Pixel found : " << totalpixelcount << endl ;
 		}
 			    
 	      /////
@@ -287,16 +304,19 @@ Int_t St_l3Clufi_Maker::Make(){
 	      //cout << "Call the clusterfinding module for the "<< sectorindex <<"sector. " << endl;
 			   			
 	      // call the clusterfinder module 
+	      if (Debug()) { timer2.Start(0) ; }
 	      if ( l3Clufi(Stpixel,St_hit_bank_this) !=1 )
 		{
 		  cerr << "problems in clusterfinding module in sector: "<< sectorindex <<endl;
 		  // stop this maker and go back to bfc
 		  return kStWarn;
 		}
+	      if (Debug()) { timer2.Stop() ; }
+
 	      // write out tables in online format just for the supersector
 	      if ( sectorindex%2 == 0 )
 		{
-		  for(Int_t tt=0;tt<80000;tt++)
+		  for(Int_t tt=0;tt<100000;tt++)
 		    {
 		      St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
 		    }
@@ -310,17 +330,14 @@ Int_t St_l3Clufi_Maker::Make(){
       delete Stpixel;
     } //  if (raw_data_tpc) 
    
+  // timing
+  if (Debug()) { timer1.Stop() ; }
 
   /////////
   /// now fill /l3/hits_in_sec_xx banks in /l3/hit/tcl_tphit tables
   /////////
   cout << "Start filling banks into tables..." << endl;
     
-  //creat tcl_tphits table
-  //St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",50000);
-  //tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
-  //m_DataSet->Add(stl3hit);
-
   //creat tcl_tphits table
   St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",400000);
   tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
@@ -359,17 +376,9 @@ Int_t St_l3Clufi_Maker::Make(){
     }
 
   // fill histogramms
-  cout << "Number of clusters found by l3 :  " << stl3hit->GetNRows() << endl;
+  cout << "Number of clusters found by l3 :  " << stl3hit->GetNRows() << endl << endl ;
   for(Int_t tt=0; tt<stl3hit->GetNRows() && tt<500000; tt++)
     {
-      // if  (l3hitst[tt].z == 0 && l3hitst[tt+1].y == 0  && l3hitst[tt+2].x == 0)
-      // 		{
-      // 		    cout << "Total number of clusters " << tt <<" ."<< endl;
-      // 		    break;
-      // 		}
-      // old style
-      //stl3hit->AddAt(&l3hitst[tt],tt);
-	    
       // fill histogramms
       x_dis->Fill(l3hitst[tt].x);
       y_dis->Fill(l3hitst[tt].y);
@@ -380,16 +389,26 @@ Int_t St_l3Clufi_Maker::Make(){
   // fill i960 timer
   for (Int_t index1=1;index1<19;index1++ )
     {
-      i960_time->Fill(index1,(Double_t)i960[index1].CpuTime());
+      i960_time->Fill(index1,(Double_t)i960[index1-1].CpuTime());
       //i960_time->Fill(index1,(Float_t)index1);
       if (Debug())
 	{
 	  cout << "Time per i960 :  " << index1 << "\t" ;
-	  cout << (Double_t)(i960[index1].RealTime()) << "\t";
-	  cout << (Double_t)(i960[index1].CpuTime()) << endl;
+	  cout << (Double_t)(i960[index1-1].RealTime()) << "\t";
+	  cout << (Double_t)(i960[index1-1].CpuTime()) << endl;
 	}
     }
-  
+ 
+  // timing output
+  if (Debug())
+    {
+      cout << endl ;
+      cout << "Timer1 : " ; timer1.Print() ; cout << endl ;
+      cout << "Timer2 : " ; timer2.Print() ; cout << endl ;
+      cout << "Timer3 : " ; timer3.Print() ; cout << endl ;
+      cout << endl ;
+    }
+
   // done with the whole job  
   cout << "Done with l3 clusterfinding." << endl;
   return kStOK;    
@@ -460,7 +479,8 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
 	      // loop over pixel in sequenz
 	      //////
 	      //cout << " Number of pixel we loop over " << numberoftimebucketsinthissequenz << endl;
-	      for ( Int_t pixelindex = 0 ; pixelindex < numberoftimebucketsinthissequenz ; pixelindex++ )
+	      // attention : seqin.i =  numberoftimebucketsinthissequenz = number of buckets - 1 !
+	      for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
 		{
 		  // get adc value
 		  Short_t adc_value = (Short_t) adcarrayin[pixelindex+pixel_offset_pad].data;
@@ -471,7 +491,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
 		  // get pixelposition in huge pixel array
 		  Int_t pixelarrayindex = (row_id-1) * (Max_number_of_pads * Max_number_of_buckets) 
 		    + (pad_id-1) * Max_number_of_buckets 
-		    + (bucket_id-1);
+		    + (bucket_id);
 
 		  if ( adc_value <= 1024 && adc_value >= 0 
 		       && pixelarrayindex <= Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets 
@@ -556,7 +576,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 	  //cout << " Number of sequenzes we loop over " << num_seq_pad << endl;
 	  for ( Int_t sequenzindex = 0 ; sequenzindex < num_seq_pad ; sequenzindex++ )
 	    {
-	      Int_t timebucketoffset;
+	      Int_t timebucketoffset = 0 ;
 	      if ( sequenzindex < seq_mod_break )
 		{
 		  timebucketoffset = (Int_t) (seqout[sequenzindex + seq_offset_pad].m);
@@ -571,7 +591,8 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 	      // loop over pixel in sequenz
 	      //////
 	      //cout << " Number of pixel we loop over " << numberoftimebucketsinthissequenz << endl;
-	      for ( Int_t pixelindex = 0 ; pixelindex < numberoftimebucketsinthissequenz ; pixelindex++ )
+	      // attention : seqin.i =  numberoftimebucketsinthissequenz = number of buckets - 1 !
+	      for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
 		{
 		  // get pixel 
 		  Short_t adc_value = (Short_t) adcarrayout[pixelindex+pixel_offset_pad].data;
@@ -582,7 +603,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 		  // get pixelposition in huge pixel array
 		  Int_t pixelarrayindex = (row_id-1) * (Max_number_of_pads * Max_number_of_buckets) 
 		    + (pad_id-1) * Max_number_of_buckets 
-		    + (bucket_id-1);
+		    + (bucket_id) ;
 
 		  if ( adc_value <= 1024 && adc_value >= 0 
 		       && pixelarrayindex <= Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets 

@@ -154,7 +154,8 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 					    transformer.raw_to_global(PTRS,XYZ) ;
 					    //Double_t a = xyzn.Getx() ;
 					    
-					    
+					    if ( flag == 0 )
+					      {
 					    // fill tphits
 					    mytclhits_st[tphit_index].x = (Float_t) XYZ.Getx() ;
 					    mytclhits_st[tphit_index].y = (Float_t) XYZ.Gety() ;
@@ -162,6 +163,7 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 					    mytclhits_st[tphit_index].q = (Float_t) charge;
 					    mytclhits_st[tphit_index].row = (Short_t) 100 * sector + row; // to store the sector 
 					    mytclhits_st[tphit_index].id  = (Long_t)  1 + tphit_index; // to start with 1
+					    mytclhits_st[tphit_index].flag = (Long_t) flag ;
 
 					    // fill constant values to make tpt-tracker happy
 					    mytclhits_st[tphit_index].dq = charge * 0.05 ;
@@ -180,10 +182,14 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 					      
 
 					    // add
-					    mytclhits->AddAt(&mytclhits_st[tphit_index],tphit_index);
+					    cout << " flag " << flag << endl ;
+					    
+						mytclhits->AddAt(&mytclhits_st[tphit_index],tphit_index);
+						tphit_index++;
+					      }
 
 					    // hit counter
-					    tphit_index++;
+					    //tphit_index++;
 
 					   
 					} // loop over cluster
