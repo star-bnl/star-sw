@@ -1,20 +1,19 @@
-* $Id: ecalgeo.g,v 1.12 2001/08/23 16:12:19 yqwang Exp $
+* $Id: ecalgeo.g,v 1.13 2001/08/29 22:44:54 yqwang Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
-* Revision 1.12  2001/08/23 16:12:19  yqwang
+* Revision 1.13  2001/08/29 22:44:54  yqwang
+* Rotate Top and South Lgd, so their numberings agree with the actual
+* labels.
+*
+*
 * Revision 1.12  2001/08/23 12:15:41  yqwang
 * Each (West (1) , East (2)) Endcap (Fpd) has possible
 *                            XOffset, YOffset, and ZOffset.
 * Each Lgd has its own ZPoz and XDis, YDis.
-* South Lgd is tilted, but not the top and bottom
 * Update Elgg_DGap value
 *
 * Revision 1.11  2001/08/20 21:17:41  yqwang
-* Each (West (1) , East (2)) Endcap (Fpd) has possible
-*                            XOffset, YOffset, and ZOffset.
-* Each Lgd has its own ZPoz and XDis, YDis.
 * South Lgd is tilted, but not the top and bottom
-* Update Elgg_DGap value
 *
 * Revision 1.10  2001/04/09 14:20:24  akio
 * set default to de, not cherenkov, for fpd
@@ -379,12 +378,12 @@ Fill ELGM				     ! PbG detector materials
         if(emcg_OnOff(3)==2 | emcg_OnOff(3)==3) then
 * top
                 Create and Position ELGD in CAVE z=-(ELGG_ZPos(1)+ztot) y=ELGG_Ydis(5)+yy x=ELGG_Xdis(5),
-                               phix=180  phiy=90               phiz=90,
+                               phix=0    phiy=-90              phiz=-90,
                                thetax=90 thetay=90             thetaz=180
 * south
                 Create and Position ELGD in CAVE z=-(ELGG_ZPos(2)+ztot) x=ELGG_Xdis(6)+yy y=ELGG_Ydis(6),
-                               phix=90   phiy=0                phiz=0,
-                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
+                               phix=0                phiy=-90  phiz=0,
+                               thetax=90-ELGG_DipAng thetay=90 thetaz=180-ELGG_DipAng
 * bottom
                 Create and Position ELGD in CAVE z=-(ELGG_ZPos(3)+ztot) y=ELGG_Ydis(7)-yy x=ELGG_Xdis(7),
                                phix=0    phiy=-90              phiz=-90,
