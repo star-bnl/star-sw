@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.37 2002/01/11 22:49:15 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.38 2002/01/13 21:30:32 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.38  2002/01/13 21:30:32  caines
+ * only do sequence merging if there are sequences to merge, save time and fix bug
+ *
  * Revision 1.37  2002/01/11 22:49:15  caines
  * Fix sequence merging bugs-hopefully
  *
@@ -482,6 +485,20 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
      mHybridBadAnodeData->SetBadAnode(128, 1);}
     cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
 
+    // L8B3-D6H1 Whole hybrid
+    index = mSvtRawData->getHybridIndex(3,8,6,1);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=1; i<241; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+   
+    // L8B3-D6H2 Whole hybrid
+    index = mSvtRawData->getHybridIndex(3,8,6,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=1; i<241; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;   
+
     // L10B3-D7H2 anode 88
     index = mSvtRawData->getHybridIndex(3,10,7,2);
     mHybridBadAnodeData = new StSvtBadAnode();
@@ -714,8 +731,10 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   int startTimeBin,  status;
   StSequence* Sequence;
   unsigned char* adc;
-  int ExtraBefore = 1;
-  int ExtraAfter = 3;
+  //int ExtraBefore = 1;
+  // int ExtraAfter = 3;
+  int ExtraBefore = 0;
+  int ExtraAfter = 0;
   int firstTimeBin, previousEndTimeBin;
 
   //Anode is the index into the anolist array
@@ -789,8 +808,11 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
       j++;
     }
   }
-   
+
+  mNumOfSeq=0;
+  if( nSeqNow > 0){
   mNumOfSeq = MergeSequences(tempSeq1,nSeqNow);
+  }
 
   mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
   
@@ -813,8 +835,10 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   int startTimeBin, length, status;
   StSequence* Sequence;
   unsigned char* adc;
-  int ExtraBefore=1;
-  int ExtraAfter=3;
+  //int ExtraBefore=1;
+  //int ExtraAfter=3;
+ int ExtraBefore=0;
+  int ExtraAfter=0;
 
   int firstTimeBin;
   
@@ -913,14 +937,12 @@ Int_t StSvtSeqAdjMaker::MergeSequences( StSequence* seq, int nSeq){
 	>= seq[i].startTimeBin){
       EndTime = seq[i].startTimeBin + seq[i].length;
       seq[nSeqNow].length = EndTime - seq[nSeqNow].startTimeBin;
-                }
+    }
     else{
       nSeqNow++;
       seq[nSeqNow].startTimeBin = seq[i].startTimeBin;
       seq[nSeqNow].length = seq[i].length;
       seq[nSeqNow].firstAdc = seq[i].firstAdc;
-      
-      
     }
 
   }
