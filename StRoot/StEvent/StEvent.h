@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.24 2001/11/10 23:53:23 ullrich Exp $
+ * $Id: StEvent.h,v 2.25 2001/12/01 15:40:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.25  2001/12/01 15:40:48  ullrich
+ * Added StDetectorState access function.
+ *
  * Revision 2.24  2001/11/10 23:53:23  ullrich
  * Added calibration vertices.
  *
@@ -100,6 +103,7 @@
 class event_header_st;
 class dst_event_summary_st;
 class StCalibrationVertex;
+class StDetectorState;
 class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
@@ -129,7 +133,6 @@ public:
             const dst_event_summary_st&);
     StEvent(const event_header_st&);
     virtual ~StEvent();
-    
 
     void                                Browse(TBrowser*);
     static const TString&               cvsTag();
@@ -198,6 +201,9 @@ public:
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
 
+    StDetectorState*                    detectorState(StDetectorId);
+    const StDetectorState*              detectorState(StDetectorId) const;
+    
     StPsd*                              psd(StPwg, int);
     const StPsd*                        psd(StPwg, int) const;
     unsigned int                        numberOfPsds() const;
@@ -233,6 +239,7 @@ public:
     void setL3Trigger(StL3Trigger*);
     void addPrimaryVertex(StPrimaryVertex*);
     void addCalibrationVertex(StCalibrationVertex*);
+    void addDetectorState(StDetectorState*);
     void addPsd(StPsd*);
     void removePsd(StPsd*);
     
@@ -248,7 +255,8 @@ private:
     StEvent(const StEvent&);
     void initToZero();
     void init(const event_header_st&);
-    ClassDef(StEvent,3)
+    
+    ClassDef(StEvent,4)
 };
 #endif
 

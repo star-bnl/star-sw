@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.30 2001/12/01 15:40:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.30  2001/12/01 15:40:47  ullrich
+ * Added StDetectorState access function.
+ *
  * Revision 2.29  2001/11/10 23:53:23  ullrich
  * Added calibration vertices.
  *
@@ -111,6 +114,7 @@
 #include "TClass.h"
 #include "TDataSetIter.h"
 #include "StCalibrationVertex.h"
+#include "StDetectorState.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
@@ -141,8 +145,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.30 2001/12/01 15:40:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.30 2001/12/01 15:40:47 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -706,6 +710,28 @@ StEvent::kinkVertices() const
     return *vertices;
 }
 
+StDetectorState*
+StEvent::detectorState(StDetectorId det)
+{
+    StSPtrVecDetectorState *states = 0;
+    _lookup(states, mContent);
+    if (states)
+	for (unsigned int i=0; i<states->size(); i++)
+	    if ((*states)[i]->detector() == det) return (*states)[i];
+    return 0;			       
+}
+
+const StDetectorState*
+StEvent::detectorState(StDetectorId det) const
+{
+    StSPtrVecDetectorState *states = 0;
+    _lookup(states, mContent);
+    if (states)
+	for (unsigned int i=0; i<states->size(); i++)
+	    if ((*states)[i]->detector() == det) return (*states)[i];
+    return 0;			       
+}
+
 StPsd*
 StEvent::psd(StPwg p, int i)
 {
@@ -938,6 +964,16 @@ StEvent::addCalibrationVertex(StCalibrationVertex* vertex)
         StSPtrVecCalibrationVertex* vertexVector = 0;
         _lookupOrCreate(vertexVector, mContent);
         vertexVector->push_back(vertex);
+    }
+}
+
+void
+StEvent::addDetectorState(StDetectorState *state)
+{
+    if (state) {
+        StSPtrVecDetectorState* stateVector = 0;
+        _lookupOrCreate(stateVector, mContent);
+        stateVector->push_back(state);
     }
 }
 
