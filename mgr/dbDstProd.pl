@@ -17,10 +17,10 @@ use Class::Struct;
 use File::Basename;
 use Class::Struct;
 
-require "/afs/rhic/star/packages/SL99h/mgr/dbheader.pl";
-require "/afs/rhic/star/packages/SL99h/mgr/dbsetup.pl";
+require "/afs/rhic/star/packages/DEV/mgr/dbheader.pl";
+require "/afs/rhic/star/packages/DEV/mgr/dbsetup.pl";
 
-require "/afs/rhic/star/packages/SL99i/mgr/dbDstProdSetup.pl";
+require "/afs/rhic/star/packages/DEV/mgr/dbDstProdSetup.pl";
 
 my $debugOn = 0;
 
