@@ -55,9 +55,45 @@ void StiDefaultTrackFilter::initialize()
   add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
   add(new EditableParameter("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   add(new EditableParameter("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
-
-
-  //add(new EditableParameter("NToNmaxPtsUsed", "Use NToNmaxPts",false,false,0,1,1,Parameter::Boolean));
-  //add(new EditableParameter("NToNmaxPtsMin","Minimum NToNmaxPts",0.25, 0.25, 0.,1.,1.,Parameter::Double));
-  //add(new EditableParameter("NToNmaxPtsMax","Maximum NToNmaxPts",1.00, 1.00, 0.,1.,1.,Parameter::Double));
 }
+
+
+bool StiDefaultTrackFilter::accept(const StiTrack * t) const
+{
+  //cout << "StiDefaultTrackFilter::accept(t) - INFO - Starting" << endl;
+  double v,low,high;
+  ParameterConstIterator iter = begin();
+  Parameter * parUse;
+  Parameter * parLow;
+  Parameter * parHi;
+  while (iter!=end())
+    {
+      parUse = *iter; iter++;
+      parLow = *iter; iter++;
+      parHi  = *iter; iter++;
+      if (parUse&&parLow&&parHi)
+				{
+					if (parUse->getBoolValue())
+						{
+							//cout << "/"<<count++;
+							v = t->getValue(parUse->getKey());
+							low = parLow->getDoubleValue();
+							high = parHi->getDoubleValue();
+							if (v<low || v>high)
+								{
+									//cout<<"/false-done"<<endl;
+									return false;
+								}
+						}
+				}
+      else
+				throw runtime_error("StiDefaultTrackFilter::accept(const StiTrack * t) -E- Internal error");
+    }
+  //cout<<"/true-done"<<endl;
+  return true;
+}
+
+
+void StiDefaultTrackFilter::setDefaults()
+{}
+
