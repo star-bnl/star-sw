@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.14 2000/04/20 17:02:42 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.15 2000/06/06 03:03:30 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.15  2000/06/06 03:03:30  calderon
+// Use with new Emc classes.
+//
 // Revision 1.14  2000/04/20 17:02:42  calderon
 // Modified macros to continue looping when status = 3
 // Pick up maker with name "StMcAnalysisMaker" instead of "McAnalysis"
@@ -80,6 +83,8 @@ const char *MainFile=
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     
+    gSystem->Load("St_emc_Maker");
+    
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     
@@ -99,6 +104,13 @@ const char *MainFile=
     // StMcEvent
     StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
     mcEventReader->doPrintEventInfo = false;
+    mcEventReader->doPrintMemoryInfo = false;
+    mcEventReader->doUseTpc = true;
+    mcEventReader->doUseSvt = true;
+    mcEventReader->doUseFtpc = true;
+    mcEventReader->doUseRich = true;
+    mcEventReader->doUseBemc = true;
+    //mcEventReader->SetDebug();
     // now execute the chain member functions
     
     chain->PrintInfo();
