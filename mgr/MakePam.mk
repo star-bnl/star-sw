@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.10  1998/04/10 14:03:14  fisyak
+#  Add supermodule in shared libraries
+#
 #  Revision 1.9  1998/04/07 22:02:49  fisyak
 #  fogotten bracket
 #
@@ -55,7 +58,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/07 22:02:49 $ 
+#           Last modification $Date: 1998/04/10 14:03:14 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 PWD       = /bin/pwd
@@ -244,17 +247,20 @@ endif
 ifneq (,$(NAMES_G))            
 FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
 endif                          
+ifneq (,$(NAMES_CC))            
+FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_CC)))
+endif                          
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/inc $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
 CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
-             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src/cfortran
+             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/cfortran
 ifneq ($(ROOT),$(STAR))        
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
 endif                          
-FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321 -I$(CERN_ROOT)/src/packlib/zebra  -I$(CERN_ROOT)/src/graflib/dzdoc 
+FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src/geant321 -I$(CERN_ROOT)/src/packlib/zebra -I$(CERN_ROOT)/src/pawlib/sigma -I$(CERN_ROOT)/src/graflib/dzdoc
 ifndef NODEBUG                 
 FFLAGS   += -g
 CFLAGS   += -g
@@ -343,8 +349,8 @@ $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
 $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 #	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def
-	cp $(FIRST_DEP) $(GEN_DIR); cd $(GEN_DIR); geant3 $(FIRST_DEP) -o  $(GEN_DIR)/$(STEM).f 
-	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
+	cp $(FIRST_DEP) $(GEN_DIR); cd $(GEN_DIR); geant3 $(FIRST_DEP) -o  $(GEN_DIR)/$(STEM).F
+	$(FC)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.o: %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(F_EXTENDED)   -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.c

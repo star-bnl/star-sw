@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.6 1998/04/04 14:45:51 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.7 1998/04/10 14:03:15 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.7  1998/04/10 14:03:15  fisyak
+#  Add supermodule in shared libraries
+#
 #  Revision 1.6  1998/04/04 14:45:51  fisyak
 #  Fix bug with geant3.def
 #
@@ -41,7 +44,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/04/04 14:45:51 $ 
+#             Last modification $Date: 1998/04/10 14:03:15 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -69,6 +72,7 @@ F_EXTENDED :=-e
 LDFLAGS    +=-bnoentry -bE:$*.exp import.map -bh:8 -T512 -H512
 LD_LIBS    :=-lld -lxlf90 -lxlf -lm -lc
 OPSYS      := AIX
+CPPFLAGS   += -DCERNLIB_IBMRT -DCERNLIB_UNIX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),alpha_osf32c))
 CXX        := cxx
@@ -78,6 +82,7 @@ F_EXTENDED := -extend_source
 LDFLAGS    += -shared -expect_unresolved \*\
 LD_LIBS    := lUfor -lfor -lFutil -lm -lm_4sqrt -lots -lc
 OPSYS      := OSF1V32
+CPPFLAGS   += -DCERNLIB_QMVAOS -DCERNLIB_DECS -DCERNLIB_UNIX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp700_ux90))
 CXX        :=      CC
@@ -105,6 +110,7 @@ LD         := ld                                     # from DSPACK
 #LDFLAGS    += -w -z +Z -g +DAportable -Wl,-E         # P.Nevski
 LD_LIBS    := -lCsup -lstream                        # P.Nevski
 CERN_LIBS  := 
+CPPFLAGS   += -DCERNLIB_HPUX -DCERNLIB_UNIX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_52 sgi_53))
 FFLAGS     +=-Nn20000 -static -trapuv -KPIC
@@ -119,6 +125,7 @@ LD         := CC
 LDFLAGS    += -32 -shared
         LD_LIBS    := -lsun -lftn -lm -lc -lPW -lmalloc
 OPSYS      := IRIX53
+CPPFLAGS   += -DCERNLIB_SGI -DCERNLIB_UNIX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_63 sgi_64))
 FFLAGS     +=-32 -Nn20000 -static -trapuv -KPIC
@@ -132,6 +139,7 @@ LD         := CC
 LDFLAGS    += -32 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_32
+CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
 else
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_n32))
 CXX        :=  CC
@@ -142,6 +150,7 @@ F_EXTENDED := -extend_source
 LDFLAGS    += -n32 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_n32
+CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_64))
 CXX        :=  CC
@@ -152,6 +161,7 @@ F_EXTENDED := -extend_source
 LDFLAGS    += -64 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_64
+CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
 endif
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),i386_linux2))
@@ -169,10 +179,12 @@ LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -
 #                                       -lstdc++
 #CC         := /usr/pgi/linux86/bin/pgcc -g77libs 
 #CXX        := /usr/pgi/linux86/bin/pgCC
+CPPFLAGS   += -DCERNLIB_QFPGF77
 endif
+CPPFLAGS   += -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sun4m_54 sun4m_55 sun4x_55 sun4x_56))
-CPPFLAGS   := -DSUN -DSOLARIS -Dsun
+CPPFLAGS   := -DSUN -DSOLARIS -Dsun 
 FFLAGS     +=-xl -PIC -w
 F_EXTENDED :=-e
 CC         := /opt/SUNWspro/bin/cc         # V.P.
@@ -187,6 +199,7 @@ CXXFLAGS   += -KPIC                        # V.P.
 LDFLAGS    += -G
 LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb
 CC_LIBS    := -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc
+CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX
 endif 
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sunx86_55))
 CXX        :=  /opt/SUNWspro/bin/CC
@@ -198,13 +211,19 @@ F_EXTENDED :=-e
 LDFLAGS    += -G -t -z muldefs
 LD_LIBS    :=-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb -lsunmath
 OPSYS      := sun4os5pc
+CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX
 endif
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),intel_wnt))
+CPPFLAGS   += -DCERNLIB_WINNT -DCERNLIB_UNIX -DCERNLIB_MSSTDCALL -DCERNLIB_QFMSOFT
+endif
+CPPFLAGS   += -DCERNLIB_TYPE
 # defaul flags
 ifeq ($(EMPTY),$(CFLAGS))
 CFLAGS     += -fpic -w
 endif
 ifeq ($(EMPTY),$(CXXFLAGS))
 CXXFLAGS   += -fpic -w
+CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX
 endif
 
 
