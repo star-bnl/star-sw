@@ -131,7 +131,7 @@ int dsCmpData(DS_TYPE_T *type, unsigned count, void *baseOne, void *baseTwo)
 *       -1 fieldOne < fieldTwo
 *       -2 type error
 */
-int dsCmpKeys(DS_KEY_T *key, char *baseOne, char *baseTwo)
+int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key)
 {
 	int c;
 	size_t i;
@@ -148,74 +148,12 @@ int dsCmpKeys(DS_KEY_T *key, char *baseOne, char *baseTwo)
 }
 /*****************************************************************************
 *
-* dsHashData - compute hash of data field
-*
-* derived from djb2 hash algorithm by Dan Bernstein
-*
-* RETURNS: hash code
-*/
-size_t dsHashData(DS_FIELD_T *field, size_t h, char *base)
-{
-	size_t i, n;
-	DS_FIELD_T *f, *limit;
-	DS_TYPE_T *type;
-
-	base += field->offset;
-	type = field->type;
-
-	if (DS_TYPE_CHAR == type->code) {
-		for (i = 0; i < field->count && base[i]; i++) {
-			h += (h << 5) + base[i];
-		}
-	}
-	else if (DS_TYPE_STRUCT == type->code) {
-		limit = DS_FIELD_PTR(type) + type->nField;
-		for (i = 0; i < field->count; i++) {
-			for (f = DS_FIELD_PTR(type); f < limit; f++) {
-				h = dsHashData(f, h, base);
-			}
-			base += type->size;
-		}
-	}
-	else {
-		if (0 == type->size%sizeof(size_t)) {
-			n = field->count*type->size/sizeof(size_t);
-			for (i = 0; i < n; i++) {
-				h += (h << 5) + ((size_t *)base)[i];
-			}
-		}
-		else {
-			n = field->count*type->size;
-			for (i = 0; i < n; i++) {
-				h += (h << 5) + base[i];
-			}
-		}
-	}
-	return h;
-}
-/*****************************************************************************
-*
-* dsHashKey - hash key data
-*
-* RETURN: hash code
-*/
-size_t dsHashKey(DS_KEY_T *key, unsigned keyID, char *base)
-{
-	size_t 	h = 5381, i;
-	
-	for (i = 0; i < key->count; i++) {
-		h = dsHashData(key->field[i][keyID], h, base);
-	}
-	return h;
-}
-/*****************************************************************************
-*
 * dsTasProject - project data to TAS variable
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTasProject(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t *pCount, void *ppData)
+int dsTasProject(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t *pCount, void *ppData)
 {
 	int rtn;
 	DS_DATASET_T *pSrcTable, table;

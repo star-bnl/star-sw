@@ -1,0 +1,71 @@
+<!doctype html public "-//IETF//DTD HTML//EN">
+<HTML>
+
+<HEAD>
+
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAM >
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Word 1.00">
+<META NAME="AUTHOR" CONTENT="bill">
+<META NAME="DOCCOMM" CONTENT="r                                      ">
+</HEAD>
+
+<BODY>
+
+<H2>xdrtape_create</H2>
+
+<P>
+The <B>xdrtape_create</B> function intializes an XDR stream for
+tape I/O.
+<P>
+<B>int xdrtape_create(XDR *</B><I>xdrs</I><B>, enum xdr_op </B><I>op</I><B>,
+int </B><I>fd</I><B>, unsigned </B><I>size</I><B>, int (*</B><I>iofcn</I><B>)(int
+</B><I>fd</I><B>, char *</B><I>buf</I><B>, unsigned </B><I>count</I><B>));</B>
+
+<H3>Parameters </H3>
+
+<DL>
+<DT><I>xdrs</I> 
+<DD>Handle for an XDR stream
+<DT><I>op</I> 
+<DD>XDR operation
+<DT><I>fd</I> 
+<DD>Handle for <I>iofcn</I> 
+<DT><I>size</I> 
+<DD>Tape record size
+<DT><I>iofcn</I> 
+<DD>Function to be called for tape I/O
+<DT><I>buf</I> 
+<DD>Location of data
+<DT><I>count</I> 
+<DD>Byte count for I/O
+</DL>
+
+<H3>Return Value</H3>
+
+<P>
+If the function succeeds, the return value is TRUE.
+<P>
+If the function fails, the return value is FALSE. To get extended
+error information, call <A HREF="xtgeterr.htm">xdrtape_get_error</A>
+. To print error information call <A HREF="xtperr.htm">xdrtape_perror</A>.
+<H3>Remarks</H3>
+
+<P>
+This routine initializes the XDR stream object pointed to by xdrs.
+The XDR stream data is written to, or read from by <I>iofcn</I>.
+The parameter op determines the direction of the XDR stream (either
+XDR_ENCODE or XDR_DECODE).
+<H3>See Also</H3>
+
+<P>
+<A HREF="xtflush.htm">xdrtape_flush</A>
+<H3>Consider</H3>
+
+<P>
+Should the destroy function call xdrtape_flush? 
+</BODY>
+
+</HTML>

@@ -19,9 +19,9 @@ and manage dataset structures
 #include "dstype.h"
 
 static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
-							char *str, char **ptr, size_t *tList);
-static int dsDatasetSpecifierR(DS_DATASET_T *dataset, DS_LIST_T *list,
-							   size_t level, char **in, char *limit);
+							DS_BUF_T *bp, size_t *tList);
+static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *dataset,
+							   DS_LIST_T *list, size_t level);
 static int dsIsAcyclicR(DS_DATASET_T *dataset, DS_LIST_T *list,
 						DS_LIST_T *path);
 /******************************************************************************
@@ -30,8 +30,8 @@ static int dsIsAcyclicR(DS_DATASET_T *dataset, DS_LIST_T *list,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsAddTable(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t nRow, char **ppData)
+int dsAddTable(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t nRow, char **ppData)
 {
 	char *pData;
 	DS_DATASET_T *pTable;
@@ -68,7 +68,9 @@ int dsAllocTables(DS_DATASET_T *dataset)
 	DS_LIST_T list;
 	DS_DATASET_T *item;
 
-	dsListInit(&list);
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
 	if (!dsVisitList(&list, dataset)) {
 		goto fail;
 	}
@@ -122,17 +124,24 @@ static int dsCheckDupEntry(DS_DATASET_T *pDataset)
 * RETURNS: TRUE if success else FALSE
 */
 int dsCreateDataset(DS_DATASET_T **ppDataset,
-					 size_t *tList, char *str, char **ptr)
+					 size_t *tList, const char *str, const char **ptr)
 {
+	DS_BUF_T bp;
 	DS_LIST_T list;
 
-	dsListInit(&list);
-	if (!dsCreateDatasetR(NULL, &list, str, &str, tList)) {
+	if (ptr != NULL) {
+		*ptr = str;
+	}
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
+	DS_GET_INIT(&bp, str);
+	if (!dsCreateDatasetR(NULL, &list, &bp, tList)) {
 		goto fail;
 	}
 	*ppDataset = list.pItem[0];
 	if (ptr != NULL) {
-		*ptr = str;
+		*ptr = bp.out;
 	}
 	return dsListFree(&list);
 fail:
@@ -149,26 +158,22 @@ fail:
 * RETURNS: TRUE if success else FALSE
 */
 static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
-							char *str, char **ptr, size_t *tList)
+							DS_BUF_T *bp, size_t *tList)
 {
 	char name[DS_NAME_DIM];
 	int c;
 	size_t h, n;
 	DS_DATASET_T *child;
 
-	if(!dsParseName(name, str, &str)) {
-		if (dsNonSpace(str, &str) != '&' || !dsParseNumber(&n, str, &str)) {
+	if(dsGetName(name, bp) < 0) {
+		if	(dsGetNonSpace(bp) != '&' || dsGetNumber(&n, bp) < 0) {
 			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
 		if (--n >= list->count) {
 			DS_ERROR(DS_E_INVALID_LINK);
 		}
 		child = list->pItem[n];
-		if (!dsLink(parent, child)) {
-			return FALSE;
-		}
-		*ptr = str;
-		return TRUE;
+		return dsLink(parent, child);
 	}
 	if (!dsNewDataset(&child, name)) {
 			return FALSE;
@@ -181,8 +186,8 @@ static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
 		dsFreeDataset(child);
 		return FALSE;
 	}
-	if ((c = dsNonSpace(str, &str)) == '(') {
-		if (!dsParseName(name, str, &str)) {
+	if ((c = dsGetNonSpace(bp)) == '(') {
+		if (dsGetName(name, bp) < 0) {
 			DS_ERROR(DS_E_INVALID_TYPE_NAME);
 		}
 		if (!dsTypeListFind(&h, tList, name)) {
@@ -191,28 +196,27 @@ static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
 		if ((child->tid = tList[h]) == 0) {
 			DS_ERROR(DS_E_UNDEFINED_TYPE);
 		}
-		if ((c = dsNonSpace(str, &str)) == ',') {
-			if (!dsParseNumber(&child->maxcount, str, &str)) {
+		if ((c = dsGetNonSpace(bp)) == ',') {
+			if (dsGetNumber(&child->maxcount, bp) < 0) {
 				DS_ERROR(DS_E_SYNTAX_ERROR);
 			}
-			c = dsNonSpace(str, &str);
+			c = dsGetNonSpace(bp);
 		}
 		if ( c != ')') {
 			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
-		*ptr = str;
 		return TRUE;		
 	}
 	if (c != '{') {
 		DS_ERROR(DS_E_SYNTAX_ERROR);
 	}
-	if ((c = dsNonSpace(str, &str)) != '}') {
-		str--;
+	if ((c = dsGetNonSpace(bp)) != '}') {
+		dsUngetc(c, bp);
 		for (;;) {
-			if (!dsCreateDatasetR(child, list, str, &str, tList)) {
+			if (!dsCreateDatasetR(child, list, bp, tList)) {
 				return FALSE;
 			}
-			if ((c = dsNonSpace(str, &str)) == '}') {
+			if ((c = dsGetNonSpace(bp)) == '}') {
 				break;
 			}
 			if (c != ',') {
@@ -220,7 +224,6 @@ static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
 			}
 		}
 	}
-	*ptr = str;
 	return TRUE;		
 }
 /******************************************************************************
@@ -229,16 +232,21 @@ static int dsCreateDatasetR(DS_DATASET_T *parent, DS_LIST_T *list,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsDatasetSpecifier(DS_DATASET_T *pDataset, char *buf, size_t bufSize)
+int dsDatasetSpecifier(DS_BUF_T *bp, DS_DATASET_T *pDataset)
 {
-	char *in = buf, *limit = buf + bufSize;
 	DS_LIST_T list;
 
-	dsListInit(&list);
-	if (!dsPutStr("data ", &in, limit)) {
-		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	if (!dsListInit(&list)) {
+		return FALSE;
 	}
-	if (!dsDatasetSpecifierR(pDataset, &list, 0, &in, limit)) {
+	if (dsPuts("data ", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (!dsDatasetSpecifierR(bp, pDataset, &list, 0)) {
+		goto fail;
+	}
+	if (dsPutc('\0', bp) < 0) {
+		DS_LOG_ERROR(DS_E_ARRAY_TOO_SMALL);
 		goto fail;
 	}
 	return dsListFree(&list);
@@ -252,63 +260,62 @@ fail:
 *
 * RETURNS: TRUE if success else FALSE
 */
-static int dsDatasetSpecifierR(DS_DATASET_T *pDataset, DS_LIST_T *list,
-							   size_t level, char **in, char *limit)
+static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
+							   DS_LIST_T *list, size_t level)
 {
 	size_t i;
 	DS_TYPE_T *type;
 
-	if (!dsPutTabs(level, in, limit)) {
-		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	if (dsPutTabs(level, bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 	}
 	if (dsVisited(list, pDataset)) {
-		if (!dsPutStr("&", in, limit)||
-			!dsPutNumber(pDataset->visit, in, limit)) {
-			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+		if (dsPutc('&', bp) < 0 || dsPutNumber(pDataset->visit, bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 		}
 		return TRUE;
 	}
 	if (!dsMark(list, pDataset)) {
 		return FALSE;
 	}
-	if (!dsPutStr(pDataset->name, in, limit)) {
-		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	if (dsPuts(pDataset->name, bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 	}
 	if (DS_IS_TABLE(pDataset)) {
 		if (!dsTypePtr(&type, pDataset->tid)) {
 			return FALSE;
 		}
-		if (!dsPutStr("(", in, limit)||
-			!dsPutStr(type->name, in, limit)||
-			!dsPutStr(", ", in, limit) < 0 ||
-			!dsPutNumber(pDataset->elcount, in, limit)||
-			!dsPutStr(")", in, limit)) {
-			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+		if (dsPutc('(', bp) < 0 ||
+			dsPuts(type->name, bp) < 0 ||
+			dsPuts(", ", bp) < 0 ||
+			dsPutNumber(pDataset->elcount, bp) < 0 ||
+			dsPutc(')', bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 		}
 		return TRUE;
 	}
 	if (!DS_IS_DATASET(pDataset)) {
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
-	if (!dsPutStr("{\n", in, limit)) {
-		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	if (dsPuts("{\n", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 	}
 	if (!dsCheckDupEntry(pDataset)) {
 		return FALSE;
 	}
 	for (i = 0; i < pDataset->elcount; i++) {
-		if (i != 0 && !dsPutStr(",\n", in, limit)) {
-			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+		if (i != 0 && dsPuts(",\n", bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 		}
-		if (!dsDatasetSpecifierR(pDataset->p.link[i],
-			list, level + 1, in, limit)) {
+		if (!dsDatasetSpecifierR(bp,
+			pDataset->p.link[i], list, level + 1)) {
 			return FALSE;
 		}
 	}
-	if (!dsPutStr("\n", in, limit) ||
-		!dsPutTabs(level, in, limit) ||
-		!dsPutStr("}", in, limit)) {
-		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	if (dsPutc('\n', bp) < 0 ||
+		dsPutTabs(level, bp) < 0 ||
+		dsPutc('}', bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 	}
 	return TRUE;
 }
@@ -318,15 +325,14 @@ static int dsDatasetSpecifierR(DS_DATASET_T *pDataset, DS_LIST_T *list,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsInitTable(DS_DATASET_T *pTable, char *tableName,
-	char *typeSpecifier, unsigned rowCount, void *pData)
+int dsInitTable(DS_DATASET_T *pTable, const char *tableName,
+	const char *typeSpecifier, unsigned rowCount, void *pData)
 {
-	char *ptr;
 	if (pTable == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
 	memset((char *)pTable, 0 , sizeof(DS_DATASET_T));
-	if (!dsParseName(pTable->name, tableName, &ptr) || *ptr != '\0') {
+	if (!dsCopyName(pTable->name, tableName, NULL)) {
 		DS_ERROR(DS_E_INVALID_TABLE_NAME);
 	}		
 	if (!dsTypeId(&pTable->tid, typeSpecifier, NULL)) {
@@ -349,8 +355,9 @@ int dsIsAcyclic(DS_DATASET_T *dataset)
 	int status;
 	DS_LIST_T list, path;
 
-	dsListInit(&list);
-	dsListInit(&path);
+	if (!dsListInit(&list) || !dsListInit(&path)) {
+		return FALSE;
+	}
 	status = dsIsAcyclicR(dataset, &list, &path);
 	if (!dsListFree(&list) || !dsListFree(&path)){
 		return FALSE;
@@ -435,7 +442,9 @@ int dsLinkAcyclic(DS_DATASET_T *parent, DS_DATASET_T *child)
 	DS_LIST_T list;
 
 	if (DS_IS_DATASET(child)) {
-		dsListInit(&list);
+		if (!dsListInit(&list)) {
+			return FALSE;
+		}
 		if (!dsVisitList(&list, child)) {
 			dsListFree(&list);
 			return FALSE;
@@ -449,27 +458,6 @@ int dsLinkAcyclic(DS_DATASET_T *parent, DS_DATASET_T *child)
 		}
 	}
 	return dsLink(parent, child);
-}
-/*****************************************************************************
-*
-* dsMark - mark node as visited
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsMark(DS_LIST_T *list, DS_DATASET_T *node)
-{
-	if (!DS_IS_VALID(node)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
-	}
-	if ((node->visit - 1) < list->count &&
-		list->pItem[node->visit - 1] == node) {
-		DS_ERROR(DS_E_MARK_ERROR);
-	}
-	if (!dsListAppend(list, node)) {
-		return FALSE;
-	}
-	node->visit = list->count;
-	return TRUE;
 }
 /*****************************************************************************
 *
@@ -499,88 +487,5 @@ int dsUnlink(DS_DATASET_T *parent, DS_DATASET_T *child)
 		parent->p.link[i] = parent->p.link[i + 1];
 	}
 	child->refcount--;
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsVisitClear - clear visit during depth first traversal of dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitClear(DS_DATASET_T *dataset)
-{
-	size_t i;
-
-	if (!DS_IS_VALID(dataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
-	}
-	if (dataset->visit != 0) {
-		dataset->visit = 0;
-		if (DS_IS_DATASET(dataset)) {
-			for (i = 0; i < dataset->elcount; i++) {
-				if (!dsVisitClear(dataset->p.link[i])) {
-					return FALSE;
-				}
-			}
-		}
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsVisitCount - count visits during depth first traversal of dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitCount(DS_DATASET_T *dataset)
-{
-	size_t i;
-
-	if (!DS_IS_VALID(dataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
-	}
-	if (dataset->visit++ == 0) {
-		if (DS_IS_DATASET(dataset)) {
-			for (i = 0; i < dataset->elcount; i++) {
-				if (!dsVisitCount(dataset->p.link[i])) {
-					return FALSE;
-				}
-			}
-		}
-	}
-	return TRUE;
-}
-/*****************************************************************************
-*
-* dsVisited - check for node of dataset visited
-*
-* RETURN TRUE if visited else FALSE
-*/
-int dsVisited(DS_LIST_T *list, DS_DATASET_T *node)
-{
-	return node != NULL && (node->visit - 1) < list->count &&
-		node == list->pItem[node->visit - 1];
-}
-/******************************************************************************
-*
-* dsVisitList - form a list of nodes accessable from dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitList(DS_LIST_T *list, DS_DATASET_T *dataset)
-{
-	size_t i;
-
-	if (!dsMark(list, dataset)) {
-		return FALSE;
-	}
-	if (DS_IS_DATASET(dataset)) {
-		for (i = 0; i < dataset->elcount; i++) {
-			if (!dsVisited(list, dataset->p.link[i]) &&
-				!dsVisitList(list, dataset->p.link[i])) {
-				return FALSE;
-			}
-		}
-	}
 	return TRUE;
 }

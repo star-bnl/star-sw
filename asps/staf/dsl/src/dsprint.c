@@ -14,7 +14,7 @@ TBS ...
 */
 #include <string.h> 
 #define DS_PRIVATE
-#include "dstype.h"
+#include "dsxdr.h"
 
 /*****************************************************************************
 *
@@ -32,12 +32,12 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 	switch(type->code) {
 
 		case DS_TYPE_CHAR:
-
- 			fprintf( stream,  "\t");
- 			for (i = 0; i < count; i++) {
- 				fprintf( stream,  "%c", p.c[i]);
+			/* 04sep97-cet- BUG FIX
+			fprintf(stream, "\t%s", p.c);*/
+			fprintf( stream,  "\t");
+			for (i = 0; i < count; i++) {
+				fprintf( stream,  "%c", p.c[i]);
 			}
-
 			break;
 			
 		case DS_TYPE_OCTET:
@@ -107,8 +107,10 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset)
 {
 	char buf[DS_MAX_SPEC_LEN+1];
+	DS_BUF_T bp;
 
-	if (!dsDatasetSpecifier(pDataset, buf, sizeof(buf))) {
+	DS_PUT_INIT(&bp, buf, sizeof(buf));
+	if (!dsDatasetSpecifier(&bp, pDataset)) {
 		return FALSE;
 	}
 	fprintf(stream, "%s\n", buf);
@@ -124,7 +126,7 @@ int dsPrintSpecifiers(FILE *stream, DS_DATASET_T *pDataset)
 {
 	size_t *tList = NULL;
 
-	if (!dsTypeListCreate(&tList, DS_TID_HASH_DIM + 1)) {
+	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
 		return FALSE;
 	}
 	if (!dsPrintTypes(stream, pDataset, tList) ||
@@ -141,13 +143,15 @@ fail:
 */
 int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 {
-	char *str;
-	size_t h, i;
+	const char *str;
+	size_t h, i, len;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
 	DS_TYPE_T *pType;
 
-	dsListInit(&list);
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
 	if (!dsVisitList(&list, dataset)) {
 		goto fail;
 	}
@@ -168,7 +172,7 @@ int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 			goto fail;
 		}
 		tList[h] = item->tid;
-		if (!dsTypeSpecifier(&str, item->tid)) {
+		if (!dsTypeSpecifier(&str, &len, item->tid)) {
 			goto fail;
 		}
 		fprintf(stream, "type %s\n", str);
@@ -205,9 +209,10 @@ void dsPrintTableData(FILE *stream, DS_DATASET_T *table)
 */
 void dsPrintTableType(FILE *stream, DS_DATASET_T *pTable)
 {
-	char *str;
+	const char *str;
+	size_t i;
 	
-	if (!dsTypeSpecifier(&str, pTable->tid)) {
+	if (!dsTypeSpecifier(&str, &i, pTable->tid)) {
 		fprintf(stream, "\nINVALID TABLE\n\n");
 		return;
 	}
