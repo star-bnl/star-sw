@@ -18,6 +18,7 @@
 #include "stafGeneric.h"
 
 /*-------------------------------------------- MACROS               --*/
+#define FIRST_IDREF 0
 
 #define VALID_IDREF(A) (0 <= A && A < soc->count())
 

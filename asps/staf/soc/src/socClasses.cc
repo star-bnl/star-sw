@@ -17,12 +17,13 @@
 #include "socClasses.hh"
 #include "soc_globals.h"
 
-#define VALID_IDREF(A)  ( (0 <= A && A < myCount && A < myMaxCount) \
+#define VALID_IDREF(A)  ( (0 <= A && A < count() && A < maxCount()) \
 	&& ( myObjs[A] != NULL ) )
 
 //:----------------------------------------------- PROTOTYPES         --
 extern "C" char *id2name(char *base, long id);
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // socObject
 
@@ -164,6 +165,7 @@ STAFCV_T socObject:: release () {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // socFactory
 //:----------------------------------------------- CTORS & DTOR       --
@@ -215,7 +217,7 @@ STAFCV_T socFactory :: addEntry (IDREF_T idRef) {
 STAFCV_T socFactory :: deleteEntry (IDREF_T idRef) {
    for( int i=0;i<myCount;i++ ){
       if( idRef == idRefs[i] ){
-	 idRefs[i]=0;
+	 idRefs[i]=-1; /*-SOC_E_INVALID_IDREF-*/
          soc->deleteID(idRef);
 	 EML_SUCCESS(STAFCV_OK);
       }
@@ -224,12 +226,23 @@ STAFCV_T socFactory :: deleteEntry (IDREF_T idRef) {
 }
 
 //----------------------------------
+STAFCV_T socFactory :: unaddEntry (IDREF_T idRef) {
+   for( int i=0;i<myCount;i++ ){
+      if( idRef == idRefs[i] ){
+	 idRefs[i]=-1; /*-SOC_E_INVALID_IDREF-*/
+	 EML_SUCCESS(STAFCV_OK);
+      }
+   }
+   EML_ERROR(INVALID_IDREF);
+}
+
+//----------------------------------
 IDREF_T socFactory :: entry (long n) {
-   if(n<myCount){
+   if(n<myCount && idRefs[n]>=0){
       return idRefs[n];
    }
    else{
-      return 0;
+      return -1; /*-SOC_E_INVALID_IDREF-*/
    }
 }
 
@@ -239,6 +252,7 @@ IDREF_T socFactory :: entry (long n) {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // socCatalog
 
@@ -248,21 +262,22 @@ socCatalog:: socCatalog()
 	, socObject((IDREF_T)0) {
    myPtr = (SOC_PTR_T)this;
    myObjs = new socObject* [maxCount()];
+   nextIDRef = FIRST_IDREF;
    IDREF_T id;
    signIn(this,id);
 }
 
 //----------------------------------
 socCatalog:: ~socCatalog() {
-	for( long i=myCount-1; i>0; i-- ){
-  		delete myObjs[i];
+	for( long i=count()-1; i>0; i-- ){
+  		if(myObjs[i])delete myObjs[i];
 	}
   	delete[] myObjs;
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * socCatalog:: version() {
-	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.6 1996/07/18 23:34:50 tull Exp $";
+	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.7 1996/07/25 00:32:16 tull Exp $";
 	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
 	strcpy(c,myVersion);
 	return c;
@@ -328,12 +343,15 @@ STAFCV_T socCatalog:: idObject (const char * name
 		, const char * type, IDREF_T& id) {
 // THIS COULD BE IMPLEMENTED BY A HASHTABLE LOOKUP !!
    char *n, *t;
-   for( int i=0; i<myCount; i++ ){
+   for( int i=0; i<count(); i++ ){
       if( myObjs[i] ) {
 	 if(  0 == strcmp(n=myObjs[i]->name(),name) ){
 	    if( 0 == strcmp(t=myObjs[i]->type(),type) 
 	    ||  0 == strcmp("-",type) ){
 	       id = i;
+	       if(i != myObjs[i]->idRef()){	//- HACK???
+printf("MAJOR ERROR REPORT!!! (%d,%d)\n",i,id=myObjs[i]->idRef());
+	       }
 	       ASUFREE(n); ASUFREE(t);
 	       EML_SUCCESS(STAFCV_OK);
 	    }
@@ -342,7 +360,7 @@ STAFCV_T socCatalog:: idObject (const char * name
 	 ASUFREE(n);
       }
    }
-   id = -1;
+   id = -1; /*- SOC_E_IDREF_NOTFOUND -*/
 // EML_ERROR(OBJECT_NOT_IDED);
    return FALSE;	//- HACK: This error is too sensitive
 }
@@ -352,7 +370,7 @@ STAFCV_T socCatalog:: idObject (const char * name
 char * socCatalog :: list () {
 
 // char *c, *cc;
-// c = (char*)ASUALLOC(70*(myCount+5));	// Best guess
+// c = (char*)ASUALLOC(70*(count()+5));	// Best guess
 
    printf("\n"
 "+---------------------------------------------------------------------"
@@ -366,7 +384,7 @@ char * socCatalog :: list () {
 "+-------+-----------------+-----------------+-------------------------"
     "\n");
    char *n,*t;
-   for( int i=0;i<myCount;i++ ){
+   for( int i=0;i<count();i++ ){
       if( myObjs[i] ){
 	 printf("| %5d | %-15s | %-15s | %p \n"
 	 		,i,n=(myObjs[i])->name(),t=(myObjs[i])->type()
@@ -395,9 +413,9 @@ STAFCV_T socCatalog:: newObject (const char * name) {
 
 //----------------------------------
 STAFCV_T socCatalog:: signIn (socObject* obj, IDREF_T& id) {
-   myObjs[myCount] = obj;
-   myCount++;
-   id = myCount;
+   myObjs[count()] = obj;
+   id = nextIDRef++;
+   addEntry(id);
    EML_SUCCESS(STAFCV_OK);
 }
 

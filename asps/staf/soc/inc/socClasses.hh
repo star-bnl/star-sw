@@ -61,6 +61,7 @@ unsigned char myLock;
 //:**NONE**
 };
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 class socFactory: public virtual socObject { 
 
@@ -79,6 +80,8 @@ public:
 
    virtual STAFCV_T addEntry (IDREF_T idRef);
    virtual STAFCV_T deleteEntry (IDREF_T idRef);
+   virtual STAFCV_T unaddEntry (IDREF_T idRef);
+
    virtual IDREF_T entry(long n);
 
 protected:
@@ -97,6 +100,7 @@ private:
 //:**NONE**
 };
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 class socCatalog:  public virtual socFactory {
 
@@ -133,6 +137,7 @@ public:
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
 socObject**  myObjs;
+long nextIDRef;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
