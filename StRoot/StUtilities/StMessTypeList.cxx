@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.7 1999/09/10 21:05:55 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.8 1999/09/14 15:42:02 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.8  1999/09/14 15:42:02  genevb
+// Some bug fixes, workaround for nulls in strings
+//
 // Revision 1.7  1999/09/10 21:05:55  genevb
 // Some workarounds for RedHat6.0
 //
@@ -38,12 +41,10 @@ type(ty),
 text(te) {}
 StMessTypePair::~StMessTypePair() {}
 
-static StMessTypeVecIter iter;
-static char ty;
 StMessTypeList* StMessTypeList::mInstance = 0;
 
 //________________________________________
-StMessTypeList::StMessTypeList() {
+StMessTypeList::StMessTypeList() : messList() {
 }
 //________________________________________
 StMessTypeList::~StMessTypeList() {
@@ -62,10 +63,7 @@ int StMessTypeList::AddType(const char* type, const char* text) {
   StMessTypePair* temp = FindType(type);
   if (temp) return 0;
   if (islower(*type)) {
-    char* type2 = new char[2];
-    *type2 = toupper(*type);
-    type2[1] = 0;
-    type = type2;
+    *(const_cast<char*> (type)) = toupper(*type);
   }
   temp = new StMessTypePair(type,text);
   messList.push_back(temp);
@@ -73,7 +71,8 @@ int StMessTypeList::AddType(const char* type, const char* text) {
 }
 //_____________________________________________________________________________
 int StMessTypeList::FindTypeNum(const char* type) {
-  ty=toupper(*type);
+  StMessTypeVecIter iter;
+  char ty=toupper(*type);
   int j=0;
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     j++;
@@ -83,7 +82,8 @@ int StMessTypeList::FindTypeNum(const char* type) {
 }
 //_____________________________________________________________________________
 StMessTypePair* StMessTypeList::FindType(const char* type) {
-  ty=toupper(*type);
+  StMessTypeVecIter iter;
+  char ty=toupper(*type);
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     if (*((*iter)->Type())==ty) {return (*iter);}
   }
@@ -101,6 +101,7 @@ const char* StMessTypeList::FindNumText(size_t typeNum) {
 }
 //_____________________________________________________________________________
 int StMessTypeList::ListTypes() {
+  StMessTypeVecIter iter;
   cout << "List of StMessage types:" << endl;
   cout << "--------------------------------------------------------" << endl;
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
