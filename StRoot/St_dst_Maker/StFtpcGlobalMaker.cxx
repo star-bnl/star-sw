@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.12 2002/11/28 09:42:05 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.13 2002/11/28 10:08:12 jcs Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.13  2002/11/28 10:08:12  jcs
+// simplify id_start_vertex comment and code
+//
 // Revision 1.12  2002/11/28 09:42:05  oldi
 // Code was prepared to fill momentum values at outermost points on tracks.
 // This feature is not used up to now.
@@ -259,8 +262,8 @@ Int_t StFtpcGlobalMaker::Make(){
     //  Charge 
     globtrk[iglobtrk].icharge      = fptrack[itrk].q;
 
-    //  If this is a primary track candidate, fptrack[itrk].id_start_vertex = -preVertx.id 
-    globtrk[iglobtrk].id_start_vertex  = fptrack[itrk].id_start_vertex*10;
+    //  If this is a primary track candidate
+    globtrk[iglobtrk].id_start_vertex  = 10*fptrack[itrk].id_start_vertex;
 
 
     //  radius at start of track (cm) 
