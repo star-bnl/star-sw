@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.79 2004/01/22 00:21:32 potekhin Exp $
+* $Id: geometry.g,v 1.80 2004/01/29 20:46:45 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.80  2004/01/29 20:46:45  potekhin
+* Disabled the long since obsoleted version of TOF,
+* because this piece of code would need to be rewritten
+* to be compiled with a variety of compiler options.
+*
 * Revision 1.79  2004/01/22 00:21:32  potekhin
 * Provide a facility to position the SVT with the MANY option,
 * which we'll likely need due to overlap of the PIXL (embedded
@@ -352,7 +357,7 @@ replace[;ON#{#;] with [
 * No correction by default
    CorrNum = 0
 
-* No Photon multiplicity detector or Silicin strip by default, hence init the version:
+* No Photon multiplicity detector or Silicon strip by default, hence init the version:
    PhmdVersion = 0
    SisdConfig  = 0
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
@@ -895,7 +900,14 @@ If LL>1
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',btofconfig,1)
    endif
-   if btof { If Itof==1 { call btofgeo1 } else { call btofgeo2 }}
+
+   if(btof) then
+             if(Itof.eq.1) then
+                write(*,*) '*************  ATTENTION : OLD VERSION OF BTOF IS NO LONGER IMPLEMENTED ***********'
+             else
+                call btofgeo2
+             endif
+   endif
      
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
