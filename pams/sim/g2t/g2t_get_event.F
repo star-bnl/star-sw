@@ -1,6 +1,9 @@
-* $Id: g2t_get_event.F,v 1.4 2000/01/22 22:50:18 nevsky Exp $
+* $Id: g2t_get_event.F,v 1.5 2000/01/22 23:42:11 nevski Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.5  2000/01/22 23:42:11  nevski
+* clean up unused variables
+*
 * Revision 1.4  2000/01/22 22:50:18  nevsky
 * proton/neutron sharing corrected
 *
@@ -41,7 +44,7 @@
         g2t_event(1).eg_label         = VERT(2)    ! run number
         g2t_event(1).event_type       = VERT(1)    ! event number
         i  =  AMASS                                ! Awest.Aeast
-        j  = (AMASS-i)*10**INT(ALOG10(AMASS+.1)+1)
+        j  = (AMASS-i)*1000+0.5
         in = (100*i)/197                           ! west
         ip = i-in
         g2t_event(1).n_part_neut_west = in
@@ -50,6 +53,7 @@
         jp = j-jn
         g2t_event(1).n_part_neut_east = jn  
         g2t_event(1).n_part_prot_east = jp
+
         g2t_event(1).n_run            = MOTH(1)
         g2t_event(1).b_impact         = PP(1)
         g2t_event(1).phi_impact       = PP(2)
