@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.36 2002/08/02 11:15:21 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.37 2002/09/07 21:30:52 jeromel Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.37  2002/09/07 21:30:52  jeromel
+// Syntax correct ")" or "(" at the begining of a line seems to make gcc crash
+// in optimize flags.
+//
 // Revision 1.36  2002/08/02 11:15:21  oldi
 // Tracking is performed even if no primary vertex is found. In this case
 // (0., 0., 0.) is used as vertex position.
@@ -363,8 +367,8 @@ Int_t StFtpcTrackMaker::Make()
 	<< "Using Tpc preVertex estimation (" 
 	<< primary_vertex_x << "+-" << primary_vertex_x_err << ", " 
 	<< primary_vertex_y << "+-" << primary_vertex_y_err << ", " 
-	<< primary_vertex_z << "+-" << primary_vertex_z_err <<  
-	") for Ftpc tracking." << endm;
+	<< primary_vertex_z << "+-" << primary_vertex_z_err 
+	<< ") for Ftpc tracking."   << endm;
     }
     
     if (iflag == 0) {
@@ -617,7 +621,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.36 2002/08/02 11:15:21 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.37 2002/09/07 21:30:52 jeromel Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
