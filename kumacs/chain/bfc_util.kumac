@@ -142,7 +142,10 @@
 * 10/8/98 K. Turner - update ftpc kumacs
 * 10/8/98 K. Turner - change "dout" so that it writes out a separate
 *                     run/params file also
-* 
+* 10/9/98 K. Turner - take back out the "dout" feature that writes a
+*                     separate run/params file
+*                   - fix dchkt so that it checks if run_summary table
+*                     exists before executing finish stuff
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -739,8 +742,17 @@ macro bfc_finish _
      (ebye1) 
              exec finish_sca#finish
              exec run_sca#close [calib_dir] [ebye_prior_switch] _
-                                [ebye_ensemble_switch] [ebye_analysis_switch]
-    (dchkt) exec dst_chk_tabl#run_summary
+	       [ebye_ensemble_switch] [ebye_analysis_switch]
+     (dchkt) 
+	  ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_FINISH: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*               message ' *** BFC_FINISH: run summary table has entries! '
+		exec dst_chk_tabl#run_summary
+	      endif
+            endif
     (dwntp) exec dst_wr_ntup#finish
      (user) exec finish_user
      (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
