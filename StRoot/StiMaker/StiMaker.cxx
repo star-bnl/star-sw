@@ -7,6 +7,10 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.104  2002/09/10 18:42:40  pruneau
+// Fixed bug in the call sequence of the association maker
+// introduced in the previous release.
+//
 // Revision 1.103  2002/09/05 21:27:10  pruneau
 // Fixed problem with StiRootSimpleTrackFilter::makeNewObject
 //
@@ -196,10 +200,13 @@ Int_t StiMaker::InitRun(int run)
       if (ioBroker->simulated()==true)
 	{
 	  if (mAssociationMaker)
-	    cout << "AssociationMaker Defined" << endl;
+	    {
+	      mAssociationMaker->SetDebug(true);
+	      cout << "AssociationMaker Defined" << endl;
+	    }
 	  else
 	    cout << "---- AssociationMaker NOT Defined" << endl;
-					
+	  
 	  StiEventAssociator::instance(mAssociationMaker);
 	  StiEvaluator::instance(mEvalFileName);
 	  cout <<"---- Evaluator Ready" << endl;
@@ -245,14 +252,12 @@ Int_t StiMaker::Make()
   else
     mMcEvent = 0;
   tracker->setEvent(mevent,mMcEvent);
+  finishEvent();
   if (ioBroker->useGui()) 
     {
       toolkit->getDisplayManager()->draw();
       toolkit->getDisplayManager()->update();
     }
-  else
-    finishEvent();
-
   return kStOK;
 }
 
@@ -289,7 +294,6 @@ void StiMaker::finishEvent()
   mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
   clockGlobalFiller.stop();
 
-  cout << " - 1 -  " <<endl;
   if (mevent->primaryVertex()) 
     {
       clockPrimaryFinder.start();
@@ -306,40 +310,23 @@ void StiMaker::finishEvent()
     }
   else 
     cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
-  cout << " - 2 -  " <<endl;
+
   if (ioBroker->simulated())
     {
       clockAssociator.start();
       StiEventAssociator::instance()->associate(mMcEvent);
-      cout << " - 2a -  " <<endl;
       clockAssociator.stop();
-      clockEvaluator.start();
+
+      //clockEvaluator.start();
       //StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
-      cout << " - 2b -  " <<endl;
-      clockEvaluator.stop();
+      //clockEvaluator.stop();
     }
-  cout << " - 3 -  " <<endl;
   if (ioBroker->useGui()==true) 
     {
-      cout << "ioBroker->useGui()==true" << endl;
       tracker->update();
-    }
-  cout << " - 4 -  " <<endl;
-
-  eventIsFinished = true;
-  cout <<"StiMaker::finishEvent()"<<endl
-       <<"        Activity :   Time Elapsed(cpu-s)"<<endl
-       <<"====================================================="<<endl
-       <<" Global  Finding :"<<clockGlobalFinder.elapsedTime()<<endl
-       <<"         Filling :"<<clockGlobalFiller.elapsedTime()<<endl
-       <<" Primary Finding :"<<clockPrimaryFinder.elapsedTime()<<endl
-       <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl
-       <<"     Association :"<<clockAssociator.elapsedTime()<<endl
-       <<"      Evaluation :"<<clockEvaluator.elapsedTime()<<endl;
-
-  if (ioBroker->useGui()==true) 
-    {
-      StiRootSimpleTrackFilter * f = static_cast<StiRootSimpleTrackFilter *>(tracker->getGuiTrackFilter());
+      StiRootSimpleTrackFilter * f = 0;
+      //static_cast<StiRootSimpleTrackFilter *>(tracker->getGuiTrackFilter());
+        // check of the quality of the track based on the track map
       if (f)
 	{
 	  f->getParameter("Chi2Used")->setValue(true);
@@ -365,7 +352,33 @@ void StiMaker::finishEvent()
 	  f->getParameter("PtMax")->setValue(1.0);
 	  cout << "       0.5<pt<1.0:" << tracker->getTrackFoundCount(f) << endl;
 	}
+      if (mAssociationMaker)
+	{
+	  rcTrackMapType * map = mAssociationMaker->rcTrackMap();
+	  rcTrackMapIter iter;
+	  for (iter=map->begin();iter!=map->end();iter++)
+	    {
+	      StGlobalTrack* g = (*iter).first;
+	      StTrackPairInfo* pairInfo = (*iter).second;
+	      if (g && pairInfo)
+		{
+		  
+		}
+	    }
+	}
     }
+  eventIsFinished = true;
+  cout <<"StiMaker::finishEvent()"<<endl
+       <<"        Activity :   Time Elapsed(cpu-s)"<<endl
+       <<"====================================================="<<endl
+       <<" Global  Finding :"<<clockGlobalFinder.elapsedTime()<<endl
+       <<"         Filling :"<<clockGlobalFiller.elapsedTime()<<endl
+       <<" Primary Finding :"<<clockPrimaryFinder.elapsedTime()<<endl
+       <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl
+       <<"     Association :"<<clockAssociator.elapsedTime()<<endl
+       <<"      Evaluation :"<<clockEvaluator.elapsedTime()<<endl;
+
+
   cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
 }
 

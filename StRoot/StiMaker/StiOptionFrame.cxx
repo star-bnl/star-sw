@@ -137,8 +137,14 @@ void StiOptionFrame::initialize()
 	  else
 	    {
 	      // Double 
-	      numberEntry->SetFormat(TGNumberFormat::kNESRealOne, 
-				     TGNumberFormat::kNEAAnyNumber);
+	      if (par->getIncrement()==2)
+		// two significant figures
+		numberEntry->SetFormat(TGNumberFormat::kNESRealTwo, 
+				       TGNumberFormat::kNEAAnyNumber);
+	      else
+		// one only
+		numberEntry->SetFormat(TGNumberFormat::kNESRealOne, 
+				       TGNumberFormat::kNEAAnyNumber);
 	    }
 	  numberEntry->SetLimits(TGNumberFormat::kNELLimitMinMax, par->getMinimum(),par->getMaximum() );
 	  numberEntry->Associate(this);
