@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.12 2004/07/15 16:36:23 ullrich Exp $
+ * $Id: StDedxPidTraits.h,v 2.13 2004/09/16 02:24:18 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.13  2004/09/16 02:24:18  perev
+ * Small optimization of alignement
+ *
  * Revision 2.12  2004/07/15 16:36:23  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -76,10 +79,10 @@ public:
     
 protected:
     UShort_t mNumberOfPoints;
+    Short_t  mMethod;
     Float_t  mDedx;
     Float_t  mSigma;
-    Short_t  mMethod;
     
-    ClassDef(StDedxPidTraits,2)
+    ClassDef(StDedxPidTraits,3)
 };
 #endif
