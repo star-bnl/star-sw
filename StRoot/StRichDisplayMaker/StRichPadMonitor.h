@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 2.6 2000/12/08 04:59:13 lasiuk Exp $
+ * $Id: StRichPadMonitor.h,v 2.7 2001/11/21 20:57:18 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
+ * Revision 2.7  2001/11/21 20:57:18  lasiuk
+ * add quick rings, text drawing
+ *
  * Revision 2.6  2000/12/08 04:59:13  lasiuk
  * unambiguate hiliteHits(flag) by requiring user
  * to specify which ring is of interest
@@ -107,6 +110,8 @@ public:
     void clearTracks();         
     void clearRingInfo();
     void clearMisc();
+    void clearQuickRings();
+    void clearText();
     
     //
     // Event info
@@ -149,6 +154,7 @@ public:
     // Misc
     void drawMarker(StThreeVectorF&,int type=26, float size=1.2, int color=1);
     void drawLine(StThreeVectorF&, StThreeVectorF&);
+    void drawText(double,double,char*);
     
     // Controls
     //void removeGeantPoints();
@@ -158,6 +164,11 @@ public:
     void drawEventInfo(Long_t,Long_t);
     void printCanvas(char*,char*, int);
 
+    //
+    // Rings
+    void drawQuickRing(vector<StThreeVectorF>&, vector<StThreeVectorF>&,
+		       vector<StThreeVectorF>&, vector<StThreeVectorF>&,
+		       vector<StThreeVectorF>&, vector<StThreeVectorF>&);
    
     void doResiduals(double,long[],int,int);
     inline TCanvas* getRichCanvas(){ return mRichCanvas;};
@@ -183,10 +194,12 @@ private:
     TObjArray   mHits;
     TObjArray   mRingInfo;
     TObjArray   mMisc;
+    TObjArray   mText;
     
     TObjArray   mColorBoxes;
     TObjArray   mTextLabels;
     TObjArray   mControls;
+    TObjArray   mQuickRings;
     
     vector<StRichDrawableTTrack*> mVectorTracks; // Vector of rings to be drawn
     
