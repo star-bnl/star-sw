@@ -4,8 +4,8 @@
 #define TABLE_HEADER_H
 
 typedef struct  table_head_st {
-   char name[31];	/* table name */
-   char type[31];	/* table type */
+   char name[20];	/* table name */
+   char type[20];	/* table type */
    long maxlen;		/* # rows allocated */
    long nok;		/* # rows filled */
    long rbytes;		/* number of bytes per row */
