@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.6 1999/08/26 03:36:57 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.7 1999/08/26 20:36:25 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.7  1999/08/26 20:36:25  snelling
+ * Fixed number of bins for row plot and changed fit function to landau
+ *
  * Revision 1.6  1999/08/26 03:36:57  snelling
  * Added Q versus pad
  *
@@ -84,7 +87,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.6 1999/08/26 03:36:57 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.7 1999/08/26 20:36:25 snelling Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -190,6 +193,9 @@ Int_t StQACosmicMaker::fillTNtuple() {
 Int_t StQACosmicMaker::initResHistograms() {
 
   int i;
+  TString *mHistTitle;
+  TString *mHistName;
+  char mCount[1];
 
   Float_t xMin = -100.;
   Float_t xMax = 100.;
@@ -198,9 +204,7 @@ Int_t StQACosmicMaker::initResHistograms() {
   Int_t nYBins = 200;
   
   for (i = 0; i < nResHist; i++) {
-    TString *mHistTitle;
-    TString *mHistName;
-    char mCount[1];
+
     sprintf(mCount,"%d",i);
 
     mHistTitle = new TString("xy residual vs crossing angle");
@@ -367,10 +371,10 @@ Int_t StQACosmicMaker::calcResHistograms() {
   TString *mHistTitle;
   TString *mHistName;
   char mCount[1];
-  char *mIndexName1[nChargeHist] = {"inner p > .3 GeV","inner p < .3 GeV",
-				    "outer p > .3 GeV","outer p < .3 GeV"};
-  char *mIndexName2[nChargeHist] = {"p > .3 GeV","p < .3 GeV", 
-				    "not used","not used"};
+  char *mIndexName1[nChargeHist] = {" inner p > .3 GeV"," inner p < .3 GeV",
+				    " outer p > .3 GeV"," outer p < .3 GeV"};
+  char *mIndexName2[nChargeHist] = {" p > .3 GeV"," p < .3 GeV", 
+				    " not used"," not used"};
 
   for (i = 0; i < nResHist; i++) {
 
@@ -386,7 +390,6 @@ Int_t StQACosmicMaker::calcResHistograms() {
     else {mHistTitle->Append(mIndexName2[i]);}
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
-    mHistTitle->Append(*mCount);
     mHistName->Append("_0");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mag);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -396,13 +399,11 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetXTitle("Crossing Angle (radians)");
     ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetYTitle("Magnitude");
 
-
     mHistTitle = new TString("Mean xy residual vs crossing angle");
     if (!bSectorSelectionOn) {mHistTitle->Append(mIndexName1[i]);}
     else {mHistTitle->Append(mIndexName2[i]);}
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
-    mHistTitle->Append(*mCount);
     mHistName->Append("_1");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mean);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -423,7 +424,6 @@ Int_t StQACosmicMaker::calcResHistograms() {
     else {mHistTitle->Append(mIndexName2[i]);}
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
-    mHistTitle->Append(*mCount);
     mHistName->Append("_2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_sigma);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -438,7 +438,6 @@ Int_t StQACosmicMaker::calcResHistograms() {
     else {mHistTitle->Append(mIndexName2[i]);}
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
-    mHistTitle->Append(*mCount);
     mHistName->Append("_chi2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_chi);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -477,60 +476,69 @@ void StQACosmicMaker::setSector(const Int_t sectorNumber) {
 Int_t StQACosmicMaker::initChargeHistograms() {
 
   int i;
+  char *mIndexName[nChargeHist]={"x","y","z","row"};
+  TString *mHistTitle;
+  TString *mHistName;
 
   Float_t xMin = -250.;
   Float_t xMax = 250.;
-  Float_t yMin = -0.00001;
+  Float_t yMin = 0.;
   Float_t yMax = 0.00001;
   Int_t nYBins = 2000;
+
 
   // define the histograms for q versus x,y,z  
   for (i = 0; i < nChargeHist; i++) {
 
-    TString *mHistTitle;
-    TString *mHistName;
-    char mCount[1];
-    sprintf(mCount,"%d",i);
-
-    mHistTitle = new TString("charge versus x,y,z");
-    mHistName  = new TString("chargevsxyz");
-    mHistName->Append(*mCount);
+    mHistTitle = new TString("Q distribution versus ");
+    mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chargevs");
+    mHistName->Append(mIndexName[i]);
     ChargeHists[i].mQdist =
       new TH2F(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax, nYBins, yMin, yMax);
-    ChargeHists[i].mQdist->SetXTitle("x/y/z (cm)");
+    if (mIndexName[i] == "row") {ChargeHists[i].mQdist->SetBins(50, 0., 50.,2000, 0., 0.00001);}
+    ChargeHists[i].mQdist->SetXTitle(mIndexName[i]);
     ChargeHists[i].mQdist->SetYTitle("Q");
     delete mHistTitle;
     delete mHistName;
 
-    mHistTitle = new TString("Mean charge versus x,y,z");
-    mHistName  = new TString("meanchargevsxyz");
-    mHistName->Append(*mCount);
+    mHistTitle = new TString("Mean charge versus ");
+    mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("meanchargevs");
+    mHistName->Append(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_mean =
       new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mean->SetBins(50, 0., 50.);}
     delete mHistTitle;
     delete mHistName;
 
-    mHistTitle = new TString("Sigma charge versus x,y,z");
-    mHistName  = new TString("sigmachargevsxyz");
-    mHistName->Append(*mCount);
+    mHistTitle = new TString("Sigma charge versus ");
+    mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("sigmachargevs");
+    mHistName->Append(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_sigma =
       new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_sigma->SetBins(50, 0., 50.);}
     delete mHistTitle;
     delete mHistName;
 
-    mHistTitle = new TString("Magnitude charge versus x,y,z");
-    mHistName  = new TString("magchargevsxyz");
-    mHistName->Append(*mCount);
+    mHistTitle = new TString("Magnitude charge versus ");
+    mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("magchargevs");
+    mHistName->Append(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_mag =
       new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mag->SetBins(50, 0., 50.);}
     delete mHistTitle;
     delete mHistName;
 
-    mHistTitle = new TString("ChiSquared charge versus x,y,z");
-    mHistName  = new TString("chichargevsxyz");
-    mHistName->Append(*mCount);
+    mHistTitle = new TString("ChiSquared charge versus ");
+    mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chichargevs");
+    mHistName->Append(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_chi =
       new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_chi->SetBins(50, 0., 50.);}
     delete mHistTitle;
     delete mHistName;
   }
@@ -624,11 +632,8 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
   char *mIndexName[nChargeHist]={"x","y","z","row"};
   TString *mHistTitle;
   TString *mHistName;
-  char mCount[1];
 
   for (i = 0; i < nChargeHist; i++) {
-
-    sprintf(mCount,"%d",i);
 
     mHistTitle = new TString("Q distribution versus ");
     mHistTitle->Append(mIndexName[i]);
@@ -636,17 +641,14 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
     ChargeHists[i].mQdist->FitSlicesY(mLandau);
     ChargeHists[i].mQdist->SetXTitle(mIndexName[i]);
     ChargeHists[i].mQdist->SetName(mHistTitle->Data());
-    if (mIndexName[i] == "row") {ChargeHists[i].mQdist->SetAxisRange(0.,50.);}
+    //    if (mIndexName[i] == "row") {ChargeHists[i].mQdist->SetAxisRange(0.,50.);}
     delete mHistTitle;
     delete mLandau;
-    if (Debug()) {  
-      cout << "pointer to hist: " << ChargeHists[i].mQdist << endl;
-    }
     
     mHistTitle = new TString("Magnitude Q distribution versus ");
-    mHistName  = new TString("chargevsxyz");
-    mHistName->Append(*mCount);
     mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chargevs");
+    mHistName->Append(mIndexName[i]);
     mHistName->Append("_0");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_mag);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -655,12 +657,12 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
     delete mHistTitle;
     ChargeHists[i].FitQHists.mQ_mag->SetXTitle(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_mag->SetYTitle("Magnitude");
-    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mag->SetAxisRange(0.,50.);}
+    //    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mag->SetAxisRange(0.,50.);}
 
     mHistTitle = new TString("Mean Q distribution versus ");
-    mHistName  = new TString("chargevsxyz");
-    mHistName->Append(*mCount);
     mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chargevs");
+    mHistName->Append(mIndexName[i]);
     mHistName->Append("_1");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_mean);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -673,12 +675,12 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
     ChargeHists[i].FitQHists.mQ_mean->GetYaxis()->SetLabelSize(0.04);
     ChargeHists[i].FitQHists.mQ_mean->SetMarkerColor(kBlue);
     ChargeHists[i].FitQHists.mQ_mean->SetMarkerStyle(20);
-    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mean->SetAxisRange(0.,50.);}
+    //    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_mean->SetAxisRange(0.,50.);}
 
     mHistTitle = new TString("Sigma Q distribution versus ");
-    mHistName  = new TString("chargevsxyz");
-    mHistName->Append(*mCount);
     mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chargevs");
+    mHistName->Append(mIndexName[i]);
     mHistName->Append("_2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_sigma);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -687,12 +689,12 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
     delete mHistTitle;
     ChargeHists[i].FitQHists.mQ_sigma->SetXTitle(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_sigma->SetYTitle("Sigma Q");
-    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_sigma->SetAxisRange(0.,50.);}
+    //    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_sigma->SetAxisRange(0.,50.);}
     
     mHistTitle = new TString("Chi2 Q distribution versus ");
-    mHistName  = new TString("chargevsxyz");
-    mHistName->Append(*mCount);
     mHistTitle->Append(mIndexName[i]);
+    mHistName  = new TString("chargevs");
+    mHistName->Append(mIndexName[i]);
     mHistName->Append("_chi2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_chi);
     delete ((TH1D *) gDirectory->Get(mHistName->Data()));
@@ -701,7 +703,7 @@ Int_t StQACosmicMaker::calcChargeHistograms() {
     delete mHistTitle;
     ChargeHists[i].FitQHists.mQ_chi->SetXTitle(mIndexName[i]);
     ChargeHists[i].FitQHists.mQ_chi->SetYTitle("chi2 Q");
-    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_chi->SetAxisRange(0.,50.);}
+    //    if (mIndexName[i] == "row") {ChargeHists[i].FitQHists.mQ_chi->SetAxisRange(0.,50.);}
     
     for (int j=0; j<ChargeHists[i].FitQHists.mQ_sigma->fN; j++) { 
       ChargeHists[i].FitQHists.mQ_sigma->fArray[j] = 
