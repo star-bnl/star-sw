@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.6 2003/01/21 23:49:50 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.7 2003/01/21 23:51:19 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -395,7 +395,6 @@ void StEventControlPanel::Redraw()
    {gSystem->DispatchOneEvent(1);}
    fgDispMk->ClearCanvas();
    fgDispMk->Make();
-//   StEventDisplayMaker::MakeLoop(1);
    fgDispMk->Info("Done");
 
    ResumeTopWidget();
