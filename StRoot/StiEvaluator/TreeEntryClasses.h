@@ -1,0 +1,179 @@
+//TreeEntryClasses.h
+//M.L. Miller (Yale Software)
+//2/02
+
+#ifndef TreeEntryClasses_HH
+#define TreeEntryClasses_HH
+
+class StMcTrack;
+class StTrack;
+class StiTrack;
+class StTrackPairInfo;
+class StiKalmanTrack;
+class StiHit;
+class StiKalmanTrackNode;
+class trackPing;
+class StiTrackPairInfo;
+
+//Temp class to be stored in TTree, eventually move to it's own .h, .cxx files
+#include "TObject.h"
+
+class TClonesArray;
+
+class StiHitEntry : public TObject
+{
+public:
+    StiHitEntry();
+    virtual ~StiHitEntry();
+    
+    void reset();
+    
+    //Might as well make these all public, for now
+
+    //We save each node, but not all nodes have hits, so check this flag
+    unsigned int nodeHasHit; // 0=no, 1=yes
+
+    //How many tracks was this hit assigned to
+    unsigned int hitTimesUsed;
+    
+    //These quantities come from the hit itself, *not* track location
+    double hitPosition; //StiHit::position()
+    double hitRefAngle; //StiHit::refAngle()
+    double hitLocalX;
+    double hitLocalY;
+    double hitLocalZ;
+
+    double hitLocalSxx;
+    double hitLocalSyy;
+    double hitLocalSzz;
+    double hitLocalSxy;
+    double hitLocalSxz;
+    double hitLocalSyz;
+    
+    //Get these from StiHit->globalPosition().x, .y(), .z()
+    double hitGlobalX;
+    double hitGlobalY;
+    double hitGlobalZ;
+
+    //These quantities come from the track-node location
+    double nodeAlpha; //rotation of local frame w.r.t. global 
+    double nodeLocalX;
+    double nodeLocalY;
+    double nodeLocalZ;
+    double nodeLocalEta;
+    double nodeLocalCurvature;
+    double nodeLocalTanLambda;
+    double nodeLocalChi2;
+    double nodeXCenter; //global (x,y) of center of circle
+    double nodeYCenter;
+    
+private:
+    ClassDef(StiHitEntry, 1)
+};
+
+
+class TrackEntry
+{
+public:
+    TrackEntry();
+    virtual ~TrackEntry() {};
+    
+    void setMcTrack(const StMcTrack*, unsigned int nTimesFound, bool best);
+    void setGlobalTrack(const StTrack*);
+    void setStiTrack(const StiTrack*);
+    void setGlobalAssoc(const StTrackPairInfo*);
+    void setAssociation(const StiTrackPairInfo&);
+
+    
+    void addStiHitEntry(const StiHitEntry&);
+    
+    double getMcTrackId();
+    double getMcTrackPt();
+
+    unsigned int hitCounter() const {return mHitCounter;}
+    TClonesArray& array() const {return *mArray;}
+    
+    void clear();
+
+    
+    double stiTrackResX;
+    double stiTrackResY;
+    double stiTrackResZ;
+    
+private:
+    //Counter:
+    unsigned int mHitCounter;
+    TClonesArray* mArray;
+
+    //flag
+    unsigned int stiTrackFlag;
+
+    //temp kinematic info : MC
+    unsigned int mcNTimesFound; //Number of times found by ITTF
+    unsigned int bestMatch; //1=yes, 0=no
+    
+    double mcTrackId;
+    double mcTrackPsi;
+    double mcTrackRapidity;
+    double mcTrackE;
+    double mcTrackPx;
+    double mcTrackPy;
+    double mcTrackPz;
+    double mcTrackPt;
+    double mcTrackEta;
+
+    //Counters in varius detectors
+    unsigned int mcTrackNTpcHits;
+    unsigned int mcTrackNSvtHits;
+    unsigned int mcTrackNFtpcHits;
+    
+    //temp kinematic info : global
+    short  globalTrackQ;
+    double globalTrackM;
+    double globalTrackPsi;
+    double globalTrackChi2;
+    double globalTrackNHit;
+    double globalTrackPx;
+    double globalTrackPy;
+    double globalTrackPz;
+    double globalTrackPt;
+    double globalTrackEta;
+    unsigned int globalTrackFitPoints;
+
+    //Assoc counters
+    unsigned int globalTrackNAssocHits;
+    unsigned int globalTrackNAssocTpcHits;
+    unsigned int globalTrackNAssocSvtHits;
+    unsigned int globalTrackNAssocFtpcHits;
+    
+    //temp kinematic info : Sti
+    double stiTrackM;
+    double stiTrackQ;
+    double stiTrackPsi;
+    double stiTrackChi2;
+    double stiTrackNHit;
+    double stiTrackY;
+    double stiTrackTanL;
+    double stiTrackPx;
+    double stiTrackPy;
+    double stiTrackPz;
+    double stiTrackPt;
+    double stiTrackEta;
+
+    //raw counters of hits on track
+    unsigned int stiTrackNHits;
+    unsigned int stiTrackNSeedHits;
+    unsigned int stiTrackNTpcHits;
+    unsigned int stiTrackNSvtHits;
+
+    //counters for associated hits on tracks
+    unsigned int stiTrackNAssocHits;
+    unsigned int stiTrackNAssocTpcHits;
+    unsigned int stiTrackNAssocSvtHits;
+    
+    
+    ClassDef(TrackEntry,1) 
+};
+
+
+#endif
