@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.52 2003/09/02 17:58:53 perev Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.53 2003/11/19 18:12:32 perev Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.53  2003/11/19 18:12:32  perev
+ * Fix Float Point Exception
+ *
  * Revision 2.52  2003/09/02 17:58:53  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -331,7 +334,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.52 2003/09/02 17:58:53 perev Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.53 2003/11/19 18:12:32 perev Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -627,7 +630,8 @@ Int_t StRichPIDMaker::Make() {
 			for (size_t jj=0; jj<theTrackNode->entries(); ++jj) {
 			    
 			    StTrack* currentTrack = theTrackNode->track(jj);
-			    
+			    if (currentTrack->bad()) continue;
+
 			    if(!currentTrack->detectorInfo()) {
 				cout << "StRichPIDMaker::Make()\n";
 				cout << "\tWARNING: No detectorInfo()\n";
@@ -648,6 +652,7 @@ Int_t StRichPIDMaker::Make() {
 // Anything
 		    for (size_t globalIndex=0; globalIndex<theTrackNode->entries();++globalIndex) {
 			StTrack* currentTrack = theTrackNode->track(globalIndex);
+                        if (currentTrack->bad()) continue;
 			// Hard coded cuts on global pt and eta
 			if (currentTrack->geometry()->momentum().perp()>=1.5 
 			    && 
@@ -677,6 +682,7 @@ Int_t StRichPIDMaker::Make() {
 		    titer!=trackKeyToTrack.end(); ++titer) {
 		    
 		    StTrack* currentTrack = (*titer).second;
+                    if (currentTrack->bad()) continue;
 		    
 		    if(!currentTrack->detectorInfo()) {
 			    cout << "StRichPIDMaker::Make()\n";
@@ -865,7 +871,7 @@ Int_t StRichPIDMaker::Make() {
       // fill the StTrack's StRichPidTrait with RICH PID info
       //
       StTrack* track = richTrack->getStTrack();
-      if (track) {
+      if (track && !track->bad()) {
 
 	//
 	// add pid
@@ -1017,7 +1023,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent,
 	    //
 	    StTrack* theGlobalTrack = track->node()->track(global);
 	    
-	    if(this->checkTrack(tempTrack)) {
+	    if(!theGlobalTrack->bad() && this->checkTrack(tempTrack)) {
 		
 		//
 		// set the eAssociatedMIP flag
@@ -1780,6 +1786,7 @@ void StRichPIDMaker::tagMips(StEvent* tempEvent, StSPtrVecRichHit* hits) {
 	    StTrack* track =
 		theTrackNodes[nodeIndex]->track(global,trackIndex);
 	    if (track  &&
+               !track->bad() &&
 		track->flag()>=0 &&
 		track->fitTraits().numberOfFitPoints(kTpcId) >= 10 ) {
 
@@ -1878,35 +1885,36 @@ bool StRichPIDMaker::checkEvent(StEvent* event) {
 bool StRichPIDMaker::checkTrack(StTrack* track) {
 
     bool status = true;
-    float bitmask = 0;
-    if (track->flag()<0) {
+    int bitmask = 0;
+    if (track->bad()) {
 	status = false;
-	bitmask += ::pow(2.,0);
+	bitmask += 1<<0;
+        return status;
     }
     
     if (!track->geometry()) {
 	status = false;
-	bitmask += ::pow(2.,1);
+	bitmask += 1<<1;
     }
     
     if (track->geometry()->helix().distance(mVertexPos) > mDcaCut) {
 	status = false;
-	bitmask += ::pow(2.,2);
+	bitmask += 1<<2;
     }
     
     if (track->fitTraits().numberOfFitPoints(kTpcId) < mFitPointsCut) {
 	status = false;
-	bitmask += ::pow(2.,3);
+	bitmask += 1<<3;
     }
     
     if (fabs(track->geometry()->momentum().pseudoRapidity()) > mEtaCut) {
 	status = false;
-	bitmask += ::pow(2.,4);
+	bitmask += 1<<4;
     }
     
     if (track->geometry()->momentum().perp() < mPtCut) {
 	status = false;
-	bitmask += ::pow(2.,5);
+	bitmask += 1<<5;
     }
     //cout << "StRichPIDMaker:checkTrack()\n";
     //cout << "\tbitmask = " << bitmask << endl;
