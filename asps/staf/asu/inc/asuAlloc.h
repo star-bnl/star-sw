@@ -2,10 +2,10 @@
 #define ASU_ALLOC_H 1
 #include <stdlib.h>
 #ifdef __ROOT__
-#define ASU_MALLOC_OFF 
+#undefine ASU_MALLOC_ON 
 #endif /**__ROOT__**/
 
-#ifndef ASU_MALLOC_OFF
+#ifdef ASU_MALLOC_ON
 #ifdef __cplusplus
 void * operator new(size_t sz,const char *file,int line);
 void * operator new(size_t sz);
@@ -17,7 +17,7 @@ void * operator new[](size_t sz);
 
 #define new new(__FILE__,__LINE__)
 #endif /**__cplusplus**/
-#endif /** ASU_MALLOC_OFF **/
+#endif /** ASU_MALLOC_ON **/
 
 
 #ifndef CC_P
@@ -77,7 +77,7 @@ extern CC_P void *asuMalloc(size_t size, const char* file, int line);
 extern CC_P void *asuRealloc(void *p, size_t size, const char* file, int line);
 
 
-#ifndef ASU_MALLOC_OFF
+#ifdef ASU_MALLOC_ON
 #define new new(__FILE__,__LINE__)
 #define CALLOC(NOBJ,SIZE) asuCalloc(NOBJ,SIZE,__FILE__,__LINE__)
 #define MALLOC(SIZE) asuMalloc(SIZE,__FILE__,__LINE__)
