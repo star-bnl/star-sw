@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.54 2004/03/11 18:01:56 posk Exp $
+// $Id: doFlowEvents.C,v 1.55 2004/06/23 20:06:02 perev Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -471,7 +471,7 @@ END:
 }
 
 // ----------- This concatenates the path and the file name ---------------------
-void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, 
+void doFlowEvents(Int_t nevents, const Char_t *path, const Char_t *file, 
 		  Bool_t phiWgtOnly)
 {
   const char *fileListQQ[] = {0,0};
@@ -487,7 +487,7 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 }
 
 // ----------- This sets default path and file names ---------------------------
-void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
+void doFlowEvents(Int_t nevents, Bool_t phiWgtOnly) {
 
 //  Char_t* filePath="./";
 //  Char_t* fileExt="*.flowpicoevent.root";
@@ -563,6 +563,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.55  2004/06/23 20:06:02  perev
+// const Int_t replaced by Int_t
+//
 // Revision 1.54  2004/03/11 18:01:56  posk
 // Added Random Subs analysis method.
 //
