@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.27 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.28 1999/03/20 22:43:05 perev Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.28  1999/03/20 22:43:05  perev
+// Do(trig)
+//
 // Revision 1.27  1999/03/11 00:15:22  perev
 // St_geant_Maker in new maker schema
 //
@@ -254,7 +257,7 @@ Int_t St_geant_Maker::Make()
   
   
   agstroot_();
-    gtrig();
+  Do("trig");
     // check EoF
     if (cquest->iquest[0]) {return kStEOF;}
     // empty g2t_event
@@ -421,7 +424,6 @@ Int_t St_geant_Maker::Make()
     addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
     if (address) csjcal(&address,&narg);
 #endif
-  gtrigc();
   return (cflag->ieorun)?kStEOF : kStOK; 
 }
 //_____________________________________________________________________________
@@ -433,7 +435,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.27 1999/03/11 00:15:22 perev Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.28 1999/03/20 22:43:05 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
