@@ -11,7 +11,7 @@
 #
 # Wensheng Deng 9/99
 #
-# Update 'operation' table in database and web current-production-summary table
+# Update database 'operation' table and web current-production-summary table
 #
 # Usage: prodSumm.pl
 #
@@ -32,6 +32,16 @@ struct FileAttri => {
 
 my $debugOn = 0;
 
+my @Sets = (
+            "auau100/venus412/default/b0_3/year_1s/hadronic_on",
+            "auau100/venus412/default/b3_6/year_1s/hadronic_on",
+            "auau100/venus412/default/b6_9/year_1s/hadronic_on",
+            "auau200/venus412/default/b0_3/year_1b/hadronic_on",
+            "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",
+            "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on"
+           );
+
+
 my $prodPeriod = "prod4";
 #my @processes = ("tfs", "tss", "trs");
 
@@ -45,17 +55,7 @@ my $topDisk1Reco =  $disk1 . "/star";
 my $sumDir = $topDisk1Reco."/$prodPeriod/sum";
 
 my $prod4_summ_html = "/star/u2e/starreco/prod4/summary/Prod4\.summary\.html";
-&beginHtml();
-
-my @Sets = (
-	    "auau100/venus412/default/b0_3/year_1s/hadronic_on",
-	    "auau100/venus412/default/b3_6/year_1s/hadronic_on",
-	    "auau100/venus412/default/b6_9/year_1s/hadronic_on",
-	    "auau200/venus412/default/b0_3/year_1b/hadronic_on",
-	    "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",
-	    "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on"
-	    );
-
+my $prod4_summ_html_back = "/star/u2e/starreco/prod4/summary/Prod4\.summary\.html\.back";
 
 my @diskRecoFiles;
 my @hpssGeantFiles;
@@ -192,6 +192,8 @@ print "\nFinding reco files in HPSS\n";
 print "Total files: ".@hpssRecoFiles."\n";
 $ftpHpss->quit();
 
+##########
+&beginHtml();
 ########## declare variables needed to fill the database table and the web table
 ## for database filling
 my $setName = "no";
@@ -482,7 +484,12 @@ $tfsDstDiskSizeT = int($tfsDstDiskSizeT/1000);
 &fillWebTableTotal();
 &endHtml();
 
+## copy html file
+`cp $prod4_summ_html_back $prod4_summ_html`;
+
+
 exit;
+
 ############
 sub fillWebTable {
 
@@ -503,7 +510,7 @@ print HTML "\n<TD>$geantInputSizeT</TD><TD>$geantInputEvtsT</TD><TD>$tfsDstHpssS
 ############
 sub beginHtml {
 
-open (HTML, ">$prod4_summ_html") or die "can't write to $prod4_summ_html";
+open (HTML, ">$prod4_summ_html_back") or die "can't write to $prod4_summ_html_back";
 
 print HTML "<html>\n";
 print HTML "  <head>\n";
