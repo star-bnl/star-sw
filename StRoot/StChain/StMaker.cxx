@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.60 1999/08/06 13:01:37 fisyak Exp $
+// $Id: StMaker.cxx,v 1.61 1999/09/02 22:27:11 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.61  1999/09/02 22:27:11  fisyak
+// Add SetDEBUG
+//
 // Revision 1.60  1999/08/06 13:01:37  fisyak
 // Add Active flag
 //
@@ -894,3 +897,15 @@ StMaker *StMaker::New(const Char_t *classname, const Char_t *name, void *title)
   return maker; 
 }
 
+//_____________________________________________________________________________
+void StMaker::SetDEBUG(Int_t l)
+{
+  m_DebugLevel = l;
+//   Loop on all makers
+   TList *tl = GetMakeList();
+   if (!tl) return;
+   
+   TIter nextMaker(tl);
+   StMaker *maker;
+   while (maker = (StMaker*)nextMaker()) maker->SetDEBUG(l);
+}
