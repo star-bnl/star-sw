@@ -1,32 +1,4 @@
-// $Id: Load.C,v 1.14 2000/06/16 21:49:32 fisyak Exp $
-// $Log: Load.C,v $
-// Revision 1.14  2000/06/16 21:49:32  fisyak
-// take care about libStar
-//
-// Revision 1.13  2000/06/09 20:07:16  fisyak
-// Remove duplication
-//
-// Revision 1.12  2000/05/20 01:21:24  perev
-// StarClassLibrary & StEvent added
-//
-// Revision 1.11  2000/05/15 20:06:21  perev
-// Two libs added
-//
-// Revision 1.10  2000/04/13 23:10:08  fisyak
-// Take out Load of libSTAR and Star2Root
-//
-// Revision 1.9  2000/03/27 02:57:12  fine
-// ROOT 2.24 needs libSTAR to be loaded
-//
-// Revision 1.8  1999/11/05 16:19:50  fisyak
-// Add StUtilities
-//
-// Revision 1.7  1999/09/09 13:52:38  fisyak
-// Add StBFChain
-//
-// Revision 1.6  1999/05/21 15:33:50  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
-//
+// $Id: Load.C,v 1.15 2000/07/31 21:40:36 fisyak Exp $
 //=======================================================================
 // owner: Yuri Fisyak
 // what it does: 
