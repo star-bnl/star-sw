@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.29  1999/07/27 17:30:39  ward
+// Converted to StIOMaker.  Also noise suppression.
+//
 // Revision 1.28  1999/07/15 13:58:25  perev
 // cleanup
 //
@@ -114,20 +117,25 @@ ClassImp(St_tpcdaq_Maker)
 #define HISTOGRAMS
 
 #include "StDaqLib/GENERIC/EventReader.hh"
-ZeroSuppressedReader *gZsr;  
-DetectorReader *gDetectorReader;
+#include "StDAQMaker/StDAQReader.h"
+char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
+char gConfig[40]; /* either "daq" or "trs" or "embedding" */
+StDAQReader *victorPrelim;
+StTPCReader *victor;
+int gSector;
+// obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
+// obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
 
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqFile):StMaker(name) 
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name) 
 {
-  printf("St_tpcdaq_Maker constructor, getting data from %s.\n",
-      daqFile?"DAQ":"TRS");
-  if(daqFile) printf("DAQ file=%s\n",daqFile);
+  printf("St_tpcdaq_Maker constructor, getting data from %s.\n",daqOrTrs);
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
-  daqInputFile=daqFile;
+  if(daqOrTrs) strcpy(gConfig,daqOrTrs); else strcpy(gConfig,"undefined");
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
 Int_t St_tpcdaq_Maker::Init() {
+  St_DataSet *herb;
 
   m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
                             "seq vs start bin" , 512 , 1.0 , 512.0 );
@@ -141,16 +149,21 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
-  if(daqInputFile) {
-    mFileDes=open(daqInputFile,O_RDONLY);
-    if(mFileDes<0) {
-      printf("St_tpcdaq_Maker can not read '%s'.\n",daqInputFile);
-      return kStErr;
-    }
+  if(!strcmp(gConfig,"daq")) { // Update this for embedding.
+    gDAQ=7; 
+    herb=GetDataSet("StDAQReader");
+    assert(herb);
+    victorPrelim=(StDAQReader*)(herb->GetObject());
+    assert(victorPrelim);
+  } else if(!strcmp(gConfig,"trs")) {
+    gDAQ=0;
   } else {
-    PP"No DAQ file, using TRS instead.\n");
+     PP"-----------------------------------------------------------------\n");
+     PP"The second argument of St_tpcdaq_Maker::St_tpcdaq_Maker() must be\n");
+     PP"either \"daq\" or \"trs\".  Fatal error.  Please fix bfc.C.\n");
+     exit(2); // Ctor called incorrectly. 
   }
-
+  PP"end of St_tpcdaq_Maker::Init\n");
   return StMaker::Init();
 }
 void St_tpcdaq_Maker::PrintErr(int number,char letter) {
@@ -289,35 +302,95 @@ void St_tpcdaq_Maker::OrderTheSequences(int nseq,StSequence *los) {
 }
 int St_tpcdaq_Maker::getSector(Int_t isect) {
   int rv;
-  if(daqInputFile) { // Use DAQ.
-    rv=0;
-    if(gDetectorReader) {
-      gZsr=gDetectorReader->getZeroSuppressedReader(isect); if(!gZsr) rv=7;
-    }
+  if(gDAQ) {         // Use DAQ.
+    gSector=isect; rv=0;
   } else {           // Use TRS.
     rv=mUnpacker->getSector(isect,mEvent);
   }
   return rv; // 0 means "no error".
 }
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
-  int rv;
-  if(daqInputFile) { // Use DAQ.
-    return (int)( gZsr->getPadList(whichPadRow,padlist));
+  int rv; unsigned char *padlistPrelim;
+  if(gDAQ) { // Use DAQ.
+    rv=victor->getPadList(gSector,whichPadRow,padlistPrelim);
+    *padlist=padlistPrelim;
+    return rv;
   } else {           // Use TRS.
     rv=mUnpacker->getPadList(whichPadRow,padlist);
   }
   return rv;
 }
 int St_tpcdaq_Maker::getSequences(int row,int pad,int *nseq,StSequence **lst) {
-  int rv;
-  if(daqInputFile) { // Use DAQ.
-    return (int)(gZsr->getSequences(row,pad,nseq,(Sequence**)lst)); // Seq cast little dangerous
+  int rv,nseqPrelim; TPCSequence *lstPrelim;
+  if(gDAQ) { // Use DAQ.
+    rv=victor->getSequences(gSector,row,pad,nseqPrelim,lstPrelim);
+    *nseq=nseqPrelim;
+    *lst=(StSequence*)lstPrelim;
+    return rv;
   } else {           // Use TRS.
     rv=mUnpacker->getSequences(row,pad,nseq,lst);
   }
   return rv; // < 0 means serious error.
 }
+#ifdef NOISE_ELIM
+void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
+  int zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
+  for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
+  ff=fopen("noiseElim.tpcdaq","r");
+  if(!ff) return;
+  sector=0;
+  while(fgets(line,196,ff)) {
+    if(!strncmp(line,"sector ",7)) {
+      if((ee=strstr(line,"time bins"))) { for(zz=0;zz<9;zz++) ee[zz]=' '; }
+      cc=strtok(line," ,\n"); cc=strtok(NULL," \n"); if(cc) sector=atoi(cc); else sector=0;
+      if(sector>=1&&sector<=24) {
+        cc=strtok(NULL," ,\n");
+        while(cc) {
+          dd=strstr(cc,"-");
+          if(!dd||noiseElim[sector-1].nbin>=BINRANGE) { PP"Error 88u tpcdaq, exiting...\n"); exit(2); }
+          noiseElim[sector-1].low[noiseElim[sector-1].nbin]=atoi(cc);
+          noiseElim[sector-1].up[noiseElim[sector-1].nbin]=atoi(dd+1);
+          (noiseElim[sector-1].nbin)++;
+          cc=strtok(NULL," ,\n");
+        }
+      }
+      continue;
+    }
+    if(sector<1||sector>24) continue;
+    if(!strncmp(line,"row ",4)) row=atoi(line+4);
+    if(row<1||row>45) continue;
+    if(!strncmp(line,"pads ",4)) {
+      cc=strtok(line," ,\n"); cc=strtok(NULL," ,\n");
+      while(cc) {
+        if(noiseElim[sector-1].npad>=MAXROWPADPERSECTOR) { PP"Error 78n tpcdaq, exiting...\n"); exit(2); }
+        noiseElim[sector-1].row[noiseElim[sector-1].npad]=row;
+        noiseElim[sector-1].pad[noiseElim[sector-1].npad]=atoi(cc);
+        (noiseElim[sector-1].npad)++;
+        cc=strtok(NULL," ,\n");
+      }
+    }
+  }
+  fclose(ff);
+}
+void St_tpcdaq_Maker::WriteStructToScreenAndExit(tpcdaq_noiseElim *noiseElim) {
+  int jj,ii;
+  for(ii=0;ii<24;ii++) {
+    PP"---------------------------------------------- sector %2d\n",ii+1);
+    for(jj=0;jj<noiseElim[ii].nbin;jj++) {
+      PP"Cut bins %3d to %3d.\n",noiseElim[ii].low[jj],noiseElim[ii].up[jj]);
+    }
+    for(jj=0;jj<noiseElim[ii].npad;jj++) {
+      PP"Cut pad %3d of row %2d\n",noiseElim[ii].pad[jj],noiseElim[ii].row[jj]);
+    }
+  }
+  exit(2); // This is in WriteStructToScreenAndExit().
+}
+#endif /* NOISE_ELIM */
 int St_tpcdaq_Maker::Output() {
+#ifdef NOISE_ELIM
+  tpcdaq_noiseElim noiseElim[24]; char skip; int hj,lgg;
+#endif
+  int pixCnt=0;
   St_raw_row *raw_row_in,*raw_row_out,*raw_row_gen;
   St_raw_pad *raw_pad_in,*raw_pad_out,*raw_pad_gen;
   St_raw_seq *raw_seq_in,*raw_seq_out,*raw_seq_gen;
@@ -335,20 +408,19 @@ int St_tpcdaq_Maker::Output() {
   int nPixelThisPad,nSeqThisPadRow,offsetIntoPadTable;
   int nPixelPreviousPadRow;
   int isect,pixSave,pixR;
-  EventReader *er; 
   unsigned long int nPixelThisPadRow;
-  static long int offset=0L;
   StSequence *listOfSequences;
   St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
 
   if(!raw_sec_m) {
     raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
-  if(daqInputFile) {
-    er=getEventReader(mFileDes,offset,0); if(!er) return 0; offset=er->NextEventOffset();
-    gDetectorReader=getDetectorReader(er,"TPCV2P0");
-    if(!gDetectorReader) { PP"Fatal error: Failed to get detector reader in tpcdaq.\n"); return 0; }
-  }
+
+  // This is for noise elimination, added July 99 for Iwona.
+#ifdef NOISE_ELIM
+  SetNoiseEliminationStuff(noiseElim);
+  /*WriteStructToScreenAndExit(noiseElim);*/
+#endif
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
@@ -361,7 +433,8 @@ int St_tpcdaq_Maker::Output() {
     }
     MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
         &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
-    sectorStatus=getSector(isect); if(sectorStatus) continue;
+    sectorStatus=getSector(isect);
+    if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
     raw_seq_gen=raw_seq_out; pixel_data_gen=pixel_data_out; seqR=0; pixR=0;
     nPixelPreviousPadRow=0;
@@ -377,6 +450,13 @@ int St_tpcdaq_Maker::Output() {
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
       for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
+#ifdef NOISE_ELIM
+        skip=0;
+        for(lgg=0;lgg<noiseElim[isect-1].npad;lgg++) {
+          if(noiseElim[isect-1].row[lgg]==ipadrow+1&&noiseElim[isect-1].pad[lgg]==pad) { skip=7; break; }
+        }
+        if(skip) continue;
+#endif
         nPixelThisPad=0;
         seqStatus=getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
@@ -395,6 +475,16 @@ int St_tpcdaq_Maker::Output() {
           if(startTimeBin>511) startTimeBin=511;
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
+#ifdef NOISE_ELIM
+          skip=0;
+          for(lgg=0;lgg<noiseElim[isect-1].nbin;lgg++) {
+            hj=startTimeBin;
+            if(hj>=(noiseElim[isect-1].low[lgg])&&hj<=(noiseElim[isect-1].up[lgg])) { skip=7; break; }
+            hj=startTimeBin+seqLen-1;
+            if(hj>=(noiseElim[isect-1].low[lgg])&&hj<=(noiseElim[isect-1].up[lgg])) { skip=7; break; }
+          }
+          if(skip) continue; // Skip this sequence.
+#endif
           if(startTimeBin<=255) timeWhere=iseq+1; else timeOff=0x100;
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
@@ -406,8 +496,7 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
           for(ibin=0;ibin<seqLen;ibin++) {
-            // fprintf(BBB,"%2d %2d %2d %2d %3d %3d\n",
-            // isect,ipadrow+1,pad,iseq,ibin+startTimeBin+1,*pointerToAdc);
+            pixCnt++;
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(*pointerToAdc));
 #endif
@@ -425,7 +514,6 @@ int St_tpcdaq_Maker::Output() {
           numPadsWithSignal,pixTblWhere,ipadrow);
       nPixelPreviousPadRow=nPixelThisPadRow;
     }   // ipadrow loop
-    delete gZsr;
   }     // sector loop
   singlerow.tfirst=1; 
   singlerow.tlast=512;
@@ -436,7 +524,7 @@ int St_tpcdaq_Maker::Output() {
     if(dataOuter[isect-1]) singlerow.RowRefOut='R'; else singlerow.RowRefOut='N';
     raw_sec_m->AddAt(&singlerow,isect-1);
   }
-  if(daqInputFile) { delete er; delete gDetectorReader; }
+  printf("Pixel count = %d\n",pixCnt);
   return 0;
 }
 /*------------------------------------------------------------------------
@@ -449,7 +537,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
-  if(daqInputFile) return 0;
+  if(gDAQ) return 0;
 #ifdef TRS_SIMPLE
  mEvent=NULL;
  St_ObjectSet *decoder=(St_ObjectSet*)GetDataSet("Decoder"); if(!decoder) return 22;
@@ -465,8 +553,10 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Ben Casey. St_tpcdaq_Maker::Make().\n");
+  printf("I am Snow White. St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
+    victor=victorPrelim->getTPCReader();
+  assert(victor);
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
     printf("Error: St_tpcdaq_Maker no event from DAQ/TRS (%d).\n",errorCode);
