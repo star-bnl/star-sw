@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.15 2001/01/22 22:56:41 laue Exp $
+ * $Id: StHbtPair.cc,v 1.16 2001/02/15 19:23:00 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.16  2001/02/15 19:23:00  rcwells
+ * Fixed sign in qSideCMS
+ *
  * Revision 1.15  2001/01/22 22:56:41  laue
  * Yano-Koonin-Podgoretskii Parametrisation added
  *
@@ -171,7 +174,7 @@ double StHbtPair::qSideCMS() const
     double xt = x1+x2;  double yt = y1+y2;
     double k1 = sqrt(xt*xt+yt*yt);
 
-    double tmp = 2.0*(x1*y2-x2*y1)/k1;
+    double tmp = 2.0*(x2*y1-x1*y2)/k1;
     return (tmp);
 }
 
