@@ -12,7 +12,7 @@ class TH2S;
 
 class StTpcCalibSector {
 private :
-  const int mSectorId; //!
+  int mSectorId; 
   const StTpcCalibSetup* mSetup; //!
   int* mNumberOfPadAtRow; //!
 
