@@ -75,7 +75,7 @@ void StiDisplayManager::draw()
 {
     mnode->Draw();
 
-    cout <<"StiDisplayManager::draw()"<<endl;
+    //cout <<"StiDisplayManager::draw()"<<endl;
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	StiDrawableHits* val = dynamic_cast<StiDrawableHits*>((*it).second);
 	if (val) {
@@ -83,7 +83,7 @@ void StiDisplayManager::draw()
 	    val->draw();
 	}
     }
-    cout <<"StiDisplayManger::draw()\tDone drawing"<<endl;
+    //cout <<"StiDisplayManger::draw()\tDone drawing"<<endl;
     
     return;
 }
