@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 1.5 2000/05/17 22:20:40 lasiuk Exp $
+ * $Id: StRichPadMonitor.h,v 1.6 2000/06/16 02:00:51 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,11 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
+ * Revision 1.6  2000/06/16 02:00:51  lasiuk
+ * add MC drawing diagnositics
+ * add vector for storage
+ * cosmetics for display
+ *
  * Revision 1.5  2000/05/17 22:20:40  lasiuk
  * charge from the pixel
  *
@@ -41,6 +46,8 @@ using std::vector;
 #include "TColor.h"
 
 #include "StRichG2TInfo.h"
+#include "StRichPIDMaker/StRichRings.h"
+#include "StRichPIDMaker/StRichTDrawableRings.h"
 
 class StRichPadMonitorText;
 class StRichGeometryDb;
@@ -49,6 +56,8 @@ class StRichSinglePixel;
 class StRichSimpleHit;
 class StRichSingleMCPixel;
 class StRichDrawableTPad;
+class StRichTrack;
+class StRichTDrawableTrack;
 
 class StRichPadMonitor : public TObject {
 public:
@@ -82,10 +91,14 @@ public:
     void calculatePadPosition(const StRichSinglePixel* pad,
 			      double* xl, double* yl, double* xu, double* yu);
 
-    // Ring stuff
-    void addInnerRingPoint(double x, double y);
-    void addOuterRingPoint(double x, double y);
-    void drawRing();
+    void addTrack(StRichTrack*);
+    StRichTDrawableTrack* getTrack(StRichTrack*);
+    void drawRings();          
+    void clearTracks();         
+
+    void drawLegend();
+    void drawFileName(char*);
+    void drawEventNum(Int_t);
     
 protected:
     StRichPadMonitor(StRichGeometryDb*);
@@ -101,13 +114,9 @@ private:
     TObjArray   mControls;
     TObjArray   mG2TSegments;
     TObjArray   mHits;
+
+    vector<StRichTDrawableTrack*> mVectorTracks; // Vector of rings to be drawn
     
-    TObjArray   mRingPoints;
-    TObjArray   mORingPoints;
-    vector<double>     mXPoints;
-    vector<double>     mYPoints;
-    vector<double>     mXOPoints;
-    vector<double>     mYOPoints;
     //St_Node *mHall;
 
     StRichPadMonitorText*      mTextWindow;
@@ -121,6 +130,18 @@ private:
     double mPadLength;
 
     short mColorMode;
+
+    TText* mLegendE;
+    TText* mLegendPi;
+    TText* mLegendK;
+    TText* mLegendP;
+    TText* mFileEventNum;
+    TText* mFileName;
+    //StRichDrawableTControl * mControlPanel;
+    
+    char mFileTextEventNum[50]; // Should be big Enough to
+                                 // Hold Any Event Number
+    
 private:
     static StRichPadMonitor* mInstance;
 };

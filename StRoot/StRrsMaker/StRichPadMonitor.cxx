@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 1.6 2000/06/16 01:53:30 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 1.7 2000/06/16 02:00:51 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,10 +7,10 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 1.6  2000/06/16 01:53:30  lasiuk
- * added GEANT info and diagnostics
- * added vector to keep track of info
- * cosmetics for filenames, user info
+ * Revision 1.7  2000/06/16 02:00:51  lasiuk
+ * add MC drawing diagnositics
+ * add vector for storage
+ * cosmetics for display
  *
  * Revision 1.5  2000/05/17 22:20:40  lasiuk
  * charge from the pixel
