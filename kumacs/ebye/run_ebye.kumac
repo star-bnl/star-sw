@@ -79,16 +79,8 @@
   
   exec init_sca#init
   
-* this should be done in init_sca!
 * set switches to make prior
-  cd [params]/ebye
-  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
-  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
-  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
-  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
-  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
-  cd /dui 
-  
+  exec init_sca#setSwitchToMakePrior  
 
 *------------------- process events ------------------------------*
 
