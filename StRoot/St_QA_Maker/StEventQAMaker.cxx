@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.28 2001/11/02 21:57:44 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.29 2001/11/20 21:53:45 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.29  2001/11/20 21:53:45  lansdell
+// added x-y dist of hits, tpc east&west histos
+//
 // Revision 2.28  2001/11/02 21:57:44  genevb
 // Fix mistake in trigger word histogram
 //
@@ -1583,6 +1586,8 @@ void StEventQAMaker::MakeHistPoint() {
     for (UInt_t i=0; i<tpcHits->numberOfSectors(); i++)
       for (UInt_t j=0; j<tpcHits->sector(i)->numberOfPadrows(); j++)
 	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++) {
+	  Float_t x  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().x();
+	  Float_t y  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().y();
 	  Float_t z  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().z();
 	  Float_t phi = tpcHits->sector(i)->padrow(j)->hits()[k]->position().phi();
 	  hists->m_z_hits->Fill(z);
@@ -1592,6 +1597,7 @@ void StEventQAMaker::MakeHistPoint() {
 	    else
 	      hists->m_pnt_phiT->Fill(phi/degree,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
+	    hists->m_pnt_xyTE->Fill(x,y);
 	  }
 	  else {
 	    if (phi<0)
@@ -1599,6 +1605,7 @@ void StEventQAMaker::MakeHistPoint() {
 	    else
 	      hists->m_pnt_phiT->Fill(phi/degree,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
+	    hists->m_pnt_xyTW->Fill(x,y);
 	  }
 	}
     hists->m_pnt_tpc->Fill(tpcHits->numberOfHits());
